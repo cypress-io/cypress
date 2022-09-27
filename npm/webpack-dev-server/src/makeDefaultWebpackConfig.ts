@@ -24,9 +24,18 @@ export function makeDefaultWebpackConfig (
 
   debug(`Using HtmlWebpackPlugin version ${version} from ${importPath}`)
 
+  const optimization = <Record<string, any>>{}
+
+  if (config.sourceWebpackModulesResult.webpack.majorVersion === 5) {
+    optimization.emitOnErrors = true
+  } else {
+    optimization.noEmitOnErrors = false
+  }
+
   const finalConfig = {
     mode: 'development',
     optimization: {
+      ...optimization,
       splitChunks: {
         chunks: 'all',
       },
@@ -38,11 +47,11 @@ export function makeDefaultWebpackConfig (
     plugins: [
       new HtmlWebpackPlugin({
         template: indexHtmlFile,
-        // TODO: revert once Angular is slated for release
         // Angular generates all of it's scripts with <script type="module">. Live-reloading breaks without this option.
-        // ...(config.devServerConfig.framework === 'angular' ? { scriptLoading: 'module' } : {}),
+        ...(config.devServerConfig.framework === 'angular' ? { scriptLoading: 'module' } : {}),
       }),
     ],
+    devtool: 'inline-source-map',
   } as any
 
   if (config.sourceWebpackModulesResult.webpackDevServer.majorVersion === 4) {

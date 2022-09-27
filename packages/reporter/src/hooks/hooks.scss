@@ -42,7 +42,6 @@
 
       .hook-failed-message {
         color: $red-400;
-        display: none;
       }
 
       .hook-open-in-ide {
@@ -65,10 +64,6 @@
           }
         }
       }
-    }
-
-    .hook-failed .hook-failed-message {
-      display: inline;
     }
   }
 }

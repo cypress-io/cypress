@@ -25,9 +25,9 @@ describe('packagesToInstall', () => {
       coreData.wizard.chosenBundler = findBundler('webpack')
     })
 
-    const actual = ctx.wizard.installDependenciesCommand()
+    const actual = await ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq(`npm install -D react-scripts webpack react-dom react`)
+    expect(actual).to.eq(`npm install -D react-scripts react-dom react`)
   })
 
   it('vueclivue2-unconfigured', async () => {
@@ -41,9 +41,9 @@ describe('packagesToInstall', () => {
       coreData.wizard.chosenBundler = findBundler('webpack')
     })
 
-    const actual = ctx.wizard.installDependenciesCommand()
+    const actual = await ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq(`npm install -D @vue/cli-service webpack vue@2`)
+    expect(actual).to.eq(`npm install -D @vue/cli-service vue@2`)
   })
 
   it('vueclivue3-unconfigured', async () => {
@@ -57,9 +57,9 @@ describe('packagesToInstall', () => {
       coreData.wizard.chosenBundler = findBundler('webpack')
     })
 
-    const actual = ctx.wizard.installDependenciesCommand()
+    const actual = await ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq(`npm install -D @vue/cli-service webpack vue`)
+    expect(actual).to.eq(`npm install -D @vue/cli-service vue`)
   })
 
   it('vuecli5vue3-unconfigured', async () => {
@@ -73,9 +73,9 @@ describe('packagesToInstall', () => {
       coreData.wizard.chosenBundler = findBundler('webpack')
     })
 
-    const actual = ctx.wizard.installDependenciesCommand()
+    const actual = await ctx.wizard.installDependenciesCommand()
 
-    expect(actual).to.eq(`npm install -D @vue/cli-service webpack vue`)
+    expect(actual).to.eq(`npm install -D @vue/cli-service vue`)
   })
 
   it('regular react project with vite', async () => {
@@ -89,7 +89,7 @@ describe('packagesToInstall', () => {
       coreData.wizard.chosenBundler = findBundler('vite')
     })
 
-    const actual = ctx.wizard.installDependenciesCommand()
+    const actual = await ctx.wizard.installDependenciesCommand()
 
     expect(actual).to.eq(`npm install -D vite react react-dom`)
   })
@@ -105,7 +105,7 @@ describe('packagesToInstall', () => {
       coreData.wizard.chosenBundler = findBundler('vite')
     })
 
-    const actual = ctx.wizard.installDependenciesCommand()
+    const actual = await ctx.wizard.installDependenciesCommand()
 
     expect(actual).to.eq(`npm install -D vite vue`)
   })
@@ -121,7 +121,7 @@ describe('packagesToInstall', () => {
       coreData.wizard.chosenBundler = findBundler('webpack')
     })
 
-    const actual = ctx.wizard.installDependenciesCommand()
+    const actual = await ctx.wizard.installDependenciesCommand()
 
     expect(actual).to.eq(`npm install -D next react react-dom`)
   })
@@ -137,7 +137,7 @@ describe('packagesToInstall', () => {
       coreData.wizard.chosenBundler = findBundler('webpack')
     })
 
-    const actual = ctx.wizard.installDependenciesCommand()
+    const actual = await ctx.wizard.installDependenciesCommand()
 
     expect(actual).to.eq('npm install -D nuxt@2 vue@2')
   })
@@ -153,7 +153,7 @@ describe('packagesToInstall', () => {
       coreData.wizard.chosenBundler = null
     })
 
-    const actual = ctx.wizard.installDependenciesCommand()
+    const actual = await ctx.wizard.installDependenciesCommand()
 
     expect(actual).to.eq('')
   })

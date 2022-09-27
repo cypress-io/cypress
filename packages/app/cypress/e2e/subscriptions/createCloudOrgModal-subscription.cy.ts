@@ -18,10 +18,8 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       // Simulate no orgs
       cy.remoteGraphQLIntercept(async (obj) => {
-        if ((obj.operationName === 'CheckCloudOrganizations_cloudViewerChange_cloudViewer' || obj.operationName === 'Runs_cloudViewer' || obj.operationName === 'SpecsPageContainer_cloudViewer')) {
-          if (obj.result.data?.cloudViewer?.organizations?.nodes) {
-            obj.result.data.cloudViewer.organizations.nodes = []
-          }
+        if (obj.result.data?.cloudViewer?.organizations?.nodes) {
+          obj.result.data.cloudViewer.organizations.nodes = []
         }
 
         return obj.result

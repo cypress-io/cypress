@@ -17,6 +17,33 @@ function averageDurationSelector (specFileName: string) {
   return `${specRowSelector(specFileName)} [data-cy="average-duration"]`
 }
 
+function makeTestingCloudLink (status: string) {
+  return `https://google.com?utm_medium=Specs+Latest+Runs+Dots&utm_campaign=${status.toUpperCase()}&utm_source=Binary%3A+App`
+}
+
+function assertCorrectRunsLink (specFileName: string, status: string) {
+  // we avoid the full `cy.validateExternalLink` here because that command
+  // clicks the link, which focuses the link causing tooltips to appear,
+  // which produces problems elsewhere testing tooltip behavior
+  cy.findByRole('link', { name: specFileName })
+  .should('have.attr', 'href', makeTestingCloudLink(status))
+  .should('have.attr', 'data-cy', 'external') // to confirm the ExternalLink component is used
+}
+
+function validateTooltip (status: string) {
+  cy.get(`a[href="${makeTestingCloudLink(status)}"]`)
+  .should('contain.text', 'accounts_new.spec.js')
+  .and('contain.text', '2:23 - 2:39')
+  .and('contain.text', 'skipped 0')
+  .and('contain.text', 'pending 1-2')
+  .and('contain.text', `passed 22-23`)
+  .and('contain.text', 'failed 1-2')
+  .invoke('text')
+  .should((text) => {
+    expect(text).to.match(/\d+ (day|week|month|year)s? ago/)
+  })
+}
+
 function specShouldShow (specFileName: string, runDotsClasses: string[], latestRunStatus: CloudRunStatus|'PLACEHOLDER') {
   const latestStatusSpinning = latestRunStatus === 'RUNNING'
 
@@ -31,10 +58,11 @@ function specShouldShow (specFileName: string, runDotsClasses: string[], latestR
   .should(`${latestStatusSpinning ? '' : 'not.'}have.class`, 'animate-spin')
   .and('have.attr', 'data-cy-run-status', latestRunStatus)
 
-  // TODO: add link verification
-  // if (latestRunStatus !== 'PLACEHOLDER') {
-  //   cy.get(`${specRowSelector(specFileName)} [data-cy="run-status-dots"]`).validateExternalLink('https://google.com')
-  // }
+  if (runDotsClasses?.length) {
+    assertCorrectRunsLink(`${specFileName} test results`, latestRunStatus)
+  } else {
+    cy.findByRole('link', { name: `${specFileName} test results` }).should('not.exist')
+  }
 }
 
 function simulateRunData () {
@@ -111,14 +139,12 @@ function simulateRunData () {
 }
 
 function allVisibleSpecsShouldBePlaceholders () {
-  cy.findAllByTestId('run-status-dot-0').should('have.class', 'icon-light-gray-300')
-  cy.findAllByTestId('run-status-dot-1').should('have.class', 'icon-light-gray-300')
-  cy.findAllByTestId('run-status-dot-2').should('have.class', 'icon-light-gray-300')
-  cy.findAllByTestId('run-status-dot-latest')
-  .should('not.have.class', 'animate-spin')
-  .and('have.attr', 'data-cy-run-status', 'PLACEHOLDER')
+  cy.findAllByTestId('run-status-empty').should('be.visible').should('have.class', 'text-gray-400')
+  cy.findAllByTestId('run-status-dot-0').should('not.exist')
+  cy.findAllByTestId('run-status-dot-1').should('not.exist')
+  cy.findAllByTestId('run-status-dot-2').should('not.exist')
+  cy.findAllByTestId('run-status-dot-latest').should('not.exist')
 
-  cy.get('.spec-list-container').scrollTo('bottom')
   cy.get('.spec-list-container').scrollTo('bottom')
 }
 
@@ -201,6 +227,29 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       })
 
       cy.findByTestId('average-duration-header').trigger('mouseleave')
+    })
+
+    it('shows login/connect button in row when hovering', () => {
+      cy.get('[data-cy="spec-list-file"] [data-cy="specs-list-row-latest-runs"]')
+      .eq(0)
+      .as('latestRunsCell')
+      .trigger('mouseenter')
+
+      cy.contains('[data-cy="specs-list-row-latest-runs"] [data-cy="cloud-button"]', 'Connect').should('be.visible')
+
+      cy.get('@latestRunsCell').trigger('mouseleave')
+
+      cy.contains('[data-cy="cloud-button"]', 'Connect').should('not.exist')
+
+      cy.get('[data-cy="spec-list-file"] [data-cy="specs-list-row-average-duration"]')
+      .eq(0)
+      .as('averageDurationCell')
+      .trigger('mouseenter')
+
+      cy.contains('[data-cy="specs-list-row-average-duration"] [data-cy="cloud-button"]', 'Connect').should('be.visible')
+      cy.get('@averageDurationCell').trigger('mouseleave')
+
+      cy.contains('[data-cy="cloud-button"]', 'Connect').should('not.exist')
     })
   })
 
@@ -309,12 +358,14 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       specShouldShow('accounts_new.spec.js', ['gray-300', 'gray-300', 'jade-400'], 'RUNNING')
       cy.get(dotSelector('accounts_new.spec.js', 'latest')).trigger('mouseenter')
       cy.get('.v-popper__popper--shown').should('exist')
-      // TODO: verify the contents of the tooltip
+
+      validateTooltip('Running')
+
       cy.get(dotSelector('accounts_new.spec.js', 'latest')).trigger('mouseleave')
       cy.get(averageDurationSelector('accounts_new.spec.js')).contains('2:03')
     })
 
-    it('lazily loads data for off-screen specs', () => {
+    it('lazily loads data for off-screen specs', { viewportHeight: 500 }, () => {
       // make sure the virtualized list didn't load z008.spec.js
       cy.get(specRowSelector('z008.spec.js')).should('not.exist')
 
@@ -580,7 +631,8 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       specShouldShow('accounts_list.spec.js', ['orange-400', 'gray-300', 'red-400'], 'PASSED')
       cy.get(dotSelector('accounts_new.spec.js', 'latest')).trigger('mouseenter')
       cy.get('.v-popper__popper--shown').should('exist')
-      // TODO: verify the contents of the tooltip
+
+      validateTooltip('Passed')
       cy.get(dotSelector('accounts_new.spec.js', 'latest')).trigger('mouseleave')
       cy.get(averageDurationSelector('accounts_list.spec.js')).contains('0:12')
 
@@ -590,7 +642,8 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       specShouldShow('accounts_list.spec.js', ['orange-400', 'gray-300', 'red-400'], 'PASSED')
       cy.get(dotSelector('accounts_new.spec.js', 'latest')).trigger('mouseenter')
       cy.get('.v-popper__popper--shown').should('exist')
-      // TODO: verify the contents of the tooltip
+
+      validateTooltip('Passed')
       cy.get(dotSelector('accounts_new.spec.js', 'latest')).trigger('mouseleave')
       cy.get(averageDurationSelector('accounts_list.spec.js')).contains('0:12')
     })
@@ -621,7 +674,8 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       allVisibleSpecsShouldBePlaceholders()
     })
 
-    it('shows offline alert then hides it after coming online', () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23419
+    it.skip('shows offline alert then hides it after coming online', () => {
       cy.findByTestId('offline-alert')
       .should('contain.text', defaultMessages.specPage.offlineWarning.title)
       .and('contain.text', defaultMessages.specPage.offlineWarning.explainer)

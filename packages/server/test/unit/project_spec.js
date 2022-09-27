@@ -3,6 +3,7 @@ require('../spec_helper')
 const path = require('path')
 const chokidar = require('chokidar')
 const pkg = require('@packages/root')
+const { setupFullConfigWithDefaults } = require('@packages/config')
 const Fixtures = require('@tooling/system-tests')
 const { sinon } = require('../spec_helper')
 const user = require(`../../lib/user`)
@@ -10,7 +11,6 @@ const config = require(`../../lib/config`)
 const scaffold = require(`../../lib/scaffold`)
 const { ServerE2E } = require(`../../lib/server-e2e`)
 const { ProjectBase } = require(`../../lib/project-base`)
-const ProjectUtils = require(`../../lib/project_utils`)
 const { Automation } = require(`../../lib/automation`)
 const savedState = require(`../../lib/saved_state`)
 const plugins = require(`../../lib/plugins`)
@@ -45,7 +45,7 @@ describe.skip('lib/project-base', () => {
     .then((obj = {}) => {
       ({ projectId: this.projectId } = obj)
 
-      return config.setupFullConfigWithDefaults({ projectName: 'project', projectRoot: '/foo/bar' })
+      return setupFullConfigWithDefaults({ projectName: 'project', projectRoot: '/foo/bar' }, getCtx().file.getFilesByGlob)
       .then((config1) => {
         this.config = config1
         this.project = new ProjectBase({ projectRoot: this.todosPath, testingType: 'e2e' })
@@ -210,7 +210,7 @@ describe.skip('lib/project-base', () => {
             family: 'some-other-family',
             name: 'some-other-name',
             warning: `\
-Your project has set the configuration option: chromeWebSecurity to false
+Your project has set the configuration option: \`chromeWebSecurity\` to \`false\`.
 
 This option will not have an effect in Some-other-name. Tests that rely on web security being disabled will not run as expected.\
 `,
@@ -255,7 +255,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
   context('#open', () => {
     beforeEach(function () {
       sinon.stub(this.project, 'startWebsockets')
-      this.checkSupportFileStub = sinon.stub(ProjectUtils, 'checkSupportFile').resolves()
       sinon.stub(this.project, 'scaffold').resolves()
       sinon.stub(this.project, 'getConfig').returns(this.config)
       sinon.stub(ServerE2E.prototype, 'open').resolves([])
@@ -292,15 +291,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     it('calls #scaffold with server config promise', function () {
       return this.project.open().then(() => {
         expect(this.project.scaffold).to.be.calledWith(this.config)
-      })
-    })
-
-    it('calls checkSupportFile with server config when scaffolding is finished', function () {
-      return this.project.open().then(() => {
-        expect(this.checkSupportFileStub).to.be.calledWith({
-          configFile: 'cypress.config.js',
-          supportFile: false,
-        })
       })
     })
 

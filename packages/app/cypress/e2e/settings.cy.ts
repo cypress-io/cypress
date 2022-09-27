@@ -16,17 +16,12 @@ describe('App: Settings', () => {
     cy.visitApp()
     cy.get(SidebarSettingsLinkSelector).click()
 
-    cy.get('div[data-cy="app-header-bar"]').should('contain', 'Settings')
+    cy.contains('[data-cy="app-header-bar"]', 'Settings')
+    cy.contains('[data-cy="app-header-bar"] button', 'Log In').should('be.visible')
+
     cy.findByText('Device Settings').should('be.visible')
     cy.findByText('Project Settings').should('be.visible')
-  })
-
-  it('shows a button to log in if user is not connected', () => {
-    cy.startAppServer('e2e')
-    cy.visitApp()
-    cy.get(SidebarSettingsLinkSelector).click()
-    cy.findByText('Project Settings').click()
-    cy.get('button').contains('Log In')
+    cy.findByText('Dashboard Settings').should('be.visible')
   })
 
   describe('Cloud Settings', () => {
@@ -341,7 +336,7 @@ describe('App: Settings', () => {
       cy.contains('Choose your editor...').click()
       cy.contains('Well known editor').click()
       cy.withRetryableCtx((ctx) => {
-        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.include('/usr/bin/well-known')
+        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.args[0]).to.include('/usr/bin/well-known')
       })
 
       // navigate away and come back
@@ -363,7 +358,7 @@ describe('App: Settings', () => {
       // assert contains `/usr/local/bin/vim'
       cy.findByPlaceholderText('/path/to/editor').clear().invoke('val', '/usr/local/bin/vim').trigger('input').trigger('change')
       cy.withRetryableCtx((ctx) => {
-        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.include('/usr/local/bin/vim')
+        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.args[0]).to.include('/usr/local/bin/vim')
       })
 
       // navigate away and come back
@@ -380,7 +375,7 @@ describe('App: Settings', () => {
       cy.get('[data-cy="computer"]').click()
 
       cy.withRetryableCtx((ctx) => {
-        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.include('computer')
+        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.args[0]).to.include('computer')
       })
 
       cy.get('[data-cy="custom-editor"]').should('not.exist')
@@ -390,7 +385,7 @@ describe('App: Settings', () => {
       cy.contains('Choose your editor...').click()
       cy.contains('Null binary editor').click()
       cy.withRetryableCtx((ctx) => {
-        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.lastArg).to.include('{"preferredEditorBinary":null')
+        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.args[0]).to.include('{"preferredEditorBinary":null')
       })
 
       // navigate away and come back
@@ -406,7 +401,7 @@ describe('App: Settings', () => {
 })
 
 describe('App: Settings without cloud', () => {
-  it('the projectId section shows a prompt to connect when there is no projectId', () => {
+  it('the projectId section shows a prompt to log in when there is no projectId, and uses correct UTM params', () => {
     cy.scaffoldProject('simple-ct')
     cy.openProject('simple-ct')
     cy.startAppServer('component')
@@ -415,7 +410,21 @@ describe('App: Settings without cloud', () => {
     cy.get(SidebarSettingsLinkSelector).click()
     cy.findByText('Dashboard Settings').click()
     cy.findByText('Project ID').should('exist')
-    cy.contains('button', 'Log in to the Cypress Dashboard').should('be.visible')
+    cy.withCtx((ctx, o) => {
+      o.sinon.spy(ctx._apis.authApi, 'logIn')
+    })
+
+    cy.contains('button', 'Log in to the Cypress Dashboard').click()
+    cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
+      cy.contains('button', 'Log In').click()
+    })
+
+    cy.withCtx((ctx, o) => {
+      // validate utmSource
+      expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[1]).to.eq('Binary: App')
+      // validate utmMedium
+      expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[2]).to.eq('Settings Tab')
+    })
   })
 
   it('have returned browsers', () => {
@@ -438,7 +447,7 @@ describe('App: Settings without cloud', () => {
       cy.contains(`channel: 'stable',`)
       cy.contains(`displayName: 'Chrome',`)
 
-      cy.percySnapshot()
+    // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
     })
   })
 })

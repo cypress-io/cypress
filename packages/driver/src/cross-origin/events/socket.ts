@@ -1,4 +1,4 @@
-import { client } from '@packages/socket'
+import { client } from '@packages/socket/lib/browser'
 
 export const handleSocketEvents = (Cypress) => {
   const webSocket = client({
@@ -13,11 +13,6 @@ export const handleSocketEvents = (Cypress) => {
   const onAutomationRequest = (...args) => {
     webSocket.emit('automation:request', ...args)
   }
-
-  webSocket.on('cross:origin:delaying:html', (request) => {
-    // Until we do nested cy.origin, we just need to know what the request was for error messaging.
-    cy.isAnticipatingCrossOriginResponseFor(request)
-  })
 
   Cypress.on('backend:request', onBackendRequest)
   Cypress.on('automation:request', onAutomationRequest)

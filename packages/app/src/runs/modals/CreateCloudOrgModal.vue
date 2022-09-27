@@ -92,7 +92,7 @@ fragment CreateCloudOrgModal on CloudUser {
 
 gql`
 mutation CreateCloudOrgModal_CloudOrganizationsCheck {
-  refreshOrganizations {
+  refreshCloudViewer {
     ...CloudConnectModals
   }
 }

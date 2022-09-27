@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { blocked, cors } from '@packages/network'
 import { InterceptRequest } from '@packages/net-stubbing'
 import type { HttpMiddleware } from './'
-import { getSameSiteContext } from './util/cookies'
+import { getSameSiteContext, addCookieJarCookiesToRequest } from './util/cookies'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -31,6 +31,21 @@ const ExtractIsAUTFrameHeader: RequestMiddleware = function () {
   this.next()
 }
 
+const MaybeSimulateSecHeaders: RequestMiddleware = function () {
+  if (!this.config.experimentalModifyObstructiveThirdPartyCode) {
+    this.next()
+
+    return
+  }
+
+  // Do NOT disclose destination to an iframe and simulate if iframe was top
+  if (this.req.isAUTFrame && this.req.headers['sec-fetch-dest'] === 'iframe') {
+    this.req.headers['sec-fetch-dest'] = 'document'
+  }
+
+  this.next()
+}
+
 const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
   const currentAUTUrl = this.getAUTUrl()
 
@@ -44,17 +59,15 @@ const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
     this.req.isAUTFrame,
   )
 
-  const cookies = this.getCookieJar().getCookies(this.req.proxiedUrl, sameSiteContext)
-  const existingCookies = this.req.headers['cookie'] ? [this.req.headers['cookie']] : []
-  const cookiesToAdd = cookies.map((cookie) => `${cookie.key}=${cookie.value}`)
+  const applicableCookiesInCookieJar = this.getCookieJar().getCookies(this.req.proxiedUrl, sameSiteContext)
+  const cookiesOnRequest = (this.req.headers['cookie'] || '').split('; ')
 
-  this.debug('existing cookies on request: %s', existingCookies.join('; '))
-  this.debug('add cookies to request: %s', cookiesToAdd.join('; '))
+  this.debug('existing cookies on request from cookie jar: %s', applicableCookiesInCookieJar.join('; '))
+  this.debug('add cookies to request from header: %s', cookiesOnRequest.join('; '))
 
-  // if two or more cookies have the same key, the first one found is preferred,
-  // so we prepend the added cookies so they take preference
-  this.req.headers['cookie'] = cookiesToAdd.concat(existingCookies).join('; ')
+  this.req.headers['cookie'] = addCookieJarCookiesToRequest(applicableCookiesInCookieJar, cookiesOnRequest)
 
+  this.debug('cookies being sent with request: %s', this.req.headers['cookie'])
   this.next()
 }
 
@@ -111,7 +124,7 @@ const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
 
   if (buffer) {
     this.debug('ending request with buffered response')
-    this.res.wantsInjection = buffer.isCrossOrigin ? 'fullCrossOrigin' : 'full'
+    this.res.wantsInjection = this.config.experimentalSessionAndOrigin && buffer.isCrossOrigin ? 'fullCrossOrigin' : 'full'
 
     return this.onResponse(buffer.response, buffer.stream)
   }
@@ -235,6 +248,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
 export default {
   LogRequest,
   ExtractIsAUTFrameHeader,
+  MaybeSimulateSecHeaders,
   MaybeAttachCrossOriginCookies,
   MaybeEndRequestWithBufferedResponse,
   CorrelateBrowserPreRequest,

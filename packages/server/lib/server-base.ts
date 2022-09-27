@@ -123,6 +123,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _graphqlWS?: WebSocketServer
   protected _eventBus: EventEmitter
   protected _remoteStates: RemoteStates
+  private getCurrentBrowser: undefined | (() => Browser)
 
   constructor () {
     this.isListening = false
@@ -173,14 +174,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   setupCrossOriginRequestHandling () {
-    this._eventBus.on('cross:origin:delaying:html', (request) => {
-      this.socket.localBus.once('cross:origin:release:html', () => {
-        this._eventBus.emit('cross:origin:release:html')
-      })
-
-      this.socket.toDriver('cross:origin:delaying:html', request)
-    })
-
     this._eventBus.on('cross:origin:automation:cookies', (cookies: AutomationCookie[]) => {
       this.socket.localBus.once('cross:origin:automation:cookies:received', () => {
         this._eventBus.emit('cross:origin:automation:cookies:received')
@@ -240,13 +233,12 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       networkProxy: this._networkProxy!,
       onError,
       getSpec,
-      getCurrentBrowser,
       testingType,
-      exit,
     }
 
+    this.getCurrentBrowser = getCurrentBrowser
+
     this.setupCrossOriginRequestHandling()
-    this._remoteStates.addEventListeners(this.socket.localBus)
 
     const runnerSpecificRouter = testingType === 'e2e'
       ? createRoutesE2E(routeOptions)
@@ -343,6 +335,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.onRequest = this._onRequest.bind(this)
     options.netStubbingState = this.netStubbingState
     options.getRenderedHTMLOrigins = this._networkProxy?.http.getRenderedHTMLOrigins
+    options.getCurrentBrowser = () => this.getCurrentBrowser?.()
 
     options.onResetServerState = () => {
       this.networkProxy.reset()

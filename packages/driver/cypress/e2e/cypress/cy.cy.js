@@ -113,7 +113,8 @@ describe('driver/src/cypress/cy', () => {
       })
     })
 
-    it('stores invocation stack for first command', () => {
+    // TODO(webkit): fix+unskip for experimental webkit
+    it('stores invocation stack for first command', { browser: '!webkit' }, () => {
       cy
       .get('input:first')
       .then(() => {
@@ -123,7 +124,8 @@ describe('driver/src/cypress/cy', () => {
       })
     })
 
-    it('stores invocation stack for chained command', () => {
+    // TODO(webkit): fix+unskip for experimental webkit
+    it('stores invocation stack for chained command', { browser: '!webkit' }, () => {
       cy
       .get('div')
       .find('input')
@@ -136,10 +138,10 @@ describe('driver/src/cypress/cy', () => {
 
     it('supports cy.state(\'subject\') for backwards compatability', () => {
       cy.stub(Cypress.utils, 'warning')
-      const a = {}
+      const subject = {}
 
-      cy.wrap(a).then(() => {
-        expect(cy.state('subject')).to.equal(a)
+      cy.wrap(subject).then(() => {
+        expect(cy.state('subject')).to.equal(subject)
         expect(Cypress.utils.warning).to.be.calledWith('`cy.state(\'subject\')` has been deprecated and will be removed in a future release. Consider migrating to `cy.currentSubject()` instead.')
       })
     })
@@ -173,7 +175,8 @@ describe('driver/src/cypress/cy', () => {
       })
     })
 
-    describe('invocation stack', () => {
+    // TODO(webkit): fix+unskip for experimental webkit
+    describe('invocation stack', { browser: '!webkit' }, () => {
       beforeEach(() => {
         Cypress.Commands.add('getInput', () => cy.get('input'))
         Cypress.Commands.add('findInput', { prevSubject: 'element' }, (subject) => {

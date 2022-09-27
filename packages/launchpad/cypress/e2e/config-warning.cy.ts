@@ -1,3 +1,5 @@
+const THIRTY_SECONDS = 1000 * 30
+
 describe('baseUrl', () => {
   it('should show baseUrl warning if Cypress cannot connect to provided baseUrl', () => {
     cy.scaffoldProject('config-with-base-url-warning')
@@ -67,48 +69,78 @@ describe('baseUrl', () => {
   })
 })
 
-describe('experimentalStudio', () => {
-  it('should show experimentalStudio warning if Cypress detects experimentalStudio config has been set', () => {
-    cy.scaffoldProject('experimental-studio')
-    cy.openProject('experimental-studio')
-    cy.visitLaunchpad()
-
-    cy.get('[data-cy="warning-alert"]').contains('Warning: Experimental Studio Removed')
-    cy.get('[data-cy-testingtype="e2e"]').click()
-    cy.get('[data-cy="warning-alert"]').contains('Warning: Experimental Studio Removed')
-  })
-
-  it('should not continually show experimentalStudio warning in the same project', () => {
-    cy.scaffoldProject('experimental-studio')
-    cy.openProject('experimental-studio')
-    cy.visitLaunchpad()
-
-    cy.get('[data-cy="warning-alert"]').contains('Warning: Experimental Studio Removed')
-    cy.findAllByLabelText(cy.i18n.components.modal.dismiss).first().click()
-    cy.get('[data-cy="warning-alert"]').should('not.exist')
+describe('experimentalSingleTabRunMode', () => {
+  it('is a valid config for component testing', () => {
+    cy.scaffoldProject('experimentalSingleTabRunMode')
+    cy.openProject('experimentalSingleTabRunMode')
     cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', await ctx.actions.file.readFileInProject('cypress.config.js'))
+      await ctx.actions.file.writeFileInProject('cypress.config.js', `
+        const { defineConfig } = require('cypress')
+
+        module.exports = defineConfig({
+          component: {
+            experimentalSingleTabRunMode: true,
+            devServer () {
+              // This test doesn't need to actually run any component tests
+              // so we create a fake dev server to make it run faster and
+              // avoid flake on CI.
+              return {
+                port: 1234,
+                close: () => {},
+              }
+            },
+          },
+        })`)
     })
 
-    cy.get('[data-cy="loading-spinner"]')
-    cy.get('h1').should('contain', 'Welcome to Cypress!')
-    cy.get('[data-cy="warning-alert"]').should('not.exist')
+    cy.visitLaunchpad()
+
+    cy.get('[data-cy-testingtype="component"]').click()
+    cy.findByTestId('launchpad-Choose a Browser')
+    cy.get('h1').contains('Choose a Browser')
   })
 
-  it('should show experimentalStudio warning when opening project and going back', () => {
-    cy.scaffoldProject('experimental-studio')
-    cy.addProject('experimental-studio')
-    cy.openGlobalMode()
+  it('is not a valid config for e2e testing', () => {
+    cy.scaffoldProject('experimentalSingleTabRunMode')
+    cy.openProject('experimentalSingleTabRunMode')
     cy.visitLaunchpad()
-    cy.contains('experimental-studio').click()
-    cy.get('[data-cy="warning-alert"]').contains('Warning: Experimental Studio Removed')
-    cy.findAllByLabelText(cy.i18n.components.modal.dismiss).first().click()
-    cy.get('[data-cy="warning-alert"]').should('not.exist')
-    cy.get('a').contains('Projects').click()
-    cy.contains('[data-cy="project-card"]', 'experimental-studio').click()
-
     cy.get('[data-cy-testingtype="e2e"]').click()
-    cy.get('[data-cy="warning-alert"]').contains('Warning: Experimental Studio Removed')
+    cy.findByTestId('error-header').contains('Cypress configuration error')
+    cy.findByTestId('alert-body').contains('The experimentalSingleTabRunMode experiment is currently only supported for Component Testing.')
+  })
+})
+
+describe('experimentalStudio', () => {
+  it('is not a valid config for component testing', () => {
+    cy.scaffoldProject('experimentalSingleTabRunMode')
+    cy.openProject('experimentalSingleTabRunMode', ['--config-file', 'cypress-invalid-studio-experiment.config.js'])
+
+    cy.visitLaunchpad()
+    cy.get('[data-cy-testingtype="component"]').click()
+    cy.findByTestId('error-header')
+    cy.contains('The experimentalStudio experiment is currently only supported for End to End Testing.')
+  })
+
+  it('is a valid config for e2e testing', { defaultCommandTimeout: THIRTY_SECONDS }, () => {
+    cy.scaffoldProject('e2e')
+    cy.openProject('e2e')
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.js', `
+        const { defineConfig } = require('cypress')
+
+        module.exports = defineConfig({
+          experimentalStudio: true,
+          e2e: {
+            experimentalStudio: true
+          },
+        })
+      `)
+    })
+
+    cy.visitLaunchpad()
+    cy.get('[data-cy-testingtype="e2e"]').click()
+    cy.findByTestId('launchpad-Choose a Browser')
+    cy.get('h1').contains('Choose a Browser')
   })
 })
 
@@ -122,7 +154,7 @@ describe('component testing dependency warnings', () => {
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.get('a').contains('Projects').click()
     cy.get('[data-cy-testingtype="component"]').click()
-    cy.get('[data-cy="warning-alert"]').should('exist')
+    cy.get('[data-cy="warning-alert"]', { timeout: 12000 }).should('exist')
     .should('contain.text', 'Warning: Component Testing Mismatched Dependencies')
     .should('contain.text', 'vite. Expected ^=2.0.0 || ^=3.0.0, found 2.0.0-beta.70')
     .should('contain.text', 'react. Expected ^=16.0.0 || ^=17.0.0 || ^=18.0.0, found 15.6.2.')
@@ -131,7 +163,8 @@ describe('component testing dependency warnings', () => {
     cy.get('.warning-markdown').find('li').should('have.length', 3)
   })
 
-  it('warns against outdated @vue/cli dependency', () => {
+  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23154
+  it.skip('warns against outdated @vue/cli dependency', () => {
     cy.scaffoldProject('outdated-deps-vuecli3')
     cy.addProject('outdated-deps-vuecli3')
     cy.openGlobalMode()
@@ -140,7 +173,7 @@ describe('component testing dependency warnings', () => {
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.get('a').contains('Projects').click()
     cy.get('[data-cy-testingtype="component"]').click()
-    cy.get('[data-cy="warning-alert"]').should('exist')
+    cy.get('[data-cy="warning-alert"]', { timeout: 12000 }).should('exist')
     .should('contain.text', 'Warning: Component Testing Mismatched Dependencies')
     .should('contain.text', '@vue/cli-service. Expected ^=4.0.0 || ^=5.0.0, found 3.12.1.')
     .should('contain.text', 'vue. Expected ^3.0.0, found 2.7.8.')
@@ -159,7 +192,17 @@ describe('component testing dependency warnings', () => {
     cy.get('[data-cy-testingtype="component"]').click()
 
     // Wait until launch browser screen and assert warning does not exist
-    cy.contains('Choose a Browser')
+    cy.contains('Choose a Browser', { timeout: 12000 })
+    cy.get('[data-cy="warning-alert"]').should('not.exist')
+  })
+
+  it('does not show warning for project that does not require bundler to be installed', () => {
+    cy.scaffoldProject('next-12')
+    cy.openProject('next-12')
+    cy.visitLaunchpad()
+    cy.get('[data-cy="warning-alert"]').should('not.exist')
+    cy.get('[data-cy-testingtype="component"]').click()
+    cy.contains('Choose a Browser', { timeout: 12000 })
     cy.get('[data-cy="warning-alert"]').should('not.exist')
   })
 })

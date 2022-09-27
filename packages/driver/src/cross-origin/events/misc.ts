@@ -1,4 +1,6 @@
 import type { $Cy } from '../../cypress/cy'
+import { $Location } from '../../cypress/location'
+import * as cors from '@packages/network/lib/cors'
 
 export const handleMiscEvents = (Cypress: Cypress.Cypress, cy: $Cy) => {
   Cypress.on('viewport:changed', (viewport, callbackFn) => {
@@ -20,7 +22,18 @@ export const handleMiscEvents = (Cypress: Cypress.Cypress, cy: $Cy) => {
   })
 
   // Listen for any unload events in other origins, if any have unloaded we should also become unstable.
-  Cypress.specBridgeCommunicator.on('before:unload', () => {
-    cy.state('isStable', false)
+  Cypress.specBridgeCommunicator.on('before:unload', (origin) => {
+    // If the unload event originated from this spec bridge, isStable is already being handled.
+    if (window.location.origin !== cors.getOriginPolicy(origin)) {
+      cy.state('isStable', false)
+    }
+  })
+
+  Cypress.specBridgeCommunicator.on('window:load', ({ url }) => {
+    cy.isStable(true, 'primary onload')
+
+    cy.state('autLocation', $Location.create(url))
+    Cypress.action('app:window:load', undefined, url)
+    Cypress.emit('internal:window:load', { type: 'same:origin', url })
   })
 }

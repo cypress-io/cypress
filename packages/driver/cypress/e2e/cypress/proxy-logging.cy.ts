@@ -46,7 +46,8 @@ describe('Proxy Logging', () => {
   }
 
   context('request logging', () => {
-    it('fetch log shows resource type, url, method, and status code and has expected snapshots and consoleProps', (done) => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23443
+    it.skip('fetch log shows resource type, url, method, and status code and has expected snapshots and consoleProps', (done) => {
       fetch('/some-url')
 
       // trigger: Cypress.Log() called
@@ -95,15 +96,15 @@ describe('Proxy Logging', () => {
 
             done()
           } catch (err) {
-            // eslint-disable-next-line no-console
-            console.log('assertion error, retrying', err)
+            done(new Error(err))
           }
         })
       })
     })
 
     // @see https://github.com/cypress-io/cypress/issues/18757 and https://github.com/cypress-io/cypress/issues/17656
-    it('xhr log has response body/status code when xhr response is logged first', {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23250
+    it.skip('xhr log has response body/status code when xhr response is logged first', {
       // TODO: unskip in Electron: https://cypress-io.atlassian.net/browse/UNIFY-1753
       browser: '!electron',
     }, (done) => {
@@ -132,8 +133,7 @@ describe('Proxy Logging', () => {
 
             done()
           } catch (err) {
-            // eslint-disable-next-line no-console
-            console.log('assertion error, retrying', err)
+            done(new Error(err))
           }
         })
 
@@ -153,7 +153,8 @@ describe('Proxy Logging', () => {
     })
 
     // @see https://github.com/cypress-io/cypress/issues/18757 and https://github.com/cypress-io/cypress/issues/17656
-    it('xhr log has response body/status code when xhr response is logged second', (done) => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23203
+    it.skip('xhr log has response body/status code when xhr response is logged second', (done) => {
       cy.visit('/fixtures/empty.html')
 
       cy.window()
@@ -179,8 +180,7 @@ describe('Proxy Logging', () => {
 
             done()
           } catch (err) {
-            // eslint-disable-next-line no-console
-            console.log('assertion error, retrying', err)
+            done(new Error(err))
           }
         })
 
@@ -263,7 +263,8 @@ describe('Proxy Logging', () => {
         .visit('/fixtures/empty.html')
       })
 
-      it('intercept log has consoleProps with intercept info', (done) => {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23420
+      it.skip('intercept log has consoleProps with intercept info', (done) => {
         cy.intercept('/some-url', 'stubbed response').as('alias')
         .then(() => {
           fetch('/some-url')
@@ -314,14 +315,14 @@ describe('Proxy Logging', () => {
             })
 
             done()
-          } catch (err) {
-            // eslint-disable-next-line no-console
-            console.error('assertion failed:', err)
+          } catch (error) {
+            done(new Error(error))
           }
         })
       })
 
-      it('works with forceNetworkError', () => {
+      // TODO(webkit): fix forceNetworkError and unskip
+      it('works with forceNetworkError', { browser: '!webkit' }, () => {
         const logs: any[] = []
 
         cy.on('log:added', (log) => {

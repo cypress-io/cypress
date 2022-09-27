@@ -3,7 +3,7 @@ import { registerMountFn, addVueCommand } from './common'
 import '../../src/styles/shared.scss'
 import 'virtual:windi.css'
 import 'cypress-real-events/support'
-import { installCustomPercyCommand } from '@packages/ui-components/cypress/support/customPercyCommand'
+import { installCustomPercyCommand } from './customPercyCommand'
 import { addNetworkCommands } from './onlineNetwork'
 import { GQLStubRegistry } from './mock-graphql/stubgql-Registry'
 
@@ -20,7 +20,6 @@ declare global {
     }
   }
 }
-
 cy.i18n = defaultMessages
 cy.gqlStub = GQLStubRegistry
 
@@ -76,5 +75,12 @@ Cypress.on('uncaught:exception', (err) => !err.message.includes('ResizeObserver 
 
 registerMountFn()
 addVueCommand()
-installCustomPercyCommand()
+installCustomPercyCommand({
+  elementOverrides: {
+    'svg.animate-spin': ($el) => {
+      $el.attr('style', 'animation: none !important')
+    },
+  },
+})
+
 addNetworkCommands()

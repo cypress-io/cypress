@@ -1,7 +1,11 @@
 import { defaultMessages } from '@cy/i18n'
-import { CloudOrganizationConnectionStubs, CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
+import {
+  CloudOrganizationConnectionStubs,
+  CloudUserStubs,
+} from '@packages/graphql/test/stubCloudTypes'
 import { SelectCloudProjectModalFragmentDoc } from '../../generated/graphql-test'
 import SelectCloudProjectModal from '../modals/SelectCloudProjectModal.vue'
+import { SelectCloudProjectModal_CreateCloudProjectDocument, SelectCloudProjectModal_SetProjectIdDocument } from '../../generated/graphql'
 
 describe('<SelectCloudProjectModal />', () => {
   function mountDialog (currentProjectName = 'Test Project') {
@@ -21,7 +25,7 @@ describe('<SelectCloudProjectModal />', () => {
       },
       render (gql) {
         return (<div class="h-screen">
-          <SelectCloudProjectModal gql={gql}/>
+          <SelectCloudProjectModal utmMedium="test" gql={gql}/>
         </div>)
       },
     })
@@ -64,5 +68,116 @@ describe('<SelectCloudProjectModal />', () => {
     cy.findByRole('listbox').within(() => cy.findAllByText('Test Org 2').click())
 
     cy.contains('a', defaultMessages.runs.connect.modal.selectProject.chooseExistingProject).should('not.exist')
+  })
+
+  it('auto selects a project if it is the only project in the organization', () => {
+    mountDialog()
+    cy.get('[data-cy="selectOrganization"]').click()
+    cy.findByRole('listbox').within(() => cy.findAllByText('Test Org 3').click())
+
+    cy.get('[data-cy="selectProject"] button').should('have.text', 'Test Project 3')
+  })
+
+  it(`doesn't auto select a project if there are more than 1 projects in the org`, () => {
+    mountDialog()
+    cy.get('[data-cy="selectOrganization"]').click()
+    cy.findByRole('listbox').within(() => cy.findAllByText('Test Org 1').click())
+    cy.get('[data-cy="selectProject"] button').should('have.text', 'Pick a project')
+  })
+
+  it('shows the selected project when selecting from a list of >= 2 projects', () => {
+    mountDialog()
+    cy.get('[data-cy="selectOrganization"]').click()
+    cy.findByRole('listbox').within(() => cy.findAllByText('Test Org 1').click())
+    cy.get('[data-cy="selectProject"] button').click()
+    cy.contains('Test Project 2').click()
+    cy.get('[data-cy="selectProject"] button').should('have.text', 'Test Project 2').click()
+    cy.contains('Test Project 1').click()
+    cy.get('[data-cy="selectProject"] button').should('have.text', 'Test Project 1')
+  })
+
+  describe('create or connect project', () => {
+    beforeEach(() => {
+      const createMutation = cy.stub().as('createMutation')
+      const setProjectIdMutation = cy.stub().as('setProjectIdMutation')
+
+      cy.stubMutationResolver(SelectCloudProjectModal_CreateCloudProjectDocument, (defineResult, payload) => {
+        createMutation(payload)
+
+        return defineResult({
+          cloudProjectCreate: {
+            __typename: 'CloudProject',
+            id: '123',
+            slug: '123',
+          },
+        })
+      })
+
+      cy.stubMutationResolver(SelectCloudProjectModal_SetProjectIdDocument, (defineResult, payload) => {
+        setProjectIdMutation(payload)
+
+        return defineResult({
+          setProjectIdInConfigFile: {
+            __typename: 'Query',
+            currentProject: {
+              __typename: 'CurrentProject',
+              id: '123',
+              projectId: '123',
+              cloudProject: {
+                __typename: 'CloudProjectUnauthorized',
+              },
+            } as any,
+          },
+        })
+      })
+
+      mountDialog()
+    })
+
+    context('create new project', () => {
+      beforeEach(() => {
+        cy.contains('a', defaultMessages.runs.connect.modal.selectProject.createNewProject).click()
+        cy.contains('button', defaultMessages.runs.connect.modal.selectProject.createProject).click()
+      })
+
+      it('should call create project mutation with expected values', () => {
+        cy.get('@createMutation').should('have.been.calledOnceWith', {
+          campaign: 'Create project',
+          cohort: '',
+          medium: 'test',
+          name: 'Test Project',
+          orgId: '1',
+          public: false,
+          source: 'Binary: Launchpad',
+        })
+      })
+
+      it('should call setProjectId mutation', () => {
+        cy.get('@setProjectIdMutation').should('have.been.calledOnceWith', {
+          projectId: '123',
+        })
+      })
+    })
+
+    context('select existing project', () => {
+      beforeEach(() => {
+        cy.get('[data-cy="selectOrganization"]').click()
+        cy.findByRole('listbox').within(() => cy.findAllByText('Test Org 1').click())
+        cy.get('[data-cy="selectProject"] button').click()
+        cy.contains('Test Project 2').click()
+
+        cy.contains('button', defaultMessages.runs.connect.modal.selectProject.connectProject).click()
+      })
+
+      it('should not call create project mutation', () => {
+        cy.get('@createMutation').should('have.not.have.been.called')
+      })
+
+      it('should call setProjectId mutation', () => {
+        cy.get('@setProjectIdMutation').should('have.been.calledOnceWith', {
+          projectId: 'test-project-2',
+        })
+      })
+    })
   })
 })

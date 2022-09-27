@@ -1,2 +1,4 @@
 // type helpers
-type Nullable<T> = T | null
+declare namespace Cypress {
+   type Nullable<T> = T | null
+}

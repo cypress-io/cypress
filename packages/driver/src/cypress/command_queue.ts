@@ -64,8 +64,18 @@ export class CommandQueue extends Queue<$Command> {
   fail: $Cy['fail']
   isCy: $Cy['isCy']
   clearTimeout: ITimeouts['clearTimeout']
+  setSubjectForChainer: $Cy['setSubjectForChainer']
 
-  constructor (state: StateFunc, timeout: $Cy['timeout'], stability: IStability, cleanup: $Cy['cleanup'], fail: $Cy['fail'], isCy: $Cy['isCy'], clearTimeout: ITimeouts['clearTimeout']) {
+  constructor (
+    state: StateFunc,
+    timeout: $Cy['timeout'],
+    stability: IStability,
+    cleanup: $Cy['cleanup'],
+    fail: $Cy['fail'],
+    isCy: $Cy['isCy'],
+    clearTimeout: ITimeouts['clearTimeout'],
+    setSubjectForChainer: $Cy['setSubjectForChainer'],
+  ) {
     super()
     this.state = state
     this.timeout = timeout
@@ -74,6 +84,7 @@ export class CommandQueue extends Queue<$Command> {
     this.fail = fail
     this.isCy = isCy
     this.clearTimeout = clearTimeout
+    this.setSubjectForChainer = setSubjectForChainer
   }
 
   logs (filter) {
@@ -141,12 +152,12 @@ export class CommandQueue extends Queue<$Command> {
     this.state('current', command)
     this.state('chainerId', command.get('chainerId'))
 
-    return this.stability.whenStableOrAnticipatingCrossOriginResponse(() => {
+    return this.stability.whenStable(() => {
       this.state('nestedIndex', this.state('index'))
 
       return command.get('args')
-    }, command)
-    .then((args) => {
+    })
+    .then((args: any) => {
       // store this if we enqueue new commands
       // to check for promise violations
       let ret
@@ -249,7 +260,7 @@ export class CommandQueue extends Queue<$Command> {
       // we're finished with the current command so set it back to null
       this.state('current', null)
 
-      cy.setSubjectForChainer(command.get('chainerId'), subject)
+      this.setSubjectForChainer(command.get('chainerId'), subject)
 
       return subject
     })
@@ -281,7 +292,7 @@ export class CommandQueue extends Queue<$Command> {
 
         this.state('index', index + 1)
 
-        cy.setSubjectForChainer(command.get('chainerId'), command.get('subject'))
+        this.setSubjectForChainer(command.get('chainerId'), command.get('subject'))
 
         Cypress.action('cy:skipped:command:end', command)
 
@@ -293,18 +304,11 @@ export class CommandQueue extends Queue<$Command> {
         // trigger queue is almost finished
         Cypress.action('cy:command:queue:before:end')
 
-        // If we're enabled experimentalSessionAndOrigin we no longer have to wait for stability at the end of the command queue.
-        if (Cypress.config('experimentalSessionAndOrigin')) {
-          Cypress.action('cy:command:queue:end')
-
-          return null
-        }
-
         // we need to wait after all commands have
         // finished running if the application under
         // test is no longer stable because we cannot
         // move onto the next test until its finished
-        return this.stability.whenStableOrAnticipatingCrossOriginResponse(() => {
+        return this.stability.whenStable(() => {
           Cypress.action('cy:command:queue:end')
 
           return null

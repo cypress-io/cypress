@@ -30,6 +30,7 @@ system-tests/projects/e2e/cypress/e2e/stdout_exit_early_failing.cy.js
 system-tests/projects/e2e/cypress/e2e/typescript_syntax_error.cy.ts
 system-tests/projects/config-with-ts-syntax-error/**
 system-tests/projects/config-with-ts-module-error/**
+system-tests/projects/no-specs-vue-2/**
 
 
 **/test/fixtures
@@ -72,6 +73,8 @@ npm/cypress-schematic/src/**/*.js
 
 # The global eslint configuration is not set up to parse vue@2 files
 /npm/vue2/**/*.vue
+
+npm/grep/cypress
 
 packages/data-context/test/unit/codegen/files
 packages/config/test/__fixtures__/**/*

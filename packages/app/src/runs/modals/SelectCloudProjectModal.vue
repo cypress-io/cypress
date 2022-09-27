@@ -41,19 +41,19 @@
       </Alert>
       <Select
         v-model="pickedOrganization"
-        :options="organizations"
+        :options="organizationOptions"
         item-value="name"
         item-key="id"
         :placeholder="orgPlaceholder"
         data-cy="selectOrganization"
       >
         <template #label>
-          <span class="flex font-normal my-8px text-16px leading-24px items-end">
+          <span class="flex font-normal my-8px text-16px leading-24px items-end justify-between">
             <span class="">
               {{ t('runs.connect.modal.selectProject.organization') }}
             </span>
             <ExternalLink
-              class="cursor-pointer flex-grow text-right text-indigo-500 hover:underline"
+              class="cursor-pointer text-right text-indigo-500 hover:underline"
               :href="organizationUrl"
             >
               {{ t('runs.connect.modal.selectProject.manageOrgs') }}
@@ -72,7 +72,7 @@
         v-model="pickedProject"
         class="mt-16px transition-all"
         :class="pickedOrganization ? undefined : 'opacity-50'"
-        :options="projects"
+        :options="projectOptions"
         item-value="name"
         item-key="id"
         :disabled="!pickedOrganization"
@@ -80,13 +80,13 @@
         data-cy="selectProject"
       >
         <template #label>
-          <div class="flex font-normal text-16px leading-24px items-center">
+          <div class="flex font-normal text-16px leading-24px items-center justify-between">
             <p class="text-gray-800">
               {{ t('runs.connect.modal.selectProject.project') }}
+              <span class="text-red-500">*</span>
             </p>
-            <span class="ml-4px text-red-500">*</span>
             <a
-              class="cursor-pointer flex-grow my-8px text-right text-indigo-500 hover:underline"
+              class="cursor-pointer my-8px text-right text-indigo-500 hover:underline"
               @click="newProject = true"
             >
               {{ t('runs.connect.modal.selectProject.createNewProject') }}
@@ -117,7 +117,7 @@
             </span>
           </label>
           <a
-            v-if="projects.length > 0"
+            v-if="projectOptions.length > 0"
             class="cursor-pointer text-indigo-500 hover:underline"
             @click="newProject = false"
           >
@@ -179,7 +179,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
@@ -200,9 +200,18 @@ import { sortBy } from 'lodash'
 import { useOnline } from '@vueuse/core'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import { clearPendingError } from '@packages/frontend-shared/src/graphql/urqlClient'
+import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
 
 const { t } = useI18n()
 const online = useOnline()
+
+gql`
+fragment CloudProjectNode on CloudProject {
+  id
+  slug
+  name
+}
+`
 
 gql`
 fragment SelectCloudProjectModal on Query {
@@ -216,8 +225,7 @@ fragment SelectCloudProjectModal on Query {
         projects(first: 100) { # Not expecting there will be > 100 projects. If there are we will implement pagination
           nodes {
             id
-            slug
-            name
+            ...CloudProjectNode
           }
         }
       }
@@ -256,8 +264,8 @@ mutation SelectCloudProjectModal_SetProjectId( $projectId: String! ) {
 `
 
 gql`
-mutation SelectCloudProjectModal_CreateCloudProject( $name: String!, $orgId: ID!, $public: Boolean! ) {
-  cloudProjectCreate(name: $name, orgId: $orgId, public: $public) {
+mutation SelectCloudProjectModal_CreateCloudProject( $name: String!, $orgId: ID!, $public: Boolean!, $campaign: String, $cohort: String, $medium: String, $source: String! ) {
+  cloudProjectCreate(name: $name, orgId: $orgId, public: $public, campaign: $campaign, cohort: $cohort, medium: $medium, source: $source) {
     id
     slug
   }
@@ -266,6 +274,7 @@ mutation SelectCloudProjectModal_CreateCloudProject( $name: String!, $orgId: ID!
 
 const props = defineProps<{
   gql: SelectCloudProjectModalFragment
+  utmMedium: string
 }>()
 
 const emit = defineEmits<{
@@ -278,23 +287,41 @@ const isInternalServerError = ref(false)
 const graphqlError = ref<{ extension: string, message: string} | undefined>()
 const projectName = ref(props.gql.currentProject?.title || '')
 const projectAccess = ref<'private' | 'public'>('private')
-const organizations = computed(() => {
-  return sortBy(props.gql.cloudViewer?.organizations?.nodes.map((org) => {
+const organizationOptions = computed(() => {
+  const options = props.gql.cloudViewer?.organizations?.nodes?.map((org) => {
     return {
-      ...org,
-      projects: {
-        ...org.projects,
-        nodes: sortBy(org.projects?.nodes, 'name'),
-      },
+      id: org.id,
+      name: org.name,
       icon: FolderIcon,
     }
-  }) || [], 'name')
-})
-const pickedOrganization = ref(organizations.value.length >= 1 ? organizations.value[0] : undefined)
+  })
 
-const projects = computed(() => pickedOrganization.value?.projects?.nodes || [])
-const newProject = ref(projects.value.length === 0)
-const pickedProject = ref(pickedOrganization.value?.projects ? pickedOrganization.value.projects.nodes.find((p) => p.name === projectName.value) : undefined)
+  return sortBy(options || [], 'name')
+})
+const pickedOrganization = ref(organizationOptions.value.length >= 1 ? organizationOptions.value[0] : undefined)
+
+const projectOptions = computed(() => {
+  const organization = props.gql.cloudViewer?.organizations?.nodes?.find((org) => org.id === pickedOrganization?.value?.id)
+  const options = organization?.projects?.nodes?.map((project) => {
+    return {
+      id: project.id,
+      name: project.name,
+      slug: project.slug,
+    }
+  })
+
+  return sortBy(options || [], 'name')
+})
+const newProject = ref(projectOptions.value.length === 0)
+const pickedProject = ref<typeof projectOptions.value[number]>()
+
+watchEffect(() => {
+  if (projectOptions.value.length === 1) {
+    pickedProject.value = projectOptions.value[0]
+  } else {
+    pickedProject.value = projectOptions.value.find((p) => p.name === projectName.value)
+  }
+})
 
 const orgPlaceholder = t('runs.connect.modal.selectProject.placeholderOrganizations')
 const projectPlaceholder = computed(() => {
@@ -318,6 +345,10 @@ async function createOrConnectProject () {
       orgId: pickedOrganization.value!.id,
       name: projectName.value,
       public: projectAccess.value === 'public',
+      campaign: 'Create project',
+      cohort: '',
+      medium: props.utmMedium,
+      source: getUtmSource(),
     })
 
     if (error?.graphQLErrors.length) {

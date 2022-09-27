@@ -78,7 +78,8 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test component')
     })
 
-    it('redirects to the specs list with error if a spec is not found', () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23159
+    it.skip('redirects to the specs list with error if a spec is not found', () => {
       cy.visitApp()
       const { title, intro, explainer } = defaultMessages.specPage.noSpecError
       const badFilePath = 'src/DoesNotExist.spec.js'
@@ -143,7 +144,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
         expect(ctx.actions.browser.setActiveBrowserById).to.have.been.calledWith(browserId)
         expect(genId).to.eql('firefox-firefox-stable')
         expect(ctx.actions.project.launchProject).to.have.been.calledWith(
-          ctx.coreData.currentTestingType, {}, o.sinon.match(new RegExp('cypress\-in\-cypress\/src\/TestComponent\.spec\.jsx$')),
+          ctx.coreData.currentTestingType, undefined, o.sinon.match(new RegExp('cypress\-in\-cypress\/src\/TestComponent\.spec\.jsx$')),
         )
       })
     })

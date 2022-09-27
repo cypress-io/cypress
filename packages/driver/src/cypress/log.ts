@@ -15,7 +15,7 @@ import type { StateFunc } from './state'
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child|system/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
-const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName groupLevel hookId instrument isStubbed group message method name numElements showError numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
+const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName groupLevel hookId instrument isStubbed group message method name numElements showError numResponses referencesAlias renderProps sessionInfo state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let counter = 0
@@ -341,20 +341,7 @@ export class Log {
     return _.pick(this.attributes, args)
   }
 
-  snapshot (name?, options: any = {}) {
-    // bail early and don't snapshot if we're in headless mode
-    // or we're not storing tests
-    if (!this.config('isInteractive') || (this.config('numTestsKeptInMemory') === 0)) {
-      return this
-    }
-
-    _.defaults(options, {
-      at: null,
-      next: null,
-    })
-
-    const snapshot = this.cy.createSnapshot(name, this.get('$el'))
-
+  private addSnapshot (snapshot, options, shouldRebindSnapshotFn = true) {
     const snapshots = this.get('snapshots') || []
 
     // don't add snapshot if we couldn't create one, which can happen
@@ -367,17 +354,46 @@ export class Log {
 
     this.set('snapshots', snapshots)
 
-    if (options.next) {
-      const fn = this.snapshot
+    if (options.next && shouldRebindSnapshotFn) {
+      this.set('next', options.next)
+    }
 
-      this.snapshot = function () {
-        // restore the fn
-        this.snapshot = fn
+    return this
+  }
 
-        // call orig fn with next as name
-        return fn.call(this, options.next)
+  snapshot (name?, options: any = {}) {
+    // bail early and don't snapshot if we're in headless mode
+    // or we're not storing tests
+    if (!this.config('isInteractive') || (this.config('numTestsKeptInMemory') === 0)) {
+      return this
+    }
+
+    if (this.get('next')) {
+      name = this.get('next')
+      this.set('next', null)
+    }
+
+    if (this.config('experimentalSessionAndOrigin') && !Cypress.isCrossOriginSpecBridge) {
+      const activeSpecBridgeOriginPolicyIfApplicable = this.state('currentActiveOriginPolicy') || undefined
+      // @ts-ignore
+      const { originPolicy: originPolicyThatIsSoonToBeOrIsActive } = Cypress.Location.create(this.state('anticipatingCrossOriginResponse')?.href || this.state('url'))
+
+      if (activeSpecBridgeOriginPolicyIfApplicable && activeSpecBridgeOriginPolicyIfApplicable === originPolicyThatIsSoonToBeOrIsActive) {
+        Cypress.emit('request:snapshot:from:spec:bridge', {
+          log: this,
+          name,
+          options,
+          specBridge: activeSpecBridgeOriginPolicyIfApplicable,
+          addSnapshot: this.addSnapshot,
+        })
+
+        return this
       }
     }
+
+    const snapshot = this.cy.createSnapshot(name, this.get('$el'))
+
+    this.addSnapshot(snapshot, options)
 
     return this
   }
@@ -596,24 +612,6 @@ class LogManager {
 
       log.set(options)
 
-      // if snapshot was passed
-      // in, go ahead and snapshot
-      if (log.get('snapshot')) {
-        log.snapshot()
-      }
-
-      // if end was passed in
-      // go ahead and end
-      if (log.get('end')) {
-        log.end()
-      }
-
-      if (log.get('error')) {
-        log.error(log.get('error'))
-      }
-
-      log.wrapConsoleProps()
-
       const onBeforeLog = state('onBeforeLog')
 
       // dont trigger log if this function
@@ -624,18 +622,25 @@ class LogManager {
         }
       }
 
-      // set the log on the command
-      const current = state('current')
+      const command = state('current')
 
-      if (current) {
-        current.log(log)
+      if (command) {
+        command.log(log)
       }
+
+      // if snapshot was passed
+      // in, go ahead and snapshot
+      if (log.get('snapshot')) {
+        log.snapshot()
+      }
+
+      if (log.get('error')) {
+        log.error(log.get('error'))
+      }
+
+      log.wrapConsoleProps()
 
       this.addToLogs(log)
-
-      if (options.sessionInfo) {
-        Cypress.emit('session:add', log.toJSON())
-      }
 
       if (options.emitOnly) {
         return
@@ -643,9 +648,8 @@ class LogManager {
 
       this.triggerLog(log)
 
-      // if not current state then the log is being run
-      // with no command reference, so just end the log
-      if (!current) {
+      // if the log isn't associated with a command, then we know it won't be retrying and we should just end it.
+      if (!command || log.get('end')) {
         log.end()
       }
 

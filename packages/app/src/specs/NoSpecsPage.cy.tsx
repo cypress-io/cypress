@@ -16,7 +16,7 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
         onResult: (ctx) => {
           ctx.currentProject = {
             ...ctx.currentProject!,
-            config: {},
+            config: [{ field: 'specPattern', from: 'config', value: '**/*.cy.{js,jsx,ts,tsx}' }],
             id: 'id',
             configFileAbsolutePath: '/usr/bin/cypress.config.ts',
             currentTestingType: 'component',
@@ -51,7 +51,7 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
         onResult: (ctx) => {
           ctx.currentProject = {
             ...ctx.currentProject!,
-            config: {},
+            config: [{ field: 'specPattern', from: 'config', value: '**/*.cy.{js,jsx,ts,tsx}' }],
             configFileAbsolutePath: '/usr/bin/cypress.config.ts',
             id: 'id',
             currentTestingType: 'e2e',

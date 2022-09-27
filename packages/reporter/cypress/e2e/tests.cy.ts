@@ -1,46 +1,42 @@
 import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
-import { addCommand } from '../support/utils'
+import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
+
+let runner: EventEmitter
+let runnables: RootRunnable
+
+function visitAndRenderReporter (runnerStore: MobxRunnerStore = new MobxRunnerStore('e2e')) {
+  cy.fixture('runnables').then((_runnables) => {
+    runnables = _runnables
+  })
+
+  runner = new EventEmitter()
+
+  runnerStore ??= new MobxRunnerStore('e2e')
+
+  runnerStore.setSpec({
+    name: 'foo.js',
+    relative: 'relative/path/to/foo.js',
+    absolute: '/absolute/path/to/foo.js',
+  })
+
+  cy.visit('/').then((win) => {
+    win.render({
+      studioEnabled: true,
+      runner,
+      runnerStore,
+    })
+  })
+
+  cy.get('.reporter').then(() => {
+    runner.emit('runnables:ready', runnables)
+    runner.emit('reporter:start', { studioActive: true })
+  })
+}
 
 describe('tests', () => {
-  let runner: EventEmitter
-  let runnables: RootRunnable
-
-  const addStudioCommand = () => {
-    addCommand(runner, {
-      hookId: 'r3-studio',
-      name: 'get',
-      message: '#studio-command',
-      state: 'success',
-      isStudio: true,
-    })
-  }
-
   beforeEach(() => {
-    cy.fixture('runnables').then((_runnables) => {
-      runnables = _runnables
-    })
-
-    runner = new EventEmitter()
-
-    cy.visit('/').then((win) => {
-      win.render({
-        runner,
-        runnerStore: {
-          spec: {
-            name: 'foo.js',
-            relative: 'relative/path/to/foo.js',
-            absolute: '/absolute/path/to/foo.js',
-          },
-        },
-        experimentalStudioEnabled: true,
-      })
-    })
-
-    cy.get('.reporter').then(() => {
-      runner.emit('runnables:ready', runnables)
-      runner.emit('reporter:start', {})
-    })
+    visitAndRenderReporter()
   })
 
   it('includes the class "test"', () => {
@@ -70,7 +66,7 @@ describe('tests', () => {
       .parents('.collapsible').first()
       .should('not.have.class', 'is-open')
       .find('.collapsible-content')
-      .should('not.be.visible')
+      .should('not.exist')
     })
 
     it('failed tests expands automatically', () => {
@@ -94,7 +90,7 @@ describe('tests', () => {
 
       cy.get('@testWrapper')
       .should('not.have.class', 'is-open')
-      .find('.collapsible-content').should('not.be.visible')
+      .find('.collapsible-content').should('not.exist')
     })
 
     it('expands/collapses on enter', () => {
@@ -112,7 +108,7 @@ describe('tests', () => {
 
       cy.get('@testWrapper')
       .should('not.have.class', 'is-open')
-      .find('.collapsible-content').should('not.be.visible')
+      .find('.collapsible-content').should('not.exist')
     })
 
     it('expands/collapses on space', () => {
@@ -130,13 +126,95 @@ describe('tests', () => {
 
       cy.get('@testWrapper')
       .should('not.have.class', 'is-open')
-      .find('.collapsible-content').should('not.be.visible')
+      .find('.collapsible-content').should('not.exist')
+    })
+  })
+})
+
+describe('studio controls', () => {
+  describe('canCopyStudioCommands is true', () => {
+    beforeEach(() => {
+      const runnerStore = new MobxRunnerStore('e2e')
+
+      runnerStore.setCanSaveStudioLogs(true)
+
+      visitAndRenderReporter(runnerStore)
+      cy.contains('test 1').click()
+      .parents('.collapsible').first()
+      .find('.studio-controls').as('studioControls')
+    })
+
+    it('is enabled with tooltip when there are commands', () => {
+      cy.get('@studioControls')
+      .find('.studio-copy')
+      .should('not.be.disabled')
+      .trigger('mouseover')
+
+      cy.get('.cy-tooltip').should('have.text', 'Copy Commands to Clipboard')
+    })
+
+    it('is enabled when there are commands', () => {
+      cy.get('@studioControls').find('.studio-save').should('not.be.disabled')
+    })
+
+    it('is emits studio:save when clicked', () => {
+      cy.stub(runner, 'emit')
+
+      cy.get('@studioControls').find('.studio-save').click()
+
+      cy.wrap(runner.emit).should('be.calledWith', 'studio:save')
+    })
+
+    it('is emits studio:copy:to:clipboard when clicked', () => {
+      cy.stub(runner, 'emit')
+
+      cy.get('@studioControls').find('.studio-copy').click()
+
+      cy.wrap(runner.emit).should('be.calledWith', 'studio:copy:to:clipboard')
+    })
+
+    it('displays success state after commands are copied', () => {
+      cy.stub(runner, 'emit').callsFake((event, callback) => {
+        if (event === 'studio:copy:to:clipboard') {
+          callback('')
+        }
+      })
+
+      cy.get('@studioControls')
+      .find('.studio-copy')
+      .click()
+      .should('have.class', 'studio-copy-success')
+      .trigger('mouseover')
+
+      cy.get('.cy-tooltip').should('have.text', 'Commands Copied!')
     })
   })
 
-  // FIXME: When studio support is re-introduced we can enable these tests.
-  describe.skip('studio', () => {
+  describe('canCopyStudioCommands is false', () => {
+    beforeEach(() => {
+      visitAndRenderReporter()
+      cy.contains('test 1').click()
+      .parents('.collapsible').first()
+      .find('.studio-controls').as('studioControls')
+    })
+
+    describe('copy button', () => {
+      it('is disabled without tooltip when there are no commands', () => {
+        cy.get('@studioControls')
+        .find('.studio-copy')
+        .should('be.disabled')
+        .parent('span')
+        .trigger('mouseover')
+
+        cy.get('.cy-tooltip').should('not.exist')
+      })
+    })
+
     describe('button', () => {
+      beforeEach(() => {
+        runner.emit('reporter:start', { studioActive: false })
+      })
+
       it('displays studio icon with half transparency when hovering over test title', { scrollBehavior: false }, () => {
         cy.contains('test 1')
         .closest('.runnable-wrapper')
@@ -175,14 +253,6 @@ describe('tests', () => {
       })
 
       describe('with studio active', () => {
-        beforeEach(() => {
-          runner.emit('reporter:start', { studioActive: true })
-
-          cy.contains('test 1').click()
-          .parents('.collapsible').first()
-          .find('.studio-controls').as('studioControls')
-        })
-
         it('is visible with save and copy button when test passed', () => {
           cy.get('@studioControls').should('be.visible')
           cy.get('@studioControls').find('.studio-save').should('be.visible')
@@ -233,76 +303,9 @@ describe('tests', () => {
           cy.wrap(runner.emit).should('be.calledWith', 'studio:cancel')
         })
 
-        describe('copy button', () => {
-          it('is disabled without tooltip when there are no commands', () => {
-            cy.get('@studioControls')
-            .find('.studio-copy')
-            .should('be.disabled')
-            .parent('span')
-            .trigger('mouseover')
-
-            cy.get('.cy-tooltip').should('not.exist')
-          })
-
-          it('is enabled with tooltip when there are commands', () => {
-            addStudioCommand()
-
-            cy.get('@studioControls')
-            .find('.studio-copy')
-            .should('not.be.disabled')
-            .trigger('mouseover')
-
-            cy.get('.cy-tooltip').should('have.text', 'Copy Commands to Clipboard')
-          })
-
-          it('is emits studio:copy:to:clipboard when clicked', () => {
-            addStudioCommand()
-
-            cy.stub(runner, 'emit')
-
-            cy.get('@studioControls').find('.studio-copy').click()
-
-            cy.wrap(runner.emit).should('be.calledWith', 'studio:copy:to:clipboard')
-          })
-
-          it('displays success state after commands are copied', () => {
-            addStudioCommand()
-
-            cy.stub(runner, 'emit').callsFake((event, callback) => {
-              if (event === 'studio:copy:to:clipboard') {
-                callback('')
-              }
-            })
-
-            cy.get('@studioControls')
-            .find('.studio-copy')
-            .click()
-            .should('have.class', 'studio-copy-success')
-            .trigger('mouseover')
-
-            cy.get('.cy-tooltip').should('have.text', 'Commands Copied!')
-          })
-        })
-
         describe('save button', () => {
-          it('is disabled without commands', () => {
+          it('save button is disabled', () => {
             cy.get('@studioControls').find('.studio-save').should('be.disabled')
-          })
-
-          it('is enabled when there are commands', () => {
-            addStudioCommand()
-
-            cy.get('@studioControls').find('.studio-save').should('not.be.disabled')
-          })
-
-          it('is emits studio:save when clicked', () => {
-            addStudioCommand()
-
-            cy.stub(runner, 'emit')
-
-            cy.get('@studioControls').find('.studio-save').click()
-
-            cy.wrap(runner.emit).should('be.calledWith', 'studio:save')
           })
         })
       })

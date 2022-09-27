@@ -120,7 +120,7 @@ describe('App: Specs', () => {
             })).to.have.lengthOf(options.expectedScaffoldPathsForPlatform.length)
           }, { expectedScaffoldPathsForPlatform })
 
-          cy.percySnapshot()
+          // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
           // Dismisses dialog with close button press
           cy.get('@CloseDialogButton').click()
@@ -163,7 +163,7 @@ describe('App: Specs', () => {
             cy.get('[data-cy="card"]').contains(defaultMessages.createSpec.e2e.importEmptySpec.header).click()
           })
 
-          cy.percySnapshot('Default')
+          // cy.percySnapshot('Default') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
           cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
           .as('enterSpecInput')
@@ -178,7 +178,7 @@ describe('App: Specs', () => {
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning)
           cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
 
-          cy.percySnapshot('Invalid spec error')
+          // cy.percySnapshot('Invalid spec error') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
           // Create spec
           cy.get('@enterSpecInput').clear().type(getPathForPlatform('cypress/e2e/MyTest.cy.js'))
@@ -189,11 +189,31 @@ describe('App: Specs', () => {
 
           cy.get('pre').should('contain', 'describe(\'empty spec\'')
 
-          cy.percySnapshot('Generator success')
+          // cy.percySnapshot('Generator success') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
           cy.get('[aria-label="Close"]').click()
 
           cy.visitApp().get('[data-cy="spec-list-file"]').contains('MyTest.cy.js')
+        })
+
+        it('should not show trouble rendering alert', () => {
+          cy.get('@EmptySpecCard').click()
+
+          cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
+          .as('enterSpecInput')
+
+          // Create spec
+          cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
+          cy.contains('h2', defaultMessages.createSpec.successPage.header)
+
+          cy.get('[data-cy="file-row"]').contains(getPathForPlatform('cypress/e2e/spec.cy.ts')).click()
+
+          cy.get('pre').should('contain', 'describe(\'empty spec\'')
+
+          cy.findByRole('link', { name: 'Okay, run the spec' })
+          .should('have.attr', 'href', `#/specs/runner?file=cypress/e2e/spec.cy.ts`).click()
+
+          cy.contains('Review the docs').should('not.exist')
         })
       })
     })
@@ -252,7 +272,7 @@ describe('App: Specs', () => {
             cy.get('[data-cy="card"]').contains(defaultMessages.createSpec.e2e.importEmptySpec.header).click()
           })
 
-          cy.percySnapshot('Default')
+          // cy.percySnapshot('Default') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
           cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
           .as('enterSpecInput')
@@ -267,7 +287,7 @@ describe('App: Specs', () => {
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning)
           cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
 
-          cy.percySnapshot('Invalid spec error')
+          // cy.percySnapshot('Invalid spec error') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
           // Create spec
           cy.get('@enterSpecInput').clear().type(getPathForPlatform('cypress/e2e/MyTest.cy.ts'))
@@ -276,7 +296,7 @@ describe('App: Specs', () => {
 
           cy.get('[data-cy="file-row"]').contains(getPathForPlatform('cypress/e2e/MyTest.cy.ts')).click()
 
-          cy.percySnapshot('Generator success')
+          // cy.percySnapshot('Generator success') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
           cy.get('pre').should('contain', 'describe(\'empty spec\'')
 
@@ -403,7 +423,7 @@ describe('App: Specs', () => {
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning)
           cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
 
-          cy.percySnapshot('Invalid spec error')
+          // cy.percySnapshot('Invalid spec error') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
           // Create spec
           cy.get('@enterSpecInput').clear().type(getPathForPlatform('src/MyTest.cy.js'))
@@ -414,7 +434,7 @@ describe('App: Specs', () => {
 
           cy.get('pre').should('contain', 'describe(\'empty spec\'')
 
-          cy.percySnapshot('Generator success')
+          // cy.percySnapshot('Generator success') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
           cy.get('[aria-label="Close"]').click()
 
@@ -434,7 +454,8 @@ describe('App: Specs', () => {
           })
 
           // Timeout is increased here to allow ample time for the config change to be processed
-          cy.contains('No Specs Found', { timeout: 10000 }).should('be.visible')
+          cy.contains('src/e2e/**/*.{js,jsx}', { timeout: 12000 }).should('be.visible')
+          cy.contains('No Specs Found').should('be.visible')
 
           cy.findByRole('button', { name: 'New Spec' }).click()
           cy.contains('Create new empty spec').click()
@@ -471,7 +492,8 @@ describe('App: Specs', () => {
         cy.get('@enterSpecInput').clear().type(getPathForPlatform('src/e2e/MyTest.spec.jsx'))
 
         cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.specExtensionWarning)
-        cy.percySnapshot('Non-recommended spec pattern warning')
+        // cy.percySnapshot('Non-recommended spec pattern warning') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
+
         cy.contains('span', '{filename}.cy.jsx')
       })
     })
@@ -711,7 +733,9 @@ describe('App: Specs', () => {
         })
 
         // Timeout is increased here to allow ample time for the config change to be processed
-        cy.contains('No Specs Found', { timeout: 10000 }).should('be.visible')
+        cy.contains('src/specs-folder/*.{js,jsx}', { timeout: 12000 }).should('be.visible')
+        cy.contains('No Specs Found').should('be.visible')
+
         cy.findByRole('button', { name: 'New Spec' }).click()
 
         cy.findByRole('dialog', {

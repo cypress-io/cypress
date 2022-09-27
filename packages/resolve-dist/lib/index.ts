@@ -2,7 +2,7 @@ import path from 'path'
 
 let fs: typeof import('fs-extra')
 
-export type RunnerPkg = 'app' | 'runner' | 'runner-ct'
+export type RunnerPkg = 'app' | 'runner'
 
 type FoldersWithDist = 'static' | 'driver' | RunnerPkg | 'launchpad'
 
@@ -33,7 +33,5 @@ export const getPathToIndex = (pkg: RunnerPkg) => {
 }
 
 export const getPathToDesktopIndex = (graphqlPort: number) => {
-  // For now, if we see that there's a CYPRESS_INTERNAL_VITE_DEV
-  // we assume we're running Cypress targeting that (dev server)
   return `http://localhost:${graphqlPort}/__launchpad/index.html`
 }

@@ -26,7 +26,6 @@ export interface ErrProps {
   name: string
   message: string
   stack: string
-  sourceMappedStack: string
   parsedStack: ParsedStackLine[]
   docsUrl: string | string[]
   templateType: string
@@ -37,7 +36,6 @@ export default class Err {
   @observable name = ''
   @observable message = ''
   @observable stack = ''
-  @observable sourceMappedStack = ''
   @observable.ref parsedStack: ParsedStackLine[] | null = null
   @observable docsUrl = '' as string | string[]
   @observable templateType = ''
@@ -63,7 +61,6 @@ export default class Err {
     if (props.message) this.message = props.message
     if (props.stack) this.stack = props.stack
     if (props.docsUrl) this.docsUrl = props.docsUrl
-    if (props.sourceMappedStack) this.sourceMappedStack = props.sourceMappedStack
     if (props.parsedStack) this.parsedStack = props.parsedStack
     if (props.templateType) this.templateType = props.templateType
     if (props.codeFrame) this.codeFrame = props.codeFrame

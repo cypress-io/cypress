@@ -27,13 +27,10 @@ export const monorepoPaths = {
   pkgRewriter: path.join(__dirname, '../../packages/rewriter'),
   pkgRoot: path.join(__dirname, '../../packages/root'),
   pkgRunner: path.join(__dirname, '../../packages/runner'),
-  pkgRunnerCt: path.join(__dirname, '../../packages/runner-ct'),
-  pkgRunnerShared: path.join(__dirname, '../../packages/runner-shared'),
   pkgScaffoldConfig: path.join(__dirname, '../../packages/scaffold-config'),
   pkgServer: path.join(__dirname, '../../packages/server'),
   pkgSocket: path.join(__dirname, '../../packages/socket'),
   pkgTs: path.join(__dirname, '../../packages/ts'),
   pkgTypes: path.join(__dirname, '../../packages/types'),
-  pkgUiComponents: path.join(__dirname, '../../packages/ui-components'),
   pkgWebConfig: path.join(__dirname, '../../packages/web-config')
 } as const

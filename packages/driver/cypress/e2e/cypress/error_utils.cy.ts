@@ -353,7 +353,8 @@ describe('driver/src/cypress/error_utils', () => {
       expect(fn).to.throw('Simple error with a message')
     })
 
-    it('removes internal stack lines from stack', () => {
+    // TODO(webkit): fix+unskip for experimental webkit
+    it('removes internal stack lines from stack', { browser: '!webkit' }, () => {
       // this features relies on Error.captureStackTrace, which some
       // browsers don't have (e.g. Firefox)
       if (!Error.captureStackTrace) return
@@ -391,23 +392,16 @@ describe('driver/src/cypress/error_utils', () => {
 
     beforeEach(() => {
       $stackUtils.replacedStack = cy.stub().returns('replaced stack')
-      $stackUtils.stackWithUserInvocationStackSpliced = cy.stub().returns({ stack: 'spliced stack' })
       $stackUtils.getSourceStack = cy.stub().returns(sourceStack)
       $stackUtils.getCodeFrame = cy.stub().returns(codeFrame)
 
       err = { stack: 'Error: original stack message\n at originalStack (foo.js:1:1)' }
     })
 
-    it('replaces stack with user invocation stack', () => {
+    it('replaces stack with source map stack', () => {
       const result = $errUtils.enhanceStack({ err, userInvocationStack })
 
-      expect(result.stack).to.equal('replaced stack')
-    })
-
-    it('attaches source mapped stack', () => {
-      const result = $errUtils.enhanceStack({ err, userInvocationStack })
-
-      expect(result.sourceMappedStack).to.equal(sourceStack.sourceMapped)
+      expect(result.stack).to.equal(sourceStack.sourceMapped)
     })
 
     it('attaches parsed stack', () => {
@@ -425,17 +419,16 @@ describe('driver/src/cypress/error_utils', () => {
     it('appends user invocation stack when it is a cypress error', () => {
       err.name = 'CypressError'
 
-      const result = $errUtils.enhanceStack({ err, userInvocationStack })
-
-      expect(result.stack).to.equal('spliced stack')
+      cy.spy($stackUtils, 'stackWithUserInvocationStackSpliced')
+      $errUtils.enhanceStack({ err, userInvocationStack })
+      expect($stackUtils.stackWithUserInvocationStackSpliced).to.be.called
     })
 
     it('appends user invocation stack when it is a chai validation error', () => {
       err.message = 'Invalid Chai property'
-
-      const result = $errUtils.enhanceStack({ err, userInvocationStack })
-
-      expect(result.stack).to.equal('spliced stack')
+      cy.spy($stackUtils, 'stackWithUserInvocationStackSpliced')
+      $errUtils.enhanceStack({ err, userInvocationStack })
+      expect($stackUtils.stackWithUserInvocationStackSpliced).to.be.called
     })
 
     it('does not replaced or append stack when there is no invocation stack', () => {
@@ -598,7 +591,8 @@ describe('driver/src/cypress/error_utils', () => {
   })
 
   context('Error.captureStackTrace', () => {
-    it('works - even where not natively support', () => {
+    // TODO(webkit): fix+unskip for experimental webkit
+    it('works - even where not natively support', { browser: '!webkit' }, () => {
       function removeMe2 () {
         const err: Record<string, any> = {}
 

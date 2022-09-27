@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Bluebird from 'bluebird'
 
 import $networkUtils from './network_utils'
@@ -14,18 +13,26 @@ const fetchScript = (scriptWindow, script) => {
 const extractSourceMap = ([script, contents]) => {
   script.fullyQualifiedUrl = `${window.top!.location.origin}${script.relativeUrl}`.replace(/ /g, '%20')
 
-  const sourceMap = $sourceMapUtils.extractSourceMap(script, contents)
+  const sourceMap = $sourceMapUtils.extractSourceMap(contents)
 
   return $sourceMapUtils.initializeSourceMapConsumer(script, sourceMap)
-  .return([script, contents])
+  .catch((_err) => {
+    // if WebAssembly is missing, we can't consume source maps, but it shouldn't block Cy
+    // like in WebKit on Windows: https://github.com/microsoft/playwright/issues/2876
+  })
+  .then(() => [script, contents])
 }
 
 const evalScripts = (specWindow, scripts: any = []) => {
-  _.each(scripts, ([script, contents]) => {
-    specWindow.eval(`${contents}\n//# sourceURL=${script.fullyQualifiedUrl}`)
-  })
+  return Bluebird.each(scripts, (_script: any) => {
+    const [script, contents] = _script
 
-  return null
+    if (script.load) {
+      return script.load()
+    }
+
+    return specWindow.eval(`${contents}\n//# sourceURL=${script.fullyQualifiedUrl}`)
+  })
 }
 
 const runScriptsFromUrls = (specWindow, scripts) => {

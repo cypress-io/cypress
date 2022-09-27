@@ -8,35 +8,40 @@ import {
 import type {
   MountOptions,
   InternalMountOptions,
-  InternalUnmountOptionsReact18,
   UnmountArgs,
 } from '@cypress/react'
 
-let root: any
+let root: ReactDOM.Root | null
+
+const cleanup = () => {
+  if (root) {
+    root.unmount()
+
+    root = null
+
+    return true
+  }
+
+  return false
+}
 
 export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerenderKey?: string) {
   const internalOptions: InternalMountOptions = {
     reactDom: ReactDOM,
     render: (reactComponent: ReturnType<typeof React.createElement>, el: HTMLElement) => {
-      root = ReactDOM.createRoot(el)
+      if (!root) {
+        root = ReactDOM.createRoot(el)
+      }
 
       return root.render(reactComponent)
     },
     unmount,
+    cleanup,
   }
 
   return makeMountFn('mount', jsx, { ReactDom: ReactDOM, ...options }, rerenderKey, internalOptions)
 }
 
 export function unmount (options: UnmountArgs = { log: true }) {
-  const internalOptions: InternalUnmountOptionsReact18 = {
-    // type is ReturnType<typeof ReactDOM.createRoot>
-    unmount: (): boolean => {
-      root.unmount()
-
-      return true
-    },
-  }
-
-  return makeUnmountFn(options, internalOptions)
+  return makeUnmountFn(options)
 }

@@ -95,8 +95,6 @@ export async function spawned (
 
   const [executable, ...rest] = command.split(' ')
 
-  // console.log(useExecutable, rest, spawnOpts)
-
   const cp = universalSpawn(executable, rest, {
     stdio: 'pipe',
     ...spawnOpts,
@@ -132,13 +130,6 @@ export async function forked (
   opts: ForkedOptions = {},
 ) {
   const { waitForExit, waitForData, tapErr, tapOut, ...spawnOpts } = opts
-
-  // console.log(args)
-
-  // let useExecutable = executable
-  // if (process.platform === 'win32' && !useExecutable.endsWith('.cmd')) {
-  //   useExecutable = `${executable}.cmd`
-  // }
 
   const cp = fork(modulePath, args, {
     stdio: 'pipe',
