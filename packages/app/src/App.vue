@@ -5,7 +5,7 @@
     />
   </router-view>
 
-  <template v-if="route.name !== 'SpecRunner'">
+  <template v-if="route.name && route.name !== 'SpecRunner'">
     <CloudViewerAndProject />
     <LoginConnectModals />
   </template>
