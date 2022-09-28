@@ -91,6 +91,15 @@ const setTopOnError = function (Cypress, cy: $Cy) {
     // but they came from the spec, so we need to differentiate them
     const isSpecError = $errUtils.isSpecError(Cypress.config('spec'), err)
 
+    // all Component Testing uncaugght exceptions are handled
+    // via listeners on the AUT Frame; in CT, since there is only 1 frame,
+    // we effectively handle all errors via the AUT frame; we return early
+    // to avoid capturing the error twice, which results in a duplicated error
+    // in the Command Log.
+    if (isSpecError && Cypress.testingType === 'component') {
+      return
+    }
+
     const handled = curCy!.onUncaughtException({
       err,
       promise,
