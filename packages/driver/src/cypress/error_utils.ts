@@ -7,6 +7,7 @@ import { stripAnsi } from '@packages/errors'
 import $errorMessages from './error_messages'
 import $stackUtils, { StackAndCodeFrameIndex } from './stack_utils'
 import $utils from './utils'
+import type { HandlerType } from './runner'
 
 const ERROR_PROPS = 'message type name stack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
 const ERR_PREPARED_FOR_SERIALIZATION = Symbol('ERR_PREPARED_FOR_SERIALIZATION')
@@ -387,6 +388,7 @@ const errByPath = (msgPath, args?) => {
 type FrameType = 'spec' | 'app'
 
 interface UncaughtException {
+  testingType: Cypress.TestingType
   frameType: FrameType
   handlerType: 'error' | 'unhandledrejection'
   err: Error & {
@@ -396,14 +398,18 @@ interface UncaughtException {
   state: typeof cy.state
 }
 
-const createUncaughtException = ({ frameType, handlerType, state, err }: UncaughtException) => {
-  const errPath = frameType === 'spec' ? 'uncaught.fromSpec' : 'uncaught.fromApp'
+const getErrPath = (frameType: FrameType, testingType: Cypress.TestingType, err: UncaughtException['err']): 'uncaught.fromSpec' | 'uncaught.fromApp' => {
+  return frameType === 'spec' ? 'uncaught.fromSpec' : 'uncaught.fromApp'
+}
+
+const createUncaughtException = ({ frameType, handlerType, state, err, testingType }: UncaughtException) => {
+  const errPath = getErrPath(frameType, testingType, err)
   let uncaughtErr = errByPath(errPath, {
     errMsg: stripAnsi(err.message),
     promiseAddendum: handlerType === 'unhandledrejection' ? ' It was caused by an unhandled promise rejection.' : '',
   }) as CypressError
 
-  modifyErrMsg(err, uncaughtErr.message, () => uncaughtErr.message)
+  err = modifyErrMsg(err, uncaughtErr.message, () => uncaughtErr.message)
 
   err.docsUrl = docsUrlToStr([uncaughtErr.docsUrl, err.docsUrl])
 
@@ -507,7 +513,15 @@ export interface ErrorFromErrorEvent {
   err: Error
 }
 
-const errorFromErrorEvent = (event): ErrorFromErrorEvent => {
+export interface ErrorDetails {
+  lineno?: number
+  filename?: string
+  colno?: number
+  message: string
+  error: CypressError
+}
+
+const errorFromErrorEvent = (event: ErrorDetails): ErrorFromErrorEvent => {
   let { message, filename, lineno, colno, error } = event
   let docsUrl = error?.docsUrl
 
@@ -555,13 +569,13 @@ const errorFromProjectRejectionEvent = (event): ErrorFromProjectRejectionEvent =
   }
 }
 
-const errorFromUncaughtEvent = (handlerType, event) => {
+const errorFromUncaughtEvent = (handlerType: HandlerType, event: ErrorDetails) => {
   return handlerType === 'error' ?
     errorFromErrorEvent(event) :
     errorFromProjectRejectionEvent(event)
 }
 
-const logError = (Cypress, handlerType, err, handled = false) => {
+const logError = (Cypress, handlerType: HandlerType, err, handled = false) => {
   Cypress.log({
     message: `${err.name}: ${err.message}`,
     name: 'uncaught exception',

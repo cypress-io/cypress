@@ -913,6 +913,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   onUncaughtException ({ handlerType, frameType, err, promise }) {
     err = $errUtils.createUncaughtException({
       handlerType,
+      testingType: this.Cypress.testingType,
       frameType,
       state: this.state,
       err,
@@ -939,6 +940,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       } catch (uncaughtExceptionErr) {
         err = $errUtils.createUncaughtException({
           err: uncaughtExceptionErr,
+          testingType: this.Cypress.testingType,
           handlerType: 'error',
           frameType: 'spec',
           state: this.state,

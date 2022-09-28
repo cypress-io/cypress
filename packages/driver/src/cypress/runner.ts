@@ -5,7 +5,7 @@ import Promise from 'bluebird'
 
 import { LogUtils } from './log'
 import $utils from './utils'
-import $errUtils from './error_utils'
+import $errUtils, { ErrorDetails } from './error_utils'
 import $stackUtils from './stack_utils'
 import { getResolvedTestConfigOverride } from '../cy/testConfigOverrides'
 import debugFn from 'debug'
@@ -33,6 +33,8 @@ const RUNNER_EVENTS = [
   TEST_AFTER_RUN_EVENT,
   TEST_AFTER_RUN_ASYNC_EVENT,
 ] as const
+
+export type HandlerType = 'error' | 'unhandledrejection'
 
 const duration = (before: Date, after: Date) => {
   return Number(before) - Number(after)
@@ -1068,7 +1070,7 @@ export default {
     }
 
     // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
-    const onSpecError = (handlerType) => (event) => {
+    const onSpecError = (handlerType: HandlerType) => (event: ErrorDetails) => {
       let { originalErr, err } = $errUtils.errorFromUncaughtEvent(handlerType, event)
 
       debugErrors('uncaught spec error: %o', originalErr)
@@ -1087,6 +1089,7 @@ export default {
       }
 
       err = $errUtils.createUncaughtException({
+        testingType: Cypress.testingType,
         frameType: 'spec',
         handlerType,
         state,

@@ -329,7 +329,7 @@ class $Cypress {
     this.events.proxyTo(this.cy)
 
     $scriptUtils.runScripts(specWindow, scripts)
-    .catch((error) => {
+    .catch((error: Error) => {
       this.runner.onSpecError('error')({ error })
     })
     .then(() => {
