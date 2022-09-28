@@ -48,7 +48,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
   const ensureSubjectByType = (subject, type) => {
     const current = state('current')
 
-    let types: string[] = [].concat(type)
+    let types: (string | boolean)[] = [].concat(type)
 
     // if we have an optional subject and nothing's
     // here then just return cuz we good to go
@@ -98,6 +98,21 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
       $errUtils.throwErrByPath('miscellaneous.outside_test_with_cmd', {
         args: {
           cmd: name,
+        },
+      })
+    }
+  }
+
+  const ensureChildCommand = (command, args) => {
+    const subjects = cy.state('subjects')
+
+    if (subjects[command.get('chainerId')] === undefined) {
+      const stringifiedArg = $utils.stringifyActual(args[0])
+
+      $errUtils.throwErrByPath('miscellaneous.invoking_child_without_parent', {
+        args: {
+          cmd: command.get('name'),
+          args: _.isString(args[0]) ? `\"${stringifiedArg}\"` : stringifiedArg,
         },
       })
     }
@@ -257,9 +272,6 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
   }
 
   const ensureElExistence = ($el) => {
-    // dont throw if this isnt even a DOM object
-    // return if not $dom.isJquery($el)
-
     // ensure that we either had some assertions
     // or that the element existed
     if ($el && $el.length) {
@@ -432,6 +444,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     // internal functions
     ensureSubjectByType,
     ensureRunnable,
+    ensureChildCommand,
   }
 }
 
