@@ -32,6 +32,4 @@ Note that this may take a while.`)
   }
 }
 
-if (process.env.DISABLE_SNAPSHOT_REQUIRE == null) {
-  setupV8Snapshots()
-}
+export { setupV8Snapshots }

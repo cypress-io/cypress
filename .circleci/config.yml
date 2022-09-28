@@ -28,7 +28,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 'feature/v8-snapshots'
-        - 'ryanm/fix/other-tests'
+        - 'ryanm/feat/add-v8-snapshot-to-binary'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -38,7 +38,7 @@ macWorkflowFilters: &darwin-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ 'feature/v8-snapshots', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/fix/other-tests', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/feat/add-v8-snapshot-to-binary', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -48,7 +48,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ 'feature/v8-snapshots', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/fix/other-tests', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/feat/add-v8-snapshot-to-binary', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -65,7 +65,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ 'feature/v8-snapshots', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/fix/other-tests', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/feat/add-v8-snapshot-to-binary', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -203,7 +203,7 @@ commands:
           name: Generate v8 snapshot
           command: |
             source ./scripts/ensure-node.sh
-            DEBUG=cypress:snapgen:info,cypress:snapgen:debug,cypress:snapgen:error yarn build-v8-snapshot-prod
+            yarn build-v8-snapshot-prod
       - prepare-modules-cache # So we don't throw these in the workspace cache
       - persist_to_workspace:
           root: ~/
@@ -1069,14 +1069,16 @@ commands:
           # notarization on Mac can take a while
           no_output_timeout: "45m"
           command: |
+            source ./scripts/ensure-node.sh
+            node --version
             if [[ `node ./scripts/get-platform-key.js` == 'linux-arm64' ]]; then
               # these are missing on Circle and there is no way to pre-install them on Arm
               sudo apt-get update
               sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+              yarn binary-build --version $(node ./scripts/get-next-version.js)
+            else
+              yarn binary-build --disableV8Snapshot --version $(node ./scripts/get-next-version.js)
             fi
-            source ./scripts/ensure-node.sh
-            node --version
-            yarn binary-build --version $(node ./scripts/get-next-version.js)
       - run:
           name: Zip the binary
           command: |

@@ -9,3 +9,5 @@ export * from './generator/snapshot-generator-flags'
 export { ensureDirSync, fileExistsSync, prettyPrintError } from './utils'
 
 export * from './meta/dependency-map'
+
+export * from './setup'
