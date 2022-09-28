@@ -45,6 +45,7 @@ declare global {
       React: any
       ReactDOM: any
       dom: any
+      highlight: any
       CypressJQuery: any
 
       MobX: typeof MobX

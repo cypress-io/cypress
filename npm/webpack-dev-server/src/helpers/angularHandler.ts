@@ -2,6 +2,7 @@ import * as fs from 'fs-extra'
 import { tmpdir } from 'os'
 import * as path from 'path'
 import { pathToFileURL } from 'url'
+import type { Configuration } from 'webpack'
 import type { PresetHandlerResult, WebpackDevServerConfig } from '../devServer'
 import { sourceDefaultWebpackDependencies } from './sourceRelativeWebpackModules'
 
@@ -253,8 +254,16 @@ async function getAngularCliWebpackConfig (devServerConfig: AngularWebpackDevSer
   return config
 }
 
+function removeSourceMapPlugin (config: Configuration) {
+  config.plugins = config.plugins?.filter((plugin) => {
+    return plugin?.constructor?.name !== 'SourceMapDevToolPlugin'
+  })
+}
+
 export async function angularHandler (devServerConfig: AngularWebpackDevServerConfig): Promise<PresetHandlerResult> {
   const webpackConfig = await getAngularCliWebpackConfig(devServerConfig)
+
+  removeSourceMapPlugin(webpackConfig)
 
   return { frameworkConfig: webpackConfig, sourceWebpackModulesResult: sourceDefaultWebpackDependencies(devServerConfig) }
 }
