@@ -201,10 +201,10 @@ it('verifies number of cy commands', () => {
   const actualCommands = Cypress._.reject(Object.keys(cy.commandFns), (command) => customCommands.includes(command))
   const expectedCommands = [
     'check', 'uncheck', 'click', 'dblclick', 'rightclick', 'focus', 'blur', 'hover', 'scrollIntoView', 'scrollTo', 'select',
-    'selectFile', 'submit', 'type', 'clear', 'trigger', 'as', 'ng', 'should', 'and', 'clock', 'tick', 'spread', 'each', 'then',
+    'selectFile', 'submit', 'type', 'clear', 'trigger', 'ng', 'should', 'and', 'clock', 'tick', 'spread', 'each', 'then',
     'invoke', 'its', 'getCookie', 'getCookies', 'setCookie', 'clearCookie', 'clearCookies', 'pause', 'debug', 'exec', 'readFile',
     'writeFile', 'fixture', 'clearLocalStorage', 'url', 'hash', 'location', 'end', 'noop', 'log', 'wrap', 'reload', 'go', 'visit',
-    'focused', 'get', 'contains', 'root', 'shadow', 'within', 'request', 'session', 'screenshot', 'task', 'find', 'filter', 'not',
+    'focused', 'get', 'contains', 'shadow', 'within', 'request', 'session', 'screenshot', 'task', 'find', 'filter', 'not',
     'children', 'eq', 'closest', 'first', 'last', 'next', 'nextAll', 'nextUntil', 'parent', 'parents', 'parentsUntil', 'prev',
     'prevAll', 'prevUntil', 'siblings', 'wait', 'title', 'window', 'document', 'viewport', 'server', 'route', 'intercept', 'origin',
     'mount',

@@ -205,7 +205,7 @@ export default (Commands, Cypress, cy, state) => {
 
         // cy.route aliases have subject that has all XHR properties
         // let's check one of them
-        return aliasObj.subject && Boolean(aliasObject.subject.xhrUrl)
+        return aliasObj.subjectChain.length && Boolean((_.last(aliasObject.subjectChain) as any).xhrUrl)
       }
 
       if (command && !isNetworkInterceptCommand(command)) {

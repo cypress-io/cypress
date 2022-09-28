@@ -300,6 +300,11 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
     message: '--waiting for new page to load--',
     event: true,
     timeout: options.timeout,
+    // If this was triggered as part of a cypress command, eg, clicking a form submit button, we don't want our
+    // snapshot timing tied to when the current command resolves. This empty 'snapshots' array prevents
+    // command.snapshotLogs() - which the command queue calls as part of resolving each command - from creating a
+    // snapshot too early.
+    snapshots: [],
     consoleProps () {
       return {
         Note: 'This event initially fires when your application fires its \'beforeunload\' event and completes when your application fires its \'load\' event after the next page loads.',
