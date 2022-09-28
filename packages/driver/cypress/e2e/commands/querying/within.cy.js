@@ -287,7 +287,7 @@ describe('src/cy/commands/querying/within', () => {
         })
 
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.within()` failed because it requires a DOM element')
+          expect(err.message).to.include('`cy.within()` failed because this element')
 
           done()
         })

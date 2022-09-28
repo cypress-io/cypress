@@ -3,6 +3,8 @@ import _ from 'lodash'
 import $errUtils from '../cypress/error_utils'
 import type { StateFunc } from '../cypress/state'
 
+const validAliasApiRe = /^(\d+|all)$/
+
 const xhrNotWaitedOnByIndex = (state: StateFunc, alias: string, index: number, prop: 'requests' | 'responses') => {
   // find the last request or response
   // which hasnt already been used.
@@ -65,6 +67,12 @@ export const create = (state: StateFunc) => ({
 
       alias = _.join(_.dropRight(allParts, 1), '.')
       prop = _.last(allParts)
+    }
+
+    if (prop && !validAliasApiRe.test(prop)) {
+      $errUtils.throwErrByPath('get.alias_invalid', {
+        args: { prop },
+      })
     }
 
     if (prop === '0') {

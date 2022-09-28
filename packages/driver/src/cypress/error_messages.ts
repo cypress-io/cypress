@@ -563,6 +563,10 @@ export default {
   },
 
   get: {
+    alias_invalid: {
+      message: '`{{prop}}` is not a valid alias property. Only `numbers` or `all` is permitted.',
+      docsUrl: 'https://on.cypress.io/get',
+    },
     alias_zero: {
       message: '`0` is not a valid alias property. Are you trying to ask for the first response? If so write `@{{alias}}.1`',
       docsUrl: 'https://on.cypress.io/get',
@@ -859,14 +863,6 @@ export default {
     },
     reserved_command: {
       message: '`Cypress.Commands.add()` cannot create a new command named `{{name}}` because that name is reserved internally by Cypress.',
-      docsUrl: 'https://on.cypress.io/custom-commands',
-    },
-    invalid_new_query: {
-      message: '`Cypress.Commands._addQuery()` is used to create new queries, but `{{name}}` is an existing Cypress command or query, or is reserved internally by Cypress.\n\n If you want to override an existing command or query, use `Cypress.Commands.overrideQuery()` instead.',
-      docsUrl: 'https://on.cypress.io/custom-commands',
-    },
-    reserved_command_query: {
-      message: '`Cypress.Commands._addQuery()` cannot create a new query named `{{name}}` because that name is reserved internally by Cypress.',
       docsUrl: 'https://on.cypress.io/custom-commands',
     },
     invalid_overwrite: {
@@ -1647,37 +1643,6 @@ export default {
     optgroup_disabled: {
       message: `${cmd('select')} failed because this \`<option>\` you are trying to select is within an \`<optgroup>\` that is currently disabled:\n\n\`{{node}}\``,
       docsUrl: 'https://on.cypress.io/select',
-    },
-  },
-
-  query_command: {
-    docsUrl: 'https://on.cypress.io/custom-commands',
-
-    returned_promise (obj) {
-      return stripIndent`
-        ${cmd(obj.name)} failed because you returned a promise from a query.
-
-        Queries must be synchronous functions that return a function. You cannot invoke commands or return promises inside of them.`
-    },
-    invoked_action (obj) {
-      return stripIndent`
-        ${cmd(obj.name)} failed because you invoked a command inside a query.
-
-        Queries must be synchronous functions that return a function. You cannot invoke commands or return promises inside of them.
-
-        The command invoked was:
-
-          > ${cmd(obj.action)}`
-    },
-    returned_non_function (obj) {
-      return stripIndent`
-        ${cmd(obj.name)} failed because you returned a value other than a function from a query.
-
-        Queries must be synchronous functions that return a function.
-
-        The returned value was:
-
-          > \`${obj.returned}\``
     },
   },
 
