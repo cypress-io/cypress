@@ -1,20 +1,27 @@
-const debug = require('debug')('cypress:server:user')
+const debug = require('debug')('cypress:server:dashboard:user')
 const api = require('./api')
-const cache = require('./cache')
-const errors = require('./errors')
+const cache = require('../cache')
+const errors = require('../errors')
+
+import type Bluebird from 'bluebird'
+
+type User = {
+  authToken: string
+  name: string
+  email: string
+}
 
 export = {
-  get () {
+  get (): Bluebird<User> {
     return cache.getUser()
   },
 
-  set (user) {
+  set (user: User): Bluebird<User> {
     return cache.setUser(user)
   },
 
-  getBaseLoginUrl () {
-    return api.getAuthUrls()
-    .get('dashboardAuthUrl')
+  getBaseLoginUrl (): string {
+    return api.getAuthUrls().get('dashboardAuthUrl')
   },
 
   logOut () {
@@ -29,13 +36,13 @@ export = {
     })
   },
 
-  syncProfile (authToken) {
+  syncProfile (authToken: string) {
     debug('synchronizing user profile')
 
     return api.getMe(authToken)
     .then((res) => {
       debug('received /me %o', res)
-      const user = {
+      const user: User = {
         authToken,
         name: res.name,
         email: res.email,

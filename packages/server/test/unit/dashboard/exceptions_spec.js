@@ -1,14 +1,14 @@
-require('../spec_helper')
+require('../../spec_helper')
 
 delete global.fs
 
-const api = require(`../../lib/api`)
-const user = require(`../../lib/user`)
-const exception = require(`../../lib/exception`)
-const system = require(`../../lib/util/system`)
+const api = require('../../../lib/dashboard/api')
+const user = require('../../../lib/dashboard/user')
+const exception = require('../../../lib/dashboard/exception')
+const system = require('../../../lib/util/system')
 const pkg = require('@packages/root')
 
-describe('lib/exceptions', () => {
+describe('lib/dashboard/exceptions', () => {
   context('.getAuthToken', () => {
     it('returns authToken from cache', () => {
       sinon.stub(user, 'get').resolves({ authToken: 'auth-token-123' })

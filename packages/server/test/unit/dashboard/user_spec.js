@@ -1,11 +1,11 @@
-require('../spec_helper')
+require('../../spec_helper')
 
-const api = require(`../../lib/api`)
-const cache = require(`../../lib/cache`)
-const user = require(`../../lib/user`)
-const errors = require(`../../lib/errors`)
+const api = require('../../../lib/dashboard/api')
+const cache = require('../../../lib/cache')
+const user = require('../../../lib/dashboard/user')
+const errors = require('../../../lib/errors')
 
-describe('lib/user', () => {
+describe('lib/dashboard/user', () => {
   context('.get', () => {
     it('calls cache.getUser', () => {
       sinon.stub(cache, 'getUser').resolves({ name: 'brian' })

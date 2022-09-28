@@ -7,9 +7,9 @@ const Promise = require('bluebird')
 const url = require('url')
 const { shell } = require('electron')
 
-const machineId = require('../util/machine_id')
+const machineId = require('./machine_id')
 const random = require('../util/random')
-const user = require('../user')
+const user = require('./user')
 
 let app
 let authCallback

@@ -1,14 +1,14 @@
 require('../../spec_helper')
 
-const auth = require(`../../../lib/gui/auth`)
-const user = require(`../../../lib/user`)
+const auth = require(`../../../lib/dashboard/auth`)
+const user = require(`../../../lib/dashboard/user`)
 
 const electron = require('electron')
-const machineId = require(`../../../lib/util/machine_id`)
+const machineId = require('../../../lib/dashboard/machine_id')
 const os = require('os')
 const pkg = require('@packages/root')
 const Promise = require('bluebird')
-const random = require(`../../../lib/util/random`)
+const random = require('../../../lib/util/random')
 
 const BASE_URL = 'https://foo.invalid/login.html'
 const RANDOM_STRING = 'a'.repeat(32)
@@ -17,7 +17,7 @@ const REDIRECT_URL = `http://127.0.0.1:${PORT}/redirect-to-auth`
 const FULL_LOGIN_URL = `https://foo.invalid/login.html?port=${PORT}&state=${RANDOM_STRING}&machineId=abc123&cypressVersion=${pkg.version}&platform=linux`
 const FULL_LOGIN_URL_UTM = `https://foo.invalid/login.html?utm_source=UTM%20Source&utm_medium=UTM%20Medium&utm_campaign=Log%20In&utm_content=UTM%20Content&port=${PORT}&state=${RANDOM_STRING}&machineId=abc123&cypressVersion=${pkg.version}&platform=linux`
 
-describe('lib/gui/auth', function () {
+describe('lib/dashboard/auth', function () {
   beforeEach(() => {
     sinon.stub(os, 'platform').returns('linux')
     sinon.stub(machineId, 'machineId').resolves('abc123')
