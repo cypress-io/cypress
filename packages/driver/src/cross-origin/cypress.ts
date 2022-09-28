@@ -206,7 +206,7 @@ const attachToWindow = (autWindow: Window) => {
 
       cy.isStable(false, 'beforeunload')
 
-      cy.Cookies.setInitial()
+      // NOTE: we intentionally do not set the cy.Cookies.setInitial() inside the spec bridge as we are not doing full injection and this leads to cookie side effects
 
       cy.resetTimer()
 
