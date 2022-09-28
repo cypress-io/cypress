@@ -1,6 +1,8 @@
 import _ from 'lodash'
 import utils from './utils'
 
+let idCounter = 1
+
 export class $Command {
   attributes!: Record<string, any>
 
@@ -12,7 +14,7 @@ export class $Command {
       // the id prefix needs to be unique per origin, so there are not
       // collisions when commands created in a secondary origin are passed
       // to the primary origin for the command log, etc.
-      attrs.id = _.uniqueId(`cmd-${window.location.origin}-`)
+      attrs.id = `${attrs.chainerId}-cmd-${idCounter++}`
     }
 
     this.set(attrs)
@@ -33,9 +35,39 @@ export class $Command {
     return this
   }
 
+  snapshotLogs () {
+    this.get('logs').forEach((log) => {
+      if (!log.get('snapshots')) {
+        log.snapshot()
+      }
+    })
+  }
+
   finishLogs () {
-    // finish each of the logs we have
-    return _.invokeMap(this.get('logs'), 'finish')
+    // TODO: Investigate whether or not we can reuse snapshots between logs
+    // that snapshot at the same time
+
+    // Finish each of the logs we have, turning any potential errors into actual ones.
+    this.get('logs').forEach((log) => {
+      if (log.get('next')) {
+        log.snapshot()
+      }
+
+      if (log.get('_error')) {
+        log.error(log.get('_error'))
+      } else {
+        log.set('snapshot', false)
+        log.finish()
+      }
+    })
+
+    // If the previous command is a query belonging to the same chainer,
+    // we also ask it to end its own logs (and so on, up the chain).
+    const prev = this.get('prev')
+
+    if (prev && prev.get('query') && prev.get('chainerId') === this.get('chainerId')) {
+      prev.finishLogs()
+    }
   }
 
   log (log) {
