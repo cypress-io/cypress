@@ -3,7 +3,6 @@ require('../../spec_helper')
 const api = require('../../../lib/dashboard/api')
 const cache = require('../../../lib/cache')
 const user = require('../../../lib/dashboard/user')
-const errors = require('../../../lib/errors')
 
 describe('lib/dashboard/user', () => {
   context('.get', () => {
@@ -80,32 +79,6 @@ describe('lib/dashboard/user', () => {
 
       return user.getBaseLoginUrl().then((url) => {
         expect(url).to.eq('https://github.com/login')
-      })
-    })
-  })
-
-  context('.ensureAuthToken', () => {
-    it('returns authToken', () => {
-      sinon.stub(cache, 'getUser').resolves({ name: 'brian', authToken: 'abc-123' })
-
-      return user.ensureAuthToken().then((st) => {
-        expect(st).to.eq('abc-123')
-      })
-    })
-
-    it('throws NOT_LOGGED_IN when no authToken, tagged as api error', () => {
-      sinon.stub(cache, 'getUser').resolves(null)
-
-      return user.ensureAuthToken()
-      .then(() => {
-        throw new Error('should have thrown an error')
-      }).catch((err) => {
-        const expectedErr = errors.get('NOT_LOGGED_IN')
-
-        expect(err.message).to.eq(expectedErr.message)
-        expect(err.isApiError).to.be.true
-
-        expect(err.type).to.eq(expectedErr.type)
       })
     })
   })

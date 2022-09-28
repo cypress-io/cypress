@@ -44,7 +44,7 @@ if (intervals) {
   .value()
 }
 
-const rp = request.defaults((params = {}, callback) => {
+const rp = request.defaults((params, callback) => {
   let resp
 
   if (params.cacheable && (resp = getCachedResponse(params))) {
@@ -258,7 +258,7 @@ module.exports = {
     })
   },
 
-  createInstance (options = {}) {
+  createInstance (options) {
     const { runId, timeout } = options
 
     const body = _.pick(options, [
@@ -285,7 +285,7 @@ module.exports = {
     })
   },
 
-  postInstanceTests (options = {}) {
+  postInstanceTests (options) {
     const { instanceId, runId, timeout, ...body } = options
 
     return retryWithBackoff((attemptIndex) => {
@@ -305,7 +305,7 @@ module.exports = {
     })
   },
 
-  updateInstanceStdout (options = {}) {
+  updateInstanceStdout (options) {
     return retryWithBackoff((attemptIndex) => {
       return rp.put({
         url: apiRoutes.instanceStdout(options.instanceId),
@@ -325,7 +325,7 @@ module.exports = {
     })
   },
 
-  postInstanceResults (options = {}) {
+  postInstanceResults (options) {
     return retryWithBackoff((attemptIndex) => {
       return rp.post({
         url: apiRoutes.instanceResults(options.instanceId),
