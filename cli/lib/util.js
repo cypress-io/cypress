@@ -134,7 +134,7 @@ function isValidCypressInternalEnvValue (value) {
     return true
   }
 
-  // names of config environments, see "packages/server/config/app.yml"
+  // names of config environments, see "packages/server/config/app.json"
   const names = ['development', 'test', 'staging', 'production']
 
   return _.includes(names, value)
