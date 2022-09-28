@@ -187,14 +187,18 @@ const verifyFailure = (options) => {
   }
 }
 
-export const createVerify = ({ fileName, hasPreferredIde, mode }) => {
+type ChainableVerify = (specTitle: string, props: any) => Cypress.Chainable
+
+export const createVerify = ({ fileName, hasPreferredIde, mode }): ChainableVerify => {
   return (specTitle: string, props: any) => {
     props.specTitle ||= specTitle
     props.fileName ||= fileName
     props.hasPreferredIde = hasPreferredIde
     props.mode = mode
 
-    ;(props.verifyFn || verifyFailure).call(null, props)
+    return cy.wrap(
+      (props.verifyFn || verifyFailure).call(null, props),
+    )
   }
 }
 
