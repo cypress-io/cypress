@@ -389,7 +389,7 @@ type FrameType = 'spec' | 'app'
 
 interface UncaughtException {
   frameType: FrameType
-  handlerType: 'error' | 'unhandledrejection'
+  handlerType: HandlerType
   err: Error & {
     docsUrl?: string
     onFail?: () => void
