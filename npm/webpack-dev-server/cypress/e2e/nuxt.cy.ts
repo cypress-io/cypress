@@ -35,6 +35,7 @@ for (const project of PROJECTS) {
       })
 
       cy.waitForSpecToFinish({ failCount: 1 })
+      cy.get('.test-err-code-frame').should('be.visible')
 
       cy.withCtx(async (ctx) => {
         const tutorialCyPath = ctx.path.join('components', 'Tutorial.cy.js')
