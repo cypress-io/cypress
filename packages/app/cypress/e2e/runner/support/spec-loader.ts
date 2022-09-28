@@ -3,11 +3,11 @@ export const shouldHaveTestResults = ({ passCount, failCount, pendingCount }) =>
   failCount = failCount || '--'
 
   cy.findByLabelText('Stats', { timeout: 10000 }).within(() => {
-    cy.get('.passed .num', { timeout: 10000 }).should('have.text', `${passCount}`)
-    cy.get('.failed .num', { timeout: 10000 }).should('have.text', `${failCount}`)
+    cy.get('.passed .num', { timeout: 30000 }).should('have.text', `${passCount}`)
+    cy.get('.failed .num', { timeout: 30000 }).should('have.text', `${failCount}`)
 
     if (pendingCount) {
-      cy.get('.pending .num', { timeout: 10000 }).should('have.text', `${pendingCount}`)
+      cy.get('.pending .num', { timeout: 20000 }).should('have.text', `${pendingCount}`)
     }
   })
 }
@@ -19,7 +19,10 @@ export type LoadSpecOptions = {
   failCount?: number | string
   pendingCount?: number | string
   hasPreferredIde?: boolean
-  projectName?: 'runner-e2e-specs' | 'session-and-origin-e2e-specs'
+  projectName?: 'runner-e2e-specs' | 'runner-ct-specs' | 'session-and-origin-e2e-specs'
+  mode?: 'e2e' | 'component'
+  configFile?: string
+  scaffold?: boolean
 }
 
 export function loadSpec (options: LoadSpecOptions) {
@@ -30,12 +33,18 @@ export function loadSpec (options: LoadSpecOptions) {
     failCount = '--',
     hasPreferredIde = false,
     pendingCount,
+    mode = 'e2e',
+    configFile = 'cypress.config.js',
     projectName = 'runner-e2e-specs',
+    scaffold = true,
   } = options
 
-  cy.scaffoldProject(projectName)
-  cy.openProject(projectName)
-  cy.startAppServer()
+  if (scaffold) {
+    cy.scaffoldProject(projectName)
+  }
+
+  cy.openProject(projectName, ['--config-file', configFile])
+  cy.startAppServer(mode)
 
   cy.withCtx((ctx, options) => {
     ctx.update((coreData) => {

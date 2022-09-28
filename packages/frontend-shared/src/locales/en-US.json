@@ -817,7 +817,7 @@
       "buttonText": "Review the guide on viewports",
       "buttonHref": "https://on.cypress.io/viewport",
       "infoText": "The viewport determines the width and height of your application under test. By default the viewport will be {0} by {1} for {2} testing.",
-      "configText": "Additionally, you can override this value in your {2} or via the {4} command."
+      "configText": "Additionally, you can override this value in your {configFile} or via the {viewportCommand} command."
     },
     "studio": {
       "studio": "Studio",
