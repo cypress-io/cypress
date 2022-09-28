@@ -21,7 +21,7 @@ export interface LoginConnectState {
 
 export type UserStatus = 'isLoggedOut' | 'needsOrgConnect' | 'needsProjectConnect' | 'needsRecordedRun' | 'noActionableState'
 
-type StatusField = 'isLoggedIn' | 'isProjectConnected' | 'isOrganizationLoaded' | 'isMemberOfOrganization' | 'hasRecordedRuns'
+export type StatusField = 'isLoggedIn' | 'isProjectConnected' | 'isOrganizationLoaded' | 'isMemberOfOrganization' | 'hasRecordedRuns'
 
 export const useLoginConnectStore = defineStore({
   id: 'loginConnect',

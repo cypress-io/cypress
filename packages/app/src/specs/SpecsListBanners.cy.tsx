@@ -6,7 +6,8 @@ import interval from 'human-interval'
 import { CloudUserStubs, CloudProjectStubs } from '@packages/graphql/test/stubCloudTypes'
 import { AllowedState, BannerIds } from '@packages/types'
 import { assignIn, set } from 'lodash'
-
+import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import type { StatusField } from '@packages/frontend-shared/src/store/login-connect-store'
 const AlertSelector = 'alert-header'
 const AlertCloseBtnSelector = 'alert-suffix-icon'
 
@@ -100,6 +101,19 @@ describe('<SpecsListBanners />', () => {
 
       it('should render when not previously-dismissed', () => {
         mountWithState(gql, stateWithFirstOpenedDaysAgo(4))
+        const bannerTrueConditions = {
+          'login-banner': [],
+          'create-organization-banner': ['isLoggedIn', 'isOrganizationLoaded'],
+          'connect-project-banner': ['isLoggedIn', 'isMemberOfOrganization'],
+          'record-banner': ['isLoggedIn', 'isMemberOfOrganization', 'isProjectConnected', 'hasNoRecordedRuns'],
+        } as const
+
+        const loginConnectStore = useLoginConnectStore()
+
+        bannerTrueConditions[bannerTestId].forEach((status: StatusField) => {
+          loginConnectStore.setStatus(status, true)
+        })
+
         cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')
       })
 
