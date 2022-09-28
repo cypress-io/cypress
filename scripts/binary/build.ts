@@ -18,7 +18,6 @@ import { transformRequires } from './util/transform-requires'
 import execa from 'execa'
 import { testStaticAssets } from './util/testStaticAssets'
 import performanceTracking from '../../system-tests/lib/performance'
-import { setupV8Snapshots } from '@tooling/v8-snapshot'
 
 const globAsync = promisify(glob)
 
@@ -36,7 +35,6 @@ interface BuildCypressAppOpts {
   version: string
   skipSigning?: boolean
   keepBuild?: boolean
-  disableV8Snapshot?: boolean
 }
 
 /**
@@ -74,7 +72,7 @@ async function checkMaxPathLength () {
 // For debugging the flow without rebuilding each time
 
 export async function buildCypressApp (options: BuildCypressAppOpts) {
-  const { platform, version, skipSigning = false, keepBuild = false, disableV8Snapshot = false } = options
+  const { platform, version, skipSigning = false, keepBuild = false } = options
 
   log('#checkPlatform')
   if (platform !== os.platform()) {
@@ -102,14 +100,6 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
       stdio: 'inherit',
       cwd: CY_ROOT_DIR,
     })
-  }
-
-  let sourceSnapshotFileLocation
-  let targetSnapshotFileLocation
-
-  if (!disableV8Snapshot) {
-    sourceSnapshotFileLocation = await setupV8Snapshots()
-    targetSnapshotFileLocation = path.join(meta.buildDir(), path.relative(path.resolve('packages', 'electron', 'dist', 'Cypress'), sourceSnapshotFileLocation))
   }
 
   // Copy Packages: We want to copy the package.json, files, and output
@@ -267,11 +257,6 @@ require('./packages/server')\
     if (!skipSigning) {
       throw e
     }
-  }
-
-  if (!disableV8Snapshot) {
-    log(`copying ${sourceSnapshotFileLocation} to ${targetSnapshotFileLocation}`)
-    fs.copySync(sourceSnapshotFileLocation, targetSnapshotFileLocation)
   }
 
   await checkMaxPathLength()

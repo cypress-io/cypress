@@ -4,6 +4,7 @@ const { join } = require('path')
 const glob = require('glob')
 const os = require('os')
 const path = require('path')
+const { setupV8Snapshots } = require('@tooling/v8-snapshot')
 
 module.exports = async function (params) {
   console.log('****************************')
@@ -44,4 +45,12 @@ module.exports = async function (params) {
   await fs.copy(distNodeModules, appNodeModules)
 
   console.log('all node_modules subfolders copied to', outputFolder)
+
+  if (process.env.DISABLE_SNAPSHOT_REQUIRE == null) {
+    const sourceSnapshotFileLocation = await setupV8Snapshots()
+    const targetSnapshotFileLocation = path.join(params.appOutDir, path.relative(path.resolve('packages', 'electron', 'dist', 'Cypress'), sourceSnapshotFileLocation))
+
+    console.log(`copying ${sourceSnapshotFileLocation} to ${targetSnapshotFileLocation}`)
+    await fs.copyFile(sourceSnapshotFileLocation, targetSnapshotFileLocation)
+  }
 }

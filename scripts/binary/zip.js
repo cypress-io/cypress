@@ -75,7 +75,9 @@ const checkZipSize = function (zipPath) {
   // Before you modify these max sizes, check and see what you did that might have
   // done to increase the size of the binary, and if you do need to change it,
   // call it out in the PR description / comments
-  const MAX_ALLOWED_SIZE_MB = os.platform() === 'win32' ? 295 : 200
+  // const MAX_ALLOWED_SIZE_MB = os.platform() === 'win32' ? 295 : 200
+  // TODO: Bump up the size of the zip file until we clean it up with: https://github.com/cypress-io/cypress/issues/23123
+  const MAX_ALLOWED_SIZE_MB = os.platform() === 'win32' ? 295 : 300
   const MAX_ZIP_FILE_SIZE = megaBytes(MAX_ALLOWED_SIZE_MB)
 
   if (stats.size > MAX_ZIP_FILE_SIZE) {
