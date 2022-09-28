@@ -169,7 +169,7 @@ const releasePackages = async (packages) => {
   }
 
   if (failures.length) {
-    console.log(`\nThe following packages failed to release:\n- ${failures.join('\n -')}`)
+    console.log(`\nThe following packages failed to release:\n- ${failures.join('\n- ')}`)
   } else {
     console.log(`\nAll packages released successfully`)
   }
@@ -234,4 +234,5 @@ if (require.main === module) {
 module.exports = {
   parseSemanticReleaseOutput,
   readPackageJson,
+  releasePackages,
 }
