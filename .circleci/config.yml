@@ -58,7 +58,6 @@ linuxWorkflowExcludeFilters: &linux-x64-workflow-exclude-filters
   unless:
     or:
     - false
-    # - equal: [ 'tgriesser/chore/fix-windows-build', << pipeline.git.branch >> ]
 
 # windows is slow and expensive in CI, so it normally only runs on main branches
 # add your branch to this list to run the full Windows build on your PR
@@ -67,7 +66,6 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ linux-arm64, << pipeline.git.branch >> ]
-    - equal: [ 'lmiller/fixing-flake-1', << pipeline.git.branch >> ]
     - equal: [ 'issue-23843_electron_21_upgrade', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
@@ -133,7 +131,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "webkit-experimental" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "issue-23843_electron_21_upgrade" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -564,7 +562,7 @@ commands:
               cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
               DEBUG=<<parameters.debug>> \
               CYPRESS_KONFIG_ENV=production \
-              CYPRESS_RECORD_KEY=${TEST_LAUNCHPAD_RECORD_KEY:-$MAIN_RECORD_KEY} \
+              CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
@@ -906,7 +904,7 @@ commands:
               fi
 
               curl -L https://raw.githubusercontent.com/cypress-io/cypress/$branch/scripts/ensure-node.sh --output ci-ensure-node.sh
-            else 
+            else
               # if no .node-version file exists, we no-op the node script and use the global yarn
               echo '' > ci-ensure-node.sh
             fi
@@ -1035,7 +1033,7 @@ commands:
           # by default, electron-builder will NOT sign app built in a pull request
           # even our internal one (!)
           # Usually this is not a problem, since we only build and test binary
-          # built on "develop" and "master" branches
+          # built on the "develop" branch
           # but if you need to really build and sign a binary in a PR
           # set variable CSC_FOR_PULL_REQUEST=true
           command: |
@@ -1737,26 +1735,6 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  ui-components-integration-tests:
-    <<: *defaults
-    steps:
-      - restore_cached_workspace
-      - run:
-          command: yarn build-for-tests
-          working_directory: packages/ui-components
-      - run:
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
-            yarn cypress:run --record --parallel --group ui-components
-          working_directory: packages/ui-components
-      - verify-mocha-results
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
-
   npm-webpack-preprocessor:
     <<: *defaults
     steps:
@@ -1878,6 +1856,34 @@ jobs:
           name: Build
           command: yarn workspace @cypress/mount-utils build
       - store-npm-logs
+  
+  npm-xpath:
+    <<: *defaults
+    resource_class: small
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/xpath cy:run
+      - store_test_results:
+          path: npm/xpath/test_results
+      - store_artifacts:
+          path: npm/xpath/test_results
+      - store-npm-logs
+
+  npm-grep:
+    <<: *defaults
+    resource_class: small
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/grep cy:run
+      - store_test_results:
+          path: npm/grep/test_results
+      - store_artifacts:
+          path: npm/grep/test_results
+      - store-npm-logs
 
   npm-create-cypress-tests:
     <<: *defaults
@@ -1896,7 +1902,6 @@ jobs:
 
   npm-cypress-schematic:
     <<: *defaults
-    resource_class: small
     steps:
       - restore_cached_workspace
       - run:
@@ -2479,10 +2484,6 @@ linux-x64-workflow: &linux-x64-workflow
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - build
-    - ui-components-integration-tests:
-        context: test-runner:cypress-record-key
-        requires:
-          - build
     - npm-webpack-dev-server:
         requires:
           - system-tests-node-modules-install
@@ -2554,7 +2555,6 @@ linux-x64-workflow: &linux-x64-workflow
           - server-integration-tests
           - server-unit-tests
           - test-kitchensink
-          - ui-components-integration-tests
           - unit-tests
           - unit-tests-release
           - cli-visual-tests

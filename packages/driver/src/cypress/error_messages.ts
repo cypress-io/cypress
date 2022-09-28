@@ -1192,6 +1192,12 @@ export default {
 
         The value you synchronously returned was: \`{{value}}\``,
     },
+    failed_to_get_callback: {
+      message: stripIndent`\
+      ${cmd('origin')} failed to run the callback function due to the following error:
+
+      {{error}}`,
+    },
     failed_to_serialize_object: {
       message: stripIndent`\
       ${cmd('origin')} could not serialize the subject due to one of its properties not being supported by the structured clone algorithm.
@@ -1243,22 +1249,6 @@ export default {
         message: `\`Cypress.session.*\` methods are not supported in the ${cmd('switchToDomain')} callback. Consider using them outside of the callback instead.`,
         docsUrl: 'https://on.cypress.io/session-api',
       },
-    },
-    cannot_visit_previous_origin (args) {
-      return {
-        message: stripIndent`\
-          ${cmd('visit')} failed because you are attempting to visit a URL from a previous origin inside of ${cmd('origin')}.
-
-          Instead of placing the ${cmd('visit')} inside of ${cmd('origin')}, the ${cmd('visit')} should be placed outside of the ${cmd('origin')} block.
-
-          \`<commands targeting ${args.attemptedUrl.origin} go here>\`
-
-          \`cy.origin('${args.previousUrl.originPolicy}', () => {\`
-          \`  <commands targeting ${args.previousUrl.origin} go here>\`
-          \`})\`
-
-          \`cy.visit('${args.originalUrl}')\``,
-      }
     },
     aut_error_prior_to_spec_bridge_attach ({ args }) {
       const { errorMessage, autLocation } = args
@@ -1450,6 +1440,17 @@ export default {
     url_wrong_type: {
       message: `${cmd('request')} requires the \`url\` to be a string.`,
       docsUrl: 'https://on.cypress.io/request',
+    },
+  },
+
+  require: {
+    invalid_outside_origin: {
+      message: `${cmd('Cypress.require')} can only be used inside the ${cmd('origin')} callback.`,
+      docsUrl: 'https://on.cypress.io/origin',
+    },
+    invalid_inside_origin: {
+      message: `Importing dependencies with ${cmd('Cypress.require')} requires using the latest version of \`@cypress/webpack-preprocessor\`.`,
+      docsUrl: 'https://on.cypress.io/origin',
     },
   },
 
@@ -1697,11 +1698,26 @@ export default {
       }
     },
     session: {
-      duplicateId: {
-        message: stripIndent`
-        You may not call ${cmd('session')} with a previously used name and different options. If you want to specify different options, please use a unique name other than **{{id}}**.
-        `,
-        docsUrl: 'https://on.cypress.io/session',
+      duplicateId ({ id, hasUniqSetupDefinition, hasUniqValidateDefinition, hasUniqPersistence }) {
+        const differences: string[] = []
+
+        if (hasUniqSetupDefinition) {
+          differences.push('setup function')
+        }
+
+        if (hasUniqValidateDefinition) {
+          differences.push('validate function')
+        }
+
+        if (hasUniqPersistence) {
+          differences.push('persistence')
+        }
+
+        return {
+          message: stripIndent`
+           This session already exists. You may not create a new session with a previously used identifier. If you want to create a new session with a different ${differences.join(' and ')}, please call ${cmd('session')} with a unique identifier other than **${id}**.`,
+          docsUrl: 'https://on.cypress.io/session',
+        }
       },
       wrongArgId: {
         message: stripIndent`
@@ -1726,6 +1742,13 @@ export default {
         message: stripIndent`
         ${cmd('session')} was passed an invalid option value. **{{key}}** must be of type **{{expected}}** but was **{{actual}}**.
         `,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+      missing_global_setup: {
+        message: stripIndent`
+        In order to restore a global ${cmd('session')}, provide a \`setup\` as the second argument:
+
+        \`cy.session(id, setup, { cacheAcrossSpecs: true })\``,
         docsUrl: 'https://on.cypress.io/session',
       },
       not_found: {
