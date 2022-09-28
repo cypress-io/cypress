@@ -18,6 +18,23 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
+    // NOTE: FLAKY in CI, need to investigate further
+    it.skip('retries finding elements until something is found', () => {
+      const missingEl = $('<div />', { id: 'missing-el' })
+
+      // wait until we're ALMOST about to time out before
+      // appending the missingEl
+      cy.on('command:retry', (options) => {
+        if ((options.total + (options._interval * 4)) > options._runnableTimeout) {
+          cy.$$('body').append(missingEl)
+        }
+      })
+
+      cy.get('#missing-el').then(($div) => {
+        expect($div).to.match(missingEl)
+      })
+    })
+
     it('can increase the timeout', () => {
       const missingEl = $('<div />', { id: 'missing-el' })
 
@@ -270,7 +287,7 @@ describe('src/cy/commands/querying', () => {
         })
       })
 
-      it('retries an alias when too many elements found', () => {
+      it('retries an alias when too many elements found without replaying commands', () => {
         // add 500ms to the delta
         cy.timeout(500, true)
 
@@ -278,15 +295,24 @@ describe('src/cy/commands/querying', () => {
 
         const length = buttons.length - 2
 
+        const replayCommandsFrom = cy.spy(cy, 'replayCommandsFrom')
+
         cy.on('command:retry', () => {
           buttons.last().remove()
           buttons = cy.$$('button')
         })
 
+        const existingLen = cy.queue.length
+
         // should eventually resolve after adding 1 button
         cy
         .get('button').as('btns')
         .get('@btns').should('have.length', length).then(($buttons) => {
+          expect(replayCommandsFrom).not.to.be.called
+
+          // get, as, get, should, then == 5
+          expect(cy.queue.length - existingLen).to.eq(5) // we should not have replayed any commands
+
           expect($buttons.length).to.eq(length)
         })
       })
@@ -371,22 +397,30 @@ describe('src/cy/commands/querying', () => {
         })
       })
 
-      it('logs primitive aliases', () => {
-        cy.noop('foo').as('f')
-        .get('@f').then(function () {
-          expect(this.lastLog.pick('$el', 'numRetries', 'referencesAlias', 'aliasType')).to.deep.eq({
-            referencesAlias: { name: 'f' },
-            aliasType: 'primitive',
-          })
+      it('logs primitive aliases', (done) => {
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'get') {
+            expect(log.pick('$el', 'numRetries', 'referencesAlias', 'aliasType')).to.deep.eq({
+              referencesAlias: { name: 'f' },
+              aliasType: 'primitive',
+            })
+
+            done()
+          }
         })
+
+        cy
+        .noop('foo').as('f')
+        .get('@f')
       })
 
       it('logs immediately before resolving', (done) => {
         cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'get') {
-            expect(log.pick('state', 'referencesAlias')).to.deep.eq({
+            expect(log.pick('state', 'referencesAlias', 'aliasType')).to.deep.eq({
               state: 'pending',
               referencesAlias: undefined,
+              aliasType: 'dom',
             })
 
             done()
@@ -419,7 +453,7 @@ describe('src/cy/commands/querying', () => {
             referencesAlias: undefined,
           }
 
-          expect(this.lastLog.get('$el')).to.eq($body)
+          expect(this.lastLog.get('$el').get(0)).to.eq($body.get(0))
 
           _.each(obj, (value, key) => {
             expect(this.lastLog.get(key)).deep.eq(value, `expected key: ${key} to eq value: ${value}`)
@@ -705,8 +739,11 @@ describe('src/cy/commands/querying', () => {
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
-          this.lastLog = log
-          this.logs.push(log)
+          if (attrs.name === 'get') {
+            this.lastLog = log
+
+            this.logs.push(log)
+          }
         })
 
         return null
@@ -883,6 +920,32 @@ describe('src/cy/commands/querying', () => {
         .get('@getUsers.0')
       })
 
+      it('throws when alias property isnt just a digit', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`1b` is not a valid alias property. Only `numbers` or `all` is permitted.')
+
+          done()
+        })
+
+        cy
+        .server()
+        .route(/users/, {}).as('getUsers')
+        .get('@getUsers.1b')
+      })
+
+      it('throws when alias property isnt a digit or `all`', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`all ` is not a valid alias property. Only `numbers` or `all` is permitted.')
+
+          done()
+        })
+
+        cy
+        .server()
+        .route(/users/, {}).as('getUsers')
+        .get('@getUsers.all ')
+      })
+
       _.each(['', 'foo', [], 1, null], (value) => {
         it(`throws when options property is not an object. Such as: ${value}`, (done) => {
           cy.on('fail', (err) => {
@@ -904,8 +967,7 @@ describe('src/cy/commands/querying', () => {
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('$el').get(0)).to.eq(button.get(0))
-
-          const consoleProps = this.logs[0].invoke('consoleProps')
+          const consoleProps = lastLog.invoke('consoleProps')
 
           expect(consoleProps.Yielded).to.eq(button.get(0))
           expect(consoleProps.Elements).to.eq(button.length)
@@ -1470,20 +1532,16 @@ space
     })
 
     describe('special characters', () => {
-      const specialCharacters = '\' " [ ] { } . @ # $ % ^ & * ( ) , ; :'.split(' ')
-
-      it(`finds content by string with characters`, () => {
-        _.each(specialCharacters, (char) => {
+      _.each('\' " [ ] { } . @ # $ % ^ & * ( ) , ; :'.split(' '), (char) => {
+        it(`finds content by string with character: ${char}`, () => {
           const span = $(`<span>special char ${char} content</span>`).appendTo(cy.$$('body'))
 
           cy.contains('span', char).then(($span) => {
             expect($span.get(0)).to.eq(span.get(0))
           })
         })
-      })
 
-      it(`finds content by regex with characters`, () => {
-        _.each(specialCharacters, (char) => {
+        it(`finds content by regex with character: ${char}`, () => {
           const span = $(`<span>special char ${char} content</span>`).appendTo(cy.$$('body'))
 
           cy.contains('span', new RegExp(_.escapeRegExp(char))).then(($span) => {
@@ -1614,18 +1672,16 @@ space
     }, () => {
       beforeEach(function () {
         this.logs = []
-        this.listener = (attrs, log) => {
-          this.lastLog = log
-          this.logs.push(log)
-        }
 
-        cy.on('log:added', this.listener)
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'contains') {
+            this.lastLog = log
+
+            this.logs.push(log)
+          }
+        })
 
         return null
-      })
-
-      afterEach(function () {
-        cy.removeListener('log:added', this.listener)
       })
 
       _.each([undefined, null], (val) => {
@@ -1724,13 +1780,10 @@ space
         const button = cy.$$('#button')
 
         cy.on('fail', (err) => {
-          const [containsLog, shouldLog] = this.logs
-
-          expect(shouldLog.get('state')).to.eq('failed')
-          expect(shouldLog.get('error')).to.eq(err)
-          expect(shouldLog.get('$el').get(0)).to.eq(button.get(0))
-
-          const consoleProps = containsLog.invoke('consoleProps')
+          expect(this.lastLog.get('state')).to.eq('failed')
+          expect(this.lastLog.get('error')).to.eq(err)
+          expect(this.lastLog.get('$el').get(0)).to.eq(button.get(0))
+          const consoleProps = this.lastLog.invoke('consoleProps')
 
           expect(consoleProps.Yielded).to.eq(button.get(0))
           expect(consoleProps.Elements).to.eq(button.length)
@@ -1743,7 +1796,7 @@ space
 
       it('throws when assertion is have.length > 1', function (done) {
         cy.on('fail', (err) => {
-          assertLogLength(this.logs, 2)
+          assertLogLength(this.logs, 1)
           expect(err.message).to.eq('`cy.contains()` cannot be passed a `length` option because it will only ever return 1 element.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/contains')
 

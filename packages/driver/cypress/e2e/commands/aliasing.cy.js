@@ -1,5 +1,5 @@
 const { assertLogLength } = require('../../support/utils')
-const { _ } = Cypress
+const { _, $ } = Cypress
 
 describe('src/cy/commands/aliasing', () => {
   beforeEach(() => {
@@ -7,6 +7,14 @@ describe('src/cy/commands/aliasing', () => {
   })
 
   context('#as', () => {
+    it('is special utility command', () => {
+      cy.wrap('foo').as('f').then(() => {
+        const cmd = cy.queue.find({ name: 'as' })
+
+        expect(cmd.get('type')).to.eq('utility')
+      })
+    })
+
     it('does not change the subject', () => {
       const body = cy.$$('body')
 
@@ -26,13 +34,11 @@ describe('src/cy/commands/aliasing', () => {
       cy.get('@body')
     })
 
-    it('stores the resulting subject chain as the alias', () => {
-      cy.get('body').as('b').then(() => {
-        const { subjectChain } = cy.state('aliases').b
+    it('stores the resulting subject as the alias', () => {
+      const $body = cy.$$('body')
 
-        expect(subjectChain.length).to.eql(2)
-        expect(subjectChain[0]).to.be.undefined
-        expect(subjectChain[1].commandName).to.eq('get')
+      cy.get('body').as('b').then(() => {
+        expect(cy.state('aliases').b.subject.get(0)).to.eq($body.get(0))
       })
     })
 
@@ -42,15 +48,6 @@ describe('src/cy/commands/aliasing', () => {
       cy.get('#list li').eq(0).as('firstLi').then(($li) => {
         expect($li).to.match(li)
       })
-    })
-
-    it('retries previous commands invoked inside custom commands', () => {
-      Cypress.Commands.add('get2', (selector) => cy.get(selector))
-
-      cy.get2('body').children('div').as('divs')
-      cy.visit('/fixtures/dom.html')
-
-      cy.get('@divs')
     })
 
     it('retries primitives and assertions', () => {
@@ -90,13 +87,29 @@ describe('src/cy/commands/aliasing', () => {
       })
     })
 
-    it('retries previous commands invoked inside custom commands', () => {
-      Cypress.Commands.add('get2', (selector) => cy.get(selector))
+    context('DOM subjects', () => {
+      it('assigns the remote jquery instance', () => {
+        const obj = {}
 
-      cy.get2('body').children('div').as('divs')
-      cy.visit('/fixtures/dom.html')
+        const jquery = () => {
+          return obj
+        }
 
-      cy.get('@divs')
+        cy.state('jQuery', jquery)
+
+        cy.get('input:first').as('input').then(function () {
+          expect(this.input).to.eq(obj)
+        })
+      })
+
+      it('retries previous commands invoked inside custom commands', () => {
+        Cypress.Commands.add('get2', (selector) => cy.get(selector))
+
+        cy.get2('body').children('div').as('divs')
+        cy.visit('/fixtures/dom.html')
+
+        cy.get('@divs')
+      })
     })
 
     context('#assign', () => {
@@ -315,8 +328,9 @@ describe('src/cy/commands/aliasing', () => {
         // sanity check without command overwrite
         cy.wrap('alias value').as('myAlias')
         .then(() => {
-          expect(cy.getAlias('@myAlias')).to.exist
-          expect(cy.getAlias('@myAlias').subjectChain).to.eql(['alias value'])
+          expect(cy.getAlias('@myAlias'), 'alias exists').to.exist
+          expect(cy.getAlias('@myAlias'), 'alias value')
+          .to.have.property('subject', 'alias value')
         })
         .then(() => {
           // cy.get returns the alias
@@ -335,9 +349,10 @@ describe('src/cy/commands/aliasing', () => {
 
         cy.wrap('alias value').as('myAlias')
         .then(() => {
-          expect(wrapCalled).to.be.true
-          expect(cy.getAlias('@myAlias')).to.exist
-          expect(cy.getAlias('@myAlias').subjectChain).to.eql(['alias value'])
+          expect(wrapCalled, 'overwrite was called').to.be.true
+          expect(cy.getAlias('@myAlias'), 'alias exists').to.exist
+          expect(cy.getAlias('@myAlias'), 'alias value')
+          .to.have.property('subject', 'alias value')
         })
         .then(() => {
           // verify cy.get works in arrow function
@@ -367,8 +382,9 @@ describe('src/cy/commands/aliasing', () => {
         .then(() => {
           expect(wrapCalled, 'overwrite was called').to.be.true
           expect(thenCalled, 'then was called').to.be.true
-          expect(cy.getAlias('@myAlias')).to.exist
-          expect(cy.getAlias('@myAlias').subjectChain).to.eql(['alias value'])
+          expect(cy.getAlias('@myAlias'), 'alias exists').to.exist
+          expect(cy.getAlias('@myAlias'), 'alias value')
+          .to.have.property('subject', 'alias value')
         })
         .then(() => {
           // verify cy.get works in arrow function
@@ -384,9 +400,9 @@ describe('src/cy/commands/aliasing', () => {
         // sanity test before the next one
         cy.wrap(1).as('myAlias')
         cy.wrap(2).then(function (subj) {
-          expect(subj).to.equal(2)
-          expect(this).to.not.be.undefined
-          expect(this.myAlias).to.eq(1)
+          expect(subj, 'subject').to.equal(2)
+          expect(this, 'this is defined').to.not.be.undefined
+          expect(this.myAlias, 'this has the alias as a property').to.eq(1)
         })
       })
 
@@ -398,8 +414,8 @@ describe('src/cy/commands/aliasing', () => {
 
         cy.wrap(1).as('myAlias')
         cy.wrap(2).then(function (subj) {
-          expect(subj).to.equal(2)
-          expect(this).to.not.be.undefined
+          expect(subj, 'subject').to.equal(2)
+          expect(this, 'this is defined').to.not.be.undefined
           expect(this.myAlias).to.eq(1)
         })
       })
@@ -412,61 +428,166 @@ describe('src/cy/commands/aliasing', () => {
 
         cy.wrap(1).as('myAlias')
         cy.wrap(2).then(function (subj) {
-          expect(subj).to.equal(2)
-          expect(this).to.not.be.undefined
+          expect(subj, 'subject').to.equal(2)
+          expect(this, 'this is defined').to.not.be.undefined
           expect(this.myAlias).to.eq(1)
         })
       })
     })
   })
 
-  context('#replaying subjects', () => {
-    it('returns if subject is still in the document', () => {
-      cy.get('#list').as('list').then((firstList) => {
-        cy.get('@list').then((secondList) => {
-          expect(firstList).to.eql(secondList)
+  context('#replayCommandsFrom', () => {
+    describe('subject in document', () => {
+      it('returns if subject is still in the document', () => {
+        cy.get('#list').as('list').then(() => {
+          const currentLength = cy.queue.length
+
+          cy.get('@list').then(() => {
+            // should only add the .get() and the .then()
+            expect(cy.queue.length).to.eq(currentLength + 2)
+          })
         })
       })
     })
 
-    it('requeries when reading alias', () => {
-      cy
-      .get('#list li')
-      .as('items').then((firstItems) => {
-        cy.$$('#list').append('<li class="foobar">123456789</li>')
+    describe('subject not in document', () => {
+      it('inserts into the queue', () => {
+        const existingNames = cy.queue.names()
 
-        cy.get('@items').then((secondItems) => {
-          expect(firstItems).to.have.length(3)
-          expect(secondItems).to.have.length(4)
+        cy
+        .get('#list li').eq(0).as('firstLi').then(($li) => {
+          return $li.remove()
+        })
+        .get('@firstLi').then(() => {
+          expect(cy.queue.names()).to.deep.eq(
+            existingNames.concat(
+              ['get', 'eq', 'as', 'then', 'get', 'get', 'eq', 'then'],
+            ),
+          )
         })
       })
-    })
 
-    it('requeries when subject is not in the DOM', () => {
-      cy
-      .get('#list li')
-      .as('items').then((firstItems) => {
-        firstItems.remove()
-        setTimeout(() => {
-          cy.$$('#list').append('<li class="foobar">123456789</li>')
-        }, 50)
+      it('replays from last root to current', () => {
+        const first = cy.$$('#list li').eq(0)
+        const second = cy.$$('#list li').eq(1)
 
-        cy.get('@items').then((secondItems) => {
-          expect(secondItems).to.have.length(1)
+        cy
+        .get('#list li').eq(0).as('firstLi').then(($li) => {
+          expect($li.get(0)).to.eq(first.get(0))
+
+          return $li.remove()
+        })
+        .get('@firstLi').then(($li) => {
+          expect($li.get(0)).to.eq(second.get(0))
         })
       })
-    })
 
-    it('only retries up to last command', () => {
-      cy
-      .get('#list li')
-      .then((items) => items.length)
-      .as('itemCount')
-      .then(() => cy.$$('#list li').remove())
+      it('replays up until first root command', () => {
+        const existingNames = cy.queue.names()
 
-      // Even though the list items have been removed from the DOM, 'then' can't be retried
-      // so we just have the primitive value "3" as our subject.
-      cy.get('@itemCount').should('eq', 3)
+        cy
+        .get('body').noop({})
+        .get('#list li').eq(0).as('firstLi').then(($li) => {
+          return $li.remove()
+        })
+        .get('@firstLi').then(() => {
+          expect(cy.queue.names()).to.deep.eq(
+            existingNames.concat(
+              ['get', 'noop', 'get', 'eq', 'as', 'then', 'get', 'get', 'eq', 'then'],
+            ),
+          )
+        })
+      })
+
+      it('resets the chainerId allow subjects to be carried on', () => {
+        cy.get('#dom').find('#button').as('button').then(($button) => {
+          $button.remove()
+
+          cy.$$('#dom').append($('<button />', { id: 'button' }))
+
+          return null
+        })
+
+        // when cy is a separate chainer there *was* a bug
+        // that cause the subject to null because of different
+        // chainer id's
+        cy.get('@button').then(($button) => {
+          expect($button).to.have.id('button')
+        })
+      })
+
+      it('skips commands which did not change, and starts at the first valid subject or parent command', () => {
+        const existingNames = cy.queue.names()
+
+        cy.$$('#list li').click(function () {
+          const ul = $(this).parent()
+          const lis = ul.children().clone()
+
+          // this simulates a re-render
+          ul.children().remove()
+          ul.append(lis)
+
+          return lis.first().remove()
+        })
+
+        cy
+        .get('#list li')
+        .then(($lis) => {
+          return $lis
+        })
+        .as('items')
+        .first()
+        .click()
+        .as('firstItem')
+        .then(() => {
+          expect(cy.queue.names()).to.deep.eq(
+            existingNames.concat(
+              ['get', 'then', 'as', 'first', 'click', 'as', 'then', 'get', 'should', 'then', 'get', 'should', 'then'],
+            ),
+          )
+        })
+        .get('@items')
+        .should('have.length', 2)
+        .then(() => {
+          expect(cy.queue.names()).to.deep.eq(
+            existingNames.concat(
+              ['get', 'then', 'as', 'first', 'click', 'as', 'then', 'get', 'get', 'should', 'then', 'get', 'should', 'then'],
+            ),
+          )
+        })
+        .get('@firstItem')
+        .should('contain', 'li 1')
+        .then(() => {
+          expect(cy.queue.names()).to.deep.eq(
+            existingNames.concat(
+              ['get', 'then', 'as', 'first', 'click', 'as', 'then', 'get', 'get', 'should', 'then', 'get', 'get', 'first', 'should', 'then'],
+            ),
+          )
+        })
+      })
+
+      it('inserts assertions', (done) => {
+        const existingNames = cy.queue.names()
+
+        cy
+        .get('#checkboxes input')
+        .eq(0)
+        .should('be.checked', 'cockatoo')
+        .as('firstItem')
+        .then(($input) => {
+          return $input.remove()
+        })
+        .get('@firstItem')
+        .then(() => {
+          expect(cy.queue.names()).to.deep.eq(
+            existingNames.concat(
+              ['get', 'eq', 'should', 'as', 'then', 'get', 'get', 'eq', 'should', 'then'],
+            ),
+          )
+
+          done()
+        })
+      })
     })
   })
 
