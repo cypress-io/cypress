@@ -1,6 +1,7 @@
 import Bluebird from 'bluebird'
 import _, { compact, extend, find } from 'lodash'
 import os from 'os'
+import { removeDuplicateBrowsers } from '@packages/data-context/src/sources/BrowserDataSource'
 import { browsers, validateMinVersion } from './browsers'
 import * as darwinHelper from './darwin'
 import { notDetectedAtPathErr } from './errors'
@@ -150,11 +151,6 @@ export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
     goalBrowsers = browsers
   }
 
-  const removeDuplicates = (val) => {
-    return _.uniqBy(val, (browser: FoundBrowser) => {
-      return `${browser.name}-${browser.version}`
-    })
-  }
   const compactFalse = (browsers: any[]) => {
     return compact(browsers) as FoundBrowser[]
   }
@@ -164,7 +160,7 @@ export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
   return Bluebird.mapSeries(goalBrowsers, checkBrowser)
   .then((val) => _.flatten(val))
   .then(compactFalse)
-  .then(removeDuplicates)
+  .then(removeDuplicateBrowsers)
 }
 
 export const detectByPath = (

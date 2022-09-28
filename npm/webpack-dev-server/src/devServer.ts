@@ -122,7 +122,7 @@ async function getPreset (devServerConfig: WebpackDevServerConfig): Promise<Opti
       return await nuxtHandler(devServerConfig)
 
     case 'vue-cli':
-      return vueCliHandler(devServerConfig)
+      return await vueCliHandler(devServerConfig)
 
     case 'next':
       return await nextHandler(devServerConfig)
