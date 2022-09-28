@@ -4,6 +4,7 @@ import EE from 'events'
 import _ from 'lodash'
 import path from 'path'
 import pkg from '@packages/root'
+
 import { Automation } from './automation'
 import browsers from './browsers'
 import * as config from './config'

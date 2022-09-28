@@ -6,6 +6,7 @@ import shortcuts from '@packages/reporter/src/lib/shortcuts'
 import * as MobX from 'mobx'
 
 import { dom } from './src/dom'
+import { highlight } from './src/selector-playground'
 
 export const UnifiedRunner = {
   CypressJQuery: $Cypress.$,
@@ -13,6 +14,7 @@ export const UnifiedRunner = {
   CypressDriver: $Cypress,
 
   dom,
+  highlight,
 
   shortcuts,
 
