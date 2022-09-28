@@ -388,7 +388,6 @@ const errByPath = (msgPath, args?) => {
 type FrameType = 'spec' | 'app'
 
 interface UncaughtException {
-  testingType: Cypress.TestingType
   frameType: FrameType
   handlerType: 'error' | 'unhandledrejection'
   err: Error & {
@@ -398,12 +397,8 @@ interface UncaughtException {
   state: typeof cy.state
 }
 
-const getErrPath = (frameType: FrameType, testingType: Cypress.TestingType, err: UncaughtException['err']): 'uncaught.fromSpec' | 'uncaught.fromApp' => {
-  return frameType === 'spec' ? 'uncaught.fromSpec' : 'uncaught.fromApp'
-}
-
-const createUncaughtException = ({ frameType, handlerType, state, err, testingType }: UncaughtException) => {
-  const errPath = getErrPath(frameType, testingType, err)
+const createUncaughtException = ({ frameType, handlerType, state, err }: UncaughtException) => {
+  const errPath = frameType === 'spec' ? 'uncaught.fromSpec' : 'uncaught.fromApp'
   let uncaughtErr = errByPath(errPath, {
     errMsg: stripAnsi(err.message),
     promiseAddendum: handlerType === 'unhandledrejection' ? ' It was caused by an unhandled promise rejection.' : '',

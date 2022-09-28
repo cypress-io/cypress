@@ -1089,7 +1089,6 @@ export default {
       }
 
       err = $errUtils.createUncaughtException({
-        testingType: Cypress.testingType,
         frameType: 'spec',
         handlerType,
         state,

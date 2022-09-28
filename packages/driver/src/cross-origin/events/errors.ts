@@ -1,9 +1,10 @@
 import type { $Cy } from '../../cypress/cy'
-import $errUtils, { ErrorFromProjectRejectionEvent } from '../../cypress/error_utils'
+import $errUtils, { ErrorDetails, ErrorFromProjectRejectionEvent } from '../../cypress/error_utils'
+import type { HandlerType } from '../../cypress/runner'
 
 export const handleErrorEvent = (cy: $Cy, frameType: 'spec' | 'app') => {
-  return (handlerType: string) => {
-    return (event) => {
+  return (handlerType: HandlerType) => {
+    return (event: ErrorDetails) => {
       const { originalErr, err, promise } = $errUtils.errorFromUncaughtEvent(handlerType, event) as ErrorFromProjectRejectionEvent
       const handled = cy.onUncaughtException({
         err,
