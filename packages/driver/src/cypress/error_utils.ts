@@ -385,19 +385,7 @@ const errByPath = (msgPath, args?) => {
   })
 }
 
-type FrameType = 'spec' | 'app'
-
-interface UncaughtException {
-  frameType: FrameType
-  handlerType: HandlerType
-  err: Error & {
-    docsUrl?: string
-    onFail?: () => void
-  }
-  state: typeof cy.state
-}
-
-const createUncaughtException = ({ frameType, handlerType, state, err }: UncaughtException) => {
+const createUncaughtException = ({ frameType, handlerType, state, err }) => {
   const errPath = frameType === 'spec' ? 'uncaught.fromSpec' : 'uncaught.fromApp'
   let uncaughtErr = errByPath(errPath, {
     errMsg: stripAnsi(err.message),
@@ -406,7 +394,7 @@ const createUncaughtException = ({ frameType, handlerType, state, err }: Uncaugh
 
   err = modifyErrMsg(err, uncaughtErr.message, () => uncaughtErr.message)
 
-  err.docsUrl = docsUrlToStr([uncaughtErr.docsUrl, err.docsUrl])
+  err.docsUrl = _.compact([uncaughtErr.docsUrl, err.docsUrl])
 
   const current = state('current')
 
@@ -454,10 +442,6 @@ const enhanceStack = ({ err, userInvocationStack, projectRoot }: {
   return err
 }
 
-const docsUrlToStr = (docsUrl: string | Array<string | undefined>): string | undefined => {
-  return _(docsUrl).castArray().compact().join('\n\n')
-}
-
 // all errors flow through this function before they're finally thrown
 // or used to reject promises
 const processErr = (errObj: CypressError, config) => {
@@ -472,7 +456,7 @@ const processErr = (errObj: CypressError, config) => {
   // for screenshots or videos
   delete errObj.docsUrl
 
-  docsUrl = docsUrlToStr(docsUrl)
+  docsUrl = _(docsUrl).castArray().compact().join('\n\n')
 
   // append the docs url when not interactive so it appears in the stdout
   return appendErrMsg(errObj, docsUrl)
@@ -508,15 +492,7 @@ export interface ErrorFromErrorEvent {
   err: Error
 }
 
-export interface ErrorDetails {
-  lineno?: number
-  filename?: string
-  colno?: number
-  message: string
-  error: CypressError
-}
-
-const errorFromErrorEvent = (event: ErrorDetails): ErrorFromErrorEvent => {
+const errorFromErrorEvent = (event): ErrorFromErrorEvent => {
   let { message, filename, lineno, colno, error } = event
   let docsUrl = error?.docsUrl
 
@@ -564,7 +540,7 @@ const errorFromProjectRejectionEvent = (event): ErrorFromProjectRejectionEvent =
   }
 }
 
-const errorFromUncaughtEvent = (handlerType: HandlerType, event: ErrorDetails) => {
+const errorFromUncaughtEvent = (handlerType: HandlerType, event) => {
   return handlerType === 'error' ?
     errorFromErrorEvent(event) :
     errorFromProjectRejectionEvent(event)
