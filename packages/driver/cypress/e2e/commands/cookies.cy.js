@@ -8,10 +8,6 @@ describe('src/cy/commands/cookies - no stub', () => {
     cy.getCookies().should('have.length', 1)
     cy.clearCookies()
     cy.getCookies().should('have.length', 0)
-    cy.window().then((win) => {
-    // Ensure the cypress cookies are still there
-      expect(win.document.cookie).to.include('__cypress')
-    })
   })
 
   it('clears a single cookie', () => {
@@ -21,11 +17,6 @@ describe('src/cy/commands/cookies - no stub', () => {
     cy.clearCookie('foo')
     cy.getCookies().should('have.length', 1).then((cookies) => {
       expect(cookies[0].name).to.eq('key')
-    })
-
-    cy.window().then((win) => {
-    // Ensure the cypress cookies are still there
-      expect(win.document.cookie).to.include('__cypress')
     })
   })
 })

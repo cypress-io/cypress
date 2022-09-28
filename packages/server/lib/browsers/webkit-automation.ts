@@ -30,22 +30,25 @@ function convertSameSiteExtensionToCypress (str: CyCookie['sameSite']): 'None' |
   return str ? extensionMap[str] : undefined
 }
 
-const normalizeGetCookieProps = (cookie: any): CyCookie => {
-  if (cookie.expires === -1) {
-    delete cookie.expires
+const normalizeGetCookieProps = ({ name, value, domain, path, secure, httpOnly, sameSite, expires }: playwright.Cookie): CyCookie => {
+  const cyCookie: CyCookie = {
+    name,
+    value,
+    domain,
+    path,
+    secure,
+    httpOnly,
+    // Use expirationDate instead of expires 🤷‍♀️
+    ...expires !== -1 ? { expirationDate: expires } : {},
+  } as CyCookie
+
+  if (sameSite === 'None') {
+    cyCookie.sameSite = 'no_restriction'
+  } else if (sameSite) {
+    cyCookie.sameSite = sameSite.toLowerCase() as CyCookie['sameSite']
   }
 
-  // Use expirationDate instead of expires 🤷‍♀️
-  cookie.expirationDate = cookie.expires
-  delete cookie.expires
-
-  if (cookie.sameSite === 'None') {
-    cookie.sameSite = 'no_restriction'
-  } else if (cookie.sameSite) {
-    cookie.sameSite = cookie.sameSite.toLowerCase()
-  }
-
-  return cookie as CyCookie
+  return cyCookie
 }
 
 const normalizeSetCookieProps = (cookie: CyCookie): playwright.Cookie => {
@@ -274,7 +277,7 @@ export class WebKitAutomation {
     })
   }
 
-  private async getCookies () {
+  private async getCookies (): Promise<CyCookie[]> {
     const cookies = await this.context.cookies()
 
     return cookies.map(normalizeGetCookieProps)
@@ -296,54 +299,34 @@ export class WebKitAutomation {
 
     return normalizeGetCookieProps(cookie)
   }
-
   /**
    * Clears one specific cookie
    * @param filter the cookie to be cleared
    * @returns the cleared cookie
    */
   private async clearCookie (filter: CookieFilter): Promise<CookieFilter> {
+    const allCookies = await this.context.cookies()
+    const persistCookies = allCookies.filter((cookie) => {
+      return !_cookieMatches(cookie, filter)
+    })
+
     await this.clearCookies([filter])
+    if (persistCookies.length) await this.context.addCookies(persistCookies)
 
     return filter
   }
 
   /**
-   * Clear specified cookies, we don't clear the cypress specific cookies that are not listed.
-   * @param cookies a list of name value cookies to clear
-   * @returns the list of cleared cookies
+   * Clear all cookies
+   * @param cookies for compatibility reasons return the passed in cookies.
+   * @returns cookies cleared
    */
-  private async clearCookies (cookies: [CookieFilter?]): Promise<[CookieFilter?]> {
-    if (!cookies || cookies.length === 0) {
-      return cookies
-    }
-
-    const allCookies = await this.context.cookies()
-
-    if (!allCookies || allCookies.length === 0) {
-      return cookies
-    }
-
-    // Find the list of cookies that shouldn't be cleared.
-    const persistCookies = allCookies.filter((cookie) => {
-      for (let index = 0; index < cookies.length; index++) {
-        const filter = cookies[index]! // This cannot be
-
-        const matches = _cookieMatches(cookie, filter)
-
-        if (matches) {
-          return false
-        }
-      }
-
-      return true
-    })
+  private async clearCookies (cookies: [CookieFilter?]): Promise<CyCookie[]> {
+    const allCookies = await this.getCookies()
 
     await this.context.clearCookies()
-    // Re-apply persisted cookies.
-    if (persistCookies.length) await this.context.addCookies(persistCookies)
 
-    return cookies
+    return allCookies
   }
 
   private async takeScreenshot (data) {
