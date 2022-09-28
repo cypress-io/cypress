@@ -147,7 +147,6 @@ const getUserInvocationStack = (err, state) => {
     !userInvocationStack
     || err.isDefaultAssertionErr
     || (currentAssertionCommand && !current?.get('followedByShouldCallback'))
-    || withInvocationStack?.get('selector')
   ) {
     userInvocationStack = withInvocationStack?.get('userInvocationStack')
   }

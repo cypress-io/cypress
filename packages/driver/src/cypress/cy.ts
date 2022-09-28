@@ -3,7 +3,8 @@ import _ from 'lodash'
 import Promise from 'bluebird'
 import debugFn from 'debug'
 
-import $utils, { SubjectChain } from './utils'
+import $dom from '../dom'
+import $utils from './utils'
 import $errUtils, { ErrorFromProjectRejectionEvent } from './error_utils'
 import $stackUtils from './stack_utils'
 
@@ -210,7 +211,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   // Private methods
   ensureSubjectByType: ReturnType<typeof createEnsures>['ensureSubjectByType']
   ensureRunnable: ReturnType<typeof createEnsures>['ensureRunnable']
-  ensureChildCommand: ReturnType<typeof createEnsures>['ensureChildCommand']
 
   onBeforeWindowLoad: ReturnType<typeof createSnapshots>['onBeforeWindowLoad']
 
@@ -244,14 +244,13 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.reset = this.reset.bind(this)
     this.addCommandSync = this.addCommandSync.bind(this)
     this.addCommand = this.addCommand.bind(this)
-    this._addQuery = this._addQuery.bind(this)
     this.now = this.now.bind(this)
+    this.replayCommandsFrom = this.replayCommandsFrom.bind(this)
     this.onBeforeAppWindowLoad = this.onBeforeAppWindowLoad.bind(this)
     this.onUncaughtException = this.onUncaughtException.bind(this)
     this.setRunnable = this.setRunnable.bind(this)
     this.cleanup = this.cleanup.bind(this)
     this.setSubjectForChainer = this.setSubjectForChainer.bind(this)
-    this.currentSubject = this.currentSubject.bind(this)
 
     // init traits
 
@@ -351,7 +350,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.ensureSubjectByType = ensures.ensureSubjectByType
     this.ensureRunnable = ensures.ensureRunnable
-    this.ensureChildCommand = ensures.ensureChildCommand
     this.ensureCommandCanCommunicateWithAUT = ensures.ensureCommandCanCommunicateWithAUT
 
     const snapshots = createSnapshots(this.$$, state)
@@ -364,7 +362,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.overrides = createOverrides(state, config, focused, snapshots)
 
-    this.queue = new CommandQueue(state, stability, this)
+    this.queue = new CommandQueue(state, this.timeout, stability, this.cleanup, this.fail, this.isCy, this.clearTimeout, this.setSubjectForChainer)
 
     setTopOnError(Cypress, this)
 
@@ -374,7 +372,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     extendEvents(this)
 
     Cypress.on('enqueue:command', (attrs: Cypress.EnqueuedCommand) => {
-      this.enqueue($Command.create(attrs))
+      this.enqueue(attrs)
     })
 
     Cypress.on('cross:origin:automation:cookies', (cookies: AutomationCookie[]) => {
@@ -760,19 +758,23 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       // dont enqueue / inject any new commands if
       // onInjectCommand returns false
       const onInjectCommand = cy.state('onInjectCommand')
+      const injected = _.isFunction(onInjectCommand)
 
-      if (_.isFunction(onInjectCommand) && onInjectCommand.call(cy, name, ...args) === false) {
-        return
+      if (injected) {
+        if (onInjectCommand.call(cy, name, ...args) === false) {
+          return
+        }
       }
 
-      cy.enqueue($Command.create({
+      cy.enqueue({
         name,
         args,
         type,
         chainerId: chainer.chainerId,
         userInvocationStack,
+        injected,
         fn: firstCall ? cyFn : chainerFn,
-      }))
+      })
     }
 
     $Chainer.add(name, callback)
@@ -829,76 +831,68 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     }
   }
 
-  _addQuery ({ name, fn }) {
-    const cy = this
-
-    const callback = (chainer, userInvocationStack, args) => {
-      // dont enqueue / inject any new commands if
-      // onInjectCommand returns false
-      const onInjectCommand = cy.state('onInjectCommand')
-
-      if (_.isFunction(onInjectCommand) && onInjectCommand.call(cy, name, ...args) === false) {
-        return
-      }
-
-      // Queries are functions that accept args (which is called once each time the command is used in the spec
-      // file), which return a function that accepts the subject (which is potentially called any number of times).
-      // The outer function is used to store any needed state needed by a particular instance of the command, such as
-      // a Cypress.log() instance, while the inner one (queryFn here) is the one that determines the next subject.
-
-      // We enqueue the outer function as the "cypress command". See command_queue.ts for details on how this is
-      // invoked and the inner function retried.
-      const command = $Command.create({
-        name,
-        args,
-        type: 'dual',
-        chainerId: chainer.chainerId,
-        userInvocationStack,
-        query: true,
-        prevSubject: 'optional',
-      })
-
-      const cyFn = function (chainerId, ...args) {
-        return fn.apply(command, args)
-      }
-
-      cyFn.originalFn = fn
-      command.set('fn', cyFn)
-
-      cy.enqueue(command)
-    }
-
-    $Chainer.add(name, callback)
-
-    cy[name] = function (...args) {
-      cy.ensureRunnable(name)
-
-      // this is the first call on cypress
-      // so create a new chainer instance
-      const chainer = new $Chainer(cy.specWindow)
-
-      if (cy.state('chainerId')) {
-        cy.linkSubject(chainer.chainerId, cy.state('chainerId'))
-      }
-
-      const userInvocationStack = $stackUtils.captureUserInvocationStack(cy.specWindow.Error)
-
-      callback(chainer, userInvocationStack, args)
-
-      // if we're the first call onto a cy
-      // command, then kick off the run
-      if (!cy.state('promise')) {
-        cy.runQueue()
-      }
-
-      return chainer
-    }
-  }
-
   now (name, ...args) {
     return Promise.resolve(
       this.commandFns[name].apply(this, args),
     )
+  }
+
+  replayCommandsFrom (current) {
+    const cy = this
+
+    // - starting with the aliased command
+    // - walk up to each prev command
+    // - until you reach a parent command
+    // - or until the subject is in the DOM
+    // - from that command walk down inserting
+    //   every command which changed the subject
+    // - coming upon an assertion should only be
+    //   inserted if the previous command should
+    //   be replayed
+
+    const commands = cy.getCommandsUntilFirstParentOrValidSubject(current)
+
+    if (commands) {
+      let initialCommand = commands.shift()
+
+      const commandsToInsert = _.reduce(commands, (memo, command, index) => {
+        const push = () => {
+          return memo.push(command)
+        }
+
+        if (!(command.get('type') !== 'assertion')) {
+          // if we're an assertion and the prev command
+          // is in the memo, then push this one
+          if (memo.includes(command.get('prev'))) {
+            push()
+          }
+        } else if (!(command.get('subject') === initialCommand.get('subject'))) {
+          // when our subjects dont match then
+          // reset the initialCommand to this command
+          // so the next commands can compare against
+          // this one to figure out the changing subjects
+          initialCommand = command
+
+          push()
+        }
+
+        return memo
+      }, [initialCommand])
+
+      const chainerId = this.state('chainerId')
+
+      for (let c of commandsToInsert) {
+        // clone the command to prevent
+        // mutating its properties
+        const command = c.clone()
+
+        command.set('chainerId', chainerId)
+        cy.enqueue(command)
+      }
+    }
+
+    // prevent loop comprehension
+    return null
   }
 
   onBeforeAppWindowLoad (contentWindow) {
@@ -1121,7 +1115,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     return this.Cypress.action('app:navigation:changed', `page navigation event (${event})`)
   }
 
-  cleanup () {
+  private cleanup () {
     // cleanup could be called during a 'stop' event which
     // could happen in between a runnable because they are async
     if (this.state('runnable')) {
@@ -1207,7 +1201,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     })
   }
 
-  private enqueue (command: $Command) {
+  private enqueue (obj: PartialBy<Cypress.EnqueuedCommand, 'id'>) {
     // if we have a nestedIndex it means we're processing
     // nested commands and need to insert them into the
     // index past the current index as opposed to
@@ -1234,9 +1228,37 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     // it onto the end of the queue
     const index = _.isNumber(nestedIndex) ? nestedIndex : this.queue.length
 
-    this.queue.insert(index, command)
+    this.queue.insert(index, $Command.create(obj))
 
-    return this.Cypress.action('cy:command:enqueued', command.attributes)
+    return this.Cypress.action('cy:command:enqueued', obj)
+  }
+
+  // TODO: Replace any with Command type.
+  private getCommandsUntilFirstParentOrValidSubject (command, memo: any[] = []) {
+    if (!command) {
+      return null
+    }
+
+    // push these onto the beginning of the commands array
+    memo.unshift(command)
+
+    // break and return the memo
+    if ((command.get('type') === 'parent') || $dom.isAttached(command.get('subject'))) {
+      return memo
+    }
+
+    // A workaround to ensure that when looking back, aliases don't extend beyond the current
+    // chainer and commands invoked inside of it. This whole area (`replayCommandsFrom` for aliases)
+    // will be replaced with subject chains as part of the detached DOM work.
+    const chainerId = command.get('chainerId')
+    const prev = command.get('prev')
+    const prevChainer = prev.get('chainerId')
+
+    if (prevChainer !== chainerId && cy.state('subjectLinks')[prevChainer] !== chainerId) {
+      return memo
+    }
+
+    return this.getCommandsUntilFirstParentOrValidSubject(prev, memo)
   }
 
   private validateFirstCall (name, args, prevSubject: string[]) {
@@ -1258,7 +1280,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   private pushSubject (name, args, prevSubject: string[], chainerId) {
     const subject = this.currentSubject(chainerId)
 
-    if (prevSubject !== undefined) {
+    if (prevSubject) {
       // make sure our current subject is valid for
       // what we expect in this command
       this.ensureSubjectByType(subject, prevSubject)
@@ -1273,26 +1295,18 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
    * Use `currentSubject()` to get the subject. It reads from cy.state('subjects'), but the format and details of
    * determining this should be considered an internal implementation detail of Cypress, subject to change at any time.
    *
-   * Currently, state('subjects') is an object, mapping chainerIds to the current subject and queries for that
-   * chainer. For example, it might look like:
+   * Currently, state('subjects') is an object, mapping chainerIds to the current subject for that chainer. For
+   * example, it might look like:
    *
    * {
-   *   'ch-http://localhost:3500-2': ['foobar'],
-   *   'ch-http://localhost:3500-4': [<input>],
-   *   'ch-http://localhost:3500-4': [undefined, f(), f()],
+   *   'chainer2': 'foobar',
+   *   'chainer4': <input>,
    * }
    *
-   * Do not read cy.state('subjects') directly; This is what currentSubject() is for, turning this structure into a
-   * usable subject.
+   * Do not read this directly; Prefer currentSubject() instead.
    */
-  currentSubject (chainerId: string = this.state('chainerId')) {
-    const subjectChain: SubjectChain | undefined = (this.state('subjects') || {})[chainerId]
-
-    if (subjectChain) {
-      return $utils.getSubjectFromChain(subjectChain, this)
-    }
-
-    return undefined
+  currentSubject (chainerId = this.state('chainerId')) {
+    return (this.state('subjects') || {})[chainerId]
   }
 
   /*
@@ -1306,12 +1320,12 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
    *
    * In the current implementation, subjectLinks might look like:
    * {
-   *   'ch-http://localhost:3500-4': 'ch-http://localhost:3500-2',
+   *   'chainer4': 'chainer2',
    * }
    *
-   * indicating that when we eventually resolve the subject of ch--4, it should *also* be used as the subject for
-   * ch--2 - for example, `cy.then(() => { return cy.get('foo') }).log()`. The inner chainer (ch--4,
-   * `cy.get('foo')`) is linked to the outer chainer (ch--2) - when we eventually .get('foo'), the resolved value
+   * indicating that when we eventually resolve the subject of chainer4, it should *also* be used as the subject for
+   * chainer2 - for example, `cy.then(() => { return cy.get('foo') }).log()`. The inner chainer (chainer4,
+   * `cy.get('foo')`) is linked to the outer chainer (chainer2) - when we eventually .get('foo'), the resolved value
    * becomes the new subject for the outer chainer.
    *
    * Whenever we are in the middle of resolving one chainer and a new one is created, Cypress links the inner chainer
@@ -1324,10 +1338,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
    * In this case, we want to break the connection between the inner chainer and the outer one, so that we can
    * instead use the return value as the new subject. Is this case, you'll want cy.breakSubjectLinksToCurrentChainer().
    */
-  linkSubject (childChainerId: string, parentChainerId: string) {
+  linkSubject (fromChainerId, toChainerId) {
     const links = this.state('subjectLinks') || {}
 
-    links[childChainerId] = parentChainerId
+    links[fromChainerId] = toChainerId
     this.state('subjectLinks', links)
   }
 
@@ -1349,47 +1363,22 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   /*
    * setSubjectForChainer should be considered an internal implementation detail of Cypress. Do not use it directly
    * outside of the Cypress codebase. It is currently used only by the command_queue, and if you think it's needed
-   * elsewhere, consider if there's a way you can use existing functionality to achieve it instead.
+   * elsewhere, consider carefully before adding additional uses.
    *
-   * The command_queue calls setSubjectForChainer after a command has finished resolving, when we have the
-   * final (non-$Chainer, non-promise) return value. This value becomes the current $Chainer's new subject - and the
-   * new subject for any chainers it's linked to (see cy.linkSubject for details on that process).
+   * The command_queue calls setSubjectForChainer after a command has finished resolving, when we have the final
+   * (non-$Chainer, non-promise) return value. This value becomes the current $Chainer's new subject - and the new
+   * subject for any chainers it's linked to (see cy.linkSubject for details on that process).
    */
   setSubjectForChainer (chainerId: string, subject: any) {
-    const cySubjects = this.state('subjects') || {}
+    const cySubject = this.state('subjects') || {}
 
-    cySubjects[chainerId] = [subject]
-    this.state('subjects', cySubjects)
+    cySubject[chainerId] = subject
+    this.state('subjects', cySubject)
 
     const links = this.state('subjectLinks') || {}
 
     if (links[chainerId]) {
       this.setSubjectForChainer(links[chainerId], subject)
-    }
-  }
-
-  /*
-   * addQueryToChainer should be considered an internal implementation detail of Cypress. Do not use it directly
-   * outside of the Cypress codebase. It is currently used only by the command_queue, and if you think it's needed
-   * elsewhere, consider if there's a way you can use existing functionality to achieve it instead.
-   *
-   * The command_queue calls addQueryToChainer after a query returns a function. This function is
-   * is appended to the subject chain (which begins with 'undefined' if no previous subject exists), and used
-   * to resolve cy.currentSubject() as needed.
-   */
-  addQueryToChainer (chainerId: string, queryFn: (subject: any) => any) {
-    const cySubjects = this.state('subjects') || {}
-
-    const subject = (cySubjects[chainerId] || [undefined]) as SubjectChain
-
-    subject.push(queryFn)
-    cySubjects[chainerId] = subject
-    this.state('subjects', cySubjects)
-
-    const links = this.state('subjectLinks') || {}
-
-    if (links[chainerId]) {
-      this.addQueryToChainer(links[chainerId], queryFn)
     }
   }
 

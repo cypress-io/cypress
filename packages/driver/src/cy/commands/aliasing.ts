@@ -1,34 +1,24 @@
 import _ from 'lodash'
 import $dom from '../../dom'
 
-export default function (Commands, Cypress, cy) {
-  Commands._addQuery('as', function asFn (alias) {
-    cy.ensureChildCommand(this, [alias])
-    cy.validateAlias(alias)
+export default function (Commands, Cypress, cy, state) {
+  Commands.addAll({ type: 'utility', prevSubject: true }, {
+    as (subject, str) {
+      const ctx = this
 
-    const prevCommand = cy.state('current').get('prev')
+      cy.validateAlias(str)
 
-    prevCommand.set('alias', alias)
+      // this is the previous command
+      // which we are setting the alias as
+      const prev = state('current').get('prev')
 
-    // Shallow clone of the existing subject chain, so that future commands running on the same chainer
-    // don't apply here as well.
-    const chainerId = cy.state('chainerId')
-    const subjectChain = [...cy.state('subjects')[chainerId]]
+      prev.set('alias', str)
 
-    const fileName = prevCommand.get('fileName')
-
-    cy.addAlias(cy.state('ctx'), { subjectChain, command: prevCommand, alias, fileName })
-
-    // Only need to update the log messages of previous commands once.
-    // Subsequent invocations can shortcut to just return the subject unchanged.
-    let alreadyDone = false
-
-    return (subject) => {
-      if (alreadyDone) {
-        return subject
+      const noLogFromPreviousCommandIsAlreadyAliased = () => {
+        return _.every(prev.get('logs'), (log) => {
+          return log.get('alias') !== str
+        })
       }
-
-      alreadyDone = true
 
       // TODO: change the log type from `any` to `Log`.
       // we also need to set the alias on the last command log
@@ -36,19 +26,27 @@ export default function (Commands, Cypress, cy) {
       const log: any = _.last(cy.queue.logs({
         instrument: 'command',
         event: false,
-        chainerId,
+        chainerId: state('chainerId'),
       }))
 
-      const alreadyAliasedLog = _.map(prevCommand.get('logs'), 'attributes.alias').find((a) => a === alias)
-
-      if (!alreadyAliasedLog && log) {
-        log.set({
-          alias,
-          aliasType: $dom.isElement(subject) ? 'dom' : 'primitive',
-        })
+      if (log) {
+        // make sure this alias hasn't already been applied
+        // to the previous command's logs by looping through
+        // all of its logs and making sure none of them are
+        // set to this alias
+        if (noLogFromPreviousCommandIsAlreadyAliased()) {
+          log.set({
+            alias: str,
+            aliasType: $dom.isElement(subject) ? 'dom' : 'primitive',
+          })
+        }
       }
 
+      const fileName = prev.get('fileName')
+
+      cy.addAlias(ctx, { subject, command: prev, alias: str, fileName })
+
       return subject
-    }
+    },
   })
 }
