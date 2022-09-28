@@ -6,6 +6,10 @@
   </router-view>
 
   <template v-if="route.name && route.name !== 'SpecRunner'">
+    <!--
+      checking for existence of `route.name` here to avoid a flash
+      of these components if the page is refreshed on the SpecRunner route
+    -->
     <CloudViewerAndProject />
     <LoginConnectModals />
   </template>
