@@ -80,6 +80,8 @@ system-tests/lib/fixtureDirs.ts
 
 # from npm/xpath
 /npm/xpath/cypress/videos
+# from npm/grep
+/npm/grep/cypress/videos
 
 # from errors
 /packages/errors/__snapshot-images__
