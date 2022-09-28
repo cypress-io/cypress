@@ -74,10 +74,8 @@
         <OpenBrowser v-else />
       </template>
     </div>
-    <template v-if="currentProject?.isFullConfigReady">
-      <CloudViewerAndProject />
-      <LoginConnectModals />
-    </template>
+    <CloudViewerAndProject />
+    <LoginConnectModals />
   </template>
   <div data-e2e />
 </template>
