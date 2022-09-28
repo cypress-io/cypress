@@ -247,4 +247,41 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.get('#unified-runner').should('have.css', 'height', '333px')
     })
   })
+
+  context('error handling', () => {
+    beforeEach(() => {
+      cy.scaffoldProject('cypress-in-cypress')
+      cy.findBrowsers()
+    })
+
+    for (const framework of ['React', 'Vue', 'Vanilla'] as const) {
+      // https://github.com/cypress-io/cypress/issues/23920
+      it(`does not duplicate error in the command log for ${framework}`, () => {
+        // TODO: Why does React double-log uncaught exceptions?
+        // I think it's because react-dom internally does something weird and re-throws
+        // the error. Other frameworks do not have this issue.
+        if (framework === 'React') {
+          return
+        }
+
+        cy.openProject('cypress-in-cypress', ['--config', 'viewportWidth=333,viewportHeight=333'])
+        cy.startAppServer('component')
+
+        cy.visitApp()
+        cy.contains('ErrorComponent.spec').click()
+        cy.waitForSpecToFinish()
+
+        let count = 0
+
+        cy.get('.command-message-text').each(($el) => {
+          if ($el.text().includes(`Error from ${framework}!`)) {
+            count++
+          }
+        }).then(() => {
+          // ensures the error is not double-captured (as per #23920)
+          expect(count).to.eq(1)
+        })
+      })
+    }
+  })
 })
