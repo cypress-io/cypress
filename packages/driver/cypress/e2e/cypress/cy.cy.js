@@ -493,46 +493,4 @@ describe('driver/src/cypress/cy', () => {
       cy.bar()
     })
   })
-
-  context('queries', {
-    defaultCommandTimeout: 30,
-  }, () => {
-    it('throws when queries return a promise', (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).to.include('`cy.aQuery()` failed because you returned a promise from a query.\n\nQueries must be synchronous functions that return a function. You cannot invoke commands or return promises inside of them.')
-        done()
-      })
-
-      Cypress.Commands._overwriteQuery('aQuery', () => Promise.resolve())
-      cy.aQuery()
-    })
-
-    it('throws when a query returns a non-function value', (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).to.include('`cy.aQuery()` failed because you returned a value other than a function from a query.\n\nQueries must be synchronous functions that return a function.\n\nThe returned value was:\n\n  > `1`')
-        done()
-      })
-
-      Cypress.Commands._overwriteQuery('aQuery', () => 1)
-      cy.aQuery()
-    })
-
-    it('throws when a command is invoked inside a query', (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).to.include('`cy.aQuery()` failed because you invoked a command inside a query.\n\nQueries must be synchronous functions that return a function. You cannot invoke commands or return promises inside of them.\n\nThe command invoked was:\n\n  > `cy.visit()`')
-        done()
-      })
-
-      Cypress.Commands._overwriteQuery('aQuery', () => cy.visit('/'))
-      cy.aQuery()
-    })
-
-    // TODO: Make this work. Setting aside for now.
-    it.skip('does allow queries to use other queries', () => {
-      Cypress.Commands._overwriteQuery('aQuery', () => cy.bQuery())
-      Cypress.Commands._overwriteQuery('bQuery', () => {})
-
-      cy.aQuery()
-    })
-  })
 })

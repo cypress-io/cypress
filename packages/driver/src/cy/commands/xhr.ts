@@ -540,7 +540,7 @@ export default (Commands, Cypress, cy, state, config) => {
         if (_.isString(o.response) && aliasObj) {
           // reset the route's response to be the
           // aliases subject
-          options.response = $utils.getSubjectFromChain(aliasObj.subjectChain, cy)
+          options.response = aliasObj.subject
         }
 
         const url = getUrl(options)
