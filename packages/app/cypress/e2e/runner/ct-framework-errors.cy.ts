@@ -1,7 +1,7 @@
 import type { ProjectFixtureDir } from '@tooling/system-tests/'
 import { createVerify } from './support/verify-failures'
 
-type VerifyFunc = (specTitle: string, verifyOptions: any) => void
+type VerifyFunc = (specTitle: string, verifyOptions: any) => Cypress.Chainable
 
 type Options = {
   projectName: ProjectFixtureDir
@@ -13,6 +13,19 @@ type Options = {
 
 Cypress.on('uncaught:exception', () => false)
 
+// https://github.com/cypress-io/cypress/issues/23920
+function verifyErrorOnlyCapturedOnce (err: string) {
+  let count = 0
+
+  return cy.get('.command-message-text').each(($el) => {
+    if ($el.text().includes(err)) {
+      count++
+    }
+  }).then(() => {
+    // ensures the error is not double-captured (as per #23920)
+    expect(count).to.eq(1)
+  })
+}
 /**
  * Navigates to desired error spec file within Cypress app and waits for completion.
  * Returns scoped verify function to aid inner spec validation.
@@ -64,7 +77,7 @@ reactVersions.forEach((reactVersion) => {
         uncaught: true,
         uncaughtMessage: 'mount error',
         message: [
-          'The following error originated from your test code',
+          'The following error originated from your application code',
           'mount error',
         ],
         codeFrameText: 'Errors.cy.jsx',
@@ -76,10 +89,13 @@ reactVersions.forEach((reactVersion) => {
         uncaught: true,
         uncaughtMessage: 'sync error',
         message: [
-          'The following error originated from your test code',
+          'The following error originated from your application code',
           'sync error',
         ],
         codeFrameText: 'Errors.cy.jsx',
+      }).then(() => {
+      // TODO: ReactDOM seems to double throw.
+      // verifyErrorOnlyCapturedOnce('Error: sync error')
       })
 
       verify('async error', {
@@ -88,10 +104,13 @@ reactVersions.forEach((reactVersion) => {
         uncaught: true,
         uncaughtMessage: 'async error',
         message: [
-          'The following error originated from your test code',
+          'The following error originated from your application code',
           'async error',
         ],
         codeFrameText: 'Errors.cy.jsx',
+      }).then(() => {
+        // TODO: ReactDOM seems to double throw.
+        // verifyErrorOnlyCapturedOnce('Error: async error')
       })
 
       verify('command failure', {
@@ -132,7 +151,7 @@ describe('Next.js', {
       uncaught: true,
       uncaughtMessage: 'mount error',
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
         'mount error',
       ],
       codeFrameText: 'Errors.cy.jsx',
@@ -144,10 +163,13 @@ describe('Next.js', {
       uncaught: true,
       uncaughtMessage: 'sync error',
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
         'sync error',
       ],
       codeFrameText: 'Errors.cy.jsx',
+    }).then(() => {
+      // TODO: ReactDOM seems to double throw.
+      // verifyErrorOnlyCapturedOnce('Error: sync error')
     })
 
     verify('async error', {
@@ -156,10 +178,12 @@ describe('Next.js', {
       uncaught: true,
       uncaughtMessage: 'async error',
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
         'async error',
       ],
       codeFrameText: 'Errors.cy.jsx',
+    }).then(() => {
+      verifyErrorOnlyCapturedOnce('Error: async error')
     })
 
     verify('command failure', {
@@ -210,10 +234,12 @@ describe('Vue', {
       uncaught: true,
       uncaughtMessage: 'sync error',
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
         'sync error',
       ],
       codeFrameText: 'Errors.vue',
+    }).then(() => {
+      verifyErrorOnlyCapturedOnce('Error: sync error')
     })
 
     verify('async error', {
@@ -223,10 +249,12 @@ describe('Vue', {
       uncaught: true,
       uncaughtMessage: 'async error',
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
         'async error',
       ],
       codeFrameText: 'Errors.vue',
+    }).then(() => {
+      verifyErrorOnlyCapturedOnce('Error: async error')
     })
 
     verify('command failure', {
@@ -276,11 +304,13 @@ describe('Nuxt', {
       uncaught: true,
       uncaughtMessage: 'async error',
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
         'async error',
       ],
       stackRegex: /Errors\.vue:28/,
       codeFrameText: 'Errors.vue',
+    }).then(() => {
+      verifyErrorOnlyCapturedOnce('Error: async error')
     })
 
     verify('command failure', {
@@ -331,9 +361,11 @@ describe.skip('Svelte', {
       column: 16,
       uncaught: true,
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
         'sync error',
       ],
+    }).then(() => {
+      verifyErrorOnlyCapturedOnce('Error: sync error')
     })
 
     verify('async error', {
@@ -342,10 +374,12 @@ describe.skip('Svelte', {
       column: 18,
       uncaught: true,
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
         'async error',
       ],
       // codeFrameText: 'Errors.vue',
+    }).then(() => {
+      verifyErrorOnlyCapturedOnce('Error: async error')
     })
 
     verify('command failure', {
