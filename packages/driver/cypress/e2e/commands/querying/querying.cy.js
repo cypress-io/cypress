@@ -919,6 +919,12 @@ describe('src/cy/commands/querying', () => {
   })
 
   context('#contains', () => {
+    it('should keep multiple contains() separate', () => {
+      cy.contains('New York').as('alias')
+      cy.contains('Nested Find').invoke('remove')
+      cy.get('@alias').should('exist')
+    })
+
     it('is scoped to the body and will not return title elements', () => {
       cy.contains('DOM Fixture').then(($el) => {
         expect($el).not.to.match('title')
@@ -1103,23 +1109,9 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
-    it('finds text by regexp and restores contains', () => {
-      const { contains } = Cypress.$Cypress.$.expr[':']
-
-      cy.contains(/^asdf \d+/).then(($li) => {
-        expect($li).to.have.text('asdf 1')
-
-        expect(Cypress.$Cypress.$.expr[':'].contains).to.eq(contains)
-      })
-    })
-
-    it('finds text by regexp when second parameter is a regexp and restores contains', () => {
-      const { contains } = Cypress.$Cypress.$.expr[':']
-
+    it('finds text by regexp when second parameter is a regexp', () => {
       cy.contains('#asdf>li:first', /asdf 1/).then(($li) => {
         expect($li).to.have.text('asdf 1')
-
-        expect(Cypress.$Cypress.$.expr[':'].contains).to.eq(contains)
       })
     })
 
@@ -1752,46 +1744,6 @@ space
         })
 
         cy.contains('Nested Find').should('have.length', 2)
-      })
-
-      it('restores contains even when cy.get fails', (done) => {
-        const { contains } = Cypress.$Cypress.$.expr[':']
-
-        const cyNow = cy.now
-
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('Syntax error, unrecognized expression')
-          expect(Cypress.$Cypress.$.expr[':'].contains).to.eq(contains)
-
-          done()
-        })
-
-        cy.stub(cy, 'now').callsFake(() => cyNow('get', 'aBad:jQuery^Selector', {}))
-
-        cy.contains(/^asdf \d+/)
-      })
-
-      it('restores contains on abort', (done) => {
-        cy.timeout(1000)
-
-        const { contains } = Cypress.$Cypress.$.expr[':']
-
-        cy.stub(Cypress.runner, 'stop')
-
-        cy.on('stop', () => {
-          _.delay(() => {
-            expect(Cypress.$Cypress.$.expr[':'].contains).to.eq(contains)
-
-            done()
-          }
-          , 50)
-        })
-
-        cy.on('command:retry', _.after(2, () => {
-          Cypress.stop()
-        }))
-
-        cy.contains(/^does not contain asdfasdf at all$/)
       })
     })
   })

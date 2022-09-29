@@ -5,7 +5,6 @@ import $jquery from '../jquery'
 import { getTagName } from './elementHelpers'
 import { isWithinShadowRoot, getShadowElementFromPoint } from './shadow'
 import { normalizeWhitespaces } from './utils'
-import { escapeQuotes, escapeBackslashes } from '../../util/escape'
 
 /**
  * Find Parents relative to an initial element
@@ -224,55 +223,72 @@ export const getElements = ($el) => {
   return els
 }
 
+// We add three custom expressions to jquery. These let us use custom
+// logic around case sensitivity, and match strings or regular expressions.
+
+// They are used exclusively by cy.contains; see `getContainsSelector` below,
+// for where we build the selectors.
+
+// Example:
+// button:cy-contains("Login")
+$.expr[':']['cy-contains'] = $.expr.createPseudo((text) => {
+  text = JSON.parse(`"${ text }"`)
+
+  return function (elem) {
+    let testText = normalizeWhitespaces(elem)
+
+    return testText.includes(text)
+  }
+})
+
+// Example:
+// .login-button:cy-contains-insensitive("login")
+$.expr[':']['cy-contains-insensitive'] = $.expr.createPseudo((text) => {
+  text = JSON.parse(`"${ text }"`)
+
+  return function (elem) {
+    let testText = normalizeWhitespaces(elem)
+
+    testText = testText.toLowerCase()
+    text = text.toLowerCase()
+
+    return testText.includes(text)
+  }
+})
+
+// Example:
+// #login>li:first:cy-contains-regex('/asdf 1/i')
+$.expr[':']['cy-contains-regex'] = $.expr.createPseudo((text) => {
+  const lastSlash = text.lastIndexOf('/')
+  const regex = new RegExp(text.slice(1, lastSlash), text.slice(lastSlash + 1))
+
+  // taken from jquery's normal contains method
+  return function (elem) {
+    if (elem.type === 'submit' && elem.tagName === 'INPUT') {
+      return regex.test(elem.value)
+    }
+
+    const testText = normalizeWhitespaces(elem)
+
+    return regex.test(testText)
+  }
+})
+
 export const getContainsSelector = (text, filter = '', options: {
   matchCase?: boolean
 } = {}) => {
-  const $expr = $.expr[':']
+  if (_.isRegExp(text) && options.matchCase === false && !text.flags.includes('i')) {
+    text = new RegExp(text.source, text.flags + 'i') // eslint-disable-line prefer-template
+  }
 
-  const escapedText = escapeQuotes(
-    escapeBackslashes(text),
-  )
+  const escapedText = _.isString(text) ? JSON.stringify(text).slice(1, -1) : text.toString()
 
   // they may have written the filter as
   // comma separated dom els, so we want to search all
   // https://github.com/cypress-io/cypress/issues/2407
   const filters = filter.trim().split(',')
 
-  let cyContainsSelector
-
-  if (_.isRegExp(text)) {
-    if (options.matchCase === false && !text.flags.includes('i')) {
-      text = new RegExp(text.source, text.flags + 'i') // eslint-disable-line prefer-template
-    }
-
-    // taken from jquery's normal contains method
-    cyContainsSelector = function (elem) {
-      if (elem.type === 'submit' && elem.tagName === 'INPUT') {
-        return text.test(elem.value)
-      }
-
-      const testText = normalizeWhitespaces(elem)
-
-      return text.test(testText)
-    }
-  } else if (_.isString(text)) {
-    cyContainsSelector = function (elem) {
-      let testText = normalizeWhitespaces(elem)
-
-      if (!options.matchCase) {
-        testText = testText.toLowerCase()
-        text = text.toLowerCase()
-      }
-
-      return testText.includes(text)
-    }
-  } else {
-    cyContainsSelector = $expr.contains
-  }
-
-  // we set the `cy-contains` jquery selector which will only be used
-  // in the context of cy.contains(...) command and selector playground.
-  $expr['cy-contains'] = cyContainsSelector
+  let expr = _.isRegExp(text) ? 'cy-contains-regex' : (options.matchCase ? 'cy-contains' : 'cy-contains-insensitive')
 
   const selectors = _.map(filters, (filter) => {
     // https://github.com/cypress-io/cypress/issues/8626
@@ -281,7 +297,7 @@ export const getContainsSelector = (text, filter = '', options: {
     const textToFind = escapedText.includes(`\'`) ? `"${escapedText}"` : `'${escapedText}'`
 
     // use custom cy-contains selector that is registered above
-    return `${filter}:cy-contains(${textToFind}), ${filter}[type='submit'][value~=${textToFind}]`
+    return `${filter}:${expr}(${textToFind}), ${filter}[type='submit'][value~=${textToFind}]`
   })
 
   return selectors.join()
