@@ -223,11 +223,26 @@ export const getElements = ($el) => {
   return els
 }
 
-// We add three custom expressions to jquery. These let us use custom
-// logic around case sensitivity, and match strings or regular expressions.
-
-// They are used exclusively by cy.contains; see `getContainsSelector` below,
-// for where we build the selectors.
+/*
+ * We add three custom expressions to jquery. These let us use custom
+ * logic around case sensitivity, and match strings or regular expressions.
+ * See https://github.com/jquery/sizzle/wiki/#-pseudo-selectors for
+ * documentation on adding Sizzle selectors.
+ *
+ * Our use of
+ *
+ *   $.expr[':']['cy-contains'] = $.expr.createPseudo()
+ *
+ * is equivelent to
+ *
+ *   Sizzle.selectors.pseudos['cy-contains'] = Sizzle.selectors.createPseudo()
+ *
+ * in the documentation linked above. $.expr[':'] is jquery's alias for
+ * Sizzle.selectors.psuedos.
+ *
+ * These custom expressions are used exclusively by cy.contains; see
+ * `getContainsSelector` below.
+ */
 
 // Example:
 // button:cy-contains("Login")
@@ -256,6 +271,10 @@ $.expr[':']['cy-contains-insensitive'] = $.expr.createPseudo((text) => {
   }
 })
 
+function isSubmit (elem: Element): elem is HTMLInputElement {
+  return elem.tagName === 'INPUT' && (elem as HTMLInputElement).type === 'submit'
+}
+
 // Example:
 // #login>li:first:cy-contains-regex('/asdf 1/i')
 $.expr[':']['cy-contains-regex'] = $.expr.createPseudo((text) => {
@@ -264,7 +283,7 @@ $.expr[':']['cy-contains-regex'] = $.expr.createPseudo((text) => {
 
   // taken from jquery's normal contains method
   return function (elem) {
-    if (elem.type === 'submit' && elem.tagName === 'INPUT') {
+    if (isSubmit(elem)) {
       return regex.test(elem.value)
     }
 
