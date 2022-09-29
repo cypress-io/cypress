@@ -635,7 +635,7 @@ describe('src/cy/commands/assertions', () => {
         cy.get('button:first').should('have.class', 'does-not-have-class')
       })
 
-      it('has a pending state while retrying', (done) => {
+      it('has a pending state while retrying queries', (done) => {
         cy.on('command:retry', (command) => {
           const [getLog, shouldLog] = cy.state('current').get('logs')
 
@@ -646,6 +646,19 @@ describe('src/cy/commands/assertions', () => {
         })
 
         cy.get('button:first', { timeout: 100 }).should('have.class', 'does-not-have-class')
+      })
+
+      it('has a pending state while retrying for commands with onFail', (done) => {
+        cy.on('command:retry', (command) => {
+          const [readFileLog, shouldLog] = cy.state('current').get('logs')
+
+          expect(readFileLog.get('state')).to.eq('pending')
+          expect(shouldLog.get('state')).to.eq('pending')
+
+          done()
+        })
+
+        cy.readFile('does-not-exist.json').should('exist')
       })
 
       it('throws when the subject isnt in the DOM', function (done) {
