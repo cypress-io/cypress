@@ -1668,7 +1668,7 @@ describe('Routes', () => {
           'set-cookie': [
             'foo=bar; Path=/',
             '___utmvmXluIZsM=fidJKOsDSdm; path=/; Max-Age=900',
-            '___utmvbXluIZsM=bZM\n    XtQOGalF: VtR; path=/; Max-Age=900',
+            '___utmvbXluIZsM=bZM    XtQOGalF: VtR; path=/; Max-Age=900',
           ],
         })
 

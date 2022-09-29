@@ -1,7 +1,7 @@
 import path from 'path'
 import execa from 'execa'
 
-import type { CyTaskResult, OpenGlobalModeOptions, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
+import type { CyTaskResult, OpenGlobalModeOptions, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from '../support/e2e'
 import { fixtureDirs } from '@tooling/system-tests'
 // import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
 import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
