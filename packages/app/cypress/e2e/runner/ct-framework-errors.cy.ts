@@ -37,7 +37,10 @@ function loadErrorSpec (options: Options): VerifyFunc {
   cy.startAppServer('component')
   cy.visitApp(`specs/runner?file=${filePath}`)
 
-  cy.findByLabelText('Stats', { timeout: 30000 }).within(() => {
+  cy.get('.runnable-header', { log: false }).should('be.visible')
+  // Extended timeout needed due to lengthy Angular bootstrap on Windows
+  cy.contains('Your tests are loading...', { timeout: 60000, log: false }).should('not.exist')
+  cy.findByLabelText('Stats').within(() => {
     cy.get('.passed .num', { timeout: 30000 }).should('have.text', `${passCount}`)
     cy.get('.failed .num', { timeout: 30000 }).should('have.text', `${failCount}`)
   })
