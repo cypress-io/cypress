@@ -262,11 +262,11 @@ export default (Commands, Cypress, cy, state) => {
       $errUtils.throwErrByPath('contains.empty_string')
     }
 
-    const getOptions = _.extend({ matchCase: true }, userOptions) as GetOptions
-
     // find elements by the :cy-contains psuedo selector
     // and any submit inputs with the attributeContainsWord selector
-    const selector = $dom.getContainsSelector(text, filter, getOptions)
+    const selector = $dom.getContainsSelector(text, filter, { matchCase: true, ...userOptions })
+
+    const getOptions = _.extend({}, userOptions) as GetOptions
     const getFn = cy.now('get', selector, getOptions)
     const log = this.get('_log')
 
