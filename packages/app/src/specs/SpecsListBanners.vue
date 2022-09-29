@@ -150,10 +150,10 @@ import { computed, ref, watch, watchEffect } from 'vue'
 import RequestAccessButton from './RequestAccessButton.vue'
 import { gql, useSubscription } from '@urql/vue'
 import { SpecsListBannersFragment, SpecsListBanners_CheckCloudOrgMembershipDocument } from '../generated/graphql'
-import interval from 'human-interval'
 import { AllowedState, BannerIds } from '@packages/types'
 import { LoginBanner, CreateOrganizationBanner, ConnectProjectBanner, RecordBanner } from './banners'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { usePromptManager } from '@packages/frontend-shared/src/composables/usePromptManager'
 import { CohortConfig, useCohorts } from '@packages/frontend-shared/src/composables/useCohorts'
 
 const route = useRoute()
@@ -252,26 +252,7 @@ watch(
 
 const cloudData = computed(() => ([props.gql.cloudViewer, props.gql.cachedUser, props.gql.currentProject] as const))
 
-const minTimeSince = (eventTime, waitTime) => {
-  return !eventTime || (Date.now() - eventTime) > interval(waitTime)
-}
-
-const isAllowedFeature = (featureName, stateName) => {
-  // TODO - extract to helper function
-  const features = {
-    specsListBanner: {
-      base: [
-        minTimeSince(loginConnectStore.firstOpened, '4 days'),
-        minTimeSince(loginConnectStore.promptsShown.ci1, '1 day'),
-      ],
-      needsRecordedRun: [
-        minTimeSince(loginConnectStore.promptsShown.loginModalRecord, '1 day'),
-      ],
-    },
-  }
-
-  return features[featureName][stateName].every((rule: boolean) => rule === true)
-}
+const { isAllowedFeature } = usePromptManager()
 
 watch(cloudData, () => {
   if (!isAllowedFeature('specsListBanner', 'base')) {
