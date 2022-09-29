@@ -209,7 +209,10 @@ const test = async function (buildAppExecutable) {
   await runSmokeTest(buildAppExecutable)
   await runProjectTest(buildAppExecutable, e2e)
   await runFailingProjectTest(buildAppExecutable, e2e)
-  await runV8SnapshotProjectTest(buildAppExecutable, e2e)
+  if (process.env.DISABLE_SNAPSHOT_REQUIRE == null) {
+    await runV8SnapshotProjectTest(buildAppExecutable, e2e)
+  }
+
   Fixtures.remove()
 }
 

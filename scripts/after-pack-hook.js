@@ -47,10 +47,6 @@ module.exports = async function (params) {
   console.log('all node_modules subfolders copied to', outputFolder)
 
   if (process.env.DISABLE_SNAPSHOT_REQUIRE == null) {
-    const sourceSnapshotFileLocation = await setupV8Snapshots()
-    const targetSnapshotFileLocation = path.join(params.appOutDir, path.relative(path.resolve('packages', 'electron', 'dist', 'Cypress'), sourceSnapshotFileLocation))
-
-    console.log(`copying ${sourceSnapshotFileLocation} to ${targetSnapshotFileLocation}`)
-    await fs.copyFile(sourceSnapshotFileLocation, targetSnapshotFileLocation)
+    await setupV8Snapshots(params.appOutDir)
   }
 }

@@ -197,8 +197,6 @@ module.exports = (on, config) => {
     },
 
     'get:size:v8:snapshot' () {
-      console.log('snapshotResult', global.snapshotResult.customRequire.exports)
-
       return Object.keys(global.snapshotResult.customRequire.exports).length
     },
   })

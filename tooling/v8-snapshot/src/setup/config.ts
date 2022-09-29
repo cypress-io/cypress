@@ -21,27 +21,24 @@ const snapshotCacheBaseDir = path.resolve(__dirname, '..', '..', 'cache')
 const projectBaseDir = path.join(__dirname, '..', '..', '..', '..')
 const appEntryFile = require.resolve('@packages/server/server-entry.js')
 
-const cypressAppSnapshotDir = (() => {
+const cypressAppSnapshotDir = (cypressAppPath?: string) => {
   const electronPackageDir = path.join(projectBaseDir, 'packages', 'electron')
 
-  let cypressApp
-  let electronPath
+  let electronResourcesPath
 
   if (platformString === 'darwin') {
-    cypressApp = path.join('dist', 'Cypress', 'Cypress.app')
-    electronPath = path.join('Contents', 'Frameworks', 'Electron Framework.framework', 'Versions', 'A', 'Resources')
+    cypressAppPath = cypressAppPath ? path.join(cypressAppPath, 'Cypress.app') : path.join(electronPackageDir, 'dist', 'Cypress', 'Cypress.app')
+    electronResourcesPath = path.join('Contents', 'Frameworks', 'Electron Framework.framework', 'Versions', 'A', 'Resources')
   } else {
-    cypressApp = path.join('dist', 'Cypress')
-    electronPath = ''
+    cypressAppPath = cypressAppPath || path.join(electronPackageDir, 'dist', 'Cypress')
+    electronResourcesPath = ''
   }
 
-  const cypressAppDir = path.join(electronPackageDir, cypressApp)
-
   return path.join(
-    cypressAppDir,
-    electronPath,
+    cypressAppPath,
+    electronResourcesPath,
   )
-})()
+}
 
 const pathsMapper = (s: string) => s.replace(/^packages\//, './packages/')
 
@@ -83,7 +80,7 @@ const usePreviousSnapshotMetadata = process.env.V8_SNAPSHOT_FROM_SCRATCH == null
  * @param {string} env - 'dev' | 'prod'
  * @returns {SnapshotConfig} config to be used for all snapshot related tasks
  */
-export function createConfig (env: 'dev' | 'prod' = 'prod'): SnapshotConfig {
+export function createConfig (env: 'dev' | 'prod' = 'prod', cypressAppPath?: string): SnapshotConfig {
   /**
    * If true only node_module dependencies are included in the snapshot. Otherwise app files are included as well
    *
@@ -106,7 +103,7 @@ export function createConfig (env: 'dev' | 'prod' = 'prod'): SnapshotConfig {
 
   return {
     appEntryFile,
-    cypressAppSnapshotDir,
+    cypressAppSnapshotDir: cypressAppSnapshotDir(cypressAppPath),
     metaFile,
     nodeModulesOnly,
     pathsMapper,
