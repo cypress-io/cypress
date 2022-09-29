@@ -173,6 +173,10 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   }, { spaces: 2 })
 
   fs.writeFileSync(meta.distDir('index.js'), `\
+${process.env.DISABLE_SNAPSHOT_REQUIRE == null ?
+`if (!global.snapshotResult && process.versions && process.versions.electron) {
+  throw new Error('global.snapshotResult is not defined. This binary has been built incorrectly.')
+}` : ''}
 process.env.CYPRESS_INTERNAL_ENV = process.env.CYPRESS_INTERNAL_ENV || 'production'
 require('./packages/server')\
 `)

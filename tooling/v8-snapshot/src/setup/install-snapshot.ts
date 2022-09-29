@@ -107,7 +107,7 @@ export async function installSnapshot (
 
     const cypressAppSnapshotFile = path.join(
       cypressAppSnapshotDir,
-      v8ContextFile,
+      'browser_v8_context_snapshot.bin',
     )
 
     await fs.copyFile(

@@ -24,6 +24,13 @@ export function processArgsFromFile (
     .filter((arg) => {
       return !arg.match(newlineRegEx) && arg !== ''
     })
+
+    const turboProfilingInputIndex = mksnapshotArgsFromFile.indexOf('--turbo-profiling-input')
+
+    if (turboProfilingInputIndex > -1) {
+      mksnapshotArgsFromFile.splice(turboProfilingInputIndex, 2)
+    }
+
     const mksnapshotBinaryPath = path.parse(mksnapshotArgsFromFile[0])
 
     if (mksnapshotBinaryPath.dir) {

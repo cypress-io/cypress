@@ -7,6 +7,7 @@ const paths = require('./paths')
 const log = require('debug')('cypress:electron')
 const fs = require('fs-extra')
 const crypto = require('crypto')
+const { flipFuses, FuseVersion, FuseV1Options } = require('@electron/fuses')
 
 let electronVersion
 
@@ -128,6 +129,15 @@ module.exports = {
       console.log('to', options.dist)
 
       return this.move(appPath, options.dist)
+    })
+    .then(() => {
+      return process.env.DISABLE_SNAPSHOT_REQUIRE == null ? flipFuses(
+        paths.getPathToExec(),
+        {
+          version: FuseVersion.V1,
+          [FuseV1Options.LoadBrowserProcessSpecificV8Snapshot]: true,
+        },
+      ) : Promise.resolve()
     }).catch((err) => {
       console.log(err.stack)
 
