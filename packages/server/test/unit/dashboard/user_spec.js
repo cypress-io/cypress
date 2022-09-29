@@ -49,28 +49,6 @@ describe('lib/dashboard/user', () => {
     })
   })
 
-  context('.syncProfile', () => {
-    it('calls api.getMe then saves user to cache', () => {
-      sinon.stub(api, 'getMe').resolves({
-        name: 'foo',
-        email: 'bar@baz',
-      })
-
-      sinon.stub(cache, 'setUser').resolves()
-
-      return user.syncProfile('foo-123', 'bar-456')
-      .then(() => {
-        expect(api.getMe).to.be.calledWith('foo-123')
-
-        expect(cache.setUser).to.be.calledWith({
-          authToken: 'foo-123',
-          name: 'foo',
-          email: 'bar@baz',
-        })
-      })
-    })
-  })
-
   context('.getBaseLoginUrl', () => {
     it('calls api.getAuthUrls', () => {
       sinon.stub(api, 'getAuthUrls').resolves({
