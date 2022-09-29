@@ -59,6 +59,10 @@ describe('<SpecsListBanners />', () => {
   const stateWithFirstOpenedDaysAgo = (days: number) => {
     return {
       firstOpened: Date.now() - interval(`${days} days`),
+      promptsShown: {
+        ci1: 1664382191411,
+        loginModalRecord: 1664382191411,
+      },
     }
   }
 

@@ -251,25 +251,36 @@ watch(
 )
 
 const cloudData = computed(() => ([props.gql.cloudViewer, props.gql.cachedUser, props.gql.currentProject] as const))
-const hasFourDaysOfCypressUse = computed(() => (Date.now() - props.gql.currentProject?.savedState?.firstOpened) > interval('4 days'))
 
-const isAllowedFeature = (featureName) => {
-  // TODO - extract to helper function, nest states under features
+const minTimeSince = (eventTime, waitTime) => {
+  return !eventTime || (Date.now() - eventTime) > interval(waitTime)
+}
+
+const isAllowedFeature = (featureName, stateName) => {
+  // TODO - extract to helper function
   const features = {
-    specsListBanner: hasFourDaysOfCypressUse.value,
+    specsListBanner: {
+      base: [
+        minTimeSince(loginConnectStore.firstOpened, '4 days'),
+        minTimeSince(loginConnectStore.promptsShown.ci1, '1 day'),
+      ],
+      needsRecordedRun: [
+        minTimeSince(loginConnectStore.promptsShown.loginModalRecord, '1 day'),
+      ],
+    },
   }
 
-  return features[featureName]
+  return features[featureName][stateName].every((rule: boolean) => rule === true)
 }
 
 watch(cloudData, () => {
-  if (!isAllowedFeature('specsListBanner')) {
+  if (!isAllowedFeature('specsListBanner', 'base')) {
     return
   }
 
   const { userStatusMatches } = loginConnectStore
 
-  showRecordBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_RECORD) && userStatusMatches('needsRecordedRun')
+  showRecordBanner.value = isAllowedFeature('specsListBanner', 'needsRecordedRun') && !hasBannerBeenDismissed(BannerIds.ACI_082022_RECORD) && userStatusMatches('needsRecordedRun')
   showConnectBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_CONNECT_PROJECT) && userStatusMatches('needsProjectConnect')
   showCreateOrganizationBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_CREATE_ORG) && userStatusMatches('needsOrgConnect')
   showLoginBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_LOGIN) && userStatusMatches('isLoggedOut')

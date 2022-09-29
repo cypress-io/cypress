@@ -17,6 +17,11 @@ export interface LoginConnectState {
   hasRecordedRuns: boolean
   loginError: boolean
   userData?: LoginUserData
+  firstOpened?: number
+  promptsShown: {
+    ci1?: number
+    loginModalRecord?: number
+  }
 }
 
 export type UserStatus = 'isLoggedOut' | 'needsOrgConnect' | 'needsProjectConnect' | 'needsRecordedRun' | 'noActionableState'
@@ -39,6 +44,8 @@ export const useLoginConnectStore = defineStore({
       hasRecordedRuns: false,
       loginError: false,
       userData: undefined,
+      promptsShown: {},
+      firstOpened: undefined,
     }
   },
   actions: {
@@ -59,6 +66,12 @@ export const useLoginConnectStore = defineStore({
     },
     setUserData (userData?: LoginUserData) {
       this.userData = userData
+    },
+    setPromptShown (slug: string, timestamp: number) {
+      this.promptsShown[slug] = timestamp
+    },
+    setFirstOpened (timestamp: number) {
+      this.firstOpened = timestamp
     },
   },
   getters: {

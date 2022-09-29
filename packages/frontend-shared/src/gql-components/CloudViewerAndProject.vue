@@ -61,7 +61,7 @@ subscription CloudViewerAndProject_CheckCloudOrgMembership {
 `
 
 const loginConnectStore = useLoginConnectStore()
-const { setStatus, setLoginError, setUserData } = loginConnectStore
+const { setStatus, setLoginError, setUserData, setPromptShown, setFirstOpened } = loginConnectStore
 
 useSubscription({ query: CloudViewerAndProject_CheckCloudOrgMembershipDocument })
 
@@ -74,6 +74,18 @@ const cloudProjectId = computed(() => {
 watchEffect(() => {
   if (!query.data) {
     return
+  }
+
+  const savedState = query.data.value?.currentProject?.savedState
+
+  if (savedState?.promptsShown) {
+    for (const item in savedState.promptsShown) {
+      setPromptShown(item, savedState.promptsShown[item])
+    }
+  }
+
+  if (savedState?.firstOpened) {
+    setFirstOpened(savedState.firstOpened)
   }
 
   const isLoggedIn = !!query.data.value?.cachedUser?.id || !!query.data.value?.cloudViewer?.id
