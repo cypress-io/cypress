@@ -28,7 +28,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - 'feature/v8-snapshots'
-        - 'ryanm/feat/add-v8-snapshot-to-binary'
+        - 'ryanm/feat/upgrade-electron-with-v8'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -38,12 +38,17 @@ macWorkflowFilters: &darwin-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ 'feature/v8-snapshots', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/feat/add-v8-snapshot-to-binary', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/feat/upgrade-electron-with-v8', << pipeline.git.branch >> ]
+    - matches:
+          pattern: "-release$"
+          value: << pipeline.git.branch >>
+
+linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ 'feature/v8-snapshots', << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/feat/add-v8-snapshot-to-binary', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/feat/upgrade-electron-with-v8', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -59,8 +64,16 @@ windowsWorkflowFilters: &windows-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/feat/add-v8-snapshot-to-binary', << pipeline.git.branch >> ]
-executors:
+    - equal: [ 'feature/v8-snapshots', << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/feat/upgrade-electron-with-v8', << pipeline.git.branch >> ]
+    - matches:
+          pattern: "-release$"
+          value: << pipeline.git.branch >>
+
+executors:  
+  # the Docker image with Cypress dependencies and Chrome browser
+  cy-doc:
+    docker:
       - image: cypress/browsers:node16.16.0-chrome105-ff99-edge
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
@@ -119,7 +132,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "ryanm/feat/add-v8-snapshot-to-binary" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "ryanm/feat/upgrade-electron-with-v8" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1911,8 +1924,6 @@ jobs:
       - store_artifacts:
           path: npm/xpath/test_results
       - store-npm-logs
-<<<<<<< HEAD:.circleci/config.yml
-=======
 
   npm-grep:
     <<: *defaults
@@ -1927,7 +1938,6 @@ jobs:
       - store_artifacts:
           path: npm/grep/test_results
       - store-npm-logs
->>>>>>> origin/issue-23843_electron_21_upgrade:circle.yml
 
   npm-create-cypress-tests:
     <<: *defaults
