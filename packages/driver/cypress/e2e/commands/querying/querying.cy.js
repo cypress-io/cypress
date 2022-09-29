@@ -1293,6 +1293,7 @@ space
 
       it('is case sensitive when matchCase is undefined', () => {
         cy.get('#test-button').contains('Test')
+        cy.contains('test').should('not.exist')
       })
 
       it('is case sensitive when matchCase is true', () => {
