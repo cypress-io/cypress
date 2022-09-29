@@ -77,14 +77,14 @@ describe('lib/util/routes', () => {
     })
 
     it('defaults to development', () => {
-      process.env.CYPRESS_KONFIG_ENV = undefined
+      process.env.CYPRESS_CONFIG_ENV = undefined
       process.env.CYPRESS_INTERNAL_ENV = undefined
 
       expect(routes().apiRoutes.api()).to.eq('http://localhost:1234/')
     })
 
-    it('honors CYPRESS_KONFIG_ENV', () => {
-      process.env.CYPRESS_KONFIG_ENV = 'staging'
+    it('honors CYPRESS_CONFIG_ENV', () => {
+      process.env.CYPRESS_CONFIG_ENV = 'staging'
       process.env.CYPRESS_INTERNAL_ENV = 'test'
 
       expect(routes().apiRoutes.api()).to.eq('https://api-staging.cypress.io/')
