@@ -19,12 +19,11 @@ const main = async () => {
     console.log()
     console.log('semantic-release dry run for:', name)
 
-    const { stdout } = await execa(
+    await execa(
       'npx',
       ['lerna', 'exec', '--scope', name, '--', 'npx', '--no-install', 'semantic-release', '--dry-run'],
+      { stdout: 'inherit', stderr: 'inherit' },
     )
-
-    console.log(stdout)
   }
 }
 
