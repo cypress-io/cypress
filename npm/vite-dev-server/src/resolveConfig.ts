@@ -11,7 +11,7 @@ import path from 'path'
 
 import { configFiles } from './constants'
 import type { ViteDevServerConfig } from './devServer'
-import { Cypress, CypressInspect } from './plugins/index'
+import { Cypress, CypressInspect, CypressSourcemap } from './plugins/index'
 import type { Vite } from './getVite'
 
 const debug = debugFn('cypress:vite-dev-server:resolve-config')
@@ -87,6 +87,7 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
     plugins: [
       Cypress(config, vite),
       CypressInspect(config),
+      CypressSourcemap(config, vite),
     ].filter((p) => p != null),
   }
 
