@@ -19,6 +19,7 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 7)
+ℹ ｢wdm｣: wait until bundle finished: /__cypress/src/index.html
 
 
   ✓ renders hello world
@@ -786,6 +787,7 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 7)
+ℹ ｢wdm｣: wait until bundle finished: /__cypress/src/index.html
 
 
   ✓ renders hello world
