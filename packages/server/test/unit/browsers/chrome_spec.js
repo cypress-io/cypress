@@ -464,7 +464,7 @@ describe('lib/browsers/chrome', () => {
         })
       })
 
-      it('appends X-Cypress-Request header to fetch request', async function () {
+      it('appends X-Cypress-Is-XHR-Or-Fetch header to fetch request', async function () {
         await chrome.open('chrome', 'http://', withExperimentalFlagOn, this.automation)
 
         this.pageCriClient.on.withArgs('Page.frameAttached').yield()
@@ -489,14 +489,14 @@ describe('lib/browsers/chrome', () => {
               value: 'Bar',
             },
             {
-              name: 'X-Cypress-Request',
+              name: 'X-Cypress-Is-XHR-Or-Fetch',
               value: 'fetch',
             },
           ],
         })
       })
 
-      it('appends X-Cypress-Request header to xhr request', async function () {
+      it('appends X-Cypress-Is-XHR-Or-Fetch header to xhr request', async function () {
         await chrome.open('chrome', 'http://', withExperimentalFlagOn, this.automation)
 
         this.pageCriClient.on.withArgs('Page.frameAttached').yield()
@@ -521,7 +521,7 @@ describe('lib/browsers/chrome', () => {
               value: 'Bar',
             },
             {
-              name: 'X-Cypress-Request',
+              name: 'X-Cypress-Is-XHR-Or-Fetch',
               value: 'xhr',
             },
           ],

@@ -373,7 +373,7 @@ describe('app/background', () => {
       })
     })
 
-    it('appends X-Cypress-Request header to request if the resourceType is "xmlhttprequest"', async function () {
+    it('appends X-Cypress-Is-XHR-Or-Fetch header to request if the resourceType is "xmlhttprequest"', async function () {
       const details = {
         parentFrameId: 0,
         type: 'xmlhttprequest',
@@ -395,14 +395,14 @@ describe('app/background', () => {
             value: 'Bar',
           },
           {
-            name: 'X-Cypress-Request',
+            name: 'X-Cypress-Is-XHR-Or-Fetch',
             value: 'true',
           },
         ],
       })
     })
 
-    it('does not append X-Cypress-Request header to request if the resourceType is not an "xmlhttprequest"', async function () {
+    it('does not append X-Cypress-Is-XHR-Or-Fetch header to request if the resourceType is not an "xmlhttprequest"', async function () {
       const details = {
         parentFrameId: 0,
         type: 'sub_frame',
@@ -420,7 +420,7 @@ describe('app/background', () => {
       expect(result).to.not.deep.equal({
         requestHeaders: [
           {
-            name: 'X-Cypress-Request',
+            name: 'X-Cypress-Is-XHR-Or-Fetch',
             value: 'true',
           },
         ],

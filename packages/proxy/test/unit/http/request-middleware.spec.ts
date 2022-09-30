@@ -61,22 +61,22 @@ describe('http/request-middleware', () => {
       })
     })
 
-    it('removes x-cypress-request header when it exists', async () => {
+    it('removes x-cypress-is-xhr-or-fetch header when it exists', async () => {
       const ctx = {
         req: {
           headers: {
-            'x-cypress-request': 'true',
+            'x-cypress-is-xhr-or-fetch': 'true',
           },
         } as Partial<CypressIncomingRequest>,
       }
 
       await testMiddleware([ExtractCypressMetadataHeaders], ctx)
       .then(() => {
-        expect(ctx.req.headers['x-cypress-request']).not.to.exist
+        expect(ctx.req.headers['x-cypress-is-xhr-or-fetch']).not.to.exist
       })
     })
 
-    it('removes x-cypress-request header when it does not exist', async () => {
+    it('removes x-cypress-is-xhr-or-fetch header when it does not exist', async () => {
       const ctx = {
         req: {
           headers: {},
@@ -85,7 +85,7 @@ describe('http/request-middleware', () => {
 
       await testMiddleware([ExtractCypressMetadataHeaders], ctx)
       .then(() => {
-        expect(ctx.req.headers['x-cypress-request']).not.to.exist
+        expect(ctx.req.headers['x-cypress-is-xhr-or-fetch']).not.to.exist
       })
     })
 
@@ -96,7 +96,7 @@ describe('http/request-middleware', () => {
         },
         req: {
           headers: {
-            'x-cypress-request': 'true',
+            'x-cypress-is-xhr-or-fetch': 'true',
           },
         } as Partial<CypressIncomingRequest>,
       }
@@ -116,7 +116,7 @@ describe('http/request-middleware', () => {
         getAUTUrl: sinon.stub().returns(undefined),
         req: {
           headers: {
-            'x-cypress-request': 'true',
+            'x-cypress-is-xhr-or-fetch': 'true',
           },
         } as Partial<CypressIncomingRequest>,
       }
@@ -128,7 +128,7 @@ describe('http/request-middleware', () => {
       })
     })
 
-    it('does not set requestedWith or credentialLevel on the request if x-cypress-request has invalid values', async () => {
+    it('does not set requestedWith or credentialLevel on the request if x-cypress-is-xhr-or-fetch has invalid values', async () => {
       const ctx = {
         config: {
           experimentalSessionAndOrigin: true,
@@ -139,7 +139,7 @@ describe('http/request-middleware', () => {
         },
         req: {
           headers: {
-            'x-cypress-request': 'sub_frame',
+            'x-cypress-is-xhr-or-fetch': 'sub_frame',
           },
         } as Partial<CypressIncomingRequest>,
       }
@@ -167,7 +167,7 @@ describe('http/request-middleware', () => {
         req: {
           proxiedUrl: 'http://localhost:8080',
           headers: {
-            'x-cypress-request': 'xhr',
+            'x-cypress-is-xhr-or-fetch': 'xhr',
           },
         } as Partial<CypressIncomingRequest>,
       }
@@ -194,7 +194,7 @@ describe('http/request-middleware', () => {
         req: {
           proxiedUrl: 'http://localhost:8080',
           headers: {
-            'x-cypress-request': 'fetch',
+            'x-cypress-is-xhr-or-fetch': 'fetch',
           },
         } as Partial<CypressIncomingRequest>,
       }
@@ -223,7 +223,7 @@ describe('http/request-middleware', () => {
         req: {
           proxiedUrl: 'http://localhost:8080',
           headers: {
-            'x-cypress-request': 'true',
+            'x-cypress-is-xhr-or-fetch': 'true',
           },
         } as Partial<CypressIncomingRequest>,
       }

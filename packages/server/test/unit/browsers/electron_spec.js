@@ -486,7 +486,7 @@ describe('lib/browsers/electron', () => {
         })
       })
 
-      it('adds X-Cypress-Request header if xhr request (includes fetch)', function () {
+      it('adds X-Cypress-Is-XHR-Or-Fetch header if xhr request (includes fetch)', function () {
         sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
 
         return electron._launch(this.win, this.url, this.automation, this.options)
@@ -511,7 +511,7 @@ describe('lib/browsers/electron', () => {
           expect(cb).to.be.calledWith({
             requestHeaders: {
               'X-Foo': 'Bar',
-              'X-Cypress-Request': 'true',
+              'X-Cypress-Is-XHR-Or-Fetch': 'true',
             },
           })
         })

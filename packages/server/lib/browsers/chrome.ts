@@ -410,15 +410,15 @@ const _handlePausedRequests = async (client) => {
 
     /**
      * Unlike the the web extension or Electrons's onBeforeSendHeaders, CDP can discern the difference
-     * between fetch or xhr resource types. Because of this, we set X-Cypress-Request to either
+     * between fetch or xhr resource types. Because of this, we set X-Cypress-Is-XHR-Or-Fetch to either
      * 'xhr' or 'fetch' with CDP so the middleware can assume correct defaults in case credential/resourceTypes
      * are not sent to the server.
      * @see https://chromedevtools.github.io/devtools-protocol/tot/Network/#type-ResourceType
      */
     if (params.resourceType === 'XHR' || params.resourceType === 'Fetch') {
-      debug('add X-Cypress-Request header to: %s', params.request.url)
+      debug('add X-Cypress-Is-XHR-Or-Fetch header to: %s', params.request.url)
       addedHeaders.push({
-        name: 'X-Cypress-Request',
+        name: 'X-Cypress-Is-XHR-Or-Fetch',
         value: params.resourceType.toLowerCase(),
       })
     }

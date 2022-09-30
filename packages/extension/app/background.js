@@ -67,12 +67,12 @@ const connect = function (host, path, extraOpts) {
           /**
            * Unlike CDP, the web extensions onBeforeSendHeaders resourceType cannot discern the difference
            * between fetch or xhr resource types, but classifies both as 'xmlhttprequest'. Because of this,
-           * we set X-Cypress-Request to true if the request is made with 'xhr' or 'fetch' so the
+           * we set X-Cypress-Is-XHR-Or-Fetch to true if the request is made with 'xhr' or 'fetch' so the
            * middleware doesn't incorrectly assume which request type is being sent
            * @see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/webRequest/ResourceType
            */
           ...(details.type === 'xmlhttprequest' ? [{
-            name: 'X-Cypress-Request',
+            name: 'X-Cypress-Is-XHR-Or-Fetch',
             value: 'true',
           }] : []),
         ],
