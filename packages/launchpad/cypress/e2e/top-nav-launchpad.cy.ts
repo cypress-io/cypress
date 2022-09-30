@@ -12,11 +12,7 @@ beforeEach(() => {
   cy.clock(Date.UTC(2021, 9, 30), ['Date'])
 })
 
-describe('App Top Nav Workflows', () => {
-  beforeEach(() => {
-    //cy.scaffoldProject('launchpad')
-  })
-
+describe('Launchpad Top Nav Workflows', () => {
   context('Page Name', () => {
     it('shows the current page name in the top nav', () => {
       cy.scaffoldProject('launchpad')
@@ -316,8 +312,10 @@ describe('App Top Nav Workflows', () => {
 
     context('user fails log in', () => {
       it('logs out user if cloud request returns unauthorized', () => {
+        cy.findBrowsers()
         cy.scaffoldProject('component-tests')
         cy.openProject('component-tests')
+        cy.loginUser()
         cy.visitLaunchpad()
 
         cy.remoteGraphQLIntercept((obj) => {
@@ -327,10 +325,6 @@ describe('App Top Nav Workflows', () => {
 
           return obj.result
         })
-
-        cy.findBrowsers()
-
-        cy.loginUser()
 
         cy.findByTestId(headerBarId).findByRole('button', { name: 'Profile and Log Out', expanded: false }).as('logInButton')
 
