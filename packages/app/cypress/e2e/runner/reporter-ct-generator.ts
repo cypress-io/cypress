@@ -537,7 +537,7 @@ export const generateCtUncaughtErrorTests = (server: 'Webpack' | 'Vite', configF
       uncaught: true,
       originalMessage: 'mount error',
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
       ],
       notInMessage: [
         'It was caused by an unhandled promise rejection',
@@ -550,7 +550,7 @@ export const generateCtUncaughtErrorTests = (server: 'Webpack' | 'Vite', configF
       uncaught: true,
       originalMessage: 'sync error',
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
       ],
       notInMessage: [
         'It was caused by an unhandled promise rejection',
@@ -576,7 +576,7 @@ export const generateCtUncaughtErrorTests = (server: 'Webpack' | 'Vite', configF
       uncaught: true,
       originalMessage: 'async error',
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
       ],
       notInMessage: [
         'It was caused by an unhandled promise rejection',
@@ -589,7 +589,7 @@ export const generateCtUncaughtErrorTests = (server: 'Webpack' | 'Vite', configF
       uncaught: true,
       originalMessage: 'promise rejection',
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
         'It was caused by an unhandled promise rejection',
       ],
       regex: /src\/Errors.jsx/,
@@ -601,7 +601,7 @@ export const generateCtUncaughtErrorTests = (server: 'Webpack' | 'Vite', configF
       column: [3, 5, 12],
       originalMessage: 'bar is not a function',
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
       ],
       notInMessage: [
         'It was caused by an unhandled promise rejection',
@@ -613,7 +613,7 @@ export const generateCtUncaughtErrorTests = (server: 'Webpack' | 'Vite', configF
       column: [3, 6, 12],
       originalMessage: 'bar is not a function',
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
       ],
       notInMessage: [
         'It was caused by an unhandled promise rejection',
@@ -625,7 +625,7 @@ export const generateCtUncaughtErrorTests = (server: 'Webpack' | 'Vite', configF
       column: [20, 21],
       originalMessage: 'Unhandled promise rejection from the spec',
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
         'It was caused by an unhandled promise rejection',
       ],
     })
@@ -646,7 +646,7 @@ export const generateCtUncaughtErrorTests = (server: 'Webpack' | 'Vite', configF
       column: [21, 22],
       originalMessage: 'Unhandled promise rejection from the spec',
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
         'It was caused by an unhandled promise rejection',
       ],
       hasCodeFrame: server !== 'Vite',
@@ -657,7 +657,7 @@ export const generateCtUncaughtErrorTests = (server: 'Webpack' | 'Vite', configF
       column: [21, 22],
       originalMessage: 'Unhandled promise rejection from the spec',
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
         'It was caused by an unhandled promise rejection',
       ],
       hasCodeFrame: server !== 'Vite',
