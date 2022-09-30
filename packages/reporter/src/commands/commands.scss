@@ -380,6 +380,9 @@
     width: 100%;
     -webkit-line-clamp: 50;
     -webkit-box-orient: vertical;
+    display: -webkit-box;
+    -webkit-line-clamp: 50;
+    -webkit-box-orient: vertical;
   }
 
   // Styles for Uncaught Exception
