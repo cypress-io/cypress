@@ -8,6 +8,142 @@ It is used in:
 
 - [`@cypress/react`](https://github.com/cypress-io/cypress/tree/develop/npm/react)
 - [`@cypress/vue`](https://github.com/cypress-io/cypress/tree/develop/npm/vue)
+- [`@cypress/svelte`](https://github.com/cypress-io/cypress/tree/develop/npm/svelte)
+- [`@cypress/angular`](https://github.com/cypress-io/cypress/tree/develop/npm/angular)
+
+## What is a Mount Adapter?
+
+All Component Tests require a component to be **mounted**. This is generally done with a custom command, `cy.mount` by default.
+
+
+### Requirements
+
+All the functionality used to create the first party Mount adapters is available to support third parties adapters. At minimum, a Mount Adapter must:
+
+- Receive a component as the first argument. This could be class, function etc - depends on the framework.
+- Return a Cypress Chainable (for example using `cy.wrap`) that resolves whatever is idiomatic for your framework
+
+In addition, we recommend that Mount Adapters:
+
+- receive a second argument that extends `StyleOptions` from `@cypress/mount-utils`
+- calls `injectStylesBeforeElement` from `@cypress/mount-utils` before mounting the component
+- calls `setupHooks` to register the required lifecycle hooks for `@cypress/mount-utils` to work
+
+This will let the user inject styles `<style>...</style>` and stylesheets `<link rel="stylesheet">`, which is very useful for developing components.
+
+### Example Mount Adapter: Web Components 
+
+Here's a simple yet realistic example of Mount Adapter targeting Web Components. It uses utilities from this package (`@cypress/mount-utils`) This is recommended, so your adapter behaves similar to the first party Mount Adapters.
+
+```ts
+import {
+  ROOT_SELECTOR,
+  setupHooks,
+  injectStylesBeforeElement,
+  getContainerEl,
+  StyleOptions
+} from "@cypress/mount-utils";
+
+Cypress.on("run:start", () => {
+  // Consider doing a check to ensure your adapter only runs in Component Testing mode.
+  if (Cypress.testingType !== "component") {
+    return;
+  }
+
+  Cypress.on("test:before:run", () => {
+    // Do some cleanup from previous test - for example, clear the DOM.
+    getContainerEl().innerHTML = "";
+  });
+});
+
+function maybeRegisterComponent<T extends CustomElementConstructor>(
+  name: string,
+  webComponent: T
+) {
+  // Avoid double-registering a Web Component.
+  if (window.customElements.get(name)) {
+    return;
+  }
+
+  window.customElements.define(name, webComponent);
+}
+
+export function mount(
+  webComponent: CustomElementConstructor,
+  options?: Partial<StyleOptions>
+): Cypress.Chainable {
+  // Get root selector defined in `cypress/support.component-index.html
+  const $root = document.querySelector(ROOT_SELECTOR)!;
+
+  // Change to kebab-case to comply with Web Component naming convention
+  const name = webComponent.name
+    .replace(/([a-z0–9])([A-Z])/g, "$1-$2")
+    .toLowerCase();
+
+  /// Register Web Component
+  maybeRegisterComponent(name, webComponent);
+
+  // Inject user styles before mounting the component
+  injectStylesBeforeElement(options ?? {}, document, getContainerEl())
+
+  // Render HTML containing component.
+  $root.innerHTML = `<${name} id="root"></${name}>`;
+
+  // Log a messsage in the Command Log.
+  Cypress.log({
+    name: "mount",
+    message: [`<${name} ... />`],
+  });
+
+  // Return a `Cypress.Chainable` that returns whatever is idiomatic
+  // in the framework your mount adapter targets.
+  return cy.wrap(document.querySelector("#root"), { log: false });
+}
+
+// Setup Cypress lifecycle hooks. This tears down any styles
+// injected by injectStylesBeforeElement, etc.
+setupHooks();
+```
+
+Usage:
+
+```ts
+// User will generally register a `cy.mount` command in `cypress/support/component.js`:
+
+import { mount } from '@package/cypress-web-components'
+
+Cypress.Commands.add('mount', mount)
+
+// Test
+export class WebCounter extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.innerHTML = `
+      <div>
+        <button>Counter</button>
+      </div>`;
+  }
+}
+
+
+describe('web-component.cy.ts', () => {
+  it('playground', () => {
+    cy.mount(WebCounter, {
+      styles: `
+        button {
+          background: lightblue;
+          color: white;
+        }
+      `
+    })
+  })
+})
+```
+
+For more robust, production ready examples, check out our first party adapters.
 
 ## Compatibility
 
