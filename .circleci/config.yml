@@ -28,6 +28,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - fix-ci-deps
+        - issue-23843_electron_21_upgrade
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -37,6 +38,7 @@ macWorkflowFilters: &darwin-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ 'correct-dashboard-results', << pipeline.git.branch >> ]
+    - equal: [ 'issue-23843_electron_21_upgrade', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -45,6 +47,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ 'issue-23843_electron_21_upgrade', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -63,7 +66,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ linux-arm64, << pipeline.git.branch >> ]
-    - equal: [ 'lmiller/fixing-flake-1', << pipeline.git.branch >> ]
+    - equal: [ 'issue-23843_electron_21_upgrade', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -72,7 +75,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+      - image: cypress/browsers:node16.16.0-chrome106-ff99-edge
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -82,7 +85,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+      - image: cypress/browsers:node16.16.0-chrome106-ff99-edge
         user: node
     environment:
       PLATFORM: linux
@@ -93,7 +96,7 @@ executors:
   mac:
     macos:
       # Executor should have Node >= required version
-      xcode: "13.0.0"
+      xcode: "14.0.0"
     resource_class: macos.x86.medium.gen2
     environment:
       PLATFORM: darwin
@@ -128,7 +131,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "webkit-experimental" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "issue-23843_electron_21_upgrade" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -559,7 +562,7 @@ commands:
               cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
               DEBUG=<<parameters.debug>> \
               CYPRESS_KONFIG_ENV=production \
-              CYPRESS_RECORD_KEY=${TEST_LAUNCHPAD_RECORD_KEY:-$MAIN_RECORD_KEY} \
+              CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
@@ -1732,26 +1735,6 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  ui-components-integration-tests:
-    <<: *defaults
-    steps:
-      - restore_cached_workspace
-      - run:
-          command: yarn build-for-tests
-          working_directory: packages/ui-components
-      - run:
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
-            yarn cypress:run --record --parallel --group ui-components
-          working_directory: packages/ui-components
-      - verify-mocha-results
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
-
   npm-webpack-preprocessor:
     <<: *defaults
     steps:
@@ -1888,6 +1871,20 @@ jobs:
           path: npm/xpath/test_results
       - store-npm-logs
 
+  npm-grep:
+    <<: *defaults
+    resource_class: small
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/grep cy:run
+      - store_test_results:
+          path: npm/grep/test_results
+      - store_artifacts:
+          path: npm/grep/test_results
+      - store-npm-logs
+
   npm-create-cypress-tests:
     <<: *defaults
     resource_class: small
@@ -1905,7 +1902,6 @@ jobs:
 
   npm-cypress-schematic:
     <<: *defaults
-    resource_class: small
     steps:
       - restore_cached_workspace
       - run:
@@ -2488,10 +2484,6 @@ linux-x64-workflow: &linux-x64-workflow
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
           - build
-    - ui-components-integration-tests:
-        context: test-runner:cypress-record-key
-        requires:
-          - build
     - npm-webpack-dev-server:
         requires:
           - system-tests-node-modules-install
@@ -2563,7 +2555,6 @@ linux-x64-workflow: &linux-x64-workflow
           - server-integration-tests
           - server-unit-tests
           - test-kitchensink
-          - ui-components-integration-tests
           - unit-tests
           - unit-tests-release
           - cli-visual-tests
