@@ -34,6 +34,8 @@ const RUNNER_EVENTS = [
   TEST_AFTER_RUN_ASYNC_EVENT,
 ] as const
 
+export type HandlerType = 'error' | 'unhandledrejection'
+
 const duration = (before: Date, after: Date) => {
   return Number(before) - Number(after)
 }
@@ -1068,7 +1070,7 @@ export default {
     }
 
     // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
-    const onSpecError = (handlerType) => (event) => {
+    const onSpecError = (handlerType: HandlerType) => (event) => {
       let { originalErr, err } = $errUtils.errorFromUncaughtEvent(handlerType, event)
 
       debugErrors('uncaught spec error: %o', originalErr)
@@ -1111,8 +1113,18 @@ export default {
       return undefined
     }
 
-    specWindow.addEventListener('error', onSpecError('error'))
-    specWindow.addEventListener('unhandledrejection', onSpecError('unhandledrejection'))
+    // Unlike End To End Testing which has two iframes
+    // - Spec Frame, for the spec.
+    // - AUT Frame, for the user's application.
+    // Component Testing only has one iframe. The AUT Frame is also the Spec Frame,
+    // since we serve the specs from a dev server - they are bundled as a single file.
+    // We don't want to bind two error handlers, or we end up logging errors twice.
+    // For this reason, we conditionally add these event listeners here - Component Testing errors are captured and logged
+    // in contentWindowListeners#bindToListeners in cypress/cy.ts.
+    if (Cypress.testingType === 'e2e') {
+      specWindow.addEventListener('error', onSpecError('error'))
+      specWindow.addEventListener('unhandledrejection', onSpecError('unhandledrejection'))
+    }
 
     // hold onto the _runnables for faster lookup later
     let _test: any = null
@@ -1674,6 +1686,10 @@ export default {
         const logAttrs = _.find(test.commands || [], (log) => log.id === logId)
 
         if (logAttrs) {
+          if (logAttrs._hasBeenCleanedUp) {
+            return { Message: `The command details and snapshot has been cleaned up to reduce the number of tests in memory.` }
+          }
+
           return LogUtils.getConsoleProps(logAttrs)
         }
 

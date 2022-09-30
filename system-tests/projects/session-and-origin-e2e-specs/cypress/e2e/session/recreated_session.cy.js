@@ -1,3 +1,6 @@
+/**
+ * Used in cy-in-cy tests in @packages/app.
+ */
 const stub = Cypress.sinon.stub().callsFake(() => {
   // The validation for t3 will fail, causing the
   // session to be recreated (rather than load from saved)

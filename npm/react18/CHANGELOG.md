@@ -1,3 +1,27 @@
+# [@cypress/react18-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/react18-v1.0.1...@cypress/react18-v1.1.0) (2022-09-30)
+
+
+### Bug Fixes
+
+* cypress/react18 rerender ([#23360](https://github.com/cypress-io/cypress/issues/23360)) ([8b8f20e](https://github.com/cypress-io/cypress/commit/8b8f20eec77d4c0a704aee7f7077dc92dbafb93f))
+
+
+### Features
+
+* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
+
+# [@cypress/react18-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/react18-v1.0.1...@cypress/react18-v1.1.0) (2022-09-29)
+
+
+### Bug Fixes
+
+* cypress/react18 rerender ([#23360](https://github.com/cypress-io/cypress/issues/23360)) ([8b8f20e](https://github.com/cypress-io/cypress/commit/8b8f20eec77d4c0a704aee7f7077dc92dbafb93f))
+
+
+### Features
+
+* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
+
 # [@cypress/react18-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/react18-v1.0.1...@cypress/react18-v1.1.0) (2022-08-30)
 
 
