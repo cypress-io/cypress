@@ -290,7 +290,7 @@ export default function (Commands, Cypress, cy) {
         }
 
         // catch when a cypress command fails in the validate callback to move the queue index
-        cy.state('onCommandFailed', (err, queue, next) => {
+        cy.state('onCommandFailed', (err, queue) => {
           const index = _.findIndex(queue.get(), (command: any) => {
             return (
               _commandToRunAfterValidation
@@ -317,7 +317,7 @@ export default function (Commands, Cypress, cy) {
 
           cy.state('onCommandFailed', null)
 
-          return next()
+          return true
         })
 
         const _commandToRunAfterValidation = cy.then(async () => {
