@@ -62,7 +62,7 @@ subscription CloudViewerAndProject_CheckCloudOrgMembership {
 `
 
 const loginConnectStore = useLoginConnectStore()
-const { setStatus, setLoginError, setUserData, setPromptShown, setFirstOpened } = loginConnectStore
+const { setStatus, setLoginError, setUserData, setPromptShown, setFirstOpened, setBannersState } = loginConnectStore
 
 useSubscription({ query: CloudViewerAndProject_CheckCloudOrgMembershipDocument })
 
@@ -87,6 +87,10 @@ watchEffect(() => {
 
   if (savedState?.firstOpened) {
     setFirstOpened(savedState.firstOpened)
+  }
+
+  if (savedState?.banners) {
+    setBannersState(savedState.banners)
   }
 
   const isLoggedIn = !!query.data.value?.cachedUser?.id || !!query.data.value?.cloudViewer?.id
@@ -115,17 +119,5 @@ watchEffect(() => {
   setLoginError(error)
   setUserData((query.data.value?.cloudViewer ?? query.data.value?.cachedUser) ?? undefined)
 })
-
-// watch(() => loginConnectStore.userStatus, (newVal) => {
-//   if (typeof newVal === 'object') {
-//     Object.entries(newVal).forEach((item) => {
-//       const [key, val] = item
-
-//       if (val !== loginConnectStore[key]) {
-//         setStatus(key, val)
-//       }
-//     })
-//   }
-// })
 
 </script>
