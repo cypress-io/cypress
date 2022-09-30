@@ -27,5 +27,5 @@
     "@angular/compiler-cli": "^15.0.0-next.4",
     "typescript": "~4.8.4"
   },
-  "projectFixtureDirectory": "angular-15"
+  "projectFixtureDirectory": "angular"
 }

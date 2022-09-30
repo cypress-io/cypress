@@ -204,7 +204,11 @@ export async function getAngularJson (projectRoot: string): Promise<AngularJson>
 
 function createFakeContext (projectRoot: string, defaultProjectConfig: Cypress.AngularDevServerProjectConfig) {
   const logger = {
-    createChild: () => ({}),
+    createChild: () => {
+      return {
+        warn: () => {},
+      }
+    },
   }
 
   const context = {
