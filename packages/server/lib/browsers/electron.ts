@@ -387,6 +387,13 @@ export = {
       const requestModifications = {
         requestHeaders: {
           ...details.requestHeaders,
+          /**
+           * Unlike CDP, Electrons's onBeforeSendHeaders resourceType cannot discern the difference
+           * between fetch or xhr resource types, but classifies both as 'xhr'. Because of this,
+           * we set X-Cypress-Request to true if the request is made with 'xhr' or 'fetch' so the
+           * middleware doesn't incorrectly assume which request type is being sent
+           * @see https://www.electronjs.org/docs/latest/api/web-request#webrequestonbeforesendheadersfilter-listener
+           */
           ...(details.resourceType === 'xhr') ? {
             'X-Cypress-Request': 'true',
           } : {},
