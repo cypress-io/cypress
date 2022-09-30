@@ -5,7 +5,7 @@
       :gql="props.gql"
       :model-value="!loginConnectStore.isLoggedIn || keepLoginOpen"
       :utm-medium="loginConnectStore.utmMedium"
-      :show-connect-button-after-login="!loginConnectStore.isProjectConnected"
+      :show-connect-button-after-login="loginConnectStore.isConfigLoaded && !loginConnectStore.isProjectConnected"
       @connect-project="handleConnectProject"
       @cancel="handleCancel"
       @loggedin="handleLoginSuccess(loginConnectStore.isProjectConnected)"

@@ -27,6 +27,7 @@ fragment CloudViewerAndProject on Query {
   currentProject {
     id
     config
+    isFullConfigReady
     savedState
     cloudProject {
       __typename
@@ -93,6 +94,7 @@ watchEffect(() => {
   // Not having this check can cause a brief flicker of the 'Create Org' banner while org data is loading
   const isOrganizationLoaded = !!query.data.value?.cloudViewer?.firstOrganization
   const isMemberOfOrganization = (query.data.value?.cloudViewer?.firstOrganization?.nodes?.length ?? 0) > 0
+  const isConfigLoaded = !!query.data.value?.currentProject?.isFullConfigReady
   const isProjectConnected = !!cloudProjectId.value && query.data.value?.currentProject?.cloudProject?.__typename === 'CloudProject'
   const hasRecordedRuns = query.data.value?.currentProject?.cloudProject?.__typename === 'CloudProject' && (query.data.value?.currentProject.cloudProject?.runs?.nodes?.length ?? 0) > 0
   const error = ['AUTH_COULD_NOT_LAUNCH_BROWSER', 'AUTH_ERROR_DURING_LOGIN', 'AUTH_COULD_NOT_LAUNCH_BROWSER'].includes(query.data.value?.authState?.name ?? '')
@@ -100,6 +102,8 @@ watchEffect(() => {
   if (isProjectConnected !== loginConnectStore.isProjectConnected) {
     setStatus('isProjectConnected', isProjectConnected)
   }
+
+  setStatus('isConfigLoaded', isConfigLoaded)
 
   if (isLoggedIn !== loginConnectStore.isLoggedIn) {
     setStatus('isLoggedIn', isLoggedIn)

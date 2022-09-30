@@ -10,6 +10,7 @@ export interface LoginConnectState {
   utmMedium: string
   isLoggedIn: boolean
   isProjectConnected: boolean
+  isConfigLoaded: boolean
   isOrganizationLoaded: boolean
   isMemberOfOrganization: boolean
   hasNoRecordedRuns: boolean
@@ -26,7 +27,7 @@ export interface LoginConnectState {
 
 export type UserStatus = 'isLoggedOut' | 'needsOrgConnect' | 'needsProjectConnect' | 'needsRecordedRun' | 'noActionableState'
 
-export type StatusField = 'isLoggedIn' | 'isProjectConnected' | 'isOrganizationLoaded' | 'isMemberOfOrganization' | 'hasRecordedRuns'
+export type StatusField = 'isLoggedIn' | 'isProjectConnected' | 'isConfigLoaded' | 'isOrganizationLoaded' | 'isMemberOfOrganization' | 'hasRecordedRuns'
 
 export const useLoginConnectStore = defineStore({
   id: 'loginConnect',
@@ -37,6 +38,7 @@ export const useLoginConnectStore = defineStore({
       utmMedium: '',
       isLoggedIn: false,
       isProjectConnected: false,
+      isConfigLoaded: false,
       isOrganizationLoaded: false,
       isMemberOfOrganization: false,
       hasNoRecordedRuns: false,
