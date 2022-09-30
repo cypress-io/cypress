@@ -255,16 +255,14 @@ const cloudData = computed(() => ([props.gql.cloudViewer, props.gql.cachedUser, 
 const { isAllowedFeature } = usePromptManager()
 
 watch(cloudData, () => {
-  if (!isAllowedFeature('specsListBanner', 'base')) {
+  if (!isAllowedFeature('specsListBanner')) {
     return
   }
 
-  const { userStatusMatches } = loginConnectStore
-
-  showRecordBanner.value = isAllowedFeature('specsListBanner', 'needsRecordedRun') && !hasBannerBeenDismissed(BannerIds.ACI_082022_RECORD) && userStatusMatches('needsRecordedRun')
-  showConnectBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_CONNECT_PROJECT) && userStatusMatches('needsProjectConnect')
-  showCreateOrganizationBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_CREATE_ORG) && userStatusMatches('needsOrgConnect')
-  showLoginBanner.value = !hasBannerBeenDismissed(BannerIds.ACI_082022_LOGIN) && userStatusMatches('isLoggedOut')
+  showRecordBanner.value = loginConnectStore.userStatus === 'needsRecordedRun'
+  showConnectBanner.value = loginConnectStore.userStatus === 'needsProjectConnect'
+  showCreateOrganizationBanner.value = loginConnectStore.userStatus === 'needsOrgConnect'
+  showLoginBanner.value = loginConnectStore.userStatus === 'isLoggedOut'
 
   hasRecordBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_RECORD)
   hasConnectBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_CONNECT_PROJECT)
@@ -316,12 +314,6 @@ watchEffect(() => {
     cohorts.connectProject = getCohortForBanner(BannerIds.ACI_082022_CONNECT_PROJECT)
   }
 })
-
-function hasBannerBeenDismissed (bannerId: string) {
-  const bannersState = (props.gql.currentProject?.savedState as AllowedState)?.banners
-
-  return !!bannersState?._disabled || !!bannersState?.[bannerId]?.dismissed
-}
 
 function hasBannerBeenShown (bannerId: string) {
   const bannersState = (props.gql.currentProject?.savedState as AllowedState)?.banners

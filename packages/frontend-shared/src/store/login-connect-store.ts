@@ -1,3 +1,4 @@
+import type { BannerState } from '@packages/types'
 import { defineStore } from 'pinia'
 
 interface LoginUserData {
@@ -18,9 +19,15 @@ export interface LoginConnectState {
   loginError: boolean
   userData?: LoginUserData
   firstOpened?: number
+  latestBannerShownTime?: number
+  hasNonExampleSpec: boolean
   promptsShown: {
     ci1?: number
     loginModalRecord?: number
+  }
+  bannersState: {
+    _disabled?: boolean
+    [key: string]: BannerState | boolean | undefined
   }
 }
 
@@ -44,8 +51,11 @@ export const useLoginConnectStore = defineStore({
       hasRecordedRuns: false,
       loginError: false,
       userData: undefined,
+      hasNonExampleSpec: true, // TODO: initialize as false and set the real value
       promptsShown: {},
       firstOpened: undefined,
+      bannersState: {},
+      latestBannerShownTime: undefined,
     }
   },
   actions: {
@@ -73,6 +83,9 @@ export const useLoginConnectStore = defineStore({
     setFirstOpened (timestamp: number) {
       this.firstOpened = timestamp
     },
+    setBannersState (banners: BannerState) {
+      this.bannersState = banners
+    },
   },
   getters: {
     userStatus (state) {
@@ -93,6 +106,9 @@ export const useLoginConnectStore = defineStore({
     },
     userStatusMatches () {
       return (status: UserStatus) => this.userStatus === status
+    },
+    projectStatus () {
+      //TODO: look at projectConnectionStatus in SpecHeaderCloudDataTooltip
     },
   },
 })
