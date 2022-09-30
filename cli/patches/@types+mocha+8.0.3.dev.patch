@@ -2095,7 +2095,6 @@ index 8d4c6db..307f232 100644
 -        private _error;
 -
 -        type: "hook";
--        originalTitle?: string; // added by Runner
 -
 -        /**
 -         * Get the test `err`.
@@ -4896,7 +4895,6 @@ index 8d4c6db..307f232 100644
 +//z         private _error;
 +
 +//z         type: "hook";
-+//z         originalTitle?: string; // added by Runner
 +
 +//z         /**
 +//z          * Get the test `err`.

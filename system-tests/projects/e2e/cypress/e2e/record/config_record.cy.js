@@ -13,8 +13,17 @@ describe('record pass', { defaultCommandTimeout: 1234 }, () => {
   it('is pending')
 
   // eslint-disable-next-line
-  it.skip('is pending due to .skip', () => {})
+  it.skip('is pending due to .skip', () => {
+    console.log('stuff')
+  })
+
   it('is skipped due to browser', { browser: 'edge' }, () => {})
 })
 
+describe('record pass', { browser: 'edge', requestTimeout: 5500 }, () => {
+  it('is skipped due to browser at suite level', { baseUrl: '' }, () => {})
+  it('is also skipped due to browser at suite level', { requestTimeout: 100 }, () => {
+    cy.get('div')
+  })
+})
 // add retries and test in snapshot / assertion

@@ -14,15 +14,17 @@ import type { Emissions } from '@packages/types'
 const mochaCtxKeysRe = /^(_runnable|test)$/
 const betweenQuotesRe = /\"(.+?)\"/
 
-const HOOKS = 'beforeAll beforeEach afterEach afterAll'.split(' ')
+const HOOKS = ['beforeAll', 'beforeEach', 'afterEach', 'afterAll'] as const
 const TEST_BEFORE_RUN_ASYNC_EVENT = 'runner:test:before:run:async'
 // event fired before hooks and test execution
 const TEST_BEFORE_RUN_EVENT = 'runner:test:before:run'
 const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
 const TEST_AFTER_RUN_ASYNC_EVENT = 'runner:runnable:after:run:async'
 
-const RUNNABLE_LOGS = 'routes agents commands hooks'.split(' ')
-const RUNNABLE_PROPS = '_testConfig id order title _titlePath root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file originalTitle invocationDetails final currentRetry retries _slow'.split(' ')
+const RUNNABLE_LOGS = ['routes', 'agents', 'commands', 'hooks'] as const
+const RUNNABLE_PROPS = [
+  '_testConfig', 'id', 'order', 'title', '_titlePath', 'root', 'hookName', 'hookId', 'err', 'state', 'failedFromHookId', 'body', 'speed', 'type', 'duration', 'wallClockStartedAt', 'wallClockDuration', 'timings', 'file', 'originalTitle', 'invocationDetails', 'final', 'currentRetry', 'retries', '_slow',
+] as const
 
 const debug = debugFn('cypress:driver:runner')
 const debugErrors = debugFn('cypress:driver:errors')
@@ -145,11 +147,14 @@ const setWallClockDuration = (test) => {
 // tests to an id-based object which prevents
 // us from recursively iterating through every
 // parent since we could just return the found test
-const wrap = (runnable) => {
+const wrap = (runnable): Record<string, any> | null => {
   return $utils.reduceProps(runnable, RUNNABLE_PROPS)
 }
 
-const wrapAll = (runnable): any => {
+// Reduce runnable down to its props and collections.
+// Sent the the Reporter to populate command log
+// and send to the Dashboard when in record mode.
+const wrapAll = (runnable): Record<string, any> => {
   return _.extend(
     {},
     $utils.reduceProps(runnable, RUNNABLE_PROPS),
@@ -563,11 +568,7 @@ const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, getO
       prevAttempts = []
 
       if (i.prevAttempts) {
-        prevAttempts = _.map(i.prevAttempts, (test) => {
-          // reduce this runnable down to its props
-          // and collections
-          return wrapAll(test)
-        })
+        prevAttempts = _.map(i.prevAttempts, wrapAll)
       }
 
       _.extend(runnable, i)
@@ -576,8 +577,6 @@ const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, getO
     // merge all hooks into single array
     runnable.hooks = condenseHooks(runnable, getHookId)
 
-    // reduce this runnable down to its props
-    // and collections
     const wrappedRunnable = wrapAll(runnable)
 
     if (runnable.type === 'test') {
@@ -585,10 +584,14 @@ const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, getO
 
       if (_.size(cfg)) {
         runnable._testConfig = cfg
-        wrappedRunnable._testConfig = cfg
+        wrappedRunnable._testConfig = cfg.unverifiedTestConfig || {}
       }
 
-      wrappedRunnable._titlePath = runnable.titlePath()
+      wrappedRunnable._titlePath = runnable.titlePath().map((title) => {
+        const BROWSER_SKIP_TITLE = ' (skipped due to browser)'
+
+        return title.replace(BROWSER_SKIP_TITLE, '')
+      })
     }
 
     if (prevAttempts) {

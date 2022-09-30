@@ -735,15 +735,11 @@ const createRunAndRecordSpecs = (options = {}) => {
         const tests = _.chain(r[0])
         .uniqBy('id')
         .map((v) => {
-          if (v.originalTitle) {
-            v._titlePath.splice(-1, 1, v.originalTitle)
-          }
-
           return _.pick({
             ...v,
             clientId: v.id,
-            config: v._testConfig?.unverifiedTestConfig || null,
             title: v._titlePath,
+            config: v._testConfig || null,
             hookIds: v.hooks.map((hook) => hook.hookId),
           },
           'clientId', 'body', 'title', 'config', 'hookIds')

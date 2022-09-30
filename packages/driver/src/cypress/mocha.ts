@@ -35,11 +35,19 @@ const suiteAfterEach = Suite.prototype.afterEach
 delete (window as any).mocha
 delete (window as any).Mocha
 
-function invokeFnWithOriginalTitle (ctx, originalTitle, mochaArgs, fn, _testConfig) {
+function invokeOverride (ctx, fnType, mochaArgs, fn, testCallback, _testConfig?: any) {
   const ret = fn.apply(ctx, mochaArgs)
 
-  ret._testConfig = _testConfig
-  ret.originalTitle = originalTitle
+  // attached testConfigOverrides will execute before `runner:test:before:run` event
+  if (_testConfig) {
+    ret._testConfig = _testConfig
+  }
+
+  if (fnType === 'Test') {
+    // persist the original callback so we can send it to the dashboard
+    // to prevent it from being registered as a modified test
+    ret.body = testCallback.toString()
+  }
 
   return ret
 }
@@ -66,40 +74,40 @@ function overloadMochaFnForConfig (fnName, specWindow) {
 
       const origFn = subFn ? _fn[subFn] : _fn
 
+      let testCallback = args[1] || ''
+
       if (args.length > 2 && _.isObject(args[1])) {
         const _testConfig = _.extend({}, args[1]) as any
 
         const mochaArgs = [args[0], args[2]]
+        const originalTitle = mochaArgs[0]
+        let testCallback = mochaArgs[1]
 
         const configMatchesBrowser = _testConfig.browser == null || Cypress.isBrowser(_testConfig.browser, `${fnType} config value \`{ browser }\``)
 
         if (!configMatchesBrowser) {
-          // TODO: this would mess up the dashboard since it would be registered as a new test
-          const originalTitle = mochaArgs[0]
+          // persist the original title so we can send it to the dashboard
+          // without it being registered as a new test vs a pending test
 
           mochaArgs[0] = `${originalTitle} (skipped due to browser)`
 
-          // TODO: weird edge case where you have an .only but also skipped the test due to the browser
+          // skip test at run-time when test is marked with .only but should also be skipped the test due to the browser
           if (subFn === 'only') {
             mochaArgs[1] = function () {
               this.skip()
             }
 
-            return invokeFnWithOriginalTitle(this, originalTitle, mochaArgs, origFn, _testConfig)
+            return invokeOverride(this, fnType, mochaArgs, origFn, testCallback, _testConfig)
           }
 
-          return invokeFnWithOriginalTitle(this, originalTitle, mochaArgs, _fn['skip'], _testConfig)
+          // skip test with .skip func to ignore the test case and not run it
+          return invokeOverride(this, fnType, mochaArgs, _fn['skip'], testCallback, _testConfig)
         }
 
-        const ret = origFn.apply(this, mochaArgs)
-
-        // attached testConfigOverrides will execute before `runner:test:before:run` event
-        ret._testConfig = _testConfig
-
-        return ret
+        return invokeOverride(this, fnType, mochaArgs, origFn, testCallback, _testConfig)
       }
 
-      return origFn.apply(this, args)
+      return invokeOverride(this, fnType, args, origFn, testCallback)
     }
   }
 
