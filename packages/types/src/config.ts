@@ -55,5 +55,4 @@ export type BannersState = {
   [bannerId in BannerId]?: BannerState
 } & {
   _disabled?: boolean
-  dismissed?: boolean
 }

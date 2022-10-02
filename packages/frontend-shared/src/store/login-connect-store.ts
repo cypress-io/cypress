@@ -1,4 +1,4 @@
-import type { BannerState } from '@packages/types'
+import type { BannersState } from '@packages/types'
 import { defineStore } from 'pinia'
 
 interface LoginUserData {
@@ -26,10 +26,7 @@ export interface LoginConnectState {
     ci1?: number
     loginModalRecord?: number
   }
-  bannersState: {
-    _disabled?: boolean
-    [key: string]: BannerState | boolean | undefined | number
-  }
+  bannersState: BannersState
 }
 
 export type UserStatus = 'isLoggedOut' | 'needsOrgConnect' | 'needsProjectConnect' | 'needsRecordedRun' | 'noActionableState'
@@ -63,7 +60,6 @@ export const useLoginConnectStore = defineStore({
   actions: {
     openLoginConnectModal ({ utmMedium }: { utmMedium: string }) {
       this.isLoginConnectOpen = true
-      // TODO: type for all valid utm_medium values?
       this.utmMedium = utmMedium
     },
     closeLoginConnectModal () {
@@ -85,7 +81,7 @@ export const useLoginConnectStore = defineStore({
     setFirstOpened (timestamp: number) {
       this.firstOpened = timestamp
     },
-    setBannersState (banners: BannerState) {
+    setBannersState (banners: BannersState) {
       this.bannersState = banners
     },
   },
@@ -110,7 +106,7 @@ export const useLoginConnectStore = defineStore({
       return (status: UserStatus) => this.userStatus === status
     },
     projectStatus () {
-      //TODO: look at projectConnectionStatus in SpecHeaderCloudDataTooltip
+      // TODO: look at projectConnectionStatus in SpecHeaderCloudDataTooltip
     },
   },
 })
