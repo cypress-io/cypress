@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "10.8.0",
+  "version": "10.9.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -59,7 +59,7 @@
     "test-scripts": "mocha -r packages/ts/register --reporter spec 'scripts/unit/**/*spec.js'",
     "test-scripts-watch": "yarn test-scripts --watch --watch-extensions 'ts,js'",
     "pretest-unit": "yarn ensure-deps",
-    "test-unit": "lerna exec yarn test-unit --ignore \"'{@packages/{driver,root,static,web-config,net-stubbing,rewriter,ui-components},@cypress/{webpack-dev-server,eslint-plugin-dev}}'\"",
+    "test-unit": "lerna exec yarn test-unit --ignore \"'{@packages/{driver,root,static,web-config,net-stubbing,rewriter},@cypress/{webpack-dev-server,eslint-plugin-dev}}'\"",
     "pretest-watch": "yarn ensure-deps",
     "test-watch": "lerna exec yarn test-watch --ignore \"'@packages/{driver,root,static,web-config}'\"",
     "type-check": "yarn lerna exec yarn type-check --scope @tooling/system-tests && node scripts/type_check",
@@ -90,7 +90,6 @@
     "@octokit/auth-app": "3.6.1",
     "@octokit/core": "3.6.0",
     "@percy/cli": "1.2.0",
-    "@percy/cypress": "^3.1.1",
     "@semantic-release/changelog": "5.0.1",
     "@semantic-release/git": "9.0.0",
     "@types/bluebird": "3.5.29",
@@ -142,7 +141,7 @@
     "dedent": "^0.7.0",
     "del": "3.0.0",
     "detect-port": "^1.3.0",
-    "electron": "19.0.8",
+    "electron": "21.0.0",
     "electron-builder": "^22.13.1",
     "electron-notarize": "^1.1.1",
     "enzyme-adapter-react-16": "1.12.1",
@@ -187,7 +186,7 @@
     "minimist": "1.2.6",
     "mocha": "3.5.3",
     "mocha-banner": "1.1.2",
-    "mocha-junit-reporter": "2.0.0",
+    "mocha-junit-reporter": "2.1.0",
     "mocha-multi-reporters": "1.1.7",
     "mock-fs": "5.1.1",
     "p-defer": "^3.0.0",
@@ -218,7 +217,7 @@
     "yarn-deduplicate": "3.1.0"
   },
   "engines": {
-    "node": ">=16.14.2",
+    "node": ">=16.16.0",
     "yarn": ">=1.17.3"
   },
   "productName": "Cypress",

@@ -3,7 +3,7 @@ import { registerMountFn, addVueCommand } from './common'
 import '../../src/styles/shared.scss'
 import 'virtual:windi.css'
 import 'cypress-real-events/support'
-import { installCustomPercyCommand } from '@packages/ui-components/cypress/support/customPercyCommand'
+import { installCustomPercyCommand } from './customPercyCommand'
 import { addNetworkCommands } from './onlineNetwork'
 import { GQLStubRegistry } from './mock-graphql/stubgql-Registry'
 

@@ -10,7 +10,11 @@ interface CollectableEvent {
   cohort?: string
 }
 
-const cloudEnv = (process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV || 'staging') as 'development' | 'staging' | 'production'
+/**
+ * Defaults to staging when doing development. To override to production for development,
+ * explicitly set process.env.CYPRESS_INTERNAL_ENV to 'production`
+ */
+const cloudEnv = (process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV || 'production') as 'development' | 'staging' | 'production'
 
 export class EventCollectorActions {
   constructor (private ctx: DataContext) {
@@ -23,7 +27,11 @@ export class EventCollectorActions {
 
       await this.ctx.util.fetch(
         `${dashboardUrl}/anon-collect`,
-        { method: 'POST', body: JSON.stringify(event) },
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(event),
+        },
       )
 
       debug(`Recorded event: %o`, event)
