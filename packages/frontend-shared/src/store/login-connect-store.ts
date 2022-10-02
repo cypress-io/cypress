@@ -28,7 +28,7 @@ export interface LoginConnectState {
   }
   bannersState: {
     _disabled?: boolean
-    [key: string]: BannerState | boolean | undefined
+    [key: string]: BannerState | boolean | undefined | number
   }
 }
 
