@@ -31,7 +31,7 @@ export interface LoginConnectState {
 
 export type UserStatus = 'isLoggedOut' | 'needsOrgConnect' | 'needsProjectConnect' | 'needsRecordedRun' | 'noActionableState'
 
-export type StatusField = 'isLoggedIn' | 'isProjectConnected' | 'isConfigLoaded' | 'isOrganizationLoaded' | 'isMemberOfOrganization' | 'hasRecordedRuns'
+export type LoginConnectField = 'isLoggedIn' | 'isProjectConnected' | 'isConfigLoaded' | 'isOrganizationLoaded' | 'isMemberOfOrganization' | 'hasRecordedRuns'
 
 export const useLoginConnectStore = defineStore({
   id: 'loginConnect',
@@ -66,7 +66,7 @@ export const useLoginConnectStore = defineStore({
       this.isLoginConnectOpen = false
       this.utmMedium = ''
     },
-    setStatus (name: StatusField, newVal: boolean) {
+    setStatus (name: LoginConnectField, newVal: boolean) {
       this[name] = newVal
     },
     setLoginError (error) {
@@ -105,8 +105,13 @@ export const useLoginConnectStore = defineStore({
     userStatusMatches () {
       return (status: UserStatus) => this.userStatus === status
     },
+    userStatusIsNot () {
+      return (status: UserStatus) => this.userStatus !== status
+    },
     projectStatus () {
       // TODO: look at projectConnectionStatus in SpecHeaderCloudDataTooltip
     },
   },
 })
+
+export type LoginConnectStore = ReturnType<typeof useLoginConnectStore>

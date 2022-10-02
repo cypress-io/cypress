@@ -96,7 +96,7 @@ describe('isAllowedFeature', () => {
             return
           }
 
-          it(`returns false when ${ status } banner has been dismissed`, () => {
+          it(`returns false for status ${ status }`, () => {
             setUpStatus(status)
 
             // simulate banner for current status having been dismissed
@@ -104,6 +104,23 @@ describe('isAllowedFeature', () => {
               [bannerIds[status]]: {
                 'dismissed': Date.now() - interval('1 day'),
               },
+            })
+
+            const result = isAllowedFeature('specsListBanner', loginConnectStore)
+
+            expect(result).to.be.false
+          })
+        })
+      })
+
+      context('banners have been disabled for testing', () => {
+        userStatuses.forEach((status) => {
+          it(`returns false for status ${ status }`, () => {
+            setUpStatus(status)
+
+            // _disabled is used as a helper in tests
+            loginConnectStore.setBannersState({
+              _disabled: true,
             })
 
             const result = isAllowedFeature('specsListBanner', loginConnectStore)
