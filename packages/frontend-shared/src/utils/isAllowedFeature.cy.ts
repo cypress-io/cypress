@@ -110,7 +110,6 @@ describe('isAllowedFeature', () => {
           it(`returns false for status ${ status }`, () => {
             setUpStatus(status)
 
-            // _disabled is used as a helper in tests
             loginConnectStore.setBannersState({
               _disabled: true,
             })
