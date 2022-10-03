@@ -4,11 +4,15 @@ import $dom from '../../../dom'
 import $elements from '../../../dom/elements'
 import $errUtils from '../../../cypress/error_utils'
 import $utils from '../../../cypress/utils'
+import type { Log } from '../../../cypress/log'
 import { resolveShadowDomInclusion } from '../../../cypress/shadow_dom_utils'
 import { getAliasedRequests, isDynamicAliasingPossible } from '../../net-stubbing/aliasing'
 import { aliasRe, aliasIndexRe } from '../../aliases'
 
-type GetOptions = Partial<Cypress.Loggable & Cypress.Withinable & Cypress.Shadow & Cypress.Timeoutable & Cypress.Withinable>
+type GetOptions = Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow & {
+  _log?: Log
+}>
+
 type ContainsOptions = Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.CaseMatchable & Cypress.Shadow>
 type ShadowOptions = Partial<Cypress.Loggable & Cypress.Timeoutable>
 
@@ -158,7 +162,7 @@ export default (Commands, Cypress, cy, state) => {
       })
     }
 
-    const log = userOptions.log !== false && (this.get('_log') || Cypress.log({
+    const log = userOptions.log !== false && (userOptions._log || Cypress.log({
       message: selector,
       type: 'parent',
       timeout: userOptions.timeout,
@@ -267,8 +271,6 @@ export default (Commands, Cypress, cy, state) => {
     // and any submit inputs with the attributeContainsWord selector
     const selector = $dom.getContainsSelector(text, filter, { matchCase: true, ...userOptions })
 
-    const getOptions = _.extend({}, userOptions) as GetOptions
-
     const log = userOptions.log !== false && Cypress.log({
       message: $utils.stringify(_.compact([filter, text])),
       type: this.hasPreviouslyLinkedCommand ? 'child' : 'parent',
@@ -276,8 +278,7 @@ export default (Commands, Cypress, cy, state) => {
       consoleProps: () => ({}),
     })
 
-    this.set('_log', log)
-
+    const getOptions = _.extend({ _log: log }, userOptions) as GetOptions
     const getFn = cy.now('get', selector, getOptions)
 
     const getPhrase = () => {
