@@ -55,7 +55,7 @@ describe('lib/cohort', () => {
 
       return cohorts.set(cohortTest).then(() => {
         return cohorts.getByName(cohortTest.name).then((cohort) => {
-          expect(cohort).to.eq(cohortTest)
+          expect(cohort).to.deep.eq(cohortTest)
         })
       })
     })

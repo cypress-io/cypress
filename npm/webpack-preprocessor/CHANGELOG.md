@@ -1,3 +1,17 @@
+# [@cypress/webpack-preprocessor-v5.13.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.12.2...@cypress/webpack-preprocessor-v5.13.0) (2022-09-29)
+
+
+### Bug Fixes
+
+* support type: module in Node.js 16.17.0+ and 18.6.0+ ([#23637](https://github.com/cypress-io/cypress/issues/23637)) ([b6dad0a](https://github.com/cypress-io/cypress/commit/b6dad0a674279936a9816939963bbf129647cee7))
+* Webpack 5 automatic publicPath error ([#23760](https://github.com/cypress-io/cypress/issues/23760)) ([823ffd0](https://github.com/cypress-io/cypress/commit/823ffd0ca920c82170705d9abfa60592b8f3979a))
+
+
+### Features
+
+* Support dependencies in cy.origin() callback ([#23283](https://github.com/cypress-io/cypress/issues/23283)) ([c48b80a](https://github.com/cypress-io/cypress/commit/c48b80a0df14e9c22f17d1174372efd6a669b055))
+* **webpack-preprocessor:** add support for cy.origin() dependencies ([#24006](https://github.com/cypress-io/cypress/issues/24006)) ([646f22a](https://github.com/cypress-io/cypress/commit/646f22add990e4223815ee2e6deac35c9455405c))
+
 # [@cypress/webpack-preprocessor-v5.12.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.12.1...@cypress/webpack-preprocessor-v5.12.2) (2022-08-15)
 
 

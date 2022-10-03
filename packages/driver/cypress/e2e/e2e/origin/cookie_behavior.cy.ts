@@ -41,7 +41,6 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
   }
 
   beforeEach(() => {
-    // FIXME: clearing cookies in the browser currently does not clear cookies in the server-side cookie jar
     cy.clearCookies()
   })
 
@@ -182,14 +181,10 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               })
             })
 
-            // FIXME: @see https://github.com/cypress-io/cypress/issues/23551
             it('does NOT attach same-site cookies to request if "omit" credentials option is specified', () => {
               cy.intercept(`${originUrl}/test-request`, (req) => {
-                // current expected assertion with server side cookie jar is set from previous test
-                expect(req['headers']['cookie']).to.equal('foo1=bar1')
+                expect(req['headers']['cookie']).to.equal(undefined)
 
-                // future expected assertion, regardless of server side cookie jar
-                // expect(req['headers']['cookie']).to.equal('')
                 req.reply({
                   statusCode: 200,
                 })
@@ -214,14 +209,10 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               })
             })
 
-            // FIXME: @see https://github.com/cypress-io/cypress/issues/23551
             it('does NOT set same-site cookies from request if "omit" credentials option is specified', () => {
               cy.intercept(`${originUrl}/test-request`, (req) => {
-                // current expected assertion with server side cookie jar is set from previous test
-                expect(req['headers']['cookie']).to.equal('foo1=bar1')
+                expect(req['headers']['cookie']).to.equal(undefined)
 
-                // future expected assertion, regardless of server side cookie jar
-                // expect(req['headers']['cookie']).to.equal('')
                 req.reply({
                   statusCode: 200,
                 })
@@ -250,10 +241,9 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
 
         describe('same site / cross origin', () => {
           describe('XMLHttpRequest', () => {
-            // withCredentials option should have no effect on same-site requests, even though the request is cross-origin
-            it('sets and attaches same-site cookies to request, even though request is cross-origin', () => {
+            it('does NOT set and attach same-site cookies to request when the request is cross-origin', () => {
               cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request`, (req) => {
-                expect(req['headers']['cookie']).to.equal('foo1=bar1')
+                expect(req['headers']['cookie']).to.equal(undefined)
 
                 req.reply({
                   statusCode: 200,
@@ -283,17 +273,107 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
                 cy.wait('@cookieCheck')
               })
             })
+
+            it('sets cookie on same-site request if withCredentials is true, but does not attach to same-site request if withCredentials is false', () => {
+              cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request`, (req) => {
+                expect(req['headers']['cookie']).to.equal(undefined)
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit('/fixtures/primary-origin.html')
+              cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+              // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+              cy.origin(originUrl, {
+                args: {
+                  scheme,
+                  crossOriginPort,
+                },
+              }, ({ scheme, crossOriginPort }) => {
+                cy.window().then((win) => {
+                  // do NOT set the cookie in the browser
+                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'xmlHttpRequest', true))
+                })
+
+                // though request is cross origin, site should have access directly to cookie because it is same site
+                // assert cookie value is actually set in the browser
+                // current expected assertion. NOTE: This SHOULD be consistent
+                if (Cypress.isBrowser('firefox')) {
+                  // firefox actually sets the cookie correctly
+                  cy.getCookie('foo1').its('value').should('equal', 'bar1')
+                } else {
+                  cy.getCookie('foo1').its('value').should('equal', null)
+                }
+
+                // FIXME: Ideally, browser should have access to this cookie. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
+                // future expected assertion
+                // cy.getCookie('foo1').its('value').should('equal', 'bar1')
+
+                cy.window().then((win) => {
+                  // but send the cookies in the request
+                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request`, 'xmlHttpRequest'))
+                })
+
+                cy.wait('@cookieCheck')
+              })
+            })
+
+            it('sets cookie on same-site request if withCredentials is true, and attaches to same-site request if withCredentials is true', () => {
+              cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, (req) => {
+                expect(req['headers']['cookie']).to.equal('foo1=bar1')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit('/fixtures/primary-origin.html')
+              cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+              // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+              cy.origin(originUrl, {
+                args: {
+                  scheme,
+                  crossOriginPort,
+                },
+              }, ({ scheme, crossOriginPort }) => {
+                cy.window().then((win) => {
+                  // do NOT set the cookie in the browser
+                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'xmlHttpRequest', true))
+                })
+
+                // though request is cross origin, site should have access directly to cookie because it is same site
+                // assert cookie value is actually set in the browser
+                // current expected assertion. NOTE: This SHOULD be consistent
+                if (Cypress.isBrowser('firefox')) {
+                  // firefox actually sets the cookie correctly
+                  cy.getCookie('foo1').its('value').should('equal', 'bar1')
+                } else {
+                  cy.getCookie('foo1').its('value').should('equal', null)
+                }
+
+                // FIXME: Ideally, browser should have access to this cookie. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
+                // future expected assertion
+                // cy.getCookie('foo1').its('value').should('equal', 'bar1')
+
+                cy.window().then((win) => {
+                  // but send the cookies in the request
+                  return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'xmlHttpRequest', true))
+                })
+
+                cy.wait('@cookieCheck')
+              })
+            })
           })
 
           describe('fetch', () => {
-            // FIXME: @see https://github.com/cypress-io/cypress/issues/23551
             it('does not set same-site cookies from request nor send same-site cookies by default (same-origin)', () => {
               cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, (req) => {
-                // current expected assertion
-                expect(req['headers']['cookie']).to.equal('foo1=bar1')
+                expect(req['headers']['cookie']).to.equal(undefined)
 
-                // future expected assertion
-                // expect(req['headers']['cookie']).to.equal('')
                 req.reply({
                   statusCode: 200,
                 })
@@ -345,7 +425,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
                 })
 
                 // assert cookie value is actually set in the browser
-                // current expected assertion. NOTE: This SHOULD be consistent
+                // current expected assertion.
                 if (Cypress.isBrowser('firefox')) {
                   // firefox actually sets the cookie correctly
                   cy.getCookie('foo1').its('value').should('equal', 'bar1')
@@ -353,7 +433,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
                   cy.getCookie('foo1').its('value').should('equal', null)
                 }
 
-                // FIXME: ideally, browser should have access to this cookie
+                // FIXME: Ideally, browser should have access to this cookie. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
                 // future expected assertion
                 // cy.getCookie('foo1').its('value').should('equal', 'bar1')
 
@@ -363,14 +443,10 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               })
             })
 
-            // FIXME: @see https://github.com/cypress-io/cypress/issues/23551
             it('sets same-site cookies if "include" credentials option is specified from request, but does not attach same-site cookies to request by default (same-origin)', () => {
               cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, (req) => {
-                // current expected assertion
-                expect(req['headers']['cookie']).to.equal('foo1=bar1')
+                expect(req['headers']['cookie']).to.equal(undefined)
 
-                // future expected assertion
-                // expect(req['headers']['cookie']).to.equal('')
                 req.reply({
                   statusCode: 200,
                 })
@@ -399,7 +475,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
                   cy.getCookie('foo1').its('value').should('equal', null)
                 }
 
-                // FIXME: ideally, browser should have access to this cookie
+                // FIXME: Ideally, browser should have access to this cookie. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
                 // future expected assertion
                 // cy.getCookie('foo1').its('value').should('equal', 'bar1')
 
@@ -411,15 +487,10 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               })
             })
 
-            // FIXME: @see https://github.com/cypress-io/cypress/issues/23551
             // this should have the same effect as same-origin option for same-site/cross-origin requests, but adding here incase our implementation is not consistent
             it('does not set or send same-site cookies if "omit" credentials option is specified', () => {
               cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, (req) => {
-                // current expected assertion
-                expect(req['headers']['cookie']).to.equal('foo1=bar1')
-
-                // future expected assertion
-                // expect(req['headers']['cookie']).to.equal('')
+                expect(req['headers']['cookie']).to.equal(undefined)
                 req.reply({
                   statusCode: 200,
                 })
@@ -453,7 +524,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
           describe('XMLHttpRequest', () => {
             it('does NOT set or send cookies with request by default', () => {
               cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, (req) => {
-                expect(req['headers']['cookie']).to.equal('')
+                expect(req['headers']['cookie']).to.equal(undefined)
 
                 req.reply({
                   statusCode: 200,
@@ -484,14 +555,9 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
 
             // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
             if (scheme === 'https') {
-              // FIXME: @see https://github.com/cypress-io/cypress/issues/23551
               it('does set cookie if withCredentials is true, but does not send cookie if withCredentials is false', () => {
                 cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, (req) => {
-                  // current expected assertion
-                  expect(req['headers']['cookie']).to.equal('bar1=baz1')
-
-                  // future expected assertion
-                  // expect(req['headers']['cookie']).to.equal('')
+                  expect(req['headers']['cookie']).to.equal(undefined)
 
                   req.reply({
                     statusCode: 200,
@@ -514,7 +580,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
 
                   // assert cookie value is actually set in the browser
                   if (scheme === 'https') {
-                    // FIXME: cy.getCookie does not believe this cookie exists, though it is set in the browser
+                    // FIXME: cy.getCookie does not believe this cookie exists. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
                     cy.getCookie('bar1').its('value').should('equal', null)
                     // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
 
@@ -555,7 +621,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
                     return cy.wrap(makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie-credentials?cookie=bar1=baz1; Domain=barbaz.com; SameSite=None; Secure`, 'xmlHttpRequest', true))
                   })
 
-                  // FIXME: cy.getCookie does not believe this cookie exists, though it is set in the browser
+                  // FIXME: cy.getCookie does not believe this cookie exists. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
                   cy.getCookie('bar1').its('value').should('equal', null)
                   // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
 
@@ -574,9 +640,9 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
 
           describe('fetch', () => {
             ['same-origin', 'omit'].forEach((credentialOption) => {
-              it(`does NOT set or send cookies with request by credentials is ${credentialOption}`, () => {
+              it(`does NOT set or send cookies with request if credentials is ${credentialOption}`, () => {
                 cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, (req) => {
-                  expect(req['headers']['cookie']).to.equal('')
+                  expect(req['headers']['cookie']).to.equal(undefined)
 
                   req.reply({
                     statusCode: 200,
@@ -608,18 +674,9 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
                 })
               })
 
-              // FIXME: @see https://github.com/cypress-io/cypress/issues/23551
               it(`does set cookie if credentials is "include", but does not send cookie if credentials is ${credentialOption}`, () => {
                 cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, (req) => {
-                  // current expected assertion
-                  if (scheme === 'https') {
-                    expect(req['headers']['cookie']).to.equal('bar1=baz1')
-                  } else {
-                    expect(req['headers']['cookie']).to.equal('')
-                  }
-
-                  // future expected assertion for both http / https
-                  // expect(req['headers']['cookie']).to.equal('')
+                  expect(req['headers']['cookie']).to.equal(undefined)
 
                   req.reply({
                     statusCode: 200,
@@ -643,7 +700,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
 
                   // assert cookie value is actually set in the browser
                   if (scheme === 'https') {
-                    // FIXME: cy.getCookie does not believe this cookie exists, though it is set in the browser
+                    // FIXME: cy.getCookie does not believe this cookie exists. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
                     cy.getCookie('bar1').its('value').should('equal', null)
                     // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
 
@@ -689,7 +746,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
 
                   // assert cookie value is actually set in the browser
 
-                  // FIXME: cy.getCookie does not believe this cookie exists, though it is set in the browser
+                  // FIXME: cy.getCookie does not believe this cookie exists, though it is set in the browser. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
                   cy.getCookie('bar1').its('value').should('equal', null)
                   // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
 
@@ -931,14 +988,10 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               cy.wait('@cookieCheck')
             })
 
-            // FIXME: @see https://github.com/cypress-io/cypress/issues/23551
             it('does NOT attach same-site cookies to request if "omit" credentials option is specified', () => {
               cy.intercept('/test-request', (req) => {
-                // current expected assertion with server side cookie jar is set from previous test
-                expect(req['headers']['cookie']).to.equal('foo1=bar1')
+                expect(req['headers']['cookie']).to.equal(undefined)
 
-                // future expected assertion, regardless of server side cookie jar
-                // expect(req['headers']['cookie']).to.equal('')
                 req.reply({
                   statusCode: 200,
                 })
@@ -958,14 +1011,10 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               cy.wait('@cookieCheck')
             })
 
-            // FIXME: @see https://github.com/cypress-io/cypress/issues/23551
             it('does NOT set same-site cookies from request if "omit" credentials option is specified', () => {
               cy.intercept('/test-request', (req) => {
-                // current expected assertion with server side cookie jar is set from previous test
-                expect(req['headers']['cookie']).to.equal('foo1=bar1')
+                expect(req['headers']['cookie']).to.equal(undefined)
 
-                // future expected assertion, regardless of server side cookie jar
-                // expect(req['headers']['cookie']).to.equal('')
                 req.reply({
                   statusCode: 200,
                 })
@@ -989,10 +1038,9 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
 
         describe('same site / cross origin', () => {
           describe('XMLHttpRequest', () => {
-            // withCredentials option should have no effect on same-site requests, even though the request is cross-origin
-            it('sets and attaches same-site cookies to request, even though request is cross-origin', () => {
+            it('does NOT set and attach same-site cookies to request when the request is cross-origin', () => {
               cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request`, (req) => {
-                expect(req['headers']['cookie']).to.equal('foo1=bar1')
+                expect(req['headers']['cookie']).to.equal(undefined)
 
                 req.reply({
                   statusCode: 200,
@@ -1010,17 +1058,64 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
 
               cy.wait('@cookieCheck')
             })
+
+            it('sets cookie on same-site request if withCredentials is true, but does not attach to same-site request if withCredentials is false', () => {
+              cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request`, (req) => {
+                expect(req['headers']['cookie']).to.equal(undefined)
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit(`${scheme}://www.foobar.com:${sameOriginPort}`)
+              cy.window().then((win) => {
+                // do NOT set the cookie in the browser
+                return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'xmlHttpRequest', true))
+              })
+
+              // firefox actually sets the cookie correctly
+              cy.getCookie('foo1').its('value').should('equal', 'bar1')
+
+              cy.window().then((win) => {
+                // but send the cookies in the request
+                return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request`, 'xmlHttpRequest'))
+              })
+
+              cy.wait('@cookieCheck')
+            })
+
+            it('sets cookie on same-site request if withCredentials is true, and attaches to same-site request if withCredentials is true', () => {
+              cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, (req) => {
+                expect(req['headers']['cookie']).to.equal('foo1=bar1')
+
+                req.reply({
+                  statusCode: 200,
+                })
+              }).as('cookieCheck')
+
+              cy.visit(`${scheme}://www.foobar.com:${sameOriginPort}`)
+              cy.window().then((win) => {
+                // do NOT set the cookie in the browser
+                return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/set-cookie-credentials?cookie=foo1=bar1; Domain=foobar.com`, 'xmlHttpRequest', true))
+              })
+
+              cy.getCookie('foo1').its('value').should('equal', 'bar1')
+
+              cy.window().then((win) => {
+                // but send the cookies in the request
+                return cy.wrap(makeRequest(win, `${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, 'xmlHttpRequest', true))
+              })
+
+              cy.wait('@cookieCheck')
+            })
           })
 
           describe('fetch', () => {
-            // FIXME: @see https://github.com/cypress-io/cypress/issues/23551
             it('does not set same-site cookies from request nor send same-site cookies by default (same-origin)', () => {
               cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, (req) => {
-                // current expected assertion
-                expect(req['headers']['cookie']).to.equal('foo1=bar1')
+                expect(req['headers']['cookie']).to.equal(undefined)
 
-                // future expected assertion
-                // expect(req['headers']['cookie']).to.equal('')
                 req.reply({
                   statusCode: 200,
                 })
@@ -1061,14 +1156,10 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               cy.wait('@cookieCheck')
             })
 
-            // FIXME: @see https://github.com/cypress-io/cypress/issues/23551
             it('sets same-site cookies if "include" credentials option is specified from request, but does not attach same-site cookies to request by default (same-origin)', () => {
               cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, (req) => {
-                // current expected assertion
-                expect(req['headers']['cookie']).to.equal('foo1=bar1')
+                expect(req['headers']['cookie']).to.equal(undefined)
 
-                // future expected assertion
-                // expect(req['headers']['cookie']).to.equal('')
                 req.reply({
                   statusCode: 200,
                 })
@@ -1088,15 +1179,11 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               cy.wait('@cookieCheck')
             })
 
-            // FIXME: @see https://github.com/cypress-io/cypress/issues/23551
             // this should have the same effect as same-origin option for same-site/cross-origin requests, but adding here incase our implementation is not consistent
             it('does not set or send same-site cookies if "omit" credentials option is specified', () => {
               cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-request-credentials`, (req) => {
-                // current expected assertion
-                expect(req['headers']['cookie']).to.equal('foo1=bar1')
+                expect(req['headers']['cookie']).to.equal(undefined)
 
-                // future expected assertion
-                // expect(req['headers']['cookie']).to.equal('')
                 req.reply({
                   statusCode: 200,
                 })
@@ -1120,7 +1207,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
           describe('XMLHttpRequest', () => {
             it('does NOT set or send cookies with request by default', () => {
               cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, (req) => {
-                expect(req['headers']['cookie']).to.equal('')
+                expect(req['headers']['cookie']).to.equal(undefined)
 
                 req.reply({
                   statusCode: 200,
@@ -1141,14 +1228,9 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
 
             // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
             if (scheme === 'https') {
-              // FIXME: @see https://github.com/cypress-io/cypress/issues/23551
               it('does set cookie if withCredentials is true, but does not send cookie if withCredentials is false', () => {
                 cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, (req) => {
-                // current expected assertion
-                  expect(req['headers']['cookie']).to.equal('bar1=baz1')
-
-                  // future expected assertion
-                  // expect(req['headers']['cookie']).to.equal('')
+                  expect(req['headers']['cookie']).to.equal(undefined)
 
                   req.reply({
                     statusCode: 200,
@@ -1162,7 +1244,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
 
                 // assert cookie value is actually set in the browser
                 if (scheme === 'https') {
-                // FIXME: cy.getCookie does not believe this cookie exists, though it is set in the browser
+                  // FIXME: cy.getCookie does not believe this cookie exists, though it is set in the browser. Should be fixed in https://github.com/cypress-io/cypress/pull/23643.
                   cy.getCookie('bar1').its('value').should('equal', null)
                   // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
 
@@ -1193,7 +1275,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
                   return cy.wrap(makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/set-cookie-credentials?cookie=bar1=baz1; Domain=barbaz.com; SameSite=None; Secure`, 'xmlHttpRequest', true))
                 })
 
-                // FIXME: cy.getCookie does not believe this cookie exists, though it is set in the browser
+                // FIXME: cy.getCookie does not believe this cookie exists, though it is set in the browser. Should be fixed in https://github.com/cypress-io/cypress/pull/23643
                 cy.getCookie('bar1').its('value').should('equal', null)
                 // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
 
@@ -1213,7 +1295,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
             ['same-origin', 'omit'].forEach((credentialOption) => {
               it(`does NOT set or send cookies with request by credentials is ${credentialOption}`, () => {
                 cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, (req) => {
-                  expect(req['headers']['cookie']).to.equal('')
+                  expect(req['headers']['cookie']).to.equal(undefined)
 
                   req.reply({
                     statusCode: 200,
@@ -1234,18 +1316,9 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
                 cy.wait('@cookieCheck')
               })
 
-              // FIXME: @see https://github.com/cypress-io/cypress/issues/23551
               it(`does set cookie if credentials is "include", but does not send cookie if credentials is ${credentialOption}`, () => {
                 cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request`, (req) => {
-                  // current expected assertion
-                  if (scheme === 'https') {
-                    expect(req['headers']['cookie']).to.equal('bar1=baz1')
-                  } else {
-                    expect(req['headers']['cookie']).to.equal('')
-                  }
-
-                  // future expected assertion for both http / https
-                  // expect(req['headers']['cookie']).to.equal('')
+                  expect(req['headers']['cookie']).to.equal(undefined)
 
                   req.reply({
                     statusCode: 200,
@@ -1259,7 +1332,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
 
                 // assert cookie value is actually set in the browser
                 if (scheme === 'https') {
-                  // FIXME: cy.getCookie does not believe this cookie exists, though it is set in the browser
+                  // FIXME: cy.getCookie does not believe this cookie exists, though it is set in the browser. Should be fixed in https://github.com/cypress-io/cypress/pull/23643
                   cy.getCookie('bar1').its('value').should('equal', null)
                   // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
 
@@ -1295,7 +1368,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
 
                 // assert cookie value is actually set in the browser
 
-                // FIXME: cy.getCookie does not believe this cookie exists, though it is set in the browser
+                // FIXME: cy.getCookie does not believe this cookie exists, though it is set in the browser. Should be fixed in https://github.com/cypress-io/cypress/pull/23643
                 cy.getCookie('bar1').its('value').should('equal', null)
                 // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
 

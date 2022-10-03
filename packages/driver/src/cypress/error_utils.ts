@@ -7,6 +7,7 @@ import { stripAnsi } from '@packages/errors'
 import $errorMessages from './error_messages'
 import $stackUtils, { StackAndCodeFrameIndex } from './stack_utils'
 import $utils from './utils'
+import type { HandlerType } from './runner'
 
 const ERROR_PROPS = 'message type name stack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
 const ERR_PREPARED_FOR_SERIALIZATION = Symbol('ERR_PREPARED_FOR_SERIALIZATION')
@@ -391,7 +392,7 @@ const createUncaughtException = ({ frameType, handlerType, state, err }) => {
     promiseAddendum: handlerType === 'unhandledrejection' ? ' It was caused by an unhandled promise rejection.' : '',
   }) as CypressError
 
-  modifyErrMsg(err, uncaughtErr.message, () => uncaughtErr.message)
+  err = modifyErrMsg(err, uncaughtErr.message, () => uncaughtErr.message)
 
   err.docsUrl = _.compact([uncaughtErr.docsUrl, err.docsUrl])
 
@@ -539,13 +540,13 @@ const errorFromProjectRejectionEvent = (event): ErrorFromProjectRejectionEvent =
   }
 }
 
-const errorFromUncaughtEvent = (handlerType, event) => {
+const errorFromUncaughtEvent = (handlerType: HandlerType, event) => {
   return handlerType === 'error' ?
     errorFromErrorEvent(event) :
     errorFromProjectRejectionEvent(event)
 }
 
-const logError = (Cypress, handlerType, err, handled = false) => {
+const logError = (Cypress, handlerType: HandlerType, err, handled = false) => {
   Cypress.log({
     message: `${err.name}: ${err.message}`,
     name: 'uncaught exception',
