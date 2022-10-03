@@ -1,16 +1,8 @@
 import { isAllowedFeature } from './isAllowedFeature'
-import { useLoginConnectStore } from '../store/login-connect-store'
+import { LoginConnectStore, useLoginConnectStore, userStatuses } from '../store/login-connect-store'
 import type { UserStatus } from '../store/login-connect-store'
 import { BannerIds } from '@packages/types'
 import interval from 'human-interval'
-
-const userStatuses = [
-  'isLoggedOut',
-  'needsOrgConnect',
-  'needsProjectConnect',
-  'needsRecordedRun',
-  'noActionableState',
-] as const
 
 const bannerIds = {
   isLoggedOut: BannerIds.ACI_082022_LOGIN,
@@ -20,7 +12,7 @@ const bannerIds = {
 }
 
 describe('isAllowedFeature', () => {
-  let loginConnectStore
+  let loginConnectStore: LoginConnectStore
 
   // this setup function acts as a test of the userStatus
   // getter in loginConnectStore, since we set the individual flags here
@@ -32,30 +24,30 @@ describe('isAllowedFeature', () => {
         expect(loginConnectStore.userStatus).to.eq('isLoggedOut')
         break
       case 'needsOrgConnect':
-        loginConnectStore.setStatus('isLoggedIn', true)
-        loginConnectStore.setStatus('isOrganizationLoaded', true)
+        loginConnectStore.setFlag('isLoggedIn', true)
+        loginConnectStore.setFlag('isOrganizationLoaded', true)
         expect(loginConnectStore.userStatus).to.eq('needsOrgConnect')
         break
       case 'needsProjectConnect':
-        loginConnectStore.setStatus('isLoggedIn', true)
-        loginConnectStore.setStatus('isMemberOfOrganization', true)
+        loginConnectStore.setFlag('isLoggedIn', true)
+        loginConnectStore.setFlag('isMemberOfOrganization', true)
         expect(loginConnectStore.userStatus).to.eq('needsProjectConnect')
         break
       case 'needsRecordedRun':
-        loginConnectStore.setStatus('isLoggedIn', true)
-        loginConnectStore.setStatus('isMemberOfOrganization', true)
-        loginConnectStore.setStatus('isProjectConnected', true)
-        loginConnectStore.setStatus('hasNoRecordedRuns', true)
+        loginConnectStore.setFlag('isLoggedIn', true)
+        loginConnectStore.setFlag('isMemberOfOrganization', true)
+        loginConnectStore.setFlag('isProjectConnected', true)
+        loginConnectStore.setFlag('hasNoRecordedRuns', true)
 
         expect(loginConnectStore.userStatus).to.eq('needsRecordedRun')
         break
-      case 'noActionableState':
-        loginConnectStore.setStatus('isLoggedIn', true)
-        loginConnectStore.setStatus('isMemberOfOrganization', true)
-        loginConnectStore.setStatus('isProjectConnected', true)
-        loginConnectStore.setStatus('hasNoRecordedRuns', false)
+      case 'allTasksCompleted':
+        loginConnectStore.setFlag('isLoggedIn', true)
+        loginConnectStore.setFlag('isMemberOfOrganization', true)
+        loginConnectStore.setFlag('isProjectConnected', true)
+        loginConnectStore.setFlag('hasNoRecordedRuns', false)
 
-        expect(loginConnectStore.userStatus).to.eq('noActionableState')
+        expect(loginConnectStore.userStatus).to.eq('allTasksCompleted')
         break
       default:
         return
@@ -64,16 +56,16 @@ describe('isAllowedFeature', () => {
 
   beforeEach(() => {
     loginConnectStore = useLoginConnectStore()
-    loginConnectStore.setStatus('hasNonExampleSpec', true)
+    loginConnectStore.setFlag('hasNonExampleSpec', true)
   })
 
   describe('specsListBanner', () => {
     context('at least one non-example spec has been written', () => {
       context('banners HAVE NOT been dismissed', () => {
         userStatuses.forEach((status) => {
-          if (status === 'noActionableState') {
+          if (status === 'allTasksCompleted') {
             it('returns false when user has no actions to take', () => {
-              setUpStatus('noActionableState')
+              setUpStatus('allTasksCompleted')
               const result = isAllowedFeature('specsListBanner', loginConnectStore)
 
               expect(result).to.be.false
@@ -91,7 +83,7 @@ describe('isAllowedFeature', () => {
 
       context('banners HAVE been dismissed', () => {
         userStatuses.forEach((status) => {
-          if (status === 'noActionableState') {
+          if (status === 'allTasksCompleted') {
             // no banner matches this state, so nothing can be dismissed, skip it
             return
           }
@@ -133,7 +125,7 @@ describe('isAllowedFeature', () => {
       context('cypress was first opened less than 4 days ago', () => {
         userStatuses.forEach((status) => {
           it(`returns false for status ${status}`, () => {
-            loginConnectStore.setStatus('firstOpened', Date.now() - interval('3 days'))
+            loginConnectStore.setFirstOpened(Date.now() - interval('3 days'))
             setUpStatus(status)
             const result = isAllowedFeature('specsListBanner', loginConnectStore)
 
@@ -158,10 +150,10 @@ describe('isAllowedFeature', () => {
 
     context('no non-example specs have been written', () => {
       userStatuses.forEach((status) => {
-        if (status === 'noActionableState' || status === 'needsRecordedRun') {
+        if (status === 'allTasksCompleted' || status === 'needsRecordedRun') {
           it(`returns false for status ${status}`, () => {
             setUpStatus(status)
-            loginConnectStore.setStatus('hasNonExampleSpec', false)
+            loginConnectStore.setFlag('hasNonExampleSpec', false)
 
             const result = isAllowedFeature('specsListBanner', loginConnectStore)
 
@@ -170,7 +162,7 @@ describe('isAllowedFeature', () => {
         } else {
           it(`returns true for status ${status}`, () => {
             setUpStatus(status)
-            loginConnectStore.setStatus('hasNonExampleSpec', false)
+            loginConnectStore.setFlag('hasNonExampleSpec', false)
 
             const result = isAllowedFeature('specsListBanner', loginConnectStore)
 
@@ -197,7 +189,7 @@ describe('isAllowedFeature', () => {
       userStatuses.forEach((status) => {
         it(`returns false with status ${ status } `, () => {
           setUpStatus(status)
-          loginConnectStore.setStatus('latestBannerShownTime', Date.now() - interval('23 hours'))
+          loginConnectStore.setLatestBannerShownTime(Date.now() - interval('23 hours'))
           const result = isAllowedFeature('docsCiPrompt', loginConnectStore)
 
           expect(result).to.be.false
@@ -209,7 +201,7 @@ describe('isAllowedFeature', () => {
       userStatuses.forEach((status) => {
         it(`returns false for status ${ status } `, () => {
           setUpStatus(status)
-          loginConnectStore.setStatus('firstOpened', Date.now() - interval('3 days'))
+          loginConnectStore.setFirstOpened(Date.now() - interval('3 days'))
           const result = isAllowedFeature('docsCiPrompt', loginConnectStore)
 
           expect(result).to.be.false

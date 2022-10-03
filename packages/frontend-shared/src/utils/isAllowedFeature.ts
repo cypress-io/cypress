@@ -9,6 +9,11 @@ const bannerIds = {
   needsRecordedRun: BannerIds.ACI_082022_RECORD,
 }
 
+/**
+ *
+ * @param eventTime - timestamp of an event
+ * @param waitTime - time to compare with, such as `1 day`, `20 minutes`, etc, to be parsed by `human-interval` package
+ */
 const minTimeSinceEvent = (eventTime: number | undefined, waitTime: string) => {
   if (!eventTime) {
     // if there is no event time, the event has never been recorded
@@ -63,7 +68,7 @@ export const isAllowedFeature = (
         minTimeSinceEvent(events.cypressFirstOpened, '4 days'),
         minTimeSinceEvent(events.navCiPromptAutoOpened, '1 day'),
         bannerForCurrentStatusWasNotDismissed(),
-        userStatusIsNot('noActionableState'),
+        userStatusIsNot('allTasksCompleted'),
         bannersAreNotDisabledForTesting(),
       ],
       needsRecordedRun: [
@@ -88,7 +93,7 @@ export const isAllowedFeature = (
 
   let rulesToCheck = [...rules[featureName].base]
 
-  if (userStatus !== 'noActionableState') {
+  if (userStatus !== 'allTasksCompleted') {
     rulesToCheck = rulesToCheck.concat(rules[featureName][userStatus])
   }
 

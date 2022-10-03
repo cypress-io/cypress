@@ -29,9 +29,20 @@ export interface LoginConnectState {
   bannersState: BannersState
 }
 
-export type UserStatus = 'isLoggedOut' | 'needsOrgConnect' | 'needsProjectConnect' | 'needsRecordedRun' | 'noActionableState'
+// The user can be in only one status at a time.
+// These are specifically related to the dashboard
+// and the progress from logging in to recording a run.
+export const userStatuses = [
+  'isLoggedOut',
+  'needsOrgConnect',
+  'needsProjectConnect',
+  'needsRecordedRun',
+  'allTasksCompleted',
+] as const
 
-export type LoginConnectField = 'isLoggedIn' | 'isProjectConnected' | 'isConfigLoaded' | 'isOrganizationLoaded' | 'isMemberOfOrganization' | 'hasRecordedRuns'
+export type UserStatus = typeof userStatuses[number]
+
+export type LoginConnectBooleanField = 'isLoggedIn' | 'isProjectConnected' | 'isConfigLoaded' | 'isOrganizationLoaded' | 'isMemberOfOrganization' | 'hasRecordedRuns' | 'hasNoRecordedRuns' | 'hasNonExampleSpec'
 
 export const useLoginConnectStore = defineStore({
   id: 'loginConnect',
@@ -66,10 +77,13 @@ export const useLoginConnectStore = defineStore({
       this.isLoginConnectOpen = false
       this.utmMedium = ''
     },
-    setStatus (name: LoginConnectField, newVal: boolean) {
+    /**
+     * Set a boolean flag in the LoginConnect store
+     */
+    setFlag (name: LoginConnectBooleanField, newVal: boolean) {
       this[name] = newVal
     },
-    setLoginError (error) {
+    setLoginError (error: boolean) {
       this.loginError = error
     },
     setUserData (userData?: LoginUserData) {
@@ -83,6 +97,9 @@ export const useLoginConnectStore = defineStore({
     },
     setBannersState (banners: BannersState) {
       this.bannersState = banners
+    },
+    setLatestBannerShownTime (timestamp: number) {
+      this.latestBannerShownTime = timestamp
     },
   },
   getters: {
@@ -99,7 +116,7 @@ export const useLoginConnectStore = defineStore({
         case state.isLoggedIn && state.isMemberOfOrganization && state.isProjectConnected && state.hasNoRecordedRuns:
           return 'needsRecordedRun'
         default:
-          return 'noActionableState'
+          return 'allTasksCompleted'
       }
     },
     userStatusMatches () {
