@@ -328,7 +328,7 @@ export default (Commands, Cypress, cy, state) => {
     })
 
     return (subject) => {
-      cy.ensureSubjectByType(subject, ['optional', 'window', 'document', 'element'])
+      cy.ensureSubjectByType(subject, ['optional', 'window', 'document', 'element'], this)
 
       if (!subject || (!$dom.isElement(subject) && !$elements.isShadowRoot(subject[0]))) {
         subject = cy.$$('body')
@@ -385,7 +385,7 @@ export default (Commands, Cypress, cy, state) => {
     })
 
     return (subject) => {
-      cy.ensureSubjectByType(subject, 'element')
+      cy.ensureSubjectByType(subject, 'element', this)
 
       // find all shadow roots of the subject(s), if any exist
       const $el = subject

@@ -1266,7 +1266,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     if (prevSubject !== undefined) {
       // make sure our current subject is valid for
       // what we expect in this command
-      this.ensureSubjectByType(subject, prevSubject)
+      this.ensureSubjectByType(subject, prevSubject, this.state('current'))
     }
 
     args.unshift(subject)

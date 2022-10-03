@@ -20,7 +20,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
   // into an array and loop through each and verify
   // each element in the array is valid. as it stands
   // we only validate the first
-  const validateType = (subject, type, cmd) => {
+  const validateType = (subject, type, cmd = state('current')) => {
     const name = cmd.get('name')
 
     switch (type) {
@@ -45,9 +45,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     }
   }
 
-  const ensureSubjectByType = (subject, type) => {
-    const current = state('current')
-
+  const ensureSubjectByType = (subject, type, command) => {
     let types: (string | boolean)[] = [].concat(type)
 
     // if we have an optional subject and nothing's
@@ -71,7 +69,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
 
     for (type of types) {
       try {
-        validateType(subject, type, current)
+        validateType(subject, type, command)
       } catch (error) {
         err = error
         errors.push(err)
