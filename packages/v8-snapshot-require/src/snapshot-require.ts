@@ -7,8 +7,7 @@ import type {
   PackherdTranspileOpts,
 } from '@packages/packherd-require'
 import { packherdRequire } from '@packages/packherd-require'
-import type { Snapshot, SnapshotAuxiliaryData, DependencyMapArray } from './types'
-import { EMBEDDED } from './constants'
+import type { Snapshot, DependencyMapArray } from './types'
 import { forwardSlash } from './utils'
 import Module from 'module'
 import { DependencyMap } from './dependency-map'
@@ -165,21 +164,6 @@ function getCaches (sr: Snapshot | undefined, useCache: boolean) {
 }
 
 /**
- * Attempts to extract the sourcemap embedded in the snapshot
- */
-function getSourceMapLookup () {
-  // @ts-ignore global snapshotAuxiliaryData
-  if (typeof snapshotAuxiliaryData === 'undefined') {
-    return (_: string) => undefined
-  }
-
-  // @ts-ignore global snapshotAuxiliaryData
-  const sourceMap = (<SnapshotAuxiliaryData>snapshotAuxiliaryData).sourceMap
-
-  return (uri: string) => (uri === EMBEDDED ? sourceMap : undefined)
-}
-
-/**
  * Sets up the require hook to use assets embedded in the snapshot.
  *
  * @param projectBaseDir project root
@@ -252,7 +236,6 @@ export function snapshotRequire (
         getModuleKey,
         requireStatsFile: opts.requireStatsFile,
         transpileOpts: opts.transpileOpts,
-        sourceMapLookup: getSourceMapLookup(),
         moduleNeedsReload,
       })
 
