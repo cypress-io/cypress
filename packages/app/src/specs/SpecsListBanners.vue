@@ -159,6 +159,7 @@ import { CohortConfig, useCohorts } from '@packages/frontend-shared/src/composab
 const route = useRoute()
 const { t } = useI18n()
 const loginConnectStore = useLoginConnectStore()
+const { userStatusMatches } = loginConnectStore
 
 gql`
 fragment SpecsListBanners on Query {
@@ -259,10 +260,10 @@ watch(cloudData, () => {
     return
   }
 
-  showRecordBanner.value = loginConnectStore.userStatus === 'needsRecordedRun'
-  showConnectBanner.value = loginConnectStore.userStatus === 'needsProjectConnect'
-  showCreateOrganizationBanner.value = loginConnectStore.userStatus === 'needsOrgConnect'
-  showLoginBanner.value = loginConnectStore.userStatus === 'isLoggedOut'
+  showRecordBanner.value = userStatusMatches('needsRecordedRun')
+  showConnectBanner.value = userStatusMatches('needsProjectConnect')
+  showCreateOrganizationBanner.value = userStatusMatches('needsOrgConnect')
+  showLoginBanner.value = userStatusMatches('isLoggedOut')
 
   hasRecordBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_RECORD)
   hasConnectBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_CONNECT_PROJECT)
