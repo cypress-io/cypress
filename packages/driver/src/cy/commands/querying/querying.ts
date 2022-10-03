@@ -160,6 +160,7 @@ export default (Commands, Cypress, cy, state) => {
 
     const log = userOptions.log !== false && (this.get('_log') || Cypress.log({
       message: selector,
+      type: 'parent',
       timeout: userOptions.timeout,
       consoleProps: () => ({}),
     }))

@@ -1552,19 +1552,13 @@ space
         })
       })
 
-      it('sets type to parent when subject isnt element', () => {
-        cy.window().contains('foo').then(function () {
-          expect(this.lastLog.get('type')).to.eq('parent')
-
-          cy.document().contains('foo').then(function () {
-            expect(this.lastLog.get('type')).to.eq('parent')
-          })
-        })
-      })
-
       it('sets type to child when used as a child command', () => {
         cy.get('#specific-contains').contains('foo').then(function () {
           expect(this.lastLog.get('type')).to.eq('child')
+
+          cy.document().contains('foo').then(function () {
+            expect(this.lastLog.get('type')).to.eq('child')
+          })
         })
       })
 
