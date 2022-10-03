@@ -23,7 +23,7 @@
 
   .command-is-studio {
     cursor: auto;
-
+    
     &.command-type-parent .commands-controls .studio-command-remove {
       display: block;
       padding-left: 5px;
@@ -97,12 +97,12 @@
     .alias-container {
       margin-left: 0;
       white-space: nowrap;
-
+  
       > * {
         display: inline-block;
         margin-left: 2px;
       }
-
+    
       > *:first-child {
         margin-left: 0;
       }
@@ -198,7 +198,7 @@
     &:not(.command-is-event) .command-number {
       color: $gray-700;
     }
-
+  
     &:not(.command-is-event, .command-type-system) .command-method {
       color: $gray-200;
     }
@@ -221,7 +221,7 @@
       .fa-circle {
         line-height: 18px;
         display: inline-block;
-
+  
         .icon-light {
           stroke: $gray-800;
         }
@@ -258,7 +258,7 @@
     &:not(.command-type-system) {
       border-left: 2px solid $fail;
       background-color: $err-header-background;
-
+          
       &.command-is-interactive:hover {
         background: rgba($red-400, 0.3);
       }
@@ -417,7 +417,7 @@
       display: inline-block;
       margin-left: 2px;
     }
-
+  
     > *:first-child {
       margin-left: 0;
     }
