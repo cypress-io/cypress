@@ -543,8 +543,11 @@ export class SocketBase {
       })
 
       if (this.supportsRunEvents) {
-        socket.on('plugins:before:spec', async (spec) => {
-          await runEvents.execute('before:spec', {}, spec)
+        socket.on('plugins:before:spec', (spec) => {
+          runEvents.execute('before:spec', {}, spec).catch((error) => {
+            socket.disconnect()
+            throw error
+          })
         })
       }
 
