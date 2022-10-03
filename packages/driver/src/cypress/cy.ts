@@ -854,11 +854,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       const command = $Command.create({
         name,
         args,
-        type: 'dual',
         chainerId: chainer.chainerId,
         userInvocationStack,
         query: true,
-        prevSubject: 'optional',
       })
 
       const cyFn = function (chainerId, ...args) {

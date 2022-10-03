@@ -158,14 +158,13 @@ export default (Commands, Cypress, cy, state) => {
       })
     }
 
-    const log = userOptions.log !== false && Cypress.log({
+    const log = userOptions.log !== false && (this.get('_log') || Cypress.log({
       message: selector,
       timeout: userOptions.timeout,
       consoleProps: () => ({}),
-    })
+    }))
 
     this.set('timeout', userOptions.timeout)
-    this.set('_log', log)
 
     if (aliasRe.test(selector)) {
       return getAlias.call(this, selector, log, cy)
@@ -267,8 +266,17 @@ export default (Commands, Cypress, cy, state) => {
     const selector = $dom.getContainsSelector(text, filter, { matchCase: true, ...userOptions })
 
     const getOptions = _.extend({}, userOptions) as GetOptions
+
+    const log = userOptions.log !== false && Cypress.log({
+      message: $utils.stringify(_.compact([filter, text])),
+      type: this.hasPreviouslyLinkedCommand ? 'child' : 'parent',
+      timeout: userOptions.timeout,
+      consoleProps: () => ({}),
+    })
+
+    this.set('_log', log)
+
     const getFn = cy.now('get', selector, getOptions)
-    const log = this.get('_log')
 
     const getPhrase = () => {
       if (filter && !(getOptions.withinSubject as JQuery<HTMLElement>).is('body')) {
@@ -337,9 +345,7 @@ export default (Commands, Cypress, cy, state) => {
       }
 
       log && log.set({
-        message: $utils.stringify(_.compact([filter, text])),
         $el,
-        type: subject.is('body') ? 'parent' : 'child',
         consoleProps: () => {
           return {
             Content: text,
