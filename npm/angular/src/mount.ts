@@ -234,18 +234,21 @@ function setupComponent<T extends { ngOnChanges? (changes: SimpleChanges): void 
     })
   }
 
+  // Manually call ngOnChanges when mounting components using the class syntax.
+  // This is necessary because we are assigning input values to the class directly
+  // on mount and therefore the ngOnChanges() lifecycle is not triggered.
   if (component.ngOnChanges && config.componentProperties) {
     const { componentProperties } = config
-    let simpleChanges: SimpleChanges
 
-    Object.keys(componentProperties).forEach((key: string, index: number, keys: string[]) => {
-      simpleChanges = {
-        ...simpleChanges,
-        [key]: new SimpleChange(null, componentProperties[key], true),
-      }
-    })
+    const simpleChanges: SimpleChanges = Object.entries(componentProperties).reduce((acc, [key, value]) => {
+      acc[key] = new SimpleChange(null, value, true)
 
-    component.ngOnChanges(simpleChanges)
+      return acc
+    }, {})
+
+    if (Object.keys(componentProperties).length > 0) {
+      component.ngOnChanges(simpleChanges)
+    }
   }
 
   return component
