@@ -61,7 +61,7 @@ export const useLoginConnectStore = defineStore({
       hasRecordedRuns: false,
       loginError: false,
       userData: undefined,
-      hasNonExampleSpec: true, // TODO: initialize as false and set the real value
+      hasNonExampleSpec: true, // TODO: in #23762 initialize as false and set the real value
       promptsShown: {},
       firstOpened: undefined,
       bannersState: {},
@@ -126,7 +126,7 @@ export const useLoginConnectStore = defineStore({
       return (status: UserStatus) => this.userStatus !== status
     },
     projectStatus () {
-      // TODO: look at projectConnectionStatus in SpecHeaderCloudDataTooltip
+      // TODO: in #23762 look at projectConnectionStatus in SpecHeaderCloudDataTooltip
     },
   },
 })
