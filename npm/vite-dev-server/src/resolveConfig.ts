@@ -16,7 +16,7 @@ import type { Vite } from './getVite'
 
 const debug = debugFn('cypress:vite-dev-server:resolve-config')
 
-export const createViteDevServerConfig = async (config: ViteDevServerConfig, vite: Vite) => {
+export const createViteDevServerConfig = async (config: ViteDevServerConfig, vite: Vite): Promise<InlineConfig> => {
   const { specs, cypressConfig, viteConfig: viteOverrides } = config
   const root = cypressConfig.projectRoot
   const { default: findUp } = await importModule('find-up')
@@ -88,6 +88,17 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
       Cypress(config, vite),
       CypressInspect(config),
     ].filter((p) => p != null),
+  }
+
+  if (!config.cypressConfig.isInteractive) {
+    viteBaseConfig.server = {
+      ...(viteBaseConfig.server || {}),
+      // Disable file watching and HMR when executing tests in `run` mode
+      watch: {
+        ignored: '**/*',
+      },
+      hmr: false,
+    }
   }
 
   let resolvedOverrides: UserConfig = {}

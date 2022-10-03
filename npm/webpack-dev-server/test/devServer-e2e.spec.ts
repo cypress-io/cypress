@@ -179,6 +179,8 @@ describe('#devServer', () => {
   })
 
   it('touches browser.js when a spec file is added and recompile', async function () {
+    // File watching only enabled when running in `open` mode
+    cypressConfig.isInteractive = true
     const devServerEvents = new EventEmitter()
     const { close } = await devServer({
       webpackConfig,

@@ -20,6 +20,7 @@ export function makeDefaultWebpackConfig (
     importPath,
   } = config.sourceWebpackModulesResult.htmlWebpackPlugin
   const indexHtmlFile = config.devServerConfig.cypressConfig.indexHtmlFile
+  const isRunMode = !config.devServerConfig.cypressConfig.isInteractive
   const HtmlWebpackPlugin = _HtmlWebpackPlugin as typeof import('html-webpack-plugin-5')
 
   debug(`Using HtmlWebpackPlugin version ${version} from ${importPath}`)
@@ -53,6 +54,13 @@ export function makeDefaultWebpackConfig (
     ],
     devtool: 'inline-source-map',
   } as any
+
+  if (isRunMode) {
+    // Disable file watching when executing tests in `run` mode
+    finalConfig.watchOptions = {
+      ignored: '**/*',
+    }
+  }
 
   if (config.sourceWebpackModulesResult.webpackDevServer.majorVersion === 4) {
     return {

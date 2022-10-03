@@ -7,6 +7,7 @@ import { CYPRESS_WEBPACK_ENTRYPOINT, makeWebpackConfig } from '../src/makeWebpac
 import { createModuleMatrixResult } from './test-helpers/createModuleMatrixResult'
 import sinon from 'sinon'
 import SinonChai from 'sinon-chai'
+import type { SourceRelativeWebpackResult } from '../src/helpers/sourceRelativeWebpackModules'
 
 Chai.use(SinonChai)
 
@@ -15,6 +16,7 @@ describe('makeWebpackConfig', () => {
     const devServerConfig: WebpackDevServerConfig = {
       specs: [],
       cypressConfig: {
+        isInteractive: true,
         isTextTerminal: false,
         projectRoot: '.',
         supportFile: '/support.js',
@@ -59,6 +61,7 @@ describe('makeWebpackConfig', () => {
     const devServerConfig: WebpackDevServerConfig = {
       specs: [],
       cypressConfig: {
+        isInteractive: true,
         isTextTerminal: false,
         projectRoot: '.',
         supportFile: '/support.js',
@@ -191,5 +194,86 @@ describe('makeWebpackConfig', () => {
     expect(actual.plugins[0].constructor.name).to.eq('IgnorePlugin')
     expect(actual.plugins[1].constructor.name).to.eq('HtmlWebpackPlugin')
     expect(actual.plugins[2].constructor.name).to.eq('CypressCTWebpackPlugin')
+  })
+
+  describe('file watching', () => {
+    let sourceWebpackModulesResult: SourceRelativeWebpackResult
+    let devServerConfig: WebpackDevServerConfig
+
+    beforeEach(() => {
+      devServerConfig = {
+        specs: [],
+        cypressConfig: {
+          projectRoot: '.',
+          devServerPublicPathRoute: '/test-public-path',
+        } as Cypress.PluginConfigOptions,
+        webpackConfig: {
+          entry: { main: 'src/index.js' },
+        },
+        devServerEvents: new EventEmitter(),
+      }
+    })
+
+    describe('webpack-dev-server v3', () => {
+      beforeEach(() => {
+        sourceWebpackModulesResult = createModuleMatrixResult({
+          webpack: 4,
+          webpackDevServer: 4,
+        })
+      })
+
+      it('is disabled in run mode', async () => {
+        devServerConfig.cypressConfig.isInteractive = false
+
+        const actual = await makeWebpackConfig({
+          devServerConfig,
+          sourceWebpackModulesResult,
+        })
+
+        expect(actual.watchOptions.ignored).to.eql('**/*')
+      })
+
+      it('uses defaults in open mode', async () => {
+        devServerConfig.cypressConfig.isInteractive = true
+
+        const actual = await makeWebpackConfig({
+          devServerConfig,
+          sourceWebpackModulesResult,
+        })
+
+        expect(actual.watchOptions?.ignored).to.be.undefined
+      })
+    })
+
+    describe('webpack-dev-server v4', () => {
+      beforeEach(() => {
+        sourceWebpackModulesResult = createModuleMatrixResult({
+          webpack: 5,
+          webpackDevServer: 4,
+        })
+      })
+
+      it('is disabled in run mode', async () => {
+        devServerConfig.cypressConfig.isInteractive = false
+
+        const actual = await makeWebpackConfig({
+          devServerConfig,
+          sourceWebpackModulesResult,
+        })
+
+        expect(actual.watchOptions.ignored).to.eql('**/*')
+      })
+
+      it('uses defaults in open mode', async () => {
+        devServerConfig.cypressConfig.isInteractive = true
+
+        const actual = await makeWebpackConfig({
+          devServerConfig,
+          sourceWebpackModulesResult,
+        })
+
+        expect(actual.watchOptions?.ignored).to.be.undefined
+      })
+    })
   })
 })
