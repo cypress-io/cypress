@@ -35,8 +35,8 @@ describe('src/cypress/script_utils', () => {
       return $scriptUtils.runScripts(scriptWindow, scripts)
       .then(() => {
         expect($sourceMapUtils.extractSourceMap).to.be.calledTwice
-        expect($sourceMapUtils.extractSourceMap).to.be.calledWith(scripts[0], 'the script contents')
-        expect($sourceMapUtils.extractSourceMap).to.be.calledWith(scripts[1], 'the script contents')
+        expect($sourceMapUtils.extractSourceMap).to.be.calledWith('the script contents')
+        expect($sourceMapUtils.extractSourceMap).to.be.calledWith('the script contents')
       })
     })
 

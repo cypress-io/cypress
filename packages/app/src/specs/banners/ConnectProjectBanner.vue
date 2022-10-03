@@ -1,6 +1,6 @@
 <template>
   <TrackedBanner
-    :banner-id="BannerIds.ACI_082022_CONNECT_PROJECT"
+    :banner-id="bannerId"
     :model-value="modelValue"
     data-cy="connect-project-banner"
     status="info"
@@ -8,10 +8,16 @@
     class="mb-16px"
     :icon="ConnectIcon"
     dismissible
+    :has-banner-been-shown="hasBannerBeenShown"
+    :event-data="{
+      campaign: 'Create project',
+      medium: 'Specs Create Project Banner',
+      cohort: cohortOption.cohort
+    }"
     @update:model-value="value => emit('update:modelValue', value)"
   >
     <p class="mb-24px">
-      {{ t('specPage.banners.connectProject.content') }}
+      {{ cohortOption.value }}
     </p>
 
     <Button
@@ -26,6 +32,7 @@
     <CloudConnectModals
       v-if="isProjectConnectOpen && cloudModalsQuery.data.value"
       :gql="cloudModalsQuery.data.value"
+      utm-medium="Specs Create Project Banner"
       @cancel="handleModalClose"
       @success="handleModalClose"
     />
@@ -38,6 +45,7 @@ import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
 import TrackedBanner from './TrackedBanner.vue'
+import type { CohortOption } from '@packages/frontend-shared/src/composables/useCohorts'
 import { BannerIds } from '@packages/types'
 import { ref } from 'vue'
 import { ConnectProjectBannerDocument } from '../../generated/graphql'
@@ -49,17 +57,18 @@ query ConnectProjectBanner {
 }
 `
 
-withDefaults(defineProps<{
+defineProps<{
   modelValue: boolean
-}>(), {
-  modelValue: false,
-})
+  hasBannerBeenShown: boolean
+  cohortOption: CohortOption
+}>()
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void
 }>()
 
 const { t } = useI18n()
+const bannerId = BannerIds.ACI_082022_CONNECT_PROJECT
 const isProjectConnectOpen = ref(false)
 
 const cloudModalsQuery = useQuery({ query: ConnectProjectBannerDocument, pause: true })

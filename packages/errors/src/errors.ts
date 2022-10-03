@@ -86,9 +86,15 @@ export const AllCypressErrors = {
   },
   CHROME_WEB_SECURITY_NOT_SUPPORTED: (browser: string) => {
     return errTemplate`\
-        Your project has set the configuration option: ${fmt.highlight(`chromeWebSecurity`)} to ${fmt.highlightTertiary(`false`)}
+        Your project has set the configuration option: \`chromeWebSecurity\` to \`false\`.
 
         This option will not have an effect in ${fmt.off(_.capitalize(browser))}. Tests that rely on web security being disabled will not run as expected.`
+  },
+  BROWSER_UNSUPPORTED_LAUNCH_OPTION: (browser: string, options: string[]) => {
+    return errTemplate`\
+        Warning: The following browser launch options were provided but are not supported by ${fmt.highlightSecondary(browser)}
+
+        ${fmt.listItems(options)}`
   },
   BROWSER_NOT_FOUND_BY_NAME: (browser: string, foundBrowsersStr: string[]) => {
     let canarySuffix: PartialErr | null = null

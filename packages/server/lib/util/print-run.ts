@@ -113,7 +113,7 @@ function macOSRemovePrivate (str: string) {
 function collectTestResults (obj: { video?: boolean, screenshots?: Screenshot[], spec?: any, stats?: any }, estimated: number) {
   return {
     name: _.get(obj, 'spec.name'),
-    baseName: _.get(obj, 'spec.baseName'),
+    relativeToCommonRoot: _.get(obj, 'spec.relativeToCommonRoot'),
     tests: _.get(obj, 'stats.tests'),
     passes: _.get(obj, 'stats.passes'),
     pending: _.get(obj, 'stats.pending'),
@@ -185,7 +185,7 @@ export function displayRunStarting (options: { browser: Browser, config: Cfg, gr
 
   const experimental = experiments.getExperimentsFromResolved(config.resolved)
   const enabledExperiments = _.pickBy(experimental, _.property('enabled'))
-  const hasExperiments = !_.isEmpty(enabledExperiments)
+  const hasExperiments = !process.env.CYPRESS_INTERNAL_SKIP_EXPERIMENT_LOGS && !_.isEmpty(enabledExperiments)
 
   // if we show Node Version, then increase 1st column width
   // to include wider 'Node Version:'.
@@ -203,7 +203,7 @@ export function displayRunStarting (options: { browser: Browser, config: Cfg, gr
 
   const formatSpecs = (specs) => {
     // 25 found: (foo.spec.js, bar.spec.js, baz.spec.js)
-    const names = _.map(specs, 'baseName')
+    const names = _.map(specs, 'relativeToCommonRoot')
     const specsTruncated = _.truncate(names.join(', '), { length: 250 })
 
     const stringifiedSpecs = [
@@ -325,7 +325,7 @@ export function renderSummaryTable (runUrl: string | undefined, results: any) {
 
       const ms = duration.format(stats.wallClockDuration || 0)
 
-      const formattedSpec = formatPath(spec.baseName, getWidth(table2, 1))
+      const formattedSpec = formatPath(spec.relativeToCommonRoot, getWidth(table2, 1))
 
       if (run.skippedSpec) {
         return table2.push([
@@ -398,7 +398,7 @@ export function displayResults (obj: { screenshots?: Screenshot[] }, estimated: 
     ['Video:', results.video],
     ['Duration:', results.duration],
     estimated ? ['Estimated:', results.estimated] : undefined,
-    ['Spec Ran:', formatPath(results.baseName, getWidth(table, 1), c)],
+    ['Spec Ran:', formatPath(results.relativeToCommonRoot, getWidth(table, 1), c)],
   ])
   .compact()
   .map((arr) => {

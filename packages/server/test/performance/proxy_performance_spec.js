@@ -21,7 +21,7 @@ const { createRoutes } = require(`../../lib/routes`)
 process.env.CYPRESS_INTERNAL_ENV = 'development'
 
 const CA = require('@packages/https-proxy').CA
-const Config = require('../../lib/config')
+const { setupFullConfigWithDefaults } = require('@packages/config')
 const { ServerE2E } = require('../../lib/server-e2e')
 const { SocketE2E } = require('../../lib/socket-e2e')
 const { _getArgs } = require('../../lib/browsers/chrome')
@@ -350,7 +350,7 @@ describe('Proxy Performance', function () {
           https: { cert, key },
         }).start(HTTPS_PROXY_PORT),
 
-        Config.setupFullConfigWithDefaults({
+        setupFullConfigWithDefaults({
           projectRoot: '/tmp/a',
           config: {
             supportFile: false,
