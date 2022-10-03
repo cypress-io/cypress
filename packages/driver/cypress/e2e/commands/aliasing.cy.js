@@ -495,5 +495,14 @@ describe('src/cy/commands/aliasing', () => {
         .get('@lastDiv')
       })
     })
+
+    // TODO: Re-enable as part of https://github.com/cypress-io/cypress/issues/23902
+    it.skip('maintains .within() context while reading aliases', () => {
+      cy.get('#specific-contains').within(() => {
+        cy.get('span').as('spanWithin').should('have.length', 1)
+      })
+
+      cy.get('@spanWithin').should('have.length', 1)
+    })
   })
 })
