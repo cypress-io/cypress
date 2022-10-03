@@ -275,7 +275,7 @@ namespace CypressCommandsTests {
   })
   Cypress.Commands.overwrite<'type', 'element'>('type', (originalFn, element, text, options?: Partial<Cypress.TypeOptions & {sensitive: boolean}>) => {
     element // $ExpectType JQueryWithSelector<HTMLElement>
-    text // $ExpectType string
+    text // $ExpectType string | number
 
     if (options && options.sensitive) {
       // turn off original log
@@ -284,7 +284,7 @@ namespace CypressCommandsTests {
       Cypress.log({
         $el: element,
         name: 'type',
-        message: '*'.repeat(text.length),
+        message: '*'.repeat(`${text}`.length),
       })
     }
 
