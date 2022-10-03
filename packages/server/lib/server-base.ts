@@ -35,6 +35,7 @@ import { RemoteStates } from './remote_states'
 import { cookieJar } from './util/cookies'
 import type { Automation } from './automation/automation'
 import type { AutomationCookie } from './automation/cookies'
+import { resourceTypeAndCredentialManager, ResourceTypeAndCredentialManager } from './util/resourceTypeAndCredentialManager'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -112,6 +113,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected request: Request
   protected isListening: boolean
   protected socketAllowed: SocketAllowed
+  protected resourceTypeAndCredentialManager: ResourceTypeAndCredentialManager
   protected _fileServer
   protected _baseUrl: string | null
   protected _server?: DestroyableHttpServer
@@ -141,6 +143,8 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
         fileServerPort: this._fileServer?.port(),
       }
     })
+
+    this.resourceTypeAndCredentialManager = resourceTypeAndCredentialManager
   }
 
   ensureProp = ensureProp
@@ -181,6 +185,8 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       this.socket.toDriver('cross:origin:automation:cookies', cookies)
     })
+
+    this.socket.localBus.on('request:sent:with:credentials', this.resourceTypeAndCredentialManager.set)
   }
 
   abstract createServer (
@@ -218,7 +224,12 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     clientCertificates.loadClientCertificateConfig(config)
 
-    this.createNetworkProxy({ config, getAutomation, remoteStates: this._remoteStates, shouldCorrelatePreRequests })
+    this.createNetworkProxy({
+      config, getAutomation,
+      remoteStates: this._remoteStates,
+      resourceTypeAndCredentialManager: this.resourceTypeAndCredentialManager,
+      shouldCorrelatePreRequests,
+    })
 
     if (config.experimentalSourceRewriting) {
       createInitialWorkers()
@@ -310,7 +321,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return e
   }
 
-  createNetworkProxy ({ config, getAutomation, remoteStates, shouldCorrelatePreRequests }) {
+  createNetworkProxy ({ config, getAutomation, remoteStates, resourceTypeAndCredentialManager, shouldCorrelatePreRequests }) {
     const getFileServerToken = () => {
       return this._fileServer.token
     }
@@ -328,6 +339,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       netStubbingState: this.netStubbingState,
       request: this.request,
       serverBus: this._eventBus,
+      resourceTypeAndCredentialManager,
     })
   }
 
@@ -341,6 +353,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       this.networkProxy.reset()
       this.netStubbingState.reset()
       this._remoteStates.reset()
+      this.resourceTypeAndCredentialManager.clear()
     }
 
     const io = this.socket.startListening(this.server, automation, config, options)
@@ -446,7 +459,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       // get the port & hostname from host header
       const fullUrl = `${req.connection.encrypted ? 'https' : 'http'}://${host}`
       const { hostname, protocol } = url.parse(fullUrl)
-      const { port } = cors.parseUrlIntoDomainTldPort(fullUrl)
+      const { port } = cors.parseUrlIntoHostProtocolDomainTldPort(fullUrl)
 
       const onProxyErr = (err, req, res) => {
         return debug('Got ERROR proxying websocket connection', { err, port, protocol, hostname, req })
@@ -475,7 +488,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   reset () {
     this._networkProxy?.reset()
-
+    this.resourceTypeAndCredentialManager.clear()
     const baseUrl = this._baseUrl ?? '<root>'
 
     return this._remoteStates.set(baseUrl)
