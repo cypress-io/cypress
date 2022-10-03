@@ -15,8 +15,7 @@ const mochaAwesomes = [
 describe('e2e reporters', () => {
   systemTests.setup()
 
-  // TODO: Skipping due to stack trace discrepancies. Will revisit with: https://github.com/cypress-io/cypress/issues/22983
-  it.skip('reports error if cannot load reporter', function () {
+  it('reports error if cannot load reporter', function () {
     return systemTests.exec(this, {
       spec: 'simple_passing.cy.js',
       snapshot: true,
@@ -26,8 +25,7 @@ describe('e2e reporters', () => {
   })
 
   // https://github.com/cypress-io/cypress/issues/1192
-  // TODO: Skipping due to stack trace discrepancies. Will revisit with: https://github.com/cypress-io/cypress/issues/22983
-  it.skip('reports error when thrown from reporter', function () {
+  it('reports error when thrown from reporter', function () {
     return systemTests.exec(this, {
       spec: 'simple_passing.cy.js',
       snapshot: true,
@@ -36,8 +34,7 @@ describe('e2e reporters', () => {
     })
   })
 
-  // TODO: Skipping due to stack trace discrepancies. Will revisit with: https://github.com/cypress-io/cypress/issues/22983
-  it.skip('supports junit reporter and reporter options', function () {
+  it('supports junit reporter and reporter options', function () {
     return systemTests.exec(this, {
       spec: 'simple_passing.cy.js',
       snapshot: true,
@@ -139,8 +136,7 @@ describe('e2e reporters', () => {
     })
   })
 
-  // TODO: Skipping due to stack trace discrepancies. Will revisit with: https://github.com/cypress-io/cypress/issues/22983
-  it.skip('supports teamcity reporter and reporter options', function () {
+  it('supports teamcity reporter and reporter options', function () {
     return systemTests.exec(this, {
       spec: 'simple_passing.cy.js',
       snapshot: true,
