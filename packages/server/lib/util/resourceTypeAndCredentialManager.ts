@@ -84,5 +84,5 @@ class ResourceTypeAndCredentialManagerClass {
 // export as a singleton
 export const resourceTypeAndCredentialManager = new ResourceTypeAndCredentialManagerClass()
 
-// export but only as a type
+// export but only as a type. We do NOT want others to create instances of the class as it is intended to be a singleton
 export type ResourceTypeAndCredentialManager = ResourceTypeAndCredentialManagerClass

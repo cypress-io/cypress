@@ -24,21 +24,22 @@ const LogRequest: RequestMiddleware = function () {
 
 const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
   this.req.isAUTFrame = !!this.req.headers['x-cypress-is-aut-frame']
-  const requestIsXhrOrFetch = this.req.headers['x-cypress-request']
+  const requestIsXhrOrFetch = this.req.headers['x-cypress-is-xhr-or-fetch']
 
   if (this.req.headers['x-cypress-is-aut-frame']) {
     delete this.req.headers['x-cypress-is-aut-frame']
   }
 
-  if (this.req.headers['x-cypress-request']) {
-    this.debug(`found x-cypress-request header. Deleting x-cypress-request header.`)
-    delete this.req.headers['x-cypress-request']
+  if (this.req.headers['x-cypress-is-xhr-or-fetch']) {
+    this.debug(`found x-cypress-is-xhr-or-fetch header. Deleting x-cypress-is-xhr-or-fetch header.`)
+    delete this.req.headers['x-cypress-is-xhr-or-fetch']
   }
 
   if (!this.config.experimentalSessionAndOrigin ||
     !doesTopNeedToBeSimulated(this) ||
-    // this should be unreachable, as the x-cypress-request header is only attached if the resource type is 'xhr'
-    // inside the extension or electron equivalent. This is only needed for defensive purposes.
+    // this should be unreachable, as the x-cypress-is-xhr-or-fetch header is only attached if
+    // the resource type is 'xhr' or 'fetch or 'true' (in the case of electron|extension).
+    // This is only needed for defensive purposes.
     (requestIsXhrOrFetch !== 'true' && requestIsXhrOrFetch !== 'xhr' && requestIsXhrOrFetch !== 'fetch')) {
     this.next()
 

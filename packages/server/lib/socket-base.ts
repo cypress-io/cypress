@@ -464,7 +464,6 @@ export class SocketBase {
             case 'cross:origin:automation:cookies:received':
               return this.localBus.emit('cross:origin:automation:cookies:received')
             case 'request:sent:with:credentials':
-              // NOTE: this is currently a no-op until the server logic is implemented
               return this.localBus.emit('request:sent:with:credentials', args[0])
             default:
               throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
