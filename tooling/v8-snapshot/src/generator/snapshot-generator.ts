@@ -220,9 +220,6 @@ export class SnapshotGenerator {
     this.nodeEnv = nodeEnv
     this._flags = new GeneratorFlags(mode)
     this.bundlerPath = getBundlerPath()
-    this.auxiliaryData = {
-      typescriptTranspilationRequired: this.nodeModulesOnly,
-    }
 
     const auxiliaryDataKeys = Object.keys(this.auxiliaryData || {})
 
