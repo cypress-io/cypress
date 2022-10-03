@@ -166,6 +166,7 @@ export default (Commands, Cypress, cy, state) => {
     }))
 
     this.set('timeout', userOptions.timeout)
+    this.set('_log', log)
 
     if (aliasRe.test(selector)) {
       return getAlias.call(this, selector, log, cy)
