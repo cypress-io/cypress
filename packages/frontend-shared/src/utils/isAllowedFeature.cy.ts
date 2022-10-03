@@ -19,12 +19,12 @@ describe('isAllowedFeature', () => {
   // and assert on the expected user status derived from those flags
   // and provided by loginConnectStore.userStatus
   const setUpStatus = (status: UserStatus) => {
-    // set a default valid number of days since first open
+    const { setFirstOpened, setPromptShown, setFlag } = store
+
+    // set a default valid number of days since first open & nav prompt shown
     // individual tests may override
-
-    const { setFirstOpened, setFlag } = store
-
     setFirstOpened(Date.now() - interval('5 days'))
+    setPromptShown('ci1', Date.now() - interval('5 days'))
 
     switch (status) {
       case 'isLoggedOut':
@@ -144,9 +144,9 @@ describe('isAllowedFeature', () => {
       context('nav CI prompt was shown less than one day ago', () => {
         userStatuses.forEach((status) => {
           it(`returns false for status ${status}`, () => {
+            setUpStatus(status)
             store.setPromptShown('ci1', Date.now() - interval('23 hours'))
 
-            setUpStatus(status)
             const result = isAllowedFeature('specsListBanner', store)
 
             expect(result).to.be.false
