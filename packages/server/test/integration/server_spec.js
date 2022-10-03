@@ -606,6 +606,7 @@ describe('Server', () => {
                 domain: 'go',
                 tld: 'com',
                 port: '80',
+                protocol: 'http:',
               },
             })
           })
@@ -922,6 +923,7 @@ describe('Server', () => {
               domain: 'google',
               tld: 'com',
               port: '80',
+              protocol: 'http:',
             },
           })
         })
@@ -952,6 +954,7 @@ describe('Server', () => {
               domain: 'cypress',
               port: '80',
               tld: 'io',
+              protocol: 'http:',
             },
             origin: 'http://cypress.io',
             strategy: 'http',
@@ -989,6 +992,7 @@ describe('Server', () => {
                 domain: 'cypress',
                 port: '80',
                 tld: 'io',
+                protocol: 'http:',
               },
               origin: 'http://www.cypress.io',
               strategy: 'http',
@@ -1022,6 +1026,7 @@ describe('Server', () => {
                 domain: '',
                 port: '3500',
                 tld: 'localhost',
+                protocol: 'http:',
               },
               origin: 'http://localhost:3500',
               strategy: 'http',
@@ -1052,6 +1057,7 @@ describe('Server', () => {
                 domain: '',
                 port: '3500',
                 tld: 'localhost',
+                protocol: 'http:',
               },
               origin: 'http://localhost:3500',
               strategy: 'http',
@@ -1087,6 +1093,7 @@ describe('Server', () => {
                 domain: '',
                 port: '3500',
                 tld: 'localhost',
+                protocol: 'http:',
               },
               origin: 'http://localhost:3500',
               strategy: 'http',
@@ -1175,6 +1182,7 @@ describe('Server', () => {
               domain: 'google',
               tld: 'com',
               port: '80',
+              protocol: 'http:',
             },
           })
         }).then(() => {
@@ -1257,6 +1265,7 @@ describe('Server', () => {
               domain: 'google',
               tld: 'com',
               port: '80',
+              protocol: 'http:',
             },
           })
         }).then(() => {
@@ -1330,6 +1339,7 @@ describe('Server', () => {
                 domain: 'google',
                 tld: 'com',
                 port: '80',
+                protocol: 'http:',
               },
             })
           })
@@ -1374,6 +1384,7 @@ describe('Server', () => {
               domain: 'foobar',
               tld: 'com',
               port: '8443',
+              protocol: 'https:',
             },
           })
         }).then(() => {
@@ -1447,6 +1458,7 @@ describe('Server', () => {
                 domain: 'foobar',
                 tld: 'com',
                 port: '8443',
+                protocol: 'https:',
               },
             })
           })
@@ -1499,6 +1511,7 @@ describe('Server', () => {
               domain: '',
               tld: 's3.amazonaws.com',
               port: '443',
+              protocol: 'https:',
             },
           })
         }).then(() => {
@@ -1578,6 +1591,7 @@ describe('Server', () => {
                 domain: '',
                 tld: 's3.amazonaws.com',
                 port: '443',
+                protocol: 'https:',
               },
             })
           })
