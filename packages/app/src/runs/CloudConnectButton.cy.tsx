@@ -16,7 +16,7 @@ describe('<CloudConnectButton />', { viewportHeight: 60, viewportWidth: 400 }, (
     beforeEach(() => {
       loginConnectStore = useLoginConnectStore()
 
-      loginConnectStore.setStatus('isLoggedIn', true)
+      loginConnectStore.setFlag('isLoggedIn', true)
     })
 
     it('show project connect if not connected', () => {

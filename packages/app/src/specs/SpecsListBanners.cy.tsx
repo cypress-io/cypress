@@ -7,7 +7,7 @@ import { CloudUserStubs, CloudProjectStubs } from '@packages/graphql/test/stubCl
 import { AllowedState, BannerIds } from '@packages/types'
 import { assignIn, set } from 'lodash'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
-import type { LoginConnectField } from '@packages/frontend-shared/src/store/login-connect-store'
+import type { LoginConnectBooleanField } from '@packages/frontend-shared/src/store/login-connect-store'
 const AlertSelector = 'alert-header'
 const AlertCloseBtnSelector = 'alert-suffix-icon'
 
@@ -114,8 +114,8 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
 
         const loginConnectStore = useLoginConnectStore()
 
-        bannerTrueConditions[bannerTestId].forEach((status: LoginConnectField) => {
-          loginConnectStore.setStatus(status, true)
+        bannerTrueConditions[bannerTestId].forEach((status: LoginConnectBooleanField) => {
+          loginConnectStore.setFlag(status, true)
         })
 
         cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')

@@ -31,9 +31,9 @@ describe('<LoginConnectModalsContent />', () => {
 
   context('when user is logged in', () => {
     it('shows "Create Project" state if project is not set up', () => {
-      const { openLoginConnectModal, setStatus } = useLoginConnectStore()
+      const { openLoginConnectModal, setFlag } = useLoginConnectStore()
 
-      setStatus('isLoggedIn', true)
+      setFlag('isLoggedIn', true)
 
       cy.mountFragment(LoginConnectModalsContentFragmentDoc, {
         onResult: (result) => {

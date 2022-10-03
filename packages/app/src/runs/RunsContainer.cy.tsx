@@ -15,7 +15,7 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
     beforeEach(() => {
       const loginConnectStore = useLoginConnectStore()
 
-      loginConnectStore.setStatus('isLoggedIn', true)
+      loginConnectStore.setFlag('isLoggedIn', true)
     })
 
     it('renders with expected runs if there is a cloud project id', () => {

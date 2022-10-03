@@ -62,7 +62,7 @@ subscription CloudViewerAndProject_CheckCloudOrgMembership {
 `
 
 const loginConnectStore = useLoginConnectStore()
-const { setStatus, setLoginError, setUserData, setPromptShown, setFirstOpened, setBannersState } = loginConnectStore
+const { setFlag, setLoginError, setUserData, setPromptShown, setFirstOpened, setBannersState } = loginConnectStore
 
 useSubscription({ query: CloudViewerAndProject_CheckCloudOrgMembershipDocument })
 
@@ -104,18 +104,18 @@ watchEffect(() => {
   const error = ['AUTH_COULD_NOT_LAUNCH_BROWSER', 'AUTH_ERROR_DURING_LOGIN', 'AUTH_COULD_NOT_LAUNCH_BROWSER'].includes(query.data.value?.authState?.name ?? '')
 
   if (isProjectConnected !== loginConnectStore.isProjectConnected) {
-    setStatus('isProjectConnected', isProjectConnected)
+    setFlag('isProjectConnected', isProjectConnected)
   }
 
-  setStatus('isConfigLoaded', isConfigLoaded)
+  setFlag('isConfigLoaded', isConfigLoaded)
 
   if (isLoggedIn !== loginConnectStore.isLoggedIn) {
-    setStatus('isLoggedIn', isLoggedIn)
+    setFlag('isLoggedIn', isLoggedIn)
   }
 
-  setStatus('isOrganizationLoaded', isOrganizationLoaded)
-  setStatus('isMemberOfOrganization', isMemberOfOrganization)
-  setStatus('hasRecordedRuns', hasRecordedRuns)
+  setFlag('isOrganizationLoaded', isOrganizationLoaded)
+  setFlag('isMemberOfOrganization', isMemberOfOrganization)
+  setFlag('hasRecordedRuns', hasRecordedRuns)
   setLoginError(error)
   setUserData((query.data.value?.cloudViewer ?? query.data.value?.cachedUser) ?? undefined)
 })
