@@ -919,12 +919,6 @@ describe('src/cy/commands/querying', () => {
   })
 
   context('#contains', () => {
-    it('should keep multiple contains() separate', () => {
-      cy.contains('New York').as('alias')
-      cy.contains('Nested Find').invoke('remove')
-      cy.get('@alias').should('exist')
-    })
-
     it('is scoped to the body and will not return title elements', () => {
       cy.contains('DOM Fixture').then(($el) => {
         expect($el).not.to.match('title')
@@ -1177,6 +1171,20 @@ describe('src/cy/commands/querying', () => {
 
       cy.visit('fixtures/dom.html')
       cy.contains(/=[0-6]/, { timeout: 100 }).should('have.text', 'a=2')
+    })
+
+    it('does not interfere with other aliased .contains()', () => {
+      /*
+       * There was a regression (no github issue logged) while refactoring .contains() where if a test aliased
+       * a query using .contains(), future .contains() calls could overwrite its internal state, causing the first one
+       * to look for the second one's arguments rather than its own.
+       *
+       * This test guards against that regression; if the `contains('New York')` inside @newYork alias were
+       * overwritten by contains(`Nested Find`), then the existence assertion would fail.
+       */
+      cy.contains('New York').as('newYork')
+      cy.contains('Nested Find').invoke('remove')
+      cy.get('@newYork').should('exist')
     })
 
     describe('should(\'not.exist\')', () => {
