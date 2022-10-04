@@ -90,7 +90,7 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
     ].filter((p) => p != null),
   }
 
-  if (!config.cypressConfig.isInteractive) {
+  if (config.cypressConfig.isTextTerminal) {
     viteBaseConfig.server = {
       ...(viteBaseConfig.server || {}),
       // Disable file watching and HMR when executing tests in `run` mode

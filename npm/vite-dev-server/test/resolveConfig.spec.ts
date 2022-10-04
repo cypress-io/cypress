@@ -100,7 +100,7 @@ describe('resolveConfig', function () {
     })
 
     it('should be disabled in run mode', async () => {
-      viteDevServerConfig.cypressConfig.isInteractive = false
+      viteDevServerConfig.cypressConfig.isTextTerminal = true
       const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite)
 
       expect(viteConfig.server?.watch?.ignored).to.eql('**/*')
@@ -108,7 +108,7 @@ describe('resolveConfig', function () {
     })
 
     it('uses defaults in open mode', async () => {
-      viteDevServerConfig.cypressConfig.isInteractive = true
+      viteDevServerConfig.cypressConfig.isTextTerminal = false
       const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite)
 
       expect(viteConfig.server?.watch?.ignored).to.be.undefined

@@ -67,7 +67,7 @@ function webpackDevServer4 (
   finalWebpackConfig: Record<string, any>,
 ) {
   const { devServerConfig: { cypressConfig: { devServerPublicPathRoute } } } = config
-  const isOpenMode = config.devServerConfig.cypressConfig.isInteractive
+  const isOpenMode = !config.devServerConfig.cypressConfig.isTextTerminal
   const WebpackDevServer = config.sourceWebpackModulesResult.webpackDevServer.module
   const webpackDevServerConfig: WebpackDevServer4Configuration = {
     host: '127.0.0.1',
@@ -97,7 +97,7 @@ function webpackDevServer3 (
   finalWebpackConfig: Record<string, any>,
 ) {
   const { devServerConfig: { cypressConfig: { devServerPublicPathRoute } } } = config
-  const isOpenMode = config.devServerConfig.cypressConfig.isInteractive
+  const isOpenMode = !config.devServerConfig.cypressConfig.isTextTerminal
   const WebpackDevServer = config.sourceWebpackModulesResult.webpackDevServer.module
   const webpackDevServerConfig: WebpackDevServer3Configuration = {
     // @ts-ignore

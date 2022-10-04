@@ -223,7 +223,7 @@ describe('makeWebpackConfig', () => {
       })
 
       it('is disabled in run mode', async () => {
-        devServerConfig.cypressConfig.isInteractive = false
+        devServerConfig.cypressConfig.isTextTerminal = true
 
         const actual = await makeWebpackConfig({
           devServerConfig,
@@ -234,7 +234,7 @@ describe('makeWebpackConfig', () => {
       })
 
       it('uses defaults in open mode', async () => {
-        devServerConfig.cypressConfig.isInteractive = true
+        devServerConfig.cypressConfig.isTextTerminal = false
 
         const actual = await makeWebpackConfig({
           devServerConfig,
@@ -254,7 +254,7 @@ describe('makeWebpackConfig', () => {
       })
 
       it('is disabled in run mode', async () => {
-        devServerConfig.cypressConfig.isInteractive = false
+        devServerConfig.cypressConfig.isTextTerminal = true
 
         const actual = await makeWebpackConfig({
           devServerConfig,
@@ -265,7 +265,7 @@ describe('makeWebpackConfig', () => {
       })
 
       it('uses defaults in open mode', async () => {
-        devServerConfig.cypressConfig.isInteractive = true
+        devServerConfig.cypressConfig.isTextTerminal = false
 
         const actual = await makeWebpackConfig({
           devServerConfig,
