@@ -5,6 +5,7 @@ import $errUtils from '../cypress/error_utils'
 import $elements from '../dom/elements'
 import type { StateFunc } from '../cypress/state'
 import type { $Cy } from '../cypress/cy'
+import { isRunnerAbleToCommunicateWithAut } from '../util/commandAUTCommunication'
 
 const VALID_POSITIONS = 'topLeft top topRight left center right bottomLeft bottom bottomRight'.split(' ')
 
@@ -383,6 +384,32 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     })
   }
 
+  /**
+   * ensureCommandCanCommunicateWithAUT will check if the command should be able to communicate with the AUT
+   * If we can not communicate, throw an error.
+   * Intended to use within retry loops.
+   * err: optional error to pass end to be appended to if the assertion happened while the aut was cross origin.
+   * @returns true or throws an error
+   */
+  const ensureCommandCanCommunicateWithAUT = (err?): boolean => {
+    if (!isRunnerAbleToCommunicateWithAut()) {
+      const crossOriginCommandError = $errUtils.errByPath('miscellaneous.cross_origin_command', {
+        commandOrigin: window.location.origin,
+        autSuperDomainOrigin: state('autLocation').superDomainOrigin,
+      })
+
+      if (err) {
+        err = $errUtils.appendErrMsg(err, crossOriginCommandError.message)
+
+        throw err
+      } else {
+        throw crossOriginCommandError
+      }
+    }
+
+    return true
+  }
+
   return {
     ensureElement,
     ensureAttached,
@@ -400,6 +427,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     ensureValidPosition,
     ensureScrollability,
     ensureNotReadonly,
+    ensureCommandCanCommunicateWithAUT,
 
     // internal functions
     ensureSubjectByType,

@@ -8,7 +8,7 @@ window.Mocha['__zone_patch__'] = false
 import 'zone.js/testing'
 
 import { CommonModule } from '@angular/common'
-import { Component, EventEmitter, Type } from '@angular/core'
+import { Component, EventEmitter, SimpleChange, SimpleChanges, Type } from '@angular/core'
 import {
   ComponentFixture,
   getTestBed,
@@ -93,6 +93,11 @@ export type MountResponse<T> = {
    */
   component: T
 };
+
+// 'zone.js/testing' is not properly aliasing `it.skip` but it does provide `xit`/`xspecify`
+// Written up under https://github.com/angular/angular/issues/46297 but is not seeing movement
+// so we'll patch here pending a fix in that library
+globalThis.it.skip = globalThis.xit
 
 /**
  * Bootstraps the TestModuleMetaData passed to the TestBed
@@ -210,10 +215,9 @@ function setupFixture<T> (
  * @param {ComponentFixture<T>} fixture Fixture for debugging and testing a component.
  * @returns {T} Component being mounted
  */
-function setupComponent<T> (
+function setupComponent<T extends { ngOnChanges? (changes: SimpleChanges): void }> (
   config: MountConfig<T>,
-  fixture: ComponentFixture<T>,
-): T {
+  fixture: ComponentFixture<T>): T {
   let component: T = fixture.componentInstance
 
   if (config?.componentProperties) {
@@ -228,6 +232,23 @@ function setupComponent<T> (
         component[key] = createOutputSpy(`${key}Spy`)
       }
     })
+  }
+
+  // Manually call ngOnChanges when mounting components using the class syntax.
+  // This is necessary because we are assigning input values to the class directly
+  // on mount and therefore the ngOnChanges() lifecycle is not triggered.
+  if (component.ngOnChanges && config.componentProperties) {
+    const { componentProperties } = config
+
+    const simpleChanges: SimpleChanges = Object.entries(componentProperties).reduce((acc, [key, value]) => {
+      acc[key] = new SimpleChange(null, value, true)
+
+      return acc
+    }, {})
+
+    if (Object.keys(componentProperties).length > 0) {
+      component.ngOnChanges(simpleChanges)
+    }
   }
 
   return component

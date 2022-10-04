@@ -100,6 +100,8 @@ export = {
 
   formatBrowsersToOptions: utils.formatBrowsersToOptions,
 
+  setFocus,
+
   _setInstance (_instance: BrowserInstance) {
     // for testing
     instance = _instance
@@ -108,15 +110,6 @@ export = {
   // note: does not guarantee that `browser` is still running
   getBrowserInstance () {
     return instance
-  },
-
-  getAllBrowsersWith (nameOrPath?: string) {
-    debug('getAllBrowsersWith %o', { nameOrPath })
-    if (nameOrPath) {
-      return utils.ensureAndGetByNameOrPath(nameOrPath, true)
-    }
-
-    return utils.getBrowsers()
   },
 
   async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance | null> {
@@ -196,5 +189,4 @@ export = {
 
     return instance
   },
-  setFocus,
 } as const

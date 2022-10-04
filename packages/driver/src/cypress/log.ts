@@ -15,7 +15,7 @@ import type { StateFunc } from './state'
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child|system/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
-const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName groupLevel hookId instrument isStubbed group message method name numElements showError numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
+const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName groupLevel hookId instrument isStubbed group message method name numElements showError numResponses referencesAlias renderProps sessionInfo state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let counter = 0
@@ -374,16 +374,16 @@ export class Log {
     }
 
     if (this.config('experimentalSessionAndOrigin') && !Cypress.isCrossOriginSpecBridge) {
-      const activeSpecBridgeOriginPolicyIfApplicable = this.state('currentActiveOriginPolicy') || undefined
+      const activeSpecBridgeSuperDomainOriginIfApplicable = this.state('currentActiveSuperDomainOrigin') || undefined
       // @ts-ignore
-      const { originPolicy: originPolicyThatIsSoonToBeOrIsActive } = Cypress.Location.create(this.state('anticipatingCrossOriginResponse')?.href || this.state('url'))
+      const { superDomainOrigin: superDomainOriginThatIsSoonToBeOrIsActive } = Cypress.Location.create(this.state('url'))
 
-      if (activeSpecBridgeOriginPolicyIfApplicable && activeSpecBridgeOriginPolicyIfApplicable === originPolicyThatIsSoonToBeOrIsActive) {
+      if (activeSpecBridgeSuperDomainOriginIfApplicable && activeSpecBridgeSuperDomainOriginIfApplicable === superDomainOriginThatIsSoonToBeOrIsActive) {
         Cypress.emit('request:snapshot:from:spec:bridge', {
           log: this,
           name,
           options,
-          specBridge: activeSpecBridgeOriginPolicyIfApplicable,
+          specBridge: activeSpecBridgeSuperDomainOriginIfApplicable,
           addSnapshot: this.addSnapshot,
         })
 
@@ -641,10 +641,6 @@ class LogManager {
       log.wrapConsoleProps()
 
       this.addToLogs(log)
-
-      if (options.sessionInfo) {
-        Cypress.emit('session:add', log.toJSON())
-      }
 
       if (options.emitOnly) {
         return

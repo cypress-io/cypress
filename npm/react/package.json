@@ -27,7 +27,7 @@
     "react-router-dom": "6.0.0-alpha.1",
     "semver": "^7.3.2",
     "typescript": "^4.7.4",
-    "vite": "3.0.3",
+    "vite": "3.1.0",
     "vite-plugin-require-transform": "1.0.3"
   },
   "peerDependencies": {
@@ -45,7 +45,7 @@
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
-  "homepage": "https://github.com/cypress-io/cypress/blob/master/npm/react/#readme",
+  "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/react/#readme",
   "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Freact&template=1-bug-report.md&title=",
   "keywords": [

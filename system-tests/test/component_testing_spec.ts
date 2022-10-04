@@ -107,13 +107,17 @@ describe(`React major versions with Webpack`, function () {
   }
 })
 
-const ANGULAR_MAJOR_VERSIONS = ['13', '14']
+const ANGULAR_MAJOR_VERSIONS = ['13', '14', '15']
 
 describe(`Angular CLI major versions`, () => {
   systemTests.setup()
 
   for (const majorVersion of ANGULAR_MAJOR_VERSIONS) {
-    const spec = `${majorVersion === '14' ? 'src/app/components/standalone.component.cy.ts,src/app/mount.cy.ts' : 'src/app/mount.cy.ts'}`
+    let spec = 'src/**/*.cy.ts,!src/app/errors.cy.ts'
+
+    if (majorVersion === '13') {
+      spec = `${spec},!src/app/components/standalone.component.cy.ts`
+    }
 
     systemTests.it(`v${majorVersion} with mount tests`, {
       project: `angular-${majorVersion}`,
@@ -140,7 +144,7 @@ describe('svelte component testing', () => {
     systemTests.it(`svelte + ${bundler}`, {
       project: `svelte-${bundler}`,
       testingType: 'component',
-      spec: '**/*.cy.js',
+      spec: '**/*.cy.js,!src/errors.cy.js',
       browser: 'chrome',
       expectedExitCode: 0,
     })

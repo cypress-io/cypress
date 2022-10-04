@@ -35,6 +35,7 @@ import { RemoteStates } from './remote_states'
 import { cookieJar } from './util/cookies'
 import type { Automation } from './automation/automation'
 import type { AutomationCookie } from './automation/cookies'
+import { resourceTypeAndCredentialManager, ResourceTypeAndCredentialManager } from './util/resourceTypeAndCredentialManager'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -112,6 +113,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected request: Request
   protected isListening: boolean
   protected socketAllowed: SocketAllowed
+  protected resourceTypeAndCredentialManager: ResourceTypeAndCredentialManager
   protected _fileServer
   protected _baseUrl: string | null
   protected _server?: DestroyableHttpServer
@@ -141,6 +143,8 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
         fileServerPort: this._fileServer?.port(),
       }
     })
+
+    this.resourceTypeAndCredentialManager = resourceTypeAndCredentialManager
   }
 
   ensureProp = ensureProp
@@ -174,14 +178,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   setupCrossOriginRequestHandling () {
-    this._eventBus.on('cross:origin:delaying:html', (request) => {
-      this.socket.localBus.once('cross:origin:release:html', () => {
-        this._eventBus.emit('cross:origin:release:html')
-      })
-
-      this.socket.toDriver('cross:origin:delaying:html', request)
-    })
-
     this._eventBus.on('cross:origin:automation:cookies', (cookies: AutomationCookie[]) => {
       this.socket.localBus.once('cross:origin:automation:cookies:received', () => {
         this._eventBus.emit('cross:origin:automation:cookies:received')
@@ -189,6 +185,8 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       this.socket.toDriver('cross:origin:automation:cookies', cookies)
     })
+
+    this.socket.localBus.on('request:sent:with:credentials', this.resourceTypeAndCredentialManager.set)
   }
 
   abstract createServer (
@@ -226,7 +224,12 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     clientCertificates.loadClientCertificateConfig(config)
 
-    this.createNetworkProxy({ config, getAutomation, remoteStates: this._remoteStates, shouldCorrelatePreRequests })
+    this.createNetworkProxy({
+      config, getAutomation,
+      remoteStates: this._remoteStates,
+      resourceTypeAndCredentialManager: this.resourceTypeAndCredentialManager,
+      shouldCorrelatePreRequests,
+    })
 
     if (config.experimentalSourceRewriting) {
       createInitialWorkers()
@@ -247,7 +250,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this.getCurrentBrowser = getCurrentBrowser
 
     this.setupCrossOriginRequestHandling()
-    this._remoteStates.addEventListeners(this.socket.localBus)
 
     const runnerSpecificRouter = testingType === 'e2e'
       ? createRoutesE2E(routeOptions)
@@ -319,7 +321,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return e
   }
 
-  createNetworkProxy ({ config, getAutomation, remoteStates, shouldCorrelatePreRequests }) {
+  createNetworkProxy ({ config, getAutomation, remoteStates, resourceTypeAndCredentialManager, shouldCorrelatePreRequests }) {
     const getFileServerToken = () => {
       return this._fileServer.token
     }
@@ -337,6 +339,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       netStubbingState: this.netStubbingState,
       request: this.request,
       serverBus: this._eventBus,
+      resourceTypeAndCredentialManager,
     })
   }
 
@@ -344,11 +347,13 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.onRequest = this._onRequest.bind(this)
     options.netStubbingState = this.netStubbingState
     options.getRenderedHTMLOrigins = this._networkProxy?.http.getRenderedHTMLOrigins
+    options.getCurrentBrowser = () => this.getCurrentBrowser?.()
 
     options.onResetServerState = () => {
       this.networkProxy.reset()
       this.netStubbingState.reset()
       this._remoteStates.reset()
+      this.resourceTypeAndCredentialManager.clear()
     }
 
     const io = this.socket.startListening(this.server, automation, config, options)
@@ -438,12 +443,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // bail if this is our own namespaced socket.io / graphql-ws request
 
     if (req.url.startsWith(socketIoRoute)) {
-      if (this.getCurrentBrowser && this.getCurrentBrowser()?.name === 'webkit') {
-        // webkit uses polling transport for websocket, which will not trigger socketAllowed.add(...)
-        // skip isRequestAllowed for webkit
-        return
-      }
-
       if (!this.socketAllowed.isRequestAllowed(req)) {
         socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via a Cypress-launched browser.')
         socket.end()
@@ -460,7 +459,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
       // get the port & hostname from host header
       const fullUrl = `${req.connection.encrypted ? 'https' : 'http'}://${host}`
       const { hostname, protocol } = url.parse(fullUrl)
-      const { port } = cors.parseUrlIntoDomainTldPort(fullUrl)
+      const { port } = cors.parseUrlIntoHostProtocolDomainTldPort(fullUrl)
 
       const onProxyErr = (err, req, res) => {
         return debug('Got ERROR proxying websocket connection', { err, port, protocol, hostname, req })
@@ -489,7 +488,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   reset () {
     this._networkProxy?.reset()
-
+    this.resourceTypeAndCredentialManager.clear()
     const baseUrl = this._baseUrl ?? '<root>'
 
     return this._remoteStates.set(baseUrl)

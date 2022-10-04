@@ -15,6 +15,7 @@ import { of } from 'rxjs'
 import { ChildProvidersService } from "./components/child-providers.service";
 import { AnotherChildProvidersComponent } from "./components/another-child-providers.component";
 import { TestBed } from '@angular/core/testing'
+import { LifecycleComponent } from "./components/lifecycle.component";
 
 @Component({
   template: `<app-projection>Hello World</app-projection>`
@@ -283,8 +284,60 @@ describe("angular mount", () => {
     cy.get('button').contains('default another child message').click()
     cy.get('button').contains('test')
   })
-
   
+  it('handles ngOnChanges on mount', () => {
+    cy.mount(LifecycleComponent, {
+      componentProperties: {
+        name: 'Angular'
+      }
+    })
+
+    cy.get('p').should('have.text', 'Hi Angular. ngOnInit fired: true and ngOnChanges fired: true and conditionalName: false')
+  })
+
+  it('handles ngOnChanges on mount with templates', () => {
+    cy.mount('<app-lifecycle [name]="name"></app-lifecycle>', {
+      declarations: [LifecycleComponent],
+      componentProperties: {
+        name: 'Angular'
+      }
+    })
+
+    cy.get('p').should('have.text', 'Hi Angular. ngOnInit fired: true and ngOnChanges fired: true and conditionalName: false')
+  })
+  
+  it('creates simpleChanges from componentProperties and calls ngOnChanges on Mount', () => {
+    cy.mount(LifecycleComponent, {
+      componentProperties: {
+        name: 'CONDITIONAL NAME'
+      }
+    })
+    cy.get('p').should('have.text', 'Hi CONDITIONAL NAME. ngOnInit fired: true and ngOnChanges fired: true and conditionalName: true')
+  })
+
+  it('creates simpleChanges from componentProperties and calls ngOnChanges on Mount with template', () => {
+    cy.mount('<app-lifecycle [name]="name"></app-lifecycle>', {
+      declarations: [LifecycleComponent],
+      componentProperties: {
+        name: 'CONDITIONAL NAME'
+      }
+    })
+    cy.get('p').should('have.text', 'Hi CONDITIONAL NAME. ngOnInit fired: true and ngOnChanges fired: true and conditionalName: true')
+  })
+
+  it('ngOnChanges is not fired when no componentProperties given', () => {
+    cy.mount(LifecycleComponent)
+    cy.get('p').should('have.text', 'Hi . ngOnInit fired: true and ngOnChanges fired: false and conditionalName: false')
+  })
+
+  it('ngOnChanges is not fired when no componentProperties given with template', () => {
+    cy.mount('<app-lifecycle></app-lifecycle>', {
+      declarations: [LifecycleComponent]
+    })
+    cy.get('p').should('have.text', 'Hi . ngOnInit fired: true and ngOnChanges fired: false and conditionalName: false')
+  })
+
+
   describe("teardown", () => {
     beforeEach(() => {
       cy.get("[id^=root]").should("not.exist");

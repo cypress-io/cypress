@@ -30,18 +30,11 @@ import { useStudioStore } from '../store/studio-store'
 
 let _eventManager: EventManager | undefined
 
-export function createWebsocket (socketIoRoute: string) {
-  const socketConfig = {
-    path: socketIoRoute,
-    transports: ['websocket'],
-  }
-
-  const ws = client(socketConfig)
-
-  ws.on('connect_error', () => {
-    // fall back to polling if websocket fails to connect (webkit)
-    // https://github.com/socketio/socket.io/discussions/3998#discussioncomment-972316
-    ws.io.opts.transports = ['polling', 'websocket']
+export function createWebsocket (config: Cypress.Config) {
+  const ws = client({
+    path: config.socketIoRoute,
+    // TODO(webkit): the websocket socket.io transport is busted in WebKit, need polling
+    transports: config.browser.family === 'webkit' ? ['polling'] : ['websocket'],
   })
 
   ws.on('connect', () => {
@@ -74,7 +67,7 @@ export function getEventManager () {
 
 window.getEventManager = getEventManager
 
-let _autIframeModel: AutIframe
+let _autIframeModel: AutIframe | null
 
 /**
  * Creates an instance of an AutIframe model which ise used to control
@@ -105,7 +98,7 @@ function createIframeModel () {
     autIframe.detachDom,
     autIframe.restoreDom,
     autIframe.highlightEl,
-    autIframe.doesAUTMatchTopOriginPolicy,
+    autIframe.doesAUTMatchTopSuperDomainOrigin,
     getEventManager(),
     {
       selectorPlaygroundModel: getEventManager().selectorPlaygroundModel,
@@ -154,7 +147,7 @@ function setupRunner () {
     'Test Project',
     getEventManager(),
     window.UnifiedRunner.CypressJQuery,
-    window.UnifiedRunner.dom,
+    window.UnifiedRunner.highlight,
   )
 
   createIframeModel()
@@ -201,11 +194,11 @@ export async function teardown () {
  * Add a cross origin iframe for cy.origin support
  */
 export function addCrossOriginIframe (location) {
-  const id = `Spec Bridge: ${location.originPolicy}`
+  const id = `Spec Bridge: ${location.superDomainOrigin}`
 
   // if it already exists, don't add another one
   if (document.getElementById(id)) {
-    getEventManager().notifyCrossOriginBridgeReady(location.originPolicy)
+    getEventManager().notifyCrossOriginBridgeReady(location.superDomainOrigin)
 
     return
   }
@@ -216,7 +209,7 @@ export function addCrossOriginIframe (location) {
     // container since it needs to match the size of the top window for screenshots
     $container: document.body,
     className: 'spec-bridge-iframe',
-    src: `${location.originPolicy}/${getRunnerConfigFromWindow().namespace}/spec-bridge-iframes`,
+    src: `${location.superDomainOrigin}/${getRunnerConfigFromWindow().namespace}/spec-bridge-iframes`,
   })
 }
 

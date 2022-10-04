@@ -351,8 +351,8 @@ class Command extends Component<Props> {
                 )}
                 {isSessionCommand && (
                   <Tag
-                    content={model.renderProps.status}
-                    type={`${model.renderProps.status === 'failed' ? 'failed' : 'successful'}-status`}
+                    content={model.sessionInfo?.status}
+                    type={`${model.sessionInfo?.status === 'failed' ? 'failed' : 'successful'}-status`}
                   />
                 )}
                 {!model.visible && (
@@ -427,16 +427,16 @@ class Command extends Component<Props> {
   @action _toggleColumnPin = () => {
     if (this.props.appState.isRunning) return
 
-    const { id } = this.props.model
+    const { testId, id } = this.props.model
 
     if (this._isPinned()) {
       this.props.appState.pinnedSnapshotId = null
-      this.props.events.emit('unpin:snapshot', id)
+      this.props.events.emit('unpin:snapshot', testId, id)
       this._snapshot(true)
     } else {
       this.props.appState.pinnedSnapshotId = id as number
-      this.props.events.emit('pin:snapshot', id)
-      this.props.events.emit('show:command', this.props.model.id)
+      this.props.events.emit('pin:snapshot', testId, id)
+      this.props.events.emit('show:command', testId, id)
     }
   }
 
@@ -465,7 +465,7 @@ class Command extends Component<Props> {
 
       this._showTimeout = setTimeout(() => {
         runnablesStore.showingSnapshot = true
-        this.props.events.emit('show:snapshot', model.id)
+        this.props.events.emit('show:snapshot', model.testId, model.id)
       }, 50)
     } else {
       runnablesStore.attemptingShowSnapshot = false
@@ -476,7 +476,7 @@ class Command extends Component<Props> {
         // we aren't trying to show a different snapshot
         if (runnablesStore.showingSnapshot && !runnablesStore.attemptingShowSnapshot) {
           runnablesStore.showingSnapshot = false
-          this.props.events.emit('hide:snapshot', model.id)
+          this.props.events.emit('hide:snapshot', model.testId, model.id)
         }
       }, 50)
     }

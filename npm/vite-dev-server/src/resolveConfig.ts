@@ -6,7 +6,7 @@
 import debugFn from 'debug'
 import { importModule } from 'local-pkg'
 import { relative, resolve } from 'pathe'
-import type { InlineConfig } from 'vite'
+import type { InlineConfig, UserConfig } from 'vite'
 import path from 'path'
 
 import { configFiles } from './constants'
@@ -90,7 +90,15 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
     ].filter((p) => p != null),
   }
 
-  const finalConfig = vite.mergeConfig(viteBaseConfig, viteOverrides as Record<string, any>)
+  let resolvedOverrides: UserConfig = {}
+
+  if (typeof viteOverrides === 'function') {
+    resolvedOverrides = await viteOverrides()
+  } else if (typeof viteOverrides === 'object') {
+    resolvedOverrides = viteOverrides
+  }
+
+  const finalConfig = vite.mergeConfig(viteBaseConfig, resolvedOverrides)
 
   debug('The resolved server config is', JSON.stringify(finalConfig, null, 2))
 

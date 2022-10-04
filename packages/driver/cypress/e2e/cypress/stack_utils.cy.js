@@ -1,6 +1,5 @@
 const $stackUtils = require('@packages/driver/src/cypress/stack_utils').default
 const $sourceMapUtils = require('@packages/driver/src/cypress/source_map_utils').default
-const { stripIndent } = require('common-tags')
 
 describe('driver/src/cypress/stack_utils', () => {
   context('.replacedStack', () => {
@@ -21,6 +20,58 @@ describe('driver/src/cypress/stack_utils', () => {
       const stack = $stackUtils.replacedStack(err, 'new stack')
 
       expect(stack).to.equal('')
+    })
+  })
+
+  context('getRelativePathFromRoot', () => {
+    const relativeFile = 'relative/path/to/file.js'
+    const absoluteFile = 'User/ruby/cypress/packages/driver/relative/path/to/file.js'
+    const repoRoot = 'User/ruby/cypress'
+    const relativePathFromRoot = 'packages/driver/relative/path/to/file.js'
+
+    const actualPlatform = Cypress.config('platform')
+    const actualRepoRoot = Cypress.config('repoRoot')
+
+    after(() => {
+      // restore config values to prevent bleeding into subsequent tests
+      Cypress.config('platform', actualPlatform)
+      Cypress.config('repoRoot', actualRepoRoot)
+    })
+
+    it('returns relativeFile if absoluteFile is empty', () => {
+      const result = $stackUtils.getRelativePathFromRoot(relativeFile, undefined)
+
+      expect(result).to.equal(relativeFile)
+    })
+
+    it('returns relativeFile if `repoRoot` is not set in the config', () => {
+      const result = $stackUtils.getRelativePathFromRoot(relativeFile, absoluteFile)
+
+      expect(result).to.equal(relativeFile)
+    })
+
+    it('returns relativeFile if absoluteFile does not start with `repoRoot`', () => {
+      Cypress.config('repoRoot', 'User/ruby/test-repo')
+      const result = $stackUtils.getRelativePathFromRoot(relativeFile, absoluteFile)
+
+      expect(result).to.equal(relativeFile)
+    })
+
+    it('returns the relative path from root if the absoluteFile starts with `repoRoot`', () => {
+      Cypress.config('repoRoot', repoRoot)
+      const result = $stackUtils.getRelativePathFromRoot(relativeFile, absoluteFile)
+
+      expect(result).to.equal(relativePathFromRoot)
+    })
+
+    it('uses posix on windows', () => {
+      Cypress.config('repoRoot', 'C:/Users/Administrator/Documents/GitHub/cypress')
+      Cypress.config('platform', 'win32')
+      const absoluteFile = 'C:\\Users\\Administrator\\Documents\\GitHub\\cypress\\packages\\app/cypress/e2e/reporter_header.cy.ts'
+      const relativeFile = 'cypress/e2e/reporter_header.cy.ts'
+      const result = $stackUtils.getRelativePathFromRoot(relativeFile, absoluteFile)
+
+      expect(result).to.equal('packages/app/cypress/e2e/reporter_header.cy.ts')
     })
   })
 
@@ -80,19 +131,27 @@ describe('driver/src/cypress/stack_utils', () => {
       expect(codeFrame).to.be.an('object')
       expect(codeFrame.frame).to.contain(`  1 | it('is a failing test', () => {`)
       expect(codeFrame.frame).to.contain(`> 2 |   cy.get('.not-there'`)
-      expect(codeFrame.frame).to.contain(`    |     ^`)
+      expect(codeFrame.frame).to.contain(`    |      ^`)
       expect(codeFrame.frame).to.contain(`  3 | }`)
       expect(codeFrame.absoluteFile).to.equal('/dev/app/cypress/integration/features/source_map_spec.js')
       expect(codeFrame.relativeFile).to.equal('cypress/integration/features/source_map_spec.js')
       expect(codeFrame.language).to.equal('js')
       expect(codeFrame.line).to.equal(2)
-      expect(codeFrame.column).to.eq(5)
+      expect(codeFrame.column).to.eq(6)
     })
 
     it('does not add code frame if stack does not yield one', () => {
       cy.stub($sourceMapUtils, 'getSourceContents').returns(null)
 
       expect($stackUtils.getCodeFrame(originalErr)).to.be.undefined
+    })
+
+    it('relativeFile is relative to the repo root when `absoluteFile` starts with `repoRoot`', () => {
+      Cypress.config('repoRoot', '/dev')
+      cy.stub($sourceMapUtils, 'getSourceContents').returns(sourceCode)
+      const codeFrame = $stackUtils.getCodeFrame(originalErr)
+
+      expect(codeFrame.relativeFile).to.equal('app/cypress/integration/features/source_map_spec.js')
     })
   })
 
@@ -111,7 +170,7 @@ describe('driver/src/cypress/stack_utils', () => {
       .then((errorLocation) => {
         expect(errorLocation, 'does not have disk information').to.deep.equal({
           absoluteFile: undefined,
-          column: 4,
+          column: 3,
           fileUrl: 'http://localhost:8888/js/utils.js',
           function: '<unknown>',
           line: 9,
@@ -150,8 +209,8 @@ describe('driver/src/cypress/stack_utils', () => {
       const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
 
       expect(sourceStack.sourceMapped).to.equal(`Error: spec iframe stack
-    at foo.bar (some_other_file.ts:2:2)
-    at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:4)\
+    at foo.bar (some_other_file.ts:2:1)
+    at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:3)\
 `)
 
       expect(sourceStack.parsed).to.eql([
@@ -166,7 +225,7 @@ describe('driver/src/cypress/stack_utils', () => {
           relativeFile: 'some_other_file.ts',
           absoluteFile: '/dev/app/some_other_file.ts',
           line: 2,
-          column: 2,
+          column: 1,
           whitespace: '    ',
         },
         {
@@ -176,7 +235,7 @@ describe('driver/src/cypress/stack_utils', () => {
           relativeFile: 'cypress/integration/features/source_map_spec.coffee',
           absoluteFile: '/dev/app/cypress/integration/features/source_map_spec.coffee',
           line: 4,
-          column: 4,
+          column: 3,
           whitespace: '    ',
         },
       ])
@@ -186,8 +245,8 @@ describe('driver/src/cypress/stack_utils', () => {
       const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
 
       expect(sourceStack.sourceMapped).to.equal(`Error: spec iframe stack
-    at foo.bar (some_other_file.ts:2:2)
-    at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:4)\
+    at foo.bar (some_other_file.ts:2:1)
+    at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:3)\
 `)
     })
 
@@ -195,8 +254,8 @@ describe('driver/src/cypress/stack_utils', () => {
       generatedStack = generatedStack.split('\n').slice(1).join('\n')
       const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
 
-      expect(sourceStack.sourceMapped).to.equal(`    at foo.bar (some_other_file.ts:2:2)
-    at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:4)\
+      expect(sourceStack.sourceMapped).to.equal(`    at foo.bar (some_other_file.ts:2:1)
+    at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:3)\
 `)
     })
 
@@ -209,8 +268,8 @@ more
 lines
 
 Error: spec iframe stack
-    at foo.bar (some_other_file.ts:2:2)
-    at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:4)\
+    at foo.bar (some_other_file.ts:2:1)
+    at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:3)\
 `)
     })
 
@@ -230,8 +289,8 @@ Error: spec iframe stack
       const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
 
       expect(sourceStack.sourceMapped).to.equal(`Error: spec iframe stack
-    at foo.bar (cypress:///some_other_file.ts:2:2)
-    at Context.<anonymous> (webpack:///cypress/integration/features/source_map_spec.coffee:4:4)\
+    at foo.bar (cypress:///some_other_file.ts:2:1)
+    at Context.<anonymous> (webpack:///cypress/integration/features/source_map_spec.coffee:4:3)\
 `)
 
       expect(sourceStack.parsed).to.eql([
@@ -246,7 +305,7 @@ Error: spec iframe stack
           relativeFile: 'some_other_file.ts',
           absoluteFile: '/dev/app/some_other_file.ts',
           line: 2,
-          column: 2,
+          column: 1,
           whitespace: '    ',
         },
         {
@@ -256,7 +315,7 @@ Error: spec iframe stack
           relativeFile: 'cypress/integration/features/source_map_spec.coffee',
           absoluteFile: '/dev/app/cypress/integration/features/source_map_spec.coffee',
           line: 4,
-          column: 4,
+          column: 3,
           whitespace: '    ',
         },
       ])
@@ -278,8 +337,8 @@ Error: spec iframe stack
       const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
 
       expect(sourceStack.sourceMapped).to.equal(`Error: spec iframe stack
-    at foo.bar (cypress:////root/absolute/path/some_other_file.ts:2:2)
-    at Context.<anonymous> (webpack:////root/absolute/path/cypress/integration/features/source_map_spec.coffee:4:4)\
+    at foo.bar (cypress:////root/absolute/path/some_other_file.ts:2:1)
+    at Context.<anonymous> (webpack:////root/absolute/path/cypress/integration/features/source_map_spec.coffee:4:3)\
 `)
 
       expect(sourceStack.parsed).to.eql([
@@ -294,7 +353,7 @@ Error: spec iframe stack
           relativeFile: '/root/absolute/path/some_other_file.ts',
           absoluteFile: '/root/absolute/path/some_other_file.ts',
           line: 2,
-          column: 2,
+          column: 1,
           whitespace: '    ',
         },
         {
@@ -304,7 +363,7 @@ Error: spec iframe stack
           relativeFile: '/root/absolute/path/cypress/integration/features/source_map_spec.coffee',
           absoluteFile: '/root/absolute/path/cypress/integration/features/source_map_spec.coffee',
           line: 4,
-          column: 4,
+          column: 3,
           whitespace: '    ',
         },
       ])
@@ -317,7 +376,7 @@ Error: spec iframe stack
 
   context('.getSourceDetailsForFirstLine', () => {
     it('parses good stack trace', () => {
-      const stack = stripIndent`
+      const stack = `
         Error
           at Suite.eval (http://localhost:8888/__cypress/tests?p=cypress/integration/spec.js:101:3)
           at Object../cypress/integration/spec.js (http://localhost:8888/__cypress/tests?p=cypress/integration/spec.js:100:1)
@@ -336,7 +395,7 @@ Error: spec iframe stack
     })
 
     it('parses anonymous eval line', () => {
-      const stack = stripIndent`
+      const stack = `
         SyntaxError: The following error originated from your application code, not from Cypress.
 
           > Identifier 'app' has already been declared
@@ -381,13 +440,13 @@ Error: spec iframe stack
 
       expect(details, 'minimal details').to.deep.equal({
         absoluteFile: undefined,
-        column: 2,
+        column: 1,
         fileUrl: undefined,
         function: '<unknown>',
         line: 1,
         originalFile: undefined,
         relativeFile: undefined,
-        whitespace: '    ',
+        whitespace: '            ',
       })
     })
 
@@ -400,7 +459,7 @@ Error: spec iframe stack
       })
 
       // stack is fairly irrelevant in this test - testing transforming getSourcePosition response
-      const stack = stripIndent`
+      const stack = `
         Error
           at Object../cypress/integration/spec%with space &^$ emoji👍_你好.js (http://localhost:50129/__cypress/tests?p=cypress/integration/spec%25with%20space%20%26^$%20emoji👍_你好.js:99:1)
       `
@@ -421,7 +480,7 @@ Error: spec iframe stack
       })
 
       // stack is fairly irrelevant in this test - testing transforming getSourcePosition response
-      const stack = stripIndent`
+      const stack = `
         Error
           at Object../cypress/integration/spec.js (http://localhost:50129/__cypress/tests?p=/root/path/cypress/integration/spec.js:99:1)
       `

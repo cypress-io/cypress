@@ -82,7 +82,7 @@ declare namespace Cypress {
 
   type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
 
-  type BrowserFamily = 'chromium' | 'firefox'
+  type BrowserFamily = 'chromium' | 'firefox' | 'webkit'
 
   /**
    * Describes a browser Cypress can control
@@ -642,6 +642,12 @@ declare namespace Cypress {
     off: Actions
 
     /**
+     * Used to import dependencies within the cy.origin() callback
+     * @see https://on.cypress.io/origin
+     */
+    require: (id: string) => any
+
+    /**
      * Trigger action
      * @private
      */
@@ -655,7 +661,22 @@ declare namespace Cypress {
   }
 
   interface SessionOptions {
-    validate?: () => false | void
+    /**
+     * Whether or not to persist the session across all specs in the run.
+     * @default {false}
+     */
+    cacheAcrossSpecs?: boolean,
+    /**
+     * Function to run immediately after the session is created and `setup` function runs or
+     * after a session is restored and the page is cleared. If this returns `false`, throws an
+     * exception, returns a Promise which resolves to `false` or rejects or contains any failing
+     * Cypress command, the session is considered invalid.
+     *
+     * If validation fails immediately after `setup`, the test will fail.
+     * If validation fails after restoring a session, `setup` will re-run.
+     * @default {false}
+     */
+    validate?: () => Promise<false | void> | false | void
   }
 
   type CanReturnChainable = void | Chainable | Promise<unknown>
@@ -705,7 +726,7 @@ declare namespace Cypress {
      *    cy.get('input[type=file]').selectFile(Cypress.Buffer.from('text'))
      *    cy.get('input[type=file]').selectFile({
      *      fileName: 'users.json',
-     *      fileContents: [{name: 'John Doe'}]
+     *      contents: [{name: 'John Doe'}]
      *    })
      */
     selectFile(files: FileReference | FileReference[], options?: Partial<SelectFileOptions>): Chainable<Subject>
@@ -1074,7 +1095,7 @@ declare namespace Cypress {
       *
       * @see https://on.cypress.io/session
       */
-    session(id: string | object, setup?: SessionOptions['validate'], options?: SessionOptions): Chainable<null>
+    session(id: string | object, setup?: () => void, options?: SessionOptions): Chainable<null>
 
     /**
      * Get the window.document of the page that is currently active.
@@ -2721,6 +2742,13 @@ declare namespace Cypress {
      */
     pageLoadTimeout: number
     /**
+     * Whether Cypress will search for and replace
+     * obstructive JS code in .js or .html files.
+     *
+     * @see https://on.cypress.io/configuration#modifyObstructiveCode
+     */
+    modifyObstructiveCode: boolean
+    /**
      * Time, in milliseconds, to wait for an XHR request to go out in a [cy.wait()](https://on.cypress.io/wait) command
      * @default 5000
      */
@@ -2877,6 +2905,11 @@ declare namespace Cypress {
      */
     experimentalStudio: boolean
     /**
+     * Adds support for testing in the WebKit browser engine used by Safari. See https://on.cypress.io/webkit-experiment for more information.
+     * @default false
+     */
+    experimentalWebKitSupport: boolean
+    /**
      * Number of times to retry a failed test.
      * If a number is set, tests will retry in both runMode and openMode.
      * To enable test retries only in runMode, set e.g. `{ openMode: null, runMode: 2 }`
@@ -2969,13 +3002,6 @@ declare namespace Cypress {
      */
     isInteractive: boolean
     /**
-     * Whether Cypress will search for and replace
-     * obstructive JS code in .js or .html files.
-     *
-     * @see https://on.cypress.io/configuration#modifyObstructiveCode
-     */
-    modifyObstructiveCode: boolean
-    /**
      * The platform Cypress is running on.
      */
     platform: 'linux' | 'darwin' | 'win32'
@@ -2988,6 +3014,7 @@ declare namespace Cypress {
     // Internal or Unlisted at server/lib/config_options
     namespace: string
     projectRoot: string
+    repoRoot: string | null
     devServerPublicPathRoute: string
     cypressBinaryRoot: string
   }
@@ -3061,18 +3088,21 @@ declare namespace Cypress {
 
   type DevServerFn<ComponentDevServerOpts = any> = (cypressDevServerConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
 
+  type ConfigHandler<T> = T
+    | (() => T | Promise<T>)
+
   type DevServerConfigOptions = {
     bundler: 'webpack'
     framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next' | 'svelte'
-    webpackConfig?: PickConfigOpt<'webpackConfig'>
+    webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>
   } | {
     bundler: 'vite'
     framework: 'react' | 'vue' | 'svelte'
-    viteConfig?: Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>
+    viteConfig?: ConfigHandler<Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>>
   } | {
     bundler: 'webpack',
     framework: 'angular',
-    webpackConfig?: PickConfigOpt<'webpackConfig'>,
+    webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>,
     options?: {
       projectConfig: AngularDevServerProjectConfig
     }
@@ -5480,6 +5510,7 @@ declare namespace Cypress {
     extensions: string[]
     preferences: { [key: string]: any }
     args: string[]
+    env: { [key: string]: any }
   }
 
   interface Dimensions {
