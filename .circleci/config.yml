@@ -28,6 +28,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - fix-ci-deps
+        - issue-23843_electron_21_upgrade
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -37,6 +38,7 @@ macWorkflowFilters: &darwin-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ 'correct-dashboard-results', << pipeline.git.branch >> ]
+    - equal: [ 'issue-23843_electron_21_upgrade', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -45,6 +47,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ 'issue-23843_electron_21_upgrade', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -63,7 +66,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ linux-arm64, << pipeline.git.branch >> ]
-    - equal: [ 'mikep/21720-ct-stack-traces', << pipeline.git.branch >> ]
+    - equal: [ 'issue-23843_electron_21_upgrade', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -72,7 +75,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+      - image: cypress/browsers:node16.16.0-chrome106-ff99-edge
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -82,7 +85,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+      - image: cypress/browsers:node16.16.0-chrome106-ff99-edge
         user: node
     environment:
       PLATFORM: linux
@@ -93,7 +96,7 @@ executors:
   mac:
     macos:
       # Executor should have Node >= required version
-      xcode: "13.0.0"
+      xcode: "14.0.0"
     resource_class: macos.x86.medium.gen2
     environment:
       PLATFORM: darwin
@@ -128,7 +131,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "webkit-experimental" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "issue-23843_electron_21_upgrade" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1899,7 +1902,6 @@ jobs:
 
   npm-cypress-schematic:
     <<: *defaults
-    resource_class: small
     steps:
       - restore_cached_workspace
       - run:
