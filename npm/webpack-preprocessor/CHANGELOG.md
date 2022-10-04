@@ -1,3 +1,10 @@
+# [@cypress/webpack-preprocessor-v5.13.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.13.0...@cypress/webpack-preprocessor-v5.13.1) (2022-10-04)
+
+
+### Bug Fixes
+
+* **webpack-preprocessor:** Move md5 from devDependencies to dependencies ([#24098](https://github.com/cypress-io/cypress/issues/24098)) ([e72d607](https://github.com/cypress-io/cypress/commit/e72d607814a08e3f6310bf91c24ecd8fc160ff3a))
+
 # [@cypress/webpack-preprocessor-v5.13.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.12.2...@cypress/webpack-preprocessor-v5.13.0) (2022-09-29)
 
 
