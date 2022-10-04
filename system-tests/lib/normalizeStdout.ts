@@ -83,9 +83,7 @@ export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'f
   // foo.js:1:2 - file locations including line/column numbers
   // <unknown> - rendered when location cannot be determined
   // [native code] - rendered in some cases by WebKit browser
-  // TODO: Added <anonymous> here to get tests to pass for now. Will revisit with: https://github.com/cypress-io/cypress/issues/22983
-  // const location = `(?:.*:\\d+:\\d+|<unknown>|\\[native code\\])`
-  const location = `(?:.*:\\d+:\\d+|<unknown>|\\[native code\\]|<anonymous>)`
+  const location = `(?:.*:\\d+:\\d+|<unknown>|\\[native code\\])`
   // matches stack lines with Chrome-style rendering:
   // '  at foobar (foo.js:1:2)'
   // '  at foo.js:1:2'

@@ -30,10 +30,6 @@ const logError = debug('cypress:snapgen:error')
  *
  * @property nodeModulesOnly if `true` only node modules will be included in the snapshot and app modules are omitted
  *
- * @property sourcemapEmbed if `true` a sourcemap of modules included in the snapshot is embedded in the snapshot itself
- *
- * @property sourcemapInline if `true` a sourcemap of modules included in the snapshot is inlined into the snapshot script
- *
  * @property previousHealthy relative paths to modules that were previously
  * determined to be _healthy_ that is they can be included into the snapshot
  * without being deferred
@@ -89,8 +85,6 @@ export type GenerationOpts = {
   cacheDir: string
   snapshotBinDir: string
   nodeModulesOnly: boolean
-  sourcemapEmbed: boolean
-  sourcemapInline: boolean
   previousHealthy?: string[]
   previousDeferred?: string[]
   previousNoRewrite?: string[]
@@ -105,8 +99,6 @@ function getDefaultGenerationOpts (projectBaseDir: string): GenerationOpts {
     cacheDir: join(projectBaseDir, 'cache'),
     snapshotBinDir: projectBaseDir,
     nodeModulesOnly: true,
-    sourcemapEmbed: false,
-    sourcemapInline: false,
     previousDeferred: [],
     previousHealthy: [],
     previousNoRewrite: [],
@@ -142,10 +134,6 @@ export class SnapshotGenerator {
   private readonly electronVersion: string
   /** See {@link GenerationOpts} nodeModulesOnly */
   private readonly nodeModulesOnly: boolean
-  /** See {@link GenerationOpts} sourcemapEmbed */
-  private readonly sourcemapEmbed: boolean
-  /** See {@link GenerationOpts} sourcemapInline */
-  private readonly sourcemapInline: boolean
   /** See {@link GenerationOpts} previousDeferred */
   private readonly previousDeferred: Set<string>
   /** See {@link GenerationOpts} previousHealthy */
@@ -201,8 +189,6 @@ export class SnapshotGenerator {
     const {
       cacheDir,
       nodeModulesOnly,
-      sourcemapEmbed,
-      sourcemapInline,
       previousDeferred,
       previousHealthy,
       previousNoRewrite,
@@ -227,8 +213,6 @@ export class SnapshotGenerator {
     this.electronVersion = resolveElectronVersion(projectBaseDir)
 
     this.nodeModulesOnly = nodeModulesOnly
-    this.sourcemapEmbed = sourcemapEmbed
-    this.sourcemapInline = sourcemapInline
     this.previousDeferred = new Set(previousDeferred)
     this.previousHealthy = new Set(previousHealthy)
     this.previousNoRewrite = new Set(previousNoRewrite)
@@ -244,8 +228,6 @@ export class SnapshotGenerator {
       cacheDir,
       snapshotScriptPath: this.snapshotScriptPath,
       nodeModulesOnly: this.nodeModulesOnly,
-      sourcemapEmbed: this.sourcemapEmbed,
-      sourcemapInline: this.sourcemapInline,
       previousDeferred: this.previousDeferred.size,
       previousHealthy: this.previousHealthy.size,
       previousNoRewrite: this.previousNoRewrite.size,
@@ -309,8 +291,6 @@ export class SnapshotGenerator {
         resolverMap: this.resolverMap,
         auxiliaryData: this.auxiliaryData,
         nodeModulesOnly: this.nodeModulesOnly,
-        sourcemapEmbed: this.sourcemapEmbed,
-        sourcemapInline: this.sourcemapInline,
         sourcemap: true,
         sourcemapExternalPath,
         nodeEnv: this.nodeEnv,
@@ -400,8 +380,6 @@ export class SnapshotGenerator {
         deferred,
         norewrite,
         nodeModulesOnly: this.nodeModulesOnly,
-        sourcemapEmbed: false,
-        sourcemapInline: false,
         sourcemap: false,
         resolverMap: this.resolverMap,
         auxiliaryData: this.auxiliaryData,

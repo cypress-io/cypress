@@ -2,7 +2,7 @@ import type {
   TransformOptions,
 } from 'esbuild'
 
-import type { RawSourceMap, SourceMapConsumer } from 'source-map-js'
+import type { SourceMapConsumer } from 'source-map-js'
 
 // -----------------
 // Loading/Require
@@ -150,12 +150,6 @@ export type PackherdTranspileOpts = {
 // -----------------
 // SourcemapSupport
 // -----------------
-/**
- * @private
- * @category Sourcemap
- */
-export type SourceMapLookup = (uri: string) => RawSourceMap | undefined
-
 /**
  * @private
  * @category Sourcemap

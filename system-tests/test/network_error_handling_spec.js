@@ -373,8 +373,7 @@ describe('e2e network error handling', function () {
       })
     })
 
-    // TODO: skipping this test until we address stack traces: https://github.com/cypress-io/cypress/issues/22983
-    it.skip('tests run as expected', function () {
+    it('tests run as expected', function () {
       return systemTests.exec(this, {
         spec: 'network_error_handling.cy.js',
         video: false,
