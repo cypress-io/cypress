@@ -2,7 +2,7 @@ import { debug as debugFn } from 'debug'
 import * as path from 'path'
 import { merge } from 'webpack-merge'
 import { importModule } from 'local-pkg'
-import type { Configuration, EntryObject } from 'webpack'
+import type { Configuration, EntryObject, RuleSetRule } from 'webpack'
 import { makeDefaultWebpackConfig } from './makeDefaultWebpackConfig'
 import { CypressCTWebpackPlugin } from './CypressCTWebpackPlugin'
 import type { CreateFinalWebpackConfig } from './createWebpackDevServer'
@@ -67,6 +67,22 @@ function modifyWebpackConfigForCypress (webpackConfig: Partial<Configuration>) {
     webpackConfig.module.unsafeCache = (module: any) => {
       return originalCachePredicate(module) && !/[\\/]webpack-dev-server[\\/]dist[\\/]browser\.js/.test(module.resource)
     }
+  }
+
+  if (webpackConfig?.module?.rules) {
+    let newRules: (RuleSetRule | '...')[] = []
+
+    webpackConfig.module.rules.forEach((ele: any) => {
+      const regex = new RegExp(ele.test)
+
+      if (regex.test('test.css')) {
+        ele = { ...ele, ...{ sideEffects: true } }
+      }
+
+      newRules.push(ele)
+    })
+
+    webpackConfig.module.rules = newRules
   }
 
   return webpackConfig
