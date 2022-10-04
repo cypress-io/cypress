@@ -29,6 +29,7 @@ describe('remote states', () => {
           port: '3500',
           domain: '',
           tld: 'localhost',
+          protocol: 'http:',
         },
       })
     })
@@ -52,6 +53,7 @@ describe('remote states', () => {
           port: '3500',
           domain: '',
           tld: 'localhost',
+          protocol: 'http:',
         },
       })
 
@@ -69,6 +71,7 @@ describe('remote states', () => {
           port: '3500',
           domain: '',
           tld: 'localhost',
+          protocol: 'http:',
         },
       })
     })
@@ -88,6 +91,7 @@ describe('remote states', () => {
           port: '3500',
           domain: '',
           tld: 'localhost',
+          protocol: 'http:',
         },
       })
     })
@@ -107,6 +111,7 @@ describe('remote states', () => {
           port: '3500',
           domain: '',
           tld: 'localhost',
+          protocol: 'http:',
         },
       })
     })
@@ -156,6 +161,7 @@ describe('remote states', () => {
           port: '443',
           domain: 'google',
           tld: 'com',
+          protocol: 'https:',
         },
       })
     })
@@ -177,6 +183,7 @@ describe('remote states', () => {
           port: '443',
           domain: 'google',
           tld: 'com',
+          protocol: 'https:',
         },
       })
 
@@ -200,6 +207,7 @@ describe('remote states', () => {
           port: '443',
           domain: 'google',
           tld: 'com',
+          protocol: 'https:',
         },
       })
 
@@ -224,6 +232,7 @@ describe('remote states', () => {
           port: '443',
           domain: 'google',
           tld: 'com',
+          protocol: 'https:',
         },
       })
 
@@ -241,6 +250,7 @@ describe('remote states', () => {
           port: '443',
           domain: 'google',
           tld: 'com',
+          protocol: 'https:',
         },
       })
     })
@@ -258,6 +268,7 @@ describe('remote states', () => {
           port: '443',
           domain: 'google',
           tld: 'com',
+          protocol: 'https:',
         },
       })
     })
@@ -275,6 +286,7 @@ describe('remote states', () => {
           port: '80',
           domain: 'google',
           tld: 'com',
+          protocol: 'http:',
         },
       })
     })
@@ -292,6 +304,7 @@ describe('remote states', () => {
           port: '4200',
           domain: '',
           tld: 'localhost',
+          protocol: 'http:',
         },
       })
     })
@@ -333,6 +346,7 @@ describe('remote states', () => {
           port: '80',
           domain: 'foobar',
           tld: 'com',
+          protocol: 'http:',
         },
       }
 

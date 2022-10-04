@@ -1,3 +1,16 @@
+# [@cypress/vite-dev-server-v3.2.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.1.1...@cypress/vite-dev-server-v3.2.0) (2022-09-29)
+
+
+### Bug Fixes
+
+* support type: module in Node.js 16.17.0+ and 18.6.0+ ([#23637](https://github.com/cypress-io/cypress/issues/23637)) ([b6dad0a](https://github.com/cypress-io/cypress/commit/b6dad0a674279936a9816939963bbf129647cee7))
+
+
+### Features
+
+* allow vite/webpack config to be an async function ([#23605](https://github.com/cypress-io/cypress/issues/23605)) ([4c647f6](https://github.com/cypress-io/cypress/commit/4c647f6d5b0f58a797b50436e63c645418bc07ac))
+* CT stack traces ([#23916](https://github.com/cypress-io/cypress/issues/23916)) ([bf590eb](https://github.com/cypress-io/cypress/commit/bf590eba3f1cf46b04f6a1252e51da5c5a3dc7c2))
+
 # [@cypress/vite-dev-server-v3.1.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.1.0...@cypress/vite-dev-server-v3.1.1) (2022-08-15)
 
 
