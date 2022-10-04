@@ -13,7 +13,7 @@
     "webpack-dev-server": "^4"
   },
   "sideEffects": [
-    "./cypress/support/*.ts"
+    "./cypress/support/*.js"
   ],
   "projectFixtureDirectory": "react"
 }
