@@ -15,8 +15,8 @@ import type {
 } from '@packages/types'
 
 import browserUtils from './browsers/utils'
-import auth from './dashboard/auth'
-import user from './dashboard/user'
+import auth from './cloud/auth'
+import user from './cloud/user'
 import cohorts from './cohorts'
 import { openProject } from './open_project'
 import cache from './cache'

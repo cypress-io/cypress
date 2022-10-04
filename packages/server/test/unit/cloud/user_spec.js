@@ -1,10 +1,10 @@
 require('../../spec_helper')
 
-const api = require('../../../lib/dashboard/api')
+const api = require('../../../lib/cloud/api')
 const cache = require('../../../lib/cache')
-const user = require('../../../lib/dashboard/user')
+const user = require('../../../lib/cloud/user')
 
-describe('lib/dashboard/user', () => {
+describe('lib/cloud/user', () => {
   context('.get', () => {
     it('calls cache.getUser', () => {
       sinon.stub(cache, 'getUser').resolves({ name: 'brian' })

@@ -1,8 +1,8 @@
 require('../../spec_helper')
 
-const { apiRoutes } = require('../../../lib/dashboard/routes')
+const { apiRoutes } = require('../../../lib/cloud/routes')
 
-describe('lib/dashboard/routes', () => {
+describe('lib/cloud/routes', () => {
   describe('api routes', () => {
     it('api', () => {
       expect(apiRoutes.api()).to.eq('http://localhost:1234/')

@@ -2,13 +2,13 @@ require('../../spec_helper')
 
 delete global.fs
 
-const api = require('../../../lib/dashboard/api')
-const user = require('../../../lib/dashboard/user')
-const exception = require('../../../lib/dashboard/exception')
+const api = require('../../../lib/cloud/api')
+const user = require('../../../lib/cloud/user')
+const exception = require('../../../lib/cloud/exception')
 const system = require('../../../lib/util/system')
 const pkg = require('@packages/root')
 
-describe('lib/dashboard/exceptions', () => {
+describe('lib/cloud/exceptions', () => {
   context('.getAuthToken', () => {
     it('returns authToken from cache', () => {
       sinon.stub(user, 'get').resolves({ authToken: 'auth-token-123' })

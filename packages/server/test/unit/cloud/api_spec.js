@@ -6,10 +6,10 @@ const {
   agent,
 } = require('@packages/network')
 const pkg = require('@packages/root')
-const api = require('../../../lib/dashboard/api')
+const api = require('../../../lib/cloud/api')
 const cache = require('../../../lib/cache')
 const errors = require('../../../lib/errors')
-const machineId = require('../../../lib/dashboard/machine_id')
+const machineId = require('../../../lib/cloud/machine_id')
 const Promise = require('bluebird')
 
 const API_BASEURL = 'http://localhost:1234'
@@ -23,7 +23,7 @@ const makeError = (details = {}) => {
   return _.extend(new Error(details.message || 'Some error'), details)
 }
 
-describe('lib/dashboard/api', () => {
+describe('lib/cloud/api', () => {
   beforeEach(() => {
     nock(API_BASEURL)
     .matchHeader('x-route-version', '2')
@@ -65,6 +65,20 @@ describe('lib/dashboard/api', () => {
 
         expect(agent.addRequest).to.be.calledWithMatch(sinon.match.any, {
           href: 'http://localhost:1234/ping',
+        })
+      })
+    })
+
+    it('sets rejectUnauthorized on the request', () => {
+      nock.cleanAll()
+
+      return api.ping()
+      .thenThrow()
+      .catch(() => {
+        expect(agent.addRequest).to.be.calledOnce
+
+        expect(agent.addRequest).to.be.calledWithMatch(sinon.match.any, {
+          rejectUnauthorized: true,
         })
       })
     })
