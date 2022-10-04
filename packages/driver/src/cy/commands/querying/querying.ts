@@ -184,7 +184,7 @@ export default (Commands, Cypress, cy, state) => {
       let $el
 
       try {
-        let scope = cy.state('withinSubject') || userOptions.withinSubject
+        let scope = userOptions.withinSubject || cy.state('withinSubject')
 
         if (scope && scope[0]) {
           scope = scope[0]
