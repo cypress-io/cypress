@@ -132,7 +132,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "issue-23843_electron_21_upgrade" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "mschile/issue-22994_app_config" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -484,7 +484,7 @@ commands:
           name: Run driver tests in Cypress
           # TODO: Fix this when we resolve the issue with snapshots in the renderer process of the electron browser: https://github.com/cypress-io/cypress/issues/22985
           environment:
-            CYPRESS_KONFIG_ENV: production
+            CYPRESS_CONFIG_ENV: production
           command: |
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
@@ -568,7 +568,7 @@ commands:
               # internal PR
               cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
               DEBUG=<<parameters.debug>> \
-              CYPRESS_KONFIG_ENV=production \
+              CYPRESS_CONFIG_ENV=production \
               CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
@@ -594,7 +594,7 @@ commands:
               cd ../..
 
               DEBUG=<<parameters.debug>> \
-              CYPRESS_KONFIG_ENV=production \
+              CYPRESS_CONFIG_ENV=production \
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
@@ -1729,7 +1729,7 @@ jobs:
           working_directory: packages/reporter
       - run:
           command: |
-            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_CONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
@@ -1752,7 +1752,7 @@ jobs:
       - restore_cached_system_tests_deps
       - run:
           command: |
-            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_CONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
@@ -1774,7 +1774,7 @@ jobs:
       - restore_cached_system_tests_deps
       - run:
           command: |
-            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_CONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
