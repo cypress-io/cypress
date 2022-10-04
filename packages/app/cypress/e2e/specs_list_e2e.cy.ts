@@ -246,7 +246,7 @@ describe('App: Spec List (E2E)', () => {
       })
 
       // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23305
-      it.skip('saves the filter when navigating to a spec and back', function () {
+      it('saves the filter when navigating to a spec and back', { retries: 15 }, function () {
         const targetSpecFile = 'accounts_list.spec.js'
 
         clearSearchAndType(targetSpecFile)

@@ -47,7 +47,7 @@ describe('Proxy Logging', () => {
 
   context('request logging', () => {
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23443
-    it.skip('fetch log shows resource type, url, method, and status code and has expected snapshots and consoleProps', (done) => {
+    it('fetch log shows resource type, url, method, and status code and has expected snapshots and consoleProps', { retries: 15 }, (done) => {
       fetch('/some-url')
 
       // trigger: Cypress.Log() called
@@ -264,7 +264,7 @@ describe('Proxy Logging', () => {
       })
 
       // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23420
-      it.skip('intercept log has consoleProps with intercept info', (done) => {
+      it('intercept log has consoleProps with intercept info', { retries: 15 }, (done) => {
         cy.intercept('/some-url', 'stubbed response').as('alias')
         .then(() => {
           fetch('/some-url')

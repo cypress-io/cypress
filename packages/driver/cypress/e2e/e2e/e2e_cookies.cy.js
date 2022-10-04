@@ -20,7 +20,7 @@ describe('e2e cookies spec', () => {
   context('__Host- prefix', () => {
     // https://github.com/cypress-io/cypress/issues/8261
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
-    it.skip('can set __Host- cookie', () => {
+    it('can set __Host- cookie', { retries: 15 }, () => {
       cy.visit('https://example.com')
       cy.setCookie('__Host-foobar', 'someval', {
         domain: 'example.com',
@@ -37,7 +37,7 @@ describe('e2e cookies spec', () => {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
-    it.skip('errors when __Host- cookie and secure:false', (done) => {
+    it('errors when __Host- cookie and secure:false', { retries: 15 }, (done) => {
       cy.visit('https://example.com')
       cy.setCookie('__Host-foobar', 'someval')
 
@@ -51,7 +51,7 @@ describe('e2e cookies spec', () => {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
-    it.skip('errors when __Host- cookie and path', (done) => {
+    it('errors when __Host- cookie and path', { retries: 15 }, (done) => {
       cy.visit('https://example.com')
       cy.setCookie('__Host-foobar', 'someval', {
         secure: true,
@@ -67,7 +67,7 @@ describe('e2e cookies spec', () => {
 
   context('__Secure- prefix', () => {
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
-    it.skip('can set __Secure- cookie', () => {
+    it('can set __Secure- cookie', { retries: 15 }, () => {
       cy.visit('https://example.com')
       cy.setCookie('__Secure-foobar', 'someval', {
         domain: 'example.com',
@@ -84,7 +84,7 @@ describe('e2e cookies spec', () => {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
-    it.skip('errors when __Secure- cookie secure:false', (done) => {
+    it('errors when __Secure- cookie secure:false', { retries: 15 }, (done) => {
       cy.visit('https://example.com')
       cy.setCookie('__Secure-foobar', 'someval', {
         domain: 'example.com',

@@ -436,7 +436,7 @@ describe('src/cy/commands/cookies', () => {
   })
 
   // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
-  context.skip('#setCookie', () => {
+  context('#setCookie', { retries: 15 }, () => {
     beforeEach(() => {
       cy.stub(Cypress.utils, 'addTwentyYears').returns(12345)
     })
@@ -510,8 +510,9 @@ describe('src/cy/commands/cookies', () => {
     })
 
     describe('timeout', () => {
-      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
-      it.skip('sets timeout to Cypress.config(responseTimeout)', {
+      it('sets timeout to Cypress.config(responseTimeout)', {
+        // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+        retries: 15,
         responseTimeout: 2500,
       }, () => {
         Cypress.automation.resolves(null)
@@ -524,7 +525,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
-      it.skip('can override timeout', () => {
+      it('can override timeout', { retries: 15 }, () => {
         Cypress.automation.resolves(null)
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
@@ -535,7 +536,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
-      it.skip('clears the current timeout and restores after success', () => {
+      it('clears the current timeout and restores after success', { retries: 15 }, () => {
         Cypress.automation.resolves(null)
 
         cy.timeout(100)
@@ -568,7 +569,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
-      it.skip('logs once on error', function (done) {
+      it('logs once on error', { retries: 15 }, function (done) {
         const error = new Error('some err message')
 
         error.name = 'foo'
@@ -589,7 +590,7 @@ describe('src/cy/commands/cookies', () => {
       })
 
       // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
-      it.skip('throws after timing out', function (done) {
+      it('throws after timing out', { retries: 15 }, function (done) {
         Cypress.automation.resolves(Promise.delay(1000))
 
         cy.on('fail', (err) => {

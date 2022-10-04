@@ -2386,7 +2386,7 @@ describe('src/cy/commands/xhr', () => {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23245
-    describe.skip('{force404: false}', () => {
+    describe('{force404: false}', { retries: 15 }, () => {
       beforeEach(() => {
         cy
         .server()
@@ -2400,7 +2400,7 @@ describe('src/cy/commands/xhr', () => {
       })
 
       // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23245
-      it.skip('logs request + response headers', () => {
+      it('logs request + response headers', { retries: 15 }, () => {
         cy.then(function () {
           cy.wrap(this).its('lastLog').invoke('invoke', 'consoleProps').should((consoleProps) => {
             expect(consoleProps['Request Headers']).to.be.an('object')
@@ -2410,7 +2410,7 @@ describe('src/cy/commands/xhr', () => {
       })
 
       // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23247
-      it.skip('logs Method, Status, URL, and XHR', () => {
+      it('logs Method, Status, URL, and XHR', { retries: 15 }, () => {
         cy.then(function () {
           const { xhr } = cy.state('responses')[0]
 
@@ -2428,7 +2428,7 @@ describe('src/cy/commands/xhr', () => {
       })
 
       // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23246
-      it.skip('logs response', () => {
+      it('logs response', { retries: 15 }, () => {
         cy.then(function () {
           cy.wrap(this).its('lastLog').invoke('invoke', 'consoleProps').should((consoleProps) => {
             expect(consoleProps['Response Body'].trim()).to.deep.eq(JSON.stringify({

@@ -1648,8 +1648,10 @@ describe('lib/cypress', () => {
       })
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23149
-    it.skip('passes filtered options to Project#open and sets cli config', async function () {
+    it('passes filtered options to Project#open and sets cli config', async function () {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23149
+      this.retries(15)
+
       const open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
 
       sinon.stub(interactiveMode, 'ready')

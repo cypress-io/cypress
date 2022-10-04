@@ -585,7 +585,7 @@ describe('Launchpad: Setup Project', () => {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23153
-    it.skip('makes the right command for pnpm', () => {
+    it('makes the right command for pnpm', { retries: 15 }, () => {
       scaffoldAndOpenProject('pristine-pnpm')
 
       cy.visitLaunchpad()
@@ -598,7 +598,7 @@ describe('Launchpad: Setup Project', () => {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23153
-    it.skip('makes the right command for npm', () => {
+    it('makes the right command for npm', { retries: 15 }, () => {
       scaffoldAndOpenProject('pristine-npm')
 
       cy.visitLaunchpad()
@@ -673,7 +673,7 @@ describe('Launchpad: Setup Project', () => {
     })
 
     // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23418
-    it.skip('takes the user to first step of ct setup when switching from app', () => {
+    it('takes the user to first step of ct setup when switching from app', { retries: 15 }, () => {
       scaffoldAndOpenProject('pristine-with-e2e-testing')
       cy.visitLaunchpad()
       verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })

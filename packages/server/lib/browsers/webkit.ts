@@ -121,7 +121,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
      */
     private suppressUnhandledEconnreset () {
       unhandledExceptions.handle((err: NodeJS.ErrnoException) => {
-        return err.code === 'ECONNRESET'
+        return err.code !== 'ECONNRESET'
       })
 
       // restore normal exception handling behavior

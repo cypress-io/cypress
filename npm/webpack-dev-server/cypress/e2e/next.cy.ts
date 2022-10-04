@@ -76,7 +76,7 @@ for (const project of WEBPACK_REACT) {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23417
-    it.skip('should detect new spec', () => {
+    it('should detect new spec', { retries: 15 }, () => {
       cy.visitApp()
 
       cy.withCtx(async (ctx) => {
@@ -94,7 +94,7 @@ for (const project of WEBPACK_REACT) {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23417
-    it.skip('should allow import of global styles in support file', () => {
+    it('should allow import of global styles in support file', { retries: 15 }, () => {
       cy.visitApp()
       cy.contains('styles.cy.js').click()
       cy.waitForSpecToFinish({ passCount: 1 })

@@ -272,7 +272,7 @@ describe('src/cy/commands/navigation', () => {
   })
 
   // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23308
-  context.skip('#go', () => {
+  context('#go', { retries: 15 }, () => {
     // TODO: fix this
     it('sets timeout to Cypress.config(pageLoadTimeout)', {
       pageLoadTimeout: 4567,
@@ -846,7 +846,7 @@ describe('src/cy/commands/navigation', () => {
 
     // https://github.com/cypress-io/cypress/issues/1311
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23201
-    it.skip('window immediately resolves and doesn\'t reload when visiting the same URL with hashes', () => {
+    it('window immediately resolves and doesn\'t reload when visiting the same URL with hashes', { retries: 15 }, () => {
       const onLoad = cy.stub()
 
       cy
