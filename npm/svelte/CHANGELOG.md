@@ -1,3 +1,11 @@
+# [@cypress/svelte-v1.0.1](https://github.com/cypress-io/cypress/compare/@cypress/svelte-v1.0.0...@cypress/svelte-v1.0.1) (2022-09-29)
+
+
+### Bug Fixes
+
+* release svelte ([b86403f](https://github.com/cypress-io/cypress/commit/b86403fcbcc85ce5be1ca96bbf42357dd24c07dd))
+* **svelte:** default mount log to true ([#23771](https://github.com/cypress-io/cypress/issues/23771)) ([96b03ab](https://github.com/cypress-io/cypress/commit/96b03abc74cd7b27ef4bbd9b66d9464c1f9fc2f2))
+
 # @cypress/svelte-v1.0.0 (2022-08-30)
 
 

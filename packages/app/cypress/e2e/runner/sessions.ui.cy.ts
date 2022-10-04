@@ -330,6 +330,38 @@ describe('runner/cypress sessions.ui.spec', {
     validateSessionsInstrumentPanel(['spec_session_1', 'spec_session_2', 'global_session_1'])
     // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
   })
+
+  describe('errors', () => {
+    it('test error when setup has failing Cypress command', () => {
+      loadSpec({
+        projectName: 'session-and-origin-e2e-specs',
+        filePath: 'session/errors.cy.js',
+        failCount: 1,
+      })
+
+      cy.contains('.test', 'setup has failing command').as('setup_failed')
+      // test marked as failed and is expanded
+      cy.get('@setup_failed').should('have.attr', 'data-model-state', 'failed')
+      .children('.collapsible').should('have.class', 'is-open')
+      .within(() => {
+        // session is marked as 'failed' and is expanded
+        // setup group is expanded
+        cy.get('.command-name-session').eq(0).should('contain', 'session_1').as('session_command')
+        .children('.command-wrapper').find('.reporter-tag').should('contain', 'failed')
+
+        cy.get('@session_command')
+        .children('.command-child-container').should('exist')
+        .within(() => {
+          cy.get('.command-name-session')
+          .should('contain', 'Create new session')
+          .get('.command-child-container').should('exist')
+        })
+      })
+
+      // has error
+      cy.get('@setup_failed').contains('This error occurred while creating session. Because the session setup failed, we failed the test.')
+    })
+  })
 })
 
 describe('runner/cypress sessions.open_mode.spec', () => {
