@@ -48,7 +48,8 @@ export function makeDefaultWebpackConfig (
       new HtmlWebpackPlugin({
         template: indexHtmlFile,
         // Angular generates all of it's scripts with <script type="module">. Live-reloading breaks without this option.
-        ...(config.devServerConfig.framework === 'angular' ? { scriptLoading: 'module' } : {}),
+        // We need to manually set the base here to `/__cypres/src/` so that static assets load with our proxy
+        ...(config.devServerConfig.framework === 'angular' ? { scriptLoading: 'module', base: '/__cypress/src/' } : {}),
       }),
     ],
     devtool: 'inline-source-map',
