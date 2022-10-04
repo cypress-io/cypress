@@ -1,6 +1,6 @@
 const _ = require('lodash')
 const os = require('os')
-const debug = require('debug')('cypress:server:dashboard:api')
+const debug = require('debug')('cypress:server:cloud:api')
 const request = require('@cypress/request-promise')
 const Promise = require('bluebird')
 const humanInterval = require('human-interval')

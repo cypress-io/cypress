@@ -1,5 +1,5 @@
 const _ = require('lodash')
-const debug = require('debug')('cypress:server:dashboard:auth')
+const debug = require('debug')('cypress:server:cloud:auth')
 const express = require('express')
 const os = require('os')
 const pkg = require('@packages/root')

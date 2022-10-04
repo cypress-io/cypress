@@ -6,8 +6,8 @@ const commitInfo = require('@cypress/commit-info')
 const mockedEnv = require('mocked-env')
 
 const errors = require(`../../../lib/errors`)
-const api = require(`../../../lib/dashboard/api`)
-const exception = require(`../../../lib/dashboard/exception`)
+const api = require(`../../../lib/cloud/api`)
+const exception = require(`../../../lib/cloud/exception`)
 const recordMode = require(`../../../lib/modes/record`)
 const ciProvider = require(`../../../lib/util/ci_provider`)
 

@@ -11,9 +11,9 @@ const commitInfo = require('@cypress/commit-info')
 
 const { hideKeys } = require('@packages/config')
 
-const api = require('../dashboard/api')
-const exception = require('../dashboard/exception')
-const upload = require('../dashboard/upload')
+const api = require('../cloud/api')
+const exception = require('../cloud/exception')
+const upload = require('../cloud/upload')
 
 const errors = require('../errors')
 const capture = require('../capture')
