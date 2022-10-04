@@ -134,7 +134,7 @@ function isValidCypressInternalEnvValue (value) {
     return true
   }
 
-  // names of config environments, see "packages/server/config/app.yml"
+  // names of config environments, see "packages/server/config/app.json"
   const names = ['development', 'test', 'staging', 'production']
 
   return _.includes(names, value)
@@ -257,7 +257,7 @@ const getApplicationDataFolder = (...paths) => {
   const { env } = process
 
   // allow overriding the app_data folder
-  let folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
+  let folder = env.CYPRESS_CONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
 
   const PRODUCT_NAME = pkg.productName || pkg.name
   const OS_DATA_PATH = ospath.data()

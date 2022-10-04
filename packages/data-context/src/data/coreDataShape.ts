@@ -119,6 +119,7 @@ export interface CoreDataShape {
   cliTestingType: string | null
   activeBrowser: FoundBrowser | null
   machineBrowsers: Promise<FoundBrowser[]> | null
+  allBrowsers: Promise<FoundBrowser[]> | null
   servers: {
     appServer?: Maybe<Server>
     appServerPort?: Maybe<number>
@@ -160,6 +161,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     cliBrowser: modeOptions.browser ?? null,
     cliTestingType: modeOptions.testingType ?? null,
     machineBrowsers: null,
+    allBrowsers: null,
     hasInitializedMode: null,
     dashboardGraphQLError: null,
     dev: {

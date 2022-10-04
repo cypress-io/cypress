@@ -18,9 +18,14 @@ describe('@cypress/webpack-dev-server', function () {
           testingType: 'component',
           browser: 'chrome',
           snapshot: true,
-          expectedExitCode: 3,
+          expectedExitCode: 7,
           onStdout: (stdout) => {
-            return systemTests.normalizeWebpackErrors(stripAnsi(stdout))
+            const normalizedOutput: string = systemTests.normalizeWebpackErrors(stripAnsi(stdout))
+
+            // TODO: Figure out why we need to filter this out. Likely can be removed with https://github.com/cypress-io/cypress/issues/22985
+            return normalizedOutput.split('\n').filter((line) => {
+              return !line.includes('wait until bundle finished:')
+            }).join('\n')
           },
         })
       })
