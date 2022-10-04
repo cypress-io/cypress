@@ -26,9 +26,6 @@ export default [
   // results in recursive call to __get_fs2__
   'packages/https-proxy/lib/ca.js',
 
-  // TODO: This should be temporary. Will address with https://github.com/cypress-io/cypress/issues/22986
-  'packages/server/lib/routes-e2e.ts',
-
   // TODO: Figure out why these don't properly get flagged as norewrite: https://github.com/cypress-io/cypress/issues/23986
   'node_modules/@cspotcode/source-map-support/source-map-support.js',
   'packages/server/lib/modes/record.js',

@@ -51,7 +51,7 @@ a module's key via the [getModuleKey function][getModuleKey-code].
 In order to learn how to orchestrate snapshot creation and loading please have a look at the
 examples provided with this app, for instance:
 
-- [example-express/snapshot/install-snasphot.js](https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/system-tests/projects/v8-snapshot/example-express/snapshot/install-snapshot.js)
+- [example-express/snapshot/install-snapshot.js](https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/system-tests/projects/v8-snapshot/example-express/snapshot/install-snapshot.js)
 - [example-express/app/hook-require.js](https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/system-tests/projects/v8-snapshot/example-express/app/hook-require.js)
 
 ## Debugging and Diagnosing
