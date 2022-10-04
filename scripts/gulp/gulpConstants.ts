@@ -34,14 +34,14 @@ export const ENV_VARS = {
 
   // Uses the "built" vite assets, not the served ones
   DEV_OPEN: {
-    CYPRESS_KONFIG_ENV: DEFAULT_INTERNAL_CLOUD_ENV, // TODO: Change this / remove konfig
+    CYPRESS_CONFIG_ENV: DEFAULT_INTERNAL_CLOUD_ENV, // TODO: Change this / remove config
     CYPRESS_INTERNAL_CLOUD_ENV: DEFAULT_INTERNAL_CLOUD_ENV,
     CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV: DEFAULT_INTERNAL_EVENT_COLLECTOR_ENV,
   },
 
   // Used when we're running Cypress in true "development" mode
   DEV: {
-    CYPRESS_KONFIG_ENV: DEFAULT_INTERNAL_CLOUD_ENV, // TODO: Change this / remove konfig
+    CYPRESS_CONFIG_ENV: DEFAULT_INTERNAL_CLOUD_ENV, // TODO: Change this / remove config
     CYPRESS_INTERNAL_CLOUD_ENV: DEFAULT_INTERNAL_CLOUD_ENV,
     CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV: DEFAULT_INTERNAL_EVENT_COLLECTOR_ENV,
   },
