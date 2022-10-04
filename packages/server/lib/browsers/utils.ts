@@ -249,7 +249,7 @@ const getBrowsers = async () => {
     return browsers
   }
 
-  const version = process.versions.electron || ''
+  const version = process.versions.chrome || ''
   let majorVersion
 
   if (version) {
