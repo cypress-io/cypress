@@ -21,7 +21,6 @@
     "./node_modules/trash/node_modules/make-dir/index.js",
     "./node_modules/utif/UTIF.js",
     "./packages/https-proxy/lib/ca.js",
-    "./packages/server/lib/routes-e2e.ts",
     "./packages/server/node_modules/@benmalka/foxdriver/node_modules/graceful-fs/polyfills.js",
     "./packages/server/node_modules/graceful-fs/polyfills.js",
     "./packages/server/node_modules/signal-exit/index.js",
