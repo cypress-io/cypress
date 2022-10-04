@@ -17,7 +17,7 @@ describe('App: Settings', () => {
     cy.get(SidebarSettingsLinkSelector).click()
 
     cy.contains('[data-cy="app-header-bar"]', 'Settings')
-    cy.contains('[data-cy="app-header-bar"] button', 'Log In').should('be.visible')
+    cy.contains('[data-cy="app-header-bar"] button', 'Log in').should('be.visible')
 
     cy.findByText('Device settings').should('be.visible')
     cy.findByText('Project settings').should('be.visible')
@@ -70,7 +70,7 @@ describe('App: Settings', () => {
       cy.loginUser()
       cy.visitApp('settings')
       cy.findByText('Dashboard settings').click()
-      cy.findByText('Manage Keys').click()
+      cy.findByText('Manage keys').click()
       cy.withRetryableCtx((ctx) => {
         expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.eq('http:/test.cloud/cloud-project/settings')
       })
@@ -116,7 +116,7 @@ describe('App: Settings', () => {
       cy.contains('Record key').should('exist')
       cy.findByTestId('sidebar-link-runs-page').click()
       cy.findByTestId('user-avatar-title').click()
-      cy.findByRole('button', { name: 'Log Out' }).click()
+      cy.findByRole('button', { name: 'Log out' }).click()
 
       cy.withRetryableCtx((ctx, o) => {
         expect(ctx.actions.auth.logout).to.have.been.calledOnce
@@ -416,7 +416,7 @@ describe('App: Settings without cloud', () => {
 
     cy.contains('button', 'Log in to the Cypress Dashboard').click()
     cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
-      cy.contains('button', 'Log In').click()
+      cy.contains('button', 'Log in').click()
     })
 
     cy.withCtx((ctx, o) => {

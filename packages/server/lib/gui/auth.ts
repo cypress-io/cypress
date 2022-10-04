@@ -47,7 +47,7 @@ const buildFullLoginUrl = (baseLoginUrl, server, utmSource, utmMedium, utmConten
       authUrl.query = {
         utm_source: utmSource,
         utm_medium: utmMedium,
-        utm_campaign: 'Log In',
+        utm_campaign: 'Log in',
         utm_content: utmContent,
         ...authUrl.query,
       }

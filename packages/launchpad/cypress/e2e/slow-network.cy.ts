@@ -34,7 +34,7 @@ describe('slow network: launchpad', () => {
     cy.loginUser()
     cy.visitLaunchpad()
     cy.get('[data-cy=top-nav-cypress-version-current-link]').should('not.exist')
-    cy.contains('E2E testing').click()
+    cy.contains('E2E Testing').click()
     cy.get('h1').should('contain', 'Choose a browser')
   })
 
@@ -42,7 +42,7 @@ describe('slow network: launchpad', () => {
   it.skip('shows the versions after they resolve', () => {
     cy.visitLaunchpad()
     cy.get('[data-cy=top-nav-cypress-version-current-link]').should('not.exist')
-    cy.contains('Log In')
+    cy.contains('Log in')
     cy.wait(500)
     cy.withCtx(async (ctx, o) => {
       o.testState.pendingFetches.map((f) => f.resolve())

@@ -81,7 +81,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
-        cy.contains('button', 'Log In').click()
+        cy.contains('button', 'Log in').click()
       })
 
       cy.withCtx((ctx, o) => {
@@ -272,7 +272,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.contains('button', 'Log in to the Cypress Dashboard').click()
 
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).as('logInModal').within(() => {
-        cy.findByRole('button', { name: 'Log In' }).click()
+        cy.findByRole('button', { name: 'Log in' }).click()
       })
 
       cy.findByRole('dialog', { name: 'Login successful' }).within(() => {
@@ -443,7 +443,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.findByText(defaultMessages.runs.errors.notFound.button).should('be.visible').click()
       cy.get('[aria-modal="true"]').should('exist')
       cy.get('[data-cy="selectProject"] button').should('have.text', 'Mock Project')
-      cy.findByText(defaultMessages.runs.connect.modal.selectProject.connectProject).click()
+      cy.get('[data-cy="connect-project"]').click()
       cy.get('[data-cy="runs"]', { timeout: 7500 })
     })
   })
@@ -587,7 +587,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.findByText(defaultMessages.runs.connect.buttonProject).should('exist')
     })
 
-    it('displays how to record prompt when connected and no runs in Component testing', () => {
+    it('displays how to record prompt when connected and no runs in Component Testing', () => {
       scaffoldTestingTypeAndVisitRunsPage('component')
       cy.contains(defaultMessages.runs.empty.title).should('be.visible')
       cy.contains(defaultMessages.runs.empty.description).should('be.visible')
@@ -602,7 +602,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.contains('cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
     })
 
-    it('displays a copy button and copies correct command in Component testing', () => {
+    it('displays a copy button and copies correct command in Component Testing', () => {
       scaffoldTestingTypeAndVisitRunsPage('component')
       cy.withCtx(async (ctx, o) => {
         o.sinon.stub(ctx.electronApi, 'copyTextToClipboard')

@@ -208,7 +208,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       .click()
 
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
-        cy.get('button').contains('Log In')
+        cy.get('button').contains('Log in')
         cy.get('[aria-label="Close"]').click()
       })
 
@@ -222,7 +222,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       .click()
 
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
-        cy.get('button').contains('Log In')
+        cy.get('button').contains('Log in')
         cy.get('[aria-label="Close"]').click()
       })
 

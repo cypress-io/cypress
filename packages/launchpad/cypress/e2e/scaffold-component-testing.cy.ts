@@ -4,7 +4,7 @@ function startSetupFor (project: ProjectFixtureDir) {
   cy.scaffoldProject(project)
   cy.openProject(project)
   cy.visitLaunchpad()
-  cy.contains('Component testing').click()
+  cy.contains('Component Testing').click()
   cy.get(`[data-testid="select-framework"]`)
 }
 

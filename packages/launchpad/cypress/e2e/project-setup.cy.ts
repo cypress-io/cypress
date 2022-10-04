@@ -299,9 +299,9 @@ describe('Launchpad: Setup Project', () => {
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
-        cy.tabUntil((el) => el.text().includes('E2E testing'))
+        cy.tabUntil((el) => el.text().includes('E2E Testing'))
 
-        cy.contains('button', 'E2E testing')
+        cy.contains('button', 'E2E Testing')
         .should('have.focus')
         .realPress('Enter')
 
@@ -335,9 +335,9 @@ describe('Launchpad: Setup Project', () => {
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
-        cy.tabUntil((el) => el.text().includes('E2E testing'))
+        cy.tabUntil((el) => el.text().includes('E2E Testing'))
 
-        cy.contains('button', 'E2E testing')
+        cy.contains('button', 'E2E Testing')
         .should('have.focus')
         .realPress('Enter')
 
@@ -370,7 +370,7 @@ describe('Launchpad: Setup Project', () => {
 
         verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
 
-        cy.contains('button', 'Component testing')
+        cy.contains('button', 'Component Testing')
         .focus()
         .realPress('Enter')
 
@@ -494,7 +494,7 @@ describe('Launchpad: Setup Project', () => {
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
-        cy.contains('button', 'Component testing')
+        cy.contains('button', 'Component Testing')
         .focus()
         .realPress('Enter')
 
@@ -541,7 +541,7 @@ describe('Launchpad: Setup Project', () => {
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
 
-        cy.contains('button', 'Component testing')
+        cy.contains('button', 'Component Testing')
         .focus()
         .realPress('Enter')
 

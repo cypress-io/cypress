@@ -276,11 +276,11 @@ describe('App Top Nav Workflows', () => {
         },
         {
           name: 'Organizing tests',
-          href: 'https://on.cypress.io/writing-and-organizing-tests?utm_medium=Docs+Menu&utm_content=Organizing+Tests&utm_source=Binary%3A+App',
+          href: 'https://on.cypress.io/writing-and-organizing-tests?utm_medium=Docs+Menu&utm_content=Organizing+tests&utm_source=Binary%3A+App',
         },
         {
           name: 'Best practices',
-          href: 'https://on.cypress.io/best-practices?utm_medium=Docs+Menu&utm_content=Best+Practices&utm_source=Binary%3A+App',
+          href: 'https://on.cypress.io/best-practices?utm_medium=Docs+Menu&utm_content=Best+practices&utm_source=Binary%3A+App',
         },
         {
           name: 'Configuration',
@@ -331,7 +331,7 @@ describe('App Top Nav Workflows', () => {
         cy.loginUser()
         cy.visitApp()
 
-        cy.findByTestId('app-header-bar').findByRole('button', { name: 'Profile and Log Out', expanded: false }).as('logInButton')
+        cy.findByTestId('app-header-bar').findByRole('button', { name: 'Profile and Log out', expanded: false }).as('logInButton')
       })
 
       it('shows user in top nav when logged in', () => {
@@ -357,9 +357,9 @@ describe('App Top Nav Workflows', () => {
           })
         })
 
-        cy.findByRole('button', { name: 'Log Out' }).click()
+        cy.findByRole('button', { name: 'Log out' }).click()
 
-        cy.findByTestId('app-header-bar').findByText('Log In').should('be.visible')
+        cy.findByTestId('app-header-bar').findByText('Log in').should('be.visible')
       })
 
       it('logouts user if cloud request returns unauthorized', () => {
@@ -388,7 +388,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.findByTestId('app-header-bar').within(() => {
           cy.findByTestId('user-avatar-title').should('not.exist')
-          cy.findByRole('button', { name: 'Log In' }).click()
+          cy.findByRole('button', { name: 'Log in' }).click()
         })
       })
     })
@@ -426,13 +426,13 @@ describe('App Top Nav Workflows', () => {
       function logIn ({ expectedNextStepText, displayName }) {
         cy.findByTestId('app-header-bar').within(() => {
           cy.findByTestId('user-avatar-title').should('not.exist')
-          cy.findByRole('button', { name: 'Log In' }).click()
+          cy.findByRole('button', { name: 'Log in' }).click()
         })
 
         cy.findByRole('dialog', { name: 'Log in to Cypress' }).as('logInModal').within(() => {
-          cy.findByRole('button', { name: 'Log In' }).click()
+          cy.findByRole('button', { name: 'Log in' }).click()
 
-          // The Log In button transitions through a few states as the browser launch lifecycle completes
+          // The Log in button transitions through a few states as the browser launch lifecycle completes
           cy.findByRole('button', { name: 'Opening browser' }).should('be.visible').and('be.disabled')
           cy.findByRole('button', { name: 'Waiting for you to log in' }).should('be.visible').and('be.disabled')
         })
@@ -509,11 +509,11 @@ describe('App Top Nav Workflows', () => {
 
           cy.findByTestId('app-header-bar').within(() => {
             cy.findByTestId('user-avatar-title').should('not.exist')
-            cy.findByRole('button', { name: 'Log In' }).click()
+            cy.findByRole('button', { name: 'Log in' }).click()
           })
 
           cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
-            cy.findByRole('button', { name: 'Log In' }).click()
+            cy.findByRole('button', { name: 'Log in' }).click()
 
             cy.contains('http://127.0.0.1:0000/redirect-to-auth').should('be.visible')
             cy.contains(loginText.titleBrowserError).should('be.visible')
@@ -541,11 +541,11 @@ describe('App Top Nav Workflows', () => {
 
           cy.findByTestId('app-header-bar').within(() => {
             cy.findByTestId('user-avatar-title').should('not.exist')
-            cy.findByRole('button', { name: 'Log In' }).click()
+            cy.findByRole('button', { name: 'Log in' }).click()
           })
 
           cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
-            cy.findByRole('button', { name: 'Log In' }).click()
+            cy.findByRole('button', { name: 'Log in' }).click()
 
             cy.contains(loginText.titleFailed).should('be.visible')
             cy.contains(loginText.bodyError).should('be.visible')
@@ -591,11 +591,11 @@ describe('App Top Nav Workflows', () => {
 
           cy.findByTestId('app-header-bar').within(() => {
             cy.findByTestId('user-avatar-title').should('not.exist')
-            cy.findByRole('button', { name: 'Log In' }).as('loginButton').click()
+            cy.findByRole('button', { name: 'Log in' }).as('loginButton').click()
           })
 
           cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
-            cy.findByRole('button', { name: 'Log In' }).click()
+            cy.findByRole('button', { name: 'Log in' }).click()
 
             cy.contains(loginText.titleFailed).should('be.visible')
             cy.contains(loginText.bodyError).should('be.visible')
@@ -628,11 +628,11 @@ describe('App Top Nav Workflows', () => {
 
           cy.findByTestId('app-header-bar').within(() => {
             cy.findByTestId('user-avatar-title').should('not.exist')
-            cy.findByRole('button', { name: 'Log In' }).as('loginButton').click()
+            cy.findByRole('button', { name: 'Log in' }).as('loginButton').click()
           })
 
           cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
-            cy.findByRole('button', { name: 'Log In' }).click()
+            cy.findByRole('button', { name: 'Log in' }).click()
             cy.contains(loginText.titleFailed).should('be.visible')
             cy.contains(loginText.bodyError).should('be.visible')
             cy.contains('An unexpected error occurred').should('be.visible')

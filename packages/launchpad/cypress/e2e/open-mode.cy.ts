@@ -102,10 +102,10 @@ describe('Launchpad: Open Mode', () => {
 
       // Need to visit after args have been configured, todo: fix in #18776
       cy.visitLaunchpad()
-      cy.contains('E2E testing').click()
+      cy.contains('E2E Testing').click()
       cy.get('h1').should('contain', 'Choose a browser')
       cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
-      cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E testing in Firefox')
+      cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
     })
 
     it('auto-launches the browser when launched with --browser --testingType --project', () => {
@@ -119,7 +119,7 @@ describe('Launchpad: Open Mode', () => {
       cy.visitLaunchpad()
       cy.get('h1').should('contain', 'Choose a browser')
       cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
-      cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E testing in Firefox')
+      cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
 
       cy.withRetryableCtx((ctx) => {
         expect(ctx._apis.projectApi.launchProject).to.be.calledOnce

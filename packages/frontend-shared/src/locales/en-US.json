@@ -272,7 +272,7 @@
           "noParallelTime": "12 mins",
           "withParallelization": "with Parallelization",
           "withoutParallelization": "without Parallelization",
-          "intro": "With smart orchestration, you'll be able to:",
+          "intro": "With Smart Orchestration, you'll be able to:",
           "bullet1": "Run spec files in parallel",
           "bullet2": "Prioritize failed specs to run first",
           "bullet3": "Cancel CI runs on test failure",
@@ -286,14 +286,14 @@
       "bodyError": "An error occurred while attempting to log in:",
       "bodyBrowserError": "The browser could not be opened.",
       "bodyBrowserErrorDetails": "Cypress was unable to open your installed browser. To continue logging in, please paste this URL into your web browser:",
-      "cloud": "Cypress dashboard service",
+      "cloud": "Cypress Dashboard service",
       "titleInitial": "Log in to Cypress",
       "titleSuccess": "Login successful",
       "titleFailed": "Login failed",
       "titleBrowserError": "Browser error",
-      "actionLogin": "Log In",
-      "profileMenuLabel": "Profile and Log Out",
-      "actionLogout": "Log Out",
+      "actionLogin": "Log in",
+      "profileMenuLabel": "Profile and Log out",
+      "actionLogout": "Log out",
       "actionContinue": "Continue",
       "actionOpening": "Opening browser",
       "actionWaiting": "Waiting for you to log in",
@@ -323,11 +323,11 @@
           "link": "https://docs.cypress.io/guides/references/configuration"
         },
         "dashboardGuide": {
-          "text": "Cypress dashboard guide",
+          "text": "Cypress Dashboard guide",
           "link": "https://docs.cypress.io/guides/dashboard/introduction"
         },
         "docsHomepage": {
-          "text": "Cypress Docs",
+          "text": "Cypress docs",
           "link": "https://docs.cypress.io"
         }
       }
@@ -343,7 +343,7 @@
       "frameworkLabel": "Front-end framework",
       "frameworkPlaceholder": "Pick a framework",
       "bundlerLabel": "Bundler",
-      "bundlerLabelDescription": "(Dev Server)",
+      "bundlerLabelDescription": "(Dev server)",
       "bundlerPlaceholder": "Pick a bundler",
       "languageLabel": "Language",
       "configFileLanguageLabel": "Cypress config file",
@@ -456,12 +456,12 @@
     },
     "specPattern": {
       "title": "Spec patterns",
-      "description": "The globs pointing Cypress App to your spec files configured for this project. {0}"
+      "description": "The globs pointing Cypress to your spec files configured for this project. {0}"
     },
     "recordKey": {
       "title": "Record key",
-      "description": "The Record Key configured for this project inside of Cypress Dashboard. {0}",
-      "manageKeys": "Manage Keys",
+      "description": "The Record key configured for this project inside of Cypress Dashboard. {0}",
+      "manageKeys": "Manage keys",
       "errorEmpty": "You do not have permission to record on this project",
       "errorEmptyButton": "Request record rights",
       "errorAccess": "You do not have permission to view this project",
@@ -469,8 +469,8 @@
       "errorAccessButton": "Request access",
       "errorNotFound": "Project not found",
       "errorNotFoundButton": "Connect it again",
-      "errorNotLoggedIn": "You are not connected to the Cypress dashboard",
-      "errorNotLoggedInButton": "Log in to the Cypress dashboard"
+      "errorNotLoggedIn": "You are not connected to the Cypress Dashboard",
+      "errorNotLoggedInButton": "Log in to the Cypress Dashboard"
     },
     "project": {
       "title": "Project settings",
@@ -524,7 +524,7 @@
       "title": "Testing preferences",
       "description": "Configure your testing environment with these flags",
       "autoScrollingEnabled": {
-        "title": "Auto Scrolling Enabled",
+        "title": "Auto scrolling enabled",
         "description": "Scroll behavior when running tests."
       }
     },
@@ -580,10 +580,10 @@
       },
       "errors": {
         "baseError": {
-          "title": "Cypress dashboard error"
+          "title": "Cypress Dashboard error"
         },
         "internalServerError": {
-          "title": "Cannot connect to the Cypress dashboard",
+          "title": "Cannot connect to the Cypress Dashboard",
           "description": "The request times out when trying to retrieve the info from the Cypress Dashboard. Please refresh the page to try again and visit out {0} if this behavior continues.",
           "link": "Support Page"
         }
@@ -631,11 +631,11 @@
   "testingType": {
     "modalTitle": "Choose a testing type",
     "e2e": {
-      "name": "E2E testing",
+      "name": "E2E Testing",
       "description": "Build and test the entire experience of your application from end-to-end to ensure each flow matches your expectations."
     },
     "component": {
-      "name": "Component testing",
+      "name": "Component Testing",
       "description": "Build and test your components from your design system in isolation in order to ensure each state matches your expectations."
     },
     "componentDisabled": {
@@ -665,11 +665,11 @@
         "line5": "We've changed the placement of component specs to be next to their source files (e.g. src/Button.jsx and src/Button.cy.jsx)",
         "line6": "The new default pattern of {0} prevents targeting conflicts with other testing frameworks. (e.g. Jest)",
         "label": "Choose from the following filename patterns:",
-        "option1": "{0} (Recommended)",
+        "option1": "{0} (recommended)",
         "option2": "Don't rename anything — keep what I have.",
         "option3": "Rename folder only.",
         "optOutAdditional": "I may need to change my {0} later if I don't use the recommended filename extension.",
-        "buttonSave": "Save Changes",
+        "buttonSave": "Save changes",
         "buttonCancel": "Cancel"
       }
     },
@@ -682,7 +682,7 @@
     },
     "renameSupport": {
       "title": "We'll automatically rename your existing E2E support file in this step",
-      "serveDifferentTypes": "We now serve different support files for E2E and component testing.",
+      "serveDifferentTypes": "We now serve different support files for E2E and Component Testing.",
       "changedSupportFile": "We've renamed the E2E support file from:"
     },
     "configFile": {
@@ -782,11 +782,11 @@
     },
     "snapshot": {
       "highlightsLabel": "Highlights",
-      "testsRunningError": "Cannot show Snapshot while tests are running",
+      "testsRunningError": "Cannot show snapshot while tests are running",
       "snapshotMissingError": "The snapshot is missing. Displaying current state of the DOM.",
       "defaultTitle": "DOM Snapshot",
       "pinnedTitle": "Pinned",
-      "studioActiveError": "Cannot show Snapshot while creating commands in Studio"
+      "studioActiveError": "Cannot show snapshot while creating commands in Studio"
     },
     "selectorPlayground": {
       "matches": "No matches | {n} match | {n} matches",
@@ -823,19 +823,19 @@
       "studio": "Studio",
       "studioDescription": "Generate Cypress commands by interacting with your site as an end user would. Then, save these commands directly to your test file.",
       "studioDetailedDescription": "Generate and save commands directly to your test suite by interacting with your app as an end user would. Right click on an element to add an assertion. Studio will track events that generate the following commands:",
-      "getStartedButton": "Get Started",
+      "getStartedButton": "Get started",
       "feedbackPrompt": "Your {0} will be highly influential to our team.",
       "experimentalMessage": "This feature is currently experimental and we will be adding more commands and abilities in the future.",
       "feedbackLink": "feedback",
-      "saveTest": "Save Test",
-      "testName": "Test Name",
+      "saveTest": "Save test",
+      "testName": "Test name",
       "saveTestButton": "Save",
       "closeStudio": "Close Studio",
       "restartStudio": "Restart Studio",
-      "copyCommands": "Copy Commands to Clipboard",
-      "commandsCopied": "Commands Copied!",
+      "copyCommands": "Copy commands to clipboard",
+      "commandsCopied": "Commands copied!",
       "availableCommands": "Available commands",
-      "giveFeedback": "Give Feedback",
+      "giveFeedback": "Give feedback",
       "enterValidUrl": "Enter a valid URL to visit",
       "continue": "Continue",
       "actionCancel": "Cancel"
