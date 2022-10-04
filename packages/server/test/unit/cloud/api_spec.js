@@ -1,4 +1,4 @@
-require('../spec_helper')
+require('../../spec_helper')
 
 const _ = require('lodash')
 const os = require('os')
@@ -6,10 +6,10 @@ const {
   agent,
 } = require('@packages/network')
 const pkg = require('@packages/root')
-const api = require(`../../lib/api`)
-const cache = require(`../../lib/cache`)
-const errors = require(`../../lib/errors`)
-const machineId = require(`../../lib/util/machine_id`)
+const api = require('../../../lib/cloud/api')
+const cache = require('../../../lib/cache')
+const errors = require('../../../lib/errors')
+const machineId = require('../../../lib/cloud/machine_id')
 const Promise = require('bluebird')
 
 const API_BASEURL = 'http://localhost:1234'
@@ -23,7 +23,7 @@ const makeError = (details = {}) => {
   return _.extend(new Error(details.message || 'Some error'), details)
 }
 
-describe('lib/api', () => {
+describe('lib/cloud/api', () => {
   beforeEach(() => {
     nock(API_BASEURL)
     .matchHeader('x-route-version', '2')

@@ -1,5 +1,5 @@
 const _ = require('lodash')
-const debug = require('debug')('cypress:server:auth')
+const debug = require('debug')('cypress:server:cloud:auth')
 const express = require('express')
 const os = require('os')
 const pkg = require('@packages/root')
@@ -7,9 +7,9 @@ const Promise = require('bluebird')
 const url = require('url')
 const { shell } = require('electron')
 
-const machineId = require('../util/machine_id')
+const machineId = require('./machine_id')
 const random = require('../util/random')
-const user = require('../user')
+const user = require('./user')
 
 let app
 let authCallback
