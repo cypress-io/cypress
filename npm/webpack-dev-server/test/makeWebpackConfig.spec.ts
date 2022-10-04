@@ -16,7 +16,6 @@ describe('makeWebpackConfig', () => {
     const devServerConfig: WebpackDevServerConfig = {
       specs: [],
       cypressConfig: {
-        isInteractive: true,
         isTextTerminal: false,
         projectRoot: '.',
         supportFile: '/support.js',
@@ -61,7 +60,6 @@ describe('makeWebpackConfig', () => {
     const devServerConfig: WebpackDevServerConfig = {
       specs: [],
       cypressConfig: {
-        isInteractive: true,
         isTextTerminal: false,
         projectRoot: '.',
         supportFile: '/support.js',
