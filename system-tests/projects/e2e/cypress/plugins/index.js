@@ -195,10 +195,6 @@ module.exports = (on, config) => {
     'get:config:value' (key) {
       return config[key]
     },
-
-    'get:size:v8:snapshot' () {
-      return Object.keys(global.snapshotResult.customRequire.exports).length
-    },
   })
 
   return config
