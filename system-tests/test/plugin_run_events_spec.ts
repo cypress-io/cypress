@@ -20,7 +20,7 @@ describe('e2e plugin run events', () => {
     snapshot: true,
   })
 
-  systemTests.it.only('fails run if event handler throws', {
+  systemTests.it('fails run if event handler throws', {
     browser: 'electron',
     project: 'plugin-run-event-throws',
     spec: '*',
