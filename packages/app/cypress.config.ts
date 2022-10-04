@@ -30,7 +30,7 @@ export default defineConfig({
             'just-my-luck',
             'combine-properties',
             'faker',
-            '@packages/ui-components/cypress/support/customPercyCommand',
+            '@packages/frontend-shared/cypress/support/customPercyCommand',
           ],
         },
       },
@@ -48,6 +48,7 @@ export default defineConfig({
       // Delete this as we only want to honor it on parent Cypress when doing E2E Cypress in Cypress testing
       delete process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS
       process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+      process.env.CYPRESS_INTERNAL_VITE_OPEN_MODE_TESTING = 'true'
       // process.env.DEBUG = '*'
       const { e2ePluginSetup } = require('@packages/frontend-shared/cypress/e2e/e2ePluginSetup')
 

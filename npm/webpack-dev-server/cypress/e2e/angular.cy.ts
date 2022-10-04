@@ -2,7 +2,7 @@
 /// <reference path="../support/e2e.ts" />
 import type { ProjectFixtureDir } from '@tooling/system-tests/lib/fixtureDirs'
 
-const WEBPACK_REACT: ProjectFixtureDir[] = ['angular-13', 'angular-14']
+const WEBPACK_REACT: ProjectFixtureDir[] = ['angular-13', 'angular-14', 'angular-15']
 
 // Add to this list to focus on a particular permutation
 const ONLY_PROJECTS: ProjectFixtureDir[] = []
@@ -73,6 +73,7 @@ for (const project of WEBPACK_REACT) {
       // The test should fail and the stack trace should appear in the command log
       cy.waitForSpecToFinish({ failCount: 1 })
       cy.contains('The following error originated from your test code, not from Cypress.').should('exist')
+      cy.get('.test-err-code-frame').should('be.visible')
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23455
