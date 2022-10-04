@@ -177,9 +177,9 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
             })
 
             // Attach the spec bridge to the window to be tested.
-            const fn = _.isFunction(callbackFn) ? callbackFn.toString() : callbackFn
-
             communicator.toSpecBridge(origin, 'attach:to:window')
+
+            const fn = _.isFunction(callbackFn) ? callbackFn.toString() : callbackFn
 
             // once the secondary origin page loads, send along the
             // user-specified callback to run in that origin
