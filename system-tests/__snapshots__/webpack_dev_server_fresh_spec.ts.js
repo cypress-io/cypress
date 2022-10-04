@@ -124,29 +124,41 @@ We dynamically generated a new test to display this failure.
 
   1) Errors
        error on mount:
-     Error: The following error originated from your test code, not from Cypress.
+     Error: The following error originated from your application code, not from Cypress.
 
   > mount error
 
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
       [stack trace lines]
 
   2) Errors
        sync error:
-     Error: The following error originated from your test code, not from Cypress.
+     Error: The following error originated from your application code, not from Cypress.
 
   > sync error
 
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
       [stack trace lines]
 
   3) Errors
        async error:
-     Error: The following error originated from your test code, not from Cypress.
+     Error: The following error originated from your application code, not from Cypress.
 
   > async error
 
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
       [stack trace lines]
 
   4) Errors
@@ -200,11 +212,15 @@ When Cypress detects uncaught errors originating from your test code it will aut
   1 failing
 
   1) is missing React:
-     ReferenceError: The following error originated from your test code, not from Cypress.
+     ReferenceError: The following error originated from your application code, not from Cypress.
 
   > React is not defined
 
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
       [stack trace lines]
 
 
@@ -512,29 +528,41 @@ We dynamically generated a new test to display this failure.
 
   1) Errors
        error on mount:
-     Error: The following error originated from your test code, not from Cypress.
+     Error: The following error originated from your application code, not from Cypress.
 
   > mount error
 
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
       [stack trace lines]
 
   2) Errors
        sync error:
-     Error: The following error originated from your test code, not from Cypress.
+     Error: The following error originated from your application code, not from Cypress.
 
   > sync error
 
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
       [stack trace lines]
 
   3) Errors
        async error:
-     Error: The following error originated from your test code, not from Cypress.
+     Error: The following error originated from your application code, not from Cypress.
 
   > async error
 
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
       [stack trace lines]
 
   4) Errors
@@ -588,11 +616,15 @@ When Cypress detects uncaught errors originating from your test code it will aut
   1 failing
 
   1) is missing React:
-     ReferenceError: The following error originated from your test code, not from Cypress.
+     ReferenceError: The following error originated from your application code, not from Cypress.
 
   > React is not defined
 
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
       [stack trace lines]
 
 
@@ -891,29 +923,41 @@ We dynamically generated a new test to display this failure.
 
   1) Errors
        error on mount:
-     Error: The following error originated from your test code, not from Cypress.
+     Error: The following error originated from your application code, not from Cypress.
 
   > mount error
 
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
       [stack trace lines]
 
   2) Errors
        sync error:
-     Error: The following error originated from your test code, not from Cypress.
+     Error: The following error originated from your application code, not from Cypress.
 
   > sync error
 
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
       [stack trace lines]
 
   3) Errors
        async error:
-     Error: The following error originated from your test code, not from Cypress.
+     Error: The following error originated from your application code, not from Cypress.
 
   > async error
 
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
       [stack trace lines]
 
   4) Errors
@@ -967,11 +1011,15 @@ When Cypress detects uncaught errors originating from your test code it will aut
   1 failing
 
   1) is missing React:
-     ReferenceError: The following error originated from your test code, not from Cypress.
+     ReferenceError: The following error originated from your application code, not from Cypress.
 
   > React is not defined
 
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
       [stack trace lines]
 
 
@@ -1282,29 +1330,41 @@ We dynamically generated a new test to display this failure.
 
   1) Errors
        error on mount:
-     Error: The following error originated from your test code, not from Cypress.
+     Error: The following error originated from your application code, not from Cypress.
 
   > mount error
 
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
       [stack trace lines]
 
   2) Errors
        sync error:
-     Error: The following error originated from your test code, not from Cypress.
+     Error: The following error originated from your application code, not from Cypress.
 
   > sync error
 
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
       [stack trace lines]
 
   3) Errors
        async error:
-     Error: The following error originated from your test code, not from Cypress.
+     Error: The following error originated from your application code, not from Cypress.
 
   > async error
 
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
       [stack trace lines]
 
   4) Errors
@@ -1358,11 +1418,15 @@ When Cypress detects uncaught errors originating from your test code it will aut
   1 failing
 
   1) is missing React:
-     ReferenceError: The following error originated from your test code, not from Cypress.
+     ReferenceError: The following error originated from your application code, not from Cypress.
 
   > React is not defined
 
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
       [stack trace lines]
 
 

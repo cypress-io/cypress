@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress'
+import { devServer as cypressWebpackDevServer } from '@cypress/webpack-dev-server'
 
 export default defineConfig({
   projectId: 'ypt4pf',
@@ -19,5 +20,15 @@ export default defineConfig({
       return require('./cypress/plugins')(on, config)
     },
     baseUrl: 'http://localhost:3500',
+  },
+  component: {
+    specPattern: 'cypress/component/**/*.cy.js',
+    supportFile: false,
+    devServer: (devServerOptions) => {
+      return cypressWebpackDevServer({
+        ...devServerOptions,
+        webpackConfig: {},
+      })
+    },
   },
 })
