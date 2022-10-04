@@ -13,7 +13,13 @@ export type CypressIncomingRequest = Request & {
   responseTimeout?: number
   followRedirect?: boolean
   isAUTFrame: boolean
+  requestedWith?: RequestResourceType
+  credentialsLevel?: RequestCredentialLevel
 }
+
+export type RequestResourceType = 'fetch' | 'xhr'
+
+export type RequestCredentialLevel = 'same-origin' | 'include' | 'omit' | boolean
 
 export type CypressWantsInjection = 'full' | 'fullCrossOrigin' | 'partial' | false
 
