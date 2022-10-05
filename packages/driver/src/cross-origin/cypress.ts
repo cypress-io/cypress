@@ -148,7 +148,6 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   handleScreenshots(Cypress)
   handleTestEvents(Cypress)
   handleUnsupportedAPIs(Cypress, cy)
-  handleDocumentCookie(Cypress)
 
   cy.onBeforeAppWindowLoad = onBeforeAppWindowLoad(Cypress, cy)
 }

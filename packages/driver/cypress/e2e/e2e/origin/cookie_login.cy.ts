@@ -664,7 +664,7 @@ describe('cy.origin - cookie login', () => {
       cy.visit('/fixtures/primary-origin.html')
     })
 
-    it('gets cookie set by http request', () => {
+    it.only('gets cookie set by http request', () => {
       cy.get('[data-cy="cookie-login-land-on-document-cookie"]').click()
       cy.origin('http://foobar.com:3500', { args: { username } }, ({ username }) => {
         cy.get('[data-cy="username"]').type(username)

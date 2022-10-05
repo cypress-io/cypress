@@ -388,6 +388,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
         Cypress.primaryOriginCommunicator.toSpecBridge(origin, 'cross:origin:cookies', cookies)
       } else {
+        // TODO: it's possible the spec bridge doesn't exist but the AUT
+        // is on that origin. how do we get the cookies to it?
+
         // otherwise, the spec bridge will be set up later and the cookies
         // will be passed to it via state('crossOriginCookies')
         Cypress.backend('cross:origin:cookies:received')

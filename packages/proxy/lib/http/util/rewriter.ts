@@ -2,6 +2,7 @@ import * as inject from './inject'
 import * as astRewriter from './ast-rewriter'
 import * as regexRewriter from './regex-rewriter'
 import type { CypressWantsInjection } from '../../types'
+import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
 
 export type SecurityOpts = {
   isHtml?: boolean
@@ -16,6 +17,7 @@ export type InjectionOpts = {
   domainName: string
   wantsInjection: CypressWantsInjection
   wantsSecurityRemoved: any
+  simulatedCookies: AutomationCookie[]
 }
 
 const doctypeRe = /(<\!doctype.*?>)/i
@@ -27,12 +29,24 @@ function getRewriter (useAstSourceRewriting: boolean) {
   return useAstSourceRewriting ? astRewriter : regexRewriter
 }
 
-function getHtmlToInject ({ domainName, wantsInjection, modifyObstructiveThirdPartyCode, modifyObstructiveCode }: InjectionOpts & SecurityOpts) {
+function getHtmlToInject (opts: InjectionOpts & SecurityOpts) {
+  const {
+    domainName,
+    wantsInjection,
+    modifyObstructiveThirdPartyCode,
+    modifyObstructiveCode,
+    simulatedCookies,
+  } = opts
+
   switch (wantsInjection) {
     case 'full':
       return inject.full(domainName)
     case 'fullCrossOrigin':
-      return inject.fullCrossOrigin(domainName, { modifyObstructiveThirdPartyCode, modifyObstructiveCode })
+      return inject.fullCrossOrigin(domainName, {
+        modifyObstructiveThirdPartyCode,
+        modifyObstructiveCode,
+        simulatedCookies,
+      })
     case 'partial':
       return inject.partial(domainName)
     default:

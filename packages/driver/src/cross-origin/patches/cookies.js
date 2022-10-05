@@ -65,41 +65,6 @@ export const handleDocumentCookie = (Cypress) => {
   Cypress.state('crossOriginCookies', [])
 
   const patch = (window) => {
-    // Cookies added to the server-side cookie jar are optimistically
-    // added here so that if a cross-origin request sets cookies, they're
-    // available via document.cookie synchronously on page load
-    const setAutomationCookie = (toughCookie) => {
-      const { superDomain } = Cypress.Location.create(window.location.href)
-      const automationCookie = Cypress.Cookies.toughCookieToAutomationCookie(toughCookie, superDomain)
-
-      Cypress.automation('set:cookie', automationCookie)
-      .catch(() => {
-      // unlikely there will be errors, but ignore them in any case, since
-      // they're not user-actionable
-      })
-    }
-
-    Object.defineProperty(window.document, 'cookie', {
-      get () {
-        return documentCookieValue
-      },
-
-      set (newValue) {
-        const cookie = Cypress.Cookies.parse(newValue)
-
-        // If cookie is undefined, it was invalid and couldn't be parsed
-        if (!cookie) return documentCookieValue
-
-        documentCookieValue = mergeCookies(documentCookieValue, [{
-          name: cookie.key,
-          value: cookie.value,
-        }])
-
-        setAutomationCookie(cookie)
-
-        return documentCookieValue
-      },
-    })
   }
 
   const updateCookies = (cookies) => {
@@ -110,35 +75,7 @@ export const handleDocumentCookie = (Cypress) => {
     documentCookieValue = ''
   }
 
-  // The interval value is arbitrary; it shouldn't be too often, but needs to
-  // be fairly frequent so that the local value is kept as up-to-date as
-  // possible. It's possible there could be a race condition where
-  // document.cookie returns an out-of-date value, but there's not really a
-  // way around that since it's a synchronous API and we can only get the
-  // browser's true cookie values asynchronously.
-  const intervalId = setInterval(async () => {
-    const { superDomain: domain } = Cypress.Location.create(window.location.href)
-
-    try {
-      const cookies = await Cypress.automation('get:cookies', { domain })
-      const cookiesString = stringifyCookies(cookies || [])
-
-      documentCookieValue = cookiesString
-    } catch (err) {
-      // unlikely there will be errors, but ignore them in any case, since
-      // they're not user-actionable
-    }
-  }, 250)
-
-  const onUnload = () => {
-    window.removeEventListener('unload', onUnload)
-    clearInterval(intervalId)
-  }
-
-  window.addEventListener('unload', onUnload)
-
-  Cypress.on('window:before:load', patch)
-
+  // TODO: figure out how to do the rest of this with patch in injection
   Cypress.specBridgeCommunicator.on('cross:origin:cookies', (cookies) => {
     updateCookies(cookies)
 

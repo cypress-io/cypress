@@ -460,6 +460,15 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
 
   const origin = cors.getOriginPolicy(this.req.proxiedUrl)
 
+  console.log(`🟠 (${this.req.proxiedUrl}) might set simulatedCookies`)
+
+  // TODO: handle case where it's an xhr or something
+  if (this.res.wantsInjection === 'fullCrossOrigin') {
+    console.log(`🟢 (${this.req.proxiedUrl}) set this.simulatedCookies:`, addedCookies.map((c) => `${c.name}=${c.value}`))
+
+    this.simulatedCookies = addedCookies
+  }
+
   this.serverBus.once('cross:origin:cookies:received', () => {
     this.next()
   })
@@ -526,6 +535,12 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
   this.incomingResStream.pipe(concatStream(async (body) => {
     const nodeCharset = getNodeCharsetFromResponse(this.incomingRes.headers, body, this.debug)
 
+    // TODO: write tests, starting with a cross-origin page that needs
+    // the cookies in document.cookie
+
+    console.log(`🔵 (${this.req.proxiedUrl}) this.simulatedCookies`)
+    console.log(this.simulatedCookies)
+
     const decodedBody = iconv.decode(body, nodeCharset)
     const injectedBody = await rewriter.html(decodedBody, {
       domainName: cors.getDomainNameFromUrl(this.req.proxiedUrl),
@@ -537,6 +552,8 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
       modifyObstructiveCode: this.config.modifyObstructiveCode,
       url: this.req.proxiedUrl,
       deferSourceMapRewrite: this.deferSourceMapRewrite,
+      // TODO: do these need to be formatted/serialized before sending to injection?
+      simulatedCookies: this.simulatedCookies,
     })
     const encodedBody = iconv.encode(injectedBody, nodeCharset)
 
