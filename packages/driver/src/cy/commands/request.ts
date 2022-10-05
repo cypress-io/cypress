@@ -155,6 +155,13 @@ export default (Commands, Cypress, cy, state, config) => {
         options.url = $Location.qualifyWithBaseUrl(originOrBase, options.url)
       }
 
+      // https://github.com/cypress-io/cypress/issues/19407
+      // Make generated querystring consistent with `URLSearchParams` class and cy.visit()
+      if (options.qs) {
+        options.url = $Location.mergeUrlWithParams(options.url, options.qs)
+        options.qs = null
+      }
+
       // Make sure the url unicode characters are properly escaped
       // https://github.com/cypress-io/cypress/issues/5274
       try {
