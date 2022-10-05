@@ -69,8 +69,9 @@ function modifyWebpackConfigForCypress (webpackConfig: Partial<Configuration>) {
     }
   }
 
+  // To prevent styling files to be tree shaken by webpack during testing
   if (webpackConfig?.module?.rules) {
-    webpackConfig.module.rules.push({ sideEffects: true })
+    webpackConfig?.module?.rules.push({ exclude: /node_modules/, test: /\.(s[ac]ss$|less$|styl$|css$)/i, sideEffects: true })
   }
 
   return webpackConfig
