@@ -8,6 +8,8 @@ import { ButtonOutputComponent } from "./components/button-output.component";
 import { createOutputSpy } from 'cypress/angular';
 import { EventEmitter, Component } from '@angular/core';
 import { ProjectionComponent } from "./components/projection.component";
+import { LifecycleComponent } from "./components/lifecycle.component";
+import { LogoComponent } from "./components/logo.component";
 
 @Component({
   template: `<app-projection>Hello World</app-projection>`
@@ -164,7 +166,65 @@ describe("angular mount", () => {
     })
     cy.get('h3').contains('Hello World')
   })
+
+  it('handles ngOnChanges on mount', () => {
+    cy.mount(LifecycleComponent, {
+      componentProperties: {
+        name: 'Angular'
+      }
+    })
+
+    cy.get('p').should('have.text', 'Hi Angular. ngOnInit fired: true and ngOnChanges fired: true and conditionalName: false')
+  })
+
+  it('handles ngOnChanges on mount with templates', () => {
+    cy.mount('<app-lifecycle [name]="name"></app-lifecycle>', {
+      declarations: [LifecycleComponent],
+      componentProperties: {
+        name: 'Angular'
+      }
+    })
+
+    cy.get('p').should('have.text', 'Hi Angular. ngOnInit fired: true and ngOnChanges fired: true and conditionalName: false')
+  })
   
+  it('creates simpleChanges from componentProperties and calls ngOnChanges on Mount', () => {
+    cy.mount(LifecycleComponent, {
+      componentProperties: {
+        name: 'CONDITIONAL NAME'
+      }
+    })
+    cy.get('p').should('have.text', 'Hi CONDITIONAL NAME. ngOnInit fired: true and ngOnChanges fired: true and conditionalName: true')
+  })
+
+  it('creates simpleChanges from componentProperties and calls ngOnChanges on Mount with template', () => {
+    cy.mount('<app-lifecycle [name]="name"></app-lifecycle>', {
+      declarations: [LifecycleComponent],
+      componentProperties: {
+        name: 'CONDITIONAL NAME'
+      }
+    })
+    cy.get('p').should('have.text', 'Hi CONDITIONAL NAME. ngOnInit fired: true and ngOnChanges fired: true and conditionalName: true')
+  })
+
+  it('ngOnChanges is not fired when no componentProperties given', () => {
+    cy.mount(LifecycleComponent)
+    cy.get('p').should('have.text', 'Hi . ngOnInit fired: true and ngOnChanges fired: false and conditionalName: false')
+  })
+
+  it('ngOnChanges is not fired when no componentProperties given with template', () => {
+    cy.mount('<app-lifecycle></app-lifecycle>', {
+      declarations: [LifecycleComponent]
+    })
+    cy.get('p').should('have.text', 'Hi . ngOnInit fired: true and ngOnChanges fired: false and conditionalName: false')
+  })
+
+  it('can load static assets', () => {
+    cy.mount(LogoComponent)
+    cy.get('img').should('be.visible').and('have.prop', 'naturalWidth').should('be.greaterThan', 0)
+  })
+
+
   describe("teardown", () => {
     beforeEach(() => {
       cy.get("[id^=root]").should("not.exist");
