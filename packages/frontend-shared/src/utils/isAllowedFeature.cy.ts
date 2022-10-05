@@ -28,6 +28,7 @@ describe('isAllowedFeature', () => {
 
     switch (status) {
       case 'isLoggedOut':
+        setFlag('isLoggedIn', false)
         expect(store.userStatus).to.eq('isLoggedOut')
         break
       case 'needsOrgConnect':
