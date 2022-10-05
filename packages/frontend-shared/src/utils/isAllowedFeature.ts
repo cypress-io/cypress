@@ -28,7 +28,7 @@ const minTimeSinceEvent = (eventTime: number | undefined, waitTime: string) => {
     throw new Error(`incorrect format for waitTime provided, value must be \`n days\`, \`n minutes\` etc. Value received was ${waitTime}`)
   }
 
-  return (Date.now() - eventTime) > interval(waitTime)
+  return (Date.now() - eventTime) > waitTimestamp
 }
 
 export const isAllowedFeature = (
