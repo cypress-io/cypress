@@ -103,7 +103,7 @@ export const useLoginConnectStore = defineStore({
     },
   },
   getters: {
-    userStatus (state) {
+    userStatus (state): UserStatus {
       switch (true) {
         // the switch here ensures the uniqueness of states as we don't allow duplicate case labels
         // https://eslint.org/docs/latest/rules/no-duplicate-case
