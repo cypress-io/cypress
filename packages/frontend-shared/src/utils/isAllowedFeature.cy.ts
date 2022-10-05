@@ -1,6 +1,6 @@
 import { isAllowedFeature } from './isAllowedFeature'
-import { LoginConnectStore, useLoginConnectStore, userStatuses } from '../store/login-connect-store'
-import type { UserStatus } from '../store/login-connect-store'
+import { LoginConnectStore, useLoginConnectStore, userStatuses } from '../store'
+import type { UserStatus } from '../store'
 import { BannerIds } from '@packages/types'
 import interval from 'human-interval'
 
@@ -9,7 +9,7 @@ const bannerIds = {
   needsOrgConnect: BannerIds.ACI_082022_CREATE_ORG,
   needsProjectConnect: BannerIds.ACI_082022_CONNECT_PROJECT,
   needsRecordedRun: BannerIds.ACI_082022_RECORD,
-}
+} as const
 
 describe('isAllowedFeature', () => {
   let store: LoginConnectStore
@@ -90,13 +90,9 @@ describe('isAllowedFeature', () => {
       })
 
       context('banners HAVE been dismissed', () => {
-        userStatuses.forEach((status) => {
-          if (status === 'allTasksCompleted') {
-            // no banner matches this state, so nothing can be dismissed, skip it
-            return
-          }
-
-          it(`returns false for status ${ status }`, () => {
+        (Object.keys(bannerIds) as (keyof typeof bannerIds)[])
+        .forEach((status) => {
+          it(`returns false for banner ${ bannerIds[status] }`, () => {
             setUpStatus(status)
 
             // simulate banner for current status having been dismissed

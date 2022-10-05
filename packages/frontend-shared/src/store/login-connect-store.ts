@@ -126,9 +126,6 @@ export const useLoginConnectStore = defineStore({
     userStatusMatches () {
       return (status: UserStatus) => this.userStatus === status
     },
-    userStatusIsNot () {
-      return (status: UserStatus) => this.userStatus !== status
-    },
     projectStatus () {
       // TODO: in #23762 look at projectConnectionStatus in SpecHeaderCloudDataTooltip
     },

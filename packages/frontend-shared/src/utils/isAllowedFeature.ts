@@ -1,6 +1,6 @@
 import interval from 'human-interval'
 import { BannerIds } from '@packages/types'
-import type { LoginConnectStore } from '../store/login-connect-store'
+import type { LoginConnectStore } from '../store'
 
 const bannerIds = {
   isLoggedOut: BannerIds.ACI_082022_LOGIN,
@@ -42,7 +42,6 @@ export const isAllowedFeature = (
     bannersState,
     userStatus,
     project,
-    userStatusIsNot,
   } = loginConnectStore
 
   const events = {
@@ -71,7 +70,6 @@ export const isAllowedFeature = (
         minTimeSinceEvent(events.cypressFirstOpened, '4 days'),
         minTimeSinceEvent(events.navCiPromptAutoOpened, '1 day'),
         bannerForCurrentStatusWasNotDismissed(),
-        userStatusIsNot('allTasksCompleted'),
         bannersAreNotDisabledForTesting(),
       ],
       needsRecordedRun: [
@@ -91,14 +89,17 @@ export const isAllowedFeature = (
       needsOrgConnect: [],
       needsProjectConnect: [],
       isLoggedOut: [],
+      allTasksCompleted: [],
     },
   }
 
-  let rulesToCheck = [...rules[featureName].base]
+  const baseRules = [...rules[featureName].base]
 
-  if (userStatus !== 'allTasksCompleted') {
-    rulesToCheck = rulesToCheck.concat(rules[featureName][userStatus])
-  }
+  // if the `userStatus` is not explicitly listed for a feature, then
+  // we don't have anything that we are allowed to show for that status
+  const statusSpecificRules = rules[featureName][userStatus] ?? [false]
+
+  const rulesToCheck = baseRules.concat(statusSpecificRules)
 
   return rulesToCheck.every((rule: boolean) => rule === true)
 }
