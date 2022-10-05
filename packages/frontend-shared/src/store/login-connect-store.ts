@@ -20,7 +20,7 @@ export interface LoginConnectState {
     isProjectConnected: boolean
     isConfigLoaded: boolean
     hasNoRecordedRuns: boolean
-    hasNonExampleSpec: boolean // TODO: in #23762 initialize as false and set the real value
+    hasNonExampleSpec: boolean
   }
   userData?: LoginUserData
   promptsShown: {
