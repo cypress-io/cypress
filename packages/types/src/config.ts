@@ -53,6 +53,4 @@ type BannerKeys = keyof typeof BannerIds
 type BannerId = typeof BannerIds[BannerKeys]
 export type BannersState = {
   [bannerId in BannerId]?: BannerState
-} & {
-  _disabled?: boolean // used for testing
-}
+} & { _disabled?: boolean } // used for testing

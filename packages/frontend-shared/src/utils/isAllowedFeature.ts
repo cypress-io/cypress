@@ -10,14 +10,12 @@ const bannerIds = {
 }
 
 /**
- *
- * @param eventTime - timestamp of an event
+ * Enures a cooldown period between two cypress-triggered events, if one has already happened
+ * @param eventTime - timestamp of an event - if undefined, this function will always return true, no cooldown is needed
  * @param waitTime - time to compare with, such as `1 day`, `20 minutes`, etc, to be parsed by `human-interval` package
  */
 const minTimeSinceEvent = (eventTime: number | undefined, waitTime: string) => {
   if (!eventTime) {
-    // if there is no event time, the event has never been recorded
-    // so the "time since" is infinite, return true here
     return true
   }
 
@@ -97,6 +95,7 @@ export const isAllowedFeature = (
 
   // if the `userStatus` is not explicitly listed for a feature, then
   // we don't have anything that we are allowed to show for that status
+  // so the fallback rules array of [false] is used
   const statusSpecificRules = rules[featureName][userStatus] ?? [false]
 
   const rulesToCheck = baseRules.concat(statusSpecificRules)
