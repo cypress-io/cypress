@@ -15,6 +15,7 @@ interface InternalHashOptions extends Partial<Cypress.Loggable & Cypress.Timeout
 
 export default (Commands, Cypress, cy) => {
   Commands.addAll({
+    // TODO: query
     url (userOptions: Partial<Cypress.UrlOptions> = {}) {
       const options: InternalUrlOptions = _.defaults({}, userOptions, { log: true })
 
@@ -44,6 +45,7 @@ export default (Commands, Cypress, cy) => {
       return resolveHref()
     },
 
+    // TODO: query
     hash (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
       const options: InternalHashOptions = _.defaults({}, userOptions, { log: true })
 
@@ -69,6 +71,7 @@ export default (Commands, Cypress, cy) => {
       return resolveHash()
     },
 
+    // TODO: query
     location (key, options) {
       let userOptions = options
 

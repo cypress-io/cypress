@@ -515,10 +515,6 @@ export default function (Commands, Cypress, cy, state) {
     },
   })
 
-  // temporarily keeping this as a dual command
-  // but it will move to a child command once
-  // cy.resolve + cy.wrap are upgraded to handle
-  // promises
   Commands.addAll({ prevSubject: 'optional' }, {
     then (subject, userOptions, fn) {
       // eslint-disable-next-line prefer-rest-params
@@ -532,10 +528,13 @@ export default function (Commands, Cypress, cy, state) {
     // return values are undefined.  prob should rethink
     // this and investigate why that is the default behavior
     // of child commands
+
+    // TODO: query
     invoke (subject, optionsOrStr, ...args) {
       return invokeFn.apply(this, [subject, optionsOrStr, ...args])
     },
 
+    // TODO: query
     its (subject, str, options, ...args) {
       return invokeItsFn.apply(this, [subject, str, options, ...args])
     },

@@ -76,13 +76,21 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
       }
     }
 
+    function wordJoin (array) {
+      const copy = [...array]
+      const last = copy.pop()
+
+      return `${copy.join(', ')} or ${last}`
+    }
+
     // every validation failed and we had more than one validation
     if (errors.length === types.length) {
       err = errors[0]
 
       if (types.length > 1) {
         // append a nice error message telling the user this
-        const errProps = $errUtils.appendErrMsg(err, `All ${types.length} subject validations failed on this subject.`)
+        const msg = err.message.replace(/(failed because it requires .*)\./, `${wordJoin(['$1', ...types.slice(1)]) }.`)
+        const errProps = $errUtils.modifyErrMsg(err, '', () => msg)
 
         $errUtils.mergeErrProps(err, errProps)
       }
@@ -214,14 +222,26 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
 
   const ensureElement = (subject, name, onFail?) => {
     if (!$dom.isElement(subject)) {
-      const prev = state('current').get('prev')
+      const current = state('current')
+
+      if ($dom.isJquery(subject) && subject.length === 0) {
+        const subjectChain = (cy.state('subjects') || {})[current.get('chainerId')]
+
+        $errUtils.throwErrByPath('subject.not_element_empty_subject', {
+          onFail,
+          args: {
+            name: current.get('name'),
+            subjectChain,
+          },
+        })
+      }
 
       $errUtils.throwErrByPath('subject.not_element', {
         onFail,
         args: {
           name,
           subject: $utils.stringifyActual(subject),
-          previous: prev.get('name'),
+          previous: current.get('prev').get('name'),
         },
       })
     }

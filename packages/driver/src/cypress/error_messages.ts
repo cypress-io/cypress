@@ -2,6 +2,7 @@ import _ from 'lodash'
 import { stripIndent } from 'common-tags'
 import capitalize from 'underscore.string/capitalize'
 import $stackUtils from './stack_utils'
+import $utils from './utils'
 
 const divider = (num, char) => {
   return Array(num).join(char)
@@ -51,6 +52,16 @@ const cmd = (command, args = '') => {
   const prefix = command.startsWith('Cypress') ? '' : 'cy.'
 
   return `\`${prefix}${command}(${args})\``
+}
+
+const queryFnToString = (queryFn) => `.${queryFn.commandName}(${queryFn.args.map($utils.stringifyActual).join(', ')})`
+
+const subjectChainToString = (subjectChain) => {
+  const [initial, ...queryFns] = subjectChain
+
+  const prefix = initial == null ? 'cy' : `${$utils.stringifyActual(initial)} -> `
+
+  return prefix + queryFns.map(queryFnToString).join('')
 }
 
 const getScreenshotDocsPath = (cmd) => {
@@ -871,6 +882,10 @@ export default {
     },
     invalid_overwrite: {
       message: 'Cannot overwite command for: `{{name}}`. An existing command does not exist by that name.',
+      docsUrl: 'https://on.cypress.io/api',
+    },
+    invalid_overwrite_query_with_command: {
+      message: 'Cannot overwite the `{{name}}` query with a command. Use `Commands._overwriteQuery()` instead.',
       docsUrl: 'https://on.cypress.io/api',
     },
     invoking_child_without_parent (obj) {
@@ -1920,6 +1935,14 @@ export default {
         The previous command that ran was:
 
           > ${cmd(obj.previous)}`
+    },
+    not_element_empty_subject (obj) {
+      return stripIndent`\
+        ${cmd(obj.name)} failed because it requires a DOM element.
+
+        No elements in the current DOM matched your query:
+
+          > ${subjectChainToString(obj.subjectChain)}`
     },
     state_subject_deprecated: {
       message: `${cmd('state', '\'subject\'')} has been deprecated and will be removed in a future release. Consider migrating to ${cmd('currentSubject')} instead.`,

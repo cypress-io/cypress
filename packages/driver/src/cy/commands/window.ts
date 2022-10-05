@@ -103,6 +103,7 @@ export default (Commands, Cypress, cy, state) => {
   }
 
   Commands.addAll({
+  // TODO: query
     title (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
       const options: InternalTitleOptions = _.defaults({}, userOptions, { log: true })
 
@@ -123,6 +124,7 @@ export default (Commands, Cypress, cy, state) => {
       return resolveTitle()
     },
 
+    // TODO: query
     window (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
       const options: InternalWindowOptions = _.defaults({}, userOptions, { log: true })
 
@@ -163,6 +165,7 @@ export default (Commands, Cypress, cy, state) => {
       return verifyAssertions()
     },
 
+    // TODO: query
     document (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
       const options: InternalDocumentOptions = _.defaults({}, userOptions, { log: true })
 

@@ -11,6 +11,7 @@ interface InternalFocusedOptions extends Partial<Cypress.Loggable & Cypress.Time
 
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({
+    // TODO: query
     focused (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
       const options: InternalFocusedOptions = _.defaults({}, userOptions, {
         verify: true,

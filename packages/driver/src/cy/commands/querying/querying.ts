@@ -328,7 +328,7 @@ export default (Commands, Cypress, cy, state) => {
     })
 
     return (subject) => {
-      cy.ensureSubjectByType(subject, ['optional', 'window', 'document', 'element'], this)
+      cy.ensureSubjectByType(subject, ['optional', 'element', 'window', 'document'], this)
 
       if (!subject || (!$dom.isElement(subject) && !$elements.isShadowRoot(subject[0]))) {
         subject = cy.state('withinSubject') || cy.$$('body')
