@@ -11,8 +11,7 @@ describe('max listeners warning spec', () => {
   systemTests.setup()
 
   // @see https://github.com/cypress-io/cypress/issues/1305
-  // TODO: Skipping for now. Will readdress with: https://github.com/cypress-io/cypress/issues/22992
-  systemTests.it.skip('does not log MaxEventListeners error', {
+  systemTests.it('does not log MaxEventListeners error', {
     browser: 'electron',
     project: 'max-listeners',
     spec: '*',
