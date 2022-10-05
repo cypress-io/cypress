@@ -1,3 +1,10 @@
+# [@cypress/angular-v1.1.1](https://github.com/cypress-io/cypress/compare/@cypress/angular-v1.1.0...@cypress/angular-v1.1.1) (2022-10-04)
+
+
+### Bug Fixes
+
+* **angular:** call ngOnChanges after mount ([#23596](https://github.com/cypress-io/cypress/issues/23596)) ([670d438](https://github.com/cypress-io/cypress/commit/670d43830947c3ea93ef9fdc9c90932a817eb453))
+
 # [@cypress/angular-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/angular-v1.0.0...@cypress/angular-v1.1.0) (2022-09-28)
 
 

@@ -9,7 +9,7 @@ context('cy.origin aliasing', () => {
     it('supports dom elements inside origin', () => {
       cy.get('a[data-cy="dom-link"]').click()
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get(':checkbox[name="colors"][value="blue"]').as('checkbox')
         cy.get('@checkbox').click().should('be.checked')
       })
@@ -23,7 +23,7 @@ context('cy.origin aliasing', () => {
 
       cy.get('[data-cy="cross-origin-secondary-link"]').as('link')
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('@link').click()
       })
     })
@@ -43,7 +43,7 @@ context('cy.origin aliasing', () => {
     it('.as()', () => {
       cy.get('a[data-cy="dom-link"]').click()
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#button').as('buttonAlias')
       })
 

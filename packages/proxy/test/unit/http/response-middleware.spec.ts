@@ -647,7 +647,7 @@ describe('http/response-middleware', function () {
 
       ctx.getAUTUrl = () => 'http://www.foobar.com/index.html'
       // set the primaryOrigin to true to signal we do NOT need to simulate top
-      ctx.remoteStates.isPrimaryOrigin = () => true
+      ctx.remoteStates.isPrimarySuperDomainOrigin = () => true
 
       await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
@@ -679,7 +679,7 @@ describe('http/response-middleware', function () {
 
       // a case where top would need to be simulated, but the experimental flag is off
       ctx.getAUTUrl = () => 'http://www.foobar.com/index.html'
-      ctx.remoteStates.isPrimaryOrigin = () => false
+      ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
 
       await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
@@ -717,7 +717,7 @@ describe('http/response-middleware', function () {
 
           // a case where top would need to be simulated
           ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
-          ctx.remoteStates.isPrimaryOrigin = () => false
+          ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
 
           await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
@@ -777,7 +777,7 @@ describe('http/response-middleware', function () {
 
           // a case where top would need to be simulated
           ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
-          ctx.remoteStates.isPrimaryOrigin = () => false
+          ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
 
           await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
@@ -836,7 +836,7 @@ describe('http/response-middleware', function () {
 
         // a case where top would need to be simulated
         ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
-        ctx.remoteStates.isPrimaryOrigin = () => false
+        ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
 
         await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
@@ -897,7 +897,7 @@ describe('http/response-middleware', function () {
 
         // a case where top would need to be simulated
         ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
-        ctx.remoteStates.isPrimaryOrigin = () => false
+        ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
 
         await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
@@ -955,7 +955,7 @@ describe('http/response-middleware', function () {
 
         // a case where top would need to be simulated
         ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
-        ctx.remoteStates.isPrimaryOrigin = () => false
+        ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
 
         await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
@@ -1014,7 +1014,7 @@ describe('http/response-middleware', function () {
 
           // a case where top would need to be simulated
           ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
-          ctx.remoteStates.isPrimaryOrigin = () => false
+          ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
 
           await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
@@ -1058,7 +1058,7 @@ describe('http/response-middleware', function () {
 
         // a case where top would need to be simulated
         ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
-        ctx.remoteStates.isPrimaryOrigin = () => false
+        ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
 
         await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
@@ -1114,7 +1114,7 @@ describe('http/response-middleware', function () {
 
           // a case where top would need to be simulated
           ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
-          ctx.remoteStates.isPrimaryOrigin = () => false
+          ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
 
           await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
@@ -1153,7 +1153,7 @@ describe('http/response-middleware', function () {
 
         // a case where top would need to be simulated
         ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
-        ctx.remoteStates.isPrimaryOrigin = () => false
+        ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
 
         await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
@@ -1208,7 +1208,7 @@ describe('http/response-middleware', function () {
 
         // a case where top would need to be simulated
         ctx.getAUTUrl = () => 'http://www.foobar.com/index.html'
-        ctx.remoteStates.isPrimaryOrigin = () => false
+        ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
 
         await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
@@ -1247,7 +1247,7 @@ describe('http/response-middleware', function () {
 
       // a case where top would need to be simulated
       ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
-      ctx.remoteStates.isPrimaryOrigin = () => false
+      ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
 
       await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
@@ -1283,7 +1283,7 @@ describe('http/response-middleware', function () {
 
       // a case where top would need to be simulated
       ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
-      ctx.remoteStates.isPrimaryOrigin = () => false
+      ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
 
       await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
@@ -1322,7 +1322,7 @@ describe('http/response-middleware', function () {
 
       // a case where top would need to be simulated
       ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
-      ctx.remoteStates.isPrimaryOrigin = () => false
+      ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
 
       await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
@@ -1401,7 +1401,7 @@ describe('http/response-middleware', function () {
         remoteStates.set(origin, {}, false)
       })
 
-      remoteStates.isPrimaryOrigin = () => false
+      remoteStates.isPrimarySuperDomainOrigin = () => false
 
       const cookieJar = props.cookieJar || {
         getAllCookies: () => [],
@@ -1465,7 +1465,7 @@ describe('http/response-middleware', function () {
         },
       })
 
-      ctx.remoteStates.isPrimaryOrigin = () => true
+      ctx.remoteStates.isPrimarySuperDomainOrigin = () => true
 
       return { appendStub, ctx }
     }

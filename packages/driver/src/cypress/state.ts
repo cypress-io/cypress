@@ -23,7 +23,7 @@ export interface StateFunc {
   (k: 'logGroupIds', v?: Array<Cypress.InternalLogConfig['id']>): Array<Cypress.InternalLogConfig['id']>
   (k: 'autLocation', v?: LocationObject): LocationObject
   (k: 'originCommandBaseUrl', v?: string): string
-  (k: 'currentActiveSuperDomainOrigin', v?: string): string
+  (k: 'currentActiveOrigin', v?: string): string
   (k: 'duringUserTestExecution', v?: boolean): boolean
   (k: 'onQueueEnd', v?: () => void): () => void
   (k: 'onFail', v?: (err: Error) => void): (err: Error) => void

@@ -25,6 +25,7 @@
     "fs-extra": "^10.1.0",
     "loader-utils": "^2.0.0",
     "lodash": "^4.17.20",
+    "md5": "2.3.0",
     "webpack-virtual-modules": "^0.4.4"
   },
   "devDependencies": {
@@ -50,7 +51,6 @@
     "eslint-plugin-mocha": "8.1.0",
     "fast-glob": "3.1.1",
     "find-webpack": "1.5.0",
-    "md5": "2.3.0",
     "mocha": "^7.1.0",
     "mockery": "2.1.0",
     "proxyquire": "2.1.3",

@@ -8,7 +8,7 @@ describe('cy.origin Cypress API', () => {
 
   context('Commands', () => {
     it('adds a custom command', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         // @ts-ignore
         Cypress.Commands.add('foo', () => 'bar')
 
@@ -17,14 +17,14 @@ describe('cy.origin Cypress API', () => {
       })
 
       // persists added command through spec bridge
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         // @ts-ignore
         cy.foo().should('equal', 'bar')
       })
     })
 
     it('overwrites an existing command in the spec bridge', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         // @ts-ignore
         Cypress.Commands.overwrite('foo', () => 'baz')
 
@@ -33,7 +33,7 @@ describe('cy.origin Cypress API', () => {
       })
 
       // persists overwritten command through spec bridge
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         // @ts-ignore
         cy.foo().should('equal', 'baz')
       })
@@ -46,7 +46,7 @@ describe('cy.origin Cypress API', () => {
         keystrokeDelay: 30,
       })
 
-      cy.origin('http://foobar.com:3500', { args: defaults }, (primaryKeyboardDefaults) => {
+      cy.origin('http://www.foobar.com:3500', { args: defaults }, (primaryKeyboardDefaults) => {
         const crossOriginKeyboardDefaults = Cypress.Keyboard.defaults({})
 
         expect(crossOriginKeyboardDefaults).to.not.deep.equal(primaryKeyboardDefaults)
@@ -54,7 +54,7 @@ describe('cy.origin Cypress API', () => {
     })
 
     it('allows a user to configure defaults', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const crossOriginKeyboardDefaults = Cypress.Keyboard.defaults({
           keystrokeDelay: 60,
         })
@@ -65,7 +65,7 @@ describe('cy.origin Cypress API', () => {
       })
 
       // persists default configuration changes through spec bridge
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const crossOriginKeyboardDefaults = Cypress.Keyboard.defaults({})
 
         expect(crossOriginKeyboardDefaults).to.deep.include({
@@ -84,7 +84,7 @@ describe('cy.origin Cypress API', () => {
         onAfterScreenshot: () => undefined,
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const crossOriginScreenshotDefaults = Cypress.Screenshot.defaults({})
 
         expect(crossOriginScreenshotDefaults).to.not.deep.include({
@@ -97,7 +97,7 @@ describe('cy.origin Cypress API', () => {
     })
 
     it('allows a user to configure defaults', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const crossOriginScreenshotDefaults = Cypress.Screenshot.defaults({
           blackout: ['foo'],
           overwrite: true,
@@ -110,7 +110,7 @@ describe('cy.origin Cypress API', () => {
       })
 
       // persists default configuration changes through spec bridge
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const crossOriginScreenshotDefaults = Cypress.Screenshot.defaults({})
 
         expect(crossOriginScreenshotDefaults).to.deep.include({
@@ -123,7 +123,7 @@ describe('cy.origin Cypress API', () => {
 
   context('dom', () => {
     it('provides a sanity check that the dom API exists on Cypress.*', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('[data-cy="dom-check"]').then(($el) => {
           expect(Cypress.dom.isAttached($el)).to.be.true
         })
@@ -133,37 +133,37 @@ describe('cy.origin Cypress API', () => {
 
   context('properties', () => {
     it('has arch property synced from primary', () => {
-      cy.origin('http://foobar.com:3500', { args: Cypress.arch }, (theArch) => {
+      cy.origin('http://www.foobar.com:3500', { args: Cypress.arch }, (theArch) => {
         expect(Cypress.arch).to.equal(theArch)
       })
     })
 
     it('has browser property synced from primary', () => {
-      cy.origin('http://foobar.com:3500', { args: Cypress.browser }, (theBrowser) => {
+      cy.origin('http://www.foobar.com:3500', { args: Cypress.browser }, (theBrowser) => {
         expect(Cypress.browser).to.deep.equal(theBrowser)
       })
     })
 
     it('has currentTest property synced from primary', () => {
-      cy.origin('http://foobar.com:3500', { args: Cypress.currentTest }, (theCurrentTest) => {
+      cy.origin('http://www.foobar.com:3500', { args: Cypress.currentTest }, (theCurrentTest) => {
         expect(Cypress.currentTest).to.deep.equal(theCurrentTest)
       })
     })
 
     it('has platform property synced from primary', () => {
-      cy.origin('http://foobar.com:3500', { args: Cypress.platform }, (thePlatform) => {
+      cy.origin('http://www.foobar.com:3500', { args: Cypress.platform }, (thePlatform) => {
         expect(Cypress.platform).to.equal(thePlatform)
       })
     })
 
     it('has testingType property synced from primary', () => {
-      cy.origin('http://foobar.com:3500', { args: Cypress.testingType }, (theTestingType) => {
+      cy.origin('http://www.foobar.com:3500', { args: Cypress.testingType }, (theTestingType) => {
         expect(Cypress.testingType).to.deep.equal(theTestingType)
       })
     })
 
     it('has spec property synced from primary', () => {
-      cy.origin('http://foobar.com:3500', { args: Cypress.spec }, (theSpec) => {
+      cy.origin('http://www.foobar.com:3500', { args: Cypress.spec }, (theSpec) => {
         expect(Cypress.spec).to.deep.equal(theSpec)
       })
     })
@@ -171,13 +171,13 @@ describe('cy.origin Cypress API', () => {
 
   context('methods', () => {
     it('isCy()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         expect(Cypress.isCy(cy)).to.be.true
       })
     })
 
     it('isBrowser()', () => {
-      cy.origin('http://foobar.com:3500', { args: Cypress.browser }, (theBrowser) => {
+      cy.origin('http://www.foobar.com:3500', { args: Cypress.browser }, (theBrowser) => {
         expect(Cypress.isBrowser(theBrowser.name)).to.equal(true)
       })
     })
@@ -189,7 +189,7 @@ describe('cy.origin Cypress API', () => {
         logs.push(log)
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         Cypress.log({
           name: 'log',
           message: 'test log',
@@ -211,7 +211,7 @@ describe('cy.origin Cypress API', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         Cypress.Server.defaults({})
       })
     })
@@ -223,7 +223,7 @@ describe('cy.origin Cypress API', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         Cypress.Cookies.preserveOnce('')
       })
     })
@@ -235,7 +235,7 @@ describe('cy.origin Cypress API', () => {
         done()
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         Cypress.session.clearAllSavedSessions()
       })
     })

@@ -6,14 +6,14 @@ import { doesTopNeedToBeSimulated } from '../../../../lib/http/util/top-simulati
 context('.doesTopNeedToBeSimulated', () => {
   const autUrl = 'http://localhost:8080'
 
-  it('returns false when URL matches the AUT Url origin policy and the AUT Url exists and is NOT the AUT frame', () => {
+  it('returns false when URL matches the AUT Url origin and the AUT Url exists and is NOT the AUT frame', () => {
     const mockCtx: HttpMiddlewareThis<any> = {
       getAUTUrl: sinon.stub().returns(autUrl),
       req: {
         isAUTFrame: false,
       },
       remoteStates: {
-        isPrimaryOrigin: sinon.stub().returns(true),
+        isPrimarySuperDomainOrigin: sinon.stub().returns(true),
       },
     }
 
@@ -26,14 +26,14 @@ context('.doesTopNeedToBeSimulated', () => {
    * If this proves problematic in the future, we can likely leverage the sec-fetch-mode header for requests and 3xx status for responses to determine
    * whether or not cookies need to be attached from the jar or set into the jar
    */
-  it('returns true when URL matches the AUT Url origin policy and the AUT Url exists and is the AUT frame', () => {
+  it('returns true when URL matches the AUT Url origin and the AUT Url exists and is the AUT frame', () => {
     const mockCtx: HttpMiddlewareThis<any> = {
       getAUTUrl: sinon.stub().returns(autUrl),
       req: {
         isAUTFrame: true,
       },
       remoteStates: {
-        isPrimaryOrigin: sinon.stub().returns(true),
+        isPrimarySuperDomainOrigin: sinon.stub().returns(true),
       },
     }
 
@@ -52,7 +52,7 @@ context('.doesTopNeedToBeSimulated', () => {
     const mockCtx: HttpMiddlewareThis<any> = {
       getAUTUrl: sinon.stub().returns(autUrl),
       remoteStates: {
-        isPrimaryOrigin: sinon.stub().returns(false),
+        isPrimarySuperDomainOrigin: sinon.stub().returns(false),
       },
     }
 
