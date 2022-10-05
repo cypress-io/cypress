@@ -1661,7 +1661,7 @@ describe('Routes', () => {
         })
       })
 
-      it('passes invalid cookies', function () {
+      it('passes invalid cookies', function (done) {
         nock(this.server.remoteStates.current().origin)
         .get('/invalid')
         .reply(200, 'OK', {
@@ -1672,15 +1672,16 @@ describe('Routes', () => {
           ],
         })
 
-        return this.rp('http://localhost:8080/invalid')
-        .then((res) => {
+        http.get('http://localhost:8080/invalid', (res) => {
           expect(res.statusCode).to.eq(200)
 
           expect(res.headers['set-cookie']).to.deep.eq([
             'foo=bar; Path=/',
             '___utmvmXluIZsM=fidJKOsDSdm; path=/; Max-Age=900',
-            '___utmvbXluIZsM=bZM    XtQOGalF: VtR; path=/; Max-Age=900',
+            '___utmvbXluIZsM=bZM\n    XtQOGalF: VtR; path=/; Max-Age=900',
           ])
+
+          done()
         })
       })
 

@@ -1,9 +1,15 @@
 require('../../spec_helper')
 
-const { apiRoutes } = require(`../../../lib/util/routes`)
-
 describe('lib/util/routes', () => {
+  const routes = () => {
+    delete require.cache[require.resolve(`../../../lib/util/routes`)]
+
+    return require(`../../../lib/util/routes`)
+  }
+
   describe('api routes', () => {
+    const apiRoutes = routes().apiRoutes
+
     it('api', () => {
       expect(apiRoutes.api()).to.eq('http://localhost:1234/')
     })
@@ -42,6 +48,46 @@ describe('lib/util/routes', () => {
 
     it('exceptions', () => {
       expect(apiRoutes.exceptions()).to.eq('http://localhost:1234/exceptions')
+    })
+  })
+
+  describe('api url', () => {
+    it('supports development environment', () => {
+      process.env.CYPRESS_INTERNAL_ENV = 'development'
+
+      expect(routes().apiRoutes.api()).to.eq('http://localhost:1234/')
+    })
+
+    it('supports staging environment', () => {
+      process.env['CYPRESS_INTERNAL_ENV'] = 'staging'
+
+      expect(routes().apiRoutes.api()).to.eq('https://api-staging.cypress.io/')
+    })
+
+    it('supports production environment', () => {
+      process.env.CYPRESS_INTERNAL_ENV = 'production'
+
+      expect(routes().apiRoutes.api()).to.eq('https://api.cypress.io/')
+    })
+
+    it('supports test environment', () => {
+      process.env.CYPRESS_INTERNAL_ENV = 'test'
+
+      expect(routes().apiRoutes.api()).to.eq('http://localhost:1234/')
+    })
+
+    it('defaults to development', () => {
+      process.env.CYPRESS_CONFIG_ENV = undefined
+      process.env.CYPRESS_INTERNAL_ENV = undefined
+
+      expect(routes().apiRoutes.api()).to.eq('http://localhost:1234/')
+    })
+
+    it('honors CYPRESS_CONFIG_ENV', () => {
+      process.env.CYPRESS_CONFIG_ENV = 'staging'
+      process.env.CYPRESS_INTERNAL_ENV = 'test'
+
+      expect(routes().apiRoutes.api()).to.eq('https://api-staging.cypress.io/')
     })
   })
 })

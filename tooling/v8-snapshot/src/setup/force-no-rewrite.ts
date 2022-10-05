@@ -26,9 +26,6 @@ export default [
   // results in recursive call to __get_fs2__
   'packages/https-proxy/lib/ca.js',
 
-  // TODO: This should be temporary. Will address with https://github.com/cypress-io/cypress/issues/22986
-  'packages/server/lib/routes-e2e.ts',
-
   // TODO: Figure out why these don't properly get flagged as norewrite: https://github.com/cypress-io/cypress/issues/23986
   'node_modules/@cspotcode/source-map-support/source-map-support.js',
   'packages/server/lib/modes/record.js',
@@ -52,4 +49,9 @@ export default [
   'packages/graphql/node_modules/debug/src/node.js',
   'packages/net-stubbing/node_modules/debug/src/node.js',
   'packages/server/node_modules/mocha/node_modules/debug/src/node.js',
+  'node_modules/minimatch/minimatch.js',
+  'node_modules/mocha-7.0.1/node_modules/glob/node_modules/minimatch/minimatch.js',
+  'packages/data-context/node_modules/minimatch/minimatch.js',
+  'packages/network/node_modules/minimatch/minimatch.js',
+  'packages/server/node_modules/glob/node_modules/minimatch/minimatch.js',
 ]

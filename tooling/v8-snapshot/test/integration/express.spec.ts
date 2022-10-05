@@ -2,14 +2,11 @@
 // checking the metadata for deferreds and healthy modules.
 import path from 'path'
 import fs from 'fs-extra'
-import { exec as execOrig } from 'child_process'
-import { promisify } from 'util'
+import execa from 'execa'
 import { assert } from 'chai'
 import Fixtures from '@tooling/system-tests'
 import * as FixturesScaffold from '@tooling/system-tests/lib/dep-installer'
 import snapshot from 'snap-shot-it'
-
-const exec = promisify(execOrig)
 
 const EXPRESS_MINIMAL_PROJECT = 'v8-snapshot/example-express'
 
@@ -36,13 +33,12 @@ describe('integration: express', () => {
       DEBUG_COLORS: 1,
     }
     const _MB = 1024 * 1024
-    const cmd = `node ./snapshot/install-snapshot.js`
 
     let stdout = ''
     let stderr = ''
 
     try {
-      ({ stdout, stderr } = await exec(cmd, { cwd: projectBaseDir, maxBuffer: 600 * _MB, env }))
+      ({ stdout, stderr } = await execa('node', ['./snapshot/install-snapshot.js'], { cwd: projectBaseDir, maxBuffer: 600 * _MB, env }))
 
       const { deferredHash, ...metadata } = require(metadataFile)
 

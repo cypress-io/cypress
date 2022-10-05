@@ -74,7 +74,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node16.16.0-chrome105-ff99-edge
+      - image: cypress/browsers:node16.16.0-chrome106-ff99-edge
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -84,7 +84,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node16.16.0-chrome105-ff99-edge
+      - image: cypress/browsers:node16.16.0-chrome106-ff99-edge
         user: node
     environment:
       PLATFORM: linux
@@ -483,7 +483,7 @@ commands:
       - run:
           name: Run driver tests in Cypress
           environment:
-            CYPRESS_KONFIG_ENV: production
+            CYPRESS_CONFIG_ENV: production
           command: |
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
@@ -567,7 +567,7 @@ commands:
               # internal PR
               cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
               DEBUG=<<parameters.debug>> \
-              CYPRESS_KONFIG_ENV=production \
+              CYPRESS_CONFIG_ENV=production \
               CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
@@ -593,7 +593,7 @@ commands:
               cd ../..
 
               DEBUG=<<parameters.debug>> \
-              CYPRESS_KONFIG_ENV=production \
+              CYPRESS_CONFIG_ENV=production \
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
@@ -1730,7 +1730,7 @@ jobs:
           working_directory: packages/reporter
       - run:
           command: |
-            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_CONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
@@ -1753,7 +1753,7 @@ jobs:
       - restore_cached_system_tests_deps
       - run:
           command: |
-            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_CONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
@@ -1775,7 +1775,7 @@ jobs:
       - restore_cached_system_tests_deps
       - run:
           command: |
-            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_CONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \

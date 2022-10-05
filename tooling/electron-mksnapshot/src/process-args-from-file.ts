@@ -25,6 +25,7 @@ export function processArgsFromFile (
       return !arg.match(newlineRegEx) && arg !== ''
     })
 
+    // TODO: Figure out why we need to filter this out: https://github.com/cypress-io/cypress/issues/24092
     const turboProfilingInputIndex = mksnapshotArgsFromFile.indexOf('--turbo-profiling-input')
 
     if (turboProfilingInputIndex > -1) {
