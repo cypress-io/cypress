@@ -188,6 +188,24 @@ context('cy.origin actions', () => {
     })
   })
 
+  context('cross-origin AUT errors', () => {
+    // We only need to check .get here because the other commands are chained off of it.
+    it('.get()', { defaultCommandTimeout: 50 }, (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include(`Timed out retrying after 50ms:`)
+        expect(err.message).to.include(`The command was expected to run against origin \`http://localhost:3500\` but the application is at origin \`http://foobar.com:3500\`.`)
+        expect(err.message).to.include(`This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.`)
+        //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures
+        expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
+        expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
+        done()
+      })
+
+      cy.get('a[data-cy="dom-link"]').click()
+      cy.get('#button')
+    })
+  })
+
   context('#consoleProps', () => {
     const { _ } = Cypress
     let logs: Map<string, any>
@@ -455,18 +473,19 @@ context('cy.origin actions', () => {
           expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps['Applied To'])
         })
 
-        expect(KeyboardEventsTable.data[1]).to.have.property('Details').that.equals('{ code: KeyF, which: 70 }')
-        expect(KeyboardEventsTable.data[1]).to.have.property('Typed').that.equals('f')
+        expect(KeyboardEventsTable.data[0]).to.have.property('Details').that.equals('{ code: KeyF, which: 70 }')
+        expect(KeyboardEventsTable.data[0]).to.have.property('Typed').that.equals('f')
+
+        expect(KeyboardEventsTable.data[1]).to.have.property('Details').that.equals('{ code: KeyO, which: 79 }')
+        expect(KeyboardEventsTable.data[1]).to.have.property('Typed').that.equals('o')
 
         expect(KeyboardEventsTable.data[2]).to.have.property('Details').that.equals('{ code: KeyO, which: 79 }')
         expect(KeyboardEventsTable.data[2]).to.have.property('Typed').that.equals('o')
-
-        expect(KeyboardEventsTable.data[3]).to.have.property('Details').that.equals('{ code: KeyO, which: 79 }')
-        expect(KeyboardEventsTable.data[3]).to.have.property('Typed').that.equals('o')
       })
     })
 
-    it('.submit()', () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23480
+    it.skip('.submit()', () => {
       cy.get('a[data-cy="dom-link"]').click()
       cy.origin('http://foobar.com:3500', () => {
         cy.get('form#multiple-inputs-and-input-submit input[name="fname"]').type('foo')

@@ -80,7 +80,10 @@
             :gql="props.gql"
             :show-retry="!!error"
             :utm-medium="props.utmMedium"
+            :utm-content="props.utmContent"
+            :show-connect-button-after-login="props.showConnectButtonAfterLogin"
             @continue="continueAuth"
+            @connect-project="handleConnectProject"
           />
         </div>
       </div>
@@ -90,13 +93,14 @@
 <script setup lang="ts">
 import { useI18n } from '@cy/i18n'
 import { gql } from '@urql/core'
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import Auth from '../Auth.vue'
 import ExternalLink from '../ExternalLink.vue'
 import { useOnline } from '@vueuse/core'
 import NoInternetConnection from '../../components/NoInternetConnection.vue'
 import CopyText from '@cy/components/CopyText.vue'
 import StandardModalHeader from '@cy/components/StandardModalHeader.vue'
+import { hideAllPoppers } from 'floating-vue'
 
 import {
   Dialog,
@@ -116,15 +120,24 @@ function continueAuth (isLoggedIn: boolean) {
   emit('update:modelValue', false)
 }
 
+function handleConnectProject () {
+  emit('loggedin')
+  emit('connect-project')
+  emit('update:modelValue', false)
+}
+
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void
   (event: 'loggedin'): void
+  (event: 'connect-project'): void
 }>()
 
 const props = defineProps<{
   modelValue: boolean
   gql: LoginModalFragment
   utmMedium: string
+  utmContent?: string
+  showConnectButtonAfterLogin?: boolean
 }>()
 
 gql`
@@ -132,6 +145,18 @@ fragment LoginModal on Query {
   ...Auth
 }
 `
+
+// Ensure all tooltips are closed when the modal opens - this prevents tooltips from beneath that
+// are stuck open being rendered on top of the modal due to the use of a fixed z-index in `floating-vue`
+watch(
+  () => props.modelValue,
+  (value) => {
+    if (value) {
+      hideAllPoppers()
+    }
+  },
+  { immediate: true },
+)
 
 const setIsOpen = (value: boolean) => {
   emit('update:modelValue', value)

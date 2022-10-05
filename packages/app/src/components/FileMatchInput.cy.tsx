@@ -24,5 +24,6 @@ describe('<FileMatchInput />', () => {
     .get('input[type=search]').should('have.value', newText)
     .clear()
     .get('@onUpdateTextSpy').should('have.been.calledWith', '')
+    .get('input[type=search]').should('have.attr', 'autocomplete', 'off')
   })
 })

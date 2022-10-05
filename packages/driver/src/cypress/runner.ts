@@ -19,6 +19,7 @@ const TEST_BEFORE_RUN_ASYNC_EVENT = 'runner:test:before:run:async'
 // event fired before hooks and test execution
 const TEST_BEFORE_RUN_EVENT = 'runner:test:before:run'
 const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
+const TEST_AFTER_RUN_ASYNC_EVENT = 'runner:runnable:after:run:async'
 
 const RUNNABLE_LOGS = 'routes agents commands hooks'.split(' ')
 const RUNNABLE_PROPS = '_testConfig id order title _titlePath root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file originalTitle invocationDetails final currentRetry retries _slow'.split(' ')
@@ -26,11 +27,18 @@ const RUNNABLE_PROPS = '_testConfig id order title _titlePath root hookName hook
 const debug = debugFn('cypress:driver:runner')
 const debugErrors = debugFn('cypress:driver:errors')
 
+const RUNNER_EVENTS = [
+  TEST_BEFORE_RUN_ASYNC_EVENT,
+  TEST_BEFORE_RUN_EVENT,
+  TEST_AFTER_RUN_EVENT,
+  TEST_AFTER_RUN_ASYNC_EVENT,
+] as const
+
 const duration = (before: Date, after: Date) => {
   return Number(before) - Number(after)
 }
 
-const fire = (event, runnable, Cypress) => {
+const fire = (event: typeof RUNNER_EVENTS[number], runnable, Cypress) => {
   debug('fire: %o', { event })
   if (runnable._fired == null) {
     runnable._fired = {}
@@ -38,7 +46,7 @@ const fire = (event, runnable, Cypress) => {
 
   runnable._fired[event] = true
 
-  // dont fire anything again if we are skipped
+  // don't fire anything again if we are skipped
   if (runnable._ALREADY_RAN) {
     return
   }
@@ -46,7 +54,7 @@ const fire = (event, runnable, Cypress) => {
   return Cypress.action(event, wrap(runnable), runnable)
 }
 
-const fired = (event, runnable) => {
+const fired = (event: typeof RUNNER_EVENTS[number], runnable) => {
   return !!(runnable._fired && runnable._fired[event])
 }
 
@@ -63,7 +71,7 @@ const runnableAfterRunAsync = (runnable, Cypress) => {
 
   return Promise.try(() => {
     // NOTE: other events we do not fire more than once, but this needed to change for test-retries
-    return fire('runner:runnable:after:run:async', runnable, Cypress)
+    return fire(TEST_AFTER_RUN_ASYNC_EVENT, runnable, Cypress)
   })
 }
 
@@ -478,7 +486,7 @@ const hasOnly = (suite) => {
   )
 }
 
-const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnable, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest) => {
+const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest) => {
   let hasTests = false
 
   // only loop until we find the first test
@@ -497,7 +505,7 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
   // create optimized lookups for the tests without
   // traversing through it multiple times
   const tests: Record<string, any> = {}
-  const normalizedSuite = normalize(suite, tests, initialTests, onRunnable, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
+  const normalizedSuite = normalize(suite, tests, initialTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
 
   if (setTestsById) {
     // use callback here to hand back
@@ -534,7 +542,7 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
   return normalizedSuite
 }
 
-const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest) => {
+const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest) => {
   const normalizeRunnable = (runnable) => {
     if (!runnable.id) {
       runnable.id = getRunnableId()
@@ -543,10 +551,6 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getRun
     // tests have a type of 'test' whereas suites do not have a type property
     if (runnable.type == null) {
       runnable.type = 'suite'
-    }
-
-    if (onRunnable) {
-      onRunnable(runnable)
     }
 
     // if we have a runnable in the initial state
@@ -560,21 +564,11 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getRun
 
       if (i.prevAttempts) {
         prevAttempts = _.map(i.prevAttempts, (test) => {
-          if (test) {
-            _.each(RUNNABLE_LOGS, (type) => {
-              return _.each(test[type], onLogsById)
-            })
-          }
-
           // reduce this runnable down to its props
           // and collections
           return wrapAll(test)
         })
       }
-
-      _.each(RUNNABLE_LOGS, (type) => {
-        return _.each(i[type], onLogsById)
-      })
 
       _.extend(runnable, i)
     }
@@ -643,7 +637,7 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getRun
     _.each({ tests: runnableTests, suites: runnableSuites }, (_runnables, type) => {
       if (runnable[type]) {
         return normalizedRunnable[type] = _.compact(_.map(_runnables, (childRunnable) => {
-          const normalizedChild = normalize(childRunnable, tests, initialTests, onRunnable, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
+          const normalizedChild = normalize(childRunnable, tests, initialTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
 
           if (type === 'tests' && onlyIdMode()) {
             if (normalizedChild.id === getOnlyTestId()) {
@@ -732,7 +726,7 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getRun
       suite.suites = []
 
       normalizedSuite.suites = _.compact(_.map(suiteSuites, (childSuite) => {
-        const normalizedChildSuite = normalize(childSuite, tests, initialTests, onRunnable, onLogsById, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
+        const normalizedChildSuite = normalize(childSuite, tests, initialTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
 
         if ((suite._onlySuites.indexOf(childSuite) !== -1) || filterOnly(normalizedChildSuite, childSuite)) {
           if (onlyIdMode()) {
@@ -1040,6 +1034,7 @@ export default {
     let _hookId = 0
     let _uncaughtFn: (() => never) | null = null
     let _resumedAtTestIndex: number | null = null
+    let _skipCollectingLogs = true
 
     const _runner = mocha.getRunner()
 
@@ -1126,8 +1121,6 @@ export default {
     const _testsQueue: any[] = []
     const _testsQueueById: Record<string, any> = {}
     // only used during normalization
-    const _runnables: any[] = []
-    const _logsById: Record<string, any> = {}
     let _emissions: Emissions = {
       started: {},
       ended: {},
@@ -1154,15 +1147,6 @@ export default {
 
     const getTests = () => {
       return _tests
-    }
-
-    const onRunnable = (r) => {
-      // set default retries at onRunnable time instead of onRunnableRun
-      return _runnables.push(r)
-    }
-
-    const onLogsById = (l) => {
-      return _logsById[l.id] = l
     }
 
     const getTest = () => {
@@ -1320,8 +1304,8 @@ export default {
       onSpecError,
       setOnlyTestId,
       setOnlySuiteId,
-
-      normalizeAll (tests) {
+      normalizeAll (tests, skipCollectingLogs) {
+        _skipCollectingLogs = skipCollectingLogs
         // if we have an uncaught error then slice out
         // all of the tests and suites and just generate
         // a single test since we received an uncaught
@@ -1342,8 +1326,6 @@ export default {
           tests,
           setTestsById,
           setTests,
-          onRunnable,
-          onLogsById,
           getRunnableId,
           getHookId,
           getOnlyTestId,
@@ -1426,23 +1408,27 @@ export default {
 
         const isHook = runnable.type === 'hook'
 
+        let runnableName = 'test'
+        let runnableId = runnable.id
+
+        if (isHook) {
         // if this isn't a hook, then the name is 'test'
-        const hookName = isHook ? getHookName(runnable) : 'test'
+          runnableName = getHookName(runnable)
 
-        // set hook id to hook id or test id
-        const hookId = isHook ? runnable.hookId : runnable.id
+          // set hook id to hook id or test id
+          runnableId = runnable.hookId
 
-        const isAfterEachHook = isHook && hookName.match(/after each/)
-        const isBeforeEachHook = isHook && hookName.match(/before each/)
+          const isAfterEachHook = runnableName.match(/after each/)
+          const isBeforeEachHook = runnableName.match(/before each/)
 
-        // if we've been told to skip hooks at a certain nested level
-        // this happens if we're handling a runnable that is going to retry due to failing in a hook
-        const shouldSkipRunnable = test._skipHooksWithLevelGreaterThan != null
-          && isHook
+          // if we've been told to skip hooks at a certain nested level
+          // this happens if we're handling a runnable that is going to retry due to failing in a hook
+          const shouldSkipRunnable = test._skipHooksWithLevelGreaterThan != null
           && (isBeforeEachHook || isAfterEachHook && runnable.titlePath().length > test._skipHooksWithLevelGreaterThan)
 
-        if (shouldSkipRunnable) {
-          return _next.call(this)
+          if (shouldSkipRunnable) {
+            return _next.call(this)
+          }
         }
 
         const next = (err) => {
@@ -1456,8 +1442,8 @@ export default {
               // this is what it 'feels' like to the user
               runnable.duration = duration(wallClockEnd, wallClockStartedAt)
 
-              setTestTimingsForHook(test, hookName, {
-                hookId: runnable.hookId,
+              setTestTimingsForHook(test, runnableName, {
+                hookId: runnableId,
                 fnDuration: duration(fnDurationEnd!, fnDurationStart!),
                 afterFnDuration: duration(afterFnDurationEnd, afterFnDurationStart!),
               })
@@ -1472,7 +1458,7 @@ export default {
 
               // but still preserve its actual function
               // body duration for timings
-              setTestTimings(test, 'test', {
+              setTestTimings(test, runnableName, {
                 fnDuration: duration(fnDurationEnd!, fnDurationStart!),
                 afterFnDuration: duration(afterFnDurationEnd!, afterFnDurationStart!),
               })
@@ -1534,6 +1520,19 @@ export default {
           })
         }
 
+        // if either the TEST_BEFORE_RUN_EVENT or TEST_BEFORE_RUN_ASYNC_EVENT throws
+        // then override the test function to associate the error to the test
+        const handleBeforeTestEventError = (err: Error): boolean => {
+          const { fn } = runnable
+
+          runnable.fn = () => {
+            runnable.fn = fn
+            throw err
+          }
+
+          return false
+        }
+
         // TODO: handle promise timeouts here!
         // whenever any runnable is about to run
         // we figure out what test its associated to
@@ -1548,6 +1547,10 @@ export default {
             fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
           }
 
+          return true
+        })
+        .catch(handleBeforeTestEventError)
+        .then((ranSuccessfulBeforeRunEvent: boolean) => {
           cy.state('duringUserTestExecution', false)
           Cypress.primaryOriginCommunicator.toAllSpecBridges('sync:state', { 'duringUserTestExecution': false })
 
@@ -1556,28 +1559,16 @@ export default {
           // running lifecycle events
           // and also get back a function result handler that we use as
           // an async seam
-          cy.setRunnable(runnable, hookId)
-        })
-        .then(() => {
-          return testBeforeRunAsync(test, Cypress)
-        })
-        .catch((err) => {
-          // TODO: if our async tasks fail
-          // then allow us to cause the test
-          // to fail here by blowing up its fn
-          // callback
-          const { fn } = runnable
+          cy.setRunnable(runnable, runnableId)
 
-          const restore = () => {
-            return runnable.fn = fn
+          if (ranSuccessfulBeforeRunEvent) {
+            return testBeforeRunAsync(test, Cypress)
           }
 
-          runnable.fn = () => {
-            restore()
-
-            throw err
-          }
-        }).finally(() => {
+          return null
+        })
+        .catch(handleBeforeTestEventError)
+        .finally(() => {
           if (lifecycleStart) {
             // capture how long the lifecycle took as part
             // of the overall wallClockDuration of our test
@@ -1673,25 +1664,42 @@ export default {
 
       getDisplayPropsForLog: LogUtils.getDisplayProps,
 
-      getConsolePropsForLogById (logId) {
-        const attrs = _logsById[logId]
+      getConsolePropsForLog (testId, logId) {
+        if (_skipCollectingLogs) return
 
-        if (attrs) {
-          return LogUtils.getConsoleProps(attrs)
-        }
-      },
+        const test = getTestById(testId)
 
-      getSnapshotPropsForLogById (logId) {
-        const attrs = _logsById[logId]
+        if (!test) return
 
-        if (attrs) {
-          return LogUtils.getSnapshotProps(attrs)
+        const logAttrs = _.find(test.commands || [], (log) => log.id === logId)
+
+        if (logAttrs) {
+          return LogUtils.getConsoleProps(logAttrs)
         }
 
         return
       },
 
-      resumeAtTest (id, emissions: Emissions = {}) {
+      getSnapshotPropsForLog (testId, logId) {
+        if (_skipCollectingLogs) return
+
+        const test = getTestById(testId)
+
+        if (!test) return
+
+        const logAttrs = _.find(test.commands || [], (log) => log.id === logId)
+
+        if (logAttrs) {
+          return LogUtils.getSnapshotProps(logAttrs)
+        }
+
+        return
+      },
+
+      resumeAtTest (id, emissions: Emissions = {
+        started: {},
+        ended: {},
+      }) {
         _resumedAtTestIndex = getTestIndexFromId(id)
 
         _emissions = emissions
@@ -1736,11 +1744,9 @@ export default {
       },
 
       addLog (attrs, isInteractive) {
-        // we dont need to hold a log reference
-        // to anything in memory when we're headless
-        // because you cannot inspect any logs
-
-        if (!isInteractive) {
+        // we don't need to hold a log reference to anything in memory when we don't
+        // render the report or are headless because you cannot inspect any logs
+        if (_skipCollectingLogs || !isInteractive) {
           return
         }
 
@@ -1752,14 +1758,20 @@ export default {
           return
         }
 
-        // if this test isnt in the current queue
+        // if this test isn't in the current queue
         // then go ahead and add it
         if (!_testsQueueById[test.id]) {
           _testsQueueById[test.id] = true
           _testsQueue.push(test)
         }
 
-        const existing = _logsById[attrs.id]
+        const { instrument } = attrs
+
+        // pluralize the instrument as a property on the runnable
+        const name = `${instrument}s`
+        const logs = test[name] != null ? test[name] : (test[name] = [])
+
+        const existing = _.find(logs, (log) => log.id === attrs.id)
 
         if (existing) {
           // because log:state:changed may
@@ -1775,20 +1787,7 @@ export default {
           return _.extend(existing, attrs)
         }
 
-        _logsById[attrs.id] = attrs
-
-        const { testId, instrument } = attrs
-
-        test = getTestById(testId)
-
-        if (test) {
-          // pluralize the instrument as a property on the runnable
-          const name = `${instrument}s`
-          const logs = test[name] != null ? test[name] : (test[name] = [])
-
-          // else push it onto the logs
-          return logs.push(attrs)
-        }
+        return logs.push(attrs)
       },
     }
   },

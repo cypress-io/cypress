@@ -1,5 +1,5 @@
 import '@testing-library/cypress/add-commands'
-import { browsers } from '@packages/types/src/browser'
+import { browsers } from '@packages/launcher/lib/browsers'
 import { installCustomPercyCommand } from '@packages/ui-components/cypress/support/customPercyCommand'
 import { configure } from '@testing-library/cypress'
 import i18n from '../../../src/locales/en-US.json'
@@ -15,7 +15,6 @@ import type { SinonStub } from 'sinon'
 import type sinon from 'sinon'
 import type pDefer from 'p-defer'
 import 'cypress-plugin-tab'
-import 'cypress-axe'
 import type { Response } from 'cross-fetch'
 
 configure({ testIdAttribute: 'data-cy' })
@@ -158,7 +157,12 @@ declare global {
        * Tabs until the result of fn is true
        */
       tabUntil(fn: ($el: JQuery) => boolean, limit?: number): Chainable<any>
+      /**
+       * Get the AUT <iframe>. Useful for Cypress in Cypress tests.
+       */
+      getAutIframe(): Chainable<JQuery<HTMLIFrameElement>>
     }
+
   }
 }
 
@@ -198,9 +202,14 @@ export interface ResetOptionsResult {
   e2eServerPort?: number | null
 }
 
-function openGlobalMode (argv?: string[]) {
+export interface OpenGlobalModeOptions {
+  argv?: string[]
+  byFlag?: boolean
+}
+
+function openGlobalMode (options: OpenGlobalModeOptions = {}) {
   return logInternal({ name: 'openGlobalMode', message: '' }, () => {
-    return taskInternal('__internal_openGlobal', argv)
+    return taskInternal('__internal_openGlobal', options)
   }).then((obj) => {
     Cypress.env('e2e_serverPort', obj.e2eServerPort)
 
@@ -237,7 +246,6 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
         const isInitialized = o.pDefer()
         const initializeActive = ctx.actions.project.initializeActiveProject
         const onErrorStub = o.sinon.stub(ctx, 'onError')
-        // @ts-expect-error - errors b/c it's a private method
         const onLoadErrorStub = o.sinon.stub(ctx.lifecycleManager, 'onLoadError')
         const initializeActiveProjectStub = o.sinon.stub(ctx.actions.project, 'initializeActiveProject')
 
@@ -291,6 +299,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
         if (!ctx.lifecycleManager.browsers?.length) throw new Error('No browsers available in startAppServer')
 
         await ctx.actions.browser.setActiveBrowser(ctx.lifecycleManager.browsers[0])
+        // @ts-expect-error this interface is strict about the options it expects
         await ctx.actions.project.launchProject(o.mode, { url: o.url })
 
         if (!o.skipMockingPrompts
@@ -301,6 +310,7 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
             firstOpened: 1609459200000,
             lastOpened: 1609459200000,
             promptsShown: { ci1: 1609459200000 },
+            banners: { _disabled: true },
           })
         }
 
@@ -521,9 +531,15 @@ function tabUntil (fn: (el: JQuery<HTMLElement>) => boolean, limit: number = 10)
   })
 }
 
+function getAutIframe () {
+  return cy.get('iframe.aut-iframe').its('0.contentDocument.documentElement').then(cy.wrap) as Cypress.Chainable<JQuery<HTMLIFrameElement>>
+}
+
 Cypress.on('uncaught:exception', (err) => !err.message.includes('ResizeObserver loop limit exceeded'))
 
 Cypress.Commands.add('scaffoldProject', scaffoldProject)
+
+Cypress.Commands.add('getAutIframe', getAutIframe)
 Cypress.Commands.add('addProject', addProject)
 Cypress.Commands.add('openGlobalMode', openGlobalMode)
 Cypress.Commands.add('visitApp', visitApp)
@@ -540,6 +556,9 @@ Cypress.Commands.add('validateExternalLink', { prevSubject: ['optional', 'elemen
 
 installCustomPercyCommand({
   elementOverrides: {
+    '[data-cy=top-nav-cypress-version-current-link]': ($el) => {
+      $el.attr('style', 'display: none !important') // TODO: display and set dummy text to vX.X.X once flake is fixed. See issue https://github.com/cypress-io/cypress/issues/21897
+    },
     '.runnable-header .duration': ($el) => {
       $el.text('XX:XX')
     },

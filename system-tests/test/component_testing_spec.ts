@@ -68,3 +68,98 @@ describe('component testing projects', function () {
     expectedExitCode: 0,
   })
 })
+
+const REACT_MAJOR_VERSIONS = ['17', '18'] as const
+
+describe(`React major versions with Vite`, function () {
+  systemTests.setup()
+
+  for (const majorVersion of REACT_MAJOR_VERSIONS) {
+    it(`executes all of the tests for React v${majorVersion} with Vite`, function () {
+      return systemTests.exec(this, {
+        project: `react${majorVersion}`,
+        configFile: 'cypress-vite.config.ts',
+        spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/UsingLegacyMount.cy.jsx,src/Rerendering.cy.jsx',
+        testingType: 'component',
+        browser: 'chrome',
+        snapshot: true,
+        expectedExitCode: 0,
+      })
+    })
+  }
+})
+
+describe(`React major versions with Webpack`, function () {
+  systemTests.setup()
+
+  for (const majorVersion of REACT_MAJOR_VERSIONS) {
+    it(`executes all of the tests for React v${majorVersion} with Webpack`, function () {
+      return systemTests.exec(this, {
+        project: `react${majorVersion}`,
+        configFile: 'cypress-webpack.config.ts',
+        spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/UsingLegacyMount.cy.jsx,src/Rerendering.cy.jsx',
+        testingType: 'component',
+        browser: 'chrome',
+        snapshot: true,
+        expectedExitCode: 0,
+      })
+    })
+  }
+})
+
+const ANGULAR_MAJOR_VERSIONS = ['13', '14']
+
+describe(`Angular CLI major versions`, () => {
+  systemTests.setup()
+
+  for (const majorVersion of ANGULAR_MAJOR_VERSIONS) {
+    let spec = 'src/**/*.cy.ts'
+
+    if (majorVersion === '13') {
+      spec = `${spec},!src/app/components/standalone.component.cy.ts`
+    }
+
+    systemTests.it(`v${majorVersion} with mount tests`, {
+      project: `angular-${majorVersion}`,
+      spec,
+      testingType: 'component',
+      browser: 'chrome',
+      expectedExitCode: 0,
+    })
+  }
+
+  systemTests.it('angular 14 custom config', {
+    project: 'angular-custom-config',
+    spec: 'src/app/my-component.cy.ts',
+    testingType: 'component',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
+})
+
+describe('svelte component testing', () => {
+  systemTests.setup()
+
+  for (const bundler of ['webpack', 'vite']) {
+    systemTests.it(`svelte + ${bundler}`, {
+      project: `svelte-${bundler}`,
+      testingType: 'component',
+      spec: '**/*.cy.js',
+      browser: 'chrome',
+      expectedExitCode: 0,
+    })
+  }
+})
+
+describe('experimentalSingleTabRunMode', function () {
+  systemTests.setup()
+
+  systemTests.it('executes all specs in a single tab', {
+    project: 'experimentalSingleTabRunMode',
+    testingType: 'component',
+    spec: '**/*.cy.js',
+    browser: 'chrome',
+    snapshot: true,
+    expectedExitCode: 2,
+  })
+})

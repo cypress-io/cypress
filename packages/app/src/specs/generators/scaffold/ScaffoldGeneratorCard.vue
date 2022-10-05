@@ -15,7 +15,7 @@ import BoxOpenIcon from '~icons/cy/box-open_x48'
 const { t } = useI18n()
 
 defineProps<{
-  disabled: boolean
+  disabled?: boolean
 }>()
 
 </script>

@@ -4,7 +4,7 @@ import Promise from 'bluebird'
 
 import debugFn from 'debug'
 import $dom from '../dom'
-import type { ElWindowPostion, ElViewportPostion } from '../dom/coordinates'
+import type { ElWindowPostion, ElViewportPostion, ElementPositioning } from '../dom/coordinates'
 import $elements from '../dom/elements'
 import $errUtils from '../cypress/error_utils'
 const debug = debugFn('cypress:driver:actionability')
@@ -290,7 +290,12 @@ const ensureNotAnimating = function (cy, $el, coordsHistory, animationDistanceTh
   cy.ensureElementIsNotAnimating($el, coordsHistory, animationDistanceThreshold)
 }
 
-const verify = function (cy, $el, config, options, callbacks) {
+interface VerifyCallbacks {
+  onReady?: ($el: any, coords: ElementPositioning) => any
+  onScroll?: ($el: any, type: 'element' | 'window' | 'container') => any
+}
+
+const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
   _.defaults(options, {
     scrollBehavior: config('scrollBehavior'),
     ensure: {

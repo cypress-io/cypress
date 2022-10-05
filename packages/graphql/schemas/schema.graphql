@@ -23,7 +23,7 @@ enum AuthStateNameEnum {
 """Container representing a browser"""
 type Browser implements Node {
   channel: String!
-  disabled: Boolean!
+  disabled: Boolean
   displayName: String!
   family: BrowserFamily!
 
@@ -42,6 +42,7 @@ type Browser implements Node {
 enum BrowserFamily {
   chromium
   firefox
+  webkit
 }
 
 enum BrowserStatus {
@@ -63,6 +64,12 @@ type CachedUser implements Node {
 
   """Relay style Node ID field for the CachedUser field"""
   id: ID!
+}
+
+"""Feature not available for subscription"""
+type CloudFeatureNotEnabled {
+  """an error message"""
+  message: String!
 }
 
 """
@@ -208,6 +215,15 @@ type CloudProjectSpec implements Node {
     """
     fromBranch: String!
   ): Float
+  flakyStatus(
+    """The number of runs to consider when counting flaky runs."""
+    flakyRunsWindow: Int!
+
+    """
+    The branch to measure average duration against. This will fallback to the closest branch with data.
+    """
+    fromBranch: String!
+  ): CloudProjectSpecFlakyResult
 
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
@@ -243,6 +259,23 @@ type CloudProjectSpec implements Node {
     """Returns the last n elements from the list."""
     last: Int
   ): CloudSpecRunConnection
+}
+
+union CloudProjectSpecFlakyResult = CloudFeatureNotEnabled | CloudProjectSpecFlakyStatus
+
+type CloudProjectSpecFlakyStatus {
+  """URL linking to the flaky data in the Cypress dashboard for this spec"""
+  dashboardUrl: String
+
+  """Number of flaky runs from the considered runs"""
+  flakyRuns: Int
+  flakyRunsWindow: Int
+
+  """
+  The last flaky run occurrence, interpreted as "n runs ago" - ex: a value of 5 means a flaky run last occurred 5 runs ago
+  """
+  lastFlaky: Int
+  severity: String
 }
 
 """Unable to find cloud spec in project"""
@@ -502,8 +535,17 @@ type CodeFrame {
   line: Int
 }
 
+"""Glob patterns for detecting files for code gen."""
+type CodeGenGlobs implements Node {
+  component: String!
+
+  """Relay style Node ID field for the CodeGenGlobs field"""
+  id: ID!
+}
+
 enum CodeGenType {
   component
+  componentEmpty
   e2e
   scaffoldIntegration
 }
@@ -511,6 +553,28 @@ enum CodeGenType {
 enum CodeLanguageEnum {
   js
   ts
+}
+
+"""used to distinguish one group of users from another"""
+type Cohort {
+  """value used to indicate the cohort (e.g. "A" or "B")"""
+  cohort: String!
+
+  """name used to identify the cohort topic (e.g. "LoginBanner" ) """
+  name: String!
+}
+
+input CohortInput {
+  """Array of cohort options to choose from.  Ex: A or B """
+  cohorts: [String!]!
+
+  """Name of the cohort"""
+  name: String!
+
+  """
+  Optional array of integer weights to use for determining cohort. Defaults to even weighting
+  """
+  weights: [Int!]
 }
 
 """
@@ -543,6 +607,7 @@ type CurrentProject implements Node & ProjectLike {
 
   """List of all code generation candidates stories"""
   codeGenCandidates(glob: String!): [FileParts]
+  codeGenGlobs: CodeGenGlobs!
 
   """Project configuration"""
   config: JSON!
@@ -672,6 +737,7 @@ enum ErrorTypeEnum {
   CDP_VERSION_TOO_OLD
   CHROME_WEB_SECURITY_NOT_SUPPORTED
   COMPONENT_FOLDER_REMOVED
+  COMPONENT_TESTING_MISMATCHED_DEPENDENCIES
   CONFIG_FILES_LANGUAGE_CONFLICT
   CONFIG_FILE_DEV_SERVER_INVALID_RETURN
   CONFIG_FILE_DEV_SERVER_IS_NOT_VALID
@@ -720,6 +786,8 @@ enum ErrorTypeEnum {
   EXPERIMENTAL_SAMESITE_REMOVED
   EXPERIMENTAL_SESSION_SUPPORT_REMOVED
   EXPERIMENTAL_SHADOW_DOM_REMOVED
+  EXPERIMENTAL_SINGLE_TAB_RUN_MODE
+  EXPERIMENTAL_STUDIO_E2E_ONLY
   EXPERIMENTAL_STUDIO_REMOVED
   EXTENSION_NOT_LOADED
   FIREFOX_COULD_NOT_CONNECT
@@ -870,10 +938,12 @@ type FileParts implements Node {
 }
 
 enum FrontendFrameworkEnum {
+  angular
   nextjs
   nuxtjs
   react
   reactscripts
+  svelte
   vue2
   vue3
   vueclivue2
@@ -1141,7 +1211,7 @@ type Mutation {
   closeBrowser: Boolean
 
   """Create a project in the dashboard and return its object"""
-  cloudProjectCreate(ciProviders: [String!], name: String!, orgId: ID!, public: Boolean!): CloudProject
+  cloudProjectCreate(campaign: String, ciProviders: [String!], cohort: String, medium: String, name: String!, orgId: ID!, public: Boolean!, source: String): CloudProject
 
   """Request access to an organization from a projectId"""
   cloudProjectRequestAccess(projectSlug: String!): CloudProjectResult
@@ -1149,6 +1219,11 @@ type Mutation {
 
   """add the passed text to the local clipboard"""
   copyTextToClipboard(text: String!): Boolean
+
+  """
+  Determine the cohort based on the given configuration.  This will either return the cached cohort for a given name or choose a new one and store it.
+  """
+  determineCohort(cohortConfig: CohortInput!): Cohort
 
   """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
@@ -1165,7 +1240,7 @@ type Mutation {
   focusActiveBrowserWindow: Boolean!
 
   """Generate spec from source"""
-  generateSpecFromSource(codeGenCandidate: String!, erroredCodegenCandidate: String, type: CodeGenType!): GenerateSpecResponse
+  generateSpecFromSource(codeGenCandidate: String!, type: CodeGenType!): GenerateSpecResponse
   internal_clearAllProjectPreferencesCache: Boolean
   internal_clearLatestProjectCache: Boolean
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
@@ -1186,7 +1261,7 @@ type Mutation {
   ): [RemoteFetchable]!
 
   """Auth with Cypress Dashboard"""
-  login(utmMedium: String!, utmSource: String!): Query
+  login(utmContent: String, utmMedium: String!, utmSource: String!): Query
 
   """Log out of Cypress Dashboard"""
   logout: Query
@@ -1235,16 +1310,24 @@ type Mutation {
   """Ping configured Base URL"""
   pingBaseUrl: Query
 
+  """Removes the cache entries for specified cloudSpecByPath query records"""
+  purgeCloudSpecByPathCache(projectSlug: String!, specPaths: [String!]!): Boolean
+
   """show the launchpad windows"""
   reconfigureProject: Boolean!
+
+  """
+  Dispatch an event to the dashboard to be recorded. Events are completely anonymous and are only used to identify aggregate usage patterns across all Cypress users.
+  """
+  recordEvent(campaign: String!, cohort: String, medium: String!, messageId: String!): Boolean
 
   """
   Signal that we are explicitly refetching remote data and should not use the server cache
   """
   refetchRemote: Query
 
-  """Clears the cloudViewer cache to refresh the organizations"""
-  refreshOrganizations: Query
+  """Clears the cloudViewer cache to refresh the organizations and projects"""
+  refreshCloudViewer: Query
 
   """Remove project from projects array and cache"""
   removeProject(path: String!): Query
@@ -1270,15 +1353,17 @@ type Mutation {
   setCurrentProject(path: String!): Query
 
   """
-  Update local preferences (also known as  appData). The payload, `value`, should be a `JSON.stringified()` object of the new values you'd like to persist. Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }))`
+  Update local preferences (also known as  appData). The payload, `value`, should be a `JSON.stringified()` object of the new values you'd like to persist. Example: `setPreferences (value: JSON.stringify({ lastOpened: Date.now() }), "local")`
   """
-  setPreferences(value: String!): Query
+  setPreferences(type: PreferencesTypeEnum!, value: String!): Query
 
   """Set the projectId field in the config file of the current project"""
   setProjectIdInConfigFile(projectId: String!): Query
 
-  """Save the projects preferences to cache"""
-  setProjectPreferences(testingType: TestingTypeEnum!): Query!
+  """
+  Save the projects preferences to cache, e.g. in dev: Library/Application Support/Cypress/cy/staging/cache
+  """
+  setProjectPreferencesInGlobalCache(testingType: TestingTypeEnum!): Query!
 
   """Save the prompt-shown state for this project"""
   setPromptShown(slug: String!): Boolean
@@ -1332,6 +1417,11 @@ enum PluginsState {
   initialized
   initializing
   uninitialized
+}
+
+enum PreferencesTypeEnum {
+  global
+  project
 }
 
 """Common base fields inherited by GlobalProject / CurrentProject"""
@@ -1431,6 +1521,12 @@ type Query {
   """A user within the Cypress Cloud"""
   cloudViewer: CloudUser
 
+  """Return the cohort for the given name"""
+  cohort(
+    """the name of the cohort to find"""
+    name: String!
+  ): Cohort
+
   """The currently opened project"""
   currentProject: CurrentProject
 
@@ -1442,8 +1538,10 @@ type Query {
   """
   invokedFromCli: Boolean!
 
-  """Whether the app is in global mode or not"""
-  isInGlobalMode: Boolean!
+  """
+  Whether the app is in global mode or not. This is based off the presence of a project, which is set by the CLI (or absent if the app is run directly). See cli/lib/exec/open.js for the logic that sets the project or not.
+  """
+  isGlobalMode: Boolean!
 
   """local settings on a device-by-device basis"""
   localSettings: LocalSettings!
@@ -1451,9 +1549,6 @@ type Query {
   """Metadata about the migration, null if we aren't showing it"""
   migration: Migration
   node(id: ID!): Node
-
-  """Whether the project was specified from the --project flag"""
-  projectRootFromCI: Boolean!
 
   """All known projects for the app"""
   projects: [ProjectLike!]!

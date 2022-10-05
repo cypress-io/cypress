@@ -15,6 +15,12 @@ const { exitWithError } = require('../errors')
  * @returns {string[]} list of CLI arguments
  */
 const processOpenOptions = (options = {}) => {
+  // In addition to setting the project directory, setting the project option
+  // here ultimately decides whether cypress is run in global mode or not.
+  // It's first based off whether it's installed globally by npm/yarn (-g).
+  // A global install can be overridden by the --project flag, putting Cypress
+  // in project mode. A non-global install can be overridden by the --global
+  // flag, putting it in global mode.
   if (!util.isInstalledGlobally() && !options.global && !options.project) {
     options.project = process.cwd()
   }
@@ -76,7 +82,6 @@ module.exports = {
         return spawn.start(args, {
           dev: options.dev,
           detached: Boolean(options.detached),
-          stdio: 'inherit',
         })
       } catch (err) {
         if (err.details) {

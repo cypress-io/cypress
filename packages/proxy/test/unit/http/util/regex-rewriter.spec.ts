@@ -168,10 +168,268 @@ const expected = `\
 </html>\
 `
 
+const originalWithModifyObstructiveThirdPartyCode = `\
+<html>
+  <body>
+    top1
+    settop
+    settopbox
+    parent1
+    grandparent
+    grandparents
+    myself
+    mywindow
+    selfVar
+    fooparent
+    windowFile
+    topFoo
+    topFoo.window
+    topFoo.window != topFoo
+    parentFoo
+    parentFoo.window
+    parentFoo.window != parentFoo
+
+    <div style="left: 1500px; top: 0px;"></div>
+    <div style="left: 1500px; top : 0px;"></div>
+    <div style="left: 1500px; top  : 0px;"></div>
+
+    parent()
+    foo.parent()
+    top()
+    foo.top()
+    foo("parent")
+    foo("top")
+
+    const parent = () => { bar: 'bar', framesStyle: 'foo' }
+    const loadStop = { locationExists = true }
+
+    parent.bar
+
+    <script type="text/javascript">
+      if (top != self) run()
+      if (top!=self) run()
+      if (self !== top) run()
+      if (self!==top) run()
+      if (self === top) return
+      if (myself !== top) runs()
+      if (mywindow !== top) runs()
+      if (top.location!=self.location&&(top.location.href=self.location.href)) run()
+      if (top.location != self.location) run()
+      if (top.location != location) run()
+      if (self.location != top.location) run()
+      if (loadStop.locationExists) run()
+      if (!top.locationExists) run()
+      if (parent.frames.length > 0) run()
+      if (parent.framesStyle) run()
+      if (window != top) run()
+      if (window.top !== window.self) run()
+      if (window.top!==window.self) run()
+      if (window.self != window.top) run()
+      if (window.top != window.self) run()
+      if (window["top"] != window["parent"]) run()
+      if (window['top'] != window['parent']) run()
+      if (window["top"] != self['parent']) run()
+      if (parent && parent != window) run()
+      if (parent && parent != self) run()
+      if (parent && window != parent) run()
+      if (parent && self != parent) run()
+      if (myself != parent) run()
+      if (parent && parent.frames && parent.frames.length > 0) run()
+      if ((self.parent && !(self.parent === self)) && (self.parent.frames.length != 0)) run()
+      if (parent !== null && parent.tag !== 'HostComponent' && parent.tag !== 'HostRoot') { }
+      if (null !== parent && parent.tag !== 'HostComponent' && parent.tag !== 'HostRoot') { }
+      if (top===self) return
+      if (top==self) return
+      if (loadStop===selfVar) return
+      if (fooparent===selfVar) return
+      if (loadStop===windowFile) return
+      if (fooparent===windowFile) return
+      if (e.self == e.top) run()
+      if (a.self===a.top) run()
+      if (f.top===g.self) run()
+      if (g.top==g.self) run()
+      if (e.self != e.top) run()
+      if (a.self!==a.top) run()
+      if (f.top!==g.self) run()
+      if (g.top!=g.self) run()
+      if (h.foo === h.top) run()
+      if (i.top === i.foo) run()
+    </script>
+    <script type="text/javascript" src="integrity.js" data-script-type="static" crossorigin="anonymous" integrity="sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c="></script>
+    <script type="text/javascript" integrity="sha512-8hir+1oK8qTZ/CCayBgHoCqQwzgG+pV925Uu02EW0QHAFQenB03kMWrzdpZWMVKCOy/vhmR2CMGMfDlzrYrViQ==" src="integrity.js" data-script-type="static" crossorigin="anonymous"></script>
+    <script type="text/javascript" integrity="non-legitimate-integrity-value" src="integrity.js" data-script-type="static" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      const dynamicIntegrityScript = document.createElement('script')
+        dynamicIntegrityScript.id = 'dynamic-set-integrity'
+        dynamicIntegrityScript.type = 'text/javascript'
+        dynamicIntegrityScript.src = 'integrity.js'
+        dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
+        dynamicIntegrityScript.setAttribute('data-script-type', 'dynamic')
+        dynamicIntegrityScript.setAttribute('integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C")
+        document.querySelector('head').appendChild(dynamicIntegrityScript)
+    </script>
+    <link id="static-set-integrity-link" rel="stylesheet" href="integrity.css"   integrity="sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c=">
+    <link integrity="sha512-8hir+1oK8qTZ/CCayBgHoCqQwzgG+pV925Uu02EW0QHAFQenB03kMWrzdpZWMVKCOy/vhmR2CMGMfDlzrYrViQ==" id="static-set-integrity-link" rel="stylesheet" href="integrity.css">
+    <script id="dynamic-link-injection" type="text/javascript">
+      const dynamicIntegrityScript = document.createElement('link')
+      dynamicIntegrityScript.id = 'dynamic-set-integrity-link'
+      dynamicIntegrityScript.rel = "stylesheet"
+      dynamicIntegrityScript.href = 'integrity.css'
+      dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
+      dynamicIntegrityScript.setAttribute('integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C")
+      document.querySelector('head').appendChild(dynamicIntegrityScript)
+    </script>
+    <script>
+      (function(){var d=document,po=d.createElement('script');po.type='text/javascript';po.async=true;po.src='https://www.foobar.com/foobar.js';po.crossOrigin='anonymous';po.integrity='sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C';var e=d.querySelector('script[nonce]'),n=e&&(e['nonce']||e.getAttribute('nonce'));if(n){po.setAttribute('nonce',n);}var s=d.getElementsByTagName('script')[0];s.parentNode.insertBefore(po, s);})();
+      var integrity = 'sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+      foo.integrity = 'foo-bar'
+      foo.integrity = 'sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+      foo['integrity'] = 'sha256-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+      var integrity='sha256-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+      foo.integrity='foo-bar'
+      foo.integrity='sha256-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+      foo['integrity']='sha256-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+    </script>
+  </body>
+</html>\
+`
+
+const expectedWithModifyObstructiveThirdPartyCode = `\
+<html>
+  <body>
+    top1
+    settop
+    settopbox
+    parent1
+    grandparent
+    grandparents
+    myself
+    mywindow
+    selfVar
+    fooparent
+    windowFile
+    topFoo
+    topFoo.window
+    topFoo.window != topFoo
+    parentFoo
+    parentFoo.window
+    parentFoo.window != parentFoo
+
+    <div style="left: 1500px; top: 0px;"></div>
+    <div style="left: 1500px; top : 0px;"></div>
+    <div style="left: 1500px; top  : 0px;"></div>
+
+    parent()
+    foo.parent()
+    top()
+    foo.top()
+    foo("parent")
+    foo("top")
+
+    const parent = () => { bar: 'bar', framesStyle: 'foo' }
+    const loadStop = { locationExists = true }
+
+    parent.bar
+
+    <script type="text/javascript">
+      if (self != self) run()
+      if (self!=self) run()
+      if (self !== self) run()
+      if (self!==self) run()
+      if (self === self) return
+      if (myself !== top) runs()
+      if (mywindow !== top) runs()
+      if (self.location!=self.location&&(self.location.href=self.location.href)) run()
+      if (self.location != self.location) run()
+      if (self.location != location) run()
+      if (self.location != self.location) run()
+      if (loadStop.locationExists) run()
+      if (!top.locationExists) run()
+      if (self.frames.length > 0) run()
+      if (parent.framesStyle) run()
+      if (window != self) run()
+      if (window.self !== window.self) run()
+      if (window.self!==window.self) run()
+      if (window.self != window.self) run()
+      if (window.self != window.self) run()
+      if (window["self"] != window["self"]) run()
+      if (window['self'] != window['self']) run()
+      if (window["self"] != self['self']) run()
+      if (parent && self != window) run()
+      if (parent && self != self) run()
+      if (parent && window != self) run()
+      if (parent && self != self) run()
+      if (myself != parent) run()
+      if (parent && self.frames && self.frames.length > 0) run()
+      if ((self.parent && !(self.self === self)) && (self.self.frames.length != 0)) run()
+      if (parent !== null && parent.tag !== 'HostComponent' && parent.tag !== 'HostRoot') { }
+      if (null !== parent && parent.tag !== 'HostComponent' && parent.tag !== 'HostRoot') { }
+      if (self===self) return
+      if (self==self) return
+      if (loadStop===selfVar) return
+      if (fooparent===selfVar) return
+      if (loadStop===windowFile) return
+      if (fooparent===windowFile) return
+      if (e.self == e.self) run()
+      if (a.self===a.self) run()
+      if (f.self===g.self) run()
+      if (g.self==g.self) run()
+      if (e.self != e.self) run()
+      if (a.self!==a.self) run()
+      if (f.self!==g.self) run()
+      if (g.self!=g.self) run()
+      if (h.foo === h.top) run()
+      if (i.top === i.foo) run()
+    </script>
+    <script type="text/javascript" src="integrity.js" data-script-type="static" crossorigin="anonymous" cypress-stripped-integrity="sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c="></script>
+    <script type="text/javascript" cypress-stripped-integrity="sha512-8hir+1oK8qTZ/CCayBgHoCqQwzgG+pV925Uu02EW0QHAFQenB03kMWrzdpZWMVKCOy/vhmR2CMGMfDlzrYrViQ==" src="integrity.js" data-script-type="static" crossorigin="anonymous"></script>
+    <script type="text/javascript" integrity="non-legitimate-integrity-value" src="integrity.js" data-script-type="static" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      const dynamicIntegrityScript = document.createElement('script')
+        dynamicIntegrityScript.id = 'dynamic-set-integrity'
+        dynamicIntegrityScript.type = 'text/javascript'
+        dynamicIntegrityScript.src = 'integrity.js'
+        dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
+        dynamicIntegrityScript.setAttribute('data-script-type', 'dynamic')
+        dynamicIntegrityScript.setAttribute('cypress-stripped-integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C")
+        document.querySelector('head').appendChild(dynamicIntegrityScript)
+    </script>
+    <link id="static-set-integrity-link" rel="stylesheet" href="integrity.css"   cypress-stripped-integrity="sha256-MGkilwijzWAi/LutxKC+CWhsXXc6t1tXTMqY1zakP8c=">
+    <link cypress-stripped-integrity="sha512-8hir+1oK8qTZ/CCayBgHoCqQwzgG+pV925Uu02EW0QHAFQenB03kMWrzdpZWMVKCOy/vhmR2CMGMfDlzrYrViQ==" id="static-set-integrity-link" rel="stylesheet" href="integrity.css">
+    <script id="dynamic-link-injection" type="text/javascript">
+      const dynamicIntegrityScript = document.createElement('link')
+      dynamicIntegrityScript.id = 'dynamic-set-integrity-link'
+      dynamicIntegrityScript.rel = "stylesheet"
+      dynamicIntegrityScript.href = 'integrity.css'
+      dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
+      dynamicIntegrityScript.setAttribute('cypress-stripped-integrity', "sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C")
+      document.querySelector('head').appendChild(dynamicIntegrityScript)
+    </script>
+    <script>
+      (function(){var d=document,po=d.createElement('script');po.type='text/javascript';po.async=true;po.src='https://www.foobar.com/foobar.js';po.crossOrigin='anonymous';po['cypress-stripped-integrity']='sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C';var e=d.querySelector('script[nonce]'),n=e&&(e['nonce']||e.getAttribute('nonce'));if(n){po.setAttribute('nonce',n);}var s=d.getElementsByTagName('script')[0];s.parentNode.insertBefore(po, s);})();
+      var integrity = 'sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+      foo.integrity = 'foo-bar'
+      foo['cypress-stripped-integrity'] = 'sha384-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+      foo['cypress-stripped-integrity'] = 'sha256-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+      var integrity='sha256-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+      foo.integrity='foo-bar'
+      foo['cypress-stripped-integrity']='sha256-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+      foo['cypress-stripped-integrity']='sha256-XiV6bRRw9OEpsWSumtD1J7rElgTrNQro4MY/O4IYjhH+YGCf1dHaNGZ3A2kzYi/C'
+    </script>
+  </body>
+</html>\
+`
+
 describe('http/util/regex-rewriter', () => {
   context('.strip', () => {
     it('replaces obstructive code', () => {
       expect(regexRewriter.strip(original)).to.eq(expected)
+    })
+
+    it('replaces additional obstructive code with the "modifyObstructiveThirdPartyCode" set', () => {
+      expect(regexRewriter.strip(originalWithModifyObstructiveThirdPartyCode, {
+        modifyObstructiveThirdPartyCode: true,
+      })).to.eq(expectedWithModifyObstructiveThirdPartyCode)
     })
 
     it('replaces jira window getter', () => {
@@ -298,46 +556,50 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
       .value() as unknown as typeof libs
 
       _.each(libs, (url, lib) => {
-        it(`does not alter code from: '${lib}'`, function () {
-          this.timeout(10000)
+        [false, true].forEach((modifyObstructiveThirdPartyCode) => {
+          it(`does not alter code from: '${lib}', with modifyObstructiveThirdPartyCode set to ${modifyObstructiveThirdPartyCode}`, function () {
+            this.timeout(10000)
 
-          const pathToLib = `/tmp/${lib}`
+            const pathToLib = `/tmp/${lib}`
 
-          const downloadFile = () => {
-            return rp(url)
-            .then((resp) => {
-              return Promise.fromCallback((cb) => {
-                fs.writeFile(pathToLib, resp, cb)
+            const downloadFile = () => {
+              return rp(url)
+              .then((resp) => {
+                return Promise.fromCallback((cb) => {
+                  fs.writeFile(pathToLib, resp, cb)
+                })
+                .return(resp)
               })
-              .return(resp)
+            }
+
+            return Promise.fromCallback((cb) => {
+              fs.readFile(pathToLib, 'utf8', cb)
             })
-          }
+            .catch(downloadFile)
+            .then((libCode: string) => {
+              let stripped = regexRewriter.strip(libCode, {
+                modifyObstructiveThirdPartyCode,
+              })
+              // nothing should have changed!
 
-          return Promise.fromCallback((cb) => {
-            fs.readFile(pathToLib, 'utf8', cb)
-          })
-          .catch(downloadFile)
-          .then((libCode: string) => {
-            let stripped = regexRewriter.strip(libCode)
-            // nothing should have changed!
+              // TODO: this is currently failing but we're
+              // going to accept this for now and make this
+              // test pass, but need to refactor to using
+              // inline expressions and change the strategy
+              // for removing obstructive code
+              if (lib === 'hugeApp') {
+                stripped = stripped.replace(
+                  'window.self !== window.self',
+                  'window.self !== window.top',
+                )
+              }
 
-            // TODO: this is currently failing but we're
-            // going to accept this for now and make this
-            // test pass, but need to refactor to using
-            // inline expressions and change the strategy
-            // for removing obstructive code
-            if (lib === 'hugeApp') {
-              stripped = stripped.replace(
-                'window.self !== window.self',
-                'window.self !== window.top',
-              )
-            }
-
-            try {
-              expect(stripped).to.eq(libCode)
-            } catch (err) {
-              throw new Error(`code from '${lib}' was different`)
-            }
+              try {
+                expect(stripped).to.eq(libCode)
+              } catch (err) {
+                throw new Error(`code from '${lib}' was different`)
+              }
+            })
           })
         })
       })
@@ -355,6 +617,32 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
 
         try {
           expect(string).to.eq(expected)
+
+          done()
+        } catch (err) {
+          done(err)
+        }
+      }))
+
+      haystacks.forEach((haystack) => {
+        replacer.write(`${haystack}\n`)
+      })
+
+      replacer.end()
+    })
+
+    it('replaces additional obstructive code with the "modifyObstructiveThirdPartyCode" set', (done) => {
+      const haystacks = originalWithModifyObstructiveThirdPartyCode.split('\n')
+
+      const replacer = regexRewriter.stripStream({
+        modifyObstructiveThirdPartyCode: true,
+      })
+
+      replacer.pipe(concatStream({ encoding: 'string' }, (str) => {
+        const string = str.toString().trim()
+
+        try {
+          expect(string).to.eq(expectedWithModifyObstructiveThirdPartyCode)
 
           done()
         } catch (err) {

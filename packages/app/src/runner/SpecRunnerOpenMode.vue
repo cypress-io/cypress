@@ -1,4 +1,12 @@
 <template>
+  <StudioInstructionsModal
+    :open="studioStore.instructionModalIsOpen"
+    @close="studioStore.closeInstructionModal"
+  />
+  <StudioSaveModal
+    :open="studioStore.saveModalIsOpen"
+    @close="studioStore.closeSaveModal"
+  />
   <AdjustRunnerStyleDuringScreenshot
     id="main-pane"
     class="flex border-gray-900"
@@ -22,7 +30,7 @@
       :min-panel2-width="minWidths.reporter"
       :min-panel3-width="minWidths.aut"
       :show-panel1="runnerUiStore.isSpecsListOpen && !screenshotStore.isScreenshotting"
-      :show-panel2="!screenshotStore.isScreenshotting"
+      :show-panel2="!screenshotStore.isScreenshotting && !hideCommandLog"
       @resize-end="handleResizeEnd"
       @panel-width-updated="handlePanelWidthUpdated"
     >
@@ -51,6 +59,7 @@
           class="h-full"
         >
           <div
+            v-if="!hideCommandLog"
             v-once
             :id="REPORTER_ID"
             class="w-full force-dark"
@@ -119,6 +128,9 @@ import { useEventManager } from './useEventManager'
 import AutomationDisconnected from './automation/AutomationDisconnected.vue'
 import AutomationMissing from './automation/AutomationMissing.vue'
 import { runnerConstants } from './runner-constants'
+import StudioInstructionsModal from './studio/StudioInstructionsModal.vue'
+import StudioSaveModal from './studio/StudioSaveModal.vue'
+import { useStudioStore } from '../store/studio-store'
 
 const {
   preferredMinimumPanelWidth,
@@ -190,6 +202,8 @@ const {
   cleanupRunner,
 } = useEventManager()
 
+const studioStore = useStudioStore()
+
 const specsListWidthPreferences = computed(() => {
   return props.gql.localSettings.preferences.specListWidth ?? runnerUiStore.specListWidth
 })
@@ -202,6 +216,8 @@ const isSpecsListOpenPreferences = computed(() => {
   return props.gql.localSettings.preferences.isSpecsListOpen ?? false
 })
 
+const hideCommandLog = runnerUiStore.hideCommandLog
+
 // watch active spec, and re-run if it changes!
 startSpecWatcher()
 
@@ -210,12 +226,16 @@ onMounted(() => {
 })
 
 preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
-preferences.update('isSpecsListOpen', isSpecsListOpenPreferences.value)
-preferences.update('reporterWidth', reporterWidthPreferences.value)
-preferences.update('specListWidth', specsListWidthPreferences.value)
 
-// 👆 we must update these preferences before calling useRunnerStyle, to make sure that values from GQL
+// if the CYPRESS_NO_COMMAND_LOG environment variable is set,
+// don't use the widths or the open status of specs list from GraphQL
+if (!hideCommandLog) {
+  preferences.update('isSpecsListOpen', isSpecsListOpenPreferences.value)
+  preferences.update('reporterWidth', reporterWidthPreferences.value)
+  preferences.update('specListWidth', specsListWidthPreferences.value)
+  // 👆 we must update these preferences before calling useRunnerStyle, to make sure that values from GQL
 // will be available during the initial calculation that useRunnerStyle does
+}
 
 const {
   viewportStyle,

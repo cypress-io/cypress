@@ -2,13 +2,53 @@ import _ from 'lodash'
 import type Debug from 'debug'
 import { URL } from 'url'
 import { cors } from '@packages/network'
-import { Cookie, CookieJar } from '@packages/server/lib/cookie-jar'
-import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
+import { AutomationCookie, Cookie, CookieJar, toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
 
 interface RequestDetails {
   url: string
   isAUTFrame: boolean
   needsCrossOriginHandling: boolean
+}
+
+/**
+ * Whether or not a url's scheme, domain, and top-level domain match to determine whether or not
+ * a cookie is considered first-party. See https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#third-party_cookies
+ * for more details.
+ * @param {string} url1 - the first url
+ * @param {string} url2 - the second url
+ * @returns {boolean} whether or not the URL Scheme, Domain, and TLD match. This is called same-site and
+ * is allowed to have a different port or subdomain. @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-Fetch-Site#directives
+ * for more details.
+ */
+export const areUrlsSameSite = (url1: string, url2: string) => {
+  if (!url1 || !url2) return false
+
+  const { port: port1, ...parsedUrl1 } = cors.parseUrlIntoDomainTldPort(url1)
+  const { port: port2, ...parsedUrl2 } = cors.parseUrlIntoDomainTldPort(url2)
+
+  // If HTTPS, ports NEED to match. Otherwise, HTTP ports can be different and are same origin
+  const doPortsPassSameSchemeCheck = port1 !== port2 ? (port1 !== '443' && port2 !== '443') : true
+
+  return doPortsPassSameSchemeCheck && _.isEqual(parsedUrl1, parsedUrl2)
+}
+
+export const addCookieJarCookiesToRequest = (applicableCookieJarCookies: Cookie[] = [], requestCookieStringArray: string[] = []): string => {
+  const cookieMap = new Map<string, Cookie>()
+  const requestCookies: Cookie[] = requestCookieStringArray.map((cookie) => CookieJar.parse(cookie)).filter((cookie) => cookie !== undefined) as Cookie[]
+
+  // Always have cookies in the jar overwrite cookies in the request if they are the same
+  requestCookies.forEach((cookie) => cookieMap.set(cookie.key, cookie))
+  // Two or more cookies on the same request can happen per https://www.rfc-editor.org/rfc/rfc6265
+  // But if a value for that cookie already exists in the cookie jar, do NOT add the cookie jar cookie
+  applicableCookieJarCookies.forEach((cookie) => {
+    if (cookieMap.get(cookie.key)) {
+      cookieMap.delete(cookie.key)
+    }
+  })
+
+  const requestCookiesThatNeedToBeAdded = Array.from(cookieMap).map(([key, cookie]) => cookie)
+
+  return applicableCookieJarCookies.concat(requestCookiesThatNeedToBeAdded).map((cookie) => cookie.cookieString()).join('; ')
 }
 
 // sameSiteContext is a concept for tough-cookie's cookie jar that helps it
@@ -20,36 +60,16 @@ interface RequestDetails {
 // see https://github.com/salesforce/tough-cookie#samesite-cookies
 export const getSameSiteContext = (autUrl: string | undefined, requestUrl: string, isAUTFrameRequest: boolean) => {
   // if there's no AUT URL, it's a request for the first URL visited, or if
-  // the request origin matches the AUT origin; both indicate that it's not
-  // a cross-origin request
-  if (!autUrl || cors.urlOriginsMatch(autUrl, requestUrl)) {
+  // the request origin is considered the same site as the AUT origin;
+  // both indicate that it's not a cross-site request
+  if (!autUrl || areUrlsSameSite(autUrl, requestUrl)) {
     return 'strict'
   }
 
   // being an AUT frame request means it's via top-level navigation, and we've
   // ruled out same-origin navigation, so the context is 'lax'.
-  // anything else is a non-navigation, cross-origin request
+  // anything else is a non-navigation, cross-site request
   return isAUTFrameRequest ? 'lax' : 'none'
-}
-
-const sameSiteNoneRe = /; +samesite=(?:'none'|"none"|none)/i
-
-export const parseCookie = (cookie: string) => {
-  const toughCookie = CookieJar.parse(cookie)
-
-  if (!toughCookie) return
-
-  // fixes tough-cookie defaulting undefined/invalid SameSite to 'none'
-  // https://github.com/salesforce/tough-cookie/issues/191
-  const hasUnspecifiedSameSite = toughCookie.sameSite === 'none' && !sameSiteNoneRe.test(cookie)
-
-  // not all browsers currently default to lax, but they're heading in that
-  // direction since it's now the standard, so this is more future-proof
-  if (hasUnspecifiedSameSite) {
-    toughCookie.sameSite = 'lax'
-  }
-
-  return toughCookie
 }
 
 const comparableCookieString = (toughCookie: Cookie): string => {
@@ -69,22 +89,6 @@ const matchesPreviousCookie = (previousCookies: Cookie[], cookie: Cookie) => {
   return !!previousCookies.find((previousCookie) => {
     return areCookiesEqual(previousCookie, cookie)
   })
-}
-
-const toughCookieToAutomationCookie = (toughCookie: Cookie, defaultDomain: string): AutomationCookie => {
-  const expiry = toughCookie.expiryTime()
-
-  return {
-    domain: toughCookie.domain || defaultDomain,
-    expiry: isFinite(expiry) ? expiry / 1000 : null,
-    httpOnly: toughCookie.httpOnly,
-    maxAge: toughCookie.maxAge,
-    name: toughCookie.key,
-    path: toughCookie.path,
-    sameSite: toughCookie.sameSite === 'none' ? 'no_restriction' : toughCookie.sameSite,
-    secure: toughCookie.secure,
-    value: toughCookie.value,
-  }
 }
 
 /**
@@ -140,7 +144,7 @@ export class CookiesHelper {
   }
 
   setCookie (cookie: string) {
-    const toughCookie = parseCookie(cookie)
+    const toughCookie = CookieJar.parse(cookie)
 
     // don't set the cookie in our own cookie jar if the parsed cookie is
     // undefined (meaning it's invalid) or if the browser would not set it

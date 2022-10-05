@@ -9,6 +9,7 @@ import Tooltip from '@cypress/react-tooltip'
 import appState, { AppState } from '../lib/app-state'
 import events, { Events } from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
+import Tag from '../lib/tag'
 import { TimeoutID } from '../lib/types'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import { Alias, AliasObject } from '../instruments/instrument-model'
@@ -25,7 +26,21 @@ const md = new Markdown()
 
 const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
-const formattedMessage = (message: string) => message ? md.renderInline(message) : ''
+
+export const formattedMessage = (message: string) => {
+  if (!message) return ''
+
+  const searchText = ['to match', 'to equal']
+  const regex = new RegExp(searchText.join('|'))
+  const split = message.split(regex)
+  const matchingText = searchText.find((text) => message.includes(text))
+  const textToConvert = [split[0].trim(), ...(matchingText ? [matchingText] : [])].join(' ')
+  const converted = md.renderInline(textToConvert)
+  const assertion = (split[1] && [`<strong>${split[1].trim()}</strong>`]) || []
+
+  return [converted, ...assertion].join(' ')
+}
+
 const invisibleMessage = (model: CommandModel) => {
   return model.numElements > 1 ?
     'One or more matched elements are not visible.' :
@@ -82,27 +97,16 @@ interface AliasReferenceProps {
 
 const AliasReference = observer(({ aliasObj, model, aliasesWithDuplicates }: AliasReferenceProps) => {
   const showCount = shouldShowCount(aliasesWithDuplicates, aliasObj.name, model)
-  const alias = (
-    <span className={cs('command-alias', model.aliasType, { 'has-multiple-aliases': showCount })}>
-      @{aliasObj.name}
-    </span>
-  )
-
-  if (showCount) {
-    return (
-      <Tooltip placement='top' title={`Found ${aliasObj.ordinal} alias for: '${aliasObj.name}'`} className='cy-tooltip'>
-        <span>
-          {alias}
-          <span className={cs(model.aliasType, 'command-alias-count')}>{aliasObj.cardinal}</span>
-        </span>
-      </Tooltip>
-    )
-  }
+  const toolTipMessage = showCount ? `Found ${aliasObj.ordinal} alias for: '${aliasObj.name}'` : `Found an alias for: '${aliasObj.name}'`
 
   return (
-    <Tooltip placement='top' title={`Found an alias for: '${aliasObj.name}'`} className='cy-tooltip'>
-      {alias}
-    </Tooltip>
+    <Tag
+      content={`@${aliasObj.name}`}
+      type={model.aliasType}
+      count={showCount ? aliasObj.cardinal : undefined}
+      tooltipMessage={toolTipMessage}
+      customClassName='command-alias'
+    />
   )
 })
 
@@ -154,28 +158,17 @@ const Interceptions = observer(({ interceptions, wentToOrigin, status }: RenderP
   const count = interceptions.length
   const displayAlias = interceptions[count - 1].alias
 
-  const intercepts = (
-    <span className={cs('command-interceptions', 'route', { 'has-multiple-interceptions': count > 1 })}>
-      {status && <span className='status'>{status} </span>}
-      {displayAlias || <em className='no-alias'>no alias</em>}
-    </span>
-  )
-
-  if (count > 1) {
-    return (
-      <Tooltip placement='top' title={interceptsTitle} className='cy-tooltip'>
-        <span>
-          {intercepts}
-          <span className={'command-interceptions-count route'}> {count}</span>
-        </span>
-      </Tooltip>
-    )
-  }
-
   return (
-    <Tooltip placement='top' title={interceptsTitle} className='cy-tooltip'>
-      {intercepts}
-    </Tooltip>
+    <Tag
+      content={<>
+        {status && <span className='status'>{status} </span>}
+        {displayAlias || <em className='no-alias'>no alias</em>}
+      </>}
+      count={count > 1 ? count : undefined}
+      type='route'
+      tooltipMessage={interceptsTitle}
+      customClassName='command-interceptions'
+    />
   )
 })
 
@@ -198,11 +191,13 @@ const Aliases = observer(({ model }: AliasesProps) => {
         }
 
         return (
-          <Tooltip key={alias} placement='top' title={`${model.displayMessage} aliased as: ${aliases.map((alias) => `'${alias}'`).join(', ')}`} className='cy-tooltip'>
-            <span className={cs('command-alias', `${model.aliasType}`)}>
-              {aliases.join(', ')}
-            </span>
-          </Tooltip>
+          <Tag
+            key={alias}
+            content={aliases.join(', ')}
+            type={model.aliasType}
+            tooltipMessage={`${model.displayMessage} aliased as: ${aliases.map((alias) => `'${alias}'`).join(', ')}`}
+            customClassName='command-alias'
+          />
         )
       })}
     </span>
@@ -304,7 +299,11 @@ class Command extends Component<Props> {
     }
 
     return (
-      <li className={cs('command', `command-name-${commandName}`)}>
+      <li className={
+        cs('command', `command-name-${commandName}`, {
+          'command-is-studio': model.isStudio,
+        })
+      }>
         <div
           className={
             cs(
@@ -344,6 +343,18 @@ class Command extends Component<Props> {
                 }
               </span>
               <span className='command-controls'>
+                {model.type === 'parent' && model.isStudio && (
+                  <i
+                    className='far fa-times-circle studio-command-remove'
+                    onClick={this._removeStudioCommand}
+                  />
+                )}
+                {isSessionCommand && (
+                  <Tag
+                    content={model.sessionInfo?.status}
+                    type={`${model.sessionInfo?.status === 'failed' ? 'failed' : 'successful'}-status`}
+                  />
+                )}
                 {!model.visible && (
                   <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
                     <span>
@@ -352,21 +363,23 @@ class Command extends Component<Props> {
                   </Tooltip>
                 )}
                 {displayNumOfElements && (
-                  <Tooltip placement='top' title={`${model.numElements} matched elements`} className='cy-tooltip'>
-                    <span className={cs('num-elements', 'command-num-elements')}>
-                      {model.numElements}
-                    </span>
-                  </Tooltip>
+                  <Tag
+                    content={model.numElements.toString()}
+                    type='count'
+                    tooltipMessage={`${model.numElements} matched elements`}
+                    customClassName='num-elements'
+                  />
                 )}
                 <span className='alias-container'>
                   <Interceptions {...model.renderProps} />
                   <Aliases model={model} />
                   {displayNumOfChildren && (
-                    <Tooltip placement='top' title={numberOfChildrenMessage(model.numChildren, model.event)} className='cy-tooltip'>
-                      <span className={cs('num-children', 'command-num-children', { 'has-alias': model.alias })}>
-                        {model.numChildren}
-                      </span>
-                    </Tooltip>
+                    <Tag
+                      content={model.numChildren}
+                      type='count'
+                      tooltipMessage={numberOfChildrenMessage(model.numChildren, model.event)}
+                      customClassName='num-children'
+                    />
                   )}
                 </span>
               </span>
@@ -414,16 +427,16 @@ class Command extends Component<Props> {
   @action _toggleColumnPin = () => {
     if (this.props.appState.isRunning) return
 
-    const { id } = this.props.model
+    const { testId, id } = this.props.model
 
     if (this._isPinned()) {
       this.props.appState.pinnedSnapshotId = null
-      this.props.events.emit('unpin:snapshot', id)
+      this.props.events.emit('unpin:snapshot', testId, id)
       this._snapshot(true)
     } else {
       this.props.appState.pinnedSnapshotId = id as number
-      this.props.events.emit('pin:snapshot', id)
-      this.props.events.emit('show:command', this.props.model.id)
+      this.props.events.emit('pin:snapshot', testId, id)
+      this.props.events.emit('show:command', testId, id)
     }
   }
 
@@ -452,7 +465,7 @@ class Command extends Component<Props> {
 
       this._showTimeout = setTimeout(() => {
         runnablesStore.showingSnapshot = true
-        this.props.events.emit('show:snapshot', model.id)
+        this.props.events.emit('show:snapshot', model.testId, model.id)
       }, 50)
     } else {
       runnablesStore.attemptingShowSnapshot = false
@@ -463,10 +476,19 @@ class Command extends Component<Props> {
         // we aren't trying to show a different snapshot
         if (runnablesStore.showingSnapshot && !runnablesStore.attemptingShowSnapshot) {
           runnablesStore.showingSnapshot = false
-          this.props.events.emit('hide:snapshot', model.id)
+          this.props.events.emit('hide:snapshot', model.testId, model.id)
         }
       }, 50)
     }
+  }
+
+  _removeStudioCommand = (e: React.MouseEvent<HTMLElement, globalThis.MouseEvent>) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const { model, events } = this.props
+
+    events.emit('studio:remove:command', model.number)
   }
 }
 

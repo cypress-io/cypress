@@ -56,9 +56,10 @@
       variant="primary"
       aria-live="polite"
       :disabled="!cloudViewer && !isOnline"
+      :prefix-icon="buttonPrefixIcon"
       @click="handleLoginOrContinue"
     >
-      {{ cloudViewer ? t('topNav.login.actionContinue') : t('topNav.login.actionLogin') }}
+      {{ buttonText }}
     </Button>
   </div>
 </template>
@@ -69,6 +70,7 @@ import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
 import { useOnline } from '@vueuse/core'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
+import ChainIcon from '~icons/cy/chain-link_x16.svg'
 
 import {
   Auth_LoginDocument,
@@ -80,6 +82,7 @@ import type {
 } from '../generated/graphql'
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
+const { t } = useI18n()
 
 const isOnline = useOnline()
 
@@ -88,6 +91,8 @@ const props = defineProps<{
   showRetry?: boolean
   showLogout?: boolean
   utmMedium: string
+  utmContent?: string
+  showConnectButtonAfterLogin?: boolean
 }>()
 
 gql`
@@ -114,8 +119,8 @@ mutation Auth_Logout {
 `
 
 gql`
-mutation Auth_Login ($utmSource: String!, $utmMedium: String!) {
-  login (utmSource: $utmSource, utmMedium: $utmMedium) {
+mutation Auth_Login ($utmSource: String!, $utmMedium: String!, $utmContent: String) {
+  login (utmSource: $utmSource, utmContent: $utmContent, utmMedium: $utmMedium) {
     ...Auth
   }
 }
@@ -156,6 +161,7 @@ onBeforeUnmount(() => {
 
 const emit = defineEmits<{
   (event: 'continue', value: boolean): void
+  (event: 'connect-project'): void
 }>()
 
 const cloudViewer = computed(() => {
@@ -178,14 +184,18 @@ const loginMutationIsPending = computed(() => {
 
 const handleLoginOrContinue = async () => {
   if (cloudViewer.value) {
-    emit('continue', true)
+    if (props.showConnectButtonAfterLogin) {
+      emit('connect-project')
+    } else {
+      emit('continue', true)
+    }
 
     return
   }
 
   loginInitiated.value = true
 
-  login.executeMutation({ utmMedium: props.utmMedium, utmSource: getUtmSource() })
+  login.executeMutation({ utmMedium: props.utmMedium, utmContent: props.utmContent || null, utmSource: getUtmSource() })
 }
 
 const handleLogout = () => {
@@ -195,13 +205,33 @@ const handleLogout = () => {
 const handleTryAgain = async () => {
   await reset.executeMutation({})
 
-  login.executeMutation({ utmMedium: props.utmMedium, utmSource: getUtmSource() })
+  login.executeMutation({ utmMedium: props.utmMedium, utmContent: props.utmContent || null, utmSource: getUtmSource() })
 }
 
 const handleCancel = () => {
   emit('continue', true)
 }
 
-const { t } = useI18n()
+const buttonText = computed(() => {
+  const strings = {
+    login: t('topNav.login.actionLogin'),
+    connectProject: t('runs.connect.modal.selectProject.connectProject'),
+    continue: t('topNav.login.actionContinue'),
+  }
+
+  if (cloudViewer.value) {
+    if (props.showConnectButtonAfterLogin) {
+      return strings.connectProject
+    }
+
+    return strings.continue
+  }
+
+  return strings.login
+})
+
+const buttonPrefixIcon = computed(() => {
+  return cloudViewer.value && props.showConnectButtonAfterLogin ? ChainIcon : undefined
+})
 
 </script>

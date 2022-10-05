@@ -1,4 +1,4 @@
-import { JSX } from './mount'
+import { JSX } from './createMount'
 
 const cachedDisplayNames: WeakMap<JSX, string> = new WeakMap()
 

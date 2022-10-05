@@ -44,7 +44,10 @@ describe('SelectorPlayground', () => {
     cy.get('[data-cy="playground-toggle"]').click().then(() => {
       expect(selectorPlaygroundStore.isEnabled).to.be.true
       expect(autIframe.toggleSelectorPlayground).to.have.been.called
-      cy.percySnapshot('toggle-enabled')
+      /*
+        TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23436
+        cy.percySnapshot('toggle-enabled')
+      */
     })
   })
 
@@ -112,10 +115,15 @@ describe('SelectorPlayground', () => {
 
     cy.get('[data-cy="playground-copy"]').trigger('mouseenter')
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Copy to clipboard')
-    cy.percySnapshot('Copy to clipboard hover tooltip')
+
+    // TODO: fix flaky snapshot https://github.com/cypress-io/cypress/issues/23436
+    // cy.percySnapshot('Copy to clipboard hover tooltip')
+
     cy.get('[data-cy="playground-copy"]').click()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Copied!')
-    cy.percySnapshot('Copy to clipboard click tooltip')
+
+    // TODO: fix flaky snapshot https://github.com/cypress-io/cypress/issues/23436
+    // cy.percySnapshot('Copy to clipboard click tooltip')
 
     cy.wrap(copyStub).should('have.been.calledWith', 'cy.get(\'.foo-bar\')')
   })
@@ -130,12 +138,18 @@ describe('SelectorPlayground', () => {
 
     cy.get('[data-cy="playground-print"]').trigger('mouseenter')
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Print to console')
-    cy.percySnapshot('Print to console hover tooltip')
+
+    /*
+      TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23436
+      cy.percySnapshot('Print to console hover tooltip')
+    */
 
     cy.get('[data-cy="playground-print"]').click()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Printed!')
-    cy.percySnapshot('Print to console click tooltip')
-
+    /*
+      TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23436
+      cy.percySnapshot('Print to console click tooltip')
+    */
     cy.then(() => {
       expect(logger.logFormatted).to.have.been.calledWith({
         Command: `cy.get('.foo-bar')`,
@@ -165,20 +179,26 @@ describe('SelectorPlayground', () => {
     cy.get('[data-cy="playground-toggle"]').focus()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Click an element to see a suggested selector')
     cy.get('[data-cy="playground-toggle"]').blur()
-    cy.get('[data-cy="selector-playground-tooltip"]').should('not.be.visible')
+    cy.get('[data-cy="selector-playground-tooltip"]').should('not.exist')
 
     cy.get('[data-cy="playground-copy"]').focus()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Copy to clipboard')
     cy.get('[data-cy="playground-copy"]').click()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Copied')
     cy.get('[data-cy="playground-copy"]').blur()
-    cy.get('[data-cy="selector-playground-tooltip"]').should('not.be.visible')
+    cy.get('[data-cy="selector-playground-tooltip"]').should('not.exist')
 
     cy.get('[data-cy="playground-print"]').focus()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Print to console')
     cy.get('[data-cy="playground-print"]').click()
     cy.get('[data-cy="selector-playground-tooltip"]').should('be.visible').contains('Printed')
     cy.get('[data-cy="playground-print"]').blur()
-    cy.get('[data-cy="selector-playground-tooltip"]').should('not.be.visible')
+    cy.get('[data-cy="selector-playground-tooltip"]').should('not.exist')
+  })
+
+  it('ensures input autocomplete is disabled', () => {
+    mountSelectorPlayground()
+
+    cy.get('[data-cy="playground-selector"]').should('have.attr', 'autocomplete', 'off')
   })
 })

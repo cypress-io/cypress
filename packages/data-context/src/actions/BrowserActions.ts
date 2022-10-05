@@ -30,9 +30,6 @@ export class BrowserActions {
 
     this.ctx.update((d) => {
       d.activeBrowser = browser
-      if (d.currentProjectData?.testingTypeData) {
-        d.currentProjectData.testingTypeData.activeAppData = { error: null, warnings: [] }
-      }
     })
 
     this.ctx._apis.projectApi.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, {

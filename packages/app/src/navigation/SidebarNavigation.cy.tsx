@@ -14,7 +14,7 @@ function mountComponent (initialNavExpandedVal = true) {
 }
 
 describe('SidebarNavigation', () => {
-  it('expands the bar when clicking the expand button', () => {
+  it('expands the bar when clicking the expand button', { viewportWidth: 1280 }, () => {
     mountComponent()
 
     cy.findByText('test-project').should('not.be.visible')
@@ -27,8 +27,34 @@ describe('SidebarNavigation', () => {
     })
 
     cy.findByText('test-project').should('be.visible')
-
+    cy.findByTestId('sidebar-link-specs-page').should('have.class', 'router-link-active') // assert active link to prevent percy flake
     cy.percySnapshot()
+  })
+
+  it('automatically collapses when viewport decreases < 1024px', () => {
+    cy.viewport(1280, 1000)
+    mountComponent()
+
+    // Collapsed by default
+    cy.findByText('test-project').should('not.be.visible')
+
+    // Expand
+    cy.findByLabelText(defaultMessages.sidebar.toggleLabel.collapsed, {
+      selector: 'button',
+    }).click()
+
+    // Verify expanded - project title should display
+    cy.findByText('test-project').should('be.visible')
+
+    // Shrink viewport, should collapse
+    cy.viewport(1000, 1000)
+
+    // Project title should not be visible anymore
+    cy.findByText('test-project').should('not.be.visible')
+    // Expand control should not be available
+    cy.findByLabelText(defaultMessages.sidebar.toggleLabel.collapsed, {
+      selector: 'button',
+    }).should('not.exist')
   })
 
   it('shows tooltips on hover', () => {

@@ -18,7 +18,7 @@ shikiWrapperClasses computed property.
 -->
 
 <template>
-  <div class="cursor-text text-left relative">
+  <div class="cursor-text text-left">
     <div
       v-if="highlighterInitialized"
       ref="codeEl"
@@ -26,7 +26,7 @@ shikiWrapperClasses computed property.
         'shiki-wrapper',
 
         // All styles contain these utility classes
-        'overflow-scroll hover:border-indigo-200 relative text-14px leading-24px font-normal',
+        'overflow-scroll hover:border-indigo-200 text-14px leading-24px font-normal',
 
         /**
          * 1. Single line is forced onto one line without any borders. It loses
@@ -52,19 +52,19 @@ shikiWrapperClasses computed property.
 
         props.class,
       ]"
-      @click="copyOnClick ? () => copyCode() : () => {}"
+      @click="copyOnClick ? () => copyCode() : () => { }"
       v-html="highlightedCode"
     />
     <pre
       v-else
       class="border rounded font-normal border-gray-100 py-8px text-14px leading-24px overflow-scroll"
-      :class="[props.class, lineNumbers ? 'pl-56px' : 'pl-8px' ]"
+      :class="[props.class, lineNumbers ? 'pl-56px' : 'pl-8px']"
     >{{ trimmedCode }}</pre>
     <CopyButton
       v-if="copyButton"
       variant="outline"
       tabindex="-1"
-      class="bg-white absolute"
+      class="bg-white ml-auto -mt-32px sticky"
       :class="numberOfLines === 1 ? 'bottom-5px right-5px' : 'bottom-8px right-8px'"
       :text="code"
       no-icon
@@ -72,42 +72,12 @@ shikiWrapperClasses computed property.
   </div>
 </template>
 
-<script lang="ts">
-import type { Highlighter } from 'shiki'
-import { getHighlighter, setOnigasmWASM, setCDN } from 'shiki'
-import onigasm from 'onigasm/lib/onigasm.wasm?url'
-
-setOnigasmWASM(onigasm)
-setCDN(`${import.meta.env.BASE_URL}shiki/`)
-
-let highlighter: Highlighter
-
-export const langsSupported = ['typescript', 'javascript', 'ts', 'js', 'css', 'jsx', 'tsx', 'json', 'yaml', 'html'] as const
-
-let langs = langsSupported.concat([])
-
-export type CyLangType = typeof langsSupported[number] | 'plaintext' | 'txt'| 'text'
-
-export async function initHighlighter () {
-  if (highlighter) {
-    return
-  }
-
-  highlighter = await getHighlighter({
-    themes: ['cypress.theme'],
-    langs,
-  })
-}
-
-const inheritAttrs = false
-
-export { highlighter, inheritAttrs }
-</script>
-
 <script lang="ts" setup>
 import type { Ref } from 'vue'
 import { computed, onBeforeMount, ref } from 'vue'
 import CopyButton from '../gql-components/CopyButton.vue'
+import { initHighlighter, langsSupported, highlighter } from './highlight'
+import type { CyLangType } from './highlight'
 import { useClipboard } from '../gql-components/useClipboard'
 
 const highlighterInitialized = ref(false)
@@ -142,12 +112,21 @@ const props = withDefaults(defineProps<{
 })
 
 const resolvedLang = computed(() => {
-  if (props.lang === 'javascript' || props.lang === 'js' || props.lang === 'jsx') return 'jsx'
-
-  if (props.lang === 'typescript' || props.lang === 'ts' || props.lang === 'tsx') return 'tsx'
-
-  // if the language is not recognized use plaintext
-  return props.lang && (langsSupported as readonly string[]).includes(props.lang) ? props.lang : 'plaintext'
+  switch (props.lang) {
+    case 'javascript':
+    case 'js':
+    case 'jsx':
+      return 'jsx'
+    case 'typescript':
+    case 'ts':
+    case 'tsx':
+      return 'tsx'
+    default:
+      return props.lang && langsSupported.includes(props.lang)
+        ? props.lang
+        // if the language is not recognized use plaintext
+        : 'plaintext'
+  }
 })
 
 const trimmedCode = computed(() => props.skipTrim ? props.code : props.code.trim())
@@ -181,7 +160,6 @@ avoid colliding with styles elsewhere in the document.
 -->
 
 <style lang="scss" scoped>
-
 $offset: 1.1em;
 
 .inline:deep(.shiki) {
@@ -199,12 +177,14 @@ $offset: 1.1em;
 
   &.line-numbers:deep(.shiki) {
     @apply py-8px;
+
     code {
       counter-reset: step;
       counter-increment: step calc(v-bind('props.initialLine') - 1);
 
       // Keep bg-gray-50 synced with the box-shadows.
-      .line::before, .line:first-child::before {
+      .line::before,
+      .line:first-child::before {
         @apply bg-gray-50 text-right mr-16px min-w-40px px-8px text-gray-500 inline-block sticky;
         left: 0px !important;
         content: counter(step);

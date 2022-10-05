@@ -6,6 +6,7 @@
         v-else
         :gql="query.data.value"
         :online="isOnlineRef"
+        data-cy="runs-container"
         @re-execute-runs-query="reExecuteRunsQuery"
       />
     </TransitionQuickFade>

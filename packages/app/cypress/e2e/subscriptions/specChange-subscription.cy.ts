@@ -230,9 +230,10 @@ e2e: {
 
     it('handles removing the last file', () => {
       cy.contains('dom-content.spec').click()
+      cy.get('button[aria-controls="reporter-inline-specs-list"]').click({ force: true })
+      cy.get('[data-cy=specs-list-panel]').should('be.visible')
       cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
-
       cy.withCtx(async (ctx, o) => {
         await Promise.all(o.paths.map((path) => ctx.actions.file.removeFileInProject(path)))
       }, {

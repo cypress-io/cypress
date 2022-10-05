@@ -1,6 +1,6 @@
 require('../spec_helper')
 
-const { makeDataContext, setCtx } = require('../../lib/makeDataContext')
+const { makeDataContext, setCtx, getCtx } = require('../../lib/makeDataContext')
 
 setCtx(makeDataContext({}))
 
@@ -21,7 +21,7 @@ const { createRoutes } = require(`../../lib/routes`)
 process.env.CYPRESS_INTERNAL_ENV = 'development'
 
 const CA = require('@packages/https-proxy').CA
-const Config = require('../../lib/config')
+const { setupFullConfigWithDefaults } = require('@packages/config')
 const { ServerE2E } = require('../../lib/server-e2e')
 const { SocketE2E } = require('../../lib/socket-e2e')
 const { _getArgs } = require('../../lib/browsers/chrome')
@@ -334,6 +334,10 @@ describe('Proxy Performance', function () {
   })
 
   before(function () {
+    setCtx(makeDataContext({}))
+
+    const getFilesByGlob = getCtx().file.getFilesByGlob
+
     return CA.create()
     .then((ca) => {
       return ca.generateServerCertificateKeys('localhost')
@@ -346,12 +350,12 @@ describe('Proxy Performance', function () {
           https: { cert, key },
         }).start(HTTPS_PROXY_PORT),
 
-        Config.setupFullConfigWithDefaults({
+        setupFullConfigWithDefaults({
           projectRoot: '/tmp/a',
           config: {
             supportFile: false,
           },
-        }).then((config) => {
+        }, getFilesByGlob).then((config) => {
           config.port = CY_PROXY_PORT
 
           // turn off morgan
@@ -371,7 +375,8 @@ describe('Proxy Performance', function () {
   })
 
   URLS_UNDER_TEST.map((urlUnderTest) => {
-    describe(urlUnderTest, function () {
+    // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23214
+    describe.skip(urlUnderTest, function () {
       let baseline
       const testCases = _.cloneDeep(TEST_CASES)
 

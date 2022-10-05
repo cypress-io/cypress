@@ -38,7 +38,7 @@ export function buildConnectReqHead (hostname: string, port: string, proxy: url.
   connectReq.push(`Host: ${hostname}:${port}`)
 
   if (proxy.auth) {
-    connectReq.push(`Proxy-Authorization: basic ${Buffer.from(proxy.auth).toString('base64')}`)
+    connectReq.push(`Proxy-Authorization: Basic ${Buffer.from(proxy.auth).toString('base64')}`)
   }
 
   return connectReq.join(CRLF) + _.repeat(CRLF, 2)
@@ -181,6 +181,10 @@ export class CombinedAgent {
       }) + options.path
     }
 
+    if (!options.uri) {
+      options.uri = url.parse(options.href)
+    }
+
     debug('addRequest called %o', { isHttps, ..._.pick(options, 'href') })
 
     return getFirstWorkingFamily(options, this.familyCache, (family: net.family) => {
@@ -280,10 +284,6 @@ class HttpsAgent extends https.Agent {
   }
 
   addRequest (req: http.ClientRequest, options: http.RequestOptions) {
-    if (!options.uri) {
-      options.uri = url.parse(options.href)
-    }
-
     // Ensure we have a proper port defined otherwise node has assumed we are port 80
     // (https://github.com/nodejs/node/blob/master/lib/_http_client.js#L164) since we are a combined agent
     // rather than an http or https agent. This will cause issues with fetch requests (@cypress/request already handles it:

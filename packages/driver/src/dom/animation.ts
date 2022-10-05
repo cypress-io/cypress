@@ -1,6 +1,6 @@
 import $ from 'jquery'
 
-function addCssAnimationDisabler ($body) {
+function addCssAnimationDisabler ($body: JQuery<HTMLBodyElement>) {
   $(`
     <style id="__cypress-animation-disabler">
       *, *:before, *:after {
@@ -11,7 +11,7 @@ function addCssAnimationDisabler ($body) {
   `).appendTo($body)
 }
 
-function removeCssAnimationDisabler ($body) {
+function removeCssAnimationDisabler ($body: JQuery<HTMLBodyElement>) {
   $body.find('#__cypress-animation-disabler').remove()
 }
 

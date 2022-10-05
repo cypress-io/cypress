@@ -7,31 +7,25 @@
     "build-prod": "yarn build",
     "cy:open": "node ../../scripts/cypress.js open --component --project ${PWD}",
     "cy:run": "node ../../scripts/cypress.js run --component --project ${PWD}",
-    "build": "rimraf dist && rollup -c rollup.config.js",
-    "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
-    "typecheck": "vue-tsc --noEmit",
+    "build": "rimraf dist && rollup -c rollup.config.mjs",
+    "postbuild": "node --require @packages/ts/register ./inline-types.ts && node ../../scripts/sync-exported-npm-with-cli.js",
+    "typecheck": "yarn tsd && vue-tsc --noEmit",
     "test": "yarn cy:run",
+    "tsd": "yarn build && yarn tsc -p test-tsd/tsconfig.tsd.json",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
-  "dependencies": {
-    "@vue/test-utils": "2.0.0-rc.19"
-  },
   "devDependencies": {
-    "@cypress/code-coverage": "3.8.1",
     "@cypress/mount-utils": "0.0.0-development",
-    "@rollup/plugin-commonjs": "^17.1.0",
-    "@rollup/plugin-node-resolve": "^11.1.1",
     "@vitejs/plugin-vue": "2.3.1",
     "@vue/compiler-sfc": "3.2.31",
+    "@vue/test-utils": "2.0.2",
     "axios": "0.21.2",
     "cypress": "0.0.0-development",
     "debug": "^4.3.2",
-    "rollup": "^2.38.5",
-    "rollup-plugin-istanbul": "2.0.1",
-    "rollup-plugin-typescript2": "^0.29.0",
+    "globby": "^11.0.1",
     "tailwindcss": "1.1.4",
-    "typescript": "^4.2.3",
-    "vite": "2.9.5",
+    "typescript": "^4.7.4",
+    "vite": "3.1.0",
     "vue": "3.2.31",
     "vue-i18n": "9.0.0-rc.6",
     "vue-router": "^4.0.0",
@@ -50,13 +44,13 @@
   "engines": {
     "node": ">=8"
   },
-  "types": "dist",
+  "types": "dist/index.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
-  "homepage": "https://github.com/cypress-io/cypress/blob/master/npm/vue/#readme",
+  "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/vue/#readme",
   "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fvue&template=1-bug-report.md&title=",
   "keywords": [
@@ -71,6 +65,10 @@
     {
       "name": "Amir Rustamzadeh",
       "social": "@amirrustam"
+    },
+    {
+      "name": "Lachlan Miller",
+      "social": "@Lachlan19900"
     }
   ],
   "module": "dist/cypress-vue.esm-bundler.js",

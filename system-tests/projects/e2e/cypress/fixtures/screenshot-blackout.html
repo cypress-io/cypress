@@ -1,0 +1,47 @@
+<html>
+  <head>
+    <style>
+      .centered-container {
+        position: relative;
+        height: 400px;
+        width: 400px;
+        max-width: 100%;
+        margin: 0 auto;
+        text-align: center;
+        vertical-align: middle;
+      }
+      .third-container {
+        color: white;
+      }
+      .grey {
+        background-color: grey;
+      }
+      .blue {
+        background-color: blue;
+        position: absolute;
+        top: 0;
+        right: 0%;
+      }
+      .red {
+        background-color: red;
+        position: absolute;
+        top: 0;
+        right: 33.33%;
+      }
+      .purple {
+        background-color: purple;
+        position: absolute;
+        top: 0;
+        right: 66.66%;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Screenshot Blackout Test Absolute Positioning</h1>
+    <div class="centered-container grey">
+      <div class="third-container blue"> Blue Container</div>
+      <div class="third-container red"> Red Container</div>
+      <div class="third-container purple"> Purple Container</div>
+    </div>
+  </body>
+</html>

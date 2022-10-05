@@ -5,22 +5,18 @@ export const RUNNER_ID = 'unified-runner'
 
 export const REPORTER_ID = 'unified-reporter'
 
-function getElementById (id: string) {
-  const el = document.querySelector<HTMLElement>(`#${id}`)
+export function getRunnerElement () {
+  const runnerElement = document.getElementById(RUNNER_ID)
 
-  if (!el) {
-    throw Error(`Expected element with #${id} but did not find it.`)
+  if (!runnerElement) {
+    throw Error(`Expected runner element with #${RUNNER_ID} but did not find it.`)
   }
 
-  return el
-}
-
-export function getRunnerElement () {
-  return getElementById(RUNNER_ID)
+  return runnerElement
 }
 
 export function getReporterElement () {
-  return getElementById(REPORTER_ID)
+  return document.getElementById(REPORTER_ID)
 }
 
 export function empty (el: HTMLElement) {

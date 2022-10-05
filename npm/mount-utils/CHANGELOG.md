@@ -1,3 +1,17 @@
+# [@cypress/mount-utils-v2.1.0](https://github.com/cypress-io/cypress/compare/@cypress/mount-utils-v2.0.1...@cypress/mount-utils-v2.1.0) (2022-08-30)
+
+
+### Features
+
+* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
+
+# [@cypress/mount-utils-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/mount-utils-v2.0.0...@cypress/mount-utils-v2.0.1) (2022-08-11)
+
+
+### Bug Fixes
+
+* remove CT side effects from mount when e2e testing ([#22633](https://github.com/cypress-io/cypress/issues/22633)) ([a9476ec](https://github.com/cypress-io/cypress/commit/a9476ecb3d43f628b689e060294a1952937cb1a7))
+
 # [@cypress/mount-utils-v2.0.0](https://github.com/cypress-io/cypress/compare/@cypress/mount-utils-v1.0.2...@cypress/mount-utils-v2.0.0) (2022-06-13)
 
 
@@ -9,7 +23,6 @@
 ### Features
 
 * embedding mount into the cypress binary (real dependency) ([#20930](https://github.com/cypress-io/cypress/issues/20930)) ([3fe5f50](https://github.com/cypress-io/cypress/commit/3fe5f50e7832a4bfb20df8e71648434eb7f263d5))
-* merging / delegating remote queries to cloud schema ([#17875](https://github.com/cypress-io/cypress/issues/17875)) ([94541d4](https://github.com/cypress-io/cypress/commit/94541d4f18591e8fa4b8702c39e92b0a7238aa5d))
 * swap the #__cy_root id selector to become data-cy-root for component mounting ([#20951](https://github.com/cypress-io/cypress/issues/20951)) ([0e7b555](https://github.com/cypress-io/cypress/commit/0e7b555f93fb403f431c5de4a07ae7ad6ac89ba2))
 
 

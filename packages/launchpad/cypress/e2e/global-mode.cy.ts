@@ -6,6 +6,20 @@ import { getPathForPlatform } from './support/getPathForPlatform'
 const sep = Cypress.platform === 'win32' ? '\\' : '/'
 
 describe('Launchpad: Global Mode', () => {
+  describe('methods of opening global mode', () => {
+    it('shows global page when opened by --global flag', () => {
+      cy.openGlobalMode()
+      cy.visitLaunchpad()
+      cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
+    })
+
+    it('shows global page when opened by global install', () => {
+      cy.openGlobalMode({ byFlag: false })
+      cy.visitLaunchpad()
+      cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
+    })
+  })
+
   describe('when no projects have been added', () => {
     it('shows "Add Project" view', () => {
       cy.openGlobalMode()
@@ -30,8 +44,11 @@ describe('Launchpad: Global Mode', () => {
         .dropFileWithPath(projectPath)
       })
 
-      cy.contains('Welcome to Cypress!')
-      cy.get('a').contains('Projects').click()
+      cy.contains('Welcome to Cypress!').should('be.visible')
+      cy.findByRole('link', { name: 'Projects' })
+      .should('have.attr', 'aria-disabled', 'false')
+      .click()
+
       cy.get('[data-cy="project-card"]')
       .should('have.length', 1)
       .should('contain', 'todos')
@@ -68,7 +85,7 @@ describe('Launchpad: Global Mode', () => {
 
   describe('when projects have been added', () => {
     const setupAndValidateProjectsList = (projectList, globalModeOptions?: string[] | undefined) => {
-      cy.openGlobalMode(globalModeOptions)
+      cy.openGlobalMode({ argv: globalModeOptions })
 
       // Adding a project puts the project first in the list, so we reverse the list
       // to ensure the projectList in the UI matches what is passed in.
@@ -94,6 +111,8 @@ describe('Launchpad: Global Mode', () => {
       const projectList = ['todos', 'ids', 'cookies', 'plugin-empty']
 
       setupAndValidateProjectsList(projectList)
+
+      cy.percySnapshot()
     })
 
     it('takes user to the next step when clicking on a project card', () => {
@@ -150,7 +169,7 @@ describe('Launchpad: Global Mode', () => {
       cy.get('[data-cy="dropzone"]').should('not.exist')
     })
 
-    it('updates breadcrumb when selecting a project and navigating back', () => {
+    it('updates "Projects" link when a project is selected and allows navigating back', () => {
       const getBreadcrumbLink = (name: string, options: { disabled: boolean } = { disabled: false }) => {
         // The timeout is increased to account for variability in configuration load times in CI.
         return cy.findByRole('link', { name, timeout: 10000 }).should('have.attr', 'aria-disabled', options.disabled ? 'true' : 'false')
@@ -177,16 +196,6 @@ describe('Launchpad: Global Mode', () => {
       // Component testing breadcrumbs
       cy.get('[data-cy="project-card"]').contains('todos').click()
       cy.get('[data-cy-testingtype="component"]').click()
-      cy.contains('li', 'component testing', { matchCase: false }).should('not.have.attr', 'href')
-      resetSpies()
-      getBreadcrumbLink('todos').click()
-      getBreadcrumbLink('todos', { disabled: true })
-      cy.withCtx((ctx) => {
-        expect(ctx.lifecycleManager.setAndLoadCurrentTestingType).to.have.been.calledWith(null)
-      })
-
-      cy.get('[data-cy-testingtype="component"]').click()
-      cy.contains('li', 'component testing', { matchCase: false }).should('not.have.attr', 'href')
       resetSpies()
       getBreadcrumbLink('Projects').click()
       getBreadcrumbLink('Projects', { disabled: true })
@@ -197,15 +206,6 @@ describe('Launchpad: Global Mode', () => {
 
       // E2E testing breadcrumbs
       cy.get('[data-cy="project-card"]').contains('todos').click()
-      cy.get('[data-cy-testingtype="e2e"]').click()
-      cy.contains('li', 'e2e testing', { matchCase: false }).should('not.have.attr', 'href')
-      resetSpies()
-      getBreadcrumbLink('todos').click()
-      getBreadcrumbLink('todos', { disabled: true })
-      cy.withCtx((ctx) => {
-        expect(ctx.lifecycleManager.setAndLoadCurrentTestingType).to.have.been.calledWith(null)
-      })
-
       cy.get('[data-cy-testingtype="e2e"]').click()
       cy.contains('li', 'e2e testing', { matchCase: false }).should('not.have.attr', 'href')
       resetSpies()

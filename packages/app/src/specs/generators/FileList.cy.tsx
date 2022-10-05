@@ -1,6 +1,7 @@
 import FileList from './FileList.vue'
-import { randomComponents } from '@packages/frontend-shared/cypress/support/mock-graphql/testStubSpecs'
+import data from '../../../cypress/fixtures/FileList.json'
 import { ref, Ref } from 'vue'
+import type { FileListItemFragment } from '../../generated/graphql-test'
 
 const difficultFile = {
   baseName: '[...all].vue',
@@ -11,7 +12,7 @@ const noResultsSlot = () => <div data-testid="no-results">No Results</div>
 const noResultsSelector = '[data-testid=no-results]'
 const fileRowSelector = '[data-cy=file-list-row]'
 
-const allFiles = randomComponents(10, 'FileParts')
+const allFiles = data as FileListItemFragment[]
 
 allFiles[1] = { ...allFiles[1], ...difficultFile }
 describe('<FileList />', { viewportHeight: 500, viewportWidth: 400 }, () => {

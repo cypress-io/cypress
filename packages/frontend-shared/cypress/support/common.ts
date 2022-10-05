@@ -1,8 +1,11 @@
 import '../../src/styles/shared.scss'
 import type { ComponentPublicInstance } from 'vue'
+import { configure } from '@testing-library/cypress'
 
 // Add cy.mount, cy.mountFragment, cy.mountFragmentList
 export * from './mock-graphql/mountFragment'
+
+configure({ testIdAttribute: 'data-cy' })
 
 export function addVueCommand () {
   Cypress.Commands.add('vue', (componentToFind = null) => {
@@ -25,7 +28,7 @@ declare global {
   }
 }
 
-import { initHighlighter } from '@cy/components/ShikiHighlight.vue'
+import { initHighlighter } from '@cy/components/highlight'
 
 // Make sure highlighter is initialized before
 // we show any code to avoid jank at rendering

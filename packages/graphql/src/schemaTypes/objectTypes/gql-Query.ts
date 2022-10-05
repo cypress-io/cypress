@@ -1,4 +1,4 @@
-import { idArg, nonNull, objectType } from 'nexus'
+import { idArg, stringArg, nonNull, objectType } from 'nexus'
 import { ProjectLike, ScaffoldedFile } from '..'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
@@ -9,6 +9,7 @@ import { VersionData } from './gql-VersionData'
 import { Wizard } from './gql-Wizard'
 import { ErrorWrapper } from './gql-ErrorWrapper'
 import { CachedUser } from './gql-CachedUser'
+import { Cohort } from './gql-Cohorts'
 
 export const Query = objectType({
   name: 'Query',
@@ -77,14 +78,9 @@ export const Query = objectType({
       resolve: (root, args, ctx) => ctx.appData.projects,
     })
 
-    t.nonNull.boolean('isInGlobalMode', {
-      description: 'Whether the app is in global mode or not',
-      resolve: (source, args, ctx) => !ctx.currentProject,
-    })
-
-    t.nonNull.boolean('projectRootFromCI', {
-      description: 'Whether the project was specified from the --project flag',
-      resolve: (source, args, ctx) => Boolean(ctx.modeOptions.projectRoot),
+    t.nonNull.boolean('isGlobalMode', {
+      description: 'Whether the app is in global mode or not. This is based off the presence of a project, which is set by the CLI (or absent if the app is run directly). See cli/lib/exec/open.js for the logic that sets the project or not.',
+      resolve: (source, args, ctx) => !ctx.modeOptions.project,
     })
 
     t.nonNull.field('authState', {
@@ -110,6 +106,17 @@ export const Query = objectType({
     t.nonNull.boolean('invokedFromCli', {
       description: 'Whether the app was invoked from the CLI, false if user is using the binary directly (not invoked from package manager e.g. npm)',
       resolve: (source, args, ctx) => Boolean(ctx.modeOptions.invokedFromCli),
+    })
+
+    t.field('cohort', {
+      description: 'Return the cohort for the given name',
+      type: Cohort,
+      args: {
+        name: nonNull(stringArg({ description: 'the name of the cohort to find' })),
+      },
+      resolve: async (source, args, ctx) => {
+        return await ctx.cohortsApi.getCohort(args.name) ?? null
+      },
     })
 
     t.field('node', {

@@ -3,8 +3,6 @@
 
 ### Bug Fixes
 
-* remove --config-file false references and update types ([#20643](https://github.com/cypress-io/cypress/issues/20643)) ([110f8ae](https://github.com/cypress-io/cypress/commit/110f8ae02dd2b6fd695856aaa77e3b9d96c939dc))
-* Restore broken gif ([#18987](https://github.com/cypress-io/cypress/issues/18987)) ([b637334](https://github.com/cypress-io/cypress/commit/b6373341f5e8d455eaa7abaaefc6a8dfff32c674))
 * scope config to current testing type ([#20677](https://github.com/cypress-io/cypress/issues/20677)) ([61f7cfc](https://github.com/cypress-io/cypress/commit/61f7cfc59284a2938e0a1c15d74ee75215ba5f8b))
 * support using create-cypress-tests as part of build process ([#18714](https://github.com/cypress-io/cypress/issues/18714)) ([0501452](https://github.com/cypress-io/cypress/commit/0501452fb9e2df954ee871171052ab9f01367b25))
 * **unified-desktop-gui branch:** initial installation on windows ([#18247](https://github.com/cypress-io/cypress/issues/18247)) ([8614e97](https://github.com/cypress-io/cypress/commit/8614e978029bcbf7155b7ae98ac54feb11f2e7f3))
@@ -19,8 +17,6 @@
 
 * Add vue2 package from npm/vue/v2 branch ([#21026](https://github.com/cypress-io/cypress/issues/21026)) ([3aa69e2](https://github.com/cypress-io/cypress/commit/3aa69e2538aae5702bfc48789c54f37263ce08fc))
 * Deprecate run-ct / open-ct, and update all examples to use --ct instead ([#18422](https://github.com/cypress-io/cypress/issues/18422)) ([196e8f6](https://github.com/cypress-io/cypress/commit/196e8f62cc6d27974f235945cb5700624b3dae41))
-* detect framework, guess component glob and query files ([#18548](https://github.com/cypress-io/cypress/issues/18548)) ([e93a074](https://github.com/cypress-io/cypress/commit/e93a074abcc6a1171b4b147520949bc8dd8fba73)), closes [#18562](https://github.com/cypress-io/cypress/issues/18562)
-* migration rename files ([#19807](https://github.com/cypress-io/cypress/issues/19807)) ([7b8e12e](https://github.com/cypress-io/cypress/commit/7b8e12eb0650fbfb0501dd722321ba9e87da25cf))
 * remove testFiles reference ([#20565](https://github.com/cypress-io/cypress/issues/20565)) ([5670344](https://github.com/cypress-io/cypress/commit/567034459089d9d53dfab5556cb9369fb335c3db))
 * update on-links ([#19235](https://github.com/cypress-io/cypress/issues/19235)) ([cc2d734](https://github.com/cypress-io/cypress/commit/cc2d7348185e2a090c60d92d9319ab460d8c7827))
 * Use .config files ([#18578](https://github.com/cypress-io/cypress/issues/18578)) ([081dd19](https://github.com/cypress-io/cypress/commit/081dd19cc6da3da229a7af9c84f62730c85a5cd6))

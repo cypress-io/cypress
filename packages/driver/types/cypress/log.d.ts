@@ -97,6 +97,14 @@ declare namespace Cypress {
     renderProps?: () => RenderProps | RenderProps
     response?: string | object
     selector?: any
+    // session information to associate with the log and be added to the session instrument panel
+    sessionInfo?: {
+      id: string
+      data: {
+        cookies?: Array<Cypress.Cookie> | null
+        localStorage?: Array<LocalStorage> | null
+      }
+    }
     snapshot?: boolean
     snapshots?: []
     state?: "failed" | "passed" | "pending" // representative of Mocha.Runnable.constants (not publicly exposed by Mocha types)

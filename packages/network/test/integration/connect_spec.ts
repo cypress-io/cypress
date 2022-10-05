@@ -11,7 +11,8 @@ chai.use(sinonChai)
 
 describe('lib/connect', function () {
   context('.getAddress', function () {
-    it('resolves localhost on 127.0.0.1 immediately', function () {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23155
+    it.skip('resolves localhost on 127.0.0.1 immediately', function () {
       this.timeout(50)
 
       const server = net.createServer(_.partialRight(_.invoke, 'close'))

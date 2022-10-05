@@ -3,7 +3,7 @@ import _ from 'lodash'
 import $utils from './utils'
 import $errUtils from './error_utils'
 
-const _reset = () => {
+const _reset = (): Pick<Cypress.ScreenshotDefaultsOptions, 'capture' | 'scale' | 'disableTimersAndAnimations' | 'screenshotOnRunFailure' | 'blackout' | 'overwrite' | 'onBeforeScreenshot' | 'onAfterScreenshot'> => {
   return {
     capture: 'fullPage',
     scale: false,

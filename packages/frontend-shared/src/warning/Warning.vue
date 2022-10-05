@@ -10,6 +10,7 @@
   >
     <div
       ref="markdownTarget"
+      class="warning-markdown"
       v-html="markdown"
     />
     <Button
@@ -68,3 +69,14 @@ let message = computed(() => {
 
 const { markdown } = useMarkdown(markdownTarget, message.value, { classes: { code: ['bg-warning-200'] } })
 </script>
+
+<style lang="scss">
+// Add some extra margin to the <ul>
+// TODO: ideally move this into `frontend-shared/src/composables/useMarkdown`
+// It doesn't get applied when added there due to conflicting with other, higher priority rules.
+.warning-markdown {
+  ul {
+    @apply ml-16px mb-16px;
+  }
+}
+</style>

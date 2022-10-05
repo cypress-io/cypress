@@ -5,6 +5,7 @@ describe('e2e typescript in spec and support file', function () {
 
   it('spec passes', function () {
     return systemTests.exec(this, {
+      project: 'coffee-react-interop',
       spec: 'typescript_passing.cy.ts',
       snapshot: true,
     })

@@ -1,12 +1,12 @@
 import FileChooser from './FileChooser.vue'
 
-import { randomComponents } from '@packages/frontend-shared/cypress/support/mock-graphql/testStubSpecs'
 import { ref } from 'vue'
 import { defaultMessages } from '@cy/i18n'
+import data from '../../../cypress/fixtures/FileChooser.json'
 
 /*----------  Fixtures  ----------*/
-const numFiles = 20
-const allFiles = randomComponents(numFiles, 'FileParts')
+const numFiles = data.length
+const allFiles = data
 const extensionPattern = '*.jsx'
 const existentExtensionPattern = '*.tsx'
 const nonExistentFileName = 'non existent file'

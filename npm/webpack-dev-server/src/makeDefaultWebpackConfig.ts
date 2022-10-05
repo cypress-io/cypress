@@ -24,9 +24,18 @@ export function makeDefaultWebpackConfig (
 
   debug(`Using HtmlWebpackPlugin version ${version} from ${importPath}`)
 
+  const optimization = <Record<string, any>>{}
+
+  if (config.sourceWebpackModulesResult.webpack.majorVersion === 5) {
+    optimization.emitOnErrors = true
+  } else {
+    optimization.noEmitOnErrors = false
+  }
+
   const finalConfig = {
     mode: 'development',
     optimization: {
+      ...optimization,
       splitChunks: {
         chunks: 'all',
       },
@@ -37,9 +46,10 @@ export function makeDefaultWebpackConfig (
     },
     plugins: [
       new HtmlWebpackPlugin({
-        // Todo: Add indexHtmlFile when it gets added as a config property
         template: indexHtmlFile,
-      }) as any,
+        // Angular generates all of it's scripts with <script type="module">. Live-reloading breaks without this option.
+        ...(config.devServerConfig.framework === 'angular' ? { scriptLoading: 'module' } : {}),
+      }),
     ],
   } as any
 

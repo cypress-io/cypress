@@ -7,6 +7,8 @@ export type SecurityOpts = {
   isHtml?: boolean
   url: string
   useAstSourceRewriting: boolean
+  modifyObstructiveThirdPartyCode: boolean
+  modifyObstructiveCode: boolean
   deferSourceMapRewrite: (opts: any) => string
 }
 
@@ -25,12 +27,12 @@ function getRewriter (useAstSourceRewriting: boolean) {
   return useAstSourceRewriting ? astRewriter : regexRewriter
 }
 
-function getHtmlToInject ({ domainName, wantsInjection }: InjectionOpts) {
+function getHtmlToInject ({ domainName, wantsInjection, modifyObstructiveThirdPartyCode, modifyObstructiveCode }: InjectionOpts & SecurityOpts) {
   switch (wantsInjection) {
     case 'full':
       return inject.full(domainName)
     case 'fullCrossOrigin':
-      return inject.fullCrossOrigin(domainName)
+      return inject.fullCrossOrigin(domainName, { modifyObstructiveThirdPartyCode, modifyObstructiveCode })
     case 'partial':
       return inject.partial(domainName)
     default:

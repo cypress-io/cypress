@@ -32,7 +32,7 @@ export default (Commands, Cypress, cy, state) => {
         const restoreCmdIndex = state('index') + 1
 
         cy.queue.insert(restoreCmdIndex, $Command.create({
-          args: [state('subject')],
+          args: [cy.currentSubject()],
           name: 'log-restore',
           fn: (subject) => subject,
         }))

@@ -33,6 +33,7 @@
         :type="type"
         :spellcheck="false"
         :class="[{'text-gray-800': !hasError, 'text-error-500': hasError}]"
+        autocomplete="off"
         class="border-0 flex-1 ml-1px min-w-100px py-9px pl-2 placeholder-gray-400 text-gray-800 block disabled:bg-gray-100 disabled:text-gray-400"
         v-bind="inputAttrs"
       >

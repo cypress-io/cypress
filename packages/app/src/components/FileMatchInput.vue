@@ -3,6 +3,7 @@
     v-model="localModelValue"
     class="flex-grow p-0 text-gray-700 placeholder-gray-400 border-transparent outline-none placeholder-shown:overflow-ellipsis placeholder-shown:truncate hocus:border-transparent mr-8px"
     type="search"
+    autocomplete="off"
   >
 </template>
 

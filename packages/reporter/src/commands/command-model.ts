@@ -4,8 +4,12 @@ import { action, computed, observable } from 'mobx'
 import Err, { ErrProps } from '../errors/err-model'
 import Instrument, { InstrumentProps } from '../instruments/instrument-model'
 import type { TimeoutID } from '../lib/types'
+import { SessionProps } from '../sessions/sessions-model'
 
 const LONG_RUNNING_THRESHOLD = 1000
+
+type InterceptStatuses = 'req modified' | 'req + res modified' | 'res modified'
+type XHRStatuses = '---' | '(canceled)' | '(aborted)' | string // string = any xhr status
 
 export interface RenderProps {
   message?: string
@@ -15,7 +19,7 @@ export interface RenderProps {
     alias?: string
     type: 'function' | 'stub' | 'spy'
   }>
-  status?: string
+  status?: InterceptStatuses | XHRStatuses
   wentToOrigin?: boolean
 }
 
@@ -25,6 +29,7 @@ export interface CommandProps extends InstrumentProps {
   number?: number
   numElements: number
   renderProps?: RenderProps
+  sessionInfo?: SessionProps['sessionInfo']
   timeout?: number
   visible?: boolean
   wallClockStartedAt?: string
@@ -39,6 +44,7 @@ export interface CommandProps extends InstrumentProps {
 
 export default class Command extends Instrument {
   @observable.struct renderProps: RenderProps = {}
+  @observable.struct sessionInfo?: SessionProps['sessionInfo']
   @observable err = new Err({})
   @observable event?: boolean = false
   @observable isLongRunning = false
@@ -86,12 +92,16 @@ export default class Command extends Instrument {
 
     return this._isOpen || (this._isOpen === null
       && (
-        (this.group && this.type === 'system' && this.hasChildren) ||
-        (this.hasChildren && !this.event && this.type !== 'system') ||
-        _.some(this.children, (v) => v.hasChildren) ||
+        // command has nested commands
+        (this.name !== 'session' && this.hasChildren && !this.event && this.type !== 'system') ||
+        // command has nested commands with children
+        (this.name !== 'session' && _.some(this.children, (v) => v.hasChildren)) ||
+        // last nested command is open
         _.last(this.children)?.isOpen ||
+        // show slow command when test is running
         (_.some(this.children, (v) => v.isLongRunning) && _.last(this.children)?.state === 'pending') ||
-        _.some(this.children, (v) => v.state === 'failed')
+        // at last nested command failed
+        _.last(this.children)?.state === 'failed'
       )
     )
   }
@@ -118,6 +128,7 @@ export default class Command extends Instrument {
     this.number = props.number
     this.numElements = props.numElements
     this.renderProps = props.renderProps || {}
+    this.sessionInfo = props.sessionInfo
     this.timeout = props.timeout
     // command log that are not associated with elements will not have a visibility
     // attribute set. i.e. cy.visit(), cy.readFile() or cy.log()
@@ -141,6 +152,7 @@ export default class Command extends Instrument {
     this.event = props.event
     this.numElements = props.numElements
     this.renderProps = props.renderProps || {}
+    this.sessionInfo = props.sessionInfo
     // command log that are not associated with elements will not have a visibility
     // attribute set. i.e. cy.visit(), cy.readFile() or cy.log()
     this.visible = props.visible === undefined || props.visible

@@ -1,3 +1,3 @@
-import { UnifiedRunner } from '@packages/runner-ct/unified-runner'
+import { UnifiedRunner } from '../unified-runner'
 
 window.UnifiedRunner = UnifiedRunner

@@ -16,6 +16,7 @@
       :page-name="currentRoute.name?.toString()"
       data-cy="app-header-bar"
       :allow-automatic-prompt-open="true"
+      @connect-project="handleConnectProject"
     />
     <div
       v-if="query.data.value?.baseError || query.data.value?.currentProject?.isLoadingConfigFile || query.data.value?.currentProject?.isLoadingNodeEvents"
@@ -24,7 +25,7 @@
       <BaseError
         v-if="query.data.value?.baseError"
         :gql="query.data.value.baseError"
-        :retry="resetErrorAndLoadConfig"
+        @retry="resetErrorAndLoadConfig"
       />
       <div v-else>
         <Spinner />
@@ -48,6 +49,16 @@
           <component :is="Component" />
         </transition>
       </router-view>
+      <!-- "Nav" is the correct UTM medium below because
+        this is only opened by event emitted from the header bar-->
+      <CloudConnectModals
+        v-if="showConnectDialog && cloudModalQuery.data.value"
+        :show="showConnectDialog"
+        :gql="cloudModalQuery.data.value"
+        utm-medium="Nav"
+        @cancel="showConnectDialog = false"
+        @success="showConnectDialog = false"
+      />
     </main>
   </div>
 </template>
@@ -58,11 +69,12 @@ import SidebarNavigation from '../navigation/SidebarNavigation.vue'
 import HeaderBar from '@cy/gql-components/HeaderBar.vue'
 import BaseError from '@cy/gql-components/error/BaseError.vue'
 import Spinner from '@cy/components/Spinner.vue'
+import CloudConnectModals from '../runs/modals/CloudConnectModals.vue'
 
 import { useRoute } from 'vue-router'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
-import { MainAppQueryDocument, MainApp_ResetErrorsAndLoadConfigDocument } from '../generated/graphql'
+import { MainApp_CloudConnectModalsQueryDocument, MainAppQueryDocument, MainApp_ResetErrorsAndLoadConfigDocument } from '../generated/graphql'
 
 gql`
 fragment MainAppQueryData on Query {
@@ -85,12 +97,22 @@ query MainAppQuery {
 `
 
 gql`
+query MainApp_CloudConnectModalsQuery {
+  ...CloudConnectModals
+}
+`
+
+gql`
 mutation MainApp_ResetErrorsAndLoadConfig($id: ID!) {
   resetErrorAndLoadConfig(id: $id) {
     ...MainAppQueryData
   }
 }
 `
+
+const showConnectDialog = ref(false)
+
+const cloudModalQuery = useQuery({ query: MainApp_CloudConnectModalsQueryDocument, pause: true })
 
 const currentRoute = useRoute()
 
@@ -111,4 +133,10 @@ const resetErrorAndLoadConfig = (id: string) => {
 }
 
 const renderSidebar = window.__CYPRESS_MODE__ !== 'run'
+
+async function handleConnectProject () {
+  await cloudModalQuery.executeQuery()
+  showConnectDialog.value = true
+}
+
 </script>

@@ -20,4 +20,13 @@ if (process.versions && semver.satisfies(process.versions.node, '>=17.0.0') && s
   NODE_OPTIONS = `${NODE_OPTIONS} --openssl-legacy-provider`
 }
 
-cp.execSync(`node ${webpackCli} ${process.argv.slice(2).join(' ')}`, { stdio: 'inherit', env: { ...process.env, NODE_OPTIONS } })
+function buildCommand () {
+  const file = process.argv.slice(2)
+  let program = `node "${webpackCli}"`
+
+  return file.length ? `${program } "${file.join('" "')}"` : program
+}
+
+const program = buildCommand()
+
+cp.execSync(program, { stdio: 'inherit', env: { ...process.env, NODE_OPTIONS } })

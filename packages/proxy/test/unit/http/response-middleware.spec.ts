@@ -5,7 +5,8 @@ import { expect } from 'chai'
 import sinon from 'sinon'
 import { testMiddleware } from './helpers'
 import { RemoteStates } from '@packages/server/lib/remote_states'
-import EventEmitter from 'events'
+import { Readable } from 'stream'
+import * as rewriter from '../../../lib/http/util/rewriter'
 
 describe('http/response-middleware', function () {
   it('exports the members in the correct order', function () {
@@ -14,7 +15,6 @@ describe('http/response-middleware', function () {
       'AttachPlainTextStreamFn',
       'InterceptResponse',
       'PatchExpressSetHeader',
-      'MaybeDelayForCrossOrigin',
       'SetInjectionLevel',
       'OmitProblematicHeaders',
       'MaybePreventCaching',
@@ -156,190 +156,6 @@ describe('http/response-middleware', function () {
         incomingRes: {
           headers,
         },
-      }
-    }
-  })
-
-  describe('MaybeDelayForCrossOrigin', function () {
-    const { MaybeDelayForCrossOrigin } = ResponseMiddleware
-    let ctx
-
-    it('doesn\'t do anything when not html or rendered html', function () {
-      prepareContext({})
-
-      return testMiddleware([MaybeDelayForCrossOrigin], ctx)
-      .then(() => {
-        expect(ctx.serverBus.emit).not.to.be.called
-      })
-    })
-
-    it('doesn\'t do anything when not AUT frame', function () {
-      prepareContext({
-        incomingRes: {
-          headers: {
-            'content-type': 'text/html',
-          },
-        },
-      })
-
-      return testMiddleware([MaybeDelayForCrossOrigin], ctx)
-      .then(() => {
-        expect(ctx.serverBus.emit).not.to.be.called
-      })
-    })
-
-    it('doesn\'t do anything when "experimentalSessionAndOrigin" config flag is not set to true"', function () {
-      prepareContext({
-        incomingRes: {
-          headers: {
-            'content-type': 'text/html',
-          },
-        },
-      })
-
-      return testMiddleware([MaybeDelayForCrossOrigin], ctx)
-      .then(() => {
-        expect(ctx.serverBus.emit).not.to.be.called
-      })
-    })
-
-    it('doesn\'t do anything when request is for a previous origin in the stack', function () {
-      prepareContext({
-        req: {
-          isAUTFrame: true,
-          proxiedUrl: 'http://www.foobar.com/test',
-        },
-        incomingRes: {
-          headers: {
-            'content-type': 'text/html',
-          },
-        },
-        secondaryOrigins: ['http://foobar.com', 'http://example.com'],
-        config: {
-          experimentalSessionAndOrigin: true,
-        },
-      })
-
-      return testMiddleware([MaybeDelayForCrossOrigin], ctx)
-      .then(() => {
-        expect(ctx.serverBus.emit).not.to.be.called
-      })
-    })
-
-    it('waits for server signal if req is not of a previous origin, letting it continue after receiving cross:origin:release:html', function () {
-      prepareContext({
-        req: {
-          isAUTFrame: true,
-          proxiedUrl: 'http://www.idp.com/test',
-        },
-        incomingRes: {
-          headers: {
-            'content-type': 'text/html',
-          },
-        },
-        secondaryOrigins: ['http://foobar.com', 'http://example.com'],
-        config: {
-          experimentalSessionAndOrigin: true,
-        },
-      })
-
-      const promise = testMiddleware([MaybeDelayForCrossOrigin], ctx)
-
-      expect(ctx.serverBus.emit).to.be.calledWith('cross:origin:delaying:html', { href: 'http://www.idp.com/test' })
-
-      ctx.serverBus.once.withArgs('cross:origin:release:html').args[0][1]()
-
-      return promise
-    })
-
-    it('waits for server signal if res is html, letting it continue after receiving cross:origin:release:html', function () {
-      prepareContext({
-        incomingRes: {
-          headers: {
-            'content-type': 'text/html',
-          },
-        },
-        req: {
-          isAUTFrame: true,
-          proxiedUrl: 'http://www.foobar.com/test',
-        },
-        config: {
-          experimentalSessionAndOrigin: true,
-        },
-      })
-
-      const promise = testMiddleware([MaybeDelayForCrossOrigin], ctx)
-
-      expect(ctx.serverBus.emit).to.be.calledWith('cross:origin:delaying:html', { href: 'http://www.foobar.com/test' })
-
-      ctx.serverBus.once.withArgs('cross:origin:release:html').args[0][1]()
-
-      return promise
-    })
-
-    it('waits for server signal if incomingRes is rendered html, letting it continue after receiving cross:origin:release:html', function () {
-      prepareContext({
-        req: {
-          headers: {
-            'accept': [
-              'text/html',
-              'application/xhtml+xml',
-            ],
-          },
-          isAUTFrame: true,
-          proxiedUrl: 'http://www.foobar.com/test',
-        },
-        config: {
-          experimentalSessionAndOrigin: true,
-        },
-      })
-
-      const promise = testMiddleware([MaybeDelayForCrossOrigin], ctx)
-
-      expect(ctx.serverBus.emit).to.be.calledWith('cross:origin:delaying:html', { href: 'http://www.foobar.com/test' })
-
-      ctx.serverBus.once.withArgs('cross:origin:release:html').args[0][1]()
-
-      return promise
-    })
-
-    function prepareContext (props) {
-      const remoteStates = new RemoteStates(() => {})
-      const eventEmitter = new EventEmitter()
-
-      // set the primary remote state
-      remoteStates.set('http://127.0.0.1:3501')
-
-      // set the secondary remote states
-      remoteStates.addEventListeners(eventEmitter)
-      props.secondaryOrigins?.forEach((originPolicy) => {
-        eventEmitter.emit('cross:origin:bridge:ready', { originPolicy })
-      })
-
-      ctx = {
-        incomingRes: {
-          headers: {},
-          ...props.incomingRes,
-        },
-        res: {
-          headers: {},
-          ...props.res,
-        },
-        req: {
-          proxiedUrl: 'http://127.0.0.1:3501/primary-origin.html',
-          headers: {},
-          ...props.req,
-        },
-        serverBus: {
-          emit: sinon.stub(),
-          once: sinon.stub(),
-        },
-        remoteStates,
-        debug () {},
-        onError (error) {
-          throw error
-        },
-        ..._.omit(props, 'incomingRes', 'res', 'req'),
       }
     }
   })
@@ -586,17 +402,156 @@ describe('http/response-middleware', function () {
       })
     })
 
+    describe('wantsSecurityRemoved', () => {
+      it('removes security if full injection is requested', () => {
+        prepareContext({
+          res: {
+            wantsInjection: 'full',
+          },
+          config: {
+            modifyObstructiveCode: true,
+          },
+        })
+
+        return testMiddleware([SetInjectionLevel], ctx)
+        .then(() => {
+          expect(ctx.res.wantsSecurityRemoved).to.be.true
+        })
+      })
+
+      it('removes security if fullCrossOrigin injection is requested', () => {
+        prepareContext({
+          res: {
+            wantsInjection: 'fullCrossOrigin',
+          },
+          config: {
+            modifyObstructiveCode: true,
+          },
+        })
+
+        return testMiddleware([SetInjectionLevel], ctx)
+        .then(() => {
+          expect(ctx.res.wantsSecurityRemoved).to.be.true
+        })
+      })
+
+      ;['application/javascript', 'application/x-javascript', 'text/javascript'].forEach((javascriptMIME) => {
+        it(`removes security if the MIME type is ${javascriptMIME} and is on the currently active remote state`, () => {
+          prepareContext({
+            incomingRes: {
+              headers: {
+                'content-type': `${javascriptMIME}`,
+              },
+            },
+            config: {
+              modifyObstructiveCode: true,
+            },
+          })
+
+          return testMiddleware([SetInjectionLevel], ctx)
+          .then(() => {
+            expect(ctx.res.wantsSecurityRemoved).to.be.true
+          })
+        })
+      })
+
+      it('otherwise, does not try to remove security on other MIME Types', () => {
+        prepareContext({
+          incomingRes: {
+            headers: {
+              'content-type': 'application/xml',
+            },
+          },
+          config: {
+            modifyObstructiveCode: true,
+          },
+        })
+
+        return testMiddleware([SetInjectionLevel], ctx)
+        .then(() => {
+          expect(ctx.res.wantsSecurityRemoved).to.be.false
+        })
+      })
+
+      describe('experimentalModifyObstructiveThirdPartyCode', () => {
+        it('continues to "modifyObstructiveCode" when "experimentalModifyObstructiveThirdPartyCode" is true, even if "modifyObstructiveCode" is set to false.', () => {
+          prepareContext({
+            res: {
+              wantsInjection: 'full',
+            },
+            config: {
+              modifyObstructiveCode: false,
+              experimentalModifyObstructiveThirdPartyCode: true,
+            },
+          })
+
+          return testMiddleware([SetInjectionLevel], ctx)
+          .then(() => {
+            expect(ctx.res.wantsSecurityRemoved).to.be.true
+          })
+        })
+
+        ;['text/html', 'application/javascript', 'application/x-javascript', 'text/javascript'].forEach((MIMEType) => {
+          it(`removes security for ${MIMEType} MIME when "experimentalModifyObstructiveThirdPartyCode" is true, regardless of injection or request origin.`, () => {
+            prepareContext({
+              req: {
+                proxiedUrl: 'http://www.some-third-party-script-or-html.com/',
+                isAUTFrame: false,
+              },
+              incomingRes: {
+                headers: {
+                  'content-type': `${MIMEType}`,
+                },
+              },
+              config: {
+                modifyObstructiveCode: true,
+                experimentalModifyObstructiveThirdPartyCode: true,
+              },
+            })
+
+            return testMiddleware([SetInjectionLevel], ctx)
+            .then(() => {
+              expect(ctx.res.wantsSecurityRemoved).to.be.true
+            })
+          })
+        })
+
+        it(`removes security when the request will render html when "experimentalModifyObstructiveThirdPartyCode" is true, regardless of injection or request origin.`, () => {
+          prepareContext({
+            renderedHTMLOrigins: {},
+            getRenderedHTMLOrigins () {
+              return this.renderedHTMLOrigins
+            },
+            req: {
+              proxiedUrl: 'http://www.some-third-party-script-or-html.com/',
+              isAUTFrame: false,
+              headers: {
+                'accept': ['text/html', 'application/xhtml+xml'],
+              },
+            },
+            config: {
+              modifyObstructiveCode: true,
+              experimentalModifyObstructiveThirdPartyCode: true,
+            },
+          })
+
+          return testMiddleware([SetInjectionLevel], ctx)
+          .then(() => {
+            expect(ctx.res.wantsSecurityRemoved).to.be.true
+          })
+        })
+      })
+    })
+
     function prepareContext (props) {
       const remoteStates = new RemoteStates(() => {})
-      const eventEmitter = new EventEmitter()
 
       // set the primary remote state
       remoteStates.set('http://127.0.0.1:3501')
 
       // set the secondary remote states
-      remoteStates.addEventListeners(eventEmitter)
       props.secondaryOrigins?.forEach((originPolicy) => {
-        eventEmitter.emit('cross:origin:bridge:ready', { originPolicy })
+        remoteStates.set(originPolicy, {}, false)
       })
 
       ctx = {
@@ -670,37 +625,6 @@ describe('http/response-middleware', function () {
       expect(appendStub).not.to.be.called
     })
 
-    it('uses X-Set-Cookie when experimental flag is on and request needs cross-origin handling', async () => {
-      const appendStub = sinon.stub()
-      const ctx = prepareContext({
-        req: {
-          isAUTFrame: true,
-        },
-        incomingRes: {
-          headers: {
-            'set-cookie': 'cookie=value',
-          },
-        },
-        res: {
-          append: appendStub,
-        },
-      })
-
-      await testMiddleware([CopyCookiesFromIncomingRes], ctx)
-
-      expect(appendStub).to.be.calledOnce
-      expect(appendStub).to.be.calledWith('X-Set-Cookie', 'cookie=value')
-    })
-
-    it('uses Set-Cookie when experimental flag is on but request does not need cross-origin handling', async () => {
-      const { appendStub, ctx } = prepareSameOriginContext()
-
-      await testMiddleware([CopyCookiesFromIncomingRes], ctx)
-
-      expect(appendStub).to.be.calledOnce
-      expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value')
-    })
-
     it('does not send cross:origin:automation:cookies if request does not need cross-origin handling', async () => {
       const { ctx } = prepareSameOriginContext()
 
@@ -761,15 +685,13 @@ describe('http/response-middleware', function () {
 
     function prepareContext (props) {
       const remoteStates = new RemoteStates(() => {})
-      const eventEmitter = new EventEmitter()
 
       // set the primary remote state
       remoteStates.set('http://foobar.com')
 
       // set the secondary remote states
-      remoteStates.addEventListeners(eventEmitter)
       props.secondaryOrigins?.forEach((originPolicy) => {
-        eventEmitter.emit('cross:origin:bridge:ready', { originPolicy })
+        remoteStates.set(originPolicy, {}, false)
       })
 
       remoteStates.isPrimaryOrigin = () => false
@@ -791,7 +713,6 @@ describe('http/response-middleware', function () {
         req: {
           proxiedUrl: 'http://www.foobar.com/login',
           headers: {},
-          isAUTFrame: true,
           ...props.req,
         },
         incomingResStream: {
@@ -846,6 +767,245 @@ describe('http/response-middleware', function () {
       return {
         expiryTime: () => 0,
         ...props,
+      }
+    }
+  })
+
+  describe('MaybeInjectHtml', function () {
+    const { MaybeInjectHtml } = ResponseMiddleware
+    let ctx
+    let htmlStub
+
+    beforeEach(() => {
+      htmlStub = sinon.spy(rewriter, 'html')
+    })
+
+    afterEach(() => {
+      htmlStub.restore()
+    })
+
+    it('modifyObstructiveThirdPartyCode is true for secondary requests', function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/primary-origin.html',
+        },
+      })
+
+      return testMiddleware([MaybeInjectHtml], ctx)
+      .then(() => {
+        expect(htmlStub).to.be.calledOnce
+        expect(htmlStub).to.be.calledWith('foo', {
+          'deferSourceMapRewrite': undefined,
+          'domainName': 'foobar.com',
+          'isHtml': true,
+          'modifyObstructiveCode': true,
+          'modifyObstructiveThirdPartyCode': true,
+          'url': 'http://www.foobar.com:3501/primary-origin.html',
+          'useAstSourceRewriting': undefined,
+          'wantsInjection': 'full',
+          'wantsSecurityRemoved': true,
+        })
+      })
+    })
+
+    it('modifyObstructiveThirdPartyCode is false for primary requests', function () {
+      prepareContext({})
+
+      return testMiddleware([MaybeInjectHtml], ctx)
+      .then(() => {
+        expect(htmlStub).to.be.calledOnce
+        expect(htmlStub).to.be.calledWith('foo', {
+          'deferSourceMapRewrite': undefined,
+          'domainName': '127.0.0.1',
+          'isHtml': true,
+          'modifyObstructiveCode': true,
+          'modifyObstructiveThirdPartyCode': false,
+          'url': 'http://127.0.0.1:3501/primary-origin.html',
+          'useAstSourceRewriting': undefined,
+          'wantsInjection': 'full',
+          'wantsSecurityRemoved': true,
+        })
+      })
+    })
+
+    it('modifyObstructiveThirdPartyCode is false when experimental flag is false', function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/primary-origin.html',
+        },
+        config: {
+          modifyObstructiveCode: false,
+          experimentalModifyObstructiveThirdPartyCode: false,
+        },
+      })
+
+      return testMiddleware([MaybeInjectHtml], ctx)
+      .then(() => {
+        expect(htmlStub).to.be.calledOnce
+        expect(htmlStub).to.be.calledWith('foo', {
+          'deferSourceMapRewrite': undefined,
+          'domainName': 'foobar.com',
+          'isHtml': true,
+          'modifyObstructiveCode': false,
+          'modifyObstructiveThirdPartyCode': false,
+          'url': 'http://www.foobar.com:3501/primary-origin.html',
+          'useAstSourceRewriting': undefined,
+          'wantsInjection': 'full',
+          'wantsSecurityRemoved': true,
+        })
+      })
+    })
+
+    function prepareContext (props) {
+      const remoteStates = new RemoteStates(() => {})
+      const stream = Readable.from(['foo'])
+
+      // set the primary remote state
+      remoteStates.set('http://127.0.0.1:3501')
+
+      ctx = {
+        incomingRes: {
+          headers: {},
+          ...props.incomingRes,
+        },
+        res: {
+          wantsInjection: 'full',
+          wantsSecurityRemoved: true,
+          ...props.res,
+        },
+        req: {
+          proxiedUrl: 'http://127.0.0.1:3501/primary-origin.html',
+          ...props.req,
+        },
+        makeResStreamPlainText () {},
+        incomingResStream: stream,
+        config: {
+          modifyObstructiveCode: true,
+          experimentalModifyObstructiveThirdPartyCode: true,
+        },
+        remoteStates,
+        debug: (formatter, ...args) => {
+          debugVerbose(`%s %s %s ${formatter}`, ctx.req.method, ctx.req.proxiedUrl, ctx.stage, ...args)
+        },
+        onError (error) {
+          throw error
+        },
+        ..._.omit(props, 'incomingRes', 'res', 'req'),
+      }
+    }
+  })
+
+  describe('MaybeRemoveSecurity', function () {
+    const { MaybeRemoveSecurity } = ResponseMiddleware
+    let ctx
+    let securityStub
+
+    beforeEach(() => {
+      securityStub = sinon.spy(rewriter, 'security')
+    })
+
+    afterEach(() => {
+      securityStub.restore()
+    })
+
+    it('modifyObstructiveThirdPartyCode is true for secondary requests', function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/primary-origin.html',
+        },
+      })
+
+      return testMiddleware([MaybeRemoveSecurity], ctx)
+      .then(() => {
+        expect(securityStub).to.be.calledOnce
+        expect(securityStub).to.be.calledWith({
+          'deferSourceMapRewrite': undefined,
+          'isHtml': true,
+          'modifyObstructiveCode': true,
+          'modifyObstructiveThirdPartyCode': true,
+          'url': 'http://www.foobar.com:3501/primary-origin.html',
+          'useAstSourceRewriting': undefined,
+        })
+      })
+    })
+
+    it('modifyObstructiveThirdPartyCode is false for primary requests', function () {
+      prepareContext({})
+
+      return testMiddleware([MaybeRemoveSecurity], ctx)
+      .then(() => {
+        expect(securityStub).to.be.calledOnce
+        expect(securityStub).to.be.calledWith({
+          'deferSourceMapRewrite': undefined,
+          'isHtml': true,
+          'modifyObstructiveCode': true,
+          'modifyObstructiveThirdPartyCode': false,
+          'url': 'http://127.0.0.1:3501/primary-origin.html',
+          'useAstSourceRewriting': undefined,
+        })
+      })
+    })
+
+    it('modifyObstructiveThirdPartyCode is false when experimental flag is false', function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/primary-origin.html',
+        },
+        config: {
+          modifyObstructiveCode: false,
+          experimentalModifyObstructiveThirdPartyCode: false,
+        },
+      })
+
+      return testMiddleware([MaybeRemoveSecurity], ctx)
+      .then(() => {
+        expect(securityStub).to.be.calledOnce
+        expect(securityStub).to.be.calledWith({
+          'deferSourceMapRewrite': undefined,
+          'isHtml': true,
+          'modifyObstructiveCode': false,
+          'modifyObstructiveThirdPartyCode': false,
+          'url': 'http://www.foobar.com:3501/primary-origin.html',
+          'useAstSourceRewriting': undefined,
+        })
+      })
+    })
+
+    function prepareContext (props) {
+      const remoteStates = new RemoteStates(() => {})
+      const stream = Readable.from(['foo'])
+
+      // set the primary remote state
+      remoteStates.set('http://127.0.0.1:3501')
+
+      ctx = {
+        incomingRes: {
+          headers: {},
+          ...props.incomingRes,
+        },
+        res: {
+          wantsInjection: 'full',
+          wantsSecurityRemoved: true,
+          ...props.res,
+        },
+        req: {
+          proxiedUrl: 'http://127.0.0.1:3501/primary-origin.html',
+          ...props.req,
+        },
+        makeResStreamPlainText () {},
+        incomingResStream: stream,
+        config: {
+          modifyObstructiveCode: true,
+          experimentalModifyObstructiveThirdPartyCode: true,
+        },
+        remoteStates,
+        debug: (formatter, ...args) => {
+          debugVerbose(`%s %s %s ${formatter}`, ctx.req.method, ctx.req.proxiedUrl, ctx.stage, ...args)
+        },
+        onError (error) {
+          throw error
+        },
+        ..._.omit(props, 'incomingRes', 'res', 'req'),
       }
     }
   })

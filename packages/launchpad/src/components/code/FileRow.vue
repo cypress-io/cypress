@@ -1,15 +1,15 @@
 <template>
   <Collapsible
-    class="border rounded bg-light-50 border-gray-100 mb-4 w-full block
-  overflow-hidden hocus-default"
+    class="rounded bg-light-50 border-gray-100 mb-4 w-full block"
     max-height="500px"
     :initially-open="statusInfo.initiallyOpen"
     :data-cy="status"
+    :file-row="true"
   >
     <template #target="{open}">
       <ListRowHeader
-        :class="{ 'border-b border-b-gray-100 rounded-b-none': open }"
-        class="cursor-pointer font-medium"
+        :class="{ 'rounded-b-none mb-0.1em default-ring': open, 'overflow-hidden': !open }"
+        class="border hocus-default cursor-pointer font-medium"
         :description="description"
         :icon="statusInfo.icon"
       >
@@ -54,7 +54,6 @@
       :code="content"
       line-numbers
       copy-on-click
-      copy-button
     />
   </Collapsible>
 </template>
@@ -80,8 +79,7 @@ import Button from '@cy/components/Button.vue'
 // eslint-disable-next-line no-duplicate-imports
 import Badge from '@cy/components/Badge.vue'
 import { useI18n } from '@cy/i18n'
-import ShikiHighlight, { langsSupported } from '@cy/components/ShikiHighlight.vue'
-import type { CyLangType } from '@cy/components/ShikiHighlight.vue'
+import ShikiHighlight from '@cy/components/ShikiHighlight.vue'
 import ListRowHeader from '@cy/components/ListRowHeader.vue'
 import Collapsible from '@cy/components/Collapsible.vue'
 import AddedIcon from '~icons/cy/file-changes-added_x24.svg'
@@ -102,13 +100,7 @@ const props = defineProps<{
 const language = computed(() => {
   // The fileExtension from FileParts is prepended with a period;
   // we must strip the period to validate against our supported languages.
-  let extension = props.fileExtension.replace(/^\./, '')
-
-  if (extension && (langsSupported as readonly string[]).includes(extension)) {
-    return extension as CyLangType
-  }
-
-  return 'plaintext'
+  return props.fileExtension.replace(/^\./, '')
 })
 
 const statusInfo: ComputedRef<StatusInfo> = computed(() => {
@@ -127,10 +119,11 @@ const statusInfo: ComputedRef<StatusInfo> = computed(() => {
     },
     valid: {
       icon: AddedIcon,
-      initiallyOpen: true,
+      initiallyOpen: false,
     },
     error: {
       icon: ErrorIcon,
+      initiallyOpen: true,
     },
   }
 

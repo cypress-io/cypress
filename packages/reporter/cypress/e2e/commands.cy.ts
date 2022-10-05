@@ -199,12 +199,6 @@ describe('commands', { viewportHeight: 1000 }, () => {
   })
 
   it('includes the state class', () => {
-    addCommand(runner, {
-      name: 'log',
-      message: 'command-warn-state',
-      state: 'warn',
-    })
-
     cy.contains('#exists').closest('.command-wrapper')
     .should('have.class', 'command-state-passed')
 
@@ -213,9 +207,6 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
     cy.contains('#in-progress').closest('.command-wrapper')
     .should('have.class', 'command-state-pending')
-
-    cy.contains('command-warn-state').closest('.command-wrapper')
-    .should('have.class', 'command-state-warn')
   })
 
   it('displays the number for parent and child', () => {
@@ -459,7 +450,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
       .should('have.class', 'command-is-pinned')
       .find('.command-pin')
 
-      cy.wrap(runner.emit).should('be.calledWith', 'runner:pin:snapshot', 2)
+      cy.wrap(runner.emit).should('be.calledWith', 'runner:pin:snapshot', 'r3', 2)
       cy.percySnapshot()
     })
 
@@ -478,13 +469,13 @@ describe('commands', { viewportHeight: 1000 }, () => {
     it('prints to console', () => {
       cy.spy(runner, 'emit')
       cy.contains('#exists').click()
-      cy.wrap(runner.emit).should('be.calledWith', 'runner:console:log', 2)
+      cy.wrap(runner.emit).should('be.calledWith', 'runner:console:log', 'r3', 2)
     })
 
     it('shows the snapshot', () => {
       cy.spy(runner, 'emit')
       cy.contains('#exists').click()
-      cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', 2)
+      cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', 'r3', 2)
     })
 
     it('unpins after clicking again, does not re-print to the console', () => {
@@ -555,7 +546,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
         .percySnapshot()
       })
 
-      it('group is closed by default when last nested command failed', () => {
+      it('group is open by default when last nested command failed', () => {
         addCommand(runner, {
           name: 'log',
           message: 'chained log example',
@@ -667,6 +658,175 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
         cy.percySnapshot()
       })
+
+      describe('session group', () => {
+        it('closed when nested logs that pass', () => {
+          const nestedGroupId = addCommand(runner, {
+            name: 'session',
+            state: 'passed',
+            type: 'child',
+          })
+
+          addCommand(runner, {
+            name: 'get',
+            message: 'do something',
+            state: 'passed',
+            groupLevel: 1,
+            group: nestedGroupId,
+          })
+
+          const nestedSessionGroupId = addCommand(runner, {
+            name: 'session',
+            displayName: 'validate',
+            type: 'child',
+            groupLevel: 2,
+            group: nestedGroupId,
+          })
+
+          addCommand(runner, {
+            name: 'log',
+            message: 'inside of group',
+            state: 'passed',
+            group: nestedSessionGroupId,
+          })
+
+          cy.get('.command-name-session').eq(0)
+          .within(() => {
+            cy.get('.num-children').should('not.exist')
+
+            cy.get('.command-expander').eq(0)
+            .should('not.have.class', 'command-expander-is-open')
+            .click()
+
+            cy.get('.command-name-session')
+            .should('contain', 'validate')
+            .within(() => {
+              cy.get('.num-children').should('not.exist')
+
+              cy.log('nested group that are passing are closed by default')
+              cy.get('.command-expander')
+              .should('not.have.class', 'command-expander-is-open')
+              .click()
+
+              cy.get('.command-expander')
+              .should('have.class', 'command-expander-is-open')
+            })
+          })
+
+          cy.percySnapshot()
+        })
+
+        it('closed when nested logs has failures but last log is successful', () => {
+          const nestedGroupId = addCommand(runner, {
+            name: 'session',
+            state: 'passed',
+            type: 'child',
+          })
+
+          addCommand(runner, {
+            name: 'get',
+            message: 'do something',
+            state: 'passed',
+            groupLevel: 1,
+            group: nestedGroupId,
+          })
+
+          const nestedSessionGroupId = addCommand(runner, {
+            name: 'session',
+            displayName: 'validate',
+            type: 'child',
+            state: 'failed',
+            group: nestedGroupId,
+          })
+
+          addCommand(runner, {
+            name: 'log',
+            message: 'inside of group',
+            state: 'failed',
+            groupLevel: 2,
+            group: nestedSessionGroupId,
+          })
+
+          addCommand(runner, {
+            name: 'log',
+            message: 'inside of group',
+            state: 'passed',
+            group: nestedGroupId,
+          })
+
+          cy.get('.command-name-session').eq(0)
+          .within(() => {
+            cy.get('.num-children').should('not.exist')
+
+            cy.get('.command-expander').eq(0)
+            .should('not.have.class', 'command-expander-is-open')
+            .click()
+
+            cy.get('.command-name-session')
+            .should('contain', 'validate')
+            .within(() => {
+              cy.get('.num-children').should('not.exist')
+
+              cy.log('nested group that have failed are open by default')
+              cy.get('.command-expander')
+              .should('have.class', 'command-expander-is-open')
+            })
+          })
+
+          cy.percySnapshot()
+        })
+
+        it('open when last log has failed', () => {
+          const nestedGroupId = addCommand(runner, {
+            name: 'session',
+            state: 'passed',
+            type: 'child',
+          })
+
+          addCommand(runner, {
+            name: 'get',
+            message: 'do something',
+            state: 'passed',
+            groupLevel: 1,
+            group: nestedGroupId,
+          })
+
+          const nestedSessionGroupId = addCommand(runner, {
+            name: 'session',
+            displayName: 'validate',
+            type: 'child',
+            group: nestedGroupId,
+          })
+
+          addCommand(runner, {
+            name: 'log',
+            message: 'inside of group',
+            state: 'failed',
+            groupLevel: 2,
+            group: nestedSessionGroupId,
+          })
+
+          cy.get('.command-name-session').eq(0)
+          .within(() => {
+            cy.get('.num-children').should('not.exist')
+
+            cy.get('.command-expander').eq(0)
+            .should('have.class', 'command-expander-is-open')
+
+            cy.get('.command-name-session')
+            .should('contain', 'validate')
+            .within(() => {
+              cy.get('.num-children').should('not.exist')
+
+              cy.log('nested group that have failed are open by default')
+              cy.get('.command-expander')
+              .should('have.class', 'command-expander-is-open')
+            })
+          })
+
+          cy.percySnapshot()
+        })
+      })
     })
 
     context('pinning group', () => {
@@ -682,7 +842,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
         .should('have.class', 'command-is-pinned')
         .find('.command-pin')
 
-        cy.wrap(runner.emit).should('be.calledWith', 'runner:pin:snapshot', fakeIdForTest)
+        cy.wrap(runner.emit).should('be.calledWith', 'runner:pin:snapshot', 'r3', fakeIdForTest)
         cy.percySnapshot()
       })
 
@@ -702,13 +862,13 @@ describe('commands', { viewportHeight: 1000 }, () => {
         cy.spy(runner, 'emit')
         cy.get('.command-name-within').click('top')
 
-        cy.wrap(runner.emit).should('be.calledWith', 'runner:console:log', fakeIdForTest)
+        cy.wrap(runner.emit).should('be.calledWith', 'runner:console:log', 'r3', fakeIdForTest)
       })
 
       it('shows the snapshot', () => {
         cy.spy(runner, 'emit')
         cy.get('.command-name-within').click('top')
-        cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', fakeIdForTest)
+        cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', 'r3', fakeIdForTest)
       })
 
       it('unpins after clicking again, does not re-print to the console', () => {
@@ -743,7 +903,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
     it('shows snapshot after 50ms passes', () => {
       cy.wrap(runner.emit).should('not.be.calledWith', 'runner:show:snapshot')
       cy.tick(50)
-      cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', 1)
+      cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', 'r3', 1)
       cy.wrap(runner.emit).should('be.calledOnce')
     })
 
@@ -755,7 +915,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
       it('hides the snapshot after 50ms pass without another mouse over', () => {
         cy.tick(50)
-        cy.wrap(runner.emit).should('be.calledWith', 'runner:hide:snapshot', 1)
+        cy.wrap(runner.emit).should('be.calledWith', 'runner:hide:snapshot', 'r3', 1)
       })
 
       it('does not hide the snapshot if there is another mouseover before 50ms passes', () => {
@@ -797,8 +957,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
     })
   })
 
-  // FIXME: When studio support is re-introduced we can enable these tests.
-  context.skip('studio commands', () => {
+  context('studio commands', () => {
     beforeEach(() => {
       addCommand(runner, {
         id: 10,
@@ -830,10 +989,10 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
     it('only parent studio commands display remove button', () => {
       cy.contains('#studio-command-parent').closest('.command')
-      .find('.studio-command-remove').should('be.visible')
+      .find('.studio-command-remove').should('exist')
 
       cy.contains('#studio-command-child').closest('.command')
-      .find('.studio-command-remove').should('not.be.visible')
+      .find('.studio-command-remove').should('not.exist')
     })
 
     it('emits studio:remove:command with number when delete button is clicked', () => {

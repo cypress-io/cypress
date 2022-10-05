@@ -5,10 +5,10 @@
   >
     <div class="flex h-full gap-12px items-center justify-between">
       <div
-        v-if="pageName"
+        v-if="props.pageName"
         class="whitespace-nowrap"
       >
-        {{ pageName }}
+        {{ props.pageName }}
       </div>
       <div
         v-else
@@ -17,91 +17,72 @@
         <img
           class="h-32px mr-18px w-32px"
           src="../assets/logos/cypress-dark.png"
+          alt="cypress"
         >
-        <nav
-          role="navigation"
-          aria-label="Breadcrumbs"
-        >
+        <nav>
           <ol>
-            <li class="inline-block">
+            <li
+              v-if="props.gql.isGlobalMode"
+              class="inline-block"
+            >
               <!-- context for use of aria role and disabled here: https://www.scottohara.me/blog/2021/05/28/disabled-links.html -->
               <!-- the `href` given here is a fake one provided for the sake of assistive technology. no actual routing is happening. -->
               <!-- the `key` is used to ensure the role/href attrs are added and removed appropriately from the element. -->
               <a
-                :key="Boolean(hasLinkToProjects).toString()"
+                :key="Boolean(currentProject).toString()"
                 class="font-medium"
-                :class="hasLinkToProjects ? 'text-indigo-500 hocus-link-default' :
+                :class="currentProject ? 'text-indigo-500 hocus-link-default' :
                   'text-gray-700'"
-                :role="hasLinkToProjects ? undefined : 'link'"
-                :href="hasLinkToProjects ? 'global-mode' : undefined"
-                :ariaDisabled="!hasLinkToProjects"
+                :role="currentProject ? undefined : 'link'"
+                :href="currentProject ? 'select-project' : undefined"
+                :ariaDisabled="!currentProject"
                 @click.prevent="clearCurrentProject"
               >
                 {{ t('topNav.global.projects') }}
               </a>
             </li>
-            <li
-              v-if="props.gql?.currentProject"
-              class="mx-2px align-middle inline-block"
-              aria-hidden
-            >
-              <i-cy-chevron-right_x16
-
-                class="icon-dark-gray-200"
-              />
-            </li>
-            <li class="inline-block">
-              <!-- context for use of aria role and disabled here: https://www.scottohara.me/blog/2021/05/28/disabled-links.html -->
-              <!-- the `href` given here is a fake one provided for the sake of assistive technology. no actual routing is happening. -->
-              <!-- the `key` is used to ensure the role/href attrs are added and removed appropriately from the element. -->
-              <a
-                :key="Boolean(hasLinkToCurrentProject).toString()"
-                class="font-medium"
-                :role="hasLinkToCurrentProject ? undefined : 'link'"
-                :href="hasLinkToCurrentProject ? 'choose-testing-type' : undefined"
-                :class="hasLinkToCurrentProject ? 'text-indigo-500 hocus-link-default' :
-                  'text-gray-700'"
-                :ariaDisabled="!hasLinkToCurrentProject"
-                @click.prevent="clearTestingType"
+            <template v-if="currentProject?.title">
+              <li
+                v-if="props.gql.isGlobalMode"
+                class="mx-2px align-middle inline-block"
+                aria-hidden="true"
               >
-                {{ props.gql?.currentProject?.title }}
-              </a>
-              <template
-                v-if="props.gql?.currentProject?.branch"
-              >
-                <!-- Using a margin here causes different overflow problems.
-                        See PR #21325. Using a space for now. -->
-                {{ ' ' }}
-                <Tooltip
-                  placement="bottom"
-                  class="inline-block"
-                >
-                  <span
-                    class="font-normal max-w-200px text-gray-500 inline-block truncate align-top"
+                <i-cy-chevron-right_x16 class="icon-dark-gray-200" />
+              </li>
+              <li class="inline-block">
+                <span class="font-medium">
+                  {{ currentProject.title }}
+                </span>
+                <!-- currentProject might not have a branch -->
+                <template v-if="currentProject.branch">
+                  <!-- Using a margin here causes different overflow problems.
+                      See PR #21325. Using a space for now. -->
+                  {{ ' ' }}
+                  <Tooltip
+                    placement="bottom"
+                    class="inline-block"
                   >
-                    ({{ props.gql.currentProject.branch }})
-                  </span>
-                  <template #popper>
-                    {{ props.gql.currentProject.branch }}
-                  </template>
-                </Tooltip>
+                    <span class="font-normal max-w-200px text-gray-500 inline-block truncate align-top">
+                      ({{ currentProject.branch }})
+                    </span>
+                    <template #popper>
+                      {{ currentProject.branch }}
+                    </template>
+                  </Tooltip>
+                </template>
+              </li>
+              <template v-if="currentProject.currentTestingType">
+                <li
+                  class="mx-2px inline-block align-middle"
+                  aria-hidden="true"
+                >
+                  <i-cy-chevron-right_x16 class="icon-dark-gray-200" />
+                </li>
+                <li class="inline-block">
+                  {{ t(`testingType.${currentProject.currentTestingType}.name`) }}
+                </li>
               </template>
-            </li>
-            <li
-              v-if="props.gql?.currentProject?.currentTestingType"
-              class="mx-2px inline-block align-middle"
-              aria-hidden
-            >
-              <i-cy-chevron-right_x16
-                class="icon-dark-gray-200"
-              />
-            </li>
-            <li
-              v-if="props.gql?.currentProject?.currentTestingType"
-              class="inline-block"
-            >
-              {{ t(`testingType.${props.gql?.currentProject?.currentTestingType}.name`) }}
-            </li>
+            </template>
           </ol>
         </nav>
       </div>
@@ -176,6 +157,8 @@
         v-model="isLoginOpen"
         :gql="props.gql"
         utm-medium="Nav"
+        :show-connect-button-after-login="isApp && !cloudProjectId"
+        @connect-project="handleConnectProject"
       />
     </div>
   </div>
@@ -183,10 +166,10 @@
 
 <script setup lang="ts">
 import { gql, useMutation, useSubscription } from '@urql/vue'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import type { HeaderBar_HeaderBarContentFragment } from '../generated/graphql'
 import {
-  GlobalPageHeader_ClearCurrentProjectDocument, GlobalPageHeader_ClearCurrentTestingTypeDocument,
+  GlobalPageHeader_ClearCurrentProjectDocument,
   HeaderBarContent_AuthChangeDocument,
 } from '../generated/graphql'
 import TopNav from './topnav/TopNav.vue'
@@ -198,6 +181,7 @@ import ExternalLink from './ExternalLink.vue'
 import interval from 'human-interval'
 import { sortBy } from 'lodash'
 import Tooltip from '../components/Tooltip.vue'
+import type { AllowedState } from '@packages/types'
 
 gql`
 fragment HeaderBarContent_Auth on Query {
@@ -243,24 +227,6 @@ mutation GlobalPageHeader_clearCurrentProject {
 `
 
 gql`
-mutation GlobalPageHeader_ClearCurrentTestingType {
-  clearCurrentTestingType {
-    baseError {
-      id
-      ...BaseError
-    }
-    warnings {
-      id
-    }
-    currentProject {
-      id
-      currentTestingType
-    }
-  }
-}
-`
-
-gql`
 fragment HeaderBar_HeaderBarContent on Query {
   currentProject {
     id
@@ -269,9 +235,8 @@ fragment HeaderBar_HeaderBarContent on Query {
     savedState
     currentTestingType
     branch
-    isLoadingNodeEvents
   }
-  projectRootFromCI
+  isGlobalMode
   ...TopNav
   ...Auth
   ...HeaderBarContent_Auth
@@ -283,37 +248,25 @@ const userData = computed(() => {
 })
 
 const savedState = computed(() => {
-  return props.gql?.currentProject?.savedState
+  return props.gql?.currentProject?.savedState as AllowedState
 })
+
+const currentProject = computed(() => props.gql.currentProject)
+
 const cloudProjectId = computed(() => {
   return props.gql?.currentProject?.config?.find((item: { field: string }) => item.field === 'projectId')?.value
 })
 
-const hasLinkToProjects = computed(() => {
-  return props.gql?.currentProject && !props.gql?.projectRootFromCI
-})
-
-const hasLinkToCurrentProject = computed(() => {
-  return props.gql?.currentProject?.currentTestingType && !props.gql?.currentProject?.isLoadingNodeEvents
-})
-
 const isLoginOpen = ref(false)
 const clearCurrentProjectMutation = useMutation(GlobalPageHeader_ClearCurrentProjectDocument)
-const clearCurrentTestingTypeMutation = useMutation(GlobalPageHeader_ClearCurrentTestingTypeDocument)
 
 const openLogin = () => {
   isLoginOpen.value = true
 }
 
 const clearCurrentProject = () => {
-  if (hasLinkToProjects.value) {
+  if (currentProject.value) {
     clearCurrentProjectMutation.executeMutation({})
-  }
-}
-
-const clearTestingType = () => {
-  if (hasLinkToCurrentProject.value) {
-    clearCurrentTestingTypeMutation.executeMutation({})
   }
 }
 
@@ -323,6 +276,16 @@ const props = defineProps<{
   pageName?: string
   allowAutomaticPromptOpen?: boolean
 }>()
+
+const emit = defineEmits<{
+  (event: 'connect-project'): void
+}>()
+
+const isApp = window.__Cypress__
+
+const handleConnectProject = () => {
+  emit('connect-project')
+}
 
 const { t } = useI18n()
 const prompts = sortBy([
@@ -337,7 +300,20 @@ const prompts = sortBy([
   },
 ], 'interval')
 const isForceOpenAllowed = ref(true)
+const isOpenDelayElapsed = ref(false)
+
+onMounted(() => {
+  setTimeout(() => isOpenDelayElapsed.value = true, 2000)
+})
+
 const isShowablePromptInSavedState = computed(() => {
+  // We do not want to show a prompt if a banner is going to be shown, but some banners rely on cloud data
+  // getting loaded before deciding whether to display. Add a delay here of a few seconds to give banners
+  // a chance to display before deciding whether to show a prompt.
+  if (!isOpenDelayElapsed.value) {
+    return false
+  }
+
   if (savedState.value) {
     for (const prompt of prompts) {
       if (shouldShowPrompt(prompt)) {
@@ -356,8 +332,9 @@ function shouldShowPrompt (prompt: { slug: string, noProjectId: boolean, interva
   }
 
   const now = Date.now()
-  const timeSinceOpened = now - savedState.value?.firstOpened
+  const timeSinceOpened = now - (savedState.value?.firstOpened ?? now)
   const allPromptShownTimes: number[] = Object.values(savedState.value?.promptsShown ?? {})
+  const bannersLastShown = Object.values(savedState.value?.banners ?? {}).map((banner) => typeof banner === 'object' && banner?.lastShown).filter((val): val is number => !!val)
 
   // prompt has been shown
   if (savedState.value?.promptsShown?.[prompt.slug]) {
@@ -366,6 +343,11 @@ function shouldShowPrompt (prompt: { slug: string, noProjectId: boolean, interva
 
   // any other prompt has been shown in the last 24 hours
   if (allPromptShownTimes?.find((time) => (now - time) < interval('24 hours'))) {
+    return false
+  }
+
+  // If any tracked banners have been shown in the last 24 hours
+  if (bannersLastShown.some((bannerLastShown) => (now - bannerLastShown) < interval('24 hours'))) {
     return false
   }
 

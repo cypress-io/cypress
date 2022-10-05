@@ -1,3 +1,45 @@
+# [@cypress/webpack-dev-server-v2.3.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v2.2.0...@cypress/webpack-dev-server-v2.3.0) (2022-08-30)
+
+
+### Bug Fixes
+
+* **webpack-dev-server:** add custom project config to handler ([a07a2a1](https://github.com/cypress-io/cypress/commit/a07a2a118d7b62b90e790ef475c86959ae894b3b))
+
+
+### Features
+
+* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
+
+# [@cypress/webpack-dev-server-v2.2.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v2.1.0...@cypress/webpack-dev-server-v2.2.0) (2022-08-15)
+
+
+### Bug Fixes
+
+* remove webpack entrypoints from for ct webpack projects ([#23299](https://github.com/cypress-io/cypress/issues/23299)) ([c93b652](https://github.com/cypress-io/cypress/commit/c93b652ff7a68ee368234ee928fbd6835d708769))
+
+
+### Features
+
+* add template support, teardown & standalone ([#23117](https://github.com/cypress-io/cypress/issues/23117)) ([d201b37](https://github.com/cypress-io/cypress/commit/d201b37b3d6b1e37a15a8d21d853acca47bfc666))
+* enable Angular CT support ([#23089](https://github.com/cypress-io/cypress/issues/23089)) ([94e78eb](https://github.com/cypress-io/cypress/commit/94e78eba0430eae97529058c40611e5f24dbf140))
+
+# [@cypress/webpack-dev-server-v2.1.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v2.0.0...@cypress/webpack-dev-server-v2.1.0) (2022-08-11)
+
+
+### Bug Fixes
+
+* allow next.js apps to import global styles ([#22769](https://github.com/cypress-io/cypress/issues/22769)) ([2027f1d](https://github.com/cypress-io/cypress/commit/2027f1daee5855b4466dad0d551c388b001664f9))
+* Increase timeout for npm-webpack-dev-server tests ([#22489](https://github.com/cypress-io/cypress/issues/22489)) ([0fccc45](https://github.com/cypress-io/cypress/commit/0fccc45aaf1edabf1a3539df02fbef2982352307))
+* map framework name to dependency that contains webpack ([#22774](https://github.com/cypress-io/cypress/issues/22774)) ([7e0de0b](https://github.com/cypress-io/cypress/commit/7e0de0b0d085cc3e07b8f904ee9f0fa4cef6c1cf))
+* retry on EMFILE always, lint sync FS calls ([#22175](https://github.com/cypress-io/cypress/issues/22175)) ([d01932b](https://github.com/cypress-io/cypress/commit/d01932bf751a6edf758451d8d19a74fe07e799ea))
+* wrong version of webpack-dev-server displayed ([#22919](https://github.com/cypress-io/cypress/issues/22919)) ([b4ae71c](https://github.com/cypress-io/cypress/commit/b4ae71c1c1ee73dbee6785292eb0ddaef50a19dc))
+
+
+### Features
+
+* **angular:** angular mount ([#22858](https://github.com/cypress-io/cypress/issues/22858)) ([4131b1f](https://github.com/cypress-io/cypress/commit/4131b1fa8482ae08113bef337965baa1ac12f66c))
+* **webpack-dev-server:** add angular handler ([#22314](https://github.com/cypress-io/cypress/issues/22314)) ([dc5d9de](https://github.com/cypress-io/cypress/commit/dc5d9de290e23efb093ac8e36fc9294242a0d0f7))
+
 # [@cypress/webpack-dev-server-v2.0.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v1.8.4...@cypress/webpack-dev-server-v2.0.0) (2022-06-13)
 
 
@@ -5,14 +47,10 @@
 
 * add package.json metadata for webpack-dev-server ([#22292](https://github.com/cypress-io/cypress/issues/22292)) ([9cfec97](https://github.com/cypress-io/cypress/commit/9cfec9750f2ddc9fe691aabbe2ecc9bc02a3d915))
 * ct testing support for node 17+ ([#21430](https://github.com/cypress-io/cypress/issues/21430)) ([0f786ab](https://github.com/cypress-io/cypress/commit/0f786ab893d178c2f87eed6a1334a248c6bec7a6))
-* display cy.mount command log ([#21500](https://github.com/cypress-io/cypress/issues/21500)) ([140b4ba](https://github.com/cypress-io/cypress/commit/140b4ba2110243712a614a39b2408c30cce4d0b1))
 * Ensuring spec file presence prior to webpack-dev-server compilation ([#21550](https://github.com/cypress-io/cypress/issues/21550)) ([87eec2b](https://github.com/cypress-io/cypress/commit/87eec2b460b02a123667b40ee907878fa4be2bee))
-* Guard against slow requests in GraphQL Resolution (part 2) ([#21020](https://github.com/cypress-io/cypress/issues/21020)) ([b0c8db3](https://github.com/cypress-io/cypress/commit/b0c8db34348be31f32795f3f67c3408403d59ace))
 * issue with compilation failures in component testing ([#21599](https://github.com/cypress-io/cypress/issues/21599)) ([f2bce02](https://github.com/cypress-io/cypress/commit/f2bce02f5dcab7a73a2a1b8e102518d706a29c25))
 * next 12.1.6 support and add tests ([#21515](https://github.com/cypress-io/cypress/issues/21515)) ([ada7179](https://github.com/cypress-io/cypress/commit/ada7179acb4ff0ca0057714883153cc9b2006daa))
-* restart dev-server on config change ([#21212](https://github.com/cypress-io/cypress/issues/21212)) ([00a0f5a](https://github.com/cypress-io/cypress/commit/00a0f5a0e905fdfe5ef9f8ba71f915ed20ca4b72))
-* supportFile path and supportFile false for vite on windows ([#21156](https://github.com/cypress-io/cypress/issues/21156)) ([dd180c8](https://github.com/cypress-io/cypress/commit/dd180c89b27546b0c96cc3f4fb4e75d983c8003e))
-* UNIFY-1774 error if component config is not sourced for webpack/vite ([#21563](https://github.com/cypress-io/cypress/issues/21563)) ([566a7b1](https://github.com/cypress-io/cypress/commit/566a7b1feb0fc1a8f1ccf83a23d8ad7a94409a6b))
+* error if component config is not sourced for webpack/vite ([#21563](https://github.com/cypress-io/cypress/issues/21563)) ([566a7b1](https://github.com/cypress-io/cypress/commit/566a7b1feb0fc1a8f1ccf83a23d8ad7a94409a6b))
 * wire up scaffolded indexHtml to dev servers ([#20453](https://github.com/cypress-io/cypress/issues/20453)) ([3a8797e](https://github.com/cypress-io/cypress/commit/3a8797e54db9fd0ef93a14ddc71c138ba8251e53))
 
 
@@ -26,9 +64,7 @@
 * add new webpack-dev-server package based on object API & bundling ([#20861](https://github.com/cypress-io/cypress/issues/20861)) ([e1da852](https://github.com/cypress-io/cypress/commit/e1da8524733c0ebedc2aed5c97117adb25fa733b))
 * Add typings for new devServer config ([#18797](https://github.com/cypress-io/cypress/issues/18797)) ([e018a14](https://github.com/cypress-io/cypress/commit/e018a14c211bfcbdc4568a9a737f14f5c1686e35))
 * Deprecate run-ct / open-ct, and update all examples to use --ct instead ([#18422](https://github.com/cypress-io/cypress/issues/18422)) ([196e8f6](https://github.com/cypress-io/cypress/commit/196e8f62cc6d27974f235945cb5700624b3dae41))
-* index.html configurability and storybook support ([#18242](https://github.com/cypress-io/cypress/issues/18242)) ([745b3ac](https://github.com/cypress-io/cypress/commit/745b3ac4518302983522daedf817623334feae5b))
-* merging / delegating remote queries to cloud schema ([#17875](https://github.com/cypress-io/cypress/issues/17875)) ([94541d4](https://github.com/cypress-io/cypress/commit/94541d4f18591e8fa4b8702c39e92b0a7238aa5d))
-* swap the #__cy_root id selector to become data-cy-root for component mounting ([#20951](https://github.com/cypress-io/cypress/issues/20951)) ([0e7b555](https://github.com/cypress-io/cypress/commit/0e7b555f93fb403f431c5de4a07ae7ad6ac89ba2))
+* index.html configurability ([#18242](https://github.com/cypress-io/cypress/issues/18242)) ([745b3ac](https://github.com/cypress-io/cypress/commit/745b3ac4518302983522daedf817623334feae5b))
 
 
 ### BREAKING CHANGES

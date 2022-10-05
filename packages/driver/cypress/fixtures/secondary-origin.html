@@ -7,15 +7,15 @@
   <p data-cy="cypress-check"></p>
   <p data-cy="window-before-load"></p>
   <input data-cy="text-input" type="text"/>
-  <form>
+  <form action="/fixtures/generic.html" method="get" target="_top">
     <button type="submit">Submit</button>
   </form>
   <button data-cy="alert">Alert</button>
   <button data-cy="confirm">Confirm</button>
   <button data-cy="reload">reload</button>
   <a data-cy="hashChange" href='#hashChange'>hashChange</a>
-  <a data-cy="cross-origin-page"
-        href="/fixtures/primary-origin.html">/fixtures/primary-origin.html</a>
+  <a data-cy="cross-origin-page" href="/fixtures/primary-origin.html">/fixtures/primary-origin.html</a>
+  <a data-cy="cross-origin-tertiary-link" href="http://www.idp.com:3500/fixtures/generic.html">http://www.idp.com:3500/fixtures/generic.html</a>
 
   <script>
     if (window.Cypress) {

@@ -18,19 +18,20 @@ exports['e2e screenshot viewport capture / passes'] = `
 
 
   ✓ takes consistent viewport captures
+  ✓ properly blacks out absolute elements within a relative container
 
-  1 passing
+  2 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  26                                                                               │
+  │ Screenshots:  27                                                                               │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     screenshot_viewport_capture.cy.js                                                │
@@ -91,6 +92,8 @@ exports['e2e screenshot viewport capture / passes'] = `
      are (23).png                                                                                   
   -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/viewport-comp     (1000x660)
      are (24).png                                                                                   
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshot_viewport_capture.cy.js/properly blac      (400x400)
+     ks out absolute elements within a relative container.png                                       
 
 
   (Video)
@@ -107,9 +110,9 @@ exports['e2e screenshot viewport capture / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  screenshot_viewport_capture.cy.js        XX:XX        1        1        -        -        - │
+  │ ✔  screenshot_viewport_capture.cy.js        XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
 
 `

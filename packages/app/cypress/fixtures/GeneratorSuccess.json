@@ -1,0 +1,22 @@
+[
+  {
+    "id": "6765523b-9147-44a9-98a2-7892bc4d876d",
+    "baseName": "VSettingsButtonList.spec.tsx",
+    "relative": "tests/VSettingsButtonList.spec.tsx",
+    "absolute": "/etc/ppp/tests/VSettingsButtonList.spec.tsx",
+    "name": "VSettingsButtonList.spec",
+    "specFileExtension": ".spec.tsx",
+    "fileExtension": ".tsx",
+    "specType": "component",
+    "fileName": "VSettingsButtonList",
+    "__typename": "FileParts",
+    "gitInfo": {
+      "__typename": "GitInfo",
+      "statusType": "unmodified",
+      "id": "1f841461-1227-4993-b1c3-9527537aa7c8",
+      "author": "Makenna_Howell",
+      "lastModifiedHumanReadable": "an hour ago",
+      "lastModifiedTimestamp": "Fri, 10 Jun 2022 07:27:34 GMT"
+    }
+  }
+]

@@ -48,7 +48,7 @@
         data-cy="new-spec-button"
         :prefix-icon="IconAdd"
         prefix-icon-class="justify-center text-lg text-center icon-light-transparent icon-dark-white"
-        class="min-w-127px"
+        class="min-w-134px"
         size="lg"
         @click="emit('showCreateSpecModal')"
       >

@@ -1,6 +1,8 @@
 import _ from 'lodash'
+import type { IStability } from '../../../src/cy/stability'
 import $Command from '../../../src/cypress/command'
 import { CommandQueue } from '../../../src/cypress/command_queue'
+import type { StateFunc } from '../../../src/cypress/state'
 
 const createCommand = (props = {}) => {
   return $Command.create(_.extend({
@@ -22,15 +24,17 @@ const log = (props = {}) => {
 
 describe('src/cypress/command_queue', () => {
   let queue
-  const state = () => {}
+  const state = (() => {}) as StateFunc
   const timeout = () => {}
-  const whenStable = () => {}
-  const cleanup = () => {}
+  const whenStable = {} as IStability
+  const cleanup = () => 0
   const fail = () => {}
-  const isCy = () => {}
+  const isCy = () => true
+  const clearTimeout = () => {}
+  const setSubjectForChainer = () => {}
 
   beforeEach(() => {
-    queue = new CommandQueue(state, timeout, whenStable, cleanup, fail, isCy)
+    queue = new CommandQueue(state, timeout, whenStable, cleanup, fail, isCy, clearTimeout, setSubjectForChainer)
 
     queue.add(createCommand({
       name: 'get',

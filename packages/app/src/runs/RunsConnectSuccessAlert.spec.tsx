@@ -13,4 +13,37 @@ describe('<RunConnectSuccessAlert />', { viewportHeight: 400 }, () => {
       },
     })
   })
+
+  // https://github.com/cypress-io/cypress/issues/21856
+  describe('resposive design', () => {
+    it('small screen (width < md(768px))', () => {
+      cy.mountFragment(RunsConnectSuccessAlertFragmentDoc, {
+        render: (gqlVal) => {
+          return (
+            <div class="bg-gray-100 h-screen p-3">
+              <RunsConnectSuccessAlert gql={gqlVal} />
+            </div>
+          )
+        },
+      })
+
+      cy.viewport(400, 800)
+      cy.percySnapshot()
+    })
+
+    it('wide screen (width >= md(768px))', () => {
+      cy.mountFragment(RunsConnectSuccessAlertFragmentDoc, {
+        render: (gqlVal) => {
+          return (
+            <div class="bg-gray-100 h-screen p-3">
+              <RunsConnectSuccessAlert gql={gqlVal} />
+            </div>
+          )
+        },
+      })
+
+      cy.viewport(1000, 800)
+      cy.percySnapshot()
+    })
+  })
 })

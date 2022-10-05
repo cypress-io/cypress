@@ -5,21 +5,44 @@ const invalidTargets = new Set(['_parent', '_top'])
 export type GuardedEvent = Event & {target: HTMLFormElement | HTMLAnchorElement}
 
 /**
- * Guard against target beting set to something other than blank or self, while trying
+ * Guard against target being set to something other than blank or self, while trying
  * to preserve the appearance of having the correct target value.
  */
 export function handleInvalidEventTarget (e: GuardedEvent) {
-  let targetValue = e.target.target
-  let targetSet = e.target.hasAttribute('target')
+  handleInvalidTarget(e.target)
+}
 
-  if (invalidTargets.has(e.target.target)) {
-    e.target.target = ''
+export type GuardedAnchorEvent = Event & {target: HTMLAnchorElement}
+
+/**
+ * We need to listen to all click events on the window, but only handle anchor elements,
+ * as those might be the ones where we have an incorrect "target" attr, or could have one
+ * dynamically set in subsequent event bubbling.
+ *
+ * @param e
+ */
+export function handleInvalidAnchorTarget (e: GuardedAnchorEvent) {
+  if (e.target.tagName === 'A') {
+    handleInvalidTarget(e.target)
+  }
+}
+
+/**
+ * Guard against target being set to something other than blank or self, while trying
+ * to preserve the appearance of having the correct target value.
+ */
+export function handleInvalidTarget (el: HTMLFormElement | HTMLAnchorElement) {
+  let targetValue = el.target
+  let targetSet = el.hasAttribute('target')
+
+  if (invalidTargets.has(el.target)) {
+    el.target = ''
   }
 
-  const { getAttribute, setAttribute, removeAttribute } = e.target
-  const targetDescriptor = Object.getOwnPropertyDescriptor(e.target, 'target')
+  const { getAttribute, setAttribute, removeAttribute } = el
+  const targetDescriptor = Object.getOwnPropertyDescriptor(el, 'target')
 
-  e.target.getAttribute = function (k) {
+  el.getAttribute = function (k) {
     if (k === 'target') {
       // https://github.com/cypress-io/cypress/issues/17512
       // When the target attribute doesn't exist, it should return null.
@@ -34,7 +57,7 @@ export function handleInvalidEventTarget (e: GuardedEvent) {
     return getAttribute.call(this, k)
   }
 
-  e.target.setAttribute = function (k, v) {
+  el.setAttribute = function (k, v) {
     if (k === 'target') {
       targetSet = true
       targetValue = v
@@ -45,7 +68,7 @@ export function handleInvalidEventTarget (e: GuardedEvent) {
     return setAttribute.call(this, k, v)
   }
 
-  e.target.removeAttribute = function (k) {
+  el.removeAttribute = function (k) {
     if (k === 'target') {
       targetSet = false
       targetValue = ''
@@ -56,7 +79,7 @@ export function handleInvalidEventTarget (e: GuardedEvent) {
   }
 
   if (!targetDescriptor) {
-    Object.defineProperty(e.target, 'target', {
+    Object.defineProperty(el, 'target', {
       configurable: false,
       set (value) {
         return targetValue = value
@@ -65,20 +88,5 @@ export function handleInvalidEventTarget (e: GuardedEvent) {
         return targetValue
       },
     })
-  }
-}
-
-export type GuardedAnchorEvent = Event & {target: HTMLAnchorElement}
-
-/**
- * We need to listen to all click events on the window, but only handle anchor elements,
- * as those might be the ones where we have an incorrect "target" attr, or could have one
- * dynamically set in subsequent event bubbling.
- *
- * @param e
- */
-export function handleInvalidAnchorTarget (e: GuardedAnchorEvent) {
-  if (e.target.tagName === 'A') {
-    handleInvalidEventTarget(e)
   }
 }

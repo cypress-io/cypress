@@ -52,6 +52,7 @@ describe('VersionsDataSource', () => {
           'x-initial-launch': String(true),
           'x-machine-id': 'abcd123',
           'x-testing-type': 'e2e',
+          'x-logged-in': 'false',
         },
       }).resolves({
         json: sinon.stub().resolves({
@@ -104,6 +105,7 @@ describe('VersionsDataSource', () => {
           'x-arch': 'x64',
           'x-initial-launch': String(false),
           'x-testing-type': 'component',
+          'x-logged-in': 'false',
         },
       }).resolves({
         json: sinon.stub().resolves({
@@ -136,6 +138,7 @@ describe('VersionsDataSource', () => {
           'x-initial-launch': String(true),
           'x-machine-id': 'abcd123',
           'x-testing-type': 'e2e',
+          'x-logged-in': 'false',
         },
       })
       .rejects()
@@ -162,6 +165,7 @@ describe('VersionsDataSource', () => {
           'x-initial-launch': String(true),
           'x-machine-id': 'abcd123',
           'x-testing-type': 'e2e',
+          'x-logged-in': 'false',
         },
       })
       .callsFake(async () => new Response('Error'))

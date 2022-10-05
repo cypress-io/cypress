@@ -28,6 +28,7 @@ export interface ASTComponentDefinitionConfig {
   testingType: 'component'
   bundler: 'vite' | 'webpack'
   framework?: string
+  specPattern?: string
 }
 
 /**
@@ -41,15 +42,18 @@ export interface ASTComponentDefinitionConfig {
  * }
  */
 export function addComponentDefinition (config: ASTComponentDefinitionConfig): t.ObjectProperty {
-  return extractProperty(`
-    const toMerge = {
-      component: {
-        devServer: {
-          framework: ${config.framework ? `'${config.framework}'` : 'undefined'},
-          bundler: '${config.bundler}',
-        },
+  const componentConfig = JSON.stringify({
+    component: {
+      devServer: {
+        framework: config.framework,
+        bundler: config.bundler,
       },
-    }
+      specPattern: config.specPattern,
+    },
+  }, null, 2)
+
+  return extractProperty(`
+    const toMerge = ${componentConfig}
   `)
 }
 

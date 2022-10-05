@@ -8,8 +8,13 @@ import debugFn from 'debug'
 import type { StateFunc } from '../cypress/state'
 import type { IFocused } from './focused'
 import type { ICypress } from '../cypress'
+import type { ElViewportPostion } from '../dom/coordinates'
 
 const debug = debugFn('cypress:driver:mouse')
+
+export type ForceEl = false | HTMLElement
+
+export type MouseCoords = { x?: number, y?: number}
 
 /**
  * @typedef Coords
@@ -18,7 +23,7 @@ const debug = debugFn('cypress:driver:mouse')
  * @property {Document} doc
  */
 
-const getLastHoveredEl = (state): HTMLElement | null => {
+const getLastHoveredEl = (state: StateFunc): HTMLElement | null => {
   let lastHoveredEl = state('mouseLastHoveredEl')
   const lastHoveredElAttached = lastHoveredEl && $elements.isAttachedEl(lastHoveredEl)
 
@@ -40,7 +45,7 @@ const defaultPointerDownUpOptions = {
   pressure: 0.5,
 }
 
-const getMouseCoords = (state) => {
+const getMouseCoords = (state: StateFunc) => {
   return state('mouseCoords')
 }
 
@@ -52,6 +57,7 @@ type DefaultMouseOptions = ModifiersEventOptions & CoordsEventOptions & {
 
 export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, Cypress: ICypress) => {
   const isFirefox = Cypress.browser.family === 'firefox'
+  const isWebKit = Cypress.isBrowser('webkit')
 
   const sendPointerEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {
     const constructor = el.ownerDocument.defaultView.PointerEvent
@@ -67,14 +73,14 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
   }
 
   const sendPointerup = (el, evtOptions) => {
-    if (isFirefox && el.disabled) {
+    if ((isFirefox || isWebKit) && el.disabled) {
       return {}
     }
 
     return sendPointerEvent(el, evtOptions, 'pointerup', true, true)
   }
   const sendPointerdown = (el, evtOptions): {} | SentEvent => {
-    if (isFirefox && el.disabled) {
+    if ((isFirefox || isWebKit) && el.disabled) {
       return {}
     }
 
@@ -97,14 +103,14 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
   }
 
   const sendMouseup = (el, evtOptions) => {
-    if (isFirefox && el.disabled) {
+    if ((isFirefox || isWebKit) && el.disabled) {
       return {}
     }
 
     return sendMouseEvent(el, evtOptions, 'mouseup', true, true)
   }
   const sendMousedown = (el, evtOptions): {} | SentEvent => {
-    if (isFirefox && el.disabled) {
+    if ((isFirefox || isWebKit) && el.disabled) {
       return {}
     }
 
@@ -127,21 +133,21 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
   }
   const sendClick = (el, evtOptions, opts: { force?: boolean } = {}) => {
     // send the click event if firefox and force (needed for force check checkbox)
-    if (!opts.force && isFirefox && el.disabled) {
+    if (!opts.force && (isFirefox || isWebKit) && el.disabled) {
       return {}
     }
 
     return sendMouseEvent(el, evtOptions, 'click', true, true)
   }
   const sendDblclick = (el, evtOptions) => {
-    if (isFirefox && el.disabled) {
+    if ((isFirefox || isWebKit) && el.disabled) {
       return {}
     }
 
     return sendMouseEvent(el, evtOptions, 'dblclick', true, true)
   }
   const sendContextmenu = (el, evtOptions) => {
-    if (isFirefox && el.disabled) {
+    if ((isFirefox || isWebKit) && el.disabled) {
       return {}
     }
 
@@ -205,11 +211,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
       }, modifiersEventOptions, coordsEventOptions)
     },
 
-    /**
-     * @param {Coords} coords
-     * @param {HTMLElement} forceEl
-     */
-    move (fromElViewport, forceEl?) {
+    move (fromElViewport: ElViewportPostion, forceEl?: ForceEl) {
       debug('mouse.move', fromElViewport)
 
       const lastHoveredEl = getLastHoveredEl(state)
@@ -241,7 +243,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
      * - send move events to elToHover (bubbles)
      * - elLastHovered = elToHover
      */
-    _moveEvents (el, coords) {
+    _moveEvents (el: HTMLElement, coords: ElViewportPostion) {
       // events are not fired on disabled elements, so we don't have to take that into account
       const win = $dom.getWindowByElement(el)
       const { x, y } = coords
@@ -386,7 +388,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
      * @param {Coords} coords
      * @returns {HTMLElement}
      */
-    getElAtCoords ({ x, y, doc }) {
+    getElAtCoords ({ x, y, doc }: ElViewportPostion) {
       const el = $dom.elementFromPoint(doc, x, y)
 
       return el

@@ -8,7 +8,7 @@ import Toast, { POSITION } from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
 import { makeUrqlClient } from '@packages/frontend-shared/src/graphql/urqlClient'
 import { createI18n } from '@cy/i18n'
-import { initHighlighter } from '@cy/components/ShikiHighlight.vue'
+import { initHighlighter } from '@packages/frontend-shared/src/components/highlight'
 
 const app = createApp(App)
 

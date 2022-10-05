@@ -22,13 +22,13 @@ const semanticReleaseNoUpdate = (version) => {
 [semantic-release] › ✔  Loaded plugin "prepare" from "@semantic-release/npm"
 [semantic-release] › ✔  Loaded plugin "publish" from "@semantic-release/npm"
 [semantic-release] › ✔  Loaded plugin "addChannel" from "@semantic-release/npm"
-[semantic-release] › ⚠  Run automated release from branch master on repository https://github.com/cypress-io/cypress.git in dry-run mode
+[semantic-release] › ⚠  Run automated release from branch develop on repository https://github.com/cypress-io/cypress.git in dry-run mode
 [semantic-release] › ✔  Allowed to push to the Git repository
 [semantic-release] › ℹ  Start step "verifyConditions" of plugin "@semantic-release/npm"
 [semantic-release] [@semantic-release/npm] › ℹ  Verify authentication for registry https://registry.npmjs.org/
 [semantic-release] [@semantic-release/npm] › ℹ  Reading npm config from /cypress/npm/package/.npmrc
 [semantic-release] › ✔  Completed step "verifyConditions" of plugin "@semantic-release/npm"
-[semantic-release] › ℹ  Found git tag @cypress/package-v${version} associated with version ${version} on branch master
+[semantic-release] › ℹ  Found git tag @cypress/package-v${version} associated with version ${version} on branch develop
 [semantic-release] › ℹ  Found 1 commits since last release
 [semantic-release] › ℹ  Start step "analyzeCommits" of plugin "[Function: semantic-release-monorepo]"
 [semantic-release] [[Function: semantic-release-monorepo]] › ℹ  Found 0 commits for package @cypress/package since last release
@@ -63,13 +63,13 @@ const semanticReleaseUpdate = (oldVersion, newVersion) => {
 [semantic-release] › ✔  Loaded plugin "prepare" from "@semantic-release/npm"
 [semantic-release] › ✔  Loaded plugin "publish" from "@semantic-release/npm"
 [semantic-release] › ✔  Loaded plugin "addChannel" from "@semantic-release/npm"
-[semantic-release] › ⚠  Run automated release from branch master on repository https://github.com/cypress-io/cypress.git in dry-run mode
+[semantic-release] › ⚠  Run automated release from branch develop on repository https://github.com/cypress-io/cypress.git in dry-run mode
 [semantic-release] › ✔  Allowed to push to the Git repository
 [semantic-release] › ℹ  Start step "verifyConditions" of plugin "@semantic-release/npm"
 [semantic-release] [@semantic-release/npm] › ℹ  Verify authentication for registry https://registry.npmjs.org/
 [semantic-release] [@semantic-release/npm] › ℹ  Reading npm config from /cypress/npm/package/.npmrc
 [semantic-release] › ✔  Completed step "verifyConditions" of plugin "@semantic-release/npm"
-[semantic-release] › ℹ  Found git tag @cypress/package-v${oldVersion} associated with version ${oldVersion} on branch master
+[semantic-release] › ℹ  Found git tag @cypress/package-v${oldVersion} associated with version ${oldVersion} on branch develop
 [semantic-release] › ℹ  Found 2 commits since last release
 [semantic-release] › ℹ  Start step "analyzeCommits" of plugin "[Function: semantic-release-monorepo]"
 [semantic-release] [[Function: semantic-release-monorepo]] › ℹ  Found 1 commits for package @cypress/package since last release
@@ -147,13 +147,13 @@ const semanticReleaseNew = () => {
 [semantic-release] › ✔  Loaded plugin "prepare" from "@semantic-release/npm"
 [semantic-release] › ✔  Loaded plugin "publish" from "@semantic-release/npm"
 [semantic-release] › ✔  Loaded plugin "addChannel" from "@semantic-release/npm"
-[semantic-release] › ⚠  Run automated release from branch master on repository https://github.com/cypress-io/cypress.git in dry-run mode
+[semantic-release] › ⚠  Run automated release from branch develop on repository https://github.com/cypress-io/cypress.git in dry-run mode
 [semantic-release] › ✔  Allowed to push to the Git repository
 [semantic-release] › ℹ  Start step "verifyConditions" of plugin "@semantic-release/npm"
 [semantic-release] [@semantic-release/npm] › ℹ  Verify authentication for registry https://registry.npmjs.org/
 [semantic-release] [@semantic-release/npm] › ℹ  Reading npm config from /cypress/npm/package/.npmrc
 [semantic-release] › ✔  Completed step "verifyConditions" of plugin "@semantic-release/npm"
-[semantic-release] › ℹ  No git tag version found on branch master
+[semantic-release] › ℹ  No git tag version found on branch develop
 [semantic-release] › ℹ  No previous release found, retrieving all commits
 [semantic-release] › ℹ  Found 100 commits since last release
 [semantic-release] › ℹ  Start step "analyzeCommits" of plugin "[Function: semantic-release-monorepo]"

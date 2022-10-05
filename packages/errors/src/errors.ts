@@ -9,6 +9,7 @@ import type { BreakingErrResult } from '@packages/config'
 import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUtils'
 import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
+import type { DependencyToInstall } from '@packages/scaffold-config'
 import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
 
 const ansi_up = new AU()
@@ -85,7 +86,7 @@ export const AllCypressErrors = {
   },
   CHROME_WEB_SECURITY_NOT_SUPPORTED: (browser: string) => {
     return errTemplate`\
-        Your project has set the configuration option: ${fmt.highlight(`chromeWebSecurity`)} to ${fmt.highlightTertiary(`false`)}
+        Your project has set the configuration option: \`chromeWebSecurity\` to \`false\`.
 
         This option will not have an effect in ${fmt.off(_.capitalize(browser))}. Tests that rely on web security being disabled will not run as expected.`
   },
@@ -1084,6 +1085,18 @@ export const AllCypressErrors = {
 
         You can safely remove the ${fmt.highlight(`experimentalStudio`)} configuration option from your config.`
   },
+  EXPERIMENTAL_SINGLE_TAB_RUN_MODE: () => {
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalSingleTabRunMode`)} experiment is currently only supported for Component Testing.
+
+        If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/single-tab-run-mode`
+  },
+  EXPERIMENTAL_STUDIO_E2E_ONLY: () => {
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalStudio`)} experiment is currently only supported for End to End Testing.
+
+        If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/studio-beta`
+  },
   FIREFOX_GC_INTERVAL_REMOVED: () => {
     return errTemplate`\
         The ${fmt.highlight(`firefoxGcInterval`)} configuration option was removed in ${fmt.cypressVersion(`8.0.0`)}. It was introduced to work around a bug in Firefox 79 and below.
@@ -1559,6 +1572,24 @@ export const AllCypressErrors = {
       Please run ‘cypress open’ and choose your testing type to automatically update your configuration file.
 
       https://on.cypress.io/configuration
+    `
+  },
+
+  COMPONENT_TESTING_MISMATCHED_DEPENDENCIES: (dependencies: DependencyToInstall[]) => {
+    const deps = dependencies.map<string>((dep) => {
+      if (dep.detectedVersion) {
+        return `\`${dep.dependency.installer}\`. Expected ${dep.dependency.minVersion}, found ${dep.detectedVersion}.`
+      }
+
+      return `\`${dep.dependency.installer}\`. Expected ${dep.dependency.minVersion} but dependency was not found.`
+    })
+
+    return errTemplate`
+      We detected that you have versions of dependencies that are not officially supported:
+
+      ${fmt.listItems(deps, { prefix: ' - ' })}
+
+      If you're experiencing problems, downgrade dependencies and restart Cypress.
     `
   },
 } as const

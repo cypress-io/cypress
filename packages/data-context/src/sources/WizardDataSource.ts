@@ -1,27 +1,27 @@
 import {
   WIZARD_DEPENDENCY_TYPESCRIPT,
   DependencyToInstall,
-  inPkgJson,
+  isDependencyInstalled,
 } from '@packages/scaffold-config'
 import type { DataContext } from '..'
 
 export class WizardDataSource {
   constructor (private ctx: DataContext) {}
 
-  packagesToInstall (): DependencyToInstall[] {
+  async packagesToInstall (): Promise<DependencyToInstall[]> {
     if (!this.ctx.coreData.wizard.chosenFramework || !this.ctx.coreData.wizard.chosenBundler || !this.ctx.currentProject) {
       return []
     }
 
     const packages: DependencyToInstall[] = [
-      ...this.ctx.coreData.wizard.chosenFramework.dependencies(
+      ...(await this.ctx.coreData.wizard.chosenFramework.dependencies(
         this.ctx.coreData.wizard.chosenBundler.type, this.ctx.currentProject,
-      ),
+      )),
     ]
 
     if (this.ctx.lifecycleManager.metaState.isUsingTypeScript) {
       packages.push({
-        ...inPkgJson(WIZARD_DEPENDENCY_TYPESCRIPT, this.ctx.currentProject),
+        ...await (isDependencyInstalled(WIZARD_DEPENDENCY_TYPESCRIPT, this.ctx.currentProject)),
         dependency: WIZARD_DEPENDENCY_TYPESCRIPT,
       })
     }
@@ -29,14 +29,14 @@ export class WizardDataSource {
     return packages
   }
 
-  installDependenciesCommand () {
+  async installDependenciesCommand () {
     const commands = {
       'npm': 'npm install -D',
       'pnpm': 'pnpm install -D',
       'yarn': 'yarn add -D',
     } as const
 
-    const deps = this.ctx.wizard.packagesToInstall()
+    const deps = (await this.ctx.wizard.packagesToInstall())
     .filter((pack) => !pack.satisfied)
     .map((pack) => pack.dependency.installer)
     .join(' ')

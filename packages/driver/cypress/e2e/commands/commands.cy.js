@@ -58,7 +58,8 @@ describe('src/cy/commands/commands', () => {
       cy
       .get('input:first')
       .parent()
-      .command('login', 'brian@foo.com').then(($input) => {
+      .command('login', 'brian@foo.com')
+      .then(($input) => {
         expect($input.get(0)).to.eq(input.get(0))
       })
     })
@@ -107,13 +108,13 @@ describe('src/cy/commands/commands', () => {
 
     it('throws when attempting to add a command with the same name as an internal function', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.eq('`Cypress.Commands.add()` cannot create a new command named `addChainer` because that name is reserved internally by Cypress.')
+        expect(err.message).to.eq('`Cypress.Commands.add()` cannot create a new command named `addCommand` because that name is reserved internally by Cypress.')
         expect(err.docsUrl).to.eq('https://on.cypress.io/custom-commands')
 
         done()
       })
 
-      Cypress.Commands.add('addChainer', () => {
+      Cypress.Commands.add('addCommand', () => {
         cy
         .get('[contenteditable]')
         .first()

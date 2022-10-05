@@ -1546,8 +1546,8 @@ describe('Migration', { viewportWidth: 1200, retries: { openMode: 0, runMode: 2 
 })
 
 describe('Migrate custom config files', () => {
-  it('completes journey for migration-custom-config-file-root-level', () => {
-    startMigrationFor('migration-custom-config-file-root-level', ['--config-file', 'customConfig.json'])
+  it('completes journey for migration-custom-config-file-root-level spaces', () => {
+    startMigrationFor('migration-custom-config-file-root-level spaces', ['--config-file', 'customConfig.json'])
 
     // defaults, rename all the things
     // can rename integration->e2e
