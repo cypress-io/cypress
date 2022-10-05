@@ -36,17 +36,17 @@ export const isAllowedFeature = (
   loginConnectStore: LoginConnectStore,
 ) => {
   const {
-    firstOpened,
+    cypressFirstOpened,
     promptsShown,
     latestBannerShownTime,
     bannersState,
     userStatus,
-    hasNonExampleSpec,
+    project,
     userStatusIsNot,
   } = loginConnectStore
 
   const events = {
-    cypressFirstOpened: firstOpened,
+    cypressFirstOpened,
     navCiPromptAutoOpened: promptsShown.ci1,
     loginModalRecordPromptShown: promptsShown.loginModalRecord,
     latestSmartBannerShown: latestBannerShownTime,
@@ -76,7 +76,7 @@ export const isAllowedFeature = (
       ],
       needsRecordedRun: [
         minTimeSinceEvent(events.loginModalRecordPromptShown, '1 day'),
-        hasNonExampleSpec,
+        project.hasNonExampleSpec,
       ],
       needsOrgConnect: [],
       needsProjectConnect: [],
