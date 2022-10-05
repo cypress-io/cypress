@@ -7,7 +7,7 @@ context('cy.origin local storage', () => {
   })
 
   it('.clearLocalStorage()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.window().then((win) => {
         win.localStorage.setItem('foo', 'bar')
         expect(win.localStorage.getItem('foo')).to.equal('bar')
@@ -32,7 +32,7 @@ context('cy.origin local storage', () => {
     })
 
     it('.clearLocalStorage()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.window().then((win) => {
           win.localStorage.setItem('foo', 'bar')
           expect(win.localStorage.getItem('foo')).to.equal('bar')

@@ -1,3 +1,10 @@
+# [@cypress/webpack-preprocessor-v5.14.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.13.1...@cypress/webpack-preprocessor-v5.14.0) (2022-10-04)
+
+
+### Features
+
+* same origin spec bridges ([#23885](https://github.com/cypress-io/cypress/issues/23885)) ([695dd27](https://github.com/cypress-io/cypress/commit/695dd275bcca75543fccefb92afe6bc7700f15ef))
+
 # [@cypress/webpack-preprocessor-v5.13.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.13.0...@cypress/webpack-preprocessor-v5.13.1) (2022-10-04)
 
 

@@ -89,4 +89,30 @@ describe('resolveConfig', function () {
       })
     })
   })
+
+  describe('file watching', () => {
+    let viteDevServerConfig: ViteDevServerConfig
+
+    beforeEach(async () => {
+      const projectRoot = await scaffoldSystemTestProject('vite-inspect')
+
+      viteDevServerConfig = getViteDevServerConfig(projectRoot)
+    })
+
+    it('should be disabled in run mode', async () => {
+      viteDevServerConfig.cypressConfig.isTextTerminal = true
+      const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite)
+
+      expect(viteConfig.server?.watch?.ignored).to.eql('**/*')
+      expect(viteConfig.server?.hmr).to.be.false
+    })
+
+    it('uses defaults in open mode', async () => {
+      viteDevServerConfig.cypressConfig.isTextTerminal = false
+      const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite)
+
+      expect(viteConfig.server?.watch?.ignored).to.be.undefined
+      expect(viteConfig.server?.hmr).to.be.undefined
+    })
+  })
 })

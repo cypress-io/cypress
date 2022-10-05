@@ -9,6 +9,7 @@ import { createOutputSpy } from 'cypress/angular';
 import { EventEmitter, Component } from '@angular/core';
 import { ProjectionComponent } from "./components/projection.component";
 import { LifecycleComponent } from "./components/lifecycle.component";
+import { LogoComponent } from "./components/logo.component";
 
 @Component({
   template: `<app-projection>Hello World</app-projection>`
@@ -216,6 +217,11 @@ describe("angular mount", () => {
       declarations: [LifecycleComponent]
     })
     cy.get('p').should('have.text', 'Hi . ngOnInit fired: true and ngOnChanges fired: false and conditionalName: false')
+  })
+
+  it('can load static assets', () => {
+    cy.mount(LogoComponent)
+    cy.get('img').should('be.visible').and('have.prop', 'naturalWidth').should('be.greaterThan', 0)
   })
 
 

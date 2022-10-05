@@ -110,7 +110,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               cy.visit('/fixtures/primary-origin.html')
               cy.get(`a[data-cy="cookie-${scheme}"]`).click()
 
-              // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
               cy.origin(originUrl, {
                 args: originUrl,
               }, (originUrl) => {
@@ -140,7 +140,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               cy.visit('/fixtures/primary-origin.html')
               cy.get(`a[data-cy="cookie-${scheme}"]`).click()
 
-              // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
               cy.origin(originUrl, () => {
                 cy.window().then((win) => {
                   return cy.wrap(makeRequest(win, '/set-cookie?cookie=foo1=bar1; Domain=foobar.com', 'fetch'))
@@ -167,7 +167,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               cy.visit('/fixtures/primary-origin.html')
               cy.get(`a[data-cy="cookie-${scheme}"]`).click()
 
-              // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
               cy.origin(originUrl, () => {
                 cy.window().then((win) => {
                   return cy.wrap(makeRequest(win, '/set-cookie?cookie=foo1=bar1; Domain=foobar.com', 'fetch'))
@@ -193,7 +193,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               cy.visit('/fixtures/primary-origin.html')
               cy.get(`a[data-cy="cookie-${scheme}"]`).click()
 
-              // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
               cy.origin(originUrl, () => {
                 cy.window().then((win) => {
                   // set the cookie in the browser
@@ -221,7 +221,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               cy.visit('/fixtures/primary-origin.html')
               cy.get(`a[data-cy="cookie-${scheme}"]`).click()
 
-              // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
               cy.origin(originUrl, () => {
                 cy.window().then((win) => {
                   // do NOT set the cookie in the browser
@@ -253,7 +253,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               cy.visit('/fixtures/primary-origin.html')
               cy.get(`a[data-cy="cookie-${scheme}"]`).click()
 
-              // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
               cy.origin(originUrl, {
                 args: {
                   scheme,
@@ -286,7 +286,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               cy.visit('/fixtures/primary-origin.html')
               cy.get(`a[data-cy="cookie-${scheme}"]`).click()
 
-              // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
               cy.origin(originUrl, {
                 args: {
                   scheme,
@@ -333,7 +333,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               cy.visit('/fixtures/primary-origin.html')
               cy.get(`a[data-cy="cookie-${scheme}"]`).click()
 
-              // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
               cy.origin(originUrl, {
                 args: {
                   scheme,
@@ -382,7 +382,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               cy.visit('/fixtures/primary-origin.html')
               cy.get(`a[data-cy="cookie-${scheme}"]`).click()
 
-              // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
               cy.origin(originUrl, {
                 args: {
                   scheme,
@@ -413,7 +413,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               cy.visit('/fixtures/primary-origin.html')
               cy.get(`a[data-cy="cookie-${scheme}"]`).click()
 
-              // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
               cy.origin(originUrl, {
                 args: {
                   scheme,
@@ -455,7 +455,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               cy.visit('/fixtures/primary-origin.html')
               cy.get(`a[data-cy="cookie-${scheme}"]`).click()
 
-              // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
               cy.origin(originUrl, {
                 args: {
                   scheme,
@@ -499,7 +499,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               cy.visit('/fixtures/primary-origin.html')
               cy.get(`a[data-cy="cookie-${scheme}"]`).click()
 
-              // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
               cy.origin(originUrl, {
                 args: {
                   scheme,
@@ -534,7 +534,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               cy.visit('/fixtures/primary-origin.html')
               cy.get(`a[data-cy="cookie-${scheme}"]`).click()
 
-              // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
               cy.origin(originUrl, {
                 args: {
                   scheme,
@@ -567,7 +567,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
                 cy.visit('/fixtures/primary-origin.html')
                 cy.get(`a[data-cy="cookie-${scheme}"]`).click()
 
-                // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+                // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
                 cy.origin(originUrl, {
                   args: {
                     scheme,
@@ -599,7 +599,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               })
 
               it('does set cookie if withCredentials is true, and sends cookie if withCredentials is true', () => {
-                cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-credentials`, (req) => {
+                cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request-credentials`, (req) => {
                   expect(req['headers']['cookie']).to.equal('bar1=baz1')
 
                   req.reply({
@@ -610,7 +610,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
                 cy.visit('/fixtures/primary-origin.html')
                 cy.get(`a[data-cy="cookie-${scheme}"]`).click()
 
-                // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+                // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
                 cy.origin(originUrl, {
                   args: {
                     scheme,
@@ -629,7 +629,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
                   // cy.getCookie('bar1').its('value').should('equal', 'baz1')
 
                   cy.window().then((win) => {
-                    return cy.wrap(makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/test-credentials`, 'xmlHttpRequest', true))
+                    return cy.wrap(makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/test-request-credentials`, 'xmlHttpRequest', true))
                   })
 
                   cy.wait('@cookieCheck')
@@ -652,7 +652,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
                 cy.visit('/fixtures/primary-origin.html')
                 cy.get(`a[data-cy="cookie-${scheme}"]`).click()
 
-                // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+                // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
                 cy.origin(originUrl, {
                   args: {
                     scheme,
@@ -686,7 +686,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
                 cy.visit('/fixtures/primary-origin.html')
                 cy.get(`a[data-cy="cookie-${scheme}"]`).click()
 
-                // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+                // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
                 cy.origin(originUrl, {
                   args: {
                     scheme,
@@ -722,7 +722,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
             // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
             if (scheme === 'https') {
               it('does set cookie if credentials is "include", and sends cookie if credentials is "include"', () => {
-                cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-credentials`, (req) => {
+                cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request-credentials`, (req) => {
                   expect(req['headers']['cookie']).to.equal('bar1=baz1')
 
                   req.reply({
@@ -733,7 +733,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
                 cy.visit('/fixtures/primary-origin.html')
                 cy.get(`a[data-cy="cookie-${scheme}"]`).click()
 
-                // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+                // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
                 cy.origin(originUrl, {
                   args: {
                     scheme,
@@ -754,7 +754,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
                   // cy.getCookie('bar1').its('value').should('equal', 'baz1')
 
                   cy.window().then((win) => {
-                    return cy.wrap(makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/test-credentials`, 'fetch', 'include'))
+                    return cy.wrap(makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/test-request-credentials`, 'fetch', 'include'))
                   })
 
                   cy.wait('@cookieCheck')
@@ -778,7 +778,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               cy.visit('/fixtures/primary-origin.html')
               cy.get(`a[data-cy="cookie-${scheme}"]`).click()
 
-              // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
               cy.origin(originUrl, {
                 args: {
                   scheme,
@@ -818,7 +818,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               cy.visit('/fixtures/primary-origin.html')
               cy.get(`a[data-cy="cookie-${scheme}"]`).click()
 
-              // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
               cy.origin(originUrl, {
                 args: {
                   scheme,
@@ -856,7 +856,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               cy.visit('/fixtures/primary-origin.html')
               cy.get(`a[data-cy="cookie-${scheme}"]`).click()
 
-              // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
               cy.origin(originUrl, () => {
                 cy.window().then((win) => {
                   return cy.wrap(makeRequest(win, '/set-cookie?cookie=foo=bar; Domain=www.foobar.com; Path=/', 'fetch'))
@@ -888,7 +888,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               cy.visit('/fixtures/primary-origin.html')
               cy.get(`a[data-cy="cookie-${scheme}"]`).click()
 
-              // cookie jar should now mimic http://foobar.com:3500 / https://foobar.com:3502 as top
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
               cy.origin(originUrl, {
                 args: {
                   scheme,
@@ -1262,7 +1262,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
               })
 
               it('does set cookie if withCredentials is true, and sends cookie if withCredentials is true', () => {
-                cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-credentials`, (req) => {
+                cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request-credentials`, (req) => {
                   expect(req['headers']['cookie']).to.equal('bar1=baz1')
 
                   req.reply({
@@ -1283,7 +1283,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
                 // cy.getCookie('bar1').its('value').should('equal', 'baz1')
 
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/test-credentials`, 'xmlHttpRequest', true))
+                  return cy.wrap(makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/test-request-credentials`, 'xmlHttpRequest', true))
                 })
 
                 cy.wait('@cookieCheck')
@@ -1353,7 +1353,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
             // can only set third-party SameSite=None with Secure attribute, which is only possibly over https
             if (scheme === 'https') {
               it('does set cookie if credentials is "include", and sends cookie if credentials is "include"', () => {
-                cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-credentials`, (req) => {
+                cy.intercept(`${scheme}://www.barbaz.com:${sameOriginPort}/test-request-credentials`, (req) => {
                   expect(req['headers']['cookie']).to.equal('bar1=baz1')
 
                   req.reply({
@@ -1376,7 +1376,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
                 // cy.getCookie('bar1').its('value').should('equal', 'baz1')
 
                 cy.window().then((win) => {
-                  return cy.wrap(makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/test-credentials`, 'fetch', 'include'))
+                  return cy.wrap(makeRequest(win, `${scheme}://www.barbaz.com:${sameOriginPort}/test-request-credentials`, 'fetch', 'include'))
                 })
 
                 cy.wait('@cookieCheck')
