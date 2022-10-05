@@ -539,13 +539,13 @@ describe('driver/src/cypress/cy', () => {
 
       cy.on('log:added', (attrs, log) => logs.push(log))
 
-      Cypress.Commands.overwriteQuery('aQuery', () => {
+      Cypress.Commands._overwriteQuery('aQuery', () => {
         cy.now('get', 'body')
 
         return cy.now('get', 'button')
       })
 
-      Cypress.Commands.overwriteQuery('bQuery', () => cy.now('aQuery'))
+      Cypress.Commands._overwriteQuery('bQuery', () => cy.now('aQuery'))
 
       cy.aQuery().should('have.length', 24)
       cy.then(() => {

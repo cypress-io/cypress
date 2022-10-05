@@ -776,8 +776,6 @@ describe('src/cy/commands/querying', () => {
         cy.get('#missing-el').should('have.prop', 'foo')
       })
 
-      it('throws when using an alias that does not exist')
-
       it('throws after timing out after a .wait() alias reference', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('Expected to find element: `getJsonButton`, but never found it.')

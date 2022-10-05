@@ -155,7 +155,7 @@ function getAlias (selector, log, cy) {
 }
 
 export default (Commands, Cypress, cy, state) => {
-  Commands.addQuery('get', function get (selector, userOptions: GetOptions = {}) {
+  Commands._addQuery('get', function get (selector, userOptions: GetOptions = {}) {
     if ((userOptions === null) || _.isArray(userOptions) || !_.isPlainObject(userOptions)) {
       $errUtils.throwErrByPath('get.invalid_options', {
         args: { options: userOptions },
@@ -234,7 +234,7 @@ export default (Commands, Cypress, cy, state) => {
     }
   })
 
-  Commands.addQuery('contains', function contains (filter, text, userOptions: ContainsOptions = {}) {
+  Commands._addQuery('contains', function contains (filter, text, userOptions: ContainsOptions = {}) {
     if (_.isRegExp(text)) {
       // .contains(filter, text)
       // Do nothing
@@ -282,7 +282,7 @@ export default (Commands, Cypress, cy, state) => {
     const getFn = cy.now('get', selector, getOptions)
 
     const getPhrase = () => {
-      if (filter && !(getOptions.withinSubject as JQuery<HTMLElement>).is('body')) {
+      if (filter && !(cy.$$(getOptions.withinSubject) as JQuery<HTMLElement>).is('body')) {
         const node = $dom.stringify(getOptions.withinSubject, 'short')
 
         return `within the element: ${node} and with the selector: '${filter}' `
@@ -292,7 +292,7 @@ export default (Commands, Cypress, cy, state) => {
         return `within the selector: '${filter}' `
       }
 
-      if (!(getOptions.withinSubject as JQuery<HTMLElement>).is('body')) {
+      if (!(cy.$$(getOptions.withinSubject) as JQuery<HTMLElement>).is('body')) {
         const node = $dom.stringify(getOptions.withinSubject, 'short')
 
         return `within the element: ${node} `
@@ -363,7 +363,7 @@ export default (Commands, Cypress, cy, state) => {
     }
   })
 
-  Commands.addQuery('shadow', function contains (userOptions: ShadowOptions = {}) {
+  Commands._addQuery('shadow', function contains (userOptions: ShadowOptions = {}) {
     const log = userOptions.log !== false && Cypress.log({
       timeout: userOptions.timeout,
       consoleProps: () => ({}),

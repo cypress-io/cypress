@@ -165,7 +165,7 @@ export default {
           builtInCommandNames[name] = true
         }
 
-        cy.addQuery({ name, fn })
+        cy._addQuery({ name, fn })
       },
 
       _overwriteQuery (name, fn) {
