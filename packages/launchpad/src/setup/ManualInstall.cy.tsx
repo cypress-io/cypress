@@ -41,7 +41,7 @@ describe('<ManualInstall />', () => {
     const installCommand = `npm install -D react-scripts typescript`
 
     cy.findByText(defaultMessages.setupWizard.installDependencies.pasteCommand).should('be.visible')
-    cy.findByText(installCommand).should('be.visible')
+    cy.get('[data-cy="terminal-prompt-input"]').should('have.value', installCommand)
     cy.findByRole('button', { name: 'Copy' }).click()
     cy.findByRole('button', { name: 'Copied!' }).should('be.visible')
 

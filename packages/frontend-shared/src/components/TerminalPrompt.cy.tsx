@@ -23,7 +23,7 @@ describe('<TerminalPrompt />', () => {
       </div>
     ))
 
-    cy.contains(command)
+    cy.get('[data-cy="terminal-prompt-input"]').should('have.value', command)
     cy.contains('button', defaultMessages.clipboard.copy)
     .should('be.visible')
     .percySnapshot()
