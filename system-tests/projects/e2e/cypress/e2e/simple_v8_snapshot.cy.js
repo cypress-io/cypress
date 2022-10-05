@@ -1,5 +1,6 @@
 describe('simple v8 snapshot spec', () => {
   it('passes', () => {
-    expect(Object.keys(window.snapshotResult.customRequire.exports).length).to.equal(0)
+    // Snapshot result needs to be undefined in the renderer process
+    expect(window.snapshotResult).to.be.undefined
   })
 })
