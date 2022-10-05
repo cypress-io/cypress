@@ -4,7 +4,7 @@ describe('basic login', () => {
     it('logs in with idp redirect', () => {
       cy.visit('/fixtures/auth/index.html') // Establishes primary origin
       cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
-      cy.origin('http://idp.com:3500', () => {
+      cy.origin('http://www.idp.com:3500', () => {
         cy.get('[data-cy="username"]').type('BJohnson')
         cy.get('[data-cy="login"]').click()
       })
@@ -23,7 +23,7 @@ describe('basic login', () => {
         win.location.href = 'http://www.idp.com:3500/fixtures/auth/idp.html'
       })
 
-      cy.origin('http://idp.com:3500', () => {
+      cy.origin('http://www.idp.com:3500', () => {
         cy.get('[data-cy="username"]').type('FJohnson')
         cy.get('[data-cy="login"]').click()
       })
@@ -37,7 +37,7 @@ describe('basic login', () => {
     it('visits foobar first', () => {
       cy.visit('http://www.foobar.com:3500/fixtures/auth/index.html') // Establishes primary origin
       cy.get('[data-cy="login-idp"]').click() // Takes you to idp.com
-      cy.origin('http://idp.com:3500', () => {
+      cy.origin('http://www.idp.com:3500', () => {
         cy.get('[data-cy="username"]').type('BJohnson')
         cy.get('[data-cy="login"]').click()
       })
@@ -60,7 +60,7 @@ describe('basic login', () => {
       // Primary established via base url
       // TODO: baseUrl does not establish primary without a visit
       it.skip('logs in with primary set via baseurl', { baseUrl: 'http://localhost:3500' }, () => {
-        cy.origin('http://idp.com:3500', () => { // primary origin is localhost
+        cy.origin('http://www.idp.com:3500', () => { // primary origin is localhost
           cy.visit('http://www.idp.com:3500/fixtures/auth/idp.html')
           cy.get('[data-cy="username"]').type('FJohnson')
           cy.get('[data-cy="login"]').click()
@@ -77,7 +77,7 @@ describe('basic login', () => {
 
       it('logs in with primary set via visit', () => {
         cy.visit('/fixtures/auth/index.html')
-        cy.origin('http://idp.com:3500', () => { // primary origin is localhost
+        cy.origin('http://www.idp.com:3500', () => { // primary origin is localhost
           cy.visit('http://www.idp.com:3500/fixtures/auth/idp.html')
           cy.get('[data-cy="username"]').type('FJohnson')
           cy.get('[data-cy="login"]').click()
@@ -94,7 +94,7 @@ describe('basic login', () => {
       const login = (name) => {
         cy.session(name, () => {
           // Note, this assumes localhost is the primary origin, ideally we'd be able to specify this directly.
-          cy.origin('http://idp.com:3500', { args: name }, (name) => {
+          cy.origin('http://www.idp.com:3500', { args: name }, (name) => {
             cy.visit('http://www.idp.com:3500/fixtures/auth/idp.html')
             cy.get('[data-cy="username"]').type(name)
             cy.get('[data-cy="login"]').click()
@@ -154,9 +154,9 @@ describe('Multi-step Auth', () => {
     cy.visit('/fixtures/auth/index.html')
     cy.get('[data-cy="login-with-approval"]').click() // takes you to foobar.com.../approval
     cy.url() //fail
-    cy.origin('http://foobar.com:3500', () => { // Parent origin is localhost
+    cy.origin('http://www.foobar.com:3500', () => { // Parent origin is localhost
       cy.get('[data-cy="approve-orig"]').click() // takes you to idp.com
-      cy.origin('http://idp.com:3500', () => { // Parent origin is foobar.com
+      cy.origin('http://www.idp.com:3500', () => { // Parent origin is foobar.com
         cy.get('[data-cy="username"]').type('MarkyMark')
         cy.get('[data-cy="login"]').click() // Takes you back to localhost
       }) // Does not wait on foobar.com because there are no subsequent commands (would wait forever)
@@ -172,11 +172,11 @@ describe('Multi-step Auth', () => {
   it.skip('final-auth redirects back to localhost - flat', () => {
     cy.visit('/fixtures/auth/index.html')
     cy.get('[data-cy="login-with-approval"]').click() // takes you to foobar.com.../approval
-    cy.origin('http://foobar.com:3500', () => { // Parent origin is localhost
+    cy.origin('http://www.foobar.com:3500', () => { // Parent origin is localhost
       cy.get('[data-cy="approve-orig"]').click() // takes you to idp.com
     }) // Exits and moves on to the next command
 
-    cy.origin('http://idp.com:3500', () => { // Parent origin is localhost
+    cy.origin('http://www.idp.com:3500', () => { // Parent origin is localhost
       cy.get('[data-cy="username"]').type('MarkyMark')
       cy.get('[data-cy="login"]').click() // Takes you back to localhost
     }) // Exits and moves on to the next command
@@ -189,10 +189,10 @@ describe('Multi-step Auth', () => {
 
   // TODO: cy.origin does not work in cy.origin yet.
   it.skip('final auth redirects back to localhost - nested - approval first', () => {
-    cy.origin('http://foobar.com:3500', () => { // parent origin is localhost
+    cy.origin('http://www.foobar.com:3500', () => { // parent origin is localhost
       cy.visit('http://www.foobar.com:3500/fixtures/auth/approval.html')
       cy.get('[data-cy="approve-orig"]').click() // takes you to idp.com
-      cy.origin('http://idp.com:3500', () => { // parent origin is foobar.com
+      cy.origin('http://www.idp.com:3500', () => { // parent origin is foobar.com
         cy.get('[data-cy="username"]').type('MarkyMark')
         cy.get('[data-cy="login"]').click() // Takes you back to localhost
       }) // Does not wait on foobar.com because there are no subsequent commands (would wait forever)
@@ -208,9 +208,9 @@ describe('Multi-step Auth', () => {
   it.skip('final auth redirects back to approval page - nested', () => {
     cy.visit('/fixtures/auth/index.html')
     cy.get('[data-cy="login-with-approval"]').click() // takes you to foobar.com.../approval
-    cy.origin('http://foobar.com:3500', () => { // parent origin is localhost
+    cy.origin('http://www.foobar.com:3500', () => { // parent origin is localhost
       cy.get('[data-cy="approve-me"]').click() // takes you to idp.com
-      cy.origin('http://idp.com:3500', () => { // parent origin is foobar.com
+      cy.origin('http://www.idp.com:3500', () => { // parent origin is foobar.com
         cy.get('[data-cy="username"]').type('MarkyMark')
         cy.get('[data-cy="login"]').click() // Takes you back to foobar.com.../approval
       }) // Exits and moves on to the next command
@@ -227,16 +227,16 @@ describe('Multi-step Auth', () => {
   it('final auth redirects back to approval page - flat', () => {
     cy.visit('/fixtures/auth/index.html')
     cy.get('[data-cy="login-with-approval"]').click() // takes you to foobar.com.../approval
-    cy.origin('http://foobar.com:3500', () => { // parent origin is localhost
+    cy.origin('http://www.foobar.com:3500', () => { // parent origin is localhost
       cy.get('[data-cy="approve-me"]').click() // takes you to idp.com
     }) // waits on localhost forever, this breaks
 
-    cy.origin('http://idp.com:3500', () => { // parent origin is localhost
+    cy.origin('http://www.idp.com:3500', () => { // parent origin is localhost
       cy.get('[data-cy="username"]').type('MarkyMark')
       cy.get('[data-cy="login"]').click() // Takes you back to foobar.com.../approval
     }) // Exits and moves on to the next command
 
-    cy.origin('http://foobar.com:3500', () => { // parent origin is localhost
+    cy.origin('http://www.foobar.com:3500', () => { // parent origin is localhost
       cy.get('[data-cy="login-success"]').click() // Takes you back to localhost
     }) // Exits and moves on to the next command
 
