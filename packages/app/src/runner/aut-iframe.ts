@@ -92,9 +92,9 @@ export class AutIframe {
   }
 
   /**
-   * If the AUT is cross origin relative to top, a security error is thrown and the method returns false
-   * If the AUT is cross origin relative to top and chromeWebSecurity is false, origins of the AUT and top need to be compared and returns false
-   * Otherwise, if top and the AUT match origins, the method returns true.
+   * If the AUT is cross super domain origin relative to top, a security error is thrown and the method returns false
+   * If the AUT is cross super domain origin relative to top and chromeWebSecurity is false, origins of the AUT and top need to be compared and returns false
+   * Otherwise, if top and the AUT match super domain origins, the method returns true.
    * If the AUT origin is "about://blank", that means the src attribute has been stripped off the iframe and is adhering to same origin policy
    */
   doesAUTMatchTopSuperDomainOrigin = () => {
@@ -163,7 +163,7 @@ export class AutIframe {
       })
 
       // The iframe is in a cross origin state.
-      // Remove the src attribute to adhere to same super domain origin policy so we can interact with the frame. NOTE: This should only be done ONCE.
+      // Remove the src attribute to adhere to same super domain origin so we can interact with the frame. NOTE: This should only be done ONCE.
       this.removeSrcAttribute()
 
       return

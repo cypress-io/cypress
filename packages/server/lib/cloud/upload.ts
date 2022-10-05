@@ -1,8 +1,8 @@
 const rp = require('@cypress/request-promise')
-const { fs } = require('./util/fs')
+const { fs } = require('../util/fs')
 
-module.exports = {
-  send (pathToFile, url) {
+export = {
+  send (pathToFile: string, url: string) {
     return fs
     .readFileAsync(pathToFile)
     .then((buf) => {
