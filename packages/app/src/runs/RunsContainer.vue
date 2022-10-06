@@ -190,7 +190,7 @@ const connectionFailed = computed(() => !props.gql.currentProject?.cloudProject 
 
 const loginConnectStore = useLoginConnectStore()
 
-watch(() => loginConnectStore.isProjectConnected, (newVal, oldVal) => {
+watch(() => loginConnectStore.project.isProjectConnected, (newVal, oldVal) => {
   if (newVal && oldVal === false) {
     // only show this alert if we have just connected
     showConnectSuccessAlert.value = true

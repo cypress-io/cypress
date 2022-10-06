@@ -94,7 +94,7 @@
           @clear-force-open="isForceOpenAllowed = false"
         >
           <template
-            v-if="loginConnectStore.isLoggedIn"
+            v-if="loginConnectStore.user.isLoggedIn"
             #login-title
           >
             <UserAvatar
@@ -141,7 +141,7 @@
             </div>
           </template>
         </TopNav>
-        <div v-if="!loginConnectStore.isLoggedIn">
+        <div v-if="!loginConnectStore.user.isLoggedIn">
           <button
             class="flex text-gray-600 items-center group focus:outline-transparent"
             @click="loginConnectStore.openLoginConnectModal({ utmMedium: 'Nav' })"

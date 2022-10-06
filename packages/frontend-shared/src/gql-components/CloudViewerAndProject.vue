@@ -63,7 +63,7 @@ subscription CloudViewerAndProject_CheckCloudOrgMembership {
 `
 
 const loginConnectStore = useLoginConnectStore()
-const { setFlag, setLoginError, setUserData, setPromptShown, setFirstOpened, setBannersState } = loginConnectStore
+const { setUserFlag, setProjectFlag, setLoginError, setUserData, setPromptShown, setCypressFirstOpened, setBannersState } = loginConnectStore
 
 useSubscription({ query: CloudViewerAndProject_CheckCloudOrgMembershipDocument })
 
@@ -87,7 +87,7 @@ watchEffect(() => {
   }
 
   if (savedState?.firstOpened) {
-    setFirstOpened(savedState.firstOpened)
+    setCypressFirstOpened(savedState.firstOpened)
   }
 
   if (savedState?.banners) {
@@ -102,23 +102,21 @@ watchEffect(() => {
   const isConfigLoaded = !!query.data.value?.currentProject?.isFullConfigReady
   const hasNonExampleSpec = !!query.data.value?.currentProject?.hasNonExampleSpec
   const isProjectConnected = !!cloudProjectId.value && query.data.value?.currentProject?.cloudProject?.__typename === 'CloudProject'
-  const hasRecordedRuns = query.data.value?.currentProject?.cloudProject?.__typename === 'CloudProject' && (query.data.value?.currentProject.cloudProject?.runs?.nodes?.length ?? 0) > 0
   const error = ['AUTH_COULD_NOT_LAUNCH_BROWSER', 'AUTH_ERROR_DURING_LOGIN', 'AUTH_COULD_NOT_LAUNCH_BROWSER'].includes(query.data.value?.authState?.name ?? '')
 
-  if (isProjectConnected !== loginConnectStore.isProjectConnected) {
-    setFlag('isProjectConnected', isProjectConnected)
+  if (isProjectConnected !== loginConnectStore.project.isProjectConnected) {
+    setProjectFlag('isProjectConnected', isProjectConnected)
   }
 
-  setFlag('isConfigLoaded', isConfigLoaded)
-  setFlag('hasNonExampleSpec', hasNonExampleSpec)
+  setProjectFlag('isConfigLoaded', isConfigLoaded)
+  setProjectFlag('hasNonExampleSpec', hasNonExampleSpec)
 
-  if (isLoggedIn !== loginConnectStore.isLoggedIn) {
-    setFlag('isLoggedIn', isLoggedIn)
+  if (isLoggedIn !== loginConnectStore.user.isLoggedIn) {
+    setUserFlag('isLoggedIn', isLoggedIn)
   }
 
-  setFlag('isOrganizationLoaded', isOrganizationLoaded)
-  setFlag('isMemberOfOrganization', isMemberOfOrganization)
-  setFlag('hasRecordedRuns', hasRecordedRuns)
+  setUserFlag('isOrganizationLoaded', isOrganizationLoaded)
+  setUserFlag('isMemberOfOrganization', isMemberOfOrganization)
   setLoginError(error)
   setUserData((query.data.value?.cloudViewer ?? query.data.value?.cachedUser) ?? undefined)
 })

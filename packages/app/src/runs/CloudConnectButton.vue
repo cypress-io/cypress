@@ -1,11 +1,11 @@
 <template>
   <Button
     :class="props.class"
-    :prefix-icon="isLoggedIn ? ChainIcon : UserIcon"
+    :prefix-icon="user.isLoggedIn ? ChainIcon : UserIcon"
     prefix-icon-class="icon-dark-white icon-light-transparent"
     @click="openLoginConnectModal({ utmMedium: props.utmMedium })"
   >
-    {{ isLoggedIn ? t('runs.connect.buttonProject') : t('runs.connect.buttonUser') }}
+    {{ user.isLoggedIn ? t('runs.connect.buttonProject') : t('runs.connect.buttonUser') }}
   </Button>
 </template>
 
@@ -17,7 +17,7 @@ import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 
-const { openLoginConnectModal, isLoggedIn } = useLoginConnectStore()
+const { openLoginConnectModal, user } = useLoginConnectStore()
 
 const { t } = useI18n()
 

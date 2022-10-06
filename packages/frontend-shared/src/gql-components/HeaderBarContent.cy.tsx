@@ -297,7 +297,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
   it('the logged in state is correctly presented in header', () => {
     const loginConnectStore = useLoginConnectStore()
 
-    loginConnectStore.setFlag('isLoggedIn', true)
+    loginConnectStore.setUserFlag('isLoggedIn', true)
 
     const cloudViewer = {
       ...CloudUserStubs.me,

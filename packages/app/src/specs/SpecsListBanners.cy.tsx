@@ -6,8 +6,8 @@ import interval from 'human-interval'
 import { CloudUserStubs, CloudProjectStubs } from '@packages/graphql/test/stubCloudTypes'
 import { AllowedState, BannerIds } from '@packages/types'
 import { assignIn, set } from 'lodash'
-import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
-import type { LoginConnectBooleanField } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useLoginConnectStore } from '@cy/store/login-connect-store'
+import type { LoginConnectState } from '@cy/store/login-connect-store'
 const AlertSelector = 'alert-header'
 const AlertCloseBtnSelector = 'alert-suffix-icon'
 
@@ -105,17 +105,28 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
 
       it('should render when not previously-dismissed', () => {
         mountWithState(gql, stateWithFirstOpenedDaysAgo(4))
-        const bannerTrueConditions = {
+        const bannerTrueUserConditions = {
           'login-banner': [],
           'create-organization-banner': ['isLoggedIn', 'isOrganizationLoaded'],
           'connect-project-banner': ['isLoggedIn', 'isMemberOfOrganization'],
-          'record-banner': ['isLoggedIn', 'isMemberOfOrganization', 'isProjectConnected', 'hasNoRecordedRuns'],
+          'record-banner': ['isLoggedIn', 'isMemberOfOrganization'],
+        } as const
+
+        const bannerTrueProjectConditions = {
+          'login-banner': [],
+          'create-organization-banner': [],
+          'connect-project-banner': [],
+          'record-banner': ['isProjectConnected', 'hasNoRecordedRuns'],
         } as const
 
         const loginConnectStore = useLoginConnectStore()
 
-        bannerTrueConditions[bannerTestId].forEach((status: LoginConnectBooleanField) => {
-          loginConnectStore.setFlag(status, true)
+        bannerTrueUserConditions[bannerTestId].forEach((status: keyof LoginConnectState['user']) => {
+          loginConnectStore.setUserFlag(status, true)
+        })
+
+        bannerTrueProjectConditions[bannerTestId].forEach((status: keyof LoginConnectState['project']) => {
+          loginConnectStore.setProjectFlag(status, true)
         })
 
         cy.get(`[data-cy="${bannerTestId}"]`).should('be.visible')

@@ -1,19 +1,19 @@
 <template>
   <template v-if="loginConnectStore.isLoginConnectOpen">
     <LoginModal
-      v-if="!loginConnectStore.isLoggedIn || keepLoginOpen"
+      v-if="!loginConnectStore.user.isLoggedIn || keepLoginOpen"
       :gql="props.gql"
-      :model-value="!loginConnectStore.isLoggedIn || keepLoginOpen"
+      :model-value="!loginConnectStore.user.isLoggedIn || keepLoginOpen"
       :utm-medium="loginConnectStore.utmMedium"
-      :show-connect-button-after-login="loginConnectStore.isConfigLoaded && !loginConnectStore.isProjectConnected"
+      :show-connect-button-after-login="loginConnectStore.project.isConfigLoaded && !loginConnectStore.project.isProjectConnected"
       @connect-project="handleConnectProject"
       @cancel="handleCancel"
-      @loggedin="handleLoginSuccess(loginConnectStore.isProjectConnected)"
-      @update:model-value="handleUpdate(loginConnectStore.isProjectConnected, loginConnectStore.loginError)"
+      @loggedin="handleLoginSuccess(loginConnectStore.project.isProjectConnected)"
+      @update:model-value="handleUpdate(loginConnectStore.project.isProjectConnected, loginConnectStore.user.loginError)"
     />
     <CloudConnectModals
-      v-else-if="loginConnectStore.isLoggedIn && !keepLoginOpen && !loginConnectStore.isProjectConnected"
-      :show="loginConnectStore.isLoggedIn"
+      v-else-if="loginConnectStore.user.isLoggedIn && !keepLoginOpen && !loginConnectStore.project.isProjectConnected"
+      :show="loginConnectStore.user.isLoggedIn"
       :gql="props.gql"
       :utm-medium="loginConnectStore.utmMedium"
       @cancel="handleCancelConnect"
@@ -55,10 +55,10 @@ const { closeLoginConnectModal } = loginConnectStore
 // and we want to show the "connect" button instead of "continue"
 const keepLoginOpen = ref(false)
 
-watch(() => loginConnectStore.isLoggedIn, (newVal, oldVal) => {
+watch(() => loginConnectStore.user.isLoggedIn, (newVal, oldVal) => {
   // when login state changes, if we have logged in but are not connected,
   // keep the "login" modal open in the "connect project" state
-  if (newVal && (!loginConnectStore.isProjectConnected || oldVal === false)) {
+  if (newVal && (!loginConnectStore.project.isProjectConnected || oldVal === false)) {
     keepLoginOpen.value = true
   }
 })
