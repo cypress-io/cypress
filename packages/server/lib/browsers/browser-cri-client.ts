@@ -11,6 +11,11 @@ interface Version {
   minor: number
 }
 
+// since we may be attempting to connect to multiple hosts, 'connected'
+// is set to true once one of the connections succeeds so the others
+// can be cancelled
+let connected = false
+
 const isVersionGte = (a: Version, b: Version) => {
   return a.major > b.major || (a.major === b.major && a.minor >= b.minor)
 }
@@ -26,12 +31,16 @@ const ensureLiveBrowser = async (host: string, port: number, browserName: string
     host,
     port,
     getDelayMsForRetry: (i) => {
+      // if we successfully connected to a different host, cancel any remaining connection attempts
+      if (connected) return -1
+
       return _getDelayMsForRetry(i, browserName)
     },
   }
 
   try {
     await _connectAsync(connectOpts)
+    connected = true
 
     return host
   } catch (err) {
@@ -175,6 +184,7 @@ export class BrowserCriClient {
       await this.currentlyAttachedTarget.close()
     }
 
+    connected = false
     await this.browserClient.close()
   }
 }

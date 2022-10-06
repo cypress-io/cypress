@@ -90,6 +90,12 @@ export function createRetryingSocket (
         return cb(err)
       }
 
+      if (delay === -1) {
+        debug('cancelling any additional retries %o', { opts })
+
+        return cb(err)
+      }
+
       debug('received error on connect, retrying %o', { iteration, delay, err })
 
       setTimeout(() => {
