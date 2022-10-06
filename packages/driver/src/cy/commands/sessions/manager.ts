@@ -194,15 +194,7 @@ export default class SessionsManager {
     },
 
     clearCookies: async () => {
-      const cookies = await this.sessions.getCookies()
-
-      // bail early if we got no cookies!
-      // Currently there is a possible race condition where cookies exist but aren't reported
-      // if (cookies && (cookies.length === 0)) {
-      //   return cookies
-      // }
-
-      return await this.Cypress.automation('clear:cookies', cookies)
+      return this.Cypress.automation('clear:cookies', await this.sessions.getCookies())
     },
 
     getCurrentSessionData: async () => {

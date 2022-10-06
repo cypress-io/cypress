@@ -14,7 +14,7 @@ exports['e2e web security / when enabled / fails'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-
+                                                                                                    
   Running:  web_security.cy.js                                                              (1 of 1)
 
 
@@ -135,7 +135,7 @@ https://on.cypress.io/cross-origin-violation
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF
+  -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security.cy.js.mp4              (X second)
 
 
@@ -144,11 +144,11 @@ https://on.cypress.io/cross-origin-violation
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖  web_security.cy.js                       XX:XX        5        1        4        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        5        1        4        -        -
+    ✖  1 of 1 failed (100%)                     XX:XX        5        1        4        -        -  
 
 
 `
@@ -169,7 +169,7 @@ exports['e2e web security / when disabled / passes'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-
+                                                                                                    
   Running:  web_security.cy.js                                                              (1 of 1)
 
 
@@ -201,7 +201,7 @@ exports['e2e web security / when disabled / passes'] = `
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF
+  -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security.cy.js.mp4              (X second)
 
 
@@ -210,11 +210,11 @@ exports['e2e web security / when disabled / passes'] = `
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔  web_security.cy.js                       XX:XX        5        5        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        5        5        -        -        -
+    ✔  All specs passed!                        XX:XX        5        5        -        -        -  
 
 
 `
@@ -234,7 +234,7 @@ exports['e2e web security / firefox / displays warning when firefox and chromeWe
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-
+                                                                                                    
   Running:  simple_passing.cy.js                                                            (1 of 1)
 
 Your project has set the configuration option: \`chromeWebSecurity\` to \`false\`.
@@ -276,11 +276,11 @@ TimeoutError: operation timed out
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔  simple_passing.cy.js                     XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `
@@ -301,7 +301,7 @@ exports['e2e web security / when experimentalSessionAndOrigin is enabled / fails
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-
+                                                                                                    
   Running:  web_security.cy.js                                                              (1 of 1)
 
 
@@ -323,7 +323,7 @@ exports['e2e web security / when experimentalSessionAndOrigin is enabled / fails
       + expected - actual
 
       +'https://www.foo.com:44665/cross_origin'
-
+      
       [stack trace lines]
 
   2) web security
@@ -333,7 +333,7 @@ exports['e2e web security / when experimentalSessionAndOrigin is enabled / fails
       + expected - actual
 
       +'https://www.foo.com:44665/cross_origin'
-
+      
       [stack trace lines]
 
   3) web security
@@ -343,7 +343,7 @@ exports['e2e web security / when experimentalSessionAndOrigin is enabled / fails
       + expected - actual
 
       +'https://www.foo.com:44665/cross_origin'
-
+      
       [stack trace lines]
 
   4) web security
@@ -383,7 +383,7 @@ exports['e2e web security / when experimentalSessionAndOrigin is enabled / fails
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF
+  -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security.cy.js.mp4              (X second)
 
 
@@ -392,11 +392,11 @@ exports['e2e web security / when experimentalSessionAndOrigin is enabled / fails
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖  web_security.cy.js                       XX:XX        5        1        4        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        5        1        4        -        -
+    ✖  1 of 1 failed (100%)                     XX:XX        5        1        4        -        -  
 
 
 `
