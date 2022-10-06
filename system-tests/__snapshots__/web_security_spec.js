@@ -14,7 +14,7 @@ exports['e2e web security / when enabled / fails'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
+
   Running:  web_security.cy.js                                                              (1 of 1)
 
 
@@ -124,18 +124,18 @@ https://on.cypress.io/cross-origin-violation
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when c     (1280x720)
-     licking a to another origin (failed).png                                                       
+     licking a to another origin (failed).png
   -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when s     (1280x720)
-     ubmitted a form and being redirected to another origin (failed).png                            
+     ubmitted a form and being redirected to another origin (failed).png
   -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when u     (1280x720)
-     sing a javascript redirect to another origin (failed).png                                      
+     sing a javascript redirect to another origin (failed).png
   -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when d     (1280x720)
-     oing a CORS request cross-origin (failed).png                                                  
+     oing a CORS request cross-origin (failed).png
 
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Started processing:  Compressing to 32 CRF
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security.cy.js.mp4              (X second)
 
 
@@ -144,11 +144,11 @@ https://on.cypress.io/cross-origin-violation
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+       Spec                                              Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖  web_security.cy.js                       XX:XX        5        1        4        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        5        1        4        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        5        1        4        -        -
 
 
 `
@@ -169,7 +169,7 @@ exports['e2e web security / when disabled / passes'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
+
   Running:  web_security.cy.js                                                              (1 of 1)
 
 
@@ -201,7 +201,7 @@ exports['e2e web security / when disabled / passes'] = `
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Started processing:  Compressing to 32 CRF
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security.cy.js.mp4              (X second)
 
 
@@ -210,11 +210,11 @@ exports['e2e web security / when disabled / passes'] = `
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+       Spec                                              Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔  web_security.cy.js                       XX:XX        5        5        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        5        5        -        -        -  
+    ✔  All specs passed!                        XX:XX        5        5        -        -        -
 
 
 `
@@ -234,7 +234,7 @@ exports['e2e web security / firefox / displays warning when firefox and chromeWe
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
+
   Running:  simple_passing.cy.js                                                            (1 of 1)
 
 Your project has set the configuration option: \`chromeWebSecurity\` to \`false\`.
@@ -276,127 +276,11 @@ TimeoutError: operation timed out
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+       Spec                                              Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔  simple_passing.cy.js                     XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
-
-
-`
-
-exports['e2e web security / when experimentalSessionAndOrigin is enabled / fails'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:      1.2.3                                                                            │
-  │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        1 found (web_security.cy.js)                                                     │
-  │ Searched:     cypress/e2e/web_security.cy.js                                                   │
-  │ Experiments:  experimentalSessionAndOrigin=false                                               │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  web_security.cy.js                                                              (1 of 1)
-
-
-  web security
-    1) fails when clicking <a> to another origin
-    2) fails when submitted a form and being redirected to another origin
-    3) fails when using a javascript redirect to another origin
-    4) fails when doing a CORS request cross-origin
-    ✓ finds the correct spec bridge even if a previous spec bridge host is a subset of the current host
-
-
-  1 passing
-  4 failing
-
-  1) web security
-       fails when clicking <a> to another origin:
-
-      Timed out retrying after 50ms
-      + expected - actual
-
-      +'https://www.foo.com:44665/cross_origin'
-      
-      [stack trace lines]
-
-  2) web security
-       fails when submitted a form and being redirected to another origin:
-
-      Timed out retrying after 50ms
-      + expected - actual
-
-      +'https://www.foo.com:44665/cross_origin'
-      
-      [stack trace lines]
-
-  3) web security
-       fails when using a javascript redirect to another origin:
-
-      Timed out retrying after 50ms
-      + expected - actual
-
-      +'https://www.foo.com:44665/cross_origin'
-      
-      [stack trace lines]
-
-  4) web security
-       fails when doing a CORS request cross-origin:
-     AssertionError: Timed out retrying after 500ms: Expected to find content: 'success!' but never did.
-      [stack trace lines]
-
-
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        5                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      4                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  4                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     web_security.cy.js                                                               │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when c     (1280x720)
-     licking a to another origin (failed).png                                                       
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when s     (1280x720)
-     ubmitted a form and being redirected to another origin (failed).png                            
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when u     (1280x720)
-     sing a javascript redirect to another origin (failed).png                                      
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when d     (1280x720)
-     oing a CORS request cross-origin (failed).png                                                  
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security.cy.js.mp4              (X second)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  web_security.cy.js                       XX:XX        5        1        4        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        5        1        4        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -
 
 
 `
@@ -417,7 +301,7 @@ exports['e2e web security / when experimentalSessionAndOrigin is enabled / fails
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
+
   Running:  web_security.cy.js                                                              (1 of 1)
 
 
@@ -434,23 +318,32 @@ exports['e2e web security / when experimentalSessionAndOrigin is enabled / fails
 
   1) web security
        fails when clicking <a> to another origin:
-     CypressError: Timed out retrying after 4000ms: The command was expected to run against origin \`http://localhost:4466\` but the application is at origin \`https://foo.com:44665\`.
 
-This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
+      Timed out retrying after 50ms
+      + expected - actual
+
+      +'https://www.foo.com:44665/cross_origin'
+
       [stack trace lines]
 
   2) web security
        fails when submitted a form and being redirected to another origin:
-     CypressError: Timed out retrying after 4000ms: The command was expected to run against origin \`http://localhost:4466\` but the application is at origin \`https://foo.com:44665\`.
 
-This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
+      Timed out retrying after 50ms
+      + expected - actual
+
+      +'https://www.foo.com:44665/cross_origin'
+
       [stack trace lines]
 
   3) web security
        fails when using a javascript redirect to another origin:
-     CypressError: Timed out retrying after 4000ms: The command was expected to run against origin \`http://localhost:4466\` but the application is at origin \`https://foo.com:44665\`.
 
-This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
+      Timed out retrying after 50ms
+      + expected - actual
+
+      +'https://www.foo.com:44665/cross_origin'
+
       [stack trace lines]
 
   4) web security
@@ -479,18 +372,18 @@ This commonly happens when you have either not navigated to the expected origin 
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when c     (1280x720)
-     licking a to another origin (failed).png                                                       
+     licking a to another origin (failed).png
   -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when s     (1280x720)
-     ubmitted a form and being redirected to another origin (failed).png                            
+     ubmitted a form and being redirected to another origin (failed).png
   -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when u     (1280x720)
-     sing a javascript redirect to another origin (failed).png                                      
+     sing a javascript redirect to another origin (failed).png
   -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when d     (1280x720)
-     oing a CORS request cross-origin (failed).png                                                  
+     oing a CORS request cross-origin (failed).png
 
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Started processing:  Compressing to 32 CRF
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security.cy.js.mp4              (X second)
 
 
@@ -499,11 +392,11 @@ This commonly happens when you have either not navigated to the expected origin 
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+       Spec                                              Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖  web_security.cy.js                       XX:XX        5        1        4        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        5        1        4        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        5        1        4        -        -
 
 
 `

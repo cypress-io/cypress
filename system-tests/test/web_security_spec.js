@@ -83,21 +83,6 @@ describe('e2e web security', () => {
     })
   })
 
-  context('firefox', () => {
-    systemTests.it('displays warning when firefox and chromeWebSecurity:false', {
-      spec: 'simple_passing.cy.js',
-      snapshot: true,
-      // TODO(webkit): run this test in webkit
-      browser: 'firefox',
-      config: {
-        chromeWebSecurity: false,
-      },
-      onStdout (stdout) {
-        expect(stdout).include('Your project has set the configuration option: chromeWebSecurity to false\n\nThis option will not have an effect in Firefox.')
-      },
-    })
-  })
-
   context('when disabled', () => {
     systemTests.it('passes', {
       spec: 'web_security.cy.js',
@@ -110,10 +95,12 @@ describe('e2e web security', () => {
     })
   })
 
-  context('when experimentalSessionAndOrigin is enabled', () => {
-    systemTests.it('fails', {
-      browser: '!webkit', // TODO(webkit): fix+unskip
-      spec: 'web_security.cy.js',
+  context('firefox', () => {
+    systemTests.it('displays warning when firefox and chromeWebSecurity:false', {
+      spec: 'simple_passing.cy.js',
+      snapshot: true,
+      // TODO(webkit): run this test in webkit
+      browser: 'firefox',
       config: {
         chromeWebSecurity: false,
       },
