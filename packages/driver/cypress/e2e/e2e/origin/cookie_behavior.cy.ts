@@ -1,4 +1,4 @@
-describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
+describe('Cookie Behavior with experimentalSessionAndOrigin=true', { browser: '!webkit' }, () => {
   const makeRequest = (
     win: Cypress.AUTWindow,
     url: string,

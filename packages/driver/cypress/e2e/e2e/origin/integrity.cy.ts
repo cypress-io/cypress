@@ -4,7 +4,7 @@ import type { TemplateExecutor } from 'lodash'
 // NOTE: in order to run these tests, the following config flags need to be set
 //    experimentalSessionAndOrigin=true
 //    experimentalModifyObstructiveThirdPartyCode=true
-describe('Integrity Preservation', () => {
+describe('Integrity Preservation', { browser: '!webkit' }, () => {
   // Add common SRI hashes used when setting script/link integrity.
   // These are the ones supported by SRI (see https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity#using_subresource_integrity)
   // For our tests, we will use CryptoJS to calculate these hashes as they can regenerate the integrity without us having to do it manually every

@@ -1,4 +1,4 @@
-describe('cy.origin', () => {
+describe('cy.origin', { browser: '!webkit' }, () => {
   it('window:before:load event', () => {
     cy.visit('/fixtures/primary-origin.html')
     cy.on('window:before:load', (win: {testPrimaryOriginBeforeLoad: boolean}) => {

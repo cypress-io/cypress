@@ -1,4 +1,4 @@
-describe('cy.origin', () => {
+describe('cy.origin', { browser: '!webkit' }, () => {
   it('passes viewportWidth/Height state to the secondary origin', () => {
     const expectedViewport = [320, 480]
 

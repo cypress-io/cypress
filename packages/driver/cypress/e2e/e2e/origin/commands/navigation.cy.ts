@@ -1,7 +1,7 @@
 const { stripIndent } = require('common-tags')
 import { findCrossOriginLogs } from '../../../../support/utils'
 
-context('cy.origin navigation', () => {
+context('cy.origin navigation', { browser: '!webkit' }, () => {
   it('.go()', () => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()

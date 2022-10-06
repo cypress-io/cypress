@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 
-describe('cy.origin - cookie login', () => {
+describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
   const { _ } = Cypress
   // ensures unique username so there's no risk of false positives from
   // test pollution
@@ -70,7 +70,7 @@ describe('cy.origin - cookie login', () => {
         • displays "Welcome, <username>"
   ****************************************************************************/
 
-  describe('general behavior', () => {
+  describe('general behavior', { browser: '!webkit' }, () => {
     let username
 
     beforeEach(() => {

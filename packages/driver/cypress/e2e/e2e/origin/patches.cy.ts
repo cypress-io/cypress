@@ -1,4 +1,4 @@
-describe('src/cross-origin/patches', () => {
+describe('src/cross-origin/patches', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
