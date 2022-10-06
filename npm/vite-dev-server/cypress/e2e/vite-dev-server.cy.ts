@@ -20,7 +20,7 @@ describe('Config options', () => {
     cy.visitApp()
 
     cy.contains('App.cy.jsx').click()
-    cy.get('.passed > .num').should('contain', 1)
+    cy.get('.passed > .num').should('contain', 2)
 
     cy.withCtx(async (ctx) => {
       const config = ctx.lifecycleManager.loadedFullConfig
@@ -45,7 +45,7 @@ describe('Config options', () => {
 
     cy.visitApp()
     cy.contains(specWithWhitespace).click()
-    cy.get('.passed > .num').should('contain', 1)
+    cy.get('.passed > .num').should('contain', 2)
   })
 
   it('supports @cypress/vite-dev-server', () => {
@@ -56,7 +56,7 @@ describe('Config options', () => {
     cy.visitApp()
     cy.contains('App.cy.jsx').click()
     cy.waitForSpecToFinish()
-    cy.get('.passed > .num').should('contain', 1)
+    cy.get('.passed > .num').should('contain', 2)
   })
 
   it('supports viteConfig as an async function', () => {
@@ -67,7 +67,7 @@ describe('Config options', () => {
     cy.visitApp()
     cy.contains('App.cy.jsx').click()
     cy.waitForSpecToFinish()
-    cy.get('.passed > .num').should('contain', 1)
+    cy.get('.passed > .num').should('contain', 2)
     cy.withCtx(async (ctx) => {
       const verifyFile = await ctx.file.readFileInProject('wrote-to-file')
 
