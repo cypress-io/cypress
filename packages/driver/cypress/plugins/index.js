@@ -33,14 +33,6 @@ babelLoader.use.options.plugins = _.reject(babelLoader.use.options.plugins, (plu
  * @type {Cypress.PluginConfig}
  */
 module.exports = (on, config) => {
-  on('before:browser:launch', (browser = {}, launchOptions) => {
-    if (browser.family === 'firefox') {
-      launchOptions.preferences['remote.log.level'] = 'Trace'
-    }
-
-    return launchOptions
-  })
-
   on('file:preprocessor', wp({ webpackOptions }))
 
   on('task', {

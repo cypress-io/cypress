@@ -26,7 +26,7 @@ const getMajorMinorVersion = (version: string): Version => {
   return { major, minor }
 }
 
-const ensureLiveBrowser = async (host: string, port: number, browserName: string): Promise<string | undefined> => {
+const tryBrowserConnection = async (host: string, port: number, browserName: string): Promise<string | undefined> => {
   const connectOpts = {
     host,
     port,
@@ -51,8 +51,9 @@ const ensureLiveBrowser = async (host: string, port: number, browserName: string
   }
 }
 
-const determineLiveBrowserHost = async (hosts: string[], port: number, browserName: string) => {
-  return Promise.any(hosts.map((host) => ensureLiveBrowser(host, port, browserName)))
+const ensureLiveBrowser = async (hosts: string[], port: number, browserName: string) => {
+  // go through all of the hosts and attempt to make a connection
+  return Promise.any(hosts.map((host) => tryBrowserConnection(host, port, browserName)))
 }
 
 const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserName: string, port: number): Promise<T> => {
@@ -89,19 +90,20 @@ export class BrowserCriClient {
    * Factory method for the browser cri client. Connects to the browser and then returns a chrome remote interface wrapper around the
    * browser target
    *
+   * @param hosts the hosts to which to attempt to connect
    * @param port the port to which to connect
    * @param browserName the display name of the browser being launched
    * @param onAsynchronousError callback for any cdp fatal errors
    * @returns a wrapper around the chrome remote interface that is connected to the browser target
    */
-  static async create (potentialHosts: string[], port: number, browserName: string, onAsynchronousError: Function, onReconnect?: (client: CriClient) => void): Promise<BrowserCriClient> {
-    const host = await determineLiveBrowserHost(potentialHosts, port, browserName)
+  static async create (hosts: string[], port: number, browserName: string, onAsynchronousError: Function, onReconnect?: (client: CriClient) => void): Promise<BrowserCriClient> {
+    const host = await ensureLiveBrowser(hosts, port, browserName)
 
     return retryWithIncreasingDelay(async () => {
       const versionInfo = await CRI.Version({ host, port, useHostName: true })
       const browserClient = await create(versionInfo.webSocketDebuggerUrl, onAsynchronousError, undefined, undefined, onReconnect)
 
-      return new BrowserCriClient(browserClient, versionInfo, host, port, browserName, onAsynchronousError)
+      return new BrowserCriClient(browserClient, versionInfo, host!, port, browserName, onAsynchronousError)
     }, browserName, port)
   }
 
