@@ -4,8 +4,6 @@ import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
 import { create, CriClient } from './cri-client'
 
-const HOST = '127.0.0.1'
-
 const debug = Debug('cypress:server:browsers:browser-cri-client')
 
 interface Version {
@@ -23,9 +21,9 @@ const getMajorMinorVersion = (version: string): Version => {
   return { major, minor }
 }
 
-const ensureLiveBrowser = async (port: number, browserName: string) => {
+const ensureLiveBrowser = async (host: string, port: number, browserName: string): Promise<string | undefined> => {
   const connectOpts = {
-    host: HOST,
+    host,
     port,
     getDelayMsForRetry: (i) => {
       return _getDelayMsForRetry(i, browserName)
@@ -34,10 +32,18 @@ const ensureLiveBrowser = async (port: number, browserName: string) => {
 
   try {
     await _connectAsync(connectOpts)
+
+    return host
   } catch (err) {
     debug('failed to connect to CDP %o', { connectOpts, err })
     errors.throwErr('CDP_COULD_NOT_CONNECT', browserName, port, err)
+
+    return
   }
+}
+
+const determineLiveBrowserHost = async (hosts: string[], port: number, browserName: string) => {
+  return Promise.any(hosts.map((host) => ensureLiveBrowser(host, port, browserName)))
 }
 
 const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserName: string, port: number): Promise<T> => {
@@ -68,7 +74,7 @@ const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserN
 
 export class BrowserCriClient {
   currentlyAttachedTarget: CriClient | undefined
-  private constructor (private browserClient: CriClient, private versionInfo, private port: number, private browserName: string, private onAsynchronousError: Function) {}
+  private constructor (private browserClient: CriClient, private versionInfo, private host: string, private port: number, private browserName: string, private onAsynchronousError: Function) {}
 
   /**
    * Factory method for the browser cri client. Connects to the browser and then returns a chrome remote interface wrapper around the
@@ -79,14 +85,14 @@ export class BrowserCriClient {
    * @param onAsynchronousError callback for any cdp fatal errors
    * @returns a wrapper around the chrome remote interface that is connected to the browser target
    */
-  static async create (port: number, browserName: string, onAsynchronousError: Function, onReconnect?: (client: CriClient) => void): Promise<BrowserCriClient> {
-    await ensureLiveBrowser(port, browserName)
+  static async create (potentialHosts: string[], port: number, browserName: string, onAsynchronousError: Function, onReconnect?: (client: CriClient) => void): Promise<BrowserCriClient> {
+    const host = await determineLiveBrowserHost(potentialHosts, port, browserName)
 
     return retryWithIncreasingDelay(async () => {
-      const versionInfo = await CRI.Version({ host: HOST, port })
+      const versionInfo = await CRI.Version({ host, port, useHostName: true })
       const browserClient = await create(versionInfo.webSocketDebuggerUrl, onAsynchronousError, undefined, undefined, onReconnect)
 
-      return new BrowserCriClient(browserClient, versionInfo, port, browserName, onAsynchronousError)
+      return new BrowserCriClient(browserClient, versionInfo, host, port, browserName, onAsynchronousError)
     }, browserName, port)
   }
 
@@ -111,7 +117,7 @@ export class BrowserCriClient {
    * @returns the chrome remote interface wrapper for the target
    */
   attachToTargetUrl = async (url: string): Promise<CriClient> => {
-    // Continue trying to re-attach until succcessful.
+    // Continue trying to re-attach until successful.
     // If the browser opens slowly, this will fail until
     // The browser and automation API is ready, so we try a few
     // times until eventually timing out.
@@ -125,7 +131,7 @@ export class BrowserCriClient {
         throw new Error(`Could not find url target in browser ${url}. Targets were ${JSON.stringify(targets)}`)
       }
 
-      this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, HOST, this.port)
+      this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, this.host, this.port)
 
       return this.currentlyAttachedTarget
     }, this.browserName, this.port)
@@ -157,7 +163,7 @@ export class BrowserCriClient {
     ])
 
     if (target) {
-      this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, HOST, this.port)
+      this.currentlyAttachedTarget = await create(target.targetId, this.onAsynchronousError, this.host, this.port)
     }
   }
 
