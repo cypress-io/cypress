@@ -139,7 +139,7 @@ function simulateRunData () {
 }
 
 function allVisibleSpecsShouldBePlaceholders () {
-  cy.findAllByTestId('run-status-empty', { timeout: 8000 }).should('be.visible').should('have.class', 'text-gray-400')
+  cy.findAllByTestId('run-status-empty', { timeout: 20000 }).should('be.visible').should('have.class', 'text-gray-400')
   cy.findAllByTestId('run-status-dot-0').should('not.exist')
   cy.findAllByTestId('run-status-dot-1').should('not.exist')
   cy.findAllByTestId('run-status-dot-2').should('not.exist')
