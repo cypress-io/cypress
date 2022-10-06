@@ -29,8 +29,8 @@ describe('lib/browsers/cri-client', function () {
     criImport = sinon.stub()
 
     criImport.Version = sinon.stub()
-    criImport.Version.withArgs({ host: HOST, port: PORT }).resolves({ webSocketDebuggerUrl: 'http://web/socket/url' })
-    criImport.Version.withArgs({ host: HOST, port: THROWS_PORT })
+    criImport.Version.withArgs({ host: HOST, port: PORT, useHostName: true }).resolves({ webSocketDebuggerUrl: 'http://web/socket/url' })
+    criImport.Version.withArgs({ host: HOST, port: THROWS_PORT, useHostName: true })
     .onFirstCall().throws()
     .onSecondCall().throws()
     .onThirdCall().resolves({ webSocketDebuggerUrl: 'http://web/socket/url' })
@@ -46,7 +46,7 @@ describe('lib/browsers/cri-client', function () {
       'chrome-remote-interface': criImport,
     })
 
-    getClient = () => browserCriClient.BrowserCriClient.create(PORT, 'Chrome', onError)
+    getClient = () => browserCriClient.BrowserCriClient.create(['127.0.0.1'], PORT, 'Chrome', onError)
   })
 
   context('.create', function () {
@@ -69,7 +69,7 @@ describe('lib/browsers/cri-client', function () {
       .onSecondCall().returns(100)
       .onThirdCall().returns(100)
 
-      const client = await browserCriClient.BrowserCriClient.create(THROWS_PORT, 'Chrome', onError)
+      const client = await browserCriClient.BrowserCriClient.create(['127.0.0.1'], THROWS_PORT, 'Chrome', onError)
 
       expect(client.attachToTargetUrl).to.be.instanceOf(Function)
 
@@ -81,7 +81,7 @@ describe('lib/browsers/cri-client', function () {
       .onFirstCall().returns(100)
       .onSecondCall().returns(undefined)
 
-      await expect(browserCriClient.BrowserCriClient.create(THROWS_PORT, 'Chrome', onError)).to.be.rejected
+      await expect(browserCriClient.BrowserCriClient.create(['127.0.0.1'], THROWS_PORT, 'Chrome', onError)).to.be.rejected
 
       expect(criImport.Version).to.be.calledTwice
     })
