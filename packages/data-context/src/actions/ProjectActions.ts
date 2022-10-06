@@ -499,7 +499,6 @@ export class ProjectActions {
   }
 
   async hasNonExampleSpec () {
-    //TODO Is this all specs or just a page of specs??
     const specs = this.ctx.project.specs?.map((spec) => spec.relativeToCommonRoot)
 
     switch (this.ctx.coreData.currentTestingType) {

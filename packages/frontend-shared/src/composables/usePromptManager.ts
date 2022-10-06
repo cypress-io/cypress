@@ -9,13 +9,6 @@ mutation LoginConnect_SetPromptShown($slug: String!) {
 }
 `
 
-/**
- *
- * @param eventTime
- * @param waitTime "1 day", "20 minutes", etc - will be parsed by human-interval package
- * @returns
- */
-
 export function usePromptManager () {
   const setPromptShownMutation = useMutation(LoginConnect_SetPromptShownDocument)
   const loginConnectStore = useLoginConnectStore()
