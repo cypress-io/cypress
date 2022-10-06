@@ -430,7 +430,7 @@ describe('src/cy/commands/actions/scroll', () => {
       context('subject errors', () => {
         it('throws when not passed DOM element as subject', (done) => {
           cy.on('fail', (err) => {
-            expect(err.message).to.include('`cy.scrollTo()` failed because it requires a DOM element.')
+            expect(err.message).to.include('`cy.scrollTo()` failed because it requires a DOM element or window.')
             expect(err.message).to.include('{foo: bar}')
             expect(err.message).to.include('> `cy.noop()`')
 
