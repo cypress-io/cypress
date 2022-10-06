@@ -81,12 +81,10 @@ export default (Commands, Cypress, cy) => {
     Commands._addQuery(traversal, function traversalFn (arg1, arg2, userOptions: TraversalOptions = {}) {
       if (_.isObject(arg1) && !_.isFunction(arg1)) {
         userOptions = arg1
-        arg1 = undefined
       }
 
       if (_.isObject(arg2) && !_.isFunction(arg2)) {
         userOptions = arg2
-        arg2 = undefined
       }
 
       // Omit any null or undefined arguments

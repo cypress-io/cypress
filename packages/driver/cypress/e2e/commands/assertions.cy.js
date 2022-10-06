@@ -61,8 +61,7 @@ describe('src/cy/commands/assertions', () => {
       .then((obj) => {
         expect(testCommands()).to.eql([
           { name: 'visit', snapshots: 1, retries: 0 },
-          { name: 'noop', snapshots: 0, retries: 0 },
-          { name: 'should', snapshots: 1, retries: 0 },
+          { name: 'noop', snapshots: 1, retries: 0 },
           { name: 'then', snapshots: 0, retries: 0 },
         ])
       })
@@ -132,21 +131,6 @@ describe('src/cy/commands/assertions', () => {
       const obj = { requestJSON: { teamIds: [2] } }
 
       cy.noop(obj).its('requestJSON').should('have.property', 'teamIds').should('deep.eq', [2])
-    })
-
-    // TODO: make cy.then retry
-    // https://github.com/cypress-io/cypress/issues/627
-    it.skip('outer assertions retry on cy.then', () => {
-      const obj = { foo: 'bar' }
-
-      cy.wrap(obj).then(() => {
-        setTimeout(() => {
-          obj.foo = 'baz'
-        }
-        , 1000)
-
-        return obj
-      }).should('deep.eq', { foo: 'baz' })
     })
 
     it('does it retry when wrapped', () => {
@@ -548,7 +532,7 @@ describe('src/cy/commands/assertions', () => {
     }, () => {
       it('should not be true', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('expected false to be true')
+          expect(err.message).to.eq('Timed out retrying after 50ms: expected false to be true')
 
           done()
         })
@@ -828,7 +812,7 @@ describe('src/cy/commands/assertions', () => {
       return null
     })
 
-    it('does not output should logs on failures', function (done) {
+    it('does not output should logs on failures', { defaultCommandTimeout: 50 }, function (done) {
       cy.on('fail', () => {
         const { length } = this.logs
 

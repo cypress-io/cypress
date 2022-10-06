@@ -304,7 +304,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         // ensure the error is about existence not about
         // the downstream assertion.
         try {
-          ensureExistence()
+          callbacks.ensureExistenceFor === 'dom' && ensureExistence()
         } catch (e2) {
           err = e2
         }

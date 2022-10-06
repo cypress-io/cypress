@@ -12,7 +12,7 @@ interface InternalWrapOptions extends Partial<Cypress.Loggable & Cypress.Timeout
 
 export default (Commands, Cypress, cy, state) => {
   Commands._addQuery('end', () => () => null)
-  Commands._addQuery('noop', () => _.identity)
+  Commands._addQuery('noop', (arg) => () => arg)
 
   Commands._addQuery('log', (msg, ...args) => {
     Cypress.log({

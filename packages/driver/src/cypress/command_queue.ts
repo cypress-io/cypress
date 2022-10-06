@@ -90,6 +90,7 @@ function retryQuery (command: $Command, ret: any, cy: $Cy) {
     return cy.verifyUpcomingAssertions(undefined, options, {
       onRetry,
       onFail: command.get('onFail'),
+      ensureExistenceFor: command.get('ensureExistenceFor'),
       subjectFn: () => {
         const subject = cy.currentSubject(command.get('chainerId'))
 
