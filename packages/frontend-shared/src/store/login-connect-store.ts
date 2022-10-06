@@ -86,7 +86,7 @@ export const useLoginConnectStore = defineStore({
       this.project[name] = newVal
     },
     setLoginError (error: boolean) {
-      this.loginError = error
+      this.user.loginError = error
     },
     setUserData (userData?: LoginUserData) {
       this.userData = userData
@@ -124,13 +124,14 @@ export const useLoginConnectStore = defineStore({
       }
     },
     userStatusMatches () {
-      return (status: UserStatus) => this.userStatus === status
+      // casting here sine ts seems to need a little extra help in this 'return a function from a getter' situation
+      return (status: UserStatus) => this.userStatus as unknown as UserStatus === status
     },
     projectStatus () {
       // TODO: in #23762 look at projectConnectionStatus in SpecHeaderCloudDataTooltip
     },
-    latestBannerShownTime () {
-      return this._latestBannerShownTimeForTesting
+    latestBannerShownTime (state) {
+      return state._latestBannerShownTimeForTesting
       // TODO: in #23762 return based on bannersState
     },
 
