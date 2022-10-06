@@ -35,13 +35,13 @@ exports['e2e web security / when enabled / fails'] = `
 
   > [Cross origin error message]
 
-Before the page load, you were bound to the origin policy:
+Before the page load, you were bound to the origin:
 
   > http://localhost:4466
 
-A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
+A cross origin error happens when your application navigates to a new URL which does not match the origin above.
 
-A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
+A new URL does not match the origin if the 'protocol', 'port' (if specified), and/or 'host' are different.
 
 Cypress does not allow you to navigate to a different origin URL within a single test.
 
@@ -58,13 +58,13 @@ https://on.cypress.io/cross-origin-violation
 
   > [Cross origin error message]
 
-Before the page load, you were bound to the origin policy:
+Before the page load, you were bound to the origin:
 
   > http://localhost:4466
 
-A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
+A cross origin error happens when your application navigates to a new URL which does not match the origin above.
 
-A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
+A new URL does not match the origin if the 'protocol', 'port' (if specified), and/or 'host' are different.
 
 Cypress does not allow you to navigate to a different origin URL within a single test.
 
@@ -81,13 +81,13 @@ https://on.cypress.io/cross-origin-violation
 
   > [Cross origin error message]
 
-Before the page load, you were bound to the origin policy:
+Before the page load, you were bound to the origin:
 
   > http://localhost:4466
 
-A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
+A cross origin error happens when your application navigates to a new URL which does not match the origin above.
 
-A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
+A new URL does not match the origin if the 'protocol', 'port' (if specified), and/or 'host' are different.
 
 Cypress does not allow you to navigate to a different origin URL within a single test.
 

@@ -329,8 +329,6 @@ class $Cypress {
     this.events.proxyTo(this.cy)
 
     $scriptUtils.runScripts(specWindow, scripts)
-    // TODO: remove this after making the type of `runScripts` more specific.
-    // @ts-expect-error
     .catch((error) => {
       this.runner.onSpecError('error')({ error })
     })

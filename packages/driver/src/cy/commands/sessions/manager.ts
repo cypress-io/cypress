@@ -134,6 +134,7 @@ export default class SessionsManager {
 
     clearAllSavedSessions: async () => {
       this.clearActiveSessions()
+      this.registeredSessions.clear()
       const clearAllSessions = true
 
       return this.Cypress.backend('clear:sessions', clearAllSessions)

@@ -5,7 +5,7 @@ describe('cy.origin dependencies - jsx', { browser: '!webkit' }, () => {
   })
 
   it('works with a jsx file', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       const lodash = Cypress.require('lodash')
 
       expect(lodash.get({ foo: 'foo' }, 'foo')).to.equal('foo')

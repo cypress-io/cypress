@@ -20,6 +20,7 @@ export function makeDefaultWebpackConfig (
     importPath,
   } = config.sourceWebpackModulesResult.htmlWebpackPlugin
   const indexHtmlFile = config.devServerConfig.cypressConfig.indexHtmlFile
+  const isRunMode = config.devServerConfig.cypressConfig.isTextTerminal
   const HtmlWebpackPlugin = _HtmlWebpackPlugin as typeof import('html-webpack-plugin-5')
 
   debug(`Using HtmlWebpackPlugin version ${version} from ${importPath}`)
@@ -48,10 +49,19 @@ export function makeDefaultWebpackConfig (
       new HtmlWebpackPlugin({
         template: indexHtmlFile,
         // Angular generates all of it's scripts with <script type="module">. Live-reloading breaks without this option.
-        ...(config.devServerConfig.framework === 'angular' ? { scriptLoading: 'module' } : {}),
+        // We need to manually set the base here to `/__cypress/src/` so that static assets load with our proxy
+        ...(config.devServerConfig.framework === 'angular' ? { scriptLoading: 'module', base: '/__cypress/src/' } : {}),
       }),
     ],
+    devtool: 'inline-source-map',
   } as any
+
+  if (isRunMode) {
+    // Disable file watching when executing tests in `run` mode
+    finalConfig.watchOptions = {
+      ignored: '**/*',
+    }
+  }
 
   if (config.sourceWebpackModulesResult.webpackDevServer.majorVersion === 4) {
     return {
