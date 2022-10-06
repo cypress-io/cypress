@@ -7,7 +7,7 @@ context('cy.origin connectors', () => {
   })
 
   it('.each()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#by-name>[name="colors"]').each(($element, index) => {
         expect($element.prop('type')).to.equal('checkbox')
       })
@@ -15,19 +15,19 @@ context('cy.origin connectors', () => {
   })
 
   it('.its()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#by-id>input').its('length').should('eq', 3)
     })
   })
 
   it('.invoke()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#button').invoke('text').should('eq', 'button')
     })
   })
 
   it('.spread()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       const arr = ['foo', 'bar', 'baz']
 
       cy.wrap(arr).spread((foo, bar, baz) => {
@@ -39,7 +39,7 @@ context('cy.origin connectors', () => {
   })
 
   it('.then()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#by-id>input').then(($list) => {
         expect($list).to.have.length(3)
       })
@@ -58,7 +58,7 @@ context('cy.origin connectors', () => {
     })
 
     it('.its()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#by-id>input').its('length')
       })
 
@@ -92,7 +92,7 @@ context('cy.origin connectors', () => {
     })
 
     it('.invoke()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#button').invoke('text')
       })
 

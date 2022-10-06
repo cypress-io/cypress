@@ -1,6 +1,6 @@
 import { isAllowedFeature } from './isAllowedFeature'
-import { LoginConnectStore, useLoginConnectStore, userStatuses } from '../store/login-connect-store'
-import type { UserStatus } from '../store/login-connect-store'
+import { LoginConnectStore, useLoginConnectStore, userStatuses } from '../store'
+import type { UserStatus } from '../store'
 import { BannerIds } from '@packages/types'
 import interval from 'human-interval'
 
@@ -9,7 +9,7 @@ const bannerIds = {
   needsOrgConnect: BannerIds.ACI_082022_CREATE_ORG,
   needsProjectConnect: BannerIds.ACI_082022_CONNECT_PROJECT,
   needsRecordedRun: BannerIds.ACI_082022_RECORD,
-}
+} as const
 
 describe('isAllowedFeature', () => {
   let store: LoginConnectStore
@@ -19,40 +19,41 @@ describe('isAllowedFeature', () => {
   // and assert on the expected user status derived from those flags
   // and provided by loginConnectStore.userStatus
   const setUpStatus = (status: UserStatus) => {
-    const { setFirstOpened, setPromptShown, setFlag } = store
+    const { setCypressFirstOpened, setPromptShown, setUserFlag, setProjectFlag } = store
 
     // set a default valid number of days since first open & nav prompt shown
     // individual tests may override
-    setFirstOpened(Date.now() - interval('5 days'))
+    setCypressFirstOpened(Date.now() - interval('5 days'))
     setPromptShown('ci1', Date.now() - interval('5 days'))
 
     switch (status) {
       case 'isLoggedOut':
+        setUserFlag('isLoggedIn', false)
         expect(store.userStatus).to.eq('isLoggedOut')
         break
       case 'needsOrgConnect':
-        setFlag('isLoggedIn', true)
-        setFlag('isOrganizationLoaded', true)
+        setUserFlag('isLoggedIn', true)
+        setUserFlag('isOrganizationLoaded', true)
         expect(store.userStatus).to.eq('needsOrgConnect')
         break
       case 'needsProjectConnect':
-        setFlag('isLoggedIn', true)
-        setFlag('isMemberOfOrganization', true)
+        setUserFlag('isLoggedIn', true)
+        setUserFlag('isMemberOfOrganization', true)
         expect(store.userStatus).to.eq('needsProjectConnect')
         break
       case 'needsRecordedRun':
-        setFlag('isLoggedIn', true)
-        setFlag('isMemberOfOrganization', true)
-        setFlag('isProjectConnected', true)
-        setFlag('hasNoRecordedRuns', true)
+        setUserFlag('isLoggedIn', true)
+        setUserFlag('isMemberOfOrganization', true)
+        setProjectFlag('isProjectConnected', true)
+        setProjectFlag('hasNoRecordedRuns', true)
 
         expect(store.userStatus).to.eq('needsRecordedRun')
         break
       case 'allTasksCompleted':
-        setFlag('isLoggedIn', true)
-        setFlag('isMemberOfOrganization', true)
-        setFlag('isProjectConnected', true)
-        setFlag('hasNoRecordedRuns', false)
+        setUserFlag('isLoggedIn', true)
+        setUserFlag('isMemberOfOrganization', true)
+        setProjectFlag('isProjectConnected', true)
+        setProjectFlag('hasNoRecordedRuns', false)
 
         expect(store.userStatus).to.eq('allTasksCompleted')
         break
@@ -63,7 +64,7 @@ describe('isAllowedFeature', () => {
 
   beforeEach(() => {
     store = useLoginConnectStore()
-    store.setFlag('hasNonExampleSpec', true)
+    store.setProjectFlag('hasNonExampleSpec', true)
   })
 
   describe('specsListBanner', () => {
@@ -89,13 +90,9 @@ describe('isAllowedFeature', () => {
       })
 
       context('banners HAVE been dismissed', () => {
-        userStatuses.forEach((status) => {
-          if (status === 'allTasksCompleted') {
-            // no banner matches this state, so nothing can be dismissed, skip it
-            return
-          }
-
-          it(`returns false for status ${ status }`, () => {
+        (Object.keys(bannerIds) as (keyof typeof bannerIds)[])
+        .forEach((status) => {
+          it(`returns false for banner ${ bannerIds[status] }`, () => {
             setUpStatus(status)
 
             // simulate banner for current status having been dismissed
@@ -132,7 +129,7 @@ describe('isAllowedFeature', () => {
         userStatuses.forEach((status) => {
           it(`returns false for status ${status}`, () => {
             setUpStatus(status)
-            store.setFirstOpened(Date.now() - interval('3 days'))
+            store.setCypressFirstOpened(Date.now() - interval('3 days'))
 
             const result = isAllowedFeature('specsListBanner', store)
 
@@ -160,7 +157,7 @@ describe('isAllowedFeature', () => {
         if (status === 'allTasksCompleted' || status === 'needsRecordedRun') {
           it(`returns false for status ${status}`, () => {
             setUpStatus(status)
-            store.setFlag('hasNonExampleSpec', false)
+            store.setProjectFlag('hasNonExampleSpec', false)
 
             const result = isAllowedFeature('specsListBanner', store)
 
@@ -169,7 +166,7 @@ describe('isAllowedFeature', () => {
         } else {
           it(`returns true for status ${status}`, () => {
             setUpStatus(status)
-            store.setFlag('hasNonExampleSpec', false)
+            store.setProjectFlag('hasNonExampleSpec', false)
 
             const result = isAllowedFeature('specsListBanner', store)
 
@@ -208,7 +205,7 @@ describe('isAllowedFeature', () => {
       userStatuses.forEach((status) => {
         it(`returns false for status ${ status } `, () => {
           setUpStatus(status)
-          store.setFirstOpened(Date.now() - interval('3 days'))
+          store.setCypressFirstOpened(Date.now() - interval('3 days'))
           const result = isAllowedFeature('docsCiPrompt', store)
 
           expect(result).to.be.false

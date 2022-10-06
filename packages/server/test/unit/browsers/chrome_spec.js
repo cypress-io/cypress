@@ -464,6 +464,70 @@ describe('lib/browsers/chrome', () => {
         })
       })
 
+      it('appends X-Cypress-Is-XHR-Or-Fetch header to fetch request', async function () {
+        await chrome.open('chrome', 'http://', withExperimentalFlagOn, this.automation)
+
+        this.pageCriClient.on.withArgs('Page.frameAttached').yield()
+
+        await this.pageCriClient.on.withArgs('Fetch.requestPaused').args[0][1]({
+          frameId: 'aut-frame-id',
+          requestId: '1234',
+          resourceType: 'Fetch',
+          request: {
+            url: 'http://localhost:3000/test-request',
+            headers: {
+              'X-Foo': 'Bar',
+            },
+          },
+        })
+
+        expect(this.pageCriClient.send).to.be.calledWith('Fetch.continueRequest', {
+          requestId: '1234',
+          headers: [
+            {
+              name: 'X-Foo',
+              value: 'Bar',
+            },
+            {
+              name: 'X-Cypress-Is-XHR-Or-Fetch',
+              value: 'fetch',
+            },
+          ],
+        })
+      })
+
+      it('appends X-Cypress-Is-XHR-Or-Fetch header to xhr request', async function () {
+        await chrome.open('chrome', 'http://', withExperimentalFlagOn, this.automation)
+
+        this.pageCriClient.on.withArgs('Page.frameAttached').yield()
+
+        await this.pageCriClient.on.withArgs('Fetch.requestPaused').args[0][1]({
+          frameId: 'aut-frame-id',
+          requestId: '1234',
+          resourceType: 'XHR',
+          request: {
+            url: 'http://localhost:3000/test-request',
+            headers: {
+              'X-Foo': 'Bar',
+            },
+          },
+        })
+
+        expect(this.pageCriClient.send).to.be.calledWith('Fetch.continueRequest', {
+          requestId: '1234',
+          headers: [
+            {
+              name: 'X-Foo',
+              value: 'Bar',
+            },
+            {
+              name: 'X-Cypress-Is-XHR-Or-Fetch',
+              value: 'xhr',
+            },
+          ],
+        })
+      })
+
       it('gets frame tree on Page.frameAttached', async function () {
         await chrome.open('chrome', 'http://', withExperimentalFlagOn, this.automation)
 

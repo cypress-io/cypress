@@ -9,24 +9,26 @@ interface LoginUserData {
 export interface LoginConnectState {
   isLoginConnectOpen: boolean
   utmMedium: string
-  isLoggedIn: boolean
-  isProjectConnected: boolean
-  isConfigLoaded: boolean
-  isOrganizationLoaded: boolean
-  isMemberOfOrganization: boolean
-  hasNoRecordedRuns: boolean
-  error: boolean
-  hasRecordedRuns: boolean
-  loginError: boolean
+  cypressFirstOpened?: number
+  user: {
+    isLoggedIn: boolean
+    loginError: boolean
+    isOrganizationLoaded: boolean
+    isMemberOfOrganization: boolean
+  }
+  project: {
+    isProjectConnected: boolean
+    isConfigLoaded: boolean
+    hasNoRecordedRuns: boolean
+    hasNonExampleSpec: boolean
+  }
   userData?: LoginUserData
-  firstOpened?: number
-  latestBannerShownTime?: number
-  hasNonExampleSpec: boolean
   promptsShown: {
     ci1?: number
     loginModalRecord?: number
   }
   bannersState: BannersState
+  _latestBannerShownTimeForTesting?: number
 }
 
 // The user can be in only one status at a time.
@@ -42,30 +44,30 @@ export const userStatuses = [
 
 export type UserStatus = typeof userStatuses[number]
 
-export type LoginConnectBooleanField = 'isLoggedIn' | 'isProjectConnected' | 'isConfigLoaded' | 'isOrganizationLoaded' | 'isMemberOfOrganization' | 'hasRecordedRuns' | 'hasNoRecordedRuns' | 'hasNonExampleSpec'
-
 export const useLoginConnectStore = defineStore({
   id: 'loginConnect',
 
   state (): LoginConnectState {
     return {
-      isLoginConnectOpen: false,
       utmMedium: '',
-      isLoggedIn: false,
-      isProjectConnected: false,
-      isConfigLoaded: false,
-      isOrganizationLoaded: false,
-      isMemberOfOrganization: false,
-      hasNoRecordedRuns: false,
-      error: false,
-      hasRecordedRuns: false,
-      loginError: false,
+      isLoginConnectOpen: false,
+      cypressFirstOpened: undefined,
       userData: undefined,
-      hasNonExampleSpec: true, // TODO: in #23762 initialize as false and set the real value
+      user: {
+        isLoggedIn: false,
+        loginError: false,
+        isOrganizationLoaded: false,
+        isMemberOfOrganization: false,
+      },
+      project: {
+        isProjectConnected: false,
+        isConfigLoaded: false,
+        hasNoRecordedRuns: false,
+        hasNonExampleSpec: true, // TODO: in #23762 initialize as false and set the real value
+      },
       promptsShown: {},
-      firstOpened: undefined,
       bannersState: {},
-      latestBannerShownTime: undefined,
+      _latestBannerShownTimeForTesting: undefined,
     }
   },
   actions: {
@@ -77,14 +79,14 @@ export const useLoginConnectStore = defineStore({
       this.isLoginConnectOpen = false
       this.utmMedium = ''
     },
-    /**
-     * Set a boolean flag in the LoginConnect store
-     */
-    setFlag (name: LoginConnectBooleanField, newVal: boolean) {
-      this[name] = newVal
+    setUserFlag (name: keyof LoginConnectState['user'], newVal: boolean) {
+      this.user[name] = newVal
+    },
+    setProjectFlag (name: keyof LoginConnectState['project'], newVal: boolean) {
+      this.project[name] = newVal
     },
     setLoginError (error: boolean) {
-      this.loginError = error
+      this.user.loginError = error
     },
     setUserData (userData?: LoginUserData) {
       this.userData = userData
@@ -92,42 +94,47 @@ export const useLoginConnectStore = defineStore({
     setPromptShown (slug: string, timestamp: number) {
       this.promptsShown[slug] = timestamp
     },
-    setFirstOpened (timestamp: number) {
-      this.firstOpened = timestamp
+    setCypressFirstOpened (timestamp: number) {
+      this.cypressFirstOpened = timestamp
     },
     setBannersState (banners: BannersState) {
       this.bannersState = banners
     },
     setLatestBannerShownTime (timestamp: number) {
-      this.latestBannerShownTime = timestamp
+      this._latestBannerShownTimeForTesting = timestamp
     },
   },
   getters: {
-    userStatus (state) {
+    userStatus (state): UserStatus {
+      const { user, project } = state
+
       switch (true) {
         // the switch here ensures the uniqueness of states as we don't allow duplicate case labels
         // https://eslint.org/docs/latest/rules/no-duplicate-case
-        case !state.isLoggedIn:
+        case !user.isLoggedIn:
           return 'isLoggedOut'
-        case state.isLoggedIn && state.isOrganizationLoaded && !state.isMemberOfOrganization:
+        case user.isLoggedIn && user.isOrganizationLoaded && !user.isMemberOfOrganization:
           return 'needsOrgConnect'
-        case state.isLoggedIn && state.isMemberOfOrganization && !state.isProjectConnected:
+        case user.isLoggedIn && user.isMemberOfOrganization && !project.isProjectConnected:
           return 'needsProjectConnect'
-        case state.isLoggedIn && state.isMemberOfOrganization && state.isProjectConnected && state.hasNoRecordedRuns:
+        case user.isLoggedIn && user.isMemberOfOrganization && project.isProjectConnected && project.hasNoRecordedRuns:
           return 'needsRecordedRun'
         default:
           return 'allTasksCompleted'
       }
     },
     userStatusMatches () {
-      return (status: UserStatus) => this.userStatus === status
-    },
-    userStatusIsNot () {
-      return (status: UserStatus) => this.userStatus !== status
+      // casting here sine ts seems to need a little extra help in this 'return a function from a getter' situation
+      return (status: UserStatus) => this.userStatus as unknown as UserStatus === status
     },
     projectStatus () {
       // TODO: in #23762 look at projectConnectionStatus in SpecHeaderCloudDataTooltip
     },
+    latestBannerShownTime (state) {
+      return state._latestBannerShownTimeForTesting
+      // TODO: in #23762 return based on bannersState
+    },
+
   },
 })
 

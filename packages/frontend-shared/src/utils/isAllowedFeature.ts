@@ -1,6 +1,6 @@
 import interval from 'human-interval'
 import { BannerIds } from '@packages/types'
-import type { LoginConnectStore } from '../store/login-connect-store'
+import type { LoginConnectStore } from '../store'
 
 const bannerIds = {
   isLoggedOut: BannerIds.ACI_082022_LOGIN,
@@ -10,14 +10,12 @@ const bannerIds = {
 }
 
 /**
- *
- * @param eventTime - timestamp of an event
+ * Enures a cooldown period between two cypress-triggered events, if one has already happened
+ * @param eventTime - timestamp of an event - if undefined, this function will always return true, no cooldown is needed
  * @param waitTime - time to compare with, such as `1 day`, `20 minutes`, etc, to be parsed by `human-interval` package
  */
 const minTimeSinceEvent = (eventTime: number | undefined, waitTime: string) => {
   if (!eventTime) {
-    // if there is no event time, the event has never been recorded
-    // so the "time since" is infinite, return true here
     return true
   }
 
@@ -28,7 +26,7 @@ const minTimeSinceEvent = (eventTime: number | undefined, waitTime: string) => {
     throw new Error(`incorrect format for waitTime provided, value must be \`n days\`, \`n minutes\` etc. Value received was ${waitTime}`)
   }
 
-  return (Date.now() - eventTime) > interval(waitTime)
+  return (Date.now() - eventTime) > waitTimestamp
 }
 
 export const isAllowedFeature = (
@@ -36,17 +34,16 @@ export const isAllowedFeature = (
   loginConnectStore: LoginConnectStore,
 ) => {
   const {
-    firstOpened,
+    cypressFirstOpened,
     promptsShown,
     latestBannerShownTime,
     bannersState,
     userStatus,
-    hasNonExampleSpec,
-    userStatusIsNot,
+    project,
   } = loginConnectStore
 
   const events = {
-    cypressFirstOpened: firstOpened,
+    cypressFirstOpened,
     navCiPromptAutoOpened: promptsShown.ci1,
     loginModalRecordPromptShown: promptsShown.loginModalRecord,
     latestSmartBannerShown: latestBannerShownTime,
@@ -71,12 +68,11 @@ export const isAllowedFeature = (
         minTimeSinceEvent(events.cypressFirstOpened, '4 days'),
         minTimeSinceEvent(events.navCiPromptAutoOpened, '1 day'),
         bannerForCurrentStatusWasNotDismissed(),
-        userStatusIsNot('allTasksCompleted'),
         bannersAreNotDisabledForTesting(),
       ],
       needsRecordedRun: [
         minTimeSinceEvent(events.loginModalRecordPromptShown, '1 day'),
-        hasNonExampleSpec,
+        project.hasNonExampleSpec,
       ],
       needsOrgConnect: [],
       needsProjectConnect: [],
@@ -91,14 +87,18 @@ export const isAllowedFeature = (
       needsOrgConnect: [],
       needsProjectConnect: [],
       isLoggedOut: [],
+      allTasksCompleted: [],
     },
   }
 
-  let rulesToCheck = [...rules[featureName].base]
+  const baseRules = [...rules[featureName].base]
 
-  if (userStatus !== 'allTasksCompleted') {
-    rulesToCheck = rulesToCheck.concat(rules[featureName][userStatus])
-  }
+  // if the `userStatus` is not explicitly listed for a feature, then
+  // we don't have anything that we are allowed to show for that status
+  // so the fallback rules array of [false] is used
+  const statusSpecificRules = rules[featureName][userStatus] ?? [false]
+
+  const rulesToCheck = baseRules.concat(statusSpecificRules)
 
   return rulesToCheck.every((rule: boolean) => rule === true)
 }

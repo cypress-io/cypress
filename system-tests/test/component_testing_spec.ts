@@ -107,7 +107,7 @@ describe(`React major versions with Webpack`, function () {
   }
 })
 
-const ANGULAR_MAJOR_VERSIONS = ['13', '14']
+const ANGULAR_MAJOR_VERSIONS = ['13', '14', '15']
 
 describe(`Angular CLI major versions`, () => {
   systemTests.setup()

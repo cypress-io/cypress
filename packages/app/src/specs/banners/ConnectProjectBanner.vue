@@ -33,6 +33,7 @@
       v-if="isProjectConnectOpen && cloudModalsQuery.data.value"
       :gql="cloudModalsQuery.data.value"
       utm-medium="Specs Create Project Banner"
+      :utm-content="cohortOption.cohort"
       @cancel="handleModalClose"
       @success="handleModalClose"
     />
