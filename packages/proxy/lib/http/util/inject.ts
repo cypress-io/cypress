@@ -34,9 +34,10 @@ export async function fullCrossOrigin (domain, options: FullCrossOriginOpts) {
   return oneLine`
     <script type='text/javascript'>
       document.domain = '${domain}';
-      const cypressConfig = ${JSON.stringify(options)};
 
-      ${contents}
+      (function (cypressConfig) {
+        ${contents}
+      }(${JSON.stringify(options)}));
     </script>
   `
 }

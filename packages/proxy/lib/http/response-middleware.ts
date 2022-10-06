@@ -14,6 +14,7 @@ import zlib from 'zlib'
 import { URL } from 'url'
 import { CookiesHelper } from './util/cookies'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
+import { toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
 
 interface ResponseMiddlewareProps {
   /**
@@ -137,6 +138,8 @@ const stringifyFeaturePolicy = (policy: any): string => {
 }
 
 const LogResponse: ResponseMiddleware = function () {
+  console.log(`🔵 (${this.req.proxiedUrl}) response`)
+
   this.debug('received response %o', {
     req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
     incomingRes: _.pick(this.incomingRes, 'headers', 'statusCode'),
@@ -372,10 +375,30 @@ const MaybePreventCaching: ResponseMiddleware = function () {
   this.next()
 }
 
+const setSimulatedCookies = (ctx) => {
+  const defaultDomain = (new URL(ctx.req.proxiedUrl)).hostname
+  const allCookiesForRequest = ctx.getCookieJar()
+  .getCookies(ctx.req.proxiedUrl)
+  .map((cookie) => toughCookieToAutomationCookie(cookie, defaultDomain))
+
+  // TODO: handle case where it's an xhr or something
+  if (ctx.res.wantsInjection === 'fullCrossOrigin') {
+    console.log(`🟢 (${ctx.req.proxiedUrl}) set ctx.simulatedCookies:`, allCookiesForRequest.map((c) => `${c.name}=${c.value}`))
+
+    ctx.simulatedCookies = allCookiesForRequest
+  } else {
+    console.log(`🔴 (${ctx.req.proxiedUrl}) not fullCrossOrigin`)
+  }
+}
+
 const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   const cookies: string | string[] | undefined = this.incomingRes.headers['set-cookie']
 
   if (!cookies || !cookies.length) {
+    console.log(`🔴 (${this.req.proxiedUrl}) no cookies`)
+
+    setSimulatedCookies(this)
+
     return this.next()
   }
 
@@ -412,6 +435,11 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
     }
   }
 
+  console.log('🔵', `(${this.req.proxiedUrl})`, {
+    experimentalSessionAndOrigin: this.config.experimentalSessionAndOrigin,
+    doesTopNeedSimulating,
+  })
+
   if (!this.config.experimentalSessionAndOrigin || !doesTopNeedSimulating) {
     ([] as string[]).concat(cookies).forEach((cookie) => {
       appendCookie(cookie)
@@ -441,28 +469,32 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
     appendCookie(cookie)
   })
 
-  const addedCookies = await cookiesHelper.getAddedCookies()
+  // const addedCookies = await cookiesHelper.getAddedCookies()
 
-  if (!addedCookies.length) {
-    return this.next()
-  }
+  // if (!addedCookies.length) {
+  //   return this.next()
+  // }
 
-  const origin = cors.getOriginPolicy(this.req.proxiedUrl)
+  const defaultDomain = (new URL(this.req.proxiedUrl)).hostname
+  const origin = cors.getOrigin(this.req.proxiedUrl)
+  const allCookiesForRequest = this.getCookieJar()
+  .getCookies(this.req.proxiedUrl)
+  .map((cookie) => toughCookieToAutomationCookie(cookie, defaultDomain))
 
   console.log(`🟠 (${this.req.proxiedUrl}) might set simulatedCookies`)
 
   // TODO: handle case where it's an xhr or something
   if (this.res.wantsInjection === 'fullCrossOrigin') {
-    console.log(`🟢 (${this.req.proxiedUrl}) set this.simulatedCookies:`, addedCookies.map((c) => `${c.name}=${c.value}`))
+    console.log(`🟢 (${this.req.proxiedUrl}) set this.simulatedCookies:`, allCookiesForRequest.map((c) => `${c.name}=${c.value}`))
 
-    this.simulatedCookies = addedCookies
+    this.simulatedCookies = allCookiesForRequest
   }
 
   this.serverBus.once('cross:origin:cookies:received', () => {
     this.next()
   })
 
-  this.serverBus.emit('cross:origin:cookies', { origin, cookies: addedCookies })
+  this.serverBus.emit('cross:origin:cookies', { origin, cookies: allCookiesForRequest })
 }
 
 const REDIRECT_STATUS_CODES: any[] = [301, 302, 303, 307, 308]
@@ -524,11 +556,7 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
   this.incomingResStream.pipe(concatStream(async (body) => {
     const nodeCharset = getNodeCharsetFromResponse(this.incomingRes.headers, body, this.debug)
 
-    // TODO: write tests, starting with a cross-origin page that needs
-    // the cookies in document.cookie
-
-    console.log(`🔵 (${this.req.proxiedUrl}) this.simulatedCookies`)
-    console.log(this.simulatedCookies)
+    console.log(`🔵 (${this.req.proxiedUrl}) this.simulatedCookies:`, this.simulatedCookies)
 
     const decodedBody = iconv.decode(body, nodeCharset)
     const injectedBody = await rewriter.html(decodedBody, {

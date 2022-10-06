@@ -63,7 +63,7 @@ const getCookiesFromCypress = () => {
   })
 }
 
-const syncCookieValues = (onCookieUpdate) => {
+const pollForAutomationCookieValues = (onCookieUpdate) => {
   // The interval value is arbitrary; it shouldn't be too often, but needs to
   // be fairly frequent so that the local value is kept as up-to-date as
   // possible. It's possible there could be a race condition where
@@ -147,15 +147,14 @@ const setAutomationCookie = (options) => {
 // - On an interval, get the browser's cookies for the given domain, so that
 //   updates to the cookie jar (via http requests, cy.setCookie, etc) are
 //   reflected in the document.cookie value.
-export const patchDocumentCookie = () => {
-  // TODO: get cookies from server
-  let documentCookieValue = ''
+export const patchDocumentCookie = (cookies) => {
+  let documentCookieValue = mergeCookies(window.document.cookie, cookies)
 
   const setDocumentCookieValue = (newCookieString) => {
     documentCookieValue = newCookieString
   }
 
-  let cookieSyncIntervalId = syncCookieValues(setDocumentCookieValue)
+  let cookieSyncIntervalId = pollForAutomationCookieValues(setDocumentCookieValue)
 
   Object.defineProperty(window.document, 'cookie', {
     get () {
@@ -184,7 +183,7 @@ export const patchDocumentCookie = () => {
         },
       })
       .then(() => {
-        cookieSyncIntervalId = syncCookieValues(setDocumentCookieValue)
+        cookieSyncIntervalId = pollForAutomationCookieValues(setDocumentCookieValue)
       })
 
       return documentCookieValue

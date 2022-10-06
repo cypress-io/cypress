@@ -9,6 +9,8 @@ interface CookieData {
   path?: string
 }
 
+type SameSiteContext = 'strict' | 'lax' | 'none' | undefined
+
 export const toughCookieToAutomationCookie = (toughCookie: Cookie, defaultDomain: string): AutomationCookie => {
   const expiry = toughCookie.expiryTime()
 
@@ -40,6 +42,7 @@ export class CookieJar {
 
     if (!toughCookie) return
 
+    // TODO: this is fixed in tough-cookie@4.1.0
     // fixes tough-cookie defaulting undefined/invalid SameSite to 'none'
     // https://github.com/salesforce/tough-cookie/issues/191
     const hasUnspecifiedSameSite = toughCookie.sameSite === 'none' && !sameSiteNoneRe.test(cookie)
@@ -57,7 +60,7 @@ export class CookieJar {
     this._cookieJar = new ToughCookieJar(undefined, { allowSpecialUseDomain: true })
   }
 
-  getCookies (url, sameSiteContext) {
+  getCookies (url: string, sameSiteContext: SameSiteContext = undefined) {
     // @ts-ignore
     return this._cookieJar.getCookiesSync(url, { sameSiteContext })
   }
@@ -75,7 +78,7 @@ export class CookieJar {
     return cookies
   }
 
-  setCookie (cookie: string | Cookie, url: string, sameSiteContext: 'strict' | 'lax' | 'none') {
+  setCookie (cookie: string | Cookie, url: string, sameSiteContext: SameSiteContext) {
     // @ts-ignore
     this._cookieJar.setCookieSync(cookie, url, { sameSiteContext })
   }

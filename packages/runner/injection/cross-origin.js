@@ -73,7 +73,7 @@ window.addEventListener('error', handleErrorEvent)
 console.log('🟢 apply patches')
 
 // Apply Patches
-patchDocumentCookie()
+patchDocumentCookie(cypressConfig.simulatedCookies)
 
 // return null to trick contentWindow into thinking
 // its not been iFramed if modifyObstructiveCode is true

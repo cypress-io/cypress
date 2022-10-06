@@ -21,6 +21,7 @@ const SAMESITE_NONE_RE = /; +samesite=(?:'none'|"none"|none)/i
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
 const convertSameSiteToughToExtension = (sameSite, setCookie) => {
+  // TODO: this is fixed in tough-cookie@4.1.0
   // tough-cookie@4.0.0 uses 'none' as a default, so run this regex to detect if
   // SameSite=None was not explicitly set
   // @see https://github.com/salesforce/tough-cookie/issues/191
