@@ -486,7 +486,7 @@ We searched for specs matching this glob pattern:
 exports['e2e record recordKey warns but does not exit when is forked pr 1'] = `
 Warning: It looks like you are trying to record this run from a forked PR.
 
-The Record Key is missing. Your CI provider is likely not passing private environment variables to builds from forks.
+The record key is missing. Your CI provider is likely not passing private environment variables to builds from forks.
 
 These results will not be recorded.
 
@@ -801,7 +801,7 @@ StatusCodeError: 500 - "Internal Server Error"
 exports['e2e record recordKey warns but does not exit when is forked pr and parallel 1'] = `
 Warning: It looks like you are trying to record this run from a forked PR.
 
-The Record Key is missing. Your CI provider is likely not passing private environment variables to builds from forks.
+The record key is missing. Your CI provider is likely not passing private environment variables to builds from forks.
 
 These results will not be recorded.
 

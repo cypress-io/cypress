@@ -276,6 +276,7 @@ mutation SelectCloudProjectModal_CreateCloudProject( $name: String!, $orgId: ID!
 const props = defineProps<{
   gql: SelectCloudProjectModalFragment
   utmMedium: string
+  utmContent?: string
 }>()
 
 const emit = defineEmits<{
@@ -347,7 +348,7 @@ async function createOrConnectProject () {
       name: projectName.value,
       public: projectAccess.value === 'public',
       campaign: 'Create project',
-      cohort: '',
+      cohort: props.utmContent || '',
       medium: props.utmMedium,
       source: getUtmSource(),
     })

@@ -43,7 +43,7 @@ describe('App: Settings', () => {
       })
     })
 
-    it('shows the Record keys section', () => {
+    it('shows the record keys section', () => {
       cy.startAppServer('e2e')
       cy.loginUser()
 

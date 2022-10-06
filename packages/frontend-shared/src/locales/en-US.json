@@ -292,7 +292,7 @@
       "titleFailed": "Login failed",
       "titleBrowserError": "Browser error",
       "actionLogin": "Log in",
-      "profileMenuLabel": "Profile and Log out",
+      "profileMenuLabel": "Profile and logout",
       "actionLogout": "Log out",
       "actionContinue": "Continue",
       "actionOpening": "Opening browser",
@@ -343,7 +343,7 @@
       "frameworkLabel": "Front-end framework",
       "frameworkPlaceholder": "Pick a framework",
       "bundlerLabel": "Bundler",
-      "bundlerLabelDescription": "(Dev server)",
+      "bundlerLabelDescription": "(dev server)",
       "bundlerPlaceholder": "Pick a bundler",
       "languageLabel": "Language",
       "configFileLanguageLabel": "Cypress config file",
@@ -460,7 +460,7 @@
     },
     "recordKey": {
       "title": "Record key",
-      "description": "The Record key configured for this project inside of Cypress Dashboard. {0}",
+      "description": "The record key configured for this project inside of Cypress Dashboard. {0}",
       "manageKeys": "Manage keys",
       "errorEmpty": "You do not have permission to record on this project",
       "errorEmptyButton": "Request record rights",
@@ -537,7 +537,7 @@
   "runs": {
     "connect": {
       "title": "View your recorded runs from the Cypress Dashboard",
-      "smartText": "Scale your test runs with built-in smart orchestration.",
+      "smartText": "Scale your test runs with built-in Smart Orchestration.",
       "debugText": "Debug tests that fail in CI with visual feedback.",
       "chartText": "Keep your tests in tip-top shape with powerful analytics.",
       "buttonUser": "Log in to the Cypress Dashboard",
@@ -766,10 +766,10 @@
     "description": "Confirm your project's preferred language."
   },
   "openBrowser": {
-    "startComponent": "Start component testing in {browser}",
-    "startE2E": "Start E2E testing in {browser}",
+    "startComponent": "Start Component Testing in {browser}",
+    "startE2E": "Start E2E Testing in {browser}",
     "openingComponent": "Opening component testing in {browser}",
-    "openingE2E": "Opening E2E testing in {browser}",
+    "openingE2E": "Opening E2E Testing in {browser}",
     "running": "Running {browser}",
     "focus": "Focus",
     "close": "Close",
@@ -784,7 +784,7 @@
       "highlightsLabel": "Highlights",
       "testsRunningError": "Cannot show snapshot while tests are running",
       "snapshotMissingError": "The snapshot is missing. Displaying current state of the DOM.",
-      "defaultTitle": "DOM Snapshot",
+      "defaultTitle": "DOM snapshot",
       "pinnedTitle": "Pinned",
       "studioActiveError": "Cannot show snapshot while creating commands in Studio"
     },

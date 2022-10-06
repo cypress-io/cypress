@@ -389,7 +389,7 @@ describe('Launchpad: Setup Project', () => {
 
         cy.contains('Pick a framework').click()
         cy.findByRole('option', { name: 'Create React App' }).click()
-        cy.findByRole('button', { name: 'Bundler(Dev Server) Webpack' }).should('not.exist')
+        cy.findByRole('button', { name: 'Bundler (dev server) Webpack' }).should('not.exist')
         cy.findByRole('button', { name: 'Next step' }).should('not.have.disabled')
 
         cy.findByRole('button', { name: 'Next step' }).click()
@@ -512,7 +512,7 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'Front-end Framework React.js (detected)' }).click()
         cy.findByRole('option', { name: 'Vue.js 3' }).click()
 
-        cy.findByRole('button', { name: 'Bundler(Dev Server) Pick a bundler' }).click()
+        cy.findByRole('button', { name: 'Bundler (dev server) Pick a bundler' }).click()
         cy.findByRole('option', { name: 'Vite' }).click()
 
         cy.findByRole('button', { name: 'TypeScript' }).click()

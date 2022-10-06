@@ -24,7 +24,7 @@ const abortRequests = () => {
 
 context('cy.origin waiting', () => {
   before(() => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       let reqQueue: XMLHttpRequest[] = []
 
       window.xhrGet = (url) => {
@@ -45,7 +45,7 @@ context('cy.origin waiting', () => {
   let logs: Map<string, any>
 
   beforeEach(() => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       window.abortRequests()
     })
 
@@ -62,7 +62,7 @@ context('cy.origin waiting', () => {
 
   context('number', () => {
     it('waits for the specified value', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const delay = cy.spy(Cypress.Promise, 'delay')
 
         cy.wait(50).then(() => {
@@ -332,7 +332,7 @@ context('cy.origin waiting', () => {
 
   context('#consoleProps', () => {
     it('number', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.wait(200)
       })
 

@@ -1425,7 +1425,7 @@ export const AllCypressErrors = {
 
   DASHBOARD_GRAPHQL_ERROR: (err: Error) => {
     return errTemplate`
-      We received an unexpected error response from the request to the Cypress dashboard:
+      We received an unexpected error response from the request to the Cypress Dashboard:
 
       ${fmt.stringify(err.message)}
     `
