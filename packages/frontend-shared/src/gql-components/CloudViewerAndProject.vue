@@ -63,7 +63,14 @@ subscription CloudViewerAndProject_CheckCloudOrgMembership {
 `
 
 const loginConnectStore = useLoginConnectStore()
-const { setUserFlag, setProjectFlag, setLoginError, setUserData, setPromptShown, setCypressFirstOpened, setBannersState } = loginConnectStore
+const {
+  setUserFlag,
+  setProjectFlag,
+  setUserData,
+  setPromptShown,
+  setCypressFirstOpened,
+  setBannersState,
+} = loginConnectStore
 
 useSubscription({ query: CloudViewerAndProject_CheckCloudOrgMembershipDocument })
 
@@ -74,11 +81,17 @@ const cloudProjectId = computed(() => {
 })
 
 watchEffect(() => {
-  if (!query.data) {
+  if (!query.data.value) {
     return
   }
 
-  const savedState = query.data.value?.currentProject?.savedState
+  const {
+    currentProject,
+    cachedUser,
+    cloudViewer,
+  } = query.data.value
+
+  const savedState = currentProject?.savedState
 
   if (savedState?.promptsShown) {
     for (const item in savedState.promptsShown) {
@@ -94,31 +107,21 @@ watchEffect(() => {
     setBannersState(savedState.banners)
   }
 
-  const isLoggedIn = !!query.data.value?.cachedUser?.id || !!query.data.value?.cloudViewer?.id
+  const AUTH_STATE_ERRORS = ['AUTH_COULD_NOT_LAUNCH_BROWSER', 'AUTH_ERROR_DURING_LOGIN', 'AUTH_COULD_NOT_LAUNCH_BROWSER']
+
+  // 1. set user-related information in store
+  setUserData((cloudViewer ?? cachedUser) ?? undefined)
+  setUserFlag('isLoggedIn', !!cachedUser?.id || !!cloudViewer?.id)
+  setUserFlag('loginError', AUTH_STATE_ERRORS.includes(query.data.value?.authState?.name ?? ''))
   // Need to be able to tell whether the lack of `firstOrganization` means they don't have an org or whether it just hasn't loaded yet
   // Not having this check can cause a brief flicker of the 'Create Org' banner while org data is loading
-  const isOrganizationLoaded = !!query.data.value?.cloudViewer?.firstOrganization
-  const isMemberOfOrganization = (query.data.value?.cloudViewer?.firstOrganization?.nodes?.length ?? 0) > 0
-  const isConfigLoaded = !!query.data.value?.currentProject?.isFullConfigReady
-  const hasNonExampleSpec = !!query.data.value?.currentProject?.hasNonExampleSpec
-  const isProjectConnected = !!cloudProjectId.value && query.data.value?.currentProject?.cloudProject?.__typename === 'CloudProject'
-  const error = ['AUTH_COULD_NOT_LAUNCH_BROWSER', 'AUTH_ERROR_DURING_LOGIN', 'AUTH_COULD_NOT_LAUNCH_BROWSER'].includes(query.data.value?.authState?.name ?? '')
+  setUserFlag('isOrganizationLoaded', !!cloudViewer?.firstOrganization)
+  setUserFlag('isMemberOfOrganization', (cloudViewer?.firstOrganization?.nodes?.length ?? 0) > 0)
 
-  if (isProjectConnected !== loginConnectStore.project.isProjectConnected) {
-    setProjectFlag('isProjectConnected', isProjectConnected)
-  }
-
-  setProjectFlag('isConfigLoaded', isConfigLoaded)
-  setProjectFlag('hasNonExampleSpec', hasNonExampleSpec)
-
-  if (isLoggedIn !== loginConnectStore.user.isLoggedIn) {
-    setUserFlag('isLoggedIn', isLoggedIn)
-  }
-
-  setUserFlag('isOrganizationLoaded', isOrganizationLoaded)
-  setUserFlag('isMemberOfOrganization', isMemberOfOrganization)
-  setLoginError(error)
-  setUserData((query.data.value?.cloudViewer ?? query.data.value?.cachedUser) ?? undefined)
+  // 2. set project-related information in the store
+  setProjectFlag('isConfigLoaded', !!currentProject?.isFullConfigReady)
+  setProjectFlag('isProjectConnected', !!cloudProjectId.value && currentProject?.cloudProject?.__typename === 'CloudProject')
+  setProjectFlag('hasNonExampleSpec', !!currentProject?.hasNonExampleSpec)
 })
 
 </script>
