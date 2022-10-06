@@ -7,6 +7,7 @@ import { CloudUserStubs, CloudProjectStubs } from '@packages/graphql/test/stubCl
 import { AllowedState, BannerIds } from '@packages/types'
 import { assignIn, set } from 'lodash'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import type { LoginConnectState } from '@packages/frontend-shared/src/store/login-connect-store'
 const AlertSelector = 'alert-header'
 const AlertCloseBtnSelector = 'alert-suffix-icon'
 
