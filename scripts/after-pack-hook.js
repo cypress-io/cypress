@@ -46,7 +46,7 @@ module.exports = async function (params) {
 
   console.log('all node_modules subfolders copied to', outputFolder)
 
-  if (process.env.DISABLE_SNAPSHOT_REQUIRE == null) {
+  if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE)) {
     await setupV8Snapshots(params.appOutDir)
   }
 }
