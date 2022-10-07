@@ -123,13 +123,13 @@ https://on.cypress.io/cross-origin-violation
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when c    (2560x1440)
+  -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when c    (1280x720)
      licking a to another origin (failed).png                                                       
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when s    (2560x1440)
+  -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when s    (1280x720)
      ubmitted a form and being redirected to another origin (failed).png                            
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when u    (2560x1440)
+  -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when u    (1280x720)
      sing a javascript redirect to another origin (failed).png                                      
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when d    (2560x1440)
+  -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when d    (1280x720)
      oing a CORS request cross-origin (failed).png                                                  
 
 
@@ -371,13 +371,13 @@ exports['e2e web security / when experimentalSessionAndOrigin is enabled / fails
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when c    (2560x1440)
+  -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when c    (1280x720)
      licking a to another origin (failed).png                                                       
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when s    (2560x1440)
+  -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when s    (1280x720)
      ubmitted a form and being redirected to another origin (failed).png                            
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when u    (2560x1440)
+  -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when u    (1280x720)
      sing a javascript redirect to another origin (failed).png                                      
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when d    (2560x1440)
+  -  /XXX/XXX/XXX/cypress/screenshots/web_security.cy.js/web security -- fails when d    (1280x720)
      oing a CORS request cross-origin (failed).png                                                  
 
 
