@@ -10,7 +10,7 @@
     dismissible
     :has-banner-been-shown="hasBannerBeenShown"
     :event-data="{
-      campaign: 'Log in',
+      campaign: 'Log In',
       medium: 'Specs Login Banner',
       cohort: cohortOption.cohort
     }"
