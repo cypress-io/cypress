@@ -53,7 +53,7 @@ module.exports = async function (params) {
     win32: join(params.appOutDir, 'Cypress.exe'),
   }
 
-  if (process.env.DISABLE_SNAPSHOT_REQUIRE == null) {
+  if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE)) {
     flipFuses(
       exePathPerPlatform[os.platform()],
       {
