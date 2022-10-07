@@ -30,7 +30,7 @@ describe('<LoginBanner />', () => {
       cy.mount({ render: () => <LoginBanner modelValue={true} hasBannerBeenShown={false} cohortOption={cohortOption}/> })
 
       cy.get('@recordEvent').should('have.been.calledWith', {
-        campaign: 'Log in',
+        campaign: 'Log In',
         medium: 'Specs Login Banner',
         messageId: Cypress.sinon.match.string,
         cohort: cohortOption.cohort,
