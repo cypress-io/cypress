@@ -131,7 +131,7 @@ module.exports = {
       return this.move(appPath, options.dist)
     })
     .then(() => {
-      return process.env.DISABLE_SNAPSHOT_REQUIRE == null ? flipFuses(
+      return !['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE) ? flipFuses(
         paths.getPathToExec(),
         {
           version: FuseVersion.V1,
