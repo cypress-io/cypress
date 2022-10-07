@@ -2,7 +2,7 @@ it('visits foobar.com and types foobar inside an input', () => {
   cy.visit('/fixtures/primary-origin.html')
   cy.get('[data-cy="cross-origin-secondary-link"]').click()
 
-  cy.origin('http://foobar.com:3500', () => {
+  cy.origin('http://www.foobar.com:3500', () => {
     cy.get('[data-cy="text-input"]').type('foobar')
   })
   .then(() => {

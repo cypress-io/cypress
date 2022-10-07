@@ -68,7 +68,7 @@ export class RemoteStates {
     return state
   }
 
-  isPrimaryOrigin (url: string): boolean {
+  isPrimarySuperDomainOrigin (url: string): boolean {
     return this.primaryOriginKey === cors.getSuperDomainOrigin(url)
   }
 
@@ -86,7 +86,7 @@ export class RemoteStates {
     return this.get(this.currentOriginKey) as Cypress.RemoteState
   }
 
-  set (urlOrState: string | Cypress.RemoteState, options: { auth?: {} } = {}, isPrimaryOrigin: boolean = true): Cypress.RemoteState {
+  set (urlOrState: string | Cypress.RemoteState, options: { auth?: {} } = {}, isPrimarySuperDomainOrigin: boolean = true): Cypress.RemoteState {
     let state
 
     if (_.isString(urlOrState)) {
@@ -120,7 +120,7 @@ export class RemoteStates {
 
     this.currentOriginKey = remoteOrigin
 
-    if (isPrimaryOrigin) {
+    if (isPrimarySuperDomainOrigin) {
       // convert map to array
       const stateArray = Array.from(this.remoteStates.entries())
 

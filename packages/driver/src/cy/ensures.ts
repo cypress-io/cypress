@@ -395,7 +395,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     if (!isRunnerAbleToCommunicateWithAut()) {
       const crossOriginCommandError = $errUtils.errByPath('miscellaneous.cross_origin_command', {
         commandOrigin: window.location.origin,
-        autSuperDomainOrigin: state('autLocation').superDomainOrigin,
+        autOrigin: state('autLocation').origin,
       })
 
       if (err) {

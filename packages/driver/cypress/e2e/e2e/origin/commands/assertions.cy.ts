@@ -7,7 +7,7 @@ context('cy.origin assertions', () => {
   })
 
   it('.should() and .and()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get(':checkbox[name="colors"][value="blue"]')
       .should('not.be.checked').and('not.be.disabled')
     })
@@ -33,7 +33,7 @@ context('cy.origin assertions', () => {
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23148
     it.skip('.should() and .and()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get(':checkbox[name="colors"][value="blue"]')
         .should('not.be.checked').and('not.be.disabled')
       })

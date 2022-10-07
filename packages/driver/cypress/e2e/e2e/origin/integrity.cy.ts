@@ -62,7 +62,7 @@ describe('Integrity Preservation', () => {
 
         cy.visit('fixtures/primary-origin.html')
         cy.get('[data-cy="integrity-link"]').click()
-        cy.origin('http://foobar.com:3500', () => {
+        cy.origin('http://www.foobar.com:3500', () => {
           // The added script, if integrity matches, should execute and
           // add a <p> element with 'integrity script loaded' as the text
           cy.get('#integrity', {
@@ -85,7 +85,7 @@ describe('Integrity Preservation', () => {
 
         cy.visit('fixtures/primary-origin.html')
         cy.get('[data-cy="integrity-link"]').click()
-        cy.origin('http://foobar.com:3500', () => {
+        cy.origin('http://www.foobar.com:3500', () => {
           // The added script, if integrity matches, should execute and
           // add a <p> element with 'integrity script loaded' as the text
           cy.get('#integrity', {
@@ -112,7 +112,7 @@ describe('Integrity Preservation', () => {
 
         cy.visit('fixtures/primary-origin.html')
         cy.get('[data-cy="integrity-link"]').click()
-        cy.origin('http://foobar.com:3500', () => {
+        cy.origin('http://www.foobar.com:3500', () => {
           cy.get('[data-cy="integrity-header"]', {
             timeout: 1000,
           }).then((integrityHeader) => {
@@ -137,7 +137,7 @@ describe('Integrity Preservation', () => {
 
         cy.visit('fixtures/primary-origin.html')
         cy.get('[data-cy="integrity-link"]').click()
-        cy.origin('http://foobar.com:3500', () => {
+        cy.origin('http://www.foobar.com:3500', () => {
           cy.get('[data-cy="integrity-header"]', {
             timeout: 1000,
           }).then((integrityHeader) => {
