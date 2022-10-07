@@ -39,8 +39,8 @@ function scaffoldAndOpenE2EProject (opts: {
   cy.visitLaunchpad()
 
   cy.contains('Welcome to Cypress!').should('be.visible')
-  cy.contains('[data-cy-testingtype="e2e"]', 'Not configured')
-  cy.contains('[data-cy-testingtype="component"]', 'Not configured')
+  cy.contains('[data-cy-testingtype="e2e"]', 'Not Configured')
+  cy.contains('[data-cy-testingtype="component"]', 'Not Configured')
   cy.contains('E2E Testing').click()
   cy.contains('We added the following files to your project:')
   cy.contains('Continue').click()
@@ -73,8 +73,8 @@ function scaffoldAndOpenCTProject (opts: {
   cy.visitLaunchpad()
 
   cy.contains('Welcome to Cypress!').should('be.visible')
-  cy.contains('[data-cy-testingtype="e2e"]', 'Not configured')
-  cy.contains('[data-cy-testingtype="component"]', 'Not configured')
+  cy.contains('[data-cy-testingtype="e2e"]', 'Not Configured')
+  cy.contains('[data-cy-testingtype="component"]', 'Not Configured')
   cy.contains('Component Testing').click()
 
   cy.contains('Pick a framework').click()

@@ -43,8 +43,8 @@ describe('Launchpad: Setup Project', () => {
 
   const verifyWelcomePage = ({ e2eIsConfigured, ctIsConfigured }) => {
     cy.contains('Welcome to Cypress!').should('be.visible')
-    cy.contains('[data-cy-testingtype="e2e"]', e2eIsConfigured ? 'Configured' : 'Not configured')
-    cy.contains('[data-cy-testingtype="component"]', ctIsConfigured ? 'Configured' : 'Not configured')
+    cy.contains('[data-cy-testingtype="e2e"]', e2eIsConfigured ? 'Configured' : 'Not Configured')
+    cy.contains('[data-cy-testingtype="component"]', ctIsConfigured ? 'Configured' : 'Not Configured')
   }
 
   const verifyChooseABrowserPage = () => {

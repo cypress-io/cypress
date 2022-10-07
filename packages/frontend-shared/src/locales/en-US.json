@@ -364,7 +364,7 @@
     },
     "testingCard": {
       "configured": "Configured",
-      "notConfigured": "Not configured",
+      "notConfigured": "Not Configured",
       "running": "Running",
       "chooseABrowser": "Choose a browser",
       "reconfigure": "Reconfigure",
