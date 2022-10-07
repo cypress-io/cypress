@@ -610,7 +610,7 @@ describe('src/cy/commands/navigation', () => {
       })
     }
 
-    it('can visit pages on the same originPolicy', () => {
+    it('can visit pages on the same origin', () => {
       cy
       .visit('http://localhost:3500/fixtures/jquery.html')
       .visit('http://localhost:3500/fixtures/generic.html')
@@ -690,7 +690,7 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    it('can visit relative pages on the same originPolicy', () => {
+    it('can visit relative pages on the same origin', () => {
       // as long as we are already on the localhost:3500
       // domain this will work
       cy
@@ -1553,7 +1553,7 @@ describe('src/cy/commands/navigation', () => {
           ${experimentalMessage}
           \`cy.visit('http://localhost:3500/fixtures/generic.html')\`
           \`<commands targeting http://localhost:3500 go here>\`\n
-          \`cy.origin('http://foobar.com:3500', () => {\`
+          \`cy.origin('http://www.foobar.com:3500', () => {\`
           \`  cy.visit('http://www.foobar.com:3500/fixtures/generic.html')\`
           \`  <commands targeting http://www.foobar.com:3500 go here>\`
           \`})\`\n
@@ -2241,10 +2241,10 @@ describe('src/cy/commands/navigation', () => {
           expect(err.message).to.contain(stripIndent`\
           Cypress detected a cross origin error happened on page load:\n
             > ${error}\n
-          Before the page load, you were bound to the origin policy:\n
+          Before the page load, you were bound to the origin:\n
             > http://localhost:3500\n
-          A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.\n
-          A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.\n
+          A cross origin error happens when your application navigates to a new URL which does not match the origin above.\n
+          A new URL does not match the origin if the 'protocol', 'port' (if specified), and/or 'host' are different.\n
           Cypress does not allow you to navigate to a different origin URL within a single test.\n
           You may need to restructure some of your test code to avoid this problem.\n
           Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false }`)

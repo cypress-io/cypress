@@ -21,9 +21,10 @@ import { handleTestEvents } from './events/test'
 import { handleMiscEvents } from './events/misc'
 import { handleUnsupportedAPIs } from './unsupported_apis'
 import { patchFormElementSubmit } from './patches/submit'
+import { patchFetch } from './patches/fetch'
+import { patchXmlHttpRequest } from './patches/xmlHttpRequest'
 import $errUtils from '../cypress/error_utils'
 import $Mocha from '../cypress/mocha'
-import * as cors from '@packages/network/lib/cors'
 
 const createCypress = () => {
   // @ts-ignore
@@ -43,7 +44,7 @@ const createCypress = () => {
 
         try {
           // the AUT would be the frame with a matching origin, but not the same exact href.
-          if (window.location.origin === cors.getOriginPolicy(frame.location.origin)
+          if (window.location.origin === frame.location.origin
               && window.location.href !== frame.location.href) {
             return frame
           }
@@ -66,10 +67,10 @@ const createCypress = () => {
   })
 
   Cypress.specBridgeCommunicator.on('generate:final:snapshot', (snapshotUrl: string) => {
-    const currentAutOriginPolicy = cy.state('autLocation').originPolicy
+    const currentAutOrigin = cy.state('autLocation').origin
     const requestedSnapshotUrlLocation = $Location.create(snapshotUrl)
 
-    if (requestedSnapshotUrlLocation.originPolicy === currentAutOriginPolicy) {
+    if (requestedSnapshotUrlLocation.origin === currentAutOrigin) {
       // if true, this is the correct spec bridge to take the snapshot and send it back
       const finalSnapshot = cy.createSnapshot(FINAL_SNAPSHOT_NAME)
 
@@ -183,6 +184,15 @@ const attachToWindow = (autWindow: Window) => {
 
   cy.overrides.wrapNativeMethods(autWindow)
 
+  // place after override incase fetch is polyfilled in the AUT injection
+  // this can be in the beforeLoad code as we only want to patch fetch/xmlHttpRequest
+  // when the cy.origin block is active to track credential use
+  patchFetch(Cypress, autWindow)
+  patchXmlHttpRequest(Cypress, autWindow)
+  // also patch it in the spec bridge as well
+  patchFetch(Cypress, window)
+  patchXmlHttpRequest(Cypress, window)
+
   // TODO: DRY this up with the mostly-the-same code in src/cypress/cy.js
   // https://github.com/cypress-io/cypress/issues/20972
   bindToListeners(autWindow, {
@@ -196,7 +206,7 @@ const attachToWindow = (autWindow: Window) => {
 
       cy.isStable(false, 'beforeunload')
 
-      cy.Cookies.setInitial()
+      // NOTE: we intentionally do not set the cy.Cookies.setInitial() inside the spec bridge as we are not doing full injection and this leads to cookie side effects
 
       cy.resetTimer()
 

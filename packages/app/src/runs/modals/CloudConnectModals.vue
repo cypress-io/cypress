@@ -12,6 +12,7 @@
     :gql="props.gql"
     show
     :utm-medium="props.utmMedium"
+    :utm-content="props.utmContent"
     @update-project-id-failed="showManualUpdate"
     @success="emit('success')"
     @cancel="emit('cancel')"
@@ -73,6 +74,7 @@ const emit = defineEmits<{
 const props = defineProps<{
   gql: CloudConnectModalsFragment
   utmMedium: string
+  utmContent?: string
 }>()
 
 const newProjectId = ref('')

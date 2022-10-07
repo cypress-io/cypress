@@ -1,6 +1,6 @@
 require('../../spec_helper')
 
-describe('lib/util/routes', () => {
+describe('lib/cloud/routes', () => {
   const routes = () => {
     delete require.cache[require.resolve(`../../../lib/util/routes`)]
 

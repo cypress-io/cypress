@@ -7,7 +7,7 @@ context('cy.origin files', () => {
   })
 
   it('.fixture()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.fixture('example.json').then((json) => {
         expect(json).to.be.an('object')
         expect(json.example).to.be.true
@@ -16,7 +16,7 @@ context('cy.origin files', () => {
   })
 
   it('.readFile()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.readFile('cypress/fixtures/example.json').then((json) => {
         expect(json).to.be.an('object')
         expect(json.example).to.be.true
@@ -25,7 +25,7 @@ context('cy.origin files', () => {
   })
 
   it('.writeFile()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       const contents = JSON.stringify({ foo: 'bar' })
 
       cy.stub(Cypress, 'backend').resolves({
@@ -59,7 +59,7 @@ context('cy.origin files', () => {
     })
 
     it('.readFile()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.readFile('cypress/fixtures/example.json')
       })
 
@@ -73,7 +73,7 @@ context('cy.origin files', () => {
     })
 
     it('.writeFile()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const contents = JSON.stringify({ foo: 'bar' })
 
         cy.stub(Cypress, 'backend').resolves({

@@ -10,14 +10,17 @@ const { sinon } = require('../spec_helper')
 describe('lib/config', () => {
   before(function () {
     this.env = process.env
+    this.versions = process.versions
 
     process.env = _.omit(process.env, 'CYPRESS_DEBUG')
+    process.versions.chrome = '0'
 
     Fixtures.scaffold()
   })
 
   after(function () {
     process.env = this.env
+    process.versions = this.versions
   })
 
   context('.get', () => {

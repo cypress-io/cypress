@@ -11,7 +11,7 @@ context('cy.origin unsupported commands', () => {
       done()
     })
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.route('api')
     })
   })
@@ -23,7 +23,7 @@ context('cy.origin unsupported commands', () => {
       done()
     })
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.server()
     })
   })
@@ -35,7 +35,7 @@ context('cy.origin unsupported commands', () => {
       done()
     })
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.origin('barbaz.com', () => {})
     })
   })
@@ -47,7 +47,7 @@ context('cy.origin unsupported commands', () => {
       done()
     })
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.intercept('/foo')
     })
   })
@@ -59,7 +59,7 @@ context('cy.origin unsupported commands', () => {
       done()
     })
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.session('/foo')
     })
   })

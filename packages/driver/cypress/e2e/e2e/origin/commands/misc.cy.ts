@@ -7,37 +7,37 @@ context('cy.origin misc', () => {
   })
 
   it('.end()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#button').end().should('be.null')
     })
   })
 
   it('.exec()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.exec('echo foobar').its('stdout').should('contain', 'foobar')
     })
   })
 
   it('.focused()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#button').click().focused().should('have.id', 'button')
     })
   })
 
   it('.wrap()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.wrap({ foo: 'bar' }).should('deep.equal', { foo: 'bar' })
     })
   })
 
   it('.debug()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#button').debug().should('have.id', 'button')
     })
   })
 
   it('.pause()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       const afterPaused = new Promise<void>((resolve) => {
         cy.once('paused', () => {
           Cypress.emit('resume:all')
@@ -54,7 +54,7 @@ context('cy.origin misc', () => {
   })
 
   it('.task()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.task('return:arg', 'works').should('eq', 'works')
     })
   })
@@ -71,7 +71,7 @@ context('cy.origin misc', () => {
     })
 
     it('.exec()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.exec('echo foobar')
       })
 
@@ -87,7 +87,7 @@ context('cy.origin misc', () => {
     })
 
     it('.focused()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#button').click().focused()
       })
 
@@ -108,7 +108,7 @@ context('cy.origin misc', () => {
     })
 
     it('.wrap()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const arr = ['foo', 'bar', 'baz']
 
         cy.wrap(arr).spread((foo, bar, baz) => {
@@ -129,7 +129,7 @@ context('cy.origin misc', () => {
     })
 
     it('.debug()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#button').debug()
       })
 
@@ -149,7 +149,7 @@ context('cy.origin misc', () => {
     })
 
     it('.pause()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const afterPaused = new Promise<void>((resolve) => {
           cy.once('paused', () => {
             Cypress.emit('resume:all')
@@ -178,7 +178,7 @@ context('cy.origin misc', () => {
     })
 
     it('.task()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.task('return:arg', 'works')
       })
 

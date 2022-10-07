@@ -15,7 +15,7 @@ describe('cy.origin yields', () => {
   })
 
   it('yields a value', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy
       .get('[data-cy="dom-check"]')
       .invoke('text')
@@ -23,7 +23,7 @@ describe('cy.origin yields', () => {
   })
 
   it('yields the cy value even if a return is present', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy
       .get('[data-cy="dom-check"]')
       .invoke('text')
@@ -45,7 +45,7 @@ describe('cy.origin yields', () => {
       done()
     })
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy
       .get('[data-cy="dom-check"]')
       .invoke('text')
@@ -55,13 +55,13 @@ describe('cy.origin yields', () => {
   })
 
   it('yields synchronously', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       return 'From a secondary origin'
     }).should('equal', 'From a secondary origin')
   })
 
   it('yields asynchronously', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       return new Promise((resolve: (val: string) => any, reject) => {
         setTimeout(() => {
           resolve('From a secondary origin')
@@ -71,7 +71,7 @@ describe('cy.origin yields', () => {
   })
 
   it('succeeds if subject cannot be serialized and is not accessed synchronously', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       return {
         symbol: Symbol(''),
       }
@@ -89,7 +89,7 @@ describe('cy.origin yields', () => {
       done()
     })
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       return {
         symbol: Symbol(''),
       }
@@ -100,7 +100,7 @@ describe('cy.origin yields', () => {
   })
 
   it('succeeds if subject cannot be serialized and is not accessed', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('[data-cy="dom-check"]')
     })
     .then(() => {
@@ -118,7 +118,7 @@ describe('cy.origin yields', () => {
       done()
     })
 
-    cy.origin<JQuery>('http://foobar.com:3500', () => {
+    cy.origin<JQuery>('http://www.foobar.com:3500', () => {
       cy.get('[data-cy="dom-check"]')
     })
     .then((subject) => subject.text())
@@ -134,7 +134,7 @@ describe('cy.origin yields', () => {
       done()
     })
 
-    cy.origin<{ key: Function }>('http://foobar.com:3500', () => {
+    cy.origin<{ key: Function }>('http://www.foobar.com:3500', () => {
       cy.wrap({
         key: () => {
           return 'whoops'
@@ -154,7 +154,7 @@ describe('cy.origin yields', () => {
       done()
     })
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.wrap({
         key: Symbol('whoops'),
       })
@@ -171,7 +171,7 @@ describe('cy.origin yields', () => {
       done()
     })
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.wrap(() => {
         return 'text'
       })
@@ -191,7 +191,7 @@ describe('cy.origin yields', () => {
       done()
     })
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.wrap(Symbol('symbol'))
     })
     .should('equal', 'symbol')
@@ -211,7 +211,7 @@ describe('cy.origin yields', () => {
       done()
     })
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.wrap({
         key: new Error('Boom goes the dynamite'),
       })
@@ -223,7 +223,7 @@ describe('cy.origin yields', () => {
   })
 
   it('yields an object containing valid types', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.wrap({
         array: [
           1,

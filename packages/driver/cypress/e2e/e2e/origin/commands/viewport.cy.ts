@@ -8,7 +8,7 @@ context('cy.origin viewport', () => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       const viewportChangedSpy = cy.spy()
 
       cy.on('viewport:changed', viewportChangedSpy)
@@ -33,7 +33,7 @@ context('cy.origin viewport', () => {
 
     context('.viewport()', () => {
       it('changes the viewport', () => {
-        cy.origin('http://foobar.com:3500', () => {
+        cy.origin('http://www.foobar.com:3500', () => {
           cy.window().then((win) => {
             expect(win.innerHeight).to.equal(660)
             expect(win.innerWidth).to.equal(1000)
@@ -47,7 +47,7 @@ context('cy.origin viewport', () => {
       })
 
       it('resets the viewport between tests', () => {
-        cy.origin('http://foobar.com:3500', () => {
+        cy.origin('http://www.foobar.com:3500', () => {
           cy.window().then((win) => {
             expect(win.innerHeight).to.equal(660)
             expect(win.innerWidth).to.equal(1000)
@@ -57,7 +57,7 @@ context('cy.origin viewport', () => {
 
       context('cy.on(\'viewport:changed\')', () => {
         it('calls viewport:changed handler in cy.origin', () => {
-          cy.origin('http://foobar.com:3500', () => {
+          cy.origin('http://www.foobar.com:3500', () => {
             const viewportChangedSpy = cy.spy()
 
             cy.on('viewport:changed', viewportChangedSpy)
@@ -73,7 +73,7 @@ context('cy.origin viewport', () => {
 
           cy.on('viewport:changed', viewportChangedSpy)
 
-          cy.origin('http://foobar.com:3500', () => {
+          cy.origin('http://www.foobar.com:3500', () => {
             cy.viewport(320, 480)
           }).then(() => {
             expect(viewportChangedSpy).not.to.be.called
@@ -86,7 +86,7 @@ context('cy.origin viewport', () => {
 
         before(() => {
           viewportChangedSpyPrimary = cy.spy()
-          cy.origin('http://foobar.com:3500', () => {
+          cy.origin('http://www.foobar.com:3500', () => {
           // using global since a function can't be passed to cy.origin
           // and we need to be able to remove the listener in the 'after' hook
             globalThis.viewportChangedSpySecondary = cy.spy()
@@ -95,7 +95,7 @@ context('cy.origin viewport', () => {
 
         after(() => {
           Cypress.off('viewport:changed', viewportChangedSpyPrimary)
-          cy.origin('http://foobar.com:3500', () => {
+          cy.origin('http://www.foobar.com:3500', () => {
             Cypress.off('viewport:changed', globalThis.viewportChangedSpySecondary)
           })
 
@@ -103,7 +103,7 @@ context('cy.origin viewport', () => {
         })
 
         it('calls viewport:changed handler in cy.origin', () => {
-          cy.origin('http://foobar.com:3500', () => {
+          cy.origin('http://www.foobar.com:3500', () => {
             Cypress.on('viewport:changed', globalThis.viewportChangedSpySecondary)
 
             cy.viewport(320, 480).then(() => {
@@ -115,7 +115,7 @@ context('cy.origin viewport', () => {
         it('does NOT call viewport:changed handler of primary', () => {
           Cypress.on('viewport:changed', viewportChangedSpyPrimary)
 
-          cy.origin('http://foobar.com:3500', () => {
+          cy.origin('http://www.foobar.com:3500', () => {
             cy.viewport(320, 480)
           }).then(() => {
             expect(viewportChangedSpyPrimary).not.to.be.called
@@ -128,7 +128,7 @@ context('cy.origin viewport', () => {
 
         cy.on('viewport:changed', viewportChangedSpy)
 
-        cy.origin('http://foobar.com:3500', () => {
+        cy.origin('http://www.foobar.com:3500', () => {
         // change the viewport in the secondary first
           cy.viewport(320, 480)
 
@@ -149,7 +149,7 @@ context('cy.origin viewport', () => {
       })
 
       it('syncs the viewport across multiple origins', () => {
-        cy.origin('http://foobar.com:3500', () => {
+        cy.origin('http://www.foobar.com:3500', () => {
           cy.viewport(320, 480)
 
           cy.window().its('innerHeight').should('eq', 480)
@@ -160,7 +160,7 @@ context('cy.origin viewport', () => {
           win.location.href = 'http://www.idp.com:3500/fixtures/primary-origin.html'
         })
 
-        cy.origin('http://idp.com:3500', () => {
+        cy.origin('http://www.idp.com:3500', () => {
           const viewportChangedSpy = cy.spy()
 
           cy.on('viewport:changed', viewportChangedSpy)
@@ -190,7 +190,7 @@ context('cy.origin viewport', () => {
       })
 
       it('.viewport()', () => {
-        cy.origin('http://foobar.com:3500', () => {
+        cy.origin('http://www.foobar.com:3500', () => {
           cy.viewport(320, 480)
         })
 
