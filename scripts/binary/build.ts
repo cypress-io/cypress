@@ -173,7 +173,7 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   }, { spaces: 2 })
 
   fs.writeFileSync(meta.distDir('index.js'), `\
-${process.env.DISABLE_SNAPSHOT_REQUIRE == null ?
+${!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE) ?
 `if (!global.snapshotResult && process.versions && process.versions.electron) {
   throw new Error('global.snapshotResult is not defined. This binary has been built incorrectly.')
 }` : ''}
