@@ -89,6 +89,7 @@ watchEffect(() => {
     currentProject,
     cachedUser,
     cloudViewer,
+    authState,
   } = query.data.value
 
   const savedState = currentProject?.savedState
@@ -112,7 +113,7 @@ watchEffect(() => {
   // 1. set user-related information in store
   setUserData((cloudViewer ?? cachedUser) ?? undefined)
   setUserFlag('isLoggedIn', !!cachedUser?.id || !!cloudViewer?.id)
-  setUserFlag('loginError', AUTH_STATE_ERRORS.includes(query.data.value?.authState?.name ?? ''))
+  setUserFlag('loginError', AUTH_STATE_ERRORS.includes(authState?.name ?? ''))
   // Need to be able to tell whether the lack of `firstOrganization` means they don't have an org or whether it just hasn't loaded yet
   // Not having this check can cause a brief flicker of the 'Create Org' banner while org data is loading
   setUserFlag('isOrganizationLoaded', !!cloudViewer?.firstOrganization)
