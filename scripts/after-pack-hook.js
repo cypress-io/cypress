@@ -4,6 +4,7 @@ const { join } = require('path')
 const glob = require('glob')
 const os = require('os')
 const path = require('path')
+const { setupV8Snapshots } = require('@tooling/v8-snapshot')
 
 module.exports = async function (params) {
   console.log('****************************')
@@ -44,4 +45,8 @@ module.exports = async function (params) {
   await fs.copy(distNodeModules, appNodeModules)
 
   console.log('all node_modules subfolders copied to', outputFolder)
+
+  if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE)) {
+    await setupV8Snapshots(params.appOutDir)
+  }
 }

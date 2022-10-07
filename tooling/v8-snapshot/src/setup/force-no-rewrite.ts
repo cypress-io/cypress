@@ -49,4 +49,9 @@ export default [
   'packages/graphql/node_modules/debug/src/node.js',
   'packages/net-stubbing/node_modules/debug/src/node.js',
   'packages/server/node_modules/mocha/node_modules/debug/src/node.js',
+  'node_modules/minimatch/minimatch.js',
+  'node_modules/mocha-7.0.1/node_modules/glob/node_modules/minimatch/minimatch.js',
+  'packages/data-context/node_modules/minimatch/minimatch.js',
+  'packages/network/node_modules/minimatch/minimatch.js',
+  'packages/server/node_modules/glob/node_modules/minimatch/minimatch.js',
 ]
