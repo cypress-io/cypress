@@ -144,7 +144,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://localhost:2000/index.html',
@@ -176,7 +176,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: false,
             contentType: 'application/json',
             url: 'http://localhost:2000/assets/foo.json',
@@ -197,7 +197,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://localhost:2000/index.html',
@@ -215,7 +215,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             expectToEqDetails(obj, {
               isOkStatusCode: true,
-              isPrimaryOrigin: true,
+              isPrimarySuperDomainOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://localhost:2000/index.html',
@@ -247,7 +247,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://localhost:2000/sub/',
@@ -280,7 +280,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: false,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://localhost:2000/does-not-exist',
@@ -308,7 +308,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://localhost:2000/index.html',
@@ -391,7 +391,7 @@ describe('Server', () => {
             }).then((obj) => {
               expectToEqDetails(obj, {
                 isOkStatusCode: true,
-                isPrimaryOrigin: true,
+                isPrimarySuperDomainOrigin: true,
                 isHtml: true,
                 contentType: 'text/html',
                 url: `http://localhost:${this.httpPort}/${path}/100`,
@@ -438,7 +438,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://getbootstrap.com/',
@@ -473,7 +473,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: false,
+            isPrimarySuperDomainOrigin: false,
             isHtml: false,
             contentType: 'application/json',
             url: 'http://getbootstrap.com/user.json',
@@ -518,7 +518,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: undefined,
             url: 'http://example.com/',
@@ -540,7 +540,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: false,
+            isPrimarySuperDomainOrigin: false,
             isHtml: false,
             contentType: undefined,
             url: 'http://example.com/',
@@ -574,7 +574,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://espn.go.com/',
@@ -606,6 +606,7 @@ describe('Server', () => {
                 domain: 'go',
                 tld: 'com',
                 port: '80',
+                protocol: 'http:',
               },
             })
           })
@@ -638,7 +639,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://espn.go.com/',
@@ -658,7 +659,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             expectToEqDetails(obj, {
               isOkStatusCode: true,
-              isPrimaryOrigin: true,
+              isPrimarySuperDomainOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://espn.go.com/',
@@ -713,7 +714,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           expectToEqDetails(obj, {
             isOkStatusCode: false,
-            isPrimaryOrigin: false,
+            isPrimarySuperDomainOrigin: false,
             isHtml: false,
             contentType: undefined,
             url: 'http://espn.com/',
@@ -728,7 +729,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             expectToEqDetails(obj, {
               isOkStatusCode: true,
-              isPrimaryOrigin: true,
+              isPrimarySuperDomainOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://espn.go.com/',
@@ -764,7 +765,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: false,
-            isPrimaryOrigin: false,
+            isPrimarySuperDomainOrigin: false,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://mlb.mlb.com/',
@@ -798,7 +799,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://getbootstrap.com/',
@@ -839,7 +840,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://google.com/foo',
@@ -896,7 +897,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://google.com/index',
@@ -922,6 +923,7 @@ describe('Server', () => {
               domain: 'google',
               tld: 'com',
               port: '80',
+              protocol: 'http:',
             },
           })
         })
@@ -952,6 +954,7 @@ describe('Server', () => {
               domain: 'cypress',
               port: '80',
               tld: 'io',
+              protocol: 'http:',
             },
             origin: 'http://cypress.io',
             strategy: 'http',
@@ -959,13 +962,13 @@ describe('Server', () => {
             fileServer: null,
           })
 
-          expect(this.server.remoteStates.isPrimaryOrigin('http://cypress.io')).to.be.false
+          expect(this.server.remoteStates.isPrimarySuperDomainOrigin('http://cypress.io')).to.be.false
 
           return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, { isFromSpecBridge: true })
           .then((obj = {}) => {
             expectToEqDetails(obj, {
               isOkStatusCode: true,
-              isPrimaryOrigin: false,
+              isPrimarySuperDomainOrigin: false,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://www.cypress.io/',
@@ -980,7 +983,7 @@ describe('Server', () => {
             const buffer = this.buffers.take('http://www.cypress.io/')
 
             expect(buffer).to.not.be.empty
-            expect(buffer.isCrossOrigin).to.be.true
+            expect(buffer.isCrossSuperDomainOrigin).to.be.true
 
             // Verify the secondary remote state is returned
             expect(this.server.remoteStates.current()).to.deep.eq({
@@ -989,6 +992,7 @@ describe('Server', () => {
                 domain: 'cypress',
                 port: '80',
                 tld: 'io',
+                protocol: 'http:',
               },
               origin: 'http://www.cypress.io',
               strategy: 'http',
@@ -1022,6 +1026,7 @@ describe('Server', () => {
                 domain: '',
                 port: '3500',
                 tld: 'localhost',
+                protocol: 'http:',
               },
               origin: 'http://localhost:3500',
               strategy: 'http',
@@ -1052,6 +1057,7 @@ describe('Server', () => {
                 domain: '',
                 port: '3500',
                 tld: 'localhost',
+                protocol: 'http:',
               },
               origin: 'http://localhost:3500',
               strategy: 'http',
@@ -1087,6 +1093,7 @@ describe('Server', () => {
                 domain: '',
                 port: '3500',
                 tld: 'localhost',
+                protocol: 'http:',
               },
               origin: 'http://localhost:3500',
               strategy: 'http',
@@ -1128,7 +1135,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://localhost:2000/index.html',
@@ -1149,7 +1156,7 @@ describe('Server', () => {
         }).then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://www.google.com/',
@@ -1175,6 +1182,7 @@ describe('Server', () => {
               domain: 'google',
               tld: 'com',
               port: '80',
+              protocol: 'http:',
             },
           })
         }).then(() => {
@@ -1182,7 +1190,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
-              isPrimaryOrigin: true,
+              isPrimarySuperDomainOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://localhost:2000/index.html',
@@ -1226,7 +1234,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://www.google.com/',
@@ -1257,6 +1265,7 @@ describe('Server', () => {
               domain: 'google',
               tld: 'com',
               port: '80',
+              protocol: 'http:',
             },
           })
         }).then(() => {
@@ -1264,7 +1273,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
-              isPrimaryOrigin: true,
+              isPrimarySuperDomainOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://localhost:2000/index.html',
@@ -1299,7 +1308,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
-              isPrimaryOrigin: true,
+              isPrimarySuperDomainOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://www.google.com/',
@@ -1330,6 +1339,7 @@ describe('Server', () => {
                 domain: 'google',
                 tld: 'com',
                 port: '80',
+                protocol: 'http:',
               },
             })
           })
@@ -1343,7 +1353,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'https://www.foobar.com:8443/',
@@ -1374,6 +1384,7 @@ describe('Server', () => {
               domain: 'foobar',
               tld: 'com',
               port: '8443',
+              protocol: 'https:',
             },
           })
         }).then(() => {
@@ -1381,7 +1392,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
-              isPrimaryOrigin: true,
+              isPrimarySuperDomainOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://localhost:2000/index.html',
@@ -1416,7 +1427,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
-              isPrimaryOrigin: true,
+              isPrimarySuperDomainOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'https://www.foobar.com:8443/',
@@ -1447,6 +1458,7 @@ describe('Server', () => {
                 domain: 'foobar',
                 tld: 'com',
                 port: '8443',
+                protocol: 'https:',
               },
             })
           })
@@ -1460,7 +1472,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: s3StaticHtmlUrl,
@@ -1499,6 +1511,7 @@ describe('Server', () => {
               domain: '',
               tld: 's3.amazonaws.com',
               port: '443',
+              protocol: 'https:',
             },
           })
         }).then(() => {
@@ -1506,7 +1519,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
-              isPrimaryOrigin: true,
+              isPrimarySuperDomainOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://localhost:2000/index.html',
@@ -1541,7 +1554,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
-              isPrimaryOrigin: true,
+              isPrimarySuperDomainOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: s3StaticHtmlUrl,
@@ -1578,6 +1591,7 @@ describe('Server', () => {
                 domain: '',
                 tld: 's3.amazonaws.com',
                 port: '443',
+                protocol: 'https:',
               },
             })
           })

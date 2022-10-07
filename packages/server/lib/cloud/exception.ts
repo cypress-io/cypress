@@ -1,9 +1,9 @@
-const _ = require('lodash')
+import _ from 'lodash'
 const Promise = require('bluebird')
 const pkg = require('@packages/root')
 const api = require('./api')
 const user = require('./user')
-const system = require('./util/system')
+const system = require('../util/system')
 
 // strip everything but the file name to remove any sensitive
 // data in the path
@@ -17,8 +17,8 @@ const stripPath = (text) => {
   })
 }
 
-module.exports = {
-  getErr (err) {
+export = {
+  getErr (err: Error) {
     return {
       name: stripPath(err.name),
       message: stripPath(err.message),
@@ -30,7 +30,7 @@ module.exports = {
     return pkg.version
   },
 
-  getBody (err) {
+  getBody (err: Error) {
     return system.info()
     .then((systemInfo) => {
       return _.extend({
@@ -40,13 +40,13 @@ module.exports = {
     })
   },
 
-  getAuthToken () {
+  async getAuthToken () {
     return user.get().then((user) => {
       return user && user.authToken
     })
   },
 
-  async create (err) {
+  async create (err: Error) {
     if ((process.env['CYPRESS_INTERNAL_ENV'] !== 'production') ||
        (process.env['CYPRESS_CRASH_REPORTS'] === '0')) {
       return

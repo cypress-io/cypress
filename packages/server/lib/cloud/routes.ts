@@ -1,10 +1,25 @@
-const _ = require('lodash')
-const UrlParse = require('url-parse')
+import _ from 'lodash'
+import UrlParse from 'url-parse'
 
 const app_config = require('../../config/app.json')
 const apiUrl = app_config[process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'development'].api_url
 
-const parseArgs = function (url, args = []) {
+const DASHBOARD_ENDPOINTS = {
+  api: '',
+  auth: 'auth',
+  me: 'me',
+  ping: 'ping',
+  runs: 'runs',
+  instances: 'runs/:id/instances',
+  instanceTests: 'instances/:id/tests',
+  instanceResults: 'instances/:id/results',
+  instanceStdout: 'instances/:id/stdout',
+  projects: 'projects',
+  project: 'projects/:id',
+  exceptions: 'exceptions',
+} as const
+
+const parseArgs = function (url, args: any[] = []) {
   _.each(args, (value) => {
     if (_.isObject(value)) {
       url.set('query', _.extend(url.query, value))
@@ -22,9 +37,9 @@ const parseArgs = function (url, args = []) {
   return url
 }
 
-const makeRoutes = (baseUrl, routes) => {
+const makeRoutes = (baseUrl: string, routes: typeof DASHBOARD_ENDPOINTS) => {
   return _.reduce(routes, (memo, value, key) => {
-    memo[key] = function (...args) {
+    memo[key] = function (...args: any[]) {
       let url = new UrlParse(baseUrl, true)
 
       if (value) {
@@ -39,23 +54,10 @@ const makeRoutes = (baseUrl, routes) => {
     }
 
     return memo
-  }, {})
+  }, {} as Record<keyof typeof DASHBOARD_ENDPOINTS, (...args: any[]) => string>)
 }
 
-const apiRoutes = makeRoutes(apiUrl, {
-  api: '',
-  auth: 'auth',
-  me: 'me',
-  ping: 'ping',
-  runs: 'runs',
-  instances: 'runs/:id/instances',
-  instanceTests: 'instances/:id/tests',
-  instanceResults: 'instances/:id/results',
-  instanceStdout: 'instances/:id/stdout',
-  projects: 'projects',
-  project: 'projects/:id',
-  exceptions: 'exceptions',
-})
+const apiRoutes = makeRoutes(apiUrl, DASHBOARD_ENDPOINTS)
 
 module.exports = {
   apiRoutes,

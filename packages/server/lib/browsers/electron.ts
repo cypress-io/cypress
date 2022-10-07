@@ -384,6 +384,22 @@ export = {
     // adds a header to the request to mark it as a request for the AUT frame
     // itself, so the proxy can utilize that for injection purposes
     win.webContents.session.webRequest.onBeforeSendHeaders((details, cb) => {
+      const requestModifications = {
+        requestHeaders: {
+          ...details.requestHeaders,
+          /**
+           * Unlike CDP, Electrons's onBeforeSendHeaders resourceType cannot discern the difference
+           * between fetch or xhr resource types, but classifies both as 'xhr'. Because of this,
+           * we set X-Cypress-Is-XHR-Or-Fetch to true if the request is made with 'xhr' or 'fetch' so the
+           * middleware doesn't incorrectly assume which request type is being sent
+           * @see https://www.electronjs.org/docs/latest/api/web-request#webrequestonbeforesendheadersfilter-listener
+           */
+          ...(details.resourceType === 'xhr') ? {
+            'X-Cypress-Is-XHR-Or-Fetch': 'true',
+          } : {},
+        },
+      }
+
       if (
         // isn't an iframe
         details.resourceType !== 'subFrame'
@@ -392,14 +408,14 @@ export = {
         // is the spec frame, not the AUT
         || details.url.includes('__cypress')
       ) {
-        cb({})
+        cb(requestModifications)
 
         return
       }
 
       cb({
         requestHeaders: {
-          ...details.requestHeaders,
+          ...requestModifications.requestHeaders,
           'X-Cypress-Is-AUT-Frame': 'true',
         },
       })

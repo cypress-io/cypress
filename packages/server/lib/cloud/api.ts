@@ -1,15 +1,19 @@
 const _ = require('lodash')
 const os = require('os')
-const debug = require('debug')('cypress:server:api')
+const debug = require('debug')('cypress:server:cloud:api')
 const request = require('@cypress/request-promise')
-const RequestErrors = require('@cypress/request-promise/errors')
 const Promise = require('bluebird')
 const humanInterval = require('human-interval')
+
+const RequestErrors = require('@cypress/request-promise/errors')
 const { agent } = require('@packages/network')
 const pkg = require('@packages/root')
-const machineId = require('./util/machine_id')
-const errors = require('./errors')
-const { apiRoutes } = require('./util/routes')
+
+const machineId = require('./machine_id')
+const errors = require('../errors')
+const { apiRoutes } = require('./routes')
+
+import type Bluebird from 'bluebird'
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
@@ -28,7 +32,7 @@ const runnerCapabilities = {
 
 let responseCache = {}
 
-const rp = request.defaults((params = {}, callback) => {
+const rp = request.defaults((params, callback) => {
   let resp
 
   if (params.cacheable && (resp = getCachedResponse(params))) {
@@ -42,6 +46,7 @@ const rp = request.defaults((params = {}, callback) => {
     proxy: null,
     gzip: true,
     cacheable: false,
+    rejectUnauthorized: true,
   })
 
   const headers = params.headers != null ? params.headers : (params.headers = {})
@@ -147,6 +152,22 @@ const isRetriableError = (err) => {
     (err.statusCode == null)
 }
 
+export type CreateRunOptions = {
+  ci: string
+  ciBuildId: string
+  projectId: string
+  recordKey: string
+  commit: string
+  specs: string[]
+  group: string
+  platform: string
+  parallel: boolean
+  specPattern: string[]
+  tags: string[]
+  testingType: 'e2e' | 'component'
+  timeout?: number
+}
+
 module.exports = {
   rp,
 
@@ -155,7 +176,7 @@ module.exports = {
     .catch(tagError)
   },
 
-  getMe (authToken) {
+  getMe (authToken): Bluebird<any> {
     return rp.get({
       url: apiRoutes.me(),
       json: true,
@@ -191,7 +212,7 @@ module.exports = {
     .catch(tagError)
   },
 
-  createRun (options = {}) {
+  createRun (options: CreateRunOptions) {
     return retryWithBackoff((attemptIndex) => {
       const body = {
         ..._.pick(options, [
@@ -226,7 +247,7 @@ module.exports = {
     })
   },
 
-  createInstance (options = {}) {
+  createInstance (options) {
     const { runId, timeout } = options
 
     const body = _.pick(options, [
@@ -253,7 +274,7 @@ module.exports = {
     })
   },
 
-  postInstanceTests (options = {}) {
+  postInstanceTests (options) {
     const { instanceId, runId, timeout, ...body } = options
 
     return retryWithBackoff((attemptIndex) => {
@@ -273,7 +294,7 @@ module.exports = {
     })
   },
 
-  updateInstanceStdout (options = {}) {
+  updateInstanceStdout (options) {
     return retryWithBackoff((attemptIndex) => {
       return rp.put({
         url: apiRoutes.instanceStdout(options.instanceId),
@@ -293,7 +314,7 @@ module.exports = {
     })
   },
 
-  postInstanceResults (options = {}) {
+  postInstanceResults (options) {
     return retryWithBackoff((attemptIndex) => {
       return rp.post({
         url: apiRoutes.instanceResults(options.instanceId),
