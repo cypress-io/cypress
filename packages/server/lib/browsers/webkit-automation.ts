@@ -310,7 +310,7 @@ export class WebKitAutomation {
       return !_cookieMatches(cookie, filter)
     })
 
-    await this.clearCookies([filter])
+    await this.context.clearCookies()
     if (persistCookies.length) await this.context.addCookies(persistCookies)
 
     return filter
@@ -318,10 +318,9 @@ export class WebKitAutomation {
 
   /**
    * Clear all cookies
-   * @param cookies for compatibility reasons return the passed in cookies.
    * @returns cookies cleared
    */
-  private async clearCookies (cookies: [CookieFilter?]): Promise<CyCookie[]> {
+  private async clearCookies (): Promise<CyCookie[]> {
     const allCookies = await this.getCookies()
 
     await this.context.clearCookies()
@@ -355,7 +354,7 @@ export class WebKitAutomation {
       case 'set:cookies':
         return await this.context.addCookies(data.map(normalizeSetCookieProps))
       case 'clear:cookies':
-        return await this.clearCookies(data)
+        return await this.clearCookies()
       case 'clear:cookie':
         return await this.clearCookie(data)
       case 'take:screenshot':
