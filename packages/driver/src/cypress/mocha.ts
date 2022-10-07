@@ -35,7 +35,7 @@ const suiteAfterEach = Suite.prototype.afterEach
 delete (window as any).mocha
 delete (window as any).Mocha
 
-function invokeOverride (ctx, fnType, mochaArgs, fn, testCallback, _testConfig?: any) {
+function invokeRunnable (ctx, fnType: 'Test' | 'Suite', mochaArgs: [string, Function], fn: Function, testCallback: Function | string, _testConfig?: Record<string, any>) {
   const ret = fn.apply(ctx, mochaArgs)
 
   // attached testConfigOverrides will execute before `runner:test:before:run` event
@@ -74,6 +74,9 @@ function overloadMochaFnForConfig (fnName, specWindow) {
 
       const origFn = subFn ? _fn[subFn] : _fn
 
+      // fallback to empty string for stubbed runnables written like:
+      // - describe('concept')
+      // - it('does something')
       let testCallback = args[1] || ''
 
       if (args.length > 2 && _.isObject(args[1])) {
@@ -97,17 +100,17 @@ function overloadMochaFnForConfig (fnName, specWindow) {
               this.skip()
             }
 
-            return invokeOverride(this, fnType, mochaArgs, origFn, testCallback, _testConfig)
+            return invokeRunnable(this, fnType, mochaArgs, origFn, testCallback, _testConfig)
           }
 
           // skip test with .skip func to ignore the test case and not run it
-          return invokeOverride(this, fnType, mochaArgs, _fn['skip'], testCallback, _testConfig)
+          return invokeRunnable(this, fnType, mochaArgs, _fn['skip'], testCallback, _testConfig)
         }
 
-        return invokeOverride(this, fnType, mochaArgs, origFn, testCallback, _testConfig)
+        return invokeRunnable(this, fnType, mochaArgs, origFn, testCallback, _testConfig)
       }
 
-      return invokeOverride(this, fnType, args, origFn, testCallback)
+      return invokeRunnable(this, fnType, args, origFn, testCallback)
     }
   }
 
