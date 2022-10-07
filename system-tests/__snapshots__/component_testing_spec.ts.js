@@ -16,19 +16,20 @@ exports['React major versions with Webpack executes all of the tests for React v
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 4)
-   44 modules
+   48 modules
 
 
   ✓ renders hello world
+  ✓ renders background
 
-  1 passing
+  2 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -155,7 +156,7 @@ exports['React major versions with Webpack executes all of the tests for React v
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  App.cy.jsx                               XX:XX        1        1        -        -        - │
+  │ ✔  App.cy.jsx                               XX:XX        2        2        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
@@ -163,7 +164,7 @@ exports['React major versions with Webpack executes all of the tests for React v
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  Rerendering.cy.jsx                       XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        6        6        -        -        -  
+    ✔  All specs passed!                        XX:XX        7        7        -        -        -  
 
 
 `
@@ -186,19 +187,20 @@ exports['React major versions with Webpack executes all of the tests for React v
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 4)
-   41 modules
+   45 modules
 
 
   ✓ renders hello world
+  ✓ renders background
 
-  1 passing
+  2 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -325,7 +327,7 @@ exports['React major versions with Webpack executes all of the tests for React v
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  App.cy.jsx                               XX:XX        1        1        -        -        - │
+  │ ✔  App.cy.jsx                               XX:XX        2        2        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
@@ -333,7 +335,7 @@ exports['React major versions with Webpack executes all of the tests for React v
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  Rerendering.cy.jsx                       XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        6        6        -        -        -  
+    ✔  All specs passed!                        XX:XX        7        7        -        -        -  
 
 
 `
@@ -359,15 +361,16 @@ exports['React major versions with Vite executes all of the tests for React v17 
 
 
   ✓ renders hello world
+  ✓ renders background
 
-  1 passing
+  2 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -494,7 +497,7 @@ exports['React major versions with Vite executes all of the tests for React v17 
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  App.cy.jsx                               XX:XX        1        1        -        -        - │
+  │ ✔  App.cy.jsx                               XX:XX        2        2        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
@@ -502,7 +505,7 @@ exports['React major versions with Vite executes all of the tests for React v17 
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  Rerendering.cy.jsx                       XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        6        6        -        -        -  
+    ✔  All specs passed!                        XX:XX        7        7        -        -        -  
 
 
 `
@@ -528,15 +531,16 @@ exports['React major versions with Vite executes all of the tests for React v18 
 
 
   ✓ renders hello world
+  ✓ renders background
 
-  1 passing
+  2 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -663,7 +667,7 @@ exports['React major versions with Vite executes all of the tests for React v18 
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  App.cy.jsx                               XX:XX        1        1        -        -        - │
+  │ ✔  App.cy.jsx                               XX:XX        2        2        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
@@ -671,7 +675,7 @@ exports['React major versions with Vite executes all of the tests for React v18 
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  Rerendering.cy.jsx                       XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        6        6        -        -        -  
+    ✔  All specs passed!                        XX:XX        7        7        -        -        -  
 
 
 `

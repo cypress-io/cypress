@@ -33,6 +33,11 @@ export function makeDefaultWebpackConfig (
     optimization.noEmitOnErrors = false
   }
 
+  // To prevent files from being tree shaken by webpack, we set optimization.sideEffects: false ensuring that
+  // webpack does not recognize the sideEffects flag in the package.json and thus files are not unintentionally
+  // dropped during testing in production mode.
+  optimization.sideEffects = false
+
   const finalConfig = {
     mode: 'development',
     optimization: {
