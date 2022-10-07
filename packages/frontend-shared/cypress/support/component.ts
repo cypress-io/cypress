@@ -7,6 +7,17 @@ import { installCustomPercyCommand } from './customPercyCommand'
 import { addNetworkCommands } from './onlineNetwork'
 import { GQLStubRegistry } from './mock-graphql/stubgql-Registry'
 
+import { createPinia } from '../../src/store'
+import { setActivePinia } from 'pinia'
+import type { Pinia } from 'pinia'
+
+let pinia: Pinia
+
+beforeEach(() => {
+  pinia = createPinia()
+  setActivePinia(pinia)
+})
+
 declare global {
   namespace Cypress {
     interface Chainable {

@@ -1,3 +1,15 @@
+# [@cypress/vite-dev-server-v3.3.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.2.0...@cypress/vite-dev-server-v3.3.0) (2022-10-06)
+
+
+### Bug Fixes
+
+* Address Vite sourcemap edge cases ([#24063](https://github.com/cypress-io/cypress/issues/24063)) ([e918fc1](https://github.com/cypress-io/cypress/commit/e918fc1a8c1b26b25207e42a6b8a879b0a3e9a2b))
+
+
+### Features
+
+* Disable file watching in component tests in run mode ([#24097](https://github.com/cypress-io/cypress/issues/24097)) ([3e01474](https://github.com/cypress-io/cypress/commit/3e014743909b35f54b697d2a759e4a2c5b67b5b7))
+
 # [@cypress/vite-dev-server-v3.2.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.1.1...@cypress/vite-dev-server-v3.2.0) (2022-09-29)
 
 
