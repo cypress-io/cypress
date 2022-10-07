@@ -165,6 +165,8 @@ const attachToWindow = (autWindow: Window) => {
 
   const cy = Cypress.cy
 
+  autWindow.postMessage('spec:bridge:attach', '*')
+
   Cypress.state('window', autWindow)
   Cypress.state('document', autWindow.document)
 

@@ -147,8 +147,8 @@ const setAutomationCookie = (options) => {
 // - On an interval, get the browser's cookies for the given domain, so that
 //   updates to the cookie jar (via http requests, cy.setCookie, etc) are
 //   reflected in the document.cookie value.
-export const patchDocumentCookie = (cookies) => {
-  let documentCookieValue = mergeCookies(window.document.cookie, cookies)
+export const patchDocumentCookie = (originalCookies) => {
+  let documentCookieValue = mergeCookies(window.document.cookie, originalCookies)
 
   const setDocumentCookieValue = (newCookieString) => {
     documentCookieValue = newCookieString
@@ -196,4 +196,33 @@ export const patchDocumentCookie = (cookies) => {
   }
 
   window.addEventListener('unload', onUnload)
+
+  const reset = () => {
+    documentCookieValue = ''
+  }
+
+  const bindCypressListeners = (Cypress) => {
+    Cypress.specBridgeCommunicator.on('cross:origin:cookies', (cookies) => {
+      documentCookieValue = mergeCookies(documentCookieValue, cookies)
+
+      // TODO: this needs to be wired up in cy.ts
+      // Cypress.specBridgeCommunicator.toPrimary('cross:origin:cookies:received')
+    })
+
+    Cypress.on('test:before:run', reset)
+
+    Cypress.on('set:cookie', (cookie) => {
+      documentCookieValue = mergeCookies(documentCookieValue, [cookie])
+    })
+
+    Cypress.on('clear:cookie', (name) => {
+      documentCookieValue = clearCookie(documentCookieValue, name)
+    })
+
+    Cypress.on('clear:cookies', reset)
+  }
+
+  return {
+    onCypress: bindCypressListeners,
+  }
 }

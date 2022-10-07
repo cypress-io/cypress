@@ -180,7 +180,7 @@ describe('cy.origin - cookie login', () => {
       verifyLoggedIn(username)
     })
 
-    it.only('SameSite=Strict -> not logged in', () => {
+    it('SameSite=Strict -> not logged in', () => {
       cy.origin('http://www.foobar.com:3500', { args: { username } }, ({ username }) => {
         cy.get('[data-cy="username"]').type(username)
         cy.get('[data-cy="cookieProps"]').type('SameSite=Strict')
@@ -193,7 +193,7 @@ describe('cy.origin - cookie login', () => {
     })
 
     // FIXME: Currently in Firefox, the default cookie setting in the extension is no_restriction, which can be set with Secure=false.
-    it.only('SameSite=None -> not logged in', { browser: '!firefox' }, () => {
+    it('SameSite=None -> not logged in', { browser: '!firefox' }, () => {
       cy.origin('http://www.foobar.com:3500', { args: { username } }, ({ username }) => {
         cy.get('[data-cy="username"]').type(username)
         cy.get('[data-cy="cookieProps"]').type('SameSite=None')
@@ -675,7 +675,7 @@ describe('cy.origin - cookie login', () => {
       })
 
       cy.origin('http://www.idp.com:3501', { args: { username } }, ({ username }) => {
-        cy.get('[data-cy="document-cookie"]').invoke('text')
+        cy.get('[data-cy="doc-cookie"]').invoke('text')
         .should('include', `user=${username}`)
       })
     })
@@ -763,8 +763,7 @@ describe('cy.origin - cookie login', () => {
       })
     })
 
-    // FIXME
-    it.skip('returns cookie set by cy.setCookie()', () => {
+    it('returns cookie set by cy.setCookie()', () => {
       cy.get('[data-cy="cookie-login-land-on-idp"]').click()
       cy.origin('http://www.foobar.com:3500', { args: { username } }, ({ username }) => {
         cy.get('[data-cy="username"]').type(username)
@@ -777,8 +776,7 @@ describe('cy.origin - cookie login', () => {
       })
     })
 
-    // FIXME
-    it.skip('no longer returns cookie after cy.clearCookie()', () => {
+    it('no longer returns cookie after cy.clearCookie()', () => {
       cy.get('[data-cy="cookie-login-land-on-idp"]').click()
       cy.origin('http://www.foobar.com:3500', { args: { username } }, ({ username }) => {
         cy.get('[data-cy="username"]').type(username)
@@ -791,8 +789,7 @@ describe('cy.origin - cookie login', () => {
       })
     })
 
-    // FIXME
-    it.skip('no longer returns cookie after cy.clearCookies()', () => {
+    it('no longer returns cookie after cy.clearCookies()', () => {
       cy.get('[data-cy="cookie-login-land-on-idp"]').click()
       cy.origin('http://www.foobar.com:3500', { args: { username } }, ({ username }) => {
         cy.get('[data-cy="username"]').type(username)
@@ -805,7 +802,6 @@ describe('cy.origin - cookie login', () => {
       })
     })
 
-    // FIXME: fails when run with other tests
     it('works when setting cookie in addition to cookie that already exists from http request', () => {
       cy.get('[data-cy="cookie-login-land-on-idp"]').click()
       cy.origin('http://www.foobar.com:3500', { args: { username } }, ({ username }) => {
