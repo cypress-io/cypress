@@ -19,15 +19,16 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite3.0.2-
 
 
   ✓ renders hello world
+  ✓ renders background
 
-  1 passing
+  2 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -363,7 +364,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  App.cy.jsx                               XX:XX        1        1        -        -        - │
+  │ ✔  App.cy.jsx                               XX:XX        2        2        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  AppCompilationError.cy.jsx               XX:XX        1        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
@@ -377,7 +378,7 @@ https://on.cypress.io/uncaught-exception-from-application
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  4 of 7 failed (57%)                      XX:XX       12        5        7        -        -  
+    ✖  4 of 7 failed (57%)                      XX:XX       13        6        7        -        -  
 
 
 `
@@ -403,15 +404,16 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite2.8.6-
 
 
   ✓ renders hello world
+  ✓ renders background
 
-  1 passing
+  2 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -747,7 +749,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  App.cy.jsx                               XX:XX        1        1        -        -        - │
+  │ ✔  App.cy.jsx                               XX:XX        2        2        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  AppCompilationError.cy.jsx               XX:XX        1        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
@@ -761,7 +763,7 @@ https://on.cypress.io/uncaught-exception-from-application
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  4 of 7 failed (57%)                      XX:XX       12        5        7        -        -  
+    ✖  4 of 7 failed (57%)                      XX:XX       13        6        7        -        -  
 
 
 `
@@ -787,15 +789,16 @@ exports['@cypress/vite-dev-server react executes all of the tests for vite2.9.1-
 
 
   ✓ renders hello world
+  ✓ renders background
 
-  1 passing
+  2 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -1131,7 +1134,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  App.cy.jsx                               XX:XX        1        1        -        -        - │
+  │ ✔  App.cy.jsx                               XX:XX        2        2        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  AppCompilationError.cy.jsx               XX:XX        1        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
@@ -1145,7 +1148,7 @@ https://on.cypress.io/uncaught-exception-from-application
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  4 of 7 failed (57%)                      XX:XX       12        5        7        -        -  
+    ✖  4 of 7 failed (57%)                      XX:XX       13        6        7        -        -  
 
 
 `
