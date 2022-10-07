@@ -302,7 +302,7 @@ type CloudRecordKey implements Node {
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
 
-  """The record key"""
+  """The Record Key"""
   key: String
   lastUsedAt: DateTime
 }

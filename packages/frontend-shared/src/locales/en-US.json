@@ -460,7 +460,7 @@
     },
     "recordKey": {
       "title": "Record key",
-      "description": "The record key configured for this project inside of Cypress Dashboard. {0}",
+      "description": "The Record Key configured for this project inside of Cypress Dashboard. {0}",
       "manageKeys": "Manage keys",
       "errorEmpty": "You do not have permission to record on this project",
       "errorEmptyButton": "Request record rights",

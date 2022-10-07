@@ -19,7 +19,7 @@ describe('<RecordKey />', () => {
     })
   })
 
-  it('renders the record key view with the correct title', () => {
+  it('renders the Record Key view with the correct title', () => {
     cy.findByText('Record key')
   })
 

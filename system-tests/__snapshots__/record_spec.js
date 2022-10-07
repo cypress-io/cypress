@@ -386,7 +386,7 @@ Your Record Key f858a...ee7e1 is not valid with this projectId: pid123
 
 It may have been recently revoked by you or another user.
 
-Please log into the Dashboard to see the valid record keys.
+Please log into the Dashboard to see the valid Record Keys.
 
 https://on.cypress.io/dashboard/projects/pid123
 
@@ -486,7 +486,7 @@ We searched for specs matching this glob pattern:
 exports['e2e record recordKey warns but does not exit when is forked pr 1'] = `
 Warning: It looks like you are trying to record this run from a forked PR.
 
-The record key is missing. Your CI provider is likely not passing private environment variables to builds from forks.
+The Record Key is missing. Your CI provider is likely not passing private environment variables to builds from forks.
 
 These results will not be recorded.
 
@@ -801,7 +801,7 @@ StatusCodeError: 500 - "Internal Server Error"
 exports['e2e record recordKey warns but does not exit when is forked pr and parallel 1'] = `
 Warning: It looks like you are trying to record this run from a forked PR.
 
-The record key is missing. Your CI provider is likely not passing private environment variables to builds from forks.
+The Record Key is missing. Your CI provider is likely not passing private environment variables to builds from forks.
 
 These results will not be recorded.
 

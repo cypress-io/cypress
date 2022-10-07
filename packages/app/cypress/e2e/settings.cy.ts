@@ -43,7 +43,7 @@ describe('App: Settings', () => {
       })
     })
 
-    it('shows the record keys section', () => {
+    it('shows the Record Keys section', () => {
       cy.startAppServer('e2e')
       cy.loginUser()
 
@@ -53,7 +53,7 @@ describe('App: Settings', () => {
       cy.findByText('Record key').should('be.visible')
     })
 
-    it('obfuscates each record key and has a button to reveal the key', () => {
+    it('obfuscates each Record Key and has a button to reveal the key', () => {
       cy.startAppServer('e2e')
       cy.loginUser()
 
@@ -103,7 +103,7 @@ describe('App: Settings', () => {
       cy.contains('Record key')
     })
 
-    it('clears nested cloud data (record key) upon logging out', () => {
+    it('clears nested cloud data (Record Key) upon logging out', () => {
       cy.startAppServer('e2e')
       cy.loginUser()
       cy.visitApp()

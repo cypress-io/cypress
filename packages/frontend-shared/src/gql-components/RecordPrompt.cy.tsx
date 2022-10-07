@@ -13,13 +13,13 @@ describe('RecordPrompt', () => {
     cy.findByText('npx cypress run --component --record --key <record-key>').should('be.visible')
   })
 
-  it('renders with record key', () => {
+  it('renders with Record Key', () => {
     cy.mount(<RecordPromptVue recordKey="abc-123" />)
 
     cy.findByText('npx cypress run --record --key abc-123').should('be.visible')
   })
 
-  it('renders with record key for component testing', () => {
+  it('renders with Record Key for component testing', () => {
     cy.mount(<RecordPromptVue currentTestingType="component" recordKey="abc-123" />)
 
     cy.findByText('npx cypress run --component --record --key abc-123').should('be.visible')
