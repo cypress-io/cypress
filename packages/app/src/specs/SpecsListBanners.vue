@@ -256,19 +256,22 @@ const cloudData = computed(() => ([props.gql.cloudViewer, props.gql.cachedUser, 
 const { isAllowedFeature } = usePromptManager()
 
 watch(cloudData, () => {
-  if (!isAllowedFeature('specsListBanner')) {
-    return
+  if (isAllowedFeature('specsListBanner')) {
+    showRecordBanner.value = userStatusMatches('needsRecordedRun')
+    showConnectBanner.value = userStatusMatches('needsProjectConnect')
+    showCreateOrganizationBanner.value = userStatusMatches('needsOrgConnect')
+    showLoginBanner.value = userStatusMatches('isLoggedOut')
+
+    hasRecordBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_RECORD)
+    hasConnectBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_CONNECT_PROJECT)
+    hasCreateOrganizationBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_CREATE_ORG)
+    hasLoginBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_LOGIN)
+  } else {
+    showRecordBanner.value = false
+    showConnectBanner.value = false
+    showCreateOrganizationBanner.value = false
+    showLoginBanner.value = false
   }
-
-  showRecordBanner.value = userStatusMatches('needsRecordedRun')
-  showConnectBanner.value = userStatusMatches('needsProjectConnect')
-  showCreateOrganizationBanner.value = userStatusMatches('needsOrgConnect')
-  showLoginBanner.value = userStatusMatches('isLoggedOut')
-
-  hasRecordBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_RECORD)
-  hasConnectBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_CONNECT_PROJECT)
-  hasCreateOrganizationBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_CREATE_ORG)
-  hasLoginBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_LOGIN)
 },
 { immediate: true })
 
