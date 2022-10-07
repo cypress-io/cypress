@@ -8,6 +8,15 @@ import { ButtonOutputComponent } from "./components/button-output.component";
 import { createOutputSpy } from 'cypress/angular';
 import { EventEmitter, Component } from '@angular/core';
 import { ProjectionComponent } from "./components/projection.component";
+import { ChildProvidersComponent, } from "./components/child-providers.component";
+import { ParentProvidersComponent } from "./components/parent-providers.component";
+import { HttpClientModule } from '@angular/common/http'
+import { of } from 'rxjs'
+import { ChildProvidersService } from "./components/child-providers.service";
+import { AnotherChildProvidersComponent } from "./components/another-child-providers.component";
+import { TestBed } from '@angular/core/testing'
+import { LifecycleComponent } from "./components/lifecycle.component";
+import { LogoComponent } from "./components/logo.component";
 
 @Component({
   template: `<app-projection>Hello World</app-projection>`
@@ -164,7 +173,177 @@ describe("angular mount", () => {
     })
     cy.get('h3').contains('Hello World')
   })
+
+  it('can use cy.intercept', () => {
+    cy.intercept('GET', '**/api/message', {
+      statusCode: 200,
+      body: { message: "test" }
+    })
+    cy.mount(ChildProvidersComponent, {
+      imports: [HttpClientModule],
+      providers: [ChildProvidersService]
+    })
+    cy.get('button').contains('default message')
+    cy.get('button').click()
+    cy.get('button').contains('test')
+  })
+
+  it('can use cy.intercept on child component', () => {
+    cy.intercept('GET', '**/api/message', {
+      statusCode: 200,
+      body: { message: "test" }
+    })
+    cy.mount(ParentProvidersComponent, {
+      declarations: [ChildProvidersComponent, AnotherChildProvidersComponent],
+      imports: [HttpClientModule],
+      providers: [ChildProvidersService]
+    })
+    cy.get('button').contains('default message').click()
+    cy.get('button').contains('test')
+  })
+
+  it('can make test doubles for child components', () => {
+    cy.mount(ParentProvidersComponent, {
+      declarations: [ChildProvidersComponent, AnotherChildProvidersComponent],
+      imports: [HttpClientModule],
+      providers: [
+        {
+          provide: ChildProvidersService,
+          useValue: {
+            getMessage() {
+              return of('test')
+            }
+          } as ChildProvidersService
+        }
+      ]
+    })
+    cy.get('button').contains('default message').click()
+    cy.get('button').contains('test')
+  })
+
+  it('can use intercept with component with a provider override', () => {
+    cy.intercept('GET', '**/api/message', {
+      statusCode: 200,
+      body: {
+        message: 'test'
+      }
+    })
+    cy.mount(AnotherChildProvidersComponent, {
+      imports: [HttpClientModule],
+      providers: [ChildProvidersService]
+    })
+    cy.get('button').contains('default another child message').click()
+    cy.get('button').contains('test')
+  })
+
+  it('can use a test double for a component with a provider override', () => {
+    cy.mount(AnotherChildProvidersComponent, {
+      imports: [HttpClientModule],
+      providers: [
+        {
+          provide: ChildProvidersService,
+          useValue: {
+            getMessage() {
+              return of('test')
+            }
+          } as ChildProvidersService
+        }
+      ]
+    })
+    cy.get('button').contains('default another child message').click()
+    cy.get('button').contains('test')
+  })
+
+  it('can use intercept with child component with a provider override', () => {
+    cy.intercept('GET', '**/api/message', {
+      statusCode: 200,
+      body: {
+        message: 'test'
+      }
+    })
+    cy.mount(ParentProvidersComponent, {
+      declarations: [ChildProvidersComponent, AnotherChildProvidersComponent],
+      imports: [HttpClientModule],
+      providers: [ChildProvidersService]
+    })
+    cy.get('button').contains('default another child message').click()
+    cy.get('button').contains('test')
+  })
+
+  it('can use a test double for a child component with a provider override', () => {
+    TestBed.overrideProvider(ChildProvidersService, {
+      useValue: {
+        getMessage() {
+          return of('test')
+        }
+      } as ChildProvidersService
+    })
+    cy.mount(ParentProvidersComponent, {
+      declarations: [ChildProvidersComponent, AnotherChildProvidersComponent],
+      imports: [HttpClientModule],
+    })
+    cy.get('button').contains('default another child message').click()
+    cy.get('button').contains('test')
+  })
   
+  it('handles ngOnChanges on mount', () => {
+    cy.mount(LifecycleComponent, {
+      componentProperties: {
+        name: 'Angular'
+      }
+    })
+
+    cy.get('p').should('have.text', 'Hi Angular. ngOnInit fired: true and ngOnChanges fired: true and conditionalName: false')
+  })
+
+  it('handles ngOnChanges on mount with templates', () => {
+    cy.mount('<app-lifecycle [name]="name"></app-lifecycle>', {
+      declarations: [LifecycleComponent],
+      componentProperties: {
+        name: 'Angular'
+      }
+    })
+
+    cy.get('p').should('have.text', 'Hi Angular. ngOnInit fired: true and ngOnChanges fired: true and conditionalName: false')
+  })
+  
+  it('creates simpleChanges from componentProperties and calls ngOnChanges on Mount', () => {
+    cy.mount(LifecycleComponent, {
+      componentProperties: {
+        name: 'CONDITIONAL NAME'
+      }
+    })
+    cy.get('p').should('have.text', 'Hi CONDITIONAL NAME. ngOnInit fired: true and ngOnChanges fired: true and conditionalName: true')
+  })
+
+  it('creates simpleChanges from componentProperties and calls ngOnChanges on Mount with template', () => {
+    cy.mount('<app-lifecycle [name]="name"></app-lifecycle>', {
+      declarations: [LifecycleComponent],
+      componentProperties: {
+        name: 'CONDITIONAL NAME'
+      }
+    })
+    cy.get('p').should('have.text', 'Hi CONDITIONAL NAME. ngOnInit fired: true and ngOnChanges fired: true and conditionalName: true')
+  })
+
+  it('ngOnChanges is not fired when no componentProperties given', () => {
+    cy.mount(LifecycleComponent)
+    cy.get('p').should('have.text', 'Hi . ngOnInit fired: true and ngOnChanges fired: false and conditionalName: false')
+  })
+
+  it('ngOnChanges is not fired when no componentProperties given with template', () => {
+    cy.mount('<app-lifecycle></app-lifecycle>', {
+      declarations: [LifecycleComponent]
+    })
+    cy.get('p').should('have.text', 'Hi . ngOnInit fired: true and ngOnChanges fired: false and conditionalName: false')
+  })
+
+  it('can load static assets', () => {
+    cy.mount(LogoComponent)
+    cy.get('img').should('be.visible').and('have.prop', 'naturalWidth').should('be.greaterThan', 0)
+  })
+
+
   describe("teardown", () => {
     beforeEach(() => {
       cy.get("[id^=root]").should("not.exist");

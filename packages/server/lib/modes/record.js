@@ -11,11 +11,12 @@ const commitInfo = require('@cypress/commit-info')
 
 const { hideKeys } = require('@packages/config')
 
-const api = require('../api')
-const exception = require('../exception')
+const api = require('../cloud/api')
+const exception = require('../cloud/exception')
+const upload = require('../cloud/upload')
+
 const errors = require('../errors')
 const capture = require('../capture')
-const upload = require('../upload')
 const Config = require('../config')
 const env = require('../util/env')
 const terminal = require('../util/terminal')
@@ -24,7 +25,6 @@ const testsUtils = require('../util/tests_utils')
 const specWriter = require('../util/spec_writer')
 
 // dont yell about any errors either
-
 const runningInternalTests = () => {
   return env.get('CYPRESS_INTERNAL_SYSTEM_TESTS') === '1'
 }
@@ -528,7 +528,6 @@ const createInstance = (options = {}) => {
     platform,
     machineId,
   })
-
   .catch((err) => {
     debug('failed creating instance %o', {
       stack: err.stack,
@@ -660,7 +659,7 @@ const createRunAndRecordSpecs = (options = {}) => {
       }
 
       const afterSpecRun = (spec, results, config) => {
-        // dont do anything if we failed to
+        // don't do anything if we failed to
         // create the instance
         if (!instanceId || results.skippedSpec) {
           return
