@@ -54,7 +54,7 @@ module.exports = async function (params) {
   }
 
   if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE)) {
-    flipFuses(
+    await flipFuses(
       exePathPerPlatform[os.platform()],
       {
         version: FuseVersion.V1,
