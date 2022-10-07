@@ -276,11 +276,11 @@ describe('App Top Nav Workflows', () => {
         },
         {
           name: 'Organizing tests',
-          href: 'https://on.cypress.io/writing-and-organizing-tests?utm_medium=Docs+Menu&utm_content=Organizing+tests&utm_source=Binary%3A+App',
+          href: 'https://on.cypress.io/writing-and-organizing-tests?utm_medium=Docs+Menu&utm_content=Organizing+Tests&utm_source=Binary%3A+App',
         },
         {
           name: 'Best practices',
-          href: 'https://on.cypress.io/best-practices?utm_medium=Docs+Menu&utm_content=Best+practices&utm_source=Binary%3A+App',
+          href: 'https://on.cypress.io/best-practices?utm_medium=Docs+Menu&utm_content=Best+Practices&utm_source=Binary%3A+App',
         },
         {
           name: 'Configuration',
@@ -331,7 +331,7 @@ describe('App Top Nav Workflows', () => {
         cy.loginUser()
         cy.visitApp()
 
-        cy.findByTestId('app-header-bar').findByRole('button', { name: 'Profile and Log out', expanded: false }).as('logInButton')
+        cy.findByTestId('app-header-bar').findByRole('button', { name: 'Profile and logout', expanded: false }).as('logInButton')
       })
 
       it('shows user in top nav when logged in', () => {
