@@ -3,10 +3,11 @@ import * as CriClient from '../../../lib/browsers/cri-client'
 import { expect, proxyquire, sinon } from '../../spec_helper'
 import * as protocol from '../../../lib/browsers/protocol'
 import { stripAnsi } from '@packages/errors'
+import net from 'net'
 
 const HOST = '127.0.0.1'
 const PORT = 50505
-const THROWS_PORT = 66666
+const THROWS_PORT = 65535
 
 describe('lib/browsers/cri-client', function () {
   let browserCriClient: {
@@ -61,6 +62,30 @@ describe('lib/browsers/cri-client', function () {
       sinon.stub(protocol, '_connectAsync').throws()
 
       await expect(getClient()).to.be.rejected
+    })
+
+    it('attempts to connect to multiple hosts', async function () {
+      (protocol._connectAsync as any).restore()
+      const socket = new net.Socket()
+
+      sinon.stub(net, 'connect').callsFake((opts, onConnect) => {
+        process.nextTick(() => {
+          // throw an error on 127.0.0.1 so ::1 can connect
+          if (opts.host === '127.0.0.1') {
+            socket.emit('error', new Error())
+          } else {
+            onConnect()
+          }
+        })
+
+        return socket
+      })
+
+      criImport.Version.withArgs({ host: '::1', port: THROWS_PORT, useHostName: true }).resolves({ webSocketDebuggerUrl: 'http://web/socket/url' })
+
+      await browserCriClient.BrowserCriClient.create(['127.0.0.1', '::1'], THROWS_PORT, 'Chrome', onError)
+
+      expect(criImport.Version).to.be.calledOnce
     })
 
     it('retries when Version fails', async function () {

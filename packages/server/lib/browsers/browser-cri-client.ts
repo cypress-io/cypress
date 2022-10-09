@@ -44,8 +44,11 @@ const tryBrowserConnection = async (host: string, port: number, browserName: str
 
     return host
   } catch (err) {
-    debug('failed to connect to CDP %o', { connectOpts, err })
-    errors.throwErr('CDP_COULD_NOT_CONNECT', browserName, port, err)
+    // don't throw an error if we've already connected
+    if (!connected) {
+      debug('failed to connect to CDP %o', { connectOpts, err })
+      errors.throwErr('CDP_COULD_NOT_CONNECT', browserName, port, err)
+    }
 
     return
   }

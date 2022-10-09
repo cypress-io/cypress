@@ -52,7 +52,7 @@ export function getDelayForRetry (iteration) {
   return [0, 100, 200, 200][iteration]
 }
 
-interface RetryingOptions {
+export interface RetryingOptions {
   family: 4 | 6 | 0
   port: number
   host: string | undefined
