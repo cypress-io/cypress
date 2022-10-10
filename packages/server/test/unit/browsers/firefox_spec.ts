@@ -519,7 +519,7 @@ describe('lib/browsers/firefox', () => {
     })
 
     context('#setupRemote', function () {
-      it('attaches foxdriver after testing connection', async function () {
+      it('correctly sets up the remote agent', async function () {
         const criClientStub: CriClient = {
           targetId: '',
           send: sinon.stub(),
