@@ -10,7 +10,10 @@
     <p class="h-48px mb-8px text-gray-600">
       {{ t("runs.empty.description") }}
     </p>
-    <RecordPromptAdapter />
+
+    <span class="w-full">
+      <RecordPromptAdapter />
+    </span>
   </div>
 </template>
 
