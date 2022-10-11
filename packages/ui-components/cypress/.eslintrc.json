@@ -1,7 +1,0 @@
-{
-  "parser": "@typescript-eslint/parser",
-  "extends": [
-    "plugin:cypress/recommended",
-    "plugin:@cypress/dev/react"
-  ]
-}

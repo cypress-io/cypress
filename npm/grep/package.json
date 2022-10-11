@@ -1,0 +1,44 @@
+{
+  "name": "@cypress/grep",
+  "version": "0.0.0-development",
+  "description": "Filter tests using substring",
+  "main": "src/support",
+  "scripts": {
+    "cy:run": "node ../../scripts/cypress.js run --config specPattern='**/unit.js'",
+    "cy:open": "node ../../scripts/cypress.js open --e2e -b electron --config specPattern='**/unit.js'"
+  },
+  "dependencies": {
+    "debug": "^4.3.2",
+    "find-test-names": "^1.19.0",
+    "globby": "^11.0.4"
+  },
+  "devDependencies": {
+    "cypress-each": "^1.11.0",
+    "cypress-expect": "^2.5.3",
+    "typescript": "^4.7.4"
+  },
+  "peerDependencies": {
+    "cypress": ">=10"
+  },
+  "files": [
+    "src"
+  ],
+  "types": "src/index.d.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cypress-io/cypress.git"
+  },
+  "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/grep#readme",
+  "author": "Cypress Tools Team",
+  "bugs": {
+    "url": "https://github.com/cypress-io/cypress/issues"
+  },
+  "keywords": [
+    "cypress",
+    "grep"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

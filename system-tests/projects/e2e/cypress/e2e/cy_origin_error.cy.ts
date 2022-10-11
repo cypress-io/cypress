@@ -5,7 +5,7 @@ describe('cy.origin', () => {
   })
 
   it('tries to find an element that doesn\'t exist and fails', () => {
-    cy.origin('http://foobar.com:4466', () => {
+    cy.origin('http://www.foobar.com:4466', () => {
       cy.get('#doesnotexist', {
         timeout: 1000,
       })

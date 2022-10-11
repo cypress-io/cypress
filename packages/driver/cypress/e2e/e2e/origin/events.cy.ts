@@ -8,14 +8,14 @@ describe('cy.origin', () => {
     cy.window().its('testPrimaryOriginBeforeLoad').should('be.true')
 
     // Needs to be declared before the visit
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.on('window:before:load', (win: {testSecondaryWindowBeforeLoad: boolean}) => {
         win.testSecondaryWindowBeforeLoad = true
       })
     })
 
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.window().its('testSecondaryWindowBeforeLoad').should('be.true')
       cy.window().its('testPrimaryOriginBeforeLoad').should('be.undefined')
       cy
@@ -37,7 +37,7 @@ describe('cy.origin', () => {
     })
 
     it('form:submitted', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const afterFormSubmitted = new Promise<void>((resolve) => {
           Cypress.once('form:submitted', (e) => {
             const $form = cy.$$('form')
@@ -56,7 +56,7 @@ describe('cy.origin', () => {
       cy.origin('http://www.foobar.com:3500', () => {
         const afterWindowBeforeUnload = new Promise<void>((resolve) => {
           Cypress.once('window:before:unload', () => {
-            expect(location.host).to.equal('foobar.com:3500')
+            expect(location.host).to.equal('www.foobar.com:3500')
             resolve()
           })
         })
@@ -71,7 +71,7 @@ describe('cy.origin', () => {
       cy.origin('http://www.foobar.com:3500', () => {
         const afterWindowUnload = new Promise<void>((resolve) => {
           Cypress.once('window:unload', () => {
-            expect(location.host).to.equal('foobar.com:3500')
+            expect(location.host).to.equal('www.foobar.com:3500')
             resolve()
           })
         })
@@ -83,10 +83,10 @@ describe('cy.origin', () => {
     })
 
     it('window:alert', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const afterWindowAlert = new Promise<void>((resolve) => {
           Cypress.once('window:alert', (text) => {
-            expect(location.host).to.equal('foobar.com:3500')
+            expect(location.host).to.equal('www.foobar.com:3500')
             expect(`window:alert ${text}`).to.equal('window:alert the alert text')
             resolve()
           })
@@ -98,10 +98,10 @@ describe('cy.origin', () => {
     })
 
     it('window:confirm', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const afterWindowConfirm = new Promise<void>((resolve) => {
           Cypress.once('window:confirm', (text) => {
-            expect(location.host).to.equal('foobar.com:3500')
+            expect(location.host).to.equal('www.foobar.com:3500')
             expect(`window:confirm ${text}`).to.equal('window:confirm the confirm text')
             resolve()
           })
@@ -113,10 +113,10 @@ describe('cy.origin', () => {
     })
 
     it('window:confirmed - true when no window:confirm listeners return false', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const afterWindowConfirmed = new Promise<void>((resolve) => {
           Cypress.once('window:confirmed', (text, returnedFalse) => {
-            expect(location.host).to.equal('foobar.com:3500')
+            expect(location.host).to.equal('www.foobar.com:3500')
             expect(`window:confirmed ${text} - ${returnedFalse}`).to.equal('window:confirmed the confirm text - true')
             resolve()
           })
@@ -133,10 +133,10 @@ describe('cy.origin', () => {
     })
 
     it('window:confirmed - false when any window:confirm listeners return false', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const afterWindowConfirmed = new Promise<void>((resolve) => {
           Cypress.once('window:confirmed', (text, returnedFalse) => {
-            expect(location.host).to.equal('foobar.com:3500')
+            expect(location.host).to.equal('www.foobar.com:3500')
             expect(`window:confirmed ${text} - ${returnedFalse}`).to.equal('window:confirmed the confirm text - false')
             resolve()
           })

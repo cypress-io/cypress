@@ -375,15 +375,13 @@ export class CommandQueue extends Queue<$Command> {
         return
       }
 
-      console.log('onError')
-
       if (this.state('onCommandFailed')) {
-        const handledError = this.state('onCommandFailed')(err, this, next, commandRunningFailed)
+        const handledError = this.state('onCommandFailed')(err, this)
 
         cy.state('onCommandFailed', null)
 
         if (handledError) {
-          return
+          return next()
         }
       }
 
