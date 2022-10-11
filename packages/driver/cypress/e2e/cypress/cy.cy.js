@@ -527,12 +527,31 @@ describe('driver/src/cypress/cy', () => {
       cy.aQuery()
     })
 
-    // TODO: Make this work. Setting aside for now.
-    it.skip('does allow queries to use other queries', () => {
-      Cypress.Commands._overwriteQuery('aQuery', () => cy.bQuery())
-      Cypress.Commands._overwriteQuery('bQuery', () => {})
+    it('custom commands that return query chainers retry', () => {
+      Cypress.Commands.add('getButton', () => cy.get('button'))
+      cy.on('command:retry', () => cy.$$('button').first().remove())
 
-      cy.aQuery()
+      cy.getButton().should('have.length', 23)
+    })
+
+    it('allows queries to use other queries', () => {
+      const logs = []
+
+      cy.on('log:added', (attrs, log) => logs.push(log))
+
+      Cypress.Commands._overwriteQuery('aQuery', () => {
+        cy.now('get', 'body')
+
+        return cy.now('get', 'button')
+      })
+
+      Cypress.Commands._overwriteQuery('bQuery', () => cy.now('aQuery'))
+
+      cy.aQuery().should('have.length', 24)
+      cy.then(() => {
+        // Length of 3: bQuery.body (from get), bQuery.button (from get), should.have.length.23
+        expect(logs.length).to.eq(3)
+      })
     })
   })
 })

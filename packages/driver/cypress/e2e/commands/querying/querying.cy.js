@@ -776,8 +776,6 @@ describe('src/cy/commands/querying', () => {
         cy.get('#missing-el').should('have.prop', 'foo')
       })
 
-      it('throws when using an alias that does not exist')
-
       it('throws after timing out after a .wait() alias reference', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('Expected to find element: `getJsonButton`, but never found it.')
@@ -960,7 +958,7 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
-    it('GET is scoped to the current subject', () => {
+    it('is scoped to the current subject', () => {
       const span = cy.$$('#click-me a span')
 
       cy.get('#click-me a').contains('click').then(($span) => {
@@ -1103,23 +1101,9 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
-    it('finds text by regexp and restores contains', () => {
-      const { contains } = Cypress.$Cypress.$.expr[':']
-
-      cy.contains(/^asdf \d+/).then(($li) => {
-        expect($li).to.have.text('asdf 1')
-
-        expect(Cypress.$Cypress.$.expr[':'].contains).to.eq(contains)
-      })
-    })
-
-    it('finds text by regexp when second parameter is a regexp and restores contains', () => {
-      const { contains } = Cypress.$Cypress.$.expr[':']
-
+    it('finds text by regexp when second parameter is a regexp', () => {
       cy.contains('#asdf>li:first', /asdf 1/).then(($li) => {
         expect($li).to.have.text('asdf 1')
-
-        expect(Cypress.$Cypress.$.expr[':'].contains).to.eq(contains)
       })
     })
 
@@ -1185,6 +1169,20 @@ describe('src/cy/commands/querying', () => {
 
       cy.visit('fixtures/dom.html')
       cy.contains(/=[0-6]/, { timeout: 100 }).should('have.text', 'a=2')
+    })
+
+    it('does not interfere with other aliased .contains()', () => {
+      /*
+       * There was a regression (no github issue logged) while refactoring .contains() where if a test aliased
+       * a query using .contains(), future .contains() calls could overwrite its internal state, causing the first one
+       * to look for the second one's arguments rather than its own.
+       *
+       * This test guards against that regression; if the `contains('New York')` inside @newYork alias were
+       * overwritten by contains(`Nested Find`), then the existence assertion would fail.
+       */
+      cy.contains('New York').as('newYork')
+      cy.contains('Nested Find').invoke('remove')
+      cy.get('@newYork').should('exist')
     })
 
     describe('should(\'not.exist\')', () => {
@@ -1293,6 +1291,7 @@ space
 
       it('is case sensitive when matchCase is undefined', () => {
         cy.get('#test-button').contains('Test')
+        cy.contains('test').should('not.exist')
       })
 
       it('is case sensitive when matchCase is true', () => {
@@ -1551,19 +1550,13 @@ space
         })
       })
 
-      it('sets type to parent when subject isnt element', () => {
-        cy.window().contains('foo').then(function () {
-          expect(this.lastLog.get('type')).to.eq('parent')
+      it('sets type to child when used as a child command', () => {
+        cy.get('#specific-contains').contains('foo').then(function () {
+          expect(this.lastLog.get('type')).to.eq('child')
 
           cy.document().contains('foo').then(function () {
-            expect(this.lastLog.get('type')).to.eq('parent')
+            expect(this.lastLog.get('type')).to.eq('child')
           })
-        })
-      })
-
-      it('sets type to child when used as a child command', () => {
-        cy.get('body').contains('foo').then(function () {
-          expect(this.lastLog.get('type')).to.eq('child')
         })
       })
 
@@ -1744,53 +1737,13 @@ space
       it('throws when assertion is have.length > 1', function (done) {
         cy.on('fail', (err) => {
           assertLogLength(this.logs, 2)
-          expect(err.message).to.eq('`cy.contains()` cannot be passed a `length` option because it will only ever return 1 element.')
+          expect(err.message).to.eq('`cy.contains()` only ever returns one element, so you cannot assert on a `length` greater than one.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/contains')
 
           done()
         })
 
         cy.contains('Nested Find').should('have.length', 2)
-      })
-
-      it('restores contains even when cy.get fails', (done) => {
-        const { contains } = Cypress.$Cypress.$.expr[':']
-
-        const cyNow = cy.now
-
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('Syntax error, unrecognized expression')
-          expect(Cypress.$Cypress.$.expr[':'].contains).to.eq(contains)
-
-          done()
-        })
-
-        cy.stub(cy, 'now').callsFake(() => cyNow('get', 'aBad:jQuery^Selector', {}))
-
-        cy.contains(/^asdf \d+/)
-      })
-
-      it('restores contains on abort', (done) => {
-        cy.timeout(1000)
-
-        const { contains } = Cypress.$Cypress.$.expr[':']
-
-        cy.stub(Cypress.runner, 'stop')
-
-        cy.on('stop', () => {
-          _.delay(() => {
-            expect(Cypress.$Cypress.$.expr[':'].contains).to.eq(contains)
-
-            done()
-          }
-          , 50)
-        })
-
-        cy.on('command:retry', _.after(2, () => {
-          Cypress.stop()
-        }))
-
-        cy.contains(/^does not contain asdfasdf at all$/)
       })
     })
   })

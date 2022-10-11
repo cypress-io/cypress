@@ -198,16 +198,16 @@ it('verifies number of cy commands', () => {
   // remove custom commands we added for our own testing
   const customCommands = ['getAll', 'shouldWithTimeout', 'originLoadUtils']
   // @ts-ignore
-  const actualCommands = Cypress._.reject(Object.keys(cy.commandFns), (command) => customCommands.includes(command))
+  const actualCommands = Cypress._.pullAll([...Object.keys(cy.commandFns), ...Object.keys(cy.queryFns)], customCommands)
   const expectedCommands = [
     'check', 'uncheck', 'click', 'dblclick', 'rightclick', 'focus', 'blur', 'hover', 'scrollIntoView', 'scrollTo', 'select',
-    'selectFile', 'submit', 'type', 'clear', 'trigger', 'ng', 'should', 'and', 'clock', 'tick', 'spread', 'each', 'then',
+    'selectFile', 'submit', 'type', 'clear', 'trigger', 'should', 'and', 'clock', 'tick', 'spread', 'each', 'then',
     'invoke', 'its', 'getCookie', 'getCookies', 'setCookie', 'clearCookie', 'clearCookies', 'pause', 'debug', 'exec', 'readFile',
     'writeFile', 'fixture', 'clearLocalStorage', 'url', 'hash', 'location', 'end', 'noop', 'log', 'wrap', 'reload', 'go', 'visit',
     'focused', 'get', 'contains', 'shadow', 'within', 'request', 'session', 'screenshot', 'task', 'find', 'filter', 'not',
     'children', 'eq', 'closest', 'first', 'last', 'next', 'nextAll', 'nextUntil', 'parent', 'parents', 'parentsUntil', 'prev',
     'prevAll', 'prevUntil', 'siblings', 'wait', 'title', 'window', 'document', 'viewport', 'server', 'route', 'intercept', 'origin',
-    'mount',
+    'mount', 'as', 'root',
   ]
   const addedCommands = Cypress._.difference(actualCommands, expectedCommands)
   const removedCommands = Cypress._.difference(expectedCommands, actualCommands)

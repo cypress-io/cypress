@@ -161,6 +161,10 @@ export default {
           internalError('miscellaneous.invalid_new_query', name)
         }
 
+        if (addingBuiltIns) {
+          builtInCommandNames[name] = true
+        }
+
         cy._addQuery({ name, fn })
       },
 

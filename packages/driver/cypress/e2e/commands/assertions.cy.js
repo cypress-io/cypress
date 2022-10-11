@@ -418,8 +418,6 @@ describe('src/cy/commands/assertions', () => {
           assertLogLength(this.logs, 6)
 
           expect(this.logs[3].get('name')).to.eq('get')
-          expect(this.logs[3].get('state')).to.eq('failed')
-          expect(this.logs[3].get('error')).to.eq(err)
 
           expect(this.logs[4].get('name')).to.eq('assert')
           expect(this.logs[4].get('state')).to.eq('failed')
@@ -448,7 +446,7 @@ describe('src/cy/commands/assertions', () => {
           done()
         })
 
-        cy.contains('Nested Find').should('have.length', 2)
+        cy.contains('Nested Find', { timeout: 50 }).should('have.length', 2)
       })
 
       // https://github.com/cypress-io/cypress/issues/6384

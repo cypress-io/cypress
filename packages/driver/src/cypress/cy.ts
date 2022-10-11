@@ -220,6 +220,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
   private testConfigOverride: TestConfigOverride
   private commandFns: Record<string, Function> = {}
+  private queryFns: Record<string, Function> = {}
 
   constructor (specWindow: SpecWindow, Cypress: ICypress, Cookies: ICookies, state: StateFunc, config: ICypress['config']) {
     super()
@@ -832,6 +833,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   _addQuery ({ name, fn }) {
     const cy = this
 
+    this.queryFns[name] = fn
+
     const callback = (chainer, userInvocationStack, args) => {
       // dont enqueue / inject any new commands if
       // onInjectCommand returns false
@@ -851,11 +854,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       const command = $Command.create({
         name,
         args,
-        type: 'dual',
         chainerId: chainer.chainerId,
         userInvocationStack,
         query: true,
-        prevSubject: 'optional',
       })
 
       const cyFn = function (chainerId, ...args) {
@@ -896,6 +897,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   now (name, ...args) {
+    if (this.queryFns[name]) {
+      return this.queryFns[name].apply(this.state('current'), args)
+    }
+
     return Promise.resolve(
       this.commandFns[name].apply(this, args),
     )
@@ -1261,7 +1266,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     if (prevSubject !== undefined) {
       // make sure our current subject is valid for
       // what we expect in this command
-      this.ensureSubjectByType(subject, prevSubject)
+      this.ensureSubjectByType(subject, prevSubject, this.state('current'))
     }
 
     args.unshift(subject)
