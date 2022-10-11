@@ -56,7 +56,7 @@ const cmd = (command, args = '') => {
 
 const queryFnToString = (queryFn) => `.${queryFn.commandName}(${queryFn.args.map($utils.stringifyActual).join(', ')})`
 
-const subjectChainToString = (subjectChain) => {
+export const subjectChainToString = (subjectChain) => {
   const [initial, ...queryFns] = subjectChain
 
   const prefix = initial == null ? 'cy' : `${$utils.stringifyActual(initial)} -> `

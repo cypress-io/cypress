@@ -552,5 +552,20 @@ describe('driver/src/cypress/cy', () => {
         expect(logs.length).to.eq(3)
       })
     })
+
+    it('ends all messages when query chain fails', (done) => {
+      const logs = []
+
+      cy.on('log:added', (attrs, log) => logs.push(log))
+
+      cy.on('fail', (err) => {
+        const state = logs.map((l) => l.get('state'))
+
+        expect(state).to.eql(['passed', 'passed', 'passed', 'failed'])
+        done()
+      })
+
+      cy.get('body').find('#specific-contains').children().should('have.class', 'active')
+    })
   })
 })

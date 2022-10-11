@@ -3,6 +3,7 @@ import _ from 'lodash'
 import $dom from '../../dom'
 import $elements from '../../dom/elements'
 import { resolveShadowDomInclusion } from '../../cypress/shadow_dom_utils'
+import { subjectChainToString } from '../../cypress/error_messages'
 
 type TraversalOptions = Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Shadow>
 
@@ -98,13 +99,18 @@ export default (Commands, Cypress, cy) => {
 
       this.set('timeout', userOptions.timeout)
 
-      let sub
-
       this.set('onFail', (err) => {
         switch (err.type) {
-          case 'existence':
-            err.message += ` Queried from element: ${$dom.stringify(sub, 'short')}`
+          case 'existence': {
+            const chainerId = this.get('chainerId')
+            const subjectChain = (cy.state('subjects') || {})[chainerId]
+
+            err.message += ` Queried from:
+
+              > ${subjectChainToString(subjectChain)}`
+
             break
+          }
           default:
             break
         }
@@ -119,9 +125,7 @@ export default (Commands, Cypress, cy) => {
 
         // normalize the selector since jQuery won't have it
         // or completely borks it
-        $el.selector = selector
-
-        sub = subject
+        $el.selector = selector || traversal
 
         log && log.set({
           $el,

@@ -220,18 +220,12 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
 
   const finishAssertions = () => {
     cy.state('current').get('logs').forEach((log) => {
-      if (log.get('next') || !log.get('snapshots')) {
+      if (!log.get('snapshots')) {
         log.snapshot()
       }
-
-      const e = log.get('_error')
-
-      if (e) {
-        return log.error(e)
-      }
-
-      return log.end()
     })
+
+    cy.state('current').finishLogs()
   }
 
   type VerifyUpcomingAssertionsCallbacks = {
