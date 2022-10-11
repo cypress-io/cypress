@@ -151,9 +151,7 @@ export function runCypressInCypressMochaEventsTest<T> (snapshots: T, snapToCompa
       /* eslint-disable no-console */
       console.info('Received snapshot:', JSON.stringify(snapshot, null, 2))
 
-      cy.fail(new Error(`The captured mocha events did not match the "${String(snapToCompare)}" snapshot.\n${diff}`), { async: false })
-
-      return done()
+      return cy.fail(new Error(`The captured mocha events did not match the "${String(snapToCompare)}" snapshot.\n${diff}`), { async: false })
     }
 
     Cypress.log({
