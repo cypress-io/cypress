@@ -90,7 +90,7 @@ export function createConfig (env: 'dev' | 'prod' = 'prod', cypressAppPath?: str
    * Configured via `env`
    */
   const nodeModulesOnly = env === 'dev'
-  const minify = env === 'prod'
+  const minify = false
 
   const snapshotCacheDir =
     env === 'dev'
