@@ -32,7 +32,11 @@ const tryBrowserConnection = async (host: string, port: number, browserName: str
     port,
     getDelayMsForRetry: (i) => {
       // if we successfully connected to a different host, cancel any remaining connection attempts
-      if (connected) return -1
+      if (connected) {
+        debug('cancelling any additional retries %o', { host, port })
+
+        return
+      }
 
       return _getDelayMsForRetry(i, browserName)
     },

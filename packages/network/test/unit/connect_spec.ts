@@ -37,8 +37,8 @@ describe('lib/connect', () => {
           return 1
         }
 
-        // return -1 to cancel any additional retries
-        return -1
+        // return undefined to cancel any additional retries
+        return
       }
 
       const opts: RetryingOptions = {
