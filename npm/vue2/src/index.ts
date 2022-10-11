@@ -273,11 +273,11 @@ declare global {
  * @see https://github.com/cypress-io/cypress/issues/7910
  */
 function failTestOnVueError (err, vm, info) {
-  console.error(`Vue error`)
-  console.error(err)
-  console.error('component:', vm)
-  console.error('info:', info)
-  window.top.onerror(err)
+  // Vue 2 try catches the error-handler so push the error to be caught outside
+  // of the handler.
+  setTimeout(() => {
+    throw err
+  })
 }
 
 function registerAutoDestroy ($destroy: () => void) {

@@ -171,7 +171,6 @@ export default {
         }
 
         queries[name] = fn
-
         cy._addQuery({ name, fn })
       },
 
