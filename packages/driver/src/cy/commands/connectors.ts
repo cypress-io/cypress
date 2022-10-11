@@ -170,12 +170,11 @@ export default function (Commands, Cypress, cy, state) {
       })
     }
 
-    const log = options.log !== false && Cypress.log({
+    const log = this.get('_log') || (options.log !== false && Cypress.log({
       message: `.${path}`,
       timeout: options.timeout,
-    })
+    }))
 
-    this.set('_log', log)
     this.set('timeout', options.timeout)
     this.set('ensureExistenceFor', 'subject')
 
@@ -244,16 +243,19 @@ export default function (Commands, Cypress, cy, state) {
       } })
     }
 
+    const log = options.log !== false && Cypress.log({
+      message: `.${path}()`,
+      timeout: options.timeout,
+    })
+
+    this.set('_log', log)
+
     const itsFn = cy.now('its', path, options)
 
     // .its() has an implicit assertions that the return value shouldn't be null, but
     // .invoke() has no such requirement. Removing ensureExistenceFor resests implicit
     // assertion that .its() added
     this.set('ensureExistenceFor', null)
-
-    const log = this.get('_log')
-
-    log && log.set('message', `.${path}()`)
 
     return (subject) => {
       subject = cy.getRemotejQueryInstance(subject) || subject
@@ -274,14 +276,17 @@ export default function (Commands, Cypress, cy, state) {
 
       let value = parent[last](...args)
 
-      log && log.set('consoleProps', () => {
-        return {
-          Command: 'invoke',
-          Function: `.${path}(${$utils.stringify(args)})`,
-          Subject: subject,
-          'With Arguments': args,
-          Yielded: value,
-        }
+      log && log.set({
+        $el: $dom.isElement(subject) ? subject : null,
+        consoleProps: () => {
+          return {
+            Command: 'invoke',
+            Function: `.${path}(${$utils.stringify(args)})`,
+            Subject: subject,
+            'With Arguments': args,
+            Yielded: value,
+          }
+        },
       })
 
       return value
