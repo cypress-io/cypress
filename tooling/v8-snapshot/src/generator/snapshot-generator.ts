@@ -246,7 +246,7 @@ export class SnapshotGenerator {
   }
 
   private _addGitignore () {
-    const gitignore = 'snapshot.js\nbase.snapshot.js.map\nprocessed.snapshot.js.processed.map\nesbuild-meta.json\nsnapshot-meta.json\nsnapshot-entry.js\n'
+    const gitignore = 'snapshot.js\nbase.snapshot.js.map\nprocessed.snapshot.js.map\nesbuild-meta.json\nsnapshot-meta.json\nsnapshot-entry.js\n'
 
     const gitignorePath = join(this.cacheDir, '.gitignore')
 
@@ -300,8 +300,8 @@ export class SnapshotGenerator {
         auxiliaryData: this.auxiliaryData,
         nodeModulesOnly: this.nodeModulesOnly,
         sourcemap: true,
-        baseSourcemapExternalPath: this.snapshotScriptPath.replace('snapshot.js.map', 'base.snapshot.js.map'),
-        processedSourcemapExternalPath: this.snapshotScriptPath.replace('snapshot.js.map', 'processed.snapshot.js.map'),
+        baseSourcemapExternalPath: this.snapshotScriptPath.replace('snapshot.js', 'base.snapshot.js.map'),
+        processedSourcemapExternalPath: this.snapshotScriptPath.replace('snapshot.js', 'processed.snapshot.js.map'),
         nodeEnv: this.nodeEnv,
       })
     } catch (err) {
