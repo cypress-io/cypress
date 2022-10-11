@@ -1,16 +1,7 @@
-import { client } from '@packages/socket/lib/browser'
+import { createWebsocket } from '@packages/socket/lib/browser'
 
 export const handleSocketEvents = (Cypress) => {
-  const webSocket = client({
-    path: Cypress.config('socketIoRoute'),
-    transports: ['websocket'],
-  })
-
-  webSocket.on('connect_error', () => {
-    // fall back to polling if websocket fails to connect (webkit)
-    // https://github.com/socketio/socket.io/discussions/3998#discussioncomment-972316
-    webSocket.io.opts.transports = ['polling', 'websocket']
-  })
+  const webSocket = createWebsocket({ path: Cypress.config('socketIoRoute'), browserFamily: Cypress.config('browser').family })
 
   webSocket.connect()
 
