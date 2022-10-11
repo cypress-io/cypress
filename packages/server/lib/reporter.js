@@ -45,11 +45,13 @@ const getTitlePath = function (runnable, titles = []) {
   // use .originalTitle which is the name of the suite/test before title change
   // (for display purposes) potentially alter by the browser skip
   if (runnable.originalTitle) {
-    titles.unshift(runnable.originalTitle)
+    runnable.title = runnable.originalTitle
+  }
 
-    if (runnable.parent) {
-      return getTitlePath(runnable.parent, titles)
-    }
+  titles.unshift(runnable.title)
+
+  if (runnable.parent) {
+    return getTitlePath(runnable.parent, titles)
   }
 
   return titles
