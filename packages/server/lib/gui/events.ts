@@ -24,16 +24,12 @@ const handleEvent = function (options, bus, event, id, type, arg) {
   switch (type) {
     case 'launch:browser':
       return
-
     case 'open:project':
       return
-
     case 'has:opened:cypress':
       return
-
     case 'ping:baseUrl':
       return
-      
     default:
       throw new Error(`No ipc event registered for: '${type}'`)
   }
