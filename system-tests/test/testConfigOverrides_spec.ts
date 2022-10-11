@@ -38,7 +38,7 @@ describe('testConfigOverrides', () => {
       await exec()
       const results = await fs.readJson(outputPath)
 
-      // make sure we've respected test.originalTitle
+      // make sure we've respected test title when creating title path
       expect(results.runs[0].tests[0].title).deep.eq(['suite', 'is skipped due to test-level browser override'])
       expect(results.runs[0].tests[1].title).deep.eq(['suite 2', 'is skipped due to suite-level browser override'])
     },

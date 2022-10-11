@@ -42,6 +42,12 @@ overrideRequire((depPath, _load) => {
 //   @parent.titlePath().concat([@title])
 
 const getTitlePath = function (runnable, titles = []) {
+  // `originalTitle` is a Mocha Hook concept used to associated the
+  // hook to the test that executed it
+  if (runnable.originalTitle) {
+    runnable.title = runnable.originalTitle
+  }
+
   if (runnable.title) {
     // sanitize the title which may have been altered by a suite-/
     // test-level browser skip to ensure the original title is used
