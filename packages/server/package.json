@@ -42,7 +42,7 @@
     "chalk": "2.4.2",
     "check-more-types": "2.24.0",
     "chokidar": "3.5.1",
-    "chrome-remote-interface": "0.31.1",
+    "chrome-remote-interface": "0.31.3",
     "cli-table3": "0.5.1",
     "coffeescript": "1.12.7",
     "color-string": "1.5.5",

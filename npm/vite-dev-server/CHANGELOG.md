@@ -1,3 +1,10 @@
+# [@cypress/vite-dev-server-v3.3.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.3.0...@cypress/vite-dev-server-v3.3.1) (2022-10-11)
+
+
+### Bug Fixes
+
+* CSS import in CT Support file is not working ([#24117](https://github.com/cypress-io/cypress/issues/24117)) ([5af6b27](https://github.com/cypress-io/cypress/commit/5af6b27ed972ba9bc03d4a7fa4eaaeb2c7848fc3))
+
 # [@cypress/vite-dev-server-v3.3.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.2.0...@cypress/vite-dev-server-v3.3.0) (2022-10-06)
 
 
