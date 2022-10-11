@@ -23,7 +23,7 @@ const TEST_AFTER_RUN_ASYNC_EVENT = 'runner:runnable:after:run:async'
 
 const RUNNABLE_LOGS = ['routes', 'agents', 'commands', 'hooks'] as const
 const RUNNABLE_PROPS = [
-  '_testConfig', 'id', 'order', 'title', '_titlePath', 'root', 'hookName', 'hookId', 'err', 'state', 'failedFromHookId', 'body', 'speed', 'type', 'duration', 'wallClockStartedAt', 'wallClockDuration', 'timings', 'file', 'originalTitle', 'invocationDetails', 'final', 'currentRetry', 'retries', '_slow',
+  '_testConfig', 'id', 'order', 'title', '_titlePath', 'root', 'hookName', 'hookId', 'err', 'state', 'failedFromHookId', 'body', 'speed', 'type', 'duration', 'wallClockStartedAt', 'wallClockDuration', 'timings', 'file', 'invocationDetails', 'final', 'currentRetry', 'retries', '_slow',
 ] as const
 
 const debug = debugFn('cypress:driver:runner')
@@ -473,9 +473,8 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
 
 const getTestResults = (tests) => {
   return _.map(tests, (test) => {
-    const obj: Record<string, any> = _.pick(test, 'id', 'duration', 'state')
+    const obj: Record<string, any> = _.pick(test, 'title', 'id', 'duration', 'state')
 
-    obj.title = test.originalTitle
     // TODO FIX THIS!
     if (!obj.state) {
       obj.state = 'skipped'

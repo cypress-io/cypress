@@ -42,13 +42,13 @@ overrideRequire((depPath, _load) => {
 //   @parent.titlePath().concat([@title])
 
 const getTitlePath = function (runnable, titles = []) {
-  // use .originalTitle which is the name of the suite/test before title change
-  // (for display purposes) potentially alter by the browser skip
-  if (runnable.originalTitle) {
-    runnable.title = runnable.originalTitle
-  }
+  if (runnable.title) {
+    // sanitize the title which may have been altered by a suite-/
+    // test-level browser skip to ensure the original title is used
+    const BROWSER_SKIP_TITLE = ' (skipped due to browser)'
 
-  titles.unshift(runnable.title)
+    titles.unshift(runnable.title.replace(BROWSER_SKIP_TITLE, ''))
+  }
 
   if (runnable.parent) {
     return getTitlePath(runnable.parent, titles)

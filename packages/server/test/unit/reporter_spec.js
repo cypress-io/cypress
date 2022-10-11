@@ -16,15 +16,18 @@ describe('lib/reporter', () => {
         {
           id: 'r2',
           title: 'TodoMVC - React',
+          originalTitle: 'TodoMVC - React',
           tests: [],
           suites: [
             {
               id: 'r3',
               title: 'When page is initially opened',
+              originalTitle: 'When page is initially opened',
               tests: [
                 {
                   id: 'r4',
                   title: 'should focus on the todo input field',
+                  originalTitle: 'should focus on the todo input field',
                   duration: 4,
                   state: 'failed',
                   timedOut: false,
@@ -47,6 +50,7 @@ describe('lib/reporter', () => {
                 {
                   id: 'r5',
                   title: 'does something good',
+                  originalTitle: 'does something good',
                   duration: 4,
                   state: 'pending',
                   timedOut: false,

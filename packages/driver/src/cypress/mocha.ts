@@ -36,18 +36,13 @@ delete (window as any).mocha
 delete (window as any).Mocha
 
 type MochaArgs = [string, Function | undefined]
-function createRunnable (ctx, fnType: 'Test' | 'Suite', originalTitle: string, mochaArgs: MochaArgs, runnableFn: Function, testCallback: Function | string, _testConfig?: Record<string, any>) {
+function createRunnable (ctx, fnType: 'Test' | 'Suite', mochaArgs: MochaArgs, runnableFn: Function, testCallback: Function | string, _testConfig?: Record<string, any>) {
   const runnable = runnableFn.apply(ctx, mochaArgs)
 
   // attached testConfigOverrides will execute before `runner:test:before:run` event
   if (_testConfig) {
     runnable._testConfig = _testConfig
   }
-
-  // persist the original title so we can record it to the cloud
-  // without it being registered as a new test vs a pending test
-  // and it can be reported correctly in mocha reporter
-  runnable.originalTitle = originalTitle
 
   if (fnType === 'Test') {
     // persist the original callback so we can send it to the cloud
@@ -107,17 +102,17 @@ function overloadMochaFnForConfig (fnName, specWindow) {
               this.skip()
             }
 
-            return createRunnable(this, fnType, originalTitle, mochaArgs, origFn, testCallback, _testConfig)
+            return createRunnable(this, fnType, mochaArgs, origFn, testCallback, _testConfig)
           }
 
           // skip test with .skip func to ignore the test case and not run it
-          return createRunnable(this, fnType, originalTitle, mochaArgs, _fn['skip'], testCallback, _testConfig)
+          return createRunnable(this, fnType, mochaArgs, _fn['skip'], testCallback, _testConfig)
         }
 
-        return createRunnable(this, fnType, originalTitle, mochaArgs, origFn, testCallback, _testConfig)
+        return createRunnable(this, fnType, mochaArgs, origFn, testCallback, _testConfig)
       }
 
-      return createRunnable(this, fnType, args[0], args as MochaArgs, origFn, testCallback)
+      return createRunnable(this, fnType, args as MochaArgs, origFn, testCallback)
     }
   }
 
