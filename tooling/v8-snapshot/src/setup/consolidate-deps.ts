@@ -45,4 +45,5 @@ async function consolidateDep ({ projectBaseDir, dep }: { projectBaseDir: string
 export async function consolidateDeps ({ projectBaseDir }: { projectBaseDir: string }): Promise<void> {
   await consolidateDep({ projectBaseDir, dep: 'bluebird' })
   await consolidateDep({ projectBaseDir, dep: 'lodash' })
+  await consolidateDep({ projectBaseDir, dep: 'registry-js' })
 }

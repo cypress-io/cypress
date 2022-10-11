@@ -82,7 +82,8 @@ export function processScript ({
       entryPoint,
       includeStrictVerifiers: true,
       nodeEnv,
-      sourcemapExternalPath: undefined,
+      baseSourcemapExternalPath: undefined,
+      processedSourcemapExternalPath: undefined,
     }).script
   } catch (err: any) {
     return { outcome: 'failed:assembleScript', error: err }

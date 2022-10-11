@@ -18,6 +18,7 @@ import { transformRequires } from './util/transform-requires'
 import execa from 'execa'
 import { testStaticAssets } from './util/testStaticAssets'
 import performanceTracking from '../../system-tests/lib/performance'
+import { cleanup } from './binary-cleanup'
 
 const globAsync = promisify(glob)
 
@@ -274,6 +275,8 @@ require('./packages/server')\
 
   // testVersion(buildAppDir)
   await testVersion(meta.buildAppDir(), version)
+
+  await cleanup()
 
   // runSmokeTests
   let usingXvfb = xvfb.isNeeded()

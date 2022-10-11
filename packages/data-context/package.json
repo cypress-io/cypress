@@ -17,7 +17,6 @@
     "@babel/code-frame": "7.8.3",
     "@babel/generator": "7.17.9",
     "@babel/parser": "7.13.0",
-    "@graphql-tools/batch-execute": "^8.4.6",
     "@urql/core": "2.4.4",
     "@urql/exchange-execute": "1.1.0",
     "@urql/exchange-graphcache": "4.3.6",
@@ -53,6 +52,7 @@
   },
   "devDependencies": {
     "@babel/types": "7.17.0",
+    "@graphql-tools/batch-execute": "^8.4.6",
     "@packages/config": "0.0.0-development",
     "@packages/errors": "0.0.0-development",
     "@packages/example": "0.0.0-development",

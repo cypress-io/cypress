@@ -82,7 +82,8 @@ export type CreateBundleOpts = {
   norewrite?: string[]
   includeStrictVerifiers?: boolean
   sourcemap?: boolean
-  sourcemapExternalPath?: string
+  baseSourcemapExternalPath?: string
+  processedSourcemapExternalPath?: string
 }
 
 /**

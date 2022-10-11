@@ -12,6 +12,7 @@ type SnapshotConfig = {
   snapshotMetaPrevFile: string
   metaFile: string
   usePreviousSnapshotMetadata: boolean
+  minify: boolean
 }
 
 const platformString = process.platform
@@ -72,6 +73,8 @@ const usePreviousSnapshotMetadata = process.env.V8_SNAPSHOT_FROM_SCRATCH == null
  *   a previous run of the snapshot doctor is used as a starting point.
  *  This speeds up the snapshot doctor step immensely, but should be turned off when a lot of
  *  dependencies changed and/or when creating a prod artifact
+ *
+ * @property {boolean} minify                - If true then the snapshot is minified
  */
 
 /**
@@ -87,6 +90,7 @@ export function createConfig (env: 'dev' | 'prod' = 'prod', cypressAppPath?: str
    * Configured via `env`
    */
   const nodeModulesOnly = env === 'dev'
+  const minify = env === 'prod'
 
   const snapshotCacheDir =
     env === 'dev'
@@ -113,5 +117,6 @@ export function createConfig (env: 'dev' | 'prod' = 'prod', cypressAppPath?: str
     snapshotMetaFile,
     snapshotMetaPrevFile,
     usePreviousSnapshotMetadata,
+    minify,
   }
 }
