@@ -38,7 +38,7 @@ export function processArgsFromFile (
       mksnapshotBinaryDir = path.join(workingDir, mksnapshotBinaryPath.dir)
     }
 
-    mksnapshotArgs = userMksnapshotArgs.concat(mksnapshotArgsFromFile.slice(1))
+    mksnapshotArgs = [...userMksnapshotArgs.concat(mksnapshotArgsFromFile.slice(1)), '--max-old-space-size=16384']
   } else {
     mksnapshotArgs = userMksnapshotArgs.concat([
       '--startup_blob',
