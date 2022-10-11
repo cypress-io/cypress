@@ -596,12 +596,12 @@ describe('e2e record', () => {
 
       expect(requests[2].body.tests[1].body).to.eq('')
 
-      expect(requests[2].body.tests[1].title).deep.eq([
+      expect(requests[2].body.tests[2].title).deep.eq([
         'record pass',
         'is pending due to .skip',
       ])
 
-      expect(requests[2].body.tests[1].body).to.eq('() => {\n    console.log(\'stuff\')\n  })')
+      expect(requests[2].body.tests[2].body).to.eq('() => {\n    console.log(\'stuff\');\n  }')
 
       expect(requests[2].body.tests[3].title).deep.eq([
         'record pass',
