@@ -61,7 +61,8 @@ describe('src/cy/commands/assertions', () => {
       .then((obj) => {
         expect(testCommands()).to.eql([
           { name: 'visit', snapshots: 1, retries: 0 },
-          { name: 'noop', snapshots: 1, retries: 0 },
+          { name: 'noop', snapshots: 0, retries: 0 },
+          { name: 'should', snapshots: 1, retries: 0 },
           { name: 'then', snapshots: 0, retries: 0 },
         ])
       })
@@ -532,7 +533,7 @@ describe('src/cy/commands/assertions', () => {
     }, () => {
       it('should not be true', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('Timed out retrying after 50ms: expected false to be true')
+          expect(err.message).to.eq('expected false to be true')
 
           done()
         })
