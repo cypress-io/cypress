@@ -26,4 +26,3 @@ describe('record pass', { browser: 'edge', requestTimeout: 5500 }, () => {
     cy.get('div')
   })
 })
-// add retries and test in snapshot / assertion

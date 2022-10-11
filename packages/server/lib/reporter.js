@@ -41,31 +41,15 @@ overrideRequire((depPath, _load) => {
 // Mocha.Runnable.prototype.titlePath = ->
 //   @parent.titlePath().concat([@title])
 
-const getParentTitle = function (runnable, titles) {
-  // if the browser/reporter changed the runnable title (for display purposes)
-  // it will have .originalTitle which is the name of the test before title change
-  let p
-
+const getTitlePath = function (runnable, titles = []) {
+  // use .originalTitle which is the name of the suite/test before title change
+  // (for display purposes) potentially alter by the browser skip
   if (runnable.originalTitle) {
-    runnable.title = runnable.originalTitle
-  }
+    titles.unshift(runnable.originalTitle)
 
-  if (!titles) {
-    titles = [runnable.title]
-  }
-
-  p = runnable.parent
-
-  if (p) {
-    let t
-
-    t = p.title
-
-    if (t) {
-      titles.unshift(t)
+    if (runnable.parent) {
+      return getTitlePath(runnable.parent, titles)
     }
-
-    return getParentTitle(p, titles)
   }
 
   return titles
@@ -385,7 +369,7 @@ class Reporter {
     return {
       hookId: hook.hookId,
       hookName: hook.hookName,
-      title: getParentTitle(hook),
+      title: getTitlePath(hook),
       body: hook.body,
     }
   }
@@ -393,7 +377,7 @@ class Reporter {
   normalizeTest (test = {}) {
     const normalizedTest = {
       testId: orNull(test.id),
-      title: getParentTitle(test),
+      title: getTitlePath(test),
       state: orNull(test.state),
       body: orNull(test.body),
       displayError: orNull(test.err && test.err.stack),

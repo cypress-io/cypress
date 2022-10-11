@@ -36,7 +36,7 @@ delete (window as any).mocha
 delete (window as any).Mocha
 
 type MochaArgs = [string, Function | undefined]
-function createRunnable (ctx, fnType: 'Test' | 'Suite', mochaArgs: MochaArgs, runnableFn: Function, testCallback: Function | string, _testConfig?: Record<string, any>) {
+function createRunnable (ctx, fnType: 'Test' | 'Suite', originalTitle: string, mochaArgs: MochaArgs, runnableFn: Function, testCallback: Function | string, _testConfig?: Record<string, any>) {
   const runnable = runnableFn.apply(ctx, mochaArgs)
 
   // attached testConfigOverrides will execute before `runner:test:before:run` event
@@ -44,8 +44,13 @@ function createRunnable (ctx, fnType: 'Test' | 'Suite', mochaArgs: MochaArgs, ru
     runnable._testConfig = _testConfig
   }
 
+  // persist the original title so we can record it to the cloud
+  // without it being registered as a new test vs a pending test
+  // and it can be reported correctly in mocha reporter
+  runnable.originalTitle = originalTitle
+
   if (fnType === 'Test') {
-    // persist the original callback so we can send it to the dashboard
+    // persist the original callback so we can send it to the cloud
     // to prevent it from being registered as a modified test
     runnable.body = testCallback.toString()
   }
@@ -94,9 +99,6 @@ function overloadMochaFnForConfig (fnName, specWindow) {
         const configMatchesBrowser = _testConfig.browser == null || Cypress.isBrowser(_testConfig.browser, `${fnType} config value \`{ browser }\``)
 
         if (!configMatchesBrowser) {
-          // persist the original title so we can send it to the dashboard
-          // without it being registered as a new test vs a pending test
-
           mochaArgs[0] = `${originalTitle} (skipped due to browser)`
 
           // skip test at run-time when test is marked with .only but should also be skipped the test due to the browser
@@ -105,17 +107,17 @@ function overloadMochaFnForConfig (fnName, specWindow) {
               this.skip()
             }
 
-            return createRunnable(this, fnType, mochaArgs, origFn, testCallback, _testConfig)
+            return createRunnable(this, fnType, originalTitle, mochaArgs, origFn, testCallback, _testConfig)
           }
 
           // skip test with .skip func to ignore the test case and not run it
-          return createRunnable(this, fnType, mochaArgs, _fn['skip'], testCallback, _testConfig)
+          return createRunnable(this, fnType, originalTitle, mochaArgs, _fn['skip'], testCallback, _testConfig)
         }
 
-        return createRunnable(this, fnType, mochaArgs, origFn, testCallback, _testConfig)
+        return createRunnable(this, fnType, originalTitle, mochaArgs, origFn, testCallback, _testConfig)
       }
 
-      return createRunnable(this, fnType, args as MochaArgs, origFn, testCallback)
+      return createRunnable(this, fnType, args[0], args as MochaArgs, origFn, testCallback)
     }
   }
 

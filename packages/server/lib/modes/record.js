@@ -738,7 +738,11 @@ const createRunAndRecordSpecs = (options = {}) => {
           return _.pick({
             ...v,
             clientId: v.id,
-            title: v._titlePath,
+            title: v._titlePath.map((title) => {
+              const BROWSER_SKIP_TITLE = ' (skipped due to browser)'
+
+              return title.replace(BROWSER_SKIP_TITLE, '')
+            }),
             config: v._testConfig || null,
             hookIds: v.hooks.map((hook) => hook.hookId),
           },
