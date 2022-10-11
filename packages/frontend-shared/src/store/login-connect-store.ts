@@ -117,7 +117,7 @@ export const useLoginConnectStore = defineStore({
           return 'needsOrgConnect'
         case user.isLoggedIn && user.isMemberOfOrganization && !project.isProjectConnected:
           return 'needsProjectConnect'
-        case user.isLoggedIn && user.isMemberOfOrganization && project.isProjectConnected && project.hasNoRecordedRuns:
+        case user.isLoggedIn && user.isMemberOfOrganization && project.isProjectConnected && project.hasNoRecordedRuns && project.hasNonExampleSpec:
           return 'needsRecordedRun'
         default:
           return 'allTasksCompleted'

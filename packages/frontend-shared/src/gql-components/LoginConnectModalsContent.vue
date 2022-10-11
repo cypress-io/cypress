@@ -19,6 +19,11 @@
       @cancel="handleCancelConnect"
       @success="handleConnectSuccess"
     />
+    <RecordRunModal
+      :is-modal-open="shouldShowRecordedRunsModal"
+      :close="handleCancel"
+      :utm-medium="loginConnectStore.utmMedium"
+    />
   </template>
 </template>
 <script setup lang="ts">
@@ -28,6 +33,8 @@ import LoginModal from './modals/LoginModal.vue'
 import { ref, watch } from 'vue'
 import { useLoginConnectStore } from '../store/login-connect-store'
 import CloudConnectModals from './modals/CloudConnectModals.vue'
+import RecordRunModal from './RecordRunModal.vue'
+import { usePromptManager } from '../composables/usePromptManager'
 
 gql`
 fragment LoginConnectModalsContent on Query {
@@ -51,15 +58,24 @@ const emit = defineEmits<{
 const loginConnectStore = useLoginConnectStore()
 const { closeLoginConnectModal } = loginConnectStore
 
+const promptManager = usePromptManager()
+
 // keepLoginOpen is only set if you've just logged in
 // and we want to show the "connect" button instead of "continue"
 const keepLoginOpen = ref(false)
+
+const shouldShowRecordedRunsModal = ref(false)
 
 watch(() => loginConnectStore.user.isLoggedIn, (newVal, oldVal) => {
   // when login state changes, if we have logged in but are not connected,
   // keep the "login" modal open in the "connect project" state
   if (newVal && (!loginConnectStore.project.isProjectConnected || oldVal === false)) {
     keepLoginOpen.value = true
+  }
+
+  //Reset shouldShowRecordedRunsModal when logging out
+  if (newVal === false && oldVal === true) {
+    shouldShowRecordedRunsModal.value = false
   }
 })
 
@@ -71,6 +87,14 @@ const handleLoginSuccess = (isProjectConnected?: boolean) => {
 
 const handleCancel = () => {
   closeLoginConnectModal()
+}
+
+const determineIfShouldShowRecordRunsModal = () => {
+  keepLoginOpen.value = false
+  shouldShowRecordedRunsModal.value = loginConnectStore.userStatus === 'needsRecordedRun'
+  if (shouldShowRecordedRunsModal.value) {
+    promptManager.setPromptShown('loginModalRecord')
+  }
 }
 
 const handleUpdate = (isProjectConnected: boolean, error: boolean) => {
@@ -90,7 +114,11 @@ const handleUpdate = (isProjectConnected: boolean, error: boolean) => {
     return
   }
 
-  closeLoginConnectModal()
+  determineIfShouldShowRecordRunsModal()
+
+  if (!shouldShowRecordedRunsModal.value) {
+    closeLoginConnectModal()
+  }
 }
 const handleConnectProject = async () => {
   // switch to Connect modal
@@ -103,7 +131,10 @@ const handleCancelConnect = () => {
 }
 
 const handleConnectSuccess = () => {
-  closeLoginConnectModal()
+  determineIfShouldShowRecordRunsModal()
+  if (!shouldShowRecordedRunsModal.value) {
+    closeLoginConnectModal()
+  }
 }
 
 </script>
