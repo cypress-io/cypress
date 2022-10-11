@@ -586,21 +586,10 @@ const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, getO
 
       if (_.size(cfg)) {
         runnable._testConfig = cfg
-        wrappedRunnable._testConfig = cfg.unverifiedTestConfig || {}
+        wrappedRunnable._testConfig = cfg
       }
 
-      // console.log('update title path')
-
       wrappedRunnable._titlePath = runnable.titlePath()
-      // .map((title) => {
-      //   console.log(title)
-      //   const BROWSER_SKIP_TITLE = ' (skipped due to browser)'
-
-      //   return title.replace(BROWSER_SKIP_TITLE, '')
-      // })
-
-      // runnable._titlePath = wrappedRunnable._titlePath
-      // console.log(wrappedRunnable._titlePath)
     }
 
     if (prevAttempts) {
