@@ -5,7 +5,6 @@ const chokidar = require('chokidar')
 const pkg = require('@packages/root')
 const Fixtures = require('@tooling/system-tests')
 const { sinon } = require('../spec_helper')
-const user = require(`../../lib/user`)
 const config = require(`../../lib/config`)
 const { ServerE2E } = require(`../../lib/server-e2e`)
 const { ProjectBase } = require(`../../lib/project-base`)
@@ -398,8 +397,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       this.project._isServerOpen = true
 
       sinon.stub(this.project, 'getConfig').returns(this.config)
-
-      sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
     })
 
     it('closes server', function () {
