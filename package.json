@@ -4,7 +4,7 @@
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
-    "binary-build": "node ./scripts/binary.js build",
+    "binary-build": "node --max-old-space-size=8192 ./scripts/binary.js build",
     "binary-deploy": "node ./scripts/binary.js deploy",
     "binary-deploy-linux": "./scripts/build-linux-binary.sh",
     "binary-ensure": "node ./scripts/binary.js ensure",
