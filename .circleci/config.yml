@@ -28,7 +28,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - fix-ci-deps
-        - marktnoonan/mocha-junit-reporter-bump
+        - 'marktnoonan/mocha-junit-reporter-bump'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
