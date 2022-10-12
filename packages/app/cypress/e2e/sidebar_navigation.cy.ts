@@ -341,7 +341,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
       })
 
       cy.get('[data-cy-testingtype="e2e"]').within(() => {
-        cy.contains('Not configured')
+        cy.contains('Not Configured')
       }).click()
 
       cy.withRetryableCtx((ctx) => {
