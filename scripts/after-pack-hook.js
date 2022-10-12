@@ -64,6 +64,6 @@ module.exports = async function (params) {
     )
 
     await setupV8Snapshots(params.appOutDir)
-    await cleanup()
+    await cleanup(outputFolder)
   }
 }
