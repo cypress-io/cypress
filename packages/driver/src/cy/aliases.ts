@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import type { $Cy } from '../cypress/cy'
 
-import $utils from '../cypress/utils'
 import $errUtils from '../cypress/error_utils'
 
 export const aliasRe = /^@.+/
@@ -27,7 +26,7 @@ export const create = (cy: $Cy) => ({
     aliases[alias] = aliasObj
     cy.state('aliases', aliases)
 
-    ctx[alias] = $utils.getSubjectFromChain(aliasObj.subjectChain, cy)
+    ctx[alias] = cy.getSubjectFromChain(aliasObj.subjectChain)
   },
 
   getAlias (name, cmd, log) {

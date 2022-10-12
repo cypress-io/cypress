@@ -1,5 +1,3 @@
-import $utils from '../../../cypress/utils'
-
 export default (Commands, Cypress, cy, state) => {
   Commands._addQuery('root', function root (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
     const log = options.log !== false && Cypress.log({
@@ -8,12 +6,12 @@ export default (Commands, Cypress, cy, state) => {
 
     this.set('timeout', options.timeout)
 
-    const withinSubject = cy.state('withinSubject')
+    const withinSubject = cy.state('withinSubjectChain')
 
     return () => {
       cy.ensureCommandCanCommunicateWithAUT()
 
-      const $el = $utils.getSubjectFromChain(withinSubject || [cy.$$('html')], cy)
+      const $el = cy.getSubjectFromChain(withinSubject || [cy.$$('html')])
 
       log && log.set({
         $el,

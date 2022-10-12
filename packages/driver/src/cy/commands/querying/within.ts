@@ -17,9 +17,9 @@ export default (Commands, Cypress, cy, state) => {
     // withinSubject when there are nested .withins()
     // we want the inner within to restore the outer
     // once its done
-    const prevWithinSubject = state('withinSubject')
+    const prevWithinSubject = state('withinSubjectChain')
 
-    state('withinSubject', state('subjects')[current.get('chainerId')])
+    state('withinSubjectChain', state('subjects')[current.get('chainerId')])
 
     // https://github.com/cypress-io/cypress/pull/8699
     // An internal command is inserted to create a divider between
@@ -58,7 +58,7 @@ export default (Commands, Cypress, cy, state) => {
       // resetting withinSubject more than once.  If they point
       // to different 'next's then its okay
       if (next !== state('nextWithinSubject')) {
-        state('withinSubject', prevWithinSubject || null)
+        state('withinSubjectChain', prevWithinSubject || null)
         state('nextWithinSubject', next)
       }
 
@@ -75,7 +75,7 @@ export default (Commands, Cypress, cy, state) => {
       // event which will finalize cleanup if there was no next obj
       cy.once('command:queue:before:end', () => {
         cleanup()
-        state('withinSubject', null)
+        state('withinSubjectChain', null)
       })
     }
 

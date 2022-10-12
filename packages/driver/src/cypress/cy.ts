@@ -253,6 +253,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.cleanup = this.cleanup.bind(this)
     this.setSubjectForChainer = this.setSubjectForChainer.bind(this)
     this.currentSubject = this.currentSubject.bind(this)
+    this.getSubjectFromChain = this.getSubjectFromChain.bind(this)
 
     // init traits
 
@@ -1294,10 +1295,34 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     const subjectChain: SubjectChain | undefined = (this.state('subjects') || {})[chainerId]
 
     if (subjectChain) {
-      return $utils.getSubjectFromChain(subjectChain, this)
+      return this.getSubjectFromChain(subjectChain)
     }
 
     return undefined
+  }
+
+  /* Given a chain of functions, return the actual subject. `subjectChain` might look like any of:
+   * [<input>]
+   * ['foobar', f()]
+   * [undefined, f(), f()]
+   */
+  getSubjectFromChain (subjectChain: SubjectChain) {
+    // If we're getting the subject of a previous command, then any log messages have already
+    // been added to the command log; We don't want to re-add them every time we query
+    // the current subject.
+    cy.state('onBeforeLog', () => false)
+
+    let subject = subjectChain[0]
+
+    try {
+      for (let i = 1; i < subjectChain.length; i++) {
+        subject = subjectChain[i](subject)
+      }
+    } finally {
+      cy.state('onBeforeLog', null)
+    }
+
+    return subject
   }
 
   /*

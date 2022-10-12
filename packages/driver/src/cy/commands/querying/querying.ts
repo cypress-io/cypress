@@ -123,7 +123,7 @@ function getAlias (selector, log, cy) {
     // which the 'should exist' assertion can read to determine if the *current* command is followed by a 'should not
     // exist' assertion.
     cy.state('aliasCurrentCommand', this)
-    const subject = $utils.getSubjectFromChain(aliasObj.subjectChain, cy)
+    const subject = cy.getSubjectFromChain(aliasObj.subjectChain)
 
     cy.state('aliasCurrentCommand', undefined)
 
@@ -176,7 +176,7 @@ export default (Commands, Cypress, cy, state) => {
       return getAlias.call(this, selector, log, cy)
     }
 
-    const withinSubject = cy.state('withinSubject') || []
+    const withinSubject = cy.state('withinSubjectChain') || []
 
     const includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
 
@@ -186,7 +186,7 @@ export default (Commands, Cypress, cy, state) => {
       let $el
 
       try {
-        let scope = userOptions.withinSubject || $utils.getSubjectFromChain(withinSubject, cy)
+        let scope = userOptions.withinSubject || cy.getSubjectFromChain(withinSubject)
 
         if (scope && scope[0]) {
           scope = scope[0]
@@ -329,13 +329,13 @@ export default (Commands, Cypress, cy, state) => {
       }
     })
 
-    const withinSubject = cy.state('withinSubject')
+    const withinSubject = cy.state('withinSubjectChain')
 
     return (subject) => {
       cy.ensureSubjectByType(subject, ['optional', 'element', 'window', 'document'], this)
 
       if (!subject || (!$dom.isElement(subject) && !$elements.isShadowRoot(subject[0]))) {
-        subject = $utils.getSubjectFromChain(withinSubject || [cy.$$('body')], cy)
+        subject = cy.getSubjectFromChain(withinSubject || [cy.$$('body')])
       }
 
       getOptions.withinSubject = subject[0] ?? subject
