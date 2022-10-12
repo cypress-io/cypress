@@ -17,7 +17,7 @@ export default class Attempt {
   @observable agents: Agent[] = []
   @observable sessions: Record<string, Session> = {}
   @observable commands: Command[] = []
-  @observable err = new Err({})
+  // @observable err = new Err({})
   @observable hooks: Hook[] = []
   // TODO: make this an enum with states: 'QUEUED, ACTIVE, INACTIVE'
   @observable isActive: boolean | null = null
@@ -49,7 +49,7 @@ export default class Attempt {
     this.id = props.currentRetry || 0
     this.test = test
     this._state = props.state
-    this.err.update(props.err)
+    // this.err.update(props.err)
 
     this.invocationDetails = props.invocationDetails
 
@@ -140,7 +140,7 @@ export default class Attempt {
   commandMatchingErr () {
     return _(this.hooks)
     .map((hook) => {
-      return hook.commandMatchingErr(this.err)
+      // return hook.commandMatchingErr(this.err)
     })
     .compact()
     .last()
@@ -155,7 +155,7 @@ export default class Attempt {
       this._state = props.state
     }
 
-    this.err.update(props.err)
+    // this.err.update(props.err)
 
     if (props.failedFromHookId) {
       const hook = _.find(this.hooks, { hookId: props.failedFromHookId })

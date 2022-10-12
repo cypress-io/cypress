@@ -3,7 +3,6 @@ import $ from 'jquery'
 import clone from 'clone'
 
 import { HIGHLIGHT_ATTR } from '../cy/snapshots'
-import { extend as extendEvents } from './events'
 import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
@@ -15,7 +14,7 @@ import type { StateFunc } from './state'
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child|system/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
-const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName groupLevel hookId instrument isStubbed group message method name numElements showError numResponses referencesAlias renderProps sessionInfo state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
+const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName groupLevel hookId instrument isStubbed group message method name numElements showRecoveredError numResponses referencesAlias renderProps sessionInfo state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let counter = 0
@@ -245,8 +244,6 @@ export class Log {
     // only fire the log:state:changed event as fast as every 4ms
     this.fireChangeEvent = _.debounce(fireChangeEvent, 4)
     this.obj = defaults(state, config, obj)
-
-    extendEvents(this)
   }
 
   get (attr) {
@@ -401,10 +398,13 @@ export class Log {
   error (err) {
     const logGroupIds = this.state('logGroupIds') || []
 
-    // current log was responsible to creating the current log group so end the current group
+    // current log was responsible for creating the current log group so end the current group
     if (_.last(logGroupIds) === this.attributes.id) {
       this.endGroup()
     }
+
+    console.log('err', err)
+    console.log('err', err.showRecoveredError)
 
     this.set({
       ended: true,
@@ -556,9 +556,10 @@ export class Log {
 }
 
 class LogManager {
-  logs: Record<string, any> = {}
+  logs: Record<string, Log> = {}
 
-  constructor () {
+  constructor (isInteractive: boolean) {
+    this.isInteractive = isInteractive
     this.fireChangeEvent = this.fireChangeEvent.bind(this)
   }
 
@@ -575,12 +576,11 @@ class LogManager {
 
     const attrs = log.toJSON()
 
+    console.log('trigger', attrs)
     // only trigger this event if our last stored
     // emitted attrs do not match the current toJSON
     if (!_.isEqual(log._emittedAttrs, attrs)) {
       log._emittedAttrs = attrs
-
-      log.emit(event, attrs)
 
       return Cypress.action(event, attrs, log)
     }
@@ -604,6 +604,11 @@ class LogManager {
 
   createLogFn (cy, state, config) {
     return (options: any = {}) => {
+      // if (!this.isInteractive) {
+      //   // if (_skipCollectingLogs || !this.isInteractive) {
+      //   return
+      // }
+
       if (!_.isObject(options)) {
         $errUtils.throwErrByPath('log.invalid_argument', { args: { arg: options } })
       }
@@ -641,7 +646,6 @@ class LogManager {
       log.wrapConsoleProps()
 
       this.addToLogs(log)
-
       if (options.emitOnly) {
         return
       }
@@ -660,7 +664,7 @@ class LogManager {
 
 export function create (Cypress, cy, state, config) {
   counter = 0
-  const logManager = new LogManager()
+  const logManager = new LogManager(Cypress.state('isInteractive'))
 
   return logManager.createLogFn(cy, state, config)
 }

@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import React, { MouseEvent } from 'react'
+import cs from 'classnames'
 import { observer } from 'mobx-react'
 import Markdown from 'markdown-it'
 
@@ -55,13 +56,15 @@ const TestError = observer((props: TestErrorProps) => {
     onPrint()
   }
 
-  const { err } = props.model
+  const err = props.model
+
+  if (!err || !err.displayMessage) return null
+
   const { codeFrame } = err
 
-  if (!err.displayMessage) return null
-
   return (
-    <div className='runnable-err-wrapper'>
+    <div className={cs('runnable-err-wrapper', { 'show-recovered-test-err': err.showRecoveredError }, props.customClassName)}>
+      {props.groupsPlaceholder}
       <div className='runnable-err'>
         <div className='runnable-err-header'>
           <div className='runnable-err-name'>

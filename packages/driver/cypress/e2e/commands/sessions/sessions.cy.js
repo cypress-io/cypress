@@ -253,20 +253,43 @@ describe('cy.session', { retries: 0 }, () => {
     describe('create session with validation flow', () => {
       let sessionId
 
-      before(() => {
-        setupTestContext()
-        cy.log('Creating new session with validation to test against')
+      // before(() => {
+      //   setupTestContext()
+      //   cy.log('Creating new session with validation to test against')
 
-        // cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
-        cy.session(`session-${Cypress.state('test').id}`, () => {
-          cy.get('does_not_exist')
-        })
+      //   // cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
+      //   cy.session(`session-${Cypress.state('test').id}`, () => {
+      //     cy.log('do setup')
+      //   }, { validate: () => {
+      //     expect(true).to.be.false
+      //   } })
+      // })
+      it.only('try', () => {
+        expect('true').to.be.true
       })
 
-      // test must be first to run before blank page visit between each test
-      it.only('does not clear page visit from validate function', () => {
-        cy.url().should('contain', '/fixtures/auth/index.html')
-      })
+      // it.only('try', () => {
+      //   cy.get('body').within(() => {
+      //     cy.get('div').within(() => {
+      //       expect('true').to.be.true
+      //     })
+      //   })
+      // })
+
+      // // test must be first to run before blank page visit between each test
+      // it.only('does not clear page visit from validate function', () => {
+      //   setupTestContext()
+      //   cy.log('Creating new session with validation to test against')
+
+      //   // cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
+      //   cy.session(`session-${Cypress.state('test').id}`, () => {
+      //     cy.log('do setup')
+      //   }, { validate: () => {
+      //     expect(true).to.be.false
+      //   } })
+
+      //   cy.url().should('contain', '/fixtures/auth/index.html')
+      // })
 
       it('successfully creates new session and validates it', () => {
         expect(setup).to.be.calledOnce
@@ -391,7 +414,7 @@ describe('cy.session', { retries: 0 }, () => {
         validate.callsFake(() => false)
 
         cy.session(`session-${Cypress.state('test').id}`, setup, { validate: () => {
-          cy.get('does_not_exist')
+          cy.get('does_not_exist', { timeout: 500 })
         } })
       })
     })
@@ -559,7 +582,7 @@ describe('cy.session', { retries: 0 }, () => {
       })
 
       // test must be first to run before blank page visit between each test
-      it('does not clear page visit from validate function', () => {
+      it.only('does not clear page visit from validate function', () => {
         cy.url().should('contain', '/fixtures/auth/index.html')
       })
 
@@ -615,7 +638,7 @@ describe('cy.session', { retries: 0 }, () => {
         })
 
         expect(logs[6].get()).to.deep.contain({
-          showError: true,
+          showRecoveredError: true,
           group: validateSessionGroup.id,
         })
 
@@ -728,7 +751,7 @@ describe('cy.session', { retries: 0 }, () => {
         //   })
 
         //   expect(logs[6].get()).to.deep.contain({
-        //     showError: true,
+        //     showRecoveredError: true,
         //     group: validateSessionGroup.id,
         //   })
 

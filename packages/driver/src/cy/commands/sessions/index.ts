@@ -242,12 +242,13 @@ export default function (Commands, Cypress, cy) {
               if (sessionStatus === 'restored') {
                 $errUtils.modifyErrMsg(err, `\n\nThis error occurred while validating the restored session. Because validation failed, we will try to recreate the session.`, _.add)
 
-                const current = cy.state('current')
+                err.showRecoveredError = true
 
                 Cypress.log({
-                  showError: true,
                   type: 'system',
                   name: 'session',
+                  displayName: 'validate result',
+                  message: '',
                 })
                 .error(err)
 

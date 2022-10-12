@@ -124,7 +124,8 @@
     margin-left: 25px;
   }
 
-  .command-pin-target.command-group {
+  .command-pin-target.command-group,
+  .runnable-err-wrapper.show-recovered-test-err {
     @include nested-command-dashes($gray-600);
     padding-left: 12px;
     min-height: 28px;
@@ -272,7 +273,8 @@
       vertical-align: middle;
     }
 
-    .command-group {
+    .command-group,
+    .show-recovered-test-err {
       border-color: $err-header-text;
       @include nested-command-dashes($err-header-text);
 
@@ -281,13 +283,6 @@
         @include nested-command-dashes($err-header-text);
       }
     }
-  }
-
-  .command .runnable-err-wrapper {
-    padding: 0;
-    border: 0;
-    margin: 0;
-    display: inline-grid;
   }
 
   // Custom Styles for Specific Commands

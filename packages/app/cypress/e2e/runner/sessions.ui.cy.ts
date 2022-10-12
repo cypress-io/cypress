@@ -332,7 +332,7 @@ describe('runner/cypress sessions.ui.spec', {
   })
 
   describe('errors', () => {
-    it('test error when setup has failing Cypress command', () => {
+    it.only('test error when setup has failing Cypress command', () => {
       loadSpec({
         projectName: 'session-and-origin-e2e-specs',
         filePath: 'session/errors.cy.js',

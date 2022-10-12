@@ -36,7 +36,6 @@ const commandRunningFailed = (Cypress, state, err) => {
     end: true,
     snapshot: true,
     error: err,
-    // showError: true,
     consoleProps () {
       if (!current) return
 

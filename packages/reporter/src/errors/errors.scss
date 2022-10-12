@@ -53,6 +53,12 @@ $code-border-radius: 4px;
 
   .runnable-err-wrapper {
     cursor: default;
+    margin-top: 2px;
+
+    &.show-recovered-test-err {
+      margin-left: 49px;
+      // needs to be padding. blowing out of width
+    }
   }
 
   .studio-err-wrapper {
@@ -60,14 +66,13 @@ $code-border-radius: 4px;
   }
 
   .runnable-err {
-    border-left: 2px solid $fail;
     background-color: $err-background;
     clear: both;
     color: $err-text;
     font-family: $monospace;
     font-style: normal;
     margin-bottom: 0;
-    margin-top: 5px;
+    margin-top: 2px;
     white-space: pre-wrap;
     word-break: break-word;
     user-select: initial;
@@ -75,22 +80,23 @@ $code-border-radius: 4px;
   }
 
   .runnable-err-header {
-    background-color: $red-300, 0.05;
-    display: flex;
+    background-color: $err-header-background;
+    // display: flex;
     justify-content: space-between;
-    padding: 5px 10px;
+    padding: 5px 16px;
     font-weight: bold;
 
+    svg {
+      color: $red-400;
+      margin-right: 10px;
+      align-self: center
+    }
     .runnable-err-name {
-      flex-grow: 2;
-      font-size: 13px;
-      line-height: 22px;
       color: $err-header-text;
-
-      svg {
-        color: $red-400;
-        margin-right: 10px;
-      }
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 20px;
+      margin-left: 16px;
     }
   }
 
@@ -104,13 +110,14 @@ $code-border-radius: 4px;
     font-family: $font-sans;
     font-size: 14px;
     font-weight: 400;
-    padding: 10px;
+    padding: 10px 10px 10px 16px;
 
     code {
       background-color: rgba($black, 0.2);
       border-radius: 4px;
       color: $err-code-text;
-      font-family: $font-sans;
+      font-size: 12px;
+      font-family: $monospace;
       padding: 2px 5px;
     }
 
@@ -229,7 +236,7 @@ $code-border-radius: 4px;
 
   .test-err-code-frame {
     background-color: $gray-1000;
-    border: 1px solid rgba($red-400, 0.25);
+    border: 1px dashed rgba(245, 154, 169, 0.1);
     border-radius: $code-border-radius;
     margin: 0 10px 10px;
 
@@ -239,7 +246,7 @@ $code-border-radius: 4px;
       border-top-right-radius: $code-border-radius;
       display: block;
       font-size: 14px;
-      line-height: 16px;
+      line-height: 20px;
       padding: 8px;
       word-break: break-all;
 
@@ -257,3 +264,4 @@ $code-border-radius: 4px;
     }
   }
 }
+

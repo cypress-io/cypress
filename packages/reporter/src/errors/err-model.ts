@@ -25,6 +25,7 @@ export interface CodeFrame extends FileDetails {
 export interface ErrProps {
   name: string
   message: string
+  showRecoveredError: boolean
   stack: string
   parsedStack: ParsedStackLine[]
   docsUrl: string | string[]
@@ -41,9 +42,14 @@ export default class Err {
   @observable templateType = ''
   // @ts-ignore
   @observable.ref codeFrame: CodeFrame
+  @observable showRecoveredError: boolean
 
   constructor (props?: Partial<ErrProps>) {
     this.update(props)
+  }
+
+  @computed get hasError () {
+    return this.displayMessage
   }
 
   @computed get displayMessage () {
@@ -55,6 +61,7 @@ export default class Err {
   }
 
   update (props?: Partial<ErrProps>) {
+    console.log('update', props)
     if (!props) return
 
     if (props.name) this.name = props.name
@@ -64,5 +71,6 @@ export default class Err {
     if (props.parsedStack) this.parsedStack = props.parsedStack
     if (props.templateType) this.templateType = props.templateType
     if (props.codeFrame) this.codeFrame = props.codeFrame
+    this.showRecoveredError = !!props.showRecoveredError
   }
 }

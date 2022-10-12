@@ -104,23 +104,17 @@ $fail: $red-400;
 $pending: $indigo-400;
 $pinned: $purple-400;
 $retried: $orange-400;
-$yellow-medium: $orange-800;
 
 $link-text: $indigo-600;
 
-$err-background: #2F2434;
+$err-background: #2C2036;
 $err-code-background: rgba($red-400, 0.18);
 $err-code-text: $red-300;
-$err-header-background: #3D2839;
+$err-header-background: #3A243B;
 $err-header-text: $red-300;
 $err-text: $red-400;
 
 $reporter-section-background: #171926; // not a brand color
-
-$warn-background: $red-1000;
-$warn-header-background: $orange-1000;
-$warn-header-text: $orange-700;
-$warn-text: $orange-600;
 
 $header-height: 64px;
 $reporter-contents-min-width: 170px;

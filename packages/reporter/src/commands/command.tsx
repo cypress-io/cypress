@@ -363,37 +363,28 @@ class Command extends Component<Props> {
     }
 
     return (
-      <li className={
-        cs('command', `command-name-${commandName}`, {
-          'command-is-studio': model.isStudio,
-        })
-      }>
-        <div
-          className={
-            cs(
-              'command-wrapper',
+      <>
+
+        <li className={
+          cs('command', `command-name-${commandName}`, {
+            'command-is-studio': model.isStudio,
+          })
+        }>
+          <div
+            className={
+              cs(
+                'command-wrapper',
               `command-state-${model.state}`,
               `command-type-${model.type}`,
               {
                 'command-is-event': !!model.event,
                 'command-is-pinned': this._isPinned(),
-                'command-is-interactive': !model.showError && (model.hasConsoleProps || model.hasSnapshot),
+                'command-is-interactive': !model.showRecoveredError && (model.hasConsoleProps || model.hasSnapshot),
               },
-            )
-          }
-        >
-          <NavColumns model={model} isPinned={this._isPinned()} toggleColumnPin={this._toggleColumnPin} />
-          {model.showError && (
-            <span className={cs('command-pin-target', { 'command-group': !!this.props.groupId })}>
-              <div
-                className='command-wrapper-text'
-              >
-                {groupPlaceholder}
-                <TestError model={model} onPrintToConsole={this._toggleColumnPin}/>
-              </div>
-            </span>
-          )}
-          {!model.showError && (
+              )
+            }
+          >
+            <NavColumns model={model} isPinned={this._isPinned()} toggleColumnPin={this._toggleColumnPin} />
             <FlashOnClick
               message='Printed output to your console'
               onClick={this._toggleColumnPin}
@@ -409,11 +400,12 @@ class Command extends Component<Props> {
                 <CommandDetails model={model} groupId={this.props.groupId} events={this.props.events} aliasesWithDuplicates={aliasesWithDuplicates} />
               </div>
             </FlashOnClick>
-          )}
-        </div>
-        <Progress model={model} />
-        {this._children()}
-      </li>
+          </div>
+          <Progress model={model} />
+          {this._children()}
+        </li>
+        {model.err && <Err model={model} isGroup={model.hasChildren} />}
+      </>
     )
   }
 
@@ -505,6 +497,38 @@ class Command extends Component<Props> {
         }
       }, 50)
     }
+  }
+}
+
+class Err extends Component<Props> {
+  static defaultProps = {
+    appState,
+    events,
+    runnablesStore,
+  }
+
+  render () {
+    const { model } = this.props
+
+    if (!model.err?.hasError) {
+      return null
+    }
+
+    const groupPlaceholder: Array<JSX.Element> = []
+
+    if (model.groupLevel !== undefined) {
+      // cap the group nesting to 5 levels to keep the log text legible
+      const level = model.groupLevel < 6 ? model.groupLevel : 5
+
+      for (let i = 1; i < level; i++) {
+        groupPlaceholder.push(<span key={`${model.id}-err-${i}`} className='command-group-block' />)
+      }
+    }
+
+    return (
+      <li className={cs('command', 'command-state-failed')}>
+        <TestError model={model.err} groups={groupPlaceholder}/>
+      </li>)
   }
 }
 
