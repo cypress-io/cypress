@@ -70,7 +70,7 @@ windowsWorkflowFilters: &windows-workflow-filters
           pattern: "-release$"
           value: << pipeline.git.branch >>
 
-executors:  
+executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
