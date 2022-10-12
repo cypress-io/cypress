@@ -73,10 +73,13 @@ describe('tests', () => {
 
     it('last retried attempt collapsed by default', () => {
       cy.contains('passed after retry')
+      .scrollIntoView()
       .parents('.collapsible').first()
       .should('not.have.class', 'is-open')
       .find('.collapsible-content')
       .should('not.exist')
+
+      cy.percySnapshot()
 
       cy.contains('passed after retry')
       .click()
@@ -91,9 +94,12 @@ describe('tests', () => {
       .find('.collapsible-indicator').should('not.exist')
 
       cy.get('@attempts').eq(1)
+      .scrollIntoView()
       .find('.collapsible')
       .should('have.class', 'is-open')
       .find('.collapsible-indicator').should('not.exist')
+
+      cy.percySnapshot('expanded')
     })
 
     it('failed tests expands automatically', () => {
@@ -109,6 +115,8 @@ describe('tests', () => {
       .parents('.collapsible').first()
       .find('.attempt-item').as('attempts')
 
+      cy.percySnapshot()
+
       cy.get('@attempts').eq(0)
       .find('.collapsible')
       .should('not.have.class', 'is-open')
@@ -119,6 +127,9 @@ describe('tests', () => {
       .should('have.class', 'is-open')
       .find('.collapsible-content')
       .should('be.visible')
+
+      cy.contains('failed with retries').click()
+      cy.percySnapshot('collapsed')
     })
 
     it('expands/collapses on click', () => {
