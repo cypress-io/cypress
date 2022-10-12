@@ -36,7 +36,7 @@ delete (window as any).mocha
 delete (window as any).Mocha
 
 type MochaArgs = [string, Function | undefined]
-function createRunnable (ctx, fnType: 'Test' | 'Suite', mochaArgs: MochaArgs, runnableFn: Function, testCallback: Function | string, _testConfig?: Record<string, any>) {
+function createRunnable (ctx, fnType: 'Test' | 'Suite', mochaArgs: MochaArgs, runnableFn: Function, testCallback: Function | string = '', _testConfig?: Record<string, any>) {
   const runnable = runnableFn.apply(ctx, mochaArgs)
 
   // attached testConfigOverrides will execute before `runner:test:before:run` event
@@ -78,7 +78,7 @@ function overloadMochaFnForConfig (fnName, specWindow) {
       // fallback to empty string for stubbed runnables written like:
       // - describe('concept')
       // - it('does something')
-      let testCallback = args[1] || ''
+      let testCallback = args[1]
 
       if (args.length > 2 && _.isObject(args[1])) {
         const _testConfig = _.extend({}, args[1]) as any
@@ -89,7 +89,7 @@ function overloadMochaFnForConfig (fnName, specWindow) {
         // fallback to empty string for stubbed runnables written like:
         // - describe('concept')
         // - it('does something')
-        testCallback = mochaArgs[1] || ''
+        testCallback = mochaArgs[1]
 
         const configMatchesBrowser = _testConfig.browser == null || Cypress.isBrowser(_testConfig.browser, `${fnType} config value \`{ browser }\``)
 
