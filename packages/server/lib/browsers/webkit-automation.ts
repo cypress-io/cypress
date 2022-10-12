@@ -38,9 +38,10 @@ const normalizeGetCookieProps = ({ name, value, domain, path, secure, httpOnly, 
     path,
     secure,
     httpOnly,
-    // Use expirationDate instead of expires 🤷‍♀️
+    hostOnly: false,
+    // Use expirationDate instead of expires
     ...expires !== -1 ? { expirationDate: expires } : {},
-  } as CyCookie
+  }
 
   if (sameSite === 'None') {
     cyCookie.sameSite = 'no_restriction'
@@ -146,6 +147,7 @@ export class WebKitAutomation {
 
     let promises: Promise<any>[] = []
 
+    // TODO: remove with experimentalSessionAndOrigin
     if (this.shouldMarkAutIframeRequests) promises.push(this.markAutIframeRequests())
 
     if (oldPwPage) promises.push(oldPwPage.context().close())
