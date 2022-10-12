@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import fs from 'fs-extra'
 import { StdioOptions, spawnSync } from 'child_process'
 
@@ -6,10 +7,10 @@ import path from 'path'
 import { track } from 'temp'
 import { processArgsFromFile } from './process-args-from-file'
 
-import debug from 'debug'
-const logInfo = debug('cypress:mksnapshot:info')
-const logDebug = debug('cypress:mksnapshot:debug')
-const logError = debug('cypress:mksnapshot:error')
+// import debug from 'debug'
+// // const console.log = debug('cypress:mksnapshot:info')
+// // const console.log = debug('cypress:mksnapshot:debug')
+// // const console.log = debug('cypress:mksnapshot:error')
 
 const temp = track()
 const workingDir = temp.mkdirSync('mksnapshot-workdir')
@@ -20,7 +21,7 @@ const { crossArchDirs, binDir, isWindows, snapshotBlobFile, v8ContextFile } =
 // improved to use a proper args parser instead
 function checkArgs (args: string[]) {
   if (args.length === 0 || args.includes('--help')) {
-    logError(
+    console.log(
       'Usage: mksnapshot file.js (--output_dir OUTPUT_DIR).  ' +
         'Additional mksnapshot args except for --startup_blob are supported:',
     )
@@ -33,7 +34,7 @@ function checkArgs (args: string[]) {
   // --startup_blob not supported
   // -----------------
   if (args.includes('--startup_blob')) {
-    logError(
+    console.log(
       '--startup_blob argument not supported. Use --output_dir to specify where to output snapshot_blob.bin',
     )
 
@@ -59,7 +60,7 @@ function extractOutdir (args: string[]) {
         mksnapshotArgs = mksnapshotArgs.concat(args.slice(outDirIdx + 2))
       }
     } else {
-      logError(
+      console.log(
         'Error! Output directory argument given but directory not specified.',
       )
 
@@ -119,9 +120,9 @@ function createSnapshotBlob (
 
   const cmd = `${mksnapshotCommand} ${mksnapshotArgs.join(' ')}`
 
-  logInfo('Generating snapshot_blob.bin')
-  logDebug({ mksnapshotBinaryDir, mksnapshotCommand, mksnapshotArgs })
-  logDebug(cmd)
+  console.log('Generating snapshot_blob.bin')
+  console.log({ mksnapshotBinaryDir, mksnapshotCommand, mksnapshotArgs })
+  console.log(cmd)
 
   const mksnapshotProcess = spawnSync(
     mksnapshotCommand,
@@ -130,12 +131,12 @@ function createSnapshotBlob (
   )
 
   if (mksnapshotProcess.status !== 0) {
-    logError(
+    console.log(
       'Error running mksnapshot, exited with code %d.',
       mksnapshotProcess.status ?? 1,
     )
 
-    logError(mksnapshotProcess.error)
+    console.log(mksnapshotProcess.error)
     throw new Error(`
     Failed to create snapshot blob, investigate this by running: ${cmd}`)
   }
@@ -176,8 +177,8 @@ function createV8ContextSnapshot (
 
   const cmd = `${v8ContextGenCommand} ${v8ContextGenArgs.join(' ')}`
 
-  logInfo(`Generating ${v8ContextFile}`)
-  logDebug(cmd)
+  console.log(`Generating ${v8ContextFile}`)
+  console.log(cmd)
 
   const v8ContextGenProcess = spawnSync(
     v8ContextGenCommand,
@@ -186,12 +187,12 @@ function createV8ContextSnapshot (
   )
 
   if (v8ContextGenProcess.status !== 0) {
-    logError(
+    console.log(
       'Error running v8 context snapshot generator, exited with code %d.',
       v8ContextGenProcess.status ?? 1,
     )
 
-    logError(v8ContextGenProcess.error)
+    console.log(v8ContextGenProcess.error)
     throw new Error(
       `Failed to create v8 context snapshot, investigate this by running: ${cmd}`,
     )
@@ -199,7 +200,7 @@ function createV8ContextSnapshot (
 }
 
 export function runMksnapshot (args: string[]) {
-  logDebug('Provided args: %o', args)
+  console.log('Provided args: %o', args)
   checkArgs(args)
   let { outputDir, mksnapshotArgs } = extractOutdir(args)
 
@@ -208,7 +209,7 @@ export function runMksnapshot (args: string[]) {
 
   mksnapshotArgs = res.mksnapshotArgs
 
-  logDebug('Processed args: %o', mksnapshotArgs)
+  console.log('Processed args: %o', mksnapshotArgs)
 
   createSnapshotBlob(
     mksnapshotBinaryDir,
