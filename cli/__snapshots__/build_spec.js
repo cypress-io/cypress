@@ -21,6 +21,7 @@ exports['package.json build outputs expected properties 1'] = {
     "e2e",
     "end-to-end",
     "integration",
+    "component",
     "mocks",
     "runner",
     "spies",

@@ -238,6 +238,7 @@
     "e2e",
     "end-to-end",
     "integration",
+    "component",
     "mocks",
     "runner",
     "spies",
