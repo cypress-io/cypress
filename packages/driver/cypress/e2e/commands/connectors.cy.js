@@ -733,7 +733,7 @@ describe('src/cy/commands/connectors', () => {
             .invoke(() => {})
           })
 
-          it('throws when first parameter is neither of type object nor of type string nor of type number', function (done) {
+          it('throws when we can\'t determine both a valid options and path', function (done) {
             cy.on('fail', (err) => {
               const { lastLog } = this
 
