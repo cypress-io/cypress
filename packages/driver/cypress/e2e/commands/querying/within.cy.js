@@ -169,6 +169,16 @@ describe('src/cy/commands/querying/within', () => {
       cy.contains(`button`, `button`).should(`exist`)
     })
 
+    it('re-queries if withinSubject is detached from dom', () => {
+      cy.on('command:retry', _.after(2, (options) => {
+        cy.$$('#wrapper').replaceWith('<div id="wrapper"><div id="upper">Newer York</div></div>')
+      }))
+
+      cy.get('#wrapper').within(() => {
+        cy.get(`#upper`).should(`contain.text`, `Newer York`)
+      })
+    })
+
     describe('.log', () => {
       beforeEach(function () {
         this.logs = []

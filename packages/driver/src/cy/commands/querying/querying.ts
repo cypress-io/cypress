@@ -176,6 +176,8 @@ export default (Commands, Cypress, cy, state) => {
       return getAlias.call(this, selector, log, cy)
     }
 
+    const withinSubject = cy.state('withinSubject') || []
+
     const includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
 
     return () => {
@@ -184,7 +186,7 @@ export default (Commands, Cypress, cy, state) => {
       let $el
 
       try {
-        let scope = userOptions.withinSubject || cy.state('withinSubject')
+        let scope = userOptions.withinSubject || $utils.getSubjectFromChain(withinSubject, cy)
 
         if (scope && scope[0]) {
           scope = scope[0]
@@ -327,11 +329,13 @@ export default (Commands, Cypress, cy, state) => {
       }
     })
 
+    const withinSubject = cy.state('withinSubject')
+
     return (subject) => {
       cy.ensureSubjectByType(subject, ['optional', 'element', 'window', 'document'], this)
 
       if (!subject || (!$dom.isElement(subject) && !$elements.isShadowRoot(subject[0]))) {
-        subject = cy.state('withinSubject') || cy.$$('body')
+        subject = $utils.getSubjectFromChain(withinSubject || [cy.$$('body')], cy)
       }
 
       getOptions.withinSubject = subject[0] ?? subject

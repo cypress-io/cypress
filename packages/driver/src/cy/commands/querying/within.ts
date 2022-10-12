@@ -9,7 +9,8 @@ export default (Commands, Cypress, cy, state) => {
     // reference the next command after this
     // within.  when that command runs we'll
     // know to remove withinSubject
-    const next = state('current').get('next')
+    const current = state('current')
+    const next = current.get('next')
 
     // backup the current withinSubject
     // this prevents a bug where we null out
@@ -18,7 +19,7 @@ export default (Commands, Cypress, cy, state) => {
     // once its done
     const prevWithinSubject = state('withinSubject')
 
-    state('withinSubject', subject)
+    state('withinSubject', state('subjects')[current.get('chainerId')])
 
     // https://github.com/cypress-io/cypress/pull/8699
     // An internal command is inserted to create a divider between
