@@ -5,6 +5,7 @@ const glob = require('glob')
 const os = require('os')
 const path = require('path')
 const { setupV8Snapshots } = require('@tooling/v8-snapshot')
+const { flipFuses, FuseVersion, FuseV1Options } = require('@electron/fuses')
 
 module.exports = async function (params) {
   console.log('****************************')
@@ -46,7 +47,21 @@ module.exports = async function (params) {
 
   console.log('all node_modules subfolders copied to', outputFolder)
 
+  const exePathPerPlatform = {
+    darwin: join(params.appOutDir, 'Cypress.app', 'Contents', 'MacOS', 'Cypress'),
+    linux: join(params.appOutDir, 'Cypress'),
+    win32: join(params.appOutDir, 'Cypress.exe'),
+  }
+
   if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE)) {
+    await flipFuses(
+      exePathPerPlatform[os.platform()],
+      {
+        version: FuseVersion.V1,
+        [FuseV1Options.LoadBrowserProcessSpecificV8Snapshot]: true,
+      },
+    )
+
     await setupV8Snapshots(params.appOutDir)
   }
 }

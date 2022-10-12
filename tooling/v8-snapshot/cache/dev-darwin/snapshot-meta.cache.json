@@ -906,6 +906,9 @@
     "./node_modules/@cypress/request/node_modules/uuid/dist/v35.js",
     "./node_modules/@cypress/request/node_modules/uuid/dist/validate.js",
     "./node_modules/@cypress/request/node_modules/uuid/dist/version.js",
+    "./node_modules/@electron/fuses/dist/config.js",
+    "./node_modules/@electron/fuses/dist/constants.js",
+    "./node_modules/@electron/fuses/dist/index.js",
     "./node_modules/@electron/get/dist/cjs/GotDownloader.js",
     "./node_modules/@electron/get/dist/cjs/artifact-utils.js",
     "./node_modules/@electron/get/dist/cjs/downloader-resolver.js",
@@ -3453,5 +3456,5 @@
     "./tooling/v8-snapshot/cache/dev-darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "fe2a8f92b3d9737d0fb5d71e66eda9565987ce3efa146dc8759f378ae3197d0e"
+  "deferredHash": "80d53b26e14b64943d1a899e219e19da938c0392c2adf7302b407596beef5ecd"
 }

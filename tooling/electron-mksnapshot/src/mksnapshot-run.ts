@@ -1,18 +1,18 @@
 import fs from 'fs-extra'
 import { StdioOptions, spawnSync } from 'child_process'
-
 import { config } from './config'
 import path from 'path'
-import { track } from 'temp'
+import tempDir from 'temp-dir'
 import { processArgsFromFile } from './process-args-from-file'
-
 import debug from 'debug'
+
 const logInfo = debug('cypress:mksnapshot:info')
 const logDebug = debug('cypress:mksnapshot:debug')
 const logError = debug('cypress:mksnapshot:error')
 
-const temp = track()
-const workingDir = temp.mkdirSync('mksnapshot-workdir')
+const workingDir = path.join(tempDir, 'mksnapshot-workdir')
+
+fs.ensureDirSync(workingDir)
 const { crossArchDirs, binDir, isWindows, snapshotBlobFile, v8ContextFile } =
   config
 

@@ -1,14 +1,16 @@
 import { syncAndRun } from '../../src/mksnapshot'
 import { expect, assert } from 'chai'
-import { track } from 'temp'
+import tempDir from 'temp-dir'
 import path from 'path'
-const { mkdirSync } = track()
+import fs from 'fs-extra'
 
 const projectRootDir = path.join(__dirname, '..', '..')
 const fixturesDir = path.join(projectRootDir, 'test', 'fixtures')
 const validSnapshot = path.join(fixturesDir, 'valid-snapshot.js')
 const invalidSnapshot = path.join(fixturesDir, 'invalid-snapshot.js')
-const outputDir = mkdirSync('test-mksnapshot')
+const outputDir = path.join(tempDir, 'test-mksnapshot')
+
+fs.ensureDirSync(outputDir)
 
 describe('mksnapshot', () => {
   it('builds valid snapshot providing version 12.0.10', async () => {
