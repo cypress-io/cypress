@@ -274,6 +274,7 @@ const makePackherdCreateBundle: (opts: CreateBundleOpts) => CreateBundle =
           cwd: basedir,
           env: {
             NODE_OPTIONS: '--max-old-space-size=16384',
+            DEBUG: process.env.DEBUG,
           },
         },
         // Windows doesn't properly support piping stdio
