@@ -32,4 +32,4 @@ Note that this may take a while.`)
   }
 }
 
-export { setupV8Snapshots }
+export { setupV8Snapshots, consolidateDeps }

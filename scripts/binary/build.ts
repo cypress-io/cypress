@@ -18,7 +18,6 @@ import { transformRequires } from './util/transform-requires'
 import execa from 'execa'
 import { testStaticAssets } from './util/testStaticAssets'
 import performanceTracking from '../../system-tests/lib/performance'
-import { cleanup } from './binary-cleanup'
 
 const globAsync = promisify(glob)
 
@@ -201,8 +200,8 @@ require('./packages/server')\
 
   await transformRequires(meta.distDir())
 
-  log(`#testVersion ${meta.distDir()}`)
-  await testVersion(meta.distDir(), version)
+  log(`#testDistVersion ${meta.distDir()}`)
+  await testDistVersion(meta.distDir(), version)
 
   log('#testStaticAssets')
   await testStaticAssets(meta.distDir())
@@ -276,10 +275,8 @@ require('./packages/server')\
 
   console.log(stdout)
 
-  // testVersion(buildAppDir)
-  await testVersion(meta.buildAppDir(), version)
-
-  await cleanup()
+  log(`#testExecutableVersion ${meta.buildAppExecutable()}`)
+  await testExecutableVersion(meta.buildAppExecutable(), version)
 
   // runSmokeTests
   let usingXvfb = xvfb.isNeeded()
@@ -368,20 +365,37 @@ function getIconFilename () {
   return iconFilename
 }
 
-async function testVersion (dir: string, version: string) {
+async function testDistVersion (distDir: string, version: string) {
   log('#testVersion')
 
   console.log('testing dist package version')
   console.log('by calling: node index.js --version')
-  console.log('in the folder %s', dir)
+  console.log('in the folder %s', distDir)
 
   const result = await execa('node', ['index.js', '--version'], {
-    cwd: dir,
+    cwd: distDir,
   })
 
   la(result.stdout, 'missing output when getting built version', result)
 
-  console.log('app in %s', dir)
+  console.log('app in %s', distDir)
+  console.log('built app version', result.stdout)
+  la(result.stdout === version, 'different version reported',
+    result.stdout, 'from input version to build', version)
+
+  console.log('✅ using node --version works')
+}
+
+async function testExecutableVersion (buildAppExecutable: string, version: string) {
+  log('#testVersion')
+
+  console.log('testing dist package version')
+  console.log(`by calling: ${buildAppExecutable} --version`)
+
+  const result = await execa(buildAppExecutable, ['--version'])
+
+  la(result.stdout, 'missing output when getting built version', result)
+
   console.log('built app version', result.stdout)
   la(result.stdout === version, 'different version reported',
     result.stdout, 'from input version to build', version)

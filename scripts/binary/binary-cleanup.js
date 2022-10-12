@@ -1,13 +1,11 @@
-import fs from 'fs-extra'
-import path from 'path'
-import { consolidateDeps } from '@tooling/v8-snapshot/src/setup/consolidate-deps'
-import del from 'del'
-import * as meta from './meta'
-import esbuild from 'esbuild'
+const fs = require('fs-extra')
+const path = require('path')
+const { consolidateDeps } = require('@tooling/v8-snapshot')
+const del = require('del')
+const esbuild = require('esbuild')
+const snapshotMetadata = require('@tooling/v8-snapshot/cache/prod-darwin/snapshot-meta.cache.json')
 
-const snapshotMetadata = require('../../tooling/v8-snapshot/cache/prod-darwin/snapshot-meta.cache.json')
-
-const external: string[] = [
+const externalDependencies = [
   './packages/server/server-entry',
   'fsevents',
   'esbuild',
@@ -76,7 +74,7 @@ async function removeEmptyDirectories (directory) {
   }
 }
 
-const cleanup = async () => {
+const cleanup = async (buildAppDir) => {
   const esbuildResult = await esbuild.build({
     entryPoints: [
       './packages/server/lib/plugins/child/register_ts_node.js',
@@ -97,60 +95,60 @@ const cleanup = async () => {
     outdir: 'out',
     platform: 'node',
     metafile: true,
-    external,
+    external: externalDependencies,
   })
 
-  const potentiallyRemovedDependencies: string[] = [...snapshotMetadata.healthy, ...snapshotMetadata.deferred, ...snapshotMetadata.norewrite]
+  const potentiallyRemovedDependencies = [...snapshotMetadata.healthy, ...snapshotMetadata.deferred, ...snapshotMetadata.norewrite]
   const keptDependencies = Object.keys(esbuildResult.metafile.inputs)
 
   await Promise.all(potentiallyRemovedDependencies.map(async (dependency) => {
-    if (dependency !== './package.json' && external.findIndex((externalDependency) => {
+    if (dependency !== './package.json' && externalDependencies.findIndex((externalDependency) => {
       return dependency.includes(externalDependency)
     }) === -1 && !keptDependencies.includes(dependency.slice(2))) {
-      await fs.remove(meta.buildAppDir(dependency.replace(/.ts$/, '.js')))
+      await fs.remove(path.join(buildAppDir, dependency.replace(/.ts$/, '.js')))
     }
   }))
 
-  await consolidateDeps({ projectBaseDir: meta.buildAppDir() })
+  await consolidateDeps({ projectBaseDir: buildAppDir })
   await del([
-    meta.buildAppDir('node_modules', 'mocha'),
-    meta.buildAppDir('**', 'test'),
-    meta.buildAppDir('**', 'tests'),
-    meta.buildAppDir('**', 'prettier', 'esm'),
-    meta.buildAppDir('**', '@babel', '**', 'esm'),
-    meta.buildAppDir('**', '*js.map'),
-    meta.buildAppDir('**', '*.md'),
-    meta.buildAppDir('**', '*.d.ts'),
-    meta.buildAppDir('**', '*.flow'),
-    meta.buildAppDir('**', 'jimp', 'browser', 'examples'),
-    meta.buildAppDir('**', 'JSV', 'jsdoc-toolkit'),
-    meta.buildAppDir('**', 'JSV', 'docs'),
-    meta.buildAppDir('**', 'fluent-ffmpeg', 'doc'),
-    meta.buildAppDir('**', 'registry-js', 'prebuilds'),
-    meta.buildAppDir('**', 'ramda', 'es'),
-    meta.buildAppDir('**', 'ramda', 'dist'),
-    meta.buildAppDir('**', '*.cc'),
-    meta.buildAppDir('**', '*.o'),
-    meta.buildAppDir('**', 'jimp', 'browser'),
-    meta.buildAppDir('**', 'jimp', 'es'),
-    meta.buildAppDir('**', '@jimp', '**', 'es'),
-    meta.buildAppDir('**', '@jimp', '**', 'src'),
-    meta.buildAppDir('**', 'nexus', 'src'),
-    meta.buildAppDir('**', 'nexus', 'dist-esm'),
-    meta.buildAppDir('**', 'source-map', 'dist'),
-    meta.buildAppDir('**', 'source-map-js', 'dist'),
-    meta.buildAppDir('node_modules', '**', 'yarn.lock'),
-    meta.buildAppDir('**', 'pako', 'dist'),
-    meta.buildAppDir('**', 'ajv', 'lib', '*.ts'),
-    meta.buildAppDir('node_modules', 'ajv', 'dist'),
-    meta.buildAppDir('**', 'node-forge', 'dist'),
-    meta.buildAppDir('**', '@graphql-tools', '**', '*.mjs'),
-    meta.buildAppDir('**', 'graphql', '**', '*.mjs'),
+    path.join(buildAppDir, 'node_modules', 'mocha'),
+    path.join(buildAppDir, '**', 'test'),
+    path.join(buildAppDir, '**', 'tests'),
+    path.join(buildAppDir, '**', 'prettier', 'esm'),
+    path.join(buildAppDir, '**', '@babel', '**', 'esm'),
+    path.join(buildAppDir, '**', '*js.map'),
+    path.join(buildAppDir, '**', '*.md'),
+    path.join(buildAppDir, '**', '*.d.ts'),
+    path.join(buildAppDir, '**', '*.flow'),
+    path.join(buildAppDir, '**', 'jimp', 'browser', 'examples'),
+    path.join(buildAppDir, '**', 'JSV', 'jsdoc-toolkit'),
+    path.join(buildAppDir, '**', 'JSV', 'docs'),
+    path.join(buildAppDir, '**', 'fluent-ffmpeg', 'doc'),
+    path.join(buildAppDir, '**', 'registry-js', 'prebuilds'),
+    path.join(buildAppDir, '**', 'ramda', 'es'),
+    path.join(buildAppDir, '**', 'ramda', 'dist'),
+    path.join(buildAppDir, '**', '*.cc'),
+    path.join(buildAppDir, '**', '*.o'),
+    path.join(buildAppDir, '**', 'jimp', 'browser'),
+    path.join(buildAppDir, '**', 'jimp', 'es'),
+    path.join(buildAppDir, '**', '@jimp', '**', 'es'),
+    path.join(buildAppDir, '**', '@jimp', '**', 'src'),
+    path.join(buildAppDir, '**', 'nexus', 'src'),
+    path.join(buildAppDir, '**', 'nexus', 'dist-esm'),
+    path.join(buildAppDir, '**', 'source-map', 'dist'),
+    path.join(buildAppDir, '**', 'source-map-js', 'dist'),
+    path.join(buildAppDir, 'node_modules', '**', 'yarn.lock'),
+    path.join(buildAppDir, '**', 'pako', 'dist'),
+    path.join(buildAppDir, '**', 'ajv', 'lib', '*.ts'),
+    path.join(buildAppDir, 'node_modules', 'ajv', 'dist'),
+    path.join(buildAppDir, '**', 'node-forge', 'dist'),
+    path.join(buildAppDir, '**', '@graphql-tools', '**', '*.mjs'),
+    path.join(buildAppDir, '**', 'graphql', '**', '*.mjs'),
   ], { force: true })
 
-  await removeEmptyDirectories(meta.buildAppDir())
+  await removeEmptyDirectories(buildAppDir)
 }
 
-export {
+module.exports = {
   cleanup,
 }

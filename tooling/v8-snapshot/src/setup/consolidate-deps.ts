@@ -36,12 +36,11 @@ async function consolidateDep ({ projectBaseDir, dep }: { projectBaseDir: string
 }
 
 /**
- * Remove all bluebird, lodash, registry-js as they are essentially duplicated and all on the same major version
+ * Remove all bluebird and lodash as they are essentially duplicated and all on the same major version
  *
  * @param {Partial<import('../snapconfig').SnapshotConfig>} opts
  */
 export async function consolidateDeps ({ projectBaseDir }: { projectBaseDir: string }): Promise<void> {
   await consolidateDep({ projectBaseDir, dep: 'bluebird' })
   await consolidateDep({ projectBaseDir, dep: 'lodash' })
-  await consolidateDep({ projectBaseDir, dep: 'registry-js' })
 }

@@ -6,6 +6,7 @@ const os = require('os')
 const path = require('path')
 const { setupV8Snapshots } = require('@tooling/v8-snapshot')
 const { flipFuses, FuseVersion, FuseV1Options } = require('@electron/fuses')
+const { cleanup } = require('./binary/binary-cleanup')
 
 module.exports = async function (params) {
   console.log('****************************')
@@ -63,5 +64,6 @@ module.exports = async function (params) {
     )
 
     await setupV8Snapshots(params.appOutDir)
+    await cleanup()
   }
 }
