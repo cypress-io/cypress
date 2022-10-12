@@ -22,7 +22,7 @@ for (const project of WEBPACK_REACT) {
     it('should mount a passing test', () => {
       cy.visitApp()
       cy.contains('app.component.cy.ts').click()
-      cy.waitForSpecToFinish({ passCount: 1 })
+      cy.waitForSpecToFinish({ passCount: 1 }, 60000)
 
       cy.get('li.command').first().within(() => {
         cy.get('.command-method').should('contain', 'mount')
@@ -33,7 +33,7 @@ for (const project of WEBPACK_REACT) {
     it('should live-reload on src changes', () => {
       cy.visitApp()
       cy.contains('app.component.cy.ts').click()
-      cy.waitForSpecToFinish({ passCount: 1 })
+      cy.waitForSpecToFinish({ passCount: 1 }, 60000)
 
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject(
@@ -42,7 +42,7 @@ for (const project of WEBPACK_REACT) {
         )
       })
 
-      cy.waitForSpecToFinish({ failCount: 1 })
+      cy.waitForSpecToFinish({ failCount: 1 }, 60000)
 
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject(
@@ -51,14 +51,14 @@ for (const project of WEBPACK_REACT) {
         )
       })
 
-      cy.waitForSpecToFinish({ passCount: 1 })
+      cy.waitForSpecToFinish({ passCount: 1 }, 60000)
     })
 
     it('should show compilation errors on src changes', () => {
       cy.visitApp()
 
       cy.contains('app.component.cy.ts').click()
-      cy.waitForSpecToFinish({ passCount: 1 })
+      cy.waitForSpecToFinish({ passCount: 1 }, 60000)
 
       // Create compilation error
       cy.withCtx(async (ctx) => {
@@ -71,7 +71,7 @@ for (const project of WEBPACK_REACT) {
       })
 
       // The test should fail and the stack trace should appear in the command log
-      cy.waitForSpecToFinish({ failCount: 1 })
+      cy.waitForSpecToFinish({ failCount: 1 }, 60000)
       cy.contains('The following error originated from your test code, not from Cypress.').should('exist')
       cy.get('.test-err-code-frame').should('be.visible')
     })
@@ -88,7 +88,7 @@ for (const project of WEBPACK_REACT) {
       })
 
       cy.contains('new.component.cy.ts').click()
-      cy.waitForSpecToFinish({ passCount: 1 })
+      cy.waitForSpecToFinish({ passCount: 1 }, 60000)
     })
   })
 }

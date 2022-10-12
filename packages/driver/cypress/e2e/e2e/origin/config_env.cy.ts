@@ -1,5 +1,5 @@
 ['config', 'env'].forEach((fnName) => {
-  describe(`cy.origin- Cypress.${fnName}()`, () => {
+  describe(`cy.origin- Cypress.${fnName}()`, { browser: '!webkit' }, () => {
     const USED_KEYS = {
       foo: 'cy-origin-foo',
       bar: 'cy-origin-bar',

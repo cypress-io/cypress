@@ -1,7 +1,7 @@
 {
   "name": "cypress",
-  "version": "10.9.0",
-  "description": "Cypress.io end to end testing tool",
+  "version": "10.10.0",
+  "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
     "binary-build": "node ./scripts/binary.js build",
@@ -238,6 +238,7 @@
     "e2e",
     "end-to-end",
     "integration",
+    "component",
     "mocks",
     "runner",
     "spies",

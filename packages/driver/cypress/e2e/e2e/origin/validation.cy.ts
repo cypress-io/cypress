@@ -1,4 +1,4 @@
-describe('cy.origin', () => {
+describe('cy.origin', { browser: '!webkit' }, () => {
   describe('successes', () => {
     beforeEach(() => {
       // TODO: There seems to be a limit of 15 active spec bridges during a given test.

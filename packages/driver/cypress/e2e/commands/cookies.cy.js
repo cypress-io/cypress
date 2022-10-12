@@ -2,6 +2,25 @@ const { assertLogLength } = require('../../support/utils')
 const { stripIndent } = require('common-tags')
 const { Promise } = Cypress
 
+describe('src/cy/commands/cookies - no stub', () => {
+  it('clears all cookies', () => {
+    cy.setCookie('foo', 'bar')
+    cy.getCookies().should('have.length', 1)
+    cy.clearCookies()
+    cy.getCookies().should('have.length', 0)
+  })
+
+  it('clears a single cookie', () => {
+    cy.setCookie('foo', 'bar')
+    cy.setCookie('key', 'val')
+    cy.getCookies().should('have.length', 2)
+    cy.clearCookie('foo')
+    cy.getCookies().should('have.length', 1).then((cookies) => {
+      expect(cookies[0].name).to.eq('key')
+    })
+  })
+})
+
 describe('src/cy/commands/cookies', () => {
   beforeEach(() => {
     // call through normally on everything

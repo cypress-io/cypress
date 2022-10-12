@@ -1,4 +1,4 @@
-it('visits foobar.com and types foobar inside an input', () => {
+it('visits foobar.com and types foobar inside an input', { browser: '!webkit' }, () => {
   cy.visit('/fixtures/primary-origin.html')
   cy.get('[data-cy="cross-origin-secondary-link"]').click()
 

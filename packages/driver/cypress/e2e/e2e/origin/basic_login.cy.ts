@@ -1,4 +1,4 @@
-describe('basic login', () => {
+describe('basic login', { browser: '!webkit' }, () => {
   // Scenario, Token based auth. Visit site, redirect to IDP hosted on secondary origin, login and redirect back to site.
   describe('visit primary first', () => {
     it('logs in with idp redirect', () => {
@@ -148,7 +148,7 @@ describe('basic login', () => {
   })
 })
 
-describe('Multi-step Auth', () => {
+describe('Multi-step Auth', { browser: '!webkit' }, () => {
   // TODO: cy.origin does not work in cy.origin yet.
   it.skip('final auth redirects back to localhost - nested', () => {
     cy.visit('/fixtures/auth/index.html')
