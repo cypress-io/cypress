@@ -725,6 +725,18 @@ export class EventManager {
       source?.postMessage({ event: 'cross:origin:aut:get:cookie', cookies }, '*')
     })
 
+    Cypress.primaryOriginCommunicator.on('backend:request', ({ args, specBridgeResponseEvent }, origin, source) => {
+      this.ws.emit('backend:request', ...args, (response) => {
+        Cypress.primaryOriginCommunicator.toSpecBridge(origin, specBridgeResponseEvent, response)
+      })
+    })
+
+    Cypress.primaryOriginCommunicator.on('automation:request', ({ args, specBridgeResponseEvent }, origin, source) => {
+      this.ws.emit('automation:request', ...args, (response) => {
+        Cypress.primaryOriginCommunicator.toSpecBridge(origin, specBridgeResponseEvent, response)
+      })
+    })
+
     // The window.top should not change between test reloads, and we only need to bind the message event when Cypress is recreated
     // Forward all message events to the current instance of the multi-origin communicator
     if (!window.top) throw new Error('missing window.top in event-manager')

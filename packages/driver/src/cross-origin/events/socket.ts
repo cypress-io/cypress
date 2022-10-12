@@ -1,16 +1,18 @@
-import { createWebsocket } from '@packages/socket/lib/browser'
+export const handleSocketEvents = (Cypress, topOrigin) => {
+  const onBackendRequest = async (...args) => {
+    // The last argument is the callback, pop that off before messaging primary and call it with the response.
+    const callback = args.pop()
+    const response = await Cypress.specBridgeCommunicator.toPrimaryPromise('backend:request', { args })
 
-export const handleSocketEvents = (Cypress) => {
-  const webSocket = createWebsocket({ path: Cypress.config('socketIoRoute'), browserFamily: Cypress.config('browser').family })
-
-  webSocket.connect()
-
-  const onBackendRequest = (...args) => {
-    webSocket.emit('backend:request', ...args)
+    callback(response)
   }
 
-  const onAutomationRequest = (...args) => {
-    webSocket.emit('automation:request', ...args)
+  const onAutomationRequest = async (...args) => {
+    // The last argument is the callback, pop that off before messaging primary and call it with the response.
+    const callback = args.pop()
+    const response = await Cypress.specBridgeCommunicator.toPrimaryPromise('automation:request', { args })
+
+    callback(response)
   }
 
   Cypress.on('backend:request', onBackendRequest)

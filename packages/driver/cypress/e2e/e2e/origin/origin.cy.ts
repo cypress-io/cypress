@@ -1,4 +1,16 @@
 describe('cy.origin', { browser: '!webkit' }, () => {
+  it('successfully visits after creating 30 spec bridges', () => {
+    // Make ~30 spec bridges
+    for (let index = 0; index < 30; index++) {
+      cy.origin(`http://www.${index}.com:3500`, () => undefined)
+    }
+
+    cy.origin('http://www.app.foobar.com:3500', () => {
+      cy.visit('/fixtures/primary-origin.html') // this fails to visit
+      cy.log('derp') // This is here to prevent the test from exiting early.
+    })
+  })
+
   it('passes viewportWidth/Height state to the secondary origin', () => {
     const expectedViewport = [320, 480]
 
