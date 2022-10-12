@@ -143,7 +143,6 @@ function setupRunner () {
     'Test Project',
     getEventManager(),
     window.UnifiedRunner.CypressJQuery,
-    window.UnifiedRunner.highlight,
   )
 
   createIframeModel()
