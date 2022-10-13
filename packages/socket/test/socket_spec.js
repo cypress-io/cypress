@@ -21,6 +21,24 @@ describe('Socket', function () {
     expect(browserLib.client).to.eq(client)
   })
 
+  it('exports createWebSocket from lib/browser', function () {
+    expect(browserLib.createWebsocket).to.be.defined
+  })
+
+  it('creates a websocket for non webkit browsers', function () {
+    const socket = browserLib.createWebsocket({ path: '/path', browserFamily: 'chromium' })
+
+    expect(socket.io.opts.path).to.eq('/path')
+    expect(socket.io.opts.transports[0]).to.eq('websocket')
+  })
+
+  it('creates a websocket for non webkit browsers', function () {
+    const socket = browserLib.createWebsocket({ path: '/path', browserFamily: 'webkit' })
+
+    expect(socket.io.opts.path).to.eq('/path')
+    expect(socket.io.opts.transports[0]).to.eq('polling')
+  })
+
   context('.getPathToClientSource', function () {
     it('returns path to socket.io.js', function () {
       const clientPath = path.join(resolvePkg('socket.io-client'), 'dist', 'socket.io.js')
