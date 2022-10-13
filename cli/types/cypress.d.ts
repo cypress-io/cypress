@@ -493,16 +493,6 @@ declare namespace Cypress {
      */
     Cookies: {
       debug(enabled: boolean, options?: Partial<DebugOptions>): void
-      /**
-       * @deprecated Use `cy.session()` instead.
-       * @see https://on.cypress.io/session
-       */
-      preserveOnce(...names: string[]): void
-      /**
-       * @deprecated Use `cy.session()` instead.
-       * @see https://on.cypress.io/session
-       */
-      defaults(options: Partial<CookieDefaults>): CookieDefaults
     }
 
     /**
@@ -2393,10 +2383,6 @@ declare namespace Cypress {
   }
 
   type Agent<T extends sinon.SinonSpy> = SinonSpyAgent<T> & T
-
-  interface CookieDefaults {
-    preserve: string | string[] | RegExp | ((cookie: Cookie) => boolean)
-  }
 
   interface Failable {
     /**

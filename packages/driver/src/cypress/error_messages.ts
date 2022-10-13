@@ -297,9 +297,9 @@ export default {
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
       }
     },
-    deprecated (obj) {
+    removed (obj) {
       return {
-        message: `${cmd(obj.cmd)} has been deprecated and will be removed in a future release. Consider using ${cmd('session')} instead.`,
+        message: `${cmd(obj.cmd)} was removed in Cypress version 11.0.0. Please update to use ${cmd('session')} instead.`,
         docsUrl: 'https://on.cypress.io/session',
       }
     },
@@ -313,11 +313,6 @@ export default {
       return {
         message: `${cmd('{{cmd}}')} timed out waiting \`{{timeout}}ms\` to complete.`,
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
-      }
-    },
-    whitelist_renamed (obj) {
-      return {
-        message: `\`${obj.type}\` \`whitelist\` option has been renamed to \`preserve\`. Please rename \`whitelist\` to \`preserve\`.`,
       }
     },
   },
@@ -1206,10 +1201,6 @@ export default {
       Server: {
         message: `\`Cypress.Server.*\` has been deprecated and its use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
         docsUrl: 'https://on.cypress.io/intercept',
-      },
-      Cookies_preserveOnce: {
-        message: `\`Cypress.Cookies.preserveOnce\` use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('session')} (outside of the callback) instead.`,
-        docsUrl: 'https://on.cypress.io/session',
       },
       origin: {
         message: `${cmd('origin')} use is not currently supported in the ${cmd('origin')} callback, but is planned for a future release. Please 👍 the following issue and leave a comment with your use-case:`,

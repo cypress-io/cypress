@@ -141,11 +141,7 @@ export default function (Commands, Cypress, cy, state, config) {
         return resp
       }
 
-      // iterate over all of these and ensure none are allowed
-      // or preserved
-      const cookies = Cypress.Cookies.getClearableCookies(resp)
-
-      return automateCookies('clear:cookies', cookies, log, timeout)
+      return automateCookies('clear:cookies', resp, log, timeout)
     })
     .then(pickCookieProps)
   }

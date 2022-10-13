@@ -216,18 +216,6 @@ describe('cy.origin Cypress API', () => {
       })
     })
 
-    it('throws an error when a user attempts to configure Cypress.Cookies.preserveOnce() inside of cy.origin', (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).to.equal('`Cypress.Cookies.preserveOnce` use is not supported in the `cy.origin()` callback. Consider using `cy.session()` (outside of the callback) instead.')
-        expect(err.docsUrl).to.equal('https://on.cypress.io/session')
-        done()
-      })
-
-      cy.origin('http://foobar.com:3500', () => {
-        Cypress.Cookies.preserveOnce('')
-      })
-    })
-
     it('throws an error when a user attempts to call Cypress.session.clearAllSavedSessions() inside of cy.origin', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.equal('`Cypress.session.*` methods are not supported in the `cy.switchToDomain()` callback. Consider using them outside of the callback instead.')

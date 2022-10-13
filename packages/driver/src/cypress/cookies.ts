@@ -7,53 +7,9 @@ import $errUtils from './error_utils'
 let isDebugging = false
 let isDebuggingVerbose = false
 
-const preserved = {}
-
-const defaults: any = {
-  preserve: null,
-}
-
-const warnOnWhitelistRenamed = (obj, type) => {
-  if (obj.whitelist) {
-    $errUtils.throwErrByPath('cookies.whitelist_renamed', { args: { type } })
-  }
-}
-
 export const $Cookies = (namespace, domain) => {
   const isNamespaced = (name) => {
     return _.startsWith(name, namespace)
-  }
-
-  const isAllowed = (cookie) => {
-    const w = defaults.preserve
-
-    if (w) {
-      if (_.isString(w)) {
-        return cookie.name === w
-      }
-
-      if (_.isArray(w)) {
-        return w.includes(cookie.name)
-      }
-
-      if (_.isFunction(w)) {
-        return w(cookie)
-      }
-
-      if (_.isRegExp(w)) {
-        return w.test(cookie.name)
-      }
-
-      return false
-    }
-  }
-
-  const removePreserved = (name) => {
-    if (preserved[name]) {
-      return delete preserved[name]
-    }
-
-    return false
   }
 
   const API = {
@@ -83,15 +39,8 @@ export const $Cookies = (namespace, domain) => {
       return console[m].apply(console, args)
     },
 
-    getClearableCookies (cookies: any[] = []) {
-      return _.filter(cookies, (cookie) => {
-        return !isAllowed(cookie) && !removePreserved(cookie.name)
-      })
-    },
-
     _set (name, value, options = {}) {
-      // dont set anything if we've been
-      // told to unload
+      // don't set anything if we've been told to unload
       if (this.getCy('unload') === 'true') {
         return
       }
@@ -119,12 +68,8 @@ export const $Cookies = (namespace, domain) => {
       return this._get(`${namespace}.${name}`)
     },
 
-    preserveOnce (...keys) {
-      $errUtils.warnByPath('cookies.deprecated', { args: { cmd: 'Cypress.Cookies.preserveOnce' } })
-
-      return _.each(keys, (key) => {
-        return preserved[key] = true
-      })
+    preserveOnce () {
+      return $errUtils.throwErrByPath('cookies.removed', { args: { cmd: 'Cypress.Cookies.preserveOnce' } })
     },
 
     clearCypressCookies () {
@@ -142,12 +87,8 @@ export const $Cookies = (namespace, domain) => {
       return this.setCy('initial', true)
     },
 
-    defaults (obj = {}) {
-      $errUtils.warnByPath('cookies.deprecated', { args: { cmd: 'Cypress.Cookies.defaults' } })
-      warnOnWhitelistRenamed(obj, 'Cypress.Cookies.defaults')
-
-      // merge obj into defaults
-      return _.extend(defaults, obj)
+    defaults () {
+      return $errUtils.throwErrByPath('cookies.removed', { args: { cmd: 'Cypress.Cookies.defaults' } })
     },
 
     parse (cookieString: string) {
