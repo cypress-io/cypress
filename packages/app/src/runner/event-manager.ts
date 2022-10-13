@@ -625,9 +625,13 @@ export class EventManager {
       const eventID = log.get('id')
 
       const requestSnapshot = () => {
-        return Cypress.primaryOriginCommunicator.toSpecBridgePromise(specBridge, 'snapshot:generate:for:log', {
-          name,
-          id: eventID,
+        return Cypress.primaryOriginCommunicator.toSpecBridgePromise({
+          origin: specBridge,
+          event: 'snapshot:generate:for:log',
+          data: {
+            name,
+            id: eventID,
+          },
         }).then((crossOriginSnapshot) => {
           const snapshot = crossOriginSnapshot.body ? crossOriginSnapshot : null
 

@@ -10,7 +10,7 @@ export const patchFetch = (Cypress: Cypress.Cypress, window) => {
 
   const originalFetch = window.fetch
 
-  window.fetch = function (...args) {
+  window.fetch = async function (...args) {
     try {
       let url: string | undefined = undefined
       let credentials: string | undefined = undefined
@@ -36,7 +36,7 @@ export const patchFetch = (Cypress: Cypress.Cypress, window) => {
       // if the option isn't set, we can imply the default as we know the resource type in the proxy
       if (url) {
         // @ts-expect-error
-        Cypress.backend('request:sent:with:credentials', {
+        await Cypress.backend('request:sent:with:credentials', {
           // TODO: might need to go off more information here or at least make collisions less likely
           url,
           resourceType: 'fetch',

@@ -21,13 +21,13 @@ export const patchXmlHttpRequest = (Cypress: Cypress.Cypress, window: Window) =>
     }
   }
 
-  window.XMLHttpRequest.prototype.send = function (...args) {
+  window.XMLHttpRequest.prototype.send = async function (...args) {
     try {
       // if the option is specified, communicate it to the the server to the proxy can make the request aware if it needs to potentially apply cross origin cookies
       // if the option isn't set, we can imply the default as we know the resource type in the proxy
       if (this._url) {
         // @ts-expect-error
-        Cypress.backend('request:sent:with:credentials', {
+        await Cypress.backend('request:sent:with:credentials', {
           // TODO: might need to go off more information here or at least make collisions less likely
           url: this._url,
           resourceType: 'xhr',

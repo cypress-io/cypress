@@ -19,6 +19,7 @@ const SNAPSHOT_EVENT_PREFIX = `${CROSS_ORIGIN_PREFIX}snapshot:`
  * @param event the name of the event to be promisified.
  * @param specBridgeName the name of the spec bridge receiving the event.
  * @param communicator the communicator that is sending the message
+ * @param timeout - in ms, if the promise does not complete during this timeout, fail the promise.
  * @returns the data to send
  */
 const sharedPromiseSetup = ({
@@ -28,6 +29,7 @@ const sharedPromiseSetup = ({
   event,
   specBridgeName,
   communicator,
+  timeout = 1000,
 }: {
   resolve: Function
   reject: Function
@@ -35,6 +37,7 @@ const sharedPromiseSetup = ({
   event: string
   specBridgeName: string
   communicator: EventEmitter
+  timeout: number
 }) => {
   let timeoutId
 
@@ -49,8 +52,8 @@ const sharedPromiseSetup = ({
 
   timeoutId = setTimeout(() => {
     communicator.off(dataToSend.specBridgeResponseEvent, handler)
-    reject(new Error(`${event} failed to receive a response from ${specBridgeName} spec bridge within 1 second.`))
-  }, 1000)
+    reject(new Error(`${event} failed to receive a response from ${specBridgeName} spec bridge within ${timeout / 1000} second.`))
+  }, timeout)
 
   communicator.once(dataToSend.specBridgeResponseEvent, handler)
 
@@ -114,7 +117,7 @@ export class PrimaryOriginCommunicator extends EventEmitter {
   }
 
   /**
-   * Events to be sent to the spec bridge communicator instance.
+   * Event to be sent to the all spec bridge communicator instances.
    * @param {string} event - the name of the event to be sent.
    * @param {any} data - any meta data to be sent with the event.
    */
@@ -137,6 +140,12 @@ export class PrimaryOriginCommunicator extends EventEmitter {
     })
   }
 
+  /**
+   * Event to be sent to sent to a specific spec bridge.
+   * @param origin - the origin of the spec bridge to send the event to.
+   * @param event - the name of the event to be sent.
+   * @param data - any meta data to be sent with the event.
+   */
   toSpecBridge (origin: string, event: string, data?: any) {
     debug('=> to spec bridge', origin, event, data)
 
@@ -159,9 +168,20 @@ export class PrimaryOriginCommunicator extends EventEmitter {
    * @param {string} event - the name of the event to be sent.
    * @param {Cypress.ObjectLike} data - any meta data to be sent with the event.
    * @param options - contains boolean to sync globals
+   * @param timeout - in ms, if the promise does not complete during this timeout, fail the promise.
    * @returns the response from primary of the event with the same name.
    */
-  toSpecBridgePromise<T> (origin: string, event: string, data?: any) {
+  toSpecBridgePromise<T> ({
+    origin,
+    event,
+    data,
+    timeout = 1000,
+  }: {
+    origin: string
+    event: string
+    data?: any
+    timeout: number
+  }) {
     return new Promise<T>((resolve, reject) => {
       const dataToSend = sharedPromiseSetup({
         resolve,
@@ -170,6 +190,7 @@ export class PrimaryOriginCommunicator extends EventEmitter {
         event,
         specBridgeName: origin,
         communicator: this,
+        timeout,
       })
 
       this.toSpecBridge(origin, event, dataToSend)
@@ -281,9 +302,20 @@ export class SpecBridgeCommunicator extends EventEmitter {
    * @param {string} event - the name of the event to be sent.
    * @param {Cypress.ObjectLike} data - any meta data to be sent with the event.
    * @param options - contains boolean to sync globals
+   * @param timeout - in ms, if the promise does not complete during this timeout, fail the promise.
    * @returns the response from primary of the event with the same name.
    */
-  toPrimaryPromise<T> (event: string, data?: Cypress.ObjectLike, options: { syncGlobals: boolean } = { syncGlobals: false }) {
+  toPrimaryPromise<T> ({
+    event,
+    data,
+    options = { syncGlobals: false },
+    timeout = 1000,
+  }: {
+    event: string
+    data?: Cypress.ObjectLike
+    options: {syncGlobals: boolean}
+    timeout: number
+  }) {
     return new Promise<T>((resolve, reject) => {
       const dataToSend = sharedPromiseSetup({
         resolve,
@@ -292,6 +324,7 @@ export class SpecBridgeCommunicator extends EventEmitter {
         event,
         specBridgeName: 'the primary Cypress',
         communicator: this,
+        timeout,
       })
 
       this.toPrimary(event, dataToSend, options)
