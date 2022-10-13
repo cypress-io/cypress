@@ -3145,7 +3145,7 @@
     tslib "~2.2.0"
     value-or-promise "1.0.6"
 
-"@graphql-tools/batch-execute@^8.1.0", "@graphql-tools/batch-execute@^8.4.6":
+"@graphql-tools/batch-execute@^8.1.0":
   version "8.4.6"
   resolved "https://registry.yarnpkg.com/@graphql-tools/batch-execute/-/batch-execute-8.4.6.tgz#6033cbf0b7d30c901ae4a1a7de7501aedf5a6a10"
   integrity sha512-8O42fReZMssrA4HCkpK68RlRQz/QAvLfOkz+/6dDX2X7VgZtRx3VvFiJd2hFaGdNbLzklBWXF9E6hJdJGkEO5g==
