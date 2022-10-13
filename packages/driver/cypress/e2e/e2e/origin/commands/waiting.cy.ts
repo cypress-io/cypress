@@ -22,7 +22,7 @@ const abortRequests = () => {
   reqQueue = []
 }
 
-context('cy.origin waiting', () => {
+context('cy.origin waiting', { browser: '!webkit' }, () => {
   before(() => {
     cy.origin('http://www.foobar.com:3500', () => {
       let reqQueue: XMLHttpRequest[] = []

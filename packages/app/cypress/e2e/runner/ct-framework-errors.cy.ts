@@ -40,9 +40,11 @@ function loadErrorSpec (options: Options): VerifyFunc {
   cy.get('.runnable-header', { log: false }).should('be.visible')
   // Extended timeout needed due to lengthy Angular bootstrap on Windows
   cy.contains('Your tests are loading...', { timeout: 60000, log: false }).should('not.exist')
+  // Then ensure the tests have finished
+  cy.get('[aria-label="Rerun all tests"]', { timeout: 30000 })
   cy.findByLabelText('Stats').within(() => {
-    cy.get('.passed .num', { timeout: 30000 }).should('have.text', `${passCount}`)
-    cy.get('.failed .num', { timeout: 30000 }).should('have.text', `${failCount}`)
+    cy.get('.passed .num').should('have.text', `${passCount}`)
+    cy.get('.failed .num').should('have.text', `${failCount}`)
   })
 
   // Return scoped verify function with spec options baked in
@@ -285,17 +287,34 @@ describe('Nuxt', {
       projectName: 'nuxtjs-vue2-configured',
       configFile: 'cypress.config.js',
       filePath: 'components/Errors.cy.js',
-      failCount: 3,
+      failCount: 4,
     })
 
     verify('error on mount', {
       fileName: 'Errors.vue',
       line: 19,
+      uncaught: true,
+      uncaughtMessage: 'mount error',
       message: [
         'mount error',
       ],
       stackRegex: /Errors\.vue:19/,
       codeFrameText: 'Errors.vue',
+    })
+
+    verify('sync error', {
+      fileName: 'Errors.vue',
+      line: 24,
+      uncaught: true,
+      uncaughtMessage: 'sync error',
+      message: [
+        'The following error originated from your application code',
+        'sync error',
+      ],
+      stackRegex: /Errors\.vue:24/,
+      codeFrameText: 'Errors.vue',
+    }).then(() => {
+      verifyErrorOnlyCapturedOnce('Error: sync error')
     })
 
     verify('async error', {
@@ -413,12 +432,37 @@ angularVersions.forEach((angularVersion) => {
         projectName: `angular-${angularVersion}`,
         configFile: 'cypress.config.ts',
         filePath: 'src/app/errors.cy.ts',
-        failCount: 1,
+        failCount: 3,
+        passCount: 1,
       })
 
-      // Angular uses ZoneJS which encapsulates errors thrown by components
-      // Thus, the mount, sync, and async error case errors will not propagate to Cypress
-      // and thus won't fail the tests
+      verify('sync error', {
+        fileName: 'errors.ts',
+        line: 14,
+        column: 11,
+        uncaught: true,
+        uncaughtMessage: 'sync error',
+        message: [
+          'The following error originated from your application code',
+          'sync error',
+        ],
+      }).then(() => {
+        verifyErrorOnlyCapturedOnce('Error: sync error')
+      })
+
+      verify('async error', {
+        fileName: 'errors.ts',
+        line: 19,
+        column: 13,
+        uncaught: true,
+        uncaughtMessage: 'async error',
+        message: [
+          'The following error originated from your application code',
+          'async error',
+        ],
+      }).then(() => {
+        verifyErrorOnlyCapturedOnce('Error: async error')
+      })
 
       verify('command failure', {
         line: 21,

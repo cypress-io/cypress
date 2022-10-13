@@ -5,6 +5,8 @@ import sinon, { SinonStub } from 'sinon'
 import sinonChai from 'sinon-chai'
 import chai, { expect } from 'chai'
 
+const pkg = require('@packages/root')
+
 chai.use(sinonChai)
 
 describe('EventCollectorActions', () => {
@@ -32,7 +34,7 @@ describe('EventCollectorActions', () => {
 
       expect(ctx.util.fetch).to.have.been.calledOnceWith(
         sinon.match(/anon-collect$/), // Verify URL ends with expected 'anon-collect' path
-        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"campaign":"abc","medium":"def","messageId":"ghi","cohort":"123"}' },
+        { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-cypress-version': pkg.version }, body: '{"campaign":"abc","medium":"def","messageId":"ghi","cohort":"123"}' },
       )
     })
 

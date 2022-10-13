@@ -30,22 +30,26 @@ function convertSameSiteExtensionToCypress (str: CyCookie['sameSite']): 'None' |
   return str ? extensionMap[str] : undefined
 }
 
-const normalizeGetCookieProps = (cookie: any): CyCookie => {
-  if (cookie.expires === -1) {
-    delete cookie.expires
+const normalizeGetCookieProps = ({ name, value, domain, path, secure, httpOnly, sameSite, expires }: playwright.Cookie): CyCookie => {
+  const cyCookie: CyCookie = {
+    name,
+    value,
+    domain,
+    path,
+    secure,
+    httpOnly,
+    hostOnly: false,
+    // Use expirationDate instead of expires
+    ...expires !== -1 ? { expirationDate: expires } : {},
   }
 
-  // Use expirationDate instead of expires 🤷‍♀️
-  cookie.expirationDate = cookie.expires
-  delete cookie.expires
-
-  if (cookie.sameSite === 'None') {
-    cookie.sameSite = 'no_restriction'
-  } else if (cookie.sameSite) {
-    cookie.sameSite = cookie.sameSite.toLowerCase()
+  if (sameSite === 'None') {
+    cyCookie.sameSite = 'no_restriction'
+  } else if (sameSite) {
+    cyCookie.sameSite = sameSite.toLowerCase() as CyCookie['sameSite']
   }
 
-  return cookie as CyCookie
+  return cyCookie
 }
 
 const normalizeSetCookieProps = (cookie: CyCookie): playwright.Cookie => {
@@ -88,17 +92,33 @@ let requestIdCounter = 1
 const requestIdMap = new WeakMap<playwright.Request, string>()
 let downloadIdCounter = 1
 
+type WebKitAutomationOpts = {
+  automation: Automation
+  browser: playwright.Browser
+  shouldMarkAutIframeRequests: boolean
+  initialUrl: string
+  downloadsFolder: string
+  videoApi?: RunModeVideoApi
+}
+
 export class WebKitAutomation {
+  automation: Automation
+  private browser: playwright.Browser
   private context!: playwright.BrowserContext
   private page!: playwright.Page
+  private shouldMarkAutIframeRequests: boolean
 
-  private constructor (public automation: Automation, private browser: playwright.Browser) {}
+  private constructor (opts: WebKitAutomationOpts) {
+    this.automation = opts.automation
+    this.browser = opts.browser
+    this.shouldMarkAutIframeRequests = opts.shouldMarkAutIframeRequests
+  }
 
   // static initializer to avoid "not definitively declared"
-  static async create (automation: Automation, browser: playwright.Browser, initialUrl: string, downloadsFolder: string, videoApi?: RunModeVideoApi) {
-    const wkAutomation = new WebKitAutomation(automation, browser)
+  static async create (opts: WebKitAutomationOpts) {
+    const wkAutomation = new WebKitAutomation(opts)
 
-    await wkAutomation.reset({ downloadsFolder, newUrl: initialUrl, videoApi })
+    await wkAutomation.reset({ downloadsFolder: opts.downloadsFolder, newUrl: opts.initialUrl, videoApi: opts.videoApi })
 
     return wkAutomation
   }
@@ -126,6 +146,9 @@ export class WebKitAutomation {
     if (options.videoApi) this.recordVideo(options.videoApi, contextStarted)
 
     let promises: Promise<any>[] = []
+
+    // TODO: remove with experimentalSessionAndOrigin
+    if (this.shouldMarkAutIframeRequests) promises.push(this.markAutIframeRequests())
 
     if (oldPwPage) promises.push(oldPwPage.context().close())
 
@@ -165,6 +188,28 @@ export class WebKitAutomation {
         videoFilters: 'mpdecimate',
       },
       startedVideoCapture,
+    })
+  }
+
+  private async markAutIframeRequests () {
+    function isAutIframeRequest (request: playwright.Request) {
+      // is an iframe
+      return (request.resourceType() === 'document')
+        // is a top-level iframe (only 1 parent in chain)
+        && request.frame().parentFrame() && !request.frame().parentFrame()?.parentFrame()
+        // is not the runner itself
+        && !request.url().includes('__cypress')
+    }
+
+    await this.context.route('**', (route, request) => {
+      if (!isAutIframeRequest(request)) return route.continue()
+
+      return route.continue({
+        headers: {
+          ...request.headers(),
+          'X-Cypress-Is-AUT-Frame': 'true',
+        },
+      })
     })
   }
 
@@ -234,7 +279,7 @@ export class WebKitAutomation {
     })
   }
 
-  private async getCookies () {
+  private async getCookies (): Promise<CyCookie[]> {
     const cookies = await this.context.cookies()
 
     return cookies.map(normalizeGetCookieProps)
@@ -256,8 +301,12 @@ export class WebKitAutomation {
 
     return normalizeGetCookieProps(cookie)
   }
-
-  private async clearCookie (filter: CookieFilter) {
+  /**
+   * Clears one specific cookie
+   * @param filter the cookie to be cleared
+   * @returns the cleared cookie
+   */
+  private async clearCookie (filter: CookieFilter): Promise<CookieFilter> {
     const allCookies = await this.context.cookies()
     const persistCookies = allCookies.filter((cookie) => {
       return !_cookieMatches(cookie, filter)
@@ -265,6 +314,20 @@ export class WebKitAutomation {
 
     await this.context.clearCookies()
     if (persistCookies.length) await this.context.addCookies(persistCookies)
+
+    return filter
+  }
+
+  /**
+   * Clear all cookies
+   * @returns cookies cleared
+   */
+  private async clearCookies (): Promise<CyCookie[]> {
+    const allCookies = await this.getCookies()
+
+    await this.context.clearCookies()
+
+    return allCookies
   }
 
   private async takeScreenshot (data) {
@@ -293,7 +356,7 @@ export class WebKitAutomation {
       case 'set:cookies':
         return await this.context.addCookies(data.map(normalizeSetCookieProps))
       case 'clear:cookies':
-        return await this.context.clearCookies()
+        return await this.clearCookies()
       case 'clear:cookie':
         return await this.clearCookie(data)
       case 'take:screenshot':
