@@ -7,7 +7,7 @@ context('cy.origin shadow dom', () => {
   })
 
   it('.shadow()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#shadow-element-1').shadow().find('p.shadow-1')
       .should('have.text', 'Shadow Content 1')
     })
@@ -25,7 +25,7 @@ context('cy.origin shadow dom', () => {
     })
 
     it('.shadow()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#shadow-element-1').shadow()
       })
 

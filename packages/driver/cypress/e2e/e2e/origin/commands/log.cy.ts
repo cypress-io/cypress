@@ -16,7 +16,7 @@ context('cy.origin log', () => {
   })
 
   it('logs in primary and secondary origins', () => {
-    cy.origin<string>('http://foobar.com:3500', () => {
+    cy.origin<string>('http://www.foobar.com:3500', () => {
       const afterLogAdded = new Promise<void>((resolve) => {
         const listener = (attrs) => {
           if (attrs.message === 'test log in cy.origin') {
@@ -42,7 +42,7 @@ context('cy.origin log', () => {
   })
 
   it('has a different id in a second test', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       const afterLogAdded = new Promise<void>((resolve) => {
         const listener = (attrs) => {
           if (attrs.message === 'test log in cy.origin') {
