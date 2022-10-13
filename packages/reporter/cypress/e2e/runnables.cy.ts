@@ -61,8 +61,8 @@ describe('runnables', () => {
 
   it('displays runnables when they load', () => {
     start()
-    cy.get('.runnable').should('have.length', 9)
-    cy.contains('test 4').should('be.visible')
+    cy.get('.runnable').should('have.length', 11)
+    cy.contains('suite 1').should('be.visible')
 
     cy.percySnapshot()
   })

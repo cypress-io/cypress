@@ -1,4 +1,4 @@
-describe('src/cross-origin/patches', () => {
+describe('src/cross-origin/patches', { browser: '!webkit' }, () => {
   context('submit', () => {
     beforeEach(() => {
       cy.visit('/fixtures/primary-origin.html')

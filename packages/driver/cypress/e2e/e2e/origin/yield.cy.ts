@@ -1,6 +1,6 @@
 import { assertLogLength } from '../../../support/utils'
 
-describe('cy.origin yields', () => {
+describe('cy.origin yields', { browser: '!webkit' }, () => {
   let logs: any = []
 
   beforeEach(() => {
