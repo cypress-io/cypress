@@ -172,7 +172,7 @@ describe('src/cross-origin/patches', { browser: '!webkit' }, () => {
       })
     })
 
-    describe('from the spec bridge', () => {
+    describe('from the spec bridge', { defaultCommandTimeout: 10000 }, () => {
       beforeEach(() => {
         cy.intercept('/test-request').as('testRequest')
         cy.stub(Cypress, 'backend').callThrough()
@@ -184,7 +184,8 @@ describe('src/cross-origin/patches', { browser: '!webkit' }, () => {
         cy.get('a[data-cy="xhr-fetch-requests"]').click()
       })
 
-      describe('patches fetch in the AUT when going cross origin and sends credential status to server socket', () => {
+      // Stubbing increases the time taken to make a backend request call, so we increase the default command timeout to avoid flake.
+      describe('patches fetch in the AUT when going cross origin and sends credential status to server socket', { defaultCommandTimeout: 10000 }, () => {
         [undefined, 'same-origin', 'omit', 'include'].forEach((credentialOption) => {
           const assertCredentialStatus = credentialOption || 'same-origin'
 
@@ -439,7 +440,8 @@ describe('src/cross-origin/patches', { browser: '!webkit' }, () => {
         cy.get('a[data-cy="xhr-fetch-requests"]').click()
       })
 
-      describe('patches xmlHttpRequest in the spec bridge', () => {
+      // Stubbing increases the time taken to make a backend request call, so we increase the default command timeout to avoid flake.
+      describe('patches xmlHttpRequest in the spec bridge', { defaultCommandTimeout: 10000 }, () => {
         [false, true].forEach((withCredentials) => {
           it(`for withCredentials option ${withCredentials}`, () => {
             cy.origin('http://www.foobar.com:3500', {

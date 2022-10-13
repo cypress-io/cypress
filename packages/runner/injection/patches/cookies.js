@@ -46,7 +46,7 @@ export const patchDocumentCookie = (win) => {
     return setInterval(async () => {
       try {
         // If Cypress is defined on the window, that means we have a spec bridge and we should use that to set cookies. If not we have to delegate to the primary cypress instance.
-        const cookies = window.Cypress ? await window.Cypress.automation('get:cookies', { domain: window.Cypress.Location.create(win.location.href).superDomain }) : await getCookiesFromCypress()
+        const cookies = window.Cypress ? await window.Cypress.automation('get:cookies', { domain: window.Cypress.Location.create(win.location.href).domain }) : await getCookiesFromCypress()
 
         const cookiesString = (cookies || []).map((c) => `${c.name}=${c.value}`).join('; ')
 
