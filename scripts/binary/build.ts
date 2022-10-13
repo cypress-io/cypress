@@ -407,5 +407,5 @@ async function testExecutableVersion (buildAppExecutable: string, version: strin
   la(result.stdout === version, 'different version reported',
     result.stdout, 'from input version to build', version)
 
-  console.log('✅ using node --version works')
+  console.log('✅ using --version on the Cypress binary works')
 }
