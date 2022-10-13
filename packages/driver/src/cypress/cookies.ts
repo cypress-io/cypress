@@ -2,6 +2,8 @@ import _ from 'lodash'
 import Cookies from 'js-cookie'
 import { CookieJar, toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
 
+import $errUtils from './error_utils'
+
 let isDebugging = false
 let isDebuggingVerbose = false
 
@@ -66,6 +68,10 @@ export const $Cookies = (namespace, domain) => {
       return this._get(`${namespace}.${name}`)
     },
 
+    preserveOnce () {
+      return $errUtils.throwErrByPath('cookies.removed', { args: { cmd: 'Cypress.Cookies.preserveOnce' } })
+    },
+
     clearCypressCookies () {
       return _.each(Cookies.get(), (value, key) => {
         if (isNamespaced(key)) {
@@ -79,6 +85,10 @@ export const $Cookies = (namespace, domain) => {
 
     setInitial () {
       return this.setCy('initial', true)
+    },
+
+    defaults () {
+      return $errUtils.throwErrByPath('cookies.removed', { args: { cmd: 'Cypress.Cookies.defaults' } })
     },
 
     parse (cookieString: string) {

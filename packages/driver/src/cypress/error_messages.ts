@@ -297,9 +297,9 @@ export default {
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
       }
     },
-    deprecated (obj) {
+    removed (obj) {
       return {
-        message: `${cmd(obj.cmd)} has been deprecated and will be removed in a future release. Consider using ${cmd('session')} instead.`,
+        message: `${cmd(obj.cmd)} was removed in Cypress version 11.0.0. Please update to use ${cmd('session')} instead.`,
         docsUrl: 'https://on.cypress.io/session',
       }
     },
