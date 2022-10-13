@@ -1,6 +1,6 @@
 const fs = require('fs-extra')
 const path = require('path')
-// const { consolidateDeps } = require('@tooling/v8-snapshot')
+const { consolidateDeps } = require('@tooling/v8-snapshot')
 // const del = require('del')
 const esbuild = require('esbuild')
 const snapshotMetadata = require('@tooling/v8-snapshot/cache/prod-darwin/snapshot-meta.cache.json')
@@ -109,7 +109,7 @@ const cleanup = async (buildAppDir) => {
     }
   }))
 
-  // await consolidateDeps({ projectBaseDir: buildAppDir })
+  await consolidateDeps({ projectBaseDir: buildAppDir })
   // await del([
   //   path.join(buildAppDir, 'node_modules', 'mocha'),
   //   path.join(buildAppDir, '**', 'test'),
