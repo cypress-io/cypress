@@ -132,7 +132,7 @@ export const useLoginConnectStore = defineStore({
     },
     latestBannerShownTime (state) {
       return state._latestBannerShownTimeForTesting
-      // TODO: in #23762 return based on bannersState
+      // TODO: in #23768 return based on bannersState - this will be used to delay the nav CI prompt if a banner was recently shown
     },
 
   },
