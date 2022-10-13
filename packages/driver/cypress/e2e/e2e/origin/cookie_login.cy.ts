@@ -703,20 +703,20 @@ describe('cy.origin - cookie login', () => {
     })
 
     it('cookie properties are preserved when set via automation', () => {
-      cy.get('[data-cy="cross-origin-secondary-link"]').click()
-      cy.origin('http://www.foobar.com:3500', () => {
+      cy.get('[data-cy="cookie-https"]').click()
+      cy.origin('https://www.foobar.com:3502', () => {
         cy.document().then((doc) => {
-          doc.cookie = 'key=value; SameSite=Strict; Path=/foo'
+          doc.cookie = 'key=value; SameSite=Strict; Secure; Path=/fixtures'
         })
 
         cy.getCookie('key').then((cookie) => {
           expect(Cypress._.omit(cookie, 'expiry')).to.deep.equal({
-            domain: '.foobar.com',
+            domain: '.www.foobar.com',
             httpOnly: false,
             name: 'key',
-            path: '/foo',
+            path: '/fixtures',
             sameSite: 'strict',
-            secure: false,
+            secure: true,
             value: 'value',
           })
         })
@@ -828,12 +828,12 @@ describe('cy.origin - cookie login', () => {
       })
 
       cy.get('[data-cy="document-cookie"]').click()
-      cy.origin('http://www.foobar.com:3500', { args: { username } }, ({ username }) => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.document().its('cookie').should('include', 'name=value')
         cy.get('[data-cy="doc-cookie"]').invoke('text').should('equal', 'name=value')
         cy.getCookie('name').then((cookie) => {
           expect(Cypress._.omit(cookie, 'expiry')).to.deep.equal({
-            domain: '.foobar.com',
+            domain: '.www.foobar.com',
             httpOnly: false,
             name: 'name',
             path: '/',
@@ -842,6 +842,28 @@ describe('cy.origin - cookie login', () => {
             value: 'value',
           })
         })
+      })
+    })
+
+    it('preserves duplicate cookie keys', () => {
+      cy.get('[data-cy="cookie-login-land-on-document-cookie"]').click()
+      cy.origin('http://www.foobar.com:3500', { args: { username } }, ({ username }) => {
+        cy.get('[data-cy="username"]').type(username)
+        cy.get('[data-cy="login"]').click()
+      })
+
+      cy.origin('http://www.idp.com:3501', () => {
+        // ensure we've redirected to the right page
+        cy.url().should('not.include', 'http://www.idp.com:3501/verify-cookie-login')
+        cy.document().then((doc) => {
+          doc.cookie = 'key=value1; domain=www.idp.com'
+          doc.cookie = 'key=value2; domain=idp.com'
+        })
+
+        // order of the cookies differs depending on browser, so just
+        // ensure that each one is there
+        cy.document().its('cookie').should('include', 'key=value1')
+        cy.document().its('cookie').should('include', 'key=value2')
       })
     })
   })

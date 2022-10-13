@@ -543,7 +543,6 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
       modifyObstructiveCode: this.config.modifyObstructiveCode,
       url: this.req.proxiedUrl,
       deferSourceMapRewrite: this.deferSourceMapRewrite,
-      // TODO: do these need to be formatted/serialized before sending to injection?
       simulatedCookies: this.simulatedCookies,
     })
     const encodedBody = iconv.encode(injectedBody, nodeCharset)

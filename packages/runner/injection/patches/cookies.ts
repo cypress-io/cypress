@@ -1,9 +1,12 @@
 import { AutomationCookie } from '@packages/server/lib/automation/cookies'
+import {
+  CookieJar,
+  toughCookieToAutomationCookie,
+  automationCookieToToughCookie,
+} from '@packages/server/lib/util/cookies'
 import { Cookie as ToughCookie } from 'tough-cookie'
 
-type PartialCookie = Pick<AutomationCookie, 'name' | 'value'>
-
-const parseDocumentCookieString = (documentCookieString: string) => {
+const parseDocumentCookieString = (documentCookieString: string): AutomationCookie[] => {
   if (!documentCookieString || !documentCookieString.trim().length) return []
 
   return documentCookieString.split(';').map((cookieString) => {
@@ -12,38 +15,15 @@ const parseDocumentCookieString = (documentCookieString: string) => {
     return {
       name: name.trim(),
       value: value.trim(),
+      domain: location.hostname,
+      expiry: null,
+      httpOnly: false,
+      maxAge: null,
+      path: null,
+      sameSite: 'lax',
+      secure: false,
     }
   })
-}
-
-const stringifyCookies = (cookies: PartialCookie[]) => {
-  return cookies
-  .map((cookie) => `${cookie.name}=${cookie.value}`)
-  .join('; ')
-}
-
-const mergeCookies = (documentCookieValue: string, newCookies: PartialCookie[] = []) => {
-  const existingCookies = parseDocumentCookieString(documentCookieValue)
-  const newCookieNameIndex = newCookies.reduce((nameIndex, cookie) => {
-    nameIndex[cookie.name] = cookie.value
-
-    return nameIndex
-  }, {} as { [key: string]: string })
-  const filteredExistingCookies = existingCookies.filter((cookie) => {
-    return !newCookieNameIndex[cookie.name]
-  })
-
-  return stringifyCookies(filteredExistingCookies.concat(newCookies))
-}
-
-const clearCookie = (documentCookieValue: string, name: string) => {
-  const cookies = parseDocumentCookieString(documentCookieValue)
-
-  const filteredCookies = cookies.filter((cookie) => {
-    return cookie.name !== name
-  })
-
-  return stringifyCookies(filteredCookies)
 }
 
 const getCookiesFromCypress = () => {
@@ -66,14 +46,18 @@ const getCookiesFromCypress = () => {
   })
 }
 
-const pollForAutomationCookieValues = (onCookieUpdate: (string) => void) => {
+const pollForAutomationCookieValues = (onCookiesUpdate: (cookies: AutomationCookie[]) => void) => {
+  let paused = false
+
   // The interval value is arbitrary; it shouldn't be too often, but needs to
   // be fairly frequent so that the local value is kept as up-to-date as
   // possible. It's possible there could be a race condition where
   // document.cookie returns an out-of-date value, but there's not really a
   // way around that since it's a synchronous API and we can only get the
   // browser's true cookie values asynchronously.
-  return setInterval(async () => {
+  const intervalId = setInterval(async () => {
+    if (paused) return
+
     try {
       // If Cypress is defined on the win, that means we have a spec bridge and
       // we should use that to set cookies. If not we have to delegate to the
@@ -84,26 +68,30 @@ const pollForAutomationCookieValues = (onCookieUpdate: (string) => void) => {
         })
         : await getCookiesFromCypress()
 
-      const cookiesString = (cookies || []).map((c) => `${c.name}=${c.value}`).join('; ')
-
-      onCookieUpdate(cookiesString)
+      if (!paused) {
+        onCookiesUpdate(cookies)
+      }
     } catch (err) {
-    // unlikely there will be errors, but ignore them in any case, since
-    // they're not user-actionable
+      // unlikely there will be errors, but ignore them in any case, since
+      // they're not user-actionable
     }
   }, 250)
+
+  return {
+    pause () {
+      paused = true
+    },
+    resume () {
+      paused = false
+    },
+    stop () {
+      clearInterval(intervalId)
+    },
+  }
 }
 
 const setAutomationCookieViaCypress = (cookie: AutomationCookie) => {
-  const { Cypress } = window
-  const { superDomain } = Cypress.Location.create(window.location.href)
-  // @ts-ignore
-  const automationCookie = Cypress.Cookies.toughCookieToAutomationCookie(
-    // @ts-ignore
-    Cypress.Cookies.parse(cookie), superDomain,
-  ) as AutomationCookie
-
-  return window.Cypress.automation('set:cookie', automationCookie)
+  return window.Cypress.automation('set:cookie', cookie)
   .catch(() => {
     // unlikely there will be errors, but ignore them in any case, since
     // they're not user-actionable
@@ -124,12 +112,12 @@ const setAutomationCookieViaPostMessage = (cookie: AutomationCookie) => {
 
     window.top!.postMessage({
       event: 'cross:origin:aut:set:cookie',
-      data: { cookie, href: window.location.href },
+      data: { cookie },
     }, '*')
   })
 }
 
-const setAutomationCookie = (cookie) => {
+const setAutomationCookie = (cookie: AutomationCookie) => {
   // If Cypress is defined on the win, that means we have a spec bridge and we
   // should use that to set cookies. If not we have to delegate to the primary
   // Cypress instance.
@@ -156,56 +144,83 @@ const setAutomationCookie = (cookie) => {
 //   updates to the cookie jar (via http requests, cy.setCookie, etc) are
 //   reflected in the document.cookie value.
 export const patchDocumentCookie = (originalCookies: AutomationCookie[]) => {
-  let documentCookieValue = mergeCookies(window.document.cookie, originalCookies)
+  const url = location.href
+  const domain = location.hostname
+  const cookieJar = new CookieJar()
+  const existingCookies = parseDocumentCookieString(document.cookie)
 
-  const setDocumentCookieValue = (newCookieString: string) => {
-    documentCookieValue = newCookieString
+  const getDocumentCookieValue = () => {
+    return cookieJar.getCookies(url, undefined).map((cookie: ToughCookie) => {
+      return `${cookie.key}=${cookie.value}`
+    }).join('; ')
   }
 
-  let cookieSyncIntervalId = pollForAutomationCookieValues(setDocumentCookieValue)
+  const addCookies = (cookies: AutomationCookie[]) => {
+    cookies.forEach((cookie) => {
+      cookieJar.setCookie(automationCookieToToughCookie(cookie, domain), url, undefined)
+    })
+  }
+
+  const replaceCookies = (cookies: AutomationCookie[]) => {
+    cookieJar.removeAllCookies()
+    addCookies(cookies)
+  }
+
+  addCookies(existingCookies.concat(originalCookies))
+
+  const polling = pollForAutomationCookieValues(replaceCookies)
 
   Object.defineProperty(window.document, 'cookie', {
     get () {
-      return documentCookieValue
+      return getDocumentCookieValue()
     },
 
     set (newValue: any) {
-      const cookie = ToughCookie.parse(newValue)
+      const stringValue = `${newValue}`
+      const parsedCookie = CookieJar.parse(stringValue)
 
-      // If cookie is undefined, it was invalid and couldn't be parsed
-      if (!cookie) return documentCookieValue
+      // if result is undefined, it was invalid and couldn't be parsed
+      if (!parsedCookie) return getDocumentCookieValue()
 
-      // Clear the syncing interval until we've successfully set this cookie
-      clearInterval(cookieSyncIntervalId)
+      polling.pause()
 
-      documentCookieValue = mergeCookies(documentCookieValue, [{
-        name: cookie.key,
-        value: cookie.value,
-      }])
+      // debugger
 
-      setAutomationCookie(newValue)
+      // we should be able to pass in parsedCookie here instead of the string
+      // value, but tough-cookie doesn't recognize it using an instanceof
+      // check and throws an error. because we can't, we have to massage
+      // some of the properties below to be correct
+      const cookie = cookieJar.setCookie(stringValue, url, undefined)!
+
+      cookie.sameSite = parsedCookie.sameSite
+
+      if (!parsedCookie.path) {
+        cookie.path = '/'
+      }
+
+      setAutomationCookie(toughCookieToAutomationCookie(cookie, domain))
       .then(() => {
-        cookieSyncIntervalId = pollForAutomationCookieValues(setDocumentCookieValue)
+        polling.resume()
       })
 
-      return documentCookieValue
+      return getDocumentCookieValue()
     },
   })
 
   const onUnload = () => {
     window.removeEventListener('unload', onUnload)
-    clearInterval(cookieSyncIntervalId)
+    polling.stop()
   }
 
   window.addEventListener('unload', onUnload)
 
   const reset = () => {
-    documentCookieValue = ''
+    cookieJar.removeAllCookies()
   }
 
   const bindCypressListeners = (Cypress: Cypress.Cypress) => {
     Cypress.specBridgeCommunicator.on('cross:origin:cookies', (cookies: AutomationCookie[]) => {
-      documentCookieValue = mergeCookies(documentCookieValue, cookies)
+      addCookies(cookies)
 
       // TODO: this needs to be wired up in cy.ts
       // Cypress.specBridgeCommunicator.toPrimary('cross:origin:cookies:received')
@@ -214,11 +229,11 @@ export const patchDocumentCookie = (originalCookies: AutomationCookie[]) => {
     Cypress.on('test:before:run', reset)
 
     Cypress.on('set:cookie', (cookie: AutomationCookie) => {
-      documentCookieValue = mergeCookies(documentCookieValue, [cookie])
+      cookieJar.setCookie(automationCookieToToughCookie(cookie, domain), url, undefined)
     })
 
     Cypress.on('clear:cookie', (name: string) => {
-      documentCookieValue = clearCookie(documentCookieValue, name)
+      cookieJar.removeCookie({ name, domain })
     })
 
     Cypress.on('clear:cookies', reset)

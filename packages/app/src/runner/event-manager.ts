@@ -3,8 +3,8 @@ import { EventEmitter } from 'events'
 import type { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 import type MobX from 'mobx'
 import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriverMap } from './event-manager-types'
-
 import type { RunState, CachedTestState, AutomationElementId, FileDetails, ReporterStartInfo, ReporterRunState } from '@packages/types'
+import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
 
 import { logger } from './logger'
 import type { Socket } from '@packages/socket/lib/browser'
@@ -699,20 +699,26 @@ export class EventManager {
     })
 
     // This message comes from the AUT, not the spec bridge.
-    // This is called in the event that cookies are set in a cross origin AUT prior to attaching a spec bridge.
-    Cypress.primaryOriginCommunicator.on('aut:set:cookie', ({ cookie, href }, _origin, source) => {
-      const { superDomain } = Cypress.Location.create(href)
-      const automationCookie = Cypress.Cookies.toughCookieToAutomationCookie(Cypress.Cookies.parse(cookie), superDomain)
-
-      Cypress.automation('set:cookie', automationCookie).then(() => {
-        // It's possible the source has already unloaded before this event has been processed.
-        source?.postMessage({ event: 'cross:origin:aut:set:cookie' }, '*')
-      })
-      .catch(() => {
-      // unlikely there will be errors, but ignore them in any case, since
-      // they're not user-actionable
-      })
-    })
+    // This is called in the event that cookies are set in a cross origin
+    // AUT prior to attaching a spec bridge.
+    Cypress.primaryOriginCommunicator.on(
+      'aut:set:cookie',
+      (
+        { cookie }: { cookie: AutomationCookie },
+        _origin,
+        source,
+      ) => {
+        Cypress.automation('set:cookie', cookie).then(() => {
+          // It's possible the source has already unloaded before this event has
+          // been processed.
+          source?.postMessage({ event: 'cross:origin:aut:set:cookie' }, '*')
+        })
+        .catch((err) => {
+          // unlikely there will be errors, but ignore them in any case, since
+          // they're not user-actionable
+        })
+      },
+    )
 
     // This message comes from the AUT, not the spec bridge.
     // This is called in the event that cookies are retrieved in a cross origin AUT prior to attaching a spec bridge.
