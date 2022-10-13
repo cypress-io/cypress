@@ -179,17 +179,6 @@ fragment SpecsListBanners on Query {
     id
     projectId
     savedState
-    cloudProject {
-      __typename
-      ... on CloudProject {
-        id
-        runs(first: 10) {
-          nodes {
-            id
-          }
-        }
-      }
-    }
   }
 }
 `
