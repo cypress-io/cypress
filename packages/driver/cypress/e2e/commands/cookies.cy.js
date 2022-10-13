@@ -955,35 +955,7 @@ describe('src/cy/commands/cookies', () => {
       })
     })
 
-    it('calls \'clear:cookies\' only with clearableCookies', () => {
-      Cypress.automation
-      .withArgs('get:cookies')
-      .resolves([
-        { name: 'foo' },
-        { name: 'bar' },
-      ])
-      .withArgs('clear:cookies', [
-        { name: 'foo', domain: 'localhost' },
-      ])
-      .resolves({
-        name: 'foo',
-      })
-
-      cy.stub(Cypress.Cookies, 'getClearableCookies')
-      .withArgs([{ name: 'foo' }, { name: 'bar' }])
-      .returns([{ name: 'foo' }])
-
-      cy.clearCookies().should('be.null').then(() => {
-        expect(Cypress.automation).to.be.calledWith(
-          'clear:cookies',
-          [{ name: 'foo', domain: 'localhost' }],
-        )
-      })
-    })
-
     it('calls \'clear:cookies\' with all cookies', () => {
-      Cypress.Cookies.preserveOnce('bar', 'baz')
-
       Cypress.automation
       .withArgs('get:cookies')
       .resolves([
@@ -991,12 +963,6 @@ describe('src/cy/commands/cookies', () => {
         { name: 'bar' },
         { name: 'baz' },
       ])
-      .withArgs('clear:cookies', [
-        { name: 'foo', domain: 'localhost' },
-      ])
-      .resolves({
-        name: 'foo',
-      })
       .withArgs('clear:cookies', [
         { name: 'foo', domain: 'localhost' },
         { name: 'bar', domain: 'localhost' },
@@ -1008,11 +974,6 @@ describe('src/cy/commands/cookies', () => {
 
       cy
       .clearCookies().should('be.null').then(() => {
-        expect(Cypress.automation).to.be.calledWith(
-          'clear:cookies',
-          [{ name: 'foo', domain: 'localhost' }],
-        )
-      }).clearCookies().should('be.null').then(() => {
         expect(Cypress.automation).to.be.calledWith(
           'clear:cookies', [
             { name: 'foo', domain: 'localhost' },
@@ -1258,36 +1219,6 @@ describe('src/cy/commands/cookies', () => {
           expect(c['Note']).to.eq('No cookies were found or removed.')
         })
       })
-    })
-  })
-
-  context('Cypress.Cookies.defaults', () => {
-    it('throws error on use of renamed whitelist option', (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).to.include('`Cypress.Cookies.defaults` `whitelist` option has been renamed to `preserve`. Please rename `whitelist` to `preserve`.')
-
-        done()
-      })
-
-      Cypress.Cookies.defaults({
-        whitelist: 'session_id',
-      })
-    })
-
-    it('logs deprecation warning', () => {
-      cy.stub(Cypress.utils, 'warning')
-
-      Cypress.Cookies.defaults({})
-      expect(Cypress.utils.warning).to.be.calledWith('`Cypress.Cookies.defaults()` has been deprecated and will be removed in a future release. Consider using `cy.session()` instead.\n\nhttps://on.cypress.io/session')
-    })
-  })
-
-  context('Cypress.Cookies.preserveOnce', () => {
-    it('logs deprecation warning', () => {
-      cy.stub(Cypress.utils, 'warning')
-
-      Cypress.Cookies.preserveOnce({})
-      expect(Cypress.utils.warning).to.be.calledWith('`Cypress.Cookies.preserveOnce()` has been deprecated and will be removed in a future release. Consider using `cy.session()` instead.\n\nhttps://on.cypress.io/session')
     })
   })
 })
