@@ -18,6 +18,7 @@ import { transformRequires } from './util/transform-requires'
 import execa from 'execa'
 import { testStaticAssets } from './util/testStaticAssets'
 import performanceTracking from '../../system-tests/lib/performance'
+import verify from '../../cli/lib/tasks/verify'
 
 const globAsync = promisify(glob)
 
@@ -392,7 +393,13 @@ async function testExecutableVersion (buildAppExecutable: string, version: strin
   console.log('testing dist package version')
   console.log(`by calling: ${buildAppExecutable} --version`)
 
-  const result = await execa(buildAppExecutable, ['--version'])
+  const args = ['--version']
+
+  if (verify.needsSandbox()) {
+    args.push('--no-sandbox')
+  }
+
+  const result = await execa(buildAppExecutable, args)
 
   la(result.stdout, 'missing output when getting built version', result)
 
