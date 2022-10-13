@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@graphql-tools/delegate": "8.2.1",
+    "@graphql-tools/wrap": "8.1.1",
     "@urql/core": "2.4.4",
     "dedent": "^0.7.0",
     "express": "4.17.1",
@@ -30,7 +31,6 @@
     "ws": "^8.5.0"
   },
   "devDependencies": {
-    "@graphql-tools/wrap": "8.1.1",
     "@packages/data-context": "0.0.0-development",
     "@packages/root": "0.0.0-development",
     "@packages/types": "0.0.0-development",

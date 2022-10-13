@@ -52,7 +52,6 @@
   },
   "devDependencies": {
     "@babel/types": "7.17.0",
-    "@graphql-tools/batch-execute": "^8.4.6",
     "@packages/config": "0.0.0-development",
     "@packages/errors": "0.0.0-development",
     "@packages/example": "0.0.0-development",
