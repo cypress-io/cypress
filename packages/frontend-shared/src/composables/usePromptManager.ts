@@ -1,11 +1,16 @@
-import { gql, useMutation, useQuery } from '@urql/vue'
-import { UsePromptManager_RefreshProjectDocument, UsePromptManager_SetPromptShownDocument } from '../generated/graphql'
+import { gql, useMutation } from '@urql/vue'
+import { UsePromptManager_SetPreferencesDocument } from '../generated/graphql'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import { isAllowedFeature } from '../utils/isAllowedFeature'
 
 gql`
-mutation UsePromptManager_SetPromptShown($slug: String!) {
-  setPromptShown(slug: $slug)
+mutation UsePromptManager_SetPreferences($value: String!) {
+  setPreferences(type: project, value: $value) {
+    currentProject {
+      id
+      savedState
+    }
+  }
 }
 `
 
@@ -19,16 +24,11 @@ query UsePromptManager_RefreshProject {
 `
 
 export function usePromptManager () {
-  const setPromptShownMutation = useMutation(UsePromptManager_SetPromptShownDocument)
-  const refreshProjectQuery = useQuery({ query: UsePromptManager_RefreshProjectDocument, pause: true })
+  const setPreferencesMutation = useMutation(UsePromptManager_SetPreferencesDocument)
   const loginConnectStore = useLoginConnectStore()
 
   function setPromptShown (slug) {
-    setPromptShownMutation.executeMutation({ slug }).then((result) => {
-      //TODO Can the mutation be modified to cause the responsive values for CurrentProject to update
-      //instead of having to execute this separate query?
-      refreshProjectQuery.executeQuery({ requestPolicy: 'network-only' })
-    })
+    setPreferencesMutation.executeMutation({ value: JSON.stringify({ promptsShown: { [slug]: Date.now() } }) })
   }
 
   const wrappedIsAllowedFeature = (featureName: 'specsListBanner' | 'docsCiPrompt') => {
