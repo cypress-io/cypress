@@ -229,7 +229,7 @@ const defaults = function (state: StateFunc, config, obj) {
 }
 
 export class Log {
-  cy: any
+  createSnapshot: Function
   state: StateFunc
   config: any
   fireChangeEvent: ((log) => (void | undefined))
@@ -237,8 +237,8 @@ export class Log {
 
   private attributes: Record<string, any> = {}
 
-  constructor (cy, state, config, fireChangeEvent, obj) {
-    this.cy = cy
+  constructor (createSnapshot, state, config, fireChangeEvent, obj) {
+    this.createSnapshot = createSnapshot
     this.state = state
     this.config = config
     // only fire the log:state:changed event as fast as every 4ms
@@ -388,7 +388,7 @@ export class Log {
       }
     }
 
-    const snapshot = this.cy.createSnapshot(name, this.get('$el'))
+    const snapshot = this.createSnapshot(name, this.get('$el'))
 
     this.addSnapshot(snapshot, options)
 
@@ -544,7 +544,7 @@ export class Log {
       }
 
       // add note if no snapshot exists on command instruments
-      if ((_this.get('instrument') === 'command') && !_this.get('snapshots')) {
+      if ((_this.get('instrument') === 'command') && _this.get('snapshot') && !_this.get('snapshots')) {
         consoleObj.Snapshot = 'The snapshot is missing. Displaying current state of the DOM.'
       } else {
         delete consoleObj.Snapshot
@@ -576,7 +576,6 @@ class LogManager {
 
     const attrs = log.toJSON()
 
-    console.log('trigger', attrs)
     // only trigger this event if our last stored
     // emitted attrs do not match the current toJSON
     if (!_.isEqual(log._emittedAttrs, attrs)) {
@@ -602,7 +601,7 @@ class LogManager {
     return this.trigger(log, 'command:log:changed')
   }
 
-  createLogFn (cy, state, config) {
+  createLogFn (createSnapshot, state, config) {
     return (options: any = {}) => {
       // if (!this.isInteractive) {
       //   // if (_skipCollectingLogs || !this.isInteractive) {
@@ -613,7 +612,7 @@ class LogManager {
         $errUtils.throwErrByPath('log.invalid_argument', { args: { arg: options } })
       }
 
-      const log = new Log(cy, state, config, this.fireChangeEvent, options)
+      const log = new Log(createSnapshot, state, config, this.fireChangeEvent, options)
 
       log.set(options)
 
@@ -666,5 +665,5 @@ export function create (Cypress, cy, state, config) {
   counter = 0
   const logManager = new LogManager(Cypress.state('isInteractive'))
 
-  return logManager.createLogFn(cy, state, config)
+  return logManager.createLogFn(cy.createSnapshot, state, config)
 }

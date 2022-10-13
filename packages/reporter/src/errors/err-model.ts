@@ -61,7 +61,6 @@ export default class Err {
   }
 
   update (props?: Partial<ErrProps>) {
-    console.log('update', props)
     if (!props) return
 
     if (props.name) this.name = props.name

@@ -332,70 +332,72 @@ describe('runner/cypress sessions.ui.spec', {
   })
 
   describe('errors', () => {
-    it.only('test error when setup has failing Cypress command', () => {
-      loadSpec({
-        projectName: 'session-and-origin-e2e-specs',
-        filePath: 'session/errors.cy.js',
-        failCount: 1,
-      })
+    describe.only('created session', () => {
+      it('has test error when setup has failing Cypress command', () => {
+        loadSpec({
+          projectName: 'session-and-origin-e2e-specs',
+          filePath: 'session/errors.cy.js',
+          failCount: 2,
+        })
 
-      cy.contains('.test', 'setup has failing command').as('setup_failed')
-      // test marked as failed and is expanded
-      cy.get('@setup_failed').should('have.attr', 'data-model-state', 'failed')
-      .children('.collapsible').should('have.class', 'is-open')
-      .within(() => {
+        cy.contains('.test', 'setup has failing command').as('setup_failed')
+        // test marked as failed and is expanded
+        cy.get('@setup_failed').should('have.attr', 'data-model-state', 'failed')
+        .children('.collapsible').should('have.class', 'is-open')
+        .within(() => {
         // session is marked as 'failed' and is expanded
         // setup group is expanded
-        cy.get('.command-name-session').eq(0).should('contain', 'session_1').as('session_command')
-        .children('.command-wrapper').find('.reporter-tag').should('contain', 'failed')
+          cy.get('.command-name-session').eq(0).should('contain', 'session_1').as('session_command')
+          .children('.command-wrapper').find('.reporter-tag').should('contain', 'failed')
 
-        cy.get('@session_command')
-        .children('.command-child-container').should('exist')
-        .within(() => {
-          cy.get('.command-name-session')
-          .should('contain', 'Create new session')
-          .get('.command-child-container').should('exist')
+          cy.get('@session_command')
+          .children('.command-child-container').should('exist')
+          .within(() => {
+            cy.get('.command-name-session')
+            .should('contain', 'Create new session')
+            .get('.command-child-container').should('exist')
+          })
         })
+
+        // has error
+        cy.get('@setup_failed').contains('This error occurred while creating session. Because the session setup failed, we failed the test.')
       })
 
-      // has error
-      cy.get('@setup_failed').contains('This error occurred while creating session. Because the session setup failed, we failed the test.')
-    })
+      describe('failed validation', () => {
+        it('has test error when validate returned false', () => {
+          // test marked as failed
+          // test is expanded
+          // session is marked as 'failed'
+          // validates group is expanded
+        })
 
-    describe('created session failed validation', () => {
-      it('has test error when validate returned false', () => {
-        // test marked as failed
-        // test is expanded
-        // session is marked as 'failed'
-        // validates group is expanded
-      })
+        it('test error when validate resolved false', () => {
+          // test marked as failed
+          // test is expanded
+          // session is marked as 'failed'
+          // validates group is expanded
+        })
 
-      it('test error when validate resolved false', () => {
-        // test marked as failed
-        // test is expanded
-        // session is marked as 'failed'
-        // validates group is expanded
-      })
+        it('test error when validate rejected with false', () => {
+          // test marked as failed
+          // test is expanded
+          // session is marked as 'failed'
+          // validates group is expanded
+        })
 
-      it('test error when validate rejected with false', () => {
-        // test marked as failed
-        // test is expanded
-        // session is marked as 'failed'
-        // validates group is expanded
-      })
+        it('test error when validate threw error', () => {
+          // test marked as failed
+          // test is expanded
+          // session is marked as 'failed'
+          // validates group is expanded
+        })
 
-      it('test error when validate threw error', () => {
-        // test marked as failed
-        // test is expanded
-        // session is marked as 'failed'
-        // validates group is expanded
-      })
-
-      it('test error when validate has failing Cypress command', () => {
-        // test marked as failed
-        // test is expanded
-        // session is marked as 'failed'
-        // validates group is expanded
+        it('test error when validate has failing Cypress command', () => {
+          // test marked as failed
+          // test is expanded
+          // session is marked as 'failed'
+          // validates group is expanded
+        })
       })
     })
 

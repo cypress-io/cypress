@@ -13,7 +13,7 @@ export interface SessionPanelProps {
   model: Record<string, SessionsModel>
 }
 
-const SessionRow = ({ name, isGlobalSession, id, state, status, testId }: SessionsModel) => {
+const SessionRow = ({ name, isGlobalSession, id, status, testId }: SessionsModel) => {
   const printToConsole = (id) => {
     events.emit('show:command', testId, id)
   }
@@ -35,7 +35,7 @@ const SessionRow = ({ name, isGlobalSession, id, state, status, testId }: Sessio
           <Tag
             customClassName='session-status'
             content={status}
-            type={`${state === 'failed' ? 'failed' : 'successful'}-status`}
+            type={`${status === 'failed' ? 'failed' : 'successful'}-status`}
           />
         </span>
       </div>

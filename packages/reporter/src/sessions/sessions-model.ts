@@ -30,6 +30,5 @@ export default class Session extends Instrument {
     const { sessionInfo, state } = props
 
     this.status = sessionInfo?.status || ''
-    this.state = state || ''
   }
 }

@@ -1681,7 +1681,7 @@ export default {
 
   sessions: {
     validate_callback_false: {
-      message: 'Your `cy.session` **validate** callback {{reason}}.',
+      message: 'Your `cy.session` **validate** {{reason}}.',
     },
     experimentNotEnabled ({ experimentalSessionSupport }) {
       if (experimentalSessionSupport) {

@@ -5,10 +5,11 @@ import { $Location } from '../../../cypress/location'
 
 type SessionData = Cypress.Commands.Session.SessionData
 
-const getSessionDetailsForTable = (sessState: SessionData) => {
+const getSessionDetailsByDomain = (sessState: SessionData) => {
   return _.merge(
     _.mapValues(_.groupBy(sessState.cookies, 'domain'), (v) => ({ cookies: v })),
     ..._.map(sessState.localStorage, (v) => ({ [$Location.create(v.origin).hostname]: { localStorage: v } })),
+    ..._.map(sessState.sessionStorage, (v) => ({ [$Location.create(v.origin).hostname]: { sessionStorage: v } })),
   )
 }
 
@@ -97,39 +98,59 @@ const setPostMessageLocalStorage = async (specWindow, originOptions) => {
   })
 }
 
-const getConsoleProps = (sessState: SessionData) => {
-  const sessionDetails = getSessionDetailsForTable(sessState)
+const getConsoleProps = (session: SessionData) => {
+  const sessionDetails = getSessionDetailsByDomain(session)
 
-  const tables = _.flatMap(sessionDetails, (val, domain) => {
-    const cookiesTable = () => {
-      return {
-        name: `🍪 Cookies - ${domain} (${val.cookies.length})`,
-        data: val.cookies,
-      }
+  const groupsByDomain = _.flatMap(sessionDetails, (val, domain) => {
+    // const info = '⚠️ There are no ${cookies, local storage or session} storage associated to this domain.',
+
+    return {
+      name: `${domain} data:`,
+      expand: true,
+      label: false,
+      // items: _.compact([
+      //   // !val.cookies && `There are no cookies associated to ${domain}.`,
+      //   !val.cookies && `🍪 Cookies - (0)`,
+      //   // !val.localStorage && `There are no local storage items associated to ${domain}.`,
+      //   !val.localStorage && `📁 Local Storage - (0)`,
+      //   // !val.sessionStorage && `There are no session storage items associated to ${domain}.`,
+      //   !val.sessionStorage && `📁 Session Storage - (0)`,
+      // ]),
+      // items: []
+      groups: _.compact([
+        val.cookies && {
+          name: `🍪 Cookies - (${val.cookies.length})`,
+          expand: true,
+          items: val.cookies,
+        },
+        val.localStorage && {
+          name: `📁 Local Storage - (${_.keys(val.localStorage.value).length})`,
+          label: true,
+          expand: true,
+          items: val.localStorage.value,
+        },
+        val.sessionStorage && {
+          name: `📁 Session Storage - (${_.keys(val.sessionStorage.value).length})`,
+          expand: true,
+          label: true,
+          items: val.sessionStorage.value,
+        },
+      ]),
     }
-
-    const localStorageTable = () => {
-      return {
-        name: `📁 Storage - ${domain} (${_.keys(val.localStorage.value).length})`,
-        data: _.map(val.localStorage.value, (value, key) => {
-          return {
-            key,
-            value,
-          }
-        }),
-      }
-    }
-
-    return [
-      val.cookies && cookiesTable,
-      val.localStorage && localStorageTable,
-    ]
   })
 
-  return {
-    id: sessState.id,
-    table: _.compact(tables),
+  const props = {
+    id: session.id,
+    ...(!groupsByDomain.length && {
+      Warning: '⚠️ There are no cookies, local storage or session storage associated to this session.',
+    }),
+    ...(groupsByDomain.length && {
+      Domains: `This session capture data from ${Object.keys(sessionDetails).join(', ')}.`,
+    }),
+    groups: _.compact(groupsByDomain),
   }
+
+  return props
 }
 
 const getPostMessageLocalStorage = (specWindow, origins): Promise<any[]> => {
