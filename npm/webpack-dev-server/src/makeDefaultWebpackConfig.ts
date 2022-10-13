@@ -20,6 +20,7 @@ export function makeDefaultWebpackConfig (
     importPath,
   } = config.sourceWebpackModulesResult.htmlWebpackPlugin
   const indexHtmlFile = config.devServerConfig.cypressConfig.indexHtmlFile
+  const isRunMode = config.devServerConfig.cypressConfig.isTextTerminal
   const HtmlWebpackPlugin = _HtmlWebpackPlugin as typeof import('html-webpack-plugin-5')
 
   debug(`Using HtmlWebpackPlugin version ${version} from ${importPath}`)
@@ -31,6 +32,11 @@ export function makeDefaultWebpackConfig (
   } else {
     optimization.noEmitOnErrors = false
   }
+
+  // To prevent files from being tree shaken by webpack, we set optimization.sideEffects: false ensuring that
+  // webpack does not recognize the sideEffects flag in the package.json and thus files are not unintentionally
+  // dropped during testing in production mode.
+  optimization.sideEffects = false
 
   const finalConfig = {
     mode: 'development',
@@ -54,6 +60,13 @@ export function makeDefaultWebpackConfig (
     ],
     devtool: 'inline-source-map',
   } as any
+
+  if (isRunMode) {
+    // Disable file watching when executing tests in `run` mode
+    finalConfig.watchOptions = {
+      ignored: '**/*',
+    }
+  }
 
   if (config.sourceWebpackModulesResult.webpackDevServer.majorVersion === 4) {
     return {

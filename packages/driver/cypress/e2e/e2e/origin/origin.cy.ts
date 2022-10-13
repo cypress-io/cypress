@@ -1,4 +1,4 @@
-describe('cy.origin', () => {
+describe('cy.origin', { browser: '!webkit' }, () => {
   it('passes viewportWidth/Height state to the secondary origin', () => {
     const expectedViewport = [320, 480]
 
@@ -224,7 +224,9 @@ describe('cy.origin', () => {
     describe('errors', () => {
       it('propagates secondary origin errors to the primary that occur within the test', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('variable is not defined')
+          const undefinedMessage = Cypress.isBrowser('webkit') ? 'Can\'t find variable: variable' : 'variable is not defined'
+
+          expect(err.message).to.include(undefinedMessage)
           expect(err.message).to.include(`Variables must either be defined within the \`cy.origin()\` command or passed in using the args option.`)
           expect(err.stack).to.include(`Variables must either be defined within the \`cy.origin()\` command or passed in using the args option.`)
           //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures

@@ -19,7 +19,57 @@
         {
           "id": "r4",
           "title": "test 2",
-          "state": "failed"
+          "state": "failed",
+          "err": {
+            "name": "CommandError",
+            "message": "failed to visit",
+            "stack": "failed to visit\n\ncould not visit http: //localhost:3000"
+          }
+        },
+        {
+          "id": "r44",
+          "title": "failed with retries",
+          "state": "failed",
+          "retries": 1,
+          "currentRetry": 1,
+          "commands": [
+            {
+              "hookId": "r77",
+              "id": "c1",
+              "instrument": "command",
+              "message": "#does_not_exist",
+              "name": "get",
+              "state": "failed",
+              "testId": "r77",
+              "timeout": 4000,
+              "type": "parent",
+              "wallClockStartedAt": "2020-01-01T00:00:00.000Z",
+              "err": {
+                "name": "CommandError",
+                "message": "failed to get",
+                "stack": "failed to get element"
+              }
+            }
+          ],
+          "prevAttempts": [
+            {
+              "hookId": "r77",
+              "id": "c1",
+              "instrument": "command",
+              "message": "#does_not_exist",
+              "name": "get",
+              "state": "failed",
+              "testId": "r77",
+              "timeout": 4000,
+              "type": "parent",
+              "wallClockStartedAt": "2020-01-01T00:00:00.000Z"
+            }
+          ],
+          "err": {
+            "name": "CommandError",
+            "message": "failed to get",
+            "stack": "failed to get element"
+          }
         }
       ],
       "suites": [
@@ -72,6 +122,46 @@
           "id": "r10",
           "title": "test 4",
           "state": "passed"
+        },
+        {
+          "id": "r55",
+          "title": "passed after retry",
+          "state": "passed",
+          "retries": 1,
+          "currentRetry": 1,
+          "commands": [
+            {
+              "hookId": "r88",
+              "id": "c1",
+              "instrument": "command",
+              "message": "#id",
+              "name": "get",
+              "state": "passed",
+              "testId": "r88",
+              "timeout": 4000,
+              "type": "parent",
+              "wallClockStartedAt": "2020-01-01T00:00:00.000Z",
+              "err": {
+                "name": "CommandError",
+                "message": "failed to get",
+                "stack": "failed to get element"
+              }
+            }
+          ],
+          "prevAttempts": [
+            {
+              "hookId": "r88",
+              "id": "c1",
+              "instrument": "command",
+              "message": "#id",
+              "name": "get",
+              "state": "failed",
+              "testId": "r88",
+              "timeout": 4000,
+              "type": "parent",
+              "wallClockStartedAt": "2020-01-01T00:00:00.000Z"
+            }
+          ]
         }
       ]
     }

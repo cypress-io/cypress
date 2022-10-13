@@ -7,6 +7,8 @@ import type { DebouncedFunc } from 'lodash'
 import { useStudioStore } from '../store/studio-store'
 import { getElementDimensions, setOffset } from './dimensions'
 import { getOrCreateHelperDom, getSelectorHighlightStyles, getZIndex, INT32_MAX } from './dom'
+import highlightMounter from './selector-playground/highlight-mounter'
+import Highlight from './selector-playground/Highlight.ce.vue'
 
 // JQuery bundled w/ Cypress
 type $CypressJQuery = any
@@ -22,7 +24,6 @@ export class AutIframe {
     private projectName: string,
     private eventManager: any,
     private $: $CypressJQuery,
-    private highlight: any,
   ) {
     this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
   }
@@ -758,10 +759,10 @@ export class AutIframe {
   private listeners: any[] = []
 
   private _addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showTooltip, onClick }: any) {
-    const { container, shadowRoot, vueContainer } = getOrCreateHelperDom({
+    const { container, vueContainer } = getOrCreateHelperDom({
       body: $body?.get(0) || document.body,
       className: '__cypress-selector-playground',
-      css: this.highlight.css,
+      css: Highlight.styles[0],
     })
 
     const removeContainerClickListeners = () => {
@@ -773,7 +774,6 @@ export class AutIframe {
     }
 
     if (!$el) {
-      this.highlight.unmount(vueContainer)
       removeContainerClickListeners()
       container.remove()
 
@@ -792,11 +792,6 @@ export class AutIframe {
       }
     }
 
-    this.highlight.render(vueContainer, {
-      selector,
-      appendTo: shadowRoot,
-      showTooltip,
-      styles,
-    })
+    highlightMounter.mount(vueContainer, selector, styles)
   }
 }
