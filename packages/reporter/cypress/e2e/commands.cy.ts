@@ -937,7 +937,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
           name: 'validate',
           displayMessage: 'mock session validation',
           state: 'failed',
-          showError: true,
+          isRecovered: true,
           err: _commandErr,
           type: 'parent',
         })

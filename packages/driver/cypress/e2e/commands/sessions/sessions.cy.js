@@ -585,7 +585,7 @@ describe('cy.session', { retries: 0 }, () => {
         })
 
         expect(logs[6].get()).to.deep.contain({
-          showError: true,
+          isRecovered: true,
           group: validateSessionGroup.id,
         })
 
@@ -679,7 +679,7 @@ describe('cy.session', { retries: 0 }, () => {
           })
 
           expect(logs[6].get()).to.deep.contain({
-            showError: true,
+            isRecovered: true,
             group: validateSessionGroup.id,
           })
 

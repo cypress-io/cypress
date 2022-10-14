@@ -138,13 +138,15 @@
   }
 
   .command-info {
+    display: -webkit-box;
+    font-weight: 600;
     margin-left: 0;
     overflow: hidden;
-    width: 100%;
-    font-weight: 600;
+    padding-top: 4px;
+    padding-bottom: 4px;
     -webkit-line-clamp: 50;
     -webkit-box-orient: vertical;
-    display: -webkit-box;
+    width: 100%;
 
     .command-aliases,
     .command-message {
@@ -254,9 +256,9 @@
     color: $err-header-text;
 
     &:not(.command-type-system) {
-      border-left: 2px solid $fail;
+      border-left: $err-border;
       background-color: $err-header-background;
-          
+
       &.command-is-interactive:hover {
         background: rgba($red-400, 0.3);
       }
@@ -277,13 +279,6 @@
         @include nested-command-dashes($err-header-text);
       }
     }
-  }
-
-  .command .runnable-err-wrapper {
-    padding: 0;
-    border: 0;
-    margin: 0;
-    margin-bottom: 5px;
   }
 
   // Custom Styles for Specific Commands
