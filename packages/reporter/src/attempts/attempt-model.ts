@@ -17,7 +17,7 @@ export default class Attempt {
   @observable agents: Agent[] = []
   @observable sessions: Record<string, Session> = {}
   @observable commands: Command[] = []
-  @observable err: Err = undefined
+  @observable err?: Err = undefined
   @observable hooks: Hook[] = []
   // TODO: make this an enum with states: 'QUEUED, ACTIVE, INACTIVE'
   @observable isActive: boolean | null = null
@@ -82,7 +82,7 @@ export default class Attempt {
   }
 
   @computed get error () {
-    const command = this.err.isCommandErr ? this.commandMatchingErr() : undefined
+    const command = this.err?.isCommandErr ? this.commandMatchingErr() : undefined
 
     return {
       err: this.err,
@@ -151,8 +151,13 @@ export default class Attempt {
   }
 
   commandMatchingErr (): Command | undefined {
+    if (!this.err) {
+      return undefined
+    }
+
     return _(this.hooks)
     .map((hook) => {
+      // @ts-ignore
       return hook.commandMatchingErr(this.err)
     })
     .compact()
