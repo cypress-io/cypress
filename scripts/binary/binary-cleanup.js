@@ -47,32 +47,32 @@ const externalDependencies = [
   '@cypress/webpack-batteries-included-preprocessor',
 ]
 
-// async function removeEmptyDirectories (directory) {
-//   // lstat does not follow symlinks (in contrast to stat)
-//   const fileStats = await fs.lstat(directory)
+async function removeEmptyDirectories (directory) {
+  // lstat does not follow symlinks (in contrast to stat)
+  const fileStats = await fs.lstat(directory)
 
-//   if (!fileStats.isDirectory()) {
-//     return
-//   }
+  if (!fileStats.isDirectory()) {
+    return
+  }
 
-//   let fileNames = await fs.readdir(directory)
+  let fileNames = await fs.readdir(directory)
 
-//   if (fileNames.length > 0) {
-//     const recursiveRemovalPromises = fileNames.map(
-//       (fileName) => removeEmptyDirectories(path.join(directory, fileName)),
-//     )
+  if (fileNames.length > 0) {
+    const recursiveRemovalPromises = fileNames.map(
+      (fileName) => removeEmptyDirectories(path.join(directory, fileName)),
+    )
 
-//     await Promise.all(recursiveRemovalPromises)
+    await Promise.all(recursiveRemovalPromises)
 
-//     // re-evaluate fileNames; after deleting subdirectory
-//     // we may have parent directory empty now
-//     fileNames = await fs.readdir(directory)
-//   }
+    // re-evaluate fileNames; after deleting subdirectory
+    // we may have parent directory empty now
+    fileNames = await fs.readdir(directory)
+  }
 
-//   if (fileNames.length === 0) {
-//     await fs.rmdir(directory)
-//   }
-// }
+  if (fileNames.length === 0) {
+    await fs.rmdir(directory)
+  }
+}
 
 const cleanup = async (buildAppDir) => {
   const esbuildResult = await esbuild.build({
@@ -111,42 +111,41 @@ const cleanup = async (buildAppDir) => {
 
   await consolidateDeps({ projectBaseDir: buildAppDir })
   await del([
-    // path.join(buildAppDir, 'node_modules', 'mocha'),
-    path.join(buildAppDir, 'node_modules', '**', 'test'),
-    path.join(buildAppDir, 'node_modules', '**', 'tests'),
-    path.join(buildAppDir, 'node_modules', '**', 'prettier', 'esm'),
-    path.join(buildAppDir, 'node_modules', '**', '@babel', '**', 'esm'),
-    path.join(buildAppDir, 'node_modules', '**', '*js.map'),
-    path.join(buildAppDir, 'node_modules', '**', '*.md'),
-    path.join(buildAppDir, 'node_modules', '**', '*.d.ts'),
-    path.join(buildAppDir, 'node_modules', '**', '*.flow'),
-    path.join(buildAppDir, 'node_modules', '**', 'jimp', 'browser', 'examples'),
-    path.join(buildAppDir, 'node_modules', '**', 'JSV', 'jsdoc-toolkit'),
-    path.join(buildAppDir, 'node_modules', '**', 'JSV', 'docs'),
-    path.join(buildAppDir, 'node_modules', '**', 'fluent-ffmpeg', 'doc'),
-    path.join(buildAppDir, 'node_modules', '**', 'registry-js', 'prebuilds'),
-    path.join(buildAppDir, 'node_modules', '**', 'ramda', 'es'),
-    path.join(buildAppDir, 'node_modules', '**', 'ramda', 'dist'),
-    path.join(buildAppDir, 'node_modules', '**', '*.cc'),
-    path.join(buildAppDir, 'node_modules', '**', '*.o'),
-    // path.join(buildAppDir, 'node_modules', '**', 'jimp', 'browser'),
-    // path.join(buildAppDir, 'node_modules', '**', 'jimp', 'es'),
-    // path.join(buildAppDir, 'node_modules', '**', '@jimp', '**', 'es'),
-    // path.join(buildAppDir, 'node_modules', '**', '@jimp', '**', 'src'),
-    // path.join(buildAppDir, 'node_modules', '**', 'nexus', 'src'),
-    // path.join(buildAppDir, 'node_modules', '**', 'nexus', 'dist-esm'),
-    // path.join(buildAppDir, 'node_modules', '**', 'source-map', 'dist'),
-    // path.join(buildAppDir, 'node_modules', '**', 'source-map-js', 'dist'),
-    // path.join(buildAppDir, 'node_modules', '**', 'yarn.lock'),
-    // path.join(buildAppDir, 'node_modules', '**', 'pako', 'dist'),
-    // path.join(buildAppDir, 'node_modules', '**', 'ajv', 'lib', '*.ts'),
-    // path.join(buildAppDir, 'node_modules', '**', 'ajv', 'dist'),
-    // path.join(buildAppDir, 'node_modules', '**', 'node-forge', 'dist'),
-    // path.join(buildAppDir, 'node_modules', '**', '@graphql-tools', '**', '*.mjs'),
-    // path.join(buildAppDir, 'node_modules', '**', 'graphql', '**', '*.mjs'),
+    path.join(buildAppDir, '**', 'test'),
+    path.join(buildAppDir, '**', 'tests'),
+    path.join(buildAppDir, '**', 'prettier', 'esm'),
+    path.join(buildAppDir, '**', '@babel', '**', 'esm'),
+    path.join(buildAppDir, '**', '*js.map'),
+    path.join(buildAppDir, '**', '*.md'),
+    path.join(buildAppDir, '**', '*.d.ts'),
+    path.join(buildAppDir, '**', '*.flow'),
+    path.join(buildAppDir, '**', 'jimp', 'browser', 'examples'),
+    path.join(buildAppDir, '**', 'JSV', 'jsdoc-toolkit'),
+    path.join(buildAppDir, '**', 'JSV', 'docs'),
+    path.join(buildAppDir, '**', 'fluent-ffmpeg', 'doc'),
+    path.join(buildAppDir, '**', 'registry-js', 'prebuilds'),
+    path.join(buildAppDir, '**', 'ramda', 'es'),
+    path.join(buildAppDir, '**', 'ramda', 'dist'),
+    path.join(buildAppDir, '**', '*.cc'),
+    path.join(buildAppDir, '**', '*.o'),
+    path.join(buildAppDir, '**', 'jimp', 'browser'),
+    path.join(buildAppDir, '**', 'jimp', 'es'),
+    path.join(buildAppDir, '**', '@jimp', '**', 'es'),
+    path.join(buildAppDir, '**', '@jimp', '**', 'src'),
+    path.join(buildAppDir, '**', 'nexus', 'src'),
+    path.join(buildAppDir, '**', 'nexus', 'dist-esm'),
+    path.join(buildAppDir, '**', 'source-map', 'dist'),
+    path.join(buildAppDir, '**', 'source-map-js', 'dist'),
+    path.join(buildAppDir, '**', 'yarn.lock'),
+    path.join(buildAppDir, '**', 'pako', 'dist'),
+    path.join(buildAppDir, '**', 'ajv', 'lib', '*.ts'),
+    path.join(buildAppDir, '**', 'ajv', 'dist'),
+    path.join(buildAppDir, '**', 'node-forge', 'dist'),
+    path.join(buildAppDir, '**', '@graphql-tools', '**', '*.mjs'),
+    path.join(buildAppDir, '**', 'graphql', '**', '*.mjs'),
   ], { force: true })
 
-  // await removeEmptyDirectories(buildAppDir)
+  await removeEmptyDirectories(buildAppDir)
 }
 
 module.exports = {
