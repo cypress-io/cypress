@@ -735,15 +735,18 @@ const createRunAndRecordSpecs = (options = {}) => {
         const tests = _.chain(r[0])
         .uniqBy('id')
         .map((v) => {
-          if (v.originalTitle) {
-            v._titlePath.splice(-1, 1, v.originalTitle)
-          }
-
           return _.pick({
             ...v,
             clientId: v.id,
             config: v._testConfig?.unverifiedTestConfig || null,
-            title: v._titlePath,
+            title: v._titlePath.map((title) => {
+              // sanitize the title which may have been altered by a suite-/test-level
+              // browser skip to ensure the original title is used so the test recorded
+              // to the cloud is correct registered as a pending test
+              const BROWSER_SKIP_TITLE = ' (skipped due to browser)'
+
+              return title.replace(BROWSER_SKIP_TITLE, '')
+            }),
             hookIds: v.hooks.map((hook) => hook.hookId),
           },
           'clientId', 'body', 'title', 'config', 'hookIds')
