@@ -147,4 +147,30 @@ describe('scaffolding component testing', {
       verifyConfigFile(`cypress.config.js`)
     })
   })
+
+  context('lit-vite-unconfigured', () => {
+    it('Scaffolds component testing for lit using vite', () => {
+      startSetupFor('lit-vite-unconfigured')
+
+      // should detect correctly
+      // Screen reader text is "Support is in", but don't want to rely on DOM introduced whitespace so using regex
+      cy.contains('button', /Lit\s+Support is in\s+Alpha\(detected\)/).should('be.visible')
+      cy.contains('button', 'Next Step').click()
+      cy.findByRole('button', { name: 'Continue' }).click()
+      verifyConfigFile(`cypress.config.js`)
+    })
+  })
+
+  context('lit-webpack-unconfigured', () => {
+    it('Scaffolds component testing for lit using webpack', () => {
+      startSetupFor('lit-webpack-unconfigured')
+
+      // should detect correctly
+      // Screen reader text is "Support is in", but don't want to rely on DOM introduced whitespace so using regex
+      cy.contains('button', /Lit\s+Support is in\s+Alpha\(detected\)/).should('be.visible')
+      cy.contains('button', 'Next Step').click()
+      cy.findByRole('button', { name: 'Continue' }).click()
+      verifyConfigFile(`cypress.config.js`)
+    })
+  })
 })

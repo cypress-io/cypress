@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="12.8" height="16" version="1.1" viewBox="0 0 12.8 16" xmlns="http://www.w3.org/2000/svg">
+ <view id="flame" viewBox="0 0 160 200"/>
+ <view id="name" viewBox="240 78 185 122"/>
+ <g stroke-width=".08">
+  <path d="m3.2 9.6 1.6-4.8 7.2 7.2-2.4 4-3.2-3.2h-1.6" fill="#00e8ff"/>
+  <path d="m6.4 12.8v-6.4l3.2-3.2v6.4m-9.6 3.2 3.2 3.2 1.6-3.2-1.6-3.2h-1.6" fill="#283198"/>
+  <path d="m3.2 9.6v-6.4l3.2-3.2v6.4m3.2 9.6v-6.4l3.2-3.2v6.4m-12.8 0v-6.4l3.2 3.2" fill="#324fff"/>
+  <path d="m3.2 16v-6.4l3.2 3.2" fill="#0ff"/>
+ </g>
+</svg>

@@ -164,8 +164,8 @@
       "types": "./svelte/dist/index.d.ts"
     },
     "./lit": {
-      "import": "./lit/dist/cypress-svelte.esm-bundler.js",
-      "require": "./lit/dist/cypress-svelte.cjs.js",
+      "import": "./lit/dist/cypress-lit.esm-bundler.js",
+      "require": "./lit/dist/cypress-lit.cjs.js",
       "types": "./lit/dist/index.d.ts"
     }
   },

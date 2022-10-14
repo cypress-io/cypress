@@ -151,6 +151,15 @@ export const WIZARD_DEPENDENCY_SVELTE = {
   minVersion: '^3.0.0',
 } as const
 
+export const WIZARD_DEPENDENCY_LIT = {
+  type: 'lit',
+  name: 'Lit',
+  package: 'lit',
+  installer: 'lit',
+  description: 'Lit is a simple library for building fast, lightweight web components.',
+  minVersion: '^2.0.0',
+}
+
 export const WIZARD_DEPENDENCIES = [
   WIZARD_DEPENDENCY_WEBPACK,
   WIZARD_DEPENDENCY_TYPESCRIPT,
@@ -169,6 +178,7 @@ export const WIZARD_DEPENDENCIES = [
   WIZARD_DEPENDENCY_ANGULAR_COMMON,
   WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC,
   WIZARD_DEPENDENCY_SVELTE,
+  WIZARD_DEPENDENCY_LIT,
 ] as const
 
 export const WIZARD_BUNDLERS = [

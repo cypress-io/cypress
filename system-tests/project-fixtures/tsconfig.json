@@ -3,6 +3,7 @@
     "rootDir": ".",
     "strict":true,
     "noEmit": true,
+    "experimentalDecorators": true,
     "types": ["cypress"]
   }
 }

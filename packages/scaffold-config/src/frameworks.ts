@@ -280,4 +280,23 @@ export const WIZARD_FRAMEWORKS = [
     supportStatus: 'alpha',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
+  {
+    type: 'lit',
+    configFramework: 'lit',
+    category: 'library',
+    name: 'Lit',
+    detectors: [dependencies.WIZARD_DEPENDENCY_LIT],
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
+    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
+      return Promise.all([
+        getBundlerDependency(bundler, projectPath),
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_LIT, projectPath),
+      ])
+    },
+    codeGenFramework: 'lit',
+    glob: '*.{ts,js}',
+    mountModule: mountModule('cypress/lit'),
+    supportStatus: 'alpha',
+    componentIndexHtml: componentIndexHtmlGenerator(),
+  },
 ] as const
