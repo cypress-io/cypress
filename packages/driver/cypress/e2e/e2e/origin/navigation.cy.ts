@@ -11,7 +11,7 @@ const reifyLogs = (logs) => {
   })
 }
 
-describe('navigation events', () => {
+describe('navigation events', { browser: '!webkit' }, () => {
   let logs: any = []
 
   beforeEach(() => {
@@ -185,7 +185,7 @@ describe('navigation events', () => {
 })
 
 // @ts-ignore / session support is needed for visiting about:blank between tests
-describe('event timing', () => {
+describe('event timing', { browser: '!webkit' }, () => {
   it('does not timeout when receiving a delaying:html event after cy.origin has started, but before the spec bridge is ready', () => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
@@ -206,7 +206,7 @@ describe('event timing', () => {
 })
 
 // @ts-ignore / session support is needed for visiting about:blank between tests
-describe('delayed navigation', { defaultCommandTimeout: 2000 }, () => {
+describe('delayed navigation', { browser: '!webkit' }, { defaultCommandTimeout: 2000 }, () => {
   it('localhost -> localhost', () => {
     cy.visit('/fixtures/auth/delayedNavigate.html')
     cy.get('[data-cy="to-localhost"]').click()
@@ -245,7 +245,7 @@ describe('delayed navigation', { defaultCommandTimeout: 2000 }, () => {
 })
 
 // @ts-ignore / session support is needed for visiting about:blank between tests
-describe('errors', () => {
+describe('errors', { browser: '!webkit' }, () => {
   it('never calls cy.origin', { defaultCommandTimeout: 50 }, (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(`Timed out retrying after 50ms:`)
