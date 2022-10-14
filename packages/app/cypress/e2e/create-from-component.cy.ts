@@ -28,7 +28,7 @@ function validateCreateFromComponentCard (beforeEachFn: () => void, expectedSpec
   it('Lists Vue components in the project', () => {
     cy.get('@ComponentCard').click()
 
-    cy.findByText('2 Matches').should('be.visible')
+    cy.findByText('2 matches').should('be.visible')
 
     cy.findByText('App').should('be.visible')
     cy.findByText('HelloWorld').should('be.visible')
@@ -38,11 +38,11 @@ function validateCreateFromComponentCard (beforeEachFn: () => void, expectedSpec
     cy.get('@ComponentCard').click()
 
     cy.findByText('*.vue').should('be.visible')
-    cy.findByText('2 Matches').should('be.visible')
+    cy.findByText('2 matches').should('be.visible')
     cy.findByLabelText('file-name-input').type('HelloWorld')
 
     cy.findByText('HelloWorld').should('be.visible')
-    cy.findByText('1 of 2 Matches').should('be.visible')
+    cy.findByText('1 of 2 matches').should('be.visible')
     cy.findByText('App').should('not.exist')
   })
 
@@ -105,7 +105,7 @@ describe('Create from component card', () => {
       cy.startAppServer('component')
       cy.visitApp()
 
-      cy.findByText('New Spec').click()
+      cy.findByText('New spec').click()
       cy.findAllByTestId('card').eq(0).as('ComponentCard')
     }, 'src/specs-folder/HelloWorld.cy.js')
   })

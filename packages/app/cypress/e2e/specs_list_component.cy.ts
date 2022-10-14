@@ -14,7 +14,7 @@ describe('App: Spec List (Component)', () => {
     cy.get('[data-cy="spec-pattern-modal"]').should('be.visible')
     cy.get('[data-cy="spec-pattern"]').contains('cypress/component-tests/*.spec.js')
 
-    cy.contains('button', 'Update Spec Pattern').click()
+    cy.contains('button', 'Update spec pattern').click()
     cy.get('[data-cy="choose-editor-modal"]').should('be.visible').within(() => {
       cy.get('[aria-label="Close"]').click()
     })
@@ -31,7 +31,7 @@ describe('App: Spec List (Component)', () => {
     cy.get('[data-selected-spec="false"]').should('contain', 'foo')
   })
 
-  it('opens the "Create a new spec" modal after clicking the "New Specs" button', () => {
+  it('opens the "Create a new spec" modal after clicking the "New specs" button', () => {
     cy.get('[data-cy="standard-modal"]').should('not.exist')
     cy.get('[data-cy="new-spec-button"]').click()
     cy.get('[data-cy="standard-modal"]').get('h2').contains('Enter the path for your new spec')

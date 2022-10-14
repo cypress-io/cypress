@@ -264,7 +264,7 @@ type CloudProjectSpec implements Node {
 union CloudProjectSpecFlakyResult = CloudFeatureNotEnabled | CloudProjectSpecFlakyStatus
 
 type CloudProjectSpecFlakyStatus {
-  """URL linking to the flaky data in the Cypress dashboard for this spec"""
+  """URL linking to the flaky data in the Cypress Dashboard for this spec"""
   dashboardUrl: String
 
   """Number of flaky runs from the considered runs"""
@@ -663,7 +663,7 @@ type CurrentProject implements Node & ProjectLike {
   """Cached preferences for this project"""
   preferences: ProjectPreferences
 
-  """Used to associate project with Cypress dashboard"""
+  """Used to associate project with Cypress Dashboard"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""
@@ -1010,7 +1010,7 @@ type GlobalProject implements Node & ProjectLike {
   """Relay style Node ID field for the GlobalProject field"""
   id: ID!
 
-  """Used to associate project with Cypress dashboard"""
+  """Used to associate project with Cypress Dashboard"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""
@@ -1436,7 +1436,7 @@ interface ProjectLike {
     name: String!
   ): RemoteFetchableCloudProjectResult
 
-  """Used to associate project with Cypress dashboard"""
+  """Used to associate project with Cypress Dashboard"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""

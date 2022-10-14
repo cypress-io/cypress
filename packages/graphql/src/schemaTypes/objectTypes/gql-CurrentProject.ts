@@ -77,7 +77,7 @@ export const CurrentProject = objectType({
     })
 
     t.string('projectId', {
-      description: 'Used to associate project with Cypress dashboard',
+      description: 'Used to associate project with Cypress Dashboard',
       resolve: (source, args, ctx) => ctx.project.projectId(),
     })
 
