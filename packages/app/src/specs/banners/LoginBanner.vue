@@ -1,7 +1,6 @@
 <template>
   <TrackedBanner
     :banner-id="bannerId"
-    :model-value="modelValue"
     data-cy="login-banner"
     status="info"
     :title="t('specPage.banners.login.title')"
@@ -14,7 +13,6 @@
       medium: 'Specs Login Banner',
       cohort: cohortOption.cohort
     }"
-    @update:model-value="value => emit('update:modelValue', value)"
   >
     <p class="mb-24px">
       {{ cohortOption.value }}
@@ -57,13 +55,8 @@ query LoginBanner {
 `
 
 defineProps<{
-  modelValue: boolean
   hasBannerBeenShown: boolean
   cohortOption: CohortOption
-}>()
-
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void
 }>()
 
 const { t } = useI18n()

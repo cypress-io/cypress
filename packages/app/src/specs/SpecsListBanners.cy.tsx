@@ -14,7 +14,7 @@ const AlertCloseBtnSelector = 'alert-suffix-icon'
 type BannerKey = keyof typeof BannerIds
 type BannerId = typeof BannerIds[BannerKey]
 
-describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
+describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 20 }, () => {
   const validateBaseRender = () => {
     it('should render as expected', () => {
       cy.findByTestId(AlertSelector).should('be.visible')
@@ -56,16 +56,6 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
     })
   }
 
-  const stateWithFirstOpenedDaysAgo = (days: number) => {
-    return {
-      firstOpened: Date.now() - interval(`${days} days`),
-      promptsShown: {
-        ci1: 1664382191411,
-        loginModalRecord: 1664382191411,
-      },
-    }
-  }
-
   const mountWithState = (query: Partial<SpecsListBannersFragment>, state?: Partial<AllowedState>, props?: object) => {
     cy.mountFragment(SpecsListBannersFragmentDoc, {
       onResult: (result) => {
@@ -78,19 +68,28 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
 
   const validateSmartNotificationBehaviors = (bannerId: BannerId, bannerTestId: string, gql: Partial<SpecsListBannersFragment>) => {
     it('should not render when using cypress < 4 days', () => {
-      mountWithState(gql, stateWithFirstOpenedDaysAgo(3))
+      const loginConnectStore = useLoginConnectStore()
+
+      loginConnectStore.setCypressFirstOpened(Date.now() - interval('3 days'))
+
+      cy.mountFragment(SpecsListBannersFragmentDoc, {
+        render: (gqlVal) => <SpecsListBanners gql={gqlVal} />,
+      })
 
       cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
     })
 
     it('should not render when previously-dismissed', () => {
-      mountWithState(gql, {
-        ...stateWithFirstOpenedDaysAgo(4),
-        banners: {
-          [bannerId]: {
-            dismissed: Date.now(),
-          },
+      const loginConnectStore = useLoginConnectStore()
+
+      loginConnectStore.setBannersState({
+        [bannerId]: {
+          dismissed: Date.now(),
         },
+      })
+
+      cy.mountFragment(SpecsListBannersFragmentDoc, {
+        render: (gqlVal) => <SpecsListBanners gql={gqlVal} />,
       })
 
       cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
@@ -98,13 +97,20 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
 
     context('banner conditions are met and when cypress use >= 4 days', () => {
       beforeEach(() => {
+        const loginConnectStore = useLoginConnectStore()
+
+        loginConnectStore.setCypressFirstOpened(Date.now() - interval('4 days'))
+
         cy.stubMutationResolver(UseCohorts_DetermineCohortDocument, (defineResult) => {
           return defineResult({ determineCohort: { __typename: 'Cohort', name: 'foo', cohort: 'A' } })
         })
       })
 
       it('should render when not previously-dismissed', () => {
-        mountWithState(gql, stateWithFirstOpenedDaysAgo(4))
+        cy.mountFragment(SpecsListBannersFragmentDoc, {
+          render: (gqlVal) => <SpecsListBanners gql={gqlVal} />,
+        })
+
         const bannerTrueUserConditions = {
           'login-banner': [],
           'create-organization-banner': ['isLoggedIn', 'isOrganizationLoaded'],
@@ -118,7 +124,6 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
           'connect-project-banner': [],
           'record-banner': ['isProjectConnected', 'hasNoRecordedRuns'],
         } as const
-
         const loginConnectStore = useLoginConnectStore()
 
         bannerTrueUserConditions[bannerTestId].forEach((status: keyof LoginConnectState['user']) => {
@@ -133,27 +138,27 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
       })
 
       it('should be preempted by spec not found banner', () => {
-        mountWithState(gql, stateWithFirstOpenedDaysAgo(4), { isSpecNotFound: true })
+        mountWithState(gql, undefined, { isSpecNotFound: true })
         cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
       })
 
       it('should be preempted by offline warning banner', () => {
-        mountWithState(gql, stateWithFirstOpenedDaysAgo(4), { isOffline: true })
+        mountWithState(gql, undefined, { isOffline: true })
         cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
       })
 
       it('should be preempted by fetch error banner', () => {
-        mountWithState(gql, stateWithFirstOpenedDaysAgo(4), { isFetchError: true })
+        mountWithState(gql, undefined, { isFetchError: true })
         cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
       })
 
       it('should be preempted by project not found banner', () => {
-        mountWithState(gql, stateWithFirstOpenedDaysAgo(4), { isProjectNotFound: true })
+        mountWithState(gql, undefined, { isProjectNotFound: true })
         cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
       })
 
       it('should be preempted by request access banner', () => {
-        mountWithState(gql, stateWithFirstOpenedDaysAgo(4), { isProjectUnauthorized: true })
+        mountWithState(gql, undefined, { isProjectUnauthorized: true })
         cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
       })
     })
@@ -164,6 +169,9 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
 
     beforeEach(() => {
       visible.value = true
+      const loginConnectStore = useLoginConnectStore()
+
+      loginConnectStore.setCypressFirstOpened(Date.now() - interval('3 days'))
       cy.mountFragment(SpecsListBannersFragmentDoc, { render: (gql) => <SpecsListBanners gql={gql} isSpecNotFound={visible} /> })
     })
 
@@ -178,6 +186,10 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
 
     beforeEach(() => {
       visible.value = true
+      const loginConnectStore = useLoginConnectStore()
+
+      loginConnectStore.setCypressFirstOpened(Date.now() - interval('3 days'))
+
       cy.mountFragment(SpecsListBannersFragmentDoc, { render: (gql) => <SpecsListBanners gql={gql} isOffline={visible} /> })
     })
 
@@ -194,6 +206,9 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
     beforeEach(() => {
       visible.value = true
       refetchCallback = cy.stub()
+      const loginConnectStore = useLoginConnectStore()
+
+      loginConnectStore.setCypressFirstOpened(Date.now() - interval('3 days'))
 
       cy.mountFragment(SpecsListBannersFragmentDoc, { render: (gql) => <SpecsListBanners gql={gql} onRefetchFailedCloudData={refetchCallback} isFetchError={visible} /> })
     })
@@ -218,6 +233,9 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
     beforeEach(() => {
       visible.value = true
       reconnectCallback = cy.stub()
+      const loginConnectStore = useLoginConnectStore()
+
+      loginConnectStore.setCypressFirstOpened(Date.now() - interval('3 days'))
 
       cy.mountFragment(SpecsListBannersFragmentDoc, { render: (gql) => <SpecsListBanners gql={gql} onReconnectProject={reconnectCallback} isProjectNotFound={visible} /> })
     })
@@ -240,6 +258,9 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
 
     beforeEach(() => {
       visible.value = true
+      const loginConnectStore = useLoginConnectStore()
+
+      loginConnectStore.setCypressFirstOpened(Date.now() - interval('3 days'))
 
       cy.mountFragment(SpecsListBannersFragmentDoc, {
         onResult: (result) => {
@@ -270,6 +291,9 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
 
     beforeEach(() => {
       visible.value = true
+      const loginConnectStore = useLoginConnectStore()
+
+      loginConnectStore.setCypressFirstOpened(Date.now() - interval('3 days'))
 
       cy.mountFragment(SpecsListBannersFragmentDoc, {
         onResult: (result) => {

@@ -110,28 +110,11 @@
     </p>
     <RequestAccessButton :gql="props.gql" />
   </Alert>
-  <RecordBanner
-    v-else-if="showRecordBanner"
-    v-model="showRecordBanner"
-    :has-banner-been-shown="hasRecordBannerBeenShown"
-  />
-  <ConnectProjectBanner
-    v-else-if="showConnectBanner && cohorts.connectProject?.value"
-    v-model="showConnectBanner"
-    :has-banner-been-shown="hasConnectBannerBeenShown"
-    :cohort-option="cohorts.connectProject.value"
-  />
-  <CreateOrganizationBanner
-    v-else-if="showCreateOrganizationBanner && cohorts.organization?.value"
-    v-model="showCreateOrganizationBanner"
-    :has-banner-been-shown="hasCreateOrganizationBannerBeenShown"
-    :cohort-option="cohorts.organization.value"
-  />
-  <LoginBanner
-    v-else-if="showLoginBanner && cohorts.login?.value"
-    v-model="showLoginBanner"
-    :has-banner-been-shown="hasLoginBannerBeenShown"
-    :cohort-option="cohorts.login.value"
+  <component
+    :is="bannerToShow"
+    v-else-if="isBannerAllowed && bannerToShow"
+    :has-banner-been-shown="hasCurrentBannerBeenShown"
+    :cohort-option="currentBannerCohortOption"
   />
 </template>
 
@@ -146,7 +129,7 @@ import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import RefreshIcon from '~icons/cy/action-restart_x16'
 import { useRoute } from 'vue-router'
-import { computed, ref, watch, watchEffect } from 'vue'
+import { computed, ref, watch } from 'vue'
 import RequestAccessButton from './RequestAccessButton.vue'
 import { gql, useSubscription } from '@urql/vue'
 import { SpecsListBannersFragment, SpecsListBanners_CheckCloudOrgMembershipDocument } from '../generated/graphql'
@@ -159,7 +142,6 @@ import { CohortConfig, useCohorts } from '@packages/frontend-shared/src/composab
 const route = useRoute()
 const { t } = useI18n()
 const loginConnectStore = useLoginConnectStore()
-const { userStatusMatches } = loginConnectStore
 
 gql`
 fragment SpecsListBanners on Query {
@@ -219,15 +201,15 @@ const showOffline = ref(props.isOffline)
 const showFetchError = ref(props.isFetchError)
 const showProjectNotFound = ref(props.isProjectNotFound)
 const showProjectRequestAccess = ref(props.isProjectUnauthorized)
-const showRecordBanner = ref(false)
-const showConnectBanner = ref(false)
-const showCreateOrganizationBanner = ref(false)
-const showLoginBanner = ref(false)
 
-const hasRecordBannerBeenShown = ref(false)
-const hasConnectBannerBeenShown = ref(false)
-const hasCreateOrganizationBannerBeenShown = ref(false)
-const hasLoginBannerBeenShown = ref(false)
+const isBannerAllowed = ref(false)
+
+const bannerIds = {
+  isLoggedOut: BannerIds.ACI_082022_LOGIN,
+  needsOrgConnect: BannerIds.ACI_082022_CREATE_ORG,
+  needsProjectConnect: BannerIds.ACI_082022_CONNECT_PROJECT,
+  needsRecordedRun: BannerIds.ACI_082022_RECORD,
+} as const
 
 watch(
   () => ([props.isSpecNotFound, props.isOffline, props.isFetchError, props.isProjectNotFound, props.isProjectUnauthorized]),
@@ -241,26 +223,28 @@ watch(
 )
 
 const cloudData = computed(() => ([props.gql.cloudViewer, props.gql.cachedUser, props.gql.currentProject] as const))
+const bannerToShow = computed(() => {
+  const componentsByStatus = {
+    isLoggedOut: LoginBanner,
+    needsOrgConnect: CreateOrganizationBanner,
+    needsProjectConnect: ConnectProjectBanner,
+    needsRecordedRun: RecordBanner,
+  }
+
+  return componentsByStatus[loginConnectStore.userStatus] ?? null
+})
+
+const hasCurrentBannerBeenShown = computed(() => {
+  const bannersState = (props.gql.currentProject?.savedState as AllowedState)?.banners
+
+  return !!bannersState?._disabled || !!bannersState?.[bannerIds[loginConnectStore.userStatus]]?.lastShown
+})
 
 const { isAllowedFeature } = usePromptManager()
 
 watch(cloudData, () => {
-  if (isAllowedFeature('specsListBanner')) {
-    showRecordBanner.value = userStatusMatches('needsRecordedRun')
-    showConnectBanner.value = userStatusMatches('needsProjectConnect')
-    showCreateOrganizationBanner.value = userStatusMatches('needsOrgConnect')
-    showLoginBanner.value = userStatusMatches('isLoggedOut')
-
-    hasRecordBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_RECORD)
-    hasConnectBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_CONNECT_PROJECT)
-    hasCreateOrganizationBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_CREATE_ORG)
-    hasLoginBannerBeenShown.value = hasBannerBeenShown(BannerIds.ACI_082022_LOGIN)
-  } else {
-    showRecordBanner.value = false
-    showConnectBanner.value = false
-    showCreateOrganizationBanner.value = false
-    showLoginBanner.value = false
-  }
+  // when cloud data updates, recheck if banner is allowed
+  isBannerAllowed.value = isAllowedFeature('specsListBanner')
 },
 { immediate: true })
 
@@ -290,28 +274,12 @@ const getCohortForBanner = (bannerId: string) => {
   return cohortBuilder.getCohort(cohortConfig)
 }
 
-type BannerType = 'login' | 'connectProject' | 'organization'
-
-const cohorts: Partial<Record<BannerType, ReturnType<typeof getCohortForBanner>>> = {}
-
-watchEffect(() => {
-  if (!cohorts.login && showLoginBanner.value) {
-    cohorts.login = getCohortForBanner(BannerIds.ACI_082022_LOGIN)
+const currentBannerCohortOption = computed(() => {
+  if (!bannerCohortOptions[bannerIds[loginConnectStore.userStatus]]) {
+    return null
   }
 
-  if (!cohorts.organization && showCreateOrganizationBanner.value) {
-    cohorts.organization = getCohortForBanner(BannerIds.ACI_082022_CREATE_ORG)
-  }
-
-  if (!cohorts.connectProject && showConnectBanner.value) {
-    cohorts.connectProject = getCohortForBanner(BannerIds.ACI_082022_CONNECT_PROJECT)
-  }
+  return getCohortForBanner(bannerIds[loginConnectStore.userStatus])
 })
-
-function hasBannerBeenShown (bannerId: string) {
-  const bannersState = (props.gql.currentProject?.savedState as AllowedState)?.banners
-
-  return !!bannersState?._disabled || !!bannersState?.[bannerId]?.lastShown
-}
 
 </script>

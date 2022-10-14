@@ -1,7 +1,6 @@
 <template>
   <TrackedBanner
     :banner-id="bannerId"
-    :model-value="modelValue"
     data-cy="create-organization-banner"
     status="info"
     :title="cohortOption.value"
@@ -14,7 +13,6 @@
       medium: 'Specs Create Organization Banner',
       cohort: cohortOption.cohort
     }"
-    @update:model-value="value => emit('update:modelValue', value)"
   >
     <p class="mb-24px">
       {{ t('specPage.banners.createOrganization.content') }}
@@ -54,13 +52,8 @@ query CreateOrganizationBanner {
 `
 
 const props = defineProps<{
-  modelValue: boolean
   hasBannerBeenShown: boolean
   cohortOption: CohortOption
-}>()
-
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void
 }>()
 
 const { t } = useI18n()

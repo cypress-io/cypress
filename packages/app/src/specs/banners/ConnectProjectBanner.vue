@@ -1,7 +1,6 @@
 <template>
   <TrackedBanner
     :banner-id="bannerId"
-    :model-value="modelValue"
     data-cy="connect-project-banner"
     status="info"
     :title="t('specPage.banners.connectProject.title')"
@@ -14,7 +13,6 @@
       medium: 'Specs Create Project Banner',
       cohort: cohortOption.cohort
     }"
-    @update:model-value="value => emit('update:modelValue', value)"
   >
     <p class="mb-24px">
       {{ cohortOption.value }}
@@ -59,7 +57,6 @@ query ConnectProjectBanner {
 `
 
 defineProps<{
-  modelValue: boolean
   hasBannerBeenShown: boolean
   cohortOption: CohortOption
 }>()
