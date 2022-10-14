@@ -112,7 +112,7 @@ const cleanup = async (buildAppDir) => {
   await consolidateDeps({ projectBaseDir: buildAppDir })
   await del([
     // path.join(buildAppDir, 'node_modules', 'mocha'),
-    // path.join(buildAppDir, 'node_modules', '**', 'test'),
+    path.join(buildAppDir, 'node_modules', '**', 'test'),
     // path.join(buildAppDir, 'node_modules', '**', 'tests'),
     // path.join(buildAppDir, 'node_modules', '**', 'prettier', 'esm'),
     // path.join(buildAppDir, 'node_modules', '**', '@babel', '**', 'esm'),
