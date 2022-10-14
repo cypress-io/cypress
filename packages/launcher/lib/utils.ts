@@ -2,6 +2,10 @@ import execa from 'execa'
 import cp from 'child_process'
 import Bluebird from 'bluebird'
 
+const cdpPathPrefix = 'cdp:'
+// expecting `cdp:http://<host>:<port>`
+const cdpPathRegex = /^cdp\:http\:\/\/([^:]):(\d+)$/
+
 // export an object for easy method stubbing
 export const utils = {
   execa,
@@ -41,5 +45,16 @@ export const utils = {
         reject(err)
       })
     })
+  },
+  isCDPPath: (path: string) => path.startsWith(cdpPathPrefix),
+  parseCDPPath: (path: string): { host: string, port: number } => {
+    const parts = cdpPathRegex.exec(path)
+
+    if (!parts) throw new Error('Invalid cdp path. Must match form "cdp:http://<host>:<port>"')
+
+    return {
+      host: parts[1],
+      port: parseInt(parts[2]),
+    }
   },
 }

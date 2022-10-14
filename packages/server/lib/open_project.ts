@@ -15,7 +15,7 @@ import { getSpecUrl } from './project_utils'
 import type { BrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions, OpenProjectLaunchOpts, FoundBrowser } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
-import type { BrowserInstance } from './browsers/types'
+import type { Browser, BrowserInstance } from './browsers/types'
 
 const debug = Debug('cypress:server:open_project')
 
@@ -55,13 +55,13 @@ export class OpenProject {
     return this.projectBase
   }
 
-  async launch (browser, spec: Cypress.Cypress['spec'], prevOptions?: OpenProjectLaunchOpts) {
+  async launch (browser: Browser, spec: Cypress.Cypress['spec'], openProjectLaunchOptions?: OpenProjectLaunchOpts) {
     this._ctx = getCtx()
 
     assert(this.projectBase, 'Cannot launch runner if projectBase is undefined!')
 
     debug('resetting project state, preparing to launch browser %s for spec %o options %o',
-      browser.name, spec, prevOptions)
+      browser.name, spec, openProjectLaunchOptions)
 
     la(_.isPlainObject(browser), 'expected browser object:', browser)
 
@@ -96,7 +96,7 @@ export class OpenProject {
       experimentalModifyObstructiveThirdPartyCode: cfg.experimentalModifyObstructiveThirdPartyCode,
       experimentalSessionAndOrigin: cfg.experimentalSessionAndOrigin,
       experimentalWebKitSupport: cfg.experimentalWebKitSupport,
-      ...prevOptions || {},
+      ...openProjectLaunchOptions || {},
     }
 
     // if we don't have the isHeaded property

@@ -1,5 +1,4 @@
 import type { FoundBrowser, BrowserLaunchOpts, BrowserNewTabOpts } from '@packages/types'
-import type { EventEmitter } from 'events'
 import type { Automation } from '../automation'
 
 export type Browser = FoundBrowser & {
@@ -8,13 +7,15 @@ export type Browser = FoundBrowser & {
   isHeaded: boolean
 }
 
-export type BrowserInstance = EventEmitter & {
+// export type BrowserInstance = EventEmitter & {
+export type BrowserInstance = {
   kill: () => void
   /**
    * Used in Electron to keep a list of what pids are spawned by the browser, to keep them separate from the launchpad/server pids.
    * In all other browsers, the process tree of `BrowserInstance.pid` can be used instead of `allPids`.
    */
   allPids?: number[]
+  // TODO optional?
   pid: number
   /**
    * After `.open`, this is set to the `Browser` used to launch this instance.

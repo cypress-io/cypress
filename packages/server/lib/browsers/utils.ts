@@ -272,12 +272,12 @@ const getBrowsers = async () => {
 }
 
 const isValidPathToBrowser = (str) => {
-  return path.basename(str) !== str
+  return !launcher.isCDPPath(str) && path.basename(str) !== str
 }
 
 const parseBrowserOption = (opt) => {
   // it's a name or a path
-  if (!_.isString(opt) || !opt.includes(':')) {
+  if (!_.isString(opt) || launcher.isCDPPath(opt) || !opt.includes(':')) {
     return {
       name: opt,
       channel: 'stable',

@@ -7,7 +7,7 @@ import os from 'os'
 import path from 'path'
 import extension from '@packages/extension'
 import mime from 'mime'
-import { launch } from '@packages/launcher'
+import { isCDPPath, launch, parseCDPPath } from '@packages/launcher'
 import type { Protocol } from 'devtools-protocol'
 
 import appData from '../util/app_data'
@@ -20,6 +20,7 @@ import { BrowserCriClient } from './browser-cri-client'
 import type { CriClient } from './cri-client'
 import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
+import type { LaunchedBrowser } from '@packages/launcher/lib/browsers'
 
 const debug = debugModule('cypress:server:browsers:chrome')
 
@@ -621,67 +622,82 @@ export = {
   },
 
   async open (browser: Browser, url, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
-    const { isTextTerminal } = options
+    let host: string
+    let port: number
+    let launchedBrowser: LaunchedBrowser | null = null
 
-    const userDir = utils.getProfileDir(browser, isTextTerminal)
+    // TODO need to check this in other browsers and throw
+    if (isCDPPath(browser.path)) {
+      const parsed = parseCDPPath(browser.path)
 
-    const [port, preferences] = await Bluebird.all([
-      protocol.getRemoteDebuggingPort(),
-      _getChromePreferences(userDir),
-    ])
+      host = parsed.host
+      port = parsed.port
+    } else {
+      const { isTextTerminal } = options
 
-    const defaultArgs = this._getArgs(browser, options, port)
+      const userDir = utils.getProfileDir(browser, isTextTerminal)
 
-    const defaultLaunchOptions = utils.getDefaultLaunchOptions({
-      preferences,
-      args: defaultArgs,
-    })
+      const [_port, preferences] = await Bluebird.all([
+        protocol.getRemoteDebuggingPort(),
+        _getChromePreferences(userDir),
+      ])
 
-    const [cacheDir, launchOptions] = await Bluebird.all([
+      host = '127.0.0.1'
+      port = _port
+
+      const defaultArgs = this._getArgs(browser, options, `${port}`)
+
+      const defaultLaunchOptions = utils.getDefaultLaunchOptions({
+        preferences,
+        args: defaultArgs,
+      })
+
+      const [cacheDir, launchOptions] = await Bluebird.all([
       // ensure that we have a clean cache dir
       // before launching the browser every time
-      utils.ensureCleanCache(browser, isTextTerminal),
-      utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options),
-    ])
+        utils.ensureCleanCache(browser, isTextTerminal),
+        utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options),
+      ])
 
-    if (launchOptions.preferences) {
-      launchOptions.preferences = _mergeChromePreferences(preferences, launchOptions.preferences as ChromePreferences)
+      if (launchOptions.preferences) {
+        launchOptions.preferences = _mergeChromePreferences(preferences, launchOptions.preferences as ChromePreferences)
+      }
+
+      const [extDest] = await Bluebird.all([
+        this._writeExtension(
+          browser,
+          options,
+        ),
+        _removeRootExtension(),
+        _disableRestorePagesPrompt(userDir),
+        _writeChromePreferences(userDir, preferences, launchOptions.preferences as ChromePreferences),
+      ])
+      // normalize the --load-extensions argument by
+      // massaging what the user passed into our own
+      const args = _normalizeArgExtensions(extDest, launchOptions.args, launchOptions.extensions, browser)
+
+      // this overrides any previous user-data-dir args
+      // by being the last one
+      args.push(`--user-data-dir=${userDir}`)
+      args.push(`--disk-cache-dir=${cacheDir}`)
+
+      debug('launching in chrome with debugging port', { url, args, port })
+
+      // FIRST load the blank page
+      // first allows us to connect the remote interface,
+      // start video recording and then
+      // we will load the actual page
+      launchedBrowser = await launch(browser, 'about:blank', port, args, launchOptions.env)
+
+      la(launchedBrowser, 'did not get launched browser instance')
     }
-
-    const [extDest] = await Bluebird.all([
-      this._writeExtension(
-        browser,
-        options,
-      ),
-      _removeRootExtension(),
-      _disableRestorePagesPrompt(userDir),
-      _writeChromePreferences(userDir, preferences, launchOptions.preferences as ChromePreferences),
-    ])
-    // normalize the --load-extensions argument by
-    // massaging what the user passed into our own
-    const args = _normalizeArgExtensions(extDest, launchOptions.args, launchOptions.extensions, browser)
-
-    // this overrides any previous user-data-dir args
-    // by being the last one
-    args.push(`--user-data-dir=${userDir}`)
-    args.push(`--disk-cache-dir=${cacheDir}`)
-
-    debug('launching in chrome with debugging port', { url, args, port })
-
-    // FIRST load the blank page
-    // first allows us to connect the remote interface,
-    // start video recording and then
-    // we will load the actual page
-    const launchedBrowser = await launch(browser, 'about:blank', port, args, launchOptions.env) as unknown as BrowserInstance & { browserCriClient: BrowserCriClient}
-
-    la(launchedBrowser, 'did not get launched browser instance')
 
     // SECOND connect to the Chrome remote interface
     // and when the connection is ready
     // navigate to the actual url
     if (!options.onError) throw new Error('Missing onError in chrome#open')
 
-    browserCriClient = await BrowserCriClient.create(['127.0.0.1'], port, browser.displayName, options.onError, onReconnect)
+    browserCriClient = await BrowserCriClient.create([host], port, browser.displayName, options.onError, onReconnect)
 
     la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)
 
@@ -694,21 +710,22 @@ export = {
       throw new Error(`Cypress requires at least Chrome 64.\n\nDetails:\n${err.message}`)
     }
 
-    // monkey-patch the .kill method to that the CDP connection is closed
-    const originalBrowserKill = launchedBrowser.kill
+    const browserInstance: BrowserInstance & { browserCriClient: BrowserCriClient} = {
+      kill: (...args) => {
+        debug('closing remote interface client')
 
-    launchedBrowser.browserCriClient = browserCriClient
+        // Do nothing on failure here since we're shutting down anyway
+        browserCriClient?.close().catch()
+        browserCriClient = undefined
 
-    launchedBrowser.kill = (...args) => {
-      debug('closing remote interface client')
-
-      // Do nothing on failure here since we're shutting down anyway
-      browserCriClient?.close().catch()
-      browserCriClient = undefined
-
-      debug('closing chrome')
-
-      originalBrowserKill.apply(launchedBrowser, args)
+        if (launchedBrowser) {
+          debug('closing chrome')
+          launchedBrowser.kill(...args)
+        }
+      },
+      // TODO -1 is hack
+      pid: launchedBrowser ? launchedBrowser.pid : -1,
+      browserCriClient,
     }
 
     const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
@@ -717,6 +734,6 @@ export = {
 
     // return the launched browser process
     // with additional method to close the remote connection
-    return launchedBrowser
+    return browserInstance
   },
 }

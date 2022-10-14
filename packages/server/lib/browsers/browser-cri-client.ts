@@ -129,6 +129,26 @@ export class BrowserCriClient {
   }
 
   /**
+   * Creates a new target that is navigated to "about:blank"
+   *
+   * @returns the chrome remote interface wrapper for the target
+   */
+  createTarget = async (): Promise<CriClient> => {
+    // Continue trying to re-attach until successful.
+    // If the browser opens slowly, this will fail until
+    // The browser and automation API is ready, so we try a few
+    // times until eventually timing out.
+    return retryWithIncreasingDelay(async () => {
+      debug('Creating target')
+      const { targetId } = await this.browserClient.send('Target.createTarget', { url: 'about:blank' })
+
+      this.currentlyAttachedTarget = await create(targetId, this.onAsynchronousError, this.host, this.port)
+
+      return this.currentlyAttachedTarget
+    }, this.browserName, this.port)
+  }
+
+  /**
    * Attaches to a target with the given url
    *
    * @param url the url to attach to

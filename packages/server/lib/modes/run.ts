@@ -691,12 +691,16 @@ function screenshotMetadata (data, resp) {
   }
 }
 
-async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, headed: boolean, outputPath: string, specs: SpecWithRelativeRoot[], specPattern: string | RegExp | string[], beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean, group?: string, tag?: string, testingType: TestingType, quiet: boolean, project: Project, onError: (err: Error) => void, exit: boolean, socketId: string, webSecurity: boolean, projectRoot: string } & Pick<Cfg, 'video' | 'videoCompression' | 'videosFolder' | 'videoUploadOnPasses'>) {
+async function runSpecs (options: { config: Cfg, browser: FoundBrowser, sys: any, headed: boolean, outputPath: string, specs: SpecWithRelativeRoot[], specPattern: string | RegExp | string[], beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean, group?: string, tag?: string, testingType: TestingType, quiet: boolean, project: Project, onError: (err: Error) => void, exit: boolean, socketId: string, webSecurity: boolean, projectRoot: string } & Pick<Cfg, 'video' | 'videoCompression' | 'videosFolder' | 'videoUploadOnPasses'>) {
   if (globalThis.CY_TEST_MOCK?.runSpecs) return globalThis.CY_TEST_MOCK.runSpecs
 
-  const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag, testingType } = options
+  const { config, browser: _browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag, testingType } = options
 
   const isHeadless = !headed
+
+  // TODO: refactor this so that augmenting the browser object here is not needed and there is no type conflict
+  // @ts-expect-error we augment browser with isHeadless and isHeaded, which is "missing" from `FoundBrowser`
+  const browser: Browser = _browser
 
   browser.isHeadless = isHeadless
   browser.isHeaded = !isHeadless
@@ -933,7 +937,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
 
   debug('project created and opened with config %o', config)
 
-  // if we have a project id and a key but record hasnt been given
+  // if we have a project id and a key but record hasn't been given
   recordMode.warnIfProjectIdButNoRecordOption(projectId, options)
   recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group, tag)
 
@@ -956,6 +960,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
     (async () => {
       const browser = await browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers)
 
+      // TODO don't do it cdp:
       await removeOldProfiles(browser)
 
       return browser
@@ -974,6 +979,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
     errors.throwErr('UNSUPPORTED_BROWSER_VERSION', browser.warning)
   }
 
+  // TODO maybe not issue with cdp
   if (browser.family === 'chromium') {
     chromePolicyCheck.run(onWarning)
   }
@@ -986,8 +992,6 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
       socketId,
       parallel,
       onError,
-      // TODO: refactor this so that augmenting the browser object here is not needed and there is no type conflict
-      // @ts-expect-error runSpecs augments browser with isHeadless and isHeaded, which is "missing" from the type here
       browser,
       project,
       runUrl,

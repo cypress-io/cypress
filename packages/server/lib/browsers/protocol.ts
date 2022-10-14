@@ -32,7 +32,7 @@ export function _connectAsync (opts) {
   })
 }
 
-export async function getRemoteDebuggingPort () {
+export async function getRemoteDebuggingPort (): Promise<number> {
   const port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT) || await utils.getPort()
 
   return port

@@ -2,6 +2,7 @@ import Debug from 'debug'
 import * as cp from 'child_process'
 import type { Browser, BrowserValidatorResult, FoundBrowser } from '@packages/types'
 import type { Readable } from 'stream'
+import { utils } from './utils'
 
 export const debug = Debug('cypress:launcher:browsers')
 
@@ -166,11 +167,15 @@ export function launch (
   debuggingPort: number,
   args: string[] = [],
   browserEnv = {},
-) {
+): LaunchedBrowser {
   debug('launching browser %o', { browser, url })
 
   if (!browser.path) {
     throw new Error(`Browser ${browser.name} is missing path`)
+  }
+
+  if (utils.isCDPPath(browser.path)) {
+    throw new Error(`Browser ${browser.name} has a CDP path so cannot be launched locally`)
   }
 
   if (url) {
