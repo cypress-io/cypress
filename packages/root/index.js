@@ -1,1 +1,1 @@
-module.exports = require('../../package.json')
+module.exports = require(require.resolve('../../package.json'))
