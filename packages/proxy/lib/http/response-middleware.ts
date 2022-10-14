@@ -379,7 +379,6 @@ const setSimulatedCookies = (ctx) => {
   .getCookies(ctx.req.proxiedUrl)
   .map((cookie) => toughCookieToAutomationCookie(cookie, defaultDomain))
 
-  // TODO: handle case where it's an xhr or something
   if (ctx.res.wantsInjection === 'fullCrossOrigin') {
     ctx.simulatedCookies = allCookiesForRequest
   }
@@ -464,13 +463,17 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
     return this.next()
   }
 
+  // we want to set the cookies via automation so they exist in the browser
+  // itself. however, firefox will hang if we try to use the extension
+  // to set cookies on a url that's in-flight, so we send the cookies down to
+  // the driver, let the response go, and set the cookies via automation
+  // from the driver once the page has loaded but before we run any further
+  // commands
   this.serverBus.once('cross:origin:cookies:received', () => {
     this.next()
   })
 
-  const origin = cors.getOrigin(this.req.proxiedUrl)
-
-  this.serverBus.emit('cross:origin:cookies', { origin, cookies: addedCookies })
+  this.serverBus.emit('cross:origin:cookies', addedCookies)
 }
 
 const REDIRECT_STATUS_CODES: any[] = [301, 302, 303, 307, 308]

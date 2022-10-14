@@ -375,28 +375,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       this.enqueue(attrs)
     })
 
-    Cypress.on('cross:origin:cookies', ({ origin, cookies }: { origin: string, cookies: AutomationCookie[] }) => {
-      // QUESTION: are existing cookies a concern?
-      // const existingCookies: AutomationCookie[] = state('crossOriginCookies') || []
-
-      // state('crossOriginCookies', existingCookies.concat(cookies))
-
-      // TODO: wire this up again
-      // if (Cypress.primaryOriginCommunicator.isConnectedToSpecBridge(origin)) {
-      //   // if spec bridge is already set up, send the cookies to it
-      //   Cypress.primaryOriginCommunicator.once('cross:origin:cookies:received', () => {
-      //     Cypress.backend('cross:origin:cookies:received')
-      //   })
-
-      //   Cypress.primaryOriginCommunicator.toSpecBridge(origin, 'cross:origin:cookies', cookies)
-      // } else {
-      //   // TODO: it's possible the spec bridge doesn't exist but the AUT
-      //   // is on that origin. how do we get the cookies to it?
-
-      //   // otherwise, the spec bridge will be set up later and the cookies
-      //   // will be passed to it via state('crossOriginCookies')
-      // }
-
+    Cypress.on('cross:origin:cookies', (cookies: AutomationCookie[]) => {
       Cypress.backend('cross:origin:cookies:received')
 
       const onBeforeStabilityRelease = (stable: boolean) => {
