@@ -165,6 +165,8 @@ const attachToWindow = (autWindow: Window) => {
 
   const cy = Cypress.cy
 
+  // this communicates to the injection code that Cypress is now available so
+  // it can safely subscribe to Cypress events, etc
   autWindow.postMessage('spec:bridge:attach', '*')
 
   Cypress.state('window', autWindow)
@@ -173,14 +175,6 @@ const attachToWindow = (autWindow: Window) => {
   if (Cypress && Cypress.config('experimentalModifyObstructiveThirdPartyCode')) {
     patchFormElementSubmit(autWindow)
   }
-
-  Cypress.removeAllListeners('app:timers:reset')
-  Cypress.removeAllListeners('app:timers:pause')
-
-  // @ts-expect-error - the injected code adds the cypressTimersReset function to window
-  Cypress.on('app:timers:reset', autWindow.cypressTimersReset)
-  // @ts-ignore - the injected code adds the cypressTimersPause function to window
-  Cypress.on('app:timers:pause', autWindow.cypressTimersPause)
 
   cy.urlNavigationEvent('before:load')
 

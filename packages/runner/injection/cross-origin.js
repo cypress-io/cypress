@@ -66,17 +66,22 @@ window.addEventListener('error', handleErrorEvent)
 // Apply Patches
 const documentCookiePatch = patchDocumentCookie(cypressConfig.simulatedCookies)
 
+const Cypress = findCypress()
+
 // Event listener to echo back the current location of the iframe
 window.addEventListener('message', (event) => {
   if (event.data === 'aut:cypress:location') {
     event.ports[0].postMessage(window.location.href)
   }
 
-  if (event.data === 'spec:bridge:attach') {
+  // if the page loaded before creating a spec bridge for it, we'll get this
+  // event letting us know we can utilize window.Cypress. we can skip this
+  // if we already have access to window.Cypress
+  if (!Cypress && event.data === 'spec:bridge:attach') {
     const Cypress = findCypress()
 
     if (Cypress) {
-      documentCookiePatch.onCypress(Cypress)
+      attachToCypress(Cypress)
     }
   }
 })
@@ -100,13 +105,19 @@ const timers = createTimers()
 
 timers.wrap()
 
-const Cypress = findCypress()
+const attachToCypress = (Cypress) => {
+  documentCookiePatch.onCypress(Cypress)
 
-// Attach these to window so cypress can call them when it attaches.
-window.cypressTimersReset = timers.reset
-window.cypressTimersPause = timers.pause
+  Cypress.removeAllListeners('app:timers:reset')
+  Cypress.removeAllListeners('app:timers:pause')
+
+  Cypress.on('app:timers:reset', timers.reset)
+  Cypress.on('app:timers:pause', timers.pause)
+}
 
 // Check for cy too to prevent a race condition for attaching.
 if (Cypress && Cypress.cy) {
+  attachToCypress(Cypress)
+
   Cypress.action('app:window:before:load', window)
 }
