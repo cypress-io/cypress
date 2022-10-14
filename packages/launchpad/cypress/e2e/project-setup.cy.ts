@@ -581,7 +581,7 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Create React App').click()
       cy.findByText('Next Step').click()
-      cy.get('code').should('contain.text', 'yarn add -D ')
+      cy.findByDisplayValue('yarn add -D react-scripts react-dom react').should('be.visible')
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23153
