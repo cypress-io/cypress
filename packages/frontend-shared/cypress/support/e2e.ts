@@ -188,7 +188,7 @@ after(() => {
 
 function scaffoldProject (projectName: ProjectFixtureDir, options: { timeout?: number } = { timeout: SIXTY_SECONDS }) {
   return logInternal({ name: 'scaffoldProject', message: projectName }, () => {
-    return taskInternal('__internal_scaffoldProject', projectName, options)
+    return taskInternal('__internal_scaffoldProject', projectName, { timeout: options.timeout || 90000 })
   })
 }
 
