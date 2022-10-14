@@ -720,17 +720,6 @@ export class EventManager {
       },
     )
 
-    // This message comes from the AUT, not the spec bridge.
-    // This is called in the event that cookies are retrieved in a cross origin AUT prior to attaching a spec bridge.
-    Cypress.primaryOriginCommunicator.on('aut:get:cookie', async ({ href }, _origin, source) => {
-      const { superDomain } = Cypress.Location.create(href)
-
-      const cookies = await Cypress.automation('get:cookies', { superDomain })
-
-      // It's possible the source has already unloaded before this event has been processed.
-      source?.postMessage({ event: 'cross:origin:aut:get:cookie', cookies }, '*')
-    })
-
     // The window.top should not change between test reloads, and we only need to bind the message event when Cypress is recreated
     // Forward all message events to the current instance of the multi-origin communicator
     if (!window.top) throw new Error('missing window.top in event-manager')

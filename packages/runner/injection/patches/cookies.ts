@@ -26,70 +26,6 @@ const parseDocumentCookieString = (documentCookieString: string): AutomationCook
   })
 }
 
-const getCookiesFromCypress = () => {
-  return new Promise<AutomationCookie[]>((resolve, reject) => {
-    const handler = (event) => {
-      if (event.data?.event === 'cross:origin:aut:get:cookie') {
-        window.removeEventListener('message', handler)
-        resolve(event.data.cookies)
-      }
-    }
-
-    setTimeout(() => {
-      window.removeEventListener('message', handler)
-      reject()
-    }, 1000)
-
-    window.addEventListener('message', handler)
-
-    window.top!.postMessage({ event: 'cross:origin:aut:get:cookie', data: { href: window.location.href } }, '*')
-  })
-}
-
-const pollForAutomationCookieValues = (onCookiesUpdate: (cookies: AutomationCookie[]) => void) => {
-  let paused = false
-
-  // The interval value is arbitrary; it shouldn't be too often, but needs to
-  // be fairly frequent so that the local value is kept as up-to-date as
-  // possible. It's possible there could be a race condition where
-  // document.cookie returns an out-of-date value, but there's not really a
-  // way around that since it's a synchronous API and we can only get the
-  // browser's true cookie values asynchronously.
-  const intervalId = setInterval(async () => {
-    if (paused) return
-
-    try {
-      // If Cypress is defined on the win, that means we have a spec bridge and
-      // we should use that to set cookies. If not we have to delegate to the
-      // primary cypress instance.
-      const cookies = window.Cypress
-        ? await window.Cypress.automation('get:cookies', {
-          domain: window.Cypress.Location.create(window.location.href).domain,
-        })
-        : await getCookiesFromCypress()
-
-      if (!paused) {
-        onCookiesUpdate(cookies)
-      }
-    } catch (err) {
-      // unlikely there will be errors, but ignore them in any case, since
-      // they're not user-actionable
-    }
-  }, 250)
-
-  return {
-    pause () {
-      paused = true
-    },
-    resume () {
-      paused = false
-    },
-    stop () {
-      clearInterval(intervalId)
-    },
-  }
-}
-
 const setAutomationCookieViaCypress = (cookie: AutomationCookie) => {
   return window.Cypress.automation('set:cookie', cookie)
   .catch(() => {
@@ -161,14 +97,7 @@ export const patchDocumentCookie = (originalCookies: AutomationCookie[]) => {
     })
   }
 
-  const replaceCookies = (cookies: AutomationCookie[]) => {
-    cookieJar.removeAllCookies()
-    addCookies(cookies)
-  }
-
   addCookies(existingCookies.concat(originalCookies))
-
-  const polling = pollForAutomationCookieValues(replaceCookies)
 
   Object.defineProperty(window.document, 'cookie', {
     get () {
@@ -181,10 +110,6 @@ export const patchDocumentCookie = (originalCookies: AutomationCookie[]) => {
 
       // if result is undefined, it was invalid and couldn't be parsed
       if (!parsedCookie) return getDocumentCookieValue()
-
-      polling.pause()
-
-      // debugger
 
       // we should be able to pass in parsedCookie here instead of the string
       // value, but tough-cookie doesn't recognize it using an instanceof
@@ -199,32 +124,17 @@ export const patchDocumentCookie = (originalCookies: AutomationCookie[]) => {
       }
 
       setAutomationCookie(toughCookieToAutomationCookie(cookie, domain))
-      .then(() => {
-        polling.resume()
-      })
 
       return getDocumentCookieValue()
     },
   })
-
-  const onUnload = () => {
-    window.removeEventListener('unload', onUnload)
-    polling.stop()
-  }
-
-  window.addEventListener('unload', onUnload)
 
   const reset = () => {
     cookieJar.removeAllCookies()
   }
 
   const bindCypressListeners = (Cypress: Cypress.Cypress) => {
-    Cypress.specBridgeCommunicator.on('cross:origin:cookies', (cookies: AutomationCookie[]) => {
-      addCookies(cookies)
-
-      // TODO: this needs to be wired up in cy.ts
-      // Cypress.specBridgeCommunicator.toPrimary('cross:origin:cookies:received')
-    })
+    Cypress.specBridgeCommunicator.on('cross:origin:cookies', addCookies)
 
     Cypress.on('test:before:run', reset)
 
