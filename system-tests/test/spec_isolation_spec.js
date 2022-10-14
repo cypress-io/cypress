@@ -67,7 +67,9 @@ describe('e2e spec_isolation', () => {
 
       // also mutates into normalized obj ready for snapshot
       expectCorrectModuleApiResult(json, {
-        e2ePath, runs: 2, video: false,
+        e2ePath,
+        runs: 2,
+        video: false,
       })
 
       systemTests.snapshot(json)
