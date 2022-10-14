@@ -1,9 +1,9 @@
 export const handleSocketEvents = (Cypress) => {
-  const onBackendRequest = async (...args) => {
+  const onRequest = async (event, args) => {
     // The last argument is the callback, pop that off before messaging primary and call it with the response.
     const callback = args.pop()
     const response = await Cypress.specBridgeCommunicator.toPrimaryPromise({
-      event: 'backend:request',
+      event,
       data: { args },
       timeout: Cypress.config().defaultCommandTimeout,
     })
@@ -11,18 +11,6 @@ export const handleSocketEvents = (Cypress) => {
     callback(response)
   }
 
-  const onAutomationRequest = async (...args) => {
-    // The last argument is the callback, pop that off before messaging primary and call it with the response.
-    const callback = args.pop()
-    const response = await Cypress.specBridgeCommunicator.toPrimaryPromise({
-      event: 'automation:request',
-      data: { args },
-      timeout: Cypress.config().defaultCommandTimeout,
-    })
-
-    callback(response)
-  }
-
-  Cypress.on('backend:request', onBackendRequest)
-  Cypress.on('automation:request', onAutomationRequest)
+  Cypress.on('backend:request', (...args) => onRequest('backend:request', args))
+  Cypress.on('automation:request', (...args) => onRequest('automation:request', args))
 }

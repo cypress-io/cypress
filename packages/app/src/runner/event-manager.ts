@@ -729,13 +729,21 @@ export class EventManager {
       source?.postMessage({ event: 'cross:origin:aut:get:cookie', cookies }, '*')
     })
 
-    Cypress.primaryOriginCommunicator.on('backend:request', ({ args, specBridgeResponseEvent }, origin, source) => {
+    /**
+     * Call a backend request for the requesting spec bridge since we cannot have websockets in the spec bridges.
+     * Return it's response.
+     */
+    Cypress.primaryOriginCommunicator.on('backend:request', ({ args, specBridgeResponseEvent }, origin) => {
       this.ws.emit('backend:request', ...args, (response) => {
         Cypress.primaryOriginCommunicator.toSpecBridge(origin, specBridgeResponseEvent, response)
       })
     })
 
-    Cypress.primaryOriginCommunicator.on('automation:request', ({ args, specBridgeResponseEvent }, origin, source) => {
+    /**
+     * Call an automation request for the requesting spec bridge since we cannot have websockets in the spec bridges.
+     * Return it's response.
+     */
+    Cypress.primaryOriginCommunicator.on('automation:request', ({ args, specBridgeResponseEvent }, origin) => {
       this.ws.emit('automation:request', ...args, (response) => {
         Cypress.primaryOriginCommunicator.toSpecBridge(origin, specBridgeResponseEvent, response)
       })

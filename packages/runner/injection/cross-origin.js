@@ -89,12 +89,11 @@ const timers = createTimers()
 
 timers.wrap()
 
-const Cypress = findCypress()
-
 // Attach these to window so cypress can call them when it attaches.
 const timersReset = timers.reset
 const timersPause = timers.pause
 
+// Add a function to window for the spec bridge to call after it has attached.
 window.cypressApplyPatchesOnAttach = () => {
   if (!window.Cypress) {
     throw new Error('Failed attempting to apply cypress patches to the AUT when a Cypress instance is not attached to the window.')
@@ -103,20 +102,23 @@ window.cypressApplyPatchesOnAttach = () => {
   // A spec bridge has attached so we don't need to forward errors to top anymore.
   window.removeEventListener('error', handleErrorEvent)
 
-  Cypress.removeAllListeners('app:timers:reset')
-  Cypress.removeAllListeners('app:timers:pause')
+  window.Cypress.removeAllListeners('app:timers:reset')
+  window.Cypress.removeAllListeners('app:timers:pause')
 
-  // @ts-expect-error - the injected code adds the cypressTimersReset function to window
-  Cypress.on('app:timers:reset', timersReset)
-  // @ts-ignore - the injected code adds the cypressTimersPause function to window
-  Cypress.on('app:timers:pause', timersPause)
+  window.Cypress.on('app:timers:reset', timersReset)
+  window.Cypress.on('app:timers:pause', timersPause)
 
-  // place after override incase fetch is polyfilled in the AUT injection
+  // Place after override incase fetch is polyfilled in the AUT injection
   // this can be in the beforeLoad code as we only want to patch fetch/xmlHttpRequest
-  // when the cy.origin block is active to track credential use
-  patchFetch(Cypress, window)
-  patchXmlHttpRequest(Cypress, window)
+  // when the cy.origin block is active to track credential use.
+  // Fetch and xmlHttpRequest are patched in the injection because when made async
+  // in firefox the would throw errors in the window where the code was defined, not
+  // on the window where the code was attached.
+  patchFetch(window.Cypress, window)
+  patchXmlHttpRequest(window.Cypress, window)
 }
+
+const Cypress = findCypress()
 
 // Check for cy too to prevent a race condition for attaching.
 if (Cypress && Cypress.cy) {

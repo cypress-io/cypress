@@ -61,6 +61,9 @@ const createCypress = () => {
 
     const autWindow = findWindow()
 
+    // If Cypress is present on the autWindow, it has already been attached
+    // This commonly happens if the spec bridge was created in a prior to
+    // running this specific instance of the cy.origin command.
     if (autWindow && !autWindow.Cypress) {
       attachToWindow(autWindow)
     }
