@@ -13,6 +13,8 @@
 import { createTimers } from './timers'
 import { patchDocumentCookie } from './patches/cookies'
 import { patchElementIntegrity } from './patches/setAttribute'
+import { patchFetch } from './patches/fetch'
+import { patchXmlHttpRequest } from './patches/xmlHttpRequest'
 
 const findCypress = () => {
   for (let index = 0; index < window.parent.frames.length; index++) {
@@ -50,22 +52,17 @@ window.addEventListener('beforeunload', () => {
 // This error could also be handled by creating and attaching a spec bridge and re-throwing the error.
 // If this approach proves to be an issue we could try the new solution.
 const handleErrorEvent = (event) => {
-  if (window.Cypress) {
-    // A spec bridge has attached so we don't need to forward errors to top anymore.
-    window.removeEventListener('error', handleErrorEvent)
+  const { error } = event
+  const data = { href: window.location.href }
+
+  if (error && error.stack && error.message) {
+    data.message = error.message
+    data.stack = error.stack
   } else {
-    const { error } = event
-    const data = { href: window.location.href }
-
-    if (error && error.stack && error.message) {
-      data.message = error.message
-      data.stack = error.stack
-    } else {
-      data.message = error
-    }
-
-    window.top.postMessage({ event: 'cross:origin:aut:throw:error', data }, '*')
+    data.message = error
   }
+
+  window.top.postMessage({ event: 'cross:origin:aut:throw:error', data }, '*')
 }
 
 window.addEventListener('error', handleErrorEvent)
@@ -95,8 +92,31 @@ timers.wrap()
 const Cypress = findCypress()
 
 // Attach these to window so cypress can call them when it attaches.
-window.cypressTimersReset = timers.reset
-window.cypressTimersPause = timers.pause
+const timersReset = timers.reset
+const timersPause = timers.pause
+
+window.cypressApplyPatchesOnAttach = () => {
+  if (!window.Cypress) {
+    throw new Error('Failed attempting to apply cypress patches to the AUT when a Cypress instance is not attached to the window.')
+  }
+
+  // A spec bridge has attached so we don't need to forward errors to top anymore.
+  window.removeEventListener('error', handleErrorEvent)
+
+  Cypress.removeAllListeners('app:timers:reset')
+  Cypress.removeAllListeners('app:timers:pause')
+
+  // @ts-expect-error - the injected code adds the cypressTimersReset function to window
+  Cypress.on('app:timers:reset', timersReset)
+  // @ts-ignore - the injected code adds the cypressTimersPause function to window
+  Cypress.on('app:timers:pause', timersPause)
+
+  // place after override incase fetch is polyfilled in the AUT injection
+  // this can be in the beforeLoad code as we only want to patch fetch/xmlHttpRequest
+  // when the cy.origin block is active to track credential use
+  patchFetch(Cypress, window)
+  patchXmlHttpRequest(Cypress, window)
+}
 
 // Check for cy too to prevent a race condition for attaching.
 if (Cypress && Cypress.cy) {

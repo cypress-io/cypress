@@ -21,8 +21,8 @@ import { handleTestEvents } from './events/test'
 import { handleMiscEvents } from './events/misc'
 import { handleUnsupportedAPIs } from './unsupported_apis'
 import { patchFormElementSubmit } from './patches/submit'
-import { patchFetch } from './patches/fetch'
-import { patchXmlHttpRequest } from './patches/xmlHttpRequest'
+import { patchFetch } from '@packages/runner/injection/patches/fetch'
+import { patchXmlHttpRequest } from '@packages/runner/injection/patches/xmlHttpRequest'
 import $errUtils from '../cypress/error_utils'
 import $Mocha from '../cypress/mocha'
 
@@ -61,7 +61,7 @@ const createCypress = () => {
 
     const autWindow = findWindow()
 
-    if (autWindow) {
+    if (autWindow && !autWindow.Cypress) {
       attachToWindow(autWindow)
     }
   })
@@ -172,24 +172,16 @@ const attachToWindow = (autWindow: Window) => {
     patchFormElementSubmit(autWindow)
   }
 
-  Cypress.removeAllListeners('app:timers:reset')
-  Cypress.removeAllListeners('app:timers:pause')
-
-  // @ts-expect-error - the injected code adds the cypressTimersReset function to window
-  Cypress.on('app:timers:reset', autWindow.cypressTimersReset)
-  // @ts-ignore - the injected code adds the cypressTimersPause function to window
-  Cypress.on('app:timers:pause', autWindow.cypressTimersPause)
-
   cy.urlNavigationEvent('before:load')
 
   cy.overrides.wrapNativeMethods(autWindow)
 
+  // @ts-expect-error - the injected code adds the cypressApplyPatchesOnAttach function to window
+  autWindow.cypressApplyPatchesOnAttach()
+
   // place after override incase fetch is polyfilled in the AUT injection
   // this can be in the beforeLoad code as we only want to patch fetch/xmlHttpRequest
   // when the cy.origin block is active to track credential use
-  patchFetch(Cypress, autWindow)
-  patchXmlHttpRequest(Cypress, autWindow)
-  // also patch it in the spec bridge as well
   patchFetch(Cypress, window)
   patchXmlHttpRequest(Cypress, window)
 
