@@ -31,13 +31,11 @@ const SessionRow = ({ name, isGlobalSession, id, status, testId }: SessionsModel
           {isGlobalSession && <GlobeIcon className='global-session-icon' />}
           {name}
         </span>
-        <span className='session-tag'>
-          <Tag
-            customClassName='session-status'
-            content={status}
-            type={`${status === 'failed' ? 'failed' : 'successful'}-status`}
-          />
-        </span>
+        <Tag
+          customClassName='session-status'
+          content={status}
+          type={`${status === 'failed' ? 'failed' : 'successful'}-status`}
+        />
       </div>
     </FlashOnClick>
   )

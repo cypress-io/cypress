@@ -37,7 +37,7 @@ const DocsUrl = ({ url }: DocsUrlProps) => {
 }
 
 interface TestErrorProps {
-  model: Attempt | Command
+  model: Command
   onPrintToConsole?: () => void
 }
 
@@ -62,22 +62,33 @@ const TestError = observer((props: TestErrorProps) => {
 
   const { codeFrame } = err
 
+  const groupPlaceholder: Array<JSX.Element> = []
+
+  if (err.showRecoveredError) {
+    // cap the group nesting to 5 levels to keep the log text legible
+    for (let i = 0; i < props.groupLevel; i++) {
+      groupPlaceholder.push(<span key={`${err.name}-err-${i}`} className='err-group-block' />)
+    }
+  }
+
   return (
-    <div className={cs('runnable-err-wrapper', { 'show-recovered-test-err': err.showRecoveredError }, props.customClassName)}>
-      {props.groupsPlaceholder}
-      <div className='runnable-err'>
-        <div className='runnable-err-header'>
-          <div className='runnable-err-name'>
-            <WarningIcon />
-            {err.name}
+    <div className={cs('runnable-err', { 'show-recovered-test-err': err.showRecoveredError }, props.customClassName)}>
+      <div className={cs('runnable-err-header', { 'show-recovered-test-err!!': err.showRecoveredError })}>
+        {groupPlaceholder}
+        <div className={cs('runnable-err-name', { 'show-recovered-test-err!!!!': err.showRecoveredError })}>
+          <WarningIcon />
+          {err.name}
+        </div>
+      </div>
+      <div className={cs('runnable-err-content', { 'show-recovered-test-err!!': err.showRecoveredError })}>
+        {groupPlaceholder}
+        <div>
+          <div className='runnable-err-message'>
+            <span dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }} />
+            <DocsUrl url={err.docsUrl} />
           </div>
-        </div>
-        <div className='runnable-err-message'>
-          <span dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }} />
-          <DocsUrl url={err.docsUrl} />
-        </div>
-        {codeFrame && <ErrorCodeFrame codeFrame={codeFrame} />}
-        {err.stack &&
+          {codeFrame && <ErrorCodeFrame codeFrame={codeFrame} />}
+          {err.stack &&
           <Collapsible
             header='View stack trace'
             headerClass='runnable-err-stack-expander'
@@ -97,7 +108,8 @@ const TestError = observer((props: TestErrorProps) => {
           >
             <ErrorStack err={err} />
           </Collapsible>
-        }
+          }
+        </div>
       </div>
     </div>
   )

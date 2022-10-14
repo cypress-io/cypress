@@ -152,6 +152,8 @@ const events: Events = {
     })
 
     localBus.on('show:error', (test: TestModel) => {
+      console.log(test)
+      // I broken this with uncaught exception errors
       const command = test.err.isCommandErr ? test.commandMatchingErr() : null
 
       runner.emit('runner:console:error', {

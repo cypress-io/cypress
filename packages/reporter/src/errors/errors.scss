@@ -51,14 +51,17 @@ $code-border-radius: 4px;
     }
   }
 
-  .runnable-err-wrapper {
-    cursor: default;
-    margin-top: 2px;
+  .show-recovered-test-err > .runnable-err-header,
+  .show-recovered-test-err > .runnable-err-content {
+    padding-left: 49px;
+    display: flex;
+  }
 
-    &.show-recovered-test-err {
-      margin-left: 49px;
-      // needs to be padding. blowing out of width
-    }
+  .err-group-block {
+    border-left: 1px dotted $err-header-text;
+    border-image-slice: 0 0 0 1;
+    border-image-source: repeating-linear-gradient(0deg, transparent, $err-header-text, $err-header-text 4px);
+    padding-right: 12px;
   }
 
   .studio-err-wrapper {
@@ -67,6 +70,7 @@ $code-border-radius: 4px;
 
   .runnable-err {
     background-color: $err-background;
+    border-left: 2px solid $red-300;
     clear: both;
     color: $err-text;
     font-family: $monospace;
@@ -83,8 +87,8 @@ $code-border-radius: 4px;
     background-color: $err-header-background;
     // display: flex;
     justify-content: space-between;
-    padding: 5px 16px;
     font-weight: bold;
+    padding-left: 16px;
 
     svg {
       color: $red-400;
@@ -93,21 +97,22 @@ $code-border-radius: 4px;
     }
     .runnable-err-name {
       color: $err-header-text;
+      flex: auto;
       font-size: 12px;
       font-weight: 600;
       line-height: 20px;
-      margin-left: 16px;
+      padding: 5px 0;
     }
   }
 
   .runnable-err-docs-url {
     margin-left: 0.5em;
     cursor: pointer;
-    font-family: $font-sans;
+    font-family: $font-system;
   }
 
   .runnable-err-message {
-    font-family: $font-sans;
+    font-family: $font-system;
     font-size: 14px;
     font-weight: 400;
     padding: 10px 10px 10px 16px;
@@ -158,7 +163,7 @@ $code-border-radius: 4px;
       div {
         cursor: pointer;
         outline: none;
-        padding: 14px 10px;
+        padding: 14px 16px;
         width: 100%;
 
         .collapsible-header-text {
@@ -195,7 +200,7 @@ $code-border-radius: 4px;
       div {
         color: $red-300;
         cursor: pointer;
-        font-family: $font-sans;
+        font-family: $font-system;
         font-size: 14px;
         font-weight: 500;
         height: 100%;

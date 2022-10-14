@@ -404,7 +404,7 @@ class Command extends Component<Props> {
           <Progress model={model} />
           {this._children()}
         </li>
-        {model.err && <Err model={model} isGroup={model.hasChildren} />}
+        {model.err?.hasError && <Err model={model} isGroup={model.hasChildren} />}
       </>
     )
   }
@@ -516,19 +516,23 @@ class Err extends Component<Props> {
 
     const groupPlaceholder: Array<JSX.Element> = []
 
-    if (model.groupLevel !== undefined) {
-      // cap the group nesting to 5 levels to keep the log text legible
-      const level = model.groupLevel < 6 ? model.groupLevel : 5
+    console.log(model.groupLevel, 'model.groupLevel')
+    let groupLevel = 0
 
-      for (let i = 1; i < level; i++) {
-        groupPlaceholder.push(<span key={`${model.id}-err-${i}`} className='command-group-block' />)
-      }
+    if (groupLevel !== undefined) {
+      // cap the group nesting to 5 levels to keep the log text legible
+      groupLevel = model.groupLevel < 6 ? model.groupLevel : 5
+
+      // for (let i = 0; i < level; i++) {
+      //   groupPlaceholder.push(<span key={`${model.id}-err-${i}`} className='err-group-block' />)
+      // }
     }
 
     return (
-      <li className={cs('command', 'command-state-failed')}>
-        <TestError model={model.err} groups={groupPlaceholder}/>
-      </li>)
+      <li>
+        <TestError model={model.err} groupLevel={groupLevel}/>
+      </li>
+    )
   }
 }
 

@@ -124,8 +124,9 @@
     margin-left: 25px;
   }
 
-  .command-pin-target.command-group,
-  .runnable-err-wrapper.show-recovered-test-err {
+  .command-pin-target.command-group {
+  // .runnable-err.show-recovered-test-err > .runnable-err-header,
+  // .show-recovered-test-err {
     @include nested-command-dashes($gray-600);
     padding-left: 12px;
     min-height: 28px;
@@ -257,7 +258,7 @@
     color: $err-header-text;
 
     &:not(.command-type-system) {
-      border-left: 2px solid $fail;
+      border-left: 2px solid $red-300;
       background-color: $err-header-background;
 
       &.command-is-interactive:hover {
