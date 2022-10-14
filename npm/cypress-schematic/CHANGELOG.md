@@ -1,3 +1,15 @@
+# [@cypress/schematic-v2.2.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.1.1...@cypress/schematic-v2.2.0) (2022-10-13)
+
+
+### Bug Fixes
+
+* Detect user-configured browsers ([#23446](https://github.com/cypress-io/cypress/issues/23446)) ([a75d3ec](https://github.com/cypress-io/cypress/commit/a75d3ec81f3405db6721a89875d89cdca0109013))
+
+
+### Features
+
+* _addQuery() ([#23665](https://github.com/cypress-io/cypress/issues/23665)) ([41fc535](https://github.com/cypress-io/cypress/commit/41fc535dca51cda4e40b5d9fc827d8bff534f3d1))
+
 # [@cypress/schematic-v2.1.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.0.3...@cypress/schematic-v2.1.0) (2022-10-12)
 
 
