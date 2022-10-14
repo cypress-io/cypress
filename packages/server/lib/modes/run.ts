@@ -165,7 +165,7 @@ const openProjectCreate = (projectRoot, socketId, args) => {
 async function checkAccess (folderPath) {
   return fs.access(folderPath, fs.constants.W_OK).catch((err) => {
     if (['EACCES', 'EPERM', 'EROFS'].includes(err.code)) {
-      // we cannot write due to folder permissions, or read-only fs
+      // we cannot write due to folder permissions, or read-only filesystem
       return errors.warning('FOLDER_NOT_WRITABLE', folderPath)
     }
 
