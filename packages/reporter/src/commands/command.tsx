@@ -259,8 +259,22 @@ interface Props {
   groupId?: number
 }
 
-const CommandDetails = observer(({ model, groupId, events, aliasesWithDuplicates }) => {
-  const commandName = model.name ? nameClassName(model.name) : ''
+const CommandDetails = observer(({ model, groupId, aliasesWithDuplicates }) => (
+  <span className={cs('command-info')}>
+    <span className='command-method'>
+      <span>
+        {model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}
+      </span>
+    </span>
+    {!!groupId && model.type === 'system' && model.state === 'failed' && <StateIcon aria-hidden className="failed-indicator" state={model.state}/>}
+    {model.referencesAlias ?
+      <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
+      : <Message model={model} />
+    }
+  </span>
+))
+
+const CommandControls = observer(({ model, commandName, events }) => {
   const displayNumOfElements = model.state !== 'pending' && model.numElements != null && model.numElements !== 1
   const isSystemEvent = model.type === 'system' && model.event
   const isSessionCommand = commandName === 'session'
@@ -274,61 +288,48 @@ const CommandDetails = observer(({ model, groupId, events, aliasesWithDuplicates
   }
 
   return (
-    <>
-      <span className={cs('command-info')}>
-        <span className='command-method'>
+
+    <span className='command-controls'>
+      {model.type === 'parent' && model.isStudio && (
+        <i
+          className='far fa-times-circle studio-command-remove'
+          onClick={_removeStudioCommand}
+        />
+      )}
+      {isSessionCommand && (
+        <Tag
+          content={model.sessionInfo?.status}
+          type={`${model.sessionInfo?.status === 'failed' ? 'failed' : 'successful'}-status`}
+        />
+      )}
+      {!model.visible && (
+        <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
           <span>
-            {model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}
+            <HiddenIcon className='command-invisible' />
           </span>
-        </span>
-        {!!groupId && model.type === 'system' && model.state === 'failed' && <StateIcon aria-hidden className="failed-indicator" state={model.state}/>}
-        {model.referencesAlias ?
-          <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
-          : <Message model={model} />
-        }
-      </span>
-      <span className='command-controls'>
-        {model.type === 'parent' && model.isStudio && (
-          <i
-            className='far fa-times-circle studio-command-remove'
-            onClick={_removeStudioCommand}
-          />
-        )}
-        {isSessionCommand && (
+        </Tooltip>
+      )}
+      {displayNumOfElements && (
+        <Tag
+          content={model.numElements.toString()}
+          type='count'
+          tooltipMessage={`${model.numElements} matched elements`}
+          customClassName='num-elements'
+        />
+      )}
+      <span className='alias-container'>
+        <Interceptions {...model.renderProps} />
+        <Aliases model={model} />
+        {displayNumOfChildren && (
           <Tag
-            content={model.sessionInfo?.status}
-            type={`${model.sessionInfo?.status === 'failed' ? 'failed' : 'successful'}-status`}
-          />
-        )}
-        {!model.visible && (
-          <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
-            <span>
-              <HiddenIcon className='command-invisible' />
-            </span>
-          </Tooltip>
-        )}
-        {displayNumOfElements && (
-          <Tag
-            content={model.numElements.toString()}
+            content={model.numChildren}
             type='count'
-            tooltipMessage={`${model.numElements} matched elements`}
-            customClassName='num-elements'
+            tooltipMessage={numberOfChildrenMessage(model.numChildren, model.event)}
+            customClassName='num-children'
           />
         )}
-        <span className='alias-container'>
-          <Interceptions {...model.renderProps} />
-          <Aliases model={model} />
-          {displayNumOfChildren && (
-            <Tag
-              content={model.numChildren}
-              type='count'
-              tooltipMessage={numberOfChildrenMessage(model.numChildren, model.event)}
-              customClassName='num-children'
-            />
-          )}
-        </span>
       </span>
-    </>
+    </span>
   )
 })
 
@@ -364,44 +365,47 @@ class Command extends Component<Props> {
       }
     }
 
-    return (<>
-      <li className={cs('command', `command-name-${commandName}`, { 'command-is-studio': model.isStudio })}>
-        <div
-          className={cs(
-            'command-wrapper',
-              `command-state-${model.state}`,
-              `command-type-${model.type}`,
-              {
-                'command-is-event': !!model.event,
-                'command-is-pinned': this._isPinned(),
-                'command-is-interactive': (model.hasConsoleProps || model.hasSnapshot),
-              },
-          )}
-        >
-          <NavColumns model={model} isPinned={this._isPinned()} toggleColumnPin={this._toggleColumnPin} />
-          <FlashOnClick
-            message='Printed output to your console'
-            onClick={this._toggleColumnPin}
-            shouldShowMessage={this._shouldShowClickMessage}
-            wrapperClassName={cs('command-pin-target', { 'command-group': !!this.props.groupId })}
+    return (
+      <>
+        <li className={cs('command', `command-name-${commandName}`, { 'command-is-studio': model.isStudio })}>
+          <div
+            className={cs(
+              'command-wrapper',
+                `command-state-${model.state}`,
+                `command-type-${model.type}`,
+                {
+                  'command-is-event': !!model.event,
+                  'command-is-pinned': this._isPinned(),
+                  'command-is-interactive': (model.hasConsoleProps || model.hasSnapshot),
+                },
+            )}
           >
-            <div
-              className='command-wrapper-text'
-              onMouseEnter={() => this._snapshot(true)}
-              onMouseLeave={() => this._snapshot(false)}
+            <NavColumns model={model} isPinned={this._isPinned()} toggleColumnPin={this._toggleColumnPin} />
+            <FlashOnClick
+              message='Printed output to your console'
+              onClick={this._toggleColumnPin}
+              shouldShowMessage={this._shouldShowClickMessage}
+              wrapperClassName={cs('command-pin-target', { 'command-group': !!this.props.groupId })}
             >
-              {groupPlaceholder}
-              <CommandDetails model={model} groupId={this.props.groupId} events={this.props.events} aliasesWithDuplicates={aliasesWithDuplicates} />
-            </div>
-          </FlashOnClick>
-        </div>
-        <Progress model={model} />
-        {this._children()}
-      </li>
-      {model.err?.isRecovered && (
-        <li><TestError err={model.err} testId={model.testId} commandId={model.id} groupLevel={groupLevel}/></li>
-      )}
-    </>)
+              <div
+                className='command-wrapper-text'
+                onMouseEnter={() => this._snapshot(true)}
+                onMouseLeave={() => this._snapshot(false)}
+              >
+                {groupPlaceholder}
+                <CommandDetails model={model} groupId={this.props.groupId} aliasesWithDuplicates={aliasesWithDuplicates} />
+                <CommandControls model={model} commandName={commandName} events={this.props.events} />
+              </div>
+            </FlashOnClick>
+          </div>
+          <Progress model={model} />
+          {this._children()}
+        </li>
+        {model.err?.isRecovered && (
+          <li><TestError err={model.err} testId={model.testId} commandId={model.id} groupLevel={groupLevel}/></li>
+        )}
+      </>
+    )
   }
 
   _children () {
