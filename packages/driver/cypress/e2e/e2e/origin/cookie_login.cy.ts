@@ -789,7 +789,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
       })
     })
 
-    it('no longer returns cookie after cy.clearCookies()', () => {
+    it('no longer returns cookies after cy.clearCookies()', () => {
       cy.get('[data-cy="cookie-login-land-on-idp"]').click()
       cy.origin('http://www.foobar.com:3500', { args: { username } }, ({ username }) => {
         cy.get('[data-cy="username"]').type(username)
@@ -864,6 +864,24 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
         // ensure that each one is there
         cy.document().its('cookie').should('include', 'key=value1')
         cy.document().its('cookie').should('include', 'key=value2')
+      })
+    })
+
+    // the spec bridge will likely already exist in this spec when running
+    // all the tests together, but this ensures the behavior in case it's run
+    // alone or if we implement spec bridge removal in the future
+    it('works when spec bridge is set up prior to page load', () => {
+      cy.origin('http://www.idp.com:3501', () => {})
+
+      cy.get('[data-cy="cookie-login-land-on-document-cookie"]').click()
+      cy.origin('http://www.foobar.com:3500', { args: { username } }, ({ username }) => {
+        cy.get('[data-cy="username"]').type(username)
+        cy.get('[data-cy="login"]').click()
+      })
+
+      cy.origin('http://www.idp.com:3501', { args: { username } }, ({ username }) => {
+        cy.get('[data-cy="doc-cookie"]').invoke('text')
+        .should('include', `user=${username}`)
       })
     })
   })
