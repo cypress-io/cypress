@@ -90,7 +90,7 @@
     "minimatch": "3.0.4",
     "minimist": "1.2.6",
     "mocha-7.0.1": "npm:mocha@7.0.1",
-    "mocha-junit-reporter": "2.0.0",
+    "mocha-junit-reporter": "2.1.0",
     "mocha-teamcity-reporter": "3.0.0",
     "morgan": "1.9.1",
     "node-machine-id": "1.1.12",
