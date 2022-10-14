@@ -1,4 +1,4 @@
-context('cy.origin unsupported commands', () => {
+context('cy.origin unsupported commands', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()

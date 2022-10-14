@@ -89,6 +89,7 @@ class Attempt extends Component<AttemptProps> {
       >
         <Collapsible
           header={<AttemptHeader index={model.id} state={model.state} />}
+          hideExpander
           headerClass='attempt-name'
           contentClass='attempt-content'
           isOpen={model.isOpen}

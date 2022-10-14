@@ -2352,7 +2352,6 @@ export default {
   webkit: {
     docsUrl: 'https://on.cypress.io/webkit-experiment',
     origin: '`cy.origin()` is not currently supported in experimental WebKit.',
-    session: '`cy.session()` is not currently supported in experimental WebKit.',
   },
 
   window: {

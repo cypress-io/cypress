@@ -1,6 +1,6 @@
 import { findCrossOriginLogs, assertLogLength } from '../../../../support/utils'
 
-describe('cy.origin cookies', () => {
+describe('cy.origin cookies', { browser: '!webkit' }, () => {
   context('client side', () => {
     beforeEach(() => {
       cy.visit('/fixtures/primary-origin.html')

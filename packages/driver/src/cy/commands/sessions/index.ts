@@ -25,10 +25,6 @@ export default function (Commands, Cypress, cy) {
   // @ts-ignore
 
   function throwIfNoSessionSupport () {
-    if (Cypress.isBrowser('webkit')) {
-      $errUtils.throwErrByPath('webkit.session')
-    }
-
     if (!Cypress.config('experimentalSessionAndOrigin')) {
       $errUtils.throwErrByPath('sessions.experimentNotEnabled', {
         args: {

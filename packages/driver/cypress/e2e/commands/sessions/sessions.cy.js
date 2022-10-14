@@ -24,6 +24,27 @@ const clearAllSavedSessions = () => {
   })
 }
 
+// In webkit, the clear page and clear cookies, etc log messages may be reversed. This isn't an issue, but we just want to test we have both messages.
+const validateClearLogs = (logs, sessionGroupId) => {
+  let clearPageLogIndex = 0
+  let clearCookiesIndex = 1
+
+  if (logs[1].get('name') === 'Clear page') {
+    clearPageLogIndex = 1
+    clearCookiesIndex = 0
+  }
+
+  expect(logs[clearPageLogIndex].get()).to.contain({
+    name: 'Clear page',
+    group: sessionGroupId,
+  })
+
+  expect(logs[clearCookiesIndex].get()).to.contain({
+    displayName: 'Clear cookies, localStorage and sessionStorage',
+    group: sessionGroupId,
+  })
+}
+
 describe('cy.session', { retries: 0 }, () => {
   describe('args', () => {
     it('accepts string as id', () => {
@@ -200,15 +221,7 @@ describe('cy.session', { retries: 0 }, () => {
           },
         })
 
-        expect(logs[1].get()).to.contain({
-          name: 'Clear page',
-          group: sessionGroupId,
-        })
-
-        expect(logs[2].get()).to.contain({
-          displayName: 'Clear cookies, localStorage and sessionStorage',
-          group: sessionGroupId,
-        })
+        validateClearLogs([logs[1], logs[2]], sessionGroupId)
 
         const createNewSessionGroup = logs[3].get()
 
@@ -308,15 +321,7 @@ describe('cy.session', { retries: 0 }, () => {
           },
         })
 
-        expect(logs[1].get()).to.contain({
-          name: 'Clear page',
-          group: sessionGroupId,
-        })
-
-        expect(logs[2].get()).to.contain({
-          displayName: 'Clear cookies, localStorage and sessionStorage',
-          group: sessionGroupId,
-        })
+        validateClearLogs([logs[1], logs[2]], sessionGroupId)
 
         const createNewSessionGroup = logs[3].get()
 
@@ -368,15 +373,7 @@ describe('cy.session', { retries: 0 }, () => {
         //     },
         //   })
 
-        //   expect(logs[1].get()).to.contain({
-        //     name: 'Clear page',
-        //     group: sessionGroupId,
-        //   })
-
-        //   expect(logs[2].get()).to.contain({
-        //     displayName: 'Clear cookies, localStorage and sessionStorage',
-        //     group: sessionGroupId,
-        //   })
+        // validateClearLogs([logs[1], logs[2]], sessionGroupId)
 
         //   const createNewSessionGroup = logs[3].get()
 
@@ -463,15 +460,7 @@ describe('cy.session', { retries: 0 }, () => {
           },
         })
 
-        expect(logs[1].get()).to.contain({
-          name: 'Clear page',
-          group: sessionGroupId,
-        })
-
-        expect(logs[2].get()).to.contain({
-          displayName: 'Clear cookies, localStorage and sessionStorage',
-          group: sessionGroupId,
-        })
+        validateClearLogs([logs[1], logs[2]], sessionGroupId)
 
         const restoreSavedSessionGroup = logs[3].get()
 
@@ -526,15 +515,7 @@ describe('cy.session', { retries: 0 }, () => {
           },
         })
 
-        expect(logs[1].get()).to.contain({
-          name: 'Clear page',
-          group: sessionGroupId,
-        })
-
-        expect(logs[2].get()).to.contain({
-          displayName: 'Clear cookies, localStorage and sessionStorage',
-          group: sessionGroupId,
-        })
+        validateClearLogs([logs[1], logs[2]], sessionGroupId)
 
         const restoreSavedSessionGroup = logs[3].get()
 
@@ -608,15 +589,7 @@ describe('cy.session', { retries: 0 }, () => {
           },
         })
 
-        expect(logs[1].get()).to.contain({
-          name: 'Clear page',
-          group: sessionGroupId,
-        })
-
-        expect(logs[2].get()).to.contain({
-          displayName: 'Clear cookies, localStorage and sessionStorage',
-          group: sessionGroupId,
-        })
+        validateClearLogs([logs[1], logs[2]], sessionGroupId)
 
         const restoreSavedSessionGroup = logs[3].get()
 
@@ -644,15 +617,7 @@ describe('cy.session', { retries: 0 }, () => {
 
         expect(logs[6].get('error').message).to.eq('Your `cy.session` **validate** callback returned false.')
 
-        expect(logs[7].get()).to.contain({
-          name: 'Clear page',
-          group: sessionGroupId,
-        })
-
-        expect(logs[8].get()).to.contain({
-          displayName: 'Clear cookies, localStorage and sessionStorage',
-          group: sessionGroupId,
-        })
+        validateClearLogs([logs[7], logs[8]], sessionGroupId)
 
         const createNewSessionGroup = logs[9].get()
 
@@ -721,15 +686,7 @@ describe('cy.session', { retries: 0 }, () => {
         //   },
         // })
 
-        //   expect(logs[1].get()).to.contain({
-        //     name: 'Clear page',
-        //     group: sessionGroupId,
-        //   })
-
-        //   expect(logs[2].get()).to.contain({
-        //     displayName: 'Clear cookies, localStorage and sessionStorage',
-        //     group: sessionGroupId,
-        //   })
+        // validateClearLogs([logs[1], logs[2]], sessionGroupId)
 
         //   const restoreSavedSessionGroup = logs[3].get()
 
@@ -757,15 +714,7 @@ describe('cy.session', { retries: 0 }, () => {
 
         //   expect(logs[6].get('error').message).to.eq('Your `cy.session` **validate** callback returned false.')
 
-        //   expect(logs[7].get()).to.contain({
-        //     name: 'Clear page',
-        //     group: sessionGroupId,
-        //   })
-
-        //   expect(logs[8].get()).to.contain({
-        //     displayName: 'Clear cookies, localStorage and sessionStorage',
-        //     group: sessionGroupId,
-        //   })
+        // validateClearLogs([logs[7], logs[8]], sessionGroupId)
 
         //   const createNewSessionGroup = logs[9].get()
 
@@ -1076,7 +1025,10 @@ describe('cy.session', { retries: 0 }, () => {
         cy.once('fail', (err) => {
           expect(err.message).contain('Expected to find element: `#does_not_exist`')
           expect(err.message).contain(errorHookMessage)
-          expect(err.codeFrame).exist
+          // TODO: Webkit does not have correct stack traces on errors currently
+          if (Cypress.isBrowser('!webkit')) {
+            expect(err.codeFrame).exist
+          }
 
           done()
         })
@@ -1094,7 +1046,11 @@ describe('cy.session', { retries: 0 }, () => {
         cy.once('fail', (err) => {
           expect(err.message).contain('validate error')
           expect(err.message).contain(errorHookMessage)
-          expect(err.codeFrame).exist
+          // TODO: Webkit does not have correct stack traces on errors currently
+          if (Cypress.isBrowser('!webkit')) {
+            expect(err.codeFrame).exist
+          }
+
           done()
         })
 
@@ -1111,7 +1067,10 @@ describe('cy.session', { retries: 0 }, () => {
         cy.once('fail', (err) => {
           expect(err.message).contain('validate error')
           expect(err.message).contain(errorHookMessage)
-          expect(err.codeFrame).exist
+          // TODO: Webkit does not have correct stack traces on errors currently
+          if (Cypress.isBrowser('!webkit')) {
+            expect(err.codeFrame).exist
+          }
 
           done()
         })
@@ -1129,7 +1088,10 @@ describe('cy.session', { retries: 0 }, () => {
         cy.once('fail', (err) => {
           expect(err.message).to.contain('Your `cy.session` **validate** callback returned false.')
           expect(err.message).contain(errorHookMessage)
-          expect(err.codeFrame).exist
+          // TODO: Webkit does not have correct stack traces on errors currently
+          if (Cypress.isBrowser('!webkit')) {
+            expect(err.codeFrame).exist
+          }
 
           done()
         })
@@ -1147,7 +1109,11 @@ describe('cy.session', { retries: 0 }, () => {
         cy.once('fail', (err) => {
           expect(err.message).to.contain('Your `cy.session` **validate** callback resolved false.')
           expect(err.message).contain(errorHookMessage)
-          expect(err.codeFrame).exist
+          // TODO: Webkit does not have correct stack traces on errors currently
+          if (Cypress.isBrowser('!webkit')) {
+            expect(err.codeFrame).exist
+          }
+
           done()
         })
 
