@@ -4,7 +4,7 @@ import { TrackedBanner_RecordBannerSeenDocument } from '../../generated/graphql'
 
 describe('<RecordBanner />', () => {
   it('should render expected content', () => {
-    cy.mount({ render: () => <RecordBanner modelValue={true} hasBannerBeenShown={false} /> })
+    cy.mount({ render: () => <RecordBanner hasBannerBeenShown={false} /> })
 
     cy.gqlStub.Query.currentProject = {
       id: 'test_id',
@@ -38,7 +38,7 @@ describe('<RecordBanner />', () => {
       return defineResult({ recordEvent: true })
     })
 
-    cy.mount({ render: () => <RecordBanner modelValue={true} hasBannerBeenShown={false} /> })
+    cy.mount({ render: () => <RecordBanner hasBannerBeenShown={false} /> })
 
     cy.get('@recordEvent').should('have.been.calledWith', {
       campaign: 'Record Runs',
