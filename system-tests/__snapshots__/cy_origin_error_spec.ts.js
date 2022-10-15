@@ -9,7 +9,6 @@ exports['e2e cy.origin errors / captures the stack trace correctly for errors in
   │ Browser:      FooBrowser 88                                                                    │
   │ Specs:        1 found (cy_origin_error.cy.ts)                                                  │
   │ Searched:     cypress/e2e/cy_origin_error.cy.ts                                                │
-  │ Experiments:  experimentalSessionAndOrigin=true                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

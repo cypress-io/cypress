@@ -789,47 +789,6 @@ describe('cy.session', { retries: 0 }, () => {
       return null
     })
 
-    it('throws error when experimentalSessionAndOrigin not enabled', { experimentalSessionAndOrigin: false, experimentalSessionSupport: false }, (done) => {
-      cy.on('fail', (err) => {
-        expect(lastLog.get('error')).to.eq(err)
-        expect(lastLog.get('state')).to.eq('failed')
-        expect(err.message).to.eq('`cy.session()` requires enabling the `experimentalSessionAndOrigin` flag.')
-        expect(err.docsUrl).to.eq('https://on.cypress.io/session')
-
-        done()
-      })
-
-      cy.session('sessions-not-enabled')
-    })
-
-    it('throws error when experimentalSessionSupport is enabled through test config', { experimentalSessionAndOrigin: false, experimentalSessionSupport: true }, (done) => {
-      cy.on('fail', (err) => {
-        expect(lastLog.get('error')).to.eq(err)
-        expect(lastLog.get('state')).to.eq('failed')
-        expect(err.message).to.eq('\`cy.session()\` requires enabling the \`experimentalSessionAndOrigin\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0.')
-        expect(err.docsUrl).to.eq('https://on.cypress.io/session')
-
-        done()
-      })
-
-      cy.session('sessions-not-enabled')
-    })
-
-    it('throws error when experimentalSessionSupport is enabled through Cypress.config', { experimentalSessionAndOrigin: false }, (done) => {
-      Cypress.config('experimentalSessionSupport', true)
-
-      cy.on('fail', (err) => {
-        Cypress.config('experimentalSessionSupport', false)
-        expect(lastLog.get('error')).to.eq(err)
-        expect(lastLog.get('state')).to.eq('failed')
-        expect(err.message).to.eq('\`cy.session()\` requires enabling the \`experimentalSessionAndOrigin\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0.')
-        expect(err.docsUrl).to.eq('https://on.cypress.io/session')
-        done()
-      })
-
-      cy.session('sessions-not-enabled')
-    })
-
     it('throws when sessionId argument was not provided', function (done) {
       cy.on('fail', (err) => {
         expect(lastLog.get('error')).to.eq(err)

@@ -183,9 +183,6 @@ describe('clears session data beforeEach test even with no session', () => {
 
 describe('navigates to about:blank between tests and shows warning about session lifecycle', () => {
   it('t1', () => {
-    // only warns after initial blank page
-    // unfortunately this fails when run alongside other tests
-    // cy.contains('experimentalSessionAndOrigin').should('not.exist')
     cy.contains('Default blank page')
     cy.contains('This page was cleared by navigating to about:blank.')
     cy.contains('All active session data (cookies, localStorage and sessionStorage) across all domains are cleared.')
@@ -555,21 +552,22 @@ describe.skip('consoleProps', () => {
   })
 })
 
+// TODO(origin): is this still correct?
 // because browsers prevent an https page from embedding http domains, we filter out
 // insecure origins (contexts) when top is a secure context when we clear cross origin session data
-// the first test in each suite visits insecure origin with sessionSupport OFF so data is not cleared
+// the first test in each suite visits insecure origin with so data is not cleared
 // on test:before:run, which allows the next run to switch top back to a secure context
-// and finally we turn sessionSupport back ON for the 3rd tests, which will now try to clear insecure
+// and finally for the 3rd tests, which will now try to clear insecure
 // bar.foo.com data.
 describe('ignores setting insecure context data when on secure context', () => {
   describe('no cross origin secure origins, nothing to clear', () => {
-    it('sets insecure content', { experimentalSessionAndOrigin: false }, () => {
+    it('sets insecure content', () => {
       cy.visit('http://bar.foo.com:4465/form')
     })
 
     let logSpy
 
-    it('nothing to clear - 1/2', { experimentalSessionAndOrigin: false }, () => {
+    it('nothing to clear - 1/2', () => {
       cy.visit('https://localhost:4466/form')
       .then(() => {
         logSpy = Cypress.sinon.spy(Cypress, 'log')
@@ -583,13 +581,13 @@ describe('ignores setting insecure context data when on secure context', () => {
   })
 
   describe('only secure origins cleared', () => {
-    it('sets insecure content', { experimentalSessionAndOrigin: false }, () => {
+    it('sets insecure content', () => {
       cy.visit('http://bar.foo.com:4465/form')
     })
 
     let logSpy
 
-    it('switches to secure context - clears only secure context data - 1/2', { experimentalSessionAndOrigin: false }, () => {
+    it('switches to secure context - clears only secure context data - 1/2', () => {
       cy.visit('https://localhost:4466/cross_origin_iframe/foo')
       .then(() => {
         logSpy = Cypress.sinon.spy(Cypress, 'log')

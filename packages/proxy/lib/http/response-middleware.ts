@@ -259,7 +259,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     const isCrossOrigin = !reqMatchesOriginPolicy(this.req, this.remoteStates.getPrimary())
     const isAUTFrame = this.req.isAUTFrame
 
-    if (this.config.experimentalSessionAndOrigin && isCrossOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
+    if (isCrossOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
       this.debug('- cross origin injection')
 
       return 'fullCrossOrigin'
@@ -378,11 +378,8 @@ const checkIfNeedsCrossOriginHandling = (ctx: HttpMiddlewareThis<ResponseMiddlew
   // since the browser won't set them in that case and if it's
   // secondary-origin -> primary-origin, we don't recognize the request as cross-origin
   return (
-    ctx.config.experimentalSessionAndOrigin
-    && (
-      (currentAUTUrl && !cors.urlOriginsMatch(currentAUTUrl, ctx.req.proxiedUrl))
+    (currentAUTUrl && !cors.urlOriginsMatch(currentAUTUrl, ctx.req.proxiedUrl))
       || !ctx.remoteStates.isPrimaryOrigin(ctx.req.proxiedUrl)
-    )
   )
 }
 
@@ -423,14 +420,6 @@ const CopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
     } catch (err) {
       this.debug(`failed to append header ${headerName}, continuing %o`, { err, cookie })
     }
-  }
-
-  if (!this.config.experimentalSessionAndOrigin) {
-    ([] as string[]).concat(cookies).forEach((cookie) => {
-      appendCookie(cookie)
-    })
-
-    return this.next()
   }
 
   const cookiesHelper = new CookiesHelper({

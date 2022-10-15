@@ -595,26 +595,50 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    if (Cypress.config('experimentalSessionAndOrigin')) {
-      describe('removes window:load listeners when testIsolation=strict', () => {
-        it('removes for first url visit', () => {
-          const listeners = cy.listeners('window:load')
+    describe('removes window:load listeners when testIsolation=strict', () => {
+      it('removes for first url visit', () => {
+        const listeners = cy.listeners('window:load')
 
-          const winLoad = cy.spy(cy, 'once').withArgs('window:load')
+        const winLoad = cy.spy(cy, 'once').withArgs('window:load')
 
-          cy.visit('/fixtures/generic.html').then(() => {
-            expect(winLoad).to.be.calledOnce
-            expect(cy.listeners('window:load')).to.deep.eq(listeners)
-          })
+        cy.visit('/fixtures/generic.html').then(() => {
+          expect(winLoad).to.be.calledOnce
+          expect(cy.listeners('window:load')).to.deep.eq(listeners)
         })
       })
-    }
+    })
 
     it('can visit pages on the same originPolicy', () => {
       cy
       .visit('http://localhost:3500/fixtures/jquery.html')
       .visit('http://localhost:3500/fixtures/generic.html')
       .visit('http://localhost:3500/fixtures/dimensions.html')
+    })
+
+    it('can visit a 2nd domain on different port', function () {
+      cy.visit('http://localhost:3500/fixtures/generic.html')
+      cy.visit('http://localhost:3501/fixtures/generic.html')
+    })
+
+    it('can visit a 2nd domain on different protocol', function () {
+      cy.visit('http://localhost:3500/fixtures/generic.html')
+      cy.visit('https://localhost:3502/fixtures/generic.html')
+    })
+
+    it('can visit a 2nd domain on different superdomain', function () {
+      cy.visit('http://localhost:3500/fixtures/generic.html')
+      cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
+    })
+
+    it('can visit 2 unique ip addresses', function () {
+      cy
+      .visit('http://127.0.0.1:3500/fixtures/generic.html')
+      .visit('http://0.0.0.0:3500/fixtures/generic.html')
+    })
+
+    it('can navigate to a cross origin', { pageLoadTimeout: 3000 }, function () {
+      cy.visit('/fixtures/primary-origin.html')
+      cy.get('a[data-cy="cross-origin-secondary-link"]').click()
     })
 
     it('resolves the subject to the remote iframe window', () => {
@@ -806,43 +830,41 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    if (Cypress.config('experimentalSessionAndOrigin')) {
-      describe('when only hashes are changing when testIsolation=strict', () => {
-        it('short circuits the visit if the page will not refresh', () => {
-          let count = 0
-          const urls = []
+    describe('when only hashes are changing when testIsolation=strict', () => {
+      it('short circuits the visit if the page will not refresh', () => {
+        let count = 0
+        const urls = []
 
-          cy.on('window:load', () => {
-            urls.push(cy.state('window').location.href)
+        cy.on('window:load', () => {
+          urls.push(cy.state('window').location.href)
 
-            count += 1
-          })
+          count += 1
+        })
 
-          cy
-          .visit('/fixtures/generic.html?foo#bar') // yes (1)
-          .visit('/fixtures/generic.html?foo#foo') // no (1)
-          .visit('/fixtures/generic.html?bar#bar') // yes (2)
-          .visit('/fixtures/dimensions.html?bar#bar') // yes (3)
-          .visit('/fixtures/dimensions.html?baz#bar') // yes (4)
-          .visit('/fixtures/dimensions.html#bar') // yes (5)
-          .visit('/fixtures/dimensions.html') // yes (6)
-          .visit('/fixtures/dimensions.html#baz') // no (6)
-          .visit('/fixtures/dimensions.html#') // no (6)
-          .then(() => {
-            expect(count).to.eq(6)
+        cy
+        .visit('/fixtures/generic.html?foo#bar') // yes (1)
+        .visit('/fixtures/generic.html?foo#foo') // no (1)
+        .visit('/fixtures/generic.html?bar#bar') // yes (2)
+        .visit('/fixtures/dimensions.html?bar#bar') // yes (3)
+        .visit('/fixtures/dimensions.html?baz#bar') // yes (4)
+        .visit('/fixtures/dimensions.html#bar') // yes (5)
+        .visit('/fixtures/dimensions.html') // yes (6)
+        .visit('/fixtures/dimensions.html#baz') // no (6)
+        .visit('/fixtures/dimensions.html#') // no (6)
+        .then(() => {
+          expect(count).to.eq(6)
 
-            expect(urls).to.deep.eq([
-              'http://localhost:3500/fixtures/generic.html?foo#bar',
-              'http://localhost:3500/fixtures/generic.html?bar#bar',
-              'http://localhost:3500/fixtures/dimensions.html?bar#bar',
-              'http://localhost:3500/fixtures/dimensions.html?baz#bar',
-              'http://localhost:3500/fixtures/dimensions.html#bar',
-              'http://localhost:3500/fixtures/dimensions.html',
-            ])
-          })
+          expect(urls).to.deep.eq([
+            'http://localhost:3500/fixtures/generic.html?foo#bar',
+            'http://localhost:3500/fixtures/generic.html?bar#bar',
+            'http://localhost:3500/fixtures/dimensions.html?bar#bar',
+            'http://localhost:3500/fixtures/dimensions.html?baz#bar',
+            'http://localhost:3500/fixtures/dimensions.html#bar',
+            'http://localhost:3500/fixtures/dimensions.html',
+          ])
         })
       })
-    }
+    })
 
     // https://github.com/cypress-io/cypress/issues/1311
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23201
@@ -1467,159 +1489,6 @@ describe('src/cy/commands/navigation', () => {
         })
       })
 
-      it('throws when attempting to visit a 2nd domain on different port', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
-          const experimentalMessage = Cypress.config('experimentalSessionAndOrigin') ? `You likely forgot to use \`cy.origin()\`:\n` : `In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use \`cy.origin()\`:\n`
-
-          expect(err.message).to.equal(stripIndent`\
-          \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
-          ${experimentalMessage}
-          \`cy.visit('http://localhost:3500/fixtures/generic.html')\`
-          \`<commands targeting http://localhost:3500 go here>\`\n
-          \`cy.origin('http://localhost:3501', () => {\`
-          \`  cy.visit('http://localhost:3501/fixtures/generic.html')\`
-          \`  <commands targeting http://localhost:3501 go here>\`
-          \`})\`\n
-          The new URL is considered a different origin because the following parts of the URL are different:\n
-            > port\n
-          You may only \`cy.visit()\` same-origin URLs within a single test.\n
-          The previous URL you visited was:\n
-            > 'http://localhost:3500'\n
-          You're attempting to visit this URL:\n
-            > 'http://localhost:3501'`)
-
-          expect(err.docsUrl).to.eq('https://on.cypress.io/cannot-visit-different-origin-domain')
-          assertLogLength(this.logs, 2)
-          expect(lastLog.get('error')).to.eq(err)
-
-          done()
-        })
-
-        cy.visit('http://localhost:3500/fixtures/generic.html')
-        cy.visit('http://localhost:3501/fixtures/generic.html')
-
-        // If experimentalSessionAndOrigin is enabled this is no longer an error
-        if (Cypress.config('experimentalSessionAndOrigin')) {
-          done()
-        }
-      })
-
-      it('throws when attempting to visit a 2nd domain on different protocol', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
-          const experimentalMessage = Cypress.config('experimentalSessionAndOrigin') ? `You likely forgot to use \`cy.origin()\`:\n` : `In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use \`cy.origin()\`:\n`
-
-          expect(err.message).to.equal(stripIndent`\
-          \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
-          ${experimentalMessage}
-          \`cy.visit('http://localhost:3500/fixtures/generic.html')\`
-          \`<commands targeting http://localhost:3500 go here>\`\n
-          \`cy.origin('https://localhost:3502', () => {\`
-          \`  cy.visit('https://localhost:3502/fixtures/generic.html')\`
-          \`  <commands targeting https://localhost:3502 go here>\`
-          \`})\`\n
-          The new URL is considered a different origin because the following parts of the URL are different:\n
-            > protocol, port\n
-          You may only \`cy.visit()\` same-origin URLs within a single test.\n
-          The previous URL you visited was:\n
-            > 'http://localhost:3500'\n
-          You're attempting to visit this URL:\n
-            > 'https://localhost:3502'`)
-
-          expect(err.docsUrl).to.eq('https://on.cypress.io/cannot-visit-different-origin-domain')
-          assertLogLength(this.logs, 2)
-          expect(lastLog.get('error')).to.eq(err)
-
-          done()
-        })
-
-        cy.visit('http://localhost:3500/fixtures/generic.html')
-        cy.visit('https://localhost:3502/fixtures/generic.html')
-
-        // If experimentalSessionAndOrigin is enabled this is no longer an error
-        if (Cypress.config('experimentalSessionAndOrigin')) {
-          done()
-        }
-      })
-
-      it('throws when attempting to visit a 2nd domain on different superdomain', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
-          const experimentalMessage = Cypress.config('experimentalSessionAndOrigin') ? `You likely forgot to use \`cy.origin()\`:\n` : `In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use \`cy.origin()\`:\n`
-
-          expect(err.message).to.equal(stripIndent`\
-          \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
-          ${experimentalMessage}
-          \`cy.visit('http://localhost:3500/fixtures/generic.html')\`
-          \`<commands targeting http://localhost:3500 go here>\`\n
-          \`cy.origin('http://foobar.com:3500', () => {\`
-          \`  cy.visit('http://www.foobar.com:3500/fixtures/generic.html')\`
-          \`  <commands targeting http://www.foobar.com:3500 go here>\`
-          \`})\`\n
-          The new URL is considered a different origin because the following parts of the URL are different:\n
-            > superdomain\n
-          You may only \`cy.visit()\` same-origin URLs within a single test.\n
-          The previous URL you visited was:\n
-            > 'http://localhost:3500'\n
-          You're attempting to visit this URL:\n
-            > 'http://www.foobar.com:3500'`)
-
-          expect(err.docsUrl).to.eq('https://on.cypress.io/cannot-visit-different-origin-domain')
-          assertLogLength(this.logs, 2)
-          expect(lastLog.get('error')).to.eq(err)
-
-          done()
-        })
-
-        cy.visit('http://localhost:3500/fixtures/generic.html')
-        cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
-
-        // If experimentalSessionAndOrigin is enabled this is no longer an error
-        if (Cypress.config('experimentalSessionAndOrigin')) {
-          done()
-        }
-      })
-
-      it('throws attempting to visit 2 unique ip addresses', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
-          const experimentalMessage = Cypress.config('experimentalSessionAndOrigin') ? `You likely forgot to use \`cy.origin()\`:\n` : `In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use \`cy.origin()\`:\n`
-
-          expect(err.message).to.equal(stripIndent`\
-          \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
-          ${experimentalMessage}
-          \`cy.visit('http://127.0.0.1:3500/fixtures/generic.html')\`
-          \`<commands targeting http://127.0.0.1:3500 go here>\`\n
-          \`cy.origin('http://0.0.0.0:3500', () => {\`
-          \`  cy.visit('http://0.0.0.0:3500/fixtures/generic.html')\`
-          \`  <commands targeting http://0.0.0.0:3500 go here>\`
-          \`})\`\n
-          The new URL is considered a different origin because the following parts of the URL are different:\n
-            > superdomain\n
-          You may only \`cy.visit()\` same-origin URLs within a single test.\n
-          The previous URL you visited was:\n
-            > 'http://127.0.0.1:3500'\n
-          You're attempting to visit this URL:\n
-            > 'http://0.0.0.0:3500'`)
-
-          expect(err.docsUrl).to.eq('https://on.cypress.io/cannot-visit-different-origin-domain')
-          assertLogLength(this.logs, 2)
-          expect(lastLog.get('error')).to.eq(err)
-
-          done()
-        })
-
-        cy
-        .visit('http://127.0.0.1:3500/fixtures/generic.html')
-        .visit('http://0.0.0.0:3500/fixtures/generic.html')
-
-        // If experimentalSessionAndOrigin is enabled this is no longer an error
-        if (Cypress.config('experimentalSessionAndOrigin')) {
-          done()
-        }
-      })
-
       it('displays loading_network_failed when _resolveUrl throws', function (done) {
         const err1 = new Error('connect ECONNREFUSED 127.0.0.1:64646')
 
@@ -2231,42 +2100,6 @@ describe('src/cy/commands/navigation', () => {
         .get('#does-not-exist', { timeout: 200 }).should('have.class', 'foo')
       })
 
-      it('displays cross origin failures when navigating to a cross origin', { pageLoadTimeout: 3000 }, function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
-
-          const error = Cypress.isBrowser('firefox') ? 'Permission denied to get property "href" on cross-origin object' : 'Blocked a frame with origin "http://localhost:3500" from accessing a cross-origin frame.'
-
-          // When the experimentalSessionAndOrigin feature is disabled, we will immediately and display this message.
-          expect(err.message).to.contain(stripIndent`\
-          Cypress detected a cross origin error happened on page load:\n
-            > ${error}\n
-          Before the page load, you were bound to the origin policy:\n
-            > http://localhost:3500\n
-          A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.\n
-          A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.\n
-          Cypress does not allow you to navigate to a different origin URL within a single test.\n
-          You may need to restructure some of your test code to avoid this problem.\n
-          Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false }`)
-
-          expect(err.message).to.contain(`packages/driver/cypress.config.ts`)
-          expect(err.docsUrl).to.eq('https://on.cypress.io/cross-origin-violation')
-          assertLogLength(this.logs, 7)
-
-          expect(lastLog.get('error')).to.eq(err)
-
-          done()
-        })
-
-        cy.visit('/fixtures/primary-origin.html')
-        cy.get('a[data-cy="cross-origin-secondary-link"]').click()
-
-        // If experimentalSessionAndOrigin is enabled this is no longer an error
-        if (Cypress.config('experimentalSessionAndOrigin')) {
-          done()
-        }
-      })
-
       return null
     })
   })
@@ -2689,103 +2522,101 @@ describe('src/cy/commands/navigation', () => {
         })
       })
 
-      if (Cypress.config('experimentalSessionAndOrigin')) {
-        describe('filters page load events when going back with window navigation when testIsolation=strict', () => {
-          // https://github.com/cypress-io/cypress/issues/19230
-          it('when going back with window navigation', () => {
-            const emit = cy.spy(Cypress, 'emit').log(false).withArgs('navigation:changed')
+      describe('filters page load events when going back with window navigation when testIsolation=strict', () => {
+        // https://github.com/cypress-io/cypress/issues/19230
+        it('when going back with window navigation', () => {
+          const emit = cy.spy(Cypress, 'emit').log(false).withArgs('navigation:changed')
 
-            cy
-            .visit('/fixtures/generic.html')
-            .get('#hashchange').click()
-            .window().then((win) => {
+          cy
+          .visit('/fixtures/generic.html')
+          .get('#hashchange').click()
+          .window().then((win) => {
+            return new Promise((resolve) => {
+              cy.once('navigation:changed', resolve)
+
+              win.history.back()
+            }).then(() => {
               return new Promise((resolve) => {
                 cy.once('navigation:changed', resolve)
 
-                win.history.back()
-              }).then(() => {
-                return new Promise((resolve) => {
-                  cy.once('navigation:changed', resolve)
-
-                  win.history.forward()
-                })
-              })
-            })
-
-            cy.get('#dimensions').click()
-            .window().then((win) => {
-              return new Promise((resolve) => {
-                cy.on('navigation:changed', (event) => {
-                  if (event.includes('(load)')) {
-                    resolve()
-                  }
-                })
-
-                win.history.back()
-              })
-              .then(() => {
-                return new Promise((resolve) => {
-                  cy.on('navigation:changed', resolve)
-                  win.history.back()
-                })
-              })
-              .then(() => {
-                expect(emit.getCall(0)).to.be.calledWith(
-                  'navigation:changed',
-                  'page navigation event (before:load)',
-                )
-
-                expect(emit.getCall(1)).to.be.calledWith(
-                  'navigation:changed',
-                  'page navigation event (load)',
-                )
-
-                expect(emit.getCall(2)).to.be.calledWith(
-                  'navigation:changed',
-                  'hashchange',
-                )
-
-                expect(emit.getCall(3)).to.be.calledWithMatch(
-                  'navigation:changed',
-                  'hashchange',
-                )
-
-                expect(emit.getCall(4)).to.be.calledWithMatch(
-                  'navigation:changed',
-                  'hashchange',
-                )
-
-                expect(emit.getCall(5)).to.be.calledWithMatch(
-                  'navigation:changed',
-                  'page navigation event (before:load)',
-                )
-
-                expect(emit.getCall(6)).to.be.calledWith(
-                  'navigation:changed',
-                  'page navigation event (load)',
-                )
-
-                expect(emit.getCall(7)).to.be.calledWith(
-                  'navigation:changed',
-                  'page navigation event (before:load)',
-                )
-
-                expect(emit.getCall(8)).to.be.calledWith(
-                  'navigation:changed',
-                  'page navigation event (load)',
-                )
-
-                expect(emit.getCall(9)).to.be.calledWith(
-                  'navigation:changed',
-                  'hashchange',
-                )
-
-                expect(emit.callCount).to.eq(10)
+                win.history.forward()
               })
             })
           })
+
+          cy.get('#dimensions').click()
+          .window().then((win) => {
+            return new Promise((resolve) => {
+              cy.on('navigation:changed', (event) => {
+                if (event.includes('(load)')) {
+                  resolve()
+                }
+              })
+
+              win.history.back()
+            })
+            .then(() => {
+              return new Promise((resolve) => {
+                cy.on('navigation:changed', resolve)
+                win.history.back()
+              })
+            })
+            .then(() => {
+              expect(emit.getCall(0)).to.be.calledWith(
+                'navigation:changed',
+                'page navigation event (before:load)',
+              )
+
+              expect(emit.getCall(1)).to.be.calledWith(
+                'navigation:changed',
+                'page navigation event (load)',
+              )
+
+              expect(emit.getCall(2)).to.be.calledWith(
+                'navigation:changed',
+                'hashchange',
+              )
+
+              expect(emit.getCall(3)).to.be.calledWithMatch(
+                'navigation:changed',
+                'hashchange',
+              )
+
+              expect(emit.getCall(4)).to.be.calledWithMatch(
+                'navigation:changed',
+                'hashchange',
+              )
+
+              expect(emit.getCall(5)).to.be.calledWithMatch(
+                'navigation:changed',
+                'page navigation event (before:load)',
+              )
+
+              expect(emit.getCall(6)).to.be.calledWith(
+                'navigation:changed',
+                'page navigation event (load)',
+              )
+
+              expect(emit.getCall(7)).to.be.calledWith(
+                'navigation:changed',
+                'page navigation event (before:load)',
+              )
+
+              expect(emit.getCall(8)).to.be.calledWith(
+                'navigation:changed',
+                'page navigation event (load)',
+              )
+
+              expect(emit.getCall(9)).to.be.calledWith(
+                'navigation:changed',
+                'hashchange',
+              )
+
+              expect(emit.callCount).to.eq(10)
+            })
+          })
         })
-      }
+      })
 
       it('logs url changed event', () => {
         cy

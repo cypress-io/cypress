@@ -135,7 +135,6 @@ describe('e2e sessions', () => {
     spec: 'session.cy.js',
     snapshot: true,
     config: {
-      experimentalSessionAndOrigin: true,
       video: false,
     },
   })
@@ -145,7 +144,6 @@ describe('e2e sessions', () => {
     spec: 'session_persist_spec_1.cy.js,session_persist_spec_2.cy.js',
     snapshot: true,
     config: {
-      experimentalSessionAndOrigin: true,
       video: false,
     },
   })
@@ -155,7 +153,6 @@ describe('e2e sessions', () => {
     spec: 'session_recreate_reload.cy.js',
     snapshot: true,
     config: {
-      experimentalSessionAndOrigin: true,
       video: false,
     },
   })

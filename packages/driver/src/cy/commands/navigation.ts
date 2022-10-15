@@ -35,11 +35,9 @@ const reset = (test: any = {}) => {
   // before each test run!
   previouslyVisitedLocation = undefined
 
-  const { experimentalSessionAndOrigin, testIsolation } = Cypress.config()
-
   // make sure we reset that we haven't visited about blank again
   // strict test isolation resets the navigation history for us.
-  hasVisitedAboutBlank = experimentalSessionAndOrigin && testIsolation === 'strict'
+  hasVisitedAboutBlank = Cypress.config('testIsolation') === 'strict'
 
   currentlyVisitingAboutBlank = false
 
@@ -62,40 +60,6 @@ const timedOutWaitingForPageLoad = (ms, log) => {
     },
     onFail: log,
   })
-}
-
-// TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
-const cannotVisitDifferentOrigin = ({ remote, existing, originalUrl, previouslyVisitedLocation, log, isCrossOriginSpecBridge = false }) => {
-  const differences: string[] = []
-
-  if (remote.protocol !== existing.protocol) {
-    differences.push('protocol')
-  }
-
-  if (remote.port !== existing.port) {
-    differences.push('port')
-  }
-
-  if (remote.superDomain !== existing.superDomain) {
-    differences.push('superdomain')
-  }
-
-  const errOpts = {
-    onFail: log,
-    args: {
-      differences: differences.join(', '),
-      previousUrl: previouslyVisitedLocation,
-      attemptedUrl: remote,
-      originalUrl,
-      isCrossOriginSpecBridge,
-      experimentalSessionAndOrigin: Cypress.config('experimentalSessionAndOrigin'),
-    },
-    errProps: {
-      isCrossOrigin: true,
-    },
-  }
-
-  $errUtils.throwErrByPath('visit.cannot_visit_different_origin', errOpts)
 }
 
 const specifyFileByRelativePath = (url, log) => {
@@ -1084,12 +1048,11 @@ export default (Commands, Cypress, cy, state, config) => {
 
           remote = $Location.create(url)
 
-          // if the origin currently matches
-          // or if we have previously visited a location or are a spec bridge
+          // if the origin currently matches,
+          // or we have previously visited a location,
+          // or are a spec bridge,
           // then go ahead and change the iframe's src
-          if (remote.originPolicy === existing.originPolicy
-            || ((previouslyVisitedLocation || Cypress.isCrossOriginSpecBridge) && Cypress.config('experimentalSessionAndOrigin'))
-          ) {
+          if (remote.originPolicy === existing.originPolicy || previouslyVisitedLocation || Cypress.isCrossOriginSpecBridge) {
             if (!previouslyVisitedLocation) {
               previouslyVisitedLocation = remote
             }
@@ -1100,19 +1063,6 @@ export default (Commands, Cypress, cy, state, config) => {
             .then(() => {
               return onLoad(resp)
             })
-          }
-
-          // if we've already cy.visit'ed in the test and we are visiting a new origin,
-          // throw an error, else we'd be in a endless loop,
-          // we also need to disable retries to prevent the endless loop
-          if (previouslyVisitedLocation) {
-            // _retries is `private`. We're not using `retries()` method here because it breaks some tests.
-            // @ts-ignore
-            $utils.getTestFromRunnable(state('runnable'))._retries = 0
-
-            const params = { remote, existing, originalUrl, previouslyVisitedLocation, log: options._log }
-
-            return cannotVisitDifferentOrigin(params)
           }
 
           // tell our backend we're changing origins

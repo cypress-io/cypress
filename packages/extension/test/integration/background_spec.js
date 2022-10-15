@@ -274,10 +274,6 @@ describe('app/background', () => {
   })
 
   context('add header to aut iframe requests', () => {
-    const withExperimentalFlagOn = {
-      experimentalSessionAndOrigin: true,
-    }
-
     it('does not listen to `onBeforeSendHeaders` if experimental flag is off', async function () {
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
@@ -293,7 +289,7 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect(withExperimentalFlagOn)
+      await this.connect()
 
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
@@ -307,7 +303,7 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect(withExperimentalFlagOn)
+      await this.connect()
 
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
@@ -322,7 +318,7 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect(withExperimentalFlagOn)
+      await this.connect()
 
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
@@ -338,7 +334,7 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect(withExperimentalFlagOn)
+      await this.connect()
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
       expect(result).to.be.undefined
@@ -356,7 +352,7 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect(withExperimentalFlagOn)
+      await this.connect()
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
       expect(result).to.deep.equal({
@@ -378,7 +374,7 @@ describe('app/background', () => {
 
       const onBeforeSendHeaders = sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect(withExperimentalFlagOn)
+      await this.connect()
 
       expect(onBeforeSendHeaders).not.to.be.called
     })

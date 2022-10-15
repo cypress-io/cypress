@@ -21,32 +21,16 @@ type SessionData = Cypress.Commands.Session.SessionData
  */
 
 export default function (Commands, Cypress, cy) {
-  function throwIfNoSessionSupport () {
-    if (!Cypress.config('experimentalSessionAndOrigin')) {
-      $errUtils.throwErrByPath('sessions.experimentNotEnabled', {
-        args: {
-          // determine if using experimental session opt-in flag (removed in 9.6.0) to
-          // generate a coherent error message
-          experimentalSessionSupport: Cypress.config('experimentalSessionSupport'),
-        },
-      })
-    }
-  }
-
   const sessionsManager = new SessionsManager(Cypress, cy)
   const sessions = sessionsManager.sessions
 
   Cypress.on('run:start', () => {
     Cypress.on('test:before:run:async', () => {
-      if (Cypress.config('experimentalSessionAndOrigin')) {
-        const clearPage = Cypress.config('testIsolation') === 'strict' ? navigateAboutBlank(false) : new Cypress.Promise.resolve()
+      const clearPage = Cypress.config('testIsolation') === 'strict' ? navigateAboutBlank(false) : new Cypress.Promise.resolve()
 
-        return clearPage
-        .then(() => sessions.clearCurrentSessionData())
-        .then(() => Cypress.backend('reset:rendered:html:origins'))
-      }
-
-      return
+      return clearPage
+      .then(() => sessions.clearCurrentSessionData())
+      .then(() => Cypress.backend('reset:rendered:html:origins'))
     })
   })
 
@@ -55,8 +39,6 @@ export default function (Commands, Cypress, cy) {
       if (Cypress.isBrowser('webkit')) {
         return $errUtils.throwErrByPath('webkit.session')
       }
-
-      throwIfNoSessionSupport()
 
       if (!id || !_.isString(id) && !_.isObject(id)) {
         $errUtils.throwErrByPath('sessions.session.wrongArgId')

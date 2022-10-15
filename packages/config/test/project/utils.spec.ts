@@ -1040,7 +1040,6 @@ describe('config/src/project/utils', () => {
             experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
-            experimentalSessionAndOrigin: { value: false, from: 'default' },
             experimentalSingleTabRunMode: { value: false, from: 'default' },
             experimentalStudio: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
@@ -1134,7 +1133,6 @@ describe('config/src/project/utils', () => {
             experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
-            experimentalSessionAndOrigin: { value: false, from: 'default' },
             experimentalSingleTabRunMode: { value: false, from: 'default' },
             experimentalStudio: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
@@ -1190,7 +1188,7 @@ describe('config/src/project/utils', () => {
             supportFile: { value: false, from: 'config' },
             supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
-            testIsolation: { value: 'legacy', from: 'default' },
+            testIsolation: { value: 'strict', from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
             userAgent: { value: null, from: 'default' },
             video: { value: true, from: 'default' },
@@ -1206,39 +1204,13 @@ describe('config/src/project/utils', () => {
         })
       })
 
-      it('sets testIsolation=strict by default when experimentalSessionAndOrigin=true and e2e testing', () => {
+      it('honors user config for testIsolation', () => {
         sinon.stub(utils, 'getProcessEnvVars').returns({})
 
         const obj = {
           projectRoot: '/foo/bar',
           supportFile: false,
           baseUrl: 'http://localhost:8080',
-          experimentalSessionAndOrigin: true,
-        }
-
-        const options = {
-          testingType: 'e2e',
-        }
-
-        const getFilesByGlob = sinon.stub().returns(['path/to/file.ts'])
-
-        return mergeDefaults(obj, options, {}, getFilesByGlob)
-        .then((cfg) => {
-          expect(cfg.resolved).to.have.property('experimentalSessionAndOrigin')
-          expect(cfg.resolved.experimentalSessionAndOrigin).to.deep.eq({ value: true, from: 'config' })
-          expect(cfg.resolved).to.have.property('testIsolation')
-          expect(cfg.resolved.testIsolation).to.deep.eq({ value: 'strict', from: 'default' })
-        })
-      })
-
-      it('honors user config for testIsolation when experimentalSessionAndOrigin=true and e2e testing', () => {
-        sinon.stub(utils, 'getProcessEnvVars').returns({})
-
-        const obj = {
-          projectRoot: '/foo/bar',
-          supportFile: false,
-          baseUrl: 'http://localhost:8080',
-          experimentalSessionAndOrigin: true,
           testIsolation: 'legacy',
         }
 
@@ -1250,8 +1222,6 @@ describe('config/src/project/utils', () => {
 
         return mergeDefaults(obj, options, {}, getFilesByGlob)
         .then((cfg) => {
-          expect(cfg.resolved).to.have.property('experimentalSessionAndOrigin')
-          expect(cfg.resolved.experimentalSessionAndOrigin).to.deep.eq({ value: true, from: 'config' })
           expect(cfg.resolved).to.have.property('testIsolation')
           expect(cfg.resolved.testIsolation).to.deep.eq({ value: 'legacy', from: 'config' })
         })

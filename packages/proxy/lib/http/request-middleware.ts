@@ -49,7 +49,7 @@ const MaybeSimulateSecHeaders: RequestMiddleware = function () {
 const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
   const currentAUTUrl = this.getAUTUrl()
 
-  if (!this.config.experimentalSessionAndOrigin || !currentAUTUrl) {
+  if (!currentAUTUrl) {
     return this.next()
   }
 
@@ -124,7 +124,7 @@ const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
 
   if (buffer) {
     this.debug('ending request with buffered response')
-    this.res.wantsInjection = this.config.experimentalSessionAndOrigin && buffer.isCrossOrigin ? 'fullCrossOrigin' : 'full'
+    this.res.wantsInjection = buffer.isCrossOrigin ? 'fullCrossOrigin' : 'full'
 
     return this.onResponse(buffer.response, buffer.stream)
   }

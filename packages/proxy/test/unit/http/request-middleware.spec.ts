@@ -138,16 +138,6 @@ describe('http/request-middleware', () => {
   describe('MaybeAttachCrossOriginCookies', () => {
     const { MaybeAttachCrossOriginCookies } = RequestMiddleware
 
-    it('is a noop if experimental flag is off', async () => {
-      const ctx = await getContext()
-
-      ctx.config.experimentalSessionAndOrigin = false
-
-      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
-
-      expect(ctx.req.headers['cookie']).to.equal('request=cookie')
-    })
-
     it('is a noop if no current AUT URL', async () => {
       const ctx = await getContext()
 
@@ -294,7 +284,6 @@ describe('http/request-middleware', () => {
       return {
         getAUTUrl: () => autAndRequestUrl,
         getCookieJar: () => cookieJar,
-        config: { experimentalSessionAndOrigin: true },
         req: {
           proxiedUrl: autAndRequestUrl,
           isAUTFrame: true,
@@ -330,7 +319,7 @@ describe('http/request-middleware', () => {
       })
     })
 
-    it('sets wantsInjection to fullCrossOrigin when a cross origin request is buffered and experimentalSessionAndOrigin=true', async () => {
+    it('sets wantsInjection to fullCrossOrigin when a cross origin request is buffered', async () => {
       const buffers = new HttpBuffers()
       const buffer = { url: 'https://www.cypress.io/', isCrossOrigin: true } as HttpBuffer
 
@@ -340,9 +329,6 @@ describe('http/request-middleware', () => {
         buffers,
         req: {
           proxiedUrl: 'https://www.cypress.io/',
-        },
-        config: {
-          experimentalSessionAndOrigin: true,
         },
         res: {} as Partial<CypressOutgoingResponse>,
       }
@@ -350,29 +336,6 @@ describe('http/request-middleware', () => {
       await testMiddleware([MaybeEndRequestWithBufferedResponse], ctx)
       .then(() => {
         expect(ctx.res.wantsInjection).to.equal('fullCrossOrigin')
-      })
-    })
-
-    it('sets wantsInjection to full when a cross origin request is buffered and experimentalSessionAndOrigin=false', async () => {
-      const buffers = new HttpBuffers()
-      const buffer = { url: 'https://www.cypress.io/', isCrossOrigin: true } as HttpBuffer
-
-      buffers.set(buffer)
-
-      const ctx = {
-        buffers,
-        req: {
-          proxiedUrl: 'https://www.cypress.io/',
-        },
-        config: {
-          experimentalSessionAndOrigin: false,
-        },
-        res: {} as Partial<CypressOutgoingResponse>,
-      }
-
-      await testMiddleware([MaybeEndRequestWithBufferedResponse], ctx)
-      .then(() => {
-        expect(ctx.res.wantsInjection).to.equal('full')
       })
     })
 

@@ -142,10 +142,7 @@ const connect = function (host, path, extraOpts) {
     // Non-Firefox browsers use CDP for these instead
     if (isFirefox) {
       listenToDownloads()
-
-      if (config.experimentalSessionAndOrigin) {
-        listenToOnBeforeHeaders()
-      }
+      listenToOnBeforeHeaders()
     }
   })
 

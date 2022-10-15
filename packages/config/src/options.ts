@@ -199,11 +199,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     isExperimental: true,
     requireRestartOnChange: 'server',
   }, {
-    name: 'experimentalSessionAndOrigin',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
-  }, {
     name: 'experimentalModifyObstructiveThirdPartyCode',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -370,12 +365,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     overrideLevel: 'any',
   }, {
     name: 'testIsolation',
-    // TODO: https://github.com/cypress-io/cypress/issues/23093
-    // When experimentalSessionAndOrigin is removed and released as GA,
-    // update the defaultValue from 'legacy' to 'strict' and
-    // update this code to remove the check/override specific to enable
-    // strict by default when experimentalSessionAndOrigin=true
-    defaultValue: 'legacy',
+    defaultValue: 'strict',
     validation: validate.isOneOf('legacy', 'strict'),
     overrideLevel: 'suite',
   }, {
@@ -623,11 +613,6 @@ export const breakingRootOptions: Array<BreakingOption> = [
     isWarning: false,
     testingTypes: ['e2e'],
   }, {
-    name: 'experimentalSessionAndOrigin',
-    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E',
-    isWarning: false,
-    testingTypes: ['e2e'],
-  }, {
     name: 'excludeSpecPattern',
     errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
     isWarning: false,
@@ -677,11 +662,6 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
   component: [
     {
       name: 'baseUrl',
-      errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
-      isWarning: false,
-    },
-    {
-      name: 'experimentalSessionAndOrigin',
       errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
       isWarning: false,
     },

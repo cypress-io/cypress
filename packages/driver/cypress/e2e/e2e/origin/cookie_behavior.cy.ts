@@ -1,4 +1,4 @@
-describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
+describe('Cookie Behavior', () => {
   const makeRequest = (
     win: Cypress.AUTWindow,
     url: string,
@@ -860,7 +860,6 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', () => {
       })
 
       // without cy.origin means the AUT has the same origin as top
-      // TODO: In the future, this test should be run with the experimentalSessionAndOrigin=true and experimentalSessionAndOrigin=false
       describe('w/o cy.origin', () => {
         describe('same site / same origin', () => {
           describe('XMLHttpRequest', () => {

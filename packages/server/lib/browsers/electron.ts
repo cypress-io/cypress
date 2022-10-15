@@ -64,7 +64,7 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
     win.destroy()
   }
 
-  const automation = await CdpAutomation.create(sendCommand, on, sendClose, parent, options.experimentalSessionAndOrigin)
+  const automation = await CdpAutomation.create(sendCommand, on, sendClose, parent)
 
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
     switch (message) {
@@ -287,9 +287,7 @@ export = {
     await this._enableDebugger(win.webContents)
 
     await win.loadURL(url)
-    if (options.experimentalSessionAndOrigin) {
-      this._listenToOnBeforeHeaders(win)
-    }
+    this._listenToOnBeforeHeaders(win)
 
     return win
   },

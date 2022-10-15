@@ -5,11 +5,10 @@ exports['e2e sessions / session tests'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:      1.2.3                                                                            │
-  │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        1 found (session.cy.js)                                                          │
-  │ Searched:     cypress/e2e/session.cy.js                                                        │
-  │ Experiments:  experimentalSessionAndOrigin=true                                                │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (session.cy.js)                                                            │
+  │ Searched:   cypress/e2e/session.cy.js                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -144,12 +143,10 @@ exports['e2e sessions / sessions persist on reload, and clear between specs'] = 
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:      1.2.3                                                                            │
-  │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        2 found (session_persist_spec_1.cy.js, session_persist_spec_2.cy.js)             │
-  │ Searched:     cypress/e2e/session_persist_spec_1.cy.js, cypress/e2e/session_persist_spec_2.cy. │
-  │               js                                                                               │
-  │ Experiments:  experimentalSessionAndOrigin=true                                                │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      2 found (session_persist_spec_1.cy.js, session_persist_spec_2.cy.js)               │
+  │ Searched:   cypress/e2e/session_persist_spec_1.cy.js, cypress/e2e/session_persist_spec_2.cy.js │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -233,11 +230,10 @@ exports['e2e sessions / sessions recreated on reload in open mode'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:      1.2.3                                                                            │
-  │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        1 found (session_recreate_reload.cy.js)                                          │
-  │ Searched:     cypress/e2e/session_recreate_reload.cy.js                                        │
-  │ Experiments:  experimentalSessionAndOrigin=true                                                │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (session_recreate_reload.cy.js)                                            │
+  │ Searched:   cypress/e2e/session_recreate_reload.cy.js                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

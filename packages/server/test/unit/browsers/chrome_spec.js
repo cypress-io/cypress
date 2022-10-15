@@ -360,11 +360,6 @@ describe('lib/browsers/chrome', () => {
     })
 
     describe('adding header to AUT iframe request', function () {
-      const withExperimentalFlagOn = {
-        ...openOpts,
-        experimentalSessionAndOrigin: true,
-      }
-
       beforeEach(function () {
         const frameTree = {
           frameTree: {
@@ -388,20 +383,14 @@ describe('lib/browsers/chrome', () => {
         this.pageCriClient.send.withArgs('Page.getFrameTree').resolves(frameTree)
       })
 
-      it('does not listen to Fetch.requestPaused if experimental flag is off', async function () {
-        await chrome.open('chrome', 'http://', { ...openOpts, experimentalSessionAndOrigin: false }, this.automation)
-
-        expect(this.pageCriClient.on).not.to.be.calledWith('Fetch.requestPaused')
-      })
-
       it('sends Fetch.enable', async function () {
-        await chrome.open('chrome', 'http://', withExperimentalFlagOn, this.automation)
+        await chrome.open('chrome', 'http://', openOpts, this.automation)
 
         expect(this.pageCriClient.send).to.have.been.calledWith('Fetch.enable')
       })
 
       it('does not add header when not a document', async function () {
-        await chrome.open('chrome', 'http://', withExperimentalFlagOn, this.automation)
+        await chrome.open('chrome', 'http://', openOpts, this.automation)
 
         this.pageCriClient.on.withArgs('Fetch.requestPaused').yield({
           requestId: '1234',
@@ -414,7 +403,7 @@ describe('lib/browsers/chrome', () => {
       })
 
       it('does not add header when it is a spec frame request', async function () {
-        await chrome.open('chrome', 'http://', withExperimentalFlagOn, this.automation)
+        await chrome.open('chrome', 'http://', openOpts, this.automation)
 
         this.pageCriClient.on.withArgs('Page.frameAttached').yield()
 
@@ -433,7 +422,7 @@ describe('lib/browsers/chrome', () => {
       })
 
       it('appends X-Cypress-Is-AUT-Frame header to AUT iframe request', async function () {
-        await chrome.open('chrome', 'http://', withExperimentalFlagOn, this.automation)
+        await chrome.open('chrome', 'http://', openOpts, this.automation)
 
         this.pageCriClient.on.withArgs('Page.frameAttached').yield()
 
@@ -465,7 +454,7 @@ describe('lib/browsers/chrome', () => {
       })
 
       it('gets frame tree on Page.frameAttached', async function () {
-        await chrome.open('chrome', 'http://', withExperimentalFlagOn, this.automation)
+        await chrome.open('chrome', 'http://', openOpts, this.automation)
 
         this.pageCriClient.on.withArgs('Page.frameAttached').yield()
 
@@ -473,7 +462,7 @@ describe('lib/browsers/chrome', () => {
       })
 
       it('gets frame tree on Page.frameDetached', async function () {
-        await chrome.open('chrome', 'http://', withExperimentalFlagOn, this.automation)
+        await chrome.open('chrome', 'http://', openOpts, this.automation)
 
         this.pageCriClient.on.withArgs('Page.frameDetached').yield()
 
