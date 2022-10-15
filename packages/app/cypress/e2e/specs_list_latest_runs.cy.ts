@@ -160,7 +160,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
   })
 
   context('when no runs are recorded', () => {
-    beforeEach(() => {
+    it('shows placeholders for all visible specs', { defaultCommandTimeout: 6000 }, () => {
       cy.loginUser()
 
       cy.remoteGraphQLIntercept(async (obj) => {
@@ -181,10 +181,6 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       })
 
       cy.visitApp()
-      cy.findByTestId('sidebar-link-specs-page').click()
-    })
-
-    it('shows placeholders for all visible specs', () => {
       allVisibleSpecsShouldBePlaceholders()
     })
   })
