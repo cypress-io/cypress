@@ -3430,6 +3430,7 @@
     "./node_modules/yallist/yallist.js",
     "./node_modules/yn/index.js",
     "./node_modules/yn/lenient.js",
+    "./package.json",
     "./packages/config/src/ast-utils/astConfigHelpers.ts",
     "./packages/config/src/utils.ts",
     "./packages/data-context/node_modules/@babel/code-frame/lib/index.js",
@@ -3857,5 +3858,5 @@
     "./tooling/v8-snapshot/cache/prod-darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "b0a4b82c9cc0eae6230f733464e4b035e36820cf2aadee3a4f43d9dcef5dca30"
+  "deferredHash": "c78e38f98d34cd5b63fc7ef21627c4ead89b0ba77f40748eb04f47d04c2ea291"
 }

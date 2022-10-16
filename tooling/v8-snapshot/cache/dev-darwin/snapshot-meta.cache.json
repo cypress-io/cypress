@@ -872,6 +872,8 @@
     "./node_modules/@cypress/commit-info/src/index.js",
     "./node_modules/@cypress/commit-info/src/utils.js",
     "./node_modules/@cypress/get-windows-proxy/node_modules/debug/src/common.js",
+    "./node_modules/@cypress/get-windows-proxy/node_modules/registry-js/dist/lib/index.js",
+    "./node_modules/@cypress/get-windows-proxy/node_modules/registry-js/dist/lib/registry.js",
     "./node_modules/@cypress/get-windows-proxy/src/index.js",
     "./node_modules/@cypress/parse-domain/build/tries/icann.complete.json",
     "./node_modules/@cypress/parse-domain/build/tries/private.complete.json",
@@ -3454,5 +3456,5 @@
     "./tooling/v8-snapshot/cache/dev-darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "60e6c6f37ad80119f2f92225069b4cf7cd7fe8baa4f92429f4c29c14ce6819ca"
+  "deferredHash": "c78e38f98d34cd5b63fc7ef21627c4ead89b0ba77f40748eb04f47d04c2ea291"
 }

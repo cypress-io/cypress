@@ -174,6 +174,8 @@ function generateSnapshot() {
 }
 
 var snapshotResult = generateSnapshot.call({})
+delete snapshotResult.customRequire.exports['./package.json']
+delete snapshotResult.customRequire.definitions['./package.json']
 generateSnapshot = null
 `,
     'utf8',
