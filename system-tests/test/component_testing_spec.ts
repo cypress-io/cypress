@@ -151,6 +151,20 @@ describe('svelte component testing', () => {
   }
 })
 
+describe('lit component testing', () => {
+  systemTests.setup()
+
+  for (const bundler of ['webpack', 'vite']) {
+    systemTests.it(`lit + ${bundler}`, {
+      project: `lit-${bundler}`,
+      testingType: 'component',
+      spec: '**/*.cy.js,!src/errors.cy.js',
+      browser: 'electron',
+      expectedExitCode: 0,
+    })
+  }
+})
+
 describe('experimentalSingleTabRunMode', function () {
   systemTests.setup()
 

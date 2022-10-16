@@ -334,7 +334,7 @@ describe('supportFileComponent', () => {
           Cypress.Commands.add('mount', mount)
 
           // Example use:
-          // cy.mount(MyComponent, html\`<my-component></my-component>\`)
+          // cy.mount(MyElement, html\`<my-element></my-element>\`)
           `)
     })
 
@@ -380,7 +380,7 @@ describe('supportFileComponent', () => {
         Cypress.Commands.add('mount', mount)
 
         // Example use:
-        // cy.mount(MyComponent, html\`<my-component></my-component>\`)
+        // cy.mount(MyElement, html\`<my-element></my-element>\`)
       `)
     })
   })

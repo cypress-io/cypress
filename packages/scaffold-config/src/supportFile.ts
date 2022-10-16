@@ -51,9 +51,17 @@ export function supportFileComponent (language: CodeLanguage['type'], mountModul
     // require('./commands')
   `
 
+  const componentTemplate = (mountModule: WizardMountModule): string => {
+    if (mountModule.includes('cypress/react')) return '<MyComponent />'
+
+    if (mountModule.includes('cypress/lit')) return 'MyElement, html`<my-element></my-element>`'
+
+    return 'MyComponent'
+  }
+
   const exampleUse = dedent`
     // Example use:
-    // cy.mount(${mountModule.includes('cypress/react') ? '<MyComponent />' : 'MyComponent'})
+    // cy.mount(${componentTemplate(mountModule)})
   `
 
   const NEWLINE = '\n\n'

@@ -6,7 +6,7 @@ Mount Lit elements in the open source [Cypress.io](https://www.cypress.io/) test
 
 ## Install
 
-- Requires Lit >= 2
+- Requires [Lit](https://lit.dev/) >= 2
 - Requires Cypress v10.7.0 or later
 - Requires [Node](https://nodejs.org/en/) version 12 or above
 

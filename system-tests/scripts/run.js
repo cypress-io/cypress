@@ -157,6 +157,11 @@ if (options['cypress-inspect-brk']) {
   env.CYPRESS_INSPECT_BRK = '1'
 }
 
+if (options['g']) {
+  console.info()
+  commandAndArguments.args.push(...['-g', options['g']])
+}
+
 const cmd = `${commandAndArguments.command} ${
   commandAndArguments.args.join(' ')}`
 
