@@ -276,9 +276,6 @@ require('./packages/server')\
 
   console.log(stdout)
 
-  log(`#testExecutableVersion ${meta.buildAppExecutable()}`)
-  await testExecutableVersion(meta.buildAppExecutable(), version)
-
   // runSmokeTests
   let usingXvfb = xvfb.isNeeded()
 
@@ -286,6 +283,9 @@ require('./packages/server')\
     if (usingXvfb) {
       await xvfb.start()
     }
+
+    log(`#testExecutableVersion ${meta.buildAppExecutable()}`)
+    await testExecutableVersion(meta.buildAppExecutable(), version)
 
     const executablePath = meta.buildAppExecutable()
 
@@ -390,7 +390,7 @@ async function testDistVersion (distDir: string, version: string) {
 async function testExecutableVersion (buildAppExecutable: string, version: string) {
   log('#testVersion')
 
-  console.log('testing dist package version')
+  console.log('testing built app executable version')
   console.log(`by calling: ${buildAppExecutable} --version`)
 
   const args = ['--version']
