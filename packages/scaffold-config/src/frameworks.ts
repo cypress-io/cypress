@@ -21,11 +21,31 @@ export interface DependencyToInstall {
 
 export type WizardFrontendFramework = typeof WIZARD_FRAMEWORKS[number] & { specPattern?: string }
 
-export async function isDependencyInstalled (dependency: WizardDependency, projectPath: string): Promise<DependencyToInstall> {
+function resolvePackageJSONPath (pkg: string, projectPath: string) {
+  let loc: string
+
   try {
-    const loc = require.resolve(path.join(dependency.package, 'package.json'), {
+    loc = require.resolve(path.join(pkg, 'package.json'), {
       paths: [projectPath],
     })
+  } catch (e) {
+    if (e?.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
+      const entryPath = path.parse(require.resolve(pkg, {
+        paths: [projectPath],
+      }))
+
+      loc = path.join(entryPath.dir, 'package.json')
+    } else {
+      throw e
+    }
+  }
+
+  return loc
+}
+
+export async function isDependencyInstalled (dependency: WizardDependency, projectPath: string): Promise<DependencyToInstall> {
+  try {
+    const loc = resolvePackageJSONPath(dependency.package, projectPath)
 
     const pkg = await fs.readJson(loc) as PkgJson
 
