@@ -176,6 +176,8 @@ function generateSnapshot() {
 var snapshotResult = generateSnapshot.call({})
 delete snapshotResult.customRequire.exports['./package.json']
 delete snapshotResult.customRequire.definitions['./package.json']
+delete snapshotResult.customRequire.exports['./packages/root/index.js']
+delete snapshotResult.customRequire.definitions['./packages/root/index.js']
 generateSnapshot = null
 `,
     'utf8',

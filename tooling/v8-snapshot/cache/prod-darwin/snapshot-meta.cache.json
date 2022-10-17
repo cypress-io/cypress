@@ -39,6 +39,7 @@
     "./node_modules/tcp-port-used/node_modules/debug/src/node.js",
     "./node_modules/trash/node_modules/make-dir/index.js",
     "./node_modules/utif/UTIF.js",
+    "./package.json",
     "./packages/data-context/node_modules/debug/src/node.js",
     "./packages/data-context/node_modules/minimatch/minimatch.js",
     "./packages/electron/lib/install.js",
@@ -46,6 +47,7 @@
     "./packages/https-proxy/lib/ca.js",
     "./packages/net-stubbing/node_modules/debug/src/node.js",
     "./packages/network/node_modules/minimatch/minimatch.js",
+    "./packages/root/index.js",
     "./packages/server/lib/capture.js",
     "./packages/server/lib/modes/record.js",
     "./packages/server/lib/modes/run.ts",
@@ -783,7 +785,6 @@
     "./packages/rewriter/node_modules/parse5-sax-parser/lib/dev-null-stream.js",
     "./packages/rewriter/node_modules/parse5-sax-parser/lib/index.js",
     "./packages/rewriter/node_modules/parse5/lib/tokenizer/named-entity-data.js",
-    "./packages/root/index.js",
     "./packages/scaffold-config/index.js",
     "./packages/scaffold-config/src/detect.ts",
     "./packages/scaffold-config/src/index.ts",
@@ -3430,7 +3431,6 @@
     "./node_modules/yallist/yallist.js",
     "./node_modules/yn/index.js",
     "./node_modules/yn/lenient.js",
-    "./package.json",
     "./packages/config/src/ast-utils/astConfigHelpers.ts",
     "./packages/config/src/utils.ts",
     "./packages/data-context/node_modules/@babel/code-frame/lib/index.js",
@@ -3858,5 +3858,5 @@
     "./tooling/v8-snapshot/cache/prod-darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "c78e38f98d34cd5b63fc7ef21627c4ead89b0ba77f40748eb04f47d04c2ea291"
+  "deferredHash": "7ba88988da9c4dd796241399857f05121d3ed8471c1adba1d16534c1d833e4f3"
 }
