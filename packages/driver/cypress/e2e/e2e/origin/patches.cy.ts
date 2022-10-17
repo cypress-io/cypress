@@ -386,9 +386,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
     describe('from the AUT', () => {
       beforeEach(() => {
         cy.intercept('/test-request').as('testRequest')
-        // cy.origin('http://www.foobar.com:3500', () => {
         cy.stub(Cypress, 'backend').callThrough()
-        // })
 
         cy.visit('/fixtures/primary-origin.html')
         cy.get('a[data-cy="xhr-fetch-requests"]').click()
