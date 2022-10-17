@@ -26,7 +26,8 @@ export default function (Commands, Cypress, cy) {
 
   Cypress.on('run:start', () => {
     Cypress.on('test:before:run:async', () => {
-      const clearPage = Cypress.config('testIsolation') === 'strict' ? navigateAboutBlank(false) : new Cypress.Promise.resolve()
+      // TODO(origin): do we also visit about:blank for component testing
+      const clearPage = (Cypress.config('testIsolation') === 'strict' && Cypress.config('testingType') === 'component') ? navigateAboutBlank(false) : new Cypress.Promise.resolve()
 
       return clearPage
       .then(() => sessions.clearCurrentSessionData())

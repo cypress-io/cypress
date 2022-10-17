@@ -178,16 +178,6 @@ export default function (Commands, Cypress, cy, state, config) {
     }
   }
 
-  // TODO(origin): is this correct??
-  if (Cypress.config('testIsolation') !== 'strict') {
-    // TODO: handle failure here somehow
-    // maybe by tapping into the Cypress reset
-    // stuff, or handling this in the runner itself?
-    Cypress.on('test:before:run:async', () => {
-      return getAndClear()
-    })
-  }
-
   return Commands.addAll({
     getCookie (name, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
       const options: InternalGetCookieOptions = _.defaults({}, userOptions, {

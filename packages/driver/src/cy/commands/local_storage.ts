@@ -21,20 +21,6 @@ const clearLocalStorage = (state, keys) => {
 }
 
 export default (Commands, Cypress, cy, state) => {
-  // TODO(origin): is this correct??
-  if (Cypress.config('testIsolation') !== 'strict') {
-    // this MUST be prepended before anything else
-    Cypress.prependListener('test:before:run', () => {
-      try {
-        // this may fail if the current
-        // window is bound to another origin
-        return clearLocalStorage(state, [])
-      } catch (error) {
-        return null
-      }
-    })
-  }
-
   Commands.addAll({
     clearLocalStorage (keys, options: Partial<Cypress.Loggable> = {}) {
       if (_.isPlainObject(keys)) {
