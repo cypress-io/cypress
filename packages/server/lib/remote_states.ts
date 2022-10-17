@@ -37,6 +37,7 @@ const debug = Debug('cypress:server:remote-states')
  *     port: 443
  *     tld: "com"
  *     domain: "google"
+ *     protocol: "https"
  *   }
  * }
  */
@@ -52,7 +53,7 @@ export class RemoteStates {
   }
 
   get (url: string) {
-    const state = this.remoteStates.get(cors.getOriginPolicy(url))
+    const state = this.remoteStates.get(cors.getSuperDomainOrigin(url))
 
     debug('getting remote state: %o for: %s', state, url)
 
@@ -67,8 +68,8 @@ export class RemoteStates {
     return state
   }
 
-  isPrimaryOrigin (url: string): boolean {
-    return this.primaryOriginKey === cors.getOriginPolicy(url)
+  isPrimarySuperDomainOrigin (url: string): boolean {
+    return this.primaryOriginKey === cors.getSuperDomainOrigin(url)
   }
 
   reset () {
@@ -85,12 +86,12 @@ export class RemoteStates {
     return this.get(this.currentOriginKey) as Cypress.RemoteState
   }
 
-  set (urlOrState: string | Cypress.RemoteState, options: { auth?: {} } = {}, isPrimaryOrigin: boolean = true): Cypress.RemoteState {
+  set (urlOrState: string | Cypress.RemoteState, options: { auth?: {} } = {}, isPrimarySuperDomainOrigin: boolean = true): Cypress.RemoteState {
     let state
 
     if (_.isString(urlOrState)) {
       const remoteOrigin = uri.origin(urlOrState)
-      const remoteProps = cors.parseUrlIntoDomainTldPort(remoteOrigin)
+      const { subdomain: _unused, ...remoteProps } = cors.parseUrlIntoHostProtocolDomainTldPort(remoteOrigin)
 
       if ((urlOrState === '<root>') || !fullyQualifiedRe.test(urlOrState)) {
         state = {
@@ -115,26 +116,26 @@ export class RemoteStates {
       state = urlOrState
     }
 
-    const remoteOriginPolicy = cors.getOriginPolicy(state.origin)
+    const remoteOrigin = cors.getSuperDomainOrigin(state.origin)
 
-    this.currentOriginKey = remoteOriginPolicy
+    this.currentOriginKey = remoteOrigin
 
-    if (isPrimaryOrigin) {
+    if (isPrimarySuperDomainOrigin) {
       // convert map to array
       const stateArray = Array.from(this.remoteStates.entries())
 
       // set the primary remote state and convert back to map
-      stateArray[0] = [remoteOriginPolicy, state]
+      stateArray[0] = [remoteOrigin, state]
       this.remoteStates = new Map(stateArray)
 
-      this.primaryOriginKey = remoteOriginPolicy
+      this.primaryOriginKey = remoteOrigin
     } else {
-      this.remoteStates.set(remoteOriginPolicy, state)
+      this.remoteStates.set(remoteOrigin, state)
     }
 
-    debug('setting remote state %o for %s', state, remoteOriginPolicy)
+    debug('setting remote state %o for %s', state, remoteOrigin)
 
-    return this.get(remoteOriginPolicy) as Cypress.RemoteState
+    return this.get(remoteOrigin) as Cypress.RemoteState
   }
 
   private get config () {

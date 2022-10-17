@@ -11,7 +11,6 @@ import { snapshots } from './retries.mochaEvents.snapshots'
  */
 describe('src/cypress/runner retries mochaEvents', { retries: 0, defaultCommandTimeout: 7500 }, () => {
   // NOTE: for test-retries
-
   it('simple retry', (done) => {
     const { assertMatchingSnapshot } = runCypressInCypressMochaEventsTest(
       snapshots,

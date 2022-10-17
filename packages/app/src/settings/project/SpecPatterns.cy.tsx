@@ -15,7 +15,7 @@ describe('<SpecPatterns />', () => {
     cy.contains('h2', defaultMessages.settingsPage.specPattern.title)
     cy.contains('code', 'specPattern')
     cy.contains('p', defaultMessages.settingsPage.specPattern.description.replace('{0}', 'Learn more'))
-    cy.get('[data-cy="file-match-indicator"]').contains('50 Matches')
+    cy.get('[data-cy="file-match-indicator"]').contains('50 matches')
     cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.cy.{js,jsx,ts,tsx}')
     cy.get('[data-cy="external"]').should('have.attr', 'href').and('eq', 'https://on.cypress.io/test-type-options')
 

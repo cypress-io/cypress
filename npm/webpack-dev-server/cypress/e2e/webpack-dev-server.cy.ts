@@ -31,7 +31,7 @@ describe('Config options', () => {
     cy.visitApp()
     cy.contains('App.cy.jsx').click()
     cy.waitForSpecToFinish()
-    cy.get('.passed > .num').should('contain', 1)
+    cy.get('.passed > .num').should('contain', 2)
 
     cy.withCtx(async (ctx) => {
       const verifyFile = await ctx.file.readFileInProject('wrote-to-file')

@@ -15,13 +15,13 @@ import type {
 } from '@packages/types'
 
 import browserUtils from './browsers/utils'
-import auth from './gui/auth'
-import user from './user'
+import auth from './cloud/auth'
+import user from './cloud/user'
 import cohorts from './cohorts'
 import { openProject } from './open_project'
 import cache from './cache'
 import { graphqlSchema } from '@packages/graphql/src/schema'
-import { openExternal } from '@packages/server/lib/gui/links'
+import { openExternal } from './gui/links'
 import { getUserEditor } from './util/editors'
 import * as savedState from './saved_state'
 import appData from './util/app_data'
@@ -47,7 +47,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       close: browsers.close,
       getBrowsers,
       async ensureAndGetByNameOrPath (nameOrPath: string) {
-        const browsers = await ctx.browser.machineBrowsers()
+        const browsers = await ctx.browser.allBrowsers()
 
         return await ensureAndGetByNameOrPath(nameOrPath, false, browsers)
       },

@@ -88,7 +88,7 @@ export class PrimaryOriginCommunicator extends EventEmitter {
       // where we need to set the crossOriginDriverWindows to source to
       // communicate back to the iframe
       if (messageName === 'bridge:ready' && source) {
-        this.crossOriginDriverWindows[data.originPolicy] = source as Window
+        this.crossOriginDriverWindows[data.origin] = source as Window
       }
 
       // reify any logs coming back from the cross-origin spec bridges to serialize snapshot/consoleProp DOM elements as well as select functions.
@@ -105,7 +105,7 @@ export class PrimaryOriginCommunicator extends EventEmitter {
         data.data.err = reifySerializedError(data.data.err, this.userInvocationStack as string)
       }
 
-      this.emit(messageName, data.data, data.originPolicy, source)
+      this.emit(messageName, data.data, data.origin, source)
 
       return
     }
@@ -137,8 +137,8 @@ export class PrimaryOriginCommunicator extends EventEmitter {
     })
   }
 
-  toSpecBridge (originPolicy: string, event: string, data?: any) {
-    debug('=> to spec bridge', originPolicy, event, data)
+  toSpecBridge (origin: string, event: string, data?: any) {
+    debug('=> to spec bridge', origin, event, data)
 
     const preprocessedData = preprocessForSerialization<any>(data)
 
@@ -148,7 +148,7 @@ export class PrimaryOriginCommunicator extends EventEmitter {
     }
 
     // If there is no crossOriginDriverWindows, there is no need to send the message.
-    this.crossOriginDriverWindows[originPolicy]?.postMessage({
+    this.crossOriginDriverWindows[origin]?.postMessage({
       event,
       data: preprocessedData,
     }, '*')
@@ -161,18 +161,18 @@ export class PrimaryOriginCommunicator extends EventEmitter {
    * @param options - contains boolean to sync globals
    * @returns the response from primary of the event with the same name.
    */
-  toSpecBridgePromise<T> (originPolicy: string, event: string, data?: any) {
+  toSpecBridgePromise<T> (origin: string, event: string, data?: any) {
     return new Promise<T>((resolve, reject) => {
       const dataToSend = sharedPromiseSetup({
         resolve,
         reject,
         data,
         event,
-        specBridgeName: originPolicy,
+        specBridgeName: origin,
         communicator: this,
       })
 
-      this.toSpecBridge(originPolicy, event, dataToSend)
+      this.toSpecBridge(origin, event, dataToSend)
     })
   }
 }
@@ -251,7 +251,7 @@ export class SpecBridgeCommunicator extends EventEmitter {
    * @param {Cypress.ObjectLike} data - any meta data to be sent with the event.
    */
   toPrimary (event: string, data?: Cypress.ObjectLike, options: { syncGlobals: boolean } = { syncGlobals: false }) {
-    const { originPolicy } = $Location.create(window.location.href)
+    const { origin } = $Location.create(window.location.href)
     const eventName = `${CROSS_ORIGIN_PREFIX}${event}`
 
     // Preprocess logs before sending through postMessage() to attempt to serialize some DOM nodes and functions.
@@ -265,14 +265,14 @@ export class SpecBridgeCommunicator extends EventEmitter {
       data = preprocessSnapshotForSerialization(data as any)
     }
 
-    debug('<= to Primary ', event, data, originPolicy)
+    debug('<= to Primary ', event, data, origin)
     if (options.syncGlobals) this.syncGlobalsToPrimary()
 
     this.handleSubjectAndErr(data, (data: Cypress.ObjectLike) => {
       window.top?.postMessage({
         event: eventName,
         data,
-        originPolicy,
+        origin,
       }, '*')
     })
   }
