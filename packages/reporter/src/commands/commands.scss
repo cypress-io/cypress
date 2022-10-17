@@ -131,9 +131,9 @@
 
     .command-group-block {
       @include nested-command-dashes($gray-600);
-      width: 11px;
+      width: 12px;
       min-height: 28px;
-      min-width: 11px;
+      min-width: 12px;
     }
   }
 
@@ -268,6 +268,10 @@
     .command-method,
     .command-message {
       color: $err-header-text;
+    }
+
+    .failed-indicator {
+      vertical-align: middle;
     }
 
     .command-group {
