@@ -498,6 +498,7 @@ export class SnapshotDoctor {
             entryFilePath: this.entryFilePath,
             entryPoint: `./${key}`,
             nodeEnv: this.nodeEnv,
+            supportTypeScript: this.nodeModulesOnly,
           })
 
           assert(result != null, 'expected result from script processor')
@@ -603,6 +604,7 @@ export class SnapshotDoctor {
         includeStrictVerifiers: true,
         deferred: deferredArg,
         norewrite: norewriteArg,
+        supportTypeScript: this.nodeModulesOnly,
       })
 
       return { warnings, meta: meta as Metadata, bundle }

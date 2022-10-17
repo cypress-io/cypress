@@ -257,7 +257,7 @@ require('./packages/server')\
   // Update the root package.json with the next app version so that it is snapshot properly
   fs.writeJSONSync(path.join(CY_ROOT_DIR, 'package.json'), {
     ...jsonRoot,
-    version: version.trim(),
+    version,
   }, { spaces: 2 })
 
   try {
@@ -390,7 +390,7 @@ async function testDistVersion (distDir: string, version: string) {
 
   console.log('app in %s', distDir)
   console.log('built app version', result.stdout)
-  la(result.stdout === version, 'different version reported',
+  la(result.stdout.trim() === version.trim(), 'different version reported',
     result.stdout, 'from input version to build', version)
 
   console.log('✅ using node --version works')
@@ -413,7 +413,7 @@ async function testExecutableVersion (buildAppExecutable: string, version: strin
   la(result.stdout, 'missing output when getting built version', result)
 
   console.log('built app version', result.stdout)
-  la(result.stdout === version, 'different version reported',
+  la(result.stdout.trim() === version.trim(), 'different version reported',
     result.stdout, 'from input version to build', version)
 
   console.log('✅ using --version on the Cypress binary works')

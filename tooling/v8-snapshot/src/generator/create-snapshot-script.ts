@@ -119,6 +119,7 @@ export function assembleScript (
     nodeEnv: string
     resolverMap?: Record<string, string>
     meta?: Metadata
+    supportTypeScript: boolean
   },
 ): { script: Buffer, processedSourceMap?: string } {
   const includeStrictVerifiers = opts.includeStrictVerifiers ?? false
@@ -177,6 +178,7 @@ export function assembleScript (
     nodeEnv: opts.nodeEnv,
     basedir,
     processedSourceMapPath: opts.processedSourcemapExternalPath,
+    supportTypeScript: opts.supportTypeScript,
   }
 
   // 5. Finally return the rendered script buffer and optionally processed
@@ -231,6 +233,7 @@ export async function createSnapshotScript (
       nodeEnv: opts.nodeEnv,
       resolverMap: opts.resolverMap,
       meta,
+      supportTypeScript: opts.supportTypeScript,
     },
   )
 

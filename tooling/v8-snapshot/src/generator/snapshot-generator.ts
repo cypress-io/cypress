@@ -82,6 +82,9 @@ const logError = debug('cypress:snapgen:error')
  *
  * @property minify if `true` the snapshot script will be minified
  *
+ * @property supportTypeScript if `true` then TypeScript should be supported
+ * when using snapshot require
+ *
  * @category snapshot
  */
 export type GenerationOpts = {
@@ -96,6 +99,7 @@ export type GenerationOpts = {
   flags: Flag
   nodeEnv: string
   minify: boolean
+  supportTypeScript: boolean
 }
 
 function getDefaultGenerationOpts (projectBaseDir: string): GenerationOpts {
@@ -109,6 +113,7 @@ function getDefaultGenerationOpts (projectBaseDir: string): GenerationOpts {
     flags: Flag.Script | Flag.MakeSnapshot | Flag.ReuseDoctorArtifacts,
     nodeEnv: 'development',
     minify: false,
+    supportTypeScript: false,
   }
 }
 
@@ -303,6 +308,7 @@ export class SnapshotGenerator {
         baseSourcemapExternalPath: this.snapshotScriptPath.replace('snapshot.js', 'base.snapshot.js.map'),
         processedSourcemapExternalPath: this.snapshotScriptPath.replace('snapshot.js', 'processed.snapshot.js.map'),
         nodeEnv: this.nodeEnv,
+        supportTypeScript: this.nodeModulesOnly,
       })
     } catch (err) {
       logError('Failed creating script')
@@ -406,6 +412,7 @@ export class SnapshotGenerator {
         resolverMap: this.resolverMap,
         auxiliaryData: this.auxiliaryData,
         nodeEnv: this.nodeEnv,
+        supportTypeScript: this.nodeModulesOnly,
       })
     } catch (err) {
       logError('Failed creating script')

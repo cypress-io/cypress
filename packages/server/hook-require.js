@@ -5,6 +5,8 @@ process.env.PROJECT_BASE_DIR = process.env.PROJECT_BASE_DIR ?? path.join(__dirna
 
 const isDev = env === 'dev'
 
+const supportTS = typeof global.snapshotResult === 'undefined' || global.supportTypeScript
+
 function runWithSnapshot () {
   const { snapshotRequire } = require('@packages/v8-snapshot-require')
   const projectBaseDir = process.env.PROJECT_BASE_DIR
@@ -13,8 +15,8 @@ function runWithSnapshot () {
     diagnostics: isDev,
     useCache: true,
     transpileOpts: {
-      supportTS: isDev,
-      initTranspileCache: isDev
+      supportTS,
+      initTranspileCache: supportTS
         ? () => require('dirt-simple-file-cache').DirtSimpleFileCache.initSync(projectBaseDir, { cacheDir: path.join(projectBaseDir, 'node_modules', '.dsfc'), keepInMemoryCache: true })
         : undefined,
       tsconfig: {

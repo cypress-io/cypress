@@ -37,6 +37,7 @@ const setGlobals = read('set-globals')
  * @property basedir the base dir of the project for which we are creating the
  * snapshot
  * @property sourceMap {@link Buffer} with content of raw sourcemaps
+ * @property supportTypeScript see {@link GenerationOpts} supportTypeScript
  */
 export type BlueprintConfig = {
   processPlatform: string
@@ -49,6 +50,7 @@ export type BlueprintConfig = {
   basedir: string
   sourceMap: Buffer | undefined
   processedSourceMapPath: string | undefined
+  supportTypeScript: boolean
 }
 
 const pathSep = path.sep === '\\' ? '\\\\' : path.sep
@@ -98,6 +100,7 @@ export function scriptFromBlueprint (config: BlueprintConfig): {
     nodeEnv,
     basedir,
     sourceMap,
+    supportTypeScript,
   } = config
 
   const normalizedMainModuleRequirePath = forwardSlash(mainModuleRequirePath)
@@ -174,6 +177,7 @@ function generateSnapshot() {
 }
 
 var snapshotResult = generateSnapshot.call({})
+var supportTypeScript = ${supportTypeScript}
 generateSnapshot = null
 `,
     'utf8',
