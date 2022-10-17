@@ -5,11 +5,11 @@ process.env.PROJECT_BASE_DIR = process.env.PROJECT_BASE_DIR ?? path.join(__dirna
 
 const isDev = env === 'dev'
 
-const supportTS = typeof global.snapshotResult === 'undefined' || global.supportTypeScript
-
-function runWithSnapshot () {
+function runWithSnapshot (forceTypeScript) {
   const { snapshotRequire } = require('@packages/v8-snapshot-require')
   const projectBaseDir = process.env.PROJECT_BASE_DIR
+
+  const supportTS = forceTypeScript || typeof global.snapshotResult === 'undefined' || global.supportTypeScript
 
   snapshotRequire(projectBaseDir, {
     diagnostics: isDev,
@@ -30,8 +30,14 @@ function runWithSnapshot () {
   })
 }
 
-if (['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE) || typeof snapshotResult === 'undefined') {
-  require('@packages/ts/register')
-} else {
-  runWithSnapshot()
+const hookRequire = (forceTypeScript) => {
+  if (['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE) || typeof snapshotResult === 'undefined') {
+    require('@packages/ts/register')
+  } else {
+    runWithSnapshot(forceTypeScript)
+  }
+}
+
+module.exports = {
+  hookRequire,
 }
