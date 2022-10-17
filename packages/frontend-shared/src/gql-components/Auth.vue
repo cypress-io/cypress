@@ -219,7 +219,6 @@ const handleLoginOrContinue = async () => {
 }
 
 const handleCancel = () => {
-  // don't kick off auth mutation, just continue no matter
   emit('cancel')
 }
 
