@@ -266,7 +266,7 @@ const CommandDetails = observer(({ model, groupId, aliasesWithDuplicates }) => (
         {model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}
       </span>
     </span>
-    {!!groupId && model.type === 'system' && model.state === 'failed' && <StateIcon aria-hidden className="failed-indicator" state={model.state}/>}
+    {!!groupId && model.type === 'system' && model.state === 'failed' && <StateIcon aria-hidden className='failed-indicator' state={model.state}/>}
     {model.referencesAlias ?
       <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
       : <Message model={model} />

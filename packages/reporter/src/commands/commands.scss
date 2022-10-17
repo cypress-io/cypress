@@ -133,9 +133,9 @@
 
     .command-group-block {
       @include nested-command-dashes($gray-600);
-      width: 11px;
+      width: 12px;
       min-height: 28px;
-      min-width: 11px;
+      min-width: 12px;
     }
   }
 
@@ -276,8 +276,8 @@
       vertical-align: middle;
     }
 
-    .command-group,
-    .show-recovered-test-err {
+
+    .command-group {
       border-color: $err-header-text;
       @include nested-command-dashes($err-header-text);
 
