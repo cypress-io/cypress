@@ -11,7 +11,6 @@ Learn more at https://on.cypress.io/reporters
 Error: Cannot find module '/foo/bar/.projects/e2e/node_modules/module-does-not-exist'
       [stack trace lines]
 
-
 `
 
 exports['e2e reporters supports junit reporter and reporter options 1'] = `
@@ -666,7 +665,6 @@ Learn more at https://on.cypress.io/reporters
 
 Error: this reporter threw an error
       [stack trace lines]
-
 
 `
 
