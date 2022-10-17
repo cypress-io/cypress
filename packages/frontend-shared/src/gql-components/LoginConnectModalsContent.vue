@@ -1,28 +1,24 @@
 <template>
-  <template v-if="loginConnectStore.isLoginConnectOpen">
+  <template v-if="loginConnectStore.isLoginConnectOpen && gqlRef">
     <LoginModal
-      v-if="!loginConnectStore.user.isLoggedIn || keepLoginOpen"
-      :gql="props.gql"
-      :model-value="!loginConnectStore.user.isLoggedIn || keepLoginOpen"
+      v-if="userStatusMatches('isLoggedOut') || keepLoginOpen"
+      :gql="gqlRef"
       :utm-medium="loginConnectStore.utmMedium"
-      :show-connect-button-after-login="loginConnectStore.project.isConfigLoaded && !loginConnectStore.project.isProjectConnected"
-      @connect-project="handleConnectProject"
-      @cancel="handleCancel"
-      @loggedin="handleLoginSuccess(loginConnectStore.project.isProjectConnected)"
-      @update:model-value="handleUpdate(loginConnectStore.project.isProjectConnected, loginConnectStore.user.loginError)"
-    />
-    <CloudConnectModals
-      v-else-if="loginConnectStore.user.isLoggedIn && !keepLoginOpen && !loginConnectStore.project.isProjectConnected"
-      :show="loginConnectStore.user.isLoggedIn"
-      :gql="props.gql"
-      :utm-medium="loginConnectStore.utmMedium"
-      @cancel="handleCancelConnect"
-      @success="handleConnectSuccess"
+      @cancel="closeLoginConnectModal"
+      @close="keepLoginOpen = false"
     />
     <RecordRunModal
-      :is-modal-open="shouldShowRecordedRunsModal"
-      :close="handleCancel"
+      v-else-if="userStatusMatches('needsRecordedRun')"
       :utm-medium="loginConnectStore.utmMedium"
+      @cancel="closeLoginConnectModal"
+    />
+    <CloudConnectModals
+      v-else-if="userStatusMatches('needsProjectConnect') || userStatusMatches('needsOrgConnect')"
+      :show="loginConnectStore.user.isLoggedIn"
+      :gql="gqlRef"
+      :utm-medium="loginConnectStore.utmMedium"
+      @cancel="closeLoginConnectModal"
+      @success="closeLoginConnectModal"
     />
   </template>
 </template>
@@ -34,7 +30,7 @@ import { ref, watch } from 'vue'
 import { useLoginConnectStore } from '../store/login-connect-store'
 import CloudConnectModals from './modals/CloudConnectModals.vue'
 import RecordRunModal from './RecordRunModal.vue'
-import { usePromptManager } from '../composables/usePromptManager'
+import { debouncedWatch } from '@vueuse/core'
 
 gql`
 fragment LoginConnectModalsContent on Query {
@@ -48,93 +44,36 @@ fragment LoginConnectModalsContent on Query {
 `
 
 const props = defineProps<{
-  gql: LoginConnectModalsContentFragment
-}>()
-
-const emit = defineEmits<{
-  (eventName: 'handleConnectProject'): void
+  gql?: LoginConnectModalsContentFragment
 }>()
 
 const loginConnectStore = useLoginConnectStore()
-const { closeLoginConnectModal } = loginConnectStore
-
-const promptManager = usePromptManager()
+const { closeLoginConnectModal, userStatusMatches } = loginConnectStore
 
 // keepLoginOpen is only set if you've just logged in
 // and we want to show the "connect" button instead of "continue"
 const keepLoginOpen = ref(false)
 
-const shouldShowRecordedRunsModal = ref(false)
-
-watch(() => loginConnectStore.user.isLoggedIn, (newVal, oldVal) => {
-  // when login state changes, if we have logged in but are not connected,
-  // keep the "login" modal open in the "connect project" state
-  if (newVal && (!loginConnectStore.project.isProjectConnected || oldVal === false)) {
+watch(() => loginConnectStore.userStatus, (newVal, oldVal) => {
+  if (oldVal === 'isLoggedOut' && newVal !== 'isLoggedOut') {
+    // use this to hold login open after the transition between logged out and logged in
+    // this is to show the temporary "continue" state and its variations
+    // that only exist if you have used the modal to log in
     keepLoginOpen.value = true
-  }
-
-  //Reset shouldShowRecordedRunsModal when logging out
-  if (newVal === false && oldVal === true) {
-    shouldShowRecordedRunsModal.value = false
   }
 })
 
-const handleLoginSuccess = (isProjectConnected?: boolean) => {
-  if (!isProjectConnected && !props.gql.currentProject?.currentTestingType) {
-    keepLoginOpen.value = true
+// in tests, the gql prop can sometimes be `null` for a split second, causing
+// "Detached from DOM" problems, so we are debouncing gql before it gets passed
+// into the login/connect/record modals
+const gqlRef = ref<LoginConnectModalsContentFragment | null>(null)
+
+debouncedWatch(() => props.gql, (newVal) => {
+  if (newVal) {
+    gqlRef.value = newVal
   }
-}
-
-const handleCancel = () => {
-  closeLoginConnectModal()
-}
-
-const determineIfShouldShowRecordRunsModal = () => {
-  keepLoginOpen.value = false
-  shouldShowRecordedRunsModal.value = loginConnectStore.userStatus === 'needsRecordedRun'
-  if (shouldShowRecordedRunsModal.value) {
-    promptManager.setPromptShown('loginModalRecord')
-  }
-}
-
-const handleUpdate = (isProjectConnected: boolean, error: boolean) => {
-  if (error || !props.gql.currentProject?.currentTestingType) {
-    // always allow close if there is an error or no testing type
-    // is found (meaning we are in the launchpad before config-loading,
-    // so projectId will always appear to be missing)
-    closeLoginConnectModal()
-
-    return
-  }
-
-  if (!isProjectConnected) {
-    // avoid double modals
-    keepLoginOpen.value = true
-
-    return
-  }
-
-  determineIfShouldShowRecordRunsModal()
-
-  if (!shouldShowRecordedRunsModal.value) {
-    closeLoginConnectModal()
-  }
-}
-const handleConnectProject = async () => {
-  // switch to Connect modal
-  keepLoginOpen.value = false
-  emit('handleConnectProject')
-}
-
-const handleCancelConnect = () => {
-  closeLoginConnectModal()
-}
-
-const handleConnectSuccess = () => {
-  determineIfShouldShowRecordRunsModal()
-  if (!shouldShowRecordedRunsModal.value) {
-    closeLoginConnectModal()
-  }
-}
+}, {
+  debounce: 10,
+})
 
 </script>

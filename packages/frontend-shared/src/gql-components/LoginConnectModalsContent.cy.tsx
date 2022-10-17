@@ -37,8 +37,12 @@ describe('<LoginConnectModalsContent />', () => {
 
       cy.mountFragment(LoginConnectModalsContentFragmentDoc, {
         onResult: (result) => {
-          // FIXME: not sure why I needed to add organizations and firstOrganization in such detail for TS
+          // TODO: add organizations and firstOrganization to CloudUserStubs, or make an extra stub for when they are needed?
           result.cloudViewer = { ...CloudUserStubs.me,
+            firstOrganization: {
+              __typename: 'CloudOrganizationConnection',
+              nodes: [],
+            },
             organizations: {
               __typename: 'CloudOrganizationConnection',
               nodes: [{
