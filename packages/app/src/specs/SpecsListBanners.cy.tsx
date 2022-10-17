@@ -121,8 +121,8 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 2
         const bannerTrueProjectConditions = {
           'login-banner': [],
           'create-organization-banner': [],
-          'connect-project-banner': [],
-          'record-banner': ['isProjectConnected', 'hasNoRecordedRuns'],
+          'connect-project-banner': ['isConfigLoaded'],
+          'record-banner': ['isProjectConnected', 'hasNoRecordedRuns', 'hasNonExampleSpec', 'isConfigLoaded'],
         } as const
         const loginConnectStore = useLoginConnectStore()
 
@@ -232,12 +232,13 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 2
 
     beforeEach(() => {
       visible.value = true
-      reconnectCallback = cy.stub()
       const loginConnectStore = useLoginConnectStore()
+
+      reconnectCallback = cy.stub(loginConnectStore, 'openLoginConnectModal')
 
       loginConnectStore.setCypressFirstOpened(Date.now() - interval('3 days'))
 
-      cy.mountFragment(SpecsListBannersFragmentDoc, { render: (gql) => <SpecsListBanners gql={gql} onReconnectProject={reconnectCallback} isProjectNotFound={visible} /> })
+      cy.mountFragment(SpecsListBannersFragmentDoc, { render: (gql) => <SpecsListBanners gql={gql} isProjectNotFound={visible} /> })
     })
 
     validateBaseRender()

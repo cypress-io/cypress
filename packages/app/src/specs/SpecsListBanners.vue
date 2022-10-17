@@ -90,7 +90,7 @@
       :prefix-icon="ConnectIcon"
       class="mt-24px"
       data-cy="reconnect-button"
-      @click="emit('reconnectProject')"
+      @click="loginConnectStore.openLoginConnectModal"
     >
       {{ t('runs.errors.notFound.button') }}
     </Button>
@@ -191,7 +191,6 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   (e: 'refetchFailedCloudData'): void
-  (e: 'reconnectProject'): void
 }>()
 
 useSubscription({ query: SpecsListBanners_CheckCloudOrgMembershipDocument })
