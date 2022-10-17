@@ -4,6 +4,7 @@ import { defaultMessages } from '@cy/i18n'
 import Tooltip from '../../components/Tooltip.vue'
 import { ref } from 'vue'
 import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
+import { useLoginConnectStore } from '../../store'
 
 const text = defaultMessages.topNav
 
@@ -37,6 +38,9 @@ const mountSuccess = (viewer: TestCloudViewer = cloudViewer) => {
     ...viewer,
   }
 
+  const { setUserFlag } = useLoginConnectStore()
+
+  setUserFlag('isLoggedIn', true)
   cy.mountFragment(LoginModalFragmentDoc, {
     onResult: (result) => {
       result.__typename = 'Query'
@@ -94,44 +98,6 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       cy.contains('h2', text.login.titleSuccess).should('be.visible')
       cy.contains(text.login.bodySuccess.replace('{0}', cloudViewer.fullName)).should('be.visible')
       cy.contains('a', cloudViewer.fullName).should('have.attr', 'href', 'https://on.cypress.io/dashboard/profile')
-    })
-
-    it('shows "connect project" after login if project is not connected', () => {
-      const connectProjectLabel = defaultMessages.runs.connect.modal.selectProject.connectProject
-      const connectProjectSpy = cy.spy().as('connectProjectSpy')
-
-      const props = {
-        'onConnect-project': () => connectProjectSpy(),
-      }
-
-      // mount with extra event spies
-      cy.mountFragment(LoginModalFragmentDoc, {
-        onResult: (result) => {
-          result.__typename = 'Query'
-          result.authState.browserOpened = true
-          result.cloudViewer = {
-            ...CloudUserStubs.me,
-            firstOrganization: {
-              __typename: 'CloudOrganizationConnection' as const,
-              nodes: [],
-            },
-          }
-        },
-        render: (gqlVal) => (
-          <div class="border-current border-1 h-700px resize overflow-auto">
-            <LoginModal
-              gql={gqlVal}
-              utmMedium="testing"
-              {...props}
-            />
-          </div>),
-      })
-
-      cy.contains('button', connectProjectLabel)
-      .click()
-
-      cy.get('@connectProjectSpy').should('have.been.calledOnce')
-      cy.get('@loggedInSpy').should('have.been.calledOnce')
     })
   })
 
@@ -198,7 +164,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   it('emits an event to close the modal when "Continue" button is clicked', () => {
     mountSuccess()
     cy.findByRole('button', { name: text.login.actionContinue }).click().then(() => {
-      cy.wrap(Cypress.vueWrapper.findComponent(LoginModal).emitted('close')?.[0])
+      cy.wrap(Cypress.vueWrapper.findComponent(LoginModal).emitted('close'))
       .should('have.length', 1)
     })
   })
@@ -261,7 +227,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
         return (
           <div>
             <Tooltip v-slots={tooltipSlots} isInteractive />
-            <LoginModal gql={gqlVal} utmMedium="testing" v-if={isOpen.value} />
+            {isOpen.value && <LoginModal gql={gqlVal} utmMedium="testing" />}
           </div>
         )
       },
