@@ -48,7 +48,6 @@ const mountSuccess = (viewer: TestCloudViewer = cloudViewer) => {
       <div class="border-current border-1 h-700px resize overflow-auto">
         <LoginModal
           gql={gqlVal}
-          modelValue={true}
           utmMedium="testing"
         />
       </div>),
@@ -59,7 +58,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   describe('progress communication', () => {
     it('renders and reaches "opening browser" status', () => {
       cy.mountFragment(LoginModalFragmentDoc, {
-        render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} utmMedium="testing" /></div>,
+        render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} utmMedium="testing" /></div>,
       })
 
       cy.contains('h2', text.login.titleInitial).should('be.visible')
@@ -79,7 +78,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
         render: (gqlVal) => {
           gqlVal.authState.browserOpened = true
 
-          return <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} utmMedium="testing" /></div>
+          return <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} utmMedium="testing" /></div>
         },
       })
 
@@ -100,7 +99,6 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
     it('shows "connect project" after login if project is not connected', () => {
       const connectProjectLabel = defaultMessages.runs.connect.modal.selectProject.connectProject
       const connectProjectSpy = cy.spy().as('connectProjectSpy')
-      const loggedInSpy = cy.spy().as('loggedInSpy')
 
       const props = {
         'onConnect-project': () => connectProjectSpy(),
@@ -113,16 +111,17 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
           result.authState.browserOpened = true
           result.cloudViewer = {
             ...CloudUserStubs.me,
+            firstOrganization: {
+              __typename: 'CloudOrganizationConnection' as const,
+              nodes: [],
+            },
           }
         },
         render: (gqlVal) => (
           <div class="border-current border-1 h-700px resize overflow-auto">
             <LoginModal
               gql={gqlVal}
-              modelValue={true}
               utmMedium="testing"
-              showConnectButtonAfterLogin={true}
-              onLoggedin={loggedInSpy}
               {...props}
             />
           </div>),
@@ -148,7 +147,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
         },
         render: (gqlVal) =>
           (<div class="border-current border-1 h-700px resize overflow-auto">
-            <LoginModal gql={gqlVal} modelValue={true} utmMedium="testing"/>
+            <LoginModal gql={gqlVal} utmMedium="testing"/>
           </div>),
       })
 
@@ -162,12 +161,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
     })
 
     it('shows non-browser errors from login process', () => {
-      const updateSpy = cy.spy().as('updateSpy')
-      const methods = {
-        'onUpdate:modelValue': (newValue) => {
-          updateSpy(newValue)
-        },
-      }
+      const cancelSpy = cy.spy().as('cancelSpy')
       const errorText = 'The flux capacitor ran out of battery'
 
       cy.mountFragment(LoginModalFragmentDoc, {
@@ -176,7 +170,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
           gqlVal.authState.message = errorText
 
           return (<div class="border-current border-1 h-700px resize overflow-auto">
-            <LoginModal gql={gqlVal} modelValue={true} {...methods} utmMedium="testing"/>
+            <LoginModal gql={gqlVal} onCancel={cancelSpy} utmMedium="testing"/>
           </div>)
         },
       })
@@ -190,7 +184,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
       // but we can test that cancelling closes the modal here:
       cy.contains('button', text.login.actionCancel).click()
-      cy.get('@updateSpy').should('have.been.calledWith', false)
+      cy.get('@cancelSpy').should('have.been.called')
     })
   })
 
@@ -204,8 +198,8 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   it('emits an event to close the modal when "Continue" button is clicked', () => {
     mountSuccess()
     cy.findByRole('button', { name: text.login.actionContinue }).click().then(() => {
-      cy.wrap(Cypress.vueWrapper.findComponent(LoginModal).emitted('update:modelValue')?.[0])
-      .should('deep.equal', [false])
+      cy.wrap(Cypress.vueWrapper.findComponent(LoginModal).emitted('close')?.[0])
+      .should('have.length', 1)
     })
   })
 
@@ -216,7 +210,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
     it('renders correct components if there is no internet connection', () => {
       cy.mountFragment(LoginModalFragmentDoc, {
-        render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} utmMedium="testing"/></div>,
+        render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} utmMedium="testing"/></div>,
       })
 
       cy.goOffline()
@@ -229,7 +223,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
     it('shows login action when the internet is back', () => {
       cy.mountFragment(LoginModalFragmentDoc, {
-        render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} utmMedium="testing"/></div>,
+        render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} utmMedium="testing"/></div>,
       })
 
       cy.goOffline()
@@ -267,7 +261,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
         return (
           <div>
             <Tooltip v-slots={tooltipSlots} isInteractive />
-            <LoginModal gql={gqlVal} utmMedium="testing" modelValue={isOpen.value} />
+            <LoginModal gql={gqlVal} utmMedium="testing" v-if={isOpen.value} />
           </div>
         )
       },
