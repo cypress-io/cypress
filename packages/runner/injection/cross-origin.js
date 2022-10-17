@@ -33,6 +33,13 @@ const findCypress = () => {
   }
 }
 
+// Event listener to echo back the current location of the iframe
+window.addEventListener('message', (event) => {
+  if (event.data === 'aut:cypress:location') {
+    event.ports[0].postMessage(window.location.href)
+  }
+})
+
 // Post the before unload event. We post the load event here instead of in the cross origin communicator
 // because we want to notify the primary cypress instance of unload events even if a corresponding spec bridge
 // has not been created.
@@ -67,13 +74,6 @@ window.addEventListener('error', handleErrorEvent)
 const documentCookiePatch = patchDocumentCookie(cypressConfig.simulatedCookies)
 
 const Cypress = findCypress()
-
-// Event listener to echo back the current location of the iframe
-window.addEventListener('message', (event) => {
-  if (event.data === 'aut:cypress:location') {
-    event.ports[0].postMessage(window.location.href)
-  }
-})
 
 // return null to trick contentWindow into thinking
 // its not been iFramed if modifyObstructiveCode is true
