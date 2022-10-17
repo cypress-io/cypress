@@ -126,5 +126,7 @@ generates:
     <<: *vueTesting
 
   './packages/frontend-shared/src/generated/graphql-test.ts':
-    documents: './packages/frontend-shared/src/gql-components/**/*.{vue,ts,tsx,js,jsx}'
+    documents: 
+      - './packages/frontend-shared/src/gql-components/**/*.{vue,ts,tsx,js,jsx}'
+      - './packages/frontend-shared/src/composables/**/*.{vue,ts,tsx,js,jsx}'
     <<: *vueTesting
