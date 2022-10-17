@@ -21,14 +21,9 @@
 -->
 
 <template>
-  <template
-    v-if="query.data.value"
-  >
-    <LoginConnectModalsContent
-      :gql="query.data.value"
-      @handleConnectProject="executeQuery"
-    />
-  </template>
+  <LoginConnectModalsContent
+    :gql="query.data.value"
+  />
 </template>
 <script setup lang="ts">
 import LoginConnectModalsContent from './LoginConnectModalsContent.vue'
@@ -50,6 +45,8 @@ watch(() => loginConnectStore.isLoginConnectOpen, (newVal) => {
   if (newVal) {
     executeQuery()
   }
+}, {
+  immediate: true,
 })
 
 const executeQuery = async () => {
