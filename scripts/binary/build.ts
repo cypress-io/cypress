@@ -161,6 +161,11 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   const electronVersion = electron.getElectronVersion()
   const electronNodeVersion = await electron.getElectronNodeVersion()
 
+  fs.writeJSONSync(path.join(CY_ROOT_DIR, 'package.json'), {
+    ...jsonRoot,
+    version,
+  }, { spaces: 2 })
+
   fs.writeJSONSync(meta.distDir('package.json'), {
     name: 'cypress',
     productName: 'Cypress',
