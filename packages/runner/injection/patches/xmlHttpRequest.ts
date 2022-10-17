@@ -1,4 +1,4 @@
-import { captureFullRequestUrl, postMessagePromise } from './utils'
+import { captureFullRequestUrl, requestSentWithCredentials } from './utils'
 
 export const patchXmlHttpRequest = (window: Window) => {
   // intercept method calls and add cypress headers to determine cookie applications in the proxy
@@ -21,24 +21,11 @@ export const patchXmlHttpRequest = (window: Window) => {
     try {
       // if the option is specified, communicate it to the the server to the proxy can make the request aware if it needs to potentially apply cross origin cookies
       // if the option isn't set, we can imply the default as we know the resource type in the proxy
-      if (this._url) {
-        await postMessagePromise({
-          event: 'backend:request',
-          data: {
-            args:
-            [
-              'request:sent:with:credentials',
-              {
-                // TODO: might need to go off more information here or at least make collisions less likely
-                url: this._url,
-                resourceType: 'xhr',
-                credentialStatus: this.withCredentials,
-              },
-            ],
-          },
-          timeout: 2000,
-        })
-      }
+      await requestSentWithCredentials({
+        url: this._url,
+        resourceType: 'xhr',
+        credentialStatus: this.withCredentials,
+      })
     } finally {
       // if our internal logic errors for whatever reason, do NOT block the end user and continue the request
       return originalXmlHttpRequestSend.apply(this, args)

@@ -1,4 +1,4 @@
-import { captureFullRequestUrl, postMessagePromise } from './utils'
+import { captureFullRequestUrl, requestSentWithCredentials } from './utils'
 
 export const patchFetch = (window) => {
   // if fetch is available in the browser, or is polyfilled by whatwg fetch
@@ -34,24 +34,11 @@ export const patchFetch = (window) => {
       credentials = credentials || 'same-origin'
       // if the option is specified, communicate it to the the server to the proxy can make the request aware if it needs to potentially apply cross origin cookies
       // if the option isn't set, we can imply the default as we know the resource type in the proxy
-      if (url) {
-        await postMessagePromise({
-          event: 'backend:request',
-          data: {
-            args:
-            [
-              'request:sent:with:credentials',
-              {
-                // TODO: might need to go off more information here or at least make collisions less likely
-                url,
-                resourceType: 'fetch',
-                credentialStatus: credentials,
-              },
-            ],
-          },
-          timeout: 2000,
-        })
-      }
+      await requestSentWithCredentials({
+        url,
+        resourceType: 'fetch',
+        credentialStatus: credentials,
+      })
     } finally {
       // if our internal logic errors for whatever reason, do NOT block the end user and continue the request
       return originalFetch.apply(this, args)
