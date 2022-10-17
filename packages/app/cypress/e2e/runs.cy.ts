@@ -81,7 +81,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
-        cy.contains('button', 'Log In').click()
+        cy.contains('button', 'Log in').click()
       })
 
       cy.withCtx((ctx, o) => {
@@ -272,10 +272,10 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.contains('button', 'Log in to the Cypress Dashboard').click()
 
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).as('logInModal').within(() => {
-        cy.findByRole('button', { name: 'Log In' }).click()
+        cy.findByRole('button', { name: 'Log in' }).click()
       })
 
-      cy.findByRole('dialog', { name: 'Login Successful' }).within(() => {
+      cy.findByRole('dialog', { name: 'Login successful' }).within(() => {
         cy.findByRole('button', { name: 'Connect project' }).click()
       })
 
@@ -443,7 +443,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.findByText(defaultMessages.runs.errors.notFound.button).should('be.visible').click()
       cy.get('[aria-modal="true"]').should('exist')
       cy.get('[data-cy="selectProject"] button').should('have.text', 'Mock Project')
-      cy.findByText(defaultMessages.runs.connect.modal.selectProject.connectProject).click()
+      cy.get('[data-cy="connect-project"]').click()
       cy.get('[data-cy="runs"]', { timeout: 7500 })
     })
   })
