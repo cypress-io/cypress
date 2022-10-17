@@ -20,7 +20,6 @@
     />
     <RunsEmpty
       v-else-if="!currentProject?.cloudProject?.runs?.nodes.length"
-      :gql="currentProject"
     />
     <div
       v-else
@@ -80,7 +79,6 @@ fragment RunsContainer on Query {
   currentProject {
     id
     projectId
-    ...RunsEmpty
     ...RunsConnectSuccessAlert
     cloudProject {
       __typename

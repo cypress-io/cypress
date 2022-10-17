@@ -25,7 +25,7 @@ describe('Launchpad: Open Mode', () => {
     cy.visitLaunchpad()
     cy.get('[data-cy=header-bar-content]').contains('e2e testing', { matchCase: false })
     // e2e testing is configured for the todo project, so we don't expect an error.
-    cy.get('h1').should('contain', 'Choose a Browser')
+    cy.get('h1').should('contain', 'Choose a browser')
   })
 
   describe('request for Cypress manifest', () => {
@@ -40,7 +40,7 @@ describe('Launchpad: Open Mode', () => {
 
     it('includes x-framework and x-dev-server, even when launched in e2e mode', () => {
       cy.visitLaunchpad()
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.get('h1').should('contain', 'Choose a browser')
       cy.withCtx((ctx, o) => {
         expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
           headers: {
@@ -54,7 +54,7 @@ describe('Launchpad: Open Mode', () => {
     describe('logged-in state', () => {
       it(`sends 'false' when not logged in`, () => {
         cy.visitLaunchpad()
-        cy.get('h1').should('contain', 'Choose a Browser')
+        cy.get('h1').should('contain', 'Choose a browser')
         cy.withCtx((ctx, o) => {
           expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
             headers: {
@@ -67,7 +67,7 @@ describe('Launchpad: Open Mode', () => {
       it(`sends 'true' when logged in`, () => {
         cy.loginUser()
         cy.visitLaunchpad()
-        cy.get('h1').should('contain', 'Choose a Browser')
+        cy.get('h1').should('contain', 'Choose a browser')
         cy.withCtx((ctx, o) => {
           expect(ctx.util.fetch).to.have.been.calledWithMatch('https://download.cypress.io/desktop.json', {
             headers: {
@@ -85,7 +85,7 @@ describe('Launchpad: Open Mode', () => {
     cy.visitLaunchpad()
     cy.get('[data-cy=header-bar-content]').contains('component testing', { matchCase: false })
     // Component testing is not configured for the todo project
-    cy.get('h1').should('contain', 'Project Setup')
+    cy.get('h1').should('contain', 'Project setup')
   })
 
   // since circle cannot have firefox installed by default,
@@ -103,7 +103,7 @@ describe('Launchpad: Open Mode', () => {
       // Need to visit after args have been configured, todo: fix in #18776
       cy.visitLaunchpad()
       cy.contains('E2E Testing').click()
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.get('h1').should('contain', 'Choose a browser')
       cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
       cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
     })
@@ -117,7 +117,7 @@ describe('Launchpad: Open Mode', () => {
 
       // Need to visit after args have been configured, todo: fix in #18776
       cy.visitLaunchpad()
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.get('h1').should('contain', 'Choose a browser')
       cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
       cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
 
@@ -176,8 +176,8 @@ describe('Launchpad: Open Mode', () => {
 
       cy.visitLaunchpad()
       cy.findByTestId('project-card')
-      cy.get('[aria-label="Project Actions"]').click()
-      cy.get('button').contains('Open In IDE').click()
+      cy.get('[aria-label="Project actions"]').click()
+      cy.get('button').contains('Open in IDE').click()
 
       cy.get('[data-cy="choose-editor-modal"]').as('modal')
 
@@ -185,13 +185,13 @@ describe('Launchpad: Open Mode', () => {
       cy.get('@modal').should('not.exist')
 
       cy.findByTestId('project-card')
-      cy.get('[aria-label="Project Actions"]').click()
-      cy.get('button').contains('Open In IDE').click()
+      cy.get('[aria-label="Project actions"]').click()
+      cy.get('button').contains('Open in IDE').click()
 
       cy.intercept('POST', 'mutation-ChooseExternalEditorModal_SetPreferredEditorBinary').as('SetPreferred')
       cy.get('@modal').contains('Choose your editor...').click()
       cy.get('@modal').contains('Well known editor').click()
-      cy.get('@modal').contains('Save Changes').click()
+      cy.get('@modal').contains('Save changes').click()
       cy.wait('@SetPreferred').its('request.body.variables.value').should('include', '/usr/bin/well-known')
     })
 
@@ -202,10 +202,10 @@ describe('Launchpad: Open Mode', () => {
 
       cy.visitLaunchpad()
       cy.findByTestId('project-card')
-      cy.get('[aria-label="Project Actions"]').click()
+      cy.get('[aria-label="Project actions"]').click()
 
       cy.intercept('POST', 'mutation-GlobalPage_OpenInFinder').as('OpenInFinder')
-      cy.get('button').contains('Open In Finder').click()
+      cy.get('button').contains('Open in Finder').click()
 
       cy.wait('@OpenInFinder')
 
@@ -233,13 +233,13 @@ describe('Launchpad: Open Mode', () => {
     cy.visitLaunchpad()
 
     cy.get('body').should('not.contain.text', 'Your project does not contain a default supportFile.')
-    cy.get('h1').should('contain', 'Choose a Browser')
+    cy.get('h1').should('contain', 'Choose a browser')
   })
 
   it('opens project with spaces in path', () => {
     cy.scaffoldProject('simple with spaces')
     cy.openProject('simple with spaces', ['--e2e'])
     cy.visitLaunchpad()
-    cy.get('h1').should('contain', 'Choose a Browser')
+    cy.get('h1').should('contain', 'Choose a browser')
   })
 })

@@ -55,8 +55,8 @@ describe('resolveConfig', function () {
 
       const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite)
 
-      expect(viteConfig.plugins).to.have.lengthOf(1)
-      expect(viteConfig.plugins[0].name).to.equal('cypress:main')
+      expect(viteConfig.plugins).to.have.lengthOf(2)
+      expect(viteConfig.plugins.map((plugin) => plugin.name)).not.to.contain('cypress:inspect')
     })
 
     context('with CYPRESS_INTERNAL_VITE_INSPECT provided', () => {
@@ -74,8 +74,8 @@ describe('resolveConfig', function () {
 
         const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite)
 
-        expect(viteConfig.plugins).to.have.lengthOf(2)
-        expect(viteConfig.plugins[1].name).to.equal('cypress:inspect')
+        expect(viteConfig.plugins).to.have.lengthOf(3)
+        expect(viteConfig.plugins.map((plugin) => plugin.name)).to.contain('cypress:inspect')
       })
 
       it('should not add inspect plugin if not installed', async () => {
@@ -84,9 +84,35 @@ describe('resolveConfig', function () {
 
         const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite)
 
-        expect(viteConfig.plugins).to.have.lengthOf(1)
-        expect(viteConfig.plugins[0].name).to.equal('cypress:main')
+        expect(viteConfig.plugins).to.have.lengthOf(2)
+        expect(viteConfig.plugins.map((plugin) => plugin.name)).not.to.contain('cypress:inspect')
       })
+    })
+  })
+
+  describe('file watching', () => {
+    let viteDevServerConfig: ViteDevServerConfig
+
+    beforeEach(async () => {
+      const projectRoot = await scaffoldSystemTestProject('vite-inspect')
+
+      viteDevServerConfig = getViteDevServerConfig(projectRoot)
+    })
+
+    it('should be disabled in run mode', async () => {
+      viteDevServerConfig.cypressConfig.isTextTerminal = true
+      const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite)
+
+      expect(viteConfig.server?.watch?.ignored).to.eql('**/*')
+      expect(viteConfig.server?.hmr).to.be.false
+    })
+
+    it('uses defaults in open mode', async () => {
+      viteDevServerConfig.cypressConfig.isTextTerminal = false
+      const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite)
+
+      expect(viteConfig.server?.watch?.ignored).to.be.undefined
+      expect(viteConfig.server?.hmr).to.be.undefined
     })
   })
 })

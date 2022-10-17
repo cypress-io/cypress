@@ -96,7 +96,7 @@ export default {
     throw new Error(`The switch/case value: '${value}' did not match any cases: ${keys.join(', ')}.`)
   },
 
-  reduceProps (obj, props: string[] = []) {
+  reduceProps (obj, props: readonly string[] = []) {
     if (!obj) {
       return null
     }

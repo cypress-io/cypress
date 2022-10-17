@@ -215,17 +215,17 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
 
         cy.contains('button', defaultMessages.createSpec.viewSpecPatternButton)
         .as('resultsCount')
-        .should('contain.text', '0 of 50 Matches')
+        .should('contain.text', '0 of 50 matches')
 
         // confirm results clear correctly
         cy.contains('button', defaultMessages.noResults.clearSearch).click()
 
         cy.get('@resultsCount')
-        .should('contain.text', '50 Matches')
+        .should('contain.text', '50 matches')
         // the exact wording here can be deceptive so confirm it's not still
         // displaying "of", since X of 50 Matches would pass for containing "50 matches"
         // but would be wrong.
-        .should('not.contain.text', 'of 50 Matches')
+        .should('not.contain.text', 'of 50 matches')
       })
 
       it('calls gql mutation to save updated filter', () => {

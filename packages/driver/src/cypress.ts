@@ -175,7 +175,7 @@ class $Cypress {
     _.extend(this.$, $)
   }
 
-  configure (config: Cypress.ObjectLike = {}) {
+  configure (config: Record<string, any> = {}) {
     const domainName = config.remote ? config.remote.domainName : undefined
 
     // set domainName but allow us to turn
@@ -328,8 +328,6 @@ class $Cypress {
     this.events.proxyTo(this.cy)
 
     $scriptUtils.runScripts(specWindow, scripts)
-    // TODO: remove this after making the type of `runScripts` more specific.
-    // @ts-expect-error
     .catch((error) => {
       this.runner.onSpecError('error')({ error })
     })
@@ -361,7 +359,6 @@ class $Cypress {
     })
     .then(() => {
       this.cy.initialize(this.$autIframe)
-
       this.onSpecReady()
     })
   }
@@ -800,7 +797,7 @@ class $Cypress {
     }
   }
 
-  static create (config) {
+  static create (config: Record<string, any>) {
     const cypress = new $Cypress()
 
     cypress.configure(config)

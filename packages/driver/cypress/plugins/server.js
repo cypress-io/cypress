@@ -8,6 +8,7 @@ const path = require('path')
 const Promise = require('bluebird')
 const multer = require('multer')
 const upload = multer({ dest: 'cypress/_test-output/' })
+const { cors } = require('@packages/network')
 
 const PATH_TO_SERVER_PKG = path.dirname(require.resolve('@packages/server'))
 
@@ -296,17 +297,20 @@ const createApp = (port) => {
   })
 
   app.get('/test-request-credentials', (req, res) => {
+    const origin = cors.getOrigin(req['headers']['referer'])
+
     res
-    .setHeader('Access-Control-Allow-Origin', req['headers']['origin'])
+    .setHeader('Access-Control-Allow-Origin', origin)
     .setHeader('Access-Control-Allow-Credentials', 'true')
     .sendStatus(200)
   })
 
   app.get('/set-cookie-credentials', (req, res) => {
     const { cookie } = req.query
+    const origin = cors.getOrigin(req['headers']['referer'])
 
     res
-    .setHeader('Access-Control-Allow-Origin', req['headers']['origin'])
+    .setHeader('Access-Control-Allow-Origin', origin)
     .setHeader('Access-Control-Allow-Credentials', 'true')
     .append('Set-Cookie', cookie)
     .sendStatus(200)

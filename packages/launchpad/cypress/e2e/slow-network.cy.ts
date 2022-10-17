@@ -35,14 +35,14 @@ describe('slow network: launchpad', () => {
     cy.visitLaunchpad()
     cy.get('[data-cy=top-nav-cypress-version-current-link]').should('not.exist')
     cy.contains('E2E Testing').click()
-    cy.get('h1').should('contain', 'Choose a Browser')
+    cy.get('h1').should('contain', 'Choose a browser')
   })
 
   // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/21897
   it.skip('shows the versions after they resolve', () => {
     cy.visitLaunchpad()
     cy.get('[data-cy=top-nav-cypress-version-current-link]').should('not.exist')
-    cy.contains('Log In')
+    cy.contains('Log in')
     cy.wait(500)
     cy.withCtx(async (ctx, o) => {
       o.testState.pendingFetches.map((f) => f.resolve())

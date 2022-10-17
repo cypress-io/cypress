@@ -958,20 +958,20 @@ export default {
   },
 
   navigation: {
-    cross_origin ({ message, originPolicy, configFile, projectRoot }) {
+    cross_origin ({ message, origin, configFile, projectRoot }) {
       return {
         message: stripIndent`\
           Cypress detected a cross origin error happened on page load:
 
             > ${message}
 
-          Before the page load, you were bound to the origin policy:
+          Before the page load, you were bound to the origin:
 
-            > ${originPolicy}
+            > ${origin}
 
-          A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
+          A cross origin error happens when your application navigates to a new URL which does not match the origin above.
 
-          A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
+          A new URL does not match the origin if the 'protocol', 'port' (if specified), and/or 'host' are different.
 
           Cypress does not allow you to navigate to a different origin URL within a single test.
 
@@ -1234,7 +1234,7 @@ export default {
 
           This error was thrown by a cross origin page. If you wish to suppress this error you will have to use the cy.origin command to handle the error prior to visiting the page.
 
-          \`cy.origin('${autLocation.originPolicy}', () => {\`
+          \`cy.origin('${autLocation.origin}', () => {\`
           \`  cy.on('uncaught:exception', (e) => {\`
           \`    if (e.message.includes('Things went bad')) {\`
           \`      // we expected this error, so let's ignore it\`
@@ -1681,11 +1681,26 @@ export default {
       message: 'Your `cy.session` **validate** callback {{reason}}.',
     },
     session: {
-      duplicateId: {
-        message: stripIndent`
-        You may not call ${cmd('session')} with a previously used name and different options. If you want to specify different options, please use a unique name other than **{{id}}**.
-        `,
-        docsUrl: 'https://on.cypress.io/session',
+      duplicateId ({ id, hasUniqSetupDefinition, hasUniqValidateDefinition, hasUniqPersistence }) {
+        const differences: string[] = []
+
+        if (hasUniqSetupDefinition) {
+          differences.push('setup function')
+        }
+
+        if (hasUniqValidateDefinition) {
+          differences.push('validate function')
+        }
+
+        if (hasUniqPersistence) {
+          differences.push('persistence')
+        }
+
+        return {
+          message: stripIndent`
+           This session already exists. You may not create a new session with a previously used identifier. If you want to create a new session with a different ${differences.join(' and ')}, please call ${cmd('session')} with a unique identifier other than **${id}**.`,
+          docsUrl: 'https://on.cypress.io/session',
+        }
       },
       wrongArgId: {
         message: stripIndent`
@@ -1710,6 +1725,13 @@ export default {
         message: stripIndent`
         ${cmd('session')} was passed an invalid option value. **{{key}}** must be of type **{{expected}}** but was **{{actual}}**.
         `,
+        docsUrl: 'https://on.cypress.io/session',
+      },
+      missing_global_setup: {
+        message: stripIndent`
+        In order to restore a global ${cmd('session')}, provide a \`setup\` as the second argument:
+
+        \`cy.session(id, setup, { cacheAcrossSpecs: true })\``,
         docsUrl: 'https://on.cypress.io/session',
       },
       not_found: {
@@ -2148,7 +2170,7 @@ export default {
         message: stripIndent`${cmd('visit')} was called to visit a cross origin site with an \`onLoad\` callback. \`onLoad\` callbacks can only be used with same origin sites.
           If you wish to specify an \`onLoad\` callback please use the \`cy.origin\` command to setup a \`window:load\` event prior to visiting the cross origin site.
 
-          \`cy.origin('${args.autLocation.originPolicy}', () => {\`
+          \`cy.origin('${args.autLocation.origin}', () => {\`
           \`  cy.on('window:load', () => {\`
           \`    <onLoad callback goes here>\`
           \`  })\`
@@ -2163,7 +2185,7 @@ export default {
         message: stripIndent`${cmd('visit')} was called to visit a cross origin site with an \`onBeforeLoad\` callback. \`onBeforeLoad\` callbacks can only be used with same origin sites.
         If you wish to specify an \`onBeforeLoad\` callback please use the \`cy.origin\` command to setup a \`window:before:load\` event prior to visiting the cross origin site.
 
-        \`cy.origin('${args.autLocation.originPolicy}', () => {\`
+        \`cy.origin('${args.autLocation.origin}', () => {\`
         \`  cy.on('window:before:load', () => {\`
         \`    <onBeforeLoad callback goes here>\`
         \`  })\`
@@ -2286,7 +2308,6 @@ export default {
   webkit: {
     docsUrl: 'https://on.cypress.io/webkit-experiment',
     origin: '`cy.origin()` is not currently supported in experimental WebKit.',
-    session: '`cy.session()` is not currently supported in experimental WebKit.',
   },
 
   window: {
