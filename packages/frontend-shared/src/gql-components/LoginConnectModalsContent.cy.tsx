@@ -31,9 +31,13 @@ describe('<LoginConnectModalsContent />', () => {
 
   context('when user is logged in', () => {
     it('shows "Create Project" state if project is not set up', () => {
-      const { openLoginConnectModal, setUserFlag } = useLoginConnectStore()
+      const { openLoginConnectModal, setUserFlag, setProjectFlag } = useLoginConnectStore()
 
       setUserFlag('isLoggedIn', true)
+      setUserFlag('isMemberOfOrganization', true)
+      setUserFlag('isOrganizationLoaded', true)
+      setProjectFlag('isConfigLoaded', true)
+      setProjectFlag('isProjectConnected', false)
 
       cy.mountFragment(LoginConnectModalsContentFragmentDoc, {
         onResult: (result) => {
@@ -41,7 +45,7 @@ describe('<LoginConnectModalsContent />', () => {
           result.cloudViewer = { ...CloudUserStubs.me,
             firstOrganization: {
               __typename: 'CloudOrganizationConnection',
-              nodes: [],
+              nodes: [{ __typename: 'CloudOrganization', id: '122' }],
             },
             organizations: {
               __typename: 'CloudOrganizationConnection',

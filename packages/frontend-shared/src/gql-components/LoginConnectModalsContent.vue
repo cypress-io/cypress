@@ -61,6 +61,8 @@ watch(() => loginConnectStore.userStatus, (newVal, oldVal) => {
     // that only exist if you have used the modal to log in
     keepLoginOpen.value = true
   }
+}, {
+  immediate: true,
 })
 
 // in tests, the gql prop can sometimes be `null` for a split second, causing
@@ -74,6 +76,7 @@ debouncedWatch(() => props.gql, (newVal) => {
   }
 }, {
   debounce: 10,
+  immediate: true,
 })
 
 </script>
