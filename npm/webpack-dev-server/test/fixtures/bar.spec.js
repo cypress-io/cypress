@@ -1,1 +1,3 @@
+import './dependency'
+
 const bar = () => {}

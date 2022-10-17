@@ -1,5 +1,6 @@
 import debugLib from 'debug'
-import type { Configuration } from 'webpack-dev-server-3'
+import type { Configuration as WebpackDevServer3Configuration } from 'webpack-dev-server-3'
+import type { Configuration as WebpackDevServer4Configuration } from 'webpack-dev-server'
 
 import type { WebpackDevServerConfig } from './devServer'
 import type { SourceRelativeWebpackResult } from './helpers/sourceRelativeWebpackModules'
@@ -66,8 +67,9 @@ function webpackDevServer4 (
   finalWebpackConfig: Record<string, any>,
 ) {
   const { devServerConfig: { cypressConfig: { devServerPublicPathRoute } } } = config
+  const isOpenMode = !config.devServerConfig.cypressConfig.isTextTerminal
   const WebpackDevServer = config.sourceWebpackModulesResult.webpackDevServer.module
-  const webpackDevServerConfig = {
+  const webpackDevServerConfig: WebpackDevServer4Configuration = {
     host: '127.0.0.1',
     port: 'auto',
     // @ts-ignore
@@ -77,6 +79,8 @@ function webpackDevServer4 (
       stats: finalWebpackConfig.stats ?? 'minimal',
     },
     hot: false,
+    // Only enable file watching & reload when executing tests in `open` mode
+    liveReload: isOpenMode,
   }
 
   const server = new WebpackDevServer(webpackDevServerConfig, compiler)
@@ -93,8 +97,9 @@ function webpackDevServer3 (
   finalWebpackConfig: Record<string, any>,
 ) {
   const { devServerConfig: { cypressConfig: { devServerPublicPathRoute } } } = config
+  const isOpenMode = !config.devServerConfig.cypressConfig.isTextTerminal
   const WebpackDevServer = config.sourceWebpackModulesResult.webpackDevServer.module
-  const webpackDevServerConfig: Configuration = {
+  const webpackDevServerConfig: WebpackDevServer3Configuration = {
     // @ts-ignore
     ...finalWebpackConfig.devServer ?? {},
     hot: false,
@@ -103,6 +108,8 @@ function webpackDevServer3 (
     publicPath: devServerPublicPathRoute,
     noInfo: false,
     stats: finalWebpackConfig.stats ?? 'minimal',
+    // Only enable file watching & reload when executing tests in `open` mode
+    liveReload: isOpenMode,
   }
 
   const server = new WebpackDevServer(compiler, webpackDevServerConfig)

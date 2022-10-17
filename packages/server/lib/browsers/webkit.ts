@@ -70,6 +70,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     },
     extensions: [],
     args: [],
+    env: {},
   }
 
   const launchOptions = await utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options)
@@ -91,7 +92,15 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   const pwBrowser = await pw.webkit.connect(pwServer.wsEndpoint())
 
-  wkAutomation = await WebKitAutomation.create(automation, pwBrowser, url, options.downloadsFolder, options.videoApi)
+  wkAutomation = await WebKitAutomation.create({
+    automation,
+    browser: pwBrowser,
+    initialUrl: url,
+    downloadsFolder: options.downloadsFolder,
+    shouldMarkAutIframeRequests: !!options.experimentalSessionAndOrigin,
+    videoApi: options.videoApi,
+  })
+
   automation.use(wkAutomation)
 
   class WkInstance extends EventEmitter implements BrowserInstance {

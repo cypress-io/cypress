@@ -1,3 +1,35 @@
+# [@cypress/vite-dev-server-v3.3.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.3.0...@cypress/vite-dev-server-v3.3.1) (2022-10-11)
+
+
+### Bug Fixes
+
+* CSS import in CT Support file is not working ([#24117](https://github.com/cypress-io/cypress/issues/24117)) ([5af6b27](https://github.com/cypress-io/cypress/commit/5af6b27ed972ba9bc03d4a7fa4eaaeb2c7848fc3))
+
+# [@cypress/vite-dev-server-v3.3.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.2.0...@cypress/vite-dev-server-v3.3.0) (2022-10-06)
+
+
+### Bug Fixes
+
+* Address Vite sourcemap edge cases ([#24063](https://github.com/cypress-io/cypress/issues/24063)) ([e918fc1](https://github.com/cypress-io/cypress/commit/e918fc1a8c1b26b25207e42a6b8a879b0a3e9a2b))
+
+
+### Features
+
+* Disable file watching in component tests in run mode ([#24097](https://github.com/cypress-io/cypress/issues/24097)) ([3e01474](https://github.com/cypress-io/cypress/commit/3e014743909b35f54b697d2a759e4a2c5b67b5b7))
+
+# [@cypress/vite-dev-server-v3.2.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.1.1...@cypress/vite-dev-server-v3.2.0) (2022-09-29)
+
+
+### Bug Fixes
+
+* support type: module in Node.js 16.17.0+ and 18.6.0+ ([#23637](https://github.com/cypress-io/cypress/issues/23637)) ([b6dad0a](https://github.com/cypress-io/cypress/commit/b6dad0a674279936a9816939963bbf129647cee7))
+
+
+### Features
+
+* allow vite/webpack config to be an async function ([#23605](https://github.com/cypress-io/cypress/issues/23605)) ([4c647f6](https://github.com/cypress-io/cypress/commit/4c647f6d5b0f58a797b50436e63c645418bc07ac))
+* CT stack traces ([#23916](https://github.com/cypress-io/cypress/issues/23916)) ([bf590eb](https://github.com/cypress-io/cypress/commit/bf590eba3f1cf46b04f6a1252e51da5c5a3dc7c2))
+
 # [@cypress/vite-dev-server-v3.1.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.1.0...@cypress/vite-dev-server-v3.1.1) (2022-08-15)
 
 
