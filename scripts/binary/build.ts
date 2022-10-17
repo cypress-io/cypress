@@ -161,11 +161,6 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   const electronVersion = electron.getElectronVersion()
   const electronNodeVersion = await electron.getElectronNodeVersion()
 
-  fs.writeJSONSync(path.join(CY_ROOT_DIR, 'package.json'), {
-    ...jsonRoot,
-    version,
-  }, { spaces: 2 })
-
   fs.writeJSONSync(meta.distDir('package.json'), {
     name: 'cypress',
     productName: 'Cypress',
@@ -259,6 +254,12 @@ require('./packages/server')\
   console.log('electron-builder arguments:')
   console.log(args.join(' '))
 
+  // Update the root package.json with the next app version so that it is snapshot properly
+  fs.writeJSONSync(path.join(CY_ROOT_DIR, 'package.json'), {
+    ...jsonRoot,
+    version: version.trim(),
+  }, { spaces: 2 })
+
   try {
     await execa('electron-builder', args, {
       stdio: 'inherit',
@@ -271,6 +272,9 @@ require('./packages/server')\
       throw e
     }
   }
+
+  // Revert the root package.json so that subsequent steps will work properly
+  fs.writeJSONSync(path.join(CY_ROOT_DIR, 'package.json'), jsonRoot, { spaces: 2 })
 
   await checkMaxPathLength()
 
