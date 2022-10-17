@@ -1,7 +1,7 @@
 {
   "name": "cypress",
-  "version": "10.9.0",
-  "description": "Cypress.io end to end testing tool",
+  "version": "10.10.0",
+  "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
     "binary-build": "node ./scripts/binary.js build",
@@ -186,7 +186,7 @@
     "minimist": "1.2.6",
     "mocha": "3.5.3",
     "mocha-banner": "1.1.2",
-    "mocha-junit-reporter": "2.0.0",
+    "mocha-junit-reporter": "2.1.0",
     "mocha-multi-reporters": "1.1.7",
     "mock-fs": "5.1.1",
     "p-defer": "^3.0.0",
@@ -238,6 +238,7 @@
     "e2e",
     "end-to-end",
     "integration",
+    "component",
     "mocks",
     "runner",
     "spies",

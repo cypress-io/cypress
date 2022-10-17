@@ -21,6 +21,7 @@ import ResponseMiddleware from './response-middleware'
 import { DeferredSourceMapCache } from '@packages/rewriter'
 import type { RemoteStates } from '@packages/server/lib/remote_states'
 import type { CookieJar } from '@packages/server/lib/util/cookies'
+import type { ResourceTypeAndCredentialManager } from '@packages/server/lib/util/resourceTypeAndCredentialManager'
 import type { Automation } from '@packages/server/lib/automation/automation'
 
 function getRandomColorFn () {
@@ -73,6 +74,7 @@ export type ServerCtx = Readonly<{
   getFileServerToken: () => string
   getCookieJar: () => CookieJar
   remoteStates: RemoteStates
+  resourceTypeAndCredentialManager: ResourceTypeAndCredentialManager
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
   middleware: HttpMiddlewareStacks
@@ -222,6 +224,7 @@ export class Http {
   request: any
   socket: CyServer.Socket
   serverBus: EventEmitter
+  resourceTypeAndCredentialManager: ResourceTypeAndCredentialManager
   renderedHTMLOrigins: {[key: string]: boolean} = {}
   autUrl?: string
   getCookieJar: () => CookieJar
@@ -240,6 +243,7 @@ export class Http {
     this.socket = opts.socket
     this.request = opts.request
     this.serverBus = opts.serverBus
+    this.resourceTypeAndCredentialManager = opts.resourceTypeAndCredentialManager
     this.getCookieJar = opts.getCookieJar
 
     if (typeof opts.middleware === 'undefined') {
@@ -267,6 +271,7 @@ export class Http {
       netStubbingState: this.netStubbingState,
       socket: this.socket,
       serverBus: this.serverBus,
+      resourceTypeAndCredentialManager: this.resourceTypeAndCredentialManager,
       getCookieJar: this.getCookieJar,
       debug: (formatter, ...args) => {
         if (!debugVerbose.enabled) return

@@ -611,8 +611,8 @@ export class EventManager {
     })
 
     // Reflect back to the requesting origin the status of the 'duringUserTestExecution' state
-    Cypress.primaryOriginCommunicator.on('sync:during:user:test:execution', ({ specBridgeResponseEvent }, originPolicy) => {
-      Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, specBridgeResponseEvent, cy.state('duringUserTestExecution'))
+    Cypress.primaryOriginCommunicator.on('sync:during:user:test:execution', ({ specBridgeResponseEvent }, origin) => {
+      Cypress.primaryOriginCommunicator.toSpecBridge(origin, specBridgeResponseEvent, cy.state('duringUserTestExecution'))
     })
 
     Cypress.on('request:snapshot:from:spec:bridge', ({ log, name, options, specBridge, addSnapshot }: {
@@ -653,22 +653,22 @@ export class EventManager {
       Cypress.primaryOriginCommunicator.toAllSpecBridges('before:unload', origin)
     })
 
-    Cypress.primaryOriginCommunicator.on('expect:origin', (originPolicy) => {
-      this.localBus.emit('expect:origin', originPolicy)
+    Cypress.primaryOriginCommunicator.on('expect:origin', (origin) => {
+      this.localBus.emit('expect:origin', origin)
     })
 
-    Cypress.primaryOriginCommunicator.on('viewport:changed', (viewport, originPolicy) => {
+    Cypress.primaryOriginCommunicator.on('viewport:changed', (viewport, origin) => {
       const callback = () => {
-        Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, 'viewport:changed:end')
+        Cypress.primaryOriginCommunicator.toSpecBridge(origin, 'viewport:changed:end')
       }
 
       Cypress.primaryOriginCommunicator.emit('sync:viewport', viewport)
       this.localBus.emit('viewport:changed', viewport, callback)
     })
 
-    Cypress.primaryOriginCommunicator.on('before:screenshot', (config, originPolicy) => {
+    Cypress.primaryOriginCommunicator.on('before:screenshot', (config, origin) => {
       const callback = () => {
-        Cypress.primaryOriginCommunicator.toSpecBridge(originPolicy, 'before:screenshot:end')
+        Cypress.primaryOriginCommunicator.toSpecBridge(origin, 'before:screenshot:end')
       }
 
       handleBeforeScreenshot(config, callback)
@@ -861,9 +861,9 @@ export class EventManager {
     this.ws.emit('spec:changed', specFile)
   }
 
-  notifyCrossOriginBridgeReady (originPolicy) {
+  notifyCrossOriginBridgeReady (origin) {
     // Any multi-origin event appends the origin as the third parameter and we do the same here for this short circuit
-    Cypress.primaryOriginCommunicator.emit('bridge:ready', undefined, originPolicy)
+    Cypress.primaryOriginCommunicator.emit('bridge:ready', undefined, origin)
   }
 
   snapshotUnpinned () {
