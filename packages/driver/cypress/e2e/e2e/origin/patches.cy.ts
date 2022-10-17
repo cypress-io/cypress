@@ -202,9 +202,8 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
               cy.origin('http://www.foobar.com:3500', {
                 args: {
                   credentialOption,
-                  assertCredentialStatus,
                 },
-              }, ({ credentialOption, assertCredentialStatus }) => {
+              }, ({ credentialOption }) => {
                 cy.then(() => {
                   if (credentialOption) {
                     return fetch('http://www.foobar.com:3500/test-request-credentials', {
@@ -229,9 +228,8 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
               cy.origin('http://www.foobar.com:3500', {
                 args: {
                   credentialOption,
-                  assertCredentialStatus,
                 },
-              }, ({ credentialOption, assertCredentialStatus }) => {
+              }, ({ credentialOption }) => {
                 cy.then(() => {
                   let req
 
@@ -260,9 +258,8 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
               cy.origin('http://www.foobar.com:3500', {
                 args: {
                   credentialOption,
-                  assertCredentialStatus,
                 },
-              }, ({ credentialOption, assertCredentialStatus }) => {
+              }, ({ credentialOption }) => {
                 cy.then(() => {
                   let urlObj = new URL('/test-request-credentials', 'http://www.foobar.com:3500')
 

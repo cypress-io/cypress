@@ -6,8 +6,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     }
 
     cy.origin('http://www.app.foobar.com:3500', () => {
-      cy.visit('/fixtures/primary-origin.html') // this fails to visit
-      cy.log('derp') // This is here to prevent the test from exiting early.
+      cy.visit('/fixtures/primary-origin.html')
     })
   })
 
