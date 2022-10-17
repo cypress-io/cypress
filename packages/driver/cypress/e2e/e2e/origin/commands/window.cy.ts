@@ -1,25 +1,25 @@
 import { findCrossOriginLogs } from '../../../../support/utils'
 
-context('cy.origin window', () => {
+context('cy.origin window', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="dom-link"]').click()
   })
 
   it('.window()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.window().should('have.property', 'top')
     })
   })
 
   it('.document()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.document().should('have.property', 'charset').and('eq', 'UTF-8')
     })
   })
 
   it('.title()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.title().should('include', 'DOM Fixture')
     })
   })
@@ -36,7 +36,7 @@ context('cy.origin window', () => {
     })
 
     it('.window()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.window()
       })
 
@@ -49,7 +49,7 @@ context('cy.origin window', () => {
     })
 
     it('.document()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.document()
       })
 
@@ -62,7 +62,7 @@ context('cy.origin window', () => {
     })
 
     it('.title()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.title()
       })
 

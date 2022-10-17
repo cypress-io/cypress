@@ -4,6 +4,7 @@ import { snapshotReporter } from './support/snapshot-reporter'
 const validateSessionsInstrumentPanel = (sessionIds: Array<string> = []) => {
   cy.get('.sessions-container')
   .should('contain', `Sessions (${sessionIds.length})`)
+  .as('instrument_panel')
   .click()
 
   sessionIds.forEach((id) => {
@@ -142,7 +143,11 @@ describe('runner/cypress sessions.ui.spec', {
     })
 
     it('restores session as expected', () => {
-      cy.get('.test').each(($el) => cy.wrap($el).click())
+      cy.get('.test').each(($el, index) => {
+        if (index < 5) { // don't click on failed test
+          cy.wrap($el).click()
+        }
+      })
 
       cy.log('validate new session was created in first test')
       cy.get('.test').eq(0).within(() => {
@@ -153,7 +158,6 @@ describe('runner/cypress sessions.ui.spec', {
       cy.log('validate saved session was used in second test')
       cy.get('.test').eq(1).within(() => {
         validateSessionsInstrumentPanel(['user1'])
-
         cy.get('.command-name-session')
         .within(() => {
           cy.get('.command-expander').first().click()
@@ -192,7 +196,7 @@ describe('runner/cypress sessions.ui.spec', {
       cy.get('.test').eq(3).should('have.class', 'runnable-passed')
       cy.get('.test').eq(4).should('have.class', 'runnable-passed')
       cy.get('.test').eq(5).should('have.class', 'runnable-failed')
-      cy.contains('If you want to specify different options, please use a unique name').should('exist')
+      cy.contains('This session already exists.').should('exist')
     })
   })
 
@@ -323,8 +327,40 @@ describe('runner/cypress sessions.ui.spec', {
       passCount: 1,
     })
 
-    validateSessionsInstrumentPanel(['user1', 'user2'])
+    validateSessionsInstrumentPanel(['spec_session_1', 'spec_session_2', 'global_session_1'])
     // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
+  })
+
+  describe('errors', () => {
+    it('test error when setup has failing Cypress command', () => {
+      loadSpec({
+        projectName: 'session-and-origin-e2e-specs',
+        filePath: 'session/errors.cy.js',
+        failCount: 1,
+      })
+
+      cy.contains('.test', 'setup has failing command').as('setup_failed')
+      // test marked as failed and is expanded
+      cy.get('@setup_failed').should('have.attr', 'data-model-state', 'failed')
+      .children('.collapsible').should('have.class', 'is-open')
+      .within(() => {
+        // session is marked as 'failed' and is expanded
+        // setup group is expanded
+        cy.get('.command-name-session').eq(0).should('contain', 'session_1').as('session_command')
+        .children('.command-wrapper').find('.reporter-tag').should('contain', 'failed')
+
+        cy.get('@session_command')
+        .children('.command-child-container').should('exist')
+        .within(() => {
+          cy.get('.command-name-session')
+          .should('contain', 'Create new session')
+          .get('.command-child-container').should('exist')
+        })
+      })
+
+      // has error
+      cy.get('@setup_failed').contains('This error occurred while creating session. Because the session setup failed, we failed the test.')
+    })
   })
 })
 
@@ -340,50 +376,91 @@ describe('runner/cypress sessions.open_mode.spec', () => {
       passCount: 1,
     })
 
-    cy.get('.command-name-session').should('contain', 'user1')
-    .find('.reporter-tag').should('contain', 'created')
-
-    cy.get('.command-name-session').should('contain', 'user2')
-    .find('.reporter-tag').should('contain', 'created')
+    cy.get('.reporter-tag').should('contain', 'created').should('length', 3)
   })
 
-  it('persists spec sessions when clicking "rerun all tests" button', () => {
+  it('persists global and spec sessions when clicking "rerun all tests" button', () => {
     cy.get('.restart').click()
 
     cy.waitForSpecToFinish({
       passCount: 1,
     })
 
-    cy.get('.command-name-session').should('contain', 'user1')
-    .find('.reporter-tag').should('contain', 'restored')
-
-    cy.get('.command-name-session').should('contain', 'user2')
-    .find('.reporter-tag').should('contain', 'restored')
+    cy.get('.reporter-tag').should('contain', 'restored').should('length', 3)
   })
 
-  it('persists spec sessions on refresh', () => {
+  it('persists global and spec sessions on refresh', () => {
     cy.get('body').type('r')
 
     cy.waitForSpecToFinish({
       passCount: 1,
     })
 
-    cy.get('.command-name-session').should('contain', 'user1')
-    .find('.reporter-tag').should('contain', 'restored')
-
-    cy.get('.command-name-session').should('contain', 'user2')
-    .find('.reporter-tag').should('contain', 'restored')
+    cy.get('.reporter-tag').should('contain', 'restored').should('length', 3)
   })
 
-  it('does not persists spec sessions when selecting a different spec', () => {
+  it('persists global session and does not persists spec session when selecting a different spec', () => {
     cy.get('body').type('f')
-    cy.get('div[title="new_session.cy.js"]').click()
+    cy.get('div[title="blank_session.cy.js"]').click()
 
     cy.waitForSpecToFinish({
       passCount: 1,
     })
 
-    cy.get('.command-name-session').should('contain', 'user1')
+    cy.get('.command-name-session').eq(0).should('contain', 'spec_session')
     .find('.reporter-tag').should('contain', 'created')
+
+    cy.get('.command-name-session').eq(1).should('contain', 'global_session_1')
+    .find('.reporter-tag').should('contain', 'restored')
+  })
+
+  it('clears all sessions when selecting "clear all sessions"', () => {
+    cy.get('body').type('r')
+
+    cy.waitForSpecToFinish({
+      passCount: 1,
+    })
+
+    cy.get('.reporter-tag').should('contain', 'restored').should('length', 3)
+
+    cy.contains('Clear All Sessions').click()
+
+    cy.contains('Your tests are loading...')
+
+    cy.waitForSpecToFinish({
+      passCount: 1,
+    })
+
+    cy.get('.reporter-tag').should('contain', 'created').should('length', 3)
+  })
+})
+
+describe('global sessions', () => {
+  beforeEach(() => {
+    cy.scaffoldProject('session-and-origin-e2e-specs')
+    cy.openProject('session-and-origin-e2e-specs')
+    cy.startAppServer('e2e')
+    cy.visitApp()
+
+    cy.get('[data-cy-row="global_sessions.cy.js"]').click()
+    cy.waitForSpecToFinish({
+      passCount: 2,
+    })
+  })
+
+  it('creates global session', () => {
+    cy.contains('.test', 'creates global session').as('creates_global').click()
+    cy.get('@creates_global').within(() => {
+      cy.get('.command-name-session').should('contain', 'global_session_1')
+      .find('.reporter-tag').should('contain', 'created')
+    })
+  })
+
+  it('restores global session', () => {
+    cy.contains('.test', 'restores global session').as('restores_global').click()
+    cy.get('@restores_global').within(() => {
+      cy.get('.command-name-session').should('contain', 'global_session_1')
+      .find('.reporter-tag').should('contain', 'restored')
+    })
   })
 })

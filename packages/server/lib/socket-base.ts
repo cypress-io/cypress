@@ -463,6 +463,8 @@ export class SocketBase {
               return resetRenderedHTMLOrigins()
             case 'cross:origin:automation:cookies:received':
               return this.localBus.emit('cross:origin:automation:cookies:received')
+            case 'request:sent:with:credentials':
+              return this.localBus.emit('request:sent:with:credentials', args[0])
             default:
               throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
           }

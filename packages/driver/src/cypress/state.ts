@@ -23,8 +23,7 @@ export interface StateFunc {
   (k: 'logGroupIds', v?: Array<Cypress.InternalLogConfig['id']>): Array<Cypress.InternalLogConfig['id']>
   (k: 'autLocation', v?: LocationObject): LocationObject
   (k: 'originCommandBaseUrl', v?: string): string
-  (k: 'currentActiveOriginPolicy', v?: string): string
-  (k: 'latestActiveOriginPolicy', v?: string): string
+  (k: 'currentActiveOrigin', v?: string): string
   (k: 'duringUserTestExecution', v?: boolean): boolean
   (k: 'onQueueEnd', v?: () => void): () => void
   (k: 'onFail', v?: (err: Error) => void): (err: Error) => void
@@ -53,7 +52,7 @@ export interface StateFunc {
   (k: 'commandIntermediateValue', v?: any): any
   (k: 'subject', v?: any): any
   (k: 'onPaused', v?: (fn: any) => void): (fn: any) => void
-  (k: 'onCommandFailed', v?: (err: any, queue: any, next: any) => boolean): (err: any, queue: any, next: any) => boolean
+  (k: 'onCommandFailed', v?: (err: any, queue: any) => boolean): (err: any, queue: any) => boolean
   (k: 'promise', v?: Bluebird<unknown>): Bluebird<unknown>
   (k: 'reject', v?: (err: any) => any): (err: any) => any
   (k: 'cancel', v?: () => void): () => void

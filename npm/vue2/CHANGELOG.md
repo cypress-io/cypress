@@ -1,3 +1,11 @@
+# [@cypress/vue2-v1.1.1](https://github.com/cypress-io/cypress/compare/@cypress/vue2-v1.1.0...@cypress/vue2-v1.1.1) (2022-10-13)
+
+
+### Bug Fixes
+
+* angular and nuxt ct tests now fail on uncaught exceptions ([#24122](https://github.com/cypress-io/cypress/issues/24122)) ([53eef4f](https://github.com/cypress-io/cypress/commit/53eef4fbd7e1caf32f0183cadbc0e4cf05524c34))
+
+
 # [@cypress/vue2-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/vue2-v1.0.2...@cypress/vue2-v1.1.0) (2022-08-30)
 
 

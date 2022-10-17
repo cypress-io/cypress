@@ -29,6 +29,7 @@ describe('remote states', () => {
           port: '3500',
           domain: '',
           tld: 'localhost',
+          protocol: 'http:',
         },
       })
     })
@@ -52,6 +53,7 @@ describe('remote states', () => {
           port: '3500',
           domain: '',
           tld: 'localhost',
+          protocol: 'http:',
         },
       })
 
@@ -69,6 +71,7 @@ describe('remote states', () => {
           port: '3500',
           domain: '',
           tld: 'localhost',
+          protocol: 'http:',
         },
       })
     })
@@ -88,6 +91,7 @@ describe('remote states', () => {
           port: '3500',
           domain: '',
           tld: 'localhost',
+          protocol: 'http:',
         },
       })
     })
@@ -107,23 +111,24 @@ describe('remote states', () => {
           port: '3500',
           domain: '',
           tld: 'localhost',
+          protocol: 'http:',
         },
       })
     })
   })
 
-  context('#isPrimaryOrigin', () => {
+  context('#isPrimarySuperDomainOrigin', () => {
     it('returns true when the requested url is the primary origin', function () {
-      const isPrimaryOrigin = this.remoteStates.isPrimaryOrigin('http://localhost:3500')
+      const isPrimarySuperDomainOrigin = this.remoteStates.isPrimarySuperDomainOrigin('http://localhost:3500')
 
-      expect(isPrimaryOrigin).to.be.true
+      expect(isPrimarySuperDomainOrigin).to.be.true
     })
 
     it('returns false when the requested url is not the primary origin', function () {
       this.remoteStates.set('https://google.com', {}, false)
-      const isPrimaryOrigin = this.remoteStates.isPrimaryOrigin('http://google.com')
+      const isPrimarySuperDomainOrigin = this.remoteStates.isPrimarySuperDomainOrigin('http://google.com')
 
-      expect(isPrimaryOrigin).to.be.false
+      expect(isPrimarySuperDomainOrigin).to.be.false
     })
   })
 
@@ -156,14 +161,15 @@ describe('remote states', () => {
           port: '443',
           domain: 'google',
           tld: 'com',
+          protocol: 'https:',
         },
       })
     })
   })
 
   context('#set', () => {
-    it('sets primary state and origin when isPrimaryOrigin is true', function () {
-      expect(this.remoteStates.isPrimaryOrigin('http://localhost:3500')).to.be.true
+    it('sets primary state and origin when isPrimarySuperDomainOrigin is true', function () {
+      expect(this.remoteStates.isPrimarySuperDomainOrigin('http://localhost:3500')).to.be.true
 
       const state = this.remoteStates.set('https://staging.google.com/foo/bar', {}, true)
 
@@ -177,16 +183,17 @@ describe('remote states', () => {
           port: '443',
           domain: 'google',
           tld: 'com',
+          protocol: 'https:',
         },
       })
 
       expect(this.remoteStates.get('https://staging.google.com')).to.deep.equal(state)
 
-      expect(this.remoteStates.isPrimaryOrigin('https://staging.google.com')).to.be.true
+      expect(this.remoteStates.isPrimarySuperDomainOrigin('https://staging.google.com')).to.be.true
     })
 
-    it('sets a secondary state when isPrimaryOrigin is false', function () {
-      expect(this.remoteStates.isPrimaryOrigin('http://localhost:3500')).to.be.true
+    it('sets a secondary state when isPrimarySuperDomainOrigin is false', function () {
+      expect(this.remoteStates.isPrimarySuperDomainOrigin('http://localhost:3500')).to.be.true
 
       const state = this.remoteStates.set('https://staging.google.com/foo/bar', {}, false)
 
@@ -200,13 +207,14 @@ describe('remote states', () => {
           port: '443',
           domain: 'google',
           tld: 'com',
+          protocol: 'https:',
         },
       })
 
       expect(this.remoteStates.get('https://staging.google.com')).to.deep.equal(state)
 
-      expect(this.remoteStates.isPrimaryOrigin('http://localhost:3500')).to.be.true
-      expect(this.remoteStates.isPrimaryOrigin('https://staging.google.com')).to.be.false
+      expect(this.remoteStates.isPrimarySuperDomainOrigin('http://localhost:3500')).to.be.true
+      expect(this.remoteStates.isPrimarySuperDomainOrigin('https://staging.google.com')).to.be.false
     })
 
     it('overrides the existing state', function () {
@@ -224,6 +232,7 @@ describe('remote states', () => {
           port: '443',
           domain: 'google',
           tld: 'com',
+          protocol: 'https:',
         },
       })
 
@@ -241,6 +250,7 @@ describe('remote states', () => {
           port: '443',
           domain: 'google',
           tld: 'com',
+          protocol: 'https:',
         },
       })
     })
@@ -258,6 +268,7 @@ describe('remote states', () => {
           port: '443',
           domain: 'google',
           tld: 'com',
+          protocol: 'https:',
         },
       })
     })
@@ -275,6 +286,7 @@ describe('remote states', () => {
           port: '80',
           domain: 'google',
           tld: 'com',
+          protocol: 'http:',
         },
       })
     })
@@ -292,6 +304,7 @@ describe('remote states', () => {
           port: '4200',
           domain: '',
           tld: 'localhost',
+          protocol: 'http:',
         },
       })
     })
@@ -333,6 +346,7 @@ describe('remote states', () => {
           port: '80',
           domain: 'foobar',
           tld: 'com',
+          protocol: 'http:',
         },
       }
 

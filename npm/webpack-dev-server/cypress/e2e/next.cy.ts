@@ -40,6 +40,7 @@ for (const project of WEBPACK_REACT) {
       })
 
       cy.waitForSpecToFinish({ failCount: 1 })
+      cy.get('.test-err-code-frame').should('be.visible')
 
       cy.withCtx(async (ctx) => {
         const indexTestPath = ctx.path.join('pages', 'index.cy.js')
