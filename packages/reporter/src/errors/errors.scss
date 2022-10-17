@@ -85,7 +85,7 @@ $code-border-radius: 4px;
 
   .runnable-err {
     background-color: $err-background;
-    border-left: 2px solid $red-300;
+    border-left: $err-border;
     clear: both;
     color: $err-text;
     font-family: $monospace;
@@ -103,21 +103,20 @@ $code-border-radius: 4px;
     display: flex;
     font-weight: bold;
     justify-content: space-between;
-    padding-left: 16px;
+    padding-left: 18px;
 
     svg {
       color: $red-400;
-      margin-right: 10px;
       align-self: center
     }
+
     .runnable-err-name {
       color: $err-header-text;
       flex: auto;
       font-size: 12px;
       font-weight: 600;
       line-height: 20px;
-      padding: 5px 0;
-      padding: 5px 0 5px 12px;
+      padding: 5px 0 5px 24px;
     }
   }
 
@@ -131,7 +130,7 @@ $code-border-radius: 4px;
     font-family: $font-system;
     font-size: 14px;
     font-weight: 400;
-    padding: 10px 10px 10px 16px;
+    padding: 10px 10px 10px 18px;
 
     code {
       background-color: rgba($black, 0.2);
@@ -152,7 +151,7 @@ $code-border-radius: 4px;
     align-items: center;
     border-top: 1px dashed rgba($red-400, 0.1);
     display: flex;
-    padding: 10px;
+    padding: 10px 18px;
     flex-wrap: wrap-reverse;
     .collapsible-header {
       flex-grow: 1;
@@ -262,7 +261,7 @@ $code-border-radius: 4px;
     background-color: $gray-1000;
     border: 1px dashed rgba(245, 154, 169, 0.1);
     border-radius: $code-border-radius;
-    margin: 0 10px 10px;
+    margin: 0 18px 10px;
 
     .runnable-err-file-path {
       background: rgba($gray-900, 0.5);
