@@ -47,6 +47,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ 'webkit-multidomain', << pipeline.git.branch >> ]
     - equal: [ 'issue-23843_electron_21_upgrade', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
@@ -1856,7 +1857,7 @@ jobs:
           name: Build
           command: yarn workspace @cypress/mount-utils build
       - store-npm-logs
-  
+
   npm-xpath:
     <<: *defaults
     resource_class: small
@@ -2437,11 +2438,10 @@ linux-x64-workflow: &linux-x64-workflow
         context: test-runner:cypress-record-key
         requires:
           - build
-    # TODO: Implement WebKit network automation to fix the majority of these tests before re-enabling
-    # - driver-integration-tests-webkit-experimentalSessionAndOrigin:
-    #     context: test-runner:cypress-record-key
-    #     requires:
-    #       - build
+    - driver-integration-tests-webkit-experimentalSessionAndOrigin:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
     - run-frontend-shared-component-tests-chrome:
         context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true

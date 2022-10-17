@@ -1,4 +1,4 @@
-context('cy.origin screenshot', () => {
+context('cy.origin screenshot', { browser: '!webkit' }, () => {
   const { devicePixelRatio } = window
 
   context('set viewport', () => {

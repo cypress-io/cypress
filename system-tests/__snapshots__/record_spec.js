@@ -386,7 +386,7 @@ Your Record Key f858a...ee7e1 is not valid with this projectId: pid123
 
 It may have been recently revoked by you or another user.
 
-Please log into the Dashboard to see the valid record keys.
+Please log into the Dashboard to see the valid Record Keys.
 
 https://on.cypress.io/dashboard/projects/pid123
 

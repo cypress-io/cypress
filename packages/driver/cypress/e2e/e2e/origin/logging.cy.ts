@@ -1,4 +1,4 @@
-describe('cy.origin logging', () => {
+describe('cy.origin logging', { browser: '!webkit' }, () => {
   const { _ } = Cypress
 
   it('groups callback commands on a passing test', () => {

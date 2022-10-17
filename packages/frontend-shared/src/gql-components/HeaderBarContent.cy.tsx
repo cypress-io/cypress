@@ -285,7 +285,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
     cy.contains(`${defaultMessages.topNav.updateCypress.title} 8.7.0`).should('be.visible')
     cy.contains('test-project').should('be.visible')
-    cy.contains('code', 'yarn add -D cypress').should('be.visible')
+    cy.findByDisplayValue('yarn add -D cypress@8.7.0').should('be.visible')
     cy.percySnapshot('after upgrade modal open')
 
     cy.get('body').type('{esc}') // dismiss modal with keyboard

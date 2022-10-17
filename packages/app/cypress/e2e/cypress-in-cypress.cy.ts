@@ -224,7 +224,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
         cy.get('body').click()
       })
 
-      cy.get('[data-cy="playground-num-elements"]').contains('1 Match')
+      cy.get('[data-cy="playground-num-elements"]').contains('1 match')
     })
 
     it(`hides reporter when NO_COMMAND_LOG is set in open mode for ${testingType}`, () => {
