@@ -337,6 +337,24 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
       })
     })
 
+    it('patches prior to attaching to a spec bridge', () => {
+      // manually remove the spec bridge iframe to ensure Cypress.state('window') is not already set
+      window.top?.document.getElementById('Spec\ Bridge:\ foobar.com')?.remove()
+
+      cy.stub(Cypress, 'backend').callThrough()
+
+      cy.visit('/fixtures/primary-origin.html')
+      cy.get('a[data-cy="xhr-fetch-requests-onload"]').click()
+
+      cy.then(() => {
+        expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
+          url: 'http://localhost:3500/foo.bar.baz.json',
+          resourceType: 'fetch',
+          credentialStatus: 'same-origin',
+        })
+      })
+    })
+
     it('does not patch fetch in the spec window or the AUT if the AUT is on the primary', () => {
       cy.stub(Cypress, 'backend').callThrough()
       cy.visit('fixtures/xhr-fetch-requests.html')
@@ -509,7 +527,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
             })
 
           cy.then(() => {
-            expect(Cypress.backend).not.to.have.been.calledWithMatch('request:sent:with:credentials')
+            expect(Cypress.backend).to.have.been.calledWithMatch('request:sent:with:credentials')
           })
         })
 
@@ -545,6 +563,24 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
               credentialStatus: true,
             })
           })
+        })
+      })
+    })
+
+    it('patches prior to attaching to a spec bridge', () => {
+      // manually remove the spec bridge iframe to ensure Cypress.state('window') is not already set
+      window.top?.document.getElementById('Spec\ Bridge:\ foobar.com')?.remove()
+
+      cy.stub(Cypress, 'backend').callThrough()
+
+      cy.visit('/fixtures/primary-origin.html')
+      cy.get('a[data-cy="xhr-fetch-requests-onload"]').click()
+
+      cy.then(() => {
+        expect(Cypress.backend).to.have.been.calledWith('request:sent:with:credentials', {
+          url: 'http://localhost:3500/foo.bar.baz.json',
+          resourceType: 'xhr',
+          credentialStatus: false,
         })
       })
     })
