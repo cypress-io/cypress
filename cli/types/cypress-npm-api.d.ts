@@ -60,7 +60,7 @@ declare namespace CypressCommandLine {
      */
     headless: boolean
     /**
-     * Specify your secret record key
+     * Specify your secret Record Key
      */
     key: string
     /**
