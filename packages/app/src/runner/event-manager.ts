@@ -4,7 +4,6 @@ import type { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 import type MobX from 'mobx'
 import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriverMap } from './event-manager-types'
 import type { RunState, CachedTestState, AutomationElementId, FileDetails, ReporterStartInfo, ReporterRunState } from '@packages/types'
-import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
 
 import { logger } from './logger'
 import type { Socket } from '@packages/socket/lib/browser'
@@ -703,7 +702,7 @@ export class EventManager {
     // AUT prior to attaching a spec bridge.
     Cypress.primaryOriginCommunicator.on(
       'aut:set:cookie',
-      (options: { cookie: AutomationCookie, url: string, sameSiteContext: string }) => {
+      (options: { cookie, url: string, sameSiteContext: string }) => {
         // unlikely there will be errors, but ignore them in any case, since
         // they're not user-actionable
         Cypress.automation('set:cookie', options.cookie).catch(() => {})
