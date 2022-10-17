@@ -82,6 +82,10 @@ import type {
 } from '../generated/graphql'
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
+import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+
+const loginConnectStore = useLoginConnectStore()
+
 const { t } = useI18n()
 
 const isOnline = useOnline()
@@ -92,7 +96,6 @@ const props = defineProps<{
   showLogout?: boolean
   utmMedium: string
   utmContent?: string
-  showConnectButtonAfterLogin?: boolean
 }>()
 
 gql`
@@ -101,11 +104,25 @@ fragment Auth on Query {
     id
     email
     fullName
+    firstOrganization: organizations(first: 1) {
+      nodes {
+        id
+      }
+    }
   }
   authState {
     browserOpened
     name
     message
+  }
+  currentProject {
+    id
+    cloudProject {
+      __typename
+      ... on CloudProject {
+        id
+      }
+    }
   }
 }
 `
@@ -159,9 +176,13 @@ onBeforeUnmount(() => {
   }
 })
 
+const showConnectButton = computed(() => {
+  return loginConnectStore.project.isConfigLoaded && loginConnectStore.userStatusMatches('needsProjectConnect')
+})
+
 const emit = defineEmits<{
-  (event: 'continue', value: boolean): void
-  (event: 'connect-project'): void
+  (event: 'close'): void
+  (event: 'cancel'): void
 }>()
 
 const cloudViewer = computed(() => {
@@ -183,19 +204,23 @@ const loginMutationIsPending = computed(() => {
 })
 
 const handleLoginOrContinue = async () => {
-  if (cloudViewer.value) {
-    if (props.showConnectButtonAfterLogin) {
-      emit('connect-project')
-    } else {
-      emit('continue', true)
-    }
+  if (loginConnectStore.user.isLoggedIn) {
+    // user is already logged in, just emit continue event & return early
+    emit('close')
 
     return
   }
 
+  // user has not already logged in, kick off the login process
+
   loginInitiated.value = true
 
   login.executeMutation({ utmMedium: props.utmMedium, utmContent: props.utmContent || null, utmSource: getUtmSource() })
+}
+
+const handleCancel = () => {
+  // don't kick off auth mutation, just continue no matter
+  emit('cancel')
 }
 
 const handleLogout = () => {
@@ -208,10 +233,6 @@ const handleTryAgain = async () => {
   login.executeMutation({ utmMedium: props.utmMedium, utmContent: props.utmContent || null, utmSource: getUtmSource() })
 }
 
-const handleCancel = () => {
-  emit('continue', true)
-}
-
 const buttonText = computed(() => {
   const strings = {
     login: t('topNav.login.actionLogin'),
@@ -219,11 +240,11 @@ const buttonText = computed(() => {
     continue: t('topNav.login.actionContinue'),
   }
 
-  if (cloudViewer.value) {
-    if (props.showConnectButtonAfterLogin) {
-      return strings.connectProject
-    }
+  if (showConnectButton.value) {
+    return strings.connectProject
+  }
 
+  if (loginConnectStore.user.isLoggedIn) {
     return strings.continue
   }
 
@@ -231,7 +252,7 @@ const buttonText = computed(() => {
 })
 
 const buttonPrefixIcon = computed(() => {
-  return cloudViewer.value && props.showConnectButtonAfterLogin ? ChainIcon : undefined
+  return showConnectButton.value ? ChainIcon : undefined
 })
 
 </script>
