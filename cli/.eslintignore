@@ -1,3 +1,4 @@
+**/__snapshots__
 /build
 
 # cli/types is linted by tslint/dtslint
