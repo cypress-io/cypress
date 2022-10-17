@@ -9,7 +9,7 @@ interface CookieData {
   path?: string
 }
 
-type SameSiteContext = 'strict' | 'lax' | 'none' | undefined
+export type SameSiteContext = 'strict' | 'lax' | 'none' | undefined
 
 export const toughCookieToAutomationCookie = (toughCookie: Cookie, defaultDomain: string): AutomationCookie => {
   const expiry = toughCookie.expiryTime()

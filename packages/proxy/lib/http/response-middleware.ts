@@ -4,7 +4,7 @@ import type Debug from 'debug'
 import type { CookieOptions } from 'express'
 import { cors, concatStream, httpUtils } from '@packages/network'
 import type { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
-import type { HttpMiddleware } from '.'
+import type { HttpMiddleware, HttpMiddlewareThis } from '.'
 import iconv from 'iconv-lite'
 import type { IncomingMessage, IncomingHttpHeaders } from 'http'
 import { InterceptResponse } from '@packages/net-stubbing'
@@ -373,7 +373,7 @@ const MaybePreventCaching: ResponseMiddleware = function () {
   this.next()
 }
 
-const setSimulatedCookies = (ctx) => {
+const setSimulatedCookies = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) => {
   const defaultDomain = (new URL(ctx.req.proxiedUrl)).hostname
   const allCookiesForRequest = ctx.getCookieJar()
   .getCookies(ctx.req.proxiedUrl)

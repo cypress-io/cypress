@@ -61,7 +61,7 @@ const createCypress = () => {
 
     const autWindow = findWindow()
 
-    if (autWindow) {
+    if (autWindow && !autWindow.Cypress) {
       attachToWindow(autWindow)
     }
   })
@@ -167,7 +167,8 @@ const attachToWindow = (autWindow: Window) => {
 
   // this communicates to the injection code that Cypress is now available so
   // it can safely subscribe to Cypress events, etc
-  autWindow.postMessage('spec:bridge:attach', '*')
+  // @ts-ignore
+  autWindow.__attachToCypress(Cypress)
 
   Cypress.state('window', autWindow)
   Cypress.state('document', autWindow.document)

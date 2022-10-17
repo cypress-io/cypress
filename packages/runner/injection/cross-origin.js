@@ -73,17 +73,6 @@ window.addEventListener('message', (event) => {
   if (event.data === 'aut:cypress:location') {
     event.ports[0].postMessage(window.location.href)
   }
-
-  // if the page loaded before creating a spec bridge for it, we'll get this
-  // event letting us know we can utilize window.Cypress. we can skip this
-  // if we already have access to window.Cypress
-  if (!Cypress && event.data === 'spec:bridge:attach') {
-    const Cypress = findCypress()
-
-    if (Cypress) {
-      attachToCypress(Cypress)
-    }
-  }
 })
 
 // return null to trick contentWindow into thinking
@@ -113,6 +102,15 @@ const attachToCypress = (Cypress) => {
 
   Cypress.on('app:timers:reset', timers.reset)
   Cypress.on('app:timers:pause', timers.pause)
+}
+
+// if the page loaded before creating a spec bridge for it, this method will
+// be called, letting us know we can utilize window.Cypress. we can skip this
+// if we already have access to window.Cypress
+window.__attachToCypress = (asyncAttachedCypress) => {
+  if (!Cypress) {
+    attachToCypress(asyncAttachedCypress)
+  }
 }
 
 // Check for cy too to prevent a race condition for attaching.

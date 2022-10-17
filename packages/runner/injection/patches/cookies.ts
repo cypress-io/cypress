@@ -26,42 +26,17 @@ const parseDocumentCookieString = (documentCookieString: string): AutomationCook
   })
 }
 
-const setAutomationCookieViaCypress = (cookie: AutomationCookie) => {
-  return window.Cypress.automation('set:cookie', cookie)
-  .catch(() => {
-    // unlikely there will be errors, but ignore them in any case, since
-    // they're not user-actionable
-  })
-}
-
-const setAutomationCookieViaPostMessage = (cookie: AutomationCookie) => {
-  return new Promise<void>((resolve) => {
-    const handler = (event) => {
-      if (event.data?.event === 'cross:origin:aut:set:cookie') {
-        window.removeEventListener('message', handler)
-
-        resolve()
-      }
-    }
-
-    window.addEventListener('message', handler)
-
-    window.top!.postMessage({
-      event: 'cross:origin:aut:set:cookie',
-      data: { cookie },
-    }, '*')
-  })
-}
-
-const setAutomationCookie = (cookie: AutomationCookie) => {
-  // If Cypress is defined on the win, that means we have a spec bridge and we
-  // should use that to set cookies. If not we have to delegate to the primary
-  // Cypress instance.
-  if (window.Cypress) {
-    return setAutomationCookieViaCypress(cookie)
-  }
-
-  return setAutomationCookieViaPostMessage(cookie)
+const sendCookieToServer = (cookie: AutomationCookie) => {
+  window.top!.postMessage({
+    event: 'cross:origin:aut:set:cookie',
+    data: {
+      cookie,
+      url: location.href,
+      // url will always match the cookie domain, so strict context tells
+      // tough-cookie to allow it to be set
+      sameSiteContext: 'strict',
+    },
+  }, '*')
 }
 
 // document.cookie monkey-patching
@@ -123,7 +98,10 @@ export const patchDocumentCookie = (originalCookies: AutomationCookie[]) => {
         cookie.path = '/'
       }
 
-      setAutomationCookie(toughCookieToAutomationCookie(cookie, domain))
+      // send the cookie to the server so it can be set in the browser via
+      // automation and in our server-side cookie jar so it's available
+      // to subsequent injections
+      sendCookieToServer(toughCookieToAutomationCookie(cookie, domain))
 
       return getDocumentCookieValue()
     },

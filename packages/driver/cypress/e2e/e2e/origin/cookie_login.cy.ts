@@ -759,6 +759,12 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
           doc.cookie = 'key=value'
         })
 
+        // it can take a small amount of time for the cookie to make it to
+        // automation, but it's unlikely a user will encounter this issue
+        // since they'd pretty much have to write this exact test. making it
+        // wait a second is probably overkill, but purposefully keeping the
+        // wait long to avoid this test becoming flaky
+        cy.wait(1000)
         cy.getCookie('key').its('value').should('equal', 'value')
       })
     })
@@ -864,6 +870,20 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
         // ensure that each one is there
         cy.document().its('cookie').should('include', 'key=value1')
         cy.document().its('cookie').should('include', 'key=value2')
+      })
+    })
+
+    it('setting cookie preserves cookies on subsequent page loads', () => {
+      cy.get('[data-cy="cross-origin-secondary-link"]').click()
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.document().then((doc) => {
+          doc.cookie = 'key=value'
+        })
+
+        cy.document().its('cookie').should('equal', 'key=value')
+        cy.wait(500)
+        cy.reload()
+        cy.document().its('cookie').should('equal', 'key=value')
       })
     })
 
