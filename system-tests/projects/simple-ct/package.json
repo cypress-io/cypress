@@ -1,0 +1,6 @@
+{
+  "name": "simple-ct",
+  "devDependencies": {
+    "webpack-dev-server": "^4.9.0"
+  }
+}
