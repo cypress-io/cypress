@@ -326,7 +326,7 @@ describe('src/cy/commands/location', () => {
   context('#location', () => {
     it('returns the location object', () => {
       cy.location().then((loc) => {
-        expect(loc).to.have.keys(['auth', 'authObj', 'hash', 'href', 'host', 'hostname', 'origin', 'pathname', 'port', 'protocol', 'search', 'originPolicy', 'superDomain', 'toString'])
+        expect(loc).to.have.keys(['auth', 'authObj', 'hash', 'href', 'host', 'hostname', 'pathname', 'port', 'protocol', 'search', 'origin', 'superDomainOrigin', 'superDomain', 'toString'])
       })
     })
 
@@ -529,7 +529,7 @@ describe('src/cy/commands/location', () => {
 
           expect(_.keys(consoleProps)).to.deep.eq(['Command', 'Yielded'])
           expect(consoleProps.Command).to.eq('location')
-          expect(_.keys(consoleProps.Yielded)).to.deep.eq(['auth', 'authObj', 'hash', 'href', 'host', 'hostname', 'origin', 'pathname', 'port', 'protocol', 'search', 'originPolicy', 'superDomain', 'toString'])
+          expect(_.keys(consoleProps.Yielded)).to.deep.eq(['auth', 'authObj', 'hash', 'href', 'host', 'hostname', 'origin', 'pathname', 'port', 'protocol', 'search', 'superDomainOrigin', 'superDomain', 'toString'])
         })
       })
     })

@@ -30,7 +30,7 @@ describe('authChange subscription', () => {
     })
 
     it('responds to authChange subscription for login', () => {
-      cy.contains('Log In')
+      cy.contains('Log in')
       cy.wait(500)
       cy.withCtx(async (ctx) => {
         await ctx.actions.auth.login('testing', 'testing')
@@ -48,7 +48,7 @@ describe('authChange subscription', () => {
         await ctx.actions.auth.logout()
       })
 
-      cy.contains('Log In')
+      cy.contains('Log in')
     })
   })
 
@@ -59,7 +59,7 @@ describe('authChange subscription', () => {
     })
 
     it('responds to authChange subscription for login', () => {
-      cy.contains('Log In')
+      cy.contains('Log in')
       cy.wait(500)
       cy.withCtx(async (ctx) => {
         await ctx.actions.auth.login('testing', 'testing')
@@ -77,7 +77,7 @@ describe('authChange subscription', () => {
         await ctx.actions.auth.logout()
       })
 
-      cy.contains('Log In')
+      cy.contains('Log in')
     })
   })
 
@@ -87,7 +87,7 @@ describe('authChange subscription', () => {
     })
 
     it('responds to authChange subscription for login', () => {
-      cy.contains('Log In')
+      cy.contains('Log in')
       cy.wait(500)
       cy.withCtx(async (ctx) => {
         await ctx.actions.auth.login('testing', 'testing')
@@ -105,7 +105,7 @@ describe('authChange subscription', () => {
         await ctx.actions.auth.logout()
       })
 
-      cy.contains('Log In')
+      cy.contains('Log in')
     })
   })
 })

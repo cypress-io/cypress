@@ -27,7 +27,7 @@ describe('configChange subscription', () => {
   describe('on config page', () => {
     it('responds to configChange event when viewport is changed', () => {
       cy.contains('a', 'Settings').click()
-      cy.get('[data-cy="collapsible-header"]').contains('Project Settings').click()
+      cy.get('[data-cy="collapsible-header"]').contains('Project settings').click()
       cy.contains(`projectId: 'abc123'`)
       updateProjectIdInCypressConfig('foo456')
       cy.contains(`projectId: 'foo456'`)

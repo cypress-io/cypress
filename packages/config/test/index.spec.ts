@@ -231,4 +231,15 @@ describe('config/src/index', () => {
       expect(errorFn).to.have.callCount(0)
     })
   })
+
+  describe('.validateNeedToRestartOnChange', () => {
+    it('returns the need to restart if given key has changed', () => {
+      const result = configUtil.validateNeedToRestartOnChange({ blockHosts: [] }, { blockHosts: ['https://example.com'] })
+
+      expect(result).to.eql({
+        server: true,
+        browser: false,
+      })
+    })
+  })
 })

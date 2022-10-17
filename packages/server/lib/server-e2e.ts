@@ -166,7 +166,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
 
     let handlingLocalFile = false
     const previousRemoteState = this._remoteStates.current()
-    const previousRemoteStateIsPrimary = this._remoteStates.isPrimaryOrigin(previousRemoteState.origin)
+    const previousRemoteStateIsPrimary = this._remoteStates.isPrimarySuperDomainOrigin(previousRemoteState.origin)
     const primaryRemoteState = this._remoteStates.getPrimary()
 
     // nuke any hashes from our url since
@@ -307,10 +307,10 @@ export class ServerE2E extends ServerBase<SocketE2E> {
                 // TODO: think about moving this logic back into the frontend so that the driver can be in control
                 // of when to buffer and set the remote state
                 if (isOk && details.isHtml) {
-                  const isCrossOrigin = options.hasAlreadyVisitedUrl && !cors.urlOriginsMatch(primaryRemoteState.origin, newUrl) || options.isFromSpecBridge
+                  const isCrossSuperDomainOrigin = options.hasAlreadyVisitedUrl && !cors.urlsSuperDomainOriginMatch(primaryRemoteState.origin, newUrl || '') || options.isFromSpecBridge
 
                   if (!handlingLocalFile) {
-                    this._remoteStates.set(newUrl as string, options, !isCrossOrigin)
+                    this._remoteStates.set(newUrl as string, options, !isCrossSuperDomainOrigin)
                   }
 
                   const responseBufferStream = new stream.PassThrough({
@@ -325,7 +325,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
                     details,
                     originalUrl,
                     response: incomingRes,
-                    isCrossOrigin,
+                    isCrossSuperDomainOrigin,
                   })
                 } else {
                   // TODO: move this logic to the driver too for
@@ -333,7 +333,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
                   restorePreviousRemoteState(previousRemoteState, previousRemoteStateIsPrimary)
                 }
 
-                details.isPrimaryOrigin = this._remoteStates.isPrimaryOrigin(newUrl!)
+                details.isPrimarySuperDomainOrigin = this._remoteStates.isPrimarySuperDomainOrigin(newUrl!)
 
                 return resolve(details)
               })
