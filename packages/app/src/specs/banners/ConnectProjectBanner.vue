@@ -15,7 +15,11 @@
     }"
   >
     <p class="mb-24px">
-      {{ cohortOption.value }}
+      <!--
+        unref allows plain object to be used in testing
+        while a ref is provided in actual usage
+      -->
+      {{ unref(cohortOption)?.value }}
     </p>
 
     <Button
@@ -46,7 +50,7 @@ import Button from '@cy/components/Button.vue'
 import TrackedBanner from './TrackedBanner.vue'
 import type { CohortOption } from '@packages/frontend-shared/src/composables/useCohorts'
 import { BannerIds } from '@packages/types'
-import { ref } from 'vue'
+import { ref, unref } from 'vue'
 import { ConnectProjectBannerDocument } from '../../generated/graphql'
 import CloudConnectModals from '@cy/gql-components/modals/CloudConnectModals.vue'
 
