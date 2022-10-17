@@ -25,7 +25,6 @@ const SNAPSHOT_EVENT_PREFIX = `${CROSS_ORIGIN_PREFIX}snapshot:`
 const sharedPromiseSetup = ({
   resolve,
   reject,
-  data,
   event,
   specBridgeName,
   communicator,
@@ -33,7 +32,6 @@ const sharedPromiseSetup = ({
 }: {
   resolve: Function
   reject: Function
-  data?: any
   event: string
   specBridgeName: string
   communicator: EventEmitter
@@ -41,9 +39,7 @@ const sharedPromiseSetup = ({
 }) => {
   let timeoutId
 
-  const dataToSend = data || {}
-
-  dataToSend.specBridgeResponseEvent = `${event}:${Date.now()}`
+  const responseEvent = `${event}:${Date.now()}`
 
   const handler = (result) => {
     clearTimeout(timeoutId)
@@ -51,13 +47,13 @@ const sharedPromiseSetup = ({
   }
 
   timeoutId = setTimeout(() => {
-    communicator.off(dataToSend.specBridgeResponseEvent, handler)
+    communicator.off(responseEvent, handler)
     reject(new Error(`${event} failed to receive a response from ${specBridgeName} spec bridge within ${timeout / 1000} second.`))
   }, timeout)
 
-  communicator.once(dataToSend.specBridgeResponseEvent, handler)
+  communicator.once(responseEvent, handler)
 
-  return dataToSend
+  return responseEvent
 }
 
 /**
@@ -108,7 +104,7 @@ export class PrimaryOriginCommunicator extends EventEmitter {
         data.data.err = reifySerializedError(data.data.err, this.userInvocationStack as string)
       }
 
-      this.emit(messageName, data.data, data.origin, source)
+      this.emit(messageName, data.data, { origin: data.origin, source, responseEvent: data.responseEvent })
 
       return
     }
@@ -145,10 +141,25 @@ export class PrimaryOriginCommunicator extends EventEmitter {
    * @param origin - the origin of the spec bridge to send the event to.
    * @param event - the name of the event to be sent.
    * @param data - any meta data to be sent with the event.
+   * @param responseEvent - the even to be responded with when sending back a result.
    */
-  toSpecBridge (origin: string, event: string, data?: any) {
+  toSpecBridge (origin: string, event: string, data?: any, responseEvent?: string) {
     debug('=> to spec bridge', origin, event, data)
+    const source = this.crossOriginDriverWindows[origin]
 
+    if (source) {
+      this.toSource(source, event, data, responseEvent)
+    }
+  }
+
+  /**
+   * Event to be sent to sent to a specific source.
+   * @param origin - the origin of the spec bridge to send the event to.
+   * @param event - the name of the event to be sent.
+   * @param data - any meta data to be sent with the event.
+   * @param responseEvent - the even to be responded with when sending back a result.
+   */
+  toSource (source: Window, event: string, data?: any, responseEvent?: string) {
     const preprocessedData = preprocessForSerialization<any>(data)
 
     // if user defined arguments are passed in, do NOT sanitize them.
@@ -157,9 +168,10 @@ export class PrimaryOriginCommunicator extends EventEmitter {
     }
 
     // If there is no crossOriginDriverWindows, there is no need to send the message.
-    this.crossOriginDriverWindows[origin]?.postMessage({
+    source.postMessage({
       event,
       data: preprocessedData,
+      responseEvent,
     }, '*')
   }
 
@@ -183,17 +195,16 @@ export class PrimaryOriginCommunicator extends EventEmitter {
     timeout: number
   }) {
     return new Promise<T>((resolve, reject) => {
-      const dataToSend = sharedPromiseSetup({
+      const responseEvent = sharedPromiseSetup({
         resolve,
         reject,
-        data,
         event,
         specBridgeName: origin,
         communicator: this,
         timeout,
       })
 
-      this.toSpecBridge(origin, event, dataToSend)
+      this.toSpecBridge(origin, event, data, responseEvent)
     })
   }
 }
@@ -263,15 +274,16 @@ export class SpecBridgeCommunicator extends EventEmitter {
   onMessage ({ data }) {
     if (!data) return
 
-    this.emit(data.event, data.data)
+    this.emit(data.event, data.data, { responseEvent: data.responseEvent })
   }
 
   /**
    * Events to be sent to the primary communicator instance.
    * @param {string} event - the name of the event to be sent.
    * @param {Cypress.ObjectLike} data - any meta data to be sent with the event.
+   * @param responseEvent - the even to be responded with when sending back a result.
    */
-  toPrimary (event: string, data?: Cypress.ObjectLike, options: { syncGlobals: boolean } = { syncGlobals: false }) {
+  toPrimary (event: string, data?: Cypress.ObjectLike, options: { syncGlobals: boolean } = { syncGlobals: false }, responseEvent?: string) {
     const { origin } = $Location.create(window.location.href)
     const eventName = `${CROSS_ORIGIN_PREFIX}${event}`
 
@@ -294,6 +306,7 @@ export class SpecBridgeCommunicator extends EventEmitter {
         event: eventName,
         data,
         origin,
+        responseEvent,
       }, '*')
     })
   }
@@ -317,17 +330,16 @@ export class SpecBridgeCommunicator extends EventEmitter {
     timeout: number
   }) {
     return new Promise<T>((resolve, reject) => {
-      const dataToSend = sharedPromiseSetup({
+      const responseEvent = sharedPromiseSetup({
         resolve,
         reject,
-        data,
         event,
         specBridgeName: 'the primary Cypress',
         communicator: this,
         timeout,
       })
 
-      this.toPrimary(event, dataToSend, options)
+      this.toPrimary(event, data, options, responseEvent)
     })
   }
 }

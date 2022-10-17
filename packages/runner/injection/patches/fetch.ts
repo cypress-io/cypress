@@ -1,10 +1,10 @@
-import { captureFullRequestUrl } from './utils'
+import { captureFullRequestUrl, postMessagePromise } from './utils'
 
-export const patchFetch = (Cypress: Cypress.Cypress, window) => {
+export const patchFetch = (window) => {
   // if fetch is available in the browser, or is polyfilled by whatwg fetch
   // intercept method calls and add cypress headers to determine cookie applications in the proxy
   // for simulated top. @see https://github.github.io/fetch/ for default options
-  if (!Cypress.config('experimentalSessionAndOrigin') || !window.fetch) {
+  if (!window.fetch) {
     return
   }
 
@@ -35,12 +35,21 @@ export const patchFetch = (Cypress: Cypress.Cypress, window) => {
       // if the option is specified, communicate it to the the server to the proxy can make the request aware if it needs to potentially apply cross origin cookies
       // if the option isn't set, we can imply the default as we know the resource type in the proxy
       if (url) {
-        // @ts-expect-error
-        await Cypress.backend('request:sent:with:credentials', {
-          // TODO: might need to go off more information here or at least make collisions less likely
-          url,
-          resourceType: 'fetch',
-          credentialStatus: credentials,
+        await postMessagePromise({
+          event: 'backend:request',
+          data: {
+            args:
+            [
+              'request:sent:with:credentials',
+              {
+                // TODO: might need to go off more information here or at least make collisions less likely
+                url,
+                resourceType: 'fetch',
+                credentialStatus: credentials,
+              },
+            ],
+          },
+          timeout: 2000,
         })
       }
     } finally {

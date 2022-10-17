@@ -8,7 +8,7 @@ export const handleSocketEvents = (Cypress) => {
       timeout: Cypress.config().defaultCommandTimeout,
     })
 
-    callback(response)
+    callback({ response })
   }
 
   Cypress.on('backend:request', (...args) => onRequest('backend:request', args))

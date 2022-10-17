@@ -93,6 +93,10 @@ timers.wrap()
 const timersReset = timers.reset
 const timersPause = timers.pause
 
+// Patched to track credentials use.
+patchFetch(window)
+patchXmlHttpRequest(window)
+
 // Add a function to window for the spec bridge to call after it has attached.
 window.cypressApplyPatchesOnAttach = () => {
   if (!window.Cypress) {
@@ -107,15 +111,6 @@ window.cypressApplyPatchesOnAttach = () => {
 
   window.Cypress.on('app:timers:reset', timersReset)
   window.Cypress.on('app:timers:pause', timersPause)
-
-  // Place after override incase fetch is polyfilled in the AUT injection
-  // this can be in the beforeLoad code as we only want to patch fetch/xmlHttpRequest
-  // when the cy.origin block is active to track credential use.
-  // Fetch and xmlHttpRequest are patched in the injection because when made async
-  // in firefox the would throw errors in the window where the code was defined, not
-  // on the window where the code was attached.
-  patchFetch(window.Cypress, window)
-  patchXmlHttpRequest(window.Cypress, window)
 }
 
 const Cypress = findCypress()

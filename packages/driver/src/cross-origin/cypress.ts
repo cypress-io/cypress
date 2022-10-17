@@ -81,7 +81,7 @@ const createCypress = () => {
     }
   })
 
-  Cypress.specBridgeCommunicator.on('snapshot:generate:for:log', ({ name, specBridgeResponseEvent }) => {
+  Cypress.specBridgeCommunicator.on('snapshot:generate:for:log', ({ name }, { responseEvent }) => {
     // if the snapshot cannot be taken (in a transitory space), set to an empty object in order to not fail serialization
     let requestedCrossOriginSnapshot = {}
 
@@ -91,7 +91,7 @@ const createCypress = () => {
       requestedCrossOriginSnapshot = cy.createSnapshot(name) || {}
     }
 
-    Cypress.specBridgeCommunicator.toPrimary(specBridgeResponseEvent, requestedCrossOriginSnapshot)
+    Cypress.specBridgeCommunicator.toPrimary(responseEvent, requestedCrossOriginSnapshot)
   })
 
   Cypress.specBridgeCommunicator.toPrimary('bridge:ready')
@@ -185,8 +185,8 @@ const attachToWindow = (autWindow: Window) => {
   // place after override incase fetch is polyfilled in the AUT injection
   // this can be in the beforeLoad code as we only want to patch fetch/xmlHttpRequest
   // when the cy.origin block is active to track credential use
-  patchFetch(Cypress, window)
-  patchXmlHttpRequest(Cypress, window)
+  patchFetch(window)
+  patchXmlHttpRequest(window)
 
   // TODO: DRY this up with the mostly-the-same code in src/cypress/cy.js
   // https://github.com/cypress-io/cypress/issues/20972
