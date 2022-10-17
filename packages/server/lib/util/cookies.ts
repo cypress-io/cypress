@@ -56,7 +56,6 @@ export class CookieJar {
 
     if (!toughCookie) return
 
-    // TODO: this is fixed in tough-cookie@4.1.0
     // fixes tough-cookie defaulting undefined/invalid SameSite to 'none'
     // https://github.com/salesforce/tough-cookie/issues/191
     const hasUnspecifiedSameSite = toughCookie.sameSite === 'none' && !sameSiteNoneRe.test(cookie)
