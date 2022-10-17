@@ -124,9 +124,11 @@ export async function generateTsConfig (devServerConfig: AngularWebpackDevServer
   }
 
   if (buildOptions.polyfills) {
-    const polyfills = getProjectFilePath(buildOptions.polyfills)
+    const polyfills = Array.isArray(buildOptions.polyfills)
+      ? buildOptions.polyfills.filter((p: string) => devServerConfig.options?.projectConfig.sourceRoot && p.startsWith(devServerConfig.options?.projectConfig.sourceRoot))
+      : [buildOptions.polyfills]
 
-    includePaths.push(polyfills)
+    includePaths.push(...polyfills.map((p: string) => getProjectFilePath(p)))
   }
 
   const cypressTypes = getProjectFilePath('node_modules', 'cypress', 'types', 'index.d.ts')
@@ -202,7 +204,11 @@ export async function getAngularJson (projectRoot: string): Promise<AngularJson>
 
 function createFakeContext (projectRoot: string, defaultProjectConfig: Cypress.AngularDevServerProjectConfig) {
   const logger = {
-    createChild: () => ({}),
+    createChild: () => {
+      return {
+        warn: () => {},
+      }
+    },
   }
 
   const context = {

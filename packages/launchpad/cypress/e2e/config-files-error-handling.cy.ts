@@ -88,7 +88,7 @@ describe('Config files error handling', () => {
 
     cy.findByRole('button', { name: 'Try again' }).click()
 
-    cy.get('h1').should('contain', 'Choose a Browser')
+    cy.get('h1').should('contain', 'Choose a browser')
   })
 })
 
@@ -261,7 +261,7 @@ describe('setupNodeEvents', () => {
 
     cy.findByRole('button', { name: 'Try again' }).click()
 
-    cy.get('h1').should('contain', 'Choose a Browser')
+    cy.get('h1').should('contain', 'Choose a browser')
   })
 
   it('handles multiple config errors and then recovers', () => {
@@ -291,7 +291,7 @@ describe('setupNodeEvents', () => {
     })
 
     cy.findByRole('button', { name: 'Try again' }).click()
-    cy.get('h1').should('contain', 'Choose a Browser')
+    cy.get('h1').should('contain', 'Choose a browser')
     cy.get('[data-cy="alert"]').should('contain', 'Warning: Cannot Connect Base Url Warning')
   })
 

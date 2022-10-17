@@ -1,6 +1,6 @@
 import React from 'react'
 
 export const App = () => {
-  return <h1>Hello World</h1>
+  return <h1 className={'sample-bg'}>Hello World</h1>
 }
 

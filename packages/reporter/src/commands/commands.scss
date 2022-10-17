@@ -138,12 +138,13 @@
   }
 
   .command-info {
-    padding-top: 4px;
-    padding-bottom: 4px;
     margin-left: 0;
     overflow: hidden;
     width: 100%;
     font-weight: 600;
+    -webkit-line-clamp: 50;
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
 
     .command-aliases,
     .command-message {
@@ -378,8 +379,6 @@
     white-space: initial;
     word-wrap: inherit;
     width: 100%;
-    -webkit-line-clamp: 50;
-    -webkit-box-orient: vertical;
   }
 
   // Styles for Uncaught Exception
