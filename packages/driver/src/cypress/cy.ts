@@ -33,11 +33,11 @@ import { TestConfigOverride } from '../cy/testConfigOverrides'
 import { create as createOverrides, IOverrides } from '../cy/overrides'
 import { historyNavigationTriggeredHashChange } from '../cy/navigation'
 import { EventEmitter2 } from 'eventemitter2'
+import { handleCrossOriginCookies } from '../cross-origin/events/cookies'
 
 import type { ICypress } from '../cypress'
 import type { ICookies } from './cookies'
 import type { StateFunc } from './state'
-import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
 
 const debugErrors = debugFn('cypress:driver:errors')
 
@@ -375,24 +375,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       this.enqueue(attrs)
     })
 
-    Cypress.on('cross:origin:cookies', (cookies: AutomationCookie[]) => {
-      Cypress.backend('cross:origin:cookies:received')
-
-      const onBeforeStabilityRelease = (stable: boolean) => {
-        if (!stable) return
-
-        // @ts-ignore
-        Cypress.off('before:stability:release', onBeforeStabilityRelease)
-
-        // this will be awaited before any stability-reliant actions
-        return Cypress.automation('add:cookies', cookies)
-        .catch(() => {
-          // errors here can be ignored as they're not user-actionable
-        })
-      }
-
-      Cypress.on('before:stability:release', onBeforeStabilityRelease)
-    })
+    handleCrossOriginCookies(Cypress)
   }
 
   isCy (val) {
