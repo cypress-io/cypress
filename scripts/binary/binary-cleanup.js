@@ -102,7 +102,7 @@ const cleanup = async (buildAppDir) => {
   const keptDependencies = Object.keys(esbuildResult.metafile.inputs)
 
   await Promise.all(potentiallyRemovedDependencies.map(async (dependency) => {
-    if (dependency !== './package.json' && externalDependencies.findIndex((externalDependency) => {
+    if (dependency !== './package.json' && dependency !== './packages/root/index.js' && externalDependencies.findIndex((externalDependency) => {
       return dependency.includes(externalDependency)
     }) === -1 && !keptDependencies.includes(dependency.slice(2))) {
       await fs.remove(path.join(buildAppDir, dependency.replace(/.ts$/, '.js')))
