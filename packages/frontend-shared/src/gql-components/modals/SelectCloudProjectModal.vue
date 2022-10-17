@@ -160,6 +160,7 @@
           size="lg"
           :prefix-icon="newProject ? CreateIcon : ConnectIcon"
           prefix-icon-class="icon-dark-white"
+          :disabled="!pickedProject"
           @click="createOrConnectProject"
         >
           {{ newProject
@@ -179,7 +180,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watchEffect } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
@@ -196,7 +197,7 @@ import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import { SelectCloudProjectModal_CreateCloudProjectDocument, SelectCloudProjectModal_SetProjectIdDocument } from '../../generated/graphql'
 import type { SelectCloudProjectModalFragment } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { sortBy } from 'lodash'
+import { isEqual, sortBy } from 'lodash'
 import { useOnline } from '@vueuse/core'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import { clearPendingError } from '@packages/frontend-shared/src/graphql/urqlClient'
@@ -335,12 +336,20 @@ const projectOptions = computed(() => {
 const newProject = ref(projectOptions.value.length === 0)
 const pickedProject = ref<typeof projectOptions.value[number]>()
 
-watchEffect(() => {
-  if (projectOptions.value.length === 1) {
+watch(projectOptions, (newVal, oldVal) => {
+  // avoid unselecting currently chosen project
+  // can happen when gql updates due to polling
+  if (isEqual(newVal, oldVal)) {
+    return
+  }
+
+  if (newVal.length === 1) {
     pickedProject.value = projectOptions.value[0]
   } else {
     pickedProject.value = projectOptions.value.find((p) => p.name === projectName.value)
   }
+}, {
+  immediate: true,
 })
 
 const orgPlaceholder = t('runs.connect.modal.selectProject.placeholderOrganizations')
