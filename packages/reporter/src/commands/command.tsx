@@ -259,8 +259,22 @@ interface Props {
   groupId?: number
 }
 
-const CommandDetails = observer(({ model, groupId, events, aliasesWithDuplicates }) => {
-  const commandName = model.name ? nameClassName(model.name) : ''
+const CommandDetails = observer(({ model, groupId, aliasesWithDuplicates }) => (
+  <span className={cs('command-info')}>
+    <span className='command-method'>
+      <span>
+        {model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}
+      </span>
+    </span>
+    {!!groupId && model.type === 'system' && model.state === 'failed' && <StateIcon aria-hidden className="failed-indicator" state={model.state}/>}
+    {model.referencesAlias ?
+      <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
+      : <Message model={model} />
+    }
+  </span>
+))
+
+const CommandControls = observer(({ model, commandName, events }) => {
   const displayNumOfElements = model.state !== 'pending' && model.numElements != null && model.numElements !== 1
   const isSystemEvent = model.type === 'system' && model.event
   const isSessionCommand = commandName === 'session'
@@ -274,61 +288,47 @@ const CommandDetails = observer(({ model, groupId, events, aliasesWithDuplicates
   }
 
   return (
-    <>
-      <span className={cs('command-info')}>
-        <span className='command-method'>
+    <span className='command-controls'>
+      {model.type === 'parent' && model.isStudio && (
+        <i
+          className='far fa-times-circle studio-command-remove'
+          onClick={_removeStudioCommand}
+        />
+      )}
+      {isSessionCommand && (
+        <Tag
+          content={model.sessionInfo?.status}
+          type={`${model.sessionInfo?.status === 'failed' ? 'failed' : 'successful'}-status`}
+        />
+      )}
+      {!model.visible && (
+        <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
           <span>
-            {model.event && model.type !== 'system' ? `(${displayName(model)})` : displayName(model)}
+            <HiddenIcon className='command-invisible' />
           </span>
-        </span>
-        {!!groupId && model.type === 'system' && model.state === 'failed' && <StateIcon aria-hidden className="failed-indicator" state={model.state}/>}
-        {model.referencesAlias ?
-          <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
-          : <Message model={model} />
-        }
-      </span>
-      <span className='command-controls'>
-        {model.type === 'parent' && model.isStudio && (
-          <i
-            className='far fa-times-circle studio-command-remove'
-            onClick={_removeStudioCommand}
-          />
-        )}
-        {isSessionCommand && (
+        </Tooltip>
+      )}
+      {displayNumOfElements && (
+        <Tag
+          content={model.numElements.toString()}
+          type='count'
+          tooltipMessage={`${model.numElements} matched elements`}
+          customClassName='num-elements'
+        />
+      )}
+      <span className='alias-container'>
+        <Interceptions {...model.renderProps} />
+        <Aliases model={model} />
+        {displayNumOfChildren && (
           <Tag
-            content={model.sessionInfo?.status}
-            type={`${model.sessionInfo?.status === 'failed' ? 'failed' : 'successful'}-status`}
-          />
-        )}
-        {!model.visible && (
-          <Tooltip placement='top' title={invisibleMessage(model)} className='cy-tooltip'>
-            <span>
-              <HiddenIcon className='command-invisible' />
-            </span>
-          </Tooltip>
-        )}
-        {displayNumOfElements && (
-          <Tag
-            content={model.numElements.toString()}
+            content={model.numChildren}
             type='count'
-            tooltipMessage={`${model.numElements} matched elements`}
-            customClassName='num-elements'
+            tooltipMessage={numberOfChildrenMessage(model.numChildren, model.event)}
+            customClassName='num-children'
           />
         )}
-        <span className='alias-container'>
-          <Interceptions {...model.renderProps} />
-          <Aliases model={model} />
-          {displayNumOfChildren && (
-            <Tag
-              content={model.numChildren}
-              type='count'
-              tooltipMessage={numberOfChildrenMessage(model.numChildren, model.event)}
-              customClassName='num-children'
-            />
-          )}
-        </span>
       </span>
-    </>
+    </span>
   )
 })
 
@@ -353,36 +353,31 @@ class Command extends Component<Props> {
     const commandName = model.name ? nameClassName(model.name) : ''
     const groupPlaceholder: Array<JSX.Element> = []
 
+    let groupLevel = 0
+
     if (model.groupLevel !== undefined) {
       // cap the group nesting to 5 levels to keep the log text legible
-      const level = model.groupLevel < 6 ? model.groupLevel : 5
+      groupLevel = model.groupLevel < 6 ? model.groupLevel : 5
 
-      for (let i = 1; i < level; i++) {
+      for (let i = 1; i < groupLevel; i++) {
         groupPlaceholder.push(<span key={`${this.props.groupId}-${i}`} className='command-group-block' />)
       }
     }
 
     return (
       <>
-
-        <li className={
-          cs('command', `command-name-${commandName}`, {
-            'command-is-studio': model.isStudio,
-          })
-        }>
+        <li className={cs('command', `command-name-${commandName}`, { 'command-is-studio': model.isStudio })}>
           <div
-            className={
-              cs(
-                'command-wrapper',
-              `command-state-${model.state}`,
-              `command-type-${model.type}`,
-              {
-                'command-is-event': !!model.event,
-                'command-is-pinned': this._isPinned(),
-                'command-is-interactive': !model.showRecoveredError && (model.hasConsoleProps || model.hasSnapshot),
-              },
-              )
-            }
+            className={cs(
+              'command-wrapper',
+                `command-state-${model.state}`,
+                `command-type-${model.type}`,
+                {
+                  'command-is-event': !!model.event,
+                  'command-is-pinned': this._isPinned(),
+                  'command-is-interactive': (model.hasConsoleProps || model.hasSnapshot),
+                },
+            )}
           >
             <NavColumns model={model} isPinned={this._isPinned()} toggleColumnPin={this._toggleColumnPin} />
             <FlashOnClick
@@ -397,14 +392,17 @@ class Command extends Component<Props> {
                 onMouseLeave={() => this._snapshot(false)}
               >
                 {groupPlaceholder}
-                <CommandDetails model={model} groupId={this.props.groupId} events={this.props.events} aliasesWithDuplicates={aliasesWithDuplicates} />
+                <CommandDetails model={model} groupId={this.props.groupId} aliasesWithDuplicates={aliasesWithDuplicates} />
+                <CommandControls model={model} commandName={commandName} events={this.props.events} />
               </div>
             </FlashOnClick>
           </div>
           <Progress model={model} />
           {this._children()}
         </li>
-        {model.err?.hasError && <Err model={model} isGroup={model.hasChildren} />}
+        {model.err?.isRecovered && (
+          <li><TestError err={model.err} testId={model.testId} commandId={model.id} groupLevel={groupLevel}/></li>
+        )}
       </>
     )
   }
@@ -497,42 +495,6 @@ class Command extends Component<Props> {
         }
       }, 50)
     }
-  }
-}
-
-class Err extends Component<Props> {
-  static defaultProps = {
-    appState,
-    events,
-    runnablesStore,
-  }
-
-  render () {
-    const { model } = this.props
-
-    if (!model.err?.hasError) {
-      return null
-    }
-
-    const groupPlaceholder: Array<JSX.Element> = []
-
-    console.log(model.groupLevel, 'model.groupLevel')
-    let groupLevel = 0
-
-    if (groupLevel !== undefined) {
-      // cap the group nesting to 5 levels to keep the log text legible
-      groupLevel = model.groupLevel < 6 ? model.groupLevel : 5
-
-      // for (let i = 0; i < level; i++) {
-      //   groupPlaceholder.push(<span key={`${model.id}-err-${i}`} className='err-group-block' />)
-      // }
-    }
-
-    return (
-      <li>
-        <TestError model={model.err} groupLevel={groupLevel}/>
-      </li>
-    )
   }
 }
 

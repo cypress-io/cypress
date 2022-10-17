@@ -51,17 +51,32 @@ $code-border-radius: 4px;
     }
   }
 
-  .show-recovered-test-err > .runnable-err-header,
-  .show-recovered-test-err > .runnable-err-content {
-    padding-left: 49px;
-    display: flex;
+  .show-recovered-test-err {
+    .runnable-err-header,
+    .runnable-err-body {
+      padding-left: 49px;
+      display: flex;
+
+      .err-group-block {
+        border-left: 1px dotted $err-header-text;
+        border-image-slice: 0 0 0 1;
+        border-image-source: repeating-linear-gradient(0deg, transparent, $err-header-text, $err-header-text 4px);
+        padding-right: 12px;
+      }
+    }
+
+    .runnable-err-header > .runnable-err-name {
+      padding: 5px 4px 5px 8px;
+    }
+
+    .runnable-err-body > .err-group-block:last-of-type {
+      padding-right: 0px;
+    }
   }
 
-  .err-group-block {
-    border-left: 1px dotted $err-header-text;
-    border-image-slice: 0 0 0 1;
-    border-image-source: repeating-linear-gradient(0deg, transparent, $err-header-text, $err-header-text 4px);
-    padding-right: 12px;
+  .runnable-err-content {
+    width: 100%;
+    overflow: scroll;
   }
 
   .studio-err-wrapper {
@@ -70,7 +85,7 @@ $code-border-radius: 4px;
 
   .runnable-err {
     background-color: $err-background;
-    border-left: 2px solid $red-300;
+    border-left: $err-border;
     clear: both;
     color: $err-text;
     font-family: $monospace;
@@ -85,23 +100,23 @@ $code-border-radius: 4px;
 
   .runnable-err-header {
     background-color: $err-header-background;
-    // display: flex;
-    justify-content: space-between;
+    display: flex;
     font-weight: bold;
-    padding-left: 16px;
+    justify-content: space-between;
+    padding-left: 18px;
 
     svg {
       color: $red-400;
-      margin-right: 10px;
       align-self: center
     }
+
     .runnable-err-name {
       color: $err-header-text;
       flex: auto;
       font-size: 12px;
       font-weight: 600;
       line-height: 20px;
-      padding: 5px 0;
+      padding: 5px 0 5px 24px;
     }
   }
 
@@ -115,7 +130,7 @@ $code-border-radius: 4px;
     font-family: $font-system;
     font-size: 14px;
     font-weight: 400;
-    padding: 10px 10px 10px 16px;
+    padding: 10px 10px 10px 18px;
 
     code {
       background-color: rgba($black, 0.2);
@@ -134,9 +149,10 @@ $code-border-radius: 4px;
 
   .runnable-err-stack-expander {
     align-items: center;
-    border-top: 1px solid rgba($red-400, 0.1);
+    border-top: 1px dashed rgba($red-400, 0.1);
     display: flex;
-
+    padding: 10px 18px;
+    flex-wrap: wrap-reverse;
     .collapsible-header {
       flex-grow: 1;
 
@@ -163,7 +179,8 @@ $code-border-radius: 4px;
       div {
         cursor: pointer;
         outline: none;
-        padding: 14px 16px;
+        padding: 6px 0;
+>>>>>>> origin/reporter-error-ui
         width: 100%;
 
         .collapsible-header-text {
@@ -204,7 +221,6 @@ $code-border-radius: 4px;
         font-size: 14px;
         font-weight: 500;
         height: 100%;
-        padding: 16px 10px;
         width: 100%;
 
         &:focus {
@@ -243,7 +259,7 @@ $code-border-radius: 4px;
     background-color: $gray-1000;
     border: 1px dashed rgba(245, 154, 169, 0.1);
     border-radius: $code-border-radius;
-    margin: 0 10px 10px;
+    margin: 0 18px 10px;
 
     .runnable-err-file-path {
       background: rgba($gray-900, 0.5);

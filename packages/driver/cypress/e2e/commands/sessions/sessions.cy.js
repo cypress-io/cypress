@@ -611,7 +611,6 @@ describe('cy.session', { retries: 0 }, () => {
         })
 
         expect(logs[6].get()).to.deep.contain({
-          showRecoveredError: true,
           group: validateSessionGroup.id,
         })
 
@@ -707,10 +706,9 @@ describe('cy.session', { retries: 0 }, () => {
         //     group: validateSessionGroup.id,
         //   })
 
-        //   expect(logs[6].get()).to.deep.contain({
-        //     showRecoveredError: true,
-        //     group: validateSessionGroup.id,
-        //   })
+        // expect(logs[6].get()).to.deep.contain({
+        //   group: validateSessionGroup.id,
+        // })
 
         //   expect(logs[6].get('error').message).to.eq('Your `cy.session` **validate** callback returned false.')
 

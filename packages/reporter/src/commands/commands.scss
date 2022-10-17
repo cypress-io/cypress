@@ -140,15 +140,15 @@
   }
 
   .command-info {
-    padding-top: 4px;
-    padding-bottom: 4px;
+    display: -webkit-box;
+    font-weight: 600;
     margin-left: 0;
     overflow: hidden;
-    width: 100%;
-    font-weight: 600;
+    padding-top: 4px;
+    padding-bottom: 4px;
     -webkit-line-clamp: 50;
     -webkit-box-orient: vertical;
-    display: -webkit-box;
+    width: 100%;
 
     .command-aliases,
     .command-message {
@@ -258,7 +258,7 @@
     color: $err-header-text;
 
     &:not(.command-type-system) {
-      border-left: 2px solid $red-300;
+      border-left: $err-border;
       background-color: $err-header-background;
 
       &.command-is-interactive:hover {

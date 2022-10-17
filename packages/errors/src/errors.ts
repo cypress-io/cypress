@@ -483,7 +483,7 @@ export const AllCypressErrors = {
 
         It may have been recently revoked by you or another user.
 
-        Please log into the Dashboard to see the valid record keys.
+        Please log into the Dashboard to see the valid Record Keys.
 
         https://on.cypress.io/dashboard/projects/${fmt.off(projectId)}`
   },
@@ -1425,7 +1425,7 @@ export const AllCypressErrors = {
 
   DASHBOARD_GRAPHQL_ERROR: (err: Error) => {
     return errTemplate`
-      We received an unexpected error response from the request to the Cypress dashboard:
+      We received an unexpected error response from the request to the Cypress Dashboard:
 
       ${fmt.stringify(err.message)}
     `
