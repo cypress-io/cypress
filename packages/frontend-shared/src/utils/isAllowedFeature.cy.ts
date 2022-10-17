@@ -39,6 +39,7 @@ describe('isAllowedFeature', () => {
       case 'needsProjectConnect':
         setUserFlag('isLoggedIn', true)
         setUserFlag('isMemberOfOrganization', true)
+        setUserFlag('isOrganizationLoaded', true)
         setProjectFlag('isConfigLoaded', true)
         setProjectFlag('isProjectConnected', false)
         expect(store.userStatus).to.eq('needsProjectConnect')
