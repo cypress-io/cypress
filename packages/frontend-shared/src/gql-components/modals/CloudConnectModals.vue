@@ -8,7 +8,7 @@
     />
   </template>
   <SelectCloudProjectModal
-    v-else-if="props.gql.cloudViewer?.organizations?.nodes.length ?? 0 > 0"
+    v-else-if="props.gql.cloudViewer?.firstOrganization?.nodes.length ?? 0 > 0"
     :gql="props.gql"
     show
     :utm-medium="props.utmMedium"
@@ -39,6 +39,11 @@ fragment CloudConnectModals on Query {
   cloudViewer {
     id
     ...CreateCloudOrgModal
+    firstOrganization: organizations(first: 1) {
+      nodes {
+        id
+      }
+    }
   }
   currentProject{
     id
