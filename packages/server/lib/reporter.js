@@ -41,31 +41,23 @@ overrideRequire((depPath, _load) => {
 // Mocha.Runnable.prototype.titlePath = ->
 //   @parent.titlePath().concat([@title])
 
-const getParentTitle = function (runnable, titles) {
-  // if the browser/reporter changed the runnable title (for display purposes)
-  // it will have .originalTitle which is the name of the test before title change
-  let p
-
+const getTitlePath = function (runnable, titles = []) {
+  // `originalTitle` is a Mocha Hook concept used to associated the
+  // hook to the test that executed it
   if (runnable.originalTitle) {
     runnable.title = runnable.originalTitle
   }
 
-  if (!titles) {
-    titles = [runnable.title]
+  if (runnable.title) {
+    // sanitize the title which may have been altered by a suite-/
+    // test-level browser skip to ensure the original title is used
+    const BROWSER_SKIP_TITLE = ' (skipped due to browser)'
+
+    titles.unshift(runnable.title.replace(BROWSER_SKIP_TITLE, ''))
   }
 
-  p = runnable.parent
-
-  if (p) {
-    let t
-
-    t = p.title
-
-    if (t) {
-      titles.unshift(t)
-    }
-
-    return getParentTitle(p, titles)
+  if (runnable.parent) {
+    return getTitlePath(runnable.parent, titles)
   }
 
   return titles
@@ -385,7 +377,7 @@ class Reporter {
     return {
       hookId: hook.hookId,
       hookName: hook.hookName,
-      title: getParentTitle(hook),
+      title: getTitlePath(hook),
       body: hook.body,
     }
   }
@@ -393,7 +385,7 @@ class Reporter {
   normalizeTest (test = {}) {
     const normalizedTest = {
       testId: orNull(test.id),
-      title: getParentTitle(test),
+      title: getTitlePath(test),
       state: orNull(test.state),
       body: orNull(test.body),
       displayError: orNull(test.err && test.err.stack),

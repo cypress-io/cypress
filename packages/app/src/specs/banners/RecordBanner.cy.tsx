@@ -24,7 +24,7 @@ describe('<RecordBanner />', () => {
     cy.contains(defaultMessages.specPage.banners.record.title).should('be.visible')
     cy.contains(defaultMessages.specPage.banners.record.content).should('be.visible')
 
-    cy.findByText('npx cypress run --component --record --key abcd-efg-1234')
+    cy.findByDisplayValue('npx cypress run --component --record --key abcd-efg-1234').should('be.visible')
 
     cy.percySnapshot()
   })

@@ -29,7 +29,7 @@ describe('testConfigOverrides', () => {
     },
   })
 
-  systemTests.it('has originalTitle when skip due to browser config', {
+  systemTests.it('has originalTitle when skipped due to browser config', {
     spec: 'testConfigOverrides/skip-browser.js',
     snapshot: true,
     outputPath,
@@ -38,8 +38,25 @@ describe('testConfigOverrides', () => {
       await exec()
       const results = await fs.readJson(outputPath)
 
-      // make sure we've respected test.originalTitle
-      expect(results.runs[0].tests[0].title).deep.eq(['suite', 'has invalid testConfigOverrides'])
+      // make sure we've respected test title when creating title path
+      expect(results.runs[0].tests[0].title).deep.eq(['suite', 'is skipped due to test-level browser override'])
+      expect(results.runs[0].tests[1].title).deep.eq(['suite 2', 'is skipped due to suite-level browser override'])
+    },
+  })
+
+  systemTests.it('maintains runnable body when skipped due to browser config', {
+    spec: 'testConfigOverrides/skip-browser.js',
+    snapshot: true,
+    outputPath,
+    browser: 'electron',
+    async onRun (exec) {
+      await exec()
+      const results = await fs.readJson(outputPath)
+
+      console.log(results.runs[0].tests)
+      // make sure we've respected alway include test body even when skipped
+      expect(results.runs[0].tests[0].body).eq('() => {}')
+      expect(results.runs[0].tests[1].body).eq('() => {// do something\n  }')
     },
   })
 

@@ -1,7 +1,7 @@
 // import to bind shouldWithTimeout into global cy commands
 import '../../../support/utils'
 
-describe('cy.origin - snapshots', () => {
+describe('cy.origin - snapshots', { browser: '!webkit' }, () => {
   const findLog = (logMap: Map<string, any>, displayName: string, url: string) => {
     return Array.from(logMap.values()).find((log: any) => {
       const props = log.get()

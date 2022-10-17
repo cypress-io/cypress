@@ -92,19 +92,19 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     }
 
     mountWithSpecCount(0)
-    cy.contains('No Matches')
+    cy.contains('No matches')
     .should('be.visible')
     .and('have.attr', 'aria-live', 'polite')
 
-    cy.percySnapshot('No Matches')
+    cy.percySnapshot('No matches')
 
     mountWithSpecCount(1)
-    cy.contains('1 Match').should('be.visible')
+    cy.contains('1 match').should('be.visible')
 
     cy.percySnapshot('Singular Match')
 
     mountWithSpecCount(100)
-    cy.contains('100 Matches').should('be.visible')
+    cy.contains('100 matches').should('be.visible')
 
     cy.percySnapshot('Plural Match')
   })
@@ -119,19 +119,19 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     }
 
     mountWithCounts(0, 0)
-    cy.contains('No Matches')
+    cy.contains('No matches')
 
     mountWithCounts(0, 22)
-    cy.contains('0 of 22 Matches')
+    cy.contains('0 of 22 matches')
 
     mountWithCounts(0, 1)
-    cy.contains('0 of 1 Match').should('be.visible')
+    cy.contains('0 of 1 match').should('be.visible')
 
     mountWithCounts(1, 1)
-    cy.contains('1 of 1 Match').should('be.visible')
+    cy.contains('1 of 1 match').should('be.visible')
 
     mountWithCounts(5, 22)
-    cy.contains('5 of 22 Matches').should('be.visible')
+    cy.contains('5 of 22 matches').should('be.visible')
 
     cy.percySnapshot()
   })

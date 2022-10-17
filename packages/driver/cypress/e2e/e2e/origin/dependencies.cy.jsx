@@ -1,4 +1,4 @@
-describe('cy.origin dependencies - jsx', () => {
+describe('cy.origin dependencies - jsx', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()

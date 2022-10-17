@@ -357,7 +357,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
       // We rename the integration folder, even if the user skips the spec rename
       cy.findByText('Rename folder only.').click()
 
-      cy.findByText('Save Changes').click()
+      cy.findByText('Save changes').click()
 
       cy.percySnapshot()
 
@@ -1326,7 +1326,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
       cy.findByText('Don\'t rename anything — keep what I have.').click()
       cy.contains('I may need to change my specPattern later')
 
-      cy.findByText('Save Changes').click()
+      cy.findByText('Save changes').click()
 
       cy.findByText('Skip renaming specs').click()
 
@@ -1527,7 +1527,7 @@ describe('Migration', { viewportWidth: 1200, retries: { openMode: 0, runMode: 2 
 
     cy.findByText('change').click()
     cy.get('h2').should('contain', 'Change the existing spec file extension')
-    cy.get('button').contains('Save Changes').click()
+    cy.get('button').contains('Save changes').click()
     cy.get('h2').should('not.contain', 'Change the existing spec file extension')
 
     cy.findByText('change').click()
