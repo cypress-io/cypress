@@ -114,13 +114,18 @@ watchEffect(() => {
   setUserData((cloudViewer ?? cachedUser) ?? undefined)
   setUserFlag('isLoggedIn', !!cachedUser?.id || !!cloudViewer?.id)
   setUserFlag('loginError', AUTH_STATE_ERRORS.includes(authState?.name ?? ''))
-  // Need to be able to tell whether the lack of `firstOrganization` means they don't have an org or whether it just hasn't loaded yet
-  // Not having this check can cause a brief flicker of the 'Create Org' banner while org data is loading
-  setUserFlag('isOrganizationLoaded', !!cloudViewer?.firstOrganization)
-  setUserFlag('isMemberOfOrganization', (cloudViewer?.firstOrganization?.nodes?.length ?? 0) > 0)
+
+  if (cloudViewer) {
+    // Need to be able to tell whether the lack of `firstOrganization` means they don't have an org or whether it just hasn't loaded yet
+    // Not having this check can cause a brief flicker of the 'Create Org' banner while org data is loading
+    setUserFlag('isOrganizationLoaded', !!cloudViewer.firstOrganization)
+    setUserFlag('isMemberOfOrganization', (cloudViewer.firstOrganization?.nodes?.length ?? 0) > 0)
+  }
 
   // 2. set project-related information in the store
   setProjectFlag('isConfigLoaded', !!currentProject?.isFullConfigReady)
+  setProjectFlag('isNotAuthorized', currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized')
+  setProjectFlag('isNotFound', currentProject?.cloudProject?.__typename === 'CloudProjectNotFound')
   setProjectFlag('isProjectConnected', !!cloudProjectId.value && currentProject?.cloudProject?.__typename === 'CloudProject')
   setProjectFlag('hasNonExampleSpec', !!currentProject?.hasNonExampleSpec)
   setProjectFlag('hasNoRecordedRuns', currentProject?.cloudProject?.__typename === 'CloudProject' && (currentProject.cloudProject?.runs?.nodes?.length ?? 0) === 0)
