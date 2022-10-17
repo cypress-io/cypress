@@ -59,7 +59,7 @@ describe('SelectorPlayground', () => {
     cy.spy(autIframe, 'toggleSelectorHighlight')
     expect(selectorPlaygroundStore.method).to.eq('get')
 
-    cy.get('[aria-label="Selector Methods"]').click()
+    cy.get('[aria-label="Selector methods"]').click()
     cy.findByRole('menuitem', { name: 'cy.contains' }).click().then(() => {
       expect(selectorPlaygroundStore.method).to.eq('contains')
       expect(autIframe.toggleSelectorHighlight).to.have.been.called
@@ -74,15 +74,15 @@ describe('SelectorPlayground', () => {
     selectorPlaygroundStore.setNumElements(0)
 
     mountSelectorPlayground()
-    cy.get('[data-cy="playground-num-elements"]').contains('No Matches')
+    cy.get('[data-cy="playground-num-elements"]').contains('No matches')
 
     cy.then(() => selectorPlaygroundStore.setNumElements(1))
 
-    cy.get('[data-cy="playground-num-elements"]').contains('1 Match')
+    cy.get('[data-cy="playground-num-elements"]').contains('1 match')
 
     cy.then(() => selectorPlaygroundStore.setNumElements(10))
 
-    cy.get('[data-cy="playground-num-elements"]').contains('10 Matches')
+    cy.get('[data-cy="playground-num-elements"]').contains('10 matches')
 
     cy.percySnapshot()
 

@@ -38,21 +38,21 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
       snapshotAUTPanel('cy.get selector')
 
-      cy.findByTestId('playground-num-elements').contains('1 Match')
+      cy.findByTestId('playground-num-elements').contains('1 match')
 
       cy.window().then((win) => cy.spy(win.console, 'log'))
       cy.findByTestId('playground-print').click().window().then((win) => {
         expect(win.console.log).to.have.been.calledWith('%cCommand:  ', 'font-weight: bold', 'cy.get(\'[data-cy-root]\')')
       })
 
-      cy.findByLabelText('Selector Methods').click()
+      cy.findByLabelText('Selector methods').click()
       cy.findByRole('menuitem', { name: 'cy.contains' }).click()
 
       cy.findByTestId('playground-selector').clear().type('Component Test')
 
       snapshotAUTPanel('cy.contains selector')
 
-      cy.findByTestId('playground-num-elements').contains('1 Match')
+      cy.findByTestId('playground-num-elements').contains('1 match')
     })
 
     it('navigation between specs and other parts of the app works', () => {
