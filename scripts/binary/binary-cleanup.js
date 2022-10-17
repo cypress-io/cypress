@@ -142,7 +142,7 @@ const cleanup = async (buildAppDir) => {
   const keptDependencies = Object.keys(esbuildResult.metafile.inputs)
 
   await Promise.all(potentiallyRemovedDependencies.map(async (dependency) => {
-    if (dependency !== './package.json' && dependency !== './packages/server/server-entry.js' && esbuildConfig.entryPoints.findIndex((externalDependency) => {
+    if (dependency !== './package.json' && dependency !== './packages/server/server-entry.js' && !dependency.includes('marionette-client') && esbuildConfig.entryPoints.findIndex((externalDependency) => {
       return dependency === externalDependency
     }) === -1 && !keptDependencies.includes(dependency.slice(2))) {
       await fs.remove(path.join(buildAppDir, dependency.replace(/.ts$/, '.js')))
