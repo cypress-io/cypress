@@ -274,14 +274,6 @@ describe('app/background', () => {
   })
 
   context('add header to aut iframe requests', () => {
-    it('does not listen to `onBeforeSendHeaders` if experimental flag is off', async function () {
-      sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
-
-      await this.connect()
-
-      expect(browser.webRequest.onBeforeSendHeaders.addListener).not.to.be.called
-    })
-
     it('does not add header if it is the top frame', async function () {
       const details = {
         parentFrameId: -1,
