@@ -453,6 +453,17 @@ describe('App Top Nav Workflows', () => {
           cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
           cy.startAppServer()
           cy.visitApp()
+          cy.remoteGraphQLIntercept(async (obj) => {
+            if (obj.result.data?.cloudViewer) {
+              obj.result.data.cloudViewer.organizations = {
+                __typename: 'CloudOrganizationConnection',
+                id: 'test',
+                nodes: [{ __typename: 'CloudOrganization', id: '987' }],
+              }
+            }
+
+            return obj.result
+          })
 
           mockLogInActionsForUser(mockUser)
           logIn({ expectedNextStepText: 'Connect project', displayName: mockUser.name })
