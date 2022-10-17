@@ -15,44 +15,30 @@
     }"
   >
     <p class="mb-24px">
-      {{ cohortOption.value }}
+      {{ unref(cohortOption)?.value }}
     </p>
 
     <Button
       :prefix-icon="ConnectIcon"
       class="mt-24px"
       data-cy="login-button"
-      @click="handleButtonClick"
+      @click="openLoginConnectModal({utmMedium: 'Specs Login Banner'})"
     >
       {{ t('specPage.banners.login.buttonLabel') }}
     </Button>
-    <LoginModal
-      v-if="loginModalQuery.data.value"
-      v-model="isLoginOpen"
-      :gql="loginModalQuery.data.value"
-      utm-medium="Specs Login Banner"
-      :utm-content="cohortOption.cohort"
-    />
   </TrackedBanner>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { gql, useQuery } from '@urql/vue'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import { useI18n } from '@cy/i18n'
 import Button from '@cy/components/Button.vue'
-import { LoginBannerDocument } from '../../generated/graphql'
 import TrackedBanner from './TrackedBanner.vue'
 import type { CohortOption } from '@packages/frontend-shared/src/composables/useCohorts'
 import { BannerIds } from '@packages/types'
-import LoginModal from '@cy/gql-components/modals/LoginModal.vue'
-
-gql`
-query LoginBanner {
-  ...LoginModal
-}
-`
+import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { unref } from 'vue'
+const { openLoginConnectModal } = useLoginConnectStore()
 
 defineProps<{
   hasBannerBeenShown: boolean
@@ -61,12 +47,5 @@ defineProps<{
 
 const { t } = useI18n()
 const bannerId = BannerIds.ACI_082022_LOGIN
-const isLoginOpen = ref(false)
-const loginModalQuery = useQuery({ query: LoginBannerDocument, pause: true })
-
-async function handleButtonClick () {
-  await loginModalQuery.executeQuery()
-  isLoginOpen.value = true
-}
 
 </script>
