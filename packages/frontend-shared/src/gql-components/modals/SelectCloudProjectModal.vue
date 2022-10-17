@@ -160,7 +160,7 @@
           size="lg"
           :prefix-icon="newProject ? CreateIcon : ConnectIcon"
           prefix-icon-class="icon-dark-white"
-          :disabled="!pickedProject"
+          :disabled="disableButton"
           @click="createOrConnectProject"
         >
           {{ newProject
@@ -416,5 +416,13 @@ async function createOrConnectProject () {
 }
 
 const isOnline = computed(() => online.value)
+
+const disableButton = computed(() => {
+  if (newProject.value) {
+    return !projectName.value
+  }
+
+  return !pickedProject.value
+})
 
 </script>
