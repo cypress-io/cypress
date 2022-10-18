@@ -22,7 +22,9 @@ describe('<CloudConnectButton />', { viewportHeight: 60, viewportWidth: 400 }, (
     it('show project connect if not connected', () => {
       cy.mount(() => <div class="h-screen"><CloudConnectButton utmMedium="testing" /></div>)
 
-      cy.contains('button', 'Connect your project').should('be.visible')
+      cy.contains('button', 'Connect your project').click()
+      cy.get('[role="dialog"]').should('be.visible')
+      cy.get('[role="dialog"] h2').should('contain', 'Connect project')
     })
 
     it('uses the store to open the Login Connect modal', () => {

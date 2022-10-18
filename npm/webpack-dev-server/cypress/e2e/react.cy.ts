@@ -131,7 +131,7 @@ for (const project of WEBPACK_REACT) {
       cy.findByTestId('new-spec-button').click()
       cy.findByRole('dialog').within(() => {
         cy.get('input').clear().type('src/App.cy.jsx')
-        cy.contains('button', 'Create Spec').click()
+        cy.contains('button', 'Create spec').click()
       })
 
       cy.findByRole('dialog').within(() => {

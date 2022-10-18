@@ -161,6 +161,7 @@
           :prefix-icon="newProject ? CreateIcon : ConnectIcon"
           prefix-icon-class="icon-dark-white"
           :disabled="disableButton"
+          data-cy="connect-project"
           @click="createOrConnectProject"
         >
           {{ newProject
