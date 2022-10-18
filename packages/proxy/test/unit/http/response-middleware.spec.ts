@@ -596,38 +596,6 @@ describe('http/response-middleware', function () {
       expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value')
     })
 
-    it('is a noop in the cookie jar when experimentalSessionAndOrigin is false', async function () {
-      const appendStub = sinon.stub()
-
-      const cookieJar = {
-        getAllCookies: () => [{ key: 'cookie', value: 'value' }],
-        setCookie: sinon.stub(),
-      }
-
-      const ctx = prepareContext({
-        cookieJar,
-        res: {
-          append: appendStub,
-        },
-        incomingRes: {
-          headers: {
-            'set-cookie': 'cookie=value',
-          },
-        },
-      })
-
-      ctx.config.experimentalSessionAndOrigin = false
-
-      // a case where top would need to be simulated, but the experimental flag is off
-      ctx.getAUTUrl = () => 'http://www.foobar.com/index.html'
-      ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
-
-      await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
-
-      expect(cookieJar.setCookie).not.to.have.been.called
-      expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value')
-    })
-
     describe('same-origin', () => {
       ['same-origin', 'include'].forEach((credentialLevel) => {
         it(`sets first-party cookie context in the jar when simulating top if credentials included with fetch with credential ${credentialLevel}`, async function () {

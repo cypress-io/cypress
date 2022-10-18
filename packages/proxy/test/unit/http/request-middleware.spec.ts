@@ -89,30 +89,8 @@ describe('http/request-middleware', () => {
       })
     })
 
-    it('does not set requestedWith or credentialLevel on the request if the the experimentalSessionAndOrigin flag is off', async () => {
-      const ctx = {
-        config: {
-          experimentalSessionAndOrigin: false,
-        },
-        req: {
-          headers: {
-            'x-cypress-is-xhr-or-fetch': 'true',
-          },
-        } as Partial<CypressIncomingRequest>,
-      }
-
-      await testMiddleware([ExtractCypressMetadataHeaders], ctx)
-      .then(() => {
-        expect(ctx.req.requestedWith).not.to.exist
-        expect(ctx.req.credentialsLevel).not.to.exist
-      })
-    })
-
     it('does not set requestedWith or credentialLevel on the request if top does NOT need to be simulated', async () => {
       const ctx = {
-        config: {
-          experimentalSessionAndOrigin: true,
-        },
         getAUTUrl: sinon.stub().returns(undefined),
         req: {
           headers: {
@@ -130,9 +108,6 @@ describe('http/request-middleware', () => {
 
     it('does not set requestedWith or credentialLevel on the request if x-cypress-is-xhr-or-fetch has invalid values', async () => {
       const ctx = {
-        config: {
-          experimentalSessionAndOrigin: true,
-        },
         getAUTUrl: sinon.stub().returns('http://localhost:8080'),
         remoteStates: {
           isPrimarySuperDomainOrigin: sinon.stub().returns(false),
@@ -154,9 +129,6 @@ describe('http/request-middleware', () => {
     // CDP can determine whether or not the request is xhr | fetch, but the extension or electron cannot
     it('provides resourceTypeAndCredentialManager with resourceType if able to determine from header (xhr)', async () => {
       const ctx = {
-        config: {
-          experimentalSessionAndOrigin: true,
-        },
         getAUTUrl: sinon.stub().returns('http://localhost:8080'),
         remoteStates: {
           isPrimarySuperDomainOrigin: sinon.stub().returns(false),
@@ -181,9 +153,6 @@ describe('http/request-middleware', () => {
     // CDP can determine whether or not the request is xhr | fetch, but the extension or electron cannot
     it('provides resourceTypeAndCredentialManager with resourceType if able to determine from header (fetch)', async () => {
       const ctx = {
-        config: {
-          experimentalSessionAndOrigin: true,
-        },
         getAUTUrl: sinon.stub().returns('http://localhost:8080'),
         remoteStates: {
           isPrimarySuperDomainOrigin: sinon.stub().returns(false),
@@ -207,9 +176,6 @@ describe('http/request-middleware', () => {
 
     it('sets the resourceType and credentialsLevel on the request from whatever is returned by resourceTypeAndCredentialManager if conditions apply', async () => {
       const ctx = {
-        config: {
-          experimentalSessionAndOrigin: true,
-        },
         getAUTUrl: sinon.stub().returns('http://localhost:8080'),
         remoteStates: {
           isPrimarySuperDomainOrigin: sinon.stub().returns(false),
