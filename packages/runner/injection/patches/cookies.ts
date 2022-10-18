@@ -106,8 +106,6 @@ export const patchDocumentCookie = (requestCookies: AutomationCookie[]) => {
   }
 
   const bindCypressListeners = (Cypress: Cypress.Cypress) => {
-    Cypress.specBridgeCommunicator.on('cross:origin:cookies', addCookies)
-
     Cypress.on('test:before:run', reset)
 
     // the following listeners are called from Cypress cookie commands, so that
