@@ -116,6 +116,10 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
           obj.result.data.cloudViewer.organizations.nodes = []
         }
 
+        if (obj.result.data?.cloudViewer?.firstOrganization?.nodes) {
+          obj.result.data.cloudViewer.firstOrganization.nodes = []
+        }
+
         return obj.result
       })
 
@@ -153,6 +157,10 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         if ((obj.operationName !== 'CreateCloudOrgModal_CloudOrganizationsCheck_refreshOrganizations_cloudViewer')) {
           if (obj.result.data?.cloudViewer?.organizations?.nodes) {
             obj.result.data.cloudViewer.organizations.nodes = []
+          }
+
+          if (obj.result.data?.cloudViewer?.firstOrganization?.nodes) {
+            obj.result.data.cloudViewer.firstOrganization.nodes = []
           }
         }
 
@@ -776,9 +784,13 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
       cy.startAppServer('component')
 
-      cy.remoteGraphQLIntercept(async (obj) => {
+      cy.remoteGraphQLIntercept((obj) => {
         if (obj.result.data?.cloudViewer?.organizations?.nodes) {
           obj.result.data.cloudViewer.organizations.nodes = []
+        }
+
+        if (obj.result.data?.cloudViewer?.firstOrganization?.nodes) {
+          obj.result.data.cloudViewer.firstOrganization.nodes = []
         }
 
         return obj.result
@@ -848,7 +860,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.openProject('component-tests')
       cy.startAppServer('component')
       cy.loginUser()
-      cy.remoteGraphQLIntercept((obj, testState) => {
+      cy.remoteGraphQLIntercept((obj) => {
         if (obj.result.data?.cloudProjectBySlug?.runs?.nodes.length) {
           obj.result.data.cloudProjectBySlug.runs.nodes.map((run) => {
             run.status = 'RUNNING'
