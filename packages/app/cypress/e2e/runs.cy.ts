@@ -322,7 +322,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       moveToRunsPage()
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
-      cy.get('button').contains(defaultMessages.runs.connect.modal.selectProject.createProject).click()
+      cy.contains('button', defaultMessages.runs.connect.modal.selectProject.createProject).click()
       cy.findByText(defaultMessages.runs.connectSuccessAlert.title).should('be.visible')
 
       cy.withCtx(async (ctx) => {
@@ -361,7 +361,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[href="#/runs"]').click()
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
-      cy.get('button').contains(defaultMessages.runs.connect.modal.selectProject.createProject).click()
+      cy.contains('button', defaultMessages.runs.connect.modal.selectProject.createProject).click()
 
       cy.get('[data-cy="alert"]').within(() => {
         cy.contains(defaultMessages.runs.connect.errors.baseError.title)
@@ -396,7 +396,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[href="#/runs"]').click()
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
-      cy.get('button').contains(defaultMessages.runs.connect.modal.selectProject.createProject).click()
+      cy.contains('button', defaultMessages.runs.connect.modal.selectProject.createProject).click()
 
       cy.get('[data-cy="alert"]').within(() => {
         cy.contains(defaultMessages.runs.connect.errors.internalServerError.title)
@@ -427,7 +427,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         }
 
         if (obj.result.data?.cloudViewer?.organizations?.nodes) {
-          const projectNodes = obj.result.data?.cloudViewer.organizations.nodes[0].projects.nodes
+          const projectNodes = obj.result.data.cloudViewer.organizations.nodes[0].projects.nodes
 
           projectNodes.push({
             __typename: 'CloudProject',
@@ -450,9 +450,10 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
 
     it('opens Connect Project modal after clicking Reconnect Project button', () => {
-      cy.findByText(defaultMessages.runs.errors.notFound.button).should('be.visible').click()
+      cy.findByText(defaultMessages.runs.errors.notFound.button).click()
+
       cy.get('[aria-modal="true"]').should('exist')
-      cy.get('[data-cy="selectProject"] button').should('have.text', 'Mock Project')
+      cy.contains('[data-cy="selectProject"] button', 'Mock Project')
       cy.get('[data-cy="connect-project"]').click()
       cy.get('[data-cy="runs"]', { timeout: 7500 })
     })
@@ -741,10 +742,6 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.scaffoldProject('component-tests')
       cy.openProject('component-tests')
       cy.startAppServer('component')
-    })
-
-    afterEach(() => {
-      cy.goOnline()
     })
 
     it('shows alert warning if runs have been returned already', () => {
