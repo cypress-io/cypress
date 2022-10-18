@@ -197,7 +197,8 @@ const cleanup = async (buildAppDir) => {
   await del([
     path.join(buildAppDir, '**', 'test'),
     path.join(buildAppDir, '**', 'tests'),
-    path.join(buildAppDir, '**', 'prettier', 'esm'),
+    // What we need of prettier is entirely encapsulated within the v8 snapshot, but has a few leftover large files
+    path.join(buildAppDir, '**', 'prettier'),
     path.join(buildAppDir, '**', '@babel', '**', 'esm'),
     path.join(buildAppDir, '**', '*js.map'),
     path.join(buildAppDir, '**', '*.md'),
