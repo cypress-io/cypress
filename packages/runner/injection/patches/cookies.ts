@@ -1,10 +1,10 @@
-import { AutomationCookie } from '@packages/server/lib/automation/cookies'
 import {
   CookieJar,
   toughCookieToAutomationCookie,
   automationCookieToToughCookie,
 } from '@packages/server/lib/util/cookies'
 import { Cookie as ToughCookie } from 'tough-cookie'
+import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
 
 const parseDocumentCookieString = (documentCookieString: string): AutomationCookie[] => {
   if (!documentCookieString || !documentCookieString.trim().length) return []
