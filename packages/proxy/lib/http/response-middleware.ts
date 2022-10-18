@@ -459,7 +459,7 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
 
   const addedCookies = await cookiesHelper.getAddedCookies()
 
-  if (!addedCookies.length || !this.req.isAUTFrame) {
+  if (!addedCookies.length) {
     return this.next()
   }
 
