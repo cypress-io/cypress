@@ -1,5 +1,6 @@
 <template>
   <StandardModal
+    v-if="createOrgUrl"
     model-value
     :title="t('runs.connect.modal.title')"
     help-link="https://on.cypress.io/adding-new-project"
@@ -122,7 +123,7 @@ onBeforeUnmount(() => {
   window.clearTimeout(timer)
 })
 
-const createOrgUrl = computed(() => props.gql.createCloudOrganizationUrl || '#')
+const createOrgUrl = computed(() => props.gql.createCloudOrganizationUrl)
 const isOnline = computed(() => online.value)
 
 </script>
