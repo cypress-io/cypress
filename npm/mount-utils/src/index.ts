@@ -217,6 +217,20 @@ export function setupHooks (optionalCallback?: Function) {
     )
   })
 
+  // TODO(origin): we may want to allow cy.session() in the future
+  Cypress.Commands.overwrite('session', () => {
+    throw new Error(
+      'cy.session from a component spec is not allowed',
+    )
+  })
+
+  // TODO(origin): we may want to allow cy.origin() in the future
+  Cypress.Commands.overwrite('origin', () => {
+    throw new Error(
+      'cy.origin from a component spec is not allowed',
+    )
+  })
+
   // @ts-ignore
   Cypress.on('test:before:run', () => {
     optionalCallback?.()

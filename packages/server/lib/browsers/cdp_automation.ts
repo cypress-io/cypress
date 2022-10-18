@@ -281,8 +281,7 @@ export class CdpAutomation {
         // and it's required for cross origin support when visiting a secondary
         // origin so that all its cookies are sent.
 
-        // TODO(origin): This may be a breaking change, so put it behind the flag for now.
-        // Need to investigate further when we remove the experimental flag.
+        // TODO(origin): need to improve cookie handling
         return !(cookie.secure && url.startsWith('http:') && !isLocalhost)
       })
     })
