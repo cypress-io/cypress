@@ -153,11 +153,11 @@ export class PrimaryOriginCommunicator extends EventEmitter {
   }
 
   /**
-   * Event to be sent to sent to a specific source.
+   * Sends an event to a specific source.
    * @param origin - the origin of the spec bridge to send the event to.
    * @param event - the name of the event to be sent.
    * @param data - any meta data to be sent with the event.
-   * @param responseEvent - the even to be responded with when sending back a result.
+   * @param responseEvent - the event to be responded with when sending back a result.
    */
   toSource (source: Window, event: string, data?: any, responseEvent?: string) {
     const preprocessedData = preprocessForSerialization<any>(data)
