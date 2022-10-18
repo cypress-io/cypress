@@ -374,14 +374,14 @@ const MaybePreventCaching: ResponseMiddleware = function () {
 }
 
 const setSimulatedCookies = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) => {
+  if (ctx.res.wantsInjection !== 'fullCrossOrigin') return
+
   const defaultDomain = (new URL(ctx.req.proxiedUrl)).hostname
   const allCookiesForRequest = ctx.getCookieJar()
   .getCookies(ctx.req.proxiedUrl)
   .map((cookie) => toughCookieToAutomationCookie(cookie, defaultDomain))
 
-  if (ctx.res.wantsInjection === 'fullCrossOrigin') {
-    ctx.simulatedCookies = allCookiesForRequest
-  }
+  ctx.simulatedCookies = allCookiesForRequest
 }
 
 const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
