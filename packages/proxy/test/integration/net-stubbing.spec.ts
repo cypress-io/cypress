@@ -1,4 +1,4 @@
-import { NetworkProxy } from '../../'
+import { NetworkProxy, RequestResourceType } from '../../'
 import {
   netStubbingState as _netStubbingState,
   NetStubbingState,
@@ -13,7 +13,6 @@ import { allowDestroy } from '@packages/network'
 import { EventEmitter } from 'events'
 import { RemoteStates } from '@packages/server/lib/remote_states'
 import { CookieJar } from '@packages/server/lib/util/cookies'
-import { Automation } from '@packages/server/lib/automation'
 
 const Request = require('@packages/server/lib/request')
 const getFixture = async () => {}
@@ -41,13 +40,22 @@ context('network stubbing', () => {
       netStubbingState,
       config,
       middleware: defaultMiddleware,
-      getAutomation: () => new Automation(),
       getCookieJar: () => new CookieJar(),
       remoteStates,
       getFileServerToken: () => 'fake-token',
       request: new Request(),
       getRenderedHTMLOrigins: () => ({}),
       serverBus: new EventEmitter(),
+      resourceTypeAndCredentialManager: {
+        get (url: string, optionalResourceType?: RequestResourceType) {
+          return {
+            resourceType: 'xhr',
+            credentialStatus: 'same-origin',
+          }
+        },
+        set () {},
+        clear () {},
+      },
     })
 
     app.use((req, res, next) => {

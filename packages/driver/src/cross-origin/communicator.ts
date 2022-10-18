@@ -113,10 +113,6 @@ export class PrimaryOriginCommunicator extends EventEmitter {
     debug('Unexpected postMessage:', data)
   }
 
-  isConnectedToSpecBridge (originPolicy: string) {
-    return !!this.crossOriginDriverWindows[originPolicy]
-  }
-
   /**
    * Events to be sent to the spec bridge communicator instance.
    * @param {string} event - the name of the event to be sent.
