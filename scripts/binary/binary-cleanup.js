@@ -198,10 +198,11 @@ const cleanup = async (buildAppDir) => {
     path.join(buildAppDir, '**', 'test'),
     path.join(buildAppDir, '**', 'tests'),
     // What we need of prettier is entirely encapsulated within the v8 snapshot, but has a few leftover large files
-    path.join(buildAppDir, '**', 'prettier'),
+    path.join(buildAppDir, '**', 'prettier', 'standalone.js'),
+    path.join(buildAppDir, '**', 'prettier', 'bin-prettier.js'),
     path.join(buildAppDir, '**', '@babel', '**', 'esm'),
     path.join(buildAppDir, '**', '*js.map'),
-    path.join(buildAppDir, '**', '*.md'),
+    path.join(buildAppDir, '**', '!(LICENSE|license|License).md'),
     path.join(buildAppDir, '**', '*.d.ts'),
     path.join(buildAppDir, '**', '*.flow'),
     path.join(buildAppDir, '**', 'jimp', 'browser', 'examples'),
@@ -213,6 +214,8 @@ const cleanup = async (buildAppDir) => {
     path.join(buildAppDir, '**', 'ramda', 'dist'),
     path.join(buildAppDir, '**', '*.cc'),
     path.join(buildAppDir, '**', '*.o'),
+    path.join(buildAppDir, '**', '*.c'),
+    path.join(buildAppDir, '**', '*.h'),
     path.join(buildAppDir, '**', 'jimp', 'browser'),
     path.join(buildAppDir, '**', 'jimp', 'es'),
     path.join(buildAppDir, '**', '@jimp', '**', 'es'),
@@ -227,6 +230,8 @@ const cleanup = async (buildAppDir) => {
     path.join(buildAppDir, '**', 'node-forge', 'dist'),
     path.join(buildAppDir, '**', '@graphql-tools', '**', '*.mjs'),
     path.join(buildAppDir, '**', 'graphql', '**', '*.mjs'),
+    path.join(buildAppDir, '**', 'pngjs', 'browser.js'),
+    path.join(buildAppDir, '**', 'plist', 'dist'),
   ], { force: true })
 
   await removeEmptyDirectories(buildAppDir)
