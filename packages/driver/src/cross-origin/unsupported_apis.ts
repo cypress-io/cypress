@@ -14,9 +14,6 @@ export const handleUnsupportedAPIs = (Cypress: Cypress.Cypress, cy: $Cy) => {
     set: () => $errUtils.throwErrByPath('origin.unsupported.Server'),
   })
 
-  // @ts-ignore
-  Cypress.Cookies.preserveOnce = () => $errUtils.throwErrByPath('origin.unsupported.Cookies_preserveOnce')
-
   // Nested `origin` is not currently supported, but will be in the future
   // @ts-ignore
   cy.origin = () => $errUtils.throwErrByPath('origin.unsupported.origin')
