@@ -15,7 +15,7 @@ import type { StateFunc } from './state'
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child|system/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
-const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName groupLevel hookId instrument isStubbed group message method name numElements showError numResponses referencesAlias renderProps sessionInfo state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
+const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName groupLevel hookId instrument isStubbed group message method name numElements numResponses referencesAlias renderProps sessionInfo state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let counter = 0
@@ -230,7 +230,7 @@ const defaults = function (state: StateFunc, config, obj) {
 }
 
 export class Log {
-  cy: any
+  createSnapshot: Function
   state: StateFunc
   config: any
   fireChangeEvent: ((log) => (void | undefined))
@@ -238,8 +238,8 @@ export class Log {
 
   private attributes: Record<string, any> = {}
 
-  constructor (cy, state, config, fireChangeEvent, obj) {
-    this.cy = cy
+  constructor (createSnapshot, state, config, fireChangeEvent, obj) {
+    this.createSnapshot = createSnapshot
     this.state = state
     this.config = config
     // only fire the log:state:changed event as fast as every 4ms
@@ -391,7 +391,7 @@ export class Log {
       }
     }
 
-    const snapshot = this.cy.createSnapshot(name, this.get('$el'))
+    const snapshot = this.createSnapshot(name, this.get('$el'))
 
     this.addSnapshot(snapshot, options)
 
@@ -608,7 +608,7 @@ class LogManager {
         $errUtils.throwErrByPath('log.invalid_argument', { args: { arg: options } })
       }
 
-      const log = new Log(cy, state, config, this.fireChangeEvent, options)
+      const log = new Log(cy.createSnapshot, state, config, this.fireChangeEvent, options)
 
       log.set(options)
 

@@ -1,6 +1,6 @@
 import { findCrossOriginLogs } from '../../../../support/utils'
 
-context('cy.origin viewport', () => {
+context('cy.origin viewport', { browser: '!webkit' }, () => {
   it('syncs the viewport from the primary to secondary', () => {
     // change the viewport in the primary first
     cy.viewport(320, 480)

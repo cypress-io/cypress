@@ -8,7 +8,7 @@ window.Mocha['__zone_patch__'] = false
 import 'zone.js/testing'
 
 import { CommonModule } from '@angular/common'
-import { Component, EventEmitter, SimpleChange, SimpleChanges, Type } from '@angular/core'
+import { Component, ErrorHandler, EventEmitter, Injectable, SimpleChange, SimpleChanges, Type } from '@angular/core'
 import {
   ComponentFixture,
   getTestBed,
@@ -99,6 +99,13 @@ export type MountResponse<T> = {
 // so we'll patch here pending a fix in that library
 globalThis.it.skip = globalThis.xit
 
+@Injectable()
+class CypressAngularErrorHandler implements ErrorHandler {
+  handleError (error: Error): void {
+    throw error
+  }
+}
+
 /**
  * Bootstraps the TestModuleMetaData passed to the TestBed
  *
@@ -119,6 +126,17 @@ function bootstrapModule<T> (
   if (!testModuleMetaData.imports) {
     testModuleMetaData.imports = []
   }
+
+  if (!testModuleMetaData.providers) {
+    testModuleMetaData.providers = []
+  }
+
+  // Replace default error handler since it will swallow uncaught exceptions.
+  // We want these to be uncaught so Cypress catches it and fails the test
+  testModuleMetaData.providers.push({
+    provide: ErrorHandler,
+    useClass: CypressAngularErrorHandler,
+  })
 
   // check if the component is a standalone component
   if ((component as any).ɵcmp.standalone) {

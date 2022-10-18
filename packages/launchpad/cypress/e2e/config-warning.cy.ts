@@ -36,7 +36,7 @@ describe('baseUrl', () => {
       `)
     })
 
-    cy.get('h1').should('contain', 'Choose a Browser')
+    cy.get('h1').should('contain', 'Choose a browser')
     cy.get('[data-cy="alert"]').should('not.exist')
   })
 
@@ -46,7 +46,7 @@ describe('baseUrl', () => {
     cy.visitLaunchpad()
 
     cy.get('[data-cy-testingtype="e2e"]').click()
-    cy.get('h1').should('contain', 'Choose a Browser')
+    cy.get('h1').should('contain', 'Choose a browser')
     cy.get('[data-cy="alert"]').should('not.exist')
 
     cy.withCtx(async (ctx) => {
@@ -64,7 +64,7 @@ describe('baseUrl', () => {
     })
 
     cy.get('[data-cy="loading-spinner"]').should('be.visible')
-    cy.get('h1').should('contain', 'Choose a Browser')
+    cy.get('h1').should('contain', 'Choose a browser')
     cy.get('[data-cy="alert"]').contains('Warning: Cannot Connect Base Url Warning')
   })
 })
@@ -96,8 +96,8 @@ describe('experimentalSingleTabRunMode', () => {
     cy.visitLaunchpad()
 
     cy.get('[data-cy-testingtype="component"]').click()
-    cy.findByTestId('launchpad-Choose a Browser')
-    cy.get('h1').contains('Choose a Browser')
+    cy.findByTestId('launchpad-Choose a browser')
+    cy.get('h1').contains('Choose a browser')
   })
 
   it('is not a valid config for e2e testing', () => {
@@ -139,8 +139,8 @@ describe('experimentalStudio', () => {
 
     cy.visitLaunchpad()
     cy.get('[data-cy-testingtype="e2e"]').click()
-    cy.findByTestId('launchpad-Choose a Browser')
-    cy.get('h1').contains('Choose a Browser')
+    cy.findByTestId('launchpad-Choose a browser')
+    cy.get('h1').contains('Choose a browser')
   })
 })
 
@@ -192,7 +192,7 @@ describe('component testing dependency warnings', () => {
     cy.get('[data-cy-testingtype="component"]').click()
 
     // Wait until launch browser screen and assert warning does not exist
-    cy.contains('Choose a Browser', { timeout: 12000 })
+    cy.contains('Choose a browser', { timeout: 12000 })
     cy.get('[data-cy="warning-alert"]').should('not.exist')
   })
 
@@ -202,7 +202,7 @@ describe('component testing dependency warnings', () => {
     cy.visitLaunchpad()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.get('[data-cy-testingtype="component"]').click()
-    cy.contains('Choose a Browser', { timeout: 12000 })
+    cy.contains('Choose a browser', { timeout: 12000 })
     cy.get('[data-cy="warning-alert"]').should('not.exist')
   })
 })
