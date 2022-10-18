@@ -10,6 +10,10 @@ const it = systemTests.it
 const onServer = function (app) {
   app.use(parser())
 
+  app.get('/', (req, res) => {
+    return res.send('<html></html>')
+  })
+
   app.get('/logout', (req, res) => {
     return res.send('<html>logged out</html>')
   })

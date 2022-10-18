@@ -152,4 +152,3 @@ All deprecated APIs are not supported in the **cy.origin()** callback and we do 
 - **cy.route()**: Superseded by **cy.intercept()**
 - **cy.server()**: Superseded by **cy.intercept()**
 - **Cypress.Server.defaults()**: Superseded by **cy.intercept()**
-- **Cypress.Cookies.preserveOnce()**: Superseded by sessions
