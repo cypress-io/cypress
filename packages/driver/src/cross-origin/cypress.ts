@@ -179,7 +179,7 @@ const attachToWindow = (autWindow: Window) => {
 
   cy.overrides.wrapNativeMethods(autWindow)
 
-  // @ts-expect-error - the injected code adds the cypressApplyPatchesOnAttach function to window
+  // @ts-expect-error - the injected code adds the __attachToCypress function to window
   autWindow.__attachToCypress ? autWindow.__attachToCypress(Cypress) : undefined
 
   // place after override incase fetch is polyfilled in the AUT injection
