@@ -90,9 +90,6 @@ const timers = createTimers()
 timers.wrap()
 
 // Attach these to window so cypress can call them when it attaches.
-const timersReset = timers.reset
-const timersPause = timers.pause
-
 // Patched to track credentials use.
 patchFetch(window)
 patchXmlHttpRequest(window)
@@ -105,8 +102,8 @@ window.__attachToCypress = (Cypress) => {
   Cypress.removeAllListeners('app:timers:reset')
   Cypress.removeAllListeners('app:timers:pause')
 
-  Cypress.on('app:timers:reset', timersReset)
-  Cypress.on('app:timers:pause', timersPause)
+  Cypress.on('app:timers:reset', timers.reset)
+  Cypress.on('app:timers:pause', timers.pause)
 
   // This function will self destruct
   delete window.__attachToCypress

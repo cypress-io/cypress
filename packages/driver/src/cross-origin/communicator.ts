@@ -113,7 +113,7 @@ export class PrimaryOriginCommunicator extends EventEmitter {
   }
 
   /**
-   * Event to be sent to the all spec bridge communicator instances.
+   * Sends an event to all spec bridge communicator instances.
    * @param {string} event - the name of the event to be sent.
    * @param {any} data - any meta data to be sent with the event.
    */
@@ -137,11 +137,11 @@ export class PrimaryOriginCommunicator extends EventEmitter {
   }
 
   /**
-   * Event to be sent to sent to a specific spec bridge.
+   * Sends an event to a specific spec bridge.
    * @param origin - the origin of the spec bridge to send the event to.
    * @param event - the name of the event to be sent.
    * @param data - any meta data to be sent with the event.
-   * @param responseEvent - the even to be responded with when sending back a result.
+   * @param responseEvent - the event to be responded with when sending back a result.
    */
   toSpecBridge (origin: string, event: string, data?: any, responseEvent?: string) {
     debug('=> to spec bridge', origin, event, data)
@@ -281,7 +281,7 @@ export class SpecBridgeCommunicator extends EventEmitter {
    * Events to be sent to the primary communicator instance.
    * @param {string} event - the name of the event to be sent.
    * @param {Cypress.ObjectLike} data - any meta data to be sent with the event.
-   * @param responseEvent - the even to be responded with when sending back a result.
+   * @param responseEvent - the event to be responded with when sending back a result.
    */
   toPrimary (event: string, data?: Cypress.ObjectLike, options: { syncGlobals: boolean } = { syncGlobals: false }, responseEvent?: string) {
     const { origin } = $Location.create(window.location.href)

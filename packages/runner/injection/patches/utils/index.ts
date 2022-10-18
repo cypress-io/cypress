@@ -20,8 +20,8 @@ const CROSS_ORIGIN_PREFIX = 'cross:origin:'
 
 /**
  * Sets up a promisified post message
- * @param data the data to send
- * @param event the name of the event to be promisified.
+ * @param data - the data to send
+ * @param event - the name of the event to be promisified.
  * @param timeout - in ms, if the promise does not complete during this timeout, fail the promise.
  * @returns the data to send
  */
@@ -57,7 +57,7 @@ export const postMessagePromise = <T>({ event, data = {}, timeout }: {event: str
 
 /**
  * Returns a promise from the backend request for the 'request:sent:with:credentials' event.
- * @param args an object containing a url, resourceType and Credential status.
+ * @param args - an object containing a url, resourceType and Credential status.
  * @returns A Promise or null depending on the url parameter.
  */
 export const requestSentWithCredentials = <T>(args: {url?: string, resourceType: 'xhr' | 'fetch', credentialStatus: string | boolean}): Promise<T> | undefined => {

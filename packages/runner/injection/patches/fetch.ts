@@ -21,7 +21,7 @@ export const patchFetch = (window) => {
       if (resource instanceof window.Request) {
         ({ url, credentials } = resource)
       } else if (resource instanceof window.URL) {
-      // should be a no-op for URL
+        // should be a no-op for URL
         url = resource.toString()
 
         ;({ credentials } = args[1] || {})
@@ -40,7 +40,7 @@ export const patchFetch = (window) => {
         credentialStatus: credentials,
       })
     } finally {
-    // if our internal logic errors for whatever reason, do NOT block the end user and continue the request
+      // if our internal logic errors for whatever reason, do NOT block the end user and continue the request
       return originalFetch.apply(this, args)
     }
   }
