@@ -1,0 +1,130 @@
+<template>
+  <div
+    class="highlight"
+    :style="highlightStyle"
+  />
+  <div
+    class="assertions-menu"
+  >
+    <div class="header">
+      <div class="title">
+        <span>Add Assertion</span>
+      </div>
+      <div class="close-wrapper">
+        <a
+          class="close"
+          @click="_close"
+        >&times;</a>
+      </div>
+    </div>
+    <div
+      class="subtitle"
+    >
+      expect
+      {{ ' ' }}
+      <code>
+        {{ tagName }}
+      </code>
+      {{ ' ' }}
+      to
+    </div>
+    <div
+      class="assertions-list"
+    >
+      <AssertionType
+        v-for="(assertion) in possibleAssertions"
+        :key="assertion.type"
+        :add-assertion="_addAssertion"
+        :type="assertion.type"
+        :options="assertion.options"
+      />
+    </div>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import AssertionType from './AssertionType.ce.vue'
+import _ from 'lodash'
+import type { StyleValue } from 'vue'
+
+const props = defineProps <{
+  jqueryElement: any
+  possibleAssertions: any[]
+  addAssertion: any
+  closeMenu: () => void
+  highlightStyle: StyleValue
+}>()
+
+const _addAssertion = (...args) => {
+  args = _.compact(args)
+  props.addAssertion(props.jqueryElement, ...args)
+}
+
+const _close = (event) => {
+  event.stopPropagation()
+  props.closeMenu()
+}
+
+const tagName = `<${props.jqueryElement.prop('tagName').toLowerCase()}>`
+</script>
+
+<style lang="scss">
+@import "./assertions-style.scss";
+
+.highlight {
+  background: rgba(159, 196, 231, 0.6);
+  border: solid 2px #9FC4E7;
+  cursor: pointer;
+}
+
+.assertions-menu {
+  @include menu-style;
+
+  font-family: 'Helvetica Neue', 'Arial', sans-serif;
+  z-index: 2147483647;
+  width: 175px;
+
+  .header {
+    align-items: center;
+    background: #07b282;
+    border-top-left-radius: $border-radius;
+    border-top-right-radius: $border-radius;
+    color: #fff;
+    display: flex;
+    padding: 0.5rem 0.7rem;
+
+    .title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .close-wrapper {
+      margin-left: auto;
+      margin-top: -2.5px;
+
+      .close {
+        font-size: 18px;
+        font-weight: 500;
+
+        &:hover, &:focus, &:active {
+          cursor: pointer;
+          color: #eee;
+        }
+      }
+    }
+  }
+
+  .subtitle {
+    border-bottom: 1px solid #c4c4c4;
+    color: #6b6b6b;
+    font-size: 13px;
+    font-style: italic;
+    font-weight: 400;
+    padding: 0.5rem 0.7rem;
+
+    code {
+      font-weight: 600;
+    }
+  }
+}
+</style>
