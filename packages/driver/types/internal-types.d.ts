@@ -1,6 +1,7 @@
 // NOTE: this is for internal Cypress types that we don't want exposed in the public API but want for development
 // TODO: find a better place for this
 /// <reference path="./internal-types-lite.d.ts" />
+
 interface InternalWindowLoadDetails {
   type: 'same:origin' | 'cross:origin' | 'cross:origin:failure'
   error?: Error
@@ -30,6 +31,9 @@ declare namespace Cypress {
     isCrossOriginSpecBridge: boolean
     originalConfig: Cypress.ObjectLike
     cy: $Cy
+    Location: {
+      create: (url: string) => ({ domain: string, superDomain: string })
+    }
   }
 
   interface CypressUtils {
@@ -46,6 +50,18 @@ declare namespace Cypress {
     $autIframe: JQuery<HTMLIFrameElement>
     document: Document
     projectRoot?: string
+  }
+
+  interface Actions {
+    (action: 'set:cookie', fn: (cookie: AutomationCookie) => void)
+    (action: 'clear:cookie', fn: (name: string) => void)
+    (action: 'clear:cookies', fn: () => void)
+    (action: 'cross:origin:cookies', fn: (cookies: AutomationCookie[]) => void)
+    (action: 'before:stability:release', fn: () => void)
+  }
+
+  interface Backend {
+    (task: 'cross:origin:cookies:received'): Promise<void>
   }
 }
 

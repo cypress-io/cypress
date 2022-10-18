@@ -355,6 +355,8 @@ export default function (Commands, Cypress, cy, state, config) {
         $errUtils.throwErrByPath('setCookie.host_prefix', { onFail })
       }
 
+      Cypress.emit('set:cookie', cookie)
+
       return cy.retryIfCommandAUTOriginMismatch(() => {
         return automateCookies('set:cookie', cookie, options._log, responseTimeout)
         .then(pickCookieProps)
@@ -404,6 +406,8 @@ export default function (Commands, Cypress, cy, state, config) {
         $errUtils.throwErrByPath('clearCookie.invalid_argument', { onFail })
       }
 
+      Cypress.emit('clear:cookie', name)
+
       // TODO: prevent clearing a cypress namespace
       return cy.retryIfCommandAUTOriginMismatch(() => {
         return automateCookies('clear:cookie', { name }, options._log, responseTimeout)
@@ -448,6 +452,8 @@ export default function (Commands, Cypress, cy, state, config) {
           },
         })
       }
+
+      Cypress.emit('clear:cookies')
 
       return cy.retryIfCommandAUTOriginMismatch(() => {
         return getAndClear(options._log, responseTimeout, { domain: options.domain })

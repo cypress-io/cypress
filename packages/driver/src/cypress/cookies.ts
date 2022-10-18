@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import Cookies from 'js-cookie'
-import { CookieJar, toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
+import { CookieJar } from '@packages/server/lib/util/cookies'
 
 import $errUtils from './error_utils'
 
@@ -153,8 +153,6 @@ export const $Cookies = (namespace, domain) => {
     parse (cookieString: string) {
       return CookieJar.parse(cookieString)
     },
-
-    toughCookieToAutomationCookie,
   }
 
   return API

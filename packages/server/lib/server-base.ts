@@ -33,7 +33,6 @@ import type { FoundSpec } from '@packages/types'
 import type { Server as WebSocketServer } from 'ws'
 import { RemoteStates } from './remote_states'
 import { cookieJar } from './util/cookies'
-import type { Automation } from './automation/automation'
 import type { AutomationCookie } from './automation/cookies'
 import { resourceTypeAndCredentialManager, ResourceTypeAndCredentialManager } from './util/resourceTypeAndCredentialManager'
 
@@ -103,7 +102,6 @@ export interface OpenServerOptions {
   onWarning: any
   exit?: boolean
   getCurrentBrowser: () => Browser
-  getAutomation: () => Automation
   getSpec: () => FoundSpec | null
   shouldCorrelatePreRequests: () => boolean
 }
@@ -178,12 +176,12 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   setupCrossOriginRequestHandling () {
-    this._eventBus.on('cross:origin:automation:cookies', (cookies: AutomationCookie[]) => {
-      this.socket.localBus.once('cross:origin:automation:cookies:received', () => {
-        this._eventBus.emit('cross:origin:automation:cookies:received')
+    this._eventBus.on('cross:origin:cookies', (cookies: AutomationCookie[]) => {
+      this.socket.localBus.once('cross:origin:cookies:received', () => {
+        this._eventBus.emit('cross:origin:cookies:received')
       })
 
-      this.socket.toDriver('cross:origin:automation:cookies', cookies)
+      this.socket.toDriver('cross:origin:cookies', cookies)
     })
 
     this.socket.localBus.on('request:sent:with:credentials', this.resourceTypeAndCredentialManager.set)
@@ -197,7 +195,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   open (config: Cfg, {
     getSpec,
-    getAutomation,
     getCurrentBrowser,
     onError,
     onWarning,
@@ -225,7 +222,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     clientCertificates.loadClientCertificateConfig(config)
 
     this.createNetworkProxy({
-      config, getAutomation,
+      config,
       remoteStates: this._remoteStates,
       resourceTypeAndCredentialManager: this.resourceTypeAndCredentialManager,
       shouldCorrelatePreRequests,
@@ -321,7 +318,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return e
   }
 
-  createNetworkProxy ({ config, getAutomation, remoteStates, resourceTypeAndCredentialManager, shouldCorrelatePreRequests }) {
+  createNetworkProxy ({ config, remoteStates, resourceTypeAndCredentialManager, shouldCorrelatePreRequests }) {
     const getFileServerToken = () => {
       return this._fileServer.token
     }
@@ -331,7 +328,6 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this._networkProxy = new NetworkProxy({
       config,
       shouldCorrelatePreRequests,
-      getAutomation,
       remoteStates,
       getFileServerToken,
       getCookieJar: () => cookieJar,

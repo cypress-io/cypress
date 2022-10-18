@@ -4,7 +4,7 @@ import type Debug from 'debug'
 import type { CookieOptions } from 'express'
 import { cors, concatStream, httpUtils } from '@packages/network'
 import type { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
-import type { HttpMiddleware } from '.'
+import type { HttpMiddleware, HttpMiddlewareThis } from '.'
 import iconv from 'iconv-lite'
 import type { IncomingMessage, IncomingHttpHeaders } from 'http'
 import { InterceptResponse } from '@packages/net-stubbing'
@@ -14,6 +14,7 @@ import zlib from 'zlib'
 import { URL } from 'url'
 import { CookiesHelper } from './util/cookies'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
+import { toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
 
 interface ResponseMiddlewareProps {
   /**
@@ -372,10 +373,23 @@ const MaybePreventCaching: ResponseMiddleware = function () {
   this.next()
 }
 
+const setSimulatedCookies = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) => {
+  if (ctx.res.wantsInjection !== 'fullCrossOrigin') return
+
+  const defaultDomain = (new URL(ctx.req.proxiedUrl)).hostname
+  const allCookiesForRequest = ctx.getCookieJar()
+  .getCookies(ctx.req.proxiedUrl)
+  .map((cookie) => toughCookieToAutomationCookie(cookie, defaultDomain))
+
+  ctx.simulatedCookies = allCookiesForRequest
+}
+
 const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   const cookies: string | string[] | undefined = this.incomingRes.headers['set-cookie']
 
   if (!cookies || !cookies.length) {
+    setSimulatedCookies(this)
+
     return this.next()
   }
 
@@ -441,17 +455,25 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
     appendCookie(cookie)
   })
 
+  setSimulatedCookies(this)
+
   const addedCookies = await cookiesHelper.getAddedCookies()
 
   if (!addedCookies.length) {
     return this.next()
   }
 
-  this.serverBus.once('cross:origin:automation:cookies:received', () => {
+  // we want to set the cookies via automation so they exist in the browser
+  // itself. however, firefox will hang if we try to use the extension
+  // to set cookies on a url that's in-flight, so we send the cookies down to
+  // the driver, let the response go, and set the cookies via automation
+  // from the driver once the page has loaded but before we run any further
+  // commands
+  this.serverBus.once('cross:origin:cookies:received', () => {
     this.next()
   })
 
-  this.serverBus.emit('cross:origin:automation:cookies', addedCookies)
+  this.serverBus.emit('cross:origin:cookies', addedCookies)
 }
 
 const REDIRECT_STATUS_CODES: any[] = [301, 302, 303, 307, 308]
@@ -524,6 +546,7 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
       modifyObstructiveCode: this.config.modifyObstructiveCode,
       url: this.req.proxiedUrl,
       deferSourceMapRewrite: this.deferSourceMapRewrite,
+      simulatedCookies: this.simulatedCookies,
     })
     const encodedBody = iconv.encode(injectedBody, nodeCharset)
 
