@@ -24,6 +24,7 @@ import * as objUtils from '../util/obj_utils'
 import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, BrowserVideoController, VideoRecording, ProcessOptions } from '@packages/types'
 import type { Cfg } from '../project-base'
 import type { Browser } from '../browsers/types'
+import { debugElapsedTime } from '../util/performance_benchmark'
 import * as printResults from '../util/print-run'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
@@ -1062,6 +1063,9 @@ export async function run (options, loading: Promise<void>) {
   }
 
   await loading
+
+  debugElapsedTime('run mode ready')
+
   try {
     return ready(options)
   } catch (e) {
