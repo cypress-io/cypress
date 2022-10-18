@@ -14,32 +14,29 @@ export const handleCrossOriginCookies = (Cypress: ICypress) => {
   let waitingToSend = false
 
   Cypress.on('cross:origin:cookies', (cookies: AutomationCookie[]) => {
-    Cypress.backend('cross:origin:cookies:received')
-
     cookiesToSend = cookiesToSend.concat(cookies)
 
-    const onBeforeStabilityRelease = () => {
+    Cypress.backend('cross:origin:cookies:received')
+
+    if (waitingToSend) return
+
+    waitingToSend = true
+
+    // this event allows running a handler before stability is released.
+    // this prevents subsequent commands from running until the cookies
+    // are set via automation
+    // @ts-ignore
+    Cypress.once('before:stability:release', () => {
       const cookies = cookiesToSend
 
       cookiesToSend = []
       waitingToSend = false
-
-      // @ts-ignore
-      Cypress.off('before:stability:release', onBeforeStabilityRelease)
 
       // this will be awaited before any stability-reliant actions
       return Cypress.automation('add:cookies', cookies)
       .catch(() => {
         // errors here can be ignored as they're not user-actionable
       })
-    }
-
-    if (!waitingToSend) {
-      waitingToSend = true
-      // this event allows running a handler before stability is released.
-      // this prevents subsequent commands from running until the cookies
-      // are set via automation
-      Cypress.on('before:stability:release', onBeforeStabilityRelease)
-    }
+    })
   })
 }
