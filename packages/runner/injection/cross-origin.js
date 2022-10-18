@@ -98,24 +98,24 @@ patchFetch(window)
 patchXmlHttpRequest(window)
 
 // Add a function to window for the spec bridge to call after it has attached.
-window.cypressApplyPatchesOnAttach = () => {
-  if (!window.Cypress) {
-    throw new Error('Failed attempting to apply cypress patches to the AUT when a Cypress instance is not attached to the window.')
-  }
-
+window.__attachToCypress = (Cypress) => {
   // A spec bridge has attached so we don't need to forward errors to top anymore.
   window.removeEventListener('error', handleErrorEvent)
 
-  window.Cypress.removeAllListeners('app:timers:reset')
-  window.Cypress.removeAllListeners('app:timers:pause')
+  Cypress.removeAllListeners('app:timers:reset')
+  Cypress.removeAllListeners('app:timers:pause')
 
-  window.Cypress.on('app:timers:reset', timersReset)
-  window.Cypress.on('app:timers:pause', timersPause)
+  Cypress.on('app:timers:reset', timersReset)
+  Cypress.on('app:timers:pause', timersPause)
+
+  // This function will self destruct
+  delete window.__attachToCypress
 }
 
 const Cypress = findCypress()
 
 // Check for cy too to prevent a race condition for attaching.
 if (Cypress && Cypress.cy) {
+  window.__attachToCypress(Cypress)
   Cypress.action('app:window:before:load', window)
 }
