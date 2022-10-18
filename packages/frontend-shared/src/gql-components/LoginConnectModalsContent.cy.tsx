@@ -81,7 +81,7 @@ describe('<LoginConnectModalsContent />', () => {
         openLoginConnectModal({ utmMedium: 'testing' })
       })
 
-      cy.findAllByLabelText('Project Name*(You can change this later)').type('test-project')
+      cy.findAllByLabelText('Project name*(You can change this later)').type('test-project')
 
       cy.contains('button', 'Create project')
       .click()
