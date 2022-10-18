@@ -38,7 +38,6 @@ macWorkflowFilters: &darwin-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ 'release/11.0.0', << pipeline.git.branch >> ]
-    - equal: [ 'mschile/issue-21471_remove_experimentalSessionAndOrigin', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -48,7 +47,6 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ 'release/11.0.0', << pipeline.git.branch >> ]
-    - equal: [ 'mschile/issue-21471_remove_experimentalSessionAndOrigin', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -67,7 +65,6 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ release/11.0.0, << pipeline.git.branch >> ]
-    - equal: [ 'mschile/issue-21471_remove_experimentalSessionAndOrigin', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
