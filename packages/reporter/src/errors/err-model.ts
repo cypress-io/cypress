@@ -25,7 +25,7 @@ export interface CodeFrame extends FileDetails {
 export interface ErrProps {
   name: string
   message: string
-  showRecoveredError: boolean
+  isRecovered: boolean
   stack: string
   parsedStack: ParsedStackLine[]
   docsUrl: string | string[]

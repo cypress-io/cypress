@@ -403,9 +403,6 @@ export class Log {
       this.endGroup()
     }
 
-    console.log('err', err)
-    console.log('err', err.showRecoveredError)
-
     this.set({
       ended: true,
       error: err,

@@ -31,28 +31,36 @@ const commandRunningFailed = (Cypress, state, err) => {
   }
 
   const current = state('current')
+  const lastLog = _.last(current?.get('logs') || [])
+
+  const consoleProps = () => {
+    if (!current) return
+
+    const consoleProps = {}
+    const prev = current.get('prev')
+
+    if (current.get('type') === 'parent' || !prev) return
+
+    // if type isn't parent then we know its dual or child
+    // and we can add Applied To if there is a prev command
+    // and it is a parent
+    consoleProps['Applied To'] = $dom.isElement(prev.get('subject')) ?
+      $dom.getElements(prev.get('subject')) :
+      prev.get('subject')
+
+    return consoleProps
+  }
+
+  // ensure the last log on the command ends correctly
+  if (lastLog) {
+    return lastLog.set({ consoleProps }).error(err)
+  }
 
   return Cypress.log({
     end: true,
     snapshot: true,
     error: err,
-    consoleProps () {
-      if (!current) return
-
-      const consoleProps = {}
-      const prev = current.get('prev')
-
-      if (current.get('type') === 'parent' || !prev) return
-
-      // if type isn't parent then we know its dual or child
-      // and we can add Applied To if there is a prev command
-      // and it is a parent
-      consoleProps['Applied To'] = $dom.isElement(prev.get('subject')) ?
-        $dom.getElements(prev.get('subject')) :
-        prev.get('subject')
-
-      return consoleProps
-    },
+    consoleProps,
   })
 }
 

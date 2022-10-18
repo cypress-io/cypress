@@ -39,6 +39,48 @@ export default function (Commands, Cypress, cy) {
   const sessionsManager = new SessionsManager(Cypress, cy)
   const sessions = sessionsManager.sessions
 
+  type SESSION_STEPS = 'create' | 'restore' | 'recreate' | 'validate'
+  const statusMap = {
+    inProgress: (step) => {
+      switch (step) {
+        case 'create':
+          return 'creating'
+        case 'restore':
+          return 'restoring'
+        case 'recreate':
+          return 'recreating'
+        default:
+          throw new Error(`${step} is not a valid session step.`)
+      }
+    },
+    stepName: (step) => {
+      switch (step) {
+        case 'create':
+          return 'Create new session'
+        case 'restore':
+          return 'Restore saved session'
+        case 'recreate':
+          return 'Recreate session'
+        case 'validate':
+          return 'Validate session'
+        default:
+          throw new Error(`${step} is not a valid session step.`)
+      }
+    },
+    complete: (step) => {
+      switch (step) {
+        case 'create':
+          return 'created'
+        case 'restore':
+          return 'restored'
+        case 'recreate':
+          return 'recreated'
+        default:
+          throw new Error(`${step} is not a valid session step.`)
+      }
+    },
+  }
+
   Cypress.on('run:start', () => {
     // @ts-ignore
     Object.values(Cypress.state('activeSessions') || {}).forEach((sessionData: ServerSessionData) => {
@@ -160,10 +202,10 @@ export default function (Commands, Cypress, cy) {
         })
       }
 
-      function createSession (existingSession, recreateSession = false) {
+      function createSession (existingSession, step: 'create' | 'recreate') {
         logGroup(Cypress, {
           name: 'session',
-          displayName: recreateSession ? 'Recreate session' : 'Create new session',
+          displayName: statusMap.stepName(step),
           message: '',
           type: 'system',
 
@@ -175,7 +217,7 @@ export default function (Commands, Cypress, cy) {
               setupLogGroup.set({
                 state: 'failed',
                 consoleProps: {
-                  Step: 'Create New Session',
+                  Step: statusMap.stepName(step),
                   Error: err.stack || err.message,
                 },
               })
@@ -197,12 +239,12 @@ export default function (Commands, Cypress, cy) {
             _.extend(existingSession, data)
             existingSession.hydrated = true
             await sessions.saveSessionData(existingSession)
-            console.log('SET CREATE NEW SESSION PROPS')
+
             _log.set({ consoleProps: () => getConsoleProps(existingSession) })
             setupLogGroup.set({
               consoleProps: () => {
                 return {
-                  Step: 'Create new session',
+                  Step: statusMap.stepName(step),
                   ...getConsoleProps(existingSession),
                 }
               },
@@ -234,7 +276,7 @@ export default function (Commands, Cypress, cy) {
         })
       }
 
-      function validateSession (existingSession, sessionStatus: 'created' | 'restored' | 'recreated' = 'created') {
+      function validateSession (existingSession, step: SESSION_STEPS) {
         const isValidSession = true
 
         if (!existingSession.validate) {
@@ -259,18 +301,20 @@ export default function (Commands, Cypress, cy) {
               Cypress.state('onFail', null)
 
               // show validation error and allow sessions workflow to recreate the session
-              if (sessionStatus === 'restored') {
-                $errUtils.modifyErrMsg(err, `\n\nThis error occurred while validating the restored session. Because validation failed, we will try to recreate the session.`, _.add)
+              if (step === 'restore') {
+                $errUtils.modifyErrMsg(err, `\n\nThis error occurred while validating the restoring session. Because validation failed, we will try to recreate the session.`, _.add)
 
                 err.isRecovered = true
 
-                Cypress.log({
-                  type: 'system',
-                  name: 'session',
-                  displayName: 'validate result',
-                  message: '',
+                validateLog.set({
+                  state: 'failed',
+                  consoleProps: (args) => {
+                    return {
+                      Error: err.stack,
+                    }
+                  },
+                  error: err,
                 })
-                .error(err)
 
                 return !isValidSession
               }
@@ -298,19 +342,19 @@ export default function (Commands, Cypress, cy) {
                 })
               }
 
-              $errUtils.modifyErrMsg(err, `\n\nThis error occurred while validating the ${sessionStatus} session. Because validation failed immediately after ${sessionStatus === 'created' ? 'creating' : 'recreating'} the session, we failed the test.`, _.add)
+              $errUtils.modifyErrMsg(err, `\n\nThis error occurred while validating the ${statusMap.complete(step)} session. Because validation failed immediately after ${statusMap.inProgress(step)} the session, we failed the test.`, _.add)
               // console.log('before throw', err)
 
               throw err
             }
 
-            return validate(existingSession, sessionStatus, onSuccess, onFail)
+            return validate(existingSession, step, onSuccess, onFail)
           })
         })
       }
 
       // uses Cypress hackery to resolve `false` if validate() resolves/returns false or throws/fails a cypress command.
-      function validate (existingSession, sessionStatus, onSuccess, onFail) {
+      function validate (existingSession, step, onSuccess, onFail) {
         let returnVal
 
         Cypress.state('onFail', (err) => {
@@ -361,7 +405,7 @@ export default function (Commands, Cypress, cy) {
               if (!(err instanceof Error)) {
                 // set current command to cy.session for more accurate codeFrame
                 cy.state('current', sessionCommand)
-                err = $errUtils.errByPath('sessions.validate_callback_false', { reason: `promise rejected with: ${String(err)}` })
+                err = $errUtils.errByPath('sessions.validate_callback_false', { reason: `promise rejected with ${String(err)}` })
               }
 
               return onFail(err)
@@ -375,7 +419,7 @@ export default function (Commands, Cypress, cy) {
               // set current command to cy.session for more accurate codeframe
               cy.state('current', sessionCommand)
 
-              return onFail($errUtils.errByPath('sessions.validate_callback_false', { reason: 'callback\'s last command yielded false' }), val)
+              return onFail($errUtils.errByPath('sessions.validate_callback_false', { reason: 'callback yielded false' }), val)
             }
           }
 
@@ -388,22 +432,22 @@ export default function (Commands, Cypress, cy) {
        *   1. create session
        *   2. validate session
        */
-      const createSessionWorkflow = (existingSession, sessionStatus: 'creating' | 'recreating' = 'creating') => {
+      const createSessionWorkflow = (existingSession, step: 'create' | 'recreate' = 'create') => {
         return cy.then(async () => {
-          setSessionLogStatus(sessionStatus)
+          setSessionLogStatus(statusMap.inProgress(step))
 
           await navigateAboutBlank()
           await sessions.clearCurrentSessionData()
 
-          return createSession(existingSession, sessionStatus === 'recreating')
+          return createSession(existingSession, step)
         })
-        .then(() => validateSession(existingSession, sessionStatus === 'recreating' ? 'recreated' : 'created'))
+        .then(() => validateSession(existingSession, step))
         .then((isValidSession: boolean) => {
           if (!isValidSession) {
             return
           }
 
-          setSessionLogStatus(sessionStatus === 'recreating' ? 'recreated' : 'created')
+          setSessionLogStatus(statusMap.complete(step))
         })
       }
 
@@ -421,10 +465,10 @@ export default function (Commands, Cypress, cy) {
 
           return restoreSession(existingSession)
         })
-        .then(() => validateSession(existingSession, 'restored'))
+        .then(() => validateSession(existingSession, 'restore'))
         .then((isValidSession: boolean) => {
           if (!isValidSession) {
-            return createSessionWorkflow(existingSession, 'recreating')
+            return createSessionWorkflow(existingSession, 'recreate')
           }
 
           setSessionLogStatus('restored')
