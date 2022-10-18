@@ -90,7 +90,7 @@
       :prefix-icon="ConnectIcon"
       class="mt-24px"
       data-cy="reconnect-button"
-      @click="loginConnectStore.openLoginConnectModal"
+      @click="loginConnectStore.openLoginConnectModal({utmMedium: 'Tests Tab'})"
     >
       {{ t('runs.errors.notFound.button') }}
     </Button>
