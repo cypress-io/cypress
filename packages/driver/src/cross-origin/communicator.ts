@@ -19,7 +19,7 @@ const SNAPSHOT_EVENT_PREFIX = `${CROSS_ORIGIN_PREFIX}snapshot:`
  * @param event the name of the event to be promisified.
  * @param specBridgeName the name of the spec bridge receiving the event.
  * @param communicator the communicator that is sending the message
- * @param timeout - in ms, if the promise does not complete during this timeout, fail the promise.
+ * @param [timeout=1000] - in ms, if the promise does not complete during this timeout, fail the promise.
  * @returns the data to send
  */
 const sharedPromiseSetup = ({
@@ -154,7 +154,7 @@ export class PrimaryOriginCommunicator extends EventEmitter {
 
   /**
    * Sends an event to a specific source.
-   * @param origin - the origin of the spec bridge to send the event to.
+   * @param source - a reference to the window object that sent the message.
    * @param event - the name of the event to be sent.
    * @param data - any meta data to be sent with the event.
    * @param responseEvent - the event to be responded with when sending back a result.
@@ -180,7 +180,7 @@ export class PrimaryOriginCommunicator extends EventEmitter {
    * @param {string} event - the name of the event to be sent.
    * @param {Cypress.ObjectLike} data - any meta data to be sent with the event.
    * @param options - contains boolean to sync globals
-   * @param timeout - in ms, if the promise does not complete during this timeout, fail the promise.
+   * @param [timeout=1000] - in ms, if the promise does not complete during this timeout, fail the promise.
    * @returns the response from primary of the event with the same name.
    */
   toSpecBridgePromise<T> ({
@@ -315,7 +315,7 @@ export class SpecBridgeCommunicator extends EventEmitter {
    * @param {string} event - the name of the event to be sent.
    * @param {Cypress.ObjectLike} data - any meta data to be sent with the event.
    * @param options - contains boolean to sync globals
-   * @param timeout - in ms, if the promise does not complete during this timeout, fail the promise.
+   * @param [timeout=1000] - in ms, if the promise does not complete during this timeout, fail the promise.
    * @returns the response from primary of the event with the same name.
    */
   toPrimaryPromise<T> ({
