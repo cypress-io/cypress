@@ -198,6 +198,7 @@ const cleanup = async (buildAppDir) => {
     path.join(buildAppDir, '**', 'test'),
     path.join(buildAppDir, '**', 'tests'),
     // What we need of prettier is entirely encapsulated within the v8 snapshot, but has a few leftover large files
+    path.join(buildAppDir, '**', 'prettier', 'esm'),
     path.join(buildAppDir, '**', 'prettier', 'standalone.js'),
     path.join(buildAppDir, '**', 'prettier', 'bin-prettier.js'),
     path.join(buildAppDir, '**', '@babel', '**', 'esm'),
