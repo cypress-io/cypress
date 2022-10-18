@@ -18,7 +18,7 @@ export default defineConfig({
     },
   },
   retries: {
-    runMode: 2,
+    runMode: 0,
   },
   // @ts-ignore We are setting these namespaces in order to properly test Cypress in Cypress
   clientRoute: '/__app/',

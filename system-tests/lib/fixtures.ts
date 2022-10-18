@@ -19,19 +19,23 @@ export const cyTmpDir = _path.join(tempDir, 'cy-projects')
 const projectFixtureDirs = fs.readdirSync(projectFixtures, { withFileTypes: true }).filter((f) => f.isDirectory()).map((f) => f.name)
 
 const safeRemove = (path) => {
-  try {
-    fs.removeSync(path)
-  } catch (_err) {
-    const err = _err as NodeJS.ErrnoException
+  let numberOfErrors = 0
+  const maxTries = 50
 
-    // Windows does not like the en masse deleting of files, since the AV will hold
-    // a lock on files when they are written. This skips deleting if the lock is
-    // encountered.
-    if (err.code === 'EBUSY' && process.platform === 'win32') {
-      return console.error(`Remove failed for ${ path } due to EBUSY. Skipping on Windows.`)
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    try {
+      fs.removeSync(path)
+      break
+    } catch (_err) {
+      const err = _err as NodeJS.ErrnoException
+
+      if (numberOfErrors++ === maxTries) {
+        throw err
+      } else {
+        console.error(`Remove failed for ${path} due to ${err.code} ${err.message}. Retrying...`)
+      }
     }
-
-    throw err
   }
 }
 

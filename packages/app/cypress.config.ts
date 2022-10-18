@@ -4,7 +4,7 @@ import { initGitRepoForTestProject, resetGitRepoForTestProject } from './cypress
 export default defineConfig({
   projectId: 'ypt4pf',
   retries: {
-    runMode: 2,
+    runMode: 0,
     openMode: 0,
   },
   videoCompression: false, // turn off video compression for CI
