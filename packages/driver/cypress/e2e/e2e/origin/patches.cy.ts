@@ -417,7 +417,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
           })
         })
 
-        it('fails gracefully if xhr is called with Bad arguments and we don\'t signal to the socket (must match the legit URL), but xhr request still proceeds', () => {
+        it('still emits credential status in the case absolute url can be parsed even though request results in 404', () => {
           cy.origin('http://www.foobar.com:3500',
             () => {
               cy.on('uncaught:exception', (err) => {
@@ -509,7 +509,7 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
           })
         })
 
-        it('fails gracefully if xmlHttpRequest is called with bad arguments and we don\'t signal to the socket (must match the legit URL), but xhr request still proceeds', () => {
+        it('still emits credential status in the case absolute url can be parsed even though request results in 404', () => {
           cy.origin('http://www.foobar.com:3500',
             () => {
               cy.on('uncaught:exception', (err) => {
