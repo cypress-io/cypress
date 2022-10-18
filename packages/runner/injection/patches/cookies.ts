@@ -45,16 +45,7 @@ const sendCookieToServer = (cookie: AutomationCookie) => {
 // document.cookie runs into cross-origin restrictions when the AUT is on
 // a different origin than top. The goal is to make it act like it would
 // if the user's app was run in top.
-//
-// The general strategy is:
-// - Keep the document.cookie value (`documentCookieValue`) available so
-//   the document.cookie getter can synchronously return it.
-// - Optimistically update that value when document.cookie is set, so that
-//   subsequent synchronous calls to get the value will work.
-// - On an interval, get the browser's cookies for the given domain, so that
-//   updates to the cookie jar (via http requests, cy.setCookie, etc) are
-//   reflected in the document.cookie value.
-export const patchDocumentCookie = (originalCookies: AutomationCookie[]) => {
+export const patchDocumentCookie = (requestCookies: AutomationCookie[]) => {
   const url = location.href
   const domain = location.hostname
   const cookieJar = new CookieJar()
@@ -72,7 +63,10 @@ export const patchDocumentCookie = (originalCookies: AutomationCookie[]) => {
     })
   }
 
-  addCookies(existingCookies.concat(originalCookies))
+  // requestCookies are ones included with the page request that's now being
+  // injected into. they're captured by the proxy and included statically in
+  // the injection so they can be added here and available before page load
+  addCookies(existingCookies.concat(requestCookies))
 
   Object.defineProperty(window.document, 'cookie', {
     get () {
@@ -116,6 +110,8 @@ export const patchDocumentCookie = (originalCookies: AutomationCookie[]) => {
 
     Cypress.on('test:before:run', reset)
 
+    // the following listeners are called from Cypress cookie commands, so that
+    // the document.cookie value is updated optimistically
     Cypress.on('set:cookie', (cookie: AutomationCookie) => {
       cookieJar.setCookie(automationCookieToToughCookie(cookie, domain), url, undefined)
     })
