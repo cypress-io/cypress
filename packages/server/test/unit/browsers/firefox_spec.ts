@@ -544,7 +544,6 @@ describe('lib/browsers/firefox', () => {
           criClientStub.on,
           browserCriClient.resetBrowserTargets,
           null,
-          false,
         )
       })
     })

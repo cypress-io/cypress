@@ -1073,7 +1073,7 @@ describe('config/src/project/utils', () => {
             supportFile: { value: false, from: 'config' },
             supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
-            testIsolation: { value: 'legacy', from: 'default' },
+            testIsolation: { value: 'strict', from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
             userAgent: { value: null, from: 'default' },
             video: { value: true, from: 'default' },

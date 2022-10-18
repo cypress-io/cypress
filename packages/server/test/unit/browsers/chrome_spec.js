@@ -76,17 +76,18 @@ describe('lib/browsers/chrome', () => {
       expect(this.browserCriClient.ensureMinimumProtocolVersion).to.be.calledOnce
     })
 
-    it('focuses on the page, calls CRI Page.visit, enables Page events, and sets download behavior', function () {
+    it('focuses on the page, calls CRI Page.navigate, enables Page/Network/Fetch events, and sets download behavior', function () {
       return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
       .then(() => {
         expect(utils.getPort).to.have.been.calledOnce // to get remote interface port
-        expect(this.pageCriClient.send.callCount).to.equal(5)
-        expect(this.pageCriClient.send).to.have.been.calledWith('Page.bringToFront')
 
+        expect(this.pageCriClient.send.callCount).to.equal(6)
+        expect(this.pageCriClient.send).to.have.been.calledWith('Page.bringToFront')
         expect(this.pageCriClient.send).to.have.been.calledWith('Page.navigate')
         expect(this.pageCriClient.send).to.have.been.calledWith('Page.enable')
         expect(this.pageCriClient.send).to.have.been.calledWith('Page.setDownloadBehavior')
         expect(this.pageCriClient.send).to.have.been.calledWith('Network.enable')
+        expect(this.pageCriClient.send).to.have.been.calledWith('Fetch.enable')
       })
     })
 
