@@ -20,7 +20,7 @@ const projectFixtureDirs = fs.readdirSync(projectFixtures, { withFileTypes: true
 
 const safeRemove = (path) => {
   let numberOfErrors = 0
-  const maxTries = 50
+  const maxTries = 1000
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
