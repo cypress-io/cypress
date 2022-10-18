@@ -645,7 +645,7 @@ class $Cypress {
         return this.emit('snapshot', ...args)
 
       case 'cy:before:stability:release':
-        return this.emitThen('before:stability:release', ...args)
+        return this.emitThen('before:stability:release')
 
       case 'app:uncaught:exception':
         return this.emitMap('uncaught:exception', ...args)

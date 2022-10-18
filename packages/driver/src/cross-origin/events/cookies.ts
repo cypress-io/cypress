@@ -18,9 +18,7 @@ export const handleCrossOriginCookies = (Cypress: ICypress) => {
 
     cookiesToSend = cookiesToSend.concat(cookies)
 
-    const onBeforeStabilityRelease = (stable: boolean) => {
-      if (!stable) return
-
+    const onBeforeStabilityRelease = () => {
       const cookies = cookiesToSend
 
       cookiesToSend = []

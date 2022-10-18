@@ -57,7 +57,7 @@ declare namespace Cypress {
     (action: 'clear:cookie', fn: (name: string) => void)
     (action: 'clear:cookies', fn: () => void)
     (action: 'cross:origin:cookies', fn: (cookies: AutomationCookie[]) => void)
-    (action: 'before:stability:release', fn: (stable: boolean) => void)
+    (action: 'before:stability:release', fn: () => void)
   }
 
   interface Backend {
