@@ -25,10 +25,6 @@ export default function (Commands, Cypress, cy) {
   // @ts-ignore
 
   function throwIfNoSessionSupport () {
-    if (Cypress.isBrowser('webkit')) {
-      $errUtils.throwErrByPath('webkit.session')
-    }
-
     if (!Cypress.config('experimentalSessionAndOrigin')) {
       $errUtils.throwErrByPath('sessions.experimentNotEnabled', {
         args: {
@@ -240,8 +236,8 @@ export default function (Commands, Cypress, cy) {
 
               // show validation error and allow sessions workflow to recreate the session
               if (restoreSession) {
+                err.isRecovered = true
                 Cypress.log({
-                  showError: true,
                   type: 'system',
                   name: 'session',
                 })

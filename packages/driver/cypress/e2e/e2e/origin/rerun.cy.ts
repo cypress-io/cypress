@@ -1,5 +1,5 @@
 // @ts-ignore
-describe('cy.origin - rerun', { }, () => {
+describe('cy.origin - rerun', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()

@@ -77,7 +77,7 @@ describe('Error handling', () => {
       cy.contains('You are using vite for your dev server, but a configuration file was not found.')
       cy.contains('Add your vite config at one of the above paths, or import your configuration file and provide it to the devServer config as a viteConfig option.')
 
-      cy.contains('Choose a Browser').should('not.exist')
+      cy.contains('Choose a browser').should('not.exist')
 
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject('cypress.config.ts', `
@@ -96,7 +96,7 @@ describe('Error handling', () => {
         `)
       })
 
-      cy.contains('Choose a Browser').should('not.exist')
+      cy.contains('Choose a browser').should('not.exist')
     })
 
     context('has config file in common location', () => {
@@ -106,7 +106,7 @@ describe('Error handling', () => {
         cy.visitLaunchpad()
 
         // should successful start dev server and move to launch screen!
-        cy.contains('Choose a Browser')
+        cy.contains('Choose a browser')
       })
     })
   })
@@ -136,7 +136,7 @@ describe('Error handling', () => {
         cy.visitLaunchpad()
 
         // should successful start dev server and move to launch screen!
-        cy.contains('Choose a Browser')
+        cy.contains('Choose a browser')
       })
     })
   })
