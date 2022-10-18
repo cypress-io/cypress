@@ -22,6 +22,7 @@
 
 <template>
   <LoginConnectModalsContent
+    v-if="loginConnectStore.isLoginConnectOpen"
     :gql="query.data.value"
   />
 </template>
