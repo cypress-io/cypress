@@ -1,10 +1,9 @@
-import { client } from '@packages/socket/lib/browser'
+import { createWebsocket } from '@packages/socket/lib/browser'
 
 export const handleSocketEvents = (Cypress) => {
-  const webSocket = client({
-    path: Cypress.config('socketIoRoute'),
-    transports: ['websocket'],
-  }).connect()
+  const webSocket = createWebsocket({ path: Cypress.config('socketIoRoute'), browserFamily: Cypress.config('browser').family })
+
+  webSocket.connect()
 
   const onBackendRequest = (...args) => {
     webSocket.emit('backend:request', ...args)

@@ -14,7 +14,7 @@ describe('RecordRunModal', () => {
     cy.contains(defaultMessages.specPage.banners.record.title).should('be.visible')
     cy.findByTestId('copy-button').should('be.visible')
 
-    cy.contains('npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
+    cy.findByDisplayValue('npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
 
     cy.percySnapshot()
   })

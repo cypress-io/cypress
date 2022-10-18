@@ -589,10 +589,26 @@ describe('e2e record', () => {
         retries: 2,
       })
 
+      expect(requests[2].body.tests[1].title).deep.eq([
+        'record pass',
+        'is pending',
+      ])
+
+      expect(requests[2].body.tests[1].body).to.eq('')
+
+      expect(requests[2].body.tests[2].title).deep.eq([
+        'record pass',
+        'is pending due to .skip',
+      ])
+
+      expect(requests[2].body.tests[2].body).to.eq('() => {\n    console.log(\'stuff\');\n  }')
+
       expect(requests[2].body.tests[3].title).deep.eq([
         'record pass',
         'is skipped due to browser',
       ])
+
+      expect(requests[2].body.tests[3].body).eq('() => {}')
 
       expect(requests[2].body.tests[3].config).deep.eq({
         defaultCommandTimeout: 1234,

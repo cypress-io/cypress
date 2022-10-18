@@ -142,6 +142,7 @@ export const create = async (target: string, onAsynchronousError: Function, host
       port,
       target,
       local: true,
+      useHostName: true,
     })
 
     connected = true

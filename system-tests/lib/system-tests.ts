@@ -179,7 +179,7 @@ type ExecOptions = {
    */
   ciBuildId?: string
   /**
-   * Run Cypress with a record key.
+   * Run Cypress with a Record Key.
    */
   key?: string
   /**

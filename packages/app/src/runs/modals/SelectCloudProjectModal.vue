@@ -160,6 +160,7 @@
           size="lg"
           :prefix-icon="newProject ? CreateIcon : ConnectIcon"
           prefix-icon-class="icon-dark-white"
+          data-cy="connect-project"
           @click="createOrConnectProject"
         >
           {{ newProject

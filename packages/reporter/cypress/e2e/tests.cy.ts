@@ -5,14 +5,14 @@ import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 let runner: EventEmitter
 let runnables: RootRunnable
 
-function visitAndRenderReporter (runnerStore: MobxRunnerStore = new MobxRunnerStore('e2e')) {
+function visitAndRenderReporter (studioEnabled: boolean = false, studioActive: boolean = false) {
   cy.fixture('runnables').then((_runnables) => {
     runnables = _runnables
   })
 
   runner = new EventEmitter()
 
-  runnerStore ??= new MobxRunnerStore('e2e')
+  const runnerStore = new MobxRunnerStore('e2e')
 
   runnerStore.setSpec({
     name: 'foo.js',
@@ -22,7 +22,7 @@ function visitAndRenderReporter (runnerStore: MobxRunnerStore = new MobxRunnerSt
 
   cy.visit('/').then((win) => {
     win.render({
-      studioEnabled: true,
+      studioEnabled,
       runner,
       runnerStore,
     })
@@ -30,8 +30,10 @@ function visitAndRenderReporter (runnerStore: MobxRunnerStore = new MobxRunnerSt
 
   cy.get('.reporter').then(() => {
     runner.emit('runnables:ready', runnables)
-    runner.emit('reporter:start', { studioActive: true })
+    runner.emit('reporter:start', { studioActive })
   })
+
+  return runnerStore
 }
 
 describe('tests', () => {
@@ -69,12 +71,65 @@ describe('tests', () => {
       .should('not.exist')
     })
 
+    it('last retried attempt collapsed by default', () => {
+      cy.contains('passed after retry')
+      .scrollIntoView()
+      .parents('.collapsible').first()
+      .should('not.have.class', 'is-open')
+      .find('.collapsible-content')
+      .should('not.exist')
+
+      cy.percySnapshot()
+
+      cy.contains('passed after retry')
+      .click()
+
+      cy.contains('passed after retry')
+      .parents('.collapsible').first()
+      .find('.attempt-item').as('attempts')
+
+      cy.get('@attempts').eq(0)
+      .find('.collapsible')
+      .should('not.have.class', 'is-open')
+      .find('.collapsible-indicator').should('not.exist')
+
+      cy.get('@attempts').eq(1)
+      .scrollIntoView()
+      .find('.collapsible')
+      .should('have.class', 'is-open')
+      .find('.collapsible-indicator').should('not.exist')
+
+      cy.percySnapshot('expanded')
+    })
+
     it('failed tests expands automatically', () => {
       cy.contains('test 2')
       .parents('.collapsible').first()
       .should('have.class', 'is-open')
       .find('.collapsible-content')
       .should('be.visible')
+    })
+
+    it('failed and last retried attempt expands automatically', () => {
+      cy.contains('failed with retries')
+      .parents('.collapsible').first()
+      .find('.attempt-item').as('attempts')
+
+      cy.percySnapshot()
+
+      cy.get('@attempts').eq(0)
+      .find('.collapsible')
+      .should('not.have.class', 'is-open')
+      .find('.collapsible-indicator').should('not.exist')
+
+      cy.get('@attempts').eq(1)
+      .find('.collapsible')
+      .should('have.class', 'is-open')
+      .find('.collapsible-content')
+      .should('be.visible')
+
+      cy.contains('failed with retries').click()
+      cy.percySnapshot('collapsed')
     })
 
     it('expands/collapses on click', () => {
@@ -134,12 +189,13 @@ describe('tests', () => {
 describe('studio controls', () => {
   describe('canCopyStudioCommands is true', () => {
     beforeEach(() => {
-      const runnerStore = new MobxRunnerStore('e2e')
+      const runnerStore = visitAndRenderReporter(true, true)
 
       runnerStore.setCanSaveStudioLogs(true)
 
-      visitAndRenderReporter(runnerStore)
-      cy.contains('test 1').click()
+      cy.contains('test 1')
+      .scrollIntoView()
+      .click()
       .parents('.collapsible').first()
       .find('.studio-controls').as('studioControls')
     })
@@ -191,14 +247,19 @@ describe('studio controls', () => {
   })
 
   describe('canCopyStudioCommands is false', () => {
-    beforeEach(() => {
-      visitAndRenderReporter()
-      cy.contains('test 1').click()
-      .parents('.collapsible').first()
-      .find('.studio-controls').as('studioControls')
-    })
-
     describe('copy button', () => {
+      beforeEach(() => {
+        const runnerStore = visitAndRenderReporter(true, true)
+
+        runnerStore.setCanSaveStudioLogs(false)
+
+        cy.contains('test 1')
+        .scrollIntoView()
+        .click()
+        .parents('.collapsible').first()
+        .find('.studio-controls').as('studioControls')
+      })
+
       it('is disabled without tooltip when there are no commands', () => {
         cy.get('@studioControls')
         .find('.studio-copy')
@@ -210,9 +271,11 @@ describe('studio controls', () => {
       })
     })
 
-    describe('button', () => {
+    describe('launch studio button when studio is not active', () => {
       beforeEach(() => {
-        runner.emit('reporter:start', { studioActive: false })
+        const runnerStore = visitAndRenderReporter(true, false)
+
+        runnerStore.setCanSaveStudioLogs(false)
       })
 
       it('displays studio icon with half transparency when hovering over test title', { scrollBehavior: false }, () => {
@@ -247,12 +310,26 @@ describe('studio controls', () => {
 
     describe('controls', () => {
       it('is not visible by default', () => {
+        visitAndRenderReporter(false, false)
+
         cy.contains('test 1').click()
         .parents('.collapsible').first()
         .find('.studio-controls').should('not.exist')
       })
 
       describe('with studio active', () => {
+        beforeEach(() => {
+          const runnerStore = visitAndRenderReporter(true, true)
+
+          runnerStore.setCanSaveStudioLogs(false)
+
+          cy.contains('test 1')
+          .scrollIntoView()
+          .click()
+          .parents('.collapsible').first()
+          .find('.studio-controls').as('studioControls')
+        })
+
         it('is visible with save and copy button when test passed', () => {
           cy.get('@studioControls').should('be.visible')
           cy.get('@studioControls').find('.studio-save').should('be.visible')
