@@ -5,9 +5,7 @@ const del = require('del')
 const esbuild = require('esbuild')
 const snapshotMetadata = require('@tooling/v8-snapshot/cache/prod-darwin/snapshot-meta.cache.json')
 
-const getEsbuildConfig = (buildAppDir) => {
-  console.log(require.resolve('webpack-dev-server', { paths: [path.join(buildAppDir, 'npm', 'webpack-dev-server')] }))
-
+const getEsbuildConfig = () => {
   return {
     entryPoints: [
       './packages/server/lib/plugins/child/register_ts_node.js',
@@ -26,24 +24,15 @@ const getEsbuildConfig = (buildAppDir) => {
       require.resolve('webpack'),
       require.resolve('webpack/hot/only-dev-server'),
       require.resolve('webpack/hot/dev-server'),
-      require.resolve('webpack-dev-server', { paths: [path.join(buildAppDir, 'npm', 'webpack-dev-server')] }),
-      require.resolve('webpack-dev-server/client/index', { paths: [path.join(buildAppDir, 'npm', 'webpack-dev-server')] }),
-      require.resolve('webpack-dev-server/client/clients/SockJSClient', { paths: [path.join(buildAppDir, 'npm', 'webpack-dev-server')] }),
-      require.resolve('webpack-dev-server/client/clients/WebSocketClient', { paths: [path.join(buildAppDir, 'npm', 'webpack-dev-server')] }),
-      require.resolve('terser-webpack-plugin/dist/minify', { paths: [path.join(buildAppDir, 'npm', 'webpack-dev-server')] }),
-      require.resolve('watchpack', { paths: [path.join(buildAppDir, 'npm', 'webpack-dev-server')] }),
-      require.resolve('html-webpack-plugin-4', { paths: [path.join(buildAppDir, 'npm', 'webpack-dev-server')] }),
-      require.resolve('html-webpack-plugin-5', { paths: [path.join(buildAppDir, 'npm', 'webpack-dev-server')] }),
-      require.resolve('html-webpack-plugin-5/lib/loader', { paths: [path.join(buildAppDir, 'npm', 'webpack-dev-server')] }),
-      require.resolve('webpack-dev-server', { paths: [path.join(buildAppDir, 'server', 'node_modules', 'webpack-dev-server')] }),
-      require.resolve('webpack-dev-server/client/index', { paths: [path.join(buildAppDir, 'server', 'node_modules', 'webpack-dev-server')] }),
-      require.resolve('webpack-dev-server/client/clients/SockJSClient', { paths: [path.join(buildAppDir, 'server', 'node_modules', 'webpack-dev-server')] }),
-      require.resolve('webpack-dev-server/client/clients/WebSocketClient', { paths: [path.join(buildAppDir, 'server', 'node_modules', 'webpack-dev-server')] }),
-      require.resolve('terser-webpack-plugin/dist/minify', { paths: [path.join(buildAppDir, 'server', 'node_modules', 'webpack-dev-server')] }),
-      require.resolve('watchpack', { paths: [path.join(buildAppDir, 'server', 'node_modules', 'webpack-dev-server')] }),
-      require.resolve('html-webpack-plugin-4', { paths: [path.join(buildAppDir, 'server', 'node_modules', 'webpack-dev-server')] }),
-      require.resolve('html-webpack-plugin-5', { paths: [path.join(buildAppDir, 'server', 'node_modules', 'webpack-dev-server')] }),
-      require.resolve('html-webpack-plugin-5/lib/loader', { paths: [path.join(buildAppDir, 'server', 'node_modules', 'webpack-dev-server')] }),
+      require.resolve('webpack-dev-server', { paths: [path.join(__dirname, '..', '..', 'npm', 'webpack-dev-server')] }),
+      require.resolve('webpack-dev-server/client/index', { paths: [path.join(__dirname, '..', '..', 'npm', 'webpack-dev-server')] }),
+      require.resolve('webpack-dev-server/client/clients/SockJSClient', { paths: [path.join(__dirname, '..', '..', 'npm', 'webpack-dev-server')] }),
+      require.resolve('webpack-dev-server/client/clients/WebSocketClient', { paths: [path.join(__dirname, '..', '..', 'npm', 'webpack-dev-server')] }),
+      require.resolve('terser-webpack-plugin/dist/minify', { paths: [path.join(__dirname, '..', '..', 'npm', 'webpack-dev-server')] }),
+      require.resolve('watchpack', { paths: [path.join(__dirname, '..', '..', 'npm', 'webpack-dev-server')] }),
+      require.resolve('html-webpack-plugin-4', { paths: [path.join(__dirname, '..', '..', 'npm', 'webpack-dev-server')] }),
+      require.resolve('html-webpack-plugin-5', { paths: [path.join(__dirname, '..', '..', 'npm', 'webpack-dev-server')] }),
+      require.resolve('html-webpack-plugin-5/lib/loader', { paths: [path.join(__dirname, '..', '..', 'npm', 'webpack-dev-server')] }),
       require.resolve('buffer/'),
       require.resolve('coffee-loader'),
       './node_modules/worker-farm/lib/child/index.js',
@@ -190,7 +179,7 @@ async function removeEmptyDirectories (directory) {
 }
 
 const cleanup = async (buildAppDir) => {
-  const esbuildConfig = getEsbuildConfig(buildAppDir)
+  const esbuildConfig = getEsbuildConfig()
   const esbuildResult = await esbuild.build(esbuildConfig)
 
   const potentiallyRemovedDependencies = [...snapshotMetadata.healthy, ...snapshotMetadata.deferred, ...snapshotMetadata.norewrite]
