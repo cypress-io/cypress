@@ -63,7 +63,7 @@ describe('InlineSpecList', () => {
 
     it('should open CreateSpec modal', () => {
       mountInlineSpecList()
-      const newSpecSelector = `[aria-label="New Spec"]`
+      const newSpecSelector = `[aria-label="New spec"]`
 
       cy.get(newSpecSelector).click()
       cy.contains(defaultMessages.createSpec.newSpecModalTitle).should('be.visible')

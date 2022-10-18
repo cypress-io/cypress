@@ -49,8 +49,6 @@ const reporterEvents = [
   // "go:to:file"
   'runner:restart',
   'runner:abort',
-  'runner:console:log',
-  'runner:console:error',
   'runner:show:snapshot',
   'runner:hide:snapshot',
   'reporter:restarted',

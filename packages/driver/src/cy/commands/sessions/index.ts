@@ -236,8 +236,8 @@ export default function (Commands, Cypress, cy) {
 
               // show validation error and allow sessions workflow to recreate the session
               if (restoreSession) {
+                err.isRecovered = true
                 Cypress.log({
-                  showError: true,
                   type: 'system',
                   name: 'session',
                 })
