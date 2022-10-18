@@ -223,7 +223,6 @@ const cleanup = async (buildAppDir) => {
     path.join(buildAppDir, '**', 'yarn.lock'),
     path.join(buildAppDir, '**', 'pako', 'dist'),
     path.join(buildAppDir, '**', 'ajv', 'lib', '**', '*.ts'),
-    path.join(buildAppDir, '**', 'ajv', 'dist'),
     path.join(buildAppDir, '**', 'node-forge', 'dist'),
     path.join(buildAppDir, '**', '@graphql-tools', '**', '*.mjs'),
     path.join(buildAppDir, '**', 'graphql', '**', '*.mjs'),
