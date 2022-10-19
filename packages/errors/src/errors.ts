@@ -570,7 +570,6 @@ export const AllCypressErrors = {
         This can happen for a number of different reasons:
 
         - You wrote an endless loop and you must fix your own code
-        - There is a memory leak in Cypress (unlikely but possible)
         - You are running Docker (there is an easy fix for this: see link below)
         - You are running lots of tests on a memory intense application
         - You are running in a memory starved VM environment

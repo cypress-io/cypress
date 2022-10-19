@@ -15,6 +15,7 @@ import { fs } from '../util/fs'
 import { CdpAutomation, screencastOpts } from './cdp_automation'
 import * as protocol from './protocol'
 import utils from './utils'
+import * as errors from '../errors'
 import type { Browser, BrowserInstance } from './types'
 import { BrowserCriClient } from './browser-cri-client'
 import type { CriClient } from './cri-client'
@@ -595,6 +596,17 @@ export = {
   async attachListeners (url: string, pageCriClient: CriClient, automation: Automation, options: BrowserLaunchOpts | BrowserNewTabOpts) {
     const browserCriClient = this._getBrowserCriClient()
 
+    // Handle chrome tab crashes.
+    pageCriClient.on('Inspector.targetCrashed', () => {
+      const err = errors.get('RENDERER_CRASHED')
+
+      errors.log(err)
+
+      if (!options.onError) throw new Error('Missing onError in onCrashed')
+
+      options.onError(err)
+    })
+
     if (!browserCriClient) throw new Error('Missing browserCriClient in attachListeners')
 
     debug('attaching listeners to chrome %o', { url, options })
@@ -675,6 +687,8 @@ export = {
     const launchedBrowser = await launch(browser, 'about:blank', port, args, launchOptions.env) as unknown as BrowserInstance & { browserCriClient: BrowserCriClient}
 
     la(launchedBrowser, 'did not get launched browser instance')
+
+    // TODO: log an error out when the chrome browser process (launchedBrowser) exits unexpectedly
 
     // SECOND connect to the Chrome remote interface
     // and when the connection is ready
