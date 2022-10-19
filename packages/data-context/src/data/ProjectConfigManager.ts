@@ -50,7 +50,7 @@ export class ProjectConfigManager {
   private _pathToWatcherRecord: Record<string, chokidar.FSWatcher> = {}
   private _watchers = new Set<chokidar.FSWatcher>()
   private _registeredEventsTarget: TestingType | undefined
-  private _testingType?: TestingType
+  private _testingType: TestingType | null = null
   private _state: ConfigManagerState = 'pending'
   private _loadConfigPromise: Promise<LoadConfigReply> | undefined
   private _cachedLoadConfig: LoadConfigReply | undefined
