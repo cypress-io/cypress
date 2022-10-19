@@ -27,7 +27,7 @@
         data-cy="cloud-data-tooltip-content"
       >
         <div
-          :class="{'my-2': project.isProjectConnected}"
+          :class="{'my-2': !project.isProjectConnected}"
           class="max-w-300px"
         >
           <i18n-t
