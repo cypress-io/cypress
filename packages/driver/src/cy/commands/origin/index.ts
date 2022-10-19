@@ -200,6 +200,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
                   originCommandBaseUrl: location.href,
                   isStable: Cypress.state('isStable'),
                   autLocation: Cypress.state('autLocation')?.href,
+                  crossOriginCookies: Cypress.state('crossOriginCookies'),
                 },
                 config: preprocessConfig(Cypress.config()),
                 env: preprocessEnv(Cypress.env()),

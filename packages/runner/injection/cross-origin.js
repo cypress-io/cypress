@@ -68,7 +68,7 @@ const handleErrorEvent = (event) => {
 window.addEventListener('error', handleErrorEvent)
 
 // Apply Patches
-patchDocumentCookie(window)
+const documentCookiePatch = patchDocumentCookie(cypressConfig.simulatedCookies)
 
 // return null to trick contentWindow into thinking
 // its not been iFramed if modifyObstructiveCode is true
@@ -98,6 +98,8 @@ patchXmlHttpRequest(window)
 window.__attachToCypress = (Cypress) => {
   // A spec bridge has attached so we don't need to forward errors to top anymore.
   window.removeEventListener('error', handleErrorEvent)
+
+  documentCookiePatch.onCypress(Cypress)
 
   Cypress.removeAllListeners('app:timers:reset')
   Cypress.removeAllListeners('app:timers:pause')

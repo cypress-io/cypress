@@ -159,6 +159,11 @@ const attachToWindow = (autWindow: Window) => {
 
   const cy = Cypress.cy
 
+  // this communicates to the injection code that Cypress is now available so
+  // it can safely subscribe to Cypress events, etc
+  // @ts-ignore
+  autWindow.__attachToCypress ? autWindow.__attachToCypress(Cypress) : undefined
+
   Cypress.state('window', autWindow)
   Cypress.state('document', autWindow.document)
 
@@ -169,9 +174,6 @@ const attachToWindow = (autWindow: Window) => {
   cy.urlNavigationEvent('before:load')
 
   cy.overrides.wrapNativeMethods(autWindow)
-
-  // @ts-expect-error - the injected code adds the __attachToCypress function to window
-  autWindow.__attachToCypress ? autWindow.__attachToCypress(Cypress) : undefined
 
   // place after override incase fetch is polyfilled in the AUT injection
   // this can be in the beforeLoad code as we only want to patch fetch/xmlHttpRequest
