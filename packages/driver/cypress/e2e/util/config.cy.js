@@ -110,7 +110,7 @@ describe('driver/src/cypress/validate_config', () => {
           expect(overrideLevel).to.eq('suite')
 
           expect(() => {
-            validateConfig(state, { testIsolation: 'strict' })
+            validateConfig(state, { testIsolation: 'on' })
           }).not.to.throw()
         })
 
@@ -192,7 +192,7 @@ describe('driver/src/cypress/validate_config', () => {
       })
 
       expect(() => {
-        validateConfig(state, { testIsolation: 'legacy' })
+        validateConfig(state, { testIsolation: 'off' })
       }).not.to.throw()
     })
 

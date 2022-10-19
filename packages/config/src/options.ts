@@ -200,6 +200,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     isExperimental: true,
     requireRestartOnChange: 'server',
   }, {
+    // TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
     name: 'experimentalSessionAndOrigin',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -373,11 +374,27 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'testIsolation',
     // TODO: https://github.com/cypress-io/cypress/issues/23093
     // When experimentalSessionAndOrigin is removed and released as GA,
-    // update the defaultValue from 'legacy' to 'strict' and
+    // update the defaultValue from 'legacy' to 'on' and
     // update this code to remove the check/override specific to enable
-    // strict by default when experimentalSessionAndOrigin=true
-    defaultValue: 'legacy',
-    validation: validate.isOneOf('legacy', 'strict'),
+    // 'on' by default when experimentalSessionAndOrigin=true
+    defaultValue: (options: Record<string, any> = {}) => {
+      if (options.testingType === 'component') {
+        return 'legacy'
+      }
+
+      return options.config?.e2e?.experimentalSessionAndOrigin ? 'on' : 'legacy'
+    },
+    validation: (key: string, value: any, { testingType, experimentalSessionAndOrigin }: { testingType: TestingType, experimentalSessionAndOrigin: boolean }) => {
+      if (testingType === 'component') {
+        return new Error('This is not a validate component-testing configuration option.')
+      }
+
+      if (experimentalSessionAndOrigin) {
+        return validate.isOneOf('on', 'off')(key, value)
+      }
+
+      return validate.isOneOf('legacy')(key, value)
+    },
     overrideLevel: 'suite',
   }, {
     name: 'trashAssetsBeforeRuns',

@@ -195,7 +195,7 @@ describe('config/src/index', () => {
 
         const isSuiteOverride = true
 
-        configUtil.validateOverridableAtRunTime({ testIsolation: 'strict' }, isSuiteOverride, errorFn)
+        configUtil.validateOverridableAtRunTime({ testIsolation: 'on' }, isSuiteOverride, errorFn)
 
         expect(errorFn).to.have.callCount(0)
       })

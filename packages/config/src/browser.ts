@@ -163,7 +163,11 @@ export const validate = (cfg: any, onErr: (property: ErrResult | string) => void
 
     // key has a validation rule & value different from the default
     if (validationFn && value !== defaultValues[key]) {
-      const result = validationFn(key, value)
+      const result = validationFn(key, value, {
+        testingType: cfg.testingType,
+        // TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
+        experimentalSessionAndOrigin: cfg.experimentalSessionAndOrigin,
+      })
 
       if (result !== true) {
         return onErr(result)
@@ -198,6 +202,8 @@ export const validateOverridableAtRunTime = (config: any, isSuiteLevelOverride: 
       // non-cypress configuration option. skip validation
       return
     }
+
+    // TODO: add a hook to ensure valid testing-type configuration is being set at runtime for all configuration values.
 
     if (overrideLevel === 'never' || (overrideLevel === 'suite' && !isSuiteLevelOverride)) {
       onErr({
