@@ -100,6 +100,7 @@ const props = defineProps<{
 
 gql`
 fragment Auth on Query {
+  ...SelectCloudProjectModal
   cloudViewer {
     id
     email
