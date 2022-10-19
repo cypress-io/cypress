@@ -16,6 +16,7 @@ describe('testConfigOverrides', () => {
     expectedExitCode: 0,
     browser: 'electron',
     config: {
+      experimentalSessionAndOrigin: true,
       video: false,
     },
   })
@@ -25,6 +26,7 @@ describe('testConfigOverrides', () => {
     snapshot: true,
     expectedExitCode: 1,
     config: {
+      experimentalSessionAndOrigin: true,
       video: false,
     },
   })
