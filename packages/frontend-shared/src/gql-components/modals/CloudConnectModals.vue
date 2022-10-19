@@ -8,7 +8,7 @@
     />
   </template>
   <SelectCloudProjectModal
-    v-else-if="props.gql.cloudViewer?.organizations?.nodes.length ?? 0 > 0"
+    v-else-if="userStatusMatches('needsProjectConnect')"
     :gql="props.gql"
     show
     :utm-medium="props.utmMedium"
@@ -32,6 +32,7 @@ import NeedManualUpdateModal from './NeedManualUpdateModal.vue'
 import { gql, useMutation, useSubscription } from '@urql/vue'
 import type { CloudConnectModalsFragment } from '../../generated/graphql'
 import { CloudConnectModals_MonitorCloudViewerDocument, CloudConnectModals_RefreshCloudViewerDocument } from '../../generated/graphql'
+import { useLoginConnectStore } from '../../store/login-connect-store'
 
 gql`
 fragment CloudConnectModals on Query {
@@ -81,6 +82,8 @@ const props = defineProps<{
   utmMedium: string
   utmContent?: string
 }>()
+
+const { userStatusMatches } = useLoginConnectStore()
 
 const newProjectId = ref('')
 const isManualUpdateOpen = ref(false)
