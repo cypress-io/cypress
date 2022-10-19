@@ -277,7 +277,9 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
 
   // We need to sync this state value prior to checking it otherwise we will erroneously log a loading event after the test is complete.
   if (Cypress.isCrossOriginSpecBridge) {
-    const duringUserTestExecution = await Cypress.specBridgeCommunicator.toPrimaryPromise('sync:during:user:test:execution')
+    const duringUserTestExecution = await Cypress.specBridgeCommunicator.toPrimaryPromise({
+      event: 'sync:during:user:test:execution',
+    })
 
     cy.state('duringUserTestExecution', duringUserTestExecution)
   }

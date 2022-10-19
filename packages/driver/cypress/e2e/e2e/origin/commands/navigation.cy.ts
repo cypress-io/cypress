@@ -453,7 +453,8 @@ context('cy.origin navigation', { browser: '!webkit' }, () => {
       })
     })
 
-    it('.go()', () => {
+    // TODO: Investigate this flaky test.
+    it('.go()', { retries: 15 }, () => {
       cy.visit('/fixtures/primary-origin.html')
       cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 

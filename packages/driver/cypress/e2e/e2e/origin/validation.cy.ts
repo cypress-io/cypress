@@ -1,12 +1,5 @@
 describe('cy.origin', { browser: '!webkit' }, () => {
   describe('successes', () => {
-    beforeEach(() => {
-      // TODO: There seems to be a limit of 15 active spec bridges during a given test.
-      // Needs to be fixed with https://github.com/cypress-io/cypress/issues/22874
-      // @ts-ignore
-      [...window.top?.document.getElementsByClassName('spec-bridge-iframe')].forEach((el) => el.remove())
-    })
-
     it('succeeds on a localhost domain name', () => {
       cy.origin('localhost', () => undefined)
       cy.then(() => {

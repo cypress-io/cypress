@@ -282,7 +282,7 @@ export default (Commands, Cypress, cy, state) => {
     })
   }
 
-  Cypress.primaryOriginCommunicator.on('wait:for:xhr', ({ args: [str, options] }, origin) => {
+  Cypress.primaryOriginCommunicator.on('wait:for:xhr', ({ args: [str, options] }, { origin }) => {
     options.isCrossOriginSpecBridge = true
     waitString(null, str, options).then((responses) => {
       Cypress.primaryOriginCommunicator.toSpecBridge(origin, 'wait:for:xhr:end', responses)
