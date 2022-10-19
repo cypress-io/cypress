@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watchEffect } from 'vue'
+import { watchEffect } from 'vue'
 import { gql, useQuery, useSubscription } from '@urql/vue'
 import { CloudViewerAndProject_RequiredDataDocument, CloudViewerAndProject_CheckCloudOrgMembershipDocument } from '../generated/graphql'
 import { useLoginConnectStore } from '../store/login-connect-store'
@@ -76,10 +76,6 @@ useSubscription({ query: CloudViewerAndProject_CheckCloudOrgMembershipDocument }
 
 const query = useQuery({ query: CloudViewerAndProject_RequiredDataDocument })
 
-const cloudProjectId = computed(() => {
-  return query.data.value?.currentProject?.config?.find((item: { field: string }) => item.field === 'projectId')?.value
-})
-
 watchEffect(() => {
   if (!query.data.value) {
     return
@@ -126,9 +122,12 @@ watchEffect(() => {
   setProjectFlag('isConfigLoaded', !!currentProject?.isFullConfigReady)
   setProjectFlag('isNotAuthorized', currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized')
   setProjectFlag('isNotFound', currentProject?.cloudProject?.__typename === 'CloudProjectNotFound')
-  setProjectFlag('isProjectConnected', !!cloudProjectId.value && currentProject?.cloudProject?.__typename === 'CloudProject')
   setProjectFlag('hasNonExampleSpec', !!currentProject?.hasNonExampleSpec)
   setProjectFlag('hasNoRecordedRuns', currentProject?.cloudProject?.__typename === 'CloudProject' && (currentProject.cloudProject?.runs?.nodes?.length ?? 0) === 0)
+
+  if (currentProject?.cloudProject) {
+    setProjectFlag('isProjectConnected', currentProject?.cloudProject?.__typename === 'CloudProject')
+  }
 })
 
 </script>
