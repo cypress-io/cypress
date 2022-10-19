@@ -23,7 +23,6 @@ import { handleUnsupportedAPIs } from './unsupported_apis'
 import { patchFormElementSubmit } from './patches/submit'
 import { patchFetch } from './patches/fetch'
 import { patchXmlHttpRequest } from './patches/xmlHttpRequest'
-import $errUtils from '../cypress/error_utils'
 import $Mocha from '../cypress/mocha'
 
 const createCypress = () => {
@@ -61,7 +60,7 @@ const createCypress = () => {
 
     const autWindow = findWindow()
 
-    if (autWindow) {
+    if (autWindow && !autWindow.Cypress) {
       attachToWindow(autWindow)
     }
   })
@@ -132,15 +131,6 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   // @ts-ignore
   Cypress.isCy = cy.isCy
 
-  // this is valid inside the cy.origin() callback, but it should be replaced
-  // by the webpack preprocessor with an actual require() before the spec code
-  // is run in the browser. if it's not, it means the user isn't using the
-  // webpack preprocessor or is using an older version of it. this error guides
-  // them to use webpack preprocessor on the latest version.
-  Cypress.require = () => {
-    $errUtils.throwErrByPath('require.invalid_inside_origin')
-  }
-
   handleOriginFn(Cypress, cy)
   handleLogs(Cypress)
   handleSocketEvents(Cypress)
@@ -165,20 +155,17 @@ const attachToWindow = (autWindow: Window) => {
 
   const cy = Cypress.cy
 
+  // this communicates to the injection code that Cypress is now available so
+  // it can safely subscribe to Cypress events, etc
+  // @ts-ignore
+  autWindow.__attachToCypress(Cypress)
+
   Cypress.state('window', autWindow)
   Cypress.state('document', autWindow.document)
 
   if (Cypress && Cypress.config('experimentalModifyObstructiveThirdPartyCode')) {
     patchFormElementSubmit(autWindow)
   }
-
-  Cypress.removeAllListeners('app:timers:reset')
-  Cypress.removeAllListeners('app:timers:pause')
-
-  // @ts-expect-error - the injected code adds the cypressTimersReset function to window
-  Cypress.on('app:timers:reset', autWindow.cypressTimersReset)
-  // @ts-ignore - the injected code adds the cypressTimersPause function to window
-  Cypress.on('app:timers:pause', autWindow.cypressTimersPause)
 
   cy.urlNavigationEvent('before:load')
 

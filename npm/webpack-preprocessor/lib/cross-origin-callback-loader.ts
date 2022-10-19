@@ -12,21 +12,13 @@ import utils from './utils'
 
 const debug = Debug('cypress:webpack')
 
-// this loader makes supporting dependencies within the cy.origin() callbacks
-// possible. it does this by doing the following:
-// - extracting callback(s)
-//   - the callback(s) is/are kept in memory and then run back through webpack
+// this loader makes supporting dependencies within cross-origin callbacks
+// possible. if there are no dependencies (e.g. no requires/imports), it's a
+// noop. otherwise: it does this by doing the following:
+// - extracts the callbacks
+//   - the callbacks are kept in memory and then run back through webpack
 //     once the initial file compilation is complete
-//   - users use Cypress.require() in their test code instead of require().
-//     this is because we don't want require()s nested within the callback
-//     to be processed in the initial compilation. this both improves
-//     performance and prevents errors (when the dependency has ES import
-//     statements, babel will error because they're not top-level since
-//     the require is not top-level)
-// - replacing Cypress.require() with require()
-//   - this allows the require()s to be processed normally during the
-//     compilation of the callback itself.
-// - replacing the callback(s) with object(s)
+// - replaces the callbacks with objects
 //   - this object references the file the callback will be output to by
 //     its own compilation. this allows the runtime to get the file and
 //     run it in its origin's context.
@@ -77,9 +69,9 @@ export default function (source: string, map, meta, store = crossOriginCallbackS
 
       const lastArg = _.last(path.get('arguments'))
 
-      // the user could try an invalid signature for cy.origin() where the
-      // last argument is not a function. in this case, we'll return the
-      // unmodified code and it will be a runtime validation error
+      // the user could try an invalid signature where the last argument is
+      // not a function. in this case, we'll return the unmodified code and
+      // it will be a runtime validation error
       if (
         !lastArg || (
           !lastArg.isArrowFunctionExpression()
@@ -89,21 +81,17 @@ export default function (source: string, map, meta, store = crossOriginCallbackS
         return
       }
 
-      // replace instances of Cypress.require('dep') with require('dep')
+      // determine if there are any requires/imports within the callback
       lastArg.traverse({
         CallExpression (path) {
-          const callee = path.get('callee') as NodePath<t.MemberExpression>
-
-          // e.g. const dep = Cypress.require('../path/to/dep')
-          if (callee.matchesPattern('Cypress.require')) {
+          if (
+            // e.g. const dep = require('../path/to/dep')
+            // @ts-ignore
+            path.node.callee.name === 'require'
+            // e.g. const dep = await import('../path/to/dep')
+            || path.node.callee.type as string === 'Import'
+          ) {
             hasDependencies = true
-
-            path.replaceWith(
-              t.callExpression(
-                callee.node.property as t.Expression, // 'require'
-                path.get('arguments').map((arg) => arg.node), // ['../path/to/dep']
-              ),
-            )
           }
         },
       }, this)
@@ -150,7 +138,7 @@ export default function (source: string, map, meta, store = crossOriginCallbackS
       // replaces callback function with object referencing the extracted
       // function's callback name and output file path in the form
       // { callbackName: <callbackName>, outputFilePath: <outputFilePath> }
-      // this is used at runtime when cy.origin() is run to execute the bundle
+      // this is used at runtime when the command is run to execute the bundle
       // generated for the extracted callback function
       lastArg.replaceWith(
         t.objectExpression([
@@ -167,7 +155,7 @@ export default function (source: string, map, meta, store = crossOriginCallbackS
     },
   })
 
-  // if we found Cypress.require()s, re-generate the code from the AST
+  // if we found requires/imports, re-generate the code from the AST
   if (hasDependencies) {
     debug('callback with modified source')
 
@@ -183,6 +171,6 @@ export default function (source: string, map, meta, store = crossOriginCallbackS
   }
 
   debug('callback with original source')
-  // if no Cypress.require()s were found, callback with the original source/map
+  // if no requires/imports were found, callback with the original source/map
   this.callback(null, source, map)
 }
