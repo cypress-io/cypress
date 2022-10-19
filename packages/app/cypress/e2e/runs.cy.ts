@@ -191,7 +191,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.startAppServer('component')
 
       cy.remoteGraphQLIntercept(async (obj, testState) => {
-        if (obj.operationName === 'CloudConnectModals_RefreshCloudViewer_refreshCloudViewer_cloudViewer') {
+        if (obj.operationName === 'LoginConnectModals_LoginConnectModalsQuery_cloudViewer') {
           testState.refetchCalled = true
         }
 

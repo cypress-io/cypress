@@ -8,7 +8,7 @@
     />
   </template>
   <SelectCloudProjectModal
-    v-else-if="userStatusMatches('needsProjectConnect')"
+    v-else-if="props.gql.cloudViewer?.organizations?.nodes.length ?? 0 > 0"
     :gql="props.gql"
     show
     :utm-medium="props.utmMedium"
@@ -25,14 +25,13 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import SelectCloudProjectModal from './SelectCloudProjectModal.vue'
 import CreateCloudOrgModal from './CreateCloudOrgModal.vue'
 import NeedManualUpdateModal from './NeedManualUpdateModal.vue'
-import { gql, useMutation, useSubscription } from '@urql/vue'
+import { gql, useSubscription } from '@urql/vue'
 import type { CloudConnectModalsFragment } from '../../generated/graphql'
-import { CloudConnectModals_MonitorCloudViewerDocument, CloudConnectModals_RefreshCloudViewerDocument } from '../../generated/graphql'
-import { useLoginConnectStore } from '../../store/login-connect-store'
+import { CloudConnectModals_MonitorCloudViewerDocument } from '../../generated/graphql'
 
 gql`
 fragment CloudConnectModals on Query {
@@ -61,16 +60,7 @@ subscription CloudConnectModals_MonitorCloudViewer {
 }
 `
 
-gql`
-mutation CloudConnectModals_RefreshCloudViewer {
-  refreshCloudViewer {
-    ...CloudConnectModals
-  }
-}
-`
-
 useSubscription({ query: CloudConnectModals_MonitorCloudViewerDocument })
-const refreshCloudViewer = useMutation(CloudConnectModals_RefreshCloudViewerDocument)
 
 const emit = defineEmits<{
   (event: 'success'): void
@@ -83,18 +73,8 @@ const props = defineProps<{
   utmContent?: string
 }>()
 
-const { userStatusMatches } = useLoginConnectStore()
-
 const newProjectId = ref('')
 const isManualUpdateOpen = ref(false)
-
-onMounted(() => {
-  /*
-  Force-refresh of cloudViewer data so that latest orgs and projects are displayed in connect modals
-  (useful if projects have been created/deleted since user opened the app)
-  */
-  refreshCloudViewer.executeMutation({})
-})
 
 function showManualUpdate (projectId: string) {
   newProjectId.value = projectId
