@@ -50,6 +50,16 @@
       "dependsOn": [
         "^build"
       ]
+    },
+    "build-prod": {
+      "dependsOn": [
+        "build-prod-ui"
+      ]
+    },
+    "build-prod-ui": {
+      "dependsOn": [
+        "^build"
+      ]
     }
   },
   "tasksRunnerOptions": {
