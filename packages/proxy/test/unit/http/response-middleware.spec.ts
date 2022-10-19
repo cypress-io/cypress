@@ -687,16 +687,19 @@ describe('http/response-middleware', function () {
       expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value')
     })
 
+    const getCookieJarStub = () => {
+      return {
+        getAllCookies: sinon.stub().returns([{ key: 'cookie', value: 'value' }]),
+        getCookies: sinon.stub().returns([]),
+        setCookie: sinon.stub(),
+      }
+    }
+
     describe('same-origin', () => {
       ['same-origin', 'include'].forEach((credentialLevel) => {
         it(`sets first-party cookie context in the jar when simulating top if credentials included with fetch with credential ${credentialLevel}`, async function () {
           const appendStub = sinon.stub()
-
-          const cookieJar = {
-            getAllCookies: () => [{ key: 'cookie', value: 'value' }],
-            setCookie: sinon.stub(),
-          }
-
+          const cookieJar = getCookieJarStub()
           const ctx = prepareContext({
             cookieJar,
             res: {
@@ -751,12 +754,7 @@ describe('http/response-middleware', function () {
       ;[true, false].forEach((credentialLevel) => {
         it(`sets first-party cookie context in the jar when simulating top if withCredentials ${credentialLevel} with xhr`, async function () {
           const appendStub = sinon.stub()
-
-          const cookieJar = {
-            getAllCookies: () => [{ key: 'cookie', value: 'value' }],
-            setCookie: sinon.stub(),
-          }
-
+          const cookieJar = getCookieJarStub()
           const ctx = prepareContext({
             cookieJar,
             res: {
@@ -810,12 +808,7 @@ describe('http/response-middleware', function () {
 
       it(`sets no cookies if fetch level is omit`, async function () {
         const appendStub = sinon.stub()
-
-        const cookieJar = {
-          getAllCookies: () => [{ key: 'cookie', value: 'value' }],
-          setCookie: sinon.stub(),
-        }
-
+        const cookieJar = getCookieJarStub()
         const ctx = prepareContext({
           cookieJar,
           res: {
@@ -871,12 +864,7 @@ describe('http/response-middleware', function () {
     describe('same-site', () => {
       it('sets first-party cookie context in the jar when simulating top if credentials included with fetch via include', async function () {
         const appendStub = sinon.stub()
-
-        const cookieJar = {
-          getAllCookies: () => [{ key: 'cookie', value: 'value' }],
-          setCookie: sinon.stub(),
-        }
-
+        const cookieJar = getCookieJarStub()
         const ctx = prepareContext({
           cookieJar,
           res: {
@@ -929,12 +917,7 @@ describe('http/response-middleware', function () {
 
       it('sets first-party cookie context in the jar when simulating top if credentials true with xhr', async function () {
         const appendStub = sinon.stub()
-
-        const cookieJar = {
-          getAllCookies: () => [{ key: 'cookie', value: 'value' }],
-          setCookie: sinon.stub(),
-        }
-
+        const cookieJar = getCookieJarStub()
         const ctx = prepareContext({
           cookieJar,
           res: {
@@ -988,12 +971,7 @@ describe('http/response-middleware', function () {
       ;['same-origin', 'omit'].forEach((credentialLevel) => {
         it(`sets no cookies if fetch level is ${credentialLevel}`, async function () {
           const appendStub = sinon.stub()
-
-          const cookieJar = {
-            getAllCookies: () => [{ key: 'cookie', value: 'value' }],
-            setCookie: sinon.stub(),
-          }
-
+          const cookieJar = getCookieJarStub()
           const ctx = prepareContext({
             cookieJar,
             res: {
@@ -1032,12 +1010,7 @@ describe('http/response-middleware', function () {
     describe('cross-site', () => {
       it('sets third-party cookie context in the jar when simulating top if credentials included with fetch', async function () {
         const appendStub = sinon.stub()
-
-        const cookieJar = {
-          getAllCookies: () => [{ key: 'cookie', value: 'value' }],
-          setCookie: sinon.stub(),
-        }
-
+        const cookieJar = getCookieJarStub()
         const ctx = prepareContext({
           cookieJar,
           res: {
@@ -1088,12 +1061,7 @@ describe('http/response-middleware', function () {
       ;['same-origin', 'omit'].forEach((credentialLevel) => {
         it(`does NOT set third-party cookie context in the jar when simulating top if credentials ${credentialLevel} with fetch`, async function () {
           const appendStub = sinon.stub()
-
-          const cookieJar = {
-            getAllCookies: () => [{ key: 'cookie', value: 'value' }],
-            setCookie: sinon.stub(),
-          }
-
+          const cookieJar = getCookieJarStub()
           const ctx = prepareContext({
             cookieJar,
             res: {
@@ -1127,12 +1095,7 @@ describe('http/response-middleware', function () {
 
       it('sets third-party cookie context in the jar when simulating top if withCredentials true with xhr', async function () {
         const appendStub = sinon.stub()
-
-        const cookieJar = {
-          getAllCookies: () => [{ key: 'cookie', value: 'value' }],
-          setCookie: sinon.stub(),
-        }
-
+        const cookieJar = getCookieJarStub()
         const ctx = prepareContext({
           cookieJar,
           res: {
@@ -1182,12 +1145,7 @@ describe('http/response-middleware', function () {
 
       it('does not set third-party cookie context in the jar when simulating top if withCredentials false with xhr', async function () {
         const appendStub = sinon.stub()
-
-        const cookieJar = {
-          getAllCookies: () => [{ key: 'cookie', value: 'value' }],
-          setCookie: sinon.stub(),
-        }
-
+        const cookieJar = getCookieJarStub()
         const ctx = prepareContext({
           cookieJar,
           res: {
@@ -1221,12 +1179,7 @@ describe('http/response-middleware', function () {
 
     it(`does NOT set third-party cookie context in the jar if secure cookie is not enabled`, async function () {
       const appendStub = sinon.stub()
-
-      const cookieJar = {
-        getAllCookies: () => [{ key: 'cookie', value: 'value' }],
-        setCookie: sinon.stub(),
-      }
-
+      const cookieJar = getCookieJarStub()
       const ctx = prepareContext({
         cookieJar,
         res: {
@@ -1259,12 +1212,7 @@ describe('http/response-middleware', function () {
 
     it(`allows setting cookies if request type cannot be determined, but comes from the AUT frame (likely in the case of documents or redirects)`, async function () {
       const appendStub = sinon.stub()
-
-      const cookieJar = {
-        getAllCookies: () => [{ key: 'cookie', value: 'value' }],
-        setCookie: sinon.stub(),
-      }
-
+      const cookieJar = getCookieJarStub()
       const ctx = prepareContext({
         cookieJar,
         res: {
@@ -1299,12 +1247,7 @@ describe('http/response-middleware', function () {
 
     it(`otherwise, does not allow setting cookies if request type cannot be determined and is not from the AUT and is cross-origin`, async function () {
       const appendStub = sinon.stub()
-
-      const cookieJar = {
-        getAllCookies: () => [{ key: 'cookie', value: 'value' }],
-        setCookie: sinon.stub(),
-      }
-
+      const cookieJar = getCookieJarStub()
       const ctx = prepareContext({
         cookieJar,
         res: {
@@ -1332,7 +1275,7 @@ describe('http/response-middleware', function () {
       expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value')
     })
 
-    it('does not send cross:origin:automation:cookies if request does not need top simulation', async () => {
+    it('does not send cross:origin:cookies if request does not need top simulation', async () => {
       const { ctx } = prepareSameOriginContext()
 
       await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
@@ -1340,11 +1283,8 @@ describe('http/response-middleware', function () {
       expect(ctx.serverBus.emit).not.to.be.called
     })
 
-    it('does not send cross:origin:automation:cookies if there are no added cookies', async () => {
-      const cookieJar = {
-        getAllCookies: () => [{ key: 'cookie', value: 'value' }],
-      }
-
+    it('does not send cross:origin:cookies if there are no added cookies', async () => {
+      const cookieJar = getCookieJarStub()
       const ctx = prepareContext({
         cookieJar,
         incomingRes: {
@@ -1359,16 +1299,17 @@ describe('http/response-middleware', function () {
       expect(ctx.serverBus.emit).not.to.be.called
     })
 
-    it('sends cross:origin:automation:cookies if there are added cookies and resolves on cross:origin:automation:cookies:received', async () => {
-      const cookieJar = {
-        getAllCookies: sinon.stub(),
-      }
+    it('sends cross:origin:cookies with origin and cookies if there are added cookies and resolves on cross:origin:cookies:received', async () => {
+      const cookieJar = getCookieJarStub()
 
       cookieJar.getAllCookies.onCall(0).returns([])
       cookieJar.getAllCookies.onCall(1).returns([cookieStub({ key: 'cookie', value: 'value' })])
 
       const ctx = prepareContext({
         cookieJar,
+        req: {
+          isAUTFrame: true,
+        },
         incomingRes: {
           headers: {
             'set-cookie': 'cookie=value',
@@ -1378,13 +1319,13 @@ describe('http/response-middleware', function () {
 
       // test will hang if this.next() is not called, so this also tests
       // that we move on once receiving this event
-      ctx.serverBus.once.withArgs('cross:origin:automation:cookies:received').yields()
+      ctx.serverBus.once.withArgs('cross:origin:cookies:received').yields()
 
       await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
-      expect(ctx.serverBus.emit).to.be.calledWith('cross:origin:automation:cookies')
+      expect(ctx.serverBus.emit).to.be.calledWith('cross:origin:cookies')
 
-      const cookies = ctx.serverBus.emit.withArgs('cross:origin:automation:cookies').args[0][1]
+      const cookies = ctx.serverBus.emit.withArgs('cross:origin:cookies').args[0][1]
 
       expect(cookies[0].name).to.equal('cookie')
       expect(cookies[0].value).to.equal('value')
@@ -1405,6 +1346,7 @@ describe('http/response-middleware', function () {
 
       const cookieJar = props.cookieJar || {
         getAllCookies: () => [],
+        getCookies: () => [],
       }
 
       return {
@@ -1496,6 +1438,7 @@ describe('http/response-middleware', function () {
         req: {
           proxiedUrl: 'http://www.foobar.com:3501/primary-origin.html',
         },
+        simulatedCookies: [],
       })
 
       return testMiddleware([MaybeInjectHtml], ctx)
@@ -1511,12 +1454,15 @@ describe('http/response-middleware', function () {
           'useAstSourceRewriting': undefined,
           'wantsInjection': 'full',
           'wantsSecurityRemoved': true,
+          'simulatedCookies': [],
         })
       })
     })
 
     it('modifyObstructiveThirdPartyCode is false for primary requests', function () {
-      prepareContext({})
+      prepareContext({
+        simulatedCookies: [],
+      })
 
       return testMiddleware([MaybeInjectHtml], ctx)
       .then(() => {
@@ -1531,6 +1477,7 @@ describe('http/response-middleware', function () {
           'useAstSourceRewriting': undefined,
           'wantsInjection': 'full',
           'wantsSecurityRemoved': true,
+          'simulatedCookies': [],
         })
       })
     })
@@ -1544,6 +1491,7 @@ describe('http/response-middleware', function () {
           modifyObstructiveCode: false,
           experimentalModifyObstructiveThirdPartyCode: false,
         },
+        simulatedCookies: [],
       })
 
       return testMiddleware([MaybeInjectHtml], ctx)
@@ -1559,6 +1507,7 @@ describe('http/response-middleware', function () {
           'useAstSourceRewriting': undefined,
           'wantsInjection': 'full',
           'wantsSecurityRemoved': true,
+          'simulatedCookies': [],
         })
       })
     })

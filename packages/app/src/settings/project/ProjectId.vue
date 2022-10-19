@@ -31,11 +31,6 @@
         variant="outline"
       />
     </div>
-    <CloudConnectButton
-      v-else
-      :gql="props.gql"
-      utm-medium="Settings Tab"
-    />
   </SettingsSection>
 </template>
 
@@ -48,7 +43,6 @@ import SettingsSection from '../SettingsSection.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import CodeBox from './CodeBox.vue'
 import type { ProjectIdFragment } from '../../generated/graphql'
-import CloudConnectButton from '../../runs/CloudConnectButton.vue'
 
 const { t } = useI18n()
 

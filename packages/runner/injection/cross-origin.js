@@ -71,7 +71,9 @@ const handleErrorEvent = (event) => {
 window.addEventListener('error', handleErrorEvent)
 
 // Apply Patches
-patchDocumentCookie(window)
+const documentCookiePatch = patchDocumentCookie(cypressConfig.simulatedCookies)
+
+const Cypress = findCypress()
 
 // return null to trick contentWindow into thinking
 // its not been iFramed if modifyObstructiveCode is true
@@ -92,13 +94,28 @@ const timers = createTimers()
 
 timers.wrap()
 
-const Cypress = findCypress()
+const attachToCypress = (Cypress) => {
+  documentCookiePatch.onCypress(Cypress)
 
-// Attach these to window so cypress can call them when it attaches.
-window.cypressTimersReset = timers.reset
-window.cypressTimersPause = timers.pause
+  Cypress.removeAllListeners('app:timers:reset')
+  Cypress.removeAllListeners('app:timers:pause')
+
+  Cypress.on('app:timers:reset', timers.reset)
+  Cypress.on('app:timers:pause', timers.pause)
+}
+
+// if the page loaded before creating a spec bridge for it, this method will
+// be called, letting us know we can utilize window.Cypress. we can skip this
+// if we already have access to window.Cypress
+window.__attachToCypress = (asyncAttachedCypress) => {
+  if (!Cypress) {
+    attachToCypress(asyncAttachedCypress)
+  }
+}
 
 // Check for cy too to prevent a race condition for attaching.
 if (Cypress && Cypress.cy) {
+  attachToCypress(Cypress)
+
   Cypress.action('app:window:before:load', window)
 }
