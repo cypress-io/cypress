@@ -5,7 +5,7 @@
       :gql="gqlRef"
       :utm-medium="loginConnectStore.utmMedium"
       @cancel="closeLoginConnectModal"
-      @close="keepLoginOpen = false"
+      @close="handleCloseLogin"
     />
     <RecordRunModal
       v-else-if="userStatusMatches('needsRecordedRun')"
@@ -65,9 +65,18 @@ watch(() => loginConnectStore.userStatus, (newVal, oldVal) => {
   immediate: true,
 })
 
+const handleCloseLogin = () => {
+  if (userStatusMatches('allTasksCompleted')) {
+    closeLoginConnectModal()
+  } else {
+    keepLoginOpen.value = false
+  }
+}
+
 // in tests, the gql prop can sometimes be `null` for a split second, causing
 // "Detached from DOM" problems, so we are debouncing gql before it gets passed
-// into the login/connect/record modals
+// into the login/connect/record modals. This seems like a good idea anyway,
+// it will also prevent flashes of very temporary states
 const gqlRef = ref<LoginConnectModalsContentFragment | null>(null)
 
 debouncedWatch(() => props.gql, (newVal) => {
