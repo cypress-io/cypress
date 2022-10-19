@@ -13,7 +13,7 @@
       <div class="close-wrapper">
         <a
           class="close"
-          @click="_close"
+          @click="onClose"
         >&times;</a>
       </div>
     </div>
@@ -34,7 +34,7 @@
       <AssertionType
         v-for="(assertion) in possibleAssertions"
         :key="assertion.type"
-        :add-assertion="_addAssertion"
+        :add-assertion="addAssertion"
         :type="assertion.type"
         :options="assertion.options"
       />
@@ -55,12 +55,12 @@ const props = defineProps <{
   highlightStyle: StyleValue
 }>()
 
-const _addAssertion = (...args) => {
+const addAssertion = (...args) => {
   args = _.compact(args)
   props.addAssertion(props.jqueryElement, ...args)
 }
 
-const _close = (event) => {
+const onClose = (event) => {
   event.stopPropagation()
   props.closeMenu()
 }

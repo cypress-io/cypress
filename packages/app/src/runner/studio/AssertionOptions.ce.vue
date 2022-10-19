@@ -8,19 +8,19 @@
       v-for="{ name, value } in options"
       :key="`${name}${value}`"
       class="assertion-option"
-      @click.stop="() => _click(name, value)"
+      @click.stop="() => onClick(name, value)"
     >
       <span
         v-if="name"
         class="assertion-option-name"
       >
-        {{ _truncate(name) }}:{{ ' ' }}
+        {{ truncate(name) }}:{{ ' ' }}
       </span>
       <span
         v-else
         class="assertion-option-value"
       >
-        {{ _truncate(value) }}
+        {{ truncate(value) }}
       </span>
     </div>
   </div>
@@ -37,7 +37,7 @@ const props = defineProps<{
   setPopperElement: any
 }>()
 
-const _truncate = (str) => {
+const truncate = (str) => {
   if (str && str.length > 80) {
     return `${str.substr(0, 77)}...`
   }
@@ -66,7 +66,7 @@ onMounted(() => {
   })
 })
 
-const _click = (name, value) => {
+const onClick = (name, value) => {
   props.addAssertion(props.type, name, value)
 }
 </script>

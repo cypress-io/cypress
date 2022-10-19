@@ -1,9 +1,9 @@
 <template>
   <div
     :class="['assertion-type', { 'single-assertion': !hasOptions }]"
-    @click.stop="_click"
-    @mouseover.stop="_open"
-    @mouseout.stop="_close"
+    @click.stop="onClick"
+    @mouseover.stop="onOpen"
+    @mouseout.stop="onClose"
   >
     <div class="assertion-type-text">
       <span>
@@ -32,7 +32,7 @@
       :type="type"
       :add-assertion="addAssertion"
       :options="options"
-      :set-popper-element="_setPopperElement"
+      :set-popper-element="setPopperElement"
     />
   </div>
 </template>
@@ -51,11 +51,11 @@ const isOpen = ref(false)
 const hasOptions = props.options && !!props.options.length
 const popperElement: Ref<HTMLElement | null> = ref(null)
 
-const _open = () => {
+const onOpen = () => {
   isOpen.value = true
 }
 
-const _close = (e) => {
+const onClose = (e) => {
   if (popperElement.value && popperElement.value.contains(e.relatedTarget)) {
     return
   }
@@ -63,13 +63,13 @@ const _close = (e) => {
   isOpen.value = false
 }
 
-const _click = () => {
+const onClick = () => {
   if (!hasOptions) {
     props.addAssertion(props.type)
   }
 }
 
-const _setPopperElement = (el) => {
+const setPopperElement = (el) => {
   popperElement.value = el
 }
 </script>
