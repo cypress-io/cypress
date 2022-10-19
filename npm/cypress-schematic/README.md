@@ -166,7 +166,7 @@ It may be useful to have different Cypress configuration files per environment (
   "builder": "@cypress/schematic:cypress",
   "options": {
     "devServerTarget": "{project-name}:serve",
-    "configFile": "cypress.production.json"
+    "configFile": "cypress.production.js"
   },
   "configurations": {
     "production": {
@@ -226,7 +226,7 @@ Read our docs to learn more about working with [reporters](https://on.cypress.io
 
 ### Running the builder with a different baseUrl
 
-You can specify a `baseUrl` that is different than the one in `cypress.json`. There are two ways to do this.
+You can specify a `baseUrl` that is different than the one in `cypress.config.js`. There are two ways to do this.
 
 1. Add `baseUrl` to `configurations` like the following: 
 
