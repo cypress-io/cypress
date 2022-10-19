@@ -401,7 +401,7 @@ export function mergeDefaults (
     config.baseUrl = url.replace(/\/\/+$/, '/')
   }
 
-  const defaultsForRuntime = getDefaultValues(options)
+  const defaultsForRuntime = getDefaultValues(config)
 
   _.defaultsDeep(config, defaultsForRuntime)
 
@@ -447,7 +447,7 @@ export function mergeDefaults (
 
   // validate config again here so that we catch configuration errors coming
   // from the CLI overrides or env var overrides
-  validate(_.omit(config, 'browsers'), (validationResult: ConfigValidationFailureInfo | string) => {
+  validate(testingType, _.omit(config, 'browsers'), (validationResult: ConfigValidationFailureInfo | string) => {
     // return errors.throwErr('CONFIG_VALIDATION_ERROR', errMsg)
     if (_.isString(validationResult)) {
       return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', null, null, validationResult)

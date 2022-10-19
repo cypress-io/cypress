@@ -155,7 +155,7 @@ export const matchesConfigKey = (key: string) => {
   return
 }
 
-export const validate = (cfg: any, onErr: (property: ErrResult | string) => void) => {
+export const validate = (testingType: TestingType, cfg: any, onErr: (property: ErrResult | string) => void) => {
   debug('validating configuration')
 
   return _.each(cfg, (value, key) => {
@@ -164,7 +164,7 @@ export const validate = (cfg: any, onErr: (property: ErrResult | string) => void
     // key has a validation rule & value different from the default
     if (validationFn && value !== defaultValues[key]) {
       const result = validationFn(key, value, {
-        testingType: cfg.testingType,
+        testingType,
         // TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
         experimentalSessionAndOrigin: cfg.experimentalSessionAndOrigin,
       })

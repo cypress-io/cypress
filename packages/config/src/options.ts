@@ -379,14 +379,14 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     // 'on' by default when experimentalSessionAndOrigin=true
     defaultValue: (options: Record<string, any> = {}) => {
       if (options.testingType === 'component') {
-        return 'legacy'
+        return 'on'
       }
 
-      return options.config?.e2e?.experimentalSessionAndOrigin ? 'on' : 'legacy'
+      return options?.e2e?.experimentalSessionAndOrigin ? 'on' : 'legacy'
     },
     validation: (key: string, value: any, { testingType, experimentalSessionAndOrigin }: { testingType: TestingType, experimentalSessionAndOrigin: boolean }) => {
       if (testingType === 'component') {
-        return new Error('This is not a validate component-testing configuration option.')
+        return validate.isOneOf('on')(key, value)
       }
 
       if (experimentalSessionAndOrigin) {

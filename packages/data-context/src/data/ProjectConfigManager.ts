@@ -361,7 +361,7 @@ export class ProjectConfigManager {
   }
 
   private validateConfigFile (file: string | false, config: Cypress.ConfigOptions) {
-    validateConfig(config, (errMsg) => {
+    validateConfig(this._testingType, config, (errMsg) => {
       if (_.isString(errMsg)) {
         throw getError('CONFIG_VALIDATION_MSG_ERROR', 'configFile', file || null, errMsg)
       }
