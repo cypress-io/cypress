@@ -37,10 +37,7 @@ const reset = (test: any = {}) => {
 
   // make sure we reset that we haven't visited about blank again
   // strict test isolation resets the navigation history for us.
-  // TODO(origin): we should be able to reset this based on testIsolation but the
-  // app integration tests fail if we do that. We should investigate why.
-  hasVisitedAboutBlank = false
-  // hasVisitedAboutBlank = Cypress.config('testIsolation') === 'strict'
+  hasVisitedAboutBlank = Cypress.config('testIsolation') === 'strict'
 
   currentlyVisitingAboutBlank = false
 
