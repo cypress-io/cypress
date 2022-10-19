@@ -401,7 +401,11 @@ export function mergeDefaults (
     config.baseUrl = url.replace(/\/\/+$/, '/')
   }
 
-  const defaultsForRuntime = getDefaultValues(config)
+  const defaultsForRuntime = getDefaultValues({
+    ...options,
+    // TODO: clean this up
+    experimentalSessionAndOrigin: config.experimentalSessionAndOrigin,
+  })
 
   _.defaultsDeep(config, defaultsForRuntime)
 
@@ -447,14 +451,14 @@ export function mergeDefaults (
 
   // validate config again here so that we catch configuration errors coming
   // from the CLI overrides or env var overrides
-  validate(testingType, _.omit(config, 'browsers'), (validationResult: ConfigValidationFailureInfo | string) => {
+  validate(_.omit(config, 'browsers'), (validationResult: ConfigValidationFailureInfo | string) => {
     // return errors.throwErr('CONFIG_VALIDATION_ERROR', errMsg)
     if (_.isString(validationResult)) {
       return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', null, null, validationResult)
     }
 
     return errors.throwErr('CONFIG_VALIDATION_ERROR', null, null, validationResult)
-  })
+  }, testingType)
 
   config = setAbsolutePaths(config)
 

@@ -50,7 +50,7 @@ export class ProjectConfigManager {
   private _pathToWatcherRecord: Record<string, chokidar.FSWatcher> = {}
   private _watchers = new Set<chokidar.FSWatcher>()
   private _registeredEventsTarget: TestingType | undefined
-  private _testingType: TestingType | null = null
+  private _testingType?: TestingType
   private _state: ConfigManagerState = 'pending'
   private _loadConfigPromise: Promise<LoadConfigReply> | undefined
   private _cachedLoadConfig: LoadConfigReply | undefined
@@ -361,13 +361,13 @@ export class ProjectConfigManager {
   }
 
   private validateConfigFile (file: string | false, config: Cypress.ConfigOptions) {
-    validateConfig(this._testingType, config, (errMsg) => {
+    validateConfig(config, (errMsg) => {
       if (_.isString(errMsg)) {
         throw getError('CONFIG_VALIDATION_MSG_ERROR', 'configFile', file || null, errMsg)
       }
 
       throw getError('CONFIG_VALIDATION_ERROR', 'configFile', file || null, errMsg)
-    })
+    }, this._testingType)
 
     return validateNoBreakingConfigLaunchpad(
       config,

@@ -382,7 +382,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
         return 'on'
       }
 
-      return options?.e2e?.experimentalSessionAndOrigin ? 'on' : 'legacy'
+      return options?.experimentalSessionAndOrigin || options?.config?.e2e?.experimentalSessionAndOrigin ? 'on' : 'legacy'
     },
     validation: (key: string, value: any, { testingType, experimentalSessionAndOrigin }: { testingType: TestingType, experimentalSessionAndOrigin: boolean }) => {
       if (testingType === 'component') {

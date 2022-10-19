@@ -116,9 +116,9 @@ describe('config/src/index', () => {
     it('validates config', () => {
       const errorFn = sinon.spy()
 
-      configUtil.validate('e2e', {
+      configUtil.validate({
         'baseUrl': 'https://',
-      }, errorFn)
+      }, errorFn, 'e2e')
 
       expect(errorFn).to.have.callCount(0)
     })
@@ -126,9 +126,9 @@ describe('config/src/index', () => {
     it('calls error callback if config is invalid', () => {
       const errorFn = sinon.spy()
 
-      configUtil.validate('e2e', {
+      configUtil.validate({
         'baseUrl': ' ',
-      }, errorFn)
+      }, errorFn, 'e2e')
 
       expect(errorFn).to.have.been.calledWithMatch({ key: 'baseUrl' })
       expect(errorFn).to.have.been.calledWithMatch({ type: 'a fully qualified URL (starting with `http://` or `https://`)' })

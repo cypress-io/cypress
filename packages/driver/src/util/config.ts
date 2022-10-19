@@ -119,7 +119,7 @@ export const validateConfig = (state: State, config: Record<string, any>, skipCo
     ...config,
   }
 
-  validateConfigValues(Cypress.testingType, config, (errResult: ErrResult | string) => {
+  validateConfigValues(config, (errResult: ErrResult | string) => {
     const stringify = (str) => format(JSON.stringify(str))
 
     const format = (str) => `\`${str}\``
@@ -132,5 +132,5 @@ export const validateConfig = (state: State, config: Record<string, any>, skipCo
       : `Expected ${format(errResult.key)} to be ${errResult.type}.\n\nInstead the value was: ${stringify(errResult.value)}`
 
     throw new (state('specWindow').Error)(errMsg)
-  })
+  }, Cypress.testingType)
 }

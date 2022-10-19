@@ -2808,7 +2808,7 @@ declare namespace Cypress {
      */
     supportFile: string | false
     /**
-     * The test isolation ensures a clean browser context between tests for end-to-end tests.
+     * The test isolation ensures a clean browser context between tests.
      *
      * Cypress will always resets/clears aliases, intercepts, clock, and viewport before each test
      * to ensure a clean test slate; i.e. this configuration only impacts the browser context.
