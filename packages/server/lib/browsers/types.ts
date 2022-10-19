@@ -9,6 +9,7 @@ export type Browser = FoundBrowser & {
 
 // export type BrowserInstance = EventEmitter & {
 export type BrowserInstance = {
+  once: (name: 'exit', fn: () => void) => void,
   kill: () => void
   /**
    * Used in Electron to keep a list of what pids are spawned by the browser, to keep them separate from the launchpad/server pids.

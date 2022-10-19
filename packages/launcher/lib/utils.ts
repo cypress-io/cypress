@@ -4,7 +4,7 @@ import Bluebird from 'bluebird'
 
 const cdpPathPrefix = 'cdp:'
 // expecting `cdp:http://<host>:<port>`
-const cdpPathRegex = /^cdp\:http\:\/\/([^:]):(\d+)$/
+const cdpPathRegex = /^cdp\:http\:\/\/([^:]+):(\d+)$/
 
 // export an object for easy method stubbing
 export const utils = {

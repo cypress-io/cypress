@@ -726,9 +726,12 @@ export = {
       // TODO -1 is hack
       pid: launchedBrowser ? launchedBrowser.pid : -1,
       browserCriClient,
+      once: (name, callback) => {
+        // TODO api for knowing when killed
+      },
     }
 
-    const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
+    const pageCriClient = launchedBrowser ? await browserCriClient.attachToTargetUrl('about:blank') : await browserCriClient.createTarget()
 
     await this.attachListeners(url, pageCriClient, automation, options)
 
