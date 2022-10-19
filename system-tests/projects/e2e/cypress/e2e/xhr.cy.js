@@ -129,11 +129,8 @@ describe('xhrs', () => {
   })
 
   describe('server with 1 visit', () => {
-    before(() => {
-      cy.visit('/xhr.html')
-    })
-
     beforeEach(() => {
+      cy.visit('/xhr.html')
       cy.server()
       cy.route(/users/, [{}, {}]).as('getUsers')
     })
