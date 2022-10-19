@@ -1,9 +1,9 @@
 <template>
   <div
     :class="['assertion-type', { 'single-assertion': !hasOptions }]"
-    @click="_click"
-    @mouseover="_open"
-    @mouseout="_close"
+    @click.stop="_click"
+    @mouseover.stop="_open"
+    @mouseout.stop="_close"
   >
     <div class="assertion-type-text">
       <span>
@@ -51,9 +51,8 @@ const isOpen = ref(false)
 const hasOptions = props.options && !!props.options.length
 const popperElement: Ref<HTMLElement | null> = ref(null)
 
-const _open = (e) => {
+const _open = () => {
   isOpen.value = true
-  e.stopPropagation()
 }
 
 const _close = (e) => {
@@ -62,15 +61,12 @@ const _close = (e) => {
   }
 
   isOpen.value = false
-  e.stopPropagation()
 }
 
-const _click = (e) => {
+const _click = () => {
   if (!hasOptions) {
     props.addAssertion(props.type)
   }
-
-  e.stopPropagation()
 }
 
 const _setPopperElement = (el) => {

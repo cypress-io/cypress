@@ -8,7 +8,7 @@
       v-for="{ name, value } in options"
       :key="`${name}${value}`"
       class="assertion-option"
-      @click="e => _click(e, name, value)"
+      @click.stop="() => _click(name, value)"
     >
       <span
         v-if="name"
@@ -66,9 +66,8 @@ onMounted(() => {
   })
 })
 
-const _click = (e, name, value) => {
+const _click = (name, value) => {
   props.addAssertion(props.type, name, value)
-  e.stopPropagation()
 }
 </script>
 
