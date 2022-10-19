@@ -178,18 +178,23 @@ async function removeEmptyDirectories (directory) {
   }
 }
 
-const getDependencyPathsToRemove = async ({ entryPoints, external }) => {
+const getDependencyPathsToRemove = async ({ entryPoints }) => {
   const esbuildResult = await esbuild.build({
     entryPoints,
     bundle: true,
     outdir: 'out',
     platform: 'node',
     metafile: true,
-    external,
+    external: [
+      './packages/server/server-entry',
+      'fsevents',
+      'pnpapi',
+      '@swc/core',
+      'emitter',
+    ],
   })
 
   const newEntryPoints = []
-  const newExternal = []
 
   esbuildResult.warnings.forEach((warning) => {
     const matches = warning.text.match(/"(.*)" should be marked as external for use with "require.resolve"/)
@@ -207,21 +212,17 @@ const getDependencyPathsToRemove = async ({ entryPoints, external }) => {
         entryPoint = require.resolve(warningSubject)
       }
 
-      if (path.extname(entryPoint) !== '') {
+      if (path.extname(entryPoint) !== '' && !entryPoints.includes(entryPoint)) {
         newEntryPoints.push(entryPoint)
       }
-
-      newExternal.push(warningSubject)
     }
   })
 
   console.log('******* new entry points *******')
   console.log([...entryPoints, ...newEntryPoints])
-  console.log('******* externals *******')
-  console.log([...external, ...newExternal])
 
   if (newEntryPoints.length > 0) {
-    return getDependencyPathsToRemove({ entryPoints: [...entryPoints, ...newEntryPoints], external: [...external, ...newExternal] })
+    return getDependencyPathsToRemove({ entryPoints: [...entryPoints, ...newEntryPoints] })
   }
 
   return [...Object.keys(esbuildResult.metafile.inputs), ...entryPoints]
@@ -262,13 +263,6 @@ const cleanup = async (buildAppDir) => {
         'openbsd',
         'sunos',
         'win32'].map((platform) => require.resolve(`default-gateway/${platform}`)),
-    ],
-    external: [
-      './packages/server/server-entry',
-      'fsevents',
-      'pnpapi',
-      '@swc/core',
-      'emitter',
     ],
   })
 
