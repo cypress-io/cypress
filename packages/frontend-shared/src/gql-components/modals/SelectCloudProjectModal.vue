@@ -53,6 +53,7 @@
               {{ t('runs.connect.modal.selectProject.organization') }}
             </span>
             <ExternalLink
+              v-if="organizationUrl"
               class="cursor-pointer text-right text-indigo-500 hover:underline"
               :href="organizationUrl"
             >
@@ -360,7 +361,7 @@ const projectPlaceholder = computed(() => {
     : t('runs.connect.modal.selectProject.placeholderProjectsPending')
 })
 
-const organizationUrl = computed(() => props.gql.cloudViewer?.cloudOrganizationsUrl ?? '#')
+const organizationUrl = computed(() => props.gql.cloudViewer?.cloudOrganizationsUrl)
 
 const createCloudProjectMutation = useMutation(SelectCloudProjectModal_CreateCloudProjectDocument)
 const setProjectIdMutation = useMutation(SelectCloudProjectModal_SetProjectIdDocument)
