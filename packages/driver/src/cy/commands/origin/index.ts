@@ -168,7 +168,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
         }
 
         // fired once the spec bridge is set up and ready to receive messages
-        communicator.once('bridge:ready', async (_data, specBridgeOrigin) => {
+        communicator.once('bridge:ready', async (_data, { origin: specBridgeOrigin }) => {
           if (specBridgeOrigin === origin) {
             // now that the spec bridge is ready, instantiate Cypress with the current app config and environment variables for initial sync when creating the instance
             communicator.toSpecBridge(origin, 'initialize:cypress', {
@@ -200,6 +200,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
                   originCommandBaseUrl: location.href,
                   isStable: Cypress.state('isStable'),
                   autLocation: Cypress.state('autLocation')?.href,
+                  crossOriginCookies: Cypress.state('crossOriginCookies'),
                 },
                 config: preprocessConfig(Cypress.config()),
                 env: preprocessEnv(Cypress.env()),
