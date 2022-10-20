@@ -135,7 +135,7 @@ export const useLoginConnectStore = defineStore({
       return userStatus
     },
     userStatusMatches () {
-      // casting here sine ts seems to need a little extra help in this 'return a function from a getter' situation
+      // casting here since ts seems to need a little extra help in this 'return a function from a getter' situation
       return (status: UserStatus) => this.userStatus as unknown as UserStatus === status
     },
     latestBannerShownTime (state) {
