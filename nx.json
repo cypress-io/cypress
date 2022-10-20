@@ -68,6 +68,7 @@
       "options": {
         "cacheableOperations": [
           "build",
+          "test",
           "test-unit",
           "lint",
           "check-ts"
