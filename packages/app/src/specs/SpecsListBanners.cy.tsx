@@ -14,7 +14,7 @@ const AlertCloseBtnSelector = 'alert-suffix-icon'
 type BannerKey = keyof typeof BannerIds
 type BannerId = typeof BannerIds[BannerKey]
 
-describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 20 }, () => {
+describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
   const validateBaseRender = () => {
     it('should render as expected', () => {
       cy.findByTestId(AlertSelector).should('be.visible')
