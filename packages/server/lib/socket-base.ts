@@ -20,13 +20,14 @@ import { openFile, OpenFileDetails } from './util/file-opener'
 import open from './util/open'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
-import { cookieJar } from './util/cookies'
+import { AutomationCookie, cookieJar, SameSiteContext, automationCookieToToughCookie } from './util/cookies'
 import runEvents from './plugins/run_events'
 
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
 
 import type { RunState, CachedTestState } from '@packages/types'
+import { cors } from '@packages/network'
 
 type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
@@ -48,8 +49,6 @@ const reporterEvents = [
   // "go:to:file"
   'runner:restart',
   'runner:abort',
-  'runner:console:log',
-  'runner:console:error',
   'runner:show:snapshot',
   'runner:hide:snapshot',
   'reporter:restarted',
@@ -394,6 +393,12 @@ export class SocketBase {
         })
       })
 
+      const setCrossOriginCookie = ({ cookie, url, sameSiteContext }: { cookie: AutomationCookie, url: string, sameSiteContext: SameSiteContext }) => {
+        const domain = cors.getOrigin(url)
+
+        cookieJar.setCookie(automationCookieToToughCookie(cookie, domain), url, sameSiteContext)
+      }
+
       socket.on('backend:request', (eventName: string, ...args) => {
         // cb is always the last argument
         const cb = args.pop()
@@ -461,8 +466,10 @@ export class SocketBase {
               return options.getRenderedHTMLOrigins()
             case 'reset:rendered:html:origins':
               return resetRenderedHTMLOrigins()
-            case 'cross:origin:automation:cookies:received':
-              return this.localBus.emit('cross:origin:automation:cookies:received')
+            case 'cross:origin:cookies:received':
+              return this.localBus.emit('cross:origin:cookies:received')
+            case 'cross:origin:set:cookie':
+              return setCrossOriginCookie(args[0])
             case 'request:sent:with:credentials':
               return this.localBus.emit('request:sent:with:credentials', args[0])
             default:

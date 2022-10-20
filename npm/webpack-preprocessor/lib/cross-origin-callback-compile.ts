@@ -68,7 +68,7 @@ interface CompileOptions {
 }
 
 // the cross-origin-callback-loader extracts any cy.origin() callback functions
-// that contains Cypress.require() and stores their sources in the
+// that includes dependencies and stores their sources in the
 // CrossOriginCallbackStore. this sends those sources through webpack again
 // to process any dependencies and create bundles for each callback function
 export const compileCrossOriginCallbackFiles = (files: CrossOriginCallbackStoreFile[], options: CompileOptions): Promise<void> => {

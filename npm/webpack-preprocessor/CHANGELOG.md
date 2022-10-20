@@ -1,3 +1,10 @@
+# [@cypress/webpack-preprocessor-v5.15.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.14.0...@cypress/webpack-preprocessor-v5.15.0) (2022-10-19)
+
+
+### Features
+
+* Enable requiring cy.origin dependencies with require() and import() ([#24294](https://github.com/cypress-io/cypress/issues/24294)) ([1b29ce7](https://github.com/cypress-io/cypress/commit/1b29ce74aafa0bc5015a93cb618b7fbda243e07a))
+
 # [@cypress/webpack-preprocessor-v5.14.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.13.1...@cypress/webpack-preprocessor-v5.14.0) (2022-10-04)
 
 

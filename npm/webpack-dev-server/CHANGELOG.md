@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v2.4.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v2.4.0...@cypress/webpack-dev-server-v2.4.1) (2022-10-19)
+
+
+### Bug Fixes
+
+* clean up inconsistencies in UI between sentence case and title case ([#23681](https://github.com/cypress-io/cypress/issues/23681)) ([f73aef5](https://github.com/cypress-io/cypress/commit/f73aef54b041fe08d939b52e5c6fe1d133502051))
+
 # [@cypress/webpack-dev-server-v2.4.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v2.3.0...@cypress/webpack-dev-server-v2.4.0) (2022-10-13)
 
 
