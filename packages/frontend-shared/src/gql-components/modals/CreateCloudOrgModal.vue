@@ -1,6 +1,5 @@
 <template>
   <StandardModal
-    v-if="createOrgUrl"
     model-value
     :title="t('runs.connect.modal.title')"
     help-link="https://on.cypress.io/adding-new-project"
@@ -20,6 +19,7 @@
         {{ t('runs.connect.modal.createOrg.description') }}
       </p>
       <ExternalLink
+        v-if="createOrgUrl"
         class="border rounded mx-auto outline-none bg-indigo-500 border-indigo-500 text-white max-h-60px py-11px px-16px inline-block hocus-default"
         :href="createOrgUrl"
         :include-graphql-port="true"

@@ -206,7 +206,7 @@ const loginMutationIsPending = computed(() => {
 
 const handleLoginOrContinue = async () => {
   if (loginConnectStore.user.isLoggedIn) {
-    // user is already logged in, just emit continue event & return early
+    // user is already logged in, just emit close event & return early
     emit('close')
 
     return

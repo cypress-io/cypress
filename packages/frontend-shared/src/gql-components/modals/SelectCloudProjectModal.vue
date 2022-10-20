@@ -237,7 +237,7 @@ fragment SelectCloudProjectModal on Query {
   currentProject{
     id
     title
-    ...NeedManualUpdateModal # TODO Can this just be projectId and not be spread
+    ...NeedManualUpdateModal
   }
 }
 `

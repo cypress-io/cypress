@@ -50,15 +50,13 @@ const props = defineProps<{
 const loginConnectStore = useLoginConnectStore()
 const { closeLoginConnectModal, userStatusMatches } = loginConnectStore
 
-// keepLoginOpen is only set if you've just logged in
-// and we want to show the "connect" button instead of "continue"
+// use this to hold login open after the transition between logged out and logged in
+// this is to show the temporary "continue" state and its variations
+// that only exist if you have used the modal to log in
 const keepLoginOpen = ref(false)
 
 watch(() => loginConnectStore.userStatus, (newVal, oldVal) => {
   if (oldVal === 'isLoggedOut' && newVal !== 'isLoggedOut') {
-    // use this to hold login open after the transition between logged out and logged in
-    // this is to show the temporary "continue" state and its variations
-    // that only exist if you have used the modal to log in
     keepLoginOpen.value = true
   }
 }, {
