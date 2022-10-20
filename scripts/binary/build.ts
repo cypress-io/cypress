@@ -263,6 +263,9 @@ require('./packages/server')\
   try {
     await execa('electron-builder', args, {
       stdio: 'inherit',
+      env: {
+        NODE_OPTIONS: '--max_old_space_size=8192',
+      },
     })
   } catch (e) {
     if (!skipSigning) {
