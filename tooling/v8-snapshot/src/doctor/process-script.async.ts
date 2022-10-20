@@ -3,6 +3,7 @@ import { strict as assert } from 'assert'
 import os from 'os'
 import WorkerNodes from 'worker-nodes'
 import type { ProcessScriptOpts, ProcessScriptResult } from '../types'
+import fs from 'fs'
 
 const workerScript = require.resolve('../../dist/doctor/process-script.worker')
 
@@ -24,8 +25,13 @@ export class AsyncScriptProcessor {
   constructor () {
     logInfo('Initializing async script processor')
 
-    const maxWorkers = os.cpus().length
-    const minWorkers = maxWorkers / 2
+    if (process.env.CI) {
+      logInfo('Running in CI', os.cpus(), fs.readFileSync('/sys/fs/cgroup/cpuset/cpuset.cpus', 'utf8'))
+    }
+
+    // On CI, we're limited in resources, so we should limit the number of workers
+    const maxWorkers = process.env.CI ? 1 : os.cpus().length
+    const minWorkers = process.env.CI ? 1 : maxWorkers / 2
 
     const opts = {
       autoStart: true,
