@@ -505,6 +505,24 @@ describe('App Top Nav Workflows', () => {
           cy.findByTestId('app-header-bar').findByTestId('user-avatar-title').should('be.visible')
         })
 
+        it('if the project has no runs, shows "record your first run" prompt after clicking', () => {
+          cy.remoteGraphQLIntercept((obj) => {
+            if (obj.result?.data?.cloudProjectBySlug?.runs?.nodes?.length) {
+              obj.result.data.cloudProjectBySlug.runs.nodes = []
+            }
+
+            return obj.result
+          })
+
+          mockLogInActionsForUser(mockUserNoName)
+
+          logIn({ expectedNextStepText: 'Continue', displayName: mockUserNoName.email })
+
+          cy.contains('[data-cy=standard-modal] h2', defaultMessages.specPage.banners.record.title).should('be.visible')
+          cy.contains('[data-cy=standard-modal]', defaultMessages.specPage.banners.record.content).should('be.visible')
+          cy.contains('button', 'Copy').should('be.visible')
+        })
+
         it('shows correct error when browser cannot launch', () => {
           cy.withCtx((ctx, o) => {
             o.sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {

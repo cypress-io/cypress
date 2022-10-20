@@ -411,7 +411,6 @@ describe('Launchpad Top Nav Workflows', () => {
       })
 
       context('with no project id', () => {
-        //TODO should show create project when on a project page
         it('shows "continue" button after login if config has not loaded', () => {
           mockLogInActionsForUser(mockUser)
           logIn({ expectedNextStepText: 'Continue', displayName: mockUser.name })
@@ -465,6 +464,26 @@ describe('Launchpad Top Nav Workflows', () => {
 
           cy.get('@logInModal').should('not.exist')
           cy.findByTestId(headerBarId).findByTestId('user-avatar-title').should('be.visible')
+        })
+
+        it('if the project has no runs, shows "record your first run" prompt after clicking', () => {
+          cy.remoteGraphQLIntercept((obj) => {
+            if (obj.result?.data?.cloudProjectBySlug?.runs?.nodes?.length) {
+              obj.result.data.cloudProjectBySlug.runs.nodes = []
+            }
+
+            return obj.result
+          })
+
+          cy.contains('Component Testing').click()
+
+          mockLogInActionsForUser(mockUserNoName)
+
+          logIn({ expectedNextStepText: 'Continue', displayName: mockUserNoName.email })
+
+          cy.contains('[data-cy=standard-modal] h2', defaultMessages.specPage.banners.record.title).should('be.visible')
+          cy.contains('[data-cy=standard-modal]', defaultMessages.specPage.banners.record.content).should('be.visible')
+          cy.contains('button', 'Copy').should('be.visible')
         })
 
         it('shows correct error when browser cannot launch', () => {
