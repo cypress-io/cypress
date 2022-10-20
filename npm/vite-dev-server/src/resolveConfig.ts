@@ -6,17 +6,17 @@
 import debugFn from 'debug'
 import { importModule } from 'local-pkg'
 import { relative, resolve } from 'pathe'
-import type { InlineConfig } from 'vite'
+import type { InlineConfig, UserConfig } from 'vite'
 import path from 'path'
 
 import { configFiles } from './constants'
 import type { ViteDevServerConfig } from './devServer'
-import { Cypress, CypressInspect } from './plugins/index'
+import { Cypress, CypressInspect, CypressSourcemap } from './plugins/index'
 import type { Vite } from './getVite'
 
 const debug = debugFn('cypress:vite-dev-server:resolve-config')
 
-export const createViteDevServerConfig = async (config: ViteDevServerConfig, vite: Vite) => {
+export const createViteDevServerConfig = async (config: ViteDevServerConfig, vite: Vite): Promise<InlineConfig> => {
   const { specs, cypressConfig, viteConfig: viteOverrides } = config
   const root = cypressConfig.projectRoot
   const { default: findUp } = await importModule('find-up')
@@ -87,10 +87,30 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
     plugins: [
       Cypress(config, vite),
       CypressInspect(config),
+      CypressSourcemap(config, vite),
     ].filter((p) => p != null),
   }
 
-  const finalConfig = vite.mergeConfig(viteBaseConfig, viteOverrides as Record<string, any>)
+  if (config.cypressConfig.isTextTerminal) {
+    viteBaseConfig.server = {
+      ...(viteBaseConfig.server || {}),
+      // Disable file watching and HMR when executing tests in `run` mode
+      watch: {
+        ignored: '**/*',
+      },
+      hmr: false,
+    }
+  }
+
+  let resolvedOverrides: UserConfig = {}
+
+  if (typeof viteOverrides === 'function') {
+    resolvedOverrides = await viteOverrides()
+  } else if (typeof viteOverrides === 'object') {
+    resolvedOverrides = viteOverrides
+  }
+
+  const finalConfig = vite.mergeConfig(viteBaseConfig, resolvedOverrides)
 
   debug('The resolved server config is', JSON.stringify(finalConfig, null, 2))
 

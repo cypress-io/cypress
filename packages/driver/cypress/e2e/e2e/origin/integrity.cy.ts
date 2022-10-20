@@ -4,7 +4,7 @@ import type { TemplateExecutor } from 'lodash'
 // NOTE: in order to run these tests, the following config flags need to be set
 //    experimentalSessionAndOrigin=true
 //    experimentalModifyObstructiveThirdPartyCode=true
-describe('Integrity Preservation', () => {
+describe('Integrity Preservation', { browser: '!webkit' }, () => {
   // Add common SRI hashes used when setting script/link integrity.
   // These are the ones supported by SRI (see https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity#using_subresource_integrity)
   // For our tests, we will use CryptoJS to calculate these hashes as they can regenerate the integrity without us having to do it manually every
@@ -62,7 +62,7 @@ describe('Integrity Preservation', () => {
 
         cy.visit('fixtures/primary-origin.html')
         cy.get('[data-cy="integrity-link"]').click()
-        cy.origin('http://foobar.com:3500', () => {
+        cy.origin('http://www.foobar.com:3500', () => {
           // The added script, if integrity matches, should execute and
           // add a <p> element with 'integrity script loaded' as the text
           cy.get('#integrity', {
@@ -85,7 +85,7 @@ describe('Integrity Preservation', () => {
 
         cy.visit('fixtures/primary-origin.html')
         cy.get('[data-cy="integrity-link"]').click()
-        cy.origin('http://foobar.com:3500', () => {
+        cy.origin('http://www.foobar.com:3500', () => {
           // The added script, if integrity matches, should execute and
           // add a <p> element with 'integrity script loaded' as the text
           cy.get('#integrity', {
@@ -112,7 +112,7 @@ describe('Integrity Preservation', () => {
 
         cy.visit('fixtures/primary-origin.html')
         cy.get('[data-cy="integrity-link"]').click()
-        cy.origin('http://foobar.com:3500', () => {
+        cy.origin('http://www.foobar.com:3500', () => {
           cy.get('[data-cy="integrity-header"]', {
             timeout: 1000,
           }).then((integrityHeader) => {
@@ -137,7 +137,7 @@ describe('Integrity Preservation', () => {
 
         cy.visit('fixtures/primary-origin.html')
         cy.get('[data-cy="integrity-link"]').click()
-        cy.origin('http://foobar.com:3500', () => {
+        cy.origin('http://www.foobar.com:3500', () => {
           cy.get('[data-cy="integrity-header"]', {
             timeout: 1000,
           }).then((integrityHeader) => {

@@ -9,7 +9,7 @@ describe('<CloudConnectButton />', () => {
         result.cloudViewer = null
       },
       render (gqlVal) {
-        return <div class="h-screen"><CloudConnectButton gql={gqlVal} /></div>
+        return <div class="h-screen"><CloudConnectButton utmMedium="testing" gql={gqlVal} /></div>
       },
     })
 
@@ -56,7 +56,7 @@ describe('<CloudConnectButton />', () => {
         result.cloudViewer = cloudViewer
       },
       render (gqlVal) {
-        return <div class="h-screen"><CloudConnectButton gql={gqlVal} /></div>
+        return <div class="h-screen"><CloudConnectButton utmMedium="testing" gql={gqlVal} /></div>
       },
     })
 
@@ -69,12 +69,12 @@ describe('<CloudConnectButton />', () => {
         result.cloudViewer = cloudViewer
       },
       render (gqlVal) {
-        return <div class="h-screen"><CloudConnectButton gql={gqlVal} /></div>
+        return <div class="h-screen"><CloudConnectButton utmMedium="testing" gql={gqlVal} /></div>
       },
     })
 
     cy.contains('button', 'Connect your project').click()
     cy.get('[role="dialog"]').should('be.visible')
-    cy.get('[role="dialog"] h2').should('contain', 'Connect Project')
+    cy.get('[role="dialog"] h2').should('contain', 'Connect project')
   })
 })

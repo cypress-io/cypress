@@ -25,7 +25,7 @@ describe('<SelectCloudProjectModal />', () => {
       },
       render (gql) {
         return (<div class="h-screen">
-          <SelectCloudProjectModal gql={gql}/>
+          <SelectCloudProjectModal utmMedium="test" utmContent="A" gql={gql}/>
         </div>)
       },
     })
@@ -143,8 +143,8 @@ describe('<SelectCloudProjectModal />', () => {
       it('should call create project mutation with expected values', () => {
         cy.get('@createMutation').should('have.been.calledOnceWith', {
           campaign: 'Create project',
-          cohort: '',
-          medium: 'Specs Create Project Banner',
+          cohort: 'A',
+          medium: 'test',
           name: 'Test Project',
           orgId: '1',
           public: false,

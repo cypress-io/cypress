@@ -53,4 +53,34 @@ describe("Svelte mount", () => {
     cy.then(() => messageStore.set("Written from spec"));
     cy.contains("h1", "Written from spec");
   });
+
+  context("log", () => {
+    it("displays component name in mount log", () => {
+      cy.mount(Counter);
+
+      cy.wrap(Cypress.$(window.top.document.body)).within(() =>
+        cy
+          .contains("displays component name in mount log")
+          .closest(".collapsible")
+          .click()
+          .within(() =>
+            cy
+              .get(".command-name-mount")
+              .should("contain", "mount<Counter ... />")
+          )
+      );
+    });
+
+    it("does not display mount log", () => {
+      cy.mount(Counter, { log: false });
+
+      cy.wrap(Cypress.$(window.top.document.body)).within(() =>
+        cy
+          .contains("does not display mount log")
+          .closest(".collapsible")
+          .click()
+          .within(() => cy.get(".command-name-mount").should("not.exist"))
+      );
+    });
+  });
 });

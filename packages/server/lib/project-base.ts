@@ -4,6 +4,7 @@ import EE from 'events'
 import _ from 'lodash'
 import path from 'path'
 import pkg from '@packages/root'
+
 import { Automation } from './automation'
 import browsers from './browsers'
 import * as config from './config'
@@ -153,7 +154,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', this.options)
 
-    let cfg = this.getConfig()
+    const cfg = this.getConfig()
 
     process.chdir(this.projectRoot)
 
@@ -161,7 +162,6 @@ export class ProjectBase<TServer extends Server> extends EE {
 
     const [port, warning] = await this._server.open(cfg, {
       getCurrentBrowser: () => this.browser,
-      getAutomation: () => this.automation,
       getSpec: () => this.spec,
       exit: this.options.args?.exit,
       onError: this.options.onError,

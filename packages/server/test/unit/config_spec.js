@@ -5,18 +5,22 @@ const stripAnsi = require('strip-ansi')
 const { stripIndent } = require('common-tags')
 const Fixtures = require('@tooling/system-tests')
 const { getCtx } = require('@packages/data-context')
+const { sinon } = require('../spec_helper')
 
 describe('lib/config', () => {
   before(function () {
     this.env = process.env
+    this.versions = process.versions
 
     process.env = _.omit(process.env, 'CYPRESS_DEBUG')
+    process.versions.chrome = '0'
 
     Fixtures.scaffold()
   })
 
   after(function () {
     process.env = this.env
+    process.versions = this.versions
   })
 
   context('.get', () => {
@@ -25,6 +29,7 @@ describe('lib/config', () => {
 
       this.projectRoot = '/_test-output/path/to/project'
 
+      sinon.stub(process, 'chdir').returns()
       sinon.stub(this.ctx.lifecycleManager, 'verifyProjectRoot').returns(undefined)
 
       await this.ctx.lifecycleManager.setCurrentProject(this.projectRoot)

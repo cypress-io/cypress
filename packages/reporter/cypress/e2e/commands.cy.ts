@@ -926,24 +926,30 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
   context('test error', () => {
     // this is a unique error permutation currently only observed in cy.session() where an error
-    // message should be presented during the session validation of a saves/restored session and the
-    // session command will attempt to recreate a valid session.
-    it('renders error instead of command', () => {
-      // font-family: $font-system;
+    // message should be presented if the session validation fails for a restored session because the
+    // session command recover and attempt to recreate a valid session.
+    it('renders recovered error for command', () => {
       cy.fixture('command_error').then((_commandErr) => {
-        addCommand(runner, {
-          id: 10,
-          number: 7,
-          name: 'validate',
-          displayMessage: 'mock session validation',
-          state: 'failed',
-          showError: true,
-          err: _commandErr,
-          type: 'parent',
+        const groupId = addCommand(runner, {
+          name: 'session',
+          message: 'mock restore',
+          state: 'passed',
+          type: 'system',
         })
 
         addCommand(runner, {
-          id: 11,
+          type: 'system',
+          name: 'validate',
+          state: 'failed',
+          err: {
+            ..._commandErr,
+            isRecovered: true,
+          },
+          groupLevel: 1,
+          group: groupId,
+        })
+
+        addCommand(runner, {
           name: 'recreate session',
           message: 'mock recreate session cmd',
           state: 'success',
@@ -953,6 +959,58 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
       cy.contains('CommandError')
       cy.contains('recreate session')
+      cy.percySnapshot()
+    })
+
+    it('renders recovered error for nested group command', () => {
+      cy.fixture('command_error').then((_commandErr) => {
+        const groupId = addCommand(runner, {
+          name: 'session',
+          message: 'mock restore',
+          state: 'passed',
+          type: 'system',
+        })
+
+        const nested = addCommand(runner, {
+          type: 'system',
+          name: 'validate',
+          state: 'failed',
+          group: groupId,
+        })
+
+        addCommand(runner, {
+          number: 8,
+          name: 'get',
+          message: 'does_not_exist',
+          state: 'failed',
+          err: {
+            ..._commandErr,
+            isRecovered: true,
+          },
+          type: 'parent',
+          groupLevel: 2,
+          group: nested,
+        })
+
+        addCommand(runner, {
+          id: 12,
+          name: 'recreate session',
+          message: 'mock recreate session cmd',
+          state: 'success',
+          type: 'parent',
+        })
+      })
+
+      cy.contains('.command', 'validate').as('validate')
+      .find('.command-expander')
+      .should('have.class', 'command-expander-is-open')
+
+      cy.get('@validate').within(() => {
+        cy.contains('CommandError')
+      })
+
+      cy.contains('recreate session')
+
       cy.percySnapshot()
     })
   })

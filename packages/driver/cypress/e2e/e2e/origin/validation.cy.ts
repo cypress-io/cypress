@@ -1,4 +1,4 @@
-describe('cy.origin', () => {
+describe('cy.origin', { browser: '!webkit' }, () => {
   describe('successes', () => {
     it('succeeds on a localhost domain name', () => {
       cy.origin('localhost', () => undefined)
@@ -53,10 +53,10 @@ describe('cy.origin', () => {
     })
 
     it('succeeds on a complete origin using https', () => {
-      cy.origin('https://foobar2.com:3500', () => undefined)
+      cy.origin('https://www.foobar2.com:3500', () => undefined)
       cy.then(() => {
-        const expectedSrc = `https://foobar2.com:3500/__cypress/spec-bridge-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://foobar2.com:3500') as HTMLIFrameElement
+        const expectedSrc = `https://www.foobar2.com:3500/__cypress/spec-bridge-iframes`
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://www.foobar2.com:3500') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -85,8 +85,8 @@ describe('cy.origin', () => {
     it('succeeds on a subdomain', () => {
       cy.origin('app.foobar5.com', () => undefined)
       cy.then(() => {
-        const expectedSrc = `https://foobar5.com/__cypress/spec-bridge-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://foobar5.com') as HTMLIFrameElement
+        const expectedSrc = `https://app.foobar5.com/__cypress/spec-bridge-iframes`
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://app.foobar5.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -105,8 +105,8 @@ describe('cy.origin', () => {
     it('succeeds on a url with path', () => {
       cy.origin('http://www.foobar7.com/login', () => undefined)
       cy.then(() => {
-        const expectedSrc = `http://foobar7.com/__cypress/spec-bridge-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ http://foobar7.com') as HTMLIFrameElement
+        const expectedSrc = `http://www.foobar7.com/__cypress/spec-bridge-iframes`
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ http://www.foobar7.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -115,8 +115,8 @@ describe('cy.origin', () => {
     it('succeeds on a url with a hash', () => {
       cy.origin('http://www.foobar8.com/#hash', () => undefined)
       cy.then(() => {
-        const expectedSrc = `http://foobar8.com/__cypress/spec-bridge-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ http://foobar8.com') as HTMLIFrameElement
+        const expectedSrc = `http://www.foobar8.com/__cypress/spec-bridge-iframes`
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ http://www.foobar8.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -125,8 +125,8 @@ describe('cy.origin', () => {
     it('succeeds on a url with a path and hash', () => {
       cy.origin('http://www.foobar9.com/login/#hash', () => undefined)
       cy.then(() => {
-        const expectedSrc = `http://foobar9.com/__cypress/spec-bridge-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ http://foobar9.com') as HTMLIFrameElement
+        const expectedSrc = `http://www.foobar9.com/__cypress/spec-bridge-iframes`
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ http://www.foobar9.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -165,8 +165,8 @@ describe('cy.origin', () => {
     it('succeeds on a public suffix with a subdomain', () => {
       cy.origin('app.foobar.herokuapp.com', () => undefined)
       cy.then(() => {
-        const expectedSrc = `https://foobar.herokuapp.com/__cypress/spec-bridge-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://foobar.herokuapp.com') as HTMLIFrameElement
+        const expectedSrc = `https://app.foobar.herokuapp.com/__cypress/spec-bridge-iframes`
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://app.foobar.herokuapp.com') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -188,7 +188,7 @@ describe('cy.origin', () => {
         win.location.href = 'http://baz.foobar.com:3500/fixtures/auth/idp.html'
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://baz.foobar.com:3500', () => {
         cy.get('[data-cy="username"]').type('TJohnson')
         cy.get('[data-cy="login"]').click()
       })
@@ -211,7 +211,7 @@ describe('cy.origin', () => {
     it.skip('uses cy.origin twice', () => {
       cy.visit('/fixtures/auth/index.html')
       cy.get('[data-cy="login-idp"]').click()
-      cy.origin('http://idp.com:3500', () => {
+      cy.origin('http://www.idp.com:3500', () => {
         cy.get('[data-cy="username"]').type('BJohnson')
         cy.get('[data-cy="login"]').click()
       })
@@ -226,7 +226,7 @@ describe('cy.origin', () => {
         win.location.href = 'http://baz.foobar.com:3500/fixtures/auth/idp.html'
       })
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('[data-cy="username"]').type('TJohnson')
         cy.get('[data-cy="login"]').click()
       })
@@ -238,15 +238,15 @@ describe('cy.origin', () => {
 
     it('creates a spec bridge for https://idp.com:3502', () => {
       cy.visit('/fixtures/auth/index.html')
-      cy.origin('idp.com:3502', () => {
+      cy.origin('www.idp.com:3502', () => {
         cy.visit('https://www.idp.com:3502/fixtures/auth/index.html')
         cy.get('[data-cy="login-idp"]').invoke('text').should('equal', 'Login IDP')
       })
     })
 
-    it('creates a spec bridge for http://idp.com:3500', () => {
+    it('creates a spec bridge for http://www.idp.com:3500', () => {
       cy.visit('/fixtures/auth/index.html')
-      cy.origin('http://idp.com:3500', () => {
+      cy.origin('http://www.idp.com:3500', () => {
         cy.visit('http://www.idp.com:3500/fixtures/auth/index.html')
         cy.get('[data-cy="login-idp"]').invoke('text').should('equal', 'Login IDP')
       })

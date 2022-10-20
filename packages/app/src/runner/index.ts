@@ -22,7 +22,7 @@ import { getRunnerElement, empty } from './utils'
 import { IframeModel } from './iframe-model'
 import { AutIframe } from './aut-iframe'
 import { EventManager } from './event-manager'
-import { client } from '@packages/socket/lib/browser'
+import { createWebsocket as createWebsocketIo } from '@packages/socket/lib/browser'
 import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
 import type { AutomationElementId } from '@packages/types/src'
 import { useSnapshotStore } from './snapshot-store'
@@ -30,19 +30,8 @@ import { useStudioStore } from '../store/studio-store'
 
 let _eventManager: EventManager | undefined
 
-export function createWebsocket (socketIoRoute: string) {
-  const socketConfig = {
-    path: socketIoRoute,
-    transports: ['websocket'],
-  }
-
-  const ws = client(socketConfig)
-
-  ws.on('connect_error', () => {
-    // fall back to polling if websocket fails to connect (webkit)
-    // https://github.com/socketio/socket.io/discussions/3998#discussioncomment-972316
-    ws.io.opts.transports = ['polling', 'websocket']
-  })
+export function createWebsocket (config: Cypress.Config) {
+  const ws = createWebsocketIo({ path: config.socketIoRoute, browserFamily: config.browser.family })
 
   ws.on('connect', () => {
     ws.emit('runner:connected')
@@ -74,7 +63,7 @@ export function getEventManager () {
 
 window.getEventManager = getEventManager
 
-let _autIframeModel: AutIframe
+let _autIframeModel: AutIframe | null
 
 /**
  * Creates an instance of an AutIframe model which ise used to control
@@ -105,7 +94,7 @@ function createIframeModel () {
     autIframe.detachDom,
     autIframe.restoreDom,
     autIframe.highlightEl,
-    autIframe.doesAUTMatchTopOriginPolicy,
+    autIframe.doesAUTMatchTopSuperDomainOrigin,
     getEventManager(),
     {
       selectorPlaygroundModel: getEventManager().selectorPlaygroundModel,
@@ -154,7 +143,6 @@ function setupRunner () {
     'Test Project',
     getEventManager(),
     window.UnifiedRunner.CypressJQuery,
-    window.UnifiedRunner.dom,
   )
 
   createIframeModel()
@@ -201,11 +189,11 @@ export async function teardown () {
  * Add a cross origin iframe for cy.origin support
  */
 export function addCrossOriginIframe (location) {
-  const id = `Spec Bridge: ${location.originPolicy}`
+  const id = `Spec Bridge: ${location.origin}`
 
   // if it already exists, don't add another one
   if (document.getElementById(id)) {
-    getEventManager().notifyCrossOriginBridgeReady(location.originPolicy)
+    getEventManager().notifyCrossOriginBridgeReady(location.origin)
 
     return
   }
@@ -216,7 +204,7 @@ export function addCrossOriginIframe (location) {
     // container since it needs to match the size of the top window for screenshots
     $container: document.body,
     className: 'spec-bridge-iframe',
-    src: `${location.originPolicy}/${getRunnerConfigFromWindow().namespace}/spec-bridge-iframes`,
+    src: `${location.origin}/${getRunnerConfigFromWindow().namespace}/spec-bridge-iframes`,
   })
 }
 

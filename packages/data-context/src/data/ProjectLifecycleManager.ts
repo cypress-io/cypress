@@ -296,7 +296,7 @@ export class ProjectLifecycleManager {
 
     // lastBrowser is cached per-project.
     const prefs = await this.ctx.project.getProjectPreferences(path.basename(this.projectRoot))
-    const browsers = await this.ctx.browser.machineBrowsers()
+    const browsers = await this.ctx.browser.allBrowsers()
 
     if (!browsers[0]) {
       this.ctx.onError(getError('UNEXPECTED_INTERNAL_ERROR', new Error('No browsers found, cannot set a browser')))
@@ -380,6 +380,8 @@ export class ProjectLifecycleManager {
   }
 
   private _setCurrentProject (projectRoot: string) {
+    process.chdir(projectRoot)
+
     this._projectRoot = projectRoot
     this._initializedProject = undefined
 
@@ -393,19 +395,17 @@ export class ProjectLifecycleManager {
     this.ctx.update((s) => {
       s.currentProject = projectRoot
       s.currentProjectGitInfo?.destroy()
-      if (!this.ctx.isRunMode) {
-        s.currentProjectGitInfo = new GitDataSource({
-          isRunMode: this.ctx.isRunMode,
-          projectRoot,
-          onError: this.ctx.onError,
-          onBranchChange: () => {
-            this.ctx.emitter.branchChange()
-          },
-          onGitInfoChange: (specPaths) => {
-            this.ctx.emitter.gitInfoChange(specPaths)
-          },
-        })
-      }
+      s.currentProjectGitInfo = new GitDataSource({
+        isRunMode: this.ctx.isRunMode,
+        projectRoot,
+        onError: this.ctx.onError,
+        onBranchChange: () => {
+          this.ctx.emitter.branchChange()
+        },
+        onGitInfoChange: (specPaths) => {
+          this.ctx.emitter.gitInfoChange(specPaths)
+        },
+      })
 
       s.diagnostics = { error: null, warnings: [] }
       s.packageManager = packageManagerUsed

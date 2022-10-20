@@ -135,7 +135,7 @@ async function connectToNewSpec (options, automation: Automation, browserCriClie
 }
 
 async function setupRemote (remotePort, automation, onError, options): Promise<BrowserCriClient> {
-  const browserCriClient = await BrowserCriClient.create(remotePort, 'Firefox', onError)
+  const browserCriClient = await BrowserCriClient.create(['127.0.0.1', '::1'], remotePort, 'Firefox', onError)
   const pageCriClient = await browserCriClient.attachToTargetUrl('about:blank')
 
   await CdpAutomation.create(pageCriClient.send, pageCriClient.on, browserCriClient.resetBrowserTargets, automation, options.experimentalSessionAndOrigin)

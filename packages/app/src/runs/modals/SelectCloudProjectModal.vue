@@ -160,6 +160,7 @@
           size="lg"
           :prefix-icon="newProject ? CreateIcon : ConnectIcon"
           prefix-icon-class="icon-dark-white"
+          data-cy="connect-project"
           @click="createOrConnectProject"
         >
           {{ newProject
@@ -274,6 +275,8 @@ mutation SelectCloudProjectModal_CreateCloudProject( $name: String!, $orgId: ID!
 
 const props = defineProps<{
   gql: SelectCloudProjectModalFragment
+  utmMedium: string
+  utmContent?: string
 }>()
 
 const emit = defineEmits<{
@@ -345,8 +348,8 @@ async function createOrConnectProject () {
       name: projectName.value,
       public: projectAccess.value === 'public',
       campaign: 'Create project',
-      cohort: '',
-      medium: 'Specs Create Project Banner',
+      cohort: props.utmContent || '',
+      medium: props.utmMedium,
       source: getUtmSource(),
     })
 

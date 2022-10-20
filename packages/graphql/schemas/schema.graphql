@@ -23,7 +23,7 @@ enum AuthStateNameEnum {
 """Container representing a browser"""
 type Browser implements Node {
   channel: String!
-  disabled: Boolean!
+  disabled: Boolean
   displayName: String!
   family: BrowserFamily!
 
@@ -264,7 +264,7 @@ type CloudProjectSpec implements Node {
 union CloudProjectSpecFlakyResult = CloudFeatureNotEnabled | CloudProjectSpecFlakyStatus
 
 type CloudProjectSpecFlakyStatus {
-  """URL linking to the flaky data in the Cypress dashboard for this spec"""
+  """URL linking to the flaky data in the Cypress Dashboard for this spec"""
   dashboardUrl: String
 
   """Number of flaky runs from the considered runs"""
@@ -555,6 +555,28 @@ enum CodeLanguageEnum {
   ts
 }
 
+"""used to distinguish one group of users from another"""
+type Cohort {
+  """value used to indicate the cohort (e.g. "A" or "B")"""
+  cohort: String!
+
+  """name used to identify the cohort topic (e.g. "LoginBanner" ) """
+  name: String!
+}
+
+input CohortInput {
+  """Array of cohort options to choose from.  Ex: A or B """
+  cohorts: [String!]!
+
+  """Name of the cohort"""
+  name: String!
+
+  """
+  Optional array of integer weights to use for determining cohort. Defaults to even weighting
+  """
+  weights: [Int!]
+}
+
 """
 The currently opened Cypress project, represented by a cypress.config.{js,ts,mjs,cjs} file
 """
@@ -641,7 +663,7 @@ type CurrentProject implements Node & ProjectLike {
   """Cached preferences for this project"""
   preferences: ProjectPreferences
 
-  """Used to associate project with Cypress dashboard"""
+  """Used to associate project with Cypress Dashboard"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""
@@ -700,6 +722,7 @@ enum ErrorTypeEnum {
   BAD_POLICY_WARNING_TOOLTIP
   BROWSER_NOT_FOUND_BY_NAME
   BROWSER_NOT_FOUND_BY_PATH
+  BROWSER_UNSUPPORTED_LAUNCH_OPTION
   BUNDLE_ERROR
   CANNOT_CONNECT_BASE_URL
   CANNOT_CONNECT_BASE_URL_RETRYING
@@ -987,7 +1010,7 @@ type GlobalProject implements Node & ProjectLike {
   """Relay style Node ID field for the GlobalProject field"""
   id: ID!
 
-  """Used to associate project with Cypress dashboard"""
+  """Used to associate project with Cypress Dashboard"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""
@@ -1199,6 +1222,11 @@ type Mutation {
   copyTextToClipboard(text: String!): Boolean
 
   """
+  Determine the cohort based on the given configuration.  This will either return the cached cohort for a given name or choose a new one and store it.
+  """
+  determineCohort(cohortConfig: CohortInput!): Cohort
+
+  """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
   """
   devRelaunch(action: DevRelaunchAction!): Boolean
@@ -1408,7 +1436,7 @@ interface ProjectLike {
     name: String!
   ): RemoteFetchableCloudProjectResult
 
-  """Used to associate project with Cypress dashboard"""
+  """Used to associate project with Cypress Dashboard"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""
@@ -1493,6 +1521,12 @@ type Query {
 
   """A user within the Cypress Cloud"""
   cloudViewer: CloudUser
+
+  """Return the cohort for the given name"""
+  cohort(
+    """the name of the cohort to find"""
+    name: String!
+  ): Cohort
 
   """The currently opened project"""
   currentProject: CurrentProject

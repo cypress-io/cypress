@@ -21,7 +21,8 @@ import ResponseMiddleware from './response-middleware'
 import { DeferredSourceMapCache } from '@packages/rewriter'
 import type { RemoteStates } from '@packages/server/lib/remote_states'
 import type { CookieJar } from '@packages/server/lib/util/cookies'
-import type { Automation } from '@packages/server/lib/automation/automation'
+import type { ResourceTypeAndCredentialManager } from '@packages/server/lib/util/resourceTypeAndCredentialManager'
+import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
 
 function getRandomColorFn () {
   return chalk.hex(`#${Number(
@@ -54,10 +55,10 @@ type HttpMiddlewareCtx<T> = {
   middleware: HttpMiddlewareStacks
   getCookieJar: () => CookieJar
   deferSourceMapRewrite: (opts: { js: string, url: string }) => string
-  getAutomation: () => Automation
   getPreRequest: (cb: GetPreRequestCb) => void
   getAUTUrl: Http['getAUTUrl']
   setAUTUrl: Http['setAUTUrl']
+  simulatedCookies: AutomationCookie[]
 } & T
 
 export const defaultMiddleware = {
@@ -69,10 +70,10 @@ export const defaultMiddleware = {
 export type ServerCtx = Readonly<{
   config: CyServer.Config & Cypress.Config
   shouldCorrelatePreRequests?: () => boolean
-  getAutomation: () => Automation
   getFileServerToken: () => string
   getCookieJar: () => CookieJar
   remoteStates: RemoteStates
+  resourceTypeAndCredentialManager: ResourceTypeAndCredentialManager
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
   middleware: HttpMiddlewareStacks
@@ -213,7 +214,6 @@ export class Http {
   config: CyServer.Config
   shouldCorrelatePreRequests: () => boolean
   deferredSourceMapCache: DeferredSourceMapCache
-  getAutomation: () => Automation
   getFileServerToken: () => string
   remoteStates: RemoteStates
   middleware: HttpMiddlewareStacks
@@ -222,6 +222,7 @@ export class Http {
   request: any
   socket: CyServer.Socket
   serverBus: EventEmitter
+  resourceTypeAndCredentialManager: ResourceTypeAndCredentialManager
   renderedHTMLOrigins: {[key: string]: boolean} = {}
   autUrl?: string
   getCookieJar: () => CookieJar
@@ -232,7 +233,6 @@ export class Http {
 
     this.config = opts.config
     this.shouldCorrelatePreRequests = opts.shouldCorrelatePreRequests || (() => false)
-    this.getAutomation = opts.getAutomation
     this.getFileServerToken = opts.getFileServerToken
     this.remoteStates = opts.remoteStates
     this.middleware = opts.middleware
@@ -240,6 +240,7 @@ export class Http {
     this.socket = opts.socket
     this.request = opts.request
     this.serverBus = opts.serverBus
+    this.resourceTypeAndCredentialManager = opts.resourceTypeAndCredentialManager
     this.getCookieJar = opts.getCookieJar
 
     if (typeof opts.middleware === 'undefined') {
@@ -259,7 +260,6 @@ export class Http {
       buffers: this.buffers,
       config: this.config,
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
-      getAutomation: this.getAutomation,
       getFileServerToken: this.getFileServerToken,
       remoteStates: this.remoteStates,
       request: this.request,
@@ -267,7 +267,9 @@ export class Http {
       netStubbingState: this.netStubbingState,
       socket: this.socket,
       serverBus: this.serverBus,
+      resourceTypeAndCredentialManager: this.resourceTypeAndCredentialManager,
       getCookieJar: this.getCookieJar,
+      simulatedCookies: [],
       debug: (formatter, ...args) => {
         if (!debugVerbose.enabled) return
 

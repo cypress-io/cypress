@@ -75,9 +75,20 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     it('clicking the login button will open the login modal', () => {
       cy.visitApp()
       moveToRunsPage()
-      cy.contains('Log In').click()
+      cy.contains(defaultMessages.runs.connect.buttonUser).click()
+      cy.withCtx((ctx, o) => {
+        o.sinon.spy(ctx._apis.authApi, 'logIn')
+      })
+
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
-        cy.get('button').contains('Log In')
+        cy.contains('button', 'Log in').click()
+      })
+
+      cy.withCtx((ctx, o) => {
+        // validate utmSource
+        expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[1]).to.eq('Binary: App')
+        // validate utmMedium
+        expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[2]).to.eq('Runs Tab')
       })
     })
 
@@ -239,6 +250,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       moveToRunsPage()
 
       cy.withCtx(async (ctx, options) => {
+        ctx.coreData.app.browserStatus = 'open'
         options.sinon.stub(ctx._apis.electronApi, 'isMainWindowFocused').returns(false)
         options.sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
           setTimeout(() => {
@@ -260,10 +272,10 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.contains('button', 'Log in to the Cypress Dashboard').click()
 
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).as('logInModal').within(() => {
-        cy.findByRole('button', { name: 'Log In' }).click()
+        cy.findByRole('button', { name: 'Log in' }).click()
       })
 
-      cy.findByRole('dialog', { name: 'Login Successful' }).within(() => {
+      cy.findByRole('dialog', { name: 'Login successful' }).within(() => {
         cy.findByRole('button', { name: 'Connect project' }).click()
       })
 
@@ -272,8 +284,8 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   })
 
   context('Runs - Create Project', () => {
-    it('when a project is created, injects new projectId into the config file', () => {
-      cy.remoteGraphQLIntercept(async (obj) => {
+    it('when a project is created, injects new projectId into the config file, and sends expected UTM params', () => {
+      cy.remoteGraphQLIntercept((obj) => {
         if (obj.operationName === 'SelectCloudProjectModal_CreateCloudProject_cloudProjectCreate') {
           obj.result.data!.cloudProjectCreate = {
             slug: 'newProjectId',
@@ -290,7 +302,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.loginUser()
       cy.visitApp()
 
-      cy.withCtx(async (ctx) => {
+      cy.withCtx(async (ctx, o) => {
+        o.sinon.spy(ctx.cloud, 'executeRemoteGraphQL')
+
         const config = await ctx.project.getConfig()
 
         expect(config.projectId).to.not.equal('newProjectId')
@@ -305,6 +319,12 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         const config = await ctx.project.getConfig()
 
         expect(config.projectId).to.equal('newProjectId')
+        expect(ctx.cloud.executeRemoteGraphQL).to.have.been.calledWithMatch({
+          fieldName: 'cloudProjectCreate',
+          operationVariables: {
+            medium: 'Runs Tab',
+            source: 'Binary: App',
+          } })
       })
     })
 
@@ -423,7 +443,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.findByText(defaultMessages.runs.errors.notFound.button).should('be.visible').click()
       cy.get('[aria-modal="true"]').should('exist')
       cy.get('[data-cy="selectProject"] button').should('have.text', 'Mock Project')
-      cy.findByText(defaultMessages.runs.connect.modal.selectProject.connectProject).click()
+      cy.get('[data-cy="connect-project"]').click()
       cy.get('[data-cy="runs"]', { timeout: 7500 })
     })
   })
@@ -571,7 +591,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       scaffoldTestingTypeAndVisitRunsPage('component')
       cy.contains(defaultMessages.runs.empty.title).should('be.visible')
       cy.contains(defaultMessages.runs.empty.description).should('be.visible')
-      cy.contains('cypress run --component --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
+      cy.findByDisplayValue('npx cypress run --component --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
     })
 
     it('displays how to record prompt when connected and no runs in E2E', () => {
@@ -579,7 +599,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.contains(defaultMessages.runs.empty.title).should('be.visible')
       cy.contains(defaultMessages.runs.empty.description).should('be.visible')
-      cy.contains('cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
+      cy.findByDisplayValue('npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
     })
 
     it('displays a copy button and copies correct command in Component Testing', () => {
@@ -591,7 +611,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.get('[data-cy="copy-button"]').click()
       cy.contains('Copied!')
       cy.withRetryableCtx((ctx) => {
-        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('cypress run --component --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('npx cypress run --component --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
       })
     })
 
@@ -604,7 +624,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.get('[data-cy="copy-button"]').click()
       cy.contains('Copied!')
       cy.withRetryableCtx((ctx) => {
-        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
       })
     })
   })

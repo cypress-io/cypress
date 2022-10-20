@@ -141,6 +141,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     defaultValue: null,
     validation: validate.isStringOrArrayOfStrings,
     overrideLevel: 'any',
+    requireRestartOnChange: 'server',
   }, {
     name: 'chromeWebSecurity',
     defaultValue: true,
@@ -227,6 +228,12 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: validate.isBoolean,
     isExperimental: true,
     requireRestartOnChange: 'browser',
+  }, {
+    name: 'experimentalWebKitSupport',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+    requireRestartOnChange: 'server',
   }, {
     name: 'fileServerFolder',
     defaultValue: '',
@@ -493,6 +500,11 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
   }, {
     name: 'namespace',
     defaultValue: '__cypress',
+    validation: validate.isString,
+    isInternal: true,
+  }, {
+    name: 'repoRoot',
+    defaultValue: null,
     validation: validate.isString,
     isInternal: true,
   }, {

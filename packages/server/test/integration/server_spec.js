@@ -5,6 +5,7 @@ const http = require('http')
 const rp = require('@cypress/request-promise')
 const Promise = require('bluebird')
 const evilDns = require('evil-dns')
+const { setupFullConfigWithDefaults } = require('@packages/config')
 const httpsServer = require(`@packages/https-proxy/test/helpers/https_server`)
 const config = require(`../../lib/config`)
 const { ServerE2E } = require(`../../lib/server-e2e`)
@@ -47,7 +48,7 @@ describe('Server', () => {
         // get all the config defaults
         // and allow us to override them
         // for each test
-        return config.setupFullConfigWithDefaults(obj, getCtx().file.getFilesByGlob)
+        return setupFullConfigWithDefaults(obj, getCtx().file.getFilesByGlob)
         .then((cfg) => {
           // use a jar for each test
           // but reset it automatically
@@ -102,8 +103,6 @@ describe('Server', () => {
 
               this.srv = this.server.getHttpServer()
 
-              // @session = new (Session({app: @srv}))
-
               this.proxy = `http://localhost:${port}`
 
               this.buffers = this.server._networkProxy.http.buffers
@@ -145,7 +144,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://localhost:2000/index.html',
@@ -177,7 +176,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: false,
             contentType: 'application/json',
             url: 'http://localhost:2000/assets/foo.json',
@@ -198,7 +197,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://localhost:2000/index.html',
@@ -216,7 +215,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             expectToEqDetails(obj, {
               isOkStatusCode: true,
-              isPrimaryOrigin: true,
+              isPrimarySuperDomainOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://localhost:2000/index.html',
@@ -248,7 +247,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://localhost:2000/sub/',
@@ -281,7 +280,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: false,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://localhost:2000/does-not-exist',
@@ -309,7 +308,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://localhost:2000/index.html',
@@ -392,7 +391,7 @@ describe('Server', () => {
             }).then((obj) => {
               expectToEqDetails(obj, {
                 isOkStatusCode: true,
-                isPrimaryOrigin: true,
+                isPrimarySuperDomainOrigin: true,
                 isHtml: true,
                 contentType: 'text/html',
                 url: `http://localhost:${this.httpPort}/${path}/100`,
@@ -439,7 +438,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://getbootstrap.com/',
@@ -474,7 +473,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: false,
+            isPrimarySuperDomainOrigin: false,
             isHtml: false,
             contentType: 'application/json',
             url: 'http://getbootstrap.com/user.json',
@@ -519,7 +518,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: undefined,
             url: 'http://example.com/',
@@ -541,7 +540,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: false,
+            isPrimarySuperDomainOrigin: false,
             isHtml: false,
             contentType: undefined,
             url: 'http://example.com/',
@@ -575,7 +574,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://espn.go.com/',
@@ -607,6 +606,7 @@ describe('Server', () => {
                 domain: 'go',
                 tld: 'com',
                 port: '80',
+                protocol: 'http:',
               },
             })
           })
@@ -639,7 +639,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://espn.go.com/',
@@ -659,7 +659,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             expectToEqDetails(obj, {
               isOkStatusCode: true,
-              isPrimaryOrigin: true,
+              isPrimarySuperDomainOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://espn.go.com/',
@@ -714,7 +714,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           expectToEqDetails(obj, {
             isOkStatusCode: false,
-            isPrimaryOrigin: false,
+            isPrimarySuperDomainOrigin: false,
             isHtml: false,
             contentType: undefined,
             url: 'http://espn.com/',
@@ -729,7 +729,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             expectToEqDetails(obj, {
               isOkStatusCode: true,
-              isPrimaryOrigin: true,
+              isPrimarySuperDomainOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://espn.go.com/',
@@ -765,7 +765,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: false,
-            isPrimaryOrigin: false,
+            isPrimarySuperDomainOrigin: false,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://mlb.mlb.com/',
@@ -799,7 +799,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://getbootstrap.com/',
@@ -840,7 +840,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://google.com/foo',
@@ -897,7 +897,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://google.com/index',
@@ -923,6 +923,7 @@ describe('Server', () => {
               domain: 'google',
               tld: 'com',
               port: '80',
+              protocol: 'http:',
             },
           })
         })
@@ -945,7 +946,7 @@ describe('Server', () => {
             fileServer: this.fileServer,
           })
 
-          this.server.socket.localBus.emit('cross:origin:bridge:ready', { originPolicy: 'http://cypress.io' })
+          this.server.remoteStates.set('http://cypress.io', {}, false)
 
           expect(this.server.remoteStates.current()).to.deep.eq({
             auth: undefined,
@@ -953,6 +954,7 @@ describe('Server', () => {
               domain: 'cypress',
               port: '80',
               tld: 'io',
+              protocol: 'http:',
             },
             origin: 'http://cypress.io',
             strategy: 'http',
@@ -960,13 +962,13 @@ describe('Server', () => {
             fileServer: null,
           })
 
-          expect(this.server.remoteStates.isSecondaryOrigin('http://cypress.io')).to.be.true
+          expect(this.server.remoteStates.isPrimarySuperDomainOrigin('http://cypress.io')).to.be.false
 
-          return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, { isCrossOrigin: true })
+          return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, { isFromSpecBridge: true })
           .then((obj = {}) => {
             expectToEqDetails(obj, {
               isOkStatusCode: true,
-              isPrimaryOrigin: false,
+              isPrimarySuperDomainOrigin: false,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://www.cypress.io/',
@@ -981,7 +983,7 @@ describe('Server', () => {
             const buffer = this.buffers.take('http://www.cypress.io/')
 
             expect(buffer).to.not.be.empty
-            expect(buffer.isCrossOrigin).to.be.true
+            expect(buffer.isCrossSuperDomainOrigin).to.be.true
 
             // Verify the secondary remote state is returned
             expect(this.server.remoteStates.current()).to.deep.eq({
@@ -990,25 +992,12 @@ describe('Server', () => {
                 domain: 'cypress',
                 port: '80',
                 tld: 'io',
+                protocol: 'http:',
               },
               origin: 'http://www.cypress.io',
               strategy: 'http',
               domainName: 'cypress.io',
               fileServer: null,
-            })
-
-            this.server.socket.localBus.emit('cross:origin:finished', 'http://cypress.io')
-
-            expect(this.server.remoteStates.isSecondaryOrigin('http://cypress.io')).to.be.false
-
-            // Verify the primary remote state is now returned
-            expect(this.server.remoteStates.current()).to.deep.eq({
-              auth: undefined,
-              props: null,
-              origin: 'http://localhost:2000',
-              strategy: 'file',
-              domainName: 'localhost',
-              fileServer: this.fileServer,
             })
           })
         })
@@ -1037,6 +1026,7 @@ describe('Server', () => {
                 domain: '',
                 port: '3500',
                 tld: 'localhost',
+                protocol: 'http:',
               },
               origin: 'http://localhost:3500',
               strategy: 'http',
@@ -1046,7 +1036,7 @@ describe('Server', () => {
           })
         })
 
-        it('doesn\'t set a remote state or buffer the response when a url has already been visited and the origins don\'t match', function () {
+        it('does set a remote state and buffer the response when a url has already been visited and the origins don\'t match', function () {
           nock('http://localhost:3500/')
           .get('/')
           .reply(200, '<html>content</html>', {
@@ -1056,7 +1046,7 @@ describe('Server', () => {
           this.server.remoteStates.set('http://localhost:3500/')
 
           // this will be the current origin
-          this.server.socket.localBus.emit('cross:origin:bridge:ready', { originPolicy: 'http://cypress.io' })
+          this.server.remoteStates.set('http://cypress.io', {}, false)
 
           return this.server._onResolveUrl('http://localhost:3500/', {}, this.automationRequest, { hasAlreadyVisitedUrl: true })
           .then(() => {
@@ -1064,24 +1054,25 @@ describe('Server', () => {
             expect(this.server.remoteStates.current()).to.deep.eq({
               auth: undefined,
               props: {
-                domain: 'cypress',
-                port: '80',
-                tld: 'io',
+                domain: '',
+                port: '3500',
+                tld: 'localhost',
+                protocol: 'http:',
               },
-              origin: 'http://cypress.io',
+              origin: 'http://localhost:3500',
               strategy: 'http',
-              domainName: 'cypress.io',
+              domainName: 'localhost',
               fileServer: null,
             })
 
-            // Verify the cross origin request was not buffered
+            // Verify the cross origin request was buffered
             const buffer = this.buffers.take('http://localhost:3500/')
 
-            expect(buffer).to.be.empty
+            expect(buffer).to.not.be.empty
           })
         })
 
-        it('doesn\'t set a remote state or buffer the response when the request is from within cy.origin and the origins don\'t match', function () {
+        it('does set a remote state or buffer the response when the request is from within cy.origin and the origins don\'t match', function () {
           nock('http://localhost:3500/')
           .get('/')
           .reply(200, '<html>content</html>', {
@@ -1091,77 +1082,29 @@ describe('Server', () => {
           this.server.remoteStates.set('http://localhost:3500/')
 
           // this will be the current origin
-          this.server.socket.localBus.emit('cross:origin:bridge:ready', { originPolicy: 'http://cypress.io' })
+          this.server.remoteStates.set('http://cypress.io', {}, false)
 
-          return this.server._onResolveUrl('http://localhost:3500/', {}, this.automationRequest, { isCrossOrigin: true })
+          return this.server._onResolveUrl('http://localhost:3500/', {}, this.automationRequest, { isFromSpecBridge: true })
           .then(() => {
             // Verify the remote state was not updated
             expect(this.server.remoteStates.current()).to.deep.eq({
               auth: undefined,
               props: {
-                domain: 'cypress',
-                port: '80',
-                tld: 'io',
+                domain: '',
+                port: '3500',
+                tld: 'localhost',
+                protocol: 'http:',
               },
-              origin: 'http://cypress.io',
+              origin: 'http://localhost:3500',
               strategy: 'http',
-              domainName: 'cypress.io',
+              domainName: 'localhost',
               fileServer: null,
             })
 
-            // Verify the cross origin request was not buffered
+            // Verify the cross origin request was buffered
             const buffer = this.buffers.take('http://localhost:3500/')
 
-            expect(buffer).to.be.empty
-          })
-        })
-
-        it('doesn\'t override existing remote state on cross:origin:bridge:ready', function () {
-          nock('http://www.cypress.io/')
-          .get('/')
-          .reply(200, '<html>content</html>', {
-            'Content-Type': 'text/html',
-          })
-
-          this.server.socket.localBus.emit('cross:origin:bridge:ready', { originPolicy: 'http://cypress.io' })
-
-          return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, { isCrossOrigin: true, auth: { username: 'u', password: 'p' } })
-          .then(() => {
-            // Verify the secondary remote state is returned
-            expect(this.server.remoteStates.current()).to.deep.eq({
-              auth: {
-                username: 'u',
-                password: 'p',
-              },
-              props: {
-                domain: 'cypress',
-                port: '80',
-                tld: 'io',
-              },
-              origin: 'http://www.cypress.io',
-              strategy: 'http',
-              domainName: 'cypress.io',
-              fileServer: null,
-            })
-
-            this.server.socket.localBus.emit('cross:origin:bridge:ready', { originPolicy: 'http://cypress.io' })
-
-            // Verify the existing secondary remote state is not overridden
-            expect(this.server.remoteStates.current()).to.deep.eq({
-              auth: {
-                username: 'u',
-                password: 'p',
-              },
-              props: {
-                domain: 'cypress',
-                port: '80',
-                tld: 'io',
-              },
-              origin: 'http://www.cypress.io',
-              strategy: 'http',
-              domainName: 'cypress.io',
-              fileServer: null,
-            })
+            expect(buffer).to.not.be.empty
           })
         })
       })
@@ -1192,7 +1135,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://localhost:2000/index.html',
@@ -1213,7 +1156,7 @@ describe('Server', () => {
         }).then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://www.google.com/',
@@ -1239,6 +1182,7 @@ describe('Server', () => {
               domain: 'google',
               tld: 'com',
               port: '80',
+              protocol: 'http:',
             },
           })
         }).then(() => {
@@ -1246,7 +1190,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
-              isPrimaryOrigin: true,
+              isPrimarySuperDomainOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://localhost:2000/index.html',
@@ -1290,7 +1234,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'http://www.google.com/',
@@ -1321,6 +1265,7 @@ describe('Server', () => {
               domain: 'google',
               tld: 'com',
               port: '80',
+              protocol: 'http:',
             },
           })
         }).then(() => {
@@ -1328,7 +1273,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
-              isPrimaryOrigin: true,
+              isPrimarySuperDomainOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://localhost:2000/index.html',
@@ -1363,7 +1308,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
-              isPrimaryOrigin: true,
+              isPrimarySuperDomainOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://www.google.com/',
@@ -1394,6 +1339,7 @@ describe('Server', () => {
                 domain: 'google',
                 tld: 'com',
                 port: '80',
+                protocol: 'http:',
               },
             })
           })
@@ -1407,7 +1353,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: 'https://www.foobar.com:8443/',
@@ -1438,6 +1384,7 @@ describe('Server', () => {
               domain: 'foobar',
               tld: 'com',
               port: '8443',
+              protocol: 'https:',
             },
           })
         }).then(() => {
@@ -1445,7 +1392,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
-              isPrimaryOrigin: true,
+              isPrimarySuperDomainOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://localhost:2000/index.html',
@@ -1480,7 +1427,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
-              isPrimaryOrigin: true,
+              isPrimarySuperDomainOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'https://www.foobar.com:8443/',
@@ -1511,6 +1458,7 @@ describe('Server', () => {
                 domain: 'foobar',
                 tld: 'com',
                 port: '8443',
+                protocol: 'https:',
               },
             })
           })
@@ -1524,7 +1472,7 @@ describe('Server', () => {
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
-            isPrimaryOrigin: true,
+            isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
             url: s3StaticHtmlUrl,
@@ -1563,6 +1511,7 @@ describe('Server', () => {
               domain: '',
               tld: 's3.amazonaws.com',
               port: '443',
+              protocol: 'https:',
             },
           })
         }).then(() => {
@@ -1570,7 +1519,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
-              isPrimaryOrigin: true,
+              isPrimarySuperDomainOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: 'http://localhost:2000/index.html',
@@ -1605,7 +1554,7 @@ describe('Server', () => {
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
-              isPrimaryOrigin: true,
+              isPrimarySuperDomainOrigin: true,
               isHtml: true,
               contentType: 'text/html',
               url: s3StaticHtmlUrl,
@@ -1642,6 +1591,7 @@ describe('Server', () => {
                 domain: '',
                 tld: 's3.amazonaws.com',
                 port: '443',
+                protocol: 'https:',
               },
             })
           })

@@ -17,6 +17,7 @@
           <span class="inline-block align-top">{{ filePath }}</span>
           <Badge
             v-if="!open && statusInfo.badgeType"
+            cy-data="changes-required-badge"
             :label="statusInfo.badgeLabel"
             :status="statusInfo.badgeType"
           />
@@ -123,6 +124,7 @@ const statusInfo: ComputedRef<StatusInfo> = computed(() => {
     },
     error: {
       icon: ErrorIcon,
+      initiallyOpen: true,
     },
   }
 

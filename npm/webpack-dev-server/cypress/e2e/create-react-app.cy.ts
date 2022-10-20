@@ -21,16 +21,14 @@ for (const project of WEBPACK_REACT) {
     it('should mount a passing test', () => {
       cy.visitApp()
       cy.contains('App.cy.js').click()
-      cy.waitForSpecToFinish()
-      cy.get('.passed > .num').should('contain', 1)
+      cy.waitForSpecToFinish({ passCount: 1 })
     })
 
     it('should live-reload on src changes', () => {
       cy.visitApp()
 
       cy.contains('App.cy.js').click()
-      cy.waitForSpecToFinish()
-      cy.get('.passed > .num').should('contain', 1)
+      cy.waitForSpecToFinish({ passCount: 1 })
 
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject(
@@ -39,7 +37,8 @@ for (const project of WEBPACK_REACT) {
         )
       })
 
-      cy.get('.failed > .num').should('contain', 1)
+      cy.waitForSpecToFinish({ failCount: 1 })
+      cy.get('.test-err-code-frame').should('be.visible')
 
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject(
@@ -48,7 +47,25 @@ for (const project of WEBPACK_REACT) {
         )
       })
 
-      cy.get('.passed > .num').should('contain', 1)
+      cy.waitForSpecToFinish({ passCount: 1 })
+    })
+
+    it('should show compilation errors on src changes', () => {
+      cy.visitApp()
+
+      cy.contains('App.cy.js').click()
+      cy.waitForSpecToFinish({ passCount: 1 })
+
+      cy.withCtx(async (ctx) => {
+        await ctx.actions.file.writeFileInProject(
+          ctx.path.join('src', 'App.js'),
+          (await ctx.file.readFileInProject(ctx.path.join('src', 'App.js'))).replace('export', 'expart'),
+        )
+      })
+
+      // The test should fail and the stack trace should appear in the command log
+      cy.waitForSpecToFinish({ failCount: 1 })
+      cy.contains('The following error originated from your test code, not from Cypress.').should('exist')
     })
 
     it('should detect new spec', () => {
@@ -62,8 +79,7 @@ for (const project of WEBPACK_REACT) {
       })
 
       cy.contains('New.cy.js').click()
-      cy.waitForSpecToFinish()
-      cy.get('.passed > .num').should('contain', 1)
+      cy.waitForSpecToFinish({ passCount: 1 })
     })
   })
 }

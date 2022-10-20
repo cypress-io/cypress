@@ -1,3 +1,18 @@
+# [@cypress/vue-v4.2.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v4.2.0...@cypress/vue-v4.2.1) (2022-10-13)
+
+
+### Bug Fixes
+
+* fix regression in npm/vue ([#23954](https://github.com/cypress-io/cypress/issues/23954)) ([78779a2](https://github.com/cypress-io/cypress/commit/78779a2db13ca6555a6b830dbabeefd3d37bbfe5))
+* **npm/vue:** update types ([#23890](https://github.com/cypress-io/cypress/issues/23890)) ([eb8ae02](https://github.com/cypress-io/cypress/commit/eb8ae02b61304d034136f7627da1ab23537e3ba4))
+
+# [@cypress/vue-v4.2.0](https://github.com/cypress-io/cypress/compare/@cypress/vue-v4.1.0...@cypress/vue-v4.2.0) (2022-08-30)
+
+
+### Features
+
+* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
+
 # [@cypress/vue-v4.1.0](https://github.com/cypress-io/cypress/compare/@cypress/vue-v4.0.0...@cypress/vue-v4.1.0) (2022-08-11)
 
 

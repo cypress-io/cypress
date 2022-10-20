@@ -1,5 +1,7 @@
 /// <reference path="../support/e2e.ts" />
 
+import dedent from 'dedent'
+
 describe('Config options', () => {
   it('supports supportFile = false', () => {
     cy.scaffoldProject('vite2.9.1-react')
@@ -20,7 +22,7 @@ describe('Config options', () => {
     cy.visitApp()
 
     cy.contains('App.cy.jsx').click()
-    cy.get('.passed > .num').should('contain', 1)
+    cy.get('.passed > .num').should('contain', 2)
 
     cy.withCtx(async (ctx) => {
       const config = ctx.lifecycleManager.loadedFullConfig
@@ -45,7 +47,7 @@ describe('Config options', () => {
 
     cy.visitApp()
     cy.contains(specWithWhitespace).click()
-    cy.get('.passed > .num').should('contain', 1)
+    cy.get('.passed > .num').should('contain', 2)
   })
 
   it('supports @cypress/vite-dev-server', () => {
@@ -56,6 +58,87 @@ describe('Config options', () => {
     cy.visitApp()
     cy.contains('App.cy.jsx').click()
     cy.waitForSpecToFinish()
-    cy.get('.passed > .num').should('contain', 1)
+    cy.get('.passed > .num').should('contain', 2)
+  })
+
+  it('supports viteConfig as an async function', () => {
+    cy.scaffoldProject('vite2.9.1-react')
+    cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite-async-function-config.config.ts'])
+    cy.startAppServer('component')
+
+    cy.visitApp()
+    cy.contains('App.cy.jsx').click()
+    cy.waitForSpecToFinish()
+    cy.get('.passed > .num').should('contain', 2)
+    cy.withCtx(async (ctx) => {
+      const verifyFile = await ctx.file.readFileInProject('wrote-to-file')
+
+      expect(verifyFile).to.eq('OK')
+    })
+  })
+})
+
+describe('sourcemaps', () => {
+  it('should be provided for JS and transpiled files', () => {
+    const testContent = dedent`
+      describe('spec file with import', () => {
+        it('should generate uncaught error', () => {
+          throw new Error('uncaught')
+        })
+      
+        it('should generate failed command', () => {
+          cy.get('#does-not-exist', { timeout: 100 })
+        })
+      })
+    `
+
+    cy.scaffoldProject('vite3.0.2-react')
+    cy.openProject('vite3.0.2-react', ['--config-file', 'cypress-vite.config.ts'])
+    cy.startAppServer('component')
+
+    cy.withCtx(async (ctx, o) => {
+      await ctx.actions.file.writeFileInProject(
+        'JsErrorSpec.cy.js',
+        o.testContent,
+      )
+
+      await ctx.actions.file.writeFileInProject(
+        'JsWithImportErrorSpec.cy.js',
+        `import React from 'react';\n\n${o.testContent}`,
+      )
+
+      await ctx.actions.file.writeFileInProject(
+        'JsxErrorSpec.cy.jsx',
+        o.testContent,
+      )
+
+      await ctx.actions.file.writeFileInProject(
+        'TsErrorSpec.cy.ts',
+        `type MyType = { value: string }\n\n${o.testContent}`,
+      )
+
+      await ctx.actions.file.writeFileInProject(
+        'TsxErrorSpec.cy.tsx',
+        `type MyType = { value: string }\n\n${o.testContent}`,
+      )
+    }, { testContent })
+
+    const verifySourcemap = (specName: string, line: number, column: number) => {
+      cy.visitApp()
+      cy.contains(specName).click()
+      cy.waitForSpecToFinish()
+      cy.get('.failed > .num').should('contain', 2)
+      cy.get('.runnable-err-file-path', { timeout: 250 }).should('contain', `${specName}:${line}:${column}`)
+    }
+
+    verifySourcemap('JsErrorSpec.cy.js', 7, 9)
+
+    verifySourcemap('JsWithImportErrorSpec.cy.js', 9, 9)
+
+    verifySourcemap('JsxErrorSpec.cy.jsx', 7, 8)
+
+    verifySourcemap('TsErrorSpec.cy.ts', 9, 8)
+
+    verifySourcemap('TsxErrorSpec.cy.tsx', 9, 8)
   })
 })
