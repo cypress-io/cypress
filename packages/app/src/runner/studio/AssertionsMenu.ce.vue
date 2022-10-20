@@ -13,7 +13,7 @@
       <div class="close-wrapper">
         <a
           class="close"
-          @click="onClose"
+          @click.stop="onClose"
         >&times;</a>
       </div>
     </div>
@@ -60,8 +60,7 @@ const addAssertion = (...args) => {
   props.addAssertion(props.jqueryElement, ...args)
 }
 
-const onClose = (event) => {
-  event.stopPropagation()
+const onClose = () => {
   props.closeMenu()
 }
 
