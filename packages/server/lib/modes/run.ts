@@ -1059,10 +1059,9 @@ export async function run (options, loading: Promise<void>) {
       debug('all BrowserWindows closed, not exiting')
     })
 
+    debugElapsedTime('run mode ready')
     await app.whenReady()
   }
-
-  debugElapsedTime('run mode ready')
 
   await loading
 
