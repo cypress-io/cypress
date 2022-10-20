@@ -136,7 +136,7 @@ import { SpecsListBannersFragment, SpecsListBanners_CheckCloudOrgMembershipDocum
 import { AllowedState, BannerIds } from '@packages/types'
 import { LoginBanner, CreateOrganizationBanner, ConnectProjectBanner, RecordBanner } from './banners'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
-import { usePromptManager } from '@packages/frontend-shared/src/composables/usePromptManager'
+import { usePromptManager } from '@packages/frontend-shared/src/gql-components/composables/usePromptManager'
 import { CohortConfig, useCohorts } from '@packages/frontend-shared/src/composables/useCohorts'
 
 const route = useRoute()

@@ -1,7 +1,7 @@
 import { gql, useMutation } from '@urql/vue'
-import { UsePromptManager_SetPreferencesDocument } from '../generated/graphql'
+import { UsePromptManager_SetPreferencesDocument } from '../../generated/graphql'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
-import { isAllowedFeature } from '../utils/isAllowedFeature'
+import { isAllowedFeature } from '../../utils/isAllowedFeature'
 
 gql`
 mutation UsePromptManager_SetPreferences($value: String!) {

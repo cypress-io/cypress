@@ -24,7 +24,7 @@ import StandardModal from '../components/StandardModal.vue'
 import RecordPromptAdapter from './RecordPromptAdapter.vue'
 import { getUtmSource } from '../utils/getUtmSource'
 import { getUrlWithParams } from '../utils/getUrlWithParams'
-import { usePromptManager } from '../composables/usePromptManager'
+import { usePromptManager } from './composables/usePromptManager'
 import { onMounted, ref } from 'vue'
 
 const { setPromptShown } = usePromptManager()
