@@ -15,7 +15,7 @@ const debugElapsedTime = (event) => {
   const now = performance.now()
   const delta = now - global.cypressServerStartTime
 
-  console.log(`elapsed time at ${event}: ${threeDecimals(delta)}ms`)
+  debug(`elapsed time at ${event}: ${threeDecimals(delta)}ms`)
 }
 
 module.exports = {
