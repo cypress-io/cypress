@@ -1062,9 +1062,9 @@ export async function run (options, loading: Promise<void>) {
     await app.whenReady()
   }
 
-  await loading
-
   debugElapsedTime('run mode ready')
+
+  await loading
 
   try {
     return ready(options)
