@@ -2813,7 +2813,7 @@ declare namespace Cypress {
      * Cypress will always resets/clears aliases, intercepts, clock, and viewport before each test
      * to ensure a clean test slate; i.e. this configuration only impacts the browser context.
      *
-     * Note: the `cy.session()` command will inherent this value to determine where or not the page is
+     * Note: the `cy.session()` command will inherent this value to determine whether or not the page is
      * cleared when the command executes.
      *
      * Options:
