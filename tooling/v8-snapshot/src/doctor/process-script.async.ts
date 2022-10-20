@@ -25,10 +25,6 @@ export class AsyncScriptProcessor {
   constructor () {
     logInfo('Initializing async script processor')
 
-    if (process.env.CI) {
-      logInfo('Running in CI', os.cpus(), fs.existsSync('/sys/fs/cgroup/cpuset/cpuset.cpus') ? fs.readFileSync('/sys/fs/cgroup/cpuset/cpuset.cpus', 'utf8') : 'no cpuset.cpus')
-    }
-
     // On CI, we're limited in resources, so we should limit the number of workers
     const maxWorkers = process.env.CI ? 1 : os.cpus().length
     const minWorkers = process.env.CI ? 1 : maxWorkers / 2
