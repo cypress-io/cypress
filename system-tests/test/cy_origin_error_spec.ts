@@ -55,7 +55,7 @@ describe('e2e cy.origin errors', () => {
     async onRun (exec) {
       const res = await exec()
 
-      expect(res.stdout).to.contain('CypressError: Importing dependencies with `Cypress.require()` requires using the latest version of `@cypress/webpack-preprocessor`')
+      expect(res.stdout).to.contain('Using `require()` or `import()` to include dependencies requires using the latest version of `@cypress/webpack-preprocessor`')
     },
   })
 })
