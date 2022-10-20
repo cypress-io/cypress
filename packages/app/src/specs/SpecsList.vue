@@ -54,7 +54,7 @@
           :gql="props.gql"
           mode="AVG_DURATION"
           data-cy="average-duration-header"
-          @showLoginConnect="openLoginConnectModal({utmMedium: 'Specs Latest Runs Tooltip'})"
+          @showLoginConnect="openLoginConnectModal({utmMedium: 'Specs Average Duration Tooltip'})"
         />
       </div>
     </div>
