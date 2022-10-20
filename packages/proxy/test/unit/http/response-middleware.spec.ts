@@ -270,7 +270,7 @@ describe('http/response-middleware', function () {
           return this.renderedHTMLOrigins
         },
         req: {
-          proxiedUrl: 'http://foobar.com',
+          proxiedUrl: 'http://127.0.0.1:3501/',
           isAUTFrame: true,
           cookies: {},
           headers: {

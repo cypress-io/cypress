@@ -33,6 +33,10 @@ describe('http/request-middleware', () => {
 
     it('removes x-cypress-is-aut-frame header when it exists, sets in on the req', async () => {
       const ctx = {
+        getAUTUrl: sinon.stub().returns('http://localhost:8080'),
+        remoteStates: {
+          isPrimarySuperDomainOrigin: sinon.stub().returns(false),
+        },
         req: {
           headers: {
             'x-cypress-is-aut-frame': 'true',
@@ -49,6 +53,10 @@ describe('http/request-middleware', () => {
 
     it('removes x-cypress-is-aut-frame header when it does not exist, sets in on the req', async () => {
       const ctx = {
+        getAUTUrl: sinon.stub().returns('http://localhost:8080'),
+        remoteStates: {
+          isPrimarySuperDomainOrigin: sinon.stub().returns(false),
+        },
         req: {
           headers: {},
         } as Partial<CypressIncomingRequest>,
@@ -63,6 +71,10 @@ describe('http/request-middleware', () => {
 
     it('removes x-cypress-is-xhr-or-fetch header when it exists', async () => {
       const ctx = {
+        getAUTUrl: sinon.stub().returns('http://localhost:8080'),
+        remoteStates: {
+          isPrimarySuperDomainOrigin: sinon.stub().returns(true),
+        },
         req: {
           headers: {
             'x-cypress-is-xhr-or-fetch': 'true',
@@ -78,6 +90,10 @@ describe('http/request-middleware', () => {
 
     it('removes x-cypress-is-xhr-or-fetch header when it does not exist', async () => {
       const ctx = {
+        getAUTUrl: sinon.stub().returns('http://localhost:8080'),
+        remoteStates: {
+          isPrimarySuperDomainOrigin: sinon.stub().returns(false),
+        },
         req: {
           headers: {},
         } as Partial<CypressIncomingRequest>,
