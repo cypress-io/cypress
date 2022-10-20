@@ -158,7 +158,7 @@ export const WIZARD_DEPENDENCY_LIT = {
   installer: 'lit',
   description: 'Lit is a simple library for building fast, lightweight web components.',
   minVersion: '^2.0.0',
-}
+} as const
 
 export const WIZARD_DEPENDENCIES = [
   WIZARD_DEPENDENCY_WEBPACK,
