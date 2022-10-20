@@ -125,8 +125,6 @@
   }
 
   .command-pin-target.command-group {
-  // .runnable-err.show-recovered-test-err > .runnable-err-header,
-  // .show-recovered-test-err {
     @include nested-command-dashes($gray-600);
     padding-left: 12px;
     min-height: 28px;

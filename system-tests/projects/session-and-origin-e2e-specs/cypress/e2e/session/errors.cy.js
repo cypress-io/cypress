@@ -1,102 +1,230 @@
 /**
  * Used in cy-in-cy tests in @packages/app.
  */
-
 before(async () => {
   Cypress.state('activeSessions', {})
   await Cypress.session.clearAllSavedSessions()
 })
 
+// unique session id for the test
 let sessionId
+// testData set to verify recreated test error in @packages/app
+let testData
+// the number of times validate has executed for a test
+let count = 0
 
 beforeEach(() => {
+  count = 0
   sessionId = `session_${Cypress._.uniqueId()}`
+  testData = Cypress.state('specWindow').parent.CYPRESS_TEST_DATA
 })
 
-it('setup has failing command', () => {
-  cy.session(sessionId, () => {
+function setup () {
+  cy.get('div')
+}
+
+it('setup - has failing command', () => {
+  function setup () {
+    if (testData && (
+    // create session for first command run
+      count === 0
+        // recreated session is successful
+        || (testData?.successfullyRecreatedSession)
+    )) {
+      return cy.get('div')
+    }
+
     cy.get('does_not_exist', { timeout: 1 })
-  })
+  }
+
+  function validate () {
+    count += 1
+    if (testData?.restoreSessionWithValidationFailure
+      && (
+        // create session for first command run
+        count === 1
+        // recreated session is successful
+        || (testData?.successfullyRecreatedSession && count === 3)
+      )
+    ) {
+      return
+    }
+
+    cy.wrap(false)
+  }
+
+  cy.session(sessionId, setup, { validate })
+
+  if (testData) {
+    cy.session(sessionId, setup, { validate })
+  }
 })
 
-it('created command - validate - has failing Cypress command', function () {
-  cy.log('hi')
-  cy.session(sessionId, function () {
-    cy.get('div').as('hello')
-  }, {
-    validate () {
-      cy.get('does_not_exist', { timeout: 1 })
-      // cy.get('does_not_exist_2', { timeout: 1 })
-    },
-  })
+// FIX ME (recreated  stuck in ''restoring, double error and test marked as passed)
+it('validate - has failing Cypress command', function () {
+  function validate () {
+    count += 1
+
+    if (testData?.restoreSessionWithValidationFailure
+      && (
+        // create session for first command run
+        count === 1
+        // recreated session is successful
+        || (testData?.successfullyRecreatedSession && count === 3)
+      )
+    ) {
+      return cy.get('div', { timeout: 1 })
+    }
+
+    cy.get('does_not_exist', { timeout: 1 })
+    // cy.get('does_not_exist_2', { timeout: 1 })
+  }
+
+  cy.session(sessionId, setup, { validate })
+
+  if (testData) {
+    cy.session(sessionId, setup, { validate })
+  }
 })
 
-it('created command - validate - command yields false', () => {
-  cy.session(sessionId, () => {
-    cy.get('div')
-  }, {
-    validate () {
-      cy.then(() => {
-        return false
+it('validate - command yields false', () => {
+  function validate () {
+    count += 1
+
+    if (testData?.restoreSessionWithValidationFailure
+      && (
+        // create session for first command run
+        count === 1
+        // recreated session is successful
+        || (testData?.successfullyRecreatedSession && count === 3)
+      )
+    ) {
+      return cy.then(() => {
+        return true
       })
-    },
-  })
+    }
+
+    cy.then(() => {
+      return false
+    })
+  }
+
+  cy.session(sessionId, setup, { validate })
+
+  if (testData) {
+    cy.session(sessionId, setup, { validate })
+  }
 })
 
-it('created command - validate - has multiple commands and yields false', () => {
-  cy.session(sessionId, () => {
-    cy.get('div')
-  }, {
-    validate () {
-      cy.log('filler log')
+it('validate - has multiple commands and yields false', () => {
+  function validate () {
+    count += 1
+    cy.log('filler log')
 
+    if (testData?.restoreSessionWithValidationFailure) {
+      if (
+        // create session for first command run
+        count === 1
+        // recreated session is successful
+        || (testData?.successfullyRecreatedSession && count === 3)
+      ) {
+        return cy.then(() => {
+          return cy.wrap(true)
+        })
+      }
+    }
+
+    cy.then(() => {
       return cy.wrap(false)
-    },
-  })
+    })
+  }
+
+  cy.session(sessionId, setup, { validate })
+
+  if (testData) {
+    cy.session(sessionId, setup, { validate })
+  }
 })
 
-it('created command - validate - rejects with false', () => {
-  cy.session(sessionId, () => {
-    cy.get('div')
-  }, {
-    async validate () {
-      return new Promise(async (resolve, reject) => {
-      // Cypress.log('getCurrentSessionData') // throws uncaught exception
-        const { cookies } = await Cypress.session.getCurrentSessionData()
+it('validate - rejects with false', () => {
+  function validate () {
+    count += 1
 
-        if (cookies.length === 0) { // this is always zero! we aren't setting any :D
-          reject(false)
+    return new Promise(async (resolve, reject) => {
+      if (testData?.restoreSessionWithValidationFailure) {
+        if (
+          // create session for first command run
+          count === 1
+          // recreated session is successful
+          || (testData?.successfullyRecreatedSession && count === 3)
+        ) {
+          return resolve()
         }
-      })
-    },
-  })
+      }
+
+      return reject(false)
+    })
+  }
+
+  cy.session(sessionId, setup, { validate })
+
+  if (testData) {
+    cy.session(sessionId, setup, { validate })
+  }
 })
 
-it('created command - validate - promise resolves false', () => {
-  cy.session(sessionId, () => {
-    cy.get('div')
-  }, {
-    async validate () {
-      return new Promise(async (resolve, reject) => {
-        const { cookies } = await Cypress.session.getCurrentSessionData()
+it('validate - promise resolves false', () => {
+  function validate () {
+    count += 1
 
-        if (cookies.length === 0) { // this is always zero! we aren't setting any :D
-          resolve(false)
+    return new Promise(async (resolve, reject) => {
+      if (testData?.restoreSessionWithValidationFailure) {
+        if (
+          // create session for first command run
+          count === 1
+          // recreated session is successful
+          || (testData?.successfullyRecreatedSession && count === 3)
+        ) {
+          return resolve()
         }
-      })
-    },
-  })
+      }
+
+      return resolve(false)
+    })
+  }
+
+  cy.session(sessionId, setup, { validate })
+
+  if (testData) {
+    cy.session(sessionId, setup, { validate })
+  }
 })
 
-it('created command - validate - throws an error', () => {
-  cy.session(sessionId, () => {
+// FIX ME (recreated  stuck in ''restoring, double error and test marked as passed)
+it('validate - throws an error', () => {
+  function validate () {
+    count += 1
+
     cy.get('div')
-  }, {
-    async validate () {
-      cy.get('div')
-      .within(() => {
-        throw new Error('Something went wrong!')
-      })
-    },
-  })
+    .within(() => {
+      if (testData?.restoreSessionWithValidationFailure) {
+        if (
+          // create session for first command run
+          count === 1
+          // recreated session is successful
+          || (testData?.successfullyRecreatedSession && count === 3)
+        ) {
+          return
+        }
+      }
+
+      throw new Error('Something went wrong!')
+    })
+  }
+
+  cy.session(sessionId, setup, { validate })
+
+  if (testData) {
+    cy.session(sessionId, setup, { validate })
+  }
 })

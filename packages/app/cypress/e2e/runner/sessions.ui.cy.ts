@@ -332,26 +332,17 @@ describe('runner/cypress sessions.ui.spec', {
   })
 
   describe('errors', () => {
-    const assertTestError = (testAlias: string, errMessage: string, errMessagePostfix: string) => {
-      cy.get(testAlias)
-      .find('.attempt-error-region')
-      .contains(errMessage)
-      .contains(errMessagePostfix)
-    }
-
-    describe.only('created session', () => {
+    describe('created session', () => {
       before(() => {
         loadSpec({
           projectName: 'session-and-origin-e2e-specs',
           filePath: 'session/errors.cy.js',
-          // passCount: 1,
-          // failCount: 12,
           failCount: 7,
         })
       })
 
       it('setup has failing Cypress command', () => {
-        cy.contains('.test', 'setup has failing command').as('example_test')
+        cy.contains('.test', 'setup - has failing command').as('example_test')
         // test marked as failed and is expanded
         cy.get('@example_test').should('have.attr', 'data-model-state', 'failed')
         .children('.collapsible').should('have.class', 'is-open')
@@ -371,98 +362,320 @@ describe('runner/cypress sessions.ui.spec', {
           })
         })
 
-        const setupError = 'This error occurred while creating the session. Because the session setup failed, we failed the test.'
+        const setupErrorPostFix = 'This error occurred while creating the session. Because the session setup failed, we failed the test.'
 
-        assertTestError('@example_test', 'Expected to find element', setupError)
+        cy.get('@example_test')
+        .find('.attempt-error-region')
+        .contains('Expected to find element')
+        .contains(setupErrorPostFix)
       })
 
       describe('failed validation', () => {
-        const validateErr = 'This error occurred while validating the created session. Because validation failed immediately after creating the session, we failed the test.'
-
-        const assertCreateSessionValidationFailed = (testAlias: string) => {
-          cy.get(testAlias)
-          .should('have.attr', 'data-model-state', 'failed')
-          .children('.collapsible')
-          .should('have.class', 'is-open')
-          .within(() => {
-            // session is marked as 'failed' and is expanded
-            // setup group is expanded
-            cy.get('.command-name-session').eq(0).as('session_command')
-            .children('.command-wrapper')
-            .find('.reporter-tag')
-            .should('contain', 'failed')
-
-            cy.get('@session_command')
-            .children('.command-child-container')
-            .should('exist')
-            .within(() => {
-              // create session group is marked as 'passed' and is collapsed
-              cy.contains('.command-wrapper', 'Create new session')
-              .should('have.class', 'command-state-passed')
-              // .children('.command-child-container')
-              // .should('not.exist')
-
-              cy.contains('.command-wrapper', 'Validate session')
-              .should('have.class', 'command-state-failed')
-              .find('.failed-indicator')
-              .should('exist')
-            })
-          })
-        }
-
-        ;[
+        [
           {
             testCase: 'has failing Cypress command',
-            systemTestTitle: 'created command - validate - has failing Cypress command',
+            systemTestTitle: 'validate - has failing Cypress command',
             errMessage: 'Expected to find element',
           },
           {
             testCase: 'command yields false',
-            systemTestTitle: 'created command - validate - command yields false',
+            systemTestTitle: 'validate - command yields false',
             errMessage: 'callback yielded false.',
           },
           {
             testCase: 'has multiple commands and yields false',
-            systemTestTitle: 'created command - validate - has multiple commands and yields false',
+            systemTestTitle: 'validate - has multiple commands and yields false',
             errMessage: 'callback yielded false.',
           },
           {
             testCase: 'rejects with false',
-            systemTestTitle: 'created command - validate - rejects with false',
+            systemTestTitle: 'validate - rejects with false',
             errMessage: 'rejected with false.',
           },
           {
             testCase: 'promise resolved false',
-            systemTestTitle: 'created command - validate - promise resolves false',
+            systemTestTitle: 'validate - promise resolves false',
             errMessage: 'promise resolved false.',
           },
           {
             testCase: 'throws an error',
-            systemTestTitle: 'created command - validate - throws an error',
+            systemTestTitle: 'validate - throws an error',
             errMessage: 'Something went wrong!',
           },
         ].forEach(({ testCase, systemTestTitle, errMessage }, index) => {
           it(`has test error when validate ${testCase}`, () => {
             cy.contains('.test', systemTestTitle).as('example_test')
-            assertCreateSessionValidationFailed('@example_test')
-            assertTestError('@example_test', errMessage, validateErr)
+            cy.get('@example_test')
+            .should('have.attr', 'data-model-state', 'failed')
+            .children('.collapsible')
+            .should('have.class', 'is-open')
+            .within(() => {
+              // session is marked as 'failed' and is expanded
+              // setup group is expanded
+              cy.get('.command-name-session').eq(0).as('session_command')
+              .children('.command-wrapper')
+              .find('.reporter-tag')
+              .should('contain', 'failed')
+
+              cy.get('@session_command')
+              .children('.command-child-container')
+              .should('exist')
+              .within(() => {
+                // create session group is marked as 'passed' and is collapsed
+                cy.contains('.command-wrapper', 'Create new session')
+                .should('have.class', 'command-state-passed')
+                .children('.command-child-container')
+                .should('not.exist')
+
+                cy.contains('.command-wrapper', 'Validate session').as('validateSessionGroup')
+                .should('have.class', 'command-state-failed')
+                .find('.failed-indicator')
+                .should('exist')
+              })
+            })
+
+            const validateErrPostFix = 'This error occurred while validating the created session. Because validation failed immediately after creating the session, we failed the test.'
+
+            cy.get('@example_test')
+            .find('.attempt-error-region')
+            .contains(errMessage)
+            .contains(validateErrPostFix)
           })
         })
       })
     })
 
-    describe('restored session fails validation and session is recreated', () => {
-      it('has inline error where validate returned false', () => {
-        // test marked as passed
-        // test is collapsed
-        // session is marked as 'successful'
-        // validates group is collapsed
+    describe('recreated session', () => {
+      const assertRecreatedSession = ({
+        testAlias,
+        validationErrMessage,
+        commandPassed,
+        successfullyRecreatedSession,
+      }) => {
+        cy.get(testAlias)
+        .should('have.attr', 'data-model-state', commandPassed ? 'passed' : 'failed')
+        .children('.collapsible')
+        .should(commandPassed ? 'not.have.class' : 'have.class', 'is-open')
+
+        if (commandPassed) {
+          cy.get(testAlias).scrollIntoView().click()
+        }
+
+        cy.get(testAlias)
+        .within(() => {
+          // second session is marked as 'failed' and is expanded
+          cy.get('.command-name-session').eq(1).as('session_command')
+          .children('.command-wrapper')
+          .find('.reporter-tag')
+          .should('contain', commandPassed ? 'recreated' : 'failed')
+
+          if (commandPassed) {
+            cy.get('@session_command')
+            .scrollIntoView()
+            .find('.command-expander')
+            .click()
+          }
+
+          cy.get('@session_command')
+          .children('.command-child-container')
+          .should('exist')
+          .within(() => {
+            // restored session log
+            cy.contains('.command-wrapper', 'Restore saved session')
+
+            cy.contains('.command-wrapper', 'Validate session').as('validateSessionGroup')
+            .should('have.class', 'command-state-failed')
+            .find('.failed-indicator')
+            .should('exist')
+
+            const restoredMessagePostfix = 'This error occurred while validating the restored session. Because validation failed, we will try to recreate the session.'
+
+            cy.get('@session_command')
+            .find('.recovered-test-err')
+            .contains(validationErrMessage)
+            .contains(restoredMessagePostfix)
+
+            cy.contains('.command-wrapper', 'Recreate session')
+            .should('have.class', successfullyRecreatedSession ? 'command-state-passed' : 'command-state-failed')
+            .find('.failed-indicator')
+            .should(successfullyRecreatedSession ? 'not.exist' : 'exist', 'is-open')
+          })
+        })
+      }
+
+      describe('successfully recreated session', () => {
+        before(() => {
+          loadSpec({
+            projectName: 'session-and-origin-e2e-specs',
+            filePath: 'session/errors.cy.js',
+            passCount: 7,
+            failCount: 0,
+            setup () {
+              cy.window().then((win) => {
+                return win.CYPRESS_TEST_DATA = {
+                  restoreSessionWithValidationFailure: true,
+                  successfullyRecreatedSession: true,
+                }
+              })
+            },
+          })
+        })
+
+        ;[
+          {
+            testCase: 'has failing Cypress command',
+            systemTestTitle: 'validate - has failing Cypress command',
+            errMessage: 'Expected to find element',
+          },
+          {
+            testCase: 'command yields false',
+            systemTestTitle: 'validate - command yields false',
+            errMessage: 'callback yielded false.',
+          },
+          {
+            testCase: 'has multiple commands and yields false',
+            systemTestTitle: 'validate - has multiple commands and yields false',
+            errMessage: 'callback yielded false.',
+          },
+          {
+            testCase: 'rejects with false',
+            systemTestTitle: 'validate - rejects with false',
+            errMessage: 'rejected with false.',
+          },
+          {
+            testCase: 'promise resolved false',
+            systemTestTitle: 'validate - promise resolves false',
+            errMessage: 'promise resolved false.',
+          },
+          {
+            testCase: 'throws an error',
+            systemTestTitle: 'validate - throws an error',
+            errMessage: 'Something went wrong!',
+          },
+        ].forEach(({ testCase, systemTestTitle, errMessage }, index) => {
+          if (index === 0 || index === 5) {
+            return
+          }
+
+          it(`has test error when validate ${testCase}`, () => {
+            cy.contains('.test', systemTestTitle).as('example_test')
+
+            cy.get('@example_test').within(() => {
+              assertRecreatedSession({
+                testAlias: '@example_test',
+                validationErrMessage: errMessage,
+                commandPassed: true,
+                successfullyRecreatedSession: true,
+              })
+            })
+
+            cy.get('@example_test')
+            .find('.attempt-error-region')
+            .should('not.exist')
+          })
+        })
       })
 
-      it('has inline error where validate resolved false')
-      it('has inline error where validate rejected with false')
-      it('has inline error where validate threw error')
-      it('has inline error where validate has failing Cypress command')
+      describe('failed to recreated session', () => {
+        before(() => {
+          loadSpec({
+            projectName: 'session-and-origin-e2e-specs',
+            filePath: 'session/errors.cy.js',
+            // passCount: 0, // should be
+            passCount: 2,
+            // failCount:7,// should be
+            failCount: 5,
+            // failCount: 1,
+            setup () {
+              cy.window().then((win) => {
+                return win.CYPRESS_TEST_DATA = {
+                  restoreSessionWithValidationFailure: true,
+                  successfullyRecreatedSession: false,
+                }
+              })
+            },
+          })
+        })
+
+        it('setup has failing command', () => {
+          cy.contains('.test', 'setup - has failing command').as('example_test')
+
+          cy.get('@example_test').within(() => {
+            assertRecreatedSession({
+              testAlias: '@example_test',
+              validationErrMessage: 'callback yielded false',
+              commandPassed: false,
+              successfullyRecreatedSession: false,
+            })
+          })
+
+          const recreatedErrPostfix = 'This error occurred while creating the session. Because the session setup failed, we failed the test.'
+
+          cy.get('@example_test')
+          .find('.attempt-error-region')
+          .contains('Expected to find element')
+          .contains(recreatedErrPostfix)
+        })
+
+        describe('failed validation', () => {
+          [
+            {
+              testCase: 'has failing Cypress command',
+              systemTestTitle: 'validate - has failing Cypress command',
+              errMessage: 'Expected to find element',
+            },
+            {
+              testCase: 'command yields false',
+              systemTestTitle: 'validate - command yields false',
+              errMessage: 'callback yielded false.',
+            },
+            {
+              testCase: 'has multiple commands and yields false',
+              systemTestTitle: 'validate - has multiple commands and yields false',
+              errMessage: 'callback yielded false.',
+            },
+            {
+              testCase: 'rejects with false',
+              systemTestTitle: 'validate - rejects with false',
+              errMessage: 'rejected with false.',
+            },
+            {
+              testCase: 'promise resolved false',
+              systemTestTitle: 'validate - promise resolves false',
+              errMessage: 'promise resolved false.',
+            },
+            {
+              testCase: 'throws an error',
+              systemTestTitle: 'validate - throws an error',
+              errMessage: 'Something went wrong!',
+            },
+          ].forEach(({ testCase, systemTestTitle, errMessage }, index) => {
+            if (index === 0 || index === 5) {
+              return
+            }
+
+            it(`has test error when validate ${testCase}`, () => {
+              cy.contains('.test', systemTestTitle).as('example_test')
+
+              cy.get('@example_test').within(() => {
+                assertRecreatedSession({
+                  testAlias: '@example_test',
+                  validationErrMessage: errMessage,
+                  commandPassed: false,
+                  successfullyRecreatedSession: true,
+                })
+              })
+
+              const recreatedErrPostfix = 'This error occurred while validating the recreated session. Because validation failed immediately after recreating the session, we failed the test.'
+
+              cy.get('@example_test')
+              .find('.attempt-error-region')
+              .contains(errMessage)
+              .contains(recreatedErrPostfix)
+            })
+          })
+        })
+      })
     })
   })
 })

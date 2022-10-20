@@ -302,7 +302,7 @@ export default function (Commands, Cypress, cy) {
 
               // show validation error and allow sessions workflow to recreate the session
               if (step === 'restore') {
-                $errUtils.modifyErrMsg(err, `\n\nThis error occurred while validating the restoring session. Because validation failed, we will try to recreate the session.`, _.add)
+                $errUtils.modifyErrMsg(err, `\n\nThis error occurred while validating the restored session. Because validation failed, we will try to recreate the session.`, _.add)
 
                 err.isRecovered = true
 
