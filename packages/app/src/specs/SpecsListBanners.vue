@@ -278,7 +278,7 @@ const currentBannerCohortOption = computed(() => {
     return null
   }
 
-  return getCohortForBanner(bannerIds[loginConnectStore.userStatus])
+  return getCohortForBanner(bannerIds[loginConnectStore.userStatus])?.value
 })
 
 </script>

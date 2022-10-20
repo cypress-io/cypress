@@ -1,5 +1,6 @@
 <template>
   <TrackedBanner
+    v-if="cohortOption"
     :banner-id="bannerId"
     data-cy="connect-project-banner"
     status="info"
@@ -15,11 +16,7 @@
     }"
   >
     <p class="mb-24px">
-      <!--
-        unref allows plain object to be used in testing
-        while a ref is provided in actual usage
-      -->
-      {{ unref(cohortOption)?.value }}
+      {{ cohortOption.value }}
     </p>
 
     <Button
@@ -40,7 +37,6 @@ import Button from '@cy/components/Button.vue'
 import TrackedBanner from './TrackedBanner.vue'
 import type { CohortOption } from '@packages/frontend-shared/src/composables/useCohorts'
 import { BannerIds } from '@packages/types'
-import { unref } from 'vue'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 const { openLoginConnectModal } = useLoginConnectStore()
 

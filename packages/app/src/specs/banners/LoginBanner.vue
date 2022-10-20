@@ -1,5 +1,6 @@
 <template>
   <TrackedBanner
+    v-if="cohortOption"
     :banner-id="bannerId"
     data-cy="login-banner"
     status="info"
@@ -15,7 +16,7 @@
     }"
   >
     <p class="mb-24px">
-      {{ unref(cohortOption)?.value }}
+      {{ cohortOption.value }}
     </p>
 
     <Button
@@ -37,7 +38,6 @@ import TrackedBanner from './TrackedBanner.vue'
 import type { CohortOption } from '@packages/frontend-shared/src/composables/useCohorts'
 import { BannerIds } from '@packages/types'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
-import { unref } from 'vue'
 const { openLoginConnectModal } = useLoginConnectStore()
 
 defineProps<{

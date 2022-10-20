@@ -1,5 +1,6 @@
 <template>
   <TrackedBanner
+    v-if="cohortOption"
     :banner-id="bannerId"
     data-cy="create-organization-banner"
     status="info"
