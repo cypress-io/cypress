@@ -3,7 +3,6 @@ import { strict as assert } from 'assert'
 import os from 'os'
 import WorkerNodes from 'worker-nodes'
 import type { ProcessScriptOpts, ProcessScriptResult } from '../types'
-import fs from 'fs'
 
 const workerScript = require.resolve('../../dist/doctor/process-script.worker')
 
