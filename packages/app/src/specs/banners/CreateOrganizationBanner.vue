@@ -35,7 +35,7 @@
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import { useI18n } from '@cy/i18n'
 import TrackedBanner from './TrackedBanner.vue'
-import type { CohortOption } from '@packages/frontend-shared/src/composables/useCohorts'
+import type { CohortOption } from '@packages/frontend-shared/src/gql-components/composables/useCohorts'
 import { BannerIds } from '@packages/types'
 import { CreateOrganizationBannerDocument } from '../../generated/graphql'
 import { gql, useQuery } from '@urql/vue'

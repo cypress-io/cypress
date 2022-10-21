@@ -122,7 +122,7 @@ generates:
   './packages/app/src/generated/graphql-test.ts':
     documents: 
       - './packages/app/src/**/*.{vue,ts,tsx,js,jsx}'
-      - './packages/frontend-shared/src/**/*.{vue,ts,tsx,js,jsx}'
+      - './packages/frontend-shared/src/gql-components/**/*.{vue,ts,tsx,js,jsx}'
     <<: *vueTesting
 
   './packages/frontend-shared/src/generated/graphql-test.ts':

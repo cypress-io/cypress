@@ -108,7 +108,9 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
 
       it('should render when not previously-dismissed', () => {
         cy.mountFragment(SpecsListBannersFragmentDoc, {
-          render: (gqlVal) => <SpecsListBanners gql={gqlVal} />,
+          render: (gqlVal) => (<SpecsListBanners
+            gql={gqlVal}
+          />),
         })
 
         const bannerTrueUserConditions = {
