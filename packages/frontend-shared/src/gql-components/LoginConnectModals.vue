@@ -30,8 +30,8 @@
 import LoginConnectModalsContent from './LoginConnectModalsContent.vue'
 import { gql, useQuery } from '@urql/vue'
 import { LoginConnectModals_LoginConnectModalsQueryDocument } from '../generated/graphql'
-import { watch } from 'vue'
 import { useLoginConnectStore } from '../store/login-connect-store'
+import { whenever } from '@vueuse/core'
 const loginConnectStore = useLoginConnectStore()
 
 gql`
@@ -42,16 +42,10 @@ query LoginConnectModals_LoginConnectModalsQuery {
 
 const query = useQuery({ query: LoginConnectModals_LoginConnectModalsQueryDocument, pause: true })
 
-watch(() => loginConnectStore.isLoginConnectOpen, (newVal) => {
-  if (newVal) {
-    executeQuery()
-  }
-}, {
-  immediate: true,
-})
-
 const executeQuery = async () => {
   await query.executeQuery()
 }
+
+whenever(() => loginConnectStore.isLoginConnectOpen, executeQuery)
 
 </script>
