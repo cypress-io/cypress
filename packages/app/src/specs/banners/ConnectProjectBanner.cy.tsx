@@ -1,10 +1,9 @@
 import { defaultMessages } from '@cy/i18n'
 import ConnectProjectBanner from './ConnectProjectBanner.vue'
 import { TrackedBanner_RecordBannerSeenDocument } from '../../generated/graphql'
-import { ref } from 'vue'
 
 describe('<ConnectProjectBanner />', () => {
-  const cohortOption = ref({ cohort: 'A', value: defaultMessages.specPage.banners.connectProject.contentA })
+  const cohortOption = { cohort: 'A', value: defaultMessages.specPage.banners.connectProject.contentA }
 
   it('should render expected content', () => {
     cy.mount({ render: () => <ConnectProjectBanner hasBannerBeenShown={true} cohortOption={cohortOption}/> })

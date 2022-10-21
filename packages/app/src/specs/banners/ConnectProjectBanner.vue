@@ -1,6 +1,6 @@
 <template>
   <TrackedBanner
-    v-if="cohortOption.value"
+    v-if="cohortOption"
     :banner-id="bannerId"
     data-cy="connect-project-banner"
     status="info"
@@ -12,11 +12,11 @@
     :event-data="{
       campaign: 'Create project',
       medium: 'Specs Create Project Banner',
-      cohort: cohortOption.value.cohort
+      cohort: cohortOption.cohort
     }"
   >
     <p class="mb-24px">
-      {{ cohortOption.value.value }}
+      {{ cohortOption.value }}
     </p>
 
     <Button
@@ -38,12 +38,11 @@ import TrackedBanner from './TrackedBanner.vue'
 import type { CohortOption } from '@packages/frontend-shared/src/gql-components/composables/useCohorts'
 import { BannerIds } from '@packages/types'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
-import type { Ref } from 'vue'
 const { openLoginConnectModal } = useLoginConnectStore()
 
 defineProps<{
   hasBannerBeenShown: boolean
-  cohortOption: Ref<CohortOption>
+  cohortOption: CohortOption
 }>()
 
 const { t } = useI18n()

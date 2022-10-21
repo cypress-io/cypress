@@ -110,11 +110,12 @@
     </p>
     <RequestAccessButton :gql="props.gql" />
   </Alert>
+
   <component
-    :is="bannerToShow.component"
+    :is="bannerToShow"
     v-else-if="isBannerAllowed && bannerToShow"
     :has-banner-been-shown="hasCurrentBannerBeenShown"
-    :cohort-option="bannerToShow.cohortOption"
+    :cohort-option="currentCohortOption.cohort"
   />
 </template>
 
@@ -129,7 +130,7 @@ import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import RefreshIcon from '~icons/cy/action-restart_x16'
 import { useRoute } from 'vue-router'
-import { computed, ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import RequestAccessButton from './RequestAccessButton.vue'
 import { gql, useSubscription } from '@urql/vue'
 import { SpecsListBannersFragment, SpecsListBanners_CheckCloudOrgMembershipDocument } from '../generated/graphql'
@@ -230,10 +231,7 @@ const bannerToShow = computed(() => {
     needsRecordedRun: RecordBanner,
   }
 
-  return {
-    component: componentsByStatus[loginConnectStore.userStatus] ?? null,
-    cohortOption: getCohortForBanner(bannerIds[loginConnectStore.userStatus]),
-  }
+  return componentsByStatus[loginConnectStore.userStatus] ?? null
 })
 
 const hasCurrentBannerBeenShown = computed(() => {
@@ -268,10 +266,6 @@ const bannerCohortOptions = {
 const cohortBuilder = useCohorts()
 
 const getCohortForBanner = (bannerId: string) => {
-  if (!bannerCohortOptions[bannerIds[loginConnectStore.userStatus]]) {
-    return null
-  }
-
   const cohortConfig: CohortConfig = {
     name: bannerId,
     options: bannerCohortOptions[bannerId],
@@ -279,5 +273,13 @@ const getCohortForBanner = (bannerId: string) => {
 
   return cohortBuilder.getCohort(cohortConfig)
 }
+
+const currentCohortOption = computed(() => {
+  if (!bannerCohortOptions[bannerIds[loginConnectStore.userStatus]]) {
+    return { cohort: null }
+  }
+
+  return reactive({ cohort: getCohortForBanner(bannerIds[loginConnectStore.userStatus]) })
+})
 
 </script>

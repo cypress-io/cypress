@@ -1,10 +1,10 @@
 <template>
   <TrackedBanner
-    v-if="cohortOption.value"
+    v-if="cohortOption"
     :banner-id="bannerId"
     data-cy="create-organization-banner"
     status="info"
-    :title="cohortOption.value.value"
+    :title="cohortOption.value"
     class="mb-16px"
     :icon="OrganizationIcon"
     dismissible
@@ -12,7 +12,7 @@
     :event-data="{
       campaign: 'Set up your organization',
       medium: 'Specs Create Organization Banner',
-      cohort: cohortOption.value.cohort
+      cohort: cohortOption.cohort
     }"
   >
     <p class="mb-24px">
@@ -41,7 +41,6 @@ import { CreateOrganizationBannerDocument } from '../../generated/graphql'
 import { gql, useQuery } from '@urql/vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { computed } from 'vue'
-import type { Ref } from 'vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 
 gql`
@@ -55,7 +54,7 @@ query CreateOrganizationBanner {
 
 const props = defineProps<{
   hasBannerBeenShown: boolean
-  cohortOption: Ref<CohortOption>
+  cohortOption: CohortOption
 }>()
 
 const { t } = useI18n()

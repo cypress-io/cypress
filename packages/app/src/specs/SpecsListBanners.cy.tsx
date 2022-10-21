@@ -140,27 +140,27 @@ describe('<SpecsListBanners />', { viewportHeight: 260 }, () => {
       })
 
       it('should be preempted by spec not found banner', () => {
-        mountWithState(gql, undefined, { isSpecNotFound: true })
+        mountWithState(gql, {}, { isSpecNotFound: true })
         cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
       })
 
       it('should be preempted by offline warning banner', () => {
-        mountWithState(gql, undefined, { isOffline: true })
+        mountWithState(gql, {}, { isOffline: true })
         cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
       })
 
       it('should be preempted by fetch error banner', () => {
-        mountWithState(gql, undefined, { isFetchError: true })
+        mountWithState(gql, {}, { isFetchError: true })
         cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
       })
 
       it('should be preempted by project not found banner', () => {
-        mountWithState(gql, undefined, { isProjectNotFound: true })
+        mountWithState(gql, {}, { isProjectNotFound: true })
         cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
       })
 
       it('should be preempted by request access banner', () => {
-        mountWithState(gql, undefined, { isProjectUnauthorized: true })
+        mountWithState(gql, {}, { isProjectUnauthorized: true })
         cy.get(`[data-cy="${bannerTestId}"]`).should('not.exist')
       })
     })

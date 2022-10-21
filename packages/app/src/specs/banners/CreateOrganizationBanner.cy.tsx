@@ -1,10 +1,9 @@
 import { defaultMessages } from '@cy/i18n'
 import CreateOrganizationBanner from './CreateOrganizationBanner.vue'
 import { TrackedBanner_RecordBannerSeenDocument } from '../../generated/graphql'
-import { ref } from 'vue'
 
 describe('<CreateOrganizationBanner />', () => {
-  const cohortOption = ref({ cohort: 'A', value: defaultMessages.specPage.banners.createOrganization.titleA })
+  const cohortOption = { cohort: 'A', value: defaultMessages.specPage.banners.createOrganization.titleA }
 
   it('should render expected content', () => {
     const linkHref = 'http://dummy.cypress.io/organizations/create'
