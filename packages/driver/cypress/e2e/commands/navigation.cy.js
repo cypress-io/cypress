@@ -2102,13 +2102,13 @@ describe('src/cy/commands/navigation', () => {
 
         cy.on('log:added', (_attrs, log) => {
           this.lastLog = log
-          this.logs.push(log)
+          this.logs?.push(log)
         })
 
         return null
       })
 
-      describe('can time out', () => {
+      describe('can time out', { retries: 1 }, () => {
         let pageLoadTimeout
 
         before(() => {

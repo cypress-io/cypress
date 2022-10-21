@@ -979,7 +979,7 @@ describe('cy.session', { retries: 0 }, () => {
         cy.once('fail', (err) => {
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
-          expect(err.message).to.contain('This error occurred while creating session. Because the session setup failed, we failed the test.')
+          expect(err.message).to.contain('This error occurred while creating the session. Because the session setup failed, we failed the test.')
           expect(lastSessionLog.get('state')).to.eq('failed')
           done()
         })
@@ -993,7 +993,7 @@ describe('cy.session', { retries: 0 }, () => {
         cy.once('fail', (err) => {
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
-          expect(err.message).to.contain('This error occurred while creating session. Because the session setup failed, we failed the test.')
+          expect(err.message).to.contain('This error occurred while creating the session. Because the session setup failed, we failed the test.')
           expect(lastSessionLog.get('state')).to.eq('failed')
 
           done()
@@ -1006,7 +1006,7 @@ describe('cy.session', { retries: 0 }, () => {
     })
 
     describe('options.validate failures', () => {
-      const errorHookMessage = 'This error occurred in a session validate hook after initializing the session. Because validation failed immediately after session setup we failed the test.'
+      const errorHookMessage = 'This error occurred while validating the created session. Because validation failed immediately after creating the session, we failed the test.'
 
       it('throws when options.validate has a failing Cypress command', (done) => {
         cy.once('fail', (err) => {
@@ -1071,30 +1071,9 @@ describe('cy.session', { retries: 0 }, () => {
         })
       })
 
-      it('throws when options.validate returns false', (done) => {
-        cy.once('fail', (err) => {
-          expect(err.message).to.contain('Your `cy.session` **validate** callback returned false.')
-          expect(err.message).contain(errorHookMessage)
-          // TODO: Webkit does not have correct stack traces on errors currently
-          if (Cypress.isBrowser('!webkit')) {
-            expect(err.codeFrame).exist
-          }
-
-          done()
-        })
-
-        cy.session(['mock-session', 'return false'], () => {
-          cy.log('setup')
-        }, {
-          validate () {
-            return false
-          },
-        })
-      })
-
       it('throws when options.validate resolves false', (done) => {
         cy.once('fail', (err) => {
-          expect(err.message).to.contain('Your `cy.session` **validate** callback resolved false.')
+          expect(err.message).to.contain('Your `cy.session` **validate** promise resolved false.')
           expect(err.message).contain(errorHookMessage)
           // TODO: Webkit does not have correct stack traces on errors currently
           if (Cypress.isBrowser('!webkit')) {
@@ -1120,7 +1099,7 @@ describe('cy.session', { retries: 0 }, () => {
 
       it('throws when options.validate returns Chainer<false>', (done) => {
         cy.once('fail', (err) => {
-          expect(err.message).to.contain('Your `cy.session` **validate** callback resolved false.')
+          expect(err.message).to.contain('Your `cy.session` **validate** callback yielded false.')
           expect(err.message).contain(errorHookMessage)
           done()
         })

@@ -196,7 +196,7 @@ it('validate - promise resolves false', () => {
   function validate () {
     count += 1
 
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       if (testData?.restoreSessionWithValidationFailure) {
         if (
           // create session for first command run

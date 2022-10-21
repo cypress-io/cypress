@@ -56,8 +56,8 @@ describe('src/cy/commands/assertions', () => {
     })
 
     it('returns the subject for chainability', () => {
-      cy
-      .noop({ foo: 'bar' }).should('deep.eq', { foo: 'bar' })
+      cy.noop({ foo: 'bar' })
+      .should('deep.eq', { foo: 'bar' })
       .then((obj) => {
         expect(testCommands()).to.eql([
           { name: 'visit', snapshots: 1, retries: 0 },

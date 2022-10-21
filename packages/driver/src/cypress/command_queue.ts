@@ -258,14 +258,10 @@ export class CommandQueue extends Queue<$Command> {
 
       command.set({ subject })
 
-      // we're finished with the current command so set it back to null
-      this.state('current', null)
-
       this.setSubjectForChainer(command.get('chainerId'), subject)
 
       return subject
     }).catch((err) => {
-      console.log('on command  err')
       if (this.state('onCommandFailed')) {
         err = this.state('onCommandFailed')(err, this)
 
@@ -282,23 +278,21 @@ export class CommandQueue extends Queue<$Command> {
         err.name = 'CypressError'
       }
 
-      console.log('cypress command had an error: %o', err.isRecovered)
-
       commandRunningFailed(Cypress, this.state, err)
 
       if (err.isRecovered) {
-        console.log('let the queue move on to the next command')
-
         return // let the queue move on to the next command
       }
 
       throw err
     }).finally(() => {
       this.state('commandIntermediateValue', undefined)
-      // we're finished with the current command so set it back to null
-      this.state('current', null)
+
       // end / snapshot our logs if they need it
       command.finishLogs()
+
+      // we're finished with the current command so set it back to null
+      this.state('current', null)
 
       // reset the nestedIndex back to null
       this.state('nestedIndex', null)
@@ -412,28 +406,6 @@ export class CommandQueue extends Queue<$Command> {
       if (runnable.isPending()) {
         return
       }
-
-      // if (this.state('onCommandFailed')) {
-      //   const handledError = this.state('onCommandFailed')(err, this)
-
-      //   // cy.state('onCommandFailed', null)
-
-      //   if (handledError) {
-      //     return next()
-      //   }
-      // }
-
-      // debugErrors('caught error in promise chain: %o', err)
-
-      // // since this failed this means that a specific command failed
-      // // and we should highlight it in red or insert a new command
-      // // @ts-ignore
-      // if (_.isObject(err) && !err.name) {
-      //   // @ts-ignore
-      //   err.name = 'CypressError'
-      // }
-
-      // commandRunningFailed(Cypress, this.state, err)
 
       return this.fail(err)
     }
