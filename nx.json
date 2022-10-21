@@ -48,7 +48,8 @@
         "^production"
       ],
       "dependsOn": [
-        "^build"
+        "^build",
+        "^types"
       ]
     },
     "build-prod": {

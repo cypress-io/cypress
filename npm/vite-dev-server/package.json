@@ -47,5 +47,22 @@
   "module": "dist/index.js",
   "publishConfig": {
     "access": "public"
+  },
+  "nx": {
+    "implicitDependencies": [
+      "cypress"
+    ],
+    "targets": {
+      "build": {
+        "outputs": [
+          "npm/vite-dev-server/dist"
+        ]
+      },
+      "check-ts": {
+        "outputs": [
+          "npm/vite-dev-server/dist"
+        ]
+      }
+    }
   }
 }
