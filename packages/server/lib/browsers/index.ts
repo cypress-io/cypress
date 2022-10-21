@@ -171,8 +171,9 @@ export = {
       // We want to avoid adding signals in here that may intentionally be caused by a user.
       // For example exiting firefox through either force quitting or quitting via cypress will fire a 'SIGTERM' event which
       // would result in constantly relaunching the browser went he user actively wants to quit.
-      if (code === null && ['SIGTRAP', 'SIGABRT'].includes(signal)) {
-        const err = errors.get('BROWSER_CRASHED', browserDisplayName, signal)
+      // On windows the crash produces 2147483651 as an exit node. We should add to the list of crashes we handle as we see them.
+      if (code === null && ['SIGTRAP', 'SIGABRT'].includes(signal) || code === 2147483651 && signal === null) {
+        const err = errors.get('BROWSER_CRASHED', browserDisplayName, code, signal)
 
         if (!options.onError) {
           errors.log(err)

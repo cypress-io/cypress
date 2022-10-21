@@ -580,9 +580,9 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/renderer-process-crashed`
   },
-  BROWSER_CRASHED: (browser: string, signal: string) => {
+  BROWSER_CRASHED: (browser: string, code: string | number, signal: string) => {
     return errTemplate`\
-        We detected that the ${fmt.highlight(browser)} process just crashed with signal '${fmt.highlight(signal)}'.
+        We detected that the ${fmt.highlight(browser)} process just crashed with code '${fmt.highlight(code)}' and signal '${fmt.highlight(signal)}'.
 
         We have failed the current test and have relaunched ${fmt.highlight(browser)}.
 

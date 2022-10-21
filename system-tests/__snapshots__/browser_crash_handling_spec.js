@@ -228,7 +228,7 @@ exports['Browser Crash Handling / when the browser process crashes in chrome / f
 
 
 
-We detected that the Chrome process just crashed with signal 'SIGTRAP'.
+We detected that the Chrome process just crashed with code 'null' and signal 'SIGTRAP'.
 
 We have failed the current test and have relaunched Chrome.
 
