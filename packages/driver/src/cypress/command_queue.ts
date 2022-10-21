@@ -31,7 +31,7 @@ const commandRunningFailed = (Cypress, state, err) => {
   }
 
   const current = state('current')
-  const lastLog = _.last(current?.get('logs') || [])
+  const lastLog = current?.getLastLog()
 
   const consoleProps = () => {
     if (!current) return
@@ -52,7 +52,7 @@ const commandRunningFailed = (Cypress, state, err) => {
   }
 
   // ensure the last log on the command ends correctly
-  if (lastLog) {
+  if (lastLog && !lastLog.get('ended')) {
     return lastLog.set({ consoleProps }).error(err)
   }
 
@@ -235,9 +235,8 @@ export class CommandQueue extends Queue<$Command> {
       }
 
       return ret
-    }).then((subject) => {
-      this.state('commandIntermediateValue', undefined)
-
+    })
+    .then((subject) => {
       // we may be given a regular array here so
       // we need to re-wrap the array in jquery
       // if that's the case if the first item
@@ -259,18 +258,50 @@ export class CommandQueue extends Queue<$Command> {
 
       command.set({ subject })
 
-      // end / snapshot our logs if they need it
-      command.finishLogs()
-
-      // reset the nestedIndex back to null
-      this.state('nestedIndex', null)
-
       // we're finished with the current command so set it back to null
       this.state('current', null)
 
       this.setSubjectForChainer(command.get('chainerId'), subject)
 
       return subject
+    }).catch((err) => {
+      console.log('on command  err')
+      if (this.state('onCommandFailed')) {
+        err = this.state('onCommandFailed')(err, this)
+
+        this.state('onCommandFailed', null)
+      }
+
+      debugErrors('cypress command had an error: %o', err)
+
+      // since this failed this means that a specific command failed
+      // and we should highlight it in red or insert a new command
+      // @ts-ignore
+      if (_.isObject(err) && !err.name) {
+        // @ts-ignore
+        err.name = 'CypressError'
+      }
+
+      console.log('cypress command had an error: %o', err.isRecovered)
+
+      commandRunningFailed(Cypress, this.state, err)
+
+      if (err.isRecovered) {
+        console.log('let the queue move on to the next command')
+
+        return // let the queue move on to the next command
+      }
+
+      throw err
+    }).finally(() => {
+      this.state('commandIntermediateValue', undefined)
+      // we're finished with the current command so set it back to null
+      this.state('current', null)
+      // end / snapshot our logs if they need it
+      command.finishLogs()
+
+      // reset the nestedIndex back to null
+      this.state('nestedIndex', null)
     })
   }
 
@@ -382,27 +413,27 @@ export class CommandQueue extends Queue<$Command> {
         return
       }
 
-      if (this.state('onCommandFailed')) {
-        const handledError = this.state('onCommandFailed')(err, this)
+      // if (this.state('onCommandFailed')) {
+      //   const handledError = this.state('onCommandFailed')(err, this)
 
-        cy.state('onCommandFailed', null)
+      //   // cy.state('onCommandFailed', null)
 
-        if (handledError) {
-          return next()
-        }
-      }
+      //   if (handledError) {
+      //     return next()
+      //   }
+      // }
 
-      debugErrors('caught error in promise chain: %o', err)
+      // debugErrors('caught error in promise chain: %o', err)
 
-      // since this failed this means that a specific command failed
-      // and we should highlight it in red or insert a new command
-      // @ts-ignore
-      if (_.isObject(err) && !err.name) {
-        // @ts-ignore
-        err.name = 'CypressError'
-      }
+      // // since this failed this means that a specific command failed
+      // // and we should highlight it in red or insert a new command
+      // // @ts-ignore
+      // if (_.isObject(err) && !err.name) {
+      //   // @ts-ignore
+      //   err.name = 'CypressError'
+      // }
 
-      commandRunningFailed(Cypress, this.state, err)
+      // commandRunningFailed(Cypress, this.state, err)
 
       return this.fail(err)
     }

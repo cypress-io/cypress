@@ -17,6 +17,23 @@ beforeEach(() => {
   count = 0
   sessionId = `session_${Cypress._.uniqueId()}`
   testData = Cypress.state('specWindow').parent.CYPRESS_TEST_DATA
+
+  // uncomment to debug tests:
+
+  // 1) create session:
+  // testData = undefined
+
+  // 2) Recreate session & recover:
+  // testData = {
+  //   restoreSessionWithValidationFailure: true,
+  //   successfullyRecreatedSession: true,
+  // }
+
+  // 3) recreate session & fail to recover:
+  // testData = {
+  //   restoreSessionWithValidationFailure: true,
+  //   successfullyRecreatedSession: false,
+  // }
 })
 
 function setup () {
@@ -75,6 +92,8 @@ it('validate - has failing Cypress command', function () {
     ) {
       return cy.get('div', { timeout: 1 })
     }
+
+    cy.wrap(null).click()
 
     cy.get('does_not_exist', { timeout: 1 })
     // cy.get('does_not_exist_2', { timeout: 1 })
@@ -207,6 +226,13 @@ it('validate - throws an error', () => {
 
     cy.get('div')
     .within(() => {
+      Cypress.log({
+        name: 'do something before error is thrown',
+        type: 'system',
+        event: true,
+        state: 'passed',
+      })
+
       if (testData?.restoreSessionWithValidationFailure) {
         if (
           // create session for first command run

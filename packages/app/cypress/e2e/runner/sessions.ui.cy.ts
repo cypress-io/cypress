@@ -375,7 +375,7 @@ describe('runner/cypress sessions.ui.spec', {
           {
             testCase: 'has failing Cypress command',
             systemTestTitle: 'validate - has failing Cypress command',
-            errMessage: 'Expected to find element',
+            errMessage: 'failed because it requires a DOM element',
           },
           {
             testCase: 'command yields false',
@@ -525,7 +525,7 @@ describe('runner/cypress sessions.ui.spec', {
           {
             testCase: 'has failing Cypress command',
             systemTestTitle: 'validate - has failing Cypress command',
-            errMessage: 'Expected to find element',
+            errMessage: 'failed because it requires a DOM element',
           },
           {
             testCase: 'command yields false',
@@ -553,10 +553,6 @@ describe('runner/cypress sessions.ui.spec', {
             errMessage: 'Something went wrong!',
           },
         ].forEach(({ testCase, systemTestTitle, errMessage }, index) => {
-          if (index === 0 || index === 5) {
-            return
-          }
-
           it(`has test error when validate ${testCase}`, () => {
             cy.contains('.test', systemTestTitle).as('example_test')
 
@@ -581,11 +577,8 @@ describe('runner/cypress sessions.ui.spec', {
           loadSpec({
             projectName: 'session-and-origin-e2e-specs',
             filePath: 'session/errors.cy.js',
-            // passCount: 0, // should be
-            passCount: 2,
-            // failCount:7,// should be
-            failCount: 5,
-            // failCount: 1,
+            passCount: 0,
+            failCount: 7,
             setup () {
               cy.window().then((win) => {
                 return win.CYPRESS_TEST_DATA = {
@@ -622,7 +615,7 @@ describe('runner/cypress sessions.ui.spec', {
             {
               testCase: 'has failing Cypress command',
               systemTestTitle: 'validate - has failing Cypress command',
-              errMessage: 'Expected to find element',
+              errMessage: 'failed because it requires a DOM element',
             },
             {
               testCase: 'command yields false',
@@ -650,10 +643,6 @@ describe('runner/cypress sessions.ui.spec', {
               errMessage: 'Something went wrong!',
             },
           ].forEach(({ testCase, systemTestTitle, errMessage }, index) => {
-            if (index === 0 || index === 5) {
-              return
-            }
-
             it(`has test error when validate ${testCase}`, () => {
               cy.contains('.test', systemTestTitle).as('example_test')
 

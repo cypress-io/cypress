@@ -96,7 +96,7 @@ export default class Command extends Instrument {
         // command has nested commands with children
         (this.name !== 'session' && _.some(this.children, (v) => v.hasChildren)) ||
         // last nested command is open
-        _.last(this.children)?.isOpen ||
+        (this.name !== 'session' && _.last(this.children)?.isOpen) ||
         // show slow command when test is running
         (_.some(this.children, (v) => v.isLongRunning) && _.last(this.children)?.state === 'pending') ||
         // at last nested command failed
