@@ -1,6 +1,6 @@
 <template>
   <TrackedBanner
-    v-if="cohortOption"
+    v-if="cohortOption?.value"
     :banner-id="bannerId"
     data-cy="login-banner"
     status="info"
@@ -12,11 +12,11 @@
     :event-data="{
       campaign: 'Log In',
       medium: 'Specs Login Banner',
-      cohort: cohortOption.cohort
+      cohort: cohortOption.value.cohort
     }"
   >
     <p class="mb-24px">
-      {{ cohortOption.value }}
+      {{ cohortOption.value.value }}
     </p>
 
     <Button

@@ -1,6 +1,6 @@
 <template>
   <TrackedBanner
-    v-if="cohortOption"
+    v-if="cohortOption.value"
     :banner-id="bannerId"
     data-cy="connect-project-banner"
     status="info"
@@ -12,11 +12,11 @@
     :event-data="{
       campaign: 'Create project',
       medium: 'Specs Create Project Banner',
-      cohort: cohortOption.cohort
+      cohort: cohortOption.value.cohort
     }"
   >
     <p class="mb-24px">
-      {{ cohortOption.value }}
+      {{ cohortOption.value.value }}
     </p>
 
     <Button

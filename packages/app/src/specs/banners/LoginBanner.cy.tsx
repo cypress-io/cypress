@@ -1,9 +1,10 @@
 import { defaultMessages } from '@cy/i18n'
 import LoginBanner from './LoginBanner.vue'
 import { TrackedBanner_RecordBannerSeenDocument } from '../../generated/graphql'
+import { ref } from 'vue'
 
 describe('<LoginBanner />', () => {
-  const cohortOption = { cohort: 'A', value: defaultMessages.specPage.banners.login.contentA }
+  const cohortOption = ref({ cohort: 'A', value: defaultMessages.specPage.banners.login.contentA })
 
   it('should render expected content', () => {
     cy.mount({ render: () => <LoginBanner hasBannerBeenShown={true} cohortOption={cohortOption}/> })
@@ -33,7 +34,7 @@ describe('<LoginBanner />', () => {
         campaign: 'Log In',
         medium: 'Specs Login Banner',
         messageId: Cypress.sinon.match.string,
-        cohort: cohortOption.cohort,
+        cohort: cohortOption.value.cohort,
       })
     })
 

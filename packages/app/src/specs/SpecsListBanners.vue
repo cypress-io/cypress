@@ -111,10 +111,10 @@
     <RequestAccessButton :gql="props.gql" />
   </Alert>
   <component
-    :is="bannerToShow"
+    :is="bannerToShow.component"
     v-else-if="isBannerAllowed && bannerToShow"
     :has-banner-been-shown="hasCurrentBannerBeenShown"
-    :cohort-option="currentBannerCohortOption"
+    :cohort-option="bannerToShow.cohortOption"
   />
 </template>
 
@@ -230,7 +230,10 @@ const bannerToShow = computed(() => {
     needsRecordedRun: RecordBanner,
   }
 
-  return componentsByStatus[loginConnectStore.userStatus] ?? null
+  return {
+    component: componentsByStatus[loginConnectStore.userStatus] ?? null,
+    cohortOption: getCohortForBanner(bannerIds[loginConnectStore.userStatus]),
+  }
 })
 
 const hasCurrentBannerBeenShown = computed(() => {
@@ -265,6 +268,10 @@ const bannerCohortOptions = {
 const cohortBuilder = useCohorts()
 
 const getCohortForBanner = (bannerId: string) => {
+  if (!bannerCohortOptions[bannerIds[loginConnectStore.userStatus]]) {
+    return null
+  }
+
   const cohortConfig: CohortConfig = {
     name: bannerId,
     options: bannerCohortOptions[bannerId],
@@ -272,13 +279,5 @@ const getCohortForBanner = (bannerId: string) => {
 
   return cohortBuilder.getCohort(cohortConfig)
 }
-
-const currentBannerCohortOption = computed(() => {
-  if (!bannerCohortOptions[bannerIds[loginConnectStore.userStatus]]) {
-    return null
-  }
-
-  return getCohortForBanner(bannerIds[loginConnectStore.userStatus])?.value
-})
 
 </script>

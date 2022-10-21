@@ -1,10 +1,10 @@
 <template>
   <TrackedBanner
-    v-if="cohortOption"
+    v-if="cohortOption.value"
     :banner-id="bannerId"
     data-cy="create-organization-banner"
     status="info"
-    :title="cohortOption.value"
+    :title="cohortOption.value.value"
     class="mb-16px"
     :icon="OrganizationIcon"
     dismissible
@@ -12,7 +12,7 @@
     :event-data="{
       campaign: 'Set up your organization',
       medium: 'Specs Create Organization Banner',
-      cohort: cohortOption.cohort
+      cohort: cohortOption.value.cohort
     }"
   >
     <p class="mb-24px">
