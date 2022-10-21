@@ -103,7 +103,9 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.options = {
       report: false,
       onFocusTests () {},
-      onError () {},
+      onError (error) {
+        errors.log(error)
+      },
       onWarning: this.ctx.onWarning,
       ...options,
     }
