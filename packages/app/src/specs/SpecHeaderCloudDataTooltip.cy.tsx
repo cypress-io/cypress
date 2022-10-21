@@ -40,6 +40,7 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
             loginConnectStore.setProjectFlag('isNotFound', true)
             break
           case 'ACCESS_REQUESTED':
+            loginConnectStore.setUserFlag('isLoggedIn', true)
             loginConnectStore.setProjectFlag('isNotAuthorized', true)
 
             set(result, 'currentProject.cloudProject', {
@@ -50,6 +51,7 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
 
             break
           case 'UNAUTHORIZED':
+            loginConnectStore.setUserFlag('isLoggedIn', true)
             loginConnectStore.setProjectFlag('isNotAuthorized', true)
 
             break
@@ -149,6 +151,7 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
           .should('be.visible')
           .and('contain', get(defaultMessages, msgKeys.noAccess).replace('{0}', get(defaultMessages, msgKeys.docs)))
 
+          cy.contains('button', defaultMessages.specPage.requestAccessButton).should('be.visible')
           cy.percySnapshot()
         })
       })
@@ -164,6 +167,8 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
           cy.findByTestId('cloud-data-tooltip-content')
           .should('be.visible')
           .and('contain', get(defaultMessages, msgKeys.noAccess).replace('{0}', get(defaultMessages, msgKeys.docs)))
+
+          cy.contains('button', defaultMessages.specPage.requestSentButton).should('be.visible')
 
           cy.percySnapshot()
         })
