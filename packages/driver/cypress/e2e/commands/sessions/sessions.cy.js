@@ -277,9 +277,6 @@ describe('cy.session', { retries: 0 }, () => {
       //     expect(true).to.be.false
       //   } })
       // })
-      it.only('try', () => {
-        expect('true').to.be.true
-      })
 
       // it.only('try', () => {
       //   cy.get('body').within(() => {
@@ -563,7 +560,7 @@ describe('cy.session', { retries: 0 }, () => {
       })
 
       // test must be first to run before blank page visit between each test
-      it.only('does not clear page visit from validate function', () => {
+      it('does not clear page visit from validate function', () => {
         cy.url().should('contain', '/fixtures/auth/index.html')
       })
 
