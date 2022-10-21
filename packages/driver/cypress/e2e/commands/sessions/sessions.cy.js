@@ -278,16 +278,8 @@ describe('cy.session', { retries: 0 }, () => {
       //   } })
       // })
 
-      // it.only('try', () => {
-      //   cy.get('body').within(() => {
-      //     cy.get('div').within(() => {
-      //       expect('true').to.be.true
-      //     })
-      //   })
-      // })
-
       // // test must be first to run before blank page visit between each test
-      // it.only('does not clear page visit from validate function', () => {
+      // it('does not clear page visit from validate function', () => {
       //   setupTestContext()
       //   cy.log('Creating new session with validation to test against')
 
