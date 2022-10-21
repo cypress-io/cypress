@@ -42,5 +42,14 @@
     "dist",
     "lib",
     "theme"
-  ]
+  ],
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "packages/extension/app/dist"
+        ]
+      }
+    }
+  }
 }
