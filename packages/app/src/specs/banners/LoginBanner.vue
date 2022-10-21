@@ -39,10 +39,11 @@ import type { CohortOption } from '@packages/frontend-shared/src/gql-components/
 import { BannerIds } from '@packages/types'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 const { openLoginConnectModal } = useLoginConnectStore()
+import type { Ref } from 'vue'
 
 defineProps<{
   hasBannerBeenShown: boolean
-  cohortOption: CohortOption
+  cohortOption: Ref<CohortOption>
 }>()
 
 const { t } = useI18n()

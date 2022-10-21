@@ -38,11 +38,12 @@ import TrackedBanner from './TrackedBanner.vue'
 import type { CohortOption } from '@packages/frontend-shared/src/gql-components/composables/useCohorts'
 import { BannerIds } from '@packages/types'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import type { Ref } from 'vue'
 const { openLoginConnectModal } = useLoginConnectStore()
 
 defineProps<{
   hasBannerBeenShown: boolean
-  cohortOption: CohortOption
+  cohortOption: Ref<CohortOption>
 }>()
 
 const { t } = useI18n()

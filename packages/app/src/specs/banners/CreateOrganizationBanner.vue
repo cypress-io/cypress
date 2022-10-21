@@ -41,6 +41,7 @@ import { CreateOrganizationBannerDocument } from '../../generated/graphql'
 import { gql, useQuery } from '@urql/vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { computed } from 'vue'
+import type { Ref } from 'vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 
 gql`
@@ -54,7 +55,7 @@ query CreateOrganizationBanner {
 
 const props = defineProps<{
   hasBannerBeenShown: boolean
-  cohortOption: CohortOption
+  cohortOption: Ref<CohortOption>
 }>()
 
 const { t } = useI18n()
@@ -74,7 +75,7 @@ const createOrganizationUrl = computed(() => {
     params: {
       utm_medium: 'Specs Create Organization Banner',
       utm_campaign: 'Set up your organization',
-      utm_content: props.cohortOption.cohort,
+      utm_content: props.cohortOption.value?.cohort,
     },
   })
 })
