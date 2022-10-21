@@ -114,14 +114,15 @@ const getDependencyPathsToKeep = async () => {
 const cleanup = async (buildAppDir) => {
   // 1. Retrieve all dependencies that still need to be kept in the binary. In theory, we could use the bundles generated here as single files within the binary,
   // but for now, we just track on the dependencies that get pulled in
-  const keptDependencies = await getDependencyPathsToKeep()
+  const keptDependencies = [...await getDependencyPathsToKeep(), 'package.json', 'packages/server/server-entry.js']
 
   // 2. Gather the dependencies that could potentially be removed from the binary due to being in the snapshot
   const potentiallyRemovedDependencies = [...snapshotMetadata.healthy, ...snapshotMetadata.deferred, ...snapshotMetadata.norewrite]
 
   // 3. Remove all dependencies that are in the snapshot but not in the list of kept dependencies from the binary
   await Promise.all(potentiallyRemovedDependencies.map(async (dependency) => {
-    if (![...keptDependencies, 'package.json', 'packages/server/server-entry.js'].includes(dependency.slice(2)) && !dependency.includes('marionette-client')) {
+    // marionette-client requires all of its dependencies in a very non-standard dynamic way. We will keep anything in marionette-client
+    if (!keptDependencies.includes(dependency.slice(2)) && !dependency.includes('marionette-client')) {
       await fs.remove(path.join(buildAppDir, dependency.replace(/.ts$/, '.js')))
     }
   }))
