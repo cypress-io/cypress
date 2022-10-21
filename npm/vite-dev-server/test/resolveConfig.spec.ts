@@ -45,49 +45,7 @@ describe('resolveConfig', function () {
     const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite)
 
     expect(viteConfigFn).to.be.called
-    expect(viteConfig.server.fs.allow).to.include('some/other/file')
-  })
-
-  context('inspect plugin', () => {
-    it('should not include inspect plugin by default', async () => {
-      const projectRoot = await scaffoldSystemTestProject('vite-inspect')
-      const viteDevServerConfig = getViteDevServerConfig(projectRoot)
-
-      const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite)
-
-      expect(viteConfig.plugins).to.have.lengthOf(2)
-      expect(viteConfig.plugins.map((plugin) => plugin.name)).not.to.contain('cypress:inspect')
-    })
-
-    context('with CYPRESS_INTERNAL_VITE_INSPECT provided', () => {
-      before(() => {
-        process.env.CYPRESS_INTERNAL_VITE_INSPECT = 'true'
-      })
-
-      after(() => {
-        process.env.CYPRESS_INTERNAL_VITE_INSPECT = undefined
-      })
-
-      it('should add inspect plugin', async () => {
-        const projectRoot = await scaffoldSystemTestProject('vite-inspect')
-        const viteDevServerConfig = getViteDevServerConfig(projectRoot)
-
-        const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite)
-
-        expect(viteConfig.plugins).to.have.lengthOf(3)
-        expect(viteConfig.plugins.map((plugin) => plugin.name)).to.contain('cypress:inspect')
-      })
-
-      it('should not add inspect plugin if not installed', async () => {
-        const projectRoot = await scaffoldSystemTestProject('vite2.9.1-react')
-        const viteDevServerConfig = getViteDevServerConfig(projectRoot)
-
-        const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite)
-
-        expect(viteConfig.plugins).to.have.lengthOf(2)
-        expect(viteConfig.plugins.map((plugin) => plugin.name)).not.to.contain('cypress:inspect')
-      })
-    })
+    expect(viteConfig.server?.fs?.allow).to.include('some/other/file')
   })
 
   describe('file watching', () => {
