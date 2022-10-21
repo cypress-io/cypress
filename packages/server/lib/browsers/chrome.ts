@@ -562,6 +562,17 @@ export = {
     return args
   },
 
+  /**
+  * Clear instance state for the chrome instance, this is normally called in on kill or on exit.
+  */
+  clearInstanceState () {
+    debug('closing remote interface client')
+
+    // Do nothing on failure here since we're shutting down anyway
+    browserCriClient?.close().catch()
+    browserCriClient = undefined
+  },
+
   async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
     debug('connecting to new chrome tab in existing instance with url and debugging port', { url: options.url })
 
@@ -600,9 +611,10 @@ export = {
     pageCriClient.on('Inspector.targetCrashed', () => {
       const err = errors.get('RENDERER_CRASHED')
 
-      errors.log(err)
-
-      if (!options.onError) throw new Error('Missing onError in onCrashed')
+      if (!options.onError) {
+        errors.log(err)
+        throw new Error('Missing onError in attachListeners')
+      }
 
       options.onError(err)
     })
@@ -688,8 +700,6 @@ export = {
 
     la(launchedBrowser, 'did not get launched browser instance')
 
-    // TODO: log an error out when the chrome browser process (launchedBrowser) exits unexpectedly
-
     // SECOND connect to the Chrome remote interface
     // and when the connection is ready
     // navigate to the actual url
@@ -714,11 +724,7 @@ export = {
     launchedBrowser.browserCriClient = browserCriClient
 
     launchedBrowser.kill = (...args) => {
-      debug('closing remote interface client')
-
-      // Do nothing on failure here since we're shutting down anyway
-      browserCriClient?.close().catch()
-      browserCriClient = undefined
+      this.clearInstanceState()
 
       debug('closing chrome')
 

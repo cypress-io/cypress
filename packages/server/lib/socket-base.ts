@@ -253,17 +253,12 @@ export class SocketBase {
               return
             }
 
-            // If we're in run mode we should bail since there is nothing the user can do.
-            if (getCtx().isRunMode) {
-              errors.throwErr('AUTOMATION_SERVER_DISCONNECTED')
-            } else {
-              // TODO: if all of our clients have also disconnected
-              // then don't warn anything
-              errors.warning('AUTOMATION_SERVER_DISCONNECTED')
+            // TODO: if all of our clients have also disconnected
+            // then don't warn anything
+            errors.warning('AUTOMATION_SERVER_DISCONNECTED')
 
-              // TODO: no longer emit this, just close the browser and display message in reporter
-              io.emit('automation:disconnected')
-            }
+            // TODO: no longer emit this, just close the browser and display message in reporter
+            io.emit('automation:disconnected')
           })
         })
 
