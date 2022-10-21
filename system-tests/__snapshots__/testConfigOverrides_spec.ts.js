@@ -5,10 +5,11 @@ exports['testConfigOverrides / fails when passing invalid config value browser']
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (invalid-browser.js)                                                       │
-  │ Searched:   cypress/e2e/testConfigOverrides/invalid-browser.js                                 │
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        1 found (invalid-browser.js)                                                     │
+  │ Searched:     cypress/e2e/testConfigOverrides/invalid-browser.js                               │
+  │ Experiments:  experimentalSessionAndOrigin=true                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -1195,10 +1196,11 @@ exports['testConfigOverrides / successfully runs valid suite-level-only override
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (valid-suite-only.js)                                                      │
-  │ Searched:   cypress/e2e/testConfigOverrides/valid-suite-only.js                                │
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        1 found (valid-suite-only.js)                                                    │
+  │ Searched:     cypress/e2e/testConfigOverrides/valid-suite-only.js                              │
+  │ Experiments:  experimentalSessionAndOrigin=true                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
