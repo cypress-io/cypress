@@ -280,8 +280,6 @@ export class CdpAutomation {
         // localhost is considered a secure context (even when http:)
         // and it's required for cross origin support when visiting a secondary
         // origin so that all its cookies are sent.
-
-        // TODO(origin): need to improve cookie handling
         return !(cookie.secure && url.startsWith('http:') && !isLocalhost)
       })
     })

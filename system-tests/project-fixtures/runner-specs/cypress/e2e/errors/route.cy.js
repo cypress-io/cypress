@@ -17,7 +17,7 @@ const abortXhr = (route) => {
   }
 }
 
-// TODO(origin): 'strict' testIsolation causes cy.route to fail, appears tob e related to visiting about:blank
+// TODO(origin): 'strict' testIsolation causes cy.route to fail, appears to be related to visiting about:blank
 describe('cy.route', { defaultCommandTimeout: 0, testIsolation: 'legacy' }, () => {
   it('callback assertion failure', () => {
     cy.server().route(() => {

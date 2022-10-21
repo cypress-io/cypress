@@ -558,7 +558,6 @@ describe.skip('consoleProps', () => {
   })
 })
 
-// TODO(origin): is this still correct?
 // because browsers prevent an https page from embedding http domains, we filter out
 // insecure origins (contexts) when top is a secure context when we clear cross origin session data
 // the first test in each suite visits insecure origin with so data is not cleared

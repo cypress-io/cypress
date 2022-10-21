@@ -48,7 +48,7 @@ describe('cookies', () => {
 
     const hostName = new Cypress.Location(httpUrl).getHostName()
 
-    // TODO(origin): remove if check once <url> is resolved
+    // TODO(origin): remove 'if' check once https://github.com/cypress-io/cypress/issues/24332 is resolved
     if (!['localhost', '127.0.0.1'].includes(hostName)) {
       // secure cookies should not have been attached
       cy.request(`${httpUrl}/requestCookies`)
