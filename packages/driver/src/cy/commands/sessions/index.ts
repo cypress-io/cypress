@@ -408,6 +408,7 @@ export default function (Commands, Cypress, cy) {
             //   return onFail(e)
             // }
             console.log('after execute validate', returnVal)
+            const returnVal = existingSession.validate.call(cy.state('ctx'))
 
             _commandToRunAfterValidation = cy.then(async () => {
               Cypress.state('current').set('name', '_commandToRunAfterValidation')
