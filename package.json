@@ -24,7 +24,7 @@
     "clean-deps": "find . -depth -name node_modules -type d -exec rimraf {} \\;",
     "clean-untracked-files": "git clean -d -f",
     "codegen": "yarn gulp codegen",
-    "create-v8-snapshot-pr": "ts-node ./scripts/create-v8-snapshot-pr.ts",
+    "create-v8-snapshot-pr": "ts-node ./tooling/v8-snapshot/scripts/create-v8-snapshot-pr.ts",
     "cypress:open": "yarn gulp open --dev --global",
     "precypress:open:debug": "yarn ensure-deps",
     "cypress:open:debug": "node ./scripts/debug.js cypress:open",
