@@ -40,7 +40,7 @@ const getDependencyPathsToKeep = async () => {
   let entryPoints = new Set([
     // This is the entry point for the server bundle. It will not have access to the snapshot yet. It needs to be kept in the binary
     require.resolve('@packages/server/index.js'),
-    // This is a dynamic import that is used to load the snapshot require logic. It will not have access to the snapshot yet. They needs to be kept in the binary
+    // This is a dynamic import that is used to load the snapshot require logic. It will not have access to the snapshot yet. It needs to be kept in the binary
     require.resolve('@packages/server/hook-require.js'),
     // These dependencies are started in a new process or thread and will not have access to the snapshot. They need to be kept in the binary
     require.resolve('@packages/server/lib/plugins/child/require_async_child.js'),
