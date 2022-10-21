@@ -110,24 +110,6 @@ export const makeMountFn = (
 
     internalMountOptions.render(reactComponent, el, reactDomToUse)
 
-    if (options.log !== false) {
-      Cypress.log({
-        name: type,
-        type: 'parent',
-        message: [message],
-        // @ts-ignore
-        $el: (el.children.item(0) as unknown) as JQuery<HTMLElement>,
-        consoleProps: () => {
-          return {
-            // @ts-ignore protect the use of jsx functional components use ReactNode
-            props: jsx.props,
-            description: type === 'mount' ? 'Mounts React component' : 'Rerenders mounted React component',
-            home: 'https://github.com/cypress-io/cypress',
-          }
-        },
-      }).snapshot('mounted').end()
-    }
-
     return (
       // Separate alias and returned value. Alias returns the component only, and the thenable returns the additional functions
       cy.wrap<React.ReactNode>(userComponent, { log: false })

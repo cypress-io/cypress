@@ -371,13 +371,6 @@ export const mount = (
     })
   })
   .then((win) => {
-    if (optionsOrProps.log !== false) {
-      Cypress.log({
-        name: 'mount',
-        message: [message],
-      }).snapshot('mounted').end()
-    }
-
     const localVue = createLocalVue()
 
     // @ts-ignore
