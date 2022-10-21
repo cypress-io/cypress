@@ -172,6 +172,8 @@ export = {
       // For example exiting firefox through either force quitting or quitting via cypress will fire a 'SIGTERM' event which
       // would result in constantly relaunching the browser went he user actively wants to quit.
       // On windows the crash produces 2147483651 as an exit node. We should add to the list of crashes we handle as we see them.
+      // In the future we may consider delegating to the browsers to determine if an exit is a crash since it might be different
+      // depending on what browser has crashed.
       if (code === null && ['SIGTRAP', 'SIGABRT'].includes(signal) || code === 2147483651 && signal === null) {
         const err = errors.get('BROWSER_CRASHED', browserDisplayName, code, signal)
 
