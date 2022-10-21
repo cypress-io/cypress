@@ -345,6 +345,15 @@ export const mount = (
   const componentName = getComponentDisplayName(component)
   const message = `<${componentName} ... />`
 
+  function callbackFunc (observer: MutationObserver) {
+    Cypress.log({
+      name: 'mount',
+      message: [message],
+    }).snapshot('mounted').end()
+
+    observer.disconnect()
+  }
+
   return cy
   .window({
     log: false,
@@ -405,10 +414,14 @@ export const mount = (
     Cypress.vueWrapper = VTUWrapper
   }).wait(0, { log: false }).then(() => {
     if (optionsOrProps.log !== false) {
-      Cypress.log({
-        name: 'mount',
-        message: [message],
-      }).snapshot('mounted').end()
+      const observer = new MutationObserver(() => callbackFunc)
+
+      callbackFunc(observer)
+
+      observer.observe(cy.$$('[data-cy-root]')[0], {
+        childList: true,
+        subtree: true,
+      })
     }
   })
 }
