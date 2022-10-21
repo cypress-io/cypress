@@ -71,10 +71,13 @@ const handleCloseLogin = () => {
   }
 }
 
-// in tests, the gql prop can sometimes be `null` for a split second, causing
-// "Detached from DOM" problems, so we are debouncing gql before it gets passed
-// into the login/connect/record modals. This seems like a good idea anyway,
-// it will also prevent flashes of very temporary states
+// TODO: confirm why `props.gql` is briefly null in tests after initial render.
+// Are we doing a reset somewhere as part of the testing setup?
+
+// We debounce gql because, in tests, the gql prop can sometimes be `null`
+// for a split second, causing "Detached from DOM" problems, so we are
+//debouncing gql before it gets passed into the login/connect/record modals.
+// This seems like a good idea anyway, it will also prevent flashes of very temporary states
 const gqlRef = ref<LoginConnectModalsContentFragment | null>(null)
 
 debouncedWatch(() => props.gql, (newVal) => {
