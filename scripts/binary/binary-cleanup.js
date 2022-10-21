@@ -66,7 +66,7 @@ const getDependencyPathsToKeep = async () => {
   let esbuildResult
   let newEntryPointsFound = true
 
-  // The general idea here is to run esbuild with on entry points that are used outside of the snapshot. If, during the process,
+  // The general idea here is to run esbuild on entry points that are used outside of the snapshot. If, during the process,
   // we find places where we do a require.resolve on a module, that should be treated as an additional entry point and we run
   // esbuild again. We do this until we no longer find any new entry points. The resulting metafile inputs are
   // the dependency paths that we need to ensure stay in the snapshot.
