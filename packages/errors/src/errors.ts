@@ -1065,6 +1065,15 @@ export const AllCypressErrors = {
         
         https://on.cypress.io/session`
   },
+  EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED: () => {
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalSessionAndOrigin`)} configuration option was removed in ${fmt.cypressVersion(`11.0.0`)}.
+
+        You can safely remove this option from your config.
+        
+        https://on.cypress.io/session
+        https://on.cypress.io/origin`
+  },
   EXPERIMENTAL_SHADOW_DOM_REMOVED: () => {
     return errTemplate`\
         The ${fmt.highlight(`experimentalShadowDomSupport`)} configuration option was removed in ${fmt.cypressVersion(`5.2.0`)}. It is no longer necessary when utilizing the ${fmt.highlightSecondary(`includeShadowDom`)} option.

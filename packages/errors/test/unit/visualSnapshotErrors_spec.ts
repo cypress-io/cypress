@@ -996,6 +996,11 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
     EXPERIMENTAL_SHADOW_DOM_REMOVED: () => {
       return {
         default: [],

@@ -968,6 +968,16 @@ describe('config/src/project/utils', () => {
       expect(warning).to.be.calledWith('EXPERIMENTAL_SESSION_SUPPORT_REMOVED')
     })
 
+    it('warns if experimentalSessionAndOrigin is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('experimentalSessionAndOrigin', true, {
+        experimentalSessionAndOrigin: true,
+      })
+
+      expect(warning).to.be.calledWith('EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED')
+    })
+
     it('warns if experimentalShadowDomSupport is passed', async function () {
       const warning = sinon.spy(errors, 'warning')
 

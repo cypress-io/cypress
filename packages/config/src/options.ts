@@ -21,6 +21,7 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'EXPERIMENTAL_NETWORK_STUBBING_REMOVED',
   'EXPERIMENTAL_RUN_EVENTS_REMOVED',
   'EXPERIMENTAL_SESSION_SUPPORT_REMOVED',
+  'EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED',
   'EXPERIMENTAL_SINGLE_TAB_RUN_MODE',
   'EXPERIMENTAL_SHADOW_DOM_REMOVED',
   'FIREFOX_GC_INTERVAL_REMOVED',
@@ -567,6 +568,10 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
   }, {
     name: 'experimentalSessionSupport',
     errorKey: 'EXPERIMENTAL_SESSION_SUPPORT_REMOVED',
+    isWarning: true,
+  }, {
+    name: 'experimentalSessionAndOrigin',
+    errorKey: 'EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED',
     isWarning: true,
   }, {
     name: 'experimentalShadowDomSupport',
