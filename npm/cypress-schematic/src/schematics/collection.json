@@ -15,6 +15,14 @@
       "description": "Create spec files for all Angular components in a project",
       "factory": "./ng-generate/cypress-ct-tests/index",
       "schema": "./ng-generate/cypress-ct-tests/schema.json"
+    },
+    "component": {
+      "description": "Creates a new, generic component definition in the given or default project.",
+      "aliases": [
+        "c"
+      ],
+      "factory": "./ng-generate/component/index",
+      "schema": "./ng-generate/component/schema.json"
     }
   }
 }
