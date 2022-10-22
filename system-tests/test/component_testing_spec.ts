@@ -158,8 +158,8 @@ describe('lit component testing', () => {
     systemTests.it(`lit + ${bundler}`, {
       project: `lit-${bundler}`,
       testingType: 'component',
-      spec: '**/*.cy.js,!src/errors.cy.js',
-      browser: 'electron',
+      spec: '**/*.cy.ts',
+      browser: 'chrome',
       expectedExitCode: 0,
     })
   }

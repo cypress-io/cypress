@@ -4,7 +4,7 @@
     "module": "commonjs",
     "skipLibCheck": true,
     "lib": [
-      "es2015",
+      "es2017",
       "dom"
     ],
     "allowJs": true,
@@ -18,5 +18,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true
   },
-  "include": ["src"],
+  "include": [
+    "src"
+  ],
 }

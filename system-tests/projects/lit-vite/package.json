@@ -2,7 +2,7 @@
   "name": "lit-vite",
   "version": "0.0.0",
   "private": true,
-  "main": "dist/my-element.es.js",
+  "main": "dist/index.es.js",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build"
@@ -16,10 +16,10 @@
     "dist",
     "types"
   ],
-  "types": "types/my-element.d.ts",
+  "types": "types/index.d.ts",
   "type": "module",
   "exports": {
-    ".": "./dist/my-element.es.js"
+    ".": "./dist/index.es.js"
   },
   "projectFixtureDirectory": "lit"
 }

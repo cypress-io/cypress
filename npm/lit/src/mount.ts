@@ -1,83 +1,109 @@
 import {
-  injectStylesBeforeElement,
-  StyleOptions,
   getContainerEl,
+  injectStylesBeforeElement,
   setupHooks,
+  StyleOptions,
 } from '@cypress/mount-utils'
-import { LitElement, render, RootPart, TemplateResult } from 'lit'
+import { html, LitElement, render, TemplateResult } from 'lit'
+import { unsafeHTML } from 'lit/directives/unsafe-html.js'
 
-const DEFAULT_COMP_NAME = 'unknown'
-
-type LitElementConstructor<T> = new (...args: any[]) => T;
-
-export interface MountOptions extends
-  Partial<StyleOptions> {
+export interface MountOptions<T extends HTMLElement>
+  extends Partial<StyleOptions> {
   log?: boolean
+  properties?: Partial<T>
 }
 
-let componentInstance: LitElement | undefined
+export type MountReturn<T extends keyof HTMLElementTagNameMap> =
+  Cypress.Chainable<{
+    component: HTMLElementTagNameMap[T]
+  }>;
+
+let componentInstance: LitElement | HTMLElement | undefined
 
 const cleanup = () => {
   componentInstance?.remove()
 }
 
-// Extract the component name from the object passed to mount
-const getComponentDisplayName = <T extends LitElement>(Component: LitElementConstructor<T>): string => {
-  if (Component.name) {
-    const [_, match] = /Proxy\<(\w+)\>/.exec(Component.name) || []
-
-    return match || Component.name
-  }
-
-  return DEFAULT_COMP_NAME
-}
-
 /**
- * Mounts a Lit element inside the Cypress browser
+ * Mounts a Web Component inside the Cypress browser
  *
- * @param {LitElementConstructor<T>} Element Lit element being mounted
- * @param {MountReturn<T extends SvelteComponent>} options options to customize the element being mounted
+ * @param {TemplateResult | string} Element Lit element being mounted or valid HTML string
+ * @param {MountReturn<T>} options options to customize the element being mounted
+ *  pass properties here when using strings. These will be assigned to the element.
  * @returns Cypress.Chainable<MountReturn>
  *
  * @example
- * import Counter from './Counter'
+ * import './Counter'
  * import { html } from 'lit'
- * import { mount } from 'cypress/svelte'
+ * import { mount } from 'cypress/lit'
  *
  * it('should render', () => {
- *   mount(Counter, html`<my-counter .count=${32}></my-counter>`)
- *   cy.get('button').contains(42)
+ *   mount(html`<my-counter .count=${32}></my-counter>`)
+ *   cy.get('counter-lit').shadow().get('button').contains(42)
  * })
  */
-export function mount<T extends LitElement> (
-  Component: LitElementConstructor<T>,
-  Template: TemplateResult,
-  options: MountOptions = {},
-): Cypress.Chainable<JQuery<HTMLElement>> {
+export function mount<T extends keyof HTMLElementTagNameMap> (
+  Template: TemplateResult | string,
+  options: MountOptions<HTMLElementTagNameMap[T]> = {},
+): Cypress.Chainable<{
+  component: HTMLElementTagNameMap[T]
+}> {
   return cy.then(() => {
     const target = getContainerEl()
 
     injectStylesBeforeElement(options, document, target)
 
-    const componentInstance = render(Template, target)
+    // If give a string set internal contents unsafely
+    const element =
+      typeof Template === 'string' ? html`${unsafeHTML(Template)}` : Template
 
-    // by waiting, we are delaying test execution for the next tick of event loop
-    // and letting hooks and component lifecycle methods to execute mount
-    return cy.wait(0, { log: false }).then(() => {
-      if (options.log !== false) {
-        const mountMessage = `<${getComponentDisplayName(Component)} ... />`
+    /**
+     * Using get will give default cypress timeouts for the element to register
+     * onto the DOM and be ready for interaction.
+     */
+    return cy
+    .wait(0, { log: false })
+    .get('[data-cy-root]')
+    .then(() => {
+      render(element, target)
+    })
+    .children()
+    .first()
+    .then((element) => {
+      const name = element.prop('tagName').toLowerCase()
+      const el = document.getElementsByTagName<T>(name)[0]
+      const { properties, log } = options
+
+      /**
+         * Pass properties to the component using the property assignment. This
+         * enables support for non string types. Not required when using
+         * lit-html.
+         */
+      if (
+        properties &&
+          typeof properties === 'object' &&
+          Array.isArray(properties) === false
+      ) {
+        Object.entries(properties).forEach(([key, value]) => {
+          el[(key as keyof typeof el)] = value
+        })
+      }
+
+      componentInstance = el
+
+      if (log !== false) {
+        const mountMessage = `<${name} ... />`
 
         Cypress.log({
           name: 'mount',
           message: [mountMessage],
-        }).snapshot('mounted').end()
+        })
+        .snapshot('mounted')
+        .end()
       }
+
+      return cy.wrap({ component: el }, { log: false })
     })
-    .wrap({ component: componentInstance }, { log: false })
-    .get('[data-cy-root]')
-    .children()
-    .first()
-    .shadow()
   })
 }
 
