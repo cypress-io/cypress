@@ -10,7 +10,7 @@ body:
   - type: textarea
     id: dashboard
     attributes:
-      label: Link to Cypress Dashboard or CircleCI failure
+      label: Link to Cypress Cloud or CircleCI failure
       description: Please include a link to the failure in Cypress Cloud or in CircleCI.
     validations:
       required: true
