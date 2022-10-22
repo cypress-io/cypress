@@ -124,7 +124,7 @@ watchEffect(() => {
   setProjectFlag('hasNonExampleSpec', !!currentProject?.hasNonExampleSpec)
   setProjectFlag('hasNoRecordedRuns', currentProject?.cloudProject?.__typename === 'CloudProject' && (currentProject.cloudProject?.runs?.nodes?.length ?? 0) === 0)
 
-  if (currentProject?.cloudProject) {
+  if (currentProject?.cloudProject || !loginConnectStore.user.isLoggedIn) {
     setProjectFlag('isProjectConnected', currentProject?.cloudProject?.__typename === 'CloudProject')
   }
 })
