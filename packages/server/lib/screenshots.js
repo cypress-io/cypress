@@ -11,7 +11,7 @@ let debug = require('debug')('cypress:server:screenshot')
 const plugins = require('./plugins')
 const { fs } = require('./util/fs')
 
-const RUNNABLE_SEPARATOR = ' -- '
+const RUNNABLE_SEPARATOR = '--'
 const pathSeparatorRe = /[\\\/]/g
 
 // internal id incrementor
@@ -178,7 +178,7 @@ const pixelConditionFn = function (data, image) {
 
   const subject = app ? 'app' : 'runner'
 
-  // if we are app, we dont need helper pixels else we do!
+  // if we are app, we don't need helper pixels else we do!
   const passes = app ? !hasPixels : hasPixels
 
   debug('pixelConditionFn %o', {
@@ -360,14 +360,18 @@ const getPath = function (data, ext, screenshotsFolder, overwrite) {
 
   const index = names.length - 1
 
-  // append (failed) to the last name
+  // append _(failed) to the last name
   if (data.testFailure) {
-    names[index] = `${names[index]} (failed)`
+    names[index] = `${names[index]}_(failed)`
   }
 
+  // append _(attempt_x) to the last name
   if (data.testAttemptIndex > 0) {
-    names[index] = `${names[index]} (attempt ${data.testAttemptIndex + 1})`
+    names[index] = `${names[index]}_(attempt_${data.testAttemptIndex + 1})`
   }
+
+  // remove whitespaces to make screenshot link terminal friendly
+  names = names.map((title) => title.replace(/\s/g, '_'))
 
   const withoutExt = path.join(screenshotsFolder, ...specNames, ...names)
 
