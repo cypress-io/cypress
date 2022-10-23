@@ -32,7 +32,6 @@ export interface LoginConnectState {
     loginModalRecord?: number
   }
   bannersState: BannersState
-  _latestBannerShownTimeForTesting?: number
 }
 
 // The user can be in only one status at a time.
@@ -73,7 +72,6 @@ export const useLoginConnectStore = defineStore({
       },
       promptsShown: {},
       bannersState: {},
-      _latestBannerShownTimeForTesting: undefined,
     }
   },
   actions: {
@@ -105,9 +103,6 @@ export const useLoginConnectStore = defineStore({
     },
     setBannersState (banners: BannersState) {
       this.bannersState = banners
-    },
-    setLatestBannerShownTime (timestamp: number) {
-      this._latestBannerShownTimeForTesting = timestamp
     },
   },
   getters: {

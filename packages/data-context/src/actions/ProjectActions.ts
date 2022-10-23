@@ -36,7 +36,6 @@ export interface ProjectApiShape {
   getRemoteStates(): { reset(): void, getPrimary(): Cypress.RemoteState } | undefined
   getCurrentBrowser: () => Cypress.Browser | undefined
   getCurrentProjectSavedState(): AllowedState | undefined
-  setPromptShown(slug: string): void
   setProjectPreferences(stated: AllowedState): void
   makeProjectSavedState(projectRoot: string): void
   getDevServer (): {
@@ -307,10 +306,6 @@ export class ProjectActions {
 
   async clearAllProjectPreferencesCache () {
     await this.api.clearAllProjectPreferences()
-  }
-
-  setPromptShown (slug: string) {
-    this.api.setPromptShown(slug)
   }
 
   setSpecs (specs: SpecWithRelativeRoot[]) {

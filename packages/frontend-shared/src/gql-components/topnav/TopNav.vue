@@ -198,8 +198,7 @@ import TopNavListItem from './TopNavListItem.vue'
 import TopNavList from './TopNavList.vue'
 import PromptContent from './PromptContent.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
-import { gql, useMutation } from '@urql/vue'
-import { TopNav_SetPromptShownDocument } from '../../generated/graphql'
+import { gql } from '@urql/vue'
 import type { TopNavFragment } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { computed, ref, watch, watchEffect } from 'vue'
@@ -211,6 +210,7 @@ import ExternalLink from '../ExternalLink.vue'
 import Button from '../../components/Button.vue'
 import UpdateCypressModal from './UpdateCypressModal.vue'
 import VerticalBrowserListItems from './VerticalBrowserListItems.vue'
+import { usePromptManager } from '@packages/frontend-shared/src/gql-components/composables/usePromptManager'
 
 const { t } = useI18n()
 
@@ -243,13 +243,7 @@ fragment TopNav on Query {
 }
 `
 
-gql`
-mutation TopNav_SetPromptShown($slug: String!) {
-  setPromptShown(slug: $slug)
-}
-`
-
-const setPromptShown = useMutation(TopNav_SetPromptShownDocument)
+const { setPromptShown, isAllowedFeature } = usePromptManager()
 
 const props = defineProps<{
   gql: TopNavFragment
@@ -304,12 +298,14 @@ const showUpdateModal = ref(false)
 const docsMenuVariant = ref<DocsMenuVariant>('main')
 
 watchEffect(() => {
-  docsMenuVariant.value = props.forceOpenDocs ? 'ci1' : 'main'
+  if (isAllowedFeature('docsCiPrompt')) {
+    docsMenuVariant.value = props.forceOpenDocs ? 'ci1' : 'main'
+  }
 })
 
 watch(docsMenuVariant, (newVal, oldVal) => {
   if (oldVal !== 'main') {
-    setPromptShown.executeMutation({ slug: `${oldVal}` })
+    setPromptShown(oldVal)
   }
 })
 
@@ -319,7 +315,7 @@ watch(docsMenuVariant, (newVal, oldVal) => {
 onClickOutside(promptsEl, () => {
   emit('clearForceOpen')
   setTimeout(() => {
-    // reset the content of the menu when
+    // reset the content of the menu after it has been closed
     docsMenuVariant.value = 'main'
   }, 300)
 })

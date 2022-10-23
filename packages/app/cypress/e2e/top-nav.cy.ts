@@ -5,9 +5,10 @@ import type Sinon from 'sinon'
 const pkg = require('@packages/root')
 
 const loginText = defaultMessages.topNav.login
+const TIMESTAMP_OF_TEST = Date.UTC(2021, 9, 30)
 
 beforeEach(() => {
-  cy.clock(Date.UTC(2021, 9, 30), ['Date'])
+  cy.clock(TIMESTAMP_OF_TEST, ['Date'])
 })
 
 describe('App Top Nav Workflows', () => {
@@ -297,27 +298,32 @@ describe('App Top Nav Workflows', () => {
       })
     })
 
-    it('growth prompts appear and call SetPromptShown mutation with the correct payload', () => {
-      cy.get('@docsButton').click()
-
-      cy.withCtx((ctx, o) => {
-        o.sinon.stub(ctx.actions.project, 'setPromptShown')
+    it('growth prompts appear and correctly store that they have been shown', () => {
+      cy.withCtx((ctx) => {
+        expect(ctx.coreData?.localSettings?.preferences?.promptsShown?.ci1).to.not.exist
+        expect(ctx.coreData?.localSettings?.preferences?.promptsShown?.orchestration1).to.not.exist
       })
+
+      cy.get('@docsButton').click()
 
       cy.findByRole('button', { name: 'Set up CI' }).click()
       cy.findByText('Configure CI').should('be.visible')
       cy.findByRole('button', { name: 'Close' }).click()
 
-      cy.withCtx((ctx) => {
-        expect(ctx.actions.project.setPromptShown).to.have.been.calledWith('ci1')
+      cy.withCtx((ctx, o) => {
+        expect(ctx.coreData?.localSettings?.preferences?.promptsShown?.ci1).to.eq(o.TIMESTAMP_OF_TEST)
+      }, {
+        TIMESTAMP_OF_TEST,
       })
 
       cy.findByRole('button', { name: 'Run tests faster' }).click()
       cy.findByText('Run tests faster in CI').should('be.visible')
       cy.findByRole('button', { name: 'Close' }).click()
 
-      cy.withCtx((ctx) => {
-        expect(ctx.actions.project.setPromptShown).to.have.been.calledWith('orchestration1')
+      cy.withCtx((ctx, o) => {
+        expect(ctx.coreData?.localSettings?.preferences?.promptsShown?.orchestration1).to.eq(o.TIMESTAMP_OF_TEST)
+      }, {
+        TIMESTAMP_OF_TEST,
       })
     })
   })

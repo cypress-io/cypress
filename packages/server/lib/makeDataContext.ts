@@ -136,15 +136,6 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
           return {}
         }
       },
-      setPromptShown (slug) {
-        return openProject.getProject()
-        ?.saveState({
-          promptsShown: {
-            ...(openProject.getProject()?.state?.promptsShown ?? {}),
-            [slug]: Date.now(),
-          },
-        })
-      },
       setProjectPreferences (state) {
         return openProject.getProject()?.saveState(state)
       },

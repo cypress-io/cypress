@@ -3,6 +3,7 @@ import HeaderBarContent from './HeaderBarContent.vue'
 import { defaultMessages } from '@cy/i18n'
 import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
 import { useLoginConnectStore } from '../store/login-connect-store'
+import interval from 'human-interval'
 
 const text = defaultMessages.topNav
 
@@ -409,6 +410,56 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
         }
 
         it('opens when after 4 days from first open, no projectId, and not already shown', () => {
+          mountWithSavedState()
+
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('be.visible')
+        })
+
+        it('does not auto-open within one day of any banner being shown', () => {
+          const loginConnectStore = useLoginConnectStore()
+
+          loginConnectStore.setBannersState({
+            aci_082022_login: {
+              lastShown: Date.now() - interval('3 days'),
+            },
+            aci_082022_connectProject: {
+              // example with no `lastShown` property
+            },
+            aci_082022_createOrganization: {
+              lastShown: Date.now() - interval('23 hours 59 minutes'),
+            },
+          })
+
+          mountWithSavedState()
+
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('not.exist')
+        })
+
+        it('does auto-open if it is more than one day since any banner was being shown', () => {
+          const loginConnectStore = useLoginConnectStore()
+
+          loginConnectStore.setBannersState({
+            aci_082022_login: {
+              lastShown: Date.now() - interval('3 days'),
+            },
+            aci_082022_connectProject: {
+              // example with no `lastShown` property
+            },
+            aci_082022_createOrganization: {
+              lastShown: Date.now() - interval('24 hours 1 minute'),
+            },
+          })
+
+          mountWithSavedState()
+
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('be.visible')
+        })
+
+        it('does auto-open if no banners have ever been shown', () => {
+          const loginConnectStore = useLoginConnectStore()
+
+          loginConnectStore.setBannersState({})
+
           mountWithSavedState()
 
           cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('be.visible')
