@@ -37,4 +37,15 @@ describe('ng-generate @cypress/schematic:component', () => {
     expect(tree.files).to.contain('/projects/sandbox/src/app/foo/foo.component.css')
     expect(tree.files).not.to.contain('/projects/sandbox/src/app/foo/foo.component.spec.ts')
   })
+
+  it('should not generate component which does exist already', async () => {
+    let tree = await schematicRunner.runSchematicAsync('component', { name: 'foo', project: 'sandbox' }, appTree).toPromise()
+
+    tree = await schematicRunner.runSchematicAsync('component', { name: 'foo', project: 'sandbox' }, appTree).toPromise()
+
+    expect(tree.files.filter((f) => f === '/projects/sandbox/src/app/foo/foo.component.ts').length).to.eq(1)
+    expect(tree.files.filter((f) => f === '/projects/sandbox/src/app/foo/foo.component.html').length).to.eq(1)
+    expect(tree.files.filter((f) => f === '/projects/sandbox/src/app/foo/foo.component.cy.ts').length).to.eq(1)
+    expect(tree.files.filter((f) => f === '/projects/sandbox/src/app/foo/foo.component.css').length).to.eq(1)
+  })
 })
