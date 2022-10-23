@@ -19,7 +19,7 @@
 import LoginConnectModals from '@cy/gql-components/LoginConnectModals.vue'
 
 import { useRoute } from 'vue-router'
-import CloudViewerAndProject from '../../frontend-shared/src/gql-components/CloudViewerAndProject.vue'
+import CloudViewerAndProject from '@packages/frontend-shared/src/gql-components/CloudViewerAndProject.vue'
 const route = useRoute()
 
 </script>

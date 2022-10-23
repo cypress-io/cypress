@@ -9,7 +9,7 @@ import 'vue-toastification/dist/index.css'
 import { makeUrqlClient } from '@packages/frontend-shared/src/graphql/urqlClient'
 import { createI18n } from '@cy/i18n'
 import { initHighlighter } from '@packages/frontend-shared/src/components/highlight'
-import { createPinia } from '../../frontend-shared/src/store'
+import { createPinia } from '@packages/frontend-shared/src/store'
 
 const app = createApp(App)
 
