@@ -5,7 +5,10 @@ import path = require('path');
 export default function (options: any): Rule {
   return (_: Tree, _context: SchematicContext) => {
     return chain([
-      externalSchematic('@schematics/angular', 'component', options),
+      externalSchematic('@schematics/angular', 'component', {
+        ...options,
+        skipTests: true,
+      }),
       (tree: Tree, _context: SchematicContext) => {
         return cypressTest({
           ...options,

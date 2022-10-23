@@ -33,7 +33,8 @@ describe('ng-generate @cypress/schematic:component', () => {
 
     expect(tree.files).to.contain('/projects/sandbox/src/app/foo/foo.component.ts')
     expect(tree.files).to.contain('/projects/sandbox/src/app/foo/foo.component.html')
-    expect(tree.files).to.contain('/projects/sandbox/src/app/foo/foo.component.spec.ts')
+    expect(tree.files).to.contain('/projects/sandbox/src/app/foo/foo.component.cy.ts')
     expect(tree.files).to.contain('/projects/sandbox/src/app/foo/foo.component.css')
+    expect(tree.files).not.to.contain('/projects/sandbox/src/app/foo/foo.component.spec.ts')
   })
 })
