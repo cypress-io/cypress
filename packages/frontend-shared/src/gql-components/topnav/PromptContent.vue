@@ -135,7 +135,6 @@
 <script setup lang="ts">
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
-const { t } = useI18n()
 import type { LinkWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { useTimeout } from '@vueuse/core'
@@ -156,6 +155,8 @@ const props = defineProps<{
 const getUrl = (link: LinkWithParams) => {
   return getUrlWithParams(link)
 }
+
+const { t } = useI18n()
 
 const shrink = useTimeout(500)
 const utmMedium = 'CI Prompt 1'
