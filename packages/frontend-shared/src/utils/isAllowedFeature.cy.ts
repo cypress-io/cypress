@@ -198,7 +198,7 @@ describe('isAllowedFeature', () => {
       userStatuses.forEach((status) => {
         it(`returns false with status ${ status } `, () => {
           setUpStatus(status)
-          store.setLatestBannerShownTime(Date.now() - interval('23 hours'))
+          store.setBannersState({ aci_082022_login: { lastShown: Date.now() - interval('23 hours') } })
           const result = isAllowedFeature('docsCiPrompt', store)
 
           expect(result).to.be.false

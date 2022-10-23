@@ -1,5 +1,6 @@
-import type { BannersState } from '@packages/types'
+import type { BannersState, BannerState } from '@packages/types'
 import { defineStore } from 'pinia'
+import { sortBy } from 'lodash'
 
 interface LoginUserData {
   fullName: string | null
@@ -26,6 +27,7 @@ export interface LoginConnectState {
   }
   userData?: LoginUserData
   promptsShown: {
+    orchestration1: number
     ci1?: number
     loginModalRecord?: number
   }
@@ -139,8 +141,23 @@ export const useLoginConnectStore = defineStore({
       return (status: UserStatus) => this.userStatus as unknown as UserStatus === status
     },
     latestBannerShownTime (state) {
-      return state._latestBannerShownTimeForTesting
-      // TODO: in #23768 return based on bannersState - this will be used to delay the nav CI prompt if a banner was recently shown
+      if (state.bannersState) {
+        const itemsWithLastShown = Object.values(state.bannersState)
+        .filter((item) => {
+          // filter out the non-object properties like `_disabled`, confirm lastShown exists
+          return typeof item === 'object' && Boolean(item.lastShown)
+        })
+
+        if (!itemsWithLastShown.length) {
+          return undefined
+        }
+
+        const sortedBannersState = sortBy(itemsWithLastShown, 'lastShown') as BannerState[]
+
+        return sortedBannersState[sortedBannersState.length - 1].lastShown
+      }
+
+      return undefined
     },
 
   },
