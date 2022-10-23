@@ -20,7 +20,7 @@ import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
 
 import system from './util/system'
-import type { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType, VideoRecording } from '@packages/types'
+import type { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, PromptsShown, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType, VideoRecording } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac } from 'crypto'
 
@@ -33,7 +33,7 @@ export interface Cfg extends ReceivedCypressOptions {
   state?: {
     firstOpened?: number | null
     lastOpened?: number | null
-    promptsShown?: object | null
+    promptsShown?: PromptsShown | null
     banners?: BannersState | null
   }
   e2e: Partial<Cfg>

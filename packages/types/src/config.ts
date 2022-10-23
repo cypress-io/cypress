@@ -54,3 +54,9 @@ type BannerId = typeof BannerIds[BannerKeys]
 export type BannersState = {
   [bannerId in BannerId]?: BannerState
 } & { _disabled?: boolean } // used for testing
+
+export type PromptsShown = {
+  ci1?: number
+  orchestration1?: number
+  loginModalRecord?: number
+}

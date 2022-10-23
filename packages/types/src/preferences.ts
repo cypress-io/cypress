@@ -1,4 +1,4 @@
-import type { BannersState, Editor } from '.'
+import type { BannersState, Editor, PromptsShown } from '.'
 
 export const defaultPreferences: AllowedState = {
   autoScrollingEnabled: true,
@@ -61,7 +61,7 @@ export type AllowedState = Partial<{
   lastProjectId: Maybe<string>
   firstOpened: Maybe<number>
   lastOpened: Maybe<number>
-  promptsShown: Maybe<object>
+  promptsShown: Maybe<PromptsShown>
   specFilter: Maybe<string>
   preferredEditorBinary: Maybe<string>
   isSideNavigationOpen: Maybe<boolean>
