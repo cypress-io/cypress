@@ -25,13 +25,13 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import SelectCloudProjectModal from './SelectCloudProjectModal.vue'
 import CreateCloudOrgModal from './CreateCloudOrgModal.vue'
 import NeedManualUpdateModal from './NeedManualUpdateModal.vue'
-import { gql, useMutation, useSubscription } from '@urql/vue'
+import { gql, useSubscription } from '@urql/vue'
 import type { CloudConnectModalsFragment } from '../../generated/graphql'
-import { CloudConnectModals_MonitorCloudViewerDocument, CloudConnectModals_RefreshCloudViewerDocument } from '../../generated/graphql'
+import { CloudConnectModals_MonitorCloudViewerDocument } from '../../generated/graphql'
 
 gql`
 fragment CloudConnectModals on Query {
@@ -39,6 +39,11 @@ fragment CloudConnectModals on Query {
   cloudViewer {
     id
     ...CreateCloudOrgModal
+    firstOrganization: organizations(first: 1) {
+      nodes {
+        id
+      }
+    }
   }
   currentProject{
     id
@@ -55,16 +60,7 @@ subscription CloudConnectModals_MonitorCloudViewer {
 }
 `
 
-gql`
-mutation CloudConnectModals_RefreshCloudViewer {
-  refreshCloudViewer {
-    ...CloudConnectModals
-  }
-}
-`
-
 useSubscription({ query: CloudConnectModals_MonitorCloudViewerDocument })
-const refreshCloudViewer = useMutation(CloudConnectModals_RefreshCloudViewerDocument)
 
 const emit = defineEmits<{
   (event: 'success'): void
@@ -79,14 +75,6 @@ const props = defineProps<{
 
 const newProjectId = ref('')
 const isManualUpdateOpen = ref(false)
-
-onMounted(() => {
-  /*
-  Force-refresh of cloudViewer data so that latest orgs and projects are displayed in connect modals
-  (useful if projects have been created/deleted since user opened the app)
-  */
-  refreshCloudViewer.executeMutation({})
-})
 
 function showManualUpdate (projectId: string) {
   newProjectId.value = projectId

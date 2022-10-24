@@ -6,120 +6,41 @@ const pkg = require('@packages/root')
 
 const loginText = defaultMessages.topNav.login
 
+const headerBarId = 'header-bar-content'
+
 beforeEach(() => {
   cy.clock(Date.UTC(2021, 9, 30), ['Date'])
 })
 
-describe('App Top Nav Workflows', () => {
-  beforeEach(() => {
-    cy.scaffoldProject('launchpad')
-  })
-
-  describe('Page Name', () => {
+describe('Launchpad Top Nav Workflows', () => {
+  context('Page Name', () => {
     it('shows the current page name in the top nav', () => {
+      cy.scaffoldProject('launchpad')
       cy.findBrowsers()
       cy.openProject('launchpad')
-      cy.startAppServer()
-      cy.visitApp()
+      cy.visitLaunchpad()
 
-      cy.findByTestId('app-header-bar').should('be.visible').and('contain', 'Specs')
+      cy.findByTestId(headerBarId).should('be.visible').and('contain', 'launchpad')
+    })
+
+    it('shows breadcrumbs in global mode', () => {
+      cy.scaffoldProject('launchpad')
+      cy.openGlobalMode()
+      cy.addProject('launchpad')
+      cy.visitLaunchpad()
+
+      cy.findByTestId(headerBarId).should('be.visible').and('contain', 'Projects')
+
+      cy.get('[data-cy="project-card"]').click()
+
+      cy.findByTestId(headerBarId).should('be.visible').and('contain', 'Projects').and('contain', 'launchpad')
     })
   })
 
-  describe('Browser List', () => {
-    context('with command line args', () => {
-      it('shows current browser when launched with browser option', () => {
-        cy.findBrowsers()
-        cy.openProject('launchpad', ['--browser', 'firefox'])
-        cy.startAppServer()
-        cy.visitApp()
-
-        cy.findByTestId('top-nav-active-browser-icon')
-        .should('have.attr', 'src')
-        .and('contain', 'firefox')
-
-        cy.findByTestId('top-nav-active-browser').should('contain', 'Firefox 5')
-      })
-    })
-
-    context('without command line args', () => {
-      beforeEach(() => {
-        cy.findBrowsers({
-          filter: (browser) => {
-            return Cypress._.includes(['chrome', 'firefox', 'electron', 'edge'], browser.name) && browser.channel === 'stable'
-          },
-        })
-
-        cy.openProject('launchpad')
-        cy.startAppServer()
-        cy.visitApp()
-      })
-
-      it('shows the current browser in the top nav browser list button', () => {
-        cy.findByTestId('top-nav-active-browser-icon')
-        .should('have.attr', 'src')
-        .and('contain', 'chrome')
-
-        cy.findByTestId('top-nav-active-browser').should('contain', 'Chrome 1')
-      })
-
-      it('shows list of browser options in dropdown when selected', () => {
-        cy.findByTestId('top-nav-active-browser').click()
-
-        cy.findAllByTestId('top-nav-browser-list-item').as('browserItems').should('have.length', 4)
-
-        cy.get('@browserItems').eq(0)
-        .should('contain', 'Chrome')
-        .and('contain', 'Version 1.2.3')
-        .findByTestId('top-nav-browser-list-selected-item')
-        .should('exist')
-
-        cy.get('@browserItems').eq(1)
-        .should('contain', 'Edge')
-        .and('contain', 'Version 8.9.10')
-        .findByTestId('top-nav-browser-list-selected-item')
-        .should('not.exist')
-
-        cy.get('@browserItems').eq(2)
-        .should('contain', 'Electron')
-        .and('contain', 'Version 12.13.14')
-        .findByTestId('top-nav-browser-list-selected-item')
-        .should('not.exist')
-
-        cy.get('@browserItems').eq(3)
-        .should('contain', 'Firefox')
-        .and('contain', 'Version 5.6.7')
-        .findByTestId('top-nav-browser-list-selected-item')
-        .should('not.exist')
-      })
-
-      it('performs mutations to update and relaunch browser', () => {
-        cy.findByTestId('top-nav-active-browser').click()
-
-        cy.withCtx((ctx, o) => {
-          o.sinon.stub(ctx.actions.browser, 'setActiveBrowserById')
-          o.sinon.stub(ctx.actions.project, 'launchProject').resolves()
-        })
-
-        cy.findAllByTestId('top-nav-browser-list-item').eq(1).click()
-
-        cy.withCtx((ctx, o) => {
-          const browserId = (ctx.actions.browser.setActiveBrowserById as SinonStub).args[0][0]
-          const genId = ctx.fromId(browserId, 'Browser')
-
-          expect(ctx.actions.browser.setActiveBrowserById).to.have.been.calledWith(browserId)
-          expect(genId).to.eql('edge-chromium-stable')
-          expect(ctx.actions.project.launchProject).to.have.been.calledWith(
-            ctx.coreData.currentTestingType, undefined, undefined,
-          )
-        })
-      })
-    })
-  })
-
-  describe('Cypress Version', () => {
+  context('Cypress Version', () => {
     context('user version current', () => {
       it('renders link to external docs if version is current', () => {
+        cy.scaffoldProject('launchpad')
         cy.findBrowsers()
         cy.withCtx(async (ctx, o) => {
           o.sinon.stub(ctx.versions, 'versionData').resolves({
@@ -137,10 +58,9 @@ describe('App Top Nav Workflows', () => {
         })
 
         cy.openProject('launchpad')
-        cy.startAppServer()
-        cy.visitApp()
+        cy.visitLaunchpad()
 
-        cy.findByTestId('app-header-bar').validateExternalLink({
+        cy.findByTestId(headerBarId).validateExternalLink({
           name: 'v10.0.0',
           href: 'https://on.cypress.io/changelog#10-0-0',
         })
@@ -168,9 +88,9 @@ describe('App Top Nav Workflows', () => {
           })
         })
 
+        cy.scaffoldProject('launchpad')
         cy.openProject('launchpad')
-        cy.startAppServer()
-        cy.visitApp()
+        cy.visitLaunchpad()
       })
 
       it('shows dropdown with version info if user version is outdated', () => {
@@ -211,7 +131,7 @@ describe('App Top Nav Workflows', () => {
 
         cy.findByRole('dialog', { name: 'Upgrade to Cypress 10.1.0' }).as('upgradeModal').within(() => {
           cy.contains('You are currently running Version 10.0.0 of Cypress').should('be.visible')
-          cy.findByDisplayValue('npm install -D cypress@10.1.0').should('be.visible')
+          cy.findAllByDisplayValue('npm install -D cypress@10.1.0').should('be.visible')
           cy.findByRole('button', { name: 'Close' }).click()
         })
 
@@ -235,12 +155,12 @@ describe('App Top Nav Workflows', () => {
           })
         })
 
+        cy.scaffoldProject('launchpad')
         cy.findBrowsers()
         cy.openProject('launchpad')
-        cy.startAppServer()
-        cy.visitApp()
+        cy.visitLaunchpad()
 
-        cy.findByTestId('app-header-bar').validateExternalLink({
+        cy.findByTestId(headerBarId).validateExternalLink({
           name: `v${pkg.version}`,
           href: `https://on.cypress.io/changelog#${pkg.version.replaceAll('.', '-')}`,
         })
@@ -249,75 +169,103 @@ describe('App Top Nav Workflows', () => {
   })
 
   describe('Docs', () => {
-    beforeEach(() => {
-      cy.findBrowsers()
-      cy.openProject('launchpad')
-      cy.startAppServer()
-      cy.visitApp()
+    context('user initiated', () => {
+      beforeEach(() => {
+        cy.scaffoldProject('launchpad')
+        cy.findBrowsers()
+        cy.openProject('launchpad')
+        cy.visitLaunchpad()
 
-      cy.findByTestId('app-header-bar').findByRole('button', { name: 'Docs', expanded: false }).as('docsButton')
-    })
+        cy.findByTestId(headerBarId).findByRole('button', { name: 'Docs', expanded: false }).as('docsButton')
+      })
 
-    it('shows popover with additional doc links', () => {
-      cy.get('@docsButton').click().should('have.attr', 'aria-expanded', 'true')
+      it('shows popover with additional doc links', () => {
+        cy.get('@docsButton').click().should('have.attr', 'aria-expanded', 'true')
 
-      cy.findByRole('heading', { name: 'Getting started', level: 2 })
-      cy.findByRole('heading', { name: 'References', level: 2 })
-      cy.findByRole('heading', { name: 'Run in CI/CD', level: 2 })
+        cy.findByRole('heading', { name: 'Getting started', level: 2 })
+        cy.findByRole('heading', { name: 'References', level: 2 })
+        cy.findByRole('heading', { name: 'Run in CI/CD', level: 2 })
 
-      const expectedLinks = [
-        {
-          name: 'Write your first test',
-          href: 'https://on.cypress.io/writing-first-test?utm_medium=Docs+Menu&utm_content=First+Test&utm_source=Binary%3A+App',
-        },
-        {
-          name: 'Testing your app',
-          href: 'https://on.cypress.io/testing-your-app?utm_medium=Docs+Menu&utm_content=Testing+Your+App&utm_source=Binary%3A+App',
-        },
-        {
-          name: 'Organizing tests',
-          href: 'https://on.cypress.io/writing-and-organizing-tests?utm_medium=Docs+Menu&utm_content=Organizing+Tests&utm_source=Binary%3A+App',
-        },
-        {
-          name: 'Best practices',
-          href: 'https://on.cypress.io/best-practices?utm_medium=Docs+Menu&utm_content=Best+Practices&utm_source=Binary%3A+App',
-        },
-        {
-          name: 'Configuration',
-          href: 'https://on.cypress.io/configuration?utm_medium=Docs+Menu&utm_content=Configuration&utm_source=Binary%3A+App',
-        },
-        {
-          name: 'API',
-          href: 'https://on.cypress.io/api?utm_medium=Docs+Menu&utm_content=API&utm_source=Binary%3A+App',
-        },
-      ]
+        const expectedLinks = [
+          {
+            name: 'Write your first test',
+            href: 'https://on.cypress.io/writing-first-test?utm_medium=Docs+Menu&utm_content=First+Test&utm_source=Binary%3A+Launchpad',
+          },
+          {
+            name: 'Testing your app',
+            href: 'https://on.cypress.io/testing-your-app?utm_medium=Docs+Menu&utm_content=Testing+Your+App&utm_source=Binary%3A+Launchpad',
+          },
+          {
+            name: 'Organizing tests',
+            href: 'https://on.cypress.io/writing-and-organizing-tests?utm_medium=Docs+Menu&utm_content=Organizing+Tests&utm_source=Binary%3A+Launchpad',
+          },
+          {
+            name: 'Best practices',
+            href: 'https://on.cypress.io/best-practices?utm_medium=Docs+Menu&utm_content=Best+Practices&utm_source=Binary%3A+Launchpad',
+          },
+          {
+            name: 'Configuration',
+            href: 'https://on.cypress.io/configuration?utm_medium=Docs+Menu&utm_content=Configuration&utm_source=Binary%3A+Launchpad',
+          },
+          {
+            name: 'API',
+            href: 'https://on.cypress.io/api?utm_medium=Docs+Menu&utm_content=API&utm_source=Binary%3A+Launchpad',
+          },
+        ]
 
-      expectedLinks.forEach((link) => {
-        cy.validateExternalLink(link)
+        expectedLinks.forEach((link) => {
+          cy.validateExternalLink(link)
+        })
+      })
+
+      it('growth prompts appear and call SetPromptShown mutation with the correct payload', () => {
+        cy.get('@docsButton').click()
+
+        cy.withCtx((ctx, o) => {
+          o.sinon.stub(ctx.actions.project, 'setPromptShown')
+        })
+
+        cy.findByRole('button', { name: 'Set up CI' }).click()
+        cy.findByText('Configure CI').should('be.visible')
+        cy.findByRole('button', { name: 'Close' }).click()
+
+        cy.withCtx((ctx) => {
+          expect(ctx.actions.project.setPromptShown).to.have.been.calledWith('ci1')
+        })
+
+        cy.findByRole('button', { name: 'Run tests faster' }).click()
+        cy.findByText('Run tests faster in CI').should('be.visible')
+        cy.findByRole('button', { name: 'Close' }).click()
+
+        cy.withCtx((ctx) => {
+          expect(ctx.actions.project.setPromptShown).to.have.been.calledWith('orchestration1')
+        })
       })
     })
 
-    it('growth prompts appear and call SetPromptShown mutation with the correct payload', () => {
-      cy.get('@docsButton').click()
-
-      cy.withCtx((ctx, o) => {
-        o.sinon.stub(ctx.actions.project, 'setPromptShown')
+    context('time based operations', () => {
+      beforeEach(() => {
+        cy.clock(1609891200000)
+        cy.scaffoldProject('launchpad')
+        cy.openProject('launchpad')
       })
 
-      cy.findByRole('button', { name: 'Set up CI' }).click()
-      cy.findByText('Configure CI').should('be.visible')
-      cy.findByRole('button', { name: 'Close' }).click()
+      it('growth prompts do not auto-open 4 days after first project opened', () => {
+        cy.withCtx(
+          (ctx, o) => {
+            o.sinon.stub(ctx._apis.projectApi, 'getCurrentProjectSavedState').resolves({
+              firstOpened: 1609459200000,
+              lastOpened: 1609459200000,
+              promptsShown: {},
+              banners: { _disabled: true },
+            })
+          },
+        )
 
-      cy.withCtx((ctx) => {
-        expect(ctx.actions.project.setPromptShown).to.have.been.calledWith('ci1')
-      })
-
-      cy.findByRole('button', { name: 'Run tests faster' }).click()
-      cy.findByText('Run tests faster in CI').should('be.visible')
-      cy.findByRole('button', { name: 'Close' }).click()
-
-      cy.withCtx((ctx) => {
-        expect(ctx.actions.project.setPromptShown).to.have.been.calledWith('orchestration1')
+        cy.visitLaunchpad()
+        cy.contains('launchpad')
+        cy.wait(1000)
+        cy.contains('Configure CI').should('not.exist')
       })
     })
   })
@@ -327,11 +275,10 @@ describe('App Top Nav Workflows', () => {
       beforeEach(() => {
         cy.findBrowsers()
         cy.openProject('launchpad')
-        cy.startAppServer()
         cy.loginUser()
-        cy.visitApp()
+        cy.visitLaunchpad()
 
-        cy.findByTestId('app-header-bar').findByRole('button', { name: 'Profile and logout', expanded: false }).as('logInButton')
+        cy.findByTestId(headerBarId).findByRole('button', { name: 'Profile and logout', expanded: false }).as('logInButton')
       })
 
       it('shows user in top nav when logged in', () => {
@@ -359,13 +306,17 @@ describe('App Top Nav Workflows', () => {
 
         cy.findByRole('button', { name: 'Log out' }).click()
 
-        cy.findByTestId('app-header-bar').findByText('Log in').should('be.visible')
+        cy.findByTestId(headerBarId).findByText('Log in').should('be.visible')
       })
+    })
 
-      it('logouts user if cloud request returns unauthorized', () => {
+    context('user fails log in', () => {
+      it('logs out user if cloud request returns unauthorized', () => {
+        cy.findBrowsers()
         cy.scaffoldProject('component-tests')
         cy.openProject('component-tests')
-        cy.startAppServer('component')
+        cy.loginUser()
+        cy.visitLaunchpad()
 
         cy.remoteGraphQLIntercept((obj) => {
           if (obj.result.data?.cloudProjectBySlug) {
@@ -375,18 +326,18 @@ describe('App Top Nav Workflows', () => {
           return obj.result
         })
 
-        cy.loginUser()
-        cy.visitApp()
+        cy.findByTestId(headerBarId).findByRole('button', { name: 'Profile and logout', expanded: false }).as('logInButton')
 
         cy.get('@logInButton').click()
 
         cy.findByTestId('login-panel').contains('Test User').should('be.visible')
         cy.findByTestId('login-panel').contains('test@example.com').should('be.visible')
 
-        cy.findByTestId('sidebar-link-runs-page').click()
+        // Navigate somewhere that will query the cloud to trigger the unauthorized response
+        cy.contains('Component Testing').click()
         cy.get('@logInButton').click()
 
-        cy.findByTestId('app-header-bar').within(() => {
+        cy.findByTestId(headerBarId).within(() => {
           cy.findByTestId('user-avatar-title').should('not.exist')
           cy.findByRole('button', { name: 'Log in' }).click()
         })
@@ -408,7 +359,7 @@ describe('App Top Nav Workflows', () => {
       const mockLogInActionsForUser = (user) => {
         cy.withCtx(async (ctx, options) => {
           ctx.coreData.app.browserStatus = 'open'
-          options.sinon.stub(ctx._apis.electronApi, 'isMainWindowFocused').returns(false)
+          options.sinon.stub(ctx._apis.electronApi, 'isMainWindowFocused').returns(true)
           options.sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
             setTimeout(() => {
               onMessage({ browserOpened: true })
@@ -423,8 +374,13 @@ describe('App Top Nav Workflows', () => {
         }, { user })
       }
 
-      function logIn ({ expectedNextStepText, displayName }) {
-        cy.findByTestId('app-header-bar').within(() => {
+      type LoginOptions = {
+        expectedNextStepText: 'Continue' | 'Connect project'
+        displayName: string
+      }
+
+      function logIn ({ expectedNextStepText, displayName }: LoginOptions) {
+        cy.findByTestId(headerBarId).within(() => {
           cy.findByTestId('user-avatar-title').should('not.exist')
           cy.findByRole('button', { name: 'Log in' }).click()
         })
@@ -432,7 +388,7 @@ describe('App Top Nav Workflows', () => {
         cy.findByRole('dialog', { name: 'Log in to Cypress' }).as('logInModal').within(() => {
           cy.findByRole('button', { name: 'Log in' }).click()
 
-          // The Log in button transitions through a few states as the browser launch lifecycle completes
+          // The Log In button transitions through a few states as the browser launch lifecycle completes
           cy.findByRole('button', { name: 'Opening browser' }).should('be.visible').and('be.disabled')
           cy.findByRole('button', { name: 'Waiting for you to log in' }).should('be.visible').and('be.disabled')
         })
@@ -447,29 +403,33 @@ describe('App Top Nav Workflows', () => {
           cy.findByRole('button', { name: expectedNextStepText }).click()
         })
       }
-      context('with no project id', () => {
-        it('shows "connect project" button after login if no project id is set', () => {
-          cy.scaffoldProject('component-tests')
-          cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
-          cy.startAppServer()
-          cy.visitApp()
-          cy.remoteGraphQLIntercept(async (obj) => {
-            if (obj.result.data?.cloudViewer) {
-              obj.result.data.cloudViewer.organizations = {
-                __typename: 'CloudOrganizationConnection',
-                id: 'test',
-                nodes: [{ __typename: 'CloudOrganization', id: '987' }],
-              }
-            }
 
-            return obj.result
+      beforeEach(() => {
+        cy.scaffoldProject('launchpad')
+        cy.openProject('launchpad')
+        cy.visitLaunchpad()
+      })
+
+      context('with no project id', () => {
+        it('shows "continue" button after login if config has not loaded', () => {
+          mockLogInActionsForUser(mockUser)
+          logIn({ expectedNextStepText: 'Continue', displayName: mockUser.name })
+          cy.withCtx((ctx, o) => {
+            // validate utmSource
+            expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[1]).to.eq('Binary: Launchpad')
+            // validate utmMedium
+            expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[2]).to.eq('Nav')
           })
+        })
+
+        it('shows "connect project" button after login if no project id is set', () => {
+          cy.contains('E2E Testing').click()
 
           mockLogInActionsForUser(mockUser)
           logIn({ expectedNextStepText: 'Connect project', displayName: mockUser.name })
           cy.withCtx((ctx, o) => {
             // validate utmSource
-            expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[1]).to.eq('Binary: App')
+            expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[1]).to.eq('Binary: Launchpad')
             // validate utmMedium
             expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[2]).to.eq('Nav')
           })
@@ -483,26 +443,27 @@ describe('App Top Nav Workflows', () => {
           cy.findBrowsers()
           cy.scaffoldProject('component-tests')
           cy.openProject('component-tests')
-          cy.startAppServer()
-          cy.visitApp()
+          cy.visitLaunchpad()
         })
 
         it('shows log in modal workflow for user with name and email', () => {
+          cy.contains('Component Testing').click()
           mockLogInActionsForUser(mockUser)
 
           logIn({ expectedNextStepText: 'Continue', displayName: mockUser.name })
 
           cy.get('@logInModal').should('not.exist')
-          cy.findByTestId('app-header-bar').findByTestId('user-avatar-title').should('be.visible')
+          cy.findByTestId(headerBarId).findByTestId('user-avatar-title').should('be.visible')
         })
 
         it('shows log in modal workflow for user with only email', () => {
+          cy.contains('Component Testing').click()
           mockLogInActionsForUser(mockUserNoName)
 
           logIn({ expectedNextStepText: 'Continue', displayName: mockUserNoName.email })
 
           cy.get('@logInModal').should('not.exist')
-          cy.findByTestId('app-header-bar').findByTestId('user-avatar-title').should('be.visible')
+          cy.findByTestId(headerBarId).findByTestId('user-avatar-title').should('be.visible')
         })
 
         it('if the project has no runs, shows "record your first run" prompt after clicking', () => {
@@ -513,6 +474,8 @@ describe('App Top Nav Workflows', () => {
 
             return obj.result
           })
+
+          cy.contains('Component Testing').click()
 
           mockLogInActionsForUser(mockUserNoName)
 
@@ -536,7 +499,7 @@ describe('App Top Nav Workflows', () => {
             })
           })
 
-          cy.findByTestId('app-header-bar').within(() => {
+          cy.findByTestId(headerBarId).within(() => {
             cy.findByTestId('user-avatar-title').should('not.exist')
             cy.findByRole('button', { name: 'Log in' }).click()
           })
@@ -568,7 +531,7 @@ describe('App Top Nav Workflows', () => {
             })
           })
 
-          cy.findByTestId('app-header-bar').within(() => {
+          cy.findByTestId(headerBarId).within(() => {
             cy.findByTestId('user-avatar-title').should('not.exist')
             cy.findByRole('button', { name: 'Log in' }).click()
           })
@@ -618,7 +581,7 @@ describe('App Top Nav Workflows', () => {
             })
           })
 
-          cy.findByTestId('app-header-bar').within(() => {
+          cy.findByTestId(headerBarId).within(() => {
             cy.findByTestId('user-avatar-title').should('not.exist')
             cy.findByRole('button', { name: 'Log in' }).as('loginButton').click()
           })
@@ -655,7 +618,7 @@ describe('App Top Nav Workflows', () => {
             })
           })
 
-          cy.findByTestId('app-header-bar').within(() => {
+          cy.findByTestId(headerBarId).within(() => {
             cy.findByTestId('user-avatar-title').should('not.exist')
             cy.findByRole('button', { name: 'Log in' }).as('loginButton').click()
           })
@@ -673,51 +636,79 @@ describe('App Top Nav Workflows', () => {
           cy.contains(loginText.titleInitial).should('be.visible')
         })
       })
+
+      context('global mode', () => {
+        it('shows "continue" button after login if project not selected', () => {
+          cy.openGlobalMode()
+          cy.visitLaunchpad()
+
+          mockLogInActionsForUser(mockUser)
+          logIn({ expectedNextStepText: 'Continue', displayName: mockUser.name })
+          cy.withCtx((ctx, o) => {
+            // validate utmSource
+            expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[1]).to.eq('Binary: Launchpad')
+            // validate utmMedium
+            expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[2]).to.eq('Nav')
+          })
+        })
+
+        it('shows "continue" button after login if project selected', () => {
+          cy.openGlobalMode()
+          cy.addProject('component-tests')
+          cy.visitLaunchpad()
+
+          cy.get('[data-cy="project-card"]').click()
+
+          mockLogInActionsForUser(mockUser)
+          logIn({ expectedNextStepText: 'Continue', displayName: mockUser.name })
+          cy.withCtx((ctx, o) => {
+            // validate utmSource
+            expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[1]).to.eq('Binary: Launchpad')
+            // validate utmMedium
+            expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[2]).to.eq('Nav')
+          })
+        })
+
+        it('shows "continue" button after login if project selected has project id', () => {
+          cy.openGlobalMode()
+          cy.addProject('component-tests')
+          cy.visitLaunchpad()
+
+          cy.get('[data-cy="project-card"]').click()
+
+          cy.contains('E2E Testing').click()
+
+          mockLogInActionsForUser(mockUser)
+          logIn({ expectedNextStepText: 'Continue', displayName: mockUser.name })
+          cy.withCtx((ctx, o) => {
+            // validate utmSource
+            expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[1]).to.eq('Binary: Launchpad')
+            // validate utmMedium
+            expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[2]).to.eq('Nav')
+          })
+        })
+
+        it('shows "connect project" button after login if project selected has no project id', () => {
+          cy.openGlobalMode()
+          cy.addProject('launchpad')
+          cy.visitLaunchpad()
+
+          cy.get('[data-cy="project-card"]').click()
+
+          cy.contains('E2E Testing').click()
+
+          mockLogInActionsForUser(mockUser)
+          logIn({ expectedNextStepText: 'Connect project', displayName: mockUser.name })
+          cy.withCtx((ctx, o) => {
+            // validate utmSource
+            expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[1]).to.eq('Binary: Launchpad')
+            // validate utmMedium
+            expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[2]).to.eq('Nav')
+          })
+
+          cy.findByRole('dialog', { name: 'Create project' }).should('be.visible')
+        })
+      })
     })
-  })
-})
-
-describe('Growth Prompts Can Open Automatically', () => {
-  beforeEach(() => {
-    cy.clock(1609891200000)
-    cy.scaffoldProject('launchpad')
-    cy.openProject('launchpad')
-    cy.startAppServer('e2e', { skipMockingPrompts: true })
-  })
-
-  it('CI prompt auto-opens 4 days after first project opened', () => {
-    cy.withCtx(
-      (ctx, o) => {
-        o.sinon.stub(ctx._apis.projectApi, 'getCurrentProjectSavedState').resolves({
-          firstOpened: 1609459200000,
-          lastOpened: 1609459200000,
-          promptsShown: {},
-          banners: { _disabled: true },
-        })
-      },
-    )
-
-    cy.visitApp()
-    cy.contains('E2E specs')
-    cy.wait(1000)
-    cy.contains('Configure CI').should('be.visible')
-  })
-
-  it('CI prompt does not auto-open when it has already been dismissed', () => {
-    cy.withCtx(
-      (ctx, o) => {
-        o.sinon.stub(ctx._apis.projectApi, 'getCurrentProjectSavedState').resolves({
-          firstOpened: 1609459200000,
-          lastOpened: 1609459200000,
-          promptsShown: { ci1: 1609459200000 },
-          banners: { _disabled: true },
-        })
-      },
-    )
-
-    cy.visitApp()
-    cy.contains('E2E specs')
-    cy.wait(1000)
-    cy.contains('Configure CI').should('not.exist')
   })
 })
