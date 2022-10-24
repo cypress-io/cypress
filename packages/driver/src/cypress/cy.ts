@@ -471,6 +471,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     // 1. callback with state("done") when async
     // 2. throw the error for the promise chain
     try {
+      Cypress.state('logGroupIds', []) // reset log groups so assertions are at the top level
+
       // collect all of the callbacks for 'fail'
       rets = this.Cypress.action('cy:fail', err, this.state('runnable'))
     } catch (cyFailErr: any) {

@@ -232,7 +232,7 @@ export default function (Commands, Cypress, cy) {
 
             return existingSession.setup()
 
-            return existingSession.setup.call(cy.state('ctx'))
+            // return existingSession.setup.call(cy.state('ctx'))
           })
           .then(async () => {
             Cypress.state('current').set('name', 'save session')
@@ -299,8 +299,6 @@ export default function (Commands, Cypress, cy) {
           return cy.then(async () => {
             Cypress.state('current').set('name', 'create validate session commands')
 
-            // // uses Cypress hackery to resolve `false` if validate() resolves/returns false or throws/fails a cypress command.
-            // function validate (existingSession, step) {
             const isValidSession = true
             let caughtCommandErr = false
             let _commandToRunAfterValidation
@@ -387,7 +385,8 @@ export default function (Commands, Cypress, cy) {
 
                 if (!(err instanceof Error) && err === false) {
                   console.log('ITS FALSE')
-                  // set current command to cy.session for more accurate codeFrame
+                // set current command to cy.session for more accurate codeFrame
+                // cy.state('current', sessionCommand)
                   err = $errUtils.errByPath('sessions.validate_callback_false', { reason: `promise rejected with: ${String(err)}` })
                 }
 
@@ -399,15 +398,17 @@ export default function (Commands, Cypress, cy) {
               return enhanceErr(err)
             })
 
-            // try {
-            returnVal = existingSession.validate.call(cy.state('ctx'))
-            // } catch (e) {
             //   console.log('caught err when executing')
 
-            //   return onFail(e)
             // }
+            let returnVal
+
+            try {
+              returnVal = existingSession.validate.call(cy.state('ctx'))
+            } catch (e) {
+              return onFail(e)
+            }
             console.log('after execute validate', returnVal)
-            const returnVal = existingSession.validate.call(cy.state('ctx'))
 
             _commandToRunAfterValidation = cy.then(async () => {
               Cypress.state('current').set('name', '_commandToRunAfterValidation')
