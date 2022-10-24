@@ -128,7 +128,7 @@
     variant="panel"
     role="region"
     aria-live="polite"
-    :force-open-state="props.forceOpenDocs"
+    :force-open-state="props.forceOpenDocs && isAllowedFeature('docsCiPrompt')"
     @clear-force-open="emit('clearForceOpen')"
   >
     <template #heading="{ open }">
@@ -168,7 +168,7 @@
       </div>
       <PromptContent
         :type="docsMenuVariant"
-        :automatic="props.forceOpenDocs"
+        :automatic="props.forceOpenDocs && isAllowedFeature('docsCiPrompt')"
       />
     </div>
   </TopNavList>

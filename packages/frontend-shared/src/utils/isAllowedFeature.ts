@@ -1,5 +1,5 @@
 import interval from 'human-interval'
-import { BannerIds } from '@packages/types'
+import { BannerIds, PromptsShown } from '@packages/types'
 import type { LoginConnectStore } from '../store'
 
 const bannerIds = {
@@ -66,6 +66,14 @@ export const isAllowedFeature = (
     specsListBannerIsNotAllowed = !isAllowedFeature('specsListBanner', loginConnectStore)
   }
 
+  const projectIsNotConnected = () => {
+    return project.isConfigLoaded && !project.isProjectConnected
+  }
+
+  const promptWasNotAlreadyShown = (prompt: keyof PromptsShown) => {
+    return !promptsShown[prompt]
+  }
+
   // For each feature, we define an array of rules for every `UserStatus`
   // for which the feature is allowed.
   // The `base` rule is applied to all statuses, additional rules are
@@ -91,6 +99,8 @@ export const isAllowedFeature = (
         minTimeSinceEvent(events.cypressFirstOpened, '4 days'),
         minTimeSinceEvent(events.latestBannerShownTime, '1 day'),
         specsListBannerIsNotAllowed, // always prioritize specsListBanner if it is allowed
+        projectIsNotConnected(),
+        promptWasNotAlreadyShown('ci1'),
       ],
       needsRecordedRun: [],
       needsOrgConnect: [],

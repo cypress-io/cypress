@@ -18,15 +18,17 @@ export class LocalSettingsActions {
     const toJson = JSON.parse(stringifiedJson) as AllowedState
 
     // update local data
-
-    _.merge(this.ctx.coreData.localSettings.preferences, toJson)
     if (type === 'global') {
+      const combinedState = _.merge(this.ctx.coreData.localSettings.preferences, toJson)
+
       // persist to global appData - projects/__global__/state.json
-      return this.ctx._apis.localSettingsApi.setPreferences(toJson)
+      return this.ctx._apis.localSettingsApi.setPreferences(combinedState)
     }
 
+    const combinedState = _.merge(this.ctx._apis.projectApi.getCurrentProjectSavedState(), toJson)
+
     // persist to project appData - for example projects/launchpad/state.json
-    return this.ctx._apis.projectApi.setProjectPreferences(toJson)
+    return this.ctx._apis.projectApi.setProjectPreferences(combinedState)
   }
 
   async refreshLocalSettings () {

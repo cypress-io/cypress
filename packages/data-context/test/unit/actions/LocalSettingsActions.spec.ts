@@ -27,6 +27,7 @@ describe('LocalSettingsActions', () => {
 
     ctx._apis.localSettingsApi.setPreferences = sinon.stub()
     ctx._apis.projectApi.setProjectPreferences = sinon.stub()
+    ctx._apis.projectApi.getCurrentProjectSavedState = sinon.stub()
   })
 
   context('saving project preferences', () => {
