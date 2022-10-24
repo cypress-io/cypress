@@ -28,6 +28,7 @@ for (const { projectName, test } of PROJECTS) {
         cy.waitForSpecToFinish()
         cy.get('.collapsible-header-inner:first').click().get('.command.command-name-mount > .command-wrapper').realHover().then(() => {
           cy.get('iframe.aut-iframe').its('0.contentDocument.body').then(cy.wrap).within(() => {
+            cy.get('[data-cy-root]').should('have.length.at.least', 1)
           })
         })
       } else {
@@ -38,6 +39,7 @@ for (const { projectName, test } of PROJECTS) {
         cy.waitForSpecToFinish()
         cy.get('.command.command-name-mount > .command-wrapper').realHover().then(() => {
           cy.get('iframe.aut-iframe').its('0.contentDocument.body').then(cy.wrap).within(() => {
+            cy.get('[data-cy-root]').should('have.length.at.least', 1)
           })
         })
       }
