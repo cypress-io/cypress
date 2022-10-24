@@ -66,7 +66,8 @@ export const isAllowedFeature = (
     specsListBannerIsNotAllowed = !isAllowedFeature('specsListBanner', loginConnectStore)
   }
 
-  // For each feature, we define an array of rules for every `UserStatus`.
+  // For each feature, we define an array of rules for every `UserStatus`
+  // for which the feature is allowed.
   // The `base` rule is applied to all statuses, additional rules are
   // nested in their respective statuses.
   const rules = {
