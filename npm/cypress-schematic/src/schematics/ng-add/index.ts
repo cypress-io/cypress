@@ -45,6 +45,7 @@ export default function (_options: any): Rule {
       addCtSpecs(_options),
       addCypressTestScriptsToPackageJson(),
       modifyAngularJson(_options),
+      addDefaultSchematic(),
     ])(tree, _context)
   }
 }
@@ -303,6 +304,33 @@ function modifyAngularJson (options: any): Rule {
     }
 
     return tree
+  }
+}
+
+function addDefaultSchematic (): Rule {
+  return (tree: Tree, _: SchematicContext) => {
+    if (tree.exists('./angular.json')) {
+      const angularJsonVal = getAngularJsonValue(tree)
+      const angularSchematic = '@schematics/angular'
+      const cli = {
+        ...angularJsonVal.cli,
+        schematicCollections: ['@cypress/schematic', ...angularJsonVal?.cli?.schematicCollections ?? []],
+      }
+
+      if (cli.schematicCollections.indexOf('@schematics/angular') === -1) {
+        cli.schematicCollections.push(angularSchematic)
+      }
+
+      return tree.overwrite(
+        './angular.json',
+        JSON.stringify({
+          ...angularJsonVal,
+          cli,
+        }, null, 2),
+      )
+    }
+
+    throw new SchematicsException('angular.json not found')
   }
 }
 
