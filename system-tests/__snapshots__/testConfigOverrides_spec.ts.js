@@ -5,11 +5,10 @@ exports['testConfigOverrides / fails when passing invalid config value browser']
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:      1.2.3                                                                            │
-  │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        1 found (invalid-browser.js)                                                     │
-  │ Searched:     cypress/e2e/testConfigOverrides/invalid-browser.js                               │
-  │ Experiments:  experimentalSessionAndOrigin=true                                                │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (invalid-browser.js)                                                       │
+  │ Searched:   cypress/e2e/testConfigOverrides/invalid-browser.js                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

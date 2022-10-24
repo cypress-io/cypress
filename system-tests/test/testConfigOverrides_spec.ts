@@ -26,7 +26,6 @@ describe('testConfigOverrides', () => {
     snapshot: true,
     expectedExitCode: 1,
     config: {
-      experimentalSessionAndOrigin: true,
       video: false,
     },
   })
