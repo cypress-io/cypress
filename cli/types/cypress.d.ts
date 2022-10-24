@@ -2837,7 +2837,7 @@ declare namespace Cypress {
      *      test isolation is off. If a test in the suite impacts the state of other tests and it were to fail, you could see
      *      misleading errors in later tests which makes debugging clunky. See the [documentation](https://on.cypress.io/test-isolation)
      *      for more information.
-     * 
+     *
      * @default 'legacy', when running end-to-end tests. When running component tests or running end-to-end tests with
      *     experimentalSessionAndOrigin=true, the default is 'on'.
      */
