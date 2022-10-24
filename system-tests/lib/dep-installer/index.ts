@@ -158,7 +158,7 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
 
   const runCmd = async (cmd) => {
     log(`Running "${cmd}" in ${projectDir}`)
-    await execa(cmd, { cwd: projectDir, stdio: 'inherit', shell: true })
+    await execa(cmd, { cwd: projectDir, stdio: 'inherit', shell: true, windowsHide: false })
   }
 
   const cacheNodeModulesDir = path.join('/tmp', 'cy-system-tests-node-modules', project, 'node_modules')

@@ -135,7 +135,7 @@ async function makeE2ETasks () {
 
       // If we have an error, it's likely that we don't have a lockfile, or it's out of date.
       // Let's run a quick "yarn" in the directory, kill the node_modules, and try again
-      await execa('yarn', { cwd: Fixtures.projectFixturePath(projectName), stdio: 'inherit', shell: true })
+      await execa('yarn', { cwd: Fixtures.projectFixturePath(projectName), stdio: 'inherit', shell: true, windowsHide: false })
       await fs.remove(path.join(Fixtures.projectFixturePath(projectName), 'node_modules'))
 
       return await __internal_scaffoldProject(projectName, true)
