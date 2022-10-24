@@ -291,7 +291,7 @@ union CloudProjectSpecFlakyResult =
 
 type CloudProjectSpecFlakyStatus {
   """
-  URL linking to the flaky data in the Cypress Dashboard for this spec
+  URL linking to the flaky data in the Cypress dashboard for this spec
   """
   dashboardUrl: String
 
