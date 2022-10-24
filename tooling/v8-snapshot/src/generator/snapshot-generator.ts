@@ -2,6 +2,7 @@ import { strict as assert } from 'assert'
 import debug from 'debug'
 import fs from 'fs'
 import { dirname, join, basename } from 'path'
+import { minify } from 'terser'
 import { createSnapshotScript, SnapshotScript } from './create-snapshot-script'
 import { SnapshotVerifier } from './snapshot-verifier'
 import { determineDeferred } from '../doctor/determine-deferred'
@@ -79,6 +80,11 @@ const logError = debug('cypress:snapgen:error')
  * @property nodeEnv the string to provide to `process.env.NODE_ENV` during
  * snapshot creation
  *
+ * @property minify if `true` the snapshot script will be minified
+ *
+ * @property supportTypeScript if `true` then TypeScript should be supported
+ * when using snapshot require
+ *
  * @category snapshot
  */
 export type GenerationOpts = {
@@ -92,6 +98,8 @@ export type GenerationOpts = {
   resolverMap?: Record<string, string>
   flags: Flag
   nodeEnv: string
+  minify: boolean
+  supportTypeScript: boolean
 }
 
 function getDefaultGenerationOpts (projectBaseDir: string): GenerationOpts {
@@ -104,6 +112,8 @@ function getDefaultGenerationOpts (projectBaseDir: string): GenerationOpts {
     previousNoRewrite: [],
     flags: Flag.Script | Flag.MakeSnapshot | Flag.ReuseDoctorArtifacts,
     nodeEnv: 'development',
+    minify: false,
+    supportTypeScript: false,
   }
 }
 
@@ -144,6 +154,8 @@ export class SnapshotGenerator {
   private readonly forceNoRewrite: Set<string>
   /** See {@link GenerationOpts} nodeEnv */
   private readonly nodeEnv: string
+  /** See {@link GenerationOpts} minify */
+  private readonly minify: boolean
   /**
    * Path to the Go bundler binary used to generate the bundle with rewritten code
    * {@link https://github.com/cypress-io/esbuild/tree/thlorenz/snap}
@@ -195,6 +207,7 @@ export class SnapshotGenerator {
       forceNoRewrite,
       flags: mode,
       nodeEnv,
+      minify,
     }: GenerationOpts = Object.assign(
       getDefaultGenerationOpts(projectBaseDir),
       opts,
@@ -220,6 +233,7 @@ export class SnapshotGenerator {
     this.nodeEnv = nodeEnv
     this._flags = new GeneratorFlags(mode)
     this.bundlerPath = getBundlerPath()
+    this.minify = minify
 
     const auxiliaryDataKeys = Object.keys(this.auxiliaryData || {})
 
@@ -237,7 +251,7 @@ export class SnapshotGenerator {
   }
 
   private _addGitignore () {
-    const gitignore = 'snapshot.js\nsnapshot.js.map\nesbuild-meta.json\nsnapshot-meta.json\nsnapshot-entry.js\n'
+    const gitignore = 'snapshot.js\nbase.snapshot.js.map\nprocessed.snapshot.js.map\nesbuild-meta.json\nsnapshot-meta.json\nsnapshot-entry.js\n'
 
     const gitignorePath = join(this.cacheDir, '.gitignore')
 
@@ -276,7 +290,6 @@ export class SnapshotGenerator {
     }
 
     let result: SnapshotScript
-    const sourcemapExternalPath = `${this.snapshotScriptPath}.map`
 
     try {
       // 2. Create the initial snapshot script using whatever info we
@@ -292,8 +305,10 @@ export class SnapshotGenerator {
         auxiliaryData: this.auxiliaryData,
         nodeModulesOnly: this.nodeModulesOnly,
         sourcemap: true,
-        sourcemapExternalPath,
+        baseSourcemapExternalPath: this.snapshotScriptPath.replace('snapshot.js', 'base.snapshot.js.map'),
+        processedSourcemapExternalPath: this.snapshotScriptPath.replace('snapshot.js', 'processed.snapshot.js.map'),
         nodeEnv: this.nodeEnv,
+        supportTypeScript: this.nodeModulesOnly,
       })
     } catch (err) {
       logError('Failed creating script')
@@ -325,9 +340,22 @@ export class SnapshotGenerator {
       throw err
     }
 
+    await this._addGitignore()
+
     logInfo(`Writing snapshot script to ${this.snapshotScriptPath}`)
 
-    await this._addGitignore()
+    if (this.minify) {
+      const minified = await minify(this.snapshotScript!.toString(), {
+        sourceMap: false,
+      })
+
+      if (!minified.code) {
+        await fs.promises.writeFile(this.snapshotScriptPath, this.snapshotScript)
+        throw new Error(`Failed to minify snapshot script. Writing unminified code to ${this.snapshotScriptPath}`)
+      }
+
+      return fs.promises.writeFile(this.snapshotScriptPath, minified.code)
+    }
 
     // 4. Write the snapshot script to the configured file
     return fs.promises.writeFile(this.snapshotScriptPath, this.snapshotScript)
@@ -384,6 +412,7 @@ export class SnapshotGenerator {
         resolverMap: this.resolverMap,
         auxiliaryData: this.auxiliaryData,
         nodeEnv: this.nodeEnv,
+        supportTypeScript: this.nodeModulesOnly,
       })
     } catch (err) {
       logError('Failed creating script')

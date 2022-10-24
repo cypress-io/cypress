@@ -72,6 +72,7 @@ export async function determineDeferred (
     previousNoRewrite: opts.previousNoRewrite,
     forceNoRewrite: opts.forceNoRewrite,
     nodeEnv: opts.nodeEnv,
+    supportTypeScript: opts.nodeModulesOnly,
   })
 
   const {

@@ -114,10 +114,12 @@ export function assembleScript (
     entryPoint?: string
     includeStrictVerifiers?: boolean
     sourceMap?: Buffer
-    sourcemapExternalPath: string | undefined
+    baseSourcemapExternalPath: string | undefined
+    processedSourcemapExternalPath: string | undefined
     nodeEnv: string
     resolverMap?: Record<string, string>
     meta?: Metadata
+    supportTypeScript: boolean
   },
 ): { script: Buffer, processedSourceMap?: string } {
   const includeStrictVerifiers = opts.includeStrictVerifiers ?? false
@@ -163,16 +165,7 @@ export function assembleScript (
   // 3. Prepare the bundled definitions for inclusion in the snapshot script
   const defs = requireDefinitions(bundle, mainModuleRequirePath)
 
-  // 4. If an external sourcemap file was generated we prepare the sourcemap
-  //    comment referencing it
-  const relSourcemapExternalPath =
-    opts.sourcemapExternalPath != null
-      ? path
-      .relative(basedir, opts.sourcemapExternalPath)
-      .replace(path.sep, '/') // consistent url even on unixlike and windows
-      : undefined
-
-  // 5. Prepare the config which we'll use to generate the snapshot script from
+  // 4. Prepare the config which we'll use to generate the snapshot script from
   //    the ./blueprint templates
   const config: BlueprintConfig = {
     processPlatform: process.platform,
@@ -182,12 +175,13 @@ export function assembleScript (
     customRequireDefinitions: defs.code,
     includeStrictVerifiers,
     sourceMap: opts.sourceMap,
-    sourcemapExternalPath: relSourcemapExternalPath,
     nodeEnv: opts.nodeEnv,
     basedir,
+    processedSourceMapPath: opts.processedSourcemapExternalPath,
+    supportTypeScript: opts.supportTypeScript,
   }
 
-  // 6. Finally return the rendered script buffer and optionally processed
+  // 5. Finally return the rendered script buffer and optionally processed
   //    sourcemaps
   return scriptFromBlueprint(config)
 }
@@ -234,10 +228,12 @@ export async function createSnapshotScript (
       auxiliaryData: opts.auxiliaryData,
       includeStrictVerifiers: opts.includeStrictVerifiers,
       sourceMap,
-      sourcemapExternalPath: opts.sourcemapExternalPath,
+      baseSourcemapExternalPath: opts.baseSourcemapExternalPath,
+      processedSourcemapExternalPath: opts.processedSourcemapExternalPath,
       nodeEnv: opts.nodeEnv,
       resolverMap: opts.resolverMap,
       meta,
+      supportTypeScript: opts.supportTypeScript,
     },
   )
 
@@ -264,7 +260,7 @@ const makePackherdCreateBundle: (opts: CreateBundleOpts) => CreateBundle =
         opts,
         popts.entryFilePath,
         basedir,
-        opts.sourcemapExternalPath,
+        opts.baseSourcemapExternalPath,
       )
 
       // 2. Launch bundler providing it the path to the config file
@@ -277,8 +273,11 @@ const makePackherdCreateBundle: (opts: CreateBundleOpts) => CreateBundle =
       const _MB = 1024 * 1024
       const execOpts: ExecSyncOptions = Object.assign(
         {
-          maxBuffer: 1000 * _MB,
+          maxBuffer: 8000 * _MB,
           cwd: basedir,
+          env: {
+            NODE_OPTIONS: '--max-old-space-size=16384',
+          },
         },
         // Windows doesn't properly support piping stdio
         process.platform === 'win32'
@@ -318,29 +317,29 @@ const makePackherdCreateBundle: (opts: CreateBundleOpts) => CreateBundle =
         }
 
         assert(
-          opts.sourcemap !== true || opts.sourcemapExternalPath != null,
+          opts.sourcemap !== true || opts.baseSourcemapExternalPath != null,
           'should include sourcemapExternalPath when sourcemap option is set',
         )
 
         if (opts.sourcemap) {
           logInfo(
             'External sourcemaps written to "%s"',
-            opts.sourcemapExternalPath,
+            opts.baseSourcemapExternalPath,
           )
         }
 
         // 5. Optionally write the sourcemap to a file
         let sourceMap: CreateBundleSourcemap | undefined = undefined
 
-        if (opts.sourcemapExternalPath != null) {
+        if (opts.baseSourcemapExternalPath != null) {
           try {
             sourceMap = {
-              contents: readFileSync(opts.sourcemapExternalPath),
+              contents: readFileSync(opts.baseSourcemapExternalPath),
             }
           } catch (err: any) {
             logError(
               'Failed to read sourcemap from "%s"',
-              opts.sourcemapExternalPath,
+              opts.baseSourcemapExternalPath,
             )
           }
         }

@@ -36,9 +36,7 @@ async function consolidateDep ({ projectBaseDir, dep }: { projectBaseDir: string
 }
 
 /**
- * Remove all bluebird + lodash installations used by the app directly or indirectly,
- * except one.  This step currently runs during `./setup-{prod,dev}` but would
- * make sense as a postinstall as well.
+ * Remove all bluebird and lodash as they are essentially duplicated and all on the same major version
  *
  * @param {Partial<import('../snapconfig').SnapshotConfig>} opts
  */

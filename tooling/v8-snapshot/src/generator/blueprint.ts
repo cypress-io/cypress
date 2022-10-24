@@ -4,8 +4,6 @@ import { BUNDLE_WRAPPER_OPEN } from './create-snapshot-script'
 import { processSourceMap } from '../sourcemap/process-sourcemap'
 import debug from 'debug'
 import { forwardSlash } from '../utils'
-import { sourceMapPath } from '@packages/packherd-require'
-import { gzipSync } from 'zlib'
 
 const logDebug = debug('cypress:snapgen:debug')
 
@@ -39,8 +37,7 @@ const setGlobals = read('set-globals')
  * @property basedir the base dir of the project for which we are creating the
  * snapshot
  * @property sourceMap {@link Buffer} with content of raw sourcemaps
- * @property sourcemapExternalPath path relative to the snapshot script where
- * the sourcemaps are stored
+ * @property supportTypeScript see {@link GenerationOpts} supportTypeScript
  */
 export type BlueprintConfig = {
   processPlatform: string
@@ -52,7 +49,8 @@ export type BlueprintConfig = {
   nodeEnv: string
   basedir: string
   sourceMap: Buffer | undefined
-  sourcemapExternalPath: string | undefined
+  processedSourceMapPath: string | undefined
+  supportTypeScript: boolean
 }
 
 const pathSep = path.sep === '\\' ? '\\\\' : path.sep
@@ -102,6 +100,7 @@ export function scriptFromBlueprint (config: BlueprintConfig): {
     nodeEnv,
     basedir,
     sourceMap,
+    supportTypeScript,
   } = config
 
   const normalizedMainModuleRequirePath = forwardSlash(mainModuleRequirePath)
@@ -178,6 +177,7 @@ function generateSnapshot() {
 }
 
 var snapshotResult = generateSnapshot.call({})
+var supportTypeScript = ${supportTypeScript}
 generateSnapshot = null
 `,
     'utf8',
@@ -198,13 +198,13 @@ generateSnapshot = null
 
     processedSourceMap = processSourceMap(sourceMap, basedir, offsetToBundle)
 
-    if (processedSourceMap != null) {
+    if (processedSourceMap != null && config.processedSourceMapPath != null) {
       logDebug(
         '[sourcemap] writing sourcemap to "%s"',
-        sourceMapPath,
+        config.processedSourceMapPath,
       )
 
-      fs.writeFileSync(sourceMapPath, gzipSync(processedSourceMap))
+      fs.writeFileSync(config.processedSourceMapPath, processedSourceMap)
     }
   }
 

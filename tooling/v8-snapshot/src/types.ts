@@ -62,14 +62,14 @@ export type Metadata = CreateBundleResult['metafile'] & {
  * @property sourcemap if `true` then a sourcemap will be generated for the
  * bundled files
  *
- * @property sourcemapExternalPath the file to write the generated sourcemap
+ * @property baseSourcemapExternalPath the file to write the raw generated sourcemap
  * to if that is desired
  *
- * @property sourcemapEmbed when `true` the sourcemap is embedded in the
- * snapshot
+ * @property processedSourcemapExternalPath the file to write the processed generated sourcemap
+ * to if that is desired
  *
- * @property sourcemapInline when `true` the sourcemap is inlined at the
- * bottom of the bundled file that is snapshotted
+ * @property supportTypeScript if `true` then TypeScript is supported when using
+ * snapshot require
  *
  * @category snapshot
  */
@@ -82,7 +82,9 @@ export type CreateBundleOpts = {
   norewrite?: string[]
   includeStrictVerifiers?: boolean
   sourcemap?: boolean
-  sourcemapExternalPath?: string
+  baseSourcemapExternalPath?: string
+  processedSourcemapExternalPath?: string
+  supportTypeScript: boolean
 }
 
 /**
@@ -118,6 +120,7 @@ export type ProcessScriptOpts = {
   entryPoint: string
 
   nodeEnv: string
+  supportTypeScript: boolean
 }
 
 /**

@@ -2,12 +2,12 @@
 const _ = require('lodash')
 const os = require('os')
 const path = require('path')
-const pkg = require('../../../package.json')
 const paths = require('./paths')
 const log = require('debug')('cypress:electron')
 const fs = require('fs-extra')
 const crypto = require('crypto')
 const { flipFuses, FuseVersion, FuseV1Options } = require('@electron/fuses')
+const pkg = require('@packages/root')
 
 let electronVersion
 

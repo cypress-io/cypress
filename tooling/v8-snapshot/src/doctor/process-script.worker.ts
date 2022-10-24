@@ -73,6 +73,7 @@ export function processScript ({
   entryFilePath,
   entryPoint,
   nodeEnv,
+  supportTypeScript,
 }: ProcessScriptOpts): ProcessScriptResult {
   const bundleContent = getBundle(bundlePath, bundleHash)
   let snapshotScript
@@ -82,7 +83,9 @@ export function processScript ({
       entryPoint,
       includeStrictVerifiers: true,
       nodeEnv,
-      sourcemapExternalPath: undefined,
+      baseSourcemapExternalPath: undefined,
+      processedSourcemapExternalPath: undefined,
+      supportTypeScript,
     }).script
   } catch (err: any) {
     return { outcome: 'failed:assembleScript', error: err }

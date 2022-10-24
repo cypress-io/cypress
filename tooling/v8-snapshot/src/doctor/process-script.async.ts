@@ -24,8 +24,9 @@ export class AsyncScriptProcessor {
   constructor () {
     logInfo('Initializing async script processor')
 
-    const maxWorkers = os.cpus().length
-    const minWorkers = maxWorkers / 2
+    // On CI, we're limited in resources, so we should limit the number of workers
+    const maxWorkers = process.env.CI ? 1 : os.cpus().length
+    const minWorkers = process.env.CI ? 1 : maxWorkers / 2
 
     const opts = {
       autoStart: true,

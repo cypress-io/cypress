@@ -7,7 +7,9 @@ const run = async () => {
     // Purposefully make this a dynamic require so that it doesn't have the potential to get picked up by snapshotting mechanism
     const hook = './hook'
 
-    require(`${hook}-require`)
+    const { hookRequire } = require(`${hook}-require`)
+
+    hookRequire(false)
   }
 
   await require('./server-entry')
