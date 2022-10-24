@@ -35,11 +35,12 @@ const reset = (test: any = {}) => {
   // before each test run!
   previouslyVisitedLocation = undefined
 
-  const { experimentalSessionAndOrigin, testIsolation } = Cypress.config()
+  // TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
+  const { experimentalSessionAndOrigin } = Cypress.config()
 
   // make sure we reset that we haven't visited about blank again
   // strict test isolation resets the navigation history for us.
-  hasVisitedAboutBlank = experimentalSessionAndOrigin && testIsolation === 'strict'
+  hasVisitedAboutBlank = experimentalSessionAndOrigin
 
   currentlyVisitingAboutBlank = false
 
@@ -1220,6 +1221,10 @@ export default (Commands, Cypress, cy, state, config) => {
       }
 
       const visit = () => {
+        // REMOVE THIS ONCE GA HITS. Sessions will handle visiting
+        // about blank.
+        // Fixed with: https://github.com/cypress-io/cypress/issues/21471
+        //
         // if we've visiting for the first time during
         // a test then we want to first visit about:blank
         // so that we nuke the previous state. subsequent

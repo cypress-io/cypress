@@ -192,6 +192,11 @@ export const mutation = mutationType({
       },
     })
 
+    // TODO: remove server-side setPromptShown helpers in #23768,
+    // since this will be handled by usePromptManager via existing
+    // `setPreferences` mutation, there is no need for this other
+    //way to modify saved sate
+
     t.field('setPromptShown', {
       type: 'Boolean',
       description: 'Save the prompt-shown state for this project',

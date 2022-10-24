@@ -1,7 +1,6 @@
 <template>
   <TrackedBanner
     :banner-id="bannerId"
-    :model-value="modelValue"
     data-cy="record-banner"
     status="info"
     :title="t('specPage.banners.record.title')"
@@ -14,7 +13,6 @@
       medium: 'Specs Record Runs Banner',
       cohort: 'n/a'
     }"
-    @update:model-value="value => emit('update:modelValue', value)"
   >
     <p class="mb-24px">
       {{ t('specPage.banners.record.content') }}
@@ -31,12 +29,7 @@ import { BannerIds } from '@packages/types'
 import RecordPromptAdapter from '@packages/frontend-shared/src/gql-components/RecordPromptAdapter.vue'
 
 defineProps<{
-  modelValue: boolean
   hasBannerBeenShown: boolean
-}>()
-
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void
 }>()
 
 const { t } = useI18n()

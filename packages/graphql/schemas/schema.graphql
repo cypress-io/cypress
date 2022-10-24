@@ -264,7 +264,7 @@ type CloudProjectSpec implements Node {
 union CloudProjectSpecFlakyResult = CloudFeatureNotEnabled | CloudProjectSpecFlakyStatus
 
 type CloudProjectSpecFlakyStatus {
-  """URL linking to the flaky data in the Cypress Dashboard for this spec"""
+  """URL linking to the flaky data in the Cypress dashboard for this spec"""
   dashboardUrl: String
 
   """Number of flaky runs from the considered runs"""
@@ -629,6 +629,11 @@ type CurrentProject implements Node & ProjectLike {
   """File extension to use based on if the project has typescript or not"""
   fileExtensionToUse: FileExtensionEnum
 
+  """
+  Whether the project has any specs found that do not match an example spec
+  """
+  hasNonExampleSpec: Boolean
+
   """Whether the project has a valid config file"""
   hasValidConfigFile: Boolean
 
@@ -720,6 +725,7 @@ enum ErrorTypeEnum {
   AUTOMATION_SERVER_DISCONNECTED
   BAD_POLICY_WARNING
   BAD_POLICY_WARNING_TOOLTIP
+  BROWSER_CRASHED
   BROWSER_NOT_FOUND_BY_NAME
   BROWSER_NOT_FOUND_BY_PATH
   BROWSER_UNSUPPORTED_LAUNCH_OPTION
