@@ -15,6 +15,7 @@ import { fs } from '../util/fs'
 import { CdpAutomation, screencastOpts } from './cdp_automation'
 import * as protocol from './protocol'
 import utils from './utils'
+import * as errors from '../errors'
 import type { Browser, BrowserInstance } from './types'
 import { BrowserCriClient } from './browser-cri-client'
 import type { CriClient } from './cri-client'
@@ -561,6 +562,17 @@ export = {
     return args
   },
 
+  /**
+  * Clear instance state for the chrome instance, this is normally called in on kill or on exit.
+  */
+  clearInstanceState () {
+    debug('closing remote interface client')
+
+    // Do nothing on failure here since we're shutting down anyway
+    browserCriClient?.close().catch()
+    browserCriClient = undefined
+  },
+
   async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
     debug('connecting to new chrome tab in existing instance with url and debugging port', { url: options.url })
 
@@ -594,6 +606,18 @@ export = {
 
   async attachListeners (url: string, pageCriClient: CriClient, automation: Automation, options: BrowserLaunchOpts | BrowserNewTabOpts) {
     const browserCriClient = this._getBrowserCriClient()
+
+    // Handle chrome tab crashes.
+    pageCriClient.on('Inspector.targetCrashed', () => {
+      const err = errors.get('RENDERER_CRASHED')
+
+      if (!options.onError) {
+        errors.log(err)
+        throw new Error('Missing onError in attachListeners')
+      }
+
+      options.onError(err)
+    })
 
     if (!browserCriClient) throw new Error('Missing browserCriClient in attachListeners')
 
@@ -700,11 +724,7 @@ export = {
     launchedBrowser.browserCriClient = browserCriClient
 
     launchedBrowser.kill = (...args) => {
-      debug('closing remote interface client')
-
-      // Do nothing on failure here since we're shutting down anyway
-      browserCriClient?.close().catch()
-      browserCriClient = undefined
+      this.clearInstanceState()
 
       debug('closing chrome')
 

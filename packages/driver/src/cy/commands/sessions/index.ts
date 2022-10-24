@@ -399,7 +399,6 @@ export default function (Commands, Cypress, cy) {
               return enhanceErr(err)
             })
 
-
             // try {
             returnVal = existingSession.validate.call(cy.state('ctx'))
             // } catch (e) {

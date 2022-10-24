@@ -3,7 +3,6 @@ import { EventEmitter } from 'events'
 import type { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 import type MobX from 'mobx'
 import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriverMap } from './event-manager-types'
-
 import type { RunState, CachedTestState, AutomationElementId, FileDetails, ReporterStartInfo, ReporterRunState } from '@packages/types'
 
 import { logger } from './logger'
@@ -40,7 +39,7 @@ const driverToSocketEvents = 'backend:request automation:request mocha recorder:
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
 const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed visit:blank cypress:in:cypress:runner:event'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
-const socketToDriverEvents = 'net:stubbing:event request:event script:error cross:origin:automation:cookies'.split(' ')
+const socketToDriverEvents = 'net:stubbing:event request:event script:error cross:origin:cookies'.split(' ')
 const localToReporterEvents = 'reporter:log:add reporter:log:state:changed reporter:log:remove'.split(' ')
 
 /**
@@ -611,8 +610,8 @@ export class EventManager {
     })
 
     // Reflect back to the requesting origin the status of the 'duringUserTestExecution' state
-    Cypress.primaryOriginCommunicator.on('sync:during:user:test:execution', ({ specBridgeResponseEvent }, origin) => {
-      Cypress.primaryOriginCommunicator.toSpecBridge(origin, specBridgeResponseEvent, cy.state('duringUserTestExecution'))
+    Cypress.primaryOriginCommunicator.on('sync:during:user:test:execution', (_data, { origin, responseEvent }) => {
+      Cypress.primaryOriginCommunicator.toSpecBridge(origin, responseEvent, cy.state('duringUserTestExecution'))
     })
 
     Cypress.on('request:snapshot:from:spec:bridge', ({ log, name, options, specBridge, addSnapshot }: {
@@ -625,9 +624,13 @@ export class EventManager {
       const eventID = log.get('id')
 
       const requestSnapshot = () => {
-        return Cypress.primaryOriginCommunicator.toSpecBridgePromise(specBridge, 'snapshot:generate:for:log', {
-          name,
-          id: eventID,
+        return Cypress.primaryOriginCommunicator.toSpecBridgePromise({
+          origin: specBridge,
+          event: 'snapshot:generate:for:log',
+          data: {
+            name,
+            id: eventID,
+          },
         }).then((crossOriginSnapshot) => {
           const snapshot = crossOriginSnapshot.body ? crossOriginSnapshot : null
 
@@ -657,7 +660,7 @@ export class EventManager {
       this.localBus.emit('expect:origin', origin)
     })
 
-    Cypress.primaryOriginCommunicator.on('viewport:changed', (viewport, origin) => {
+    Cypress.primaryOriginCommunicator.on('viewport:changed', (viewport, { origin }) => {
       const callback = () => {
         Cypress.primaryOriginCommunicator.toSpecBridge(origin, 'viewport:changed:end')
       }
@@ -666,7 +669,7 @@ export class EventManager {
       this.localBus.emit('viewport:changed', viewport, callback)
     })
 
-    Cypress.primaryOriginCommunicator.on('before:screenshot', (config, origin) => {
+    Cypress.primaryOriginCommunicator.on('before:screenshot', (config, { origin }) => {
       const callback = () => {
         Cypress.primaryOriginCommunicator.toSpecBridge(origin, 'before:screenshot:end')
       }
@@ -698,31 +701,37 @@ export class EventManager {
       log?.set(attrs)
     })
 
-    // This message comes from the AUT, not the spec bridge.
-    // This is called in the event that cookies are set in a cross origin AUT prior to attaching a spec bridge.
-    Cypress.primaryOriginCommunicator.on('aut:set:cookie', ({ cookie, href }, _origin, source) => {
-      const { superDomain } = Cypress.Location.create(href)
-      const automationCookie = Cypress.Cookies.toughCookieToAutomationCookie(Cypress.Cookies.parse(cookie), superDomain)
+    // This message comes from the AUT, not the spec bridge. This is called in
+    // the event that cookies are set via document.cookie in a cross origin
+    // AUT prior to attaching a spec bridge.
+    Cypress.primaryOriginCommunicator.on(
+      'aut:set:cookie',
+      (options: { cookie, url: string, sameSiteContext: string }) => {
+        // unlikely there will be errors, but ignore them in any case, since
+        // they're not user-actionable
+        Cypress.automation('set:cookie', options.cookie).catch(() => {})
+        Cypress.backend('cross:origin:set:cookie', options).catch(() => {})
+      },
+    )
 
-      Cypress.automation('set:cookie', automationCookie).then(() => {
-        // It's possible the source has already unloaded before this event has been processed.
-        source?.postMessage({ event: 'cross:origin:aut:set:cookie' }, '*')
-      })
-      .catch(() => {
-      // unlikely there will be errors, but ignore them in any case, since
-      // they're not user-actionable
-      })
+    /**
+     * Call a backend request for the requesting spec bridge since we cannot have websockets in the spec bridges.
+     * Return it's response.
+     */
+    Cypress.primaryOriginCommunicator.on('backend:request', async ({ args }, { source, responseEvent }) => {
+      const response = await Cypress.backend(...args)
+
+      Cypress.primaryOriginCommunicator.toSource(source, responseEvent, response)
     })
 
-    // This message comes from the AUT, not the spec bridge.
-    // This is called in the event that cookies are retrieved in a cross origin AUT prior to attaching a spec bridge.
-    Cypress.primaryOriginCommunicator.on('aut:get:cookie', async ({ href }, _origin, source) => {
-      const { superDomain } = Cypress.Location.create(href)
+    /**
+     * Call an automation request for the requesting spec bridge since we cannot have websockets in the spec bridges.
+     * Return it's response.
+     */
+    Cypress.primaryOriginCommunicator.on('automation:request', async ({ args }, { source, responseEvent }) => {
+      const response = await Cypress.automation(...args)
 
-      const cookies = await Cypress.automation('get:cookies', { superDomain })
-
-      // It's possible the source has already unloaded before this event has been processed.
-      source?.postMessage({ event: 'cross:origin:aut:get:cookie', cookies }, '*')
+      Cypress.primaryOriginCommunicator.toSource(source, responseEvent, response)
     })
 
     // The window.top should not change between test reloads, and we only need to bind the message event when Cypress is recreated
@@ -863,7 +872,7 @@ export class EventManager {
 
   notifyCrossOriginBridgeReady (origin) {
     // Any multi-origin event appends the origin as the third parameter and we do the same here for this short circuit
-    Cypress.primaryOriginCommunicator.emit('bridge:ready', undefined, origin)
+    Cypress.primaryOriginCommunicator.emit('bridge:ready', undefined, { origin })
   }
 
   snapshotUnpinned () {

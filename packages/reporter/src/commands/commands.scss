@@ -274,7 +274,6 @@
       vertical-align: middle;
     }
 
-
     .command-group {
       border-color: $err-header-text;
       @include nested-command-dashes($err-header-text);

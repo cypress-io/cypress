@@ -146,9 +146,10 @@ export = {
       onCrashed () {
         const err = errors.get('RENDERER_CRASHED')
 
-        errors.log(err)
-
-        if (!options.onError) throw new Error('Missing onError in onCrashed')
+        if (!options.onError) {
+          errors.log(err)
+          throw new Error('Missing onError in onCrashed')
+        }
 
         options.onError(err)
       },
@@ -470,6 +471,11 @@ export = {
       proxyBypassRules: '<-loopback>',
     })
   },
+
+  /**
+   * Clear instance state for the electron instance, this is normally called in on kill or on exit for electron there isn't state to clear.
+   */
+  clearInstanceState () {},
 
   async connectToNewSpec (browser: Browser, options: ElectronOpts, automation: Automation) {
     if (!options.url) throw new Error('Missing url in connectToNewSpec')
