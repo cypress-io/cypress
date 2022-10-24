@@ -258,6 +258,14 @@ export class CommandQueue extends Queue<$Command> {
 
       command.set({ subject })
 
+      this.state({
+        commandIntermediateValue: undefined,
+        // reset the nestedIndex back to null
+        nestedIndex: null,
+        // we're finished with the current command so set it back to null
+        current: null,
+      })
+
       this.setSubjectForChainer(command.get('chainerId'), subject)
 
       return subject
@@ -281,21 +289,21 @@ export class CommandQueue extends Queue<$Command> {
       commandRunningFailed(Cypress, this.state, err)
 
       if (err.isRecovered) {
+        this.state({
+          commandIntermediateValue: undefined,
+          // reset the nestedIndex back to null
+          nestedIndex: null,
+          // we're finished with the current command so set it back to null
+          current: null,
+        })
+
         return // let the queue move on to the next command
       }
 
       throw err
     }).finally(() => {
-      this.state('commandIntermediateValue', undefined)
-
       // end / snapshot our logs if they need it
       command.finishLogs()
-
-      // we're finished with the current command so set it back to null
-      this.state('current', null)
-
-      // reset the nestedIndex back to null
-      this.state('nestedIndex', null)
     })
   }
 
