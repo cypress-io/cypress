@@ -2808,7 +2808,8 @@ declare namespace Cypress {
      */
     supportFile: string | false
     /**
-     * The test isolation ensures a clean browser context between tests.
+     * The test isolation ensures a clean browser context between tests. This option is only available when
+     * `experimentalSessionAndOrigin=true`.
      *
      * Cypress will always resets/clears aliases, intercepts, clock, and viewport before each test
      * to ensure a clean test slate; i.e. this configuration only impacts the browser context.
@@ -2816,20 +2817,12 @@ declare namespace Cypress {
      * Note: the [`cy.session()`](https://on.cypress.io/session) command will inherent this value to determine whether
      * or not the page is cleared when the command executes. This command is only available in end-to-end testing.
      *
-     * Options:
-     *   When experimentalSessionAndOrigin=false
-     *   - legacy - "Pass through" to document the default Cypress test isolation behavior. The page is not cleared
-     *          before each end-to-end test. Cookies, local storage and session storage in the current domains are
-     *          cleared before each test. The `cy.session()` command is not available for end-to-end without this experiment.
-     *          NOTE: this behavior will be changed in the next major release and the new default will be 'on'.
-     *
-     *   When experimentalSessionAndOrigin=true
-     *   - on - The page is cleared before each test. Cookies, local storage and session storage in all domains are cleared
-     *          before each test. The `cy.session()` command will also clear the page and current browser context when creating
-     *          or restoring the browser session.
-     *   - off - The current browser state will persist between tests. The page does not clear before the test and cookies, local
-     *           storage and session storage will be available in the next test. The `cy.session()` command will only clear the
-     *           current browser context when creating or restoring the browser session - the current page will not clear.
+     *  - on - The page is cleared before each test. Cookies, local storage and session storage in all domains are cleared
+     *         before each test. The `cy.session()` command will also clear the page and current browser context when creating
+     *         or restoring the browser session.
+     *  - off - The current browser state will persist between tests. The page does not clear before the test and cookies, local
+     *          storage and session storage will be available in the next test. The `cy.session()` command will only clear the
+     *          current browser context when creating or restoring the browser session - the current page will not clear.
      *
      * Tradeoffs:
      *      Turning test isolation off may improve performance of end-to-end tests, however, previous tests could impact the
@@ -2838,10 +2831,9 @@ declare namespace Cypress {
      *      misleading errors in later tests which makes debugging clunky. See the [documentation](https://on.cypress.io/test-isolation)
      *      for more information.
      *
-     * @default 'legacy', when running end-to-end tests. When running component tests or running end-to-end tests with
-     *     experimentalSessionAndOrigin=true, the default is 'on'.
+     * @default null, when experimentalSessionAndOrigin=false. The default is 'on' when experimentalSessionAndOrigin=true.
      */
-    testIsolation: 'legacy' | 'on' | 'off'
+    testIsolation: null | 'on' | 'off'
     /**
      * Path to folder where videos will be saved after a headless or CI run
      * @default "cypress/videos"

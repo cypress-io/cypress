@@ -31,6 +31,11 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'TEST_FILES_RENAMED',
 ] as const
 
+type ValidationOptions = {
+  testingType: TestingType | null
+  experimentalSessionAndOrigin: boolean
+}
+
 export type BreakingOptionErrorKey = typeof BREAKING_OPTION_ERROR_KEY[number]
 
 export type OverrideLevel = 'any' | 'suite' | 'never'
@@ -90,7 +95,7 @@ export interface BreakingOption {
   showInLaunchpad?: boolean
 }
 
-const isValidConfig = (testingType: string, config: any) => {
+const isValidConfig = (testingType: string, config: any, opts: ValidationOptions) => {
   const status = validate.isPlainObject(testingType, config)
 
   if (status !== true) {
@@ -99,7 +104,7 @@ const isValidConfig = (testingType: string, config: any) => {
 
   for (const rule of options) {
     if (rule.name in config && rule.validation) {
-      const status = rule.validation(`${testingType}.${rule.name}`, config[rule.name])
+      const status = rule.validation(`${testingType}.${rule.name}`, config[rule.name], opts)
 
       if (status !== true) {
         return status
@@ -374,26 +379,36 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'testIsolation',
     // TODO: https://github.com/cypress-io/cypress/issues/23093
     // When experimentalSessionAndOrigin is removed and released as GA,
-    // update the defaultValue from 'legacy' to 'on' and
+    // update the defaultValue from undefined to 'on' and
     // update this code to remove the check/override specific to enable
     // 'on' by default when experimentalSessionAndOrigin=true
     defaultValue: (options: Record<string, any> = {}) => {
       if (options.testingType === 'component') {
-        return 'on'
+        return null
       }
 
-      return options?.experimentalSessionAndOrigin || options?.config?.e2e?.experimentalSessionAndOrigin ? 'on' : 'legacy'
+      return options?.experimentalSessionAndOrigin || options?.config?.e2e?.experimentalSessionAndOrigin ? 'on' : null
     },
-    validation: (key: string, value: any, { testingType, experimentalSessionAndOrigin }: { testingType: TestingType, experimentalSessionAndOrigin: boolean }) => {
-      if (testingType === 'component') {
-        return validate.isOneOf('on')(key, value)
+    validation: (key: string, value: any, opts: ValidationOptions) => {
+      const { testingType, experimentalSessionAndOrigin } = opts
+
+      if (testingType == null || testingType === 'component') {
+        return true
       }
 
-      if (experimentalSessionAndOrigin) {
+      if (experimentalSessionAndOrigin && testingType === 'e2e') {
         return validate.isOneOf('on', 'off')(key, value)
       }
 
-      return validate.isOneOf('legacy')(key, value)
+      if (value == null) {
+        return true
+      }
+
+      return {
+        key,
+        value,
+        type: 'not set unless the experimentalSessionAndOrigin flag is turned on',
+      }
     },
     overrideLevel: 'suite',
   }, {
