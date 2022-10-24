@@ -27,7 +27,7 @@ export interface LoginConnectState {
   }
   userData?: LoginUserData
   promptsShown: {
-    orchestration1: number
+    orchestration1?: number
     ci1?: number
     loginModalRecord?: number
   }
