@@ -16,17 +16,20 @@ import { dynamicImport } from './dynamic-import'
 const debug = debugFn('cypress:vite-dev-server:resolve-config')
 
 export const createViteDevServerConfig = async (config: ViteDevServerConfig, vite: Vite): Promise<InlineConfig> => {
-  const { viteConfig: viteOverrides, cypressConfig: { projectRoot } } = config
+  const { viteConfig: inlineViteConfig, cypressConfig: { projectRoot } } = config
   let resolvedOverrides: InlineConfig = {}
 
-  if (viteOverrides) {
-    debug(`Received a custom viteConfig`, viteOverrides)
+  if (inlineViteConfig) {
+    debug(`Received a custom viteConfig`, inlineViteConfig)
 
-    if (typeof viteOverrides === 'function') {
-      resolvedOverrides = await viteOverrides()
-    } else if (typeof viteOverrides === 'object') {
-      resolvedOverrides = viteOverrides
+    if (typeof inlineViteConfig === 'function') {
+      resolvedOverrides = await inlineViteConfig()
+    } else if (typeof inlineViteConfig === 'object') {
+      resolvedOverrides = inlineViteConfig
     }
+
+    // Set "configFile: false" to disable auto resolution of <project-root>/vite.config.js
+    resolvedOverrides = { configFile: false, ...resolvedOverrides }
   } else {
     const { findUp } = await dynamicImport<typeof import('find-up')>('find-up')
 
