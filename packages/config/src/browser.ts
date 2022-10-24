@@ -204,6 +204,7 @@ export const validateOverridableAtRunTime = (config: any, isSuiteLevelOverride: 
     }
 
     // TODO: add a hook to ensure valid testing-type configuration is being set at runtime for all configuration values.
+    // https://github.com/cypress-io/cypress/issues/24365
 
     if (overrideLevel === 'never' || (overrideLevel === 'suite' && !isSuiteLevelOverride)) {
       onErr({

@@ -403,7 +403,7 @@ export function mergeDefaults (
 
   const defaultsForRuntime = getDefaultValues({
     ...options,
-    // TODO: clean this up
+    // TODO: clean this up. Fixed with: https://github.com/cypress-io/cypress/issues/21471
     experimentalSessionAndOrigin: config.experimentalSessionAndOrigin,
   })
 
