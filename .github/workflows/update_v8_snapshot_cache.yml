@@ -1,7 +1,5 @@
 name: Update V8 Snapshot Cache
-on:
-  schedule:
-    - cron: '0 8 * * *' #  every day at 8am UTC (3/4am EST/EDT)
+on: push
 jobs:
   update-v8-snapshot-cache:
     runs-on: ubuntu-latest
