@@ -22,3 +22,7 @@ jobs:
           node-version: 16
       - name: Run yarn
         run: yarn
+      - name: Generate dev snapshot
+        run: yarn build-v8-snapshot-dev
+      - name: Generate prod snapshot
+        run: yarn build-v8-snapshot-prod
