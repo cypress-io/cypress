@@ -600,11 +600,6 @@ class LogManager {
 
   createLogFn (cy, state, config) {
     return (options: any = {}) => {
-      // if (!this.isInteractive) {
-      //   // if (_skipCollectingLogs || !this.isInteractive) {
-      //   return
-      // }
-
       if (!_.isObject(options)) {
         $errUtils.throwErrByPath('log.invalid_argument', { args: { arg: options } })
       }
@@ -660,7 +655,7 @@ class LogManager {
 
 export function create (Cypress, cy, state, config) {
   counter = 0
-  const logManager = new LogManager(Cypress.state('isInteractive'))
+  const logManager = new LogManager()
 
   return logManager.createLogFn(cy, state, config)
 }

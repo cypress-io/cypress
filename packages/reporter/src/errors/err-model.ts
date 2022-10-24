@@ -49,10 +49,6 @@ export default class Err {
     this.update(props)
   }
 
-  @computed get hasError () {
-    return this.displayMessage
-  }
-
   @computed get displayMessage () {
     return _.compact([this.name, this.message]).join(': ')
   }
