@@ -1,3 +1,11 @@
+<!--
+  This component exists to avoid repeating this logic between the root components
+  of packages/app and packages/launchpad. It doesn't render anything and can
+  probably be a composable. It hasn't been made into a composable yet as we
+  have a convention where we put GQL queries into Vue components, so for simplicity's sake
+  this is a regular ole component.
+-->
+
 <script setup lang="ts">
 import { watchEffect } from 'vue'
 import { gql, useQuery, useSubscription } from '@urql/vue'
