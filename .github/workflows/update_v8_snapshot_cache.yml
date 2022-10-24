@@ -2,7 +2,10 @@ name: Update V8 Snapshot Cache
 on: push
 jobs:
   update-v8-snapshot-cache:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.platform }}
     env:
       CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
       BASE_BRANCH: feature/v8-snapshots-auto-pr
