@@ -6,7 +6,6 @@
       :show-browsers="props.showBrowsers"
       :page-name="props.pageName"
       :allow-automatic-prompt-open="props.allowAutomaticPromptOpen"
-      @connect-project="emit('connect-project')"
     />
   </div>
 </template>
@@ -32,10 +31,6 @@ const props = withDefaults(
     pageName: undefined,
   },
 )
-
-const emit = defineEmits<{
-  (event: 'connect-project'): void
-}>()
 
 const query = useQuery({ query: HeaderBar_HeaderBarQueryDocument })
 
