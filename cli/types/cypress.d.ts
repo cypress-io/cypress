@@ -1081,8 +1081,6 @@ declare namespace Cypress {
     /**
       * Save/Restore browser Cookies, LocalStorage, and SessionStorage data resulting from the supplied `setup` function.
       *
-      * Only available if the `experimentalSessionAndOrigin` config option is enabled.
-      *
       * @see https://on.cypress.io/session
       */
     session(id: string | object, setup?: () => void, options?: SessionOptions): Chainable<null>
@@ -2803,7 +2801,7 @@ declare namespace Cypress {
      * The test isolation level applied to ensure a clean slate between tests.
      *   - legacy - resets/clears aliases, intercepts, clock, viewport, cookies, and local storage before each test.
      *   - strict - applies all resets/clears from legacy, plus clears the page by visiting 'about:blank' to ensure clean app state before each test.
-     * @default "legacy", however, when experimentalSessionAndOrigin=true, the default is "strict"
+     * @default "strict"
      */
     testIsolation: 'legacy' | 'strict'
     /**
@@ -2866,11 +2864,6 @@ declare namespace Cypress {
      * @default false
      */
     experimentalInteractiveRunEvents: boolean
-    /**
-     * Enables cross-origin and improved session support, including the `cy.origin` and `cy.session` commands. See https://on.cypress.io/origin and https://on.cypress.io/session.
-     * @default false
-     */
-    experimentalSessionAndOrigin: boolean
     /**
      * Whether Cypress will search for and replace obstructive code in third party .js or .html files.
      * NOTE: Setting this flag to true removes Subresource Integrity (SRI).
@@ -3038,7 +3031,7 @@ declare namespace Cypress {
     xhrUrl: string
   }
 
-  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations' | 'experimentalSessionAndOrigin'>>, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
+  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>>, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
   }
@@ -3094,7 +3087,7 @@ declare namespace Cypress {
     }
   }
 
-  interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl' | 'experimentalSessionAndOrigin' | 'experimentalStudio'> {
+  interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl' | 'experimentalStudio'> {
     devServer: DevServerFn<ComponentDevServerOpts> | DevServerConfigOptions
     devServerConfig?: ComponentDevServerOpts
     /**

@@ -1059,9 +1059,20 @@ export const AllCypressErrors = {
   },
   EXPERIMENTAL_SESSION_SUPPORT_REMOVED: () => {
     return errTemplate`\
-        The ${fmt.highlight(`experimentalSessionSupport`)} configuration option was removed in ${fmt.cypressVersion(`9.6.0`)} and replaced with ${fmt.highlight(`experimentalSessionAndOrigin`)}. Please update your config to use ${fmt.highlight(`experimentalSessionAndOrigin`)} instead.
+        The ${fmt.highlight(`experimentalSessionSupport`)} configuration option was removed in ${fmt.cypressVersion(`9.6.0`)}.
+
+        You can safely remove this option from your config.
         
         https://on.cypress.io/session`
+  },
+  EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED: () => {
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalSessionAndOrigin`)} configuration option was removed in ${fmt.cypressVersion(`11.0.0`)}.
+
+        You can safely remove this option from your config.
+        
+        https://on.cypress.io/session
+        https://on.cypress.io/origin`
   },
   EXPERIMENTAL_SHADOW_DOM_REMOVED: () => {
     return errTemplate`\

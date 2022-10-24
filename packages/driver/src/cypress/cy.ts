@@ -556,10 +556,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           autWindow.location.href
           isRunnerAbleToCommunicateWithAUT = true
         } catch (err: any) {
-          if (!this.config('experimentalSessionAndOrigin') && err.name === 'SecurityError') {
-            throw err
-          }
-
           isRunnerAbleToCommunicateWithAUT = false
         }
 

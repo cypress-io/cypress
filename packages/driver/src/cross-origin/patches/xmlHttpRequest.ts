@@ -1,13 +1,7 @@
 import { captureFullRequestUrl } from './utils'
 
+// intercept method calls and add cypress headers to determine cookie applications in the proxy for simulated top
 export const patchXmlHttpRequest = (Cypress: Cypress.Cypress, window: Window) => {
-  // intercept method calls and add cypress headers to determine cookie applications in the proxy
-  // for simulated top
-
-  if (!Cypress.config('experimentalSessionAndOrigin')) {
-    return
-  }
-
   const originalXmlHttpRequestOpen = window.XMLHttpRequest.prototype.open
   const originalXmlHttpRequestSend = window.XMLHttpRequest.prototype.send
 

@@ -1116,9 +1116,6 @@ export default {
 
   origin: {
     docsUrl: 'https://on.cypress.io/origin',
-    experiment_not_enabled: {
-      message: `${cmd('origin')} requires enabling the experimentalSessionAndOrigin flag`,
-    },
     invalid_url_argument: {
       message: `${cmd('origin')} requires the first argument to be either a url (\`https://www.example.com/path\`) or a domain name (\`example.com\`). Query parameters are not allowed. You passed: \`{{arg}}\``,
     },
@@ -1674,20 +1671,6 @@ export default {
     validate_callback_false: {
       message: 'Your `cy.session` **validate** callback {{reason}}.',
     },
-    experimentNotEnabled ({ experimentalSessionSupport }) {
-      if (experimentalSessionSupport) {
-        return {
-          message: stripIndent`
-          ${cmd('session')} requires enabling the \`experimentalSessionAndOrigin\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0.`,
-          docsUrl: 'https://on.cypress.io/session',
-        }
-      }
-
-      return {
-        message: `${cmd('session')} requires enabling the \`experimentalSessionAndOrigin\` flag.`,
-        docsUrl: 'https://on.cypress.io/session',
-      }
-    },
     session: {
       duplicateId ({ id, hasUniqSetupDefinition, hasUniqValidateDefinition, hasUniqPersistence }) {
         const differences: string[] = []
@@ -2209,43 +2192,6 @@ export default {
         \`url\` from the \`options\` object: {{optionsUrl}}
         \`url\` from the \`url\` parameter: {{url}}`,
       docsUrl: 'https://on.cypress.io/visit',
-    },
-    cannot_visit_different_origin (args) {
-      return {
-        message: stripIndent`\
-          ${cmd('visit')} failed because you are attempting to visit a URL that is of a different origin.
-
-          ${args.experimentalSessionAndOrigin ? `You likely forgot to use ${cmd('origin')}:` : `In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use ${cmd('origin')}:` }
-
-          ${args.isCrossOriginSpecBridge ?
-          `\`cy.origin('${args.previousUrl.origin}', () => {\`
-          \`  cy.visit('${args.previousUrl}')\`
-          \`  <commands targeting ${args.previousUrl.origin} go here>\`
-          \`})\`` :
-          `\`cy.visit('${args.previousUrl}')\`
-          \`<commands targeting ${args.previousUrl.origin} go here>\``
-          }
-
-          \`cy.origin('${args.attemptedUrl.origin}', () => {\`
-          \`  cy.visit('${args.originalUrl}')\`
-          \`  <commands targeting ${args.attemptedUrl.origin} go here>\`
-          \`})\`
-
-          The new URL is considered a different origin because the following parts of the URL are different:
-
-            > {{differences}}
-
-          You may only ${cmd('visit')} same-origin URLs within ${args.isCrossOriginSpecBridge ? cmd('origin') : 'a single test'}.
-
-          The previous URL you visited was:
-
-            > '${args.previousUrl.origin}'
-
-          You're attempting to visit this URL:
-
-            > '${args.attemptedUrl.origin}'`,
-        docsUrl: 'https://on.cypress.io/cannot-visit-different-origin-domain',
-      }
     },
     loading_network_failed: stripIndent`\
       ${cmd('visit')} failed trying to load:

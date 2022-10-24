@@ -21,6 +21,7 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'EXPERIMENTAL_NETWORK_STUBBING_REMOVED',
   'EXPERIMENTAL_RUN_EVENTS_REMOVED',
   'EXPERIMENTAL_SESSION_SUPPORT_REMOVED',
+  'EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED',
   'EXPERIMENTAL_SINGLE_TAB_RUN_MODE',
   'EXPERIMENTAL_SHADOW_DOM_REMOVED',
   'FIREFOX_GC_INTERVAL_REMOVED',
@@ -200,11 +201,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     isExperimental: true,
     requireRestartOnChange: 'server',
   }, {
-    name: 'experimentalSessionAndOrigin',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
-  }, {
     name: 'experimentalModifyObstructiveThirdPartyCode',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -371,12 +367,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     overrideLevel: 'any',
   }, {
     name: 'testIsolation',
-    // TODO: https://github.com/cypress-io/cypress/issues/23093
-    // When experimentalSessionAndOrigin is removed and released as GA,
-    // update the defaultValue from 'legacy' to 'strict' and
-    // update this code to remove the check/override specific to enable
-    // strict by default when experimentalSessionAndOrigin=true
-    defaultValue: 'legacy',
+    defaultValue: 'strict',
     validation: validate.isOneOf('legacy', 'strict'),
     overrideLevel: 'suite',
   }, {
@@ -579,6 +570,10 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
     errorKey: 'EXPERIMENTAL_SESSION_SUPPORT_REMOVED',
     isWarning: true,
   }, {
+    name: 'experimentalSessionAndOrigin',
+    errorKey: 'EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED',
+    isWarning: true,
+  }, {
     name: 'experimentalShadowDomSupport',
     errorKey: 'EXPERIMENTAL_SHADOW_DOM_REMOVED',
     isWarning: true,
@@ -620,11 +615,6 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
 export const breakingRootOptions: Array<BreakingOption> = [
   {
     name: 'baseUrl',
-    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E',
-    isWarning: false,
-    testingTypes: ['e2e'],
-  }, {
-    name: 'experimentalSessionAndOrigin',
     errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E',
     isWarning: false,
     testingTypes: ['e2e'],
@@ -678,11 +668,6 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
   component: [
     {
       name: 'baseUrl',
-      errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
-      isWarning: false,
-    },
-    {
-      name: 'experimentalSessionAndOrigin',
       errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
       isWarning: false,
     },

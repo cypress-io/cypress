@@ -261,7 +261,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     const isCrossSuperDomainOrigin = !reqMatchesSuperDomainOrigin(this.req, this.remoteStates.getPrimary())
     const isAUTFrame = this.req.isAUTFrame
 
-    if (this.config.experimentalSessionAndOrigin && isCrossSuperDomainOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
+    if (isCrossSuperDomainOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
       this.debug('- cross origin injection')
 
       return 'fullCrossOrigin'
@@ -412,7 +412,7 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
     }
   }
 
-  if (!this.config.experimentalSessionAndOrigin || !doesTopNeedSimulating) {
+  if (!doesTopNeedSimulating) {
     ([] as string[]).concat(cookies).forEach((cookie) => {
       appendCookie(cookie)
     })

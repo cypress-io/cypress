@@ -4,7 +4,7 @@ export const patchFetch = (Cypress: Cypress.Cypress, window) => {
   // if fetch is available in the browser, or is polyfilled by whatwg fetch
   // intercept method calls and add cypress headers to determine cookie applications in the proxy
   // for simulated top. @see https://github.github.io/fetch/ for default options
-  if (!Cypress.config('experimentalSessionAndOrigin') || !window.fetch) {
+  if (!window.fetch) {
     return
   }
 

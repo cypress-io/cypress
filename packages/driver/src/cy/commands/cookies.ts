@@ -174,19 +174,6 @@ export default function (Commands, Cypress, cy, state, config) {
     }
   }
 
-  // TODO: https://github.com/cypress-io/cypress/issues/23093
-  // Cypress sessions will clear cookies on its own before each test.
-  // Once experimentalSessionAndOrigin is made GA, remove this logic. Leave clearing
-  // session data (cookies / local storage / session storage) to reset functionality.
-  if (!Cypress.config('experimentalSessionAndOrigin')) {
-    // TODO: handle failure here somehow
-    // maybe by tapping into the Cypress reset
-    // stuff, or handling this in the runner itself?
-    Cypress.on('test:before:run:async', () => {
-      return getAndClear()
-    })
-  }
-
   return Commands.addAll({
     getCookie (name, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
       const options: InternalGetCookieOptions = _.defaults({}, userOptions, {
