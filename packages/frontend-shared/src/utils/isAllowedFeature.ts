@@ -46,7 +46,7 @@ export const isAllowedFeature = (
     cypressFirstOpened,
     navCiPromptAutoOpened: promptsShown.ci1,
     loginModalRecordPromptShown: promptsShown.loginModalRecord,
-    latestSmartBannerShown: latestBannerShownTime,
+    latestBannerShownTime,
   }
 
   function bannerForCurrentStatusWasNotDismissed () {
@@ -57,6 +57,13 @@ export const isAllowedFeature = (
 
   function bannersAreNotDisabledForTesting () {
     return !bannersState?._disabled
+  }
+
+  let specsListBannerIsNotAllowed = false
+
+  if (featureName === 'docsCiPrompt') {
+    // to avoid infinite recursion, only run this when necessary
+    specsListBannerIsNotAllowed = !isAllowedFeature('specsListBanner', loginConnectStore)
   }
 
   // For each feature, we define an array of rules for every `UserStatus`.
@@ -81,7 +88,8 @@ export const isAllowedFeature = (
     docsCiPrompt: {
       base: [
         minTimeSinceEvent(events.cypressFirstOpened, '4 days'),
-        minTimeSinceEvent(events.latestSmartBannerShown, '1 day'),
+        minTimeSinceEvent(events.latestBannerShownTime, '1 day'),
+        specsListBannerIsNotAllowed, // always prioritize specsListBanner if it is allowed
       ],
       needsRecordedRun: [],
       needsOrgConnect: [],
@@ -95,7 +103,9 @@ export const isAllowedFeature = (
 
   // if the `userStatus` is not explicitly listed for a feature, then
   // we don't have anything that we are allowed to show for that status
-  // so the fallback rules array of [false] is used
+  // so the fallback rules array of [false] is used. For example
+  // specsListBanner.allTasksCompleted does not exist, as there is no banner
+  // for that state, so no feature is "allowed"
   const statusSpecificRules = rules[featureName][userStatus] ?? [false]
 
   const rulesToCheck = baseRules.concat(statusSpecificRules)

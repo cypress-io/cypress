@@ -19,12 +19,13 @@ describe('isAllowedFeature', () => {
   // and assert on the expected user status derived from those flags
   // and provided by loginConnectStore.userStatus
   const setUpStatus = (status: UserStatus) => {
-    const { setCypressFirstOpened, setPromptShown, setUserFlag, setProjectFlag } = store
+    const { setCypressFirstOpened, setPromptShown, setUserFlag, setProjectFlag, setBannersState } = store
 
     // set a default valid number of days since first open & nav prompt shown
     // individual tests may override
     setCypressFirstOpened(Date.now() - interval('5 days'))
     setPromptShown('ci1', Date.now() - interval('5 days'))
+    setBannersState({})
 
     switch (status) {
       case 'isLoggedOut':
@@ -183,14 +184,69 @@ describe('isAllowedFeature', () => {
   })
 
   describe('docsCiPrompt', () => {
-    context('a banner WAS NOT shown in the last day', () => {
+    context('a banner WAS NOT shown in the last day, but IS allowed now', () => {
       userStatuses.forEach((status) => {
-        it(`returns true with status ${ status } `, () => {
-          setUpStatus(status)
-          const result = isAllowedFeature('docsCiPrompt', store)
+        if (status === 'allTasksCompleted') {
+          it(`returns true with status allTasksCompleted`, () => {
+            setUpStatus(status)
 
-          expect(result).to.be.true
-        })
+            const bannerResult = isAllowedFeature('specsListBanner', store)
+            const promptResult = isAllowedFeature('docsCiPrompt', store)
+
+            // no banner can show in allTasksCompleted state
+            expect(bannerResult).to.be.false
+
+            // smart prompt should be allowed
+            expect(promptResult).to.be.true
+          })
+        } else {
+          it(`returns false with status ${ status } if banner is allowed now`, () => {
+            setUpStatus(status)
+
+            const bannerResult = isAllowedFeature('specsListBanner', store)
+            const promptResult = isAllowedFeature('docsCiPrompt', store)
+
+            expect(bannerResult).to.be.true
+
+            expect(promptResult).to.be.false
+          })
+        }
+      })
+    })
+
+    context('a banner WAS NOT shown the last day, and IS NOT allowed now', () => {
+      userStatuses.forEach((status) => {
+        if (status === 'allTasksCompleted') {
+          it(`returns true with status allTasksCompleted`, () => {
+            setUpStatus(status)
+
+            // make the banner for the current state dismissed
+            store.setBannersState({ [bannerIds[status]]: { dismissed: Date.now() - interval('2 days') } })
+
+            const bannerResult = isAllowedFeature('specsListBanner', store)
+            const promptResult = isAllowedFeature('docsCiPrompt', store)
+
+            // no banner can show in allTasksCompleted state
+            expect(bannerResult).to.be.false
+
+            // smart prompt should be allowed
+            expect(promptResult).to.be.true
+          })
+        } else {
+          it(`returns true with status ${ status } if a banner is NOT allowed now`, () => {
+            setUpStatus(status)
+
+            // make the banner for the current state dismissed
+            store.setBannersState({ [bannerIds[status]]: { dismissed: Date.now() - interval('2 days') } })
+
+            const bannerResult = isAllowedFeature('specsListBanner', store)
+            const promptResult = isAllowedFeature('docsCiPrompt', store)
+
+            expect(bannerResult).to.be.false
+
+            expect(promptResult).to.be.true
+          })
+        }
       })
     })
 

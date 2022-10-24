@@ -409,7 +409,17 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
           return mountResult
         }
 
-        it('opens when after 4 days from first open, no projectId, and not already shown', () => {
+        it('opens when after 4 days from first open, no projectId, a banner is not allowed to show, and prompt not already shown', () => {
+          const loginConnectStore = useLoginConnectStore()
+
+          // set the login banner to already have been shown
+          loginConnectStore.setBannersState({
+            aci_082022_login: {
+              lastShown: Date.now() - interval('3 days'),
+              dismissed: Date.now(),
+            },
+          })
+
           mountWithSavedState()
 
           cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('be.visible')
@@ -441,6 +451,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
           loginConnectStore.setBannersState({
             aci_082022_login: {
               lastShown: Date.now() - interval('3 days'),
+              dismissed: Date.now(),
             },
             aci_082022_connectProject: {
               // example with no `lastShown` property
@@ -455,17 +466,32 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
           cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('be.visible')
         })
 
-        it('does auto-open if no banners have ever been shown', () => {
+        it('does not auto-open if no banners have ever been shown but a banner is allowed', () => {
           const loginConnectStore = useLoginConnectStore()
 
           loginConnectStore.setBannersState({})
 
           mountWithSavedState()
 
-          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('be.visible')
+          // confirm user is logged out
+          cy.wrap(loginConnectStore.userStatus).should('eq', 'isLoggedOut')
+
+          // since no banner has been shown, the a banner for logged out users is allowed
+          // so we do not auto-open the docs prompt
+          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('not.exist')
         })
 
         it('links have correct utm_content param', () => {
+          const loginConnectStore = useLoginConnectStore()
+
+          // set the login banner to already have been shown
+          loginConnectStore.setBannersState({
+            aci_082022_login: {
+              lastShown: Date.now() - interval('3 days'),
+              dismissed: Date.now(),
+            },
+          })
+
           mountWithSavedState()
 
           cy.contains(
