@@ -646,6 +646,11 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    BROWSER_CRASHED: () => {
+      return {
+        default: ['Chrome', 'code', 'signal'],
+      }
+    },
     AUTOMATION_SERVER_DISCONNECTED: () => {
       return {
         default: [],
