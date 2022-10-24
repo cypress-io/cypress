@@ -2811,7 +2811,7 @@ declare namespace Cypress {
      * The test isolation ensures a clean browser context between tests. This option is only available when
      * `experimentalSessionAndOrigin=true`.
      *
-     * Cypress will always resets/clears aliases, intercepts, clock, and viewport before each test
+     * Cypress will always reset/clear aliases, intercepts, clock, and viewport before each test
      * to ensure a clean test slate; i.e. this configuration only impacts the browser context.
      *
      * Note: the [`cy.session()`](https://on.cypress.io/session) command will inherent this value to determine whether
