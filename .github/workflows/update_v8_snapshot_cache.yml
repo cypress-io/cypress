@@ -1,0 +1,26 @@
+name: Update V8 Snapshot Cache
+on:
+  schedule:
+    - cron: '0 8 * * *' #  every day at 8am UTC (3/4am EST/EDT)
+jobs:
+  update-v8-snapshot-cache:
+    runs-on: ubuntu-latest
+    env:
+      CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
+      BASE_BRANCH: feature/v8-snapshots-auto-pr
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout base branch
+        run: |
+          git fetch origin
+          git checkout ${{ env.BASE_BRANCH }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      - name: Run yarn
+        run: yarn
