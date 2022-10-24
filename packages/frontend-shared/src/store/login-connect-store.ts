@@ -21,6 +21,8 @@ export interface LoginConnectState {
     isConfigLoaded: boolean
     hasNoRecordedRuns: boolean
     hasNonExampleSpec: boolean
+    isNotAuthorized: boolean
+    isNotFound: boolean
   }
   userData?: LoginUserData
   promptsShown: {
@@ -63,7 +65,9 @@ export const useLoginConnectStore = defineStore({
         isProjectConnected: false,
         isConfigLoaded: false,
         hasNoRecordedRuns: false,
-        hasNonExampleSpec: true, // TODO: in #23762 initialize as false and set the real value
+        hasNonExampleSpec: false,
+        isNotAuthorized: false,
+        isNotFound: false,
       },
       promptsShown: {},
       bannersState: {},
@@ -107,32 +111,36 @@ export const useLoginConnectStore = defineStore({
   getters: {
     userStatus (state): UserStatus {
       const { user, project } = state
+      let userStatus: UserStatus
 
       switch (true) {
         // the switch here ensures the uniqueness of states as we don't allow duplicate case labels
         // https://eslint.org/docs/latest/rules/no-duplicate-case
         case !user.isLoggedIn:
-          return 'isLoggedOut'
+          userStatus = 'isLoggedOut'
+          break
         case user.isLoggedIn && user.isOrganizationLoaded && !user.isMemberOfOrganization:
-          return 'needsOrgConnect'
-        case user.isLoggedIn && user.isMemberOfOrganization && !project.isProjectConnected:
-          return 'needsProjectConnect'
-        case user.isLoggedIn && user.isMemberOfOrganization && project.isProjectConnected && project.hasNoRecordedRuns:
-          return 'needsRecordedRun'
+          userStatus = 'needsOrgConnect'
+          break
+        case user.isLoggedIn && user.isMemberOfOrganization && !project.isProjectConnected && project.isConfigLoaded:
+          userStatus = 'needsProjectConnect'
+          break
+        case user.isLoggedIn && user.isMemberOfOrganization && project.isProjectConnected && project.hasNoRecordedRuns && project.hasNonExampleSpec && project.isConfigLoaded:
+          userStatus = 'needsRecordedRun'
+          break
         default:
-          return 'allTasksCompleted'
+          userStatus = 'allTasksCompleted'
       }
+
+      return userStatus
     },
     userStatusMatches () {
-      // casting here sine ts seems to need a little extra help in this 'return a function from a getter' situation
+      // casting here since ts seems to need a little extra help in this 'return a function from a getter' situation
       return (status: UserStatus) => this.userStatus as unknown as UserStatus === status
-    },
-    projectStatus () {
-      // TODO: in #23762 look at projectConnectionStatus in SpecHeaderCloudDataTooltip
     },
     latestBannerShownTime (state) {
       return state._latestBannerShownTimeForTesting
-      // TODO: in #23762 return based on bannersState
+      // TODO: in #23768 return based on bannersState - this will be used to delay the nav CI prompt if a banner was recently shown
     },
 
   },

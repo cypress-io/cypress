@@ -1,5 +1,5 @@
 import { useMutation, gql } from '@urql/vue'
-import { UseCohorts_DetermineCohortDocument } from '../generated/graphql'
+import { UseCohorts_DetermineCohortDocument } from '../../generated/graphql'
 import { ref } from 'vue'
 
 gql`
