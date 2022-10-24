@@ -5,7 +5,7 @@ import fs from 'fs-extra'
 import path from 'path'
 import { DataContext } from '../../../src'
 import {
-  Action, codeGenerator, CodeGenResult, CodeGenResults,
+  Action, codeGenerator, CodeGenResult, CodeGenResults, hasNonExampleSpec,
 } from '../../../src/codegen/code-generator'
 import { SpecOptions } from '../../../src/codegen/spec-options'
 import templates from '../../../src/codegen/templates'
@@ -271,5 +271,57 @@ describe('code-generator', () => {
     const codeGenResult = await codeGenerator(action, codeGenOptions)
 
     expect(() => babelParse(codeGenResult.files[0].content)).not.throw()
+  })
+
+  context('nonExampleSpecfile', () => {
+    it('should return true after adding new spec file', async () => {
+      const target = path.join(tmpPath, 'spec-check')
+
+      const checkBeforeScaffolding = await hasNonExampleSpec(templates.scaffoldIntegration, [])
+
+      expect(checkBeforeScaffolding, 'expected having no spec files to show no non-example specs').to.be.false
+
+      const scaffoldExamplesAction: Action = {
+        templateDir: templates.scaffoldIntegration,
+        target,
+      }
+
+      const addTemplatesAsSpecs = (results: CodeGenResults) => {
+        return results.files.map((file) => {
+          return file.file.substring(target.length + 1)
+        })
+      }
+
+      const scaffoldResults = await codeGenerator(scaffoldExamplesAction, {})
+
+      expect(scaffoldResults.files.length, 'expected scaffold files to be created').gt(0)
+
+      const specs = addTemplatesAsSpecs(scaffoldResults)
+
+      const checkAfterScaffolding = await hasNonExampleSpec(templates.scaffoldIntegration, specs)
+
+      expect(checkAfterScaffolding, 'expected only having template files to show no non-example specs').to.be.false
+
+      const fileName = 'my-test-file.js'
+      const scaffoldTemplateAction: Action = {
+        templateDir: templates.e2e,
+        target,
+      }
+      const codeGenArgs = { fileName }
+
+      const generatedTest = await codeGenerator(scaffoldTemplateAction, codeGenArgs)
+
+      const specsWithGenerated = [...specs, ...addTemplatesAsSpecs(generatedTest)]
+
+      const checkAfterTemplate = await hasNonExampleSpec(templates.scaffoldIntegration, specsWithGenerated)
+
+      expect(checkAfterTemplate, 'expected check after adding a new spec to indicate there are now non-example specs').to.be.true
+    })
+
+    it('should error if template dir does not exist', async () => {
+      const singleSpec = ['sample.spec.ts']
+
+      expect(async () => await hasNonExampleSpec('', singleSpec)).to.throw
+    })
   })
 })
