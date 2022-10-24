@@ -765,7 +765,6 @@ describe('src/cy/commands/navigation', () => {
       })
 
       cy.visit('fixtures/redirection-loop-a.html')
-      cy.get('div').should('contain', 'this should fail?')
     })
 
     describe('when only hashes are changing when testIsolation=legacy', { testIsolation: 'legacy' }, () => {
