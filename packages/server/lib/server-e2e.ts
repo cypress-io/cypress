@@ -105,15 +105,15 @@ export class ServerE2E extends ServerBase<SocketE2E> {
           if (baseUrl) {
             this._baseUrl = baseUrl
 
-            if (config.isTextTerminal) {
-              return this._retryBaseUrlCheck(baseUrl, onWarning)
-              .return(null)
-              .catch((e) => {
-                debug(e)
+            // if (config.isTextTerminal) {
+            //   return this._retryBaseUrlCheck(baseUrl, onWarning)
+            //   .return(null)
+            //   .catch((e) => {
+            //     debug(e)
 
-                return reject(errors.get('CANNOT_CONNECT_BASE_URL'))
-              })
-            }
+            //     return reject(errors.get('CANNOT_CONNECT_BASE_URL'))
+            //   })
+            // }
 
             return ensureUrl.isListening(baseUrl)
             .return(null)
