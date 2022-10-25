@@ -54,26 +54,6 @@ export const makeMountFn = (
     ? `${jsxComponentName} as "${options.alias}"`
     : jsxComponentName
 
-  function callbackFunc (observer: MutationObserver, el: HTMLElement) {
-    Cypress.log({
-      name: type,
-      type: 'parent',
-      message: [message],
-      // @ts-ignore
-      $el: (el.children.item(0) as unknown) as JQuery<HTMLElement>,
-      consoleProps: () => {
-        return {
-          // @ts-ignore protect the use of jsx functional components use ReactNode
-          props: jsx.props,
-          description: type === 'mount' ? 'Mounts React component' : 'Rerenders mounted React component',
-          home: 'https://github.com/cypress-io/cypress',
-        }
-      },
-    }).snapshot('mounted').end()
-
-    observer.disconnect()
-  }
-
   return cy
   .then(injectStyles(options))
   .then(() => {
@@ -124,17 +104,23 @@ export const makeMountFn = (
       // by waiting, we delaying test execution for the next tick of event loop
       // and letting hooks and component lifecycle methods to execute mount
       // https://github.com/bahmutov/cypress-react-unit-test/issues/200
-      .wait(0, { log: false }).then(() => {
-        if (options.log !== false) {
-          const observer = new MutationObserver(() => callbackFunc)
-
-          callbackFunc(observer, el)
-
-          observer.observe(cy.$$('[data-cy-root]')[0], {
-            childList: true,
-            subtree: true,
-          })
-        }
+      .wait(0, { log: false })
+      .then(() => {
+        Cypress.log({
+          name: type,
+          type: 'parent',
+          message: [message],
+          // @ts-ignore
+          $el: (el.children.item(0) as unknown) as JQuery<HTMLElement>,
+          consoleProps: () => {
+            return {
+              // @ts-ignore protect the use of jsx functional components use ReactNode
+              props: jsx.props,
+              description: type === 'mount' ? 'Mounts React component' : 'Rerenders mounted React component',
+              home: 'https://github.com/cypress-io/cypress',
+            }
+          },
+        }).snapshot('mounted').end()
       })
     )
   // Bluebird types are terrible. I don't think the return type can be carried without this cast
