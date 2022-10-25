@@ -69,20 +69,6 @@ describe('lib/cloud/api', () => {
       })
     })
 
-    it('sets rejectUnauthorized on the request', () => {
-      nock.cleanAll()
-
-      return api.ping()
-      .thenThrow()
-      .catch(() => {
-        expect(agent.addRequest).to.be.calledOnce
-
-        expect(agent.addRequest).to.be.calledWithMatch(sinon.match.any, {
-          rejectUnauthorized: true,
-        })
-      })
-    })
-
     context('with a proxy defined', () => {
       beforeEach(function () {
         nock.cleanAll()
