@@ -121,7 +121,7 @@ executors:
     resource_class: arm.medium
     environment:
       PLATFORM: linux
-      # TODO: Disabling snapshots for now on Windows. Will revisit with https://github.com/cypress-io/cypress/issues/23557
+      # TODO: Disabling snapshots for now on Linux Arm 64 architectures. Will revisit with https://github.com/cypress-io/cypress/issues/23557
       DISABLE_SNAPSHOT_REQUIRE: 1
 
 commands:
