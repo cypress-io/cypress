@@ -70,6 +70,11 @@ export interface MountConfig<T> extends TestModuleMetadata {
    * })
    */
   componentProperties?: Partial<{ [P in keyof T]: T[P] }>
+  /**
+   * @memberof MountConfig
+   * @description overrides providers in `@Component({providers: []})`
+   */
+  componentProviders?: any[]
 }
 
 /**
@@ -131,6 +136,10 @@ function bootstrapModule<T> (
     testModuleMetaData.providers = []
   }
 
+  if (!testModuleMetaData.componentProviders) {
+    testModuleMetaData.componentProviders = []
+  }
+
   // Replace default error handler since it will swallow uncaught exceptions.
   // We want these to be uncaught so Cypress catches it and fails the test
   testModuleMetaData.providers.push({
@@ -163,7 +172,7 @@ function initTestBed<T> (
   component: Type<T> | string,
   config: MountConfig<T>,
 ): Type<T> {
-  const { providers, ...configRest } = config
+  const { componentProviders, ...configRest } = config
 
   const componentFixture = createComponentFixture(component) as Type<T>
 
@@ -171,10 +180,10 @@ function initTestBed<T> (
     ...bootstrapModule(componentFixture, configRest),
   })
 
-  if (providers != null) {
+  if (componentProviders != null) {
     getTestBed().overrideComponent(componentFixture, {
-      add: {
-        providers,
+      set: {
+        providers: componentProviders,
       },
     })
   }

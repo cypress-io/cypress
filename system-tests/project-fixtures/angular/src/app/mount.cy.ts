@@ -17,6 +17,8 @@ import { AnotherChildProvidersComponent } from "./components/another-child-provi
 import { TestBed } from '@angular/core/testing'
 import { LifecycleComponent } from "./components/lifecycle.component";
 import { LogoComponent } from "./components/logo.component";
+import {TransientService, TransientServicesComponent} from "./components/transient-services.component";
+import {ComponentProviderComponent, MessageService} from "./components/component-provider.component";
 
 @Component({
   template: `<app-projection>Hello World</app-projection>`
@@ -239,7 +241,7 @@ describe("angular mount", () => {
   it('can use a test double for a component with a provider override', () => {
     cy.mount(AnotherChildProvidersComponent, {
       imports: [HttpClientModule],
-      providers: [
+      componentProviders: [
         {
           provide: ChildProvidersService,
           useValue: {
@@ -343,6 +345,35 @@ describe("angular mount", () => {
     cy.get('img').should('be.visible').and('have.prop', 'naturalWidth').should('be.greaterThan', 0)
   })
 
+  it('should not override transient service', () => {
+    cy.mount(TransientServicesComponent)
+    cy.get('p').should('have.text', 'Original Transient Service')
+  })
+
+  it('should override transient service', () => {
+    cy.mount(TransientServicesComponent, {providers: [{provide: TransientService, useValue: {message: 'Overridden Transient Service'}}]})
+    cy.get('p').should('have.text', 'Overridden Transient Service')
+  })
+
+  it('should have a component provider', () => {
+    cy.mount(ComponentProviderComponent)
+    cy.get('p').should('have.text', 'component provided service')
+  })
+
+  it('should not override component-providers via providers', () => {
+    cy.mount(ComponentProviderComponent, {providers: [{provide: MessageService, useValue: {message: 'overridden service'}}]});
+    cy.get('p').should('have.text', 'component provided service')
+  })
+
+  it('should override component-providers via componentProviders', () => {
+    cy.mount(ComponentProviderComponent, {componentProviders: [{provide: MessageService, useValue: {message: 'overridden service'}}]});
+    cy.get('p').should('have.text', 'overridden service')
+  })
+
+  it('should remove component-providers', () => {
+    cy.mount(ComponentProviderComponent, {componentProviders: []})
+    cy.get('p').should('have.text', 'globally provided service')
+  })
 
   describe("teardown", () => {
     beforeEach(() => {
