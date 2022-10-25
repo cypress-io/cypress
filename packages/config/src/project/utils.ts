@@ -401,7 +401,11 @@ export function mergeDefaults (
     config.baseUrl = url.replace(/\/\/+$/, '/')
   }
 
-  const defaultsForRuntime = getDefaultValues(options)
+  const defaultsForRuntime = getDefaultValues({
+    ...options,
+    // TODO: clean this up. Fixed with: https://github.com/cypress-io/cypress/issues/21471
+    experimentalSessionAndOrigin: config.experimentalSessionAndOrigin,
+  })
 
   _.defaultsDeep(config, defaultsForRuntime)
 
@@ -454,7 +458,7 @@ export function mergeDefaults (
     }
 
     return errors.throwErr('CONFIG_VALIDATION_ERROR', null, null, validationResult)
-  })
+  }, testingType)
 
   config = setAbsolutePaths(config)
 
@@ -477,15 +481,15 @@ export function mergeDefaults (
   }, testingType)
 
   // TODO: https://github.com/cypress-io/cypress/issues/23093
-  // testIsolation should equal 'strict' by default when experimentalSessionAndOrigin=true
+  // testIsolation should equal 'on' by default when experimentalSessionAndOrigin=true
   // Once experimentalSessionAndOrigin is made GA, remove this logic and update the defaultValue
-  // to be be 'strict'
+  // to be be 'on'
   if (testingType === 'e2e' && config.experimentalSessionAndOrigin) {
     if (config.rawJson.testIsolation) {
       config.resolved.testIsolation.from = 'config'
     } else {
-      config.testIsolation = 'strict'
-      config.resolved.testIsolation.value = 'strict'
+      config.testIsolation = 'on'
+      config.resolved.testIsolation.value = 'on'
       config.resolved.testIsolation.from === 'default'
     }
   }
