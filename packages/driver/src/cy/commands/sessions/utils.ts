@@ -145,7 +145,7 @@ const getConsoleProps = (session: SessionData) => {
       Warning: '⚠️ There are no cookies, local storage or session storage associated to this session.',
     }),
     ...(groupsByDomain.length && {
-      Domains: `This session capture data from ${Object.keys(sessionDetails).join(', ')}.`,
+      Domains: `This session capture data from ${Object.keys(sessionDetails).join(' and ')}.`,
     }),
     groups: _.compact(groupsByDomain),
   }
