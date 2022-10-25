@@ -922,7 +922,6 @@ namespace CypressTaskTests {
 }
 
 namespace CypressSessionsTests {
-  cy.session('user')
   cy.session('user', () => {})
   cy.session({ name: 'bob' }, () => {})
   cy.session('user', () => {}, {})
@@ -931,6 +930,7 @@ namespace CypressSessionsTests {
   })
 
   cy.session() // $ExpectError
+  cy.session('user') // $ExpectError
   cy.session(null) // $ExpectError
   cy.session('user', () => {}, {
     validate: { foo: true } // $ExpectError
