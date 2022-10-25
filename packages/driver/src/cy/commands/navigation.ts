@@ -341,7 +341,7 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
   state('onPageLoadErr', onPageLoadErr)
 
   const getRedirectionCount = (href) => {
-    // redirecting to about blank should not count towards the redirection limit.
+    // redirecting to about:blank should not count towards the redirection limit.
     if (href === 'about:blank') {
       return 0
     }
