@@ -54,18 +54,18 @@ describe('throws error correctly when beforeEach hook', () => {
   })
 })
 
-it('throws error when invalid test-level override', { testIsolation: 'legacy' }, () => {
+it('throws error when invalid test-level override', { testIsolation: 'off' }, () => {
   shouldNotExecute()
 })
 
 it('throws error when invalid config opt in Cypress.config() in test', () => {
-  Cypress.config({ testIsolation: 'legacy' })
+  Cypress.config({ testIsolation: 'off' })
   shouldNotExecute()
 })
 
 describe('throws error when invalid config opt in Cypress.config() in before hook', () => {
   before(() => {
-    Cypress.config({ testIsolation: 'legacy' })
+    Cypress.config({ testIsolation: 'off' })
   })
 
   it('4', () => {
@@ -75,7 +75,7 @@ describe('throws error when invalid config opt in Cypress.config() in before hoo
 
 describe('throws error when invalid config opt in Cypress.config() in beforeEach hook', () => {
   beforeEach(() => {
-    Cypress.config({ testIsolation: 'legacy' })
+    Cypress.config({ testIsolation: 'off' })
   })
 
   it('5', () => {
@@ -85,7 +85,7 @@ describe('throws error when invalid config opt in Cypress.config() in beforeEach
 
 describe('throws error when invalid config opt in Cypress.config() in after hook', () => {
   after(() => {
-    Cypress.config({ testIsolation: 'legacy' })
+    Cypress.config({ testIsolation: 'off' })
   })
 
   it('5', () => {
@@ -95,7 +95,7 @@ describe('throws error when invalid config opt in Cypress.config() in after hook
 
 describe('throws error when invalid config opt in Cypress.config() in afterEach hook', () => {
   afterEach(() => {
-    Cypress.config({ testIsolation: 'legacy' })
+    Cypress.config({ testIsolation: 'off' })
   })
 
   it('5', () => {

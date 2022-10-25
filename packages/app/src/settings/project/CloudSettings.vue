@@ -4,10 +4,7 @@
     :gql="props.gql"
   />
   <section v-else>
-    <CloudConnectButton
-      :gql="props.gql"
-      utm-medium="Settings Tab"
-    />
+    <CloudConnectButton utm-medium="Settings Tab" />
   </section>
 
   <template

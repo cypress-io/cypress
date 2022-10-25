@@ -367,7 +367,7 @@ export class ProjectConfigManager {
       }
 
       throw getError('CONFIG_VALIDATION_ERROR', 'configFile', file || null, errMsg)
-    })
+    }, this._testingType)
 
     return validateNoBreakingConfigLaunchpad(
       config,

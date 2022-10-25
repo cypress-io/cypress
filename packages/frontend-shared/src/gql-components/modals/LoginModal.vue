@@ -1,8 +1,8 @@
 <template>
   <Dialog
-    :open="modelValue"
+    open
     class="inset-0 z-50 fixed overflow-y-auto"
-    @close="setIsOpen"
+    @close="cancelLogin"
   >
     <div class="flex min-h-screen items-center justify-center">
       <DialogOverlay class="bg-gray-800 opacity-90 inset-0 fixed" />
@@ -11,7 +11,7 @@
         <StandardModalHeader
           help-link="https://on.cypress.io"
           :help-text="t('links.needHelp')"
-          @close="setIsOpen(false)"
+          @close="cancelLogin"
         >
           {{ title }}
         </StandardModalHeader>
@@ -81,9 +81,8 @@
             :show-retry="!!error"
             :utm-medium="props.utmMedium"
             :utm-content="props.utmContent"
-            :show-connect-button-after-login="props.showConnectButtonAfterLogin"
-            @continue="continueAuth"
-            @connect-project="handleConnectProject"
+            @close="emit('close')"
+            @cancel="emit('cancel')"
           />
         </div>
       </div>
@@ -93,7 +92,7 @@
 <script setup lang="ts">
 import { useI18n } from '@cy/i18n'
 import { gql } from '@urql/core'
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 import Auth from '../Auth.vue'
 import ExternalLink from '../ExternalLink.vue'
 import { useOnline } from '@vueuse/core'
@@ -112,32 +111,15 @@ import type { LoginModalFragment } from '../../generated/graphql'
 
 const online = useOnline()
 
-function continueAuth (isLoggedIn: boolean) {
-  if (isLoggedIn) {
-    emit('loggedin')
-  }
-
-  emit('update:modelValue', false)
-}
-
-function handleConnectProject () {
-  emit('loggedin')
-  emit('connect-project')
-  emit('update:modelValue', false)
-}
-
 const emit = defineEmits<{
-  (event: 'update:modelValue', value: boolean): void
-  (event: 'loggedin'): void
-  (event: 'connect-project'): void
+  (event: 'close'): void
+  (event: 'cancel'): void
 }>()
 
 const props = defineProps<{
-  modelValue: boolean
   gql: LoginModalFragment
   utmMedium: string
   utmContent?: string
-  showConnectButtonAfterLogin?: boolean
 }>()
 
 gql`
@@ -146,21 +128,8 @@ fragment LoginModal on Query {
 }
 `
 
-// Ensure all tooltips are closed when the modal opens - this prevents tooltips from beneath that
-// are stuck open being rendered on top of the modal due to the use of a fixed z-index in `floating-vue`
-watch(
-  () => props.modelValue,
-  (value) => {
-    if (value) {
-      hideAllPoppers()
-    }
-  },
-  { immediate: true },
-)
+hideAllPoppers()
 
-const setIsOpen = (value: boolean) => {
-  emit('update:modelValue', value)
-}
 const { t } = useI18n()
 
 const viewer = computed(() => props.gql?.cloudViewer)
@@ -194,5 +163,9 @@ const title = computed(() => {
 })
 
 const isOnline = computed(() => online.value)
+
+const cancelLogin = () => {
+  emit('cancel')
+}
 
 </script>

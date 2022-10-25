@@ -144,7 +144,7 @@
     <div
       v-if="docsMenuVariant === 'main'"
       data-cy="docs-menu-container"
-      class="flex p-16px gap-24px flex-col md:flex-row"
+      class="flex flex-col p-16px gap-24px md:flex-row"
     >
       <DocsMenuContent
         :current-project-exists="!!props.gql?.currentProject"
