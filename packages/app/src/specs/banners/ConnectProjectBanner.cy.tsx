@@ -6,7 +6,7 @@ describe('<ConnectProjectBanner />', () => {
   const cohortOption = { cohort: 'A', value: defaultMessages.specPage.banners.connectProject.contentA }
 
   it('should render expected content', () => {
-    cy.mount({ render: () => <ConnectProjectBanner modelValue={true} hasBannerBeenShown={true} cohortOption={cohortOption}/> })
+    cy.mount({ render: () => <ConnectProjectBanner hasBannerBeenShown={true} cohortOption={cohortOption}/> })
 
     cy.contains(defaultMessages.specPage.banners.connectProject.title).should('be.visible')
     cy.contains(defaultMessages.specPage.banners.connectProject.contentA).should('be.visible')
@@ -27,7 +27,7 @@ describe('<ConnectProjectBanner />', () => {
     })
 
     it('should record expected event on mount', () => {
-      cy.mount({ render: () => <ConnectProjectBanner modelValue={true} hasBannerBeenShown={false} cohortOption={cohortOption}/> })
+      cy.mount({ render: () => <ConnectProjectBanner hasBannerBeenShown={false} cohortOption={cohortOption}/> })
 
       cy.get('@recordEvent').should('have.been.calledWith', {
         campaign: 'Create project',
@@ -38,7 +38,7 @@ describe('<ConnectProjectBanner />', () => {
     })
 
     it('should not record event on mount if already shown', () => {
-      cy.mount({ render: () => <ConnectProjectBanner modelValue={true} hasBannerBeenShown={true} cohortOption={cohortOption}/> })
+      cy.mount({ render: () => <ConnectProjectBanner hasBannerBeenShown={true} cohortOption={cohortOption}/> })
 
       cy.get('@recordEvent').should('not.have.been.called')
     })

@@ -39,6 +39,9 @@ describe('isAllowedFeature', () => {
       case 'needsProjectConnect':
         setUserFlag('isLoggedIn', true)
         setUserFlag('isMemberOfOrganization', true)
+        setUserFlag('isOrganizationLoaded', true)
+        setProjectFlag('isConfigLoaded', true)
+        setProjectFlag('isProjectConnected', false)
         expect(store.userStatus).to.eq('needsProjectConnect')
         break
       case 'needsRecordedRun':
@@ -46,6 +49,8 @@ describe('isAllowedFeature', () => {
         setUserFlag('isMemberOfOrganization', true)
         setProjectFlag('isProjectConnected', true)
         setProjectFlag('hasNoRecordedRuns', true)
+        setProjectFlag('isConfigLoaded', true)
+        setProjectFlag('hasNonExampleSpec', true)
 
         expect(store.userStatus).to.eq('needsRecordedRun')
         break

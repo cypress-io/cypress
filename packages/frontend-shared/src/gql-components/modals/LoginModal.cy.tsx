@@ -3,6 +3,8 @@ import LoginModal from './LoginModal.vue'
 import { defaultMessages } from '@cy/i18n'
 import Tooltip from '../../components/Tooltip.vue'
 import { ref } from 'vue'
+import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
+import { useLoginConnectStore } from '../../store'
 
 const text = defaultMessages.topNav
 
@@ -26,18 +28,30 @@ type TestCloudViewer = {
 }
 
 const mountSuccess = (viewer: TestCloudViewer = cloudViewer) => {
+  const finalViewer = {
+    ...CloudUserStubs.me,
+    organizations: null,
+    firstOrganization: {
+      __typename: 'CloudOrganizationConnection' as const,
+      nodes: [],
+    },
+    ...viewer,
+  }
+
+  const { setUserFlag } = useLoginConnectStore()
+
+  setUserFlag('isLoggedIn', true)
   cy.mountFragment(LoginModalFragmentDoc, {
     onResult: (result) => {
       result.__typename = 'Query'
       result.authState.browserOpened = true
-      result.cloudViewer = viewer
+      result.cloudViewer = finalViewer
       result.cloudViewer.__typename = 'CloudUser'
     },
     render: (gqlVal) => (
       <div class="border-current border-1 h-700px resize overflow-auto">
         <LoginModal
           gql={gqlVal}
-          modelValue={true}
           utmMedium="testing"
         />
       </div>),
@@ -48,7 +62,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   describe('progress communication', () => {
     it('renders and reaches "opening browser" status', () => {
       cy.mountFragment(LoginModalFragmentDoc, {
-        render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} utmMedium="testing" /></div>,
+        render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} utmMedium="testing" /></div>,
       })
 
       cy.contains('h2', text.login.titleInitial).should('be.visible')
@@ -68,7 +82,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
         render: (gqlVal) => {
           gqlVal.authState.browserOpened = true
 
-          return <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} utmMedium="testing" /></div>
+          return <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} utmMedium="testing" /></div>
         },
       })
 
@@ -85,48 +99,6 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       cy.contains(text.login.bodySuccess.replace('{0}', cloudViewer.fullName)).should('be.visible')
       cy.contains('a', cloudViewer.fullName).should('have.attr', 'href', 'https://on.cypress.io/dashboard/profile')
     })
-
-    it('shows "connect project" after login if required by prop, and emits expected events', () => {
-      const connectProjectLabel = defaultMessages.runs.connect.modal.selectProject.connectProject
-      const connectProjectSpy = cy.spy().as('connectProjectSpy')
-      const loggedInSpy = cy.spy().as('loggedInSpy')
-      const updateModelSpy = cy.spy().as('updateModelSpy')
-
-      const props = {
-        'onUpdate:modelValue': (value: boolean) => {
-          updateModelSpy(value)
-        },
-        'onConnect-project': () => connectProjectSpy(),
-      }
-
-      // mount with extra event spies
-      cy.mountFragment(LoginModalFragmentDoc, {
-        onResult: (result) => {
-          result.__typename = 'Query'
-          result.authState.browserOpened = true
-          result.cloudViewer = cloudViewer
-          result.cloudViewer.__typename = 'CloudUser'
-        },
-        render: (gqlVal) => (
-          <div class="border-current border-1 h-700px resize overflow-auto">
-            <LoginModal
-              gql={gqlVal}
-              modelValue={true}
-              utmMedium="testing"
-              showConnectButtonAfterLogin={true}
-              onLoggedin={loggedInSpy}
-              {...props}
-            />
-          </div>),
-      })
-
-      cy.contains('button', connectProjectLabel)
-      .click()
-
-      cy.get('@connectProjectSpy').should('have.been.calledOnce')
-      cy.get('@loggedInSpy').should('have.been.calledOnce')
-      cy.get('@updateModelSpy').should('have.been.calledOnceWith', false)
-    })
   })
 
   describe('errors', () => {
@@ -141,7 +113,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
         },
         render: (gqlVal) =>
           (<div class="border-current border-1 h-700px resize overflow-auto">
-            <LoginModal gql={gqlVal} modelValue={true} utmMedium="testing"/>
+            <LoginModal gql={gqlVal} utmMedium="testing"/>
           </div>),
       })
 
@@ -155,12 +127,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
     })
 
     it('shows non-browser errors from login process', () => {
-      const updateSpy = cy.spy().as('updateSpy')
-      const methods = {
-        'onUpdate:modelValue': (newValue) => {
-          updateSpy(newValue)
-        },
-      }
+      const cancelSpy = cy.spy().as('cancelSpy')
       const errorText = 'The flux capacitor ran out of battery'
 
       cy.mountFragment(LoginModalFragmentDoc, {
@@ -169,7 +136,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
           gqlVal.authState.message = errorText
 
           return (<div class="border-current border-1 h-700px resize overflow-auto">
-            <LoginModal gql={gqlVal} modelValue={true} {...methods} utmMedium="testing"/>
+            <LoginModal gql={gqlVal} onCancel={cancelSpy} utmMedium="testing"/>
           </div>)
         },
       })
@@ -183,7 +150,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
       // but we can test that cancelling closes the modal here:
       cy.contains('button', text.login.actionCancel).click()
-      cy.get('@updateSpy').should('have.been.calledWith', false)
+      cy.get('@cancelSpy').should('have.been.called')
     })
   })
 
@@ -197,8 +164,8 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   it('emits an event to close the modal when "Continue" button is clicked', () => {
     mountSuccess()
     cy.findByRole('button', { name: text.login.actionContinue }).click().then(() => {
-      cy.wrap(Cypress.vueWrapper.findComponent(LoginModal).emitted('update:modelValue')?.[0])
-      .should('deep.equal', [false])
+      cy.wrap(Cypress.vueWrapper.findComponent(LoginModal).emitted('close'))
+      .should('have.length', 1)
     })
   })
 
@@ -209,7 +176,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
     it('renders correct components if there is no internet connection', () => {
       cy.mountFragment(LoginModalFragmentDoc, {
-        render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} utmMedium="testing"/></div>,
+        render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} utmMedium="testing"/></div>,
       })
 
       cy.goOffline()
@@ -222,7 +189,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
     it('shows login action when the internet is back', () => {
       cy.mountFragment(LoginModalFragmentDoc, {
-        render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} modelValue={true} utmMedium="testing"/></div>,
+        render: (gqlVal) => <div class="border-current border-1 h-700px resize overflow-auto"><LoginModal gql={gqlVal} utmMedium="testing"/></div>,
       })
 
       cy.goOffline()
@@ -260,7 +227,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
         return (
           <div>
             <Tooltip v-slots={tooltipSlots} isInteractive />
-            <LoginModal gql={gqlVal} utmMedium="testing" modelValue={isOpen.value} />
+            {isOpen.value && <LoginModal gql={gqlVal} utmMedium="testing" />}
           </div>
         )
       },
