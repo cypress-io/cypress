@@ -295,7 +295,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
 
       cy.on('fail', (err) => {
         expect(cleared).to.be.calledOnce
-        expect(err.message).to.include('`cy.clear()` failed because the DOM updated')
+        expect(err.message).to.include('`cy.clear()` failed because the page updated')
 
         done()
       })

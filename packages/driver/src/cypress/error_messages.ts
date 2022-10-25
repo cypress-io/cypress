@@ -1883,11 +1883,11 @@ export default {
     detached_during_actionability (obj) {
       return {
         message: stripIndent`\
-          ${cmd(obj.name)} failed because the DOM updated while this command was executing. Cypress tried to locate elements based on this query:
+          ${cmd(obj.name)} failed because the page updated while this command was executing. Cypress tried to locate elements based on this query:
 
           > ${subjectChainToString(obj.subjectChain)}
 
-          We initially found matching element(s), but they disappeared from the DOM while ${cmd(obj.name)} waited for them to become actionable. Common situations why this happens:
+          We initially found matching element(s), but while waiting for them to become actionable, they disappeared from the page. Common situations why this happens:
             - Your JS framework re-rendered asynchronously
             - Your app code reacted to an event firing and removed the element
 
@@ -1907,7 +1907,7 @@ export default {
     detached_after_command (obj) {
       return {
         message: stripIndent`\
-          ${cmd(obj.name)} failed because the DOM updated as a result of this command, but you tried to continue the command chain.
+          ${cmd(obj.name)} failed because the page updated as a result of this command, but you tried to continue the command chain. The subject is no longer attached to the DOM, and Cypress cannot requery the page after commands such as ${cmd(obj.name)}.
 
           Common situations why this happens:
             - Your JS framework re-rendered asynchronously

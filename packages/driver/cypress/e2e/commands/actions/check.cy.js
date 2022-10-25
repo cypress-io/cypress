@@ -101,10 +101,11 @@ describe('src/cy/commands/actions/check', () => {
     it('requeries if the DOM rerenders during actionability', () => {
       cy.$$('[name=colors]').first().prop('disabled', true)
 
-      const listener =  _.after(3, () => {
+      const listener = _.after(3, () => {
         cy.$$('[name=colors]').first().prop('disabled', false)
 
         const parent = cy.$$('[name=colors]').parent()
+
         parent.replaceWith(parent[0].outerHTML)
         cy.off('command:retry', listener)
       })
@@ -457,7 +458,7 @@ describe('src/cy/commands/actions/check', () => {
 
         cy.on('fail', (err) => {
           expect(checked).to.eq(1)
-          expect(err.message).to.include('`cy.check()` failed because the DOM updated')
+          expect(err.message).to.include('`cy.check()` failed because the page updated')
 
           done()
         })
@@ -823,58 +824,6 @@ describe('src/cy/commands/actions/check', () => {
   })
 
   context('#uncheck', () => {
-    it('does not change the subject', () => {
-      const inputs = $('[name=birds]')
-
-      cy.get('[name=birds]').uncheck().then(($inputs) => {
-        expect($inputs.length).to.eq(2)
-        expect($inputs.toArray()).to.deep.eq(inputs.toArray())
-      })
-    })
-
-    it('changes the subject if specific value passed to check', () => {
-      const checkboxes = $('[name=birds]')
-
-      cy.get('[name=birds]').check(['cockatoo', 'amazon']).then(($chk) => {
-        expect($chk.length).to.eq(2)
-
-        const cockatoo = checkboxes.filter('[value=cockatoo]')
-        const amazon = checkboxes.filter('[value=amazon]')
-
-        expect($chk.get(0)).to.eq(cockatoo.get(0))
-        expect($chk.get(1)).to.eq(amazon.get(0))
-      })
-    })
-
-    it('filters out values which were not found', () => {
-      const checkboxes = $('[name=birds]')
-
-      cy.get('[name=birds]').check(['cockatoo', 'parrot']).then(($chk) => {
-        expect($chk.length).to.eq(1)
-
-        const cockatoo = checkboxes.filter('[value=cockatoo]')
-
-        expect($chk.get(0)).to.eq(cockatoo.get(0))
-      })
-    })
-
-    it('changes the subject when matching values even if noop', () => {
-      const checked = $('<input type=\'checkbox\' name=\'birds\' value=\'cockatoo\'>')
-
-      $('[name=birds]').parent().append(checked)
-
-      const checkboxes = $('[name=birds]')
-
-      cy.get('[name=birds]').check('cockatoo').then(($chk) => {
-        expect($chk.length).to.eq(2)
-
-        const cockatoo = checkboxes.filter('[value=cockatoo]')
-
-        expect($chk.get(0)).to.eq(cockatoo.get(0))
-        expect($chk.get(1)).to.eq(cockatoo.get(1))
-      })
-    })
-
     // https://github.com/cypress-io/cypress/issues/19098
     it('removes indeterminate prop when checkbox is unchecked', () => {
       const indeterminateCheckbox = $(`<input type='checkbox' name="indeterminate">`)
@@ -923,103 +872,6 @@ describe('src/cy/commands/actions/check', () => {
       })
     })
 
-    it('can forcibly click even when being covered by another element', () => {
-      let clicked = false
-      const checkbox = $('<input type=\'checkbox\' />').attr('id', 'checkbox-covered-in-span').prop('checked', true).prependTo($('body'))
-
-      $('<span>span on checkbox</span>').css({ position: 'absolute', left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo($('body'))
-
-      checkbox.on('click', () => {
-        clicked = true
-      })
-
-      cy.get('#checkbox-covered-in-span').uncheck({ force: true }).then(() => {
-        expect(clicked).to.be.true
-      })
-    })
-
-    it('passes timeout and interval down to click', (done) => {
-      const checkbox = $('<input type=\'checkbox\' />').attr('id', 'checkbox-covered-in-span').prop('checked', true).prependTo($('body'))
-
-      $('<span>span on checkbox</span>').css({ position: 'absolute', left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo($('body'))
-
-      cy.on('command:retry', (options) => {
-        expect(options.timeout).to.eq(1000)
-        expect(options.interval).to.eq(60)
-
-        done()
-      })
-
-      cy.get('#checkbox-covered-in-span').uncheck({ timeout: 1000, interval: 60 })
-    })
-
-    it('waits until element is no longer disabled', () => {
-      const chk = $(':checkbox:first').prop('checked', true).prop('disabled', true)
-
-      let retried = false
-      let clicks = 0
-
-      chk.on('click', () => {
-        clicks += 1
-      })
-
-      cy.on('command:retry', _.after(3, () => {
-        chk.prop('disabled', false)
-        retried = true
-      }))
-
-      cy.get(':checkbox:first').uncheck().then(() => {
-        expect(clicks).to.eq(1)
-        expect(retried).to.be.true
-      })
-    })
-
-    describe('assertion verification', () => {
-      beforeEach(function () {
-        cy.on('log:added', (attrs, log) => {
-          if (log.get('name') === 'assert') {
-            this.lastLog = log
-          }
-        })
-
-        return null
-      })
-
-      it('eventually passes the assertion', () => {
-        $(':checkbox:first').prop('checked', true).click(function () {
-          _.delay(() => {
-            $(this).addClass('unchecked')
-          }, 100)
-        })
-
-        cy.get(':checkbox:first').uncheck().should('have.class', 'unchecked').then(function () {
-          const { lastLog } = this
-
-          expect(lastLog.get('name')).to.eq('assert')
-          expect(lastLog.get('state')).to.eq('passed')
-          expect(lastLog.get('ended')).to.be.true
-        })
-      })
-    })
-
-    describe('events', () => {
-      it('emits click event', (done) => {
-        $('[name=colors][value=blue]').prop('checked', true).click(() => {
-          done()
-        })
-
-        cy.get('[name=colors]').uncheck('blue')
-      })
-
-      it('emits change event', (done) => {
-        $('[name=colors][value=blue]').prop('checked', true).change(() => {
-          done()
-        })
-
-        cy.get('[name=colors]').uncheck('blue')
-      })
-    })
-
     describe('errors', {
       defaultCommandTimeout: 100,
     }, () => {
@@ -1052,140 +904,6 @@ describe('src/cy/commands/actions/check', () => {
           done()
         })
       })
-
-      it('throws when any member of the subject isnt visible', function (done) {
-        // grab the first 3 checkboxes.
-        const chk = $(':checkbox').slice(0, 3).show()
-
-        cy.on('fail', (err) => {
-          const { lastLog } = this
-          const len = (chk.length * 2) + 6
-
-          assertLogLength(this.logs, len)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(err.message).to.include('`cy.uncheck()` failed because this element is not visible')
-
-          done()
-        })
-
-        cy
-        .get(':checkbox').invoke('slice', 0, 3).check().last().invoke('hide')
-        .get(':checkbox').invoke('slice', 0, 3).uncheck()
-      })
-
-      it('logs once when not dom subject', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
-
-          assertLogLength(this.logs, 1)
-          expect(lastLog.get('error')).to.eq(err)
-
-          done()
-        })
-
-        cy.uncheck()
-      })
-
-      it('throws when subject is not in the document', (done) => {
-        let unchecked = 0
-
-        const checkbox = $(':checkbox:first').prop('checked', true).click((e) => {
-          unchecked += 1
-          checkbox.prop('checked', true)
-          checkbox.remove()
-
-          return false
-        })
-
-        cy.on('fail', (err) => {
-          expect(unchecked).to.eq(1)
-          expect(err.message).to.include('`cy.uncheck()` failed because the DOM updated')
-
-          done()
-        })
-
-        cy.get(':checkbox:first').uncheck().uncheck()
-      })
-
-      it('throws when input cannot be clicked', function (done) {
-        const checkbox = $('<input type=\'checkbox\' />').attr('id', 'checkbox-covered-in-span').prop('checked', true).prependTo($('body'))
-
-        $('<span>span on button</span>').css({ position: 'absolute', left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo($('body'))
-
-        cy.on('fail', (err) => {
-          assertLogLength(this.logs, 2)
-          expect(err.message).to.include('`cy.uncheck()` failed because this element')
-          expect(err.message).to.include('is being covered by another element')
-
-          done()
-        })
-
-        cy.get('#checkbox-covered-in-span').uncheck()
-      })
-
-      it('throws when subject is disabled', function (done) {
-        $(':checkbox:first').prop('checked', true).prop('disabled', true)
-
-        cy.on('fail', (err) => {
-          // get + type logs
-          expect(this.logs.length).eq(2)
-          expect(err.message).to.include('`cy.uncheck()` failed because this element is `disabled`:\n')
-
-          done()
-        })
-
-        cy.get(':checkbox:first').uncheck()
-      })
-
-      it('eventually passes the assertion on multiple :checkboxs', () => {
-        $(':checkbox').prop('checked', true).click(function () {
-          _.delay(() => {
-            $(this).addClass('unchecked')
-          }, 100)
-        })
-
-        cy.get(':checkbox').invoke('slice', 0, 2).uncheck().should('have.class', 'unchecked')
-      })
-
-      it('eventually fails the assertion', function (done) {
-        $(':checkbox:first').prop('checked', true)
-
-        cy.on('fail', (err) => {
-          const { lastLog } = this
-
-          expect(err.message).to.include(lastLog.get('error').message)
-          expect(err.message).not.to.include('undefined')
-          expect(lastLog.get('name')).to.eq('assert')
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(lastLog.get('error')).to.be.an.instanceof(chai.AssertionError)
-
-          done()
-        })
-
-        cy.get(':checkbox:first').uncheck().should('have.class', 'unchecked')
-      })
-
-      it('does not log an additional log on failure', function (done) {
-        cy.on('fail', () => {
-          assertLogLength(this.logs, 3)
-
-          done()
-        })
-
-        cy.get(':checkbox:first').uncheck().should('have.class', 'unchecked')
-      })
-
-      it('throws when cmd recieves values but subject has no value attribute', function (done) {
-        cy.get('[name=dogs]').uncheck(['husky', 'poodle', 'on']).then(($chk) => {
-          expect($chk.length).to.eq(4)
-        })
-
-        cy.on('fail', (err) => {
-          expect(err.message).to.include(' cannot be checked/unchecked because it has no \`value\` attribute')
-
-          done()
-        })
-      })
     })
 
     describe('.log', () => {
@@ -1197,87 +915,6 @@ describe('src/cy/commands/actions/check', () => {
         })
 
         return null
-      })
-
-      it('logs immediately before resolving', (done) => {
-        const chk = $(':checkbox:first')
-
-        cy.on('log:added', (attrs, log) => {
-          if (log.get('name') === 'uncheck') {
-            expect(log.get('state')).to.eq('pending')
-            expect(log.get('$el').get(0)).to.eq(chk.get(0))
-
-            done()
-          }
-        })
-
-        cy.get(':checkbox:first').check().uncheck()
-      })
-
-      it('snapshots before unchecking', function (done) {
-        $(':checkbox:first').change(() => {
-          const { lastLog } = this
-
-          expect(lastLog.get('snapshots').length).to.eq(1)
-          expect(lastLog.get('snapshots')[0].name).to.eq('before')
-          expect(lastLog.get('snapshots')[0].body).to.be.an('object')
-
-          done()
-        })
-
-        cy.get(':checkbox:first').invoke('prop', 'checked', true).uncheck()
-      })
-
-      it('snapshots after unchecking', () => {
-        cy.get(':checkbox:first').invoke('prop', 'checked', true).uncheck().then(function () {
-          const { lastLog } = this
-
-          expect(lastLog.get('snapshots').length).to.eq(2)
-          expect(lastLog.get('snapshots')[1].name).to.eq('after')
-          expect(lastLog.get('snapshots')[1].body).to.be.an('object')
-        })
-      })
-
-      it('logs only 1 uncheck event', () => {
-        const logs = []
-        const unchecks = []
-
-        cy.on('log:added', (attrs, log) => {
-          logs.push(log)
-          if (log.get('name') === 'uncheck') {
-            unchecks.push(log)
-          }
-        })
-
-        cy.get('[name=colors][value=blue]').uncheck().then(() => {
-          expect(logs.length).to.eq(2)
-          expect(unchecks).to.have.length(1)
-        })
-      })
-
-      it('logs only 1 uncheck event on uncheck with 1 matching value arg', () => {
-        const logs = []
-        const unchecks = []
-
-        cy.on('log:added', (attrs, log) => {
-          logs.push(log)
-          if (log.get('name') === 'uncheck') {
-            unchecks.push(log)
-          }
-        })
-
-        cy.get('[name=colors]').uncheck('blue').then(() => {
-          expect(logs.length).to.eq(2)
-          expect(unchecks).to.have.length(1)
-        })
-      })
-
-      it('passes in $el', () => {
-        cy.get('[name=colors][value=blue]').uncheck().then(function ($input) {
-          const { lastLog } = this
-
-          expect(lastLog.get('$el').get(0)).to.eq($input.get(0))
-        })
       })
 
       it('ends command when checkbox is already unchecked', () => {
@@ -1331,15 +968,6 @@ describe('src/cy/commands/actions/check', () => {
             Note: 'This checkbox was already unchecked. No operation took place.',
             Options: undefined,
           })
-        })
-      })
-
-      it('logs deltaOptions', () => {
-        cy.get('[name=colors][value=blue]').check().uncheck({ force: true, timeout: 1000 }).then(function () {
-          const { lastLog } = this
-
-          expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
-          expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
         })
       })
     })

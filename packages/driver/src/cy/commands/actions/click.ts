@@ -198,7 +198,7 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
       // once we establish the coordinates and the element
       // passes all of the internal checks
       return $actionability.verify(cy, $el, config, individualOptions, {
-        subjectFn: options.subjectFn || (() =>  cy.getSubjectFromChain(subjectChain).eq(index)),
+        subjectFn: options.subjectFn || (() => cy.getSubjectFromChain(subjectChain).eq(index)),
 
         onScroll ($el, type) {
           return Cypress.action('cy:scrolled', $el, type)
@@ -210,6 +210,7 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
           const forceEl = options.force && $elToClick.get(0)
 
           const moveEvents = mouse.move(fromElViewport, forceEl)
+
           clickedElements.push($el[0])
 
           flagModifiers(true)
@@ -243,7 +244,7 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
     return Promise
     .each(options.$el.toArray(), perform)
     .then(() => {
-//       options.$el = cy.$$(clickedElements)
+      options.$el = cy.$$(clickedElements)
 
       if (options.verify === false) {
         return options.$el

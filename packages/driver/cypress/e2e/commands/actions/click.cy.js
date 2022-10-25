@@ -47,7 +47,7 @@ const getMidPoint = (el) => {
 const isFirefox = Cypress.isBrowser('firefox')
 const isWebKit = Cypress.isBrowser('webkit')
 
-describe.skip('src/cy/commands/actions/click', () => {
+describe('src/cy/commands/actions/click', () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
   })
@@ -741,10 +741,11 @@ describe.skip('src/cy/commands/actions/click', () => {
     it('requeries if the DOM rerenders during actionability', () => {
       cy.$$('[name=colors]').first().prop('disabled', true)
 
-      const listener =  _.after(3, () => {
+      const listener = _.after(3, () => {
         cy.$$('[name=colors]').first().prop('disabled', false)
 
         const parent = cy.$$('[name=colors]').parent()
+
         parent.replaceWith(parent[0].outerHTML)
         cy.off('command:retry', listener)
       })
@@ -1618,7 +1619,6 @@ describe.skip('src/cy/commands/actions/click', () => {
 
         cy.on('command:retry', _.after(3, () => {
           $btn.replaceWith('<button id="button">New Button</button>')
-          retried = true
         }))
 
         cy.get('#button').click().should('contain', 'New Button')
@@ -4431,27 +4431,6 @@ describe('mouse state', () => {
           expect(pointerover).to.be.calledOnce
           expect(pointerenter).to.be.calledOnce
         })
-      })
-
-      it.only('can move mouse from a div to another div', () => {
-        let coords = {
-          clientX: 494,
-          clientY: 10,
-          // layerX: 492,
-          // layerY: 215,
-          pageX: 494,
-          pageY: 226,
-          screenX: 494,
-          screenY: 10,
-          x: 494,
-          y: 10,
-        }
-
-        cy.$$('div.item').eq(1).one('mouseover', cy.stub().callsFake((e) => {
-          expect(e.clientX).closeTo(coords.clientX, 1)
-        }))
-
-        cy.get('div.item').eq(1).click()
       })
     })
   })
