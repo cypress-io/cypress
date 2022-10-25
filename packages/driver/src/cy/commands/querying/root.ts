@@ -13,7 +13,7 @@ export default (Commands, Cypress, cy, state) => {
 
       const $el = cy.getSubjectFromChain(withinSubject || [cy.$$('html')])
 
-      log && log.set({
+      log && cy.state('current') === this && log.set({
         $el,
         consoleProps: () => {
           return {

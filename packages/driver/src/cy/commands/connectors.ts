@@ -189,7 +189,7 @@ export default function (Commands, Cypress, cy, state) {
 
       const value = _.get(subject, path)
 
-      log && log.set({
+      log && cy.state('current') === this && log.set({
         $el: $dom.isElement(subject) ? subject : null,
         consoleProps () {
           const obj = {
@@ -276,7 +276,7 @@ export default function (Commands, Cypress, cy, state) {
 
       let value = parent[last](...args)
 
-      log && log.set({
+      log && cy.state('current') === this && log.set({
         $el: $dom.isElement(subject) ? subject : null,
         consoleProps: () => {
           return {

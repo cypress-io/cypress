@@ -403,28 +403,4 @@ export default {
   isPromiseLike (ret) {
     return ret && _.isFunction(ret.then)
   },
-
-  /* Given a chain of functions, return the actual subject. `subjectChain` might look like any of:
-   * [<input>]
-   * ['foobar', f()]
-   * [undefined, f(), f()]
-   */
-  getSubjectFromChain (subjectChain: SubjectChain, cy) {
-    // If we're getting the subject of a previous command, then any log messages have already
-    // been added to the command log; We don't want to re-add them every time we query
-    // the current subject.
-    cy.state('onBeforeLog', () => false)
-
-    let subject = subjectChain[0]
-
-    try {
-      for (let i = 1; i < subjectChain.length; i++) {
-        subject = subjectChain[i](subject)
-      }
-    } finally {
-      cy.state('onBeforeLog', null)
-    }
-
-    return subject
-  },
 }

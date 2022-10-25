@@ -142,7 +142,7 @@ describe('driver/src/cypress/cy', () => {
 
       cy.wrap(subject).then(() => {
         expect(cy.state('subject')).to.equal(subject)
-        expect(Cypress.utils.warning).to.be.calledWith('`cy.state(\'subject\')` has been deprecated and will be removed in a future release. Consider migrating to `cy.currentSubject()` instead.')
+        expect(Cypress.utils.warning).to.be.calledWith('`cy.state(\'subject\')` has been deprecated and will be removed in a future release. Consider migrating to `cy.subject()` instead.')
       })
     })
   })
@@ -306,9 +306,8 @@ describe('driver/src/cypress/cy', () => {
         })
 
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.parent()` failed because this element is detached from the DOM.')
-          expect(err.message).to.include('<button id="button">button</button>')
-          expect(err.message).to.include('> `cy.click()`')
+          expect(err.message).to.include('`cy.parent()` failed because the DOM updated as a result of this command, but you tried to continue the command chain.')
+          expect(err.message).to.include('You can typically solve this by breaking up a chain.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/element-has-detached-from-dom')
 
           done()
@@ -551,6 +550,21 @@ describe('driver/src/cypress/cy', () => {
         // Length of 3: bQuery.body (from get), bQuery.button (from get), should.have.length.23
         expect(logs.length).to.eq(3)
       })
+    })
+
+    it("closes each log as the query completes", (done) => {
+      let getLog
+
+      cy.on('log:added', (attrs, log) => {
+        if (attrs.name === 'get') {
+          getLog = log
+        } else if (attrs.name === 'find') {
+          expect(getLog.get('state')).to.eq('passed')
+          done()
+        }
+      })
+
+      cy.get('body').find('#wrapper')
     })
 
     it('ends all messages when query chain fails', (done) => {

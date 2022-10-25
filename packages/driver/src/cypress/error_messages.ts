@@ -59,7 +59,7 @@ const queryFnToString = (queryFn) => `.${queryFn.commandName}(${queryFn.args.map
 export const subjectChainToString = (subjectChain) => {
   const [initial, ...queryFns] = subjectChain
 
-  const prefix = initial == null ? 'cy' : `${$utils.stringifyActual(initial)} -> `
+  const prefix = initial == null ? 'cy' : `${$utils.stringifyActual(initial)}${queryFns.length ? ' -> ' : ''}`
 
   return prefix + queryFns.map(queryFnToString).join('')
 }
@@ -1880,26 +1880,49 @@ export default {
 
         Cypress only considers the \`window\`, \`document\`, or any \`element\` to be valid DOM objects.`
     },
-    not_attached (obj) {
+    detached_during_actionability (obj) {
       return {
         message: stripIndent`\
-          ${cmd(obj.cmd)} failed because this element is detached from the DOM.
+          ${cmd(obj.name)} failed because the DOM updated while this command was executing. Cypress tried to locate elements based on this query:
 
-          \`${obj.node}\`
+          > ${subjectChainToString(obj.subjectChain)}
 
-          Cypress requires elements be attached in the DOM to interact with them.
+          We initially found matching element(s), but they disappeared from the DOM while ${cmd(obj.name)} waited for them to become actionable. Common situations why this happens:
+            - Your JS framework re-rendered asynchronously
+            - Your app code reacted to an event firing and removed the element
 
-          The previous command that ran was:
+          You can typically solve this by breaking up a chain. For example, rewrite:
 
-            > ${cmd(obj.prev)}
+          > \`cy.get('button').click().click()\`
 
-          This DOM element likely became detached somewhere between the previous and current command.
+          to
+
+          > \`cy.get('button').click()\`
+          > \`cy.get('button').click()\`
+
+            `,
+        docsUrl: 'https://on.cypress.io/element-has-detached-from-dom',
+      }
+    },
+    detached_after_command (obj) {
+      return {
+        message: stripIndent`\
+          ${cmd(obj.name)} failed because the DOM updated as a result of this command, but you tried to continue the command chain.
 
           Common situations why this happens:
             - Your JS framework re-rendered asynchronously
             - Your app code reacted to an event firing and removed the element
 
-          You typically need to re-query for the element or add 'guards' which delay Cypress from running new commands.`,
+          You can typically solve this by breaking up a chain. For example, rewrite:
+
+          > \`cy.get('button').click().should('have.class', 'active')\`
+
+          to
+
+          > \`cy.get('button').click()\`
+          > \`cy.get('button').should('have.class', 'active')\`
+
+            `,
         docsUrl: 'https://on.cypress.io/element-has-detached-from-dom',
       }
     },
@@ -1936,7 +1959,7 @@ export default {
           > ${subjectChainToString(obj.subjectChain)}`
     },
     state_subject_deprecated: {
-      message: `${cmd('state', '\'subject\'')} has been deprecated and will be removed in a future release. Consider migrating to ${cmd('currentSubject')} instead.`,
+      message: `${cmd('state', '\'subject\'')} has been deprecated and will be removed in a future release. Consider migrating to ${cmd('subject')} instead.`,
     },
     state_withinsubject_deprecated: {
       message: `${cmd('state', '\'withinSubject\'')} has been deprecated and will be removed in a future release. You should read ${cmd('state', '\'withinSubjectChain\'')} once at the top of your command / query, and resolve it into a value with ${cmd('getSubjectFromChain', 'withinSubjectChain')} as needed.`,

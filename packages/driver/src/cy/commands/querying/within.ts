@@ -19,7 +19,7 @@ export default (Commands, Cypress, cy, state) => {
     // once its done
     const prevWithinSubject = state('withinSubjectChain')
 
-    state('withinSubjectChain', state('subjects')[current.get('chainerId')])
+    state('withinSubjectChain', cy.subjectChain())
 
     // https://github.com/cypress-io/cypress/pull/8699
     // An internal command is inserted to create a divider between

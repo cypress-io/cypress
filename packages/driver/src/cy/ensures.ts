@@ -110,9 +110,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
   }
 
   const ensureChildCommand = (command, args) => {
-    const subjects = cy.state('subjects')
-
-    if (subjects[command.get('chainerId')] === undefined) {
+    if (cy.subjectChain(command.get('chainerId')) === undefined) {
       const stringifiedArg = $utils.stringifyActual(args[0])
 
       $errUtils.throwErrByPath('miscellaneous.invoking_child_without_parent', {
@@ -208,14 +206,12 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     if ($dom.isDetached(subject)) {
       const current = state('current')
 
-      const cmd = name ?? current.get('name')
+      name = name ?? current.get('name')
+      const subjectChain = cy.subjectChain(current.get('chainerId'))
 
-      const prev = current.get('prev') ? current.get('prev').get('name') : current.get('name')
-      const node = $dom.stringify(subject)
-
-      $errUtils.throwErrByPath('subject.not_attached', {
+      $errUtils.throwErrByPath('subject.detached_after_command', {
         onFail,
-        args: { cmd, prev, node },
+        args: { name, subjectChain },
       })
     }
   }
@@ -225,9 +221,12 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
       const current = state('current')
 
       if ($dom.isJquery(subject) && subject.length === 0) {
-        const subjectChain = (cy.state('subjects') || {})[current.get('chainerId')]
+        const subjectChain = cy.subjectChain(current.get('chainerId'))
 
-        $errUtils.throwErrByPath('subject.not_element_empty_subject', {
+        const prevCommandWasQuery = current.get('prev').get('query')
+        const errMsg = prevCommandWasQuery ? 'subject.not_element_empty_subject' : 'subject.detached_after_command'
+
+        $errUtils.throwErrByPath(errMsg, {
           onFail,
           args: {
             name: current.get('name'),

@@ -57,7 +57,7 @@ function getAlias (selector, log, cy) {
 
     const { command } = aliasObj
 
-    log && log.set('referencesAlias', { name: alias })
+    log && cy.state('current') === this && log.set('referencesAlias', { name: alias })
 
     /*
      * There are three cases for aliases, each explained in more detail below:
@@ -71,7 +71,7 @@ function getAlias (selector, log, cy) {
       // and returns one or more requests.
       const requests = cy.getRequestsByAlias(alias) || null
 
-      log && log.set({
+      log && cy.state('current') === this && log.set({
         aliasType: 'route',
         consoleProps: () => {
           return {
@@ -97,7 +97,7 @@ function getAlias (selector, log, cy) {
 
       const returnValue = index === 'all' ? requests : (requests[parseInt(index, 10)] || null)
 
-      log && log.set({
+      log && cy.state('current') === this && log.set({
         aliasType: 'intercept',
         consoleProps: () => {
           return {
@@ -128,7 +128,7 @@ function getAlias (selector, log, cy) {
     cy.state('aliasCurrentCommand', undefined)
 
     if ($dom.isElement(subject)) {
-      log && log.set({
+      log && cy.state('current') === this && log.set({
         aliasType: 'dom',
         consoleProps: () => {
           return {
@@ -139,7 +139,7 @@ function getAlias (selector, log, cy) {
         },
       })
     } else {
-      log && log.set({
+      log && cy.state('current') === this && log.set({
         aliasType: 'primitive',
         consoleProps: () => {
           return {
@@ -176,7 +176,7 @@ export default (Commands, Cypress, cy, state) => {
       return getAlias.call(this, selector, log, cy)
     }
 
-    const withinSubject = cy.state('withinSubjectChain') || []
+    const withinSubject = cy.state('withinSubjectChain')
 
     const includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
 
@@ -221,7 +221,7 @@ export default (Commands, Cypress, cy, state) => {
         throw err
       }
 
-      log && log.set({
+      log && cy.state('current') === this && log.set({
         $el,
         consoleProps: () => {
           return {
@@ -351,7 +351,7 @@ export default (Commands, Cypress, cy, state) => {
         $el = $dom.getFirstDeepestElement($el)
       }
 
-      log && log.set({
+      log && cy.state('current') === this && log.set({
         $el,
         consoleProps: () => {
           return {
@@ -396,7 +396,7 @@ export default (Commands, Cypress, cy, state) => {
       .map((i, node) => node.shadowRoot)
       .filter((i, node) => node !== undefined && node !== null)
 
-      log && log.set({
+      log && cy.state('current') === this && log.set({
         $el,
         consoleProps: () => {
           return {

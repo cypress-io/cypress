@@ -102,8 +102,7 @@ export default (Commands, Cypress, cy) => {
       this.set('onFail', (err) => {
         switch (err.type) {
           case 'existence': {
-            const chainerId = this.get('chainerId')
-            const subjectChain = (cy.state('subjects') || {})[chainerId]
+            const subjectChain = cy.subjectChain(this.get('chainerId'))
 
             err.message += ` Queried from:
 
@@ -127,7 +126,7 @@ export default (Commands, Cypress, cy) => {
         // or completely borks it
         $el.selector = selector || traversal
 
-        log && log.set({
+        log && cy.state('current') === this && log.set({
           $el,
           consoleProps: () => {
             return {

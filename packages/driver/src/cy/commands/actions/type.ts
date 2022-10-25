@@ -476,6 +476,8 @@ export default function (Commands, Cypress, cy, state, config) {
       })
     }
 
+    const subjectChain = cy.subjectChain()
+
     const handleFocused = function () {
       // if it's the body, don't need to worry about focus
       // (unless it can be modified i.e we're in designMode or contenteditable)
@@ -509,6 +511,8 @@ export default function (Commands, Cypress, cy, state, config) {
       }
 
       return $actionability.verify(cy, options.$el, config, options, {
+        subjectFn: () =>  cy.getSubjectFromChain(subjectChain),
+
         onScroll ($el, type) {
           return Cypress.action('cy:scrolled', $el, type)
         },
@@ -579,6 +583,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
         const verifyAssertions = () => {
           return cy.verifyUpcomingAssertions(options.$el, options, {
+            subjectFn: () => cy.getSubjectFromChain(subjectChain),
             onRetry: verifyAssertions,
           })
         }

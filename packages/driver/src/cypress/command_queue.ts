@@ -92,7 +92,7 @@ function retryQuery (command: $Command, ret: any, cy: $Cy) {
       onFail: command.get('onFail'),
       ensureExistenceFor: command.get('ensureExistenceFor'),
       subjectFn: () => {
-        const subject = cy.currentSubject(command.get('chainerId'))
+        const subject = cy.subject(command.get('chainerId'))
 
         cy.ensureSubjectByType(subject, command.get('prevSubject'), command)
 
@@ -305,11 +305,7 @@ export class CommandQueue extends Queue<$Command> {
       }
 
       command.set({ subject })
-
-      // When a command - query or normal - first passes, we verify that we have any snapshots needed.
-      // The logs may still be pending, but we want to know the state of the DOM now, before any subsequent commands
-      // run to alter it.
-      command.snapshotLogs()
+      command.finishLogs()
 
       if (isQuery) {
         subject = command.get('queryFn')
@@ -325,17 +321,10 @@ export class CommandQueue extends Queue<$Command> {
 
         // This is done so that any query's logs remain in the 'pending' state until the subject chain is finished.
         this.cy.addQueryToChainer(command.get('chainerId'), subject)
-
-        const next = command.get('next')
-
-        if (!next || next.get('chainerId') !== command.get('chainerId') || !next.get('query')) {
-          command.finishLogs()
-        }
       } else {
         // For commands, the "subject" here is the command's return value, which replaces
         // the current subject chain. We cannot re-invoke commands - the return value here is final.
         this.cy.setSubjectForChainer(command.get('chainerId'), subject)
-        command.finishLogs()
       }
 
       // reset the nestedIndex back to null

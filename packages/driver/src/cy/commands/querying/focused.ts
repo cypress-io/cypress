@@ -7,7 +7,7 @@ export default (Commands, Cypress, cy, state) => {
     return () => {
       let $el = cy.getFocused()
 
-      log && log.set({
+      log && cy.state('current') === this && log.set({
         $el,
         consoleProps: () => {
           return {

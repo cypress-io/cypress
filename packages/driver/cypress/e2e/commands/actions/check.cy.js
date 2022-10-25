@@ -98,6 +98,26 @@ describe('src/cy/commands/actions/check', () => {
       cy.get(checkbox).check()
     })
 
+    it('requeries if the DOM rerenders during actionability', () => {
+      cy.$$('[name=colors]').first().prop('disabled', true)
+
+      const listener =  _.after(3, () => {
+        cy.$$('[name=colors]').first().prop('disabled', false)
+
+        const parent = cy.$$('[name=colors]').parent()
+        parent.replaceWith(parent[0].outerHTML)
+        cy.off('command:retry', listener)
+      })
+
+      cy.on('command:retry', listener)
+
+      cy.get('[name=colors]').check().then(($inputs) => {
+        $inputs.each((i, el) => {
+          expect($(el)).to.be.checked
+        })
+      })
+    })
+
     // readonly should only be limited to inputs, not checkboxes
     it('can check readonly checkboxes', () => {
       cy.get('#readonly-checkbox').check().then(($checkbox) => {
@@ -437,7 +457,7 @@ describe('src/cy/commands/actions/check', () => {
 
         cy.on('fail', (err) => {
           expect(checked).to.eq(1)
-          expect(err.message).to.include('`cy.check()` failed because this element')
+          expect(err.message).to.include('`cy.check()` failed because the DOM updated')
 
           done()
         })
@@ -1079,7 +1099,7 @@ describe('src/cy/commands/actions/check', () => {
 
         cy.on('fail', (err) => {
           expect(unchecked).to.eq(1)
-          expect(err.message).to.include('`cy.uncheck()` failed because this element')
+          expect(err.message).to.include('`cy.uncheck()` failed because the DOM updated')
 
           done()
         })

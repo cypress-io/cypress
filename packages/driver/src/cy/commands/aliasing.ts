@@ -12,8 +12,7 @@ export default function (Commands, Cypress, cy) {
 
     // Shallow clone of the existing subject chain, so that future commands running on the same chainer
     // don't apply here as well.
-    const chainerId = cy.state('chainerId')
-    const subjectChain = [...cy.state('subjects')[chainerId]]
+    const subjectChain = [...cy.subjectChain()]
 
     const fileName = prevCommand.get('fileName')
 
