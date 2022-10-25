@@ -118,7 +118,7 @@ describe('config/src/index', () => {
 
       configUtil.validate({
         'baseUrl': 'https://',
-      }, errorFn)
+      }, errorFn, 'e2e')
 
       expect(errorFn).to.have.callCount(0)
     })
@@ -128,7 +128,7 @@ describe('config/src/index', () => {
 
       configUtil.validate({
         'baseUrl': ' ',
-      }, errorFn)
+      }, errorFn, 'e2e')
 
       expect(errorFn).to.have.been.calledWithMatch({ key: 'baseUrl' })
       expect(errorFn).to.have.been.calledWithMatch({ type: 'a fully qualified URL (starting with `http://` or `https://`)' })
@@ -195,7 +195,7 @@ describe('config/src/index', () => {
 
         const isSuiteOverride = true
 
-        configUtil.validateOverridableAtRunTime({ testIsolation: 'strict' }, isSuiteOverride, errorFn)
+        configUtil.validateOverridableAtRunTime({ testIsolation: 'on' }, isSuiteOverride, errorFn)
 
         expect(errorFn).to.have.callCount(0)
       })

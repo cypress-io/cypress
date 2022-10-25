@@ -13,6 +13,8 @@
 import { createTimers } from './timers'
 import { patchDocumentCookie } from './patches/cookies'
 import { patchElementIntegrity } from './patches/setAttribute'
+import { patchFetch } from './patches/fetch'
+import { patchXmlHttpRequest } from './patches/xmlHttpRequest'
 
 const findCypress = () => {
   for (let index = 0; index < window.parent.frames.length; index++) {
@@ -50,28 +52,23 @@ window.addEventListener('beforeunload', () => {
 // This error could also be handled by creating and attaching a spec bridge and re-throwing the error.
 // If this approach proves to be an issue we could try the new solution.
 const handleErrorEvent = (event) => {
-  if (window.Cypress) {
-    // A spec bridge has attached so we don't need to forward errors to top anymore.
-    window.removeEventListener('error', handleErrorEvent)
+  const { error } = event
+  const data = { href: window.location.href }
+
+  if (error && error.stack && error.message) {
+    data.message = error.message
+    data.stack = error.stack
   } else {
-    const { error } = event
-    const data = { href: window.location.href }
-
-    if (error && error.stack && error.message) {
-      data.message = error.message
-      data.stack = error.stack
-    } else {
-      data.message = error
-    }
-
-    window.top.postMessage({ event: 'cross:origin:aut:throw:error', data }, '*')
+    data.message = error
   }
+
+  window.top.postMessage({ event: 'cross:origin:aut:throw:error', data }, '*')
 }
 
 window.addEventListener('error', handleErrorEvent)
 
 // Apply Patches
-patchDocumentCookie(window)
+const documentCookiePatch = patchDocumentCookie(cypressConfig.simulatedCookies)
 
 // return null to trick contentWindow into thinking
 // its not been iFramed if modifyObstructiveCode is true
@@ -92,13 +89,32 @@ const timers = createTimers()
 
 timers.wrap()
 
-const Cypress = findCypress()
-
 // Attach these to window so cypress can call them when it attaches.
-window.cypressTimersReset = timers.reset
-window.cypressTimersPause = timers.pause
+// Patched to track credentials use.
+patchFetch(window)
+patchXmlHttpRequest(window)
+
+// Add a function to window for the spec bridge to call after it has attached.
+window.__attachToCypress = (Cypress) => {
+  // A spec bridge has attached so we don't need to forward errors to top anymore.
+  window.removeEventListener('error', handleErrorEvent)
+
+  documentCookiePatch.onCypress(Cypress)
+
+  Cypress.removeAllListeners('app:timers:reset')
+  Cypress.removeAllListeners('app:timers:pause')
+
+  Cypress.on('app:timers:reset', timers.reset)
+  Cypress.on('app:timers:pause', timers.pause)
+
+  // This function will self destruct
+  delete window.__attachToCypress
+}
+
+const Cypress = findCypress()
 
 // Check for cy too to prevent a race condition for attaching.
 if (Cypress && Cypress.cy) {
+  window.__attachToCypress(Cypress)
   Cypress.action('app:window:before:load', window)
 }

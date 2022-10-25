@@ -12,7 +12,7 @@ export type CopyOption = {
 </script>
 
 <script setup lang="ts">
-import { CohortConfig, useCohorts } from '../useCohorts'
+import { CohortConfig, useCohorts } from '../../gql-components/composables/useCohorts'
 
 const props = defineProps<{
   weights?: number[]
