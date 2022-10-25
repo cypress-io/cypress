@@ -23,7 +23,6 @@ const commandRunningFailed = (Cypress, state, err) => {
   // allow for our own custom onFail function
   if (err.onFail) {
     err.onFail(err)
-
     // clean up this onFail callback after it's been called
     delete err.onFail
 
@@ -258,7 +257,6 @@ export class CommandQueue extends Queue<$Command> {
 
       command.set({ subject })
 
-
       this.setSubjectForChainer(command.get('chainerId'), subject)
 
       return subject
@@ -282,7 +280,6 @@ export class CommandQueue extends Queue<$Command> {
       commandRunningFailed(Cypress, this.state, err)
 
       if (err.isRecovered) {
-
         return // let the queue move on to the next command
       }
 

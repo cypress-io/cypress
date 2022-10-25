@@ -537,7 +537,7 @@ describe('cy.session', { retries: 0 }, () => {
           resetMocks()
           validate.callsFake(() => {
             if (validate.callCount === 1) {
-              return false
+              return cy.wrap(false)
             }
 
             handleValidate()
