@@ -25,6 +25,10 @@ describe('<CloudConnectModals />', () => {
         result.cloudViewer = {
           ...CloudUserStubs.me,
           organizations: hasOrg ? cloneDeep(CloudOrganizationConnectionStubs) : null,
+          firstOrganization: {
+            __typename: 'CloudOrganizationConnection',
+            nodes: [],
+          },
         }
 
         if (!hasProjects) {

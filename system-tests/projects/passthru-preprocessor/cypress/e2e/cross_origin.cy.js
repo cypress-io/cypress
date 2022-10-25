@@ -3,6 +3,6 @@ it('uses cy.origin() dependency handling', () => {
   cy.get('a[data-cy="cross_origin_secondary_link"]').click()
 
   cy.origin('foobar.com:4466', () => {
-    Cypress.require('lodash')
+    require('lodash')
   })
 })

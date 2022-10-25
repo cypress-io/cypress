@@ -629,6 +629,11 @@ type CurrentProject implements Node & ProjectLike {
   """File extension to use based on if the project has typescript or not"""
   fileExtensionToUse: FileExtensionEnum
 
+  """
+  Whether the project has any specs found that do not match an example spec
+  """
+  hasNonExampleSpec: Boolean
+
   """Whether the project has a valid config file"""
   hasValidConfigFile: Boolean
 
@@ -663,7 +668,7 @@ type CurrentProject implements Node & ProjectLike {
   """Cached preferences for this project"""
   preferences: ProjectPreferences
 
-  """Used to associate project with Cypress dashboard"""
+  """Used to associate project with Cypress Dashboard"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""
@@ -720,6 +725,7 @@ enum ErrorTypeEnum {
   AUTOMATION_SERVER_DISCONNECTED
   BAD_POLICY_WARNING
   BAD_POLICY_WARNING_TOOLTIP
+  BROWSER_CRASHED
   BROWSER_NOT_FOUND_BY_NAME
   BROWSER_NOT_FOUND_BY_PATH
   BROWSER_UNSUPPORTED_LAUNCH_OPTION
@@ -1010,7 +1016,7 @@ type GlobalProject implements Node & ProjectLike {
   """Relay style Node ID field for the GlobalProject field"""
   id: ID!
 
-  """Used to associate project with Cypress dashboard"""
+  """Used to associate project with Cypress Dashboard"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""
@@ -1436,7 +1442,7 @@ interface ProjectLike {
     name: String!
   ): RemoteFetchableCloudProjectResult
 
-  """Used to associate project with Cypress dashboard"""
+  """Used to associate project with Cypress Dashboard"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""

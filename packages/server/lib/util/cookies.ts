@@ -9,6 +9,8 @@ interface CookieData {
   path?: string
 }
 
+export type SameSiteContext = 'strict' | 'lax' | 'none' | undefined
+
 export const toughCookieToAutomationCookie = (toughCookie: Cookie, defaultDomain: string): AutomationCookie => {
   const expiry = toughCookie.expiryTime()
 
@@ -23,6 +25,20 @@ export const toughCookieToAutomationCookie = (toughCookie: Cookie, defaultDomain
     secure: toughCookie.secure,
     value: toughCookie.value,
   }
+}
+
+export const automationCookieToToughCookie = (automationCookie: AutomationCookie, defaultDomain: string): Cookie => {
+  return new Cookie({
+    domain: automationCookie.domain || defaultDomain,
+    expires: automationCookie.expiry != null && isFinite(automationCookie.expiry) ? new Date(automationCookie.expiry * 1000) : undefined,
+    httpOnly: automationCookie.httpOnly,
+    maxAge: automationCookie.maxAge || 'Infinity',
+    key: automationCookie.name,
+    path: automationCookie.path || undefined,
+    sameSite: automationCookie.sameSite === 'no_restriction' ? 'none' : automationCookie.sameSite,
+    secure: automationCookie.secure,
+    value: automationCookie.value,
+  })
 }
 
 const sameSiteNoneRe = /; +samesite=(?:'none'|"none"|none)/i
@@ -57,7 +73,7 @@ export class CookieJar {
     this._cookieJar = new ToughCookieJar(undefined, { allowSpecialUseDomain: true })
   }
 
-  getCookies (url, sameSiteContext) {
+  getCookies (url: string, sameSiteContext: SameSiteContext = undefined) {
     // @ts-ignore
     return this._cookieJar.getCookiesSync(url, { sameSiteContext })
   }
@@ -75,9 +91,9 @@ export class CookieJar {
     return cookies
   }
 
-  setCookie (cookie: string | Cookie, url: string, sameSiteContext: 'strict' | 'lax' | 'none') {
+  setCookie (cookie: string | Cookie, url: string, sameSiteContext: SameSiteContext) {
     // @ts-ignore
-    this._cookieJar.setCookieSync(cookie, url, { sameSiteContext })
+    return this._cookieJar.setCookieSync(cookie, url, { sameSiteContext })
   }
 
   removeCookie (cookieData: CookieData) {

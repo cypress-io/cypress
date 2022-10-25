@@ -1,5 +1,6 @@
 import { AllowedState, defaultPreferences, Editor } from '@packages/types'
 import pDefer from 'p-defer'
+import _ from 'lodash'
 
 import type { DataContext } from '..'
 
@@ -17,10 +18,8 @@ export class LocalSettingsActions {
     const toJson = JSON.parse(stringifiedJson) as AllowedState
 
     // update local data
-    for (const [key, value] of Object.entries(toJson)) {
-      this.ctx.coreData.localSettings.preferences[key as keyof AllowedState] = value as any
-    }
 
+    _.merge(this.ctx.coreData.localSettings.preferences, toJson)
     if (type === 'global') {
       // persist to global appData - projects/__global__/state.json
       return this.ctx._apis.localSettingsApi.setPreferences(toJson)

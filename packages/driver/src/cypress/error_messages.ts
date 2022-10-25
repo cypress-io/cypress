@@ -1178,7 +1178,9 @@ export default {
       message: stripIndent`
         {{error}}
 
-        Variables must either be defined within the ${cmd('origin')} command or passed in using the args option.`,
+        Variables must either be defined within the ${cmd('origin')} command or passed in using the args option.
+
+        Using \`require()\` or \`import()\` to include dependencies requires using the latest version of \`@cypress/webpack-preprocessor\`.`,
     },
     callback_mixes_sync_and_async: {
       message: stripIndent`\
@@ -1440,17 +1442,6 @@ export default {
     url_wrong_type: {
       message: `${cmd('request')} requires the \`url\` to be a string.`,
       docsUrl: 'https://on.cypress.io/request',
-    },
-  },
-
-  require: {
-    invalid_outside_origin: {
-      message: `${cmd('Cypress.require')} can only be used inside the ${cmd('origin')} callback.`,
-      docsUrl: 'https://on.cypress.io/origin',
-    },
-    invalid_inside_origin: {
-      message: `Importing dependencies with ${cmd('Cypress.require')} requires using the latest version of \`@cypress/webpack-preprocessor\`.`,
-      docsUrl: 'https://on.cypress.io/origin',
     },
   },
 
@@ -1725,6 +1716,13 @@ export default {
         `,
         docsUrl: 'https://on.cypress.io/session',
       },
+      wrongArgSetup: {
+        message: stripIndent`
+        In order to use ${cmd('session')}, provide a \`setup\` as the second argument:
+
+        \`cy.session(id, setup)\``,
+        docsUrl: 'https://on.cypress.io/session',
+      },
       wrongArgOptions: {
         message: stripIndent`
         ${cmd('session')} was passed an invalid argument. The optional third argument \`options\` must be an object.
@@ -1742,13 +1740,6 @@ export default {
         message: stripIndent`
         ${cmd('session')} was passed an invalid option value. **{{key}}** must be of type **{{expected}}** but was **{{actual}}**.
         `,
-        docsUrl: 'https://on.cypress.io/session',
-      },
-      missing_global_setup: {
-        message: stripIndent`
-        In order to restore a global ${cmd('session')}, provide a \`setup\` as the second argument:
-
-        \`cy.session(id, setup, { cacheAcrossSpecs: true })\``,
         docsUrl: 'https://on.cypress.io/session',
       },
       not_found: {
@@ -2352,7 +2343,6 @@ export default {
   webkit: {
     docsUrl: 'https://on.cypress.io/webkit-experiment',
     origin: '`cy.origin()` is not currently supported in experimental WebKit.',
-    session: '`cy.session()` is not currently supported in experimental WebKit.',
   },
 
   window: {

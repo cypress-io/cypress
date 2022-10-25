@@ -1,4 +1,4 @@
-context('cy.origin unsupported commands', () => {
+context('cy.origin unsupported commands', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
@@ -60,7 +60,7 @@ context('cy.origin unsupported commands', () => {
     })
 
     cy.origin('http://www.foobar.com:3500', () => {
-      cy.session('/foo')
+      cy.session('/foo', () => {})
     })
   })
 })
