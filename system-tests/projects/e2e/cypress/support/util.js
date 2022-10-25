@@ -14,7 +14,7 @@ const getTitle = (title, ctx) => {
 export const fail = (title, ctx, test) => {
   const testTitle = `${count++}) ✗ FAIL - ${getTitle(title, ctx)}`
 
-  it(testTitle, { defaultCommandTimeout: 0 }, test)
+  it(testTitle, test)
 }
 
 export const verify = (title, ctx, options) => {
