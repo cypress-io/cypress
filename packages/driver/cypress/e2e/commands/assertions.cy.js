@@ -632,7 +632,7 @@ describe('src/cy/commands/assertions', () => {
       })
 
       it('has a pending state while retrying for commands with onFail', (done) => {
-        cy.on('command:retry', (command) => {
+        cy.on('command:retry', () => {
           const [readFileLog, shouldLog] = cy.state('current').get('logs')
 
           expect(readFileLog.get('state')).to.eq('pending')
@@ -640,6 +640,8 @@ describe('src/cy/commands/assertions', () => {
 
           done()
         })
+
+        cy.on('fail', () => {})
 
         cy.readFile('does-not-exist.json').should('exist')
       })

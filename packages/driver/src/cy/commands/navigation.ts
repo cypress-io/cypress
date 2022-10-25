@@ -35,11 +35,12 @@ const reset = (test: any = {}) => {
   // before each test run!
   previouslyVisitedLocation = undefined
 
-  const { experimentalSessionAndOrigin, testIsolation } = Cypress.config()
+  // TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
+  const { experimentalSessionAndOrigin } = Cypress.config()
 
   // make sure we reset that we haven't visited about blank again
   // strict test isolation resets the navigation history for us.
-  hasVisitedAboutBlank = experimentalSessionAndOrigin && testIsolation === 'strict'
+  hasVisitedAboutBlank = experimentalSessionAndOrigin
 
   currentlyVisitingAboutBlank = false
 
@@ -277,7 +278,9 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
 
   // We need to sync this state value prior to checking it otherwise we will erroneously log a loading event after the test is complete.
   if (Cypress.isCrossOriginSpecBridge) {
-    const duringUserTestExecution = await Cypress.specBridgeCommunicator.toPrimaryPromise('sync:during:user:test:execution')
+    const duringUserTestExecution = await Cypress.specBridgeCommunicator.toPrimaryPromise({
+      event: 'sync:during:user:test:execution',
+    })
 
     cy.state('duringUserTestExecution', duringUserTestExecution)
   }
@@ -1223,6 +1226,10 @@ export default (Commands, Cypress, cy, state, config) => {
       }
 
       const visit = () => {
+        // REMOVE THIS ONCE GA HITS. Sessions will handle visiting
+        // about blank.
+        // Fixed with: https://github.com/cypress-io/cypress/issues/21471
+        //
         // if we've visiting for the first time during
         // a test then we want to first visit about:blank
         // so that we nuke the previous state. subsequent

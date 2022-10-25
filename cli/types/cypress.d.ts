@@ -642,12 +642,6 @@ declare namespace Cypress {
     off: Actions
 
     /**
-     * Used to import dependencies within the cy.origin() callback
-     * @see https://on.cypress.io/origin
-     */
-    require: (id: string) => any
-
-    /**
      * Trigger action
      * @private
      */
@@ -2814,12 +2808,32 @@ declare namespace Cypress {
      */
     supportFile: string | false
     /**
-     * The test isolation level applied to ensure a clean slate between tests.
-     *   - legacy - resets/clears aliases, intercepts, clock, viewport, cookies, and local storage before each test.
-     *   - strict - applies all resets/clears from legacy, plus clears the page by visiting 'about:blank' to ensure clean app state before each test.
-     * @default "legacy", however, when experimentalSessionAndOrigin=true, the default is "strict"
+     * The test isolation ensures a clean browser context between tests. This option is only available when
+     * `experimentalSessionAndOrigin=true`.
+     *
+     * Cypress will always reset/clear aliases, intercepts, clock, and viewport before each test
+     * to ensure a clean test slate; i.e. this configuration only impacts the browser context.
+     *
+     * Note: the [`cy.session()`](https://on.cypress.io/session) command will inherent this value to determine whether
+     * or not the page is cleared when the command executes. This command is only available in end-to-end testing.
+     *
+     *  - on - The page is cleared before each test. Cookies, local storage and session storage in all domains are cleared
+     *         before each test. The `cy.session()` command will also clear the page and current browser context when creating
+     *         or restoring the browser session.
+     *  - off - The current browser state will persist between tests. The page does not clear before the test and cookies, local
+     *          storage and session storage will be available in the next test. The `cy.session()` command will only clear the
+     *          current browser context when creating or restoring the browser session - the current page will not clear.
+     *
+     * Tradeoffs:
+     *      Turning test isolation off may improve performance of end-to-end tests, however, previous tests could impact the
+     *      browser state of the next test and cause inconsistency when using .only(). Be mindful to write isolated tests when
+     *      test isolation is off. If a test in the suite impacts the state of other tests and it were to fail, you could see
+     *      misleading errors in later tests which makes debugging clunky. See the [documentation](https://on.cypress.io/test-isolation)
+     *      for more information.
+     *
+     * @default null, when experimentalSessionAndOrigin=false. The default is 'on' when experimentalSessionAndOrigin=true.
      */
-    testIsolation: 'legacy' | 'strict'
+    testIsolation: null | 'on' | 'off'
     /**
      * Path to folder where videos will be saved after a headless or CI run
      * @default "cypress/videos"

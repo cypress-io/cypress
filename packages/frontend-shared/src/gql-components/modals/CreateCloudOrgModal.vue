@@ -19,6 +19,7 @@
         {{ t('runs.connect.modal.createOrg.description') }}
       </p>
       <ExternalLink
+        v-if="createOrgUrl"
         class="border rounded mx-auto outline-none bg-indigo-500 border-indigo-500 text-white max-h-60px py-11px px-16px inline-block hocus-default"
         :href="createOrgUrl"
         :include-graphql-port="true"
@@ -69,7 +70,7 @@ import { computed, onBeforeUnmount, ref } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
-import ExternalLink from '@cy/gql-components/ExternalLink.vue'
+import ExternalLink from '../ExternalLink.vue'
 import NoInternetConnection from '@cy/components/NoInternetConnection.vue'
 
 import { CreateCloudOrgModalFragment, CreateCloudOrgModal_CloudOrganizationsCheckDocument } from '../../generated/graphql'
@@ -122,7 +123,7 @@ onBeforeUnmount(() => {
   window.clearTimeout(timer)
 })
 
-const createOrgUrl = computed(() => props.gql.createCloudOrganizationUrl || '#')
+const createOrgUrl = computed(() => props.gql.createCloudOrganizationUrl)
 const isOnline = computed(() => online.value)
 
 </script>

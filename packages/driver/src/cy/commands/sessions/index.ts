@@ -49,7 +49,12 @@ export default function (Commands, Cypress, cy) {
 
     Cypress.on('test:before:run:async', () => {
       if (Cypress.config('experimentalSessionAndOrigin')) {
-        const clearPage = Cypress.config('testIsolation') === 'strict' ? navigateAboutBlank(false) : new Cypress.Promise.resolve()
+        if (Cypress.config('testIsolation') === 'off') {
+          return
+        }
+
+        // Component testing does not support navigation and handles clearing the page via mount utils
+        const clearPage = Cypress.testingType === 'e2e' ? navigateAboutBlank(false) : new Cypress.Promise.resolve()
 
         return clearPage
         .then(() => sessions.clearCurrentSessionData())
@@ -240,8 +245,8 @@ export default function (Commands, Cypress, cy) {
 
               // show validation error and allow sessions workflow to recreate the session
               if (restoreSession) {
+                err.isRecovered = true
                 Cypress.log({
-                  showError: true,
                   type: 'system',
                   name: 'session',
                 })

@@ -55,10 +55,12 @@ function renderAttemptContent (model: AttemptModel, studioActive: boolean) {
       <div ref='commands' className='runnable-commands-region'>
         {model.hasCommands ? <Hooks model={model} /> : <NoCommands />}
       </div>
-      <div className='attempt-error-region'>
-        <TestError model={model} />
-        {studioActive && model.state === 'failed' && <StudioError />}
-      </div>
+      {model.state === 'failed' && (
+        <div className='attempt-error-region'>
+          <TestError {...model.error} />
+          {studioActive && <StudioError />}
+        </div>
+      )}
     </div>
   )
 }

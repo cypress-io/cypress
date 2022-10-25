@@ -58,7 +58,6 @@ const rp = request.defaults((params, callback) => {
     proxy: null,
     gzip: true,
     cacheable: false,
-    rejectUnauthorized: true,
   })
 
   const headers = params.headers != null ? params.headers : (params.headers = {})
