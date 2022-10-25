@@ -25,10 +25,9 @@ for (const { projectName, test } of PROJECTS) {
         cy.visitApp()
         cy.contains(`${test}`).click()
         cy.waitForSpecToFinish()
-        cy.get('.collapsible-header-inner:first').click().get('.command.command-name-mount > .command-wrapper').realHover().then(() => {
-          cy.get('iframe.aut-iframe').its('0.contentDocument.body').children().should('have.length.at.least', 2)
+        cy.get('.collapsible-header-inner:first').click().get('.command.command-name-mount > .command-wrapper').click().then(() => {
           cy.get('iframe.aut-iframe').its('0.contentDocument.body').then(cy.wrap).within(() => {
-            cy.get('[data-cy-root]').should('exist')
+            cy.get('[data-cy-root]').children().should('have.length.at.least', 1)
           })
         })
       } else {
@@ -37,11 +36,14 @@ for (const { projectName, test } of PROJECTS) {
         cy.visitApp()
         cy.contains(`${test}`).click()
         cy.waitForSpecToFinish()
-        cy.get('.command.command-name-mount > .command-wrapper').realHover().then(() => {
-          cy.get('iframe.aut-iframe').its('0.contentDocument.body').children().should('have.length.at.least', 2)
-          cy.get('iframe.aut-iframe').its('0.contentDocument.body').then(cy.wrap).within(() => {
-            cy.get('[data-cy-root]').should('exist')
-          })
+        cy.get('.command.command-name-mount > .command-wrapper').click().then(() => {
+          if (`${projectName}` === 'angular-15') {
+            cy.get('iframe.aut-iframe').its('0.contentDocument.body').children().should('have.length.at.least', 2)
+          } else {
+            cy.get('iframe.aut-iframe').its('0.contentDocument.body').then(cy.wrap).within(() => {
+              cy.get('[data-cy-root]').children().should('have.length.at.least', 1)
+            })
+          }
         })
       }
     })
