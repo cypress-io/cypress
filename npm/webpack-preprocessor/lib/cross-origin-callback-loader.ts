@@ -169,6 +169,10 @@ export default function (source: string, map, meta, store = crossOriginCallbackS
   const result = generate(ast, { sourceMaps: true }, {
     [resourcePath]: source,
   })
+  // result.map needs to be merged with the original map for it to include
+  // the changes made in this loader. we can't return result.map because it
+  // is based off the intermediary code provided to the loader and not the
+  // original source code (which could be TypeScript or JSX or something)
   const newMap = mergeSourceMaps(map, result.map)
 
   debug('callback with modified source')
