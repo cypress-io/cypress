@@ -220,18 +220,12 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
 
   const finishAssertions = () => {
     cy.state('current').get('logs').forEach((log) => {
-      if (log.get('next') || !log.get('snapshots')) {
+      if (!log.get('snapshots')) {
         log.snapshot()
       }
-
-      const e = log.get('_error')
-
-      if (e) {
-        return log.error(e)
-      }
-
-      return log.end()
     })
+
+    cy.state('current').finishLogs()
   }
 
   type VerifyUpcomingAssertionsCallbacks = {
@@ -304,7 +298,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         // ensure the error is about existence not about
         // the downstream assertion.
         try {
-          ensureExistence()
+          callbacks.ensureExistenceFor === 'dom' && ensureExistence()
         } catch (e2) {
           err = e2
         }

@@ -6,9 +6,12 @@ export default (Commands, Cypress, cy, state) => {
 
     this.set('timeout', options.timeout)
 
+    const withinSubject = cy.state('withinSubjectChain')
+
     return () => {
       cy.ensureCommandCanCommunicateWithAUT()
-      const $el = state('withinSubject') || cy.$$('html')
+
+      const $el = cy.getSubjectFromChain(withinSubject || [cy.$$('html')])
 
       log && log.set({
         $el,

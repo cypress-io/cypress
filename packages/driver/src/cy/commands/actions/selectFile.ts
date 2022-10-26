@@ -4,7 +4,6 @@ import mime from 'mime-types'
 
 import $dom from '../../../dom'
 import $errUtils from '../../../cypress/error_utils'
-import $utils from '../../../cypress/utils'
 import $actionability from '../../actionability'
 import { addEventCoords, dispatch } from './trigger'
 
@@ -128,7 +127,7 @@ export default (Commands, Cypress, cy, state, config) => {
       return
     }
 
-    const contents = $utils.getSubjectFromChain(aliasObj.subjectChain, cy)
+    const contents = cy.getSubjectFromChain(aliasObj.subjectChain)
 
     if (contents == null) {
       $errUtils.throwErrByPath('selectFile.invalid_alias', {

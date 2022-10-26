@@ -45,6 +45,7 @@ export default {
   create: (Cypress, cy, state, config) => {
     const reservedCommandNames = new Set(Object.keys(cy))
     const commands = {}
+    const queries = {}
 
     // we track built in commands to ensure users cannot
     // add custom commands with the same name
@@ -124,6 +125,10 @@ export default {
       overwrite (name, fn) {
         const original = commands[name]
 
+        if (queries[name]) {
+          internalError('miscellaneous.invalid_overwrite_query_with_command', name)
+        }
+
         if (!original) {
           internalError('miscellaneous.invalid_overwrite', name)
         }
@@ -165,6 +170,7 @@ export default {
           builtInCommandNames[name] = true
         }
 
+        queries[name] = fn
         cy._addQuery({ name, fn })
       },
 

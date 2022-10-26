@@ -314,7 +314,7 @@ describe('driver/src/cypress/cy', () => {
           done()
         })
 
-        cy.get('#button').click().parent()
+        cy.get('#button').click().parent({ timeout: 50 })
       })
 
       it('fails when previous subject isnt window', (done) => {
@@ -346,10 +346,9 @@ describe('driver/src/cypress/cy', () => {
 
         cy.on('fail', (err) => {
           expect(firstPassed).to.be.true
-          expect(err.message).to.include('`cy.elWinOnly()` failed because it requires a DOM element.')
+          expect(err.message).to.include('`cy.elWinOnly()` failed because it requires a DOM element or window.')
           expect(err.message).to.include('string')
           expect(err.message).to.include('> `cy.wrap()`')
-          expect(err.message).to.include('All 2 subject validations failed')
 
           done()
         })
@@ -416,10 +415,10 @@ describe('driver/src/cypress/cy', () => {
         return orig(`foo${arg1}`)
       })
 
-      Cypress.Commands.overwrite('first', (orig, subject) => {
-        subject = $([1, 2])
+      Cypress.Commands.overwrite('each', (orig, subject, cb) => {
+        subject = $([1])
 
-        return orig(subject)
+        return orig(subject, cb)
       })
 
       Cypress.Commands.overwrite('noop', function (orig, fn) {
@@ -439,8 +438,8 @@ describe('driver/src/cypress/cy', () => {
     })
 
     it('can modify child commands', () => {
-      cy.get('li').first().then((el) => {
-        expect(el[0]).to.eq(1)
+      cy.get('li').each((i) => {
+        expect(i).to.eq(1)
       })
     })
 
@@ -552,6 +551,21 @@ describe('driver/src/cypress/cy', () => {
         // Length of 3: bQuery.body (from get), bQuery.button (from get), should.have.length.23
         expect(logs.length).to.eq(3)
       })
+    })
+
+    it('ends all messages when query chain fails', (done) => {
+      const logs = []
+
+      cy.on('log:added', (attrs, log) => logs.push(log))
+
+      cy.on('fail', (err) => {
+        const state = logs.map((l) => l.get('state'))
+
+        expect(state).to.eql(['passed', 'passed', 'passed', 'failed'])
+        done()
+      })
+
+      cy.get('body').find('#specific-contains').children().should('have.class', 'active')
     })
   })
 })

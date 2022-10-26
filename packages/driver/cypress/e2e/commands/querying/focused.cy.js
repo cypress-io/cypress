@@ -95,7 +95,7 @@ describe('src/cy/commands/querying', () => {
         cy.get('body').focused().then(function () {
           const { lastLog } = this
 
-          expect(lastLog.get('type')).to.eq('parent')
+          expect(lastLog.get('type')).not.to.eq('child')
         })
       })
 

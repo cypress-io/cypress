@@ -90,6 +90,7 @@ function retryQuery (command: $Command, ret: any, cy: $Cy) {
     return cy.verifyUpcomingAssertions(undefined, options, {
       onRetry,
       onFail: command.get('onFail'),
+      ensureExistenceFor: command.get('ensureExistenceFor'),
       subjectFn: () => {
         const subject = cy.currentSubject(command.get('chainerId'))
 
@@ -315,8 +316,8 @@ export class CommandQueue extends Queue<$Command> {
         // For queries, the "subject" here is the query's return value, which is a function which
         // accepts a subject and returns a subject, and can be re-invoked at any time.
 
-        // We add the command name here only to make debugging easier; It should not be relied on functionally.
         subject.commandName = name
+        subject.args = command.get('args')
 
         // Even though we've snapshotted, we only end the logs a query's logs if we're at the end of a query
         // chain - either there is no next command (end of a test), the next command is an action, or the next

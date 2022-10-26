@@ -134,21 +134,6 @@ describe('src/cy/commands/assertions', () => {
       cy.noop(obj).its('requestJSON').should('have.property', 'teamIds').should('deep.eq', [2])
     })
 
-    // TODO: make cy.then retry
-    // https://github.com/cypress-io/cypress/issues/627
-    it.skip('outer assertions retry on cy.then', () => {
-      const obj = { foo: 'bar' }
-
-      cy.wrap(obj).then(() => {
-        setTimeout(() => {
-          obj.foo = 'baz'
-        }
-        , 1000)
-
-        return obj
-      }).should('deep.eq', { foo: 'baz' })
-    })
-
     it('does it retry when wrapped', () => {
       const obj = { foo: 'bar' }
 
@@ -830,7 +815,7 @@ describe('src/cy/commands/assertions', () => {
       return null
     })
 
-    it('does not output should logs on failures', function (done) {
+    it('does not output should logs on failures', { defaultCommandTimeout: 50 }, function (done) {
       cy.on('fail', () => {
         const { length } = this.logs
 
@@ -2088,6 +2073,20 @@ describe('src/cy/commands/assertions', () => {
         })
 
         cy.wrap(undefined).should('have.value', 'somevalue')
+      })
+
+      it('shows subject instead of undefined when a previous traversal errors', (done) => {
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'assert') {
+            cy.removeAllListeners('log:added')
+            expect(log.get('message')).to.eq('expected **subject** to have class **updated**')
+            done()
+          }
+        })
+
+        cy.get('body')
+        .contains('Does not exist')
+        .should('have.class', 'updated')
       })
     })
 

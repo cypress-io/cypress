@@ -11,33 +11,22 @@ interface InternalWrapOptions extends Partial<Cypress.Loggable & Cypress.Timeout
 }
 
 export default (Commands, Cypress, cy, state) => {
-  Commands.addAll({ prevSubject: 'optional' }, {
-    end () {
-      return null
-    },
+  Commands._addQuery('end', () => () => null)
+
+  Commands._addQuery('log', (msg, ...args) => {
+    Cypress.log({
+      end: true,
+      snapshot: true,
+      message: [msg, ...args],
+      consoleProps: () => ({ message: msg, args }),
+    })
+
+    return () => null
   })
 
+  Commands.add('noop', (arg) => arg)
+
   Commands.addAll({
-    noop (arg) {
-      return arg
-    },
-
-    log (msg, ...args) {
-      Cypress.log({
-        end: true,
-        snapshot: true,
-        message: [msg, ...args],
-        consoleProps () {
-          return {
-            message: msg,
-            args,
-          }
-        },
-      })
-
-      return null
-    },
-
     wrap (arg, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
       const options: InternalWrapOptions = _.defaults({}, userOptions, {
         log: true,

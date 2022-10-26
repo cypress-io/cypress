@@ -104,7 +104,7 @@ describe('src/cy/commands/querying/within', () => {
       })
     })
 
-    it('clears withinSubject after within is over', () => {
+    it('clears withinSubjectChain after within is over', () => {
       const input = cy.$$('input:first')
       const span = cy.$$('#button-text button span')
 
@@ -133,17 +133,17 @@ describe('src/cy/commands/querying/within', () => {
       })
     })
 
-    it('clears withinSubject even if next is null', (done) => {
+    it('clears withinSubjectChain even if next is null', (done) => {
       const span = cy.$$('#button-text button span')
 
       // should be defined here because next would have been
-      // null and withinSubject would not have been cleared
+      // null and withinSubjectChain would not have been cleared
       cy.once('command:queue:before:end', () => {
-        expect(cy.state('withinSubject')).not.to.be.undefined
+        expect(cy.state('withinSubjectChain')).not.to.be.undefined
       })
 
       cy.once('command:queue:end', () => {
-        expect(cy.state('withinSubject')).to.be.null
+        expect(cy.state('withinSubjectChain')).to.be.null
 
         done()
       })
@@ -167,6 +167,16 @@ describe('src/cy/commands/querying/within', () => {
     it('contains() works after within() call', () => {
       cy.get(`#wrapper`).within(() => cy.get(`#upper`)).should(`contain.text`, `New York`)
       cy.contains(`button`, `button`).should(`exist`)
+    })
+
+    it('re-queries if withinSubject is detached from dom', () => {
+      cy.on('command:retry', _.after(2, (options) => {
+        cy.$$('#wrapper').replaceWith('<div id="wrapper"><div id="upper">Newer York</div></div>')
+      }))
+
+      cy.get('#wrapper').within(() => {
+        cy.get(`#upper`).should(`contain.text`, `Newer York`)
+      })
     })
 
     describe('.log', () => {
