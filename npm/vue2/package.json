@@ -9,7 +9,8 @@
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "build-prod": "yarn build",
     "test": "echo \"Tests for @cypress/vue2 are run from system-tests\"",
-    "watch": "yarn build --watch --watch.exclude ./dist/**/*"
+    "watch": "yarn build --watch --watch.exclude ./dist/**/*",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@vue/test-utils": "^1.1.3"
