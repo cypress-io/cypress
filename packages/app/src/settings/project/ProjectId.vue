@@ -52,7 +52,6 @@ fragment ProjectId on Query {
     id
     projectId
   }
-  ...CloudConnectButton
 }`
 
 const props = defineProps<{

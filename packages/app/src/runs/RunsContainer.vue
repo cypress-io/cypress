@@ -10,8 +10,6 @@
     />
     <RunsConnect
       v-if="!currentProject?.projectId || !cloudViewer?.id"
-      :gql="props.gql"
-      @success="showConnectSuccessAlert = true"
     />
     <RunsErrorRenderer
       v-else-if="currentProject?.cloudProject?.__typename !== 'CloudProject' || connectionFailed"
@@ -43,7 +41,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
 import NoInternetConnection from '@packages/frontend-shared/src/components/NoInternetConnection.vue'
@@ -54,6 +52,7 @@ import RunsEmpty from './RunsEmpty.vue'
 import { RunsContainerFragment, RunsContainer_FetchNewerRunsDocument } from '../generated/graphql'
 import Warning from '@packages/frontend-shared/src/warning/Warning.vue'
 import RunsErrorRenderer from './RunsErrorRenderer.vue'
+import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 
 const { t } = useI18n()
 
@@ -93,7 +92,6 @@ fragment RunsContainer on Query {
   cloudViewer {
     id
   }
-  ...RunsConnect
 }`
 
 gql`
@@ -189,6 +187,21 @@ const props = defineProps<{
 
 const showConnectSuccessAlert = ref(false)
 const connectionFailed = computed(() => !props.gql.currentProject?.cloudProject && props.online)
+
+const loginConnectStore = useLoginConnectStore()
+
+watch(() => loginConnectStore.project.isProjectConnected, (newVal, oldVal) => {
+  if (newVal && oldVal === false) {
+    // only show this alert if we have just connected
+    showConnectSuccessAlert.value = true
+  } else {
+    // otherwise, set to false, eg if we just connected,
+    // and then manually reverted the config changes
+    // or edited the project ID
+    showConnectSuccessAlert.value = false
+  }
+})
+
 </script>
 
 <style scoped>

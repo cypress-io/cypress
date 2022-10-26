@@ -1,7 +1,7 @@
 <template>
   <TrackedBanner
+    v-if="cohortOption"
     :banner-id="bannerId"
-    :model-value="modelValue"
     data-cy="create-organization-banner"
     status="info"
     :title="cohortOption.value"
@@ -14,7 +14,6 @@
       medium: 'Specs Create Organization Banner',
       cohort: cohortOption.cohort
     }"
-    @update:model-value="value => emit('update:modelValue', value)"
   >
     <p class="mb-24px">
       {{ t('specPage.banners.createOrganization.content') }}
@@ -36,7 +35,7 @@
 import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import { useI18n } from '@cy/i18n'
 import TrackedBanner from './TrackedBanner.vue'
-import type { CohortOption } from '@packages/frontend-shared/src/composables/useCohorts'
+import type { CohortOption } from '@packages/frontend-shared/src/gql-components/composables/useCohorts'
 import { BannerIds } from '@packages/types'
 import { CreateOrganizationBannerDocument } from '../../generated/graphql'
 import { gql, useQuery } from '@urql/vue'
@@ -54,13 +53,8 @@ query CreateOrganizationBanner {
 `
 
 const props = defineProps<{
-  modelValue: boolean
   hasBannerBeenShown: boolean
   cohortOption: CohortOption
-}>()
-
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void
 }>()
 
 const { t } = useI18n()
@@ -80,7 +74,7 @@ const createOrganizationUrl = computed(() => {
     params: {
       utm_medium: 'Specs Create Organization Banner',
       utm_campaign: 'Set up your organization',
-      utm_content: props.cohortOption.cohort,
+      utm_content: props.cohortOption.value?.cohort,
     },
   })
 })

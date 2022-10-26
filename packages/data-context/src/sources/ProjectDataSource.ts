@@ -198,6 +198,7 @@ export function getPathFromSpecPattern ({
 export class ProjectDataSource {
   private _specWatcher: FSWatcher | null = null
   private _specs: SpecWithRelativeRoot[] = []
+  private _hasNonExampleSpec: boolean = false
 
   constructor (private ctx: DataContext) {}
 
@@ -227,6 +228,14 @@ export class ProjectDataSource {
 
   setSpecs (specs: SpecWithRelativeRoot[]) {
     this._specs = specs
+  }
+
+  get hasNonExampleSpec () {
+    return this._hasNonExampleSpec
+  }
+
+  setHasNonExampleSpec (hasNonExampleSpec: boolean) {
+    this._hasNonExampleSpec = hasNonExampleSpec
   }
 
   setRelaunchBrowser (relaunchBrowser: boolean) {
