@@ -141,6 +141,36 @@ export const expectCaret = (start, end) => {
   }
 }
 
+export const makeRequestForCookieBehaviorTests = (
+  win: Cypress.AUTWindow,
+  url: string,
+  client: 'fetch' | 'xmlHttpRequest' = 'xmlHttpRequest',
+  credentials: 'same-origin' | 'include' | 'omit' | boolean = false,
+) => {
+  if (client === 'fetch') {
+    // if a boolean is specified, make sure the default is applied
+    credentials = Cypress._.isBoolean(credentials) ? 'same-origin' : credentials
+
+    return win.fetch(url, { credentials })
+  }
+
+  return new Promise<void>((resolve, reject) => {
+    let xhr = new XMLHttpRequest()
+
+    xhr.open('GET', url)
+    xhr.withCredentials = Cypress._.isBoolean(credentials) ? credentials : false
+    xhr.onload = function () {
+      resolve(xhr.response)
+    }
+
+    xhr.onerror = function () {
+      reject(xhr.response)
+    }
+
+    xhr.send()
+  })
+}
+
 Cypress.Commands.add('getAll', getAllFn)
 
 Cypress.Commands.add('shouldWithTimeout', shouldWithTimeout)
