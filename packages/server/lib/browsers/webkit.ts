@@ -25,6 +25,13 @@ export async function connectToNewSpec (browser: Browser, options: BrowserNewTab
   })
 }
 
+/**
+ * Clear instance state for the webkit instance, this is normally called in on kill or on exit.
+ */
+export function clearInstanceState () {
+  wkAutomation = undefined
+}
+
 export function connectToExisting () {
   throw new Error('Cypress-in-Cypress is not supported for WebKit.')
 }
@@ -120,7 +127,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     async kill () {
       debug('closing pwBrowser')
       await pwBrowser.close()
-      wkAutomation = undefined
+      clearInstanceState()
     }
 
     /**

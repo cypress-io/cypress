@@ -8,7 +8,7 @@ import assert from 'assert'
 import type { ProjectShape } from '../data/coreDataShape'
 
 import type { DataContext } from '..'
-import { codeGenerator, SpecOptions } from '../codegen'
+import { codeGenerator, SpecOptions, hasNonExampleSpec } from '../codegen'
 import templates from '../codegen/templates'
 import { insertValuesInConfigFile } from '../util'
 import { getError } from '@packages/errors'
@@ -317,6 +317,15 @@ export class ProjectActions {
     this.ctx.project.setSpecs(specs)
     this.refreshSpecs(specs)
 
+    // only check for non-example specs when the specs change
+    this.hasNonExampleSpec().then((result) => {
+      this.ctx.project.setHasNonExampleSpec(result)
+    })
+    .catch((e) => {
+      this.ctx.project.setHasNonExampleSpec(false)
+      this.ctx.logTraceError(e)
+    })
+
     if (this.ctx.coreData.currentTestingType === 'component') {
       this.api.getDevServer().updateSpecs(specs)
     }
@@ -487,6 +496,21 @@ export class ProjectActions {
         description: 'Generated spec',
       }
     })
+  }
+
+  async hasNonExampleSpec () {
+    const specs = this.ctx.project.specs?.map((spec) => spec.relativeToCommonRoot)
+
+    switch (this.ctx.coreData.currentTestingType) {
+      case 'e2e':
+        return hasNonExampleSpec(templates.scaffoldIntegration, specs)
+      case 'component':
+        return specs.length > 0
+      case null:
+        return false
+      default:
+        throw new Error(`Unsupported testing type ${this.ctx.coreData.currentTestingType}`)
+    }
   }
 
   async pingBaseUrl () {

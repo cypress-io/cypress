@@ -127,7 +127,7 @@ In order to counteract this, we utilize the [proxy](../proxy) to capture cookies
 
 ## Dependencies
 
-Users can utilize `Cypress.require()` to include dependencies. It's functionally the same as the CommonJs `require()`. We handle the dependency resolution and bundling with the webpack preprocessor. We add a webpack loader that runs last. If we find a `Cypress.require()` call inside a `cy.origin()` callback, we extract that callback from the output code and replace references to `Cypress.require()` with `require()` calls. We then run that extracted callback through webpack again, so that it gets its own output bundle with all dependencies included. The original callback is replaced with an object that references the output bundle. At runtime, when executing `cy.origin()`, it loads and executes the callback bundle.
+Users can utilize `require()` or (dynamic) `import()` to include dependencies. We handle the dependency resolution and bundling with the webpack preprocessor. We add a webpack loader that runs last. If we find a `require()` or `import()` call inside a `cy.origin()` callback, we extract that callback from the output code. We then run that extracted callback through webpack again, so that it gets its own output bundle with all dependencies included. The original callback is replaced with an object that references the output bundle. At runtime, when executing `cy.origin()`, it loads and executes the callback bundle.
 
 ## Unsupported APIs
 
