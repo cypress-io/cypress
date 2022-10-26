@@ -1478,7 +1478,7 @@ describe('http/response-middleware', function () {
         expect(htmlStub).to.be.calledWith('foo', {
           'deferSourceMapRewrite': undefined,
           'domainName': 'foobar.com',
-          'isHtml': true,
+          'isNotJavascript': true,
           'modifyObstructiveCode': true,
           'modifyObstructiveThirdPartyCode': true,
           'url': 'http://www.foobar.com:3501/primary-origin.html',
@@ -1501,7 +1501,7 @@ describe('http/response-middleware', function () {
         expect(htmlStub).to.be.calledWith('foo', {
           'deferSourceMapRewrite': undefined,
           'domainName': '127.0.0.1',
-          'isHtml': true,
+          'isNotJavascript': true,
           'modifyObstructiveCode': true,
           'modifyObstructiveThirdPartyCode': false,
           'url': 'http://127.0.0.1:3501/primary-origin.html',
@@ -1531,7 +1531,7 @@ describe('http/response-middleware', function () {
         expect(htmlStub).to.be.calledWith('foo', {
           'deferSourceMapRewrite': undefined,
           'domainName': 'foobar.com',
-          'isHtml': true,
+          'isNotJavascript': true,
           'modifyObstructiveCode': false,
           'modifyObstructiveThirdPartyCode': false,
           'url': 'http://www.foobar.com:3501/primary-origin.html',
@@ -1607,7 +1607,7 @@ describe('http/response-middleware', function () {
         expect(securityStub).to.be.calledOnce
         expect(securityStub).to.be.calledWith({
           'deferSourceMapRewrite': undefined,
-          'isHtml': true,
+          'isNotJavascript': true,
           'modifyObstructiveCode': true,
           'modifyObstructiveThirdPartyCode': true,
           'url': 'http://www.foobar.com:3501/primary-origin.html',
@@ -1624,7 +1624,7 @@ describe('http/response-middleware', function () {
         expect(securityStub).to.be.calledOnce
         expect(securityStub).to.be.calledWith({
           'deferSourceMapRewrite': undefined,
-          'isHtml': true,
+          'isNotJavascript': true,
           'modifyObstructiveCode': true,
           'modifyObstructiveThirdPartyCode': false,
           'url': 'http://127.0.0.1:3501/primary-origin.html',
@@ -1649,7 +1649,7 @@ describe('http/response-middleware', function () {
         expect(securityStub).to.be.calledOnce
         expect(securityStub).to.be.calledWith({
           'deferSourceMapRewrite': undefined,
-          'isHtml': true,
+          'isNotJavascript': true,
           'modifyObstructiveCode': false,
           'modifyObstructiveThirdPartyCode': false,
           'url': 'http://www.foobar.com:3501/primary-origin.html',

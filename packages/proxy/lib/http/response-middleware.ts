@@ -97,7 +97,7 @@ function resContentTypeIsJavaScript (res: IncomingMessage) {
   )
 }
 
-function isHtml (res: IncomingMessage) {
+function isNotJavascript (res: IncomingMessage) {
   return !resContentTypeIsJavaScript(res)
 }
 
@@ -545,7 +545,7 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
       domainName: cors.getDomainNameFromUrl(this.req.proxiedUrl),
       wantsInjection: this.res.wantsInjection,
       wantsSecurityRemoved: this.res.wantsSecurityRemoved,
-      isHtml: isHtml(this.incomingRes),
+      isNotJavascript: isNotJavascript(this.incomingRes),
       useAstSourceRewriting: this.config.experimentalSourceRewriting,
       modifyObstructiveThirdPartyCode: this.config.experimentalModifyObstructiveThirdPartyCode && !this.remoteStates.isPrimarySuperDomainOrigin(this.req.proxiedUrl),
       modifyObstructiveCode: this.config.modifyObstructiveCode,
@@ -576,7 +576,7 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
 
   this.incomingResStream.setEncoding('utf8')
   this.incomingResStream = this.incomingResStream.pipe(rewriter.security({
-    isHtml: isHtml(this.incomingRes),
+    isNotJavascript: isNotJavascript(this.incomingRes),
     useAstSourceRewriting: this.config.experimentalSourceRewriting,
     modifyObstructiveThirdPartyCode: this.config.experimentalModifyObstructiveThirdPartyCode && !this.remoteStates.isPrimarySuperDomainOrigin(this.req.proxiedUrl),
     modifyObstructiveCode: this.config.modifyObstructiveCode,
