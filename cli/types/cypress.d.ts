@@ -1672,66 +1672,6 @@ declare namespace Cypress {
     root<E extends Node = HTMLHtmlElement>(options?: Partial<Loggable>): Chainable<JQuery<E>> // can't do better typing unless we ignore the `.within()` case
 
     /**
-     * @deprecated Use `cy.intercept()` instead.
-     *
-     * Use `cy.route()` to manage the behavior of network requests.
-     * @see https://on.cypress.io/route
-     * @example
-     *    cy.server()
-     *    cy.route('https://localhost:7777/users', [{id: 1, name: 'Pat'}])
-     */
-    route(url: string | RegExp, response?: string | object): Chainable<null>
-    /**
-     * @deprecated Use `cy.intercept()` instead.
-     *
-     * Spy or stub request with specific method and url.
-     *
-     * @see https://on.cypress.io/route
-     * @example
-     *    cy.server()
-     *    // spy on POST /todos requests
-     *    cy.route('POST', '/todos').as('add-todo')
-     */
-    route(method: string, url: string | RegExp, response?: string | object): Chainable<null>
-    /**
-     * @deprecated Use `cy.intercept()` instead.
-     *
-     * Set a route by returning an object literal from a callback function.
-     * Functions that return a Promise will automatically be awaited.
-     *
-     * @see https://on.cypress.io/route
-     * @example
-     *    cy.server()
-     *    cy.route(() => {
-     *      // your logic here
-     *      // return an appropriate routing object here
-     *      return {
-     *        method: 'POST',
-     *        url: '/comments',
-     *        response: this.commentsFixture
-     *      }
-     *    })
-     */
-    route(fn: () => RouteOptions): Chainable<null>
-    /**
-     * @deprecated Use `cy.intercept()` instead.
-     *
-     * Spy or stub a given route.
-     *
-     * @see https://on.cypress.io/route
-     * @example
-     *    cy.server()
-     *    cy.route({
-     *      method: 'DELETE',
-     *      url: '/users',
-     *      status: 412,
-     *      delay: 1000
-     *      // and other options, see documentation
-     *    })
-     */
-    route(options: Partial<RouteOptions>): Chainable<null>
-
-    /**
      * Take a screenshot of the application under test and the Cypress Command Log.
      *
      * @see https://on.cypress.io/screenshot
@@ -1775,26 +1715,6 @@ declare namespace Cypress {
      * @see https://on.cypress.io/select
      */
     select(valueOrTextOrIndex: string | number | Array<string | number>, options?: Partial<SelectOptions>): Chainable<Subject>
-
-    /**
-     * @deprecated Use `cy.intercept()` instead.
-     *
-     * Start a server to begin routing responses to `cy.route()` and `cy.request()`.
-     *
-     * @example
-     *    // start server
-     *    cy.server()
-     *    // get default server options
-     *    cy.server().should((server) => {
-     *      expect(server.delay).to.eq(0)
-     *      expect(server.method).to.eq('GET')
-     *      expect(server.status).to.eq(200)
-     *      // and many others options
-     *    })
-     *
-     * @see https://on.cypress.io/server
-     */
-    server(options?: Partial<ServerOptions>): Chainable<ServerOptions>
 
     /**
      * Set a browser cookie.

@@ -7,8 +7,7 @@ describe('xhrs', () => {
       }
     }
 
-    cy.server()
-    cy.route(/api/, getResp()).as('getApi')
+    cy.intercept(/api/, getResp()).as('getApi')
     cy.visit('/index.html')
     cy.window().then((win) => {
       const xhr = new win.XMLHttpRequest
@@ -93,15 +92,14 @@ describe('xhrs', () => {
   })
 
   it('works prior to visit', () => {
-    cy.server()
+    cy.intercept()
   })
 
   // https://github.com/cypress-io/cypress/issues/5431
   it('can stub a 100kb response', (done) => {
     const body = 'X'.repeat(100 * 1024)
 
-    cy.server()
-    cy.route({
+    cy.intercept({
       method: 'POST',
       url: '/foo',
       response: {
@@ -131,8 +129,7 @@ describe('xhrs', () => {
   describe('server with 1 visit', () => {
     beforeEach(() => {
       cy.visit('/xhr.html')
-      cy.server()
-      cy.route(/users/, [{}, {}]).as('getUsers')
+      cy.intercept(/users/, [{}, {}]).as('getUsers')
     })
 
     it('response body', () => {
@@ -145,7 +142,7 @@ describe('xhrs', () => {
     })
 
     it('request body', () => {
-      cy.route('POST', /users/, { name: 'b' }).as('createUser')
+      cy.intercept('POST', /users/, { name: 'b' }).as('createUser')
       cy.get('#create').click()
       cy.wait('@createUser').its('requestBody')
       .should('deep.eq', { some: 'data' })
@@ -154,7 +151,7 @@ describe('xhrs', () => {
     it('aborts', () => {
       cy.window()
       .then((win) => {
-        cy.route({
+        cy.intercept({
           method: 'POST',
           url: /users/,
           response: { name: 'b' },

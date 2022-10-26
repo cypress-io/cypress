@@ -1420,46 +1420,6 @@ export default {
     },
   },
 
-  route: {
-    deprecated: {
-      message: `${cmd('route')} has been deprecated and will be moved to a plugin in a future release. Consider migrating to using ${cmd('intercept')} instead.`,
-      docsUrl: 'https://on.cypress.io/intercept',
-    },
-    failed_prerequisites: {
-      message: `${cmd('route')} cannot be invoked before starting the ${cmd('server')}`,
-      docsUrl: 'https://on.cypress.io/server',
-    },
-    invalid_arguments: {
-      message: `${cmd('route')} was not provided any arguments. You must provide valid arguments.`,
-      docsUrl: 'https://on.cypress.io/route',
-    },
-    method_invalid: {
-      message: `${cmd('route')} was called with an invalid method: \`{{method}}\`. Method can be: \`GET\`, \`POST\`, \`PUT\`, \`DELETE\`, \`PATCH\`, \`HEAD\`, \`OPTIONS\`, or any other method supported by Node's HTTP parser.`,
-      docsUrl: 'https://on.cypress.io/route',
-    },
-    response_invalid: {
-      message: `${cmd('route')} cannot accept an \`undefined\` or \`null\` response. It must be set to something, even an empty string will work.`,
-      docsUrl: 'https://on.cypress.io/route',
-    },
-    url_invalid: {
-      message: `${cmd('route')} was called with an invalid \`url\`. \`url\` must be either a string or regular expression.`,
-      docsUrl: 'https://on.cypress.io/route',
-    },
-    url_missing: {
-      message: `${cmd('route')} must be called with a \`url\`. It can be a string or regular expression.`,
-      docsUrl: 'https://on.cypress.io/route',
-    },
-    url_percentencoding_warning ({ decodedUrl }) {
-      return {
-        message: stripIndent`\
-          A \`url\` with percent-encoded characters was passed to ${cmd('route')}, but ${cmd('route')} expects a decoded \`url\`.
-
-          Did you mean to pass "${decodedUrl}"?`,
-        docsUrl: 'https://on.cypress.io/route',
-      }
-    },
-  },
-
   scrollIntoView: {
     invalid_argument: {
       message: `${cmd('scrollIntoView')} can only be called with an \`options\` object. Your argument was: \`{{arg}}\``,
@@ -1651,20 +1611,6 @@ export default {
       message: '`Cypress.SelectorPlayground.defaults()` called with invalid `onElement` property. It must be a function. You passed: `{{arg}}`',
       docsUrl: 'https://on.cypress.io/selector-playground-api',
     },
-  },
-
-  server: {
-    deprecated: {
-      message: `${cmd('server')} has been deprecated and will be moved to a plugin in a future release. Consider migrating to using ${cmd('intercept')} instead.`,
-      docsUrl: 'https://on.cypress.io/intercept',
-    },
-    invalid_argument: {
-      message: `${cmd('server')} accepts only an object literal as its argument.`,
-      docsUrl: 'https://on.cypress.io/server',
-    },
-    xhrurl_not_set: '`Server.options.xhrUrl` has not been set',
-    unavailable: 'The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message.',
-    whitelist_renamed: `The ${cmd('server')} \`whitelist\` option has been renamed to \`ignore\`. Please rename \`whitelist\` to \`ignore\`.`,
   },
 
   sessions: {

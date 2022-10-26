@@ -5,10 +5,8 @@ import type Bluebird from 'bluebird'
 
 import type { RouteMap } from '../cy/net-stubbing/types'
 import type { $Command } from './command'
-import type { XHRRequest, XHRResponse } from '../cy/commands/xhr'
 import type { KeyboardModifiers } from '../cy/keyboard'
 import type { MouseCoords } from '../cy/mouse'
-import type { Server } from './server'
 import type { LocationObject } from './location'
 
 export interface StateFunc {
@@ -37,14 +35,11 @@ export interface StateFunc {
   (k: 'error', v?: Error): Error
   (k: 'assertUsed', v?: boolean): boolean
   (k: 'currentAssertionUserInvocationStack', v?: string): string
-  (k: 'responses', v?: XHRResponse[]): XHRResponse[]
   (k: 'aliases', v?: Record<string, any>): Record<string, any>
   (k: 'onBeforeLog', v?: (() => boolean) | null): () => boolean | null
   (k: 'keyboardModifiers', v?: KeyboardModifiers): KeyboardModifiers
   (k: 'mouseLastHoveredEl', v?: HTMLElement | null): HTMLElement | null
   (k: 'mouseCoords', v?: MouseCoords): MouseCoords
-  (k: 'server', v?: Server): Server
-  (k: 'requests', v?: XHRRequest[]): XHRRequest[]
   (k: 'fetchPolyfilled', v?: boolean): boolean
   (k: 'nestedIndex', v?: number): number
   (k: 'chainerId', v?: string): string

@@ -52,8 +52,6 @@ import * as Waiting from './waiting'
 
 import Window from './window'
 
-import * as Xhr from './xhr'
-
 export const allCommands = {
   ...Actions,
   Agents,
@@ -82,5 +80,4 @@ export const allCommands = {
   Traversals,
   Waiting,
   Window,
-  Xhr,
 }

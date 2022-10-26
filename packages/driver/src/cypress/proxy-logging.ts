@@ -283,7 +283,7 @@ export default class ProxyLogging {
   }
 
   /**
-   * The `cy.route()` XHR stub functions will log before a proxy log is received, so this queues an XHR log to be overridden by a proxy log later.
+   * The `cy.intercept()` XHR stub functions will log before a proxy log is received, so this queues an XHR log to be overridden by a proxy log later.
    */
   addXhrLog (xhrLog: UnmatchedXhrLog) {
     this.unmatchedXhrLogs.push(xhrLog)

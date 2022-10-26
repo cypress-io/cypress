@@ -75,7 +75,7 @@ interface BackendError {
 
 export default (Commands, Cypress, cy, state, config) => {
   Commands.addAll({
-    // allow our signature to be similar to cy.route
+    // allow our signature to be similar to cy.intercept
     // METHOD / URL / BODY
     // or object literal with all expanded options
     request (...args) {
