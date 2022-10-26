@@ -1244,7 +1244,7 @@ describe('src/cy/commands/cookies', () => {
   context('Cypress.Cookies.defaults', () => {
     it('throws error on use of Cookies.defaults()', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.equal('`Cypress.Cookies.defaults()` was removed in Cypress version 11.0.0. Please update to use `cy.session()` instead.')
+        expect(err.message).to.equal('`Cypress.Cookies.defaults()` was removed in Cypress version 12.0.0. Please update to use `cy.session()` instead.')
         expect(err.docsUrl).to.equal('https://on.cypress.io/session')
 
         done()
@@ -1257,7 +1257,7 @@ describe('src/cy/commands/cookies', () => {
   context('Cypress.Cookies.preserveOnce', () => {
     it('throws error on use of Cookies.preserveOnce', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.equal('`Cypress.Cookies.preserveOnce()` was removed in Cypress version 11.0.0. Please update to use `cy.session()` instead.')
+        expect(err.message).to.equal('`Cypress.Cookies.preserveOnce()` was removed in Cypress version 12.0.0. Please update to use `cy.session()` instead.')
         expect(err.docsUrl).to.equal('https://on.cypress.io/session')
 
         done()

@@ -18,7 +18,7 @@ describe('xhrs', () => {
     })
 
     cy.wait('@getApi')
-    .its('url').should('include', 'api/v1')
+    .its('request.url').should('include', 'api/v1')
   })
 
   it('ensures that request headers + body go out and reach the server unscathed', () => {
@@ -92,19 +92,15 @@ describe('xhrs', () => {
   })
 
   it('works prior to visit', () => {
-    cy.intercept()
+    cy.intercept('/foo')
   })
 
   // https://github.com/cypress-io/cypress/issues/5431
   it('can stub a 100kb response', (done) => {
     const body = 'X'.repeat(100 * 1024)
 
-    cy.intercept({
-      method: 'POST',
-      url: '/foo',
-      response: {
-        'bar': body,
-      },
+    cy.intercept('POST', '/foo', {
+      'bar': body,
     })
 
     cy.visit('/index.html')
@@ -116,7 +112,7 @@ describe('xhrs', () => {
 
       const finish = function () {
         expect(xhr.status).to.eq(200)
-        expect(xhr.responseText).to.include(body)
+        expect(xhr.response.text).to.include(body)
 
         return done()
       }
@@ -135,9 +131,9 @@ describe('xhrs', () => {
     it('response body', () => {
       cy.get('#fetch').click()
       cy.wait('@getUsers').then((xhr) => {
-        expect(xhr.url).to.include('/users')
+        expect(xhr.request.url).to.include('/users')
 
-        expect(xhr.responseBody).to.deep.eq([{}, {}])
+        expect(xhr.response.body).to.deep.eq([{}, {}])
       })
     })
 
@@ -151,10 +147,8 @@ describe('xhrs', () => {
     it('aborts', () => {
       cy.window()
       .then((win) => {
-        cy.intercept({
-          method: 'POST',
-          url: /users/,
-          response: { name: 'b' },
+        cy.intercept('POST', /users/, {
+          body: { name: 'b' },
           delay: 2000,
         }).as('createUser')
 

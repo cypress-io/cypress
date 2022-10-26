@@ -24,6 +24,7 @@ import { create as createMouse } from './cy/mouse'
 import $Runner from './cypress/runner'
 import $Screenshot from './cypress/screenshot'
 import $SelectorPlayground from './cypress/selector_playground'
+import $Server from './cypress/server'
 import $SetterGetter from './cypress/setter_getter'
 import { validateConfig } from './util/config'
 import $utils from './cypress/utils'
@@ -138,6 +139,7 @@ class $Cypress {
   }
 
   Runner = $Runner
+  Server = $Server
   Screenshot = $Screenshot
   SelectorPlayground = $SelectorPlayground
   utils = $utils

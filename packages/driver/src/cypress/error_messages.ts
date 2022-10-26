@@ -299,7 +299,7 @@ export default {
     },
     removed (obj) {
       return {
-        message: `${cmd(obj.cmd)} was removed in Cypress version 11.0.0. Please update to use ${cmd('session')} instead.`,
+        message: `${cmd(obj.cmd)} was removed in Cypress version 12.0.0. Please update to use ${cmd('session')} instead.`,
         docsUrl: 'https://on.cypress.io/session',
       }
     },
@@ -1187,18 +1187,6 @@ export default {
       ${cmd('origin')} could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.`,
     },
     unsupported: {
-      route: {
-        message: `${cmd('route')} has been deprecated and its use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
-        docsUrl: 'https://on.cypress.io/intercept',
-      },
-      server: {
-        message: `${cmd('server')} has been deprecated and its use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
-        docsUrl: 'https://on.cypress.io/intercept',
-      },
-      Server: {
-        message: `\`Cypress.Server.*\` has been deprecated and its use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
-        docsUrl: 'https://on.cypress.io/intercept',
-      },
       origin: {
         message: `${cmd('origin')} use is not currently supported in the ${cmd('origin')} callback, but is planned for a future release. Please 👍 the following issue and leave a comment with your use-case:`,
         docsUrl: 'https://on.cypress.io/github-issue/20718',
@@ -1420,6 +1408,15 @@ export default {
     },
   },
 
+  route: {
+    removed (obj) {
+      return {
+        message: `${cmd(obj.cmd)} was removed in Cypress version 12.0.0. Please update to use ${cmd('intercept')} instead.`,
+        docsUrl: 'https://on.cypress.io/intercept',
+      }
+    },
+  },
+
   scrollIntoView: {
     invalid_argument: {
       message: `${cmd('scrollIntoView')} can only be called with an \`options\` object. Your argument was: \`{{arg}}\``,
@@ -1610,6 +1607,15 @@ export default {
     defaults_invalid_on_element: {
       message: '`Cypress.SelectorPlayground.defaults()` called with invalid `onElement` property. It must be a function. You passed: `{{arg}}`',
       docsUrl: 'https://on.cypress.io/selector-playground-api',
+    },
+  },
+
+  server: {
+    removed (obj) {
+      return {
+        message: `${cmd(obj.cmd)} was removed in Cypress version 12.0.0. Please update to use ${cmd('intercept')} instead.`,
+        docsUrl: 'https://on.cypress.io/intercept',
+      }
     },
   },
 

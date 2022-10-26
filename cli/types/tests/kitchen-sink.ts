@@ -25,11 +25,6 @@ cy.visit('https://www.acme.com/', {
   }
 })
 
-const serverOptions: Partial<Cypress.ServerOptions> = {
-  delay: 100,
-  ignore: () => true
-}
-
 Cypress.spec.name // $ExpectType string
 Cypress.spec.relative // $ExpectType string
 Cypress.spec.absolute // $ExpectType string
