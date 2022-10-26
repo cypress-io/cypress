@@ -29,6 +29,8 @@ packlist({ path: currentPackageDir })
   const exportName = currentPackageConfig.name.replace('@cypress/', '')
   const outDir = path.join(cliPath, exportName)
 
+  fs.removeSync(outDir)
+
   // 3. For each file, mkdir if not exists, and then copy the dist'd assets over
   // to write to the `cliPackageConfig` at the end
   files.forEach((f) => {
