@@ -70,7 +70,7 @@ const checkOrUncheck = (Cypress, cy, type, subject, values: any[] = [], userOpti
       })
     }
 
-    if(!elHasMatchingValue($el)) {
+    if (!elHasMatchingValue($el)) {
       return
     }
 
@@ -129,6 +129,7 @@ const checkOrUncheck = (Cypress, cy, type, subject, values: any[] = [], userOpti
       }
 
       matchingElements.push($el[0])
+
       return null
     }
 
@@ -136,7 +137,7 @@ const checkOrUncheck = (Cypress, cy, type, subject, values: any[] = [], userOpti
     // el's value is in the array then check it
     return cy.now('click', $el, {
       $el,
-      subjectFn: () =>  cy.getSubjectFromChain(subjectChain).eq(index),
+      subjectFn: () => cy.getSubjectFromChain(subjectChain).eq(index),
       log: false,
       verify: false,
       _log: options._log,
