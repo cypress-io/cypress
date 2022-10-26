@@ -37,10 +37,22 @@ context('cy.origin misc', { browser: '!webkit' }, () => {
   })
 
   it('.pause()', () => {
+    // ensures the 'paused' event makes it to the event-manager in the primary.
+    // if we get cross-origin cy-in-cy test working, we could potentially make
+    // this even more end-to-end: test out the reporter UI and click the
+    // resume buttons instead of sending the resume:all event
+    Cypress.primaryOriginCommunicator.once('paused', ({ nextCommandName, origin }) => {
+      expect(nextCommandName).to.equal('wrap')
+      expect(origin).to.equal('http://www.foobar.com:3500')
+
+      Cypress.primaryOriginCommunicator.toSpecBridge(origin, 'resume:all')
+    })
+
     cy.origin('http://www.foobar.com:3500', () => {
       const afterPaused = new Promise<void>((resolve) => {
-        cy.once('paused', () => {
-          Cypress.emit('resume:all')
+        // event is sent from the event listener in the primary above,
+        // ensuring that the pause sequence has come full circle
+        cy.once('resume:all', () => {
           resolve()
         })
       })
