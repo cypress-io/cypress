@@ -231,6 +231,8 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
       const e = log.get('_error')
 
       if (e) {
+        log.set('_error', undefined)
+
         return log.error(e)
       }
 

@@ -127,7 +127,7 @@ describe('runner/cypress sessions.ui.spec', {
       .contains('runValidation')
     })
 
-    cy.contains('CypressError')
+    cy.contains('AssertionError')
 
     // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
   })
@@ -272,7 +272,6 @@ describe('runner/cypress sessions.ui.spec', {
     cy.get('.test').each(($el) => cy.wrap($el).click())
 
     cy.log('validate new session was created in first test')
-    cy.get('.test').eq(0).within(() => {
       validateSessionsInstrumentPanel(['user1'])
 
       cy.get('.command-name-session').contains('created')
