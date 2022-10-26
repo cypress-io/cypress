@@ -611,6 +611,21 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         expect(err.code).to.eq('EPERM')
       })
     })
+
+    it('bubbles up Settings.read EROFS error', function () {
+      const err = new Error()
+
+      err.code = 'EROFS'
+
+      sinon.stub(settings, 'read').rejects(err)
+
+      return this.project.getProjectId()
+      .then((id) => {
+        throw new Error('expected to fail, but did not')
+      }).catch((err) => {
+        expect(err.code).to.eq('EROFS')
+      })
+    })
   })
 })
 
