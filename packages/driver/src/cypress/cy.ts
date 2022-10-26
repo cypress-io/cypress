@@ -245,7 +245,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.reset = this.reset.bind(this)
     this.addCommandSync = this.addCommandSync.bind(this)
     this.addCommand = this.addCommand.bind(this)
-    this._addQuery = this._addQuery.bind(this)
+    this.addQuery = this.addQuery.bind(this)
     this.now = this.now.bind(this)
     this.onBeforeAppWindowLoad = this.onBeforeAppWindowLoad.bind(this)
     this.onUncaughtException = this.onUncaughtException.bind(this)
@@ -810,7 +810,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     }
   }
 
-  _addQuery ({ name, fn }) {
+  addQuery ({ name, fn }) {
     const cy = this
 
     this.queryFns[name] = fn
@@ -1297,7 +1297,11 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
    * ['foobar', f()]
    * [undefined, f(), f()]
    */
-  getSubjectFromChain (subjectChain: SubjectChain = []) {
+  getSubjectFromChain (subjectChain: SubjectChain | null | undefined) {
+    if (!subjectChain) {
+      return
+    }
+
     // If we're getting the subject of a previous command, then any log messages have already
     // been added to the command log; We don't want to re-add them every time we query
     // the current subject.

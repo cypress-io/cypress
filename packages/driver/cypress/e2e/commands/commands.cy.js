@@ -90,13 +90,13 @@ describe('src/cy/commands/commands', () => {
 
     it('throws when attempting to add an existing query', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.eq('`Cypress.Commands._addQuery()` is used to create new queries, but `get` is an existing Cypress command or query, or is reserved internally by Cypress.\n\n If you want to override an existing command or query, use `Cypress.Commands.overrideQuery()` instead.')
+        expect(err.message).to.eq('`Cypress.Commands.addQuery()` is used to create new queries, but `get` is an existing Cypress command or query, or is reserved internally by Cypress.\n\n If you want to override an existing command or query, use `Cypress.Commands.overrideQuery()` instead.')
         expect(err.docsUrl).to.eq('https://on.cypress.io/custom-commands')
 
         done()
       })
 
-      Cypress.Commands._addQuery('get', () => {
+      Cypress.Commands.addQuery('get', () => {
         cy
         .get('[contenteditable]')
         .first()
@@ -138,13 +138,13 @@ describe('src/cy/commands/commands', () => {
 
     it('throws when attempting to add a query with the same name as an internal function', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.eq('`Cypress.Commands._addQuery()` cannot create a new query named `addCommand` because that name is reserved internally by Cypress.')
+        expect(err.message).to.eq('`Cypress.Commands.addQuery()` cannot create a new query named `addCommand` because that name is reserved internally by Cypress.')
         expect(err.docsUrl).to.eq('https://on.cypress.io/custom-commands')
 
         done()
       })
 
-      Cypress.Commands._addQuery('addCommand', () => {
+      Cypress.Commands.addQuery('addCommand', () => {
         cy
         .get('[contenteditable]')
         .first()

@@ -2155,7 +2155,7 @@ describe('src/cy/commands/actions/click', () => {
       // The error message tells the user exactly how to fix this case.
       it('throws when subject is detached during actionability', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.click()` failed because the DOM updated while this command was executing.')
+          expect(err.message).to.include('`cy.click()` failed because the page updated while this command was executing.')
           expect(err.message).to.include('You can typically solve this by breaking up a chain.')
 
           done()
@@ -2163,9 +2163,7 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.get('input:first')
         .then(($el) => {
-          cy.on('scrolled', () => {
-            $el.remove()
-          })
+          cy.on('scrolled', () => $el.remove())
         })
         .click()
       })
@@ -3280,26 +3278,6 @@ describe('src/cy/commands/actions/click', () => {
         cy.dblclick()
       })
 
-      it('throws when subject is not in the document', (done) => {
-        let dblclicked = 0
-
-        const $button = cy.$$('button:first').dblclick(() => {
-          dblclicked += 1
-          $button.remove()
-
-          return false
-        })
-
-        cy.on('fail', (err) => {
-          expect(dblclicked).to.eq(1)
-          expect(err.message).to.include('`cy.dblclick()` failed because the DOM updated as a result of this command')
-
-          done()
-        })
-
-        cy.get('button:first').dblclick().dblclick()
-      })
-
       it('logs once when not dom subject', function (done) {
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -3717,26 +3695,6 @@ describe('src/cy/commands/actions/click', () => {
         })
 
         cy.rightclick()
-      })
-
-      it('throws when subject is not in the document', (done) => {
-        let rightclicked = 0
-
-        const $button = cy.$$('button:first').on('contextmenu', () => {
-          rightclicked += 1
-          $button.remove()
-
-          return false
-        })
-
-        cy.on('fail', (err) => {
-          expect(rightclicked).to.eq(1)
-          expect(err.message).to.include('`cy.rightclick()` failed because the DOM updated as a result of this command')
-
-          done()
-        })
-
-        cy.get('button:first').rightclick().rightclick()
       })
 
       it('logs once when not dom subject', function (done) {

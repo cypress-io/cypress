@@ -251,6 +251,7 @@ export default (Commands, Cypress, cy, state) => {
       let isWin
 
       const options: InternalScrollToOptions = _.defaults({}, userOptions, {
+        $el: subject,
         log: true,
         duration: 0,
         easing: 'swing',
@@ -363,7 +364,7 @@ export default (Commands, Cypress, cy, state) => {
             $errUtils.throwErrByPath('scrollTo.multiple_containers', { args: { num: options.$el.length } })
           }
 
-          options._log.set('$el', options.$el)
+          options._log?.set('$el', options.$el)
 
           // Some elements are not scrollable, user may opt out of error checking
           // https://github.com/cypress-io/cypress/issues/1924

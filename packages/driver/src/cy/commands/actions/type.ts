@@ -511,7 +511,7 @@ export default function (Commands, Cypress, cy, state, config) {
       }
 
       return $actionability.verify(cy, options.$el, config, options, {
-        subjectFn: () =>  cy.getSubjectFromChain(subjectChain),
+        subjectFn: () => cy.getSubjectFromChain(subjectChain),
 
         onScroll ($el, type) {
           return Cypress.action('cy:scrolled', $el, type)
@@ -583,7 +583,6 @@ export default function (Commands, Cypress, cy, state, config) {
 
         const verifyAssertions = () => {
           return cy.verifyUpcomingAssertions(options.$el, options, {
-            subjectFn: () => cy.getSubjectFromChain(subjectChain),
             onRetry: verifyAssertions,
           })
         }

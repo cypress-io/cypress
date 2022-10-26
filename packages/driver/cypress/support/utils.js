@@ -139,7 +139,7 @@ export const expectCaret = (start, end) => {
   }
 }
 
-Cypress.Commands._addQuery('getAll', getAllFn)
+Cypress.Commands.addQuery('getAll', getAllFn)
 
 Cypress.Commands.add('shouldWithTimeout', shouldWithTimeout)
 

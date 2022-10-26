@@ -155,7 +155,7 @@ function getAlias (selector, log, cy) {
 }
 
 export default (Commands, Cypress, cy, state) => {
-  Commands._addQuery('get', function get (selector, userOptions: GetOptions = {}) {
+  Commands.addQuery('get', function get (selector, userOptions: GetOptions = {}) {
     if ((userOptions === null) || _.isArray(userOptions) || !_.isPlainObject(userOptions)) {
       $errUtils.throwErrByPath('get.invalid_options', {
         args: { options: userOptions },
@@ -236,7 +236,7 @@ export default (Commands, Cypress, cy, state) => {
     }
   })
 
-  Commands._addQuery('contains', function contains (filter, text, userOptions: ContainsOptions = {}) {
+  Commands.addQuery('contains', function contains (filter, text, userOptions: ContainsOptions = {}) {
     if (_.isRegExp(text)) {
       // .contains(filter, text)
       // Do nothing
@@ -367,7 +367,7 @@ export default (Commands, Cypress, cy, state) => {
     }
   })
 
-  Commands._addQuery('shadow', function contains (userOptions: ShadowOptions = {}) {
+  Commands.addQuery('shadow', function contains (userOptions: ShadowOptions = {}) {
     const log = userOptions.log !== false && Cypress.log({
       timeout: userOptions.timeout,
       consoleProps: () => ({}),

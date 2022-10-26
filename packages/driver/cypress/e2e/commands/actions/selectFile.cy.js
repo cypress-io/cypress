@@ -628,23 +628,30 @@ is being covered by another element:
         })
       })
 
-      it('waits until input stops animating', {
-        defaultCommandTimeout: 1000,
-      }, () => {
-        let retries = 0
+      it('retries until label is not disabled', () => {
+        cy.on('command:retry', () => {
+          // Replace the label with a copy of itself, to ensure selectFile is requerying the DOM
+          const hidden = cy.$$('#hidden-basic-label')
 
-        cy.on('command:retry', (obj) => {
-          retries += 1
+          hidden.replaceWith(hidden[0].outerHTML)
+
+          cy.$$('#hidden-basic-label').show()
         })
 
-        cy.stub(cy, 'ensureElementIsNotAnimating')
-        .throws(new Error('animating!'))
-        .onThirdCall().returns()
+        cy.get('#hidden-basic-label').selectFile({ contents: '@foo' }, { timeout: 1000 })
+      })
 
-        cy.get('#basic').selectFile({ contents: '@foo' }).then(() => {
-          expect(retries).to.eq(3)
-          expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
+      it('retries until input is not disabled', () => {
+        cy.on('command:retry', () => {
+          // Replace the input with a copy of itself, to ensure selectFile is requerying the DOM
+          const disabled = cy.$$('#disabled')
+
+          disabled.replaceWith(disabled[0].outerHTML)
+
+          cy.$$('#disabled').attr('disabled', false)
         })
+
+        cy.get('#disabled-label').selectFile({ contents: '@foo' })
       })
 
       // TODO(webkit): fix+unskip for experimental webkit

@@ -2,7 +2,7 @@ import _ from 'lodash'
 import $dom from '../../dom'
 
 export default function (Commands, Cypress, cy) {
-  Commands._addQuery('as', function asFn (alias) {
+  Commands.addQuery('as', function asFn (alias) {
     cy.ensureChildCommand(this, [alias])
     cy.validateAlias(alias)
 
@@ -35,7 +35,7 @@ export default function (Commands, Cypress, cy) {
       const log: any = _.last(cy.queue.logs({
         instrument: 'command',
         event: false,
-        chainerId,
+        chainerId: this.get('chainerId'),
       }))
 
       const alreadyAliasedLog = _.map(prevCommand.get('logs'), 'attributes.alias').find((a) => a === alias)

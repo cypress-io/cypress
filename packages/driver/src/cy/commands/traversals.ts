@@ -79,7 +79,7 @@ export default (Commands, Cypress, cy) => {
   }
 
   _.each(traversals, (traversal) => {
-    Commands._addQuery(traversal, function traversalFn (arg1, arg2, userOptions: TraversalOptions = {}) {
+    Commands.addQuery(traversal, function traversalFn (arg1, arg2, userOptions: TraversalOptions = {}) {
       if (_.isObject(arg1) && !_.isFunction(arg1)) {
         userOptions = arg1
       }

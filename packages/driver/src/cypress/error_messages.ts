@@ -143,28 +143,6 @@ export default {
     },
   },
 
-  selectFile: {
-    docsUrl: 'https://on.cypress.io/selectfile',
-    invalid_action: {
-      message: `${cmd('selectFile')} \`action\` can only be \`select\` or \`drag-drop\`. You passed: \`{{action}}\`.`,
-    },
-    invalid_array_file_reference: {
-      message: `${cmd('selectFile')} must be passed an array of Buffers or objects with non-null \`contents\`. At files[{{index}}] you passed: \`{{file}}\`.`,
-    },
-    invalid_single_file_reference: {
-      message: `${cmd('selectFile')} must be passed a Buffer or an object with a non-null \`contents\` property as its 1st argument. You passed: \`{{file}}\`.`,
-    },
-    multiple_elements: {
-      message: `${cmd('selectFile')} can only be called on a single element. Your subject contained {{num}} elements.`,
-    },
-    not_file_input: {
-      message: `${cmd('selectFile')} can only be called on an \`<input type="file">\` or a \`<label for="fileInput">\` pointing to or containing one. Your subject is: \`{{node}}\`.`,
-    },
-    invalid_alias: {
-      message: `${cmd('selectFile')} can only attach strings, Buffers or objects, while your alias \`{{alias}}\` resolved to: \`{{subject}}\`.`,
-    },
-  },
-
   blur: {
     docsUrl: 'https://on.cypress.io/blur',
     multiple_elements: {
@@ -873,11 +851,11 @@ export default {
       docsUrl: 'https://on.cypress.io/custom-commands',
     },
     invalid_new_query: {
-      message: '`Cypress.Commands._addQuery()` is used to create new queries, but `{{name}}` is an existing Cypress command or query, or is reserved internally by Cypress.\n\n If you want to override an existing command or query, use `Cypress.Commands.overrideQuery()` instead.',
+      message: '`Cypress.Commands.addQuery()` is used to create new queries, but `{{name}}` is an existing Cypress command or query, or is reserved internally by Cypress.\n\n If you want to override an existing command or query, use `Cypress.Commands.overrideQuery()` instead.',
       docsUrl: 'https://on.cypress.io/custom-commands',
     },
     reserved_command_query: {
-      message: '`Cypress.Commands._addQuery()` cannot create a new query named `{{name}}` because that name is reserved internally by Cypress.',
+      message: '`Cypress.Commands.addQuery()` cannot create a new query named `{{name}}` because that name is reserved internally by Cypress.',
       docsUrl: 'https://on.cypress.io/custom-commands',
     },
     invalid_overwrite: {
@@ -885,7 +863,7 @@ export default {
       docsUrl: 'https://on.cypress.io/api',
     },
     invalid_overwrite_query_with_command: {
-      message: 'Cannot overwite the `{{name}}` query with a command. Use `Commands._overwriteQuery()` instead.',
+      message: 'Cannot overwite the `{{name}}` query with a command. Use `Commands.overwriteQuery()` instead.',
       docsUrl: 'https://on.cypress.io/api',
     },
     invoking_child_without_parent (obj) {
@@ -1618,10 +1596,6 @@ export default {
       message: `${cmd('select')} must be passed an array containing only strings and/or numbers. You passed: \`{{value}}\`.`,
       docsUrl: 'https://on.cypress.io/select',
     },
-    disabled: {
-      message: `${cmd('select')} failed because this element is currently disabled:\n\n\`{{node}}\``,
-      docsUrl: 'https://on.cypress.io/select',
-    },
     invalid_element: {
       message: `${cmd('select')} can only be called on a \`<select>\`. Your subject is a: \`{{node}}\``,
       docsUrl: 'https://on.cypress.io/select',
@@ -1653,6 +1627,28 @@ export default {
     optgroup_disabled: {
       message: `${cmd('select')} failed because this \`<option>\` you are trying to select is within an \`<optgroup>\` that is currently disabled:\n\n\`{{node}}\``,
       docsUrl: 'https://on.cypress.io/select',
+    },
+  },
+
+  selectFile: {
+    docsUrl: 'https://on.cypress.io/selectfile',
+    invalid_action: {
+      message: `${cmd('selectFile')} \`action\` can only be \`select\` or \`drag-drop\`. You passed: \`{{action}}\`.`,
+    },
+    invalid_array_file_reference: {
+      message: `${cmd('selectFile')} must be passed an array of Buffers or objects with non-null \`contents\`. At files[{{index}}] you passed: \`{{file}}\`.`,
+    },
+    invalid_single_file_reference: {
+      message: `${cmd('selectFile')} must be passed a Buffer or an object with a non-null \`contents\` property as its 1st argument. You passed: \`{{file}}\`.`,
+    },
+    multiple_elements: {
+      message: `${cmd('selectFile')} can only be called on a single element. Your subject contained {{num}} elements.`,
+    },
+    not_file_input: {
+      message: `${cmd('selectFile')} can only be called on an \`<input type="file">\` or a \`<label for="fileInput">\` pointing to or containing one. Your subject is: \`{{node}}\`.`,
+    },
+    invalid_alias: {
+      message: `${cmd('selectFile')} can only attach strings, Buffers or objects, while your alias \`{{alias}}\` resolved to: \`{{subject}}\`.`,
     },
   },
 

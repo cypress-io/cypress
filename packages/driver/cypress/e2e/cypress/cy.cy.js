@@ -300,22 +300,6 @@ describe('driver/src/cypress/cy', () => {
         cy.c('bar')
       })
 
-      it('fails when previous subject becomes detached', (done) => {
-        cy.$$('#button').click(function () {
-          return $(this).remove()
-        })
-
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.parent()` failed because the DOM updated as a result of this command, but you tried to continue the command chain.')
-          expect(err.message).to.include('You can typically solve this by breaking up a chain.')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/element-has-detached-from-dom')
-
-          done()
-        })
-
-        cy.get('#button').click().parent({ timeout: 50 })
-      })
-
       it('fails when previous subject isnt window', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.winOnly()` failed because it requires the subject be a global `window` object.')
@@ -501,7 +485,7 @@ describe('driver/src/cypress/cy', () => {
         done()
       })
 
-      Cypress.Commands._overwriteQuery('aQuery', () => Promise.resolve())
+      Cypress.Commands.overwriteQuery('aQuery', () => Promise.resolve())
       cy.aQuery()
     })
 
@@ -511,7 +495,7 @@ describe('driver/src/cypress/cy', () => {
         done()
       })
 
-      Cypress.Commands._overwriteQuery('aQuery', () => 1)
+      Cypress.Commands.overwriteQuery('aQuery', () => 1)
       cy.aQuery()
     })
 
@@ -521,7 +505,7 @@ describe('driver/src/cypress/cy', () => {
         done()
       })
 
-      Cypress.Commands._overwriteQuery('aQuery', () => cy.visit('/'))
+      Cypress.Commands.overwriteQuery('aQuery', () => cy.visit('/'))
       cy.aQuery()
     })
 
@@ -537,13 +521,13 @@ describe('driver/src/cypress/cy', () => {
 
       cy.on('log:added', (attrs, log) => logs.push(log))
 
-      Cypress.Commands._overwriteQuery('aQuery', () => {
+      Cypress.Commands.overwriteQuery('aQuery', () => {
         cy.now('get', 'body')
 
         return cy.now('get', 'button')
       })
 
-      Cypress.Commands._overwriteQuery('bQuery', () => cy.now('aQuery'))
+      Cypress.Commands.overwriteQuery('bQuery', () => cy.now('aQuery'))
 
       cy.aQuery().should('have.length', 24)
       cy.then(() => {
@@ -552,7 +536,7 @@ describe('driver/src/cypress/cy', () => {
       })
     })
 
-    it("closes each log as the query completes", (done) => {
+    it('closes each log as the query completes', (done) => {
       let getLog
 
       cy.on('log:added', (attrs, log) => {

@@ -88,7 +88,7 @@ export default (Commands, Cypress, cy, state) => {
     })
   }
 
-  Commands._addQuery('title', function title (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+  Commands.addQuery('title', function title (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
     this.set('timeout', options.timeout)
     if (options.log !== false) {
       Cypress.log({ timeout: options.timeout })
@@ -97,7 +97,7 @@ export default (Commands, Cypress, cy, state) => {
     return () => (state('document')?.title || '')
   })
 
-  Commands._addQuery('window', function windowFn (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+  Commands.addQuery('window', function windowFn (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
     this.set('timeout', options.timeout)
     if (options.log !== false) {
       Cypress.log({ timeout: options.timeout })
@@ -114,7 +114,7 @@ export default (Commands, Cypress, cy, state) => {
     }
   })
 
-  Commands._addQuery('document', function documentFn (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+  Commands.addQuery('document', function documentFn (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
     this.set('timeout', options.timeout)
     if (options.log !== false) {
       Cypress.log({ timeout: options.timeout })

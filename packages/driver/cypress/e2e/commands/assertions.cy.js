@@ -646,28 +646,6 @@ describe('src/cy/commands/assertions', () => {
         cy.readFile('does-not-exist.json').should('exist')
       })
 
-      it('throws when the subject isnt in the DOM', function (done) {
-        cy.$$('button:first').click(function () {
-          $(this).addClass('foo').remove()
-        })
-
-        cy.on('fail', (err) => {
-          const names = _.invokeMap(this.logs, 'get', 'name')
-
-          // the 'should' is not here because based on
-          // when we check for the element to be detached
-          // it never actually runs the assertion
-          expect(names).to.deep.eq(['get', 'click'])
-          expect(err.message).to.include('`cy.should()` failed because this element is detached')
-
-          done()
-        })
-
-        cy.get('button:first').click().should('have.class', 'foo').then(() => {
-          done('cy.should was supposed to fail')
-        })
-      })
-
       it('throws when the subject eventually isnt in the DOM', function (done) {
         cy.timeout(200)
 
@@ -682,14 +660,12 @@ describe('src/cy/commands/assertions', () => {
 
           // should is present here due to the retry
           expect(names).to.deep.eq(['get', 'click', 'assert'])
-          expect(err.message).to.include('`cy.should()` failed because this element is detached')
+          expect(err.message).to.include('`cy.should()` failed because the page updated')
 
           done()
         })
 
-        cy.get('button:first').click().should('have.class', 'foo').then(() => {
-          done('cy.should was supposed to fail')
-        })
+        cy.get('button:first').click().should('have.class', 'foo')
       })
 
       it('throws when should(\'have.length\') isnt a number', function (done) {
@@ -1496,7 +1472,7 @@ describe('src/cy/commands/assertions', () => {
 
         it('fails not.visible for detached DOM', function (done) {
           cy.on('fail', (err) => {
-            expect(err.message).include('detached')
+            expect(err.message).include('`cy.should()` failed because the page updated')
             done()
           })
 

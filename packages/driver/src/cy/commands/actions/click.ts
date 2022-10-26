@@ -39,7 +39,7 @@ const formatMouseEvents = (events) => {
 // TODO: remove any, Function, Record
 type MouseActionOptions = {
   subject: any
-  subjectFn: () => any
+  subjectFn?: () => any
   positionOrX: string | number
   y: number
   userOptions: Record<string, any>
@@ -107,7 +107,7 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
     }
 
     const subjectChain = cy.subjectChain()
-    const clickedElements = []
+    const clickedElements: any[] = []
 
     const perform = (el, index) => {
       let deltaOptions

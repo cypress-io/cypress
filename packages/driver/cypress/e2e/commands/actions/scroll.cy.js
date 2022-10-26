@@ -334,7 +334,6 @@ describe('src/cy/commands/actions/scroll', () => {
           // Replacing the element with itself to ensure that .scrollTo() is requerying the DOM
           // as necessary
           $container.replaceWith($container[0].outerHTML)
-          $container.remove()
           $container = cy.$$('#nonscroll-becomes-scrollable')
 
           $container.css('overflow', 'scroll')

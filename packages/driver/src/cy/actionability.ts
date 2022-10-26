@@ -291,7 +291,7 @@ const ensureNotAnimating = function (cy, $el, coordsHistory, animationDistanceTh
 }
 
 interface VerifyCallbacks {
-  onReady?: ($el: any, coords: ElementPositioning) => any
+  onReady?: (finalEl: any, coords: ElementPositioning, $el: any) => any
   onScroll?: ($el: any, type: 'element' | 'window' | 'container') => any
   subjectFn?: () => any
 }
