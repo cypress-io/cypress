@@ -269,9 +269,8 @@ describe('runner/cypress sessions.ui.spec', {
       failCount: 1,
     })
 
-    cy.get('.test').each(($el) => cy.wrap($el).click())
-
     cy.log('validate new session was created in first test')
+    cy.get('.test').eq(0).click().within(() => {
       validateSessionsInstrumentPanel(['user1'])
 
       cy.get('.command-name-session').contains('created')
