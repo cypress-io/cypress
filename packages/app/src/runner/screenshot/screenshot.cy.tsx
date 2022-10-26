@@ -37,20 +37,6 @@ const Layout: FunctionalComponent = () => {
 
 const captureTypes = ['fullPage', 'viewport', 'runner'] as const
 
-function removeGlobalStyles () {
-  // To help with consistency over time when diffing the images produce in this test
-  // this function removes global app styles after mounting,
-  // so that only the CSS injected by the component will be applied.
-
-  cy.get('style').each((item) => {
-    if (item[0].dataset.cy !== 'injected-style-tag') {
-      item.remove()
-    }
-  })
-
-  return cy.get('style').should('have.length', 1)
-}
-
 describe('screenshot', () => {
   captureTypes.forEach((capture) => {
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23424
@@ -64,7 +50,6 @@ describe('screenshot', () => {
         styles,
       })
 
-      removeGlobalStyles()
       cy.screenshot(`percy/component_testing_takes_a_screenshot_viewport_${capture}`, { capture })
     })
   })
@@ -75,7 +60,6 @@ describe('screenshot', () => {
       styles,
     })
 
-    removeGlobalStyles()
     cy.screenshot('percy/component_testing_screenshot_custom_viewport_screenshot')
   })
 
@@ -85,7 +69,6 @@ describe('screenshot', () => {
       styles,
     })
 
-    removeGlobalStyles()
     cy.screenshot('percy/component_testing_screenshot_long_viewport')
   })
 
@@ -156,7 +139,6 @@ describe('screenshot', () => {
       }
 
       mount(() => <Comp />, { style }).then(() => {
-        removeGlobalStyles()
         cy.screenshot(`percy/large_component_hardcoded_size_viewport_${viewport[0]}_${viewport[1]}`, { capture: 'viewport' })
         cy.screenshot(`percy/large_component_hardcoded_size_fullPage_${viewport[0]}_${viewport[1]}`, { capture: 'fullPage' })
       })
