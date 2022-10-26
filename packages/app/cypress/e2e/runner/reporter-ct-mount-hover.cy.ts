@@ -3,7 +3,7 @@ import type { fixtureDirs } from '@tooling/system-tests'
 type ProjectDirs = typeof fixtureDirs
 
 const PROJECTS: {projectName: ProjectDirs[number], test: string}[] = [
-  { projectName: 'angular-15', test: 'app.component' },
+  { projectName: 'angular-14', test: 'app.component' },
   { projectName: 'vueclivue2-configured', test: 'HelloWorld.cy' },
   { projectName: 'react-vite-ts-configured', test: 'App.cy' },
   { projectName: 'react18', test: 'App.cy' },
@@ -37,7 +37,7 @@ for (const { projectName, test } of PROJECTS) {
         cy.contains(`${test}`).click()
         cy.waitForSpecToFinish()
         cy.get('.command.command-name-mount > .command-wrapper').click().then(() => {
-          if (`${projectName}` === 'angular-15') {
+          if (`${projectName}` === 'angular-14') {
             cy.get('iframe.aut-iframe').its('0.contentDocument.body').children().should('have.length.at.least', 2)
           } else {
             cy.get('iframe.aut-iframe').its('0.contentDocument.body').then(cy.wrap).within(() => {

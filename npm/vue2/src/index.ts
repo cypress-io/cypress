@@ -412,7 +412,7 @@ export const mount = (
 
     Cypress.vue = VTUWrapper.vm
     Cypress.vueWrapper = VTUWrapper
-  }).wait(0, { log: false })
+  })
 }
 
 /**
