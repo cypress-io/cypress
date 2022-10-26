@@ -153,6 +153,13 @@ describe('utils', () => {
         ],
       ])
     })
+
+    it('allows all tags to be inverted', () => {
+      const parsed = parseTagsGrep('--@tag1,--@tag2')
+      expect(parsed).to.deep.equal([
+        [ { tag: '@tag1', invert: true }, { tag: '@tag2', invert: true } ]
+      ])
+    })
   })
 
   context('parseGrep', () => {
