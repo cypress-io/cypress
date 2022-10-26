@@ -401,7 +401,15 @@ class Command extends Component<Props> {
           {this._children()}
         </li>
         {model.err?.isRecovered && (
-          <li><TestError err={model.err} testId={model.testId} commandId={model.id} groupLevel={groupLevel}/></li>
+          <li>
+            <TestError
+              err={model.err}
+              testId={model.testId}
+              commandId={model.id}
+              // if the err is recovered and the current command is a log group, nest the test error within the group
+              groupLevel={this.props.groupId ? ++groupLevel : groupLevel}
+            />
+          </li>
         )}
       </>
     )

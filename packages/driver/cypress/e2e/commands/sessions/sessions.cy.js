@@ -260,54 +260,22 @@ describe('cy.session', { retries: 0 }, () => {
         it('has session details in the consoleProps', () => {
           const consoleProps = logs[0].get('consoleProps')()
 
-          expect(consoleProps).to.deep.eq({
-            Command: 'session',
-            id: 'session-1',
-            table: [],
-          })
+          expect(consoleProps.Command).to.eq('session')
+          expect(consoleProps.id).to.eq('session-1')
+          expect(consoleProps.Domains).to.eq('This session capture data from localhost.')
+
+          expect(consoleProps.groups).to.have.length(1)
+          expect(consoleProps.groups[0].name).to.eq('localhost data:')
+          expect(consoleProps.groups[0].groups).to.have.length(1)
+
+          const sessionStorageData = consoleProps.groups[0].groups[0]
+
+          expect(sessionStorageData.name).to.contain('Session Storage - (1)')
+          expect(sessionStorageData.items).to.deep.eq({ cypressAuthToken: '{"body":{"username":"tester"}}' })
         })
       })
 
-
-        expect(logs[5].get()).to.contain({
-          name: 'Clear page',
-          group: createNewSessionGroup.id,
-        })
-      })
-
-      it('creates new session instrument with session details', () => {
-        const sessionInfo = logs[0].get('sessionInfo')
-
-        expect(sessionInfo).to.deep.eq({
-          id: 'session-1',
-          isGlobalSession: false,
-          status: 'created',
-        })
-      })
-
-      it('has session details in the consoleProps', () => {
-        const consoleProps = logs[0].get('consoleProps')()
-
-        expect(consoleProps).to.deep.contains({
-          Command: 'session',
-          id: 'session-1',
-          Domains: 'This session capture data from localhost.',
-        })
-
-        expect(consoleProps.groups).to.have.length(1)
-        expect(consoleProps.groups[0]).to.deep.contains({
-          name: 'localhost data:',
-        })
-
-        expect(consoleProps.groups[0].groups).to.have.length(1)
-        expect(consoleProps.groups[0].groups[0]).to.deep.contains({
-          name: '📁 Session Storage - (1)',
-          items: { cypressAuthToken: '{"body":{"username":"tester"}}' },
-        })
-      })
-    })
-
-    describe('create session with validation flow', () => {
+      describe('create session with validation flow', () => {
         let sessionId
 
         before(() => {
@@ -370,67 +338,6 @@ describe('cy.session', { retries: 0 }, () => {
             alias: ['validateSession'],
             group: validateSessionGroup.id,
           })
-
-          done()
-        })
-
-        validate.callsFake(() => cy.wrap(false))
-
-        cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
-      })
-    })
-
-    describe('restores saved session flow', () => {
-      let sessionId
-
-      before(() => {
-        setupTestContext()
-        cy.log('Creating new session for test')
-        sessionId = `session-${Cypress.state('test').id}`
-        cy.session(sessionId, setup)
-        .then(() => {
-          // reset and only test restored session
-          resetMocks()
-        })
-
-        cy.log('restore session to test against')
-        cy.session(sessionId, setup)
-      })
-
-      // test must be first to run before blank page visit between each test
-      it('clears page after setup runs', () => {
-        cy.url().should('eq', 'about:blank')
-      })
-
-      it('successfully restores saved session', () => {
-        expect(setup).to.not.be.called
-        expect(validate).to.not.be.called
-        expect(clearPageCount, 'total times session cleared the page').to.eq(1)
-      })
-
-      it('groups session logs correctly', () => {
-        expect(logs[0].get()).to.contain({
-          name: 'session',
-          id: sessionGroupId,
-        })
-
-        expect(logs[0].get()).to.deep.contain({
-          name: 'session',
-          id: sessionGroupId,
-          sessionInfo: {
-            id: sessionId,
-            isGlobalSession: false,
-            status: 'restored',
-          },
-        })
-
-        validateClearLogs([logs[1], logs[2]], sessionGroupId)
-
-        const restoreSavedSessionGroup = logs[3].get()
-
-        expect(restoreSavedSessionGroup).to.contain({
-          displayName: 'Restore saved session',
-          group: sessionGroupId,
         })
       })
 
@@ -443,7 +350,7 @@ describe('cy.session', { retries: 0 }, () => {
             expect(setup).to.be.calledOnce
             expect(validate).to.be.calledOnce
             expect(clearPageCount, 'total times session cleared the page').to.eq(2)
-            expect(err.message).to.contain('Your `cy.session` **validate** callback returned false')
+            expect(err.message).to.contain('This error occurred while validating the created session')
             expect(logs[0].get()).to.deep.contain({
               name: 'session',
               id: sessionGroupId,
@@ -486,227 +393,395 @@ describe('cy.session', { retries: 0 }, () => {
               group: validateSessionGroup.id,
             })
 
-        const validateSessionGroup = logs[4].get()
+            done()
+          })
 
-        expect(validateSessionGroup).to.contain({
-          displayName: 'Validate session',
-          group: sessionGroupId,
+          validate.rejects(false)
+
+          cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
+        })
+      })
+
+      describe('restores saved session flow', () => {
+        let sessionId
+
+        before(() => {
+          setupTestContext()
+          cy.log('Creating new session for test')
+          sessionId = `session-${Cypress.state('test').id}`
+          cy.session(sessionId, setup)
+          .then(() => {
+          // reset and only test restored session
+            resetMocks()
+          })
+
+          cy.log('restore session to test against')
+          cy.session(sessionId, setup)
         })
 
-        expect(logs[5].get()).to.deep.contain({
-          alias: ['validateSession'],
-          group: validateSessionGroup.id,
+        // test must be first to run before blank page visit between each test
+        it('clears page after setup runs', () => {
+          cy.url().should('eq', 'about:blank')
+        })
+
+        it('successfully restores saved session', () => {
+          expect(setup).to.not.be.called
+          expect(validate).to.not.be.called
+          expect(clearPageCount, 'total times session cleared the page').to.eq(1)
+        })
+
+        it('groups session logs correctly', () => {
+          expect(logs[0].get()).to.contain({
+            name: 'session',
+            id: sessionGroupId,
+          })
+
+          expect(logs[0].get()).to.deep.contain({
+            name: 'session',
+            id: sessionGroupId,
+            sessionInfo: {
+              id: sessionId,
+              isGlobalSession: false,
+              status: 'restored',
+            },
+          })
+
+          validateClearLogs([logs[1], logs[2]], sessionGroupId)
+
+          const restoreSavedSessionGroup = logs[3].get()
+
+          expect(restoreSavedSessionGroup).to.contain({
+            displayName: 'Restore saved session',
+            group: sessionGroupId,
+          })
+        })
+      })
+
+      describe('restores saved session with validation flow', () => {
+        let sessionId
+
+        before(() => {
+          setupTestContext()
+          cy.log('Creating new session for test')
+          sessionId = `session-${Cypress.state('test').id}`
+          cy.session(sessionId, setup, { validate })
+          .then(() => {
+          // reset and only test restored session
+            resetMocks()
+          })
+
+          cy.log('restore session to test against')
+          cy.session(sessionId, setup, { validate })
+        })
+
+        // test must be first to run before blank page visit between each test
+        it('does not clear page visit from validate function', () => {
+          cy.url().should('contain', '/fixtures/auth/index.html')
+        })
+
+        it('successfully restores saved session', () => {
+          expect(setup).to.not.be.called
+          expect(validate).to.be.calledOnce
+          expect(clearPageCount, 'total times session cleared the page').to.eq(1)
+        })
+
+        it('groups session logs correctly', () => {
+          expect(logs[0].get()).to.contain({
+            name: 'session',
+            id: sessionGroupId,
+          })
+
+          expect(logs[0].get()).to.deep.contain({
+            name: 'session',
+            id: sessionGroupId,
+            sessionInfo: {
+              id: sessionId,
+              isGlobalSession: false,
+              status: 'restored',
+            },
+          })
+
+          validateClearLogs([logs[1], logs[2]], sessionGroupId)
+
+          const restoreSavedSessionGroup = logs[3].get()
+
+          expect(restoreSavedSessionGroup).to.contain({
+            displayName: 'Restore saved session',
+            group: sessionGroupId,
+          })
+
+          const validateSessionGroup = logs[4].get()
+
+          expect(validateSessionGroup).to.contain({
+            displayName: 'Validate session',
+            group: sessionGroupId,
+          })
+
+          expect(logs[5].get()).to.deep.contain({
+            alias: ['validateSession'],
+            group: validateSessionGroup.id,
+          })
+        })
+      })
+
+      describe('recreates existing session flow', () => {
+        let sessionId
+
+        before(() => {
+          setupTestContext()
+          cy.log('Creating new session for test')
+          sessionId = `session-${Cypress.state('test').id}`
+          cy.session(sessionId, setup, { validate })
+          .then(() => {
+            // reset and only test restored session
+            resetMocks()
+            validate.callsFake(() => {
+              if (validate.callCount === 1) {
+                return Promise.reject(false)
+              }
+
+              handleValidate()
+            })
+          })
+
+          cy.log('restore session to test against')
+          cy.session(sessionId, setup, { validate })
+        })
+
+        // test must be first to run before blank page visit between each test
+        it('does not clear page visit from validate function', () => {
+          cy.url().should('contain', '/fixtures/auth/index.html')
+        })
+
+        it('successfully recreates session', () => {
+          expect(setup).to.be.calledOnce
+          expect(validate).to.be.calledTwice
+          expect(clearPageCount, 'total times session cleared the page').to.eq(3)
+        })
+
+        it('groups session logs correctly', () => {
+          expect(logs[0].get()).to.contain({
+            name: 'session',
+            id: sessionGroupId,
+          })
+
+          expect(logs[0].get()).to.deep.contain({
+            name: 'session',
+            id: sessionGroupId,
+            sessionInfo: {
+              id: sessionId,
+              isGlobalSession: false,
+              status: 'recreated',
+            },
+          })
+
+          validateClearLogs([logs[1], logs[2]], sessionGroupId)
+
+          const restoreSavedSessionGroup = logs[3].get()
+
+          expect(restoreSavedSessionGroup).to.contain({
+            displayName: 'Restore saved session',
+            group: sessionGroupId,
+          })
+
+          const validateSessionGroup = logs[4].get()
+
+          expect(validateSessionGroup).to.contain({
+            displayName: 'Validate session',
+            group: sessionGroupId,
+          })
+
+          expect(logs[5].get()).to.deep.contain({
+            alias: ['validateSession'],
+            group: validateSessionGroup.id,
+          })
+
+          // this error is associated with the group since the validation rejected
+          expect(logs[4].get('error').message).to.contain('This error occurred while validating the restored session')
+
+          validateClearLogs([logs[6], logs[7]], sessionGroupId)
+
+          const createNewSessionGroup = logs[8].get()
+
+          expect(createNewSessionGroup).to.contain({
+            displayName: 'Recreate session',
+            groupStart: true,
+            group: sessionGroupId,
+          })
+
+          expect(logs[9].get()).to.deep.contain({
+            alias: ['setupSession'],
+            group: createNewSessionGroup.id,
+          })
+
+          expect(logs[10].get()).to.contain({
+            name: 'Clear page',
+            group: createNewSessionGroup.id,
+          })
+
+          const secondValidateSessionGroup = logs[11].get()
+
+          expect(secondValidateSessionGroup).to.contain({
+            displayName: 'Validate session',
+            group: sessionGroupId,
+          })
+
+          expect(logs[12].get()).to.deep.contain({
+            alias: ['validateSession'],
+            group: secondValidateSessionGroup.id,
+          })
+        })
+      })
+
+      describe('recreates existing session with failed validation flow', () => {
+        it('fails to recreate session and logs correctly', function (done) {
+          setupTestContext()
+          cy.log('Creating new session for test')
+          cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
+          .then(() => {
+          // reset and only test restored session
+            resetMocks()
+            validate.callsFake(() => Promise.reject(false))
+          })
+
+          cy.once('fail', (err) => {
+            expect(err.message).to.contain('Your `cy.session` **validate** promise rejected with false')
+            expect(setup).to.be.calledOnce
+            expect(validate).to.be.calledTwice
+            expect(clearPageCount, 'total times session cleared the page').to.eq(3)
+
+            expect(logs[0].get()).to.contain({
+              name: 'session',
+              id: sessionGroupId,
+            })
+
+            expect(logs[0].get()).to.deep.contain({
+              name: 'session',
+              id: sessionGroupId,
+              sessionInfo: {
+                id: `session-${Cypress.state('test').id}`,
+                isGlobalSession: false,
+                status: 'failed',
+              },
+            })
+
+            validateClearLogs([logs[1], logs[2]], sessionGroupId)
+
+            const restoreSavedSessionGroup = logs[3].get()
+
+            expect(restoreSavedSessionGroup).to.contain({
+              displayName: 'Restore saved session',
+              group: sessionGroupId,
+            })
+
+            const validateSessionGroup = logs[4].get()
+
+            expect(validateSessionGroup).to.contain({
+              displayName: 'Validate session',
+              group: sessionGroupId,
+            })
+
+            expect(logs[5].get()).to.deep.contain({
+              alias: ['validateSession'],
+              group: validateSessionGroup.id,
+            })
+
+            // this error is associated with the group since the validation rejected
+            expect(logs[4].get('error').message).to.contain('Your `cy.session` **validate** promise rejected with false.')
+
+            validateClearLogs([logs[6], logs[7]], sessionGroupId)
+
+            const createNewSessionGroup = logs[8].get()
+
+            expect(createNewSessionGroup).to.contain({
+              displayName: 'Recreate session',
+              groupStart: true,
+              group: sessionGroupId,
+            })
+
+            expect(logs[9].get()).to.deep.contain({
+              alias: ['setupSession'],
+              group: createNewSessionGroup.id,
+            })
+
+            expect(logs[10].get()).to.contain({
+              name: 'Clear page',
+              group: createNewSessionGroup.id,
+            })
+
+            const secondValidateSessionGroup = logs[11].get()
+
+            expect(secondValidateSessionGroup).to.contain({
+              displayName: 'Validate session',
+              group: sessionGroupId,
+            })
+
+            expect(logs[12].get()).to.deep.contain({
+              alias: ['validateSession'],
+              group: secondValidateSessionGroup.id,
+            })
+
+            done()
+          })
+
+          cy.log('restore session to test against')
+          cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
         })
       })
     })
+  })
 
-    describe('recreates existing session flow', () => {
-      let sessionId
-
-      before(() => {
-        setupTestContext()
-        cy.log('Creating new session for test')
-        sessionId = `session-${Cypress.state('test').id}`
-        cy.session(sessionId, setup, { validate })
-        .then(() => {
-          // reset and only test restored session
-          resetMocks()
-          validate.callsFake(() => {
-            if (validate.callCount === 1) {
-              return cy.wrap(false)
-            }
-
-            handleValidate()
-          })
-
-        cy.log('restore session to test against')
-        cy.session(sessionId, setup, { validate })
-      })
-
-      // test must be first to run before blank page visit between each test
-      it('does not clear page visit from validate function', () => {
-        cy.url().should('contain', 'about:blank')
-      })
-
-      it('successfully recreates session', () => {
-        expect(setup).to.be.calledOnce
-        expect(validate).to.be.calledTwice
-        expect(clearPageCount, 'total times session cleared the page').to.eq(3)
-      })
-
-      it('groups session logs correctly', () => {
-        expect(logs[0].get()).to.contain({
-          name: 'session',
-          id: sessionGroupId,
-        })
-
-        expect(logs[0].get()).to.deep.contain({
-          name: 'session',
-          id: sessionGroupId,
-          sessionInfo: {
-            id: sessionId,
-            isGlobalSession: false,
-            status: 'recreated',
-          },
-        })
-
-        validateClearLogs([logs[1], logs[2]], sessionGroupId)
-
-        const restoreSavedSessionGroup = logs[3].get()
-
-        expect(restoreSavedSessionGroup).to.contain({
-          displayName: 'Restore saved session',
-          group: sessionGroupId,
-        })
-
-        const validateSessionGroup = logs[4].get()
-
-        expect(validateSessionGroup).to.contain({
-          displayName: 'Validate session',
-          group: sessionGroupId,
-        })
-
-        expect(logs[5].get()).to.deep.contain({
-          alias: ['validateSession'],
-          group: validateSessionGroup.id,
-        })
-
-        expect(logs[6].get()).to.deep.contain({
-          group: validateSessionGroup.id,
-        })
-
-        expect(logs[6].get('error').message).to.eq('Your `cy.session` **validate** callback returned false.')
-
-        validateClearLogs([logs[7], logs[8]], sessionGroupId)
-
-        const createNewSessionGroup = logs[9].get()
-
-        expect(createNewSessionGroup).to.contain({
-          displayName: 'Recreate session',
-          groupStart: true,
-          group: sessionGroupId,
-        })
-
-        expect(logs[10].get()).to.deep.contain({
-          alias: ['setupSession'],
-          group: createNewSessionGroup.id,
-        })
-
-        expect(logs[11].get()).to.contain({
-          name: 'Clear page',
-          group: createNewSessionGroup.id,
-        })
-
-        const secondValidateSessionGroup = logs[12].get()
-
-        expect(secondValidateSessionGroup).to.contain({
-          displayName: 'Validate session',
-          group: sessionGroupId,
-        })
-
-        expect(logs[13].get()).to.deep.contain({
-          alias: ['validateSession'],
-          group: secondValidateSessionGroup.id,
-        })
-      })
+  describe('testIsolation=off', { testIsolation: 'off' }, () => {
+    before(async () => {
+      // manually ensure clear browser state! since we turned testIsolation off
+      await Cypress.session.clearCurrentSessionData()
     })
 
-    describe('recreates existing session with failed validation flow', () => {
-      it('fails to recreate session and logs correctly', function () {
-        setupTestContext()
-        cy.log('Creating new session for test')
-        cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
-        .then(() => {
-          // reset and only test restored session
-          resetMocks()
-          validate.callsFake(() => {
-            return false
-            // cy.get('does not exist')
-          })
+    describe('test:before:run:async', () => {
+      it('does not clear page before each run', () => {
+        cy.visit('/fixtures/form.html')
+        .then(async () => {
+          cy.spy(Cypress, 'action').log(false)
+
+          await Cypress.action('runner:test:before:run:async', {})
+
+          expect(Cypress.action).not.to.be.calledWith('cy:url:changed')
+          expect(Cypress.action).not.to.be.calledWith('cy:visit:blank')
         })
+        .url('/fixtures/form.html')
+      })
 
-        // cy.once('fail', (err) => {
-        //   expect(err.message).to.contain('Your `cy.session` **validate** callback returned false')
-        //   expect(setup).to.be.calledOnce
-        //   expect(validate).to.be.calledTwice
-        //   expect(clearPageCount, 'total times session cleared the page').to.eq(3)
+      it('does not clear session data before each run', async () => {
+        const clearCurrentSessionData = cy.spy(Cypress.session, 'clearCurrentSessionData')
 
-        //   expect(logs[0].get()).to.contain({
-        //     name: 'session',
-        //     id: sessionGroupId,
-        //   })
+        await Cypress.action('runner:test:before:run:async', {})
 
-        // expect(logs[0].get()).to.deep.contain({
-        //   name: 'session',
-        //   id: sessionGroupId,
-        //   sessionInfo: {
-        //     id: `session-${Cypress.state('test').id}`,
-        //     isGlobalSession: false,
-        //     status: 'failed',
-        //   },
-        // })
+        expect(clearCurrentSessionData).not.to.be.called
+      })
 
-        // validateClearLogs([logs[1], logs[2]], sessionGroupId)
+      it('does not reset rendered html origins before each run', async () => {
+        const backendSpy = cy.spy(Cypress, 'backend')
 
-        //   const restoreSavedSessionGroup = logs[3].get()
+        await Cypress.action('runner:test:before:run:async', {})
 
-        //   expect(restoreSavedSessionGroup).to.contain({
-        //     displayName: 'Restore saved session',
-        //     group: sessionGroupId,
-        //   })
+        expect(backendSpy).not.to.be.calledWith('reset:rendered:html:origins')
+      })
 
-        //   const validateSessionGroup = logs[4].get()
+      it('does not clear the browser context before each run', () => {
+        cy.window()
+        .then((win) => {
+          win.cookie = 'key=value; SameSite=Strict; Secure; Path=/fixtures'
+          win.localStorage.setItem('animal', 'bear')
+          win.sessionStorage.setItem('food', 'burgers')
+        })
+        .then(async () => {
+          cy.spy(Cypress, 'action').log(false)
 
-        //   expect(validateSessionGroup).to.contain({
-        //     displayName: 'Validate session',
-        //     group: sessionGroupId,
-        //   })
+          await Cypress.action('runner:test:before:run:async', {})
 
-        //   expect(logs[5].get()).to.deep.contain({
-        //     alias: ['validateSession'],
-        //     group: validateSessionGroup.id,
-        //   })
-
-        // expect(logs[6].get()).to.deep.contain({
-        //   group: validateSessionGroup.id,
-        // })
-
-        //   expect(logs[6].get('error').message).to.eq('Your `cy.session` **validate** callback returned false.')
-
-        // validateClearLogs([logs[7], logs[8]], sessionGroupId)
-
-        //   const createNewSessionGroup = logs[9].get()
-
-        //   expect(createNewSessionGroup).to.contain({
-        //     displayName: 'Recreate session',
-        //     groupStart: true,
-        //     group: sessionGroupId,
-        //   })
-
-        //   expect(logs[10].get()).to.deep.contain({
-        //     alias: ['setupSession'],
-        //     group: createNewSessionGroup.id,
-        //   })
-
-        //   expect(logs[11].get()).to.contain({
-        //     name: 'Clear page',
-        //     group: createNewSessionGroup.id,
-        //   })
-
-        //   const secondValidateSessionGroup = logs[12].get()
-
-        //   expect(secondValidateSessionGroup).to.contain({
-        //     displayName: 'Validate session',
-        //     group: sessionGroupId,
-        //   })
-
-        //   expect(logs[13].get()).to.deep.contain({
-        //     alias: ['validateSession'],
-        //     group: secondValidateSessionGroup.id,
-        //   })
-
-        //   done()
-        // })
+          expect(Cypress.action).not.to.be.calledWith('cy:url:changed')
+          expect(Cypress.action).not.to.be.calledWith('cy:visit:blank')
+        })
 
         cy.window().its('cookie').should('equal', 'key=value; SameSite=Strict; Secure; Path=/fixtures')
         cy.window().its('localStorage').should('have.length', 1).should('deep.contain', { animal: 'bear' })
@@ -842,11 +917,18 @@ describe('cy.session', { retries: 0 }, () => {
         it('has session details in the consoleProps', () => {
           const consoleProps = logs[0].get('consoleProps')()
 
-          expect(consoleProps).to.deep.eq({
-            Command: 'session',
-            id: 'session-1',
-            table: [],
-          })
+          expect(consoleProps.Command).to.eq('session')
+          expect(consoleProps.id).to.eq('session-1')
+          expect(consoleProps.Domains).to.eq('This session capture data from localhost.')
+
+          expect(consoleProps.groups).to.have.length(1)
+          expect(consoleProps.groups[0].name).to.eq('localhost data:')
+          expect(consoleProps.groups[0].groups).to.have.length(1)
+
+          const sessionStorageData = consoleProps.groups[0].groups[0]
+
+          expect(sessionStorageData.name).to.contain('Session Storage - (1)')
+          expect(sessionStorageData.items).to.deep.eq({ cypressAuthToken: '{"body":{"username":"tester"}}' })
         })
       })
 
@@ -922,7 +1004,7 @@ describe('cy.session', { retries: 0 }, () => {
             expect(setup).to.be.calledOnce
             expect(validate).to.be.calledOnce
             expect(clearPageCount, 'total times session cleared the page').to.eq(0)
-            expect(err.message).to.contain('Your `cy.session` **validate** callback returned false')
+            expect(err.message).to.contain('Your `cy.session` **validate** promise rejected with false')
             expect(logs[0].get()).to.deep.contain({
               name: 'session',
               id: sessionGroupId,
@@ -966,7 +1048,7 @@ describe('cy.session', { retries: 0 }, () => {
             done()
           })
 
-          validate.callsFake(() => false)
+          validate.callsFake(() => Promise.reject(false))
 
           cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
         })
@@ -1111,7 +1193,7 @@ describe('cy.session', { retries: 0 }, () => {
             resetMocks()
             validate.callsFake(() => {
               if (validate.callCount === 1) {
-                return false
+                return Promise.reject(false)
               }
 
               handleValidate()
@@ -1172,18 +1254,15 @@ describe('cy.session', { retries: 0 }, () => {
             group: validateSessionGroup.id,
           })
 
-          expect(logs[5].get()).to.deep.contain({
-            group: validateSessionGroup.id,
-          })
+          // this error is associated with the group since the validation rejected
+          expect(logs[3].get('error').message).to.contain('Your `cy.session` **validate** promise rejected with false.')
 
-          expect(logs[5].get('error').message).to.eq('Your `cy.session` **validate** callback returned false.')
-
-          expect(logs[6].get()).to.contain({
+          expect(logs[5].get()).to.contain({
             displayName: 'Clear cookies, localStorage and sessionStorage',
             group: sessionGroupId,
           })
 
-          const createNewSessionGroup = logs[7].get()
+          const createNewSessionGroup = logs[6].get()
 
           expect(createNewSessionGroup).to.contain({
             displayName: 'Recreate session',
@@ -1191,19 +1270,19 @@ describe('cy.session', { retries: 0 }, () => {
             group: sessionGroupId,
           })
 
-          expect(logs[8].get()).to.deep.contain({
+          expect(logs[7].get()).to.deep.contain({
             alias: ['setupSession'],
             group: createNewSessionGroup.id,
           })
 
-          const secondValidateSessionGroup = logs[9].get()
+          const secondValidateSessionGroup = logs[8].get()
 
           expect(secondValidateSessionGroup).to.contain({
             displayName: 'Validate session',
             group: sessionGroupId,
           })
 
-          expect(logs[10].get()).to.deep.contain({
+          expect(logs[9].get()).to.deep.contain({
             alias: ['validateSession'],
             group: secondValidateSessionGroup.id,
           })
@@ -1218,11 +1297,11 @@ describe('cy.session', { retries: 0 }, () => {
           .then(() => {
           // reset and only test restored session
             resetMocks()
-            validate.callsFake(() => false)
+            validate.callsFake(() => Promise.reject(false))
           })
 
           cy.once('fail', (err) => {
-            expect(err.message).to.contain('Your `cy.session` **validate** callback returned false')
+            expect(err.message).to.contain('Your `cy.session` **validate** promise rejected with false')
             expect(setup).to.be.calledOnce
             expect(validate).to.be.calledTwice
             expect(clearPageCount, 'total times session cleared the page').to.eq(0)
@@ -1266,18 +1345,15 @@ describe('cy.session', { retries: 0 }, () => {
               group: validateSessionGroup.id,
             })
 
-            expect(logs[5].get()).to.deep.contain({
-              group: validateSessionGroup.id,
-            })
+            // this error is associated with the group since the validation rejected
+            expect(logs[3].get('error').message).to.contain('Your `cy.session` **validate** promise rejected with false.')
 
-            expect(logs[5].get('error').message).to.eq('Your `cy.session` **validate** callback returned false.')
-
-            expect(logs[6].get()).to.contain({
+            expect(logs[5].get()).to.contain({
               displayName: 'Clear cookies, localStorage and sessionStorage',
               group: sessionGroupId,
             })
 
-            const createNewSessionGroup = logs[7].get()
+            const createNewSessionGroup = logs[6].get()
 
             expect(createNewSessionGroup).to.contain({
               displayName: 'Recreate session',
@@ -1285,19 +1361,19 @@ describe('cy.session', { retries: 0 }, () => {
               group: sessionGroupId,
             })
 
-            expect(logs[8].get()).to.deep.contain({
+            expect(logs[7].get()).to.deep.contain({
               alias: ['setupSession'],
               group: createNewSessionGroup.id,
             })
 
-            const secondValidateSessionGroup = logs[9].get()
+            const secondValidateSessionGroup = logs[8].get()
 
             expect(secondValidateSessionGroup).to.contain({
               displayName: 'Validate session',
               group: sessionGroupId,
             })
 
-            expect(logs[10].get()).to.deep.contain({
+            expect(logs[9].get()).to.deep.contain({
               alias: ['validateSession'],
               group: secondValidateSessionGroup.id,
             })

@@ -397,6 +397,6 @@ export default {
   },
 
   isPromiseLike (ret) {
-    return ret && _.isFunction(ret.then)
+    return ret && _.isObject(ret) && _.isFunction(ret.then) && _.isFunction(ret.catch)
   },
 }

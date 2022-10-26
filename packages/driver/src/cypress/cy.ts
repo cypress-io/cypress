@@ -270,7 +270,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.verifyUpcomingAssertions = assertions.verifyUpcomingAssertions
 
     const onFinishAssertions = function () {
-      return assertions.finishAssertions.apply(window)
+      return assertions.finishAssertions.apply(window, arguments as any)
     }
 
     const retries = createRetries(Cypress, state, this.timeout, this.clearTimeout, this.whenStable, onFinishAssertions)

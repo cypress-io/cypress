@@ -222,10 +222,16 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
     return null
   }
 
-  const finishAssertions = () => {
-    cy.state('current').get('logs').forEach((log) => {
+  const finishAssertions = (err) => {
+    const logs = cy.state('current').get('logs')
+
+    logs.forEach((log, index) => {
       if (log.get('next') || !log.get('snapshots')) {
         log.snapshot()
+      }
+
+      if (err && index === logs.length - 1) {
+        return log.error(err)
       }
 
       const e = log.get('_error')
@@ -445,11 +451,11 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         // when we're told not to retry
         if (err.retry === false) {
           // finish the assertions
-          finishAssertions()
+          // finishAssertions()
 
           // and then push our command into this err
           try {
-            $errUtils.throwErr(err, { onFail: options._log })
+            $errUtils.throwErr(err, { onFail: finishAssertions })
           } catch (e) {
             err = e
           }
