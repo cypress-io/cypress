@@ -53,21 +53,12 @@
       <slot>{{ description }}</slot>
     </p>
     <slot name="footer" />
-    <div
-      v-if="title === t('testingType.component.name')"
-      class="sr-only"
-    >
-      Support is in {{ t('versions.beta') }}
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { FunctionalComponent, SVGAttributes } from 'vue'
 import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-
-const { t } = useI18n()
 
 const props = withDefaults(defineProps<{
   title: string
