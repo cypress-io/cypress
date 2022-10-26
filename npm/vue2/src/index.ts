@@ -414,6 +414,8 @@ export const mount = (
 }
 
 /**
+ * @deprecated Removed as of Cypress 11.0.0
+ *
  * Helper function for mounting a component quickly in test hooks.
  * @example
  *  import {mountCallback} from '@cypress/vue2'
@@ -423,7 +425,9 @@ export const mountCallback = (
   component: VueComponent,
   options?: MountOptionsArgument,
 ) => {
-  return () => mount(component, options)
+  return () => {
+    throw new Error('mountCallback has been removed')
+  }
 }
 
 // Side effects from "import { mount } from '@cypress/<my-framework>'" are annoying, we should avoid doing this

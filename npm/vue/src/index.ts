@@ -407,6 +407,8 @@ function getComponentDisplayName (componentOptions: any): string {
 }
 
 /**
+ * @deprecated Removed as of Cypress 11.0.0
+ *
  * Helper function for mounting a component quickly in test hooks.
  * @example
  *  import {mountCallback} from '@cypress/vue'
@@ -417,7 +419,7 @@ export function mountCallback (
   options: any = {},
 ): () => Cypress.Chainable {
   return () => {
-    return mount(component, options)
+    throw new Error('mountCallback has been removed')
   }
 }
 
