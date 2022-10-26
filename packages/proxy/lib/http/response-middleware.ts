@@ -67,7 +67,7 @@ function reqMatchesSuperDomainOrigin (req: CypressIncomingRequest, remoteState) 
   return false
 }
 
-function reqWillRenderHtml (req: CypressIncomingRequest) {
+function reqWillRenderHtml (req: CypressIncomingRequest, res: IncomingMessage) {
   // will this request be rendered in the browser, necessitating injection?
   // https://github.com/cypress-io/cypress/issues/288
 
@@ -79,7 +79,11 @@ function reqWillRenderHtml (req: CypressIncomingRequest) {
   // don't inject if we didn't find both text/html and application/xhtml+xml,
   const accept = req.headers['accept']
 
-  return accept && accept.includes('text/html') && accept.includes('application/xhtml+xml')
+  // only check the content-type value, if it exists, to contains some type of html mimetype
+  const contentType = res?.headers['content-type'] || ''
+  const contentTypeIsHtmlIfExists = contentType ? contentType.includes('html') : true
+
+  return accept && accept.includes('text/html') && accept.includes('application/xhtml+xml') && contentTypeIsHtmlIfExists
 }
 
 function resContentTypeIs (res: IncomingMessage, contentType: string) {
@@ -240,7 +244,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
   this.res.isInitial = this.req.cookies['__cypress.initial'] === 'true'
 
   const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
-  const isRenderedHTML = reqWillRenderHtml(this.req)
+  const isRenderedHTML = reqWillRenderHtml(this.req, this.incomingRes)
 
   if (isRenderedHTML) {
     const origin = new URL(this.req.proxiedUrl).origin
@@ -261,8 +265,9 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     // NOTE: Only inject fullCrossOrigin if the super domain origins do not match in order to keep parity with cypress application reloads
     const isCrossSuperDomainOrigin = !reqMatchesSuperDomainOrigin(this.req, this.remoteStates.getPrimary())
     const isAUTFrame = this.req.isAUTFrame
+    const isHTMLLike = isHTML || isRenderedHTML
 
-    if (this.config.experimentalSessionAndOrigin && isCrossSuperDomainOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
+    if (this.config.experimentalSessionAndOrigin && isCrossSuperDomainOrigin && isAUTFrame && isHTMLLike) {
       this.debug('- cross origin injection')
 
       return 'fullCrossOrigin'
@@ -274,7 +279,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
       return false
     }
 
-    if (this.res.isInitial) {
+    if (this.res.isInitial && isHTMLLike) {
       this.debug('- full injection')
 
       return 'full'

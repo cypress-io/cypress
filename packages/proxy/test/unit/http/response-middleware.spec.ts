@@ -540,6 +540,37 @@ describe('http/response-middleware', function () {
             expect(ctx.res.wantsSecurityRemoved).to.be.true
           })
         })
+
+        it(`does not remove security or inject when the request will not render html (csv).`, () => {
+          prepareContext({
+            renderedHTMLOrigins: {},
+            getRenderedHTMLOrigins () {
+              return this.renderedHTMLOrigins
+            },
+            req: {
+              proxiedUrl: 'http://www.some-third-party-csv.csv',
+              isAUTFrame: false,
+              headers: {
+                'accept': ['text/html', 'application/xhtml+xml'],
+              },
+            },
+            incomingRes: {
+              headers: {
+                'content-type': 'text/csv',
+              },
+            },
+            config: {
+              modifyObstructiveCode: true,
+              experimentalModifyObstructiveThirdPartyCode: true,
+            },
+          })
+
+          return testMiddleware([SetInjectionLevel], ctx)
+          .then(() => {
+            expect(ctx.res.wantsSecurityRemoved).to.be.false
+            expect(ctx.res.wantsInjection).to.be.false
+          })
+        })
       })
     })
 
