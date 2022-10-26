@@ -1,12 +1,11 @@
 import type React from 'react'
-import type { StyleOptions } from '@cypress/mount-utils'
 
 export interface UnmountArgs {
   log: boolean
   boundComponentMessage?: string
 }
 
-export type MountOptions = Partial<StyleOptions & MountReactComponentOptions>
+export type MountOptions = Partial<MountReactComponentOptions>
 
 export interface MountReactComponentOptions {
   alias: string

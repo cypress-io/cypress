@@ -8,8 +8,6 @@ import {
   enableAutoDestroy,
 } from '@vue/test-utils'
 import {
-  injectStylesBeforeElement,
-  StyleOptions,
   getContainerEl,
   setupHooks,
 } from '@cypress/mount-utils'
@@ -241,7 +239,7 @@ interface MountOptions {
 /**
  * Utility type for union of options passed to "mount(..., options)"
  */
-type MountOptionsArgument = Partial<ComponentOptions & MountOptions & StyleOptions & VueTestUtilsConfigOptions>
+type MountOptionsArgument = Partial<ComponentOptions & MountOptions & VueTestUtilsConfigOptions>
 
 // when we mount a Vue component, we add it to the global Cypress object
 // so here we extend the global Cypress namespace and its Cypress interface
@@ -287,10 +285,6 @@ function registerAutoDestroy ($destroy: () => void) {
 }
 
 enableAutoDestroy(registerAutoDestroy)
-
-const injectStyles = (options: StyleOptions) => {
-  return injectStylesBeforeElement(options, document, getContainerEl())
-}
 
 /**
  * Extract the component name from the object passed to mount
@@ -348,18 +342,6 @@ export const mount = (
   return cy
   .window({
     log: false,
-  })
-  .then(() => {
-    const { style, stylesheets, stylesheet, styles, cssFiles, cssFile } = optionsOrProps
-
-    injectStyles({
-      style,
-      stylesheets,
-      stylesheet,
-      styles,
-      cssFiles,
-      cssFile,
-    })
   })
   .then((win) => {
     if (optionsOrProps.log !== false) {

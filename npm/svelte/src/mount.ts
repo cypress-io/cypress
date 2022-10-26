@@ -1,6 +1,4 @@
 import {
-  injectStylesBeforeElement,
-  StyleOptions,
   getContainerEl,
   setupHooks,
 } from '@cypress/mount-utils'
@@ -15,8 +13,7 @@ type SvelteComponentOptions<T extends SvelteComponent> = Omit<
 >;
 
 export interface MountOptions<T extends SvelteComponent>
-  extends SvelteComponentOptions<T>,
-  Partial<StyleOptions> {
+  extends SvelteComponentOptions<T> {
   log?: boolean
 }
 
@@ -63,8 +60,6 @@ export function mount<T extends SvelteComponent> (
 ): Cypress.Chainable<MountReturn<T>> {
   return cy.then(() => {
     const target = getContainerEl()
-
-    injectStylesBeforeElement(options, document, target)
 
     const ComponentConstructor = ((Component as any).default || Component) as SvelteConstructor<T>
 

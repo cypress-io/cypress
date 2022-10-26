@@ -21,8 +21,6 @@ import type {
 } from 'vue'
 import type { MountingOptions as VTUMountingOptions, VueWrapper } from '@vue/test-utils'
 import {
-  injectStylesBeforeElement,
-  StyleOptions,
   getContainerEl,
   setupHooks,
 } from '@cypress/mount-utils'
@@ -68,7 +66,7 @@ type MountingOptions<Props, Data = {}> = Omit<VTUMountingOptions<Props, Data>, '
     use?: GlobalMountOptions['plugins']
     mixin?: GlobalMountOptions['mixins']
   }
-} & Partial<StyleOptions>
+}
 
 export type CyMountOptions<Props, Data = {}> = MountingOptions<Props, Data>
 
@@ -344,8 +342,6 @@ export function mount (componentOptions: any, options: any = {}) {
     const document: Document = cy.state('document')
 
     const el = getContainerEl()
-
-    injectStylesBeforeElement(options, document, el)
 
     // merge the extensions with global
     if (options.extensions) {

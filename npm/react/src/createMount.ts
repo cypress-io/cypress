@@ -1,23 +1,11 @@
 import * as React from 'react'
 import getDisplayName from './getDisplayName'
 import {
-  injectStylesBeforeElement,
   getContainerEl,
   ROOT_SELECTOR,
   setupHooks,
 } from '@cypress/mount-utils'
 import type { InternalMountOptions, MountOptions, MountReturn, UnmountArgs } from './types'
-
-/**
- * Inject custom style text or CSS file or 3rd party style resources
- */
-const injectStyles = (options: MountOptions) => {
-  return (): HTMLElement => {
-    const el = getContainerEl()
-
-    return injectStylesBeforeElement(options, document, el)
-  }
-}
 
 let mountCleanup: InternalMountOptions['cleanup']
 
@@ -55,7 +43,6 @@ export const makeMountFn = (
     : jsxComponentName
 
   return cy
-  .then(injectStyles(options))
   .then(() => {
     const reactDomToUse = internalMountOptions.reactDom
 
