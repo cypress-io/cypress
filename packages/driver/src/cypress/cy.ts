@@ -592,7 +592,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           // this catches errors thrown by user-registered event handlers
           // for `window:load`. this is used in the `catch` below so they
           // aren't mistaken as cross-origin errors
-          err.isFromWindowLoadEvent = true
+          // If this is a cypress error, pass it on through.
+          if (!$errUtils.isCypressErr(err)) {
+            err.isFromWindowLoadEvent = true
+          }
 
           throw err
         } finally {
