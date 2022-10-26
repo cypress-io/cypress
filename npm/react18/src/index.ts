@@ -42,6 +42,6 @@ export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerende
   return makeMountFn('mount', jsx, { ReactDom: ReactDOM, ...options }, rerenderKey, internalOptions)
 }
 
-export function unmount (options: UnmountArgs = { log: true }) {
+function unmount (options: UnmountArgs = { log: true }) {
   return makeUnmountFn(options)
 }
