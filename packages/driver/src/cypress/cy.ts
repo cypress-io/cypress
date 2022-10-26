@@ -251,10 +251,11 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.onUncaughtException = this.onUncaughtException.bind(this)
     this.setRunnable = this.setRunnable.bind(this)
     this.cleanup = this.cleanup.bind(this)
+
+    this.getSubjectFromChain = this.getSubjectFromChain.bind(this)
     this.setSubjectForChainer = this.setSubjectForChainer.bind(this)
     this.subject = this.subject.bind(this)
     this.subjectChain = this.subjectChain.bind(this)
-    this.getSubjectFromChain = this.getSubjectFromChain.bind(this)
 
     // init traits
 

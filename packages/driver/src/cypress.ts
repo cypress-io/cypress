@@ -251,6 +251,14 @@ class $Cypress {
       },
     })
 
+    Object.defineProperty(this.state(), 'withinSubject', {
+      get: () => {
+        $errUtils.warnByPath('subject.state_withinsubject_deprecated')
+
+        return this.cy.getSubjectFromChain(this.cy.state('withinSubjectChain') || [])
+      },
+    })
+
     this.originalConfig = _.cloneDeep(config)
     this.config = $SetterGetter.create(config, (config) => {
       const skipConfigOverrideValidation = this.isCrossOriginSpecBridge ? window.__cySkipValidateConfig : window.top!.__cySkipValidateConfig
