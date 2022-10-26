@@ -1089,7 +1089,7 @@ declare namespace Cypress {
       *
       * @see https://on.cypress.io/session
       */
-    session(id: string | object, setup?: () => void, options?: SessionOptions): Chainable<null>
+    session(id: string | object, setup: () => void, options?: SessionOptions): Chainable<null>
 
     /**
      * Get the window.document of the page that is currently active.
