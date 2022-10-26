@@ -49,6 +49,9 @@ declare namespace Cypress {
   interface CommandFnWithOriginalFnAndSubject<T extends keyof Chainable, S> {
     (this: Mocha.Context, originalFn: CommandOriginalFnWithSubject<T, S>, prevSubject: S, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
   }
+  interface QueryFn<T extends keyof ChainableMethods> {
+    (...args: Parameters<ChainableMethods[T]>): (subject: any) => any
+  }
   interface ObjectLike {
     [key: string]: any
   }
@@ -487,8 +490,8 @@ declare namespace Cypress {
       overwrite<T extends keyof Chainable>(name: T, fn: CommandFnWithOriginalFn<T>): void
       overwrite<T extends keyof Chainable, S extends PrevSubject>(name: T, fn: CommandFnWithOriginalFnAndSubject<T, PrevSubjectMap[S]>): void
 
-      addQuery<T extends keyof Chainable>(name: T, fn: QueryFn<t>): void
-      overwriteQuery<T extends keyof Chainable>(name: T, fn: QueryFn<t>): void
+      addQuery<T extends keyof Chainable>(name: T, fn: QueryFn<T>): void
+      overwriteQuery<T extends keyof Chainable>(name: T, fn: QueryFn<T>): void
     }
 
     /**
