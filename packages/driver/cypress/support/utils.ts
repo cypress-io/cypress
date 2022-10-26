@@ -2,15 +2,15 @@ const { $, _, Promise } = Cypress
 
 export const getCommandLogWithText = (command, type = 'method') => {
   // Open current test if not already open, so we can find the command log
-  cy.$$('.runnable-active .collapsible:not(.is-open) .collapsible-header', top.document).click()
+  cy.$$('.runnable-active .collapsible:not(.is-open) .collapsible-header', top?.document).click()
 
   return cy
-  .$$(`.runnable-active .command-${type}:contains(${command})`, top.document)
+  .$$(`.runnable-active .command-${type}:contains(${command})`, top?.document)
   .closest('.command')
 }
 
 export const findReactInstance = function (dom) {
-  let key = _.keys(dom).find((key) => key.startsWith('__reactInternalInstance$'))
+  let key = _.keys(dom).find((key) => key.startsWith('__reactInternalInstance$')) as string
   let internalInstance = dom[key]
 
   if (internalInstance == null) return null
@@ -37,21 +37,23 @@ export const clickCommandLog = (sel, type) => {
       inner.get(0).click()
 
       // make sure command was pinned, otherwise throw a better error message
-      expect(cy.$$('.runnable-active .command-pin', top.document).length, 'command should be pinned').ok
+      expect(cy.$$('.runnable-active .command-pin', top?.document).length, 'command should be pinned').ok
     })
   })
 }
 
 export const withMutableReporterState = (fn) => {
-  top.UnifiedRunner.MobX.configure({ enforceActions: 'never' })
+  // @ts-ignore
+  top?.UnifiedRunner.MobX.configure({ enforceActions: 'never' })
 
-  const currentTestLog = findReactInstance(cy.$$('.runnable-active', top.document)[0])
+  const currentTestLog = findReactInstance(cy.$$('.runnable-active', top?.document)[0])
 
   currentTestLog.props.model._isOpen = true
 
   return Promise.try(fn)
   .then(() => {
-    top.UnifiedRunner.MobX.configure({ enforceActions: 'always' })
+    // @ts-ignore
+    top?.UnifiedRunner.MobX.configure({ enforceActions: 'always' })
   })
 }
 
@@ -72,7 +74,7 @@ export const assertLogLength = (logs, expectedLength) => {
 }
 
 export const findCrossOriginLogs = (consolePropCommand, logMap, matchingOrigin) => {
-  const matchedLogs = Array.from(logMap.values()).filter((log) => {
+  const matchedLogs = Array.from(logMap.values()).filter((log: any) => {
     const props = log.get()
 
     let consoleProps = _.isFunction(props?.consoleProps) ? props.consoleProps() : props?.consoleProps
@@ -82,7 +84,7 @@ export const findCrossOriginLogs = (consolePropCommand, logMap, matchingOrigin) 
 
   // While we'd expect the incoming log order to be deterministic, in practice we've found it fairly
   // flakey. Sorting here eliminates this, resulting in far more reliable tests.
-  const logAttrs = matchedLogs.map((log) => log.get()).sort()
+  const logAttrs = matchedLogs.map((log: any) => log.get()).sort()
 
   return logAttrs.length === 1 ? logAttrs[0] : logAttrs
 }
@@ -104,6 +106,7 @@ const getAllFn = (...aliases) => {
 
   return Promise.all(
     aliases[0].split(' ').map((alias) => {
+      // @ts-ignore
       return cy.now('get', alias)
     }),
   )
@@ -133,6 +136,7 @@ export const trimInnerText = ($el) => {
 export const expectCaret = (start, end) => {
   return ($el) => {
     end = end == null ? start : end
+    // @ts-ignore
     expect(Cypress.dom.getSelectionBounds($el.get(0))).to.deep.eq({ start, end })
   }
 }
