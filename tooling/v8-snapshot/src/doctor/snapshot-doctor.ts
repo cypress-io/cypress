@@ -219,7 +219,7 @@ function unpathify (keys: Set<string>) {
  * ## Snapshot Doctor Metadata
  *
  * - `norewrite`: modules that should not be rewritten when generating the
- *    sanpshot script as
+ *    snapshot script as
  * - `deferred`: modules that need to be deferred, that is they can not be
  *    initialized during snapshot inialization
  * - `healthy`: modules that can be fully initialized during snapshot
