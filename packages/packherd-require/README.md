@@ -99,7 +99,7 @@ Since esbuild enforces the behaviour of imports being static this caused problem
 with tests that relied on being able to patch/`sinon.stub` modules even after they were
 imported. 
 
-In general I recommend doing this _properly_ via a tool like
+In general we would recommend doing this _properly_ via a tool like
 [proxyquire][proxyquire].
 
 ## Env Vars
