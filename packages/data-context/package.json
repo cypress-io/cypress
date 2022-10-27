@@ -5,6 +5,7 @@
   "main": "index.js",
   "browser": "src/index.ts",
   "scripts": {
+    "build": "yarn build-prod",
     "build-prod": "tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
@@ -19,6 +20,7 @@
     "@babel/generator": "7.17.9",
     "@babel/parser": "7.13.0",
     "@graphql-tools/batch-execute": "^8.4.6",
+    "@packages/graphql": "0.0.0-development",
     "@urql/core": "2.4.4",
     "@urql/exchange-execute": "1.1.0",
     "@urql/exchange-graphcache": "4.3.6",
