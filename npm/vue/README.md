@@ -46,7 +46,7 @@ const todo = {
   title: 'Write more tests',
 }
 
-mount(Todo, { propsData: { todo } })
+mount(Todo, { props: { todo } })
 ```
 
 ### Global Vue Options
