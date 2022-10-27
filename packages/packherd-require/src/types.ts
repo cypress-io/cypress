@@ -110,9 +110,9 @@ export type ModuleNeedsReload = (
  *
  * @category Transpilation */
 export interface TranspileCache {
-  get(fullPath: string, skipStaleCheck?: boolean): string | undefined
-  addAsync(origFullPath: string, convertedContent: string): Promise<void>
-  add(origFullPath: string, convertedContent: string): void
+  get(fullPath: string): string | undefined
+  setAsync(origFullPath: string, convertedContent: string): Promise<void>
+  set(origFullPath: string, convertedContent: string): void
   clearSync(): void
 }
 

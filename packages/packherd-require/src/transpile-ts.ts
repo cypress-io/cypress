@@ -46,7 +46,7 @@ function transpileTsCode (
 
   // Add to Cache
   if (cache != null) {
-    cache.add(fullModuleUri, result.code)
+    cache.set(fullModuleUri, result.code)
   }
 
   return result.code

@@ -6,12 +6,12 @@ import type { TranspileCache } from './types'
 export class DefaultTranspileCache implements TranspileCache {
   private readonly _cache: Map<string, string> = new Map()
 
-  get (fullPath: string, _skipStaleCheck?: boolean): string | undefined {
+  get (fullPath: string): string | undefined {
     // In memory cache only so we don't expect anything to be stale
     return this._cache.get(fullPath)
   }
-  addAsync (origFullPath: string, convertedContent: string): Promise<void> {
-    this.add(origFullPath, convertedContent)
+  setAsync (origFullPath: string, convertedContent: string): Promise<void> {
+    this.set(origFullPath, convertedContent)
 
     return Promise.resolve()
   }
