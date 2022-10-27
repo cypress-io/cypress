@@ -15,7 +15,7 @@ export class DefaultTranspileCache implements TranspileCache {
 
     return Promise.resolve()
   }
-  add (origFullPath: string, convertedContent: string): void {
+  set (origFullPath: string, convertedContent: string): void {
     this._cache.set(origFullPath, convertedContent)
   }
   clearSync (): void {
