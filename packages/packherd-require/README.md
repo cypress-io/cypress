@@ -70,7 +70,7 @@ have it hook into Node.js `require` calls via a `Module._extension`. Particularl
 
 ### Transpile Cache
 
-I recommend to use the [dirt-simple-file-cache][dirt-simple-file-cache] module to provide the
+We recommend to use the [dirt-simple-file-cache][dirt-simple-file-cache] module to provide the
 transpile cache as it has been developed alongside packherd for just this purpose.
 
 Here is an example of how that option field could be setup with this module.
