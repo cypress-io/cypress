@@ -11,6 +11,7 @@ import { automation, useRunnerUiStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
 import { useStudioStore } from '../store/studio-store'
 import { getAutIframeModel } from '.'
+import { handlePausing } from './events/pausing'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -33,7 +34,6 @@ interface AddGlobalListenerOptions {
   randomString: string
 }
 
-const driverToReporterEvents = 'paused'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
@@ -224,18 +224,6 @@ export class EventManager {
     })
 
     this.reporterBus.on('runner:unpin:snapshot', this._unpinSnapshot.bind(this))
-
-    this.reporterBus.on('runner:resume', () => {
-      if (!Cypress) return
-
-      Cypress.emit('resume:all')
-    })
-
-    this.reporterBus.on('runner:next', () => {
-      if (!Cypress) return
-
-      Cypress.emit('resume:next')
-    })
 
     this.reporterBus.on('runner:stop', () => {
       if (!Cypress) return
@@ -538,12 +526,6 @@ export class EventManager {
 
     Cypress.on('after:screenshot', handleAfterScreenshot)
 
-    driverToReporterEvents.forEach((event) => {
-      Cypress.on(event, (...args) => {
-        this.reporterBus.emit(event, ...args)
-      })
-    })
-
     driverTestEvents.forEach((event) => {
       Cypress.on(event, (test, cb) => {
         this.reporterBus.emit(event, test, cb)
@@ -595,6 +577,8 @@ export class EventManager {
         this.studioStore.testFailed()
       }
     })
+
+    handlePausing(this.getCypress, this.reporterBus)
 
     Cypress.on('test:before:run', (...args) => {
       Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:run', ...args)
