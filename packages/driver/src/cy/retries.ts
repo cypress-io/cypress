@@ -87,12 +87,9 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
 
         throwErr(retryErr, {
           onFail: (err) => {
-            console.log('timed out', err)
             if (onFail) {
               err = onFail(err)
             }
-
-            console.log('onFail timed out', err)
 
             finishAssertions(err)
           },
