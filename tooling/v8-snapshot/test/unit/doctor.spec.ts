@@ -111,7 +111,7 @@ describe('doctor', () => {
     }
   })
 
-  it('snapshots using dir/file name delayed and during init ', async () => {
+  it('snapshots using dir/file name delayed and during init', async () => {
     const projectBaseDir = path.join(__dirname, '..', 'fixtures', 'dirname-filename-use')
     const cacheDir = path.join(projectBaseDir, 'cache')
     const snapshotEntryFile = path.join(projectBaseDir, 'entry.js')
