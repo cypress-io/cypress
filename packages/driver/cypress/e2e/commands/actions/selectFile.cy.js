@@ -511,6 +511,32 @@ describe('src/cy/commands/actions/selectFile', () => {
       })
     })
 
+    it('retries until label is not disabled', () => {
+      cy.on('command:retry', () => {
+        // Replace the label with a copy of itself, to ensure selectFile is requerying the DOM
+        const hidden = cy.$$('#hidden-basic-label')
+
+        hidden.replaceWith(hidden[0].outerHTML)
+
+        cy.$$('#hidden-basic-label').show()
+      })
+
+      cy.get('#hidden-basic-label').selectFile({ contents: '@foo' })
+    })
+
+    it('retries until input is not disabled', () => {
+      cy.on('command:retry', () => {
+        // Replace the input with a copy of itself, to ensure selectFile is requerying the DOM
+        const disabled = cy.$$('#disabled')
+
+        disabled.replaceWith(disabled[0].outerHTML)
+
+        cy.$$('#disabled').attr('disabled', false)
+      })
+
+      cy.get('#disabled-label').selectFile({ contents: '@foo' })
+    })
+
     /*
      * The tests around actionability are somewhat limited, since the functionality is thoroughly tested in the
      * `cy.trigger()` unit tests. We include a few tests directly on `cy.selectFile()` in order to ensure we're
@@ -626,32 +652,6 @@ is being covered by another element:
         .then(() => {
           expect(scrolled).to.be.empty
         })
-      })
-
-      it('retries until label is not disabled', () => {
-        cy.on('command:retry', () => {
-          // Replace the label with a copy of itself, to ensure selectFile is requerying the DOM
-          const hidden = cy.$$('#hidden-basic-label')
-
-          hidden.replaceWith(hidden[0].outerHTML)
-
-          cy.$$('#hidden-basic-label').show()
-        })
-
-        cy.get('#hidden-basic-label').selectFile({ contents: '@foo' }, { timeout: 1000 })
-      })
-
-      it('retries until input is not disabled', () => {
-        cy.on('command:retry', () => {
-          // Replace the input with a copy of itself, to ensure selectFile is requerying the DOM
-          const disabled = cy.$$('#disabled')
-
-          disabled.replaceWith(disabled[0].outerHTML)
-
-          cy.$$('#disabled').attr('disabled', false)
-        })
-
-        cy.get('#disabled-label').selectFile({ contents: '@foo' })
       })
 
       // TODO(webkit): fix+unskip for experimental webkit
