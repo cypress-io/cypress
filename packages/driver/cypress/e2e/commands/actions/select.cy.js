@@ -648,7 +648,7 @@ describe('src/cy/commands/actions/select', () => {
         cy.get('#select-maps').select('de_dust2').then(function ($select) {
           const { lastLog } = this
 
-          expect(lastLog.get('$el')).to.eq($select)
+          expect(lastLog.get('$el')).to.eql($select)
         })
       })
 

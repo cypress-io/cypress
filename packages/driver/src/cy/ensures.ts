@@ -222,17 +222,17 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
 
       if ($dom.isJquery(subject) && subject.length === 0) {
         const subjectChain = cy.subjectChain(current.get('chainerId'))
-
         const prevCommandWasQuery = current.get('prev').get('query')
-        const errMsg = prevCommandWasQuery ? 'subject.not_element_empty_subject' : 'subject.detached_after_command'
 
-        $errUtils.throwErrByPath(errMsg, {
-          onFail,
-          args: {
-            name: current.get('name'),
-            subjectChain,
-          },
-        })
+        if (prevCommandWasQuery) {
+          $errUtils.throwErrByPath('subject.not_element_empty_subject', {
+            onFail,
+            args: {
+              name: current.get('name'),
+              subjectChain,
+            },
+          })
+        }
       }
 
       $errUtils.throwErrByPath('subject.not_element', {
