@@ -41,7 +41,7 @@ packherd resolves and loads the modules that are included via one of the followi
 - `moduleDefinitions`: similar to `moduleExports` except that these are functions that need to
 be invoked in order to obtain the `module.exports`, thus incurring some overhead
 
-Since packherd cannot know how the modules are keyed inside the maps you should pass a  `getModuleKey`
+Since packherd cannot know how the modules are keyed inside the maps, you should pass a  `getModuleKey`
 function of [this type][GetModuleKey] in order to resolve those keys. 
 
 For example in the case of [v8-snapshot][v8-snapshot] (TODO: Update this link when snapshot module is added) the [getModuleKey
