@@ -112,7 +112,7 @@ describe('xhrs', () => {
 
       const finish = function () {
         expect(xhr.status).to.eq(200)
-        expect(xhr.response.text).to.include(body)
+        expect(xhr.responseText).to.include(body)
 
         return done()
       }
@@ -140,8 +140,9 @@ describe('xhrs', () => {
     it('request body', () => {
       cy.intercept('POST', /users/, { name: 'b' }).as('createUser')
       cy.get('#create').click()
-      cy.wait('@createUser').its('requestBody')
-      .should('deep.eq', { some: 'data' })
+      cy.wait('@createUser')
+      .its('request.body')
+      .should('equal', '{\"some\":\"data\"}')
     })
 
     it('aborts', () => {

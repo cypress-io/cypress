@@ -149,14 +149,15 @@ describe('src/cy/commands/waiting', () => {
         .wait('@fetch', { requestTimeout: 199 })
       })
 
-      // TODO: response timeout not honored by intercept
-      it.skip('waits for responseTimeout', {
+      it('waits for responseTimeout', {
         responseTimeout: 299,
       }, (done) => {
         cy.on('command:retry', (options) => {
-          expect(options.timeout).to.eq(299)
+          if (options.type === 'response') {
+            expect(options.timeout).to.eq(299)
 
-          done()
+            done()
+          }
         })
 
         cy
@@ -172,13 +173,14 @@ describe('src/cy/commands/waiting', () => {
         .wait('@fetch')
       })
 
-      // TODO: response timeout not honored by intercept
-      it.skip('waits for responseTimeout override', (done) => {
+      it('waits for responseTimeout override', (done) => {
         cy.on('command:retry', (options) => {
-          expect(options.type).to.eq('response')
-          expect(options.timeout).to.eq(299)
+          if (options.type === 'response') {
+            expect(options.type).to.eq('response')
+            expect(options.timeout).to.eq(299)
 
-          done()
+            done()
+          }
         })
 
         cy
@@ -194,8 +196,7 @@ describe('src/cy/commands/waiting', () => {
         .wait('@fetch', { responseTimeout: 299 })
       })
 
-      // TODO: response timeout not honored by intercept
-      it.skip('waits for requestTimeout and responseTimeout override', (done) => {
+      it('waits for requestTimeout and responseTimeout override', (done) => {
         let retryCount = 0
 
         cy.on('command:retry', (options) => {
@@ -210,7 +211,7 @@ describe('src/cy/commands/waiting', () => {
             xhrGet(win, '/foo')
           }
 
-          if (retryCount === 2) {
+          if (options.type === 'response') {
             expect(options.type).to.eq('response')
             expect(options.timeout).to.eq(299)
 
@@ -681,15 +682,14 @@ describe('src/cy/commands/waiting', () => {
           cy.wait(['@getOne', '@getTwo', '@get.three'])
         })
 
-        // TODO: intercept does not honor response timeout
-        it.skip('throws when waiting on the 3rd response on array of aliases', {
+        it('throws when waiting on the 3rd response on array of aliases', {
           requestTimeout: 200,
           responseTimeout: 1000,
         }, (done) => {
           const win = cy.state('window')
 
           cy.on('command:retry', (options) => {
-            if (/getThree/.test(options.error)) {
+            if (/getThree/.test(options.error) && options.type === 'response') {
               options._runnableTimeout = 0
             }
           })
@@ -1152,14 +1152,15 @@ describe('src/cy/commands/waiting', () => {
           .wait('@fetch', { requestTimeout: 199 })
         })
 
-        // TODO: response timeout not honored by intercept
-        it.skip('sets default responseTimeout', {
+        it('sets default responseTimeout', {
           responseTimeout: 299,
         }, function (done) {
-          cy.on('command:retry', () => {
-            expect(this.lastLog.get('timeout')).to.eq(299)
+          cy.on('command:retry', (command) => {
+            if (command.type === 'response') {
+              expect(this.lastWaitLog.get('timeout')).to.eq(299)
 
-            done()
+              done()
+            }
           })
 
           cy
@@ -1175,12 +1176,13 @@ describe('src/cy/commands/waiting', () => {
           .wait('@fetch')
         })
 
-        // TODO: response timeout not honored by intercept
-        it.skip('sets custom responseTimeout', function (done) {
-          cy.on('command:retry', () => {
-            expect(this.lastLog.get('timeout')).to.eq(299)
+        it('sets custom responseTimeout', function (done) {
+          cy.on('command:retry', (command) => {
+            if (command.type === 'response') {
+              expect(this.lastWaitLog.get('timeout')).to.eq(299)
 
-            done()
+              done()
+            }
           })
 
           cy
@@ -1196,13 +1198,12 @@ describe('src/cy/commands/waiting', () => {
           .wait('@fetch', { responseTimeout: 299 })
         })
 
-        // TODO: response timeout not honored by intercept
-        it.skip('updates to requestTimeout and responseTimeout at the proper times', function (done) {
+        it('updates to requestTimeout and responseTimeout at the proper times', function (done) {
           let log
           let retryCount = 0
 
-          cy.on('command:retry', () => {
-            log = log || this.lastLog
+          cy.on('command:retry', (command) => {
+            log = log || this.lastWaitLog
             retryCount++
             if (retryCount === 1) {
               expect(log.get('timeout')).to.eq(100)
@@ -1213,7 +1214,7 @@ describe('src/cy/commands/waiting', () => {
               xhrGet(win, '/foo')
             }
 
-            if (retryCount === 2) {
+            if (command.type === 'response') {
               expect(log.get('timeout')).to.eq(299)
 
               done()
