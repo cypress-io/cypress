@@ -28,7 +28,7 @@
     "@packages/frontend-shared": "0.0.0-development",
     "@percy/cypress": "^3.1.0",
     "@purge-icons/generated": "0.8.1",
-    "@testing-library/cypress": "8.0.0",
+    "@testing-library/cypress": "BlueWinds/cypress-testing-library",
     "@tooling/system-tests": "0.0.0-development",
     "@toycode/markdown-it-class": "1.2.3",
     "@types/dedent": "^0.7.0",
