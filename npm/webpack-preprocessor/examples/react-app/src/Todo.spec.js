@@ -1,6 +1,8 @@
 import React from 'react'
 import { Todo } from './App'
 import { mount } from '@cypress/react'
+import './App.css'
+import 'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.css'
 
 describe('Todo', () => {
   it('renders new item', () => {

@@ -1,6 +1,7 @@
 /// <reference types="cypress" />
 import React from 'react'
 import { mount } from '@cypress/react'
+import './tic-tac-toe.css'
 
 // let's put React component right in the spec file
 class Square extends React.Component {
@@ -45,6 +46,7 @@ describe('Square', () => {
     cy.wait(1000)
 
     cy.get('.square')
-    .should('have.class', 'square')
+    .should('have.css', 'background-color', 'rgb(255, 255, 255)')
+    .and('have.css', 'border', '1px solid rgb(153, 153, 153)')
   })
 })
