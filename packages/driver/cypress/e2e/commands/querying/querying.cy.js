@@ -738,12 +738,16 @@ describe('src/cy/commands/querying', () => {
       beforeEach(function () {
         this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
-          if (attrs.name === 'get') {
-            this.lastLog = log
+        const collectLogs = (attrs, log) => {
+          console.log('collect log')
+          this.lastLog = log
 
-            this.logs.push(log)
-          }
+          this.logs?.push(log)
+        }
+
+        cy.on('log:added', collectLogs)
+        cy.on('fail', () => {
+          cy.off('log:added', collectLogs)
         })
 
         return null
@@ -860,6 +864,38 @@ describe('src/cy/commands/querying', () => {
         cy.get('div:first').should('not.be.visible')
       })
 
+      it('fails get command when element is not found', function (done) {
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          expect(err.message).to.eq('Timed out retrying after 1ms: Expected to find element: `does_not_exist`, but never found it.')
+
+          expect(lastLog.get('name')).to.eq('get')
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(lastLog.get('error')).to.eq(err)
+
+          done()
+        })
+
+        cy.get('does_not_exist', { timeout: 1 })
+      })
+
+      it('fails get command when element is not found and has chained assertions', function (done) {
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          expect(err.message).to.eq('Timed out retrying after 1ms: Expected to find element: `does_not_exist`, but never found it.')
+
+          expect(lastLog.get('name')).to.eq('get')
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(lastLog.get('error')).to.eq(err)
+
+          done()
+        })
+
+        cy.get('does_not_exist', { timeout: 1 }).should('have.class', 'hi')
+      })
+
       it('does not include message about why element was not visible', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).not.to.include('why this element is not visible')
@@ -962,15 +998,23 @@ describe('src/cy/commands/querying', () => {
         const button = cy.$$('#button').hide()
 
         cy.on('fail', (err) => {
-          const { lastLog } = this
+          assertLogLength(this.logs, 2)
 
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('$el').get(0)).to.eq(button.get(0))
-          const consoleProps = lastLog.invoke('consoleProps')
+          const getLog = this.logs[0]
+          const assertionLog = this.logs[1]
+
+          expect(err.message).to.contain('This element `<button#button>` is not visible because it has CSS property: `display: none`')
+
+          expect(getLog.get('state')).to.eq('passed')
+          expect(getLog.get('error')).to.be.undefined
+          expect(getLog.get('$el').get(0)).to.eq(button.get(0))
+          const consoleProps = getLog.invoke('consoleProps')
 
           expect(consoleProps.Yielded).to.eq(button.get(0))
           expect(consoleProps.Elements).to.eq(button.length)
+
+          expect(assertionLog.get('state')).to.eq('failed')
+          expect(err.message).to.include(assertionLog.get('error').message)
 
           done()
         })
@@ -1674,11 +1718,9 @@ space
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
-          if (attrs.name === 'contains') {
-            this.lastLog = log
+          this.lastLog = log
 
-            this.logs.push(log)
-          }
+          this.logs.push(log)
         })
 
         return null
@@ -1779,14 +1821,24 @@ space
       it('logs out $el when existing $el is found even on failure', function (done) {
         const button = cy.$$('#button')
 
-        cy.on('fail', (err) => {
-          expect(this.lastLog.get('state')).to.eq('failed')
-          expect(this.lastLog.get('error')).to.eq(err)
-          expect(this.lastLog.get('$el').get(0)).to.eq(button.get(0))
-          const consoleProps = this.lastLog.invoke('consoleProps')
+        cy.once('fail', (err) => {
+          assertLogLength(this.logs, 2)
+
+          const containsLog = this.logs[0]
+          const assertionLog = this.logs[1]
+
+          expect(err.message).to.contain(`Expected not to find content: \'button\' but continuously found it.`)
+
+          expect(containsLog.get('state')).to.eq('passed')
+          expect(containsLog.get('error')).to.be.undefined
+          expect(containsLog.get('$el').get(0)).to.eq(button.get(0))
+          const consoleProps = containsLog.invoke('consoleProps')
 
           expect(consoleProps.Yielded).to.eq(button.get(0))
           expect(consoleProps.Elements).to.eq(button.length)
+
+          expect(assertionLog.get('state')).to.eq('failed')
+          expect(err.message).to.include(assertionLog.get('error').message)
 
           done()
         })
@@ -1795,10 +1847,20 @@ space
       })
 
       it('throws when assertion is have.length > 1', function (done) {
-        cy.on('fail', (err) => {
-          assertLogLength(this.logs, 1)
+        cy.once('fail', (err) => {
+          assertLogLength(this.logs, 2)
+
+          const containsLog = this.logs[0]
+          const assertionLog = this.logs[1]
+
           expect(err.message).to.eq('`cy.contains()` cannot be passed a `length` option because it will only ever return 1 element.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/contains')
+
+          expect(containsLog.get('state')).to.eq('passed')
+          expect(containsLog.get('error')).to.be.undefined
+
+          expect(assertionLog.get('state')).to.eq('failed')
+          expect(err.message).to.include(assertionLog.get('error').message)
 
           done()
         })

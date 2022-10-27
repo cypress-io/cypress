@@ -225,24 +225,26 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
   const finishAssertions = (err) => {
     const logs = cy.state('current').get('logs')
 
-    logs.forEach((log, index) => {
-      if (log.get('next') || !log.get('snapshots')) {
-        log.snapshot()
+    let hasLoggedError = false
+
+    logs.reverse().forEach((log, index) => {
+      if (log._shouldAutoEnd()) {
+        if (log.get('next') || !log.get('snapshots')) {
+          log.snapshot()
+        }
+
+        if (err && !hasLoggedError) {
+          hasLoggedError = true
+
+          return log.error(err)
+        }
+
+        if (err && err.issuesCommunicatingOrFinding && index === logs.length - 1) {
+          return log.error(err)
+        }
+
+        return log.end()
       }
-
-      if (err && index === logs.length - 1) {
-        return log.error(err)
-      }
-
-      const e = log.get('_error')
-
-      if (e) {
-        log.set('_error', undefined)
-
-        return log.error(e)
-      }
-
-      return log.end()
     })
   }
 
@@ -319,6 +321,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
           cy.ensureCommandCanCommunicateWithAUT(err)
           ensureExistence()
         } catch (e2) {
+          e2.issuesCommunicatingOrFinding = true
           err = e2
         }
 
@@ -327,13 +330,9 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
 
         options.error = err
 
-        if (err.retry === false) {
-          throw err
-        }
-
         const { onFail, onRetry } = callbacks
 
-        if (!onFail && !onRetry) {
+        if (err.retry === false || (!onFail && !onRetry)) {
           throw err
         }
 
@@ -346,7 +345,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
             onFail.call(this, err, isDefaultAssertionErr, cmds)
           }
         } catch (e3) {
-          finishAssertions()
+          e3.onFail = finishAssertions
           throw e3
         }
 

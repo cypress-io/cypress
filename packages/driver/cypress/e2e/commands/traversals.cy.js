@@ -346,16 +346,27 @@ describe('src/cy/commands/traversals', () => {
       const button = cy.$$('#button').hide()
 
       cy.on('fail', (err) => {
-        const log = this.logs[1]
+        assertLogLength(this.logs, 3)
 
-        expect(log.get('state')).to.eq('failed')
-        expect(err.message).to.include(log.get('error').message)
-        expect(log.get('$el').get(0)).to.eq(button.get(0))
+        const getLog = this.logs[0]
+        const findLog = this.logs[1]
+        const assertionLog = this.logs[2]
 
-        const consoleProps = log.invoke('consoleProps')
+        expect(err.message).to.contain('This element `<button#button>` is not visible because it has CSS property: `display: none`')
+
+        expect(getLog.get('state')).to.eq('passed')
+        expect(getLog.get('error')).to.be.undefined
+
+        expect(findLog.get('state')).to.eq('passed')
+        expect(findLog.get('error')).to.be.undefined
+        expect(findLog.get('$el').get(0)).to.eq(button.get(0))
+        const consoleProps = findLog.invoke('consoleProps')
 
         expect(consoleProps.Yielded).to.eq(button.get(0))
         expect(consoleProps.Elements).to.eq(button.length)
+
+        expect(assertionLog.get('state')).to.eq('failed')
+        expect(err.message).to.include(assertionLog.get('error').message)
 
         done()
       })

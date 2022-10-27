@@ -68,9 +68,9 @@ const onInvoke = function (Cypress, obj, args) {
   const logProps: Record<string, any> = {
     name: agentName,
     message: obj.message,
-    // error: obj.error,
+    error: obj.error,
     type: 'parent',
-    // end: true,
+    end: true,
     snapshot: !agent._noSnapshot,
     event: true,
     consoleProps () {
@@ -85,13 +85,13 @@ const onInvoke = function (Cypress, obj, args) {
       consoleObj.Alias = agent._cyAlias
 
       consoleObj[display(obj.name)] = obj.obj
-      consoleObj.Arguments = obj.call?.args
-      consoleObj.Context = obj.call?.thisValue
-      consoleObj.Returned = obj.call?.returnValue
+      consoleObj.Arguments = obj.call.args
+      consoleObj.Context = obj.call.thisValue
+      consoleObj.Returned = obj.call.returnValue
 
-      // if (obj.error) {
-      //   consoleObj.Error = obj.error.stack
-      // }
+      if (obj.error) {
+        consoleObj.Error = obj.error.stack
+      }
 
       for (let fake of fakes) {
         const count = fake._cyCount
@@ -115,6 +115,10 @@ const onInvoke = function (Cypress, obj, args) {
   }
 
   return Cypress.log(logProps)
+}
+
+const onError = (err) => {
+  return $errUtils.throwErr(err)
 }
 
 // create a global sandbox
@@ -176,7 +180,18 @@ export default function (Commands, Cypress, cy, state) {
     const { invoke } = agent
 
     agent.invoke = function (func, thisValue, args) {
+      let error = null
       let returned = null
+
+      // because our spy could potentially fail here
+      // we need to wrap this in a try / catch
+      // so we still emit the command that failed
+      // and the user can easily find the error
+      try {
+        returned = invoke.call(this, func, thisValue, args)
+      } catch (e: any) {
+        error = e
+      }
 
       const props = {
         count,
@@ -186,53 +201,17 @@ export default function (Commands, Cypress, cy, state) {
         agent,
         call: agent.lastCall,
         callCount: agent.callCount,
+        error,
         log,
       }
 
-      const invokeLog = onInvoke(Cypress, props, args)
+      onInvoke(Cypress, props, args)
 
-      // return invoke.call(this, func, thisValue, args)
-      // because our spy could potentially fail here
-      // we need to wrap this in a try / catch
-      // so we still emit the command that failed
-      // and the user can easily find the error
-      try {
-        returned = invoke.call(this, func, thisValue, args)
-      } catch (err: any) {
-        $errUtils.throwErr(err)
-        //  {
-        //   onFail: () => {
-        //     // emily too do...setting error on this log caused double error rendering
-        //     // for restored errors. want this for console props & what not.
-        //     // might be the reporter need to verify the last child log only shows in-line
-        //     // errors if reported multiple times.
-        //     invokeLog.set({
-        //       state: 'failed',
-        //     })
-        //   },
-        // })
+      // if an error did exist then we need
+      // to bubble it up
+      if (error) {
+        onError(error)
       }
-
-      if ($utils.isPromiseLike(returned)) {
-        return returned
-        .then((val) => {
-          invokeLog?.end()
-          console.log('val', val)
-
-          return val
-        })
-        .catch((err) => {
-          console.log('AGENT HERE', err)
-          invokeLog?.set({
-            state: 'failed',
-            error: err,
-          })
-
-          $errUtils.throwErr(err)
-        })
-      }
-
-      invokeLog?.end()
 
       // make sure we return the invoked return value
       // of the spy

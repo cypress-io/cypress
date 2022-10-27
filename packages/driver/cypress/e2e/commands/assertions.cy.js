@@ -416,21 +416,26 @@ describe('src/cy/commands/assertions', () => {
       it('does not log extra commands on fail and properly fails command + assertions', function (done) {
         cy.on('fail', (err) => {
           assertLogLength(this.logs, 6)
+          expect(err.message).to.eq('You must provide a valid number to a `length` assertion. You passed: `asdf`')
 
           expect(this.logs[3].get('name')).to.eq('get')
-          expect(this.logs[3].get('state')).to.eq('failed')
-          expect(this.logs[3].get('error')).to.eq(err)
+          expect(this.logs[3].get('state')).to.eq('passed')
+          expect(this.logs[3].get('error')).to.be.undefined
 
           expect(this.logs[4].get('name')).to.eq('assert')
           expect(this.logs[4].get('state')).to.eq('failed')
-          expect(this.logs[4].get('error').name).to.eq('AssertionError')
+          expect(this.logs[4].get('error').name).to.eq('CypressError')
+          expect(this.logs[4].get('error')).to.eq(err)
 
           done()
         })
 
         cy
-        .root().should('exist').and('contain', 'foo')
-        .get('button').should('have.length', 'asdf')
+        .root()
+        .should('exist')
+        .and('contain', 'foo')
+        .get('button')
+        .should('have.length', 'asdf')
       })
 
       it('finishes failed assertions and does not log extra commands when cy.contains fails', function (done) {
@@ -438,12 +443,13 @@ describe('src/cy/commands/assertions', () => {
           assertLogLength(this.logs, 2)
 
           expect(this.logs[0].get('name')).to.eq('contains')
-          expect(this.logs[0].get('state')).to.eq('failed')
-          expect(this.logs[0].get('error')).to.eq(err)
+          expect(this.logs[0].get('state')).to.eq('passed')
+          expect(this.logs[0].get('error')).to.be.undefined
 
           expect(this.logs[1].get('name')).to.eq('assert')
           expect(this.logs[1].get('state')).to.eq('failed')
-          expect(this.logs[1].get('error').name).to.eq('AssertionError')
+          expect(this.logs[1].get('error').name).to.eq('CypressError')
+          expect(this.logs[1].get('error')).to.eq(err)
 
           done()
         })

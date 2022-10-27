@@ -165,11 +165,17 @@ describe('src/cy/commands/files', () => {
 
         this.logs = []
 
-        cy.on('log:added', (attrs, log) => {
+        const collectLogs = (attrs, log) => {
           if (attrs.name === 'readFile') {
-            this.lastLog = log
-            this.logs.push(log)
+            this.fileLog = log
           }
+
+          this.logs?.push(log)
+        }
+
+        cy.on('log:added', collectLogs)
+        cy.on('fail', () => {
+          cy.off('log:added', collectLogs)
         })
 
         return null
@@ -177,11 +183,10 @@ describe('src/cy/commands/files', () => {
 
       it('throws when file argument is absent', function (done) {
         cy.on('fail', (err) => {
-          const { lastLog } = this
+          const { fileLog } = this
 
-          assertLogLength(this.logs, 1)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
+          expect(fileLog.get('error')).to.eq(err)
+          expect(fileLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: `undefined`.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
 
@@ -193,11 +198,10 @@ describe('src/cy/commands/files', () => {
 
       it('throws when file argument is not a string', function (done) {
         cy.on('fail', (err) => {
-          const { lastLog } = this
+          const { fileLog } = this
 
-          assertLogLength(this.logs, 1)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
+          expect(fileLog.get('error')).to.eq(err)
+          expect(fileLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: `2`.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
 
@@ -209,11 +213,10 @@ describe('src/cy/commands/files', () => {
 
       it('throws when file argument is an empty string', function (done) {
         cy.on('fail', (err) => {
-          const { lastLog } = this
+          const { fileLog } = this
 
-          assertLogLength(this.logs, 1)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
+          expect(fileLog.get('error')).to.eq(err)
+          expect(fileLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: ``.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
 
@@ -233,11 +236,10 @@ describe('src/cy/commands/files', () => {
         Cypress.backend.rejects(err)
 
         cy.on('fail', (err) => {
-          const { lastLog } = this
+          const { fileLog } = this
 
-          assertLogLength(this.logs, 1)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
+          expect(fileLog.get('error')).to.eq(err)
+          expect(fileLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`\
             \`cy.readFile(\"foo\")\` failed while trying to read the file at the following path:
 
@@ -265,11 +267,10 @@ describe('src/cy/commands/files', () => {
         Cypress.backend.rejects(err)
 
         cy.on('fail', (err) => {
-          const { lastLog } = this
+          const { fileLog } = this
 
-          assertLogLength(this.logs, 1)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
+          expect(fileLog.get('error')).to.eq(err)
+          expect(fileLog.get('state')).to.eq('failed')
 
           expect(err.message).to.eq(stripIndent`
             Timed out retrying after 50ms: \`cy.readFile(\"foo.json\")\` failed because the file does not exist at the following path:
@@ -300,11 +301,10 @@ describe('src/cy/commands/files', () => {
         })
 
         cy.on('fail', (err) => {
-          const { lastLog } = this
+          const { fileLog } = this
 
-          assertLogLength(this.logs, 1)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
+          expect(fileLog.get('error')).to.eq(err)
+          expect(fileLog.get('state')).to.eq('failed')
 
           expect(err.message).to.eq(stripIndent`
             Timed out retrying after 50ms: \`cy.readFile(\"foo.json\")\` failed because the file does not exist at the following path:
@@ -325,11 +325,16 @@ describe('src/cy/commands/files', () => {
         Cypress.backend.resolves(okResponse)
 
         cy.on('fail', (err) => {
-          const { lastLog } = this
+          const { fileLog, logs } = this
 
-          assertLogLength(this.logs, 1)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
+          const assertLog = logs.find((log) => log.get('name') === 'assert')
+
+          expect(fileLog.get('state')).to.eq('passed')
+          expect(fileLog.get('error')).to.be.undefined
+
+          expect(assertLog.get('name')).to.eq('assert')
+          expect(assertLog.get('error')).to.eq(err)
+          expect(assertLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`\
             Timed out retrying after 50ms: \`cy.readFile(\"foo.json\")\` failed because the file exists when expected not to exist at the following path:
 
@@ -349,11 +354,15 @@ describe('src/cy/commands/files', () => {
         })
 
         cy.on('fail', (err) => {
-          const { lastLog } = this
+          const { fileLog, logs } = this
 
-          assertLogLength(this.logs, 1)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
+          expect(fileLog.get('state')).to.eq('passed')
+          expect(fileLog.get('error')).to.be.undefined
+
+          const assertLog = logs.find((log) => log.get('name') === 'assert')
+
+          expect(assertLog.get('error')).to.eq(err)
+          expect(assertLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('Timed out retrying after 50ms: expected \'foo\' to equal \'contents\'')
 
           done()
@@ -368,11 +377,10 @@ describe('src/cy/commands/files', () => {
         })
 
         cy.on('fail', (err) => {
-          const { lastLog } = this
+          const { fileLog } = this
 
-          assertLogLength(this.logs, 1)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
+          expect(fileLog.get('error')).to.eq(err)
+          expect(fileLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`\
             \`cy.readFile("foo")\` timed out after waiting \`10ms\`.
           `)
@@ -393,11 +401,10 @@ describe('src/cy/commands/files', () => {
         })
 
         cy.on('fail', (err) => {
-          const { lastLog } = this
+          const { fileLog } = this
 
-          assertLogLength(this.logs, 1)
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
+          expect(fileLog.get('error')).to.eq(err)
+          expect(fileLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`\
             \`cy.readFile("foo")\` timed out after waiting \`42ms\`.
           `)
