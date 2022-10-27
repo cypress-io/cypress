@@ -108,11 +108,13 @@ export type ModuleNeedsReload = (
 /**
  * Interface to the cache used to store/retrieve transpiled TypeScript
  *
+ * This interface matches DirtSimpleFileCache
+ *
  * @category Transpilation */
 export interface TranspileCache {
   get(fullPath: string): string | undefined
-  setAsync(origFullPath: string, convertedContent: string): Promise<void>
-  set(origFullPath: string, convertedContent: string): void
+  addAsync(origFullPath: string, convertedContent: string): Promise<void>
+  add(origFullPath: string, convertedContent: string): void
   clearSync(): void
 }
 

@@ -10,12 +10,12 @@ export class DefaultTranspileCache implements TranspileCache {
     // In memory cache only so we don't expect anything to be stale
     return this._cache.get(fullPath)
   }
-  setAsync (origFullPath: string, convertedContent: string): Promise<void> {
-    this.set(origFullPath, convertedContent)
+  addAsync (origFullPath: string, convertedContent: string): Promise<void> {
+    this.add(origFullPath, convertedContent)
 
     return Promise.resolve()
   }
-  set (origFullPath: string, convertedContent: string): void {
+  add (origFullPath: string, convertedContent: string): void {
     this._cache.set(origFullPath, convertedContent)
   }
   clearSync (): void {
