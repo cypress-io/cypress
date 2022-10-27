@@ -1754,4 +1754,10 @@ describe('cy.session', { retries: 0 }, () => {
       })
     })
   })
+
+  it('should allow more than 20 sessions to be created per test', () => {
+    for (let index = 0; index < 21; index++) {
+      cy.session(`${index}`, () => {})
+    }
+  })
 })
