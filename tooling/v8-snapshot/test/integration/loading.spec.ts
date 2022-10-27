@@ -275,7 +275,7 @@ describe('loading', () => {
     }
   })
 
-  it('loads all cached ', async () => {
+  it('loads all cached', async () => {
     const projectName = 'v8-snapshot/stealthy-require'
 
     const projectBaseDir = await scaffoldProject(projectName)
