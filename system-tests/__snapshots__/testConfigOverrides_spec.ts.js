@@ -1195,10 +1195,11 @@ exports['testConfigOverrides / successfully runs valid suite-level-only override
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (valid-suite-only.js)                                                      │
-  │ Searched:   cypress/e2e/testConfigOverrides/valid-suite-only.js                                │
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        1 found (valid-suite-only.js)                                                    │
+  │ Searched:     cypress/e2e/testConfigOverrides/valid-suite-only.js                              │
+  │ Experiments:  experimentalSessionAndOrigin=true                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
