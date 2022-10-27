@@ -38,7 +38,7 @@ describe('doctor', () => {
     })
   })
 
-  it('snapshots entry points modules using and reassigning console ', async () => {
+  it('snapshots entry points modules using and reassigning console', async () => {
     const projectBaseDir = path.join(__dirname, '..', 'fixtures', 'console-assign')
     const cacheDir = path.join(projectBaseDir, 'cache')
     const snapshotEntryFile = path.join(projectBaseDir, 'entry.js')
