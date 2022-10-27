@@ -1,5 +1,6 @@
 import { mount } from 'cypress/vue'
 import type { FunctionalComponent } from 'vue-demi'
+import './screenshot.scss'
 
 const Layout: FunctionalComponent = () => {
   return (
