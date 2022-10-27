@@ -411,7 +411,7 @@ They will outline development and test procedures. When in doubt just look at th
 
 ### V8 Snapshotting
 
-In order to improve start up time, Cypress uses [electron mksnapshot](https://github.com/electron/mksnapshot) for generating [V8 snapshots](https://v8.dev/blog/custom-startup-snapshots) for both development and prod.
+In order to improve start up time, Cypress uses [electron mksnapshot](https://github.com/electron/mksnapshot) for generating [v8 snapshots](https://v8.dev/blog/custom-startup-snapshots) for both development and production.
 
 #### Snapshot Generation
 
