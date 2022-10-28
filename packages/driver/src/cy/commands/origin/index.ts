@@ -64,6 +64,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
         name: 'origin',
         type: 'parent',
         message: urlOrDomain,
+        timeout: 0,
         // @ts-ignore TODO: revisit once log-grouping has more implementations
       }, (_log) => {
         log = _log
