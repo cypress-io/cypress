@@ -203,7 +203,7 @@ describe('src/cy/commands/waiting', () => {
           retryCount++
           if (retryCount === 1) {
             expect(options.type).to.eq('request')
-            expect(options.timeout).to.eq(100)
+            expect(options.timeout).to.eq(150)
 
             // trigger request to move onto response timeout verification
             const win = cy.state('window')
@@ -224,7 +224,7 @@ describe('src/cy/commands/waiting', () => {
           body: {},
           delay: 100,
         }).as('fetch')
-        .wait('@fetch', { requestTimeout: 100, responseTimeout: 299 })
+        .wait('@fetch', { requestTimeout: 150, responseTimeout: 299 })
       })
 
       // https://github.com/cypress-io/cypress/issues/369
@@ -1206,7 +1206,7 @@ describe('src/cy/commands/waiting', () => {
             log = log || this.lastWaitLog
             retryCount++
             if (retryCount === 1) {
-              expect(log.get('timeout')).to.eq(100)
+              expect(log.get('timeout')).to.eq(150)
 
               // trigger request to move onto response timeout verification
               const win = cy.state('window')
@@ -1226,7 +1226,7 @@ describe('src/cy/commands/waiting', () => {
             body: {},
             delay: 100,
           }).as('fetch')
-          .wait('@fetch', { requestTimeout: 100, responseTimeout: 299 })
+          .wait('@fetch', { requestTimeout: 150, responseTimeout: 299 })
         })
       })
     })
