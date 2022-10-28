@@ -2821,6 +2821,14 @@ darwin-arm64-workflow: &darwin-arm64-workflow
         requires:
           - darwin-arm64-build
 
+    - run-app-integration-tests-chrome:
+        name: darwin-arm64-run-app-integration-tests-chrome
+        executor: darwin-arm64
+        resource_class: cypress-io/latest_m1
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
+        requires:
+          - darwin-arm64-build
+
 windows-workflow: &windows-workflow
   jobs:
     - node_modules_install:

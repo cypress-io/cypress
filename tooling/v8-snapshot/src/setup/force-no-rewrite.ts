@@ -55,4 +55,5 @@ export default [
   'packages/network/node_modules/minimatch/minimatch.js',
   'packages/server/node_modules/glob/node_modules/minimatch/minimatch.js',
   'node_modules/js-yaml/lib/js-yaml/type/js/function.js',
+  'packages/server/lib/open_project.ts',
 ]
