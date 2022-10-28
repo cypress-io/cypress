@@ -11,9 +11,9 @@ import type {
 } from './types'
 import path from 'path'
 
-const logInfo = debug('cypress:packherd:info')
-const logDebug = debug('cypress:packherd:debug')
-const logTrace = debug('cypress:packherd:trace')
+const logInfo = debug('cypress-verbose:packherd:info')
+const logDebug = debug('cypress-verbose:packherd:debug')
+const logTrace = debug('cypress-verbose:packherd:trace')
 const logError = debug('cypress:packherd:error')
 
 export * from './loader'

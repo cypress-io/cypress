@@ -10,9 +10,9 @@ import type {
 } from './types'
 import { strict as assert } from 'assert'
 
-const logDebug = debug('cypress:packherd:debug')
-const logTrace = debug('cypress:packherd:trace')
-const logSilly = debug('cypress:packherd:silly')
+const logDebug = debug('cypress-verbose:packherd:debug')
+const logTrace = debug('cypress-verbose:packherd:trace')
+const logSilly = debug('cypress-verbose:packherd:silly')
 const logWarn = debug('cypress:packherd:warn')
 
 /**

@@ -102,13 +102,16 @@ module.exports = {
 
     log('package icon', iconPath)
 
+    const platform = os.platform()
+    const arch = os.arch()
+
     _.defaults(options, {
       dist: paths.getPathToDist(),
       dir: 'app',
       out: 'tmp',
       name: 'Cypress',
-      platform: os.platform(),
-      arch: os.arch(),
+      platform,
+      arch,
       asar: false,
       prune: true,
       overwrite: true,
@@ -135,6 +138,7 @@ module.exports = {
         paths.getPathToExec(),
         {
           version: FuseVersion.V1,
+          resetAdHocDarwinSignature: platform === 'darwin' && arch === 'arm64',
           [FuseV1Options.LoadBrowserProcessSpecificV8Snapshot]: true,
         },
       ) : Promise.resolve()
