@@ -88,6 +88,52 @@ describe('src/cy/commands/cookies', () => {
       })
     })
 
+    it('retrieves cookies from the domain matching the AUT by default', () => {
+      // don't stub automation; let it go through
+      Cypress.automation.restore()
+
+      cy.visit('http://localhost:3500/fixtures/generic.html')
+      cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
+      cy.setCookie('foo', 'bar')
+
+      cy.getCookies().then((cookies) => {
+        expect(cookies[0].domain).to.equal('localhost')
+      })
+
+      if (!Cypress.config('experimentalSessionAndOrigin')) return
+
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
+
+        cy.getCookies().then((cookies) => {
+          expect(cookies[0].domain).to.equal('.www.foobar.com')
+        })
+      })
+    })
+
+    it('returns cookies for the specified domain', () => {
+      // don't stub automation; let it go through
+      Cypress.automation.restore()
+
+      cy.visit('http://localhost:3500/fixtures/generic.html')
+      cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
+      cy.setCookie('foo', 'bar')
+
+      cy.getCookies({ domain: 'www.foobar.com' }).then((cookies) => {
+        expect(cookies[0].domain).to.equal('.www.foobar.com')
+      })
+
+      if (!Cypress.config('experimentalSessionAndOrigin')) return
+
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
+
+        cy.getCookies({ domain: 'localhost' }).then((cookies) => {
+          expect(cookies[0].domain).to.equal('localhost')
+        })
+      })
+    })
+
     describe('timeout', () => {
       it('sets timeout to Cypress.config(responseTimeout)', {
         responseTimeout: 2500,
