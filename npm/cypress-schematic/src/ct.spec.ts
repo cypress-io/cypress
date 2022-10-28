@@ -49,5 +49,15 @@ describe('ng add @cypress/schematic / e2e and ct', function () {
       await copyAngularMount(projectPath)
       await runCommandInProject('yarn ng run angular:ct --watch false --spec src/app/app.component.cy.ts', projectPath)
     })
+
+    it('should generate component alongside component spec', async () => {
+      const projectPath = await scaffoldAngularProject(project)
+
+      await runCommandInProject(`yarn add @cypress/schematic@file:${cypressSchematicPackagePath}`, projectPath)
+      await runCommandInProject('yarn ng add @cypress/schematic --e2e --component', projectPath)
+      await copyAngularMount(projectPath)
+      await runCommandInProject('yarn ng generate c foo', projectPath)
+      await runCommandInProject('yarn ng run angular:ct --watch false --spec src/app/foo/foo.component.cy.ts', projectPath)
+    })
   }
 })
