@@ -52,7 +52,7 @@ export type GetModuleKey = (opts: {
 /**
  * Configures the {@link PackherdModuleLoader}.
  *
- * @property diagnostics: if set loading diagnostics are logged
+ * @property diagnosticsEnabled: if set loading diagnostics are logged
  * @property moduleExports: map holding fully initialized and exported modules
  * @property moduleDefinitions: map holding functions that when invoke initialize a module and return its exports
  * @property getModuleKey: overrides how a module's key is resolved from its uri
@@ -62,7 +62,7 @@ export type GetModuleKey = (opts: {
  * @category Loader
  */
 export type ModuleLoaderOpts = {
-  diagnostics?: boolean
+  diagnosticsEnabled?: boolean
   moduleExports?: Record<string, Module>
   moduleDefinitions?: Record<string, ModuleDefinition>
   getModuleKey?: GetModuleKey
@@ -83,6 +83,7 @@ const defaultGetModuleKey: GetModuleKey = ({ moduleUri, baseDir }) => {
  */
 class LoadingModules {
   private readonly currentlyLoading: Map<string, Module> = new Map()
+
   start (id: string, mod: Module) {
     if (this.currentlyLoading.has(id)) {
       throw new Error(`Already loading ${id}\nstack: ${this.stack()}`)
@@ -227,7 +228,7 @@ export class PackherdModuleLoader {
   exportHits: Set<string> = new Set()
   definitionHits: Set<string> = new Set()
   misses: Set<string> = new Set()
-  private readonly diagnostics: boolean
+  private readonly diagnosticsEnabled: boolean
   private _dumpedInfo: {
     exportHits: number
     definitionHits: number
@@ -253,7 +254,7 @@ export class PackherdModuleLoader {
     private readonly projectBaseDir: string,
     opts: ModuleLoaderOpts,
   ) {
-    this.diagnostics = !!opts.diagnostics
+    this.diagnosticsEnabled = !!opts.diagnosticsEnabled
     this._dumpedInfo = { exportHits: 0, definitionHits: 0, misses: 0 }
     this.getModuleKey = opts.getModuleKey || defaultGetModuleKey
     assert(
@@ -707,7 +708,7 @@ export class PackherdModuleLoader {
    * @private
    */
   private _dumpInfo () {
-    if (this.diagnostics && logDebug.enabled) {
+    if (this.diagnosticsEnabled && logDebug.enabled) {
       const {
         exportHits: prevExportHits,
         definitionHits: prevDefinitionHits,
@@ -765,7 +766,7 @@ export class PackherdModuleLoader {
   // -----------------
   /**
    * Creates a Node.js module, similarly to how Node.js would do it.
-   * The `require` function provided to the module is wrapped when `this.diagnostics` is enabled in order to intercept
+   * The `require` function provided to the module is wrapped when `this.diagnosticsEnabled` is enabled in order to intercept
    * and track require calls.
    *
    * @param fullPath fully resolved module path
@@ -778,7 +779,7 @@ export class PackherdModuleLoader {
     parent: Module | undefined,
     moduleUri: string,
   ): NodeModule {
-    const require = this.diagnostics
+    const require = this.diagnosticsEnabled
       ? this._interceptedRequire(fullPath, moduleUri, parent)
       : this._createRequire(fullPath, moduleUri, parent)
 

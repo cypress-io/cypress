@@ -52,6 +52,16 @@ describe('lib/cloud/routes', () => {
   })
 
   describe('api url', () => {
+    let oldCypressInternalEnv
+
+    beforeEach(() => {
+      oldCypressInternalEnv = process.env.CYPRESS_INTERNAL_ENV
+    })
+
+    afterEach(() => {
+      process.env.CYPRESS_INTERNAL_ENV = oldCypressInternalEnv
+    })
+
     it('supports development environment', () => {
       process.env.CYPRESS_INTERNAL_ENV = 'development'
 

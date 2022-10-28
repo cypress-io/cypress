@@ -51,8 +51,8 @@ a module's key via the [getModuleKey function][getModuleKey-code].
 In order to learn how to orchestrate snapshot creation and loading please have a look at the
 examples provided with this app, for instance:
 
-- [example-express/snapshot/install-snapshot.js](https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/system-tests/projects/v8-snapshot/example-express/snapshot/install-snapshot.js)
-- [example-express/app/hook-require.js](https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/system-tests/projects/v8-snapshot/example-express/app/hook-require.js)
+- [example-express/snapshot/install-snapshot.js](https://github.com/cypress-io/cypress/blob/develop/system-tests/projects/v8-snapshot/example-express/snapshot/install-snapshot.js)
+- [example-express/app/hook-require.js](https://github.com/cypress-io/cypress/blob/develop/system-tests/projects/v8-snapshot/example-express/app/hook-require.js)
 
 ## Debugging and Diagnosing
 
@@ -81,9 +81,9 @@ exports: 12
 definitions: 18
 ```
 
-[getModuleKey-code]:https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/packages/v8-snapshot-require/src/snapshot-require.ts#L45
+[getModuleKey-code]:https://github.com/cypress-io/cypress/blob/develop/packages/v8-snapshot-require/src/snapshot-require.ts#L45
 
-[resolver-map]:https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/tooling/v8-snapshot/src/snapshot-generator.ts#L126
-[snapshot-require]:https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/packages/v8-snapshot-require/src/snapshot-require.ts#L187
+[resolver-map]:https://github.com/cypress-io/cypress/blob/develop/tooling/v8-snapshot/src/snapshot-generator.ts#L126
+[snapshot-require]:https://github.com/cypress-io/cypress/blob/develop/packages/v8-snapshot-require/src/snapshot-require.ts#L187
 
 [esbuild-snap]:https://github.com/cypress-io/esbuild/tree/thlorenz/snap

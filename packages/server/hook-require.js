@@ -12,7 +12,7 @@ function runWithSnapshot (forceTypeScript) {
   const supportTS = forceTypeScript || typeof global.snapshotResult === 'undefined' || global.supportTypeScript
 
   snapshotRequire(projectBaseDir, {
-    diagnostics: isDev,
+    diagnosticsEnabled: isDev,
     useCache: true,
     transpileOpts: {
       supportTS,

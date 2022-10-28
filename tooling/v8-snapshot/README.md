@@ -169,17 +169,17 @@ our app. See [makeAndInstallSnapshot][makeAndInstallSnapshot].
 	provided to the snapshot bundler
 - `V8_SNAPSHOT_FROM_SCRATCH` will not use the snapshot cache and generate v8 snapshots from scratch
  
-[doctor-next-stage]:https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/tooling/v8-snapshot/src/doctor/snapshot-doctor.ts#L628
-[makeAndInstallSnapshot]:https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/tooling/v8-snapshot/src/snapshot-generator.ts#L669
+[doctor-next-stage]:https://github.com/cypress-io/cypress/blob/develop/tooling/v8-snapshot/src/doctor/snapshot-doctor.ts#L628
+[makeAndInstallSnapshot]:https://github.com/cypress-io/cypress/blob/develop/tooling/v8-snapshot/src/snapshot-generator.ts#L669
 
-[blueprint-config]:https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/tooling/v8-snapshot/src/blueprint.ts#L51
-[globals-strict-code]:https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/tooling/v8-snapshot/src/blueprint/globals-strict.js
+[blueprint-config]:https://github.com/cypress-io/cypress/blob/develop/tooling/v8-snapshot/src/blueprint.ts#L51
+[globals-strict-code]:https://github.com/cypress-io/cypress/blob/develop/tooling/v8-snapshot/src/blueprint/globals-strict.js
 
-[generation-opts]:https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/tooling/v8-snapshot/src/snapshot-generator.ts#L112
-[resolver-map]:https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/tooling/v8-snapshot/src/snapshot-generator.ts#L126
-[snapshot-verifier]:https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/tooling/v8-snapshot/src/snapshot-verifier.ts#L10
+[generation-opts]:https://github.com/cypress-io/cypress/blob/develop/tooling/v8-snapshot/src/snapshot-generator.ts#L112
+[resolver-map]:https://github.com/cypress-io/cypress/blob/develop/tooling/v8-snapshot/src/snapshot-generator.ts#L126
+[snapshot-verifier]:https://github.com/cypress-io/cypress/blob/develop/tooling/v8-snapshot/src/snapshot-verifier.ts#L10
 
-[snapshot-doctor]:https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/tooling/v8-snapshot/src/doctor/snapshot-doctor.ts
-[snapshot-doctor-class]:https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/tooling/v8-snapshot/src/doctor/snapshot-doctor.ts#L261
-[snapshot-doctor-heal]:https://github.com/cypress-io/cypress/blob/bbabd12c9aae3d3eef0cb077d3e8628a53eea623/tooling/v8-snapshot/src/doctor/snapshot-doctor.ts#L308
+[snapshot-doctor]:https://github.com/cypress-io/cypress/blob/develop/tooling/v8-snapshot/src/doctor/snapshot-doctor.ts
+[snapshot-doctor-class]:https://github.com/cypress-io/cypress/blob/develop/tooling/v8-snapshot/src/doctor/snapshot-doctor.ts#L261
+[snapshot-doctor-heal]:https://github.com/cypress-io/cypress/blob/develop/tooling/v8-snapshot/src/doctor/snapshot-doctor.ts#L308
 [esbuild-snap]:https://github.com/cypress-io/esbuild/tree/thlorenz/snap

@@ -8,7 +8,7 @@ const DEFAULT_BUNDLE_OPTS: Partial<CreateBundleOpts> = {
 
 /**
  * The default bundle function.
- * Calls into [esbuild build](https://esbuild.github.io/api/#build-api]  passing along the {@link CreateBundleOpts}.
+ * Calls into [esbuild build](https://esbuild.github.io/api/#build-api] passing along the {@link CreateBundleOpts}.
  */
 export function createBundle (
   args: CreateBundleOpts,

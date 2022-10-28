@@ -79,6 +79,6 @@ SNAPSHOT_UPDATE=1 yarn test test/integration/cli_spec.js
 
 ### V8 Snapshots
 
-In order to improve start up time, Cypress uses [electron mksnapshot](https://github.com/electron/mksnapshot) for generating [V8 snapshots](https://v8.dev/blog/custom-startup-snapshots) for both development and prod.
+In order to improve start up time, Cypress uses [electron mksnapshot](https://github.com/electron/mksnapshot) for generating [v8 snapshots](https://v8.dev/blog/custom-startup-snapshots) for both development and production.
 
 Cypress code is automatically set up to run using snapshots. If you want to run Cypress in development without the v8 snapshot (for debugging purposes or to see if there's a problem with the snapshot or the code itself) you can set the environment variable `DISABLE_SNAPSHOT_REQUIRE` to 1 or true.

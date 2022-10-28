@@ -126,7 +126,7 @@ function createModuleNeedsReload (
  * Configures the setup of the require hook.
  *
  * @property useCache if `true` we use the cached module exports and definitions embedded in the snapshot
- * @property diagnostics toggles diagnostics
+ * @property diagnosticsEnabled toggles diagnosticsEnabled
  * @property snapshotOverride if set overrides the exports and definitions
  * embedded in the snapshot
  * @property requireStatsFile if set require stats are written to this file
@@ -136,7 +136,7 @@ function createModuleNeedsReload (
  */
 export type SnapshotRequireOpts = {
   useCache?: boolean
-  diagnostics?: boolean
+  diagnosticsEnabled?: boolean
   snapshotOverride?: Snapshot
   requireStatsFile?: string
   transpileOpts?: PackherdTranspileOpts
@@ -145,7 +145,7 @@ export type SnapshotRequireOpts = {
 
 const DEFAULT_SNAPSHOT_REQUIRE_OPTS = {
   useCache: true,
-  diagnostics: false,
+  diagnosticsEnabled: false,
   alwaysHook: true,
 }
 
@@ -173,7 +173,7 @@ export function snapshotRequire (
   projectBaseDir: string,
   opts: SnapshotRequireOpts = {},
 ) {
-  const { useCache, diagnostics, alwaysHook } = Object.assign(
+  const { useCache, diagnosticsEnabled, alwaysHook } = Object.assign(
     {},
     DEFAULT_SNAPSHOT_REQUIRE_OPTS,
     opts,
@@ -230,7 +230,7 @@ export function snapshotRequire (
     //    to interact with packherd's module loading mechanism
     const { resolve, shouldBypassCache, registerModuleLoad, tryLoad } =
       packherdRequire(projectBaseDir, {
-        diagnostics,
+        diagnosticsEnabled,
         moduleExports,
         moduleDefinitions,
         getModuleKey,

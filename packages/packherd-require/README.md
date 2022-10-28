@@ -107,16 +107,16 @@ In general we would recommend doing this _properly_ via a tool like
 - `PACKHERD_CODE_FRAMES` if set will include code snippets for error messages that have been
   sourcemapped
 
-[require fn]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/require.ts#L71
-[require opts]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/require.ts#L23-L32
-[transpile opts]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/types.ts#L187-L195
-[init transpile cache fn]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/types.ts#L177-L185
-[transpile-ts]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/transpile-ts.ts
-[GetModuleKey]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/loader.ts#L35-L45
-[packherd module loader]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/loader.ts#L226
-[try load]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/loader.ts#L536
-[try resolve]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/loader.ts#L458
-[sourcemap docs]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/sourcemap-support.ts
+[require fn]:https://github.com/cypress-io/cypress/blob/develop/packages/packherd/src/require.ts#L71
+[require opts]:https://github.com/cypress-io/cypress/blob/develop/packages/packherd/src/require.ts#L23-L32
+[transpile opts]:https://github.com/cypress-io/cypress/blob/develop/packages/packherd/src/types.ts#L187-L195
+[init transpile cache fn]:https://github.com/cypress-io/cypress/blob/develop/packages/packherd/src/types.ts#L177-L185
+[transpile-ts]:https://github.com/cypress-io/cypress/blob/develop/packages/packherd/src/transpile-ts.ts
+[GetModuleKey]:https://github.com/cypress-io/cypress/blob/develop/packages/packherd/src/loader.ts#L35-L45
+[packherd module loader]:https://github.com/cypress-io/cypress/blob/develop/packages/packherd/src/loader.ts#L226
+[try load]:https://github.com/cypress-io/cypress/blob/develop/packages/packherd/src/loader.ts#L536
+[try resolve]:https://github.com/cypress-io/cypress/blob/develop/packages/packherd/src/loader.ts#L458
+[sourcemap docs]:https://github.com/cypress-io/cypress/blob/develop/packages/packherd/src/sourcemap-support.ts
 
 [v8-snapshot]:https://github.com/thlorenz/v8-snapshot
 [v8-snapshot module key]:https://github.com/thlorenz/v8-snapshot/blob/master/src/loading/snapshot-require.ts#L20

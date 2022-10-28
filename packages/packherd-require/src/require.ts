@@ -78,7 +78,7 @@ export function packherdRequire (
     DEFAULT_TRANSPILE_OPTS,
     opts.transpileOpts,
   )
-  const diagnostics = opts.diagnostics ?? false
+  const diagnosticsEnabled = opts.diagnosticsEnabled ?? false
 
   const cache =
     initTranspileCache == null
@@ -97,7 +97,7 @@ export function packherdRequire (
       Module,
       projectBaseDir,
       logInfo,
-      diagnostics,
+      diagnosticsEnabled,
       cache,
       tsconfig,
     )
@@ -203,7 +203,7 @@ export function packherdRequire (
 
       return exports
     } catch (err) {
-      if (diagnostics && !moduleUri.endsWith('hook-require')) {
+      if (diagnosticsEnabled && !moduleUri.endsWith('hook-require')) {
         logError(err)
         // eslint-disable-next-line no-debugger
         debugger

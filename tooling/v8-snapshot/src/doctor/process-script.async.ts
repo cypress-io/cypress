@@ -55,7 +55,7 @@ export class AsyncScriptProcessor {
   }
 
   /**
-   * Termiates all workers and refuses to take on any work after that
+   * Terminates all workers and refuses to take on any work after that
    */
   dispose () {
     logTrace('Disposing AsyncScriptProcessor')

@@ -20,7 +20,7 @@ function getModuleKey({ moduleUri, baseDir }) {
 
 const projectBaseDir = path.dirname(entryFile)
 packherdRequire(projectBaseDir, {
-  diagnostics: true,
+  diagnosticsEnabled: true,
   moduleDefinitions: definitions,
   getModuleKey,
 })

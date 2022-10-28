@@ -44,20 +44,18 @@ try {
   })
 
   // Not dealing with things as crazy as async deps which are assigned during `setTimeout`
-  /*
-  test('should require a module with the exception of async deps', (t) => {
-    var req1 = require('../fixtures/async-deps.js')
-    var req2 = stealthyRequire(require.cache, function () {
+  test.skip('should require a module with the exception of async deps', (t) => {
+    let req1 = require('../fixtures/async-deps.js')
+    let req2 = stealthyRequire(require.cache, function () {
       return require('../fixtures/async-deps.js')
     })
-    var req3 = require('../fixtures/async-deps.js')
+    let req3 = require('../fixtures/async-deps.js')
 
     t.equal(req1, req3, 'req1 === req3')
     t.notEqual(req1.me, req2.me, 'req1.me !== req2.me')
     t.notEqual(req1.sync_dep, req2.sync_dep, 'req1.sync_dep !== req2.sync_dep')
     t.notEqual(req1.async_dep, req2.async_dep, 'req1.async_dep !== req2.async_dep')
   })
-  */
 
   test('should require a module while keeping a dependency that was required before', (t) => {
     let req1 = require('../fixtures/sync-deps.js')

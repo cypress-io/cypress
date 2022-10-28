@@ -22,15 +22,15 @@ and work hand in hand, `3.` is unrelated to them and was just added here since i
 ## Creating a Bundle with Packherd
 
 Calling the [packherd function][packherd fn] and providing the desired [packherd opts][packherd
-opts] will return the `Buffer` of the bundle,  a `meta` [esbuild metafile][esbuild metafile], a
+opts] will return the `Buffer` of the bundle, a `meta` [esbuild metafile][esbuild metafile], a
 `Buffer` containing the sourceMap if it was generated as well as any warnings that esbuild
 emitted.
 
 The caller can then store this data or use it for further operations, i.e. to generate a
 snapshot as is the case for the [v8-snapshot][v8-snapshot] module.
 
-[packherd fn]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/packherd.ts#L44
-[packherd opts]:https://github.com/cypress-io/cypress/blob/bb89994af7e119236bd263234294d325439abce2/packages/packherd/src/packherd.ts#L14-L27
+[packherd fn]:https://github.com/cypress-io/cypress/blob/develop/packages/packherd/src/packherd.ts#L44
+[packherd opts]:https://github.com/cypress-io/cypress/blob/develop/packages/packherd/src/packherd.ts#L14-L27
 [esbuild metafile]:https://esbuild.github.io/api/#metafile
 
 [v8-snapshot]:https://github.com/thlorenz/v8-snapshot

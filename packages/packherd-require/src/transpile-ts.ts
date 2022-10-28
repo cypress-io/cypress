@@ -58,7 +58,7 @@ function transpileTsCode (
  * @param Module the Node.js Module
  * @param projectBaseDir root of the project
  * @param log `debug` module logger to use
- * @param diagnostics if `true` in case of a transpile/compile error the app breaks when run in the debugger
+ * @param diagnosticsEnabled if `true` in case of a transpile/compile error the app breaks when run in the debugger
  * @param cache used to avoid re-transpiling modules that haven't changed since last transpile
  * @param sourceMapLookup allows overriding how a sourcemap for a particular `uri` is retrieved
  * @param tsconfig overrides tsconfig passed to esbuild
@@ -69,7 +69,7 @@ export function hookTranspileTs (
   Module: EnhancedModule,
   projectBaseDir: string,
   log: Debugger,
-  diagnostics: boolean,
+  diagnosticsEnabled: boolean,
   cache: TranspileCache,
   tsconfig?: TransformOptions['tsconfigRaw'],
 ) {
@@ -107,7 +107,7 @@ export function hookTranspileTs (
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error(err)
-        if (diagnostics) {
+        if (diagnosticsEnabled) {
           // eslint-disable-next-line no-debugger
           debugger
         }
