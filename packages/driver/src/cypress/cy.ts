@@ -174,7 +174,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   expect: IChai['expect']
 
   getIndexedXhrByAlias: IXhr['getIndexedXhrByAlias']
-  getRequestsByAlias: IXhr['getRequestsByAlias']
 
   addAlias: IAliases['addAlias']
   getAlias: IAliases['getAlias']
@@ -318,7 +317,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     const xhr = createXhr(state)
 
     this.getIndexedXhrByAlias = xhr.getIndexedXhrByAlias
-    this.getRequestsByAlias = xhr.getRequestsByAlias
 
     const aliases = createAliases(this)
 

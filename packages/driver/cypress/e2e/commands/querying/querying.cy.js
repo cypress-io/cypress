@@ -631,7 +631,7 @@ describe('src/cy/commands/querying', () => {
               win.$.get('/users', { num: 1 }),
               win.$.get('/users', { num: 2 }),
             ])
-          }).wait('@getUsers').wait('@getUsers').get('@getUsers.0').then((xhr1) => {
+          }).wait('@getUsers').wait('@getUsers').get('@getUsers.1').then((xhr1) => {
             expect(xhr1.response.url).to.include('/users?num=1')
           })
         })
@@ -645,7 +645,7 @@ describe('src/cy/commands/querying', () => {
               win.$.get('/users', { num: 1 }),
               win.$.get('/users', { num: 2 }),
             ])
-          }).wait('@getUsers').wait('@getUsers').get('@getUsers.1').then((xhr2) => {
+          }).wait('@getUsers').wait('@getUsers').get('@getUsers.2').then((xhr2) => {
             expect(xhr2.response.url).to.include('/users?num=2')
           })
         })
@@ -660,7 +660,7 @@ describe('src/cy/commands/querying', () => {
             ])
           })
 
-          cy.wait('@get.users').wait('@get.users').get('@get.users.1').then((xhr2) => {
+          cy.wait('@get.users').wait('@get.users').get('@get.users.2').then((xhr2) => {
             expect(xhr2.response.url).to.include('/users?num=2')
           })
         })
@@ -674,7 +674,7 @@ describe('src/cy/commands/querying', () => {
               win.$.get('/users', { num: 1 }),
               win.$.get('/users', { num: 2 }),
             ])
-          }).wait('@getUsers').wait('@getUsers').get('@getUsers.2').then((xhr3) => {
+          }).wait('@getUsers').wait('@getUsers').get('@getUsers.3').then((xhr3) => {
             expect(xhr3).to.be.null
           })
         })
@@ -896,7 +896,7 @@ describe('src/cy/commands/querying', () => {
       })
 
       // TODO: This is not throw when intercept is aliased. Is this correct?
-      it.skip('throws when alias property is `0`', (done) => {
+      it('throws when alias property is `0`', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`0` is not a valid alias property. Are you trying to ask for the first response? If so write `@getUsers.1`')
 
@@ -909,7 +909,7 @@ describe('src/cy/commands/querying', () => {
       })
 
       // TODO: This is not throw when intercept is aliased. Is this correct?
-      it.skip('throws when alias property isnt just a digit', (done) => {
+      it('throws when alias property isnt just a digit', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`1b` is not a valid alias property. Only `numbers` or `all` is permitted.')
 
@@ -922,7 +922,7 @@ describe('src/cy/commands/querying', () => {
       })
 
       // TODO: This is not throw when intercept is aliased. Is this correct?
-      it.skip('throws when alias property isnt a digit or `all`', (done) => {
+      it('throws when alias property isnt a digit or `all`', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`all ` is not a valid alias property. Only `numbers` or `all` is permitted.')
 
