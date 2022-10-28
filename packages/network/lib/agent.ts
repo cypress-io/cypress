@@ -8,6 +8,8 @@ import url from 'url'
 import { createRetryingSocket, getAddress } from './connect'
 import { lenientOptions } from './http-utils'
 import { ClientCertificateStore } from './client-certificates'
+import { promises as fs } from 'fs'
+import tls from 'tls'
 
 const debug = debugModule('cypress:network:agent')
 const CRLF = '\r\n'
@@ -30,6 +32,24 @@ type HttpsRequestOptionsWithProxy = WithProxyOpts<HttpsRequestOptions>
 
 type FamilyCache = {
   [host: string]: 4 | 6
+}
+
+const getCAOption = async () => {
+  if (process.env.npm_config_cafile) {
+    return { ca: await fs.readFile(process.env.npm_config_cafile, 'utf8') }
+  }
+
+  if (process.env.npm_config_ca) {
+    return { ca: process.env.npm_config_ca }
+  }
+
+  if (process.env.NODE_EXTRA_CA_CERTS) {
+    const extraCerts = await fs.readFile(process.env.NODE_EXTRA_CA_CERTS, 'utf8')
+
+    return { ca: tls.rootCertificates.concat(extraCerts) }
+  }
+
+  return {}
 }
 
 export function buildConnectReqHead (hostname: string, port: string, proxy: url.Url) {
@@ -293,7 +313,12 @@ class HttpsAgent extends https.Agent {
       options.port = 443
     }
 
-    super.addRequest(req, options)
+    getCAOption().then((caOption) => {
+      super.addRequest(req, {
+        ...options,
+        ...caOption,
+      })
+    })
   }
 
   createConnection (options: HttpsRequestOptions, cb: http.SocketCallback) {
