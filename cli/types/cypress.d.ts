@@ -1252,7 +1252,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/getcookie
      */
-    getCookie(name: string, options?: Partial<Loggable & Timeoutable>): Chainable<Cookie | null>
+    getCookie(name: string, options?: Partial<CookieOptions>): Chainable<Cookie | null>
 
     /**
      * Get all of the browser cookies.

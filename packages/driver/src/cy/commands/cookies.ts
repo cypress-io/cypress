@@ -81,7 +81,7 @@ function cookieValidatesSecurePrefix (options) {
 
 interface InternalGetCookieOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
   _log?: Log
-  cookie?: Cypress.Cookie
+  domain?: string
 }
 
 interface InternalGetCookiesOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
@@ -201,18 +201,17 @@ export default function (Commands, Cypress, cy, state, config) {
 
       options.timeout = options.timeout || config('defaultCommandTimeout')
 
+      let cookie: Cypress.Cookie
+
       if (options.log) {
         options._log = Cypress.log({
           message: name,
           timeout: responseTimeout,
           consoleProps () {
-            let c
             const obj = {}
 
-            c = options.cookie
-
-            if (c) {
-              obj['Yielded'] = c
+            if (cookie) {
+              obj['Yielded'] = cookie
             } else {
               obj['Yielded'] = 'null'
               obj['Note'] = `No cookie with the name: '${name}' was found.`
@@ -230,12 +229,10 @@ export default function (Commands, Cypress, cy, state, config) {
       }
 
       return cy.retryIfCommandAUTOriginMismatch(() => {
-        return automateCookies('get:cookie', { name }, options._log, responseTimeout)
+        return automateCookies('get:cookie', { name, domain: options.domain }, options._log, responseTimeout)
         .then(pickCookieProps)
-        .then((resp) => {
-          options.cookie = resp
-
-          return resp
+        .tap((result) => {
+          cookie = result
         })
         .catch(handleBackendError('getCookie', 'reading the requested cookie from', onFail))
       }, options.timeout)
@@ -272,10 +269,8 @@ export default function (Commands, Cypress, cy, state, config) {
       return cy.retryIfCommandAUTOriginMismatch(() => {
         return automateCookies('get:cookies', _.pick(options, 'domain'), options._log, responseTimeout)
         .then(pickCookieProps)
-        .then((result: Cypress.Cookie[]) => {
+        .tap((result: Cypress.Cookie[]) => {
           cookies = result
-
-          return result
         })
         .catch(handleBackendError('getCookies', 'reading cookies from', options._log))
       }, options.timeout)

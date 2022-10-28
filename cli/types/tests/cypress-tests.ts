@@ -989,3 +989,17 @@ namespace CypressGetCookiesTests {
   cy.getCookies({ timeout: '10' }) // $ExpectError
   cy.getCookies({ domain: false }) // $ExpectError
 }
+
+namespace CypressGetCookieTests {
+  cy.getCookie('name').then((cookie) => {
+    cookie // $ExpectType Cypress.Cookie | null
+  })
+  cy.getCookie('name', { log: true })
+  cy.getCookie('name', { timeout: 10 })
+  cy.getCookie('name', { domain: 'localhost' })
+  cy.getCookie('name', { log: true, timeout: 10, domain: 'localhost' })
+
+  cy.getCookie('name', { log: 'true' }) // $ExpectError
+  cy.getCookie('name', { timeout: '10' }) // $ExpectError
+  cy.getCookie('name', { domain: false }) // $ExpectError
+}
