@@ -1259,7 +1259,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/getcookies
      */
-    getCookies(options?: Partial<Loggable & Timeoutable>): Chainable<Cookie[]>
+    getCookies(options?: Partial<CookieOptions>): Chainable<Cookie[]>
 
     /**
      * Navigate back or forward to the previous or next URL in the browser's history.
@@ -2631,6 +2631,13 @@ declare namespace Cypress {
      * @default false
      */
     cmdKey: boolean
+  }
+
+  interface CookieOptions extends Loggable, Timeoutable {
+    /**
+     * Domain to set cookies on or get cookies from
+     */
+    domain: string
   }
 
   interface PEMCert {

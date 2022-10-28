@@ -86,7 +86,7 @@ interface InternalGetCookieOptions extends Partial<Cypress.Loggable & Cypress.Ti
 
 interface InternalGetCookiesOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
   _log?: Log
-  cookies?: Cypress.Cookie[]
+  domain?: string
 }
 
 interface InternalSetCookieOptions extends Partial<Cypress.SetCookieOptions> {
@@ -250,19 +250,18 @@ export default function (Commands, Cypress, cy, state, config) {
 
       options.timeout = options.timeout || config('defaultCommandTimeout')
 
+      let cookies: Cypress.Cookie[] = []
+
       if (options.log) {
         options._log = Cypress.log({
           message: '',
           timeout: responseTimeout,
           consoleProps () {
-            let c
             const obj = {}
 
-            c = options.cookies
-
-            if (c) {
-              obj['Yielded'] = c
-              obj['Num Cookies'] = c.length
+            if (cookies.length) {
+              obj['Yielded'] = cookies
+              obj['Num Cookies'] = cookies.length
             }
 
             return obj
@@ -273,10 +272,10 @@ export default function (Commands, Cypress, cy, state, config) {
       return cy.retryIfCommandAUTOriginMismatch(() => {
         return automateCookies('get:cookies', _.pick(options, 'domain'), options._log, responseTimeout)
         .then(pickCookieProps)
-        .then((resp) => {
-          options.cookies = resp
+        .then((result: Cypress.Cookie[]) => {
+          cookies = result
 
-          return resp
+          return result
         })
         .catch(handleBackendError('getCookies', 'reading cookies from', options._log))
       }, options.timeout)

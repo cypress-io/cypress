@@ -936,6 +936,7 @@ namespace CypressSessionsTests {
     validate: { foo: true } // $ExpectError
   })
 }
+
 namespace CypressCurrentTest {
   Cypress.currentTest.title // $ExpectType string
   Cypress.currentTest.titlePath // $ExpectType string[]
@@ -973,4 +974,18 @@ namespace CypressOriginTests {
   cy.origin('example.com', {}, {}) // $ExpectError
   cy.origin('example.com', { args: ['value'] }, (value: boolean[]) => {}) // $ExpectError
   cy.origin('example.com', {}, (value: undefined) => {}) // $ExpectError
+}
+
+namespace CypressGetCookiesTests {
+  cy.getCookies().then((cookies) => {
+    cookies // $ExpectType Cypress.Cookie[]
+  })
+  cy.getCookies({ log: true })
+  cy.getCookies({ timeout: 10 })
+  cy.getCookies({ domain: 'localhost' })
+  cy.getCookies({ log: true, timeout: 10, domain: 'localhost' })
+
+  cy.getCookies({ log: 'true' }) // $ExpectError
+  cy.getCookies({ timeout: '10' }) // $ExpectError
+  cy.getCookies({ domain: false }) // $ExpectError
 }
