@@ -25,7 +25,7 @@ import {
 
 /**
  * Additional module configurations needed while mounting the component, like
- * providers, declarations, imports and even component @Inputs()
+ * providers, componentProviders, declarations, imports and even component @Inputs()
  *
  *
  * @interface MountConfig
@@ -76,6 +76,14 @@ export interface MountConfig<T> extends TestModuleMetadata {
    */
   componentProviders?: any[]
 }
+
+/**
+ * Additional module configurations needed while mounting the component, like
+ * providers, declarations, imports and even component @Inputs()
+ *
+ * @type MountConfigWithTemplate<T>
+ */
+export type MountConfigWithTemplate<T> = Omit<MountConfig<T>, 'componentProviders'>
 
 /**
  * Type that the `mount` function returns
@@ -281,6 +289,17 @@ function setupComponent<T extends { ngOnChanges? (changes: SimpleChanges): void 
   return component
 }
 
+export function mount<T> (component: Type<T>): Cypress.Chainable<MountResponse<T>>;
+
+// eslint-disable-next-line no-redeclare
+export function mount<T> (component: Type<T>, config: MountConfig<T>): Cypress.Chainable<MountResponse<T>>;
+
+// eslint-disable-next-line no-redeclare
+export function mount<T> (template: string): Cypress.Chainable<MountResponse<T>>;
+
+// eslint-disable-next-line no-redeclare
+export function mount<T> (template: string, config: MountConfigWithTemplate<T>): Cypress.Chainable<MountResponse<T>>;
+
 /**
  * Mounts an Angular component inside Cypress browser
  *
@@ -310,6 +329,7 @@ function setupComponent<T extends { ngOnChanges? (changes: SimpleChanges): void 
  * })
  * @returns Cypress.Chainable<MountResponse<T>>
  */
+// eslint-disable-next-line no-redeclare
 export function mount<T> (
   component: Type<T> | string,
   config: MountConfig<T> = { },
