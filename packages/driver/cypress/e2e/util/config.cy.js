@@ -110,7 +110,8 @@ describe('driver/src/cypress/validate_config', () => {
           expect(overrideLevel).to.eq('suite')
 
           expect(() => {
-            validateConfig(state, { testIsolation: 'strict' })
+            // TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
+            validateConfig(state, { testIsolation: Cypress.config('experimentalSessionAndOrigin') ? 'on' : null })
           }).not.to.throw()
         })
 
@@ -127,7 +128,7 @@ describe('driver/src/cypress/validate_config', () => {
           expect(overrideLevel).to.eq('test')
 
           expect(() => {
-            validateConfig(state, { testIsolation: 'strict' })
+            validateConfig(state, { testIsolation: 'on' })
           }).to.throw(`The \`testIsolation\` configuration can only be overridden from a suite-level override.`)
         })
       })
@@ -192,7 +193,8 @@ describe('driver/src/cypress/validate_config', () => {
       })
 
       expect(() => {
-        validateConfig(state, { testIsolation: 'legacy' })
+        // TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
+        validateConfig(state, { testIsolation: Cypress.config('experimentalSessionAndOrigin') ? 'off' : null })
       }).not.to.throw()
     })
 

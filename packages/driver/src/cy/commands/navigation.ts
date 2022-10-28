@@ -35,11 +35,12 @@ const reset = (test: any = {}) => {
   // before each test run!
   previouslyVisitedLocation = undefined
 
-  const { experimentalSessionAndOrigin, testIsolation } = Cypress.config()
+  // TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
+  const { experimentalSessionAndOrigin } = Cypress.config()
 
   // make sure we reset that we haven't visited about blank again
   // strict test isolation resets the navigation history for us.
-  hasVisitedAboutBlank = experimentalSessionAndOrigin && testIsolation === 'strict'
+  hasVisitedAboutBlank = experimentalSessionAndOrigin
 
   currentlyVisitingAboutBlank = false
 
@@ -277,7 +278,9 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
 
   // We need to sync this state value prior to checking it otherwise we will erroneously log a loading event after the test is complete.
   if (Cypress.isCrossOriginSpecBridge) {
-    const duringUserTestExecution = await Cypress.specBridgeCommunicator.toPrimaryPromise('sync:during:user:test:execution')
+    const duringUserTestExecution = await Cypress.specBridgeCommunicator.toPrimaryPromise({
+      event: 'sync:during:user:test:execution',
+    })
 
     cy.state('duringUserTestExecution', duringUserTestExecution)
   }
@@ -312,6 +315,11 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
   const onPageLoadErr = (err) => {
     state('onPageLoadErr', null)
 
+    // If the error thrown is a cypress error, return it instead of throwing a cross origin error.
+    if ($errUtils.isCypressErr(err)) {
+      return err
+    }
+
     const { origin } = $Location.create(window.location.href)
 
     try {
@@ -333,6 +341,11 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
   state('onPageLoadErr', onPageLoadErr)
 
   const getRedirectionCount = (href) => {
+    // redirecting to about:blank should not count towards the redirection limit.
+    if (href === 'about:blank') {
+      return 0
+    }
+
     // object updated at test:before:run:async
     const count = state('redirectionCount')
 
@@ -360,6 +373,7 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
 
         if (count === limit) {
           $errUtils.throwErrByPath('navigation.reached_redirection_limit', {
+            onFail: options._log,
             args: {
               href,
               limit,
@@ -1218,6 +1232,10 @@ export default (Commands, Cypress, cy, state, config) => {
       }
 
       const visit = () => {
+        // REMOVE THIS ONCE GA HITS. Sessions will handle visiting
+        // about blank.
+        // Fixed with: https://github.com/cypress-io/cypress/issues/21471
+        //
         // if we've visiting for the first time during
         // a test then we want to first visit about:blank
         // so that we nuke the previous state. subsequent

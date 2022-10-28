@@ -17,7 +17,7 @@ export default class Attempt {
   @observable agents: Agent[] = []
   @observable sessions: Record<string, Session> = {}
   @observable commands: Command[] = []
-  @observable err = new Err({})
+  @observable err?: Err = undefined
   @observable hooks: Hook[] = []
   // TODO: make this an enum with states: 'QUEUED, ACTIVE, INACTIVE'
   @observable isActive: boolean | null = null
@@ -49,7 +49,10 @@ export default class Attempt {
     this.id = props.currentRetry || 0
     this.test = test
     this._state = props.state
-    this.err.update(props.err)
+
+    if (props.err) {
+      this.err = new Err(props.err)
+    }
 
     this.invocationDetails = props.invocationDetails
 
@@ -76,6 +79,16 @@ export default class Attempt {
 
   @computed get state () {
     return this._state || (this.isActive ? 'active' : 'processing')
+  }
+
+  @computed get error () {
+    const command = this.err?.isCommandErr ? this.commandMatchingErr() : undefined
+
+    return {
+      err: this.err,
+      testId: command?.testId,
+      commandId: command?.id,
+    }
   }
 
   @computed get isLast () {
@@ -137,9 +150,14 @@ export default class Attempt {
     }
   }
 
-  commandMatchingErr () {
+  commandMatchingErr (): Command | undefined {
+    if (!this.err) {
+      return undefined
+    }
+
     return _(this.hooks)
     .map((hook) => {
+      // @ts-ignore
       return hook.commandMatchingErr(this.err)
     })
     .compact()
@@ -155,7 +173,13 @@ export default class Attempt {
       this._state = props.state
     }
 
-    this.err.update(props.err)
+    if (props.err) {
+      if (this.err) {
+        this.err.update(props.err)
+      } else {
+        this.err = new Err(props.err)
+      }
+    }
 
     if (props.failedFromHookId) {
       const hook = _.find(this.hooks, { hookId: props.failedFromHookId })
