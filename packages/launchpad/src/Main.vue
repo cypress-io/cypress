@@ -4,7 +4,7 @@
       class="w-full z-10 fixed"
     />
 
-    <MigrationLandingPage
+    <MajorVersionLandingPage
       v-if="currentProject?.needsLegacyConfigMigration && !wasLandingPageShown && online && videoHtml"
       class="pt-64px"
       :video-html="videoHtml"
@@ -94,7 +94,7 @@ import Spinner from '@cy/components/Spinner.vue'
 import CompareTestingTypes from './setup/CompareTestingTypes.vue'
 import MigrationWizard from './migration/MigrationWizard.vue'
 import ScaffoldedFiles from './setup/ScaffoldedFiles.vue'
-import MigrationLandingPage from './migration/MigrationLandingPage.vue'
+import MajorVersionLandingPage from './migration/MajorVersionLandingPage.vue'
 import { useI18n } from '@cy/i18n'
 import { computed, ref } from 'vue'
 import LaunchpadHeader from './setup/LaunchpadHeader.vue'

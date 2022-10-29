@@ -1,9 +1,9 @@
 import { defaultMessages } from '@cy/i18n'
-import MigrationLandingPage from './MigrationLandingPage.vue'
+import MajorVersionLandingPage from './MajorVersionLandingPage.vue'
 
 const text = defaultMessages.migration.landingPage
 
-describe('<MigrationLandingPage />', { viewportWidth: 1280, viewportHeight: 720 }, () => {
+describe('<MajorVersionLandingPage />', { viewportWidth: 1280, viewportHeight: 720 }, () => {
   const assertAllContentsVisible = () => {
     cy.contains('h1', text.title).should('be.visible')
     cy.contains('p', text.description).should('be.visible')
@@ -22,7 +22,7 @@ describe('<MigrationLandingPage />', { viewportWidth: 1280, viewportHeight: 720 
   it('renders the content at large viewport', () => {
     const continueStub = cy.stub()
 
-    cy.mount(<MigrationLandingPage onClearLandingPage={continueStub} videoHtml={testVideoHtml}/>)
+    cy.mount(<MajorVersionLandingPage onClearLandingPage={continueStub} videoHtml={testVideoHtml}/>)
     assertAllContentsVisible()
     assertVideoSize(680, 408)
     cy.contains('button', text.actionContinue).click()
@@ -32,7 +32,7 @@ describe('<MigrationLandingPage />', { viewportWidth: 1280, viewportHeight: 720 
   })
 
   it('is responsive on smaller viewports', () => {
-    cy.mount(<MigrationLandingPage videoHtml={testVideoHtml}/>)
+    cy.mount(<MajorVersionLandingPage videoHtml={testVideoHtml}/>)
 
     // asserting a few viewports here since it's pretty easy to accidentally remove aspect ratio css
     // and not notice right away
