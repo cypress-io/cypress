@@ -25,7 +25,7 @@ import {
 
 /**
  * Additional module configurations needed while mounting the component, like
- * providers, componentProviders, declarations, imports and even component @Inputs()
+ * providers, declarations, imports and even component @Inputs()
  *
  *
  * @interface MountConfig
@@ -70,20 +70,7 @@ export interface MountConfig<T> extends TestModuleMetadata {
    * })
    */
   componentProperties?: Partial<{ [P in keyof T]: T[P] }>
-  /**
-   * @memberof MountConfig
-   * @description overrides providers in `@Component({providers: []})`
-   */
-  componentProviders?: any[]
 }
-
-/**
- * Additional module configurations needed while mounting the component, like
- * providers, declarations, imports and even component @Inputs()
- *
- * @type MountConfigWithTemplate<T>
- */
-export type MountConfigWithTemplate<T> = Omit<MountConfig<T>, 'componentProviders'>
 
 /**
  * Type that the `mount` function returns
@@ -144,10 +131,6 @@ function bootstrapModule<T> (
     testModuleMetaData.providers = []
   }
 
-  if (!testModuleMetaData.componentProviders) {
-    testModuleMetaData.componentProviders = []
-  }
-
   // Replace default error handler since it will swallow uncaught exceptions.
   // We want these to be uncaught so Cypress catches it and fails the test
   testModuleMetaData.providers.push({
@@ -180,21 +163,11 @@ function initTestBed<T> (
   component: Type<T> | string,
   config: MountConfig<T>,
 ): Type<T> {
-  const { componentProviders, ...configRest } = config
-
   const componentFixture = createComponentFixture(component) as Type<T>
 
   getTestBed().configureTestingModule({
-    ...bootstrapModule(componentFixture, configRest),
+    ...bootstrapModule(componentFixture, config),
   })
-
-  if (componentProviders != null) {
-    getTestBed().overrideComponent(componentFixture, {
-      set: {
-        providers: componentProviders,
-      },
-    })
-  }
 
   return componentFixture
 }
@@ -289,17 +262,6 @@ function setupComponent<T extends { ngOnChanges? (changes: SimpleChanges): void 
   return component
 }
 
-export function mount<T> (component: Type<T>): Cypress.Chainable<MountResponse<T>>;
-
-// eslint-disable-next-line no-redeclare
-export function mount<T> (component: Type<T>, config: MountConfig<T>): Cypress.Chainable<MountResponse<T>>;
-
-// eslint-disable-next-line no-redeclare
-export function mount<T> (template: string): Cypress.Chainable<MountResponse<T>>;
-
-// eslint-disable-next-line no-redeclare
-export function mount<T> (template: string, config: MountConfigWithTemplate<T>): Cypress.Chainable<MountResponse<T>>;
-
 /**
  * Mounts an Angular component inside Cypress browser
  *
@@ -329,7 +291,6 @@ export function mount<T> (template: string, config: MountConfigWithTemplate<T>):
  * })
  * @returns Cypress.Chainable<MountResponse<T>>
  */
-// eslint-disable-next-line no-redeclare
 export function mount<T> (
   component: Type<T> | string,
   config: MountConfig<T> = { },
