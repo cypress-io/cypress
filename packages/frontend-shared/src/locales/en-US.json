@@ -733,9 +733,9 @@
     }
   },
   "majorVersionLandingPage": {
-    "title": "Welcome to Cypress 10!",
-    "description": "Check out the highlights in the video below to explore what’s changed recently.",
-    "actionContinue": "Continue to Cypress 10",
+    "title": "What's new in Cypress 11?",
+    "description": "Component Testing is now generally available for projects using React, Vue, and Angular!",
+    "actionContinue": "Continue",
     "linkReleaseNotes": "Release notes"
   },
   "setupWizard": {
