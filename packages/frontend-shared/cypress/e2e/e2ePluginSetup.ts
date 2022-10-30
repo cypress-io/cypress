@@ -257,18 +257,6 @@ async function makeE2ETasks () {
           }), { status: 200 })
         }
 
-        if (String(url).startsWith('https://on.cypress.io/v10-video-embed/')) {
-          return new Response(JSON.stringify({
-            videoHtml: `<iframe
-              src="https://player.vimeo.com/video/668764401?h=0cbc785eef"
-              class="rounded h-full bg-gray-1000 w-full"
-              frameborder="0"
-              allow="autoplay; fullscreen; picture-in-picture"
-              allowfullscreen
-            />`,
-          }), { status: 200 })
-        }
-
         return fetchApi(url, init)
       })
 
