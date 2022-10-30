@@ -43,7 +43,7 @@ describe('Config files error handling', () => {
 
     cy.visitLaunchpad()
 
-    cy.contains('button', defaultMessages.migration.landingPage.actionContinue).click()
+    cy.contains('button', defaultMessages.majorVersionLandingPage.actionContinue).click()
     cy.get('body').should('contain.text', defaultMessages.migration.wizard.title)
     cy.get('body').should('contain.text', defaultMessages.migration.wizard.description)
   })

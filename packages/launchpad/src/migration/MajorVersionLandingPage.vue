@@ -1,12 +1,12 @@
 <template>
   <div class="bg-no-repeat bg-cover h-screen min-h-700px lp-wrapper">
     <h1 class="font-medium text-center tracking-tighter pt-45px text-32px text-teal-1000">
-      {{ t('migration.landingPage.title') }}
+      {{ t('majorVersionLandingPage.title') }}
     </h1>
     <p
       class="mx-42px mt-12px text-center mb-32px text-teal-600 text-18px"
     >
-      {{ t('migration.landingPage.description') }}
+      {{ t('majorVersionLandingPage.description') }}
     </p>
 
     <div class="border-transparent rounded mx-auto bg-gray-50/50 border-4px text-center max-w-80vw w-688px overflow-hidden">
@@ -16,7 +16,7 @@
           size="lg"
           @click="handleClick"
         >
-          {{ t('migration.landingPage.actionContinue') }}
+          {{ t('majorVersionLandingPage.actionContinue') }}
           <template #suffix>
             <i-cy-arrow-right_x16 class="transform transition-transform ease-in duration-200 group-hocus:translate-x-1px" />
           </template>
@@ -29,7 +29,7 @@
           <template #prefix>
             <i-cy-book_x16 class="icon-dark-gray-600" />
           </template>
-          {{ t('migration.landingPage.linkReleaseNotes') }}
+          {{ t('majorVersionLandingPage.linkReleaseNotes') }}
         </Button>
       </div>
     </div>

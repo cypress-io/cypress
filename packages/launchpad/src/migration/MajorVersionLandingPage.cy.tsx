@@ -1,7 +1,7 @@
 import { defaultMessages } from '@cy/i18n'
 import MajorVersionLandingPage from './MajorVersionLandingPage.vue'
 
-const text = defaultMessages.migration.landingPage
+const text = defaultMessages.majorVersionLandingPage
 
 describe('<MajorVersionLandingPage />', { viewportWidth: 1280, viewportHeight: 720 }, () => {
   const assertAllContentsVisible = () => {
