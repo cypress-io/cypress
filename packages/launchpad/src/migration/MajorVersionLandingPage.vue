@@ -10,11 +10,6 @@
     </p>
 
     <div class="border-transparent rounded mx-auto bg-gray-50/50 border-4px text-center max-w-80vw w-688px overflow-hidden">
-      <div
-        class="bg-white rounded-t border-4px-gray-500 w-full p-24px video"
-        data-cy="video-container"
-        v-html="props.videoHtml"
-      />
       <div class="rounded-b flex bg-gray-50 py-16px px-24px gap-8px overflow-hidden">
         <Button
           class="group"
@@ -45,10 +40,6 @@
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
 const { t } = useI18n()
-
-const props = defineProps<{
-  videoHtml: string
-}>()
 
 const emit = defineEmits<{
   (eventName: 'clearLandingPage', value: void): void

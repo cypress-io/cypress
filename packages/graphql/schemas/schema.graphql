@@ -1121,9 +1121,6 @@ type Migration {
 
   """Support files needing automated rename"""
   supportFiles: MigrationFile
-
-  """Markup for the migration landing page video embed"""
-  videoEmbedHtml: String
 }
 
 type MigrationFile {

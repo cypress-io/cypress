@@ -1,5 +1,4 @@
 import type { ProjectFixtureDir } from '@tooling/system-tests'
-import type { SinonStub } from 'sinon'
 import { getPathForPlatform } from './support/getPathForPlatform'
 
 // @ts-ignore
@@ -80,27 +79,6 @@ function renameSupport (lang: 'js' | 'ts' | 'coffee' = 'js') {
   }, { lang })
 }
 
-function stubVideoHtml (): void {
-  // ctx.migration.getVideoEmbedHtml
-  cy.withCtx((ctx, o) => {
-    o.sinon.stub(ctx.migration, 'getVideoEmbedHtml').callsFake(async () => {
-      return '<span>Stubbed Video Content</span>'
-    })
-  })
-}
-
-function unstubVideoHtml (): void {
-  cy.withCtx((ctx, o) => {
-    const restoreFn = (ctx.migration.getVideoEmbedHtml as SinonStub).restore
-
-    restoreFn?.()
-  })
-}
-
-beforeEach(() => {
-  stubVideoHtml()
-})
-
 describe('global mode', () => {
   it('migrates 2 projects in global mode', () => {
     cy.openGlobalMode()
@@ -178,45 +156,7 @@ describe('Opening unmigrated project', () => {
     .should('be.visible')
     .and('have.attr', 'href', 'https://on.cypress.io/changelog')
 
-    // Vimeo's implementation may change and we don't want to have an external dependency in this test,
-    // this is just a high level check that the mocked embed html from the on-link is being included
-    cy.get('[data-cy="video-container"]')
-    .contains('Stubbed Video Content')
-    .and('be.visible')
-
     cy.percySnapshot()
-  })
-
-  it('landing page does not appear if there is no video embed code', () => {
-    unstubVideoHtml()
-
-    cy.scaffoldProject('migration')
-    cy.openProject('migration')
-    cy.withCtx((ctx, o) => {
-      o.sinon.stub(ctx.migration, 'getVideoEmbedHtml').callsFake(async () => {
-        return null
-      })
-    })
-
-    cy.visitLaunchpad()
-    cy.contains(cy.i18n.welcomePage.title).should('be.visible')
-    cy.contains(cy.i18n.migration.landingPage.title).should('not.exist')
-  })
-
-  it('should only hit the video on link once & cache it', () => {
-    unstubVideoHtml()
-
-    cy.scaffoldProject('migration')
-    cy.openProject('migration')
-
-    cy.visitLaunchpad()
-    cy.contains(cy.i18n.migration.landingPage.title).should('be.visible')
-
-    cy.visitLaunchpad()
-    cy.contains(cy.i18n.migration.landingPage.title).should('be.visible')
-    cy.withCtx((ctx, o) => {
-      expect((ctx.util.fetch as SinonStub).args.filter((a) => String(a[0]).includes('v10-video-embed')).length).to.eq(1)
-    })
   })
 })
 

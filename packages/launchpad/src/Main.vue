@@ -3,11 +3,9 @@
     <HeaderBar
       class="w-full z-10 fixed"
     />
-
     <MajorVersionLandingPage
-      v-if="currentProject?.needsLegacyConfigMigration && !wasLandingPageShown && online && videoHtml"
+      v-if="!wasLandingPageShown"
       class="pt-64px"
-      :video-html="videoHtml"
       @clearLandingPage="wasLandingPageShown = true"
     />
     <div
@@ -99,14 +97,12 @@ import { useI18n } from '@cy/i18n'
 import { computed, ref } from 'vue'
 import LaunchpadHeader from './setup/LaunchpadHeader.vue'
 import OpenBrowser from './setup/OpenBrowser.vue'
-import { useOnline } from '@vueuse/core'
 import LoginConnectModals from '@cy/gql-components/LoginConnectModals.vue'
 import CloudViewerAndProject from '@cy/gql-components/CloudViewerAndProject.vue'
 
 const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
 const wasLandingPageShown = ref(false)
-const online = useOnline()
 
 gql`
 fragment MainLaunchpadQueryData on Query {
@@ -125,9 +121,6 @@ fragment MainLaunchpadQueryData on Query {
     isFullConfigReady
     needsLegacyConfigMigration
     currentTestingType
-  }
-  migration {
-    videoEmbedHtml
   }
   isGlobalMode
   ...GlobalPage
@@ -159,6 +152,5 @@ const resetErrorAndLoadConfig = (id: string) => {
 }
 const query = useQuery({ query: MainLaunchpadQueryDocument })
 const currentProject = computed(() => query.data.value?.currentProject)
-const videoHtml = computed(() => query.data.value?.migration?.videoEmbedHtml)
 
 </script>
