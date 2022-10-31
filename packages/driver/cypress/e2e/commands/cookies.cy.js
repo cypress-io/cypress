@@ -124,6 +124,60 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.clearCookies()
       cy.getCookies().should('have.length', 0)
     })
+
+    it('clears the cookies on the domain matching the AUT by default', () => {
+      cy.visit('http://localhost:3500/fixtures/generic.html')
+      cy.setCookie('foo', 'bar')
+      cy.setCookie('baz', 'qux')
+      cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
+
+      cy.clearCookies()
+
+      cy.getCookie('foo').should('be.null')
+      cy.getCookie('baz').should('be.null')
+      cy.getCookie('foo', { domain: 'www.foobar.com' }).should('exist')
+
+      if (!Cypress.config('experimentalSessionAndOrigin')) return
+
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
+        cy.setCookie('baz', 'qux')
+        cy.setCookie('foo', 'bar', { domain: 'localhost' })
+
+        cy.clearCookies()
+
+        cy.getCookie('foo').should('be.null')
+        cy.getCookie('baz').should('be.null')
+        cy.getCookie('foo', { domain: 'localhost' }).should('exist')
+      })
+    })
+
+    it('clears the cookies on the specified domain', () => {
+      cy.visit('http://localhost:3500/fixtures/generic.html')
+      cy.setCookie('foo', 'bar')
+      cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
+      cy.setCookie('baz', 'qux', { domain: 'www.foobar.com' })
+
+      cy.clearCookies({ domain: 'www.foobar.com' })
+
+      cy.getCookie('foo', { domain: 'www.foobar.com' }).should('be.null')
+      cy.getCookie('baz', { domain: 'www.foobar.com' }).should('be.null')
+      cy.getCookie('foo').should('exist')
+
+      if (!Cypress.config('experimentalSessionAndOrigin')) return
+
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
+        cy.setCookie('foo', 'bar')
+        cy.setCookie('baz', 'qux', { domain: 'localhost' })
+
+        cy.clearCookies({ domain: 'localhost' })
+
+        cy.getCookie('foo', { domain: 'localhost' }).should('be.null')
+        cy.getCookie('baz', { domain: 'localhost' }).should('be.null')
+        cy.getCookie('foo').should('exist')
+      })
+    })
   })
 
   context('#clearCookie', () => {

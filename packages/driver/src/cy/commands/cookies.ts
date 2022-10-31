@@ -411,7 +411,7 @@ export default function (Commands, Cypress, cy, state, config) {
       }, options.timeout)
     },
 
-    clearCookies (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+    clearCookies (userOptions: Partial<Cypress.CookieOptions> = {}) {
       const options: InternalClearCookiesOptions = _.defaults({}, userOptions, {
         log: true,
       })
@@ -420,19 +420,20 @@ export default function (Commands, Cypress, cy, state, config) {
 
       options.timeout = options.timeout || config('defaultCommandTimeout')
 
+      let cookies: Cypress.Cookie[] = []
+
       if (options.log) {
         options._log = Cypress.log({
           message: '',
           timeout: responseTimeout,
           consoleProps () {
-            const c = options.cookies
             const obj = {}
 
             obj['Yielded'] = 'null'
 
-            if (c && c.length) {
-              obj['Cleared Cookies'] = c
-              obj['Num Cookies'] = c.length
+            if (cookies.length) {
+              obj['Cleared Cookies'] = cookies
+              obj['Num Cookies'] = cookies.length
             } else {
               obj['Note'] = 'No cookies were found or removed.'
             }
@@ -446,8 +447,8 @@ export default function (Commands, Cypress, cy, state, config) {
 
       return cy.retryIfCommandAUTOriginMismatch(() => {
         return getAndClear(options._log, responseTimeout, { domain: options.domain })
-        .then((resp) => {
-          options.cookies = resp
+        .then((result) => {
+          cookies = result
 
           // null out the current subject
           return null
