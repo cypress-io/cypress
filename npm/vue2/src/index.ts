@@ -267,9 +267,6 @@ declare global {
 
 const cleanup = () => {
   Cypress.vueWrapper?.destroy()
-  const el = getContainerEl()
-
-  el.innerHTML = ''
 }
 
 /**
