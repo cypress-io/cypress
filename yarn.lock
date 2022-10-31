@@ -7658,10 +7658,10 @@
   resolved "https://registry.yarnpkg.com/@vue/test-utils/-/test-utils-2.0.2.tgz#0b5edd683366153d5bc5a91edc62f292118710eb"
   integrity sha512-E2P4oXSaWDqTZNbmKZFVLrNN/siVN78YkEqs7pHryWerrlZR9bBFLWdJwRoguX45Ru6HxIflzKl4vQvwRMwm5g==
 
-"@vue/test-utils@^1.1.3":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@vue/test-utils/-/test-utils-1.3.0.tgz#d563decdcd9c68a7bca151d4179a2bfd6d5c3e15"
-  integrity sha512-Xk2Xiyj2k5dFb8eYUKkcN9PzqZSppTlx7LaQWBbdA8tqh3jHr/KHX2/YLhNFc/xwDrgeLybqd+4ZCPJSGPIqeA==
+"@vue/test-utils@^1.3.1":
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/@vue/test-utils/-/test-utils-1.3.1.tgz#be181387f4dc19f17c2bbd451b0f97ed48329642"
+  integrity sha512-99MBPPGBx/Dfe1kHE8eqjDmFjKSC1LZiNbHcece/sm56NppNEm4qk13vFAqHdXJp9snrR5CVQaBeBj9eYNNhjQ==
   dependencies:
     dom-event-types "^1.0.0"
     lodash "^4.17.15"
