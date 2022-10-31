@@ -136,6 +136,52 @@ describe('src/cy/commands/cookies - no stub', () => {
         expect(cookies[0].name).to.eq('key')
       })
     })
+
+    it('clears the cookie on the domain matching the AUT by default', () => {
+      cy.visit('http://localhost:3500/fixtures/generic.html')
+      cy.setCookie('foo', 'bar')
+      cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
+
+      cy.clearCookie('foo')
+
+      cy.getCookie('foo').should('be.null')
+      cy.getCookie('foo', { domain: 'www.foobar.com' }).should('exist')
+
+      if (!Cypress.config('experimentalSessionAndOrigin')) return
+
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
+        cy.setCookie('foo', 'bar', { domain: 'localhost' })
+
+        cy.clearCookie('foo')
+
+        cy.getCookie('foo').should('be.null')
+        cy.getCookie('foo', { domain: 'localhost' }).should('exist')
+      })
+    })
+
+    it('clears the cookie on the specified domain', () => {
+      cy.visit('http://localhost:3500/fixtures/generic.html')
+      cy.setCookie('foo', 'bar')
+      cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
+
+      cy.clearCookie('foo', { domain: 'www.foobar.com' })
+
+      cy.getCookie('foo', { domain: 'www.foobar.com' }).should('be.null')
+      cy.getCookie('foo').should('exist')
+
+      if (!Cypress.config('experimentalSessionAndOrigin')) return
+
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
+        cy.setCookie('foo', 'bar')
+
+        cy.clearCookie('foo', { domain: 'localhost' })
+
+        cy.getCookie('foo', { domain: 'localhost' }).should('be.null')
+        cy.getCookie('foo').should('exist')
+      })
+    })
   })
 })
 

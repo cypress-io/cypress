@@ -780,7 +780,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/clearcookie
      */
-    clearCookie(name: string, options?: Partial<Loggable & Timeoutable>): Chainable<null>
+    clearCookie(name: string, options?: Partial<CookieOptions>): Chainable<null>
 
     /**
      * Clear all browser cookies.

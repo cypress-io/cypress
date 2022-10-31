@@ -192,7 +192,7 @@ export default function (Commands, Cypress, cy, state, config) {
   }
 
   return Commands.addAll({
-    getCookie (name, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+    getCookie (name, userOptions: Partial<Cypress.CookieOptions> = {}) {
       const options: InternalGetCookieOptions = _.defaults({}, userOptions, {
         log: true,
       })
@@ -238,7 +238,7 @@ export default function (Commands, Cypress, cy, state, config) {
       }, options.timeout)
     },
 
-    getCookies (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+    getCookies (userOptions: Partial<Cypress.CookieOptions> = {}) {
       const options: InternalGetCookiesOptions = _.defaults({}, userOptions, {
         log: true,
       })
@@ -358,7 +358,7 @@ export default function (Commands, Cypress, cy, state, config) {
       }, options.timeout)
     },
 
-    clearCookie (name, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+    clearCookie (name, userOptions: Partial<Cypress.CookieOptions> = {}) {
       const options: InternalClearCookieOptions = _.defaults({}, userOptions, {
         log: true,
       })
@@ -367,20 +367,19 @@ export default function (Commands, Cypress, cy, state, config) {
 
       options.timeout = options.timeout || config('defaultCommandTimeout')
 
+      let cookie: Cypress.Cookie
+
       if (options.log) {
         options._log = Cypress.log({
           message: name,
           timeout: responseTimeout,
           consoleProps () {
-            let c
             const obj = {}
 
             obj['Yielded'] = 'null'
 
-            c = options.cookie
-
-            if (c) {
-              obj['Cleared Cookie'] = c
+            if (cookie) {
+              obj['Cleared Cookie'] = cookie
             } else {
               obj['Note'] = `No cookie with the name: '${name}' was found or removed.`
             }
@@ -400,10 +399,10 @@ export default function (Commands, Cypress, cy, state, config) {
 
       // TODO: prevent clearing a cypress namespace
       return cy.retryIfCommandAUTOriginMismatch(() => {
-        return automateCookies('clear:cookie', { name }, options._log, responseTimeout)
+        return automateCookies('clear:cookie', { name, domain: options.domain }, options._log, responseTimeout)
         .then(pickCookieProps)
-        .then((resp) => {
-          options.cookie = resp
+        .then((result) => {
+          cookie = result
 
           // null out the current subject
           return null

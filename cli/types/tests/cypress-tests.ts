@@ -1026,3 +1026,17 @@ namespace CypressSetCookieTests {
   cy.setCookie('name', { domain: false }) // $ExpectError
   cy.setCookie('name', { foo: 'bar' }) // $ExpectError
 }
+
+namespace CypressClearCookieTests {
+  cy.clearCookie('name').then((cookie) => {
+    cookie // $ExpectType null
+  })
+  cy.clearCookie('name', { log: true })
+  cy.clearCookie('name', { timeout: 10 })
+  cy.clearCookie('name', { domain: 'localhost' })
+  cy.clearCookie('name', { log: true, timeout: 10, domain: 'localhost' })
+
+  cy.clearCookie('name', { log: 'true' }) // $ExpectError
+  cy.clearCookie('name', { timeout: '10' }) // $ExpectError
+  cy.clearCookie('name', { domain: false }) // $ExpectError
+}
