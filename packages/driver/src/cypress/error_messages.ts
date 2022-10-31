@@ -1762,6 +1762,13 @@ export default {
         `,
         docsUrl: 'https://on.cypress.io/session',
       },
+      wrongArgSetup: {
+        message: stripIndent`
+        In order to use ${cmd('session')}, provide a \`setup\` as the second argument:
+
+        \`cy.session(id, setup)\``,
+        docsUrl: 'https://on.cypress.io/session',
+      },
       wrongArgOptions: {
         message: stripIndent`
         ${cmd('session')} was passed an invalid argument. The optional third argument \`options\` must be an object.
@@ -1779,13 +1786,6 @@ export default {
         message: stripIndent`
         ${cmd('session')} was passed an invalid option value. **{{key}}** must be of type **{{expected}}** but was **{{actual}}**.
         `,
-        docsUrl: 'https://on.cypress.io/session',
-      },
-      missing_global_setup: {
-        message: stripIndent`
-        In order to restore a global ${cmd('session')}, provide a \`setup\` as the second argument:
-
-        \`cy.session(id, setup, { cacheAcrossSpecs: true })\``,
         docsUrl: 'https://on.cypress.io/session',
       },
       not_found: {

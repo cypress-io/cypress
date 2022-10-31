@@ -66,18 +66,16 @@ export default function (Commands, Cypress, cy) {
   })
 
   Commands.addAll({
-    session (id: string | object, setup?: () => void, options: Cypress.SessionOptions = { cacheAcrossSpecs: false }) {
+    session (id: string | object, setup: () => void, options: Cypress.SessionOptions = { cacheAcrossSpecs: false }) {
       throwIfNoSessionSupport()
 
       if (!id || !_.isString(id) && !_.isObject(id)) {
         $errUtils.throwErrByPath('sessions.session.wrongArgId')
       }
 
-      // backup session command so we can set it as codeFrame location for errors later on
-      const sessionCommand = cy.state('current')
-
-      // stringify deterministically if we were given an object
-      id = _.isString(id) ? id : stringifyStable(id)
+      if (!setup || !_.isFunction(setup)) {
+        $errUtils.throwErrByPath('sessions.session.wrongArgSetup')
+      }
 
       if (options) {
         if (!_.isObject(options)) {
@@ -104,55 +102,51 @@ export default function (Commands, Cypress, cy) {
         })
       }
 
+      // backup session command so we can set it as codeFrame location for validation errors later on
+      const sessionCommand = cy.state('current')
+
+      // stringify deterministically if we were given an object
+      id = _.isString(id) ? id : stringifyStable(id)
+
       let session: SessionData = sessionsManager.getActiveSession(id)
       const isRegisteredSessionForSpec = sessionsManager.registeredSessions.has(id)
 
-      if (!setup) {
-        if (!session && !isRegisteredSessionForSpec) {
-          $errUtils.throwErrByPath('sessions.session.not_found', { args: { id } })
+      if (session) {
+        const hasUniqSetupDefinition = session.setup.toString().trim() !== setup.toString().trim()
+        const hasUniqValidateDefinition = (!!session.validate !== !!options.validate) || (!!session.validate && !!options.validate && session.validate.toString().trim() !== options.validate.toString().trim())
+        const hasUniqPersistence = session.cacheAcrossSpecs !== !!options.cacheAcrossSpecs
+
+        if (isRegisteredSessionForSpec && (hasUniqSetupDefinition || hasUniqValidateDefinition || hasUniqPersistence)) {
+          $errUtils.throwErrByPath('sessions.session.duplicateId', {
+            args: {
+              id,
+              hasUniqSetupDefinition,
+              hasUniqValidateDefinition,
+              hasUniqPersistence,
+            },
+          })
         }
 
         if (session.cacheAcrossSpecs && _.isString(session.setup)) {
-          $errUtils.throwErrByPath('sessions.session.missing_global_setup', { args: { id } })
+          session.setup = setup
+        }
+
+        if (session.cacheAcrossSpecs && session.validate && _.isString(session.validate)) {
+          session.validate = options.validate
         }
       } else {
-        if (session) {
-          const hasUniqSetupDefinition = session.setup.toString().trim() !== setup.toString().trim()
-          const hasUniqValidateDefinition = (!!session.validate !== !!options.validate) || (!!session.validate && !!options.validate && session.validate.toString().trim() !== options.validate.toString().trim())
-          const hasUniqPersistence = session.cacheAcrossSpecs !== !!options.cacheAcrossSpecs
-
-          if (isRegisteredSessionForSpec && (hasUniqSetupDefinition || hasUniqValidateDefinition || hasUniqPersistence)) {
-            $errUtils.throwErrByPath('sessions.session.duplicateId', {
-              args: {
-                id,
-                hasUniqSetupDefinition,
-                hasUniqValidateDefinition,
-                hasUniqPersistence,
-              },
-            })
-          }
-
-          if (session.cacheAcrossSpecs && _.isString(session.setup)) {
-            session.setup = setup
-          }
-
-          if (session.cacheAcrossSpecs && session.validate && _.isString(session.validate)) {
-            session.validate = options.validate
-          }
-        } else {
-          if (isRegisteredSessionForSpec) {
-            $errUtils.throwErrByPath('sessions.session.duplicateId', { args: { id } })
-          }
-
-          session = sessions.defineSession({
-            id,
-            setup,
-            validate: options.validate,
-            cacheAcrossSpecs: options.cacheAcrossSpecs,
-          })
-
-          sessionsManager.registeredSessions.set(id, true)
+        if (isRegisteredSessionForSpec) {
+          $errUtils.throwErrByPath('sessions.session.duplicateId', { args: { id } })
         }
+
+        session = sessions.defineSession({
+          id,
+          setup,
+          validate: options.validate,
+          cacheAcrossSpecs: options.cacheAcrossSpecs,
+        })
+
+        sessionsManager.registeredSessions.set(id, true)
       }
 
       function setSessionLogStatus (status: string) {

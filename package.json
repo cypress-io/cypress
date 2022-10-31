@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "10.10.0",
+  "version": "10.11.0",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -255,6 +255,7 @@
     ],
     "nohoist": [
       "**/webpack-preprocessor/babel-loader",
+      "**/webpack-preprocessor/**/merge-source-map",
       "**/webpack-batteries-included-preprocessor/ts-loader",
       "**/jest",
       "**/jest*",
