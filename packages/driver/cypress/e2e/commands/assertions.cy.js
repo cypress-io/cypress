@@ -643,7 +643,7 @@ describe('src/cy/commands/assertions', () => {
 
         cy.on('fail', () => {})
 
-        cy.readFile('does-not-exist.json').should('exist')
+        cy.readFile('does-not-exist.json', { timeout: 500 }).should('exist')
       })
 
       it('throws when the subject eventually isnt in the DOM', function (done) {
