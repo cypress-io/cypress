@@ -125,9 +125,9 @@ export default function (Commands, Cypress, cy, state) {
 
       try {
         if (value === lastChainer && !isCheckingExistence) {
-        // https://github.com/cypress-io/cypress/issues/16006
-        // Referring some commands like 'visible'  triggers assert function in chai_jquery.js
-        // It creates duplicated messages and confuses users.
+          // https://github.com/cypress-io/cypress/issues/16006
+          // Referring some commands like 'visible'  triggers assert function in chai_jquery.js
+          // It creates duplicated messages and confuses users.
           const cmd = memo[value]
 
           if (_.isFunction(cmd)) {

@@ -628,7 +628,7 @@ describe('src/cy/commands/assertions', () => {
           done()
         })
 
-        cy.get('button:first', { timeout: 200 }).should('have.class', 'does-not-have-class')
+        cy.get('button:first', { timeout: 500 }).should('have.class', 'does-not-have-class')
       })
 
       it('has a pending state while retrying for commands with onFail', (done) => {

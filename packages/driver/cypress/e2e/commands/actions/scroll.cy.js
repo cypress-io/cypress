@@ -457,7 +457,7 @@ describe('src/cy/commands/actions/scroll', () => {
         })
 
         it('throws if subject disappears while waiting for scrollability', (done) => {
-          cy.on('command:retry', _.after(2, () => cy.$$('#nonscroll-becomes-scrollable').remove()))
+          cy.on('command:retry', () => cy.$$('#nonscroll-becomes-scrollable').remove())
 
           cy.on('fail', (err) => {
             expect(err.message).to.include('`cy.scrollTo()` failed because the page updated')
