@@ -320,14 +320,13 @@ function getComponentDisplayName (componentOptions: any): string {
  * Mounts a Vue component inside Cypress browser.
  * @param {object} component imported from Vue file
  * @example
- *  import Greeting from './Greeting.vue'
- *  import { mount } from '@cypress/vue2'
- *  it('works', () => {
- *    // pass props, additional extensions, etc
- *    mount(Greeting, { ... })
- *    // use any Cypress command to test the component
- *    cy.get('#greeting').should('be.visible')
- *  })
+ * import { mount } from '@cypress/vue'
+ * import { Stepper } from './Stepper.vue'
+ * it('mounts', () => {
+ *   cy.mount(Stepper)
+ *   cy.get('[data-cy=increment]').click()
+ *   cy.get('[data-cy=counter]').should('have.text', '1')
+ * })
  */
 export const mount = (
   component: VueComponent,

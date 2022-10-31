@@ -39,6 +39,10 @@ export interface StyleOptions {
 
 export const ROOT_SELECTOR = '[data-cy-root]'
 
+/**
+ * Gets the root element used to mount the component.
+ * @returns {HTMLElement | null} The root element
+ */
 export const getContainerEl = (): HTMLElement => {
   const el = document.querySelector<HTMLElement>(ROOT_SELECTOR)
 
@@ -199,8 +203,12 @@ export const injectStylesBeforeElement = (
   return insertLocalCssFiles(cssFiles, document, el, options.log)
 }
 
+/**
+ * Consumed by the framework "mount" libs.
+ * A user might register their own mount in the scaffolded 'commands.js'
+ * @param optionalCallback Callback to be called before the next test runs
+ */
 export function setupHooks (optionalCallback?: Function) {
-  // Consumed by the framework "mount" libs. A user might register their own mount in the scaffolded 'commands.js'
   // file that is imported by e2e and component support files by default. We don't want CT side effects to run when e2e
   // testing so we early return.
   // System test to verify CT side effects do not pollute e2e: system-tests/test/e2e_with_mount_import_spec.ts

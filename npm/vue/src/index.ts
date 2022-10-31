@@ -323,7 +323,21 @@ export function mount<
   >
 >
 
-// implementation
+/**
+ * Mounts a component and returns an object containing the component and VueWrapper
+ * @param componentOptions
+ * @param options
+ * @returns {{vueWrapper: VueWrapper, component: ComponentPublicInstance}}
+ *
+ * @example
+ * import { mount } from '@cypress/vue'
+ * import { Stepper } from './Stepper.vue'
+ * it('mounts', () => {
+ *   cy.mount(Stepper)
+ *   cy.get('[data-cy=increment]').click()
+ *   cy.get('[data-cy=counter]').should('have.text', '1')
+ * })
+ */
 export function mount (componentOptions: any, options: any = {}) {
   // TODO: get the real displayName and props from VTU shallowMount
   const componentName = getComponentDisplayName(componentOptions)

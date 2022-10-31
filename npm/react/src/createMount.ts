@@ -134,6 +134,8 @@ export const makeMountFn = (
  *
  * This is designed to be consumed by `npm/react{16,17,18}`, and other React adapters,
  * or people writing adapters for third-party, custom adapters.
+ *
+ * @param {UnmountArgs} options used during unmounting
  */
 export const makeUnmountFn = (options: UnmountArgs) => {
   return cy.then(() => {

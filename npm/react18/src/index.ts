@@ -25,6 +25,21 @@ const cleanup = () => {
   return false
 }
 
+/**
+ * Mounts a React component into the DOM.
+ * @param jsx {React.ReactNode} The React component to mount.
+ * @param options {MountOptions} Options to pass to the mount function.
+ * @param rerenderKey {string} A key to use to force a rerender.
+ *
+ * @example
+ * import { mount } from '@cypress/react'
+ * import { Stepper } from './Stepper'
+ * it('mounts', () => {
+ *  mount(<StepperComponent />)
+ *  cy.get('[data-cy=increment]').click()
+ *  cy.get('[data-cy=counter]').should('have.text', '1')
+ * }
+ */
 export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerenderKey?: string) {
   const internalOptions: InternalMountOptions = {
     reactDom: ReactDOM,
