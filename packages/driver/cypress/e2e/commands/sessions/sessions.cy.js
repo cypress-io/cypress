@@ -53,12 +53,11 @@ describe('cy.session', { retries: 0 }, () => {
     })
 
     it('accepts array as id', () => {
-      cy.session('session-id', () => {})
-      cy.session('session-id')
+      cy.session(['session', 'id'], () => {})
     })
 
     it('accepts object as id', () => {
-      cy.session('session-id', () => {})
+      cy.session({ 'session-id': true }, () => {})
     })
 
     // redundant?
@@ -1464,6 +1463,19 @@ describe('cy.session', { retries: 0 }, () => {
       cy.session()
     })
 
+    it('throws when setup function is not provided', function (done) {
+      cy.once('fail', (err) => {
+        expect(lastLog.get('error')).to.eq(err)
+        expect(lastLog.get('state')).to.eq('failed')
+        expect(err.message).to.eq('In order to use `cy.session()`, provide a `setup` as the second argument:\n\n`cy.session(id, setup)`')
+        expect(err.docsUrl).to.eq('https://on.cypress.io/session')
+
+        done()
+      })
+
+      cy.session('some-session')
+    })
+
     it('throws when sessionId argument is not an object', function (done) {
       cy.once('fail', (err) => {
         expect(lastSessionLog).to.eq(lastLog)
@@ -1517,42 +1529,6 @@ describe('cy.session', { retries: 0 }, () => {
       })
 
       cy.session('some-session', () => {}, { validate: 2 })
-    })
-
-    it('throws when setup function is not provided and existing session is not found', function (done) {
-      cy.once('fail', (err) => {
-        expect(lastLog.get('error')).to.eq(err)
-        expect(lastLog.get('state')).to.eq('failed')
-        expect(err.message).to.eq('No session is defined with the name\n  **some-session**\nIn order to use `cy.session()`, provide a `setup` as the second argument:\n\n`cy.session(id, setup)`')
-        expect(err.docsUrl).to.eq('https://on.cypress.io/session')
-
-        done()
-      })
-
-      cy.session('some-session')
-    })
-
-    it('throws when setup function is not provided and global session is registered', function (done) {
-      cy.once('fail', (err) => {
-        expect(lastSessionLog).to.eq(lastLog)
-        expect(lastLog.get('error')).to.eq(err)
-        expect(lastLog.get('state')).to.eq('failed')
-        expect(err.message).to.eq('In order to restore a global `cy.session()`, provide a `setup` as the second argument:\n\n`cy.session(id, setup, { cacheAcrossSpecs: true })`')
-        expect(err.docsUrl).to.eq('https://on.cypress.io/session')
-
-        done()
-      })
-
-      cy.session('some-session-2', () => {}, { cacheAcrossSpecs: true })
-      .then(() => {
-        Cypress.state('activeSessions', {})
-      }).then(async () => {
-        await Cypress.backend('get:session', 'some-session-2').then((sessionDetails) => {
-          Cypress.state('activeSessions', { 'some-session-2': sessionDetails })
-        })
-      })
-
-      cy.session('some-session-2')
     })
 
     it('throws when multiple session calls with same sessionId but different setup', function (done) {
@@ -1777,5 +1753,11 @@ describe('cy.session', { retries: 0 }, () => {
         })
       })
     })
+  })
+
+  it('should allow more than 20 sessions to be created per test', () => {
+    for (let index = 0; index < 21; index++) {
+      cy.session(`${index}`, () => {})
+    }
   })
 })

@@ -1,34 +1,6 @@
+import { makeRequestForCookieBehaviorTests as makeRequest } from '../../../support/utils'
+
 describe('Cookie Behavior with experimentalSessionAndOrigin=true', { browser: '!webkit' }, () => {
-  const makeRequest = (
-    win: Cypress.AUTWindow,
-    url: string,
-    client: 'fetch' | 'xmlHttpRequest' = 'xmlHttpRequest',
-    credentials: 'same-origin' | 'include' | 'omit' | boolean = false,
-  ) => {
-    if (client === 'fetch') {
-      // if a boolean is specified, make sure the default is applied
-      credentials = Cypress._.isBoolean(credentials) ? 'same-origin' : credentials
-
-      return win.fetch(url, { credentials })
-    }
-
-    return new Promise<void>((resolve, reject) => {
-      let xhr = new XMLHttpRequest()
-
-      xhr.open('GET', url)
-      xhr.withCredentials = Cypress._.isBoolean(credentials) ? credentials : false
-      xhr.onload = function () {
-        resolve(xhr.response)
-      }
-
-      xhr.onerror = function () {
-        reject(xhr.response)
-      }
-
-      xhr.send()
-    })
-  }
-
   const serverConfig = {
     http: {
       sameOriginPort: 3500,
@@ -59,35 +31,7 @@ describe('Cookie Behavior with experimentalSessionAndOrigin=true', { browser: '!
 
           // add httpClient here globally until Cypress.require PR is merged
           cy.origin(`${scheme}://www.foobar.com:${sameOriginPort}`, () => {
-            const makeRequest = (
-              win: Cypress.AUTWindow,
-              url: string,
-              client: 'fetch' | 'xmlHttpRequest' = 'xmlHttpRequest',
-              credentials: 'same-origin' | 'include' | 'omit' | boolean = false,
-            ) => {
-              if (client === 'fetch') {
-                // if a boolean is specified, make sure the default is applied
-                credentials = Cypress._.isBoolean(credentials) ? 'same-origin' : credentials
-
-                return win.fetch(url, { credentials })
-              }
-
-              return new Promise<void>((resolve, reject) => {
-                let xhr = new XMLHttpRequest()
-
-                xhr.open('GET', url)
-                xhr.withCredentials = Cypress._.isBoolean(credentials) ? credentials : false
-                xhr.onload = function () {
-                  resolve(xhr.response)
-                }
-
-                xhr.onerror = function () {
-                  reject(xhr.response)
-                }
-
-                xhr.send()
-              })
-            }
+            const { makeRequestForCookieBehaviorTests: makeRequest } = require('../../../support/utils')
 
             // @ts-ignore
             window.makeRequest = makeRequest
