@@ -32,17 +32,17 @@ describe('e2e cy.origin errors', () => {
     // keep the port the same to prevent issues with the snapshot
     port: PORT,
     spec: 'cy_origin_error.cy.ts',
-    snapshot: true,
-    expectedExitCode: 1,
+    expectedExitCode: 2,
     config: commonConfig,
     async onRun (exec) {
-      const res = await exec()
+      const { stdout } = await exec()
 
-      expect(res.stdout).to.contain('AssertionError')
-      expect(res.stdout).to.contain('Timed out retrying after 1000ms: Expected to find element: `#doesnotexist`, but never found it.')
+      expect(stdout).to.contain('AssertionError')
+      expect(stdout).to.contain('Timed out retrying after 1ms: Expected to find element: `#doesnotexist`, but never found it.')
 
-      // check to make sure the snapshot contains the 'cy.origin' sourcemap
-      expect(res.stdout).to.contain('webpack:///./cypress/e2e/cy_origin_error.cy.ts:8:7')
+      // check to make sure stack trace contains the 'cy.origin' source
+      expect(stdout).to.contain('webpack:///./cypress/e2e/cy_origin_error.cy.ts:16:7')
+      expect(stdout).to.contain('webpack:///./cypress/e2e/cy_origin_error.cy.ts:32:7')
     },
   })
 
