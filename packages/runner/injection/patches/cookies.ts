@@ -111,7 +111,13 @@ export const patchDocumentCookie = (requestCookies: AutomationCookie[]) => {
     // the following listeners are called from Cypress cookie commands, so that
     // the document.cookie value is updated optimistically
     Cypress.on('set:cookie', (cookie: AutomationCookie) => {
-      cookieJar.setCookie(automationCookieToToughCookie(cookie, domain), url, undefined)
+      try {
+        cookieJar.setCookie(automationCookieToToughCookie(cookie, domain), url, undefined)
+      } catch (err) {
+        // it's possible setting the cookie fails because the domain does not
+        // match. this is expected and okay. it's meant to be set via
+        // automation and wouldn't apply to the current AUT anyway
+      }
     })
 
     Cypress.on('clear:cookie', (name: string) => {

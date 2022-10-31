@@ -92,7 +92,7 @@ interface InternalGetCookiesOptions extends Partial<Cypress.Loggable & Cypress.T
 interface InternalSetCookieOptions extends Partial<Cypress.SetCookieOptions> {
   _log?: Log
   name: string
-  cookie?: Cypress.Cookie
+  domain?: string
 }
 
 type InternalClearCookieOptions = InternalGetCookieOptions
@@ -292,19 +292,17 @@ export default function (Commands, Cypress, cy, state, config) {
       options.timeout = options.timeout || config('defaultCommandTimeout')
 
       const cookie = pickCookieProps(options)
+      let resultingCookie: Cypress.Cookie
 
       if (options.log) {
         options._log = Cypress.log({
           message: [name, value],
           timeout: responseTimeout,
           consoleProps () {
-            let c
             const obj = {}
 
-            c = options.cookie
-
-            if (c) {
-              obj['Yielded'] = c
+            if (resultingCookie) {
+              obj['Yielded'] = resultingCookie
             }
 
             return obj
@@ -354,10 +352,8 @@ export default function (Commands, Cypress, cy, state, config) {
       return cy.retryIfCommandAUTOriginMismatch(() => {
         return automateCookies('set:cookie', cookie, options._log, responseTimeout)
         .then(pickCookieProps)
-        .then((resp) => {
-          options.cookie = resp
-
-          return resp
+        .tap((result) => {
+          resultingCookie = result
         }).catch(handleBackendError('setCookie', 'setting the requested cookie in', onFail))
       }, options.timeout)
     },
