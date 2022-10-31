@@ -431,6 +431,45 @@ which will include both node modules and cypress code.
 
 During the process of snapshot generation, metadata is created/updated in `tooling/v8-snapshot/cache`. Changes to these files can and should be committed to the repo as it will make subsequent snapshot generations faster.
 
+#### Troubleshooting
+
+**Generation**
+
+If you run into errors while generating the v8 snapshot, you can occasionally identify the problem dependency via the output. You can try to remove that dependency from the cache and see if regenerating succeeds. If it does, likely it was moved to a more restrictive section (e.g. healthy to deferred/no-rewrite or deferred to norewrite). If all else fails, you can try running the following (but keep in mind this may take a while):
+
+```
+V8_SNAPSHOT_FROM_SCRATCH=1 yarn build-v8-snapshot-dev
+```
+
+or
+
+```
+V8_SNAPSHOT_FROM_SCRATCH=1 yarn build-v8-snapshot-prod
+```
+
+**Runtime**
+
+If you're experiencing issues during runtime, you can try and narrow down where the problem might be via a few different scenarios:
+
+* If the problem occurs with the binary, but not in the monorepo, chances are something is being removed during the binary cleanup step that shouldn't be
+* If the problem occurs with running `yarn build-v8-snapshot-prod` but not `yarn build-v8-snapshot-dev`, then that means there's a problem with a cypress file and not a node module dependency. Chances are that a file is not being flagged properly (e.g. healthy when it should be deferred or norewrite).
+* If the problem occurs with both `yarn build-v8-snapshot-prod` and `yarn build-v8-snapshot-dev` but does not occur when using the `DISABLE_SNAPSHOT_REQUIRE` environment variable, then that means there's a problem with a node module dependency. Chances are that a file is not being flagged properly (e.g. healthy when it should be deferred or norewrite).
+* If the problem still occurs when using the `DISABLE_SNAPSHOT_REQUIRE` environment variable, then that means the problem is not snapshot related.
+
+**Build Length**
+
+If the `build-v8-snapshot-prod` command is taking a long time to run on Circle CI, the snapshot cache probably needs to be updated. Run these commands on a windows, linux, and mac and commit the updates to the snapshot cache to git:
+
+```
+yarn build-v8-snapshot-dev
+```
+
+or
+
+```
+yarn build-v8-snapshot-prod
+```
+
 ## Committing Code
 
 ### Branches
