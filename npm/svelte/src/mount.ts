@@ -62,6 +62,9 @@ export function mount<T extends SvelteComponent> (
   options: MountOptions<T> = {},
 ): Cypress.Chainable<MountReturn<T>> {
   return cy.then(() => {
+    // Remove last mounted component if cy.mount is called more than once in a test
+    cleanup()
+
     const target = getContainerEl()
 
     injectStylesBeforeElement(options, document, target)

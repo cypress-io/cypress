@@ -72,6 +72,15 @@ export interface MountConfig<T> extends TestModuleMetadata {
   componentProperties?: Partial<{ [P in keyof T]: T[P] }>
 }
 
+let activeFixture: ComponentFixture<any> | null = null
+
+function cleanup () {
+  activeFixture = null
+  // Not public, we need to call this to remove the last component from the DOM
+  getTestBed()['tearDownTestingModule']()
+  getTestBed().resetTestingModule()
+}
+
 /**
  * Type that the `mount` function returns
  * @type MountResponse<T>
@@ -219,6 +228,8 @@ function setupFixture<T> (
 ): ComponentFixture<T> {
   const fixture = getTestBed().createComponent(component)
 
+  setupComponent(config, fixture)
+
   fixture.whenStable().then(() => {
     fixture.autoDetectChanges(config.autoDetectChanges ?? true)
   })
@@ -305,13 +316,18 @@ export function mount<T> (
   component: Type<T> | string,
   config: MountConfig<T> = { },
 ): Cypress.Chainable<MountResponse<T>> {
+  // Remove last mounted component if cy.mount is called more than once in a test
+  if (activeFixture) {
+    cleanup()
+  }
+
   const componentFixture = initTestBed(component, config)
-  const fixture = setupFixture(componentFixture, config)
-  const componentInstance = setupComponent(config, fixture)
+
+  activeFixture = setupFixture(componentFixture, config)
 
   const mountResponse: MountResponse<T> = {
-    fixture,
-    component: componentInstance,
+    fixture: activeFixture,
+    component: activeFixture.componentInstance,
   }
 
   const logMessage = typeof component === 'string' ? 'Component' : componentFixture.name
@@ -348,8 +364,4 @@ getTestBed().initTestEnvironment(
   },
 )
 
-setupHooks(() => {
-  // Not public, we need to call this to remove the last component from the DOM
-  getTestBed()['tearDownTestingModule']()
-  getTestBed().resetTestingModule()
-})
+setupHooks(cleanup)

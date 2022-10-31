@@ -26,6 +26,10 @@ const cleanup = () => {
 }
 
 export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerenderKey?: string) {
+  // Remove last mounted component if cy.mount is called more than once in a test
+  // React by default removes the last component when calling render, but we should remove the root
+  // to wipe away any state
+  cleanup()
   const internalOptions: InternalMountOptions = {
     reactDom: ReactDOM,
     render: (reactComponent: ReturnType<typeof React.createElement>, el: HTMLElement) => {

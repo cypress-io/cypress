@@ -352,5 +352,15 @@ describe("angular mount", () => {
     it("should mount", () => {
       cy.mount(ButtonOutputComponent);
     });
+
+    it('should remove previous mounted component', () => {
+      cy.mount(ChildComponent, {componentProperties: { msg: 'Render 1' }})
+      cy.contains('Render 1')
+      cy.mount(ChildComponent, {componentProperties: { msg: 'Render 2' }})
+      cy.contains('Render 2')
+
+      cy.contains('Render 1').should('not.exist')
+      cy.get('[id^=root]').children().should('have.length', 1)
+    })
   });
 });

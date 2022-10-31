@@ -72,24 +72,12 @@ type MountingOptions<Props, Data = {}> = Omit<VTUMountingOptions<Props, Data>, '
 
 export type CyMountOptions<Props, Data = {}> = MountingOptions<Props, Data>
 
-Cypress.on('run:start', () => {
-  // `mount` is designed to work with component testing only.
-  // it assumes ROOT_SELECTOR exists, which is not the case in e2e.
-  // if the user registers a custom command that imports `cypress/vue`,
-  // this event will be registered and cause an error when the user
-  // launches e2e (since it's common to use Cypress for both CT and E2E.
-  // https://github.com/cypress-io/cypress/issues/17438
-  if (Cypress.testingType !== 'component') {
-    return
-  }
+const cleanup = () => {
+  Cypress.vueWrapper?.unmount()
+  const el = getContainerEl()
 
-  Cypress.on('test:before:run', () => {
-    Cypress.vueWrapper?.unmount()
-    const el = getContainerEl()
-
-    el.innerHTML = ''
-  })
-})
+  el.innerHTML = ''
+}
 
 /**
  * The types for mount have been copied directly from the VTU mount
@@ -325,6 +313,9 @@ export function mount<
 
 // implementation
 export function mount (componentOptions: any, options: any = {}) {
+  // Remove last mounted component if cy.mount is called more than once in a test
+  cleanup()
+
   // TODO: get the real displayName and props from VTU shallowMount
   const componentName = getComponentDisplayName(componentOptions)
 
@@ -429,4 +420,4 @@ export function mountCallback (
 //    import { registerCT } from 'cypress/<my-framework>'
 //    registerCT()
 // Note: This would be a breaking change
-setupHooks()
+setupHooks(cleanup)

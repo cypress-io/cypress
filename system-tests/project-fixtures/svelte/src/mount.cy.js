@@ -83,4 +83,25 @@ describe("Svelte mount", () => {
       );
     });
   });
+
+  context('teardown', () => {
+    beforeEach(() => {
+      // component-index.html has anchor element within [data-cy-root] so base # of elements is 1
+      cy.get('[data-cy-root]').children().should('have.length', 1)
+    })
+
+    it("should mount", () => {
+      cy.mount(Counter);
+    });
+
+    it('should remove previous mounted component', () => {
+      cy.mount(Counter);
+      cy.contains('h1', 'Count is 0')
+      cy.mount(Counter, {props: { count: 42 }})
+      cy.contains('h1', 'Count is 42')
+
+      cy.contains('h1', 'Count is 0').should('not.exist')
+      cy.get('[data-cy-root]').children().should('have.length', 2)
+    })
+  })
 });
