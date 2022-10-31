@@ -28,7 +28,6 @@
     "lodash": "^4.17.20",
     "md5": "2.3.0",
     "merge-source-map": "1.1.0",
-    "patch-package": "6.4.7",
     "webpack-virtual-modules": "^0.4.4"
   },
   "devDependencies": {
@@ -93,8 +92,7 @@
   ],
   "workspaces": {
     "nohoist": [
-      "merge-source-map",
-      "patch-package"
+      "merge-source-map"
     ]
   }
 }
