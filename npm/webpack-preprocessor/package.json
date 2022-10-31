@@ -93,7 +93,8 @@
   ],
   "workspaces": {
     "nohoist": [
-      "merge-source-map"
+      "merge-source-map",
+      "patch-package"
     ]
   }
 }
