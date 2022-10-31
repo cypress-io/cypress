@@ -137,15 +137,6 @@ export class ProjectBase<TServer extends Server> extends EE {
     return this._server?.remoteStates
   }
 
-  injectCtSpecificConfig (cfg) {
-    cfg.resolved.testingType = { value: 'component' }
-
-    return {
-      ...cfg,
-      componentTesting: true,
-    }
-  }
-
   createServer (testingType: Cypress.TestingType) {
     return testingType === 'e2e'
       ? new ServerE2E() as TServer
@@ -444,10 +435,6 @@ export class ProjectBase<TServer extends Server> extends EE {
       testingType: this.testingType,
     } as Cfg // ?? types are definitely wrong here I think
 
-    theCfg = this.testingType === 'e2e'
-      ? theCfg
-      : this.injectCtSpecificConfig(theCfg)
-
     if (theCfg.isTextTerminal) {
       this._cfg = theCfg
 
@@ -511,7 +498,6 @@ export class ProjectBase<TServer extends Server> extends EE {
   }
 
   // These methods are not related to start server/sockets/runners
-
   async getProjectId () {
     return getCtx().lifecycleManager.getProjectId()
   }
