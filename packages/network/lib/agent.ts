@@ -15,6 +15,34 @@ const debug = debugModule('cypress:network:agent')
 const CRLF = '\r\n'
 const statusCodeRe = /^HTTP\/1.[01] (\d*)/
 
+const mergeCAOption = (options: https.RequestOptions): Promise<https.RequestOptions> => {
+  const caArray = options.ca ? _.castArray(options.ca).map((caOption) => caOption.toString()) : []
+
+  if (process.env.npm_config_cafile) {
+    return fs.readFile(process.env.npm_config_cafile, 'utf8').then((ca) => {
+      return _.extend({}, options, { ca: caArray.concat(ca) })
+    }).catch(() => {
+      // We ignore the error here because npm handles the error via a non blocking warning
+      return options
+    })
+  }
+
+  if (process.env.npm_config_ca) {
+    return Promise.resolve(_.extend({}, options, { ca: caArray.concat(process.env.npm_config_ca) }))
+  }
+
+  if (process.env.NODE_EXTRA_CA_CERTS) {
+    return fs.readFile(process.env.NODE_EXTRA_CA_CERTS, 'utf8').then((ca) => {
+      return _.extend({}, options, { ca: tls.rootCertificates.concat(...caArray).concat(ca) })
+    }).catch(() => {
+      // We ignore the error here because node handles the error via a non blocking warning
+      return options
+    })
+  }
+
+  return Promise.resolve(options)
+}
+
 export const clientCertificateStore = new ClientCertificateStore()
 
 type WithProxyOpts<RequestOptions> = RequestOptions & {
@@ -32,24 +60,6 @@ type HttpsRequestOptionsWithProxy = WithProxyOpts<HttpsRequestOptions>
 
 type FamilyCache = {
   [host: string]: 4 | 6
-}
-
-const getCAOption = async () => {
-  if (process.env.npm_config_cafile) {
-    return { ca: await fs.readFile(process.env.npm_config_cafile, 'utf8') }
-  }
-
-  if (process.env.npm_config_ca) {
-    return { ca: process.env.npm_config_ca }
-  }
-
-  if (process.env.NODE_EXTRA_CA_CERTS) {
-    const extraCerts = await fs.readFile(process.env.NODE_EXTRA_CA_CERTS, 'utf8')
-
-    return { ca: tls.rootCertificates.concat(extraCerts) }
-  }
-
-  return {}
 }
 
 export function buildConnectReqHead (hostname: string, port: string, proxy: url.Url) {
@@ -215,7 +225,7 @@ export class CombinedAgent {
       if (isHttps) {
         _.assign(options, clientCertificateStore.getClientCertificateAgentOptionsForUrl(options.uri))
 
-        return this.httpsAgent.addRequest(req, options)
+        return this.httpsAgent.addRequest(req, options as https.RequestOptions)
       }
 
       this.httpAgent.addRequest(req, options)
@@ -303,7 +313,7 @@ class HttpsAgent extends https.Agent {
     super(opts)
   }
 
-  addRequest (req: http.ClientRequest, options: http.RequestOptions) {
+  addRequest (req: http.ClientRequest, options: https.RequestOptions) {
     // Ensure we have a proper port defined otherwise node has assumed we are port 80
     // (https://github.com/nodejs/node/blob/master/lib/_http_client.js#L164) since we are a combined agent
     // rather than an http or https agent. This will cause issues with fetch requests (@cypress/request already handles it:
@@ -313,11 +323,8 @@ class HttpsAgent extends https.Agent {
       options.port = 443
     }
 
-    getCAOption().then((caOption) => {
-      super.addRequest(req, {
-        ...options,
-        ...caOption,
-      })
+    mergeCAOption(options).then((options) => {
+      super.addRequest(req, options)
     })
   }
 
