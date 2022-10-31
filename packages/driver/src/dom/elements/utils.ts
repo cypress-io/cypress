@@ -60,8 +60,6 @@ export const stringify = (el, form = 'long') => {
   // convert this to jquery if its not already one
   const $el = $jquery.wrap(el)
 
-  $el.selector = el.selector
-
   const long = () => {
     const str = $el
     .clone()
@@ -88,7 +86,7 @@ export const stringify = (el, form = 'long') => {
   const short = () => {
     const id = $el.prop('id')
     const klass = $el.attr('class')
-    let str = $el.length ? $el.prop('tagName').toLowerCase() : $el.selector
+    let str = $el.length ? $el.prop('tagName').toLowerCase() : el.selector
 
     if (id) {
       str += `#${id}`
