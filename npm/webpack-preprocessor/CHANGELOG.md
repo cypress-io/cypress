@@ -1,3 +1,10 @@
+# [@cypress/webpack-preprocessor-v5.15.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.15.0...@cypress/webpack-preprocessor-v5.15.1) (2022-10-31)
+
+
+### Bug Fixes
+
+* Fix sourcemaps when using cy.origin() dependencies ([#24367](https://github.com/cypress-io/cypress/issues/24367)) ([b916ba9](https://github.com/cypress-io/cypress/commit/b916ba9c410856582b113fcdcef69cfc6b6e9861))
+
 # [@cypress/webpack-preprocessor-v5.15.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.14.0...@cypress/webpack-preprocessor-v5.15.0) (2022-10-19)
 
 
