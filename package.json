@@ -256,6 +256,7 @@
     "nohoist": [
       "**/webpack-preprocessor/babel-loader",
       "**/webpack-preprocessor/**/merge-source-map",
+      "**/webpack-preprocessor/**/patch-package",
       "**/webpack-batteries-included-preprocessor/ts-loader",
       "**/jest",
       "**/jest*",
