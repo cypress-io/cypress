@@ -1,18 +1,9 @@
 import _ from 'lodash'
 import $ from 'jquery'
-import { $Location } from '../../../cypress/location'
 import Bluebird from 'bluebird'
+import { $Location } from '../../../cypress/location'
 
 type SessionData = Cypress.Commands.Session.SessionData
-
-const getSessionDetails = (sessState: SessionData) => {
-  return {
-    id: sessState.id,
-    data: _.merge(
-      _.mapValues(_.groupBy(sessState.cookies, 'domain'), (v) => ({ cookies: v.length })),
-      ..._.map(sessState.localStorage, (v) => ({ [$Location.create(v.origin).hostname]: { localStorage: Object.keys(v.value).length } })),
-    ) }
-}
 
 const getSessionDetailsForTable = (sessState: SessionData) => {
   return _.merge(
@@ -193,13 +184,16 @@ const getPostMessageLocalStorage = (specWindow, origins): Promise<any[]> => {
 }
 
 function navigateAboutBlank (session: boolean = true) {
+  if (Cypress.config('testIsolation') === 'off') {
+    return
+  }
+
   Cypress.action('cy:url:changed', '')
 
   return Cypress.action('cy:visit:blank', { type: session ? 'session' : 'session-lifecycle' }) as unknown as Promise<void>
 }
 
 export {
-  getSessionDetails,
   getCurrentOriginStorage,
   setPostMessageLocalStorage,
   getConsoleProps,

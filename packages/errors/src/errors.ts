@@ -90,6 +90,12 @@ export const AllCypressErrors = {
 
         This option will not have an effect in ${fmt.off(_.capitalize(browser))}. Tests that rely on web security being disabled will not run as expected.`
   },
+  BROWSER_UNSUPPORTED_LAUNCH_OPTION: (browser: string, options: string[]) => {
+    return errTemplate`\
+        Warning: The following browser launch options were provided but are not supported by ${fmt.highlightSecondary(browser)}
+
+        ${fmt.listItems(options)}`
+  },
   BROWSER_NOT_FOUND_BY_NAME: (browser: string, foundBrowsersStr: string[]) => {
     let canarySuffix: PartialErr | null = null
 
@@ -477,7 +483,7 @@ export const AllCypressErrors = {
 
         It may have been recently revoked by you or another user.
 
-        Please log into the Dashboard to see the valid record keys.
+        Please log into the Dashboard to see the valid Record Keys.
 
         https://on.cypress.io/dashboard/projects/${fmt.off(projectId)}`
   },
@@ -564,7 +570,6 @@ export const AllCypressErrors = {
         This can happen for a number of different reasons:
 
         - You wrote an endless loop and you must fix your own code
-        - There is a memory leak in Cypress (unlikely but possible)
         - You are running Docker (there is an easy fix for this: see link below)
         - You are running lots of tests on a memory intense application
         - You are running in a memory starved VM environment
@@ -574,6 +579,20 @@ export const AllCypressErrors = {
         You can learn more including how to fix Docker here:
 
         https://on.cypress.io/renderer-process-crashed`
+  },
+  BROWSER_CRASHED: (browser: string, code: string | number, signal: string) => {
+    return errTemplate`\
+        We detected that the ${fmt.highlight(browser)} process just crashed with code '${fmt.highlight(code)}' and signal '${fmt.highlight(signal)}'.
+
+        We have failed the current test and have relaunched ${fmt.highlight(browser)}.
+
+        This can happen for many different reasons:
+
+        - You wrote an endless loop and you must fix your own code
+        - You are running lots of tests on a memory intense application
+        - You are running in a memory starved VM environment
+        - There are problems with your GPU / GPU drivers
+        - There are browser bugs`
   },
   AUTOMATION_SERVER_DISCONNECTED: () => {
     return errTemplate`The automation client disconnected. Cannot continue running tests.`
@@ -1419,7 +1438,7 @@ export const AllCypressErrors = {
 
   DASHBOARD_GRAPHQL_ERROR: (err: Error) => {
     return errTemplate`
-      We received an unexpected error response from the request to the Cypress dashboard:
+      We received an unexpected error response from the request to the Cypress Dashboard:
 
       ${fmt.stringify(err.message)}
     `

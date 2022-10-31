@@ -10,59 +10,15 @@
     <p class="h-48px mb-8px text-gray-600">
       {{ t("runs.empty.description") }}
     </p>
-    <TerminalPrompt
-      :command="recordCommand"
-      :project-folder-name="projectName"
-      class="max-w-700px"
-    />
+    <RecordPromptAdapter class="w-full" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
-import { gql } from '@urql/vue'
-import TerminalPrompt from '@cy/components/TerminalPrompt.vue'
-import type { RunsEmptyFragment } from '../generated/graphql'
+import RecordPromptAdapter from '@packages/frontend-shared/src/gql-components/RecordPromptAdapter.vue'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
-
-gql`
-fragment RunsEmpty on CurrentProject {
-  id
-  title
-  projectId
-  configFile
-  currentTestingType
-  cloudProject {
-    __typename
-    ... on CloudProject {
-      id
-      recordKeys {
-        id
-        ...RecordKey
-      }
-    }
-    
-  }
-}
-`
-
-const props = defineProps<{
-  gql: RunsEmptyFragment
-}>()
-
-const projectName = computed(() => props.gql.title)
-const firstRecordKey = computed(() => {
-  return props.gql.cloudProject?.__typename === 'CloudProject' && props.gql.cloudProject.recordKeys?.[0]?.key
-    ? props.gql.cloudProject.recordKeys[0].key
-    : '<record-key>'
-})
-const recordCommand = computed(() => {
-  const componentFlagOrSpace = props.gql.currentTestingType === 'component' ? ' --component ' : ' '
-
-  return `cypress run${componentFlagOrSpace}--record --key ${firstRecordKey.value}`
-})
 </script>
 
 <style scoped lang="scss">

@@ -40,6 +40,9 @@ import * as $Events from './cypress/events'
 import $Keyboard from './cy/keyboard'
 import * as resolvers from './cypress/resolvers'
 import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from './cross-origin/communicator'
+import { setupAutEventHandlers } from './cypress/aut_event_handlers'
+
+import type { CachedTestState } from '@packages/types'
 
 const debug = debugFn('cypress:driver:cypress')
 
@@ -167,10 +170,12 @@ class $Cypress {
     this.events = $Events.extend(this)
     this.$ = jqueryProxyFn.bind(this)
 
+    setupAutEventHandlers(this)
+
     _.extend(this.$, $)
   }
 
-  configure (config: Cypress.ObjectLike = {}) {
+  configure (config: Record<string, any> = {}) {
     const domainName = config.remote ? config.remote.domainName : undefined
 
     // set domainName but allow us to turn
@@ -214,6 +219,7 @@ class $Cypress {
     // change this in the NEXT_BREAKING
     const { env } = config
 
+    // TODO: remove rawJson - https://github.com/cypress-io/cypress/issues/23945
     config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isCrossOriginSpecBridge')
 
     _.extend(this, browserInfo(config))
@@ -277,10 +283,12 @@ class $Cypress {
     }
   }
 
-  run (fn) {
+  run (cachedTestState: CachedTestState, fn) {
     if (!this.runner) {
       $errUtils.throwErrByPath('miscellaneous.no_runner')
     }
+
+    this.state(cachedTestState)
 
     return this.runner.run(fn)
   }
@@ -321,8 +329,6 @@ class $Cypress {
     this.events.proxyTo(this.cy)
 
     $scriptUtils.runScripts(specWindow, scripts)
-    // TODO: remove this after making the type of `runScripts` more specific.
-    // @ts-ignore
     .catch((error) => {
       this.runner.onSpecError('error')({ error })
     })
@@ -354,7 +360,6 @@ class $Cypress {
     })
     .then(() => {
       this.cy.initialize(this.$autIframe)
-
       this.onSpecReady()
     })
   }
@@ -640,7 +645,7 @@ class $Cypress {
         return this.emit('snapshot', ...args)
 
       case 'cy:before:stability:release':
-        return this.emitThen('before:stability:release', ...args)
+        return this.emitThen('before:stability:release')
 
       case 'app:uncaught:exception':
         return this.emitMap('uncaught:exception', ...args)
@@ -672,6 +677,7 @@ class $Cypress {
         this.emit('internal:window:load', {
           type: 'same:origin',
           window: args[0],
+          url: args[1],
         })
 
         return this.emit('window:load', args[0])
@@ -787,7 +793,7 @@ class $Cypress {
     }
   }
 
-  static create (config) {
+  static create (config: Record<string, any>) {
     const cypress = new $Cypress()
 
     cypress.configure(config)

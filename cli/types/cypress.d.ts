@@ -655,7 +655,22 @@ declare namespace Cypress {
   }
 
   interface SessionOptions {
-    validate?: () => false | void
+    /**
+     * Whether or not to persist the session across all specs in the run.
+     * @default {false}
+     */
+    cacheAcrossSpecs?: boolean,
+    /**
+     * Function to run immediately after the session is created and `setup` function runs or
+     * after a session is restored and the page is cleared. If this returns `false`, throws an
+     * exception, returns a Promise which resolves to `false` or rejects or contains any failing
+     * Cypress command, the session is considered invalid.
+     *
+     * If validation fails immediately after `setup`, the test will fail.
+     * If validation fails after restoring a session, `setup` will re-run.
+     * @default {false}
+     */
+    validate?: () => Promise<false | void> | false | void
   }
 
   type CanReturnChainable = void | Chainable | Promise<unknown>
@@ -705,7 +720,7 @@ declare namespace Cypress {
      *    cy.get('input[type=file]').selectFile(Cypress.Buffer.from('text'))
      *    cy.get('input[type=file]').selectFile({
      *      fileName: 'users.json',
-     *      fileContents: [{name: 'John Doe'}]
+     *      contents: [{name: 'John Doe'}]
      *    })
      */
     selectFile(files: FileReference | FileReference[], options?: Partial<SelectFileOptions>): Chainable<Subject>
@@ -1074,7 +1089,7 @@ declare namespace Cypress {
       *
       * @see https://on.cypress.io/session
       */
-    session(id: string | object, setup?: SessionOptions['validate'], options?: SessionOptions): Chainable<null>
+    session(id: string | object, setup: () => void, options?: SessionOptions): Chainable<null>
 
     /**
      * Get the window.document of the page that is currently active.
@@ -2793,12 +2808,32 @@ declare namespace Cypress {
      */
     supportFile: string | false
     /**
-     * The test isolation level applied to ensure a clean slate between tests.
-     *   - legacy - resets/clears aliases, intercepts, clock, viewport, cookies, and local storage before each test.
-     *   - strict - applies all resets/clears from legacy, plus clears the page by visiting 'about:blank' to ensure clean app state before each test.
-     * @default "legacy", however, when experimentalSessionAndOrigin=true, the default is "strict"
+     * The test isolation ensures a clean browser context between tests. This option is only available when
+     * `experimentalSessionAndOrigin=true`.
+     *
+     * Cypress will always reset/clear aliases, intercepts, clock, and viewport before each test
+     * to ensure a clean test slate; i.e. this configuration only impacts the browser context.
+     *
+     * Note: the [`cy.session()`](https://on.cypress.io/session) command will inherent this value to determine whether
+     * or not the page is cleared when the command executes. This command is only available in end-to-end testing.
+     *
+     *  - on - The page is cleared before each test. Cookies, local storage and session storage in all domains are cleared
+     *         before each test. The `cy.session()` command will also clear the page and current browser context when creating
+     *         or restoring the browser session.
+     *  - off - The current browser state will persist between tests. The page does not clear before the test and cookies, local
+     *          storage and session storage will be available in the next test. The `cy.session()` command will only clear the
+     *          current browser context when creating or restoring the browser session - the current page will not clear.
+     *
+     * Tradeoffs:
+     *      Turning test isolation off may improve performance of end-to-end tests, however, previous tests could impact the
+     *      browser state of the next test and cause inconsistency when using .only(). Be mindful to write isolated tests when
+     *      test isolation is off. If a test in the suite impacts the state of other tests and it were to fail, you could see
+     *      misleading errors in later tests which makes debugging clunky. See the [documentation](https://on.cypress.io/test-isolation)
+     *      for more information.
+     *
+     * @default null, when experimentalSessionAndOrigin=false. The default is 'on' when experimentalSessionAndOrigin=true.
      */
-    testIsolation: 'legacy' | 'strict'
+    testIsolation: null | 'on' | 'off'
     /**
      * Path to folder where videos will be saved after a headless or CI run
      * @default "cypress/videos"
@@ -2993,6 +3028,7 @@ declare namespace Cypress {
     // Internal or Unlisted at server/lib/config_options
     namespace: string
     projectRoot: string
+    repoRoot: string | null
     devServerPublicPathRoute: string
     cypressBinaryRoot: string
   }
@@ -3066,18 +3102,21 @@ declare namespace Cypress {
 
   type DevServerFn<ComponentDevServerOpts = any> = (cypressDevServerConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
 
+  type ConfigHandler<T> = T
+    | (() => T | Promise<T>)
+
   type DevServerConfigOptions = {
     bundler: 'webpack'
     framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next' | 'svelte'
-    webpackConfig?: PickConfigOpt<'webpackConfig'>
+    webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>
   } | {
     bundler: 'vite'
     framework: 'react' | 'vue' | 'svelte'
-    viteConfig?: Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>
+    viteConfig?: ConfigHandler<Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>>
   } | {
     bundler: 'webpack',
     framework: 'angular',
-    webpackConfig?: PickConfigOpt<'webpackConfig'>,
+    webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>,
     options?: {
       projectConfig: AngularDevServerProjectConfig
     }
@@ -5485,6 +5524,7 @@ declare namespace Cypress {
     extensions: string[]
     preferences: { [key: string]: any }
     args: string[]
+    env: { [key: string]: any }
   }
 
   interface Dimensions {

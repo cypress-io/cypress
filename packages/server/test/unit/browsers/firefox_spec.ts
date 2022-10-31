@@ -10,6 +10,9 @@ import stripAnsi from 'strip-ansi'
 import Foxdriver from '@benmalka/foxdriver'
 import * as firefox from '../../../lib/browsers/firefox'
 import firefoxUtil from '../../../lib/browsers/firefox-util'
+import { CdpAutomation } from '../../../lib/browsers/cdp_automation'
+import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
+import { CriClient } from '../../../lib/browsers/cri-client'
 
 const path = require('path')
 const _ = require('lodash')
@@ -115,7 +118,7 @@ describe('lib/browsers/firefox', () => {
     it('calls connectToNewSpec in firefoxUtil', function () {
       sinon.stub(firefoxUtil, 'connectToNewSpec').withArgs(50505, this.options, this.automation).resolves()
 
-      firefox.connectToNewSpec(this.browser, 50505, this.options, this.automation)
+      firefox.connectToNewSpec(this.browser, this.options, this.automation)
 
       expect(firefoxUtil.connectToNewSpec).to.be.called
     })
@@ -512,6 +515,37 @@ describe('lib/browsers/firefox', () => {
 
         expect(memory.forceCycleCollection).to.be.calledTwice
         expect(memory.forceGarbageCollection).to.be.calledTwice
+      })
+    })
+
+    context('#setupRemote', function () {
+      it('correctly sets up the remote agent', async function () {
+        const criClientStub: CriClient = {
+          targetId: '',
+          send: sinon.stub(),
+          on: sinon.stub(),
+          close: sinon.stub(),
+        }
+
+        const browserCriClient: BrowserCriClient = sinon.createStubInstance(BrowserCriClient)
+
+        browserCriClient.attachToTargetUrl = sinon.stub().resolves(criClientStub)
+
+        sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient)
+        sinon.stub(CdpAutomation, 'create').resolves()
+
+        const actual = await firefoxUtil.setupRemote(port, null, null, { experimentalSessionAndOrigin: false })
+
+        expect(actual).to.equal(browserCriClient)
+        expect(browserCriClient.attachToTargetUrl).to.be.calledWith('about:blank')
+        expect(BrowserCriClient.create).to.be.calledWith(['127.0.0.1', '::1'], port, 'Firefox', null)
+        expect(CdpAutomation.create).to.be.calledWith(
+          criClientStub.send,
+          criClientStub.on,
+          browserCriClient.resetBrowserTargets,
+          null,
+          false,
+        )
       })
     })
   })

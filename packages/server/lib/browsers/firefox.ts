@@ -371,6 +371,17 @@ export function _createDetachedInstance (browserInstance: BrowserInstance, brows
   return detachedInstance
 }
 
+/**
+* Clear instance state for the chrome instance, this is normally called in on kill or on exit.
+*/
+export function clearInstanceState () {
+  debug('closing remote interface client')
+  if (browserCriClient) {
+    browserCriClient.close().catch()
+    browserCriClient = undefined
+  }
+}
+
 export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
   await firefoxUtil.connectToNewSpec(options, automation, browserCriClient)
 }
@@ -536,6 +547,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     // user can overwrite this default with these env vars or --height, --width arguments
     MOZ_HEADLESS_WIDTH: '1280',
     MOZ_HEADLESS_HEIGHT: '721',
+    ...launchOptions.env,
   })
 
   try {
@@ -551,13 +563,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     const originalBrowserKill = browserInstance.kill
 
     browserInstance.kill = (...args) => {
-      debug('closing remote interface client')
-
       // Do nothing on failure here since we're shutting down anyway
-      if (browserCriClient) {
-        browserCriClient.close().catch()
-        browserCriClient = undefined
-      }
+      clearInstanceState()
 
       debug('closing firefox')
 

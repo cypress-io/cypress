@@ -66,7 +66,7 @@ describe('e2e stdout', () => {
     return systemTests.exec(this, {
       port: 2020,
       snapshot: true,
-      spec: 'nested-1/nested-2/nested-3/*',
+      spec: 'nested-1/nested-2/nested-3/**/*',
     })
   })
 

@@ -38,7 +38,7 @@ const cypressSchematicPackagePath = path.join(__dirname, '..')
 const ANGULAR_PROJECTS: ProjectFixtureDir[] = ['angular-13', 'angular-14']
 
 describe('ng add @cypress/schematic / e2e and ct', function () {
-  this.timeout(1000 * 60 * 4)
+  this.timeout(1000 * 60 * 5)
 
   for (const project of ANGULAR_PROJECTS) {
     it('should install ct files with option and no component specs', async () => {

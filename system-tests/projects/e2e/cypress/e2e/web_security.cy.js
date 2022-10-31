@@ -25,12 +25,14 @@ describe('web security', function () {
     .contains('success!', { timeout: 500 })
   })
 
-  it('finds the correct spec bridge even if a previous spec bridge host is a subset of the current host', () => {
+  it('finds the correct spec bridge even if a previous spec bridge host is a subset of the current host', { defaultCommandTimeout: 4000 }, () => {
     // Establish a spec bridge with a 'bar.com' host prior to loading 'foobar.com'
-    cy.origin('http://www.bar.com:4466', () => undefined)
+    if (Cypress.config('experimentalSessionAndOrigin')) {
+      cy.origin('http://www.bar.com:4466', () => undefined)
 
-    cy.origin('http://www.app.foobar.com:4466', () => {
-      cy.visit('/link')
-    })
+      cy.origin('http://www.app.foobar.com:4466', () => {
+        cy.visit('/link')
+      })
+    }
   })
 })

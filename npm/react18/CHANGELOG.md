@@ -1,3 +1,10 @@
+# [@cypress/react18-v1.1.1](https://github.com/cypress-io/cypress/compare/@cypress/react18-v1.1.0...@cypress/react18-v1.1.1) (2022-10-13)
+
+
+### Bug Fixes
+
+* cypress/react18 rerender ([#23360](https://github.com/cypress-io/cypress/issues/23360)) ([8b8f20e](https://github.com/cypress-io/cypress/commit/8b8f20eec77d4c0a704aee7f7077dc92dbafb93f))
+
 # [@cypress/react18-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/react18-v1.0.1...@cypress/react18-v1.1.0) (2022-08-30)
 
 

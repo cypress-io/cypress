@@ -3,32 +3,44 @@ import LoginBanner from './LoginBanner.vue'
 import { TrackedBanner_RecordBannerSeenDocument } from '../../generated/graphql'
 
 describe('<LoginBanner />', () => {
+  const cohortOption = { cohort: 'A', value: defaultMessages.specPage.banners.login.contentA }
+
   it('should render expected content', () => {
-    cy.mount({ render: () => <LoginBanner modelValue={true} /> })
+    cy.mount({ render: () => <LoginBanner hasBannerBeenShown={true} cohortOption={cohortOption}/> })
 
     cy.contains(defaultMessages.specPage.banners.login.title).should('be.visible')
-    cy.contains(defaultMessages.specPage.banners.login.content).should('be.visible')
+    cy.contains(defaultMessages.specPage.banners.login.contentA).should('be.visible')
     cy.contains(defaultMessages.specPage.banners.login.buttonLabel).should('be.visible')
 
     cy.percySnapshot()
   })
 
-  it('should record expected event on mount', () => {
-    const recordEvent = cy.stub().as('recordEvent')
+  context('events', () => {
+    beforeEach(() => {
+      const recordEvent = cy.stub().as('recordEvent')
 
-    cy.stubMutationResolver(TrackedBanner_RecordBannerSeenDocument, (defineResult, event) => {
-      recordEvent(event)
+      cy.stubMutationResolver(TrackedBanner_RecordBannerSeenDocument, (defineResult, event) => {
+        recordEvent(event)
 
-      return defineResult({ recordEvent: true })
+        return defineResult({ recordEvent: true })
+      })
     })
 
-    cy.mount({ render: () => <LoginBanner modelValue={true} hasBannerBeenShown={false} /> })
+    it('should record expected event on mount', () => {
+      cy.mount({ render: () => <LoginBanner hasBannerBeenShown={false} cohortOption={cohortOption}/> })
 
-    cy.get('@recordEvent').should('have.been.calledWith', {
-      campaign: 'Log In',
-      medium: 'Specs Login Banner',
-      messageId: Cypress.sinon.match.string,
-      cohort: null,
+      cy.get('@recordEvent').should('have.been.calledWith', {
+        campaign: 'Log In',
+        medium: 'Specs Login Banner',
+        messageId: Cypress.sinon.match.string,
+        cohort: cohortOption.cohort,
+      })
+    })
+
+    it('should not record event on mount if already shown', () => {
+      cy.mount({ render: () => <LoginBanner hasBannerBeenShown={true} cohortOption={cohortOption}/> })
+
+      cy.get('@recordEvent').should('not.have.been.called')
     })
   })
 })

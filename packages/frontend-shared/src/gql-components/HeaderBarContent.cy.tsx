@@ -1,6 +1,8 @@
 import { HeaderBar_HeaderBarContentFragmentDoc } from '../generated/graphql-test'
 import HeaderBarContent from './HeaderBarContent.vue'
 import { defaultMessages } from '@cy/i18n'
+import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
+import { useLoginConnectStore } from '../store/login-connect-store'
 
 const text = defaultMessages.topNav
 
@@ -285,37 +287,31 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
     cy.contains(`${defaultMessages.topNav.updateCypress.title} 8.7.0`).should('be.visible')
     cy.contains('test-project').should('be.visible')
-    cy.contains('code', 'yarn add -D cypress').should('be.visible')
+    cy.findByDisplayValue('yarn add -D cypress@8.7.0').should('be.visible')
     cy.percySnapshot('after upgrade modal open')
 
     cy.get('body').type('{esc}') // dismiss modal with keyboard
     cy.contains(`${defaultMessages.topNav.updateCypress.title} 8.7.0`).should('not.exist')
   })
 
-  it('the login modal reaches "opening browser" status', () => {
-    mountFragmentWithData()
-
-    cy.findByRole('button', { name: text.login.actionLogin })
-    .click()
-
-    cy.contains('h2', text.login.titleInitial).should('be.visible')
-    cy.percySnapshot()
-
-    cy.findByRole('button', { name: text.login.actionLogin })
-    .should('be.visible')
-    .and('have.focus')
-
-    cy.findByRole('button', { name: defaultMessages.actions.close }).click()
-
-    cy.contains('h2', text.login.titleInitial).should('not.exist')
-  })
-
   it('the logged in state is correctly presented in header', () => {
+    const loginConnectStore = useLoginConnectStore()
+
+    loginConnectStore.setUserFlag('isLoggedIn', true)
+
     const cloudViewer = {
+      ...CloudUserStubs.me,
+      organizations: null,
+      firstOrganization: {
+        __typename: 'CloudOrganizationConnection' as const,
+        nodes: [],
+      },
       id: '1',
       email: 'test@test.test',
       fullName: 'Tester Test',
     }
+
+    loginConnectStore.setUserData(cloudViewer)
 
     cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
       onResult: (result) => {
@@ -374,6 +370,12 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       context('opens automatically', () => {
         beforeEach(() => {
           cy.clock(1609891200000)
+        })
+
+        afterEach(() => {
+          // Setting the clock in the beforeEach was causing the cy.checkA11y call in cy.percySnapshot to timeout only in open mode.  Resetting
+          // the clock here prevents that timeout
+          cy.clock().invoke('restore')
         })
 
         function mountWithSavedState (options?: {state?: object, projectId?: string }) {
