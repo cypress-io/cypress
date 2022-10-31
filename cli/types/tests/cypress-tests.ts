@@ -978,7 +978,7 @@ namespace CypressOriginTests {
 
 namespace CypressGetCookiesTests {
   cy.getCookies().then((cookies) => {
-    cookies // $ExpectType Cypress.Cookie[]
+    cookies // $ExpectType Cookie[]
   })
   cy.getCookies({ log: true })
   cy.getCookies({ timeout: 10 })
@@ -992,7 +992,7 @@ namespace CypressGetCookiesTests {
 
 namespace CypressGetCookieTests {
   cy.getCookie('name').then((cookie) => {
-    cookie // $ExpectType Cypress.Cookie | null
+    cookie // $ExpectType Cookie | null
   })
   cy.getCookie('name', { log: true })
   cy.getCookie('name', { timeout: 10 })
@@ -1006,7 +1006,7 @@ namespace CypressGetCookieTests {
 
 namespace CypressSetCookieTests {
   cy.setCookie('name', 'value').then((cookie) => {
-    cookie // $ExpectType Cypress.Cookie | null
+    cookie // $ExpectType Cookie
   })
   cy.setCookie('name', 'value', { log: true })
   cy.setCookie('name', 'value', { timeout: 10 })
@@ -1021,10 +1021,10 @@ namespace CypressSetCookieTests {
   cy.setCookie('name', 'value', { log: true, timeout: 10, domain: 'localhost' })
 
   cy.setCookie('name') // $ExpectError
-  cy.setCookie('name', { log: 'true' }) // $ExpectError
-  cy.setCookie('name', { timeout: '10' }) // $ExpectError
-  cy.setCookie('name', { domain: false }) // $ExpectError
-  cy.setCookie('name', { foo: 'bar' }) // $ExpectError
+  cy.setCookie('name', 'value', { log: 'true' }) // $ExpectError
+  cy.setCookie('name', 'value', { timeout: '10' }) // $ExpectError
+  cy.setCookie('name', 'value', { domain: false }) // $ExpectError
+  cy.setCookie('name', 'value', { foo: 'bar' }) // $ExpectError
 }
 
 namespace CypressClearCookieTests {
