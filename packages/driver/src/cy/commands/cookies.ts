@@ -79,6 +79,18 @@ function cookieValidatesSecurePrefix (options) {
   return options.secure === false
 }
 
+function validateDomainOption (domain: any, commandName: string, log: Log | undefined) {
+  if (domain !== undefined && !_.isString(domain)) {
+    $errUtils.throwErrByPath('cookies.invalid_domain', {
+      onFail: log,
+      args: {
+        cmd: commandName,
+        domain,
+      },
+    })
+  }
+}
+
 export default function (Commands, Cypress, cy, state, config) {
   const automateCookies = function (event, obj = {}, log, timeout) {
     const automate = () => {
@@ -203,6 +215,8 @@ export default function (Commands, Cypress, cy, state, config) {
         $errUtils.throwErrByPath('getCookie.invalid_argument', { onFail: log })
       }
 
+      validateDomainOption(options.domain, 'getCookie', log)
+
       return cy.retryIfCommandAUTOriginMismatch(() => {
         return automateCookies('get:cookie', { name, domain: options.domain }, log, responseTimeout)
         .then(pickCookieProps)
@@ -241,6 +255,8 @@ export default function (Commands, Cypress, cy, state, config) {
           },
         })
       }
+
+      validateDomainOption(options.domain, 'getCookies', log)
 
       return cy.retryIfCommandAUTOriginMismatch(() => {
         return automateCookies('get:cookies', _.pick(options, 'domain'), log, responseTimeout)
@@ -320,6 +336,8 @@ export default function (Commands, Cypress, cy, state, config) {
         $errUtils.throwErrByPath('setCookie.host_prefix', { onFail: log })
       }
 
+      validateDomainOption(options.domain, 'setCookie', log)
+
       Cypress.emit('set:cookie', cookie)
 
       return cy.retryIfCommandAUTOriginMismatch(() => {
@@ -366,6 +384,8 @@ export default function (Commands, Cypress, cy, state, config) {
       if (!_.isString(name)) {
         $errUtils.throwErrByPath('clearCookie.invalid_argument', { onFail: log })
       }
+
+      validateDomainOption(options.domain, 'clearCookie', log)
 
       Cypress.emit('clear:cookie', name)
 
@@ -415,6 +435,8 @@ export default function (Commands, Cypress, cy, state, config) {
           },
         })
       }
+
+      validateDomainOption(options.domain, 'clearCookies', log)
 
       Cypress.emit('clear:cookies')
 

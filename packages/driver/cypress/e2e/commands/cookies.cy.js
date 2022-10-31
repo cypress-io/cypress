@@ -361,6 +361,20 @@ describe('src/cy/commands/cookies', () => {
         return null
       })
 
+      it('when an invalid domain prop is supplied', function (done) {
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          expect(lastLog.get('error').message).to.eq('`cy.getCookies()` must be passed a valid domain name. You passed: `true`')
+          expect(lastLog.get('error').docsUrl).to.eq('https://on.cypress.io/getcookies')
+          expect(lastLog.get('error')).to.eq(err)
+
+          done()
+        })
+
+        cy.getCookies({ domain: true })
+      })
+
       it('logs once on error', function (done) {
         const error = new Error('some err message')
 
@@ -587,6 +601,20 @@ describe('src/cy/commands/cookies', () => {
         })
 
         cy.getCookie(123)
+      })
+
+      it('when an invalid domain prop is supplied', function (done) {
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          expect(lastLog.get('error').message).to.eq('`cy.getCookie()` must be passed a valid domain name. You passed: `true`')
+          expect(lastLog.get('error').docsUrl).to.eq('https://on.cypress.io/getcookie')
+          expect(lastLog.get('error')).to.eq(err)
+
+          done()
+        })
+
+        cy.getCookie('foo', { domain: true })
       })
     })
 
@@ -909,6 +937,20 @@ describe('src/cy/commands/cookies', () => {
         cy.setCookie('foo', 'bar', { sameSite: 'None' })
       })
 
+      it('when an invalid domain prop is supplied', function (done) {
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          expect(lastLog.get('error').message).to.eq('`cy.setCookie()` must be passed a valid domain name. You passed: `true`')
+          expect(lastLog.get('error').docsUrl).to.eq('https://on.cypress.io/setcookie')
+          expect(lastLog.get('error')).to.eq(err)
+
+          done()
+        })
+
+        cy.setCookie('foo', 'bar', { domain: true })
+      })
+
       context('when setting an invalid cookie', () => {
         it('throws an error if the backend responds with an error', (done) => {
           const err = new Error('backend could not set cookie')
@@ -1102,6 +1144,20 @@ describe('src/cy/commands/cookies', () => {
         })
 
         cy.clearCookie(123)
+      })
+
+      it('when an invalid domain prop is supplied', function (done) {
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          expect(lastLog.get('error').message).to.eq('`cy.clearCookie()` must be passed a valid domain name. You passed: `true`')
+          expect(lastLog.get('error').docsUrl).to.eq('https://on.cypress.io/clearcookie')
+          expect(lastLog.get('error')).to.eq(err)
+
+          done()
+        })
+
+        cy.clearCookie('foo', { domain: true })
       })
     })
 
@@ -1314,6 +1370,20 @@ describe('src/cy/commands/cookies', () => {
         })
 
         return null
+      })
+
+      it('when an invalid domain prop is supplied', function (done) {
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          expect(lastLog.get('error').message).to.eq('`cy.clearCookies()` must be passed a valid domain name. You passed: `true`')
+          expect(lastLog.get('error').docsUrl).to.eq('https://on.cypress.io/clearcookies')
+          expect(lastLog.get('error')).to.eq(err)
+
+          done()
+        })
+
+        cy.clearCookies({ domain: true })
       })
 
       it('logs once on \'get:cookies\' error', function (done) {
