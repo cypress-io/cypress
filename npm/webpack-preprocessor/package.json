@@ -90,11 +90,5 @@
     "cypress-plugin",
     "cypress-preprocessor",
     "webpack"
-  ],
-  "workspaces": {
-    "nohoist": [
-      "merge-source-map",
-      "patch-package"
-    ]
-  }
+  ]
 }
