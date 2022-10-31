@@ -6012,9 +6012,9 @@
   dependencies:
     defer-to-connect "^2.0.0"
 
-"@testing-library/cypress@BlueWinds/cypress-testing-library":
+"@testing-library/cypress@BlueWinds/cypress-testing-library#119054b5963b0d2e064b13c5cc6fc9db32c8b7b5":
   version "0.0.0-semantically-released"
-  resolved "https://codeload.github.com/BlueWinds/cypress-testing-library/tar.gz/c78ccf987eb9ab29c47ef78b0cef9e94f746e553"
+  resolved "https://codeload.github.com/BlueWinds/cypress-testing-library/tar.gz/119054b5963b0d2e064b13c5cc6fc9db32c8b7b5"
   dependencies:
     "@babel/runtime" "^7.14.6"
     "@testing-library/dom" "^8.1.0"
