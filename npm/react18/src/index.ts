@@ -27,7 +27,7 @@ const cleanup = () => {
 
 /**
  * Mounts a React component into the DOM.
- * @param jsx {React.ReactNode} The React component to mount.
+ * @param jsx {import('react').JSX.Element} The React component to mount.
  * @param options {MountOptions} Options to pass to the mount function.
  * @param rerenderKey {string} A key to use to force a rerender.
  *
@@ -39,6 +39,10 @@ const cleanup = () => {
  *  cy.get('[data-cy=increment]').click()
  *  cy.get('[data-cy=counter]').should('have.text', '1')
  * }
+ *
+ * @see {@link https://docs.cypress.io/guides/component-testing/mounting-react} for more details.
+ *
+ * @returns {Cypress.Chainable<MountReturn>} The mounted component.
  */
 export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerenderKey?: string) {
   const internalOptions: InternalMountOptions = {

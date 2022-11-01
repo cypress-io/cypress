@@ -275,32 +275,33 @@ function setupComponent<T extends { ngOnChanges? (changes: SimpleChanges): void 
 /**
  * Mounts an Angular component inside Cypress browser
  *
- * @param {Type<T> | string} component Angular component being mounted or its template
- * @param {MountConfig<T>} config configuration used to configure the TestBed
+ * @param component Angular component being mounted or its template
+ * @param config configuration used to configure the TestBed
  * @example
  * import { mount } from '@cypress/angular'
  * import { StepperComponent } from './stepper.component'
  * import { MyService } from 'services/my.service'
  * import { SharedModule } from 'shared/shared.module';
  * it('mounts', () => {
- *  mount(StepperComponent, {
- *    providers: [MyService],
- *    imports: [SharedModule]
- *  })
- *  cy.get('[data-cy=increment]').click()
- *  cy.get('[data-cy=counter]').should('have.text', '1')
+ *    mount(StepperComponent, {
+ *      providers: [MyService],
+ *      imports: [SharedModule]
+ *    })
+ *    cy.get('[data-cy=increment]').click()
+ *    cy.get('[data-cy=counter]').should('have.text', '1')
  * })
  *
  * // or
  *
  * it('mounts with template', () => {
- *  mount('<app-hello-world></app-hello-world>', {
- *    declarations: [HelloWorldComponent],
- *    providers: [MyService],
- *    imports: [SharedModule]
- *  })
+ *   mount('<app-stepper></app-stepper>', {
+ *     declarations: [StepperComponent],
+ *   })
  * })
- * @returns Cypress.Chainable<MountResponse<T>>
+ *
+ @see {@link https://docs.cypress.io/guides/component-testing/mounting-angular} for more details.
+ *
+ * @returns A component and component fixture
  */
 export function mount<T> (
   component: Type<T> | string,

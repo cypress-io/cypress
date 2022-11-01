@@ -41,7 +41,8 @@ export const ROOT_SELECTOR = '[data-cy-root]'
 
 /**
  * Gets the root element used to mount the component.
- * @returns {HTMLElement | null} The root element
+ * @returns {HTMLElement} The root element
+ * @throws {Error} If the root element is not found
  */
 export const getContainerEl = (): HTMLElement => {
   const el = document.querySelector<HTMLElement>(ROOT_SELECTOR)
@@ -204,13 +205,11 @@ export const injectStylesBeforeElement = (
 }
 
 /**
- * Consumed by the framework "mount" libs.
- * A user might register their own mount in the scaffolded 'commands.js'
+ * Utility function to register CT side effects and run cleanup code during the "test:before:run" Cypress hook
  * @param optionalCallback Callback to be called before the next test runs
  */
 export function setupHooks (optionalCallback?: Function) {
-  // file that is imported by e2e and component support files by default. We don't want CT side effects to run when e2e
-  // testing so we early return.
+  // We don't want CT side effects to run when e2e
   // System test to verify CT side effects do not pollute e2e: system-tests/test/e2e_with_mount_import_spec.ts
   if (Cypress.testingType !== 'component') {
     return

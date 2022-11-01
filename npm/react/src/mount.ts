@@ -28,9 +28,9 @@ const cleanup = () => {
 /**
  * Mounts a React component into the DOM.
  * @param jsx {React.ReactNode} The React component to mount.
- * @param options {MountOptions} Options to pass to the mount function.
- * @param rerenderKey {string} A key to use to force a rerender.
- *
+ * @param options {MountOptions} [options={}] options to pass to the mount function.
+ * @param rerenderKey {string} [rerenderKey] A key to use to force a rerender.
+ * @see {@link https://docs.cypress.io/guides/component-testing/mounting-react} for more details.
  * @example
  * import { mount } from '@cypress/react'
  * import { Stepper } from './Stepper'
