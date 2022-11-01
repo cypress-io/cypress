@@ -1,0 +1,32 @@
+{
+  "name": "@packages/v8-snapshot-require",
+  "version": "0.0.0-development",
+  "description": "Various utils related to create v8 snapshots for electron apps.",
+  "private": true,
+  "main": "dist/snapshot-require.js",
+  "scripts": {
+    "build": "tsc",
+    "build-prod": "yarn build",
+    "check-ts": "tsc --noEmit && yarn -s tslint",
+    "clean-deps": "rimraf node_modules",
+    "clean": "rimraf dist",
+    "test": "yarn test-unit",
+    "test-unit": "mocha --config ./test/.mocharc.js",
+    "tslint": "tslint --config ../ts/tslint.json --project .",
+    "watch": "tsc --watch"
+  },
+  "dependencies": {
+    "@packages/packherd-require": "0.0.0-development",
+    "debug": "^4.1.1",
+    "source-map-js": "^0.6.2"
+  },
+  "devDependencies": {
+    "mocha": "7.0.1",
+    "rimraf": "^3.0.2"
+  },
+  "files": [
+    "dist",
+    "src/snapshot-require.ts"
+  ],
+  "types": "src/snapshot-require.ts"
+}
