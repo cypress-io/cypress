@@ -15,9 +15,15 @@ it('calls callbacks on mount and unmount', () => {
   })
 
   cy.contains('Component with').should('be.visible')
-  unmount().then(() => {
-    expect(onUnmount).to.have.been.calledOnce
-  })
 
-  cy.contains('Component with').should('not.exist')
+  let stub = cy.stub()
+
+  try {
+    unmount()
+  } catch (e) {
+    expect(e.message).to.eq('unmount is no longer supported. See https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes to migrate.')
+    stub()
+  }
+
+  expect(stub).to.have.been.calledOnce
 })
