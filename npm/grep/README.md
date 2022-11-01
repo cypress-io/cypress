@@ -84,12 +84,12 @@ yarn add -D @cypress/grep
 ```js
 // cypress/support/index.js
 // load and register the grep feature using "require" function
-// https://github.com/cypress-io/cypress-grep
-const registerCypressGrep = require('cypress-grep')
+// https://github.com/cypress-io/cypress/tree/develop/npm/grep
+const registerCypressGrep = require('@cypress/grep')
 registerCypressGrep()
 
 // if you want to use the "import" keyword
-import registerCypressGrep from 'cypress-grep'
+import registerCypressGrep from '@cypress/grep'
 registerCypressGrep()
 ```
 
@@ -102,7 +102,7 @@ registerCypressGrep()
 {
   e2e: {
     setupNodeEvents(on, config) {
-      require('cypress-grep/src/plugin')(config);
+      require('@cypress/grep/src/plugin')(config);
       return config;
   },
   }
