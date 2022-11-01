@@ -283,8 +283,11 @@ export class ProjectLifecycleManager {
     if (this.ctx.coreData.cliBrowser) {
       await this.setActiveBrowserByNameOrPath(this.ctx.coreData.cliBrowser)
 
+      const preferences = await this.ctx._apis.localSettingsApi.getPreferences()
+      const hasLandingPageBeenDismissed = preferences.majorVersionLandingPageDismissed?.['11']
+
       // only continue if the browser was successfully set - we must have an activeBrowser once this function resolves
-      if (this.ctx.coreData.activeBrowser) {
+      if (this.ctx.coreData.activeBrowser && hasLandingPageBeenDismissed) {
         // if `cypress open` was launched with a `--project` and `--testingType`, go ahead and launch the `--browser`
         if (this.ctx.modeOptions.project && this.ctx.modeOptions.testingType) {
           await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType)
@@ -326,7 +329,7 @@ export class ProjectLifecycleManager {
   }
 
   async refreshLifecycle (): Promise<void> {
-    if (!this._projectRoot || !this._configManager || !this.readyToInitialize(this._projectRoot)) {
+    if (!this._projectRoot || !this._configManager || this.readyToInitialize(this._projectRoot)) {
       return
     }
 
@@ -379,7 +382,7 @@ export class ProjectLifecycleManager {
     return this._configManager.initializeConfig()
   }
 
-  private _setCurrentProject (projectRoot: string) {
+  private async _setCurrentProject (projectRoot: string) {
     process.chdir(projectRoot)
 
     this._projectRoot = projectRoot
