@@ -69,11 +69,11 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     })
 
     it('succeeds on a complete origin from https using https', () => {
-      cy.visit('https://foobar.com:3502/fixtures/primary-origin.html')
-      cy.origin('https://idp.com:3502', () => undefined)
+      cy.visit('https://www.foobar.com:3502/fixtures/primary-origin.html')
+      cy.origin('https://www.idp.com:3502', () => undefined)
       cy.then(() => {
-        const expectedSrc = `https://idp.com:3502/__cypress/spec-bridge-iframes`
-        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://idp.com:3502') as HTMLIFrameElement
+        const expectedSrc = `https://www.idp.com:3502/__cypress/spec-bridge-iframes`
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://www.idp.com:3502') as HTMLIFrameElement
 
         expect(iframe.src).to.equal(expectedSrc)
       })
@@ -443,8 +443,8 @@ describe('cy.origin', { browser: '!webkit' }, () => {
         done()
       })
 
-      cy.visit('https://foobar.com:3502/fixtures/primary-origin.html')
-      cy.origin('http://foobar.com:3500', () => {})
+      cy.visit('https://www.foobar.com:3502/fixtures/primary-origin.html')
+      cy.origin('http://www.foobar.com:3500', () => {})
     })
   })
 })
