@@ -160,6 +160,47 @@ const runFailingProjectTest = function (buildAppExecutable, e2e) {
   .then(verifyScreenshots)
 }
 
+const runV8SnapshotProjectTest = function (buildAppExecutable, e2e) {
+  if (shouldSkipProjectTest()) {
+    console.log('skipping failing project test')
+
+    return Promise.resolve()
+  }
+
+  console.log('running v8 snapshot project test')
+
+  const spawn = () => {
+    return new Promise((resolve, reject) => {
+      const env = _.omit(process.env, 'CYPRESS_INTERNAL_ENV')
+
+      const args = [
+        `--run-project=${e2e}`,
+        `--spec=${e2e}/cypress/e2e/simple_v8_snapshot.cy.js`,
+      ]
+
+      if (verify.needsSandbox()) {
+        args.push('--no-sandbox')
+      }
+
+      const options = {
+        stdio: 'inherit',
+        env,
+      }
+
+      return cp.spawn(buildAppExecutable, args, options)
+      .on('exit', (code) => {
+        if (code === 0) {
+          return resolve()
+        }
+
+        return reject(new Error(`running project tests failed with: '${code}' errors.`))
+      })
+    })
+  }
+
+  return spawn()
+}
+
 const test = async function (buildAppExecutable) {
   await scaffoldCommonNodeModules()
   await Fixtures.scaffoldProject('e2e')
@@ -168,6 +209,10 @@ const test = async function (buildAppExecutable) {
   await runSmokeTest(buildAppExecutable)
   await runProjectTest(buildAppExecutable, e2e)
   await runFailingProjectTest(buildAppExecutable, e2e)
+  if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE)) {
+    await runV8SnapshotProjectTest(buildAppExecutable, e2e)
+  }
+
   Fixtures.remove()
 }
 

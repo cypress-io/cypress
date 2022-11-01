@@ -1,3 +1,10 @@
+# [@cypress/webpack-preprocessor-v5.15.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.15.1...@cypress/webpack-preprocessor-v5.15.2) (2022-11-01)
+
+
+### Bug Fixes
+
+* patching packages in `npm/webpack-preprocessor` on windows builds ([#24473](https://github.com/cypress-io/cypress/issues/24473)) ([440a08b](https://github.com/cypress-io/cypress/commit/440a08bb2a67b7415fd1895118278e5dd0d8b32f))
+
 # [@cypress/webpack-preprocessor-v5.15.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.15.0...@cypress/webpack-preprocessor-v5.15.1) (2022-10-31)
 
 
