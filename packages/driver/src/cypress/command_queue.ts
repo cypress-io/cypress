@@ -172,7 +172,7 @@ export class CommandQueue extends Queue<$Command> {
   cleanup () {
     const runnable = this.state('runnable')
 
-    if (!runnable.isPending()) {
+    if (runnable && !runnable.isPending()) {
       // make sure we reset the runnable's timeout now
       runnable.resetTimeout()
     }
@@ -319,6 +319,8 @@ export class CommandQueue extends Queue<$Command> {
     })
   }
 
+  // TypeScript doesn't allow overriding functions with different type signatures
+  // @ts-ignore
   run () {
     if (this.stopped) {
       this.cleanup()
@@ -410,10 +412,7 @@ export class CommandQueue extends Queue<$Command> {
         if (pauseFn) {
           return new Bluebird((resolve) => {
             return pauseFn(resolve)
-          })
-          .then(() => {
-            return next()
-          })
+          }).then(next)
         }
 
         return next()

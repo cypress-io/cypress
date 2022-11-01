@@ -214,12 +214,12 @@ export default function (Commands, Cypress, cy) {
           return cy.then(async () => {
             // Catch when a cypress command fails in the setup function to correctly update log status
             // before failing command and ending command queue.
-            cy.state('onQueueFailed', (err) => {
+            cy.state('onQueueFailed', (err: Error | string, _queue): Error => {
               setupLogGroup.set({
                 state: 'failed',
                 consoleProps: {
                   Step: statusMap.stepName(step),
-                  Error: err.stack || err.message,
+                  Error: err?.stack || err?.message || err,
                 },
               })
 
@@ -339,7 +339,7 @@ export default function (Commands, Cypress, cy) {
               return err
             }
 
-            cy.state('onQueueFailed', (err: Error | string, queue): boolean => {
+            cy.state('onQueueFailed', (err: Error | string, queue): Error => {
               if (step === 'restore') {
                 const commands = queue.get()
                 // determine command queue index of _commandToRunAfterValidation's index

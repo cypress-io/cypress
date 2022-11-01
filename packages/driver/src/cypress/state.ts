@@ -51,7 +51,7 @@ export interface StateFunc {
   (k: 'commandIntermediateValue', v?: any): any
   (k: 'subject', v?: any): any
   (k: 'onPaused', v?: (fn: any) => void): (fn: any) => void
-  (k: 'onQueueFailed', v?: (err: any, queue: any) => boolean): (err: any, queue: any) => boolean
+  (k: 'onQueueFailed', v?: (err: Error | string, queue?: any) => Error): (err: Error | string, queue?: any) => Error
   (k: 'promise', v?: Bluebird<unknown>): Bluebird<unknown>
   (k: 'reject', v?: (err: any) => any): (err: any) => any
   (k: 'cancel', v?: () => void): () => void

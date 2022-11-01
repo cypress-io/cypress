@@ -102,8 +102,6 @@ const getConsoleProps = (session: SessionData) => {
   const sessionDetails = getSessionDetailsByDomain(session)
 
   const groupsByDomain = _.flatMap(sessionDetails, (val, domain) => {
-    // const info = '⚠️ There are no ${cookies, local storage or session} storage associated to this domain.',
-
     return {
       name: `${domain} data:`,
       expand: true,

@@ -127,7 +127,7 @@ export const logger = {
   },
 
   _logTables (consoleProps: any) {
-    const logTable = ({ name, data, columns }: Table) => {
+    const logTable = ({ name, data, columns }) => {
       let tableData = data
 
       if (Cypress.isBrowser('webkit')) {

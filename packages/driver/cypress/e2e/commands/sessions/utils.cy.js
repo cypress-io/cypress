@@ -40,7 +40,7 @@ describe('src/cy/commands/sessions/utils.ts', () => {
       logForDebugging(consoleProps)
 
       expect(consoleProps.id).to.eq('session1')
-      expect(consoleProps.Domains).to.eq('This session capture data from localhost.')
+      expect(consoleProps.Domains).to.eq('This session captured data from localhost.')
 
       expect(consoleProps.groups).to.have.length(1)
       expect(consoleProps.groups[0].name).to.eq('localhost data:')
@@ -64,7 +64,7 @@ describe('src/cy/commands/sessions/utils.ts', () => {
       logForDebugging(consoleProps)
 
       expect(consoleProps.id).to.eq('session1')
-      expect(consoleProps.Domains).to.eq('This session capture data from localhost.')
+      expect(consoleProps.Domains).to.eq('This session captured data from localhost.')
 
       expect(consoleProps.groups).to.have.length(1)
       expect(consoleProps.groups[0].name).to.eq('localhost data:')
@@ -88,7 +88,7 @@ describe('src/cy/commands/sessions/utils.ts', () => {
       logForDebugging(consoleProps)
 
       expect(consoleProps.id).to.eq('session1')
-      expect(consoleProps.Domains).to.eq('This session capture data from localhost.')
+      expect(consoleProps.Domains).to.eq('This session captured data from localhost.')
 
       expect(consoleProps.groups).to.have.length(1)
       expect(consoleProps.groups[0].name).to.eq('localhost data:')
@@ -116,7 +116,7 @@ describe('src/cy/commands/sessions/utils.ts', () => {
       logForDebugging(consoleProps)
 
       expect(consoleProps.id).to.eq('session1')
-      expect(consoleProps.Domains).to.eq('This session capture data from localhost.')
+      expect(consoleProps.Domains).to.eq('This session captured data from localhost.')
 
       expect(consoleProps.groups).to.have.length(1)
       expect(consoleProps.groups[0].name).to.eq('localhost data:')
@@ -150,7 +150,7 @@ describe('src/cy/commands/sessions/utils.ts', () => {
       logForDebugging(consoleProps)
 
       expect(consoleProps.id).to.eq('session1')
-      expect(consoleProps.Domains).to.eq('This session capture data from localhost and example.com.')
+      expect(consoleProps.Domains).to.eq('This session captured data from localhost and example.com.')
 
       expect(consoleProps.groups).to.have.length(2)
       expect(consoleProps.groups[0].name).to.eq('localhost data:')

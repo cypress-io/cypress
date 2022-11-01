@@ -261,7 +261,7 @@ describe('cy.session', { retries: 0 }, () => {
 
           expect(consoleProps.Command).to.eq('session')
           expect(consoleProps.id).to.eq('session-1')
-          expect(consoleProps.Domains).to.eq('This session capture data from localhost.')
+          expect(consoleProps.Domains).to.eq('This session captured data from localhost.')
 
           expect(consoleProps.groups).to.have.length(1)
           expect(consoleProps.groups[0].name).to.eq('localhost data:')
@@ -918,7 +918,7 @@ describe('cy.session', { retries: 0 }, () => {
 
           expect(consoleProps.Command).to.eq('session')
           expect(consoleProps.id).to.eq('session-1')
-          expect(consoleProps.Domains).to.eq('This session capture data from localhost.')
+          expect(consoleProps.Domains).to.eq('This session captured data from localhost.')
 
           expect(consoleProps.groups).to.have.length(1)
           expect(consoleProps.groups[0].name).to.eq('localhost data:')
