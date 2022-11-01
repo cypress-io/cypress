@@ -6,7 +6,7 @@
     <MajorVersionLandingPage
       v-if="!wasLandingPageShown"
       class="pt-64px"
-      @clearLandingPage="wasLandingPageShown = true"
+      @clearLandingPage="handleClearLandingPage"
     />
     <div
       v-else
@@ -99,10 +99,11 @@ import LaunchpadHeader from './setup/LaunchpadHeader.vue'
 import OpenBrowser from './setup/OpenBrowser.vue'
 import LoginConnectModals from '@cy/gql-components/LoginConnectModals.vue'
 import CloudViewerAndProject from '@cy/gql-components/CloudViewerAndProject.vue'
+import { usePromptManager } from '@cy/gql-components/composables/usePromptManager'
 
+const { setMajorVersionLandingPageDismissed } = usePromptManager()
 const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
-const wasLandingPageShown = ref(false)
 
 gql`
 fragment MainLaunchpadQueryData on Query {
@@ -111,6 +112,17 @@ fragment MainLaunchpadQueryData on Query {
   baseError {
     id
     ...BaseError
+  }
+  versions {
+    current {
+      id
+      version
+    }
+  }
+  localSettings {
+    preferences {
+      majorVersionLandingPageDismissed
+    }
   }
   currentProject {
     id
@@ -152,5 +164,20 @@ const resetErrorAndLoadConfig = (id: string) => {
 }
 const query = useQuery({ query: MainLaunchpadQueryDocument })
 const currentProject = computed(() => query.data.value?.currentProject)
+const currentMajorVersion = computed(() => query.data.value?.versions?.current?.version?.split('.')[0])
+
+function handleClearLandingPage () {
+  if (currentMajorVersion.value) {
+    setMajorVersionLandingPageDismissed(currentMajorVersion.value)
+  }
+}
+
+const wasLandingPageShown = computed(() => {
+  if (query.data.value && currentMajorVersion.value) {
+    return query.data.value?.localSettings?.preferences?.majorVersionLandingPageDismissed?.[currentMajorVersion.value]
+  }
+
+  return false
+})
 
 </script>
