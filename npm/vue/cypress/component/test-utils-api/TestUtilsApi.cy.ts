@@ -20,4 +20,12 @@ describe('VueTestUtils API', () => {
 
     cy.get('h1').contains(greeting)
   })
+
+  it('accesses wrapper and component', () => {
+    mount(TestUtilsApi, { props: { msg: 'Hello world!' } }).then(({ component, wrapper }) => {
+      expect(wrapper.find('h2').text()).to.eq('Hello world!')
+      expect(component.msg).to.eq('Hello world!')
+      expect(component.$data.foo).to.eq('bar')
+    })
+  })
 })

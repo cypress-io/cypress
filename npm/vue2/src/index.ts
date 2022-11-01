@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import Vue from 'vue'
+import Vue, { Component } from 'vue'
 import {
   createLocalVue,
   mount as testUtilsMount,
@@ -332,7 +332,10 @@ function getComponentDisplayName (componentOptions: any): string {
 export const mount = (
   component: VueComponent,
   optionsOrProps: MountOptionsArgument = {},
-) => {
+): Cypress.Chainable<{
+  wrapper: Wrapper<Vue, Element>
+  component: Wrapper<Vue, Element>['vm']
+}> => {
   const options: Partial<MountOptions> = Cypress._.pick(
     optionsOrProps,
     defaultOptions,
@@ -410,6 +413,11 @@ export const mount = (
 
     Cypress.vue = VTUWrapper.vm
     Cypress.vueWrapper = VTUWrapper
+
+    return {
+      wrapper: VTUWrapper,
+      component: VTUWrapper.vm,
+    }
   })
 }
 
