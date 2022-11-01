@@ -80,7 +80,7 @@
 
 <script lang="ts" setup>
 import { gql, useMutation, useQuery } from '@urql/vue'
-import { MainLaunchpadQueryDocument, Main_ResetErrorsAndLoadConfigDocument } from './generated/graphql'
+import { MainLaunchpadQueryDocument, Main_ResetErrorsAndLoadConfigDocument, Main_LaunchProjectDocument } from './generated/graphql'
 import TestingTypeCards from './setup/TestingTypeCards.vue'
 import Wizard from './setup/Wizard.vue'
 import GlobalPage from './global/GlobalPage.vue'
@@ -116,6 +116,7 @@ fragment MainLaunchpadQueryData on Query {
   localSettings {
     preferences {
       majorVersionLandingPageDismissed
+      wasBrowserSetInCLI
     }
   }
   currentProject {
@@ -149,7 +150,22 @@ mutation Main_ResetErrorsAndLoadConfig($id: ID!) {
 }
 `
 
+gql`
+mutation Main_LaunchProject ($testingType: TestingTypeEnum!)  {
+  launchOpenProject {
+    id
+  }
+  setProjectPreferencesInGlobalCache(testingType: $testingType) {
+    currentProject {
+      id
+      title
+    }
+  }
+}
+`
+
 const mutation = useMutation(Main_ResetErrorsAndLoadConfigDocument)
+const launchProject = useMutation(Main_LaunchProjectDocument)
 
 const resetErrorAndLoadConfig = (id: string) => {
   if (!mutation.fetching.value) {
@@ -163,6 +179,12 @@ const majorVersion = t('majorVersionLandingPage.majorVersion')
 function handleClearLandingPage () {
   if (majorVersion) {
     setMajorVersionLandingPageDismissed(majorVersion)
+    const wasBrowserSetInCLI = query.data?.value?.localSettings.preferences?.wasBrowserSetInCLI
+    const currentTestingType = query.data?.value?.currentProject?.currentTestingType
+
+    if (wasBrowserSetInCLI && currentTestingType) {
+      launchProject.executeMutation({ testingType: currentTestingType })
+    }
   }
 }
 
