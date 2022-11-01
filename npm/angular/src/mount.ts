@@ -75,17 +75,15 @@ export interface MountConfig<T> extends TestModuleMetadata {
 let activeFixture: ComponentFixture<any> | null = null
 
 function cleanup () {
-  activeFixture = null
   // Not public, we need to call this to remove the last component from the DOM
-  const tearDownFn = (getTestBed() as any).tearDownTestingModule
-
-  if (!tearDownFn) {
-    throw new Error(`Could not teardown component. The version of Angular you are using may not be officially supported.
-Visit https://docs.cypress.io/guides/component-testing/component-framework-configuration to see the currently supported versions of Angular.`)
+  try {
+    (getTestBed() as any).tearDownTestingModule()
+  } catch (e) {
+    throw new Error(`Failed to teardown component. The version of Angular you are using may not be officially supported, visit https://docs.cypress.io/guides/component-testing/component-framework-configuration for current Angular version support.`)
   }
 
-  tearDownFn()
   getTestBed().resetTestingModule()
+  activeFixture = null
 }
 
 /**
