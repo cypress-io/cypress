@@ -1,3 +1,10 @@
+# [@cypress/schematic-v2.3.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.2.0...@cypress/schematic-v2.3.0) (2022-11-01)
+
+
+### Features
+
+* introduce v8 snapshots to improve startup performance ([#24295](https://github.com/cypress-io/cypress/issues/24295)) ([b0c0eaa](https://github.com/cypress-io/cypress/commit/b0c0eaa508bb6dafdc1997bc00fb7ed6f5bcc160))
+
 # [@cypress/schematic-v2.2.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.1.1...@cypress/schematic-v2.2.0) (2022-10-13)
 
 

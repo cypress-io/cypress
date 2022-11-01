@@ -8,8 +8,11 @@ import { mutationErrorPlugin, nexusDebugLogPlugin, nexusSlowGuardPlugin, nexusDe
 
 const isCodegen = Boolean(process.env.CYPRESS_INTERNAL_NEXUS_CODEGEN)
 
+// TODO: fix this with an update to esbuild: https://github.com/cypress-io/cypress/issues/23126
+const types = Object.assign({}, schemaTypes, { default: undefined })
+
 export const graphqlSchema = makeSchema({
-  types: schemaTypes,
+  types,
   shouldGenerateArtifacts: isCodegen,
   shouldExitAfterGenerateArtifacts: isCodegen,
   outputs: {
