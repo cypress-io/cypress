@@ -2,6 +2,7 @@ import _ from 'lodash'
 import Bluebird from 'bluebird'
 import Debug from 'debug'
 import utils from './utils'
+import * as errors from '../errors'
 import check from 'check-more-types'
 import { exec } from 'child_process'
 import util from 'util'
@@ -155,13 +156,36 @@ export = {
     // TODO: normalizing opening and closing / exiting
     // so that there is a default for each browser but
     // enable the browser to configure the interface
-    instance.once('exit', () => {
+    instance.once('exit', async (code, signal) => {
       ctx.browser.setBrowserStatus('closed')
       // TODO: make this a required property
       if (!options.onBrowserClose) throw new Error('onBrowserClose did not exist in interactive mode')
 
+      const browserDisplayName = instance?.browser?.displayName || 'unknown'
+
       options.onBrowserClose()
+      browserLauncher.clearInstanceState()
       instance = null
+
+      // We are being very narrow on when to restart the browser here. The only case we can reliably test the 'SIGTRAP' signal.
+      // We want to avoid adding signals in here that may intentionally be caused by a user.
+      // For example exiting firefox through either force quitting or quitting via cypress will fire a 'SIGTERM' event which
+      // would result in constantly relaunching the browser when the user actively wants to quit.
+      // On windows the crash produces 2147483651 as an exit code. We should add to the list of crashes we handle as we see them.
+      // In the future we may consider delegating to the browsers to determine if an exit is a crash since it might be different
+      // depending on what browser has crashed.
+      if (code === null && ['SIGTRAP', 'SIGABRT'].includes(signal) || code === 2147483651 && signal === null) {
+        const err = errors.get('BROWSER_CRASHED', browserDisplayName, code, signal)
+
+        if (!options.onError) {
+          errors.log(err)
+          throw new Error('Missing onError in attachListeners')
+        }
+
+        await options.onError(err)
+
+        await options.relaunchBrowser!()
+      }
     })
 
     // TODO: instead of waiting an arbitrary

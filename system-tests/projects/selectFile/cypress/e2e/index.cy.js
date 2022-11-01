@@ -3,10 +3,10 @@ import Dashboard from '@uppy/dashboard'
 
 import Dropzone from 'dropzone'
 
-// TODO(origin): fails in testIsolation: 'strict' mode with ResizeObserver loop limit exceeded
+// TODO(origin): fails in testIsolation: 'on' mode with ResizeObserver loop limit exceeded
 // error. Using Cypress.on('uncaught:exception') does not catch the error as it appears to be
 // happening when we are visiting about:blank.
-describe('selectFile', { testIsolation: 'legacy' }, () => {
+describe('selectFile', { testIsolation: 'off' }, () => {
   describe('uppy', () => {
     beforeEach(() => {
       cy.document().then((doc) => {

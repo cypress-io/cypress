@@ -570,7 +570,6 @@ export const AllCypressErrors = {
         This can happen for a number of different reasons:
 
         - You wrote an endless loop and you must fix your own code
-        - There is a memory leak in Cypress (unlikely but possible)
         - You are running Docker (there is an easy fix for this: see link below)
         - You are running lots of tests on a memory intense application
         - You are running in a memory starved VM environment
@@ -580,6 +579,20 @@ export const AllCypressErrors = {
         You can learn more including how to fix Docker here:
 
         https://on.cypress.io/renderer-process-crashed`
+  },
+  BROWSER_CRASHED: (browser: string, code: string | number, signal: string) => {
+    return errTemplate`\
+        We detected that the ${fmt.highlight(browser)} process just crashed with code '${fmt.highlight(code)}' and signal '${fmt.highlight(signal)}'.
+
+        We have failed the current test and have relaunched ${fmt.highlight(browser)}.
+
+        This can happen for many different reasons:
+
+        - You wrote an endless loop and you must fix your own code
+        - You are running lots of tests on a memory intense application
+        - You are running in a memory starved VM environment
+        - There are problems with your GPU / GPU drivers
+        - There are browser bugs`
   },
   AUTOMATION_SERVER_DISCONNECTED: () => {
     return errTemplate`The automation client disconnected. Cannot continue running tests.`

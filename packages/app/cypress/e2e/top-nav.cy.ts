@@ -453,6 +453,17 @@ describe('App Top Nav Workflows', () => {
           cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
           cy.startAppServer()
           cy.visitApp()
+          cy.remoteGraphQLIntercept(async (obj) => {
+            if (obj.result.data?.cloudViewer) {
+              obj.result.data.cloudViewer.organizations = {
+                __typename: 'CloudOrganizationConnection',
+                id: 'test',
+                nodes: [{ __typename: 'CloudOrganization', id: '987' }],
+              }
+            }
+
+            return obj.result
+          })
 
           mockLogInActionsForUser(mockUser)
           logIn({ expectedNextStepText: 'Connect project', displayName: mockUser.name })
@@ -492,6 +503,24 @@ describe('App Top Nav Workflows', () => {
 
           cy.get('@logInModal').should('not.exist')
           cy.findByTestId('app-header-bar').findByTestId('user-avatar-title').should('be.visible')
+        })
+
+        it('if the project has no runs, shows "record your first run" prompt after clicking', () => {
+          cy.remoteGraphQLIntercept((obj) => {
+            if (obj.result?.data?.cloudProjectBySlug?.runs?.nodes?.length) {
+              obj.result.data.cloudProjectBySlug.runs.nodes = []
+            }
+
+            return obj.result
+          })
+
+          mockLogInActionsForUser(mockUserNoName)
+
+          logIn({ expectedNextStepText: 'Continue', displayName: mockUserNoName.email })
+
+          cy.contains('[data-cy=standard-modal] h2', defaultMessages.specPage.banners.record.title).should('be.visible')
+          cy.contains('[data-cy=standard-modal]', defaultMessages.specPage.banners.record.content).should('be.visible')
+          cy.contains('button', 'Copy').should('be.visible')
         })
 
         it('shows correct error when browser cannot launch', () => {
