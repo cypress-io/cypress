@@ -26,6 +26,12 @@ export const LocalSettingsPreferences = objectType({
         return preferences.majorVersionLandingPageDismissed || {}
       },
     })
+
+    t.boolean('wasBrowserSetInCLI', {
+      resolve: (source, args, ctx) => {
+        return Boolean(ctx.coreData.cliBrowser)
+      },
+    })
   },
 })
 

@@ -1046,6 +1046,7 @@ type LocalSettingsPreferences {
   proxyServer: String
   reporterWidth: Int
   specListWidth: Int
+  wasBrowserSetInCLI: Boolean
 }
 
 type ManualMigration implements Node {
