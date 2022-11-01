@@ -57,10 +57,31 @@ You can pass extensions (global components, mixins, modules to use)
 when mounting Vue component. Use `{ extensions: { ... }}` object inside
 the `options`.
 
-- `components` - object of 'id' and components to register globally, see [Components](cypress/component/basic/components) example
-- `use` (alias `plugins`) - list of plugins, see [Plugins](cypress/component/basic/plugins)
-- `mixin` (alias `mixins`) - list of global mixins, see [Mixins](cypress/component/basic/mixins) example
-- `filters` - hash of global filters, see [Filters](cypress/component/basic/filters) example
+- `components` - object of 'id' and components to register globally. See docs [here](https://v2.vuejs.org/v2/guide/components-registration.html#Global-Registration).
+- `use` (alias `plugins`) - list of plugins.  See docs [here](https://v2.vuejs.org/v2/guide/plugins.html#Using-a-Plugin).
+- `mixin` (alias `mixins`) - list of global mixins.  See docs [here](https://v2.vuejs.org/v2/guide/mixins.html#Global-Mixin).
+- `filters` - hash of global filters. See docs [here](https://v2.vuejs.org/v2/guide/filters.html).
+- `directives` - global directives, see `directives` docs [here](https://v2.vuejs.org/v2/guide/custom-directive.html#ad) and [here](https://vuejs.org/guide/reusability/custom-directives.html).
+
+```js
+import Todo from './Todo.vue'
+import MyMixin1 from '../mixins/MyMixin1'
+import MyMixin2 from '../mixins/MyMixin2'
+import MyPlugin from '../plugins/MyPlugin'
+import MyGlobalComponent1 from '../global/MyGlobalComponent1.vue'
+import MyGlobalComponent2 from '../global/MyGlobalComponent2.vue'
+import MyDirective from '../directives/MyDirective'
+
+mount(Todo, {
+  extensions: {
+    mixins: [MyMixin1, MyMixin2],
+    plugins: [MyPlugin],
+    // or use: [MyPlugin]
+    components: { MyGlobalComponent1, MyGlobalComponent2 },
+    directives: { MyDirective },
+  }
+})
+```
 
 ## Compatibility
 
