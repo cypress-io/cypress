@@ -108,15 +108,6 @@ const getConsoleProps = (session: SessionData) => {
       name: `${domain} data:`,
       expand: true,
       label: false,
-      // items: _.compact([
-      //   // !val.cookies && `There are no cookies associated to ${domain}.`,
-      //   !val.cookies && `🍪 Cookies - (0)`,
-      //   // !val.localStorage && `There are no local storage items associated to ${domain}.`,
-      //   !val.localStorage && `📁 Local Storage - (0)`,
-      //   // !val.sessionStorage && `There are no session storage items associated to ${domain}.`,
-      //   !val.sessionStorage && `📁 Session Storage - (0)`,
-      // ]),
-      // items: []
       groups: _.compact([
         val.cookies && {
           name: `🍪 Cookies - (${val.cookies.length})`,

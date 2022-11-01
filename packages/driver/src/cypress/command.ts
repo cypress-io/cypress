@@ -29,10 +29,6 @@ export class $Command {
   }
 
   fail () {
-    if (this.get('onFail')) {
-      console.log('command has onFail')
-    }
-
     this.state = 'failed'
   }
 
@@ -61,7 +57,7 @@ export class $Command {
 
   finishLogs () {
     // finish each of the logs we have
-    return _.invokeMap(this.get('logs'), 'finish', this.state)
+    return _.invokeMap(this.get('logs'), 'finish')
   }
 
   log (log) {

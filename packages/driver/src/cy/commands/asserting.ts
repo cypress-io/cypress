@@ -95,7 +95,7 @@ export default function (Commands, Cypress, cy, state) {
       // without going through the assertion we need
       // to ensure our .should command gets logged
       logIndex++
-      Cypress.log({
+      const log = Cypress.log({
         name: 'should',
         type: 'child',
         message: ([] as any[]).concat(originalChainers, args),
@@ -104,7 +104,7 @@ export default function (Commands, Cypress, cy, state) {
         error: err,
       })
 
-      return $errUtils.throwErr(err)
+      return $errUtils.throwErr(err, { onFail: log })
     }
 
     chainers = chainers.split('.')

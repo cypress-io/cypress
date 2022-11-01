@@ -20,12 +20,6 @@ export class Queue<T> {
   }
 
   add (queueable: T) {
-    if (this.length) {
-      const prev = this.at(this.length - 1)
-
-      queueable.set('prev', prev)
-    }
-
     this.queueables.push(queueable)
   }
 
@@ -49,8 +43,6 @@ export class Queue<T> {
 
   reset () {
     this._stopped = false
-    this.index = 0
-    this.queueables.length = 0
   }
 
   clear () {
@@ -64,12 +56,6 @@ export class Queue<T> {
 
   hasNext () {
     return this.index < this.length
-  }
-
-  next () {
-    const next = this.at(this.index)
-
-    return next
   }
 
   run ({ onRun, onError, onFinish }: QueueRunProps) {

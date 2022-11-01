@@ -220,13 +220,10 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
         },
       })
       .catch((err) => {
-        console.log('error!')
-
         // if we give up on waiting for actionability then
         // lets throw this error and log the command
         return $errUtils.throwErr(err, {
           onFail (err) {
-            console.log('on click fail')
             if (options._log) {
               // snapshot only on click failure
               options._log.snapshot().error(err)

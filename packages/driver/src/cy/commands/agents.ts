@@ -69,7 +69,6 @@ const onInvoke = function (Cypress, obj, args) {
     name: agentName,
     message: obj.message,
     state: obj.error ? 'failed' : 'passed',
-    // error: obj.error,
     type: 'parent',
     end: true,
     snapshot: !agent._noSnapshot,

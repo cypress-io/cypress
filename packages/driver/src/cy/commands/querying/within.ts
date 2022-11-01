@@ -31,7 +31,6 @@ export default (Commands, Cypress, cy, state) => {
       fn: (subject) => subject,
     }))
 
-
     fn.call(cy.state('ctx'), subject)
 
     const cleanup = () => {

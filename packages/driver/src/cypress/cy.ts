@@ -1150,33 +1150,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   private enqueue (obj: PartialBy<Cypress.EnqueuedCommand, 'id'>) {
-    // if we have a nestedIndex it means we're processing
-    // nested commands and need to insert them into the
-    // index past the current index as opposed to
-    // pushing them to the end we also dont want to
-    // reset the run defer because splicing means we're
-    // already in a run loop and dont want to create another!
-    // we also reset the .next property to properly reference
-    // our new obj
-
-    // we had a bug that would bomb on custom commands when it was the
-    // first command. this was due to nestedIndex being undefined at that
-    // time. so we have to ensure to check that its any kind of number (even 0)
-    // in order to know to insert it into the existing array.
-    let nestedIndex = this.state('nestedIndex')
-
-    // if this is a number, then we know we're about to insert this
-    // into our commands and need to reset next + increment the index
-    if (_.isNumber(nestedIndex) && nestedIndex < this.queue.length) {
-      this.state('nestedIndex', (nestedIndex += 1))
-    }
-
-    // we look at whether or not nestedIndex is a number, because if it
-    // is then we need to insert inside of our commands, else just push
-    // it onto the end of the queue
-    const index = _.isNumber(nestedIndex) ? nestedIndex : this.queue.length
-
-    this.queue.insert(index, $Command.create(obj))
+    this.queue.enqueue($Command.create(obj))
 
     return this.Cypress.action('cy:command:enqueued', obj)
   }

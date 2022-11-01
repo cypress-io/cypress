@@ -399,12 +399,12 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
       // and force the assertion to return
       // this value so it does not get
       // invoked again
-      const setSubjectAndPass = () => {
+      const setSubjectAndSkip = () => {
         subjects.forEach((subject, i) => {
           const cmd = cmds[i]
 
           cmd.set('subject', subject)
-          cmd.pass()
+          cmd.skip() // technically this passed because it already ran
         })
 
         return cmds
@@ -439,7 +439,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
       .then(() => {
         restore()
 
-        setSubjectAndPass()
+        setSubjectAndSkip()
 
         finishAssertions()
 
@@ -450,15 +450,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
 
         // when we're told not to retry
         if (err.retry === false) {
-          // finish the assertions
-          // finishAssertions()
-
-          // and then push our command into this err
-          try {
-            $errUtils.throwErr(err, { onFail: finishAssertions })
-          } catch (e) {
-            err = e
-          }
+          throw $errUtils.throwErr(err, { onFail: finishAssertions })
         }
 
         throw err

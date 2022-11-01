@@ -1519,14 +1519,6 @@ export default {
             // because mocha internally does not return
             // the test.run(fn)
             return null
-          }).catch((err) => {
-            next(err)
-
-            // return null here to signal to bluebird
-            // that we did not forget to return a promise
-            // because mocha internally does not return
-            // the test.run(fn)
-            return null
           })
         }
 
