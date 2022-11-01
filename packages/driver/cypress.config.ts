@@ -11,7 +11,7 @@ export default defineConfig({
     '*.idp.com': '127.0.0.1',
     'localalias': '127.0.0.1',
   },
-  reporter: 'cypress-multi-reporters',
+  reporter: '../../node_modules/cypress-multi-reporters/index.js',
   reporterOptions: {
     configFile: '../../mocha-reporter-config.json',
   },

@@ -27,8 +27,7 @@ mainBuildFilters: &mainBuildFilters
     branches:
       only:
         - develop
-        - fix-ci-deps
-        - issue-23843_electron_21_upgrade
+        - 'feature/v8-snapshots'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -37,8 +36,7 @@ macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'correct-dashboard-results', << pipeline.git.branch >> ]
-    - equal: [ 'issue-23843_electron_21_upgrade', << pipeline.git.branch >> ]
+    - equal: [ 'feature/v8-snapshots', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -47,8 +45,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'webkit-multidomain', << pipeline.git.branch >> ]
-    - equal: [ 'issue-23843_electron_21_upgrade', << pipeline.git.branch >> ]
+    - equal: [ 'feature/v8-snapshots', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -66,8 +63,7 @@ windowsWorkflowFilters: &windows-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ linux-arm64, << pipeline.git.branch >> ]
-    - equal: [ 'issue-23843_electron_21_upgrade', << pipeline.git.branch >> ]
+    - equal: [ 'feature/v8-snapshots', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -114,17 +110,19 @@ executors:
     environment:
       PLATFORM: windows
 
-  darwin-arm64:
+  darwin-arm64: &darwin-arm64-executor
     machine: true
     environment:
       PLATFORM: darwin
 
-  linux-arm64:
+  linux-arm64: &linux-arm64-executor
     machine:
       image: ubuntu-2004:2022.04.1
     resource_class: arm.medium
     environment:
       PLATFORM: linux
+      # TODO: Disabling snapshots for now on Linux Arm 64 architectures. Will revisit with https://github.com/cypress-io/cypress/issues/23557
+      DISABLE_SNAPSHOT_REQUIRE: 1
 
 commands:
   verify_should_persist_artifacts:
@@ -132,7 +130,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "issue-23843_electron_21_upgrade" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "feature/v8-snapshots" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -199,6 +197,11 @@ commands:
           command: |
             source ./scripts/ensure-node.sh
             yarn build
+      - run:
+          name: Generate v8 snapshot
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn build-v8-snapshot-prod
       - prepare-modules-cache # So we don't throw these in the workspace cache
       - persist_to_workspace:
           root: ~/
@@ -478,7 +481,7 @@ commands:
       - run:
           name: Run driver tests in Cypress
           environment:
-            CYPRESS_KONFIG_ENV: production
+            CYPRESS_CONFIG_ENV: production
           command: |
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
@@ -562,7 +565,7 @@ commands:
               # internal PR
               cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
               DEBUG=<<parameters.debug>> \
-              CYPRESS_KONFIG_ENV=production \
+              CYPRESS_CONFIG_ENV=production \
               CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
@@ -588,7 +591,7 @@ commands:
               cd ../..
 
               DEBUG=<<parameters.debug>> \
-              CYPRESS_KONFIG_ENV=production \
+              CYPRESS_CONFIG_ENV=production \
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
               PERCY_ENABLE=${PERCY_TOKEN:-0} \
               PERCY_PARALLEL_TOTAL=-1 \
@@ -1063,14 +1066,16 @@ commands:
           # notarization on Mac can take a while
           no_output_timeout: "45m"
           command: |
+            source ./scripts/ensure-node.sh
+            node --version
             if [[ `node ./scripts/get-platform-key.js` == 'linux-arm64' ]]; then
               # these are missing on Circle and there is no way to pre-install them on Arm
               sudo apt-get update
               sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+              DISABLE_SNAPSHOT_REQUIRE=1 yarn binary-build --version $(node ./scripts/get-next-version.js)
+            else
+              yarn binary-build --version $(node ./scripts/get-next-version.js)
             fi
-            source ./scripts/ensure-node.sh
-            node --version
-            yarn binary-build --version $(node ./scripts/get-next-version.js)
       - run:
           name: Zip the binary
           command: |
@@ -1207,7 +1212,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium+
+        default: large
     resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
@@ -1316,6 +1321,52 @@ jobs:
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy snapshot ./cli/visual-snapshots
 
+  v8-integration-tests:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium
+    resource_class: << parameters.resource_class >>
+    parallelism: 1
+    steps:
+      - restore_cached_workspace
+      - restore_cached_system_tests_deps
+      # TODO: Remove this once we switch off self-hosted M1 runners
+      - when:
+          condition:
+            equal: [ *darwin-arm64-executor, << parameters.executor >> ]
+          steps:
+            - run: rm -f /tmp/cypress/junit/* 
+      - unless:
+          condition:
+            or:
+              - equal: [ *linux-arm64-executor, << parameters.executor >> ] # TODO: Figure out how to support linux-arm64 when we get to linux arm64 build: https://github.com/cypress-io/cypress/issues/23557
+          steps:
+            - run:
+                name: Run v8 integration tests
+                command: |
+                  source ./scripts/ensure-node.sh
+                  yarn test-integration --scope "'@tooling/{packherd,v8-snapshot,electron-mksnapshot}'"
+            - verify-mocha-results:
+                expectedResultCount: 3
+      - when:
+          condition:
+            or:
+              - equal: [ *linux-arm64-executor, << parameters.executor >> ]
+          steps:
+            - run:
+                name: Run v8 integration tests
+                command: |
+                  source ./scripts/ensure-node.sh
+                  yarn test-integration --scope "'@tooling/packherd'"
+            - verify-mocha-results:
+                expectedResultCount: 1
+      - store_test_results:
+          path: /tmp/cypress
+      - store-npm-logs
+
   unit-tests:
     <<: *defaults
     parameters:
@@ -1346,7 +1397,7 @@ jobs:
             # run type checking for each individual package
             - run: yarn lerna run types
             - verify-mocha-results:
-                expectedResultCount: 10
+                expectedResultCount: 18
       - store_test_results:
           path: /tmp/cypress
       # CLI tests generate HTML files with sample CLI command output
@@ -1677,7 +1728,7 @@ jobs:
           working_directory: packages/reporter
       - run:
           command: |
-            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_CONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
@@ -1700,7 +1751,7 @@ jobs:
       - restore_cached_system_tests_deps
       - run:
           command: |
-            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_CONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
@@ -1722,7 +1773,7 @@ jobs:
       - restore_cached_system_tests_deps
       - run:
           command: |
-            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_CONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
@@ -1932,7 +1983,7 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium+
+        default: large
     resource_class: << parameters.resource_class >>
     steps:
       - restore_cached_workspace
@@ -1951,6 +2002,7 @@ jobs:
         type: string
         default: medium+
     steps:
+      - restore_cached_workspace
       - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
       - install-required-node
@@ -1986,6 +2038,7 @@ jobs:
   test-kitchensink-against-staging:
     <<: *defaults
     steps:
+      - restore_cached_workspace
       - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
       - install-required-node
@@ -2011,6 +2064,7 @@ jobs:
   test-against-staging:
     <<: *defaults
     steps:
+      - restore_cached_workspace
       - clone-repo-and-checkout-branch:
           repo: cypress-test-tiny
       - run:
@@ -2517,6 +2571,9 @@ linux-x64-workflow: &linux-x64-workflow
     - npm-cypress-schematic:
         requires:
           - build
+    - v8-integration-tests:
+        requires:
+          - system-tests-node-modules-install
     # This release definition must be updated with any new jobs
     # Any attempts to automate this are welcome
     # If CircleCI provided an "after all" hook, then this wouldn't be necessary
@@ -2567,6 +2624,7 @@ linux-x64-workflow: &linux-x64-workflow
           - run-reporter-component-tests-chrome
           - run-webpack-dev-server-integration-tests
           - run-vite-dev-server-integration-tests
+          - v8-integration-tests
 
     # various testing scenarios, like building full binary
     # and testing it on a real project
@@ -2677,6 +2735,13 @@ linux-arm64-workflow: &linux-arm64-workflow
         requires:
           - linux-arm64-build
 
+    - v8-integration-tests:
+        name: linux-arm64-v8-integration-tests
+        executor: linux-arm64
+        resource_class: arm.medium
+        requires:
+          - linux-arm64-build
+
 darwin-x64-workflow: &darwin-x64-workflow
   jobs:
     - node_modules_install:
@@ -2716,6 +2781,13 @@ darwin-x64-workflow: &darwin-x64-workflow
         requires:
           - darwin-x64-build
 
+    - v8-integration-tests:
+        name: darwin-x64-v8-integration-tests
+        executor: mac
+        resource_class: macos.x86.medium.gen2
+        requires:
+          - darwin-x64-build
+
 darwin-arm64-workflow: &darwin-arm64-workflow
   jobs:
     - node_modules_install:
@@ -2737,6 +2809,13 @@ darwin-arm64-workflow: &darwin-arm64-workflow
           - test-runner:sign-mac-binary
           - test-runner:upload
           - test-runner:commit-status-checks
+        executor: darwin-arm64
+        resource_class: cypress-io/latest_m1
+        requires:
+          - darwin-arm64-build
+
+    - v8-integration-tests:
+        name: darwin-arm64-v8-integration-tests
         executor: darwin-arm64
         resource_class: cypress-io/latest_m1
         requires:
@@ -2802,6 +2881,13 @@ windows-workflow: &windows-workflow
         executor: windows
         requires:
           - windows-create-build-artifacts
+
+    - v8-integration-tests:
+        name: windows-v8-integration-tests
+        executor: windows
+        resource_class: windows.large
+        requires:
+          - windows-build
 
 workflows:
   linux-x64:

@@ -30,7 +30,7 @@ const log = (...args) => console.log(logTag, ...args)
     log('Scaffolding node_modules for', project)
 
     await Fixtures.scaffoldProject(project)
-    await scaffoldProjectNodeModules(project)
+    await scaffoldProjectNodeModules({ project })
     console.timeEnd(timeTag)
   }
 
