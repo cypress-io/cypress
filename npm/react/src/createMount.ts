@@ -101,7 +101,9 @@ export const makeMountFn = (
         return cy.wrap<MountReturn>({
           component: userComponent,
           rerender: (newComponent) => makeMountFn('rerender', newComponent, options, key, internalMountOptions),
-          unmount: internalMountOptions.unmount,
+          unmount: () => {
+            throw new Error('unmount is no longer supported. See https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes to migrate.')
+          },
         }, { log: false })
       })
       // by waiting, we delaying test execution for the next tick of event loop
