@@ -25,7 +25,7 @@ describe('errors ui', {
   viewportWidth: 1024,
   // Limiting tests kept in memory due to large memory cost
   // of nested spec snapshots
-  numTestsKeptInMemory: 1,
+  numTestsKeptInMemory: 0,
 }, () => {
   it('exception failures', () => {
     const verify = loadErrorSpec({
