@@ -600,6 +600,28 @@ describe('lib/agent', function () {
           return this.request({
             url: `https://localhost:${HTTPS_PORT}/get`,
           }).then((body) => {
+            // Test the CA options the first time through
+            expect(body).to.eq('It worked!')
+            if (this.debugProxy) {
+              expect(this.debugProxy.requests[0]).to.include({
+                https: true,
+                url: `localhost:${HTTPS_PORT}`,
+              })
+            }
+
+            const socketKey = Object.keys(this.agent.httpsAgent.sockets).filter((key) => key.includes(`localhost:${HTTPS_PORT}`))
+
+            expect(socketKey.length).to.eq(1, 'There should only be a single localhost TLS Socket')
+
+            for (const ca of testCase.caContents) {
+              expect(socketKey[0]).to.contain(ca, `${testCase.option} should be used for the TLS Socket`)
+            }
+
+            return this.request({
+              url: `https://localhost:${HTTPS_PORT}/get`,
+            })
+          }).then((body) => {
+            // Test that the caching of the ca options works
             expect(body).to.eq('It worked!')
             if (this.debugProxy) {
               expect(this.debugProxy.requests[0]).to.include({

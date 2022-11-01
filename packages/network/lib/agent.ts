@@ -15,32 +15,80 @@ const debug = debugModule('cypress:network:agent')
 const CRLF = '\r\n'
 const statusCodeRe = /^HTTP\/1.[01] (\d*)/
 
-const mergeCAOption = (options: https.RequestOptions): Promise<https.RequestOptions> => {
-  const caArray = options.ca ? _.castArray(options.ca).map((caOption) => caOption.toString()) : []
+// Load and cache the contents of process.env.npm_config_cafile so that we don't have to read it
+// on every call
+let npmConfigCAFileValue: string | undefined
+const getNpmConfigCAFileValue = (): Promise<string | undefined> => {
+  if (!process.env.npm_config_cafile) {
+    return Promise.resolve(undefined)
+  }
+
+  if (npmConfigCAFileValue) {
+    return Promise.resolve(npmConfigCAFileValue)
+  }
 
   if (process.env.npm_config_cafile) {
     return fs.readFile(process.env.npm_config_cafile, 'utf8').then((ca) => {
-      return _.extend({}, options, { ca: caArray.concat(ca) })
+      npmConfigCAFileValue = ca
+
+      return ca
     }).catch(() => {
-      // We ignore the error here because npm handles the error via a non blocking warning
-      return options
+      return undefined
     })
   }
 
-  if (process.env.npm_config_ca) {
-    return Promise.resolve(_.extend({}, options, { ca: caArray.concat(process.env.npm_config_ca) }))
+  return Promise.resolve(undefined)
+}
+
+// Load and cache the contents of process.env.NODE_EXTRA_CA_CERTS so that we don't have to read it
+// on every call
+let nodeExtraCACertsFileValue: string | undefined
+const getNodeExtraCACertsFileValue = (): Promise<string | undefined> => {
+  if (!process.env.NODE_EXTRA_CA_CERTS) {
+    return Promise.resolve(undefined)
+  }
+
+  if (nodeExtraCACertsFileValue) {
+    return Promise.resolve(nodeExtraCACertsFileValue)
   }
 
   if (process.env.NODE_EXTRA_CA_CERTS) {
     return fs.readFile(process.env.NODE_EXTRA_CA_CERTS, 'utf8').then((ca) => {
-      return _.extend({}, options, { ca: tls.rootCertificates.concat(...caArray).concat(ca) })
+      nodeExtraCACertsFileValue = ca
+
+      return ca
     }).catch(() => {
-      // We ignore the error here because node handles the error via a non blocking warning
-      return options
+      return undefined
     })
   }
 
-  return Promise.resolve(options)
+  return Promise.resolve(undefined)
+}
+
+const mergeCAOption = (options: https.RequestOptions): Promise<https.RequestOptions> => {
+  // First, normalize the options.ca option. It can be a string, a Buffer, an array of strings, or an array of Buffers
+  const caArray = options.ca ? _.castArray(options.ca).map((caOption) => caOption.toString()) : []
+
+  // Load the contents of process.env.npm_config_cafile and process.env.NODE_EXTRA_CA_CERTS
+  // They will be cached so we don't have to actually read them on every call
+  return Promise.all([getNpmConfigCAFileValue(), getNodeExtraCACertsFileValue()]).then(([npm_config_cafile, NODE_EXTRA_CA_CERTS]) => {
+    // Merge the contents of ca with the npm config options. These options are meant to be replacements, but we want to keep the tls client certificate
+    // config that our consumers provide
+    if (npm_config_cafile) {
+      return _.extend({}, options, { ca: caArray.concat(npm_config_cafile) })
+    }
+
+    if (process.env.npm_config_ca) {
+      return Promise.resolve(_.extend({}, options, { ca: caArray.concat(process.env.npm_config_ca) }))
+    }
+
+    // Merge the contents of ca with the NODE_EXTRA_CA_CERTS options. This option is additive to the tls root certificates
+    if (NODE_EXTRA_CA_CERTS) {
+      return Promise.resolve(_.extend({}, options, { ca: tls.rootCertificates.concat(...caArray).concat(NODE_EXTRA_CA_CERTS) }))
+    }
+
+    return Promise.resolve(options)
+  })
 }
 
 export const clientCertificateStore = new ClientCertificateStore()
