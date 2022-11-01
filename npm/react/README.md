@@ -72,7 +72,7 @@ You may also specify the `ReactDOM` package to use. This can be useful in comple
 // if you have multiple versions of ReactDom in your monorepo
 import ReactDom from 'react-dom'
 
-mount(<Todo todo={todo} />, { ReactDom })
+mount(<Todo todo={todo} />, { reactDom: ReactDom })
 ```
 
 ## Compatibility

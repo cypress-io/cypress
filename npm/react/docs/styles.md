@@ -43,7 +43,7 @@ it('is stylish', () => {
 
 ## Import from support file
 
-If you have stylesheets that should apply to all of your components, you can import those from your component support file.
+If you have stylesheets that should apply to all of your components, you can import those in your component support file.
 
 ```js
 // cypress/support/component.js
@@ -103,3 +103,7 @@ describe('footer component', () => {
   })
 })
 ```
+
+The component is rendered with the correct styles:
+
+![Footer component](../images/footer.png)
