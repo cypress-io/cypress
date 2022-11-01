@@ -215,7 +215,7 @@ export default function (Commands, Cypress, cy) {
             Cypress.state('current').set('name', 'setup session')
             // Catch when a cypress command fails in the setup function to correctly update log status
             // before failing command and ending command queue.
-            cy.state('onCommandFailed', (err) => {
+            cy.state('onQueueFailed', (err) => {
               setupLogGroup.set({
                 state: 'failed',
                 consoleProps: {
@@ -237,7 +237,7 @@ export default function (Commands, Cypress, cy) {
           })
           .then(async () => {
             Cypress.state('current').set('name', 'save session')
-            cy.state('onCommandFailed', null)
+            cy.state('onQueueFailed', null)
             await navigateAboutBlank()
             const data = await sessions.getCurrentSessionData()
 
@@ -305,7 +305,7 @@ export default function (Commands, Cypress, cy) {
             let _commandToRunAfterValidation
 
             const enhanceErr = (err) => {
-              Cypress.state('onCommandFailed', null)
+              Cypress.state('onQueueFailed', null)
               console.log('[onFail] step', step, err)
 
               // show validation error and allow sessions workflow to recreate the session
@@ -347,8 +347,8 @@ export default function (Commands, Cypress, cy) {
               return err
             }
 
-            cy.state('onCommandFailed', (err: Error | string, queue): boolean => {
-              console.log('onCommandFailed', step, err)
+            cy.state('onQueueFailed', (err: Error | string, queue): boolean => {
+              console.log('onQueueFailed', step, err)
 
               if (step === 'restore') {
                 const commands = queue.get()
@@ -415,7 +415,7 @@ export default function (Commands, Cypress, cy) {
             // }
             _commandToRunAfterValidation = cy.then(async () => {
               Cypress.state('current').set('name', '_commandToRunAfterValidation')
-              Cypress.state('onCommandFailed', null)
+              Cypress.state('onQueueFailed', null)
 
               if (caughtCommandErr) {
                 return !isValidSession

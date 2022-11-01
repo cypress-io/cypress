@@ -307,10 +307,10 @@ export class CommandQueue extends Queue<$Command> {
       // })
       // .catch((err) => {
       //   console.log('command err')
-      //   if (this.state('onCommandFailed')) {
-      //     err = this.state('onCommandFailed')(err, this)
+      //   if (this.state('onQueueFailed')) {
+      //     err = this.state('onQueueFailed')(err, this)
 
-      //     this.state('onCommandFailed', null)
+      //     this.state('onQueueFailed', null)
       //   }
 
       //   debugErrors('cypress command had an error: %o', err)
@@ -353,7 +353,7 @@ export class CommandQueue extends Queue<$Command> {
   }
 
   run () {
-    const runQueue = () => {
+    const runQueueable = () => {
       const command = this.at(this.index)
 
       if (!command) {
@@ -463,10 +463,10 @@ export class CommandQueue extends Queue<$Command> {
 
       const current = this.state('current')
 
-      if (this.state('onCommandFailed')) {
-        err = this.state('onCommandFailed')(err, this)
+      if (this.state('onQueueFailed')) {
+        err = this.state('onQueueFailed')(err, this)
 
-        this.state('onCommandFailed', null)
+        this.state('onQueueFailed', null)
       }
 
       debugErrors('cypress command had an error: %o', err)
@@ -503,7 +503,7 @@ export class CommandQueue extends Queue<$Command> {
     }
 
     const { promise, reject, cancel } = super.run({
-      onRun: runQueue,
+      onRun: runQueueable,
       onError: onQueueError,
       onFinish: this.run,
     })
