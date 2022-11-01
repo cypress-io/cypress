@@ -34,6 +34,7 @@ export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
   'preferredEditorBinary',
   'isSideNavigationOpen',
   'lastBrowser',
+  'majorVersionLandingPageDismissed',
 ] as const
 
 type Maybe<T> = T | null | undefined
@@ -67,4 +68,5 @@ export type AllowedState = Partial<{
   isSideNavigationOpen: Maybe<boolean>
   testingType: 'e2e' | 'component'
   lastBrowser: { name: string, channel: string }
+  majorVersionLandingPageDismissed: Maybe<object>
 }>

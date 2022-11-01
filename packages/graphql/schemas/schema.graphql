@@ -1040,6 +1040,7 @@ type LocalSettingsPreferences {
   autoScrollingEnabled: Boolean
   isSideNavigationOpen: Boolean
   isSpecsListOpen: Boolean
+  majorVersionLandingPageDismissed: JSON
   preferredEditorBinary: String
   proxyBypass: String
   proxyServer: String
