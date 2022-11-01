@@ -1,9 +1,11 @@
 <template>
   <div
+    ref="highlight"
     class="highlight"
     :style="highlightStyle"
   />
   <div
+    ref="assertionsMenu"
     class="assertions-menu"
   >
     <div class="header">
@@ -43,9 +45,10 @@
 </template>
 
 <script lang="ts" setup>
+import { computePosition, flip, shift } from '@floating-ui/dom'
 import AssertionType from './AssertionType.ce.vue'
 import _ from 'lodash'
-import type { StyleValue } from 'vue'
+import { nextTick, onMounted, Ref, ref, StyleValue } from 'vue'
 
 const props = defineProps <{
   jqueryElement: any
@@ -65,6 +68,26 @@ const onClose = () => {
 }
 
 const tagName = `<${props.jqueryElement.prop('tagName').toLowerCase()}>`
+
+const highlight: Ref<HTMLElement | null> = ref(null)
+const assertionsMenu: Ref<HTMLElement | null> = ref(null)
+
+onMounted(() => {
+  nextTick(() => {
+    const highlightEl = highlight.value as HTMLElement
+    const assertionsMenuEl = assertionsMenu.value as HTMLElement
+
+    computePosition(highlightEl, assertionsMenuEl, {
+      placement: 'bottom',
+      middleware: [flip(), shift()],
+    }).then(({ x, y }) => {
+      Object.assign(assertionsMenuEl.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+      })
+    })
+  })
+})
 </script>
 
 <style lang="scss">
@@ -82,6 +105,7 @@ const tagName = `<${props.jqueryElement.prop('tagName').toLowerCase()}>`
   font-family: 'Helvetica Neue', 'Arial', sans-serif;
   z-index: 2147483647;
   width: 175px;
+  position: absolute;
 
   .header {
     align-items: center;

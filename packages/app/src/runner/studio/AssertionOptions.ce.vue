@@ -2,7 +2,6 @@
   <div
     ref="popper"
     class="assertion-options"
-    :style="{ position: 'absolute' }"
   >
     <div
       v-for="{ name, value } in options"
@@ -27,7 +26,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computePosition } from '@floating-ui/dom'
+import { computePosition, flip } from '@floating-ui/dom'
 import { onMounted, ref, nextTick, Ref } from 'vue'
 
 const props = defineProps<{
@@ -54,7 +53,7 @@ onMounted(() => {
 
     computePosition(reference, popperEl, {
       placement: 'right-start',
-      middleware: [],
+      middleware: [flip()],
     }).then(({ x, y }) => {
       Object.assign(popperEl.style, {
         left: `${x}px`,
@@ -81,6 +80,7 @@ const onClick = (name, value) => {
   max-width: 150px;
   overflow: hidden;
   overflow-wrap: break-word;
+  position: absolute;
 
   .assertion-option {
     cursor: pointer;
