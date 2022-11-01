@@ -346,7 +346,7 @@ describe('src/cy/commands/querying', () => {
           if (attrs.name === 'get') {
             this.lastLog = log
 
-            this.logs.push(log)
+            this.logs?.push(log)
           }
         })
 
@@ -739,7 +739,6 @@ describe('src/cy/commands/querying', () => {
         this.logs = []
 
         const collectLogs = (attrs, log) => {
-          console.log('collect log')
           this.lastLog = log
 
           this.logs?.push(log)
@@ -881,12 +880,17 @@ describe('src/cy/commands/querying', () => {
       })
 
       it('fails get command when element is not found and has chained assertions', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
+        cy.once('fail', (err) => {
+          const { logs, lastLog } = this
+          const getLog = logs[logs.length - 2]
 
           expect(err.message).to.eq('Timed out retrying after 1ms: Expected to find element: `does_not_exist`, but never found it.')
 
-          expect(lastLog.get('name')).to.eq('get')
+          expect(getLog.get('name')).to.eq('get')
+          expect(getLog.get('state')).to.eq('failed')
+          expect(getLog.get('error')).to.eq(err)
+
+          expect(lastLog.get('name')).to.eq('assert')
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('error')).to.eq(err)
 
@@ -1604,7 +1608,7 @@ space
             this.lastLog = log
           }
 
-          this.logs.push(log)
+          this.logs?.push(log)
         })
 
         return null
@@ -1720,7 +1724,7 @@ space
         cy.on('log:added', (attrs, log) => {
           this.lastLog = log
 
-          this.logs.push(log)
+          this.logs?.push(log)
         })
 
         return null

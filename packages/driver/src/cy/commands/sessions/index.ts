@@ -361,7 +361,7 @@ export default function (Commands, Cypress, cy) {
                 })
 
                 // skip all commands between this command and _commandToRunAfterValidation
-                for (let i = Cypress.state('index'); i < index; i++) {
+                for (let i = cy.queue.index; i < index; i++) {
                   const cmd = commands[i]
 
                   if (!cmd.get('restore-within')) {
@@ -374,7 +374,7 @@ export default function (Commands, Cypress, cy) {
                 Cypress.state('withinSubject', withinSubject)
 
                 // move to _commandToRunAfterValidation's index to ensure failures are handled correctly
-                queue.state('index', index)
+                queue.index = index
 
                 console.log('sessionStatus', step, typeof err)
 
@@ -405,7 +405,9 @@ export default function (Commands, Cypress, cy) {
             let returnVal
 
             // try {
-            returnVal = existingSession.validate.call(cy.state('ctx'))
+            cy.then(() => {
+              returnVal = existingSession.validate.call(cy.state('ctx'))
+            })
             // } catch (e) {
             // debugger
 

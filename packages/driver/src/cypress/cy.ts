@@ -249,7 +249,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.onBeforeAppWindowLoad = this.onBeforeAppWindowLoad.bind(this)
     this.onUncaughtException = this.onUncaughtException.bind(this)
     this.setRunnable = this.setRunnable.bind(this)
-    this.cleanup = this.cleanup.bind(this)
     this.setSubjectForChainer = this.setSubjectForChainer.bind(this)
 
     // init traits
@@ -362,7 +361,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.overrides = createOverrides(state, config, focused, snapshots)
 
-    this.queue = new CommandQueue(state, this.timeout, stability, this.cleanup, this.fail, this.isCy, this.clearTimeout, this.setSubjectForChainer)
+    this.queue = new CommandQueue(state, this.timeout, stability, this.fail, this.isCy, this.clearTimeout, this.setSubjectForChainer)
 
     setTopOnError(Cypress, this)
 
@@ -693,19 +692,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
   runQueue () {
     cy.queue.run()
-    .then(() => {
-      const onQueueEnd = cy.state('onQueueEnd')
-
-      if (onQueueEnd) {
-        onQueueEnd()
-      }
-    })
-    .catch(() => {
-      // errors from the queue are propagated to cy.fail by the queue itself
-      // and can be safely ignored here. omitting this catch causes
-      // unhandled rejections to be logged because Bluebird sees a promise
-      // chain with no catch handler
-    })
   }
 
   addCommand ({ name, fn, type, prevSubject }) {
@@ -1098,27 +1084,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     return this.Cypress.action('app:navigation:changed', `page navigation event (${event})`)
   }
 
-  private cleanup () {
-    // cleanup could be called during a 'stop' event which
-    // could happen in between a runnable because they are async
-    if (this.state('runnable')) {
-      // make sure we reset the runnable's timeout now
-      this.state('runnable').resetTimeout()
-    }
-
-    // if a command fails then after each commands
-    // could also fail unless we clear this out
-    this.state('commandIntermediateValue', undefined)
-
-    // reset the nestedIndex back to null
-    this.state('nestedIndex', null)
-
-    // and forcibly move the index needle to the
-    // end in case we have after / afterEach hooks
-    // which need to run
-    return this.state('index', this.queue.length)
-  }
-
   private contentWindowListeners (contentWindow) {
     const cy = this
 
@@ -1366,7 +1331,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   private doneEarly () {
-    this.queue.stop()
+    this.queue.cleanup()
 
     // we only need to worry about doneEarly when
     // it comes from a manual event such as stopping
@@ -1382,6 +1347,5 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       this.state('cancel')()
     }
 
-    return this.cleanup()
   }
 }

@@ -31,7 +31,6 @@ export interface StateFunc {
   (k: 'runnable', v?: CypressRunnable): CypressRunnable
   (k: 'isStable', v?: boolean): boolean
   (k: 'whenStable', v?: null | (() => Promise<any>)): () => Promise<any>
-  (k: 'index', v?: number): number
   (k: 'current', v?: $Command): $Command
   (k: 'canceld', v?: boolean): boolean
   (k: 'error', v?: Error): Error

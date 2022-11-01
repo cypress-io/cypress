@@ -64,10 +64,10 @@ const commandRunningFailed = (Cypress, state, err) => {
 }
 
 export class CommandQueue extends Queue<$Command> {
+  index: number
   state: StateFunc
   timeout: $Cy['timeout']
   stability: IStability
-  cleanup: $Cy['cleanup']
   fail: $Cy['fail']
   isCy: $Cy['isCy']
   clearTimeout: ITimeouts['clearTimeout']
@@ -77,21 +77,22 @@ export class CommandQueue extends Queue<$Command> {
     state: StateFunc,
     timeout: $Cy['timeout'],
     stability: IStability,
-    cleanup: $Cy['cleanup'],
     fail: $Cy['fail'],
     isCy: $Cy['isCy'],
     clearTimeout: ITimeouts['clearTimeout'],
     setSubjectForChainer: $Cy['setSubjectForChainer'],
   ) {
     super()
+    this.index = 0
     this.state = state
     this.timeout = timeout
     this.stability = stability
-    this.cleanup = cleanup
     this.fail = fail
     this.isCy = isCy
     this.clearTimeout = clearTimeout
     this.setSubjectForChainer = setSubjectForChainer
+
+    this.run = this.run.bind(this)
   }
 
   logs (filter) {
@@ -110,6 +111,33 @@ export class CommandQueue extends Queue<$Command> {
 
   names () {
     return _.invokeMap(this.get(), 'get', 'name')
+  }
+
+  add (command: $Command) {
+    // if we have a nestedIndex it means we're processing
+    // nested commands and need to insert them into the
+    // index past the current index as opposed to
+    // pushing them to the end we also dont want to
+    // reset the run defer because splicing means we're
+    // already in a run loop and dont want to create another!
+    // we also reset the .next property to properly reference
+    // our new obj
+
+    // we had a bug that would bomb on custom commands when it was the
+    // first command. this was due to nestedIndex being undefined at that
+    // time. so we have to ensure to check that its any kind of number (even 0)
+    // in order to know to insert it into the existing array.
+    let nestedIndex = this.state('nestedIndex')
+
+    // if this is a number, then we know we're about to insert this
+    // into our commands and need to reset next + increment the index
+    if (_.isNumber(nestedIndex) && nestedIndex < this.queue.length) {
+      this.state('nestedIndex', (nestedIndex += 1))
+
+      return this.insert(index, command)
+    }
+
+    return super.add(command)
   }
 
   insert (index: number, command: $Command) {
@@ -139,12 +167,23 @@ export class CommandQueue extends Queue<$Command> {
     })
   }
 
-  /**
-   * Check if the current command index is the last command in the queue
-   * @returns boolean
-   */
-  isOnLastCommand (): boolean {
-    return this.state('index') === this.length
+  cleanup () {
+    if (this.state('runnable')) {
+      // make sure we reset the runnable's timeout now
+      this.state('runnable').resetTimeout()
+    }
+
+    // if a command fails then after each commands
+    // could also fail unless we clear this out
+    this.state('commandIntermediateValue', undefined)
+
+    // reset the nestedIndex back to null
+    this.state('nestedIndex', null)
+
+    // and forcibly move the index needle to the
+    // end in case we have after / afterEach hooks
+    // which need to run
+    this.index = this.length
   }
 
   private runCommand (command: $Command) {
@@ -160,7 +199,7 @@ export class CommandQueue extends Queue<$Command> {
     this.state('chainerId', command.get('chainerId'))
 
     return this.stability.whenStable(() => {
-      this.state('nestedIndex', this.state('index'))
+      this.state('nestedIndex', this.index)
 
       return command.get('args')
     })
@@ -187,6 +226,7 @@ export class CommandQueue extends Queue<$Command> {
 
       // run the command's fn with runnable's context
       try {
+        command.start()
         ret = __stackReplacementMarker(command.get('fn'), args)
       } catch (err) {
         throw err
@@ -201,6 +241,8 @@ export class CommandQueue extends Queue<$Command> {
       // back into bluebird else it will create a thenable
       // which is never resolved
       if (this.isCy(ret)) {
+        // console.log('return null')
+
         return null
       }
 
@@ -259,33 +301,42 @@ export class CommandQueue extends Queue<$Command> {
 
       this.setSubjectForChainer(command.get('chainerId'), subject)
 
-      return subject
-    }).catch((err) => {
-      if (this.state('onCommandFailed')) {
-        err = this.state('onCommandFailed')(err, this)
+      console.log('cmd passed', command.get('name'))
+      command.pass()
 
-        this.state('onCommandFailed', null)
-      }
+      // })
+      // .catch((err) => {
+      //   console.log('command err')
+      //   if (this.state('onCommandFailed')) {
+      //     err = this.state('onCommandFailed')(err, this)
 
-      debugErrors('cypress command had an error: %o', err)
+      //     this.state('onCommandFailed', null)
+      //   }
 
-      // since this failed this means that a specific command failed
-      // and we should highlight it in red or insert a new command
-      // @ts-ignore
-      if (_.isObject(err) && !err.name) {
-        // @ts-ignore
-        err.name = 'CypressError'
-      }
+      //   debugErrors('cypress command had an error: %o', err)
 
-      commandRunningFailed(Cypress, this.state, err)
+      //   // since this failed this means that a specific command failed
+      //   // and we should highlight it in red or insert a new command
+      //   // @ts-ignore
+      //   if (_.isObject(err) && !err.name) {
+      //     // @ts-ignore
+      //     err.name = 'CypressError'
+      //   }
 
-      if (err.isRecovered) {
-        return // let the queue move on to the next command
-      }
+      //   commandRunningFailed(Cypress, this.state, err)
 
-      throw err
-    })
-    .then(() => {
+      //   if (err.isRecovered) {
+      //     command.recovered()
+
+      //     return // let the queue move on to the next command
+      //   }
+
+      //   command.failed()
+
+      //   throw err
+      // })
+      // .then(() => {
+      // console.log('finish logs')
       // end / snapshot our logs if they need it
       command.finishLogs()
 
@@ -296,45 +347,16 @@ export class CommandQueue extends Queue<$Command> {
         // we're finished with the current command so set it back to null
         current: null,
       })
+
+      return subject
     })
   }
 
-  // TypeScript doesn't allow overriding functions with different type signatures
-  // @ts-ignore
   run () {
-    const next = () => {
-      // bail if we've been told to abort in case
-      // an old command continues to run after
-      if (this.stopped) {
-        return
-      }
+    const runQueue = () => {
+      const command = this.at(this.index)
 
-      // start at 0 index if one is not already set
-      let index = this.state('index') || this.state('index', 0)
-
-      const command = this.at(index)
-
-      // if the command should be skipped, just bail and increment index
-      if (command && command.get('skip')) {
-        // must set prev + next since other
-        // operations depend on this state being correct
-        command.set({
-          prev: this.at(index - 1),
-          next: this.at(index + 1),
-        })
-
-        this.state('index', index + 1)
-
-        this.setSubjectForChainer(command.get('chainerId'), command.get('subject'))
-
-        Cypress.action('cy:skipped:command:end', command)
-
-        return next()
-      }
-
-      // if we're at the very end
       if (!command) {
-        // trigger queue is almost finished
         Cypress.action('cy:command:queue:before:end')
 
         // we need to wait after all commands have
@@ -343,9 +365,39 @@ export class CommandQueue extends Queue<$Command> {
         // move onto the next test until its finished
         return this.stability.whenStable(() => {
           Cypress.action('cy:command:queue:end')
+          this.stop()
+
+          const onQueueEnd = cy.state('onQueueEnd')
+
+          if (onQueueEnd) {
+            onQueueEnd()
+          }
 
           return null
         })
+      }
+
+      // start at 0 index if one is not already set
+      // console.log('next', this.index, command, cmd)
+
+      // if the command should be skipped, just bail and increment index
+      if (command && (command.state === 'passed' || command.get('skip'))) {
+        // must set prev + next since other
+        // operations depend on this state being correct
+        command.set({
+          prev: this.at(this.index - 1),
+          next: this.at(this.index + 1),
+        })
+
+        this.setSubjectForChainer(command.get('chainerId'), command.get('subject'))
+
+        if (command.get('skip')) {
+          Cypress.action('cy:skipped:command:end', command)
+        }
+
+        this.index += 1
+
+        return runQueueable()
       }
 
       // store the previous timeout
@@ -370,7 +422,6 @@ export class CommandQueue extends Queue<$Command> {
         // and we reset the timeout again, it will always
         // cause a timeout later no matter what.  by this time
         // mocha expects the test to be done
-        let fn
 
         if (!runnable.state) {
           this.timeout(prevTimeout)
@@ -381,24 +432,27 @@ export class CommandQueue extends Queue<$Command> {
         // in between different hooks like before + beforeEach
         // else run will be called again and index would start
         // over at 0
-        index += 1
-        this.state('index', index)
 
         Cypress.action('cy:command:end', command)
 
-        fn = this.state('onPaused')
+        this.index += 1
 
-        if (fn) {
+        const pauseFn = this.state('onPaused')
+
+        if (pauseFn) {
           return new Bluebird((resolve) => {
-            return fn(resolve)
-          }).then(next)
+            return pauseFn(resolve)
+            .then(() => {
+              return runQueueable()
+            })
+          })
         }
 
-        return next()
+        return runQueueable()
       })
     }
 
-    const onError = (err: Error | string) => {
+    const onQueueError = (err: Error | string) => {
       // If the runnable was marked as pending, this test was skipped
       // go ahead and just return
       const runnable = this.state('runnable')
@@ -407,17 +461,56 @@ export class CommandQueue extends Queue<$Command> {
         return
       }
 
+      const current = this.state('current')
+
+      if (this.state('onCommandFailed')) {
+        err = this.state('onCommandFailed')(err, this)
+
+        this.state('onCommandFailed', null)
+      }
+
+      debugErrors('cypress command had an error: %o', err)
+
+      // since this failed this means that a specific command failed
+      // and we should highlight it in red or insert a new command
+      // @ts-ignore
+      if (_.isObject(err) && !err.name) {
+        // @ts-ignore
+        err.name = 'CypressError'
+      }
+
+      commandRunningFailed(Cypress, this.state, err)
+
+      if (err.isRecovered) {
+        current?.recovered()
+
+        return // let the queue move on to the next command
+      }
+
+      if (current?.state === 'queued') {
+        current.skip()
+      } else if (current?.state === 'pending') {
+        current.fail()
+      }
+
       return this.fail(err)
     }
 
+    if (this.stopped) {
+      this.cleanup()
+
+      return Promise.resolve()
+    }
+
     const { promise, reject, cancel } = super.run({
-      onRun: next,
-      onError,
-      onFinish: this.cleanup,
+      onRun: runQueue,
+      onError: onQueueError,
+      onFinish: this.run,
     })
 
     this.state('promise', promise)
     this.state('reject', reject)
+
     this.state('cancel', () => {
       cancel()
 

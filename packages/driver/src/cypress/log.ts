@@ -406,6 +406,7 @@ export class Log {
     this.set({
       ended: true,
       error: err,
+      _error: undefined,
       state: 'failed',
     })
 

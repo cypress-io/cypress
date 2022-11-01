@@ -48,7 +48,7 @@ describe('src/cy/commands/assertions', () => {
       this.logs = []
 
       cy.on('log:added', (attrs, log) => {
-        this.logs.push(log)
+        this.logs?.push(log)
         this.lastLog = log
       })
 
@@ -368,7 +368,7 @@ describe('src/cy/commands/assertions', () => {
 
         cy.on('log:added', (attrs, log) => {
           if (log.get('name') === 'assert') {
-            logs.push(log)
+            logs?.push(log)
 
             if (logs.length === 3) {
               done()
@@ -737,7 +737,7 @@ describe('src/cy/commands/assertions', () => {
       })
 
       it('does not additionally log when .should is the current command', function (done) {
-        cy.on('fail', (err) => {
+        cy.once('fail', (err) => {
           const { lastLog } = this
 
           assertLogLength(this.logs, 1)
@@ -828,7 +828,7 @@ describe('src/cy/commands/assertions', () => {
       this.logs = []
 
       cy.on('log:added', (attrs, log) => {
-        this.logs.push(log)
+        this.logs?.push(log)
 
         if (attrs.name === 'assert') {
           this.lastLog = log
@@ -1185,7 +1185,7 @@ describe('src/cy/commands/assertions', () => {
       this.logs = []
 
       cy.on('log:added', (attrs, log) => {
-        this.logs.push(log)
+        this.logs?.push(log)
       })
 
       return null
@@ -1627,7 +1627,7 @@ describe('src/cy/commands/assertions', () => {
       }
 
       cy.on('log:added', (attrs, log) => {
-        this.logs.push(log)
+        this.logs?.push(log)
       })
 
       return null

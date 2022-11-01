@@ -81,7 +81,7 @@ const parseValueActualAndExpected = (value, actual, expected) => {
 
 export const create = (Cypress: ICypress, cy: $Cy) => {
   const getUpcomingAssertions = () => {
-    const index = cy.state('index') + 1
+    const index = cy.queue.index + 1
 
     const assertions: any[] = []
 
@@ -333,6 +333,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         const { onFail, onRetry } = callbacks
 
         if (err.retry === false || (!onFail && !onRetry)) {
+          err.onFail = finishAssertions
           throw err
         }
 
@@ -398,12 +399,12 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
       // and force the assertion to return
       // this value so it does not get
       // invoked again
-      const setSubjectAndSkip = () => {
+      const setSubjectAndPass = () => {
         subjects.forEach((subject, i) => {
           const cmd = cmds[i]
 
           cmd.set('subject', subject)
-          cmd.skip()
+          cmd.pass()
         })
 
         return cmds
@@ -438,7 +439,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
       .then(() => {
         restore()
 
-        setSubjectAndSkip()
+        setSubjectAndPass()
 
         finishAssertions()
 
