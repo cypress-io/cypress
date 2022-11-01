@@ -8,7 +8,6 @@
     "build": "rimraf dist && tsc || echo 'built, with errors'",
     "build-prod": "yarn build",
     "deps": "deps-ok && dependency-check --no-dev .",
-    "postinstall": "patch-package",
     "secure": "nsp check",
     "semantic-release": "semantic-release",
     "size": "npm pack --dry",
@@ -27,8 +26,8 @@
     "loader-utils": "^2.0.0",
     "lodash": "^4.17.20",
     "md5": "2.3.0",
-    "merge-source-map": "1.1.0",
-    "patch-package": "6.4.7",
+    "source-map": "^0.6.1",
+    "webpack": "^5.39.0",
     "webpack-virtual-modules": "^0.4.4"
   },
   "devDependencies": {
@@ -37,7 +36,6 @@
     "@babel/preset-env": "^7.0.0",
     "@fellow/eslint-plugin-coffee": "0.4.13",
     "@types/mocha": "9.0.0",
-    "@types/webpack": "^4.41.12",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
     "babel-loader": "^8.0.2",
@@ -65,8 +63,7 @@
     "sinon": "^9.0.0",
     "sinon-chai": "^3.5.0",
     "snap-shot-it": "7.9.2",
-    "ts-node": "^10.9.1",
-    "webpack": "^4.44.2"
+    "ts-node": "^10.9.1"
   },
   "peerDependencies": {
     "@babel/core": "^7.0.1",
