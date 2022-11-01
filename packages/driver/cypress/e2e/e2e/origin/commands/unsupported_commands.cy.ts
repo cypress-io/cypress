@@ -60,7 +60,7 @@ context('cy.origin unsupported commands', { browser: '!webkit' }, () => {
     })
 
     cy.origin('http://www.foobar.com:3500', () => {
-      cy.session('/foo')
+      cy.session('/foo', () => {})
     })
   })
 })

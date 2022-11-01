@@ -19,9 +19,7 @@ const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
 const TWO_MINUTES = humanInterval('2 minutes')
 
-let intervals
-
-let DELAYS = [
+const DELAYS = process.env.API_RETRY_INTERVALS ? process.env.API_RETRY_INTERVALS.split(',').map(_.toNumber) : [
   THIRTY_SECONDS,
   SIXTY_SECONDS,
   TWO_MINUTES,
@@ -33,16 +31,6 @@ const runnerCapabilities = {
 }
 
 let responseCache = {}
-
-intervals = process.env.API_RETRY_INTERVALS
-
-if (intervals) {
-  DELAYS = _
-  .chain(intervals)
-  .split(',')
-  .map(_.toNumber)
-  .value()
-}
 
 const rp = request.defaults((params, callback) => {
   let resp
