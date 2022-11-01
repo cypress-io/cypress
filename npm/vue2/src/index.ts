@@ -410,7 +410,7 @@ export const mount = (
         Cypress.log({
           name: 'mount',
           message: [message],
-        }).snapshot('mounted').end()
+        })
       })
     }
   })

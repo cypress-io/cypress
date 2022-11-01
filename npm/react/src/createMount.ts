@@ -120,7 +120,7 @@ export const makeMountFn = (
               home: 'https://github.com/cypress-io/cypress',
             }
           },
-        }).snapshot('mounted').end()
+        })
       })
     )
   // Bluebird types are terrible. I don't think the return type can be carried without this cast
