@@ -40,15 +40,22 @@ export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerende
 
       return lastReactDom.render(reactComponent, el)
     },
-    unmount,
+    unmount: internalUnmount,
     cleanup,
   }
 
   return makeMountFn('mount', jsx, { ReactDom: ReactDOM, ...options }, rerenderKey, internalOptions)
 }
 
-function unmount (options = { log: true }) {
+function internalUnmount (options = { log: true }) {
   return makeUnmountFn(options)
+}
+
+/**
+ * @deprecated in Cypress 11.
+ */
+export function unmount (options = { log: true }) {
+  throw new Error('unmount is no longer supported. See https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes to migrate.')
 }
 
 // Re-export this to help with migrating away from `unmount`

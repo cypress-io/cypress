@@ -41,7 +41,7 @@ export function setupHooks (optionalCallback?: Function) {
  * @deprecated Removed as of Cypress 11.0.0
  */
 export function cleanupStyles () {
-  throw new Error('cleanupStyles has been removed')
+  throw new Error('cleanupStyles is no longer supported. See https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes to migrate.')
 }
 
 /**
@@ -64,5 +64,5 @@ export const injectStylesBeforeElement = (
   document: Document,
   el: HTMLElement | null,
 ): HTMLElement => {
-  throw new Error('injectStylesBeforeElement has been removed')
+  throw new Error('injectStylesBeforeElement is no longer supported. See https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes to migrate.')
 }

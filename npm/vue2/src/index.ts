@@ -408,7 +408,7 @@ export const mountCallback = (
   options?: MountOptionsArgument,
 ) => {
   return () => {
-    throw new Error('mountCallback has been removed')
+    throw new Error('mountCallback  is no longer supported. See https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes to migrate.')
   }
 }
 
