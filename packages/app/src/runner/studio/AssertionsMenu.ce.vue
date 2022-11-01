@@ -45,7 +45,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computePosition, flip, shift } from '@floating-ui/dom'
+import { createPopper } from '@popperjs/core'
 import AssertionType from './AssertionType.ce.vue'
 import _ from 'lodash'
 import { nextTick, onMounted, Ref, ref, StyleValue } from 'vue'
@@ -77,14 +77,15 @@ onMounted(() => {
     const highlightEl = highlight.value as HTMLElement
     const assertionsMenuEl = assertionsMenu.value as HTMLElement
 
-    computePosition(highlightEl, assertionsMenuEl, {
-      placement: 'bottom',
-      middleware: [flip(), shift()],
-    }).then(({ x, y }) => {
-      Object.assign(assertionsMenuEl.style, {
-        left: `${x}px`,
-        top: `${y}px`,
-      })
+    createPopper(highlightEl, assertionsMenuEl, {
+      modifiers: [
+        {
+          name: 'preventOverflow',
+          options: {
+            altAxis: true,
+          },
+        },
+      ],
     })
   })
 })

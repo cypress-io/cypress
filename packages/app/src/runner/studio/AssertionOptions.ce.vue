@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computePosition, flip } from '@floating-ui/dom'
+import { createPopper } from '@popperjs/core'
 import { onMounted, ref, nextTick, Ref } from 'vue'
 
 const props = defineProps<{
@@ -51,14 +51,8 @@ onMounted(() => {
     const popperEl = popper.value as HTMLElement
     const reference = popperEl.parentElement as HTMLElement
 
-    computePosition(reference, popperEl, {
+    createPopper(reference, popperEl, {
       placement: 'right-start',
-      middleware: [flip()],
-    }).then(({ x, y }) => {
-      Object.assign(popperEl.style, {
-        left: `${x}px`,
-        top: `${y}px`,
-      })
     })
 
     props.setPopperElement(popperEl)
