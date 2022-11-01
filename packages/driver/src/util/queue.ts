@@ -3,7 +3,7 @@ import Bluebird from 'bluebird'
 interface QueueRunProps {
   onRun: () => Bluebird<any> | Promise<any>
   onError: (err: Error) => void
-  onFinish: () => void
+  onFinish: () => Bluebird<any> | Promise<any>
 }
 
 export class Queue<T> {

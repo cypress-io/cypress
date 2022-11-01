@@ -1492,7 +1492,7 @@ export default {
           // attach error right now
           // if we have one
           if (err) {
-            const PendingErrorMessages = ['sync skip', 'async skip call', 'async skip; aborting execution']
+            const PendingErrorMessages = ['sync skip', 'sync skip; aborting execution', 'async skip call', 'async skip; aborting execution']
 
             if (_.find(PendingErrorMessages, err.message) !== undefined) {
               err.isPending = true
@@ -1510,6 +1510,16 @@ export default {
 
           return runnableAfterRunAsync(runnable, Cypress)
           .then(() => {
+            // once we complete callback with the
+            // original err
+            next(err)
+
+            // return null here to signal to bluebird
+            // that we did not forget to return a promise
+            // because mocha internally does not return
+            // the test.run(fn)
+            return null
+          }).catch((err) => {
             // once we complete callback with the
             // original err
             next(err)

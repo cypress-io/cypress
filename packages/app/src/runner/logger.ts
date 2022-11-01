@@ -3,8 +3,8 @@ import _ from 'lodash'
 
 interface Table {
   name: string
-  data?: object
-  columns?: any
+  data: object
+  columns: any
 }
 
 interface Group {
@@ -127,7 +127,7 @@ export const logger = {
   },
 
   _logTables (consoleProps: any) {
-    const logTable = ({ name, data, columns }) => {
+    const logTable = ({ name, data, columns }: Table) => {
       let tableData = data
 
       if (Cypress.isBrowser('webkit')) {

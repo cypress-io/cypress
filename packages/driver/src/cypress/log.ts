@@ -554,10 +554,9 @@ export class Log {
 }
 
 class LogManager {
-  logs: Record<string, Log> = {}
+  logs: Record<string, boolean> = {}
 
-  constructor (isInteractive: boolean) {
-    this.isInteractive = isInteractive
+  constructor () {
     this.fireChangeEvent = this.fireChangeEvent.bind(this)
   }
 

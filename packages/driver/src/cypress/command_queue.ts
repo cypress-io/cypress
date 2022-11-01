@@ -19,9 +19,10 @@ const __stackReplacementMarker = (fn, args) => {
   return fn(...args)
 }
 
-const commandRunningFailed = (Cypress, state, err) => {
+const commandRunningFailed = (Cypress, err: Error | string, current?: $Command) => {
   // allow for our own custom onFail function
-  if (err.onFail) {
+  // @ts-ignore
+  if (_.isObject(err) && err.onFail) {
     err.onFail(err)
     // clean up this onFail callback after it's been called
     delete err.onFail
@@ -29,7 +30,6 @@ const commandRunningFailed = (Cypress, state, err) => {
     return
   }
 
-  const current = state('current')
   const lastLog = current?.getLastLog()
 
   const consoleProps = () => {
@@ -170,9 +170,11 @@ export class CommandQueue extends Queue<$Command> {
   }
 
   cleanup () {
-    if (this.state('runnable')) {
+    const runnable = this.state('runnable')
+
+    if (!runnable.isPending()) {
       // make sure we reset the runnable's timeout now
-      this.state('runnable').resetTimeout()
+      runnable.resetTimeout()
     }
 
     // if a command fails then after each commands
@@ -276,7 +278,8 @@ export class CommandQueue extends Queue<$Command> {
       }
 
       return ret
-    }).then((subject) => {
+    })
+    .then((subject) => {
       // we may be given a regular array here so
       // we need to re-wrap the array in jquery
       // if that's the case if the first item
@@ -317,8 +320,35 @@ export class CommandQueue extends Queue<$Command> {
   }
 
   run () {
-    const runQueueable = () => {
+    if (this.stopped) {
+      this.cleanup()
+
+      return Promise.resolve()
+    }
+
+    const next = () => {
       const command = this.at(this.index)
+
+      // if the command has already ran or should be skipped, just bail and increment index
+      if (command && (command.state === 'passed' || command.state === 'skipped')) {
+        // must set prev + next since other
+        // operations depend on this state being correct
+        command.set({
+          prev: this.at(this.index - 1),
+          next: this.at(this.index + 1),
+        })
+
+        this.setSubjectForChainer(command.get('chainerId'), command.get('subject'))
+
+        if (command.state === 'skipped') {
+          Cypress.action('cy:skipped:command:end', command)
+        }
+
+        // move on to the next queueable
+        this.index += 1
+
+        return next()
+      }
 
       // if we're at the very end
       if (!command) {
@@ -341,27 +371,6 @@ export class CommandQueue extends Queue<$Command> {
 
           return null
         })
-      }
-
-      // if the command should be skipped, just bail and increment index
-      if (command && (command.state === 'passed' || command.state === 'skipped')) {
-        // must set prev + next since other
-        // operations depend on this state being correct
-        command.set({
-          prev: this.at(this.index - 1),
-          next: this.at(this.index + 1),
-        })
-
-        this.setSubjectForChainer(command.get('chainerId'), command.get('subject'))
-
-        if (command.state === 'skipped') {
-          Cypress.action('cy:skipped:command:end', command)
-        }
-
-        // move on to the next queueable
-        this.index += 1
-
-        return runQueueable()
       }
 
       // store the previous timeout
@@ -393,37 +402,34 @@ export class CommandQueue extends Queue<$Command> {
 
         Cypress.action('cy:command:end', command)
 
+        // move on to the next queueable
+        this.index += 1
+
         const pauseFn = this.state('onPaused')
 
         if (pauseFn) {
           return new Bluebird((resolve) => {
             return pauseFn(resolve)
-            .then(() => {
-              // move on to the next queueable
-              this.index += 1
-
-              return runQueueable()
-            })
+          })
+          .then(() => {
+            return next()
           })
         }
 
-        // move on to the next queueable
-        this.index += 1
-
-        return runQueueable()
+        return next()
       })
     }
 
-    const onQueueError = (err: Error | string) => {
+    const onError = (err: Error | string) => {
       // If the runnable was marked as pending, this test was skipped
       // go ahead and just return
       const runnable = this.state('runnable')
 
       if (runnable.isPending()) {
+        this.stop()
+
         return
       }
-
-      const current = this.state('current')
 
       if (this.state('onQueueFailed')) {
         err = this.state('onQueueFailed')(err, this)
@@ -431,7 +437,7 @@ export class CommandQueue extends Queue<$Command> {
         this.state('onQueueFailed', null)
       }
 
-      debugErrors('cypress command had an error: %o', err)
+      debugErrors('error throw while executing cypress queue: %o', err)
 
       // since this failed this means that a specific command failed
       // and we should highlight it in red or insert a new command
@@ -441,12 +447,14 @@ export class CommandQueue extends Queue<$Command> {
         err.name = 'CypressError'
       }
 
-      commandRunningFailed(Cypress, this.state, err)
+      const current = this.state('current')
 
-      if (err.isRecovered) {
+      commandRunningFailed(Cypress, err, current)
+
+      if (_.isObject(err) && err.isRecovered) {
         current?.recovered()
 
-        return // let the queue move on to the next command
+        return // let the queue end & restart on to the next command index (set in onQueueFailed)
       }
 
       if (current?.state === 'queued') {
@@ -460,21 +468,14 @@ export class CommandQueue extends Queue<$Command> {
       return this.fail(err)
     }
 
-    if (this.stopped) {
-      this.cleanup()
-
-      return Promise.resolve()
-    }
-
     const { promise, reject, cancel } = super.run({
-      onRun: runQueueable,
-      onError: onQueueError,
+      onRun: next,
+      onError,
       onFinish: this.run,
     })
 
     this.state('promise', promise)
     this.state('reject', reject)
-
     this.state('cancel', () => {
       cancel()
 

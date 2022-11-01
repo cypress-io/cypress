@@ -30,7 +30,7 @@ const getNextQueuedCommand = (queue) => {
     return cmd
   }
 
-  return search(queue.index + 1)
+  return search(queue.index)
 }
 
 interface InternalPauseOptions extends Partial<Cypress.Loggable> {

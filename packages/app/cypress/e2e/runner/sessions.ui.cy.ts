@@ -493,6 +493,7 @@ describe('runner/cypress sessions.ui.spec', {
             failCount: 0,
             setup () {
               cy.window().then((win) => {
+                // @ts-ignore
                 return win.CYPRESS_TEST_DATA = {
                   restoreSessionWithValidationFailure: true,
                   successfullyRecreatedSession: true,
@@ -562,6 +563,7 @@ describe('runner/cypress sessions.ui.spec', {
             failCount: 7,
             setup () {
               cy.window().then((win) => {
+                // @ts-ignore
                 return win.CYPRESS_TEST_DATA = {
                   restoreSessionWithValidationFailure: true,
                   successfullyRecreatedSession: false,

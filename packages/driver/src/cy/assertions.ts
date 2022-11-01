@@ -222,7 +222,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
     return null
   }
 
-  const finishAssertions = (err) => {
+  const finishAssertions = (err?: Error) => {
     const logs = cy.state('current').get('logs')
 
     let hasLoggedError = false
@@ -233,13 +233,10 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
           log.snapshot()
         }
 
-        if (err && !hasLoggedError) {
+        // @ts-ignore
+        if (err && (!hasLoggedError || (err.issuesCommunicatingOrFinding && index === logs.length - 1))) {
           hasLoggedError = true
 
-          return log.error(err)
-        }
-
-        if (err && err.issuesCommunicatingOrFinding && index === logs.length - 1) {
           return log.error(err)
         }
 
