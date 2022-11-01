@@ -22,13 +22,11 @@ import {
 import { allowDestroy } from '../../lib/allow-destroy'
 import { AsyncServer, Servers } from '../support/servers'
 import { UrlClientCertificates, ClientCertificates, PemKey } from '../../lib/client-certificates'
-import Forge from 'node-forge'
+import { pki } from 'node-forge'
 import fetch from 'cross-fetch'
 import os from 'os'
 import path from 'path'
 import fs from 'fs'
-
-const { pki } = Forge
 
 const expect = chai.expect
 
