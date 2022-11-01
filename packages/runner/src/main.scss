@@ -1,8 +1,6 @@
 @import 'lib/variables';
 @import 'lib/mixins';
 @import 'lib/fonts';
-$cy-tooltip-class: 'cy-tooltip';
-@import '~@cypress/react-tooltip/dist/tooltip.scss';
 @import 'lib/base';
 // import all other scss files in src except if they are in lib 
 // or their file name is `main`
