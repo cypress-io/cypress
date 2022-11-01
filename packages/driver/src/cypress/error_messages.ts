@@ -1149,6 +1149,13 @@ export default {
     invalid_url_argument: {
       message: `${cmd('origin')} requires the first argument to be either a url (\`https://www.example.com/path\`) or a domain name (\`example.com\`). Query parameters are not allowed. You passed: \`{{arg}}\``,
     },
+    invalid_url_argument_same_origin ({ originUrl, topOrigin }) {
+      return stripIndent`\
+      ${cmd('origin')} requires the first argument to be either a url or a domain name that is cross origin when compared to the top url. You passed \`${originUrl}\` to the origin command, while top is at \`${topOrigin}\`.
+
+      Either the intended page was not visited prior to running the cy.origin block or the cy.origin block may not be needed at all.
+      `
+    },
     invalid_options_argument: {
       message: `${cmd('origin')} requires the 'options' argument to be an object. You passed: \`{{arg}}\``,
     },
@@ -1217,6 +1224,13 @@ export default {
     failed_to_serialize_or_map_thrown_value: {
       message: stripIndent`\
       ${cmd('origin')} could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.`,
+    },
+    failed_to_create_spec_bridge: {
+      message: stripIndent`\
+      ${cmd('origin')} failed to create a spec bridge to communicate with the specified origin. This can happen when you attempt to create a spec bridge to an insecure (http) frame from a secure (https) frame.
+
+      Check your Developer Tools Console for the actual error - it should be printed there.
+      `,
     },
     unsupported: {
       route: {
