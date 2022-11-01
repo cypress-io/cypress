@@ -8,7 +8,7 @@ window.Mocha['__zone_patch__'] = false
 import 'zone.js/testing'
 
 import { CommonModule } from '@angular/common'
-import { Component, ErrorHandler, EventEmitter, Injectable, SimpleChange, SimpleChanges, Type } from '@angular/core'
+import { Component, ErrorHandler, EventEmitter, Injectable, SimpleChange, SimpleChanges, Type, OnChanges } from '@angular/core'
 import {
   ComponentFixture,
   getTestBed,
@@ -77,7 +77,14 @@ let activeFixture: ComponentFixture<any> | null = null
 function cleanup () {
   activeFixture = null
   // Not public, we need to call this to remove the last component from the DOM
-  getTestBed()['tearDownTestingModule']()
+  const tearDownFn = (getTestBed() as any).tearDownTestingModule
+
+  if (!tearDownFn) {
+    throw new Error(`Could not teardown component. The version of Angular you are using may not be officially supported.
+Visit https://docs.cypress.io/guides/component-testing/component-framework-configuration to see the currently supported versions of Angular.`)
+  }
+
+  tearDownFn()
   getTestBed().resetTestingModule()
 }
 
@@ -244,17 +251,18 @@ function setupFixture<T> (
  * @param {ComponentFixture<T>} fixture Fixture for debugging and testing a component.
  * @returns {T} Component being mounted
  */
-function setupComponent<T extends { ngOnChanges? (changes: SimpleChanges): void }> (
+function setupComponent<T> (
   config: MountConfig<T>,
-  fixture: ComponentFixture<T>): T {
-  let component: T = fixture.componentInstance
+  fixture: ComponentFixture<T>,
+): void {
+  let component = fixture.componentInstance as unknown as { [key: string]: any } & Partial<OnChanges>
 
   if (config?.componentProperties) {
     component = Object.assign(component, config.componentProperties)
   }
 
   if (config.autoSpyOutputs) {
-    Object.keys(component).forEach((key: string, index: number, keys: string[]) => {
+    Object.keys(component).forEach((key) => {
       const property = component[key]
 
       if (property instanceof EventEmitter) {
@@ -273,14 +281,12 @@ function setupComponent<T extends { ngOnChanges? (changes: SimpleChanges): void 
       acc[key] = new SimpleChange(null, value, true)
 
       return acc
-    }, {})
+    }, {} as {[key: string]: SimpleChange})
 
     if (Object.keys(componentProperties).length > 0) {
       component.ngOnChanges(simpleChanges)
     }
   }
-
-  return component
 }
 
 /**
