@@ -13,8 +13,21 @@ jobs:
     name: Add to triage project
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/add-to-project@v0.3.0
+      - name: Check if organization member
+        id: is_organization_member
+        if: github.event.action == 'opened'
+        uses: jamessingleton/is-organization-member@v1
         with:
-          project-url: https://github.com/orgs/cypress-io/projects/9
+          organization: nagash77-cypress
+          username: ${{ github.event.issue.user.login }}
+          token: ${{ secrets.ADD_TO_PROJECT_TOKEN}}
+        run: echo ${{steps.is_organization_member.outputs.result}}
+        shell: bash
+      - name: Add issue from non-member to Triage Board
+        if: steps.is_organization_member.outputs.result == false
+        uses: actions/add-to-project@v0.3.0
+        with:
+          project-url: hhttps://github.com/orgs/nagash77-cypress/projects/1
           github-token: ${{ secrets.ADD_TO_PROJECT_TOKEN }}
+        
           
