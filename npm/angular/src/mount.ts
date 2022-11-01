@@ -179,21 +179,11 @@ function initTestBed<T> (
   component: Type<T> | string,
   config: MountConfig<T>,
 ): Type<T> {
-  const { providers, ...configRest } = config
-
   const componentFixture = createComponentFixture(component) as Type<T>
 
   getTestBed().configureTestingModule({
-    ...bootstrapModule(componentFixture, configRest),
+    ...bootstrapModule(componentFixture, config),
   })
-
-  if (providers != null) {
-    getTestBed().overrideComponent(componentFixture, {
-      add: {
-        providers,
-      },
-    })
-  }
 
   return componentFixture
 }

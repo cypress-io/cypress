@@ -1,0 +1,59 @@
+{
+  "name": "@tooling/v8-snapshot",
+  "version": "0.0.0-development",
+  "description": "Various utils related to create v8 snapshots for electron apps.",
+  "private": true,
+  "main": "dist/v8-snapshot.js",
+  "scripts": {
+    "build": "tsc && (rimraf ./dist/blueprint && cpr ./src/blueprint ./dist/blueprint)",
+    "build-prod": "yarn build",
+    "check-ts": "tsc --noEmit && yarn -s tslint",
+    "clean-deps": "rimraf node_modules",
+    "clean": "rimraf dist",
+    "test": "yarn test-unit",
+    "test-integration": "mocha test/integration/**/*.spec.ts --config ./test/.mocharc.js",
+    "test-unit": "mocha test/unit/**/*.spec.ts --config ./test/.mocharc.js",
+    "tslint": "tslint --config ../ts/tslint.json --project .",
+    "watch": "tsc --watch"
+  },
+  "dependencies": {
+    "@tooling/electron-mksnapshot": "0.0.0-development",
+    "@tooling/packherd": "0.0.0-development",
+    "ansi-colors": "^4.1.1",
+    "convert-source-map": "^1.8.0",
+    "debug": "^4.1.1",
+    "resolve-from": "^5.0.0",
+    "source-map-js": "^0.6.2",
+    "temp-dir": "^2.0.0",
+    "tslib": "^2.0.1",
+    "worker-nodes": "^2.3.0"
+  },
+  "devDependencies": {
+    "@tooling/system-tests": "0.0.0-development",
+    "cpr": "^3.0.1",
+    "mocha": "7.0.1",
+    "rimraf": "^3.0.2",
+    "snap-shot-it": "7.9.3",
+    "stealthy-require": "^1.1.1"
+  },
+  "files": [
+    "dist",
+    "src/v8-snapshot.ts"
+  ],
+  "types": "src/v8-snapshot.ts",
+  "optionalDependencies": {
+    "@cypress/snapbuild-android-arm64": "1.0.1",
+    "@cypress/snapbuild-darwin-64": "1.0.1",
+    "@cypress/snapbuild-darwin-arm64": "1.0.1",
+    "@cypress/snapbuild-freebsd-64": "1.0.1",
+    "@cypress/snapbuild-freebsd-arm64": "1.0.1",
+    "@cypress/snapbuild-linux-32": "1.0.1",
+    "@cypress/snapbuild-linux-64": "1.0.1",
+    "@cypress/snapbuild-linux-arm": "1.0.1",
+    "@cypress/snapbuild-linux-arm64": "1.0.1",
+    "@cypress/snapbuild-linux-mips64le": "1.0.1",
+    "@cypress/snapbuild-linux-ppc64le": "1.0.1",
+    "@cypress/snapbuild-windows-32": "1.0.1",
+    "@cypress/snapbuild-windows-64": "1.0.1"
+  }
+}

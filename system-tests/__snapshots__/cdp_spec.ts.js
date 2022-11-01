@@ -23,6 +23,4 @@ There was an error reconnecting to the Chrome DevTools protocol. Please restart 
 
 Error: connect ECONNREFUSED 127.0.0.1:7777
       [stack trace lines]
-
-
 `
