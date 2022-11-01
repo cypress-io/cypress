@@ -1,6 +1,7 @@
 import React from 'react'
 // @ts-expect-error
 import ReactDOM from 'react-dom/client'
+import { getContainerEl } from '@cypress/mount-utils'
 import {
   makeMountFn,
   makeUnmountFn,
@@ -44,4 +45,9 @@ export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerende
 
 function unmount (options: UnmountArgs = { log: true }) {
   return makeUnmountFn(options)
+}
+
+// Re-export this to help with migrating away from `unmount`
+export {
+  getContainerEl,
 }

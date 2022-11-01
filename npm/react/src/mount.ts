@@ -50,3 +50,8 @@ export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerende
 function unmount (options = { log: true }) {
   return makeUnmountFn(options)
 }
+
+// Re-export this to help with migrating away from `unmount`
+export {
+  getContainerEl,
+}
