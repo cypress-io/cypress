@@ -1,0 +1,33 @@
+{
+  "name": "@packages/packherd-require",
+  "version": "0.0.0-development",
+  "description": "Loads modules that have been bundled by `@tooling/packherd`.",
+  "private": true,
+  "main": "dist/require.js",
+  "scripts": {
+    "build": "tsc",
+    "build-prod": "yarn build",
+    "check-ts": "tsc --noEmit && yarn -s tslint",
+    "clean-deps": "rimraf node_modules",
+    "clean": "rimraf dist",
+    "test": "yarn test-unit",
+    "test-unit": "mocha --config ./test/.mocharc.js",
+    "tslint": "tslint --config ../ts/tslint.json --project .",
+    "watch": "tsc --watch"
+  },
+  "dependencies": {
+    "convert-source-map": "^1.7.0",
+    "debug": "^4.3.1",
+    "source-map-js": "^0.6.2"
+  },
+  "devDependencies": {
+    "@packages/ts": "0.0.0-development",
+    "esbuild": "^0.15.3",
+    "mocha": "7.0.1"
+  },
+  "files": [
+    "dist",
+    "src/require.ts"
+  ],
+  "types": "src/require.ts"
+}
