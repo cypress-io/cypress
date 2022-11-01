@@ -4,7 +4,7 @@
       class="w-full z-10 fixed"
     />
     <MajorVersionLandingPage
-      v-if="!wasLandingPageShown"
+      v-if="!wasLandingPageDismissed"
       class="pt-64px"
       @clearLandingPage="handleClearLandingPage"
     />
@@ -22,7 +22,7 @@
         :gql="query.data.value"
       />
       <MigrationWizard
-        v-else-if="currentProject?.needsLegacyConfigMigration && wasLandingPageShown"
+        v-else-if="currentProject?.needsLegacyConfigMigration && wasLandingPageDismissed"
       />
       <template v-else>
         <ScaffoldedFiles
@@ -113,12 +113,6 @@ fragment MainLaunchpadQueryData on Query {
     id
     ...BaseError
   }
-  versions {
-    current {
-      id
-      version
-    }
-  }
   localSettings {
     preferences {
       majorVersionLandingPageDismissed
@@ -164,17 +158,17 @@ const resetErrorAndLoadConfig = (id: string) => {
 }
 const query = useQuery({ query: MainLaunchpadQueryDocument })
 const currentProject = computed(() => query.data.value?.currentProject)
-const currentMajorVersion = computed(() => query.data.value?.versions?.current?.version?.split('.')[0])
+const majorVersion = t('majorVersionLandingPage.majorVersion')
 
 function handleClearLandingPage () {
-  if (currentMajorVersion.value) {
-    setMajorVersionLandingPageDismissed(currentMajorVersion.value)
+  if (majorVersion) {
+    setMajorVersionLandingPageDismissed(majorVersion)
   }
 }
 
-const wasLandingPageShown = computed(() => {
-  if (query.data.value && currentMajorVersion.value) {
-    return query.data.value?.localSettings?.preferences?.majorVersionLandingPageDismissed?.[currentMajorVersion.value]
+const wasLandingPageDismissed = computed(() => {
+  if (query.data.value && majorVersion) {
+    return query.data.value?.localSettings?.preferences?.majorVersionLandingPageDismissed?.[majorVersion]
   }
 
   return false
