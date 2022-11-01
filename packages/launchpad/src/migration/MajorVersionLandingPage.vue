@@ -44,7 +44,7 @@
             </p>
           </div>
           <div>
-            <h2 class="font-bold mb-16px text-jade-1000">
+            <h2 class="font-bold text-18px mb-16px text-jade-1000">
               Previous release highlights
             </h2>
             <div class="flex justify-between items-center">
