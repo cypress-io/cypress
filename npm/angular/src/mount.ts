@@ -79,7 +79,10 @@ function cleanup () {
   try {
     (getTestBed() as any).tearDownTestingModule()
   } catch (e) {
-    throw new Error(`Failed to teardown component. The version of Angular you are using may not be officially supported, visit https://docs.cypress.io/guides/component-testing/component-framework-configuration for current Angular version support.`)
+    const notSupportedError = new Error(`Failed to teardown component. The version of Angular you are using may not be officially supported.`)
+
+    ;(notSupportedError as any).docsUrl = 'https://on.cypress.io/component-framework-configuration'
+    throw notSupportedError
   }
 
   getTestBed().resetTestingModule()
