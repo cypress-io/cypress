@@ -78,7 +78,7 @@ Browser automation APIs and the proxy play a small but critical role in facilita
 
 The proxy intercepts http requests from all sources. In order to detect cross-origin navigation of **AUT**, it’s necessary to know that a request came specifically from the **AUT frame** and not **top**, a nested iframe, or elsewhere. To achieve this, we use the browser automation APIs to add a `X-Cypress-Is-AUT-Frame` header to any requests from the AUT.
 
-Allowing the proxy to know if a request is from the **AUT** enables us to recognizes that it’s not the **primary origin** and inject code into the request that’s tailored to cross-origin testing.
+Allowing the proxy to know if a request is from the **AUT** enables us to recognize that it’s not the **primary origin** and inject code into the request that’s tailored to cross-origin testing.
 
 ### Cross-origin navigation timing
 
