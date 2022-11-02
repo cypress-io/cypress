@@ -10,7 +10,7 @@ jobs:
     env:
       CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
       BASE_BRANCH: feature/v8-snapshots-auto-pr
-      SNAPSHOT_FILES: tooling/v8-snapshot/cache/dev-darwin/snapshot-meta.cache.json tooling/v8-snapshot/cache/prod-darwin/snapshot-meta.cache.json tooling/v8-snapshot/cache/dev-linux/snapshot-meta.cache.json tooling/v8-snapshot/cache/prod-linux/snapshot-meta.cache.json tooling/v8-snapshot/cache/dev-windows/snapshot-meta.cache.json tooling/v8-snapshot/cache/prod-windows/snapshot-meta.cache.json
+      SNAPSHOT_FILES: ${{ (env.RUNNER_OS != 'Windows' && "tooling/v8-snapshot/cache/dev-darwin/snapshot-meta.cache.json tooling/v8-snapshot/cache/prod-darwin/snapshot-meta.cache.json tooling/v8-snapshot/cache/dev-linux/snapshot-meta.cache.json tooling/v8-snapshot/cache/prod-linux/snapshot-meta.cache.json tooling/v8-snapshot/cache/dev-windows/snapshot-meta.cache.json tooling/v8-snapshot/cache/prod-windows/snapshot-meta.cache.json") || ("tooling\v8-snapshot\cache\dev-darwin\snapshot-meta.cache.json tooling\v8-snapshot\cache\prod-darwin\snapshot-meta.cache.json tooling\v8-snapshot\cache\dev-linux\snapshot-meta.cache.json tooling\v8-snapshot\cache\prod-linux\snapshot-meta.cache.json tooling\v8-snapshot\cache\dev-windows\snapshot-meta.cache.json tooling\v8-snapshot\cache\prod-windows\snapshot-meta.cache.json") }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
