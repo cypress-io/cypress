@@ -56,7 +56,7 @@ describe('issue #761 - aborted XHRs from previous tests', () => {
 // https://github.com/cypress-io/cypress/issues/3973
 if (Cypress.isBrowser('chrome')) {
   describe('issue #3973 - unloaded xhrs do not fire readystatechange event in chrome >= 71', () => {
-    // TODO: When Intercepted, aborted XHR requests do not resolve the cy.wait command. Resolved by https://github.com/cypress-io/cypress/issues/24492
+    // TODO: When Intercepted, aborted XHR requests do not resolve the cy.wait command. https://github.com/cypress-io/cypress/issues/24492
     it.skip('cancels pending requests that are incomplete', () => {
       const logs = []
 

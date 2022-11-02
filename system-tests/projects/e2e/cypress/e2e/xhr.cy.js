@@ -145,7 +145,7 @@ describe('xhrs', () => {
       .should('equal', '{\"some\":\"data\"}')
     })
 
-    // TODO: When Intercepted, aborted XHR requests do not resolve the cy.wait command. Resolved by https://github.com/cypress-io/cypress/issues/24492
+    // TODO: When Intercepted, aborted XHR requests do not resolve the cy.wait command. https://github.com/cypress-io/cypress/issues/24492
     it.skip('aborts', () => {
       cy.window()
       .then((win) => {
