@@ -108,7 +108,7 @@ jobs:
         uses: actions/github-script@v4
         with:
           script: |
-            const { createPullRequest } = require('./scripts/github-actions/update-browser-versions.js')
+            const { createPullRequest } = require('./scripts/github-actions/create-pull-request.js')
 
             await createPullRequest({
               context,

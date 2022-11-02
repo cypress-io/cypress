@@ -3,9 +3,9 @@ on: push
 jobs:
   update-v8-snapshot-cache:
     strategy:
+      max-parallel: 1
       matrix:
         platform: [ubuntu-latest, windows-latest, macos-latest]
-        max-parallel: 1
     runs-on: ${{ matrix.platform }}
     env:
       CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
