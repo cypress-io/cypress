@@ -47,7 +47,8 @@ function internalUnmount (options = { log: true }) {
   return makeUnmountFn(options)
 }
 /**
- * @deprecated in Cypress 11.
+ * Removed as of Cypress 11.0.0.
+ * @see https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes
  */
 export function unmount (options: UnmountArgs = { log: true }) {
   throw new Error('unmount is no longer supported. See https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes to migrate.')
