@@ -327,7 +327,10 @@ function getComponentDisplayName (componentOptions: any): string {
 export const mount = (
   component: VueComponent,
   optionsOrProps: MountOptionsArgument = {},
-) => {
+): Cypress.Chainable<{
+  wrapper: Wrapper<Vue, Element>
+  component: Wrapper<Vue, Element>['vm']
+}> => {
   // Remove last mounted component if cy.mount is called more than once in a test
   cleanup()
 
@@ -408,6 +411,11 @@ export const mount = (
 
     Cypress.vue = VTUWrapper.vm
     Cypress.vueWrapper = VTUWrapper
+
+    return {
+      wrapper: VTUWrapper,
+      component: VTUWrapper.vm,
+    }
   })
 }
 
