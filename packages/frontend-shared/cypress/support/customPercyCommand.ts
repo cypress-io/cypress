@@ -3,6 +3,7 @@
 import '@percy/cypress'
 import type { SnapshotOptions } from '@percy/core'
 import 'cypress-axe'
+import axe from 'axe-core/axe.js'
 
 export interface CustomSnapshotOptions extends SnapshotOptions{
   /**
@@ -61,7 +62,6 @@ function setupAxeAndCheckA11y () {
       // this is a work around for the issue with require.resolve in CT
       // described here: https://github.com/component-driven/cypress-axe/issues/134
       cy.window({ log: false }).then((window) => {
-        const axe = require('axe-core/axe.js')
         const script = window.document.createElement('script')
 
         script.innerHTML = axe.source
