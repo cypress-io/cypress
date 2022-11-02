@@ -203,10 +203,52 @@ function navigateAboutBlank (session: boolean = true) {
   return Cypress.action('cy:visit:blank', { type: session ? 'session' : 'session-lifecycle' }) as unknown as Promise<void>
 }
 
+const statusMap = {
+  inProgress: (step) => {
+    switch (step) {
+      case 'create':
+        return 'creating'
+      case 'restore':
+        return 'restoring'
+      case 'recreate':
+        return 'recreating'
+      default:
+        throw new Error(`${step} is not a valid session step.`)
+    }
+  },
+  stepName: (step) => {
+    switch (step) {
+      case 'create':
+        return 'Create new session'
+      case 'restore':
+        return 'Restore saved session'
+      case 'recreate':
+        return 'Recreate session'
+      case 'validate':
+        return 'Validate session'
+      default:
+        throw new Error(`${step} is not a valid session step.`)
+    }
+  },
+  complete: (step) => {
+    switch (step) {
+      case 'create':
+        return 'created'
+      case 'restore':
+        return 'restored'
+      case 'recreate':
+        return 'recreated'
+      default:
+        throw new Error(`${step} is not a valid session step.`)
+    }
+  },
+}
+
 export {
   getCurrentOriginStorage,
   setPostMessageLocalStorage,
   getConsoleProps,
   getPostMessageLocalStorage,
   navigateAboutBlank,
+  statusMap,
 }

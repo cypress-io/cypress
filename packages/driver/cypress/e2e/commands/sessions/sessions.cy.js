@@ -134,7 +134,7 @@ describe('cy.session', { retries: 0 }, () => {
       let validate
 
       const handleSetup = () => {
-      // create session clears page before running
+        // create session clears page before running
         cy.contains('Default blank page')
         cy.contains('This page was cleared by navigating to about:blank.')
 
@@ -146,7 +146,7 @@ describe('cy.session', { retries: 0 }, () => {
       }
 
       const handleValidate = () => {
-      // both create & restore session clears page after running
+        // both create & restore session clears page after running
         cy.contains('Default blank page')
         cy.contains('This page was cleared by navigating to about:blank.')
 
@@ -1062,7 +1062,7 @@ describe('cy.session', { retries: 0 }, () => {
           sessionId = `session-${Cypress.state('test').id}`
           cy.session(sessionId, setup)
           .then(() => {
-          // reset and only test restored session
+            // reset and only test restored session
             resetMocks()
           })
 
@@ -1119,7 +1119,7 @@ describe('cy.session', { retries: 0 }, () => {
           sessionId = `session-${Cypress.state('test').id}`
           cy.session(sessionId, setup, { validate })
           .then(() => {
-          // reset and only test restored session
+            // reset and only test restored session
             resetMocks()
           })
 
@@ -1294,7 +1294,7 @@ describe('cy.session', { retries: 0 }, () => {
           cy.log('Creating new session for test')
           cy.session(`session-${Cypress.state('test').id}`, setup, { validate })
           .then(() => {
-          // reset and only test restored session
+            // reset and only test restored session
             resetMocks()
             validate.callsFake(() => Promise.reject(false))
           })

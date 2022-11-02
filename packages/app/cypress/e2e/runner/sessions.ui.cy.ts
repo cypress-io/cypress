@@ -28,7 +28,7 @@ const validateSetupSessionGroup = (isNewSession = true) => {
 describe('runner/cypress sessions.ui.spec', {
   // Limiting tests kept in memory due to large memory cost
   // of nested spec snapshots
-  numTestsKeptInMemory: 1,
+  numTestsKeptInMemory: 0,
   viewportWidth: 1000,
   viewportHeight: 1000,
 }, () => {
@@ -349,6 +349,11 @@ describe('runner/cypress sessions.ui.spec', {
         .find('.attempt-error-region')
         .contains('Expected to find element')
         .contains(setupErrorPostFix)
+
+        cy.get('@example_test')
+        .find('.attempt-error-region')
+        .find('.test-err-code-frame')
+        .should('exist')
       })
 
       describe('failed validation', () => {
@@ -382,8 +387,16 @@ describe('runner/cypress sessions.ui.spec', {
             testCase: 'throws an error',
             systemTestTitle: 'validate - throws an error',
             errMessage: 'Something went wrong!',
+            hasCodeFrame: false,
           },
-        ].forEach(({ testCase, systemTestTitle, errMessage }, index) => {
+        ].forEach((opts, index) => {
+          if (index !== 5) {
+            return
+          }
+
+          const { testCase, systemTestTitle, errMessage } = opts
+          const hasCodeFrame = opts.hasCodeFrame !== undefined ? opts.hasCodeFrame : true
+
           it(`has test error when validate ${testCase}`, () => {
             cy.contains('.test', systemTestTitle).as('example_test')
             cy.get('@example_test')
@@ -421,18 +434,28 @@ describe('runner/cypress sessions.ui.spec', {
             .find('.attempt-error-region')
             .contains(errMessage)
             .contains(validateErrPostFix)
+
+            if (hasCodeFrame) {
+              cy.get('@example_test')
+              .find('.attempt-error-region')
+              .find('.test-err-code-frame')
+              .should('exist')
+            }
           })
         })
       })
     })
 
     describe('recreated session', () => {
-      const assertRecreatedSession = ({
-        testAlias,
-        validationErrMessage,
-        commandPassed,
-        successfullyRecreatedSession,
-      }) => {
+      const assertRecreatedSession = (opts) => {
+        const {
+          testAlias,
+          validationErrMessage,
+          commandPassed,
+          successfullyRecreatedSession,
+        } = opts
+        const hasCodeFrame = opts.hasCodeFrame !== undefined ? opts.hasCodeFrame : true
+
         cy.get(testAlias)
         .should('have.attr', 'data-model-state', commandPassed ? 'passed' : 'failed')
         .children('.collapsible')
@@ -475,6 +498,13 @@ describe('runner/cypress sessions.ui.spec', {
             .find('.recovered-test-err')
             .contains(validationErrMessage)
             .contains(restoredMessagePostfix)
+
+            if (hasCodeFrame) {
+              cy.get('@session_command')
+              .find('.recovered-test-err')
+              .find('.test-err-code-frame')
+              .should('exist')
+            }
 
             cy.contains('.command-wrapper', 'Recreate session')
             .should('have.class', successfullyRecreatedSession ? 'command-state-passed' : 'command-state-failed')
@@ -533,8 +563,9 @@ describe('runner/cypress sessions.ui.spec', {
             testCase: 'throws an error',
             systemTestTitle: 'validate - throws an error',
             errMessage: 'Something went wrong!',
+            hasCodeFrame: false,
           },
-        ].forEach(({ testCase, systemTestTitle, errMessage }, index) => {
+        ].forEach(({ testCase, systemTestTitle, errMessage, hasCodeFrame }, index) => {
           it(`has test error when validate ${testCase}`, () => {
             cy.contains('.test', systemTestTitle).as('example_test')
 
@@ -544,6 +575,7 @@ describe('runner/cypress sessions.ui.spec', {
                 validationErrMessage: errMessage,
                 commandPassed: true,
                 successfullyRecreatedSession: true,
+                hasCodeFrame,
               })
             })
 
@@ -624,8 +656,9 @@ describe('runner/cypress sessions.ui.spec', {
               testCase: 'throws an error',
               systemTestTitle: 'validate - throws an error',
               errMessage: 'Something went wrong!',
+              hasCodeFrame: false,
             },
-          ].forEach(({ testCase, systemTestTitle, errMessage }, index) => {
+          ].forEach(({ testCase, systemTestTitle, errMessage, hasCodeFrame }, index) => {
             it(`has test error when validate ${testCase}`, () => {
               cy.contains('.test', systemTestTitle).as('example_test')
 
@@ -635,6 +668,7 @@ describe('runner/cypress sessions.ui.spec', {
                   validationErrMessage: errMessage,
                   commandPassed: false,
                   successfullyRecreatedSession: true,
+                  hasCodeFrame,
                 })
               })
 

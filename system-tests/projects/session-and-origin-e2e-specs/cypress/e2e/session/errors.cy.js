@@ -77,7 +77,6 @@ it('setup - has failing command', () => {
   }
 })
 
-// FIX ME (recreated  stuck in ''restoring, double error and test marked as passed)
 it('validate - has failing Cypress command', function () {
   function validate () {
     count += 1
@@ -219,7 +218,6 @@ it('validate - promise resolves false', () => {
   }
 })
 
-// FIX ME (recreated  stuck in ''restoring, double error and test marked as passed)
 it('validate - throws an error', () => {
   function validate () {
     count += 1

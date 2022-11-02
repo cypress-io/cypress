@@ -2,13 +2,13 @@ import _ from 'lodash'
 import stringifyStable from 'json-stable-stringify'
 
 import $errUtils from '../../../cypress/error_utils'
-// import $stackUtils from '../../../cypress/stack_utils'
 import $utils from '../../../cypress/utils'
 import logGroup from '../../logGroup'
 import SessionsManager from './manager'
 import {
   getConsoleProps,
   navigateAboutBlank,
+  statusMap,
 } from './utils'
 
 import type { ServerSessionData } from '@packages/types'
@@ -24,8 +24,6 @@ type SessionData = Cypress.Commands.Session.SessionData
  *  - session data SHOULD be cleared between specs in run mode
  */
 export default function (Commands, Cypress, cy) {
-  // @ts-ignore
-
   function throwIfNoSessionSupport () {
     if (!Cypress.config('experimentalSessionAndOrigin')) {
       $errUtils.throwErrByPath('sessions.experimentNotEnabled', {
@@ -42,46 +40,6 @@ export default function (Commands, Cypress, cy) {
   const sessions = sessionsManager.sessions
 
   type SESSION_STEPS = 'create' | 'restore' | 'recreate' | 'validate'
-  const statusMap = {
-    inProgress: (step) => {
-      switch (step) {
-        case 'create':
-          return 'creating'
-        case 'restore':
-          return 'restoring'
-        case 'recreate':
-          return 'recreating'
-        default:
-          throw new Error(`${step} is not a valid session step.`)
-      }
-    },
-    stepName: (step) => {
-      switch (step) {
-        case 'create':
-          return 'Create new session'
-        case 'restore':
-          return 'Restore saved session'
-        case 'recreate':
-          return 'Recreate session'
-        case 'validate':
-          return 'Validate session'
-        default:
-          throw new Error(`${step} is not a valid session step.`)
-      }
-    },
-    complete: (step) => {
-      switch (step) {
-        case 'create':
-          return 'created'
-        case 'restore':
-          return 'restored'
-        case 'recreate':
-          return 'recreated'
-        default:
-          throw new Error(`${step} is not a valid session step.`)
-      }
-    },
-  }
 
   Cypress.on('run:start', () => {
     // @ts-ignore
@@ -210,7 +168,6 @@ export default function (Commands, Cypress, cy) {
           displayName: statusMap.stepName(step),
           message: '',
           type: 'system',
-
         }, (setupLogGroup) => {
           return cy.then(async () => {
             // Catch when a cypress command fails in the setup function to correctly update log status
@@ -307,9 +264,15 @@ export default function (Commands, Cypress, cy) {
 
             const enhanceErr = (err) => {
               Cypress.state('onQueueFailed', null)
-              if (_.isString(err)) {
+              if (!(err instanceof Error)) {
                 err = new Error(err)
               }
+
+              err = $errUtils.enhanceStack({
+                err,
+                userInvocationStack: $errUtils.getUserInvocationStack(err, Cypress.state),
+                projectRoot: Cypress.config('projectRoot'),
+              })
 
               // show validation error and allow sessions workflow to recreate the session
               if (step === 'restore') {
@@ -349,7 +312,7 @@ export default function (Commands, Cypress, cy) {
             }
 
             cy.state('onQueueFailed', (err, queue): Error => {
-              if (!_.isObject(err)) {
+              if (!(err instanceof Error)) {
                 err = new Error(err)
               }
 
@@ -443,7 +406,7 @@ export default function (Commands, Cypress, cy) {
                 const yielded = cy.state('current').get('prev')?.attributes?.subject
 
                 if (yielded === false) {
-                // set current command to cy.session for more accurate codeframe
+                  // set current command to cy.session for more accurate codeframe
                   cy.state('current', sessionCommand)
 
                   return failValidation($errUtils.errByPath('sessions.validate_callback_false', { reason: 'callback yielded false' }))
