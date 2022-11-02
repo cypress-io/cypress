@@ -1101,6 +1101,7 @@
     "./node_modules/ansi_up/ansi_up.js",
     "./node_modules/any-base/index.js",
     "./node_modules/any-base/src/converter.js",
+    "./node_modules/anymatch/index.js",
     "./node_modules/archiver-utils/file.js",
     "./node_modules/archiver-utils/index.js",
     "./node_modules/archiver-utils/node_modules/glob/common.js",
@@ -3284,7 +3285,6 @@
     "./node_modules/yn/lenient.js",
     "./packages/data-context/node_modules/@babel/code-frame/lib/index.js",
     "./packages/data-context/node_modules/@babel/parser/lib/index.js",
-    "./packages/data-context/node_modules/anymatch/index.js",
     "./packages/data-context/node_modules/cross-spawn/index.js",
     "./packages/data-context/node_modules/cross-spawn/lib/enoent.js",
     "./packages/data-context/node_modules/cross-spawn/lib/parse.js",
@@ -3528,5 +3528,5 @@
     "./tooling/v8-snapshot/cache/dev-darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "b23274a95457555a9102f7f660744b1a8f08324bfcfa01be64771c12fcb3ae35"
+  "deferredHash": "66156a5424fbd0d70c750ef2b16c22b0084a30220c67b632cff9212a7de7a226"
 }
