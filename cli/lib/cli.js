@@ -411,7 +411,7 @@ module.exports = {
       let msg = `
         ${logSymbols.warning} Warning: It looks like you're setting CYPRESS_DOWNLOAD_USE_CA=${CYPRESS_DOWNLOAD_USE_CA}
 
-        The environment variable "CYPRESS_DOWNLOAD_USE_CA" is no longer in use as its behavior is now the default behavior.
+        The environment variable "CYPRESS_DOWNLOAD_USE_CA" is no longer required to be set.
         
         You can safely unset this environment variable.
       `
