@@ -244,16 +244,8 @@ class ProxyRequest {
   }
 }
 
-type UnmatchedXhrLog = {
-  xhr: Cypress.WaitXHR
-  route?: any
-  log: Cypress.Log
-  stack?: string
-}
-
 export default class ProxyLogging {
   unloggedPreRequests: Array<BrowserPreRequest> = []
-  unmatchedXhrLogs: Array<UnmatchedXhrLog> = []
   proxyRequests: Array<ProxyRequest> = []
 
   constructor (private Cypress: Cypress.Cypress) {
@@ -278,15 +270,7 @@ export default class ProxyLogging {
       }
       this.unloggedPreRequests = []
       this.proxyRequests = []
-      this.unmatchedXhrLogs = []
     })
-  }
-
-  /**
-   * The `cy.intercept()` XHR stub functions will log before a proxy log is received, so this queues an XHR log to be overridden by a proxy log later.
-   */
-  addXhrLog (xhrLog: UnmatchedXhrLog) {
-    this.unmatchedXhrLogs.push(xhrLog)
   }
 
   /**
@@ -369,26 +353,6 @@ export default class ProxyLogging {
    * Create a Cypress.Log for an incoming proxy request, or store the metadata for later if it is ignored.
    */
   private logIncomingRequest (preRequest: BrowserPreRequest): void {
-    // if this is an XHR, check to see if it matches an XHR log that is missing a pre-request
-    if (preRequest.resourceType === 'xhr') {
-      const unmatchedXhrLog = take(this.unmatchedXhrLogs, ({ xhr }) => xhr.url === preRequest.url && xhr.method === preRequest.method)
-
-      if (unmatchedXhrLog) {
-        const { log, route } = unmatchedXhrLog
-        const proxyRequest = new ProxyRequest(preRequest, unmatchedXhrLog)
-
-        if (route) {
-          proxyRequest.setFlag(_.isNil(route.response) ? 'spied' : 'stubbed')
-        }
-
-        log.set(getRequestLogConfig(proxyRequest))
-
-        this.proxyRequests.push(proxyRequest)
-
-        return
-      }
-    }
-
     if (!shouldLog(preRequest)) {
       this.unloggedPreRequests.push(preRequest)
 
