@@ -2947,8 +2947,6 @@ declare namespace Cypress {
     socketIoRoute: string
     spec: Cypress['spec'] | null
     specs: Array<Cypress['spec']>
-    xhrRoute: string
-    xhrUrl: string
   }
 
   interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>>, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
@@ -5852,28 +5850,6 @@ declare namespace Cypress {
   interface Viewport {
     viewportWidth: number
     viewportHeight: number
-  }
-
-  interface WaitXHR {
-    duration: number
-    id: string
-    method: HttpMethod
-    request: {
-      body: string | ObjectLike
-      headers: ObjectLike
-    }
-    requestBody: WaitXHR['request']['body']
-    requestHeaders: WaitXHR['request']['headers']
-    response: {
-      body: string | ObjectLike
-      headers: ObjectLike
-    }
-    responseBody: WaitXHR['response']['body']
-    responseHeaders: WaitXHR['response']['headers']
-    status: number
-    statusMessage: string
-    url: string
-    xhr: XMLHttpRequest
   }
 
   type Encodings = 'ascii' | 'base64' | 'binary' | 'hex' | 'latin1' | 'utf8' | 'utf-8' | 'ucs2' | 'ucs-2' | 'utf16le' | 'utf-16le' | null
