@@ -5,16 +5,23 @@ jobs:
     strategy:
       matrix:
         platform: [ubuntu-latest, windows-latest, macos-latest]
+        max-parallel: 1
     runs-on: ${{ matrix.platform }}
     env:
       CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
       BASE_BRANCH: feature/v8-snapshots-auto-pr
+      SNAPSHOT_FILES: tooling/v8-snapshot/cache/dev-darwin/snapshot-meta.cache.json tooling/v8-snapshot/cache/prod-darwin/snapshot-meta.cache.json tooling/v8-snapshot/cache/dev-linux/snapshot-meta.cache.json tooling/v8-snapshot/cache/prod-linux/snapshot-meta.cache.json tooling/v8-snapshot/cache/dev-windows/snapshot-meta.cache.json tooling/v8-snapshot/cache/prod-windows/snapshot-meta.cache.json
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set committer info
+        ## attribute the commit to cypress-bot: https://github.community/t/logging-into-git-as-a-github-app/115916
+        run: |
+          git config --local user.email "${{ env.CYPRESS_BOT_APP_ID }}+cypress-bot[bot]@users.noreply.github.com"
+          git config --local user.name "cypress-bot[bot]"
       - name: Checkout base branch
         run: |
           git fetch origin
@@ -25,9 +32,60 @@ jobs:
           node-version: 16
       - name: Run yarn
         run: yarn
-      - name: Run yarn
+      - name: Run build
         run: yarn build
       - name: Generate dev snapshot
         run: yarn build-v8-snapshot-dev
       - name: Generate prod snapshot
         run: yarn build-v8-snapshot-prod
+      - name: Check for v8 snapshot cache changes
+        id: check-for-v8-snapshot-cache-changes
+        run: |
+          echo "::set-output name=has_changes::${{[[ $(git status -- ${{ env.SNAPSHOT_FILES }}) ]] && echo 'true'}}"
+      - name: Determine name of new branch and if it already exists
+        id: check-branch
+        env:
+          BRANCH_NAME: update-v8-snapshot-cache-on-${{ env.BASE_BRANCH }}
+        run: |
+          echo "::set-output name=branch_name::${{ env.BRANCH_NAME }}"
+          echo "::set-output name=branch_exists::$(git show-ref --verify --quiet refs/remotes/origin/${{ env.BRANCH_NAME }} && echo 'true')"
+      - name: Check need for PR or branch update
+        id: check-need-for-pr
+        run: |
+          echo "::set-output name=needs_pr::${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' && steps.check-branch.outputs.branch_exists != 'true' }}"
+          echo "::set-output name=needs_branch_update::${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' && steps.check-branch.outputs.branch_exists == 'true' }}"
+      ## Update available and a branch/PR already exists
+      - name: Checkout existing branch
+        if: ${{ steps.check-need-for-pr.outputs.needs_branch_update == 'true' }}
+        run: |
+          git stash push -- ${{ env.SNAPSHOT_FILES }}
+          git reset --hard
+          git checkout ${{ steps.check-branch.outputs.branch_name }}
+          git stash pop
+      ## Update available and a PR doesn't already exist
+      - name: Checkout new branch
+        if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
+        run: git checkout -b ${{ steps.check-branch.outputs.branch_name }} ${{ env.BASE_BRANCH }}
+      ## Both
+      - name: Commit the changes
+        if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' || steps.check-need-for-branch-update.outputs.has_newer_update == 'true' }}
+        run: |
+          git commit -am "chore: updating v8 snapshot cache"
+      - name: Push branch to remote
+        if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' || steps.check-need-for-branch-update.outputs.has_newer_update == 'true' }}
+        run: git push origin ${{ steps.check-branch.outputs.branch_name }}
+      # Update available and a PR doesn't already exist
+      - name: Create Pull Request
+        if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const { createPullRequest } = require('./scripts/github-actions/create-pull-request.js')
+
+            await createPullRequest({
+              context,
+              github,
+              baseBranch: '${{ env.BASE_BRANCH }}',
+              branchName: '${{ steps.check-branch.outputs.branch_name }}',
+              description: '${{ steps.get-versions.outputs.description }}',
+            })
