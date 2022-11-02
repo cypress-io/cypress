@@ -27,7 +27,6 @@
     "lodash": "^4.17.20",
     "md5": "2.3.0",
     "source-map": "^0.6.1",
-    "webpack": "^5.39.0",
     "webpack-virtual-modules": "^0.4.4"
   },
   "devDependencies": {
@@ -63,7 +62,8 @@
     "sinon": "^9.0.0",
     "sinon-chai": "^3.5.0",
     "snap-shot-it": "7.9.2",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "webpack": "^4.44.2"
   },
   "peerDependencies": {
     "@babel/core": "^7.0.1",
