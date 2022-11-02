@@ -205,11 +205,11 @@ Nesting **cy.origin()** inside the callback is not currently not supported, but 
 
 ### cy.session() / Cypress.session.*
 
-**cy.session()** and related APIs are likely not necessary inside the callback and should be used at the top-level of the test instead of in the **cy.origin()** callback. However, if there are use-cases discovered where it’s necessary, we may implement support for it.
+**cy.session()** and related APIs are likely not necessary inside the callback and should be used at the top-level of the test instead of in the **cy.origin()** callback. However, if there are use-cases discovered where it’s necessary, we may [implement support for it](https://github.com/cypress-io/cypress/issues/20721).
 
 ### cy.intercept()
 
-It's not currently supported, but we will likely add support for **cy.intercept()** within the **cy.origin()** callback in the future.
+Most use-cases for **cy.intercept()** can be accomplished by using it outside of the **cy.origin()** callback. Since there may be use-cases where setting up a response, for example, requires the scope within the **cy.origin()** callback, we will likely [add support for **cy.intercept()** in the future](https://github.com/cypress-io/cypress/issues/20720). 
 
 ### Deprecated commands / methods
 
