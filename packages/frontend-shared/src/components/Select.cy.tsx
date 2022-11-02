@@ -110,6 +110,26 @@ describe('<Select />', () => {
       .percySnapshot('Selected has check icon')
     })
 
+    it('marks the selected item with custom itemKey', () => {
+      const nestedOptions = [
+        { profile: { firstName: 'Lachlan' }, id: 'ewiofjdew' },
+        { profile: { firstName: 'Jess' }, id: '1i24u' },
+        { profile: { firstName: 'Bart' }, id: 'ewopf' },
+      ]
+
+      mountSelect({
+        options: nestedOptions,
+        // To break strict equality
+        modelValue: { ...nestedOptions[0] },
+        itemKey: 'id',
+        itemValue: 'profile.firstName',
+      }).then(openSelect)
+      .then(selectFirstOption)
+      .then(openSelect)
+      .get(optionsSelector).first()
+      .find(checkIconSelector).should('be.visible')
+    })
+
     it('renders a caret by default', () => {
       mountSelect().get(caretIconSelector).should('be.visible')
     })
