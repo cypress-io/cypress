@@ -1,15 +1,16 @@
 import _ from 'lodash'
 import stringifyStable from 'json-stable-stringify'
-import $utils from '../../../cypress/utils'
 
 import $errUtils from '../../../cypress/error_utils'
 // import $stackUtils from '../../../cypress/stack_utils'
+import $utils from '../../../cypress/utils'
 import logGroup from '../../logGroup'
 import SessionsManager from './manager'
 import {
   getConsoleProps,
   navigateAboutBlank,
 } from './utils'
+
 import type { ServerSessionData } from '@packages/types'
 
 type SessionData = Cypress.Commands.Session.SessionData
@@ -214,12 +215,18 @@ export default function (Commands, Cypress, cy) {
           return cy.then(async () => {
             // Catch when a cypress command fails in the setup function to correctly update log status
             // before failing command and ending command queue.
-            cy.state('onQueueFailed', (err: Error | string, _queue): Error => {
+            cy.state('onQueueFailed', (err, _queue) => {
+              if (!_.isObject(err)) {
+                err = new Error(err)
+              }
+
               setupLogGroup.set({
                 state: 'failed',
-                consoleProps: {
-                  Step: statusMap.stepName(step),
-                  Error: err?.stack || err?.message || err,
+                consoleProps: () => {
+                  return {
+                    Step: statusMap.stepName(step),
+                    Error: err?.stack || err?.message,
+                  }
                 },
               })
 
@@ -256,25 +263,23 @@ export default function (Commands, Cypress, cy) {
         })
       }
 
-      function restoreSession (testSession) {
-        return cy.then(async () => {
-          Cypress.log({
-            name: 'session',
-            displayName: 'Restore saved session',
-            message: '',
-            type: 'system',
-            consoleProps: () => {
-              return {
-                Step: 'Restore saved session',
-                ...getConsoleProps(testSession),
-              }
-            },
-          })
-
-          _log.set({ consoleProps: () => getConsoleProps(testSession) })
-
-          await sessions.setSessionData(testSession)
+      async function restoreSession (testSession) {
+        Cypress.log({
+          name: 'session',
+          displayName: 'Restore saved session',
+          message: '',
+          type: 'system',
+          consoleProps: () => {
+            return {
+              Step: 'Restore saved session',
+              ...getConsoleProps(testSession),
+            }
+          },
         })
+
+        _log.set({ consoleProps: () => getConsoleProps(testSession) })
+
+        return sessions.setSessionData(testSession)
       }
 
       function validateSession (existingSession, step: SESSION_STEPS) {
@@ -289,8 +294,10 @@ export default function (Commands, Cypress, cy) {
           displayName: 'Validate session',
           message: '',
           type: 'system',
-          consoleProps: {
-            Step: 'Validate Session',
+          consoleProps: () => {
+            return {
+              Step: 'Validate Session',
+            }
           },
         }, (validateLog) => {
           return cy.then(async () => {
@@ -313,8 +320,10 @@ export default function (Commands, Cypress, cy) {
 
                 validateLog.set({
                   state: 'failed',
-                  consoleProps: {
-                    Error: err.stack,
+                  consoleProps: () => {
+                    return {
+                      Error: err.stack,
+                    }
                   },
                   // explicitly set via .set() so we don't end the log group early
                   ...(!caughtCommandErr && { error: err }),
@@ -326,7 +335,7 @@ export default function (Commands, Cypress, cy) {
               setSessionLogStatus('failed')
               validateLog.set({
                 state: 'failed',
-                consoleProps: (args) => {
+                consoleProps: () => {
                   return {
                     Error: err.stack,
                   }
@@ -339,7 +348,11 @@ export default function (Commands, Cypress, cy) {
               return err
             }
 
-            cy.state('onQueueFailed', (err: Error | string, queue): Error => {
+            cy.state('onQueueFailed', (err, queue): Error => {
+              if (!_.isObject(err)) {
+                err = new Error(err)
+              }
+
               if (step === 'restore') {
                 const commands = queue.get()
                 // determine command queue index of _commandToRunAfterValidation's index
@@ -350,7 +363,7 @@ export default function (Commands, Cypress, cy) {
                   )
                 })
 
-                // skip all commands between this command and _commandToRunAfterValidation
+                // skip all commands between this command which errored and _commandToRunAfterValidation
                 for (let i = cy.queue.index; i < index; i++) {
                   const cmd = commands[i]
 

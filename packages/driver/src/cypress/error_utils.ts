@@ -262,7 +262,8 @@ const warnByPath = (errPath, options: any = {}) => {
 }
 
 export class InternalCypressError extends Error {
-  onFail?: undefined | Function
+  onFail?: Function
+  isRecovered?: boolean
 
   constructor (message) {
     super(message)
@@ -279,7 +280,8 @@ export class CypressError extends Error {
   docsUrl?: string
   retry?: boolean
   userInvocationStack?: any
-  onFail?: undefined | Function
+  onFail?: Function
+  isRecovered?: boolean
 
   constructor (message) {
     super(message)

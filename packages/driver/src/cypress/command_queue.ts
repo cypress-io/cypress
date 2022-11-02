@@ -19,10 +19,9 @@ const __stackReplacementMarker = (fn, args) => {
   return fn(...args)
 }
 
-const commandRunningFailed = (Cypress, err: Error | string, current?: $Command) => {
+const commandRunningFailed = (Cypress, err, current?: $Command) => {
   // allow for our own custom onFail function
-  // @ts-ignore
-  if (_.isObject(err) && err.onFail) {
+  if (err.onFail && _.isFunction(err.onFail)) {
     err.onFail(err)
     // clean up this onFail callback after it's been called
     delete err.onFail
@@ -419,7 +418,7 @@ export class CommandQueue extends Queue<$Command> {
       })
     }
 
-    const onError = (err: Error | string) => {
+    const onError = (err) => {
       // If the runnable was marked as pending, this test was skipped
       // go ahead and just return
       const runnable = this.state('runnable')
@@ -450,7 +449,7 @@ export class CommandQueue extends Queue<$Command> {
 
       commandRunningFailed(Cypress, err, current)
 
-      if (_.isObject(err) && err.isRecovered) {
+      if (err.isRecovered) {
         current?.recovered()
 
         return // let the queue end & restart on to the next command index (set in onQueueFailed)
