@@ -39,13 +39,14 @@ module.exports = {
     })
   },
 
-  handleCrossOriginIframe (req, res) {
+  handleCrossOriginIframe (req, res, namespace) {
     const iframePath = cwd('lib', 'html', 'spec-bridge-iframe.html')
     const domain = cors.getSuperDomain(req.proxiedUrl)
 
     const iframeOptions = {
       domain,
       title: `Cypress for ${domain}`,
+      namespace,
     }
 
     debug('cross origin iframe with options %o', iframeOptions)
