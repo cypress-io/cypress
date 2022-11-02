@@ -41,7 +41,8 @@ jobs:
       - name: Check for v8 snapshot cache changes
         id: check-for-v8-snapshot-cache-changes
         run: |
-          echo "::set-output name=has_changes::${{[[ $(git status -- ${{ env.SNAPSHOT_FILES }}) ]] && echo 'true'}}"
+          echo "::set-output name=has_changes::${{[[ $(git status -- format('${0}', env.SNAPSHOT_FILES) }}) ]] && echo 'true'}}"
+        shell: bash
       - name: Determine name of new branch and if it already exists
         id: check-branch
         env:
