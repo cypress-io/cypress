@@ -52,8 +52,6 @@ const getDependencyPathsToKeep = async () => {
     require.resolve('webpack-dev-server', { paths: [path.join(__dirname, '..', '..', 'npm', 'webpack-dev-server')] }),
     require.resolve('html-webpack-plugin-4', { paths: [path.join(__dirname, '..', '..', 'npm', 'webpack-dev-server')] }),
     require.resolve('html-webpack-plugin-5', { paths: [path.join(__dirname, '..', '..', 'npm', 'webpack-dev-server')] }),
-    // This is a loader that is loaded dynamically in webpack-preprocessor
-    require.resolve('@cypress/webpack-preprocessor/lib/cross-origin-callback-loader.ts'),
     // These dependencies are completely dynamic using the pattern `require(`./${name}`)` and will not be pulled in by esbuild but still need to be kept in the binary.
     ...['ibmi',
       'sunos',
