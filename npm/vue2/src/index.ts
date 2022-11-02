@@ -322,6 +322,7 @@ function getComponentDisplayName (componentOptions: any): string {
  * @example
  * import { mount } from '@cypress/vue'
  * import { Stepper } from './Stepper.vue'
+ *
  * it('mounts', () => {
  *   cy.mount(Stepper)
  *   cy.get('[data-cy=increment]').click()

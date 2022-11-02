@@ -299,7 +299,7 @@ function setupComponent<T extends { ngOnChanges? (changes: SimpleChanges): void 
  *   })
  * })
  *
- @see {@link https://docs.cypress.io/guides/component-testing/mounting-angular} for more details.
+ * @see {@link https://docs.cypress.io/guides/component-testing/mounting-angular} for more details.
  *
  * @returns A component and component fixture
  */

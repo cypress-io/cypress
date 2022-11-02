@@ -34,10 +34,11 @@ const cleanup = () => {
  * @example
  * import { mount } from '@cypress/react'
  * import { Stepper } from './Stepper'
+ *
  * it('mounts', () => {
- *  mount(<StepperComponent />)
- *  cy.get('[data-cy=increment]').click()
- *  cy.get('[data-cy=counter]').should('have.text', '1')
+ *   mount(<StepperComponent />)
+ *   cy.get('[data-cy=increment]').click()
+ *   cy.get('[data-cy=counter]').should('have.text', '1')
  * }
  *
  * @see {@link https://docs.cypress.io/guides/component-testing/mounting-react} for more details.
