@@ -167,7 +167,7 @@ const props = withDefaults(defineProps<{
   placeholder?: string
   label?: string
   /**
-   * The key of the modelValue to render. `value` by default
+   * The value of the modelValue to render. `value` by default
    */
   itemValue?: string
   /**
