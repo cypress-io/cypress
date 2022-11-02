@@ -38,7 +38,7 @@ export function setupHooks (optionalCallback?: Function) {
  * Remove any style or extra link elements from the iframe placeholder
  * left from any previous test
  *
- * @deprecated Removed as of Cypress 11.0.0
+ * @ Removed as of Cypress 11.0.0
  */
 export function cleanupStyles () {
   throw new Error('cleanupStyles is no longer supported. See https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes to migrate.')
@@ -49,7 +49,8 @@ export function cleanupStyles () {
  * A component might need 3rd party libraries from CDN,
  * local CSS files and custom styles.
  *
- * @deprecated Removed as of Cypress 11.0.0
+ * Removed as of Cypress 11.0.0.
+ * @see https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes
  */
 export type StyleOptions = unknown
 
@@ -57,7 +58,8 @@ export type StyleOptions = unknown
  * Injects custom style text or CSS file or 3rd party style resources
  * into the given document.
  *
- * @deprecated Removed as of Cypress 11.0.0
+ * Removed as of Cypress 11.0.0.
+ * @see https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes
  */
 export const injectStylesBeforeElement = (
   options: Partial<StyleOptions & { log: boolean }>,

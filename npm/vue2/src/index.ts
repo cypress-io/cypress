@@ -396,19 +396,20 @@ export const mount = (
 }
 
 /**
- * @deprecated Removed as of Cypress 11.0.0
- *
  * Helper function for mounting a component quickly in test hooks.
  * @example
  *  import {mountCallback} from '@cypress/vue2'
  *  beforeEach(mountVue(component, options))
+ *
+ * Removed as of Cypress 11.0.0.
+ * @see https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes
  */
 export const mountCallback = (
   component: VueComponent,
   options?: MountOptionsArgument,
 ) => {
   return () => {
-    throw new Error('mountCallback  is no longer supported. See https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes to migrate.')
+    throw new Error('mountCallback is no longer supported. See https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes to migrate.')
   }
 }
 

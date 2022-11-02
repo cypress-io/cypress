@@ -47,7 +47,9 @@ export interface MountReturn {
   rerender: (component: React.ReactNode) => globalThis.Cypress.Chainable<MountReturn>
   /**
    * Removes the mounted component.
-   * @deprecated in Cypress 11.
+   *
+   * Removed as of Cypress 11.0.0.
+   * @see https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes
    */
   unmount: (payload: UnmountArgs) => void // globalThis.Cypress.Chainable<JQuery<HTMLElement>>
 }

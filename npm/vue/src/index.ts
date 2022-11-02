@@ -403,12 +403,13 @@ function getComponentDisplayName (componentOptions: any): string {
 }
 
 /**
- * @deprecated Removed as of Cypress 11.0.0
- *
  * Helper function for mounting a component quickly in test hooks.
  * @example
  *  import {mountCallback} from '@cypress/vue'
  *  beforeEach(mountVue(component, options))
+ *
+ * Removed as of Cypress 11.0.0.
+ * @see https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes
  */
 export function mountCallback (
   component: any,

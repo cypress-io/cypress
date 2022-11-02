@@ -34,7 +34,6 @@ export const makeMountFn = (
   // Get the display name property via the component constructor
   // @ts-ignore FIXME
   const componentName = getDisplayName(jsx.type, options.alias)
-  const displayName = options.alias || componentName
 
   const jsxComponentName = `<${componentName} ... />`
 
@@ -159,14 +158,6 @@ export const createMount = (defaultOptions: MountOptions) => {
   ) => {
     return _mount(element, { ...defaultOptions, ...options })
   }
-}
-
-/** @deprecated Should be removed in the next major version */
-// TODO: Remove
-export default _mount
-
-export interface JSX extends Function {
-  displayName: string
 }
 
 // Side effects from "import { mount } from '@cypress/<my-framework>'" are annoying, we should avoid doing this
