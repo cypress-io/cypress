@@ -10,8 +10,13 @@ jobs:
     env:
       CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
       BASE_BRANCH: feature/v8-snapshots-auto-pr
-      SNAPSHOT_FILES: ${{ ($RUNNER_OS != 'Windows' && "tooling/v8-snapshot/cache/dev-darwin/snapshot-meta.cache.json tooling/v8-snapshot/cache/prod-darwin/snapshot-meta.cache.json tooling/v8-snapshot/cache/dev-linux/snapshot-meta.cache.json tooling/v8-snapshot/cache/prod-linux/snapshot-meta.cache.json tooling/v8-snapshot/cache/dev-windows/snapshot-meta.cache.json tooling/v8-snapshot/cache/prod-windows/snapshot-meta.cache.json") || ("tooling\v8-snapshot\cache\dev-darwin\snapshot-meta.cache.json tooling\v8-snapshot\cache\prod-darwin\snapshot-meta.cache.json tooling\v8-snapshot\cache\dev-linux\snapshot-meta.cache.json tooling\v8-snapshot\cache\prod-linux\snapshot-meta.cache.json tooling\v8-snapshot\cache\dev-windows\snapshot-meta.cache.json tooling\v8-snapshot\cache\prod-windows\snapshot-meta.cache.json") }}
     steps:
+      - name: Determine snapshot files - Windows
+        if: ${{ matrix.platform == 'windows-latest' }}
+        run: echo "SNAPSHOT_FILES=tooling\v8-snapshot\cache\dev-darwin\snapshot-meta.cache.json tooling\v8-snapshot\cache\prod-darwin\snapshot-meta.cache.json tooling\v8-snapshot\cache\dev-linux\snapshot-meta.cache.json tooling\v8-snapshot\cache\prod-linux\snapshot-meta.cache.json tooling\v8-snapshot\cache\dev-windows\snapshot-meta.cache.json tooling\v8-snapshot\cache\prod-windows\snapshot-meta.cache.json" >> $GITHUB_ENV
+      - name: Determine snapshot files - Non Windows
+        if: ${{ matrix.platform != 'windows-latest' }}
+        run: echo "SNAPSHOT_FILES=tooling/v8-snapshot/cache/dev-darwin/snapshot-meta.cache.json tooling/v8-snapshot/cache/prod-darwin/snapshot-meta.cache.json tooling/v8-snapshot/cache/dev-linux/snapshot-meta.cache.json tooling/v8-snapshot/cache/prod-linux/snapshot-meta.cache.json tooling/v8-snapshot/cache/dev-windows/snapshot-meta.cache.json tooling/v8-snapshot/cache/prod-windows/snapshot-meta.cache.json" >> $GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@v2
         with:
