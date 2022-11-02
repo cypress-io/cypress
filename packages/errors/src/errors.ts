@@ -1067,7 +1067,7 @@ export const AllCypressErrors = {
   },
   EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED: () => {
     return errTemplate`\
-        The ${fmt.highlight(`experimentalSessionAndOrigin`)} configuration option was removed in ${fmt.cypressVersion(`11.0.0`)}.
+        The ${fmt.highlight(`experimentalSessionAndOrigin`)} configuration option was removed in ${fmt.cypressVersion(`12.0.0`)}.
 
         You can safely remove this option from your config.
         
