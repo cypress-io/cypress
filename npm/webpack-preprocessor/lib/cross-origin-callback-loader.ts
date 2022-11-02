@@ -7,6 +7,7 @@ import * as loaderUtils from 'loader-utils'
 import * as pathUtil from 'path'
 import Debug from 'debug'
 
+import mergeSourceMaps from './merge-source-map'
 import { crossOriginCallbackStore } from './cross-origin-callback-store'
 import utils from './utils'
 
@@ -41,6 +42,7 @@ export default function (source: string, map, meta, store = crossOriginCallbackS
       allowSuperOutsideMethod: true,
       allowUndeclaredExports: true,
       sourceType: 'unambiguous',
+      sourceFilename: resourcePath,
     })
   } catch (err) {
     // it's unlikely there will be a parsing error, since that should have
@@ -155,22 +157,24 @@ export default function (source: string, map, meta, store = crossOriginCallbackS
     },
   })
 
-  // if we found requires/imports, re-generate the code from the AST
-  if (hasDependencies) {
-    debug('callback with modified source')
-
-    // TODO: handle sourcemaps for this correctly
-    // https://github.com/cypress-io/cypress/issues/23365
-    // the following causes error "Cannot read property 'replace' of undefined"
-    //   return generate(ast, { sourceMaps: true }, source).code
-    // and can't pass in original map or the output ends up with
-    // `undefinedundefined` appended, which is a syntax error
-    this.callback(null, generate(ast, {}).code)
+  // if no requires/imports were found, callback with the original source/map
+  if (!hasDependencies) {
+    debug('callback with original source')
+    this.callback(null, source, map)
 
     return
   }
 
-  debug('callback with original source')
-  // if no requires/imports were found, callback with the original source/map
-  this.callback(null, source, map)
+  // if we found requires/imports, re-generate the code from the AST
+  const result = generate(ast, { sourceMaps: true }, {
+    [resourcePath]: source,
+  })
+  // result.map needs to be merged with the original map for it to include
+  // the changes made in this loader. we can't return result.map because it
+  // is based off the intermediary code provided to the loader and not the
+  // original source code (which could be TypeScript or JSX or something)
+  const newMap = mergeSourceMaps(map, result.map)
+
+  debug('callback with modified source')
+  this.callback(null, result.code, newMap)
 }
