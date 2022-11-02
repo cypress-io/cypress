@@ -14,8 +14,8 @@ import { FileSystemIconLoader } from 'unplugin-icons/loaders'
 
 import PkgConfig from 'vite-plugin-package-config'
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const base = './'
 
@@ -94,9 +94,9 @@ const makePlugins = (plugins) => {
  * @property {import('@antfu/utils').ArgumentsType<typeof Icons>[0]=} VueI18n
  * @property {import('@antfu/utils').ArgumentsType<typeof Components>[0]=} componentOptions
 
- * 
- * @param {import('vite').UserConfig} config 
- * @param {PluginOptions} plugins 
+ *
+ * @param {import('vite').UserConfig} config
+ * @param {PluginOptions} plugins
  * @returns {import('vite').UserConfig}
  */
 export const makeConfig = (config = {}, plugins = {}) => {

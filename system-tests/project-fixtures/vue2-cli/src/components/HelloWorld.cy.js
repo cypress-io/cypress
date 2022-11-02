@@ -9,6 +9,15 @@ describe('<Logo />', () => {
       propsData: {
         msg: slotContent,
       },
+      data () {
+        return {
+          foo: 'bar'
+        }
+      }
+    })
+    .then(({ wrapper, component }) => {
+      expect(wrapper.find('.hello').text()).to.contain(slotContent)
+      expect(component.$data.foo).to.eq('bar')
     })
 
     cy.contains('h1', slotContent)
