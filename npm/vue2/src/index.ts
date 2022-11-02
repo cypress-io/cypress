@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import Vue, { Component } from 'vue'
+import Vue from 'vue'
 import {
   createLocalVue,
   mount as testUtilsMount,

@@ -420,7 +420,6 @@ export function mount (componentOptions: any, options: any = {}) {
     Cypress.vue = wrapper.vm as ComponentPublicInstance
 
     return cy
-    .wrap(wrapper, { log: false })
     .wait(1, { log: false })
     .then(() => {
       if (logInstance) {
