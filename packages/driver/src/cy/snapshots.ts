@@ -229,6 +229,11 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
 
   const createSnapshot = (name, $elToHighlight, preprocessedSnapshot) => {
     Cypress.action('cy:snapshot', name)
+    // only take a snapshot if the AUT document is in state to prevent cypress-in-cypress like snapshots
+    // or if the snapshot has been taken in a spec bridge and has already been preprocessed
+    if (!preprocessedSnapshot && !state('document')) {
+      return null
+    }
 
     try {
       const {
