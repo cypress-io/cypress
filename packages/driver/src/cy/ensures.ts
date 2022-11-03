@@ -251,6 +251,8 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     // verify the $el exists and use our default error messages
     try {
       expect(subject).to.exist
+    } catch (err) {
+      throw $errUtils.mergeErrProps(err, $errUtils.cypressErr(new Error(err.message)))
     } finally {
       state('onBeforeLog', null)
     }
