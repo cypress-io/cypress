@@ -26,6 +26,7 @@ function scaffoldAndVisitLaunchpad (project: ProjectFixtureDir, argv?: string[])
   cy.scaffoldProject(project)
   cy.openProject(project, argv)
   cy.visitLaunchpad()
+  cy.skipWelcome()
 }
 
 function startMigrationFor (project: ProjectFixtureDir, argv?: string[]) {
