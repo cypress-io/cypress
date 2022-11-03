@@ -44,6 +44,7 @@ const {
 export { VueTestUtils }
 
 const DEFAULT_COMP_NAME = 'unknown'
+const VUE_ROOT = '__cy_vue_root'
 
 type GlobalMountOptions = Required<VTUMountingOptions<any>>['global']
 
@@ -74,6 +75,7 @@ export type CyMountOptions<Props, Data = {}> = MountingOptions<Props, Data>
 
 const cleanup = () => {
   Cypress.vueWrapper?.unmount()
+  Cypress.$(`#${VUE_ROOT}`).remove()
 
   ;(Cypress as any).vueWrapper = null
 
@@ -401,7 +403,7 @@ export function mount (componentOptions: any, options: any = {}) {
 
     const componentNode = document.createElement('div')
 
-    componentNode.id = '__cy_vue_root'
+    componentNode.id = VUE_ROOT
 
     el.append(componentNode)
 
