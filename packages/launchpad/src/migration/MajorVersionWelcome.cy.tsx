@@ -1,13 +1,13 @@
 import { defaultMessages } from '@cy/i18n'
-import MajorVersionLandingPage from './MajorVersionLandingPage.vue'
+import MajorVersionWelcome from './MajorVersionWelcome.vue'
 
-const text = defaultMessages.majorVersionLandingPage
+const text = defaultMessages.majorVersionWelcome
 
-describe('<MajorVersionLandingPage />', { viewportWidth: 1280, viewportHeight: 1400 }, () => {
+describe('<MajorVersionWelcome />', { viewportWidth: 1280, viewportHeight: 1400 }, () => {
   it('renders expected interactive content', () => {
     const continueStub = cy.stub()
 
-    cy.mount(<MajorVersionLandingPage onClearLandingPage={continueStub} />)
+    cy.mount(<MajorVersionWelcome onClearLandingPage={continueStub} />)
 
     cy.contains('h1', 'What\'s New in Cypress').should('be.visible')
     cy.contains('a[href="https://on.cypress.io/changelog"]', text.linkReleaseNotes).should('be.visible')

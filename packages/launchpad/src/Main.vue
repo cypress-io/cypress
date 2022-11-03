@@ -3,7 +3,7 @@
     <HeaderBar
       class="w-full z-10 fixed"
     />
-    <MajorVersionLandingPage
+    <MajorVersionWelcome
       v-if="!wasLandingPageDismissed"
       class="pt-64px"
       @clearLandingPage="handleClearLandingPage"
@@ -92,7 +92,7 @@ import Spinner from '@cy/components/Spinner.vue'
 import CompareTestingTypes from './setup/CompareTestingTypes.vue'
 import MigrationWizard from './migration/MigrationWizard.vue'
 import ScaffoldedFiles from './setup/ScaffoldedFiles.vue'
-import MajorVersionLandingPage from './migration/MajorVersionLandingPage.vue'
+import MajorVersionWelcome from './migration/MajorVersionWelcome.vue'
 import { useI18n } from '@cy/i18n'
 import { computed, ref } from 'vue'
 import LaunchpadHeader from './setup/LaunchpadHeader.vue'
@@ -174,7 +174,7 @@ const resetErrorAndLoadConfig = (id: string) => {
 }
 const query = useQuery({ query: MainLaunchpadQueryDocument })
 const currentProject = computed(() => query.data.value?.currentProject)
-const majorVersion = t('majorVersionLandingPage.majorVersion')
+const majorVersion = t('majorVersionWelcome.majorVersion')
 
 function handleClearLandingPage () {
   if (majorVersion) {

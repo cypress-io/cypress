@@ -11,7 +11,7 @@
         <div class="h-full overflow-scroll">
           <div class="p-16px">
             <h1 class="font-medium mt-4px text-center mb-32px tracking-tighter text-22px text-gray-1000">
-              {{ t('majorVersionLandingPage.title') }}
+              {{ t('majorVersionWelcome.title') }}
             </h1>
             <div class="mb-16px">
               <ExternalLink
@@ -96,7 +96,7 @@
           size="lg"
           @click="handleClick"
         >
-          {{ t('majorVersionLandingPage.actionContinue') }}
+          {{ t('majorVersionWelcome.actionContinue') }}
           <template #suffix>
             <i-cy-chevron-right_x16 class="icon-dark-white" />
           </template>
@@ -104,7 +104,7 @@
         <ExternalLink
           href="https://on.cypress.io/changelog"
         >
-          {{ t('majorVersionLandingPage.linkReleaseNotes') }}
+          {{ t('majorVersionWelcome.linkReleaseNotes') }}
         </ExternalLink>
       </div>
     </div>

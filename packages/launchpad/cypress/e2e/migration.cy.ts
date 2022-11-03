@@ -30,7 +30,7 @@ function scaffoldAndVisitLaunchpad (project: ProjectFixtureDir, argv?: string[])
 
 function startMigrationFor (project: ProjectFixtureDir, argv?: string[]) {
   scaffoldAndVisitLaunchpad(project, argv)
-  cy.contains('button', cy.i18n.majorVersionLandingPage.actionContinue).click()
+  cy.contains('button', cy.i18n.majorVersionWelcome.actionContinue).click()
   cy.waitForWizard()
 }
 
@@ -90,9 +90,9 @@ describe('global mode', () => {
       o.sinon.stub(ctx.actions.migration, 'locallyInstalledCypressVersion').resolves('10.0.0')
     })
 
-    cy.contains('migration-e2e-export-default').click()
+    cy.contains('button', cy.i18n.majorVersionWelcome.actionContinue).click()
 
-    cy.contains('button', cy.i18n.majorVersionLandingPage.actionContinue).click()
+    cy.contains('migration-e2e-export-default').click()
 
     // rename integration->e2e
     cy.get(renameAutoStep).should('exist')
@@ -132,7 +132,7 @@ describe('Opening unmigrated project', () => {
     cy.scaffoldProject('migration')
     cy.openProject('migration', ['--e2e'])
     cy.visitLaunchpad()
-    cy.contains('button', cy.i18n.majorVersionLandingPage.actionContinue).click()
+    cy.contains('button', cy.i18n.majorVersionWelcome.actionContinue).click()
     cy.get('h1').should('contain', 'Migration')
   })
 
@@ -140,21 +140,35 @@ describe('Opening unmigrated project', () => {
     cy.scaffoldProject('migration-component-testing')
     cy.openProject('migration-component-testing', ['--component'])
     cy.visitLaunchpad()
-    cy.contains('button', cy.i18n.majorVersionLandingPage.actionContinue).click()
+    cy.contains('button', cy.i18n.majorVersionWelcome.actionContinue).click()
     cy.get('h1').should('contain', 'Migration')
   })
 
-  it('migration landing page appears with a video', () => {
+  it('major version welcome page appears with correct links and can be dismissed', () => {
     cy.scaffoldProject('migration')
     cy.openProject('migration')
     cy.visitLaunchpad()
 
-    cy.contains(cy.i18n.majorVersionLandingPage.title).should('be.visible')
-    cy.contains(cy.i18n.majorVersionLandingPage.description).should('be.visible')
-    cy.contains('button', cy.i18n.majorVersionLandingPage.actionContinue).should('be.visible')
-    cy.contains('a', cy.i18n.majorVersionLandingPage.linkReleaseNotes)
-    .should('be.visible')
-    .and('have.attr', 'href', 'https://on.cypress.io/changelog')
+    cy.contains(cy.i18n.majorVersionWelcome.title).should('be.visible')
+
+    cy.validateExternalLink({
+      name: cy.i18n.majorVersionWelcome.linkReleaseNotes,
+      href: 'https://on.cypress.io/changelog',
+    })
+
+    cy.validateExternalLink({
+      name: '11.0.0',
+      href: 'https://on.cypress.io/changelog#11-0-0',
+    })
+
+    cy.validateExternalLink({
+      name: '10.0.0',
+      href: 'https://on.cypress.io/changelog#10-0-0',
+    })
+
+    cy.contains('button', cy.i18n.majorVersionWelcome.actionContinue).click()
+    cy.contains(cy.i18n.majorVersionWelcome.title).should('not.exist')
+    cy.contains('h1', 'Migration helper').should('be.visible')
 
     cy.percySnapshot()
   })
@@ -1310,7 +1324,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
     }, { path: getPathForPlatform('cypress/plugins/index.js') })
 
     cy.findByRole('button', { name: 'Try again' }).click()
-    cy.contains('button', cy.i18n.majorVersionLandingPage.actionContinue).click()
+    cy.contains('button', cy.i18n.majorVersionWelcome.actionContinue).click()
 
     cy.waitForWizard()
   })
@@ -1645,7 +1659,7 @@ describe('Migrate custom config files', () => {
 
   it('shows error for migration-custom-config-file-with-existing-v10-config-file', () => {
     scaffoldAndVisitLaunchpad('migration-custom-config-file-with-existing-v10-config-file', ['--config-file', 'customConfig.json'])
-    cy.contains('button', cy.i18n.majorVersionLandingPage.actionContinue).click()
+    cy.contains('button', cy.i18n.majorVersionWelcome.actionContinue).click()
 
     cy.contains('There is both a customConfig.config.js and a customConfig.json file at the location below:')
     cy.contains('Cypress no longer supports customConfig.json, please remove it from your project.')
