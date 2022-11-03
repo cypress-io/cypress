@@ -5,7 +5,6 @@ import {
   mount as testUtilsMount,
   VueTestUtilsConfigOptions,
   Wrapper,
-  enableAutoDestroy,
 } from '@vue/test-utils'
 import {
   injectStylesBeforeElement,
@@ -266,6 +265,10 @@ declare global {
   }
 }
 
+const cleanup = () => {
+  Cypress.vueWrapper?.destroy()
+}
+
 /**
  * Direct Vue errors to the top error handler
  * where they will fail Cypress test
@@ -279,14 +282,6 @@ function failTestOnVueError (err, vm, info) {
     throw err
   })
 }
-
-function registerAutoDestroy ($destroy: () => void) {
-  Cypress.on('test:before:run', () => {
-    $destroy()
-  })
-}
-
-enableAutoDestroy(registerAutoDestroy)
 
 const injectStyles = (options: StyleOptions) => {
   return injectStylesBeforeElement(options, document, getContainerEl())
@@ -336,6 +331,9 @@ export const mount = (
   wrapper: Wrapper<Vue, Element>
   component: Wrapper<Vue, Element>['vm']
 }> => {
+  // Remove last mounted component if cy.mount is called more than once in a test
+  cleanup()
+
   const options: Partial<MountOptions> = Cypress._.pick(
     optionsOrProps,
     defaultOptions,
@@ -442,4 +440,4 @@ export const mountCallback = (
 //    import { registerCT } from 'cypress/<my-framework>'
 //    registerCT()
 // Note: This would be a breaking change
-setupHooks()
+setupHooks(cleanup)

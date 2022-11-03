@@ -8,7 +8,7 @@ window.Mocha['__zone_patch__'] = false
 import 'zone.js/testing'
 
 import { CommonModule } from '@angular/common'
-import { Component, ErrorHandler, EventEmitter, Injectable, SimpleChange, SimpleChanges, Type } from '@angular/core'
+import { Component, ErrorHandler, EventEmitter, Injectable, SimpleChange, SimpleChanges, Type, OnChanges } from '@angular/core'
 import {
   ComponentFixture,
   getTestBed,
@@ -70,6 +70,23 @@ export interface MountConfig<T> extends TestModuleMetadata {
    * })
    */
   componentProperties?: Partial<{ [P in keyof T]: T[P] }>
+}
+
+let activeFixture: ComponentFixture<any> | null = null
+
+function cleanup () {
+  // Not public, we need to call this to remove the last component from the DOM
+  try {
+    (getTestBed() as any).tearDownTestingModule()
+  } catch (e) {
+    const notSupportedError = new Error(`Failed to teardown component. The version of Angular you are using may not be officially supported.`)
+
+    ;(notSupportedError as any).docsUrl = 'https://on.cypress.io/component-framework-configuration'
+    throw notSupportedError
+  }
+
+  getTestBed().resetTestingModule()
+  activeFixture = null
 }
 
 /**
@@ -209,6 +226,8 @@ function setupFixture<T> (
 ): ComponentFixture<T> {
   const fixture = getTestBed().createComponent(component)
 
+  setupComponent(config, fixture)
+
   fixture.whenStable().then(() => {
     fixture.autoDetectChanges(config.autoDetectChanges ?? true)
   })
@@ -223,17 +242,18 @@ function setupFixture<T> (
  * @param {ComponentFixture<T>} fixture Fixture for debugging and testing a component.
  * @returns {T} Component being mounted
  */
-function setupComponent<T extends { ngOnChanges? (changes: SimpleChanges): void }> (
+function setupComponent<T> (
   config: MountConfig<T>,
-  fixture: ComponentFixture<T>): T {
-  let component: T = fixture.componentInstance
+  fixture: ComponentFixture<T>,
+): void {
+  let component = fixture.componentInstance as unknown as { [key: string]: any } & Partial<OnChanges>
 
   if (config?.componentProperties) {
     component = Object.assign(component, config.componentProperties)
   }
 
   if (config.autoSpyOutputs) {
-    Object.keys(component).forEach((key: string, index: number, keys: string[]) => {
+    Object.keys(component).forEach((key) => {
       const property = component[key]
 
       if (property instanceof EventEmitter) {
@@ -252,14 +272,12 @@ function setupComponent<T extends { ngOnChanges? (changes: SimpleChanges): void 
       acc[key] = new SimpleChange(null, value, true)
 
       return acc
-    }, {})
+    }, {} as {[key: string]: SimpleChange})
 
     if (Object.keys(componentProperties).length > 0) {
       component.ngOnChanges(simpleChanges)
     }
   }
-
-  return component
 }
 
 /**
@@ -295,13 +313,18 @@ export function mount<T> (
   component: Type<T> | string,
   config: MountConfig<T> = { },
 ): Cypress.Chainable<MountResponse<T>> {
+  // Remove last mounted component if cy.mount is called more than once in a test
+  if (activeFixture) {
+    cleanup()
+  }
+
   const componentFixture = initTestBed(component, config)
-  const fixture = setupFixture(componentFixture, config)
-  const componentInstance = setupComponent(config, fixture)
+
+  activeFixture = setupFixture(componentFixture, config)
 
   const mountResponse: MountResponse<T> = {
-    fixture,
-    component: componentInstance,
+    fixture: activeFixture,
+    component: activeFixture.componentInstance,
   }
 
   const logMessage = typeof component === 'string' ? 'Component' : componentFixture.name
@@ -338,8 +361,4 @@ getTestBed().initTestEnvironment(
   },
 )
 
-setupHooks(() => {
-  // Not public, we need to call this to remove the last component from the DOM
-  getTestBed()['tearDownTestingModule']()
-  getTestBed().resetTestingModule()
-})
+setupHooks(cleanup)
