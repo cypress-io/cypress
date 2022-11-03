@@ -6,7 +6,7 @@
   "scripts": {
     "build-prod": "tsc --project .",
     "clean-deps": "rimraf node_modules",
-    "test": "mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json --exit test/unit/*"
+    "test": "CYPRESS_INTERNAL_ENV=test mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json --exit test/unit/*"
   },
   "dependencies": {
     "@types/mime-types": "2.1.0",
