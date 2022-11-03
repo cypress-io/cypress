@@ -33,6 +33,9 @@ export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerende
     Cypress.log({ name: 'warning', message })
   }
 
+  // Remove last mounted component if cy.mount is called more than once in a test
+  cleanup()
+
   const internalOptions: InternalMountOptions = {
     reactDom: ReactDOM,
     render: (reactComponent: ReturnType<typeof React.createElement>, el: HTMLElement, reactDomToUse: typeof ReactDOM) => {

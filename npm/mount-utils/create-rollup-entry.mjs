@@ -68,10 +68,19 @@ export function createEntries (options) {
     console.log(`Building ${format}: ${finalConfig.output.file}`)
 
     return finalConfig
-  }).concat({
+  }).concat([{
     input,
     output: [{ file: 'dist/index.d.ts', format: 'es' }],
-    plugins: [dts({ respectExternal: true })],
+    plugins: [
+      dts({ respectExternal: true }),
+      {
+        name: 'cypress-types-reference',
+        // rollup-plugin-dts does not add '// <reference types="cypress" />' like rollup-plugin-typescript2 did so we add it here.
+        renderChunk (...[code]) {
+          return `/// <reference types="cypress" />\n\n${code}`
+        },
+      },
+    ],
     external: config.external || [],
-  })
+  }])
 }
