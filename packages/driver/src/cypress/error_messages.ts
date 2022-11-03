@@ -1645,7 +1645,9 @@ export default {
       message: `${cmd('selectFile')} can only be called on a single element. Your subject contained {{num}} elements.`,
     },
     not_file_input: {
-      message: `${cmd('selectFile')} can only be called on an \`<input type="file">\` or a \`<label for="fileInput">\` pointing to or containing one. Your subject is: \`{{node}}\`.`,
+      message: `${cmd('selectFile')} can only be called on an \`<input type="file">\` or a \`<label for="fileInput">\`, but received the element:
+      
+      \`{{node}}\`.`,
     },
     invalid_alias: {
       message: `${cmd('selectFile')} can only attach strings, Buffers or objects, while your alias \`{{alias}}\` resolved to: \`{{subject}}\`.`,
