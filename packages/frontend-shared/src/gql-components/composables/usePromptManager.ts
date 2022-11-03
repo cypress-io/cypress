@@ -19,7 +19,7 @@ mutation UsePromptManager_SetGlobalPreferences($value: String!) {
   setPreferences(type: global, value: $value) {
     localSettings {
       preferences {
-        majorVersionLandingPageDismissed
+        majorVersionWelcomeDismissed
       }
     }
   }
@@ -36,8 +36,8 @@ export function usePromptManager () {
     return setProjectPreferencesMutation.executeMutation({ value: JSON.stringify({ promptsShown: { [slug]: Date.now() } }) })
   }
 
-  function setMajorVersionLandingPageDismissed (majorVersion: string) {
-    return setGlobalPreferencesMutation.executeMutation({ value: JSON.stringify({ majorVersionLandingPageDismissed: { [majorVersion]: Date.now() } }) })
+  function setMajorVersionWelcomeDismissed (majorVersion: string) {
+    return setGlobalPreferencesMutation.executeMutation({ value: JSON.stringify({ majorVersionWelcomeDismissed: { [majorVersion]: Date.now() } }) })
   }
 
   const wrappedIsAllowedFeature = (featureName: 'specsListBanner' | 'docsCiPrompt') => {
@@ -47,6 +47,6 @@ export function usePromptManager () {
   return {
     setPromptShown,
     isAllowedFeature: wrappedIsAllowedFeature,
-    setMajorVersionLandingPageDismissed,
+    setMajorVersionWelcomeDismissed,
   }
 }

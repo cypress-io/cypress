@@ -101,7 +101,7 @@ import LoginConnectModals from '@cy/gql-components/LoginConnectModals.vue'
 import CloudViewerAndProject from '@cy/gql-components/CloudViewerAndProject.vue'
 import { usePromptManager } from '@cy/gql-components/composables/usePromptManager'
 
-const { setMajorVersionLandingPageDismissed } = usePromptManager()
+const { setMajorVersionWelcomeDismissed } = usePromptManager()
 const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
 
@@ -115,7 +115,7 @@ fragment MainLaunchpadQueryData on Query {
   }
   localSettings {
     preferences {
-      majorVersionLandingPageDismissed
+      majorVersionWelcomeDismissed
       wasBrowserSetInCLI
     }
   }
@@ -178,7 +178,7 @@ const majorVersion = t('majorVersionLandingPage.majorVersion')
 
 function handleClearLandingPage () {
   if (majorVersion) {
-    setMajorVersionLandingPageDismissed(majorVersion)
+    setMajorVersionWelcomeDismissed(majorVersion)
     const wasBrowserSetInCLI = query.data?.value?.localSettings.preferences?.wasBrowserSetInCLI
     const currentTestingType = query.data?.value?.currentProject?.currentTestingType
 
@@ -190,7 +190,7 @@ function handleClearLandingPage () {
 
 const wasLandingPageDismissed = computed(() => {
   if (query.data.value && majorVersion) {
-    return query.data.value?.localSettings?.preferences?.majorVersionLandingPageDismissed?.[majorVersion]
+    return query.data.value?.localSettings?.preferences?.majorVersionWelcomeDismissed?.[majorVersion]
   }
 
   return false

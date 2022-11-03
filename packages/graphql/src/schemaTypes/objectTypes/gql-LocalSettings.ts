@@ -19,11 +19,11 @@ export const LocalSettingsPreferences = objectType({
       resolve: (source, args, ctx) => ctx.env.NO_PROXY ?? null,
     })
 
-    t.json('majorVersionLandingPageDismissed', {
+    t.json('majorVersionWelcomeDismissed', {
       resolve: async (source, args, ctx) => {
         const preferences = await ctx._apis.localSettingsApi.getPreferences()
 
-        return preferences.majorVersionLandingPageDismissed || {}
+        return preferences.majorVersionWelcomeDismissed || {}
       },
     })
 
