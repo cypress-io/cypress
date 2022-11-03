@@ -507,7 +507,7 @@ export function mergeDefaults (
 }
 
 function isValidCypressInternalEnvValue (value: string) {
-  // names of config environments, see "config/app.yml"
+  // names of config environments, see "config/app.json"
   const names = ['development', 'test', 'staging', 'production']
 
   return _.includes(names, value)
