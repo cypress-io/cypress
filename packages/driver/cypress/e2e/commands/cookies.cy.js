@@ -6,6 +6,14 @@ const isWebkit = Cypress.isBrowser('webkit')
 
 describe('src/cy/commands/cookies - no stub', () => {
   context('#getCookies', () => {
+    // this can be removed along with the experimental flag since once the flag
+    // removed, clearing cookies for all domains will be done by default
+    beforeEach(() => {
+      if (!Cypress.config('experimentalSessionAndOrigin')) {
+        cy.clearCookies({ domain: null })
+      }
+    })
+
     it('returns cookies from the domain matching the AUT by default', () => {
       cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
