@@ -29,17 +29,19 @@ export const makeMountFn = (
     throw Error('internalMountOptions must be provided with `render` and `reactDom` parameters')
   }
 
+  // @ts-expect-error - this is removed but we want to check if a user is passing it, and error if they are.
+  if (options.alias) {
+    // @ts-expect-error
+    throw new Error(`passing \`alias\` to mounting options is no longer supported. Use mount(...).as('${options.alias}') instead. See https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes to migrate.`)
+  }
+
   mountCleanup = internalMountOptions.cleanup
 
   // Get the display name property via the component constructor
   // @ts-ignore FIXME
-  const componentName = getDisplayName(jsx.type, options.alias)
+  const componentName = getDisplayName(jsx.type)
 
   const jsxComponentName = `<${componentName} ... />`
-
-  const message = options.alias
-    ? `${jsxComponentName} as "${options.alias}"`
-    : jsxComponentName
 
   return cy
   .then(() => {
@@ -80,7 +82,7 @@ export const makeMountFn = (
       Cypress.log({
         name: type,
         type: 'parent',
-        message: [message],
+        message: [jsxComponentName],
         // @ts-ignore
         $el: (el.children.item(0) as unknown) as JQuery<HTMLElement>,
         consoleProps: () => {

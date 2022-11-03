@@ -8,7 +8,6 @@ export interface UnmountArgs {
 export type MountOptions = Partial<MountReactComponentOptions>
 
 export interface MountReactComponentOptions {
-  alias: string
   ReactDom: typeof import('react-dom')
   /**
    * Log the mounting command into Cypress Command Log,
