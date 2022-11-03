@@ -306,6 +306,9 @@ export class WebKitAutomation {
       })
     })
 
+    debug('clear cookies: %o', cookiesToClear)
+    debug('put back cookies: %o', persistCookies)
+
     await this.context.clearCookies()
 
     if (persistCookies.length) await this.context.addCookies(persistCookies)
