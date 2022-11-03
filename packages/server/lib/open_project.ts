@@ -185,6 +185,8 @@ export class OpenProject {
         return await browsers.connectToNewSpec(browser, { onInitializeNewBrowserTab, ...options }, automation)
       }
 
+      options.relaunchBrowser = this.relaunchBrowser
+
       return await browsers.open(browser, options, automation, this._ctx)
     }
 

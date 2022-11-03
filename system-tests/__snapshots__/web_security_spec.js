@@ -214,7 +214,6 @@ This error will not alter the exit code.
 TimeoutError: operation timed out
       [stack trace lines]
 
-
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐

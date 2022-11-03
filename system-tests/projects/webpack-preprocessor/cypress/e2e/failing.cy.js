@@ -14,11 +14,11 @@ context('validation errors', function () {
     Cypress.config('isInteractive', true)
   })
 
-  fail(this, () => {
+  fail('validation error', this, () => {
     cy.viewport()
   })
 
-  verify(this, {
+  verify('validation error', this, {
     line: 18,
     column: 8,
     message: 'can only accept a string preset or',

@@ -4,7 +4,7 @@ import type Debug from 'debug'
 import type { CookieOptions } from 'express'
 import { cors, concatStream, httpUtils } from '@packages/network'
 import type { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
-import type { HttpMiddleware } from '.'
+import type { HttpMiddleware, HttpMiddlewareThis } from '.'
 import iconv from 'iconv-lite'
 import type { IncomingMessage, IncomingHttpHeaders } from 'http'
 import { InterceptResponse } from '@packages/net-stubbing'
@@ -14,6 +14,7 @@ import zlib from 'zlib'
 import { URL } from 'url'
 import { CookiesHelper } from './util/cookies'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
+import { toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
 
 interface ResponseMiddlewareProps {
   /**
@@ -66,7 +67,7 @@ function reqMatchesSuperDomainOrigin (req: CypressIncomingRequest, remoteState) 
   return false
 }
 
-function reqWillRenderHtml (req: CypressIncomingRequest) {
+function reqWillRenderHtml (req: CypressIncomingRequest, res: IncomingMessage) {
   // will this request be rendered in the browser, necessitating injection?
   // https://github.com/cypress-io/cypress/issues/288
 
@@ -78,7 +79,11 @@ function reqWillRenderHtml (req: CypressIncomingRequest) {
   // don't inject if we didn't find both text/html and application/xhtml+xml,
   const accept = req.headers['accept']
 
-  return accept && accept.includes('text/html') && accept.includes('application/xhtml+xml')
+  // only check the content-type value, if it exists, to contains some type of html mimetype
+  const contentType = res?.headers['content-type'] || ''
+  const contentTypeIsHtmlIfExists = contentType ? contentType.includes('html') : true
+
+  return accept && accept.includes('text/html') && accept.includes('application/xhtml+xml') && contentTypeIsHtmlIfExists
 }
 
 function resContentTypeIs (res: IncomingMessage, contentType: string) {
@@ -90,10 +95,6 @@ function resContentTypeIsJavaScript (res: IncomingMessage) {
     ['application/javascript', 'application/x-javascript', 'text/javascript']
     .map(_.partial(resContentTypeIs, res)),
   )
-}
-
-function isHtml (res: IncomingMessage) {
-  return !resContentTypeIsJavaScript(res)
 }
 
 function resIsGzipped (res: IncomingMessage) {
@@ -239,7 +240,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
   this.res.isInitial = this.req.cookies['__cypress.initial'] === 'true'
 
   const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
-  const isRenderedHTML = reqWillRenderHtml(this.req)
+  const isRenderedHTML = reqWillRenderHtml(this.req, this.incomingRes)
 
   if (isRenderedHTML) {
     const origin = new URL(this.req.proxiedUrl).origin
@@ -260,8 +261,9 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     // NOTE: Only inject fullCrossOrigin if the super domain origins do not match in order to keep parity with cypress application reloads
     const isCrossSuperDomainOrigin = !reqMatchesSuperDomainOrigin(this.req, this.remoteStates.getPrimary())
     const isAUTFrame = this.req.isAUTFrame
+    const isHTMLLike = isHTML || isRenderedHTML
 
-    if (isCrossSuperDomainOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
+    if (isCrossSuperDomainOrigin && isAUTFrame && isHTMLLike) {
       this.debug('- cross origin injection')
 
       return 'fullCrossOrigin'
@@ -273,7 +275,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
       return false
     }
 
-    if (this.res.isInitial) {
+    if (this.res.isInitial && isHTMLLike) {
       this.debug('- full injection')
 
       return 'full'
@@ -372,10 +374,23 @@ const MaybePreventCaching: ResponseMiddleware = function () {
   this.next()
 }
 
+const setSimulatedCookies = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) => {
+  if (ctx.res.wantsInjection !== 'fullCrossOrigin') return
+
+  const defaultDomain = (new URL(ctx.req.proxiedUrl)).hostname
+  const allCookiesForRequest = ctx.getCookieJar()
+  .getCookies(ctx.req.proxiedUrl)
+  .map((cookie) => toughCookieToAutomationCookie(cookie, defaultDomain))
+
+  ctx.simulatedCookies = allCookiesForRequest
+}
+
 const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   const cookies: string | string[] | undefined = this.incomingRes.headers['set-cookie']
 
   if (!cookies || !cookies.length) {
+    setSimulatedCookies(this)
+
     return this.next()
   }
 
@@ -441,17 +456,25 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
     appendCookie(cookie)
   })
 
+  setSimulatedCookies(this)
+
   const addedCookies = await cookiesHelper.getAddedCookies()
 
   if (!addedCookies.length) {
     return this.next()
   }
 
-  this.serverBus.once('cross:origin:automation:cookies:received', () => {
+  // we want to set the cookies via automation so they exist in the browser
+  // itself. however, firefox will hang if we try to use the extension
+  // to set cookies on a url that's in-flight, so we send the cookies down to
+  // the driver, let the response go, and set the cookies via automation
+  // from the driver once the page has loaded but before we run any further
+  // commands
+  this.serverBus.once('cross:origin:cookies:received', () => {
     this.next()
   })
 
-  this.serverBus.emit('cross:origin:automation:cookies', addedCookies)
+  this.serverBus.emit('cross:origin:cookies', addedCookies)
 }
 
 const REDIRECT_STATUS_CODES: any[] = [301, 302, 303, 307, 308]
@@ -518,12 +541,13 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
       domainName: cors.getDomainNameFromUrl(this.req.proxiedUrl),
       wantsInjection: this.res.wantsInjection,
       wantsSecurityRemoved: this.res.wantsSecurityRemoved,
-      isHtml: isHtml(this.incomingRes),
+      isNotJavascript: !resContentTypeIsJavaScript(this.incomingRes),
       useAstSourceRewriting: this.config.experimentalSourceRewriting,
       modifyObstructiveThirdPartyCode: this.config.experimentalModifyObstructiveThirdPartyCode && !this.remoteStates.isPrimarySuperDomainOrigin(this.req.proxiedUrl),
       modifyObstructiveCode: this.config.modifyObstructiveCode,
       url: this.req.proxiedUrl,
       deferSourceMapRewrite: this.deferSourceMapRewrite,
+      simulatedCookies: this.simulatedCookies,
     })
     const encodedBody = iconv.encode(injectedBody, nodeCharset)
 
@@ -548,7 +572,7 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
 
   this.incomingResStream.setEncoding('utf8')
   this.incomingResStream = this.incomingResStream.pipe(rewriter.security({
-    isHtml: isHtml(this.incomingRes),
+    isNotJavascript: !resContentTypeIsJavaScript(this.incomingRes),
     useAstSourceRewriting: this.config.experimentalSourceRewriting,
     modifyObstructiveThirdPartyCode: this.config.experimentalModifyObstructiveThirdPartyCode && !this.remoteStates.isPrimarySuperDomainOrigin(this.req.proxiedUrl),
     modifyObstructiveCode: this.config.modifyObstructiveCode,

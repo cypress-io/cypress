@@ -35,7 +35,6 @@ export interface CommandProps extends InstrumentProps {
   wallClockStartedAt?: string
   hookId: string
   isStudio?: boolean
-  showError?: boolean
   group?: number
   groupLevel?: number
   hasSnapshot?: boolean
@@ -45,7 +44,7 @@ export interface CommandProps extends InstrumentProps {
 export default class Command extends Instrument {
   @observable.struct renderProps: RenderProps = {}
   @observable.struct sessionInfo?: SessionProps['sessionInfo']
-  @observable err = new Err({})
+  @observable err?: Err
   @observable event?: boolean = false
   @observable isLongRunning = false
   @observable number?: number
@@ -56,7 +55,6 @@ export default class Command extends Instrument {
   @observable children: Array<Command> = []
   @observable hookId: string
   @observable isStudio: boolean
-  @observable showError?: boolean = false
   @observable group?: number
   @observable groupLevel?: number
   @observable hasSnapshot?: boolean
@@ -92,6 +90,7 @@ export default class Command extends Instrument {
 
     return this._isOpen || (this._isOpen === null
       && (
+        this.err?.isRecovered ||
         // command has nested commands
         (this.name !== 'session' && this.hasChildren && !this.event && this.type !== 'system') ||
         // command has nested commands with children
@@ -123,7 +122,10 @@ export default class Command extends Instrument {
   constructor (props: CommandProps) {
     super(props)
 
-    this.err.update(props.err)
+    if (props.err) {
+      this.err = new Err(props.err)
+    }
+
     this.event = props.event
     this.number = props.number
     this.numElements = props.numElements
@@ -136,7 +138,6 @@ export default class Command extends Instrument {
     this.wallClockStartedAt = props.wallClockStartedAt
     this.hookId = props.hookId
     this.isStudio = !!props.isStudio
-    this.showError = !!props.showError
     this.group = props.group
     this.hasSnapshot = !!props.hasSnapshot
     this.hasConsoleProps = !!props.hasConsoleProps
@@ -148,7 +149,14 @@ export default class Command extends Instrument {
   update (props: CommandProps) {
     super.update(props)
 
-    this.err.update(props.err)
+    if (props.err) {
+      if (!this.err) {
+        this.err = new Err(props.err)
+      } else {
+        this.err.update(props.err)
+      }
+    }
+
     this.event = props.event
     this.numElements = props.numElements
     this.renderProps = props.renderProps || {}
@@ -159,7 +167,6 @@ export default class Command extends Instrument {
     this.timeout = props.timeout
     this.hasSnapshot = props.hasSnapshot
     this.hasConsoleProps = props.hasConsoleProps
-    this.showError = props.showError
 
     this._checkLongRunning()
   }

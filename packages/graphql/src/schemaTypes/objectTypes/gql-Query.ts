@@ -1,5 +1,6 @@
 import { idArg, stringArg, nonNull, objectType } from 'nexus'
-import { ProjectLike, ScaffoldedFile } from '..'
+import { ProjectLike } from '../interfaceTypes/gql-ProjectLike'
+import { ScaffoldedFile } from './gql-ScaffoldedFile'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
 import { AuthState } from './gql-AuthState'

@@ -1,0 +1,36 @@
+<html>
+  <body>
+    <script>
+      window.onmessage = function (event) {
+        const msg = event.data
+
+        if (msg.type === 'set:storage:data') {
+          const { data } = msg
+
+          const setData = (storageData, type) => {
+            if (!storageData) return
+
+            const { clear, value } = storageData
+
+            if (clear) {
+              window[type].clear()
+            }
+
+            if (value) {
+              Object.keys(value).forEach((key) => {
+                window[type].setItem(key, value[key])
+              })
+            }
+          }
+
+          setData(data.localStorage, 'localStorage')
+          setData(data.sessionStorage, 'sessionStorage')
+
+          window.parent.postMessage({ type: 'set:storage:complete' }, '*')
+        }
+      }
+
+      window.parent.postMessage({ type: 'set:storage:load' }, '*')
+    </script>
+  </body>
+</html>
