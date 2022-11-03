@@ -11,6 +11,10 @@ import type { MouseCoords } from '../cy/mouse'
 import type { Server } from './server'
 import type { LocationObject } from './location'
 
+export type QueryFunction = (any) => any
+
+export type SubjectChain = [any, ...QueryFunction[]]
+
 export interface StateFunc {
   (): Record<string, any>
   (v: Record<string, any>): Record<string, any>
@@ -44,13 +48,14 @@ export interface StateFunc {
   (k: 'mouseLastHoveredEl', v?: HTMLElement | null): HTMLElement | null
   (k: 'mouseCoords', v?: MouseCoords): MouseCoords
   (k: 'server', v?: Server): Server
+  (k: 'subjects', v?: Record<string, SubjectChain>): Record<string, SubjectChain>
+  (k: 'subjectLinks', v?: Record<string, string>): Record<string, string>
   (k: 'requests', v?: XHRRequest[]): XHRRequest[]
   (k: 'fetchPolyfilled', v?: boolean): boolean
   (k: 'nestedIndex', v?: number): number
   (k: 'chainerId', v?: string): string
   (k: 'ctx', v?: Mocha.Context): Mocha.Context
   (k: 'commandIntermediateValue', v?: any): any
-  (k: 'subject', v?: any): any
   (k: 'onPaused', v?: (fn: any) => void): (fn: any) => void
   (k: 'onCommandFailed', v?: (err: any, queue: any) => boolean): (err: any, queue: any) => boolean
   (k: 'promise', v?: Bluebird<unknown>): Bluebird<unknown>

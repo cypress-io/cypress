@@ -3,7 +3,7 @@ import _ from 'lodash'
 import Promise from 'bluebird'
 import debugFn from 'debug'
 
-import $utils, { SubjectChain } from './utils'
+import $utils from './utils'
 import $errUtils, { ErrorFromProjectRejectionEvent } from './error_utils'
 import $stackUtils from './stack_utils'
 
@@ -36,7 +36,7 @@ import { handleCrossOriginCookies } from '../cross-origin/events/cookies'
 
 import type { ICypress } from '../cypress'
 import type { ICookies } from './cookies'
-import type { StateFunc } from './state'
+import type { StateFunc, SubjectChain } from './state'
 
 const debugErrors = debugFn('cypress:driver:errors')
 
@@ -1292,7 +1292,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
    * structure into a usable subject.
    */
   subjectChain (chainerId: string = this.state('chainerId')) {
-    return (this.state('subjects') || {})[chainerId]
+    return (this.state('subjects') || {} as Record<string, SubjectChain>)[chainerId]
   }
 
   /* Given a chain of functions, return the actual subject. `subjectChain` might look like any of:
@@ -1354,7 +1354,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
    * instead use the return value as the new subject. Is this case, you'll want cy.breakSubjectLinksToCurrentChainer().
    */
   linkSubject (childChainerId: string, parentChainerId: string) {
-    const links = this.state('subjectLinks') || {}
+    const links = this.state('subjectLinks') || {} as Record<string, string>
 
     links[childChainerId] = parentChainerId
     this.state('subjectLinks', links)
@@ -1370,7 +1370,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
    */
   breakSubjectLinksToCurrentChainer () {
     const chainerId = this.state('chainerId')
-    const links = this.state('subjectLinks') || {}
+    const links = this.state('subjectLinks') || {} as Record<string, string>
 
     this.state('subjectLinks', _.omitBy(links, (l) => l === chainerId))
   }
@@ -1385,12 +1385,12 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
    * new subject for any chainers it's linked to (see cy.linkSubject for details on that process).
    */
   setSubjectForChainer (chainerId: string, subject: any) {
-    const cySubjects = this.state('subjects') || {}
+    const cySubjects = this.state('subjects') || {} as Record<string, SubjectChain>
 
     cySubjects[chainerId] = [subject]
     this.state('subjects', cySubjects)
 
-    const links = this.state('subjectLinks') || {}
+    const links = this.state('subjectLinks') || {} as Record<string, string>
 
     if (links[chainerId]) {
       this.setSubjectForChainer(links[chainerId], subject)
@@ -1407,7 +1407,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
    * to resolve cy.subject() as needed.
    */
   addQueryToChainer (chainerId: string, queryFn: (subject: any) => any) {
-    const cySubjects = this.state('subjects') || {}
+    const cySubjects = this.state('subjects') || {} as Record<string, SubjectChain>
 
     const subject = (cySubjects[chainerId] || [undefined]) as SubjectChain
 
@@ -1415,7 +1415,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     cySubjects[chainerId] = subject
     this.state('subjects', cySubjects)
 
-    const links = this.state('subjectLinks') || {}
+    const links = this.state('subjectLinks') || {} as Record<string, string>
 
     if (links[chainerId]) {
       this.addQueryToChainer(links[chainerId], queryFn)

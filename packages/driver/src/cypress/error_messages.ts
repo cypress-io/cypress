@@ -1645,7 +1645,7 @@ export default {
       message: `${cmd('selectFile')} can only be called on a single element. Your subject contained {{num}} elements.`,
     },
     not_file_input: {
-      message: `${cmd('selectFile')} can only be called on an \`<input type="file">\` or a \`<label for="fileInput">\`, but received the element:
+      message: `${cmd('selectFile')} can only be called on an \`<input type="file">\` or a \`<label for="fileInput">\` pointing to or containing a file input, but received the element:
       
       \`{{node}}\`.`,
     },
@@ -1895,8 +1895,8 @@ export default {
 
           to
 
-          > \`cy.get('button').click()\`
-          > \`cy.get('button').click()\`
+          > \`cy.get('button').as('btn').click()\`
+          > \`cy.get('@btn').click()\`
 
             `,
         docsUrl: 'https://on.cypress.io/element-has-detached-from-dom',
@@ -1917,8 +1917,8 @@ export default {
 
           to
 
-          > \`cy.get('button').click()\`
-          > \`cy.get('button').should('have.class', 'active')\`
+          > \`cy.get('button').as('btn').click()\`
+          > \`cy.get('@btn').should('have.class', 'active')\`
 
             `,
         docsUrl: 'https://on.cypress.io/element-has-detached-from-dom',

@@ -41,11 +41,7 @@ export class $Command {
 
     // Finish each of the logs we have, turning any potential errors into actual ones.
     this.get('logs').forEach((log) => {
-      if (log.get('next')) {
-        log.snapshot()
-      }
-
-      if (!log.get('snapshots')) {
+      if (log.get('next') || !log.get('snapshots')) {
         log.snapshot()
       }
 

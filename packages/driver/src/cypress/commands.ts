@@ -4,7 +4,7 @@ import { addCommand as addNetstubbingCommand } from '../cy/net-stubbing'
 import $errUtils from './error_utils'
 import $stackUtils from './stack_utils'
 
-import type { QueryFunction } from './utils'
+import type { QueryFunction } from './state'
 
 const PLACEHOLDER_COMMANDS = ['mount', 'hover']
 

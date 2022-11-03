@@ -8,10 +8,6 @@ import $dom from '../dom'
 import $jquery from '../dom/jquery'
 import { $Location } from './location'
 
-export type QueryFunction = (any) => any
-
-export type SubjectChain = [any, ...QueryFunction[]];
-
 const tagOpen = /\[([a-z\s='"-]+)\]/g
 const tagClosed = /\[\/([a-z]+)\]/g
 
