@@ -4,6 +4,7 @@ function startSetupFor (project: ProjectFixtureDir) {
   cy.scaffoldProject(project)
   cy.openProject(project)
   cy.visitLaunchpad()
+  cy.findByRole('button', { name: 'Continue' }).click()
   cy.contains('Component Testing').click()
   cy.get(`[data-testid="select-framework"]`)
 }
