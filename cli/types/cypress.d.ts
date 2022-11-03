@@ -592,13 +592,6 @@ declare namespace Cypress {
     }
 
     /**
-     * @see https://on.cypress.io/api/api-server
-     */
-    Server: {
-      defaults(options: Partial<ServerOptions>): void
-    }
-
-    /**
      * @see https://on.cypress.io/screenshot-api
      */
     Screenshot: {
