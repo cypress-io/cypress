@@ -15,7 +15,7 @@ describe('removed mounting options', () => {
           [key]: `body { background: red; }`,
         })
       }).to.throw(
-        `The \`${key}\` mounting option is no longer supported. See https://on.cypress.io/migration-11-0-0-component-testing-updates to migrate.`,
+        `The \`${key}\` mounting option is no longer supported.`,
       )
     }
   })

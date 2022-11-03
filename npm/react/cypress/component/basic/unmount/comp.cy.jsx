@@ -21,7 +21,7 @@ it('calls callbacks on mount and unmount', () => {
   try {
     unmount()
   } catch (e) {
-    expect(e.message).to.eq('unmount is no longer supported. See https://on.cypress.io/migration-11-0-0-component-testing-updates to migrate.')
+    expect(e.message).to.eq('`unmount` is no longer supported.')
     stub()
   }
 

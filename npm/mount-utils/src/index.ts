@@ -13,7 +13,7 @@ export const getContainerEl = (): HTMLElement => {
 export function checkForRemovedStyleOptions (mountingOptions: Record<string, any>) {
   for (const key of ['cssFile', 'cssFiles', 'style', 'styles', 'stylesheet', 'stylesheets'] as const) {
     if (mountingOptions[key]) {
-      throw new Error(`The \`${key}\` mounting option is no longer supported. See https://on.cypress.io/migration-11-0-0-component-testing-updates to migrate.`)
+      Cypress.utils.throwErrByPath('mount.removed_style_mounting_options', key)
     }
   }
 }
@@ -49,7 +49,7 @@ export function setupHooks (optionalCallback?: Function) {
  * @ Removed as of Cypress 11.0.0
  */
 export function cleanupStyles () {
-  throw new Error('cleanupStyles is no longer supported. See https://on.cypress.io/migration-11-0-0-component-testing-updates to migrate.')
+  Cypress.utils.throwErrByPath('mount.cleanup_styles')
 }
 
 /**
@@ -73,6 +73,6 @@ export const injectStylesBeforeElement = (
   options: Partial<StyleOptions & { log: boolean }>,
   document: Document,
   el: HTMLElement | null,
-): HTMLElement => {
-  throw new Error('injectStylesBeforeElement is no longer supported. See https://on.cypress.io/migration-11-0-0-component-testing-updates to migrate.')
+) => {
+  Cypress.utils.throwErrByPath('mount.inject_styles_before_element')
 }

@@ -12,7 +12,7 @@ describe('HelloWorld component', () => {
 
   it('errors if passing alias', () => {
     expect(() => mount(<HelloWorld />, { alias: 'foo' })).to.throw(
-      `passing \`alias\` to mounting options is no longer supported. Use mount(...).as('foo') instead. See https://on.cypress.io/migration-11-0-0-component-testing-updates to migrate.`,
+      `passing \`alias\` to mounting options is no longer supported. Use mount(...).as('foo') instead.`,
     )
   })
 })

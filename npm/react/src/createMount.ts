@@ -33,7 +33,7 @@ export const makeMountFn = (
   // @ts-expect-error - this is removed but we want to check if a user is passing it, and error if they are.
   if (options.alias) {
     // @ts-expect-error
-    throw new Error(`passing \`alias\` to mounting options is no longer supported. Use mount(...).as('${options.alias}') instead. See https://on.cypress.io/migration-11-0-0-component-testing-updates to migrate.`)
+    Cypress.utils.throwErrByPath('mount.alias', options.alias)
   }
 
   checkForRemovedStyleOptions(options)
@@ -106,7 +106,8 @@ export const makeMountFn = (
           component: userComponent,
           rerender: (newComponent) => makeMountFn('rerender', newComponent, options, key, internalMountOptions),
           unmount: () => {
-            throw new Error('unmount is no longer supported. See https://on.cypress.io/migration-11-0-0-component-testing-updates to migrate.')
+            // @ts-expect-error - undocumented API
+            Cypress.utils.throwErrByPath('mount.unmount')
           },
         }, { log: false })
       })

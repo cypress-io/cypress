@@ -429,7 +429,8 @@ export function mount (componentOptions: any, options: any = {}) {
       return new Proxy(Object.create({}), {
         get (obj, prop) {
           if (Reflect.get(wrapper, prop)) {
-            throw new Error('As of Cypress 11, mount now yields an object with VueWrapper as a property. Destructure using `{ wrapper }` to access the VueWrapper. See https://on.cypress.io/migration-11-0-0-component-testing-updates for more information.')
+            // @ts-expect-error - internal API
+            Cypress.utils.throwErrByPath('mount.vue_yielded_value')
           }
 
           if (prop === 'then') {
@@ -488,9 +489,10 @@ function getComponentDisplayName (componentOptions: any): string {
 export function mountCallback (
   component: any,
   options: any = {},
-): () => Cypress.Chainable {
+) {
   return () => {
-    throw new Error('mountCallback  is no longer supported. See https://on.cypress.io/migration-11-0-0-component-testing-updates to migrate.')
+    // @ts-expect-error - undocumented API
+    Cypress.utils.throwErrByPath('mount.mount_callback')
   }
 }
 

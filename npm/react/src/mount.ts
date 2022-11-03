@@ -56,7 +56,8 @@ function internalUnmount (options = { log: true }) {
  * @see https://on.cypress.io/migration-11-0-0-component-testing-updates
  */
 export function unmount (options = { log: true }) {
-  throw new Error('unmount is no longer supported. See https://on.cypress.io/migration-11-0-0-component-testing-updates to migrate.')
+  // @ts-expect-error - undocumented API
+  Cypress.utils.throwErrByPath('mount.unmount')
 }
 
 // Re-export this to help with migrating away from `unmount`

@@ -420,7 +420,8 @@ export const mountCallback = (
   options?: MountOptionsArgument,
 ) => {
   return () => {
-    throw new Error('mountCallback is no longer supported. See https://on.cypress.io/migration-11-0-0-component-testing-updates to migrate.')
+    // @ts-expect-error - undocumented API
+    Cypress.utils.throwErrByPath('mount.mount_callback')
   }
 }
 
