@@ -1,3 +1,4 @@
+import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 import { getPathForPlatform } from './support/getPathForPlatform'
 
 function verifyScaffoldedFiles (testingType: string) {
@@ -37,7 +38,7 @@ describe('Launchpad: Setup Project', () => {
     cy.withCtx(async (ctx, o) => {
       o.sinon.stub(ctx.project, 'projectId').resolves(null)
       o.sinon.stub(ctx._apis.localSettingsApi, 'getPreferences').resolves({ majorVersionWelcomeDismissed: {
-        '11': Date.now(),
+        [MAJOR_VERSION_FOR_CONTENT]: Date.now(),
       } })
 
       // Delete the fixtures folder so it scaffold correctly the example

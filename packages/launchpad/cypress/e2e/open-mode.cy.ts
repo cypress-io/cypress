@@ -1,5 +1,6 @@
 import type { SinonStub } from 'sinon'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 
 describe('Launchpad: Open Mode', () => {
   describe('global mode', () => {
@@ -145,7 +146,7 @@ describe('Launchpad: Open Mode', () => {
       cy.withCtx((ctx, o) => {
         o.sinon.stub(ctx._apis.projectApi, 'launchProject').resolves()
         o.sinon.stub(ctx._apis.localSettingsApi, 'getPreferences').resolves({ majorVersionWelcomeDismissed: {
-          '11': Date.now(),
+          [MAJOR_VERSION_FOR_CONTENT]: Date.now(),
         } })
       })
 

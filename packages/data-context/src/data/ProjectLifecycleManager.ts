@@ -23,6 +23,7 @@ import { EventRegistrar } from './EventRegistrar'
 import { getServerPluginHandlers, resetPluginHandlers } from '../util/pluginHandlers'
 import { detectLanguage } from '@packages/scaffold-config'
 import { validateNeedToRestartOnChange } from '@packages/config'
+import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 
 export interface SetupFullConfigOptions {
   projectName: string
@@ -284,7 +285,7 @@ export class ProjectLifecycleManager {
       await this.setActiveBrowserByNameOrPath(this.ctx.coreData.cliBrowser)
 
       const preferences = await this.ctx._apis.localSettingsApi.getPreferences()
-      const hasLandingPageBeenDismissed = preferences.majorVersionWelcomeDismissed?.['11']
+      const hasLandingPageBeenDismissed = preferences.majorVersionWelcomeDismissed?.[MAJOR_VERSION_FOR_CONTENT]
 
       // only continue if the browser was successfully set - we must have an activeBrowser once this function resolves
       if (this.ctx.coreData.activeBrowser && hasLandingPageBeenDismissed) {

@@ -100,6 +100,7 @@ import OpenBrowser from './setup/OpenBrowser.vue'
 import LoginConnectModals from '@cy/gql-components/LoginConnectModals.vue'
 import CloudViewerAndProject from '@cy/gql-components/CloudViewerAndProject.vue'
 import { usePromptManager } from '@cy/gql-components/composables/usePromptManager'
+import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 
 const { setMajorVersionWelcomeDismissed } = usePromptManager()
 const { t } = useI18n()
@@ -174,23 +175,20 @@ const resetErrorAndLoadConfig = (id: string) => {
 }
 const query = useQuery({ query: MainLaunchpadQueryDocument })
 const currentProject = computed(() => query.data.value?.currentProject)
-const majorVersion = t('majorVersionWelcome.majorVersion')
 
 function handleClearLandingPage () {
-  if (majorVersion) {
-    setMajorVersionWelcomeDismissed(majorVersion)
-    const wasBrowserSetInCLI = query.data?.value?.localSettings.preferences?.wasBrowserSetInCLI
-    const currentTestingType = query.data?.value?.currentProject?.currentTestingType
+  setMajorVersionWelcomeDismissed(MAJOR_VERSION_FOR_CONTENT)
+  const wasBrowserSetInCLI = query.data?.value?.localSettings.preferences?.wasBrowserSetInCLI
+  const currentTestingType = query.data?.value?.currentProject?.currentTestingType
 
-    if (wasBrowserSetInCLI && currentTestingType) {
-      launchProject.executeMutation({ testingType: currentTestingType })
-    }
+  if (wasBrowserSetInCLI && currentTestingType) {
+    launchProject.executeMutation({ testingType: currentTestingType })
   }
 }
 
 const wasLandingPageDismissed = computed(() => {
-  if (query.data.value && majorVersion) {
-    return query.data.value?.localSettings?.preferences?.majorVersionWelcomeDismissed?.[majorVersion]
+  if (query.data.value) {
+    return query.data.value?.localSettings?.preferences?.majorVersionWelcomeDismissed?.[MAJOR_VERSION_FOR_CONTENT]
   }
 
   return false

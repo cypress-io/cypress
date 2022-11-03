@@ -20,3 +20,5 @@ export const MIGRATION_STEPS = ['renameAuto', 'renameManual', 'renameSupport', '
 export type MigrationStep = typeof MIGRATION_STEPS[number]
 
 export const PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm'] as const
+
+export const MAJOR_VERSION_FOR_CONTENT = '11'
