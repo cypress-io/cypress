@@ -425,10 +425,18 @@ export function mount (componentOptions: any, options: any = {}) {
 
       // by returning undefined we keep the previous subject
       // which is the mounted component
-      return {
-        wrapper,
-        component: wrapper.vm,
-      }
+      return new Proxy(Object.create(null), {
+        get (obj, prop) {
+          switch (prop) {
+            case 'wrapper':
+              return wrapper
+            case 'component':
+              return wrapper.vm
+            default:
+              throw Error('As of Cypress 11, mount now returns an object with a `wrapper` property. Use destructuring to access the VueWrapper. See https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes for more information.')
+          }
+        },
+      })
     })
   })
 }

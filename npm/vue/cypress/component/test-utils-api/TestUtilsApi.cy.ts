@@ -28,4 +28,10 @@ describe('VueTestUtils API', () => {
       expect(component.$data.foo).to.eq('bar')
     })
   })
+
+  it('errors when attempting to access Vue Wrapper without destructuring', () => {
+    mount(TestUtilsApi, { props: { msg: 'Hello world!' } }).then((vueWrapper) => {
+      expect(() => vueWrapper.find('h2').text()).to.throw()
+    })
+  })
 })
