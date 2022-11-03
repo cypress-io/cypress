@@ -3,33 +3,25 @@ import MajorVersionLandingPage from './MajorVersionLandingPage.vue'
 
 const text = defaultMessages.majorVersionLandingPage
 
-describe('<MajorVersionLandingPage />', { viewportWidth: 1280, viewportHeight: 720 }, () => {
-  const assertAllContentsVisible = () => {
-    cy.contains('h1', text.title).should('be.visible')
-    cy.contains('p', text.description).should('be.visible')
-    cy.contains('a', text.linkReleaseNotes).should('be.visible')
-    cy.contains('button', text.actionContinue).should('be.visible')
-  }
-
-  it('renders the content at large viewport', () => {
+describe('<MajorVersionLandingPage />', { viewportWidth: 1280, viewportHeight: 1400 }, () => {
+  it('renders expected interactive content', () => {
     const continueStub = cy.stub()
 
     cy.mount(<MajorVersionLandingPage onClearLandingPage={continueStub} />)
-    .pause()
 
-    assertAllContentsVisible()
+    cy.contains('h1', 'What\'s New in Cypress').should('be.visible')
+    cy.contains('a[href="https://on.cypress.io/changelog"]', text.linkReleaseNotes).should('be.visible')
+    cy.contains('a[href="https://on.cypress.io/changelog#11-0-0"]', '11.0.0').should('be.visible')
+    cy.contains('a[href="https://on.cypress.io/changelog#10-0-0"]', '10.0.0').should('be.visible')
+
+    cy.contains('button', text.actionContinue).should('be.visible')
     cy.contains('button', text.actionContinue).click()
     cy.wrap(continueStub).should('have.been.calledOnce')
 
-    cy.percySnapshot()
-  })
+    cy.percySnapshot('looks good at full size')
 
-  it('is responsive on smaller viewports', () => {
-    cy.mount(<MajorVersionLandingPage />)
-    cy.viewport(500, 500)
-    assertAllContentsVisible()
-    cy.viewport(600, 600)
+    cy.viewport(1280, 500)
 
-    cy.percySnapshot()
+    cy.percySnapshot('content overflows inside box')
   })
 })
