@@ -336,7 +336,7 @@ describe('src/cy/commands/actions/selectFile', () => {
     })
 
     describe('errors', {
-      defaultCommandTimeout: 500,
+      defaultCommandTimeout: 100,
     }, () => {
       it('is a child command', (done) => {
         cy.on('fail', (err) => {
@@ -358,17 +358,17 @@ describe('src/cy/commands/actions/selectFile', () => {
 
       it('throws when non-input subject', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.selectFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing one. Your subject is: `<body>...</body>`')
+          expect(err.message).to.include('`cy.selectFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing a file input, but received the element:')
           expect(err.docsUrl).to.eq('https://on.cypress.io/selectfile')
           done()
         })
 
-        cy.get('body').selectFile({ contents: '@foo' })
+        cy.get('body').selectFile({ contents: '@foo' }, { timeout: 0 })
       })
 
       it('throws when non-file input', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.selectFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing one. Your subject is: `<input type="text" id="text-input">`')
+          expect(err.message).to.include('`cy.selectFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing a file input, but received the element:')
           expect(err.docsUrl).to.eq('https://on.cypress.io/selectfile')
           done()
         })
@@ -378,7 +378,7 @@ describe('src/cy/commands/actions/selectFile', () => {
 
       it('throws when label for non-file input', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.selectFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing one. Your subject is: `<label for="text-input" id="text-label">Text label</label>`')
+          expect(err.message).to.include('`cy.selectFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing a file input, but received the element:')
           expect(err.docsUrl).to.eq('https://on.cypress.io/selectfile')
           done()
         })
@@ -390,7 +390,7 @@ describe('src/cy/commands/actions/selectFile', () => {
         // Even though this label contains a file input, testing on real browsers confirms that clicking it
         // does *not* activate the contained input.
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.selectFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing one. Your subject is: `<label for="nonexistent" id="nonexistent-label">...</label>`')
+          expect(err.message).to.include('`cy.selectFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing a file input, but received the element:')
           expect(err.docsUrl).to.eq('https://on.cypress.io/selectfile')
           done()
         })
