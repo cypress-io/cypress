@@ -1,9 +1,9 @@
 import _ from 'lodash'
-
 import UrlParse from 'url-parse'
-import konfig from '../konfig'
 
-const apiUrl = konfig('api_url')
+const app_config = require('../../config/app.json')
+const apiUrl = app_config[process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'development'].api_url
+
 const DASHBOARD_ENDPOINTS = {
   api: '',
   auth: 'auth',

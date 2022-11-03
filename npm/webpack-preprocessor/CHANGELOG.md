@@ -1,3 +1,24 @@
+# [@cypress/webpack-preprocessor-v5.15.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.15.2...@cypress/webpack-preprocessor-v5.15.3) (2022-11-02)
+
+
+### Bug Fixes
+
+* Ensure patched merge-source-map is included in package ([#24490](https://github.com/cypress-io/cypress/issues/24490)) ([493d90c](https://github.com/cypress-io/cypress/commit/493d90c33082565a93418f39388daab348c175cf))
+
+# [@cypress/webpack-preprocessor-v5.15.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.15.1...@cypress/webpack-preprocessor-v5.15.2) (2022-11-01)
+
+
+### Bug Fixes
+
+* patching packages in `npm/webpack-preprocessor` on windows builds ([#24473](https://github.com/cypress-io/cypress/issues/24473)) ([440a08b](https://github.com/cypress-io/cypress/commit/440a08bb2a67b7415fd1895118278e5dd0d8b32f))
+
+# [@cypress/webpack-preprocessor-v5.15.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.15.0...@cypress/webpack-preprocessor-v5.15.1) (2022-10-31)
+
+
+### Bug Fixes
+
+* Fix sourcemaps when using cy.origin() dependencies ([#24367](https://github.com/cypress-io/cypress/issues/24367)) ([b916ba9](https://github.com/cypress-io/cypress/commit/b916ba9c410856582b113fcdcef69cfc6b6e9861))
+
 # [@cypress/webpack-preprocessor-v5.15.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.14.0...@cypress/webpack-preprocessor-v5.15.0) (2022-10-19)
 
 
