@@ -13,4 +13,14 @@ describe('<Logo />', () => {
 
     cy.contains('h1', slotContent)
   })
+
+  it('throws error when receiving removed mounting options', () => {
+    for (const key of ['cssFile', 'cssFiles', 'style', 'styles', 'stylesheet', 'stylesheets']) {
+      expect(() => mount(HelloWorld, { 
+        [key]: `body { background: red; }`
+      })).to.throw(
+        `The \`${key}\` mounting option is no longer supported. See https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes to migrate.`
+      )
+    }
+  })
 })

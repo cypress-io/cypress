@@ -4,6 +4,7 @@ import {
   getContainerEl,
   ROOT_SELECTOR,
   setupHooks,
+  checkForRemovedStyleOptions,
 } from '@cypress/mount-utils'
 import type { InternalMountOptions, MountOptions, MountReturn, UnmountArgs } from './types'
 
@@ -34,6 +35,8 @@ export const makeMountFn = (
     // @ts-expect-error
     throw new Error(`passing \`alias\` to mounting options is no longer supported. Use mount(...).as('${options.alias}') instead. See https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes to migrate.`)
   }
+
+  checkForRemovedStyleOptions(options)
 
   mountCleanup = internalMountOptions.cleanup
 

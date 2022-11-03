@@ -10,6 +10,7 @@ import {
 import {
   getContainerEl,
   setupHooks,
+  checkForRemovedStyleOptions,
 } from '@cypress/mount-utils'
 
 const defaultOptions: (keyof MountOptions)[] = [
@@ -330,6 +331,8 @@ export const mount = (
   wrapper: Wrapper<Vue, Element>
   component: Wrapper<Vue, Element>['vm']
 }> => {
+  checkForRemovedStyleOptions(optionsOrProps)
+
   const options: Partial<MountOptions> = Cypress._.pick(
     optionsOrProps,
     defaultOptions,

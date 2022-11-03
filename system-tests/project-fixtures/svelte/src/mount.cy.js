@@ -2,6 +2,7 @@ import Counter from "./Counter.svelte";
 import Context from "./Context.svelte";
 import Store from "./Store.svelte";
 import { messageStore } from "./store";
+import { mount } from 'cypress/svelte'
 
 describe("Svelte mount", () => {
   it("mounts", () => {
@@ -83,4 +84,17 @@ describe("Svelte mount", () => {
       );
     });
   });
+
+  it('throws error when receiving removed mounting option', () => {
+    const msg = 'The `styles` mounting option is no longer supported. See https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes to migrate.'
+
+    Cypress.on('fail', (e) => {
+      expect(e.message).to.eq(msg)
+      return false
+    })
+
+    cy.mount(Counter, { 
+      styles: `body { background: red; }`
+    })
+  })
 });

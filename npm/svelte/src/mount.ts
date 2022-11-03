@@ -1,6 +1,7 @@
 import {
   getContainerEl,
   setupHooks,
+  checkForRemovedStyleOptions,
 } from '@cypress/mount-utils'
 import type { ComponentConstructorOptions, ComponentProps, SvelteComponent } from 'svelte'
 
@@ -58,6 +59,8 @@ export function mount<T extends SvelteComponent> (
   Component: SvelteConstructor<T>,
   options: MountOptions<T> = {},
 ): Cypress.Chainable<MountReturn<T>> {
+  checkForRemovedStyleOptions(options)
+
   return cy.then(() => {
     const target = getContainerEl()
 

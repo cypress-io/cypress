@@ -10,6 +10,14 @@ export const getContainerEl = (): HTMLElement => {
   throw Error(`No element found that matches selector ${ROOT_SELECTOR}. Please add a root element with data-cy-root attribute to your "component-index.html" file so that Cypress can attach your component to the DOM.`)
 }
 
+export function checkForRemovedStyleOptions (mountingOptions: Record<string, any>) {
+  for (const key of ['cssFile', 'cssFiles', 'style', 'styles', 'stylesheet', 'stylesheets'] as const) {
+    if (mountingOptions[key]) {
+      throw new Error(`The \`${key}\` mounting option is no longer supported. See https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes to migrate.`)
+    }
+  }
+}
+
 export function setupHooks (optionalCallback?: Function) {
   // Consumed by the framework "mount" libs. A user might register their own mount in the scaffolded 'commands.js'
   // file that is imported by e2e and component support files by default. We don't want CT side effects to run when e2e

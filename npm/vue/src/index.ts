@@ -23,6 +23,7 @@ import type { MountingOptions as VTUMountingOptions, VueWrapper } from '@vue/tes
 import {
   getContainerEl,
   setupHooks,
+  checkForRemovedStyleOptions,
 } from '@cypress/mount-utils'
 
 import * as _VueTestUtils from '@vue/test-utils'
@@ -376,6 +377,8 @@ export function mount<
 
 // implementation
 export function mount (componentOptions: any, options: any = {}) {
+  checkForRemovedStyleOptions(options)
+
   // TODO: get the real displayName and props from VTU shallowMount
   const componentName = getComponentDisplayName(componentOptions)
 
