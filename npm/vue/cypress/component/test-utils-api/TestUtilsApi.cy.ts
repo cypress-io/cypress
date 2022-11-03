@@ -31,7 +31,8 @@ describe('VueTestUtils API', () => {
 
   it('errors when attempting to access Vue Wrapper without destructuring', () => {
     mount(TestUtilsApi, { props: { msg: 'Hello world!' } }).then((vueWrapper) => {
-      expect(() => vueWrapper.find('h2').text()).to.throw()
+      expect(() => vueWrapper.vm).to.throw('As of Cypress 11, mount now yields an object with VueWrapper as a property. Destructure using `{ wrapper }` to access the VueWrapper. See https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes for more information.')
+      expect(() => vueWrapper.find('h2').text()).to.throw('As of Cypress 11, mount now yields an object with VueWrapper as a property. Destructure using `{ wrapper }` to access the VueWrapper. See https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes for more information.')
     })
   })
 })
