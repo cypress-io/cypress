@@ -382,7 +382,7 @@ export class ProjectLifecycleManager {
     return this._configManager.initializeConfig()
   }
 
-  private async _setCurrentProject (projectRoot: string) {
+  private _setCurrentProject (projectRoot: string) {
     process.chdir(projectRoot)
 
     this._projectRoot = projectRoot
