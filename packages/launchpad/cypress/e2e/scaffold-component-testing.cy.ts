@@ -4,12 +4,7 @@ function startSetupFor (project: ProjectFixtureDir) {
   cy.scaffoldProject(project)
   cy.openProject(project)
   cy.visitLaunchpad()
-
-  // click Continue on Welcome page
-  // and wait for the button to disappear
-  cy.contains('button', 'Continue')
-  .click()
-  .should('not.exist')
+  cy.skipWelcome()
 
   cy.contains('Component Testing').click()
   cy.get(`[data-testid="select-framework"]`)
