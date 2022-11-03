@@ -285,7 +285,8 @@ export class ProjectLifecycleManager {
       await this.setActiveBrowserByNameOrPath(this.ctx.coreData.cliBrowser)
 
       const preferences = await this.ctx._apis.localSettingsApi.getPreferences()
-      const hasLandingPageBeenDismissed = preferences.majorVersionWelcomeDismissed?.[MAJOR_VERSION_FOR_CONTENT]
+
+      const hasLandingPageBeenDismissed = Boolean(preferences.majorVersionWelcomeDismissed?.[MAJOR_VERSION_FOR_CONTENT])
 
       // only continue if the browser was successfully set - we must have an activeBrowser once this function resolves
       if (this.ctx.coreData.activeBrowser && hasLandingPageBeenDismissed) {
