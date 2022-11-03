@@ -32,6 +32,10 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'TEST_FILES_RENAMED',
 ] as const
 
+type ValidationOptions = {
+  testingType: TestingType | null
+}
+
 export type BreakingOptionErrorKey = typeof BREAKING_OPTION_ERROR_KEY[number]
 
 export type OverrideLevel = 'any' | 'suite' | 'never'
@@ -91,7 +95,7 @@ export interface BreakingOption {
   showInLaunchpad?: boolean
 }
 
-const isValidConfig = (testingType: string, config: any) => {
+const isValidConfig = (testingType: string, config: any, opts: ValidationOptions) => {
   const status = validate.isPlainObject(testingType, config)
 
   if (status !== true) {
@@ -100,7 +104,7 @@ const isValidConfig = (testingType: string, config: any) => {
 
   for (const rule of options) {
     if (rule.name in config && rule.validation) {
-      const status = rule.validation(`${testingType}.${rule.name}`, config[rule.name])
+      const status = rule.validation(`${testingType}.${rule.name}`, config[rule.name], opts)
 
       if (status !== true) {
         return status
@@ -367,8 +371,27 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     overrideLevel: 'any',
   }, {
     name: 'testIsolation',
-    defaultValue: 'strict',
-    validation: validate.isOneOf('legacy', 'strict'),
+    defaultValue: 'on',
+    validation: (key: string, value: any, opts: ValidationOptions) => {
+      const { testingType } = opts
+
+      if (testingType == null || testingType === 'component') {
+        return true
+      }
+
+      if (testingType === 'e2e') {
+        return validate.isOneOf('on', 'off')(key, value)
+      }
+
+      if (value == null) {
+        return true
+      }
+
+      return {
+        key,
+        value,
+      }
+    },
     overrideLevel: 'suite',
   }, {
     name: 'trashAssetsBeforeRuns',

@@ -401,7 +401,9 @@ export function mergeDefaults (
     config.baseUrl = url.replace(/\/\/+$/, '/')
   }
 
-  const defaultsForRuntime = getDefaultValues(options)
+  const defaultsForRuntime = getDefaultValues({
+    ...options,
+  })
 
   _.defaultsDeep(config, defaultsForRuntime)
 
@@ -454,7 +456,7 @@ export function mergeDefaults (
     }
 
     return errors.throwErr('CONFIG_VALIDATION_ERROR', null, null, validationResult)
-  })
+  }, testingType)
 
   config = setAbsolutePaths(config)
 
@@ -476,6 +478,16 @@ export function mergeDefaults (
     throw makeConfigError(errors.get(err, ...args))
   }, testingType)
 
+  if (testingType === 'e2e') {
+    if (config.rawJson.testIsolation) {
+      config.resolved.testIsolation.from = 'config'
+    } else {
+      config.testIsolation = 'on'
+      config.resolved.testIsolation.value = 'on'
+      config.resolved.testIsolation.from === 'default'
+    }
+  }
+
   // We need to remove the nested propertied by testing type because it has been
   // flattened/compacted based on the current testing type that is selected
   // making the config only available with the properties that are valid,
@@ -489,7 +501,7 @@ export function mergeDefaults (
 }
 
 function isValidCypressInternalEnvValue (value: string) {
-  // names of config environments, see "config/app.yml"
+  // names of config environments, see "config/app.json"
   const names = ['development', 'test', 'staging', 'production']
 
   return _.includes(names, value)

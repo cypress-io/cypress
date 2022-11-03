@@ -24,6 +24,7 @@ import * as objUtils from '../util/obj_utils'
 import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, BrowserVideoController, VideoRecording, ProcessOptions } from '@packages/types'
 import type { Cfg } from '../project-base'
 import type { Browser } from '../browsers/types'
+import { debugElapsedTime } from '../util/performance_benchmark'
 import * as printResults from '../util/print-run'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
@@ -164,8 +165,8 @@ const openProjectCreate = (projectRoot, socketId, args) => {
 
 async function checkAccess (folderPath) {
   return fs.access(folderPath, fs.constants.W_OK).catch((err) => {
-    if (['EACCES', 'EPERM'].includes(err.code)) {
-      // we cannot write due to folder permissions
+    if (['EACCES', 'EPERM', 'EROFS'].includes(err.code)) {
+      // we cannot write due to folder permissions, or read-only filesystem
       return errors.warning('FOLDER_NOT_WRITABLE', folderPath)
     }
 
@@ -1058,10 +1059,12 @@ export async function run (options, loading: Promise<void>) {
       debug('all BrowserWindows closed, not exiting')
     })
 
+    debugElapsedTime('run mode ready')
     await app.whenReady()
   }
 
   await loading
+
   try {
     return ready(options)
   } catch (e) {

@@ -6,7 +6,7 @@ export async function scaffoldMigrationProject (project: ProjectFixtureDir): Pro
 
   await Fixtures.scaffoldProject(project)
 
-  await FixturesScaffold.scaffoldProjectNodeModules(project)
+  await FixturesScaffold.scaffoldProjectNodeModules({ project })
 
   return Fixtures.projectPath(project)
 }

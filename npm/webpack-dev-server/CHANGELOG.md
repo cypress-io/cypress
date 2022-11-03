@@ -1,3 +1,17 @@
+# [@cypress/webpack-dev-server-v2.5.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v2.4.1...@cypress/webpack-dev-server-v2.5.0) (2022-11-01)
+
+
+### Features
+
+* introduce v8 snapshots to improve startup performance ([#24295](https://github.com/cypress-io/cypress/issues/24295)) ([b0c0eaa](https://github.com/cypress-io/cypress/commit/b0c0eaa508bb6dafdc1997bc00fb7ed6f5bcc160))
+
+# [@cypress/webpack-dev-server-v2.4.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v2.4.0...@cypress/webpack-dev-server-v2.4.1) (2022-10-19)
+
+
+### Bug Fixes
+
+* clean up inconsistencies in UI between sentence case and title case ([#23681](https://github.com/cypress-io/cypress/issues/23681)) ([f73aef5](https://github.com/cypress-io/cypress/commit/f73aef54b041fe08d939b52e5c6fe1d133502051))
+
 # [@cypress/webpack-dev-server-v2.4.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v2.3.0...@cypress/webpack-dev-server-v2.4.0) (2022-10-13)
 
 

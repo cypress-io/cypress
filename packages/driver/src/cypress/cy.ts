@@ -33,11 +33,11 @@ import { TestConfigOverride } from '../cy/testConfigOverrides'
 import { create as createOverrides, IOverrides } from '../cy/overrides'
 import { historyNavigationTriggeredHashChange } from '../cy/navigation'
 import { EventEmitter2 } from 'eventemitter2'
+import { handleCrossOriginCookies } from '../cross-origin/events/cookies'
 
 import type { ICypress } from '../cypress'
 import type { ICookies } from './cookies'
 import type { StateFunc } from './state'
-import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
 
 const debugErrors = debugFn('cypress:driver:errors')
 
@@ -373,29 +373,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       this.enqueue(attrs)
     })
 
-    Cypress.on('cross:origin:automation:cookies', (cookies: AutomationCookie[]) => {
-      const existingCookies: AutomationCookie[] = state('cross:origin:automation:cookies') || []
-
-      this.state('cross:origin:automation:cookies', existingCookies.concat(cookies))
-
-      Cypress.backend('cross:origin:automation:cookies:received')
-    })
-
-    Cypress.on('before:stability:release', (stable: boolean) => {
-      const cookies: AutomationCookie[] = state('cross:origin:automation:cookies') || []
-
-      if (!stable || !cookies.length) return
-
-      // reset the state cookies before setting them via automation in case
-      // any more get set in the interim
-      state('cross:origin:automation:cookies', [])
-
-      // this will be awaited before any stability-reliant actions
-      return Cypress.automation('add:cookies', cookies)
-      .catch(() => {
-        // errors here can be ignored as they're not user-actionable
-      })
-    })
+    handleCrossOriginCookies(Cypress)
   }
 
   isCy (val) {
@@ -608,7 +586,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           // this catches errors thrown by user-registered event handlers
           // for `window:load`. this is used in the `catch` below so they
           // aren't mistaken as cross-origin errors
-          err.isFromWindowLoadEvent = true
+          // If this is a cypress error, pass it on through.
+          if (!$errUtils.isCypressErr(err)) {
+            err.isFromWindowLoadEvent = true
+          }
 
           throw err
         } finally {

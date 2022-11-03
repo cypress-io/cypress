@@ -29,5 +29,9 @@ describe('e2e plugin run events', () => {
     config: {
       video: false,
     },
+    onStdout: (stdout) => {
+      // TODO: Figure out how to fix the race condition on thrown exceptions in before:spec that causes additional electron exceptions to fire: https://github.com/cypress-io/cypress/issues/24102
+      return stdout.trimRight()
+    },
   })
 })
