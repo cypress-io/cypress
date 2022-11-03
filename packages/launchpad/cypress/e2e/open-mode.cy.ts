@@ -1,6 +1,6 @@
 import type { SinonStub } from 'sinon'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
-import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
+import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types/src'
 
 describe('Launchpad: Open Mode', () => {
   describe('global mode', () => {
@@ -128,10 +128,13 @@ describe('Launchpad: Open Mode', () => {
       cy.openProject('launchpad', ['--browser', 'firefox', '--e2e'])
       cy.withCtx((ctx, o) => {
         o.sinon.stub(ctx._apis.projectApi, 'launchProject').resolves()
+        // o.sinon.stub(ctx._apis.localSettingsApi, 'getPreferences').callsFake()
       })
 
       // Need to visit after args have been configured, todo: fix in #18776
       cy.visitLaunchpad()
+      // avoid flake by asserting the testing type has appeared
+      cy.contains('nav', 'E2E Testing').should('be.visible')
       cy.skipWelcome()
       cy.get('h1').should('contain', 'Choose a browser')
       cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
@@ -146,8 +149,10 @@ describe('Launchpad: Open Mode', () => {
       cy.withCtx((ctx, o) => {
         o.sinon.stub(ctx._apis.projectApi, 'launchProject').resolves()
         o.sinon.stub(ctx._apis.localSettingsApi, 'getPreferences').resolves({ majorVersionWelcomeDismissed: {
-          [MAJOR_VERSION_FOR_CONTENT]: Date.now(),
+          [o.MAJOR_VERSION_FOR_CONTENT]: Date.now(),
         } })
+      }, {
+        MAJOR_VERSION_FOR_CONTENT,
       })
 
       cy.scaffoldProject('launchpad')
@@ -155,6 +160,7 @@ describe('Launchpad: Open Mode', () => {
 
       // Need to visit after args have been configured, todo: fix in #18776
       cy.visitLaunchpad()
+
       cy.get('h1').should('contain', 'Choose a browser')
       cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
       cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')

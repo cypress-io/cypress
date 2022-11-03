@@ -31,7 +31,6 @@ function scaffoldAndVisitLaunchpad (project: ProjectFixtureDir, argv?: string[])
 
 function startMigrationFor (project: ProjectFixtureDir, argv?: string[]) {
   scaffoldAndVisitLaunchpad(project, argv)
-  cy.contains('button', cy.i18n.majorVersionWelcome.actionContinue).click()
   cy.waitForWizard()
 }
 
@@ -133,7 +132,7 @@ describe('Opening unmigrated project', () => {
     cy.scaffoldProject('migration')
     cy.openProject('migration', ['--e2e'])
     cy.visitLaunchpad()
-    cy.contains('button', cy.i18n.majorVersionWelcome.actionContinue).click()
+    cy.skipWelcome()
     cy.get('h1').should('contain', 'Migration')
   })
 
@@ -141,7 +140,7 @@ describe('Opening unmigrated project', () => {
     cy.scaffoldProject('migration-component-testing')
     cy.openProject('migration-component-testing', ['--component'])
     cy.visitLaunchpad()
-    cy.contains('button', cy.i18n.majorVersionWelcome.actionContinue).click()
+    cy.skipWelcome()
     cy.get('h1').should('contain', 'Migration')
   })
 
@@ -645,7 +644,10 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
     cy.get(setupComponentStep).should('not.exist')
     cy.get(configFileStep).should('exist')
 
-    startMigrationFor('migration-e2e-custom-test-files')
+    cy.scaffoldProject('migration-e2e-custom-test-files')
+    cy.openProject('migration-e2e-custom-test-files')
+    cy.visitLaunchpad()
+
     // default testFiles but custom integration - can rename automatically
     cy.get(renameAutoStep).should('exist')
     // no CT
@@ -1325,7 +1327,6 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
     }, { path: getPathForPlatform('cypress/plugins/index.js') })
 
     cy.findByRole('button', { name: 'Try again' }).click()
-    cy.contains('button', cy.i18n.majorVersionWelcome.actionContinue).click()
 
     cy.waitForWizard()
   })
@@ -1660,7 +1661,6 @@ describe('Migrate custom config files', () => {
 
   it('shows error for migration-custom-config-file-with-existing-v10-config-file', () => {
     scaffoldAndVisitLaunchpad('migration-custom-config-file-with-existing-v10-config-file', ['--config-file', 'customConfig.json'])
-    cy.contains('button', cy.i18n.majorVersionWelcome.actionContinue).click()
 
     cy.contains('There is both a customConfig.config.js and a customConfig.json file at the location below:')
     cy.contains('Cypress no longer supports customConfig.json, please remove it from your project.')
