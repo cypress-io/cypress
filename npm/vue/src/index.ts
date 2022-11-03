@@ -380,7 +380,7 @@ export function mount<
  * Mounts a component and returns an object containing the component and VueWrapper
  * @param componentOptions
  * @param options
- * @returns {Cypress.Chainable<VueWrapper>}
+ * @returns {Cypress.Chainable<{wrapper: VueWrapper<T>, component: T}
  * @see {@link https://docs.cypress.io/guides/component-testing/mounting-vue} for more details.
  * @example
  * import { mount } from '@cypress/vue'

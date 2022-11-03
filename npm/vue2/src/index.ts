@@ -319,6 +319,8 @@ function getComponentDisplayName (componentOptions: any): string {
 /**
  * Mounts a Vue component inside Cypress browser.
  * @param {VueComponent} component imported from Vue file
+ * @param {MountOptionsArgument} optionsOrProps used to pass options to component being mounted
+ * @returns {Cypress.Chainable<{wrapper: Wrapper<T>, component: T}
  * @example
  * import { mount } from '@cypress/vue'
  * import { Stepper } from './Stepper.vue'

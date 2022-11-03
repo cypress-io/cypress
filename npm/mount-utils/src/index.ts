@@ -210,6 +210,7 @@ export const injectStylesBeforeElement = (
  */
 export function setupHooks (optionalCallback?: Function) {
   // We don't want CT side effects to run when e2e
+  // testing so we early return.
   // System test to verify CT side effects do not pollute e2e: system-tests/test/e2e_with_mount_import_spec.ts
   if (Cypress.testingType !== 'component') {
     return

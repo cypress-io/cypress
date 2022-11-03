@@ -27,9 +27,9 @@ const cleanup = () => {
 
 /**
  * Mounts a React component into the DOM.
- * @param jsx {import('react').JSX.Element} The React component to mount.
- * @param options {MountOptions} Options to pass to the mount function.
- * @param rerenderKey {string} A key to use to force a rerender.
+ * @param {import('react').JSX.Element} jsx The React component to mount.
+ * @param {MountOptions} options Options to pass to the mount function.
+ * @param {string} rerenderKey A key to use to force a rerender.
  *
  * @example
  * import { mount } from '@cypress/react'
