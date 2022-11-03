@@ -48,7 +48,7 @@ export interface MountReturn {
    * Removes the mounted component.
    *
    * Removed as of Cypress 11.0.0.
-   * @see https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes
+   * @see https://on.cypress.io/migration-11-0-0-component-testing-updates
    */
   unmount: (payload: UnmountArgs) => void // globalThis.Cypress.Chainable<JQuery<HTMLElement>>
 }

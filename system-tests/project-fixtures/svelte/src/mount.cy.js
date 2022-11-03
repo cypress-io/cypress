@@ -86,7 +86,7 @@ describe("Svelte mount", () => {
   });
 
   it('throws error when receiving removed mounting option', () => {
-    const msg = 'The `styles` mounting option is no longer supported. See https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes to migrate.'
+    const msg = 'The `styles` mounting option is no longer supported. See https://on.cypress.io/migration-11-0-0-component-testing-updates to migrate.'
 
     Cypress.on('fail', (e) => {
       expect(e.message).to.eq(msg)

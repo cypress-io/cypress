@@ -13,7 +13,7 @@ export const getContainerEl = (): HTMLElement => {
 export function checkForRemovedStyleOptions (mountingOptions: Record<string, any>) {
   for (const key of ['cssFile', 'cssFiles', 'style', 'styles', 'stylesheet', 'stylesheets'] as const) {
     if (mountingOptions[key]) {
-      throw new Error(`The \`${key}\` mounting option is no longer supported. See https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes to migrate.`)
+      throw new Error(`The \`${key}\` mounting option is no longer supported. See https://on.cypress.io/migration-11-0-0-component-testing-updates to migrate.`)
     }
   }
 }
@@ -49,7 +49,7 @@ export function setupHooks (optionalCallback?: Function) {
  * @ Removed as of Cypress 11.0.0
  */
 export function cleanupStyles () {
-  throw new Error('cleanupStyles is no longer supported. See https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes to migrate.')
+  throw new Error('cleanupStyles is no longer supported. See https://on.cypress.io/migration-11-0-0-component-testing-updates to migrate.')
 }
 
 /**
@@ -58,7 +58,7 @@ export function cleanupStyles () {
  * local CSS files and custom styles.
  *
  * Removed as of Cypress 11.0.0.
- * @see https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes
+ * @see https://on.cypress.io/migration-11-0-0-component-testing-updates
  */
 export type StyleOptions = unknown
 
@@ -67,12 +67,12 @@ export type StyleOptions = unknown
  * into the given document.
  *
  * Removed as of Cypress 11.0.0.
- * @see https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes
+ * @see https://on.cypress.io/migration-11-0-0-component-testing-updates
  */
 export const injectStylesBeforeElement = (
   options: Partial<StyleOptions & { log: boolean }>,
   document: Document,
   el: HTMLElement | null,
 ): HTMLElement => {
-  throw new Error('injectStylesBeforeElement is no longer supported. See https://docs.cypress.io/guides/references/migration-guide#Component-Testing-Changes to migrate.')
+  throw new Error('injectStylesBeforeElement is no longer supported. See https://on.cypress.io/migration-11-0-0-component-testing-updates to migrate.')
 }
