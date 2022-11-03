@@ -80,7 +80,7 @@ function cookieValidatesSecurePrefix (options) {
 }
 
 function validateDomainOption (domain: any, commandName: string, log: Log | undefined) {
-  if (domain != null && !_.isString(domain)) {
+  if (domain !== undefined && domain !== null && !_.isString(domain)) {
     $errUtils.throwErrByPath('cookies.invalid_domain', {
       onFail: log,
       args: {
