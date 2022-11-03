@@ -74,9 +74,10 @@ export type CyMountOptions<Props, Data = {}> = MountingOptions<Props, Data>
 
 const cleanup = () => {
   Cypress.vueWrapper?.unmount()
-  const el = getContainerEl()
 
-  el.innerHTML = ''
+  ;(Cypress as any).vueWrapper = null
+
+  ;(Cypress as any).vue = null
 }
 
 /**
