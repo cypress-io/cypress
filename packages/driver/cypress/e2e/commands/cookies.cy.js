@@ -9,6 +9,7 @@ describe('src/cy/commands/cookies - no stub', () => {
     it('returns cookies from the domain matching the AUT by default', () => {
       cy.visit('http://localhost:3500/fixtures/generic.html')
       cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
+      cy.setCookie('baz', 'qux', { domain: 'foobar.com' })
       cy.setCookie('foo', 'bar')
 
       cy.getCookies().then((cookies) => {
@@ -22,6 +23,7 @@ describe('src/cy/commands/cookies - no stub', () => {
 
         cy.getCookies().then((cookies) => {
           expect(cookies[0].domain).to.match(/\.?www\.foobar\.com/)
+          expect(cookies[1].domain).to.match(/\.?foobar\.com/)
         })
       })
     })
