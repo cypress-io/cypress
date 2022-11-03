@@ -7,13 +7,13 @@ const isWebkit = Cypress.isBrowser('webkit')
 describe('src/cy/commands/cookies - no stub', () => {
   context('#getCookies', () => {
     it('returns cookies from the domain matching the AUT by default', () => {
-      cy.visit('http://localhost:3500/fixtures/generic.html')
+      cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
       cy.setCookie('baz', 'qux', { domain: 'foobar.com' })
       cy.setCookie('foo', 'bar')
 
       cy.getCookies().then((cookies) => {
-        expect(cookies[0].domain).to.equal('localhost')
+        expect(cookies[0].domain).to.match(/\.?.barbaz\.com/)
       })
 
       if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
@@ -29,7 +29,7 @@ describe('src/cy/commands/cookies - no stub', () => {
     })
 
     it('returns cookies for the specified domain', () => {
-      cy.visit('http://localhost:3500/fixtures/generic.html')
+      cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
       cy.setCookie('foo', 'bar')
 
@@ -42,14 +42,14 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
 
-        cy.getCookies({ domain: 'localhost' }).then((cookies) => {
-          expect(cookies[0].domain).to.equal('localhost')
+        cy.getCookies({ domain: 'barbaz.com' }).then((cookies) => {
+          expect(cookies[0].domain).to.match(/\.?barbaz\.com/)
         })
       })
     })
 
     it('returns cookies for all domains when domain is null', () => {
-      cy.visit('http://localhost:3500/fixtures/generic.html')
+      cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
       cy.setCookie('foo', 'bar')
 
@@ -67,11 +67,11 @@ describe('src/cy/commands/cookies - no stub', () => {
 
   context('#getCookie', () => {
     it('returns the cookie from the domain matching the AUT by default', () => {
-      cy.visit('http://localhost:3500/fixtures/generic.html')
+      cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
       cy.setCookie('foo', 'bar')
 
-      cy.getCookie('foo').its('domain').should('equal', 'localhost')
+      cy.getCookie('foo').its('domain').should('match', /\.?barbaz\.com/)
 
       if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
 
@@ -83,7 +83,7 @@ describe('src/cy/commands/cookies - no stub', () => {
     })
 
     it('returns the cookie from the specified domain', () => {
-      cy.visit('http://localhost:3500/fixtures/generic.html')
+      cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
       cy.setCookie('foo', 'bar')
 
@@ -95,13 +95,13 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
 
-        cy.getCookie('foo', { domain: 'localhost' })
-        .its('domain').should('equal', 'localhost')
+        cy.getCookie('foo', { domain: 'barbaz.com' })
+        .its('domain').should('match', /\.?barbaz\.com/)
       })
     })
 
     it('returns cookie for any domain when domain is null', () => {
-      cy.visit('http://localhost:3500/fixtures/generic.html')
+      cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
 
       cy.getCookie('foo', { domain: null })
@@ -113,20 +113,20 @@ describe('src/cy/commands/cookies - no stub', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
 
         cy.clearCookie('foo')
-        cy.setCookie('foo', 'bar', { domain: 'localhost' })
+        cy.setCookie('foo', 'bar', { domain: 'barbaz.com' })
 
         cy.getCookie('foo', { domain: null })
-        .its('domain').should('equal', 'localhost')
+        .its('domain').should('match', /\.?barbaz\.com/)
       })
     })
   })
 
   context('#setCookie', () => {
     it('sets the cookie on the domain matching the AUT by default', () => {
-      cy.visit('http://localhost:3500/fixtures/generic.html')
+      cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       cy.setCookie('foo', 'bar')
 
-      cy.getCookie('foo').its('domain').should('equal', 'localhost')
+      cy.getCookie('foo').its('domain').should('match', /\.?barbaz\.com/)
 
       if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
 
@@ -139,7 +139,7 @@ describe('src/cy/commands/cookies - no stub', () => {
     })
 
     it('set the cookie on the specified domain', () => {
-      cy.visit('http://localhost:3500/fixtures/generic.html')
+      cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
 
       cy.getCookie('foo', { domain: 'www.foobar.com' })
@@ -149,10 +149,10 @@ describe('src/cy/commands/cookies - no stub', () => {
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
-        cy.setCookie('foo', 'bar', { domain: 'localhost' })
+        cy.setCookie('foo', 'bar', { domain: 'barbaz.com' })
 
-        cy.getCookie('foo', { domain: 'localhost' })
-        .its('domain').should('equal', 'localhost')
+        cy.getCookie('foo', { domain: 'barbaz.com' })
+        .its('domain').should('match', /\.?barbaz\.com/)
       })
     })
   })
@@ -166,7 +166,7 @@ describe('src/cy/commands/cookies - no stub', () => {
     })
 
     it('clears the cookies on the domain matching the AUT by default', () => {
-      cy.visit('http://localhost:3500/fixtures/generic.html')
+      cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       cy.setCookie('foo', 'bar')
       cy.setCookie('baz', 'qux')
       cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
@@ -182,18 +182,18 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
         cy.setCookie('baz', 'qux')
-        cy.setCookie('foo', 'bar', { domain: 'localhost' })
+        cy.setCookie('foo', 'bar', { domain: 'barbaz.com' })
 
         cy.clearCookies()
 
         cy.getCookie('foo').should('be.null')
         cy.getCookie('baz').should('be.null')
-        cy.getCookie('foo', { domain: 'localhost' }).should('exist')
+        cy.getCookie('foo', { domain: 'barbaz.com' }).should('exist')
       })
     })
 
     it('clears the cookies on the specified domain', () => {
-      cy.visit('http://localhost:3500/fixtures/generic.html')
+      cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       cy.setCookie('foo', 'bar')
       cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
       cy.setCookie('baz', 'qux', { domain: 'www.foobar.com' })
@@ -209,18 +209,18 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
         cy.setCookie('foo', 'bar')
-        cy.setCookie('baz', 'qux', { domain: 'localhost' })
+        cy.setCookie('baz', 'qux', { domain: 'barbaz.com' })
 
-        cy.clearCookies({ domain: 'localhost' })
+        cy.clearCookies({ domain: 'barbaz.com' })
 
-        cy.getCookie('foo', { domain: 'localhost' }).should('be.null')
-        cy.getCookie('baz', { domain: 'localhost' }).should('be.null')
+        cy.getCookie('foo', { domain: 'barbaz.com' }).should('be.null')
+        cy.getCookie('baz', { domain: 'barbaz.com' }).should('be.null')
         cy.getCookie('foo').should('exist')
       })
     })
 
     it('clears cookies for all domains when domain is null', () => {
-      cy.visit('http://localhost:3500/fixtures/generic.html')
+      cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       cy.setCookie('foo', 'bar')
       cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
 
@@ -233,7 +233,7 @@ describe('src/cy/commands/cookies - no stub', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
 
         cy.setCookie('foo', 'bar')
-        cy.setCookie('foo', 'bar', { domain: 'localhost' })
+        cy.setCookie('foo', 'bar', { domain: 'barbaz.com' })
 
         cy.clearCookies({ domain: null })
         cy.getCookies().should('have.length', 0)
@@ -253,7 +253,7 @@ describe('src/cy/commands/cookies - no stub', () => {
     })
 
     it('clears the cookie on the domain matching the AUT by default', () => {
-      cy.visit('http://localhost:3500/fixtures/generic.html')
+      cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       cy.setCookie('foo', 'bar')
       cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
 
@@ -266,17 +266,17 @@ describe('src/cy/commands/cookies - no stub', () => {
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
-        cy.setCookie('foo', 'bar', { domain: 'localhost' })
+        cy.setCookie('foo', 'bar', { domain: 'barbaz.com' })
 
         cy.clearCookie('foo')
 
         cy.getCookie('foo').should('be.null')
-        cy.getCookie('foo', { domain: 'localhost' }).should('exist')
+        cy.getCookie('foo', { domain: 'barbaz.com' }).should('exist')
       })
     })
 
     it('clears the cookie on the specified domain', () => {
-      cy.visit('http://localhost:3500/fixtures/generic.html')
+      cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       cy.setCookie('foo', 'bar')
       cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
 
@@ -291,16 +291,16 @@ describe('src/cy/commands/cookies - no stub', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
         cy.setCookie('foo', 'bar')
 
-        cy.clearCookie('foo', { domain: 'localhost' })
+        cy.clearCookie('foo', { domain: 'barbaz.com' })
 
-        cy.getCookie('foo', { domain: 'localhost' }).should('be.null')
+        cy.getCookie('foo', { domain: 'barbaz.com' }).should('be.null')
         cy.getCookie('foo').should('exist')
       })
     })
   })
 
   it('clears cookie for any domain when domain is null', () => {
-    cy.visit('http://localhost:3500/fixtures/generic.html')
+    cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
     cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
 
     cy.clearCookie('foo', { domain: null })
@@ -311,7 +311,7 @@ describe('src/cy/commands/cookies - no stub', () => {
     cy.origin('http://www.foobar.com:3500', () => {
       cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
 
-      cy.setCookie('foo', 'bar', { domain: 'localhost' })
+      cy.setCookie('foo', 'bar', { domain: 'barbaz.com' })
 
       cy.clearCookie('foo', { domain: null })
       cy.getCookies().should('have.length', 0)
@@ -323,6 +323,8 @@ describe('src/cy/commands/cookies', () => {
   beforeEach(() => {
     // call through normally on everything
     cy.stub(Cypress, 'automation').rejects(new Error('Cypress.automation was not stubbed'))
+
+    cy.visit('http://localhost:3500/fixtures/generic.html')
   })
 
   context('test:before:run:async', () => {
