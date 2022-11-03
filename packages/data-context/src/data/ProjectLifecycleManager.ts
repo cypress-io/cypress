@@ -329,7 +329,7 @@ export class ProjectLifecycleManager {
   }
 
   async refreshLifecycle (): Promise<void> {
-    if (!this._projectRoot || !this._configManager || this.readyToInitialize(this._projectRoot)) {
+    if (!this._projectRoot || !this._configManager || !this.readyToInitialize(this._projectRoot)) {
       return
     }
 
