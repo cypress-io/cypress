@@ -489,7 +489,7 @@ declare namespace Cypress {
        * @see https://on.cypress.io/api/commands#Validations
        */
       add<T extends keyof Chainable, S extends PrevSubject>(
-          name: T, options: CommandOptions & { prevSubject: S }, fn: CommandFnWithSubject<T, PrevSubjectMap[S]>,
+          name: T, options: CommandOptions & { prevSubject: S | ['optional'] }, fn: CommandFnWithSubject<T, PrevSubjectMap[S]>,
       ): void
 
       /**
