@@ -1,4 +1,4 @@
-import type { BannersState, Editor } from '.'
+import type { BannersState, Editor, MajorVersionWelcomeDismissed } from '.'
 
 export const defaultPreferences: AllowedState = {
   autoScrollingEnabled: true,
@@ -68,5 +68,5 @@ export type AllowedState = Partial<{
   isSideNavigationOpen: Maybe<boolean>
   testingType: 'e2e' | 'component'
   lastBrowser: { name: string, channel: string }
-  majorVersionWelcomeDismissed: Maybe<object>
+  majorVersionWelcomeDismissed: Maybe<MajorVersionWelcomeDismissed>
 }>
