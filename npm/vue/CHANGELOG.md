@@ -1,3 +1,10 @@
+# [@cypress/vue-v4.2.2](https://github.com/cypress-io/cypress/compare/@cypress/vue-v4.2.1...@cypress/vue-v4.2.2) (2022-11-01)
+
+
+### Bug Fixes
+
+* Hovering over mount in command log does not show component in AUT ([#24346](https://github.com/cypress-io/cypress/issues/24346)) ([355d210](https://github.com/cypress-io/cypress/commit/355d2101d38ea4d1e93b9c571cf77babab2bbbfc))
+
 # [@cypress/vue-v4.2.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v4.2.0...@cypress/vue-v4.2.1) (2022-10-13)
 
 
