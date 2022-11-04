@@ -30,7 +30,7 @@ const cleanup = () => {
  * @param jsx {React.ReactNode} The React component to mount.
  * @param options {MountOptions} [options={}] options to pass to the mount function.
  * @param rerenderKey {string} [rerenderKey] A key to use to force a rerender.
- * @see {@link https://docs.cypress.io/guides/component-testing/mounting-react} for more details.
+ * @see {@link https://on.cypress.io/mounting-react} for more details.
  * @example
  * import { mount } from '@cypress/react'
  * import { Stepper } from './Stepper'

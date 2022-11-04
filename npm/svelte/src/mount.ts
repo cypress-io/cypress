@@ -55,7 +55,7 @@ const getComponentDisplayName = <T extends SvelteComponent>(Component: SvelteCon
  *   cy.get('button').contains(42)
  * })
  *
- * @see {@link https://docs.cypress.io/guides/component-testing/mounting-svelte} for more details.
+ * @see {@link https://on.cypress.io/mounting-svelte} for more details.
  */
 export function mount<T extends SvelteComponent> (
   Component: SvelteConstructor<T>,

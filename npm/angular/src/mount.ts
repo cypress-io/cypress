@@ -307,7 +307,7 @@ function setupComponent<T> (
  *   })
  * })
  *
- * @see {@link https://docs.cypress.io/guides/component-testing/mounting-angular} for more details.
+ * @see {@link https://on.cypress.io/mounting-angular} for more details.
  *
  * @returns A component and component fixture
  */

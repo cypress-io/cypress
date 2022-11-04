@@ -371,7 +371,7 @@ export function mount<
  * @param componentOptions
  * @param options
  * @returns {Cypress.Chainable<{wrapper: VueWrapper<T>, component: T}
- * @see {@link https://docs.cypress.io/guides/component-testing/mounting-vue} for more details.
+ * @see {@link https://on.cypress.io/mounting-vue} for more details.
  * @example
  * import { mount } from '@cypress/vue'
  * import { Stepper } from './Stepper.vue'

@@ -320,7 +320,7 @@ function getComponentDisplayName (componentOptions: any): string {
  *   cy.get('[data-cy=increment]').click()
  *   cy.get('[data-cy=counter]').should('have.text', '1')
  * })
- * @see {@link https://docs.cypress.io/guides/component-testing/mounting-vue} for more details.
+ * @see {@link https://on.cypress.io/mounting-vue} for more details.
  *
  */
 export const mount = (

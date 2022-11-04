@@ -42,7 +42,7 @@ const cleanup = () => {
  *   cy.get('[data-cy=counter]').should('have.text', '1')
  * }
  *
- * @see {@link https://docs.cypress.io/guides/component-testing/mounting-react} for more details.
+ * @see {@link https://on.cypress.io/mounting-react} for more details.
  *
  * @returns {Cypress.Chainable<MountReturn>} The mounted component.
  */
