@@ -36,7 +36,7 @@ describe('cy.origin - snapshots', { browser: '!webkit' }, () => {
     cy.shouldWithTimeout(() => {
       const getLogFromSecondaryOrigin = findLog(logs, '[data-cy="assertion-header"]')?.get()
 
-      expect(getLogFromSecondaryOrigin).to.not.be.undefined
+      expect(getLogFromSecondaryOrigin).to.exist
 
       const snapshots = getLogFromSecondaryOrigin.snapshots.map((snapshot) => snapshot?.body.get()[0])
 
@@ -85,7 +85,7 @@ describe('cy.origin - snapshots', { browser: '!webkit' }, () => {
       cy.shouldWithTimeout(() => {
         const xhrLogFromSecondaryOrigin = findLog(logs, 'xhr', 'http://localhost:3500/foo.bar.baz.json')?.get()
 
-        expect(xhrLogFromSecondaryOrigin).to.not.be.undefined
+        expect(xhrLogFromSecondaryOrigin).to.exist
 
         const snapshots = xhrLogFromSecondaryOrigin.snapshots.map((snapshot) => snapshot.body.get()[0])
 
@@ -111,7 +111,7 @@ describe('cy.origin - snapshots', { browser: '!webkit' }, () => {
       cy.shouldWithTimeout(() => {
         const xhrLogFromSecondaryOrigin = findLog(logs, 'fetch', 'http://localhost:3500/foo.bar.baz.json')?.get()
 
-        expect(xhrLogFromSecondaryOrigin).to.not.be.undefined
+        expect(xhrLogFromSecondaryOrigin).to.exist
 
         const snapshots = xhrLogFromSecondaryOrigin.snapshots.map((snapshot) => snapshot.body.get()[0])
 
@@ -128,7 +128,7 @@ describe('cy.origin - snapshots', { browser: '!webkit' }, () => {
       cy.on('fail', () => {
         const xhrLogFromSecondaryOrigin = findLog(logs, 'fetch', 'http://localhost:3500/foo.bar.baz.json')?.get()
 
-        expect(xhrLogFromSecondaryOrigin).to.not.be.undefined
+        expect(xhrLogFromSecondaryOrigin).to.exist
 
         const snapshots = xhrLogFromSecondaryOrigin.snapshots.map((snapshot) => snapshot.body.get()[0])
 
