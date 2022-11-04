@@ -325,6 +325,12 @@ export default {
         docsUrl: 'https://on.cypress.io/session',
       }
     },
+    invalid_domain (obj) {
+      return {
+        message: `${cmd('{{cmd}}')} must be passed a valid domain name. You passed: \`{{domain}}\``,
+        docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
+      }
+    },
     invalid_name (obj) {
       return {
         message: `${cmd('{{cmd}}')} must be passed an RFC-6265-compliant cookie name. You passed:\n\n\`{{name}}\``,
