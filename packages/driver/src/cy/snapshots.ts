@@ -246,7 +246,16 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
       const body = {
         get: () => {
           if (!attachedBody) {
-            // If we don't have an AUT document, use the spec bridge document
+            // logs streaming in from the secondary need to be cloned off a document,
+            // which means state("document") will be undefined in the primary
+            // if a cy.origin block is active
+
+            // this could also be possible, but unlikely, if the spec bridge is taking
+            // snapshots before the document has loaded into state, as could be the case with logs
+            // generated from before:load event handlers in a spec bridge
+
+            // in any of these cases, fall back to the root document as we only
+            // need the document to clone the node.
             const doc = state('document') || window.document
 
             attachedBody = $$(doc.adoptNode($body[0]))
