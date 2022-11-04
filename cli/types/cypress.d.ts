@@ -2636,6 +2636,7 @@ declare namespace Cypress {
   interface CookieOptions extends Partial<Loggable & Timeoutable> {
     /**
      * Domain to set cookies on or get cookies from
+     * @default superdomain of the current app under test
      */
     domain?: string
   }
