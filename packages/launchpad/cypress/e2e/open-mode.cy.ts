@@ -133,8 +133,7 @@ describe('Launchpad: Open Mode', () => {
 
       // Need to visit after args have been configured, todo: fix in #18776
       cy.visitLaunchpad()
-      // avoid flake by asserting the testing type has appeared
-      cy.contains('nav', 'E2E Testing').should('be.visible')
+
       cy.skipWelcome()
       cy.get('h1').should('contain', 'Choose a browser')
       cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')

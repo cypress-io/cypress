@@ -4,7 +4,7 @@
       class="w-full z-10 fixed"
     />
     <MajorVersionWelcome
-      v-if="!wasLandingPageDismissed"
+      v-if="shouldShowWelcome"
       class="pt-64px"
       @clearLandingPage="handleClearLandingPage"
     />
@@ -22,7 +22,7 @@
         :gql="query.data.value"
       />
       <MigrationWizard
-        v-else-if="currentProject?.needsLegacyConfigMigration && wasLandingPageDismissed"
+        v-else-if="currentProject?.needsLegacyConfigMigration"
       />
       <template v-else>
         <ScaffoldedFiles
@@ -129,6 +129,9 @@ fragment MainLaunchpadQueryData on Query {
     isFullConfigReady
     needsLegacyConfigMigration
     currentTestingType
+    activeBrowser {
+      id
+    }
   }
   isGlobalMode
   ...GlobalPage
@@ -179,16 +182,31 @@ const currentProject = computed(() => query.data.value?.currentProject)
 function handleClearLandingPage () {
   setMajorVersionWelcomeDismissed(MAJOR_VERSION_FOR_CONTENT)
   const wasBrowserSetInCLI = query.data?.value?.localSettings.preferences?.wasBrowserSetInCLI
-  const currentTestingType = query.data?.value?.currentProject?.currentTestingType
+
+  const currentTestingType = currentProject.value?.currentTestingType
 
   if (wasBrowserSetInCLI && currentTestingType) {
     launchProject.executeMutation({ testingType: currentTestingType })
   }
 }
 
-const wasLandingPageDismissed = computed(() => {
+const shouldShowWelcome = computed(() => {
   if (query.data.value) {
-    return query.data.value?.localSettings?.preferences?.majorVersionWelcomeDismissed?.[MAJOR_VERSION_FOR_CONTENT]
+    const hasThisVersionBeenSeen = query.data.value?.localSettings?.preferences?.majorVersionWelcomeDismissed?.[MAJOR_VERSION_FOR_CONTENT]
+    const wasBrowserSetInCLI = query.data?.value?.localSettings.preferences?.wasBrowserSetInCLI
+    const currentTestingType = currentProject.value?.currentTestingType
+
+    const activeBrowser = currentProject.value?.activeBrowser
+
+    const needsActiveBrowser = wasBrowserSetInCLI && currentTestingType
+
+    // if Cypress opened with --browser and --testingType flags,
+    // the next step is project launch, so we don't show welcome until browser is ready
+    if (needsActiveBrowser) {
+      return !hasThisVersionBeenSeen && activeBrowser
+    }
+
+    return !hasThisVersionBeenSeen
   }
 
   return false
