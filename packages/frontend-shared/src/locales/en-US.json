@@ -699,8 +699,10 @@
       "line4": "In the next screen, you'll be able to reconfigure component testing in a new guided configuration wizard."
     },
     "wizard": {
-      "title": "Migration helper",
-      "description": "Complete the steps below to migrate your project to Cypress 10",
+      "title": "Migrating to Cypress 11",
+      "description": "Your project requires updates to work with this version.",
+      "typicalMigrationLabel": "Typical migration:",
+      "typicalMigrationTime": "5-10 minutes",
       "step1": {
         "title": "Migrate existing specs",
         "description": "In this step, we'll automatically rename and/or move your existing spec files as needed.",

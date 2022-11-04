@@ -133,7 +133,7 @@ describe('Opening unmigrated project', () => {
     cy.openProject('migration', ['--e2e'])
     cy.visitLaunchpad()
     cy.skipWelcome()
-    cy.get('h1').should('contain', 'Migration')
+    cy.get('h1').should('contain', 'Migrating')
   })
 
   it('legacy project with --component', () => {
@@ -141,7 +141,7 @@ describe('Opening unmigrated project', () => {
     cy.openProject('migration-component-testing', ['--component'])
     cy.visitLaunchpad()
     cy.skipWelcome()
-    cy.get('h1').should('contain', 'Migration')
+    cy.get('h1').should('contain', 'Migrating')
   })
 
   it('major version welcome page appears with correct links and can be dismissed', () => {
@@ -168,7 +168,7 @@ describe('Opening unmigrated project', () => {
 
     cy.contains('button', cy.i18n.majorVersionWelcome.actionContinue).click()
     cy.contains(cy.i18n.majorVersionWelcome.title).should('not.exist')
-    cy.contains('h1', 'Migration helper').should('be.visible')
+    cy.contains('h1', 'Migrating to Cypress 11').should('be.visible')
 
     cy.percySnapshot()
   })
