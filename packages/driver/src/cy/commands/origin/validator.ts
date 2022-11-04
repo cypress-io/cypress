@@ -2,10 +2,9 @@ import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import { difference, isPlainObject, isString } from 'lodash'
 import type { LocationObject } from '../../../cypress/location'
+import * as cors from '@packages/network/lib/cors'
 
 const validOptionKeys = Object.freeze(['args'])
-
-const strictSameOriginDomains = Object.freeze(['google.com'])
 
 export class Validator {
   log: Cypress.Log
@@ -71,35 +70,6 @@ export class Validator {
   }
 
   /**
-   * Is this super domain in the list of domains that must be validated as strictly same origin?
-   * @param superDomain domain, excluding sub domain.
-   * @returns boolean answer to the question.
-   */
-  _isStrictSameOriginDomain (superDomain: string): boolean {
-    for (let index = 0; index < strictSameOriginDomains.length; index++) {
-      if (superDomain.endsWith(strictSameOriginDomains[0])) {
-        return true
-      }
-    }
-
-    return false
-  }
-
-  /**
-   * Determines if the origin location is the same superDomain as the spec with excepted domains where we must check strictly for sameOrigin
-   * @param originLocation - the location passed into the cy.origin command.
-   * @param specLocation - the location of the current spec.
-   * @returns boolean answer to the question.
-   */
-  _isSameSuperDomainOriginWithExceptions ({ originLocation, specLocation }: {originLocation: LocationObject, specLocation: LocationObject}): boolean {
-    if (this._isStrictSameOriginDomain(originLocation.superDomainOrigin)) {
-      return originLocation.origin === specLocation.origin
-    }
-
-    return originLocation.superDomainOrigin === specLocation.superDomainOrigin
-  }
-
-  /**
    * Validates the location parameter of the cy.origin call.
    * @param originLocation - the location passed into the cy.origin command.
    * @param urlOrDomain - the original string param passed in.
@@ -115,7 +85,8 @@ export class Validator {
     }
 
     // Users would be better off not using cy.origin if the origin is part of the same super domain.
-    if (this._isSameSuperDomainOriginWithExceptions({ originLocation, specLocation })) {
+    if (cors.urlMatchesPolicyBasedOnDomain(originLocation.href, specLocation.href)) {
+      // this._isSameSuperDomainOriginWithExceptions({ originLocation, specLocation })) {
       $errUtils.throwErrByPath('origin.invalid_url_argument_same_origin', {
         onFail: this.log,
         args: {
