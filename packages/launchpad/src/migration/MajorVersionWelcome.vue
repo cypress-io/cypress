@@ -30,7 +30,7 @@
               </h2>
 
               <p>
-                Component Testing is now generally available for projects using React, Vue, Angular, and Next.js!
+                Component Testing is now generally available for projects using React, Next.js, Angular, and Vue!
               </p>
               <p>
                 Component tests allow you to see and test your application’s components in a real browser as you work. You can use your favorite Cypress commands and features to develop your components without running your whole app. <ExternalLink href="https://on.cypress.io/cypress-11-release">

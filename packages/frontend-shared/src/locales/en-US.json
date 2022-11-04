@@ -735,7 +735,6 @@
     }
   },
   "majorVersionWelcome": {
-    "majorVersion": "11",
     "title": "What's New in Cypress",
     "actionContinue": "Continue",
     "linkReleaseNotes": "View full changelog"

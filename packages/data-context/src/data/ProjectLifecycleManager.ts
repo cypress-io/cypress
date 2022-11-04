@@ -286,10 +286,12 @@ export class ProjectLifecycleManager {
 
       const preferences = await this.ctx._apis.localSettingsApi.getPreferences()
 
-      const hasLandingPageBeenDismissed = Boolean(preferences.majorVersionWelcomeDismissed?.[MAJOR_VERSION_FOR_CONTENT])
+      const hasWelcomeBeenDismissed = Boolean(preferences.majorVersionWelcomeDismissed?.[MAJOR_VERSION_FOR_CONTENT])
 
       // only continue if the browser was successfully set - we must have an activeBrowser once this function resolves
-      if (this.ctx.coreData.activeBrowser && hasLandingPageBeenDismissed) {
+      // but if the user needs to dismiss a landing page, don't continue, the active browser will be opened
+      // by a mutation called from the client side when the user dismisses the welcome screen
+      if (this.ctx.coreData.activeBrowser && hasWelcomeBeenDismissed) {
         // if `cypress open` was launched with a `--project` and `--testingType`, go ahead and launch the `--browser`
         if (this.ctx.modeOptions.project && this.ctx.modeOptions.testingType) {
           await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType)
