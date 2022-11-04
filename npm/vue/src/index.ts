@@ -390,18 +390,8 @@ export function mount (componentOptions: any, options: any = {}) {
   // TODO: get the real displayName and props from VTU shallowMount
   const componentName = getComponentDisplayName(componentOptions)
 
-  const message = `<${componentName} ... />`
-  let logInstance: Cypress.Log
-
   // then wait for cypress to load
   return cy.then(() => {
-    if (options.log !== false) {
-      logInstance = Cypress.log({
-        name: 'mount',
-        message: [message],
-      })
-    }
-
     // @ts-ignore
     const document: Document = cy.state('document')
 
@@ -429,9 +419,14 @@ export function mount (componentOptions: any, options: any = {}) {
     return cy
     .wait(1, { log: false })
     .then(() => {
-      if (logInstance) {
-        logInstance.snapshot('mounted')
-        logInstance.end()
+      if (options.log !== false) {
+        // TODO: get the real displayName and props from VTU shallowMount
+        const message = `<${getComponentDisplayName(componentOptions)} ... />`
+
+        Cypress.log({
+          name: 'mount',
+          message: [message],
+        })
       }
 
       const returnVal = {

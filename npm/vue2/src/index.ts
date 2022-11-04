@@ -351,13 +351,6 @@ export const mount = (
     log: false,
   })
   .then((win) => {
-    if (optionsOrProps.log !== false) {
-      Cypress.log({
-        name: 'mount',
-        message: [message],
-      }).snapshot('mounted').end()
-    }
-
     const localVue = createLocalVue()
 
     // @ts-ignore
@@ -403,6 +396,16 @@ export const mount = (
     return {
       wrapper: VTUWrapper,
       component: VTUWrapper.vm,
+    }
+  })
+  .then(() => {
+    if (optionsOrProps.log !== false) {
+      return Vue.nextTick(() => {
+        Cypress.log({
+          name: 'mount',
+          message: [message],
+        })
+      })
     }
   })
 }

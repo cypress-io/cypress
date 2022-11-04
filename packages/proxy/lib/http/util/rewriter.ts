@@ -5,7 +5,7 @@ import type { CypressWantsInjection } from '../../types'
 import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
 
 export type SecurityOpts = {
-  isHtml?: boolean
+  isNotJavascript?: boolean
   url: string
   useAstSourceRewriting: boolean
   modifyObstructiveThirdPartyCode: boolean

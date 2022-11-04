@@ -85,7 +85,7 @@ export function mount<T extends SvelteComponent> (
         Cypress.log({
           name: 'mount',
           message: [mountMessage],
-        }).snapshot('mounted').end()
+        })
       }
     })
     .wrap({ component: componentInstance as T }, { log: false })
