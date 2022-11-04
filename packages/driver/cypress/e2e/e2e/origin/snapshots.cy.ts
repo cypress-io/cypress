@@ -30,6 +30,9 @@ describe('cy.origin - snapshots', { browser: '!webkit' }, () => {
     cy.get('a[data-cy="xhr-fetch-requests-onload"]').click()
 
     cy.origin('http://www.foobar.com:3500', () => {
+      // need to set isInteractive in the spec bridge in order to take snapshots in run mode, similar to how isInteractive is set within support/defaults.js
+      // @ts-ignore
+      Cypress.config('isInteractive', true)
       cy.get(`[data-cy="assertion-header"]`)
     })
 
