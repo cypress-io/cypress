@@ -79,7 +79,7 @@ jobs:
       - name: Commit the changes
         if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
         run: |
-          git commit -am "chore: updating v8 snapshot cache"
+          git diff-index --quiet HEAD || git commit -am "chore: updating v8 snapshot cache"
       - name: Push branch to remote
         if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
         run: git push origin ${{ steps.check-branch.outputs.branch_name }}
