@@ -38,7 +38,7 @@ describe('cy.origin - snapshots', { browser: '!webkit' }, () => {
 
       expect(getLogFromSecondaryOrigin).to.not.be.undefined
 
-      const snapshots = getLogFromSecondaryOrigin.snapshots.map((snapshot) => snapshot.body.get()[0])
+      const snapshots = getLogFromSecondaryOrigin.snapshots.map((snapshot) => snapshot?.body.get()[0])
 
       expect(snapshots.length).to.equal(1)
 
@@ -121,7 +121,7 @@ describe('cy.origin - snapshots', { browser: '!webkit' }, () => {
       })
     })
 
-    it('Does not take snapshots of XHR/fetch requests from secondary origin if the wrong origin is / origin mismatch, but instead the primary origin (existing behavior)', {
+    it('Does not take snapshots of XHR/fetch requests from secondary origin if the wrong origin is visited / origin mismatch, but instead the primary origin (existing behavior)', {
       defaultCommandTimeout: 50,
     },
     (done) => {
