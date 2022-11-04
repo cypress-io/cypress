@@ -25,6 +25,22 @@ const cleanup = () => {
   return false
 }
 
+/**
+ * Mounts a React component into the DOM.
+ * @param jsx {React.ReactNode} The React component to mount.
+ * @param options {MountOptions} [options={}] options to pass to the mount function.
+ * @param rerenderKey {string} [rerenderKey] A key to use to force a rerender.
+ * @see {@link https://on.cypress.io/mounting-react} for more details.
+ * @example
+ * import { mount } from '@cypress/react'
+ * import { Stepper } from './Stepper'
+ *
+ * it('mounts', () => {
+ *   mount(<StepperComponent />)
+ *   cy.get('[data-cy=increment]').click()
+ *   cy.get('[data-cy=counter]').should('have.text', '1')
+ * }
+ */
 export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerenderKey?: string) {
   if (major(React.version) === 18) {
     const message = '[cypress/react]: You are using `cypress/react`, which is designed for React <= 17. Consider changing to `cypress/react18`, which is designed for React 18.'
@@ -50,6 +66,11 @@ export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerende
   return makeMountFn('mount', jsx, { ReactDom: ReactDOM, ...options }, rerenderKey, internalOptions)
 }
 
+/**
+ * Unmounts the component from the DOM.
+ * @internal
+ * @param options - Options for unmounting.
+ */
 function internalUnmount (options = { log: true }) {
   return makeUnmountFn(options)
 }

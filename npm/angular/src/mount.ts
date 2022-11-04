@@ -283,31 +283,33 @@ function setupComponent<T> (
 /**
  * Mounts an Angular component inside Cypress browser
  *
- * @param {Type<T> | string} component Angular component being mounted or its template
- * @param {MountConfig<T>} config configuration used to configure the TestBed
+ * @param component Angular component being mounted or its template
+ * @param config configuration used to configure the TestBed
  * @example
- * import { HelloWorldComponent } from 'hello-world/hello-world.component'
+ * import { mount } from '@cypress/angular'
+ * import { StepperComponent } from './stepper.component'
  * import { MyService } from 'services/my.service'
  * import { SharedModule } from 'shared/shared.module';
- * import { mount } from '@cypress/angular'
- * it('can mount', () => {
- *  mount(HelloWorldComponent, {
- *    providers: [MyService],
- *    imports: [SharedModule]
- *  })
- *  cy.get('h1').contains('Hello World')
+ * it('mounts', () => {
+ *    mount(StepperComponent, {
+ *      providers: [MyService],
+ *      imports: [SharedModule]
+ *    })
+ *    cy.get('[data-cy=increment]').click()
+ *    cy.get('[data-cy=counter]').should('have.text', '1')
  * })
  *
- * or
+ * // or
  *
- * it('can mount with template', () => {
- *  mount('<app-hello-world></app-hello-world>', {
- *    declarations: [HelloWorldComponent],
- *    providers: [MyService],
- *    imports: [SharedModule]
- *  })
+ * it('mounts with template', () => {
+ *   mount('<app-stepper></app-stepper>', {
+ *     declarations: [StepperComponent],
+ *   })
  * })
- * @returns Cypress.Chainable<MountResponse<T>>
+ *
+ * @see {@link https://on.cypress.io/mounting-angular} for more details.
+ *
+ * @returns A component and component fixture
  */
 export function mount<T> (
   component: Type<T> | string,
@@ -343,6 +345,15 @@ export function mount<T> (
  *
  * @param {string} alias name you want to use for your cy.spy() alias
  * @returns EventEmitter<T>
+ * @example
+ * import { StepperComponent } from './stepper.component'
+ * import { mount, createOutputSpy } from '@cypress/angular'
+ *
+ * it('Has spy', () => {
+ *   mount(StepperComponent, { change: createOutputSpy('changeSpy') })
+ *   cy.get('[data-cy=increment]').click()
+ *   cy.get('@changeSpy').should('have.been.called')
+ * })
  */
 export const createOutputSpy = <T>(alias: string) => {
   const emitter = new EventEmitter<T>()

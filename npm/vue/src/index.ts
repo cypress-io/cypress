@@ -366,7 +366,22 @@ export function mount<
   >['vm']
 }>
 
-// implementation
+/**
+ * Mounts a component and returns an object containing the component and VueWrapper
+ * @param componentOptions
+ * @param options
+ * @returns {Cypress.Chainable<{wrapper: VueWrapper<T>, component: T}
+ * @see {@link https://on.cypress.io/mounting-vue} for more details.
+ * @example
+ * import { mount } from '@cypress/vue'
+ * import { Stepper } from './Stepper.vue'
+ *
+ * it('mounts', () => {
+ *   cy.mount(Stepper)
+ *   cy.get('[data-cy=increment]').click()
+ *   cy.get('[data-cy=counter]').should('have.text', '1')
+ * })
+ */
 export function mount (componentOptions: any, options: any = {}) {
   checkForRemovedStyleOptions(options)
   // Remove last mounted component if cy.mount is called more than once in a test
