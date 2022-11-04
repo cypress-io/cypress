@@ -20,7 +20,7 @@ it('is stylish', () => {
 })
 ```
 
-## Import from spec
+## Import in the spec file
 
 Sometimes the root component imports the style, or it is included from `src/public/index.html` file. We can usually import the style directly from the spec file:
 
@@ -41,7 +41,7 @@ it('is stylish', () => {
 })
 ```
 
-## Import from support file
+## Import in the component support file
 
 If you have stylesheets that should apply to all of your components, you can import those in your component support file.
 

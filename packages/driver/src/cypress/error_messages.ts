@@ -1004,7 +1004,7 @@ export default {
       docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
     },
     vue_yielded_value: {
-      message: 'As of Cypress 11, mount now yields an object with VueWrapper as a property. Destructure using `{ wrapper }` to access the VueWrapper.',
+      message: 'As of Cypress 11, mount now yields an object with VueWrapper and the component as properties. Destructure using `{ wrapper, component }` to access the VueWrapper and component.',
       docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
     },
     alias (alias: string) {

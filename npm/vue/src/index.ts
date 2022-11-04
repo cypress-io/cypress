@@ -419,27 +419,20 @@ export function mount (componentOptions: any, options: any = {}) {
         logInstance.end()
       }
 
-      return new Proxy(Object.create({}), {
+      const returnVal = {
+        wrapper,
+        component: wrapper.vm,
+      }
+
+      return new Proxy(Object.create(returnVal), {
         get (obj, prop) {
+        // throw an error if it looks like the caller is trying to call a method on the VueWrapper that was originally returned
           if (Reflect.get(wrapper, prop)) {
             // @ts-expect-error - internal API
             Cypress.utils.throwErrByPath('mount.vue_yielded_value')
           }
 
-          if (prop === 'then') {
-            return {
-              wrapper,
-              component: wrapper.vm,
-            }
-          }
-
-          if (prop === 'wrapper') {
-            return wrapper
-          }
-
-          if (prop === 'component') {
-            return wrapper.vm
-          }
+          return Reflect.get(obj, prop)
         },
       })
     })

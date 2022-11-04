@@ -17,7 +17,7 @@ If your component imports its own style, the style should be applied during the 
 
 You can also load styles in the following ways:
 
-## Import from spec
+## Import in the spec file
 
 ```js
 import '../styles/main.css'
@@ -29,7 +29,7 @@ const myComponent = {
 mount(myComponent)
 ```
 
-## Import from support file
+## Import in the component support file
 
 If you have stylesheets that should apply to all of your components, you can import those from your component support file.
 

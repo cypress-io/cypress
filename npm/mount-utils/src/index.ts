@@ -46,7 +46,8 @@ export function setupHooks (optionalCallback?: Function) {
  * Remove any style or extra link elements from the iframe placeholder
  * left from any previous test
  *
- * @ Removed as of Cypress 11.0.0
+ * Removed as of Cypress 11.0.0
+ * @see https://on.cypress.io/migration-11-0-0-component-testing-updates
  */
 export function cleanupStyles () {
   Cypress.utils.throwErrByPath('mount.cleanup_styles')
