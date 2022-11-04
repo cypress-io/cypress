@@ -737,7 +737,6 @@
   "majorVersionWelcome": {
     "majorVersion": "11",
     "title": "What's New in Cypress",
-    "description": "Component Testing is now generally available for projects using React, Vue, Angular, Next.js, and Nuxt!",
     "actionContinue": "Continue",
     "linkReleaseNotes": "View full changelog"
   },
