@@ -1,3 +1,10 @@
+# [@cypress/svelte-v1.0.2](https://github.com/cypress-io/cypress/compare/@cypress/svelte-v1.0.1...@cypress/svelte-v1.0.2) (2022-11-01)
+
+
+### Bug Fixes
+
+* Hovering over mount in command log does not show component in AUT ([#24346](https://github.com/cypress-io/cypress/issues/24346)) ([355d210](https://github.com/cypress-io/cypress/commit/355d2101d38ea4d1e93b9c571cf77babab2bbbfc))
+
 # [@cypress/svelte-v1.0.1](https://github.com/cypress-io/cypress/compare/@cypress/svelte-v1.0.0...@cypress/svelte-v1.0.1) (2022-09-29)
 
 

@@ -127,7 +127,7 @@ async function makeE2ETasks () {
     await scaffoldCommonNodeModules()
 
     try {
-      await scaffoldProjectNodeModules(projectName)
+      await scaffoldProjectNodeModules({ project: projectName })
     } catch (e) {
       if (isRetry) {
         throw e

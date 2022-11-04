@@ -1,3 +1,10 @@
+# [@cypress/react-v6.2.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v6.2.0...@cypress/react-v6.2.1) (2022-11-01)
+
+
+### Bug Fixes
+
+* Hovering over mount in command log does not show component in AUT ([#24346](https://github.com/cypress-io/cypress/issues/24346)) ([355d210](https://github.com/cypress-io/cypress/commit/355d2101d38ea4d1e93b9c571cf77babab2bbbfc))
+
 # [@cypress/react-v6.2.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v6.1.1...@cypress/react-v6.2.0) (2022-08-30)
 
 

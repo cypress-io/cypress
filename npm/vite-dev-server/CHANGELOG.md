@@ -1,3 +1,10 @@
+# [@cypress/vite-dev-server-v3.4.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.3.1...@cypress/vite-dev-server-v3.4.0) (2022-11-01)
+
+
+### Features
+
+* introduce v8 snapshots to improve startup performance ([#24295](https://github.com/cypress-io/cypress/issues/24295)) ([b0c0eaa](https://github.com/cypress-io/cypress/commit/b0c0eaa508bb6dafdc1997bc00fb7ed6f5bcc160))
+
 # [@cypress/vite-dev-server-v3.3.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.3.0...@cypress/vite-dev-server-v3.3.1) (2022-10-11)
 
 
