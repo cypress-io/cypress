@@ -229,8 +229,12 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
 
   const createSnapshot = (name, $elToHighlight, preprocessedSnapshot) => {
     Cypress.action('cy:snapshot', name)
-    // only take a snapshot if the AUT document is in state to prevent cypress-in-cypress like snapshots
-    // or if the snapshot has been taken in a spec bridge and has already been preprocessed
+    // when using cy.origin() and in a transitionary state, state('document')
+    // can be undefined, resulting in a bizarre snapshot of the entire Cypress
+    // UI. better not to take the snapshot in that case.
+    // https://github.com/cypress-io/cypress/issues/24506
+    // also, do not take the snapshot here if it has already been taken and
+    // preprocessed in a spec bridge.
     if (!preprocessedSnapshot && !state('document')) {
       return null
     }
