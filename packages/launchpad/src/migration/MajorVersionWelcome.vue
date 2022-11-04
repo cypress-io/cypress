@@ -21,7 +21,7 @@
                 11.0.0
               </ExternalLink>
               <span class="font-light pl-10px text-gray-500 text-14px">
-                Released 2 days ago
+                Released {{ versionReleaseDates['11'] }}
               </span>
             </div>
             <div class="children:mb-16px">
@@ -75,7 +75,7 @@
                 10.0.0
               </ExternalLink>
               <span class="font-light pl-10px text-gray-500 text-14px">
-                Released 6 months ago
+                Released {{ versionReleaseDates['10'] }}
               </span>
             </div>
             <p class="text-14px leading-20px">
@@ -115,7 +115,7 @@
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
-import { useScroll, useElementSize } from '@vueuse/core'
+import { useScroll, useElementSize, useTimeAgo } from '@vueuse/core'
 import { computed, ref } from 'vue'
 
 const { t } = useI18n()
@@ -132,6 +132,13 @@ const emit = defineEmits<{
 const handleClick = () => {
   emit('clearLandingPage')
 }
+
+const versionReleaseDates = computed(() => {
+  return {
+    '10': useTimeAgo(Date.UTC(2022, 6, 1)).value,
+    '11': useTimeAgo(Date.UTC(2022, 11, 8)).value,
+  }
+})
 
 const shouldShowShadow = computed(() => {
   if (!scroller.value) {
