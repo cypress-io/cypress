@@ -282,6 +282,8 @@ export class WebKitAutomation {
    * @returns the cleared cookie
    */
   private async clearCookie (filter: CyCookieFilter): Promise<CyCookieFilter> {
+    // webkit doesn't have a way to only clear certain cookies, so we have
+    // to clear all cookies and put back the ones we don't want cleared
     const allCookies = await this.context.cookies()
     const persistCookies = allCookies.filter((cookie) => {
       return !cookieMatches(cookie, filter)
@@ -299,6 +301,8 @@ export class WebKitAutomation {
    * @returns cookies cleared
    */
   private async clearCookies (cookiesToClear: CyCookie[]): Promise<CyCookie[]> {
+    // webkit doesn't have a way to only clear certain cookies, so we have
+    // to clear all cookies and put back the ones we don't want cleared
     const allCookies = await this.context.cookies()
     const persistCookies = allCookies.filter((cookie) => {
       return !cookiesToClear.find((cookieToClear) => {
