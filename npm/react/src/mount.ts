@@ -34,7 +34,7 @@ const cleanup = () => {
  * @example
  * import { mount } from '@cypress/react'
  * import { Stepper } from './Stepper'
- * 
+ *
  * it('mounts', () => {
  *   mount(<StepperComponent />)
  *   cy.get('[data-cy=increment]').click()
@@ -49,6 +49,9 @@ export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerende
     Cypress.log({ name: 'warning', message })
   }
 
+  // Remove last mounted component if cy.mount is called more than once in a test
+  cleanup()
+
   const internalOptions: InternalMountOptions = {
     reactDom: ReactDOM,
     render: (reactComponent: ReturnType<typeof React.createElement>, el: HTMLElement, reactDomToUse: typeof ReactDOM) => {
@@ -56,7 +59,7 @@ export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerende
 
       return lastReactDom.render(reactComponent, el)
     },
-    unmount,
+    unmount: internalUnmount,
     cleanup,
   }
 
@@ -65,8 +68,23 @@ export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerende
 
 /**
  * Unmounts the component from the DOM.
+ * @internal
  * @param options - Options for unmounting.
  */
-export function unmount (options = { log: true }) {
+function internalUnmount (options = { log: true }) {
   return makeUnmountFn(options)
+}
+
+/**
+ * Removed as of Cypress 11.0.0.
+ * @see https://on.cypress.io/migration-11-0-0-component-testing-updates
+ */
+export function unmount (options = { log: true }) {
+  // @ts-expect-error - undocumented API
+  Cypress.utils.throwErrByPath('mount.unmount')
+}
+
+// Re-export this to help with migrating away from `unmount`
+export {
+  getContainerEl,
 }
