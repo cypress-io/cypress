@@ -98,21 +98,23 @@ export const makeMountFn = (
       // https://github.com/bahmutov/cypress-react-unit-test/issues/200
       .wait(0, { log: false })
       .then(() => {
-        Cypress.log({
-          name: type,
-          type: 'parent',
-          message: [jsxComponentName],
-          // @ts-ignore
-          $el: (el.children.item(0) as unknown) as JQuery<HTMLElement>,
-          consoleProps: () => {
-            return {
+        if (options.log !== false) {
+          Cypress.log({
+            name: type,
+            type: 'parent',
+            message: [jsxComponentName],
+            // @ts-ignore
+            $el: (el.children.item(0) as unknown) as JQuery<HTMLElement>,
+            consoleProps: () => {
+              return {
               // @ts-ignore protect the use of jsx functional components use ReactNode
-              props: jsx.props,
-              description: type === 'mount' ? 'Mounts React component' : 'Rerenders mounted React component',
-              home: 'https://github.com/cypress-io/cypress',
-            }
-          },
-        })
+                props: jsx.props,
+                description: type === 'mount' ? 'Mounts React component' : 'Rerenders mounted React component',
+                home: 'https://github.com/cypress-io/cypress',
+              }
+            },
+          })
+        }
       })
     )
   // Bluebird types are terrible. I don't think the return type can be carried without this cast
