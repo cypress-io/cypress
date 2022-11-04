@@ -128,7 +128,6 @@ describe('Launchpad: Open Mode', () => {
       cy.openProject('launchpad', ['--browser', 'firefox', '--e2e'])
       cy.withCtx((ctx, o) => {
         o.sinon.stub(ctx._apis.projectApi, 'launchProject').resolves()
-        // o.sinon.stub(ctx._apis.localSettingsApi, 'getPreferences').callsFake()
       })
 
       // Need to visit after args have been configured, todo: fix in #18776
