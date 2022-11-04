@@ -363,7 +363,7 @@ function visitLaunchpad () {
 function skipWelcome () {
   // click Continue on Welcome page
   // and wait for the button to disappear
-  return cy.contains('button', 'Continue')
+  return cy.contains('[data-cy="major-version-welcome-footer"] button', 'Continue')
   .click()
   .should('not.exist')
 }
