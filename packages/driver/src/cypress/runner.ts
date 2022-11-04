@@ -1520,8 +1520,6 @@ export default {
             // the test.run(fn)
             return null
           }).catch((err) => {
-            // once we complete callback with the
-            // original err
             next(err)
 
             // return null here to signal to bluebird

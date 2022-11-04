@@ -189,7 +189,7 @@ export default function (Commands, Cypress, cy) {
 
               setSessionLogStatus('failed')
 
-              $errUtils.modifyErrMsg(err, `\n\nThis error occurred while creating the session. Because the session setup failed, we failed the test.`, _.add)
+              $errUtils.modifyErrMsg(err, `\n\nThis error occurred while ${statusMap.inProgress(step)} the session. Because the session setup failed, we failed the test.`, _.add)
 
               return err
             })
@@ -264,7 +264,7 @@ export default function (Commands, Cypress, cy) {
 
             const enhanceErr = (err) => {
               Cypress.state('onQueueFailed', null)
-              if (!(err instanceof Error)) {
+              if (typeof err !== 'object') {
                 err = new Error(err)
               }
 
@@ -312,14 +312,14 @@ export default function (Commands, Cypress, cy) {
             }
 
             cy.state('onQueueFailed', (err, queue): Error => {
-              if (!(err instanceof Error)) {
+              if (typeof err !== 'object') {
                 err = new Error(err)
               }
 
               if (step === 'restore') {
                 const commands = queue.get()
                 // determine command queue index of _commandToRunAfterValidation's index
-                const index = _.findIndex(commands, (command: any) => {
+                let index = _.findIndex(commands, (command: any) => {
                   return (
                     _commandToRunAfterValidation
                     && command.attributes.chainerId === _commandToRunAfterValidation.chainerId
@@ -339,8 +339,11 @@ export default function (Commands, Cypress, cy) {
                 // the session command kicked off
                 Cypress.state('withinSubject', withinSubject)
 
-                // move to _commandToRunAfterValidation's index to ensure failures are handled correctly
-                queue.index = index
+                // move to _commandToRunAfterValidation's index to ensure failures are
+                // handled correctly if next index was not found, the error was caused by
+                // a sync validation failure and _commandToRunAfterValidation is our next
+                // cmd
+                queue.index = index === -1 ? queue.index + 1 : index
 
                 err.isRecovered = true
 
@@ -352,9 +355,18 @@ export default function (Commands, Cypress, cy) {
 
             let returnVal
 
-            cy.then(() => {
+            try {
               returnVal = existingSession.validate.call(cy.state('ctx'))
-            })
+            } catch (err) {
+              err.onFail = (err) => {
+                validateLog.set({
+                  error: err,
+                  state: 'failed',
+                })
+              }
+
+              throw err
+            }
 
             _commandToRunAfterValidation = cy.then(async () => {
               Cypress.state('onQueueFailed', null)

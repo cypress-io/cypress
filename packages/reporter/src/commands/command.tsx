@@ -400,14 +400,14 @@ class Command extends Component<Props> {
           <Progress model={model} />
           {this._children()}
         </li>
-        {model.err?.isRecovered && (
+        {model.showError && (
           <li>
             <TestError
               err={model.err}
               testId={model.testId}
               commandId={model.id}
               // if the err is recovered and the current command is a log group, nest the test error within the group
-              groupLevel={this.props.groupId && groupLevel === this.props.groupId ? ++groupLevel : groupLevel}
+              groupLevel={model.group && model.hasChildren ? ++groupLevel : groupLevel}
             />
           </li>
         )}

@@ -171,7 +171,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
     } else {
       obj.end = true
       obj.snapshot = true
-      obj.error = error
+      obj.error = _.clone(error)
     }
 
     const isChildLike = (subject, current) => {
@@ -187,8 +187,6 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
 
     _.extend(obj, {
       name: 'assert',
-      // end:      true
-      // snapshot: true
       message,
       passed,
       selector: value ? value.selector : undefined,

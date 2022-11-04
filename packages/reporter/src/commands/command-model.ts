@@ -120,6 +120,14 @@ export default class Command extends Instrument {
     return this.numChildren > 0
   }
 
+  @computed get showError () {
+    if (this.hasChildren) {
+      return (this.err?.isRecovered && this.isOpen)
+    }
+
+    return this.err?.isRecovered
+  }
+
   constructor (props: CommandProps) {
     super(props)
 
