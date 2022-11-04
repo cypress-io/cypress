@@ -34,7 +34,6 @@ export function setUrls (obj: any) {
     proxyUrl,
     browserUrl: rootUrl + obj.clientRoute,
     reporterUrl: rootUrl + obj.reporterRoute,
-    xhrUrl: `${obj.namespace}${obj.xhrRoute}`,
   }
 }
 

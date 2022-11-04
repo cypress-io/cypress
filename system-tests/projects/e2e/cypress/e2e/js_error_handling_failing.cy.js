@@ -2,7 +2,6 @@
 describe('s1', () => {
   context('without an afterEach hook', () => {
     beforeEach(() => {
-      cy.server()
       cy.visit('/js_errors.html')
       cy.get('body')
     })
@@ -16,7 +15,7 @@ describe('s1', () => {
 
     // fail
     it('t2', () => {
-      cy.route(/foo/, 'foo html').as('getFoo')
+      cy.intercept(/foo/, 'foo html').as('getFoo')
       cy.get('.xhr').click()
       cy.wait('@getFoo')
       cy.get('.xhr').should('have.class', 'active')
@@ -32,7 +31,6 @@ describe('s1', () => {
     const runs = []
 
     beforeEach(() => {
-      cy.server()
       cy.visit('/js_errors.html')
       cy.get('body')
     })

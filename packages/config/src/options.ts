@@ -546,11 +546,6 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     defaultValue: pkg.version,
     validation: validate.isString,
     isInternal: true,
-  }, {
-    name: 'xhrRoute',
-    defaultValue: '/xhrs/',
-    validation: validate.isString,
-    isInternal: true,
   },
 ]
 

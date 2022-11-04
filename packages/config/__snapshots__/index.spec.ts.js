@@ -97,8 +97,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys 1
   "reporterRoute": "/__cypress/reporter",
   "socketId": null,
   "socketIoCookie": "__socket",
-  "socketIoRoute": "/__socket",
-  "xhrRoute": "/xhrs/"
+  "socketIoRoute": "/__socket"
 }
 
 exports['config/src/index .getDefaultValues returns list of public config keys for selected testing type 1'] = {
@@ -181,8 +180,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys f
   "reporterRoute": "/__cypress/reporter",
   "socketId": null,
   "socketIoCookie": "__socket",
-  "socketIoRoute": "/__socket",
-  "xhrRoute": "/xhrs/"
+  "socketIoRoute": "/__socket"
 }
 
 exports['config/src/index .getPublicConfigKeys returns list of public config keys 1'] = [
