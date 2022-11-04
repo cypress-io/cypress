@@ -38,7 +38,7 @@ describe('cy.origin - snapshots', { browser: '!webkit' }, () => {
 
       expect(getLogFromSecondaryOrigin).to.exist
 
-      const snapshots = getLogFromSecondaryOrigin.snapshots.map((snapshot) => snapshot?.body.get()[0])
+      const snapshots = getLogFromSecondaryOrigin?.snapshots?.map((snapshot) => snapshot?.body.get()[0]) || []
 
       expect(snapshots.length).to.equal(1)
 
