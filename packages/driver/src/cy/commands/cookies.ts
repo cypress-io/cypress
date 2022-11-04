@@ -180,8 +180,8 @@ export default function (Commands, Cypress, cy, state, config) {
   }
 
   return Commands.addAll({
-    getCookie (name, userOptions: Partial<Cypress.CookieOptions> = {}) {
-      const options: Partial<Cypress.CookieOptions> = _.defaults({}, userOptions, {
+    getCookie (name, userOptions: Cypress.CookieOptions = {}) {
+      const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
         log: true,
       })
 
@@ -227,8 +227,8 @@ export default function (Commands, Cypress, cy, state, config) {
       }, options.timeout)
     },
 
-    getCookies (userOptions: Partial<Cypress.CookieOptions> = {}) {
-      const options: Partial<Cypress.CookieOptions> = _.defaults({}, userOptions, {
+    getCookies (userOptions: Cypress.CookieOptions = {}) {
+      const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
         log: true,
       })
 
@@ -349,8 +349,8 @@ export default function (Commands, Cypress, cy, state, config) {
       }, options.timeout)
     },
 
-    clearCookie (name, userOptions: Partial<Cypress.CookieOptions> = {}) {
-      const options: Partial<Cypress.CookieOptions> = _.defaults({}, userOptions, {
+    clearCookie (name, userOptions: Cypress.CookieOptions = {}) {
+      const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
         log: true,
       })
 
@@ -403,8 +403,8 @@ export default function (Commands, Cypress, cy, state, config) {
       }, options.timeout)
     },
 
-    clearCookies (userOptions: Partial<Cypress.CookieOptions> = {}) {
-      const options: Partial<Cypress.CookieOptions> = _.defaults({}, userOptions, {
+    clearCookies (userOptions: Cypress.CookieOptions = {}) {
+      const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
         log: true,
       })
 

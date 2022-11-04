@@ -780,7 +780,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/clearcookie
      */
-    clearCookie(name: string, options?: Partial<CookieOptions>): Chainable<null>
+    clearCookie(name: string, options?: CookieOptions): Chainable<null>
 
     /**
      * Clear all browser cookies.
@@ -788,7 +788,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/clearcookies
      */
-    clearCookies(options?: Partial<CookieOptions>): Chainable<null>
+    clearCookies(options?: CookieOptions): Chainable<null>
 
     /**
      * Clear data in local storage.
@@ -1252,14 +1252,14 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/getcookie
      */
-    getCookie(name: string, options?: Partial<CookieOptions>): Chainable<Cookie | null>
+    getCookie(name: string, options?: CookieOptions): Chainable<Cookie | null>
 
     /**
      * Get all of the browser cookies.
      *
      * @see https://on.cypress.io/getcookies
      */
-    getCookies(options?: Partial<CookieOptions>): Chainable<Cookie[]>
+    getCookies(options?: CookieOptions): Chainable<Cookie[]>
 
     /**
      * Navigate back or forward to the previous or next URL in the browser's history.
@@ -2633,11 +2633,11 @@ declare namespace Cypress {
     cmdKey: boolean
   }
 
-  interface CookieOptions extends Loggable, Timeoutable {
+  interface CookieOptions extends Partial<Loggable & Timeoutable> {
     /**
      * Domain to set cookies on or get cookies from
      */
-    domain: string
+    domain?: string
   }
 
   interface PEMCert {
