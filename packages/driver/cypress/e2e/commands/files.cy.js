@@ -161,10 +161,6 @@ describe('src/cy/commands/files', () => {
       defaultCommandTimeout: 50,
     }, () => {
       beforeEach(function () {
-        cy.visit('/fixtures/empty.html')
-
-        this.logs = []
-
         const collectLogs = (attrs, log) => {
           if (attrs.name === 'readFile') {
             this.fileLog = log
@@ -173,7 +169,13 @@ describe('src/cy/commands/files', () => {
           this.logs?.push(log)
         }
 
-        cy.on('log:added', collectLogs)
+        cy.visit('/fixtures/empty.html')
+        .then(() => {
+          cy.on('log:added', collectLogs)
+        })
+
+        this.logs = []
+
         cy.on('fail', () => {
           cy.off('log:added', collectLogs)
         })
@@ -185,6 +187,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { fileLog } = this
 
+          assertLogLength(this.logs, 1)
           expect(fileLog.get('error')).to.eq(err)
           expect(fileLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: `undefined`.')
@@ -200,6 +203,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { fileLog } = this
 
+          assertLogLength(this.logs, 1)
           expect(fileLog.get('error')).to.eq(err)
           expect(fileLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: `2`.')
@@ -215,6 +219,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { fileLog } = this
 
+          assertLogLength(this.logs, 1)
           expect(fileLog.get('error')).to.eq(err)
           expect(fileLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: ``.')
@@ -238,6 +243,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { fileLog } = this
 
+          assertLogLength(this.logs, 2)
           expect(fileLog.get('error')).to.eq(err)
           expect(fileLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`\

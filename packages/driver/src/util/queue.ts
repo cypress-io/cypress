@@ -54,10 +54,6 @@ export class Queue<T> {
     this._stopped = true
   }
 
-  hasNext () {
-    return this.index < this.length
-  }
-
   run ({ onRun, onError, onFinish }: QueueRunProps) {
     let inner
     let rejectOuterAndCancelInner

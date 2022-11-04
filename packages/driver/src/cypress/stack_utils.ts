@@ -482,7 +482,7 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
   // add/$Chainer.prototype[key] (cypress:///../driver/src/cypress/chainer.js:30:128)
   // whereas Chromium browsers have the user's line first
   const stackLines = getStackLines(userInvocationStack)
-  const windowedStackLines = _.reject(stackLines, (line) => {
+  const nonCypressStackLines = _.reject(stackLines, (line) => {
     // WARNING: STACK TRACE WILL BE DIFFERENT IN DEVELOPMENT vs PRODUCTION
     // stacks in development builds look like:
     //     at cypressErr (cypress:///../driver/src/cypress/error_utils.js:259:17)
@@ -494,7 +494,7 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
     || line.includes('$Chainer.<computed>')
   }).join('\n')
 
-  return normalizeStackIndentation(windowedStackLines)
+  return normalizeStackIndentation(nonCypressStackLines)
 }
 
 export default {

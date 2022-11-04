@@ -22,7 +22,7 @@ describe('src/cy/commands/sessions/utils.ts', () => {
       const consoleProps = getConsoleProps(sessionState)
 
       logForDebugging(consoleProps)
-      expect(consoleProps.Warning).to.eq('⚠️ There are no cookies, local storage or session storage associated to this session.')
+      expect(consoleProps.Warning).to.eq('⚠️ There are no cookies, local storage nor session storage associated with this session')
       expect(consoleProps.id).to.eq('session1')
       expect(consoleProps.groups).to.have.length(0)
     })

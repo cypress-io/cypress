@@ -397,7 +397,6 @@ export default {
   },
 
   isPromiseLike (ret) {
-    // @ts-ignore
-    return ret && _.isObject(ret) && _.isFunction(ret.then) && _.isFunction(ret.catch)
+    return ret && _.isObject(ret) && 'then' in ret && _.isFunction(ret.then) && 'catch' in ret && _.isFunction(ret.catch)
   },
 }
