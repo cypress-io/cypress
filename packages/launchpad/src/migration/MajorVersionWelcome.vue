@@ -30,10 +30,10 @@
               </h2>
 
               <p>
-                Component Testing is now generally available for projects using React, Vue, Angular, Next.js, and Nuxt!
+                Component Testing is now generally available for projects using React, Vue, Angular, and Next.js!
               </p>
               <p>
-                Component tests allow you to see and test your application’s components in a real browser as you work. You can use your favorite Cypress commands and features to develop your components without running your whole app. <ExternalLink href="https://on.cypress.io/release-blog-11">
+                Component tests allow you to see and test your application’s components in a real browser as you work. You can use your favorite Cypress commands and features to develop your components without running your whole app. <ExternalLink href="https://on.cypress.io/cypress-11-release">
                   Learn more in our blog post.
                 </ExternalLink>
               </p>
@@ -81,7 +81,7 @@
             <p class="text-14px leading-20px">
               We've reworked the Cypress app from the ground up to modernize the interface, streamline workflows and integrate better into your overall development experience. Read about breaking changes in our
               <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
-              <ExternalLink href="https://www.cypress.io/blog/2022/06/01/cypress-10-release/">blog post</ExternalLink>.
+              <ExternalLink href="https://on.cypress.io/cypress-10-release">blog post</ExternalLink>.
             </p>
           </div>
         </div>
