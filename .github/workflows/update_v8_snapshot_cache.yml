@@ -76,11 +76,11 @@ jobs:
         run: git checkout -b ${{ steps.check-branch.outputs.branch_name }} ${{ env.BASE_BRANCH }}
       ## Both
       - name: Commit the changes
-        if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' || steps.check-need-for-branch-update.outputs.has_newer_update == 'true' }}
+        if: ${{ steps.check-need-for-pr.outputs.has_changes == 'true' }}
         run: |
           git commit -am "chore: updating v8 snapshot cache"
       - name: Push branch to remote
-        if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' || steps.check-need-for-branch-update.outputs.has_newer_update == 'true' }}
+        if: ${{ steps.check-need-for-pr.outputs.has_changes == 'true' }}
         run: git push origin ${{ steps.check-branch.outputs.branch_name }}
       # Update available and a PR doesn't already exist
       - name: Create Pull Request
@@ -95,5 +95,5 @@ jobs:
               github,
               baseBranch: '${{ env.BASE_BRANCH }}',
               branchName: '${{ steps.check-branch.outputs.branch_name }}',
-              description: '${{ steps.get-versions.outputs.description }}',
+              description: 'Update v8 snapshot cache',
             })
