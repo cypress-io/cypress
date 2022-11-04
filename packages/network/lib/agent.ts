@@ -35,10 +35,24 @@ export const _resetBaseCaOptionsPromise = () => {
 }
 
 const mergeCAOptions = (options: https.RequestOptions, caOptions: CaOptions): https.RequestOptions => {
-  // First, normalize the options.ca option. It can be a string, a Buffer, an array of strings, or an array of Buffers
-  const caArray = options.ca ? _.castArray(options.ca).map((caOption) => caOption.toString()) : []
+  if (!caOptions.ca) {
+    return options
+  }
 
-  return caOptions.ca ? _.extend({}, options, { ca: caArray.concat(caOptions.ca) }) : options
+  if (!options.ca) {
+    return {
+      ...options,
+      ca: caOptions.ca,
+    }
+  }
+
+  // First, normalize the options.ca option. It can be a string, a Buffer, an array of strings, or an array of Buffers
+  const caArray = _.castArray(options.ca).map((caOption) => caOption.toString())
+
+  return {
+    ...options,
+    ca: [...caArray, ...caOptions.ca],
+  }
 }
 
 export const clientCertificateStore = new ClientCertificateStore()
