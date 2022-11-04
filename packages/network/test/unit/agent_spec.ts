@@ -18,6 +18,7 @@ import {
   regenerateRequestHead,
   CombinedAgent,
   clientCertificateStore,
+  _resetBaseCaOptionsPromise,
 } from '../../lib/agent'
 import { allowDestroy } from '../../lib/allow-destroy'
 import { AsyncServer, Servers } from '../support/servers'
@@ -43,15 +44,7 @@ if (!fs.existsSync(tempDirPath)) {
   fs.mkdirSync(tempDirPath)
 }
 
-createCaFile(path.join(tempDirPath, 'cafile.pem'))
-const caFileContents = fs.readFileSync(path.join(tempDirPath, 'cafile.pem'), 'utf8')
-
-const caContents = pki.certificateToPem(createCertAndKey()[0])
-
-createCaFile(path.join(tempDirPath, 'extra_ca_certs.pem'))
-const extraCACertsFileContents = fs.readFileSync(path.join(tempDirPath, 'extra_ca_certs.pem'), 'utf8')
-
-function createCertAndKey (): [pki.Certificate, object] {
+function createCertAndKey (): [pki.Certificate, pki.rsa.PrivateKey] {
   let keys = pki.rsa.generateKeyPair(2048)
   let cert = pki.createCertificate()
 
@@ -93,12 +86,6 @@ function createCertAndKey (): [pki.Certificate, object] {
   cert.sign(keys.privateKey)
 
   return [cert, keys.privateKey]
-}
-
-function createCaFile (filepath: string) {
-  const certInfo = createCertAndKey()
-
-  fs.writeFileSync(filepath, pki.certificateToPem(certInfo[0]))
 }
 
 describe('lib/agent', function () {
@@ -529,23 +516,14 @@ describe('lib/agent', function () {
     ;[
       {
         name: 'should use the npm_config_cafile override',
-        npm_config_cafile: path.join(tempDirPath, 'cafile.pem'),
-        npm_config_ca: 'ca',
-        NODE_EXTRA_CA_CERTS: path.join(tempDirPath, 'extra_ca_certs.pem'),
-        caContents: [caFileContents],
         option: 'npm_config_cafile',
       },
       {
         name: 'should use the npm_config_ca override',
-        npm_config_ca: caContents,
-        NODE_EXTRA_CA_CERTS: path.join(tempDirPath, 'extra_ca_certs.pem'),
-        caContents: [caContents],
         option: 'npm_config_ca',
       },
       {
         name: 'should use the NODE_EXTRA_CA_CERTS override',
-        NODE_EXTRA_CA_CERTS: path.join(tempDirPath, 'extra_ca_certs.pem'),
-        caContents: [extraCACertsFileContents, ...tls.rootCertificates],
         option: 'NODE_EXTRA_CA_CERTS',
       },
     ].slice().map((testCase) => {
@@ -568,21 +546,36 @@ describe('lib/agent', function () {
 
           let options: any = {
             keepRequests: true,
-            https: this.servers.https,
+            https: {
+              ...this.servers.https,
+              ca: this.caContents,
+            },
             auth: false,
           }
 
-          if (testCase.npm_config_cafile) {
-            process.env.npm_config_cafile = testCase.npm_config_cafile
+          if (testCase.option === 'npm_config_cafile') {
+            process.env.npm_config_cafile = this.servers.caCertificatePath
+            this.caContents = [fs.readFileSync(this.servers.caCertificatePath, 'utf-8')]
+
+            // Ensure the priority picks cafile over the next two options
+            process.env.npm_config_ca = 'a'
+            process.env.NODE_EXTRA_CA_CERTS = 'b'
           }
 
-          if (testCase.npm_config_ca) {
-            process.env.npm_config_ca = testCase.npm_config_ca
+          if (testCase.option === 'npm_config_ca') {
+            this.caContents = [fs.readFileSync(this.servers.caCertificatePath, 'utf-8')]
+            process.env.npm_config_ca = this.caContents[0]
+
+            // Ensure the priority picks cafile over the next option
+            process.env.NODE_EXTRA_CA_CERTS = 'b'
           }
 
-          if (testCase.NODE_EXTRA_CA_CERTS) {
-            process.env.NODE_EXTRA_CA_CERTS = testCase.NODE_EXTRA_CA_CERTS
+          if (testCase.option === 'NODE_EXTRA_CA_CERTS') {
+            process.env.NODE_EXTRA_CA_CERTS = this.servers.caCertificatePath
+            this.caContents = [fs.readFileSync(this.servers.caCertificatePath, 'utf-8'), ...tls.rootCertificates]
           }
+
+          _resetBaseCaOptionsPromise()
 
           this.debugProxy = new DebuggingProxy(options)
 
@@ -599,6 +592,7 @@ describe('lib/agent', function () {
         it(`CA from ${testCase.option} presented for https request`, function () {
           return this.request({
             url: `https://localhost:${HTTPS_PORT}/get`,
+            rejectUnauthorized: true,
           }).then((body) => {
             // Test the CA options the first time through
             expect(body).to.eq('It worked!')
@@ -613,7 +607,7 @@ describe('lib/agent', function () {
 
             expect(socketKey.length).to.eq(1, 'There should only be a single localhost TLS Socket')
 
-            for (const ca of testCase.caContents) {
+            for (const ca of this.caContents) {
               expect(socketKey[0]).to.contain(ca, `${testCase.option} should be used for the TLS Socket`)
             }
 
@@ -634,7 +628,7 @@ describe('lib/agent', function () {
 
             expect(socketKey.length).to.eq(1, 'There should only be a single localhost TLS Socket')
 
-            for (const ca of testCase.caContents) {
+            for (const ca of this.caContents) {
               expect(socketKey[0]).to.contain(ca, `${testCase.option} should be used for the TLS Socket`)
             }
           })
@@ -663,23 +657,14 @@ describe('lib/agent', function () {
       },
       {
         name: 'should present a client certificate with npm_config_cafile',
-        presentClientCertificate: true,
-        npm_config_cafile: path.join(tempDirPath, 'cafile.pem'),
-        caContents: [caFileContents],
         configOption: 'npm_config_cafile',
       },
       {
         name: 'should present a client certificate with npm_config_ca',
-        presentClientCertificate: true,
-        npm_config_ca: caContents,
-        caContents: [caContents],
         configOption: 'npm_config_ca',
       },
       {
         name: 'should present a client certificate with NODE_EXTRA_CA_CERTS',
-        presentClientCertificate: true,
-        NODE_EXTRA_CA_CERTS: path.join(tempDirPath, 'extra_ca_certs.pem'),
-        caContents: [extraCACertsFileContents, ...tls.rootCertificates],
         option: 'NODE_EXTRA_CA_CERTS',
       },
       {
@@ -719,22 +704,34 @@ describe('lib/agent', function () {
             const testCerts = new UrlClientCertificates(`https://localhost`)
 
             testCerts.clientCertificates = new ClientCertificates()
-            testCerts.clientCertificates.cert.push(pemCert)
-            testCerts.clientCertificates.key.push(new PemKey(pki.privateKeyToPem(certAndKey[1]), undefined))
+            testCerts.clientCertificates.cert.push(Buffer.from(pemCert, 'utf-8'))
+            testCerts.clientCertificates.key.push(new PemKey(Buffer.from(pki.privateKeyToPem(certAndKey[1]), 'utf-8'), undefined))
             clientCertificateStore.addClientCertificatesForUrl(testCerts)
           }
 
-          if (testCase.npm_config_cafile) {
-            process.env.npm_config_cafile = testCase.npm_config_cafile
+          if (testCase.option === 'npm_config_cafile') {
+            process.env.npm_config_cafile = this.servers.caCertificatePath
+            this.caContents = [fs.readFileSync(this.servers.caCertificatePath, 'utf-8')]
+
+            // Ensure the priority picks cafile over the next two options
+            process.env.npm_config_ca = 'a'
+            process.env.NODE_EXTRA_CA_CERTS = 'b'
           }
 
-          if (testCase.npm_config_ca) {
-            process.env.npm_config_ca = testCase.npm_config_ca
+          if (testCase.option === 'npm_config_ca') {
+            this.caContents = [fs.readFileSync(this.servers.caCertificatePath, 'utf-8')]
+            process.env.npm_config_ca = this.caContents[0]
+
+            // Ensure the priority picks cafile over the next option
+            process.env.NODE_EXTRA_CA_CERTS = 'b'
           }
 
-          if (testCase.NODE_EXTRA_CA_CERTS) {
-            process.env.NODE_EXTRA_CA_CERTS = testCase.NODE_EXTRA_CA_CERTS
+          if (testCase.option === 'NODE_EXTRA_CA_CERTS') {
+            process.env.NODE_EXTRA_CA_CERTS = this.servers.caCertificatePath
+            this.caContents = [fs.readFileSync(this.servers.caCertificatePath, 'utf-8'), ...tls.rootCertificates]
           }
+
+          _resetBaseCaOptionsPromise()
 
           this.debugProxy = new DebuggingProxy(options)
 
@@ -772,8 +769,8 @@ describe('lib/agent', function () {
               expect(socketKey[0]).not.to.contain(this.clientCert, 'A client cert should not be used for the TLS Socket')
             }
 
-            if (testCase.caContents) {
-              for (const ca of testCase.caContents) {
+            if (this.caContents) {
+              for (const ca of this.caContents) {
                 expect(socketKey[0]).to.contain(ca, `${testCase.configOption} should be used for the TLS Socket`)
               }
             }
