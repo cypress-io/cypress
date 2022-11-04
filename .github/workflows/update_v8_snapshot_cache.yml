@@ -2,6 +2,9 @@ name: Update V8 Snapshot Cache
 on: push
 jobs:
   update-v8-snapshot-cache:
+    concurrency: 
+      group: ${{ github.ref }}
+      cancel-in-progress: true
     strategy:
       max-parallel: 1
       matrix:
