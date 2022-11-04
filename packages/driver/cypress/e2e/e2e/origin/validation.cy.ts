@@ -80,6 +80,11 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     })
 
     it('succeeds if url is the super domain as top but the super domain is excepted and must be strictly same origin', () => {
+      // Intercept google to keep our tests independent from google.
+      cy.intercept('https://www.google.com', {
+        body: '<html><head><title></title></head><body><p></body></html>',
+      })
+
       cy.visit('https://www.google.com')
       cy.origin('accounts.google.com', () => undefined)
       cy.then(() => {
@@ -351,6 +356,11 @@ describe('cy.origin', { browser: '!webkit' }, () => {
         expect(err.message).to.include('`cy.origin()` requires the first argument to be either a url or a domain name that is cross origin when compared to the top url. You passed `https://www.google.com` to the origin command, while top is at `https://www.google.com`')
 
         done()
+      })
+
+      // Intercept google to keep our tests independent from google.
+      cy.intercept('https://www.google.com', {
+        body: '<html><head><title></title></head><body><p></body></html>',
       })
 
       cy.visit('https://www.google.com')
