@@ -45,7 +45,7 @@ const StudioError = () => (
   </div>
 )
 
-function renderAttemptContent (model: AttemptModel, studioActive: boolean, testType?: Cypress.CypressSpecType) {
+function renderAttemptContent (model: AttemptModel, studioActive: boolean) {
   // performance optimization - don't render contents if not open
   return (
     <div className={`attempt-${model.id + 1}`}>
@@ -53,7 +53,7 @@ function renderAttemptContent (model: AttemptModel, studioActive: boolean, testT
       <Agents model={model} />
       <Routes model={model} />
       <div ref='commands' className='runnable-commands-region'>
-        {model.hasCommands ? <Hooks model={model} testType={testType} /> : <NoCommands />}
+        {model.hasCommands ? <Hooks model={model} /> : <NoCommands />}
       </div>
       {model.state === 'failed' && (
         <div className='attempt-error-region'>
@@ -69,7 +69,6 @@ interface AttemptProps {
   model: AttemptModel
   scrollIntoView: Function
   studioActive: boolean
-  testType?: Cypress.CypressSpecType
 }
 
 @observer
@@ -79,7 +78,7 @@ class Attempt extends Component<AttemptProps> {
   }
 
   render () {
-    const { model, studioActive, testType } = this.props
+    const { model, studioActive } = this.props
 
     // HACK: causes component update when command log is added
     model.commands.length
@@ -97,14 +96,14 @@ class Attempt extends Component<AttemptProps> {
           contentClass='attempt-content'
           isOpen={model.isOpen}
         >
-          {renderAttemptContent(model, studioActive, testType)}
+          {renderAttemptContent(model, studioActive)}
         </Collapsible>
       </li>
     )
   }
 }
 
-const Attempts = observer(({ test, scrollIntoView, studioActive, testType }: {test: TestModel, scrollIntoView: Function, studioActive: boolean, testType?: Cypress.CypressSpecType }) => {
+const Attempts = observer(({ test, scrollIntoView, studioActive }: {test: TestModel, scrollIntoView: Function, studioActive: boolean}) => {
   return (<ul className={cs('attempts', {
     'has-multiple-attempts': test.hasMultipleAttempts,
   })}>
@@ -115,7 +114,6 @@ const Attempts = observer(({ test, scrollIntoView, studioActive, testType }: {te
           scrollIntoView={scrollIntoView}
           studioActive={studioActive}
           model={attempt}
-          testType={testType}
         />
       )
     })}
