@@ -14,7 +14,7 @@ describe('component testing projects', function () {
   systemTests.it('vueclivue2-configured', {
     project: 'vueclivue2-configured',
     testingType: 'component',
-    spec: 'src/components/HelloWorld.cy.js',
+    spec: 'src/**/*.cy.js',
     browser: 'electron',
     expectedExitCode: 0,
   })
