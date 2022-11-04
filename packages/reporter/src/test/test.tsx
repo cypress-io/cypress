@@ -109,6 +109,7 @@ interface TestProps {
   model: TestModel
   studioEnabled: boolean
   canSaveStudioLogs: boolean
+  testType?: Cypress.CypressSpecType
 }
 
 @observer
@@ -118,6 +119,7 @@ class Test extends Component<TestProps> {
     appState,
     runnablesStore,
     scroller,
+    testType: 'integration',
   }
 
   containerRef: RefObject<HTMLDivElement>
@@ -217,11 +219,11 @@ class Test extends Component<TestProps> {
   }
 
   _contents () {
-    const { appState, model } = this.props
+    const { appState, model, testType } = this.props
 
     return (
       <div style={{ paddingLeft: indent(model.level) }}>
-        <Attempts studioActive={appState.studioActive} test={model} scrollIntoView={() => this._scrollIntoView()} />
+        <Attempts studioActive={appState.studioActive} test={model} scrollIntoView={() => this._scrollIntoView()} testType={testType} />
         {appState.studioActive && <StudioControls model={model} canSaveStudioLogs={this.props.canSaveStudioLogs}/>}
       </div>
     )

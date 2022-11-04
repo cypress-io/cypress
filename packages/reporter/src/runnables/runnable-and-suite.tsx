@@ -20,9 +20,10 @@ interface SuiteProps {
   model: SuiteModel
   studioEnabled: boolean
   canSaveStudioLogs: boolean
+  testType?: Cypress.CypressSpecType
 }
 
-const Suite = observer(({ eventManager = events, model, studioEnabled, canSaveStudioLogs }: SuiteProps) => {
+const Suite = observer(({ eventManager = events, model, studioEnabled, canSaveStudioLogs, testType }: SuiteProps) => {
   const _launchStudio = (e: MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -59,6 +60,7 @@ const Suite = observer(({ eventManager = events, model, studioEnabled, canSaveSt
             model={runnable}
             studioEnabled={studioEnabled}
             canSaveStudioLogs={canSaveStudioLogs}
+            testType={testType}
           />))}
       </ul>
     </Collapsible>
@@ -70,6 +72,7 @@ export interface RunnableProps {
   appState: AppState
   studioEnabled: boolean
   canSaveStudioLogs: boolean
+  testType?: Cypress.CypressSpecType
 }
 
 // NOTE: some of the driver tests dig into the React instance for this component
@@ -83,7 +86,7 @@ class Runnable extends Component<RunnableProps> {
   }
 
   render () {
-    const { appState, model, studioEnabled, canSaveStudioLogs } = this.props
+    const { appState, model, studioEnabled, canSaveStudioLogs, testType } = this.props
 
     return (
       <li
@@ -94,8 +97,8 @@ class Runnable extends Component<RunnableProps> {
         data-model-state={model.state}
       >
         {model.type === 'test'
-          ? <Test model={model as TestModel} studioEnabled={studioEnabled} canSaveStudioLogs={canSaveStudioLogs} />
-          : <Suite model={model as SuiteModel} studioEnabled={studioEnabled} canSaveStudioLogs={canSaveStudioLogs} />}
+          ? <Test model={model as TestModel} studioEnabled={studioEnabled} canSaveStudioLogs={canSaveStudioLogs} testType={testType} />
+          : <Suite model={model as SuiteModel} studioEnabled={studioEnabled} canSaveStudioLogs={canSaveStudioLogs} testType={testType} />}
       </li>
     )
   }

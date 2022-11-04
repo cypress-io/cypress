@@ -89,9 +89,10 @@ interface RunnablesListProps {
   runnables: RunnableArray
   studioEnabled: boolean
   canSaveStudioLogs: boolean
+  testType?: Cypress.CypressSpecType
 }
 
-const RunnablesList = observer(({ runnables, studioEnabled, canSaveStudioLogs }: RunnablesListProps) => (
+const RunnablesList = observer(({ runnables, studioEnabled, canSaveStudioLogs, testType }: RunnablesListProps) => (
   <div className='wrap'>
     <ul className='runnables'>
       {_.map(runnables, (runnable) =>
@@ -100,6 +101,7 @@ const RunnablesList = observer(({ runnables, studioEnabled, canSaveStudioLogs }:
           model={runnable}
           canSaveStudioLogs={canSaveStudioLogs}
           studioEnabled={studioEnabled}
+          testType={testType}
         />))}
     </ul>
   </div>
@@ -139,6 +141,7 @@ const RunnablesContent = observer(({ runnablesStore, spec, error, studioEnabled,
       runnables={isRunning ? runnables : runnablesHistory[specPath]}
       studioEnabled={studioEnabled}
       canSaveStudioLogs={canSaveStudioLogs}
+      testType={spec.specType}
     />
   )
 })

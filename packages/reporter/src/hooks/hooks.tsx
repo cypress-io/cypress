@@ -59,14 +59,16 @@ const StudioNoCommands = () => (
 export interface HookProps {
   model: HookModel
   showNumber: boolean
+  testType?: Cypress.CypressSpecType
 }
 
-const Hook = observer(({ model, showNumber }: HookProps) => (
+const Hook = observer(({ model, showNumber, testType }: HookProps) => (
   <li className={cs('hook-item', { 'hook-failed': model.failed, 'hook-studio': model.isStudio })}>
     <Collapsible
       header={<HookHeader model={model} number={showNumber ? model.hookNumber : undefined} />}
       headerClass='hook-header'
-      headerExtras={model.invocationDetails && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
+      // Temporarily removed from CT since it doesn't work. Will be re-enabled in https://github.com/cypress-io/cypress/issues/24549
+      headerExtras={model.invocationDetails && testType !== 'component' && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
       isOpen
     >
       <ul className='commands-container'>
@@ -86,13 +88,14 @@ export interface HooksModel {
 export interface HooksProps {
   state?: AppState
   model: HooksModel
+  testType?: Cypress.CypressSpecType
 }
 
-const Hooks = observer(({ state = appState, model }: HooksProps) => (
+const Hooks = observer(({ state = appState, model, testType }: HooksProps) => (
   <ul className='hooks-container'>
     {_.map(model.hooks, (hook) => {
       if (hook.commands.length || (hook.isStudio && state.studioActive && model.state === 'passed')) {
-        return <Hook key={hook.hookId} model={hook} showNumber={model.hookCount[hook.hookName] > 1} />
+        return <Hook key={hook.hookId} model={hook} showNumber={model.hookCount[hook.hookName] > 1} testType={testType} />
       }
 
       return null
