@@ -1,8 +1,7 @@
 import {
-  injectStylesBeforeElement,
-  StyleOptions,
   getContainerEl,
   setupHooks,
+  checkForRemovedStyleOptions,
 } from '@cypress/mount-utils'
 import type { ComponentConstructorOptions, ComponentProps, SvelteComponent } from 'svelte'
 
@@ -15,8 +14,7 @@ type SvelteComponentOptions<T extends SvelteComponent> = Omit<
 >;
 
 export interface MountOptions<T extends SvelteComponent>
-  extends SvelteComponentOptions<T>,
-  Partial<StyleOptions> {
+  extends SvelteComponentOptions<T> {
   log?: boolean
 }
 
@@ -61,13 +59,13 @@ export function mount<T extends SvelteComponent> (
   Component: SvelteConstructor<T>,
   options: MountOptions<T> = {},
 ): Cypress.Chainable<MountReturn<T>> {
+  checkForRemovedStyleOptions(options)
+
   return cy.then(() => {
     // Remove last mounted component if cy.mount is called more than once in a test
     cleanup()
 
     const target = getContainerEl()
-
-    injectStylesBeforeElement(options, document, target)
 
     const ComponentConstructor = ((Component as any).default || Component) as SvelteConstructor<T>
 

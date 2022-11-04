@@ -43,13 +43,27 @@ export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerende
 
       return lastReactDom.render(reactComponent, el)
     },
-    unmount,
+    unmount: internalUnmount,
     cleanup,
   }
 
   return makeMountFn('mount', jsx, { ReactDom: ReactDOM, ...options }, rerenderKey, internalOptions)
 }
 
-export function unmount (options = { log: true }) {
+function internalUnmount (options = { log: true }) {
   return makeUnmountFn(options)
+}
+
+/**
+ * Removed as of Cypress 11.0.0.
+ * @see https://on.cypress.io/migration-11-0-0-component-testing-updates
+ */
+export function unmount (options = { log: true }) {
+  // @ts-expect-error - undocumented API
+  Cypress.utils.throwErrByPath('mount.unmount')
+}
+
+// Re-export this to help with migrating away from `unmount`
+export {
+  getContainerEl,
 }

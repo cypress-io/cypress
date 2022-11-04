@@ -21,10 +21,9 @@ import type {
 } from 'vue'
 import type { MountingOptions as VTUMountingOptions, VueWrapper } from '@vue/test-utils'
 import {
-  injectStylesBeforeElement,
-  StyleOptions,
   getContainerEl,
   setupHooks,
+  checkForRemovedStyleOptions,
 } from '@cypress/mount-utils'
 
 import * as _VueTestUtils from '@vue/test-utils'
@@ -69,7 +68,7 @@ type MountingOptions<Props, Data = {}> = Omit<VTUMountingOptions<Props, Data>, '
     use?: GlobalMountOptions['plugins']
     mixin?: GlobalMountOptions['mixins']
   }
-} & Partial<StyleOptions>
+}
 
 export type CyMountOptions<Props, Data = {}> = MountingOptions<Props, Data>
 
@@ -369,6 +368,7 @@ export function mount<
 
 // implementation
 export function mount (componentOptions: any, options: any = {}) {
+  checkForRemovedStyleOptions(options)
   // Remove last mounted component if cy.mount is called more than once in a test
   cleanup()
 
@@ -391,8 +391,6 @@ export function mount (componentOptions: any, options: any = {}) {
     const document: Document = cy.state('document')
 
     const el = getContainerEl()
-
-    injectStylesBeforeElement(options, document, el)
 
     // merge the extensions with global
     if (options.extensions) {
@@ -421,12 +419,22 @@ export function mount (componentOptions: any, options: any = {}) {
         logInstance.end()
       }
 
-      // by returning undefined we keep the previous subject
-      // which is the mounted component
-      return {
+      const returnVal = {
         wrapper,
         component: wrapper.vm,
       }
+
+      return new Proxy(Object.create(returnVal), {
+        get (obj, prop) {
+        // throw an error if it looks like the caller is trying to call a method on the VueWrapper that was originally returned
+          if (Reflect.get(wrapper, prop)) {
+            // @ts-expect-error - internal API
+            Cypress.utils.throwErrByPath('mount.vue_yielded_value')
+          }
+
+          return Reflect.get(obj, prop)
+        },
+      })
     })
   })
 }
@@ -460,13 +468,17 @@ function getComponentDisplayName (componentOptions: any): string {
  * @example
  *  import {mountCallback} from '@cypress/vue'
  *  beforeEach(mountVue(component, options))
+ *
+ * Removed as of Cypress 11.0.0.
+ * @see https://on.cypress.io/migration-11-0-0-component-testing-updates
  */
 export function mountCallback (
   component: any,
   options: any = {},
-): () => Cypress.Chainable {
+) {
   return () => {
-    return mount(component, options)
+    // @ts-expect-error - undocumented API
+    Cypress.utils.throwErrByPath('mount.mount_callback')
   }
 }
 

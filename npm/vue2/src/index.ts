@@ -7,10 +7,9 @@ import {
   Wrapper,
 } from '@vue/test-utils'
 import {
-  injectStylesBeforeElement,
-  StyleOptions,
   getContainerEl,
   setupHooks,
+  checkForRemovedStyleOptions,
 } from '@cypress/mount-utils'
 
 const defaultOptions: (keyof MountOptions)[] = [
@@ -240,7 +239,7 @@ interface MountOptions {
 /**
  * Utility type for union of options passed to "mount(..., options)"
  */
-type MountOptionsArgument = Partial<ComponentOptions & MountOptions & StyleOptions & VueTestUtilsConfigOptions>
+type MountOptionsArgument = Partial<ComponentOptions & MountOptions & VueTestUtilsConfigOptions>
 
 // when we mount a Vue component, we add it to the global Cypress object
 // so here we extend the global Cypress namespace and its Cypress interface
@@ -281,10 +280,6 @@ function failTestOnVueError (err, vm, info) {
   setTimeout(() => {
     throw err
   })
-}
-
-const injectStyles = (options: StyleOptions) => {
-  return injectStylesBeforeElement(options, document, getContainerEl())
 }
 
 /**
@@ -331,6 +326,7 @@ export const mount = (
   wrapper: Wrapper<Vue, Element>
   component: Wrapper<Vue, Element>['vm']
 }> => {
+  checkForRemovedStyleOptions(optionsOrProps)
   // Remove last mounted component if cy.mount is called more than once in a test
   cleanup()
 
@@ -349,18 +345,6 @@ export const mount = (
   return cy
   .window({
     log: false,
-  })
-  .then(() => {
-    const { style, stylesheets, stylesheet, styles, cssFiles, cssFile } = optionsOrProps
-
-    injectStyles({
-      style,
-      stylesheets,
-      stylesheet,
-      styles,
-      cssFiles,
-      cssFile,
-    })
   })
   .then((win) => {
     if (optionsOrProps.log !== false) {
@@ -424,12 +408,18 @@ export const mount = (
  * @example
  *  import {mountCallback} from '@cypress/vue2'
  *  beforeEach(mountVue(component, options))
+ *
+ * Removed as of Cypress 11.0.0.
+ * @see https://on.cypress.io/migration-11-0-0-component-testing-updates
  */
 export const mountCallback = (
   component: VueComponent,
   options?: MountOptionsArgument,
 ) => {
-  return () => mount(component, options)
+  return () => {
+    // @ts-expect-error - undocumented API
+    Cypress.utils.throwErrByPath('mount.mount_callback')
+  }
 }
 
 // Side effects from "import { mount } from '@cypress/<my-framework>'" are annoying, we should avoid doing this
