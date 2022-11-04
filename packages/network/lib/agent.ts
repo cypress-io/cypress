@@ -28,6 +28,7 @@ const getCaOptionsPromise = (): Promise<CaOptions> => {
 }
 let baseCaOptionsPromise: Promise<CaOptions> = getCaOptionsPromise()
 
+// This is for testing purposes only
 export const _resetBaseCaOptionsPromise = () => {
   baseCaOptions = undefined
   baseCaOptionsPromise = getCaOptionsPromise()

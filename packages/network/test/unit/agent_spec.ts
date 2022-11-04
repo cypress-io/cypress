@@ -657,15 +657,18 @@ describe('lib/agent', function () {
       },
       {
         name: 'should present a client certificate with npm_config_cafile',
-        configOption: 'npm_config_cafile',
+        option: 'npm_config_cafile',
+        presentClientCertificate: true,
       },
       {
         name: 'should present a client certificate with npm_config_ca',
-        configOption: 'npm_config_ca',
+        option: 'npm_config_ca',
+        presentClientCertificate: true,
       },
       {
         name: 'should present a client certificate with NODE_EXTRA_CA_CERTS',
         option: 'NODE_EXTRA_CA_CERTS',
+        presentClientCertificate: true,
       },
       {
         name: 'should not present a client certificate',
@@ -745,7 +748,7 @@ describe('lib/agent', function () {
           this.debugProxy.stop()
         })
 
-        it(`Client certificate${testCase.presentClientCertificate ? ' ' : ' not '}presented for https request${testCase.configOption ? ` with config option ${testCase.configOption}` : '' }`, function () {
+        it(`Client certificate${testCase.presentClientCertificate ? ' ' : ' not '}presented for https request${testCase.option ? ` with config option ${testCase.option}` : '' }`, function () {
           return this.request({
             url: `https://localhost:${HTTPS_PORT}/get`,
           }).then((body) => {
@@ -771,7 +774,7 @@ describe('lib/agent', function () {
 
             if (this.caContents) {
               for (const ca of this.caContents) {
-                expect(socketKey[0]).to.contain(ca, `${testCase.configOption} should be used for the TLS Socket`)
+                expect(socketKey[0]).to.contain(ca, `${testCase.option} should be used for the TLS Socket`)
               }
             }
           })
