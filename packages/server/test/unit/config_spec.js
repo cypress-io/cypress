@@ -13,7 +13,7 @@ describe('lib/config', () => {
     this.versions = process.versions
 
     process.env = _.omit(process.env, 'CYPRESS_DEBUG')
-    process.versions.chrome = '0'
+    process.versions.electron = '0'
 
     Fixtures.scaffold()
   })
