@@ -14,7 +14,7 @@ const PROJECTS: {projectName: ProjectDirs[number], test: string}[] = [
 
 // TODO: Add these tests to another cy-in-cy framework test to reduce CI cost as these scaffolding is expensive
 for (const { projectName, test } of PROJECTS) {
-  describe(`CT Mount ${projectName}`, { viewportWidth: 1500, defaultCommandTimeout: 30000 }, () => {
+  describe(`CT Mount ${projectName}`, { viewportWidth: 1500, defaultCommandTimeout: 45000 }, () => {
     beforeEach(() => {
       cy.scaffoldProject(projectName)
       cy.findBrowsers()
