@@ -486,7 +486,7 @@ describe('Launchpad Top Nav Workflows', () => {
           mockLogInActionsForUser(mockUserNoName)
 
           logIn({ expectedNextStepText: 'Continue', displayName: mockUserNoName.email })
-
+          cy.contains(defaultMessages.components.loading.config.title).should('not.exist')
           cy.contains('[data-cy=standard-modal] h2', defaultMessages.specPage.banners.record.title).should('be.visible')
           cy.contains('[data-cy=standard-modal]', defaultMessages.specPage.banners.record.content).should('be.visible')
           cy.contains('button', 'Copy').should('be.visible')
