@@ -360,7 +360,6 @@ export default function (Commands, Cypress, cy) {
             return
           }
 
-          sessionsManager.setActiveSession({ [existingSession.id]: existingSession })
           sessionsManager.registeredSessions.set(existingSession.id, true)
           await sessions.saveSessionData(existingSession)
 
