@@ -775,20 +775,20 @@ declare namespace Cypress {
     clear(options?: Partial<ClearOptions>): Chainable<Subject>
 
     /**
-     * Clear a specific browser cookie.
+     * Clear a specific browser cookie for the current superdomain or for the domain specified.
      * Cypress automatically clears all cookies before each test to prevent state from being shared across tests. You shouldn't need to use this command unless you're using it to clear a specific cookie inside a single test.
      *
      * @see https://on.cypress.io/clearcookie
      */
-    clearCookie(name: string, options?: Partial<Loggable & Timeoutable>): Chainable<null>
+    clearCookie(name: string, options?: CookieOptions): Chainable<null>
 
     /**
-     * Clear all browser cookies.
-     * Cypress automatically clears all cookies before each test to prevent state from being shared across tests. You shouldn't need to use this command unless you're using it to clear a specific cookie inside a single test.
+     * Clear all browser cookies for the current superdomain or for the domain specified.
+     * Cypress automatically clears all cookies before each test to prevent state from being shared across tests. You shouldn't need to use this command unless you're using it to clear all cookies or specific cookies inside a single test.
      *
      * @see https://on.cypress.io/clearcookies
      */
-    clearCookies(options?: Partial<Loggable & Timeoutable>): Chainable<null>
+    clearCookies(options?: CookieOptions): Chainable<null>
 
     /**
      * Clear data in local storage.
@@ -1248,18 +1248,18 @@ declare namespace Cypress {
     get<S = any>(alias: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<S>
 
     /**
-     * Get a browser cookie by its name.
+     * Get a browser cookie by its name for the current superdomain or for the domain specified.
      *
      * @see https://on.cypress.io/getcookie
      */
-    getCookie(name: string, options?: Partial<Loggable & Timeoutable>): Chainable<Cookie | null>
+    getCookie(name: string, options?: CookieOptions): Chainable<Cookie | null>
 
     /**
-     * Get all of the browser cookies.
+     * Get all of the browser cookies for the current superdomain or for the domain specified.
      *
      * @see https://on.cypress.io/getcookies
      */
-    getCookies(options?: Partial<Loggable & Timeoutable>): Chainable<Cookie[]>
+    getCookies(options?: CookieOptions): Chainable<Cookie[]>
 
     /**
      * Navigate back or forward to the previous or next URL in the browser's history.
@@ -2631,6 +2631,14 @@ declare namespace Cypress {
      * @default false
      */
     cmdKey: boolean
+  }
+
+  interface CookieOptions extends Partial<Loggable & Timeoutable> {
+    /**
+     * Domain to set cookies on or get cookies from
+     * @default superdomain of the current app under test
+     */
+    domain?: string
   }
 
   interface PEMCert {

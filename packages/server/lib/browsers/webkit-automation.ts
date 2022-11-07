@@ -1,8 +1,7 @@
-import _ from 'lodash'
 import Debug from 'debug'
 import type playwright from 'playwright-webkit'
 import type { Automation } from '../automation'
-import { normalizeResourceType } from './cdp_automation'
+import { cookieMatches, normalizeResourceType, CyCookieFilter } from './cdp_automation'
 import os from 'os'
 import type { RunModeVideoApi } from '@packages/types'
 import path from 'path'
@@ -13,11 +12,6 @@ const debug = Debug('cypress:server:browsers:webkit-automation')
 export type CyCookie = Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expirationDate' | 'hostOnly' | 'domain' | 'path' | 'secure' | 'httpOnly'> & {
   // use `undefined` instead of `unspecified`
   sameSite?: 'no_restriction' | 'lax' | 'strict'
-}
-
-type CookieFilter = {
-  name: string
-  domain: string
 }
 
 const extensionMap = {
@@ -63,29 +57,6 @@ const normalizeSetCookieProps = (cookie: CyCookie): playwright.Cookie => {
     expires: cookie.expirationDate!,
     sameSite: convertSameSiteExtensionToCypress(cookie.sameSite)!,
   }
-}
-
-const _domainIsWithinSuperdomain = (domain: string, suffix: string) => {
-  const suffixParts = suffix.split('.').filter(_.identity)
-  const domainParts = domain.split('.').filter(_.identity)
-
-  return _.isEqual(suffixParts, domainParts.slice(domainParts.length - suffixParts.length))
-}
-
-const _cookieMatches = (cookie: any, filter: Record<string, any>) => {
-  if (filter.domain && !(cookie.domain && _domainIsWithinSuperdomain(cookie.domain, filter.domain))) {
-    return false
-  }
-
-  if (filter.path && filter.path !== cookie.path) {
-    return false
-  }
-
-  if (filter.name && filter.name !== cookie.name) {
-    return false
-  }
-
-  return true
 }
 
 let requestIdCounter = 1
@@ -279,19 +250,23 @@ export class WebKitAutomation {
     })
   }
 
-  private async getCookies (): Promise<CyCookie[]> {
+  private async getCookies (filter: CyCookieFilter): Promise<CyCookie[]> {
     const cookies = await this.context.cookies()
 
-    return cookies.map(normalizeGetCookieProps)
+    return cookies
+    .filter((cookie) => {
+      return cookieMatches(cookie, filter)
+    })
+    .map(normalizeGetCookieProps)
   }
 
-  private async getCookie (filter: CookieFilter) {
+  private async getCookie (filter: CyCookieFilter) {
     const cookies = await this.context.cookies()
 
     if (!cookies.length) return null
 
     const cookie = cookies.find((cookie) => {
-      return _cookieMatches(cookie, {
+      return cookieMatches(cookie, {
         domain: filter.domain,
         name: filter.name,
       })
@@ -306,13 +281,16 @@ export class WebKitAutomation {
    * @param filter the cookie to be cleared
    * @returns the cleared cookie
    */
-  private async clearCookie (filter: CookieFilter): Promise<CookieFilter> {
+  private async clearCookie (filter: CyCookieFilter): Promise<CyCookieFilter> {
+    // webkit doesn't have a way to only clear certain cookies, so we have
+    // to clear all cookies and put back the ones we don't want cleared
     const allCookies = await this.context.cookies()
     const persistCookies = allCookies.filter((cookie) => {
-      return !_cookieMatches(cookie, filter)
+      return !cookieMatches(cookie, filter)
     })
 
     await this.context.clearCookies()
+
     if (persistCookies.length) await this.context.addCookies(persistCookies)
 
     return filter
@@ -322,12 +300,24 @@ export class WebKitAutomation {
    * Clear all cookies
    * @returns cookies cleared
    */
-  private async clearCookies (): Promise<CyCookie[]> {
-    const allCookies = await this.getCookies()
+  private async clearCookies (cookiesToClear: CyCookie[]): Promise<CyCookie[]> {
+    // webkit doesn't have a way to only clear certain cookies, so we have
+    // to clear all cookies and put back the ones we don't want cleared
+    const allCookies = await this.context.cookies()
+    const persistCookies = allCookies.filter((cookie) => {
+      return !cookiesToClear.find((cookieToClear) => {
+        return cookieMatches(cookie, cookieToClear)
+      })
+    })
+
+    debug('clear cookies: %o', cookiesToClear)
+    debug('put back cookies: %o', persistCookies)
 
     await this.context.clearCookies()
 
-    return allCookies
+    if (persistCookies.length) await this.context.addCookies(persistCookies)
+
+    return cookiesToClear
   }
 
   private async takeScreenshot (data) {
@@ -347,7 +337,7 @@ export class WebKitAutomation {
       case 'is:automation:client:connected':
         return true
       case 'get:cookies':
-        return await this.getCookies()
+        return await this.getCookies(data)
       case 'get:cookie':
         return await this.getCookie(data)
       case 'set:cookie':
@@ -356,7 +346,7 @@ export class WebKitAutomation {
       case 'set:cookies':
         return await this.context.addCookies(data.map(normalizeSetCookieProps))
       case 'clear:cookies':
-        return await this.clearCookies()
+        return await this.clearCookies(data)
       case 'clear:cookie':
         return await this.clearCookie(data)
       case 'take:screenshot':

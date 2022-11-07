@@ -325,6 +325,12 @@ export default {
         docsUrl: 'https://on.cypress.io/session',
       }
     },
+    invalid_domain (obj) {
+      return {
+        message: `${cmd('{{cmd}}')} must be passed a valid domain name. You passed: \`{{domain}}\``,
+        docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
+      }
+    },
     invalid_name (obj) {
       return {
         message: `${cmd('{{cmd}}')} must be passed an RFC-6265-compliant cookie name. You passed:\n\n\`{{name}}\``,
@@ -976,6 +982,42 @@ export default {
         'full instructions for doing so at the following location.',
       ].join('\n'),
       docsUrl: 'https://on.cypress.io/mount',
+    },
+    removed_style_mounting_options (key: string) {
+      return {
+        message: `The \`${key}\` mounting option is no longer supported.`,
+        docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
+      }
+    },
+    cleanup_styles: {
+      message: `\`cleanupStyles\` is no longer supported.`,
+      docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
+    },
+    inject_styles_before_element: {
+      message: `\`injectStylesBeforeElement\` is no longer supported.`,
+      docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
+    },
+    mount_hook: {
+      message: `\`mountHook\` is no longer supported.`,
+      docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
+    },
+    unmount: {
+      message: `\`unmount\` is no longer supported.`,
+      docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
+    },
+    mount_callback: {
+      message: `\`mountCallback\` is no longer supported.`,
+      docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
+    },
+    vue_yielded_value: {
+      message: 'As of Cypress 11, mount now yields an object with VueWrapper and the component as properties. Destructure using `{ wrapper, component }` to access the VueWrapper and component.',
+      docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
+    },
+    alias (alias: string) {
+      return {
+        message: `passing \`alias\` to mounting options is no longer supported. Use mount(...).as('${alias}') instead.`,
+        docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
+      }
     },
   },
 

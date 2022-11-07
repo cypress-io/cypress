@@ -75,46 +75,5 @@
   },
   "files": [
     "dist"
-  ],
-  "vite": {
-    "optimizeDeps": {
-      "include": [
-        "@cypress/parse-domain",
-        "@headlessui/vue",
-        "@iconify/iconify",
-        "@percy/cypress",
-        "@testing-library/cypress/add-commands",
-        "@toycode/markdown-it-class",
-        "@urql/exchange-execute",
-        "@urql/vue",
-        "@vueuse/core",
-        "ansi-to-html",
-        "bluebird",
-        "cypress-real-events",
-        "dedent",
-        "debug",
-        "events",
-        "fake-uuid",
-        "floating-vue",
-        "fuzzysort",
-        "graphql",
-        "graphql-relay",
-        "graphql/jsutils/Path",
-        "gravatar",
-        "human-interval",
-        "javascript-time-ago",
-        "lodash",
-        "markdown-it",
-        "mobx",
-        "nanoid",
-        "pinia",
-        "shiki",
-        "url",
-        "vue",
-        "vue-demi",
-        "vue-toastification",
-        "wonka"
-      ]
-    }
-  }
+  ]
 }
