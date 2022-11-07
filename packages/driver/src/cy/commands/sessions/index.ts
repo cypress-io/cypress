@@ -145,8 +145,6 @@ export default function (Commands, Cypress, cy) {
           validate: options.validate,
           cacheAcrossSpecs: options.cacheAcrossSpecs,
         })
-
-        sessionsManager.registeredSessions.set(id, true)
       }
 
       function setSessionLogStatus (status: string) {
@@ -159,7 +157,7 @@ export default function (Commands, Cypress, cy) {
         })
       }
 
-      function createSession (existingSession, recreateSession = false) {
+      function createSession (existingSession: SessionData, recreateSession = false) {
         logGroup(Cypress, {
           name: 'session',
           displayName: recreateSession ? 'Recreate session' : 'Create new session',
@@ -187,7 +185,6 @@ export default function (Commands, Cypress, cy) {
 
             _.extend(existingSession, data)
             existingSession.hydrated = true
-            await sessions.saveSessionData(existingSession)
 
             _log.set({ consoleProps: () => getConsoleProps(existingSession) })
 
@@ -348,7 +345,7 @@ export default function (Commands, Cypress, cy) {
        *   1. create session
        *   2. validate session
        */
-      const createSessionWorkflow = (existingSession, recreateSession = false) => {
+      const createSessionWorkflow = (existingSession: SessionData, recreateSession = false) => {
         return cy.then(async () => {
           setSessionLogStatus(recreateSession ? 'recreating' : 'creating')
 
@@ -358,10 +355,14 @@ export default function (Commands, Cypress, cy) {
           return createSession(existingSession, recreateSession)
         })
         .then(() => validateSession(existingSession))
-        .then((isValidSession: boolean) => {
+        .then(async (isValidSession: boolean) => {
           if (!isValidSession) {
             return
           }
+
+          sessionsManager.setActiveSession({ [existingSession.id]: existingSession })
+          sessionsManager.registeredSessions.set(existingSession.id, true)
+          await sessions.saveSessionData(existingSession)
 
           setSessionLogStatus(recreateSession ? 'recreated' : 'created')
         })
@@ -373,7 +374,7 @@ export default function (Commands, Cypress, cy) {
        *   2. validate session
        *   3. if validation fails, catch error and recreate session
        */
-      const restoreSessionWorkflow = (existingSession) => {
+      const restoreSessionWorkflow = (existingSession: SessionData) => {
         return cy.then(async () => {
           setSessionLogStatus('restoring')
           await navigateAboutBlank()
