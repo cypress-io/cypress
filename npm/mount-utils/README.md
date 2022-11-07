@@ -25,11 +25,7 @@ All the functionality used to create the first party Mount adapters is available
 
 In addition, we recommend that Mount Adapters:
 
-- receive a second argument that extends `StyleOptions` from `@cypress/mount-utils`
-- calls `injectStylesBeforeElement` from `@cypress/mount-utils` before mounting the component
-- calls `setupHooks` to register the required lifecycle hooks for `@cypress/mount-utils` to work
-
-This will let the user inject styles `<style>...</style>` and stylesheets `<link rel="stylesheet">`, which is very useful for developing components.
+- call `setupHooks` to register the required lifecycle hooks for `@cypress/mount-utils` to work
 
 ### Example Mount Adapter: Web Components 
 
@@ -39,9 +35,7 @@ Here's a simple yet realistic example of Mount Adapter targeting Web Components.
 import {
   ROOT_SELECTOR,
   setupHooks,
-  injectStylesBeforeElement,
-  getContainerEl,
-  StyleOptions
+  getContainerEl
 } from "@cypress/mount-utils";
 
 Cypress.on("run:start", () => {
@@ -69,8 +63,7 @@ function maybeRegisterComponent<T extends CustomElementConstructor>(
 }
 
 export function mount(
-  webComponent: CustomElementConstructor,
-  options?: Partial<StyleOptions>
+  webComponent: CustomElementConstructor
 ): Cypress.Chainable {
   // Get root selector defined in `cypress/support.component-index.html
   const $root = document.querySelector(ROOT_SELECTOR)!;
@@ -82,9 +75,6 @@ export function mount(
 
   /// Register Web Component
   maybeRegisterComponent(name, webComponent);
-
-  // Inject user styles before mounting the component
-  injectStylesBeforeElement(options ?? {}, document, getContainerEl())
 
   // Render HTML containing component.
   $root.innerHTML = `<${name} id="root"></${name}>`;
@@ -100,8 +90,7 @@ export function mount(
   return cy.wrap(document.querySelector("#root"), { log: false });
 }
 
-// Setup Cypress lifecycle hooks. This tears down any styles
-// injected by injectStylesBeforeElement, etc.
+// Setup Cypress lifecycle hooks.
 setupHooks();
 ```
 
@@ -131,14 +120,7 @@ export class WebCounter extends HTMLElement {
 
 describe('web-component.cy.ts', () => {
   it('playground', () => {
-    cy.mount(WebCounter, {
-      styles: `
-        button {
-          background: lightblue;
-          color: white;
-        }
-      `
-    })
+    cy.mount(WebCounter)
   })
 })
 ```

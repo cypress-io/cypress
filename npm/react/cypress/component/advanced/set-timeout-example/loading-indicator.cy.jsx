@@ -1,5 +1,5 @@
 import React from 'react'
-import { mount, unmount } from '@cypress/react'
+import { mount } from '@cypress/react'
 import LoadingIndicator from './LoadingIndicator'
 
 // compare these tests to Jest + Enzyme tests in
@@ -73,7 +73,9 @@ describe('LoadingIndicator', () => {
       )
 
       cy.tick(2010)
-      unmount()
+
+      // mount something else to trigger unmount
+      mount(<div>Test Component</div>)
 
       cy.get('@clearTimeout').should('have.been.calledOnce')
     })

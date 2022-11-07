@@ -3284,7 +3284,6 @@
     "./node_modules/yn/lenient.js",
     "./packages/data-context/node_modules/@babel/code-frame/lib/index.js",
     "./packages/data-context/node_modules/@babel/parser/lib/index.js",
-    "./packages/data-context/node_modules/anymatch/index.js",
     "./packages/data-context/node_modules/cross-spawn/index.js",
     "./packages/data-context/node_modules/cross-spawn/lib/enoent.js",
     "./packages/data-context/node_modules/cross-spawn/lib/parse.js",
@@ -3528,5 +3527,4 @@
     "./tooling/v8-snapshot/cache/dev-darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "38a57222b063271f0a219966e246dafa9d1b2a118dd3cb545a691f06bddce332"
 }

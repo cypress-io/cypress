@@ -1040,11 +1040,13 @@ type LocalSettingsPreferences {
   autoScrollingEnabled: Boolean
   isSideNavigationOpen: Boolean
   isSpecsListOpen: Boolean
+  majorVersionWelcomeDismissed: JSON
   preferredEditorBinary: String
   proxyBypass: String
   proxyServer: String
   reporterWidth: Int
   specListWidth: Int
+  wasBrowserSetInCLI: Boolean
 }
 
 type ManualMigration implements Node {
@@ -1121,9 +1123,6 @@ type Migration {
 
   """Support files needing automated rename"""
   supportFiles: MigrationFile
-
-  """Markup for the migration landing page video embed"""
-  videoEmbedHtml: String
 }
 
 type MigrationFile {
