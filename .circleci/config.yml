@@ -38,7 +38,7 @@ macWorkflowFilters: &darwin-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ 'correct-dashboard-results', << pipeline.git.branch >> ]
-    - equal: [ 'issue-23843_electron_21_upgrade', << pipeline.git.branch >> ]
+    - equal: [ 'lmiller-xiaolong/issue-23636', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
