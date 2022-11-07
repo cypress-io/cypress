@@ -20,4 +20,21 @@ describe('VueTestUtils API', () => {
 
     cy.get('h1').contains(greeting)
   })
+
+  it('accesses wrapper and component', () => {
+    mount(TestUtilsApi, { props: { msg: 'Hello world!' } }).then(({ component, wrapper }) => {
+      expect(wrapper.find('h2').text()).to.eq('Hello world!')
+      expect(component.msg).to.eq('Hello world!')
+      expect(component.$data.foo).to.eq('bar')
+    })
+  })
+
+  it('errors when attempting to access Vue Wrapper without destructuring', () => {
+    mount(TestUtilsApi, { props: { msg: 'Hello world!' } }).then((vueWrapper) => {
+      // @ts-expect-error - these are removed
+      expect(() => vueWrapper.vm).to.throw('As of Cypress 11, mount now yields an object with VueWrapper as a property. Destructure using `{ wrapper }` to access the VueWrapper.')
+      // @ts-expect-error - these are removed
+      expect(() => vueWrapper.find('h2').text()).to.throw('As of Cypress 11, mount now yields an object with VueWrapper as a property. Destructure using `{ wrapper }` to access the VueWrapper.')
+    })
+  })
 })
