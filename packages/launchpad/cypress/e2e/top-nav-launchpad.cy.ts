@@ -28,6 +28,7 @@ describe('Launchpad Top Nav Workflows', () => {
       cy.openGlobalMode()
       cy.addProject('launchpad')
       cy.visitLaunchpad()
+      cy.skipWelcome()
 
       cy.findByTestId(headerBarId).should('be.visible').and('contain', 'Projects')
 
@@ -317,6 +318,7 @@ describe('Launchpad Top Nav Workflows', () => {
         cy.openProject('component-tests')
         cy.loginUser()
         cy.visitLaunchpad()
+        cy.skipWelcome()
 
         cy.remoteGraphQLIntercept((obj) => {
           if (obj.result.data?.cloudProjectBySlug) {
@@ -412,6 +414,8 @@ describe('Launchpad Top Nav Workflows', () => {
 
       context('with no project id', () => {
         it('shows "continue" button after login if config has not loaded', () => {
+          cy.skipWelcome()
+
           mockLogInActionsForUser(mockUser)
           logIn({ expectedNextStepText: 'Continue', displayName: mockUser.name })
           cy.withCtx((ctx, o) => {
@@ -423,6 +427,7 @@ describe('Launchpad Top Nav Workflows', () => {
         })
 
         it('shows "connect project" button after login if no project id is set', () => {
+          cy.skipWelcome()
           cy.contains('E2E Testing').click()
 
           mockLogInActionsForUser(mockUser)
@@ -444,6 +449,7 @@ describe('Launchpad Top Nav Workflows', () => {
           cy.scaffoldProject('component-tests')
           cy.openProject('component-tests')
           cy.visitLaunchpad()
+          cy.skipWelcome()
         })
 
         it('shows log in modal workflow for user with name and email', () => {
@@ -641,6 +647,7 @@ describe('Launchpad Top Nav Workflows', () => {
         it('shows "continue" button after login if project not selected', () => {
           cy.openGlobalMode()
           cy.visitLaunchpad()
+          cy.skipWelcome()
 
           mockLogInActionsForUser(mockUser)
           logIn({ expectedNextStepText: 'Continue', displayName: mockUser.name })
@@ -656,6 +663,7 @@ describe('Launchpad Top Nav Workflows', () => {
           cy.openGlobalMode()
           cy.addProject('component-tests')
           cy.visitLaunchpad()
+          cy.skipWelcome()
 
           cy.get('[data-cy="project-card"]').click()
 
@@ -673,6 +681,7 @@ describe('Launchpad Top Nav Workflows', () => {
           cy.openGlobalMode()
           cy.addProject('component-tests')
           cy.visitLaunchpad()
+          cy.skipWelcome()
 
           cy.get('[data-cy="project-card"]').click()
 
@@ -692,6 +701,7 @@ describe('Launchpad Top Nav Workflows', () => {
           cy.openGlobalMode()
           cy.addProject('launchpad')
           cy.visitLaunchpad()
+          cy.skipWelcome()
 
           cy.get('[data-cy="project-card"]').click()
 
