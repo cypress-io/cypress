@@ -1,4 +1,4 @@
-import { JSX } from './createMount'
+type JSX = Function & { displayName: string }
 
 const cachedDisplayNames: WeakMap<JSX, string> = new WeakMap()
 

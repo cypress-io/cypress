@@ -34,23 +34,19 @@ describe('HelloWorld component', () => {
 
 Look at the examples in [cypress/component](cypress/component) folder. Here is the list of examples showing various testing scenarios.
 
-### Options
+### Styles
 
-You can pass additional styles, css files and external stylesheets to load, see [docs/styles.md](./docs/styles.md) for full list.
+One option for styling your components is to import stylesheets into your test file. See [docs/styles.md](./docs/styles.md) for full list of options.
 
 ```js
 import Todo from './Todo.vue'
+import '../styles/main.css'
 const todo = {
   id: '123',
   title: 'Write more tests',
 }
 
-mount(Todo, {
-  propsData: { todo },
-  stylesheets: [
-    'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.css',
-  ],
-})
+mount(Todo, { props: { todo } })
 ```
 
 ### Global Vue Options
