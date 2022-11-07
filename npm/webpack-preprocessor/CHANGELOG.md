@@ -1,3 +1,10 @@
+# [@cypress/webpack-preprocessor-v5.15.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.15.3...@cypress/webpack-preprocessor-v5.15.4) (2022-11-07)
+
+
+### Bug Fixes
+
+* remove some CT functions and props ([#24419](https://github.com/cypress-io/cypress/issues/24419)) ([294985f](https://github.com/cypress-io/cypress/commit/294985f8b3e0fa00ed66d25f88c8814603766074))
+
 # [@cypress/webpack-preprocessor-v5.15.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.15.2...@cypress/webpack-preprocessor-v5.15.3) (2022-11-02)
 
 

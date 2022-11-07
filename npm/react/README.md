@@ -31,8 +31,6 @@ For more information, please check the official docs for [running Cypress](https
 
 - `mount` is the most important function, allows to mount a given React component as a mini web application and interact with it using Cypress commands
 - `createMount` factory function that creates new `mount` function with default options
-- `unmount` removes previously mounted component, mostly useful to test how the component cleans up after itself
-- `mountHook` mounts a given React Hook in a test component for full testing, see `hooks` example
 
 ## Examples
 
@@ -65,20 +63,7 @@ it('looks right', () => {
 })
 ```
 
-### Extra styles
-
-You can pass additional styles, css files and external stylesheets to load, see [docs/styles.md](./docs/styles.md) for the full list of options.
-
-```js
-const todo = {
-  id: '123',
-  title: 'Write more tests',
-}
-mount(<Todo todo={todo} />, {
-  stylesheets: [
-    'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.css',
-  ],
-})
+See [docs/styles.md](./docs/styles.md) for full list of options.
 ```
 
 You may also specify the `ReactDOM` package to use. This can be useful in complex monorepo setups that have different versions of React and React DOM installed. If you see an error relating to [mismatching versions of React or React DOM](https://reactjs.org/warnings/invalid-hook-call-warning.html#mismatching-versions-of-react-and-react-dom), this may be the solution. You can do this using the `ReactDom` option:
@@ -87,12 +72,7 @@ You may also specify the `ReactDOM` package to use. This can be useful in comple
 // if you have multiple versions of ReactDom in your monorepo
 import ReactDom from 'react-dom'
 
-mount(<Todo todo={todo} />, {
-  stylesheets: [
-    'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.css',
-  ],
-  ReactDom
-})
+mount(<Todo todo={todo} />, { reactDom: ReactDom })
 ```
 
 ## Compatibility
