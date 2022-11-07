@@ -502,7 +502,7 @@ describe('src/cy/commands/querying', () => {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
             Command: 'get',
             Alias: '@getUsers',
-            // Yielded: obj, TODO: get does not log this out from an intercept
+            Yielded: obj,
           })
         })
       })

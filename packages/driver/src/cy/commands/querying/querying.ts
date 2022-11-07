@@ -98,7 +98,7 @@ export default (Commands, Cypress, cy, state) => {
               })
 
               break
-            case 'route':
+            case 'intercept':
               _.extend(consoleProps, {
                 Yielded: value,
               })
