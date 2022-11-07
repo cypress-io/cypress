@@ -1,3 +1,4 @@
+import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types/src'
 import { getPathForPlatform } from './support/getPathForPlatform'
 
 function verifyScaffoldedFiles (testingType: string) {
@@ -36,8 +37,14 @@ describe('Launchpad: Setup Project', () => {
 
     cy.withCtx(async (ctx, o) => {
       o.sinon.stub(ctx.project, 'projectId').resolves(null)
+      o.sinon.stub(ctx._apis.localSettingsApi, 'getPreferences').resolves({ majorVersionWelcomeDismissed: {
+        [o.MAJOR_VERSION_FOR_CONTENT]: Date.now(),
+      } })
+
       // Delete the fixtures folder so it scaffold correctly the example
       await ctx.actions.file.removeFileInProject('cypress/fixtures')
+    }, {
+      MAJOR_VERSION_FOR_CONTENT,
     })
   }
 
@@ -75,6 +82,7 @@ describe('Launchpad: Setup Project', () => {
     cy.scaffoldProject('pristine')
     cy.openProject('pristine', ['--e2e'])
     cy.visitLaunchpad()
+    cy.skipWelcome()
 
     cy.contains('h1', 'Configuration files')
     cy.findByText('We added the following files to your project:')
@@ -97,6 +105,7 @@ describe('Launchpad: Setup Project', () => {
     cy.scaffoldProject('pristine')
     cy.openProject('pristine', ['--component'])
     cy.visitLaunchpad()
+    cy.skipWelcome()
     cy.get('h1').should('contain', 'Project setup')
   })
 
@@ -437,6 +446,7 @@ describe('Launchpad: Setup Project', () => {
       it('can move forward to choose browser if e2e is configured', () => {
         cy.openProject('pristine-with-e2e-testing')
         cy.visitLaunchpad()
+        cy.skipWelcome()
 
         verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
 
@@ -448,6 +458,7 @@ describe('Launchpad: Setup Project', () => {
       it('can move forward to choose browser if component is configured', () => {
         cy.openProject('pristine-with-ct-testing')
         cy.visitLaunchpad()
+        cy.skipWelcome()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
 
