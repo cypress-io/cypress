@@ -75,7 +75,7 @@ export class Validator {
    * @param urlOrDomain - the original string param passed in.
    * @param specLocation - the location of the current spec.
    */
-  validateLocation (originLocation: LocationObject, urlOrDomain: string, specLocation: LocationObject): void {
+  validateLocation (originLocation: LocationObject, urlOrDomain: string, specLocation: string): void {
     // we don't support query params
     if (originLocation.search.length > 0) {
       $errUtils.throwErrByPath('origin.invalid_url_argument', {
@@ -85,7 +85,7 @@ export class Validator {
     }
 
     // Users would be better off not using cy.origin if the origin is part of the same super domain.
-    if (cors.urlMatchesPolicyBasedOnDomain(originLocation.href, specLocation.href)) {
+    if (cors.urlMatchesPolicyBasedOnDomain(originLocation.href, specLocation)) {
       // this._isSameSuperDomainOriginWithExceptions({ originLocation, specLocation })) {
       $errUtils.throwErrByPath('origin.invalid_url_argument_same_origin', {
         onFail: this.log,

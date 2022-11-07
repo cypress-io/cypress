@@ -85,7 +85,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
       const url = new URL(normalizeOrigin(urlOrDomain)).toString()
       const location = $Location.create(url)
 
-      validator.validateLocation(location, urlOrDomain, $Location.create(window.location.href))
+      validator.validateLocation(location, urlOrDomain, window.location.href)
 
       const origin = location.origin
 
