@@ -39,7 +39,7 @@
     node-html-parser "5.3.3"
     pathe "0.2.0"
 
-"@testing-library/cypress@BlueWinds/cypress-testing-library":
+"@testing-library/cypress@BlueWinds/cypress-testing-library#119054b5963b0d2e064b13c5cc6fc9db32c8b7b5":
   version "0.0.0-semantically-released"
   resolved "https://codeload.github.com/BlueWinds/cypress-testing-library/tar.gz/119054b5963b0d2e064b13c5cc6fc9db32c8b7b5"
   dependencies:
