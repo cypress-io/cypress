@@ -136,8 +136,8 @@ const handleClick = () => {
 
 const versionReleaseDates = computed(() => {
   return {
-    '10': useTimeAgo(Date.UTC(2022, 6, 1)).value,
-    '11': useTimeAgo(Date.UTC(2022, 11, 8)).value,
+    '10': useTimeAgo(Date.UTC(2022, 5, 1)).value,
+    '11': useTimeAgo(Date.UTC(2022, 10, 8)).value,
   }
 })
 
