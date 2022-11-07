@@ -182,7 +182,6 @@ export default function (Commands, Cypress, cy) {
           })
           .then(async () => {
             cy.state('onCommandFailed', null)
-            await navigateAboutBlank()
             const data = await sessions.getCurrentSessionData()
 
             _.extend(existingSession, data)
@@ -423,7 +422,8 @@ export default function (Commands, Cypress, cy) {
           }
 
           return restoreSessionWorkflow(session)
-        }).then(() => {
+        }).then(async () => {
+          await navigateAboutBlank()
           _log.set({ state: 'passed' })
         })
       })
