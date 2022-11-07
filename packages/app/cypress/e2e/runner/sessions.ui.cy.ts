@@ -155,6 +155,23 @@ describe('runner/cypress sessions.ui.spec', {
     })
   })
 
+  it('creates, not recreates, session when validation fails then succeeds', () => {
+    loadSpec({
+      projectName: 'session-and-origin-e2e-specs',
+      filePath: 'session/new_session_and_fails_then_succeeds_validation_retries.cy.js',
+      failCount: 1,
+    })
+
+    validateSessionsInstrumentPanel(['blank_session'])
+
+    cy.get('.attempt-item').eq(1).within(() => {
+      cy.contains('Create new session')
+      // when we stored sessions pre-validation, the 2nd attempt would
+      // say "Recreate session"
+      cy.contains('Recreate session').should('not.exist')
+    })
+  })
+
   it('restores session as expected', () => {
     loadSpec({
       projectName: 'session-and-origin-e2e-specs',
