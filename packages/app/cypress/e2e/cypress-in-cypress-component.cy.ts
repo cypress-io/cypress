@@ -53,6 +53,9 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       snapshotAUTPanel('cy.contains selector')
 
       cy.findByTestId('playground-num-elements').contains('1 match')
+
+      // Temporarily removed from CT since it doesn't work. Invert this assertion when completing https://github.com/cypress-io/cypress/issues/24549
+      cy.get('.hook-open-in-ide').should('not.exist')
     })
 
     it('navigation between specs and other parts of the app works', () => {

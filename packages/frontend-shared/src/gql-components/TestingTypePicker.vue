@@ -112,7 +112,7 @@ const testingTypes = computed(() => {
       icon: IconComponent,
       iconSolid: IconComponentSolid,
       status: componentStatus.value,
-      badgeText: t('versions.beta'),
+      badgeText: '',
     },
   ] as const
 })

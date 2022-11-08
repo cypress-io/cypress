@@ -21,13 +21,6 @@ export default defineConfig({
     devServer: {
       bundler: 'vite',
       framework: 'vue',
-      viteConfig: {
-        optimizeDeps: {
-          include: [
-            '@packages/frontend-shared/cypress/support/customPercyCommand',
-          ],
-        },
-      },
     },
     indexHtmlFile: 'cypress/component/support/component-index.html',
   },

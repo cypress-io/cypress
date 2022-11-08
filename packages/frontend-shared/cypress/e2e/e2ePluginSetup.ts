@@ -127,7 +127,7 @@ async function makeE2ETasks () {
     await scaffoldCommonNodeModules()
 
     try {
-      await scaffoldProjectNodeModules(projectName)
+      await scaffoldProjectNodeModules({ project: projectName })
     } catch (e) {
       if (isRetry) {
         throw e
@@ -254,18 +254,6 @@ async function makeE2ETasks () {
             'time': {
               [pkg.version]: '2022-02-10T01:07:37.369Z',
             },
-          }), { status: 200 })
-        }
-
-        if (String(url).startsWith('https://on.cypress.io/v10-video-embed/')) {
-          return new Response(JSON.stringify({
-            videoHtml: `<iframe
-              src="https://player.vimeo.com/video/668764401?h=0cbc785eef"
-              class="rounded h-full bg-gray-1000 w-full"
-              frameborder="0"
-              allow="autoplay; fullscreen; picture-in-picture"
-              allowfullscreen
-            />`,
           }), { status: 200 })
         }
 

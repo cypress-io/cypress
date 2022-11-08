@@ -1,3 +1,24 @@
+# [@cypress/webpack-dev-server-v3.0.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v2.5.0...@cypress/webpack-dev-server-v3.0.0) (2022-11-07)
+
+
+### Bug Fixes
+
+* normalize vite config resolution ([#24369](https://github.com/cypress-io/cypress/issues/24369)) ([feba489](https://github.com/cypress-io/cypress/commit/feba489a9aeaddad3197764fe7e7405cfb4e7a56))
+* remove last mounted component upon subsequent mount calls ([#24470](https://github.com/cypress-io/cypress/issues/24470)) ([f39eb1c](https://github.com/cypress-io/cypress/commit/f39eb1c19e0923bda7ae263168fc6448da942d54))
+
+
+### BREAKING CHANGES
+
+* remove last mounted component upon subsequent mount calls of mount
+* vite.config.js is no longer merged when devServer.viteConfig is provided
+
+# [@cypress/webpack-dev-server-v2.5.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v2.4.1...@cypress/webpack-dev-server-v2.5.0) (2022-11-01)
+
+
+### Features
+
+* introduce v8 snapshots to improve startup performance ([#24295](https://github.com/cypress-io/cypress/issues/24295)) ([b0c0eaa](https://github.com/cypress-io/cypress/commit/b0c0eaa508bb6dafdc1997bc00fb7ed6f5bcc160))
+
 # [@cypress/webpack-dev-server-v2.4.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v2.4.0...@cypress/webpack-dev-server-v2.4.1) (2022-10-19)
 
 

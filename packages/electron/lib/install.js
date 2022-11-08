@@ -2,11 +2,12 @@
 const _ = require('lodash')
 const os = require('os')
 const path = require('path')
-const pkg = require('../../../package.json')
 const paths = require('./paths')
 const log = require('debug')('cypress:electron')
 const fs = require('fs-extra')
 const crypto = require('crypto')
+const { flipFuses, FuseVersion, FuseV1Options } = require('@electron/fuses')
+const pkg = require('@packages/root')
 
 let electronVersion
 
@@ -101,13 +102,16 @@ module.exports = {
 
     log('package icon', iconPath)
 
+    const platform = os.platform()
+    const arch = os.arch()
+
     _.defaults(options, {
       dist: paths.getPathToDist(),
       dir: 'app',
       out: 'tmp',
       name: 'Cypress',
-      platform: os.platform(),
-      arch: os.arch(),
+      platform,
+      arch,
       asar: false,
       prune: true,
       overwrite: true,
@@ -128,6 +132,16 @@ module.exports = {
       console.log('to', options.dist)
 
       return this.move(appPath, options.dist)
+    })
+    .then(() => {
+      return !['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE) ? flipFuses(
+        paths.getPathToExec(),
+        {
+          version: FuseVersion.V1,
+          resetAdHocDarwinSignature: platform === 'darwin' && arch === 'arm64',
+          [FuseV1Options.LoadBrowserProcessSpecificV8Snapshot]: true,
+        },
+      ) : Promise.resolve()
     }).catch((err) => {
       console.log(err.stack)
 

@@ -405,7 +405,21 @@ module.exports = {
       args = process.argv
     }
 
-    const { CYPRESS_INTERNAL_ENV } = process.env
+    const { CYPRESS_INTERNAL_ENV, CYPRESS_DOWNLOAD_USE_CA } = process.env
+
+    if (process.env.CYPRESS_DOWNLOAD_USE_CA) {
+      let msg = `
+        ${logSymbols.warning} Warning: It looks like you're setting CYPRESS_DOWNLOAD_USE_CA=${CYPRESS_DOWNLOAD_USE_CA}
+
+        The environment variable "CYPRESS_DOWNLOAD_USE_CA" is no longer required to be set.
+        
+        You can safely unset this environment variable.
+      `
+
+      logger.log()
+      logger.warn(stripIndent(msg))
+      logger.log()
+    }
 
     if (!util.isValidCypressInternalEnvValue(CYPRESS_INTERNAL_ENV)) {
       debug('invalid CYPRESS_INTERNAL_ENV value', CYPRESS_INTERNAL_ENV)

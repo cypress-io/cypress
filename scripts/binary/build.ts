@@ -18,6 +18,7 @@ import { transformRequires } from './util/transform-requires'
 import execa from 'execa'
 import { testStaticAssets } from './util/testStaticAssets'
 import performanceTracking from '../../system-tests/lib/performance'
+import verify from '../../cli/lib/tasks/verify'
 
 const globAsync = promisify(glob)
 
@@ -173,6 +174,10 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   }, { spaces: 2 })
 
   fs.writeFileSync(meta.distDir('index.js'), `\
+${!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE) ?
+`if (!global.snapshotResult && process.versions?.electron) {
+  throw new Error('global.snapshotResult is not defined. This binary has been built incorrectly.')
+}` : ''}
 process.env.CYPRESS_INTERNAL_ENV = process.env.CYPRESS_INTERNAL_ENV || 'production'
 require('./packages/server')\
 `)
@@ -196,8 +201,8 @@ require('./packages/server')\
 
   await transformRequires(meta.distDir())
 
-  log(`#testVersion ${meta.distDir()}`)
-  await testVersion(meta.distDir(), version)
+  log(`#testDistVersion ${meta.distDir()}`)
+  await testDistVersion(meta.distDir(), version)
 
   log('#testStaticAssets')
   await testStaticAssets(meta.distDir())
@@ -249,15 +254,27 @@ require('./packages/server')\
   console.log('electron-builder arguments:')
   console.log(args.join(' '))
 
+  // Update the root package.json with the next app version so that it is snapshot properly
+  fs.writeJSONSync(path.join(CY_ROOT_DIR, 'package.json'), {
+    ...jsonRoot,
+    version,
+  }, { spaces: 2 })
+
   try {
     await execa('electron-builder', args, {
       stdio: 'inherit',
+      env: {
+        NODE_OPTIONS: '--max_old_space_size=8192',
+      },
     })
   } catch (e) {
     if (!skipSigning) {
       throw e
     }
   }
+
+  // Revert the root package.json so that subsequent steps will work properly
+  fs.writeJSONSync(path.join(CY_ROOT_DIR, 'package.json'), jsonRoot, { spaces: 2 })
 
   await checkMaxPathLength()
 
@@ -268,9 +285,6 @@ require('./packages/server')\
 
   console.log(stdout)
 
-  // testVersion(buildAppDir)
-  await testVersion(meta.buildAppDir(), version)
-
   // runSmokeTests
   let usingXvfb = xvfb.isNeeded()
 
@@ -278,6 +292,9 @@ require('./packages/server')\
     if (usingXvfb) {
       await xvfb.start()
     }
+
+    log(`#testExecutableVersion ${meta.buildAppExecutable()}`)
+    await testExecutableVersion(meta.buildAppExecutable(), version)
 
     const executablePath = meta.buildAppExecutable()
 
@@ -358,23 +375,46 @@ function getIconFilename () {
   return iconFilename
 }
 
-async function testVersion (dir: string, version: string) {
+async function testDistVersion (distDir: string, version: string) {
   log('#testVersion')
 
   console.log('testing dist package version')
   console.log('by calling: node index.js --version')
-  console.log('in the folder %s', dir)
+  console.log('in the folder %s', distDir)
 
   const result = await execa('node', ['index.js', '--version'], {
-    cwd: dir,
+    cwd: distDir,
   })
 
   la(result.stdout, 'missing output when getting built version', result)
 
-  console.log('app in %s', dir)
+  console.log('app in %s', distDir)
   console.log('built app version', result.stdout)
-  la(result.stdout === version, 'different version reported',
+  la(result.stdout.trim() === version.trim(), 'different version reported',
     result.stdout, 'from input version to build', version)
 
   console.log('✅ using node --version works')
+}
+
+async function testExecutableVersion (buildAppExecutable: string, version: string) {
+  log('#testVersion')
+
+  console.log('testing built app executable version')
+  console.log(`by calling: ${buildAppExecutable} --version`)
+
+  const args = ['--version']
+
+  if (verify.needsSandbox()) {
+    args.push('--no-sandbox')
+  }
+
+  const result = await execa(buildAppExecutable, args)
+
+  la(result.stdout, 'missing output when getting built version', result)
+
+  console.log('built app version', result.stdout)
+  la(result.stdout.trim() === version.trim(), 'different version reported',
+    result.stdout, 'from input version to build', version)
+
+  console.log('✅ using --version on the Cypress binary works')
 }
