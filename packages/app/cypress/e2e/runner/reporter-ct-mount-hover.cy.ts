@@ -17,6 +17,7 @@ const describeSkipIfWindows = Cypress.platform === 'win32' ? describe.skip : des
 
 // TODO: Add these tests to another cy-in-cy framework test to reduce CI cost as these scaffolding is expensive
 for (const { projectName, test } of PROJECTS) {
+  // Flaky, especially on windows. Issue to improve these tests: https://github.com/cypress-io/cypress/issues/24579
   describeSkipIfWindows(`CT Mount ${projectName}`, { viewportWidth: 1500, defaultCommandTimeout: 30000 }, () => {
     beforeEach(() => {
       cy.scaffoldProject(projectName)
