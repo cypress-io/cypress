@@ -447,4 +447,16 @@ describe('angular mount', () => {
       cy.get('[id^=root]').children().should('have.length', 1)
     })
   });
+
+  it('should error when passing in undecorated component', () => {
+    Cypress.on('fail', (err) => {
+      expect(err.message).contain("Please add a @Pipe/@Directive/@Component");
+
+      return false
+    })
+
+    class MyClass {}
+
+    cy.mount(MyClass)
+  })
 });
