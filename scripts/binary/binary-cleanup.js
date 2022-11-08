@@ -36,22 +36,22 @@ async function removeEmptyDirectories (directory) {
   }
 }
 
-const getDependencyPathsToKeep = async () => {
+const getDependencyPathsToKeep = async (buildAppDir) => {
   let entryPoints = new Set([
     // This is the entry point for the server bundle. It will not have access to the snapshot yet. It needs to be kept in the binary
-    require.resolve('@packages/server/index.js'),
+    require.resolve('@packages/server/index.js', { paths: [buildAppDir] }),
     // This is a dynamic import that is used to load the snapshot require logic. It will not have access to the snapshot yet. It needs to be kept in the binary
-    require.resolve('@packages/server/hook-require.js'),
+    require.resolve('@packages/server/hook-require.js', { paths: [buildAppDir] }),
     // These dependencies are started in a new process or thread and will not have access to the snapshot. They need to be kept in the binary
-    require.resolve('@packages/server/lib/plugins/child/require_async_child.js'),
-    require.resolve('@packages/server/lib/plugins/child/register_ts_node.js'),
-    require.resolve('@packages/rewriter/lib/threads/worker.ts'),
+    require.resolve('@packages/server/lib/plugins/child/require_async_child.js', { paths: [buildAppDir] }),
+    require.resolve('@packages/server/lib/plugins/child/register_ts_node.js', { paths: [buildAppDir] }),
+    require.resolve('@packages/rewriter/lib/threads/worker.ts', { paths: [buildAppDir] }),
     // These dependencies use the `require.resolve(<dependency>, { paths: [<path>] })` pattern where <path> is a path within the cypress monorepo. These will not be
     // pulled in by esbuild but still need to be kept in the binary.
-    require.resolve('webpack'),
-    require.resolve('webpack-dev-server', { paths: [path.join(__dirname, '..', '..', 'npm', 'webpack-dev-server')] }),
-    require.resolve('html-webpack-plugin-4', { paths: [path.join(__dirname, '..', '..', 'npm', 'webpack-dev-server')] }),
-    require.resolve('html-webpack-plugin-5', { paths: [path.join(__dirname, '..', '..', 'npm', 'webpack-dev-server')] }),
+    require.resolve('webpack', { paths: [buildAppDir] }),
+    require.resolve('webpack-dev-server', { paths: [buildAppDir] }),
+    require.resolve('html-webpack-plugin-4', { paths: [buildAppDir] }),
+    require.resolve('html-webpack-plugin-5', { paths: [buildAppDir] }),
     // These dependencies are completely dynamic using the pattern `require(`./${name}`)` and will not be pulled in by esbuild but still need to be kept in the binary.
     ...['ibmi',
       'sunos',
@@ -61,7 +61,7 @@ const getDependencyPathsToKeep = async () => {
       'linux',
       'openbsd',
       'sunos',
-      'win32'].map((platform) => require.resolve(`default-gateway/${platform}`)),
+      'win32'].map((platform) => require.resolve(`default-gateway/${platform}`, { paths: [buildAppDir] })),
   ])
   let esbuildResult
   let newEntryPointsFound = true
@@ -77,7 +77,9 @@ const getDependencyPathsToKeep = async () => {
       outdir: workingDir,
       platform: 'node',
       metafile: true,
+      absWorkingDir: buildAppDir,
       external: [
+        './packages/packherd-require/dist/transpile-ts',
         './packages/server/server-entry',
         'fsevents',
         'pnpapi',
@@ -95,9 +97,9 @@ const getDependencyPathsToKeep = async () => {
         let entryPoint
 
         if (warningSubject.startsWith('.')) {
-          entryPoint = path.join(__dirname, '..', '..', path.dirname(warning.location.file), warningSubject)
+          entryPoint = path.join(buildAppDir, path.dirname(warning.location.file), warningSubject)
         } else {
-          entryPoint = require.resolve(warningSubject)
+          entryPoint = require.resolve(warningSubject, { paths: [path.join(buildAppDir, path.dirname(warning.location.file))] })
         }
 
         if (path.extname(entryPoint) !== '' && !entryPoints.has(entryPoint)) {
@@ -114,7 +116,7 @@ const getDependencyPathsToKeep = async () => {
 const cleanup = async (buildAppDir) => {
   // 1. Retrieve all dependencies that still need to be kept in the binary. In theory, we could use the bundles generated here as single files within the binary,
   // but for now, we just track on the dependencies that get pulled in
-  const keptDependencies = [...await getDependencyPathsToKeep(), 'package.json', 'packages/server/server-entry.js']
+  const keptDependencies = [...await getDependencyPathsToKeep(buildAppDir), 'package.json', 'packages/server/server-entry.js']
 
   // 2. Gather the dependencies that could potentially be removed from the binary due to being in the snapshot
   const potentiallyRemovedDependencies = [...snapshotMetadata.healthy, ...snapshotMetadata.deferred, ...snapshotMetadata.norewrite]
