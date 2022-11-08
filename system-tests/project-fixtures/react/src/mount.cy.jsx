@@ -24,4 +24,11 @@ describe('mount', () => {
       cy.get('[data-cy-root]').children().should('have.length', 1)
     })
   });
+
+  it('does not error when rendering primitives', () => {
+    cy.mount('Hello World')
+    cy.mount(5)
+    cy.mount(null)
+    cy.mount(undefined)
+  })
 })
