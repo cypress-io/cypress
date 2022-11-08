@@ -116,6 +116,16 @@
             />
           </template>
 
+          <template #runAllSpecs>
+            <button
+              v-if="!row.data.isLeaf"
+              data-cy="console"
+              @click="consoleV.log(row.data)"
+            >
+              Run {{ row.data.children.length }} Specs
+            </button>
+          </template>
+
           <template #git-info>
             <SpecListGitInfo
               v-if="row.data.isLeaf && row.data.data?.gitInfo"
@@ -405,6 +415,7 @@ function getIdIfDirectory (row) {
 const isProjectDisconnected = computed(() => props.gql.cloudViewer?.id === undefined || (cloudProjectType.value !== 'CloudProject'))
 
 const displayedSpecs = computed(() => list.value.map((v) => v.data.data))
+const consoleV = computed(() => console)
 
 const mostRecentUpdateRef = toRef(props, 'mostRecentUpdate')
 
