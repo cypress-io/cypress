@@ -27,4 +27,11 @@ describe('formattedMessage', () => {
 
     expect(result).to.equal('expected <em><strong>abcdef</strong></em> to contain <em><strong>abcdef</strong></em>')
   })
+
+  it('maintains spaces on new lines', () => {
+    const specialMessage = 'hello\n world'
+    const result = formattedMessage(specialMessage)
+
+    expect(result).to.equal('hello\n world')
+  })
 })
