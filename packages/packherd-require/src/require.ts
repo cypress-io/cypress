@@ -205,8 +205,6 @@ export function packherdRequire (
     } catch (err) {
       if (diagnosticsEnabled && !moduleUri.endsWith('hook-require')) {
         logError(err)
-        // eslint-disable-next-line no-debugger
-        debugger
       }
 
       throw err

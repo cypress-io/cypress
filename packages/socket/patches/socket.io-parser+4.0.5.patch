@@ -1,8 +1,18 @@
 diff --git a/node_modules/socket.io-parser/dist/binary.js b/node_modules/socket.io-parser/dist/binary.js
-index a908023..99e0215 100644
+index 50ed998..0492ec4 100644
 --- a/node_modules/socket.io-parser/dist/binary.js
 +++ b/node_modules/socket.io-parser/dist/binary.js
-@@ -13,12 +13,12 @@ function deconstructPacket(packet) {
+@@ -2,6 +2,9 @@
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.reconstructPacket = exports.deconstructPacket = void 0;
+ const is_binary_1 = require("./is-binary");
++/**
++ * This file is patched to enable circular objects to be sent over socket.io.
++ */
+ /**
+  * Replaces every Buffer | ArrayBuffer | Blob | File in packet with a numbered placeholder.
+  *
+@@ -13,12 +16,12 @@ function deconstructPacket(packet) {
      const buffers = [];
      const packetData = packet.data;
      const pack = packet;
@@ -17,7 +27,7 @@ index a908023..99e0215 100644
      if (!data)
          return data;
      if (is_binary_1.isBinary(data)) {
-@@ -26,18 +26,27 @@ function _deconstructPacket(data, buffers) {
+@@ -26,18 +29,27 @@ function _deconstructPacket(data, buffers) {
          buffers.push(data);
          return placeholder;
      }
@@ -49,7 +59,7 @@ index a908023..99e0215 100644
              }
          }
          return newData;
-@@ -53,26 +62,29 @@ function _deconstructPacket(data, buffers) {
+@@ -53,12 +65,12 @@ function _deconstructPacket(data, buffers) {
   * @public
   */
  function reconstructPacket(packet, buffers) {
@@ -63,8 +73,11 @@ index a908023..99e0215 100644
 +function _reconstructPacket(data, buffers, known) {
      if (!data)
          return data;
-     if (data && data._placeholder) {
-         return buffers[data.num]; // appropriate buffer (should be natural order anyway)
+     if (data && data._placeholder === true) {
+@@ -71,16 +83,19 @@ function _reconstructPacket(data, buffers) {
+         else {
+             throw new Error("illegal attachments");
+         }
 +    } else if (known.includes(data)) {
 +        return data
      }
@@ -85,7 +98,7 @@ index a908023..99e0215 100644
          }
      }
 diff --git a/node_modules/socket.io-parser/dist/index.js b/node_modules/socket.io-parser/dist/index.js
-index 0ef9f80..4cd787e 100644
+index b0c8727..3b2dcc3 100644
 --- a/node_modules/socket.io-parser/dist/index.js
 +++ b/node_modules/socket.io-parser/dist/index.js
 @@ -5,6 +5,7 @@ const Emitter = require("component-emitter");
@@ -105,7 +118,7 @@ index 0ef9f80..4cd787e 100644
          }
          debug("encoded %j as %s", obj, str);
          return str;
-@@ -232,7 +233,7 @@ class Decoder extends Emitter {
+@@ -235,7 +236,7 @@ class Decoder extends Emitter {
  exports.Decoder = Decoder;
  function tryParse(str) {
      try {
@@ -115,7 +128,7 @@ index 0ef9f80..4cd787e 100644
      catch (e) {
          return false;
 diff --git a/node_modules/socket.io-parser/dist/is-binary.js b/node_modules/socket.io-parser/dist/is-binary.js
-index 4b7c234..f588141 100644
+index 4b7c234..73ec260 100644
 --- a/node_modules/socket.io-parser/dist/is-binary.js
 +++ b/node_modules/socket.io-parser/dist/is-binary.js
 @@ -1,6 +1,7 @@
@@ -149,8 +162,8 @@ index 4b7c234..f588141 100644
 +    return ((withNativeArrayBuffer && (obj instanceof ArrayBuffer || isArrayBuffer(obj) || isView(obj))) ||
          (withNativeBlob && obj instanceof Blob) ||
 -        (withNativeFile && obj instanceof File));
-+        (withNativeFile && obj instanceof File)) ||
-+        (withNativeBuffer && Buffer.isBuffer(obj));
++        (withNativeFile && obj instanceof File) ||
++        (withNativeBuffer && Buffer.isBuffer(obj)));
  }
  exports.isBinary = isBinary;
 -function hasBinary(obj, toJSON) {

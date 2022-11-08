@@ -1,3 +1,17 @@
+# [@cypress/mount-utils-v3.0.0](https://github.com/cypress-io/cypress/compare/@cypress/mount-utils-v2.1.0...@cypress/mount-utils-v3.0.0) (2022-11-07)
+
+
+### Bug Fixes
+
+* remove dependence on @cypress/<dep> types ([#24415](https://github.com/cypress-io/cypress/issues/24415)) ([58e0ab9](https://github.com/cypress-io/cypress/commit/58e0ab91604618ea6f75932622f7e66e419270e6))
+* remove last mounted component upon subsequent mount calls ([#24470](https://github.com/cypress-io/cypress/issues/24470)) ([f39eb1c](https://github.com/cypress-io/cypress/commit/f39eb1c19e0923bda7ae263168fc6448da942d54))
+* remove some CT functions and props ([#24419](https://github.com/cypress-io/cypress/issues/24419)) ([294985f](https://github.com/cypress-io/cypress/commit/294985f8b3e0fa00ed66d25f88c8814603766074))
+
+
+### BREAKING CHANGES
+
+* remove last mounted component upon subsequent mount calls of mount
+
 # [@cypress/mount-utils-v2.1.0](https://github.com/cypress-io/cypress/compare/@cypress/mount-utils-v2.0.1...@cypress/mount-utils-v2.1.0) (2022-08-30)
 
 

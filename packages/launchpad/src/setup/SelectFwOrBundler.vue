@@ -3,6 +3,7 @@
     :model-value="selectedOptionObject"
     :placeholder="props.placeholder"
     :options="props.options"
+    item-key="id"
     @update:model-value="selectOption"
   >
     <template #label>
