@@ -374,7 +374,7 @@ declare namespace Cypress {
     // 60000
     ```
      */
-    config<K extends keyof Config>(key: K): Config[K]
+    config<K extends keyof TestConfigOverrides>(key: K): TestConfigOverrides[K]
     /**
      * Sets one configuration value.
      * @see https://on.cypress.io/config
@@ -395,7 +395,7 @@ declare namespace Cypress {
     })
     ```
      */
-    config(Object: ConfigOptions): void
+    config(Object: TestConfigOverrides): void
 
     // no real way to type without generics
     /**
@@ -3074,7 +3074,16 @@ declare namespace Cypress {
     xhrUrl: string
   }
 
-  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations' | 'experimentalSessionAndOrigin'>>, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
+  interface SuiteConfigOverrides extends Partial<
+    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations' | 'experimentalSessionAndOrigin'>
+  >, Partial<Pick<ResolvedConfigOptions, 'baseUrl' | 'testIsolation'>> {
+    browser?: IsBrowserMatcher | IsBrowserMatcher[]
+    keystrokeDelay?: number
+  }
+
+  interface TestConfigOverrides extends Partial<
+    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations' | 'experimentalSessionAndOrigin'>
+  >, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
   }
@@ -6079,7 +6088,7 @@ declare namespace Mocha {
      * Describe a "suite" with the given `title`, TestOptions, and callback `fn` containing
      * nested suites.
      */
-    (title: string, config: Cypress.TestConfigOverrides, fn: (this: Suite) => void): Suite
+    (title: string, config: Cypress.SuiteConfigOverrides, fn: (this: Suite) => void): Suite
   }
 
   interface ExclusiveSuiteFunction {
@@ -6087,10 +6096,10 @@ declare namespace Mocha {
      * Describe a "suite" with the given `title`, TestOptions, and callback `fn` containing
      * nested suites. Indicates this suite should be executed exclusively.
      */
-    (title: string, config: Cypress.TestConfigOverrides, fn: (this: Suite) => void): Suite
+    (title: string, config: Cypress.SuiteConfigOverrides, fn: (this: Suite) => void): Suite
   }
 
   interface PendingSuiteFunction {
-    (title: string, config: Cypress.TestConfigOverrides, fn: (this: Suite) => void): Suite | void
+    (title: string, config: Cypress.SuiteConfigOverrides, fn: (this: Suite) => void): Suite | void
   }
 }

@@ -29,19 +29,20 @@ namespace CypressAutomationTests {
 
 namespace CypressConfigTests {
   // getters
-  Cypress.config('baseUrl') // $ExpectType string | null
+  Cypress.config('baseUrl') // $ExpectType string | null | undefined
   Cypress.config().baseUrl // $ExpectType string | null
 
   // setters
   Cypress.config('baseUrl', '.') // $ExpectType void
-  Cypress.config({ e2e: { baseUrl: '.' }}) // $ExpectType void
-  Cypress.config({ e2e: { baseUrl: null }}) // $ExpectType void
-  Cypress.config({ e2e: { baseUrl: '.', }}) // $ExpectType void
+  Cypress.config({ e2e: { baseUrl: '.' }}) // $ExpectError
+  Cypress.config({ e2e: { baseUrl: null }}) // $ExpectError
+  Cypress.config({ e2e: { baseUrl: '.', }}) // $ExpectError
   Cypress.config({ component: { baseUrl: '.', devServer: () => ({} as any) } }) // $ExpectError
   Cypress.config({ e2e: { indexHtmlFile: 'index.html' } }) // $ExpectError
+  Cypress.config({ testIsolation: 'off' }) // $ExpectError
 
-  Cypress.config('taskTimeout') // $ExpectType number
-  Cypress.config('includeShadowDom') // $ExpectType boolean
+  Cypress.config('taskTimeout') // $ExpectType number | undefined
+  Cypress.config('includeShadowDom') // $ExpectType boolean | undefined
 }
 
 namespace CypressEnvTests {
@@ -866,6 +867,9 @@ namespace CypressTestConfigOverridesTests {
   it('test', {
     retries: { run: 3 } // $ExpectError
   }, () => { })
+  it('test', {
+    testIsolation: 'off', // $ExpectError
+  }, () => { })
 
   it.skip('test', {}, () => {})
   it.only('test', {}, () => {})
@@ -880,6 +884,10 @@ namespace CypressTestConfigOverridesTests {
   describe('suite', {
     browser: {family: 'firefox'},
     keystrokeDelay: 0
+  }, () => {})
+
+  describe('suite', {
+    testIsolation: 'off',
   }, () => {})
 
   context('suite', {}, () => {})
