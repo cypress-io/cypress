@@ -236,7 +236,7 @@ describe('runner/cypress sessions.ui.spec', {
 
       // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
-      cy.get('.runnable-err').should('have.length', 1)
+      cy.get('.runnable-err')
 
       cy.get('.command-name-session').get('.command-expander').first().click()
 

@@ -1023,19 +1023,20 @@ describe('src/cy/commands/assertions', () => {
       cy.on('log:added', (attrs, log) => {
         if (attrs.name === 'assert') {
           cy.removeAllListeners('log:added')
-          const consoleProps = log.invoke('consoleProps')
           let err
 
-          // FIXME: workaround for https://github.com/cypress-io/cypress/issues/4742
           try {
-            expect(consoleProps.Command).to.eq('assert')
-            expect(consoleProps.expected).to.be.false
-            expect(consoleProps.actual).to.be.true
-            expect(consoleProps.Message).to.eq('expected true to be false')
-            expect(consoleProps.Error).to.include(log.get('error').message)
+            expect(log.invoke('consoleProps')).to.deep.eq({
+              Command: 'assert',
+              expected: false,
+              actual: true,
+              Message: 'expected true to be false',
+              Error: log.get('error').message,
+            })
           } catch (e) {
             err = e
           }
+
           done(err)
         }
       })

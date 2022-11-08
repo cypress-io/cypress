@@ -171,7 +171,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
     } else {
       obj.end = true
       obj.snapshot = true
-      obj.error = _.clone(error)
+      obj.error = error
     }
 
     const isChildLike = (subject, current) => {
