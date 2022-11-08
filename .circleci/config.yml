@@ -40,7 +40,7 @@ macWorkflowFilters: &darwin-workflow-filters
         pattern: "-release$"
         value: << pipeline.git.branch >>
     - matches:
-        pattern: "^release/\d*\.\d*\.\d*$"
+        pattern: \^release\/\d*\.\d*\.\d*$\
         value: << pipeline.git.branch >>
 linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
@@ -50,7 +50,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
         pattern: "-release$"
         value: << pipeline.git.branch >>
     - matches:
-        pattern: "^release/\d*\.\d*\.\d*$"
+        pattern: \^release\/\d*\.\d*\.\d*$\
         value: << pipeline.git.branch >>
 # uncomment & add to the branch conditions below to disable the main linux
 # flow if we don't want to test it for a certain branch
@@ -69,7 +69,7 @@ windowsWorkflowFilters: &windows-workflow-filters
         pattern: "-release$"
         value: << pipeline.git.branch >>
     - matches:
-        pattern: "^release/\d*\.\d*\.\d*$"
+        pattern: \^release\/\d*\.\d*\.\d*$\
         value: << pipeline.git.branch >>
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
