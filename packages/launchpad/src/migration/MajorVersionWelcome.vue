@@ -2,13 +2,13 @@
   <div class="bg-no-repeat bg-cover h-screen min-h-700px lp-wrapper">
     <div
       ref="wrapper"
-      class="border-transparent rounded mx-auto bg-gray-50/50 border-4px max-w-80vw top-7vh w-716px relative overflow-hidden"
+      class="rounded mx-auto bg-gray-50/50 border-color-[rgba(0,0,0,0.05)] border-4px max-w-80vw top-7vh w-716px relative overflow-hidden"
     >
       <div
         ref="scroller"
         class="bg-white rounded-b max-h-72vh pb-90px overflow-scroll"
       >
-        <div class="h-full overflow-scroll">
+        <div class="h-full">
           <div class="p-16px">
             <h1 class="font-medium mt-4px text-center mb-32px tracking-tighter text-22px text-gray-1000">
               {{ t('majorVersionWelcome.title') }}
@@ -136,8 +136,8 @@ const handleClick = () => {
 
 const versionReleaseDates = computed(() => {
   return {
-    '10': useTimeAgo(Date.UTC(2022, 6, 1)).value,
-    '11': useTimeAgo(Date.UTC(2022, 11, 8)).value,
+    '10': useTimeAgo(Date.UTC(2022, 5, 1)).value,
+    '11': useTimeAgo(Date.UTC(2022, 10, 8)).value,
   }
 })
 
