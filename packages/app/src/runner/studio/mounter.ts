@@ -3,6 +3,7 @@ import AssertionsMenu from './AssertionsMenu.ce.vue'
 import AssertionType from './AssertionType.ce.vue'
 import AssertionOptions from './AssertionOptions.ce.vue'
 import { getOrCreateHelperDom, getSelectorHighlightStyles } from '../dom'
+import type { PossibleAssertions, AddAssertion } from './types'
 
 function getStudioAssertionsMenuDom (body) {
   return getOrCreateHelperDom({
@@ -12,7 +13,17 @@ function getStudioAssertionsMenuDom (body) {
   })
 }
 
-export function openStudioAssertionsMenu ({ $el, $body, props }) {
+interface StudioAssertionsMenuArgs {
+  $el: JQuery<HTMLElement>
+  $body: JQuery<HTMLElement>
+  props: {
+    possibleAssertions: PossibleAssertions
+    addAssertion: AddAssertion
+    closeMenu: () => void
+  }
+}
+
+export function openStudioAssertionsMenu ({ $el, $body, props }: StudioAssertionsMenuArgs) {
   const { vueContainer } = getStudioAssertionsMenuDom($body.get(0))
 
   vueContainerListeners(vueContainer)

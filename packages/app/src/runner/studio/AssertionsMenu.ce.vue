@@ -38,7 +38,7 @@
         :key="assertion.type"
         :type="assertion.type"
         :options="assertion.options"
-        @add-assertion="addAssertion"
+        @add-assertion="onAddAssertion"
       />
     </div>
   </div>
@@ -49,20 +49,25 @@ import { createPopper } from '@popperjs/core'
 import AssertionType from './AssertionType.ce.vue'
 import _ from 'lodash'
 import { nextTick, onMounted, Ref, ref, StyleValue } from 'vue'
+import type { PossibleAssertions, AddAssertion, AssertionArgs } from './types'
 
 const props = defineProps <{
-  jqueryElement: any
-  possibleAssertions: any[]
-  addAssertion: any
+  jqueryElement: JQuery<HTMLElement>
+  possibleAssertions: PossibleAssertions
+  addAssertion: AddAssertion
   closeMenu: () => void
   highlightStyle: StyleValue
 }>()
 
-const addAssertion = ({ type, name, value }) => {
+const onAddAssertion = ({ type, name, value }: {
+  type: string
+  name?: string
+  value?: string
+}) => {
   let args = [type, name, value]
 
   args = _.compact(args)
-  props.addAssertion(props.jqueryElement, ...args)
+  props.addAssertion(props.jqueryElement, ...args as AssertionArgs)
 }
 
 const onClose = () => {

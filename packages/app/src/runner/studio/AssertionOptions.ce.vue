@@ -19,7 +19,7 @@
         v-else
         class="assertion-option-value"
       >
-        {{ truncate(value) }}
+        {{ typeof value === 'string' && truncate(value) }}
       </span>
     </div>
   </div>
@@ -28,10 +28,11 @@
 <script lang="ts" setup>
 import { createPopper } from '@popperjs/core'
 import { onMounted, ref, nextTick, Ref } from 'vue'
+import type { AssertionOption } from './types'
 
 const props = defineProps<{
   type: string
-  options: any
+  options: AssertionOption[]
 }>()
 
 const emit = defineEmits<{
@@ -39,7 +40,7 @@ const emit = defineEmits<{
   (eventName: 'setPopperElement', value: HTMLElement)
 }>()
 
-const truncate = (str) => {
+const truncate = (str: string) => {
   if (str && str.length > 80) {
     return `${str.substr(0, 77)}...`
   }

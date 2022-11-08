@@ -5,6 +5,7 @@ import { getEventManager } from '../runner'
 import type { StudioSavePayload } from '../runner/event-manager-types'
 import { closeStudioAssertionsMenu, openStudioAssertionsMenu } from '../runner/studio/mounter'
 import { useAutStore } from './aut-store'
+import type { PossibleAssertions, AssertionArgs } from '../runner/studio/types'
 
 function getCypress () {
   const eventManager = getEventManager()
@@ -86,15 +87,6 @@ const tagNamesWithValue = [
   'PROGRESS',
   'TEXTAREA',
 ]
-
-// Single argument assertion: ['be.visible']
-type AssertionArgs_1 = [string]
-// Two argument assertion: ['have.text', '<some text>']
-type AssertionArgs_2 = [string, string]
-// Three argument assertion: ['have.attr', 'href', '<some value>']
-type AssertionArgs_3 = [string, string, string]
-
-type AssertionArgs = AssertionArgs_1 | AssertionArgs_2 | AssertionArgs_3
 
 export interface StudioLog {
   id?: number
@@ -403,7 +395,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       })
     },
 
-    _addAssertion ($el: HTMLElement, ...args: AssertionArgs) {
+    _addAssertion ($el: HTMLElement | JQuery<HTMLElement>, ...args: AssertionArgs) {
       const id = this._getId()
       const selector = getCypress().SelectorPlayground.getSelector($el)
 
@@ -421,7 +413,7 @@ export const useStudioStore = defineStore('studioRecorder', {
         id,
         selector,
         name: 'assert',
-        message: this._generateAssertionMessage($el, ...args),
+        message: this._generateAssertionMessage($el as HTMLElement, ...args),
       }
 
       this._generateBothLogs(reporterLog).forEach((commandLog) => {
@@ -797,7 +789,7 @@ export const useStudioStore = defineStore('studioRecorder', {
     _generatePossibleAssertions ($el: JQuery<Element>) {
       const tagName = $el.prop('tagName')
 
-      const possibleAssertions: Array<{ type: string, options?: unknown[] }> = []
+      const possibleAssertions: PossibleAssertions = []
 
       if (!tagNamesWithoutText.includes(tagName)) {
         const text = $el.text()

@@ -58,8 +58,9 @@ const onOpen = () => {
   isOpen.value = true
 }
 
-const onClose = (e) => {
-  if (popperElement.value && popperElement.value.contains(e.relatedTarget)) {
+const onClose = (e: MouseEvent) => {
+  if (e.relatedTarget instanceof Element &&
+    popperElement.value && popperElement.value.contains(e.relatedTarget)) {
     return
   }
 
@@ -72,7 +73,7 @@ const onClick = () => {
   }
 }
 
-const setPopperElement = (el) => {
+const setPopperElement = (el: HTMLElement) => {
   popperElement.value = el
 }
 
