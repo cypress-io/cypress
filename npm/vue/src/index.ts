@@ -370,7 +370,7 @@ export function mount<
  * Mounts a component and returns an object containing the component and VueWrapper
  * @param componentOptions
  * @param options
- * @returns {Cypress.Chainable<{wrapper: VueWrapper<T>, component: T}
+ * @returns {Cypress.Chainable<{wrapper: VueWrapper<T>, component: T}>}
  * @see {@link https://on.cypress.io/mounting-vue} for more details.
  * @example
  * import { mount } from '@cypress/vue'
@@ -386,9 +386,6 @@ export function mount (componentOptions: any, options: any = {}) {
   checkForRemovedStyleOptions(options)
   // Remove last mounted component if cy.mount is called more than once in a test
   cleanup()
-
-  // TODO: get the real displayName and props from VTU shallowMount
-  const componentName = getComponentDisplayName(componentOptions)
 
   // then wait for cypress to load
   return cy.then(() => {
