@@ -45,7 +45,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     // These dependencies are started in a new process or thread and will not have access to the snapshot. They need to be kept in the binary
     require.resolve('@packages/server/lib/plugins/child/require_async_child.js', { paths: [buildAppDir] }),
     require.resolve('@packages/server/lib/plugins/child/register_ts_node.js', { paths: [buildAppDir] }),
-    require.resolve('@packages/rewriter/lib/threads/worker.ts', { paths: [buildAppDir] }),
+    require.resolve('@packages/rewriter/lib/threads/worker.js', { paths: [buildAppDir] }),
     // These dependencies use the `require.resolve(<dependency>, { paths: [<path>] })` pattern where <path> is a path within the cypress monorepo. These will not be
     // pulled in by esbuild but still need to be kept in the binary.
     require.resolve('webpack', { paths: [buildAppDir] }),
