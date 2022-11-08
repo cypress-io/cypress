@@ -237,10 +237,12 @@ export default (Commands, Cypress, cy, state) => {
               return requests[Number(index) - 1] || null
             }
 
-            log(requests, command.get('name'))
+            const lastRequest = _.last(requests)
+
+            log(lastRequest, command.get('name'))
 
             // by default return the latest match
-            return _.last(requests) || null
+            return lastRequest || null
           }
 
           // log as primitive
