@@ -64,6 +64,9 @@ export const InterceptRequest: RequestMiddleware = async function () {
 
   debug('intercepting request %o', { requestId: request.id, req: _.pick(this.req, 'url') })
 
+  // Break caching, remove this header to prevent the downstream server from returning a 304 so we can return an up to date body.
+  delete this.req.headers['if-none-match']
+
   // attach requestId to the original req object for later use
   this.req.requestId = request.id
 
