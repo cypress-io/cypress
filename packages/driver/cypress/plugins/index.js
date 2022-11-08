@@ -5,8 +5,9 @@ const _ = require('lodash')
 const path = require('path')
 const fs = require('fs-extra')
 const Promise = require('bluebird')
-const wp = require('@cypress/webpack-preprocessor')
+// const wp = require('@cypress/webpack-preprocessor')
 const Jimp = require('jimp')
+const { cypressEsbuildPreprocessor } = require('cypress-esbuild-preprocessor')
 
 process.env.NO_LIVERELOAD = '1'
 const [webpackOptions] = require('@packages/runner/webpack.config.ts').default
@@ -33,7 +34,10 @@ babelLoader.use.options.plugins = _.reject(babelLoader.use.options.plugins, (plu
  * @type {Cypress.PluginConfig}
  */
 module.exports = (on, config) => {
-  on('file:preprocessor', wp({ webpackOptions }))
+  // on('file:preprocessor', wp({ webpackOptions }))
+  on('file:preprocessor', cypressEsbuildPreprocessor({
+    tsconfig: path.resolve(__dirname, '../../tsconfig.json'),
+  }))
 
   on('task', {
     'return:arg' (arg) {
