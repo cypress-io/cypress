@@ -100,7 +100,7 @@ https://on.cypress.io/cross-origin-violation
 
   4) web security
        fails when doing a CORS request cross-origin:
-     AssertionError: Timed out retrying after 500ms: Expected to find content: 'success!' but never did.
+     CypressError: Timed out retrying after 500ms: Expected to find content: 'success!' but never did.
       [stack trace lines]
 
 
@@ -347,7 +347,7 @@ exports['e2e web security / when experimentalSessionAndOrigin is enabled / fails
 
   4) web security
        fails when doing a CORS request cross-origin:
-     AssertionError: Timed out retrying after 500ms: Expected to find content: 'success!' but never did.
+     CypressError: Timed out retrying after 500ms: Expected to find content: 'success!' but never did.
       [stack trace lines]
 
 

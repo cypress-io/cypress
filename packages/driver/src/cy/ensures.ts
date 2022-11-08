@@ -252,7 +252,8 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     try {
       expect(subject).to.exist
     } catch (err) {
-      throw $errUtils.mergeErrProps(err, $errUtils.cypressErr(new Error(err.message)))
+      err.stack = $errUtils.stackWithReplacedProps(err, { name: 'CypressError' })
+      throw $errUtils.mergeErrProps(err, { name: 'CypressError' })
     } finally {
       state('onBeforeLog', null)
     }

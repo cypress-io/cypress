@@ -93,7 +93,7 @@ exports['e2e config applies defaultCommandTimeout globally 1'] = `
 
   1) short defaultCommandTimeout
        times out looking for a missing element:
-     AssertionError: Timed out retrying after 1000ms: Expected to find element: \`#bar\`, but never found it.
+     CypressError: Timed out retrying after 1000ms: Expected to find element: \`#bar\`, but never found it.
       [stack trace lines]
 
 

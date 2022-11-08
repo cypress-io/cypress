@@ -504,7 +504,7 @@ exports['e2e stdout / displays assertion errors'] = `
 
   4) assertion errors
        fails with dom assertion without diff, with retries:
-     AssertionError: Timed out retrying after 4000ms: expected '<body>' to have class 'foo'
+     CypressError: Timed out retrying after 4000ms: expected '<body>' to have class 'foo'
       [stack trace lines]
 
 

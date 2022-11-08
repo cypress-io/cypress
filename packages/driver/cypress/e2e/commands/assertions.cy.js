@@ -2177,6 +2177,14 @@ describe('src/cy/commands/assertions', () => {
       })
 
       it('visible, not visible, adds to error', function () {
+        cy.once('fail', (err) => {
+          const l6 = this.logs[5]
+
+          // the error on this log should have this message appended to it
+          expect(l6.get('error').message).to.include(`expected '<div>' to be 'visible'`)
+          expect(err.message).to.include(`This element \`<div>\` is not visible because it has CSS property: \`display: none\``)
+        })
+
         expect(this.$div).to.be.visible // 1
         expect(this.$div2).not.to.be.visible // 2
 
@@ -2193,15 +2201,7 @@ describe('src/cy/commands/assertions', () => {
           'expected **<div>** not to be **visible**',
         )
 
-        try {
-          expect(this.$div2).to.be.visible
-        } catch (err) {
-          const l6 = this.logs[5]
-
-          // the error on this log should have this message appended to it
-          expect(l6.get('error').message).to.include(`expected '<div>' to be 'visible'`)
-          expect(l6.get('error').message).to.include(`This element \`<div>\` is not visible because it has CSS property: \`display: none\``)
-        }
+        expect(this.$div2).to.be.visible
       })
 
       it('throws when obj is not DOM', function (done) {

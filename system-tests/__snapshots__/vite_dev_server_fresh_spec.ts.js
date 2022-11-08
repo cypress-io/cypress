@@ -153,7 +153,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
   4) Errors
        command failure:
-     AssertionError: Timed out retrying after 50ms: Expected to find element: \`element-that-does-not-exist\`, but never found it.
+     CypressError: Timed out retrying after 50ms: Expected to find element: \`element-that-does-not-exist\`, but never found it.
       [stack trace lines]
 
 
@@ -575,7 +575,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
   4) Errors
        command failure:
-     AssertionError: Timed out retrying after 50ms: Expected to find element: \`element-that-does-not-exist\`, but never found it.
+     CypressError: Timed out retrying after 50ms: Expected to find element: \`element-that-does-not-exist\`, but never found it.
       [stack trace lines]
 
 
@@ -997,7 +997,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
   4) Errors
        command failure:
-     AssertionError: Timed out retrying after 50ms: Expected to find element: \`element-that-does-not-exist\`, but never found it.
+     CypressError: Timed out retrying after 50ms: Expected to find element: \`element-that-does-not-exist\`, but never found it.
       [stack trace lines]
 
 

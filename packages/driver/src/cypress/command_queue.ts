@@ -195,7 +195,7 @@ export class CommandQueue extends Queue<$Command> {
     // prior to ever making it through our first
     // command
     if (this.stopped) {
-      return
+      return Promise.resolve()
     }
 
     this.state('current', command)

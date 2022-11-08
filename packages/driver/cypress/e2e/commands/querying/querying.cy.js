@@ -823,7 +823,7 @@ describe('src/cy/commands/querying', () => {
       it('throws when using an alias that does not exist', (done) => {
         cy.on('fail', (err) => {
           expect(err.name).to.include('CypressError')
-          expect(err.message).to.include('could not find a registered alias for: @alias.\nYou have not aliased anything yet.')
+          expect(err.message).to.include('could not find a registered alias for: `@alias`.\nYou have not aliased anything yet.')
 
           done()
         })
