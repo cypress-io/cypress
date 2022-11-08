@@ -1,3 +1,10 @@
+# [@cypress/angular-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/angular-v2.0.0...@cypress/angular-v2.0.1) (2022-11-08)
+
+
+### Bug Fixes
+
+* make component derived info not throw ([#24571](https://github.com/cypress-io/cypress/issues/24571)) ([838dd4f](https://github.com/cypress-io/cypress/commit/838dd4fa2e0ec56633d0af2faf10a47d190b5594))
+
 # [@cypress/angular-v2.0.0](https://github.com/cypress-io/cypress/compare/@cypress/angular-v1.1.2...@cypress/angular-v2.0.0) (2022-11-07)
 
 
