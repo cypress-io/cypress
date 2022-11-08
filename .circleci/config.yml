@@ -27,7 +27,7 @@ mainBuildFilters: &mainBuildFilters
     branches:
       only:
         - develop
-        - release/12.0.0
+        - /^release\/\d*\.\d*\.\d*$/
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -39,14 +39,19 @@ macWorkflowFilters: &darwin-workflow-filters
     - matches:
         pattern: "-release$"
         value: << pipeline.git.branch >>
+    - matches:
+        pattern: "^release\/\d*\.\d*\.\d*$"
+        value: << pipeline.git.branch >>
 linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - matches:
-          pattern: "-release$"
-          value: << pipeline.git.branch >>
-
+        pattern: "-release$"
+        value: << pipeline.git.branch >>
+    - matches:
+        pattern: "^release\/\d*\.\d*\.\d*$"
+        value: << pipeline.git.branch >>
 # uncomment & add to the branch conditions below to disable the main linux
 # flow if we don't want to test it for a certain branch
 linuxWorkflowExcludeFilters: &linux-x64-workflow-exclude-filters
@@ -62,6 +67,9 @@ windowsWorkflowFilters: &windows-workflow-filters
     - equal: [ develop, << pipeline.git.branch >> ]
     - matches:
         pattern: "-release$"
+        value: << pipeline.git.branch >>
+    - matches:
+        pattern: "^release\/\d*\.\d*\.\d*$"
         value: << pipeline.git.branch >>
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
@@ -125,7 +133,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/11.0.0" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1320,7 +1328,7 @@ jobs:
           condition:
             equal: [ *darwin-arm64-executor, << parameters.executor >> ]
           steps:
-            - run: rm -f /tmp/cypress/junit/* 
+            - run: rm -f /tmp/cypress/junit/*
       - unless:
           condition:
             or:
