@@ -226,9 +226,7 @@ class ProxyRequest {
   }
 }
 
-type FilterFnRequestInfo = {
-  matchedIntercept: boolean
-} & BrowserPreRequest
+type FilterFnRequestInfo = BrowserPreRequest
 
 export default class NetworkLogs {
   unloggedPreRequests: Array<BrowserPreRequest> = []
@@ -296,6 +294,7 @@ export default class NetworkLogs {
         requestId: interception.browserRequestId || interception.id,
         resourceType: 'other',
         originalResourceType: 'Request with no browser pre-request',
+        matchedIntercept: true,
         ..._.pick(interception.request, ['url', 'method', 'headers']),
       })
     }
