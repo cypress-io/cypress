@@ -1026,12 +1026,12 @@ describe('src/cy/commands/assertions', () => {
           let err
 
           try {
-            expect(log.invoke('consoleProps')).to.deep.eq({
+            expect(log.invoke('consoleProps')).to.deep.contain({
               Command: 'assert',
               expected: false,
               actual: true,
               Message: 'expected true to be false',
-              Error: log.get('error').message,
+              Error: log.get('error').stack,
             })
           } catch (e) {
             err = e
