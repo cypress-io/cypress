@@ -5,5 +5,10 @@
 <script>
 export default {
   name: 'GlobalComponentWithCustomDirective',
+  data () {
+    return {
+      test: 'testing123'
+    }
+  }
 }
 </script>

@@ -11,6 +11,15 @@ describe('<Logo />', () => {
       propsData: {
         msg: slotContent,
       },
+      extensions: {
+        components: { 
+          // stubbing for simplicity, this smoke test does not depend on
+          // GlobalComponent
+          GlobalComponentWithCustomDirective: {
+            render: h => h('div')
+          }
+        },
+      }
     })
 
     cy.contains('h1', slotContent)
@@ -23,7 +32,7 @@ describe('<Logo />', () => {
       },
     })
 
-    cy.get('.child').should('have.attr', 'data-custom', 'test')
+    cy.get('.child').should('have.attr', 'data-custom', 'testing123')
   })
 
   it('Vue2 custom directive should work in nested component', () => {
@@ -39,6 +48,6 @@ describe('<Logo />', () => {
       },
     })
 
-    cy.get('.child').should('have.attr', 'data-custom', 'test')
+    cy.get('.child').should('have.attr', 'data-custom', 'testing123')
   })
 })
