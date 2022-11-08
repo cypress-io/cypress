@@ -789,7 +789,7 @@ describe('src/cy/commands/querying', () => {
 
       it('throws after timing out not finding element', (done) => {
         cy.on('fail', (err) => {
-          expect(err.name).to.include('CypressError')
+          expect(err.name).to.include('AssertionError')
           expect(err.message).to.include('Expected to find element: `#missing-el`, but never found it.')
 
           done()
@@ -800,7 +800,7 @@ describe('src/cy/commands/querying', () => {
 
       it('throws after timing out not finding element when should exist', (done) => {
         cy.on('fail', (err) => {
-          expect(err.name).to.include('CypressError')
+          expect(err.name).to.include('AssertionError')
           expect(err.message).to.include('Expected to find element: `#missing-el`, but never found it.')
 
           done()
@@ -811,7 +811,7 @@ describe('src/cy/commands/querying', () => {
 
       it('throws existence error without running assertions', (done) => {
         cy.on('fail', (err) => {
-          expect(err.name).to.include('CypressError')
+          expect(err.name).to.include('AssertionError')
           expect(err.message).to.include('Expected to find element: `#missing-el`, but never found it.')
 
           done()
@@ -833,7 +833,7 @@ describe('src/cy/commands/querying', () => {
 
       it('throws after timing out after a .wait() alias reference', (done) => {
         cy.on('fail', (err) => {
-          expect(err.name).to.eq('CypressError')
+          expect(err.name).to.eq('AssertionError')
           expect(err.message).to.include('Expected to find element: `getJsonButton`, but never found it.')
 
           done()
@@ -883,7 +883,7 @@ describe('src/cy/commands/querying', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          expect(err.name).to.eq('CypressError')
+          expect(err.name).to.eq('AssertionError')
           expect(err.message).to.eq('Timed out retrying after 1ms: Expected to find element: `does_not_exist`, but never found it.')
 
           expect(lastLog.get('name')).to.eq('get')
@@ -901,7 +901,7 @@ describe('src/cy/commands/querying', () => {
           const { logs, lastLog } = this
           const getLog = logs[logs.length - 2]
 
-          expect(err.name).to.eq('CypressError')
+          expect(err.name).to.eq('AssertionError')
           expect(err.message).to.eq('Timed out retrying after 1ms: Expected to find element: `does_not_exist`, but never found it.')
 
           expect(getLog.get('name')).to.eq('get')
@@ -1795,7 +1795,7 @@ space
 
       it('throws when there is no filter and no subject', (done) => {
         cy.on('fail', (err) => {
-          expect(err.name).to.eq('CypressError')
+          expect(err.name).to.eq('AssertionError')
           expect(err.message).to.include('Expected to find content: \'brand new content\' but never did.')
 
           done()
@@ -1806,7 +1806,7 @@ space
 
       it('throws when there is a filter', (done) => {
         cy.on('fail', (err) => {
-          expect(err.name).to.eq('CypressError')
+          expect(err.name).to.eq('AssertionError')
           expect(err.message).to.include('Expected to find content: \'brand new content\' within the selector: \'span\' but never did.')
 
           done()
@@ -1817,7 +1817,7 @@ space
 
       it('throws when there is no filter but there is a subject', (done) => {
         cy.on('fail', (err) => {
-          expect(err.name).to.eq('CypressError')
+          expect(err.name).to.eq('AssertionError')
           expect(err.message).to.include('Expected to find content: \'0\' within the element: <div.badge> but never did.')
 
           done()
@@ -1828,7 +1828,7 @@ space
 
       it('throws when there is both a subject and a filter', (done) => {
         cy.on('fail', (err) => {
-          expect(err.name).to.eq('CypressError')
+          expect(err.name).to.eq('AssertionError')
           expect(err.message).to.include('Expected to find content: \'foo\' within the element: <div#edge-case-contains> and with the selector: \'ul\' but never did.')
 
           done()
