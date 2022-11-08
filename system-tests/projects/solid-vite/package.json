@@ -1,0 +1,19 @@
+{
+  "name": "test-for-solid",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "cy:open": "node ../../scripts/cypress.js open --component --project ${PWD}"
+  },
+  "dependencies": {
+    "solid-js": "^1.6.1"
+  },
+  "devDependencies": {
+    "vite": "^3.2.0",
+    "vite-plugin-solid": "^2.4.0"
+  },
+  "type": "module"
+}

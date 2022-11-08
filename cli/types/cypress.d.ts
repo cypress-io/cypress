@@ -3115,11 +3115,11 @@ declare namespace Cypress {
 
   type DevServerConfigOptions = {
     bundler: 'webpack'
-    framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next' | 'svelte'
+    framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next' | 'svelte' | 'solid'
     webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>
   } | {
     bundler: 'vite'
-    framework: 'react' | 'vue' | 'svelte'
+    framework: 'react' | 'vue' | 'svelte' | 'solid'
     viteConfig?: ConfigHandler<Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>>
   } | {
     bundler: 'webpack',

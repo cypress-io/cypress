@@ -1,0 +1,21 @@
+{
+  "name": "solid-webpack-unconfigured",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cross-env NODE_ENV=production webpack",
+    "dev": "webpack serve --content-base public"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.2",
+    "@babel/preset-env": "^7.20.2",
+    "babel-loader": "^9.1.0",
+    "babel-preset-solid": "^1.6.1",
+    "cross-env": "^7.0.3",
+    "solid": "^0.2.1",
+    "solid-hot-loader": "^0.0.5",
+    "solid-js": "^1.6.1",
+    "webpack": "^5.16.0",
+    "webpack-cli": "^4.4.0",
+    "webpack-dev-server": "^3.11.2"
+  }
+}

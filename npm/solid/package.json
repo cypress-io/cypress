@@ -1,0 +1,48 @@
+{
+  "name": "solid",
+  "version": "0.0.0-development",
+  "description": "Browser-based Component Testing for Solid.js with Cypress.io",
+  "main": "dist/cypress-solid.cjs.js",
+  "scripts": {
+    "cy:open": "node ../../scripts/cypress.js open --component --project ${PWD}",
+    "cy:run": "node ../../scripts/cypress.js run --component --project ${PWD}",
+    "prebuild": "rimraf dist",
+    "build": "rimraf dist && rollup -c rollup.config.mjs",
+    "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
+    "build-prod": "yarn build",
+    "check-ts": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cypress/mount-utils": "0.0.0-development",
+    "cypress": "0.0.0-development",
+    "solid-js": "1.5.7",
+    "vite": "3.1.0",
+    "vite-plugin-solid": "^2.3.0"
+  },
+  "peerDependencies": {
+    "cypress": ">=10.6.0",
+    "solid": ">=1.5.0"
+  },
+  "files": [
+    "dist/**/*"
+  ],
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cypress-io/cypress.git"
+  },
+  "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/solid/#readme",
+  "author": "Xiaorui Cui <cui_xiaorui@126.com>",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fsolid&template=1-bug-report.md&title=",
+  "keywords": [
+    "cypress",
+    "solid",
+    "testing",
+    "component testing"
+  ],
+  "module": "dist/cypress-solid.esm-bundler.js",
+  "publishConfig": {
+    "access": "public"
+  }
+}

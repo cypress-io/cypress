@@ -280,4 +280,23 @@ export const WIZARD_FRAMEWORKS = [
     supportStatus: 'alpha',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
+  {
+    type: 'solid',
+    configFramework: 'solid',
+    category: 'library',
+    name: 'Solid.js',
+    detectors: [dependencies.WIZARD_DEPENDENCY_SOLID],
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
+    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
+      return Promise.all([
+        getBundlerDependency(bundler, projectPath),
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_SOLID, projectPath),
+      ])
+    },
+    codeGenFramework: 'solid',
+    glob: '*.{js,jsx,tsx}',
+    mountModule: mountModule('cypress/solid'),
+    supportStatus: 'alpha',
+    componentIndexHtml: componentIndexHtmlGenerator(),
+  },
 ] as const

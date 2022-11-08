@@ -881,7 +881,6 @@
     "./node_modules/@babel/types/lib/validators/matchesPattern.js",
     "./node_modules/@babel/types/lib/validators/react/isCompatTag.js",
     "./node_modules/@babel/types/lib/validators/react/isReactComponent.js",
-    "./node_modules/@babel/types/node_modules/to-fast-properties/index.js",
     "./node_modules/@cypress/commit-info/node_modules/cross-spawn/index.js",
     "./node_modules/@cypress/commit-info/node_modules/cross-spawn/lib/enoent.js",
     "./node_modules/@cypress/commit-info/node_modules/cross-spawn/lib/parse.js",
@@ -3052,6 +3051,7 @@
     "./node_modules/through/index.js",
     "./node_modules/timm/lib/timm.js",
     "./node_modules/tinycolor2/tinycolor.js",
+    "./node_modules/to-fast-properties/index.js",
     "./node_modules/to-readable-stream/index.js",
     "./node_modules/to-regex-range/index.js",
     "./node_modules/to-regex-range/node_modules/is-number/index.js",
@@ -3528,5 +3528,5 @@
     "./tooling/v8-snapshot/cache/dev-darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "ce60d1d6cc0c77f20dcfc741105a5c53593752f814bf3cab816a3024faf68bfc"
+  "deferredHash": "de21200d10c5d13ccea6c18bf12b7a5d25fefa7f57ef883843820994ba59575f"
 }

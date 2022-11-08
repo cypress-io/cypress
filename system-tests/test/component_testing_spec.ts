@@ -171,6 +171,20 @@ describe('Vue major versions with Vite', () => {
   })
 })
 
+describe('solid component testing', () => {
+  systemTests.setup()
+
+  for (const bundler of ['webpack', 'vite']) {
+    systemTests.it(`solid + ${bundler}`, {
+      project: `solid-${bundler}`,
+      testingType: 'component',
+      spec: '**/*.cy.js,!src/errors.cy.js',
+      browser: 'chrome',
+      expectedExitCode: 0,
+    })
+  }
+})
+
 describe('experimentalSingleTabRunMode', function () {
   systemTests.setup()
 

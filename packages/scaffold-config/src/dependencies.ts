@@ -151,6 +151,15 @@ export const WIZARD_DEPENDENCY_SVELTE = {
   minVersion: '^3.0.0',
 } as const
 
+export const WIZARD_DEPENDENCY_SOLID = {
+  type: 'solid',
+  name: 'Solid.js',
+  package: 'solid',
+  installer: 'solid',
+  description: 'Simple and performant reactivity for building user interfaces',
+  minVersion: '^1.0.0',
+} as const
+
 export const WIZARD_DEPENDENCIES = [
   WIZARD_DEPENDENCY_WEBPACK,
   WIZARD_DEPENDENCY_TYPESCRIPT,
@@ -169,6 +178,7 @@ export const WIZARD_DEPENDENCIES = [
   WIZARD_DEPENDENCY_ANGULAR_COMMON,
   WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC,
   WIZARD_DEPENDENCY_SVELTE,
+  WIZARD_DEPENDENCY_SOLID,
 ] as const
 
 export const WIZARD_BUNDLERS = [

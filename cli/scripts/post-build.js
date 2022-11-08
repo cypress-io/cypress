@@ -14,6 +14,7 @@ const npmModulesToCopy = [
   'vue2',
   'angular',
   'svelte',
+  'solid',
 ]
 
 npmModulesToCopy.forEach((folder) => {

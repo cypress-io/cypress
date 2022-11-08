@@ -249,6 +249,36 @@ describe('detectFramework', () => {
     expect(actual.bundler?.type).to.eq('webpack')
   })
 
+  ;['2.0.0', '3.0.0'].forEach((v) => {
+    it(`Solid and Vite v${v}`, async () => {
+      const projectPath = await scaffoldMigrationProject('solid-vite-unconfigured')
+
+      fakeDepsInNodeModules(projectPath, [
+        { dependency: 'solid', version: '1.5.0' },
+        { dependency: 'vite', version: v },
+      ])
+
+      const actual = await detectFramework(projectPath)
+
+      expect(actual.framework?.type).to.eq('solid')
+      expect(actual.bundler?.type).to.eq('vite')
+    })
+  })
+
+  it(`Solid and Webpack`, async () => {
+    const projectPath = await scaffoldMigrationProject('solid-webpack-unconfigured')
+
+    fakeDepsInNodeModules(projectPath, [
+      { dependency: 'solid', version: '1.0.0' },
+      { dependency: 'webpack', version: '5.0.0' },
+    ])
+
+    const actual = await detectFramework(projectPath)
+
+    expect(actual.framework?.type).to.eq('solid')
+    expect(actual.bundler?.type).to.eq('webpack')
+  })
+
   it(`no framework or library`, async () => {
     const projectPath = await scaffoldMigrationProject('pristine')
 
