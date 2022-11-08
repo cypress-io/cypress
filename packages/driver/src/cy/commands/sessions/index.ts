@@ -7,7 +7,9 @@ import SessionsManager from './manager'
 import {
   getConsoleProps,
   navigateAboutBlank,
+  statusMap,
 } from './utils'
+
 import type { ServerSessionData } from '@packages/types'
 
 type SessionData = Cypress.Commands.Session.SessionData
@@ -22,8 +24,6 @@ type SessionData = Cypress.Commands.Session.SessionData
  */
 
 export default function (Commands, Cypress, cy) {
-  // @ts-ignore
-
   function throwIfNoSessionSupport () {
     if (!Cypress.config('experimentalSessionAndOrigin')) {
       $errUtils.throwErrByPath('sessions.experimentNotEnabled', {
@@ -151,6 +151,7 @@ export default function (Commands, Cypress, cy) {
 
       function setSessionLogStatus (status: string) {
         _log.set({
+          state: statusMap.commandState(status),
           sessionInfo: {
             id: session.id,
             isGlobalSession: session.cacheAcrossSpecs,
@@ -360,10 +361,10 @@ export default function (Commands, Cypress, cy) {
         .then(() => validateSession(existingSession))
         .then((isValidSession: boolean) => {
           if (!isValidSession) {
-            return
+            return 'failed'
           }
 
-          setSessionLogStatus(recreateSession ? 'recreated' : 'created')
+          return recreateSession ? 'recreated' : 'created'
         })
       }
 
@@ -387,7 +388,7 @@ export default function (Commands, Cypress, cy) {
             return createSessionWorkflow(existingSession, true)
           }
 
-          setSessionLogStatus('restored')
+          return 'restored'
         })
       }
 
@@ -423,8 +424,8 @@ export default function (Commands, Cypress, cy) {
           }
 
           return restoreSessionWorkflow(session)
-        }).then(() => {
-          _log.set({ state: 'passed' })
+        }).then((status: string) => {
+          setSessionLogStatus(status)
         })
       })
     },

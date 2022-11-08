@@ -193,10 +193,28 @@ function navigateAboutBlank (session: boolean = true) {
   return Cypress.action('cy:visit:blank', { type: session ? 'session' : 'session-lifecycle' }) as unknown as Promise<void>
 }
 
+const statusMap = {
+  commandState: (status: string) => {
+    switch (status) {
+      case 'failed':
+        return 'failed'
+      case 'recreating':
+      case 'recreated':
+        return 'warned'
+      case 'created':
+      case 'restored':
+        return 'passed'
+      default:
+        return 'pending'
+    }
+  },
+}
+
 export {
   getCurrentOriginStorage,
   setPostMessageLocalStorage,
   getConsoleProps,
   getPostMessageLocalStorage,
   navigateAboutBlank,
+  statusMap,
 }

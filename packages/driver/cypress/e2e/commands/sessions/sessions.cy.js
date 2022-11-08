@@ -217,6 +217,7 @@ describe('cy.session', { retries: 0 }, () => {
         it('groups session logs correctly', () => {
           expect(logs[0].get()).to.deep.contain({
             name: 'session',
+            state: 'passed',
             id: sessionGroupId,
             sessionInfo: {
               id: 'session-1',
@@ -291,6 +292,7 @@ describe('cy.session', { retries: 0 }, () => {
         it('groups session logs correctly', () => {
           expect(logs[0].get()).to.deep.contain({
             name: 'session',
+            state: 'passed',
             id: sessionGroupId,
             sessionInfo: {
               id: sessionId,
@@ -345,6 +347,7 @@ describe('cy.session', { retries: 0 }, () => {
             expect(err.message).to.contain('Your `cy.session` **validate** callback returned false')
             expect(logs[0].get()).to.deep.contain({
               name: 'session',
+              state: 'failed',
               id: sessionGroupId,
               sessionInfo: {
                 id: `session-${Cypress.state('test').id}`,
@@ -425,6 +428,7 @@ describe('cy.session', { retries: 0 }, () => {
         it('groups session logs correctly', () => {
           expect(logs[0].get()).to.contain({
             name: 'session',
+            state: 'passed',
             id: sessionGroupId,
           })
 
@@ -480,6 +484,7 @@ describe('cy.session', { retries: 0 }, () => {
         it('groups session logs correctly', () => {
           expect(logs[0].get()).to.contain({
             name: 'session',
+            state: 'passed',
             id: sessionGroupId,
           })
 
@@ -525,7 +530,7 @@ describe('cy.session', { retries: 0 }, () => {
           sessionId = `session-${Cypress.state('test').id}`
           cy.session(sessionId, setup, { validate })
           .then(() => {
-          // reset and only test restored session
+            // reset and only test restored session
             resetMocks()
             validate.callsFake(() => {
               if (validate.callCount === 1) {
@@ -554,6 +559,7 @@ describe('cy.session', { retries: 0 }, () => {
         it('groups session logs correctly', () => {
           expect(logs[0].get()).to.contain({
             name: 'session',
+            state: 'warned',
             id: sessionGroupId,
           })
 
@@ -647,6 +653,7 @@ describe('cy.session', { retries: 0 }, () => {
 
             expect(logs[0].get()).to.contain({
               name: 'session',
+              state: 'failed',
               id: sessionGroupId,
             })
 
@@ -875,6 +882,7 @@ describe('cy.session', { retries: 0 }, () => {
         it('groups session logs correctly', () => {
           expect(logs[0].get()).to.deep.contain({
             name: 'session',
+            state: 'passed',
             id: sessionGroupId,
             sessionInfo: {
               id: 'session-1',
@@ -946,6 +954,7 @@ describe('cy.session', { retries: 0 }, () => {
         it('groups session logs correctly', () => {
           expect(logs[0].get()).to.deep.contain({
             name: 'session',
+            state: 'passed',
             id: sessionGroupId,
             sessionInfo: {
               id: sessionId,
@@ -998,6 +1007,7 @@ describe('cy.session', { retries: 0 }, () => {
             expect(err.message).to.contain('Your `cy.session` **validate** callback returned false')
             expect(logs[0].get()).to.deep.contain({
               name: 'session',
+              state: 'failed',
               id: sessionGroupId,
               sessionInfo: {
                 id: `session-${Cypress.state('test').id}`,
@@ -1075,6 +1085,7 @@ describe('cy.session', { retries: 0 }, () => {
         it('groups session logs correctly', () => {
           expect(logs[0].get()).to.contain({
             name: 'session',
+            state: 'passed',
             id: sessionGroupId,
           })
 
@@ -1132,6 +1143,7 @@ describe('cy.session', { retries: 0 }, () => {
         it('groups session logs correctly', () => {
           expect(logs[0].get()).to.contain({
             name: 'session',
+            state: 'passed',
             id: sessionGroupId,
           })
 
@@ -1208,6 +1220,7 @@ describe('cy.session', { retries: 0 }, () => {
         it('groups session logs correctly', () => {
           expect(logs[0].get()).to.contain({
             name: 'session',
+            state: 'warned',
             id: sessionGroupId,
           })
 
@@ -1302,6 +1315,7 @@ describe('cy.session', { retries: 0 }, () => {
 
             expect(logs[0].get()).to.contain({
               name: 'session',
+              state: 'failed',
               id: sessionGroupId,
             })
 
