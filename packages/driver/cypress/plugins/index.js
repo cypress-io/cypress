@@ -5,7 +5,7 @@ const _ = require('lodash')
 const path = require('path')
 const fs = require('fs-extra')
 const Promise = require('bluebird')
-const wp = require('@cypress/webpack-preprocessor')
+// const wp = require('@cypress/webpack-preprocessor')
 const Jimp = require('jimp')
 
 process.env.NO_LIVERELOAD = '1'
@@ -29,11 +29,13 @@ babelLoader.use.options.plugins = _.reject(babelLoader.use.options.plugins, (plu
   return _.includes(plugin[0], 'babel-plugin-prismjs')
 })
 
+const createBundler = require('@bahmutov/cypress-esbuild-preprocessor')
+
 /**
  * @type {Cypress.PluginConfig}
  */
 module.exports = (on, config) => {
-  on('file:preprocessor', wp({ webpackOptions }))
+  on('file:preprocessor', createBundler())
 
   on('task', {
     'return:arg' (arg) {
