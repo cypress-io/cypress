@@ -36,9 +36,9 @@
       <AssertionType
         v-for="(assertion) in possibleAssertions"
         :key="assertion.type"
-        :add-assertion="addAssertion"
         :type="assertion.type"
         :options="assertion.options"
+        @add-assertion="addAssertion"
       />
     </div>
   </div>
@@ -58,7 +58,9 @@ const props = defineProps <{
   highlightStyle: StyleValue
 }>()
 
-const addAssertion = (...args) => {
+const addAssertion = ({ type, name, value }) => {
+  let args = [type, name, value]
+
   args = _.compact(args)
   props.addAssertion(props.jqueryElement, ...args)
 }

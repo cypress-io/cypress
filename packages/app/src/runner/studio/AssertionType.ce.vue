@@ -30,9 +30,9 @@
     <AssertionOptions
       v-if="hasOptions && isOpen"
       :type="type"
-      :add-assertion="addAssertion"
       :options="options"
       :set-popper-element="setPopperElement"
+      @add-assertion="addAssertion"
     />
   </div>
 </template>
@@ -43,8 +43,11 @@ import AssertionOptions from './AssertionOptions.ce.vue'
 
 const props = defineProps<{
   type: string
-  addAssertion: any
   options: any
+}>()
+
+const emit = defineEmits<{
+  (eventName: 'addAssertion', value: { type: string, name?: string, value?: string })
 }>()
 
 const isOpen = ref(false)
@@ -65,12 +68,16 @@ const onClose = (e) => {
 
 const onClick = () => {
   if (!hasOptions) {
-    props.addAssertion(props.type)
+    emit('addAssertion', { type: props.type })
   }
 }
 
 const setPopperElement = (el) => {
   popperElement.value = el
+}
+
+const addAssertion = ({ type, name, value }) => {
+  emit('addAssertion', { type, name, value })
 }
 </script>
 

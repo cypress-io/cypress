@@ -31,9 +31,12 @@ import { onMounted, ref, nextTick, Ref } from 'vue'
 
 const props = defineProps<{
   type: string
-  addAssertion: any
   options: any
   setPopperElement: any
+}>()
+
+const emit = defineEmits<{
+  (eventName: 'addAssertion', value: { type: string, name: string, value: string })
 }>()
 
 const truncate = (str) => {
@@ -60,7 +63,7 @@ onMounted(() => {
 })
 
 const onClick = (name, value) => {
-  props.addAssertion(props.type, name, value)
+  emit('addAssertion', { type: props.type, name, value })
 }
 </script>
 
