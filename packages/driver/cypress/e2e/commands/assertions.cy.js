@@ -1023,14 +1023,13 @@ describe('src/cy/commands/assertions', () => {
       cy.on('log:added', (attrs, log) => {
         if (attrs.name === 'assert') {
           cy.removeAllListeners('log:added')
+          const consoleProps = log.invoke('consoleProps')
 
-          expect(log.invoke('consoleProps')).to.deep.eq({
-            Command: 'assert',
-            expected: false,
-            actual: true,
-            Message: 'expected true to be false',
-            Error: log.get('error').message,
-          })
+          expect(consoleProps.Command).to.eq('assert')
+          expect(consoleProps.expected).to.be.false
+          expect(consoleProps.actual).to.be.false
+          expect(consoleProps.Message).to.eq('expected true to be false')
+          expect(consoleProps.Error).to.include(log.get('error').message)
 
           done()
         }
