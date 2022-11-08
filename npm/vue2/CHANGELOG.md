@@ -1,3 +1,25 @@
+# [@cypress/vue2-v1.1.1](https://github.com/cypress-io/cypress/compare/@cypress/vue2-v1.1.0...@cypress/vue2-v1.1.1) (2022-10-13)
+
+
+### Bug Fixes
+
+* angular and nuxt ct tests now fail on uncaught exceptions ([#24122](https://github.com/cypress-io/cypress/issues/24122)) ([53eef4f](https://github.com/cypress-io/cypress/commit/53eef4fbd7e1caf32f0183cadbc0e4cf05524c34))
+
+
+# [@cypress/vue2-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/vue2-v1.0.2...@cypress/vue2-v1.1.0) (2022-08-30)
+
+
+### Features
+
+* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
+
+# [@cypress/vue2-v1.0.2](https://github.com/cypress-io/cypress/compare/@cypress/vue2-v1.0.1...@cypress/vue2-v1.0.2) (2022-08-11)
+
+
+### Bug Fixes
+
+* remove CT side effects from mount when e2e testing ([#22633](https://github.com/cypress-io/cypress/issues/22633)) ([a9476ec](https://github.com/cypress-io/cypress/commit/a9476ecb3d43f628b689e060294a1952937cb1a7))
+
 # [@cypress/vue2-v1.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vue2-v1.0.0...@cypress/vue2-v1.0.1) (2022-06-13)
 
 

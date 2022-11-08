@@ -10,27 +10,28 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      5 found (App.cy.jsx, AppCompilationError.cy.jsx, MissingReact.cy.jsx, MissingReact │
-  │             InSpec.cy.jsx, Unmount.cy.jsx)                                                     │
+  │ Specs:      7 found (App.cy.jsx, AppCompilationError.cy.jsx, Errors.cy.jsx, MissingReact.cy.js │
+  │             x, MissingReactInSpec.cy.jsx, Rerendering.cy.jsx, Unmount.cy.jsx)                  │
   │ Searched:   **/*.cy.{js,jsx,ts,tsx}                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  App.cy.jsx                                                                      (1 of 5)
+  Running:  App.cy.jsx                                                                      (1 of 7)
 
 
   ✓ renders hello world
+  ✓ renders background
 
-  1 passing
+  2 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -49,7 +50,7 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  AppCompilationError.cy.jsx                                                      (2 of 5)
+  Running:  AppCompilationError.cy.jsx                                                      (2 of 7)
 
 
   1) An uncaught error was detected outside of a test
@@ -109,7 +110,101 @@ We dynamically generated a new test to display this failure.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReact.cy.jsx                                                             (3 of 5)
+  Running:  Errors.cy.jsx                                                                   (3 of 7)
+
+
+  Errors
+    1) error on mount
+    2) sync error
+    3) async error
+    4) command failure
+
+
+  0 passing
+  4 failing
+
+  1) Errors
+       error on mount:
+     Error: The following error originated from your application code, not from Cypress.
+
+  > mount error
+
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
+      [stack trace lines]
+
+  2) Errors
+       sync error:
+     Error: The following error originated from your application code, not from Cypress.
+
+  > sync error
+
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
+      [stack trace lines]
+
+  3) Errors
+       async error:
+     Error: The following error originated from your application code, not from Cypress.
+
+  > async error
+
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
+      [stack trace lines]
+
+  4) Errors
+       command failure:
+     AssertionError: Timed out retrying after 50ms: Expected to find element: \`element-that-does-not-exist\`, but never found it.
+      [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        4                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      4                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  4                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     Errors.cy.jsx                                                                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- error on mount (failed)     (1280x720)
+     .png                                                                                           
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- sync error (failed).png     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- async error (failed).pn     (1280x720)
+     g                                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x720)
+     ).png                                                                                          
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/Errors.cy.jsx.mp4                   (X second)
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  MissingReact.cy.jsx                                                             (4 of 7)
 
 
   1) is missing React
@@ -118,11 +213,15 @@ We dynamically generated a new test to display this failure.
   1 failing
 
   1) is missing React:
-     ReferenceError: The following error originated from your test code, not from Cypress.
+     ReferenceError: The following error originated from your application code, not from Cypress.
 
   > React is not defined
 
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
       [stack trace lines]
 
 
@@ -157,7 +256,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReactInSpec.cy.jsx                                                       (4 of 5)
+  Running:  MissingReactInSpec.cy.jsx                                                       (5 of 7)
 
 
   1) is missing React in this file
@@ -201,11 +300,11 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Unmount.cy.jsx                                                                  (5 of 5)
+  Running:  Rerendering.cy.jsx                                                              (6 of 7)
 
 
-  Comp with componentWillUnmount
-    ✓ calls the prop
+  re-render
+    ✓ maintains component state across re-renders
 
 
   1 passing
@@ -216,6 +315,43 @@ When Cypress detects uncaught errors originating from your test code it will aut
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Tests:        1                                                                                │
   │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     Rerendering.cy.jsx                                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/Rerendering.cy.jsx.mp4              (X second)
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  Unmount.cy.jsx                                                                  (7 of 7)
+
+
+  Comp with componentWillUnmount
+    ✓ calls the prop
+
+  mount cleanup
+    ✓ mount 1
+    ✓ mount 2
+
+
+  3 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -239,17 +375,21 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  App.cy.jsx                               XX:XX        1        1        -        -        - │
+  │ ✔  App.cy.jsx                               XX:XX        2        2        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  AppCompilationError.cy.jsx               XX:XX        1        -        1        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✖  Errors.cy.jsx                            XX:XX        4        -        4        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  MissingReact.cy.jsx                      XX:XX        1        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  MissingReactInSpec.cy.jsx                XX:XX        1        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  Unmount.cy.jsx                           XX:XX        1        1        -        -        - │
+  │ ✔  Rerendering.cy.jsx                       XX:XX        1        1        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  3 of 5 failed (60%)                      XX:XX        5        2        3        -        -  
+    ✖  4 of 7 failed (57%)                      XX:XX       13        6        7        -        -  
 
 
 `
@@ -263,16 +403,16 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      5 found (App.cy.jsx, AppCompilationError.cy.jsx, MissingReact.cy.jsx, MissingReact │
-  │             InSpec.cy.jsx, Unmount.cy.jsx)                                                     │
+  │ Specs:      7 found (App.cy.jsx, AppCompilationError.cy.jsx, Errors.cy.jsx, MissingReact.cy.js │
+  │             x, MissingReactInSpec.cy.jsx, Rerendering.cy.jsx, Unmount.cy.jsx)                  │
   │ Searched:   **/*.cy.{js,jsx,ts,tsx}                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  App.cy.jsx                                                                      (1 of 5)
-   43 modules
+  Running:  App.cy.jsx                                                                      (1 of 7)
+   49 modules
 
 ERROR in ./src/AppCompilationError.cy.jsx
 Module build failed (from [..]):
@@ -287,15 +427,16 @@ SyntaxError: /foo/bar/.projects/webpack4_wds4-react/src/AppCompilationError.cy.j
 
 
   ✓ renders hello world
+  ✓ renders background
 
-  1 passing
+  2 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -314,7 +455,7 @@ SyntaxError: /foo/bar/.projects/webpack4_wds4-react/src/AppCompilationError.cy.j
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  AppCompilationError.cy.jsx                                                      (2 of 5)
+  Running:  AppCompilationError.cy.jsx                                                      (2 of 7)
 
 
   1) An uncaught error was detected outside of a test
@@ -374,7 +515,101 @@ We dynamically generated a new test to display this failure.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReact.cy.jsx                                                             (3 of 5)
+  Running:  Errors.cy.jsx                                                                   (3 of 7)
+
+
+  Errors
+    1) error on mount
+    2) sync error
+    3) async error
+    4) command failure
+
+
+  0 passing
+  4 failing
+
+  1) Errors
+       error on mount:
+     Error: The following error originated from your application code, not from Cypress.
+
+  > mount error
+
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
+      [stack trace lines]
+
+  2) Errors
+       sync error:
+     Error: The following error originated from your application code, not from Cypress.
+
+  > sync error
+
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
+      [stack trace lines]
+
+  3) Errors
+       async error:
+     Error: The following error originated from your application code, not from Cypress.
+
+  > async error
+
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
+      [stack trace lines]
+
+  4) Errors
+       command failure:
+     AssertionError: Timed out retrying after 50ms: Expected to find element: \`element-that-does-not-exist\`, but never found it.
+      [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        4                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      4                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  4                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     Errors.cy.jsx                                                                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- error on mount (failed)     (1280x720)
+     .png                                                                                           
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- sync error (failed).png     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- async error (failed).pn     (1280x720)
+     g                                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x720)
+     ).png                                                                                          
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/Errors.cy.jsx.mp4                   (X second)
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  MissingReact.cy.jsx                                                             (4 of 7)
 
 
   1) is missing React
@@ -383,11 +618,15 @@ We dynamically generated a new test to display this failure.
   1 failing
 
   1) is missing React:
-     ReferenceError: The following error originated from your test code, not from Cypress.
+     ReferenceError: The following error originated from your application code, not from Cypress.
 
   > React is not defined
 
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
       [stack trace lines]
 
 
@@ -422,7 +661,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReactInSpec.cy.jsx                                                       (4 of 5)
+  Running:  MissingReactInSpec.cy.jsx                                                       (5 of 7)
 
 
   1) is missing React in this file
@@ -466,11 +705,11 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Unmount.cy.jsx                                                                  (5 of 5)
+  Running:  Rerendering.cy.jsx                                                              (6 of 7)
 
 
-  Comp with componentWillUnmount
-    ✓ calls the prop
+  re-render
+    ✓ maintains component state across re-renders
 
 
   1 passing
@@ -481,6 +720,43 @@ When Cypress detects uncaught errors originating from your test code it will aut
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Tests:        1                                                                                │
   │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     Rerendering.cy.jsx                                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/Rerendering.cy.jsx.mp4              (X second)
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  Unmount.cy.jsx                                                                  (7 of 7)
+
+
+  Comp with componentWillUnmount
+    ✓ calls the prop
+
+  mount cleanup
+    ✓ mount 1
+    ✓ mount 2
+
+
+  3 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -504,17 +780,21 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  App.cy.jsx                               XX:XX        1        1        -        -        - │
+  │ ✔  App.cy.jsx                               XX:XX        2        2        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  AppCompilationError.cy.jsx               XX:XX        1        -        1        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✖  Errors.cy.jsx                            XX:XX        4        -        4        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  MissingReact.cy.jsx                      XX:XX        1        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  MissingReactInSpec.cy.jsx                XX:XX        1        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  Unmount.cy.jsx                           XX:XX        1        1        -        -        - │
+  │ ✔  Rerendering.cy.jsx                       XX:XX        1        1        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  3 of 5 failed (60%)                      XX:XX        5        2        3        -        -  
+    ✖  4 of 7 failed (57%)                      XX:XX       13        6        7        -        -  
 
 
 `
@@ -531,27 +811,28 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      5 found (App.cy.jsx, AppCompilationError.cy.jsx, MissingReact.cy.jsx, MissingReact │
-  │             InSpec.cy.jsx, Unmount.cy.jsx)                                                     │
+  │ Specs:      7 found (App.cy.jsx, AppCompilationError.cy.jsx, Errors.cy.jsx, MissingReact.cy.js │
+  │             x, MissingReactInSpec.cy.jsx, Rerendering.cy.jsx, Unmount.cy.jsx)                  │
   │ Searched:   **/*.cy.{js,jsx,ts,tsx}                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  App.cy.jsx                                                                      (1 of 5)
+  Running:  App.cy.jsx                                                                      (1 of 7)
 
 
   ✓ renders hello world
+  ✓ renders background
 
-  1 passing
+  2 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -570,7 +851,7 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  AppCompilationError.cy.jsx                                                      (2 of 5)
+  Running:  AppCompilationError.cy.jsx                                                      (2 of 7)
 
 
   1) An uncaught error was detected outside of a test
@@ -630,7 +911,101 @@ We dynamically generated a new test to display this failure.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReact.cy.jsx                                                             (3 of 5)
+  Running:  Errors.cy.jsx                                                                   (3 of 7)
+
+
+  Errors
+    1) error on mount
+    2) sync error
+    3) async error
+    4) command failure
+
+
+  0 passing
+  4 failing
+
+  1) Errors
+       error on mount:
+     Error: The following error originated from your application code, not from Cypress.
+
+  > mount error
+
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
+      [stack trace lines]
+
+  2) Errors
+       sync error:
+     Error: The following error originated from your application code, not from Cypress.
+
+  > sync error
+
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
+      [stack trace lines]
+
+  3) Errors
+       async error:
+     Error: The following error originated from your application code, not from Cypress.
+
+  > async error
+
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
+      [stack trace lines]
+
+  4) Errors
+       command failure:
+     AssertionError: Timed out retrying after 50ms: Expected to find element: \`element-that-does-not-exist\`, but never found it.
+      [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        4                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      4                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  4                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     Errors.cy.jsx                                                                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- error on mount (failed)     (1280x720)
+     .png                                                                                           
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- sync error (failed).png     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- async error (failed).pn     (1280x720)
+     g                                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x720)
+     ).png                                                                                          
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/Errors.cy.jsx.mp4                   (X second)
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  MissingReact.cy.jsx                                                             (4 of 7)
 
 
   1) is missing React
@@ -639,11 +1014,15 @@ We dynamically generated a new test to display this failure.
   1 failing
 
   1) is missing React:
-     ReferenceError: The following error originated from your test code, not from Cypress.
+     ReferenceError: The following error originated from your application code, not from Cypress.
 
   > React is not defined
 
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
       [stack trace lines]
 
 
@@ -678,7 +1057,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReactInSpec.cy.jsx                                                       (4 of 5)
+  Running:  MissingReactInSpec.cy.jsx                                                       (5 of 7)
 
 
   1) is missing React in this file
@@ -722,11 +1101,11 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Unmount.cy.jsx                                                                  (5 of 5)
+  Running:  Rerendering.cy.jsx                                                              (6 of 7)
 
 
-  Comp with componentWillUnmount
-    ✓ calls the prop
+  re-render
+    ✓ maintains component state across re-renders
 
 
   1 passing
@@ -737,6 +1116,43 @@ When Cypress detects uncaught errors originating from your test code it will aut
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Tests:        1                                                                                │
   │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     Rerendering.cy.jsx                                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/Rerendering.cy.jsx.mp4              (X second)
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  Unmount.cy.jsx                                                                  (7 of 7)
+
+
+  Comp with componentWillUnmount
+    ✓ calls the prop
+
+  mount cleanup
+    ✓ mount 1
+    ✓ mount 2
+
+
+  3 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -760,17 +1176,21 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  App.cy.jsx                               XX:XX        1        1        -        -        - │
+  │ ✔  App.cy.jsx                               XX:XX        2        2        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  AppCompilationError.cy.jsx               XX:XX        1        -        1        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✖  Errors.cy.jsx                            XX:XX        4        -        4        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  MissingReact.cy.jsx                      XX:XX        1        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  MissingReactInSpec.cy.jsx                XX:XX        1        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  Unmount.cy.jsx                           XX:XX        1        1        -        -        - │
+  │ ✔  Rerendering.cy.jsx                       XX:XX        1        1        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  3 of 5 failed (60%)                      XX:XX        5        2        3        -        -  
+    ✖  4 of 7 failed (57%)                      XX:XX       13        6        7        -        -  
 
 
 `
@@ -784,17 +1204,17 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      5 found (App.cy.jsx, AppCompilationError.cy.jsx, MissingReact.cy.jsx, MissingReact │
-  │             InSpec.cy.jsx, Unmount.cy.jsx)                                                     │
+  │ Specs:      7 found (App.cy.jsx, AppCompilationError.cy.jsx, Errors.cy.jsx, MissingReact.cy.js │
+  │             x, MissingReactInSpec.cy.jsx, Rerendering.cy.jsx, Unmount.cy.jsx)                  │
   │ Searched:   **/*.cy.{js,jsx,ts,tsx}                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  App.cy.jsx                                                                      (1 of 5)
-12 assets
-53 modules
+  Running:  App.cy.jsx                                                                      (1 of 7)
+14 assets
+65 modules
 
 ERROR in ./src/AppCompilationError.cy.jsx
 Module build failed (from [..]):
@@ -811,15 +1231,16 @@ webpack x.x.x compiled with x errors in xxx ms
 
 
   ✓ renders hello world
+  ✓ renders background
 
-  1 passing
+  2 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
+  │ Tests:        2                                                                                │
+  │ Passing:      2                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -838,7 +1259,7 @@ webpack x.x.x compiled with x errors in xxx ms
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  AppCompilationError.cy.jsx                                                      (2 of 5)
+  Running:  AppCompilationError.cy.jsx                                                      (2 of 7)
 
 
   1) An uncaught error was detected outside of a test
@@ -898,7 +1319,101 @@ We dynamically generated a new test to display this failure.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReact.cy.jsx                                                             (3 of 5)
+  Running:  Errors.cy.jsx                                                                   (3 of 7)
+
+
+  Errors
+    1) error on mount
+    2) sync error
+    3) async error
+    4) command failure
+
+
+  0 passing
+  4 failing
+
+  1) Errors
+       error on mount:
+     Error: The following error originated from your application code, not from Cypress.
+
+  > mount error
+
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
+      [stack trace lines]
+
+  2) Errors
+       sync error:
+     Error: The following error originated from your application code, not from Cypress.
+
+  > sync error
+
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
+      [stack trace lines]
+
+  3) Errors
+       async error:
+     Error: The following error originated from your application code, not from Cypress.
+
+  > async error
+
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
+      [stack trace lines]
+
+  4) Errors
+       command failure:
+     AssertionError: Timed out retrying after 50ms: Expected to find element: \`element-that-does-not-exist\`, but never found it.
+      [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        4                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      4                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  4                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     Errors.cy.jsx                                                                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- error on mount (failed)     (1280x720)
+     .png                                                                                           
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- sync error (failed).png     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- async error (failed).pn     (1280x720)
+     g                                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/Errors.cy.jsx/Errors -- command failure (failed     (1280x720)
+     ).png                                                                                          
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/Errors.cy.jsx.mp4                   (X second)
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  MissingReact.cy.jsx                                                             (4 of 7)
 
 
   1) is missing React
@@ -907,11 +1422,15 @@ We dynamically generated a new test to display this failure.
   1 failing
 
   1) is missing React:
-     ReferenceError: The following error originated from your test code, not from Cypress.
+     ReferenceError: The following error originated from your application code, not from Cypress.
 
   > React is not defined
 
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
       [stack trace lines]
 
 
@@ -946,7 +1465,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  MissingReactInSpec.cy.jsx                                                       (4 of 5)
+  Running:  MissingReactInSpec.cy.jsx                                                       (5 of 7)
 
 
   1) is missing React in this file
@@ -990,11 +1509,11 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Unmount.cy.jsx                                                                  (5 of 5)
+  Running:  Rerendering.cy.jsx                                                              (6 of 7)
 
 
-  Comp with componentWillUnmount
-    ✓ calls the prop
+  re-render
+    ✓ maintains component state across re-renders
 
 
   1 passing
@@ -1005,6 +1524,43 @@ When Cypress detects uncaught errors originating from your test code it will aut
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Tests:        1                                                                                │
   │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     Rerendering.cy.jsx                                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/Rerendering.cy.jsx.mp4              (X second)
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  Unmount.cy.jsx                                                                  (7 of 7)
+
+
+  Comp with componentWillUnmount
+    ✓ calls the prop
+
+  mount cleanup
+    ✓ mount 1
+    ✓ mount 2
+
+
+  3 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -1028,17 +1584,21 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  App.cy.jsx                               XX:XX        1        1        -        -        - │
+  │ ✔  App.cy.jsx                               XX:XX        2        2        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  AppCompilationError.cy.jsx               XX:XX        1        -        1        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✖  Errors.cy.jsx                            XX:XX        4        -        4        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  MissingReact.cy.jsx                      XX:XX        1        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  MissingReactInSpec.cy.jsx                XX:XX        1        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  Unmount.cy.jsx                           XX:XX        1        1        -        -        - │
+  │ ✔  Rerendering.cy.jsx                       XX:XX        1        1        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  3 of 5 failed (60%)                      XX:XX        5        2        3        -        -  
+    ✖  4 of 7 failed (57%)                      XX:XX       13        6        7        -        -  
 
 
 `

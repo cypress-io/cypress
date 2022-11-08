@@ -4,6 +4,7 @@ import path from 'path'
 import { BrowserStatusEnum, FileExtensionEnum } from '..'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { Browser } from './gql-Browser'
+import { CodeGenGlobs } from './gql-CodeGenGlobs'
 import { FileParts } from './gql-FileParts'
 import { ProjectPreferences } from './gql-ProjectPreferences'
 import { Spec } from './gql-Spec'
@@ -35,6 +36,11 @@ export const CurrentProject = objectType({
 
     t.boolean('isFullConfigReady', {
       description: 'Whether or not the full config is ready',
+    })
+
+    t.boolean('hasNonExampleSpec', {
+      description: 'Whether the project has any specs found that do not match an example spec',
+      resolve: (_, args, ctx) => ctx.project.hasNonExampleSpec,
     })
 
     t.field('currentTestingType', {
@@ -76,7 +82,7 @@ export const CurrentProject = objectType({
     })
 
     t.string('projectId', {
-      description: 'Used to associate project with Cypress dashboard',
+      description: 'Used to associate project with Cypress Dashboard',
       resolve: (source, args, ctx) => ctx.project.projectId(),
     })
 
@@ -191,6 +197,11 @@ export const CurrentProject = objectType({
       resolve: (source, args, ctx) => {
         return ctx.project.getProjectPreferences(path.basename(source.projectRoot))
       },
+    })
+
+    t.nonNull.field('codeGenGlobs', {
+      type: CodeGenGlobs,
+      resolve: (src, args, ctx) => ctx.project.getCodeGenGlobs(),
     })
 
     t.list.field('codeGenCandidates', {

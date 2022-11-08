@@ -31,7 +31,7 @@ export function getAddress (port: number, hostname: string): Bluebird<net.Addres
   const lookupAsync = Bluebird.promisify<LookupAddress[], string, LookupAllOptions>(dns.lookup, { context: dns })
 
   // this does not go out to the network to figure
-  // out the addresess. in fact it respects the /etc/hosts file
+  // out the addresses. in fact it respects the /etc/hosts file
   // https://github.com/nodejs/node/blob/dbdbdd4998e163deecefbb1d34cda84f749844a4/lib/dns.js#L108
   // https://nodejs.org/api/dns.html#dns_dns_lookup_hostname_options_callback
   // @ts-ignore
@@ -52,7 +52,7 @@ export function getDelayForRetry (iteration) {
   return [0, 100, 200, 200][iteration]
 }
 
-interface RetryingOptions {
+export interface RetryingOptions {
   family: 4 | 6 | 0
   port: number
   host: string | undefined

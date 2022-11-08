@@ -3,6 +3,7 @@
     placement="top"
     :is-interactive="true"
     :show-group="VALUES[mode].header"
+    :show-delay="250"
   >
     <button
       type="button"
@@ -26,7 +27,7 @@
         data-cy="cloud-data-tooltip-content"
       >
         <div
-          :class="{'my-2': projectConnectionStatus!== 'CONNECTED'}"
+          :class="{'my-2': !project.isProjectConnected}"
           class="max-w-300px"
         >
           <i18n-t
@@ -43,51 +44,36 @@
         </div>
         <div>
           <Button
-            v-if="projectConnectionStatus === 'LOGGED_OUT'"
+            v-if="userStatusMatches('isLoggedOut')"
             :prefix-icon="UserOutlineIcon"
             prefix-icon-class="icon-dark-white icon-light-transparent"
             data-cy="login-button"
-            @click="emits('showLogin')"
+            @click="emits('showLoginConnect')"
           >
             {{ t('specPage.dashboardLoginButton') }}
           </Button>
           <Button
-            v-else-if="projectConnectionStatus === 'NOT_CONNECTED'"
+            v-else-if="userStatusMatches('needsProjectConnect')"
             :prefix-icon="ConnectIcon"
             prefix-icon-class="icon-dark-white icon-light-transparent"
             data-cy="connect-button"
-            @click="emits('showConnectToProject')"
+            @click="emits('showLoginConnect')"
           >
             {{ t("specPage.connectProjectButton") }}
           </Button>
           <Button
-            v-else-if="projectConnectionStatus === 'NOT_FOUND'"
+            v-else-if="project.isNotFound"
             :prefix-icon="ConnectIcon"
             prefix-icon-class="icon-dark-white icon-light-transparent"
             data-cy="reconnect-button"
-            @click="emits('showConnectToProject')"
+            @click="emits('showLoginConnect')"
           >
             {{ t("specPage.reconnectProjectButton") }}
           </Button>
-          <Button
-            v-else-if="projectConnectionStatus === 'UNAUTHORIZED'"
-            :prefix-icon="SendIcon"
-            prefix-icon-class="icon-dark-white icon-light-transparent"
-            data-cy="request-access-button"
-            @click="requestAccess"
-          >
-            {{ t("specPage.requestAccessButton") }}
-          </Button>
-          <Button
-            v-else-if="projectConnectionStatus === 'ACCESS_REQUESTED'"
-            :prefix-icon="SendIcon"
-            prefix-icon-class="icon-dark-white icon-light-transparent"
-            data-cy="access-requested-button"
-            class="bg-gray-800 border-gray-800"
-            disabled
-          >
-            {{ t("specPage.requestSentButton") }}
-          </Button>
+          <RequestAccessButton
+            v-else-if="project.isNotAuthorized"
+            :gql="props.gql"
+          />
         </div>
       </div>
     </template>
@@ -95,18 +81,21 @@
 </template>
 
 <script setup lang="ts">
+import RequestAccessButton from './RequestAccessButton.vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import Button from '@cy/components/Button.vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import UserOutlineIcon from '~icons/cy/user-outline_x16.svg'
-import SendIcon from '~icons/cy/paper-airplane_x16.svg'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import type { SpecHeaderCloudDataTooltipFragment } from '../generated/graphql'
-import { SpecHeaderCloudDataTooltip_RequestAccessDocument } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { computed, onMounted, ref } from 'vue'
-import { gql, useMutation } from '@urql/vue'
+import { computed } from 'vue'
+import { gql } from '@urql/vue'
+import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+
+const { userStatusMatches, project } = useLoginConnectStore()
+
 const { t } = useI18n()
 
 type CloudDataTooltipMode = 'LATEST_RUNS' | 'AVG_DURATION'
@@ -155,8 +144,7 @@ const VALUES: Record<CloudDataTooltipMode, CouldDataTooltipModeValues> = {
 }
 
 const emits = defineEmits<{
-  (eventName: 'showLogin'): void
-  (eventName: 'showConnectToProject'): void
+  (eventName: 'showLoginConnect'): void
 }>()
 
 const props = defineProps<{
@@ -175,69 +163,18 @@ fragment SpecHeaderCloudDataTooltip on Query {
       }
     }
   }
-  ...Auth
-  ...CloudConnectModals
+  ...RequestAccessButton
 }
 `
-
-gql`
-mutation SpecHeaderCloudDataTooltip_RequestAccess( $projectId: String! ) {
-  cloudProjectRequestAccess(projectSlug: $projectId) {
-    __typename
-    ... on CloudProjectUnauthorized {
-      message
-      hasRequestedAccess
-    }
-  }
-}
-`
-
-const hasRequestedAccess = ref(false)
-
-onMounted(() => {
-  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized') {
-    hasRequestedAccess.value = props.gql.currentProject.cloudProject.hasRequestedAccess ?? false
-  }
-})
-
-const projectConnectionStatus = computed(() => {
-  if (!props.gql.cloudViewer) return 'LOGGED_OUT'
-
-  if (!props.gql.currentProject?.cloudProject?.__typename) return 'NOT_CONNECTED'
-
-  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectNotFound') return 'NOT_FOUND'
-
-  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized') {
-    if (hasRequestedAccess.value) {
-      return 'ACCESS_REQUESTED'
-    }
-
-    return 'UNAUTHORIZED'
-  }
-
-  return 'CONNECTED'
-})
-
-const requestAccessMutation = useMutation(SpecHeaderCloudDataTooltip_RequestAccessDocument)
-
-async function requestAccess () {
-  const projectId = props.gql.currentProject?.projectId
-
-  if (projectId) {
-    const result = await requestAccessMutation.executeMutation({ projectId })
-
-    if (result.data?.cloudProjectRequestAccess?.__typename === 'CloudProjectUnauthorized') {
-      hasRequestedAccess.value = result.data.cloudProjectRequestAccess.hasRequestedAccess ?? false
-    } else {
-      hasRequestedAccess.value = false
-    }
-  }
-}
 
 const tooltipTextKey = computed(() => {
-  if (projectConnectionStatus.value === 'CONNECTED') return VALUES[props.mode].connected
+  if (project.isProjectConnected) {
+    return VALUES[props.mode].connected
+  }
 
-  if (['UNAUTHORIZED', 'ACCESS_REQUESTED'].includes(projectConnectionStatus.value)) return VALUES[props.mode].noAccess
+  if (project.isNotAuthorized) {
+    return VALUES[props.mode].noAccess
+  }
 
   return VALUES[props.mode].notConnected
 })

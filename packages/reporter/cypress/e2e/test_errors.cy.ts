@@ -69,7 +69,7 @@ describe('test errors', () => {
 
     it('does not expand or collapse stack trace when clicking', () => {
       cy.get('.runnable-err-print').click()
-      cy.get('.runnable-err-stack-trace').should('not.be.visible')
+      cy.get('.runnable-err-stack-trace').should('not.exist')
       cy.contains('View stack trace').click()
       cy.get('.runnable-err-stack-trace').should('be.visible')
       cy.get('.runnable-err-print').click()
@@ -82,8 +82,8 @@ describe('test errors', () => {
       setError(commandErr)
     })
 
-    it('hides stack trace by default', () => {
-      cy.get('.runnable-err-stack-trace').should('not.be.visible')
+    it('does not render stack trace by default', () => {
+      cy.get('.runnable-err-stack-trace').should('not.exist')
     })
 
     it('opens stack trace on click', () => {
@@ -227,12 +227,13 @@ describe('test errors', () => {
 
     // NOTE: still needs to be implemented
     it.skip('renders and escapes markdown with leading/trailing whitespace', () => {
+      setError(commandErr)
       cy.get('.runnable-err-message')
 
       // https://github.com/cypress-io/cypress/issues/1360
       // renders ** buzz ** as <strong> buzz </strong>
-      .contains('code', 'foo')
-      .and('not.contain', '`foo`')
+      .contains('strong', 'buzz')
+      .and('not.contain', '** buzz **')
     })
   })
 

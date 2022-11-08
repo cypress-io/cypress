@@ -1,4 +1,4 @@
-import type { WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import type { WizardFrontendFramework } from '@packages/scaffold-config'
 import type { SnapshotScaffoldTestResult } from '@packages/launchpad/cypress/tasks/snapshotsScaffold'
 
 // The tests in this file take an existing project without Cypress Configured
@@ -47,16 +47,16 @@ function scaffoldAndOpenE2EProject (opts: {
   // Going through the loading of config
   cy.get('[data-cy="loading-spinner"]')
   cy.get('[data-cy="loading-spinner"]').should('not.exist')
-  // No errrors were encountered
+  // No errors were encountered
   cy.get('[data-testid="error-header"]').should('not.exist')
   // Asserts that we've made it through the flow
-  cy.contains('Choose a Browser')
+  cy.contains('Choose a browser')
 }
 
 function scaffoldAndOpenCTProject (opts: {
   name: Parameters<typeof cy.scaffoldProject>[0]
-  framework: typeof WIZARD_FRAMEWORKS[number]['name']
-  bundler?: typeof WIZARD_FRAMEWORKS[number]['supportedBundlers'][number]['name']
+  framework: WizardFrontendFramework['name']
+  bundler?: WizardFrontendFramework['supportedBundlers'][number]['name']
   args?: Parameters<typeof cy.openProject>[1]
   removeFixturesFolder?: boolean
 }) {
@@ -84,7 +84,7 @@ function scaffoldAndOpenCTProject (opts: {
     cy.contains(opts.bundler).click()
   }
 
-  cy.contains('Next Step').click()
+  cy.contains('Next step').click()
 
   cy.contains(cy.i18n.setupWizard.installDependencies.title).should('be.visible')
   cy.contains('button', cy.i18n.setupWizard.installDependencies.waitForInstall).should('be.disabled')

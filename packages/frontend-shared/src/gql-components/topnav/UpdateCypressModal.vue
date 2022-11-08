@@ -4,7 +4,7 @@
     variant="bare"
     :title="title"
     :model-value="show"
-    help-link=""
+    :no-help="true"
     @update:model-value="emits('close')"
   >
     <div class="p-24px text-gray-700">

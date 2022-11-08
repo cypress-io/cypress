@@ -20,7 +20,7 @@ import Runnables from './runnables/runnables'
 import TestingPreferences from './preferences/testing-preferences'
 import type { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 
-interface BaseReporterProps {
+export interface BaseReporterProps {
   appState: AppState
   className?: string
   runnablesStore: RunnablesStore
@@ -33,7 +33,7 @@ interface BaseReporterProps {
   error?: RunnablesErrorModel
   resetStatsOnSpecChange?: boolean
   renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element
-  experimentalStudioEnabled: boolean
+  studioEnabled: boolean
   runnerStore: MobxRunnerStore
 }
 
@@ -60,13 +60,12 @@ class Reporter extends Component<SingleReporterProps> {
       scroller,
       error,
       statsStore,
-      experimentalStudioEnabled,
+      studioEnabled,
       renderReporterHeader = (props: ReporterHeaderProps) => <Header {...props}/>,
     } = this.props
 
     return (
       <div className={cs(className, 'reporter', {
-        'experimental-studio-enabled': experimentalStudioEnabled,
         'studio-active': appState.studioActive,
       })}>
         {renderReporterHeader({ appState, statsStore })}
@@ -80,6 +79,8 @@ class Reporter extends Component<SingleReporterProps> {
             scroller={scroller}
             spec={this.props.runnerStore.spec}
             statsStore={this.props.statsStore}
+            studioEnabled={studioEnabled}
+            canSaveStudioLogs={this.props.runnerStore.canSaveStudioLogs}
           />
         )}
       </div>
@@ -143,6 +144,7 @@ declare global {
     Cypress: any
     state: AppState
     render: ((props: Partial<BaseReporterProps>) => void)
+    __CYPRESS_MODE__: 'run' | 'open'
   }
 }
 
@@ -151,7 +153,7 @@ if (window.Cypress) {
   window.state = appState
   window.render = (props) => {
     // @ts-ignore
-    render(<Reporter {...props as Required<ReporterProps>} />, document.getElementById('app'))
+    render(<Reporter {...props as Required<BaseReporterProps>} />, document.getElementById('app'))
   }
 }
 

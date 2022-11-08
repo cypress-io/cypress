@@ -1,6 +1,6 @@
 import { findCrossOriginLogs } from '../../../../support/utils'
 
-context('cy.origin actions', () => {
+context('cy.origin actions', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
   })
@@ -8,7 +8,7 @@ context('cy.origin actions', () => {
   it('.type()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#input').type('foo')
       .should('have.value', 'foo')
     })
@@ -17,7 +17,7 @@ context('cy.origin actions', () => {
   it('.focus()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#input').focus()
       .should('be.focused')
     })
@@ -26,7 +26,7 @@ context('cy.origin actions', () => {
   it('.blur()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#input').type('foo').blur()
       .should('not.be.focused')
     })
@@ -35,7 +35,7 @@ context('cy.origin actions', () => {
   it('.clear()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#input')
       .type('foo').should('have.value', 'foo')
       .clear().should('have.value', '')
@@ -45,7 +45,7 @@ context('cy.origin actions', () => {
   it('.submit()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       const afterFormSubmitted = new Promise<void>((resolve) => {
         cy.once('form:submitted', resolve)
       })
@@ -58,7 +58,7 @@ context('cy.origin actions', () => {
   it('.click()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#button').then(($btn) => {
         const onClick = new Promise<void>((resolve) => {
           $btn.on('click', () => resolve())
@@ -73,7 +73,7 @@ context('cy.origin actions', () => {
   it('.dblclick()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#button').then(($btn) => {
         const afterDblClick = new Promise<void>((resolve) => {
           $btn.on('dblclick', () => resolve())
@@ -88,7 +88,7 @@ context('cy.origin actions', () => {
   it('.rightclick()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#button').then(($btn) => {
         const afterContextmenu = new Promise<void>((resolve) => {
           $btn.on('contextmenu', () => resolve())
@@ -103,7 +103,7 @@ context('cy.origin actions', () => {
   it('.check()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get(':checkbox[name="colors"][value="blue"]')
       .check().should('be.checked')
     })
@@ -112,7 +112,7 @@ context('cy.origin actions', () => {
   it('.uncheck()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get(':checkbox[name="colors"][value="blue"]')
       .check().should('be.checked')
       .uncheck().should('not.be.checked')
@@ -122,7 +122,7 @@ context('cy.origin actions', () => {
   it('.select()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('select[name="foods"]')
       .select('Japanese').should('have.value', 'Japanese')
     })
@@ -131,7 +131,7 @@ context('cy.origin actions', () => {
   it('.scrollIntoView()', () => {
     cy.get('a[data-cy="scrolling-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#scroll-into-view-vertical h5')
       .should('not.be.visible')
       .scrollIntoView().should('be.visible')
@@ -141,7 +141,7 @@ context('cy.origin actions', () => {
   it('.scrollTo()', () => {
     cy.get('a[data-cy="scrolling-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#scroll-into-view-vertical h5').should('not.be.visible')
       cy.get('#scroll-into-view-vertical').scrollTo(0, 300)
       cy.get('#scroll-into-view-vertical h5').should('be.visible')
@@ -151,7 +151,7 @@ context('cy.origin actions', () => {
   it('.trigger()', () => {
     cy.get('a[data-cy="dom-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#button').then(($btn) => {
         const afterClick = new Promise<void>((resolve) => {
           $btn.on('click', () => resolve())
@@ -166,7 +166,7 @@ context('cy.origin actions', () => {
   it('.selectFile()', () => {
     cy.get('a[data-cy="files-form-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.wrap(Cypress.Buffer.from('foo')).as('foo')
 
       cy.get('#basic')
@@ -188,6 +188,24 @@ context('cy.origin actions', () => {
     })
   })
 
+  context('cross-origin AUT errors', () => {
+    // We only need to check .get here because the other commands are chained off of it.
+    it('.get()', { defaultCommandTimeout: 50 }, (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include(`Timed out retrying after 50ms:`)
+        expect(err.message).to.include(`The command was expected to run against origin \`http://localhost:3500\` but the application is at origin \`http://www.foobar.com:3500\`.`)
+        expect(err.message).to.include(`This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.`)
+        //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures
+        expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
+        expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
+        done()
+      })
+
+      cy.get('a[data-cy="dom-link"]').click()
+      cy.get('#button')
+    })
+  })
+
   context('#consoleProps', () => {
     const { _ } = Cypress
     let logs: Map<string, any>
@@ -202,7 +220,7 @@ context('cy.origin actions', () => {
 
     it('.get()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#button')
       })
 
@@ -224,7 +242,7 @@ context('cy.origin actions', () => {
 
     it('.alias()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#button').as('buttonAlias')
       })
 
@@ -248,7 +266,7 @@ context('cy.origin actions', () => {
 
     it('.click()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#button-inside-a').click()
       })
 
@@ -301,7 +319,7 @@ context('cy.origin actions', () => {
 
     it('.dblclick()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#button').dblclick()
       })
 
@@ -349,7 +367,7 @@ context('cy.origin actions', () => {
 
     it('.rightclick()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#button').rightclick()
       })
 
@@ -397,7 +415,7 @@ context('cy.origin actions', () => {
 
     it('.type()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('input#input').type('foo')
       })
 
@@ -455,20 +473,21 @@ context('cy.origin actions', () => {
           expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps['Applied To'])
         })
 
-        expect(KeyboardEventsTable.data[1]).to.have.property('Details').that.equals('{ code: KeyF, which: 70 }')
-        expect(KeyboardEventsTable.data[1]).to.have.property('Typed').that.equals('f')
+        expect(KeyboardEventsTable.data[0]).to.have.property('Details').that.equals('{ code: KeyF, which: 70 }')
+        expect(KeyboardEventsTable.data[0]).to.have.property('Typed').that.equals('f')
+
+        expect(KeyboardEventsTable.data[1]).to.have.property('Details').that.equals('{ code: KeyO, which: 79 }')
+        expect(KeyboardEventsTable.data[1]).to.have.property('Typed').that.equals('o')
 
         expect(KeyboardEventsTable.data[2]).to.have.property('Details').that.equals('{ code: KeyO, which: 79 }')
         expect(KeyboardEventsTable.data[2]).to.have.property('Typed').that.equals('o')
-
-        expect(KeyboardEventsTable.data[3]).to.have.property('Details').that.equals('{ code: KeyO, which: 79 }')
-        expect(KeyboardEventsTable.data[3]).to.have.property('Typed').that.equals('o')
       })
     })
 
-    it('.submit()', () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23480
+    it.skip('.submit()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('form#multiple-inputs-and-input-submit input[name="fname"]').type('foo')
         cy.get('form#multiple-inputs-and-input-submit input[name="lname"]').type('bar')
         cy.get('form#multiple-inputs-and-input-submit').submit()
@@ -503,7 +522,7 @@ context('cy.origin actions', () => {
 
     it('.focus()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#input').focus()
       })
 
@@ -526,7 +545,7 @@ context('cy.origin actions', () => {
 
     it('.blur()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         // FIXME: snapshot shows the primary domain (before type). Should be secondary
         cy.get('#input').type('foo').blur()
       })
@@ -550,7 +569,7 @@ context('cy.origin actions', () => {
 
     it('.clear()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         // FIXME: snapshot shows the primary domain. Should be secondary
         cy.get('#input').type('foo').clear()
       })
@@ -576,7 +595,7 @@ context('cy.origin actions', () => {
 
     it('.check()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get(':checkbox[name="colors"][value="blue"]').check()
       })
 
@@ -620,7 +639,7 @@ context('cy.origin actions', () => {
 
     it('.uncheck()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get(':checkbox[name="colors"][value="blue"]')
         .check().uncheck()
       })
@@ -665,7 +684,7 @@ context('cy.origin actions', () => {
 
     it('.select()', () => {
       cy.get('a[data-cy="dom-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         // TODO: wrong selected value is displayed in the snapshot after
         cy.get('select[name="foods"]').select('Japanese')
       })
@@ -711,7 +730,7 @@ context('cy.origin actions', () => {
 
     it('.scrollIntoView()', () => {
       cy.get('a[data-cy="scrolling-link"]').click()
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         // FIXME: snapshot of primary is showing for scrollIntoView
         cy.get('#scroll-into-view-vertical h5')
         .should('not.be.visible')
@@ -739,7 +758,7 @@ context('cy.origin actions', () => {
     it('.scrollTo()', () => {
       cy.get('a[data-cy="scrolling-link"]').click()
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#scroll-into-view-vertical h5').should('not.be.visible')
         cy.get('#scroll-into-view-vertical').scrollTo(0, 300)
       })
@@ -759,7 +778,7 @@ context('cy.origin actions', () => {
     it('.trigger()', () => {
       cy.get('a[data-cy="dom-link"]').click()
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#button').trigger('click')
       })
 
@@ -784,7 +803,7 @@ context('cy.origin actions', () => {
     it('.selectFile()', () => {
       cy.get('a[data-cy="files-form-link"]').click()
 
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#basic').selectFile({ contents: Cypress.Buffer.from('foo'), fileName: 'foo.txt' })
       })
 

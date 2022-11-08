@@ -2,6 +2,8 @@ import ListRowHeader from './ListRowHeader.vue'
 import faker from 'faker'
 import FileChangesAdded from '~icons/cy/file-changes-added_x24.svg'
 
+faker.seed(1)
+
 const description = faker.hacker.phrase()
 const header = faker.system.directoryPath()
 const iconSelector = '[data-testid=file-added-icon]'
@@ -11,7 +13,7 @@ const descriptionSelector = '[data-testid=list-row-description]'
 describe('<ListRowHeader />', () => {
   it('renders the icon slot', () => {
     cy.mount(() => (
-      <div class="p-4 text-center">
+      <div class="text-center p-4">
         <ListRowHeader
           // @ts-ignore - doesn't know about vSlots
           vSlots={{
@@ -29,7 +31,7 @@ describe('<ListRowHeader />', () => {
 
   it('renders a minimal example with an icon and description', () => {
     cy.mount(() => (
-      <div class="p-4 text-center" data-testid="list-row-header">
+      <div class="text-center p-4" data-testid="list-row-header">
         <ListRowHeader
           icon={() => <FileChangesAdded data-testid="file-added-icon"/>}
           description={description}

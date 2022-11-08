@@ -22,10 +22,15 @@ export class MobxRunnerStore {
   @observable width: number
   @observable height: number
   @observable automation?: AutomationStatus
+  @observable canSaveStudioLogs = false
 
   constructor (testingType: Cypress.TestingType) {
     this.width = defaults[testingType].width
     this.height = defaults[testingType].height
+  }
+
+  @action setCanSaveStudioLogs (canSave: boolean) {
+    this.canSaveStudioLogs = canSave
   }
 
   @action setSpec (spec: Cypress.Spec | undefined) {

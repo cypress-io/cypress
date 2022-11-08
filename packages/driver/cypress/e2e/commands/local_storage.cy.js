@@ -43,7 +43,7 @@ describe('src/cy/commands/local_storage', () => {
 
         Cypress.emit('test:before:run', {})
 
-        expect(clear).to.be.calledWith([])
+        expect(clear).not.to.be.called
       })
     })
 

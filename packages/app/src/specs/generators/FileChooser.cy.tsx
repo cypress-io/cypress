@@ -60,17 +60,17 @@ describe('<FileChooser />', () => {
   describe('matches', () => {
     it('displays the total number of file matches', () => {
       cy.mount(() => (<FileChooser extensionPattern={extensionPattern} files={allFiles} />))
-      .get(fileMatchIndicatorSelector).should('contain.text', `${allFiles.length } Matches`)
+      .get(fileMatchIndicatorSelector).should('contain.text', `${allFiles.length } matches`)
     })
 
     it('handles pluralization', () => {
       cy.mount(() => (<FileChooser extensionPattern={extensionPattern} files={[allFiles[0]]} />))
-      .get(fileMatchIndicatorSelector).should('contain.text', `${1 } Match`)
+      .get(fileMatchIndicatorSelector).should('contain.text', `${1 } match`)
     })
 
     it('handles no matches', () => {
       cy.mount(() => (<FileChooser extensionPattern={extensionPattern} files={[]} />))
-      .get(fileMatchIndicatorSelector).should('contain.text', 'No Matches')
+      .get(fileMatchIndicatorSelector).should('contain.text', 'No matches')
     })
 
     it('updates the number of files found out of the total number available', () => {
@@ -86,15 +86,15 @@ describe('<FileChooser />', () => {
         // Figure out how many files were actually matched and make sure
         // that they're out of the total files passed in
         cy.get(fileMatchIndicatorSelector)
-        .should('contain.text', `${$rows.length} of ${allFiles.length} Matches`)
+        .should('contain.text', `${$rows.length} of ${allFiles.length} matches`)
 
         // Get back to an empty state where all files are shown
         .get(filenameInputSelector).clear()
-        .get(fileMatchIndicatorSelector).should('contain.text', `${allFiles.length } Matches`)
+        .get(fileMatchIndicatorSelector).should('contain.text', `${allFiles.length } matches`)
 
         // Go to the no matches state
         .get(filenameInputSelector).type(nonExistentFileName, { delay: 0 })
-        .get(fileMatchIndicatorSelector).should('contain.text', 'No Matches')
+        .get(fileMatchIndicatorSelector).should('contain.text', 'No matches')
       })
     })
   })

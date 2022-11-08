@@ -1,15 +1,15 @@
 <template>
   <Collapsible
-    class="border rounded bg-light-50 border-gray-100 mb-4 w-full block
-  overflow-hidden hocus-default"
+    class="rounded bg-light-50 border-gray-100 mb-4 w-full block"
     max-height="500px"
     :initially-open="statusInfo.initiallyOpen"
     :data-cy="status"
+    :file-row="true"
   >
     <template #target="{open}">
       <ListRowHeader
-        :class="{ 'border-b border-b-gray-100 rounded-b-none': open }"
-        class="cursor-pointer font-medium"
+        :class="{ 'rounded-b-none mb-0.1em default-ring': open, 'overflow-hidden': !open }"
+        class="border hocus-default cursor-pointer font-medium"
         :description="description"
         :icon="statusInfo.icon"
       >
@@ -17,6 +17,7 @@
           <span class="inline-block align-top">{{ filePath }}</span>
           <Badge
             v-if="!open && statusInfo.badgeType"
+            cy-data="changes-required-badge"
             :label="statusInfo.badgeLabel"
             :status="statusInfo.badgeType"
           />
@@ -119,10 +120,11 @@ const statusInfo: ComputedRef<StatusInfo> = computed(() => {
     },
     valid: {
       icon: AddedIcon,
-      initiallyOpen: true,
+      initiallyOpen: false,
     },
     error: {
       icon: ErrorIcon,
+      initiallyOpen: true,
     },
   }
 

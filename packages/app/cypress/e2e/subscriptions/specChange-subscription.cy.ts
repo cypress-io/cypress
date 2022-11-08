@@ -230,9 +230,10 @@ e2e: {
 
     it('handles removing the last file', () => {
       cy.contains('dom-content.spec').click()
+      cy.get('button[aria-controls="reporter-inline-specs-list"]').click({ force: true })
+      cy.get('[data-cy=specs-list-panel]').should('be.visible')
       cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
-
       cy.withCtx(async (ctx, o) => {
         await Promise.all(o.paths.map((path) => ctx.actions.file.removeFileInProject(path)))
       }, {
@@ -323,14 +324,14 @@ e2e: {
       cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.spec.{js,ts}')
 
       cy.get('[data-cy="file-match-indicator"]')
-      .should('contain', '23 Matches')
+      .should('contain', '23 matches')
 
       cy.withCtx(async (ctx, o) => {
         await ctx.actions.file.writeFileInProject(o.path, '')
       }, { path: getPathForPlatform('cypress/e2e/new-file.spec.js') })
 
       cy.get('[data-cy="file-match-indicator"]')
-      .should('contain', '24 Matches')
+      .should('contain', '24 matches')
     })
 
     it('responds to specChange event for a removed file', () => {
@@ -340,14 +341,14 @@ e2e: {
       cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.spec.{js,ts}')
 
       cy.get('[data-cy="file-match-indicator"]')
-      .should('contain', '23 Matches')
+      .should('contain', '23 matches')
 
       cy.withCtx(async (ctx, o) => {
         await ctx.actions.file.removeFileInProject(o.path)
       }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
 
       cy.get('[data-cy="file-match-indicator"]')
-      .should('contain', '22 Matches')
+      .should('contain', '22 matches')
     })
 
     it('handles removing the last file', () => {
@@ -386,7 +387,7 @@ e2e: {
       })
 
       cy.get('[data-cy="file-match-indicator"]')
-      .should('contain', '1 Match')
+      .should('contain', '1 match')
 
       cy.withCtx(async (ctx, o) => {
         await ctx.actions.file.removeFileInProject(o.path)
@@ -403,7 +404,7 @@ e2e: {
       cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.spec.{js,ts}')
 
       cy.get('[data-cy="file-match-indicator"]')
-      .should('contain', '23 Matches')
+      .should('contain', '23 matches')
 
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject('cypress.config.js',
@@ -427,7 +428,7 @@ e2e: {
       })
 
       cy.get('[data-cy="file-match-indicator"]', { timeout: 7500 })
-      .should('contain', '2 Matches')
+      .should('contain', '2 matches')
     })
   })
 })

@@ -125,6 +125,10 @@ Having the **AUT** on a different origin than **top** causes issues with cookies
 
 In order to counteract this, we utilize the [proxy](../proxy) to capture cookies from cross-origin responses, store them in our own server-side cookie jar, set them in the browser with automation, and then attach them to cross-origin requests where appropriate. This simulates how cookies behave outside of Cypress.
 
+## Dependencies
+
+Users can utilize `require()` or (dynamic) `import()` to include dependencies. We handle the dependency resolution and bundling with the webpack preprocessor. We add a webpack loader that runs last. If we find a `require()` or `import()` call inside a `cy.origin()` callback, we extract that callback from the output code. We then run that extracted callback through webpack again, so that it gets its own output bundle with all dependencies included. The original callback is replaced with an object that references the output bundle. At runtime, when executing `cy.origin()`, it loads and executes the callback bundle.
+
 ## Unsupported APIs
 
 Certain APIs are currently not supported in the **cy.origin()** callback. Depending on the API, we may or may not implement support for them in the future.
@@ -140,12 +144,3 @@ Nesting **cy.origin()** inside the callback is not currently not supported, but 
 ### cy.intercept()
 
 We will likely add support for **cy.intercept()** within the **cy.origin()** callback in the future.
-
-### Deprecated commands / methods
-
-All deprecated APIs are not supported in the **cy.origin()** callback and we do not plan to ever add support for them. If a user attempts to use one, we throw an error that points them to the preferred API that superseded it. The following are deprecated APIs that are not supported:
-
-- **cy.route()**: Superseded by **cy.intercept()**
-- **cy.server()**: Superseded by **cy.intercept()**
-- **Cypress.Server.defaults()**: Superseded by **cy.intercept()**
-- **Cypress.Cookies.preserveOnce()**: Superseded by sessions

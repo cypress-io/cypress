@@ -1,5 +1,6 @@
-import { idArg, nonNull, objectType } from 'nexus'
-import { ProjectLike, ScaffoldedFile } from '..'
+import { idArg, stringArg, nonNull, objectType } from 'nexus'
+import { ProjectLike } from '../interfaceTypes/gql-ProjectLike'
+import { ScaffoldedFile } from './gql-ScaffoldedFile'
 import { CurrentProject } from './gql-CurrentProject'
 import { DevState } from './gql-DevState'
 import { AuthState } from './gql-AuthState'
@@ -9,6 +10,7 @@ import { VersionData } from './gql-VersionData'
 import { Wizard } from './gql-Wizard'
 import { ErrorWrapper } from './gql-ErrorWrapper'
 import { CachedUser } from './gql-CachedUser'
+import { Cohort } from './gql-Cohorts'
 
 export const Query = objectType({
   name: 'Query',
@@ -105,6 +107,17 @@ export const Query = objectType({
     t.nonNull.boolean('invokedFromCli', {
       description: 'Whether the app was invoked from the CLI, false if user is using the binary directly (not invoked from package manager e.g. npm)',
       resolve: (source, args, ctx) => Boolean(ctx.modeOptions.invokedFromCli),
+    })
+
+    t.field('cohort', {
+      description: 'Return the cohort for the given name',
+      type: Cohort,
+      args: {
+        name: nonNull(stringArg({ description: 'the name of the cohort to find' })),
+      },
+      resolve: async (source, args, ctx) => {
+        return await ctx.cohortsApi.getCohort(args.name) ?? null
+      },
     })
 
     t.field('node', {

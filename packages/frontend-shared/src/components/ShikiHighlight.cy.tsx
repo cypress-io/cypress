@@ -1,4 +1,5 @@
-import ShikiHighlight, { initHighlighter } from './ShikiHighlight.vue'
+import ShikiHighlight from './ShikiHighlight.vue'
+import { initHighlighter } from './highlight'
 import code from '../../windi.config?raw'
 
 const devServerCode = `const { defineConfig } = require('cypress')

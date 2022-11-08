@@ -20,11 +20,11 @@ import { handleScreenshots } from './events/screenshots'
 import { handleTestEvents } from './events/test'
 import { handleMiscEvents } from './events/misc'
 import { handleUnsupportedAPIs } from './unsupported_apis'
-import { patchDocumentCookie } from './patches/cookies'
 import { patchFormElementSubmit } from './patches/submit'
-import { patchElementIntegrity } from './patches/setAttribute'
+import { patchFetch } from '@packages/runner/injection/patches/fetch'
+import { patchXmlHttpRequest } from '@packages/runner/injection/patches/xmlHttpRequest'
+
 import $Mocha from '../cypress/mocha'
-import * as cors from '@packages/network/lib/cors'
 
 const createCypress = () => {
   // @ts-ignore
@@ -35,16 +35,63 @@ const createCypress = () => {
     setup(config, env)
   })
 
+  Cypress.specBridgeCommunicator.on('attach:to:window', () => {
+    // It would be ideal to get a window identifier and attach to that window specifically instead of searching all parent windows.
+    // This will be implemented for iFrames.
+    const findWindow = () => {
+      for (let index = 0; index < window.parent.frames.length; index++) {
+        const frame = window.parent.frames[index]
+
+        try {
+          // the AUT would be the frame with a matching origin, but not the same exact href.
+          if (window.location.origin === frame.location.origin
+              && window.location.href !== frame.location.href) {
+            return frame
+          }
+        } catch (error) {
+          // Catch DOMException: Blocked a frame from accessing a cross-origin frame.
+          if (error.name !== 'SecurityError') {
+            throw error
+          }
+        }
+      }
+
+      return undefined
+    }
+
+    const autWindow = findWindow()
+
+    // If Cypress is present on the autWindow, it has already been attached
+    // This commonly happens if the spec bridge was created in a prior to
+    // running this specific instance of the cy.origin command.
+    if (autWindow && !autWindow.Cypress) {
+      attachToWindow(autWindow)
+    }
+  })
+
   Cypress.specBridgeCommunicator.on('generate:final:snapshot', (snapshotUrl: string) => {
-    const currentAutOriginPolicy = cy.state('autOrigin')
+    const currentAutOrigin = cy.state('autLocation').origin
     const requestedSnapshotUrlLocation = $Location.create(snapshotUrl)
 
-    if (requestedSnapshotUrlLocation.originPolicy === currentAutOriginPolicy) {
-      // if true, this is the correct specbridge to take the snapshot and send it back
+    if (requestedSnapshotUrlLocation.origin === currentAutOrigin) {
+      // if true, this is the correct spec bridge to take the snapshot and send it back
       const finalSnapshot = cy.createSnapshot(FINAL_SNAPSHOT_NAME)
 
-      Cypress.specBridgeCommunicator.toPrimary('final:snapshot:generated', finalSnapshot)
+      Cypress.specBridgeCommunicator.toPrimary('snapshot:final:generated', finalSnapshot)
     }
+  })
+
+  Cypress.specBridgeCommunicator.on('snapshot:generate:for:log', ({ name }, { responseEvent }) => {
+    // if the snapshot cannot be taken (in a transitory space), set to an empty object in order to not fail serialization
+    let requestedCrossOriginSnapshot = {}
+
+    // don't attempt to take snapshots after the spec bridge has been unloaded. Instead, send an empty snapshot back to the primary
+    // to display current state of dom
+    if (cy.state('document') !== undefined) {
+      requestedCrossOriginSnapshot = cy.createSnapshot(name) || {}
+    }
+
+    Cypress.specBridgeCommunicator.toPrimary(responseEvent, requestedCrossOriginSnapshot)
   })
 
   Cypress.specBridgeCommunicator.toPrimary('bridge:ready')
@@ -77,7 +124,6 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
     addLog () {},
   }
 
-  // @ts-ignore
   Cypress.cy = cy
   // @ts-ignore
   Cypress.events.proxyTo(Cypress.cy)
@@ -105,27 +151,35 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
 const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow: Window) => {
   autWindow.Cypress = Cypress
 
+  attachToWindow(autWindow)
+}
+
+const attachToWindow = (autWindow: Window) => {
+  autWindow.Cypress = Cypress
+
+  const cy = Cypress.cy
+
+  // this communicates to the injection code that Cypress is now available so
+  // it can safely subscribe to Cypress events, etc
+  // @ts-ignore
+  autWindow.__attachToCypress ? autWindow.__attachToCypress(Cypress) : undefined
+
   Cypress.state('window', autWindow)
   Cypress.state('document', autWindow.document)
 
   if (Cypress && Cypress.config('experimentalModifyObstructiveThirdPartyCode')) {
     patchFormElementSubmit(autWindow)
-    patchElementIntegrity(autWindow)
   }
 
-  patchDocumentCookie(Cypress, autWindow)
-
-  // This is typically called by the cy function `urlNavigationEvent` but it is private. For the primary origin this is called in 'onBeforeAppWindowLoad'.
-  Cypress.action('app:navigation:changed', 'page navigation event (\'before:load\')')
+  cy.urlNavigationEvent('before:load')
 
   cy.overrides.wrapNativeMethods(autWindow)
 
-  const onWindowLoadPrimary = ({ url }) => {
-    cy.isStable(true, 'primary onload')
-
-    cy.state('autOrigin', cors.getOriginPolicy(url))
-    Cypress.emit('internal:window:load', { type: 'cross:origin', url })
-  }
+  // place after override incase fetch is polyfilled in the AUT injection
+  // this can be in the beforeLoad code as we only want to patch fetch/xmlHttpRequest
+  // when the cy.origin block is active to track credential use
+  patchFetch(window)
+  patchXmlHttpRequest(window)
 
   // TODO: DRY this up with the mostly-the-same code in src/cypress/cy.js
   // https://github.com/cypress-io/cypress/issues/20972
@@ -136,41 +190,35 @@ const onBeforeAppWindowLoad = (Cypress: Cypress.Cypress, cy: $Cy) => (autWindow:
       return Cypress.action('app:form:submitted', e)
     },
     onBeforeUnload (e) {
+      // The before unload event is propagated to primary through code injected into the AUT.
+
       cy.isStable(false, 'beforeunload')
 
-      cy.Cookies.setInitial()
+      // NOTE: we intentionally do not set the cy.Cookies.setInitial() inside the spec bridge as we are not doing full injection and this leads to cookie side effects
 
       cy.resetTimer()
 
       Cypress.action('app:window:before:unload', e)
-
-      Cypress.specBridgeCommunicator.toPrimary('before:unload')
 
       // return undefined so our beforeunload handler
       // doesn't trigger a confirmation dialog
       return undefined
     },
     onLoad () {
-      // This is typically called by the cy function `urlNavigationEvent` but it is private. For the primary origin this is called on 'load'.
-      Cypress.action('app:navigation:changed', 'page navigation event (\'load\')')
-      // This is also call on the on 'load' event in cy
-      Cypress.action('app:window:load', autWindow)
+      cy.urlNavigationEvent('load')
 
       const remoteLocation = cy.getRemoteLocation()
 
-      cy.state('autOrigin', remoteLocation.originPolicy)
+      cy.state('autLocation', remoteLocation)
+
+      Cypress.action('app:window:load', autWindow, remoteLocation.href)
 
       Cypress.specBridgeCommunicator.toPrimary('window:load', { url: remoteLocation.href })
       cy.isStable(true, 'load')
-
-      // If load happened in this spec bridge stop listening.
-      Cypress.specBridgeCommunicator.off('window:load', onWindowLoadPrimary)
     },
     onUnload (e) {
       cy.state('window', undefined)
       cy.state('document', undefined)
-      // We only need to listen to this if we've started an unload event and the load happens in another spec bridge.
-      Cypress.specBridgeCommunicator.once('window:load', onWindowLoadPrimary)
 
       return Cypress.action('app:window:unload', e)
     },

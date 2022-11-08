@@ -65,7 +65,7 @@ const dateRe = /^\d{4}-\d{2}-\d{2}/
 const monthRe = /^\d{4}-(0\d|1[0-2])/
 const weekRe = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])/
 const timeRe = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?/
-const dateTimeRe = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}/
+const dateTimeRe = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}(:[0-9]{2})?(\.[0-9]{1,3})?/
 const numberRe = /^-?(\d+|\d+\.\d+|\.\d+)([eE][-+]?\d+)?$/i
 const charsBetweenCurlyBracesRe = /({.+?})/
 const isValidNumberInputChar = /[-+eE\d\.]/
@@ -876,7 +876,7 @@ export class Keyboard {
     let charCode: number | undefined
     let keyCode: number | undefined
     let which: number | undefined
-    let data: Nullable<string> | undefined
+    let data: Cypress.Nullable<string> | undefined
     let location: number | undefined = keyDetails.location || 0
     let key: string | undefined
     let code: string | undefined = keyDetails.code
@@ -912,7 +912,18 @@ export class Keyboard {
         keyCode = 0
         which = 0
         location = undefined
-        data = text === '\r' ? '↵' : text
+
+        // WebKit will insert characters on a textInput event, resulting
+        // in double char entry when the default handler is executed. But values
+        // inserted by textInput aren't always correct/aren't filtered
+        // through our shouldUpdateValue logic, so we prevent textInput's
+        // default logic by removing the key data from the event.
+        if (Cypress.isBrowser('webkit')) {
+          data = ''
+        } else {
+          data = text === '\r' ? '↵' : text
+        }
+
         break
 
       case 'beforeinput':
@@ -1162,6 +1173,13 @@ export class Keyboard {
 
       if ($elements.isContentEditable(elToType)) {
         key.events.input = false
+
+        if (Cypress.isBrowser('webkit')) {
+          // WebKit will emit beforeinput itself when the text is
+          // inserted into a contenteditable input using `execCommand('insertText')`.
+          // We prevent the simulated event from firing to avoid duplicative events.
+          key.events.beforeinput = false
+        }
       } else if ($elements.isReadOnlyInputOrTextarea(elToType)) {
         key.events.textInput = false
       }

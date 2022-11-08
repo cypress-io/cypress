@@ -16,14 +16,10 @@ describe('e2e runnable execution', () => {
     }],
   })
 
-  // navigation in before and in test body doesn't cause infinite loop
-  // but throws correct error
-  // https://github.com/cypress-io/cypress/issues/1987
-  systemTests.it('cannot navigate in before hook and test', {
+  systemTests.it('can navigate in before hook and test', {
     project: 'hooks-after-rerun',
     spec: 'beforehook-and-test-navigation.cy.js',
     snapshot: true,
-    expectedExitCode: 2,
   })
 
   systemTests.it('runnables run correct number of times with navigation', {

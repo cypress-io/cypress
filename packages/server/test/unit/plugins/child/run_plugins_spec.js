@@ -267,6 +267,16 @@ describe.skip('lib/plugins/child/run_plugins', () => {
         return done()
       })
     })
+
+    it('defines global __cypressCallbackReplacementCommands', function () {
+      const setupNodeEventsFn = sinon.spy()
+
+      runPlugins.runSetupNodeEvents(setupNodeEventsFn)
+
+      this.ipc.on.withArgs('load:plugins').yield()
+
+      expect(global.__cypressCallbackReplacementCommands).to.deep.equal(['origin'])
+    })
   })
 
   describe('on \'execute\' message', () => {

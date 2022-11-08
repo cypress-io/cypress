@@ -6,8 +6,8 @@ exports['config/src/index .getBreakingKeys returns list of breaking config keys 
   "experimentalNetworkStubbing",
   "experimentalRunEvents",
   "experimentalSessionSupport",
+  "experimentalSessionAndOrigin",
   "experimentalShadowDomSupport",
-  "experimentalStudio",
   "firefoxGcInterval",
   "ignoreTestFiles",
   "integrationFolder",
@@ -36,9 +36,11 @@ exports['config/src/index .getDefaultValues returns list of public config keys 1
   "execTimeout": 60000,
   "experimentalFetchPolyfill": false,
   "experimentalInteractiveRunEvents": false,
-  "experimentalSessionAndOrigin": false,
   "experimentalModifyObstructiveThirdPartyCode": false,
   "experimentalSourceRewriting": false,
+  "experimentalSingleTabRunMode": false,
+  "experimentalStudio": false,
+  "experimentalWebKitSupport": false,
   "fileServerFolder": "",
   "fixturesFolder": "cypress/fixtures",
   "excludeSpecPattern": "*.hot-update.js",
@@ -67,6 +69,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys 1
   "supportFile": "cypress/support/e2e.{js,jsx,ts,tsx}",
   "supportFolder": false,
   "taskTimeout": 60000,
+  "testIsolation": "on",
   "trashAssetsBeforeRuns": true,
   "userAgent": null,
   "video": true,
@@ -77,6 +80,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys 1
   "viewportWidth": 1000,
   "waitForAnimations": true,
   "watchForFileChanges": true,
+  "specPattern": "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}",
   "additionalIgnorePattern": [],
   "autoOpen": false,
   "browsers": [],
@@ -89,11 +93,11 @@ exports['config/src/index .getDefaultValues returns list of public config keys 1
   "isTextTerminal": false,
   "morgan": true,
   "namespace": "__cypress",
+  "repoRoot": null,
   "reporterRoute": "/__cypress/reporter",
   "socketId": null,
   "socketIoCookie": "__socket",
-  "socketIoRoute": "/__socket",
-  "xhrRoute": "/xhrs/"
+  "socketIoRoute": "/__socket"
 }
 
 exports['config/src/index .getDefaultValues returns list of public config keys for selected testing type 1'] = {
@@ -115,9 +119,11 @@ exports['config/src/index .getDefaultValues returns list of public config keys f
   "execTimeout": 60000,
   "experimentalFetchPolyfill": false,
   "experimentalInteractiveRunEvents": false,
-  "experimentalSessionAndOrigin": false,
   "experimentalModifyObstructiveThirdPartyCode": false,
   "experimentalSourceRewriting": false,
+  "experimentalSingleTabRunMode": false,
+  "experimentalStudio": false,
+  "experimentalWebKitSupport": false,
   "fileServerFolder": "",
   "fixturesFolder": "cypress/fixtures",
   "excludeSpecPattern": "*.hot-update.js",
@@ -146,6 +152,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys f
   "supportFile": "cypress/support/e2e.{js,jsx,ts,tsx}",
   "supportFolder": false,
   "taskTimeout": 60000,
+  "testIsolation": "on",
   "trashAssetsBeforeRuns": true,
   "userAgent": null,
   "video": true,
@@ -156,6 +163,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys f
   "viewportWidth": 1000,
   "waitForAnimations": true,
   "watchForFileChanges": true,
+  "specPattern": "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}",
   "additionalIgnorePattern": [],
   "autoOpen": false,
   "browsers": [],
@@ -168,12 +176,11 @@ exports['config/src/index .getDefaultValues returns list of public config keys f
   "isTextTerminal": false,
   "morgan": true,
   "namespace": "__cypress",
+  "repoRoot": null,
   "reporterRoute": "/__cypress/reporter",
   "socketId": null,
   "socketIoCookie": "__socket",
-  "socketIoRoute": "/__socket",
-  "xhrRoute": "/xhrs/",
-  "specPattern": "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}"
+  "socketIoRoute": "/__socket"
 }
 
 exports['config/src/index .getPublicConfigKeys returns list of public config keys 1'] = [
@@ -191,9 +198,11 @@ exports['config/src/index .getPublicConfigKeys returns list of public config key
   "execTimeout",
   "experimentalFetchPolyfill",
   "experimentalInteractiveRunEvents",
-  "experimentalSessionAndOrigin",
   "experimentalModifyObstructiveThirdPartyCode",
   "experimentalSourceRewriting",
+  "experimentalSingleTabRunMode",
+  "experimentalStudio",
+  "experimentalWebKitSupport",
   "fileServerFolder",
   "fixturesFolder",
   "excludeSpecPattern",
@@ -221,6 +230,7 @@ exports['config/src/index .getPublicConfigKeys returns list of public config key
   "supportFile",
   "supportFolder",
   "taskTimeout",
+  "testIsolation",
   "trashAssetsBeforeRuns",
   "userAgent",
   "video",
@@ -235,6 +245,5 @@ exports['config/src/index .getPublicConfigKeys returns list of public config key
   "browsers",
   "hosts",
   "isInteractive",
-  "modifyObstructiveCode",
-  "specPattern"
+  "modifyObstructiveCode"
 ]

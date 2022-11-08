@@ -30,6 +30,7 @@ system-tests/projects/e2e/cypress/e2e/stdout_exit_early_failing.cy.js
 system-tests/projects/e2e/cypress/e2e/typescript_syntax_error.cy.ts
 system-tests/projects/config-with-ts-syntax-error/**
 system-tests/projects/config-with-ts-module-error/**
+system-tests/projects/no-specs-vue-2/**
 
 
 **/test/fixtures
@@ -73,6 +74,8 @@ npm/cypress-schematic/src/**/*.js
 # The global eslint configuration is not set up to parse vue@2 files
 /npm/vue2/**/*.vue
 
+npm/grep/cypress
+
 packages/data-context/test/unit/codegen/files
 packages/config/test/__fixtures__/**/*
 packages/config/test/__babel_fixtures__/**/*
@@ -87,6 +90,7 @@ system-tests/projects/create-react-app-custom-index-html
 
 system-tests/projects/vueclivue2-unconfigured/**/*
 system-tests/projects/vueclivue2-configured/**/*
+system-tests/projects/outdated-deps-vuecli3/**/*
 
 system-tests/projects/vueclivue3-unconfigured/**/*
 system-tests/projects/vueclivue3-configured/**/*
@@ -109,3 +113,7 @@ system-tests/projects/react-app-webpack-5-unconfigured/**/*
 
 system-tests/project-fixtures/**
 system-tests/projects/**/*/expected-cypress*/**/*
+
+# These are generated files that are not linted
+tooling/electron-mksnapshot/bin/**
+tooling/v8-snapshot/cache/**

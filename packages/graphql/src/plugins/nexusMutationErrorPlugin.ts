@@ -15,7 +15,7 @@ export const mutationErrorPlugin = plugin({
     return (source, args, ctx: DataContext, info, next) => {
       return plugin.completeValue(next(source, args, ctx, info), (v) => v, (err) => {
         ctx.update((d) => {
-          d.baseError = {
+          d.diagnostics.error = {
             id: _.uniqueId('Error'),
             cypressError: err.isCypressErr
               ? err

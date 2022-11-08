@@ -495,7 +495,6 @@ export function reduceConfig (cfg: LegacyCypressConfigJson, options: CreateConfi
           e2e: { ...acc.e2e, supportFile: val },
         }
       case 'baseUrl':
-      case 'experimentalSessionAndOrigin':
         return {
           ...acc,
           e2e: { ...acc.e2e, [key]: val },

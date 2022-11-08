@@ -5,24 +5,19 @@ const chokidar = require('chokidar')
 const pkg = require('@packages/root')
 const Fixtures = require('@tooling/system-tests')
 const { sinon } = require('../spec_helper')
-const user = require(`../../lib/user`)
 const config = require(`../../lib/config`)
-const scaffold = require(`../../lib/scaffold`)
 const { ServerE2E } = require(`../../lib/server-e2e`)
 const { ProjectBase } = require(`../../lib/project-base`)
-const ProjectUtils = require(`../../lib/project_utils`)
 const { Automation } = require(`../../lib/automation`)
 const savedState = require(`../../lib/saved_state`)
-const plugins = require(`../../lib/plugins`)
 const runEvents = require(`../../lib/plugins/run_events`)
 const system = require(`../../lib/util/system`)
-const settings = require(`../../lib/util/settings`)
 const { getCtx } = require(`../../lib/makeDataContext`)
 
 let ctx
 
 // NOTE: todo: come back to this
-describe.skip('lib/project-base', () => {
+describe('lib/project-base', () => {
   beforeEach(async function () {
     ctx = getCtx()
     Fixtures.scaffold()
@@ -31,7 +26,6 @@ describe.skip('lib/project-base', () => {
     this.idsPath = Fixtures.projectPath('ids')
     this.pristinePath = Fixtures.projectPath('pristine-with-e2e-testing')
 
-    sinon.stub(scaffold, 'isNewProject').resolves(false)
     sinon.stub(chokidar, 'watch').returns({
       on: () => {},
       close: () => {},
@@ -40,19 +34,11 @@ describe.skip('lib/project-base', () => {
     sinon.stub(runEvents, 'execute').resolves()
 
     await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
+    this.config = await ctx.project.getConfig()
 
-    return settings.read(this.todosPath)
-    .then((obj = {}) => {
-      ({ projectId: this.projectId } = obj)
-
-      return config.setupFullConfigWithDefaults({ projectName: 'project', projectRoot: '/foo/bar' })
-      .then((config1) => {
-        this.config = config1
-        this.project = new ProjectBase({ projectRoot: this.todosPath, testingType: 'e2e' })
-        this.project._server = { close () {} }
-        this.project._cfg = config1
-      })
-    })
+    this.project = new ProjectBase({ projectRoot: this.todosPath, testingType: 'e2e' })
+    this.project._server = { close () {} }
+    this.project._cfg = this.config
   })
 
   afterEach(function () {
@@ -70,33 +56,16 @@ describe.skip('lib/project-base', () => {
   })
 
   it('always resolves the projectRoot to be absolute', function () {
-    const p = new ProjectBase({ projectRoot: '../foo/bar', testingType: 'e2e' })
+    const p = new ProjectBase({ projectRoot: path.join('..', 'foo', 'bar'), testingType: 'e2e' })
 
-    expect(p.projectRoot).not.to.eq('../foo/bar')
-    expect(p.projectRoot).to.eq(path.resolve('../foo/bar'))
-  })
-
-  it('sets CT specific defaults and calls CT function', async function () {
-    sinon.stub(ServerE2E.prototype, 'open').resolves([])
-    sinon.stub(ProjectBase.prototype, 'startCtDevServer').resolves({ port: 9999 })
-
-    const projectCt = new ProjectBase({ projectRoot: this.pristinePath, testingType: 'component' })
-
-    await projectCt.initializeConfig()
-
-    return projectCt.open({}).then(() => {
-      expect(projectCt._cfg.viewportHeight).to.eq(500)
-      expect(projectCt._cfg.viewportWidth).to.eq(500)
-      expect(projectCt._cfg.baseUrl).to.eq('http://localhost:9999')
-      expect(projectCt.startCtDevServer).to.have.beenCalled
-    })
+    expect(p.projectRoot).not.to.eq(path.join('..', 'foo', 'bar'))
+    expect(p.projectRoot).to.eq(path.resolve(path.join('..', 'foo', 'bar')))
   })
 
   context('#saveState', function () {
     beforeEach(function () {
-      const supportFile = 'the/save/state/test'
+      const supportFile = path.join('the', 'save', 'state', 'test')
 
-      sinon.stub(config, 'get').withArgs(this.todosPath).resolves({ supportFile })
       this.project.cfg = { supportFile }
 
       return savedState.create(this.project.projectRoot)
@@ -135,58 +104,59 @@ describe.skip('lib/project-base', () => {
   })
 
   context('#initializeConfig', () => {
-    const supportFile = 'foo/bar/baz'
+    const supportFile = path.join('foo', 'bar', 'baz')
 
-    beforeEach(function () {
-      sinon.stub(ctx.lifecycleManager, 'getFullInitialConfig').withArgs({ foo: 'bar', configFile: 'cypress.config.js' })
-      .resolves({ baz: 'quux', supportFile, browsers: [] })
-    })
-
-    it('calls config.get with projectRoot + options + saved state', function () {
-      this.project.__setOptions({ foo: 'bar' })
-
-      return savedState.create(this.todosPath)
-      .then(async (state) => {
-        sinon.stub(state, 'get').resolves({ reporterWidth: 225 })
-
-        await this.project.initializeConfig()
-        expect(this.project.getConfig()).to.deep.eq({
-          supportFile,
-          browsers: [],
-          baz: 'quux',
-          state: {
-            reporterWidth: 225,
-          },
-        })
-      })
-    })
-
-    it('resolves if cfg is already set', async function () {
-      this.project._cfg = {
+    it('resolves with saved state when in open mode', async function () {
+      sinon.stub(ctx.lifecycleManager, 'getFullInitialConfig')
+      .resolves({
         supportFile,
-        foo: 'bar',
-      }
+        isTextTerminal: false,
+        baz: 'quux',
+      })
 
-      expect(this.project.getConfig()).to.deep.eq({
+      sinon.stub(savedState, 'create')
+      .withArgs(this.todosPath, false)
+      .resolves({
+        get () {
+          return { reporterWidth: 225 }
+        },
+      })
+
+      const cfg = await this.project.initializeConfig()
+
+      expect(cfg).to.deep.eq({
         supportFile,
-        foo: 'bar',
+        isTextTerminal: false,
+        baz: 'quux',
+        state: {
+          reporterWidth: 225,
+        },
+        testingType: 'e2e',
       })
     })
 
-    it('does not set cfg.isNewProject when cfg.isTextTerminal', function () {
-      const cfg = { isTextTerminal: true, browsers: [] }
-
-      ctx.lifecycleManager.getFullInitialConfig.resolves(cfg)
-
-      sinon.stub(this.project, '_setSavedState').resolves(cfg)
-
-      return this.project.initializeConfig()
-      .then((cfg) => {
-        expect(cfg).not.to.have.property('isNewProject')
+    it('resolves without saved state when in run mode', async function () {
+      sinon.stub(ctx.lifecycleManager, 'getFullInitialConfig')
+      .resolves({
+        supportFile,
+        isTextTerminal: true,
+        baz: 'quux',
       })
+
+      const cfg = await this.project.initializeConfig()
+
+      expect(cfg).to.deep.eq({
+        supportFile,
+        isTextTerminal: true,
+        baz: 'quux',
+        testingType: 'e2e',
+      })
+
+      expect(cfg).to.not.have.property('state')
     })
 
-    it('attaches warning to non-chrome browsers when chromeWebSecurity:false', async function () {
+    // FIXME: NEED TO MOVE TO DATA_CONTEXT PACKAGE
+    it.skip('attaches warning to non-chrome browsers when chromeWebSecurity:false', async function () {
       const cfg = Object.assign({}, {
         supportFile,
         browsers: [{ family: 'chromium', name: 'Canary' }, { family: 'some-other-family', name: 'some-other-name' }],
@@ -210,7 +180,7 @@ describe.skip('lib/project-base', () => {
             family: 'some-other-family',
             name: 'some-other-name',
             warning: `\
-Your project has set the configuration option: chromeWebSecurity to false
+Your project has set the configuration option: \`chromeWebSecurity\` to \`false\`.
 
 This option will not have an effect in Some-other-name. Tests that rely on web security being disabled will not run as expected.\
 `,
@@ -221,8 +191,9 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
     })
 
+    // FIXME: NEED TO MOVE TO DATA_CONTEXT PACKAGE
     // https://github.com/cypress-io/cypress/issues/17614
-    it('only attaches warning to non-chrome browsers when chromeWebSecurity:true', async function () {
+    it.skip('only attaches warning to non-chrome browsers when chromeWebSecurity:true', async function () {
       ctx.lifecycleManager.restore?.()
       sinon.stub(ctx.lifecycleManager, 'getFullInitialConfig').returns({
         supportFile,
@@ -249,20 +220,12 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
   })
 
-  context('#initializeConfig', function () {
-  })
-
   context('#open', () => {
     beforeEach(function () {
       sinon.stub(this.project, 'startWebsockets')
-      this.checkSupportFileStub = sinon.stub(ProjectUtils, 'checkSupportFile').resolves()
-      sinon.stub(this.project, 'scaffold').resolves()
       sinon.stub(this.project, 'getConfig').returns(this.config)
       sinon.stub(ServerE2E.prototype, 'open').resolves([])
       sinon.stub(ServerE2E.prototype, 'reset')
-      sinon.stub(config, 'updateWithPluginValues').returns(this.config)
-      sinon.stub(scaffold, 'plugins').resolves()
-      sinon.stub(plugins, 'init').resolves()
     })
 
     it('calls #startWebsockets with options + config', function () {
@@ -280,58 +243,12 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         }, {
           socketIoCookie: '__socket',
           namespace: '__cypress',
-          screenshotsFolder: '/foo/bar/cypress/screenshots',
+          screenshotsFolder: path.join(this.project.projectRoot, 'cypress', 'screenshots'),
           report: undefined,
           reporter: 'spec',
           reporterOptions: null,
           projectRoot: this.todosPath,
         })
-      })
-    })
-
-    it('calls #scaffold with server config promise', function () {
-      return this.project.open().then(() => {
-        expect(this.project.scaffold).to.be.calledWith(this.config)
-      })
-    })
-
-    it('calls checkSupportFile with server config when scaffolding is finished', function () {
-      return this.project.open().then(() => {
-        expect(this.checkSupportFileStub).to.be.calledWith({
-          configFile: 'cypress.config.js',
-          supportFile: false,
-        })
-      })
-    })
-
-    it('initializes the plugins', function () {
-      return this.project.open().then(() => {
-        expect(plugins.init).to.be.called
-      })
-    })
-
-    it('calls support.plugins with pluginsFile directory', function () {
-      return this.project.open().then(() => {
-        expect(scaffold.plugins).to.be.calledWith(path.dirname(this.config.pluginsFile))
-      })
-    })
-
-    it('calls options.onError with plugins error when there is a plugins error', function () {
-      const onError = sinon.spy()
-      const err = {
-        name: 'plugin error name',
-        message: 'plugin error message',
-      }
-
-      this.project.__setOptions({ onError })
-
-      return this.project.open().then(() => {
-        const pluginsOnError = plugins.init.lastCall.args[1].onError
-
-        expect(pluginsOnError).to.be.a('function')
-        pluginsOnError(err)
-
-        expect(onError).to.be.calledWith(err)
       })
     })
 
@@ -367,7 +284,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
     })
 
-    it('does not call startSpecWatcher if not in interactive mode', function () {
+    // FIXME: NEED TO MOVE TO DATA_CONTEXT PACKAGE
+    it.skip('does not call startSpecWatcher if not in interactive mode', function () {
       const startSpecWatcherStub = sinon.stub()
 
       sinon.stub(ProjectBase.prototype, 'initializeSpecStore').resolves({
@@ -382,7 +300,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
     })
 
-    it('calls startSpecWatcher if in interactive mode', function () {
+    // FIXME: NEED TO MOVE TO DATA_CONTEXT PACKAGE
+    it.skip('calls startSpecWatcher if in interactive mode', function () {
       const startSpecWatcherStub = sinon.stub()
 
       sinon.stub(ProjectBase.prototype, 'initializeSpecStore').resolves({
@@ -420,7 +339,11 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         .then(() => {
           const cfg = this.project.getConfig()
 
-          expect(cfg.state).to.eql({ firstOpened: this._time, lastOpened: this._time })
+          expect(cfg.state).to.eql({
+            firstOpened: this._time,
+            lastOpened: this._time,
+            lastProjectId: 'abc123',
+          })
         })
       })
 
@@ -433,7 +356,11 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         .then(() => {
           const cfg = this.project.getConfig()
 
-          expect(cfg.state).to.eql({ firstOpened: this._time, lastOpened: this._time + 100000 })
+          expect(cfg.state).to.eql({
+            firstOpened: this._time,
+            lastOpened: this._time + 100000,
+            lastProjectId: 'abc123',
+          })
         })
       })
 
@@ -455,6 +382,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
             autoScrollingEnabled: false,
             firstOpened: this._time,
             lastOpened: this._time,
+            lastProjectId: 'abc123',
           })
         })
       })
@@ -469,8 +397,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       this.project._isServerOpen = true
 
       sinon.stub(this.project, 'getConfig').returns(this.config)
-
-      sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
     })
 
     it('closes server', function () {
@@ -565,63 +491,14 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
   context('#getProjectId', () => {
     beforeEach(function () {
       this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
-      this.verifyExistence = sinon.stub(ProjectBase.prototype, 'verifyExistence').resolves()
+      sinon.stub(ctx.lifecycleManager, 'getProjectId').resolves('id-123')
     })
 
-    it('calls verifyExistence', function () {
-      sinon.stub(settings, 'read').resolves({ projectId: 'id-123' })
-
-      return this.project.getProjectId()
-      .then(() => expect(this.verifyExistence).to.be.calledOnce)
-    })
-
-    it('returns the project id from settings', function () {
-      sinon.stub(settings, 'read').resolves({ projectId: 'id-123' })
-
-      return this.project.getProjectId()
-      .then((id) => expect(id).to.eq('id-123'))
-    })
-
-    it('throws NO_PROJECT_ID with the projectRoot when no projectId was found', function () {
-      sinon.stub(settings, 'read').resolves({})
-
+    it('returns the project id from data-context', function () {
       return this.project.getProjectId()
       .then((id) => {
-        throw new Error('expected to fail, but did not')
-      }).catch((err) => {
-        expect(err.type).to.eq('NO_PROJECT_ID')
-
-        expect(err.message).to.include('/_test-output/path/to/project-e2e')
-      })
-    })
-
-    it('bubbles up Settings.read EACCES error', function () {
-      const err = new Error()
-
-      err.code = 'EACCES'
-
-      sinon.stub(settings, 'read').rejects(err)
-
-      return this.project.getProjectId()
-      .then((id) => {
-        throw new Error('expected to fail, but did not')
-      }).catch((err) => {
-        expect(err.code).to.eq('EACCES')
-      })
-    })
-
-    it('bubbles up Settings.read EPERM error', function () {
-      const err = new Error()
-
-      err.code = 'EPERM'
-
-      sinon.stub(settings, 'read').rejects(err)
-
-      return this.project.getProjectId()
-      .then((id) => {
-        throw new Error('expected to fail, but did not')
-      }).catch((err) => {
-        expect(err.code).to.eq('EPERM')
+        expect(ctx.lifecycleManager.getProjectId).to.be.calledOnce
+        expect(id).to.eq('id-123')
       })
     })
   })

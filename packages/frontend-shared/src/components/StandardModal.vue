@@ -17,6 +17,7 @@
         :class="props.class || ''"
       >
         <StandardModalHeader
+          :no-help="noHelp"
           :help-link="helpLink"
           :help-text="helpText"
           @close="closeModal"
@@ -52,6 +53,9 @@ import StandardModalHeader from './StandardModalHeader.vue'
 import StandardModalBody from './StandardModalBody.vue'
 import StandardModalFooter from './StandardModalFooter.vue'
 
+import { hideAllPoppers } from 'floating-vue'
+import { watch } from 'vue'
+
 import {
   Dialog,
   DialogOverlay,
@@ -69,11 +73,13 @@ const props = withDefaults(defineProps<{
   helpLink?: string
   helpText?: string
   variant?: 'bare'
+  noHelp?: boolean
   title?: string
   class?: string | string[] | Record<string, any>
 }>(), {
   modelValue: false,
   helpText: `${defaultMessages.links.needHelp}`,
+  noHelp: false,
   helpLink: 'https://on.cypress.io',
   class: undefined,
   variant: undefined,
@@ -83,6 +89,18 @@ const props = withDefaults(defineProps<{
 const setIsOpen = (val: boolean) => {
   emit('update:modelValue', val)
 }
+
+// Ensure all tooltips are closed when the modal opens - this prevents tooltips from beneath that
+// are stuck open being rendered on top of the modal due to the use of a fixed z-index in `floating-vue`
+watch(
+  () => props.modelValue,
+  (value) => {
+    if (value) {
+      hideAllPoppers()
+    }
+  },
+  { immediate: true },
+)
 
 const closeModal = () => {
   setIsOpen(false)

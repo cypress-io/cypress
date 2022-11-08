@@ -83,7 +83,7 @@ async function checkReportFiles (filenames) {
     circleEnv = await readCircleEnv()
   } catch (err) {
     // set SKIP_CIRCLE_ENV to bypass, for local development
-    if (!process.env.SKIP_CIRCLE_ENV) throw err
+    if (!process.env.SKIP_CIRCLE_ENV && process.env.CI_DOCKER) throw err
 
     circleEnv = {}
   }
@@ -95,8 +95,6 @@ async function checkReportFiles (filenames) {
 }
 
 async function verifyMochaResults () {
-  if (process.platform === 'win32') throw new Error('verifyMochaResults not supported on Windows')
-
   try {
     const filenames = await fs.readdir(REPORTS_PATH)
 

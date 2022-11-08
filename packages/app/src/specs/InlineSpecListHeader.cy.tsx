@@ -4,21 +4,21 @@ import { defaultMessages } from '@cy/i18n'
 
 describe('InlineSpecListHeader', () => {
   const mountWithResultCount = (resultCount = 0) => {
-    const search = ref('')
+    const specFilterModel = ref('')
     const onNewSpec = cy.spy().as('new-spec')
 
-    cy.wrap(search).as('search')
+    cy.wrap(specFilterModel).as('specFilterModel')
 
     const methods = {
-      'onUpdate:search': (val: string) => {
-        search.value = val
+      'onUpdate:specFilterModel': (val: string) => {
+        specFilterModel.value = val
       },
       onNewSpec,
     }
 
     cy.mount(() =>
       (<div class="bg-gray-1000">
-        <InlineSpecListHeader {...methods} search={search.value} resultCount={resultCount} />
+        <InlineSpecListHeader {...methods} specFilterModel={specFilterModel.value} resultCount={resultCount} />
       </div>))
   }
 
@@ -29,7 +29,7 @@ describe('InlineSpecListHeader', () => {
     cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
     // `force` necessary due to the field label being overlaid on top of the input
     .type(searchString, { delay: 0, force: true })
-    .get('@search').its('value').should('eq', searchString)
+    .get('@specFilterModel').its('value').should('eq', searchString)
   })
 
   it('should emit add spec', () => {
@@ -49,21 +49,21 @@ describe('InlineSpecListHeader', () => {
     cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
     // `force` necessary due to the field label being overlaid on top of the input
     .type('abcd', { delay: 0, force: true })
-    .get('@search').its('value').should('eq', 'abcd')
+    .get('@specFilterModel').its('value').should('eq', 'abcd')
 
     cy.findByTestId('clear-search-button').click()
-    cy.get('@search').its('value').should('eq', '')
+    cy.get('@specFilterModel').its('value').should('eq', '')
   })
 
   it('exposes the result count correctly to assistive tech', () => {
     mountWithResultCount(0)
-    cy.contains('No Matches')
+    cy.contains('No matches')
     .should('have.class', 'sr-only')
     .and('have.attr', 'aria-live', 'polite')
 
     mountWithResultCount(1)
-    cy.contains('1 Match').should('have.class', 'sr-only')
+    cy.contains('1 match').should('have.class', 'sr-only')
     mountWithResultCount(100)
-    cy.contains('100 Matches').should('have.class', 'sr-only')
+    cy.contains('100 matches').should('have.class', 'sr-only')
   })
 })

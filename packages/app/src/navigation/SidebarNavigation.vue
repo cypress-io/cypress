@@ -93,9 +93,11 @@ import { computed, ref, watchEffect } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import SidebarNavigationRow from './SidebarNavigationRow.vue'
 import KeyboardBindingsModal from './KeyboardBindingsModal.vue'
-import CodeIcon from '~icons/cy/code-editor_x24'
-import RunsIcon from '~icons/cy/runs_x24'
-import SettingsIcon from '~icons/cy/settings_x24'
+import {
+  IconTechnologyCodeEditor,
+  IconTechnologyTestResults,
+  IconObjectGear,
+} from '@cypress-design/vue-icon'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import HideDuringScreenshot from '../runner/screenshot/HideDuringScreenshot.vue'
 import { SideBarNavigationDocument, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql'
@@ -108,10 +110,10 @@ import { useWindowSize } from '@vueuse/core'
 const { t } = useI18n()
 
 const navigation = [
-  { name: 'Specs', icon: CodeIcon, href: '/specs' },
-  { name: 'Runs', icon: RunsIcon, href: '/runs' },
-  { name: 'Settings', icon: SettingsIcon, href: '/settings' },
-]
+  { name: 'Specs', icon: IconTechnologyCodeEditor, href: '/specs' },
+  { name: 'Runs', icon: IconTechnologyTestResults, href: '/runs' },
+  { name: 'Settings', icon: IconObjectGear, href: '/settings' },
+] as const
 
 gql`
 fragment SidebarNavigation on Query {
@@ -129,7 +131,7 @@ fragment SidebarNavigation on Query {
 
 gql`
 mutation SideBarNavigation_SetPreferences ($value: String!) {
-  setPreferences (value: $value) {
+  setPreferences (value: $value, type: global) {
     ...SidebarNavigation
   }
 }`

@@ -2,7 +2,7 @@ import { debug as debugFn } from 'debug'
 import * as path from 'path'
 import { merge } from 'webpack-merge'
 import { importModule } from 'local-pkg'
-import type { Configuration } from 'webpack'
+import type { Configuration, EntryObject } from 'webpack'
 import { makeDefaultWebpackConfig } from './makeDefaultWebpackConfig'
 import { CypressCTWebpackPlugin } from './CypressCTWebpackPlugin'
 import type { CreateFinalWebpackConfig } from './createWebpackDevServer'
@@ -41,7 +41,7 @@ if (process.platform === 'linux') {
 const OsSeparatorRE = RegExp(`\\${path.sep}`, 'g')
 const posixSeparator = '/'
 
-const CYPRESS_WEBPACK_ENTRYPOINT = path.resolve(__dirname, 'browser.js')
+export const CYPRESS_WEBPACK_ENTRYPOINT = path.resolve(__dirname, 'browser.js')
 
 /**
  * Removes and/or modifies certain plugins known to conflict
@@ -72,29 +72,6 @@ function modifyWebpackConfigForCypress (webpackConfig: Partial<Configuration>) {
   return webpackConfig
 }
 
-async function addEntryPoint (webpackConfig: Configuration) {
-  let entry = webpackConfig.entry
-
-  if (typeof entry === 'function') {
-    entry = await entry()
-  }
-
-  if (typeof entry === 'string') {
-    entry = [entry, CYPRESS_WEBPACK_ENTRYPOINT]
-  } else if (Array.isArray(entry)) {
-    entry.push(CYPRESS_WEBPACK_ENTRYPOINT)
-  } else if (typeof entry === 'object') {
-    entry = {
-      ...entry,
-      ['cypress-entry']: CYPRESS_WEBPACK_ENTRYPOINT,
-    }
-  } else {
-    entry = CYPRESS_WEBPACK_ENTRYPOINT
-  }
-
-  webpackConfig.entry = entry
-}
-
 /**
  * Creates a webpack 4/5 compatible webpack "configuration"
  * to pass to the sourced webpack function
@@ -103,7 +80,7 @@ export async function makeWebpackConfig (
   config: CreateFinalWebpackConfig,
 ) {
   const { module: webpack } = config.sourceWebpackModulesResult.webpack
-  let userWebpackConfig = config.devServerConfig.webpackConfig as Partial<Configuration>
+  let userWebpackConfig = config.devServerConfig.webpackConfig
   const frameworkWebpackConfig = config.frameworkConfig as Partial<Configuration>
   const {
     cypressConfig: {
@@ -113,6 +90,7 @@ export async function makeWebpackConfig (
     },
     specs: files,
     devServerEvents,
+    framework,
   } = config.devServerConfig
 
   let configFile: string | undefined = undefined
@@ -146,6 +124,10 @@ export async function makeWebpackConfig (
       }
     }
   }
+
+  userWebpackConfig = typeof userWebpackConfig === 'function'
+    ? await userWebpackConfig()
+    : userWebpackConfig
 
   const userAndFrameworkWebpackConfig = modifyWebpackConfigForCypress(
     merge(frameworkWebpackConfig ?? {}, userWebpackConfig ?? {}),
@@ -184,7 +166,20 @@ export async function makeWebpackConfig (
     dynamicWebpackConfig,
   )
 
-  await addEntryPoint(mergedConfig)
+  // Some frameworks (like Next.js) change this value which changes the path we would need to use to fetch our spec.
+  // (eg, http://localhost:xxxx/<dev-server-public-path>/static/chunks/spec-<x>.js). Deleting this key to normalize
+  // the spec URL to `*/spec-<x>.js` which we need to know up-front so we can fetch the sourcemaps.
+  delete mergedConfig.output?.chunkFilename
+
+  // Angular loads global styles and polyfills via script injection in the index.html
+  if (framework === 'angular') {
+    mergedConfig.entry = {
+      ...(mergedConfig.entry as EntryObject) || {},
+      'cypress-entry': CYPRESS_WEBPACK_ENTRYPOINT,
+    }
+  } else {
+    mergedConfig.entry = CYPRESS_WEBPACK_ENTRYPOINT
+  }
 
   debug('Merged webpack config %o', mergedConfig)
 

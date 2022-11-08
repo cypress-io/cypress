@@ -10,17 +10,6 @@
     local("Roboto-Light"), local("DroidSans"), local("Tahoma");
 }
 
-/* Set up Roboto for modern browsers, all weights */
-@supports (font-variation-settings: normal) {
-  @font-face {
-    font-family: 'Fira Code';
-    src: url('/fonts/FiraCode-VF.woff2') format('woff2 supports variations'),
-         url('/fonts/FiraCode-VF.woff2') format('woff2-variations');
-    font-weight: 100 1000;
-    font-stretch: 25% 151%;
-  }
-}
-
 html, body {
   @apply bg-white font-sans antialiased;
 }

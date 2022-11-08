@@ -29,6 +29,11 @@ describe('src/cy/commands/aliasing', () => {
       })
     })
 
+    it('stores the lookup as an alias when .then() is an intermediate', () => {
+      cy.get('body').then(() => {}).as('body')
+      cy.get('@body')
+    })
+
     it('stores the resulting subject as the alias', () => {
       const $body = cy.$$('body')
 
@@ -95,6 +100,15 @@ describe('src/cy/commands/aliasing', () => {
         cy.get('input:first').as('input').then(function () {
           expect(this.input).to.eq(obj)
         })
+      })
+
+      it('retries previous commands invoked inside custom commands', () => {
+        Cypress.Commands.add('get2', (selector) => cy.get(selector))
+
+        cy.get2('body').children('div').as('divs')
+        cy.visit('/fixtures/dom.html')
+
+        cy.get('@divs')
       })
     })
 
@@ -291,8 +305,7 @@ describe('src/cy/commands/aliasing', () => {
       it('does not match alias when the alias has already been applied', () => {
         cy
         .visit('/fixtures/commands.html')
-        .server()
-        .route(/foo/, {}).as('getFoo')
+        .intercept(/foo/, {}).as('getFoo')
         .then(function () {
           // 1 log from visit
           // 1 log from route

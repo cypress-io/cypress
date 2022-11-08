@@ -56,9 +56,10 @@
       variant="primary"
       aria-live="polite"
       :disabled="!cloudViewer && !isOnline"
+      :prefix-icon="buttonPrefixIcon"
       @click="handleLoginOrContinue"
     >
-      {{ cloudViewer ? t('topNav.login.actionContinue') : t('topNav.login.actionLogin') }}
+      {{ buttonText }}
     </Button>
   </div>
 </template>
@@ -69,6 +70,7 @@ import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
 import { useOnline } from '@vueuse/core'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
+import ChainIcon from '~icons/cy/chain-link_x16.svg'
 
 import {
   Auth_LoginDocument,
@@ -80,6 +82,11 @@ import type {
 } from '../generated/graphql'
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
+import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+
+const loginConnectStore = useLoginConnectStore()
+
+const { t } = useI18n()
 
 const isOnline = useOnline()
 
@@ -88,19 +95,35 @@ const props = defineProps<{
   showRetry?: boolean
   showLogout?: boolean
   utmMedium: string
+  utmContent?: string
 }>()
 
 gql`
 fragment Auth on Query {
+  ...SelectCloudProjectModal
   cloudViewer {
     id
     email
     fullName
+    firstOrganization: organizations(first: 1) {
+      nodes {
+        id
+      }
+    }
   }
   authState {
     browserOpened
     name
     message
+  }
+  currentProject {
+    id
+    cloudProject {
+      __typename
+      ... on CloudProject {
+        id
+      }
+    }
   }
 }
 `
@@ -114,8 +137,8 @@ mutation Auth_Logout {
 `
 
 gql`
-mutation Auth_Login ($utmSource: String!, $utmMedium: String!) {
-  login (utmSource: $utmSource, utmMedium: $utmMedium) {
+mutation Auth_Login ($utmSource: String!, $utmMedium: String!, $utmContent: String) {
+  login (utmSource: $utmSource, utmContent: $utmContent, utmMedium: $utmMedium) {
     ...Auth
   }
 }
@@ -154,8 +177,13 @@ onBeforeUnmount(() => {
   }
 })
 
+const showConnectButton = computed(() => {
+  return loginConnectStore.project.isConfigLoaded && loginConnectStore.userStatusMatches('needsProjectConnect')
+})
+
 const emit = defineEmits<{
-  (event: 'continue', value: boolean): void
+  (event: 'close'): void
+  (event: 'cancel'): void
 }>()
 
 const cloudViewer = computed(() => {
@@ -177,15 +205,22 @@ const loginMutationIsPending = computed(() => {
 })
 
 const handleLoginOrContinue = async () => {
-  if (cloudViewer.value) {
-    emit('continue', true)
+  if (loginConnectStore.user.isLoggedIn) {
+    // user is already logged in, just emit close event & return early
+    emit('close')
 
     return
   }
 
+  // user has not already logged in, kick off the login process
+
   loginInitiated.value = true
 
-  login.executeMutation({ utmMedium: props.utmMedium, utmSource: getUtmSource() })
+  login.executeMutation({ utmMedium: props.utmMedium, utmContent: props.utmContent || null, utmSource: getUtmSource() })
+}
+
+const handleCancel = () => {
+  emit('cancel')
 }
 
 const handleLogout = () => {
@@ -195,13 +230,29 @@ const handleLogout = () => {
 const handleTryAgain = async () => {
   await reset.executeMutation({})
 
-  login.executeMutation({ utmMedium: props.utmMedium, utmSource: getUtmSource() })
+  login.executeMutation({ utmMedium: props.utmMedium, utmContent: props.utmContent || null, utmSource: getUtmSource() })
 }
 
-const handleCancel = () => {
-  emit('continue', true)
-}
+const buttonText = computed(() => {
+  const strings = {
+    login: t('topNav.login.actionLogin'),
+    connectProject: t('runs.connect.modal.selectProject.connectProject'),
+    continue: t('topNav.login.actionContinue'),
+  }
 
-const { t } = useI18n()
+  if (showConnectButton.value) {
+    return strings.connectProject
+  }
+
+  if (loginConnectStore.user.isLoggedIn) {
+    return strings.continue
+  }
+
+  return strings.login
+})
+
+const buttonPrefixIcon = computed(() => {
+  return showConnectButton.value ? ChainIcon : undefined
+})
 
 </script>

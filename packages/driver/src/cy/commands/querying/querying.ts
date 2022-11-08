@@ -209,37 +209,32 @@ export default (Commands, Cypress, cy, state) => {
             })
           }
 
-          // if this is a route command
-          if (command.get('name') === 'route') {
-            if (!((_.indexOf(selector, '.') === -1) ||
-              (_.keys(state('aliases')).includes(selector.slice(1))))
-            ) {
-              allParts = _.split(selector, '.')
-              const index = _.last(allParts)
-
-              alias = _.join([alias, index], '.')
-            }
-
-            const requests = cy.getRequestsByAlias(alias) || null
-
-            log(requests, 'route')
-
-            return requests
-          }
-
           if (command.get('name') === 'intercept') {
             const requests = getAliasedRequests(alias, state)
             // detect alias.all and alias.index
-            const specifier = /\.(all|[\d]+)$/.exec(selector)
+            const specifier = /\.(all.*|\d.*)$/.exec(selector)
 
             if (specifier) {
               const [, index] = specifier
+
+              if (index && !/^(\d+|all)$/.test(index)) {
+                $errUtils.throwErrByPath('get.alias_invalid', {
+                  args: { prop: index },
+                })
+              }
+
+              if (index === '0') {
+                $errUtils.throwErrByPath('get.alias_zero', {
+                  args: { alias },
+                })
+              }
 
               if (index === 'all') {
                 return requests
               }
 
-              return requests[Number(index)] || null
+              // Adjust the index to be 1 base
+              return requests[Number(index) - 1] || null
             }
 
             log(requests, command.get('name'))
@@ -356,7 +351,7 @@ export default (Commands, Cypress, cy, state) => {
         })
       }
 
-      return resolveElements()
+      return cy.retryIfCommandAUTOriginMismatch(resolveElements, options.timeout)
     },
   })
 

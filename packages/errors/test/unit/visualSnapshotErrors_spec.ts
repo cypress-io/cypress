@@ -646,6 +646,11 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    BROWSER_CRASHED: () => {
+      return {
+        default: ['Chrome', 'code', 'signal'],
+      }
+    },
     AUTOMATION_SERVER_DISCONNECTED: () => {
       return {
         default: [],
@@ -996,6 +1001,11 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
     EXPERIMENTAL_SHADOW_DOM_REMOVED: () => {
       return {
         default: [],
@@ -1170,6 +1180,46 @@ describe('visual error templates', () => {
     TESTING_TYPE_NOT_CONFIGURED: () => {
       return {
         default: ['component'],
+      }
+    },
+
+    COMPONENT_TESTING_MISMATCHED_DEPENDENCIES: () => {
+      return {
+        default: [
+          [
+            {
+              dependency: {
+                type: 'vite',
+                name: 'Vite',
+                package: 'vite',
+                installer: 'vite',
+                description: 'Vite is dev server that serves your source files over native ES modules',
+                minVersion: '^=2.0.0 || ^=3.0.0',
+              },
+              satisfied: false,
+              detectedVersion: '1.0.0',
+              loc: null,
+            },
+          ],
+        ],
+      }
+    },
+
+    EXPERIMENTAL_SINGLE_TAB_RUN_MODE: () => {
+      return {
+        default: [],
+      }
+    },
+
+    EXPERIMENTAL_STUDIO_E2E_ONLY: () => {
+      return {
+        default: [],
+      }
+    },
+
+    BROWSER_UNSUPPORTED_LAUNCH_OPTION: () => {
+      return {
+        default: ['electron', ['env']],
       }
     },
   })

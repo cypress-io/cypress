@@ -2,6 +2,25 @@ const { assertLogLength } = require('../../support/utils')
 const { stripIndent } = require('common-tags')
 const { Promise } = Cypress
 
+describe('src/cy/commands/cookies - no stub', () => {
+  it('clears all cookies', () => {
+    cy.setCookie('foo', 'bar')
+    cy.getCookies().should('have.length', 1)
+    cy.clearCookies()
+    cy.getCookies().should('have.length', 0)
+  })
+
+  it('clears a single cookie', () => {
+    cy.setCookie('foo', 'bar')
+    cy.setCookie('key', 'val')
+    cy.getCookies().should('have.length', 2)
+    cy.clearCookie('foo')
+    cy.getCookies().should('have.length', 1).then((cookies) => {
+      expect(cookies[0].name).to.eq('key')
+    })
+  })
+})
+
 describe('src/cy/commands/cookies', () => {
   beforeEach(() => {
     // call through normally on everything
@@ -435,7 +454,8 @@ describe('src/cy/commands/cookies', () => {
     })
   })
 
-  context('#setCookie', () => {
+  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+  context.skip('#setCookie', () => {
     beforeEach(() => {
       cy.stub(Cypress.utils, 'addTwentyYears').returns(12345)
     })
@@ -500,7 +520,8 @@ describe('src/cy/commands/cookies', () => {
       cy.setCookie('five', 'bar')
 
       // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1624668
-      if (Cypress.isBrowser('firefox')) {
+      // TODO(webkit): pw webkit has the same issue as firefox (no "unspecified" state), need a patched binary
+      if (Cypress.isBrowser('firefox') || Cypress.isBrowser('webkit')) {
         cy.getCookie('five').should('include', { sameSite: 'no_restriction' })
       } else {
         cy.getCookie('five').should('not.have.property', 'sameSite')
@@ -508,7 +529,8 @@ describe('src/cy/commands/cookies', () => {
     })
 
     describe('timeout', () => {
-      it('sets timeout to Cypress.config(responseTimeout)', {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+      it.skip('sets timeout to Cypress.config(responseTimeout)', {
         responseTimeout: 2500,
       }, () => {
         Cypress.automation.resolves(null)
@@ -520,7 +542,8 @@ describe('src/cy/commands/cookies', () => {
         })
       })
 
-      it('can override timeout', () => {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+      it.skip('can override timeout', () => {
         Cypress.automation.resolves(null)
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
@@ -530,7 +553,8 @@ describe('src/cy/commands/cookies', () => {
         })
       })
 
-      it('clears the current timeout and restores after success', () => {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+      it.skip('clears the current timeout and restores after success', () => {
         Cypress.automation.resolves(null)
 
         cy.timeout(100)
@@ -562,7 +586,8 @@ describe('src/cy/commands/cookies', () => {
         return null
       })
 
-      it('logs once on error', function (done) {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+      it.skip('logs once on error', function (done) {
         const error = new Error('some err message')
 
         error.name = 'foo'
@@ -582,7 +607,8 @@ describe('src/cy/commands/cookies', () => {
         cy.setCookie('foo', 'bar')
       })
 
-      it('throws after timing out', function (done) {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23444
+      it.skip('throws after timing out', function (done) {
         Cypress.automation.resolves(Promise.delay(1000))
 
         cy.on('fail', (err) => {
@@ -948,35 +974,7 @@ describe('src/cy/commands/cookies', () => {
       })
     })
 
-    it('calls \'clear:cookies\' only with clearableCookies', () => {
-      Cypress.automation
-      .withArgs('get:cookies')
-      .resolves([
-        { name: 'foo' },
-        { name: 'bar' },
-      ])
-      .withArgs('clear:cookies', [
-        { name: 'foo', domain: 'localhost' },
-      ])
-      .resolves({
-        name: 'foo',
-      })
-
-      cy.stub(Cypress.Cookies, 'getClearableCookies')
-      .withArgs([{ name: 'foo' }, { name: 'bar' }])
-      .returns([{ name: 'foo' }])
-
-      cy.clearCookies().should('be.null').then(() => {
-        expect(Cypress.automation).to.be.calledWith(
-          'clear:cookies',
-          [{ name: 'foo', domain: 'localhost' }],
-        )
-      })
-    })
-
     it('calls \'clear:cookies\' with all cookies', () => {
-      Cypress.Cookies.preserveOnce('bar', 'baz')
-
       Cypress.automation
       .withArgs('get:cookies')
       .resolves([
@@ -984,12 +982,6 @@ describe('src/cy/commands/cookies', () => {
         { name: 'bar' },
         { name: 'baz' },
       ])
-      .withArgs('clear:cookies', [
-        { name: 'foo', domain: 'localhost' },
-      ])
-      .resolves({
-        name: 'foo',
-      })
       .withArgs('clear:cookies', [
         { name: 'foo', domain: 'localhost' },
         { name: 'bar', domain: 'localhost' },
@@ -1001,11 +993,6 @@ describe('src/cy/commands/cookies', () => {
 
       cy
       .clearCookies().should('be.null').then(() => {
-        expect(Cypress.automation).to.be.calledWith(
-          'clear:cookies',
-          [{ name: 'foo', domain: 'localhost' }],
-        )
-      }).clearCookies().should('be.null').then(() => {
         expect(Cypress.automation).to.be.calledWith(
           'clear:cookies', [
             { name: 'foo', domain: 'localhost' },
@@ -1251,36 +1238,6 @@ describe('src/cy/commands/cookies', () => {
           expect(c['Note']).to.eq('No cookies were found or removed.')
         })
       })
-    })
-  })
-
-  context('Cypress.Cookies.defaults', () => {
-    it('throws error on use of renamed whitelist option', (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).to.include('`Cypress.Cookies.defaults` `whitelist` option has been renamed to `preserve`. Please rename `whitelist` to `preserve`.')
-
-        done()
-      })
-
-      Cypress.Cookies.defaults({
-        whitelist: 'session_id',
-      })
-    })
-
-    it('logs deprecation warning', () => {
-      cy.stub(Cypress.utils, 'warning')
-
-      Cypress.Cookies.defaults({})
-      expect(Cypress.utils.warning).to.be.calledWith('`Cypress.Cookies.defaults()` has been deprecated and will be removed in a future release. Consider using `cy.session()` instead.\n\nhttps://on.cypress.io/session')
-    })
-  })
-
-  context('Cypress.Cookies.preserveOnce', () => {
-    it('logs deprecation warning', () => {
-      cy.stub(Cypress.utils, 'warning')
-
-      Cypress.Cookies.preserveOnce({})
-      expect(Cypress.utils.warning).to.be.calledWith('`Cypress.Cookies.preserveOnce()` has been deprecated and will be removed in a future release. Consider using `cy.session()` instead.\n\nhttps://on.cypress.io/session')
     })
   })
 })

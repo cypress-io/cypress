@@ -1,5 +1,6 @@
 /// <reference path="./cypress-npm-api.d.ts" />
 /// <reference path="./cypress-eventemitter.d.ts" />
+/// <reference path="./cypress-type-helpers.d.ts" />
 
 declare namespace Cypress {
   type FileContents = string | any[] | object
@@ -81,7 +82,7 @@ declare namespace Cypress {
 
   type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
 
-  type BrowserFamily = 'chromium' | 'firefox'
+  type BrowserFamily = 'chromium' | 'firefox' | 'webkit'
 
   /**
    * Describes a browser Cypress can control
@@ -502,16 +503,6 @@ declare namespace Cypress {
      */
     Cookies: {
       debug(enabled: boolean, options?: Partial<DebugOptions>): void
-      /**
-       * @deprecated Use `cy.session()` instead.
-       * @see https://on.cypress.io/session
-       */
-      preserveOnce(...names: string[]): void
-      /**
-       * @deprecated Use `cy.session()` instead.
-       * @see https://on.cypress.io/session
-       */
-      defaults(options: Partial<CookieDefaults>): CookieDefaults
     }
 
     /**
@@ -626,13 +617,6 @@ declare namespace Cypress {
     }
 
     /**
-     * @see https://on.cypress.io/api/api-server
-     */
-    Server: {
-      defaults(options: Partial<ServerOptions>): void
-    }
-
-    /**
      * @see https://on.cypress.io/screenshot-api
      */
     Screenshot: {
@@ -679,7 +663,22 @@ declare namespace Cypress {
   }
 
   interface SessionOptions {
-    validate?: () => false | void
+    /**
+     * Whether or not to persist the session across all specs in the run.
+     * @default {false}
+     */
+    cacheAcrossSpecs?: boolean,
+    /**
+     * Function to run immediately after the session is created and `setup` function runs or
+     * after a session is restored and the page is cleared. If this returns `false`, throws an
+     * exception, returns a Promise which resolves to `false` or rejects or contains any failing
+     * Cypress command, the session is considered invalid.
+     *
+     * If validation fails immediately after `setup`, the test will fail.
+     * If validation fails after restoring a session, `setup` will re-run.
+     * @default {false}
+     */
+    validate?: () => Promise<false | void> | false | void
   }
 
   type CanReturnChainable = void | Chainable | Promise<unknown>
@@ -729,7 +728,7 @@ declare namespace Cypress {
      *    cy.get('input[type=file]').selectFile(Cypress.Buffer.from('text'))
      *    cy.get('input[type=file]').selectFile({
      *      fileName: 'users.json',
-     *      fileContents: [{name: 'John Doe'}]
+     *      contents: [{name: 'John Doe'}]
      *    })
      */
     selectFile(files: FileReference | FileReference[], options?: Partial<SelectFileOptions>): Chainable<Subject>
@@ -1094,11 +1093,9 @@ declare namespace Cypress {
     /**
       * Save/Restore browser Cookies, LocalStorage, and SessionStorage data resulting from the supplied `setup` function.
       *
-      * Only available if the `experimentalSessionAndOrigin` config option is enabled.
-      *
       * @see https://on.cypress.io/session
       */
-    session(id: string | object, setup?: SessionOptions['validate'], options?: SessionOptions): Chainable<null>
+    session(id: string | object, setup: () => void, options?: SessionOptions): Chainable<null>
 
     /**
      * Get the window.document of the page that is currently active.
@@ -1687,66 +1684,6 @@ declare namespace Cypress {
     root<E extends Node = HTMLHtmlElement>(options?: Partial<Loggable>): Chainable<JQuery<E>> // can't do better typing unless we ignore the `.within()` case
 
     /**
-     * @deprecated Use `cy.intercept()` instead.
-     *
-     * Use `cy.route()` to manage the behavior of network requests.
-     * @see https://on.cypress.io/route
-     * @example
-     *    cy.server()
-     *    cy.route('https://localhost:7777/users', [{id: 1, name: 'Pat'}])
-     */
-    route(url: string | RegExp, response?: string | object): Chainable<null>
-    /**
-     * @deprecated Use `cy.intercept()` instead.
-     *
-     * Spy or stub request with specific method and url.
-     *
-     * @see https://on.cypress.io/route
-     * @example
-     *    cy.server()
-     *    // spy on POST /todos requests
-     *    cy.route('POST', '/todos').as('add-todo')
-     */
-    route(method: string, url: string | RegExp, response?: string | object): Chainable<null>
-    /**
-     * @deprecated Use `cy.intercept()` instead.
-     *
-     * Set a route by returning an object literal from a callback function.
-     * Functions that return a Promise will automatically be awaited.
-     *
-     * @see https://on.cypress.io/route
-     * @example
-     *    cy.server()
-     *    cy.route(() => {
-     *      // your logic here
-     *      // return an appropriate routing object here
-     *      return {
-     *        method: 'POST',
-     *        url: '/comments',
-     *        response: this.commentsFixture
-     *      }
-     *    })
-     */
-    route(fn: () => RouteOptions): Chainable<null>
-    /**
-     * @deprecated Use `cy.intercept()` instead.
-     *
-     * Spy or stub a given route.
-     *
-     * @see https://on.cypress.io/route
-     * @example
-     *    cy.server()
-     *    cy.route({
-     *      method: 'DELETE',
-     *      url: '/users',
-     *      status: 412,
-     *      delay: 1000
-     *      // and other options, see documentation
-     *    })
-     */
-    route(options: Partial<RouteOptions>): Chainable<null>
-
-    /**
      * Take a screenshot of the application under test and the Cypress Command Log.
      *
      * @see https://on.cypress.io/screenshot
@@ -1790,26 +1727,6 @@ declare namespace Cypress {
      * @see https://on.cypress.io/select
      */
     select(valueOrTextOrIndex: string | number | Array<string | number>, options?: Partial<SelectOptions>): Chainable<Subject>
-
-    /**
-     * @deprecated Use `cy.intercept()` instead.
-     *
-     * Start a server to begin routing responses to `cy.route()` and `cy.request()`.
-     *
-     * @example
-     *    // start server
-     *    cy.server()
-     *    // get default server options
-     *    cy.server().should((server) => {
-     *      expect(server.delay).to.eq(0)
-     *      expect(server.method).to.eq('GET')
-     *      expect(server.status).to.eq(200)
-     *      // and many others options
-     *    })
-     *
-     * @see https://on.cypress.io/server
-     */
-    server(options?: Partial<ServerOptions>): Chainable<ServerOptions>
 
     /**
      * Set a browser cookie.
@@ -2412,10 +2329,6 @@ declare namespace Cypress {
 
   type Agent<T extends sinon.SinonSpy> = SinonSpyAgent<T> & T
 
-  interface CookieDefaults {
-    preserve: string | string[] | RegExp | ((cookie: Cookie) => boolean)
-  }
-
   interface Failable {
     /**
      * Whether to fail on response codes other than 2xx and 3xx
@@ -2745,6 +2658,13 @@ declare namespace Cypress {
      */
     pageLoadTimeout: number
     /**
+     * Whether Cypress will search for and replace
+     * obstructive JS code in .js or .html files.
+     *
+     * @see https://on.cypress.io/configuration#modifyObstructiveCode
+     */
+    modifyObstructiveCode: boolean
+    /**
      * Time, in milliseconds, to wait for an XHR request to go out in a [cy.wait()](https://on.cypress.io/wait) command
      * @default 5000
      */
@@ -2810,6 +2730,32 @@ declare namespace Cypress {
      */
     supportFile: string | false
     /**
+     * The test isolation ensures a clean browser context between tests.
+     *
+     * Cypress will always reset/clear aliases, intercepts, clock, and viewport before each test
+     * to ensure a clean test slate; i.e. this configuration only impacts the browser context.
+     *
+     * Note: the [`cy.session()`](https://on.cypress.io/session) command will inherent this value to determine whether
+     * or not the page is cleared when the command executes. This command is only available in end-to-end testing.
+     *
+     *  - on - The page is cleared before each test. Cookies, local storage and session storage in all domains are cleared
+     *         before each test. The `cy.session()` command will also clear the page and current browser context when creating
+     *         or restoring the browser session.
+     *  - off - The current browser state will persist between tests. The page does not clear before the test and cookies, local
+     *          storage and session storage will be available in the next test. The `cy.session()` command will only clear the
+     *          current browser context when creating or restoring the browser session - the current page will not clear.
+     *
+     * Tradeoffs:
+     *      Turning test isolation off may improve performance of end-to-end tests, however, previous tests could impact the
+     *      browser state of the next test and cause inconsistency when using .only(). Be mindful to write isolated tests when
+     *      test isolation is off. If a test in the suite impacts the state of other tests and it were to fail, you could see
+     *      misleading errors in later tests which makes debugging clunky. See the [documentation](https://on.cypress.io/test-isolation)
+     *      for more information.
+     *
+     * @default 'on'
+     */
+    testIsolation: 'on' | 'off'
+    /**
      * Path to folder where videos will be saved after a headless or CI run
      * @default "cypress/videos"
      */
@@ -2870,11 +2816,6 @@ declare namespace Cypress {
      */
     experimentalInteractiveRunEvents: boolean
     /**
-     * Enables cross-origin and improved session support, including the `cy.origin` and `cy.session` commands. See https://on.cypress.io/origin and https://on.cypress.io/session.
-     * @default false
-     */
-    experimentalSessionAndOrigin: boolean
-    /**
      * Whether Cypress will search for and replace obstructive code in third party .js or .html files.
      * NOTE: Setting this flag to true removes Subresource Integrity (SRI).
      * Please see https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity.
@@ -2884,10 +2825,20 @@ declare namespace Cypress {
      */
     experimentalModifyObstructiveThirdPartyCode: boolean
     /**
-     * Generate and save commands directly to your test suite by interacting with your app as an end user would.
+     * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.
      * @default false
      */
     experimentalSourceRewriting: boolean
+    /**
+     * Generate and save commands directly to your test suite by interacting with your app as an end user would.
+     * @default false
+     */
+    experimentalStudio: boolean
+    /**
+     * Adds support for testing in the WebKit browser engine used by Safari. See https://on.cypress.io/webkit-experiment for more information.
+     * @default false
+     */
+    experimentalWebKitSupport: boolean
     /**
      * Number of times to retry a failed test.
      * If a number is set, tests will retry in both runMode and openMode.
@@ -2981,13 +2932,6 @@ declare namespace Cypress {
      */
     isInteractive: boolean
     /**
-     * Whether Cypress will search for and replace
-     * obstructive JS code in .js or .html files.
-     *
-     * @see https://on.cypress.io/configuration#modifyObstructiveCode
-     */
-    modifyObstructiveCode: boolean
-    /**
      * The platform Cypress is running on.
      */
     platform: 'linux' | 'darwin' | 'win32'
@@ -3000,6 +2944,7 @@ declare namespace Cypress {
     // Internal or Unlisted at server/lib/config_options
     namespace: string
     projectRoot: string
+    repoRoot: string | null
     devServerPublicPathRoute: string
     cypressBinaryRoot: string
   }
@@ -3033,11 +2978,9 @@ declare namespace Cypress {
     socketIoRoute: string
     spec: Cypress['spec'] | null
     specs: Array<Cypress['spec']>
-    xhrRoute: string
-    xhrUrl: string
   }
 
-  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations' | 'experimentalSessionAndOrigin'>>, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
+  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>>, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
   }
@@ -3065,21 +3008,42 @@ declare namespace Cypress {
 
   type PickConfigOpt<T> = T extends keyof DefineDevServerConfig ? DefineDevServerConfig[T] : any
 
+  interface AngularDevServerProjectConfig {
+    root: string,
+    sourceRoot: string,
+    buildOptions: Record<string, any>
+  }
+
   type DevServerFn<ComponentDevServerOpts = any> = (cypressDevServerConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
+
+  type ConfigHandler<T> = T
+    | (() => T | Promise<T>)
 
   type DevServerConfigOptions = {
     bundler: 'webpack'
-    framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next' | 'angular'
-    webpackConfig?: PickConfigOpt<'webpackConfig'>
+    framework: 'react' | 'vue' | 'vue-cli' | 'nuxt' | 'create-react-app' | 'next' | 'svelte'
+    webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>
   } | {
     bundler: 'vite'
-    framework: 'react' | 'vue'
-    viteConfig?: Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>
+    framework: 'react' | 'vue' | 'svelte'
+    viteConfig?: ConfigHandler<Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>>
+  } | {
+    bundler: 'webpack',
+    framework: 'angular',
+    webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>,
+    options?: {
+      projectConfig: AngularDevServerProjectConfig
+    }
   }
 
-  interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl' | 'experimentalSessionAndOrigin'> {
+  interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl' | 'experimentalStudio'> {
     devServer: DevServerFn<ComponentDevServerOpts> | DevServerConfigOptions
     devServerConfig?: ComponentDevServerOpts
+    /**
+     * Runs all component specs in a single tab, trading spec isolation for faster run mode execution.
+     * @default false
+     */
+    experimentalSingleTabRunMode?: boolean
   }
 
   /**
@@ -3091,7 +3055,12 @@ declare namespace Cypress {
    * Takes ComponentDevServerOpts to track the signature of the devServerConfig for the provided `devServer`,
    * so we have proper completion for `devServerConfig`
    */
-  type ConfigOptions<ComponentDevServerOpts = any> = Partial<UserConfigOptions<ComponentDevServerOpts>>
+  type ConfigOptions<ComponentDevServerOpts = any> = Partial<UserConfigOptions<ComponentDevServerOpts>> & {
+    /**
+     * Hosts mappings to IP addresses.
+     */
+     hosts?: null | {[key: string]: string}
+  }
 
   interface PluginConfigOptions extends ResolvedConfigOptions, RuntimeConfigOptions {
     /**
@@ -3254,28 +3223,6 @@ declare namespace Cypress {
 
   interface SelectOptions extends Loggable, Timeoutable, Forceable {
     interval: number
-  }
-
-  /**
-   * Setting default options for cy.server()
-   * @see https://on.cypress.io/server
-   */
-  interface ServerOptions {
-    delay: number
-    method: HttpMethod
-    status: number
-    headers: object
-    response: any
-    onRequest(...args: any[]): void
-    onResponse(...args: any[]): void
-    onAbort(...args: any[]): void
-    enable: boolean
-    force404: boolean
-    urlMatchingOptions: object
-    ignore(xhr: Request): void
-    onAnyRequest(route: RouteOptions, proxy: any): void
-    onAnyResponse(route: RouteOptions, proxy: any): void
-    onAnyAbort(route: RouteOptions, proxy: any): void
   }
 
   interface Session {
@@ -5469,6 +5416,7 @@ declare namespace Cypress {
     extensions: string[]
     preferences: { [key: string]: any }
     args: string[]
+    env: { [key: string]: any }
   }
 
   interface Dimensions {
@@ -5791,6 +5739,26 @@ declare namespace Cypress {
      *   cy.clock().invoke('restore')
      */
     restore(): void
+    /**
+     * Change the time without invoking any timers.
+     *
+     * Default value with no argument or undefined is 0.
+     *
+     * This can be useful if you need to change the time by an hour
+     * while there is a setInterval registered that may otherwise run thousands
+     * of times.
+     * @see https://on.cypress.io/clock
+     * @example
+     *   cy.clock()
+     *   cy.visit('/')
+     *   ...
+     *   cy.clock().then(clock => {
+     *     clock.setSystemTime(60 * 60 * 1000)
+     *   })
+     *   // or use this shortcut
+     *   cy.clock().invoke('setSystemTime', 60 * 60 * 1000)
+     */
+    setSystemTime(now?: number | Date): void
   }
 
   interface Cookie {
@@ -5891,28 +5859,6 @@ declare namespace Cypress {
   interface Viewport {
     viewportWidth: number
     viewportHeight: number
-  }
-
-  interface WaitXHR {
-    duration: number
-    id: string
-    method: HttpMethod
-    request: {
-      body: string | ObjectLike
-      headers: ObjectLike
-    }
-    requestBody: WaitXHR['request']['body']
-    requestHeaders: WaitXHR['request']['headers']
-    response: {
-      body: string | ObjectLike
-      headers: ObjectLike
-    }
-    responseBody: WaitXHR['response']['body']
-    responseHeaders: WaitXHR['response']['headers']
-    status: number
-    statusMessage: string
-    url: string
-    xhr: XMLHttpRequest
   }
 
   type Encodings = 'ascii' | 'base64' | 'binary' | 'hex' | 'latin1' | 'utf8' | 'utf-8' | 'ucs2' | 'ucs-2' | 'utf16le' | 'utf-16le' | null

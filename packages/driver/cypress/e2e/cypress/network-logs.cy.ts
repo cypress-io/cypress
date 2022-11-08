@@ -46,7 +46,8 @@ describe('Network Logs', () => {
   }
 
   context('request logging', () => {
-    it('fetch log shows resource type, url, method, and status code and has expected snapshots and consoleProps', (done) => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23443
+    it.skip('fetch log shows resource type, url, method, and status code and has expected snapshots and consoleProps', (done) => {
       fetch('/some-url')
 
       // trigger: Cypress.Log() called
@@ -95,15 +96,15 @@ describe('Network Logs', () => {
 
             done()
           } catch (err) {
-            // eslint-disable-next-line no-console
-            console.log('assertion error, retrying', err)
+            done(new Error(err))
           }
         })
       })
     })
 
     // @see https://github.com/cypress-io/cypress/issues/18757 and https://github.com/cypress-io/cypress/issues/17656
-    it('xhr log has response body/status code when xhr response is logged first', {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23250
+    it.skip('xhr log has response body/status code when xhr response is logged first', {
       // TODO: unskip in Electron: https://cypress-io.atlassian.net/browse/UNIFY-1753
       browser: '!electron',
     }, (done) => {
@@ -132,8 +133,7 @@ describe('Network Logs', () => {
 
             done()
           } catch (err) {
-            // eslint-disable-next-line no-console
-            console.log('assertion error, retrying', err)
+            done(new Error(err))
           }
         })
 
@@ -154,7 +154,8 @@ describe('Network Logs', () => {
     })
 
     // @see https://github.com/cypress-io/cypress/issues/18757 and https://github.com/cypress-io/cypress/issues/17656
-    it('xhr log has response body/status code when xhr response is logged second', (done) => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23203
+    it.skip('xhr log has response body/status code when xhr response is logged second', (done) => {
       cy.visit('/fixtures/empty.html')
 
       cy.window()
@@ -180,8 +181,7 @@ describe('Network Logs', () => {
 
             done()
           } catch (err) {
-            // eslint-disable-next-line no-console
-            console.log('assertion error, retrying', err)
+            done(new Error(err))
           }
         })
 
@@ -266,7 +266,8 @@ describe('Network Logs', () => {
         .visit('/fixtures/empty.html')
       })
 
-      it('intercept log has consoleProps with intercept info', (done) => {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23420
+      it.skip('intercept log has consoleProps with intercept info', (done) => {
         cy.intercept('/some-url', 'stubbed response').as('alias')
         .then(() => {
           fetch('/some-url')
@@ -317,14 +318,14 @@ describe('Network Logs', () => {
             })
 
             done()
-          } catch (err) {
-            // eslint-disable-next-line no-console
-            console.error('assertion failed:', err)
+          } catch (error) {
+            done(new Error(error))
           }
         })
       })
 
-      it('works with forceNetworkError', () => {
+      // TODO(webkit): fix forceNetworkError and unskip
+      it('works with forceNetworkError', { browser: '!webkit' }, () => {
         const logs: any[] = []
 
         cy.on('log:added', (log) => {
@@ -460,121 +461,6 @@ describe('Network Logs', () => {
             }).as(alias)
           },
         ))
-      })
-    })
-
-    context('with cy.route()', () => {
-      context('flags', () => {
-        let $XMLHttpRequest
-
-        const testFlagXhr = (expectStatus, expectInterceptions, setupFn) => {
-          return testFlag(expectStatus, expectInterceptions, setupFn, (url) => {
-            const xhr = new $XMLHttpRequest()
-
-            xhr.open('GET', url)
-            xhr.send()
-          })
-        }
-
-        beforeEach(() => {
-          cy.visit('/fixtures/empty.html')
-          cy.window()
-          .then(({ XMLHttpRequest }) => {
-            $XMLHttpRequest = XMLHttpRequest
-          })
-        })
-
-        it('is unflagged when not routed', testFlagXhr(
-          undefined,
-          [],
-          () => {},
-        ))
-
-        it('spied flagged as expected', testFlagXhr(
-          undefined,
-          [{
-            command: 'route',
-            alias,
-            type: 'spy',
-          }],
-          () => {
-            cy.server()
-            cy.route(`${url}`).as(alias)
-          },
-        ))
-
-        it('stubbed flagged as expected', testFlagXhr(
-          undefined,
-          [{
-            command: 'route',
-            alias,
-            type: 'stub',
-          }],
-          () => {
-            cy.server()
-            cy.route(url, 'stubbed response').as(alias)
-          },
-        ))
-      })
-    })
-
-    context('filtering', () => {
-      let logs: Cypress.Log[] = []
-
-      beforeEach(() => {
-        Cypress.NetworkLogs.filter = Cypress.NetworkLogs.defaultFilter
-
-        logs = []
-        cy.on('log:added', (log) => {
-          if (!['request', 'xhr', 'route'].includes(log.name)) return
-
-          logs.push(log)
-        })
-      })
-
-      function sendXhr () {
-        return cy.window().then(({ XMLHttpRequest }) => {
-          const xhr = new XMLHttpRequest()
-
-          xhr.open('GET', '/foo-xhr')
-          xhr.send()
-
-          return new Promise<void>((resolve) => {
-            xhr.addEventListener('loadend', () => resolve())
-          })
-        })
-      }
-
-      function sendFetch () {
-        return cy.window().then(({ fetch }) => {
-          return fetch('/foo-fetch')
-        })
-      }
-
-      it('can filter out XHR', () => {
-        Cypress.NetworkLogs.filter = (req) => req.resourceType !== 'xhr'
-        sendXhr()
-        .then(() => {
-          expect(logs).to.have.length(0)
-        })
-      })
-
-      it('can filter out fetch', () => {
-        Cypress.NetworkLogs.filter = (req) => req.resourceType !== 'fetch'
-        sendFetch()
-        .then(() => {
-          expect(logs).to.have.length(0)
-        })
-      })
-
-      it('can filter out intercept', () => {
-        Cypress.NetworkLogs.filter = (req) => !req.matchedIntercept
-
-        cy.intercept('/foo-fetch', 'boo')
-        .then(sendFetch)
-        .should(() => {
-          expect(logs).to.have.length(1)
-        })
       })
     })
   })

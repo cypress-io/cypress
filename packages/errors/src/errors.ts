@@ -9,6 +9,7 @@ import type { BreakingErrResult } from '@packages/config'
 import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUtils'
 import { errPartial, errTemplate, fmt, theme, PartialErr } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
+import type { DependencyToInstall } from '@packages/scaffold-config'
 import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
 
 const ansi_up = new AU()
@@ -85,9 +86,15 @@ export const AllCypressErrors = {
   },
   CHROME_WEB_SECURITY_NOT_SUPPORTED: (browser: string) => {
     return errTemplate`\
-        Your project has set the configuration option: ${fmt.highlight(`chromeWebSecurity`)} to ${fmt.highlightTertiary(`false`)}
+        Your project has set the configuration option: \`chromeWebSecurity\` to \`false\`.
 
         This option will not have an effect in ${fmt.off(_.capitalize(browser))}. Tests that rely on web security being disabled will not run as expected.`
+  },
+  BROWSER_UNSUPPORTED_LAUNCH_OPTION: (browser: string, options: string[]) => {
+    return errTemplate`\
+        Warning: The following browser launch options were provided but are not supported by ${fmt.highlightSecondary(browser)}
+
+        ${fmt.listItems(options)}`
   },
   BROWSER_NOT_FOUND_BY_NAME: (browser: string, foundBrowsersStr: string[]) => {
     let canarySuffix: PartialErr | null = null
@@ -476,7 +483,7 @@ export const AllCypressErrors = {
 
         It may have been recently revoked by you or another user.
 
-        Please log into the Dashboard to see the valid record keys.
+        Please log into the Dashboard to see the valid Record Keys.
 
         https://on.cypress.io/dashboard/projects/${fmt.off(projectId)}`
   },
@@ -563,7 +570,6 @@ export const AllCypressErrors = {
         This can happen for a number of different reasons:
 
         - You wrote an endless loop and you must fix your own code
-        - There is a memory leak in Cypress (unlikely but possible)
         - You are running Docker (there is an easy fix for this: see link below)
         - You are running lots of tests on a memory intense application
         - You are running in a memory starved VM environment
@@ -573,6 +579,20 @@ export const AllCypressErrors = {
         You can learn more including how to fix Docker here:
 
         https://on.cypress.io/renderer-process-crashed`
+  },
+  BROWSER_CRASHED: (browser: string, code: string | number, signal: string) => {
+    return errTemplate`\
+        We detected that the ${fmt.highlight(browser)} process just crashed with code '${fmt.highlight(code)}' and signal '${fmt.highlight(signal)}'.
+
+        We have failed the current test and have relaunched ${fmt.highlight(browser)}.
+
+        This can happen for many different reasons:
+
+        - You wrote an endless loop and you must fix your own code
+        - You are running lots of tests on a memory intense application
+        - You are running in a memory starved VM environment
+        - There are problems with your GPU / GPU drivers
+        - There are browser bugs`
   },
   AUTOMATION_SERVER_DISCONNECTED: () => {
     return errTemplate`The automation client disconnected. Cannot continue running tests.`
@@ -1052,9 +1072,20 @@ export const AllCypressErrors = {
   },
   EXPERIMENTAL_SESSION_SUPPORT_REMOVED: () => {
     return errTemplate`\
-        The ${fmt.highlight(`experimentalSessionSupport`)} configuration option was removed in ${fmt.cypressVersion(`9.6.0`)} and replaced with ${fmt.highlight(`experimentalSessionAndOrigin`)}. Please update your config to use ${fmt.highlight(`experimentalSessionAndOrigin`)} instead.
+        The ${fmt.highlight(`experimentalSessionSupport`)} configuration option was removed in ${fmt.cypressVersion(`9.6.0`)}.
+
+        You can safely remove this option from your config.
         
         https://on.cypress.io/session`
+  },
+  EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED: () => {
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalSessionAndOrigin`)} configuration option was removed in ${fmt.cypressVersion(`12.0.0`)}.
+
+        You can safely remove this option from your config.
+        
+        https://on.cypress.io/session
+        https://on.cypress.io/origin`
   },
   EXPERIMENTAL_SHADOW_DOM_REMOVED: () => {
     return errTemplate`\
@@ -1083,6 +1114,18 @@ export const AllCypressErrors = {
         Your feedback will help us factor in product decisions that may see Studio return in a future release.
 
         You can safely remove the ${fmt.highlight(`experimentalStudio`)} configuration option from your config.`
+  },
+  EXPERIMENTAL_SINGLE_TAB_RUN_MODE: () => {
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalSingleTabRunMode`)} experiment is currently only supported for Component Testing.
+
+        If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/single-tab-run-mode`
+  },
+  EXPERIMENTAL_STUDIO_E2E_ONLY: () => {
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalStudio`)} experiment is currently only supported for End to End Testing.
+
+        If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/studio-beta`
   },
   FIREFOX_GC_INTERVAL_REMOVED: () => {
     return errTemplate`\
@@ -1406,7 +1449,7 @@ export const AllCypressErrors = {
 
   DASHBOARD_GRAPHQL_ERROR: (err: Error) => {
     return errTemplate`
-      We received an unexpected error response from the request to the Cypress dashboard:
+      We received an unexpected error response from the request to the Cypress Dashboard:
 
       ${fmt.stringify(err.message)}
     `
@@ -1559,6 +1602,24 @@ export const AllCypressErrors = {
       Please run ‘cypress open’ and choose your testing type to automatically update your configuration file.
 
       https://on.cypress.io/configuration
+    `
+  },
+
+  COMPONENT_TESTING_MISMATCHED_DEPENDENCIES: (dependencies: DependencyToInstall[]) => {
+    const deps = dependencies.map<string>((dep) => {
+      if (dep.detectedVersion) {
+        return `\`${dep.dependency.installer}\`. Expected ${dep.dependency.minVersion}, found ${dep.detectedVersion}.`
+      }
+
+      return `\`${dep.dependency.installer}\`. Expected ${dep.dependency.minVersion} but dependency was not found.`
+    })
+
+    return errTemplate`
+      We detected that you have versions of dependencies that are not officially supported:
+
+      ${fmt.listItems(deps, { prefix: ' - ' })}
+
+      If you're experiencing problems, downgrade dependencies and restart Cypress.
     `
   },
 } as const

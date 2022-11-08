@@ -1,5 +1,5 @@
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
-import { detectFramework, WIZARD_FRAMEWORKS, WIZARD_BUNDLERS, commandsFileBody, supportFileComponent, supportFileE2E } from '@packages/scaffold-config'
+import { detectFramework, WIZARD_FRAMEWORKS, commandsFileBody, supportFileComponent, supportFileE2E, WizardBundler, WizardFrontendFramework } from '@packages/scaffold-config'
 import assert from 'assert'
 import path from 'path'
 import Debug from 'debug'
@@ -23,7 +23,7 @@ export class WizardActions {
     return this.ctx.wizardData
   }
 
-  setFramework (framework: typeof WIZARD_FRAMEWORKS[number] | null): void {
+  setFramework (framework: WizardFrontendFramework | null): void {
     const next = WIZARD_FRAMEWORKS.find((x) => x.type === framework?.type)
 
     this.ctx.update((coreData) => {
@@ -51,7 +51,7 @@ export class WizardActions {
     }
   }
 
-  setBundler (bundler: typeof WIZARD_BUNDLERS[number] | null) {
+  setBundler (bundler: WizardBundler | null) {
     this.ctx.update((coreData) => {
       coreData.wizard.chosenBundler = bundler
     })
@@ -80,14 +80,14 @@ export class WizardActions {
     return this.ctx.coreData.wizard
   }
 
-  initialize () {
+  async initialize () {
     if (!this.ctx.currentProject) {
       return
     }
 
     this.resetWizard()
 
-    const detected = detectFramework(this.ctx.currentProject)
+    const detected = await detectFramework(this.ctx.currentProject)
 
     debug('detected %o', detected)
 
@@ -196,7 +196,9 @@ export class WizardActions {
       description = 'The support file that is bundled and loaded before each E2E spec.'
     } else if (fileName === 'component') {
       assert(this.ctx.coreData.wizard.chosenFramework)
-      fileContent = supportFileComponent(language, this.ctx.coreData.wizard.chosenFramework)
+      const mountModule = await this.ctx.coreData.wizard.chosenFramework.mountModule(this.projectRoot)
+
+      fileContent = supportFileComponent(language, mountModule)
       description = 'The support file that is bundled and loaded before each component testing spec.'
     }
 
@@ -227,6 +229,7 @@ export class WizardActions {
       testingType: 'component',
       bundler: this.ctx.coreData.wizard.chosenBundler?.package ?? 'webpack',
       framework: this.ctx.coreData.wizard.chosenFramework?.configFramework,
+      specPattern: this.ctx.coreData.wizard.chosenFramework?.specPattern,
     }
 
     const result = await addTestingTypeToCypressConfig({
@@ -292,7 +295,7 @@ export class WizardActions {
     }
   }
 
-  private async scaffoldComponentIndexHtml (chosenFramework: typeof WIZARD_FRAMEWORKS[number]): Promise<NexusGenObjects['ScaffoldedFile']> {
+  private async scaffoldComponentIndexHtml (chosenFramework: WizardFrontendFramework): Promise<NexusGenObjects['ScaffoldedFile']> {
     const componentIndexHtmlPath = path.join(this.projectRoot, 'cypress', 'support', 'component-index.html')
 
     await this.ensureDir('support')

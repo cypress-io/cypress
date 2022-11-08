@@ -274,18 +274,6 @@ describe('app/background', () => {
   })
 
   context('add header to aut iframe requests', () => {
-    const withExperimentalFlagOn = {
-      experimentalSessionAndOrigin: true,
-    }
-
-    it('does not listen to `onBeforeSendHeaders` if experimental flag is off', async function () {
-      sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
-
-      await this.connect()
-
-      expect(browser.webRequest.onBeforeSendHeaders.addListener).not.to.be.called
-    })
-
     it('does not add header if it is the top frame', async function () {
       const details = {
         parentFrameId: -1,
@@ -293,11 +281,11 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect(withExperimentalFlagOn)
+      await this.connect()
 
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
-      expect(result).to.be.undefined
+      expect(result).to.deep.equal({ requestHeaders: [] })
     })
 
     it('does not add header if it is a nested frame', async function () {
@@ -307,11 +295,11 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect(withExperimentalFlagOn)
+      await this.connect()
 
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
-      expect(result).to.be.undefined
+      expect(result).to.deep.equal({ requestHeaders: [] })
     })
 
     it('does not add header if it is not a sub frame request', async function () {
@@ -322,11 +310,11 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect(withExperimentalFlagOn)
+      await this.connect()
 
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
-      expect(result).to.be.undefined
+      expect(result).to.deep.equal({ requestHeaders: [] })
     })
 
     it('does not add header if it is a spec frame request', async function () {
@@ -338,10 +326,10 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect(withExperimentalFlagOn)
+      await this.connect()
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
-      expect(result).to.be.undefined
+      expect(result).to.deep.equal({ requestHeaders: [] })
     })
 
     it('appends X-Cypress-Is-AUT-Frame header to AUT iframe request', async function () {
@@ -356,7 +344,7 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect(withExperimentalFlagOn)
+      await this.connect()
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
       expect(result).to.deep.equal({
@@ -373,12 +361,66 @@ describe('app/background', () => {
       })
     })
 
+    it('appends X-Cypress-Is-XHR-Or-Fetch header to request if the resourceType is "xmlhttprequest"', async function () {
+      const details = {
+        parentFrameId: 0,
+        type: 'xmlhttprequest',
+        url: 'http://localhost:3000/index.html',
+        requestHeaders: [
+          { name: 'X-Foo', value: 'Bar' },
+        ],
+      }
+
+      sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
+
+      await this.connect()
+      const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
+
+      expect(result).to.deep.equal({
+        requestHeaders: [
+          {
+            name: 'X-Foo',
+            value: 'Bar',
+          },
+          {
+            name: 'X-Cypress-Is-XHR-Or-Fetch',
+            value: 'true',
+          },
+        ],
+      })
+    })
+
+    it('does not append X-Cypress-Is-XHR-Or-Fetch header to request if the resourceType is not an "xmlhttprequest"', async function () {
+      const details = {
+        parentFrameId: 0,
+        type: 'sub_frame',
+        url: 'http://localhost:3000/index.html',
+        requestHeaders: [
+          { name: 'X-Foo', value: 'Bar' },
+        ],
+      }
+
+      sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
+
+      await this.connect()
+      const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
+
+      expect(result).to.not.deep.equal({
+        requestHeaders: [
+          {
+            name: 'X-Cypress-Is-XHR-Or-Fetch',
+            value: 'true',
+          },
+        ],
+      })
+    })
+
     it('does not add before-headers listener if in non-Firefox browser', async function () {
       browser.runtime.getBrowserInfo = undefined
 
       const onBeforeSendHeaders = sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect(withExperimentalFlagOn)
+      await this.connect()
 
       expect(onBeforeSendHeaders).not.to.be.called
     })

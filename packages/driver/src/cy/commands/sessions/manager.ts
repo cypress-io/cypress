@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { $Location } from '../../../cypress/location'
-
+import type { ServerSessionData } from '@packages/types'
 import {
   getCurrentOriginStorage,
   setPostMessageLocalStorage,
@@ -10,10 +10,22 @@ import {
 type ActiveSessions = Cypress.Commands.Session.ActiveSessions
 type SessionData = Cypress.Commands.Session.SessionData
 
+const getLogProperties = (displayName) => {
+  return {
+    name: 'sessions_manager',
+    displayName,
+    message: '',
+    event: 'true',
+    state: 'passed',
+    type: 'system',
+    snapshot: false,
+  }
+}
+
 export default class SessionsManager {
   Cypress
   cy
-  currentTestRegisteredSessions = new Map()
+  registeredSessions = new Map()
 
   constructor (Cypress, cy) {
     this.Cypress = Cypress
@@ -108,9 +120,11 @@ export default class SessionsManager {
         id: options.id,
         cookies: null,
         localStorage: null,
+        sessionStorage: null,
         setup: options.setup,
         hydrated: false,
         validate: options.validate,
+        cacheAcrossSpecs: !!options.cacheAcrossSpecs,
       }
 
       this.setActiveSession({ [sess_state.id]: sess_state })
@@ -120,11 +134,18 @@ export default class SessionsManager {
 
     clearAllSavedSessions: async () => {
       this.clearActiveSessions()
+      this.registeredSessions.clear()
+      const clearAllSessions = true
 
-      return this.Cypress.backend('clear:session', null)
+      return this.Cypress.backend('clear:sessions', clearAllSessions)
     },
 
     clearCurrentSessionData: async () => {
+      // this prevents a log occurring when we clear session in-between tests
+      if (this.cy.state('duringUserTestExecution')) {
+        this.Cypress.log(getLogProperties('Clear cookies, localStorage and sessionStorage'))
+      }
+
       window.localStorage.clear()
       window.sessionStorage.clear()
 
@@ -134,8 +155,15 @@ export default class SessionsManager {
       ])
     },
 
+    saveSessionData: async (data) => {
+      this.setActiveSession({ [data.id]: data })
+
+      // persist the session to the server. Only matters in openMode OR if there's a top navigation on a future test.
+      // eslint-disable-next-line no-console
+      return this.Cypress.backend('save:session', { ...data, setup: data.setup.toString(), validate: data.validate?.toString() }).catch(console.error)
+    },
+
     setSessionData: async (data) => {
-      await this.sessions.clearCurrentSessionData()
       const allHtmlOrigins = await this.getAllHtmlOrigins()
 
       let _localStorage = data.localStorage || []
@@ -153,10 +181,8 @@ export default class SessionsManager {
 
       await Promise.all([
         this.sessions.setStorage({ localStorage: _localStorage, sessionStorage: _sessionStorage }),
-        this.Cypress.automation('clear:cookies', null),
+        this.sessions.setCookies(data.cookies),
       ])
-
-      await this.sessions.setCookies(data.cookies)
     },
 
     getCookies: async () => {
@@ -183,7 +209,7 @@ export default class SessionsManager {
       }
     },
 
-    getSession: (id: string) => {
+    getSession: (id: string): Promise<ServerSessionData> => {
       return this.Cypress.backend('get:session', id)
     },
 
