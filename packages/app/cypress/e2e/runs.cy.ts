@@ -848,9 +848,10 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
   })
 
+  const RUNNING_COUNT = 3
+
   describe('refetching', () => {
     let obj: {toCall?: Function} = {}
-    const RUNNING_COUNT = 3
 
     beforeEach(() => {
       cy.scaffoldProject('component-tests')
@@ -874,7 +875,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
           const setTimeout = win.setTimeout
 
           // @ts-expect-error
-          win.setTimeout = function (fn, time) {
+          win.setTimeout = function (fn: () => void, time: number) {
             if (fn.name === 'fetchNewerRuns') {
               obj.toCall = fn
             } else {
@@ -885,7 +886,10 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
     })
 
-    it('should re-query for executing runs', () => {
+    // https://github.com/cypress-io/cypress/issues/24575
+    const itSkipIfWindows = Cypress.platform === 'win32' ? it.skip : it
+
+    itSkipIfWindows('should re-query for executing runs', () => {
       cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', RUNNING_COUNT).should('be.visible')
 
       cy.remoteGraphQLIntercept(async (obj) => {
@@ -918,7 +922,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       completeNext(1)
     })
 
-    it('should fetch newer runs and maintain them when navigating', () => {
+    itSkipIfWindows('should fetch newer runs and maintain them when navigating', () => {
       cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', RUNNING_COUNT).should('be.visible')
 
       cy.remoteGraphQLIntercept(async (obj) => {

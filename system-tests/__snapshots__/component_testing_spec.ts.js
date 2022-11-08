@@ -156,19 +156,20 @@ exports['React major versions with Webpack executes all of the tests for React v
 
 
   mount
+    ✓ does not error when rendering primitives
     teardown
       ✓ should mount
       ✓ should remove previous mounted component
 
 
-  2 passing
+  3 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
-  │ Passing:      2                                                                                │
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -200,9 +201,9 @@ exports['React major versions with Webpack executes all of the tests for React v
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  Rerendering.cy.jsx                       XX:XX        1        1        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  mount.cy.jsx                             XX:XX        2        2        -        -        - │
+  │ ✔  mount.cy.jsx                             XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        9        9        -        -        -  
+    ✔  All specs passed!                        XX:XX       10       10        -        -        -  
 
 
 `
@@ -365,19 +366,20 @@ exports['React major versions with Webpack executes all of the tests for React v
 
 
   mount
+    ✓ does not error when rendering primitives
     teardown
       ✓ should mount
       ✓ should remove previous mounted component
 
 
-  2 passing
+  3 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
-  │ Passing:      2                                                                                │
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -409,9 +411,9 @@ exports['React major versions with Webpack executes all of the tests for React v
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  Rerendering.cy.jsx                       XX:XX        1        1        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  mount.cy.jsx                             XX:XX        2        2        -        -        - │
+  │ ✔  mount.cy.jsx                             XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        9        9        -        -        -  
+    ✔  All specs passed!                        XX:XX       10       10        -        -        -  
 
 
 `
@@ -573,19 +575,20 @@ exports['React major versions with Vite executes all of the tests for React v17 
 
 
   mount
+    ✓ does not error when rendering primitives
     teardown
       ✓ should mount
       ✓ should remove previous mounted component
 
 
-  2 passing
+  3 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
-  │ Passing:      2                                                                                │
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -617,9 +620,9 @@ exports['React major versions with Vite executes all of the tests for React v17 
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  Rerendering.cy.jsx                       XX:XX        1        1        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  mount.cy.jsx                             XX:XX        2        2        -        -        - │
+  │ ✔  mount.cy.jsx                             XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        9        9        -        -        -  
+    ✔  All specs passed!                        XX:XX       10       10        -        -        -  
 
 
 `
@@ -781,19 +784,20 @@ exports['React major versions with Vite executes all of the tests for React v18 
 
 
   mount
+    ✓ does not error when rendering primitives
     teardown
       ✓ should mount
       ✓ should remove previous mounted component
 
 
-  2 passing
+  3 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
-  │ Passing:      2                                                                                │
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -825,9 +829,9 @@ exports['React major versions with Vite executes all of the tests for React v18 
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  Rerendering.cy.jsx                       XX:XX        1        1        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  mount.cy.jsx                             XX:XX        2        2        -        -        - │
+  │ ✔  mount.cy.jsx                             XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        9        9        -        -        -  
+    ✔  All specs passed!                        XX:XX       10       10        -        -        -  
 
 
 `

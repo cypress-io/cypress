@@ -40,12 +40,6 @@ export const makeMountFn = (
 
   mountCleanup = internalMountOptions.cleanup
 
-  // Get the display name property via the component constructor
-  // @ts-ignore FIXME
-  const componentName = getDisplayName(jsx.type)
-
-  const jsxComponentName = `<${componentName} ... />`
-
   return cy
   .then(() => {
     const reactDomToUse = internalMountOptions.reactDom
@@ -99,6 +93,12 @@ export const makeMountFn = (
       .wait(0, { log: false })
       .then(() => {
         if (options.log !== false) {
+          // Get the display name property via the component constructor
+          // @ts-ignore FIXME
+          const componentName = getDisplayName(jsx)
+
+          const jsxComponentName = `<${componentName} ... />`
+
           Cypress.log({
             name: type,
             type: 'parent',
@@ -108,7 +108,7 @@ export const makeMountFn = (
             consoleProps: () => {
               return {
               // @ts-ignore protect the use of jsx functional components use ReactNode
-                props: jsx.props,
+                props: jsx?.props,
                 description: type === 'mount' ? 'Mounts React component' : 'Rerenders mounted React component',
                 home: 'https://github.com/cypress-io/cypress',
               }
