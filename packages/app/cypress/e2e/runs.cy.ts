@@ -886,6 +886,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/24575
     const itSkipIfWindows = Cypress.platform === 'win32' ? it.skip : it
 
     itSkipIfWindows('should re-query for executing runs', () => {
