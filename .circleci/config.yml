@@ -27,6 +27,7 @@ mainBuildFilters: &mainBuildFilters
     branches:
       only:
         - develop
+        - lmiller-xiaolong/issue-23636
         - fix-ci-deps
         - issue-23843_electron_21_upgrade
 
@@ -132,7 +133,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "issue-23843_electron_21_upgrade" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "lmiller-xiaolong-issue-23636" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
