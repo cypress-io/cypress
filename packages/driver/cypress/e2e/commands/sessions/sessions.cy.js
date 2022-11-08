@@ -1613,7 +1613,7 @@ describe('cy.session', { retries: 0 }, () => {
 
       it('throws when setup function has a failing assertion', function (done) {
         cy.once('fail', (err) => {
-          expect(lastLog.get('error')).to.eq(err)
+          expect(err.message).to.contain(lastLog.get('error').message)
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.contain('This error occurred while creating the session. Because the session setup failed, we failed the test.')
           expect(lastSessionLog.get('state')).to.eq('failed')
