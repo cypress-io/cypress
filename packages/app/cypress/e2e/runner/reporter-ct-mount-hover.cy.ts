@@ -13,7 +13,7 @@ const PROJECTS: {projectName: ProjectDirs[number], test: string}[] = [
 ]
 
 // These are especially flaky on windows, skipping them there.
-const describeSkipIfWindows = Cypress.platform === 'win32' ? it.skip : it
+const describeSkipIfWindows = Cypress.platform === 'win32' ? describe.skip : it
 
 // TODO: Add these tests to another cy-in-cy framework test to reduce CI cost as these scaffolding is expensive
 for (const { projectName, test } of PROJECTS) {
