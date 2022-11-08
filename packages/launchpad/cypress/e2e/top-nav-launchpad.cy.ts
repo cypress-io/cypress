@@ -472,7 +472,7 @@ describe('Launchpad Top Nav Workflows', () => {
           cy.findByTestId(headerBarId).findByTestId('user-avatar-title').should('be.visible')
         })
 
-        it('if the project has no runs, shows "record your first run" prompt after clicking', () => {
+        it('if the project has no runs, shows "record your first run" prompt after choosing testing type', () => {
           cy.remoteGraphQLIntercept((obj) => {
             if (obj.result?.data?.cloudProjectBySlug?.runs?.nodes?.length) {
               obj.result.data.cloudProjectBySlug.runs.nodes = []
@@ -483,10 +483,11 @@ describe('Launchpad Top Nav Workflows', () => {
 
           cy.contains('Component Testing').click()
 
+          cy.contains(defaultMessages.setupWizard.chooseBrowser.title).should('be.visible')
+
           mockLogInActionsForUser(mockUserNoName)
 
           logIn({ expectedNextStepText: 'Continue', displayName: mockUserNoName.email })
-
           cy.contains('[data-cy=standard-modal] h2', defaultMessages.specPage.banners.record.title).should('be.visible')
           cy.contains('[data-cy=standard-modal]', defaultMessages.specPage.banners.record.content).should('be.visible')
           cy.contains('button', 'Copy').should('be.visible')
