@@ -31,7 +31,7 @@
       v-if="hasOptions && isOpen"
       :type="type"
       :options="options"
-      :set-popper-element="setPopperElement"
+      @set-popper-element="setPopperElement"
       @add-assertion="addAssertion"
     />
   </div>

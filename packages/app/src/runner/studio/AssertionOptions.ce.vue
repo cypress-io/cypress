@@ -32,11 +32,11 @@ import { onMounted, ref, nextTick, Ref } from 'vue'
 const props = defineProps<{
   type: string
   options: any
-  setPopperElement: any
 }>()
 
 const emit = defineEmits<{
   (eventName: 'addAssertion', value: { type: string, name: string, value: string })
+  (eventName: 'setPopperElement', value: HTMLElement)
 }>()
 
 const truncate = (str) => {
@@ -58,7 +58,7 @@ onMounted(() => {
       placement: 'right-start',
     })
 
-    props.setPopperElement(popperEl)
+    emit('setPopperElement', popperEl)
   })
 })
 
