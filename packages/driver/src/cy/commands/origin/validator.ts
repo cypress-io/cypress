@@ -87,11 +87,15 @@ export class Validator {
     // Users would be better off not using cy.origin if the origin is part of the same super domain.
     if (cors.urlMatchesPolicyBasedOnDomain(originLocation.href, specHref)) {
       // this._isSameSuperDomainOriginWithExceptions({ originLocation, specLocation })) {
+
+      const policy = cors.policyForDomain(originLocation.href)
+
       $errUtils.throwErrByPath('origin.invalid_url_argument_same_origin', {
         onFail: this.log,
         args: {
           originUrl: $utils.stringify(urlOrDomain),
           topOrigin: (window.location.origin),
+          policy,
         },
       })
     }

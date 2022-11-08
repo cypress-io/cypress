@@ -1191,9 +1191,9 @@ export default {
     invalid_url_argument: {
       message: `${cmd('origin')} requires the first argument to be either a url (\`https://www.example.com/path\`) or a domain name (\`example.com\`). Query parameters are not allowed. You passed: \`{{arg}}\``,
     },
-    invalid_url_argument_same_origin ({ originUrl, topOrigin }) {
+    invalid_url_argument_same_origin ({ originUrl, topOrigin, policy }) {
       return stripIndent`\
-      ${cmd('origin')} requires the first argument to be either a url or a domain name that is cross origin when compared to the top url. You passed \`${originUrl}\` to the origin command, while top is at \`${topOrigin}\`.
+      ${cmd('origin')} requires the first argument to be a different ${policy === 'same-origin' ? 'origin' : 'domain' } than top. You passed \`${originUrl}\` to the origin command, while top is at \`${topOrigin}\`.
 
       Either the intended page was not visited prior to running the cy.origin block or the cy.origin block may not be needed at all.
       `

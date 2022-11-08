@@ -159,6 +159,17 @@ export const urlSameSiteMatch = (frameUrl: string, topUrl: string): boolean => {
 }
 
 /**
+ * Returns the policy that will be used for the specified url.
+ * @param url - the url to check the policy against.
+ * @returns a Policy string.
+ */
+export const policyForDomain = (url: string): Policy => {
+  const obj = parseUrlIntoHostProtocolDomainTldPort(url)
+
+  return strictSameOriginDomains.includes(`${obj.domain}.${obj.tld}`) ? 'same-origin' : 'same-super-domain-origin'
+}
+
+/**
  * Checks the supplied url's against the determined policy.
  * The policy is same-super-domain-origin unless the domain is in the list of strict same origin domains,
  * in which case the policy is 'same-origin'
@@ -167,11 +178,8 @@ export const urlSameSiteMatch = (frameUrl: string, topUrl: string): boolean => {
  * @returns boolean, true if matching, false if not.
  */
 export const urlMatchesPolicyBasedOnDomain = (frameUrl: string, topUrl: string): boolean => {
-  const obj = parseUrlIntoHostProtocolDomainTldPort(frameUrl)
-  const policy = strictSameOriginDomains.includes(`${obj.domain}.${obj.tld}`) ? 'same-origin' : 'same-super-domain-origin'
-
   return urlMatchesPolicy({
-    policy,
+    policy: policyForDomain(frameUrl),
     frameUrl,
     topUrl,
   })

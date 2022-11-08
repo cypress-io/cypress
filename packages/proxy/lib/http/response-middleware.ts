@@ -259,11 +259,11 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     }
 
     // NOTE: Only inject fullCrossOrigin if the super domain origins do not match in order to keep parity with cypress application reloads
-    const isCrossSuperDomainOrigin = !reqMatchesPolicyBasedOnDomain(this.req, this.remoteStates.getPrimary())
+    const urlDoesNotMatchPolicyBasedOnDomain = !reqMatchesPolicyBasedOnDomain(this.req, this.remoteStates.getPrimary())
     const isAUTFrame = this.req.isAUTFrame
     const isHTMLLike = isHTML || isRenderedHTML
 
-    if (this.config.experimentalSessionAndOrigin && isCrossSuperDomainOrigin && isAUTFrame && isHTMLLike) {
+    if (this.config.experimentalSessionAndOrigin && urlDoesNotMatchPolicyBasedOnDomain && isAUTFrame && isHTMLLike) {
       this.debug('- cross origin injection')
 
       return 'fullCrossOrigin'

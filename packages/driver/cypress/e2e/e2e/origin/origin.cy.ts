@@ -24,7 +24,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     cy.visit('https://accounts.google.com')
     cy.origin('https://accounts.google.com', () => {
       cy.window().then((win) => {
-        expect(win.Cypress).to.not.be.undefined
+        expect(win.Cypress).to.exist
       })
     })
   })
@@ -43,7 +43,7 @@ describe('cy.origin', { browser: '!webkit' }, () => {
     cy.origin('https://accounts.google.com', () => {
       cy.visit('https://accounts.google.com')
       cy.window().then((win) => {
-        expect(win.Cypress).to.not.be.undefined
+        expect(win.Cypress).to.exist
       })
     })
   })
