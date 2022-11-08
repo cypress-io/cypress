@@ -173,10 +173,6 @@ export default {
         queries[name] = fn
         cy.addQuery({ name, fn })
       },
-
-      overwriteQuery (name, fn) {
-        cy.addQuery({ name, fn })
-      },
     }
 
     addingBuiltIns = true

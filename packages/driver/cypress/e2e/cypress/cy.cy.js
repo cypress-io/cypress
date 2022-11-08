@@ -481,32 +481,32 @@ describe('driver/src/cypress/cy', () => {
   }, () => {
     it('throws when queries return a promise', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.include('`cy.aQuery()` failed because you returned a promise from a query.\n\nQueries must be synchronous functions that return a function. You cannot invoke commands or return promises inside of them.')
+        expect(err.message).to.include('`cy.promiseQuery()` failed because you returned a promise from a query.\n\nQueries must be synchronous functions that return a function. You cannot invoke commands or return promises inside of them.')
         done()
       })
 
-      Cypress.Commands.overwriteQuery('aQuery', () => Promise.resolve())
-      cy.aQuery()
+      Cypress.Commands.addQuery('promiseQuery', () => Promise.resolve())
+      cy.promiseQuery()
     })
 
     it('throws when a query returns a non-function value', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.include('`cy.aQuery()` failed because you returned a value other than a function from a query.\n\nQueries must be synchronous functions that return a function.\n\nThe returned value was:\n\n  > `1`')
+        expect(err.message).to.include('`cy.badReturnQuery()` failed because you returned a value other than a function from a query.\n\nQueries must be synchronous functions that return a function.\n\nThe returned value was:\n\n  > `1`')
         done()
       })
 
-      Cypress.Commands.overwriteQuery('aQuery', () => 1)
-      cy.aQuery()
+      Cypress.Commands.addQuery('badReturnQuery', () => 1)
+      cy.badReturnQuery()
     })
 
     it('throws when a command is invoked inside a query', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.include('`cy.aQuery()` failed because you invoked a command inside a query.\n\nQueries must be synchronous functions that return a function. You cannot invoke commands or return promises inside of them.\n\nThe command invoked was:\n\n  > `cy.visit()`')
+        expect(err.message).to.include('`cy.commandQuery()` failed because you invoked a command inside a query.\n\nQueries must be synchronous functions that return a function. You cannot invoke commands or return promises inside of them.\n\nThe command invoked was:\n\n  > `cy.visit()`')
         done()
       })
 
-      Cypress.Commands.overwriteQuery('aQuery', () => cy.visit('/'))
-      cy.aQuery()
+      Cypress.Commands.addQuery('commandQuery', () => cy.visit('/'))
+      cy.commandQuery()
     })
 
     it('custom commands that return query chainers retry', () => {
@@ -521,17 +521,17 @@ describe('driver/src/cypress/cy', () => {
 
       cy.on('log:added', (attrs, log) => logs.push(log))
 
-      Cypress.Commands.overwriteQuery('aQuery', () => {
+      Cypress.Commands.addQuery('getButtonQuery', () => {
         cy.now('get', 'body')
 
         return cy.now('get', 'button')
       })
 
-      Cypress.Commands.overwriteQuery('bQuery', () => cy.now('aQuery'))
+      Cypress.Commands.addQuery('queryQuery', () => cy.now('getButtonQuery'))
 
-      cy.aQuery().should('have.length', 24)
+      cy.queryQuery().should('have.length', 24)
       cy.then(() => {
-        // Length of 3: bQuery.body (from get), bQuery.button (from get), should.have.length.23
+        // Length of 3: getButtonQuery.body (from get), getButtonQuery.button (from get), `should.have.length.24`
         expect(logs.length).to.eq(3)
       })
     })

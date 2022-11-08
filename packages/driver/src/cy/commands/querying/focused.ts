@@ -4,6 +4,8 @@ export default (Commands, Cypress, cy, state) => {
   Commands.addQuery('focused', function focused (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
     const log = options.log !== false && Cypress.log({ timeout: options.timeout })
 
+    this.set('timeout', options.timeout)
+
     return () => {
       let $el = cy.getFocused()
 

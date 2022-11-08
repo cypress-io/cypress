@@ -863,7 +863,7 @@ export default {
       docsUrl: 'https://on.cypress.io/api',
     },
     invalid_overwrite_query_with_command: {
-      message: 'Cannot overwite the `{{name}}` query with a command. Use `Commands.overwriteQuery()` instead.',
+      message: 'Cannot overwite the `{{name}}` query. Queries cannot be overwritten.',
       docsUrl: 'https://on.cypress.io/api',
     },
     invoking_child_without_parent (obj) {
