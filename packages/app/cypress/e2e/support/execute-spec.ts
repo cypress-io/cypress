@@ -22,7 +22,7 @@ declare global {
   }
 }
 
-const waitForSpecToFinish = (expectedResults, timeout?: number) => {
+export const waitForSpecToFinish = (expectedResults, timeout?: number) => {
   // First ensure the test is loaded
   cy.get('.passed > .num').should('exist')
   cy.get('.failed > .num').should('exist')
@@ -39,8 +39,3 @@ const waitForSpecToFinish = (expectedResults, timeout?: number) => {
 }
 
 Cypress.Commands.add('waitForSpecToFinish', waitForSpecToFinish)
-
-// Here we export an empty object to tell the
-// typescript type checker that this definitely is a module.
-// This way, we are allowed to use the global namespace declaration
-export {}
