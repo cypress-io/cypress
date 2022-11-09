@@ -37,23 +37,22 @@ async function removeEmptyDirectories (directory) {
 }
 
 const getDependencyPathsToKeep = async (buildAppDir) => {
+  const unixBuildAppDir = buildAppDir.split(path.sep).join(path.posix.sep)
+  const startingEntryPoints = [
+    '@packages/server/index.js',
+    '@packages/server/hook-require.js',
+    '@packages/server/lib/plugins/child/require_async_child.js',
+    '@packages/server/lib/plugins/child/register_ts_node.js',
+    '@packages/rewriter/lib/threads/worker.js',
+    'webpack',
+    'webpack-dev-server',
+    'html-webpack-plugin-4',
+    'html-webpack-plugin-5',
+    'mocha-7.0.1',
+  ]
+
   let entryPoints = new Set([
-    // This is the entry point for the server bundle. It will not have access to the snapshot yet. It needs to be kept in the binary
-    require.resolve('@packages/server/index.js', { paths: [buildAppDir] }),
-    // This is a dynamic import that is used to load the snapshot require logic. It will not have access to the snapshot yet. It needs to be kept in the binary
-    require.resolve('@packages/server/hook-require.js', { paths: [buildAppDir] }),
-    // These dependencies are started in a new process or thread and will not have access to the snapshot. They need to be kept in the binary
-    require.resolve('@packages/server/lib/plugins/child/require_async_child.js', { paths: [buildAppDir] }),
-    require.resolve('@packages/server/lib/plugins/child/register_ts_node.js', { paths: [buildAppDir] }),
-    require.resolve('@packages/rewriter/lib/threads/worker.js', { paths: [buildAppDir] }),
-    // These dependencies use the `require.resolve(<dependency>, { paths: [<path>] })` pattern where <path> is a path within the cypress monorepo. These will not be
-    // pulled in by esbuild but still need to be kept in the binary.
-    require.resolve('webpack', { paths: [buildAppDir] }),
-    require.resolve('webpack-dev-server', { paths: [buildAppDir] }),
-    require.resolve('html-webpack-plugin-4', { paths: [buildAppDir] }),
-    require.resolve('html-webpack-plugin-5', { paths: [buildAppDir] }),
-    // These involve dynamic requires that are not resolved by esbuild. They need to be kept in the binary.
-    require.resolve('mocha-7.0.1', { paths: [buildAppDir] }),
+    ...startingEntryPoints.map((entryPoint) => require.resolve(entryPoint, { paths: [unixBuildAppDir] })),
     // These dependencies are completely dynamic using the pattern `require(`./${name}`)` and will not be pulled in by esbuild but still need to be kept in the binary.
     ...['ibmi',
       'sunos',
@@ -63,7 +62,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
       'linux',
       'openbsd',
       'sunos',
-      'win32'].map((platform) => require.resolve(`default-gateway/${platform}`, { paths: [buildAppDir] })),
+      'win32'].map((platform) => require.resolve(`default-gateway/${platform}`, { paths: [unixBuildAppDir] })),
   ])
   let esbuildResult
   let newEntryPointsFound = true
@@ -79,7 +78,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
       outdir: workingDir,
       platform: 'node',
       metafile: true,
-      absWorkingDir: buildAppDir.split(path.sep).join(path.posix.sep),
+      absWorkingDir: unixBuildAppDir,
       external: [
         './transpile-ts',
         './server-entry',
@@ -99,9 +98,9 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
         let entryPoint
 
         if (warningSubject.startsWith('.')) {
-          entryPoint = path.join(buildAppDir, path.dirname(warning.location.file), warningSubject)
+          entryPoint = path.join(unixBuildAppDir, path.dirname(warning.location.file), warningSubject)
         } else {
-          entryPoint = require.resolve(warningSubject, { paths: [path.join(buildAppDir, path.dirname(warning.location.file))] })
+          entryPoint = require.resolve(warningSubject, { paths: [path.join(unixBuildAppDir, path.dirname(warning.location.file))] })
         }
 
         if (path.extname(entryPoint) !== '' && !entryPoints.has(entryPoint)) {
