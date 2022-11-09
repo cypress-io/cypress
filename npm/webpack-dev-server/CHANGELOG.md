@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v3.0.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.0.0...@cypress/webpack-dev-server-v3.0.1) (2022-11-08)
+
+
+### Bug Fixes
+
+* revert dynamic import of webpack config file ([#24598](https://github.com/cypress-io/cypress/issues/24598)) ([69f7dab](https://github.com/cypress-io/cypress/commit/69f7dabc94a5adb25edc7fda6057e92b8bd2e072))
+
 # [@cypress/webpack-dev-server-v3.0.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v2.5.0...@cypress/webpack-dev-server-v3.0.0) (2022-11-07)
 
 
