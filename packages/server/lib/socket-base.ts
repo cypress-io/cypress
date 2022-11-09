@@ -67,14 +67,12 @@ export class SocketBase {
   private _sendFocusBrowserMessage
 
   protected supportsRunEvents: boolean
-  protected experimentalSessionAndOrigin: boolean
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
   localBus: EventEmitter
 
   constructor (config: Record<string, any>) {
     this.supportsRunEvents = config.isTextTerminal || config.experimentalInteractiveRunEvents
-    this.experimentalSessionAndOrigin = config.experimentalSessionAndOrigin
     this.ended = false
     this.localBus = new EventEmitter()
   }
@@ -225,9 +223,7 @@ export class SocketBase {
         debug('automation:client connected')
 
         // only send the necessary config
-        automationClient.emit('automation:config', {
-          experimentalSessionAndOrigin: this.experimentalSessionAndOrigin,
-        })
+        automationClient.emit('automation:config', {})
 
         // if our automation disconnects then we're
         // in trouble and should probably bomb everything
@@ -552,8 +548,11 @@ export class SocketBase {
       })
 
       if (this.supportsRunEvents) {
-        socket.on('plugins:before:spec', async (spec) => {
-          await runEvents.execute('before:spec', {}, spec)
+        socket.on('plugins:before:spec', (spec) => {
+          runEvents.execute('before:spec', {}, spec).catch((error) => {
+            socket.disconnect()
+            throw error
+          })
         })
       }
 

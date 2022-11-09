@@ -90,6 +90,7 @@ Error: Webpack Compilation Error
 ./cypress/e2e/typescript_syntax_error.cy.tsXX:XX
 Module parse failed: Unexpected token (3:19)
 File was processed with these loaders:
+ * relative/path/to/webpack-preprocessor/dist/lib/cross-origin-callback-loader.js
  * relative/path/to/webpack-batteries-included-preprocessor/node_modules/ts-loader/index.js
 You may need an additional loader to handle the result of these loaders.
 | // The code below is ignored by eslint

@@ -292,8 +292,7 @@ describe('src/cy/commands/aliasing', () => {
       it('does not match alias when the alias has already been applied', () => {
         cy
         .visit('/fixtures/commands.html')
-        .server()
-        .route(/foo/, {}).as('getFoo')
+        .intercept(/foo/, {}).as('getFoo')
         .then(function () {
           // 1 log from visit
           // 1 log from route

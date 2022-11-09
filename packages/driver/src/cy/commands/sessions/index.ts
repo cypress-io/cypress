@@ -22,20 +22,6 @@ type SessionData = Cypress.Commands.Session.SessionData
  */
 
 export default function (Commands, Cypress, cy) {
-  // @ts-ignore
-
-  function throwIfNoSessionSupport () {
-    if (!Cypress.config('experimentalSessionAndOrigin')) {
-      $errUtils.throwErrByPath('sessions.experimentNotEnabled', {
-        args: {
-          // determine if using experimental session opt-in flag (removed in 9.6.0) to
-          // generate a coherent error message
-          experimentalSessionSupport: Cypress.config('experimentalSessionSupport'),
-        },
-      })
-    }
-  }
-
   const sessionsManager = new SessionsManager(Cypress, cy)
   const sessions = sessionsManager.sessions
 
@@ -48,27 +34,16 @@ export default function (Commands, Cypress, cy) {
     })
 
     Cypress.on('test:before:run:async', () => {
-      if (Cypress.config('experimentalSessionAndOrigin')) {
-        if (Cypress.config('testIsolation') === 'off') {
-          return
-        }
+      const clearPage = (Cypress.config('testIsolation') === 'on' && Cypress.testingType === 'e2e') ? navigateAboutBlank(false) : new Cypress.Promise.resolve()
 
-        // Component testing does not support navigation and handles clearing the page via mount utils
-        const clearPage = Cypress.testingType === 'e2e' ? navigateAboutBlank(false) : new Cypress.Promise.resolve()
-
-        return clearPage
-        .then(() => sessions.clearCurrentSessionData())
-        .then(() => Cypress.backend('reset:rendered:html:origins'))
-      }
-
-      return
+      return clearPage
+      .then(() => sessions.clearCurrentSessionData())
+      .then(() => Cypress.backend('reset:rendered:html:origins'))
     })
   })
 
   Commands.addAll({
     session (id: string | object, setup: () => void, options: Cypress.SessionOptions = { cacheAcrossSpecs: false }) {
-      throwIfNoSessionSupport()
-
       if (!id || !_.isString(id) && !_.isObject(id)) {
         $errUtils.throwErrByPath('sessions.session.wrongArgId')
       }

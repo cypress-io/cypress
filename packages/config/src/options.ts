@@ -21,6 +21,7 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'EXPERIMENTAL_NETWORK_STUBBING_REMOVED',
   'EXPERIMENTAL_RUN_EVENTS_REMOVED',
   'EXPERIMENTAL_SESSION_SUPPORT_REMOVED',
+  'EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED',
   'EXPERIMENTAL_SINGLE_TAB_RUN_MODE',
   'EXPERIMENTAL_SHADOW_DOM_REMOVED',
   'FIREFOX_GC_INTERVAL_REMOVED',
@@ -33,7 +34,6 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
 
 type ValidationOptions = {
   testingType: TestingType | null
-  experimentalSessionAndOrigin: boolean
 }
 
 export type BreakingOptionErrorKey = typeof BREAKING_OPTION_ERROR_KEY[number]
@@ -205,12 +205,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     isExperimental: true,
     requireRestartOnChange: 'server',
   }, {
-    // TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
-    name: 'experimentalSessionAndOrigin',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
-  }, {
     name: 'experimentalModifyObstructiveThirdPartyCode',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -377,26 +371,15 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     overrideLevel: 'any',
   }, {
     name: 'testIsolation',
-    // TODO: https://github.com/cypress-io/cypress/issues/23093
-    // When experimentalSessionAndOrigin is removed and released as GA,
-    // update the defaultValue from undefined to 'on' and
-    // update this code to remove the check/override specific to enable
-    // 'on' by default when experimentalSessionAndOrigin=true
-    defaultValue: (options: Record<string, any> = {}) => {
-      if (options.testingType === 'component') {
-        return null
-      }
-
-      return options?.experimentalSessionAndOrigin || options?.config?.e2e?.experimentalSessionAndOrigin ? 'on' : null
-    },
+    defaultValue: 'on',
     validation: (key: string, value: any, opts: ValidationOptions) => {
-      const { testingType, experimentalSessionAndOrigin } = opts
+      const { testingType } = opts
 
       if (testingType == null || testingType === 'component') {
         return true
       }
 
-      if (experimentalSessionAndOrigin && testingType === 'e2e') {
+      if (testingType === 'e2e') {
         return validate.isOneOf('on', 'off')(key, value)
       }
 
@@ -407,7 +390,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
       return {
         key,
         value,
-        type: 'not set unless the experimentalSessionAndOrigin flag is turned on',
       }
     },
     overrideLevel: 'suite',
@@ -564,11 +546,6 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     defaultValue: pkg.version,
     validation: validate.isString,
     isInternal: true,
-  }, {
-    name: 'xhrRoute',
-    defaultValue: '/xhrs/',
-    validation: validate.isString,
-    isInternal: true,
   },
 ]
 
@@ -609,6 +586,10 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
   }, {
     name: 'experimentalSessionSupport',
     errorKey: 'EXPERIMENTAL_SESSION_SUPPORT_REMOVED',
+    isWarning: true,
+  }, {
+    name: 'experimentalSessionAndOrigin',
+    errorKey: 'EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED',
     isWarning: true,
   }, {
     name: 'experimentalShadowDomSupport',
@@ -652,11 +633,6 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
 export const breakingRootOptions: Array<BreakingOption> = [
   {
     name: 'baseUrl',
-    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E',
-    isWarning: false,
-    testingTypes: ['e2e'],
-  }, {
-    name: 'experimentalSessionAndOrigin',
     errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E',
     isWarning: false,
     testingTypes: ['e2e'],
@@ -710,11 +686,6 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
   component: [
     {
       name: 'baseUrl',
-      errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
-      isWarning: false,
-    },
-    {
-      name: 'experimentalSessionAndOrigin',
       errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
       isWarning: false,
     },

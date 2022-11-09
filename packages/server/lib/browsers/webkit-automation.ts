@@ -95,7 +95,6 @@ let downloadIdCounter = 1
 type WebKitAutomationOpts = {
   automation: Automation
   browser: playwright.Browser
-  shouldMarkAutIframeRequests: boolean
   initialUrl: string
   downloadsFolder: string
   videoApi?: RunModeVideoApi
@@ -106,12 +105,10 @@ export class WebKitAutomation {
   private browser: playwright.Browser
   private context!: playwright.BrowserContext
   private page!: playwright.Page
-  private shouldMarkAutIframeRequests: boolean
 
   private constructor (opts: WebKitAutomationOpts) {
     this.automation = opts.automation
     this.browser = opts.browser
-    this.shouldMarkAutIframeRequests = opts.shouldMarkAutIframeRequests
   }
 
   // static initializer to avoid "not definitively declared"
@@ -147,8 +144,7 @@ export class WebKitAutomation {
 
     let promises: Promise<any>[] = []
 
-    // TODO: remove with experimentalSessionAndOrigin
-    if (this.shouldMarkAutIframeRequests) promises.push(this.markAutIframeRequests())
+    promises.push(this.markAutIframeRequests())
 
     if (oldPwPage) promises.push(oldPwPage.context().close())
 

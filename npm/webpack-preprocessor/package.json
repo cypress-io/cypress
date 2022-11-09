@@ -21,6 +21,7 @@
     "watch": "rimraf dist && tsc --watch"
   },
   "dependencies": {
+    "@babel/parser": "7.13.0",
     "bluebird": "3.7.1",
     "debug": "^4.3.2",
     "fs-extra": "^10.1.0",
@@ -90,10 +91,5 @@
     "cypress-plugin",
     "cypress-preprocessor",
     "webpack"
-  ],
-  "workspaces": {
-    "nohoist": [
-      "merge-source-map"
-    ]
-  }
+  ]
 }

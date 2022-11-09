@@ -308,9 +308,9 @@ export default {
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
       }
     },
-    deprecated (obj) {
+    removed (obj) {
       return {
-        message: `${cmd(obj.cmd)} has been deprecated and will be removed in a future release. Consider using ${cmd('session')} instead.`,
+        message: `${cmd(obj.cmd)} was removed in Cypress version 12.0.0. Please update to use ${cmd('session')} instead.`,
         docsUrl: 'https://on.cypress.io/session',
       }
     },
@@ -324,11 +324,6 @@ export default {
       return {
         message: `${cmd('{{cmd}}')} timed out waiting \`{{timeout}}ms\` to complete.`,
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
-      }
-    },
-    whitelist_renamed (obj) {
-      return {
-        message: `\`${obj.type}\` \`whitelist\` option has been renamed to \`preserve\`. Please rename \`whitelist\` to \`preserve\`.`,
       }
     },
   },
@@ -1140,9 +1135,6 @@ export default {
 
   origin: {
     docsUrl: 'https://on.cypress.io/origin',
-    experiment_not_enabled: {
-      message: `${cmd('origin')} requires enabling the experimentalSessionAndOrigin flag`,
-    },
     invalid_url_argument: {
       message: `${cmd('origin')} requires the first argument to be either a url (\`https://www.example.com/path\`) or a domain name (\`example.com\`). Query parameters are not allowed. You passed: \`{{arg}}\``,
     },
@@ -1216,22 +1208,6 @@ export default {
       ${cmd('origin')} could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.`,
     },
     unsupported: {
-      route: {
-        message: `${cmd('route')} has been deprecated and its use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
-        docsUrl: 'https://on.cypress.io/intercept',
-      },
-      server: {
-        message: `${cmd('server')} has been deprecated and its use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
-        docsUrl: 'https://on.cypress.io/intercept',
-      },
-      Server: {
-        message: `\`Cypress.Server.*\` has been deprecated and its use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('intercept')} (outside of the callback) instead.`,
-        docsUrl: 'https://on.cypress.io/intercept',
-      },
-      Cookies_preserveOnce: {
-        message: `\`Cypress.Cookies.preserveOnce\` use is not supported in the ${cmd('origin')} callback. Consider using ${cmd('session')} (outside of the callback) instead.`,
-        docsUrl: 'https://on.cypress.io/session',
-      },
       origin: {
         message: `${cmd('origin')} use is not currently supported in the ${cmd('origin')} callback, but is planned for a future release. Please 👍 the following issue and leave a comment with your use-case:`,
         docsUrl: 'https://on.cypress.io/github-issue/20718',
@@ -1443,41 +1419,10 @@ export default {
   },
 
   route: {
-    deprecated: {
-      message: `${cmd('route')} has been deprecated and will be moved to a plugin in a future release. Consider migrating to using ${cmd('intercept')} instead.`,
-      docsUrl: 'https://on.cypress.io/intercept',
-    },
-    failed_prerequisites: {
-      message: `${cmd('route')} cannot be invoked before starting the ${cmd('server')}`,
-      docsUrl: 'https://on.cypress.io/server',
-    },
-    invalid_arguments: {
-      message: `${cmd('route')} was not provided any arguments. You must provide valid arguments.`,
-      docsUrl: 'https://on.cypress.io/route',
-    },
-    method_invalid: {
-      message: `${cmd('route')} was called with an invalid method: \`{{method}}\`. Method can be: \`GET\`, \`POST\`, \`PUT\`, \`DELETE\`, \`PATCH\`, \`HEAD\`, \`OPTIONS\`, or any other method supported by Node's HTTP parser.`,
-      docsUrl: 'https://on.cypress.io/route',
-    },
-    response_invalid: {
-      message: `${cmd('route')} cannot accept an \`undefined\` or \`null\` response. It must be set to something, even an empty string will work.`,
-      docsUrl: 'https://on.cypress.io/route',
-    },
-    url_invalid: {
-      message: `${cmd('route')} was called with an invalid \`url\`. \`url\` must be either a string or regular expression.`,
-      docsUrl: 'https://on.cypress.io/route',
-    },
-    url_missing: {
-      message: `${cmd('route')} must be called with a \`url\`. It can be a string or regular expression.`,
-      docsUrl: 'https://on.cypress.io/route',
-    },
-    url_percentencoding_warning ({ decodedUrl }) {
+    removed (obj) {
       return {
-        message: stripIndent`\
-          A \`url\` with percent-encoded characters was passed to ${cmd('route')}, but ${cmd('route')} expects a decoded \`url\`.
-
-          Did you mean to pass "${decodedUrl}"?`,
-        docsUrl: 'https://on.cypress.io/route',
+        message: `${cmd(obj.cmd)} was removed in Cypress version 12.0.0. Please update to use ${cmd('intercept')} instead.`,
+        docsUrl: 'https://on.cypress.io/intercept',
       }
     },
   },
@@ -1646,8 +1591,8 @@ export default {
     },
     not_file_input: {
       message: `${cmd('selectFile')} can only be called on an \`<input type="file">\` or a \`<label for="fileInput">\` pointing to or containing a file input, but received the element:
-      
-      \`{{node}}\`.`,
+
+      > \`{{node}}\`.`,
     },
     invalid_alias: {
       message: `${cmd('selectFile')} can only attach strings, Buffers or objects, while your alias \`{{alias}}\` resolved to: \`{{subject}}\`.`,
@@ -1705,36 +1650,17 @@ export default {
   },
 
   server: {
-    deprecated: {
-      message: `${cmd('server')} has been deprecated and will be moved to a plugin in a future release. Consider migrating to using ${cmd('intercept')} instead.`,
-      docsUrl: 'https://on.cypress.io/intercept',
+    removed (obj) {
+      return {
+        message: `${cmd(obj.cmd)} was removed in Cypress version 12.0.0. Please update to use ${cmd('intercept')} instead.`,
+        docsUrl: 'https://on.cypress.io/intercept',
+      }
     },
-    invalid_argument: {
-      message: `${cmd('server')} accepts only an object literal as its argument.`,
-      docsUrl: 'https://on.cypress.io/server',
-    },
-    xhrurl_not_set: '`Server.options.xhrUrl` has not been set',
-    unavailable: 'The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message.',
-    whitelist_renamed: `The ${cmd('server')} \`whitelist\` option has been renamed to \`ignore\`. Please rename \`whitelist\` to \`ignore\`.`,
   },
 
   sessions: {
     validate_callback_false: {
       message: 'Your `cy.session` **validate** callback {{reason}}.',
-    },
-    experimentNotEnabled ({ experimentalSessionSupport }) {
-      if (experimentalSessionSupport) {
-        return {
-          message: stripIndent`
-          ${cmd('session')} requires enabling the \`experimentalSessionAndOrigin\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0.`,
-          docsUrl: 'https://on.cypress.io/session',
-        }
-      }
-
-      return {
-        message: `${cmd('session')} requires enabling the \`experimentalSessionAndOrigin\` flag.`,
-        docsUrl: 'https://on.cypress.io/session',
-      }
     },
     session: {
       duplicateId ({ id, hasUniqSetupDefinition, hasUniqValidateDefinition, hasUniqPersistence }) {
@@ -1853,6 +1779,16 @@ export default {
     language_chainer: {
       message: 'The chainer `{{originalChainers}}` is a language chainer provided to improve the readability of your assertions, not an actual assertion. Please provide a valid assertion.',
       docsUrl: 'https://on.cypress.io/assertions',
+    },
+
+    command_inside_should (obj) {
+      return stripIndent`\
+        ${cmd('should')} failed because you invoked a command inside the callback. ${cmd('should')} retries the inner function, which would result in commands being added to the queue multiple times. Use ${cmd('then')} instead of ${cmd('should')}, or move any commands outside the callback function.
+
+        The command invoked was:
+
+          > ${cmd(obj.action)}
+      `
     },
   },
 
@@ -2281,43 +2217,6 @@ export default {
         \`url\` from the \`options\` object: {{optionsUrl}}
         \`url\` from the \`url\` parameter: {{url}}`,
       docsUrl: 'https://on.cypress.io/visit',
-    },
-    cannot_visit_different_origin (args) {
-      return {
-        message: stripIndent`\
-          ${cmd('visit')} failed because you are attempting to visit a URL that is of a different origin.
-
-          ${args.experimentalSessionAndOrigin ? `You likely forgot to use ${cmd('origin')}:` : `In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use ${cmd('origin')}:` }
-
-          ${args.isCrossOriginSpecBridge ?
-          `\`cy.origin('${args.previousUrl.origin}', () => {\`
-          \`  cy.visit('${args.previousUrl}')\`
-          \`  <commands targeting ${args.previousUrl.origin} go here>\`
-          \`})\`` :
-          `\`cy.visit('${args.previousUrl}')\`
-          \`<commands targeting ${args.previousUrl.origin} go here>\``
-          }
-
-          \`cy.origin('${args.attemptedUrl.origin}', () => {\`
-          \`  cy.visit('${args.originalUrl}')\`
-          \`  <commands targeting ${args.attemptedUrl.origin} go here>\`
-          \`})\`
-
-          The new URL is considered a different origin because the following parts of the URL are different:
-
-            > {{differences}}
-
-          You may only ${cmd('visit')} same-origin URLs within ${args.isCrossOriginSpecBridge ? cmd('origin') : 'a single test'}.
-
-          The previous URL you visited was:
-
-            > '${args.previousUrl.origin}'
-
-          You're attempting to visit this URL:
-
-            > '${args.attemptedUrl.origin}'`,
-        docsUrl: 'https://on.cypress.io/cannot-visit-different-origin-domain',
-      }
     },
     loading_network_failed: stripIndent`\
       ${cmd('visit')} failed trying to load:

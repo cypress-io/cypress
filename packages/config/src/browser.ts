@@ -165,8 +165,6 @@ export const validate = (cfg: any, onErr: (property: ErrResult | string) => void
     if (validationFn && value !== defaultValues[key]) {
       const result = validationFn(key, value, {
         testingType,
-        // TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
-        experimentalSessionAndOrigin: cfg.experimentalSessionAndOrigin,
       })
 
       if (result !== true) {

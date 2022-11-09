@@ -184,7 +184,7 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
 }
 
 export class CdpAutomation {
-  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private experimentalSessionAndOrigin: boolean) {
+  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
   }
@@ -198,8 +198,8 @@ export class CdpAutomation {
     await this.sendDebuggerCommandFn('Page.startScreencast', screencastOpts)
   }
 
-  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, experimentalSessionAndOrigin: boolean): Promise<CdpAutomation> {
-    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, sendCloseCommandFn, automation, experimentalSessionAndOrigin)
+  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation): Promise<CdpAutomation> {
+    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, sendCloseCommandFn, automation)
 
     await sendDebuggerCommandFn('Network.enable', {
       maxTotalBufferSize: 0,
@@ -277,16 +277,10 @@ export class CdpAutomation {
         // be sent with a request. This standardizes it by filtering out ones
         // that are secure but not on a secure context
 
-        if (this.experimentalSessionAndOrigin) {
-          // localhost is considered a secure context (even when http:)
-          // and it's required for cross origin support when visiting a secondary
-          // origin so that all its cookies are sent. This may be a
-          // breaking change, so put it behind the flag for now. Need to
-          // investigate further when we remove the experimental flag.
-          return !(cookie.secure && url.startsWith('http:') && !isLocalhost)
-        }
-
-        return !(url.startsWith('http:') && cookie.secure)
+        // localhost is considered a secure context (even when http:)
+        // and it's required for cross origin support when visiting a secondary
+        // origin so that all its cookies are sent.
+        return !(cookie.secure && url.startsWith('http:') && !isLocalhost)
       })
     })
   }

@@ -6,6 +6,7 @@ exports['config/src/index .getBreakingKeys returns list of breaking config keys 
   "experimentalNetworkStubbing",
   "experimentalRunEvents",
   "experimentalSessionSupport",
+  "experimentalSessionAndOrigin",
   "experimentalShadowDomSupport",
   "firefoxGcInterval",
   "ignoreTestFiles",
@@ -35,7 +36,6 @@ exports['config/src/index .getDefaultValues returns list of public config keys 1
   "execTimeout": 60000,
   "experimentalFetchPolyfill": false,
   "experimentalInteractiveRunEvents": false,
-  "experimentalSessionAndOrigin": false,
   "experimentalModifyObstructiveThirdPartyCode": false,
   "experimentalSourceRewriting": false,
   "experimentalSingleTabRunMode": false,
@@ -52,7 +52,6 @@ exports['config/src/index .getDefaultValues returns list of public config keys 1
   "port": null,
   "projectId": null,
   "redirectionLimit": 20,
-  "repoRoot": null,
   "reporter": "spec",
   "reporterOptions": null,
   "requestTimeout": 5000,
@@ -70,7 +69,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys 1
   "supportFile": "cypress/support/e2e.{js,jsx,ts,tsx}",
   "supportFolder": false,
   "taskTimeout": 60000,
-  "testIsolation": null,
+  "testIsolation": "on",
   "trashAssetsBeforeRuns": true,
   "userAgent": null,
   "video": true,
@@ -94,11 +93,11 @@ exports['config/src/index .getDefaultValues returns list of public config keys 1
   "isTextTerminal": false,
   "morgan": true,
   "namespace": "__cypress",
+  "repoRoot": null,
   "reporterRoute": "/__cypress/reporter",
   "socketId": null,
   "socketIoCookie": "__socket",
-  "socketIoRoute": "/__socket",
-  "xhrRoute": "/xhrs/"
+  "socketIoRoute": "/__socket"
 }
 
 exports['config/src/index .getDefaultValues returns list of public config keys for selected testing type 1'] = {
@@ -120,7 +119,6 @@ exports['config/src/index .getDefaultValues returns list of public config keys f
   "execTimeout": 60000,
   "experimentalFetchPolyfill": false,
   "experimentalInteractiveRunEvents": false,
-  "experimentalSessionAndOrigin": false,
   "experimentalModifyObstructiveThirdPartyCode": false,
   "experimentalSourceRewriting": false,
   "experimentalSingleTabRunMode": false,
@@ -137,7 +135,6 @@ exports['config/src/index .getDefaultValues returns list of public config keys f
   "port": null,
   "projectId": null,
   "redirectionLimit": 20,
-  "repoRoot": null,
   "reporter": "spec",
   "reporterOptions": null,
   "requestTimeout": 5000,
@@ -155,7 +152,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys f
   "supportFile": "cypress/support/e2e.{js,jsx,ts,tsx}",
   "supportFolder": false,
   "taskTimeout": 60000,
-  "testIsolation": null,
+  "testIsolation": "on",
   "trashAssetsBeforeRuns": true,
   "userAgent": null,
   "video": true,
@@ -179,11 +176,11 @@ exports['config/src/index .getDefaultValues returns list of public config keys f
   "isTextTerminal": false,
   "morgan": true,
   "namespace": "__cypress",
+  "repoRoot": null,
   "reporterRoute": "/__cypress/reporter",
   "socketId": null,
   "socketIoCookie": "__socket",
-  "socketIoRoute": "/__socket",
-  "xhrRoute": "/xhrs/"
+  "socketIoRoute": "/__socket"
 }
 
 exports['config/src/index .getPublicConfigKeys returns list of public config keys 1'] = [
@@ -201,7 +198,6 @@ exports['config/src/index .getPublicConfigKeys returns list of public config key
   "execTimeout",
   "experimentalFetchPolyfill",
   "experimentalInteractiveRunEvents",
-  "experimentalSessionAndOrigin",
   "experimentalModifyObstructiveThirdPartyCode",
   "experimentalSourceRewriting",
   "experimentalSingleTabRunMode",

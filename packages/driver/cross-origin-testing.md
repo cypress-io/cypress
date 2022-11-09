@@ -144,12 +144,3 @@ Nesting **cy.origin()** inside the callback is not currently not supported, but 
 ### cy.intercept()
 
 We will likely add support for **cy.intercept()** within the **cy.origin()** callback in the future.
-
-### Deprecated commands / methods
-
-All deprecated APIs are not supported in the **cy.origin()** callback and we do not plan to ever add support for them. If a user attempts to use one, we throw an error that points them to the preferred API that superseded it. The following are deprecated APIs that are not supported:
-
-- **cy.route()**: Superseded by **cy.intercept()**
-- **cy.server()**: Superseded by **cy.intercept()**
-- **Cypress.Server.defaults()**: Superseded by **cy.intercept()**
-- **Cypress.Cookies.preserveOnce()**: Superseded by sessions

@@ -60,49 +60,28 @@ function getAlias (selector, log, cy) {
     log && cy.state('current') === this && log.set('referencesAlias', { name: alias })
 
     /*
-     * There are three cases for aliases, each explained in more detail below:
-     * 1. Route aliases
-     * 2. Intercept aliases
-     * 3. Subject aliases (either DOM elements or primitives).
+     * There are two cases for aliases, each explained in more detail below:
+     * 1. Intercept aliases
+     * 2. Subject aliases (either DOM elements or primitives).
      */
-
-    if (command.get('name') === 'route') {
-      // In the case of a route alias, getRequestsByAlias handles selecting the proper index
-      // and returns one or more requests.
-      const requests = cy.getRequestsByAlias(alias) || null
-
-      log && cy.state('current') === this && log.set({
-        aliasType: 'route',
-        consoleProps: () => {
-          return {
-            Alias: selector,
-            Yielded: requests,
-          }
-        },
-      })
-
-      return requests
-    }
 
     if (command.get('name') === 'intercept') {
       // Intercept aliases are fairly similar, but `getAliasedRequests` does *not* handle indexes
       // and we have to do it ourselves here.
 
-      // Posible TODO: Unify this index identifying and selecting logic with that from `getRequestsByAlias`
       const requests = getAliasedRequests(aliasObj.alias, cy.state)
 
       // If the user provides an index ("@foo.1" or "@foo.all"), use that. Otherwise, return the most recent request.
       const match = selector.match(aliasIndexRe)
-      const index = match ? match[1] : (requests.length - 1)
+      const index = match ? match[1] : (requests.length)
 
-      const returnValue = index === 'all' ? requests : (requests[parseInt(index, 10)] || null)
+      const returnValue = index === 'all' ? requests : (requests[parseInt(index, 10) - 1] || null)
 
       log && cy.state('current') === this && log.set({
         aliasType: 'intercept',
         consoleProps: () => {
           return {
             Alias: selector,
-            Yielded: returnValue,
           }
         },
       })
