@@ -11,6 +11,8 @@ const debug = debugModule('cypress:network:cors')
 // match IP addresses or anything following the last .
 const customTldsRe = /(^[\d\.]+$|\.[^\.]+$)/
 
+const strictSameOriginDomains = Object.freeze(['google.com'])
+
 export function getSuperDomain (url) {
   const parsed = parseUrlIntoHostProtocolDomainTldPort(url)
 
@@ -81,30 +83,30 @@ export function getDomainNameFromParsedHost (parsedHost: ParsedHost) {
  * same-super-domain-origin: Whether or not a url's scheme, domain, top-level domain, and port match
  * same-site: Whether or not a url's scheme, domain, and top-level domain match. @see https://developer.mozilla.org/en-US/docs/Glossary/Site
  * @param {Policy} policy - the policy being used
- * @param {string} url - the url being compared
- * @param {ParsedHostWithProtocolAndHost} props - the props being compared against the url
+ * @param {string} frameUrl - the url being compared
+ * @param {ParsedHostWithProtocolAndHost} topProps - the props being compared against the url
  * @returns {boolean} whether or not the props and url fit the policy
  */
-function urlMatchesPolicyProps ({ policy, url, props }: {
+function urlMatchesPolicyProps ({ policy, frameUrl, topProps }: {
   policy: Policy
-  url: string
-  props: ParsedHostWithProtocolAndHost
+  frameUrl: string
+  topProps: ParsedHostWithProtocolAndHost
 }): boolean {
-  if (!policy || !url || !props) {
+  if (!policy || !frameUrl || !topProps) {
     return false
   }
 
-  const urlProps = parseUrlIntoHostProtocolDomainTldPort(url)
+  const urlProps = parseUrlIntoHostProtocolDomainTldPort(frameUrl)
 
   switch (policy) {
     case 'same-origin': {
       // if same origin, all parts of the props needs to match, including subdomain and scheme
-      return _.isEqual(urlProps, props)
+      return _.isEqual(urlProps, topProps)
     }
     case 'same-super-domain-origin':
     case 'schemeful-same-site': {
       const { port: port1, subdomain: _unused1, ...parsedUrl } = urlProps
-      const { port: port2, subdomain: _unused2, ...relevantProps } = props
+      const { port: port2, subdomain: _unused2, ...relevantProps } = topProps
 
       let doPortsPassSameSchemeCheck: boolean
 
@@ -124,67 +126,81 @@ function urlMatchesPolicyProps ({ policy, url, props }: {
   }
 }
 
-function urlMatchesPolicy ({ policy, url1, url2 }: {
+function urlMatchesPolicy ({ policy, frameUrl, topUrl }: {
   policy: Policy
-  url1: string
-  url2: string
+  frameUrl: string
+  topUrl: string
 }): boolean {
-  if (!policy || !url1 || !url2) {
+  if (!policy || !frameUrl || !topUrl) {
     return false
   }
 
   return urlMatchesPolicyProps({
     policy,
-    url: url1,
-    props: parseUrlIntoHostProtocolDomainTldPort(url2),
+    frameUrl,
+    topProps: parseUrlIntoHostProtocolDomainTldPort(topUrl),
   })
 }
 
-export function urlMatchesOriginProps (url, props) {
-  return urlMatchesPolicyProps({
-    policy: 'same-origin',
-    url,
-    props,
-  })
-}
-
-export function urlMatchesSuperDomainOriginProps (url, props) {
-  return urlMatchesPolicyProps({
-    policy: 'same-super-domain-origin',
-    url,
-    props,
-  })
-}
-
-export function urlMatchesSameSiteProps (url: string, props: ParsedHostWithProtocolAndHost) {
-  return urlMatchesPolicyProps({
-    policy: 'schemeful-same-site',
-    url,
-    props,
-  })
-}
-
-export function urlOriginsMatch (url1: string, url2: string) {
+export function urlOriginsMatch (frameUrl: string, topUrl: string): boolean {
   return urlMatchesPolicy({
     policy: 'same-origin',
-    url1,
-    url2,
+    frameUrl,
+    topUrl,
   })
 }
 
-export function urlsSuperDomainOriginMatch (url1: string, url2: string) {
-  return urlMatchesPolicy({
-    policy: 'same-super-domain-origin',
-    url1,
-    url2,
-  })
-}
-
-export const urlSameSiteMatch = (url1: string, url2: string) => {
+export const urlSameSiteMatch = (frameUrl: string, topUrl: string): boolean => {
   return urlMatchesPolicy({
     policy: 'schemeful-same-site',
-    url1,
-    url2,
+    frameUrl,
+    topUrl,
+  })
+}
+
+/**
+ * Returns the policy that will be used for the specified url.
+ * @param url - the url to check the policy against.
+ * @returns a Policy string.
+ */
+export const policyForDomain = (url: string): Policy => {
+  const obj = parseUrlIntoHostProtocolDomainTldPort(url)
+
+  return strictSameOriginDomains.includes(`${obj.domain}.${obj.tld}`) ? 'same-origin' : 'same-super-domain-origin'
+}
+
+/**
+ * Checks the supplied url's against the determined policy.
+ * The policy is same-super-domain-origin unless the domain is in the list of strict same origin domains,
+ * in which case the policy is 'same-origin'
+ * @param frameUrl - The url you are testing the policy for.
+ * @param topUrl - The url you are testing the policy in context of.
+ * @returns boolean, true if matching, false if not.
+ */
+export const urlMatchesPolicyBasedOnDomain = (frameUrl: string, topUrl: string): boolean => {
+  return urlMatchesPolicy({
+    policy: policyForDomain(frameUrl),
+    frameUrl,
+    topUrl,
+  })
+}
+
+/**
+ * Checks the supplied url and props against the determined policy.
+ * The policy is same-super-domain-origin unless the domain is in the list of strict same origin domains,
+ * in which case the policy is 'same-origin'
+ * @param frameUrl - The url you are testing the policy for.
+ * @param topProps - The props of the url you are testing the policy in context of.
+ * @returns boolean, true if matching, false if not.
+ */
+export const urlMatchesPolicyBasedOnDomainProps = (frameUrl: string, topProps: ParsedHostWithProtocolAndHost): boolean => {
+  const obj = parseUrlIntoHostProtocolDomainTldPort(frameUrl)
+  const policy = strictSameOriginDomains.includes(`${obj.domain}.${obj.tld}`) ? 'same-origin' : 'same-super-domain-origin'
+
+  return urlMatchesPolicyProps({
+    policy,
+    frameUrl,
+    topProps,
   })
 }
 
