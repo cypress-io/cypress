@@ -959,7 +959,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     const cy = this
 
-    runnable.fn = function () {
+    runnable.fn = async function () {
       restore()
 
       const timeout = cy.config('defaultCommandTimeout')
@@ -1045,6 +1045,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           if (cy.queue.length > currentLength) {
             cy.warnMixingPromisesAndCommands()
           }
+
+          await cy.state('promise')
 
           return ret
         }
