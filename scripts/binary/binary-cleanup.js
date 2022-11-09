@@ -52,6 +52,8 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     require.resolve('webpack-dev-server', { paths: [buildAppDir] }),
     require.resolve('html-webpack-plugin-4', { paths: [buildAppDir] }),
     require.resolve('html-webpack-plugin-5', { paths: [buildAppDir] }),
+    // This is a dynamic import swizzle that needs to happen in the reporter
+    require.resolve('mocha-7.0.1', { paths: [buildAppDir] }),
     // These dependencies are completely dynamic using the pattern `require(`./${name}`)` and will not be pulled in by esbuild but still need to be kept in the binary.
     ...['ibmi',
       'sunos',
