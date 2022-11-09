@@ -468,7 +468,7 @@ describe('src/cy/commands/querying', () => {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
             Command: 'get',
             Alias: '@getUsers',
-            // Yielded: obj, TODO: get does not log this out from an intercept
+            Yielded: obj,
           })
         })
       })
@@ -646,46 +646,6 @@ describe('src/cy/commands/querying', () => {
         })
       })
     })
-
-    // it "re-queries the dom if any element in an alias isnt visible", ->
-    //   inputs = cy.$$("input")
-    //   inputs.hide()
-
-    //   cy
-    //     .get("input", {visible: false}).as("inputs").then ($inputs) ->
-    //       @length = $inputs.length
-
-    //       ## show the inputs
-    //       $inputs.show()
-
-    //       return $inputs
-    //     .get("@inputs").then ($inputs) ->
-    //       ## we should have re-queried for these inputs
-    //       ## which should have increased their length by 1
-    //       expect($inputs).to.have.length(@length)
-
-    // these other tests are for .save
-    // it "will resolve deferred arguments", ->
-    //   df = $.Deferred()
-
-    //   _.delay ->
-    //     df.resolve("iphone")
-    //   , 100
-
-    //   cy.get("input:text:first").type(df).then ($input) ->
-    //     expect($input).to.have.value("iphone")
-
-    // it "handles saving subjects", ->
-    //   cy.noop({foo: "foo"}).assign("foo").noop(cy.get("foo")).then (subject) ->
-    //     expect(subject).to.deep.eq {foo: "foo"}
-
-    // it "resolves falsy arguments", ->
-    //   cy.noop(0).assign("zero").then ->
-    //     expect(cy.get("zero")).to.eq 0
-
-    // it "returns a function when no alias was found", ->
-    //   cy.noop().then ->
-    //     expect(cy.get("something")).to.be.a("function")
 
     describe('errors', {
       defaultCommandTimeout: 50,
@@ -870,7 +830,7 @@ describe('src/cy/commands/querying', () => {
 
       it('throws when alias property isnt just a digit', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`1b` is not a valid alias property. Only `numbers` or `all` is permitted.')
+          expect(err.message).to.include('could not find a registered alias for: `@getUsers.1b`')
 
           done()
         })
@@ -882,7 +842,7 @@ describe('src/cy/commands/querying', () => {
 
       it('throws when alias property isnt a digit or `all`', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`all ` is not a valid alias property. Only `numbers` or `all` is permitted.')
+          expect(err.message).to.include('could not find a registered alias for: `@getUsers.all `')
 
           done()
         })

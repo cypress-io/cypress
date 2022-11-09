@@ -73,8 +73,14 @@ function getAlias (selector, log, cy) {
 
       // If the user provides an index ("@foo.1" or "@foo.all"), use that. Otherwise, return the most recent request.
       const match = selector.match(aliasIndexRe)
-      const index = match ? match[1] : (requests.length)
 
+      if (match && match[1] === '0') {
+        $errUtils.throwErrByPath('get.alias_zero', {
+          args: { alias: aliasObj.alias },
+        })
+      }
+
+      const index = match ? match[1] : requests.length
       const returnValue = index === 'all' ? requests : (requests[parseInt(index, 10) - 1] || null)
 
       log && cy.state('current') === this && log.set({
@@ -82,6 +88,7 @@ function getAlias (selector, log, cy) {
         consoleProps: () => {
           return {
             Alias: selector,
+            Yielded: returnValue,
           }
         },
       })
