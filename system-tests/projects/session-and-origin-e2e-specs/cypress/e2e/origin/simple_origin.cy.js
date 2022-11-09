@@ -2,7 +2,7 @@
 // REPLACE THIS COMMENT FOR HOT RELOAD
 describe('simple origin', () => {
   it('passes', () => {
-    cy.origin('http://localhost:4455', () => {
+    cy.origin('http://foobar:4455', () => {
       cy.log('log me once')
       cy.log('log me twice')
     })
