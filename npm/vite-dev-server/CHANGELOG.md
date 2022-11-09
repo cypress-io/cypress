@@ -1,3 +1,10 @@
+# [@cypress/vite-dev-server-v4.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v4.0.0...@cypress/vite-dev-server-v4.0.1) (2022-11-08)
+
+
+### Bug Fixes
+
+* vite-dev-server hoisting issue in binary ([#24599](https://github.com/cypress-io/cypress/issues/24599)) ([2513bea](https://github.com/cypress-io/cypress/commit/2513beac307e95267ab736a93a39cd1cd1280506))
+
 # [@cypress/vite-dev-server-v4.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.4.0...@cypress/vite-dev-server-v4.0.0) (2022-11-07)
 
 
