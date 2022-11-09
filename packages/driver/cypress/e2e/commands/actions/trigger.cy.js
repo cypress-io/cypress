@@ -149,6 +149,18 @@ describe('src/cy/commands/actions/trigger', () => {
       })
     })
 
+    it('requeries the dom while waiting for actionability', () => {
+      const $input = cy.$$('input:first').attr('disabled', true)
+
+      cy.on('command:retry', () => {
+        // Replace the input with a copy of itself, to ensure trigger is requerying the DOM
+        $input.replaceWith($input[0].outerHTML)
+        cy.$$('input:first').attr('disabled', false)
+      })
+
+      cy.get('input:first').trigger('keydown')
+    })
+
     it('can trigger events on the window', () => {
       let expected = false
 
@@ -1057,7 +1069,7 @@ describe('src/cy/commands/actions/trigger', () => {
 
         cy.on('fail', (err) => {
           expect(mouseover).to.eq(1)
-          expect(err.message).to.include('`cy.trigger()` failed because this element')
+          expect(err.message).to.include('`cy.trigger()` failed because the page')
 
           done()
         })

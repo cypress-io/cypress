@@ -6012,10 +6012,9 @@
   dependencies:
     defer-to-connect "^2.0.0"
 
-"@testing-library/cypress@8.0.0":
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/@testing-library/cypress/-/cypress-8.0.0.tgz#290d9bd7d60a3398e9fd965cb45764023f8fcc05"
-  integrity sha512-hx1YYzS6oqQTMiQcTCqoEpB/sYOZWXDDyPw1Akr+LVLDFLRbvOG/lLVI4wpb12dJ2AzPm5dYjLGh5w3hbx/mGQ==
+"@testing-library/cypress@BlueWinds/cypress-testing-library#119054b5963b0d2e064b13c5cc6fc9db32c8b7b5":
+  version "0.0.0-semantically-released"
+  resolved "https://codeload.github.com/BlueWinds/cypress-testing-library/tar.gz/119054b5963b0d2e064b13c5cc6fc9db32c8b7b5"
   dependencies:
     "@babel/runtime" "^7.14.6"
     "@testing-library/dom" "^8.1.0"

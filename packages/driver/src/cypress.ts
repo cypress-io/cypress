@@ -239,7 +239,7 @@ class $Cypress {
       get: () => {
         $errUtils.warnByPath('subject.state_subject_deprecated')
 
-        return this.cy.currentSubject()
+        return this.cy.subject()
       },
     })
 
@@ -247,7 +247,7 @@ class $Cypress {
       get: () => {
         $errUtils.warnByPath('subject.state_withinsubject_deprecated')
 
-        return this.cy.getSubjectFromChain(this.cy.state('withinSubjectChain') || [])
+        return this.cy.getSubjectFromChain(this.cy.state('withinSubjectChain'))
       },
     })
 

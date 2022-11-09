@@ -1,5 +1,5 @@
 export default (Commands, Cypress, cy, state) => {
-  Commands._addQuery('root', function root (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+  Commands.addQuery('root', function root (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
     const log = options.log !== false && Cypress.log({
       timeout: options.timeout,
     })
@@ -13,7 +13,7 @@ export default (Commands, Cypress, cy, state) => {
 
       const $el = cy.getSubjectFromChain(withinSubject || [cy.$$('html')])
 
-      log && log.set({
+      log && cy.state('current') === this && log.set({
         $el,
         consoleProps: () => {
           return {

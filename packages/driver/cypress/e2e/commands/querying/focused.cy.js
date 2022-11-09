@@ -123,7 +123,7 @@ describe('src/cy/commands/querying', () => {
         cy.get('input:first').focused().then(function ($input) {
           const { lastLog } = this
 
-          expect(lastLog.get('$el')).to.eq($input)
+          expect(lastLog.get('$el')).to.eql($input)
         })
       })
 

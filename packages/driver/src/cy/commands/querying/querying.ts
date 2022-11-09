@@ -57,7 +57,7 @@ function getAlias (selector, log, cy) {
 
     const { command } = aliasObj
 
-    log && log.set('referencesAlias', { name: alias })
+    log && cy.state('current') === this && log.set('referencesAlias', { name: alias })
 
     /*
      * There are three cases for aliases, each explained in more detail below:
@@ -71,7 +71,7 @@ function getAlias (selector, log, cy) {
       // and returns one or more requests.
       const requests = cy.getRequestsByAlias(alias) || null
 
-      log && log.set({
+      log && cy.state('current') === this && log.set({
         aliasType: 'route',
         consoleProps: () => {
           return {
@@ -97,7 +97,7 @@ function getAlias (selector, log, cy) {
 
       const returnValue = index === 'all' ? requests : (requests[parseInt(index, 10)] || null)
 
-      log && log.set({
+      log && cy.state('current') === this && log.set({
         aliasType: 'intercept',
         consoleProps: () => {
           return {
@@ -128,7 +128,7 @@ function getAlias (selector, log, cy) {
     cy.state('aliasCurrentCommand', undefined)
 
     if ($dom.isElement(subject)) {
-      log && log.set({
+      log && cy.state('current') === this && log.set({
         aliasType: 'dom',
         consoleProps: () => {
           return {
@@ -139,7 +139,7 @@ function getAlias (selector, log, cy) {
         },
       })
     } else {
-      log && log.set({
+      log && cy.state('current') === this && log.set({
         aliasType: 'primitive',
         consoleProps: () => {
           return {
@@ -155,7 +155,7 @@ function getAlias (selector, log, cy) {
 }
 
 export default (Commands, Cypress, cy, state) => {
-  Commands._addQuery('get', function get (selector, userOptions: GetOptions = {}) {
+  Commands.addQuery('get', function get (selector, userOptions: GetOptions = {}) {
     if ((userOptions === null) || _.isArray(userOptions) || !_.isPlainObject(userOptions)) {
       $errUtils.throwErrByPath('get.invalid_options', {
         args: { options: userOptions },
@@ -176,7 +176,7 @@ export default (Commands, Cypress, cy, state) => {
       return getAlias.call(this, selector, log, cy)
     }
 
-    const withinSubject = cy.state('withinSubjectChain') || []
+    const withinSubject = cy.state('withinSubjectChain')
 
     const includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
 
@@ -221,7 +221,7 @@ export default (Commands, Cypress, cy, state) => {
         throw err
       }
 
-      log && log.set({
+      log && cy.state('current') === this && log.set({
         $el,
         consoleProps: () => {
           return {
@@ -236,7 +236,7 @@ export default (Commands, Cypress, cy, state) => {
     }
   })
 
-  Commands._addQuery('contains', function contains (filter, text, userOptions: ContainsOptions = {}) {
+  Commands.addQuery('contains', function contains (filter, text, userOptions: ContainsOptions = {}) {
     if (_.isRegExp(text)) {
       // .contains(filter, text)
       // Do nothing
@@ -351,7 +351,7 @@ export default (Commands, Cypress, cy, state) => {
         $el = $dom.getFirstDeepestElement($el)
       }
 
-      log && log.set({
+      log && cy.state('current') === this && log.set({
         $el,
         consoleProps: () => {
           return {
@@ -367,7 +367,7 @@ export default (Commands, Cypress, cy, state) => {
     }
   })
 
-  Commands._addQuery('shadow', function contains (userOptions: ShadowOptions = {}) {
+  Commands.addQuery('shadow', function contains (userOptions: ShadowOptions = {}) {
     const log = userOptions.log !== false && Cypress.log({
       timeout: userOptions.timeout,
       consoleProps: () => ({}),
@@ -396,7 +396,7 @@ export default (Commands, Cypress, cy, state) => {
       .map((i, node) => node.shadowRoot)
       .filter((i, node) => node !== undefined && node !== null)
 
-      log && log.set({
+      log && cy.state('current') === this && log.set({
         $el,
         consoleProps: () => {
           return {

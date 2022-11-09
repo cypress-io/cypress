@@ -35,21 +35,13 @@ export class $Command {
     return this
   }
 
-  snapshotLogs () {
-    this.get('logs').forEach((log) => {
-      if (!log.get('snapshots')) {
-        log.snapshot()
-      }
-    })
-  }
-
   finishLogs () {
     // TODO: Investigate whether or not we can reuse snapshots between logs
     // that snapshot at the same time
 
     // Finish each of the logs we have, turning any potential errors into actual ones.
     this.get('logs').forEach((log) => {
-      if (log.get('next')) {
+      if (log.get('next') || !log.get('snapshots')) {
         log.snapshot()
       }
 
@@ -60,14 +52,6 @@ export class $Command {
         log.finish()
       }
     })
-
-    // If the previous command is a query belonging to the same chainer,
-    // we also ask it to end its own logs (and so on, up the chain).
-    const prev = this.get('prev')
-
-    if (prev && prev.get('query') && prev.get('chainerId') === this.get('chainerId')) {
-      prev.finishLogs()
-    }
   }
 
   log (log) {

@@ -42,7 +42,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
   // pause should indefinitely pause until the user
   // presses a key or clicks in the UI to continue
-  Commands._addQuery('pause', function pause (options: Partial<Cypress.Loggable> = {}) {
+  Commands.addQuery('pause', function pause (options: Partial<Cypress.Loggable> = {}) {
     if (!config('isInteractive') && (!config('browser').isHeaded || config('exit'))) {
       return _.identity
     }
@@ -101,7 +101,7 @@ export default (Commands, Cypress, cy, state, config) => {
     }
   })
 
-  Commands._addQuery('debug', function debug (options: Partial<Cypress.Loggable> = {}) {
+  Commands.addQuery('debug', function debug (options: Partial<Cypress.Loggable> = {}) {
     options.log !== false && Cypress.log({
       snapshot: true,
       end: true,

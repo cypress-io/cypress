@@ -419,10 +419,10 @@ describe('src/cy/commands/querying', () => {
             referencesAlias: undefined,
           }
 
-          expect(this.lastLog.get('$el')).to.eq($body)
+          expect(this.lastLog.get('$el')).to.eql($body)
 
           _.each(obj, (value, key) => {
-            expect(this.lastLog.get(key)).deep.eq(value, `expected key: ${key} to eq value: ${value}`)
+            expect(this.lastLog.get(key)).to.eq(value, `expected key: ${key} to eq value: ${value}`)
           })
         })
       })

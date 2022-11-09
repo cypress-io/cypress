@@ -59,7 +59,7 @@ const queryFnToString = (queryFn) => `.${queryFn.commandName}(${queryFn.args.map
 export const subjectChainToString = (subjectChain) => {
   const [initial, ...queryFns] = subjectChain
 
-  const prefix = initial == null ? 'cy' : `${$utils.stringifyActual(initial)} -> `
+  const prefix = initial == null ? 'cy' : `${$utils.stringifyActual(initial)}${queryFns.length ? ' -> ' : ''}`
 
   return prefix + queryFns.map(queryFnToString).join('')
 }
@@ -140,28 +140,6 @@ export default {
     },
     reserved_word: {
       message: `${cmd('as')} cannot be aliased as: \`{{alias}}\`. This word is reserved.`,
-    },
-  },
-
-  selectFile: {
-    docsUrl: 'https://on.cypress.io/selectfile',
-    invalid_action: {
-      message: `${cmd('selectFile')} \`action\` can only be \`select\` or \`drag-drop\`. You passed: \`{{action}}\`.`,
-    },
-    invalid_array_file_reference: {
-      message: `${cmd('selectFile')} must be passed an array of Buffers or objects with non-null \`contents\`. At files[{{index}}] you passed: \`{{file}}\`.`,
-    },
-    invalid_single_file_reference: {
-      message: `${cmd('selectFile')} must be passed a Buffer or an object with a non-null \`contents\` property as its 1st argument. You passed: \`{{file}}\`.`,
-    },
-    multiple_elements: {
-      message: `${cmd('selectFile')} can only be called on a single element. Your subject contained {{num}} elements.`,
-    },
-    not_file_input: {
-      message: `${cmd('selectFile')} can only be called on an \`<input type="file">\` or a \`<label for="fileInput">\` pointing to or containing one. Your subject is: \`{{node}}\`.`,
-    },
-    invalid_alias: {
-      message: `${cmd('selectFile')} can only attach strings, Buffers or objects, while your alias \`{{alias}}\` resolved to: \`{{subject}}\`.`,
     },
   },
 
@@ -873,11 +851,11 @@ export default {
       docsUrl: 'https://on.cypress.io/custom-commands',
     },
     invalid_new_query: {
-      message: '`Cypress.Commands._addQuery()` is used to create new queries, but `{{name}}` is an existing Cypress command or query, or is reserved internally by Cypress.\n\n If you want to override an existing command or query, use `Cypress.Commands.overrideQuery()` instead.',
+      message: '`Cypress.Commands.addQuery()` is used to create new queries, but `{{name}}` is an existing Cypress command or query, or is reserved internally by Cypress.\n\n If you want to override an existing command or query, use `Cypress.Commands.overrideQuery()` instead.',
       docsUrl: 'https://on.cypress.io/custom-commands',
     },
     reserved_command_query: {
-      message: '`Cypress.Commands._addQuery()` cannot create a new query named `{{name}}` because that name is reserved internally by Cypress.',
+      message: '`Cypress.Commands.addQuery()` cannot create a new query named `{{name}}` because that name is reserved internally by Cypress.',
       docsUrl: 'https://on.cypress.io/custom-commands',
     },
     invalid_overwrite: {
@@ -885,7 +863,7 @@ export default {
       docsUrl: 'https://on.cypress.io/api',
     },
     invalid_overwrite_query_with_command: {
-      message: 'Cannot overwite the `{{name}}` query with a command. Use `Commands._overwriteQuery()` instead.',
+      message: 'Cannot overwite the `{{name}}` query. Queries cannot be overwritten.',
       docsUrl: 'https://on.cypress.io/api',
     },
     invoking_child_without_parent (obj) {
@@ -1618,10 +1596,6 @@ export default {
       message: `${cmd('select')} must be passed an array containing only strings and/or numbers. You passed: \`{{value}}\`.`,
       docsUrl: 'https://on.cypress.io/select',
     },
-    disabled: {
-      message: `${cmd('select')} failed because this element is currently disabled:\n\n\`{{node}}\``,
-      docsUrl: 'https://on.cypress.io/select',
-    },
     invalid_element: {
       message: `${cmd('select')} can only be called on a \`<select>\`. Your subject is a: \`{{node}}\``,
       docsUrl: 'https://on.cypress.io/select',
@@ -1653,6 +1627,30 @@ export default {
     optgroup_disabled: {
       message: `${cmd('select')} failed because this \`<option>\` you are trying to select is within an \`<optgroup>\` that is currently disabled:\n\n\`{{node}}\``,
       docsUrl: 'https://on.cypress.io/select',
+    },
+  },
+
+  selectFile: {
+    docsUrl: 'https://on.cypress.io/selectfile',
+    invalid_action: {
+      message: `${cmd('selectFile')} \`action\` can only be \`select\` or \`drag-drop\`. You passed: \`{{action}}\`.`,
+    },
+    invalid_array_file_reference: {
+      message: `${cmd('selectFile')} must be passed an array of Buffers or objects with non-null \`contents\`. At files[{{index}}] you passed: \`{{file}}\`.`,
+    },
+    invalid_single_file_reference: {
+      message: `${cmd('selectFile')} must be passed a Buffer or an object with a non-null \`contents\` property as its 1st argument. You passed: \`{{file}}\`.`,
+    },
+    multiple_elements: {
+      message: `${cmd('selectFile')} can only be called on a single element. Your subject contained {{num}} elements.`,
+    },
+    not_file_input: {
+      message: `${cmd('selectFile')} can only be called on an \`<input type="file">\` or a \`<label for="fileInput">\` pointing to or containing a file input, but received the element:
+      
+      \`{{node}}\`.`,
+    },
+    invalid_alias: {
+      message: `${cmd('selectFile')} can only attach strings, Buffers or objects, while your alias \`{{alias}}\` resolved to: \`{{subject}}\`.`,
     },
   },
 
@@ -1880,26 +1878,49 @@ export default {
 
         Cypress only considers the \`window\`, \`document\`, or any \`element\` to be valid DOM objects.`
     },
-    not_attached (obj) {
+    detached_during_actionability (obj) {
       return {
         message: stripIndent`\
-          ${cmd(obj.cmd)} failed because this element is detached from the DOM.
+          ${cmd(obj.name)} failed because the page updated while this command was executing. Cypress tried to locate elements based on this query:
 
-          \`${obj.node}\`
+          > ${subjectChainToString(obj.subjectChain)}
 
-          Cypress requires elements be attached in the DOM to interact with them.
+          We initially found matching element(s), but while waiting for them to become actionable, they disappeared from the page. Common situations why this happens:
+            - Your JS framework re-rendered asynchronously
+            - Your app code reacted to an event firing and removed the element
 
-          The previous command that ran was:
+          You can typically solve this by breaking up a chain. For example, rewrite:
 
-            > ${cmd(obj.prev)}
+          > \`cy.get('button').click().click()\`
 
-          This DOM element likely became detached somewhere between the previous and current command.
+          to
+
+          > \`cy.get('button').as('btn').click()\`
+          > \`cy.get('@btn').click()\`
+
+            `,
+        docsUrl: 'https://on.cypress.io/element-has-detached-from-dom',
+      }
+    },
+    detached_after_command (obj) {
+      return {
+        message: stripIndent`\
+          ${cmd(obj.name)} failed because the page updated as a result of this command, but you tried to continue the command chain. The subject is no longer attached to the DOM, and Cypress cannot requery the page after commands such as ${cmd(obj.name)}.
 
           Common situations why this happens:
             - Your JS framework re-rendered asynchronously
             - Your app code reacted to an event firing and removed the element
 
-          You typically need to re-query for the element or add 'guards' which delay Cypress from running new commands.`,
+          You can typically solve this by breaking up a chain. For example, rewrite:
+
+          > \`cy.get('button').click().should('have.class', 'active')\`
+
+          to
+
+          > \`cy.get('button').as('btn').click()\`
+          > \`cy.get('@btn').should('have.class', 'active')\`
+
+            `,
         docsUrl: 'https://on.cypress.io/element-has-detached-from-dom',
       }
     },
@@ -1936,7 +1957,7 @@ export default {
           > ${subjectChainToString(obj.subjectChain)}`
     },
     state_subject_deprecated: {
-      message: `${cmd('state', '\'subject\'')} has been deprecated and will be removed in a future release. Consider migrating to ${cmd('currentSubject')} instead.`,
+      message: `${cmd('state', '\'subject\'')} has been deprecated and will be removed in a future release. Consider migrating to ${cmd('subject')} instead.`,
     },
     state_withinsubject_deprecated: {
       message: `${cmd('state', '\'withinSubject\'')} has been deprecated and will be removed in a future release. You should read ${cmd('state', '\'withinSubjectChain\'')} once at the top of your command / query, and resolve it into a value with ${cmd('getSubjectFromChain', 'withinSubjectChain')} as needed.`,

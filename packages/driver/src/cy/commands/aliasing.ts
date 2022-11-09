@@ -2,7 +2,7 @@ import _ from 'lodash'
 import $dom from '../../dom'
 
 export default function (Commands, Cypress, cy) {
-  Commands._addQuery('as', function asFn (alias) {
+  Commands.addQuery('as', function asFn (alias) {
     cy.ensureChildCommand(this, [alias])
     cy.validateAlias(alias)
 
@@ -12,8 +12,7 @@ export default function (Commands, Cypress, cy) {
 
     // Shallow clone of the existing subject chain, so that future commands running on the same chainer
     // don't apply here as well.
-    const chainerId = cy.state('chainerId')
-    const subjectChain = [...cy.state('subjects')[chainerId]]
+    const subjectChain = [...cy.subjectChain()]
 
     const fileName = prevCommand.get('fileName')
 
@@ -36,7 +35,7 @@ export default function (Commands, Cypress, cy) {
       const log: any = _.last(cy.queue.logs({
         instrument: 'command',
         event: false,
-        chainerId,
+        chainerId: this.get('chainerId'),
       }))
 
       const alreadyAliasedLog = _.map(prevCommand.get('logs'), 'attributes.alias').find((a) => a === alias)

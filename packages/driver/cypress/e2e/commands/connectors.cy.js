@@ -310,7 +310,7 @@ describe('src/cy/commands/connectors', () => {
             return $div
           })
           .then(function () {
-            expect(cy.currentSubject()).not.to.be.instanceof(this.remoteWindow.$)
+            expect(cy.subject()).not.to.be.instanceof(this.remoteWindow.$)
           })
         })
       })

@@ -143,7 +143,7 @@ export default function (Commands, Cypress, cy, state) {
   // to allow the falsy value 0 to be used
   const isPath = (str) => (!!str || str === 0)
 
-  Commands._addQuery('its', function its (path, options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}, ...args) {
+  Commands.addQuery('its', function its (path, options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}, ...args) {
     // If we're being used in .invoke(), we us it. For any other current command (.its itself or a custom command),
     // we fall back to the .its() error messages.
     const cmd = this.get('name') === 'invoke' ? 'invoke' : 'its'
@@ -189,7 +189,7 @@ export default function (Commands, Cypress, cy, state) {
 
       const value = _.get(subject, path)
 
-      log && log.set({
+      log && cy.state('current') === this && log.set({
         $el: $dom.isElement(subject) ? subject : null,
         consoleProps () {
           const obj = {
@@ -214,7 +214,7 @@ export default function (Commands, Cypress, cy, state) {
     }
   })
 
-  Commands._addQuery('invoke', function invoke (optionsOrPath, argOrOptions, ...args) {
+  Commands.addQuery('invoke', function invoke (optionsOrPath, argOrOptions, ...args) {
     let options
     let path
 
@@ -276,7 +276,7 @@ export default function (Commands, Cypress, cy, state) {
 
       let value = parent[last](...args)
 
-      log && log.set({
+      log && cy.state('current') === this && log.set({
         $el: $dom.isElement(subject) ? subject : null,
         consoleProps: () => {
           return {

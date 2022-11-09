@@ -172,7 +172,7 @@ export const makeRequestForCookieBehaviorTests = (
   })
 }
 
-Cypress.Commands.add('getAll', getAllFn)
+Cypress.Commands.addQuery('getAll', getAllFn)
 
 Cypress.Commands.add('shouldWithTimeout', shouldWithTimeout)
 
