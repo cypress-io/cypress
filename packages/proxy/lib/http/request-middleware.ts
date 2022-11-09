@@ -146,9 +146,7 @@ const SendToDriver: RequestMiddleware = function () {
   const { browserPreRequest } = this.req
 
   if (browserPreRequest) {
-    this.socket.toDriver('request:event', 'incoming:request', {
-      browserPreRequest,
-    })
+    this.socket.toDriver('request:event', 'incoming:request', { ...browserPreRequest, matchedIntercept: !!this.req.matchedIntercept })
   }
 
   this.next()

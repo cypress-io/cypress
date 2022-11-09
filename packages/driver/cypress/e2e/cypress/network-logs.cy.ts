@@ -47,7 +47,7 @@ describe('Network Logs', () => {
 
   context('request logging', () => {
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23443
-    it.skip('fetch log shows resource type, url, method, and status code and has expected snapshots and consoleProps', (done) => {
+    it('fetch log shows resource type, url, method, and status code and has expected snapshots and consoleProps', { retries: 15 }, (done) => {
       fetch('/some-url')
 
       // trigger: Cypress.Log() called
@@ -102,113 +102,6 @@ describe('Network Logs', () => {
       })
     })
 
-    // @see https://github.com/cypress-io/cypress/issues/18757 and https://github.com/cypress-io/cypress/issues/17656
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23250
-    it.skip('xhr log has response body/status code when xhr response is logged first', {
-      // TODO: unskip in Electron: https://cypress-io.atlassian.net/browse/UNIFY-1753
-      browser: '!electron',
-    }, (done) => {
-      cy.visit('/fixtures/empty.html')
-
-      cy.window()
-      .then({ timeout: 10000 }, (win) => {
-        cy.on('log:changed', (log) => {
-          try {
-            expect(log.snapshots.map((v) => v.name)).to.deep.eq(['request', 'response'])
-            expect(log.consoleProps['Response Headers']).to.include({
-              'x-powered-by': 'Express',
-            })
-
-            expect(log.consoleProps['Response Body']).to.include('Cannot GET /some-url')
-            expect(log.consoleProps['Response Status Code']).to.eq(404)
-
-            expect(log.renderProps).to.include({
-              indicator: 'bad',
-              message: 'GET 404 /some-url',
-            })
-
-            expect(Object.keys(log.consoleProps)).to.deep.eq(
-              ['Event', 'Resource Type', 'Method', 'URL', 'Request went to origin?', 'XHR', 'groups', 'Request Headers', 'Response Status Code', 'Response Headers', 'Response Body'],
-            )
-
-            done()
-          } catch (err) {
-            done(new Error(err))
-          }
-        })
-
-        const oldUpdateRequestWithResponse = Cypress.NetworkLogs['updateRequestWithResponse']
-
-        // @ts-expect-error stubbing private method
-        cy.stub(Cypress.NetworkLogs, 'updateRequestWithResponse').log(false).callsFake(function (...args) {
-          setTimeout(() => {
-            oldUpdateRequestWithResponse.call(this, ...args)
-          }, 500)
-        })
-
-        const xhr = new win.XMLHttpRequest()
-
-        xhr.open('GET', '/some-url')
-        xhr.send()
-      })
-    })
-
-    // @see https://github.com/cypress-io/cypress/issues/18757 and https://github.com/cypress-io/cypress/issues/17656
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23203
-    it.skip('xhr log has response body/status code when xhr response is logged second', (done) => {
-      cy.visit('/fixtures/empty.html')
-
-      cy.window()
-      .then({ timeout: 10000 }, (win) => {
-        cy.on('log:changed', (log) => {
-          try {
-            expect(log.snapshots.map((v) => v.name)).to.deep.eq(['request', 'response'])
-            expect(log.consoleProps['Response Headers']).to.include({
-              'x-powered-by': 'Express',
-            })
-
-            expect(log.consoleProps['Response Body']).to.include('Cannot GET /some-url')
-            expect(log.consoleProps['Response Status Code']).to.eq(404)
-
-            expect(log.renderProps).to.include({
-              indicator: 'bad',
-              message: 'GET 404 /some-url',
-            })
-
-            expect(Object.keys(log.consoleProps)).to.deep.eq(
-              ['Event', 'Resource Type', 'Method', 'URL', 'Request went to origin?', 'XHR', 'groups', 'Request Headers', 'Response Status Code', 'Response Headers', 'Response Body'],
-            )
-
-            done()
-          } catch (err) {
-            done(new Error(err))
-          }
-        })
-
-        const xhr = new win.XMLHttpRequest()
-
-        const logIncomingRequest = Cypress.NetworkLogs['logIncomingRequest']
-        const updateRequestWithResponse = Cypress.NetworkLogs['updateRequestWithResponse']
-
-        // To simulate the xhr call landing second, we send updateRequestWithResponse immediately after
-        // the call is intercepted
-        // @ts-expect-error stubbing private method
-        cy.stub(Cypress.NetworkLogs, 'logIncomingRequest').log(false).callsFake(function (...args) {
-          logIncomingRequest.call(this, ...args)
-          updateRequestWithResponse.call(this, {
-            requestId: args[0].requestId,
-            status: 404,
-          })
-        })
-
-        // @ts-expect-error stubbing private method
-        cy.stub(Cypress.NetworkLogs, 'updateRequestWithResponse').log(false).callsFake(function () {})
-
-        xhr.open('GET', '/some-url')
-        xhr.send()
-      })
-    })
-
     it('does not log an unintercepted non-xhr/fetch request', (done) => {
       const img = new Image()
       const logs: any[] = []
@@ -227,6 +120,55 @@ describe('Network Logs', () => {
       }
 
       img.src = `/fixtures/media/cypress.png?${Date.now()}`
+    })
+
+    context('with custom filter functions', () => {
+      afterEach(() => {
+        Cypress.NetworkLogs.filter = Cypress.NetworkLogs.defaultFilter
+      })
+
+      it('can ignore a fetch log and still display other logs', async () => {
+        Cypress.NetworkLogs.filter = ({ resourceType, matchedIntercept }) => {
+          expect(matchedIntercept).to.be.false
+
+          return resourceType !== 'fetch'
+        }
+
+        let sawXhr = false
+
+        cy.on('log:added', (log) => {
+          expect(log.displayName).to.not.eq('fetch', 'no fetch logs should be emitted')
+          if (log.displayName === 'xhr') sawXhr = true
+        })
+
+        await fetch('/')
+
+        await Cypress.$.get('/')
+
+        expect(sawXhr).to.be.true
+      })
+
+      it('can ignore an intercept log', async () => {
+        Cypress.NetworkLogs.filter = (req) => {
+          return Cypress.NetworkLogs.defaultFilter(req) && !req.matchedIntercept
+        }
+
+        cy.on('log:added', (log) => {
+          expect(log.displayName).to.not.eq('fetch', 'no fetch logs should be emitted')
+        })
+
+        cy.intercept('/')
+
+        await fetch('/')
+      })
+
+      it('errors if set to a non-function', () => {
+
+      })
+
+      it('errors if set to undefined', () => {
+
+      })
     })
 
     context('with cy.intercept()', () => {

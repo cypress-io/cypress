@@ -226,12 +226,10 @@ class ProxyRequest {
   }
 }
 
-type FilterFnRequestInfo = BrowserPreRequest
-
 export default class NetworkLogs {
   unloggedPreRequests: Array<BrowserPreRequest> = []
   proxyRequests: Array<ProxyRequest> = []
-  _filter: (requestInfo: FilterFnRequestInfo) => boolean
+  _filter: (requestInfo: BrowserPreRequest) => boolean
 
   constructor (private Cypress: Cypress.Cypress) {
     this._filter = this.defaultFilter
@@ -269,7 +267,13 @@ export default class NetworkLogs {
     this._filter = filterFn || this.defaultFilter
   }
 
-  readonly defaultFilter = (requestInfo: FilterFnRequestInfo) => {
+  get filter () {
+    if (!this._filter) throw new Error('NetworkLogs._filter got unset - this should not be possible using the setter.')
+
+    return this._filter
+  }
+
+  readonly defaultFilter = (requestInfo: BrowserPreRequest) => {
     return ['xhr', 'fetch'].includes(requestInfo.resourceType) || requestInfo.matchedIntercept
   }
 
@@ -345,6 +349,7 @@ export default class NetworkLogs {
    */
   private logIncomingRequest (preRequest: BrowserPreRequest): void {
     if (!this._filter(preRequest)) {
+      // TODO: probably not needed anymore with matchedIntercept??
       this.unloggedPreRequests.push(preRequest)
 
       return
