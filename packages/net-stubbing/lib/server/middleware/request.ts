@@ -24,9 +24,9 @@ import type { BackendRoute } from '../types'
 const debug = Debug('cypress:net-stubbing:server:intercept-request')
 
 /**
- * Called when a new request is received in the proxy layer.
+ * Called when a new request is received in the proxy layer to set the matching `cy.intercept()` routes, if any.
  */
-export const InterceptRequest: RequestMiddleware = async function () {
+export const SetMatchingRoutes: RequestMiddleware = function () {
   if (matchesRoutePreflight(this.netStubbingState.routes, this.req)) {
     // send positive CORS preflight response
     return sendStaticResponse(this, {
@@ -67,8 +67,18 @@ export const InterceptRequest: RequestMiddleware = async function () {
   // attach requestId to the original req object for later use
   this.req.requestId = request.id
   this.req.matchedIntercept = true
-
   this.netStubbingState.requests[request.id] = request
+}
+
+/**
+ * Using the data from SetMatchingRoutes, execute the user's routes.
+ */
+export const InterceptRequest: RequestMiddleware = async function () {
+  if (!this.req.matchedIntercept) {
+    return this.next()
+  }
+
+  const request = this.netStubbingState.requests[this.req.requestId]
 
   const req = _.extend(_.pick(request.req, SERIALIZABLE_REQ_PROPS), {
     url: request.req.proxiedUrl,
