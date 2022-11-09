@@ -29,7 +29,7 @@ namespace CypressAutomationTests {
 
 namespace CypressConfigTests {
   // getters
-  Cypress.config('baseUrl') // $ExpectType string | null | undefined
+  Cypress.config('baseUrl') // $ExpectType string | null
   Cypress.config().baseUrl // $ExpectType string | null
 
   // setters
@@ -41,8 +41,8 @@ namespace CypressConfigTests {
   Cypress.config({ e2e: { indexHtmlFile: 'index.html' } }) // $ExpectError
   Cypress.config({ testIsolation: 'off' }) // $ExpectError
 
-  Cypress.config('taskTimeout') // $ExpectType number | undefined
-  Cypress.config('includeShadowDom') // $ExpectType boolean | undefined
+  Cypress.config('taskTimeout') // $ExpectType number
+  Cypress.config('includeShadowDom') // $ExpectType boolean
 }
 
 namespace CypressEnvTests {
