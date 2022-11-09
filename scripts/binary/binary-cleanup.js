@@ -81,8 +81,8 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
       metafile: true,
       absWorkingDir: buildAppDir,
       external: [
-        './packages/packherd-require/dist/transpile-ts',
-        './packages/server/server-entry',
+        './transpile-ts',
+        './server-entry',
         'fsevents',
         'pnpapi',
         '@swc/core',
