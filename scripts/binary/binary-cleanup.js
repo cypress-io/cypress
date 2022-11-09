@@ -39,20 +39,20 @@ async function removeEmptyDirectories (directory) {
 const getDependencyPathsToKeep = async (buildAppDir) => {
   const unixBuildAppDir = buildAppDir.split(path.sep).join(path.posix.sep)
   const startingEntryPoints = [
-    '@packages/server/index.js',
-    '@packages/server/hook-require.js',
-    '@packages/server/lib/plugins/child/require_async_child.js',
-    '@packages/server/lib/plugins/child/register_ts_node.js',
-    '@packages/rewriter/lib/threads/worker.js',
-    'webpack',
-    'webpack-dev-server',
-    'html-webpack-plugin-4',
-    'html-webpack-plugin-5',
-    'mocha-7.0.1',
+    'packages/server/index.js',
+    'packages/server/hook-require.js',
+    'packages/server/lib/plugins/child/require_async_child.js',
+    'packages/server/lib/plugins/child/register_ts_node.js',
+    'packages/rewriter/lib/threads/worker.js',
+    'node_modules/webpack/lib/webpack.js',
+    'node_modules/webpack-dev-server/lib/Server.js',
+    'node_modules/html-webpack-plugin-4/index.js',
+    'node_modules/html-webpack-plugin-5/index.js',
+    'node_modules/mocha-7.0.1/index.js',
   ]
 
   let entryPoints = new Set([
-    ...startingEntryPoints.map((entryPoint) => require.resolve(entryPoint, { paths: [unixBuildAppDir] })),
+    ...startingEntryPoints.map((entryPoint) => path.join(unixBuildAppDir, entryPoint)),
     // These dependencies are completely dynamic using the pattern `require(`./${name}`)` and will not be pulled in by esbuild but still need to be kept in the binary.
     ...['ibmi',
       'sunos',
@@ -62,7 +62,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
       'linux',
       'openbsd',
       'sunos',
-      'win32'].map((platform) => require.resolve(`default-gateway/${platform}`, { paths: [unixBuildAppDir] })),
+      'win32'].map((platform) => path.join(unixBuildAppDir, `node_modules/default-gateway/${platform}.js`)),
   ])
   let esbuildResult
   let newEntryPointsFound = true
