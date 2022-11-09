@@ -551,12 +551,6 @@ declare namespace Cypress {
        * @see https://on.cypress.io/api/commands#Queries
        */
       addQuery<T extends keyof Chainable>(name: T, fn: QueryFn<T>): void
-
-      /**
-       * Overwrite an existing Cypress command or query with a new query
-       * @see https://on.cypress.io/api/commands#Overwrite-Existing-Queries
-       */
-      overwriteQuery<T extends keyof Chainable>(name: T, fn: QueryFn<T>): void
     }
 
     /**
