@@ -79,7 +79,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
       outdir: workingDir,
       platform: 'node',
       metafile: true,
-      absWorkingDir: buildAppDir,
+      absWorkingDir: buildAppDir.split(path.sep).join(path.posix.sep),
       external: [
         './transpile-ts',
         './server-entry',
