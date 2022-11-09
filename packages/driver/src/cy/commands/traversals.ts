@@ -120,7 +120,7 @@ export default (Commands, Cypress, cy) => {
       return (subject) => {
         cy.ensureSubjectByType(subject, ['element', 'document'], this)
 
-        const $el = getEl(traversal, includeShadowDom, subject, arg1, arg2)
+        const $el = getEl(traversal, includeShadowDom, cy.$$(subject), arg1, arg2)
 
         // normalize the selector since jQuery won't have it
         // or completely borks it

@@ -4,12 +4,12 @@ type ProjectDirs = typeof fixtureDirs
 
 const PROJECTS: {projectName: ProjectDirs[number], test: string}[] = [
   { projectName: 'angular-14', test: 'app.component' },
-  { projectName: 'vueclivue2-configured', test: 'HelloWorld.cy' },
-  { projectName: 'react-vite-ts-configured', test: 'App.cy' },
-  { projectName: 'react18', test: 'App.cy' },
-  { projectName: 'create-react-app-configured', test: 'App.cy' },
-  { projectName: 'vueclivue3-configured', test: 'HelloWorld.cy' },
-  { projectName: 'nuxtjs-vue2-configured', test: 'Tutorial.cy' },
+//   { projectName: 'vueclivue2-configured', test: 'HelloWorld.cy' },
+//   { projectName: 'react-vite-ts-configured', test: 'App.cy' },
+//   { projectName: 'react18', test: 'App.cy' },
+//   { projectName: 'create-react-app-configured', test: 'App.cy' },
+//   { projectName: 'vueclivue3-configured', test: 'HelloWorld.cy' },
+//   { projectName: 'nuxtjs-vue2-configured', test: 'Tutorial.cy' },
 ]
 
 // TODO: Add these tests to another cy-in-cy framework test to reduce CI cost as these scaffolding is expensive

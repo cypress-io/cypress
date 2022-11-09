@@ -38,6 +38,7 @@ export default function (Commands, Cypress, cy, state) {
       $errUtils.throwErrByPath(
         'should.command_inside_should', {
           args: { action: obj.name },
+          errProps: { retry: false },
         },
       )
     }
