@@ -1,4 +1,4 @@
-# @cypress/react
+# @cypress/react18
 
 Mount React 18 components in the open source [Cypress.io](https://www.cypress.io/) test runner
 
