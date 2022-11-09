@@ -374,7 +374,7 @@ declare namespace Cypress {
     // 60000
     ```
      */
-    config<K extends keyof TestConfigOverrides>(key: K): TestConfigOverrides[K]
+    config<K extends keyof Config>(key: K): Config[K]
     /**
      * Sets one configuration value.
      * @see https://on.cypress.io/config
