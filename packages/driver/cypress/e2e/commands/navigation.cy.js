@@ -115,7 +115,7 @@ describe('src/cy/commands/navigation', () => {
 
         cy.on('log:added', (attrs, log) => {
           this.lastLog = log
-          this.logs.push(log)
+          this.logs?.push(log)
         })
 
         return null
@@ -2104,7 +2104,7 @@ describe('src/cy/commands/navigation', () => {
 
         cy.on('log:added', (_attrs, log) => {
           this.lastLog = log
-          this.logs.push(log)
+          this.logs?.push(log)
         })
 
         return null
@@ -2124,17 +2124,15 @@ describe('src/cy/commands/navigation', () => {
         it('times out', function (done) {
           let thenCalled = false
 
-          cy.on('fail', (err, test) => {
-            if (test._currentRetry < 1) {
-              const { lastLog } = this
+          cy.once('fail', (err, test) => {
+            const { lastLog } = this
 
-              // visit, window, page loading
-              assertLogLength(this.logs, 3)
+            // visit, window, page loading
+            assertLogLength(this.logs, 3)
 
-              expect(lastLog.get('name')).to.eq('page load')
-              expect(lastLog.get('error')).to.eq(err)
-            }
-
+            expect(lastLog.get('name')).to.eq('page load')
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(lastLog.get('error')).to.eq(err)
             expect(err.message).to.include('Your page did not fire its `load` event within `50ms`.')
 
             return Promise
@@ -2158,7 +2156,9 @@ describe('src/cy/commands/navigation', () => {
             causeSynchronousBeforeUnload($a)
 
             return null
-          }).wrap(null).then(() => {
+          })
+          .wrap(null)
+          .then(() => {
             thenCalled = true
           })
         })

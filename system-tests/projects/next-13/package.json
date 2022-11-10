@@ -1,5 +1,5 @@
 {
-  "name": "my-app",
+  "name": "next-latest",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,9 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "^11.0.0",
-    "react": "17.0.2",
-    "react-dom": "17.0.2"
+    "next": "13.0.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
   },
   "projectFixtureDirectory": "next"
 }

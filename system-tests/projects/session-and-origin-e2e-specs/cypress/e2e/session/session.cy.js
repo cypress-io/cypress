@@ -387,12 +387,6 @@ function SuiteWithValidateFn (id, fn) {
   })
 }
 
-describe('options.validate reruns steps when returning false', () => {
-  SuiteWithValidateFn('validate_return_false', (callCount) => {
-    return callCount !== 2
-  })
-})
-
 describe('options.validate reruns steps when resolving false', () => {
   SuiteWithValidateFn('validate_resolve_false', (callCount) => {
     return Promise.resolve(callCount !== 2)
