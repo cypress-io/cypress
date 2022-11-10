@@ -132,71 +132,94 @@ describe('runner/cypress sessions.ui.spec', {
     // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
   })
 
-  describe('restores saved session', () => {
-    beforeEach(() => {
-      loadSpec({
-        projectName: 'session-and-origin-e2e-specs',
-        filePath: 'session/restores_saved_session.cy.js',
-        passCount: 5,
-        failCount: 1,
-      })
+  // https://github.com/cypress-io/cypress/issues/24208
+  it('does not save session when validation fails', () => {
+    loadSpec({
+      projectName: 'session-and-origin-e2e-specs',
+      filePath: 'session/new_session_and_fails_validation_retries.cy.js',
+      failCount: 1,
     })
 
-    it('restores session as expected', () => {
-      cy.get('.test').each(($el, index) => {
-        if (index < 5) { // don't click on failed test
-          cy.wrap($el).click()
-        }
-      })
+    validateSessionsInstrumentPanel(['blank_session'])
 
-      cy.log('validate new session was created in first test')
-      cy.get('.test').eq(0).within(() => {
-        validateSessionsInstrumentPanel(['user1'])
-        cy.get('.command-name-session').contains('created')
-      })
-
-      cy.log('validate saved session was used in second test')
-      cy.get('.test').eq(1).within(() => {
-        validateSessionsInstrumentPanel(['user1'])
-        cy.get('.command-name-session')
-        .within(() => {
-          cy.get('.command-expander').first().click()
-          cy.contains('user1')
-          cy.contains('restored')
-
-          cy.get('.command-name-Clear-page').should('have.length', 1)
-
-          cy.contains('Restore saved session')
-
-          cy.contains('Validate session')
-          .closest('.command').as('validateSession')
-
-          cy.get('@validateSession')
-          .find('.command-expander')
-          .should('not.have.class', 'command-expander-is-open')
-          .click()
-
-          cy.get('@validateSession')
-          .find('.command-alias')
-          .contains('runValidation')
-        })
-
-        cy.get('.command-name-session').get('.command-expander').first().click()
-
-        cy.get('.command').should('have.length', 2)
-      })
+    cy.contains('Attempt 1').click()
+    cy.get('.attempt-item').eq(0).within(() => {
+      cy.contains('validation error')
     })
 
-    // https://github.com/cypress-io/cypress/issues/22381
-    it('ensures sessionid integrity is maintained across tests', () => {
-      cy.contains('test sessionid integrity is maintained').closest('.runnable').should('have.class', 'runnable-failed')
-      cy.get('.test').should('have.length', 6)
+    cy.get('.attempt-item').eq(1).within(() => {
+      cy.contains('validation error')
+      // when we stored sessions pre-validation, the 2nd attempt would fail
+      // with this error instead of the validation failing again
+      cy.contains('session already exists').should('not.exist')
+    })
+  })
 
-      cy.get('.test').eq(2).should('have.class', 'runnable-passed')
-      cy.get('.test').eq(3).should('have.class', 'runnable-passed')
-      cy.get('.test').eq(4).should('have.class', 'runnable-passed')
-      cy.get('.test').eq(5).should('have.class', 'runnable-failed')
-      cy.contains('This session already exists.').should('exist')
+  it('creates, not recreates, session when validation fails then succeeds', () => {
+    loadSpec({
+      projectName: 'session-and-origin-e2e-specs',
+      filePath: 'session/new_session_and_fails_then_succeeds_validation_retries.cy.js',
+      failCount: 1,
+    })
+
+    validateSessionsInstrumentPanel(['blank_session'])
+
+    cy.get('.attempt-item').eq(1).within(() => {
+      cy.contains('Create new session')
+      // when we stored sessions pre-validation, the 2nd attempt would
+      // say "Recreate session"
+      cy.contains('Recreate session').should('not.exist')
+    })
+  })
+
+  it('restores session as expected', () => {
+    loadSpec({
+      projectName: 'session-and-origin-e2e-specs',
+      filePath: 'session/restores_saved_session.cy.js',
+      passCount: 2,
+    })
+
+    cy.get('.test').each(($el, index) => {
+      if (index < 5) { // don't click on failed test
+        cy.wrap($el).click()
+      }
+    })
+
+    cy.log('validate new session was created in first test')
+    cy.get('.test').eq(0).within(() => {
+      validateSessionsInstrumentPanel(['user1'])
+      cy.get('.command-name-session').contains('created')
+    })
+
+    cy.log('validate saved session was used in second test')
+    cy.get('.test').eq(1).within(() => {
+      validateSessionsInstrumentPanel(['user1'])
+      cy.get('.command-name-session')
+      .within(() => {
+        cy.get('.command-expander').first().click()
+        cy.contains('user1')
+        cy.contains('restored')
+
+        cy.get('.command-name-Clear-page').should('have.length', 1)
+
+        cy.contains('Restore saved session')
+
+        cy.contains('Validate session')
+        .closest('.command').as('validateSession')
+
+        cy.get('@validateSession')
+        .find('.command-expander')
+        .should('not.have.class', 'command-expander-is-open')
+        .click()
+
+        cy.get('@validateSession')
+        .find('.command-alias')
+        .contains('runValidation')
+      })
+
+      cy.get('.command-name-session').get('.command-expander').first().click()
+
+      cy.get('.command').should('have.length', 2)
     })
   })
 

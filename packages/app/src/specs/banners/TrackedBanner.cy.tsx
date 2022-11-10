@@ -4,7 +4,7 @@ import { TrackedBanner_RecordBannerSeenDocument, TrackedBanner_SetProjectStateDo
 
 describe('<TrackedBanner />', () => {
   it('should pass through props and child content', () => {
-    cy.mount({ render: () => <TrackedBanner bannerId="test-banner" dismissible modelValue={true} hasBannerBeenShown={false} eventData={{} as any}>Test Content</TrackedBanner> })
+    cy.mount({ render: () => <TrackedBanner bannerId="test-banner" dismissible hasBannerBeenShown={false} eventData={{} as any}>Test Content</TrackedBanner> })
 
     cy.findByText('Test Content').should('be.visible')
     cy.findByTestId('alert-suffix-icon').should('be.visible')
@@ -94,7 +94,7 @@ describe('<TrackedBanner />', () => {
         eventData = reactive({ campaign: 'CAM', medium: 'MED', cohort: 'COH' })
 
         cy.mount({
-          render: () => <TrackedBanner bannerId="test-banner" modelValue={true} hasBannerBeenShown={hasBannerBeenShown.value} eventData={eventData} />,
+          render: () => <TrackedBanner bannerId="test-banner" hasBannerBeenShown={hasBannerBeenShown.value} eventData={eventData} />,
         })
       })
 
@@ -118,7 +118,7 @@ describe('<TrackedBanner />', () => {
 
       beforeEach(() => {
         eventData = reactive({ campaign: 'CAM', medium: 'MED', cohort: undefined })
-        cy.mount({ render: () => <TrackedBanner bannerId="test-banner" modelValue={true} hasBannerBeenShown={true} eventData={eventData} /> })
+        cy.mount({ render: () => <TrackedBanner bannerId="test-banner" hasBannerBeenShown={true} eventData={eventData} /> })
       })
 
       it('should not record event', () => {

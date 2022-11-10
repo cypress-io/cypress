@@ -395,7 +395,7 @@ declare namespace Cypress {
     })
     ```
      */
-    config(Object: ConfigOptions): void
+    config(Object: TestConfigOverrides): void
 
     // no real way to type without generics
     /**
@@ -775,20 +775,20 @@ declare namespace Cypress {
     clear(options?: Partial<ClearOptions>): Chainable<Subject>
 
     /**
-     * Clear a specific browser cookie.
+     * Clear a specific browser cookie for the current superdomain or for the domain specified.
      * Cypress automatically clears all cookies before each test to prevent state from being shared across tests. You shouldn't need to use this command unless you're using it to clear a specific cookie inside a single test.
      *
      * @see https://on.cypress.io/clearcookie
      */
-    clearCookie(name: string, options?: Partial<Loggable & Timeoutable>): Chainable<null>
+    clearCookie(name: string, options?: CookieOptions): Chainable<null>
 
     /**
-     * Clear all browser cookies.
-     * Cypress automatically clears all cookies before each test to prevent state from being shared across tests. You shouldn't need to use this command unless you're using it to clear a specific cookie inside a single test.
+     * Clear all browser cookies for the current superdomain or for the domain specified.
+     * Cypress automatically clears all cookies before each test to prevent state from being shared across tests. You shouldn't need to use this command unless you're using it to clear all cookies or specific cookies inside a single test.
      *
      * @see https://on.cypress.io/clearcookies
      */
-    clearCookies(options?: Partial<Loggable & Timeoutable>): Chainable<null>
+    clearCookies(options?: CookieOptions): Chainable<null>
 
     /**
      * Clear data in local storage.
@@ -1089,7 +1089,7 @@ declare namespace Cypress {
       *
       * @see https://on.cypress.io/session
       */
-    session(id: string | object, setup?: () => void, options?: SessionOptions): Chainable<null>
+    session(id: string | object, setup: () => void, options?: SessionOptions): Chainable<null>
 
     /**
      * Get the window.document of the page that is currently active.
@@ -1248,18 +1248,18 @@ declare namespace Cypress {
     get<S = any>(alias: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<S>
 
     /**
-     * Get a browser cookie by its name.
+     * Get a browser cookie by its name for the current superdomain or for the domain specified.
      *
      * @see https://on.cypress.io/getcookie
      */
-    getCookie(name: string, options?: Partial<Loggable & Timeoutable>): Chainable<Cookie | null>
+    getCookie(name: string, options?: CookieOptions): Chainable<Cookie | null>
 
     /**
-     * Get all of the browser cookies.
+     * Get all of the browser cookies for the current superdomain or for the domain specified.
      *
      * @see https://on.cypress.io/getcookies
      */
-    getCookies(options?: Partial<Loggable & Timeoutable>): Chainable<Cookie[]>
+    getCookies(options?: CookieOptions): Chainable<Cookie[]>
 
     /**
      * Navigate back or forward to the previous or next URL in the browser's history.
@@ -2633,6 +2633,14 @@ declare namespace Cypress {
     cmdKey: boolean
   }
 
+  interface CookieOptions extends Partial<Loggable & Timeoutable> {
+    /**
+     * Domain to set cookies on or get cookies from
+     * @default superdomain of the current app under test
+     */
+    domain?: string
+  }
+
   interface PEMCert {
     /**
      * Path to the certificate file, relative to project root.
@@ -2808,12 +2816,32 @@ declare namespace Cypress {
      */
     supportFile: string | false
     /**
-     * The test isolation level applied to ensure a clean slate between tests.
-     *   - legacy - resets/clears aliases, intercepts, clock, viewport, cookies, and local storage before each test.
-     *   - strict - applies all resets/clears from legacy, plus clears the page by visiting 'about:blank' to ensure clean app state before each test.
-     * @default "legacy", however, when experimentalSessionAndOrigin=true, the default is "strict"
+     * The test isolation ensures a clean browser context between tests. This option is only available when
+     * `experimentalSessionAndOrigin=true`.
+     *
+     * Cypress will always reset/clear aliases, intercepts, clock, and viewport before each test
+     * to ensure a clean test slate; i.e. this configuration only impacts the browser context.
+     *
+     * Note: the [`cy.session()`](https://on.cypress.io/session) command will inherent this value to determine whether
+     * or not the page is cleared when the command executes. This command is only available in end-to-end testing.
+     *
+     *  - on - The page is cleared before each test. Cookies, local storage and session storage in all domains are cleared
+     *         before each test. The `cy.session()` command will also clear the page and current browser context when creating
+     *         or restoring the browser session.
+     *  - off - The current browser state will persist between tests. The page does not clear before the test and cookies, local
+     *          storage and session storage will be available in the next test. The `cy.session()` command will only clear the
+     *          current browser context when creating or restoring the browser session - the current page will not clear.
+     *
+     * Tradeoffs:
+     *      Turning test isolation off may improve performance of end-to-end tests, however, previous tests could impact the
+     *      browser state of the next test and cause inconsistency when using .only(). Be mindful to write isolated tests when
+     *      test isolation is off. If a test in the suite impacts the state of other tests and it were to fail, you could see
+     *      misleading errors in later tests which makes debugging clunky. See the [documentation](https://on.cypress.io/test-isolation)
+     *      for more information.
+     *
+     * @default null, when experimentalSessionAndOrigin=false. The default is 'on' when experimentalSessionAndOrigin=true.
      */
-    testIsolation: 'legacy' | 'strict'
+    testIsolation: null | 'on' | 'off'
     /**
      * Path to folder where videos will be saved after a headless or CI run
      * @default "cypress/videos"
@@ -3046,7 +3074,16 @@ declare namespace Cypress {
     xhrUrl: string
   }
 
-  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations' | 'experimentalSessionAndOrigin'>>, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
+  interface SuiteConfigOverrides extends Partial<
+    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations' | 'experimentalSessionAndOrigin'>
+  >, Partial<Pick<ResolvedConfigOptions, 'baseUrl' | 'testIsolation'>> {
+    browser?: IsBrowserMatcher | IsBrowserMatcher[]
+    keystrokeDelay?: number
+  }
+
+  interface TestConfigOverrides extends Partial<
+    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations' | 'experimentalSessionAndOrigin'>
+  >, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
   }
@@ -6051,7 +6088,7 @@ declare namespace Mocha {
      * Describe a "suite" with the given `title`, TestOptions, and callback `fn` containing
      * nested suites.
      */
-    (title: string, config: Cypress.TestConfigOverrides, fn: (this: Suite) => void): Suite
+    (title: string, config: Cypress.SuiteConfigOverrides, fn: (this: Suite) => void): Suite
   }
 
   interface ExclusiveSuiteFunction {
@@ -6059,10 +6096,10 @@ declare namespace Mocha {
      * Describe a "suite" with the given `title`, TestOptions, and callback `fn` containing
      * nested suites. Indicates this suite should be executed exclusively.
      */
-    (title: string, config: Cypress.TestConfigOverrides, fn: (this: Suite) => void): Suite
+    (title: string, config: Cypress.SuiteConfigOverrides, fn: (this: Suite) => void): Suite
   }
 
   interface PendingSuiteFunction {
-    (title: string, config: Cypress.TestConfigOverrides, fn: (this: Suite) => void): Suite | void
+    (title: string, config: Cypress.SuiteConfigOverrides, fn: (this: Suite) => void): Suite | void
   }
 }

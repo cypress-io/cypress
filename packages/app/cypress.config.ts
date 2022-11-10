@@ -21,19 +21,6 @@ export default defineConfig({
     devServer: {
       bundler: 'vite',
       framework: 'vue',
-      viteConfig: {
-        optimizeDeps: {
-          include: [
-            '@headlessui/vue',
-            'vue3-file-selector',
-            'p-defer',
-            'just-my-luck',
-            'combine-properties',
-            'faker',
-            '@packages/frontend-shared/cypress/support/customPercyCommand',
-          ],
-        },
-      },
     },
   },
   'e2e': {

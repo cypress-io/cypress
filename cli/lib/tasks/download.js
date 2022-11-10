@@ -40,13 +40,7 @@ const getBaseUrl = () => {
 
 const getCA = () => {
   return new Promise((resolve) => {
-    if (!util.getEnv('CYPRESS_DOWNLOAD_USE_CA')) {
-      resolve()
-    }
-
-    if (process.env.npm_config_ca) {
-      resolve(process.env.npm_config_ca)
-    } else if (process.env.npm_config_cafile) {
+    if (process.env.npm_config_cafile) {
       fs.readFile(process.env.npm_config_cafile, 'utf8')
       .then((cafileContent) => {
         resolve(cafileContent)
@@ -54,6 +48,8 @@ const getCA = () => {
       .catch(() => {
         resolve()
       })
+    } else if (process.env.npm_config_ca) {
+      resolve(process.env.npm_config_ca)
     } else {
       resolve()
     }

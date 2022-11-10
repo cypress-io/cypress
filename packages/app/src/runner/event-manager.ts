@@ -11,6 +11,7 @@ import { automation, useRunnerUiStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
 import { useStudioStore } from '../store/studio-store'
 import { getAutIframeModel } from '.'
+import { handlePausing } from './events/pausing'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -33,7 +34,6 @@ interface AddGlobalListenerOptions {
   randomString: string
 }
 
-const driverToReporterEvents = 'paused'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
@@ -224,18 +224,6 @@ export class EventManager {
     })
 
     this.reporterBus.on('runner:unpin:snapshot', this._unpinSnapshot.bind(this))
-
-    this.reporterBus.on('runner:resume', () => {
-      if (!Cypress) return
-
-      Cypress.emit('resume:all')
-    })
-
-    this.reporterBus.on('runner:next', () => {
-      if (!Cypress) return
-
-      Cypress.emit('resume:next')
-    })
 
     this.reporterBus.on('runner:stop', () => {
       if (!Cypress) return
@@ -538,12 +526,6 @@ export class EventManager {
 
     Cypress.on('after:screenshot', handleAfterScreenshot)
 
-    driverToReporterEvents.forEach((event) => {
-      Cypress.on(event, (...args) => {
-        this.reporterBus.emit(event, ...args)
-      })
-    })
-
     driverTestEvents.forEach((event) => {
       Cypress.on(event, (test, cb) => {
         this.reporterBus.emit(event, test, cb)
@@ -596,6 +578,8 @@ export class EventManager {
       }
     })
 
+    handlePausing(this.getCypress, this.reporterBus)
+
     Cypress.on('test:before:run', (...args) => {
       Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:run', ...args)
     })
@@ -610,8 +594,8 @@ export class EventManager {
     })
 
     // Reflect back to the requesting origin the status of the 'duringUserTestExecution' state
-    Cypress.primaryOriginCommunicator.on('sync:during:user:test:execution', ({ specBridgeResponseEvent }, origin) => {
-      Cypress.primaryOriginCommunicator.toSpecBridge(origin, specBridgeResponseEvent, cy.state('duringUserTestExecution'))
+    Cypress.primaryOriginCommunicator.on('sync:during:user:test:execution', (_data, { origin, responseEvent }) => {
+      Cypress.primaryOriginCommunicator.toSpecBridge(origin, responseEvent, cy.state('duringUserTestExecution'))
     })
 
     Cypress.on('request:snapshot:from:spec:bridge', ({ log, name, options, specBridge, addSnapshot }: {
@@ -624,9 +608,13 @@ export class EventManager {
       const eventID = log.get('id')
 
       const requestSnapshot = () => {
-        return Cypress.primaryOriginCommunicator.toSpecBridgePromise(specBridge, 'snapshot:generate:for:log', {
-          name,
-          id: eventID,
+        return Cypress.primaryOriginCommunicator.toSpecBridgePromise({
+          origin: specBridge,
+          event: 'snapshot:generate:for:log',
+          data: {
+            name,
+            id: eventID,
+          },
         }).then((crossOriginSnapshot) => {
           const snapshot = crossOriginSnapshot.body ? crossOriginSnapshot : null
 
@@ -656,7 +644,7 @@ export class EventManager {
       this.localBus.emit('expect:origin', origin)
     })
 
-    Cypress.primaryOriginCommunicator.on('viewport:changed', (viewport, origin) => {
+    Cypress.primaryOriginCommunicator.on('viewport:changed', (viewport, { origin }) => {
       const callback = () => {
         Cypress.primaryOriginCommunicator.toSpecBridge(origin, 'viewport:changed:end')
       }
@@ -665,7 +653,7 @@ export class EventManager {
       this.localBus.emit('viewport:changed', viewport, callback)
     })
 
-    Cypress.primaryOriginCommunicator.on('before:screenshot', (config, origin) => {
+    Cypress.primaryOriginCommunicator.on('before:screenshot', (config, { origin }) => {
       const callback = () => {
         Cypress.primaryOriginCommunicator.toSpecBridge(origin, 'before:screenshot:end')
       }
@@ -709,6 +697,26 @@ export class EventManager {
         Cypress.backend('cross:origin:set:cookie', options).catch(() => {})
       },
     )
+
+    /**
+     * Call a backend request for the requesting spec bridge since we cannot have websockets in the spec bridges.
+     * Return it's response.
+     */
+    Cypress.primaryOriginCommunicator.on('backend:request', async ({ args }, { source, responseEvent }) => {
+      const response = await Cypress.backend(...args)
+
+      Cypress.primaryOriginCommunicator.toSource(source, responseEvent, response)
+    })
+
+    /**
+     * Call an automation request for the requesting spec bridge since we cannot have websockets in the spec bridges.
+     * Return it's response.
+     */
+    Cypress.primaryOriginCommunicator.on('automation:request', async ({ args }, { source, responseEvent }) => {
+      const response = await Cypress.automation(...args)
+
+      Cypress.primaryOriginCommunicator.toSource(source, responseEvent, response)
+    })
 
     // The window.top should not change between test reloads, and we only need to bind the message event when Cypress is recreated
     // Forward all message events to the current instance of the multi-origin communicator
@@ -848,7 +856,7 @@ export class EventManager {
 
   notifyCrossOriginBridgeReady (origin) {
     // Any multi-origin event appends the origin as the third parameter and we do the same here for this short circuit
-    Cypress.primaryOriginCommunicator.emit('bridge:ready', undefined, origin)
+    Cypress.primaryOriginCommunicator.emit('bridge:ready', undefined, { origin })
   }
 
   snapshotUnpinned () {

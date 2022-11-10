@@ -9,7 +9,6 @@
       :is-project-unauthorized="cloudProjectType === 'CloudProjectUnauthorized'"
       :has-requested-access="hasRequestedAccess"
       @refetch-failed-cloud-data="refetchFailedCloudData"
-      @reconnect-project="showConnectToProject"
     />
     <SpecsListHeader
       v-model="specFilterModel"
@@ -47,8 +46,7 @@
           :gql="props.gql"
           mode="LATEST_RUNS"
           data-cy="latest-runs-header"
-          @showLogin="showLogin('Specs Latest Runs Tooltip')"
-          @showConnectToProject="showConnectToProject"
+          @showLoginConnect="openLoginConnectModal({utmMedium: 'Specs Latest Runs Tooltip'})"
         />
       </div>
       <div class="hidden items-center justify-end truncate md:flex">
@@ -56,8 +54,7 @@
           :gql="props.gql"
           mode="AVG_DURATION"
           data-cy="average-duration-header"
-          @showLogin="showLogin('Specs Average Duration Tooltip')"
-          @showConnectToProject="showConnectToProject"
+          @showLoginConnect="openLoginConnectModal({utmMedium: 'Specs Average Duration Tooltip'})"
         />
       </div>
     </div>
@@ -131,8 +128,7 @@
               v-if="projectConnectionStatus !== 'CONNECTED' && row.data.isLeaf && row.data.data && (row.data.data.cloudSpec?.data || row.data.data.cloudSpec?.fetchingStatus !== 'FETCHING')"
               :gql="props.gql"
               :project-connection-status="projectConnectionStatus"
-              @showLogin="showLogin(utmMedium)"
-              @showConnectToProject="showConnectToProject"
+              @show-login-connect="openLoginConnectModal({ utmMedium })"
               @request-access="requestAccess(props.gql?.currentProject?.projectId)"
             />
           </template>
@@ -171,30 +167,13 @@
       @clear="handleClear"
     />
   </div>
-  <LoginModal
-    v-model="isLoginOpen"
-    :gql="props.gql"
-    :utm-medium="loginUtmMedium"
-    :show-connect-button-after-login="!props.gql?.currentProject?.projectId"
-    @loggedin="handleLoggedin"
-    @connect-project="isProjectConnectOpen = true"
-  />
-  <CloudConnectModals
-    v-if="isProjectConnectOpen"
-    :gql="props.gql"
-    :utm-medium="loginUtmMedium"
-    @cancel="isProjectConnectOpen = false"
-    @success="refreshPage"
-  />
 </template>
 
 <script setup lang="ts">
 import SpecsListBanners from './SpecsListBanners.vue'
 import LastUpdatedHeader from './LastUpdatedHeader.vue'
 import SpecHeaderCloudDataTooltip from './SpecHeaderCloudDataTooltip.vue'
-import LoginModal from '@cy/gql-components/topnav/LoginModal.vue'
 import SpecsListCloudButton from './SpecsListCloudButton.vue'
-import CloudConnectModals from '../runs/modals/CloudConnectModals.vue'
 import SpecsListHeader from './SpecsListHeader.vue'
 import SpecListGitInfo from './SpecListGitInfo.vue'
 import RunStatusDots from './RunStatusDots.vue'
@@ -218,6 +197,9 @@ import FlakyInformation from './flaky-badge/FlakyInformation.vue'
 import { useCloudSpecData } from '../composables/useCloudSpecData'
 import { useSpecFilter } from '../composables/useSpecFilter'
 import { useRequestAccess } from '../composables/useRequestAccess'
+import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+
+const { openLoginConnectModal } = useLoginConnectStore()
 
 const route = useRoute()
 const { t } = useI18n()
@@ -228,10 +210,6 @@ const isOffline = ref(false)
 watch(isOnline, (newIsOnlineValue) => isOffline.value = !newIsOnlineValue, { immediate: true })
 
 const tableGridColumns = 'grid-cols-[1fr,135px,130px] md:grid-cols-[1fr,135px,130px,130px] lg:grid-cols-[1fr,160px,160px,180px]'
-
-const isProjectConnectOpen = ref(false)
-const isLoginOpen = ref(false)
-const loginUtmMedium = ref('')
 
 const projectConnectionStatus = computed(() => {
   if (!props.gql.cloudViewer) return 'LOGGED_OUT'
@@ -256,15 +234,6 @@ const cloudProjectType = computed(() => props.gql.currentProject?.cloudProject?.
 const hasRequestedAccess = computed(() => {
   return projectConnectionStatus.value === 'ACCESS_REQUESTED'
 })
-
-const showLogin = (utmMedium: string) => {
-  loginUtmMedium.value = utmMedium
-  isLoginOpen.value = true
-}
-
-const showConnectToProject = () => {
-  isProjectConnectOpen.value = true
-}
 
 const requestAccess = useRequestAccess()
 
@@ -447,19 +416,6 @@ const { refetchFailedCloudData } = useCloudSpecData(
   displayedSpecs,
   props.gql.currentProject?.specs as SpecsListFragment[] || [],
 )
-
-function refreshPage () {
-  location.reload()
-}
-
-const handleLoggedin = () => {
-  // if there is no project id, there can be no cloud data to refresh -
-  // we want to stay on the page and let the `connect-project` event take the user
-  // to the next step to connect their project
-  if (props.gql.currentProject?.projectId) {
-    refreshPage()
-  }
-}
 
 </script>
 

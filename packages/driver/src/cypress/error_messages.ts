@@ -325,6 +325,12 @@ export default {
         docsUrl: 'https://on.cypress.io/session',
       }
     },
+    invalid_domain (obj) {
+      return {
+        message: `${cmd('{{cmd}}')} must be passed a valid domain name. You passed: \`{{domain}}\``,
+        docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
+      }
+    },
     invalid_name (obj) {
       return {
         message: `${cmd('{{cmd}}')} must be passed an RFC-6265-compliant cookie name. You passed:\n\n\`{{name}}\``,
@@ -977,6 +983,42 @@ export default {
       ].join('\n'),
       docsUrl: 'https://on.cypress.io/mount',
     },
+    removed_style_mounting_options (key: string) {
+      return {
+        message: `The \`${key}\` mounting option is no longer supported.`,
+        docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
+      }
+    },
+    cleanup_styles: {
+      message: `\`cleanupStyles\` is no longer supported.`,
+      docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
+    },
+    inject_styles_before_element: {
+      message: `\`injectStylesBeforeElement\` is no longer supported.`,
+      docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
+    },
+    mount_hook: {
+      message: `\`mountHook\` is no longer supported.`,
+      docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
+    },
+    unmount: {
+      message: `\`unmount\` is no longer supported.`,
+      docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
+    },
+    mount_callback: {
+      message: `\`mountCallback\` is no longer supported.`,
+      docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
+    },
+    vue_yielded_value: {
+      message: 'As of Cypress 11, mount now yields an object with VueWrapper and the component as properties. Destructure using `{ wrapper, component }` to access the VueWrapper and component.',
+      docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
+    },
+    alias (alias: string) {
+      return {
+        message: `passing \`alias\` to mounting options is no longer supported. Use mount(...).as('${alias}') instead.`,
+        docsUrl: 'https://on.cypress.io/migration-11-0-0-component-testing-updates',
+      }
+    },
   },
 
   navigation: {
@@ -1149,6 +1191,13 @@ export default {
     invalid_url_argument: {
       message: `${cmd('origin')} requires the first argument to be either a url (\`https://www.example.com/path\`) or a domain name (\`example.com\`). Query parameters are not allowed. You passed: \`{{arg}}\``,
     },
+    invalid_url_argument_same_origin ({ originUrl, topOrigin, policy }) {
+      return stripIndent`\
+      ${cmd('origin')} requires the first argument to be a different ${policy === 'same-origin' ? 'origin' : 'domain' } than top. You passed \`${originUrl}\` to the origin command, while top is at \`${topOrigin}\`.
+
+      Either the intended page was not visited prior to running the cy.origin block or the cy.origin block may not be needed at all.
+      `
+    },
     invalid_options_argument: {
       message: `${cmd('origin')} requires the 'options' argument to be an object. You passed: \`{{arg}}\``,
     },
@@ -1217,6 +1266,13 @@ export default {
     failed_to_serialize_or_map_thrown_value: {
       message: stripIndent`\
       ${cmd('origin')} could not serialize the thrown value. Please make sure the value being thrown is supported by the structured clone algorithm.`,
+    },
+    failed_to_create_spec_bridge: {
+      message: stripIndent`\
+      ${cmd('origin')} failed to create a spec bridge to communicate with the specified origin. This can happen when you attempt to create a spec bridge to an insecure (http) frame from a secure (https) frame.
+
+      Check your Developer Tools Console for the actual error - it should be printed there.
+      `,
     },
     unsupported: {
       route: {
@@ -1716,6 +1772,13 @@ export default {
         `,
         docsUrl: 'https://on.cypress.io/session',
       },
+      wrongArgSetup: {
+        message: stripIndent`
+        In order to use ${cmd('session')}, provide a \`setup\` as the second argument:
+
+        \`cy.session(id, setup)\``,
+        docsUrl: 'https://on.cypress.io/session',
+      },
       wrongArgOptions: {
         message: stripIndent`
         ${cmd('session')} was passed an invalid argument. The optional third argument \`options\` must be an object.
@@ -1733,13 +1796,6 @@ export default {
         message: stripIndent`
         ${cmd('session')} was passed an invalid option value. **{{key}}** must be of type **{{expected}}** but was **{{actual}}**.
         `,
-        docsUrl: 'https://on.cypress.io/session',
-      },
-      missing_global_setup: {
-        message: stripIndent`
-        In order to restore a global ${cmd('session')}, provide a \`setup\` as the second argument:
-
-        \`cy.session(id, setup, { cacheAcrossSpecs: true })\``,
         docsUrl: 'https://on.cypress.io/session',
       },
       not_found: {
