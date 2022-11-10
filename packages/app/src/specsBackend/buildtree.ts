@@ -22,62 +22,47 @@ export type FuzzyFoundSpec<T = FoundSpec> = T & {
 const getRegexSeparator = () => /\//
 const getSeparator = () => '/'
 
-const map: SpecMap = new Map()
-let deleted: string[] = []
-
 const defaults = { name: '', isLeaf: false, children: [], id: '', highlightIndexes: [] }
 
-export function buildSpecTree<T extends FoundSpec> (specs: FoundSpec[], root: SpecTreeNode<T> = defaults): {tree: SpecTreeNode<T>, map: SpecMap} {
-  specs.forEach((spec) => buildSpecTreeRecursive(spec.relative, root, spec))
-  for (const m of deleted) {
-    map.delete(m)
-  }
-  collapseEmptyChildren(root)
+export function buildSpecTree<T extends FoundSpec> (specs: FoundSpec[], root: SpecTreeNode<T> = defaults): {tree: SpecTreeNode<T>, map: DirectoryMap} {
+  const dirMap = getDirectoryMap(specs)
 
-  return { tree: root, map }
+  specs.forEach((spec) => buildSpecTreeRecursive(dirMap, spec.relative, root, spec))
+
+  return { tree: root, map: dirMap }
 }
 
-export function buildSpecTreeRecursive<T extends FoundSpec> (path: string, tree: SpecTreeNode<T>, data?: T) {
-  const [firstFile, ...rest] = path.split(getRegexSeparator())
-  const splitFiles = path.split('/').filter((f) => f.length >= 1)
-  const directories = splitFiles.slice(0, splitFiles.length - 1)
-  //console.log({firstFile, rest})
-  // console.log({directories})
-  // console.log('hello')
-  // console.log({map})
-  // if (directories.length >= 1 && !map.has(directories.join('/'))) {
-  //   map.set(directories.join('/'), [])
-  // }
-  //console.log({directories})
-  const id = tree.id ? [tree.id, firstFile].join(getSeparator()) : firstFile
+type DirectoryMap = Map<string, FoundSpec[]>
 
-  // console.log({id})
-  // console.log({map})
-  if (directories.length >= 1 && !map.has(id)) {
-    map.set(id, [])
+export function getDirectoryMap (specs: FoundSpec[], sep = '/'): DirectoryMap {
+  const dirMap: DirectoryMap = new Map()
+
+  for (const spec of specs) {
+    let split = spec.relative.split(sep)
+
+    split = split.slice(0, split.length - 1)
+
+    let acc: string[] = []
+
+    for (let i = 0; i < split.length; i++) {
+      acc.push(split[i])
+      dirMap.set(acc.join(sep), [])
+    }
   }
+
+  return dirMap
+}
+
+export function buildSpecTreeRecursive<T extends FoundSpec> (map: DirectoryMap, path: string, tree: SpecTreeNode<T>, data?: T): SpecTreeNode<T> {
+  const [firstFile, ...rest] = path.split(getRegexSeparator())
+  const id = tree.id ? [tree.id, firstFile].join(getSeparator()) : firstFile
 
   const newNode: SpecTreeNode<T> = { name: firstFile, isLeaf: false, children: [], parent: null, data, id, highlightIndexes: [] }
 
   if (rest.length < 1) {
     newNode.isLeaf = true
-    for (const key of map.keys()) {
-      const alreadyExists = data?.relative.indexOf(key) ?? 0
-
-      if (alreadyExists > 0) {
-        const prevValue = map.get(key) ?? []
-        const substring = data?.relative.substring(0, alreadyExists - 1) ?? ''
-        const potentialVal = map.get(`${substring }/${ key}`) ?? []
-
-        if (potentialVal) {
-          map.set(`${substring }/${ key}`, [...prevValue, ...potentialVal])
-          deleted.push(key)
-        }
-      }
-
+    for (const [key, val] of map.entries()) {
       if (data?.relative.includes(key)) {
-        const val = map.get(key) ?? []
-
         map.set(key, [...val, data])
       }
     }
@@ -88,59 +73,20 @@ export function buildSpecTreeRecursive<T extends FoundSpec> (path: string, tree:
     return tree
   }
 
-  //console.log({map})
   const foundChild = tree.children.find((child) => child.name === firstFile)
 
   if (foundChild) {
-    buildSpecTreeRecursive(rest.join(getSeparator()), foundChild, data)
+    buildSpecTreeRecursive(map, rest.join(getSeparator()), foundChild, data)
 
     return tree
   }
 
   newNode.highlightIndexes = getHighlightIndexes(newNode)
-  const newTree = buildSpecTreeRecursive(rest.join(getSeparator()), newNode, data)
+  const newTree = buildSpecTreeRecursive(map, rest.join(getSeparator()), newNode, data)
 
   tree.children.push(newTree)
 
   return tree
-}
-
-// function cleanTreeMapping<T extends FoundSpec> (node: SpecTreeNode<T>, data) {
-//   for (const key of map.keys()) {
-//     const alreadyExists = data?.relative.indexOf(key)
-//     if (alreadyExists) {
-//       // you need to check if it exists before or after
-//       const prevValue = map.get(key) ?? []
-//       const substring = data?.relative.substring(0, alreadyExists - 1) ?? ''
-//       console.log({substring})
-//       const potentialVal = map.get(substring + "/" + key) ?? []
-//       console.log({potentialVal})
-//       if (potentialVal) {
-//         map.set(substring, [...prevValue, ...potentialVal])
-//         map.delete(key)
-//       }
-//     }
-//   }
-// }
-
-function collapseEmptyChildren<T extends FoundSpec> (node: SpecTreeNode<T>) {
-  for (const child of node.children) {
-    collapseEmptyChildren(child)
-  }
-  if (node.isLeaf) {
-    return
-  }
-
-  // Root name of our tree is '/'. We don't want to collapse into the root node
-  // so we check node.parent.parent
-  if (node.parent && node.parent.parent && (node.parent.children.length === 1)) {
-    node.parent.name = [node.parent.name, node.name].join(getSeparator())
-    node.parent.id = [node.parent.id, node.name].join(getSeparator())
-    node.parent.children = node.children
-    node.parent.highlightIndexes = getHighlightIndexes(node.parent)
-  }
-
-  return
 }
 
 // Given a node, return the indexes of the characters that should be highlighted
