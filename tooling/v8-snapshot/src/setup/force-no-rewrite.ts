@@ -56,4 +56,6 @@ export default [
   'packages/server/node_modules/glob/node_modules/minimatch/minimatch.js',
   'node_modules/js-yaml/lib/js-yaml/type/js/function.js',
   'packages/server/lib/open_project.ts',
+  'packages/server/lib/project-base.ts',
+  'packages/server/lib/socket-ct.ts',
 ]
