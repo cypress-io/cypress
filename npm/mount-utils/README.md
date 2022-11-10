@@ -2,7 +2,7 @@
 
 > **Note** this package is not meant to be used outside of cypress component testing.
 
-This librares exports some shared types and utility functions designed to build adapters for components frameworks.
+This library exports some shared types and utility functions designed to build adapters for components frameworks.
 
 It is used in:
 
@@ -22,6 +22,7 @@ All the functionality used to create the first party Mount adapters is available
 
 - Receive a component as the first argument. This could be class, function etc - depends on the framework.
 - Return a Cypress Chainable (for example using `cy.wrap`) that resolves whatever is idiomatic for your framework
+- Call `getContainerEl` to access the root DOM element
 
 In addition, we recommend that Mount Adapters:
 
