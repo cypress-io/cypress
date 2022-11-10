@@ -3,8 +3,6 @@ import Debug from 'debug'
 import type playwright from 'playwright-webkit'
 import type { Automation } from '../automation'
 import { normalizeResourceType } from './cdp_automation'
-import os from 'os'
-import type { RunModeVideoApi } from '@packages/types'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
 
@@ -92,32 +90,26 @@ export class WebKitAutomation {
   private constructor (public automation: Automation, private browser: playwright.Browser) {}
 
   // static initializer to avoid "not definitively declared"
-  static async create (automation: Automation, browser: playwright.Browser, initialUrl: string, videoApi?: RunModeVideoApi) {
+  static async create (automation: Automation, browser: playwright.Browser, initialUrl: string) {
     const wkAutomation = new WebKitAutomation(automation, browser)
 
-    await wkAutomation.reset(initialUrl, videoApi)
+    await wkAutomation.reset(initialUrl)
 
     return wkAutomation
   }
 
-  public async reset (newUrl?: string, videoApi?: RunModeVideoApi) {
+  public async reset (newUrl?: string) {
     debug('resetting playwright page + context %o', { newUrl })
     // new context comes with new cache + storage
     const newContext = await this.browser.newContext({
       ignoreHTTPSErrors: true,
-      recordVideo: videoApi && {
-        dir: os.tmpdir(),
-        size: { width: 1280, height: 720 },
-      },
     })
-    const contextStarted = new Date
     const oldPwPage = this.page
 
     this.page = await newContext.newPage()
     this.context = this.page.context()
 
     this.attachListeners(this.page)
-    if (videoApi) this.recordVideo(videoApi, contextStarted)
 
     let promises: Promise<any>[] = []
 
@@ -126,40 +118,6 @@ export class WebKitAutomation {
     if (newUrl) promises.push(this.page.goto(newUrl))
 
     if (promises.length) await Promise.all(promises)
-  }
-
-  private recordVideo (videoApi: RunModeVideoApi, startedVideoCapture: Date) {
-    const _this = this
-
-    videoApi.useVideoController({
-      async endVideoCapture () {
-        const pwVideo = _this.page.video()
-
-        if (!pwVideo) throw new Error('pw.page missing video in endVideoCapture, cannot save video')
-
-        debug('ending video capture, closing page...')
-
-        await Promise.all([
-          // pwVideo.saveAs will not resolve until the page closes, presumably we do want to close it
-          _this.page.close(),
-          pwVideo.saveAs(videoApi.videoName),
-        ])
-      },
-      writeVideoFrame: () => {
-        throw new Error('writeVideoFrame called, but WebKit does not support streaming frame data.')
-      },
-      async restart () {
-        throw new Error('Cannot restart WebKit video - WebKit cannot record video on multiple specs in single-tab mode.')
-      },
-      postProcessFfmpegOptions: {
-        // WebKit seems to record at the highest possible frame rate, so filter out duplicate frames before compressing
-        // otherwise compressing with all these dupe frames can take a really long time
-        // https://stackoverflow.com/q/37088517/3474615
-        outputOptions: ['-vsync vfr'],
-        videoFilters: 'mpdecimate',
-      },
-      startedVideoCapture,
-    })
   }
 
   private attachListeners (page: playwright.Page) {

@@ -20,7 +20,6 @@ describe('e2e runnable execution', () => {
   // but throws correct error
   // https://github.com/cypress-io/cypress/issues/1987
   systemTests.it('cannot navigate in before hook and test', {
-    browser: '!webkit', // TODO(webkit): fix+unskip (failing due to broken stack trace)
     project: 'hooks-after-rerun',
     spec: 'beforehook-and-test-navigation.cy.js',
     snapshot: true,
@@ -34,7 +33,6 @@ describe('e2e runnable execution', () => {
   })
 
   systemTests.it('runs correctly after top navigation with already ran suite', {
-    browser: '!webkit', // TODO(webkit): fix+unskip (failing due to broken stack trace)
     spec: 'runnables_already_run_suite.cy.js',
     snapshot: true,
     expectedExitCode: 1,

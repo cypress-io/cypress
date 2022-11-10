@@ -7,7 +7,7 @@ import Bluebird from 'bluebird'
 import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg'
 import BlackHoleStream from 'black-hole-stream'
 import { fs } from './util/fs'
-import type { ProcessOptions, WriteVideoFrame } from '@packages/types'
+import type { WriteVideoFrame } from '@packages/types'
 
 const debug = Debug('cypress:server:video')
 const debugVerbose = Debug('cypress-verbose:server:video')
@@ -21,7 +21,7 @@ ffmpeg.setFfmpegPath(ffmpegPath)
 const deferredPromise = function () {
   let reject
   let resolve
-  const promise = new Promise((_resolve, _reject) => {
+  const promise = new Bluebird((_resolve, _reject) => {
     resolve = _resolve
     reject = _reject
   })
@@ -31,7 +31,7 @@ const deferredPromise = function () {
 
 export function generateFfmpegChaptersConfig (tests) {
   if (!tests) {
-    return
+    return null
   }
 
   const configString = tests.map((test) => {
@@ -108,16 +108,14 @@ export function copy (src, dest) {
   })
 }
 
-export type StartOptions = {
-  // Path to write video to.
-  videoName: string
+type StartOptions = {
   // If set, expect input frames as webm chunks.
   webmInput?: boolean
   // Callback for asynchronous errors in video processing/compression.
   onError?: (err: Error, stdout: string, stderr: string) => void
 }
 
-export function start (options: StartOptions) {
+export function start (name, options: StartOptions = {}) {
   const pt = new stream.PassThrough()
   const ended = deferredPromise()
   let done = false
@@ -190,10 +188,8 @@ export function start (options: StartOptions) {
     debugFrames('writing video frame')
 
     if (wantsWrite) {
-      wantsWrite = pt.write(data)
-      if (!wantsWrite) {
-        // ffmpeg stream isn't accepting data, so drop frames until the stream is ready to accept data
-        pt.once('drain', () => {
+      if (!(wantsWrite = pt.write(data))) {
+        return pt.once('drain', () => {
           debugFrames('video stream drained')
 
           wantsWrite = true
@@ -207,7 +203,7 @@ export function start (options: StartOptions) {
   }
 
   const startCapturing = () => {
-    return new Promise((resolve) => {
+    return new Bluebird((resolve) => {
       const cmd = ffmpeg({
         source: pt,
         priority: 20,
@@ -260,7 +256,7 @@ export function start (options: StartOptions) {
         .inputOptions('-use_wallclock_as_timestamps 1')
       }
 
-      return cmd.save(options.videoName)
+      return cmd.save(name)
     })
   }
 
@@ -272,21 +268,22 @@ export function start (options: StartOptions) {
       endVideoCapture,
       writeVideoFrame,
       startedVideoCapture,
-      restart: () => {
-        throw new Error('restart cannot be called on a plain ffmpeg stream')
-      },
     }
   })
 }
 
-export async function process (options: ProcessOptions) {
+// Progress callback called with percentage `0 <= p <= 1` of compression progress.
+type OnProgress = (p: number) => void
+
+export async function process (name, cname, videoCompression, ffmpegchaptersConfig, onProgress: OnProgress = function () {}) {
   let total = null
 
-  const metaFileName = `${options.videoName}.meta`
-  const addChaptersMeta = options.chaptersConfig && await fs.writeFile(metaFileName, options.chaptersConfig).then(() => true)
+  const metaFileName = `${name}.meta`
+  const addChaptersMeta = ffmpegchaptersConfig && await fs.writeFile(metaFileName, ffmpegchaptersConfig).then(() => true)
 
-  return new Promise<void>((resolve, reject) => {
-    debug('processing video %o', options)
+  return new Bluebird((resolve, reject) => {
+    debug('processing video from %s to %s video compression %o',
+      name, cname, videoCompression)
 
     const command = ffmpeg({
       priority: 20,
@@ -322,13 +319,12 @@ export async function process (options: ProcessOptions) {
       '-preset fast',
       // Compression Rate Factor is essentially the quality dial; 0 would be lossless
       // (big files), while 51 (the maximum) would lead to low quality (and small files).
-      `-crf ${options.videoCompression}`,
+      `-crf ${videoCompression}`,
 
       // Discussion of pixel formats is beyond the scope of these comments. See
       // https://en.wikipedia.org/wiki/Chroma_subsampling if you want the gritty details.
       // Short version: yuv420p is a standard video format supported everywhere.
       '-pix_fmt yuv420p',
-      ...(options.outputOptions || []),
     ]
 
     if (addChaptersMeta) {
@@ -336,13 +332,10 @@ export async function process (options: ProcessOptions) {
       outputOptions.push('-map_metadata 1')
     }
 
-    let chain = command.input(options.videoName)
+    command.input(name)
     .videoCodec('libx264')
     .outputOptions(outputOptions)
-
-    if (options.videoFilters) chain = chain.videoFilters(options.videoFilters)
-
-    chain
+    // .videoFilters("crop='floor(in_w/2)*2:floor(in_h/2)*2'")
     .on('start', (command) => {
       debug('compression started %o', { command })
     })
@@ -368,7 +361,7 @@ export async function process (options: ProcessOptions) {
       const percent = progressed / total
 
       if (percent < 1) {
-        return options.onProgress?.(percent)
+        return onProgress(percent)
       }
     })
     .on('error', (err, stdout, stderr) => {
@@ -380,10 +373,10 @@ export async function process (options: ProcessOptions) {
       debug('compression ended')
 
       // we are done progressing
-      options.onProgress?.(1)
+      onProgress(1)
 
       // rename and obliterate the original
-      await fs.move(options.compressedVideoName, options.videoName, {
+      await fs.move(cname, name, {
         overwrite: true,
       })
 
@@ -392,6 +385,6 @@ export async function process (options: ProcessOptions) {
       }
 
       resolve()
-    }).save(options.compressedVideoName)
+    }).save(cname)
   })
 }
