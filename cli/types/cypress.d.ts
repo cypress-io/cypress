@@ -670,7 +670,7 @@ declare namespace Cypress {
      * If validation fails after restoring a session, `setup` will re-run.
      * @default {false}
      */
-    validate?: () => Promise<false | void> | false | void
+    validate?: () => Promise<false | void> | void
   }
 
   type CanReturnChainable = void | Chainable | Promise<unknown>
