@@ -5,8 +5,6 @@ import type { Automation } from '../automation'
 import { normalizeResourceType } from './cdp_automation'
 import os from 'os'
 import type { RunModeVideoApi } from '@packages/types'
-import path from 'path'
-import mime from 'mime'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
 
@@ -86,7 +84,6 @@ const _cookieMatches = (cookie: any, filter: Record<string, any>) => {
 
 let requestIdCounter = 1
 const requestIdMap = new WeakMap<playwright.Request, string>()
-let downloadIdCounter = 1
 
 export class WebKitAutomation {
   private context!: playwright.BrowserContext
@@ -95,20 +92,20 @@ export class WebKitAutomation {
   private constructor (public automation: Automation, private browser: playwright.Browser) {}
 
   // static initializer to avoid "not definitively declared"
-  static async create (automation: Automation, browser: playwright.Browser, initialUrl: string, downloadsFolder: string, videoApi?: RunModeVideoApi) {
+  static async create (automation: Automation, browser: playwright.Browser, initialUrl: string, videoApi?: RunModeVideoApi) {
     const wkAutomation = new WebKitAutomation(automation, browser)
 
-    await wkAutomation.reset({ downloadsFolder, newUrl: initialUrl, videoApi })
+    await wkAutomation.reset(initialUrl, videoApi)
 
     return wkAutomation
   }
 
-  public async reset (options: { downloadsFolder?: string, newUrl?: string, videoApi?: RunModeVideoApi }) {
-    debug('resetting playwright page + context %o', options)
+  public async reset (newUrl?: string, videoApi?: RunModeVideoApi) {
+    debug('resetting playwright page + context %o', { newUrl })
     // new context comes with new cache + storage
     const newContext = await this.browser.newContext({
       ignoreHTTPSErrors: true,
-      recordVideo: options.videoApi && {
+      recordVideo: videoApi && {
         dir: os.tmpdir(),
         size: { width: 1280, height: 720 },
       },
@@ -119,17 +116,14 @@ export class WebKitAutomation {
     this.page = await newContext.newPage()
     this.context = this.page.context()
 
-    this.handleRequestEvents()
-
-    if (options.downloadsFolder) this.handleDownloadEvents(options.downloadsFolder)
-
-    if (options.videoApi) this.recordVideo(options.videoApi, contextStarted)
+    this.attachListeners(this.page)
+    if (videoApi) this.recordVideo(videoApi, contextStarted)
 
     let promises: Promise<any>[] = []
 
     if (oldPwPage) promises.push(oldPwPage.context().close())
 
-    if (options.newUrl) promises.push(this.page.goto(options.newUrl))
+    if (newUrl) promises.push(this.page.goto(newUrl))
 
     if (promises.length) await Promise.all(promises)
   }
@@ -168,30 +162,9 @@ export class WebKitAutomation {
     })
   }
 
-  private handleDownloadEvents (downloadsFolder: string) {
-    this.page.on('download', async (download) => {
-      const id = downloadIdCounter++
-      const suggestedFilename = download.suggestedFilename()
-      const filePath = path.join(downloadsFolder, suggestedFilename)
-
-      this.automation.push('create:download', {
-        id,
-        url: download.url(),
-        filePath,
-        mime: mime.getType(suggestedFilename),
-      })
-
-      // NOTE: WebKit does have a `downloadsPath` option, but it is trashed after each run
-      // Cypress trashes before runs - so we have to use `.saveAs` to move it
-      await download.saveAs(filePath)
-
-      this.automation.push('complete:download', { id })
-    })
-  }
-
-  private handleRequestEvents () {
+  private attachListeners (page: playwright.Page) {
     // emit preRequest to proxy
-    this.page.on('request', (request) => {
+    page.on('request', (request) => {
       // ignore socket.io events
       // TODO: use config.socketIoRoute here instead
       if (request.url().includes('/__socket') || request.url().includes('/__cypress')) return
@@ -215,7 +188,7 @@ export class WebKitAutomation {
       this.automation.onBrowserPreRequest?.(browserPreRequest)
     })
 
-    this.page.on('requestfinished', async (request) => {
+    page.on('requestfinished', async (request) => {
       const requestId = requestIdMap.get(request)
 
       if (!requestId) return
@@ -301,11 +274,9 @@ export class WebKitAutomation {
       case 'focus:browser:window':
         return await this.context.pages[0]?.bringToFront()
       case 'reset:browser:state':
-        debug('stubbed reset:browser:state')
-
         return
       case 'reset:browser:tabs:for:next:test':
-        if (data.shouldKeepTabOpen) return await this.reset({})
+        if (data.shouldKeepTabOpen) return await this.reset()
 
         return await this.context.browser()?.close()
       default:

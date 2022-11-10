@@ -271,7 +271,7 @@ const _navigateUsingCRI = async function (client, url) {
   await client.send('Page.navigate', { url })
 }
 
-const _handleDownloads = async function (client, downloadsFolder: string, automation) {
+const _handleDownloads = async function (client, dir, automation) {
   client.on('Page.downloadWillBegin', (data) => {
     const downloadItem = {
       id: data.guid,
@@ -282,7 +282,7 @@ const _handleDownloads = async function (client, downloadsFolder: string, automa
 
     if (filename) {
       // @ts-ignore
-      downloadItem.filePath = path.join(downloadsFolder, data.suggestedFilename)
+      downloadItem.filePath = path.join(dir, data.suggestedFilename)
       // @ts-ignore
       downloadItem.mime = mime.getType(data.suggestedFilename)
     }
@@ -300,7 +300,7 @@ const _handleDownloads = async function (client, downloadsFolder: string, automa
 
   await client.send('Page.setDownloadBehavior', {
     behavior: 'allow',
-    downloadPath: downloadsFolder,
+    downloadPath: dir,
   })
 }
 
