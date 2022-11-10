@@ -15,7 +15,6 @@
       >
         <slot name="file" />
       </div>
-      <slot name="runAllSpecs" />
       <template
         v-if="lazyRender"
       >

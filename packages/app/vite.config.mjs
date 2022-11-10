@@ -21,4 +21,7 @@ export default makeConfig({}, {
       renderLegacyChunks: false,
     }),
   ],
+  test: {
+    exclude: ['**/node_modules/**'],
+  },
 })

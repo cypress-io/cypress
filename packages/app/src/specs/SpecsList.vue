@@ -86,6 +86,8 @@
           :grid-columns="tableGridColumns"
           :route="{ path: '/specs/runner', query: { file: row.data.data?.relative?.replace(/\\/g, '/') } }"
           @toggleRow="row.data.toggle"
+          @mouseleave="showRunAll = false"
+          @mouseenter=" !row.data.isLeaf ? childrenSpecs(collapsible, row) : showRunAll = false"
         >
           <template #file>
             <SpecItem
@@ -113,17 +115,24 @@
               :indexes="row.data.highlightIndexes"
               :aria-controls="getIdIfDirectory(row)"
               @click.stop="row.data.toggle"
-            />
-          </template>
-
-          <template #runAllSpecs>
-            <button
-              v-if="!row.data.isLeaf"
-              data-cy="console"
-              @click="consoleV.log(row.data)"
             >
-              Run {{ row.data.children.length }} Specs
-            </button>
+              <template #runAllSpecs>
+                <button
+                  v-if="showRunAll && row.index === rowIndex"
+                  class="group hover:text-indigo-700 font-normal text-sm content-center space-x-2 inline-flex ml-7"
+                >
+                  <IconActionPlaySmall
+                    size="16"
+                    stroke-color="gray-300"
+                    fill-color="gray-50"
+                    hover-stroke-color="indigo-500"
+                    hover-fill-color="indigo-100"
+                    interactive-colors-on-group
+                  />
+                  Run {{ children }} specs
+                </button>
+              </template>
+            </RowDirectory>
           </template>
 
           <template #git-info>
@@ -208,6 +217,8 @@ import { useCloudSpecData } from '../composables/useCloudSpecData'
 import { useSpecFilter } from '../composables/useSpecFilter'
 import { useRequestAccess } from '../composables/useRequestAccess'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { IconActionPlaySmall } from '@cypress-design/vue-icon'
+//import fs from 'fs'
 
 const { openLoginConnectModal } = useLoginConnectStore()
 
@@ -361,7 +372,9 @@ const specs = computed(() => {
     return fuzzyFoundSpecs
   }
 
-  return fuzzySortSpecs(fuzzyFoundSpecs, debouncedSpecFilterModel.value)
+  let p = fuzzySortSpecs(fuzzyFoundSpecs, debouncedSpecFilterModel.value)
+
+  return p
 })
 
 // Maintain a cache of what tree directories are expanded/collapsed so the tree state is visually preserved
@@ -415,7 +428,61 @@ function getIdIfDirectory (row) {
 const isProjectDisconnected = computed(() => props.gql.cloudViewer?.id === undefined || (cloudProjectType.value !== 'CloudProject'))
 
 const displayedSpecs = computed(() => list.value.map((v) => v.data.data))
-const consoleV = computed(() => console)
+
+let children = ref(0)
+let showRunAll = ref(false)
+let rowIndex = ref()
+
+function childrenSpecs (collapsible, row) {
+  // for runAllSpecs
+  showRunAll.value = true
+
+  rowIndex.value = row.index
+
+  if (collapsible) {
+    if (row.data.parent.name === '') {
+      let c = 0
+
+      collapsible.tree.forEach((element: any) => {
+        if (element.isLeaf) {
+          c += 1
+        }
+      })
+
+      children.value = c
+    } else {
+      // let c = 0
+
+      // c = recurse(row, c)
+      // // this is the wrong implementation and will not work due to nested folders.
+      // /// you need to recurse or use fs
+
+      children.value = row.data.children.length
+      // // fs.readdirAsync(row.data.data.absolute, (err, files) => {
+      // //   children.value = files.length
+      // // })
+      // children.value = c
+    }
+  }
+}
+
+// function recurse (node: any, c: number) {
+//   // eslint-disable-next-line no-console
+//   //console.log('node')
+//   // eslint-disable-next-line no-console
+//   // console.log(node)
+//   if (node.data.children.length === 0) return 1
+
+//   node.data.children.forEach((element) => {
+//     let r = recurse(element.data.children, c)
+
+//     c += r
+//   })
+
+//   return c
+// }
+
+//const consoleV = computed(() => console)
 
 const mostRecentUpdateRef = toRef(props, 'mostRecentUpdate')
 
