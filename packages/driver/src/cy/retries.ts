@@ -25,7 +25,7 @@ type retryOptions = {
 }
 
 // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
-export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeout'], clearTimeout: $Cy['clearTimeout'], whenStable: $Cy['whenStable'], finishAssertions: (...args: any) => any) => ({
+export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeout'], clearTimeout: $Cy['clearTimeout'], whenStable: $Cy['whenStable'], finishAssertions: (err?: Error) => void) => ({
   retry (fn, options: retryOptions, log?) {
     // remove the runnables timeout because we are now in retry
     // mode and should be handling timing out ourselves and dont
@@ -70,8 +70,6 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
     // if our total exceeds the timeout OR the total + the interval
     // exceed the runnables timeout, then bail
     if ((total + interval) >= options._runnableTimeout!) {
-      finishAssertions()
-
       let onFail
 
       ({ error, onFail } = options)
@@ -88,7 +86,13 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
         const retryErr = mergeErrProps(error, retryErrProps)
 
         throwErr(retryErr, {
-          onFail: onFail || log,
+          onFail: (err) => {
+            if (onFail) {
+              err = onFail(err)
+            }
+
+            finishAssertions(err)
+          },
         })
       }
     }
