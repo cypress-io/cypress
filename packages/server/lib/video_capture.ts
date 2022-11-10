@@ -7,7 +7,8 @@ import Bluebird from 'bluebird'
 import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg'
 import BlackHoleStream from 'black-hole-stream'
 import { fs } from './util/fs'
-import type { WriteVideoFrame } from '@packages/types'
+
+export type WriteVideoFrame = (data: Buffer) => void
 
 const debug = Debug('cypress:server:video')
 const debugVerbose = Debug('cypress-verbose:server:video')

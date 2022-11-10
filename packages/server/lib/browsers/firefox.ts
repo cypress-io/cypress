@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import Bluebird from 'bluebird'
 import fs from 'fs-extra'
 import Debug from 'debug'
 import getPort from 'get-port'
@@ -20,7 +21,6 @@ import type { BrowserCriClient } from './browser-cri-client'
 import type { Automation } from '../automation'
 import { getCtx } from '@packages/data-context'
 import { getError } from '@packages/errors'
-import type { BrowserLaunchOpts, BrowserNewTabOpts } from '@packages/types'
 
 const debug = Debug('cypress:server:browsers:firefox')
 
@@ -371,7 +371,7 @@ export function _createDetachedInstance (browserInstance: BrowserInstance, brows
   return detachedInstance
 }
 
-export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
+export async function connectToNewSpec (browser: Browser, options: any = {}, automation: Automation) {
   await firefoxUtil.connectToNewSpec(options, automation, browserCriClient)
 }
 
@@ -379,7 +379,7 @@ export function connectToExisting () {
   getCtx().onWarning(getError('UNEXPECTED_INTERNAL_ERROR', new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for firefox')))
 }
 
-export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
+export async function open (browser: Browser, url, options: any = {}, automation): Promise<BrowserInstance> {
   // see revision comment here https://wiki.mozilla.org/index.php?title=WebDriver/RemoteProtocol&oldid=1234946
   const hasCdp = browser.majorVersion >= 86
   const defaultLaunchOptions = utils.getDefaultLaunchOptions({
@@ -441,7 +441,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   const [
     foxdriverPort,
     marionettePort,
-  ] = await Promise.all([getPort(), getPort()])
+  ] = await Bluebird.all([getPort(), getPort()])
 
   defaultLaunchOptions.preferences['devtools.debugger.remote-port'] = foxdriverPort
   defaultLaunchOptions.preferences['marionette.port'] = marionettePort
@@ -452,7 +452,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     cacheDir,
     extensionDest,
     launchOptions,
-  ] = await Promise.all([
+  ] = await Bluebird.all([
     utils.ensureCleanCache(browser, options.isTextTerminal),
     utils.writeExtension(browser, options.isTextTerminal, options.proxyUrl, options.socketIoRoute),
     utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options),
