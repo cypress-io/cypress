@@ -165,8 +165,8 @@ export function launch (
   url: string,
   debuggingPort: number,
   args: string[] = [],
-  defaultBrowserEnv = {},
-): LaunchedBrowser {
+  browserEnv = {},
+) {
   debug('launching browser %o', { browser, url })
 
   if (!browser.path) {
@@ -181,7 +181,9 @@ export function launch (
 
   // allow setting default env vars such as MOZ_HEADLESS_WIDTH
   // but only if it's not already set by the environment
-  const env = Object.assign({}, defaultBrowserEnv, process.env)
+  const env = Object.assign({}, browserEnv, process.env)
+
+  debug('spawning browser with environment %o', { env })
 
   const proc = cp.spawn(browser.path, args, { stdio: ['ignore', 'pipe', 'pipe'], env })
 

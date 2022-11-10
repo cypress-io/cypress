@@ -86,7 +86,6 @@ export const WIZARD_FRAMEWORKS = [
     dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
       return Promise.all([
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT_SCRIPTS, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT_DOM, projectPath),
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
       ])
@@ -107,7 +106,6 @@ export const WIZARD_FRAMEWORKS = [
     dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
       return Promise.all([
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
       ])
     },
@@ -127,7 +125,6 @@ export const WIZARD_FRAMEWORKS = [
     dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
       return Promise.all([
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_3, projectPath),
       ])
     },
@@ -154,7 +151,7 @@ export const WIZARD_FRAMEWORKS = [
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
     mountModule: reactMountModule,
-    supportStatus: 'alpha',
+    supportStatus: 'full',
     /**
      * Next.js uses style-loader to inject CSS and requires this element to exist in the HTML.
      * @see: https://github.com/vercel/next.js/blob/5f3351dbb8de71bcdbc91d869c04bc862a25da5f/packages/next/build/webpack/config/blocks/css/loaders/client.ts#L24

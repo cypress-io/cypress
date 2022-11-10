@@ -24,6 +24,18 @@ describe('driver/src/cypress/validate_config', () => {
       expect(overrideLevel).to.be.undefined
     })
 
+    it('returns override level of restoring', () => {
+      const state = $SetterGetter.create({
+        duringUserTestExecution: false,
+        test: {
+          _testConfig: { applied: 'restoring' },
+        },
+      })
+      const overrideLevel = getMochaOverrideLevel(state)
+
+      expect(overrideLevel).to.eq('restoring')
+    })
+
     it('returns override level of suite', () => {
       const state = $SetterGetter.create({
         duringUserTestExecution: false,
@@ -98,7 +110,8 @@ describe('driver/src/cypress/validate_config', () => {
           expect(overrideLevel).to.eq('suite')
 
           expect(() => {
-            validateConfig(state, { testIsolation: 'strict' })
+            // TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
+            validateConfig(state, { testIsolation: Cypress.config('experimentalSessionAndOrigin') ? 'on' : null })
           }).not.to.throw()
         })
 
@@ -115,7 +128,7 @@ describe('driver/src/cypress/validate_config', () => {
           expect(overrideLevel).to.eq('test')
 
           expect(() => {
-            validateConfig(state, { testIsolation: 'strict' })
+            validateConfig(state, { testIsolation: 'on' })
           }).to.throw(`The \`testIsolation\` configuration can only be overridden from a suite-level override.`)
         })
       })
@@ -167,6 +180,21 @@ describe('driver/src/cypress/validate_config', () => {
 
       expect(() => {
         validateConfig(state, { chromeWebSecurity: true }, skipOverrideCHeck)
+      }).not.to.throw()
+    })
+
+    it('skips checking override level when restoring global configuration before next test', () => {
+      const state = $SetterGetter.create({
+        duringUserTestExecution: false,
+        test: {
+          _testConfig: { applied: 'restoring' },
+        },
+        specWindow: { Error },
+      })
+
+      expect(() => {
+        // TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
+        validateConfig(state, { testIsolation: Cypress.config('experimentalSessionAndOrigin') ? 'off' : null })
       }).not.to.throw()
     })
 

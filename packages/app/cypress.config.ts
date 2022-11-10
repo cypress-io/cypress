@@ -1,12 +1,8 @@
 import { defineConfig } from 'cypress'
-import getenv from 'getenv'
 import { initGitRepoForTestProject, resetGitRepoForTestProject } from './cypress/tasks/git'
 
-const CYPRESS_INTERNAL_CLOUD_ENV = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development')
-const CYPRESS_INTERNAL_DEV_PROJECT_ID = getenv('CYPRESS_INTERNAL_DEV_PROJECT_ID', process.env.CYPRESS_INTERNAL_DEV_PROJECT_ID || 'sehy69')
-
 export default defineConfig({
-  projectId: CYPRESS_INTERNAL_CLOUD_ENV === 'staging' ? 'ypt4pf' : CYPRESS_INTERNAL_DEV_PROJECT_ID,
+  projectId: 'ypt4pf',
   retries: {
     runMode: 2,
     openMode: 0,
@@ -25,22 +21,10 @@ export default defineConfig({
     devServer: {
       bundler: 'vite',
       framework: 'vue',
-      viteConfig: {
-        optimizeDeps: {
-          include: [
-            '@headlessui/vue',
-            'vue3-file-selector',
-            'p-defer',
-            'just-my-luck',
-            'combine-properties',
-            'faker',
-            '@packages/ui-components/cypress/support/customPercyCommand',
-          ],
-        },
-      },
     },
   },
   'e2e': {
+    experimentalStudio: true,
     baseUrl: 'http://localhost:5555',
     supportFile: 'cypress/e2e/support/e2eSupport.ts',
     async setupNodeEvents (on, config) {
@@ -51,6 +35,7 @@ export default defineConfig({
       // Delete this as we only want to honor it on parent Cypress when doing E2E Cypress in Cypress testing
       delete process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS
       process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+      process.env.CYPRESS_INTERNAL_VITE_OPEN_MODE_TESTING = 'true'
       // process.env.DEBUG = '*'
       const { e2ePluginSetup } = require('@packages/frontend-shared/cypress/e2e/e2ePluginSetup')
 

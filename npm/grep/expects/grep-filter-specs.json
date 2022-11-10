@@ -1,0 +1,14 @@
+{
+  "is a test outside any suites": "passing",
+  "block with no tags": {
+    "inside describe 1": "pending",
+    "inside describe 2": "pending"
+  },
+  "block with tag smoke": {
+    "inside describe 3": "pending",
+    "inside describe 4": "pending"
+  },
+  "block without any tags": {
+    "test with tag smoke": "pending"
+  }
+}

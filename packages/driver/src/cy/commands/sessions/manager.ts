@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { $Location } from '../../../cypress/location'
-
+import type { ServerSessionData } from '@packages/types'
 import {
   getCurrentOriginStorage,
   setPostMessageLocalStorage,
@@ -116,24 +116,24 @@ export default class SessionsManager {
   // this the public api exposed to consumers as Cypress.session
   sessions = {
     defineSession: (options = {} as any): SessionData => {
-      const sess_state: SessionData = {
+      return {
         id: options.id,
         cookies: null,
         localStorage: null,
+        sessionStorage: null,
         setup: options.setup,
         hydrated: false,
         validate: options.validate,
+        cacheAcrossSpecs: !!options.cacheAcrossSpecs,
       }
-
-      this.setActiveSession({ [sess_state.id]: sess_state })
-
-      return sess_state
     },
 
     clearAllSavedSessions: async () => {
       this.clearActiveSessions()
+      this.registeredSessions.clear()
+      const clearAllSessions = true
 
-      return this.Cypress.backend('clear:session', null)
+      return this.Cypress.backend('clear:sessions', clearAllSessions)
     },
 
     clearCurrentSessionData: async () => {
@@ -156,7 +156,7 @@ export default class SessionsManager {
 
       // persist the session to the server. Only matters in openMode OR if there's a top navigation on a future test.
       // eslint-disable-next-line no-console
-      return this.Cypress.backend('save:session', { ...data, setup: data.setup.toString() }).catch(console.error)
+      return this.Cypress.backend('save:session', { ...data, setup: data.setup.toString(), validate: data.validate?.toString() }).catch(console.error)
     },
 
     setSessionData: async (data) => {
@@ -205,7 +205,7 @@ export default class SessionsManager {
       }
     },
 
-    getSession: (id: string) => {
+    getSession: (id: string): Promise<ServerSessionData> => {
       return this.Cypress.backend('get:session', id)
     },
 

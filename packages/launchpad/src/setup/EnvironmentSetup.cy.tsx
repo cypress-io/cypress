@@ -15,7 +15,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     })
 
     cy.findByRole('button', {
-      name: 'Front-end Framework Pick a framework',
+      name: 'Front-end framework Pick a framework',
       expanded: false,
     })
     .should('have.attr', 'aria-haspopup', 'true')
@@ -52,7 +52,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       .should('have.attr', 'data-cy', frameworkIconName(name))
     })
 
-    cy.findByRole('button', { name: 'Next Step' })
+    cy.findByRole('button', { name: 'Next step' })
     .should('have.disabled')
   })
 
@@ -72,7 +72,7 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
     })
 
     cy.findByRole('button', {
-      name: 'Front-end Framework Pick a framework',
+      name: 'Front-end framework Pick a framework',
       expanded: false,
     }).click()
 
@@ -97,6 +97,6 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       ),
     })
 
-    cy.findByLabelText('Bundler(Dev Server)').should('be.visible')
+    cy.findByLabelText('Bundler(dev server)').should('be.visible')
   })
 })

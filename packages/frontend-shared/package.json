@@ -25,6 +25,7 @@
     "@iconify/json": "1.1.368",
     "@iconify/vue": "3.0.0-beta.1",
     "@intlify/vite-plugin-vue-i18n": "2.4.0",
+    "@percy/core": "^1.0.0-beta.48",
     "@percy/cypress": "^3.1.0",
     "@testing-library/cypress": "8.0.0",
     "@toycode/markdown-it-class": "1.2.3",
@@ -40,6 +41,7 @@
     "@vue/compiler-sfc": "3.2.31",
     "@vueuse/core": "7.2.2",
     "axe-core": "4.4.1",
+    "browser-logos": "github:alrra/browser-logos",
     "combine-properties": "0.1.0",
     "cross-env": "6.0.3",
     "cypress-axe": "0.14.0",
@@ -65,7 +67,7 @@
     "shiki": "^0.9.12",
     "unplugin-icons": "0.13.2",
     "unplugin-vue-components": "^0.15.4",
-    "vite": "3.0.3",
+    "vite": "3.1.0",
     "vite-plugin-components": "0.11.3",
     "vite-svg-loader": "3.1.2",
     "vue": "3.2.31",
@@ -83,33 +85,5 @@
       "@toycode/markdown-it-class",
       "patch-package"
     ]
-  },
-  "vite": {
-    "optimizeDeps": {
-      "include": [
-        "@testing-library/cypress/add-commands",
-        "@urql/core",
-        "@urql/devtools",
-        "@urql/exchange-execute",
-        "@urql/exchange-graphcache",
-        "@urql/vue",
-        "@vue/test-utils",
-        "@vueuse/core",
-        "dedent",
-        "fake-uuid",
-        "floating-vue",
-        "graphql",
-        "graphql-relay",
-        "graphql/jsutils/Path",
-        "gravatar",
-        "human-interval",
-        "lodash",
-        "shiki",
-        "vue",
-        "vue-i18n",
-        "vue-toastification",
-        "wonka"
-      ]
-    }
   }
 }

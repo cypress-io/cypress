@@ -5,7 +5,8 @@ import Agent, { AgentProps } from '../agents/agent-model'
 import Command, { CommandProps } from '../commands/command-model'
 import Err from '../errors/err-model'
 import Route, { RouteProps } from '../routes/route-model'
-import Test, { UpdatableTestProps, TestProps, TestState } from '../test/test-model'
+import Test, { UpdatableTestProps, TestProps } from '../test/test-model'
+import type { TestState } from '@packages/types'
 import Hook, { HookName } from '../hooks/hook-model'
 import { FileDetails } from '@packages/types'
 import { LogProps } from '../runnables/runnables-store'
@@ -16,7 +17,7 @@ export default class Attempt {
   @observable agents: Agent[] = []
   @observable sessions: Record<string, Session> = {}
   @observable commands: Command[] = []
-  @observable err = new Err({})
+  @observable err?: Err = undefined
   @observable hooks: Hook[] = []
   // TODO: make this an enum with states: 'QUEUED, ACTIVE, INACTIVE'
   @observable isActive: boolean | null = null
@@ -48,7 +49,10 @@ export default class Attempt {
     this.id = props.currentRetry || 0
     this.test = test
     this._state = props.state
-    this.err.update(props.err)
+
+    if (props.err) {
+      this.err = new Err(props.err)
+    }
 
     this.invocationDetails = props.invocationDetails
 
@@ -77,6 +81,16 @@ export default class Attempt {
     return this._state || (this.isActive ? 'active' : 'processing')
   }
 
+  @computed get error () {
+    const command = this.err?.isCommandErr ? this.commandMatchingErr() : undefined
+
+    return {
+      err: this.err,
+      testId: command?.testId,
+      commandId: command?.id,
+    }
+  }
+
   @computed get isLast () {
     return this.id === this.test.lastAttempt.id
   }
@@ -90,13 +104,14 @@ export default class Attempt {
     return this.test.isActive || this.isLast
   }
 
-  @computed get studioIsNotEmpty () {
-    return _.some(this.hooks, (hook) => hook.isStudio && hook.commands.length)
-  }
-
   addLog = (props: LogProps) => {
     switch (props.instrument) {
       case 'command': {
+        // @ts-ignore satisfied by CommandProps
+        if (props.sessionInfo) {
+          this._addSession(props as unknown as SessionProps) // add sessionInstrumentPanel details
+        }
+
         return this._addCommand(props as CommandProps)
       }
       case 'agent': {
@@ -115,6 +130,11 @@ export default class Attempt {
     const log = this._logs[props.id]
 
     if (log) {
+      // @ts-ignore satisfied by CommandProps
+      if (props.sessionInfo) {
+        this._updateOrAddSession(props as unknown as SessionProps) // update sessionInstrumentPanel details
+      }
+
       log.update(props)
     }
   }
@@ -130,9 +150,14 @@ export default class Attempt {
     }
   }
 
-  commandMatchingErr () {
+  commandMatchingErr (): Command | undefined {
+    if (!this.err) {
+      return undefined
+    }
+
     return _(this.hooks)
     .map((hook) => {
+      // @ts-ignore
       return hook.commandMatchingErr(this.err)
     })
     .compact()
@@ -148,7 +173,13 @@ export default class Attempt {
       this._state = props.state
     }
 
-    this.err.update(props.err)
+    if (props.err) {
+      if (this.err) {
+        this.err.update(props.err)
+      } else {
+        this.err = new Err(props.err)
+      }
+    }
 
     if (props.failedFromHookId) {
       const hook = _.find(this.hooks, { hookId: props.failedFromHookId })
@@ -180,7 +211,19 @@ export default class Attempt {
   _addSession (props: SessionProps) {
     const session = new Session(props)
 
-    this.sessions[props.sessionInfo.id] = session
+    this.sessions[props.id] = session
+  }
+
+  _updateOrAddSession (props: SessionProps) {
+    const session = this.sessions[props.id]
+
+    if (session) {
+      session.update(props)
+
+      return
+    }
+
+    this._addSession(props)
   }
 
   _addRoute (props: RouteProps) {

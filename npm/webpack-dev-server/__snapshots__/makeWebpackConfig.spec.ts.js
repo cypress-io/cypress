@@ -10,12 +10,15 @@ exports['makeWebpackConfig ignores userland webpack `output.publicPath` and `dev
       "overlay": false
     }
   },
-  "mode": "development",
   "optimization": {
+    "emitOnErrors": true,
+    "sideEffects": false,
     "splitChunks": {
       "chunks": "all"
     }
   },
+  "devtool": "inline-source-map",
+  "mode": "development",
   "plugins": [
     "HtmlWebpackPlugin",
     "CypressCTWebpackPlugin"
@@ -31,12 +34,15 @@ exports['makeWebpackConfig ignores userland webpack `output.publicPath` and `dev
     "progress": true,
     "overlay": false
   },
-  "mode": "development",
   "optimization": {
+    "noEmitOnErrors": false,
+    "sideEffects": false,
     "splitChunks": {
       "chunks": "all"
     }
   },
+  "devtool": "inline-source-map",
+  "mode": "development",
   "plugins": [
     "HtmlWebpackPlugin",
     "CypressCTWebpackPlugin"

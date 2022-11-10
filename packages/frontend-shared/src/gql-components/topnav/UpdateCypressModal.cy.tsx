@@ -22,7 +22,7 @@ describe('<UpdateCypressModal />', { viewportWidth: 1000, viewportHeight: 750 },
     cy.contains(defaultMessages.topNav.updateCypress.pasteToUpgradeGlobal
     .replace('{0}', defaultMessages.topNav.updateCypress.rememberToCloseInsert)).should('be.visible')
 
-    cy.contains(`cypress@${latestVersion}`).should('be.visible')
+    cy.findByDisplayValue(`npm i cypress@${latestVersion}`).should('be.visible')
     cy.findByLabelText('Close').click().then(() => {
       expect(handleClose).to.have.been.calledOnce
     })

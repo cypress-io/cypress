@@ -23,8 +23,6 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'EXPERIMENTAL_SESSION_SUPPORT_REMOVED',
   'EXPERIMENTAL_SINGLE_TAB_RUN_MODE',
   'EXPERIMENTAL_SHADOW_DOM_REMOVED',
-  'EXPERIMENTAL_STUDIO_REMOVED',
-  'EXPERIMENTAL_STUDIO_REMOVED',
   'FIREFOX_GC_INTERVAL_REMOVED',
   'NODE_VERSION_DEPRECATION_SYSTEM',
   'NODE_VERSION_DEPRECATION_BUNDLED',
@@ -32,6 +30,11 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'RENAMED_CONFIG_OPTION',
   'TEST_FILES_RENAMED',
 ] as const
+
+type ValidationOptions = {
+  testingType: TestingType | null
+  experimentalSessionAndOrigin: boolean
+}
 
 export type BreakingOptionErrorKey = typeof BREAKING_OPTION_ERROR_KEY[number]
 
@@ -92,7 +95,7 @@ export interface BreakingOption {
   showInLaunchpad?: boolean
 }
 
-const isValidConfig = (testingType: string, config: any) => {
+const isValidConfig = (testingType: string, config: any, opts: ValidationOptions) => {
   const status = validate.isPlainObject(testingType, config)
 
   if (status !== true) {
@@ -101,7 +104,7 @@ const isValidConfig = (testingType: string, config: any) => {
 
   for (const rule of options) {
     if (rule.name in config && rule.validation) {
-      const status = rule.validation(`${testingType}.${rule.name}`, config[rule.name])
+      const status = rule.validation(`${testingType}.${rule.name}`, config[rule.name], opts)
 
       if (status !== true) {
         return status
@@ -143,6 +146,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     defaultValue: null,
     validation: validate.isStringOrArrayOfStrings,
     overrideLevel: 'any',
+    requireRestartOnChange: 'server',
   }, {
     name: 'chromeWebSecurity',
     defaultValue: true,
@@ -201,6 +205,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     isExperimental: true,
     requireRestartOnChange: 'server',
   }, {
+    // TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
     name: 'experimentalSessionAndOrigin',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -219,6 +224,18 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     requireRestartOnChange: 'server',
   }, {
     name: 'experimentalSingleTabRunMode',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+    requireRestartOnChange: 'server',
+  }, {
+    name: 'experimentalStudio',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+    requireRestartOnChange: 'browser',
+  }, {
+    name: 'experimentalWebKitSupport',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
@@ -362,11 +379,37 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'testIsolation',
     // TODO: https://github.com/cypress-io/cypress/issues/23093
     // When experimentalSessionAndOrigin is removed and released as GA,
-    // update the defaultValue from 'legacy' to 'strict' and
+    // update the defaultValue from undefined to 'on' and
     // update this code to remove the check/override specific to enable
-    // strict by default when experimentalSessionAndOrigin=true
-    defaultValue: 'legacy',
-    validation: validate.isOneOf('legacy', 'strict'),
+    // 'on' by default when experimentalSessionAndOrigin=true
+    defaultValue: (options: Record<string, any> = {}) => {
+      if (options.testingType === 'component') {
+        return null
+      }
+
+      return options?.experimentalSessionAndOrigin || options?.config?.e2e?.experimentalSessionAndOrigin ? 'on' : null
+    },
+    validation: (key: string, value: any, opts: ValidationOptions) => {
+      const { testingType, experimentalSessionAndOrigin } = opts
+
+      if (testingType == null || testingType === 'component') {
+        return true
+      }
+
+      if (experimentalSessionAndOrigin && testingType === 'e2e') {
+        return validate.isOneOf('on', 'off')(key, value)
+      }
+
+      if (value == null) {
+        return true
+      }
+
+      return {
+        key,
+        value,
+        type: 'not set unless the experimentalSessionAndOrigin flag is turned on',
+      }
+    },
     overrideLevel: 'suite',
   }, {
     name: 'trashAssetsBeforeRuns',
@@ -492,6 +535,11 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     validation: validate.isString,
     isInternal: true,
   }, {
+    name: 'repoRoot',
+    defaultValue: null,
+    validation: validate.isString,
+    isInternal: true,
+  }, {
     name: 'reporterRoute',
     defaultValue: '/__cypress/reporter',
     validation: validate.isString,
@@ -567,11 +615,6 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
     errorKey: 'EXPERIMENTAL_SHADOW_DOM_REMOVED',
     isWarning: true,
   }, {
-    name: 'experimentalStudio',
-    errorKey: 'EXPERIMENTAL_STUDIO_REMOVED',
-    isWarning: true,
-    showInLaunchpad: true,
-  }, {
     name: 'firefoxGcInterval',
     errorKey: 'FIREFOX_GC_INTERVAL_REMOVED',
     isWarning: true,
@@ -621,11 +664,6 @@ export const breakingRootOptions: Array<BreakingOption> = [
     name: 'excludeSpecPattern',
     errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
     isWarning: false,
-    testingTypes: ['component', 'e2e'],
-  }, {
-    name: 'experimentalStudio',
-    errorKey: 'EXPERIMENTAL_STUDIO_REMOVED',
-    isWarning: true,
     testingTypes: ['component', 'e2e'],
   }, {
     name: 'indexHtmlFile',
@@ -679,6 +717,12 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
       name: 'experimentalSessionAndOrigin',
       errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
       isWarning: false,
+    },
+    {
+      name: 'experimentalStudio',
+      errorKey: 'EXPERIMENTAL_STUDIO_E2E_ONLY',
+      isWarning: false,
+      testingTypes: ['component'],
     },
     {
       name: 'testIsolation',

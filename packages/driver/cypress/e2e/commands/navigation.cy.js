@@ -581,8 +581,8 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    describe('removes window:load listeners when testIsolation=legacy', { testIsolation: 'legacy' }, () => {
-      it('removes 2x for about:blank and first url visit', () => {
+    if (!Cypress.config('experimentalSessionAndOrigin')) {
+      it('removes window:load listeners 2x for about:blank and first url visit when experimentalSessionAndOrigin=false', () => {
         const listeners = cy.listeners('window:load')
 
         const winLoad = cy.spy(cy, 'once').withArgs('window:load')
@@ -593,24 +593,24 @@ describe('src/cy/commands/navigation', () => {
           expect(cy.listeners('window:load')).to.deep.eq(listeners)
         })
       })
-    })
+    }
 
     if (Cypress.config('experimentalSessionAndOrigin')) {
-      describe('removes window:load listeners when testIsolation=strict', () => {
+      describe('removes window:load listeners for first url visit when experimentalSessionAndOrigin=true', () => {
         it('removes for first url visit', () => {
           const listeners = cy.listeners('window:load')
 
           const winLoad = cy.spy(cy, 'once').withArgs('window:load')
 
           cy.visit('/fixtures/generic.html').then(() => {
-            expect(winLoad).to.be.calledOnce
+            expect(winLoad).to.be.calledOnce // once for $iframe src
             expect(cy.listeners('window:load')).to.deep.eq(listeners)
           })
         })
       })
     }
 
-    it('can visit pages on the same originPolicy', () => {
+    it('can visit pages on the same origin', () => {
       cy
       .visit('http://localhost:3500/fixtures/jquery.html')
       .visit('http://localhost:3500/fixtures/generic.html')
@@ -690,7 +690,7 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    it('can visit relative pages on the same originPolicy', () => {
+    it('can visit relative pages on the same origin', () => {
       // as long as we are already on the localhost:3500
       // domain this will work
       cy
@@ -753,58 +753,63 @@ describe('src/cy/commands/navigation', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/14445
-    // TODO: skip flaky test https://github.com/cypress-io/cypress/issues/23472
-    it.skip('should eventually fail on assertion despite redirects', (done) => {
+    // FIXME: fix flaky test (webkit): https://github.com/cypress-io/cypress/issues/24600
+    it('should eventually fail on assertion despite redirects', { browser: '!webkit' }, (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.contain('The application redirected to')
-
         done()
       })
 
+      // One time, set the amount of times we want the page to perform it's redirect loop.
+      cy.once('window:before:load', (win) => {
+        win.sessionStorage.setItem('redirectCount', 21)
+      })
+
       cy.visit('fixtures/redirection-loop-a.html')
-      cy.get('div').should('contain', 'this should fail?')
     })
 
-    describe('when only hashes are changing when testIsolation=legacy', { testIsolation: 'legacy' }, () => {
-      it('short circuits the visit if the page will not refresh', () => {
-        let count = 0
-        const urls = []
+    if (!Cypress.config('experimentalSessionAndOrigin')) {
+      describe('when only hashes are changing when experimentalSessionAndOrigin=false', () => {
+        it('short circuits the visit if the page will not refresh', () => {
+          let count = 0
+          const urls = []
 
-        cy.on('window:load', () => {
-          urls.push(cy.state('window').location.href)
+          cy.on('window:load', () => {
+            urls.push(cy.state('window').location.href)
 
-          count += 1
-        })
+            count += 1
+          })
 
-        cy
-        // about:blank yes (1)
-        .visit('/fixtures/generic.html?foo#bar') // yes (2)
-        .visit('/fixtures/generic.html?foo#foo') // no (2)
-        .visit('/fixtures/generic.html?bar#bar') // yes (3)
-        .visit('/fixtures/dimensions.html?bar#bar') // yes (4)
-        .visit('/fixtures/dimensions.html?baz#bar') // yes (5)
-        .visit('/fixtures/dimensions.html#bar') // yes (6)
-        .visit('/fixtures/dimensions.html') // yes (7)
-        .visit('/fixtures/dimensions.html#baz') // no (7)
-        .visit('/fixtures/dimensions.html#') // no (7)
-        .then(() => {
-          expect(count).to.eq(7)
+          cy
+          // about:blank yes (1)
+          .visit('/fixtures/generic.html?foo#bar') // yes (2)
+          .visit('/fixtures/generic.html?foo#foo') // no (2)
+          .visit('/fixtures/generic.html?bar#bar') // yes (3)
+          .visit('/fixtures/dimensions.html?bar#bar') // yes (4)
+          .visit('/fixtures/dimensions.html?baz#bar') // yes (5)
+          .visit('/fixtures/dimensions.html#bar') // yes (6)
+          .visit('/fixtures/dimensions.html') // yes (7)
+          .visit('/fixtures/dimensions.html#baz') // no (7)
+          .visit('/fixtures/dimensions.html#') // no (7)
+          .then(() => {
+            expect(count).to.eq(7)
 
-          expect(urls).to.deep.eq([
-            'about:blank',
-            'http://localhost:3500/fixtures/generic.html?foo#bar',
-            'http://localhost:3500/fixtures/generic.html?bar#bar',
-            'http://localhost:3500/fixtures/dimensions.html?bar#bar',
-            'http://localhost:3500/fixtures/dimensions.html?baz#bar',
-            'http://localhost:3500/fixtures/dimensions.html#bar',
-            'http://localhost:3500/fixtures/dimensions.html',
-          ])
+            expect(urls).to.deep.eq([
+              'about:blank',
+              'http://localhost:3500/fixtures/generic.html?foo#bar',
+              'http://localhost:3500/fixtures/generic.html?bar#bar',
+              'http://localhost:3500/fixtures/dimensions.html?bar#bar',
+              'http://localhost:3500/fixtures/dimensions.html?baz#bar',
+              'http://localhost:3500/fixtures/dimensions.html#bar',
+              'http://localhost:3500/fixtures/dimensions.html',
+            ])
+          })
         })
       })
-    })
+    }
 
     if (Cypress.config('experimentalSessionAndOrigin')) {
-      describe('when only hashes are changing when testIsolation=strict', () => {
+      describe('when only hashes are changing when experimentalSessionAndOrigin=true', () => {
         it('short circuits the visit if the page will not refresh', () => {
           let count = 0
           const urls = []
@@ -1495,6 +1500,11 @@ describe('src/cy/commands/navigation', () => {
 
         cy.visit('http://localhost:3500/fixtures/generic.html')
         cy.visit('http://localhost:3501/fixtures/generic.html')
+
+        // If experimentalSessionAndOrigin is enabled this is no longer an error
+        if (Cypress.config('experimentalSessionAndOrigin')) {
+          done()
+        }
       })
 
       it('throws when attempting to visit a 2nd domain on different protocol', function (done) {
@@ -1528,6 +1538,11 @@ describe('src/cy/commands/navigation', () => {
 
         cy.visit('http://localhost:3500/fixtures/generic.html')
         cy.visit('https://localhost:3502/fixtures/generic.html')
+
+        // If experimentalSessionAndOrigin is enabled this is no longer an error
+        if (Cypress.config('experimentalSessionAndOrigin')) {
+          done()
+        }
       })
 
       it('throws when attempting to visit a 2nd domain on different superdomain', function (done) {
@@ -1540,7 +1555,7 @@ describe('src/cy/commands/navigation', () => {
           ${experimentalMessage}
           \`cy.visit('http://localhost:3500/fixtures/generic.html')\`
           \`<commands targeting http://localhost:3500 go here>\`\n
-          \`cy.origin('http://foobar.com:3500', () => {\`
+          \`cy.origin('http://www.foobar.com:3500', () => {\`
           \`  cy.visit('http://www.foobar.com:3500/fixtures/generic.html')\`
           \`  <commands targeting http://www.foobar.com:3500 go here>\`
           \`})\`\n
@@ -1561,6 +1576,11 @@ describe('src/cy/commands/navigation', () => {
 
         cy.visit('http://localhost:3500/fixtures/generic.html')
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
+
+        // If experimentalSessionAndOrigin is enabled this is no longer an error
+        if (Cypress.config('experimentalSessionAndOrigin')) {
+          done()
+        }
       })
 
       it('throws attempting to visit 2 unique ip addresses', function (done) {
@@ -1595,6 +1615,11 @@ describe('src/cy/commands/navigation', () => {
         cy
         .visit('http://127.0.0.1:3500/fixtures/generic.html')
         .visit('http://0.0.0.0:3500/fixtures/generic.html')
+
+        // If experimentalSessionAndOrigin is enabled this is no longer an error
+        if (Cypress.config('experimentalSessionAndOrigin')) {
+          done()
+        }
       })
 
       it('displays loading_network_failed when _resolveUrl throws', function (done) {
@@ -2212,45 +2237,23 @@ describe('src/cy/commands/navigation', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          if (Cypress.config('experimentalSessionAndOrigin')) {
-            // When the experimentalSessionAndOrigin feature is enabled, we will timeout and display this message.
-            expect(err.message).to.include(stripIndent`\
-            Timed out after waiting \`3000ms\` for your remote page to load on origin(s):\n
-            - \`http://localhost:3500\`\n
-            A cross-origin request for \`http://www.foobar.com:3500/fixtures/secondary-origin.html\` was detected.\n
-            A command that triggers cross-origin navigation must be immediately followed by a \`cy.origin()\` command:\n
-            \`cy.origin(\'http://foobar.com:3500\', () => {\`
-            \`  <commands targeting http://www.foobar.com:3500 go here>\`
-            \`})\`\n
-            If the cross-origin request was an intermediary state, you can try increasing the \`pageLoadTimeout\` value in`)
+          const error = Cypress.isBrowser('firefox') ? 'Permission denied to get property "href" on cross-origin object' : 'Blocked a frame with origin "http://localhost:3500" from accessing a cross-origin frame.'
 
-            expect(err.message).to.include(`packages/driver/cypress.config.ts`)
-            expect(err.message).to.include(`to wait longer.\n`)
+          // When the experimentalSessionAndOrigin feature is disabled, we will immediately and display this message.
+          expect(err.message).to.contain(stripIndent`\
+          Cypress detected a cross origin error happened on page load:\n
+            > ${error}\n
+          Before the page load, you were bound to the origin:\n
+            > http://localhost:3500\n
+          A cross origin error happens when your application navigates to a new URL which does not match the origin above.\n
+          A new URL does not match the origin if the 'protocol', 'port' (if specified), and/or 'host' are different.\n
+          Cypress does not allow you to navigate to a different origin URL within a single test.\n
+          You may need to restructure some of your test code to avoid this problem.\n
+          Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false }`)
 
-            expect(err.message).to.include(`Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.\n`)
-            expect(err.message).to.include(`When this \`load\` event occurs, Cypress will continue running commands.`)
-
-            expect(err.docsUrl).to.eq('https://on.cypress.io/origin')
-            assertLogLength(this.logs, 10)
-          } else {
-            const error = Cypress.isBrowser('firefox') ? 'Permission denied to access property "document" on cross-origin object' : 'Blocked a frame with origin "http://localhost:3500" from accessing a cross-origin frame.'
-
-            // When the experimentalSessionAndOrigin feature is disabled, we will immediately and display this message.
-            expect(err.message).to.contain(stripIndent`\
-            Cypress detected a cross origin error happened on page load:\n
-              > ${error}\n
-            Before the page load, you were bound to the origin policy:\n
-              > http://localhost:3500\n
-            A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.\n
-            A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.\n
-            Cypress does not allow you to navigate to a different origin URL within a single test.\n
-            You may need to restructure some of your test code to avoid this problem.\n
-            Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false }`)
-
-            expect(err.message).to.contain(`packages/driver/cypress.config.ts`)
-            expect(err.docsUrl).to.eq('https://on.cypress.io/cross-origin-violation')
-            assertLogLength(this.logs, 7)
-          }
+          expect(err.message).to.contain(`packages/driver/cypress.config.ts`)
+          expect(err.docsUrl).to.eq('https://on.cypress.io/cross-origin-violation')
+          assertLogLength(this.logs, 7)
 
           expect(lastLog.get('error')).to.eq(err)
 
@@ -2259,6 +2262,11 @@ describe('src/cy/commands/navigation', () => {
 
         cy.visit('/fixtures/primary-origin.html')
         cy.get('a[data-cy="cross-origin-secondary-link"]').click()
+
+        // If experimentalSessionAndOrigin is enabled this is no longer an error
+        if (Cypress.config('experimentalSessionAndOrigin')) {
+          done()
+        }
       })
 
       return null
@@ -2280,7 +2288,8 @@ describe('src/cy/commands/navigation', () => {
       return null
     })
 
-    it('emits \'page:loading\' before and after initial visit', () => {
+    // FIXME: fix flaky test (webkit): https://github.com/cypress-io/cypress/issues/24600
+    it('emits \'page:loading\' before and after initial visit', { browser: '!webkit' }, () => {
       const emit = cy.spy(Cypress, 'emit').log(false).withArgs('page:loading')
 
       cy
@@ -2296,7 +2305,8 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    it('emits during page navigation', () => {
+    // FIXME: fix flaky test (webkit): https://github.com/cypress-io/cypress/issues/24600
+    it('emits during page navigation', { browser: '!webkit' }, () => {
       const emit = cy.spy(Cypress, 'emit').log(false).withArgs('page:loading')
       let expected = false
 
@@ -2322,7 +2332,8 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    it('logs during page navigation', () => {
+    // FIXME: fix flaky test (webkit): https://github.com/cypress-io/cypress/issues/24600
+    it('logs during page navigation', { browser: '!webkit' }, () => {
       let expected = false
 
       cy
@@ -2345,7 +2356,8 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    it('logs during form submission and yields stale element', () => {
+    // FIXME: fix flaky test (webkit): https://github.com/cypress-io/cypress/issues/24600
+    it('logs during form submission and yields stale element', { browser: '!webkit' }, () => {
       let expected = false
 
       const names = cy.queue.names()
@@ -2389,24 +2401,11 @@ describe('src/cy/commands/navigation', () => {
       cy
       .visit('/fixtures/generic.html')
       .then((win) => {
-        // We do not wait if the experimentalSessionAndOrigin feature is enabled
-        if (Cypress.config('experimentalSessionAndOrigin')) {
-          const onLoad = cy.spy()
-
-          cy.on('window:load', onLoad)
-
+        cy.on('window:load', () => {
           cy.on('command:queue:end', () => {
-            expect(onLoad).not.have.been.called
             done()
           })
-        } else {
-          // We do wait if the experimentalSessionAndOrigin feature is not enabled
-          cy.on('window:load', () => {
-            cy.on('command:queue:end', () => {
-              done()
-            })
-          })
-        }
+        })
 
         cy.on('command:queue:before:end', () => {
           // force us to become unstable immediately
@@ -2595,109 +2594,111 @@ describe('src/cy/commands/navigation', () => {
         })
       })
 
-      describe('filters page load events when going back with window navigation when testIsolation=legacy', { testIsolation: 'legacy' }, () => {
+      if (!Cypress.config('experimentalSessionAndOrigin')) {
+        describe('filters page load events when going back with window navigation when experimentalSessionAndOrigin=false', () => {
         // https://github.com/cypress-io/cypress/issues/19230
-        it('when going back with window navigation', () => {
-          const emit = cy.spy(Cypress, 'emit').log(false).withArgs('navigation:changed')
+          it('when going back with window navigation', () => {
+            const emit = cy.spy(Cypress, 'emit').log(false).withArgs('navigation:changed')
 
-          cy
-          .visit('/fixtures/generic.html')
-          .get('#hashchange').click()
-          .window().then((win) => {
-            return new Promise((resolve) => {
-              cy.once('navigation:changed', resolve)
-
-              win.history.back()
-            }).then(() => {
+            cy
+            .visit('/fixtures/generic.html')
+            .get('#hashchange').click()
+            .window().then((win) => {
               return new Promise((resolve) => {
                 cy.once('navigation:changed', resolve)
 
-                win.history.forward()
+                win.history.back()
+              }).then(() => {
+                return new Promise((resolve) => {
+                  cy.once('navigation:changed', resolve)
+
+                  win.history.forward()
+                })
               })
             })
-          })
 
-          cy.get('#dimensions').click()
-          .window().then((win) => {
-            return new Promise((resolve) => {
-              cy.on('navigation:changed', (event) => {
-                if (event.includes('(load)')) {
-                  resolve()
-                }
-              })
-
-              win.history.back()
-            })
-            .then(() => {
+            cy.get('#dimensions').click()
+            .window().then((win) => {
               return new Promise((resolve) => {
-                cy.on('navigation:changed', resolve)
+                cy.on('navigation:changed', (event) => {
+                  if (event.includes('(load)')) {
+                    resolve()
+                  }
+                })
+
                 win.history.back()
               })
-            })
-            .then(() => {
-              expect(emit.getCall(0)).to.be.calledWith(
-                'navigation:changed',
-                'page navigation event (load)',
-              )
+              .then(() => {
+                return new Promise((resolve) => {
+                  cy.on('navigation:changed', resolve)
+                  win.history.back()
+                })
+              })
+              .then(() => {
+                expect(emit.getCall(0)).to.be.calledWith(
+                  'navigation:changed',
+                  'page navigation event (load)',
+                )
 
-              expect(emit.getCall(1)).to.be.calledWith(
-                'navigation:changed',
-                'page navigation event (before:load)',
-              )
+                expect(emit.getCall(1)).to.be.calledWith(
+                  'navigation:changed',
+                  'page navigation event (before:load)',
+                )
 
-              expect(emit.getCall(2)).to.be.calledWith(
-                'navigation:changed',
-                'page navigation event (load)',
-              )
+                expect(emit.getCall(2)).to.be.calledWith(
+                  'navigation:changed',
+                  'page navigation event (load)',
+                )
 
-              expect(emit.getCall(3)).to.be.calledWithMatch(
-                'navigation:changed',
-                'hashchange',
-              )
+                expect(emit.getCall(3)).to.be.calledWithMatch(
+                  'navigation:changed',
+                  'hashchange',
+                )
 
-              expect(emit.getCall(4)).to.be.calledWithMatch(
-                'navigation:changed',
-                'hashchange',
-              )
+                expect(emit.getCall(4)).to.be.calledWithMatch(
+                  'navigation:changed',
+                  'hashchange',
+                )
 
-              expect(emit.getCall(5)).to.be.calledWithMatch(
-                'navigation:changed',
-                'hashchange',
-              )
+                expect(emit.getCall(5)).to.be.calledWithMatch(
+                  'navigation:changed',
+                  'hashchange',
+                )
 
-              expect(emit.getCall(6)).to.be.calledWith(
-                'navigation:changed',
-                'page navigation event (before:load)',
-              )
+                expect(emit.getCall(6)).to.be.calledWith(
+                  'navigation:changed',
+                  'page navigation event (before:load)',
+                )
 
-              expect(emit.getCall(7)).to.be.calledWith(
-                'navigation:changed',
-                'page navigation event (load)',
-              )
+                expect(emit.getCall(7)).to.be.calledWith(
+                  'navigation:changed',
+                  'page navigation event (load)',
+                )
 
-              expect(emit.getCall(8)).to.be.calledWith(
-                'navigation:changed',
-                'page navigation event (before:load)',
-              )
+                expect(emit.getCall(8)).to.be.calledWith(
+                  'navigation:changed',
+                  'page navigation event (before:load)',
+                )
 
-              expect(emit.getCall(9)).to.be.calledWith(
-                'navigation:changed',
-                'page navigation event (load)',
-              )
+                expect(emit.getCall(9)).to.be.calledWith(
+                  'navigation:changed',
+                  'page navigation event (load)',
+                )
 
-              expect(emit.getCall(10)).to.be.calledWithMatch(
-                'navigation:changed',
-                'hashchange',
-              )
+                expect(emit.getCall(10)).to.be.calledWithMatch(
+                  'navigation:changed',
+                  'hashchange',
+                )
 
-              expect(emit.callCount).to.eq(11)
+                expect(emit.callCount).to.eq(11)
+              })
             })
           })
         })
-      })
+      }
 
       if (Cypress.config('experimentalSessionAndOrigin')) {
-        describe('filters page load events when going back with window navigation when testIsolation=strict', () => {
+        describe('filters page load events when going back with window navigation when experimentalSessionAndOrigin=true', () => {
           // https://github.com/cypress-io/cypress/issues/19230
           it('when going back with window navigation', () => {
             const emit = cy.spy(Cypress, 'emit').log(false).withArgs('navigation:changed')
@@ -2858,18 +2859,29 @@ describe('src/cy/commands/navigation', () => {
     })
 
     describe('history.pushState', () => {
-      it('emits url:changed event', () => {
-        const emit = cy.spy(Cypress, 'emit').log(false)
+      it('emits url:changed event', (done) => {
+        let times = 1
+
+        const listener = (url) => {
+          if (times === 1) {
+            expect(url).to.eq('http://localhost:3500/fixtures/generic.html')
+          }
+
+          if (times === 2) {
+            expect(url).to.eq('http://localhost:3500/fixtures/pushState.html')
+            Cypress.removeListener('url:changed', listener)
+            done()
+          }
+
+          times++
+        }
+
+        Cypress.on('url:changed', listener)
 
         cy
         .visit('/fixtures/generic.html')
         .window().then((win) => {
           win.history.pushState({ foo: 'bar' }, null, 'pushState.html')
-
-          expect(emit).to.be.calledWith(
-            'url:changed',
-            'http://localhost:3500/fixtures/pushState.html',
-          )
         })
       })
 
@@ -2899,18 +2911,29 @@ describe('src/cy/commands/navigation', () => {
     })
 
     describe('history.replaceState', () => {
-      it('emits url:changed event', () => {
-        const emit = cy.spy(Cypress, 'emit').log(false)
+      it('emits url:changed event', (done) => {
+        let times = 1
+
+        const listener = (url) => {
+          if (times === 1) {
+            expect(url).to.eq('http://localhost:3500/fixtures/generic.html')
+          }
+
+          if (times === 2) {
+            expect(url).to.eq('http://localhost:3500/fixtures/replaceState.html')
+            Cypress.removeListener('url:changed', listener)
+            done()
+          }
+
+          times++
+        }
+
+        Cypress.on('url:changed', listener)
 
         cy
         .visit('/fixtures/generic.html')
         .window().then((win) => {
           win.history.replaceState({ foo: 'bar' }, null, 'replaceState.html')
-
-          expect(emit).to.be.calledWith(
-            'url:changed',
-            'http://localhost:3500/fixtures/replaceState.html',
-          )
         })
       })
 
@@ -2954,7 +2977,8 @@ describe('src/cy/commands/navigation', () => {
       return null
     })
 
-    it('logs \'form sub\'', () => {
+    // FIXME: fix flaky test (webkit): https://github.com/cypress-io/cypress/issues/24600
+    it('logs \'form sub\'', { browser: '!webkit' }, () => {
       let event = null
 
       cy

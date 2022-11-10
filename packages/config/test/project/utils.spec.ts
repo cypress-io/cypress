@@ -988,16 +988,6 @@ describe('config/src/project/utils', () => {
       expect(warning).to.be.calledWith('EXPERIMENTAL_RUN_EVENTS_REMOVED')
     })
 
-    it('warns if experimentalStudio is passed', async function () {
-      const warning = sinon.spy(errors, 'warning')
-
-      await this.defaults('experimentalStudio', true, {
-        experimentalStudio: true,
-      })
-
-      expect(warning).to.be.calledWith('EXPERIMENTAL_STUDIO_REMOVED')
-    })
-
     // @see https://github.com/cypress-io/cypress/pull/9185
     it('warns if experimentalNetworkStubbing is passed', async function () {
       const warning = sinon.spy(errors, 'warning')
@@ -1052,7 +1042,9 @@ describe('config/src/project/utils', () => {
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
             experimentalSessionAndOrigin: { value: false, from: 'default' },
             experimentalSingleTabRunMode: { value: false, from: 'default' },
+            experimentalStudio: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
+            experimentalWebKitSupport: { value: false, from: 'default' },
             fileServerFolder: { value: '', from: 'default' },
             fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
             hosts: { value: null, from: 'default' },
@@ -1082,7 +1074,7 @@ describe('config/src/project/utils', () => {
             supportFile: { value: false, from: 'config' },
             supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
-            testIsolation: { value: 'legacy', from: 'default' },
+            testIsolation: { value: null, from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
             userAgent: { value: null, from: 'default' },
             video: { value: true, from: 'default' },
@@ -1144,7 +1136,9 @@ describe('config/src/project/utils', () => {
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
             experimentalSessionAndOrigin: { value: false, from: 'default' },
             experimentalSingleTabRunMode: { value: false, from: 'default' },
+            experimentalStudio: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
+            experimentalWebKitSupport: { value: false, from: 'default' },
             env: {
               foo: {
                 value: 'foo',
@@ -1196,7 +1190,7 @@ describe('config/src/project/utils', () => {
             supportFile: { value: false, from: 'config' },
             supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
-            testIsolation: { value: 'legacy', from: 'default' },
+            testIsolation: { value: null, from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
             userAgent: { value: null, from: 'default' },
             video: { value: true, from: 'default' },
@@ -1212,7 +1206,7 @@ describe('config/src/project/utils', () => {
         })
       })
 
-      it('sets testIsolation=strict by default when experimentalSessionAndOrigin=true and e2e testing', () => {
+      it('sets testIsolation=on by default when experimentalSessionAndOrigin=true and e2e testing', () => {
         sinon.stub(utils, 'getProcessEnvVars').returns({})
 
         const obj = {
@@ -1233,7 +1227,7 @@ describe('config/src/project/utils', () => {
           expect(cfg.resolved).to.have.property('experimentalSessionAndOrigin')
           expect(cfg.resolved.experimentalSessionAndOrigin).to.deep.eq({ value: true, from: 'config' })
           expect(cfg.resolved).to.have.property('testIsolation')
-          expect(cfg.resolved.testIsolation).to.deep.eq({ value: 'strict', from: 'default' })
+          expect(cfg.resolved.testIsolation).to.deep.eq({ value: 'on', from: 'default' })
         })
       })
 
@@ -1245,7 +1239,7 @@ describe('config/src/project/utils', () => {
           supportFile: false,
           baseUrl: 'http://localhost:8080',
           experimentalSessionAndOrigin: true,
-          testIsolation: 'legacy',
+          testIsolation: 'on',
         }
 
         const options = {
@@ -1259,7 +1253,7 @@ describe('config/src/project/utils', () => {
           expect(cfg.resolved).to.have.property('experimentalSessionAndOrigin')
           expect(cfg.resolved.experimentalSessionAndOrigin).to.deep.eq({ value: true, from: 'config' })
           expect(cfg.resolved).to.have.property('testIsolation')
-          expect(cfg.resolved.testIsolation).to.deep.eq({ value: 'legacy', from: 'config' })
+          expect(cfg.resolved.testIsolation).to.deep.eq({ value: 'on', from: 'config' })
         })
       })
     })

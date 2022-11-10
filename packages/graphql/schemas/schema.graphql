@@ -23,7 +23,7 @@ enum AuthStateNameEnum {
 """Container representing a browser"""
 type Browser implements Node {
   channel: String!
-  disabled: Boolean!
+  disabled: Boolean
   displayName: String!
   family: BrowserFamily!
 
@@ -555,6 +555,28 @@ enum CodeLanguageEnum {
   ts
 }
 
+"""used to distinguish one group of users from another"""
+type Cohort {
+  """value used to indicate the cohort (e.g. "A" or "B")"""
+  cohort: String!
+
+  """name used to identify the cohort topic (e.g. "LoginBanner" ) """
+  name: String!
+}
+
+input CohortInput {
+  """Array of cohort options to choose from.  Ex: A or B """
+  cohorts: [String!]!
+
+  """Name of the cohort"""
+  name: String!
+
+  """
+  Optional array of integer weights to use for determining cohort. Defaults to even weighting
+  """
+  weights: [Int!]
+}
+
 """
 The currently opened Cypress project, represented by a cypress.config.{js,ts,mjs,cjs} file
 """
@@ -607,6 +629,11 @@ type CurrentProject implements Node & ProjectLike {
   """File extension to use based on if the project has typescript or not"""
   fileExtensionToUse: FileExtensionEnum
 
+  """
+  Whether the project has any specs found that do not match an example spec
+  """
+  hasNonExampleSpec: Boolean
+
   """Whether the project has a valid config file"""
   hasValidConfigFile: Boolean
 
@@ -641,7 +668,7 @@ type CurrentProject implements Node & ProjectLike {
   """Cached preferences for this project"""
   preferences: ProjectPreferences
 
-  """Used to associate project with Cypress dashboard"""
+  """Used to associate project with Cypress Dashboard"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""
@@ -698,8 +725,10 @@ enum ErrorTypeEnum {
   AUTOMATION_SERVER_DISCONNECTED
   BAD_POLICY_WARNING
   BAD_POLICY_WARNING_TOOLTIP
+  BROWSER_CRASHED
   BROWSER_NOT_FOUND_BY_NAME
   BROWSER_NOT_FOUND_BY_PATH
+  BROWSER_UNSUPPORTED_LAUNCH_OPTION
   BUNDLE_ERROR
   CANNOT_CONNECT_BASE_URL
   CANNOT_CONNECT_BASE_URL_RETRYING
@@ -765,6 +794,7 @@ enum ErrorTypeEnum {
   EXPERIMENTAL_SESSION_SUPPORT_REMOVED
   EXPERIMENTAL_SHADOW_DOM_REMOVED
   EXPERIMENTAL_SINGLE_TAB_RUN_MODE
+  EXPERIMENTAL_STUDIO_E2E_ONLY
   EXPERIMENTAL_STUDIO_REMOVED
   EXTENSION_NOT_LOADED
   FIREFOX_COULD_NOT_CONNECT
@@ -986,7 +1016,7 @@ type GlobalProject implements Node & ProjectLike {
   """Relay style Node ID field for the GlobalProject field"""
   id: ID!
 
-  """Used to associate project with Cypress dashboard"""
+  """Used to associate project with Cypress Dashboard"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""
@@ -1010,11 +1040,13 @@ type LocalSettingsPreferences {
   autoScrollingEnabled: Boolean
   isSideNavigationOpen: Boolean
   isSpecsListOpen: Boolean
+  majorVersionWelcomeDismissed: JSON
   preferredEditorBinary: String
   proxyBypass: String
   proxyServer: String
   reporterWidth: Int
   specListWidth: Int
+  wasBrowserSetInCLI: Boolean
 }
 
 type ManualMigration implements Node {
@@ -1091,9 +1123,6 @@ type Migration {
 
   """Support files needing automated rename"""
   supportFiles: MigrationFile
-
-  """Markup for the migration landing page video embed"""
-  videoEmbedHtml: String
 }
 
 type MigrationFile {
@@ -1188,7 +1217,7 @@ type Mutation {
   closeBrowser: Boolean
 
   """Create a project in the dashboard and return its object"""
-  cloudProjectCreate(ciProviders: [String!], name: String!, orgId: ID!, public: Boolean!): CloudProject
+  cloudProjectCreate(campaign: String, ciProviders: [String!], cohort: String, medium: String, name: String!, orgId: ID!, public: Boolean!, source: String): CloudProject
 
   """Request access to an organization from a projectId"""
   cloudProjectRequestAccess(projectSlug: String!): CloudProjectResult
@@ -1196,6 +1225,11 @@ type Mutation {
 
   """add the passed text to the local clipboard"""
   copyTextToClipboard(text: String!): Boolean
+
+  """
+  Determine the cohort based on the given configuration.  This will either return the cached cohort for a given name or choose a new one and store it.
+  """
+  determineCohort(cohortConfig: CohortInput!): Cohort
 
   """
   Development only: Triggers or dismisses a prompted refresh by touching the file watched by our development scripts
@@ -1233,7 +1267,7 @@ type Mutation {
   ): [RemoteFetchable]!
 
   """Auth with Cypress Dashboard"""
-  login(utmMedium: String!, utmSource: String!): Query
+  login(utmContent: String, utmMedium: String!, utmSource: String!): Query
 
   """Log out of Cypress Dashboard"""
   logout: Query
@@ -1289,12 +1323,17 @@ type Mutation {
   reconfigureProject: Boolean!
 
   """
+  Dispatch an event to the dashboard to be recorded. Events are completely anonymous and are only used to identify aggregate usage patterns across all Cypress users.
+  """
+  recordEvent(campaign: String!, cohort: String, medium: String!, messageId: String!): Boolean
+
+  """
   Signal that we are explicitly refetching remote data and should not use the server cache
   """
   refetchRemote: Query
 
-  """Clears the cloudViewer cache to refresh the organizations"""
-  refreshOrganizations: Query
+  """Clears the cloudViewer cache to refresh the organizations and projects"""
+  refreshCloudViewer: Query
 
   """Remove project from projects array and cache"""
   removeProject(path: String!): Query
@@ -1402,7 +1441,7 @@ interface ProjectLike {
     name: String!
   ): RemoteFetchableCloudProjectResult
 
-  """Used to associate project with Cypress dashboard"""
+  """Used to associate project with Cypress Dashboard"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""
@@ -1487,6 +1526,12 @@ type Query {
 
   """A user within the Cypress Cloud"""
   cloudViewer: CloudUser
+
+  """Return the cohort for the given name"""
+  cohort(
+    """the name of the cohort to find"""
+    name: String!
+  ): Cohort
 
   """The currently opened project"""
   currentProject: CurrentProject

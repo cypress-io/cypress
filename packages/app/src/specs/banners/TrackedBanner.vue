@@ -1,8 +1,7 @@
 <template>
   <Alert
+    v-model="isAlertDisplayed"
     v-bind="$attrs"
-    :model-value="modelValue"
-    @update:model-value="handleBannerDismissed"
   >
     <slot />
   </Alert>
@@ -10,19 +9,23 @@
 
 <script setup lang="ts">
 import Alert from '@packages/frontend-shared/src/components/Alert.vue'
-import { watchEffect } from 'vue'
+import { onMounted, ref, watchEffect, watch } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
-import { TrackedBanner_ProjectStateDocument, TrackedBanner_SetProjectStateDocument } from '../../generated/graphql'
+import { TrackedBanner_ProjectStateDocument, TrackedBanner_RecordBannerSeenDocument, TrackedBanner_SetProjectStateDocument } from '../../generated/graphql'
 import { set } from 'lodash'
+import { nanoid } from 'nanoid'
+
+type EventData = {
+  campaign: string
+  medium: string
+  cohort?: string
+}
 
 type AlertComponentProps = InstanceType<typeof Alert>['$props']
-type AlertComponentEmits = InstanceType<typeof Alert>['$emit']
 interface TrackedBannerComponentProps extends AlertComponentProps {
   bannerId: string
-  modelValue: boolean
-}
-interface TrackedBannerComponentEmits extends AlertComponentEmits {
-  (e: 'update:modelValue'): void
+  hasBannerBeenShown: boolean
+  eventData: EventData
 }
 
 gql`
@@ -39,37 +42,60 @@ mutation TrackedBanner_SetProjectState($value: String!) {
   setPreferences(type: project, value: $value) {
     ...TestingPreferences
     ...SpecRunner_Preferences
+    currentProject {
+      id
+      savedState
+    }
   }
+}
+`
+
+gql`
+mutation TrackedBanner_recordBannerSeen($campaign: String!, $messageId: String!, $medium: String!, $cohort: String) {
+  recordEvent(campaign: $campaign, messageId: $messageId, medium: $medium, cohort: $cohort)
 }
 `
 
 const props = withDefaults(defineProps<TrackedBannerComponentProps>(), {})
 
-const emit = defineEmits<TrackedBannerComponentEmits>()
-
 const stateQuery = useQuery({ query: TrackedBanner_ProjectStateDocument })
 const setStateMutation = useMutation(TrackedBanner_SetProjectStateDocument)
+const reportSeenMutation = useMutation(TrackedBanner_RecordBannerSeenDocument)
+const bannerInstanceId = ref(nanoid())
+const isAlertDisplayed = ref(true)
 
 watchEffect(() => {
-  if (props.modelValue) {
-    updateBannerState('lastShown')
+  if (!props.hasBannerBeenShown && props.eventData) {
+    // We only want to record the banner being shown once per user, so only record if this is the *first* time the banner has been shown
+    recordBannerShown(props.eventData)
   }
 })
 
-function handleBannerDismissed (visible: boolean) {
-  if (!visible) {
+watch(() => isAlertDisplayed.value, (newVal) => {
+  if (!newVal) {
     updateBannerState('dismissed')
   }
+})
 
-  emit('update:modelValue', visible)
-}
+onMounted(() => {
+  updateBannerState('lastShown')
+})
 
 function updateBannerState (field: 'lastShown' | 'dismissed') {
-  const savedState = stateQuery.data.value?.currentProject?.savedState ?? {}
+  const savedBannerState = stateQuery.data.value?.currentProject?.savedState?.banners ?? {}
 
-  set(savedState, ['banners', props.bannerId, field], Date.now())
+  set(savedBannerState, [props.bannerId, field], Date.now())
 
-  setStateMutation.executeMutation({ value: JSON.stringify(savedState) })
+  setStateMutation.executeMutation({ value: JSON.stringify({ banners: savedBannerState }) })
+}
+
+function recordBannerShown ({ campaign, medium, cohort }: EventData): void {
+  reportSeenMutation.executeMutation({
+    campaign,
+    messageId: bannerInstanceId.value,
+    medium,
+    cohort: cohort || null,
+  })
 }
 
 </script>

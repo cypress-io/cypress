@@ -646,6 +646,11 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    BROWSER_CRASHED: () => {
+      return {
+        default: ['Chrome', 'code', 'signal'],
+      }
+    },
     AUTOMATION_SERVER_DISCONNECTED: () => {
       return {
         default: [],
@@ -1198,6 +1203,18 @@ describe('visual error templates', () => {
     EXPERIMENTAL_SINGLE_TAB_RUN_MODE: () => {
       return {
         default: [],
+      }
+    },
+
+    EXPERIMENTAL_STUDIO_E2E_ONLY: () => {
+      return {
+        default: [],
+      }
+    },
+
+    BROWSER_UNSUPPORTED_LAUNCH_OPTION: () => {
+      return {
+        default: ['electron', ['env']],
       }
     },
   })

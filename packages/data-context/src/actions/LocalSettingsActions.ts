@@ -1,5 +1,6 @@
 import { AllowedState, defaultPreferences, Editor } from '@packages/types'
 import pDefer from 'p-defer'
+import _ from 'lodash'
 
 import type { DataContext } from '..'
 
@@ -13,21 +14,25 @@ export interface LocalSettingsApiShape {
 export class LocalSettingsActions {
   constructor (private ctx: DataContext) {}
 
-  setPreferences (stringifiedJson: string, type: 'global' | 'project') {
+  async setPreferences (stringifiedJson: string, type: 'global' | 'project') {
     const toJson = JSON.parse(stringifiedJson) as AllowedState
 
-    // update local data
-    for (const [key, value] of Object.entries(toJson)) {
-      this.ctx.coreData.localSettings.preferences[key as keyof AllowedState] = value as any
+    if (type === 'global') {
+      // update local data on server
+      _.merge(this.ctx.coreData.localSettings.preferences, toJson)
+
+      // persist to global appData - projects/__global__/state.json
+      const currentGlobalPreferences = await this.ctx._apis.localSettingsApi.getPreferences()
+      const combinedResult = _.merge(currentGlobalPreferences, toJson)
+
+      return this.ctx._apis.localSettingsApi.setPreferences(combinedResult)
     }
 
-    if (type === 'global') {
-      // persist to global appData - projects/__global__/state.json
-      return this.ctx._apis.localSettingsApi.setPreferences(toJson)
-    }
+    const currentLocalPreferences = this.ctx._apis.projectApi.getCurrentProjectSavedState()
+    const combinedResult = _.merge(currentLocalPreferences, toJson)
 
     // persist to project appData - for example projects/launchpad/state.json
-    return this.ctx._apis.projectApi.setProjectPreferences(toJson)
+    return this.ctx._apis.projectApi.setProjectPreferences(combinedResult)
   }
 
   async refreshLocalSettings () {

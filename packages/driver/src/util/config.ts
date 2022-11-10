@@ -77,7 +77,7 @@ export const getMochaOverrideLevel = (state): MochaOverrideLevel | undefined => 
   const test = state('test')
 
   if (!state('duringUserTestExecution') && test && !Object.keys(test?._fired || {}).length) {
-    return test._testConfig.applied // either suite or test
+    return test._testConfig.applied
   }
 
   return undefined
@@ -87,15 +87,17 @@ export const getMochaOverrideLevel = (state): MochaOverrideLevel | undefined => 
 // be override and that the provided override values are the correct type.
 //
 // The run-time override levels (listed in order applied):
-//   fileLoad -  config override via Cypress.config() when either loading the supportFile or specFile in the
+//   fileLoad  -  config override via Cypress.config() when either loading the supportFile or specFile in the
 //                 browser (this is before mocha as process the spec
-//   suite    - config override via describe('', {...}, () => {})
-//   test     - config override via it('', {...}, () => {})
-//   event    - config override via Cypress.config() in test:before:runner or test:before:runner:async event
-//   runtime  - config override via Cypress.config() when the test callback is executed
+//   restoring - restore global (suite-level) configuration before applying test-specific overrides
+//   suite     - config override via describe('', {...}, () => {})
+//   test      - config override via it('', {...}, () => {})
+//   event     - config override via Cypress.config() in test:before:runner or test:before:runner:async event
+//   runtime   - config override via Cypress.config() when the test callback is executed
 export const validateConfig = (state: State, config: Record<string, any>, skipConfigOverrideValidation: boolean = false) => {
-  if (!skipConfigOverrideValidation) {
-    const mochaOverrideLevel = getMochaOverrideLevel(state)
+  const mochaOverrideLevel = getMochaOverrideLevel(state)
+
+  if (!skipConfigOverrideValidation && mochaOverrideLevel !== 'restoring') {
     const isSuiteOverride = mochaOverrideLevel === 'suite'
 
     validateOverridableAtRunTime(config, isSuiteOverride, (validationResult) => {
@@ -111,6 +113,12 @@ export const validateConfig = (state: State, config: Record<string, any>, skipCo
     })
   }
 
+  config = {
+    // TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
+    experimentalSessionAndOrigin: Cypress.originalConfig.experimentalSessionAndOrigin,
+    ...config,
+  }
+
   validateConfigValues(config, (errResult: ErrResult | string) => {
     const stringify = (str) => format(JSON.stringify(str))
 
@@ -124,5 +132,5 @@ export const validateConfig = (state: State, config: Record<string, any>, skipCo
       : `Expected ${format(errResult.key)} to be ${errResult.type}.\n\nInstead the value was: ${stringify(errResult.value)}`
 
     throw new (state('specWindow').Error)(errMsg)
-  })
+  }, Cypress.testingType)
 }

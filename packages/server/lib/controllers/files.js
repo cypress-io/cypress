@@ -5,6 +5,7 @@ const cwd = require('../cwd')
 const debug = require('debug')('cypress:server:controllers')
 const { escapeFilenameInUrl } = require('../util/escape_filename')
 const { getCtx } = require('@packages/data-context')
+const { cors } = require('@packages/network')
 
 module.exports = {
 
@@ -38,13 +39,14 @@ module.exports = {
     })
   },
 
-  handleCrossOriginIframe (req, res) {
+  handleCrossOriginIframe (req, res, namespace) {
     const iframePath = cwd('lib', 'html', 'spec-bridge-iframe.html')
-    const domain = req.hostname
+    const domain = cors.getSuperDomain(req.proxiedUrl)
 
     const iframeOptions = {
       domain,
       title: `Cypress for ${domain}`,
+      namespace,
     }
 
     debug('cross origin iframe with options %o', iframeOptions)

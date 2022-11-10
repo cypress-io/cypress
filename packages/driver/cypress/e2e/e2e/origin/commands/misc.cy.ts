@@ -1,46 +1,58 @@
 import { findCrossOriginLogs } from '../../../../support/utils'
 
-context('cy.origin misc', () => {
+context('cy.origin misc', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="dom-link"]').click()
   })
 
   it('.end()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#button').end().should('be.null')
     })
   })
 
   it('.exec()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.exec('echo foobar').its('stdout').should('contain', 'foobar')
     })
   })
 
   it('.focused()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#button').click().focused().should('have.id', 'button')
     })
   })
 
   it('.wrap()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.wrap({ foo: 'bar' }).should('deep.equal', { foo: 'bar' })
     })
   })
 
   it('.debug()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#button').debug().should('have.id', 'button')
     })
   })
 
   it('.pause()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    // ensures the 'paused' event makes it to the event-manager in the primary.
+    // if we get cross-origin cy-in-cy test working, we could potentially make
+    // this even more end-to-end: test out the reporter UI and click the
+    // resume buttons instead of sending the resume:all event
+    Cypress.primaryOriginCommunicator.once('paused', ({ nextCommandName, origin }) => {
+      expect(nextCommandName).to.equal('wrap')
+      expect(origin).to.equal('http://www.foobar.com:3500')
+
+      Cypress.primaryOriginCommunicator.toSpecBridge(origin, 'resume:all')
+    })
+
+    cy.origin('http://www.foobar.com:3500', () => {
       const afterPaused = new Promise<void>((resolve) => {
-        cy.once('paused', () => {
-          Cypress.emit('resume:all')
+        // event is sent from the event listener in the primary above,
+        // ensuring that the pause sequence has come full circle
+        cy.once('resume:all', () => {
           resolve()
         })
       })
@@ -54,7 +66,7 @@ context('cy.origin misc', () => {
   })
 
   it('.task()', () => {
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.task('return:arg', 'works').should('eq', 'works')
     })
   })
@@ -71,7 +83,7 @@ context('cy.origin misc', () => {
     })
 
     it('.exec()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.exec('echo foobar')
       })
 
@@ -87,7 +99,7 @@ context('cy.origin misc', () => {
     })
 
     it('.focused()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#button').click().focused()
       })
 
@@ -108,7 +120,7 @@ context('cy.origin misc', () => {
     })
 
     it('.wrap()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const arr = ['foo', 'bar', 'baz']
 
         cy.wrap(arr).spread((foo, bar, baz) => {
@@ -129,7 +141,7 @@ context('cy.origin misc', () => {
     })
 
     it('.debug()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#button').debug()
       })
 
@@ -149,7 +161,7 @@ context('cy.origin misc', () => {
     })
 
     it('.pause()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         const afterPaused = new Promise<void>((resolve) => {
           cy.once('paused', () => {
             Cypress.emit('resume:all')
@@ -178,7 +190,7 @@ context('cy.origin misc', () => {
     })
 
     it('.task()', () => {
-      cy.origin('http://foobar.com:3500', () => {
+      cy.origin('http://www.foobar.com:3500', () => {
         cy.task('return:arg', 'works')
       })
 
@@ -195,9 +207,10 @@ context('cy.origin misc', () => {
 })
 
 it('verifies number of cy commands', () => {
+  // remove custom commands we added for our own testing
+  const customCommands = ['getAll', 'shouldWithTimeout', 'originLoadUtils']
   // @ts-ignore
-  // remove 'getAll' and 'shouldWithTimeout' commands since they are custom commands we added for our own testing and are not actual cy commands
-  const actualCommands = Cypress._.reject(Object.keys(cy.commandFns), (command) => command === 'getAll' || command === 'shouldWithTimeout')
+  const actualCommands = Cypress._.reject(Object.keys(cy.commandFns), (command) => customCommands.includes(command))
   const expectedCommands = [
     'check', 'uncheck', 'click', 'dblclick', 'rightclick', 'focus', 'blur', 'hover', 'scrollIntoView', 'scrollTo', 'select',
     'selectFile', 'submit', 'type', 'clear', 'trigger', 'as', 'ng', 'should', 'and', 'clock', 'tick', 'spread', 'each', 'then',

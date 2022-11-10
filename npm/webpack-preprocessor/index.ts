@@ -1,19 +1,29 @@
-import { overrideSourceMaps } from './lib/typescript-overrides'
-
-import * as Promise from 'bluebird'
+import Bluebird from 'bluebird'
+import Debug from 'debug'
+import _ from 'lodash'
 import * as events from 'events'
-import * as _ from 'lodash'
-import * as webpack from 'webpack'
-import { createDeferred } from './deferred'
+import * as path from 'path'
+import webpack from 'webpack'
+import utils from './lib/utils'
+import { crossOriginCallbackStore } from './lib/cross-origin-callback-store'
+import { overrideSourceMaps } from './lib/typescript-overrides'
+import { compileCrossOriginCallbackFiles } from './lib/cross-origin-callback-compile'
 
-const path = require('path')
-const debug = require('debug')('cypress:webpack')
-const debugStats = require('debug')('cypress:webpack:stats')
+const debug = Debug('cypress:webpack')
+const debugStats = Debug('cypress:webpack:stats')
+
+declare global {
+  // this indicates which commands should be acted upon by the
+  // cross-origin-callback-loader. its absence means the loader
+  // should not be utilized at all
+  // eslint-disable-next-line no-var
+  var __cypressCallbackReplacementCommands: string[] | undefined
+}
 
 type FilePath = string
 interface BundleObject {
-  promise: Promise<FilePath>
-  deferreds: Array<{ resolve: (filePath: string) => void, reject: (error: Error) => void, promise: Promise<string> }>
+  promise: Bluebird<FilePath>
+  deferreds: Array<{ resolve: (filePath: string) => void, reject: (error: Error) => void, promise: Bluebird<string> }>
   initial: boolean
 }
 
@@ -114,7 +124,7 @@ interface FileEvent extends events.EventEmitter {
  * Cypress asks file preprocessor to bundle the given file
  * and return the full path to produced bundle.
  */
-type FilePreprocessor = (file: FileEvent) => Promise<FilePath>
+type FilePreprocessor = (file: FileEvent) => Bluebird<FilePath>
 
 type WebpackPreprocessorFn = (options: PreprocessorOptions) => FilePreprocessor
 
@@ -152,6 +162,8 @@ interface WebpackPreprocessor extends WebpackPreprocessorFn {
 // @ts-ignore
 const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): FilePreprocessor => {
   debug('user options: %o', options)
+
+  let crossOriginCallbackLoaderAdded = false
 
   // we return function that accepts the arguments provided by
   // the event 'file:preprocessor'
@@ -202,6 +214,8 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
       // we need to set entry and output
       entry,
       output: {
+        // disable automatic publicPath
+        publicPath: '',
         path: path.dirname(outputPath),
         filename: path.basename(outputPath),
       },
@@ -220,8 +234,30 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
       // override typescript to always generate proper source maps
       overrideSourceMaps(true, options.typescript)
+
+      // To support dynamic imports, we have to disable any code splitting.
+      debug('Limiting number of chunks to 1')
+      opts.plugins = (opts.plugins || []).concat(new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }))
     })
     .value() as any
+
+    const callbackReplacementCommands = global.__cypressCallbackReplacementCommands
+
+    if (!crossOriginCallbackLoaderAdded && !!callbackReplacementCommands) {
+      // webpack runs loaders last-to-first and we want ours to run last
+      // so that it's working with plain javascript
+      webpackOptions.module.rules.unshift({
+        test: /\.(js|ts|jsx|tsx)$/,
+        use: [{
+          loader: require.resolve('@cypress/webpack-preprocessor/dist/lib/cross-origin-callback-loader.js'),
+          options: {
+            commands: callbackReplacementCommands,
+          },
+        }],
+      })
+
+      crossOriginCallbackLoaderAdded = true
+    }
 
     debug('webpackOptions: %o', webpackOptions)
     debug('watchOptions: %o', watchOptions)
@@ -232,7 +268,7 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
     const compiler = webpack(webpackOptions)
 
-    let firstBundle = createDeferred<string>()
+    let firstBundle = utils.createDeferred<string>()
 
     // cache the bundle promise, so it can be returned if this function
     // is invoked again with the same filePath
@@ -295,29 +331,78 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
         console.error(stats.toString({ colors: true }))
       }
 
-      // resolve with the outputPath so Cypress knows where to serve
-      // the file from
-      // Seems to be a race condition where changing file before next tick
-      // does not cause build to rerun
-      Promise.delay(0).then(() => {
-        if (!bundles[filePath]) {
-          return
-        }
-
+      const resolveAllBundles = () => {
         bundles[filePath].deferreds.forEach((deferred) => {
+          // resolve with the outputPath so Cypress knows where to serve
+          // the file from
           deferred.resolve(outputPath)
         })
 
         bundles[filePath].deferreds.length = 0
+      }
+
+      // the cross-origin-callback-loader extracts any cross-origin callback
+      // functions that require dependencies and stores their sources
+      // in the CrossOriginCallbackStore. it saves the callbacks per source
+      // files, since that's the context it has. here we need to unfurl
+      // what dependencies the input source file has so we can know which
+      // files stored in the CrossOriginCallbackStore to compile
+      const handleCrossOriginCallbackFiles = () => {
+        // get the source file and any of its dependencies
+        const sourceFiles = jsonStats.modules
+        .filter((module) => {
+          // entries have duplicate modules whose ids are numbers
+          return _.isString(module.id)
+        })
+        .map((module) => {
+          // module id is the path relative to the cwd,
+          // e.g. ./cypress/support/e2e.js, but we need it absolute
+          return path.join(process.cwd(), module.id as string)
+        })
+
+        if (!crossOriginCallbackStore.hasFilesFor(sourceFiles)) {
+          debug('no cross-origin callback files')
+
+          return resolveAllBundles()
+        }
+
+        compileCrossOriginCallbackFiles(crossOriginCallbackStore.getFilesFor(sourceFiles), {
+          originalFilePath: filePath,
+          webpackOptions,
+        })
+        .then(() => {
+          debug('resolve all after handling cross-origin callback files')
+          resolveAllBundles()
+        })
+        .catch((err) => {
+          rejectWithErr(err)
+        })
+        .finally(() => {
+          crossOriginCallbackStore.reset(filePath)
+        })
+      }
+
+      // seems to be a race condition where changing file before next tick
+      // does not cause build to rerun
+      Bluebird.delay(0).then(() => {
+        if (!bundles[filePath]) {
+          return
+        }
+
+        if (!callbackReplacementCommands) {
+          return resolveAllBundles()
+        }
+
+        handleCrossOriginCallbackFiles()
       })
     }
 
-    // this event is triggered when watching and a file is saved
     const plugin = { name: 'CypressWebpackPreprocessor' }
 
+    // this event is triggered when watching and a file is saved
     const onCompile = () => {
       debug('compile', filePath)
-      const nextBundle = createDeferred<string>()
+      const nextBundle = utils.createDeferred<string>()
 
       bundles[filePath].promise = nextBundle.promise
       bundles[filePath].deferreds.push(nextBundle)
@@ -368,6 +453,17 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
           bundler.close(cb)
         }
       }
+
+      // clean up temp dir where cross-origin callback files are output
+      const tmpdir = utils.tmpdir(utils.hash(filePath))
+
+      debug('remove temp directory:', tmpdir)
+
+      utils.rmdir(tmpdir).catch((err) => {
+        // not the end of the world if removing the tmpdir fails, but we
+        // don't want it to crash the whole process by going uncaught
+        debug('failed removing temp directory: %s', err.stack)
+      })
     })
 
     // return the promise, which will resolve with the outputPath or reject

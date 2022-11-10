@@ -2,7 +2,7 @@ const { expect, sinon } = require('../../spec_helper')
 
 import {
   CdpAutomation,
-  _cookieMatches,
+  cookieMatches,
   _domainIsWithinSuperdomain,
   CyCookie,
 } from '../../../lib/browsers/cdp_automation'
@@ -47,7 +47,7 @@ context('lib/browsers/cdp_automation', () => {
     })
   })
 
-  context('._cookieMatches', () => {
+  context('.cookieMatches', () => {
     it('matches as expected', () => {
       [
         {
@@ -61,12 +61,14 @@ context('lib/browsers/cdp_automation', () => {
           expected: true,
         },
       ].forEach(({ cookie, filter, expected }) => {
-        expect(_cookieMatches(cookie as CyCookie, filter)).to.eq(expected)
+        expect(cookieMatches(cookie as CyCookie, filter)).to.eq(expected)
       })
     })
   })
 
   context('.CdpAutomation', () => {
+    let cdpAutomation: CdpAutomation
+
     beforeEach(async function () {
       this.sendDebuggerCommand = sinon.stub()
       this.onFn = sinon.stub()
@@ -76,14 +78,35 @@ context('lib/browsers/cdp_automation', () => {
         onRequestEvent: sinon.stub(),
       }
 
-      this.cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, this.automation, false)
+      cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, this.automation, false)
 
       this.sendDebuggerCommand
       .throws(new Error('not stubbed'))
       .withArgs('Browser.getVersion')
       .resolves()
 
-      this.onRequest = this.cdpAutomation.onRequest
+      this.onRequest = cdpAutomation.onRequest
+    })
+
+    describe('.startVideoRecording', function () {
+      // https://github.com/cypress-io/cypress/issues/9265
+      it('respond ACK after receiving new screenshot frame', async function () {
+        const writeVideoFrame = sinon.stub()
+        const frameMeta = { data: Buffer.from('foo'), sessionId: '1' }
+
+        this.onFn.withArgs('Page.screencastFrame').callsFake((e, fn) => {
+          fn(frameMeta)
+        })
+
+        const startScreencast = this.sendDebuggerCommand.withArgs('Page.startScreencast').resolves()
+        const screencastFrameAck = this.sendDebuggerCommand.withArgs('Page.screencastFrameAck').resolves()
+
+        await cdpAutomation.startVideoRecording(writeVideoFrame)
+
+        expect(startScreencast).to.have.been.calledWith('Page.startScreencast')
+        expect(writeVideoFrame).to.have.been.calledWithMatch((arg) => Buffer.isBuffer(arg) && arg.length > 0)
+        expect(screencastFrameAck).to.have.been.calledWith('Page.screencastFrameAck', { sessionId: frameMeta.sessionId })
+      })
     })
 
     describe('.onNetworkRequestWillBeSent', function () {

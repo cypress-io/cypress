@@ -306,40 +306,26 @@ describe('events', () => {
       expect(runner.emit).to.have.been.calledWith('runner:console:log', 'command id')
     })
 
-    it('emits runner:console:error with test id on show:error', () => {
-      const test = { err: { isCommandErr: false } }
+    it('emits runner:console:error with error on show:error', () => {
+      const errorDetails = { err: { stack: 'hi' } }
 
-      runnablesStore.testById.returns(test)
-      events.emit('show:error', test)
+      events.emit('show:error', errorDetails)
       expect(runner.emit).to.have.been.calledWith('runner:console:error', {
-        err: test.err,
-        commandId: undefined,
+        err: errorDetails.err,
+        testId: undefined,
+        logId: undefined,
       })
     })
 
-    it('emits runner:console:error with test id and command id on show:error when it is a command error and there is a matching command', () => {
-      const test = { err: { isCommandErr: true }, commandMatchingErr: () => {
-        return { id: 'matching command id' }
-      } }
+    it('emits runner:console:error with error, test id and command id on show:error ', () => {
+      const test = { err: { isCommandErr: true }, commandId: 'matching command id', testId: 'test' }
 
       runnablesStore.testById.returns(test)
       events.emit('show:error', test)
       expect(runner.emit).to.have.been.calledWith('runner:console:error', {
         err: test.err,
-        commandId: 'matching command id',
-      })
-    })
-
-    it('emits runner:console:error with test id on show:error when it is a command error but there not a matching command', () => {
-      const test = { err: { isCommandErr: true }, commandMatchingErr: () => {
-        return null
-      } }
-
-      runnablesStore.testById.returns(test)
-      events.emit('show:error', test)
-      expect(runner.emit).to.have.been.calledWith('runner:console:error', {
-        err: test.err,
-        commandId: undefined,
+        testId: 'test',
+        logId: 'matching command id',
       })
     })
 

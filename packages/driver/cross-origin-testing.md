@@ -6,13 +6,16 @@ The goal of this document is to give a technical overview of the architecture be
 
 See [Node.js’s URL doc](https://nodejs.org/api/url.html#url-strings-and-url-objects) for a handy breakdown of URL parts
 
-- **domain**: A hostname without the subdomain. (e.g. `example.com`, `example.co.uk`, `localhost`)
+- **domain**: A hostname without the subdomain (for the purposes of this doc). May also be referred to as **superdomain** (e.g. `example.com`, `example.co.uk`, `localhost`)
 - **origin**: The combination of the protocol, hostname, and port of a URL. For the purposes of Cypress, the subdomain is irrelevant. (e.g. `http://example.com:3500`)
 - **top**: The main window/frame of the browser
 - **primary origin**: The origin that top is on
 - **secondary origin**: Any origin that is not the primary origin
 - **primary driver**: The Cypress driver that run in **top** on the primary origin
 - **secondary driver**: Any Cypress driver that run in a **spec bridge**, interacting with a secondary origin
+- **AUT**: **A**pp **U**nder **T**est - the user's app currently being tested
+- **AUT frame**: The iframe used to run the user's app
+- **spec frame**: The iframe used to run the spec file
 
 ## Frame architecture (single origin)
 
@@ -22,8 +25,8 @@ Components:
 
 ```mermaid
 graph TD;
-    top["top frame: domain1.com"]-->specFrame["spec frame: domain1.com"];
-    top-->aut["AUT frame: domain1.com"];
+  top["top frame: domain1.com"]-->specFrame["spec frame: domain1.com"];
+  top-->aut["AUT frame: domain1.com"];
 ```
 
 **top** communicates directly and synchronously with the **spec frame** and the **AUT frame**. The **spec frame** runs the spec, which uses the driver to run commands and interact with the **AUT**.
@@ -38,15 +41,15 @@ Since the **AUT** is no longer on the same origin as **top**, they can no longer
 
 The **spec bridge** is run on `domain2.com` to match the **AUT**. This and being a sibling allows the spec bridge to communicate directly with the **AUT**. The **spec bridge** communicates *asynchronously* with **top** via the [postMessage API](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage).
 
-The **spec bridge** remains in the DOM from the moment it’s created until the browser is refreshed or closed, the same as the the **spec frame** and **AUT**.
+The **spec bridge** remains in the DOM from the moment it’s created until the browser is refreshed or closed, the same as the the **spec frame** and **AUT frame**.
 
 Here’s what the components look like now:
 
 ```mermaid
 graph TD;
-    top["top frame: domain1.com"]-->specFrame["spec frame: domain1.com"];
-    top-->aut["AUT frame: domain2.com"];
-    top-->specBridge["spec bridge: domain2.com"];
+  top["top frame: domain1.com"]-->specFrame["spec frame: domain1.com"];
+  top-->aut["AUT frame: domain2.com"];
+  top-->specBridge["spec bridge: domain2.com"];
 ```
 
 ## cy.origin()
@@ -54,6 +57,8 @@ graph TD;
 Refer to the [public documentation on cy.origin()](https://on.cypress.io/origin) for all details on the user-facing API.
 
 The main responsibilities of **cy.origin()** are to create the **spec bridge** for the specified origin and facilitate communication between the primary driver and the secondary driver in that **spec bridge**.
+
+The callback function the user passes to **cy.origin()** is stringified by the **primary driver**, sent to the origin-matching **secondary driver** via postMessage, then evaluated. Its commands are run by the **secondary driver**, since it can communicate synchronously with the cross-origin **AUT**.
 
 ## Cross-origin communication
 
@@ -73,17 +78,76 @@ Browser automation APIs and the proxy play a small but critical role in facilita
 
 The proxy intercepts http requests from all sources. In order to detect cross-origin navigation of **AUT**, it’s necessary to know that a request came specifically from the **AUT frame** and not **top**, a nested iframe, or elsewhere. To achieve this, we use the browser automation APIs to add a `X-Cypress-Is-AUT-Frame` header to any requests from the AUT.
 
-Allowing the proxy to know if a request is from the **AUT** enables us to do two things when it recognizes that it’s not the **primary origin**:
-
-- Delay the response. This allows us to communicate with the **primary driver** to set up the **spec bridge** and run the user’s callback function via **cy.origin()**. Then the driver notifies the proxy that it can allow the response through. This enables users to listen to the `window:before:load` event in the callback function, since the page will not load until after any such listeners are set up.
-- Inject code into the request that’s tailored to cross-origin testing.
+Allowing the proxy to know if a request is from the **AUT** enables us to recognize that it’s not the **primary origin** and inject code into the request that’s tailored to cross-origin testing.
 
 ### Cross-origin navigation timing
 
-It’s possible for the user’s test to navigate to a different origin in two different ways.
+It’s possible for the user’s test to navigate to a different origin in a couple different ways.
 
-1. An action causes the navigation (click, submit, etc). In this case, delaying the response is necessary for the aforementioned reasons.
-2. The user explicitly navigates via **cy.visit()**. In this case, it’s not necessary to delay the response, since the navigation has not happened yet, and all setup can be done before the navigation occurs.
+#### Action-triggered navigation
+
+An action causes the navigation (click, submit, etc).
+
+If a user wishes to utilize the `window:before:load` or `window:load` events, they must register listeners before the navigation. This means they need to run **cy.origin()** before any navigation-causing actions.
+
+```js
+// the app hasn't navigated to domain2.com at this point, but we need to
+// set up listeners before the navigation happens and the page loads
+cy.origin('http://domain2.com', () => {
+  cy.on('window:before:load', (win) => {
+    // do something before page load
+  })
+  cy.on('window:load', (win) => {
+    // do something after page load
+  })
+})
+
+cy.visit('http://domain1.com')
+cy.get('a[href=http://domain2.com]').click() // <- navigates to domain2.com
+cy.origin('http://domain2.com', () => {
+  // further testing in domain2.com
+})
+```
+
+#### Explicit cy.visit()
+
+The user explicitly navigates via **cy.visit()**.
+
+The visit can exist before the **cy.origin()** call or inside its callback. However, if before **cy.origin()**, it can't use the `onBeforeLoad` or `onLoad` callbacks that **cy.visit()** can accept because its not possible to serialize and send the `window` object to them.
+
+```js
+cy.visit('http://domain1.com')
+cy.visit('http://domain2.com', { // <- cross-origin visit
+  onBeforeLoad (win) {},         // defining either of these here results
+  onLoad (win) {},               // in an error
+})
+```
+
+```js
+cy.visit('http://domain1.com')
+cy.origin('http://domain2.com', () => {
+  cy.visit('http://domain2.com', { // <- cross-origin visit
+    onBeforeLoad (win) {},         // these work just fine when inside
+    onLoad (win) {},               // the cross-origin callback
+  })
+})
+```
+
+Visiting inside the callback also allows setting up `window:before:load` and  `window:load` listeners in the same callback, since it will ensure the listeners are registered before the page loads.
+
+```js
+cy.visit('http://domain1.com')
+cy.origin('http://domain2.com', () => {
+  cy.on('window:before:load', (win) => {
+    // do something before page load
+  })
+  cy.on('window:load', (win) => {
+    // do something after page load
+  })
+
+  cy.visit('http://domain2.com')
+})
+```
 
 ## State syncing
 
@@ -123,7 +187,13 @@ Similar to **defaults()** methods needing to be called again, some events may ne
 
 Having the **AUT** on a different origin than **top** causes issues with cookies being set for the origin in the **AUT**. Cookies that would normally be set when a user's app is run outside of Cypress are not set due to it being rendered in an iframe.
 
-In order to counteract this, we utilize the [proxy](../proxy) to capture cookies from cross-origin responses, store them in our own server-side cookie jar, set them in the browser with automation, and then attach them to cross-origin requests where appropriate. This simulates how cookies behave outside of Cypress.
+In order to counteract this, we utilize the [proxy](../proxy) to capture cookies from cross-origin responses, store them in our own server-side cookie jar, set them in the browser with automation, and then attach them to cross-origin requests where appropriate. This simulates how cookies behave outside of Cypress. We also patch `document.cookie` client-side to simulate how it would behave outside of Cypress.
+
+We patch `XMLHttpRequest` and `fetch` client-side to capture their `withCredentials` and `credentials` values (respectively), since they influence whether or not cookies should be attached to requests.
+
+## Dependencies
+
+Users can utilize `require()` or (dynamic) `import()` to include dependencies. We handle the dependency resolution and bundling with the webpack preprocessor. We add a webpack loader that runs last. If we find a `require()` or `import()` call inside a `cy.origin()` callback, we extract that callback from the output code. We then run that extracted callback through webpack again, so that it gets its own output bundle with all dependencies included. The original callback is replaced with an object that references the output bundle. At runtime, when executing `cy.origin()`, it loads and executes the callback bundle.
 
 ## Unsupported APIs
 
@@ -131,15 +201,15 @@ Certain APIs are currently not supported in the **cy.origin()** callback. Depend
 
 ### cy.origin()
 
-Nesting **cy.origin()** inside the callback is not currently not supported, but support will likely be added in the future. In most use-cases, the desired functionality of nesting it can be achieved calling **cy.origin()** back-to-back at the top level of the test.
+Nesting **cy.origin()** inside the callback is not currently supported, but support will likely be added in the future. In most use-cases, the desired functionality of nesting it can be achieved calling **cy.origin()** back-to-back at the top level of the test.
 
 ### cy.session() / Cypress.session.*
 
-**cy.session()** and related APIs are likely not necessary inside the callback and should be used at the top-level of the test instead of in the **cy.origin()** callback. However, if there are use-cases discovered where it’s necessary, we may implement support for it.
+**cy.session()** and related APIs are likely not necessary inside the callback and should be used at the top-level of the test instead of in the **cy.origin()** callback. However, if there are use-cases discovered where it’s necessary, we may [implement support for it](https://github.com/cypress-io/cypress/issues/20721).
 
 ### cy.intercept()
 
-We will likely add support for **cy.intercept()** within the **cy.origin()** callback in the future.
+Most use-cases for **cy.intercept()** can be accomplished by using it outside of the **cy.origin()** callback. Since there may be use-cases where setting up a response, for example, requires the scope within the **cy.origin()** callback, we will likely [add support for **cy.intercept()** in the future](https://github.com/cypress-io/cypress/issues/20720). 
 
 ### Deprecated commands / methods
 
