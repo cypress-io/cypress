@@ -31,10 +31,9 @@ export default class Session extends Instrument {
   }
 
   update (props: Partial<SessionProps>) {
-    const { sessionInfo } = props
+    const { state, sessionInfo } = props
 
     this.status = sessionInfo?.status || ''
-    this.state = state || ''
     this.tagType = determineTagType(state || '')
   }
 }
