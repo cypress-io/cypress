@@ -15,7 +15,7 @@
     "test-unit": "mocha -r ts-node/register/transpile-only --config ./test/.mocharc.js"
   },
   "dependencies": {
-    "debug": "4.3.3",
+    "debug": "^4.3.4",
     "find-up": "6.3.0",
     "node-html-parser": "5.3.3"
   },

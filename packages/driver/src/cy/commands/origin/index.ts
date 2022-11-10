@@ -38,7 +38,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
       communicator.userInvocationStack = userInvocationStack
 
       // this command runs for as long as the commands in the secondary
-      // origin run, so it can't have its own timeout
+      // origin run, so it can't have its own timeout except in the case where we're creating the spec bridge.
       cy.clearTimeout()
 
       if (!config('experimentalSessionAndOrigin')) {
@@ -47,6 +47,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
 
       let options
       let callbackFn
+      const timeout = Cypress.config('defaultCommandTimeout')
 
       if (fn) {
         callbackFn = fn
@@ -64,7 +65,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
         name: 'origin',
         type: 'parent',
         message: urlOrDomain,
-        timeout: 0,
+        timeout,
         // @ts-ignore TODO: revisit once log-grouping has more implementations
       }, (_log) => {
         log = _log
@@ -84,7 +85,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
       const url = new URL(normalizeOrigin(urlOrDomain)).toString()
       const location = $Location.create(url)
 
-      validator.validateLocation(location, urlOrDomain)
+      validator.validateLocation(location, urlOrDomain, window.location.href)
 
       const origin = location.origin
 
@@ -92,7 +93,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
       cy.state('currentActiveOrigin', origin)
 
       return new Bluebird((resolve, reject, onCancel) => {
-        const cleanup = ({ readyForOriginFailed }: {readyForOriginFailed?: boolean} = {}): void => {
+        const cleanup = (): void => {
           cy.state('currentActiveOrigin', undefined)
 
           communicator.off('queue:finished', onQueueFinished)
@@ -108,8 +109,10 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
           resolve(unserializableSubjectType ? createUnserializableSubjectProxy(unserializableSubjectType) : subject)
         }
 
-        const _reject = (err, cleanupOptions: {readyForOriginFailed?: boolean} = {}) => {
-          cleanup(cleanupOptions)
+        const _reject = (err) => {
+          // Prevent cypress from trying to add the function to the error log
+          err.onFail = () => {}
+          cleanup()
           log?.error(err)
           reject(err)
         }
@@ -141,9 +144,6 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
               wrappedErr.name = err.name
               wrappedErr.stack = $stackUtils.replacedStack(wrappedErr, err.stack)
 
-              // Prevent cypress from trying to add the function to the error log
-              wrappedErr.onFail = () => {}
-
               return _reject(wrappedErr)
             }
 
@@ -168,9 +168,15 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
           })
         }
 
+        // If the spec bridge isn't created in time, it likely failed and we shouldn't hang the test.
+        const timeoutId = setTimeout(() => {
+          _reject($errUtils.errByPath('origin.failed_to_create_spec_bridge'))
+        }, timeout)
+
         // fired once the spec bridge is set up and ready to receive messages
         communicator.once('bridge:ready', async (_data, { origin: specBridgeOrigin }) => {
           if (specBridgeOrigin === origin) {
+            clearTimeout(timeoutId)
             // now that the spec bridge is ready, instantiate Cypress with the current app config and environment variables for initial sync when creating the instance
             communicator.toSpecBridge(origin, 'initialize:cypress', {
               config: preprocessConfig(Cypress.config()),
@@ -229,11 +235,7 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
               // It tries to add a bunch of stuff that's not useful and ends up
               // messing up the stack that we want on the error
               wrappedErr.__stackCleaned__ = true
-
-              // Prevent cypress from trying to add the function to the error log
-              wrappedErr.onFail = () => {}
-
-              _reject(wrappedErr, { readyForOriginFailed: true })
+              _reject(wrappedErr)
             }
           }
         })
