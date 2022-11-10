@@ -68,7 +68,7 @@ const onInvoke = function (Cypress, obj, args) {
   const logProps: Record<string, any> = {
     name: agentName,
     message: obj.message,
-    error: obj.error,
+    state: obj.error ? 'failed' : 'passed',
     type: 'parent',
     end: true,
     snapshot: !agent._noSnapshot,

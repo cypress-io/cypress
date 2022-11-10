@@ -1,7 +1,7 @@
 /// <reference path="../support/e2e.ts" />
 import type { ProjectFixtureDir } from '@tooling/system-tests/lib/fixtureDirs'
 
-const WEBPACK_REACT: ProjectFixtureDir[] = ['next-11', 'next-12', 'next-11-webpack-4', 'next-12.1.6']
+const WEBPACK_REACT: ProjectFixtureDir[] = ['next-12', 'next-12.1.6', 'next-13']
 
 // Add to this list to focus on a particular permutation
 const ONLY_PROJECTS: ProjectFixtureDir[] = []

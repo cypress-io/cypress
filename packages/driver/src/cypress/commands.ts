@@ -84,8 +84,6 @@ export default {
     }
 
     const Commands = {
-      _commands: commands, // for testing
-
       each (fn) {
         // perf loop
         for (let name in commands) {

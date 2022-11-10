@@ -2,6 +2,7 @@ export const shouldHaveTestResults = ({ passCount, failCount, pendingCount }) =>
   passCount = passCount || '--'
   failCount = failCount || '--'
 
+  cy.get('button.restart', { timeout: 30000 }).should('be.visible') // ensure tests are finished running
   cy.findByLabelText('Stats', { timeout: 10000 }).within(() => {
     cy.get('.passed .num', { timeout: 30000 }).should('have.text', `${passCount}`)
     cy.get('.failed .num', { timeout: 30000 }).should('have.text', `${failCount}`)

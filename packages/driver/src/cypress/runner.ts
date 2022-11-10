@@ -1492,7 +1492,7 @@ export default {
           // attach error right now
           // if we have one
           if (err) {
-            const PendingErrorMessages = ['sync skip', 'async skip call', 'async skip; aborting execution']
+            const PendingErrorMessages = ['sync skip', 'sync skip; aborting execution', 'async skip call', 'async skip; aborting execution']
 
             if (_.find(PendingErrorMessages, err.message) !== undefined) {
               err.isPending = true
