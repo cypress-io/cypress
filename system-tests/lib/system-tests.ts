@@ -926,13 +926,6 @@ const systemTests = {
 
       // force file watching for use with --no-exit
       ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
-
-      // opt in to WebKit experimental support if we are running w WebKit
-      ...(specifiedBrowser === 'webkit' ? {
-        CYPRESS_experimentalWebKitSupport: 'true',
-        // prevent snapshots from failing due to "Experiments:  experimentalWebKitSupport=true" difference
-        CYPRESS_INTERNAL_SKIP_EXPERIMENT_LOGS: '1',
-      } : {}),
     })
     .extend(options.processEnv)
     .value()

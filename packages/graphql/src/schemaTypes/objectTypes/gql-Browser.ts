@@ -7,7 +7,9 @@ export const Browser = objectType({
   node: (obj, args, ctx) => ctx.browser.idForBrowser(obj),
   definition (t) {
     t.nonNull.string('channel')
-    t.boolean('disabled')
+    t.nonNull.boolean('disabled', {
+      resolve: () => false,
+    })
 
     t.nonNull.boolean('isSelected', {
       resolve: (source, args, ctx) => ctx.browser.isSelected(source),

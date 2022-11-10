@@ -43,7 +43,8 @@
         "displayName": "Electron",
         "version": "94.0.4606.81",
         "path": "",
-        "majorVersion": 94
+        "majorVersion": 94,
+        "info": "Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses."
       }
     ],
     "from": "default",
@@ -101,11 +102,6 @@
     "value": false,
     "from": "default",
     "field": "experimentalSessionAndOrigin"
-  },
-  {
-    "value": false,
-    "from": "default",
-    "field": "experimentalWebKitSupport"
   },
   {
     "value": "",

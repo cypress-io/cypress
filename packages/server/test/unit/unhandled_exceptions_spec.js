@@ -15,7 +15,6 @@ describe('unhandled_exceptions: infinite loop guard', () => {
         get logException () {
           errCount++
           if (errCount < INFINITE_LOOP_GUARD) {
-            // simulate an unhandled exception in sentry
             throw new SyntaxError('Invalid file')
           }
 
@@ -23,8 +22,6 @@ describe('unhandled_exceptions: infinite loop guard', () => {
         },
       },
     })
-
-    require('../../lib/unhandled_exceptions').handle()
 
     sinon.stub(process, 'exit').callsFake(() => {
       // Should only be hit if we hit the infinite loop

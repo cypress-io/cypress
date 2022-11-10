@@ -228,12 +228,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     isExperimental: true,
     requireRestartOnChange: 'browser',
   }, {
-    name: 'experimentalWebKitSupport',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
-    requireRestartOnChange: 'server',
-  }, {
     name: 'fileServerFolder',
     defaultValue: '',
     validation: validate.isString,

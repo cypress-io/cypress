@@ -1044,7 +1044,6 @@ describe('config/src/project/utils', () => {
             experimentalSingleTabRunMode: { value: false, from: 'default' },
             experimentalStudio: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
-            experimentalWebKitSupport: { value: false, from: 'default' },
             fileServerFolder: { value: '', from: 'default' },
             fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
             hosts: { value: null, from: 'default' },
@@ -1138,7 +1137,6 @@ describe('config/src/project/utils', () => {
             experimentalSingleTabRunMode: { value: false, from: 'default' },
             experimentalStudio: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
-            experimentalWebKitSupport: { value: false, from: 'default' },
             env: {
               foo: {
                 value: 'foo',

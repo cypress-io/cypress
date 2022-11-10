@@ -185,7 +185,7 @@ export function displayRunStarting (options: { browser: Browser, config: Cfg, gr
 
   const experimental = experiments.getExperimentsFromResolved(config.resolved)
   const enabledExperiments = _.pickBy(experimental, _.property('enabled'))
-  const hasExperiments = !process.env.CYPRESS_INTERNAL_SKIP_EXPERIMENT_LOGS && !_.isEmpty(enabledExperiments)
+  const hasExperiments = !_.isEmpty(enabledExperiments)
 
   // if we show Node Version, then increase 1st column width
   // to include wider 'Node Version:'.

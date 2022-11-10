@@ -16,7 +16,7 @@ const app = createApp(App)
 
 const config = getRunnerConfigFromWindow()
 
-const ws = createWebsocket(config)
+const ws = createWebsocket(config.socketIoRoute)
 
 window.ws = ws
 

@@ -17,11 +17,7 @@ const extractSourceMap = ([script, contents]) => {
   const sourceMap = $sourceMapUtils.extractSourceMap(contents)
 
   return $sourceMapUtils.initializeSourceMapConsumer(script, sourceMap)
-  .catch((_err) => {
-    // if WebAssembly is missing, we can't consume source maps, but it shouldn't block Cy
-    // like in WebKit on Windows: https://github.com/microsoft/playwright/issues/2876
-  })
-  .then(() => [script, contents])
+  .return([script, contents])
 }
 
 const evalScripts = (specWindow, scripts: any = []) => {

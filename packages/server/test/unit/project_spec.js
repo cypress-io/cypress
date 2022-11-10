@@ -209,7 +209,7 @@ describe.skip('lib/project-base', () => {
             family: 'some-other-family',
             name: 'some-other-name',
             warning: `\
-Your project has set the configuration option: \`chromeWebSecurity\` to \`false\`.
+Your project has set the configuration option: chromeWebSecurity to false
 
 This option will not have an effect in Some-other-name. Tests that rely on web security being disabled will not run as expected.\
 `,

@@ -36,7 +36,8 @@ macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'webkit-experimental', << pipeline.git.branch >> ]
+    - equal: [ 'correct-dashboard-results', << pipeline.git.branch >> ]
+    - equal: [ 'skip-or-fix-flaky-tests-2', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -45,7 +46,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'webkit-experimental', << pipeline.git.branch >> ]
+    - equal: [ 'skip-or-fix-flaky-tests-2', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -65,7 +66,8 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ linux-arm64, << pipeline.git.branch >> ]
-    - equal: [ 'webkit-experimental', << pipeline.git.branch >> ]
+    - equal: [ 'lmiller/fixing-flake-1', << pipeline.git.branch >> ]
+    - equal: [ 'skip-or-fix-flaky-tests-2', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
           value: << pipeline.git.branch >>
@@ -130,7 +132,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "webkit-experimental" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "correct-dashboard-results" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi

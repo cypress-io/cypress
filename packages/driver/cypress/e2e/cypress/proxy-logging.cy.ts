@@ -321,8 +321,7 @@ describe('Proxy Logging', () => {
         })
       })
 
-      // TODO(webkit): fix forceNetworkError and unskip
-      it('works with forceNetworkError', { browser: '!webkit' }, () => {
+      it('works with forceNetworkError', () => {
         const logs: any[] = []
 
         cy.on('log:added', (log) => {

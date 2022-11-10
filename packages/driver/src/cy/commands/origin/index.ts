@@ -54,10 +54,6 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
 
   Commands.addAll({
     origin<T> (urlOrDomain: string, optionsOrFn: { args: T } | (() => {}), fn?: (args?: T) => {}) {
-      if (Cypress.isBrowser('webkit')) {
-        return $errUtils.throwErrByPath('webkit.origin')
-      }
-
       const userInvocationStack = state('current').get('userInvocationStack')
 
       // store the invocation stack in the case that `cy.origin` errors

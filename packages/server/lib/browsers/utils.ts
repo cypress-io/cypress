@@ -204,10 +204,10 @@ const getWebKitBrowserVersion = async () => {
   }
 }
 
-async function getWebKitBrowser () {
+const getWebKitBrowser = async () => {
   try {
     const modulePath = require.resolve('playwright-webkit', { paths: [process.cwd()] })
-    const mod = await import(modulePath) as typeof import('playwright-webkit')
+    const mod = require(modulePath) as typeof import('playwright-webkit')
     const version = await getWebKitBrowserVersion()
 
     const browser: FoundBrowser = {
@@ -218,7 +218,7 @@ async function getWebKitBrowser () {
       version,
       path: mod.webkit.executablePath(),
       majorVersion: version.split('.')[0],
-      warning: 'WebKit support is currently experimental. Some functions may not work as expected.',
+      warning: 'WebKit support is not currently available in production.',
     }
 
     return browser
@@ -232,12 +232,8 @@ async function getWebKitBrowser () {
 const getBrowsers = async () => {
   debug('getBrowsers')
 
-  const [browsers, wkBrowser] = await Promise.all([
-    launcher.detect(),
-    getWebKitBrowser(),
-  ])
-
-  if (wkBrowser) browsers.push(wkBrowser)
+  const browsers = await launcher.detect()
+  let majorVersion
 
   debug('found browsers %o', { browsers })
 
@@ -247,8 +243,8 @@ const getBrowsers = async () => {
     return browsers
   }
 
+  // @ts-ignore
   const version = process.versions.chrome || ''
-  let majorVersion
 
   if (version) {
     majorVersion = getMajorVersion(version)
@@ -262,9 +258,16 @@ const getBrowsers = async () => {
     version,
     path: '',
     majorVersion,
+    info: 'Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.',
   }
 
   browsers.push(electronBrowser)
+
+  if (process.env.CYPRESS_INTERNAL_ENV !== 'production') {
+    const wkBrowser = await getWebKitBrowser()
+
+    if (wkBrowser) browsers.push(wkBrowser)
+  }
 
   return browsers
 }

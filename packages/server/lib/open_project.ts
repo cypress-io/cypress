@@ -91,9 +91,8 @@ export class OpenProject {
       chromeWebSecurity: cfg.chromeWebSecurity,
       isTextTerminal: !!cfg.isTextTerminal,
       downloadsFolder: cfg.downloadsFolder,
-      experimentalModifyObstructiveThirdPartyCode: cfg.experimentalModifyObstructiveThirdPartyCode,
       experimentalSessionAndOrigin: cfg.experimentalSessionAndOrigin,
-      experimentalWebKitSupport: cfg.experimentalWebKitSupport,
+      experimentalModifyObstructiveThirdPartyCode: cfg.experimentalModifyObstructiveThirdPartyCode,
       ...prevOptions || {},
     }
 
