@@ -132,6 +132,46 @@ describe('runner/cypress sessions.ui.spec', {
     // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
   })
 
+  // https://github.com/cypress-io/cypress/issues/24208
+  it('does not save session when validation fails', () => {
+    loadSpec({
+      projectName: 'session-and-origin-e2e-specs',
+      filePath: 'session/new_session_and_fails_validation_retries.cy.js',
+      failCount: 1,
+    })
+
+    validateSessionsInstrumentPanel(['blank_session'])
+
+    cy.contains('Attempt 1').click()
+    cy.get('.attempt-item').eq(0).within(() => {
+      cy.contains('validation error')
+    })
+
+    cy.get('.attempt-item').eq(1).within(() => {
+      cy.contains('validation error')
+      // when we stored sessions pre-validation, the 2nd attempt would fail
+      // with this error instead of the validation failing again
+      cy.contains('session already exists').should('not.exist')
+    })
+  })
+
+  it('creates, not recreates, session when validation fails then succeeds', () => {
+    loadSpec({
+      projectName: 'session-and-origin-e2e-specs',
+      filePath: 'session/new_session_and_fails_then_succeeds_validation_retries.cy.js',
+      failCount: 1,
+    })
+
+    validateSessionsInstrumentPanel(['blank_session'])
+
+    cy.get('.attempt-item').eq(1).within(() => {
+      cy.contains('Create new session')
+      // when we stored sessions pre-validation, the 2nd attempt would
+      // say "Recreate session"
+      cy.contains('Recreate session').should('not.exist')
+    })
+  })
+
   it('restores session as expected', () => {
     loadSpec({
       projectName: 'session-and-origin-e2e-specs',

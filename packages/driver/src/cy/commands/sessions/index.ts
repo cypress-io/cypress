@@ -148,8 +148,6 @@ export default function (Commands, Cypress, cy) {
           validate: options.validate,
           cacheAcrossSpecs: options.cacheAcrossSpecs,
         })
-
-        sessionsManager.registeredSessions.set(id, true)
       }
 
       function setSessionLogStatus (status: string) {
@@ -203,7 +201,6 @@ export default function (Commands, Cypress, cy) {
 
             _.extend(existingSession, data)
             existingSession.hydrated = true
-            await sessions.saveSessionData(existingSession)
 
             _log.set({ consoleProps: () => getConsoleProps(existingSession) })
             setupLogGroup.set({
@@ -438,7 +435,7 @@ export default function (Commands, Cypress, cy) {
        *   2. validate session
        */
       const createSessionWorkflow = (existingSession, step: 'create' | 'recreate') => {
-        cy.then(async () => {
+        return cy.then(async () => {
           setSessionLogStatus(statusMap.inProgress(step))
 
           await navigateAboutBlank()
@@ -447,10 +444,13 @@ export default function (Commands, Cypress, cy) {
           return createSession(existingSession, step)
         })
         .then(() => validateSession(existingSession, step))
-        .then((isValidSession: boolean) => {
+        .then(async (isValidSession: boolean) => {
           if (!isValidSession) {
             throw new Error('not a valid session :(')
           }
+
+          sessionsManager.registeredSessions.set(existingSession.id, true)
+          await sessions.saveSessionData(existingSession)
 
           setSessionLogStatus(statusMap.complete(step))
         })
@@ -462,8 +462,8 @@ export default function (Commands, Cypress, cy) {
        *   2. validate session
        *   3. if validation fails, catch error and recreate session
        */
-      const restoreSessionWorkflow = (existingSession) => {
-        cy.then(async () => {
+      const restoreSessionWorkflow = (existingSession: SessionData) => {
+        return cy.then(async () => {
           setSessionLogStatus('restoring')
           await navigateAboutBlank()
           await sessions.clearCurrentSessionData()

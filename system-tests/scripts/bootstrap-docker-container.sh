@@ -39,7 +39,7 @@ export npm_config_package_lock=false
 mkdir $npm_config_cache
 chown -R 1000:1000 $npm_config_cache
 
-npx npm@latest install --unsafe-perm --allow-root --force file:$CLI_PATH
+npx npm@8 install --unsafe-perm --allow-root --force file:$CLI_PATH
 
 PATH=$PATH:./node_modules/.bin
 
