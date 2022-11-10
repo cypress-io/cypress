@@ -184,6 +184,10 @@ const getPostMessageLocalStorage = (specWindow, origins): Promise<any[]> => {
 }
 
 function navigateAboutBlank (session: boolean = true) {
+  if (Cypress.config('testIsolation') === 'off') {
+    return
+  }
+
   Cypress.action('cy:url:changed', '')
 
   return Cypress.action('cy:visit:blank', { type: session ? 'session' : 'session-lifecycle' }) as unknown as Promise<void>

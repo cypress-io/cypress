@@ -4,10 +4,26 @@ describe('cy.origin dependencies', { browser: '!webkit' }, () => {
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
   })
 
+  it('works with require()', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
+      const lodash = require('lodash')
+
+      expect(lodash.get({ foo: 'foo' }, 'foo')).to.equal('foo')
+    })
+  })
+
+  it('works with dynamic import()', () => {
+    cy.origin('http://www.foobar.com:3500', async () => {
+      const lodash = await import('lodash')
+
+      expect(lodash.get({ foo: 'foo' }, 'foo')).to.equal('foo')
+    })
+  })
+
   it('works with an arrow function', () => {
     cy.origin('http://www.foobar.com:3500', () => {
-      const lodash = Cypress.require('lodash')
-      const dayjs = Cypress.require('dayjs')
+      const lodash = require('lodash')
+      const dayjs = require('dayjs')
 
       expect(lodash.get({ foo: 'foo' }, 'foo')).to.equal('foo')
       expect(dayjs('2022-07-29 12:00:00').format('MMMM D, YYYY')).to.equal('July 29, 2022')
@@ -18,7 +34,7 @@ describe('cy.origin dependencies', { browser: '!webkit' }, () => {
 
   it('works with a function expression', () => {
     cy.origin('http://www.foobar.com:3500', function () {
-      const lodash = Cypress.require('lodash')
+      const lodash = require('lodash')
 
       expect(lodash.get({ foo: 'foo' }, 'foo')).to.equal('foo')
     })
@@ -26,7 +42,7 @@ describe('cy.origin dependencies', { browser: '!webkit' }, () => {
 
   it('works with options object + args', () => {
     cy.origin('http://www.foobar.com:3500', { args: ['arg1'] }, ([arg1]) => {
-      const lodash = Cypress.require('lodash')
+      const lodash = require('lodash')
 
       expect(lodash.get({ foo: 'foo' }, 'foo')).to.equal('foo')
       expect(arg1).to.equal('arg1')
@@ -35,7 +51,7 @@ describe('cy.origin dependencies', { browser: '!webkit' }, () => {
 
   it('works with a yielded value', () => {
     cy.origin('http://www.foobar.com:3500', () => {
-      const lodash = Cypress.require('lodash')
+      const lodash = require('lodash')
 
       expect(lodash.get({ foo: 'foo' }, 'foo')).to.equal('foo')
 
@@ -46,7 +62,7 @@ describe('cy.origin dependencies', { browser: '!webkit' }, () => {
 
   it('works with a returned value', () => {
     cy.origin('http://www.foobar.com:3500', () => {
-      const lodash = Cypress.require('lodash')
+      const lodash = require('lodash')
 
       expect(lodash.get({ foo: 'foo' }, 'foo')).to.equal('foo')
 
@@ -57,7 +73,7 @@ describe('cy.origin dependencies', { browser: '!webkit' }, () => {
 
   it('works with multiple cy.origin calls', () => {
     cy.origin('http://www.foobar.com:3500', () => {
-      const lodash = Cypress.require('lodash')
+      const lodash = require('lodash')
 
       expect(lodash.get({ foo: 'foo' }, 'foo')).to.equal('foo')
 
@@ -65,7 +81,7 @@ describe('cy.origin dependencies', { browser: '!webkit' }, () => {
     })
 
     cy.origin('http://www.idp.com:3500', () => {
-      const dayjs = Cypress.require('dayjs')
+      const dayjs = require('dayjs')
 
       expect(dayjs('2022-07-29 12:00:00').format('MMMM D, YYYY')).to.equal('July 29, 2022')
     })
@@ -73,7 +89,7 @@ describe('cy.origin dependencies', { browser: '!webkit' }, () => {
 
   it('works with a relative esm dependency', () => {
     cy.origin('http://www.foobar.com:3500', () => {
-      const { add } = Cypress.require('./dependencies.support-esm')
+      const { add } = require('./dependencies.support-esm')
 
       expect(add(1, 2)).to.equal(3)
     })
@@ -81,7 +97,7 @@ describe('cy.origin dependencies', { browser: '!webkit' }, () => {
 
   it('works with a relative commonjs dependency', () => {
     cy.origin('http://www.foobar.com:3500', () => {
-      const { add } = Cypress.require('./dependencies.support-commonjs')
+      const { add } = require('./dependencies.support-commonjs')
 
       expect(add(1, 2)).to.equal(3)
     })
@@ -91,7 +107,7 @@ describe('cy.origin dependencies', { browser: '!webkit' }, () => {
     const args = ['some string']
 
     cy.origin('http://www.foobar.com:3500', { args }, ([arg1]) => {
-      const result = Cypress.require('./dependencies.support-commonjs')(arg1)
+      const result = require('./dependencies.support-commonjs')(arg1)
 
       expect(result).to.equal('some_string')
     })
@@ -116,16 +132,8 @@ describe('cy.origin dependencies', { browser: '!webkit' }, () => {
       })
 
       cy.origin('http://www.foobar.com:3500', () => {
-        Cypress.require('./does-not-exist')
+        require('./does-not-exist')
       })
-    })
-
-    it('when Cypress.require() is used outside cy.origin() callback', () => {
-      cy.on('fail', (err) => {
-        expect(err.message).to.equal('`Cypress.require()` can only be used inside the `cy.origin()` callback.')
-      })
-
-      Cypress.require('./does-not-exist')
     })
   })
 })

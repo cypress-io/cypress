@@ -1,86 +1,29 @@
-# [@cypress/react-v6.2.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v6.1.1...@cypress/react-v6.2.0) (2022-10-12)
+# [@cypress/react-v7.0.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v7.0.0...@cypress/react-v7.0.1) (2022-11-08)
 
 
-### Features
+### Bug Fixes
 
-* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
+* make component derived info not throw ([#24571](https://github.com/cypress-io/cypress/issues/24571)) ([838dd4f](https://github.com/cypress-io/cypress/commit/838dd4fa2e0ec56633d0af2faf10a47d190b5594))
 
-# [@cypress/react-v6.2.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v6.1.1...@cypress/react-v6.2.0) (2022-10-11)
-
-
-### Features
-
-* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
-
-# [@cypress/react-v6.2.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v6.1.1...@cypress/react-v6.2.0) (2022-10-11)
+# [@cypress/react-v7.0.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v6.2.1...@cypress/react-v7.0.0) (2022-11-07)
 
 
-### Features
+### Bug Fixes
 
-* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
-
-# [@cypress/react-v6.2.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v6.1.1...@cypress/react-v6.2.0) (2022-10-06)
-
-
-### Features
-
-* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
-
-# [@cypress/react-v6.2.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v6.1.1...@cypress/react-v6.2.0) (2022-10-04)
+* remove last mounted component upon subsequent mount calls ([#24470](https://github.com/cypress-io/cypress/issues/24470)) ([f39eb1c](https://github.com/cypress-io/cypress/commit/f39eb1c19e0923bda7ae263168fc6448da942d54))
+* remove some CT functions and props ([#24419](https://github.com/cypress-io/cypress/issues/24419)) ([294985f](https://github.com/cypress-io/cypress/commit/294985f8b3e0fa00ed66d25f88c8814603766074))
 
 
-### Features
+### BREAKING CHANGES
 
-* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
+* remove last mounted component upon subsequent mount calls of mount
 
-# [@cypress/react-v6.2.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v6.1.1...@cypress/react-v6.2.0) (2022-10-04)
-
-
-### Features
-
-* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
-
-# [@cypress/react-v6.2.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v6.1.1...@cypress/react-v6.2.0) (2022-10-03)
+# [@cypress/react-v6.2.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v6.2.0...@cypress/react-v6.2.1) (2022-11-01)
 
 
-### Features
+### Bug Fixes
 
-* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
-
-# [@cypress/react-v6.2.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v6.1.1...@cypress/react-v6.2.0) (2022-10-01)
-
-
-### Features
-
-* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
-
-# [@cypress/react-v6.2.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v6.1.1...@cypress/react-v6.2.0) (2022-09-30)
-
-
-### Features
-
-* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
-
-# [@cypress/react-v6.2.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v6.1.1...@cypress/react-v6.2.0) (2022-09-30)
-
-
-### Features
-
-* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
-
-# [@cypress/react-v6.2.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v6.1.1...@cypress/react-v6.2.0) (2022-09-30)
-
-
-### Features
-
-* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
-
-# [@cypress/react-v6.2.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v6.1.1...@cypress/react-v6.2.0) (2022-09-29)
-
-
-### Features
-
-* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
+* Hovering over mount in command log does not show component in AUT ([#24346](https://github.com/cypress-io/cypress/issues/24346)) ([355d210](https://github.com/cypress-io/cypress/commit/355d2101d38ea4d1e93b9c571cf77babab2bbbfc))
 
 # [@cypress/react-v6.2.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v6.1.1...@cypress/react-v6.2.0) (2022-08-30)
 

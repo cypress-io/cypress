@@ -49,7 +49,12 @@ export default function (Commands, Cypress, cy) {
 
     Cypress.on('test:before:run:async', () => {
       if (Cypress.config('experimentalSessionAndOrigin')) {
-        const clearPage = Cypress.config('testIsolation') === 'strict' ? navigateAboutBlank(false) : new Cypress.Promise.resolve()
+        if (Cypress.config('testIsolation') === 'off') {
+          return
+        }
+
+        // Component testing does not support navigation and handles clearing the page via mount utils
+        const clearPage = Cypress.testingType === 'e2e' ? navigateAboutBlank(false) : new Cypress.Promise.resolve()
 
         return clearPage
         .then(() => sessions.clearCurrentSessionData())
@@ -61,18 +66,16 @@ export default function (Commands, Cypress, cy) {
   })
 
   Commands.addAll({
-    session (id: string | object, setup?: () => void, options: Cypress.SessionOptions = { cacheAcrossSpecs: false }) {
+    session (id: string | object, setup: () => void, options: Cypress.SessionOptions = { cacheAcrossSpecs: false }) {
       throwIfNoSessionSupport()
 
       if (!id || !_.isString(id) && !_.isObject(id)) {
         $errUtils.throwErrByPath('sessions.session.wrongArgId')
       }
 
-      // backup session command so we can set it as codeFrame location for errors later on
-      const sessionCommand = cy.state('current')
-
-      // stringify deterministically if we were given an object
-      id = _.isString(id) ? id : stringifyStable(id)
+      if (!setup || !_.isFunction(setup)) {
+        $errUtils.throwErrByPath('sessions.session.wrongArgSetup')
+      }
 
       if (options) {
         if (!_.isObject(options)) {
@@ -99,55 +102,49 @@ export default function (Commands, Cypress, cy) {
         })
       }
 
+      // backup session command so we can set it as codeFrame location for validation errors later on
+      const sessionCommand = cy.state('current')
+
+      // stringify deterministically if we were given an object
+      id = _.isString(id) ? id : stringifyStable(id)
+
       let session: SessionData = sessionsManager.getActiveSession(id)
       const isRegisteredSessionForSpec = sessionsManager.registeredSessions.has(id)
 
-      if (!setup) {
-        if (!session && !isRegisteredSessionForSpec) {
-          $errUtils.throwErrByPath('sessions.session.not_found', { args: { id } })
+      if (session) {
+        const hasUniqSetupDefinition = session.setup.toString().trim() !== setup.toString().trim()
+        const hasUniqValidateDefinition = (!!session.validate !== !!options.validate) || (!!session.validate && !!options.validate && session.validate.toString().trim() !== options.validate.toString().trim())
+        const hasUniqPersistence = session.cacheAcrossSpecs !== !!options.cacheAcrossSpecs
+
+        if (isRegisteredSessionForSpec && (hasUniqSetupDefinition || hasUniqValidateDefinition || hasUniqPersistence)) {
+          $errUtils.throwErrByPath('sessions.session.duplicateId', {
+            args: {
+              id,
+              hasUniqSetupDefinition,
+              hasUniqValidateDefinition,
+              hasUniqPersistence,
+            },
+          })
         }
 
         if (session.cacheAcrossSpecs && _.isString(session.setup)) {
-          $errUtils.throwErrByPath('sessions.session.missing_global_setup', { args: { id } })
+          session.setup = setup
+        }
+
+        if (session.cacheAcrossSpecs && session.validate && _.isString(session.validate)) {
+          session.validate = options.validate
         }
       } else {
-        if (session) {
-          const hasUniqSetupDefinition = session.setup.toString().trim() !== setup.toString().trim()
-          const hasUniqValidateDefinition = (!!session.validate !== !!options.validate) || (!!session.validate && !!options.validate && session.validate.toString().trim() !== options.validate.toString().trim())
-          const hasUniqPersistence = session.cacheAcrossSpecs !== !!options.cacheAcrossSpecs
-
-          if (isRegisteredSessionForSpec && (hasUniqSetupDefinition || hasUniqValidateDefinition || hasUniqPersistence)) {
-            $errUtils.throwErrByPath('sessions.session.duplicateId', {
-              args: {
-                id,
-                hasUniqSetupDefinition,
-                hasUniqValidateDefinition,
-                hasUniqPersistence,
-              },
-            })
-          }
-
-          if (session.cacheAcrossSpecs && _.isString(session.setup)) {
-            session.setup = setup
-          }
-
-          if (session.cacheAcrossSpecs && session.validate && _.isString(session.validate)) {
-            session.validate = options.validate
-          }
-        } else {
-          if (isRegisteredSessionForSpec) {
-            $errUtils.throwErrByPath('sessions.session.duplicateId', { args: { id } })
-          }
-
-          session = sessions.defineSession({
-            id,
-            setup,
-            validate: options.validate,
-            cacheAcrossSpecs: options.cacheAcrossSpecs,
-          })
-
-          sessionsManager.registeredSessions.set(id, true)
+        if (isRegisteredSessionForSpec) {
+          $errUtils.throwErrByPath('sessions.session.duplicateId', { args: { id } })
         }
+
+        session = sessions.defineSession({
+          id,
+          setup,
+          validate: options.validate,
+          cacheAcrossSpecs: options.cacheAcrossSpecs,
+        })
       }
 
       function setSessionLogStatus (status: string) {
@@ -160,7 +157,7 @@ export default function (Commands, Cypress, cy) {
         })
       }
 
-      function createSession (existingSession, recreateSession = false) {
+      function createSession (existingSession: SessionData, recreateSession = false) {
         logGroup(Cypress, {
           name: 'session',
           displayName: recreateSession ? 'Recreate session' : 'Create new session',
@@ -188,7 +185,6 @@ export default function (Commands, Cypress, cy) {
 
             _.extend(existingSession, data)
             existingSession.hydrated = true
-            await sessions.saveSessionData(existingSession)
 
             _log.set({ consoleProps: () => getConsoleProps(existingSession) })
 
@@ -236,8 +232,8 @@ export default function (Commands, Cypress, cy) {
 
               // show validation error and allow sessions workflow to recreate the session
               if (restoreSession) {
+                err.isRecovered = true
                 Cypress.log({
-                  showError: true,
                   type: 'system',
                   name: 'session',
                 })
@@ -349,7 +345,7 @@ export default function (Commands, Cypress, cy) {
        *   1. create session
        *   2. validate session
        */
-      const createSessionWorkflow = (existingSession, recreateSession = false) => {
+      const createSessionWorkflow = (existingSession: SessionData, recreateSession = false) => {
         return cy.then(async () => {
           setSessionLogStatus(recreateSession ? 'recreating' : 'creating')
 
@@ -359,10 +355,13 @@ export default function (Commands, Cypress, cy) {
           return createSession(existingSession, recreateSession)
         })
         .then(() => validateSession(existingSession))
-        .then((isValidSession: boolean) => {
+        .then(async (isValidSession: boolean) => {
           if (!isValidSession) {
             return
           }
+
+          sessionsManager.registeredSessions.set(existingSession.id, true)
+          await sessions.saveSessionData(existingSession)
 
           setSessionLogStatus(recreateSession ? 'recreated' : 'created')
         })
@@ -374,7 +373,7 @@ export default function (Commands, Cypress, cy) {
        *   2. validate session
        *   3. if validation fails, catch error and recreate session
        */
-      const restoreSessionWorkflow = (existingSession) => {
+      const restoreSessionWorkflow = (existingSession: SessionData) => {
         return cy.then(async () => {
           setSessionLogStatus('restoring')
           await navigateAboutBlank()

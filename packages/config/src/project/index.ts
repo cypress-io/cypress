@@ -60,7 +60,7 @@ export function updateWithPluginValues (cfg: FullConfig, modifiedConfig: any, te
     }
 
     return errors.throwErr('CONFIG_VALIDATION_ERROR', 'configFile', configFile, validationResult)
-  })
+  }, testingType)
 
   debug('validate that there is no breaking config options added by setupNodeEvents')
 

@@ -5,6 +5,7 @@ describe('baseUrl', () => {
     cy.scaffoldProject('config-with-base-url-warning')
     cy.openProject('config-with-base-url-warning')
     cy.visitLaunchpad()
+    cy.skipWelcome()
 
     cy.get('[data-cy-testingtype="e2e"]').click()
     cy.get('[data-cy="alert"]').contains('Warning: Cannot Connect Base Url Warning')
@@ -21,6 +22,7 @@ describe('baseUrl', () => {
     cy.scaffoldProject('config-with-base-url-warning')
     cy.openProject('config-with-base-url-warning')
     cy.visitLaunchpad()
+    cy.skipWelcome()
 
     cy.get('[data-cy-testingtype="e2e"]').click()
     cy.get('[data-cy="alert"]').contains('Warning: Cannot Connect Base Url Warning')
@@ -36,7 +38,7 @@ describe('baseUrl', () => {
       `)
     })
 
-    cy.get('h1').should('contain', 'Choose a Browser')
+    cy.get('h1').should('contain', 'Choose a browser')
     cy.get('[data-cy="alert"]').should('not.exist')
   })
 
@@ -44,9 +46,10 @@ describe('baseUrl', () => {
     cy.scaffoldProject('config-with-js')
     cy.openProject('config-with-js')
     cy.visitLaunchpad()
+    cy.skipWelcome()
 
     cy.get('[data-cy-testingtype="e2e"]').click()
-    cy.get('h1').should('contain', 'Choose a Browser')
+    cy.get('h1').should('contain', 'Choose a browser')
     cy.get('[data-cy="alert"]').should('not.exist')
 
     cy.withCtx(async (ctx) => {
@@ -64,7 +67,7 @@ describe('baseUrl', () => {
     })
 
     cy.get('[data-cy="loading-spinner"]').should('be.visible')
-    cy.get('h1').should('contain', 'Choose a Browser')
+    cy.get('h1').should('contain', 'Choose a browser')
     cy.get('[data-cy="alert"]').contains('Warning: Cannot Connect Base Url Warning')
   })
 })
@@ -94,16 +97,18 @@ describe('experimentalSingleTabRunMode', () => {
     })
 
     cy.visitLaunchpad()
+    cy.skipWelcome()
 
     cy.get('[data-cy-testingtype="component"]').click()
-    cy.findByTestId('launchpad-Choose a Browser')
-    cy.get('h1').contains('Choose a Browser')
+    cy.findByTestId('launchpad-Choose a browser')
+    cy.get('h1').contains('Choose a browser')
   })
 
   it('is not a valid config for e2e testing', () => {
     cy.scaffoldProject('experimentalSingleTabRunMode')
     cy.openProject('experimentalSingleTabRunMode')
     cy.visitLaunchpad()
+    cy.skipWelcome()
     cy.get('[data-cy-testingtype="e2e"]').click()
     cy.findByTestId('error-header').contains('Cypress configuration error')
     cy.findByTestId('alert-body').contains('The experimentalSingleTabRunMode experiment is currently only supported for Component Testing.')
@@ -116,6 +121,7 @@ describe('experimentalStudio', () => {
     cy.openProject('experimentalSingleTabRunMode', ['--config-file', 'cypress-invalid-studio-experiment.config.js'])
 
     cy.visitLaunchpad()
+    cy.skipWelcome()
     cy.get('[data-cy-testingtype="component"]').click()
     cy.findByTestId('error-header')
     cy.contains('The experimentalStudio experiment is currently only supported for End to End Testing.')
@@ -138,9 +144,10 @@ describe('experimentalStudio', () => {
     })
 
     cy.visitLaunchpad()
+    cy.skipWelcome()
     cy.get('[data-cy-testingtype="e2e"]').click()
-    cy.findByTestId('launchpad-Choose a Browser')
-    cy.get('h1').contains('Choose a Browser')
+    cy.findByTestId('launchpad-Choose a browser')
+    cy.get('h1').contains('Choose a browser')
   })
 })
 
@@ -150,6 +157,7 @@ describe('component testing dependency warnings', () => {
     cy.addProject('component-testing-outdated-dependencies')
     cy.openGlobalMode()
     cy.visitLaunchpad()
+    cy.skipWelcome()
     cy.contains('component-testing-outdated-dependencies').click()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.get('a').contains('Projects').click()
@@ -169,6 +177,7 @@ describe('component testing dependency warnings', () => {
     cy.addProject('outdated-deps-vuecli3')
     cy.openGlobalMode()
     cy.visitLaunchpad()
+    cy.skipWelcome()
     cy.contains('outdated-deps-vuecli3').click()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.get('a').contains('Projects').click()
@@ -186,13 +195,14 @@ describe('component testing dependency warnings', () => {
     cy.addProject('vueclivue3-configured')
     cy.openGlobalMode()
     cy.visitLaunchpad()
+    cy.skipWelcome()
     cy.contains('vueclivue3-configured').click()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.get('a').contains('Projects').click()
     cy.get('[data-cy-testingtype="component"]').click()
 
     // Wait until launch browser screen and assert warning does not exist
-    cy.contains('Choose a Browser', { timeout: 12000 })
+    cy.contains('Choose a browser', { timeout: 12000 })
     cy.get('[data-cy="warning-alert"]').should('not.exist')
   })
 
@@ -200,9 +210,10 @@ describe('component testing dependency warnings', () => {
     cy.scaffoldProject('next-12')
     cy.openProject('next-12')
     cy.visitLaunchpad()
+    cy.skipWelcome()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.get('[data-cy-testingtype="component"]').click()
-    cy.contains('Choose a Browser', { timeout: 12000 })
+    cy.contains('Choose a browser', { timeout: 12000 })
     cy.get('[data-cy="warning-alert"]').should('not.exist')
   })
 })

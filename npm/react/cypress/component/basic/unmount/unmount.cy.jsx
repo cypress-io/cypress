@@ -1,6 +1,8 @@
 /// <reference types="cypress" />
 import React, { Component } from 'react'
-import { mount, unmount } from '@cypress/react'
+import { getContainerEl } from '@cypress/mount-utils'
+import ReactDom from 'react-dom'
+import { mount } from '@cypress/react'
 
 class Comp extends Component {
   componentWillUnmount () {
@@ -20,7 +22,7 @@ describe('Comp with componentWillUnmount', () => {
 
     // after we have confirmed the component exists let's remove it
     // unmount() command is automatically enqueued
-    unmount()
+    cy.then(() => ReactDom.unmountComponentAtNode(getContainerEl()))
 
     // the component is gone from the DOM
     cy.contains('My component').should('not.exist')
@@ -33,7 +35,7 @@ describe('Comp with componentWillUnmount', () => {
     cy.contains('My component')
 
     // still works, should probably be removed in v5
-    cy.then(unmount)
+    cy.then(() => ReactDom.unmountComponentAtNode(getContainerEl()))
 
     // the component is gone from the DOM
     cy.contains('My component').should('not.exist')

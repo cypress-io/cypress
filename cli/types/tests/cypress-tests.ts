@@ -34,11 +34,12 @@ namespace CypressConfigTests {
 
   // setters
   Cypress.config('baseUrl', '.') // $ExpectType void
-  Cypress.config({ e2e: { baseUrl: '.' }}) // $ExpectType void
-  Cypress.config({ e2e: { baseUrl: null }}) // $ExpectType void
-  Cypress.config({ e2e: { baseUrl: '.', }}) // $ExpectType void
+  Cypress.config({ e2e: { baseUrl: '.' }}) // $ExpectError
+  Cypress.config({ e2e: { baseUrl: null }}) // $ExpectError
+  Cypress.config({ e2e: { baseUrl: '.', }}) // $ExpectError
   Cypress.config({ component: { baseUrl: '.', devServer: () => ({} as any) } }) // $ExpectError
   Cypress.config({ e2e: { indexHtmlFile: 'index.html' } }) // $ExpectError
+  Cypress.config({ testIsolation: 'off' }) // $ExpectError
 
   Cypress.config('taskTimeout') // $ExpectType number
   Cypress.config('includeShadowDom') // $ExpectType boolean
@@ -866,6 +867,9 @@ namespace CypressTestConfigOverridesTests {
   it('test', {
     retries: { run: 3 } // $ExpectError
   }, () => { })
+  it('test', {
+    testIsolation: 'off', // $ExpectError
+  }, () => { })
 
   it.skip('test', {}, () => {})
   it.only('test', {}, () => {})
@@ -880,6 +884,10 @@ namespace CypressTestConfigOverridesTests {
   describe('suite', {
     browser: {family: 'firefox'},
     keystrokeDelay: 0
+  }, () => {})
+
+  describe('suite', {
+    testIsolation: 'off',
   }, () => {})
 
   context('suite', {}, () => {})
@@ -922,7 +930,6 @@ namespace CypressTaskTests {
 }
 
 namespace CypressSessionsTests {
-  cy.session('user')
   cy.session('user', () => {})
   cy.session({ name: 'bob' }, () => {})
   cy.session('user', () => {}, {})
@@ -931,11 +938,13 @@ namespace CypressSessionsTests {
   })
 
   cy.session() // $ExpectError
+  cy.session('user') // $ExpectError
   cy.session(null) // $ExpectError
   cy.session('user', () => {}, {
     validate: { foo: true } // $ExpectError
   })
 }
+
 namespace CypressCurrentTest {
   Cypress.currentTest.title // $ExpectType string
   Cypress.currentTest.titlePath // $ExpectType string[]
@@ -973,4 +982,83 @@ namespace CypressOriginTests {
   cy.origin('example.com', {}, {}) // $ExpectError
   cy.origin('example.com', { args: ['value'] }, (value: boolean[]) => {}) // $ExpectError
   cy.origin('example.com', {}, (value: undefined) => {}) // $ExpectError
+}
+
+namespace CypressGetCookiesTests {
+  cy.getCookies().then((cookies) => {
+    cookies // $ExpectType Cookie[]
+  })
+  cy.getCookies({ log: true })
+  cy.getCookies({ timeout: 10 })
+  cy.getCookies({ domain: 'localhost' })
+  cy.getCookies({ log: true, timeout: 10, domain: 'localhost' })
+
+  cy.getCookies({ log: 'true' }) // $ExpectError
+  cy.getCookies({ timeout: '10' }) // $ExpectError
+  cy.getCookies({ domain: false }) // $ExpectError
+}
+
+namespace CypressGetCookieTests {
+  cy.getCookie('name').then((cookie) => {
+    cookie // $ExpectType Cookie | null
+  })
+  cy.getCookie('name', { log: true })
+  cy.getCookie('name', { timeout: 10 })
+  cy.getCookie('name', { domain: 'localhost' })
+  cy.getCookie('name', { log: true, timeout: 10, domain: 'localhost' })
+
+  cy.getCookie('name', { log: 'true' }) // $ExpectError
+  cy.getCookie('name', { timeout: '10' }) // $ExpectError
+  cy.getCookie('name', { domain: false }) // $ExpectError
+}
+
+namespace CypressSetCookieTests {
+  cy.setCookie('name', 'value').then((cookie) => {
+    cookie // $ExpectType Cookie
+  })
+  cy.setCookie('name', 'value', { log: true })
+  cy.setCookie('name', 'value', { timeout: 10 })
+  cy.setCookie('name', 'value', {
+    domain: 'localhost',
+    path: '/',
+    secure: true,
+    httpOnly: false,
+    expiry: 12345,
+    sameSite: 'lax',
+  })
+  cy.setCookie('name', 'value', { log: true, timeout: 10, domain: 'localhost' })
+
+  cy.setCookie('name') // $ExpectError
+  cy.setCookie('name', 'value', { log: 'true' }) // $ExpectError
+  cy.setCookie('name', 'value', { timeout: '10' }) // $ExpectError
+  cy.setCookie('name', 'value', { domain: false }) // $ExpectError
+  cy.setCookie('name', 'value', { foo: 'bar' }) // $ExpectError
+}
+
+namespace CypressClearCookieTests {
+  cy.clearCookie('name').then((result) => {
+    result // $ExpectType null
+  })
+  cy.clearCookie('name', { log: true })
+  cy.clearCookie('name', { timeout: 10 })
+  cy.clearCookie('name', { domain: 'localhost' })
+  cy.clearCookie('name', { log: true, timeout: 10, domain: 'localhost' })
+
+  cy.clearCookie('name', { log: 'true' }) // $ExpectError
+  cy.clearCookie('name', { timeout: '10' }) // $ExpectError
+  cy.clearCookie('name', { domain: false }) // $ExpectError
+}
+
+namespace CypressClearCookiesTests {
+  cy.clearCookies().then((result) => {
+    result // $ExpectType null
+  })
+  cy.clearCookies({ log: true })
+  cy.clearCookies({ timeout: 10 })
+  cy.clearCookies({ domain: 'localhost' })
+  cy.clearCookies({ log: true, timeout: 10, domain: 'localhost' })
+
+  cy.clearCookies({ log: 'true' }) // $ExpectError
+  cy.clearCookies({ timeout: '10' }) // $ExpectError
+  cy.clearCookies({ domain: false }) // $ExpectError
 }

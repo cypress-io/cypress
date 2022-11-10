@@ -66,7 +66,7 @@ const Hook = observer(({ model, showNumber }: HookProps) => (
     <Collapsible
       header={<HookHeader model={model} number={showNumber ? model.hookNumber : undefined} />}
       headerClass='hook-header'
-      headerExtras={model.invocationDetails && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
+      headerExtras={model.invocationDetails && Cypress.testingType !== 'component' && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
       isOpen
     >
       <ul className='commands-container'>

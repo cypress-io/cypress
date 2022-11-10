@@ -116,7 +116,7 @@ export default class SessionsManager {
   // this the public api exposed to consumers as Cypress.session
   sessions = {
     defineSession: (options = {} as any): SessionData => {
-      const sess_state: SessionData = {
+      return {
         id: options.id,
         cookies: null,
         localStorage: null,
@@ -126,10 +126,6 @@ export default class SessionsManager {
         validate: options.validate,
         cacheAcrossSpecs: !!options.cacheAcrossSpecs,
       }
-
-      this.setActiveSession({ [sess_state.id]: sess_state })
-
-      return sess_state
     },
 
     clearAllSavedSessions: async () => {

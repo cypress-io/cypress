@@ -227,12 +227,13 @@ describe('test errors', () => {
 
     // NOTE: still needs to be implemented
     it.skip('renders and escapes markdown with leading/trailing whitespace', () => {
+      setError(commandErr)
       cy.get('.runnable-err-message')
 
       // https://github.com/cypress-io/cypress/issues/1360
       // renders ** buzz ** as <strong> buzz </strong>
-      .contains('code', 'foo')
-      .and('not.contain', '`foo`')
+      .contains('strong', 'buzz')
+      .and('not.contain', '** buzz **')
     })
   })
 

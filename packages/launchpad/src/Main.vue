@@ -3,12 +3,10 @@
     <HeaderBar
       class="w-full z-10 fixed"
     />
-
-    <MigrationLandingPage
-      v-if="currentProject?.needsLegacyConfigMigration && !wasLandingPageShown && online && videoHtml"
+    <MajorVersionWelcome
+      v-if="shouldShowWelcome"
       class="pt-64px"
-      :video-html="videoHtml"
-      @clearLandingPage="wasLandingPageShown = true"
+      @clearLandingPage="handleClearLandingPage"
     />
     <div
       v-else
@@ -24,7 +22,7 @@
         :gql="query.data.value"
       />
       <MigrationWizard
-        v-else-if="currentProject?.needsLegacyConfigMigration && wasLandingPageShown"
+        v-else-if="currentProject?.needsLegacyConfigMigration"
       />
       <template v-else>
         <ScaffoldedFiles
@@ -74,13 +72,15 @@
         <OpenBrowser v-else />
       </template>
     </div>
+    <CloudViewerAndProject />
+    <LoginConnectModals />
   </template>
   <div data-e2e />
 </template>
 
 <script lang="ts" setup>
 import { gql, useMutation, useQuery } from '@urql/vue'
-import { MainLaunchpadQueryDocument, Main_ResetErrorsAndLoadConfigDocument } from './generated/graphql'
+import { MainLaunchpadQueryDocument, Main_ResetErrorsAndLoadConfigDocument, Main_LaunchProjectDocument } from './generated/graphql'
 import TestingTypeCards from './setup/TestingTypeCards.vue'
 import Wizard from './setup/Wizard.vue'
 import GlobalPage from './global/GlobalPage.vue'
@@ -92,17 +92,19 @@ import Spinner from '@cy/components/Spinner.vue'
 import CompareTestingTypes from './setup/CompareTestingTypes.vue'
 import MigrationWizard from './migration/MigrationWizard.vue'
 import ScaffoldedFiles from './setup/ScaffoldedFiles.vue'
-import MigrationLandingPage from './migration/MigrationLandingPage.vue'
+import MajorVersionWelcome from './migration/MajorVersionWelcome.vue'
 import { useI18n } from '@cy/i18n'
 import { computed, ref } from 'vue'
 import LaunchpadHeader from './setup/LaunchpadHeader.vue'
 import OpenBrowser from './setup/OpenBrowser.vue'
-import { useOnline } from '@vueuse/core'
+import LoginConnectModals from '@cy/gql-components/LoginConnectModals.vue'
+import CloudViewerAndProject from '@cy/gql-components/CloudViewerAndProject.vue'
+import { usePromptManager } from '@cy/gql-components/composables/usePromptManager'
+import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 
+const { setMajorVersionWelcomeDismissed } = usePromptManager()
 const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
-const wasLandingPageShown = ref(false)
-const online = useOnline()
 
 gql`
 fragment MainLaunchpadQueryData on Query {
@@ -111,6 +113,12 @@ fragment MainLaunchpadQueryData on Query {
   baseError {
     id
     ...BaseError
+  }
+  localSettings {
+    preferences {
+      majorVersionWelcomeDismissed
+      wasBrowserSetInCLI
+    }
   }
   currentProject {
     id
@@ -121,9 +129,9 @@ fragment MainLaunchpadQueryData on Query {
     isFullConfigReady
     needsLegacyConfigMigration
     currentTestingType
-  }
-  migration {
-    videoEmbedHtml
+    activeBrowser {
+      id
+    }
   }
   isGlobalMode
   ...GlobalPage
@@ -146,7 +154,22 @@ mutation Main_ResetErrorsAndLoadConfig($id: ID!) {
 }
 `
 
+gql`
+mutation Main_LaunchProject ($testingType: TestingTypeEnum!)  {
+  launchOpenProject {
+    id
+  }
+  setProjectPreferencesInGlobalCache(testingType: $testingType) {
+    currentProject {
+      id
+      title
+    }
+  }
+}
+`
+
 const mutation = useMutation(Main_ResetErrorsAndLoadConfigDocument)
+const launchProject = useMutation(Main_LaunchProjectDocument)
 
 const resetErrorAndLoadConfig = (id: string) => {
   if (!mutation.fetching.value) {
@@ -155,6 +178,38 @@ const resetErrorAndLoadConfig = (id: string) => {
 }
 const query = useQuery({ query: MainLaunchpadQueryDocument })
 const currentProject = computed(() => query.data.value?.currentProject)
-const videoHtml = computed(() => query.data.value?.migration?.videoEmbedHtml)
+
+function handleClearLandingPage () {
+  setMajorVersionWelcomeDismissed(MAJOR_VERSION_FOR_CONTENT)
+  const wasBrowserSetInCLI = query.data?.value?.localSettings.preferences?.wasBrowserSetInCLI
+
+  const currentTestingType = currentProject.value?.currentTestingType
+
+  if (wasBrowserSetInCLI && currentTestingType) {
+    launchProject.executeMutation({ testingType: currentTestingType })
+  }
+}
+
+const shouldShowWelcome = computed(() => {
+  if (query.data.value) {
+    const hasThisVersionBeenSeen = query.data.value?.localSettings?.preferences?.majorVersionWelcomeDismissed?.[MAJOR_VERSION_FOR_CONTENT]
+    const wasBrowserSetInCLI = query.data?.value?.localSettings.preferences?.wasBrowserSetInCLI
+    const currentTestingType = currentProject.value?.currentTestingType
+
+    const activeBrowser = currentProject.value?.activeBrowser
+
+    const needsActiveBrowser = wasBrowserSetInCLI && currentTestingType
+
+    // if Cypress opened with --browser and --testingType flags,
+    // the next step is project launch, so we don't show welcome until browser is ready
+    if (needsActiveBrowser) {
+      return !hasThisVersionBeenSeen && activeBrowser
+    }
+
+    return !hasThisVersionBeenSeen
+  }
+
+  return false
+})
 
 </script>
