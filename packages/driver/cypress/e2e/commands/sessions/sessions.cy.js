@@ -24,27 +24,6 @@ const clearAllSavedSessions = () => {
   })
 }
 
-// In webkit, the clear page and clear cookies, etc log messages may be reversed. This isn't an issue, but we just want to test we have both messages.
-const validateClearLogs = (logs, sessionGroupId) => {
-  let clearPageLogIndex = 0
-  let clearCookiesIndex = 1
-
-  if (logs[1].get('name') === 'Clear page') {
-    clearPageLogIndex = 1
-    clearCookiesIndex = 0
-  }
-
-  expect(logs[clearPageLogIndex].get()).to.contain({
-    name: 'Clear page',
-    group: sessionGroupId,
-  })
-
-  expect(logs[clearCookiesIndex].get()).to.contain({
-    displayName: 'Clear cookies, localStorage and sessionStorage',
-    group: sessionGroupId,
-  })
-}
-
 describe('cy.session', { retries: 0 }, () => {
   describe('args', () => {
     it('accepts string as id', () => {
@@ -222,7 +201,15 @@ describe('cy.session', { retries: 0 }, () => {
             },
           })
 
-          validateClearLogs([logs[1], logs[2]], sessionGroupId)
+          expect(logs[1].get()).to.contain({
+            name: 'Clear page',
+            group: sessionGroupId,
+          })
+
+          expect(logs[2].get()).to.contain({
+            displayName: 'Clear cookies, localStorage and sessionStorage',
+            group: sessionGroupId,
+          })
 
           const createNewSessionGroup = logs[3].get()
 
@@ -303,7 +290,15 @@ describe('cy.session', { retries: 0 }, () => {
             },
           })
 
-          validateClearLogs([logs[1], logs[2]], sessionGroupId)
+          expect(logs[1].get()).to.contain({
+            name: 'Clear page',
+            group: sessionGroupId,
+          })
+
+          expect(logs[2].get()).to.contain({
+            displayName: 'Clear cookies, localStorage and sessionStorage',
+            group: sessionGroupId,
+          })
 
           const createNewSessionGroup = logs[3].get()
 
@@ -357,7 +352,15 @@ describe('cy.session', { retries: 0 }, () => {
               },
             })
 
-            validateClearLogs([logs[1], logs[2]], sessionGroupId)
+            expect(logs[1].get()).to.contain({
+              name: 'Clear page',
+              group: sessionGroupId,
+            })
+
+            expect(logs[2].get()).to.contain({
+              displayName: 'Clear cookies, localStorage and sessionStorage',
+              group: sessionGroupId,
+            })
 
             const createNewSessionGroup = logs[3].get()
 
@@ -437,7 +440,15 @@ describe('cy.session', { retries: 0 }, () => {
             },
           })
 
-          validateClearLogs([logs[1], logs[2]], sessionGroupId)
+          expect(logs[1].get()).to.contain({
+            name: 'Clear page',
+            group: sessionGroupId,
+          })
+
+          expect(logs[2].get()).to.contain({
+            displayName: 'Clear cookies, localStorage and sessionStorage',
+            group: sessionGroupId,
+          })
 
           const restoreSavedSessionGroup = logs[3].get()
 
@@ -492,7 +503,15 @@ describe('cy.session', { retries: 0 }, () => {
             },
           })
 
-          validateClearLogs([logs[1], logs[2]], sessionGroupId)
+          expect(logs[1].get()).to.contain({
+            name: 'Clear page',
+            group: sessionGroupId,
+          })
+
+          expect(logs[2].get()).to.contain({
+            displayName: 'Clear cookies, localStorage and sessionStorage',
+            group: sessionGroupId,
+          })
 
           const restoreSavedSessionGroup = logs[3].get()
 
@@ -566,7 +585,15 @@ describe('cy.session', { retries: 0 }, () => {
             },
           })
 
-          validateClearLogs([logs[1], logs[2]], sessionGroupId)
+          expect(logs[1].get()).to.contain({
+            name: 'Clear page',
+            group: sessionGroupId,
+          })
+
+          expect(logs[2].get()).to.contain({
+            displayName: 'Clear cookies, localStorage and sessionStorage',
+            group: sessionGroupId,
+          })
 
           const restoreSavedSessionGroup = logs[3].get()
 
@@ -590,7 +617,15 @@ describe('cy.session', { retries: 0 }, () => {
           // this error is associated with the group since the validation rejected
           expect(logs[4].get('error').message).to.contain('This error occurred while validating the restored session')
 
-          validateClearLogs([logs[6], logs[7]], sessionGroupId)
+          expect(logs[6].get()).to.contain({
+            name: 'Clear page',
+            group: sessionGroupId,
+          })
+
+          expect(logs[7].get()).to.contain({
+            displayName: 'Clear cookies, localStorage and sessionStorage',
+            group: sessionGroupId,
+          })
 
           const createNewSessionGroup = logs[8].get()
 
@@ -656,7 +691,15 @@ describe('cy.session', { retries: 0 }, () => {
               },
             })
 
-            validateClearLogs([logs[1], logs[2]], sessionGroupId)
+            expect(logs[1].get()).to.contain({
+              name: 'Clear page',
+              group: sessionGroupId,
+            })
+
+            expect(logs[2].get()).to.contain({
+              displayName: 'Clear cookies, localStorage and sessionStorage',
+              group: sessionGroupId,
+            })
 
             const restoreSavedSessionGroup = logs[3].get()
 
@@ -680,7 +723,15 @@ describe('cy.session', { retries: 0 }, () => {
             // this error is associated with the group since the validation rejected
             expect(logs[4].get('error').message).to.contain('Your `cy.session` **validate** promise rejected with false.')
 
-            validateClearLogs([logs[6], logs[7]], sessionGroupId)
+            expect(logs[6].get()).to.contain({
+              name: 'Clear page',
+              group: sessionGroupId,
+            })
+
+            expect(logs[7].get()).to.contain({
+              displayName: 'Clear cookies, localStorage and sessionStorage',
+              group: sessionGroupId,
+            })
 
             const createNewSessionGroup = logs[8].get()
 
