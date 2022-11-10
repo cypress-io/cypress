@@ -51,7 +51,7 @@
               </h2>
 
               <p>
-                We have also massively improved our startup performance by shipping a snapshot of our binary instead of the source files. Results will vary based on your situation, but we saw up to 84% faster startup times!
+                We have also massively improved our startup performance by shipping a snapshot of our binary instead of the source files. The performance boost applies to the time it takes from running a cypress command (e.g. cypress open) to when the Cypress app is opened. Results will vary based on your situation, but we saw up to 84% faster startup times!
               </p>
               <p>
                 For a complete list of updates in v11, please review our <ExternalLink
