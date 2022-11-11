@@ -12,6 +12,7 @@
     "../frontend-shared/cypress/**/*.ts"
   ],
   "compilerOptions": {
+    "target": "esnext",
     "noImplicitThis": true,
     "paths": {
       "@cy/i18n": ["../frontend-shared/src/locales/i18n"],
