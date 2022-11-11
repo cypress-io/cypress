@@ -19,20 +19,7 @@ export type FuzzyFoundSpec<T = FoundSpec> = T & {
   }
 }
 
-const getRegexSeparator = () => /\//
-const getSeparator = () => '/'
-
-const defaults = { name: '', isLeaf: false, children: [], id: '', highlightIndexes: [] }
-
-export function buildSpecTree<T extends FoundSpec> (specs: FoundSpec[], root: SpecTreeNode<T> = defaults): {tree: SpecTreeNode<T>, map: DirectoryMap} {
-  const dirMap = getDirectoryMap(specs)
-
-  specs.forEach((spec) => buildSpecTreeRecursive(dirMap, spec.relative, root, spec))
-
-  return { tree: root, map: dirMap }
-}
-
-type DirectoryMap = Map<string, FoundSpec[]>
+export type DirectoryMap = Map<string, FoundSpec[]>
 
 export function getDirectoryMap (specs: FoundSpec[], sep = '/'): DirectoryMap {
   const dirMap: DirectoryMap = new Map()
@@ -53,20 +40,35 @@ export function getDirectoryMap (specs: FoundSpec[], sep = '/'): DirectoryMap {
   return dirMap
 }
 
+const getRegexSeparator = () => /\//
+const getSeparator = () => '/'
+
+const defaults = { name: '', isLeaf: false, children: [], id: '', highlightIndexes: [] }
+
+export function buildSpecTree<T extends FoundSpec> (specs: FoundSpec[], root: SpecTreeNode<T> = defaults): {tree: SpecTreeNode<T>, map: DirectoryMap} {
+  const dirMap = getDirectoryMap(specs)
+
+  specs.forEach((spec) => buildSpecTreeRecursive(dirMap, spec.relative, root, spec))
+  collapseEmptyChildren(root)
+
+  return { tree: root, map: dirMap }
+}
+
 export function buildSpecTreeRecursive<T extends FoundSpec> (map: DirectoryMap, path: string, tree: SpecTreeNode<T>, data?: T): SpecTreeNode<T> {
   const [firstFile, ...rest] = path.split(getRegexSeparator())
   const id = tree.id ? [tree.id, firstFile].join(getSeparator()) : firstFile
 
-  const newNode: SpecTreeNode<T> = { name: firstFile, isLeaf: false, children: [], parent: null, data, id, highlightIndexes: [] }
+  const newNode: SpecTreeNode<T> = { name: firstFile, isLeaf: false, children: [], parent: tree, data, id, highlightIndexes: [] }
 
   if (rest.length < 1) {
     newNode.isLeaf = true
+    newNode.highlightIndexes = getHighlightIndexes(newNode)
+
     for (const [key, val] of map.entries()) {
       if (data?.relative.includes(key)) {
         map.set(key, [...val, data])
       }
     }
-    newNode.highlightIndexes = getHighlightIndexes(newNode)
 
     tree.children.push(newNode)
 
@@ -121,4 +123,22 @@ function getHighlightIndexes <T extends FoundSpec> (node: SpecTreeNode<T>) {
   return res.map((idx) => idx - minIndex)
 }
 
-// change to set
+function collapseEmptyChildren<T extends FoundSpec> (node: SpecTreeNode<T>) {
+  for (const child of node.children) {
+    collapseEmptyChildren(child)
+  }
+  if (node.isLeaf) {
+    return
+  }
+
+  // Root name of our tree is '/'. We don't want to collapse into the root node
+  // so we check node.parent.parent
+  if (node.parent && node.parent.parent && (node.parent.children.length === 1)) {
+    node.parent.name = [node.parent.name, node.name].join(getSeparator())
+    node.parent.id = [node.parent.id, node.name].join(getSeparator())
+    node.parent.children = node.children
+    node.parent.highlightIndexes = getHighlightIndexes(node.parent)
+  }
+
+  return
+}

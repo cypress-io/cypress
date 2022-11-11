@@ -117,6 +117,7 @@
               @click.stop="row.data.toggle"
             >
               <template #runAllSpecs>
+                <!-- {{ log(row) }} -->
                 <button
                   v-if="showRunAll && row.index === rowIndex"
                   class="group hover:text-indigo-700 font-normal text-sm content-center space-x-2 inline-flex ml-7"
@@ -202,7 +203,8 @@ import { gql, useSubscription } from '@urql/vue'
 import { computed, ref, toRef, watch } from 'vue'
 import { Specs_SpecsListFragment, SpecsList_GitInfoUpdatedDocument, SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { buildSpecTree, fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
+import { fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
+import { buildSpecTree } from '../specsBackend/buildtree'
 import type { FuzzyFoundSpec } from './spec-utils'
 import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import RowDirectory from './RowDirectory.vue'
@@ -218,7 +220,6 @@ import { useSpecFilter } from '../composables/useSpecFilter'
 import { useRequestAccess } from '../composables/useRequestAccess'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import { IconActionPlaySmall } from '@cypress-design/vue-icon'
-//import fs from 'fs'
 
 const { openLoginConnectModal } = useLoginConnectStore()
 
@@ -385,10 +386,12 @@ const treeExpansionCache = ref(new Map<string, boolean>())
 watch([() => specFilterModel.value, () => specs.value.length], () => treeExpansionCache.value.clear())
 
 const collapsible = computed(() => {
-  return useCollapsibleTree(
-    buildSpecTree<FuzzyFoundSpec<SpecsListFragment>>(specs.value), { dropRoot: true, cache: treeExpansionCache.value },
-  )
+  const passingIn = buildSpecTree<FuzzyFoundSpec<SpecsListFragment>>(specs.value)
+  const p = useCollapsibleTree(passingIn, { dropRoot: true, cache: treeExpansionCache.value })
+
+  return p
 })
+
 const treeSpecList = computed(() => collapsible.value.tree.filter(((item) => !item.hidden.value)))
 
 const { containerProps, list, wrapperProps, scrollTo } = useVirtualList(treeSpecList, { itemHeight: 40, overscan: 10 })
@@ -433,56 +436,12 @@ let children = ref(0)
 let showRunAll = ref(false)
 let rowIndex = ref()
 
+// For run all specs
 function childrenSpecs (collapsible, row) {
-  // for runAllSpecs
   showRunAll.value = true
-
   rowIndex.value = row.index
-
-  if (collapsible) {
-    if (row.data.parent.name === '') {
-      let c = 0
-
-      collapsible.tree.forEach((element: any) => {
-        if (element.isLeaf) {
-          c += 1
-        }
-      })
-
-      children.value = c
-    } else {
-      // let c = 0
-
-      // c = recurse(row, c)
-      // // this is the wrong implementation and will not work due to nested folders.
-      // /// you need to recurse or use fs
-
-      children.value = row.data.children.length
-      // // fs.readdirAsync(row.data.data.absolute, (err, files) => {
-      // //   children.value = files.length
-      // // })
-      // children.value = c
-    }
-  }
+  children.value = collapsible.dirMap.get(row.data.id)?.length
 }
-
-// function recurse (node: any, c: number) {
-//   // eslint-disable-next-line no-console
-//   //console.log('node')
-//   // eslint-disable-next-line no-console
-//   // console.log(node)
-//   if (node.data.children.length === 0) return 1
-
-//   node.data.children.forEach((element) => {
-//     let r = recurse(element.data.children, c)
-
-//     c += r
-//   })
-
-//   return c
-// }
-
-//const consoleV = computed(() => console)
 
 const mostRecentUpdateRef = toRef(props, 'mostRecentUpdate')
 

@@ -1,6 +1,7 @@
 import type { ComputedRef, Ref } from 'vue'
 import { computed } from 'vue'
 import { useToggle } from '@vueuse/core'
+import type { DirectoryMap } from '@packages/app/src/specsBackend/buildtree'
 
 export type RawNode <T> = {
   id: string
@@ -112,10 +113,10 @@ function sortTree<T extends RawNode<T>> (tree: T) {
   }
 }
 
-export function useCollapsibleTree <T extends RawNode<T>> (tree: T, options: UseCollapsibleTreeOptions = {}) {
+export function useCollapsibleTree <T extends RawNode<T>> (payload: {tree: T, map: DirectoryMap}, options: UseCollapsibleTreeOptions = {}) {
   options.expandInitially = options.expandInitially ?? true
-  sortTree(tree)
-  const collapsibleTree = buildTree<T>(tree, options)
+  sortTree(payload.tree)
+  const collapsibleTree = buildTree<T>(payload.tree, options)
 
   collapsibleTree.sort((a, b) => {
     if (a.parent === b.parent) {
@@ -131,5 +132,6 @@ export function useCollapsibleTree <T extends RawNode<T>> (tree: T, options: Use
 
   return {
     tree: options.dropRoot ? collapsibleTree.slice(1) : collapsibleTree,
+    dirMap: payload.map,
   }
 }
