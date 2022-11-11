@@ -72,7 +72,7 @@ export function buildSpecTreeRecursive<T extends FoundSpec> (path: string, tree:
   return tree
 }
 
-function collapseEmptyChildren<T extends FoundSpec> (node: SpecTreeNode<T>) {
+export function collapseEmptyChildren<T extends FoundSpec> (node: SpecTreeNode<T>) {
   for (const child of node.children) {
     collapseEmptyChildren(child)
   }

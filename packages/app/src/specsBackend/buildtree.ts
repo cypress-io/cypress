@@ -1,4 +1,5 @@
 import type { FoundSpec } from '@packages/types'
+import { collapseEmptyChildren } from '../specs/spec-utils'
 
 export type SpecMap = Map<string, FoundSpec[]>
 
@@ -26,13 +27,13 @@ const defaults = { name: '', isLeaf: false, children: [], id: '', highlightIndex
 
 export function buildSpecTree<T extends FoundSpec> (specs: FoundSpec[], root: SpecTreeNode<T> = defaults): {tree: SpecTreeNode<T>, map: DirectoryMap} {
   const dirMap = getDirectoryMap(specs)
-
   specs.forEach((spec) => buildSpecTreeRecursive(dirMap, spec.relative, root, spec))
+  collapseEmptyChildren(root)
 
   return { tree: root, map: dirMap }
 }
 
-type DirectoryMap = Map<string, FoundSpec[]>
+export type DirectoryMap = Map<string, FoundSpec[]>
 
 export function getDirectoryMap (specs: FoundSpec[], sep = '/'): DirectoryMap {
   const dirMap: DirectoryMap = new Map()

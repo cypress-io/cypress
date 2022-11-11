@@ -117,6 +117,8 @@
               @click.stop="row.data.toggle"
             >
               <template #runAllSpecs>
+                Run {{ collapsible.dirMap.get(row.data.id)?.length }} specs
+                {{ log(row) }}
                 <button
                   v-if="showRunAll && row.index === rowIndex"
                   class="group hover:text-indigo-700 font-normal text-sm content-center space-x-2 inline-flex ml-7"
@@ -129,7 +131,6 @@
                     hover-fill-color="indigo-100"
                     interactive-colors-on-group
                   />
-                  Run {{ children }} specs
                 </button>
               </template>
             </RowDirectory>
@@ -202,7 +203,8 @@ import { gql, useSubscription } from '@urql/vue'
 import { computed, ref, toRef, watch } from 'vue'
 import { Specs_SpecsListFragment, SpecsList_GitInfoUpdatedDocument, SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { buildSpecTree, fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
+import { fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
+import { buildSpecTree, } from '../specsBackend/buildtree'
 import type { FuzzyFoundSpec } from './spec-utils'
 import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
 import RowDirectory from './RowDirectory.vue'
@@ -219,6 +221,8 @@ import { useRequestAccess } from '../composables/useRequestAccess'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import { IconActionPlaySmall } from '@cypress-design/vue-icon'
 //import fs from 'fs'
+
+function log(p) { console.log(p)}
 
 const { openLoginConnectModal } = useLoginConnectStore()
 
@@ -385,10 +389,12 @@ const treeExpansionCache = ref(new Map<string, boolean>())
 watch([() => specFilterModel.value, () => specs.value.length], () => treeExpansionCache.value.clear())
 
 const collapsible = computed(() => {
-  return useCollapsibleTree(
+  const p = useCollapsibleTree(
     buildSpecTree<FuzzyFoundSpec<SpecsListFragment>>(specs.value), { dropRoot: true, cache: treeExpansionCache.value },
   )
+  return p
 })
+
 const treeSpecList = computed(() => collapsible.value.tree.filter(((item) => !item.hidden.value)))
 
 const { containerProps, list, wrapperProps, scrollTo } = useVirtualList(treeSpecList, { itemHeight: 40, overscan: 10 })
