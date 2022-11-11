@@ -46,6 +46,7 @@
     "dayjs": "^1.9.3",
     "disparity": "^3.0.0",
     "engine.io-client": "3.5.2",
+    "esbuild": "0.15.7",
     "faker": "5.5.3",
     "fuzzysort": "^1.1.4",
     "graphql": "^15.5.1",
