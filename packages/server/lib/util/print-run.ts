@@ -22,6 +22,19 @@ type Screenshot = {
   specName: string
 }
 
+export const cloudRecommendationMessage = `
+-----------------------------------------------------------------------------------------
+
+  Having trouble debugging your CI failures?
+  
+  Record your runs to the Cypress Cloud to watch video recordings for each test, 
+  debug failing and flaky tests, and integrate with your favorite tools.
+
+  >> https://on.cypress.io/cloud-get-started
+
+------------------------------------------------------------------------------------------
+`
+
 function color (val: any, c: string) {
   return chalk[c](val)
 }
@@ -274,7 +287,17 @@ export function displaySpecHeader (name: string, curr: number, total: number, es
   }
 }
 
-export function renderSummaryTable (runUrl: string | undefined, results: any) {
+function maybeLogCloudRecommendationMessage (runs: CypressCommandLine.RunResult[], record?: boolean) {
+  if (!process.env.CI || process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS || record) {
+    return
+  }
+
+  if (runs.some((run) => run.stats.failures > 0)) {
+    console.log(cloudRecommendationMessage)
+  }
+}
+
+export function renderSummaryTable (runUrl: string | undefined, results: CypressCommandLine.CypressRunResult, record?: boolean) {
   const { runs } = results
 
   console.log('')
@@ -369,6 +392,8 @@ export function renderSummaryTable (runUrl: string | undefined, results: any) {
       console.log(`  Recorded Run: ${formatPath(runUrl, undefined, 'gray')}`)
       console.log('')
     }
+
+    maybeLogCloudRecommendationMessage(runs, record)
   }
 }
 

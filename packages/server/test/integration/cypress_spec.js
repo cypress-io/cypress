@@ -44,6 +44,7 @@ const electronApp = require('../../lib/util/electron-app')
 const savedState = require(`../../lib/saved_state`)
 const { getCtx, clearCtx, setCtx, makeDataContext } = require(`../../lib/makeDataContext`)
 const { BrowserCriClient } = require(`../../lib/browsers/browser-cri-client`)
+const { cloudRecommendationMessage } = require('../../lib/util/print-run')
 
 const TYPICAL_BROWSERS = [
   {
@@ -347,6 +348,43 @@ describe('lib/cypress', () => {
       sinon.stub(browsers, 'open')
       sinon.stub(browsers, 'connectToNewSpec')
       sinon.stub(commitInfo, 'getRemoteOrigin').resolves('remoteOrigin')
+    })
+
+    describe('cloud recommendation message', () => {
+      it('gets logged when in CI and there is a failure', function () {
+        process.env.CI = true
+        globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
+
+        return cypress.start([`--run-project=${this.todosPath}`]).then(() => {
+          expect(console.log).to.be.calledWith(cloudRecommendationMessage)
+        })
+      })
+
+      it('does not get logged if CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS is set', function () {
+        process.env.CI = true
+        process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS = true
+        globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
+
+        return cypress.start([`--run-project=${this.todosPath}`]).then(() => {
+          expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
+        })
+      })
+
+      it('does not get logged if everything passes', function () {
+        process.env.CI = true
+
+        return cypress.start([`--run-project=${this.todosPath}`]).then(() => {
+          expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
+        })
+      })
+
+      it('does not get logged if not running in CI', function () {
+        globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
+
+        return cypress.start([`--run-project=${this.todosPath}`]).then(() => {
+          expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
+        })
+      })
     })
 
     it('runs project headlessly and exits with exit code 0', function () {
@@ -1564,6 +1602,24 @@ describe('lib/cypress', () => {
         this.expectExitWithErr('DASHBOARD_STALE_RUN')
 
         return snapshotConsoleLogs('DASHBOARD_STALE_RUN 1')
+      })
+    })
+
+    describe('cloud recommendation message', () => {
+      it('does not display if --record is passed', function () {
+        process.env.CI = true
+        globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
+
+        return cypress.start([
+          `--run-project=${this.recordPath}`,
+          '--record',
+          '--key=token-123',
+          '--group=electron-smoke-tests',
+          '--ciBuildId=ciBuildId123',
+        ])
+        .then(() => {
+          expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
+        })
       })
     })
   })

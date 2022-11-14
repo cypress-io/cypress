@@ -215,7 +215,7 @@ declare namespace CypressCommandLine {
   /**
    * Cypress test run result for a single spec.
   */
-  interface RunResult {
+  export interface RunResult {
     /**
      * Accurate test results collected by Cypress.
      */
