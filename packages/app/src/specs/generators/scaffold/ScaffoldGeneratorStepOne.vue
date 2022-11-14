@@ -58,7 +58,7 @@
 import { gql, useMutation } from '@urql/vue'
 import { ScaffoldGeneratorStepOne_ScaffoldIntegrationDocument } from '../../../generated/graphql'
 import { computed, onMounted } from 'vue'
-import { buildSpecTree } from '../../spec-utils'
+import { buildSpecTree } from '../../../specs/tree/useCollapsibleTree'
 import { useCollapsibleTree } from '../../tree/useCollapsibleTree'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import Button from '@cy/components/Button.vue'
