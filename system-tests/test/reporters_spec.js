@@ -36,22 +36,30 @@ describe('e2e reporters', () => {
 
   it('supports junit reporter and reporter options', function () {
     return systemTests.exec(this, {
-      spec: 'simple_passing.cy.js',
+      spec: 'simple_passing.cy.js,simple_failing.cy.js',
       snapshot: true,
       reporter: 'junit',
       reporterOptions: 'mochaFile=junit-output/result.[hash].xml,testCaseSwitchClassnameAndName=true',
+      expectedExitCode: 2,
     })
     .then(() => {
       return glob(path.join(e2ePath, 'junit-output', 'result.*.xml'))
       .then((paths) => {
-        expect(paths.length).to.eq(1)
+        expect(paths.length).to.eq(2)
 
-        return fs.readFileAsync(paths[0], 'utf8')
-        .then((str) => {
+        return Promise.all([fs.readFileAsync(paths[0], 'utf8'), fs.readFileAsync(paths[1], 'utf8')])
+        .then((results) => {
+          const str = results.join('')
+
           expect(str).to.include('<testsuite name="simple passing spec"')
           expect(str).to.include('<testcase name="passes"')
-
           expect(str).to.include('classname="simple passing spec passes"')
+
+          expect(str).to.include('<testsuite name="simple failing spec"')
+          expect(str).to.include('<testcase name="fails1"')
+          expect(str).to.include('<testcase name="fails2"')
+          expect(str).to.include('classname="simple failing spec fails1"')
+          expect(str).to.include('classname="simple failing spec fails2"')
         })
       })
     })
