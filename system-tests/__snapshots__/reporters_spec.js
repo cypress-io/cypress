@@ -74,9 +74,9 @@ exports['e2e reporters supports junit reporter and reporter options 1'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing.cy.js/simple failing spec -- fai   (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing.cy.js/simple failing spec -- fai     (1280x720)
      ls1 (failed).png                                                                               
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing.cy.js/simple failing spec -- fai   (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing.cy.js/simple failing spec -- fai     (1280x720)
      ls2 (failed).png                                                                               
 
 
@@ -309,11 +309,11 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s   (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
      pec -- beforeEach hooks -- never gets here -- before each hook (failed).png                    
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s   (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
      pec -- afterEach hooks -- runs this -- after each hook (failed).png                            
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s   (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
      pec -- after hooks -- fails on this -- after all hook (failed).png                             
 
 
@@ -485,11 +485,11 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s   (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
      pec -- beforeEach hooks -- never gets here -- before each hook (failed).png                    
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s   (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
      pec -- afterEach hooks -- runs this -- after each hook (failed).png                            
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s   (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
      pec -- after hooks -- fails on this -- after all hook (failed).png                             
 
 
@@ -661,11 +661,11 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s   (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
      pec -- beforeEach hooks -- never gets here -- before each hook (failed).png                    
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s   (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
      pec -- afterEach hooks -- runs this -- after each hook (failed).png                            
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s   (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
      pec -- after hooks -- fails on this -- after all hook (failed).png                             
 
 
