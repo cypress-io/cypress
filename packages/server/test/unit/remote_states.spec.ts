@@ -29,6 +29,7 @@ describe('remote states', () => {
           port: '3500',
           domain: '',
           tld: 'localhost',
+          subdomain: null,
           protocol: 'http:',
         },
       })
@@ -53,6 +54,7 @@ describe('remote states', () => {
           port: '3500',
           domain: '',
           tld: 'localhost',
+          subdomain: null,
           protocol: 'http:',
         },
       })
@@ -71,6 +73,7 @@ describe('remote states', () => {
           port: '3500',
           domain: '',
           tld: 'localhost',
+          subdomain: null,
           protocol: 'http:',
         },
       })
@@ -91,6 +94,7 @@ describe('remote states', () => {
           port: '3500',
           domain: '',
           tld: 'localhost',
+          subdomain: null,
           protocol: 'http:',
         },
       })
@@ -111,6 +115,7 @@ describe('remote states', () => {
           port: '3500',
           domain: '',
           tld: 'localhost',
+          subdomain: null,
           protocol: 'http:',
         },
       })
@@ -161,6 +166,7 @@ describe('remote states', () => {
           port: '443',
           domain: 'google',
           tld: 'com',
+          subdomain: 'staging',
           protocol: 'https:',
         },
       })
@@ -183,6 +189,7 @@ describe('remote states', () => {
           port: '443',
           domain: 'google',
           tld: 'com',
+          subdomain: 'staging',
           protocol: 'https:',
         },
       })
@@ -207,6 +214,7 @@ describe('remote states', () => {
           port: '443',
           domain: 'google',
           tld: 'com',
+          subdomain: 'staging',
           protocol: 'https:',
         },
       })
@@ -232,6 +240,7 @@ describe('remote states', () => {
           port: '443',
           domain: 'google',
           tld: 'com',
+          subdomain: 'staging',
           protocol: 'https:',
         },
       })
@@ -250,6 +259,7 @@ describe('remote states', () => {
           port: '443',
           domain: 'google',
           tld: 'com',
+          subdomain: 'prod',
           protocol: 'https:',
         },
       })
@@ -268,6 +278,7 @@ describe('remote states', () => {
           port: '443',
           domain: 'google',
           tld: 'com',
+          subdomain: 'staging',
           protocol: 'https:',
         },
       })
@@ -286,6 +297,7 @@ describe('remote states', () => {
           port: '80',
           domain: 'google',
           tld: 'com',
+          subdomain: 'staging',
           protocol: 'http:',
         },
       })
@@ -304,6 +316,7 @@ describe('remote states', () => {
           port: '4200',
           domain: '',
           tld: 'localhost',
+          subdomain: null,
           protocol: 'http:',
         },
       })
@@ -346,6 +359,7 @@ describe('remote states', () => {
           port: '80',
           domain: 'foobar',
           tld: 'com',
+          subdomain: 'www',
           protocol: 'http:',
         },
       }

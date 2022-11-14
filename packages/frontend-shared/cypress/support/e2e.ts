@@ -146,6 +146,10 @@ declare global {
        */
       visitLaunchpad(href?: string): Chainable<AUTWindow>
       /**
+       * Skips the welcome screen of the launchpad
+       */
+      skipWelcome(): Chainable<any>
+      /**
        * Mocks the system browser retrieval to return the desired browsers
        */
       findBrowsers(options?: FindBrowsersOptions): void
@@ -356,6 +360,14 @@ function visitLaunchpad () {
   })
 }
 
+function skipWelcome () {
+  // click Continue on Welcome page
+  // and wait for the button to disappear
+  return cy.contains('[data-cy="major-version-welcome-footer"] button', 'Continue')
+  .click()
+  .should('not.exist')
+}
+
 type UnwrapPromise<R> = R extends PromiseLike<infer U> ? U : R
 
 export type CyTaskResult<R> =
@@ -546,6 +558,7 @@ Cypress.Commands.add('openGlobalMode', openGlobalMode)
 Cypress.Commands.add('visitApp', visitApp)
 Cypress.Commands.add('loginUser', loginUser)
 Cypress.Commands.add('visitLaunchpad', visitLaunchpad)
+Cypress.Commands.add('skipWelcome', skipWelcome)
 Cypress.Commands.add('startAppServer', startAppServer)
 Cypress.Commands.add('openProject', openProject)
 Cypress.Commands.add('withCtx', withCtx)

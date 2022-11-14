@@ -48,7 +48,7 @@ describe('src/cy/commands/assertions', () => {
       this.logs = []
 
       cy.on('log:added', (attrs, log) => {
-        this.logs.push(log)
+        this.logs?.push(log)
         this.lastLog = log
       })
 
@@ -56,8 +56,8 @@ describe('src/cy/commands/assertions', () => {
     })
 
     it('returns the subject for chainability', () => {
-      cy
-      .noop({ foo: 'bar' }).should('deep.eq', { foo: 'bar' })
+      cy.noop({ foo: 'bar' })
+      .should('deep.eq', { foo: 'bar' })
       .then((obj) => {
         expect(testCommands()).to.eql([
           { name: 'visit', snapshots: 1, retries: 0 },
@@ -366,7 +366,7 @@ describe('src/cy/commands/assertions', () => {
 
         cy.on('log:added', (attrs, log) => {
           if (log.get('name') === 'assert') {
-            logs.push(log)
+            logs?.push(log)
 
             if (logs.length === 3) {
               done()
@@ -414,19 +414,26 @@ describe('src/cy/commands/assertions', () => {
       it('does not log extra commands on fail and properly fails command + assertions', function (done) {
         cy.on('fail', (err) => {
           assertLogLength(this.logs, 6)
+          expect(err.message).to.eq('You must provide a valid number to a `length` assertion. You passed: `asdf`')
 
           expect(this.logs[3].get('name')).to.eq('get')
+          expect(this.logs[3].get('state')).to.eq('passed')
+          expect(this.logs[3].get('error')).to.be.undefined
 
           expect(this.logs[4].get('name')).to.eq('assert')
           expect(this.logs[4].get('state')).to.eq('failed')
-          expect(this.logs[4].get('error').name).to.eq('AssertionError')
+          expect(this.logs[4].get('error').name).to.eq('CypressError')
+          expect(this.logs[4].get('error')).to.eq(err)
 
           done()
         })
 
         cy
-        .root().should('exist').and('contain', 'foo')
-        .get('button').should('have.length', 'asdf')
+        .root()
+        .should('exist')
+        .and('contain', 'foo')
+        .get('button')
+        .should('have.length', 'asdf')
       })
 
       it('finishes failed assertions and does not log extra commands when cy.contains fails', function (done) {
@@ -434,12 +441,13 @@ describe('src/cy/commands/assertions', () => {
           assertLogLength(this.logs, 2)
 
           expect(this.logs[0].get('name')).to.eq('contains')
-          expect(this.logs[0].get('state')).to.eq('failed')
-          expect(this.logs[0].get('error')).to.eq(err)
+          expect(this.logs[0].get('state')).to.eq('passed')
+          expect(this.logs[0].get('error')).to.be.undefined
 
           expect(this.logs[1].get('name')).to.eq('assert')
           expect(this.logs[1].get('state')).to.eq('failed')
           expect(this.logs[1].get('error').name).to.eq('AssertionError')
+          expect(this.logs[1].get('error')).to.eq(err)
 
           done()
         })
@@ -703,7 +711,7 @@ describe('src/cy/commands/assertions', () => {
       })
 
       it('does not additionally log when .should is the current command', function (done) {
-        cy.on('fail', (err) => {
+        cy.once('fail', (err) => {
           const { lastLog } = this
 
           assertLogLength(this.logs, 1)
@@ -794,7 +802,7 @@ describe('src/cy/commands/assertions', () => {
       this.logs = []
 
       cy.on('log:added', (attrs, log) => {
-        this.logs.push(log)
+        this.logs?.push(log)
 
         if (attrs.name === 'assert') {
           this.lastLog = log
@@ -974,16 +982,21 @@ describe('src/cy/commands/assertions', () => {
       cy.on('log:added', (attrs, log) => {
         if (attrs.name === 'assert') {
           cy.removeAllListeners('log:added')
+          let err
 
-          expect(log.invoke('consoleProps')).to.deep.eq({
-            Command: 'assert',
-            expected: false,
-            actual: true,
-            Message: 'expected true to be false',
-            Error: log.get('error').stack,
-          })
+          try {
+            expect(log.invoke('consoleProps')).to.deep.contain({
+              Command: 'assert',
+              expected: false,
+              actual: true,
+              Message: 'expected true to be false',
+              Error: log.get('error').stack,
+            })
+          } catch (e) {
+            err = e
+          }
 
-          done()
+          done(err)
         }
       })
 
@@ -1136,7 +1149,7 @@ describe('src/cy/commands/assertions', () => {
       this.logs = []
 
       cy.on('log:added', (attrs, log) => {
-        this.logs.push(log)
+        this.logs?.push(log)
       })
 
       return null
@@ -1578,7 +1591,7 @@ describe('src/cy/commands/assertions', () => {
       }
 
       cy.on('log:added', (attrs, log) => {
-        this.logs.push(log)
+        this.logs?.push(log)
       })
 
       return null
@@ -2142,6 +2155,14 @@ describe('src/cy/commands/assertions', () => {
       })
 
       it('visible, not visible, adds to error', function () {
+        cy.once('fail', (err) => {
+          const l6 = this.logs[5]
+
+          // the error on this log should have this message appended to it
+          expect(l6.get('error').message).to.include(`expected '<div>' to be 'visible'`)
+          expect(err.message).to.include(`This element \`<div>\` is not visible because it has CSS property: \`display: none\``)
+        })
+
         expect(this.$div).to.be.visible // 1
         expect(this.$div2).not.to.be.visible // 2
 
@@ -2158,15 +2179,7 @@ describe('src/cy/commands/assertions', () => {
           'expected **<div>** not to be **visible**',
         )
 
-        try {
-          expect(this.$div2).to.be.visible
-        } catch (err) {
-          const l6 = this.logs[5]
-
-          // the error on this log should have this message appended to it
-          expect(l6.get('error').message).to.include(`expected '<div>' to be 'visible'`)
-          expect(l6.get('error').message).to.include(`This element \`<div>\` is not visible because it has CSS property: \`display: none\``)
-        }
+        expect(this.$div2).to.be.visible
       })
 
       it('throws when obj is not DOM', function (done) {

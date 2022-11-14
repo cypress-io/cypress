@@ -34,7 +34,7 @@ export default function (Commands, Cypress, cy, state) {
   const shouldFnWithCallback = function (subject, fn) {
     state('current')?.set('followedByShouldCallback', true)
 
-    const commandEnqueued = (obj) => {
+    const commandEnqueued = (obj: Cypress.EnqueuedCommandAttributes) => {
       $errUtils.throwErrByPath(
         'should.command_inside_should', {
           args: { action: obj.name },

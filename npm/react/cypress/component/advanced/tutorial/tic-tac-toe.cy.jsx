@@ -4,6 +4,7 @@
 import React from 'react'
 import { mount } from '@cypress/react'
 import { Game } from './tic-tac-toe.jsx'
+import './tic-tac-toe.css'
 
 describe('Tic Tac Toe', () => {
   /**
@@ -18,9 +19,7 @@ describe('Tic Tac Toe', () => {
   })
 
   it('starts and lets X win', () => {
-    mount(<Game />, {
-      cssFile: 'cypress/component/advanced/tutorial/tic-tac-toe.css',
-    })
+    mount(<Game />)
 
     cy.contains('.status', 'Next player: X')
     clickSquare(0, 0).click()

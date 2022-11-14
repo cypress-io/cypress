@@ -1,7 +1,6 @@
 import { shouldHaveTestResults } from '../runner/support/spec-loader'
 
-export interface ExpectedResults
-{
+export interface ExpectedResults {
   passCount?: number
   failCount?: number
   pendingCount?: number
@@ -23,13 +22,10 @@ declare global {
   }
 }
 
-// Here we export the function with no intention to import it
-// This only tells the typescript type checker that this definitely is a module
-// This way, we are allowed to use the global namespace declaration
 export const waitForSpecToFinish = (expectedResults, timeout?: number) => {
   // First ensure the test is loaded
-  cy.get('.passed > .num').should('contain', '--')
-  cy.get('.failed > .num').should('contain', '--')
+  cy.get('.passed > .num').should('exist')
+  cy.get('.failed > .num').should('exist')
 
   // Then ensure the tests are running
   cy.contains('Your tests are loading...', { timeout: timeout || 20000 }).should('not.exist')

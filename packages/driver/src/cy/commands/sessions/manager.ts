@@ -10,15 +10,25 @@ import {
 type ActiveSessions = Cypress.Commands.Session.ActiveSessions
 type SessionData = Cypress.Commands.Session.SessionData
 
-const getLogProperties = (displayName) => {
+const LOGS = {
+  clearCurrentSessionData: {
+    displayName: 'Clear cookies, localStorage and sessionStorage',
+    consoleProps: {
+      Event: 'Cypress.session.clearCurrentSessionData()',
+      Details: 'Clearing the cookies, localStorage and sessionStorage across all domains. This ensures the session is created in clean browser context.',
+    },
+  },
+}
+
+const getLogProperties = (apiName) => {
   return {
     name: 'sessions_manager',
-    displayName,
     message: '',
-    event: 'true',
+    event: true,
     state: 'passed',
     type: 'system',
     snapshot: false,
+    ...LOGS[apiName],
   }
 }
 
@@ -116,7 +126,7 @@ export default class SessionsManager {
   // this the public api exposed to consumers as Cypress.session
   sessions = {
     defineSession: (options = {} as any): SessionData => {
-      const sess_state: SessionData = {
+      return {
         id: options.id,
         cookies: null,
         localStorage: null,
@@ -126,10 +136,6 @@ export default class SessionsManager {
         validate: options.validate,
         cacheAcrossSpecs: !!options.cacheAcrossSpecs,
       }
-
-      this.setActiveSession({ [sess_state.id]: sess_state })
-
-      return sess_state
     },
 
     clearAllSavedSessions: async () => {
@@ -143,7 +149,7 @@ export default class SessionsManager {
     clearCurrentSessionData: async () => {
       // this prevents a log occurring when we clear session in-between tests
       if (this.cy.state('duringUserTestExecution')) {
-        this.Cypress.log(getLogProperties('Clear cookies, localStorage and sessionStorage'))
+        this.Cypress.log(getLogProperties('clearCurrentSessionData'))
       }
 
       window.localStorage.clear()

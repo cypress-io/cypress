@@ -1004,8 +1004,8 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('#ptrNone').click({ timeout: 300, force: true })
       })
 
-      it('should error with message about pointer-events', function () {
-        const onError = cy.stub().callsFake((err) => {
+      it('should error with message about pointer-events', function (done) {
+        cy.once('fail', (err) => {
           const { lastLog } = this
 
           expect(err.message).to.contain('has CSS `pointer-events: none`')
@@ -1020,18 +1020,14 @@ describe('src/cy/commands/actions/click', () => {
           ])
 
           expect(consoleProps['But it has CSS']).to.eq('pointer-events: none')
+          done()
         })
-
-        cy.once('fail', onError)
 
         cy.get('#ptrNone').click({ timeout: 300 })
-        .then(() => {
-          expect(onError).calledOnce
-        })
       })
 
-      it('should error with message about pointer-events and include inheritance', function () {
-        const onError = cy.stub().callsFake((err) => {
+      it('should error with message about pointer-events and include inheritance', function (done) {
+        cy.once('fail', (err) => {
           const { lastLog } = this
 
           expect(err.message).to.contain('has CSS `pointer-events: none`, inherited from this element:')
@@ -1049,14 +1045,10 @@ describe('src/cy/commands/actions/click', () => {
           expect(consoleProps['But it has CSS']).to.eq('pointer-events: none')
 
           expect(consoleProps['Inherited From']).to.eq(this.ptrNone.get(0))
+          done()
         })
-
-        cy.once('fail', onError)
 
         cy.get('#ptrNoneChild').click({ timeout: 300 })
-        .then(() => {
-          expect(onError).calledOnce
-        })
       })
     })
 
@@ -2125,10 +2117,8 @@ describe('src/cy/commands/actions/click', () => {
         cy.on('log:added', (attrs, log) => {
           this.lastLog = log
 
-          this.logs.push(log)
+          this.logs?.push(log)
         })
-
-        null
       })
 
       it('throws when not a dom subject', (done) => {
@@ -2248,7 +2238,7 @@ describe('src/cy/commands/actions/click', () => {
         const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').prependTo(cy.$$('body'))
         const span = $('<span>span on button</span>').css({ position: 'absolute', left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo(cy.$$('body'))
 
-        cy.on('fail', (err) => {
+        cy.once('fail', (err) => {
           const { lastLog } = this
 
           // get + click logs
@@ -4171,6 +4161,7 @@ describe('mouse state', () => {
 
           e.target.removeEventListener('pointerout', pointerout)
         }).as('pointerout')
+
         const pointerleave = cy.stub().callsFake((e) => {
           const exp = {
             altKey: false,
@@ -4208,6 +4199,7 @@ describe('mouse state', () => {
 
           e.target.removeEventListener('pointerleave', pointerleave)
         }).as('pointerleave')
+
         const mouseover = cy.stub().callsFake((e) => {
           const exp = {
             altKey: false,
@@ -4245,6 +4237,7 @@ describe('mouse state', () => {
 
           e.target.removeEventListener('mouseover', mouseover)
         }).as('mouseover')
+
         const mouseenter = cy.stub().callsFake((e) => {
           const exp = {
             altKey: false,
@@ -4282,6 +4275,7 @@ describe('mouse state', () => {
 
           e.target.removeEventListener('mouseenter', mouseenter)
         }).as('mouseenter')
+
         const pointerover = cy.stub().callsFake((e) => {
           const exp = {
             altKey: false,
@@ -4319,6 +4313,7 @@ describe('mouse state', () => {
 
           e.target.removeEventListener('pointerover', pointerover)
         }).as('pointerover')
+
         const pointerenter = cy.stub().callsFake((e) => {
           const exp = {
             altKey: false,
