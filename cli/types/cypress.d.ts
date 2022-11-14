@@ -2995,6 +2995,12 @@ declare namespace Cypress {
     setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => Promise<PluginConfigOptions | void> | PluginConfigOptions | void
 
     indexHtmlFile: string
+
+    /**
+     * Enables the "Run All Specs" UI feature, allowing the execution of multiple specs at once
+     * @default false
+     */
+    experimentalRunAllSpecs: boolean
   }
 
   /**

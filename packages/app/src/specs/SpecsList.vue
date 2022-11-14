@@ -1,5 +1,11 @@
 <template>
   <div class="p-24px spec-container">
+    <button
+      v-if="isRunAllSpecsAllowed"
+      @click="onRunAllSpecs"
+    >
+      Run All Specs
+    </button>
     <SpecsListBanners
       :gql="props.gql"
       :is-spec-not-found="isSpecNotFound"
@@ -198,6 +204,7 @@ import { useCloudSpecData } from '../composables/useCloudSpecData'
 import { useSpecFilter } from '../composables/useSpecFilter'
 import { useRequestAccess } from '../composables/useRequestAccess'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useRunAllSpecs } from '../composables/useRunAllSpecs'
 
 const { openLoginConnectModal } = useLoginConnectStore()
 
@@ -416,6 +423,20 @@ const { refetchFailedCloudData } = useCloudSpecData(
   displayedSpecs,
   props.gql.currentProject?.specs as SpecsListFragment[] || [],
 )
+
+const { runAllSpecs, isRunAllSpecsAllowed } = useRunAllSpecs()
+
+function onRunAllSpecs () {
+  const filteredSpecs = list.value.reduce((acc, node) => {
+    if (node.data.isLeaf) {
+      acc.push(node.data.data?.relative!)
+    }
+
+    return acc
+  }, [] as string[])
+
+  runAllSpecs(filteredSpecs)
+}
 
 </script>
 

@@ -1374,6 +1374,9 @@ type Mutation {
   """Save the prompt-shown state for this project"""
   setPromptShown(slug: String!): Boolean
 
+  """List of specs to run for the "Run All Specs" Feature"""
+  setRunAllSpecs(runAllSpecs: [String!]!): Boolean
+
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
 

@@ -4,6 +4,9 @@
     class="pt-8px specs-list-container"
     data-cy="specs-list-container"
   >
+    <button @click="onRunAllSpecs">
+      Run All Specs
+    </button>
     <ul
       v-bind="wrapperProps"
       class="children:h-30px"
@@ -72,6 +75,7 @@ import { useSpecStore } from '../store'
 import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
 import { useVirtualListNavigation } from '@packages/frontend-shared/src/composables/useVirtualListNavigation'
 import { useStudioStore } from '../store/studio-store'
+import { useRunAllSpecs } from '../composables/useRunAllSpecs'
 
 const props = defineProps<{
   specs: FuzzyFoundSpec[]
@@ -154,6 +158,20 @@ const resetFocusIfNecessary = (row, index) => {
   if (isTabbable(row, index)) {
     activeItem.value = index
   }
+}
+
+const { runAllSpecs } = useRunAllSpecs()
+
+function onRunAllSpecs () {
+  const filteredSpecs = list.value.reduce((acc, node) => {
+    if (node.data.isLeaf) {
+      acc.push(node.data.data?.relative!)
+    }
+
+    return acc
+  }, [] as string[])
+
+  runAllSpecs(filteredSpecs)
 }
 
 </script>

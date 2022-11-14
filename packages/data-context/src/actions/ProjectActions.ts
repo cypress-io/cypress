@@ -1,5 +1,5 @@
 import type { CodeGenType, MutationSetProjectPreferencesInGlobalCacheArgs, NexusGenObjects, NexusGenUnions } from '@packages/graphql/src/gen/nxs.gen'
-import type { InitializeProjectOptions, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig, AllowedState, SpecWithRelativeRoot, OpenProjectLaunchOpts } from '@packages/types'
+import { InitializeProjectOptions, FoundBrowser, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig, AllowedState, SpecWithRelativeRoot, OpenProjectLaunchOpts, RUN_ALL_SPEC } from '@packages/types'
 import type { EventEmitter } from 'events'
 import execa from 'execa'
 import path from 'path'
@@ -246,10 +246,10 @@ export class ProjectActions {
 
     if (!browser) throw new Error('Missing browser in launchProject')
 
-    let activeSpec: FoundSpec | undefined
+    let activeSpec: Cypress.Spec | undefined
 
     if (specPath) {
-      activeSpec = this.ctx.project.getCurrentSpecByAbsolute(specPath)
+      activeSpec = specPath === '__all' ? RUN_ALL_SPEC : this.ctx.project.getCurrentSpecByAbsolute(specPath)
     }
 
     // launchProject expects a spec when opening browser for url navigation.
