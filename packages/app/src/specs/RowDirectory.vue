@@ -25,6 +25,7 @@
         class="font-medium"
         highlight-classes="text-gray-1000"
       />
+      <slot />
     </div>
     <span class="sr-only">{{ expanded ? 'collapse' : 'expand' }}</span>
   </button>

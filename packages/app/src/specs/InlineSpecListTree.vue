@@ -19,6 +19,8 @@
         data-cy="spec-row-item"
         :data-selected-spec="isCurrentSpec(row.data)"
         @click.self="submit(row.data, row.index)"
+        @mouseleave="showRunAll = false"
+        @mouseenter="!row.data.isLeaf ? childrenSpecs(collapsible, row) : showRunAll = false"
       >
         <RouterLink
           :ref="el => setItemRef(el, row.index)"
@@ -52,7 +54,14 @@
             :expanded="treeSpecList[row.index].expanded.value"
             :indexes="row.data.highlightIndexes"
             data-cy="directory-item"
-          />
+          >
+            <RunAllSpecs
+              v-if="showRunAll && row.index === rowIndex"
+              data-cy="run-all-specs"
+              :spec-number="children"
+              :runner="true"
+            />
+          </DirectoryItem>
         </RouterLink>
       </li>
     </ul>
@@ -65,13 +74,14 @@ import type { UseCollapsibleTreeNode } from '@packages/frontend-shared/src/compo
 import { buildSpecTree } from './spec-utils'
 import type { SpecTreeNode, FuzzyFoundSpec } from './spec-utils'
 import SpecFileItem from './SpecFileItem.vue'
-import { computed, watch, onMounted } from 'vue'
+import { computed, watch, onMounted, ref } from 'vue'
 import DirectoryItem from './DirectoryItem.vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useSpecStore } from '../store'
 import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
 import { useVirtualListNavigation } from '@packages/frontend-shared/src/composables/useVirtualListNavigation'
 import { useStudioStore } from '../store/studio-store'
+import RunAllSpecs from './RunAllSpecs.vue'
 
 const props = defineProps<{
   specs: FuzzyFoundSpec[]
@@ -154,6 +164,17 @@ const resetFocusIfNecessary = (row, index) => {
   if (isTabbable(row, index)) {
     activeItem.value = index
   }
+}
+
+let children = ref(0)
+let showRunAll = ref(false)
+let rowIndex = ref()
+
+// For run all specs
+function childrenSpecs (collapsible, row) {
+  showRunAll.value = true
+  rowIndex.value = row.index
+  children.value = 48
 }
 
 </script>

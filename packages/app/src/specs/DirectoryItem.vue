@@ -14,6 +14,7 @@
       class="text-gray-400 group-focus:text-indigo-300"
       highlight-classes="font-bold text-white"
     />
+    <slot />
   </div>
 </template>
 

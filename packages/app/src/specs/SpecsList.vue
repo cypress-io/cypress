@@ -86,6 +86,8 @@
           :grid-columns="tableGridColumns"
           :route="{ path: '/specs/runner', query: { file: row.data.data?.relative?.replace(/\\/g, '/') } }"
           @toggleRow="row.data.toggle"
+          @mouseleave="showRunAll = false"
+          @mouseenter="!row.data.isLeaf ? childrenSpecs(collapsible, row) : showRunAll = false"
         >
           <template #file>
             <SpecItem
@@ -113,7 +115,13 @@
               :indexes="row.data.highlightIndexes"
               :aria-controls="getIdIfDirectory(row)"
               @click.stop="row.data.toggle"
-            />
+            >
+              <RunAllSpecs
+                v-if="showRunAll && row.index === rowIndex"
+                data-cy="run-all-specs"
+                :spec-number="children"
+              />
+            </RowDirectory>
           </template>
 
           <template #git-info>
@@ -198,6 +206,7 @@ import { useCloudSpecData } from '../composables/useCloudSpecData'
 import { useSpecFilter } from '../composables/useSpecFilter'
 import { useRequestAccess } from '../composables/useRequestAccess'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import RunAllSpecs from './RunAllSpecs.vue'
 
 const { openLoginConnectModal } = useLoginConnectStore()
 
@@ -416,6 +425,18 @@ const { refetchFailedCloudData } = useCloudSpecData(
   displayedSpecs,
   props.gql.currentProject?.specs as SpecsListFragment[] || [],
 )
+
+let children = ref(0)
+let showRunAll = ref(false)
+let rowIndex = ref()
+
+// For run all specs
+function childrenSpecs (collapsible, row) {
+  showRunAll.value = true
+  rowIndex.value = row.index
+  //children.value = collapsible.dirMap.get(row.data.id)?.length
+  children.value = 48
+}
 
 </script>
 
