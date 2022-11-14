@@ -514,6 +514,10 @@
       "experimentalWebKitSupport": {
         "name": "WebKit Support",
         "description": "Adds support for testing in the WebKit browser engine used by Safari. See https://on.cypress.io/webkit-experiment for more information."
+      },
+      "experimentalRunAllSpecs": {
+        "name": "Run All Specs",
+        "description": "Enables the \"Run All Specs\" UI feature, allowing the execution of multiple specs at once."
       }
     },
     "device": {
