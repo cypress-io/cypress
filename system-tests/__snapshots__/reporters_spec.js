@@ -9,6 +9,8 @@ We searched for the reporter in these paths:
 Learn more at https://on.cypress.io/reporters
 
 Error: Cannot find module '/foo/bar/.projects/e2e/node_modules/module-does-not-exist'
+Require stack:
+- lib/reporter.js
       [stack trace lines]
 `
 
@@ -307,11 +309,11 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s    (2560x1440)
      pec -- beforeEach hooks -- never gets here -- before each hook (failed).png                    
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s    (2560x1440)
      pec -- afterEach hooks -- runs this -- after each hook (failed).png                            
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s    (2560x1440)
      pec -- after hooks -- fails on this -- after all hook (failed).png                             
 
 
@@ -483,11 +485,11 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s    (2560x1440)
      pec -- beforeEach hooks -- never gets here -- before each hook (failed).png                    
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s    (2560x1440)
      pec -- afterEach hooks -- runs this -- after each hook (failed).png                            
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s    (2560x1440)
      pec -- after hooks -- fails on this -- after all hook (failed).png                             
 
 
@@ -659,11 +661,11 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s    (2560x1440)
      pec -- beforeEach hooks -- never gets here -- before each hook (failed).png                    
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s    (2560x1440)
      pec -- afterEach hooks -- runs this -- after each hook (failed).png                            
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook.cy.js/simple failing hook s    (2560x1440)
      pec -- after hooks -- fails on this -- after all hook (failed).png                             
 
 
