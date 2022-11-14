@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v3.1.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.0.1...@cypress/webpack-dev-server-v3.1.0) (2022-11-10)
+
+
+### Features
+
+* add support for next 13 ([#24396](https://github.com/cypress-io/cypress/issues/24396)) ([cc4244d](https://github.com/cypress-io/cypress/commit/cc4244dd5d10d743389192dee6ded68d28c72665))
+
 # [@cypress/webpack-dev-server-v3.0.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.0.0...@cypress/webpack-dev-server-v3.0.1) (2022-11-08)
 
 
