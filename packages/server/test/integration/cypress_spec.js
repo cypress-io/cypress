@@ -353,7 +353,7 @@ describe('lib/cypress', () => {
     describe('cloud recommendation message', () => {
       it('gets logged when in CI and there is a failure', function () {
         process.env.CI = true
-        process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS = false
+        delete process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
 
         return cypress.start([`--run-project=${this.todosPath}`]).then(() => {
@@ -373,7 +373,7 @@ describe('lib/cypress', () => {
 
       it('does not get logged if all tests pass', function () {
         process.env.CI = true
-        process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS = false
+        delete process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 0 } }
 
         return cypress.start([`--run-project=${this.todosPath}`]).then(() => {
@@ -382,8 +382,8 @@ describe('lib/cypress', () => {
       })
 
       it('does not get logged if not running in CI', function () {
-        process.env.CI = false
-        process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS = false
+        delete process.env.CI
+        delete process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
 
         return cypress.start([`--run-project=${this.todosPath}`]).then(() => {
@@ -924,6 +924,10 @@ describe('lib/cypress', () => {
     })
 
     describe('config overrides', () => {
+      beforeEach(function () {
+        delete process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS
+      })
+
       it('can override default values', function () {
         return cypress.start([`--run-project=${this.todosPath}`, '--config=requestTimeout=1234,videoCompression=false'])
         .then(() => {
@@ -1112,6 +1116,7 @@ describe('lib/cypress', () => {
     describe('--env', () => {
       beforeEach(() => {
         process.env = _.omit(process.env, 'CYPRESS_DEBUG')
+        delete process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS
 
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 0 } }
       })
@@ -1613,7 +1618,7 @@ describe('lib/cypress', () => {
     describe('cloud recommendation message', () => {
       it('does not display if --record is passed', function () {
         process.env.CI = true
-        process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS = false
+        delete process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
 
         return cypress.start([
