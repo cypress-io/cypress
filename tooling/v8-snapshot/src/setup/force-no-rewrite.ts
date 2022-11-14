@@ -62,4 +62,11 @@ export default [
   'packages/server/lib/cloud/exception.ts',
   'packages/server/lib/errors.ts',
   'packages/server/lib/util/process_profiler.ts',
+  'node_modules/prettier/index.js',
+  'node_modules/prettier/parser-babel.js',
+  'node_modules/prettier/parser-espree.js',
+  'node_modules/prettier/parser-flow.js',
+  'node_modules/prettier/parser-meriyah.js',
+  'node_modules/prettier/parser-typescript.js',
+  'node_modules/prettier/third-party.js',
 ]
