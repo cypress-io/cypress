@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     /* Basic Options */
-    "target": "es2018",
+    "target": "ES2018",
     "module": "esnext",
     "lib": ["dom", "ESNext"],
     /*
