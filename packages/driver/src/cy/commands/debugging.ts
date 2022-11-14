@@ -19,18 +19,18 @@ const resume = (state, resumeAll = true) => {
   return onResume(resumeAll)
 }
 
-const getNextQueuedCommand = (state, queue) => {
+const getNextQueuedCommand = (queue) => {
   const search = (i) => {
     const cmd = queue.at(i)
 
-    if (cmd && cmd.get('skip')) {
+    if (cmd && cmd.state === 'skipped') {
       return search(i + 1)
     }
 
     return cmd
   }
 
-  return search(state('index'))
+  return search(queue.index)
 }
 
 interface InternalPauseOptions extends Partial<Cypress.Loggable> {
@@ -92,7 +92,7 @@ export default (Commands, Cypress, cy, state, config) => {
       }
 
       state('onPaused', (fn) => {
-        const next = getNextQueuedCommand(state, cy.queue)
+        const next = getNextQueuedCommand(cy.queue)
 
         // backup the current timeout
         const timeout = cy.timeout()

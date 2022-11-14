@@ -249,7 +249,7 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
       webpackOptions.module.rules.unshift({
         test: /\.(js|ts|jsx|tsx)$/,
         use: [{
-          loader: path.join(__dirname, 'lib/cross-origin-callback-loader'),
+          loader: require.resolve('@cypress/webpack-preprocessor/dist/lib/cross-origin-callback-loader.js'),
           options: {
             commands: callbackReplacementCommands,
           },

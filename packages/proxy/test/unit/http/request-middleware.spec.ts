@@ -548,7 +548,7 @@ describe('http/request-middleware', () => {
 
     it('sets wantsInjection to full when a request is buffered', async () => {
       const buffers = new HttpBuffers()
-      const buffer = { url: 'https://www.cypress.io/', isCrossSuperDomainOrigin: false } as HttpBuffer
+      const buffer = { url: 'https://www.cypress.io/', urlDoesNotMatchPolicyBasedOnDomain: false } as HttpBuffer
 
       buffers.set(buffer)
 
@@ -568,7 +568,7 @@ describe('http/request-middleware', () => {
 
     it('sets wantsInjection to fullCrossOrigin when a cross origin request is buffered and experimentalSessionAndOrigin=true', async () => {
       const buffers = new HttpBuffers()
-      const buffer = { url: 'https://www.cypress.io/', isCrossSuperDomainOrigin: true } as HttpBuffer
+      const buffer = { url: 'https://www.cypress.io/', urlDoesNotMatchPolicyBasedOnDomain: true } as HttpBuffer
 
       buffers.set(buffer)
 
@@ -591,7 +591,7 @@ describe('http/request-middleware', () => {
 
     it('sets wantsInjection to full when a cross origin request is buffered and experimentalSessionAndOrigin=false', async () => {
       const buffers = new HttpBuffers()
-      const buffer = { url: 'https://www.cypress.io/', isCrossSuperDomainOrigin: true } as HttpBuffer
+      const buffer = { url: 'https://www.cypress.io/', urlDoesNotMatchPolicyBasedOnDomain: true } as HttpBuffer
 
       buffers.set(buffer)
 
@@ -614,7 +614,7 @@ describe('http/request-middleware', () => {
 
     it('wantsInjection is not set when the request is not buffered', async () => {
       const buffers = new HttpBuffers()
-      const buffer = { url: 'https://www.cypress.io/', isCrossSuperDomainOrigin: true } as HttpBuffer
+      const buffer = { url: 'https://www.cypress.io/', urlDoesNotMatchPolicyBasedOnDomain: true } as HttpBuffer
 
       buffers.set(buffer)
 

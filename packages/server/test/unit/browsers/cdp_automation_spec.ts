@@ -2,7 +2,7 @@ const { expect, sinon } = require('../../spec_helper')
 
 import {
   CdpAutomation,
-  _cookieMatches,
+  cookieMatches,
   _domainIsWithinSuperdomain,
   CyCookie,
 } from '../../../lib/browsers/cdp_automation'
@@ -47,7 +47,7 @@ context('lib/browsers/cdp_automation', () => {
     })
   })
 
-  context('._cookieMatches', () => {
+  context('.cookieMatches', () => {
     it('matches as expected', () => {
       [
         {
@@ -61,7 +61,7 @@ context('lib/browsers/cdp_automation', () => {
           expected: true,
         },
       ].forEach(({ cookie, filter, expected }) => {
-        expect(_cookieMatches(cookie as CyCookie, filter)).to.eq(expected)
+        expect(cookieMatches(cookie as CyCookie, filter)).to.eq(expected)
       })
     })
   })
