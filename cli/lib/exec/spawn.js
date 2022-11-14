@@ -172,6 +172,12 @@ module.exports = {
 
         if (stdioOptions.env.ELECTRON_RUN_AS_NODE) {
           // Since we are running electron as node, we need to add an entry point file.
+          if (isPlatform('darwin')) {
+            startScriptPath = path.join(state.getBinaryPkgPath(path.join(executable, '..', '..', '..')), '..', 'index.js')
+          } else {
+            startScriptPath = path.join(state.getBinaryPkgPath(path.dirname(executable)), '..', 'index.js')
+          }
+
           startScriptPath = path.join(state.getBinaryPkgPath(path.dirname(executable)), '..', 'index.js')
         } else {
           // Start arguments with "--" so Electron knows these are OUR
