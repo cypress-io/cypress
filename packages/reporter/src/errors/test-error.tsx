@@ -72,7 +72,7 @@ const TestError = (props: TestErrorProps) => {
   }
 
   return (
-    <div className={cs('runnable-err', { 'show-recovered-test-err': err.isRecovered })}>
+    <div className={cs('runnable-err', { 'recovered-test-err': err.isRecovered })}>
       <div className='runnable-err-header'>
         {groupPlaceholder}
         <WarningIcon />

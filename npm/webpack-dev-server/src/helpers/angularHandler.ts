@@ -1,9 +1,9 @@
 import * as fs from 'fs-extra'
 import { tmpdir } from 'os'
 import * as path from 'path'
-import { pathToFileURL } from 'url'
 import type { Configuration } from 'webpack'
 import type { PresetHandlerResult, WebpackDevServerConfig } from '../devServer'
+import { dynamicAbsoluteImport, dynamicImport } from '../dynamic-import'
 import { sourceDefaultWebpackDependencies } from './sourceRelativeWebpackModules'
 
 export type BuildOptions = Record<string, any>
@@ -31,8 +31,6 @@ type AngularJson = {
     [project: string]: AngularJsonProjectConfig
   }
 }
-
-const dynamicImport = new Function('specifier', 'return import(specifier)')
 
 export async function getProjectConfig (projectRoot: string): Promise<Cypress.AngularDevServerProjectConfig> {
   const angularJson = await getAngularJson(projectRoot)
@@ -161,21 +159,21 @@ export async function getTempDir (): Promise<string> {
 }
 
 export async function getAngularCliModules (projectRoot: string) {
+  const angularCLiModules = [
+    '@angular-devkit/build-angular/src/utils/webpack-browser-config.js',
+    '@angular-devkit/build-angular/src/webpack/configs/common.js',
+    '@angular-devkit/build-angular/src/webpack/configs/styles.js',
+  ] as const
+
   const [
     { generateBrowserWebpackConfigFromContext },
     { getCommonConfig },
     { getStylesConfig },
-  ] = await Promise.all([
-    '@angular-devkit/build-angular/src/utils/webpack-browser-config.js',
-    '@angular-devkit/build-angular/src/webpack/configs/common.js',
-    '@angular-devkit/build-angular/src/webpack/configs/styles.js',
-  ].map((dep) => {
+  ] = await Promise.all(angularCLiModules.map((dep) => {
     try {
       const depPath = require.resolve(dep, { paths: [projectRoot] })
 
-      const url = pathToFileURL(depPath).href
-
-      return dynamicImport(url)
+      return dynamicAbsoluteImport(depPath)
     } catch (e) {
       throw new Error(`Could not resolve "${dep}". Do you have "@angular-devkit/build-angular" installed?`)
     }
@@ -189,7 +187,7 @@ export async function getAngularCliModules (projectRoot: string) {
 }
 
 export async function getAngularJson (projectRoot: string): Promise<AngularJson> {
-  const { findUp } = await dynamicImport('find-up') as typeof import('find-up')
+  const { findUp } = await dynamicImport<typeof import('find-up')>('find-up')
 
   const angularJsonPath = await findUp('angular.json', { cwd: projectRoot })
 

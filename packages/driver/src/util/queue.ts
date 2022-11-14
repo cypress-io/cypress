@@ -3,12 +3,13 @@ import Bluebird from 'bluebird'
 interface QueueRunProps {
   onRun: () => Bluebird<any> | Promise<any>
   onError: (err: Error) => void
-  onFinish: () => void
+  onFinish: () => Bluebird<any> | Promise<any>
 }
 
 export class Queue<T> {
   private queueables: T[] = []
   private _stopped = false
+  index: number = 0
 
   constructor (queueables: T[] = []) {
     this.queueables = queueables
@@ -45,6 +46,7 @@ export class Queue<T> {
   }
 
   clear () {
+    this.index = 0
     this.queueables.length = 0
   }
 
@@ -81,7 +83,7 @@ export class Queue<T> {
       }
     })
     .catch(onError)
-    .finally(onFinish)
+    .then(onFinish)
 
     const cancel = () => {
       promise.cancel()
