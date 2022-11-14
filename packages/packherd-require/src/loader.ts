@@ -898,8 +898,14 @@ export class PackherdModuleLoader {
       parent = this._createModule(fullPath, parent, moduleUri)
     }
 
+    const originalRequireResolve = require.resolve
+
     require.resolve = Object.assign(
-      (moduleUri: string, _options?: { paths?: string[] }) => {
+      (moduleUri: string, options?: { paths?: string[] }) => {
+        if (options && options.paths) {
+          return originalRequireResolve(moduleUri, options)
+        }
+
         return this.tryResolve(moduleUri, parent).fullPath
       },
       {
