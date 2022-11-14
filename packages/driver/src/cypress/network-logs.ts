@@ -6,23 +6,6 @@ import Debug from 'debug'
 
 const debug = Debug('cypress:driver:network-logs')
 
-/**
- * Remove and return the first element from `array` for which `filterFn` returns a truthy value.
- */
-function take<E> (array: E[], filterFn: (data: E) => boolean) {
-  for (const i in array) {
-    const e = array[i]
-
-    if (!filterFn(e)) continue
-
-    array.splice(i as unknown as number, 1)
-
-    return e
-  }
-
-  return
-}
-
 function formatInterception ({ route, interception }: ProxyRequest['interceptions'][number]) {
   const ret = {
     'RouteMatcher': route.options,
@@ -227,7 +210,6 @@ class ProxyRequest {
 }
 
 export default class NetworkLogs {
-  unloggedPreRequests: Array<BrowserPreRequest> = []
   proxyRequests: Array<ProxyRequest> = []
   _filter: (requestInfo: BrowserPreRequest) => boolean
 
@@ -237,7 +219,7 @@ export default class NetworkLogs {
     Cypress.on('request:event', (eventName, data) => {
       switch (eventName) {
         case 'incoming:request':
-          return this.logIncomingRequest(data)
+          return this.createProxyRequestLog(data)
         case 'response:received':
           return this.updateRequestWithResponse(data)
         case 'request:error':
@@ -253,7 +235,6 @@ export default class NetworkLogs {
           proxyRequest.log.end()
         }
       }
-      this.unloggedPreRequests = []
       this.proxyRequests = []
     })
   }
@@ -281,16 +262,10 @@ export default class NetworkLogs {
    * Update an existing proxy log with an interception, or create a new log if one was not created (like if shouldLog returned false)
    */
   logInterception (interception: Interception, route: Route): ProxyRequest {
-    const unloggedPreRequest = take(this.unloggedPreRequests, ({ requestId }) => requestId === interception.browserRequestId)
-
-    if (unloggedPreRequest) {
-      debug('interception matched an unlogged prerequest, logging %o', { unloggedPreRequest, interception })
-      this.createProxyRequestLog(unloggedPreRequest)
-    }
-
     let proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === interception.browserRequestId)
 
     if (!proxyRequest) {
+      throw new Error('missing proxy request')
       // this can happen in a race condition, if user runs Network.disable, if the browser doesn't send pre-request for some reason...
       debug(`Missing pre-request/proxy log for cy.intercept to ${interception.request.url} %o`, { interception, route })
 
@@ -344,21 +319,11 @@ export default class NetworkLogs {
     proxyRequest.log?.snapshot('error').error(proxyRequest.error)
   }
 
-  /**
-   * Create a Cypress.Log for an incoming proxy request, or store the metadata for later if it is ignored.
-   */
-  private logIncomingRequest (preRequest: BrowserPreRequest): void {
+  private createProxyRequestLog (preRequest: BrowserPreRequest): ProxyRequest {
     if (!this._filter(preRequest)) {
-      // TODO: probably not needed anymore with matchedIntercept??
-      this.unloggedPreRequests.push(preRequest)
-
       return
     }
 
-    this.createProxyRequestLog(preRequest)
-  }
-
-  private createProxyRequestLog (preRequest: BrowserPreRequest): ProxyRequest {
     const proxyRequest = new ProxyRequest(preRequest)
     const logConfig = getRequestLogConfig(proxyRequest as Omit<ProxyRequest, 'log'>)
 

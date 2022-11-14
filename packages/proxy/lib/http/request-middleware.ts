@@ -3,7 +3,7 @@ import { blocked, cors } from '@packages/network'
 import { SetMatchingRoutes, InterceptRequest } from '@packages/net-stubbing'
 import type { HttpMiddleware } from './'
 import { getSameSiteContext, addCookieJarCookiesToRequest, shouldAttachAndSetCookies } from './util/cookies'
-import { doesTopNeedToBeSimulated  } from './util/top-simulation'
+import { doesTopNeedToBeSimulated } from './util/top-simulation'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -18,6 +18,10 @@ const LogRequest: RequestMiddleware = function () {
   this.debug('proxying request %o', {
     req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
   })
+
+  if (this.req.url.includes('cypress.png')) {
+    debugger
+  }
 
   this.next()
 }
@@ -286,9 +290,9 @@ export default {
   MaybeAttachCrossOriginCookies,
   MaybeEndRequestWithBufferedResponse,
   SetMatchingRoutes,
-  InterceptRequest,
   CorrelateBrowserPreRequest,
   SendToDriver,
+  InterceptRequest,
   RedirectToClientRouteIfUnloaded,
   EndRequestsToBlockedHosts,
   StripUnsupportedAcceptEncoding,

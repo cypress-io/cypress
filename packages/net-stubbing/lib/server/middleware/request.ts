@@ -68,6 +68,8 @@ export const SetMatchingRoutes: RequestMiddleware = function () {
   this.req.requestId = request.id
   this.req.matchedIntercept = true
   this.netStubbingState.requests[request.id] = request
+
+  return this.next()
 }
 
 /**
