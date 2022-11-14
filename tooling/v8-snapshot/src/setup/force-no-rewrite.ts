@@ -58,4 +58,11 @@ export default [
   'packages/server/lib/open_project.ts',
   'packages/server/lib/project-base.ts',
   'packages/server/lib/socket-ct.ts',
+  'node_modules/prettier/index.js',
+  'node_modules/prettier/parser-babel.js',
+  'node_modules/prettier/parser-espree.js',
+  'node_modules/prettier/parser-flow.js',
+  'node_modules/prettier/parser-meriyah.js',
+  'node_modules/prettier/parser-typescript.js',
+  'node_modules/prettier/third-party.js',
 ]
