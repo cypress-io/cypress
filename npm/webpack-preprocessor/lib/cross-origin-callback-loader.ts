@@ -3,11 +3,11 @@ import { parse } from '@babel/parser'
 import { default as traverse } from '@babel/traverse'
 import { default as generate } from '@babel/generator'
 import { NodePath, types as t } from '@babel/core'
-import mergeSourceMaps from 'merge-source-map'
 import * as loaderUtils from 'loader-utils'
 import * as pathUtil from 'path'
 import Debug from 'debug'
 
+import mergeSourceMaps from './merge-source-map'
 import { crossOriginCallbackStore } from './cross-origin-callback-store'
 import utils from './utils'
 

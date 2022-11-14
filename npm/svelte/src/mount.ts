@@ -1,8 +1,7 @@
 import {
-  injectStylesBeforeElement,
-  StyleOptions,
   getContainerEl,
   setupHooks,
+  checkForRemovedStyleOptions,
 } from '@cypress/mount-utils'
 import type { ComponentConstructorOptions, ComponentProps, SvelteComponent } from 'svelte'
 
@@ -15,8 +14,7 @@ type SvelteComponentOptions<T extends SvelteComponent> = Omit<
 >;
 
 export interface MountOptions<T extends SvelteComponent>
-  extends SvelteComponentOptions<T>,
-  Partial<StyleOptions> {
+  extends SvelteComponentOptions<T> {
   log?: boolean
 }
 
@@ -56,15 +54,20 @@ const getComponentDisplayName = <T extends SvelteComponent>(Component: SvelteCon
  *   mount(Counter, { props: { count: 42 } })
  *   cy.get('button').contains(42)
  * })
+ *
+ * @see {@link https://on.cypress.io/mounting-svelte} for more details.
  */
 export function mount<T extends SvelteComponent> (
   Component: SvelteConstructor<T>,
   options: MountOptions<T> = {},
 ): Cypress.Chainable<MountReturn<T>> {
-  return cy.then(() => {
-    const target = getContainerEl()
+  checkForRemovedStyleOptions(options)
 
-    injectStylesBeforeElement(options, document, target)
+  return cy.then(() => {
+    // Remove last mounted component if cy.mount is called more than once in a test
+    cleanup()
+
+    const target = getContainerEl()
 
     const ComponentConstructor = ((Component as any).default || Component) as SvelteConstructor<T>
 

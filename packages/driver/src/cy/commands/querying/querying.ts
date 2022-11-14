@@ -494,7 +494,9 @@ export default (Commands, Cypress, cy, state) => {
               switch (err.type) {
                 case 'length':
                   if (err.expected > 1) {
-                    return $errUtils.throwErrByPath('contains.length_option', { onFail: options._log })
+                    const assertionLog = Cypress.state('current').getLastLog()
+
+                    return $errUtils.throwErrByPath('contains.length_option', { onFail: assertionLog })
                   }
 
                   break

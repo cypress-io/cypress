@@ -1,3 +1,37 @@
+# [@cypress/vue-v5.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v5.0.0...@cypress/vue-v5.0.1) (2022-11-08)
+
+
+### Bug Fixes
+
+* make component derived info not throw ([#24571](https://github.com/cypress-io/cypress/issues/24571)) ([838dd4f](https://github.com/cypress-io/cypress/commit/838dd4fa2e0ec56633d0af2faf10a47d190b5594))
+
+# [@cypress/vue-v5.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vue-v4.2.2...@cypress/vue-v5.0.0) (2022-11-07)
+
+
+### Bug Fixes
+
+* remove dependence on @cypress/<dep> types ([#24415](https://github.com/cypress-io/cypress/issues/24415)) ([58e0ab9](https://github.com/cypress-io/cypress/commit/58e0ab91604618ea6f75932622f7e66e419270e6))
+* remove last mounted component upon subsequent mount calls ([#24470](https://github.com/cypress-io/cypress/issues/24470)) ([f39eb1c](https://github.com/cypress-io/cypress/commit/f39eb1c19e0923bda7ae263168fc6448da942d54))
+* remove some CT functions and props ([#24419](https://github.com/cypress-io/cypress/issues/24419)) ([294985f](https://github.com/cypress-io/cypress/commit/294985f8b3e0fa00ed66d25f88c8814603766074))
+
+
+### Features
+
+* include component and wrapper in return type for vue mount adapter ([#24479](https://github.com/cypress-io/cypress/issues/24479)) ([33875d7](https://github.com/cypress-io/cypress/commit/33875d75505416b1f65ca7c6d5dedc46f3289f1b))
+
+
+### BREAKING CHANGES
+
+* remove last mounted component upon subsequent mount calls of mount
+* Vue mount returns wrapper and component rather than wrapper only
+
+# [@cypress/vue-v4.2.2](https://github.com/cypress-io/cypress/compare/@cypress/vue-v4.2.1...@cypress/vue-v4.2.2) (2022-11-01)
+
+
+### Bug Fixes
+
+* Hovering over mount in command log does not show component in AUT ([#24346](https://github.com/cypress-io/cypress/issues/24346)) ([355d210](https://github.com/cypress-io/cypress/commit/355d2101d38ea4d1e93b9c571cf77babab2bbbfc))
+
 # [@cypress/vue-v4.2.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v4.2.0...@cypress/vue-v4.2.1) (2022-10-13)
 
 

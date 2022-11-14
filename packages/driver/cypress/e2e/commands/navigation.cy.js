@@ -115,7 +115,7 @@ describe('src/cy/commands/navigation', () => {
 
         cy.on('log:added', (attrs, log) => {
           this.lastLog = log
-          this.logs.push(log)
+          this.logs?.push(log)
         })
 
         return null
@@ -763,7 +763,8 @@ describe('src/cy/commands/navigation', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/14445
-    it('should eventually fail on assertion despite redirects', (done) => {
+    // FIXME: fix flaky test (webkit): https://github.com/cypress-io/cypress/issues/24600
+    it('should eventually fail on assertion despite redirects', { browser: '!webkit' }, (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.contain('The application redirected to')
         done()
@@ -1918,7 +1919,7 @@ describe('src/cy/commands/navigation', () => {
 
         cy.on('log:added', (_attrs, log) => {
           this.lastLog = log
-          this.logs.push(log)
+          this.logs?.push(log)
         })
 
         return null
@@ -1938,17 +1939,15 @@ describe('src/cy/commands/navigation', () => {
         it('times out', function (done) {
           let thenCalled = false
 
-          cy.on('fail', (err, test) => {
-            if (test._currentRetry < 1) {
-              const { lastLog } = this
+          cy.once('fail', (err, test) => {
+            const { lastLog } = this
 
-              // visit, window, page loading
-              assertLogLength(this.logs, 3)
+            // visit, window, page loading
+            assertLogLength(this.logs, 3)
 
-              expect(lastLog.get('name')).to.eq('page load')
-              expect(lastLog.get('error')).to.eq(err)
-            }
-
+            expect(lastLog.get('name')).to.eq('page load')
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(lastLog.get('error')).to.eq(err)
             expect(err.message).to.include('Your page did not fire its `load` event within `50ms`.')
 
             return Promise
@@ -1972,7 +1971,9 @@ describe('src/cy/commands/navigation', () => {
             causeSynchronousBeforeUnload($a)
 
             return null
-          }).wrap(null).then(() => {
+          })
+          .wrap(null)
+          .then(() => {
             thenCalled = true
           })
         })
@@ -2066,7 +2067,8 @@ describe('src/cy/commands/navigation', () => {
       return null
     })
 
-    it('emits \'page:loading\' before and after initial visit', () => {
+    // FIXME: fix flaky test (webkit): https://github.com/cypress-io/cypress/issues/24600
+    it('emits \'page:loading\' before and after initial visit', { browser: '!webkit' }, () => {
       const emit = cy.spy(Cypress, 'emit').log(false).withArgs('page:loading')
 
       cy
@@ -2082,7 +2084,8 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    it('emits during page navigation', () => {
+    // FIXME: fix flaky test (webkit): https://github.com/cypress-io/cypress/issues/24600
+    it('emits during page navigation', { browser: '!webkit' }, () => {
       const emit = cy.spy(Cypress, 'emit').log(false).withArgs('page:loading')
       let expected = false
 
@@ -2108,7 +2111,8 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    it('logs during page navigation', () => {
+    // FIXME: fix flaky test (webkit): https://github.com/cypress-io/cypress/issues/24600
+    it('logs during page navigation', { browser: '!webkit' }, () => {
       let expected = false
 
       cy
@@ -2131,7 +2135,8 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    it('logs during form submission and yields stale element', () => {
+    // FIXME: fix flaky test (webkit): https://github.com/cypress-io/cypress/issues/24600
+    it('logs during form submission and yields stale element', { browser: '!webkit' }, () => {
       let expected = false
 
       const names = cy.queue.names()
@@ -2646,7 +2651,8 @@ describe('src/cy/commands/navigation', () => {
       return null
     })
 
-    it('logs \'form sub\'', () => {
+    // FIXME: fix flaky test (webkit): https://github.com/cypress-io/cypress/issues/24600
+    it('logs \'form sub\'', { browser: '!webkit' }, () => {
       let event = null
 
       cy

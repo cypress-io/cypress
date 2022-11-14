@@ -1,6 +1,8 @@
 import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import { difference, isPlainObject, isString } from 'lodash'
+import type { LocationObject } from '../../../cypress/location'
+import * as cors from '@packages/network/lib/cors'
 
 const validOptionKeys = Object.freeze(['args'])
 
@@ -67,12 +69,34 @@ export class Validator {
     return false
   }
 
-  validateLocation (location, urlOrDomain) {
+  /**
+   * Validates the location parameter of the cy.origin call.
+   * @param originLocation - the location passed into the cy.origin command.
+   * @param urlOrDomain - the original string param passed in.
+   * @param specHref - the address of the current spec.
+   */
+  validateLocation (originLocation: LocationObject, urlOrDomain: string, specHref: string): void {
     // we don't support query params
-    if (location.search.length > 0) {
+    if (originLocation.search.length > 0) {
       $errUtils.throwErrByPath('origin.invalid_url_argument', {
         onFail: this.log,
         args: { arg: $utils.stringify(urlOrDomain) },
+      })
+    }
+
+    // Users would be better off not using cy.origin if the origin is part of the same super domain.
+    if (cors.urlMatchesPolicyBasedOnDomain(originLocation.href, specHref)) {
+      // this._isSameSuperDomainOriginWithExceptions({ originLocation, specLocation })) {
+
+      const policy = cors.policyForDomain(originLocation.href)
+
+      $errUtils.throwErrByPath('origin.invalid_url_argument_same_origin', {
+        onFail: this.log,
+        args: {
+          originUrl: $utils.stringify(urlOrDomain),
+          topOrigin: (window.location.origin),
+          policy,
+        },
       })
     }
   }
