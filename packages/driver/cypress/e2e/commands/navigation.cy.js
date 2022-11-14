@@ -982,10 +982,10 @@ describe('src/cy/commands/navigation', () => {
           expect(win.location.href).to.include('/fixtures/jquery.html?foo=bar#dashboard?baz=quux')
         })
 
-        this.win = cy.state('window')
+        this.cyWin = cy.state('window')
 
         this.eq = (attr, str) => {
-          expect(this.win.location[attr]).to.eq(str)
+          expect(this.cyWin.location[attr]).to.eq(str)
         }
       })
 
@@ -2120,7 +2120,7 @@ describe('src/cy/commands/navigation', () => {
           expect(this.lastLog).to.exist
           expect(this.lastLog.get('state')).to.eq('pending')
           expect(this.lastLog.get('message')).to.eq('--waiting for new page to load--')
-          expect(this.lastLog.get('snapshots')).to.not.exist
+          expect(this.lastLog.get('snapshots')).to.have.length(0)
         })
       }).get('#dimensions').click()
       .then(function () {
@@ -2147,7 +2147,7 @@ describe('src/cy/commands/navigation', () => {
           expect(this.lastLog).to.exist
           expect(this.lastLog.get('state')).to.eq('pending')
           expect(this.lastLog.get('message')).to.eq('--waiting for new page to load--')
-          expect(this.lastLog.get('snapshots')).to.not.exist
+          expect(this.lastLog.get('snapshots')).to.have.length(0)
         })
 
         cy

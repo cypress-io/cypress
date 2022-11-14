@@ -19,10 +19,6 @@ const LogRequest: RequestMiddleware = function () {
     req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
   })
 
-  if (this.req.url.includes('cypress.png')) {
-    debugger
-  }
-
   this.next()
 }
 
@@ -289,8 +285,8 @@ export default {
   MaybeSimulateSecHeaders,
   MaybeAttachCrossOriginCookies,
   MaybeEndRequestWithBufferedResponse,
-  SetMatchingRoutes,
   CorrelateBrowserPreRequest,
+  SetMatchingRoutes,
   SendToDriver,
   InterceptRequest,
   RedirectToClientRouteIfUnloaded,

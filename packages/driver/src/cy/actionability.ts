@@ -291,8 +291,9 @@ const ensureNotAnimating = function (cy, $el, coordsHistory, animationDistanceTh
 }
 
 interface VerifyCallbacks {
-  onReady?: ($el: any, coords: ElementPositioning) => any
+  onReady?: (finalEl: any, coords: ElementPositioning, $el: any) => any
   onScroll?: ($el: any, type: 'element' | 'window' | 'container') => any
+  subjectFn?: () => any
 }
 
 const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
@@ -366,6 +367,7 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
 
       if (force !== true) {
         // ensure it's attached
+        cy.ensureElement($el, null, _log)
         cy.ensureAttached($el, null, _log)
 
         // ensure its 'receivable'
@@ -444,7 +446,7 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
         finalEl = $elAtCoords != null ? $elAtCoords : $el
       }
 
-      return onReady(finalEl, finalCoords)
+      return onReady(finalEl, finalCoords, $el)
     }
 
     // we cannot enforce async promises here because if our
@@ -453,6 +455,19 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
     // the checks and firing the event!
     const retryActionability = () => {
       try {
+        if (callbacks.subjectFn) {
+          $el = callbacks.subjectFn()
+
+          if ($el.length === 0 || $dom.isDetached($el)) {
+            const current = cy.state('current')
+            const subjectChain = cy.subjectChain(current.get('chainerId'))
+
+            $errUtils.throwErrByPath('subject.detached_during_actionability', {
+              args: { name: current.get('name'), subjectChain },
+            })
+          }
+        }
+
         return runAllChecks()
       } catch (err) {
         options.error = err

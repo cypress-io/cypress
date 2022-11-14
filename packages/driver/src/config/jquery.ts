@@ -55,7 +55,7 @@ $.find.matchesSelector = function (elem, expr) {
       // When regex starts with =, it is a syntax error when nothing found.
       // Because Sizzle internally escapes = to handle attribute selectors.
       // @see https://github.com/jquery/sizzle/blob/20390f05731af380833b5aa805db97de0b91268a/external/jquery/jquery.js#L4363-L4370
-      if (e.message.includes(`Syntax error, unrecognized expression: :cy-contains('`)) {
+      if (e.message.includes(`Syntax error, unrecognized expression: :cy-contains`)) {
         return false
       }
 

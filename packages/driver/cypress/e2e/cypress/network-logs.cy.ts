@@ -194,6 +194,7 @@ describe('Network Logs', () => {
       })
 
       it.only('shows cy.visit if intercepted', () => {
+        cy.on('fail', () => {})
         cy.intercept('/fixtures/empty.html')
         .then(() => {
           // trigger: cy.visit()

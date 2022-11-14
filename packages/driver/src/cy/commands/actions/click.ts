@@ -39,6 +39,7 @@ const formatMouseEvents = (events) => {
 // TODO: remove any, Function, Record
 type MouseActionOptions = {
   subject: any
+  subjectFn?: () => any
   positionOrX: string | number
   y: number
   userOptions: Record<string, any>
@@ -105,7 +106,10 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
       }
     }
 
-    const perform = (el) => {
+    const subjectChain = cy.subjectChain()
+    const clickedElements: any[] = []
+
+    const perform = (el, index) => {
       let deltaOptions
       const $el = $dom.wrap(el)
 
@@ -150,7 +154,7 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
             'Options': deltaOptions,
           })
 
-          if (options.$el.get(0) !== elClicked) {
+          if (options.$el.get(index) !== elClicked) {
             // only do this if $elToClick isnt $el
             consoleObj['Actual Element Clicked'] = $dom.getElements($(elClicked))
           }
@@ -194,16 +198,20 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
       // once we establish the coordinates and the element
       // passes all of the internal checks
       return $actionability.verify(cy, $el, config, individualOptions, {
+        subjectFn: options.subjectFn || (() => cy.getSubjectFromChain(subjectChain).eq(index)),
+
         onScroll ($el, type) {
           return Cypress.action('cy:scrolled', $el, type)
         },
 
-        onReady ($elToClick, coords) {
+        onReady ($elToClick, coords, $el) {
           const { fromElViewport, fromElWindow, fromAutWindow } = coords
 
           const forceEl = options.force && $elToClick.get(0)
 
           const moveEvents = mouse.move(fromElViewport, forceEl)
+
+          clickedElements.push($el[0])
 
           flagModifiers(true)
 
@@ -236,6 +244,8 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
     return Promise
     .each(options.$el.toArray(), perform)
     .then(() => {
+      options.$el = cy.$$(clickedElements)
+
       if (options.verify === false) {
         return options.$el
       }

@@ -142,7 +142,7 @@ describe('driver/src/cypress/cy', () => {
 
       cy.wrap(subject).then(() => {
         expect(cy.state('subject')).to.equal(subject)
-        expect(Cypress.utils.warning).to.be.calledWith('`cy.state(\'subject\')` has been deprecated and will be removed in a future release. Consider migrating to `cy.currentSubject()` instead.')
+        expect(Cypress.utils.warning).to.be.calledWith('`cy.state(\'subject\')` has been deprecated and will be removed in a future release. Consider migrating to `cy.subject()` instead.')
       })
     })
   })
@@ -300,23 +300,6 @@ describe('driver/src/cypress/cy', () => {
         cy.c('bar')
       })
 
-      it('fails when previous subject becomes detached', (done) => {
-        cy.$$('#button').click(function () {
-          return $(this).remove()
-        })
-
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.parent()` failed because this element is detached from the DOM.')
-          expect(err.message).to.include('<button id="button">button</button>')
-          expect(err.message).to.include('> `cy.click()`')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/element-has-detached-from-dom')
-
-          done()
-        })
-
-        cy.get('#button').click().parent()
-      })
-
       it('fails when previous subject isnt window', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.winOnly()` failed because it requires the subject be a global `window` object.')
@@ -346,10 +329,9 @@ describe('driver/src/cypress/cy', () => {
 
         cy.on('fail', (err) => {
           expect(firstPassed).to.be.true
-          expect(err.message).to.include('`cy.elWinOnly()` failed because it requires a DOM element.')
+          expect(err.message).to.include('`cy.elWinOnly()` failed because it requires a DOM element or window.')
           expect(err.message).to.include('string')
           expect(err.message).to.include('> `cy.wrap()`')
-          expect(err.message).to.include('All 2 subject validations failed')
 
           done()
         })
@@ -416,10 +398,10 @@ describe('driver/src/cypress/cy', () => {
         return orig(`foo${arg1}`)
       })
 
-      Cypress.Commands.overwrite('first', (orig, subject) => {
-        subject = $([1, 2])
+      Cypress.Commands.overwrite('each', (orig, subject, cb) => {
+        subject = $([1])
 
-        return orig(subject)
+        return orig(subject, cb)
       })
 
       Cypress.Commands.overwrite('noop', function (orig, fn) {
@@ -439,8 +421,8 @@ describe('driver/src/cypress/cy', () => {
     })
 
     it('can modify child commands', () => {
-      cy.get('li').first().then((el) => {
-        expect(el[0]).to.eq(1)
+      cy.get('li').each((i) => {
+        expect(i).to.eq(1)
       })
     })
 
@@ -491,6 +473,97 @@ describe('driver/src/cypress/cy', () => {
       })
 
       cy.bar()
+    })
+  })
+
+  context('queries', {
+    defaultCommandTimeout: 30,
+  }, () => {
+    it('throws when queries return a promise', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('`cy.promiseQuery()` failed because you returned a promise from a query.\n\nQueries must be synchronous functions that return a function. You cannot invoke commands or return promises inside of them.')
+        done()
+      })
+
+      Cypress.Commands.addQuery('promiseQuery', () => Promise.resolve())
+      cy.promiseQuery()
+    })
+
+    it('throws when a query returns a non-function value', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('`cy.badReturnQuery()` failed because you returned a value other than a function from a query.\n\nQueries must be synchronous functions that return a function.\n\nThe returned value was:\n\n  > `1`')
+        done()
+      })
+
+      Cypress.Commands.addQuery('badReturnQuery', () => 1)
+      cy.badReturnQuery()
+    })
+
+    it('throws when a command is invoked inside a query', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('`cy.commandQuery()` failed because you invoked a command inside a query.\n\nQueries must be synchronous functions that return a function. You cannot invoke commands or return promises inside of them.\n\nThe command invoked was:\n\n  > `cy.visit()`')
+        done()
+      })
+
+      Cypress.Commands.addQuery('commandQuery', () => cy.visit('/'))
+      cy.commandQuery()
+    })
+
+    it('custom commands that return query chainers retry', () => {
+      Cypress.Commands.add('getButton', () => cy.get('button'))
+      cy.on('command:retry', () => cy.$$('button').first().remove())
+
+      cy.getButton().should('have.length', 23)
+    })
+
+    it('allows queries to use other queries', () => {
+      const logs = []
+
+      cy.on('log:added', (attrs, log) => logs.push(log))
+
+      Cypress.Commands.addQuery('getButtonQuery', () => {
+        cy.now('get', 'body')
+
+        return cy.now('get', 'button')
+      })
+
+      Cypress.Commands.addQuery('queryQuery', () => cy.now('getButtonQuery'))
+
+      cy.queryQuery().should('have.length', 24)
+      cy.then(() => {
+        // Length of 3: getButtonQuery.body (from get), getButtonQuery.button (from get), `should.have.length.24`
+        expect(logs.length).to.eq(3)
+      })
+    })
+
+    it('closes each log as the query completes', (done) => {
+      let getLog
+
+      cy.on('log:added', (attrs, log) => {
+        if (attrs.name === 'get') {
+          getLog = log
+        } else if (attrs.name === 'find') {
+          expect(getLog.get('state')).to.eq('passed')
+          done()
+        }
+      })
+
+      cy.get('body').find('#wrapper')
+    })
+
+    it('ends all messages when query chain fails', (done) => {
+      const logs = []
+
+      cy.on('log:added', (attrs, log) => logs.push(log))
+
+      cy.on('fail', (err) => {
+        const state = logs.map((l) => l.get('state'))
+
+        expect(state).to.eql(['passed', 'passed', 'passed', 'failed'])
+        done()
+      })
+
+      cy.get('body').find('#specific-contains').children().should('have.class', 'active')
     })
   })
 })

@@ -4,8 +4,6 @@ import * as Agents from './agents'
 
 import * as Aliasing from './aliasing'
 
-import * as Angular from './angular'
-
 import * as Asserting from './asserting'
 
 import * as Clock from './clock'
@@ -58,7 +56,6 @@ export const allCommands = {
   ...Actions,
   Agents,
   Aliasing,
-  Angular,
   Asserting,
   Clock,
   Commands,

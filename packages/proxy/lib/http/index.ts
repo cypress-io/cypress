@@ -30,11 +30,7 @@ function getRandomColorFn () {
   ).toString(16).padStart(6, 'F').toUpperCase()}`)
 }
 
-process.env.DEBUG = 'cypress-verbose:*'
-
 export const debugVerbose = Debug('cypress-verbose:proxy:http')
-
-debugVerbose.enabled = true
 
 export enum HttpStages {
   IncomingRequest,
@@ -176,6 +172,7 @@ export function _runStage (type: HttpStages, ctx: any, onError) {
           _end()
         },
         onError: (error: Error) => {
+          debugger
           ctx.debug('Error in middleware %o', { middlewareName, error })
 
           if (type === HttpStages.Error) {
