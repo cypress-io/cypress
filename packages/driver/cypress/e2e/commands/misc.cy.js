@@ -229,9 +229,8 @@ describe('src/cy/commands/misc', () => {
 
       it('throws when wrapping an array of windows', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.scrollTo()` failed because it requires a DOM element.')
+          expect(err.message).to.include('`cy.scrollTo()` failed because it requires a DOM element or window.')
           expect(err.message).to.include('[<window>]')
-          expect(err.message).to.include('All 2 subject validations failed on this subject.')
 
           done()
         })
@@ -243,9 +242,8 @@ describe('src/cy/commands/misc', () => {
 
       it('throws when wrapping an array of documents', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.screenshot()` failed because it requires a DOM element.')
+          expect(err.message).to.include('`cy.screenshot()` failed because it requires a DOM element, window or document.')
           expect(err.message).to.include('[<document>]')
-          expect(err.message).to.include('All 3 subject validations failed on this subject.')
 
           done()
         })

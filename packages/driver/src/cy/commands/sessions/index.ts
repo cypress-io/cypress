@@ -153,7 +153,11 @@ export default function (Commands, Cypress, cy) {
               return false
             })
 
-            return existingSession.setup()
+            try {
+              return existingSession.setup()
+            } finally {
+              cy.breakSubjectLinksToCurrentChainer()
+            }
           })
           .then(async () => {
             cy.state('onCommandFailed', null)

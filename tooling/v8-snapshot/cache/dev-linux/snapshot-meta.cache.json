@@ -47,6 +47,7 @@
     "./packages/network/node_modules/minimatch/minimatch.js",
     "./packages/server/lib/modes/record.js",
     "./packages/server/lib/modes/run.ts",
+    "./packages/server/lib/open_project.ts",
     "./packages/server/node_modules/@benmalka/foxdriver/node_modules/graceful-fs/polyfills.js",
     "./packages/server/node_modules/glob/node_modules/minimatch/minimatch.js",
     "./packages/server/node_modules/graceful-fs/polyfills.js",
@@ -3526,5 +3527,5 @@
     "./tooling/v8-snapshot/cache/dev-linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "95205f49259fe2d246d45ef15d1499f6e3d1d235d6db892124bbd5423f1ba872"
+  "deferredHash": "806c79ee381c52242a7061f7b2721546968f916ce5ba1d56e53a8d13d230df3e"
 }

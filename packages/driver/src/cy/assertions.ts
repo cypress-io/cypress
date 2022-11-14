@@ -104,10 +104,6 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
     return assertions
   }
 
-  const injectAssertionFns = (cmds) => {
-    return _.map(cmds, injectAssertion)
-  }
-
   const injectAssertion = (cmd) => {
     return ((subject) => {
       // set assertions to itself or empty array
@@ -224,24 +220,19 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
 
   const finishAssertions = () => {
     cy.state('current').get('logs').forEach((log) => {
-      if (log.get('next') || !log.get('snapshots')) {
+      if (!log.get('snapshots')) {
         log.snapshot()
       }
-
-      const e = log.get('_error')
-
-      if (e) {
-        return log.error(e)
-      }
-
-      return log.end()
     })
+
+    cy.state('current').finishLogs()
   }
 
   type VerifyUpcomingAssertionsCallbacks = {
     ensureExistenceFor?: 'subject' | 'dom' | boolean
     onFail?: (err?, isDefaultAssertionErr?: boolean, cmds?: any[]) => void
     onRetry?: () => any
+    subjectFn?: () => any
   }
 
   return {
@@ -307,9 +298,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         // ensure the error is about existence not about
         // the downstream assertion.
         try {
-          // Ensure the command is on the same origin as the AUT
-          cy.ensureCommandCanCommunicateWithAUT(err)
-          ensureExistence()
+          callbacks.ensureExistenceFor === 'dom' && ensureExistence()
         } catch (e2) {
           err = e2
         }
@@ -350,6 +339,14 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         return
       }
 
+      if (callbacks.subjectFn) {
+        try {
+          subject = callbacks.subjectFn()
+        } catch (err) {
+          return onFailFn(err)
+        }
+      }
+
       // bail if we have no assertions and apply
       // the default assertions if applicable
       if (!cmds.length) {
@@ -382,7 +379,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         return assertFn.apply(this, args.concat(true) as any)
       }
 
-      const fns = injectAssertionFns(cmds)
+      const fns = _.map(cmds, injectAssertion)
 
       // TODO: remove any when the type of subject, the first argument of this function is specified.
       const subjects: any[] = []

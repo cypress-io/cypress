@@ -115,7 +115,7 @@ describe('Launchpad Top Nav Workflows', () => {
       })
 
       it('hides dropdown when version in header is clicked', () => {
-        cy.findByTestId('cypress-update-popover').findByRole('button', { expanded: false }).as('topNavVersionButton').click()
+        cy.findByTestId('cypress-update-popover').findAllByRole('button').first().as('topNavVersionButton').click()
 
         cy.get('@topNavVersionButton').should('have.attr', 'aria-expanded', 'true')
 
@@ -504,7 +504,7 @@ describe('Launchpad Top Nav Workflows', () => {
             cy.findByRole('button', { name: 'Log in' }).click()
           })
 
-          cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
+          cy.findByRole('dialog').within(() => {
             cy.findByRole('button', { name: 'Log in' }).click()
 
             cy.contains('http://127.0.0.1:0000/redirect-to-auth').should('be.visible')
@@ -536,7 +536,7 @@ describe('Launchpad Top Nav Workflows', () => {
             cy.findByRole('button', { name: 'Log in' }).click()
           })
 
-          cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
+          cy.findByRole('dialog').within(() => {
             cy.findByRole('button', { name: 'Log in' }).click()
 
             cy.contains(loginText.titleFailed).should('be.visible')
@@ -586,7 +586,7 @@ describe('Launchpad Top Nav Workflows', () => {
             cy.findByRole('button', { name: 'Log in' }).as('loginButton').click()
           })
 
-          cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
+          cy.findByRole('dialog').within(() => {
             cy.findByRole('button', { name: 'Log in' }).click()
 
             cy.contains(loginText.titleFailed).should('be.visible')
@@ -623,7 +623,7 @@ describe('Launchpad Top Nav Workflows', () => {
             cy.findByRole('button', { name: 'Log in' }).as('loginButton').click()
           })
 
-          cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
+          cy.findByRole('dialog').within(() => {
             cy.findByRole('button', { name: 'Log in' }).click()
             cy.contains(loginText.titleFailed).should('be.visible')
             cy.contains(loginText.bodyError).should('be.visible')
