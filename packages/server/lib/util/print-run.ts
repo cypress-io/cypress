@@ -288,7 +288,7 @@ export function displaySpecHeader (name: string, curr: number, total: number, es
 }
 
 function maybeLogCloudRecommendationMessage (runs: CypressCommandLine.RunResult[], record?: boolean) {
-  if (!process.env.CI || process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS || record) {
+  if (!process.env.CI || env.get('CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS') || record) {
     return
   }
 
