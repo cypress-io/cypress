@@ -196,19 +196,18 @@ const getPostMessageLocalStorage = (specWindow, origins): Promise<any[]> => {
 function navigateAboutBlank (session: boolean = true) {
   // Component testing does not support navigation and handles clearing the page via mount utils
   if (Cypress.testingType === 'component' || Cypress.config('testIsolation') === 'off') {
-    return new Cypress.Promise.resolve()
+    return Promise.resolve()
   }
 
   return new Promise((resolve) => {
-    cy.once('window:load', () => {
-      resolve()
-    })
+    cy.once('window:load', resolve)
 
     Cypress.action('cy:url:changed', '')
 
     return Cypress.action('cy:visit:blank', { type: session ? 'session' : 'session-lifecycle' }) as unknown as Promise<void>
   })
 }
+
 const statusMap = {
   inProgress: (step) => {
     switch (step) {
