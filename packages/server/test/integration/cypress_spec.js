@@ -353,6 +353,7 @@ describe('lib/cypress', () => {
     describe('cloud recommendation message', () => {
       it('gets logged when in CI and there is a failure', function () {
         process.env.CI = true
+        process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS = false
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
 
         return cypress.start([`--run-project=${this.todosPath}`]).then(() => {
@@ -370,8 +371,10 @@ describe('lib/cypress', () => {
         })
       })
 
-      it('does not get logged if everything passes', function () {
+      it('does not get logged if all tests pass', function () {
         process.env.CI = true
+        process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS = false
+        globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 0 } }
 
         return cypress.start([`--run-project=${this.todosPath}`]).then(() => {
           expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
@@ -379,6 +382,8 @@ describe('lib/cypress', () => {
       })
 
       it('does not get logged if not running in CI', function () {
+        process.env.CI = false
+        process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS = false
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
 
         return cypress.start([`--run-project=${this.todosPath}`]).then(() => {
@@ -1608,6 +1613,7 @@ describe('lib/cypress', () => {
     describe('cloud recommendation message', () => {
       it('does not display if --record is passed', function () {
         process.env.CI = true
+        process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS = false
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
 
         return cypress.start([
