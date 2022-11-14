@@ -38,7 +38,12 @@ export default function (Commands, Cypress, cy) {
     })
 
     Cypress.on('test:before:run:async', () => {
-      const clearPage = (Cypress.config('testIsolation') === 'on' && Cypress.testingType === 'e2e') ? navigateAboutBlank(false) : new Cypress.Promise.resolve()
+      if (Cypress.config('testIsolation') === 'off') {
+        return
+      }
+
+      // Component testing does not support navigation and handles clearing the page via mount utils
+      const clearPage = Cypress.testingType === 'e2e' ? navigateAboutBlank(false) : new Cypress.Promise.resolve()
 
       return clearPage
       .then(() => sessions.clearCurrentSessionData())
