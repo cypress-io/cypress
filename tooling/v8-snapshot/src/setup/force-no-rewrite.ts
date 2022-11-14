@@ -58,4 +58,8 @@ export default [
   'packages/server/lib/open_project.ts',
   'packages/server/lib/project-base.ts',
   'packages/server/lib/socket-ct.ts',
+  'packages/server/lib/browsers/utils.ts',
+  'packages/server/lib/cloud/exception.ts',
+  'packages/server/lib/errors.ts',
+  'packages/server/lib/util/process_profiler.ts',
 ]
