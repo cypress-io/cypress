@@ -1484,7 +1484,7 @@ describe('src/cy/commands/connectors', () => {
 
         it('throws the traversalErr as precedence when property does not exist even if the additional assertions fail', function (done) {
           cy.once('fail', (err) => {
-            const { itsLog, lastLog } = this
+            const { itsLog } = this
 
             expect(err.message).to.include('Timed out retrying after 100ms: `cy.its()` errored because the property: `b` does not exist on your subject.')
             expect(err.message).to.include('`cy.its()` waited for the specified property `b` to exist, but it never did.')
@@ -1492,13 +1492,8 @@ describe('src/cy/commands/connectors', () => {
             expect(err.message).to.include('`cy.wrap({ foo: \'bar\' }).its(\'quux\').should(\'not.exist\')`')
             expect(err.docsUrl).to.eq('https://on.cypress.io/its')
 
-            expect(itsLog.get('state')).to.eq('passed')
-            expect(itsLog.get('error')).to.be.undefined
-
-            expect(lastLog.get('name')).to.eq('assert')
-            expect(lastLog.get('state')).to.eq('failed')
-            expect(lastLog.get('message')).to.contain('to be true')
-            expect(lastLog.get('error').message).to.include(err.message)
+            expect(itsLog.get('state')).to.eq('failed')
+            expect(itsLog.get('error').message).to.include(err.message)
 
             done()
           })
@@ -1508,7 +1503,7 @@ describe('src/cy/commands/connectors', () => {
 
         it('throws the traversalErr as precedence when property value is undefined even if the additional assertions fail', function (done) {
           cy.once('fail', (err) => {
-            const { itsLog, lastLog } = this
+            const { itsLog } = this
 
             expect(err.message).to.include('Timed out retrying after 100ms: `cy.its()` errored because the property: `a` returned a `undefined` value.')
             expect(err.message).to.include('`cy.its()` waited for the specified property `a` to become accessible, but it never did.')
@@ -1516,13 +1511,8 @@ describe('src/cy/commands/connectors', () => {
             expect(err.message).to.include('`cy.wrap({ foo: undefined }).its(\'foo\').should(\'be.undefined\')`')
             expect(err.docsUrl).to.eq('https://on.cypress.io/its')
 
-            expect(itsLog.get('state')).to.eq('passed')
-            expect(itsLog.get('error')).to.be.undefined
-
-            expect(lastLog.get('name')).to.eq('assert')
-            expect(lastLog.get('state')).to.eq('failed')
-            expect(lastLog.get('message')).to.contain('to be true')
-            expect(lastLog.get('error').message).to.include(err.message)
+            expect(itsLog.get('state')).to.eq('failed')
+            expect(itsLog.get('error').message).to.include(err.message)
 
             done()
           })
