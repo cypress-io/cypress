@@ -864,7 +864,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     }
   }
 
-  now (name: string, ...args: any[]): Promise | QueryFunction {
+  now (name: string, ...args: any[]): Promise<any> | QueryFunction {
     if (this.queryFns[name]) {
       return this.queryFns[name].apply(this.state('current'), args)
     }
