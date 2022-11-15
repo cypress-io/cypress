@@ -52,14 +52,6 @@ export async function spawnUntilMatch (
 
       cb(null, chunk)
     },
-    tapErr (chunk, enc, cb) {
-      if (!ready && String(chunk).match(config.match)) {
-        ready = true
-        setTimeout(() => dfd.resolve(), 20) // flush the rest of the chunks
-      }
-
-      cb(null, chunk)
-    },
   })
 
   return dfd.promise
@@ -82,14 +74,6 @@ export async function forkUntilMatch (
   const cp = await forked(prefix, config.modulePath, config.args, {
     ...config.options,
     tapOut (chunk, enc, cb) {
-      if (!ready && String(chunk).match(config.match)) {
-        ready = true
-        setTimeout(() => dfd.resolve(cp), 20) // flush the rest of the chunks
-      }
-
-      cb(null, chunk)
-    },
-    tapErr (chunk, enc, cb) {
       if (!ready && String(chunk).match(config.match)) {
         ready = true
         setTimeout(() => dfd.resolve(cp), 20) // flush the rest of the chunks
