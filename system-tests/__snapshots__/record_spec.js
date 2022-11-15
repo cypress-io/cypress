@@ -11,7 +11,7 @@ exports['e2e record passing passes 1'] = `
   │             .cy.js)                                                                            │
   │ Searched:   cypress/e2e/record*                                                                │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://cloud.cypress.io/projects/cjvoj7/runs/12                               │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -251,7 +251,7 @@ We dynamically generated a new test to display this failure.
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://cloud.cypress.io/projects/cjvoj7/runs/12
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 
 `
@@ -283,7 +283,7 @@ exports['e2e record api interaction errors update instance stdout warns but proc
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://cloud.cypress.io/projects/cjvoj7/runs/12                               │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -348,7 +348,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://cloud.cypress.io/projects/cjvoj7/runs/12
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 
 `
@@ -404,7 +404,7 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://cloud.cypress.io/projects/cjvoj7/runs/12                               │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -469,7 +469,7 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://cloud.cypress.io/projects/cjvoj7/runs/12
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 
 `
@@ -612,7 +612,7 @@ exports['e2e record api interaction errors create instance 500 does not proceed 
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
   │ Params:     Tag: nightly, Group: foo, Parallel: true                                           │
-  │ Run URL:    https://cloud.cypress.io/projects/cjvoj7/runs/12                               │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 We encountered an unexpected error talking to our servers.
@@ -640,7 +640,7 @@ exports['e2e record api interaction errors update instance 500 does not proceed 
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
   │ Params:     Tag: nightly, Group: foo, Parallel: true                                           │
-  │ Run URL:    https://cloud.cypress.io/projects/cjvoj7/runs/12                               │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -728,7 +728,7 @@ StatusCodeError: 500 - "Internal Server Error"
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
   │ Params:     Tag: nightly, Group: foo, Parallel: true                                           │
-  │ Run URL:    https://cloud.cypress.io/projects/cjvoj7/runs/12                               │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 We encountered an unexpected error talking to our servers.
@@ -793,7 +793,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://cloud.cypress.io/projects/cjvoj7/runs/12
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 
 `
@@ -937,7 +937,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://cloud.cypress.io/projects/cjvoj7/runs/12                               │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -995,7 +995,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://cloud.cypress.io/projects/cjvoj7/runs/12
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 
 `
@@ -1017,7 +1017,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://cloud.cypress.io/projects/cjvoj7/runs/12                               │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -1075,7 +1075,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://cloud.cypress.io/projects/cjvoj7/runs/12
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 
 `
@@ -1102,7 +1102,7 @@ Details:
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://cloud.cypress.io/projects/cjvoj7/runs/12                               │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -1160,7 +1160,7 @@ Details:
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://cloud.cypress.io/projects/cjvoj7/runs/12
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 
 `
@@ -1438,7 +1438,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://cloud.cypress.io/projects/cjvoj7/runs/12                               │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -1496,7 +1496,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://cloud.cypress.io/projects/cjvoj7/runs/12
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 
 `
@@ -1520,7 +1520,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://cloud.cypress.io/projects/cjvoj7/runs/12                               │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -1578,7 +1578,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://cloud.cypress.io/projects/cjvoj7/runs/12
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 
 `
@@ -1600,7 +1600,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://cloud.cypress.io/projects/cjvoj7/runs/12                               │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -1658,7 +1658,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://cloud.cypress.io/projects/cjvoj7/runs/12
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 
 `
@@ -1680,7 +1680,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://cloud.cypress.io/projects/cjvoj7/runs/12                               │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -1738,7 +1738,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://cloud.cypress.io/projects/cjvoj7/runs/12
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 
 `
@@ -1760,7 +1760,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://cloud.cypress.io/projects/cjvoj7/runs/12                               │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -1818,7 +1818,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://cloud.cypress.io/projects/cjvoj7/runs/12
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 
 `
@@ -1856,7 +1856,7 @@ exports['e2e record api interaction errors create instance 500 without paralleli
   │ Specs:      2 found (a_record.cy.js, b_record.cy.js)                                           │
   │ Searched:   cypress/e2e/a_record.cy.js, cypress/e2e/b_record.cy.js                             │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://cloud.cypress.io/projects/cjvoj7/runs/12                               │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 We encountered an unexpected error talking to our servers.
@@ -1879,7 +1879,7 @@ exports['e2e record api interaction errors create instance errors and exits on c
   │ Specs:      1 found (a_record_instantfail.cy.js)                                               │
   │ Searched:   cypress/e2e/a_record_instantfail.cy.js                                             │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://cloud.cypress.io/projects/cjvoj7/runs/12                               │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 We encountered an unexpected error talking to our servers.
@@ -1902,7 +1902,7 @@ exports['e2e record api interaction errors postInstanceTests without paralleliza
   │ Specs:      2 found (a_record.cy.js, b_record.cy.js)                                           │
   │ Searched:   cypress/e2e/a_record.cy.js, cypress/e2e/b_record.cy.js                             │
   │ Params:     Tag: false, Group: foo, Parallel: false                                            │
-  │ Run URL:    https://cloud.cypress.io/projects/cjvoj7/runs/12                               │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -1933,7 +1933,7 @@ exports['e2e record api interaction errors postInstanceTests with parallelizatio
   │ Specs:      2 found (a_record.cy.js, b_record.cy.js)                                           │
   │ Searched:   cypress/e2e/a_record.cy.js, cypress/e2e/b_record.cy.js                             │
   │ Params:     Tag: false, Group: foo, Parallel: true                                             │
-  │ Run URL:    https://cloud.cypress.io/projects/cjvoj7/runs/12                               │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -1966,7 +1966,7 @@ exports['e2e record api interaction errors postInstanceResults errors and exits 
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://cloud.cypress.io/projects/cjvoj7/runs/12                               │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -2028,7 +2028,7 @@ exports['e2e record api skips specs records tests and exits without executing 1'
   │ Specs:      2 found (a_record_instantfail.cy.js, b_record.cy.js)                               │
   │ Searched:   cypress/e2e/a_record_instantfail.cy.js, cypress/e2e/b_record.cy.js                 │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://cloud.cypress.io/projects/cjvoj7/runs/12                               │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -2088,7 +2088,7 @@ exports['e2e record api skips specs records tests and exits without executing 1'
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://cloud.cypress.io/projects/cjvoj7/runs/12
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 
   Exiting with non-zero exit code because the run was canceled.
@@ -2107,7 +2107,7 @@ exports['e2e record api skips specs records tests and exits without executing in
   │ Specs:      2 found (a_record_instantfail.cy.js, b_record.cy.js)                               │
   │ Searched:   cypress/e2e/a_record_instantfail.cy.js, cypress/e2e/b_record.cy.js                 │
   │ Params:     Tag: false, Group: abc, Parallel: true                                             │
-  │ Run URL:    https://cloud.cypress.io/projects/cjvoj7/runs/12                               │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -2167,7 +2167,7 @@ exports['e2e record api skips specs records tests and exits without executing in
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://cloud.cypress.io/projects/cjvoj7/runs/12
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 
   Exiting with non-zero exit code because the run was canceled.
@@ -2186,7 +2186,7 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
   │ Specs:      2 found (empty_suite.cy.js, empty.cy.js)                                           │
   │ Searched:   cypress/e2e/empty_suite.cy.js, cypress/e2e/empty.cy.js                             │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://cloud.cypress.io/projects/cjvoj7/runs/12                               │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -2264,7 +2264,7 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://cloud.cypress.io/projects/cjvoj7/runs/12
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 
 `
@@ -2355,7 +2355,7 @@ exports['e2e record video recording when videoUploadOnPasses=false does not uplo
   │ Specs:      2 found (record_fail.cy.js, record_pass.cy.js)                                     │
   │ Searched:   cypress/e2e/record_fail*, cypress/e2e/record_pass*                                 │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://cloud.cypress.io/projects/cjvoj7/runs/12                               │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -2472,7 +2472,7 @@ plugin stdout
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://cloud.cypress.io/projects/cjvoj7/runs/12
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 
 `
@@ -2489,7 +2489,7 @@ exports['e2e record video recording when video=false does not upload when not en
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://cloud.cypress.io/projects/cjvoj7/runs/12                               │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -2548,7 +2548,7 @@ plugin stdout
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://cloud.cypress.io/projects/cjvoj7/runs/12
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 
 `

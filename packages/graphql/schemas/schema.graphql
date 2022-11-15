@@ -134,10 +134,10 @@ type CloudOrganizationEdge {
 
 """A CloudProject represents a Project stored in the Cypress Cloud"""
 type CloudProject implements Node {
-  """A link to the settings page of the project in Cypress Cloud"""
+  """A link to the settings page of the project in the dashboard"""
   cloudProjectSettingsUrl: String!
 
-  """A link to the project in Cypress Cloud"""
+  """A link to the project in the dashboard"""
   cloudProjectUrl: String!
 
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
@@ -264,8 +264,8 @@ type CloudProjectSpec implements Node {
 union CloudProjectSpecFlakyResult = CloudFeatureNotEnabled | CloudProjectSpecFlakyStatus
 
 type CloudProjectSpecFlakyStatus {
-  """URL linking to the flaky data in Cypress Cloud for this spec"""
-  cloudUrl: String
+  """URL linking to the flaky data in the Cypress dashboard for this spec"""
+  dashboardUrl: String
 
   """Number of flaky runs from the considered runs"""
   flakyRuns: Int
@@ -488,7 +488,7 @@ type CloudUser implements Node {
   """Url to manage cloud organizations for this user"""
   cloudOrganizationsUrl: String
 
-  """Url to the profile of the current user on Cypress Cloud"""
+  """Url to the profile of the current user on the dashboard"""
   cloudProfileUrl: String
 
   """Url to create a cloud organization for this user"""
@@ -1216,7 +1216,7 @@ type Mutation {
   """Close active browser"""
   closeBrowser: Boolean
 
-  """Create a project in Cypress Cloud and return its object"""
+  """Create a project in the dashboard and return its object"""
   cloudProjectCreate(campaign: String, ciProviders: [String!], cohort: String, medium: String, name: String!, orgId: ID!, public: Boolean!, source: String): CloudProject
 
   """Request access to an organization from a projectId"""

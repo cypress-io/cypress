@@ -100,12 +100,12 @@ A CloudProject represents a Project stored in the Cypress Cloud
 """
 type CloudProject implements Node {
   """
-  A link to the settings page of the project in Cypress Cloud
+  A link to the settings page of the project in the dashboard
   """
   cloudProjectSettingsUrl: String!
 
   """
-  A link to the project in Cypress Cloud
+  A link to the project in the dashboard
   """
   cloudProjectUrl: String!
 
@@ -291,9 +291,9 @@ union CloudProjectSpecFlakyResult =
 
 type CloudProjectSpecFlakyStatus {
   """
-  URL linking to the flaky data in Cypress Cloud for this spec
+  URL linking to the flaky data in the Cypress dashboard for this spec
   """
-  cloudUrl: String
+  dashboardUrl: String
 
   """
   Number of flaky runs from the considered runs
@@ -602,7 +602,7 @@ type CloudUser implements Node {
   cloudOrganizationsUrl: String
 
   """
-  Url to the profile of the current user on Cypress Cloud
+  Url to the profile of the current user on the dashboard
   """
   cloudProfileUrl: String
 
@@ -665,7 +665,7 @@ scalar DateTime
 
 type Mutation {
   """
-  Create a project in Cypress Cloud and return its object
+  Create a project in the dashboard and return its object
   """
   cloudProjectCreate(
     campaign: String

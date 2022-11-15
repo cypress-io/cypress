@@ -70,7 +70,7 @@ fragment FlakyInformationCloudSpec on RemoteFetchableCloudProjectSpecResult {
       flakyStatus(fromBranch: $fromBranch, flakyRunsWindow: 50) {
         __typename
         ... on CloudProjectSpecFlakyStatus {
-          cloudUrl
+          dashboardUrl
         }
       }
     }
@@ -90,7 +90,7 @@ const cloudUrl = computed(() => {
   const flakyStatus = cloudSpec?.flakyStatus?.__typename === 'CloudProjectSpecFlakyStatus' ? cloudSpec.flakyStatus : null
 
   return getUrlWithParams({
-    url: flakyStatus?.cloudUrl || '#',
+    url: flakyStatus?.dashboardUrl || '#',
     params: {
       utm_medium: 'Specs Flake Annotation Badge',
       utm_campaign: 'Flaky',

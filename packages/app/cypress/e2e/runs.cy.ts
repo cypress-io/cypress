@@ -769,7 +769,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[data-cy=warning-alert]')
       .should('contain.text', 'You have no internet connection')
-      .and('contain.text', 'Check your internet connection to pull the latest data from the Cypress Cloud')
+      .and('contain.text', 'Check your internet connection to pull the latest data from Cypress Cloud')
 
       cy.goOnline()
 
