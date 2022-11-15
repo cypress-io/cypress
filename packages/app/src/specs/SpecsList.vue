@@ -423,9 +423,9 @@ const { refetchFailedCloudData } = useCloudSpecData(
 const { runAllSpecs, isRunAllSpecsAllowed } = useRunAllSpecs()
 
 function onRunAllSpecs (directory: string) {
-  const filteredSpecs = list.value.reduce((acc, node) => {
-    if (node.data.isLeaf && node.data.id.startsWith(directory)) {
-      acc.push(node.data.data?.relative!)
+  const filteredSpecs = treeSpecList.value.reduce((acc, node) => {
+    if (node.isLeaf && node.id.startsWith(directory)) {
+      acc.push(node.data?.relative!)
     }
 
     return acc
