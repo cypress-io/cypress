@@ -504,7 +504,7 @@ export default function (Commands, Cypress, cy) {
           }
 
           return restoreSessionWorkflow(session)
-        }).then((status: 'passed' | 'warned' | 'failed') => {
+        }).then((status: 'created' | 'restored' | 'recreated' | 'failed') => {
           return navigateAboutBlank()
           .then(() => {
             setSessionLogStatus(status)
