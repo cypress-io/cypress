@@ -510,9 +510,7 @@ describe('lib/cypress', () => {
       .then(() => {
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
           proxyServer: 'http://localhost:8888',
-          browser: {
-            isHeadless: false,
-          },
+          show: true,
         })
 
         this.expectExitWith(0)
@@ -1024,7 +1022,7 @@ describe('lib/cypress', () => {
               browser: 'electron',
               foo: 'bar',
               onNewWindow: sinon.match.func,
-              writeVideoFrame: sinon.match.func,
+              onScreencastFrame: sinon.match.func,
             })
 
             this.expectExitWith(0)

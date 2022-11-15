@@ -3,36 +3,34 @@ import Bluebird from 'bluebird'
 import { BrowserWindow } from 'electron'
 import Debug from 'debug'
 import * as savedState from '../saved_state'
+import { getPathToDesktopIndex } from '@packages/resolve-dist'
 
 const debug = Debug('cypress:server:windows')
 
 export type WindowOptions = Electron.BrowserWindowConstructorOptions & {
   type?: 'INDEX'
+  url?: string
   devTools?: boolean
   graphqlPort?: number
-  contextMenu?: boolean
-  partition?: string
-  /**
-   * Synchronizes properties of browserwindow with local state
-   */
-  trackState?: TrackStateMap
-  onFocus?: () => void
-  onNewWindow?: (e, url, frameName, disposition, options) => Promise<void>
-  onCrashed?: () => void
 }
-
-export type WindowOpenOptions = WindowOptions & { url: string }
-
-type TrackStateMap = Record<'width' | 'height' | 'x' | 'y' | 'devTools', string>
 
 let windows = {}
 let recentlyCreatedWindow = false
 
-const getByType = (type: string) => {
+const getUrl = function (type, port: number) {
+  switch (type) {
+    case 'INDEX':
+      return getPathToDesktopIndex(port)
+
+    default:
+      throw new Error(`No acceptable window type found for: '${type}'`)
+  }
+}
+const getByType = (type) => {
   return windows[type]
 }
 
-const setWindowProxy = function (win: BrowserWindow) {
+const setWindowProxy = function (win) {
   if (!process.env.HTTP_PROXY) {
     return
   }
@@ -43,7 +41,7 @@ const setWindowProxy = function (win: BrowserWindow) {
   })
 }
 
-export function installExtension (win: BrowserWindow, path: string) {
+export function installExtension (win: BrowserWindow, path) {
   return win.webContents.session.loadExtension(path)
   .then((data) => {
     debug('electron extension installed %o', { data, path })
@@ -72,7 +70,7 @@ export function reset () {
   windows = {}
 }
 
-export function destroy (type: string) {
+export function destroy (type) {
   let win
 
   if (type && (win = getByType(type))) {
@@ -80,7 +78,7 @@ export function destroy (type: string) {
   }
 }
 
-export function get (type: string) {
+export function get (type) {
   return getByType(type) || (() => {
     throw new Error(`No window exists for: '${type}'`)
   })()
@@ -145,7 +143,7 @@ export function defaults (options = {}) {
   })
 }
 
-export function create (projectRoot, _options: WindowOptions, newBrowserWindow = _newBrowserWindow) {
+export function create (projectRoot, _options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow) {
   const options = defaults(_options)
 
   if (options.show === false) {
@@ -215,15 +213,15 @@ export function create (projectRoot, _options: WindowOptions, newBrowserWindow =
 }
 
 // open launchpad BrowserWindow
-export async function open (projectRoot: string, options: WindowOpenOptions, newBrowserWindow = _newBrowserWindow): Promise<BrowserWindow> {
+export function open (projectRoot, launchpadPort: number, options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow): Bluebird<BrowserWindow> {
   // if we already have a window open based
   // on that type then just show + focus it!
-  const knownWin = options.type && getByType(options.type)
+  let win = getByType(options.type)
 
-  if (knownWin) {
-    knownWin.show()
+  if (win) {
+    win.show()
 
-    return Bluebird.resolve(knownWin)
+    return Bluebird.resolve(win)
   }
 
   recentlyCreatedWindow = true
@@ -237,7 +235,11 @@ export async function open (projectRoot: string, options: WindowOpenOptions, new
     },
   })
 
-  const win = create(projectRoot, options, newBrowserWindow)
+  if (!options.url) {
+    options.url = getUrl(options.type, launchpadPort)
+  }
+
+  win = create(projectRoot, options, newBrowserWindow)
 
   debug('creating electron window with options %o', options)
 
@@ -249,15 +251,21 @@ export async function open (projectRoot: string, options: WindowOpenOptions, new
     })
   }
 
-  await setWindowProxy(win)
-  await win.loadURL(options.url)
+  // enable our url to be a promise
+  // and wait for this to be resolved
+  return Bluebird.join(
+    options.url,
+    setWindowProxy(win),
+  )
+  .spread((url) => {
+    // navigate the window here!
+    win.loadURL(url)
 
-  recentlyCreatedWindow = false
-
-  return win
+    recentlyCreatedWindow = false
+  }).thenReturn(win)
 }
 
-export function trackState (projectRoot, isTextTerminal, win, keys: TrackStateMap) {
+export function trackState (projectRoot, isTextTerminal, win, keys) {
   const isDestroyed = () => {
     return win.isDestroyed()
   }

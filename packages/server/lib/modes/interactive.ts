@@ -11,10 +11,9 @@ import { globalPubSub, getCtx, clearCtx } from '@packages/data-context'
 
 // eslint-disable-next-line no-duplicate-imports
 import type { WebContents } from 'electron'
-import type { LaunchArgs, Preferences } from '@packages/types'
+import type { LaunchArgs } from '@packages/types'
 
 import debugLib from 'debug'
-import { getPathToDesktopIndex } from '@packages/resolve-dist'
 
 const debug = debugLib('cypress:server:interactive')
 
@@ -27,7 +26,7 @@ export = {
     return os.platform() === 'darwin'
   },
 
-  getWindowArgs (url: string, state: Preferences) {
+  getWindowArgs (state) {
     // Electron Window's arguments
     // These options are passed to Electron's BrowserWindow
     const minWidth = Math.round(/* 13" MacBook Air */ 1792 / 3) // Thirds
@@ -47,7 +46,6 @@ export = {
     }
 
     const common = {
-      url,
       // The backgroundColor should match the value we will show in the
       // launchpad frontend.
 
@@ -131,10 +129,16 @@ export = {
     return args[os.platform()]
   },
 
-  async ready (options: LaunchArgs, launchpadPort: number) {
+  /**
+   * @param {import('@packages/types').LaunchArgs} options
+   * @returns
+   */
+  ready (options: {projectRoot?: string} = {}, port: number) {
     const { projectRoot } = options
     const ctx = getCtx()
 
+    // TODO: potentially just pass an event emitter
+    // instance here instead of callback functions
     menu.set({
       withInternalDevTools: isDev(),
       onLogOutClicked () {
@@ -145,14 +149,15 @@ export = {
       },
     })
 
-    const State = await savedState.create(projectRoot, false)
-    const state = await State.get()
-    const url = getPathToDesktopIndex(launchpadPort)
-    const win = await Windows.open(projectRoot, this.getWindowArgs(url, state))
+    return savedState.create(projectRoot, false).then((state) => state.get())
+    .then((state) => {
+      return Windows.open(projectRoot, port, this.getWindowArgs(state))
+      .then((win) => {
+        ctx?.actions.electron.setBrowserWindow(win)
 
-    ctx?.actions.electron.setBrowserWindow(win)
-
-    return win
+        return win
+      })
+    })
   },
 
   async run (options: LaunchArgs, _loading: Promise<void>) {

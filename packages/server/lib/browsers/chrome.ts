@@ -20,7 +20,7 @@ import { BrowserCriClient } from './browser-cri-client'
 import type { LaunchedBrowser } from '@packages/launcher/lib/browsers'
 import type { CriClient } from './cri-client'
 import type { Automation } from '../automation'
-import type { BrowserLaunchOpts, BrowserNewTabOpts, WriteVideoFrame } from '@packages/types'
+import type { BrowserLaunchOpts, BrowserNewTabOpts } from '@packages/types'
 
 const debug = debugModule('cypress:server:browsers:chrome')
 
@@ -249,10 +249,22 @@ const _disableRestorePagesPrompt = function (userDir) {
   .catch(() => { })
 }
 
-async function _recordVideo (cdpAutomation: CdpAutomation, writeVideoFrame: WriteVideoFrame, browserMajorVersion: number) {
-  const opts = browserMajorVersion >= CHROME_VERSION_WITH_FPS_INCREASE ? screencastOpts() : screencastOpts(1)
+const _maybeRecordVideo = async function (client, options, browserMajorVersion) {
+  if (!options.onScreencastFrame) {
+    debug('options.onScreencastFrame is false')
 
-  await cdpAutomation.startVideoRecording(writeVideoFrame, opts)
+    return client
+  }
+
+  debug('starting screencast')
+  client.on('Page.screencastFrame', (meta) => {
+    options.onScreencastFrame(meta)
+    client.send('Page.screencastFrameAck', { sessionId: meta.sessionId })
+  })
+
+  await client.send('Page.startScreencast', browserMajorVersion >= CHROME_VERSION_WITH_FPS_INCREASE ? screencastOpts() : screencastOpts(1))
+
+  return client
 }
 
 // a utility function that navigates to the given URL
@@ -422,9 +434,7 @@ const _handlePausedRequests = async (client) => {
 const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
   const cdpAutomation = await CdpAutomation.create(client.send, client.on, resetBrowserTargets, automation, !!options.experimentalSessionAndOrigin)
 
-  automation.use(cdpAutomation)
-
-  return cdpAutomation
+  return automation.use(cdpAutomation)
 }
 
 export = {
@@ -438,7 +448,7 @@ export = {
 
   _removeRootExtension,
 
-  _recordVideo,
+  _maybeRecordVideo,
 
   _navigateUsingCRI,
 
@@ -458,7 +468,7 @@ export = {
     return browserCriClient
   },
 
-  async _writeExtension (browser: Browser, options: BrowserLaunchOpts) {
+  async _writeExtension (browser: Browser, options) {
     if (browser.isHeadless) {
       debug('chrome is running headlessly, not installing extension')
 
@@ -555,7 +565,7 @@ export = {
     await this.attachListeners(browser, options.url, pageCriClient, automation, options)
   },
 
-  async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation) {
+  async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation) {
     const port = await protocol.getRemoteDebuggingPort()
 
     debug('connecting to existing chrome instance with url and debugging port', { url: options.url, port })
@@ -570,17 +580,17 @@ export = {
     await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
   },
 
-  async attachListeners (browser: Browser, url: string, pageCriClient: CriClient, automation: Automation, options: BrowserLaunchOpts | BrowserNewTabOpts) {
+  async attachListeners (browser: Browser, url: string, pageCriClient, automation: Automation, options: BrowserLaunchOpts & { onInitializeNewBrowserTab?: () => void }) {
     if (!browserCriClient) throw new Error('Missing browserCriClient in attachListeners')
 
-    const cdpAutomation = await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
+    await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
 
     await pageCriClient.send('Page.enable')
 
-    await options['onInitializeNewBrowserTab']?.()
+    await options.onInitializeNewBrowserTab?.()
 
     await Promise.all([
-      options.writeVideoFrame && this._recordVideo(cdpAutomation, options.writeVideoFrame, browser.majorVersion),
+      this._maybeRecordVideo(pageCriClient, options, browser.majorVersion),
       this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
     ])
 
