@@ -2997,7 +2997,7 @@ declare namespace Cypress {
     indexHtmlFile: string
 
     /**
-     * Enables the "Run All Specs" UI feature, allowing the execution of multiple specs at once
+     * Enables the "Run All Specs" UI feature, allowing the execution of multiple specs at once (only available for e2e).
      * @default false
      */
     experimentalRunAllSpecs: boolean
