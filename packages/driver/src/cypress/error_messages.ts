@@ -1129,6 +1129,11 @@ export default {
     },
   },
 
+  network_logs: {
+    docsUrl: 'https://on.cypress.io/network-logs',
+    filter_must_be_function: ({ filterFn }) => `NetworkLogs.filter should be set to a function, but a ${typeof filterFn} was passed.`,
+  },
+
   ng: {
     no_global: `Angular global (\`window.angular\`) was not found in your window. You cannot use ${cmd('ng')} methods without angular.`,
   },

@@ -167,20 +167,18 @@ describe('Network Logs', () => {
         try {
           // @ts-ignore
           Cypress.NetworkLogs.filter = 4
+          throw new Error('should not reach')
         } catch (err) {
           expect(Cypress.NetworkLogs.filter).to.eq(Cypress.NetworkLogs.defaultFilter)
           expect(err.message).to.include('NetworkLogs.filter should be set to a function')
         }
       })
 
-      it('errors if set to undefined', () => {
-        try {
-          // @ts-ignore
-          Cypress.NetworkLogs.filter = undefined
-        } catch (err) {
-          expect(Cypress.NetworkLogs.filter).to.eq(Cypress.NetworkLogs.defaultFilter)
-          expect(err.message).to.include('NetworkLogs.filter should be set to a function')
-        }
+      it('restores default if set to undefined', () => {
+        Cypress.NetworkLogs.filter = () => false
+        // @ts-ignore
+        Cypress.NetworkLogs.filter = undefined
+        expect(Cypress.NetworkLogs.filter).to.eq(Cypress.NetworkLogs.defaultFilter)
       })
     })
 

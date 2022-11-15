@@ -241,29 +241,18 @@ export default class NetworkLogs {
 
   set filter (filterFn: typeof this._filter | undefined) {
     if (filterFn !== undefined && typeof filterFn !== 'function') {
-      // TODO: move to error_messages once API is finalized
-      throw new Error(`NetworkLogs.filter should be set to a function, but a ${typeof filterFn} was passed.`)
+      $errUtils.throwErrByPath('network_logs.filter_must_be_function', { args: { filterFn } })
     }
 
     this._filter = filterFn || this.defaultFilter
   }
 
   get filter () {
-    if (!this._filter) throw new Error('NetworkLogs._filter got unset - this should not be possible using the setter.')
-
     return this._filter
   }
 
   readonly defaultFilter = (requestInfo: BrowserPreRequest) => {
     return ['xhr', 'fetch'].includes(requestInfo.resourceType) || requestInfo.matchedIntercept
-  }
-
-  setLogFlag (interception: Interception, route: Route, flag: string) {
-    const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === interception.browserRequestId)
-
-    if (!proxyRequest) {
-      // a flag is being set, but
-    }
   }
 
   /**
