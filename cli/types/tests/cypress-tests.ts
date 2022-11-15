@@ -69,6 +69,7 @@ namespace CypressIsCyTests {
 declare namespace Cypress {
   interface Chainable {
     newCommand: (arg: string) => Chainable<number>
+    newQuery: (arg: string) => Chainable<number>
   }
 }
 
@@ -291,6 +292,27 @@ namespace CypressCommandsTests {
 
     return originalFn(element, text, options)
   })
+
+  Cypress.Commands.addQuery('newQuery', function(arg) {
+    this // $ExpectType Command
+    arg // $ExpectType string
+    return () => 3
+  })
+}
+
+namespace CypressNowTest {
+  cy.now('get') // $ExpectType Promise<any> | ((subject: any) => any)
+}
+
+namespace CypressEnsuresTest {
+  cy.ensureSubjectByType('', ['optional', 'element'], 'newQuery') // $ExpectType void
+  cy.ensureElement('', 'newQuery') // $ExpectType void
+  cy.ensureWindow('', 'newQuery') // $ExpectType void
+  cy.ensureDocument('', 'newQuery') // $ExpectType void
+
+  cy.ensureAttached('', 'newQuery') // $ExpectType void
+  cy.ensureNotDisabled('', 'newQuery') // $ExpectType void
+  cy.ensureVisibility('', 'newQuery') // $ExpectType void
 }
 
 namespace CypressLogsTest {

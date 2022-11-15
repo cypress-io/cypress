@@ -36,7 +36,7 @@ import { handleCrossOriginCookies } from '../cross-origin/events/cookies'
 
 import type { ICypress } from '../cypress'
 import type { ICookies } from './cookies'
-import type { StateFunc, SubjectChain } from './state'
+import type { StateFunc, SubjectChain, QueryFunction } from './state'
 
 const debugErrors = debugFn('cypress:driver:errors')
 
@@ -181,14 +181,18 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   aliasNotFoundFor: IAliases['aliasNotFoundFor']
   getXhrTypeByAlias: IAliases['getXhrTypeByAlias']
 
+  // Publicly exposed Ensures types
+  ensureSubjectByType: ReturnType<typeof createEnsures>['ensureSubjectByType']
   ensureElement: IEnsures['ensureElement']
-  ensureAttached: IEnsures['ensureAttached']
   ensureWindow: IEnsures['ensureWindow']
   ensureDocument: IEnsures['ensureDocument']
-  ensureElDoesNotHaveCSS: IEnsures['ensureElDoesNotHaveCSS']
-  ensureElementIsNotAnimating: IEnsures['ensureElementIsNotAnimating']
+  ensureAttached: IEnsures['ensureAttached']
   ensureNotDisabled: IEnsures['ensureNotDisabled']
   ensureVisibility: IEnsures['ensureVisibility']
+
+  // Not publicly exposed Ensures types
+  ensureElDoesNotHaveCSS: IEnsures['ensureElDoesNotHaveCSS']
+  ensureElementIsNotAnimating: IEnsures['ensureElementIsNotAnimating']
   ensureStrictVisibility: IEnsures['ensureStrictVisibility']
   ensureNotHiddenByAncestors: IEnsures['ensureNotHiddenByAncestors']
   ensureExistence: IEnsures['ensureExistence']
@@ -207,7 +211,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   overrides: IOverrides
 
   // Private methods
-  ensureSubjectByType: ReturnType<typeof createEnsures>['ensureSubjectByType']
   ensureRunnable: ReturnType<typeof createEnsures>['ensureRunnable']
   ensureChildCommand: ReturnType<typeof createEnsures>['ensureChildCommand']
 
@@ -861,7 +864,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     }
   }
 
-  now (name, ...args) {
+  now (name: string, ...args: any[]): Promise | QueryFunction {
     if (this.queryFns[name]) {
       return this.queryFns[name].apply(this.state('current'), args)
     }

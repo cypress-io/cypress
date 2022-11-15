@@ -20,9 +20,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
   // into an array and loop through each and verify
   // each element in the array is valid. as it stands
   // we only validate the first
-  const validateType = (subject, type, cmd = state('current')) => {
-    const name = cmd.get('name')
-
+  const validateType = (subject, type, name) => {
     switch (type) {
       case 'element':
         // if this is an element then ensure its currently attached
@@ -45,7 +43,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     }
   }
 
-  const ensureSubjectByType = (subject, type, command) => {
+  const ensureSubjectByType = (subject, type, name) => {
     let types: (string | boolean)[] = [].concat(type)
 
     // if we have an optional subject and nothing's
@@ -69,7 +67,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
 
     for (type of types) {
       try {
-        validateType(subject, type, command)
+        validateType(subject, type, name)
       } catch (error) {
         err = error
         errors.push(err)
@@ -467,5 +465,5 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
 
 export interface IEnsures extends Omit<
   ReturnType<typeof create>,
-  'ensureSubjectByType' | 'ensureRunnable'
+  'ensureRunnable'
 > {}

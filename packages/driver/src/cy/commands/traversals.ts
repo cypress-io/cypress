@@ -118,7 +118,7 @@ export default (Commands, Cypress, cy) => {
       const includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
 
       return (subject) => {
-        cy.ensureSubjectByType(subject, ['element', 'document'], this)
+        cy.ensureSubjectByType(subject, ['element', 'document'], traversal)
 
         const $el = getEl(traversal, includeShadowDom, cy.$$(subject), arg1, arg2)
 

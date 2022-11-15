@@ -14,7 +14,7 @@ export default (Commands, Cypress, cy, state) => {
   Commands.add('end', () => null)
   Commands.add('noop', (arg) => arg)
 
-  Commands.addQuery('log', (msg, ...args) => {
+  Commands.add('log', (msg, ...args) => {
     Cypress.log({
       end: true,
       snapshot: true,
@@ -22,7 +22,7 @@ export default (Commands, Cypress, cy, state) => {
       consoleProps: () => ({ message: msg, args }),
     })
 
-    return () => null
+    return null
   })
 
   Commands.addAll({

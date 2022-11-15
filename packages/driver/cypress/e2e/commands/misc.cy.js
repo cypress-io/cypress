@@ -23,6 +23,11 @@ describe('src/cy/commands/misc', () => {
     it('nulls out the subject', () => {
       cy.wrap({}).log('foo').then((subject) => {
         expect(subject).to.be.null
+
+        // We want cy.end() to break the subject chain - any previous entries
+        // (in this case `{}`) should be discarded. No re-running any previous
+        // query functions once you've used `.end()` on a chain.
+        expect(cy.subjectChain()).to.eql([null])
       })
     })
 
@@ -40,16 +45,19 @@ describe('src/cy/commands/misc', () => {
 
       it('logs immediately', function (done) {
         cy.on('log:added', (attrs, log) => {
-          cy.removeAllListeners('log:added')
+          if (log.get('name') === 'log') {
+            cy.removeAllListeners('log:added')
 
-          expect(log.get('message')).to.eq('foo, {foo: bar}')
-          expect(log.get('name')).to.eq('log')
-          expect(log.get('end')).to.be.true
+            expect(log.get('message')).to.eq('foo, {foo: bar}')
+            expect(log.get('end')).to.be.true
 
-          done()
+            done()
+          }
         })
 
-        cy.log('foo', { foo: 'bar' }).then(() => {
+        // Query the 'body' here to verify that .log()
+        // ignores the previous subject and logs only its arguments.
+        cy.get('body').log('foo', { foo: 'bar' }).then(() => {
           const { lastLog } = this
 
           expect(lastLog.get('ended')).to.be.true
