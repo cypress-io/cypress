@@ -121,6 +121,7 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
       headers: this.req.headers,
       resourceType: 'document',
       originalResourceType: 'document',
+      matchedIntercept: !!this.req.matchingRoutes?.length,
     }
 
     this.res.on('close', () => {

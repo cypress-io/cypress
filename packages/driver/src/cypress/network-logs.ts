@@ -258,34 +258,32 @@ export default class NetworkLogs {
     return ['xhr', 'fetch'].includes(requestInfo.resourceType) || requestInfo.matchedIntercept
   }
 
+  setLogFlag (interception: Interception, route: Route, flag: string) {
+    const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === interception.browserRequestId)
+
+    if (!proxyRequest) {
+      // a flag is being set, but
+    }
+  }
+
   /**
-   * Update an existing proxy log with an interception, or create a new log if one was not created (like if shouldLog returned false)
+   * Returns a setter which can be used to update the request's log as `cy.intercept()` rules run.
    */
-  logInterception (interception: Interception, route: Route): ProxyRequest {
+  getFlagSetter (interception: Interception, route: Route): ProxyRequest['setFlag'] | undefined {
     let proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === interception.browserRequestId)
 
     if (!proxyRequest) {
-      throw new Error('missing proxy request')
-      // this can happen in a race condition, if user runs Network.disable, if the browser doesn't send pre-request for some reason...
-      debug(`Missing pre-request/proxy log for cy.intercept to ${interception.request.url} %o`, { interception, route })
+      // a custom `.filter` can cause the proxyRequest to not exist
+      debug('Missing proxyRequest in logInterception %o', { interception, route })
 
-      proxyRequest = this.createProxyRequestLog({
-        requestId: interception.browserRequestId || interception.id,
-        resourceType: 'other',
-        originalResourceType: 'Request with no browser pre-request',
-        matchedIntercept: true,
-        ..._.pick(interception.request, ['url', 'method', 'headers']),
-      })
+      return
     }
 
     proxyRequest.interceptions.push({ interception, route })
 
     proxyRequest.log?.set(getDynamicRequestLogConfig(proxyRequest))
 
-    // consider a function to be 'spying' until it actually stubs/modifies the response
-    proxyRequest.setFlag(!_.isNil(route.handler) && !_.isFunction(route.handler) ? 'stubbed' : 'spied')
-
-    return proxyRequest
+    return proxyRequest.setFlag
   }
 
   private updateRequestWithResponse (responseReceived: BrowserResponseReceived): void {
@@ -319,7 +317,7 @@ export default class NetworkLogs {
     proxyRequest.log?.snapshot('error').error(proxyRequest.error)
   }
 
-  private createProxyRequestLog (preRequest: BrowserPreRequest): ProxyRequest {
+  private createProxyRequestLog (preRequest: BrowserPreRequest): ProxyRequest | undefined {
     if (!this._filter(preRequest)) {
       return
     }

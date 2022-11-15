@@ -234,7 +234,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
         // `responseHandler` is a StaticResponse
         validateStaticResponse('req.reply', responseHandler)
 
-        request.setLogFlag('stubbed')
+        request.setLogFlag?.('stubbed')
 
         sendStaticResponse(requestId, responseHandler)
 
@@ -287,7 +287,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     }
 
     if (!_.isEqual(req, reqClone)) {
-      request.setLogFlag('reqModified')
+      request.setLogFlag?.('reqModified')
     }
 
     resolve({
@@ -302,7 +302,10 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     resolve = _resolve
   })
 
-  request.setLogFlag = Cypress.NetworkLogs.logInterception(request, route).setFlag
+  request.setLogFlag = Cypress.NetworkLogs['getFlagSetter'](request, route)
+
+  // consider a function to be 'spying' until it actually stubs/modifies the response
+  request.setLogFlag?.(!_.isNil(route.handler) && !_.isFunction(route.handler) ? 'stubbed' : 'spied')
 
   // TODO: this misnomer is a holdover from XHR, should be numRequests
   route.log.set('numResponses', (route.log.get('numResponses') || 0) + 1)

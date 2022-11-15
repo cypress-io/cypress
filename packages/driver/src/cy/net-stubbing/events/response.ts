@@ -41,7 +41,7 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
   const finishResponseStage = (res) => {
     if (request) {
       if (!_.isEqual(resClone, res)) {
-        request.setLogFlag('resModified')
+        request.setLogFlag?.('resModified')
       }
 
       request.response = _.cloneDeep(res)

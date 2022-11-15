@@ -28,7 +28,6 @@ describe('Network Logs', () => {
           if (['request', 'xhr'].includes(log.name)) {
             try {
               testLog(log)
-              resolve()
             } catch (err) {
               // eslint-disable-next-line no-console
               console.error('assertions failed:', err)
@@ -46,8 +45,7 @@ describe('Network Logs', () => {
   }
 
   context('request logging', () => {
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23443
-    it('fetch log shows resource type, url, method, and status code and has expected snapshots and consoleProps', { retries: 15 }, (done) => {
+    it('fetch log shows resource type, url, method, and status code and has expected snapshots and consoleProps', (done) => {
       fetch('/some-url')
 
       // trigger: Cypress.Log() called
@@ -96,7 +94,8 @@ describe('Network Logs', () => {
 
             done()
           } catch (err) {
-            done(new Error(err))
+            // eslint-disable-next-line no-console
+            console.error('log incorrect, retrying', err)
           }
         })
       })
@@ -157,17 +156,31 @@ describe('Network Logs', () => {
           expect(log.displayName).to.not.eq('fetch', 'no fetch logs should be emitted')
         })
 
-        cy.intercept('/')
-
-        await fetch('/')
+        cy.intercept('/').as('aliased')
+        .then(() => {
+          return fetch('/')
+        })
+        .wait('@aliased')
       })
 
       it('errors if set to a non-function', () => {
-
+        try {
+          // @ts-ignore
+          Cypress.NetworkLogs.filter = 4
+        } catch (err) {
+          expect(Cypress.NetworkLogs.filter).to.eq(Cypress.NetworkLogs.defaultFilter)
+          expect(err.message).to.include('NetworkLogs.filter should be set to a function')
+        }
       })
 
       it('errors if set to undefined', () => {
-
+        try {
+          // @ts-ignore
+          Cypress.NetworkLogs.filter = undefined
+        } catch (err) {
+          expect(Cypress.NetworkLogs.filter).to.eq(Cypress.NetworkLogs.defaultFilter)
+          expect(err.message).to.include('NetworkLogs.filter should be set to a function')
+        }
       })
     })
 
@@ -194,7 +207,6 @@ describe('Network Logs', () => {
       })
 
       it('shows cy.visit if intercepted', () => {
-        cy.on('fail', () => {})
         cy.intercept('/fixtures/empty.html')
         .then(() => {
           // trigger: cy.visit()
@@ -209,8 +221,7 @@ describe('Network Logs', () => {
         .visit('/fixtures/empty.html')
       })
 
-      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23420
-      it.skip('intercept log has consoleProps with intercept info', (done) => {
+      it('intercept log has consoleProps with intercept info', (done) => {
         cy.intercept('/some-url', 'stubbed response').as('alias')
         .then(() => {
           fetch('/some-url')
@@ -262,7 +273,8 @@ describe('Network Logs', () => {
 
             done()
           } catch (error) {
-            done(new Error(error))
+            // eslint-disable-next-line no-console
+            console.error('log incorrect, retrying', error)
           }
         })
       })
@@ -404,36 +416,6 @@ describe('Network Logs', () => {
             }).as(alias)
           },
         ))
-      })
-    })
-  })
-
-  context('Cypress.NetworkLogs', () => {
-    describe('.logInterception', () => {
-      it('creates a fake log for unmatched requests', () => {
-        const interception = {
-          id: 'request123',
-          request: {
-            url: 'http://foo',
-            method: 'GET',
-            headers: {},
-          },
-        }
-
-        const route = {}
-
-        const ret = Cypress.NetworkLogs['logInterception'](interception, route)
-
-        expect(ret.preRequest).to.deep.eq({
-          requestId: 'request123',
-          resourceType: 'other',
-          originalResourceType: 'Request with no browser pre-request',
-          url: 'http://foo',
-          method: 'GET',
-          headers: {},
-        })
-
-        expect(ret.log.get('name')).to.eq('request')
       })
     })
   })
