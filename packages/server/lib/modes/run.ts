@@ -569,7 +569,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
     reporterStats: null,
   })
 
-  // dashboard told us to skip this spec
+  // Cypress Cloud told us to skip this spec
   const skippedSpec = results.skippedSpec
 
   if (screenshots) {

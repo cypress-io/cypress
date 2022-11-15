@@ -134,10 +134,10 @@ type CloudOrganizationEdge {
 
 """A CloudProject represents a Project stored in the Cypress Cloud"""
 type CloudProject implements Node {
-  """A link to the settings page of the project in the dashboard"""
+  """A link to the settings page of the project in Cypress Cloud"""
   cloudProjectSettingsUrl: String!
 
-  """A link to the project in the dashboard"""
+  """A link to the project in Cypress Cloud"""
   cloudProjectUrl: String!
 
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
@@ -264,7 +264,13 @@ type CloudProjectSpec implements Node {
 union CloudProjectSpecFlakyResult = CloudFeatureNotEnabled | CloudProjectSpecFlakyStatus
 
 type CloudProjectSpecFlakyStatus {
-  """URL linking to the flaky data in the Cypress dashboard for this spec"""
+  """
+  <<<<<<< HEAD
+    URL linking to the flaky data in the Cypress dashboard for this spec
+  =======
+    URL linking to the flaky data in Cypress Cloud for this spec
+  >>>>>>> 54df348386 (Update superficial references of Dashboard)
+  """
   dashboardUrl: String
 
   """Number of flaky runs from the considered runs"""
@@ -488,7 +494,7 @@ type CloudUser implements Node {
   """Url to manage cloud organizations for this user"""
   cloudOrganizationsUrl: String
 
-  """Url to the profile of the current user on the dashboard"""
+  """Url to the profile of the current user on Cypress Cloud"""
   cloudProfileUrl: String
 
   """Url to create a cloud organization for this user"""
@@ -593,7 +599,7 @@ type CurrentProject implements Node & ProjectLike {
   """Browsers found that are compatible with Cypress"""
   browsers: [Browser!]
 
-  """The remote associated project from Cypress Dashboard"""
+  """The remote associated project from Cypress Cloud"""
   cloudProject: CloudProjectResult
 
   """
@@ -668,7 +674,7 @@ type CurrentProject implements Node & ProjectLike {
   """Cached preferences for this project"""
   preferences: ProjectPreferences
 
-  """Used to associate project with Cypress Dashboard"""
+  """Used to associate project with Cypress Cloud"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""
@@ -1016,7 +1022,7 @@ type GlobalProject implements Node & ProjectLike {
   """Relay style Node ID field for the GlobalProject field"""
   id: ID!
 
-  """Used to associate project with Cypress Dashboard"""
+  """Used to associate project with Cypress Cloud"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""
@@ -1216,7 +1222,7 @@ type Mutation {
   """Close active browser"""
   closeBrowser: Boolean
 
-  """Create a project in the dashboard and return its object"""
+  """Create a project in Cypress Cloud and return its object"""
   cloudProjectCreate(campaign: String, ciProviders: [String!], cohort: String, medium: String, name: String!, orgId: ID!, public: Boolean!, source: String): CloudProject
 
   """Request access to an organization from a projectId"""
@@ -1266,10 +1272,10 @@ type Mutation {
     ids: [ID!]!
   ): [RemoteFetchable]!
 
-  """Auth with Cypress Dashboard"""
+  """Auth with Cypress Cloud"""
   login(utmContent: String, utmMedium: String!, utmSource: String!): Query
 
-  """Log out of Cypress Dashboard"""
+  """Log out of Cypress Cloud"""
   logout: Query
 
   """Check if a give spec file will match the project spec pattern"""
@@ -1323,7 +1329,7 @@ type Mutation {
   reconfigureProject: Boolean!
 
   """
-  Dispatch an event to the dashboard to be recorded. Events are completely anonymous and are only used to identify aggregate usage patterns across all Cypress users.
+  Dispatch an event to Cypress Cloud to be recorded. Events are completely anonymous and are only used to identify aggregate usage patterns across all Cypress users.
   """
   recordEvent(campaign: String!, cohort: String, medium: String!, messageId: String!): Boolean
 
@@ -1441,7 +1447,7 @@ interface ProjectLike {
     name: String!
   ): RemoteFetchableCloudProjectResult
 
-  """Used to associate project with Cypress Dashboard"""
+  """Used to associate project with Cypress Cloud"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""

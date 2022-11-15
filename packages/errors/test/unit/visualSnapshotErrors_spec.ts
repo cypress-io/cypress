@@ -434,7 +434,7 @@ describe('visual error templates', () => {
     DASHBOARD_STALE_RUN: () => {
       return {
         default: [{
-          runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1',
+          runUrl: 'https://cloud.cypress.io/project/abcd/runs/1',
           tag: '123',
           group: 'foo',
           parallel: true,
@@ -444,7 +444,7 @@ describe('visual error templates', () => {
     DASHBOARD_ALREADY_COMPLETE: () => {
       return {
         default: [{
-          runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1',
+          runUrl: 'https://cloud.cypress.io/project/abcd/runs/1',
           tag: '123',
           group: 'foo',
           parallel: true,
@@ -454,7 +454,7 @@ describe('visual error templates', () => {
     DASHBOARD_PARALLEL_REQUIRED: () => {
       return {
         default: [{
-          runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1',
+          runUrl: 'https://cloud.cypress.io/project/abcd/runs/1',
           tag: '123',
           group: 'foo',
           parallel: true,
@@ -464,7 +464,7 @@ describe('visual error templates', () => {
     DASHBOARD_PARALLEL_DISALLOWED: () => {
       return {
         default: [{
-          runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1',
+          runUrl: 'https://cloud.cypress.io/project/abcd/runs/1',
           tag: '123',
           group: 'foo',
           parallel: true,
@@ -476,7 +476,7 @@ describe('visual error templates', () => {
         default: [
           {
             group: 'foo',
-            runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1',
+            runUrl: 'https://cloud.cypress.io/project/abcd/runs/1',
             ciBuildId: 'test-ciBuildId-123',
             parameters: {
               osName: 'darwin',
@@ -494,7 +494,7 @@ describe('visual error templates', () => {
     DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE: () => {
       return {
         default: [{
-          runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1',
+          runUrl: 'https://cloud.cypress.io/project/abcd/runs/1',
           tag: '123',
           group: 'foo',
           parallel: true,
@@ -819,7 +819,7 @@ describe('visual error templates', () => {
     FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS: () => {
       return {
         default: [{
-          link: 'https://dashboard.cypress.io/project/abcd',
+          link: 'https://cloud.cypress.io/project/abcd',
           limit: 500,
           usedTestsMessage: 'test',
         }],
@@ -828,7 +828,7 @@ describe('visual error templates', () => {
     FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS: () => {
       return {
         default: [{
-          link: 'https://dashboard.cypress.io/project/abcd',
+          link: 'https://cloud.cypress.io/project/abcd',
           limit: 500,
           usedTestsMessage: 'test',
           gracePeriodMessage: 'the grace period ends',

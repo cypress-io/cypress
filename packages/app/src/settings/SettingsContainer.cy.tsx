@@ -40,11 +40,11 @@ describe('<SettingsContainer />', { viewportHeight: 800, viewportWidth: 900 }, (
   })
 
   it('expands and collapses cloud settings', () => {
-    cy.contains('Dashboard settings').click()
+    cy.contains('Cypress Cloud settings').click()
 
     cy.findByText(defaultMessages.settingsPage.projectId.title).scrollIntoView().should('be.visible')
     cy.percySnapshot()
-    cy.findByText('Dashboard settings').click()
+    cy.findByText('Cypress Cloud settings').click()
 
     cy.findByText(defaultMessages.settingsPage.projectId.title).should('not.exist')
   })

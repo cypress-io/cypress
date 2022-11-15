@@ -135,9 +135,9 @@ Before running Cypress in `open` mode, ensure that you have started your applica
 
 Read our docs to learn more about [launching browsers](https://on.cypress.io/launching-browsers) with Cypress.
 
-### Recording test results to the Cypress Dashboard
+### Recording test results to Cypress Cloud
 
-We recommend setting your [Cypress Dashboard](https://on.cypress.io/features-dashboard) recording key as an environment variable and NOT as a builder option when running it in CI.
+We recommend setting your [Cypress Cloud](https://on.cypress.io/features-dashboard) recording key as an environment variable and NOT as a builder option when running it in CI.
 
 ```json
 "cypress-run": {
@@ -145,7 +145,7 @@ We recommend setting your [Cypress Dashboard](https://on.cypress.io/features-das
   "options": {
     "devServerTarget": "{project-name}:serve",
     "record": true,
-    "key": "your-cypress-dashboard-recording-key"
+    "key": "your-cypress-cloud-recording-key"
   },
   "configurations": {
     "production": {
@@ -155,7 +155,7 @@ We recommend setting your [Cypress Dashboard](https://on.cypress.io/features-das
 }
 ```
 
-Read our docs to learn more about [recording test results](https://on.cypress.io/recording-project-runs) to the [Cypress Dashboard](https://on.cypress.io/features-dashboard).
+Read our docs to learn more about [recording test results](https://on.cypress.io/recording-project-runs) to [Cypress Cloud](https://on.cypress.io/features-dashboard).
 
 ### Specifying a custom config file
 
@@ -187,7 +187,7 @@ Read our docs to learn more about all the [configuration options](https://on.cyp
     "devServerTarget": "{project-name}:serve",
     "parallel": true,
     "record": true,
-    "key": "your-cypress-dashboard-recording-key"
+    "key": "your-cypress-cloud-recording-key"
   },
   "configurations": {
     "production": {

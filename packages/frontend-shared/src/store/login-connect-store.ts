@@ -34,7 +34,7 @@ export interface LoginConnectState {
 }
 
 // The user can be in only one status at a time.
-// These are specifically related to the dashboard
+// These are specifically related to Cypress Cloud
 // and the progress from logging in to recording a run.
 export const userStatuses = [
   'isLoggedOut',

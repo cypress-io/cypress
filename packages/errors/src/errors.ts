@@ -207,7 +207,7 @@ export const AllCypressErrors = {
   },
   DASHBOARD_UNKNOWN_CREATE_RUN_WARNING: (arg1: {props: any, message: string}) => {
     return errTemplate`\
-        Warning from Cypress Dashboard: ${fmt.highlight(arg1.message)}
+        Warning from Cypress Cloud: ${fmt.highlight(arg1.message)}
 
         Details:
         ${fmt.meta(arg1.props)}`
@@ -369,7 +369,7 @@ export const AllCypressErrors = {
       parallel: '--parallel',
     })}
 
-        These flags can only be used when recording to the Cypress Dashboard service.
+        These flags can only be used when recording to Cypress Cloud.
 
         https://on.cypress.io/record-params-without-recording`
   },
@@ -415,7 +415,7 @@ export const AllCypressErrors = {
   },
   PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION: (arg1: string) => {
     return errTemplate`\
-        This project has been configured to record runs on our Dashboard.
+        This project has been configured to record runs on our Cypress Cloud.
 
         It currently has the projectId: ${fmt.highlight(arg1)}
 
@@ -483,17 +483,17 @@ export const AllCypressErrors = {
 
         It may have been recently revoked by you or another user.
 
-        Please log into the Dashboard to see the valid Record Keys.
+        Please log into Cypress Cloud to see the valid Record Keys.
 
         https://on.cypress.io/dashboard/projects/${fmt.off(projectId)}`
   },
   DASHBOARD_PROJECT_NOT_FOUND: (projectId: string, configFileBaseName: string) => {
     return errTemplate`\
-        We could not find a Dashboard project with the projectId: ${fmt.highlight(projectId)}
+        We could not find a Cypress Cloud project with the projectId: ${fmt.highlight(projectId)}
 
         This ${fmt.highlightSecondary(`projectId`)} came from your ${fmt.path(configFileBaseName)} file or an environment variable.
 
-        Please log into the Dashboard and find your project.
+        Please log into Cypress Cloud and find your project.
 
         We will list the correct projectId in the 'Settings' tab.
 
@@ -850,7 +850,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         You've exceeded the limit of private test results under your free plan this month. ${getUsedTestsMessage(arg1.limit, arg1.usedTestsMessage)}
 
-        Your plan is now in a grace period, which means your tests will still be recorded until ${fmt.off(arg1.gracePeriodMessage)}. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
+        Your plan is now in a grace period, which means your tests will still be recorded until ${fmt.off(arg1.gracePeriodMessage)}. Please upgrade your plan to continue recording tests on Cypress Cloud in the future.
 
         ${fmt.off(arg1.link)}`
   },
@@ -1438,7 +1438,7 @@ export const AllCypressErrors = {
 
   DASHBOARD_GRAPHQL_ERROR: (err: Error) => {
     return errTemplate`
-      We received an unexpected error response from the request to the Cypress Dashboard:
+      We received an unexpected error response from the request to Cypress Cloud:
 
       ${fmt.stringify(err.message)}
     `

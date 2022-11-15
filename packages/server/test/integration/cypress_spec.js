@@ -1370,10 +1370,10 @@ describe('lib/cypress', () => {
       sinon.stub(Windows, 'create').returns(ee)
     })
 
-    it('does not truncate a really long dashboard url', function () {
+    it('does not truncate a really long Cypress Cloud url', function () {
       api.createRun.resolves({
         warnings: [],
-        runUrl: `http://dashboard.cypress.io/this-is-a${'-long'.repeat(50)}-url`,
+        runUrl: `http://cloud.cypress.io/this-is-a${'-long'.repeat(50)}-url`,
       })
 
       return cypress.start([
@@ -1384,7 +1384,7 @@ describe('lib/cypress', () => {
         '--ciBuildId=ciBuildId123',
       ])
       .then(() => {
-        return snapshotConsoleLogs('Long Dashboard URL')
+        return snapshotConsoleLogs('Long Cypress Cloud URL')
       })
     })
 
@@ -1395,7 +1395,7 @@ describe('lib/cypress', () => {
       err.error = {
         code: 'RUN_GROUP_NAME_NOT_UNIQUE',
         payload: {
-          runUrl: 'https://dashboard.cypress.io/runs/12345',
+          runUrl: 'https://cloud.cypress.io/runs/12345',
         },
       }
 
@@ -1432,7 +1432,7 @@ describe('lib/cypress', () => {
       err.error = {
         code: 'PARALLEL_GROUP_PARAMS_MISMATCH',
         payload: {
-          runUrl: 'https://dashboard.cypress.io/runs/12345',
+          runUrl: 'https://cloud.cypress.io/runs/12345',
         },
       }
 
@@ -1460,7 +1460,7 @@ describe('lib/cypress', () => {
       err.error = {
         code: 'PARALLEL_DISALLOWED',
         payload: {
-          runUrl: 'https://dashboard.cypress.io/runs/12345',
+          runUrl: 'https://cloud.cypress.io/runs/12345',
         },
       }
 
@@ -1488,7 +1488,7 @@ describe('lib/cypress', () => {
       err.error = {
         code: 'PARALLEL_REQUIRED',
         payload: {
-          runUrl: 'https://dashboard.cypress.io/runs/12345',
+          runUrl: 'https://cloud.cypress.io/runs/12345',
         },
       }
 
@@ -1517,7 +1517,7 @@ describe('lib/cypress', () => {
       err.error = {
         code: 'ALREADY_COMPLETE',
         payload: {
-          runUrl: 'https://dashboard.cypress.io/runs/12345',
+          runUrl: 'https://cloud.cypress.io/runs/12345',
         },
       }
 
@@ -1545,7 +1545,7 @@ describe('lib/cypress', () => {
       err.error = {
         code: 'STALE_RUN',
         payload: {
-          runUrl: 'https://dashboard.cypress.io/runs/12345',
+          runUrl: 'https://cloud.cypress.io/runs/12345',
         },
       }
 
