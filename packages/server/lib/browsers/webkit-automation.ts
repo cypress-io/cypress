@@ -3,10 +3,6 @@ import Debug from 'debug'
 import type playwright from 'playwright-webkit'
 import type { Automation } from '../automation'
 import { normalizeResourceType } from './cdp_automation'
-import os from 'os'
-import type { RunModeVideoApi } from '@packages/types'
-import path from 'path'
-import mime from 'mime'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
 
@@ -86,7 +82,6 @@ const _cookieMatches = (cookie: any, filter: Record<string, any>) => {
 
 let requestIdCounter = 1
 const requestIdMap = new WeakMap<playwright.Request, string>()
-let downloadIdCounter = 1
 
 export class WebKitAutomation {
   private context!: playwright.BrowserContext
@@ -95,101 +90,37 @@ export class WebKitAutomation {
   private constructor (public automation: Automation, private browser: playwright.Browser) {}
 
   // static initializer to avoid "not definitively declared"
-  static async create (automation: Automation, browser: playwright.Browser, initialUrl: string, downloadsFolder: string, videoApi?: RunModeVideoApi) {
+  static async create (automation: Automation, browser: playwright.Browser, initialUrl: string) {
     const wkAutomation = new WebKitAutomation(automation, browser)
 
-    await wkAutomation.reset({ downloadsFolder, newUrl: initialUrl, videoApi })
+    await wkAutomation.reset(initialUrl)
 
     return wkAutomation
   }
 
-  public async reset (options: { downloadsFolder?: string, newUrl?: string, videoApi?: RunModeVideoApi }) {
-    debug('resetting playwright page + context %o', options)
+  public async reset (newUrl?: string) {
+    debug('resetting playwright page + context %o', { newUrl })
     // new context comes with new cache + storage
     const newContext = await this.browser.newContext({
       ignoreHTTPSErrors: true,
-      recordVideo: options.videoApi && {
-        dir: os.tmpdir(),
-        size: { width: 1280, height: 720 },
-      },
     })
-    const contextStarted = new Date
     const oldPwPage = this.page
 
     this.page = await newContext.newPage()
     this.context = this.page.context()
 
-    this.handleRequestEvents()
-
-    if (options.downloadsFolder) this.handleDownloadEvents(options.downloadsFolder)
-
-    if (options.videoApi) this.recordVideo(options.videoApi, contextStarted)
+    this.attachListeners(this.page)
 
     let promises: Promise<any>[] = []
 
     if (oldPwPage) promises.push(oldPwPage.context().close())
 
-    if (options.newUrl) promises.push(this.page.goto(options.newUrl))
+    if (newUrl) promises.push(this.page.goto(newUrl))
 
     if (promises.length) await Promise.all(promises)
   }
 
-  private recordVideo (videoApi: RunModeVideoApi, startedVideoCapture: Date) {
-    const _this = this
-
-    videoApi.useVideoController({
-      async endVideoCapture () {
-        const pwVideo = _this.page.video()
-
-        if (!pwVideo) throw new Error('pw.page missing video in endVideoCapture, cannot save video')
-
-        debug('ending video capture, closing page...')
-
-        await Promise.all([
-          // pwVideo.saveAs will not resolve until the page closes, presumably we do want to close it
-          _this.page.close(),
-          pwVideo.saveAs(videoApi.videoName),
-        ])
-      },
-      writeVideoFrame: () => {
-        throw new Error('writeVideoFrame called, but WebKit does not support streaming frame data.')
-      },
-      async restart () {
-        throw new Error('Cannot restart WebKit video - WebKit cannot record video on multiple specs in single-tab mode.')
-      },
-      postProcessFfmpegOptions: {
-        // WebKit seems to record at the highest possible frame rate, so filter out duplicate frames before compressing
-        // otherwise compressing with all these dupe frames can take a really long time
-        // https://stackoverflow.com/q/37088517/3474615
-        outputOptions: ['-vsync vfr'],
-        videoFilters: 'mpdecimate',
-      },
-      startedVideoCapture,
-    })
-  }
-
-  private handleDownloadEvents (downloadsFolder: string) {
-    this.page.on('download', async (download) => {
-      const id = downloadIdCounter++
-      const suggestedFilename = download.suggestedFilename()
-      const filePath = path.join(downloadsFolder, suggestedFilename)
-
-      this.automation.push('create:download', {
-        id,
-        url: download.url(),
-        filePath,
-        mime: mime.getType(suggestedFilename),
-      })
-
-      // NOTE: WebKit does have a `downloadsPath` option, but it is trashed after each run
-      // Cypress trashes before runs - so we have to use `.saveAs` to move it
-      await download.saveAs(filePath)
-
-      this.automation.push('complete:download', { id })
-    })
-  }
-
-  private handleRequestEvents () {
+  private attachListeners (page: playwright.Page) {
     // emit preRequest to proxy
     this.page.on('request', (request) => {
       // ignore socket.io events
@@ -305,7 +236,7 @@ export class WebKitAutomation {
 
         return
       case 'reset:browser:tabs:for:next:test':
-        if (data.shouldKeepTabOpen) return await this.reset({})
+        if (data.shouldKeepTabOpen) return await this.reset()
 
         return await this.context.browser()?.close()
       default:

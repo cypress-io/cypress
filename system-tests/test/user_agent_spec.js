@@ -29,7 +29,6 @@ describe('e2e user agent', () => {
   })
 
   systemTests.it('passes', {
-    browser: '!webkit', // TODO(webkit): fix+unskip
     spec: 'user_agent.cy.js',
     snapshot: true,
   })

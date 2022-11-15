@@ -168,7 +168,6 @@ describe('e2e requests', () => {
   })
 
   systemTests.it('passes', {
-    browser: '!webkit', // TODO(webkit): fix+unskip
     spec: 'request.cy.js',
     snapshot: true,
     config: {

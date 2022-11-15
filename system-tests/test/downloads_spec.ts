@@ -10,7 +10,6 @@ describe('e2e downloads', () => {
   systemTests.setup()
 
   systemTests.it('handles various file downloads', {
-    browser: '!webkit', // TODO(webkit): fix+unskip (implement downloads support)
     project: 'downloads',
     spec: 'downloads.cy.ts',
     config: {
@@ -23,7 +22,6 @@ describe('e2e downloads', () => {
   }
 
   systemTests.it('allows changing the downloads folder', {
-    browser: '!webkit', // TODO(webkit): fix+unskip (implement downloads support)
     project: 'downloads',
     spec: 'downloads.cy.ts',
     config: {
