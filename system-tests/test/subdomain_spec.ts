@@ -93,7 +93,7 @@ const onServer = function (app) {
 
         case 'domain.foobar.com:2292':
           res.cookie('nomnom', 'good', {
-            domain: '.foobar.com',
+            domain: '.domain.foobar.com',
           })
 
           return getText('Domain')

@@ -16,16 +16,17 @@ describe('subdomains', () => {
     cy.visit('http://help.foobar.com:2292')
     cy.get('h1').should('contain', 'Help')
     cy.document().then((document) => {
-    // set cookies that are just on this subdomain
-    // and cookies on the superdomain
-    // and then regular cookies too
+      // set cookies that are just on this subdomain
+      // and cookies on the superdomain
+      // and then regular cookies too
       document.cookie = 'help=true; domain=help.foobar.com'
       document.cookie = 'asdf=asdf; domain=foobar.com'
       document.cookie = 'foo=bar'
     })
 
     cy.getCookies().then((cookies) => {
-      expect(cookies.length).to.eq(3)
+      // only cookies matching this subdomain should be yielded
+      expect(cookies.length).to.eq(2)
     })
   })
 
@@ -55,7 +56,7 @@ describe('subdomains', () => {
     cy.visit('http://domain.foobar.com:2292')
     cy.getCookies().should('have.length', 1)
     cy.getCookie('nomnom').should('include', {
-      domain: '.foobar.com',
+      domain: '.domain.foobar.com',
       name: 'nomnom',
       value: 'good',
       path: '/',
@@ -68,7 +69,7 @@ describe('subdomains', () => {
         const xhr = new win.XMLHttpRequest
 
         xhr.withCredentials = true
-        xhr.open('GET', 'http://www.foobar.com:2292/cookies')
+        xhr.open('GET', 'http://domain.foobar.com:2292/cookies')
         xhr.send()
         xhr.onload = () => {
           return resolve(JSON.parse(xhr.response).cookie)

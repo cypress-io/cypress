@@ -28,20 +28,6 @@ const getCommandFromEvent = (event) => {
   })
 }
 
-const mergeDefaults = function (obj) {
-  // and if the user did not provide a domain
-  // then we know to set the default to be origin
-  const merge = (o) => {
-    return _.defaults(o, { domain: window.location.hostname })
-  }
-
-  if (_.isArray(obj)) {
-    return _.map(obj, merge)
-  }
-
-  return merge(obj)
-}
-
 // from https://developer.chrome.com/extensions/cookies#type-SameSiteStatus
 // note that `unspecified` is purposely omitted - Firefox and Chrome set
 // different defaults, and Firefox lacks support for `unspecified`, so
@@ -87,6 +73,27 @@ function validateDomainOption (domain: any, commandName: string, log: Log | unde
 }
 
 export default function (Commands, Cypress, cy, state, config) {
+  const getDefaultDomain = () => {
+    const hostname = state('window').location.hostname
+
+    // if hostname is undefined, the AUT is on about:blank, so use the
+    // spec frame's hostname instead
+    return hostname || window.location.hostname
+  }
+
+  const mergeDefaults = function (obj) {
+    // set the default domain to be the AUT hostname
+    const merge = (o) => {
+      return _.defaults(o, { domain: getDefaultDomain() })
+    }
+
+    if (_.isArray(obj)) {
+      return _.map(obj, merge)
+    }
+
+    return merge(obj)
+  }
+
   const automateCookies = function (event, obj = {}, log, timeout) {
     const automate = () => {
       return Cypress.automation(event, mergeDefaults(obj))
