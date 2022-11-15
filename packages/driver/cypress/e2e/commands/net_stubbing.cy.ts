@@ -21,7 +21,7 @@ const uniqueRoute = (route) => {
 }
 
 // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23434
-describe('network stubbing', { retries: 15 }, function () {
+describe.skip('network stubbing', function () {
   const { $, _, sinon, state, Promise } = Cypress
 
   beforeEach(function () {
