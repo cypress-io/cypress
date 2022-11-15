@@ -902,6 +902,7 @@ export class PackherdModuleLoader {
 
     require.resolve = Object.assign(
       (moduleUri: string, options?: { paths?: string[] }) => {
+        // Handle the case where options populated. The module is expected to be outside of the cypress snapshot so use the original require.resolve.
         if (options && options.paths) {
           return originalRequireResolve(moduleUri, options)
         }
