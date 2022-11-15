@@ -29,7 +29,7 @@ export default (Commands, Cypress, cy, state) => {
       // when cy.log() is used inside it.
       // The code below restore the stack when cy.log() is injected in cy.then().
       if (state('current').get('injected')) {
-        const restoreCmdIndex = state('index') + 1
+        const restoreCmdIndex = cy.queue.index + 1
 
         cy.queue.insert(restoreCmdIndex, $Command.create({
           args: [cy.currentSubject()],
@@ -37,7 +37,7 @@ export default (Commands, Cypress, cy, state) => {
           fn: (subject) => subject,
         }))
 
-        state('index', restoreCmdIndex)
+        cy.queue.index = restoreCmdIndex
       }
 
       Cypress.log({

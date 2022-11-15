@@ -1,4 +1,8 @@
 describe('cy.origin', { browser: '!webkit' }, () => {
+  beforeEach(() => {
+    cy.visit('')
+  })
+
   describe('successes', () => {
     it('succeeds on a localhost domain name', () => {
       cy.origin('localhost', () => undefined)
@@ -354,6 +358,86 @@ describe('cy.origin', { browser: '!webkit' }, () => {
 
       // @ts-ignore
       cy.origin('foobar.com', {})
+    })
+  })
+})
+
+describe('cy.origin - external hosts', { browser: '!webkit' }, () => {
+  describe('successes', () => {
+    it('succeeds on a complete origin from https using https', () => {
+      cy.visit('https://www.foobar.com:3502/fixtures/primary-origin.html')
+      cy.origin('https://www.idp.com:3502', () => undefined)
+      cy.then(() => {
+        const expectedSrc = `https://www.idp.com:3502/__cypress/spec-bridge-iframes`
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://www.idp.com:3502') as HTMLIFrameElement
+
+        expect(iframe.src).to.equal(expectedSrc)
+      })
+    })
+
+    it('succeeds if url is the super domain as top but the super domain is excepted and must be strictly same origin', () => {
+      // Intercept google to keep our tests independent from google.
+      cy.intercept('https://www.google.com', {
+        body: '<html><head><title></title></head><body><p></body></html>',
+      })
+
+      cy.visit('https://www.google.com')
+      cy.origin('accounts.google.com', () => undefined)
+      cy.then(() => {
+        const expectedSrc = `https://accounts.google.com/__cypress/spec-bridge-iframes`
+        const iframe = window.top?.document.getElementById('Spec\ Bridge:\ https://accounts.google.com') as HTMLIFrameElement
+
+        expect(iframe.src).to.equal(expectedSrc)
+      })
+    })
+  })
+
+  describe('errors', () => {
+    it('errors if the url param is same superDomainOrigin as top', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('`cy.origin()` requires the first argument to be a different domain than top. You passed `http://app.foobar.com` to the origin command, while top is at `http://www.foobar.com`.')
+
+        done()
+      })
+
+      cy.intercept('http://www.foobar.com', {
+        body: '<html><head><title></title></head><body><p></body></html>',
+      })
+
+      cy.intercept('http://app.foobar.com', {
+        body: '<html><head><title></title></head><body><p></body></html>',
+      })
+
+      cy.visit('http://www.foobar.com')
+
+      cy.origin('http://app.foobar.com', () => undefined)
+    })
+
+    it('errors if the url param is same origin as top', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('`cy.origin()` requires the first argument to be a different origin than top. You passed `https://www.google.com` to the origin command, while top is at `https://www.google.com`.')
+
+        done()
+      })
+
+      // Intercept google to keep our tests independent from google.
+      cy.intercept('https://www.google.com', {
+        body: '<html><head><title></title></head><body><p></body></html>',
+      })
+
+      cy.visit('https://www.google.com')
+      cy.origin('https://www.google.com', () => undefined)
+    })
+
+    it('errors and does not hang when throwing a mixed content error creating the spec bridge', { defaultCommandTimeout: 50 }, (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include(`\`cy.origin()\` failed to create a spec bridge to communicate with the specified origin. This can happen when you attempt to create a spec bridge to an insecure (http) frame from a secure (https) frame.`)
+
+        done()
+      })
+
+      cy.visit('https://www.foobar.com:3502/fixtures/primary-origin.html')
+      cy.origin('http://www.foobar.com:3500', () => {})
     })
   })
 })

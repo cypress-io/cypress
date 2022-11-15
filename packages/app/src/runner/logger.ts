@@ -8,9 +8,11 @@ interface Table {
 }
 
 interface Group {
-  items: any
-  label: boolean
   name: string
+  items?: any
+  label?: boolean
+  expand?: boolean
+  table?: boolean
 }
 
 export const logger = {
@@ -93,7 +95,12 @@ export const logger = {
     const groups = this._getGroups(consoleProps)
 
     _.each(groups, (group) => {
-      console.groupCollapsed(group.name)
+      if (group.expand) {
+        console.group(group.name)
+      } else {
+        console.groupCollapsed(group.name)
+      }
+
       _.each(group.items, (value, key) => {
         if (group.label === false) {
           this.log(value)
@@ -102,6 +109,7 @@ export const logger = {
         }
       })
 
+      this._logGroups(group)
       console.groupEnd()
     })
   },
@@ -112,7 +120,7 @@ export const logger = {
     if (!groups) return
 
     return _.map(groups, (group) => {
-      group.items = this._formatted(group.items)
+      group.items = this._formatted(group.items || {})
 
       return group
     })

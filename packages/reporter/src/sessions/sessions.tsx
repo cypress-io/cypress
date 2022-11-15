@@ -13,7 +13,7 @@ export interface SessionPanelProps {
   model: Record<string, SessionsModel>
 }
 
-const SessionRow = ({ name, isGlobalSession, id, state, status, testId }: SessionsModel) => {
+const SessionRow = ({ name, isGlobalSession, id, status, testId }: SessionsModel) => {
   const printToConsole = (id) => {
     events.emit('show:command', testId, id)
   }
@@ -31,13 +31,11 @@ const SessionRow = ({ name, isGlobalSession, id, state, status, testId }: Sessio
           {isGlobalSession && <GlobeIcon className='global-session-icon' />}
           {name}
         </span>
-        <span className='session-tag'>
-          <Tag
-            customClassName='session-status'
-            content={status}
-            type={`${state === 'failed' ? 'failed' : 'successful'}-status`}
-          />
-        </span>
+        <Tag
+          customClassName='session-status'
+          content={status}
+          type={`${status === 'failed' ? 'failed' : 'successful'}-status`}
+        />
       </div>
     </FlashOnClick>
   )
