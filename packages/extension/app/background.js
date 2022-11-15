@@ -4,6 +4,8 @@ const pick = require('lodash/pick')
 const once = require('lodash/once')
 const Promise = require('bluebird')
 const browser = require('webextension-polyfill')
+const { cookieMatches } = require('@packages/server/lib/automation/util')
+
 const client = require('./client')
 const util = require('../lib/util')
 
@@ -220,8 +222,12 @@ const automation = {
   getAll (filter = {}) {
     filter = pick(filter, GET_ALL_PROPS)
 
-    return Promise.try(() => {
-      return browser.cookies.getAll(filter)
+    return Promise.try(async () => {
+      const cookies = await browser.cookies.getAll({})
+
+      return cookies.filter((cookie) => {
+        return cookieMatches(cookie, filter)
+      })
     })
   },
 

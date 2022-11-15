@@ -4,7 +4,6 @@ import Promise from 'bluebird'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
-import { $Location } from '../../cypress/location'
 
 // TODO: add hostOnly to COOKIE_PROPS
 // https://github.com/cypress-io/cypress/issues/363
@@ -30,14 +29,10 @@ const getCommandFromEvent = (event) => {
 }
 
 const mergeDefaults = function (obj) {
-  // we always want to be able to see and influence cookies
-  // on our superdomain
-  const { superDomain } = $Location.create(window.location.href)
-
   // and if the user did not provide a domain
   // then we know to set the default to be origin
   const merge = (o) => {
-    return _.defaults(o, { domain: superDomain })
+    return _.defaults(o, { domain: window.location.hostname })
   }
 
   if (_.isArray(obj)) {
