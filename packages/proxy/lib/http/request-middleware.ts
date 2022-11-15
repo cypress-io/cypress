@@ -121,7 +121,6 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
       headers: this.req.headers,
       resourceType: 'document',
       originalResourceType: 'document',
-      matchedIntercept: !!this.req.matchingRoutes?.length,
     }
 
     this.res.on('close', () => {
@@ -146,7 +145,7 @@ const SendToDriver: RequestMiddleware = function () {
   const { browserPreRequest } = this.req
 
   if (browserPreRequest) {
-    this.socket.toDriver('request:event', 'incoming:request', { ...browserPreRequest, matchedIntercept: !!this.req.matchingRoutes?.length })
+    this.socket.toDriver('request:event', 'incoming:request', { browserPreRequest, matchedIntercept: !!this.req.matchingRoutes?.length })
   }
 
   this.next()

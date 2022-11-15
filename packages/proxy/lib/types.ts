@@ -53,7 +53,6 @@ export type BrowserPreRequest = {
   headers: { [key: string]: string | string[] }
   resourceType: ResourceType
   originalResourceType: string | undefined
-  matchedIntercept: boolean
 }
 
 /**

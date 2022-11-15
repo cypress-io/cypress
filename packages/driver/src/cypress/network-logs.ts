@@ -209,9 +209,11 @@ class ProxyRequest {
   }
 }
 
+type FilterFnOpts = BrowserPreRequest & { matchedIntercept: boolean }
+
 export default class NetworkLogs {
   proxyRequests: Array<ProxyRequest> = []
-  _filter: (requestInfo: BrowserPreRequest) => boolean
+  _filter: (requestInfo: FilterFnOpts) => boolean
 
   constructor (private Cypress: Cypress.Cypress) {
     this._filter = this.defaultFilter
@@ -251,7 +253,7 @@ export default class NetworkLogs {
     return this._filter
   }
 
-  readonly defaultFilter = (requestInfo: BrowserPreRequest) => {
+  readonly defaultFilter: typeof this._filter = (requestInfo) => {
     return ['xhr', 'fetch'].includes(requestInfo.resourceType) || requestInfo.matchedIntercept
   }
 
@@ -306,12 +308,12 @@ export default class NetworkLogs {
     proxyRequest.log?.snapshot('error').error(proxyRequest.error)
   }
 
-  private createProxyRequestLog (preRequest: BrowserPreRequest): ProxyRequest | undefined {
-    if (!this._filter(preRequest)) {
+  private createProxyRequestLog ({ browserPreRequest, matchedIntercept }: { browserPreRequest: BrowserPreRequest, matchedIntercept: boolean }): ProxyRequest | undefined {
+    if (!this._filter({ ...browserPreRequest, matchedIntercept })) {
       return
     }
 
-    const proxyRequest = new ProxyRequest(preRequest)
+    const proxyRequest = new ProxyRequest(browserPreRequest)
     const logConfig = getRequestLogConfig(proxyRequest as Omit<ProxyRequest, 'log'>)
 
     // TODO: Figure out what is causing the race condition here
