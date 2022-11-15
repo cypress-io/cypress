@@ -5,13 +5,11 @@ import {
   mount as testUtilsMount,
   VueTestUtilsConfigOptions,
   Wrapper,
-  enableAutoDestroy,
 } from '@vue/test-utils'
 import {
-  injectStylesBeforeElement,
-  StyleOptions,
   getContainerEl,
   setupHooks,
+  checkForRemovedStyleOptions,
 } from '@cypress/mount-utils'
 
 const defaultOptions: (keyof MountOptions)[] = [
@@ -65,6 +63,17 @@ const installMixins = (Vue, options) => {
   if (Cypress._.isArray(mixins)) {
     mixins.forEach((mixin) => {
       Vue.mixin(mixin)
+    })
+  }
+}
+
+const registerGlobalDirectives = (Vue, options) => {
+  const directives =
+    Cypress._.get(options, 'extensions.directives')
+
+  if (Cypress._.isPlainObject(directives)) {
+    Object.keys(directives).forEach((name) => {
+      Vue.directive(name, directives[name])
     })
   }
 }
@@ -125,6 +134,10 @@ type VueLocalComponents = Record<string, VueComponent>
 
 type VueFilters = {
   [key: string]: (value: string) => string
+}
+
+type VueDirectives = {
+  [key: string]: Function | Object
 }
 
 type VueMixin = unknown
@@ -211,6 +224,27 @@ interface MountOptionsExtensions {
    * @memberof MountOptionsExtensions
    */
   plugins?: VuePlugins
+
+  /**
+   * Optional Vue directives to install while mounting the component
+   *
+   * @memberof MountOptionsExtensions
+   * @see https://github.com/cypress-io/cypress/tree/develop/npm/vue#examples
+   * @example
+   *  const directives = {
+   *    custom: {
+   *        name: 'custom',
+   *        bind (el, binding) {
+   *          el.dataset['custom'] = binding.value
+   *        },
+   *        unbind (el) {
+   *          el.removeAttribute('data-custom')
+   *        },
+   *    },
+   *  }
+   *  mount(Hello, { extensions: { directives }})
+   */
+  directives?: VueDirectives
 }
 
 /**
@@ -241,7 +275,7 @@ interface MountOptions {
 /**
  * Utility type for union of options passed to "mount(..., options)"
  */
-type MountOptionsArgument = Partial<ComponentOptions & MountOptions & StyleOptions & VueTestUtilsConfigOptions>
+type MountOptionsArgument = Partial<ComponentOptions & MountOptions & VueTestUtilsConfigOptions>
 
 // when we mount a Vue component, we add it to the global Cypress object
 // so here we extend the global Cypress namespace and its Cypress interface
@@ -266,6 +300,10 @@ declare global {
   }
 }
 
+const cleanup = () => {
+  Cypress.vueWrapper?.destroy()
+}
+
 /**
  * Direct Vue errors to the top error handler
  * where they will fail Cypress test
@@ -278,18 +316,6 @@ function failTestOnVueError (err, vm, info) {
   setTimeout(() => {
     throw err
   })
-}
-
-function registerAutoDestroy ($destroy: () => void) {
-  Cypress.on('test:before:run', () => {
-    $destroy()
-  })
-}
-
-enableAutoDestroy(registerAutoDestroy)
-
-const injectStyles = (options: StyleOptions) => {
-  return injectStylesBeforeElement(options, document, getContainerEl())
 }
 
 /**
@@ -318,21 +344,32 @@ function getComponentDisplayName (componentOptions: any): string {
 
 /**
  * Mounts a Vue component inside Cypress browser.
- * @param {object} component imported from Vue file
+ * @param {VueComponent} component imported from Vue file
+ * @param {MountOptionsArgument} optionsOrProps used to pass options to component being mounted
+ * @returns {Cypress.Chainable<{wrapper: Wrapper<T>, component: T}
  * @example
- *  import Greeting from './Greeting.vue'
- *  import { mount } from '@cypress/vue2'
- *  it('works', () => {
- *    // pass props, additional extensions, etc
- *    mount(Greeting, { ... })
- *    // use any Cypress command to test the component
- *    cy.get('#greeting').should('be.visible')
- *  })
+ * import { mount } from '@cypress/vue'
+ * import { Stepper } from './Stepper.vue'
+ *
+ * it('mounts', () => {
+ *   cy.mount(Stepper)
+ *   cy.get('[data-cy=increment]').click()
+ *   cy.get('[data-cy=counter]').should('have.text', '1')
+ * })
+ * @see {@link https://on.cypress.io/mounting-vue} for more details.
+ *
  */
 export const mount = (
   component: VueComponent,
   optionsOrProps: MountOptionsArgument = {},
-) => {
+): Cypress.Chainable<{
+  wrapper: Wrapper<Vue, Element>
+  component: Wrapper<Vue, Element>['vm']
+}> => {
+  checkForRemovedStyleOptions(optionsOrProps)
+  // Remove last mounted component if cy.mount is called more than once in a test
+  cleanup()
+
   const options: Partial<MountOptions> = Cypress._.pick(
     optionsOrProps,
     defaultOptions,
@@ -348,18 +385,6 @@ export const mount = (
   return cy
   .window({
     log: false,
-  })
-  .then(() => {
-    const { style, stylesheets, stylesheet, styles, cssFiles, cssFile } = optionsOrProps
-
-    injectStyles({
-      style,
-      stylesheets,
-      stylesheet,
-      styles,
-      cssFiles,
-      cssFile,
-    })
   })
   .then((win) => {
     const localVue = createLocalVue()
@@ -393,6 +418,7 @@ export const mount = (
     installFilters(localVue, options)
     installMixins(localVue, options)
     installPlugins(localVue, options, props)
+    registerGlobalDirectives(localVue, options)
     registerGlobalComponents(localVue, options)
 
     props.attachTo = componentNode
@@ -403,6 +429,11 @@ export const mount = (
 
     Cypress.vue = VTUWrapper.vm
     Cypress.vueWrapper = VTUWrapper
+
+    return {
+      wrapper: VTUWrapper,
+      component: VTUWrapper.vm,
+    }
   })
   .then(() => {
     if (optionsOrProps.log !== false) {
@@ -421,12 +452,18 @@ export const mount = (
  * @example
  *  import {mountCallback} from '@cypress/vue2'
  *  beforeEach(mountVue(component, options))
+ *
+ * Removed as of Cypress 11.0.0.
+ * @see https://on.cypress.io/migration-11-0-0-component-testing-updates
  */
 export const mountCallback = (
   component: VueComponent,
   options?: MountOptionsArgument,
 ) => {
-  return () => mount(component, options)
+  return () => {
+    // @ts-expect-error - undocumented API
+    Cypress.utils.throwErrByPath('mount.mount_callback')
+  }
 }
 
 // Side effects from "import { mount } from '@cypress/<my-framework>'" are annoying, we should avoid doing this
@@ -437,4 +474,4 @@ export const mountCallback = (
 //    import { registerCT } from 'cypress/<my-framework>'
 //    registerCT()
 // Note: This would be a breaking change
-setupHooks()
+setupHooks(cleanup)

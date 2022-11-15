@@ -156,7 +156,7 @@ export const matchesConfigKey = (key: string) => {
 }
 
 export const validate = (cfg: any, onErr: (property: ErrResult | string) => void, testingType: TestingType | null) => {
-  debug('validating configuration')
+  debug('validating configuration', cfg)
 
   return _.each(cfg, (value, key) => {
     const validationFn = validationRules[key]

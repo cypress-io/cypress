@@ -81,7 +81,7 @@ const parseValueActualAndExpected = (value, actual, expected) => {
 
 export const create = (Cypress: ICypress, cy: $Cy) => {
   const getUpcomingAssertions = () => {
-    const index = cy.state('index') + 1
+    const index = cy.queue.index + 1
 
     const assertions: any[] = []
 
@@ -183,8 +183,6 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
 
     _.extend(obj, {
       name: 'assert',
-      // end:      true
-      // snapshot: true
       message,
       passed,
       selector: value ? value.selector : undefined,
@@ -218,10 +216,25 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
     return null
   }
 
-  const finishAssertions = () => {
-    cy.state('current').get('logs').forEach((log) => {
-      if (!log.get('snapshots')) {
-        log.snapshot()
+  const finishAssertions = (err?: Error) => {
+    const logs = cy.state('current').get('logs')
+
+    let hasLoggedError = false
+
+    logs.reverse().forEach((log, index) => {
+      if (log._shouldAutoEnd()) {
+        if (log.get('next') || !log.get('snapshots')) {
+          log.snapshot()
+        }
+
+        // @ts-ignore
+        if (err && (!hasLoggedError || (err.issuesCommunicatingOrFinding && index === logs.length - 1))) {
+          hasLoggedError = true
+
+          return log.error(err)
+        }
+
+        return log.end()
       }
     })
 
@@ -300,6 +313,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         try {
           callbacks.ensureExistenceFor === 'dom' && ensureExistence()
         } catch (e2) {
+          e2.issuesCommunicatingOrFinding = true
           err = e2
         }
 
@@ -308,13 +322,10 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
 
         options.error = err
 
-        if (err.retry === false) {
-          throw err
-        }
-
         const { onFail, onRetry } = callbacks
 
-        if (!onFail && !onRetry) {
+        if (err.retry === false || (!onFail && !onRetry)) {
+          err.onFail = finishAssertions
           throw err
         }
 
@@ -327,7 +338,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
             onFail.call(this, err, isDefaultAssertionErr, cmds)
           }
         } catch (e3) {
-          finishAssertions()
+          e3.onFail = finishAssertions
           throw e3
         }
 
@@ -393,7 +404,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
           const cmd = cmds[i]
 
           cmd.set('subject', subject)
-          cmd.skip()
+          cmd.skip() // technically this passed because it already ran
         })
 
         return cmds
@@ -439,15 +450,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
 
         // when we're told not to retry
         if (err.retry === false) {
-          // finish the assertions
-          finishAssertions()
-
-          // and then push our command into this err
-          try {
-            $errUtils.throwErr(err, { onFail: options._log })
-          } catch (e) {
-            err = e
-          }
+          throw $errUtils.throwErr(err, { onFail: finishAssertions })
         }
 
         throw err

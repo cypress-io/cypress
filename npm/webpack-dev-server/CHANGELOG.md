@@ -1,3 +1,31 @@
+# [@cypress/webpack-dev-server-v3.1.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.0.1...@cypress/webpack-dev-server-v3.1.0) (2022-11-10)
+
+
+### Features
+
+* add support for next 13 ([#24396](https://github.com/cypress-io/cypress/issues/24396)) ([cc4244d](https://github.com/cypress-io/cypress/commit/cc4244dd5d10d743389192dee6ded68d28c72665))
+
+# [@cypress/webpack-dev-server-v3.0.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.0.0...@cypress/webpack-dev-server-v3.0.1) (2022-11-08)
+
+
+### Bug Fixes
+
+* revert dynamic import of webpack config file ([#24598](https://github.com/cypress-io/cypress/issues/24598)) ([69f7dab](https://github.com/cypress-io/cypress/commit/69f7dabc94a5adb25edc7fda6057e92b8bd2e072))
+
+# [@cypress/webpack-dev-server-v3.0.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v2.5.0...@cypress/webpack-dev-server-v3.0.0) (2022-11-07)
+
+
+### Bug Fixes
+
+* normalize vite config resolution ([#24369](https://github.com/cypress-io/cypress/issues/24369)) ([feba489](https://github.com/cypress-io/cypress/commit/feba489a9aeaddad3197764fe7e7405cfb4e7a56))
+* remove last mounted component upon subsequent mount calls ([#24470](https://github.com/cypress-io/cypress/issues/24470)) ([f39eb1c](https://github.com/cypress-io/cypress/commit/f39eb1c19e0923bda7ae263168fc6448da942d54))
+
+
+### BREAKING CHANGES
+
+* remove last mounted component upon subsequent mount calls of mount
+* vite.config.js is no longer merged when devServer.viteConfig is provided
+
 # [@cypress/webpack-dev-server-v2.5.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v2.4.1...@cypress/webpack-dev-server-v2.5.0) (2022-11-01)
 
 

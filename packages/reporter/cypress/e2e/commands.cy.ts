@@ -794,7 +794,8 @@ describe('commands', { viewportHeight: 1000 }, () => {
           const nestedSessionGroupId = addCommand(runner, {
             name: 'session',
             displayName: 'validate',
-            type: 'child',
+            state: 'failed',
+            type: 'system',
             group: nestedGroupId,
           })
 

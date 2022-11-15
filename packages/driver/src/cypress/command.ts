@@ -5,9 +5,11 @@ let idCounter = 1
 
 export class $Command {
   attributes!: Record<string, any>
+  state: 'queued' | 'pending' | 'passed' | 'recovered' | 'failed' | 'skipped'
 
   constructor (attrs: any = {}) {
     this.reset()
+    this.state = 'queued'
 
     // if the command came from a secondary origin, it already has an id
     if (!attrs.id) {
@@ -18,6 +20,26 @@ export class $Command {
     }
 
     this.set(attrs)
+  }
+
+  pass () {
+    this.state = 'passed'
+  }
+
+  skip () {
+    this.state = 'skipped'
+  }
+
+  fail () {
+    this.state = 'failed'
+  }
+
+  recovered () {
+    this.state = 'recovered'
+  }
+
+  start () {
+    this.state = 'pending'
   }
 
   set (key, val?) {
@@ -116,10 +138,6 @@ export class $Command {
         return
       }
     }
-  }
-
-  skip () {
-    return this.set('skip', true)
   }
 
   stringify () {

@@ -1,6 +1,6 @@
-import { JSX } from './createMount'
+import type { ReactNode } from 'react'
 
-const cachedDisplayNames: WeakMap<JSX, string> = new WeakMap()
+type JSX = Function & { displayName: string }
 
 /**
  * Gets the display name of the component when possible.
@@ -9,13 +9,13 @@ const cachedDisplayNames: WeakMap<JSX, string> = new WeakMap()
  * @link https://github.com/facebook/react-devtools/blob/master/backend/getDisplayName.js
  */
 export default function getDisplayName (
-  type: JSX,
+  node: ReactNode,
   fallbackName: string = 'Unknown',
 ): string {
-  const nameFromCache = cachedDisplayNames.get(type)
+  const type: JSX | undefined = (node as any)?.type
 
-  if (nameFromCache != null) {
-    return nameFromCache
+  if (!type) {
+    return fallbackName
   }
 
   let displayName: string | null = null
@@ -47,12 +47,6 @@ export default function getDisplayName (
         displayName = componentName
       }
     }
-  }
-
-  try {
-    cachedDisplayNames.set(type, displayName)
-  } catch (e) {
-    // do nothing
   }
 
   return displayName

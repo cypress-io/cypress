@@ -27,7 +27,6 @@ describe('src/cypress/command_queue', () => {
   const whenStable = {} as IStability
   const stubCy = {
     timeout: () => {},
-    cleanup: () => 0,
     fail: () => {},
     isCy: () => true,
     clearTimeout: () => {},

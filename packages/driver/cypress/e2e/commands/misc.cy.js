@@ -10,6 +10,11 @@ describe('src/cy/commands/misc', () => {
     it('nulls out the subject', () => {
       cy.noop({}).end().then((subject) => {
         expect(subject).to.be.null
+
+        // We want cy.end() to break the subject chain - any previous entries
+        // (in this case `{}`) should be discarded. No re-running any previous
+        // query functions once you've used `.end()` on a chain.
+        expect(cy.subjectChain()).to.eql([null])
       })
     })
   })

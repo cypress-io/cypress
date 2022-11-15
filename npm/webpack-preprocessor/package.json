@@ -8,7 +8,6 @@
     "build": "rimraf dist && tsc || echo 'built, with errors'",
     "build-prod": "yarn build",
     "deps": "deps-ok && dependency-check --no-dev .",
-    "postinstall": "patch-package",
     "secure": "nsp check",
     "semantic-release": "semantic-release",
     "size": "npm pack --dry",
@@ -28,8 +27,7 @@
     "loader-utils": "^2.0.0",
     "lodash": "^4.17.20",
     "md5": "2.3.0",
-    "merge-source-map": "1.1.0",
-    "patch-package": "6.4.7",
+    "source-map": "^0.6.1",
     "webpack-virtual-modules": "^0.4.4"
   },
   "devDependencies": {
