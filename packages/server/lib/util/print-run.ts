@@ -23,7 +23,7 @@ type Screenshot = {
 }
 
 export const cloudRecommendationMessage = `
------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 
   Having trouble debugging your CI failures?
   
@@ -32,7 +32,7 @@ export const cloudRecommendationMessage = `
 
   >> https://on.cypress.io/cloud-get-started
 
-------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 `
 
 function color (val: any, c: string) {
@@ -287,7 +287,7 @@ export function displaySpecHeader (name: string, curr: number, total: number, es
   }
 }
 
-function maybeLogCloudRecommendationMessage (runs: CypressCommandLine.RunResult[], record?: boolean) {
+export function maybeLogCloudRecommendationMessage (runs: CypressCommandLine.RunResult[], record: boolean) {
   if (!process.env.CI || env.get('CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS') || record) {
     return
   }
@@ -297,7 +297,7 @@ function maybeLogCloudRecommendationMessage (runs: CypressCommandLine.RunResult[
   }
 }
 
-export function renderSummaryTable (runUrl: string | undefined, results: CypressCommandLine.CypressRunResult, record?: boolean) {
+export function renderSummaryTable (runUrl: string | undefined, results: CypressCommandLine.CypressRunResult) {
   const { runs } = results
 
   console.log('')
@@ -392,8 +392,6 @@ export function renderSummaryTable (runUrl: string | undefined, results: Cypress
       console.log(`  Recorded Run: ${formatPath(runUrl, undefined, 'gray')}`)
       console.log('')
     }
-
-    maybeLogCloudRecommendationMessage(runs, record)
   }
 }
 
