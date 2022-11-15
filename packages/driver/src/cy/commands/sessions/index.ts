@@ -54,10 +54,7 @@ export default function (Commands, Cypress, cy) {
           return
         }
 
-        // Component testing does not support navigation and handles clearing the page via mount utils
-        const clearPage = Cypress.testingType === 'e2e' ? navigateAboutBlank(false) : new Cypress.Promise.resolve()
-
-        return clearPage
+        return navigateAboutBlank(false)
         .then(() => sessions.clearCurrentSessionData())
         .then(() => Cypress.backend('reset:rendered:html:origins'))
       }
@@ -196,7 +193,6 @@ export default function (Commands, Cypress, cy) {
           })
           .then(async () => {
             cy.state('onQueueFailed', null)
-            await navigateAboutBlank()
             const data = await sessions.getCurrentSessionData()
 
             _.extend(existingSession, data)
@@ -437,7 +433,7 @@ export default function (Commands, Cypress, cy) {
           await navigateAboutBlank()
           await sessions.clearCurrentSessionData()
 
-          return createSession(existingSession, step)
+          return cy.whenStable(() => createSession(existingSession, step))
         })
         .then(() => validateSession(existingSession, step))
         .then(async (isValidSession: boolean) => {
@@ -509,9 +505,10 @@ export default function (Commands, Cypress, cy) {
 
           return restoreSessionWorkflow(session)
         }).then((status: 'passed' | 'warned' | 'failed') => {
-          setSessionLogStatus(status)
-
-          return null
+          return navigateAboutBlank()
+          .then(() => {
+            setSessionLogStatus(status)
+          })
         })
       })
     },
