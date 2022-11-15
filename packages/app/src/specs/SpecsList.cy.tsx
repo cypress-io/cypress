@@ -193,6 +193,26 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
           cy.viewport(2000, 850)
           cy.percySnapshot('widest')
         })
+
+        it('displays runAllSpecs when hovering over a spec-list directory row', () => {
+          cy.get('[data-cy="spec-list-directory"]').first()
+          .trigger('mouseenter').then(() => {
+            cy.get('[data-cy="run-all-specs"]')
+            .should('contain.text', 'Run 48 specs')
+            .realHover().then(() => {
+              cy.findByTestId('run-all-specs-text').should('have.css', 'color', 'rgb(47, 58, 176)')
+              cy.findByTestId('play-button').should('have.css', 'color', 'rgb(47, 58, 176)')
+            })
+
+            cy.get('[data-cy="play-button"]').should('exist')
+          })
+
+          cy.get('[data-cy="spec-list-file"]').first()
+          .trigger('mouseenter').then(() => {
+            cy.get('[data-cy="run-all-specs"]')
+            .should('not.exist')
+          })
+        })
       })
     })
 
@@ -269,6 +289,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
     it('should display the e2e testing header', () => {
       cy.findByTestId('specs-testing-type-header').should('have.text', 'E2E specs')
     })
+    // Test that the run-all specs shows ups
   })
 
   context('when testingType is component', () => {
@@ -279,5 +300,9 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
     it('should display the component testing header', () => {
       cy.findByTestId('specs-testing-type-header').should('have.text', 'Component specs')
     })
+
+    // Test that the run all specs does not show up
   })
 })
+
+// To do: Test that run-all specs shows up with the correct number of specs on hover and not just a default value

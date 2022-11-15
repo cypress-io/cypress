@@ -13,22 +13,25 @@
         hover-stroke-color="indigo-500"
         hover-fill-color="indigo-100"
         class="ml-76px inline-flex align-text-bottom"
+        data-cy="play-button"
       />
     </button>
     <template
       #popper
     >
-      <div data-cy="run-all-specs-tooltip">
-        <span class="font-normal text-sm font-family: SFPro-Display inline-flex">
-          Run {{ specNumber }} specs
-        </span>
-      </div>
+      <span
+        class="font-normal text-sm font-family: SFPro-Display inline-flex"
+        data-cy="tooltip-content"
+      >
+        Run {{ specNumber }} specs
+      </span>
     </template>
   </Tooltip>
 
   <button
     v-else
     class="group hover:text-indigo-700 space-x-2 items-center ml-28px"
+    data-cy="run-all-specs-button"
   >
     <IconActionPlaySmall
       size="16"
@@ -38,8 +41,12 @@
       hover-fill-color="indigo-100"
       interactive-colors-on-group
       class="inline-flex align-text-bottom"
+      data-cy="play-button"
     />
-    <span class="font-normal text-sm font-family: SFPro-Display inline-flex">
+    <span
+      class="font-normal text-sm font-family: SFPro-Display inline-flex"
+      data-cy="run-all-specs-text"
+    >
       Run {{ specNumber }} specs
     </span>
   </button>
