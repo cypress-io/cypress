@@ -1,11 +1,5 @@
 <template>
   <div class="p-24px spec-container">
-    <button
-      v-if="isRunAllSpecsAllowed"
-      @click="onRunAllSpecs"
-    >
-      Run All Specs
-    </button>
     <SpecsListBanners
       :gql="props.gql"
       :is-spec-not-found="isSpecNotFound"
@@ -117,8 +111,10 @@
               :depth="row.data.depth - 2"
               :style="{ paddingLeft: `${(row.data.depth - 2) * 10}px` }"
               :indexes="row.data.highlightIndexes"
+              :is-run-all-specs-allowed="isRunAllSpecsAllowed"
               :aria-controls="getIdIfDirectory(row)"
               @click.stop="row.data.toggle"
+              @run-all-specs="onRunAllSpecs(row.data.id)"
             />
           </template>
 
@@ -426,9 +422,9 @@ const { refetchFailedCloudData } = useCloudSpecData(
 
 const { runAllSpecs, isRunAllSpecsAllowed } = useRunAllSpecs()
 
-function onRunAllSpecs () {
+function onRunAllSpecs (directory: string) {
   const filteredSpecs = list.value.reduce((acc, node) => {
-    if (node.data.isLeaf) {
+    if (node.data.isLeaf && node.data.id.startsWith(directory)) {
       acc.push(node.data.data?.relative!)
     }
 

@@ -1,9 +1,23 @@
 describe('run-all-specs', () => {
   const ALL_SPECS = {
-    spec1: { relative: 'cypress/e2e/folder-1/spec-1.cy.js', name: 'runs folder-1/spec-1' },
-    spec2: { relative: 'cypress/e2e/folder-1/spec-2.cy.js', name: 'runs folder-1/spec-2' },
-    spec3: { relative: 'cypress/e2e/folder-2/spec-3.cy.js', name: 'runs folder-2/spec-3' },
-    spec4: { relative: 'cypress/e2e/folder-2/spec-4.cy.js', name: 'runs folder-2/spec-4' },
+    spec1: { relative: 'cypress/e2e/folder-a/spec-a.cy.js', name: 'runs folder-a/spec-a' },
+    spec2: { relative: 'cypress/e2e/folder-a/spec-b.cy.js', name: 'runs folder-a/spec-b' },
+    spec3: { relative: 'cypress/e2e/folder-b/spec-a.cy.js', name: 'runs folder-b/spec-a' },
+    spec4: { relative: 'cypress/e2e/folder-b/spec-b.cy.js', name: 'runs folder-b/spec-b' },
+  }
+
+  const clickRunAllSpecs = (directory?: string) => {
+    let command = cy.get('[data-cy=spec-item-directory]')
+
+    if (directory) {
+      command = command.contains(directory)
+    } else {
+      command = command.first()
+    }
+
+    return command.realHover().within(() => {
+      cy.get('[data-cy=run-all-specs-btn]').click({ force: true })
+    })
   }
 
   it('can run all specs with filter and live-reloading', () => {
@@ -17,13 +31,74 @@ describe('run-all-specs', () => {
       sinon.stub(ctx.actions.project, 'launchProject').resolves()
     })
 
-    // Verify "Run All Specs"
-    cy.contains('button', 'Run All Specs').click()
+    // Verify "Run All Specs" with sub-directory
+    const subDirectorySpecs = [ALL_SPECS.spec1, ALL_SPECS.spec2]
 
-    cy.withCtx((ctx, { allSpecs }) => {
+    cy.get('[data-cy=sidebar-link-specs-page]').click()
+
+    clickRunAllSpecs('folder-a')
+
+    cy.waitForSpecToFinish({ passCount: 2 })
+
+    cy.withCtx((ctx, { specs }) => {
+      expect(ctx.project.runAllSpecs).to.include.members(specs.map((spec) => spec.relative))
+    }, { specs: subDirectorySpecs })
+
+    for (const spec of subDirectorySpecs) {
+      cy.get('.runnable-title').contains(spec.name)
+    }
+
+    // Verify "Run All Specs" with filter
+    const filteredSpecs = [ALL_SPECS.spec1, ALL_SPECS.spec3]
+
+    cy.get('[data-cy=sidebar-link-specs-page]').click()
+
+    cy.findByLabelText('Search specs').clear().type('spec-a')
+    cy.get('[data-cy=spec-list-file]').contains('spec-b').should('not.exist')
+
+    clickRunAllSpecs()
+
+    cy.waitForSpecToFinish({ passCount: 2 })
+
+    cy.withCtx((ctx, { specs }) => {
+      expect(ctx.project.runAllSpecs).to.include.members(specs.map((spec) => spec.relative))
+    }, { specs: filteredSpecs })
+
+    for (const spec of filteredSpecs) {
+      cy.get('.runnable-title').contains(spec.name)
+    }
+
+    // Verify "Run All Specs" with filter + folder
+    const filteredWithSubDirectorySpecs = [ALL_SPECS.spec1]
+
+    cy.get('[data-cy=sidebar-link-specs-page]').click()
+
+    cy.findByLabelText('Search specs').clear().type('spec-a')
+    cy.get('[data-cy=spec-list-file]').contains('spec-b').should('not.exist')
+
+    clickRunAllSpecs('folder-a')
+
+    cy.waitForSpecToFinish({ passCount: 1 })
+
+    cy.withCtx((ctx, { specs }) => {
+      expect(ctx.project.runAllSpecs).to.include.members(specs.map((spec) => spec.relative))
+    }, { specs: filteredWithSubDirectorySpecs })
+
+    for (const spec of filteredWithSubDirectorySpecs) {
+      cy.get('.runnable-title').contains(spec.name)
+    }
+
+    // Verify "Run All Specs" live-reload
+    cy.get('[data-cy=sidebar-link-specs-page]').click()
+    cy.findByLabelText('Search specs').clear()
+    cy.get('[data-cy=spec-list-file]').should('have.length', 4)
+
+    clickRunAllSpecs()
+
+    cy.withCtx((ctx, { specs }) => {
       expect(ctx.actions.project.launchProject).to.have.been.calledWith('e2e', undefined, '__all')
-      expect(ctx.project.runAllSpecs).to.include.members(Object.values(allSpecs).map((spec) => spec.relative))
-    }, { allSpecs: ALL_SPECS })
+      expect(ctx.project.runAllSpecs).to.include.members(specs.map((spec) => spec.relative))
+    }, { specs: Object.values(ALL_SPECS) })
 
     cy.waitForSpecToFinish({ passCount: 4 })
 
@@ -31,34 +106,15 @@ describe('run-all-specs', () => {
       cy.get('.runnable-title').contains(spec.name)
     }
 
-    // Verify "Run All Specs" with filter
-    cy.get('[data-cy=sidebar-link-specs-page]').click()
-
-    cy.findByLabelText('Search specs').type('folder-1')
-    cy.get('[data-cy=spec-list-file]').contains('spec-3').should('not.exist')
-
-    cy.contains('button', 'Run All Specs').click()
-
-    cy.waitForSpecToFinish({ passCount: 2 })
-
-    cy.withCtx((ctx, { allSpecs: { spec1, spec2 } }) => {
-      expect(ctx.project.runAllSpecs).to.include.members([spec1.relative, spec2.relative])
-    }, { allSpecs: ALL_SPECS })
-
-    for (const spec of [ALL_SPECS.spec1, ALL_SPECS.spec2]) {
-      cy.get('.runnable-title').contains(spec.name)
-    }
-
-    // Verify live-reloading
-    cy.withCtx(async (ctx, { allSpecs: { spec1 } }) => {
-      const originalContent = await ctx.actions.file.readFileInProject(spec1.relative)
+    cy.withCtx(async (ctx, { spec }) => {
+      const originalContent = await ctx.actions.file.readFileInProject(spec.relative)
       const newContent = originalContent.replace('expect(true)', 'expect(false)')
 
       expect(newContent).not.eq(originalContent)
 
-      await ctx.actions.file.writeFileInProject(spec1.relative, newContent)
-    }, { allSpecs: ALL_SPECS })
+      await ctx.actions.file.writeFileInProject(spec.relative, newContent)
+    }, { spec: ALL_SPECS.spec1 })
 
-    cy.waitForSpecToFinish({ passCount: 1, failCount: 1 })
+    cy.waitForSpecToFinish({ passCount: 3, failCount: 1 })
   })
 })

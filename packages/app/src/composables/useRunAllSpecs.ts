@@ -43,7 +43,7 @@ export function useRunAllSpecs () {
       const config: ResolvedConfig = query.data.value?.currentProject?.config || []
       const hasExperiment = config.find(({ field, value }) => field === 'experimentalRunAllSpecs' && value === true)
 
-      return isE2E && hasExperiment
+      return Boolean(isE2E && hasExperiment)
     }),
   }
 }
