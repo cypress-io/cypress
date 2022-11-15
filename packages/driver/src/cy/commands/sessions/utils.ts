@@ -203,6 +203,13 @@ function navigateAboutBlank (session: boolean = true) {
   return Cypress.action('cy:visit:blank', { type: session ? 'session' : 'session-lifecycle' }) as unknown as Promise<void>
 }
 
+const enum SESSION_STEPS {
+  create = 'create',
+  restore = 'restore',
+  recreate = 'recreate',
+  validate = 'validate',
+}
+
 const statusMap = {
   commandState: (status: string) => {
     switch (status) {
@@ -264,5 +271,6 @@ export {
   getConsoleProps,
   getPostMessageLocalStorage,
   navigateAboutBlank,
+  SESSION_STEPS,
   statusMap,
 }
