@@ -1,5 +1,7 @@
 export { onNetStubbingEvent } from './driver-events'
 
+export { onNetworkLoadingFailedEvent } from './cdp/networkLoadingFailed'
+
 export { InterceptError } from './middleware/error'
 
 export { InterceptRequest } from './middleware/request'

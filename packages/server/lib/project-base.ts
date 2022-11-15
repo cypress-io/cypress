@@ -18,6 +18,7 @@ import { ServerE2E } from './server-e2e'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
+import { onNetworkLoadingFailedEvent } from '@packages/net-stubbing/'
 
 import system from './util/system'
 import type { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType, VideoRecording } from '@packages/types'
@@ -333,7 +334,11 @@ export class ProjectBase<TServer extends Server> extends EE {
       this.server.emitRequestEvent(eventName, data)
     }
 
-    this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onRequestEvent)
+    const onNetworkLoadingFailed = (data) => {
+      onNetworkLoadingFailedEvent(this.server.netStubbingState, data)
+    }
+
+    this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onRequestEvent, onNetworkLoadingFailed)
 
     const io = this.server.startWebsockets(this.automation, this.cfg, {
       onReloadBrowser: options.onReloadBrowser,

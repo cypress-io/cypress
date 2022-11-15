@@ -197,6 +197,14 @@ export namespace CyHttpMessages {
   export interface NetworkError {
     error: any
   }
+
+  export interface NetworkLoadingFailed {
+    requestId: string
+    timestamp: number
+    type: string
+    errorText: string
+    canceled?: boolean
+  }
 }
 
 export interface DictMatcher<T> {
@@ -303,7 +311,8 @@ export type InterceptionState =
   'ResponseReceived' |
   'ResponseIntercepted' |
   'Complete' |
-  'Errored'
+  'Errored' |
+  'Canceled'
 
 export interface Route {
   alias?: string

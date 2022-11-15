@@ -83,7 +83,8 @@ export const InterceptRequest: RequestMiddleware = async function () {
     })
 
     debug('request/response finished, cleaning up %o', { requestId: request.id })
-    delete this.netStubbingState.requests[request.id]
+
+    this.netStubbingState.removeRequest(request.id)
   })
 
   const ensureBody = () => {

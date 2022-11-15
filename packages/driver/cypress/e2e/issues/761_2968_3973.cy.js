@@ -69,8 +69,7 @@ if (Cypress.isBrowser('chrome')) {
       })
 
       cy
-      .server()
-      .route('GET', /timeout/).as('getTimeout')
+      .intercept('GET', /timeout/).as('getTimeout')
       .visit('http://localhost:3500/fixtures/generic.html')
       .window()
       .then((win) => {
@@ -107,13 +106,13 @@ if (Cypress.isBrowser('chrome')) {
       // after we unload we should cancel the
       // pending XHR's and receive it here
       // after waiting on it
-        expect(xhrProxy.canceled).to.be.true
+        expect(xhrProxy.state).to.eq('Canceled')
 
         const [firstXhr, secondXhr] = xhrs
         const [firstLog, secondLog] = logs
 
         // should be the same XHR here as the proxy's XHR
-        expect(secondXhr === xhrProxy.xhr).to.be.true
+        expect(secondXhr.url === xhrProxy.request.url).to.be.true
 
         expect(firstXhr.canceled).not.to.be.true
         expect(firstXhr.aborted).not.to.be.true

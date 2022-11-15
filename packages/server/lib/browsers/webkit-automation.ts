@@ -6,6 +6,7 @@ import os from 'os'
 import type { RunModeVideoApi } from '@packages/types'
 import path from 'path'
 import mime from 'mime'
+import type Protocol from 'devtools-protocol'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
 
@@ -247,6 +248,25 @@ export class WebKitAutomation {
       debug('received requestfinished %o', { responseReceived })
 
       this.automation.onRequestEvent?.('response:received', responseReceived)
+    })
+
+    this.page.on('requestfailed', (request) => {
+      const requestId = requestIdMap.get(request)
+
+      if (requestId) {
+        // Re-create the CDP style request data.
+        const data = {
+          requestId,
+          timestamp: request.timing().startTime,
+          type: request.resourceType() as Protocol.Network.ResourceType,
+          errorText: 'net::ERR_ABORTED',
+          canceled: request.failure()?.errorText === 'cancelled',
+        }
+
+        debug('received requestfailed %o', { data })
+
+        this.automation.onNetworkLoadingFailed?.(data)
+      }
     })
   }
 

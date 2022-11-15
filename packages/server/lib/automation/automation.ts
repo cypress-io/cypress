@@ -5,8 +5,11 @@ import { Screenshot } from './screenshot'
 import type { BrowserPreRequest } from '@packages/proxy'
 import type { AutomationMiddleware, OnRequestEvent } from '@packages/types'
 import { cookieJar } from '../util/cookies'
+import type { Protocol } from 'devtools-protocol'
 
 export type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => void
+
+export type OnNetworkLoadingFailed = (data: Protocol.Network.LoadingFailedEvent) => void
 
 export class Automation {
   private requests: Record<number, (any) => void>
@@ -14,7 +17,7 @@ export class Automation {
   private cookies: Cookies
   private screenshot: { capture: (data: any, automate: any) => any }
 
-  constructor (cyNamespace?: string, cookieNamespace?: string, screenshotsFolder?: string | false, public onBrowserPreRequest?: OnBrowserPreRequest, public onRequestEvent?: OnRequestEvent) {
+  constructor (cyNamespace?: string, cookieNamespace?: string, screenshotsFolder?: string | false, public onBrowserPreRequest?: OnBrowserPreRequest, public onRequestEvent?: OnRequestEvent, public onNetworkLoadingFailed?: OnNetworkLoadingFailed) {
     this.requests = {}
 
     // set the middleware

@@ -188,6 +188,7 @@ export class CdpAutomation {
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private experimentalSessionAndOrigin: boolean) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
+    onFn('Network.loadingFailed', this.automation.onNetworkLoadingFailed!)
   }
 
   async startVideoRecording (writeVideoFrame: WriteVideoFrame, screencastOpts?) {
