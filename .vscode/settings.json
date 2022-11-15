@@ -41,7 +41,4 @@
   "volar.takeOverMode.enabled": "auto",
 
   "editor.tabSize": 2,
-  "githubPullRequests.ignoredPullRequestBranches": [
-    "develop"
-  ],
 }
