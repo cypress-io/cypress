@@ -1,5 +1,6 @@
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
+import type { BackendRoute } from '@packages/net-stubbing/lib/server/types'
 
 /**
  * An incoming request to the Cypress web server.
@@ -13,7 +14,7 @@ export type CypressIncomingRequest = Request & {
   responseTimeout?: number
   followRedirect?: boolean
   isAUTFrame: boolean
-  matchedIntercept?: boolean
+  matchingRoutes?: BackendRoute[]
   requestedWith?: RequestResourceType
   credentialsLevel?: RequestCredentialLevel
 }

@@ -13,6 +13,7 @@ export type HttpBuffer = {
   stream: Readable
   url: string
   isCrossSuperDomainOrigin: boolean
+  urlDoesNotMatchPolicyBasedOnDomain: boolean
 }
 
 const stripPort = (url) => {

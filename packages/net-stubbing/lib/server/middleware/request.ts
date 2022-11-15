@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import { concatStream } from '@packages/network'
-import Debug from 'debug'
 import url from 'url'
 
 import type {
@@ -19,13 +18,12 @@ import {
   getBodyEncoding,
 } from '../util'
 import { InterceptedRequest } from '../intercepted-request'
-import type { BackendRoute } from '../types'
 
-const debug = Debug('cypress:net-stubbing:server:intercept-request')
+// do not use a debug namespace in this file - use the per-request `request.debug` instead
+// available as cypress-verbose:proxy:http
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const debug = null
 
-/**
- * Called when a new request is received in the proxy layer to set the matching `cy.intercept()` routes, if any.
- */
 export const SetMatchingRoutes: RequestMiddleware = async function () {
   if (matchesRoutePreflight(this.netStubbingState.routes, this.req)) {
     // send positive CORS preflight response
@@ -41,9 +39,16 @@ export const SetMatchingRoutes: RequestMiddleware = async function () {
     })
   }
 
-  const matchingRoutes: BackendRoute[] = [...getRoutesForRequest(this.netStubbingState.routes, this.req)]
+  this.req.matchingRoutes = [...getRoutesForRequest(this.netStubbingState.routes, this.req)]
 
-  if (!matchingRoutes.length) {
+  this.next()
+}
+
+/**
+ * Called when a new request is received in the proxy layer.
+ */
+export const InterceptRequest: RequestMiddleware = async function () {
+  if (!this.req.matchingRoutes?.length) {
     // not intercepted, carry on normally...
     return this.next()
   }
@@ -59,15 +64,20 @@ export const SetMatchingRoutes: RequestMiddleware = async function () {
     res: this.res,
     socket: this.socket,
     state: this.netStubbingState,
-    matchingRoutes,
+    matchingRoutes: this.req.matchingRoutes,
+    reqDebug: this.debug,
   })
 
-  debug('intercepting request %o', { requestId: request.id, req: _.pick(this.req, 'url') })
+  request.debug('intercepting request %o')
 
   // attach requestId to the original req object for later use
   this.req.requestId = request.id
-  this.req.matchedIntercept = true
+
   this.netStubbingState.requests[request.id] = request
+
+  const req = _.extend(_.pick(request.req, SERIALIZABLE_REQ_PROPS), {
+    url: request.req.proxiedUrl,
+  }) as CyHttpMessages.IncomingRequest
 
   request.res.once('finish', async () => {
     request.handleSubscriptions<CyHttpMessages.ResponseComplete>({
@@ -78,18 +88,18 @@ export const SetMatchingRoutes: RequestMiddleware = async function () {
       mergeChanges: _.noop,
     })
 
-    debug('request/response finished, cleaning up %o', { requestId: request.id })
+    request.debug('request/response finished, cleaning up')
     delete this.netStubbingState.requests[request.id]
   })
 
   const ensureBody = () => {
     return new Promise<void>((resolve) => {
-      if (request.req.body) {
+      if (req.body) {
         return resolve()
       }
 
       request.req.pipe(concatStream((reqBody) => {
-        request.req.body = reqBody
+        req.body = reqBody
         resolve()
       }))
     })
@@ -97,39 +107,24 @@ export const SetMatchingRoutes: RequestMiddleware = async function () {
 
   await ensureBody()
 
-  const bodyEncoding = getBodyEncoding(request.req)
+  if (!_.isString(req.body) && !_.isBuffer(req.body)) {
+    throw new Error('req.body must be a string or a Buffer')
+  }
+
+  const bodyEncoding = getBodyEncoding(req)
   const bodyIsBinary = bodyEncoding === 'binary'
 
   if (bodyIsBinary) {
-    debug('req.body contained non-utf8 characters, treating as binary content %o', { requestId: request.id, req: _.pick(this.req, 'url') })
+    request.debug('req.body contained non-utf8 characters, treating as binary content %o', { requestId: request.id, req: _.pick(this.req, 'url') })
   }
 
   // leave the requests that send a binary buffer unchanged
   // but we can work with the "normal" string requests
   if (!bodyIsBinary) {
-    request.req.body = request.req.body.toString('utf8')
+    req.body = req.body.toString('utf8')
   }
 
-  if (!_.isString(request.req.body) && !_.isBuffer(request.req.body)) {
-    throw new Error('req.body must be a string or a Buffer')
-  }
-
-  return this.next()
-}
-
-/**
- * Using the data from SetMatchingRoutes, execute the user's routes.
- */
-export const InterceptRequest: RequestMiddleware = async function () {
-  if (!this.req.matchedIntercept) {
-    return this.next()
-  }
-
-  const request = this.netStubbingState.requests[this.req.requestId]
-
-  const serializedReq = _.extend(_.pick(request.req, SERIALIZABLE_REQ_PROPS), {
-    url: request.req.proxiedUrl,
-  }) as CyHttpMessages.IncomingRequest
+  request.req.body = req.body
 
   const mergeChanges = (before: CyHttpMessages.IncomingRequest, after: CyHttpMessages.IncomingRequest) => {
     if (before.headers['content-length'] === after.headers['content-length']) {
@@ -147,13 +142,13 @@ export const InterceptRequest: RequestMiddleware = async function () {
 
   const modifiedReq = await request.handleSubscriptions<CyHttpMessages.IncomingRequest>({
     eventName: 'before:request',
-    data: serializedReq,
+    data: req,
     mergeChanges,
   })
 
-  mergeChanges(serializedReq, modifiedReq)
+  mergeChanges(req, modifiedReq)
   // @ts-ignore
-  mergeChanges(request.req, serializedReq)
+  mergeChanges(request.req, req)
 
   if (request.responseSent) {
     // request has been fulfilled with a response already, do not send the request outgoing

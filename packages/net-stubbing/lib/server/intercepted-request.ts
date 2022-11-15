@@ -13,6 +13,7 @@ import type { BackendRoute, NetStubbingState } from './types'
 import { emit, sendStaticResponse } from './util'
 import type CyServer from '@packages/server'
 import type { BackendStaticResponse } from '../internal-types'
+import type { Debugger } from 'debug'
 
 export class InterceptedRequest {
   id: string
@@ -42,8 +43,9 @@ export class InterceptedRequest {
   matchingRoutes: BackendRoute[]
   state: NetStubbingState
   socket: CyServer.Socket
+  reqDebug: Debugger
 
-  constructor (opts: Pick<InterceptedRequest, 'req' | 'res' | 'continueRequest' | 'onError' | 'onResponse' | 'state' | 'socket' | 'matchingRoutes'>) {
+  constructor (opts: Pick<InterceptedRequest, 'req' | 'res' | 'continueRequest' | 'onError' | 'onResponse' | 'state' | 'socket' | 'matchingRoutes' | 'reqDebug'>) {
     this.id = _.uniqueId('interceptedRequest')
     this.req = opts.req
     this.res = opts.res
@@ -53,8 +55,13 @@ export class InterceptedRequest {
     this.matchingRoutes = opts.matchingRoutes
     this.state = opts.state
     this.socket = opts.socket
+    this.reqDebug = opts.reqDebug
 
     this.addDefaultSubscriptions()
+  }
+
+  debug (formatter: string, ...args: any[]) {
+    this.reqDebug('(cy.intercept)', formatter, ...args)
   }
 
   onResponse = (incomingRes: IncomingMessage, resStream: Readable) => {

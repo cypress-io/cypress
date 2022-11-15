@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import { concatStream, httpUtils } from '@packages/network'
-import Debug from 'debug'
 import type { Readable } from 'stream'
 import { getEncoding } from 'istextorbinary'
 
@@ -17,17 +16,20 @@ import {
   mergeWithPreservedBuffers,
 } from '../util'
 
-const debug = Debug('cypress:net-stubbing:server:intercept-response')
+// do not use a debug namespace in this file - use the per-request `request.debug` instead
+// available as cypress-verbose:proxy:http
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const debug = null
 
 export const InterceptResponse: ResponseMiddleware = async function () {
   const request = this.netStubbingState.requests[this.req.requestId]
-
-  debug('InterceptResponse %o', { req: _.pick(this.req, 'url'), request })
 
   if (!request) {
     // original request was not intercepted, nothing to do
     return this.next()
   }
+
+  request.debug('InterceptResponse %o', { req: _.pick(this.req, 'url'), request })
 
   request.onResponse = (incomingRes, resStream) => {
     this.incomingRes = incomingRes

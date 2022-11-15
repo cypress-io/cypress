@@ -1,11 +1,12 @@
-import Debug from 'debug'
-
 import type { ErrorMiddleware } from '@packages/proxy'
 import type { CyHttpMessages } from '../../types'
 import _ from 'lodash'
 import * as errors from '@packages/server/lib/errors'
 
-const debug = Debug('cypress:net-stubbing:server:intercept-error')
+// do not use a debug namespace in this file - use the per-request `request.debug` instead
+// available as cypress-verbose:proxy:http
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const debug = null
 
 export const InterceptError: ErrorMiddleware = async function () {
   const request = this.netStubbingState.requests[this.req.requestId]
@@ -15,7 +16,7 @@ export const InterceptError: ErrorMiddleware = async function () {
     return this.next()
   }
 
-  debug('intercepting error %o', { req: this.req, request })
+  request.debug('intercepting error %o', { req: this.req, request })
 
   request.continueResponse = this.next
 

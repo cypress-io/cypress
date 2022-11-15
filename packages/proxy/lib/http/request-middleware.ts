@@ -121,7 +121,6 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
       headers: this.req.headers,
       resourceType: 'document',
       originalResourceType: 'document',
-      matchedIntercept: !!this.req.matchedIntercept,
     }
 
     this.res.on('close', () => {
@@ -146,7 +145,7 @@ const SendToDriver: RequestMiddleware = function () {
   const { browserPreRequest } = this.req
 
   if (browserPreRequest) {
-    this.socket.toDriver('request:event', 'incoming:request', { ...browserPreRequest, matchedIntercept: !!this.req.matchedIntercept })
+    this.socket.toDriver('request:event', 'incoming:request', { ...browserPreRequest, matchedIntercept: !!this.req.matchingRoutes?.length })
   }
 
   this.next()
@@ -157,8 +156,9 @@ const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
 
   if (buffer) {
     this.debug('ending request with buffered response')
-    // NOTE: Only inject fullCrossOrigin here if the super domain origins do not match in order to keep parity with cypress application reloads
-    this.res.wantsInjection = buffer.isCrossSuperDomainOrigin ? 'fullCrossOrigin' : 'full'
+    // NOTE: Only inject fullCrossOrigin here if experimental is on and
+    // the super domain origins do not match in order to keep parity with cypress application reloads
+    this.res.wantsInjection = buffer.urlDoesNotMatchPolicyBasedOnDomain ? 'fullCrossOrigin' : 'full'
 
     return this.onResponse(buffer.response, buffer.stream)
   }
