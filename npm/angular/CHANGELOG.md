@@ -1,3 +1,23 @@
+# [@cypress/angular-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/angular-v2.0.0...@cypress/angular-v2.0.1) (2022-11-08)
+
+
+### Bug Fixes
+
+* make component derived info not throw ([#24571](https://github.com/cypress-io/cypress/issues/24571)) ([838dd4f](https://github.com/cypress-io/cypress/commit/838dd4fa2e0ec56633d0af2faf10a47d190b5594))
+
+# [@cypress/angular-v2.0.0](https://github.com/cypress-io/cypress/compare/@cypress/angular-v1.1.2...@cypress/angular-v2.0.0) (2022-11-07)
+
+
+### Bug Fixes
+
+* possibility to override global services in Angular component tests ([#24394](https://github.com/cypress-io/cypress/issues/24394)) ([54d2853](https://github.com/cypress-io/cypress/commit/54d285321723450920e0f1d50374c4bd0590e72a))
+* remove last mounted component upon subsequent mount calls ([#24470](https://github.com/cypress-io/cypress/issues/24470)) ([f39eb1c](https://github.com/cypress-io/cypress/commit/f39eb1c19e0923bda7ae263168fc6448da942d54))
+
+
+### BREAKING CHANGES
+
+* remove last mounted component upon subsequent mount calls of mount
+
 # [@cypress/angular-v1.1.2](https://github.com/cypress-io/cypress/compare/@cypress/angular-v1.1.1...@cypress/angular-v1.1.2) (2022-10-11)
 
 
