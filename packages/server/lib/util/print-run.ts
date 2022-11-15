@@ -27,7 +27,7 @@ export const cloudRecommendationMessage = `
 
   Having trouble debugging your CI failures?
   
-  Record your runs to the Cypress Cloud to watch video recordings for each test, 
+  Record your runs to Cypress Cloud to watch video recordings for each test, 
   debug failing and flaky tests, and integrate with your favorite tools.
 
   >> https://on.cypress.io/cloud-get-started
