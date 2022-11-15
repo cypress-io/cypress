@@ -324,7 +324,7 @@
         },
         "cloudGuide": {
           "text": "Cypress Cloud guide",
-          "link": "https://docs.cypress.io/guides/dashboard/introduction"
+          "link": "https://on.cypress.io/features-dashboard"
         },
         "docsHomepage": {
           "text": "Cypress docs",
