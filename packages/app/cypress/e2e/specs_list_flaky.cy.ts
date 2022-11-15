@@ -32,7 +32,7 @@ describe('App: Spec List - Flaky Indicator', () => {
               flakyRuns: 2,
               flakyRunsWindow: 50,
               lastFlaky: 2,
-              dashboardUrl: '#',
+              cloudUrl: '#',
             },
           }
         } else {

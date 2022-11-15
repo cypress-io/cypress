@@ -164,7 +164,7 @@ Because the ciBuildId could not be auto-detected you must pass the --ci-build-id
 https://on.cypress.io/indeterminate-ci-build-id
 `
 
-exports['DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE 1'] = `
+exports['CLOUD_RUN_GROUP_NAME_NOT_UNIQUE 1'] = `
 You passed the --group flag, but this group name has already been used for this run.
 
 The existing run is: https://cloud.cypress.io/runs/12345
@@ -183,7 +183,7 @@ This flag must be unique for each new run, but must also be identical for each m
 https://on.cypress.io/run-group-name-not-unique
 `
 
-exports['DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH 1'] = `
+exports['CLOUD_PARALLEL_GROUP_PARAMS_MISMATCH 1'] = `
 You passed the --parallel flag, but we do not parallelize tests across different environments.
 
 This machine is sending different environment parameters than the first machine that started this parallel run.
@@ -213,7 +213,7 @@ This machine sent the following parameters:
 https://on.cypress.io/parallel-group-params-mismatch
 `
 
-exports['DASHBOARD_PARALLEL_DISALLOWED 1'] = `
+exports['CLOUD_PARALLEL_DISALLOWED 1'] = `
 You passed the --parallel flag, but this run group was originally created without the --parallel flag.
 
 The existing run is: https://cloud.cypress.io/runs/12345
@@ -226,7 +226,7 @@ You can not use the --parallel flag with this group.
 https://on.cypress.io/parallel-disallowed
 `
 
-exports['DASHBOARD_PARALLEL_REQUIRED 1'] = `
+exports['CLOUD_PARALLEL_REQUIRED 1'] = `
 You did not pass the --parallel flag, but this run's group was originally created with the --parallel flag.
 
 The existing run is: https://cloud.cypress.io/runs/12345
@@ -240,7 +240,7 @@ You must use the --parallel flag with this group.
 https://on.cypress.io/parallel-required
 `
 
-exports['DASHBOARD_ALREADY_COMPLETE 1'] = `
+exports['CLOUD_ALREADY_COMPLETE 1'] = `
 The run you are attempting to access is already complete and will not accept new groups.
 
 The existing run is: https://cloud.cypress.io/runs/12345
@@ -254,7 +254,7 @@ The --ciBuildId flag you passed was: ciBuildId123
 https://on.cypress.io/already-complete
 `
 
-exports['DASHBOARD_STALE_RUN 1'] = `
+exports['CLOUD_STALE_RUN 1'] = `
 You are attempting to pass the --parallel flag to a run that was completed over 24 hours ago.
 
 The existing run is: https://cloud.cypress.io/runs/12345

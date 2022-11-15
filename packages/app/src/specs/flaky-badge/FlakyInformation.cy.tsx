@@ -25,7 +25,7 @@ describe('<FlakyInformation />', () => {
         isConsideredFlaky: flaky,
         flakyStatus: {
           __typename: 'CloudProjectSpecFlakyStatus',
-          dashboardUrl: '#',
+          cloudUrl: '#',
         },
       },
     }

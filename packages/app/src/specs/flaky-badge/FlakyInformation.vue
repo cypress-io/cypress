@@ -9,7 +9,7 @@
     style="width: fit-content"
   >
     <ExternalLink
-      :href="dashboardUrl"
+      :href="cloudUrl"
       class="hocus:no-underline"
     >
       <FlakyBadge />
@@ -17,7 +17,7 @@
     <template #popper="{ shown }">
       <ExternalLink
         v-if="shown && props.projectGql?.projectId && props.specGql?.relative"
-        :href="dashboardUrl"
+        :href="cloudUrl"
         class="hocus:no-underline"
       >
         <FlakySpecSummaryAdapter
@@ -70,7 +70,7 @@ fragment FlakyInformationCloudSpec on RemoteFetchableCloudProjectSpecResult {
       flakyStatus(fromBranch: $fromBranch, flakyRunsWindow: 50) {
         __typename
         ... on CloudProjectSpecFlakyStatus {
-          dashboardUrl
+          cloudUrl
         }
       }
     }
@@ -85,12 +85,12 @@ const props = defineProps<{
 }>()
 
 const isFlaky = computed(() => props.cloudSpecGql?.data?.__typename === 'CloudProjectSpec' && !!props.cloudSpecGql?.data?.isConsideredFlaky)
-const dashboardUrl = computed(() => {
+const cloudUrl = computed(() => {
   const cloudSpec = props.cloudSpecGql?.data?.__typename === 'CloudProjectSpec' ? props.cloudSpecGql.data : null
   const flakyStatus = cloudSpec?.flakyStatus?.__typename === 'CloudProjectSpecFlakyStatus' ? cloudSpec.flakyStatus : null
 
   return getUrlWithParams({
-    url: flakyStatus?.dashboardUrl || '#',
+    url: flakyStatus?.cloudUrl || '#',
     params: {
       utm_medium: 'Specs Flake Annotation Badge',
       utm_campaign: 'Flaky',

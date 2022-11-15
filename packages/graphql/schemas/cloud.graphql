@@ -293,7 +293,7 @@ type CloudProjectSpecFlakyStatus {
   """
   URL linking to the flaky data in Cypress Cloud for this spec
   """
-  dashboardUrl: String
+  cloudUrl: String
 
   """
   Number of flaky runs from the considered runs

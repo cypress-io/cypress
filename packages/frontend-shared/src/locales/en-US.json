@@ -170,7 +170,7 @@
       "requestSentShort": "Sent"
     },
     "connectProjectButton": "Connect your project",
-    "dashboardLoginButton": "Log in to Cypress Cloud",
+    "cloudLoginButton": "Log in to Cypress Cloud",
     "reconnectProjectButton": "Reconnect your project",
     "unauthorizedBannerTitle": "Request access to project",
     "requestAccessButton": "Request access",
@@ -322,9 +322,9 @@
           "text": "Configuration guide",
           "link": "https://docs.cypress.io/guides/references/configuration"
         },
-        "dashboardGuide": {
+        "cloudGuide": {
           "text": "Cypress Cloud guide",
-          "link": "https://docs.cypress.io/guides/cloud/introduction"
+          "link": "https://docs.cypress.io/guides/dashboard/introduction"
         },
         "docsHomepage": {
           "text": "Cypress docs",

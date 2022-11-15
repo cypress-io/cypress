@@ -1409,9 +1409,9 @@ describe('lib/cypress', () => {
         '--ciBuildId=ciBuildId123',
       ])
       .then(() => {
-        this.expectExitWithErr('DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE')
+        this.expectExitWithErr('CLOUD_RUN_GROUP_NAME_NOT_UNIQUE')
 
-        return snapshotConsoleLogs('DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE 1')
+        return snapshotConsoleLogs('CLOUD_RUN_GROUP_NAME_NOT_UNIQUE 1')
       })
     })
 
@@ -1447,9 +1447,9 @@ describe('lib/cypress', () => {
         '--ciBuildId=ciBuildId123',
       ])
       .then(() => {
-        this.expectExitWithErr('DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH')
+        this.expectExitWithErr('CLOUD_PARALLEL_GROUP_PARAMS_MISMATCH')
 
-        return snapshotConsoleLogs('DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH 1')
+        return snapshotConsoleLogs('CLOUD_PARALLEL_GROUP_PARAMS_MISMATCH 1')
       })
     })
 
@@ -1475,9 +1475,9 @@ describe('lib/cypress', () => {
         '--ciBuildId=ciBuildId123',
       ])
       .then(() => {
-        this.expectExitWithErr('DASHBOARD_PARALLEL_DISALLOWED')
+        this.expectExitWithErr('CLOUD_PARALLEL_DISALLOWED')
 
-        return snapshotConsoleLogs('DASHBOARD_PARALLEL_DISALLOWED 1')
+        return snapshotConsoleLogs('CLOUD_PARALLEL_DISALLOWED 1')
       })
     })
 
@@ -1504,9 +1504,9 @@ describe('lib/cypress', () => {
         '--ciBuildId=ciBuildId123',
       ])
       .then(() => {
-        this.expectExitWithErr('DASHBOARD_PARALLEL_REQUIRED')
+        this.expectExitWithErr('CLOUD_PARALLEL_REQUIRED')
 
-        return snapshotConsoleLogs('DASHBOARD_PARALLEL_REQUIRED 1')
+        return snapshotConsoleLogs('CLOUD_PARALLEL_REQUIRED 1')
       })
     })
 
@@ -1532,9 +1532,9 @@ describe('lib/cypress', () => {
         '--ciBuildId=ciBuildId123',
       ])
       .then(() => {
-        this.expectExitWithErr('DASHBOARD_ALREADY_COMPLETE')
+        this.expectExitWithErr('CLOUD_ALREADY_COMPLETE')
 
-        return snapshotConsoleLogs('DASHBOARD_ALREADY_COMPLETE 1')
+        return snapshotConsoleLogs('CLOUD_ALREADY_COMPLETE 1')
       })
     })
 
@@ -1561,9 +1561,9 @@ describe('lib/cypress', () => {
         '--ciBuildId=ciBuildId123',
       ])
       .then(() => {
-        this.expectExitWithErr('DASHBOARD_STALE_RUN')
+        this.expectExitWithErr('CLOUD_STALE_RUN')
 
-        return snapshotConsoleLogs('DASHBOARD_STALE_RUN 1')
+        return snapshotConsoleLogs('CLOUD_STALE_RUN 1')
       })
     })
   })

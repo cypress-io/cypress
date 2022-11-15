@@ -58,9 +58,9 @@ describe('<BaseError />', () => {
     })
 
     it('renders the expected docs button for Cypress Cloud errors', () => {
-      mountFragmentWithError({ errorType: 'DASHBOARD_GRAPHQL_ERROR' })
-      cy.contains(docsButtonSelector, docsButton.dashboardGuide.text)
-      .should('have.attr', 'href', docsButton.dashboardGuide.link)
+      mountFragmentWithError({ errorType: 'CLOUD_GRAPHQL_ERROR' })
+      cy.contains(docsButtonSelector, docsButton.cloudGuide.text)
+      .should('have.attr', 'href', docsButton.cloudGuide.link)
     })
 
     it('renders the expected docs button for errors that are known and unrelated to Cypress Cloud', () => {
