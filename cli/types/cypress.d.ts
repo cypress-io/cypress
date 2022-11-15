@@ -1489,7 +1489,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/custom-queries
      */
-    now<T extends keyof Chainable>(name: string, ...args: any[]): Promise<any> | ((subject: any) => any)
+    now(name: string, ...args: any[]): Promise<any> | ((subject: any) => any)
 
     /**
      * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
