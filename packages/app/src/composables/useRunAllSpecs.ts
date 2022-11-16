@@ -1,3 +1,4 @@
+import { RUN_ALL_SPECS_KEY } from '@packages/types/src'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
@@ -16,9 +17,9 @@ query RunAllSpecs_Config {
 `
 
 gql`
-mutation RunAllSpecs ($runAllSpecs: [String!]!) {
+mutation RunAllSpecs ($specPath: String!, $runAllSpecs: [String!]!) {
   setRunAllSpecs(runAllSpecs: $runAllSpecs)
-  launchOpenProject(specPath: "__all") {
+  launchOpenProject(specPath: $specPath) {
     id
   }
 } 
@@ -31,11 +32,11 @@ export function useRunAllSpecs () {
 
   return {
     runAllSpecs: async (runAllSpecs: string[]) => {
-      await setRunAllSpecsMutation.executeMutation({ runAllSpecs })
+      await setRunAllSpecsMutation.executeMutation({ runAllSpecs, specPath: RUN_ALL_SPECS_KEY })
 
       // Won't execute unless we are testing since the browser gets killed. In testing,
       // we can stub `launchProject` to verify the functionality is working
-      router.push({ path: '/specs/runner', query: { file: '__all' } })
+      router.push({ path: '/specs/runner', query: { file: RUN_ALL_SPECS_KEY } })
     },
     isRunAllSpecsAllowed: computed(() => {
       const isE2E = query.data.value?.currentProject?.currentTestingType === 'e2e'

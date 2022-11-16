@@ -741,10 +741,10 @@ export const mutation = mutationType({
     t.boolean('setRunAllSpecs', {
       description: 'List of specs to run for the "Run All Specs" Feature',
       args: {
-        runAllSpecs: nonNull(list(nonNull(stringArg({})))),
+        runAllSpecs: nonNull(list(nonNull(stringArg()))),
       },
-      resolve: async (source, args, ctx) => {
-        ctx.project.runAllSpecs = args.runAllSpecs
+      resolve: (source, args, ctx) => {
+        ctx.project.setRunAllSpecs(args.runAllSpecs)
 
         return true
       },

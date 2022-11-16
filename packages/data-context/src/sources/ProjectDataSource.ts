@@ -199,7 +199,8 @@ export class ProjectDataSource {
   private _specWatcher: FSWatcher | null = null
   private _specs: SpecWithRelativeRoot[] = []
   private _hasNonExampleSpec: boolean = false
-  private _runAllSpecs: string[] = []
+
+  #runAllSpecs: string[] = []
 
   constructor (private ctx: DataContext) {}
 
@@ -232,11 +233,11 @@ export class ProjectDataSource {
   }
 
   get runAllSpecs () {
-    return this._runAllSpecs
+    return this.#runAllSpecs
   }
 
-  set runAllSpecs (runAllSpecs: string[]) {
-    this._runAllSpecs = runAllSpecs
+  setRunAllSpecs (specs: string[]) {
+    this.#runAllSpecs = specs
   }
 
   get hasNonExampleSpec () {

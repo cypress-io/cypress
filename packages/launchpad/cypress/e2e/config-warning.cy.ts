@@ -151,6 +151,42 @@ describe('experimentalStudio', () => {
   })
 })
 
+describe('experimentalRunAllSpecs', () => {
+  it('is not a valid config for component testing', () => {
+    cy.scaffoldProject('experimentalSingleTabRunMode')
+    cy.openProject('experimentalSingleTabRunMode', ['--config-file', 'cypress-invalid-run-all-specs-experiment.config.js'])
+
+    cy.visitLaunchpad()
+    cy.skipWelcome()
+    cy.get('[data-cy-testingtype="component"]').click()
+    cy.findByTestId('error-header')
+    cy.contains('The experimentalRunAllSpecs experiment is currently only supported for End to End Testing.')
+  })
+
+  it('is a valid config for e2e testing', { defaultCommandTimeout: THIRTY_SECONDS }, () => {
+    cy.scaffoldProject('e2e')
+    cy.openProject('e2e')
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.js', `
+        const { defineConfig } = require('cypress')
+
+        module.exports = defineConfig({
+          experimentalRunAllSpecs: true,
+          e2e: {
+            experimentalRunAllSpecs: true
+          },
+        })
+      `)
+    })
+
+    cy.visitLaunchpad()
+    cy.skipWelcome()
+    cy.get('[data-cy-testingtype="e2e"]').click()
+    cy.findByTestId('launchpad-Choose a browser')
+    cy.get('h1').contains('Choose a browser')
+  })
+})
+
 describe('component testing dependency warnings', () => {
   it('warns against outdated react and vite version', () => {
     cy.scaffoldProject('component-testing-outdated-dependencies')

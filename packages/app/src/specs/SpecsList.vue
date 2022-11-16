@@ -114,7 +114,7 @@
               :is-run-all-specs-allowed="isRunAllSpecsAllowed"
               :aria-controls="getIdIfDirectory(row)"
               @click.stop="row.data.toggle"
-              @run-all-specs="onRunAllSpecs(row.data.id)"
+              @runAllSpecs="onRunAllSpecs(row.data.id)"
             />
           </template>
 
@@ -423,13 +423,13 @@ const { refetchFailedCloudData } = useCloudSpecData(
 const { runAllSpecs, isRunAllSpecsAllowed } = useRunAllSpecs()
 
 function onRunAllSpecs (directory: string) {
-  const filteredSpecs = treeSpecList.value.reduce((acc, node) => {
+  const filteredSpecs = treeSpecList.value.reduce<string[]>((acc, node) => {
     if (node.isLeaf && node.id.startsWith(directory)) {
       acc.push(node.data?.relative!)
     }
 
     return acc
-  }, [] as string[])
+  }, [])
 
   runAllSpecs(filteredSpecs)
 }
