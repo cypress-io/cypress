@@ -223,8 +223,12 @@ const automation = {
     filter = pick(filter, GET_ALL_PROPS)
 
     return Promise.try(async () => {
-      const cookies = await browser.cookies.getAll({})
+      const cookies = await browser.cookies.getAll(filter)
 
+      // Firefox's default filtering is not as strict as ours when it comes
+      // to filtering on domain, i.e. { domain: example.com } will return
+      // cookies for example.com and all subdomains, whereas we want an
+      // exact match for only "example.com"
       return cookies.filter((cookie) => {
         return cookieMatches(cookie, filter)
       })
