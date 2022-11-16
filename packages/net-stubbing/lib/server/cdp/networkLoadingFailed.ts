@@ -2,7 +2,7 @@ import type { CyHttpMessages } from '../../types'
 import type { NetStubbingState } from '../types'
 import _ from 'lodash'
 
-export const onNetworkLoadingFailedEvent = async (netStubbingState: NetStubbingState, data) => {
+export const onNetworkLoadingFailedEvent = async (netStubbingState: NetStubbingState, data): Promise<void> => {
   //Find the matching pre-request
   const request = Object.values(netStubbingState.requests).find((req) => {
     return req?.req?.browserPreRequest?.requestId === data.requestId

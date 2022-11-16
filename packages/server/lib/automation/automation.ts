@@ -9,7 +9,7 @@ import type { Protocol } from 'devtools-protocol'
 
 export type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => void
 
-export type OnNetworkLoadingFailed = (data: Protocol.Network.LoadingFailedEvent) => void
+export type OnNetworkLoadingFailed = (data: Protocol.Network.LoadingFailedEvent) => Promise<void>
 
 export class Automation {
   private requests: Record<number, (any) => void>

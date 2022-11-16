@@ -24,6 +24,7 @@ import system from './util/system'
 import type { BannersState, FoundBrowser, FoundSpec, OpenProjectLaunchOptions, ReceivedCypressOptions, ResolvedConfigurationOptions, TestingType, VideoRecording } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac } from 'crypto'
+import type { Protocol } from 'devtools-protocol'
 
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string
@@ -334,8 +335,8 @@ export class ProjectBase<TServer extends Server> extends EE {
       this.server.emitRequestEvent(eventName, data)
     }
 
-    const onNetworkLoadingFailed = (data) => {
-      onNetworkLoadingFailedEvent(this.server.netStubbingState, data)
+    const onNetworkLoadingFailed = (data: Protocol.Network.LoadingFailedEvent): Promise<void> => {
+      return onNetworkLoadingFailedEvent(this.server.netStubbingState, data)
     }
 
     this._automation = new Automation(namespace, socketIoCookie, screenshotsFolder, onBrowserPreRequest, onRequestEvent, onNetworkLoadingFailed)

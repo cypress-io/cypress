@@ -164,10 +164,6 @@ describe('xhrs', () => {
         })
 
         cy.wait('@createUser').its('state').should('eq', 'Canceled')
-
-        cy.visit('/xhr.html')
-
-        cy.get('#create').click()
       })
     })
   })
