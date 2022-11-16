@@ -1,13 +1,14 @@
 import type { FoundBrowser } from './browser'
 import type { ReceivedCypressOptions } from './config'
 import type { PlatformName } from './platform'
-import type { RunModeVideoApi } from './video'
+
+export type WriteVideoFrame = (data: Buffer) => void
 
 export type OpenProjectLaunchOpts = {
   projectRoot: string
   shouldLaunchNewTab: boolean
   automationMiddleware: AutomationMiddleware
-  videoApi?: RunModeVideoApi
+  writeVideoFrame?: WriteVideoFrame
   onWarning: (err: Error) => void
   onError: (err: Error) => void
 }

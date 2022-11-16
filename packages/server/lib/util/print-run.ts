@@ -452,7 +452,7 @@ function displayScreenshots (screenshots: Screenshot[] = []) {
   console.log('')
 }
 
-export function displayVideoProcessingProgress (opts: { videoName: string, videoCompression: number | false }) {
+export function displayVideoProcessingProgress (opts: { name: string, videoCompression: number | false }) {
   console.log('')
 
   terminal.header('Video', {
@@ -508,7 +508,7 @@ export function displayVideoProcessingProgress (opts: { videoName: string, video
         table.push([
           gray('-'),
           gray('Finished processing:'),
-            `${formatPath(opts.videoName, getWidth(table, 2), 'cyan')}`,
+            `${formatPath(opts.name, getWidth(table, 2), 'cyan')}`,
             gray(dur),
         ])
 

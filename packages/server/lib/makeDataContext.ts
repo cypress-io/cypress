@@ -54,8 +54,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       async focusActiveBrowserWindow () {
         return openProject.sendFocusBrowserMessage()
       },
-      async relaunchBrowser () {
-        await openProject.relaunchBrowser()
+      relaunchBrowser () {
+        return openProject.relaunchBrowser ? openProject.relaunchBrowser() : null
       },
     },
     appApi: {
@@ -76,8 +76,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
     },
     projectApi: {
-      async launchProject (browser: FoundBrowser, spec: Cypress.Spec, options: OpenProjectLaunchOpts) {
-        await openProject.launch({ ...browser }, spec, options)
+      launchProject (browser: FoundBrowser, spec: Cypress.Spec, options: OpenProjectLaunchOpts) {
+        return openProject.launch({ ...browser }, spec, options)
       },
       openProjectCreate (args: InitializeProjectOptions, options: OpenProjectLaunchOptions) {
         return openProject.create(args.projectRoot, args, options)

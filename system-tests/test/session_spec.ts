@@ -181,9 +181,7 @@ describe('e2e sessions', () => {
   })
 
   it('session tests', {
-    project: 'session-and-origin-e2e-specs',
-    browser: 'chrome', // TODO(webkit): fix+unskip (needs multidomain support)
-    spec: 'session/session.cy.js',
+    spec: 'session.cy.js',
     snapshot: true,
     config: {
       experimentalSessionAndOrigin: true,
@@ -191,10 +189,17 @@ describe('e2e sessions', () => {
     },
   })
 
-  it('handles spec and global sessions persistence on spec reload, and switching specs', {
-    project: 'session-and-origin-e2e-specs',
-    spec: 'session/session_persist_1.cy.js,session/session_persist_2.cy.js',
-    browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
+  it('sessions persist on reload, and clear between specs', {
+    spec: 'session_persist_spec_1.cy.js,session_persist_spec_2.cy.js',
+    snapshot: true,
+    config: {
+      experimentalSessionAndOrigin: true,
+      video: false,
+    },
+  })
+
+  it('sessions recreated on reload in open mode', {
+    spec: 'session_recreate_reload.cy.js',
     snapshot: true,
     config: {
       env: { SYSTEM_TESTS: true },
