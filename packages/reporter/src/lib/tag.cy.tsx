@@ -11,6 +11,7 @@ describe('Tag', () => {
 
   const statuses = [
     'successful-status',
+    'warned-status',
     'failed-status',
   ]
 

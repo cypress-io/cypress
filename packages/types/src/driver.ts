@@ -43,4 +43,4 @@ export interface CachedTestState {
 
 export type Instrument = 'agent' | 'command' | 'route'
 
-export type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing'
+export type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing' | 'warned'

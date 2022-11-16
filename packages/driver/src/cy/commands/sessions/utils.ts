@@ -208,7 +208,28 @@ function navigateAboutBlank (session: boolean = true) {
   })
 }
 
+const enum SESSION_STEPS {
+  create = 'create',
+  restore = 'restore',
+  recreate = 'recreate',
+  validate = 'validate',
+}
+
 const statusMap = {
+  commandState: (status: string) => {
+    switch (status) {
+      case 'failed':
+        return 'failed'
+      case 'recreating':
+      case 'recreated':
+        return 'warned'
+      case 'created':
+      case 'restored':
+        return 'passed'
+      default:
+        return 'pending'
+    }
+  },
   inProgress: (step) => {
     switch (step) {
       case 'create':
@@ -255,5 +276,6 @@ export {
   getConsoleProps,
   getPostMessageLocalStorage,
   navigateAboutBlank,
+  SESSION_STEPS,
   statusMap,
 }
