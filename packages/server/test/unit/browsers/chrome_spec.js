@@ -325,14 +325,14 @@ describe('lib/browsers/chrome', () => {
 
     // https://github.com/cypress-io/cypress/issues/9265
     it('respond ACK after receiving new screenshot frame', function () {
-      const frameMeta = { data: Buffer.from('foo'), sessionId: '1' }
+      const frameMeta = { data: Buffer.from(''), sessionId: '1' }
       const write = sinon.stub()
-      const options = { writeVideoFrame: write }
+      const options = { onScreencastFrame: write }
 
       return this.onCriEvent('Page.screencastFrame', frameMeta, options)
       .then(() => {
         expect(this.pageCriClient.send).to.have.been.calledWith('Page.startScreencast')
-        expect(write).to.have.been.calledWithMatch((arg) => Buffer.isBuffer(arg) && arg.length > 0)
+        expect(write).to.have.been.calledWith(frameMeta)
         expect(this.pageCriClient.send).to.have.been.calledWith('Page.screencastFrameAck', { sessionId: frameMeta.sessionId })
       })
     })
@@ -516,18 +516,12 @@ describe('lib/browsers/chrome', () => {
       }
 
       let onInitializeNewBrowserTabCalled = false
-      const options = {
-        ...openOpts,
-        url: 'https://www.google.com',
-        downloadsFolder: '/tmp/folder',
-        writeVideoFrame: () => {},
-        onInitializeNewBrowserTab: () => {
-          onInitializeNewBrowserTabCalled = true
-        },
-      }
+      const options = { ...openOpts, url: 'https://www.google.com', downloadsFolder: '/tmp/folder', onInitializeNewBrowserTab: () => {
+        onInitializeNewBrowserTabCalled = true
+      } }
 
       sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
-      sinon.stub(chrome, '_recordVideo').withArgs(sinon.match.object, options.writeVideoFrame, 354).resolves()
+      sinon.stub(chrome, '_maybeRecordVideo').withArgs(pageCriClient, options, 354).resolves()
       sinon.stub(chrome, '_navigateUsingCRI').withArgs(pageCriClient, options.url, 354).resolves()
       sinon.stub(chrome, '_handleDownloads').withArgs(pageCriClient, options.downloadFolder, automation).resolves()
 
@@ -535,7 +529,7 @@ describe('lib/browsers/chrome', () => {
 
       expect(automation.use).to.be.called
       expect(chrome._getBrowserCriClient).to.be.called
-      expect(chrome._recordVideo).to.be.called
+      expect(chrome._maybeRecordVideo).to.be.called
       expect(chrome._navigateUsingCRI).to.be.called
       expect(chrome._handleDownloads).to.be.called
       expect(onInitializeNewBrowserTabCalled).to.be.true

@@ -1,5 +1,6 @@
 /* eslint-disable no-console, @cypress/dev/arrow-body-multiline-braces */
 import _ from 'lodash'
+import la from 'lazy-ass'
 import pkg from '@packages/root'
 import path from 'path'
 import chalk from 'chalk'
@@ -21,7 +22,7 @@ import random from '../util/random'
 import system from '../util/system'
 import chromePolicyCheck from '../util/chrome_policy_check'
 import * as objUtils from '../util/obj_utils'
-import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, WriteVideoFrame } from '@packages/types'
+import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser } from '@packages/types'
 import type { Cfg } from '../project-base'
 import type { Browser } from '../browsers/types'
 import * as printResults from '../util/print-run'
@@ -40,7 +41,7 @@ let exitEarly = (err) => {
   earlyExitErr = err
 }
 let earlyExitErr: Error
-let currentWriteVideoFrameCallback: WriteVideoFrame
+let currentWriteVideoFrameCallback: videoCapture.WriteVideoFrame
 let currentSetScreenshotMetadata: SetScreenshotMetadata
 
 const debug = Debug('cypress:server:run')
@@ -117,6 +118,70 @@ async function getProjectId (project, id) {
   } catch (err) {
     // no id no problem
     return null
+  }
+}
+
+const getDefaultBrowserOptsByFamily = (browser, project, writeVideoFrame, onError) => {
+  la(browserUtils.isBrowserFamily(browser.family), 'invalid browser family in', browser)
+
+  if (browser.name === 'electron') {
+    return getElectronProps(browser.isHeaded, writeVideoFrame, onError)
+  }
+
+  if (browser.family === 'chromium') {
+    return getCdpVideoProp(writeVideoFrame)
+  }
+
+  if (browser.family === 'firefox') {
+    return getFirefoxProps(project, writeVideoFrame)
+  }
+
+  return {}
+}
+
+const getFirefoxProps = (project, writeVideoFrame) => {
+  if (writeVideoFrame) {
+    project.on('capture:video:frames', writeVideoFrame)
+
+    return { onScreencastFrame: true }
+  }
+
+  return {}
+}
+
+const getCdpVideoProp = (writeVideoFrame) => {
+  if (!writeVideoFrame) {
+    return {}
+  }
+
+  return {
+    onScreencastFrame: (e) => {
+      // https://chromedevtools.github.io/devtools-protocol/tot/Page#event-screencastFrame
+      writeVideoFrame(Buffer.from(e.data, 'base64'))
+    },
+  }
+}
+
+const getElectronProps = (isHeaded, writeVideoFrame, onError) => {
+  return {
+    ...getCdpVideoProp(writeVideoFrame),
+    width: 1280,
+    height: 720,
+    show: isHeaded,
+    onCrashed () {
+      const err = errors.get('RENDERER_CRASHED')
+
+      errors.log(err)
+
+      onError(err)
+    },
+    onNewWindow (e, url, frameName, disposition, options) {
+      // force new windows to automatically open with show: false
+      // this prevents window.open inside of javascript client code
+      // to cause a new BrowserWindow instance to open
+      // https://github.com/cypress-io/cypress/issues/123
+      options.show = false
+    },
   }
 }
 
@@ -315,20 +380,15 @@ async function postProcessRecording (name, cname, videoCompression, shouldUpload
   return continueProcessing(onProgress)
 }
 
-function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot, writeVideoFrame?: WriteVideoFrame, setScreenshotMetadata: SetScreenshotMetadata, project: Project, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, onError: (err: Error) => void }) {
-  const { browser, spec, setScreenshotMetadata, project, screenshots, projectRoot, shouldLaunchNewTab, onError } = options
+function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot, writeVideoFrame?: videoCapture.WriteVideoFrame, setScreenshotMetadata: SetScreenshotMetadata, project: Project, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, onError: (err: Error) => void }) {
+  const { browser, spec, writeVideoFrame, setScreenshotMetadata, project, screenshots, projectRoot, shouldLaunchNewTab, onError } = options
 
   const warnings = {}
 
-  if (options.writeVideoFrame && browser.family === 'firefox') {
-    project.on('capture:video:frames', options.writeVideoFrame)
-  }
-
   const browserOpts: OpenProjectLaunchOpts = {
+    ...getDefaultBrowserOptsByFamily(browser, project, writeVideoFrame, onError),
     projectRoot,
     shouldLaunchNewTab,
-    onError,
-    writeVideoFrame: options.writeVideoFrame,
     automationMiddleware: {
       onBeforeRequest (message, data) {
         if (message === 'take:screenshot') {
@@ -431,7 +491,7 @@ function writeVideoFrameCallback (data: Buffer) {
   return currentWriteVideoFrameCallback(data)
 }
 
-function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, writeVideoFrame?: WriteVideoFrame, spec: SpecWithRelativeRoot, isFirstSpec: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean }) {
+function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, writeVideoFrame?: videoCapture.WriteVideoFrame, spec: SpecWithRelativeRoot, isFirstSpec: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean }) {
   if (globalThis.CY_TEST_MOCK?.waitForBrowserToConnect) return Promise.resolve()
 
   const { project, socketId, onError, writeVideoFrame, spec } = options
