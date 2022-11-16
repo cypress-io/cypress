@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { deriveSpecTree, fuzzySortSpecs } from "./tree/deriveTree";
+import { deriveSpecTree, fuzzySortSpecs, getAllFileInDirectory } from "./tree/deriveTree";
 import type { SpecListOptions, SpecTreeDirectoryNode } from "./tree/deriveTree";
 import type {
   SpecsListFragment,
@@ -59,6 +59,9 @@ function handleClear() {
   specFilterModel.value = "";
   specsListInputRef.value?.focus();
 }
+
+// result count is always count of files from root node
+const resultCount = computed(() => getAllFileInDirectory(tree.value.root).length);
 </script>
 
 <template>
@@ -66,8 +69,8 @@ function handleClear() {
     v-model="specFilterModel"
     :specs-list-input-ref-fn="specsListInputRefFn"
     class="pb-32px"
-    :result-count="specs.length"
-    :spec-count="12"
+    :result-count="resultCount"
+    :spec-count="specs.length"
   />
   <!-- @show-create-spec-modal="emit('showCreateSpecModal')"
     @show-spec-pattern-modal="showSpecPatternModal = true" -->
