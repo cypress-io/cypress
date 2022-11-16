@@ -12,6 +12,7 @@ import AverageDuration from "../AverageDuration.vue";
 const props = defineProps<{
   node: DirectoryNode;
   projectConnectionStatus: ProjectConnectionStatus;
+  projectId?: string
 }>();
 
 const emit = defineEmits<{
@@ -62,6 +63,7 @@ const grouped = computed(() => groupSpecTreeNodes(props.node));
       v-for="file of grouped.files"
       :node="file"
       :project-connection-status="props.projectConnectionStatus"
+      :project-id="props.projectId"
       :key="file.data.relative"
     >
 

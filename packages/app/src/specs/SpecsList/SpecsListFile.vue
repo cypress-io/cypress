@@ -3,17 +3,19 @@ import { computed } from "vue";
 import type { RouteLocationRaw } from "vue-router";
 import type { SpecsListFragment } from "../../generated/graphql";
 import HighlightedText from "../HighlightedText.vue";
-import RunStatusDots from "../RunStatusDots.vue";
 import { deriveIndexes } from "../spec-utils";
 import SpecListGitInfo from "../SpecListGitInfo.vue";
 import type { SpecTreeFileNode } from "../tree/deriveTree";
 import { tableGridColumns } from "./constants";
-import type { ProjectConnectionStatus} from '../tree/types'
+import type { ProjectConnectionStatus } from "../tree/types";
 import SpecsListHoverCell from "../SpecsListHoverCell.vue";
 import SpecsListCloudButton from "../SpecsListCloudButton.vue";
+import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useRequestAccess } from "../../composables/useRequestAccess";
 
 const props = defineProps<{
   node: SpecTreeFileNode<SpecsListFragment>;
+  projectId?: string
   projectConnectionStatus: ProjectConnectionStatus;
 }>();
 
@@ -24,11 +26,20 @@ const route: RouteLocationRaw = {
   },
 };
 
+const showCloudConnectButton = computed(() => 
+  props.projectConnectionStatus !== 'CONNECTED' && (
+    props.node.data.cloudSpec?.data || props.node.data.cloudSpec?.fetchingStatus !== 'FETCHING')
+)
+
+const { openLoginConnectModal } = useLoginConnectStore()
+const requestAccess = useRequestAccess()
+
 // TODO: Fix
 const split = computed(() => {
   const idx = deriveIndexes(
     props.node.data.fileName,
     // TODO: Types are janky
+    // @ts-ignore
     props.node.data.fuzzyIndexes?.relative ?? []
   );
   return idx;
@@ -54,7 +65,6 @@ const split = computed(() => {
           :title="`${props.node.data.fileName + props.node.data.fileExtension}`"
           class="text-gray-400 text-indigo-500 truncate group-hocus:text-indigo-600"
         >
-          <!-- {{ props.node.name }} -->
           <HighlightedText
             :text="props.node.data.fileName"
             :indexes="[] /* split.fileNameIndexes */"
@@ -86,16 +96,33 @@ const split = computed(() => {
       </template>
 
       <template #hover>
-        <slot name="connect-button" utmMedium="Specs Latest Runs Empty State" />
-        <SpecsListCloudButton 
+        <SpecsListCloudButton
+          v-if="showCloudConnectButton"
           :project-connection-status="props.projectConnectionStatus"
+          @show-login-connect="openLoginConnectModal({ utmMedium: 'Specs Latest Runs Empty State' })"
+          @request-access="requestAccess(props.projectId)"
         />
       </template>
-
     </SpecsListHoverCell>
 
     <!-- average duration -->
-    <div>av</div>
+    <SpecsListHoverCell
+      data-cy="specs-list-row-average-duration"
+      :is-hover-disabled="props.projectConnectionStatus ===  'CONNECTED'"
+      class="hidden md:block"
+    >
+      <template #content>
+        <slot name="average-duration" />
+      </template>
 
+      <template #hover>
+        <SpecsListCloudButton
+          v-if="showCloudConnectButton"
+          :project-connection-status="props.projectConnectionStatus"
+          @show-login-connect="openLoginConnectModal({ utmMedium: 'Specs Average Duration Empty State' })"
+          @request-access="requestAccess(props.projectId)"
+        />
+      </template>
+    </SpecsListHoverCell>
   </RouterLink>
 </template>

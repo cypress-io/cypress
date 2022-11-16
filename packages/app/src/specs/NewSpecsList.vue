@@ -119,6 +119,7 @@ const resultCount = computed(
       :node="tree.root"
       :onHandleCollapse="handleCollapse"
       :project-connection-status="projectConnectionStatus"
+      :project-id="props.gql.currentProject?.projectId ?? undefined"
     />
   </div>
   <NoResults
