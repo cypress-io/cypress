@@ -68,10 +68,7 @@ describe('network stubbing - not skipped', () => {
         // do nothing on an abort
       })
 
-      //delay the abort a tic, so the request can actually be sent.
-      setTimeout(() => {
-        controller.abort()
-      }, 0)
+      controller.abort()
 
       cy.wait('@createUser').its('state').should('eq', 'Canceled')
     })
@@ -598,7 +595,7 @@ describe.skip('network stubbing', function () {
             cy.wait('@testRequest')
             .its('request')
             .then((req) => {
-              expect(req.body).to.eq(str)
+              expect(req?.body).to.eq(str)
             })
           })
         })

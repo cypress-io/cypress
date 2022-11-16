@@ -85,7 +85,7 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.wait('@foo.request').then((xhr) => {
-          expect(xhr.request.url).to.include('/foo')
+          expect(xhr.request?.url).to.include('/foo')
           expect(xhr.response).to.be.undefined
         })
       })
@@ -106,7 +106,7 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
 
       cy.origin('http://www.foobar.com:3500', { args: { response } }, ({ response }) => {
         cy.wait('@foo.response').then((xhr) => {
-          expect(xhr.request.url).to.include('/foo')
+          expect(xhr.request?.url).to.include('/foo')
           expect(xhr.response?.body).to.deep.equal(response)
         })
       })
