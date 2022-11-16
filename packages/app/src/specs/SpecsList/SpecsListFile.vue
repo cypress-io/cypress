@@ -2,7 +2,9 @@
 import { computed } from "vue";
 import type { RouteLocationRaw } from "vue-router";
 import type { SpecsListFragment } from "../../generated/graphql";
+import AverageDuration from "../AverageDuration.vue";
 import HighlightedText from "../HighlightedText.vue";
+import RunStatusDots from "../RunStatusDots.vue";
 import { deriveIndexes } from "../spec-utils";
 import SpecListGitInfo from "../SpecListGitInfo.vue";
 import type { SpecTreeFileNode } from "../tree/deriveTree";
@@ -31,54 +33,63 @@ const split = computed(() => {
 </script>
 
 <template>
-  <!-- <div
+  <RouterLink
     :style="{ paddingLeft: `${(node.parent.depth + 1) * 10 + 22}px` }"
-    class="flex"
-  > -->
-    <RouterLink
-      :style="{ paddingLeft: `${(node.parent.depth + 1) * 10 + 22}px` }"
-      class="h-full outline-none ring-inset grid pr-20px group focus:outline-transparent focus-within:ring-indigo-300 focus-within:ring-1 children:cursor-pointer"
-      :class="tableGridColumns"
-      :to="route"
+    class="h-full outline-none ring-inset grid pr-20px group focus:outline-transparent focus-within:ring-indigo-300 focus-within:ring-1 children:cursor-pointer"
+    :class="tableGridColumns"
+    :to="route"
+  >
+    <div
+      class="h-full grid gap-8px grid-cols-[16px,auto,auto] items-center"
+      data-cy="spec-item"
     >
-      <div
-        class="h-full grid gap-8px grid-cols-[16px,auto,auto] items-center"
-        data-cy="spec-item"
-      >
-        <i-cy-document-blank_x16
-          class="icon-light-gray-50 icon-dark-gray-200 group-hocus:icon-light-indigo-200 group-hocus:icon-dark-indigo-400"
-        />
-        <div>
-          <div
-            :title="`${
-              props.node.data.fileName + props.node.data.fileExtension
-            }`"
-            class="text-gray-400 text-indigo-500 truncate group-hocus:text-indigo-600"
-          >
-            <!-- {{ props.node.name }} -->
-            <HighlightedText
-              :text="props.node.data.fileName"
-              :indexes="[] /* split.fileNameIndexes */"
-              class="font-medium text-indigo-500 group-hocus:text-indigo-700"
-              highlight-classes="text-gray-1000"
-            />
-            <HighlightedText
-              :text="props.node.data.specFileExtension"
-              :indexes="[] /* split.extensionIndexes */"
-              class="font-light group-hocus:text-gray-400"
-              highlight-classes="text-gray-1000"
-            />
-          </div>
+      <i-cy-document-blank_x16
+        class="icon-light-gray-50 icon-dark-gray-200 group-hocus:icon-light-indigo-200 group-hocus:icon-dark-indigo-400"
+      />
+      <div>
+        <div
+          :title="`${props.node.data.fileName + props.node.data.fileExtension}`"
+          class="text-gray-400 text-indigo-500 truncate group-hocus:text-indigo-600"
+        >
+          <!-- {{ props.node.name }} -->
+          <HighlightedText
+            :text="props.node.data.fileName"
+            :indexes="[] /* split.fileNameIndexes */"
+            class="font-medium text-indigo-500 group-hocus:text-indigo-700"
+            highlight-classes="text-gray-1000"
+          />
+          <HighlightedText
+            :text="props.node.data.specFileExtension"
+            :indexes="[] /* split.extensionIndexes */"
+            class="font-light group-hocus:text-gray-400"
+            highlight-classes="text-gray-1000"
+          />
         </div>
       </div>
+    </div>
 
-      <SpecListGitInfo
-        v-if="props.node.data.gitInfo"
-        :gql="props.node.data.gitInfo"
+    <SpecListGitInfo
+      v-if="props.node.data.gitInfo"
+      :gql="props.node.data.gitInfo"
+    />
+
+    <div class="h-full grid justify-items-end items-center relative">
+      <RunStatusDots
+        v-if="
+          props.node.data &&
+          (props.node.data.cloudSpec?.data ||
+            props.node.data.cloudSpec?.fetchingStatus !== 'FETCHING')
+        "
+        :gql="props.node.data.cloudSpec ?? null"
+        :spec-file-extension="props.node.data.specFileExtension"
+        :spec-file-name="props.node.data.fileName"
       />
-
-      <div>latest runs</div>
-      <div>average duration</div>
-    </RouterLink>
-  <!-- </div> -->
+      <div
+        v-else-if="props.node.data?.cloudSpec?.fetchingStatus === 'FETCHING'"
+        class="bg-gray-50 rounded-[20px] h-24px w-full animate-pulse"
+        data-cy="run-status-dots-loading"
+      />
+    </div>
+    <AverageDuration :gql="props.node.data.cloudSpec ?? null" />
+  </RouterLink>
 </template>
