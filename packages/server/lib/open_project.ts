@@ -88,7 +88,6 @@ export class OpenProject {
       downloadsFolder: cfg.downloadsFolder,
       experimentalModifyObstructiveThirdPartyCode: cfg.experimentalModifyObstructiveThirdPartyCode,
       experimentalSessionAndOrigin: cfg.experimentalSessionAndOrigin,
-      experimentalWebKitSupport: cfg.experimentalWebKitSupport,
       ...prevOptions || {},
     }
 
