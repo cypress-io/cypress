@@ -13,7 +13,9 @@ export interface SessionPanelProps {
   model: Record<string, SessionsModel>
 }
 
-const SessionRow = ({ name, isGlobalSession, id, status, testId }: SessionsModel) => {
+const SessionRow = (model: SessionsModel) => {
+  const { name, isGlobalSession, id, status, testId } = model
+
   const printToConsole = (id) => {
     events.emit('show:command', testId, id)
   }
@@ -34,7 +36,7 @@ const SessionRow = ({ name, isGlobalSession, id, status, testId }: SessionsModel
         <Tag
           customClassName='session-status'
           content={status}
-          type={`${status === 'failed' ? 'failed' : 'successful'}-status`}
+          type={model.tagType}
         />
       </div>
     </FlashOnClick>
