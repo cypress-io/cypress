@@ -2,6 +2,12 @@ import type { CyHttpMessages } from '../../types'
 import type { NetStubbingState } from '../types'
 import _ from 'lodash'
 
+/**
+ * Handle the Network:LoadingFailed CDP event to mark intercepted calls as canceled.
+ * @param netStubbingState - the current state of intercepted requests, use this to find the intercepted request.
+ * @param data - response from the network:LoadingFailed cdp event.
+ * @returns void
+ */
 export const onNetworkLoadingFailedEvent = async (netStubbingState: NetStubbingState, data): Promise<void> => {
   //Find the matching pre-request
   const request = Object.values(netStubbingState.requests).find((req) => {

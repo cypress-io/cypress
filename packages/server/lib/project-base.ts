@@ -335,6 +335,12 @@ export class ProjectBase<TServer extends Server> extends EE {
       this.server.emitRequestEvent(eventName, data)
     }
 
+    /**
+     * Simple function to forward the servers netStubbing state along with the Network:LoadingFailed
+     * event to the netStubbing function to handle.
+     * @param data - response from the CDP Network:LoadingFailed event
+     * @returns void promise
+     */
     const onNetworkLoadingFailed = (data: Protocol.Network.LoadingFailedEvent): Promise<void> => {
       return onNetworkLoadingFailedEvent(this.server.netStubbingState, data)
     }
