@@ -21,7 +21,8 @@ const uniqueRoute = (route) => {
 }
 
 describe('network stubbing - not skipped', () => {
-  it('stops waiting when an xhr request is canceled', () => {
+  // The expected CDP event does not fire on firefox so this test would time out.
+  it('stops waiting when an xhr request is canceled', { browser: '!firefox' }, () => {
     cy.visit('http://localhost:3500/fixtures/generic.html')
 
     cy.intercept('POST', /users/, {
@@ -49,7 +50,8 @@ describe('network stubbing - not skipped', () => {
     })
   })
 
-  it('stops waiting when an fetch request is canceled', () => {
+  // The expected CDP event does not fire on firefox so this test would time out.
+  it('stops waiting when an fetch request is canceled', { browser: '!firefox' }, () => {
     cy.visit('http://localhost:3500/fixtures/generic.html')
 
     cy.intercept('POST', /users/, {
