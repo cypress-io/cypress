@@ -517,7 +517,7 @@
       },
       "experimentalRunAllSpecs": {
         "name": "Run All Specs",
-        "description": "Enables the \"Run All Specs\" UI feature, allowing the execution of multiple specs at once (only available for e2e)"
+        "description": "Enables the \"Run All Specs\" UI feature, allowing the execution of multiple specs sequentially."
       }
     },
     "device": {

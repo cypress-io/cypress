@@ -152,38 +152,37 @@ describe('experimentalStudio', () => {
 })
 
 describe('experimentalRunAllSpecs', () => {
-  it('is not a valid config for component testing', () => {
-    cy.scaffoldProject('experimentalSingleTabRunMode')
-    cy.openProject('experimentalSingleTabRunMode', ['--config-file', 'cypress-invalid-run-all-specs-experiment.config.js'])
-
-    cy.visitLaunchpad()
-    cy.skipWelcome()
-    cy.get('[data-cy-testingtype="component"]').click()
-    cy.findByTestId('error-header')
-    cy.contains('The experimentalRunAllSpecs experiment is currently only supported for End to End Testing.')
-  })
-
   it('is a valid config for e2e testing', { defaultCommandTimeout: THIRTY_SECONDS }, () => {
-    cy.scaffoldProject('e2e')
-    cy.openProject('e2e')
-    cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject('cypress.config.js', `
-        const { defineConfig } = require('cypress')
-
-        module.exports = defineConfig({
-          experimentalRunAllSpecs: true,
-          e2e: {
-            experimentalRunAllSpecs: true
-          },
-        })
-      `)
-    })
+    cy.scaffoldProject('run-all-specs')
+    cy.openProject('run-all-specs')
 
     cy.visitLaunchpad()
     cy.skipWelcome()
     cy.get('[data-cy-testingtype="e2e"]').click()
     cy.findByTestId('launchpad-Choose a browser')
     cy.get('h1').contains('Choose a browser')
+  })
+
+  it('is not a valid config for component testing', () => {
+    cy.scaffoldProject('run-all-specs')
+    cy.openProject('run-all-specs', ['--config-file', 'cypress-invalid-component.config.js'])
+
+    cy.visitLaunchpad()
+    cy.skipWelcome()
+    cy.get('[data-cy-testingtype="component"]').click()
+    cy.findByTestId('error-header')
+    cy.contains('The experimentalRunAllSpecs experiment is currently only supported for End to End Testing')
+  })
+
+  it('is not valid config when specified at root', { defaultCommandTimeout: THIRTY_SECONDS }, () => {
+    cy.scaffoldProject('run-all-specs')
+    cy.openProject('run-all-specs', ['--config-file', 'cypress-invalid-root.config.js'])
+
+    cy.visitLaunchpad()
+    cy.skipWelcome()
+    cy.get('[data-cy-testingtype="e2e"]').click()
+    cy.findByTestId('error-header')
+    cy.contains('The experimentalRunAllSpecs experiment is currently only supported for End to End Testing')
   })
 })
 

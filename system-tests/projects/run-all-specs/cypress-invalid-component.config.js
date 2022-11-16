@@ -1,7 +1,13 @@
 const { defineConfig } = require('cypress')
 
 module.exports = defineConfig({
-  e2e: {
+  component: {
+    devServer () {
+      return {
+        port: 1234,
+        close: () => {},
+      }
+    },
     experimentalRunAllSpecs: true,
     supportFile: false,
   },

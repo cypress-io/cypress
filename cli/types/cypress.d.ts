@@ -2997,7 +2997,7 @@ declare namespace Cypress {
     indexHtmlFile: string
 
     /**
-     * Enables the "Run All Specs" UI feature, allowing the execution of multiple specs at once (only available for e2e).
+     * Enables the "Run All Specs" UI feature, allowing the execution of multiple specs sequentially.
      * @default false
      */
     experimentalRunAllSpecs: boolean
@@ -3145,7 +3145,7 @@ declare namespace Cypress {
     }
   }
 
-  interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl' | 'experimentalSessionAndOrigin' | 'experimentalStudio'> {
+  interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl' | 'experimentalSessionAndOrigin' | 'experimentalStudio' | 'experimentalRunAllSpecs'> {
     devServer: DevServerFn<ComponentDevServerOpts> | DevServerConfigOptions
     devServerConfig?: ComponentDevServerOpts
     /**
