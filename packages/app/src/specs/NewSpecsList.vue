@@ -45,7 +45,7 @@ const tree = computed(() => {
 
 <template>
   <input v-model="opts.search" placeholder="Search..." />
-  <div>
+  <div class="divide-y-1 border-gray-50 border-y-1 children:border-gray-50 children:h-40px">
     <SpecsListDirectory
       :node="tree.root"
       :onHandleCollapse="handleCollapse" 

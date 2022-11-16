@@ -61,7 +61,7 @@ const grouped = computed(() => groupSpecTreeNodes(props.node));
     </button>
   </div>
 
-  <div v-if="!props.node.collapsed">
+  <template v-if="!props.node.collapsed">
     <SpecsListFile 
       v-for="file of grouped.files" 
       :node="file" :key="file.data.relative" 
@@ -73,5 +73,5 @@ const grouped = computed(() => groupSpecTreeNodes(props.node));
       :node="child" 
       @handleCollapse="(node: DirectoryNode) => emit('handleCollapse', node)"
     />
-  </div>
+  </template>
 </template>
