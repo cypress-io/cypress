@@ -44,7 +44,7 @@ const electronApp = require('../../lib/util/electron-app')
 const savedState = require(`../../lib/saved_state`)
 const { getCtx, clearCtx, setCtx, makeDataContext } = require(`../../lib/makeDataContext`)
 const { BrowserCriClient } = require(`../../lib/browsers/browser-cri-client`)
-const { cloudRecommendationMessage } = require('../../lib/util/print-run')
+const { cloudRecommendationMessage, gray } = require('../../lib/util/print-run')
 
 const TYPICAL_BROWSERS = [
   {
@@ -352,42 +352,44 @@ describe('lib/cypress', () => {
 
     describe('cloud recommendation message', () => {
       it('gets logged when in CI and there is a failure', function () {
-        process.env.CI = true
-        delete process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS
+        sinon.stub(ciProvider, 'getIsCi').returns(true)
+        delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
 
         return cypress.start([`--run-project=${this.todosPath}`]).then(() => {
-          expect(console.log).to.be.calledWith(cloudRecommendationMessage)
+          expect(console.log).to.be.calledWith(gray(cloudRecommendationMessage))
+
+          snapshotConsoleLogs('CLOUD_RECOMMENDATION_MESSAGE')
         })
       })
 
-      it('does not get logged if CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS is set', function () {
-        process.env.CI = true
-        process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS = true
+      it('does not get logged if CYPRESS_COMMERCIAL_RECOMMENDATIONS is set to 0', function () {
+        sinon.stub(ciProvider, 'getIsCi').returns(true)
+        process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS = '0'
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
 
         return cypress.start([`--run-project=${this.todosPath}`]).then(() => {
-          expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
+          expect(console.log).not.to.be.calledWith(gray(cloudRecommendationMessage))
         })
       })
 
       it('does not get logged if all tests pass', function () {
-        process.env.CI = true
-        delete process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS
+        sinon.stub(ciProvider, 'getIsCi').returns(true)
+        delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 0 } }
 
         return cypress.start([`--run-project=${this.todosPath}`]).then(() => {
-          expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
+          expect(console.log).not.to.be.calledWith(gray(cloudRecommendationMessage))
         })
       })
 
       it('does not get logged if not running in CI', function () {
-        delete process.env.CI
-        delete process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS
+        sinon.stub(ciProvider, 'getIsCi').returns(undefined)
+        delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
 
         return cypress.start([`--run-project=${this.todosPath}`]).then(() => {
-          expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
+          expect(console.log).not.to.be.calledWith(gray(cloudRecommendationMessage))
         })
       })
     })
@@ -925,7 +927,7 @@ describe('lib/cypress', () => {
 
     describe('config overrides', () => {
       beforeEach(function () {
-        delete process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS
+        delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
       })
 
       it('can override default values', function () {
@@ -1116,7 +1118,7 @@ describe('lib/cypress', () => {
     describe('--env', () => {
       beforeEach(() => {
         process.env = _.omit(process.env, 'CYPRESS_DEBUG')
-        delete process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS
+        delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
 
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 0 } }
       })
@@ -1617,8 +1619,8 @@ describe('lib/cypress', () => {
 
     describe('cloud recommendation message', () => {
       it('does not display if --record is passed', function () {
-        process.env.CI = true
-        delete process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS
+        sinon.stub(ciProvider, 'getIsCi').returns(true)
+        delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
 
         return cypress.start([
@@ -1629,7 +1631,7 @@ describe('lib/cypress', () => {
           '--ciBuildId=ciBuildId123',
         ])
         .then(() => {
-          expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
+          expect(console.log).not.to.be.calledWith(gray(cloudRecommendationMessage))
         })
       })
     })

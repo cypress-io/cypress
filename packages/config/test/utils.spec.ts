@@ -11,7 +11,7 @@ import {
 
 describe('config/src/utils', () => {
   beforeEach(function () {
-    delete process.env.CYPRESS_NO_COMMERCIAL_RECOMMENDATIONS
+    delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
   })
 
   describe('hideKeys', () => {
