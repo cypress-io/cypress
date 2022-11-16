@@ -29,7 +29,7 @@ import InlineSpecListHeader from './InlineSpecListHeader.vue'
 import InlineSpecListTree from './InlineSpecListTree.vue'
 import CreateSpecModal from './CreateSpecModal.vue'
 import { fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
-import type { FuzzyFoundSpec } from './spec-utils'
+import type { FuzzyFoundSpec } from './tree/useCollapsibleTree'
 import { useSpecFilter } from '../composables/useSpecFilter'
 
 gql`
