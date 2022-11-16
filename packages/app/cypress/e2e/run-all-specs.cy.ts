@@ -97,10 +97,10 @@ describe('run-all-specs', () => {
 
     clickRunAllSpecs()
 
-    cy.withCtx((ctx, { specs }) => {
-      expect(ctx.actions.project.launchProject).to.have.been.calledWith('e2e', undefined, RUN_ALL_SPECS_KEY)
+    cy.withCtx((ctx, { specs, runAllSpecsKey }) => {
+      expect(ctx.actions.project.launchProject).to.have.been.calledWith('e2e', undefined, runAllSpecsKey)
       expect(ctx.project.runAllSpecs).to.include.members(specs.map((spec) => spec.relative))
-    }, { specs: Object.values(ALL_SPECS) })
+    }, { specs: Object.values(ALL_SPECS), runAllSpecsKey: RUN_ALL_SPECS_KEY })
 
     cy.waitForSpecToFinish({ passCount: 4 })
 
