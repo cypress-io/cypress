@@ -232,7 +232,7 @@ export default function (Commands, Cypress, cy) {
         return sessions.setSessionData(testSession)
       }
 
-      function validateSession (existingSession, step: SESSION_STEPS) {
+      function validateSession (existingSession, step: keyof typeof SESSION_STEPS) {
         const isValidSession = true
 
         if (!existingSession.validate) {
