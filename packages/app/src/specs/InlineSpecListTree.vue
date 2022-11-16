@@ -60,17 +60,14 @@
 </template>
 
 <script setup lang="ts">
-import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
-import type { UseCollapsibleTreeNode } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
-import { buildSpecTree } from './spec-utils'
-import type { SpecTreeNode, FuzzyFoundSpec } from './spec-utils'
+import { UseCollapsibleTreeNode, useCollapsibleTree, SpecTreeNode, FuzzyFoundSpec, buildSpecTree } from './tree/useCollapsibleTree'
 import SpecFileItem from './SpecFileItem.vue'
 import { computed, watch, onMounted } from 'vue'
 import DirectoryItem from './DirectoryItem.vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useSpecStore } from '../store'
-import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
-import { useVirtualListNavigation } from '@packages/frontend-shared/src/composables/useVirtualListNavigation'
+import { useVirtualList } from './tree/useVirtualList'
+import { useVirtualListNavigation } from './tree/useVirtualListNavigation'
 import { useStudioStore } from '../store/studio-store'
 
 const props = defineProps<{
