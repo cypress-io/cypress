@@ -1,15 +1,22 @@
-export interface SpecListOptions {
+import fuzzysort from 'fuzzysort'
+
+type SearchFn<T extends BaseSpec> = (search: string, specs: T[]) => T[]
+
+export interface SpecListOptions<T extends BaseSpec> {
   /** either / for posix for \\ for windows */
   sep?: string
 
   /** string to filter by. */
   search?: string;
 
+  /** sera */
+  searchFn?: SearchFn<T>
+
   /** Relative paths for all collapsed directories */
   collapsedDirs: Set<string>;
 }
 
-export interface SpecTreeDirectoryNode<T extends { relative: string }> {
+export interface SpecTreeDirectoryNode<T extends BaseSpec> {
   name: string;
   type: "directory";
   relative: string;
@@ -22,16 +29,16 @@ export interface SpecTreeDirectoryNode<T extends { relative: string }> {
   collapsed: boolean;
 }
 
-export interface SpecTreeFileNode<T extends { relative: string }> {
+export interface SpecTreeFileNode<T extends BaseSpec> {
   type: "file";
   name: string;
   data: T;
   parent: SpecTreeDirectoryNode<T>;
 }
 
-export type SpecTreeNode<T extends { relative: string }> = SpecTreeFileNode<T> | SpecTreeDirectoryNode<T>;
+export type SpecTreeNode<T extends BaseSpec> = SpecTreeFileNode<T> | SpecTreeDirectoryNode<T>;
 
-type DirectoryMap<T extends { relative: string }> = Map<
+type DirectoryMap<T extends BaseSpec> = Map<
   string,
   { node: SpecTreeDirectoryNode<T> }
 >;
@@ -68,9 +75,38 @@ function isRootLevelSpec(path: string, name: string) {
   return path === name
 }
 
-export function deriveSpecTree<T extends { relative: string }>(
+export function basicSearch<T extends BaseSpec>(search: string, specs: T[]): T[]  {
+  return specs.filter((x) => x.relative.includes(search));
+}
+
+export function fuzzySortSpecs<T extends BaseSpec>(
+  search: string,
+  specs: T[]
+): T[] {
+  const fuzzySortResult = fuzzysort
+    .go(search, specs, {
+      keys: ["relative", "baseName"],
+      allowTypo: false,
+      threshold: -3000,
+    })
+    .map((result) => {
+      const [relative, baseName] = result;
+
+      return {
+        ...result.obj,
+        fuzzyIndexes: {
+          relative: relative?.indexes ?? [],
+          baseName: baseName?.indexes ?? [],
+        },
+      };
+    });
+
+  return fuzzySortResult;
+}
+
+export function deriveSpecTree<T extends BaseSpec>(
   allSpecs: T[],
-  options?: Partial<SpecListOptions>
+  options?: Partial<SpecListOptions<T>>
 ): {
   root: SpecTreeDirectoryNode<T>;
   map: DirectoryMap<T>;
@@ -78,8 +114,9 @@ export function deriveSpecTree<T extends { relative: string }>(
 
   const sep = options?.sep ?? "/";
   const search = options?.search ?? null;
+  const searchFn = options?.searchFn ?? basicSearch
   const specs = search
-    ? allSpecs.filter((x) => x.relative.includes(search))
+    ? searchFn(search, allSpecs)
     : allSpecs;
 
   const root: SpecTreeDirectoryNode<T> = {
@@ -207,24 +244,6 @@ export function deriveSpecTree<T extends { relative: string }>(
   return {
     root: rootNode,
     map,
-  };
-}
-
-export function createSpec (
-  p: string,
-  name: string
-) {
-  const prefix = p.length > 0 ? `${p}/` : ``;
-
-  return {
-    name: `${prefix}${name}.cy.ts`,
-    specType: "integration",
-    absolute: `/${prefix}${name}.cy.ts`,
-    baseName: name,
-    fileName: name,
-    specFileExtension: ".cy.ts",
-    fileExtension: ".ts",
-    relative: `${prefix}${name}.cy.ts`,
   };
 }
 

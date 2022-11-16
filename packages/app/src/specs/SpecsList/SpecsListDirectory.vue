@@ -7,6 +7,7 @@ import {
 import SpecsListFile from './SpecsListFile.vue'
 import IconFolder from '~icons/cy/folder_x16.svg'
 import type { DirectoryNode } from '../tree/types';
+import HighlightedText from '../HighlightedText.vue';
 
 const props = defineProps<{
   node: DirectoryNode
@@ -24,7 +25,9 @@ const grouped = computed(() => groupSpecTreeNodes(props.node));
 <template>
   <div :style="{ paddingLeft: `${(props.node.depth - 2) * 10}px` }" class="flex items-center">
     <button 
-      class="flex items-center"
+      class="h-full grid gap-8px grid-cols-[14px,16px,auto] items-center focus:outline-none"
+      :data-cy="`row-directory-depth-${props.node.depth}`"
+      :aria-expanded="!props.node.children"
       @click="emit('handleCollapse', props.node)"
     >
       <i-cy-chevron-down-small_x16
@@ -38,11 +41,23 @@ const grouped = computed(() => groupSpecTreeNodes(props.node));
         :is="IconFolder"
         class="icon-dark-white icon-light-gray-200"
       />
-      <span class="directory-name">{{ props.node.name }}</span>
 
-      <span class="text-gray-700 text-xs">
-        (Run {{ fileList.length }} specs)
-      </span>
+      <div
+        :title="props.node.name"
+        class="text-gray-600 truncate"
+      >
+        <HighlightedText
+          :text="props.node.name"
+          :indexes="[]"
+          class="font-medium"
+          highlight-classes="text-gray-1000"
+        />
+        <span class="text-gray-700 text-xs">
+          (Run {{ fileList.length }} specs)
+        </span>
+      </div>
+      <span class="sr-only">{{ !props.node.collapsed ? 'collapse' : 'expand' }}</span>
+
     </button>
   </div>
 
