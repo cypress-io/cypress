@@ -10,7 +10,7 @@ import type {
   SpecsListFragment,
   Specs_SpecsListFragment,
 } from "../generated/graphql";
-import { computed, reactive, ref } from "vue";
+import { computed, reactive, ref, toRef } from "vue";
 import SpecsListDirectory from "./SpecsList/SpecsListDirectory.vue";
 import { getPlatform } from "./tree/useCollapsibleTree";
 import SpecsListHeader from "./SpecsListHeader.vue";
@@ -18,6 +18,7 @@ import SpecsListTableHeader from "./SpecsList/SpecsListTableHeader.vue";
 import { useSpecFilter } from "../composables/useSpecFilter";
 import NoResults from "@cy/components/NoResults.vue";
 import { useI18n } from "@cy/i18n";
+import { useCloudSpecData } from "../composables/useCloudSpecData";
 
 const props = defineProps<{
   gql: Specs_SpecsListFragment;
@@ -42,6 +43,29 @@ const handleCollapse = (node: SpecTreeDirectoryNode<SpecsListFragment>) => {
     ]);
   }
 };
+
+const cloudProjectType = computed(() => props.gql.currentProject?.cloudProject?.__typename)
+
+const isProjectDisconnected = computed(() => props.gql.cloudViewer?.id === undefined || (cloudProjectType.value !== 'CloudProject'))
+const isOffline = ref(false)
+// TODO
+const mostRecentUpdateRef = ref(null) // toRef(props.gql, 'mostRecentUpdate')
+
+const specs = computed(() => {
+  const all = props.gql.currentProject?.specs.slice() ?? []
+  return all
+});
+
+const { refetchFailedCloudData } = useCloudSpecData(
+  isProjectDisconnected,
+  isOffline,
+  props.gql.currentProject?.projectId,
+  mostRecentUpdateRef,
+  specs,
+  // displayedSpecs,
+  specs.value,
+  // props.gql.currentProject?.specs as SpecsListFragment[] || [],
+)
 
 const projectConnectionStatus = computed<ProjectConnectionStatus>(() => {
   if (!props.gql.cloudViewer) return "LOGGED_OUT";
@@ -69,7 +93,6 @@ const projectConnectionStatus = computed<ProjectConnectionStatus>(() => {
   return "CONNECTED";
 });
 
-const specs = computed(() => props.gql.currentProject?.specs.slice() ?? []);
 
 const normalizedSearchValue = (str: string = "") =>
   getPlatform() === "win32" ? str.replaceAll("/", "\\") : str;
