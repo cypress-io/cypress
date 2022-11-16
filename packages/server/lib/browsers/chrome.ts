@@ -119,6 +119,10 @@ const DEFAULT_ARGS = [
   // write shared memory files into '/tmp' instead of '/dev/shm'
   // https://github.com/cypress-io/cypress/issues/5336
   '--disable-dev-shm-usage',
+
+  // Disable Optimization Guide Prediction models
+  // https://source.chromium.org/chromium/chromium/src/+/main:components/optimization_guide/core/optimization_guide_features.cc;l=85
+  `--disable-features='OptimizationGuideModelDownloading,OptimizationHintsFetching,OptimizationTargetPrediction,OptimizationHints'`,
 ]
 
 let browserCriClient: BrowserCriClient | undefined
@@ -443,7 +447,7 @@ const _handlePausedRequests = async (client) => {
 }
 
 const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
-  const cdpAutomation = await CdpAutomation.create(client.send, client.on, resetBrowserTargets, automation, !!options.experimentalSessionAndOrigin)
+  const cdpAutomation = await CdpAutomation.create(client.send, client.on, resetBrowserTargets, automation)
 
   automation.use(cdpAutomation)
 
@@ -636,10 +640,8 @@ export = {
 
     await this._navigateUsingCRI(pageCriClient, url)
 
-    if (options.experimentalSessionAndOrigin) {
-      await this._handlePausedRequests(pageCriClient)
-      _listenForFrameTreeChanges(pageCriClient)
-    }
+    await this._handlePausedRequests(pageCriClient)
+    _listenForFrameTreeChanges(pageCriClient)
 
     return cdpAutomation
   },
