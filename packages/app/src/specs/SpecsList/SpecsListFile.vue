@@ -2,16 +2,19 @@
 import { computed } from "vue";
 import type { RouteLocationRaw } from "vue-router";
 import type { SpecsListFragment } from "../../generated/graphql";
-import AverageDuration from "../AverageDuration.vue";
 import HighlightedText from "../HighlightedText.vue";
 import RunStatusDots from "../RunStatusDots.vue";
 import { deriveIndexes } from "../spec-utils";
 import SpecListGitInfo from "../SpecListGitInfo.vue";
 import type { SpecTreeFileNode } from "../tree/deriveTree";
 import { tableGridColumns } from "./constants";
+import type { ProjectConnectionStatus} from '../tree/types'
+import SpecsListHoverCell from "../SpecsListHoverCell.vue";
+import SpecsListCloudButton from "../SpecsListCloudButton.vue";
 
 const props = defineProps<{
   node: SpecTreeFileNode<SpecsListFragment>;
+  projectConnectionStatus: ProjectConnectionStatus;
 }>();
 
 const route: RouteLocationRaw = {
@@ -73,23 +76,26 @@ const split = computed(() => {
       :gql="props.node.data.gitInfo"
     />
 
-    <div class="h-full grid justify-items-end items-center relative">
-      <RunStatusDots
-        v-if="
-          props.node.data &&
-          (props.node.data.cloudSpec?.data ||
-            props.node.data.cloudSpec?.fetchingStatus !== 'FETCHING')
-        "
-        :gql="props.node.data.cloudSpec ?? null"
-        :spec-file-extension="props.node.data.specFileExtension"
-        :spec-file-name="props.node.data.fileName"
-      />
-      <div
-        v-else-if="props.node.data?.cloudSpec?.fetchingStatus === 'FETCHING'"
-        class="bg-gray-50 rounded-[20px] h-24px w-full animate-pulse"
-        data-cy="run-status-dots-loading"
-      />
-    </div>
-    <AverageDuration :gql="props.node.data.cloudSpec ?? null" />
+    <!-- latest -->
+    <SpecsListHoverCell
+      data-cy="specs-list-row-latest-runs"
+      :is-hover-disabled="props.projectConnectionStatus === 'CONNECTED'"
+    >
+      <template #content>
+        <slot name="latest-runs" />
+      </template>
+
+      <template #hover>
+        <slot name="connect-button" utmMedium="Specs Latest Runs Empty State" />
+        <SpecsListCloudButton 
+          :project-connection-status="props.projectConnectionStatus"
+        />
+      </template>
+
+    </SpecsListHoverCell>
+
+    <!-- average duration -->
+    <div>av</div>
+
   </RouterLink>
 </template>

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <!-- <div> -->
     <component
       :is="latestRun? Tooltip : 'div'"
       v-if="isRunsLoaded"
@@ -72,7 +72,7 @@
     >
       --
     </div>
-  </div>
+  <!-- </div> -->
 </template>
 
 <script setup lang="ts">

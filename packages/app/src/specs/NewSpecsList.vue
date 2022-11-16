@@ -5,6 +5,7 @@ import {
   getAllFileInDirectory,
 } from "./tree/deriveTree";
 import type { SpecListOptions, SpecTreeDirectoryNode } from "./tree/deriveTree";
+import type { ProjectConnectionStatus} from './tree/types'
 import type {
   SpecsListFragment,
   Specs_SpecsListFragment,
@@ -42,7 +43,7 @@ const handleCollapse = (node: SpecTreeDirectoryNode<SpecsListFragment>) => {
   }
 };
 
-const projectConnectionStatus = computed(() => {
+const projectConnectionStatus = computed<ProjectConnectionStatus>(() => {
   if (!props.gql.cloudViewer) return "LOGGED_OUT";
 
   if (!props.gql.currentProject?.cloudProject?.__typename)
@@ -117,6 +118,7 @@ const resultCount = computed(
     <SpecsListDirectory
       :node="tree.root"
       :onHandleCollapse="handleCollapse"
+      :project-connection-status="projectConnectionStatus"
     />
   </div>
   <NoResults
