@@ -19,10 +19,7 @@ const validateSetupSessionGroup = (isNewSession = true) => {
   cy.get('@setupSession').find('.command-expander').click()
   cy.get('@setupSession').find('.command-alias').contains('runSetup')
 
-  return cy.contains(groupText)
-  .closest('.command')
-  .find('.command-name-Clear-page')
-  .should('have.length', 1)
+  return cy.get('@setupSession')
 }
 
 describe('runner/cypress sessions.ui.spec', {
@@ -200,7 +197,7 @@ describe('runner/cypress sessions.ui.spec', {
         cy.contains('user1')
         cy.contains('restored')
 
-        cy.get('.command-name-Clear-page').should('have.length', 1)
+        cy.get('.command-name-Clear-page').should('have.length', 2)
 
         cy.contains('Restore saved session')
 
@@ -258,7 +255,7 @@ describe('runner/cypress sessions.ui.spec', {
         .find('.command-expander')
         .should('have.class', 'command-expander-is-open')
 
-        cy.get('.command-name-Clear-page').should('have.length', 2)
+        cy.get('.command-name-Clear-page').should('have.length', 3)
 
         validateSetupSessionGroup(false)
 
@@ -321,8 +318,6 @@ describe('runner/cypress sessions.ui.spec', {
         cy.get('.command-name-Clear-page').should('have.length', 2)
 
         validateSetupSessionGroup(false)
-        .parent()
-        .closest('.command')
         .next()
         .contains('Validate session')
         .closest('.command').as('secondValidateSession')
