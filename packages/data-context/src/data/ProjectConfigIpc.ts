@@ -1,7 +1,7 @@
 /* eslint-disable no-dupe-class-members */
 import { CypressError, getError } from '@packages/errors'
 import type { FullConfig, TestingType } from '@packages/types'
-import { ChildProcess, fork, ForkOptions } from 'child_process'
+import { ChildProcess, fork, ForkOptions, spawn } from 'child_process'
 import EventEmitter from 'events'
 import fs from 'fs-extra'
 import path from 'path'
@@ -308,6 +308,13 @@ export class ProjectConfigIpc extends EventEmitter {
       // Just use Node's built-in ESM support.
       // TODO: Consider using userland `esbuild` with Node's --loader API to handle ESM.
       debug(`no typescript found, just use regular Node.js`)
+    }
+
+    if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
+      return spawn(process.execPath, ['--entryPoint', CHILD_PROCESS_FILE_PATH, ...configProcessArgs], {
+        ...childOptions,
+        stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
+      })
     }
 
     return fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)

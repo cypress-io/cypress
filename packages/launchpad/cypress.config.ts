@@ -28,6 +28,7 @@ export default defineConfig({
     baseUrl: 'http://localhost:5555',
     supportFile: 'cypress/e2e/support/e2eSupport.ts',
     async setupNodeEvents (on, config) {
+      delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
       process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
       const { e2ePluginSetup } = require('@packages/frontend-shared/cypress/e2e/e2ePluginSetup')
 
