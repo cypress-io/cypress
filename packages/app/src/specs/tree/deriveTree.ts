@@ -1,5 +1,3 @@
-import type { FoundSpec } from "@packages/types/src";
-
 export interface SpecListOptions {
   /** either / for posix for \\ for windows */
   sep?: string
@@ -11,29 +9,32 @@ export interface SpecListOptions {
   collapsedDirs: Set<string>;
 }
 
-export interface SpecTreeDirectoryNode {
+export interface SpecTreeDirectoryNode<T extends { relative: string }> {
   name: string;
   type: "directory";
   relative: string;
-  parent: SpecTreeDirectoryNode | null;
+  parent: SpecTreeDirectoryNode<T> | null;
   /** This is technical derived data.
-   *  It's the count of parent.parent.parent... but we cache for perf. reasons. 
+   *  It's the count of parent.parent.parent... but we cache for perf. reasons.
    */
   depth: number;
-  children: Map<string, SpecTreeNode>;
+  children: Map<string, SpecTreeNode<T>>;
   collapsed: boolean;
 }
 
-export interface SpecTreeFileNode {
+export interface SpecTreeFileNode<T extends { relative: string }> {
   type: "file";
   name: string;
-  data: FoundSpec;
-  parent: SpecTreeDirectoryNode;
+  data: T;
+  parent: SpecTreeDirectoryNode<T>;
 }
 
-export type SpecTreeNode = SpecTreeFileNode | SpecTreeDirectoryNode;
+export type SpecTreeNode<T extends { relative: string }> = SpecTreeFileNode<T> | SpecTreeDirectoryNode<T>;
 
-type DirectoryMap = Map<string, { node: SpecTreeDirectoryNode }>;
+type DirectoryMap<T extends { relative: string }> = Map<
+  string,
+  { node: SpecTreeDirectoryNode<T> }
+>;
 
 function splitIntoParts(
   path: string,
@@ -50,13 +51,15 @@ function splitIntoParts(
   return { name, path: p };
 }
 
-export function filterFileNodes(node: SpecTreeNode): node is SpecTreeFileNode {
+type BaseSpec = { relative: string }
+
+export function filterFileNodes<T extends BaseSpec>(node: SpecTreeNode<T>): node is SpecTreeFileNode<T> {
   return node.type === "file";
 }
 
-export function filterDirectoryNodes(
-  node: SpecTreeNode
-): node is SpecTreeDirectoryNode {
+export function filterDirectoryNodes<T extends BaseSpec>(
+  node: SpecTreeNode<T>
+): node is SpecTreeDirectoryNode<T> {
   return node.type === "directory";
 }
 
@@ -65,12 +68,12 @@ function isRootLevelSpec(path: string, name: string) {
   return path === name
 }
 
-export function deriveSpecTree(
-  allSpecs: FoundSpec[],
+export function deriveSpecTree<T extends { relative: string }>(
+  allSpecs: T[],
   options?: Partial<SpecListOptions>
 ): {
-  root: SpecTreeDirectoryNode;
-  map: DirectoryMap;
+  root: SpecTreeDirectoryNode<T>;
+  map: DirectoryMap<T>;
 } {
 
   const sep = options?.sep ?? "/";
@@ -79,7 +82,7 @@ export function deriveSpecTree(
     ? allSpecs.filter((x) => x.relative.includes(search))
     : allSpecs;
 
-  const root: SpecTreeDirectoryNode = {
+  const root: SpecTreeDirectoryNode<T> = {
     type: "directory",
     relative: "/",
     name: "/",
@@ -90,8 +93,8 @@ export function deriveSpecTree(
   };
 
 
-  const map: DirectoryMap = new Map();
-  const dirNodes: Map<string, SpecTreeDirectoryNode> = new Map();
+  const map: DirectoryMap<T> = new Map();
+  const dirNodes: Map<string, SpecTreeDirectoryNode<T>> = new Map();
 
   map.set("/", { node: root });
   dirNodes.set("/", root);
@@ -133,12 +136,12 @@ export function deriveSpecTree(
       const parent = existing ?? root;
 
       let depth = 1
-      let p: SpecTreeDirectoryNode | null = parent
+      let p: SpecTreeDirectoryNode<T> | null = parent
       while (p = p.parent) {
         depth++
       }
 
-      const node: SpecTreeDirectoryNode = {
+      const node: SpecTreeDirectoryNode<T> = {
         type: "directory",
         relative: dirName,
         name: parts[i],
@@ -153,7 +156,7 @@ export function deriveSpecTree(
     }
   }
 
-  const recursivelyAssignDirectories = (node: SpecTreeDirectoryNode) => {
+  const recursivelyAssignDirectories = (node: SpecTreeDirectoryNode<T>) => {
     if (node.relative === 'cypress') {
     }
     if (node.parent) {
@@ -185,7 +188,7 @@ export function deriveSpecTree(
     }
 
     // Finally, add the spec to the correct directory.
-    const fileNode: SpecTreeFileNode = {
+    const fileNode: SpecTreeFileNode<T> = {
       name,
       type: "file",
       data: spec,
@@ -207,7 +210,10 @@ export function deriveSpecTree(
   };
 }
 
-export function createSpec(p: string, name: string): FoundSpec {
+export function createSpec (
+  p: string,
+  name: string
+) {
   const prefix = p.length > 0 ? `${p}/` : ``;
 
   return {
@@ -222,13 +228,13 @@ export function createSpec(p: string, name: string): FoundSpec {
   };
 }
 
-interface GroupedNodes {
-  files: SpecTreeFileNode[]
-  directories: SpecTreeDirectoryNode[]
+interface GroupedNodes<T extends {relative: string}> {
+  files: SpecTreeFileNode<T>[]
+  directories: SpecTreeDirectoryNode<T>[]
 }
 
-export function groupSpecTreeNodes (node: SpecTreeDirectoryNode): GroupedNodes {
-  return array(node.children).reduce<GroupedNodes>((acc, curr) => {
+export function groupSpecTreeNodes<T extends BaseSpec> (node: SpecTreeDirectoryNode<T>): GroupedNodes<T> {
+  return array(node.children).reduce<GroupedNodes<T>>((acc, curr) => {
     if (curr.type === 'file') {
       acc.files.push(curr)
     } else {
@@ -241,14 +247,14 @@ export function groupSpecTreeNodes (node: SpecTreeDirectoryNode): GroupedNodes {
   });
 }
 
-export function array<T>(list: Set<T> | Map<string, T>):T [] {
+export function array<T>(list: Set<T> | Map<string, T>): T[] {
   return Array.from(list.values());
 }
 
-export function getAllFileInDirectory(node: SpecTreeDirectoryNode): SpecTreeFileNode[] {
-  const files: SpecTreeFileNode[] = []
+export function getAllFileInDirectory<T extends BaseSpec>(node: SpecTreeDirectoryNode<T>): SpecTreeFileNode<T>[] {
+  const files: SpecTreeFileNode<T>[] = []
 
-  function walk (node: SpecTreeNode) {
+  function walk (node: SpecTreeNode<T>) {
     if (node.type === 'file') {
       files.push(node)
     } else {

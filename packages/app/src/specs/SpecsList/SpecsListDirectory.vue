@@ -3,17 +3,17 @@ import { computed } from 'vue';
 import {
   getAllFileInDirectory,
   groupSpecTreeNodes,
-  SpecTreeDirectoryNode
 } from '../tree/deriveTree';
 import SpecsListFile from './SpecsListFile.vue'
 import IconFolder from '~icons/cy/folder_x16.svg'
+import type { DirectoryNode } from '../tree/types';
 
 const props = defineProps<{
-  node: SpecTreeDirectoryNode
+  node: DirectoryNode
 }>()
 
 const emit = defineEmits<{
-  (event: 'handleCollapse', node: SpecTreeDirectoryNode): void
+  (event: 'handleCollapse', node: DirectoryNode): void
 }>()
 
 const fileList = computed(() => getAllFileInDirectory(props.node));
@@ -47,12 +47,16 @@ const grouped = computed(() => groupSpecTreeNodes(props.node));
   </div>
 
   <div v-if="!props.node.collapsed">
-    <SpecsListFile v-for="file of grouped.files" :node="file" :key="file.data.relative" />
+    <SpecsListFile 
+      v-for="file of grouped.files" 
+      :node="file" :key="file.data.relative" 
+    />
+
     <SpecsListDirectory 
       v-for="child of grouped.directories"
       :key="child.relative"
       :node="child" 
-      @handleCollapse="(node: SpecTreeDirectoryNode) => emit('handleCollapse', node)"
+      @handleCollapse="(node: DirectoryNode) => emit('handleCollapse', node)"
     />
   </div>
 </template>

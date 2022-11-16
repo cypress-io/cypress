@@ -5,7 +5,7 @@ import type {
   SpecTreeDirectoryNode,
   SpecTreeFileNode,
 } from "./tree/deriveTree";
-import type { Specs_SpecsListFragment } from "../generated/graphql";
+import type { SpecsListFragment, Specs_SpecsListFragment } from "../generated/graphql";
 import { computed, reactive } from "vue";
 import SpecsListDirectory from "./SpecsList/SpecsListDirectory.vue";
 
@@ -19,7 +19,7 @@ const opts = reactive<SpecListOptions>({
   collapsedDirs: new Set(),
 });
 
-const handleCollapse = (node: SpecTreeDirectoryNode) => {
+const handleCollapse = (node: SpecTreeDirectoryNode<SpecsListFragment>) => {
   const contained = opts.collapsedDirs.has(node.relative);
   if (contained) {
     opts.collapsedDirs = new Set(
