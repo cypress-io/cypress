@@ -31,7 +31,7 @@ const split = computed(() => {
 
 <template>
   <div
-    :style="{ paddingLeft: `${(node.parent.depth - 2) * 10 + 22}px` }"
+    :style="{ paddingLeft: `${(node.parent.depth + 1) * 10 + 22}px` }"
     class="flex"
   >
     <RouterLink

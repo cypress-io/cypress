@@ -20,10 +20,11 @@ const emit = defineEmits<{
 const fileList = computed(() => getAllFileInDirectory(props.node));
 
 const grouped = computed(() => groupSpecTreeNodes(props.node));
+console.log(props.node.name, props.node.depth)
 </script>
 
 <template>
-  <div :style="{ paddingLeft: `${(props.node.depth - 2) * 10}px` }" class="flex items-center">
+  <div :style="{ paddingLeft: `${(props.node.depth) * 10}px` }" class="flex items-center">
     <button 
       class="h-full grid gap-8px grid-cols-[14px,16px,auto] items-center focus:outline-none"
       :data-cy="`row-directory-depth-${props.node.depth}`"
