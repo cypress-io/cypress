@@ -281,7 +281,7 @@
       }
     },
     "login": {
-      "bodyInitial": "Logging in gives you access to the {0}. You can set up projects to be recorded and see test data from your project.",
+      "bodyInitial": "Logging in gives you access to {0}. You can set up projects to be recorded and see test data from your project.",
       "bodySuccess": "You are now logged in as {0}.",
       "bodyError": "An error occurred while attempting to log in:",
       "bodyBrowserError": "The browser could not be opened.",
