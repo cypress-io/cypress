@@ -671,12 +671,14 @@ declare namespace Cypress {
        * The default rules for network log filtering:
        * 1. Display all XHRs and fetch requests
        * 2. Display all requests matched by a `cy.intercept()` route
+       * @see https://on.cypress.io/network-logs
        */
       readonly defaultFilter: NetworkLogsFilterFn
       /**
        * Set custom filtering rules for network logs.
        * @default Cypress.NetworkLogs.defaultFilter
        * @param filterFn a function that returns true if the request should be logged and false otherwise
+       * @see https://on.cypress.io/network-logs
        */
       filter: NetworkLogsFilterFn
     }
