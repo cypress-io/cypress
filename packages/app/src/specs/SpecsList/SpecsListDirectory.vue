@@ -20,7 +20,6 @@ const emit = defineEmits<{
 const fileList = computed(() => getAllFileInDirectory(props.node));
 
 const grouped = computed(() => groupSpecTreeNodes(props.node));
-console.log(props.node.name, props.node.depth)
 </script>
 
 <template>

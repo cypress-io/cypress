@@ -1,13 +1,15 @@
 <script lang="ts" setup>
 import { deriveSpecTree, fuzzySortSpecs } from "./tree/deriveTree";
+import type { SpecListOptions, SpecTreeDirectoryNode } from "./tree/deriveTree";
 import type {
-  SpecListOptions,
-  SpecTreeDirectoryNode,
-} from "./tree/deriveTree";
-import type { SpecsListFragment, Specs_SpecsListFragment } from "../generated/graphql";
-import { computed, reactive } from "vue";
+  SpecsListFragment,
+  Specs_SpecsListFragment,
+} from "../generated/graphql";
+import { computed, reactive, ref } from "vue";
 import SpecsListDirectory from "./SpecsList/SpecsListDirectory.vue";
 import { getPlatform } from "./tree/useCollapsibleTree";
+import SpecsListHeader from "./SpecsListHeader.vue";
+import { useSpecFilter } from "../composables/useSpecFilter";
 
 const props = defineProps<{
   gql: Specs_SpecsListFragment;
@@ -15,9 +17,8 @@ const props = defineProps<{
 
 const opts = reactive<SpecListOptions<SpecsListFragment>>({
   sep: "/",
-  search: "",
   collapsedDirs: new Set(),
-  searchFn: fuzzySortSpecs
+  searchFn: fuzzySortSpecs,
 });
 
 const handleCollapse = (node: SpecTreeDirectoryNode<SpecsListFragment>) => {
@@ -34,22 +35,46 @@ const handleCollapse = (node: SpecTreeDirectoryNode<SpecsListFragment>) => {
   }
 };
 
-const specs = computed(() => props.gql.currentProject?.specs.slice() ?? [])
+const specs = computed(() => props.gql.currentProject?.specs.slice() ?? []);
 
-const normalizedSearchValue = (str: string = '') => getPlatform() === 'win32' ? str.replaceAll('/', '\\') : str
+const normalizedSearchValue = (str: string = "") =>
+  getPlatform() === "win32" ? str.replaceAll("/", "\\") : str;
 
 const tree = computed(() => {
-  return deriveSpecTree(specs.value, {...opts, search: normalizedSearchValue(opts.search) });
+  return deriveSpecTree(specs.value, {
+    ...opts,
+    search: normalizedSearchValue(debouncedSpecFilterModel.value),
+  });
 });
+
+const { debouncedSpecFilterModel, specFilterModel } = useSpecFilter(
+  props.gql.currentProject?.savedState?.specFilter
+);
+
+const specsListInputRef = ref<HTMLInputElement>();
+
+const specsListInputRefFn = () => specsListInputRef;
+
+function handleClear() {
+  specFilterModel.value = "";
+  specsListInputRef.value?.focus();
+}
 </script>
 
 <template>
+  <SpecsListHeader
+    v-model="specFilterModel"
+    :specs-list-input-ref-fn="specsListInputRefFn"
+    class="pb-32px"
+    :result-count="specs.length"
+    :spec-count="12"
+  />
+  <!-- @show-create-spec-modal="emit('showCreateSpecModal')"
+    @show-spec-pattern-modal="showSpecPatternModal = true" -->
   <input v-model="opts.search" placeholder="Search..." />
-  <div class="divide-y-1 border-gray-50 border-y-1 children:border-gray-50 children:h-40px">
-    <SpecsListDirectory
-      :node="tree.root"
-      :onHandleCollapse="handleCollapse" 
-    />
+  <div
+    class="divide-y-1 border-gray-50 border-y-1 children:border-gray-50 children:h-40px"
+  >
+    <SpecsListDirectory :node="tree.root" :onHandleCollapse="handleCollapse" />
   </div>
-
 </template>
