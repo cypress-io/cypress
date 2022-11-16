@@ -9,6 +9,7 @@ import { computed, reactive, ref } from "vue";
 import SpecsListDirectory from "./SpecsList/SpecsListDirectory.vue";
 import { getPlatform } from "./tree/useCollapsibleTree";
 import SpecsListHeader from "./SpecsListHeader.vue";
+import SpecsListTableHeader from "./SpecsList/SpecsListTableHeader.vue";
 import { useSpecFilter } from "../composables/useSpecFilter";
 
 const props = defineProps<{
@@ -71,6 +72,10 @@ const resultCount = computed(() => getAllFileInDirectory(tree.value.root).length
     class="pb-32px"
     :result-count="resultCount"
     :spec-count="specs.length"
+  />
+  <SpecsListTableHeader 
+    v-if="specs.length"
+    :gql="props.gql"
   />
   <!-- @show-create-spec-modal="emit('showCreateSpecModal')"
     @show-spec-pattern-modal="showSpecPatternModal = true" -->
