@@ -352,11 +352,13 @@ describe('lib/cypress', () => {
 
     describe('cloud recommendation message', () => {
       it('gets logged when in CI and there is a failure', function () {
+        const relativePath = path.relative(cwd(), this.todosPath)
+
         sinon.stub(ciProvider, 'getIsCi').returns(true)
         delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
 
-        return cypress.start([`--run-project=${this.todosPath}`]).then(() => {
+        return cypress.start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test1.js`]).then(() => {
           expect(console.log).to.be.calledWith(gray(cloudRecommendationMessage))
 
           snapshotConsoleLogs('CLOUD_RECOMMENDATION_MESSAGE')
@@ -364,31 +366,37 @@ describe('lib/cypress', () => {
       })
 
       it('does not get logged if CYPRESS_COMMERCIAL_RECOMMENDATIONS is set to 0', function () {
+        const relativePath = path.relative(cwd(), this.todosPath)
+
         sinon.stub(ciProvider, 'getIsCi').returns(true)
         process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS = '0'
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
 
-        return cypress.start([`--run-project=${this.todosPath}`]).then(() => {
+        return cypress.start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test1.js`]).then(() => {
           expect(console.log).not.to.be.calledWith(gray(cloudRecommendationMessage))
         })
       })
 
       it('does not get logged if all tests pass', function () {
+        const relativePath = path.relative(cwd(), this.todosPath)
+
         sinon.stub(ciProvider, 'getIsCi').returns(true)
         delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 0 } }
 
-        return cypress.start([`--run-project=${this.todosPath}`]).then(() => {
+        return cypress.start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test1.js`]).then(() => {
           expect(console.log).not.to.be.calledWith(gray(cloudRecommendationMessage))
         })
       })
 
       it('does not get logged if not running in CI', function () {
+        const relativePath = path.relative(cwd(), this.todosPath)
+
         sinon.stub(ciProvider, 'getIsCi').returns(undefined)
         delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
 
-        return cypress.start([`--run-project=${this.todosPath}`]).then(() => {
+        return cypress.start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test1.js`]).then(() => {
           expect(console.log).not.to.be.calledWith(gray(cloudRecommendationMessage))
         })
       })
