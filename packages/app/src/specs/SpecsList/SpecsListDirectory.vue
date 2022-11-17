@@ -12,28 +12,32 @@ const props = defineProps<{
   node: DirectoryNode
   projectConnectionStatus: ProjectConnectionStatus
   projectId?: string
+  handleCollapse: (node: DirectoryNode) => void
 }>()
 
-const emit = defineEmits<{
-  (event: 'handleCollapse', node: DirectoryNode): void
-}>()
+// const emit = defineEmits<{
+// (event: 'handleCollapse', node: DirectoryNode): void
+// }>()
 
 const fileList = computed(() => getAllFileInDirectory(props.node))
 
 const grouped = computed(() => groupSpecTreeNodes(props.node))
+
+const isRootNode = computed(() => props.node.depth === 0)
 </script>
 
 <template>
   <div
     :style="{ paddingLeft: `${props.node.depth - 1 * 10}px` }"
     class="flex items-center"
-    :class="{ 'hidden-node': props.node.depth === 0 }"
+    :data-cy="isRootNode ? '' : 'spec-list-directory'"
+    :class="{ 'hidden-node': isRootNode }"
   >
     <button
       class="h-full grid gap-8px grid-cols-[14px,16px,auto] items-center focus:outline-none"
       :data-cy="`row-directory-depth-${props.node.depth}`"
-      :aria-expanded="!props.node.children"
-      @click="emit('handleCollapse', props.node)"
+      :aria-expanded="!props.node.collapsed"
+      @click="props.handleCollapse(props.node)"
     >
       <i-cy-chevron-down-small_x16
         class="mr-8px text-sm icon-dark-gray-300 group-hocus:(icon-dark-gray-700)"
@@ -101,7 +105,7 @@ const grouped = computed(() => groupSpecTreeNodes(props.node))
       :key="child.relative"
       :node="child"
       :project-connection-status="props.projectConnectionStatus"
-      @handleCollapse="(node: DirectoryNode) => emit('handleCollapse', node)"
+      :handle-collapse="(node: DirectoryNode) => props.handleCollapse(node)"
     />
   </template>
 </template>

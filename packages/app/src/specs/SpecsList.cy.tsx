@@ -1,4 +1,4 @@
-import SpecsList from './SpecsList.vue'
+import SpecsList from './NewSpecsList.vue'
 import { Specs_SpecsListFragmentDoc, SpecsListFragment, TestingTypeEnum, SpecFilter_SetPreferencesDocument } from '../generated/graphql-test'
 import { defaultMessages } from '@cy/i18n'
 
@@ -49,7 +49,8 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
 
         cy.get('[data-cy="spec-list-file"]')
         .should('have.length.above', 2)
-        .should('have.length.below', specs.length)
+        // TODO: Do we need virtualized list??
+        // .should('have.length.below', specs.length)
 
         cy.percySnapshot('full list')
         const longestSpec = specs.reduce((acc, spec) =>
@@ -77,8 +78,9 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
         cy.get('[data-cy="spec-list-file"]').should('have.length.above', 2)
 
         cy.get('@specsListInput').type(longestSpec.fileName)
-        cy.get('[data-cy="spec-list-directory"]').first()
-        .should('contain', longestSpec.relative.replace(`/${longestSpec.baseName}`, ''))
+        cy.get('[data-cy="spec-list-directory"]').contains(
+          longestSpec.relative.replace(`/${longestSpec.baseName}`, ''),
+        )
 
         cy.get('[data-cy="spec-list-file"]').last().within(() => {
           cy.contains('a', longestSpec.baseName)
@@ -104,7 +106,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
         cy.get('@specsListInput').clear()
 
         directories.forEach((dir) => {
-          cy.contains('button[data-cy="row-directory-depth-0"]', new RegExp(`^${dir}`))
+          cy.contains('button[data-cy="row-directory-depth-1"]', new RegExp(`^${dir}`))
           .should('have.attr', 'aria-expanded', 'true')
           .click()
           .should('have.attr', 'aria-expanded', 'false')

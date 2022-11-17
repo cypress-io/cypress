@@ -63,9 +63,7 @@ const showSpecPatternModal = ref(false)
 const mostRecentUpdateRef = ref(null) // toRef(props.gql, 'mostRecentUpdate')
 
 const specs = computed(() => {
-  const all = props.gql.currentProject?.specs.slice() ?? []
-
-  return all
+  return props.gql.currentProject?.specs.slice() ?? []
 })
 
 const { refetchFailedCloudData } = useCloudSpecData(
@@ -186,13 +184,13 @@ const resultCount = computed(
     >
       <SpecsListDirectory
         :node="tree.root"
-        :on-handle-collapse="handleCollapse"
+        :handle-collapse="handleCollapse"
         :project-connection-status="projectConnectionStatus"
         :project-id="props.gql.currentProject?.projectId ?? undefined"
       />
     </div>
     <NoResults
-      v-show="!specs.length"
+      v-show="resultCount === 0"
       :search-term="specFilterModel"
       :message="t('specPage.noResultsMessage')"
       class="mt-56px"
