@@ -4,7 +4,7 @@ import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
 
 describe('<DebugResults />', () => {
   it('mounts with default values', () => {
-    cy.mount(<DebugResults/>)
+    cy.mount(() => (<DebugResults/>))
     cy.get('[data-cy=debug-results-holder]').then((items) => {
       cy.get(`[title=${defaultMessages.runs.results.passed}]`).should('contain.text', 1)
       cy.get(`[title=${defaultMessages.runs.results.failed}]`).should('contain.text', 7)

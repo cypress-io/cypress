@@ -15,7 +15,7 @@ describe('<DebugPageHeader />', {
 },
 () => {
   it('displays all default values', () => {
-    cy.mount(<DebugPageHeader/>)
+    cy.mount(() => (<DebugPageHeader/>))
     cy.get('[data-cy=debug-header-3]').children().should('have.length', 2)
     cy.get('[data-cy=debug-test-summary]')
     .should('have.css', 'color', 'rgb(46, 50, 71)')
