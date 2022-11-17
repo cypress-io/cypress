@@ -4,7 +4,7 @@
     class="flex flex-col pb-24px gap-16px"
   >
     <div
-      :data-cy="`debug-header-${defaults.id}`"
+      :data-cy="`debug-header-${debug.id}`"
       class="grid px-24px w-full overflow-hidden flex items-center border gap-y-2 py-24px"
     >
       <ul
@@ -12,14 +12,14 @@
         class="flex self-stretch items-center gap-x-2 flex-row whitespace-nowrap"
       >
         <li
-          v-if="defaults.commitInfo.summary"
+          v-if="debug?.commitInfo?.summary"
           class="font-medium text-lg text-gray-900"
           data-cy="debug-test-summary"
         >
-          {{ defaults.commitInfo.summary }}
+          {{ debug.commitInfo.summary }}
         </li>
         <div
-          v-if="defaults.commitInfo.runNumber && commitsAhead"
+          v-if="defaultscommitInfo.runNumber && commitsAhead"
           class="border rounded border-gray-100 items-center text-sm h-6"
           data-cy="debug-runCommit-info"
         >
@@ -27,7 +27,7 @@
             class="font-medium text-gray-700 border-r-1px px-2 mx-px items-center"
             data-cy="debug-runNumber"
           >
-            {{ defaults.commitInfo.runNumber }}
+            {{ defaultscommitInfo.runNumber }}
           </span>
           <span
             class="font-normal text-orange-500 px-2 mx-px items-center"
@@ -42,7 +42,7 @@
         <li class="font-normal text-sm text-indigo-500">
           <ExternalLink
             :data-cy="'debug-header-dashboard-link'"
-            :href="defaults.url || '#'"
+            :href="debug.url || '#'"
             :use-default-hocus="false"
           >
             <span class="sr-only">Dashboard Link:</span> View in the dashboard
@@ -61,33 +61,33 @@
           />
         </li>
         <li
-          v-if="defaults.commitInfo.branch"
+          v-if="debug?.commitInfo?.branch"
           data-cy="debug-header-branch"
         >
           <i-cy-tech-branch-h_x16 class="mr-1 icon-dark-gray-300 mr-9px" />
-          <span class="sr-only">Branch Name:</span> {{ defaults.commitInfo.branch }}
+          <span class="sr-only">Branch Name:</span> {{ debug.commitInfo.branch }}
         </li>
         <li
-          v-if="defaults.commitInfo.commitHash"
+          v-if="defaultscommitInfo.commitHash"
           data-cy="debug-header-commitHash"
         >
           <CommitIcon
             class="fill-white h-16px w-16px mr-11px"
           />
-          <span class="sr-only">Commit Hash:</span> {{ defaults.commitInfo.commitHash }}
+          <span class="sr-only">Commit Hash:</span> {{ defaultscommitInfo.commitHash }}
         </li>
         <li
-          v-if="defaults.commitInfo.authorName"
+          v-if="debug?.commitInfo?.authorName"
           data-cy="debug-header-author"
         >
           <i-cy-general-user_x16
             class="mr-1 icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200 mr-11px"
             data-cy="debug-header-avatar"
           />
-          <span class="sr-only">Commit Author:</span> {{ defaults.commitInfo.authorName }}
+          <span class="sr-only">Commit Author:</span> {{ debug.commitInfo.authorName }}
         </li>
         <li
-          v-if="defaults.createdAt"
+          v-if="debug.createdAt"
           data-cy="debug-header-createdAt"
         >
           <IconTimeStopwatch
@@ -96,7 +96,7 @@
             stroke-color="gray-500"
             fill-color="gray-50"
           />
-          <span class="sr-only">Run Total Duration:</span> {{ defaults.totalDuration }} {{ defaults.createdAt }}
+          <span class="sr-only">Run Total Duration:</span> {{ debug.totalDuration }} ({{ relativeCreatedAt }})
         </li>
       </ul>
     </div>
@@ -106,10 +106,11 @@
 import { computed } from 'vue'
 import DebugResults from './DebugResults.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
-import type { DebugPageFragment } from '../generated/graphql' // This will change to DebugCardFragment
+import type { DebugPageFragment } from '../generated/graphql'
 import CommitIcon from '~icons/cy/commit_x14'
 import { IconTimeStopwatch } from '@cypress-design/vue-icon'
 import { gql } from '@urql/core'
+import { dayjs } from '../runs/utils/day.js'
 
 interface DefaultcommitInfoTypes {
   authorName: string
@@ -129,6 +130,7 @@ interface DefaultTypes {
 }
 
 // the query below will also be updated to fetch debug page information
+// runNumber and commitHash dont exist in the query and should be queried
 gql`
 fragment DebugPage on CloudRun {
 	id
@@ -152,11 +154,9 @@ fragment DebugPage on CloudRun {
 
 const props = defineProps<{
   gql: DebugPageFragment
-  defaults: DefaultTypes
 }>()
 
-// These default values are temporary.
-// They will be replaced by the results of the query
+// These default values exist in case no values are returned by the query
 const defaultscommitInfo: DefaultcommitInfoTypes = {
   authorName: 'ankithmehta',
   branch: 'feature/DESIGN-183',
@@ -167,29 +167,25 @@ const defaultscommitInfo: DefaultcommitInfoTypes = {
 
 const defaultValues: DefaultTypes = {
   id: '3',
-  createdAt: '(43m ago)',
+  createdAt: '2022-11-14T14:41:23.078Z',
   totalDuration: '10m 30s',
   url: 'cloud.cypress.io',
   authorEmail: 'hello@cypress.io',
   commitInfo: defaultscommitInfo,
 }
 
-const defaults = computed(() => {
-  if (props.defaults) {
-    return props.defaults
+const debug = computed(() => {
+  if (props.gql) {
+    return props.gql
   }
 
   return defaultValues
 })
 
-// debug will be used instead of defaults above when the query returns something
-// const debug = computed(() =>  props.gql)
+const relativeCreatedAt = computed(() => dayjs(new Date(debug.value.createdAt!)).fromNow())
 
 // We need a function to calculate the commits ahead property
 const commitsAhead = computed(() => 'You are 2 commits ahead')
-
-// add tests
-// remove the top margin for the whole component
 
 </script>
 <style scoped>

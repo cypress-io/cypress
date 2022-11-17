@@ -1,10 +1,13 @@
 <template>
-  <div class="flex gap-8px items-center">
+  <div
+    class="flex gap-8px items-center"
+    data-cy="debug-results-holder"
+  >
     <ResultCounts
-      :total-passed="1"
-      :total-failed="7"
-      :total-skipped="6"
-      :total-pending="6"
+      :total-passed="results.totalPassed"
+      :total-failed="results.totalFailed"
+      :total-skipped="results.totalSkipped"
+      :total-pending="results.totalPending"
       :order="['PASSED', 'FAILED', 'SKIPPED', 'PENDING']"
     >
       <template #prefix>
@@ -14,6 +17,7 @@
           <component
             :is="FailedSolidIcon"
             class="h-16px w-16px pr-2"
+            data-cy="failed-prefix"
           />
           Failed
         </div>
@@ -23,7 +27,8 @@
 </template>
 
 <script lang="ts" setup>
-// import type { DebugResultsFragment } from '../generated/graphql'
+import { computed } from 'vue'
+import type { DebugResultsFragment } from '../generated/graphql'
 import { gql } from '@urql/core'
 import FailedSolidIcon from '~icons/cy/status-failed-solid_x24.svg'
 import ResultCounts from '@packages/frontend-shared/src/components/ResultCounts.vue'
@@ -39,8 +44,24 @@ fragment DebugResults on CloudRun {
   totalFlakyTests
 }
 `
-// const props = defineProps<{
-//   gql: DebugResultsFragment
-// }>()
+
+const props = defineProps<{
+  gql: DebugResultsFragment
+}>()
+
+const defaultResults = {
+  totalPassed: 1,
+  totalFailed: 7,
+  totalSkipped: 6,
+  totalPending: 6,
+}
+
+const results = computed(() => {
+  if (props.gql) {
+    return props.gql
+  }
+
+  return defaultResults
+})
 
 </script>
