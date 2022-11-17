@@ -15,14 +15,13 @@ describe('initial', () => {
 
 describe('session', () => {
   it('works', () => {
-    throw new Error()
-    // getContainerEl()!.innerHTML = session()
+    getContainerEl()!.innerHTML = session()
 
-    // cy.get('[data-cy="cypress-logo"]')
-    // cy.get('[data-cy="text"]').should('have.text', 'Default blank page')
-    // cy.get('[data-cy="subtext"]').should('have.text', 'This page was cleared by navigating to about:blank.')
+    cy.get('[data-cy="cypress-logo"]')
+    cy.get('[data-cy="text"]').should('have.text', 'Default blank page')
+    cy.get('[data-cy="subtext"]').should('have.text', 'This page was cleared by navigating to about:blank.')
 
-    // cy.percySnapshot()
+    cy.percySnapshot()
   })
 
   it('works with small viewport', () => {
