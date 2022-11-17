@@ -57,7 +57,7 @@ export function useCachedSpecs<S extends { absolute: string }> (
 //      extensionIndexes: [1,2,4,5,6] // indexes to highlight in ".cy.tsx"
 //    }
 export function deriveIndexes (fileName: string, indexes: number[]) {
-  return indexes.reduce<{ fileNameIndexes: number[]; extensionIndexes: number[] }>((acc, idx) => {
+  return indexes.reduce<{ fileNameIndexes: number[], extensionIndexes: number[] }>((acc, idx) => {
     if (idx < fileName.length) {
       acc.fileNameIndexes.push(idx)
     } else {

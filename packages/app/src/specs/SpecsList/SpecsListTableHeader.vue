@@ -1,29 +1,29 @@
 <script lang="ts" setup>
-import { useI18n } from "@cy/i18n";
-import { useLoginConnectStore } from "@packages/frontend-shared/src/store/login-connect-store";
-import { computed } from "vue";
-import type { Specs_SpecsListFragment } from "../../generated/graphql";
-import { tableGridColumns } from "./constants";
-import LastUpdatedHeader from "../LastUpdatedHeader.vue";
-import SpecHeaderCloudDataTooltip from "../SpecHeaderCloudDataTooltip.vue";
+import { useI18n } from '@cy/i18n'
+import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { computed } from 'vue'
+import type { Specs_SpecsListFragment } from '../../generated/graphql'
+import { tableGridColumns } from './constants'
+import LastUpdatedHeader from '../LastUpdatedHeader.vue'
+import SpecHeaderCloudDataTooltip from '../SpecHeaderCloudDataTooltip.vue'
 
 const props = defineProps<{
-  gql: Specs_SpecsListFragment;
-}>();
+  gql: Specs_SpecsListFragment
+}>()
 
 const isGitAvailable = computed(() => {
   return !(
     props.gql.currentProject?.specs.some(
-      (s) => s.gitInfo?.statusType === "noGitInfo"
+      (s) => s.gitInfo?.statusType === 'noGitInfo',
     ) ?? false
-  );
-});
+  )
+})
 
-const { t } = useI18n();
-const { openLoginConnectModal } = useLoginConnectStore();
+const { t } = useI18n()
+const { openLoginConnectModal } = useLoginConnectStore()
 
 // TODO: Do we need this at all
-const scrollbarOffset = 0;
+const scrollbarOffset = 0
 </script>
 
 <template>
