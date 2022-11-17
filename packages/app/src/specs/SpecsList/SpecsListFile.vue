@@ -37,7 +37,7 @@ const requestAccess = useRequestAccess()
 const indexes = computed(() => {
   const idx = deriveIndexes(
     props.node.data.fileName,
-    props.node.data.fuzzyIndexes.baseName ?? []
+    props.node.data.fuzzyIndexes?.baseName ?? []
   );
   return idx;
 });

@@ -5,7 +5,7 @@ import {
   getAllFileInDirectory,
 } from "./tree/deriveTree";
 import type { SpecListOptions, SpecTreeDirectoryNode } from "./tree/deriveTree";
-import type { ProjectConnectionStatus} from './tree/types'
+import type { ProjectConnectionStatus } from "./tree/types";
 import type {
   SpecsListFragment,
   Specs_SpecsListFragment,
@@ -19,6 +19,9 @@ import { useSpecFilter } from "../composables/useSpecFilter";
 import NoResults from "@cy/components/NoResults.vue";
 import { useI18n } from "@cy/i18n";
 import { useCloudSpecData } from "../composables/useCloudSpecData";
+import SpecsListBanners from "./SpecsListBanners.vue";
+import { useRoute } from "vue-router";
+import SpecPatternModal from "../components/SpecPatternModal.vue";
 
 const props = defineProps<{
   gql: Specs_SpecsListFragment;
@@ -44,16 +47,22 @@ const handleCollapse = (node: SpecTreeDirectoryNode<SpecsListFragment>) => {
   }
 };
 
-const cloudProjectType = computed(() => props.gql.currentProject?.cloudProject?.__typename)
+const cloudProjectType = computed(
+  () => props.gql.currentProject?.cloudProject?.__typename
+);
 
-const isProjectDisconnected = computed(() => props.gql.cloudViewer?.id === undefined || (cloudProjectType.value !== 'CloudProject'))
-const isOffline = ref(false)
-// TODO
-const mostRecentUpdateRef = ref(null) // toRef(props.gql, 'mostRecentUpdate')
+const isProjectDisconnected = computed(
+  () =>
+    props.gql.cloudViewer?.id === undefined ||
+    cloudProjectType.value !== "CloudProject"
+);
+const isOffline = ref(false);
+const showSpecPatternModal = ref(false)
+const mostRecentUpdateRef = ref(null); // toRef(props.gql, 'mostRecentUpdate')
 
 const specs = computed(() => {
-  const all = props.gql.currentProject?.specs.slice() ?? []
-  return all
+  const all = props.gql.currentProject?.specs.slice() ?? [];
+  return all;
 });
 
 const { refetchFailedCloudData } = useCloudSpecData(
@@ -63,9 +72,9 @@ const { refetchFailedCloudData } = useCloudSpecData(
   mostRecentUpdateRef,
   specs,
   // displayedSpecs,
-  specs.value,
+  specs.value
   // props.gql.currentProject?.specs as SpecsListFragment[] || [],
-)
+);
 
 const projectConnectionStatus = computed<ProjectConnectionStatus>(() => {
   if (!props.gql.cloudViewer) return "LOGGED_OUT";
@@ -93,7 +102,6 @@ const projectConnectionStatus = computed<ProjectConnectionStatus>(() => {
   return "CONNECTED";
 });
 
-
 const normalizedSearchValue = (str: string = "") =>
   getPlatform() === "win32" ? str.replaceAll("/", "\\") : str;
 
@@ -110,6 +118,15 @@ const { debouncedSpecFilterModel, specFilterModel } = useSpecFilter(
 
 const specsListInputRef = ref<HTMLInputElement>();
 
+const route = useRoute()
+
+const isSpecNotFound = ref(!!route.params?.unrunnable)
+const shouldShowFetchError = ref(false)
+
+const hasRequestedAccess = computed(() => {
+  return projectConnectionStatus.value === 'ACCESS_REQUESTED'
+})
+
 const specsListInputRefFn = () => specsListInputRef;
 
 function handleClear() {
@@ -125,31 +142,52 @@ const resultCount = computed(
 </script>
 
 <template>
-  <SpecsListHeader
-    v-model="specFilterModel"
-    :specs-list-input-ref-fn="specsListInputRefFn"
-    class="pb-32px"
-    :result-count="resultCount"
-    :spec-count="specs.length"
-  />
-  <SpecsListTableHeader v-if="specs.length" :gql="props.gql" />
-  <!-- @show-create-spec-modal="emit('showCreateSpecModal')"
+  <div class="p-24px spec-container">
+    <SpecsListBanners
+      :gql="props.gql"
+      :is-spec-not-found="isSpecNotFound"
+      :is-offline="isOffline"
+      :is-fetch-error="shouldShowFetchError"
+      :is-project-not-found="cloudProjectType === 'CloudProjectNotFound'"
+      :is-project-unauthorized="cloudProjectType === 'CloudProjectUnauthorized'"
+      :has-requested-access="hasRequestedAccess"
+      @refetch-failed-cloud-data="refetchFailedCloudData"
+    />
+
+    <SpecsListHeader
+      v-model="specFilterModel"
+      :specs-list-input-ref-fn="specsListInputRefFn"
+      class="pb-32px"
+      :result-count="resultCount"
+      :spec-count="specs.length"
+    />
+
+    <SpecPatternModal
+      v-if="props.gql.currentProject"
+      :show="showSpecPatternModal"
+      :gql="props.gql.currentProject"
+      @close="showSpecPatternModal = false"
+    />
+
+    <SpecsListTableHeader v-if="specs.length" :gql="props.gql" />
+    <!-- @show-create-spec-modal="emit('showCreateSpecModal')"
     @show-spec-pattern-modal="showSpecPatternModal = true" -->
-  <div
-    class="divide-y-1 border-gray-50 border-y-1 children:border-gray-50 children:h-40px"
-  >
-    <SpecsListDirectory
-      :node="tree.root"
-      :onHandleCollapse="handleCollapse"
-      :project-connection-status="projectConnectionStatus"
-      :project-id="props.gql.currentProject?.projectId ?? undefined"
+    <div
+      class="divide-y-1 border-gray-50 border-y-1 children:border-gray-50 children:h-40px"
+    >
+      <SpecsListDirectory
+        :node="tree.root"
+        :onHandleCollapse="handleCollapse"
+        :project-connection-status="projectConnectionStatus"
+        :project-id="props.gql.currentProject?.projectId ?? undefined"
+      />
+    </div>
+    <NoResults
+      v-show="!specs.length"
+      :search-term="specFilterModel"
+      :message="t('specPage.noResultsMessage')"
+      class="mt-56px"
+      @clear="handleClear"
     />
   </div>
-  <NoResults
-    v-show="!specs.length"
-    :search-term="specFilterModel"
-    :message="t('specPage.noResultsMessage')"
-    class="mt-56px"
-    @clear="handleClear"
-  />
 </template>

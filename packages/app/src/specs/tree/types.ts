@@ -12,7 +12,7 @@ export type ProjectConnectionStatus =
   | "CONNECTED";
 
 export interface FuzzyIndexes {
-  fuzzyIndexes: {
+  fuzzyIndexes?: {
     relative: number[];
     baseName: number[];
   };
