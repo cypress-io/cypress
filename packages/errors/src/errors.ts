@@ -1116,6 +1116,21 @@ export const AllCypressErrors = {
 
         If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/studio-beta`
   },
+  EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY: () => {
+    const code = errPartial`
+    {
+      e2e: {
+        experimentalRunAllSpecs: true
+      },
+    }`
+
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalRunAllSpecs`)} experiment is currently only supported for End to End Testing and must be configured as an e2e testing type property: ${fmt.highlightSecondary(`e2e.experimentalRunAllSpecs`)}.
+
+        ${fmt.code(code)}
+
+        If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/run-all-specs`
+  },
   FIREFOX_GC_INTERVAL_REMOVED: () => {
     return errTemplate`\
         The ${fmt.highlight(`firefoxGcInterval`)} configuration option was removed in ${fmt.cypressVersion(`8.0.0`)}. It was introduced to work around a bug in Firefox 79 and below.

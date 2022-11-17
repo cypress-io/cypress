@@ -111,8 +111,10 @@
               :depth="row.data.depth - 2"
               :style="{ paddingLeft: `${(row.data.depth - 2) * 10}px` }"
               :indexes="row.data.highlightIndexes"
+              :is-run-all-specs-allowed="isRunAllSpecsAllowed"
               :aria-controls="getIdIfDirectory(row)"
               @click.stop="row.data.toggle"
+              @runAllSpecs="onRunAllSpecs(row.data.id)"
             />
           </template>
 
@@ -198,6 +200,7 @@ import { useCloudSpecData } from '../composables/useCloudSpecData'
 import { useSpecFilter } from '../composables/useSpecFilter'
 import { useRequestAccess } from '../composables/useRequestAccess'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { useRunAllSpecs } from '../composables/useRunAllSpecs'
 
 const { openLoginConnectModal } = useLoginConnectStore()
 
@@ -416,6 +419,20 @@ const { refetchFailedCloudData } = useCloudSpecData(
   displayedSpecs,
   props.gql.currentProject?.specs as SpecsListFragment[] || [],
 )
+
+const { runAllSpecs, isRunAllSpecsAllowed } = useRunAllSpecs()
+
+function onRunAllSpecs (directory: string) {
+  const filteredSpecs = treeSpecList.value.reduce<string[]>((acc, node) => {
+    if (node.isLeaf && node.id.startsWith(directory)) {
+      acc.push(node.data?.relative!)
+    }
+
+    return acc
+  }, [])
+
+  runAllSpecs(filteredSpecs)
+}
 
 </script>
 
