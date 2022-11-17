@@ -1,14 +1,5 @@
 const runChildProcess = async (entryPoint) => {
   require('./lib/plugins/child/register_ts_node')
-  if (require.name !== 'customRequire') {
-    // Purposefully make this a dynamic require so that it doesn't have the potential to get picked up by snapshotting mechanism
-    const hook = './hook'
-
-    const { hookRequire } = require(`${hook}-require`)
-
-    hookRequire(false)
-  }
-
   require(entryPoint)
 }
 
