@@ -319,11 +319,11 @@ export class ProjectConfigIpc extends EventEmitter {
       debug(`no typescript found, just use regular Node.js`)
     }
 
-    if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
-      if (isSandboxNeeded()) {
-        configProcessArgs.push('--no-sandbox')
-      }
+    if (isSandboxNeeded()) {
+      configProcessArgs.push('--no-sandbox')
+    }
 
+    if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
       return spawn(process.execPath, ['--entryPoint', CHILD_PROCESS_FILE_PATH, ...configProcessArgs], {
         ...childOptions,
         stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
