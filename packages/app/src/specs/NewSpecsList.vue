@@ -33,6 +33,10 @@ const opts = reactive<SpecListOptions<SpecsListFragment>>({
   searchFn: fuzzySortSpecs,
 })
 
+defineEmits<{
+  (e: 'showCreateSpecModal'): void
+}>()
+
 const handleCollapse = (node: SpecTreeDirectoryNode<SpecsListFragment>) => {
   const contained = opts.collapsedDirs.has(node.relative)
 

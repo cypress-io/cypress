@@ -15,10 +15,6 @@ const props = defineProps<{
   handleCollapse: (node: DirectoryNode) => void
 }>()
 
-// const emit = defineEmits<{
-// (event: 'handleCollapse', node: DirectoryNode): void
-// }>()
-
 const fileList = computed(() => getAllFileInDirectory(props.node))
 
 const grouped = computed(() => groupSpecTreeNodes(props.node))
