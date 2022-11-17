@@ -1618,6 +1618,7 @@ jobs:
           percy: << parameters.percy >>
           package: app
           type: e2e
+          debug: 'cypress:*'
 
   driver-integration-tests-chrome:
     <<: *defaults
