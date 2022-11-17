@@ -289,8 +289,8 @@ export function maybeLogCloudRecommendationMessage (runs: CypressCommandLine.Run
 
   if (runs.some((run) => run.stats.failures > 0)) {
     terminal.divider('-')
-    console.log(gray(cloudRecommendationMessage))
-    console.log(color(`  >>`, 'gray'), color('https://on.cypress.io/cloud-get-started', 'cyan'))
+    console.log(cloudRecommendationMessage)
+    console.log(`  >>`, color('https://on.cypress.io/cloud-get-started', 'cyan'))
     console.log('')
     terminal.divider('-')
   }

@@ -44,7 +44,7 @@ const electronApp = require('../../lib/util/electron-app')
 const savedState = require(`../../lib/saved_state`)
 const { getCtx, clearCtx, setCtx, makeDataContext } = require(`../../lib/makeDataContext`)
 const { BrowserCriClient } = require(`../../lib/browsers/browser-cri-client`)
-const { cloudRecommendationMessage, gray } = require('../../lib/util/print-run')
+const { cloudRecommendationMessage } = require('../../lib/util/print-run')
 
 const TYPICAL_BROWSERS = [
   {
@@ -359,7 +359,7 @@ describe('lib/cypress', () => {
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
 
         return cypress.start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test1.js`]).then(() => {
-          expect(console.log).to.be.calledWith(gray(cloudRecommendationMessage))
+          expect(console.log).to.be.calledWith(cloudRecommendationMessage)
 
           snapshotConsoleLogs('CLOUD_RECOMMENDATION_MESSAGE')
         })
@@ -373,7 +373,7 @@ describe('lib/cypress', () => {
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
 
         return cypress.start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test1.js`]).then(() => {
-          expect(console.log).not.to.be.calledWith(gray(cloudRecommendationMessage))
+          expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
         })
       })
 
@@ -385,7 +385,7 @@ describe('lib/cypress', () => {
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 0 } }
 
         return cypress.start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test1.js`]).then(() => {
-          expect(console.log).not.to.be.calledWith(gray(cloudRecommendationMessage))
+          expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
         })
       })
 
@@ -397,7 +397,7 @@ describe('lib/cypress', () => {
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
 
         return cypress.start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test1.js`]).then(() => {
-          expect(console.log).not.to.be.calledWith(gray(cloudRecommendationMessage))
+          expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
         })
       })
     })
@@ -1639,7 +1639,7 @@ describe('lib/cypress', () => {
           '--ciBuildId=ciBuildId123',
         ])
         .then(() => {
-          expect(console.log).not.to.be.calledWith(gray(cloudRecommendationMessage))
+          expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
         })
       })
     })
