@@ -10,3 +10,10 @@ export type ProjectConnectionStatus =
   | "ACCESS_REQUESTED"
   | "UNAUTHORIZED"
   | "CONNECTED";
+
+export interface FuzzyIndexes {
+  fuzzyIndexes: {
+    relative: number[];
+    baseName: number[];
+  };
+}

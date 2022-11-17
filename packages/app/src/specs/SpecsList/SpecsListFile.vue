@@ -7,14 +7,14 @@ import { deriveIndexes } from "../spec-utils";
 import SpecListGitInfo from "../SpecListGitInfo.vue";
 import type { SpecTreeFileNode } from "../tree/deriveTree";
 import { tableGridColumns } from "./constants";
-import type { ProjectConnectionStatus } from "../tree/types";
+import type { ProjectConnectionStatus, FuzzyIndexes } from "../tree/types";
 import SpecsListHoverCell from "../SpecsListHoverCell.vue";
 import SpecsListCloudButton from "../SpecsListCloudButton.vue";
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import { useRequestAccess } from "../../composables/useRequestAccess";
 
 const props = defineProps<{
-  node: SpecTreeFileNode<SpecsListFragment>;
+  node: SpecTreeFileNode<SpecsListFragment & FuzzyIndexes>;
   projectId?: string
   projectConnectionStatus: ProjectConnectionStatus;
 }>();
@@ -34,13 +34,10 @@ const showCloudConnectButton = computed(() =>
 const { openLoginConnectModal } = useLoginConnectStore()
 const requestAccess = useRequestAccess()
 
-// TODO: Fix
-const split = computed(() => {
+const indexes = computed(() => {
   const idx = deriveIndexes(
     props.node.data.fileName,
-    // TODO: Types are janky
-    // @ts-ignore
-    props.node.data.fuzzyIndexes?.relative ?? []
+    props.node.data.fuzzyIndexes.baseName ?? []
   );
   return idx;
 });
@@ -67,13 +64,13 @@ const split = computed(() => {
         >
           <HighlightedText
             :text="props.node.data.fileName"
-            :indexes="[] /* split.fileNameIndexes */"
+            :indexes="indexes.fileNameIndexes"
             class="font-medium text-indigo-500 group-hocus:text-indigo-700"
             highlight-classes="text-gray-1000"
           />
           <HighlightedText
             :text="props.node.data.specFileExtension"
-            :indexes="[] /* split.extensionIndexes */"
+            :indexes="indexes.extensionIndexes"
             class="font-light group-hocus:text-gray-400"
             highlight-classes="text-gray-1000"
           />
