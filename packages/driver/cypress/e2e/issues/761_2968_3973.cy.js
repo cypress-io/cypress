@@ -69,7 +69,7 @@ if (Cypress.isBrowser('chrome')) {
       })
 
       cy
-      .intercept('GET', /timeout/).as('getTimeout')
+      .intercept('GET', /timeout/, { delay: 2000 }).as('getTimeout')
       .visit('http://localhost:3500/fixtures/generic.html')
       .window()
       .then((win) => {
