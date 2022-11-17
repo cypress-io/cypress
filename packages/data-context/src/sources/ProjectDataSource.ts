@@ -238,6 +238,16 @@ export class ProjectDataSource {
 
   setRunAllSpecs (specs: string[]) {
     this.#runAllSpecs = specs
+
+    if (this.ctx.coreData.currentTestingType === 'component') {
+      const specsMap = this.specs.reduce<{[key: string]: SpecWithRelativeRoot}>((acc, spec) => {
+        return { ...acc, [spec.relative]: spec }
+      }, {})
+
+      const fullRunAllSpecs = this.#runAllSpecs.map((spec) => specsMap[spec]!)
+
+      this.api.getDevServer().updateRunAllSpecs(fullRunAllSpecs)
+    }
   }
 
   get hasNonExampleSpec () {

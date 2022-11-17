@@ -39,12 +39,10 @@ export function useRunAllSpecs () {
       router.push({ path: '/specs/runner', query: { file: RUN_ALL_SPECS_KEY } })
     },
     isRunAllSpecsAllowed: computed(() => {
-      const isE2E = query.data.value?.currentProject?.currentTestingType === 'e2e'
-
       const config: ResolvedConfig = query.data.value?.currentProject?.config || []
       const hasExperiment = config.find(({ field, value }) => field === 'experimentalRunAllSpecs' && value === true)
 
-      return Boolean(isE2E && hasExperiment)
+      return Boolean(hasExperiment)
     }),
   }
 }

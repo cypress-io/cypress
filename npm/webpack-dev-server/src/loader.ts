@@ -63,18 +63,26 @@ export default function loader (this: unknown) {
 
   const supportFileAbsolutePath = supportFile ? JSON.stringify(path.resolve(projectRoot, supportFile)) : undefined
   const supportFileRelativePath = supportFile ? JSON.stringify(path.relative(projectRoot, supportFileAbsolutePath || '')) : undefined
+  const runAllSpecNames = ctx._cypress.runAllSpecs.map((spec) => spec.name)
+
   const result = `
   var allTheSpecs = ${buildSpecs(projectRoot, files)};
 
   var { init } = require(${JSON.stringify(require.resolve('./aut-runner'))})
 
-  var scriptLoaders = Object.values(allTheSpecs).reduce(
-    (accSpecLoaders, specLoader) => {
-      if (specLoader.shouldLoad()) {
-        accSpecLoaders.push(specLoader)
-      }
-      return accSpecLoaders
-  }, [])
+  var scriptLoaders = []
+
+  if (document.location.pathname.endsWith('__all')) {
+    scriptLoaders = ${JSON.stringify(runAllSpecNames)}.map((name) => allTheSpecs[name])
+  } else {
+    scriptLoaders = Object.values(allTheSpecs).reduce(
+      (accSpecLoaders, specLoader) => {
+        if (specLoader.shouldLoad()) {
+          accSpecLoaders.push(specLoader)
+        }
+        return accSpecLoaders
+    }, [])
+  }
 
   if (${!!supportFile}) {
     var supportFile = {

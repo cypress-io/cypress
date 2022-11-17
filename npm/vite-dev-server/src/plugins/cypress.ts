@@ -2,14 +2,12 @@ import debugFn from 'debug'
 import type { ModuleNode, Plugin, ViteDevServer } from 'vite'
 import type { Vite } from '../getVite'
 import { parse, HTMLElement } from 'node-html-parser'
-import fs from 'fs'
+import { readFile } from 'fs/promises'
 
 import type { ViteDevServerConfig } from '../devServer'
 import path from 'path'
 
 const debug = debugFn('cypress:vite-dev-server:plugins:cypress')
-
-const INIT_FILEPATH = path.resolve(__dirname, '../../client/initCypressTests.js')
 
 const HMR_DEPENDENCY_LOOKUP_MAX_ITERATION = 50
 
@@ -38,13 +36,30 @@ export const Cypress = (
   const indexHtmlFile = options.cypressConfig.indexHtmlFile
 
   let specsPathsSet = getSpecsPathsSet(specs)
-  // TODO: use async fs methods here
-  // eslint-disable-next-line no-restricted-syntax
-  let loader = fs.readFileSync(INIT_FILEPATH, 'utf8')
+  let runAllSpecs: Spec[] = []
 
   devServerEvents.on('dev-server:specs:changed', (specs: Spec[]) => {
     specsPathsSet = getSpecsPathsSet(specs)
   })
+
+  devServerEvents.on('dev-server:run-all-specs:changed', (specs: Spec[]) => {
+    runAllSpecs = specs
+  })
+
+  async function createEntry () {
+    const supportFile = supportFilePath ? {
+      absolute: supportFilePath,
+      relative: supportFilePath.replace(projectRoot, ''),
+    } : null
+
+    let virtualEntry = await readFile(path.join(__dirname, '..', '..', 'client', 'cypress-virtual-entry.js'), 'utf-8')
+
+    virtualEntry = virtualEntry.replace(`'__CYPRESS_SPECS__'`, JSON.stringify(options.specs))
+    virtualEntry = virtualEntry.replace(`'__CYPRESS_SUPPORT_FILE__'`, JSON.stringify(supportFile))
+    virtualEntry = virtualEntry.replace(`'__CYPRESS_RUN_ALL_SPECS__'`, JSON.stringify(runAllSpecs))
+
+    return virtualEntry
+  }
 
   return {
     name: 'cypress:main',
@@ -69,7 +84,7 @@ export const Cypress = (
 
       debug('resolved the indexHtmlPath as', indexHtmlPath, 'from', indexHtmlFile)
 
-      let indexHtmlContent = await fs.promises.readFile(indexHtmlPath, { encoding: 'utf8' })
+      let indexHtmlContent = await readFile(indexHtmlPath, { encoding: 'utf8' })
 
       // Inject the script tags
       indexHtmlContent = indexHtmlContent.replace(
@@ -82,10 +97,12 @@ export const Cypress = (
       // find </body> last index
       const endOfBody = indexHtmlContent.lastIndexOf('</body>')
 
+      const entry = await createEntry()
+
       // insert the script in the end of the body
       const newHtml = `
         ${indexHtmlContent.substring(0, endOfBody)}
-        <script>${loader}</script>
+        <script type="module">${entry}</script>
         ${indexHtmlContent.substring(endOfBody)}
       `
 

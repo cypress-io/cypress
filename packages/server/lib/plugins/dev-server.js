@@ -12,6 +12,10 @@ plugins.registerHandler((ipc) => {
     ipc.send('dev-server:specs:changed', specs)
   })
 
+  baseEmitter.on('dev-server:run-all-specs:changed', (specs) => {
+    ipc.send('dev-server:run-all-specs:changed', specs)
+  })
+
   ipc.on('dev-server:compile:success', ({ specFile } = {}) => {
     baseEmitter.emit('dev-server:compile:success', { specFile })
   })
@@ -31,6 +35,10 @@ const API = {
 
   updateSpecs (specs) {
     baseEmitter.emit('dev-server:specs:changed', specs)
+  },
+
+  updateRunAllSpecs (specs) {
+    baseEmitter.emit('dev-server:run-all-specs:changed', specs)
   },
 
   close () {

@@ -734,11 +734,11 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
       errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
       isWarning: false,
     },
-    {
-      name: 'experimentalRunAllSpecs',
-      errorKey: 'EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY',
-      isWarning: false,
-      testingTypes: ['component'],
-    },
+    // {
+    //   name: 'experimentalRunAllSpecs',
+    //   errorKey: 'EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY',
+    //   isWarning: false,
+    //   testingTypes: ['component'],
+    // },
   ],
 }

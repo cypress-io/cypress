@@ -18,7 +18,7 @@ export interface CypressCTWebpackPluginOptions {
 export type CypressCTContextOptions = Omit<CypressCTWebpackPluginOptions, 'devServerEvents' | 'webpack'>
 
 export interface CypressCTWebpackContext {
-  _cypress: CypressCTContextOptions
+  _cypress: CypressCTContextOptions & { runAllSpecs: Cypress.Spec[] }
 }
 
 /**
@@ -43,8 +43,9 @@ export const normalizeError = (error: Error | string) => {
  * @internal
  */
 export class CypressCTWebpackPlugin {
-  private files: Cypress.Cypress['spec'][] = []
+  private files: Cypress.Spec[] = []
   private supportFile: string | false
+  private runAllSpecs: Cypress.Spec[] = []
   private compilation: Webpack45Compilation | null = null
   private webpack: Function
 
@@ -64,6 +65,7 @@ export class CypressCTWebpackPlugin {
       files: this.files,
       projectRoot: this.projectRoot,
       supportFile: this.supportFile,
+      runAllSpecs: this.runAllSpecs,
     }
   };
 
@@ -99,12 +101,19 @@ export class CypressCTWebpackPlugin {
    * has been "updated on disk", causing a recompliation (and pulling the new specs in as
    * dependencies).
    */
-  private onSpecsChange = async (specs: Cypress.Cypress['spec'][]) => {
-    if (!this.compilation || _.isEqual(specs, this.files)) {
-      return
+  private onSpecsChange = async (specs: Cypress.Spec[], runAllSpecs = false) => {
+    if (!this.compilation) return
+
+    if (!runAllSpecs) {
+      if (_.isEqual(specs, this.files)) return
+
+      this.files = specs
+    } else {
+      if (_.isEqual(specs, this.runAllSpecs)) return
+
+      this.runAllSpecs = specs
     }
 
-    this.files = specs
     const inputFileSystem = this.compilation.inputFileSystem
     // TODO: don't use a sync fs method here
     // eslint-disable-next-line no-restricted-syntax
@@ -142,6 +151,10 @@ export class CypressCTWebpackPlugin {
     const _compiler = compiler as Compiler
 
     this.devServerEvents.on('dev-server:specs:changed', this.onSpecsChange)
+    this.devServerEvents.on('dev-server:run-all-specs:changed', (specs) => {
+      this.onSpecsChange(specs, true)
+    })
+
     _compiler.hooks.beforeCompile.tapAsync('CypressCTPlugin', this.beforeCompile)
     _compiler.hooks.compilation.tap('CypressCTPlugin', (compilation) => this.addCompilationHooks(compilation as Webpack45Compilation))
     _compiler.hooks.done.tap('CypressCTPlugin', () => {
