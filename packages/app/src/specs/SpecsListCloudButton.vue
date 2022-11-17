@@ -19,8 +19,6 @@ import UserIcon from '~icons/cy/user-outline_x16.svg'
 import ChainIcon from '~icons/cy/chain-link_x16.svg'
 import PlayIcon from '~icons/cy/play-large_x16.svg'
 import { computed } from 'vue'
-import { gql } from '@urql/vue'
-import type { SpecCloudDataHoverButtonFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import type { ProjectConnectionStatus } from './tree/types'
 
@@ -32,28 +30,8 @@ const emits = defineEmits<{
 }>()
 
 const props = defineProps<{
-  // gql: SpecCloudDataHoverButtonFragment
   projectConnectionStatus: ProjectConnectionStatus
 }>()
-
-/**
- * TODO: This is not even used here, move it to where it is used.
- * This component does not rely on GraphQL.
- */
-gql`
-fragment SpecCloudDataHoverButton on Query {
-  currentProject {
-    id
-    cloudProject{
-      __typename
-      ... on CloudProjectUnauthorized {
-        hasRequestedAccess
-      }
-    }
-  }
-  ...RequestAccessButton
-}
-`
 
 type ButtonOptions = {
   text: string
@@ -99,7 +77,7 @@ const VALUES: Record<ProjectConnectionStatus, ButtonOptions> = {
     textShort: t('specPage.hoverButton.connect'),
     icon: PlayIcon,
     emits: undefined,
-  }
+  },
 }
 
 const buttonOptions = computed(() => {
