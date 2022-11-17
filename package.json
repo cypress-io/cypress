@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "11.0.1",
+  "version": "11.1.0",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -42,7 +42,7 @@
     "get-next-version": "node scripts/get-next-version.js",
     "postinstall": "node ./scripts/run-postInstall.js",
     "jscodeshift": "jscodeshift -t ./node_modules/js-codemod/transforms/arrow-function-arguments.js",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue .",
+    "lint": "lerna run lint --no-bail",
     "lint-changed": "lint-changed",
     "prepare-release-artifacts": "node ./scripts/prepare-release-artifacts.js",
     "npm-release": "node scripts/npm-release.js",

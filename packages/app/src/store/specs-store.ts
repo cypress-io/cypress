@@ -12,16 +12,12 @@ export const useSpecStore = defineStore({
   state (): SpecState {
     return {
       activeSpec: undefined,
-      specFilter: undefined,
     }
   },
 
   actions: {
     setActiveSpec (activeSpec: SpecFile | null) {
       this.activeSpec = activeSpec
-    },
-    setSpecFilter (filter: string) {
-      this.specFilter = filter
     },
   },
 })

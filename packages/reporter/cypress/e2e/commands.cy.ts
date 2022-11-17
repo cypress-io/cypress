@@ -794,7 +794,8 @@ describe('commands', { viewportHeight: 1000 }, () => {
           const nestedSessionGroupId = addCommand(runner, {
             name: 'session',
             displayName: 'validate',
-            type: 'child',
+            state: 'failed',
+            type: 'system',
             group: nestedGroupId,
           })
 
@@ -847,7 +848,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
       })
 
       it('shows a tooltip', () => {
-        cy.get('.command-name-within').click()
+        cy.get('.command-name-within').click('top')
         cy.get('.cy-tooltip').should('have.text', 'Printed output to your console')
       })
 

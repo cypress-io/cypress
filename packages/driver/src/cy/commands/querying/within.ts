@@ -23,15 +23,13 @@ export default (Commands, Cypress, cy, state) => {
     // https://github.com/cypress-io/cypress/pull/8699
     // An internal command is inserted to create a divider between
     // commands inside within() callback and commands chained to it.
-    const restoreCmdIndex = state('index') + 1
+    const restoreCmdIndex = cy.queue.index + 1
 
     cy.queue.insert(restoreCmdIndex, $Command.create({
       args: [subject],
       name: 'within-restore',
       fn: (subject) => subject,
     }))
-
-    state('index', restoreCmdIndex)
 
     fn.call(cy.state('ctx'), subject)
 
