@@ -32,11 +32,11 @@ const isRootNode = computed(() => props.node.depth === 0)
     class="flex items-center"
     :data-cy="isRootNode ? '' : 'spec-list-directory'"
     :class="{ 'hidden-node': isRootNode }"
+    :aria-expanded="!props.node.collapsed"
   >
     <button
       class="h-full grid gap-8px grid-cols-[14px,16px,auto] items-center focus:outline-none"
       :data-cy="`row-directory-depth-${props.node.depth}`"
-      :aria-expanded="!props.node.collapsed"
       @click="props.handleCollapse(props.node)"
     >
       <i-cy-chevron-down-small_x16
