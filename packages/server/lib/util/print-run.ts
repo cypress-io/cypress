@@ -283,6 +283,7 @@ export function displaySpecHeader (name: string, curr: number, total: number, es
 }
 
 export function maybeLogCloudRecommendationMessage (runs: CypressCommandLine.RunResult[], record: boolean) {
+  console.log('PROCESS ENV', process.env)
   console.log('IS CI:', getIsCi(), 'CYPRESS_COMMERCIAL_RECOMMENDATIONS:', env.get('CYPRESS_COMMERCIAL_RECOMMENDATIONS'), 'RECORD:', record)
   if (!getIsCi() || env.get('CYPRESS_COMMERCIAL_RECOMMENDATIONS') === '0' || record) {
     return
