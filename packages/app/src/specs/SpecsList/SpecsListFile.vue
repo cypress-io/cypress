@@ -1,35 +1,35 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import type { RouteLocationRaw } from "vue-router";
-import type { SpecsListFragment } from "../../generated/graphql";
-import HighlightedText from "../HighlightedText.vue";
-import { deriveIndexes } from "../spec-utils";
-import SpecListGitInfo from "../SpecListGitInfo.vue";
-import type { SpecTreeFileNode } from "../tree/deriveTree";
-import { tableGridColumns } from "./constants";
-import type { ProjectConnectionStatus, FuzzyIndexes } from "../tree/types";
-import SpecsListHoverCell from "../SpecsListHoverCell.vue";
-import SpecsListCloudButton from "../SpecsListCloudButton.vue";
+import { computed } from 'vue'
+import type { RouteLocationRaw } from 'vue-router'
+import type { SpecsListFragment } from '../../generated/graphql'
+import HighlightedText from '../HighlightedText.vue'
+import { deriveIndexes } from '../spec-utils'
+import SpecListGitInfo from '../SpecListGitInfo.vue'
+import type { SpecTreeFileNode } from '../tree/deriveTree'
+import { tableGridColumns } from './constants'
+import type { ProjectConnectionStatus, FuzzyIndexes } from '../tree/types'
+import SpecsListHoverCell from '../SpecsListHoverCell.vue'
+import SpecsListCloudButton from '../SpecsListCloudButton.vue'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
-import { useRequestAccess } from "../../composables/useRequestAccess";
+import { useRequestAccess } from '../../composables/useRequestAccess'
 
 const props = defineProps<{
-  node: SpecTreeFileNode<SpecsListFragment & FuzzyIndexes>;
+  node: SpecTreeFileNode<SpecsListFragment & FuzzyIndexes>
   projectId?: string
-  projectConnectionStatus: ProjectConnectionStatus;
-}>();
+  projectConnectionStatus: ProjectConnectionStatus
+}>()
 
 const route: RouteLocationRaw = {
-  path: "/specs/runner",
+  path: '/specs/runner',
   query: {
-    file: props.node.data.relative.replace(/\\/g, "/"),
+    file: props.node.data.relative.replace(/\\/g, '/'),
   },
-};
+}
 
-const showCloudConnectButton = computed(() => 
-  props.projectConnectionStatus !== 'CONNECTED' && (
+const showCloudConnectButton = computed(() => {
+  return props.projectConnectionStatus !== 'CONNECTED' && (
     props.node.data.cloudSpec?.data || props.node.data.cloudSpec?.fetchingStatus !== 'FETCHING')
-)
+})
 
 const { openLoginConnectModal } = useLoginConnectStore()
 const requestAccess = useRequestAccess()
@@ -37,15 +37,16 @@ const requestAccess = useRequestAccess()
 const indexes = computed(() => {
   const idx = deriveIndexes(
     props.node.data.fileName,
-    props.node.data.fuzzyIndexes?.baseName ?? []
-  );
-  return idx;
-});
+    props.node.data.fuzzyIndexes?.baseName ?? [],
+  )
+
+  return idx
+})
 </script>
 
 <template>
   <RouterLink
-    :style="{ paddingLeft: `${(node.parent.depth + 1) * 10 + 22}px` }"
+    :style="{ paddingLeft: `${((node.parent.depth) * 10) + 22}px` }"
     class="h-full outline-none ring-inset grid pr-20px group focus:outline-transparent focus-within:ring-indigo-300 focus-within:ring-1 children:cursor-pointer"
     :class="tableGridColumns"
     :to="route"
@@ -105,7 +106,7 @@ const indexes = computed(() => {
     <!-- average duration -->
     <SpecsListHoverCell
       data-cy="specs-list-row-average-duration"
-      :is-hover-disabled="props.projectConnectionStatus ===  'CONNECTED'"
+      :is-hover-disabled="props.projectConnectionStatus === 'CONNECTED'"
       class="hidden md:block"
     >
       <template #content>

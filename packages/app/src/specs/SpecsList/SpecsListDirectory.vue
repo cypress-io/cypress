@@ -1,33 +1,33 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { getAllFileInDirectory, groupSpecTreeNodes } from "../tree/deriveTree";
-import SpecsListFile from "./SpecsListFile.vue";
-import IconFolder from "~icons/cy/folder_x16.svg";
-import type { DirectoryNode } from "../tree/types";
-import HighlightedText from "../HighlightedText.vue";
-import type { ProjectConnectionStatus } from "../tree/types";
-import RunStatusDots from "../RunStatusDots.vue";
-import AverageDuration from "../AverageDuration.vue";
+import { computed } from 'vue'
+import { getAllFileInDirectory, groupSpecTreeNodes } from '../tree/deriveTree'
+import SpecsListFile from './SpecsListFile.vue'
+import IconFolder from '~icons/cy/folder_x16.svg'
+import type { DirectoryNode, ProjectConnectionStatus } from '../tree/types'
+import HighlightedText from '../HighlightedText.vue'
+import RunStatusDots from '../RunStatusDots.vue'
+import AverageDuration from '../AverageDuration.vue'
 
 const props = defineProps<{
-  node: DirectoryNode;
-  projectConnectionStatus: ProjectConnectionStatus;
+  node: DirectoryNode
+  projectConnectionStatus: ProjectConnectionStatus
   projectId?: string
-}>();
+}>()
 
 const emit = defineEmits<{
-  (event: "handleCollapse", node: DirectoryNode): void;
-}>();
+  (event: 'handleCollapse', node: DirectoryNode): void
+}>()
 
-const fileList = computed(() => getAllFileInDirectory(props.node));
+const fileList = computed(() => getAllFileInDirectory(props.node))
 
-const grouped = computed(() => groupSpecTreeNodes(props.node));
+const grouped = computed(() => groupSpecTreeNodes(props.node))
 </script>
 
 <template>
   <div
-    :style="{ paddingLeft: `${props.node.depth * 10}px` }"
+    :style="{ paddingLeft: `${props.node.depth - 1 * 10}px` }"
     class="flex items-center"
+    :class="{ 'hidden-node': props.node.depth === 0 }"
   >
     <button
       class="h-full grid gap-8px grid-cols-[14px,16px,auto] items-center focus:outline-none"
@@ -39,9 +39,15 @@ const grouped = computed(() => groupSpecTreeNodes(props.node));
         class="mr-8px text-sm icon-dark-gray-300 group-hocus:(icon-dark-gray-700)"
         :class="{ 'transform rotate-270': props.node.collapsed }"
       />
-      <component :is="IconFolder" class="icon-dark-white icon-light-gray-200" />
+      <component
+        :is="IconFolder"
+        class="icon-dark-white icon-light-gray-200"
+      />
 
-      <div :title="props.node.name" class="text-gray-600 truncate">
+      <div
+        :title="props.node.name"
+        class="text-gray-600 truncate"
+      >
         <HighlightedText
           :text="props.node.name"
           :indexes="[]"
@@ -61,18 +67,17 @@ const grouped = computed(() => groupSpecTreeNodes(props.node));
   <template v-if="!props.node.collapsed">
     <SpecsListFile
       v-for="file of grouped.files"
+      :key="file.data.relative"
       :node="file"
       :project-connection-status="props.projectConnectionStatus"
       :project-id="props.projectId"
-      :key="file.data.relative"
     >
-
       <template #latest-runs>
         <div class="h-full grid justify-items-end items-center relative">
           <RunStatusDots
             v-if="
               file.data.cloudSpec?.data ||
-              file.data.cloudSpec?.fetchingStatus !== 'FETCHING'
+                file.data.cloudSpec?.fetchingStatus !== 'FETCHING'
             "
             :gql="file.data.cloudSpec ?? null"
             :spec-file-extension="file.data.specFileExtension"
@@ -89,7 +94,6 @@ const grouped = computed(() => groupSpecTreeNodes(props.node));
       <template #average-duration>
         <AverageDuration :gql="file.data.cloudSpec ?? null" />
       </template>
-
     </SpecsListFile>
 
     <SpecsListDirectory
@@ -101,3 +105,11 @@ const grouped = computed(() => groupSpecTreeNodes(props.node));
     />
   </template>
 </template>
+
+<style>
+/** We hide the root node, which is always `/` */
+.hidden-node {
+  height: 0px !important;
+  overflow: hidden;
+}
+</style>
