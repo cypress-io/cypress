@@ -14,7 +14,8 @@
     "dev": "gulp dev --project .",
     "generate-shiki-theme": "node ./script/generate-shiki-theme.js",
     "generate-stub-specs": "node ./script/generate-stub-specs.js",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue ."
   },
   "dependencies": {},
   "devDependencies": {
