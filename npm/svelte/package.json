@@ -40,5 +40,14 @@
   "module": "dist/cypress-svelte.esm-bundler.js",
   "publishConfig": {
     "access": "public"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "cli/svelte"
+        ]
+      }
+    }
   }
 }

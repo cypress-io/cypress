@@ -59,6 +59,15 @@
   "publishConfig": {
     "access": "public"
   },
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "cli/angular"
+        ]
+      }
+    }
+  },
   "standard": {
     "globals": [
       "Cypress",

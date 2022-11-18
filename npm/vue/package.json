@@ -81,5 +81,14 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "cli/vue"
+        ]
+      }
+    }
   }
 }

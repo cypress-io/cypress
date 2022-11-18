@@ -20,14 +20,14 @@ export const remoteSchemaWrapped = wrapSchema<DataContext>({
   createProxyingResolver: ({
     subschemaConfig,
     operation,
-    transformedSchema,
+    fieldName,
   }) => {
     return (source, args, context, info) => {
       return delegateToSchema({
         rootValue: source,
         schema: subschemaConfig,
         operation,
-        transformedSchema,
+        fieldName,
         context,
         info,
       })

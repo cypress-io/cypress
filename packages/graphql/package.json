@@ -5,7 +5,7 @@
   "main": "index.js",
   "browser": "src/index.ts",
   "scripts": {
-    "build-prod": "tsc || echo 'built, with errors'",
+    "build": "yarn graphql-codegen --config ./graphql-codegen.yml",
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
     "clean": "rimraf './{src,test}/**/*.js'",
@@ -16,8 +16,9 @@
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {
-    "@graphql-tools/delegate": "8.2.1",
-    "@graphql-tools/wrap": "8.1.1",
+    "@graphql-tools/delegate": "9.0.17",
+    "@graphql-tools/executor": "0.0.9",
+    "@graphql-tools/wrap": "9.2.16",
     "@urql/core": "2.4.4",
     "dedent": "^0.7.0",
     "express": "4.17.1",

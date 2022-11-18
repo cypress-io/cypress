@@ -19,7 +19,8 @@
       "runner": "nx/tasks-runners/default",
       "options": {
         "cacheableOperations": [
-          "lint"
+          "lint",
+          "build"
         ]
       }
     }
@@ -39,6 +40,12 @@
         "default",
         "{workspaceRoot}/.eslintrc.json",
         "{workspaceRoot}/.eslintignore"
+      ]
+    },
+    "build-prod": {
+      "dependsOn": [
+        "^build",
+        "build-prod-ui"
       ]
     }
   }

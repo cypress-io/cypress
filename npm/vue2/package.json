@@ -49,5 +49,14 @@
   "module": "dist/cypress-vue2.esm-bundler.js",
   "publishConfig": {
     "access": "public"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "cli/vue2"
+        ]
+      }
+    }
   }
 }

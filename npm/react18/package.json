@@ -57,5 +57,14 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "cli/react18"
+        ]
+      }
+    }
   }
 }
