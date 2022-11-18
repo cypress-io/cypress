@@ -101,33 +101,28 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
 
         // test interactions
 
-        const directories: string[] = Array.from(new Set(specs.map((spec) => spec.relative.split('/')[0]))).sort()
-
         cy.get('@specsListInput').clear()
 
-        directories.forEach((dir) => {
-          cy.contains('button[data-cy="row-directory-depth-1"]', new RegExp(`^${dir}`))
-          .should('have.attr', 'aria-expanded', 'true')
-          .click()
-          .should('have.attr', 'aria-expanded', 'false')
-        })
+        cy.get('[data-cy-spec-item="SettingsPage"]').should('exist')
+        cy.get('[data-cy-row-directory="tests"]').as('dir')
+        .should('have.attr', 'aria-expanded', 'true')
+        .click()
+        .should('have.attr', 'aria-expanded', 'false')
 
-        cy.get('[data-cy="spec-item"]').should('not.exist')
+        cy.get('[data-cy-spec-item="SettingsPage"]').should('not.exist')
 
-        cy.contains('button[data-cy="row-directory-depth-0"]', directories[0])
+        cy.get('@dir')
         .should('have.attr', 'aria-expanded', 'false')
         .focus()
         .type('{enter}')
-
-        cy.contains('button[data-cy="row-directory-depth-0"]', directories[0])
+        .get('@dir')
         .should('have.attr', 'aria-expanded', 'true')
         .focus()
         .realPress('Space')
-
-        cy.contains('button[data-cy="row-directory-depth-0"]', directories[0])
+        .get('@dir')
         .should('have.attr', 'aria-expanded', 'false')
 
-        cy.get('[data-cy="spec-item"]').should('not.exist')
+        cy.get('[data-cy-spec-item="SettingsPage"]').should('not.exist')
 
         cy.contains(defaultMessages.createSpec.newSpec).click()
         cy.get('@showCreateSpecModalSpy').should('have.been.calledOnce')
@@ -177,7 +172,8 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
           })
         })
 
-        it('displays the list as expected visually at various widths', () => {
+        // TODO: If we need virtualization, comment this back in.
+        it.skip('displays the list as expected visually at various widths', () => {
           cy.get('[data-cy="spec-list-file"]')
           .should('have.length.above', 2)
           .should('have.length.below', specs.length)

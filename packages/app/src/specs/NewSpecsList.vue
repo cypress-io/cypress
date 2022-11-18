@@ -36,7 +36,7 @@ const opts = reactive<SpecListOptions<SpecsListFragment>>({
   searchFn: fuzzySortSpecs,
 })
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'showCreateSpecModal'): void
 }>()
 
@@ -171,6 +171,8 @@ const resultCount = computed(
       class="pb-32px"
       :result-count="resultCount"
       :spec-count="specs.length"
+      @show-create-spec-modal="emit('showCreateSpecModal')"
+      @show-spec-pattern-modal="showSpecPatternModal = true"
     />
 
     <SpecPatternModal
@@ -184,8 +186,6 @@ const resultCount = computed(
       v-if="specs.length"
       :gql="props.gql"
     />
-    <!-- @show-create-spec-modal="emit('showCreateSpecModal')"
-    @show-spec-pattern-modal="showSpecPatternModal = true" -->
     <div
       class="divide-y-1 border-gray-50 border-y-1 children:border-gray-50 children:h-40px"
     >

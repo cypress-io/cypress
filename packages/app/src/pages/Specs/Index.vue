@@ -18,6 +18,7 @@
       v-if="query.data.value.currentProject?.specs.length"
       :most-recent-update="mostRecentUpdate"
       :gql="query.data.value"
+      @showCreateSpecModal="showCreateSpecModal"
     />
     <NoSpecsPage
       v-else

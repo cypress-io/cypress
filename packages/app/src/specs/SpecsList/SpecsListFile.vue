@@ -55,6 +55,7 @@ const indexes = computed(() => {
     <div
       class="h-full grid gap-8px grid-cols-[16px,auto,auto] items-center"
       data-cy="spec-item"
+      :data-cy-spec-item="props.node.data.fileName"
     >
       <i-cy-document-blank_x16
         class="icon-light-gray-50 icon-dark-gray-200 group-hocus:icon-light-indigo-200 group-hocus:icon-dark-indigo-400"
