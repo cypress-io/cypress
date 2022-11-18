@@ -1,4 +1,5 @@
-import { it, expect, describe } from 'vitest'
+// TODO: Either run in mocha or install vitest.
+// import { it, expect, describe } from 'vitest'
 import {
   getAllFileInDirectory,
   deriveSpecTree,

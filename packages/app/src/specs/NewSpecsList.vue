@@ -206,6 +206,7 @@ const { t } = useI18n()
       v-if="specs.length"
       :gql="props.gql"
     />
+    <div />
     <div
       class="spec-list-container"
       :class="resultCount ? 'grid': 'hidden'"
@@ -221,13 +222,13 @@ const { t } = useI18n()
           :project-id="props.gql.currentProject?.projectId ?? undefined"
         />
       </div>
-      <NoResults
-        v-show="resultCount === 0"
-        :search-term="specFilterModel"
-        :message="t('specPage.noResultsMessage')"
-        class="mt-56px"
-        @clear="handleClear"
-      />
     </div>
+    <NoResults
+      v-show="resultCount === 0"
+      :search-term="specFilterModel"
+      :message="t('specPage.noResultsMessage')"
+      class="mt-56px"
+      @clear="handleClear"
+    />
   </div>
 </template>
