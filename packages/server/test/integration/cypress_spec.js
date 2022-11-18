@@ -1370,10 +1370,10 @@ describe('lib/cypress', () => {
       sinon.stub(Windows, 'create').returns(ee)
     })
 
-    it('does not truncate a really long dashboard url', function () {
+    it('does not truncate a really long Cypress Cloud url', function () {
       api.createRun.resolves({
         warnings: [],
-        runUrl: `http://dashboard.cypress.io/this-is-a${'-long'.repeat(50)}-url`,
+        runUrl: `http://cloud.cypress.io/this-is-a${'-long'.repeat(50)}-url`,
       })
 
       return cypress.start([
@@ -1384,7 +1384,7 @@ describe('lib/cypress', () => {
         '--ciBuildId=ciBuildId123',
       ])
       .then(() => {
-        return snapshotConsoleLogs('Long Dashboard URL')
+        return snapshotConsoleLogs('Long Cypress Cloud URL')
       })
     })
 
@@ -1395,7 +1395,7 @@ describe('lib/cypress', () => {
       err.error = {
         code: 'RUN_GROUP_NAME_NOT_UNIQUE',
         payload: {
-          runUrl: 'https://dashboard.cypress.io/runs/12345',
+          runUrl: 'https://cloud.cypress.io/runs/12345',
         },
       }
 
@@ -1409,9 +1409,9 @@ describe('lib/cypress', () => {
         '--ciBuildId=ciBuildId123',
       ])
       .then(() => {
-        this.expectExitWithErr('DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE')
+        this.expectExitWithErr('CLOUD_RUN_GROUP_NAME_NOT_UNIQUE')
 
-        return snapshotConsoleLogs('DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE 1')
+        return snapshotConsoleLogs('CLOUD_RUN_GROUP_NAME_NOT_UNIQUE 1')
       })
     })
 
@@ -1432,7 +1432,7 @@ describe('lib/cypress', () => {
       err.error = {
         code: 'PARALLEL_GROUP_PARAMS_MISMATCH',
         payload: {
-          runUrl: 'https://dashboard.cypress.io/runs/12345',
+          runUrl: 'https://cloud.cypress.io/runs/12345',
         },
       }
 
@@ -1447,9 +1447,9 @@ describe('lib/cypress', () => {
         '--ciBuildId=ciBuildId123',
       ])
       .then(() => {
-        this.expectExitWithErr('DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH')
+        this.expectExitWithErr('CLOUD_PARALLEL_GROUP_PARAMS_MISMATCH')
 
-        return snapshotConsoleLogs('DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH 1')
+        return snapshotConsoleLogs('CLOUD_PARALLEL_GROUP_PARAMS_MISMATCH 1')
       })
     })
 
@@ -1460,7 +1460,7 @@ describe('lib/cypress', () => {
       err.error = {
         code: 'PARALLEL_DISALLOWED',
         payload: {
-          runUrl: 'https://dashboard.cypress.io/runs/12345',
+          runUrl: 'https://cloud.cypress.io/runs/12345',
         },
       }
 
@@ -1475,9 +1475,9 @@ describe('lib/cypress', () => {
         '--ciBuildId=ciBuildId123',
       ])
       .then(() => {
-        this.expectExitWithErr('DASHBOARD_PARALLEL_DISALLOWED')
+        this.expectExitWithErr('CLOUD_PARALLEL_DISALLOWED')
 
-        return snapshotConsoleLogs('DASHBOARD_PARALLEL_DISALLOWED 1')
+        return snapshotConsoleLogs('CLOUD_PARALLEL_DISALLOWED 1')
       })
     })
 
@@ -1488,7 +1488,7 @@ describe('lib/cypress', () => {
       err.error = {
         code: 'PARALLEL_REQUIRED',
         payload: {
-          runUrl: 'https://dashboard.cypress.io/runs/12345',
+          runUrl: 'https://cloud.cypress.io/runs/12345',
         },
       }
 
@@ -1504,9 +1504,9 @@ describe('lib/cypress', () => {
         '--ciBuildId=ciBuildId123',
       ])
       .then(() => {
-        this.expectExitWithErr('DASHBOARD_PARALLEL_REQUIRED')
+        this.expectExitWithErr('CLOUD_PARALLEL_REQUIRED')
 
-        return snapshotConsoleLogs('DASHBOARD_PARALLEL_REQUIRED 1')
+        return snapshotConsoleLogs('CLOUD_PARALLEL_REQUIRED 1')
       })
     })
 
@@ -1517,7 +1517,7 @@ describe('lib/cypress', () => {
       err.error = {
         code: 'ALREADY_COMPLETE',
         payload: {
-          runUrl: 'https://dashboard.cypress.io/runs/12345',
+          runUrl: 'https://cloud.cypress.io/runs/12345',
         },
       }
 
@@ -1532,9 +1532,9 @@ describe('lib/cypress', () => {
         '--ciBuildId=ciBuildId123',
       ])
       .then(() => {
-        this.expectExitWithErr('DASHBOARD_ALREADY_COMPLETE')
+        this.expectExitWithErr('CLOUD_ALREADY_COMPLETE')
 
-        return snapshotConsoleLogs('DASHBOARD_ALREADY_COMPLETE 1')
+        return snapshotConsoleLogs('CLOUD_ALREADY_COMPLETE 1')
       })
     })
 
@@ -1545,7 +1545,7 @@ describe('lib/cypress', () => {
       err.error = {
         code: 'STALE_RUN',
         payload: {
-          runUrl: 'https://dashboard.cypress.io/runs/12345',
+          runUrl: 'https://cloud.cypress.io/runs/12345',
         },
       }
 
@@ -1561,9 +1561,9 @@ describe('lib/cypress', () => {
         '--ciBuildId=ciBuildId123',
       ])
       .then(() => {
-        this.expectExitWithErr('DASHBOARD_STALE_RUN')
+        this.expectExitWithErr('CLOUD_STALE_RUN')
 
-        return snapshotConsoleLogs('DASHBOARD_STALE_RUN 1')
+        return snapshotConsoleLogs('CLOUD_STALE_RUN 1')
       })
     })
   })

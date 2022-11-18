@@ -192,6 +192,11 @@ export const mutation = mutationType({
       },
     })
 
+    // TODO: remove server-side setPromptShown helpers in #23768,
+    // since this will be handled by usePromptManager via existing
+    // `setPreferences` mutation, there is no need for this other
+    //way to modify saved sate
+
     t.field('setPromptShown', {
       type: 'Boolean',
       description: 'Save the prompt-shown state for this project',
@@ -262,7 +267,7 @@ export const mutation = mutationType({
 
     t.field('login', {
       type: Query,
-      description: 'Auth with Cypress Dashboard',
+      description: 'Auth with Cypress Cloud',
       args: {
         utmMedium: nonNull(stringArg()),
         utmContent: stringArg(),
@@ -277,7 +282,7 @@ export const mutation = mutationType({
 
     t.field('logout', {
       type: Query,
-      description: 'Log out of Cypress Dashboard',
+      description: 'Log out of Cypress Cloud',
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.logout()
 
@@ -698,7 +703,7 @@ export const mutation = mutationType({
 
     t.field('recordEvent', {
       type: 'Boolean',
-      description: 'Dispatch an event to the dashboard to be recorded. Events are completely anonymous and are only used to identify aggregate usage patterns across all Cypress users.',
+      description: 'Dispatch an event to Cypress Cloud to be recorded. Events are completely anonymous and are only used to identify aggregate usage patterns across all Cypress users.',
       args: {
         campaign: nonNull(stringArg({})),
         messageId: nonNull(stringArg({})),

@@ -51,8 +51,39 @@ $code-border-radius: 4px;
     }
   }
 
-  .runnable-err-wrapper {
-    cursor: default;
+  .recovered-test-err {
+    .runnable-err-header,
+    .runnable-err-body {
+      padding-left: 49px;
+      display: flex;
+
+      .err-group-block {
+        border-left: 1px dotted $err-header-text;
+        border-image-slice: 0 0 0 1;
+        border-image-source: repeating-linear-gradient(0deg, transparent, $err-header-text, $err-header-text 4px);
+        width: 12px;
+        min-width: 12px;
+
+        &:first-of-type {
+          width: 13px;
+          min-width: 13px;
+        }
+    } 
+  }
+
+    .runnable-err-header > .runnable-err-name {
+      padding: 5px 4px 5px 15px;
+    }
+
+    .runnable-err-content {
+      padding: 0 12px 0 0;
+    }
+  }
+
+  .runnable-err-content {
+    width: 100%;
+    overflow: scroll;
+    padding: 0 18px;
   }
 
   .studio-err-wrapper {
@@ -60,13 +91,14 @@ $code-border-radius: 4px;
   }
 
   .runnable-err {
-    border-left: 2px solid $fail;
     background-color: $err-background;
+    border-left: $err-border;
     clear: both;
     color: $err-text;
     font-family: $monospace;
+    font-style: normal;
     margin-bottom: 0;
-    margin-top: 5px;
+    margin-top: 2px;
     white-space: pre-wrap;
     word-break: break-word;
     user-select: initial;
@@ -74,39 +106,45 @@ $code-border-radius: 4px;
   }
 
   .runnable-err-header {
-    background-color: rgba($red-400, 0.05);
+    background-color: $err-header-background;
     display: flex;
-    justify-content: space-between;
-    padding: 5px 10px;
     font-weight: bold;
+    justify-content: space-between;
+    padding-left: 18px;
+
+    svg {
+      color: $red-400;
+      align-self: center
+    }
 
     .runnable-err-name {
-      flex-grow: 2;
-      font-size: 13px;
-      line-height: 22px;
       color: $err-header-text;
-
-      svg {
-        margin-right: 10px;
-      }
+      flex: auto;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 20px;
+      padding: 5px 4px 5px 24px;
     }
   }
 
   .runnable-err-docs-url {
     margin-left: 0.5em;
     cursor: pointer;
-    font-family: $font-sans;
+    font-family: $font-system;
   }
 
   .runnable-err-message {
-    font-family: $monospace;
-    font-size: 1em;
-    padding: 10px;
+    font-family: $font-system;
+    font-size: 14px;
+    font-weight: 400;
+    padding: 10px 0;
 
     code {
       background-color: rgba($black, 0.2);
       border-radius: 4px;
       color: $err-code-text;
+      font-size: 12px;
+      font-family: $monospace;
       padding: 2px 5px;
     }
 
@@ -118,9 +156,10 @@ $code-border-radius: 4px;
 
   .runnable-err-stack-expander {
     align-items: center;
-    border-top: 1px solid rgba($red-400, 0.1);
+    border-top: 1px dashed rgba($red-400, 0.1);
     display: flex;
-
+    padding: 10px 0;
+    flex-wrap: wrap-reverse;
     .collapsible-header {
       flex-grow: 1;
 
@@ -147,7 +186,7 @@ $code-border-radius: 4px;
       div {
         cursor: pointer;
         outline: none;
-        padding: 14px 10px;
+        padding: 6px 0;
         width: 100%;
 
         .collapsible-header-text {
@@ -184,10 +223,10 @@ $code-border-radius: 4px;
       div {
         color: $red-300;
         cursor: pointer;
+        font-family: $font-system;
         font-size: 14px;
         font-weight: 500;
         height: 100%;
-        padding: 14px 10px;
         width: 100%;
 
         &:focus {
@@ -224,9 +263,9 @@ $code-border-radius: 4px;
 
   .test-err-code-frame {
     background-color: $gray-1000;
-    border: 1px solid rgba($red-400, 0.25);
+    border: 1px dashed rgba(245, 154, 169, 0.1);
     border-radius: $code-border-radius;
-    margin: 0 10px 10px;
+    margin: 0 0 10px;
 
     .runnable-err-file-path {
       background: rgba($gray-900, 0.5);
@@ -234,7 +273,7 @@ $code-border-radius: 4px;
       border-top-right-radius: $code-border-radius;
       display: block;
       font-size: 14px;
-      line-height: 16px;
+      line-height: 20px;
       padding: 8px;
       word-break: break-all;
 
@@ -252,3 +291,4 @@ $code-border-radius: 4px;
     }
   }
 }
+

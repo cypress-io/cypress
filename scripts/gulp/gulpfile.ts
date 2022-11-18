@@ -62,7 +62,7 @@ gulp.task(
     webpackRunner,
     gulp.series(
       makePathMap,
-      // Before dev, fetch the latest "remote" schema from the Cypress dashboard
+      // Before dev, fetch the latest "remote" schema from Cypress Cloud
       syncRemoteGraphQL,
       gulp.parallel(
         viteClean,

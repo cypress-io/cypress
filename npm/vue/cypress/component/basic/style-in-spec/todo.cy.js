@@ -37,9 +37,9 @@ it('injects local style', () => {
 
 it('passes props via options object', () => {
   // if you want to pass props right away, without creating a template
-  // use "propsData" key
+  // use "props" key
   const options = {
-    propsData: {
+    props: {
       title: 'finish test',
       done: true,
     },

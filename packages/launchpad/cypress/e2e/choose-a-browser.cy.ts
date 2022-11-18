@@ -1,7 +1,7 @@
 import type { FoundBrowser } from '@packages/types/src'
 
 // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23418
-describe.skip('Choose a Browser Page', () => {
+describe.skip('Choose a browser page', () => {
   beforeEach(() => {
     cy.scaffoldProject('launchpad')
   })
@@ -26,7 +26,7 @@ describe.skip('Choose a Browser Page', () => {
 
       cy.visitLaunchpad()
 
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.get('h1').should('contain', 'Choose a browser')
 
       cy.findByRole('radio', { name: 'Edge v8', checked: true })
 
@@ -41,7 +41,7 @@ describe.skip('Choose a Browser Page', () => {
       cy.openProject('launchpad', ['--e2e', '--browser', 'doesNotExist'])
       cy.visitLaunchpad()
 
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.get('h1').should('contain', 'Choose a browser')
       cy.get('[data-cy="alert-header"]').should('contain', 'Warning: Browser Not Found')
       cy.get('[data-cy="alert-body"]')
       .should('contain', 'Browser: doesNotExist was not found on your system or is not supported by Cypress.')
@@ -64,7 +64,7 @@ describe.skip('Choose a Browser Page', () => {
 
       cy.visitLaunchpad()
 
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.get('h1').should('contain', 'Choose a browser')
 
       cy.get('[data-cy="alert-header"]').should('contain', 'Warning: Browser Not Found')
       cy.get('[data-cy="alert-body"]').as('AlertBody')
@@ -88,7 +88,7 @@ describe.skip('Choose a Browser Page', () => {
       cy.get('[data-cy="alert-header"]').should('not.exist')
 
       cy.visitLaunchpad()
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.get('h1').should('contain', 'Choose a browser')
       cy.get('[data-cy="alert-header"]').should('not.exist')
     })
 
@@ -97,7 +97,7 @@ describe.skip('Choose a Browser Page', () => {
 
       cy.visitLaunchpad()
 
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.get('h1').should('contain', 'Choose a browser')
 
       cy.findByRole('radio', { name: 'Chrome v1' })
 
@@ -113,7 +113,7 @@ describe.skip('Choose a Browser Page', () => {
 
       cy.visitLaunchpad()
 
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.get('h1').should('contain', 'Choose a browser')
 
       cy.contains('button', 'Start E2E Testing in Chrome').as('launchButton')
 
@@ -165,7 +165,7 @@ describe.skip('Choose a Browser Page', () => {
 
       cy.visitLaunchpad()
 
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.get('h1').should('contain', 'Choose a browser')
 
       cy.findByRole('radio', { name: 'Chrome v1', checked: true }).as('chromeItem')
       cy.findByRole('radio', { name: 'Firefox v5', checked: false }).as('firefoxItem')
@@ -189,7 +189,7 @@ describe.skip('Choose a Browser Page', () => {
 
       cy.visitLaunchpad()
 
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.get('h1').should('contain', 'Choose a browser')
 
       cy.withCtx((ctx, o) => {
         o.sinon.stub(ctx.actions.project, 'launchProject')
@@ -227,7 +227,7 @@ describe.skip('Choose a Browser Page', () => {
         ctx.browser.setBrowserStatus('open')
       })
 
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.get('h1').should('contain', 'Choose a browser')
 
       cy.contains('button', 'Running Chrome').as('launchButton')
 
@@ -263,7 +263,7 @@ describe.skip('Choose a Browser Page', () => {
 
       cy.visitLaunchpad()
 
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.get('h1').should('contain', 'Choose a browser')
 
       cy.withCtx((ctx) => {
         expect(ctx.actions.project.launchProject).to.have.been.called
@@ -276,7 +276,7 @@ describe.skip('Choose a Browser Page', () => {
 
       cy.visitLaunchpad()
 
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.get('h1').should('contain', 'Choose a browser')
 
       cy.findByRole('radio', { name: 'Chrome v1', checked: true }).as('chromeItem')
 
@@ -307,14 +307,14 @@ describe.skip('Choose a Browser Page', () => {
       cy.openProject('launchpad', ['--e2e'])
       cy.visitLaunchpad()
 
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.get('h1').should('contain', 'Choose a browser')
 
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
       })
 
       cy.get('h1').should('contain', 'Welcome to Cypress!')
-      cy.contains('[data-cy-testingtype="e2e"]', 'Not Configured')
+      cy.contains('[data-cy-testingtype="e2e"]', 'Not configured')
 
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.writeFileInProject('cypress.config.js',
@@ -327,7 +327,7 @@ describe.skip('Choose a Browser Page', () => {
       })
 
       cy.get('h1').should('contain', 'Welcome to Cypress!')
-      cy.get('[data-cy-testingtype="e2e"]').should('not.contain', 'Not Configured')
+      cy.get('[data-cy-testingtype="e2e"]').should('not.contain', 'Not configured')
     })
   })
 
@@ -344,7 +344,7 @@ describe.skip('Choose a Browser Page', () => {
 
       cy.visitLaunchpad()
 
-      cy.get('h1').should('contain', 'Choose a Browser')
+      cy.get('h1').should('contain', 'Choose a browser')
 
       cy.get('[data-cy="open-browser-list"]').children().should('have.length', 1)
 

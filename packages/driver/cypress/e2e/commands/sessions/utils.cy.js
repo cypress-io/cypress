@@ -4,6 +4,15 @@ const {
 } = require('@packages/driver/src/cy/commands/sessions/utils')
 
 describe('src/cy/commands/sessions/utils.ts', () => {
+  const logForDebugging = (consoleProps) => {
+    Cypress.log({
+      name: 'debug',
+      message: 'click this log to view how this renders in the console',
+      event: true,
+      consoleProps,
+    })
+  }
+
   describe('.getConsoleProps', () => {
     it('for one domain with neither cookies or localStorage set', () => {
       const sessionState = {
@@ -12,8 +21,10 @@ describe('src/cy/commands/sessions/utils.ts', () => {
 
       const consoleProps = getConsoleProps(sessionState)
 
+      logForDebugging(consoleProps)
+      expect(consoleProps.Warning).to.eq('⚠️ There are no cookies, local storage nor session storage associated with this session')
       expect(consoleProps.id).to.eq('session1')
-      expect(consoleProps.table).to.have.length(0)
+      expect(consoleProps.groups).to.have.length(0)
     })
 
     it('for one domain with only cookies set', () => {
@@ -26,12 +37,19 @@ describe('src/cy/commands/sessions/utils.ts', () => {
 
       const consoleProps = getConsoleProps(sessionState)
 
-      expect(consoleProps.id).to.eq('session1')
-      expect(consoleProps.table).to.have.length(1)
-      const cookiesTable = consoleProps.table[0]()
+      logForDebugging(consoleProps)
 
-      expect(cookiesTable.name).to.contain('Cookies - localhost (1)')
-      expect(cookiesTable.data).to.deep.eq(sessionState.cookies)
+      expect(consoleProps.id).to.eq('session1')
+      expect(consoleProps.Domains).to.eq('This session captured data from localhost.')
+
+      expect(consoleProps.groups).to.have.length(1)
+      expect(consoleProps.groups[0].name).to.eq('localhost data:')
+      expect(consoleProps.groups[0].groups).to.have.length(1)
+
+      const cookieData = consoleProps.groups[0].groups[0]
+
+      expect(cookieData.name).to.contain('Cookies - (1)')
+      expect(cookieData.items).to.deep.eq(sessionState.cookies)
     })
 
     it('for one domain with only localStorage set', () => {
@@ -43,13 +61,43 @@ describe('src/cy/commands/sessions/utils.ts', () => {
       }
       const consoleProps = getConsoleProps(sessionState)
 
-      expect(consoleProps.id).to.eq('session1')
-      expect(consoleProps.table).to.have.length(1)
-      const localStorageTable = consoleProps.table[0]()
+      logForDebugging(consoleProps)
 
-      expect(localStorageTable.name).to.contain('Storage - localhost (1)')
-      expect(localStorageTable.data).to.have.length(1)
-      expect(localStorageTable.data).to.deep.eq([{ key: 'stor-foo', value: 's-f' }])
+      expect(consoleProps.id).to.eq('session1')
+      expect(consoleProps.Domains).to.eq('This session captured data from localhost.')
+
+      expect(consoleProps.groups).to.have.length(1)
+      expect(consoleProps.groups[0].name).to.eq('localhost data:')
+      expect(consoleProps.groups[0].groups).to.have.length(1)
+
+      const localStorageData = consoleProps.groups[0].groups[0]
+
+      expect(localStorageData.name).to.contain('Local Storage - (1)')
+      expect(localStorageData.items).to.deep.eq({ 'stor-foo': 's-f' })
+    })
+
+    it('for one domain with only sessionStorage set', () => {
+      const sessionState = {
+        id: 'session1',
+        sessionStorage: [
+          { origin: 'localhost', value: { 'stor-foo': 's-f' } },
+        ],
+      }
+      const consoleProps = getConsoleProps(sessionState)
+
+      logForDebugging(consoleProps)
+
+      expect(consoleProps.id).to.eq('session1')
+      expect(consoleProps.Domains).to.eq('This session captured data from localhost.')
+
+      expect(consoleProps.groups).to.have.length(1)
+      expect(consoleProps.groups[0].name).to.eq('localhost data:')
+      expect(consoleProps.groups[0].groups).to.have.length(1)
+
+      const sessionStorageData = consoleProps.groups[0].groups[0]
+
+      expect(sessionStorageData.name).to.contain('Session Storage - (1)')
+      expect(sessionStorageData.items).to.deep.eq({ 'stor-foo': 's-f' })
     })
 
     it('for one domain with both cookies and localStorage set', () => {
@@ -65,18 +113,23 @@ describe('src/cy/commands/sessions/utils.ts', () => {
 
       const consoleProps = getConsoleProps(sessionState)
 
+      logForDebugging(consoleProps)
+
       expect(consoleProps.id).to.eq('session1')
-      expect(consoleProps.table).to.have.length(2)
-      let table = consoleProps.table[0]()
+      expect(consoleProps.Domains).to.eq('This session captured data from localhost.')
 
-      expect(table.name).to.contain('Cookies - localhost (1)')
-      expect(table.data).to.have.length(1)
-      expect(table.data).to.deep.eq(sessionState.cookies)
+      expect(consoleProps.groups).to.have.length(1)
+      expect(consoleProps.groups[0].name).to.eq('localhost data:')
+      expect(consoleProps.groups[0].groups).to.have.length(2)
 
-      table = consoleProps.table[1]()
-      expect(table.name).to.contain('Storage - localhost (1)')
-      expect(table.data).to.have.length(1)
-      expect(table.data).to.deep.eq([{ key: 'stor-foo', value: 's-f' }])
+      const cookieData = consoleProps.groups[0].groups[0]
+      const localStorageData = consoleProps.groups[0].groups[1]
+
+      expect(cookieData.name).to.contain('Cookies - (1)')
+      expect(cookieData.items).to.deep.eq(sessionState.cookies)
+
+      expect(localStorageData.name).to.contain('Local Storage - (1)')
+      expect(localStorageData.items).to.deep.eq({ 'stor-foo': 's-f' })
     })
 
     it('for multiple domains', () => {
@@ -94,23 +147,31 @@ describe('src/cy/commands/sessions/utils.ts', () => {
 
       const consoleProps = getConsoleProps(sessionState)
 
+      logForDebugging(consoleProps)
+
       expect(consoleProps.id).to.eq('session1')
-      expect(consoleProps.table).to.have.length(3)
-      let table = consoleProps.table[0]()
+      expect(consoleProps.Domains).to.eq('This session captured data from localhost and example.com.')
 
-      expect(table.name).to.contain('Cookies - localhost (2)')
-      expect(table.data).to.have.length(2)
-      expect(table.data).to.deep.eq(sessionState.cookies)
+      expect(consoleProps.groups).to.have.length(2)
+      expect(consoleProps.groups[0].name).to.eq('localhost data:')
+      expect(consoleProps.groups[0].groups).to.have.length(2)
 
-      table = consoleProps.table[1]()
-      expect(table.name).to.contain('Storage - localhost (1)')
-      expect(table.data).to.have.length(1)
-      expect(table.data).to.deep.eq([{ key: 'stor-foo', value: 's-f' }])
+      const cookieData = consoleProps.groups[0].groups[0]
+      let localStorageData = consoleProps.groups[0].groups[1]
 
-      table = consoleProps.table[2]()
-      expect(table.name).to.contain('Storage - example.com (1)')
-      expect(table.data).to.have.length(1)
-      expect(table.data).to.deep.eq([{ key: 'random', value: 'hi' }])
+      expect(cookieData.name).to.contain('Cookies - (2)')
+      expect(cookieData.items).to.deep.eq(sessionState.cookies)
+
+      expect(localStorageData.name).to.contain('Local Storage - (1)')
+      expect(localStorageData.items).to.deep.eq({ 'stor-foo': 's-f' })
+
+      expect(consoleProps.groups[1].name).to.eq('example.com data:')
+      expect(consoleProps.groups[1].groups).to.have.length(1)
+
+      localStorageData = consoleProps.groups[1].groups[0]
+
+      expect(localStorageData.name).to.contain('Local Storage - (1)')
+      expect(localStorageData.items).to.deep.eq({ 'random': 'hi' })
     })
   })
 

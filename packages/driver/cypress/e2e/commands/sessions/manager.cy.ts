@@ -235,7 +235,6 @@ describe('src/cy/commands/sessions/manager.ts', () => {
   describe('.sessions', () => {
     it('sessions.defineSession()', () => {
       const sessionsManager = new SessionsManager(CypressInstance, cy)
-      const sessionsSpy = cy.stub(sessionsManager, 'setActiveSession')
       const setup = cy.stub()
       const sess = sessionsManager.sessions.defineSession({ id: '1', setup })
 
@@ -249,9 +248,6 @@ describe('src/cy/commands/sessions/manager.ts', () => {
         sessionStorage: null,
         hydrated: false,
       })
-
-      expect(sessionsSpy).to.be.calledOnce
-      expect(sessionsSpy.getCall(0).args[0]).to.deep.eq({ 1: sess })
     })
 
     it('sessions.clearAllSavedSessions()', async () => {

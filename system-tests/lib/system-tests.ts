@@ -179,7 +179,7 @@ type ExecOptions = {
    */
   ciBuildId?: string
   /**
-   * Run Cypress with a record key.
+   * Run Cypress with a Record Key.
    */
   key?: string
   /**
@@ -279,6 +279,7 @@ export type SpawnerResult = {
   on(event: 'error', cb: (err: Error) => void): void
   on(event: 'exit', cb: (exitCode: number) => void): void
   kill: ChildProcess['kill']
+  pid: number
 }
 
 const cpSpawner: Spawner = (cmd, args, env, options) => {
@@ -805,7 +806,7 @@ const systemTests = {
       // symlinks won't work via docker
       options.dockerImage || await DepInstaller.scaffoldCommonNodeModules()
       await Fixtures.scaffoldProject(options.project)
-      await DepInstaller.scaffoldProjectNodeModules(options.project)
+      await DepInstaller.scaffoldProjectNodeModules({ project: options.project })
     }
 
     if (process.env.NO_EXIT) {

@@ -1,3 +1,48 @@
+# [@cypress/vite-dev-server-v4.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v4.0.0...@cypress/vite-dev-server-v4.0.1) (2022-11-08)
+
+
+### Bug Fixes
+
+* vite-dev-server hoisting issue in binary ([#24599](https://github.com/cypress-io/cypress/issues/24599)) ([2513bea](https://github.com/cypress-io/cypress/commit/2513beac307e95267ab736a93a39cd1cd1280506))
+
+# [@cypress/vite-dev-server-v4.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.4.0...@cypress/vite-dev-server-v4.0.0) (2022-11-07)
+
+
+### Bug Fixes
+
+* normalize vite config resolution ([#24369](https://github.com/cypress-io/cypress/issues/24369)) ([feba489](https://github.com/cypress-io/cypress/commit/feba489a9aeaddad3197764fe7e7405cfb4e7a56))
+
+
+### BREAKING CHANGES
+
+* vite.config.js is no longer merged when devServer.viteConfig is provided
+
+# [@cypress/vite-dev-server-v3.4.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.3.1...@cypress/vite-dev-server-v3.4.0) (2022-11-01)
+
+
+### Features
+
+* introduce v8 snapshots to improve startup performance ([#24295](https://github.com/cypress-io/cypress/issues/24295)) ([b0c0eaa](https://github.com/cypress-io/cypress/commit/b0c0eaa508bb6dafdc1997bc00fb7ed6f5bcc160))
+
+# [@cypress/vite-dev-server-v3.3.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.3.0...@cypress/vite-dev-server-v3.3.1) (2022-10-11)
+
+
+### Bug Fixes
+
+* CSS import in CT Support file is not working ([#24117](https://github.com/cypress-io/cypress/issues/24117)) ([5af6b27](https://github.com/cypress-io/cypress/commit/5af6b27ed972ba9bc03d4a7fa4eaaeb2c7848fc3))
+
+# [@cypress/vite-dev-server-v3.3.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.2.0...@cypress/vite-dev-server-v3.3.0) (2022-10-06)
+
+
+### Bug Fixes
+
+* Address Vite sourcemap edge cases ([#24063](https://github.com/cypress-io/cypress/issues/24063)) ([e918fc1](https://github.com/cypress-io/cypress/commit/e918fc1a8c1b26b25207e42a6b8a879b0a3e9a2b))
+
+
+### Features
+
+* Disable file watching in component tests in run mode ([#24097](https://github.com/cypress-io/cypress/issues/24097)) ([3e01474](https://github.com/cypress-io/cypress/commit/3e014743909b35f54b697d2a759e4a2c5b67b5b7))
+
 # [@cypress/vite-dev-server-v3.2.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.1.1...@cypress/vite-dev-server-v3.2.0) (2022-09-29)
 
 

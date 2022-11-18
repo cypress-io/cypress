@@ -2,6 +2,7 @@
 
 import _ from 'lodash'
 import Bluebird from 'bluebird'
+import type playwright from 'playwright-webkit'
 import type { Protocol } from 'devtools-protocol'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import { cors, uri } from '@packages/network'
@@ -25,7 +26,7 @@ export type CyCookie = Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expiratio
 
 // Cypress uses the webextension-style filtering
 // https://developer.chrome.com/extensions/cookies#method-getAll
-type CyCookieFilter = chrome.cookies.GetAllDetails
+export type CyCookieFilter = chrome.cookies.GetAllDetails
 
 export function screencastOpts (everyNthFrame = Number(process.env.CYPRESS_EVERY_NTH_FRAME || 5)): Protocol.Page.StartScreencastRequest {
   return {
@@ -61,7 +62,7 @@ export const _domainIsWithinSuperdomain = (domain: string, suffix: string) => {
   return _.isEqual(suffixParts, domainParts.slice(domainParts.length - suffixParts.length))
 }
 
-export const _cookieMatches = (cookie: CyCookie, filter: CyCookieFilter) => {
+export const cookieMatches = (cookie: CyCookie | playwright.Cookie, filter: CyCookieFilter) => {
   if (filter.domain && !(cookie.domain && _domainIsWithinSuperdomain(cookie.domain, filter.domain))) {
     return false
   }
@@ -255,7 +256,7 @@ export class CdpAutomation {
     .then((result: Protocol.Network.GetAllCookiesResponse) => {
       return normalizeGetCookies(result.cookies)
       .filter((cookie: CyCookie) => {
-        const matches = _cookieMatches(cookie, filter)
+        const matches = cookieMatches(cookie, filter)
 
         debugVerbose('cookie matches filter? %o', { matches, cookie, filter })
 

@@ -12,14 +12,13 @@
     "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project .",
     "watch": "tsc -w",
     "test": "yarn test-unit",
-    "test-unit": "mocha -r ts-node/register/transpile-only --config ./test/.mocharc.js"
+    "test-unit": "mocha -r ts-node/register/transpile-only --config ./test/.mocharc.js",
+    "lint": "eslint --ext .js,.ts,.json, ."
   },
   "dependencies": {
-    "debug": "4.3.3",
+    "debug": "^4.3.4",
     "find-up": "6.3.0",
-    "local-pkg": "0.4.1",
-    "node-html-parser": "5.3.3",
-    "pathe": "0.2.0"
+    "node-html-parser": "5.3.3"
   },
   "devDependencies": {
     "chai": "^4.3.6",

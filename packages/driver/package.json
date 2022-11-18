@@ -10,7 +10,8 @@
     "cypress:open-experimentalSessionAndOrigin": "node ../../scripts/cypress open --config experimentalSessionAndOrigin=true,experimentalModifyObstructiveThirdPartyCode=true",
     "cypress:run-experimentalSessionAndOrigin": "node ../../scripts/cypress run --config experimentalSessionAndOrigin=true,experimentalModifyObstructiveThirdPartyCode=true",
     "postinstall": "patch-package",
-    "start": "node -e 'console.log(require(`chalk`).red(`\nError:\n\tRunning \\`yarn start\\` is no longer needed for driver/cypress tests.\n\tWe now automatically spawn the server in e2e.setupNodeEvents config.\n\tChanges to the server will be watched and reloaded automatically.`))'"
+    "start": "node -e 'console.log(require(`chalk`).red(`\nError:\n\tRunning \\`yarn start\\` is no longer needed for driver/cypress tests.\n\tWe now automatically spawn the server in e2e.setupNodeEvents config.\n\tChanges to the server will be watched and reloaded automatically.`))'",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {},
   "devDependencies": {
@@ -65,7 +66,7 @@
     "method-override": "3.0.0",
     "methods": "1.1.2",
     "mime-types": "2.1.27",
-    "minimatch": "3.0.4",
+    "minimatch": "3.0.5",
     "mocha": "7.0.1",
     "multer": "1.4.2",
     "ordinal": "1.0.3",

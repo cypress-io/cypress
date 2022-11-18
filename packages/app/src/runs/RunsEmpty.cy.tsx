@@ -21,6 +21,6 @@ describe('RunsEmpty', () => {
     } as any
 
     cy.contains(defaultMessages.specPage.banners.record.title).should('be.visible')
-    cy.contains('npx cypress run --component --record --key abcd-efg-1234').should('be.visible')
+    cy.findByDisplayValue('npx cypress run --component --record --key abcd-efg-1234').should('be.visible')
   })
 })

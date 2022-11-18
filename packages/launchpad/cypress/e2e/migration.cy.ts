@@ -1,5 +1,4 @@
 import type { ProjectFixtureDir } from '@tooling/system-tests'
-import type { SinonStub } from 'sinon'
 import { getPathForPlatform } from './support/getPathForPlatform'
 
 // @ts-ignore
@@ -27,11 +26,11 @@ function scaffoldAndVisitLaunchpad (project: ProjectFixtureDir, argv?: string[])
   cy.scaffoldProject(project)
   cy.openProject(project, argv)
   cy.visitLaunchpad()
+  cy.skipWelcome()
 }
 
 function startMigrationFor (project: ProjectFixtureDir, argv?: string[]) {
   scaffoldAndVisitLaunchpad(project, argv)
-  cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
   cy.waitForWizard()
 }
 
@@ -80,27 +79,6 @@ function renameSupport (lang: 'js' | 'ts' | 'coffee' = 'js') {
   }, { lang })
 }
 
-function stubVideoHtml (): void {
-  // ctx.migration.getVideoEmbedHtml
-  cy.withCtx((ctx, o) => {
-    o.sinon.stub(ctx.migration, 'getVideoEmbedHtml').callsFake(async () => {
-      return '<span>Stubbed Video Content</span>'
-    })
-  })
-}
-
-function unstubVideoHtml (): void {
-  cy.withCtx((ctx, o) => {
-    const restoreFn = (ctx.migration.getVideoEmbedHtml as SinonStub).restore
-
-    restoreFn?.()
-  })
-}
-
-beforeEach(() => {
-  stubVideoHtml()
-})
-
 describe('global mode', () => {
   it('migrates 2 projects in global mode', () => {
     cy.openGlobalMode()
@@ -112,9 +90,9 @@ describe('global mode', () => {
       o.sinon.stub(ctx.actions.migration, 'locallyInstalledCypressVersion').resolves('10.0.0')
     })
 
-    cy.contains('migration-e2e-export-default').click()
+    cy.contains('button', cy.i18n.majorVersionWelcome.actionContinue).click()
 
-    cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
+    cy.contains('migration-e2e-export-default').click()
 
     // rename integration->e2e
     cy.get(renameAutoStep).should('exist')
@@ -154,69 +132,45 @@ describe('Opening unmigrated project', () => {
     cy.scaffoldProject('migration')
     cy.openProject('migration', ['--e2e'])
     cy.visitLaunchpad()
-    cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
-    cy.get('h1').should('contain', 'Migration')
+    cy.skipWelcome()
+    cy.get('h1').should('contain', 'Migrating')
   })
 
   it('legacy project with --component', () => {
     cy.scaffoldProject('migration-component-testing')
     cy.openProject('migration-component-testing', ['--component'])
     cy.visitLaunchpad()
-    cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
-    cy.get('h1').should('contain', 'Migration')
+    cy.skipWelcome()
+    cy.get('h1').should('contain', 'Migrating')
   })
 
-  it('migration landing page appears with a video', () => {
+  it('major version welcome page appears with correct links and can be dismissed', () => {
     cy.scaffoldProject('migration')
     cy.openProject('migration')
     cy.visitLaunchpad()
 
-    cy.contains(cy.i18n.migration.landingPage.title).should('be.visible')
-    cy.contains(cy.i18n.migration.landingPage.description).should('be.visible')
-    cy.contains('button', cy.i18n.migration.landingPage.actionContinue).should('be.visible')
-    cy.contains('a', cy.i18n.migration.landingPage.linkReleaseNotes)
-    .should('be.visible')
-    .and('have.attr', 'href', 'https://on.cypress.io/changelog')
+    cy.contains(cy.i18n.majorVersionWelcome.title).should('be.visible')
 
-    // Vimeo's implementation may change and we don't want to have an external dependency in this test,
-    // this is just a high level check that the mocked embed html from the on-link is being included
-    cy.get('[data-cy="video-container"]')
-    .contains('Stubbed Video Content')
-    .and('be.visible')
+    cy.validateExternalLink({
+      name: cy.i18n.majorVersionWelcome.linkReleaseNotes,
+      href: 'https://on.cypress.io/changelog',
+    })
+
+    cy.validateExternalLink({
+      name: '11.0.0',
+      href: 'https://on.cypress.io/changelog#11-0-0',
+    })
+
+    cy.validateExternalLink({
+      name: '10.0.0',
+      href: 'https://on.cypress.io/changelog#10-0-0',
+    })
+
+    cy.contains('button', cy.i18n.majorVersionWelcome.actionContinue).click()
+    cy.contains(cy.i18n.majorVersionWelcome.title).should('not.exist')
+    cy.contains('h1', 'Migrating to Cypress 11').should('be.visible')
 
     cy.percySnapshot()
-  })
-
-  it('landing page does not appear if there is no video embed code', () => {
-    unstubVideoHtml()
-
-    cy.scaffoldProject('migration')
-    cy.openProject('migration')
-    cy.withCtx((ctx, o) => {
-      o.sinon.stub(ctx.migration, 'getVideoEmbedHtml').callsFake(async () => {
-        return null
-      })
-    })
-
-    cy.visitLaunchpad()
-    cy.contains(cy.i18n.welcomePage.title).should('be.visible')
-    cy.contains(cy.i18n.migration.landingPage.title).should('not.exist')
-  })
-
-  it('should only hit the video on link once & cache it', () => {
-    unstubVideoHtml()
-
-    cy.scaffoldProject('migration')
-    cy.openProject('migration')
-
-    cy.visitLaunchpad()
-    cy.contains(cy.i18n.migration.landingPage.title).should('be.visible')
-
-    cy.visitLaunchpad()
-    cy.contains(cy.i18n.migration.landingPage.title).should('be.visible')
-    cy.withCtx((ctx, o) => {
-      expect((ctx.util.fetch as SinonStub).args.filter((a) => String(a[0]).includes('v10-video-embed')).length).to.eq(1)
-    })
   })
 })
 
@@ -357,7 +311,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
       // We rename the integration folder, even if the user skips the spec rename
       cy.findByText('Rename folder only.').click()
 
-      cy.findByText('Save Changes').click()
+      cy.findByText('Save changes').click()
 
       cy.percySnapshot()
 
@@ -690,7 +644,10 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
     cy.get(setupComponentStep).should('not.exist')
     cy.get(configFileStep).should('exist')
 
-    startMigrationFor('migration-e2e-custom-test-files')
+    cy.scaffoldProject('migration-e2e-custom-test-files')
+    cy.openProject('migration-e2e-custom-test-files')
+    cy.visitLaunchpad()
+
     // default testFiles but custom integration - can rename automatically
     cy.get(renameAutoStep).should('exist')
     // no CT
@@ -1326,7 +1283,7 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
       cy.findByText('Don\'t rename anything — keep what I have.').click()
       cy.contains('I may need to change my specPattern later')
 
-      cy.findByText('Save Changes').click()
+      cy.findByText('Save changes').click()
 
       cy.findByText('Skip renaming specs').click()
 
@@ -1370,7 +1327,6 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
     }, { path: getPathForPlatform('cypress/plugins/index.js') })
 
     cy.findByRole('button', { name: 'Try again' }).click()
-    cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
 
     cy.waitForWizard()
   })
@@ -1527,7 +1483,7 @@ describe('Migration', { viewportWidth: 1200, retries: { openMode: 0, runMode: 2 
 
     cy.findByText('change').click()
     cy.get('h2').should('contain', 'Change the existing spec file extension')
-    cy.get('button').contains('Save Changes').click()
+    cy.get('button').contains('Save changes').click()
     cy.get('h2').should('not.contain', 'Change the existing spec file extension')
 
     cy.findByText('change').click()
@@ -1705,7 +1661,6 @@ describe('Migrate custom config files', () => {
 
   it('shows error for migration-custom-config-file-with-existing-v10-config-file', () => {
     scaffoldAndVisitLaunchpad('migration-custom-config-file-with-existing-v10-config-file', ['--config-file', 'customConfig.json'])
-    cy.contains('button', cy.i18n.migration.landingPage.actionContinue).click()
 
     cy.contains('There is both a customConfig.config.js and a customConfig.json file at the location below:')
     cy.contains('Cypress no longer supports customConfig.json, please remove it from your project.')

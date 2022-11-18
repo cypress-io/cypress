@@ -25,7 +25,7 @@ describe('web security', function () {
     .contains('success!', { timeout: 500 })
   })
 
-  it('finds the correct spec bridge even if a previous spec bridge host is a subset of the current host', () => {
+  it('finds the correct spec bridge even if a previous spec bridge host is a subset of the current host', { defaultCommandTimeout: 4000 }, () => {
     // Establish a spec bridge with a 'bar.com' host prior to loading 'foobar.com'
     if (Cypress.config('experimentalSessionAndOrigin')) {
       cy.origin('http://www.bar.com:4466', () => undefined)

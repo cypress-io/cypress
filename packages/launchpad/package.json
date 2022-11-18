@@ -15,7 +15,8 @@
     "cypress:run:e2e": "cross-env TZ=America/New_York node ../../scripts/cypress run --e2e --project .",
     "dev": "yarn gulp dev --project .",
     "start": "echo 'run yarn dev from the root' && exit 1",
-    "watch": "echo 'run yarn dev from the root' && exit 1"
+    "watch": "echo 'run yarn dev from the root' && exit 1",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {},
   "devDependencies": {
@@ -74,43 +75,5 @@
   },
   "files": [
     "dist"
-  ],
-  "vite": {
-    "optimizeDeps": {
-      "include": [
-        "@headlessui/vue",
-        "@iconify/iconify",
-        "@iconify/vue",
-        "@percy/cypress",
-        "@purge-icons/generated",
-        "@testing-library/cypress/add-commands",
-        "@urql/core",
-        "@urql/devtools",
-        "@urql/exchange-execute",
-        "@urql/exchange-graphcache",
-        "@urql/vue",
-        "@vue/test-utils",
-        "@vueuse/core",
-        "dedent",
-        "fake-uuid",
-        "floating-vue",
-        "graphql",
-        "graphql-relay",
-        "graphql/jsutils/Path",
-        "gravatar",
-        "lodash",
-        "lodash/clone",
-        "markdown-it",
-        "@toycode/markdown-it-class",
-        "shiki",
-        "vue",
-        "vue-router",
-        "vue-demi",
-        "vue-i18n",
-        "vue-toastification",
-        "vue3-file-selector",
-        "wonka"
-      ]
-    }
-  }
+  ]
 }

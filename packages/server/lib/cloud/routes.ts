@@ -1,10 +1,10 @@
 import _ from 'lodash'
-
 import UrlParse from 'url-parse'
-import konfig from '../konfig'
 
-const apiUrl = konfig('api_url')
-const DASHBOARD_ENDPOINTS = {
+const app_config = require('../../config/app.json')
+const apiUrl = app_config[process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'development'].api_url
+
+const CLOUD_ENDPOINTS = {
   api: '',
   auth: 'auth',
   me: 'me',
@@ -37,7 +37,7 @@ const parseArgs = function (url, args: any[] = []) {
   return url
 }
 
-const makeRoutes = (baseUrl: string, routes: typeof DASHBOARD_ENDPOINTS) => {
+const makeRoutes = (baseUrl: string, routes: typeof CLOUD_ENDPOINTS) => {
   return _.reduce(routes, (memo, value, key) => {
     memo[key] = function (...args: any[]) {
       let url = new UrlParse(baseUrl, true)
@@ -54,10 +54,10 @@ const makeRoutes = (baseUrl: string, routes: typeof DASHBOARD_ENDPOINTS) => {
     }
 
     return memo
-  }, {} as Record<keyof typeof DASHBOARD_ENDPOINTS, (...args: any[]) => string>)
+  }, {} as Record<keyof typeof CLOUD_ENDPOINTS, (...args: any[]) => string>)
 }
 
-const apiRoutes = makeRoutes(apiUrl, DASHBOARD_ENDPOINTS)
+const apiRoutes = makeRoutes(apiUrl, CLOUD_ENDPOINTS)
 
 module.exports = {
   apiRoutes,

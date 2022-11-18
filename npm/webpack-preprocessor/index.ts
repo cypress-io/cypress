@@ -249,7 +249,7 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
       webpackOptions.module.rules.unshift({
         test: /\.(js|ts|jsx|tsx)$/,
         use: [{
-          loader: path.join(__dirname, 'lib/cross-origin-callback-loader'),
+          loader: require.resolve('@cypress/webpack-preprocessor/dist/lib/cross-origin-callback-loader.js'),
           options: {
             commands: callbackReplacementCommands,
           },
@@ -341,8 +341,8 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
         bundles[filePath].deferreds.length = 0
       }
 
-      // the cross-origin-callback-loader extracts any cy.origin() callback
-      // functions that contains Cypress.require() and stores their sources
+      // the cross-origin-callback-loader extracts any cross-origin callback
+      // functions that require dependencies and stores their sources
       // in the CrossOriginCallbackStore. it saves the callbacks per source
       // files, since that's the context it has. here we need to unfurl
       // what dependencies the input source file has so we can know which
