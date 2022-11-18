@@ -73,15 +73,40 @@ const specs = computed(() => {
   return props.gql.currentProject?.specs.slice() ?? []
 })
 
+const normalizedSearchValue = (str: string = '') => {
+  return getPlatform() === 'win32' ? str.replaceAll('/', '\\') : str
+}
+
+const { debouncedSpecFilterModel, specFilterModel } = useSpecFilter(
+  props.gql.currentProject?.savedState?.specFilter,
+)
+
+const tree = computed(() => {
+  return deriveSpecTree(specs.value, {
+    ...opts,
+    search: normalizedSearchValue(debouncedSpecFilterModel.value),
+  })
+})
+
+const allSpecFilesFromRoot = computed(() => {
+  const allFiles = getAllFileInDirectory(tree.value.root)
+
+  return allFiles
+})
+
+const resultCount = computed(
+  () => allSpecFilesFromRoot.value.length,
+)
+
 const { refetchFailedCloudData } = useCloudSpecData(
   isProjectDisconnected,
   isOffline,
   props.gql.currentProject?.projectId,
   mostRecentUpdateRef,
-  specs,
-  // displayedSpecs,
-  specs.value,
-  // props.gql.currentProject?.specs as SpecsListFragment[] || [],
+  // @ts-ignore
+  // ref([]),
+  allSpecFilesFromRoot.value.map((x) => x.data),
+  props.gql.currentProject?.specs as SpecsListFragment[] || [],
 )
 
 const projectConnectionStatus = computed<ProjectConnectionStatus>(() => {
@@ -112,21 +137,6 @@ const projectConnectionStatus = computed<ProjectConnectionStatus>(() => {
   return 'CONNECTED'
 })
 
-const normalizedSearchValue = (str: string = '') => {
-  return getPlatform() === 'win32' ? str.replaceAll('/', '\\') : str
-}
-
-const tree = computed(() => {
-  return deriveSpecTree(specs.value, {
-    ...opts,
-    search: normalizedSearchValue(debouncedSpecFilterModel.value),
-  })
-})
-
-const { debouncedSpecFilterModel, specFilterModel } = useSpecFilter(
-  props.gql.currentProject?.savedState?.specFilter,
-)
-
 const specsListInputRef = ref<HTMLInputElement>()
 
 const route = useRoute()
@@ -147,9 +157,6 @@ function handleClear () {
 
 const { t } = useI18n()
 // result count is always count of files from root node
-const resultCount = computed(
-  () => getAllFileInDirectory(tree.value.root).length,
-)
 </script>
 
 <template>

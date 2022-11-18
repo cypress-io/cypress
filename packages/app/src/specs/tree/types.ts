@@ -1,5 +1,5 @@
 import type { SpecsListFragment } from '../../generated/graphql'
-import type { SpecTreeDirectoryNode } from './deriveTree'
+import type { SpecTreeDirectoryNode, SpecTreeFileNode } from './deriveTree'
 
 export type DirectoryNode = SpecTreeDirectoryNode<SpecsListFragment>;
 
@@ -17,3 +17,5 @@ export interface FuzzyIndexes {
     baseName: number[]
   }
 }
+
+export type FileNode = SpecTreeFileNode<SpecsListFragment & FuzzyIndexes>

@@ -12,7 +12,7 @@
       popper-class="RunStatusDots_Tooltip"
     >
       <component
-        :is="latestRun? ExternalLink : 'div'"
+        :is="latestRun ? ExternalLink : 'div'"
         :href="dashboardUrl"
       >
         <div
@@ -147,7 +147,9 @@ const props = defineProps<{
 }>()
 
 const runs = computed(() => {
-  return props.gql?.data?.__typename === 'CloudProjectSpec' ? props.gql?.data?.specRuns?.nodes ?? [] : []
+  const data = props.gql?.data?.__typename === 'CloudProjectSpec' ? props.gql?.data?.specRuns?.nodes ?? [] : []
+
+  return data
 })
 
 const isRunsLoaded = computed(() => {

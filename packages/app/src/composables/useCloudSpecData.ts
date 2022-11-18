@@ -29,7 +29,8 @@ export function useCloudSpecData (
   isOffline: Ref<boolean>,
   projectId: string | null | undefined,
   mostRecentUpdate: Ref<string | null>,
-  displayedSpecs: Ref<(SpecsListFragment | undefined)[]>,
+  // displayedSpecs: Ref<(SpecsListFragment | undefined)[]>,
+  displayedSpecs: Array<(SpecsListFragment | undefined)>,
   allSpecs: (SpecsListFragment | undefined)[],
 ) {
   const refetchMutation = useMutation(CloudData_RefetchDocument)
@@ -71,7 +72,7 @@ export function useCloudSpecData (
    * or that have not yet been fetched
    */
   const fetchDisplayedCloudData = async () => {
-    const cloudSpecIdsToRefetch = displayedSpecs.value
+    const cloudSpecIdsToRefetch = displayedSpecs
     .map((spec) => spec?.cloudSpec)
     .filter((cloudSpec): cloudSpec is NonNullCloudSpec => Boolean(cloudSpec && shouldRefetch(cloudSpec)))
     .map((cloudSpec) => cloudSpec.id)
@@ -94,7 +95,7 @@ export function useCloudSpecData (
     await refetchMutation.executeMutation({ ids: [...latestRunsIds] })
   }
 
-  const displayedSpecIds = computed(() => displayedSpecs.value.map((v) => v?.cloudSpec?.id).filter((id) => !!id).join('|'))
+  const displayedSpecIds = computed(() => displayedSpecs.map((v) => v?.cloudSpec?.id).filter((id) => !!id).join('|'))
   const debouncedDisplayedSpecIds = useDebounce(displayedSpecIds, 200)
 
   /*

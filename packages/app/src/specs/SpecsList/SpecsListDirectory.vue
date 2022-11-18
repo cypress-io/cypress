@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { getAllFileInDirectory, groupSpecTreeNodes } from '../tree/deriveTree'
 import SpecsListFile from './SpecsListFile.vue'
 import IconFolder from '~icons/cy/folder_x16.svg'
-import type { DirectoryNode, ProjectConnectionStatus } from '../tree/types'
+import type { DirectoryNode, ProjectConnectionStatus, FileNode } from '../tree/types'
 import HighlightedText from '../HighlightedText.vue'
 import RunStatusDots from '../RunStatusDots.vue'
 import AverageDuration from '../AverageDuration.vue'
@@ -20,6 +20,13 @@ const fileList = computed(() => getAllFileInDirectory(props.node))
 const grouped = computed(() => groupSpecTreeNodes(props.node))
 
 const isRootNode = computed(() => props.node.depth === 0)
+
+function shouldShowDots (node: FileNode) {
+  const shouldShow = node.data.cloudSpec?.data ||
+    node.data.cloudSpec?.fetchingStatus !== 'FETCHING'
+
+  return shouldShow
+}
 </script>
 
 <template>
@@ -75,11 +82,9 @@ const isRootNode = computed(() => props.node.depth === 0)
     >
       <template #latest-runs>
         <div class="h-full grid justify-items-end items-center relative">
+          <!-- status: {{ file.data.cloudSpec?.fetchingStatus }} -->
           <RunStatusDots
-            v-if="
-              file.data.cloudSpec?.data ||
-                file.data.cloudSpec?.fetchingStatus !== 'FETCHING'
-            "
+            v-if="shouldShowDots(file)"
             :gql="file.data.cloudSpec ?? null"
             :spec-file-extension="file.data.specFileExtension"
             :spec-file-name="file.data.fileName"
