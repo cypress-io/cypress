@@ -39,7 +39,7 @@ jobs:
               LAST_LOG=$(git log -1 --grep="run ci" --pretty=%B)
               [ -z "$LAST_LOG" ] && RUN_PIPELINES=0
               
-              if [[ "$CIRCLE_BRANCH" == "develop"]] || [[ "$CIRCLE_BRANCH" == "release/"* ]]; then
+              if [[ "$CIRCLE_BRANCH" == "develop" || "$CIRCLE_BRANCH" == "release/"* ]]; then
                 printf "Always run CI for develop and for release candidate branches.\n"
 
                 RUN_PIPELINES=1
