@@ -375,22 +375,13 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: (key: string, value: any, opts: ValidationOptions) => {
       const { testingType } = opts
 
-      if (testingType == null || testingType === 'component') {
-        return true
+      let configOpts = ['on', 'off']
+
+      if (testingType === 'component') {
+        configOpts.pop()
       }
 
-      if (testingType === 'e2e') {
-        return validate.isOneOf('on', 'off')(key, value)
-      }
-
-      if (value == null) {
-        return true
-      }
-
-      return {
-        key,
-        value,
-      }
+      return validate.isOneOf(...configOpts)(key, value)
     },
     overrideLevel: 'suite',
   }, {

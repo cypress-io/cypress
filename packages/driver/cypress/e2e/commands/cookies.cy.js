@@ -6,14 +6,6 @@ const isWebkit = Cypress.isBrowser('webkit')
 
 describe('src/cy/commands/cookies - no stub', () => {
   context('#getCookies', () => {
-    // this can be removed along with the experimental flag since once the flag
-    // removed, clearing cookies for all domains will be done by default
-    beforeEach(() => {
-      if (!Cypress.config('experimentalSessionAndOrigin')) {
-        cy.clearCookies({ domain: null })
-      }
-    })
-
     it('returns cookies from the domain matching the AUT by default', () => {
       cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
@@ -28,7 +20,7 @@ describe('src/cy/commands/cookies - no stub', () => {
         expect(cookies[1].domain).to.match(/\.?www\.barbaz\.com/)
       })
 
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+      if (isWebkit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
@@ -50,7 +42,7 @@ describe('src/cy/commands/cookies - no stub', () => {
         expect(cookies[0].domain).to.match(/\.?www\.foobar\.com/)
       })
 
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+      if (isWebkit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
@@ -71,7 +63,7 @@ describe('src/cy/commands/cookies - no stub', () => {
 
       cy.getCookies({ domain: null }).should('have.length', 2)
 
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+      if (isWebkit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
@@ -89,7 +81,7 @@ describe('src/cy/commands/cookies - no stub', () => {
 
       cy.getCookie('foo').its('domain').should('match', /\.?barbaz\.com/)
 
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+      if (isWebkit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
@@ -106,7 +98,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.getCookie('foo', { domain: 'www.foobar.com' })
       .its('domain').should('match', /\.?www\.foobar\.com/)
 
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+      if (isWebkit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
@@ -123,7 +115,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.getCookie('foo', { domain: null })
       .its('domain').should('match', /\.?www\.foobar\.com/)
 
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+      if (isWebkit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
@@ -144,7 +136,7 @@ describe('src/cy/commands/cookies - no stub', () => {
 
       cy.getCookie('foo').its('domain').should('match', /\.?barbaz\.com/)
 
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+      if (isWebkit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
@@ -161,7 +153,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.getCookie('foo', { domain: 'www.foobar.com' })
       .its('domain').should('match', /\.?www\.foobar\.com/)
 
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+      if (isWebkit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
@@ -193,7 +185,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.getCookie('baz').should('be.null')
       cy.getCookie('foo', { domain: 'www.foobar.com' }).should('exist')
 
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+      if (isWebkit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
@@ -220,7 +212,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.getCookie('baz', { domain: 'www.foobar.com' }).should('be.null')
       cy.getCookie('foo').should('exist')
 
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+      if (isWebkit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
@@ -243,7 +235,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.clearCookies({ domain: null })
       cy.getCookies().should('have.length', 0)
 
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+      if (isWebkit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
@@ -278,7 +270,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.getCookie('foo').should('be.null')
       cy.getCookie('foo', { domain: 'www.foobar.com' }).should('exist')
 
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+      if (isWebkit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
@@ -301,7 +293,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.getCookie('foo', { domain: 'www.foobar.com' }).should('be.null')
       cy.getCookie('foo').should('exist')
 
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+      if (isWebkit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
@@ -322,7 +314,7 @@ describe('src/cy/commands/cookies - no stub', () => {
     cy.clearCookie('foo', { domain: null })
     cy.getCookies().should('have.length', 0)
 
-    if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+    if (isWebkit) return
 
     cy.origin('http://www.foobar.com:3500', () => {
       cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
