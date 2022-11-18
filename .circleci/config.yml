@@ -17,7 +17,7 @@ jobs:
             SHOULD_RUN_PIPELINES=0
 
             # run CI when manually triggers via CircleCi Dashboard
-            [ <<pipeline.trigger_source>> ~= 'api' ] && SHOULD_RUN_PIPELINES=1 
+            # [ <<pipeline.trigger_source>> ~= 'api' ] && SHOULD_RUN_PIPELINES=1 
             
             # only run CI when commit message includes 'run ci'
             LAST_LOG=$(git log -1 --grep="run ci" --pretty=%B)
