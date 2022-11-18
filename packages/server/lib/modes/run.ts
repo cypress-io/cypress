@@ -1012,6 +1012,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
 
     if (!options.quiet) {
       printResults.renderSummaryTable(runUrl, results)
+      printResults.maybeLogCloudRecommendationMessage(results.runs || [], record)
     }
 
     return results

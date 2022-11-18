@@ -351,3 +351,59 @@ exports['Long Cypress Cloud URL'] = `
   Recorded Run: http://cloud.cypress.io/this-is-a-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-url
 
 `
+
+exports['CLOUD_RECOMMENDATION_MESSAGE'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (test1.js)                                                                 │
+  │ Searched:   tests/test1.js                                                                     │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  test1.js                                                                        (1 of 1)
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        undefined                                                                        │
+  │ Passing:      undefined                                                                        │
+  │ Failing:      1                                                                                │
+  │ Pending:      undefined                                                                        │
+  │ Skipped:      undefined                                                                        │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     undefined seconds                                                                │
+  │ Spec Ran:     test1.js                                                                         │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  test1.js                                 XX:XX        -        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
+
+----------------------------------------------------------------------------------------------------
+
+  Having trouble debugging your CI failures?
+  
+  Record your runs to Cypress Cloud to watch video recordings for each test, 
+  debug failing and flaky tests, and integrate with your favorite tools.
+
+  >> https://on.cypress.io/cloud-get-started
+
+----------------------------------------------------------------------------------------------------
+`
