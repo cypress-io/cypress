@@ -1,0 +1,11 @@
+version: 2.1
+
+linux-x64-workflow: &linux-x64-workflow
+  jobs:
+    - run: "echo 'Continuing module B'"
+
+workflows:
+  linux-x64:
+    <<: *linux-x64-workflow
+    <<: *linux-x64-workflow-exclude-filters
+
