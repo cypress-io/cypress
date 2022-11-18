@@ -90,7 +90,9 @@ describe('App: Settings', () => {
       cy.startAppServer('e2e')
       cy.loginUser()
       cy.visitApp()
-      cy.get('.spec-list-container').scrollTo('bottom')
+      cy.get('.spec-list-container')
+      // TODO: Only if we are using virtualized list.
+      // .scrollTo('bottom')
       // Visit the test to trigger the ws.off() for the TR websockets
       cy.contains('test1.js').click()
       cy.waitForSpecToFinish()

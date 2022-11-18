@@ -12,7 +12,7 @@ describe('plugin events', () => {
       cy.startAppServer('e2e')
       cy.visitApp()
 
-      cy.get('[data-cy-row="run_events_spec_1.cy.js"]').eq(1).click()
+      cy.get('[data-cy-row="run_events_spec_1.cy.js"]').click()
       cy.waitForSpecToFinish({
         passCount: 1,
       })
@@ -37,7 +37,7 @@ describe('plugin events', () => {
       cy.startAppServer('e2e')
       cy.visitApp()
 
-      cy.get('[data-cy-row="run_events_spec_1.cy.js"]').eq(1).click()
+      cy.get('[data-cy-row="run_events_spec_1.cy.js"]').click()
       cy.waitForSpecToFinish({
         passCount: 1,
       })
