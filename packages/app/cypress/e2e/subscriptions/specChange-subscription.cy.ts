@@ -11,7 +11,7 @@ describe('specChange subscription', () => {
 
   describe('specs list', () => {
     it('responds to specChange event for an added file', () => {
-      cy.get('[data-cy="spec-item-link"]')
+      cy.get('[data-cy="spec-list-file"]')
       // cannot assert a length since this is a virtualized list
       // .should('have.length', 14)
       .should('contain', 'blank-contents.spec.js')
@@ -23,7 +23,7 @@ describe('specChange subscription', () => {
         await ctx.actions.file.writeFileInProject(o.path, '')
       }, { path: getPathForPlatform('cypress/e2e/new-file.spec.js') })
 
-      cy.get('[data-cy="spec-item-link"]')
+      cy.get('[data-cy="spec-list-file"]')
       // cannot assert a length since this is a virtualized list
       // .should('have.length', 15)
       .should('contain', 'blank-contents.spec.js')
@@ -34,7 +34,7 @@ describe('specChange subscription', () => {
     })
 
     it('responds to specChange event for a removed file', () => {
-      cy.get('[data-cy="spec-item-link"]')
+      cy.get('[data-cy="spec-list-file"]')
       // cannot assert a length since this is a virtualized list
       // .should('have.length', 14)
       .should('contain', 'blank-contents.spec.js')
@@ -46,7 +46,7 @@ describe('specChange subscription', () => {
         await ctx.actions.file.removeFileInProject(o.path)
       }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
 
-      cy.get('[data-cy="spec-item-link"]')
+      cy.get('[data-cy="spec-list-file"]')
       // cannot assert a length since this is a virtualized list
       // .should('have.length', 13)
       .should('contain', 'blank-contents.spec.js')
@@ -93,7 +93,7 @@ describe('specChange subscription', () => {
         await ctx.actions.file.writeFileInProject(o.path, '')
       }, { path: getPathForPlatform('cypress/e2e/new-file.spec.js') })
 
-      cy.get('[data-cy="spec-item-link"]')
+      cy.get('[data-cy="spec-list-file"]')
       .should('have.length', 1)
       .should('contain', 'new-file.spec.js')
     })
@@ -128,7 +128,7 @@ describe('specChange subscription', () => {
         ],
       })
 
-      cy.get('[data-cy="spec-item-link"]')
+      cy.get('[data-cy="spec-list-file"]')
       .should('have.length', 1)
       .should('contain', 'dom-list.spec.js')
 
@@ -141,7 +141,7 @@ describe('specChange subscription', () => {
     })
 
     it('responds to a cypress.config.js file change', () => {
-      cy.get('[data-cy="spec-item-link"]')
+      cy.get('[data-cy="spec-list-file"]')
       // cannot assert a length since this is a virtualized list
       // .should('have.length', 14)
       .should('contain', 'blank-contents.spec.js')
@@ -170,7 +170,7 @@ e2e: {
 }`)
       })
 
-      cy.get('[data-cy="spec-item-link"]', { timeout: 7500 })
+      cy.get('[data-cy="spec-list-file"]', { timeout: 7500 })
       .should('have.length', 2)
       .should('contain', 'dom-container.spec.js')
       .should('contain', 'dom-content.spec.js')

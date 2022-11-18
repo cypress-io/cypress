@@ -249,18 +249,6 @@ const shouldShowFetchError = ref(false)
 watch(hasCloudErrors, (wasErrorFound) => shouldShowFetchError.value = wasErrorFound, { immediate: true })
 
 gql`
-subscription SpecsList_GitInfoUpdated {
-  gitInfoChange {
-    id
-    absolute
-    gitInfo {
-      ...SpecListRow
-    }
-  }
-}
-`
-
-gql`
 fragment SpecsList on Spec {
   id
   name

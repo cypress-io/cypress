@@ -5,7 +5,7 @@
       class="h-full outline-none ring-inset grid pr-20px group focus:outline-transparent focus-within:ring-indigo-300 focus-within:ring-1 children:cursor-pointer"
       :class="gridColumns"
       :to="route"
-      :data-cy="isLeaf ? 'spec-item-link' : 'spec-item-directory'"
+      :data-cy="isLeaf ? 'spec-list-file' : 'spec-item-directory'"
       @click="emit('toggleRow')"
       @click.meta.prevent="handleCtrlClick"
       @click.ctrl.prevent="handleCtrlClick"

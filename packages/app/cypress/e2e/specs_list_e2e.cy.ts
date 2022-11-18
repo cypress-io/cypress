@@ -79,9 +79,9 @@ describe('App: Spec List (E2E)', () => {
 
     it('collapses or expands folders when clicked, hiding or revealing the specs within it', () => {
       cy.findAllByTestId('spec-item').should('contain', 'dom-content.spec.js')
-      cy.findByTestId('row-directory-depth-0').click()
+      cy.findByTestId('row-directory-depth-1').click()
       cy.findAllByTestId('spec-item').should('not.exist')
-      cy.findByTestId('row-directory-depth-0').click()
+      cy.findByTestId('row-directory-depth-1').click()
       cy.findAllByTestId('spec-item').should('contain', 'dom-content.spec.js')
     })
 
@@ -107,8 +107,8 @@ describe('App: Spec List (E2E)', () => {
 
     it('has an <a> tag in the Spec File Row that runs the selected spec when clicked', () => {
       cy.get('[data-selected-spec="true"]').should('not.exist')
-      cy.findAllByTestId('spec-item-link').should('have.attr', 'href')
-      cy.findAllByTestId('spec-item-link').contains('dom-content.spec.js').click()
+      cy.findAllByTestId('spec-list-file').should('have.attr', 'href')
+      cy.findAllByTestId('spec-list-file').contains('dom-content.spec.js').click()
 
       cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
       cy.findByText('Your tests are loading...').should('not.be.visible')
@@ -125,7 +125,7 @@ describe('App: Spec List (E2E)', () => {
       Cypress.automation('remote:debugger:protocol', { command: 'Target.getTargets' }).then((res) => {
         numTargets = res.targetInfos.length
 
-        cy.findAllByTestId('spec-item-link').first().click({ metaKey: true }).then(async () => {
+        cy.findAllByTestId('spec-list-file').first().click({ metaKey: true }).then(async () => {
           await Cypress.automation('remote:debugger:protocol', { command: 'Target.getTargets' }).then((res) => {
             newNumTargets = res.targetInfos.length
           })

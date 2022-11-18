@@ -26,7 +26,7 @@ describe('SpecItem', () => {
     cy.wrap(toggleRowHandler).should('have.callCount', 2)
 
     // Clicking elsewhere on row should trigger row
-    cy.get('[data-cy="spec-item-link"]').click('right')
+    cy.get('[data-cy="spec-list-file"]').click('right')
     cy.wrap(toggleRowHandler).should('have.callCount', 3)
   })
 

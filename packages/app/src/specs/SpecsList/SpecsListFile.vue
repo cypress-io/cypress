@@ -63,7 +63,7 @@ const indexes = computed(() => {
       />
       <div>
         <div
-          :title="`${props.node.data.fileName + props.node.data.fileExtension}`"
+          :title="`${props.node.data.fileName + props.node.data.specFileExtension}`"
           class="text-gray-400 text-indigo-500 truncate group-hocus:text-indigo-600"
         >
           <HighlightedText

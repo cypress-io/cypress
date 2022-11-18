@@ -6,8 +6,9 @@ import {
 } from './tree/deriveTree'
 import type { SpecListOptions, SpecTreeDirectoryNode } from './tree/deriveTree'
 import type { ProjectConnectionStatus } from './tree/types'
-import type {
+import {
   SpecsListFragment,
+  SpecsList_GitInfoUpdatedDocument,
   Specs_SpecsListFragment,
 } from '../generated/graphql'
 import { computed, reactive, ref, toRef, watch } from 'vue'
@@ -23,6 +24,7 @@ import SpecsListBanners from './SpecsListBanners.vue'
 import { useRoute } from 'vue-router'
 import SpecPatternModal from '../components/SpecPatternModal.vue'
 import { useOnline } from '@vueuse/core'
+import { useSubscription, gql } from '@urql/vue'
 
 const props = withDefaults(defineProps<{
   gql: Specs_SpecsListFragment
@@ -30,6 +32,20 @@ const props = withDefaults(defineProps<{
 }>(), {
   mostRecentUpdate: null,
 })
+
+gql`
+subscription SpecsList_GitInfoUpdated {
+  gitInfoChange {
+    id
+    absolute
+    gitInfo {
+      ...SpecListRow
+    }
+  }
+}
+`
+
+useSubscription({ query: SpecsList_GitInfoUpdatedDocument })
 
 const opts = reactive<SpecListOptions<SpecsListFragment>>({
   sep: '/',
@@ -40,6 +56,14 @@ const opts = reactive<SpecListOptions<SpecsListFragment>>({
 const emit = defineEmits<{
   (e: 'showCreateSpecModal'): void
 }>()
+
+const shouldShowFetchError = ref(false)
+
+const hasCloudErrors = computed(() => {
+  return props.gql.currentProject?.specs.some((s) => s.cloudSpec?.fetchingStatus === 'ERRORED') ?? false
+})
+
+watch(hasCloudErrors, (wasErrorFound) => shouldShowFetchError.value = wasErrorFound, { immediate: true })
 
 const handleCollapse = (node: SpecTreeDirectoryNode<SpecsListFragment>) => {
   const contained = opts.collapsedDirs.has(node.relative)
@@ -155,7 +179,6 @@ const specsListInputRef = ref<HTMLInputElement>()
 const route = useRoute()
 
 const isSpecNotFound = ref(!!route.params?.unrunnable)
-const shouldShowFetchError = ref(false)
 
 const hasRequestedAccess = computed(() => {
   return projectConnectionStatus.value === 'ACCESS_REQUESTED'
