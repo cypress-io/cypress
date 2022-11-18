@@ -26,7 +26,9 @@ jobs:
             
             echo "should run? $RUN_PIPELINES"
             if [[ $RUN_PIPELINES -eq 0 ]]; then
-              circleci-agent step halt
+              curl --request POST \
+                --url https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/cancel \
+                --header "Circle-Token: ${CIRCLE_TOKEN}"
             fi
   fluff:
     docker:
