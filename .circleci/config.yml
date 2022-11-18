@@ -11,6 +11,7 @@ jobs:
       - image: circleci/golang:latest
     steps:
       - run: echo 'Starting Circle CI pipeline'
+      - checkout
       - run:
           name: Verify CI should run
           command: |
@@ -25,7 +26,6 @@ jobs:
             
             echo "should run? $SHOULD_RUN_PIPELINES"
 
-      # - checkout
       # - run:
       #   name: Dynamically generate the appropriate pipeline configuration
       #   command: |
