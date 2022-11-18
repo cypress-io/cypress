@@ -6,25 +6,32 @@ orbs:
   continuation: circleci/continuation@0.1.0
 
 jobs:
-  generate-config:
+  verify-ci-should-run:
     docker:
       - image: circleci/golang:latest
     steps:
-      - run: echo 'Starting Circle CI pipeline'
       - checkout
       - run:
           name: Verify CI should run
           command: |
-            SHOULD_RUN_PIPELINES=0
+            # RUN_PIPELINES=0
 
             # run CI when manually triggers via CircleCi Dashboard
             # [ <<pipeline.trigger_source>> ~= 'api' ] && SHOULD_RUN_PIPELINES=1 
             
             # only run CI when commit message includes 'run ci'
             LAST_LOG=$(git log -1 --grep="run ci" --pretty=%B)
-            [ -z "$LAST_LOG" ] && SHOULD_RUN_PIPELINES=0
+            [ -z "$LAST_LOG" ] && RUN_PIPELINES=0
             
-            echo "should run? $SHOULD_RUN_PIPELINES"
+            echo "should run? $RUN_PIPELINES"
+            if [ $RUN_PIPELINES -eq 0 ]; then
+              circleci-agent step halt
+            fi
+  fluff:
+    docker:
+      - image: circleci/golang:latest
+    steps:
+      - run: echo 'Next Step'
 
       # - run:
       #   name: Dynamically generate the appropriate pipeline configuration
@@ -45,7 +52,9 @@ workflows:
   # the always-run workflow is always triggered, regardless of the pipeline parameters.
   setup-workflow:
     jobs:
-      - generate-config
+      - run: echo 'Starting Circle CI pipeline'
+      - verify-ci-should-run
+      - fluff
     # jobs:
       # # the path-filtering/filter job determines which pipeline
       # # parameters to update.
