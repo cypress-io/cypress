@@ -362,7 +362,8 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       cy.get(averageDurationSelector('accounts_new.spec.js')).contains('2:03')
     })
 
-    it('lazily loads data for off-screen specs', { viewportHeight: 500 }, () => {
+    // TODO: Do we want to use virtialized list still?
+    it.skip('lazily loads data for off-screen specs', { viewportHeight: 500 }, () => {
       // make sure the virtualized list didn't load z008.spec.js
       cy.get(specRowSelector('z008.spec.js')).should('not.exist')
 
