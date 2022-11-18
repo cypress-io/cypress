@@ -50,5 +50,20 @@
     "src",
     "schemas"
   ],
-  "types": "src/index.ts"
+  "types": "src/index.ts",
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "packages/frontend-shared/src/generated",
+          "packages/app/src/generated",
+          "packages/launchpad/src/generated",
+          "packages/data-context/src/gen",
+          "packages/graphql/src/gen",
+          "packages/frontend-shared/cypress/support/generated",
+          "packages/graphql/schemas"
+        ]
+      }
+    }
+  }
 }
