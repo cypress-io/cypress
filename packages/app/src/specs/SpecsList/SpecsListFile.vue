@@ -48,6 +48,7 @@ const indexes = computed(() => {
   <RouterLink
     :style="{ paddingLeft: `${((node.parent.depth) * 10) + 22}px` }"
     data-cy="spec-list-file"
+    :data-cy-row="props.node.data.baseName"
     class="h-full outline-none ring-inset grid pr-20px group focus:outline-transparent focus-within:ring-indigo-300 focus-within:ring-1 children:cursor-pointer"
     :class="tableGridColumns"
     :to="route"

@@ -8,12 +8,6 @@
       :gql="query.data.value"
       @close="closeCreateSpecModal"
     />
-    <!-- <SpecsList
-      v-if="query.data.value.currentProject?.specs.length"
-      :gql="query.data.value"
-      :most-recent-update="mostRecentUpdate"
-      @showCreateSpecModal="showCreateSpecModal"
-    /> -->
     <NewSpecsList
       v-if="query.data.value.currentProject?.specs.length"
       :most-recent-update="mostRecentUpdate"

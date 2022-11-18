@@ -187,21 +187,27 @@ const resultCount = computed(
       :gql="props.gql"
     />
     <div
-      class="divide-y-1 border-gray-50 border-y-1 children:border-gray-50 children:h-40px"
+      class="spec-list-container"
+      :class="resultCount ? 'grid': 'hidden'"
     >
-      <SpecsListDirectory
-        :node="tree.root"
-        :handle-collapse="handleCollapse"
-        :project-connection-status="projectConnectionStatus"
-        :project-id="props.gql.currentProject?.projectId ?? undefined"
+      <!-- v-bind="containerProps" -->
+      <div
+        class="divide-y-1 border-gray-50 border-y-1 children:border-gray-50 children:h-40px"
+      >
+        <SpecsListDirectory
+          :node="tree.root"
+          :handle-collapse="handleCollapse"
+          :project-connection-status="projectConnectionStatus"
+          :project-id="props.gql.currentProject?.projectId ?? undefined"
+        />
+      </div>
+      <NoResults
+        v-show="resultCount === 0"
+        :search-term="specFilterModel"
+        :message="t('specPage.noResultsMessage')"
+        class="mt-56px"
+        @clear="handleClear"
       />
     </div>
-    <NoResults
-      v-show="resultCount === 0"
-      :search-term="specFilterModel"
-      :message="t('specPage.noResultsMessage')"
-      class="mt-56px"
-      @clear="handleClear"
-    />
   </div>
 </template>
