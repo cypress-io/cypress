@@ -10,7 +10,7 @@ import type {
   SpecsListFragment,
   Specs_SpecsListFragment,
 } from '../generated/graphql'
-import { computed, reactive, ref, toRef } from 'vue'
+import { computed, reactive, ref, toRef, watch } from 'vue'
 import SpecsListDirectory from './SpecsList/SpecsListDirectory.vue'
 import { getPlatform } from './tree/useCollapsibleTree'
 import SpecsListHeader from './SpecsListHeader.vue'
@@ -22,6 +22,7 @@ import { useCloudSpecData } from '../composables/useCloudSpecData'
 import SpecsListBanners from './SpecsListBanners.vue'
 import { useRoute } from 'vue-router'
 import SpecPatternModal from '../components/SpecPatternModal.vue'
+import { useOnline } from '@vueuse/core'
 
 const props = withDefaults(defineProps<{
   gql: Specs_SpecsListFragment
@@ -65,7 +66,11 @@ const isProjectDisconnected = computed(
     cloudProjectType.value !== 'CloudProject'
   },
 )
+const isOnline = useOnline()
 const isOffline = ref(false)
+
+watch(isOnline, (newIsOnlineValue) => isOffline.value = !newIsOnlineValue, { immediate: true })
+
 const showSpecPatternModal = ref(false)
 const mostRecentUpdateRef = toRef(props, 'mostRecentUpdate')
 
@@ -80,6 +85,14 @@ const normalizedSearchValue = (str: string = '') => {
 const { debouncedSpecFilterModel, specFilterModel } = useSpecFilter(
   props.gql.currentProject?.savedState?.specFilter,
 )
+
+// When search value changes or when specs are added/removed, reset so that any collapsed directories re-expand
+watch([
+  () => specFilterModel.value,
+  () => specs.value.length,
+], () => {
+  opts.collapsedDirs = new Set()
+})
 
 const tree = computed(() => {
   return deriveSpecTree(specs.value, {
@@ -105,7 +118,7 @@ const { refetchFailedCloudData } = useCloudSpecData(
   mostRecentUpdateRef,
   // @ts-ignore
   // ref([]),
-  allSpecFilesFromRoot.value.map((x) => x.data),
+  computed(() => allSpecFilesFromRoot.value.map((x) => x.data)),
   props.gql.currentProject?.specs as SpecsListFragment[] || [],
 )
 

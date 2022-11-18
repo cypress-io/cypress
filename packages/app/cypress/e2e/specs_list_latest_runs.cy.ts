@@ -145,7 +145,8 @@ function allVisibleSpecsShouldBePlaceholders () {
   cy.findAllByTestId('run-status-dot-2').should('not.exist')
   cy.findAllByTestId('run-status-dot-latest').should('not.exist')
 
-  cy.get('.spec-list-container').scrollTo('bottom')
+  cy.get('.spec-list-container')
+  // TODO: Add back if we need virtualization. .scrollTo('bottom')
 }
 
 describe('App/Cloud Integration - Latest runs and Average duration', { viewportWidth: 1200, viewportHeight: 900 }, () => {
@@ -365,7 +366,8 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       // make sure the virtualized list didn't load z008.spec.js
       cy.get(specRowSelector('z008.spec.js')).should('not.exist')
 
-      cy.get('.spec-list-container').scrollTo('bottom')
+      cy.get('.spec-list-container')
+      // TODO: Add back if we need virtualization. .scrollTo('bottom')
       // scrolling down should load z008.spec.js with loading status
       cy.get(dotsSkeletonSelector('z008.spec.js')).should('exist')
 
@@ -384,9 +386,10 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
 
         // Trigger cloud specs list change by scrolling
         cy.get('.spec-list-container')
-        .scrollTo('bottom', { duration: 500 })
+        // TODO: Add back if we need virtualization. .scrollTo('bottom')
+        // .scrollTo('bottom', { duration: 500 })
         .wait(100)
-        .scrollTo('top', { duration: 500 })
+        // .scrollTo('top', { duration: 500 })
 
         // Directory should still be collapsed
         cy.get('button[data-cy="row-directory-depth-1"]').first()
@@ -395,7 +398,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
 
       it('should expand all directories when search is performed', () => {
         // Collapse a directory
-        cy.get('button[data-cy="row-directory-depth-0"]').first()
+        cy.get('button[data-cy="row-directory-depth-1"]').first()
         .should('have.attr', 'aria-expanded', 'true')
         .click()
         .should('have.attr', 'aria-expanded', 'false')
@@ -671,7 +674,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23419
-    it.skip('shows offline alert then hides it after coming online', () => {
+    it('shows offline alert then hides it after coming online', () => {
       cy.findByTestId('offline-alert')
       .should('contain.text', defaultMessages.specPage.offlineWarning.title)
       .and('contain.text', defaultMessages.specPage.offlineWarning.explainer)
