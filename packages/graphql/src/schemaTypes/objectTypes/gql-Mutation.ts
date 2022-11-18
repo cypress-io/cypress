@@ -737,5 +737,17 @@ export const mutation = mutationType({
         return data
       },
     })
+
+    t.boolean('setRunAllSpecs', {
+      description: 'List of specs to run for the "Run All Specs" Feature',
+      args: {
+        runAllSpecs: nonNull(list(nonNull(stringArg()))),
+      },
+      resolve: (source, args, ctx) => {
+        ctx.project.setRunAllSpecs(args.runAllSpecs)
+
+        return true
+      },
+    })
   },
 })

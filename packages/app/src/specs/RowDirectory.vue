@@ -1,34 +1,36 @@
 <template>
-  <button
-    class="h-full grid gap-8px grid-cols-[14px,16px,auto] items-center focus:outline-none"
-    :data-cy="`row-directory-depth-${depth}`"
-    :aria-expanded="expanded"
-  >
-    <i-cy-chevron-down-small_x16
-      class="
-        mr-8px text-sm icon-dark-gray-300
-        group-hocus:(icon-dark-gray-700)
-      "
-      :class="{'transform rotate-270': !expanded}"
-    />
-    <component
-      :is="IconFolder"
-      class="icon-dark-white icon-light-gray-200"
-    />
-    <div
-      :title="name"
-      class="text-gray-600 truncate"
+  <div class="flex items-center h-full">
+    <button
+      class="grid gap-8px grid-cols-[14px,16px,auto,auto] items-center group focus:outline-none"
+      :data-cy="`row-directory-depth-${depth}`"
+      :aria-expanded="expanded"
     >
-      <HighlightedText
-        :text="name"
-        :indexes="indexes"
-        class="font-medium"
-        highlight-classes="text-gray-1000"
+      <i-cy-chevron-down-small_x16
+        class="
+          mr-8px text-sm icon-dark-gray-300
+          group-hocus:(icon-dark-gray-700)
+        "
+        :class="{'transform rotate-270': !expanded}"
       />
-      <slot />
-    </div>
-    <span class="sr-only">{{ expanded ? 'collapse' : 'expand' }}</span>
-  </button>
+      <component
+        :is="IconFolder"
+        class="icon-dark-white icon-light-gray-200"
+      />
+      <div
+        :title="name"
+        class="text-gray-600 truncate flex"
+      >
+        <HighlightedText
+          :text="name"
+          :indexes="indexes"
+          class="font-medium"
+          highlight-classes="text-gray-1000"
+        />
+      </div>
+      <span class="sr-only">{{ expanded ? 'collapse' : 'expand' }}</span>
+    </button>
+    <slot />
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -40,4 +42,5 @@ withDefaults(defineProps<{ name: string, expanded: boolean, indexes: number[], d
   expanded: false,
   indexes: () => [],
 })
+
 </script>

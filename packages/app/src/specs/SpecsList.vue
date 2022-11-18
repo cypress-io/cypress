@@ -86,8 +86,6 @@
           :grid-columns="tableGridColumns"
           :route="{ path: '/specs/runner', query: { file: row.data.data?.relative?.replace(/\\/g, '/') } }"
           @toggleRow="row.data.toggle"
-          @mouseleave="showRunAll = false"
-          @mouseenter="!row.data.isLeaf ? childrenSpecs(collapsible, row) : showRunAll = false"
         >
           <template #file>
             <SpecItem
@@ -113,13 +111,16 @@
               :depth="row.data.depth - 2"
               :style="{ paddingLeft: `${(row.data.depth - 2) * 10}px` }"
               :indexes="row.data.highlightIndexes"
+              :is-run-all-specs-allowed="isRunAllSpecsAllowed"
               :aria-controls="getIdIfDirectory(row)"
               @click.stop="row.data.toggle"
             >
               <RunAllSpecs
-                v-if="showRunAll && row.index === rowIndex"
+                v-if="isRunAllSpecsAllowed"
                 data-cy="run-all-specs"
-                :spec-number="children"
+                class="run-all hidden"
+                :spec-number="directoryChildren[row.data.id].length"
+                @runAllSpecs="onRunAllSpecs(row.data.id)"
               />
             </RowDirectory>
           </template>
@@ -207,6 +208,7 @@ import { useSpecFilter } from '../composables/useSpecFilter'
 import { useRequestAccess } from '../composables/useRequestAccess'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import RunAllSpecs from './RunAllSpecs.vue'
+import { useRunAllSpecs } from '../composables/useRunAllSpecs'
 
 const { openLoginConnectModal } = useLoginConnectStore()
 
@@ -379,6 +381,33 @@ const treeSpecList = computed(() => collapsible.value.tree.filter(((item) => !it
 
 const { containerProps, list, wrapperProps, scrollTo } = useVirtualList(treeSpecList, { itemHeight: 40, overscan: 10 })
 
+const childrenCalc = (rowId: string) => {
+  const filteredSpecs = collapsible.value.tree.reduce<string[]>((acc, node) => {
+    if (node.isLeaf && node.id.startsWith(rowId)) {
+      acc.push(node.data?.relative!)
+    }
+
+    return acc
+  }, [])
+
+  return filteredSpecs
+}
+
+const directoryChildren = computed(() => {
+  const map = collapsible.value.tree.reduce((acc, node) => {
+    if (!node.isLeaf) {
+      return {
+        ...acc,
+        [node.id]: childrenCalc(node.id),
+      }
+    }
+
+    return acc
+  }, {})
+
+  return map
+})
+
 const scrollbarOffset = ref(0)
 
 // Watch the sizing of the specs list so we can detect when a scrollbar is added/removed
@@ -426,16 +455,10 @@ const { refetchFailedCloudData } = useCloudSpecData(
   props.gql.currentProject?.specs as SpecsListFragment[] || [],
 )
 
-let children = ref(0)
-let showRunAll = ref(false)
-let rowIndex = ref()
+const { runAllSpecs, isRunAllSpecsAllowed } = useRunAllSpecs()
 
-// For run all specs
-function childrenSpecs (collapsible, row) {
-  showRunAll.value = true
-  rowIndex.value = row.index
-  //children.value = collapsible.dirMap.get(row.data.id)?.length
-  children.value = 48
+function onRunAllSpecs (rowId: string) {
+  runAllSpecs(directoryChildren.value[rowId])
 }
 
 </script>
@@ -451,5 +474,10 @@ function childrenSpecs (collapsible, row) {
 /** Search bar is 72px + List header is 40px = 112px offset */
 .spec-list-container {
   height: calc(100% - 112px)
+}
+
+/** For run all specs group hover to work */
+[data-cy=spec-list-directory]:hover .run-all {
+  display: block !important;
 }
 </style>

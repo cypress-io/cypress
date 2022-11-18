@@ -14,6 +14,7 @@
         hover-fill-color="indigo-100"
         class="ml-76px inline-flex align-text-bottom"
         data-cy="play-button"
+        @click.stop="emits('runAllSpecs')"
       />
     </button>
     <template
@@ -30,8 +31,9 @@
 
   <button
     v-else
-    class="group hover:text-indigo-700 space-x-2 items-center ml-28px"
+    class="group hover:text-indigo-700 space-x-2 items-center ml-28px text-gray-600"
     data-cy="run-all-specs-button"
+    @click.stop="emits('runAllSpecs')"
   >
     <IconActionPlaySmall
       size="16"
@@ -40,11 +42,11 @@
       hover-stroke-color="indigo-500"
       hover-fill-color="indigo-100"
       interactive-colors-on-group
-      class="inline-flex align-text-bottom"
+      class="group-hover: inline-flex align-text-bottom"
       data-cy="play-button"
     />
     <span
-      class="font-normal text-sm font-family: SFPro-Display inline-flex"
+      class="font-normal text-sm"
       data-cy="run-all-specs-text"
     >
       Run {{ specNumber }} specs
@@ -60,4 +62,9 @@ withDefaults(defineProps<{ specNumber: number, runner: boolean }>(), {
   specNumber: 0,
   runner: false,
 })
+
+const emits = defineEmits<{
+  (event: 'runAllSpecs'): void
+}>()
+
 </script>
