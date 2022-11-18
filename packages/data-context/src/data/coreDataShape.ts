@@ -129,7 +129,7 @@ export interface CoreDataShape {
     gqlSocketServer?: Maybe<SocketIONamespace>
   }
   hasInitializedMode: 'run' | 'open' | null
-  dashboardGraphQLError: ErrorWrapperSource | null
+  cloudGraphQLError: ErrorWrapperSource | null
   dev: DevStateShape
   localSettings: LocalSettingsDataShape
   app: AppDataShape
@@ -162,7 +162,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     machineBrowsers: null,
     allBrowsers: null,
     hasInitializedMode: null,
-    dashboardGraphQLError: null,
+    cloudGraphQLError: null,
     dev: {
       refreshState: null,
     },

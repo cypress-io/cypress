@@ -14,7 +14,8 @@
     "cypress:run-cypress-in-cypress": "cross-env HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS=http://localhost:4455 CYPRESS_REMOTE_DEBUGGING_PORT=6666 TZ=America/New_York",
     "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project .",
     "test": "yarn test-unit",
-    "test-unit": "mocha -r ts-node/register/transpile-only --config ./test/.mocharc.js"
+    "test-unit": "mocha -r ts-node/register/transpile-only --config ./test/.mocharc.js",
+    "lint": "eslint --ext .js,.ts,.json, ."
   },
   "dependencies": {
     "find-up": "6.3.0",

@@ -1046,7 +1046,7 @@ describe('e2e record', () => {
               code: 'RUN_GROUP_NAME_NOT_UNIQUE',
               message: 'Run group name cannot be used again without passing the parallel flag.',
               payload: {
-                runUrl: 'https://dashboard.cypress.io/runs/12345',
+                runUrl: 'https://cloud.cypress.io/runs/12345',
               },
             })
           },
@@ -1811,7 +1811,7 @@ describe('e2e record', () => {
                 tags,
                 warnings: [{
                   name: 'FreePlanExceedsMonthlyTests',
-                  message: 'Warning from Cypress Dashboard: Organization with free plan has exceeded monthly test results limit.',
+                  message: 'Warning from Cypress Cloud: Organization with free plan has exceeded monthly test results limit.',
                   code: 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS_V2',
                   used: 700,
                   limit: 500,

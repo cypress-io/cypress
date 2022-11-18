@@ -27,6 +27,10 @@ import path from 'node:path'
 const debug = Debug('test')
 
 describe('config/src/project/utils', () => {
+  beforeEach(function () {
+    delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
+  })
+
   before(function () {
     this.env = process.env;
 
