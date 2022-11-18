@@ -140,8 +140,6 @@ const { refetchFailedCloudData } = useCloudSpecData(
   isOffline,
   props.gql.currentProject?.projectId,
   mostRecentUpdateRef,
-  // @ts-ignore
-  // ref([]),
   computed(() => allSpecFilesFromRoot.value.map((x) => x.data)),
   props.gql.currentProject?.specs as SpecsListFragment[] || [],
 )
@@ -192,7 +190,6 @@ function handleClear () {
 }
 
 const { t } = useI18n()
-// result count is always count of files from root node
 </script>
 
 <template>
@@ -234,11 +231,11 @@ const { t } = useI18n()
       class="spec-list-container"
       :class="resultCount ? 'grid': 'hidden'"
     >
-      <!-- v-bind="containerProps" -->
       <div
         class="divide-y-1 border-gray-50 border-y-1 children:border-gray-50 children:h-40px"
       >
         <SpecsListDirectory
+          :key="tree.root.name"
           :node="tree.root"
           :handle-collapse="handleCollapse"
           :project-connection-status="projectConnectionStatus"

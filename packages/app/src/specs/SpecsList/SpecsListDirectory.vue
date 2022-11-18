@@ -33,7 +33,7 @@ function shouldShowDots (node: FileNode) {
 
 <template>
   <div
-    :style="{ paddingLeft: `${props.node.depth - 1 * 10}px` }"
+    :style="{ paddingLeft: `${(props.node.depth - 1) * 20}px` }"
     class="flex items-center"
     :data-cy="isRootNode ? '' : 'spec-list-directory'"
     :class="{ 'hidden-node': isRootNode }"
@@ -65,7 +65,7 @@ function shouldShowDots (node: FileNode) {
           highlight-classes="text-gray-1000"
         />
         <span class="text-gray-700 text-xs">
-          (Run {{ fileList.length }} specs)
+          (Run {{ fileList.length }} specs) [depth: {{ props.node.depth }}]
         </span>
       </div>
       <span class="sr-only">{{
