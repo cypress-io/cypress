@@ -596,7 +596,7 @@ describe('Launchpad: Setup Project', () => {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23153
-    it('makes the right command for pnpm', { retries: 15 }, () => {
+    it.skip('makes the right command for pnpm', () => {
       scaffoldAndOpenProject('pristine-pnpm')
 
       cy.visitLaunchpad()
@@ -609,7 +609,7 @@ describe('Launchpad: Setup Project', () => {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23153
-    it('makes the right command for npm', { retries: 15 }, () => {
+    it.skip('makes the right command for npm', () => {
       scaffoldAndOpenProject('pristine-npm')
 
       cy.visitLaunchpad()
