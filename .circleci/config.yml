@@ -54,7 +54,7 @@ workflows:
   setup-workflow:
     jobs:
       - verify-ci-should-run
-      - fluff
+      - fluff:
           requires:
             - verify-ci-should-run
     # jobs:
