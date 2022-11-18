@@ -46,7 +46,7 @@ jobs:
               fi
             fi
             
-            printf "should run? $RUN_PIPELINES"
+            echo "should run? $RUN_PIPELINES"
             if [ "$RUN_PIPELINES" -eq "0" ]; then
               printf "Don't run CI workflows\n"
               curl --request POST \
