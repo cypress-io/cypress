@@ -10,6 +10,7 @@ jobs:
     docker:
       - image: circleci/golang:latest
     steps:
+      - run: echo 'Starting Circle CI pipeline'
       - checkout
       - run:
           name: Verify CI should run
@@ -52,7 +53,6 @@ workflows:
   # the always-run workflow is always triggered, regardless of the pipeline parameters.
   setup-workflow:
     jobs:
-      - run: echo 'Starting Circle CI pipeline'
       - verify-ci-should-run
       - fluff
     # jobs:
