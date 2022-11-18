@@ -15,7 +15,7 @@ jobs:
       - run:
           name: Verify CI should run
           command: |
-            # RUN_PIPELINES=0
+            RUN_PIPELINES=1
 
             # run CI when manually triggers via CircleCi Dashboard
             # [ <<pipeline.trigger_source>> ~= 'api' ] && SHOULD_RUN_PIPELINES=1 
@@ -25,7 +25,7 @@ jobs:
             [ -z "$LAST_LOG" ] && RUN_PIPELINES=0
             
             echo "should run? $RUN_PIPELINES"
-            if [ $RUN_PIPELINES -eq 0 ]; then
+            if [[ $RUN_PIPELINES -eq 0 ]]; then
               circleci-agent step halt
             fi
   fluff:
@@ -55,6 +55,8 @@ workflows:
     jobs:
       - verify-ci-should-run
       - fluff
+        requires:
+          - verify-ci-should-run
     # jobs:
       # # the path-filtering/filter job determines which pipeline
       # # parameters to update.
