@@ -7,8 +7,6 @@ orbs:
 
 jobs:
   verify-ci-should-run:
-    docker:
-      - image: circleci/golang:latest
     steps:
       - checkout
       - run:
@@ -16,23 +14,24 @@ jobs:
           command: |
             # run CI when manually triggers via CircleCi Dashboard
             # [ <<pipeline.trigger_source>> ~= 'api' ] && SHOULD_RUN_PIPELINES=1
-  
+
             if [ -v "${CIRCLE_PULL_REQUEST##*/}" ]; then
               # Since we're piggybacking off of an existing OAuth var, tweak the var for our uses
-              token=$(printf "${GITHUB_TOKEN}" | cut -d':' -f1)
+              token=$(echo "${GITHUB_TOKEN}" | cut -d':' -f1)
 
               headers="Authorization: token $token"
               api_endpoint="https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}"
 
               # Fetch PR metadata from Github's API and parse fields from json
               github_res=$(curl --silent --header "${headers}" "${api_endpoint}" | jq '{draft: .draft}')
-              draft=$(printf "${github_res}" | jq '.draft')
+              draft=$(echo "${github_res}" | jq '.draft')
 
               if [[ "${draft}" == true ]]; then
-                printf "PR is a draft, skipping CI!\n"
+                echo "PR is a draft, skipping CI!"
                 RUN_PIPELINES=0
               else 
-                printf "Always run CI for PR that are ready for review!\n"
+                echo "Always run CI for PR that are ready for review!"
+                RUN_PIPELINES=1
               fi
             else
               # only run CI when commit message includes 'run ci'
@@ -40,15 +39,14 @@ jobs:
               [ -z "$LAST_LOG" ] && RUN_PIPELINES=0
               
               if [[ "$CIRCLE_BRANCH" == "develop" || "$CIRCLE_BRANCH" == "release/"* ]]; then
-                printf "Always run CI for develop and for release candidate branches.\n"
+                echo "Always run CI for develop and for release candidate branches."
 
                 RUN_PIPELINES=1
               fi
             fi
             
-            echo "should run? $RUN_PIPELINES"
             if [[ "$RUN_PIPELINES" -eq "0" ]]; then
-              printf "Don't run CI workflows\n"
+              echo "Don't run CI workflows"
               curl --request POST \
                 --url https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/cancel \
                 --header "Circle-Token: ${CIRCLE_TOKEN}"
@@ -56,8 +54,6 @@ jobs:
               exit 1  # If cancellation didn't run for some reason, fail the build.
             fi
   fluff:
-    docker:
-      - image: circleci/golang:latest
     steps:
       - run: echo 'Next Step'
 
