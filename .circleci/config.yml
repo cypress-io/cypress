@@ -29,12 +29,11 @@ jobs:
               echo "Don't run CI workflows"
               curl --request POST \
                 --url https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/cancel \
-                --header "Authorization: Basic ${CIRCLE_TOKEN}=:"
+                --header "Circle-Token: ${CIRCLE_TOKEN}"
               sleep 30  # Give cancellation a chance to run. This script then won't continue running.
               exit 1  # If cancellation didn't run for some reason, fail the build.
             else 
               echo 'Run CI workflow'
-
             fi
   fluff:
     docker:
@@ -62,7 +61,7 @@ workflows:
   setup-workflow:
     jobs:
       - verify-ci-should-run:
-          context: test-runner:poll-circle-workflow
+          context: workflow-setup
       - fluff:
           requires:
             - verify-ci-should-run
