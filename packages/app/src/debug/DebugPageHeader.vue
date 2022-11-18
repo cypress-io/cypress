@@ -4,8 +4,8 @@
     class="flex flex-col pb-24px gap-16px"
   >
     <div
-      :data-cy="`debug-header-${debug.id}`"
-      class="grid px-24px w-full overflow-hidden flex items-center border gap-y-2 py-24px"
+      :data-cy="`debug-header`"
+      class="grid px-24px w-full overflow-hidden flex items-center gap-y-2 py-24px"
     >
       <ul
         :data-cy="'header-top'"
@@ -19,21 +19,22 @@
           {{ debug.commitInfo.summary }}
         </li>
         <div
-          v-if="defaultscommitInfo.runNumber && commitsAhead"
-          class="border rounded border-gray-100 items-center text-sm h-6"
+          v-if="defaultscommitInfo.runNumber && props.commitsAhead"
+          class="border rounded border-gray-100 items-center flex text-sm h-6"
           data-cy="debug-runCommit-info"
         >
           <span
-            class="font-medium text-gray-700 border-r-1px px-2 mx-px items-center"
+            class="font-medium text-gray-700 px-2 mx-px items-center"
             data-cy="debug-runNumber"
           >
             {{ defaultscommitInfo.runNumber }}
           </span>
+          <div class="w-px h-3 my-6px bg-gray-100" />
           <span
             class="font-normal text-orange-500 px-2 mx-px items-center"
             data-cy="debug-commitsAhead"
           >
-            {{ commitsAhead }}
+            {{ props.commitsAhead }}
           </span>
         </div>
         <li class="-mt-8px text-lg text-gray-400">
@@ -154,6 +155,7 @@ fragment DebugPage on CloudRun {
 
 const props = defineProps<{
   gql: DebugPageFragment
+  commitsAhead: string
 }>()
 
 // These default values exist in case no values are returned by the query
@@ -183,9 +185,6 @@ const debug = computed(() => {
 })
 
 const relativeCreatedAt = computed(() => dayjs(new Date(debug.value.createdAt!)).fromNow())
-
-// We need a function to calculate the commits ahead property
-const commitsAhead = computed(() => 'You are 2 commits ahead')
 
 </script>
 <style scoped>

@@ -7,7 +7,7 @@ const defaults = [
   { attr: 'debug-header-branch', text: 'Branch Name: feature/DESIGN-183' },
   { attr: 'debug-header-commitHash', text: 'Commit Hash: b5e6fde' },
   { attr: 'debug-header-author', text: 'Commit Author: ankithmehta' },
-  { attr: 'debug-header-createdAt', text: 'Run Total Duration: 10m 30s (3 days ago) ' },
+  { attr: 'debug-header-createdAt', text: 'Run Total Duration: 10m 30s (4 days ago) ' },
 ]
 
 describe('<DebugPageHeader />', {
@@ -15,13 +15,12 @@ describe('<DebugPageHeader />', {
 },
 () => {
   it('displays all default values', () => {
-    cy.mount(() => (<DebugPageHeader/>))
-    cy.get('[data-cy=debug-header-3]').children().should('have.length', 2)
+    cy.mount(() => (<DebugPageHeader commitsAhead={'You are 2 commits ahead'}/>))
+    cy.get('[data-cy=debug-header]').children().should('have.length', 2)
     cy.get('[data-cy=debug-test-summary]')
-    .should('have.css', 'color', 'rgb(46, 50, 71)')
     .should('have.text', 'Adding a hover state to the button component')
 
-    cy.get('[data-cy=debug-runCommit-info]').children().should('have.length', 2)
+    cy.get('[data-cy=debug-runCommit-info]').children().should('have.length', 3)
     cy.get('[data-cy=debug-runNumber]')
     .should('have.text', 'Run #468')
     .should('have.css', 'color', 'rgb(90, 95, 122)')

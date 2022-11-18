@@ -24,7 +24,7 @@ describe('<DebugResults />', () => {
         cy.get(`[title=${defaultMessages.runs.results.failed}]`).should('contain.text', cloudRun.totalFailed)
         cy.get(`[title=${defaultMessages.runs.results.skipped}]`).should('contain.text', cloudRun.totalSkipped)
         cy.get(`[title=${defaultMessages.runs.results.pending}]`).should('contain.text', cloudRun.totalPending)
-        cy.get('[data-cy=failed-prefix]').should('exist')
+        cy.get('[data-cy=icon-prefix]').should('exist')
       })
     })
 
