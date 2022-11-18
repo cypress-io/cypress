@@ -7,6 +7,8 @@ orbs:
 
 jobs:
   verify-ci-should-run:
+    docker:
+      - image: circleci/golang:latest
     steps:
       - checkout
       - run:
@@ -54,6 +56,8 @@ jobs:
               exit 1  # If cancellation didn't run for some reason, fail the build.
             fi
   fluff:
+    docker:
+      - image: circleci/golang:latest
     steps:
       - run: echo 'Next Step'
 
