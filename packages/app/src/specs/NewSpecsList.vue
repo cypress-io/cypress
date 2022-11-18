@@ -10,7 +10,7 @@ import type {
   SpecsListFragment,
   Specs_SpecsListFragment,
 } from '../generated/graphql'
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, toRef } from 'vue'
 import SpecsListDirectory from './SpecsList/SpecsListDirectory.vue'
 import { getPlatform } from './tree/useCollapsibleTree'
 import SpecsListHeader from './SpecsListHeader.vue'
@@ -23,9 +23,12 @@ import SpecsListBanners from './SpecsListBanners.vue'
 import { useRoute } from 'vue-router'
 import SpecPatternModal from '../components/SpecPatternModal.vue'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   gql: Specs_SpecsListFragment
-}>()
+  mostRecentUpdate: string | null
+}>(), {
+  mostRecentUpdate: null,
+})
 
 const opts = reactive<SpecListOptions<SpecsListFragment>>({
   sep: '/',
@@ -64,7 +67,7 @@ const isProjectDisconnected = computed(
 )
 const isOffline = ref(false)
 const showSpecPatternModal = ref(false)
-const mostRecentUpdateRef = ref(null) // toRef(props.gql, 'mostRecentUpdate')
+const mostRecentUpdateRef = toRef(props, 'mostRecentUpdate')
 
 const specs = computed(() => {
   return props.gql.currentProject?.specs.slice() ?? []

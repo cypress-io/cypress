@@ -101,7 +101,7 @@ const isRootNode = computed(() => props.node.depth === 0)
       :key="child.relative"
       :node="child"
       :project-connection-status="props.projectConnectionStatus"
-      :handle-collapse="(node: DirectoryNode) => props.handleCollapse(node)"
+      :handle-collapse="props.handleCollapse"
     />
   </template>
 </template>
