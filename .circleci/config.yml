@@ -15,30 +15,24 @@ jobs:
       - run:
           name: Verify CI should run
           command: |
-            RUN_PIPELINES=1
+            RUN_PIPELINES=0
 
             # run CI when manually triggers via CircleCi Dashboard
             # [ <<pipeline.trigger_source>> ~= 'api' ] && SHOULD_RUN_PIPELINES=1 
             
             # only run CI when commit message includes 'run ci'
             LAST_LOG=$(git log -1 --grep="run ci" --pretty=%B)
-            [ -z "$LAST_LOG" ] && RUN_PIPELINES=0
+            [ -z "$LAST_LOG" ] && RUN_PIPELINES=1
             
             echo "should run? $RUN_PIPELINES"
             if [ "$RUN_PIPELINES" -eq "0" ]; then
               echo "Don't run CI workflows"
               curl --request POST \
-                --url https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/cancel \
-                --header "Circle-Token: ${CIRCLE_TOKEN}"
+                --url https://${CIRCLE_TOKEN}@circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/cancel
               sleep 30  # Give cancellation a chance to run. This script then won't continue running.
               exit 1  # If cancellation didn't run for some reason, fail the build.
             else 
               echo 'Run CI workflow'
-                curl --request POST \
-                --url https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/cancel \
-                --header "Circle-Token: ${CIRCLE_TOKEN}"
-              sleep 30  # Give cancellation a chance to run. This script then won't continue running.
-              exit 1  # If cancellation didn't run for some reason, fail the build.
             fi
   fluff:
     docker:
