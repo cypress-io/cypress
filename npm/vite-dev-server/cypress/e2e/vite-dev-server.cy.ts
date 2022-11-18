@@ -125,7 +125,7 @@ describe('sourcemaps', () => {
 
     const verifySourcemap = (specName: string, line: number, column: number) => {
       cy.visitApp()
-      cy.contains(specName).click()
+      cy.get('[data-cy="spec-item"]').contains(specName).click()
       cy.waitForSpecToFinish()
       cy.get('.failed > .num').should('contain', 2)
       cy.get('.runnable-err-file-path', { timeout: 250 }).should('contain', `${specName}:${line}:${column}`)
