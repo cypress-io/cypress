@@ -243,7 +243,7 @@ interface GroupedNodes<T extends { relative: string }> {
 export function groupSpecTreeNodes<T extends BaseSpec> (
   node: SpecTreeDirectoryNode<T>,
 ): GroupedNodes<T> {
-  return node.children.reduce<GroupedNodes<T>>(
+  const group = node.children.reduce<GroupedNodes<T>>(
     (acc, curr) => {
       if (curr.type === 'file') {
         acc.files.push(curr)
@@ -258,6 +258,12 @@ export function groupSpecTreeNodes<T extends BaseSpec> (
       directories: [],
     },
   )
+
+  // rememember, Array.prototype.sort mutates the array.
+  group.directories.sort((x, y) => x.name.localeCompare(y.name))
+  group.files.sort((x, y) => x.name.localeCompare(y.name))
+
+  return group
 }
 
 export function getAllFileInDirectory<T extends BaseSpec> (
