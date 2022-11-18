@@ -28,11 +28,17 @@
   "targetDefaults": {
     "build": {
       "dependsOn": [
+        "prebuild",
         "^build"
       ],
       "inputs": [
         "production",
         "^production"
+      ]
+    },
+    "postbuild": {
+      "dependsOn": [
+        "build"
       ]
     },
     "lint": {
@@ -44,7 +50,7 @@
     },
     "build-prod": {
       "dependsOn": [
-        "^build",
+        "build",
         "build-prod-ui"
       ]
     }
