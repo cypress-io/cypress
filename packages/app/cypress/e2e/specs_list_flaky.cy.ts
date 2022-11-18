@@ -73,7 +73,7 @@ describe('App: Spec List - Flaky Indicator', () => {
       const isFlaky = specName.includes('123.spec.js')
 
       cy.wrap(item).find('[data-cy="flaky-badge"]')
-      .should(isFlaky ? 'be.visible' : 'not.exist')
+      .should(isFlaky ? 'exist' : 'not.exist')
 
       isFlaky ? flakyCounter++ : nonFlakyCounter++
     })

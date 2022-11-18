@@ -7,11 +7,13 @@ import type { DirectoryNode, ProjectConnectionStatus, FileNode } from '../tree/t
 import HighlightedText from '../HighlightedText.vue'
 import RunStatusDots from '../RunStatusDots.vue'
 import AverageDuration from '../AverageDuration.vue'
+import FlakyInformation from '../flaky-badge/FlakyInformation.vue'
+import type { FlakyInformationProjectFragment } from '../../generated/graphql'
 
 const props = defineProps<{
   node: DirectoryNode
   projectConnectionStatus: ProjectConnectionStatus
-  projectId?: string
+  gqlProject: FlakyInformationProjectFragment | null
   handleCollapse: (node: DirectoryNode) => void
 }>()
 
@@ -78,8 +80,17 @@ function shouldShowDots (node: FileNode) {
       :key="file.data.relative"
       :node="file"
       :project-connection-status="props.projectConnectionStatus"
-      :project-id="props.projectId"
+      :project-id="props.gqlProject?.projectId ?? undefined"
     >
+      <template #flaky-information>
+        <span class="ml-2 inline-block">
+          <FlakyInformation
+            :project-gql="props.gqlProject"
+            :spec-gql="file.data"
+            :cloud-spec-gql="file.data.cloudSpec"
+          />
+        </span>
+      </template>
       <template #latest-runs>
         <div class="h-full grid justify-items-end items-center relative">
           <!-- status: {{ file.data.cloudSpec?.fetchingStatus }} -->
@@ -108,6 +119,7 @@ function shouldShowDots (node: FileNode) {
       :node="child"
       :project-connection-status="props.projectConnectionStatus"
       :handle-collapse="props.handleCollapse"
+      :gql-project="props.gqlProject"
     />
   </template>
 </template>

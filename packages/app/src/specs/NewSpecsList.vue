@@ -242,7 +242,7 @@ const { t } = useI18n()
           :node="tree.root"
           :handle-collapse="handleCollapse"
           :project-connection-status="projectConnectionStatus"
-          :project-id="props.gql.currentProject?.projectId ?? undefined"
+          :gql-project="props.gql.currentProject"
         />
       </div>
     </div>

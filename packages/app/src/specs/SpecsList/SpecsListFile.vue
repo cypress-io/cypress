@@ -78,6 +78,7 @@ const indexes = computed(() => {
             class="font-light group-hocus:text-gray-400"
             highlight-classes="text-gray-1000"
           />
+          <slot name="flaky-information" />
         </div>
       </div>
     </div>
