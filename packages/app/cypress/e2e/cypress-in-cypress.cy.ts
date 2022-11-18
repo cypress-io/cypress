@@ -287,7 +287,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.get('[href="#/runs"]').click()
       cy.location('hash').should('eq', '#/runs')
       cy.get('[href="#/specs"').click()
-      cy.contains('accounts_list.spec').should('be.visible')
+      cy.contains('accounts_list.spec').scrollIntoView().should('be.visible')
     })
   })
 
