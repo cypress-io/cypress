@@ -55,7 +55,8 @@ workflows:
   # the always-run workflow is always triggered, regardless of the pipeline parameters.
   setup-workflow:
     jobs:
-      - verify-ci-should-run
+      - verify-ci-should-run:
+        context: test-runner:poll-circle-workflow
       - fluff:
           requires:
             - verify-ci-should-run
