@@ -39,7 +39,7 @@ jobs:
               LAST_LOG=$(git log -1 --grep="run ci" --pretty=%B)
               [ -z "$LAST_LOG" ] && RUN_PIPELINES=0
               
-              if [[ "$CIRCLE_BRANCH" == "develop" || "$CIRCLE_BRANCH" == "release/"* ]]; then
+              if [[ "$CIRCLE_BRANCH" == "develop"]] || [[ "$CIRCLE_BRANCH" == "release/"* ]]; then
                 printf "Always run CI for develop and for release candidate branches.\n"
 
                 RUN_PIPELINES=1
@@ -47,7 +47,7 @@ jobs:
             fi
             
             echo "should run? $RUN_PIPELINES"
-            if [ "$RUN_PIPELINES" -eq "0" ]; then
+            if [[ "$RUN_PIPELINES" -eq "0" ]]; then
               printf "Don't run CI workflows\n"
               curl --request POST \
                 --url https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/cancel \
