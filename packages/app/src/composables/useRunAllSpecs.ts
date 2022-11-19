@@ -25,9 +25,11 @@ mutation RunAllSpecs ($specPath: String!, $runAllSpecs: [String!]!) {
 } 
 `
 
+const isRunMode = window.__CYPRESS_MODE__ === 'run' && window.top === window
+
 export function useRunAllSpecs () {
   const router = useRouter()
-  const query = useQuery({ query: RunAllSpecs_ConfigDocument })
+  const query = useQuery({ query: RunAllSpecs_ConfigDocument, pause: isRunMode })
   const setRunAllSpecsMutation = useMutation(RunAllSpecsDocument)
 
   return {
