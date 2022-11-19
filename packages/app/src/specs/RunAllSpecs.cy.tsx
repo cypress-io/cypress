@@ -14,7 +14,7 @@ describe('<RunAllSpecs/>', () => {
 
     it('renders play icon and expected text', () => {
       cy.findByTestId('run-all-specs-button').children().should('have.length', 2)
-      //cy.findByTestId('run-all-specs-button').should('contain.text', 'Run 25 specs')
+      cy.findByTestId('run-all-specs-button').should('contain.text', 'Run 25 specs')
       cy.findByTestId('play-button').should('be.visible')
     })
 
@@ -27,7 +27,7 @@ describe('<RunAllSpecs/>', () => {
       cy.findByTestId('run-all-specs-text')
       .should('have.css', 'font-size', '14px')
       .should('have.css', 'font-weight', '400')
-      .should('have.css', 'display', 'inline-flex')
+      .should('have.css', 'display', 'inline')
       .should('have.css', 'line-height', '20px')
 
       cy.findByTestId('run-all-specs-button').realHover().then(() => {

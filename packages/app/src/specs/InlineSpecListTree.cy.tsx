@@ -75,32 +75,4 @@ describe('InlineSpecListTree', () => {
 
     cy.percySnapshot()
   })
-
-  it('displays runAllSpecs when hovering over a spec-list directory row', () => {
-    const specProp = ref(foundSpecs.slice(0, 4))
-
-    cy.mount(() => (
-      <div class="bg-gray-1000">
-        <InlineSpecListTree specs={specProp.value}/>
-      </div>
-    ))
-
-    cy.findAllByTestId('directory-item').first()
-    .trigger('mouseenter').then(() => {
-      cy.get('[data-cy="play-button"]').should('exist')
-      cy.get('[data-cy="run-all-specs"]')
-      .realHover().then(() => {
-        cy.findByTestId('tooltip-content').should('contain.text', 'Run 48 specs')
-      })
-    })
-
-    cy.findAllByTestId('spec-file-item').first()
-    .trigger('mouseenter').then(() => {
-      cy.get('[data-cy="run-all-specs"]')
-      .should('not.exist')
-    })
-  })
 })
-
-// To do: Test that run-all specs shows up with the correct number of specs on hover and not just a default value
-// To do: Test that this only shows up in E2E testing

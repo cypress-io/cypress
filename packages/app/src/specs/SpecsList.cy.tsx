@@ -2,14 +2,33 @@ import SpecsList from './SpecsList.vue'
 import { Specs_SpecsListFragmentDoc, SpecsListFragment, TestingTypeEnum, SpecFilter_SetPreferencesDocument } from '../generated/graphql-test'
 import { defaultMessages } from '@cy/i18n'
 
+const hoverRunAllSpecs = (directory?: string, specNumber?: number) => {
+  let command
+
+  if (directory) {
+    command = cy.contains('[data-cy=spec-item-directory]', directory)
+  } else {
+    command = cy.get('[data-cy=spec-item-directory]').first()
+  }
+
+  return command.realHover().within(() => {
+    cy.get('[data-cy=run-all-specs]').should('contain.text', ` Run ${specNumber} specs `).realHover().then(() => {
+      cy.findByTestId('run-all-specs-text').should('have.css', 'color', 'rgb(47, 58, 176)')
+      cy.findByTestId('play-button').should('have.css', 'color', 'rgb(47, 58, 176)')
+    })
+
+    cy.get('[data-cy="play-button"]').should('exist')
+  })
+}
+
 describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
   let specs: Array<SpecsListFragment>
 
-  function mountWithTestingType (testingType: TestingTypeEnum | undefined, specFilter?: string) {
+  function mountWithTestingType ({ testingType, specFilter, experimentalRunAllSpecs }: { testingType?: TestingTypeEnum, specFilter?: string, experimentalRunAllSpecs?: boolean } = {}) {
     specs = []
     const showCreateSpecModalSpy = cy.spy().as('showCreateSpecModalSpy')
 
-    cy.mountFragment(Specs_SpecsListFragmentDoc, {
+    return cy.mountFragment(Specs_SpecsListFragmentDoc, {
       variableTypes: {
         hasBranch: 'Boolean',
       },
@@ -28,6 +47,10 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
           ctx.currentProject.savedState = { specFilter }
         }
 
+        if (experimentalRunAllSpecs) {
+          ctx.currentProject.config = [{ field: 'experimentalRunAllSpecs', value: true }]
+        }
+
         return ctx
       },
       render: (gqlVal) => {
@@ -39,7 +62,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
   context('when testingType is unset', () => {
     describe('with no saved filter', () => {
       beforeEach(() => {
-        mountWithTestingType(undefined)
+        mountWithTestingType({})
       })
 
       it('should filter specs', () => {
@@ -193,32 +216,12 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
           cy.viewport(2000, 850)
           cy.percySnapshot('widest')
         })
-
-        it('displays runAllSpecs when hovering over a spec-list directory row', () => {
-          cy.get('[data-cy="spec-list-directory"]').first()
-          .trigger('mouseenter').then(() => {
-            cy.get('[data-cy="run-all-specs"]')
-            .should('contain.text', 'Run 48 specs')
-            .realHover().then(() => {
-              cy.findByTestId('run-all-specs-text').should('have.css', 'color', 'rgb(47, 58, 176)')
-              cy.findByTestId('play-button').should('have.css', 'color', 'rgb(47, 58, 176)')
-            })
-
-            cy.get('[data-cy="play-button"]').should('exist')
-          })
-
-          cy.get('[data-cy="spec-list-file"]').first()
-          .trigger('mouseenter').then(() => {
-            cy.get('[data-cy="run-all-specs"]')
-            .should('not.exist')
-          })
-        })
       })
     })
 
     describe('with a saved spec filter', () => {
       beforeEach(() => {
-        mountWithTestingType(undefined, 'saved-search-term 🗑')
+        mountWithTestingType({ specFilter: 'saved-search-term 🗑' })
         cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
         .as('searchField')
 
@@ -283,26 +286,36 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
 
   context('when testingType is e2e', () => {
     beforeEach(() => {
-      mountWithTestingType('e2e')
+      mountWithTestingType({ testingType: 'e2e' })
     })
 
     it('should display the e2e testing header', () => {
       cy.findByTestId('specs-testing-type-header').should('have.text', 'E2E specs')
     })
-    // Test that the run-all specs shows ups
   })
 
   context('when testingType is component', () => {
     beforeEach(() => {
-      mountWithTestingType('component')
+      mountWithTestingType({ testingType: 'component' })
     })
 
     it('should display the component testing header', () => {
       cy.findByTestId('specs-testing-type-header').should('have.text', 'Component specs')
     })
+  })
 
-    // Test that the run all specs does not show up
+  describe('Run all Specs', () => {
+    it('displays runAllSpecs when hovering over a spec-list directory row', () => {
+      mountWithTestingType({ experimentalRunAllSpecs: true })
+      hoverRunAllSpecs('__test__', 5)
+      hoverRunAllSpecs('frontend', 11)
+      hoverRunAllSpecs('components', 6)
+    })
+
+    it('checks if functionality works after a search', () => {
+      mountWithTestingType({ experimentalRunAllSpecs: true, specFilter: 'base' })
+      hoverRunAllSpecs('__test__', 2)
+      hoverRunAllSpecs('frontend/components', 2)
+    })
   })
 })
-
-// To do: Test that run-all specs shows up with the correct number of specs on hover and not just a default value

@@ -113,7 +113,7 @@
               :indexes="row.data.highlightIndexes"
               :is-run-all-specs-allowed="isRunAllSpecsAllowed"
               :aria-controls="getIdIfDirectory(row)"
-              @click.stop="row.data.toggle"
+              @toggle="() => row.data.toggle()"
             >
               <RunAllSpecs
                 v-if="isRunAllSpecsAllowed"
@@ -381,31 +381,20 @@ const treeSpecList = computed(() => collapsible.value.tree.filter(((item) => !it
 
 const { containerProps, list, wrapperProps, scrollTo } = useVirtualList(treeSpecList, { itemHeight: 40, overscan: 10 })
 
-const childrenCalc = (rowId: string) => {
-  const filteredSpecs = collapsible.value.tree.reduce<string[]>((acc, node) => {
-    if (node.isLeaf && node.id.startsWith(rowId)) {
-      acc.push(node.data?.relative!)
-    }
-
-    return acc
-  }, [])
-
-  return filteredSpecs
-}
-
 const directoryChildren = computed(() => {
-  const map = collapsible.value.tree.reduce((acc, node) => {
+  return collapsible.value.tree.reduce<{[key: string]: string[]}>((acc, node) => {
     if (!node.isLeaf) {
-      return {
-        ...acc,
-        [node.id]: childrenCalc(node.id),
-      }
+      acc[node.id] = []
+    } else {
+      Object.keys(acc).forEach((dir) => {
+        if (node.id.startsWith(dir)) {
+          acc[dir].push(node.id)
+        }
+      })
     }
 
     return acc
   }, {})
-
-  return map
 })
 
 const scrollbarOffset = ref(0)

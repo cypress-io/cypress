@@ -21,7 +21,7 @@
       #popper
     >
       <span
-        class="font-normal text-sm font-family: SFPro-Display inline-flex"
+        class="font-normal text-sm inline-flex"
         data-cy="tooltip-content"
       >
         Run {{ specNumber }} specs
@@ -31,7 +31,7 @@
 
   <button
     v-else
-    class="group hover:text-indigo-700 space-x-2 items-center ml-28px text-gray-600"
+    class="group hover:text-indigo-700 space-x-2 items-center ml-28px text-gray-600 whitespace-nowrap"
     data-cy="run-all-specs-button"
     @click.stop="emits('runAllSpecs')"
   >

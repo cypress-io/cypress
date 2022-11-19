@@ -167,31 +167,20 @@ const resetFocusIfNecessary = (row, index) => {
   }
 }
 
-const childrenCalc = (rowId: string) => {
-  const filteredSpecs = collapsible.value.tree.reduce<string[]>((acc, node) => {
-    if (node.isLeaf && node.id.startsWith(rowId)) {
-      acc.push(node.data?.relative!)
-    }
-
-    return acc
-  }, [])
-
-  return filteredSpecs
-}
-
 const directoryChildren = computed(() => {
-  const map = collapsible.value.tree.reduce((acc, node) => {
+  return collapsible.value.tree.reduce<{[key: string]: string[]}>((acc, node) => {
     if (!node.isLeaf) {
-      return {
-        ...acc,
-        [node.id]: childrenCalc(node.id),
-      }
+      acc[node.id] = []
+    } else {
+      Object.keys(acc).forEach((dir) => {
+        if (node.id.startsWith(dir)) {
+          acc[dir].push(node.id)
+        }
+      })
     }
 
     return acc
   }, {})
-
-  return map
 })
 
 const { runAllSpecs, isRunAllSpecsAllowed } = useRunAllSpecs()

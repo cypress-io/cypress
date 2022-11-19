@@ -4,6 +4,7 @@
       class="grid gap-8px grid-cols-[14px,16px,auto,auto] items-center group focus:outline-none"
       :data-cy="`row-directory-depth-${depth}`"
       :aria-expanded="expanded"
+      @click.stop="emits('toggle')"
     >
       <i-cy-chevron-down-small_x16
         class="
@@ -42,5 +43,9 @@ withDefaults(defineProps<{ name: string, expanded: boolean, indexes: number[], d
   expanded: false,
   indexes: () => [],
 })
+
+const emits = defineEmits<{
+  (event: 'toggle'): void
+}>()
 
 </script>

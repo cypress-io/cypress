@@ -4,8 +4,25 @@ import { defaultMessages } from '@cy/i18n'
 
 let specs: Array<any> = []
 
+const hoverRunAllSpecs = (directory?: string, specNumber?: number) => {
+  let command
+
+  if (directory) {
+    command = cy.contains('[data-cy=directory-item]', directory)
+  } else {
+    command = cy.get('[data-cy=directory-item]').first()
+  }
+
+  return command.realHover().then(() => {
+    cy.get('[data-cy=play-button]').should('exist')
+    cy.get('[data-cy=run-all-specs]').realHover().then(() => {
+      cy.get('[data-cy=tooltip-content]').should('contain.text', ` Run ${specNumber} specs `)
+    })
+  })
+}
+
 describe('InlineSpecList', () => {
-  const mountInlineSpecList = (specFilter?: string) => cy.mountFragment(Specs_InlineSpecListFragmentDoc, {
+  const mountInlineSpecList = ({ specFilter, experimentalRunAllSpecs }: {specFilter?: string, experimentalRunAllSpecs?: boolean} = {}) => cy.mountFragment(Specs_InlineSpecListFragmentDoc, {
     onResult: (ctx) => {
       if (!ctx.currentProject?.specs) {
         return ctx
@@ -14,6 +31,10 @@ describe('InlineSpecList', () => {
       specs = ctx.currentProject.specs = specs.map((spec) => ({ __typename: 'Spec', ...spec, id: spec.relative }))
       if (specFilter) {
         ctx.currentProject.savedState = { specFilter }
+      }
+
+      if (experimentalRunAllSpecs) {
+        ctx.currentProject.config = [{ field: 'experimentalRunAllSpecs', value: true }]
       }
 
       return ctx
@@ -33,7 +54,7 @@ describe('InlineSpecList', () => {
     })
 
     it('should render a list of specs', () => {
-      mountInlineSpecList()
+      mountInlineSpecList({})
       cy.get('li')
       .should('exist')
       .and('have.length', 7)
@@ -48,7 +69,7 @@ describe('InlineSpecList', () => {
     })
 
     it('should support fuzzy sort', () => {
-      mountInlineSpecList()
+      mountInlineSpecList({})
       cy.get('input').type('compspec')
 
       cy.get('li').should('have.length', 4)
@@ -62,7 +83,7 @@ describe('InlineSpecList', () => {
     })
 
     it('should open CreateSpec modal', () => {
-      mountInlineSpecList()
+      mountInlineSpecList({})
       const newSpecSelector = `[aria-label="New spec"]`
 
       cy.get(newSpecSelector).click()
@@ -147,7 +168,7 @@ describe('InlineSpecList', () => {
     beforeEach(() => {
       cy.fixture('found-specs').then((foundSpecs) => specs = foundSpecs)
 
-      mountInlineSpecList('saved-search-term 🗑')
+      mountInlineSpecList({ specFilter: 'saved-search-term 🗑' })
       cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
       .as('searchField')
 
@@ -182,6 +203,22 @@ describe('InlineSpecList', () => {
       cy.wrap(setSpecFilterStub).should('have.been.calledWith', 'te')
       cy.get('@searchField').type('{backspace}{backspace}')
       cy.wrap(setSpecFilterStub).should('have.been.calledWith', '')
+    })
+  })
+
+  describe('Run all Specs', () => {
+    beforeEach(() => {
+      cy.fixture('found-specs').then((foundSpecs) => specs = foundSpecs)
+    })
+
+    it('displays runAllSpecs when hovering over a spec-list directory row', () => {
+      mountInlineSpecList({ experimentalRunAllSpecs: true })
+      hoverRunAllSpecs('src', 4)
+    })
+
+    it('checks if functionality works after a search', () => {
+      mountInlineSpecList({ experimentalRunAllSpecs: true, specFilter: 'B' })
+      hoverRunAllSpecs('src', 1)
     })
   })
 })
