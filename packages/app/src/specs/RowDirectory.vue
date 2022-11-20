@@ -13,10 +13,7 @@
         "
         :class="{'transform rotate-270': !expanded}"
       />
-      <component
-        :is="IconFolder"
-        class="icon-dark-white icon-light-gray-200"
-      />
+      <IconFolder class="icon-dark-white icon-light-gray-200" />
       <div
         :title="name"
         class="text-gray-600 truncate flex"
