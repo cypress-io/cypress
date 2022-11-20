@@ -53,14 +53,16 @@
             :indexes="row.data.highlightIndexes"
             data-cy="directory-item"
           >
-            <RunAllSpecs
-              v-if="isRunAllSpecsAllowed"
-              data-cy="run-all-specs"
-              class="run-all hidden"
-              :spec-number="directoryChildren[row.data.id].length"
-              :runner="true"
-              @runAllSpecs="onRunAllSpecs(row.data.id)"
-            />
+            <template #run-all-specs>
+              <RunAllSpecs
+                v-if="isRunAllSpecsAllowed"
+                data-cy="run-all-specs"
+                class="run-all hidden"
+                :spec-number="directoryChildren[row.data.id].length"
+                :runner="true"
+                @runAllSpecs="onRunAllSpecs(row.data.id)"
+              />
+            </template>
           </DirectoryItem>
         </RouterLink>
       </li>
