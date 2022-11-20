@@ -170,7 +170,7 @@ const resetFocusIfNecessary = (row, index) => {
 }
 
 const directoryChildren = computed(() => {
-  return collapsible.value.tree.reduce<{[key: string]: string[]}>((acc, node) => {
+  return collapsible.value.tree.reduce<Record<string, string[]>>((acc, node) => {
     if (!node.isLeaf) {
       acc[node.id] = []
     } else {
