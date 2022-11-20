@@ -54,7 +54,7 @@ describe('InlineSpecList', () => {
     })
 
     it('should render a list of specs', () => {
-      mountInlineSpecList({})
+      mountInlineSpecList()
       cy.get('li')
       .should('exist')
       .and('have.length', 7)
@@ -69,7 +69,7 @@ describe('InlineSpecList', () => {
     })
 
     it('should support fuzzy sort', () => {
-      mountInlineSpecList({})
+      mountInlineSpecList()
       cy.get('input').type('compspec')
 
       cy.get('li').should('have.length', 4)
@@ -83,7 +83,7 @@ describe('InlineSpecList', () => {
     })
 
     it('should open CreateSpec modal', () => {
-      mountInlineSpecList({})
+      mountInlineSpecList()
       const newSpecSelector = `[aria-label="New spec"]`
 
       cy.get(newSpecSelector).click()
