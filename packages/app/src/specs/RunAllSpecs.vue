@@ -58,8 +58,7 @@
 import { IconActionPlaySmall } from '@cypress-design/vue-icon'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 
-withDefaults(defineProps<{ specNumber: number, runner: boolean }>(), {
-  specNumber: 0,
+withDefaults(defineProps<{ specNumber: number, runner?: boolean }>(), {
   runner: false,
 })
 
