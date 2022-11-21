@@ -29,9 +29,7 @@ const VISIT_OPTS = 'url log onBeforeLoad onLoad timeout requestTimeout'
 const reset = (test: any = {}) => {
   knownCommandCausedInstability = false
 
-  if (Cypress.state('testIsolation') === 'on') {
-    previouslyVisitedLocation = undefined
-  }
+  previouslyVisitedLocation = undefined
 
   id = test.id
 }
