@@ -12,7 +12,7 @@
         fill-color="transparent"
         hover-stroke-color="indigo-500"
         hover-fill-color="indigo-100"
-        class="ml-76px inline-flex align-text-bottom"
+        class="inline-flex align-text-bottom"
         data-cy="play-button"
         @click.stop="emits('runAllSpecs')"
       />
