@@ -51,7 +51,7 @@
         </li>
       </ul>
       <ul
-        :data-cy="'metadata'"
+        data-cy="metadata"
         class="flex flex-wrap gap-x-2 items-center whitespace-nowrap children:flex children:items-center font-normal text-sm text-gray-700"
       >
         <li
@@ -148,7 +148,7 @@ const relativeCreatedAt = computed(() => dayjs(new Date(debug.value.createdAt!))
 
 </script>
 <style scoped>
-ul:nth-child(2) li:not(:first-child)::before {
+[data-cy=metadata] li:not(:first-child)::before {
   content: '.';
   @apply -mt-8px text-lg text-gray-400 pr-8px
 }
