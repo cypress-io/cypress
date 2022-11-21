@@ -9,11 +9,7 @@ describe('run-all-specs', () => {
   }
 
   const clickRunAllSpecs = (directory: string) => {
-    let command = cy.get('[data-cy=spec-item-directory]')
-
-    if (directory) {
-      command = command.contains(directory)
-    }
+    const command = cy.get('[data-cy=spec-item-directory]').contains(directory)
 
     return command.realHover().then(() => {
       cy.get(`[data-cy="run-all-specs-for-${directory}"]`).click({ force: true })

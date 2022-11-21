@@ -2,22 +2,11 @@ import SpecsList from './SpecsList.vue'
 import { Specs_SpecsListFragmentDoc, SpecsListFragment, TestingTypeEnum, SpecFilter_SetPreferencesDocument } from '../generated/graphql-test'
 import { defaultMessages } from '@cy/i18n'
 
-const hoverRunAllSpecs = (directory?: string, specNumber?: number) => {
-  let command
-
-  if (directory) {
-    command = cy.contains('[data-cy=spec-item-directory]', directory)
-  } else {
-    command = cy.get('[data-cy=spec-item-directory]').first()
-  }
-
-  return command.realHover().within(() => {
-    cy.get('[data-cy=run-all-specs]').should('contain.text', ` Run ${specNumber} specs `).realHover().then(() => {
-      cy.findByTestId('run-all-specs-text').should('have.css', 'color', 'rgb(47, 58, 176)')
-      cy.findByTestId('play-button').should('have.css', 'color', 'rgb(47, 58, 176)')
-    })
-
+const hoverRunAllSpecs = (directory: string, specNumber: number) => {
+  cy.contains('[data-cy=spec-item-directory]', directory).realHover().then(() => {
+    cy.get(`[data-cy="run-all-specs-for-${directory}"]`).should('contain.text', ` Run ${specNumber} specs `)
     cy.get('[data-cy="play-button"]').should('exist')
+    cy.percySnapshot()
   })
 }
 
