@@ -8,6 +8,7 @@ import SessionsManager from './manager'
 import {
   getConsoleProps,
   navigateAboutBlank,
+  SESSION_STEPS,
   statusMap,
 } from './utils'
 
@@ -38,8 +39,6 @@ export default function (Commands, Cypress, cy) {
 
   const sessionsManager = new SessionsManager(Cypress, cy)
   const sessions = sessionsManager.sessions
-
-  type SESSION_STEPS = 'create' | 'restore' | 'recreate' | 'validate'
 
   Cypress.on('run:start', () => {
     // @ts-ignore
@@ -149,6 +148,7 @@ export default function (Commands, Cypress, cy) {
 
       function setSessionLogStatus (status: string) {
         _log.set({
+          state: statusMap.commandState(status),
           sessionInfo: {
             id: session.id,
             isGlobalSession: session.cacheAcrossSpecs,
@@ -232,7 +232,7 @@ export default function (Commands, Cypress, cy) {
         return sessions.setSessionData(testSession)
       }
 
-      function validateSession (existingSession, step: SESSION_STEPS) {
+      function validateSession (existingSession, step: keyof typeof SESSION_STEPS) {
         const isValidSession = true
 
         if (!existingSession.validate) {
@@ -321,11 +321,7 @@ export default function (Commands, Cypress, cy) {
 
                 // skip all commands between this command which errored and _commandToRunAfterValidation
                 for (let i = cy.queue.index; i < index; i++) {
-                  const cmd = commands[i]
-
-                  if (!cmd.get('restore-within')) {
-                    commands[i].skip()
-                  }
+                  commands[i].skip()
                 }
 
                 // restore within subject back to the original subject used when
@@ -369,7 +365,7 @@ export default function (Commands, Cypress, cy) {
               }
 
               const failValidation = (err) => {
-                if (step === 'restore') {
+                if (step === SESSION_STEPS.restore) {
                   enhanceErr(err)
 
                   // move to recreate session flow
@@ -442,13 +438,13 @@ export default function (Commands, Cypress, cy) {
         .then(() => validateSession(existingSession, step))
         .then(async (isValidSession: boolean) => {
           if (!isValidSession) {
-            throw new Error('not a valid session :(')
+            return 'failed'
           }
 
           sessionsManager.registeredSessions.set(existingSession.id, true)
           await sessions.saveSessionData(existingSession)
 
-          setSessionLogStatus(statusMap.complete(step))
+          return statusMap.complete(step)
         })
       }
 
@@ -460,19 +456,19 @@ export default function (Commands, Cypress, cy) {
        */
       const restoreSessionWorkflow = (existingSession: SessionData) => {
         return cy.then(async () => {
-          setSessionLogStatus('restoring')
+          setSessionLogStatus(statusMap.inProgress(SESSION_STEPS.restore))
           await navigateAboutBlank()
           await sessions.clearCurrentSessionData()
 
           return restoreSession(existingSession)
         })
-        .then(() => validateSession(existingSession, 'restore'))
+        .then(() => validateSession(existingSession, SESSION_STEPS.restore))
         .then((isValidSession: boolean) => {
           if (!isValidSession) {
-            return createSessionWorkflow(existingSession, 'recreate')
+            return createSessionWorkflow(existingSession, SESSION_STEPS.recreate)
           }
 
-          setSessionLogStatus('restored')
+          return statusMap.complete(SESSION_STEPS.restore)
         })
       }
 
@@ -503,15 +499,15 @@ export default function (Commands, Cypress, cy) {
               _.extend(session, _.omit(serverStoredSession, 'setup', 'validate'))
               session.hydrated = true
             } else {
-              return createSessionWorkflow(session, 'create')
+              return createSessionWorkflow(session, SESSION_STEPS.create)
             }
           }
 
           return restoreSessionWorkflow(session)
-        }).then(() => {
+        }).then((status: 'created' | 'restored' | 'recreated' | 'failed') => {
           return navigateAboutBlank()
           .then(() => {
-            _log.set({ state: 'passed' })
+            setSessionLogStatus(status)
           })
         })
       })
