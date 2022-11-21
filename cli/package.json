@@ -194,7 +194,8 @@
       },
       "build": {
         "dependsOn": [
-          "prebuild"
+          "prebuild",
+          "^build"
         ]
       },
       "postbuild": {
