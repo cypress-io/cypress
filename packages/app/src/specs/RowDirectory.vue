@@ -1,7 +1,7 @@
 <template>
-  <div class="flex items-center h-full">
+  <div class="flex h-full items-center">
     <button
-      class="grid gap-8px grid-cols-[14px,16px,auto,auto] items-center group focus:outline-none"
+      class="h-full grid gap-8px grid-cols-[14px,16px,auto] items-center group focus:outline-none"
       :data-cy="`row-directory-depth-${depth}`"
       :aria-expanded="expanded"
       @click.stop="emits('toggle')"
@@ -16,7 +16,7 @@
       <IconFolder class="icon-dark-white icon-light-gray-200" />
       <div
         :title="name"
-        class="text-gray-600 truncate flex"
+        class="flex text-gray-600 truncate"
       >
         <HighlightedText
           :text="name"

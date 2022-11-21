@@ -58,7 +58,7 @@
                 v-if="isRunAllSpecsAllowed"
                 data-cy="run-all-specs"
                 :directory="row.data.name"
-                class="run-all hidden"
+                class="opacity-0 run-all"
                 :spec-number="directoryChildren[row.data.id].length"
                 @runAllSpecs="onRunAllSpecs(row.data.id)"
               />
@@ -202,8 +202,8 @@ a::before {
 }
 
 /** For run all specs group hover to work */
-[data-cy=directory-item]:hover .run-all {
-  display: block !important;
+[data-cy=spec-row-item]:hover .run-all, [data-cy=spec-row-item]:focus-within .run-all {
+  opacity: 1 !important;
 }
 
 </style>

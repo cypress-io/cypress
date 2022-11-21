@@ -1,6 +1,6 @@
 <template>
   <button
-    class="group hover:text-indigo-700 space-x-2 items-center ml-28px text-gray-600 whitespace-nowrap"
+    class="h-full space-x-2 ml-24px text-gray-600 group items-center whitespace-nowrap hocus:text-indigo-700"
     :data-cy="`run-all-specs-for-${directory}`"
     @click.stop="emits('runAllSpecs')"
   >
@@ -8,23 +8,26 @@
       size="16"
       stroke-color="gray-300"
       fill-color="gray-50"
-      hover-stroke-color="indigo-500"
-      hover-fill-color="indigo-100"
+      hocus-stroke-color="indigo-500"
+      hocus-fill-color="indigo-100"
       interactive-colors-on-group
-      class="group-hover: inline-flex align-text-bottom"
+      class="align-text-bottom group-hover: inline-flex "
       data-cy="play-button"
     />
     <span
       class="font-normal text-sm"
       data-cy="run-all-specs-text"
     >
-      Run {{ specNumber }} specs
+      {{ t('specPage.runAllSpecs', specNumber) }}
     </span>
   </button>
 </template>
 
 <script lang="ts" setup>
 import { IconActionPlaySmall } from '@cypress-design/vue-icon'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 defineProps<{
   specNumber: number
