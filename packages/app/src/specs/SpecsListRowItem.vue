@@ -16,7 +16,7 @@
         <slot name="file" />
       </div>
       <template
-        v-if="lazyRender"
+        v-if="lazyRender && isLeaf"
       >
         <div
           data-cy="specs-list-row-git-info"
@@ -42,7 +42,7 @@
         <SpecsListHoverCell
           data-cy="specs-list-row-average-duration"
           :is-hover-disabled="isProjectConnected"
-          class="hidden md:block group"
+          class="hidden group md:block"
         >
           <template #content>
             <slot name="average-duration" />

@@ -83,7 +83,7 @@
           :data-cy-row="row.data.data?.baseName"
           :is-leaf="row.data.isLeaf"
           :is-project-connected="projectConnectionStatus === 'CONNECTED'"
-          :grid-columns="tableGridColumns"
+          :grid-columns="row.data.isLeaf ? tableGridColumns : 'grid-cols-[1fr]'"
           :route="{ path: '/specs/runner', query: { file: row.data.data?.relative?.replace(/\\/g, '/') } }"
           @toggleRow="row.data.toggle"
         >
