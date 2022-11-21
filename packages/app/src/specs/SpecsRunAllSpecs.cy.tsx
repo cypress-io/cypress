@@ -21,7 +21,7 @@ describe('<SpecsRunAllSpecs/>', () => {
     it('Renders styles correctly', () => {
       cy.findByTestId('run-all-specs-for-cypress/e2e').as('button')
       .should('have.css', 'align-items', 'center')
-      .should('have.css', 'margin-left', '28px')
+      .should('have.css', 'margin-left', '24px')
       .should('have.css', 'justify-content', 'normal')
 
       cy.findByTestId('run-all-specs-text')
