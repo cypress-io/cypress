@@ -179,7 +179,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
       if (options.log) {
         log = Cypress.log({
-          message: name,
+          message: userOptions.domain ? [name, { domain: userOptions.domain }] : name,
           timeout: responseTimeout,
           consoleProps () {
             const obj = {}
@@ -226,7 +226,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
       if (options.log) {
         log = Cypress.log({
-          message: '',
+          message: userOptions.domain ? { domain: userOptions.domain } : '',
           timeout: responseTimeout,
           consoleProps () {
             const obj = {}
@@ -272,7 +272,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
       if (options.log) {
         log = Cypress.log({
-          message: [name, value],
+          message: userOptions.domain ? [name, value, { domain: userOptions.domain }] : [name, value],
           timeout: responseTimeout,
           consoleProps () {
             const obj = {}
@@ -348,7 +348,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
       if (options.log) {
         log = Cypress.log({
-          message: name,
+          message: userOptions.domain ? [name, { domain: userOptions.domain }] : [name],
           timeout: responseTimeout,
           consoleProps () {
             const obj = {}
@@ -402,7 +402,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
       if (options.log) {
         log = Cypress.log({
-          message: '',
+          message: userOptions.domain ? { domain: userOptions.domain } : '',
           timeout: responseTimeout,
           consoleProps () {
             const obj = {}
