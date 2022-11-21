@@ -34,7 +34,6 @@ jobs:
 
             TRIGGER_INSTRUCTIONS="to trigger CI , include 'run ci' in the commit message or click the 'Trigger Pipeline' button in the CircleCI UI."
 
-            echo "should have hit this block: ${CIRCLE_PULL_REQUEST##*/}"
             if [ ! -z "${CIRCLE_PULL_REQUEST##*/}" ]; then
               DRAFT=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}" | jq '.draft')
 
