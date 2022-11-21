@@ -7,7 +7,7 @@ orbs:
 jobs:
   verify-ci-should-run:
     docker:
-      - image: cimg/golang:latest
+      - image: cimg/go
     steps:
       - checkout
       - run:
