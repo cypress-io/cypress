@@ -149,7 +149,8 @@ function generateSnapshot() {
       value: { node: '${processNodeVersion}' },
       enumerable: false,
     },
-    nextTick: getPrevent('process', 'nextTick')
+    nextTick: getPrevent('process', 'nextTick'),
+    once: getPrevent('process', 'once')
   })
 
   function get_process() {
@@ -177,6 +178,22 @@ function generateSnapshot() {
 }
 
 var snapshotResult = generateSnapshot.call({})
+
+function deepFreeze(object) {
+  const propNames = Object.getOwnPropertyNames(object);
+  for (const name of propNames) {
+    const value = object[name];
+
+    if (value && typeof value === "object") {
+      deepFreeze(value);
+    }
+  }
+
+  return Object.freeze(object);
+}
+
+deepFreeze(snapshotResult)
+
 var supportTypeScript = ${supportTypeScript}
 generateSnapshot = null
 `,
