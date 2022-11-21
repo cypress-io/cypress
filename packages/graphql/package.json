@@ -5,7 +5,8 @@
   "main": "index.js",
   "browser": "src/index.ts",
   "scripts": {
-    "build": "yarn graphql-codegen --config graphql-codegen.yml",
+    "prebuild": "yarn graphql-codegen --config graphql-codegen.yml",
+    "build": "echo true",
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
     "clean": "rimraf './{src,test}/**/*.js'",
@@ -54,6 +55,9 @@
   "nx": {
     "targets": {
       "build": {
+        "dependsOn": [
+          "prebuild"
+        ],
         "outputs": [
           "packages/frontend-shared/src/generated",
           "packages/app/src/generated",

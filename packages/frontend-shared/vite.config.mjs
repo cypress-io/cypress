@@ -110,6 +110,11 @@ export const makeConfig = (config = {}, plugins = {}) => {
     // Production-only build options
     build: {
       minify: false,
+      rollupOptions: {
+        external: [
+          '@packages/data-context/src/gen/urql-introspection.gen',
+        ],
+      },
     },
 
     css: {
