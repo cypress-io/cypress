@@ -65,8 +65,6 @@ jobs:
       - continuation/continue:
           # configuration_path: .circleci/continue_config.yml
           configuration_path: .circleci/pipelines.yml
-          requires:
-            - verify-ci-should-run
 
   determine-pipeline-parameters:
     docker:
