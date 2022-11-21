@@ -5,11 +5,12 @@
   "main": "index.js",
   "scripts": {
     "clean": "node ./scripts/clean.js",
-    "prebuild": "yarn postinstall && node ./scripts/start-build.js",
+    "prebuild": "node ./scripts/start-build.js",
     "build": "node ./scripts/build.js",
     "postbuild": "node ./scripts/post-build.js",
     "dtslint": "dtslint types",
-    "postinstall": "patch-package && node ./scripts/post-install.js",
+    "patch-package": "patch-package",
+    "postinstall": "node ./scripts/post-install.js",
     "size": "t=\"cypress-v0.0.0.tgz\"; yarn pack --filename \"${t}\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "yarn test-unit",
     "test-debug": "node --inspect-brk $(yarn bin mocha)",
@@ -179,6 +180,28 @@
       "@cypress/svelte",
       "@cypress/vue",
       "@cypress/vue2"
-    ]
+    ],
+    "targets": {
+      "postinstall": {
+        "dependsOn": [
+          "patch-package"
+        ]
+      },
+      "prebuild": {
+        "dependsOn": [
+          "postinstall"
+        ]
+      },
+      "build": {
+        "dependsOn": [
+          "prebuild"
+        ]
+      },
+      "postbuild": {
+        "dependsOn": [
+          "build"
+        ]
+      }
+    }
   }
 }
