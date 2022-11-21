@@ -8,7 +8,7 @@
       class="grid px-24px w-full overflow-hidden flex items-center gap-y-2 py-24px"
     >
       <ul
-        :data-cy="'header-top'"
+        data-cy="header-top"
         class="flex self-stretch items-center gap-x-2 flex-row whitespace-nowrap"
       >
         <li
@@ -42,7 +42,7 @@
         </li>
         <li class="font-normal text-sm text-indigo-500">
           <ExternalLink
-            :data-cy="'debug-header-dashboard-link'"
+            data-cy="debug-header-dashboard-link"
             :href="debug.url || '#'"
             :use-default-hocus="false"
           >
