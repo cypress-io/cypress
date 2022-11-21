@@ -9,7 +9,6 @@ jobs:
     docker:
       - image: cimg/node:current
     steps:
-      - checkout
       - run:
           name: Verify CI should run
           command: |
@@ -33,20 +32,12 @@ jobs:
               exit 1  # If cancellation didn't run for some reason, fail the build.
             }
 
-            TRIGGER_INSTRUCTIONS="to trigger CI , include 'run ci' in the commit message or click the 'Trigger Pipeline' button in the CircleCI UI."
+            trigger_instructions="to trigger CI , include 'run ci' in the commit message or click the 'Trigger Pipeline' button in the CircleCI UI."
 
             if [ -v "${CIRCLE_PULL_REQUEST##*/}" ]; then
-              # Since we're piggybacking off of an existing OAuth var, tweak the var for our uses ?? are we.
-              token=$(echo "${GITHUB_TOKEN}" | cut -d':' -f1)
+              DRAFT=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}" | jq '.draft')
 
-              headers="Authorization: token $token"
-              api_endpoint="https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}"
-
-              # Fetch PR metadata from Github's API and parse fields from json
-              github_res=$(curl --silent --header "${headers}" "${api_endpoint}" | jq '{draft: .draft}')
-              draft=$(echo "${github_res}" | jq '.draft')
-
-              if [[ "${draft}" == true ]]; then
+              if [[ "${DRAFT}" == true ]]; then
                 echo "Skipping CI; PR is in draft - $TRIGGER_INSTRUCTIONS"
                 cancel_build
               fi
@@ -55,9 +46,10 @@ jobs:
               exit 0
             fi
 
-            LAST_LOG=$(git log -1 --grep="run ci" --pretty=%B)
-            echo "$LAST_LOG"
-            if [ -z "$LAST_LOG" ]; then
+            LAST_COMMIT_MESSAGE=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/commits/${CIRCLE_BRANCH}" | jq '.commit.message')
+            echo "$LAST_COMMIT_MESSAGE"
+
+            if [ -z "$LAST_COMMIT_MESSAGE" ]; then
               echo "Skipping CI; branch in progress - $TRIGGER_INSTRUCTIONS"
               cancel_build
             fi
