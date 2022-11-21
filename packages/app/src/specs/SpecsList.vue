@@ -110,12 +110,20 @@
               :expanded="treeSpecList[row.index].expanded.value"
               :depth="row.data.depth - 2"
               :style="{ paddingLeft: `${(row.data.depth - 2) * 10}px` }"
+              class="group"
               :indexes="row.data.highlightIndexes"
               :is-run-all-specs-allowed="isRunAllSpecsAllowed"
               :aria-controls="getIdIfDirectory(row)"
-              @click.stop="row.data.toggle"
-              @runAllSpecs="onRunAllSpecs(row.data.id)"
-            />
+              @toggle="() => row.data.toggle()"
+            >
+              <RunAllSpecs
+                v-if="isRunAllSpecsAllowed"
+                :directory="row.data.name"
+                class="run-all hidden group-hover:block"
+                :spec-number="directoryChildren[row.data.id].length"
+                @runAllSpecs="onRunAllSpecs(row.data.id)"
+              />
+            </RowDirectory>
           </template>
 
           <template #git-info>
@@ -200,6 +208,7 @@ import { useCloudSpecData } from '../composables/useCloudSpecData'
 import { useSpecFilter } from '../composables/useSpecFilter'
 import { useRequestAccess } from '../composables/useRequestAccess'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import RunAllSpecs from './RunAllSpecs.vue'
 import { useRunAllSpecs } from '../composables/useRunAllSpecs'
 
 const { openLoginConnectModal } = useLoginConnectStore()
@@ -373,6 +382,22 @@ const treeSpecList = computed(() => collapsible.value.tree.filter(((item) => !it
 
 const { containerProps, list, wrapperProps, scrollTo } = useVirtualList(treeSpecList, { itemHeight: 40, overscan: 10 })
 
+const directoryChildren = computed(() => {
+  return collapsible.value.tree.reduce<{[key: string]: string[]}>((acc, node) => {
+    if (!node.isLeaf) {
+      acc[node.id] = []
+    } else {
+      Object.keys(acc).forEach((dir) => {
+        if (node.id.startsWith(dir)) {
+          acc[dir].push(node.id)
+        }
+      })
+    }
+
+    return acc
+  }, {})
+})
+
 const scrollbarOffset = ref(0)
 
 // Watch the sizing of the specs list so we can detect when a scrollbar is added/removed
@@ -422,16 +447,8 @@ const { refetchFailedCloudData } = useCloudSpecData(
 
 const { runAllSpecs, isRunAllSpecsAllowed } = useRunAllSpecs()
 
-function onRunAllSpecs (directory: string) {
-  const filteredSpecs = treeSpecList.value.reduce<string[]>((acc, node) => {
-    if (node.isLeaf && node.id.startsWith(directory)) {
-      acc.push(node.data?.relative!)
-    }
-
-    return acc
-  }, [])
-
-  runAllSpecs(filteredSpecs)
+function onRunAllSpecs (rowId: string) {
+  runAllSpecs(directoryChildren.value[rowId])
 }
 
 </script>

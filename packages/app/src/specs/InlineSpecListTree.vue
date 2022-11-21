@@ -52,7 +52,19 @@
             :expanded="treeSpecList[row.index].expanded.value"
             :indexes="row.data.highlightIndexes"
             data-cy="directory-item"
-          />
+          >
+            <template #run-all-specs>
+              <RunAllSpecs
+                v-if="isRunAllSpecsAllowed"
+                data-cy="run-all-specs"
+                :directory="row.data.name"
+                class="run-all hidden"
+                :spec-number="directoryChildren[row.data.id].length"
+                :runner="true"
+                @runAllSpecs="onRunAllSpecs(row.data.id)"
+              />
+            </template>
+          </DirectoryItem>
         </RouterLink>
       </li>
     </ul>
@@ -72,6 +84,8 @@ import { useSpecStore } from '../store'
 import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
 import { useVirtualListNavigation } from '@packages/frontend-shared/src/composables/useVirtualListNavigation'
 import { useStudioStore } from '../store/studio-store'
+import RunAllSpecs from './RunAllSpecs.vue'
+import { useRunAllSpecs } from '../composables/useRunAllSpecs'
 
 const props = defineProps<{
   specs: FuzzyFoundSpec[]
@@ -156,6 +170,28 @@ const resetFocusIfNecessary = (row, index) => {
   }
 }
 
+const directoryChildren = computed(() => {
+  return collapsible.value.tree.reduce<Record<string, string[]>>((acc, node) => {
+    if (!node.isLeaf) {
+      acc[node.id] = []
+    } else {
+      Object.keys(acc).forEach((dir) => {
+        if (node.id.startsWith(dir)) {
+          acc[dir].push(node.id)
+        }
+      })
+    }
+
+    return acc
+  }, {})
+})
+
+const { runAllSpecs, isRunAllSpecsAllowed } = useRunAllSpecs()
+
+function onRunAllSpecs (rowId: string) {
+  runAllSpecs(directoryChildren.value[rowId])
+}
+
 </script>
 
 <style scoped>
@@ -167,6 +203,11 @@ a::before {
 /** Header is 64px, padding-top is 8px **/
 .specs-list-container {
   height: calc(100vh - 64px - 8px);
+}
+
+/** For run all specs group hover to work */
+[data-cy=directory-item]:hover .run-all {
+  display: block !important;
 }
 
 </style>
