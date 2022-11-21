@@ -6,7 +6,7 @@ describe('<InlineRunAllSpecs/>', () => {
       cy.mount(() => {
         return (
           <div class="flex justify-center">
-            <InlineRunAllSpecs specNumber={40} runner={true} directory='cypress/e2e' />
+            <InlineRunAllSpecs specNumber={40} directory='cypress/e2e' />
           </div>
         )
       })
