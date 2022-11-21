@@ -280,7 +280,7 @@ export default (Commands, Cypress, cy, state, config) => {
         }
 
         if (!options.force) {
-          cy.ensureNotDisabled(eventTarget, options._log)
+          Cypress.ensure.isNotDisabled(eventTarget, 'selectFile', options._log)
         }
 
         return eventTarget

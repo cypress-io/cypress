@@ -276,10 +276,10 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
               return
             }
 
-            return cy.ensureElExistence($el)
+            return Cypress.ensure.elExists($el, cy)
           }
           case 'subject':
-            return cy.ensureExistence(subject)
+            return Cypress.ensure.exists(subject, cy)
 
           default:
             return

@@ -100,7 +100,7 @@ function retryQuery (command: $Command, ret: any, cy: $Cy) {
       subjectFn: () => {
         const subject = cy.subject(command.get('chainerId'))
 
-        cy.ensureSubjectByType(subject, command.get('prevSubject'), command.get('name'))
+        Cypress.ensure.isType(subject, command.get('prevSubject'), command.get('name'), cy)
 
         return ret(subject)
       },

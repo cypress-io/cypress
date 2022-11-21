@@ -12,7 +12,6 @@ import { create as createXhr, IXhr } from '../cy/xhrs'
 import { create as createJQuery, IJQuery } from '../cy/jquery'
 import { create as createAliases, IAliases } from '../cy/aliases'
 import { extend as extendEvents } from './events'
-import { create as createEnsures, IEnsures } from '../cy/ensures'
 import { create as createFocused, IFocused } from '../cy/focused'
 import { create as createMouse, Mouse } from '../cy/mouse'
 import { Keyboard } from '../cy/keyboard'
@@ -121,6 +120,14 @@ const setTopOnError = function (Cypress, cy: $Cy) {
   top.__alreadySetErrorHandlers__ = true
 }
 
+const ensureRunnable = (cy, cmd) => {
+  if (!cy.state('runnable')) {
+    $errUtils.throwErrByPath('miscellaneous.outside_test_with_cmd', {
+      args: { cmd },
+    })
+  }
+}
+
 interface ICyFocused extends Omit<
   IFocused,
   'documentHasFocus' | 'interceptFocus' | 'interceptBlur'
@@ -131,7 +138,7 @@ interface ICySnapshots extends Omit<
   'onCssModified' | 'onBeforeWindowLoad'
 > {}
 
-export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, IEnsures, ICySnapshots, ICyFocused {
+export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, ICySnapshots, ICyFocused {
   id: string
   specWindow: any
   state: StateFunc
@@ -181,28 +188,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   aliasNotFoundFor: IAliases['aliasNotFoundFor']
   getXhrTypeByAlias: IAliases['getXhrTypeByAlias']
 
-  // Publicly exposed Ensures types
-  ensureSubjectByType: ReturnType<typeof createEnsures>['ensureSubjectByType']
-  ensureElement: IEnsures['ensureElement']
-  ensureWindow: IEnsures['ensureWindow']
-  ensureDocument: IEnsures['ensureDocument']
-  ensureAttached: IEnsures['ensureAttached']
-  ensureNotDisabled: IEnsures['ensureNotDisabled']
-  ensureVisibility: IEnsures['ensureVisibility']
-
-  // Not publicly exposed Ensures types
-  ensureElDoesNotHaveCSS: IEnsures['ensureElDoesNotHaveCSS']
-  ensureElementIsNotAnimating: IEnsures['ensureElementIsNotAnimating']
-  ensureStrictVisibility: IEnsures['ensureStrictVisibility']
-  ensureNotHiddenByAncestors: IEnsures['ensureNotHiddenByAncestors']
-  ensureExistence: IEnsures['ensureExistence']
-  ensureElExistence: IEnsures['ensureElExistence']
-  ensureDescendents: IEnsures['ensureDescendents']
-  ensureValidPosition: IEnsures['ensureValidPosition']
-  ensureScrollability: IEnsures['ensureScrollability']
-  ensureNotReadonly: IEnsures['ensureNotReadonly']
-  ensureCommandCanCommunicateWithAUT: IEnsures['ensureCommandCanCommunicateWithAUT']
-
   createSnapshot: ISnapshots['createSnapshot']
   detachDom: ISnapshots['detachDom']
   getStyles: ISnapshots['getStyles']
@@ -211,9 +196,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   overrides: IOverrides
 
   // Private methods
-  ensureRunnable: ReturnType<typeof createEnsures>['ensureRunnable']
-  ensureChildCommand: ReturnType<typeof createEnsures>['ensureChildCommand']
-
   onBeforeWindowLoad: ReturnType<typeof createSnapshots>['onBeforeWindowLoad']
 
   documentHasFocus: ReturnType<typeof createFocused>['documentHasFocus']
@@ -332,30 +314,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.validateAlias = aliases.validateAlias
     this.aliasNotFoundFor = aliases.aliasNotFoundFor
     this.getXhrTypeByAlias = aliases.getXhrTypeByAlias
-
-    const ensures = createEnsures(state, this.expect)
-
-    this.ensureElement = ensures.ensureElement
-    this.ensureAttached = ensures.ensureAttached
-    this.ensureWindow = ensures.ensureWindow
-    this.ensureDocument = ensures.ensureDocument
-    this.ensureElDoesNotHaveCSS = ensures.ensureElDoesNotHaveCSS
-    this.ensureElementIsNotAnimating = ensures.ensureElementIsNotAnimating
-    this.ensureNotDisabled = ensures.ensureNotDisabled
-    this.ensureVisibility = ensures.ensureVisibility
-    this.ensureStrictVisibility = ensures.ensureStrictVisibility
-    this.ensureNotHiddenByAncestors = ensures.ensureNotHiddenByAncestors
-    this.ensureExistence = ensures.ensureExistence
-    this.ensureElExistence = ensures.ensureElExistence
-    this.ensureDescendents = ensures.ensureDescendents
-    this.ensureValidPosition = ensures.ensureValidPosition
-    this.ensureScrollability = ensures.ensureScrollability
-    this.ensureNotReadonly = ensures.ensureNotReadonly
-
-    this.ensureSubjectByType = ensures.ensureSubjectByType
-    this.ensureRunnable = ensures.ensureRunnable
-    this.ensureChildCommand = ensures.ensureChildCommand
-    this.ensureCommandCanCommunicateWithAUT = ensures.ensureCommandCanCommunicateWithAUT
 
     const snapshots = createSnapshots(this.$$, state)
 
@@ -747,7 +705,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     $Chainer.add(name, callback)
 
     cy[name] = function (...args) {
-      cy.ensureRunnable(name)
+      ensureRunnable(this, name)
 
       // this is the first call on cypress
       // so create a new chainer instance
@@ -840,7 +798,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     $Chainer.add(name, callback)
 
     cy[name] = function (...args) {
-      cy.ensureRunnable(name)
+      ensureRunnable(this, name)
 
       // this is the first call on cypress
       // so create a new chainer instance
@@ -1085,7 +1043,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   private runnableCtx (name) {
-    this.ensureRunnable(name)
+    ensureRunnable(this, name)
 
     return this.state('runnable').ctx
   }
@@ -1187,7 +1145,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     if (prevSubject !== undefined) {
       // make sure our current subject is valid for
       // what we expect in this command
-      this.ensureSubjectByType(subject, prevSubject, this.state('current'))
+      Cypress.ensure.isType(subject, prevSubject as any, this.state('current').get('name'), this)
     }
 
     args.unshift(subject)

@@ -9,7 +9,7 @@ export default (Commands, Cypress, cy, state) => {
     const withinSubject = cy.state('withinSubjectChain')
 
     return () => {
-      cy.ensureCommandCanCommunicateWithAUT()
+      Cypress.ensure.commandCanCommunicateWithAUT(cy)
 
       const $el = cy.getSubjectFromChain(withinSubject || [cy.$$('html')])
 

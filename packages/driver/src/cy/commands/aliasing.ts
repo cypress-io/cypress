@@ -3,7 +3,7 @@ import $dom from '../../dom'
 
 export default function (Commands, Cypress, cy) {
   Commands.addQuery('as', function asFn (alias) {
-    cy.ensureChildCommand(this, [alias])
+    Cypress.ensure.isChildCommand(this, [alias])
     cy.validateAlias(alias)
 
     const prevCommand = cy.state('current').get('prev')

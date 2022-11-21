@@ -111,7 +111,7 @@ const checkOrUncheck = (Cypress, cy, type, subject, values: any[] = [], userOpti
     if (isNoop($el)) {
       if (!options.force) {
         // still ensure visibility even if the command is noop
-        cy.ensureVisibility($el, options._log)
+        Cypress.ensure.isVisible($el, type, options._log)
       }
 
       // if the checkbox is in an indeterminate state, checking or unchecking should set the

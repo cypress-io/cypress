@@ -167,7 +167,7 @@ export default (Commands, Cypress, cy, state) => {
     const includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
 
     return () => {
-      cy.ensureCommandCanCommunicateWithAUT()
+      Cypress.ensure.commandCanCommunicateWithAUT(cy)
 
       let $el
 
@@ -318,7 +318,7 @@ export default (Commands, Cypress, cy, state) => {
     const withinSubject = cy.state('withinSubjectChain')
 
     return (subject) => {
-      cy.ensureSubjectByType(subject, ['optional', 'element', 'window', 'document'], this.get('name'))
+      Cypress.ensure.isType(subject, ['optional', 'element', 'window', 'document'], this.get('name'), cy)
 
       if (!subject || (!$dom.isElement(subject) && !$elements.isShadowRoot(subject[0]))) {
         subject = cy.getSubjectFromChain(withinSubject || [cy.$$('body')])
@@ -375,7 +375,7 @@ export default (Commands, Cypress, cy, state) => {
     })
 
     return (subject) => {
-      cy.ensureSubjectByType(subject, 'element', this)
+      Cypress.ensure.isType(subject, 'element', 'shadow', cy)
 
       // find all shadow roots of the subject(s), if any exist
       const $el = subject

@@ -130,6 +130,53 @@ declare namespace Cypress {
     unsupportedVersion?: boolean
   }
 
+  interface Ensure {
+    /**
+     * Throws an error if `subject` is not one of the passed in `type`s.
+     */
+    isType(subject: any, type: PrevSubject[], commandName: string, cy: $Cy): void
+
+    /**
+     * Throws an error if `subject` is not a DOM element.
+     */
+    isElement(subject: any, commandName: string, cy: Chainable): void
+
+    /**
+     * Throws an error if `subject` is not a `window`.
+     */
+    isWindow(subject: any, commandName: string, cy: Chainable): void
+
+    /**
+     * Throws an error if `subject` is not a `document`.
+     */
+    isDocument(subject: any, commandName: string, cy: Chainable): void
+
+    /**
+     * Throws an error if `subject` is not a DOM element attached to the application under test.
+     */
+    isAttached(subject: any, commandName: string, cy: $Cy, onFail?: any): void
+
+    /**
+     * Throws an error if `subject` is a disabled DOM element.
+     */
+    isNotDisabled(subject: any, commandName: string, onFail?: any): void
+
+    /**
+     * Throws an error if `subject` is a read-only form element.
+     */
+    isNotReadonly(subject: any, commandName: string, onFail?: any): void
+
+    /**
+     * Throws an error if `subject` is not a DOM element visible in the AUT.
+     */
+    isVisible(subject: any, commandName: string, onFail?: any): void
+
+    /**
+     * Throws an error if `subject` is hidden by any of its parent elements.
+     */
+    isNotHiddenByAncestors(subject: any, commandName: string, onFail?: any): void
+  }
+
   interface LocalStorage {
     /**
      * Called internally to clear `localStorage` in two situations.
@@ -273,6 +320,12 @@ declare namespace Cypress {
      * @see https://example.cypress.io/commands/spies-stubs-clocks
      */
     sinon: sinon.SinonStatic
+
+    /**
+     * Utility functions for ensuring various properties about a subject.
+     * @see https://on.cypress.io/custom-queries
+     */
+    ensure: Ensure
 
     /**
      * Cypress version string. i.e. "1.1.2"
@@ -1162,15 +1215,6 @@ declare namespace Cypress {
      * @see https://on.cypress.io/end
      */
     end(): Chainable<null>
-
-    ensureElement(subject: any, commandName: string): void
-    ensureSubjectByType(subject: any, type: PrevSubject[], commandName: string): void
-    ensureWindow(subject: any, commandName: string): void
-    ensureDocument(subject: any, commandName: string): void
-
-    ensureAttached(subject: any, commandName: string): void
-    ensureNotDisabled(subject: any, commandName: string): void
-    ensureVisibility(subject: any, commandName: string): void
 
     /**
      * Get A DOM element at a specific index in an array of elements.

@@ -148,7 +148,7 @@ export default function (Commands, Cypress, cy, state) {
     // we fall back to the .its() error messages.
     const cmd = this.get('name') === 'invoke' ? 'invoke' : 'its'
 
-    cy.ensureChildCommand(this, arguments)
+    Cypress.ensure.isChildCommand(this, arguments)
 
     if (args.length) {
       $errUtils.throwErrByPath('invoke_its.invalid_num_of_args', { args: { cmd } })

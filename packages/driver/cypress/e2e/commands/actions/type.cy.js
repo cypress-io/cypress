@@ -200,6 +200,15 @@ describe('src/cy/commands/actions/type - #type', () => {
   })
 
   describe('actionability', () => {
+    let retries = 0
+
+    beforeEach(() => {
+      retries = 0
+      cy.on('command:retry', () => {
+        retries += 1
+      })
+    })
+
     it('can forcibly type + click even when element is invisible', () => {
       const $txt = cy.$$(':text:first').hide()
 
@@ -261,38 +270,32 @@ describe('src/cy/commands/actions/type - #type', () => {
     it('waits until element becomes visible', () => {
       const $txt = cy.$$(':text:first').hide()
 
-      const retried = cy.stub()
-
       cy.on('command:retry', _.after(3, () => {
         // Replace the element with a copy of itself, to ensure that .type() requeries the DOM
         // while retrying actionability
         $txt.replaceWith($txt[0].innerHTML)
         cy.$$(':text:first').show()
-        retried()
       }))
 
       cy.get(':text:first').type('foo').then(() => {
-        expect(retried).to.be.called
+        expect(retries).to.be.gt(1)
       })
     })
 
     it('waits until element is no longer disabled', () => {
       const $txt = cy.$$(':text:first').prop('disabled', true)
 
-      const retried = cy.stub()
       const clicked = cy.stub()
 
       $txt.on('click', clicked)
 
       cy.on('command:retry', _.after(3, () => {
         $txt.prop('disabled', false)
-        retried()
       }))
 
       cy.get(':text:first').type('foo').then(() => {
         expect(clicked).to.be.calledOnce
-
-        expect(retried).to.be.called
+        expect(retries).to.be.gt(1)
       })
     })
 
@@ -317,67 +320,44 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('waits until element stops animating', () => {
-      const retried = cy.stub()
-
-      cy.on('command:retry', retried)
-
-      cy.stub(cy, 'ensureElementIsNotAnimating')
-      .throws(new Error('animating!'))
-      .onThirdCall().returns()
-
-      cy.get(':text:first').type('foo').then(() => {
-        // - retry animation coords
-        // - retry animation
-        // - retry animation
-        expect(retried).to.be.calledThrice
-
-        expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
+      cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).type('foo').then(() => {
+        expect(retries).to.be.gt(1)
       })
     })
 
-    it('does not throw when waiting for animations is disabled', {
+    it('does not wait when waiting for animations is disabled', {
       waitForAnimations: false,
     }, () => {
-      cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
-
-      cy.get(':text:first').type('foo').then(() => {
-        expect(cy.ensureElementIsNotAnimating).not.to.be.called
+      cy.get(':text:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).type('foo').then(() => {
+        expect(retries).to.eq(0)
       })
     })
 
-    it('does not throw when turning off waitForAnimations in options', () => {
-      cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
-
-      cy.get(':text:first').type('foo', { waitForAnimations: false }).then(() => {
-        expect(cy.ensureElementIsNotAnimating).not.to.be.called
+    it('does not wait when turning off waitForAnimations in options', () => {
+      cy.get(':text:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).type('foo', { waitForAnimations: false }).then(() => {
+        expect(retries).to.eq(0)
       })
     })
 
-    it('passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
-      cy.spy(cy, 'ensureElementIsNotAnimating')
-
-      cy.get(':text:first').type('foo', { animationDistanceThreshold: 1000 }).then(($txt) => {
-        const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
-        const { args } = cy.ensureElementIsNotAnimating.firstCall
-
-        expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
-
-        expect(args[2]).to.eq(1000)
+    it('passes options.animationDistanceThreshold to ensureElementIsNotAnimating', () => {
+      cy.get(':text:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).type('foo', { animationDistanceThreshold: 1000 }).then(($txt) => {
+        // One retry, because $actionability always waits for two sets of points to determine if an element is animating.
+        expect(retries).to.eq(1)
       })
     })
 
-    it('passes config.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
-      const animationDistanceThreshold = Cypress.config('animationDistanceThreshold')
+    it('passes config.animationDistanceThreshold to ensureElementIsNotAnimating', () => {
+      let old = Cypress.config('animationDistanceThreshold')
 
-      cy.spy(cy, 'ensureElementIsNotAnimating')
+      Cypress.config('animationDistanceThreshold', 1000)
 
-      cy.get(':text:first').type('foo').then(($txt) => {
-        const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
-        const { args } = cy.ensureElementIsNotAnimating.firstCall
-
-        expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
-
-        expect(args[2]).to.eq(animationDistanceThreshold)
+      cy.get(':text:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).type('foo').then(($txt) => {
+        // One retry, because $actionability always waits for two sets of points to determine if an element is animating.
+        try {
+          expect(retries).to.eq(1)
+        } finally {
+          Cypress.config('animationDistanceThreshold', old)
+        }
       })
     })
 
