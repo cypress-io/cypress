@@ -1191,11 +1191,6 @@ jobs:
         default: medium
     resource_class: << parameters.resource_class >>
     steps:
-      - run:
-          name: Configure Git to use LF
-          command: | 
-            git config --global core.autocrlf false
-            git config --global core.eol lf
       - checkout
       - install-required-node
       - verify-build-setup:
