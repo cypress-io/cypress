@@ -116,7 +116,7 @@
               :aria-controls="getIdIfDirectory(row)"
               @toggle="() => row.data.toggle()"
             >
-              <RunAllSpecs
+              <SpecsRunAllSpecs
                 v-if="isRunAllSpecsAllowed"
                 :directory="row.data.name"
                 class="run-all hidden group-hover:block"
@@ -207,7 +207,7 @@ import { useCloudSpecData } from '../composables/useCloudSpecData'
 import { useSpecFilter } from '../composables/useSpecFilter'
 import { useRequestAccess } from '../composables/useRequestAccess'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
-import RunAllSpecs from './RunAllSpecs.vue'
+import SpecsRunAllSpecs from './SpecsRunAllSpecs.vue'
 import { useRunAllSpecs } from '../composables/useRunAllSpecs'
 
 const { openLoginConnectModal } = useLoginConnectStore()

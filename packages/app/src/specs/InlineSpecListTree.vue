@@ -54,13 +54,12 @@
             data-cy="directory-item"
           >
             <template #run-all-specs>
-              <RunAllSpecs
+              <InlineRunAllSpecs
                 v-if="isRunAllSpecsAllowed"
                 data-cy="run-all-specs"
                 :directory="row.data.name"
                 class="run-all hidden"
                 :spec-number="directoryChildren[row.data.id].length"
-                :runner="true"
                 @runAllSpecs="onRunAllSpecs(row.data.id)"
               />
             </template>
@@ -81,7 +80,7 @@ import { useSpecStore } from '../store'
 import { useVirtualList } from './tree/useVirtualList'
 import { useVirtualListNavigation } from './tree/useVirtualListNavigation'
 import { useStudioStore } from '../store/studio-store'
-import RunAllSpecs from './RunAllSpecs.vue'
+import InlineRunAllSpecs from './InlineRunAllSpecs.vue'
 import { useRunAllSpecs } from '../composables/useRunAllSpecs'
 
 const props = defineProps<{

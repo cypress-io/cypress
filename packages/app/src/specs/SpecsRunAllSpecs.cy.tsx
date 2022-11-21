@@ -1,12 +1,12 @@
-import RunAllSpecs from './RunAllSpecs.vue'
+import SpecsRunAllSpecs from './SpecsRunAllSpecs.vue'
 
-describe('<RunAllSpecs/>', () => {
+describe('<SpecsRunAllSpecs/>', () => {
   context('Correctly rendered for Specs List', () => {
     beforeEach(() => {
       cy.mount(() => {
         return (
           <div class="flex justify-center">
-            <RunAllSpecs specNumber={25} directory='cypress/e2e' />
+            <SpecsRunAllSpecs specNumber={25} directory='cypress/e2e' />
           </div>
         )
       })
@@ -33,30 +33,6 @@ describe('<RunAllSpecs/>', () => {
       cy.get('@button').realHover().then(() => {
         cy.findByTestId('run-all-specs-text').should('have.css', 'color', 'rgb(47, 58, 176)')
         cy.findByTestId('play-button').should('have.css', 'color', 'rgb(47, 58, 176)')
-      })
-    })
-  })
-
-  context('Correctly rendered for Inline Specs list', () => {
-    beforeEach(() => {
-      cy.mount(() => {
-        return (
-          <div class="flex justify-center">
-            <RunAllSpecs specNumber={40} runner={true} directory='cypress/e2e' />
-          </div>
-        )
-      })
-    })
-
-    it('renders component correctly', () => {
-      cy.findByTestId('tooltip').children().should('have.length', 1)
-      cy.findByTestId('play-button').should('be.visible')
-    })
-
-    it('provides expected tooltip content', () => {
-      cy.findByTestId('tooltip-content').should('not.exist')
-      cy.findByTestId('tooltip').realHover().then(() => {
-        cy.findByTestId('tooltip-content').should('contain.text', 'Run 40 specs')
       })
     })
   })
