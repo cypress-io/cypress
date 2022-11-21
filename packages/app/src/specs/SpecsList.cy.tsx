@@ -2,14 +2,6 @@ import SpecsList from './SpecsList.vue'
 import { Specs_SpecsListFragmentDoc, SpecsListFragment, TestingTypeEnum, SpecFilter_SetPreferencesDocument } from '../generated/graphql-test'
 import { defaultMessages } from '@cy/i18n'
 
-const hoverRunAllSpecs = (directory: string, specNumber: number) => {
-  cy.contains('[data-cy=spec-item-directory]', directory).realHover().then(() => {
-    cy.get(`[data-cy="run-all-specs-for-${directory}"]`).should('contain.text', ` Run ${specNumber} specs `)
-    cy.get('[data-cy="play-button"]').should('exist')
-    cy.percySnapshot()
-  })
-}
-
 describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
   let specs: Array<SpecsListFragment>
 
@@ -294,17 +286,38 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
   })
 
   describe('Run all Specs', () => {
+    const hoverRunAllSpecs = (directory: string, specNumber: number) => {
+      cy.contains('[data-cy=spec-item-directory]', directory).realHover().then(() => {
+        cy.get(`[data-cy="run-all-specs-for-${directory}"]`).should('contain.text', `Run ${specNumber} spec${specNumber > 1 ? 's' : ''}`)
+        cy.get('[data-cy="play-button"]').should('exist')
+      })
+    }
+
     it('displays runAllSpecs when hovering over a spec-list directory row', () => {
       mountWithTestingType({ experimentalRunAllSpecs: true })
       hoverRunAllSpecs('__test__', 5)
       hoverRunAllSpecs('frontend', 11)
       hoverRunAllSpecs('components', 6)
+
+      cy.percySnapshot()
     })
 
     it('checks if functionality works after a search', () => {
       mountWithTestingType({ experimentalRunAllSpecs: true, specFilter: 'base' })
       hoverRunAllSpecs('__test__', 2)
       hoverRunAllSpecs('frontend/components', 2)
+      hoverRunAllSpecs('Cell/test', 1)
+    })
+
+    it('can tab into run-all', () => {
+      mountWithTestingType({ experimentalRunAllSpecs: true })
+      cy.get('[data-cy=run-all-specs-for-__test__]').should('not.be.visible')
+
+      cy.tabUntil(($el) => {
+        return $el.text().includes('Run 5 specs')
+      })
+
+      cy.get('[data-cy=run-all-specs-for-__test__]').should('be.visible')
     })
   })
 })

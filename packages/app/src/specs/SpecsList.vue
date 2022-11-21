@@ -110,7 +110,6 @@
               :expanded="treeSpecList[row.index].expanded.value"
               :depth="row.data.depth - 2"
               :style="{ paddingLeft: `${(row.data.depth - 2) * 10}px` }"
-              class="group"
               :indexes="row.data.highlightIndexes"
               :is-run-all-specs-allowed="isRunAllSpecsAllowed"
               :aria-controls="getIdIfDirectory(row)"
@@ -119,7 +118,7 @@
               <SpecsRunAllSpecs
                 v-if="isRunAllSpecsAllowed"
                 :directory="row.data.name"
-                class="run-all hidden group-hover:block"
+                class="opacity-0 run-all"
                 :spec-number="directoryChildren[row.data.id].length"
                 @runAllSpecs="onRunAllSpecs(row.data.id)"
               />
@@ -463,5 +462,13 @@ function onRunAllSpecs (rowId: string) {
 /** Search bar is 72px + List header is 40px = 112px offset */
 .spec-list-container {
   height: calc(100% - 112px)
+}
+
+/**
+ * Can't put a group on the parent element as it has downstream effects on the styling of child components
+ * that have individual group stylings.
+ */
+[data-cy=spec-list-directory]:hover .run-all, [data-cy=spec-list-directory]:focus-within .run-all {
+  opacity: 1 !important;
 }
 </style>
