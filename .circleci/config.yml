@@ -64,7 +64,7 @@ jobs:
           configuration_path: workflows.yml
 
 workflows:
-  # the setup-workflow workflow is always triggered, regardless of the pipeline parameters.
+  # the setup-workflow workflow is always triggered.
   setup-workflow:
     jobs:
       - verify-ci-should-run:
