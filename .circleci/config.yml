@@ -62,6 +62,11 @@ jobs:
             fi
 
             echo "Always run CI when the commit message includes 'run ci'."
+      - continuation/continue:
+          # configuration_path: .circleci/continue_config.yml
+          configuration_path: .circleci/pipelines.yml
+          requires:
+            - verify-ci-should-run
 
   determine-pipeline-parameters:
     docker:
@@ -101,11 +106,7 @@ workflows:
 
       # - set-parameters:
       #     mapping: << parameters.mapping >>
-      - continuation/continue:
-          # configuration_path: .circleci/continue_config.yml
-          configuration_path: .circleci/pipelines.yml
-          requires:
-            - verify-ci-should-run
+
           # parameters: /tmp/pipeline-parameters.json
     # jobs:
     #   # the path-filtering/filter job determines which pipeline
