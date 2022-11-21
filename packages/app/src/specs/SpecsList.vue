@@ -380,22 +380,6 @@ const treeSpecList = computed(() => collapsible.value.tree.filter(((item) => !it
 
 const { containerProps, list, wrapperProps, scrollTo } = useVirtualList(treeSpecList, { itemHeight: 40, overscan: 10 })
 
-const directoryChildren = computed(() => {
-  return collapsible.value.tree.reduce<{[key: string]: string[]}>((acc, node) => {
-    if (!node.isLeaf) {
-      acc[node.id] = []
-    } else {
-      Object.keys(acc).forEach((dir) => {
-        if (node.id.startsWith(dir)) {
-          acc[dir].push(node.id)
-        }
-      })
-    }
-
-    return acc
-  }, {})
-})
-
 const scrollbarOffset = ref(0)
 
 // Watch the sizing of the specs list so we can detect when a scrollbar is added/removed
@@ -443,7 +427,7 @@ const { refetchFailedCloudData } = useCloudSpecData(
   props.gql.currentProject?.specs as SpecsListFragment[] || [],
 )
 
-const { runAllSpecs, isRunAllSpecsAllowed } = useRunAllSpecs()
+const { runAllSpecs, isRunAllSpecsAllowed, directoryChildren } = useRunAllSpecs(collapsible)
 
 function onRunAllSpecs (rowId: string) {
   runAllSpecs(directoryChildren.value[rowId])
