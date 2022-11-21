@@ -1,8 +1,9 @@
 import { RUN_ALL_SPECS_KEY } from '@packages/types/src'
 import { gql, useMutation, useQuery } from '@urql/vue'
-import { computed } from 'vue'
+import { computed, ComputedRef } from 'vue'
 import { useRouter } from 'vue-router'
 import { RunAllSpecsDocument, RunAllSpecs_ConfigDocument } from '../generated/graphql'
+import { getSeparator, SpecTreeNode, UseCollapsibleTreeNode } from '../specs/tree/useCollapsibleTree'
 
 type ResolvedConfig = { value: any, from: 'string', field: string }[]
 
@@ -26,8 +27,9 @@ mutation RunAllSpecs ($specPath: String!, $runAllSpecs: [String!]!) {
 `
 
 const isRunMode = window.__CYPRESS_MODE__ === 'run' && window.top === window
+const separator = getSeparator()
 
-export function useRunAllSpecs () {
+export function useRunAllSpecs (list: ComputedRef<{tree: UseCollapsibleTreeNode<SpecTreeNode>[]}>) {
   const router = useRouter()
   const query = useQuery({ query: RunAllSpecs_ConfigDocument, pause: isRunMode })
   const setRunAllSpecsMutation = useMutation(RunAllSpecsDocument)
@@ -47,6 +49,21 @@ export function useRunAllSpecs () {
       const hasExperiment = config.find(({ field, value }) => field === 'experimentalRunAllSpecs' && value === true)
 
       return Boolean(isE2E && hasExperiment)
+    }),
+    directoryChildren: computed(() => {
+      return list.value.tree.reduce<Record<string, string[]>>((acc, node) => {
+        if (!node.isLeaf) {
+          acc[node.id] = []
+        } else {
+          Object.keys(acc).forEach((dir) => {
+            if (node.id.startsWith(dir) && node.id.replace(dir, '').startsWith(separator)) {
+              acc[dir].push(node.id)
+            }
+          })
+        }
+
+        return acc
+      }, {})
     }),
   }
 }
