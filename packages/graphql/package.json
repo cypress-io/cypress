@@ -5,7 +5,7 @@
   "main": "index.js",
   "browser": "src/index.ts",
   "scripts": {
-    "build": "yarn graphql-codegen --config ./graphql-codegen.yml",
+    "build": "yarn graphql-codegen --config graphql-codegen.yml",
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
     "clean": "rimraf './{src,test}/**/*.js'",
