@@ -55,7 +55,8 @@ jobs:
             fi
 
             echo "Always run CI when the commit message includes 'run ci'."
-      - download_workflows_yaml:
+      - run:
+        name: Download .circleci/workflows.yaml
         command: |
           curl -o workflows.yml https://raw.githubusercontent.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}/.circleci/workflows.yml
       - continuation/continue:
