@@ -104,7 +104,6 @@ $fail: $red-400;
 $pending: $indigo-400;
 $pinned: $purple-400;
 $retried: $orange-400;
-$yellow-medium: $orange-800;
 
 $link-text: $indigo-600;
 
@@ -118,10 +117,8 @@ $err-text: $red-400;
 
 $reporter-section-background: #171926; // not a brand color
 
-$warn-background: $red-1000;
-$warn-header-background: $orange-1000;
-$warn-header-text: $orange-700;
-$warn-text: $orange-600;
+$warn-border: 2px solid $orange-300;
+$warn-text: $orange-300;
 
 $header-height: 64px;
 $reporter-contents-min-width: 170px;

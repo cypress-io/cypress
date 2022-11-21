@@ -6,7 +6,7 @@ It replaces the original electron app, `desktop-gui`.
 
 **Launchpad has the following responsibilities:**
 
-- Allow users to log in through the Dashboard Service
+- Allow users to log in through Cypress Cloud
 - Onboarding for new users (configure Component Testing dev server, install dependencies, etc)
 - Select testing mode (E2E, Component, Node.js)
 
