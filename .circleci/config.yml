@@ -15,7 +15,10 @@ jobs:
           name: Verify CI should run
           command: |
             # run CI when manually triggers via CircleCi Dashboard
-            # [ <<pipeline.trigger_source>> ~= 'api' ] && SHOULD_RUN_PIPELINES=1
+            if [ <<pipeline.trigger_source>> == 'api' ]; then
+              echo "Always run CI when manually triggered from the UI or the API."
+              exit 0
+            fi
 
             if [ -v "${CIRCLE_PULL_REQUEST##*/}" ]; then
               # Since we're piggybacking off of an existing OAuth var, tweak the var for our uses
@@ -32,13 +35,16 @@ jobs:
                 echo "PR is a draft, skipping CI!"
                 RUN_PIPELINES=0
               else 
-                echo "Always run CI for PR that are ready for review!"
+                echo "Always run CI for PR that are ready for review."
                 RUN_PIPELINES=1
               fi
             else
               # only run CI when commit message includes 'run ci'
               LAST_LOG=$(git log -1 --grep="run ci" --pretty=%B)
-              [ -z "$LAST_LOG" ] && RUN_PIPELINES=0
+              if [ -z "$LAST_LOG" ]; then
+                echo "To trigger CI builds for a branch in progress, include 'run ci' in the commit message."
+                RUN_PIPELINES=0
+              fi
               
               if [[ "$CIRCLE_BRANCH" == "develop" || "$CIRCLE_BRANCH" == "release/"* ]]; then
                 echo "Always run CI for develop and for release candidate branches."
@@ -48,18 +54,23 @@ jobs:
             fi
             
             if [[ "$RUN_PIPELINES" -eq "0" ]]; then
-              echo "Don't run CI workflows"
+              echo "Don't run CI workflows. Cancel the build..."
               curl --request POST \
                 --url https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/cancel \
                 --header "Circle-Token: ${CIRCLE_TOKEN}"
               sleep 30  # Give cancellation a chance to run. This script then won't continue running.
               exit 1  # If cancellation didn't run for some reason, fail the build.
             fi
-  fluff:
+  determine-pipeline-parameters:
     docker:
       - image: circleci/golang:latest
     steps:
       - run: echo 'Next Step'
+      # - run:
+          # name: Determine Pipeline Parameters
+          # command: |
+          #   touch /tmp/pipeline-parameters.json
+          #   PARAM_FILE="/tmp/pipeline-parameters.json"
 
       # - run:
       #   name: Dynamically generate the appropriate pipeline configuration
@@ -82,20 +93,28 @@ workflows:
     jobs:
       - verify-ci-should-run:
           context: workflow-setup
-      - fluff:
+      - determine-pipeline-parameters:
           requires:
             - verify-ci-should-run
+
+      - set-parameters:
+          mapping: << parameters.mapping >>
+      - continuation/continue:
+          # configuration_path: .circleci/continue_config.yml
+          configuration_path: .circleci/pipeline.yml
+          parameters: /tmp/pipeline-parameters.json
     # jobs:
-      # # the path-filtering/filter job determines which pipeline
-      # # parameters to update.
-      # - path-filtering/filter:
-      #     name: check-updated-files
-      #     mapping: |
-      #       service1/.* run-build-service-1-job true
-      #       service2/.* run-build-service-2-job true
-      #     base-revision: main
-      #     # this is the path of the configuration we should trigger once
-      #     # path filtering and pipeline parameter value updates are
-      #     # complete. In this case, we are using the parent dynamic
-      #     # configuration itself.
-      #     config-path: .circleci/continue_config.yml
+    #   # the path-filtering/filter job determines which pipeline
+    #   # parameters to update.
+    #   - path-filtering/filter:
+    #       name: check-updated-files
+    #       mapping: |
+    #         service1/.* run-build-service-1-job true
+    #         service2/.* run-build-service-2-job true
+    #       base-revision: main
+    #       # this is the path of the configuration we should trigger once
+    #       # path filtering and pipeline parameter value updates are
+    #       # complete. In this case, we are using the parent dynamic
+    #       # configuration itself.
+    #       config-path: .circleci/continue_config.yml
+    #       parameters: "/tmp/pipeline-parameters.json"
