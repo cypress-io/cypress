@@ -8,7 +8,7 @@ orbs:
 jobs:
   verify-ci-should-run:
     docker:
-      - image: circleci/golang:latest
+      - image: cimg/go:latest
     steps:
       - checkout
       - run:
@@ -16,7 +16,7 @@ jobs:
           command: |
             # run CI when manually triggers via CircleCi Dashboard
             if [ <<pipeline.trigger_source>> == 'api' ]; then
-              echo "Always run CI when manually triggered from the UI or the API."
+              echo "Always run CI when manually triggered from the UI."
               exit 0
             fi
 
@@ -24,6 +24,7 @@ jobs:
               echo "Always run CI for develop and for release candidate branches."
               exit 0
             fi
+
 
             cancel_build () {
               echo "Canceling the CI build..."
@@ -33,6 +34,8 @@ jobs:
               sleep 30  # Give cancellation a chance to run. This script then won't continue running.
               exit 1  # If cancellation didn't run for some reason, fail the build.
             }
+
+            TRIGGER_INSTRUCTIONS="to trigger CI , include 'run ci' in the commit message or click the 'Trigger Pipeline' button in the CircleCI UI."
 
             if [ -v "${CIRCLE_PULL_REQUEST##*/}" ]; then
               # Since we're piggybacking off of an existing OAuth var, tweak the var for our uses ?? are we.
@@ -46,7 +49,7 @@ jobs:
               draft=$(echo "${github_res}" | jq '.draft')
 
               if [[ "${draft}" == true ]]; then
-                echo "Skipping CI; PR is in draft."
+                echo "Skipping CI; PR is in draft - $TRIGGER_INSTRUCTIONS"
                 cancel_build
               fi
 
@@ -57,7 +60,7 @@ jobs:
             LAST_LOG=$(git log -1 --grep="run ci" --pretty=%B)
             echo "$LAST_LOG"
             if [ -z "$LAST_LOG" ]; then
-              echo "Skipping CI; to trigger CI for a branch in progress, include 'run ci' in the commit message."
+              echo "Skipping CI; branch in progress - $TRIGGER_INSTRUCTIONS"
               cancel_build
             fi
 
@@ -68,7 +71,7 @@ jobs:
 
   determine-pipeline-parameters:
     docker:
-      - image: circleci/golang:latest
+      - image: cimg/go:latest
     steps:
       - run: echo 'Next Step'
       # - run:
