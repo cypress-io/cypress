@@ -57,6 +57,7 @@
               <RunAllSpecs
                 v-if="isRunAllSpecsAllowed"
                 data-cy="run-all-specs"
+                :directory="row.data.name"
                 class="run-all hidden"
                 :spec-number="directoryChildren[row.data.id].length"
                 :runner="true"

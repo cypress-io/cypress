@@ -32,7 +32,7 @@
   <button
     v-else
     class="group hover:text-indigo-700 space-x-2 items-center ml-28px text-gray-600 whitespace-nowrap"
-    data-cy="run-all-specs-button"
+    :data-cy="`run-all-specs-for-${directory}`"
     @click.stop="emits('runAllSpecs')"
   >
     <IconActionPlaySmall
@@ -58,9 +58,15 @@
 import { IconActionPlaySmall } from '@cypress-design/vue-icon'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 
-withDefaults(defineProps<{ specNumber: number, runner?: boolean }>(), {
-  runner: false,
-})
+withDefaults(
+  defineProps<{
+    specNumber: number
+    directory: string
+    runner?: boolean
+  }>(), {
+    runner: false,
+  },
+)
 
 const emits = defineEmits<{
   (event: 'runAllSpecs'): void

@@ -8,17 +8,15 @@ describe('run-all-specs', () => {
     spec4: { relative: 'cypress/e2e/folder-b/spec-b.cy.js', name: 'runs folder-b/spec-b' },
   }
 
-  const clickRunAllSpecs = (directory?: string) => {
+  const clickRunAllSpecs = (directory: string) => {
     let command = cy.get('[data-cy=spec-item-directory]')
 
     if (directory) {
       command = command.contains(directory)
-    } else {
-      command = command.first()
     }
 
-    return command.realHover().within(() => {
-      cy.get('[data-cy=run-all-specs-btn]').click({ force: true })
+    return command.realHover().then(() => {
+      cy.get(`[data-cy="run-all-specs-for-${directory}"]`).click({ force: true })
     })
   }
 
@@ -58,7 +56,7 @@ describe('run-all-specs', () => {
     cy.findByLabelText('Search specs').clear().type('spec-a')
     cy.get('[data-cy=spec-list-file]').contains('spec-b').should('not.exist')
 
-    clickRunAllSpecs()
+    clickRunAllSpecs('cypress/e2e')
 
     cy.waitForSpecToFinish({ passCount: 2 })
 
@@ -95,7 +93,7 @@ describe('run-all-specs', () => {
     cy.findByLabelText('Search specs').clear()
     cy.get('[data-cy=spec-list-file]').should('have.length', 4)
 
-    clickRunAllSpecs()
+    clickRunAllSpecs('cypress/e2e')
 
     cy.withCtx((ctx, { specs, runAllSpecsKey }) => {
       expect(ctx.actions.project.launchProject).to.have.been.calledWith('e2e', undefined, runAllSpecsKey)

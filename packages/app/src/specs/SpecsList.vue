@@ -118,7 +118,7 @@
             >
               <RunAllSpecs
                 v-if="isRunAllSpecsAllowed"
-                data-cy="run-all-specs"
+                :directory="row.data.name"
                 class="run-all hidden group-hover:block"
                 :spec-number="directoryChildren[row.data.id].length"
                 @runAllSpecs="onRunAllSpecs(row.data.id)"
