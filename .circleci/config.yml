@@ -58,7 +58,7 @@ jobs:
       - run:
           name: Download .circleci/workflows.yaml
           command: |
-            curl -o workflows.yml https://raw.githubusercontent.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}/.circleci/workflows.yml
+            curl -o .circleci/workflows.yml https://raw.githubusercontent.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}/.circleci/workflows.yml
       - continuation/continue:
           configuration_path: .circleci/workflows.yml
 
