@@ -49,12 +49,13 @@ jobs:
             LAST_COMMIT_MESSAGE=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/commits/${CIRCLE_BRANCH}" | jq '.commit.message')
             echo "$LAST_COMMIT_MESSAGE"
 
-            if [[ ! "$LAST_COMMIT_MESSAGE" =~ *"run ci"* ]]; then
+            if [[ "$LAST_COMMIT_MESSAGE" =~ *"run ci"* ]]; then
+              echo "Always run CI when the commit message includes 'run ci'."
+            else
               echo "Skipping CI; branch in progress - $TRIGGER_INSTRUCTIONS"
               cancel_build
             fi
 
-            echo "Always run CI when the commit message includes 'run ci'."
       - run:
           name: Download .circleci/workflows.yaml
           command: |
