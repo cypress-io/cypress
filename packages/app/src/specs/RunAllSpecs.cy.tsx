@@ -13,13 +13,13 @@ describe('<RunAllSpecs/>', () => {
     })
 
     it('renders play icon and expected text', () => {
-      cy.findByTestId('run-all-specs-button').children().should('have.length', 2)
-      cy.findByTestId('run-all-specs-button').should('contain.text', 'Run 25 specs')
+      cy.findByTestId('run-all-specs-for-cypress/e2e').as('button').children().should('have.length', 2)
+      cy.get('@button').should('contain.text', 'Run 25 specs')
       cy.findByTestId('play-button').should('be.visible')
     })
 
     it('Renders styles correctly', () => {
-      cy.findByTestId('run-all-specs-button')
+      cy.findByTestId('run-all-specs-for-cypress/e2e').as('button')
       .should('have.css', 'align-items', 'center')
       .should('have.css', 'margin-left', '28px')
       .should('have.css', 'justify-content', 'normal')
@@ -30,12 +30,13 @@ describe('<RunAllSpecs/>', () => {
       .should('have.css', 'display', 'inline')
       .should('have.css', 'line-height', '20px')
 
-      cy.findByTestId('run-all-specs-button').realHover().then(() => {
+      cy.get('@button').realHover().then(() => {
         cy.findByTestId('run-all-specs-text').should('have.css', 'color', 'rgb(47, 58, 176)')
         cy.findByTestId('play-button').should('have.css', 'color', 'rgb(47, 58, 176)')
       })
     })
-  }),
+  })
+
   context('Correctly rendered for Inline Specs list', () => {
     beforeEach(() => {
       cy.mount(() => {
