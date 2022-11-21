@@ -21,7 +21,7 @@ jobs:
             fi
 
             if [ -v "${CIRCLE_PULL_REQUEST##*/}" ]; then
-              # Since we're piggybacking off of an existing OAuth var, tweak the var for our uses
+              # Since we're piggybacking off of an existing OAuth var, tweak the var for our uses ?? are we.
               token=$(echo "${GITHUB_TOKEN}" | cut -d':' -f1)
 
               headers="Authorization: token $token"
@@ -39,17 +39,16 @@ jobs:
                 RUN_PIPELINES=1
               fi
             else
-              # only run CI when commit message includes 'run ci'
-              LAST_LOG=$(git log -1 --grep="run ci" --pretty=%B)
-              if [ -z "$LAST_LOG" ]; then
-                echo "To trigger CI builds for a branch in progress, include 'run ci' in the commit message."
-                RUN_PIPELINES=0
-              fi
-              
               if [[ "$CIRCLE_BRANCH" == "develop" || "$CIRCLE_BRANCH" == "release/"* ]]; then
                 echo "Always run CI for develop and for release candidate branches."
 
                 RUN_PIPELINES=1
+              fi
+
+              LAST_LOG=$(git log -1 --grep="run ci" --pretty=%B)
+              if [ -z "$LAST_LOG" ]; then
+                echo "To trigger CI for a branch in progress, include 'run ci' in the commit message."
+                RUN_PIPELINES=0
               fi
             fi
             
