@@ -3,7 +3,8 @@
   "version": "0.0.0-development",
   "private": true,
   "scripts": {
-    "build": "yarn generate-shiki-theme",
+    "prebuild": "yarn generate-shiki-theme",
+    "build": "echo true",
     "check-ts": "vue-tsc --noEmit",
     "clean-deps": "rimraf node_modules",
     "clean": "rimraf dist ./node_modules/.vite src/*.js src/**/*.js && echo 'cleaned'",
@@ -89,5 +90,14 @@
       "@toycode/markdown-it-class",
       "patch-package"
     ]
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "dependsOn": [
+          "prebuild"
+        ]
+      }
+    }
   }
 }
