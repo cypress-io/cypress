@@ -8,7 +8,7 @@ orbs:
 jobs:
   verify-ci-should-run:
     docker:
-      - image: cimg/go:latest
+      - image: cimg/golang:latest
     steps:
       - checkout
       - run:
@@ -69,58 +69,9 @@ jobs:
           # configuration_path: .circleci/continue_config.yml
           configuration_path: .circleci/pipelines.yml
 
-  determine-pipeline-parameters:
-    docker:
-      - image: cimg/go:latest
-    steps:
-      - run: echo 'Next Step'
-      # - run:
-          # name: Determine Pipeline Parameters
-          # command: |
-          #   touch /tmp/pipeline-parameters.json
-          #   PARAM_FILE="/tmp/pipeline-parameters.json"
-
-      # - run:
-      #   name: Dynamically generate the appropriate pipeline configuration
-      #   command: |
-      #     cd .circleci
-      #     ls -la
-      #     echo "Merge all YAML files into a dynamically generated pipeline.yml file"
-      #     cat executors.yml commands.yml jobs.yml workflows.yml > pipeline.yml
-      #     ls -a
-      #     cat pipeline.yml
-      # - continuation/continue:
-      #   configuration_path: .circleci/pipeline.yml
-      # - store_artifacts:
-      #   path: .circleci/pipeline.yml
-      #   destination yaml/pipeline.yml
-
 workflows:
   # the always-run workflow is always triggered, regardless of the pipeline parameters.
   setup-workflow:
     jobs:
       - verify-ci-should-run:
           context: workflow-setup
-      # - determine-pipeline-parameters:
-      #     requires:
-      #       - verify-ci-should-run
-
-      # - set-parameters:
-      #     mapping: << parameters.mapping >>
-
-          # parameters: /tmp/pipeline-parameters.json
-    # jobs:
-    #   # the path-filtering/filter job determines which pipeline
-    #   # parameters to update.
-    #   - path-filtering/filter:
-    #       name: check-updated-files
-    #       mapping: |
-    #         service1/.* run-build-service-1-job true
-    #         service2/.* run-build-service-2-job true
-    #       base-revision: main
-    #       # this is the path of the configuration we should trigger once
-    #       # path filtering and pipeline parameter value updates are
-    #       # complete. In this case, we are using the parent dynamic
-    #       # configuration itself.
-    #       config-path: .circleci/continue_config.yml
-    #       parameters: "/tmp/pipeline-parameters.json"
