@@ -95,16 +95,16 @@ workflows:
     jobs:
       - verify-ci-should-run:
           context: workflow-setup
-      - determine-pipeline-parameters:
-          requires:
-            - verify-ci-should-run
+      # - determine-pipeline-parameters:
+      #     requires:
+      #       - verify-ci-should-run
 
       # - set-parameters:
       #     mapping: << parameters.mapping >>
-      # - continuation/continue:
-      #     # configuration_path: .circleci/continue_config.yml
-      #     configuration_path: .circleci/pipeline.yml
-      #     parameters: /tmp/pipeline-parameters.json
+      - continuation/continue:
+          # configuration_path: .circleci/continue_config.yml
+          configuration_path: .circleci/pipeline.yml
+          # parameters: /tmp/pipeline-parameters.json
     # jobs:
     #   # the path-filtering/filter job determines which pipeline
     #   # parameters to update.
