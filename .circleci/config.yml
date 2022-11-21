@@ -58,9 +58,9 @@ jobs:
       - run:
           name: Download .circleci/workflows.yaml
           command: |
-            curl -o .circleci/workflows.yml https://raw.githubusercontent.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}/.circleci/workflows.yml
+            curl -o workflows.yml https://raw.githubusercontent.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}/.circleci/workflows.yml
       - continuation/continue:
-          configuration_path: .circleci/workflows.yml
+          configuration_path: workflows.yml
 
 workflows:
   # the setup-workflow workflow is always triggered, regardless of the pipeline parameters.
