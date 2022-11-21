@@ -20,6 +20,20 @@ jobs:
               exit 0
             fi
 
+            if [[ "$CIRCLE_BRANCH" == "develop" || "$CIRCLE_BRANCH" == "release/"* ]]; then
+              echo "Always run CI for develop and for release candidate branches."
+              exit 0
+            fi
+
+            cancel_build () {
+              echo "Canceling the CI build..."
+              curl --request POST \
+                --url https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/cancel \
+                --header "Circle-Token: ${CIRCLE_TOKEN}"
+              sleep 30  # Give cancellation a chance to run. This script then won't continue running.
+              exit 1  # If cancellation didn't run for some reason, fail the build.
+            }
+
             if [ -v "${CIRCLE_PULL_REQUEST##*/}" ]; then
               # Since we're piggybacking off of an existing OAuth var, tweak the var for our uses ?? are we.
               token=$(echo "${GITHUB_TOKEN}" | cut -d':' -f1)
@@ -32,34 +46,23 @@ jobs:
               draft=$(echo "${github_res}" | jq '.draft')
 
               if [[ "${draft}" == true ]]; then
-                echo "PR is a draft, skipping CI!"
-                RUN_PIPELINES=0
-              else 
-                echo "Always run CI for PR that are ready for review."
-                RUN_PIPELINES=1
-              fi
-            else
-              if [[ "$CIRCLE_BRANCH" == "develop" || "$CIRCLE_BRANCH" == "release/"* ]]; then
-                echo "Always run CI for develop and for release candidate branches."
-
-                RUN_PIPELINES=1
+                echo "Skipping CI; PR is in draft."
+                cancel_build()
               fi
 
-              LAST_LOG=$(git log -1 --grep="run ci" --pretty=%B)
-              if [ -z "$LAST_LOG" ]; then
-                echo "To trigger CI for a branch in progress, include 'run ci' in the commit message."
-                RUN_PIPELINES=0
-              fi
+              echo "Always run CI for PR that is ready for review."
+              exit 0
             fi
-            
-            if [[ "$RUN_PIPELINES" -eq "0" ]]; then
-              echo "Don't run CI workflows. Cancel the build..."
-              curl --request POST \
-                --url https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/cancel \
-                --header "Circle-Token: ${CIRCLE_TOKEN}"
-              sleep 30  # Give cancellation a chance to run. This script then won't continue running.
-              exit 1  # If cancellation didn't run for some reason, fail the build.
+
+            LAST_LOG=$(git log -1 --grep="run ci" --pretty=%B)
+            echo "$LAST_LOG"
+            if [ -z "$LAST_LOG" ]; then
+              echo "Skipping CI; to trigger CI for a branch in progress, include 'run ci' in the commit message."
+              cancel_build()
             fi
+
+            echo "Always run CI when the commit message includes 'run ci'."
+
   determine-pipeline-parameters:
     docker:
       - image: circleci/golang:latest
