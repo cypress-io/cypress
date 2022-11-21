@@ -49,7 +49,7 @@ jobs:
             LAST_COMMIT_MESSAGE=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/commits/${CIRCLE_BRANCH}" | jq '.commit.message')
             echo "$LAST_COMMIT_MESSAGE"
 
-            if ! [[ "$LAST_COMMIT_MESSAGE" =~ *"run ci"* ]]; then
+            if [[ ! "$LAST_COMMIT_MESSAGE" =~ *"run ci"* ]]; then
               echo "Skipping CI; branch in progress - $TRIGGER_INSTRUCTIONS"
               cancel_build
             fi
