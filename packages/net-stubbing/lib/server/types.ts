@@ -27,5 +27,4 @@ export interface NetStubbingState {
   }
   routes: BackendRoute[]
   reset: () => void
-  removeRequest: (requestId: string) => void
 }

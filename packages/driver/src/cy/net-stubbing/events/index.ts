@@ -3,7 +3,6 @@ import { onBeforeRequest } from './before-request'
 import { onResponse } from './response'
 import { onAfterResponse } from './after-response'
 import { onNetworkError } from './network-error'
-import { onNetworkLoadingFailed } from './network-loading-failed'
 import Bluebird from 'bluebird'
 import { getBackendStaticResponse } from '../static-response-utils'
 
@@ -26,7 +25,6 @@ const netEventHandlers: { [eventName: string]: HandlerFn<any> } = {
   'response': onResponse,
   'after:response': onAfterResponse,
   'network:error': onNetworkError,
-  'network:loadingFailed': onNetworkLoadingFailed,
 }
 
 export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {

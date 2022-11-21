@@ -81,7 +81,7 @@ export class InterceptedRequest {
           await: !!route.hasInterceptor,
           routeId: route.id,
         },
-        ...(['response:callback', 'after:response', 'network:error', 'network:loadingFailed'].map((eventName) => {
+        ...(['response:callback', 'after:response', 'network:error'].map((eventName) => {
           // notification-only default event
           return { eventName, await: false, routeId: route.id }
         }))],

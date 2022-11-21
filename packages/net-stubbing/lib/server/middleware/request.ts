@@ -83,8 +83,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
     })
 
     debug('request/response finished, cleaning up %o', { requestId: request.id })
-
-    this.netStubbingState.removeRequest(request.id)
+    delete this.netStubbingState.requests[request.id]
   })
 
   const ensureBody = () => {
@@ -93,8 +92,23 @@ export const InterceptRequest: RequestMiddleware = async function () {
         return resolve()
       }
 
+      const onClose = (): void => {
+        req.body = 'Request canceled before body could be determined.'
+
+        return resolve()
+      }
+
+      // If the response has been destroyed we won't be able to get the body from the stream.
+      if (request.res.destroyed) {
+        onClose()
+      }
+
+      // Also listen the response close in case it happens while we are piping the request stream.
+      request.res.once('close', onClose)
+
       request.req.pipe(concatStream((reqBody) => {
         req.body = reqBody
+        request.res.off('close', onClose)
         resolve()
       }))
     })

@@ -35,7 +35,7 @@ function formatInterception ({ route, interception }: ProxyRequest['interception
     ret['Response'] = _.omitBy(interception.response, _.isNil)
   }
 
-  const alias = interception.request?.alias || route.alias
+  const alias = interception.request.alias || route.alias
 
   if (alias) ret['Alias'] = alias
 
@@ -52,7 +52,7 @@ function getDisplayUrl (url: string) {
 
 function getDynamicRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.InternalLogConfig> {
   const last = _.last(req.interceptions)
-  let alias = last ? last.interception.request?.alias || last.route.alias : undefined
+  let alias = last ? last.interception.request.alias || last.route.alias : undefined
 
   if (!alias && req.xhr && req.route) {
     alias = req.route.alias
@@ -117,7 +117,7 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.I
           ...(req.interceptions.map(({ interception, route }) => {
             return {
               command: 'intercept',
-              alias: interception.request?.alias || route.alias,
+              alias: interception.request.alias || route.alias,
               type: !_.isNil(route.handler) ? (_.isFunction(route.handler) ? 'function' : 'stub') : 'spy',
             }
           })),
@@ -304,13 +304,13 @@ export default class ProxyLogging {
 
     if (!proxyRequest) {
       // this can happen in a race condition, if user runs Network.disable, if the browser doesn't send pre-request for some reason...
-      debug(`Missing pre-request/proxy log for cy.intercept to ${interception.request?.url} %o`, { interception, route })
+      debug(`Missing pre-request/proxy log for cy.intercept to ${interception.request.url} %o`, { interception, route })
 
       proxyRequest = this.createProxyRequestLog({
         requestId: interception.browserRequestId || interception.id,
         resourceType: 'other',
         originalResourceType: 'Request with no browser pre-request',
-        ...(interception.request) ? _.pick(interception.request, ['url', 'method', 'headers']) : { url: '', method: '', headers: {} },
+        ..._.pick(interception.request, ['url', 'method', 'headers']),
       })
     }
 

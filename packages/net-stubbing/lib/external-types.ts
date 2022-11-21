@@ -197,14 +197,6 @@ export namespace CyHttpMessages {
   export interface NetworkError {
     error: any
   }
-
-  export interface NetworkLoadingFailed {
-    requestId: string
-    timestamp: number
-    type: string
-    errorText: string
-    canceled?: boolean
-  }
 }
 
 export interface DictMatcher<T> {
@@ -280,7 +272,7 @@ export interface Interception {
   routeId: string
   /* @internal */
   setLogFlag: (flag: 'spied' | 'stubbed' | 'reqModified' | 'resModified') => void
-  request?: CyHttpMessages.IncomingRequest
+  request: CyHttpMessages.IncomingRequest
   /**
    * Was `cy.wait()` used to wait on this request?
    * @internal
@@ -311,8 +303,7 @@ export type InterceptionState =
   'ResponseReceived' |
   'ResponseIntercepted' |
   'Complete' |
-  'Errored' |
-  'Canceled'
+  'Errored'
 
 export interface Route {
   alias?: string

@@ -21,8 +21,7 @@ const uniqueRoute = (route) => {
 }
 
 describe('network stubbing - not skipped', () => {
-  // The expected CDP event does not fire on firefox so this test would time out.
-  it('stops waiting when an xhr request is canceled', { browser: '!firefox' }, () => {
+  it('stops waiting when an xhr request is canceled', () => {
     cy.visit('http://localhost:3500/fixtures/generic.html')
 
     cy.intercept('POST', /users/, {
@@ -46,12 +45,11 @@ describe('network stubbing - not skipped', () => {
 
       win.location.reload()
 
-      cy.wait('@createUser').its('state').should('eq', 'Canceled')
+      cy.wait('@createUser').its('state').should('eq', 'Errored')
     })
   })
 
-  // The expected CDP event does not fire on firefox so this test would time out.
-  it('stops waiting when an fetch request is canceled', { browser: '!firefox' }, () => {
+  it('stops waiting when an fetch request is canceled', () => {
     cy.visit('http://localhost:3500/fixtures/generic.html')
 
     cy.intercept('POST', /users/, {
@@ -68,9 +66,16 @@ describe('network stubbing - not skipped', () => {
         // do nothing on an abort
       })
 
-      controller.abort()
+      // if you abort too fast in firefox, the fetch is never sent to the server for us to intercept
+      if (Cypress.isBrowser('firefox')) {
+        setTimeout(() => {
+          controller.abort()
+        }, 100)
+      } else {
+        controller.abort()
+      }
 
-      cy.wait('@createUser').its('state').should('eq', 'Canceled')
+      cy.wait('@createUser').its('state').should('eq', 'Errored')
     })
   })
 })
@@ -595,7 +600,7 @@ describe.skip('network stubbing', function () {
             cy.wait('@testRequest')
             .its('request')
             .then((req) => {
-              expect(req?.body).to.eq(str)
+              expect(req.body).to.eq(str)
             })
           })
         })

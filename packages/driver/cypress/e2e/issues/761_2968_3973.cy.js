@@ -106,7 +106,7 @@ if (Cypress.isBrowser('chrome')) {
       // after we unload we should cancel the
       // pending XHR's and receive it here
       // after waiting on it
-        expect(xhrProxy.state).to.eq('Canceled')
+        expect(xhrProxy.state).to.eq('Errored')
 
         const [firstXhr, secondXhr] = xhrs
         const [firstLog, secondLog] = logs
