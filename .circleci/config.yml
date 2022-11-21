@@ -69,7 +69,7 @@ jobs:
           configuration_path: .circleci/pipelines.yml
 
 workflows:
-  # the always-run workflow is always triggered, regardless of the pipeline parameters.
+  # the setup-workflow workflow is always triggered, regardless of the pipeline parameters.
   setup-workflow:
     jobs:
       - verify-ci-should-run:
