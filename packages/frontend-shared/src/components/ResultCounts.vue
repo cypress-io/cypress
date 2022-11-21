@@ -23,6 +23,7 @@
 </template>
 
 <script lang="ts" setup>
+
 export interface ResultCountsProps {
   totalPassed: number|string|null
   totalFailed: number|string|null
@@ -41,7 +42,16 @@ const { t } = useI18n()
 
 const props = defineProps<ResultCountsProps>()
 
-const ORDER_MAP = {
+type CountType= 'SKIPPED' | 'PENDING' | 'PASSED' | 'FAILED'
+
+interface Status {
+  value: number|string|null
+  class: string
+  icon: FunctionalComponent<SVGAttributes, {}>
+  name: string
+}
+
+const ORDER_MAP: Record<CountType, Status> = {
   'SKIPPED': {
     value: props.totalSkipped,
     class: 'icon-dark-gray-400',
@@ -68,23 +78,10 @@ const ORDER_MAP = {
   },
 }
 
-interface status {
-  value: number|string|null
-  class: string
-  icon: FunctionalComponent<SVGAttributes, {}>
-  name: string
-}
-
 const results = computed(() => {
-  const acc: status[] = []
+  const order = props.order || ['SKIPPED', 'PENDING', 'PASSED', 'FAILED']
 
-  if (props.order) {
-    props.order.forEach((status) => acc.push(ORDER_MAP[status]))
-  } else {
-    acc.push(ORDER_MAP['SKIPPED'], ORDER_MAP['PENDING'], ORDER_MAP['PASSED'], ORDER_MAP['FAILED'])
-  }
-
-  return acc
+  return order.map((status) => ORDER_MAP[status])
 })
 
 </script>

@@ -1,8 +1,6 @@
 import { DebugPageFragmentDoc } from '../generated/graphql-test'
 import DebugPageHeader from './DebugPageHeader.vue'
 
-const generateTags = (num): any => new Array(num).fill(null).map((_, i) => ({ id: `${i}`, name: `tag${i}`, __typename: 'CloudRunTag' }))
-
 const defaults = [
   { attr: 'debug-header-branch', text: 'Branch Name: feature/DESIGN-183' },
   { attr: 'debug-header-commitHash', text: 'Commit Hash: b5e6fde' },
@@ -41,11 +39,17 @@ describe('<DebugPageHeader />', {
   it('renders with passed in gql props', () => {
     cy.mountFragment(DebugPageFragmentDoc, {
       onResult (result) {
-        result.tags = generateTags(3)
+        if (result) {
+          if (result.commitInfo) {
+            result.commitInfo.summary = 'Adding a hover state to the button component'
+            result.commitInfo.branch = 'feature/DESIGN-183'
+            result.commitInfo.authorName = 'cypressDTest'
+          }
+        }
       },
       render: (gqlVal) => {
         return (
-          <DebugPageHeader gql={gqlVal} />
+          <DebugPageHeader gql={gqlVal} runNumber={468} commitsAhead={'You are 2 commits ahead'} commitHash={'b5e6fde'}/>
         )
       },
     })

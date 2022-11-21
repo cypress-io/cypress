@@ -57,19 +57,6 @@ const ICON_MAP = {
 
 const icon = computed(() => ICON_MAP['FAILED'])
 
-const defaultResults = {
-  totalPassed: 1,
-  totalFailed: 7,
-  totalSkipped: 6,
-  totalPending: 6,
-}
-
-const results = computed(() => {
-  if (props.gql) {
-    return props.gql
-  }
-
-  return defaultResults
-})
+const results = computed(() => props.gql)
 
 </script>

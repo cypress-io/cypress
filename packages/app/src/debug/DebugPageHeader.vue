@@ -19,7 +19,7 @@
           {{ debug.commitInfo.summary }}
         </li>
         <div
-          v-if="defaultscommitInfo.runNumber && props.commitsAhead"
+          v-if="props.runNumber && props.commitsAhead"
           class="border rounded border-gray-100 items-center flex text-sm h-6"
           data-cy="debug-runCommit-info"
         >
@@ -27,7 +27,7 @@
             class="font-medium text-gray-700 px-2 mx-px items-center"
             data-cy="debug-runNumber"
           >
-            {{ defaultscommitInfo.runNumber }}
+            Run #{{ props.runNumber }}
           </span>
           <div class="w-px h-3 my-6px bg-gray-100" />
           <span
@@ -65,17 +65,17 @@
           v-if="debug?.commitInfo?.branch"
           data-cy="debug-header-branch"
         >
-          <i-cy-tech-branch-h_x16 class="mr-1 icon-dark-gray-300 mr-9px" />
+          <i-cy-tech-branch-h_x16 class="mr-1 icon-dark-gray-300 mr-8px" />
           <span class="sr-only">Branch Name:</span> {{ debug.commitInfo.branch }}
         </li>
         <li
-          v-if="defaultscommitInfo.commitHash"
+          v-if="props.commitHash"
           data-cy="debug-header-commitHash"
         >
           <CommitIcon
             class="fill-white h-16px w-16px mr-11px"
           />
-          <span class="sr-only">Commit Hash:</span> {{ defaultscommitInfo.commitHash }}
+          <span class="sr-only">Commit Hash:</span> {{ props.commitHash }}
         </li>
         <li
           v-if="debug?.commitInfo?.authorName"
@@ -113,25 +113,7 @@ import { IconTimeStopwatch } from '@cypress-design/vue-icon'
 import { gql } from '@urql/core'
 import { dayjs } from '../runs/utils/day.js'
 
-interface DefaultcommitInfoTypes {
-  authorName: string
-  branch: string
-  summary: string
-  runNumber: string
-  commitHash: string
-}
-
-interface DefaultTypes {
-  id: string
-  createdAt: string
-  totalDuration: string
-  url: string
-  authorEmail: string
-  commitInfo: DefaultcommitInfoTypes
-}
-
-// the query below will also be updated to fetch debug page information
-// runNumber and commitHash dont exist in the query and should be queried
+// runNumber and commitHash dont currently exist in the query and therefore are being obtained as props instead
 gql`
 fragment DebugPage on CloudRun {
 	id
@@ -156,33 +138,11 @@ fragment DebugPage on CloudRun {
 const props = defineProps<{
   gql: DebugPageFragment
   commitsAhead: string
+  commitHash: string
+  runNumber: number
 }>()
 
-// These default values exist in case no values are returned by the query
-const defaultscommitInfo: DefaultcommitInfoTypes = {
-  authorName: 'ankithmehta',
-  branch: 'feature/DESIGN-183',
-  summary: 'Adding a hover state to the button component',
-  runNumber: 'Run #468',
-  commitHash: 'b5e6fde',
-}
-
-const defaultValues: DefaultTypes = {
-  id: '3',
-  createdAt: '2022-11-14T14:41:23.078Z',
-  totalDuration: '10m 30s',
-  url: 'cloud.cypress.io',
-  authorEmail: 'hello@cypress.io',
-  commitInfo: defaultscommitInfo,
-}
-
-const debug = computed(() => {
-  if (props.gql) {
-    return props.gql
-  }
-
-  return defaultValues
-})
+const debug = computed(() => props.gql)
 
 const relativeCreatedAt = computed(() => dayjs(new Date(debug.value.createdAt!)).fromNow())
 
