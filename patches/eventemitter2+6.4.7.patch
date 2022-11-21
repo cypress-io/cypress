@@ -1,0 +1,45 @@
+diff --git a/node_modules/eventemitter2/lib/eventemitter2.js b/node_modules/eventemitter2/lib/eventemitter2.js
+index 7c2e550..a283552 100644
+--- a/node_modules/eventemitter2/lib/eventemitter2.js
++++ b/node_modules/eventemitter2/lib/eventemitter2.js
+@@ -11,11 +11,15 @@
+     return Object.prototype.toString.call(obj) === "[object Array]";
+   };
+   var defaultMaxListeners = 10;
+-  var nextTickSupported= typeof process=='object' && typeof process.nextTick=='function';
++  var getNextTickSupported = function() {
++    return typeof process=='object' && typeof process.nextTick=='function'
++  }
+   var symbolsSupported= typeof Symbol==='function';
+   var reflectSupported= typeof Reflect === 'object';
+   var setImmediateSupported= typeof setImmediate === 'function';
+-  var _setImmediate= setImmediateSupported ? setImmediate : setTimeout;
++  var getSetImmediate = function() {
++    return setImmediateSupported ? setImmediate : setTimeout;
++  }
+   var ownKeys= symbolsSupported? (reflectSupported && typeof Reflect.ownKeys==='function'? Reflect.ownKeys : function(obj){
+     var arr= Object.getOwnPropertyNames(obj);
+     arr.push.apply(arr, Object.getOwnPropertySymbols(obj));
+@@ -753,7 +757,7 @@
+         var _listener = listener;
+         var _origin = listener._origin || listener;
+ 
+-        if (nextTick && !nextTickSupported) {
++        if (nextTick && !getNextTickSupported()) {
+           throw Error('process.nextTick is not supported');
+         }
+ 
+@@ -767,11 +771,11 @@
+           var event = this.event;
+ 
+           return promisify ? (nextTick ? Promise.resolve() : new Promise(function (resolve) {
+-            _setImmediate(resolve);
++            getSetImmediate()(resolve);
+           }).then(function () {
+             context.event = event;
+             return _listener.apply(context, args)
+-          })) : (nextTick ? process.nextTick : _setImmediate)(function () {
++          })) : (nextTick ? process.nextTick : getSetImmediate())(function () {
+             context.event = event;
+             _listener.apply(context, args)
+           });

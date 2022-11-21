@@ -1,6 +1,5 @@
-import {
-  getCtx, registerServerPluginHandler,
-} from '@packages/data-context'
+import { registerServerPluginHandler } from '@packages/data-context/src/util/pluginHandlers'
+import { getCtx } from '@packages/data-context'
 
 export const registerEvent = (event, callback) => {
   getCtx().lifecycleManager.registerEvent(event, callback)

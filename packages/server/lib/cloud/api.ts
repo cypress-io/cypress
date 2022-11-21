@@ -19,11 +19,19 @@ const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
 const TWO_MINUTES = humanInterval('2 minutes')
 
-const DELAYS = process.env.API_RETRY_INTERVALS ? process.env.API_RETRY_INTERVALS.split(',').map(_.toNumber) : [
-  THIRTY_SECONDS,
-  SIXTY_SECONDS,
-  TWO_MINUTES,
-]
+let delays
+
+const getDelays = () => {
+  if (!delays) {
+    delays = process.env.API_RETRY_INTERVALS ? process.env.API_RETRY_INTERVALS.split(',').map(_.toNumber) : [
+      THIRTY_SECONDS,
+      SIXTY_SECONDS,
+      TWO_MINUTES,
+    ]
+  }
+
+  return delays
+}
 
 const runnerCapabilities = {
   'dynamicSpecsInSerialMode': true,
@@ -32,51 +40,59 @@ const runnerCapabilities = {
 
 let responseCache = {}
 
-const rp = request.defaults((params, callback) => {
-  let resp
+let rp
 
-  if (params.cacheable && (resp = getCachedResponse(params))) {
-    debug('resolving with cached response for ', params.url)
+const getRp = () => {
+  if (!rp) {
+    rp = rp = request.defaults((params, callback) => {
+      let resp
 
-    return Promise.resolve(resp)
+      if (params.cacheable && (resp = getCachedResponse(params))) {
+        debug('resolving with cached response for ', params.url)
+
+        return Promise.resolve(resp)
+      }
+
+      _.defaults(params, {
+        agent,
+        proxy: null,
+        gzip: true,
+        cacheable: false,
+        rejectUnauthorized: true,
+      })
+
+      const headers = params.headers != null ? params.headers : (params.headers = {})
+
+      _.defaults(headers, {
+        'x-os-name': os.platform(),
+        'x-cypress-version': pkg.version,
+      })
+
+      const method = params.method.toLowerCase()
+
+      // use %j argument to ensure deep nested properties are serialized
+      debug(
+        'request to url: %s with params: %j and token: %s',
+        `${params.method} ${params.url}`,
+        _.pick(params, 'body', 'headers'),
+        params.auth && params.auth.bearer,
+      )
+
+      return request[method](params, callback)
+      .promise()
+      .tap((resp) => {
+        if (params.cacheable) {
+          debug('caching response for ', params.url)
+          cacheResponse(resp, params)
+        }
+
+        return debug('response %o', resp)
+      })
+    })
   }
 
-  _.defaults(params, {
-    agent,
-    proxy: null,
-    gzip: true,
-    cacheable: false,
-    rejectUnauthorized: true,
-  })
-
-  const headers = params.headers != null ? params.headers : (params.headers = {})
-
-  _.defaults(headers, {
-    'x-os-name': os.platform(),
-    'x-cypress-version': pkg.version,
-  })
-
-  const method = params.method.toLowerCase()
-
-  // use %j argument to ensure deep nested properties are serialized
-  debug(
-    'request to url: %s with params: %j and token: %s',
-    `${params.method} ${params.url}`,
-    _.pick(params, 'body', 'headers'),
-    params.auth && params.auth.bearer,
-  )
-
-  return request[method](params, callback)
-  .promise()
-  .tap((resp) => {
-    if (params.cacheable) {
-      debug('caching response for ', params.url)
-      cacheResponse(resp, params)
-    }
-
-    return debug('response %o', resp)
-  })
-})
+  return rp
+}
 
 const cacheResponse = (resp, params) => {
   return responseCache[params.url] = resp
@@ -100,16 +116,16 @@ const retryWithBackoff = (fn) => {
     return Promise
     .try(() => fn(retryIndex))
     .catch(isRetriableError, (err) => {
-      if (retryIndex > DELAYS.length) {
+      if (retryIndex > getDelays().length) {
         throw err
       }
 
-      const delay = DELAYS[retryIndex]
+      const delay = getDelays()[retryIndex]
 
       errors.warning(
         'CLOUD_API_RESPONSE_FAILED_RETRYING', {
           delay,
-          tries: DELAYS.length - retryIndex,
+          tries: getDelays().length - retryIndex,
           response: err,
         },
       )
@@ -169,15 +185,13 @@ export type CreateRunOptions = {
 }
 
 module.exports = {
-  rp,
-
   ping () {
-    return rp.get(apiRoutes.ping())
+    return getRp().get(apiRoutes.ping())
     .catch(tagError)
   },
 
   getMe (authToken): Bluebird<any> {
-    return rp.get({
+    return getRp().get({
       url: apiRoutes.me(),
       json: true,
       auth: {
@@ -187,7 +201,7 @@ module.exports = {
   },
 
   getAuthUrls () {
-    return rp.get({
+    return getRp().get({
       url: apiRoutes.auth(),
       json: true,
       cacheable: true,
@@ -199,7 +213,7 @@ module.exports = {
   },
 
   getProject (projectId, authToken) {
-    return rp.get({
+    return getRp().get({
       url: apiRoutes.project(projectId),
       json: true,
       auth: {
@@ -232,7 +246,7 @@ module.exports = {
         runnerCapabilities,
       }
 
-      return rp.post({
+      return getRp().post({
         body,
         url: apiRoutes.runs(),
         json: true,
@@ -258,7 +272,7 @@ module.exports = {
     ])
 
     return retryWithBackoff((attemptIndex) => {
-      return rp.post({
+      return getRp().post({
         body,
         url: apiRoutes.instances(runId),
         json: true,
@@ -278,7 +292,7 @@ module.exports = {
     const { instanceId, runId, timeout, ...body } = options
 
     return retryWithBackoff((attemptIndex) => {
-      return rp.post({
+      return getRp().post({
         url: apiRoutes.instanceTests(instanceId),
         json: true,
         timeout: timeout || SIXTY_SECONDS,
@@ -296,7 +310,7 @@ module.exports = {
 
   updateInstanceStdout (options) {
     return retryWithBackoff((attemptIndex) => {
-      return rp.put({
+      return getRp().put({
         url: apiRoutes.instanceStdout(options.instanceId),
         json: true,
         timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
@@ -316,7 +330,7 @@ module.exports = {
 
   postInstanceResults (options) {
     return retryWithBackoff((attemptIndex) => {
-      return rp.post({
+      return getRp().post({
         url: apiRoutes.instanceResults(options.instanceId),
         json: true,
         timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
@@ -341,7 +355,7 @@ module.exports = {
   },
 
   createCrashReport (body, authToken, timeout = 3000) {
-    return rp.post({
+    return getRp().post({
       url: apiRoutes.exceptions(),
       json: true,
       body,
@@ -358,7 +372,7 @@ module.exports = {
       this.getAuthUrls(),
       machineId.machineId(),
       (urls, machineId) => {
-        return rp.post({
+        return getRp().post({
           url: urls.dashboardLogoutUrl,
           json: true,
           auth: {
@@ -381,7 +395,7 @@ module.exports = {
       authToken,
     })
 
-    return rp.post({
+    return getRp().post({
       url: apiRoutes.projects(),
       json: true,
       auth: {

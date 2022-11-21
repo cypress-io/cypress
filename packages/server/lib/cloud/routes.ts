@@ -1,4 +1,7 @@
-import _ from 'lodash'
+import reduce from 'lodash.reduce'
+import isObject from 'lodash.isobject'
+import isString from 'lodash.isstring'
+import isNumber from 'lodash.isnumber'
 import UrlParse from 'url-parse'
 
 const app_config = require('../../config/app.json')
@@ -20,14 +23,17 @@ const CLOUD_ENDPOINTS = {
 } as const
 
 const parseArgs = function (url, args: any[] = []) {
-  _.each(args, (value) => {
-    if (_.isObject(value)) {
-      url.set('query', _.extend(url.query, value))
+  args.forEach((value) => {
+    if (isObject(value)) {
+      url.set('query', {
+        ...url.query,
+        ...value,
+      })
 
       return
     }
 
-    if (_.isString(value) || _.isNumber(value)) {
+    if (isString(value) || isNumber(value)) {
       url.set('pathname', url.pathname.replace(':id', value))
 
       return
@@ -37,10 +43,10 @@ const parseArgs = function (url, args: any[] = []) {
   return url
 }
 
-const makeRoutes = (baseUrl: string, routes: typeof CLOUD_ENDPOINTS) => {
-  return _.reduce(routes, (memo, value, key) => {
+const makeRoutes = (routes: typeof CLOUD_ENDPOINTS) => {
+  return reduce(routes, (memo, value, key) => {
     memo[key] = function (...args: any[]) {
-      let url = new UrlParse(baseUrl, true)
+      let url = new UrlParse(apiUrl, true)
 
       if (value) {
         url.set('pathname', value)
@@ -57,7 +63,7 @@ const makeRoutes = (baseUrl: string, routes: typeof CLOUD_ENDPOINTS) => {
   }, {} as Record<keyof typeof CLOUD_ENDPOINTS, (...args: any[]) => string>)
 }
 
-const apiRoutes = makeRoutes(apiUrl, CLOUD_ENDPOINTS)
+const apiRoutes = makeRoutes(CLOUD_ENDPOINTS)
 
 module.exports = {
   apiRoutes,

@@ -121,9 +121,7 @@ export async function makePackage () {
     fs.writeFile(
       path.join(newDir, 'index.js'),
       dedent`
-        if (process.env.CYPRESS_INTERNAL_ENV !== 'production') {
-          require('@packages/ts/register')
-        }
+        require('@packages/ts/register')
         
         module.exports = require('./src')
       `,
