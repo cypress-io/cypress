@@ -90,7 +90,7 @@ export function createConfig (env: 'dev' | 'prod' = 'prod', cypressAppPath?: str
    * Configured via `env`
    */
   const nodeModulesOnly = env === 'dev'
-  const minify = env === 'prod'
+  const minify = !process.env.V8_SNAPSHOT_DISABLE_MINIFY && env === 'prod'
 
   const snapshotCacheDir =
     env === 'dev'

@@ -167,7 +167,12 @@ function customRequire (
       } else {
         // While snapshotting we load the module and add it to the exports cache
         mod.exports = require(modulePath)
-        customRequire.exports[modulePath] = mod
+
+        Object.defineProperty(customRequire.exports, modulePath, {
+          configurable: false,
+          enumerable: false,
+          value: mod,
+        })
       }
     }
   }
