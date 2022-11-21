@@ -4,7 +4,7 @@
     class="h-full truncate"
     data-cy="tooltip"
   >
-    <button>
+    <button @click.stop="emits('runAllSpecs')">
       <IconActionPlaySmall
         size="16"
         stroke-color="gray-700"
@@ -13,7 +13,6 @@
         hocus-fill-color="indigo-100"
         class="inline-flex align-text-bottom"
         data-cy="play-button"
-        @click.stop="emits('runAllSpecs')"
       />
     </button>
     <template
@@ -23,7 +22,7 @@
         class="font-normal text-sm inline-flex"
         data-cy="tooltip-content"
       >
-        Run {{ specNumber }} specs
+        {{ t('specPage.runAllSpecs', specNumber) }}
       </span>
     </template>
   </Tooltip>
@@ -32,6 +31,9 @@
 <script lang="ts" setup>
 import { IconActionPlaySmall } from '@cypress-design/vue-icon'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 defineProps<{
   specNumber: number
