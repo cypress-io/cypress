@@ -47,7 +47,7 @@ jobs:
 
               if [[ "${draft}" == true ]]; then
                 echo "Skipping CI; PR is in draft."
-                cancel_build()
+                cancel_build
               fi
 
               echo "Always run CI for PR that is ready for review."
@@ -58,7 +58,7 @@ jobs:
             echo "$LAST_LOG"
             if [ -z "$LAST_LOG" ]; then
               echo "Skipping CI; to trigger CI for a branch in progress, include 'run ci' in the commit message."
-              cancel_build()
+              cancel_build
             fi
 
             echo "Always run CI when the commit message includes 'run ci'."
