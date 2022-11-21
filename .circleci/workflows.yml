@@ -27,6 +27,7 @@ mainBuildFilters: &mainBuildFilters
     branches:
       only:
         - develop
+        - 'ryanm/fix/typescript-issue'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -35,16 +36,18 @@ macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/fix/typescript-issue', << pipeline.git.branch >> ]
     - matches:
-          pattern: /^release\/\d+\.\d+\.\d+$/
+          pattern: "-release$"
           value: << pipeline.git.branch >>
 
 linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/fix/typescript-issue', << pipeline.git.branch >> ]
     - matches:
-          pattern: /^release\/\d+\.\d+\.\d+$/
+          pattern: "-release$"
           value: << pipeline.git.branch >>
 
 # uncomment & add to the branch conditions below to disable the main linux
@@ -60,8 +63,9 @@ windowsWorkflowFilters: &windows-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ 'ryanm/fix/typescript-issue', << pipeline.git.branch >> ]
     - matches:
-          pattern: /^release\/\d+\.\d+\.\d+$/
+          pattern: "-release$"
           value: << pipeline.git.branch >>
 
 executors:
@@ -126,7 +130,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "ryanm/fix/typescript-issue" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1380,15 +1384,16 @@ jobs:
             # until these are fixed, run the tests that are working.
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
-            - run: yarn test-unit:scripts scripts/**/*spec.js
+            - run: yarn test-scripts scripts/**/*spec.js
       - unless:
           condition:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
+            - run: yarn test-scripts
             # make sure packages with TypeScript can be transpiled to JS
             - run: yarn lerna run build-prod --stream --concurrency 4
             # run unit tests from each individual package
-            - run: yarn test-unit --ignore @packages/server
+            - run: yarn test
             # run type checking for each individual package
             - run: yarn lerna run types
             - verify-mocha-results:
@@ -1425,6 +1430,10 @@ jobs:
       - run:
           name: "Lint types 🧹"
           command: yarn workspace cypress dtslint
+  # todo(lachlan): do we need this? yarn check-ts does something very similar
+  #     - run:
+  #         name: "TypeScript check 🧩"
+  #         command: yarn type-check --ignore-progress
       - store-npm-logs
 
   server-unit-tests:
@@ -1432,7 +1441,7 @@ jobs:
     parallelism: 1
     steps:
       - restore_cached_workspace
-      - run: yarn workspace @packages/server test-unit
+      - run: yarn test-unit --scope @packages/server
       - verify-mocha-results:
           expectedResultCount: 1
       - store_test_results:
