@@ -6,7 +6,7 @@ describe('<RunAllSpecs/>', () => {
       cy.mount(() => {
         return (
           <div class="flex justify-center">
-            <RunAllSpecs specNumber={25}/>
+            <RunAllSpecs specNumber={25} directory='cypress/e2e' />
           </div>
         )
       })
@@ -41,7 +41,7 @@ describe('<RunAllSpecs/>', () => {
       cy.mount(() => {
         return (
           <div class="flex justify-center">
-            <RunAllSpecs specNumber={40} runner={true}/>
+            <RunAllSpecs specNumber={40} runner={true} directory='cypress/e2e' />
           </div>
         )
       })
