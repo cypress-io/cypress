@@ -110,6 +110,7 @@
               :expanded="treeSpecList[row.index].expanded.value"
               :depth="row.data.depth - 2"
               :style="{ paddingLeft: `${(row.data.depth - 2) * 10}px` }"
+              class="group"
               :indexes="row.data.highlightIndexes"
               :is-run-all-specs-allowed="isRunAllSpecsAllowed"
               :aria-controls="getIdIfDirectory(row)"
@@ -118,7 +119,7 @@
               <RunAllSpecs
                 v-if="isRunAllSpecsAllowed"
                 data-cy="run-all-specs"
-                class="run-all hidden"
+                class="run-all hidden group-hover:block"
                 :spec-number="directoryChildren[row.data.id].length"
                 @runAllSpecs="onRunAllSpecs(row.data.id)"
               />
@@ -463,10 +464,5 @@ function onRunAllSpecs (rowId: string) {
 /** Search bar is 72px + List header is 40px = 112px offset */
 .spec-list-container {
   height: calc(100% - 112px)
-}
-
-/** For run all specs group hover to work */
-[data-cy=spec-list-directory]:hover .run-all {
-  display: block !important;
 }
 </style>
