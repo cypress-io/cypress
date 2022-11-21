@@ -1,4 +1,4 @@
-import { logInternal } from './common'
+import { logInternal } from './utils'
 
 declare global {
   namespace Cypress {

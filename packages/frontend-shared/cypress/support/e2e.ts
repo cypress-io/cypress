@@ -17,7 +17,7 @@ import type { E2ETaskMap } from '../e2e/e2ePluginSetup'
 import { installCustomPercyCommand } from './customPercyCommand'
 import i18n from '../../src/locales/en-US.json'
 import { addNetworkCommands } from './onlineNetwork'
-import { logInternal } from './common'
+import { logInternal } from './utils'
 import { tabUntil } from './tab-until'
 
 configure({ testIdAttribute: 'data-cy' })
