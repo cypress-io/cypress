@@ -1145,6 +1145,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     if (prevSubject !== undefined) {
       // make sure our current subject is valid for
       // what we expect in this command
+
+      // @ts-ignore
       Cypress.ensure.isType(subject, prevSubject as any, this.state('current').get('name'), this)
     }
 

@@ -134,7 +134,7 @@ declare namespace Cypress {
     /**
      * Throws an error if `subject` is not one of the passed in `type`s.
      */
-    isType(subject: any, type: PrevSubject[], commandName: string, cy: $Cy): void
+    isType(subject: any, type: PrevSubject[], commandName: string, cy: Chainable): void
 
     /**
      * Throws an error if `subject` is not a DOM element.
@@ -154,7 +154,7 @@ declare namespace Cypress {
     /**
      * Throws an error if `subject` is not a DOM element attached to the application under test.
      */
-    isAttached(subject: any, commandName: string, cy: $Cy, onFail?: any): void
+    isAttached(subject: any, commandName: string, cy: Chainable, onFail?: any): void
 
     /**
      * Throws an error if `subject` is a disabled DOM element.

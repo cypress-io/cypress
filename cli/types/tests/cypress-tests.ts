@@ -305,14 +305,14 @@ namespace CypressNowTest {
 }
 
 namespace CypressEnsuresTest {
-  Cypress.ensure.isType('', ['optional', 'element'], 'newQuery') // $ExpectType void
-  Cypress.ensure.isElement('', 'newQuery') // $ExpectType void
-  Cypress.ensure.isWindow('', 'newQuery') // $ExpectType void
-  Cypress.ensure.isDocument('', 'newQuery') // $ExpectType void
+  Cypress.ensure.isType('', ['optional', 'element'], 'newQuery', cy) // $ExpectType void
+  Cypress.ensure.isElement('', 'newQuery', cy) // $ExpectType void
+  Cypress.ensure.isWindow('', 'newQuery', cy) // $ExpectType void
+  Cypress.ensure.isDocument('', 'newQuery', cy) // $ExpectType void
 
   Cypress.ensure.isAttached('', 'newQuery', cy) // $ExpectType void
   Cypress.ensure.isNotDisabled('', 'newQuery') // $ExpectType void
-  Cypress.ensure.isVisibile('', 'newQuery') // $ExpectType void
+  Cypress.ensure.isVisible('', 'newQuery') // $ExpectType void
 }
 
 namespace CypressLogsTest {
