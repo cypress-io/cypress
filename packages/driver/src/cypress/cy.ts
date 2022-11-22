@@ -705,7 +705,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     $Chainer.add(name, callback)
 
     cy[name] = function (...args) {
-      ensureRunnable(this, name)
+      ensureRunnable(cy, name)
 
       // this is the first call on cypress
       // so create a new chainer instance
@@ -798,7 +798,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     $Chainer.add(name, callback)
 
     cy[name] = function (...args) {
-      ensureRunnable(this, name)
+      ensureRunnable(cy, name)
 
       // this is the first call on cypress
       // so create a new chainer instance
