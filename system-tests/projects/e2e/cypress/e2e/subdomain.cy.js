@@ -87,25 +87,20 @@ describe('subdomains', () => {
       domain: 'subdomain.foobar.com',
     })
 
-    cy.getCookies({ domain: 'www.foobar.com' }).then((cookies) => {
-      console.log('cookies:', cookies)
-    })
-
-    // this redirects to www.foobar.com, which should not have access to
-    // domain.foobar.com cookies
-    cy.visit('http://localhost:2292/domainRedirect')
-    cy.document().its('cookie').should('equal', '')
+    // sends a request to localhost but gets redirected back
+    // to www.foobar.com
+    cy.request('http://localhost:2292/redirect')
+    .its('body.cookie')
+    .should('not.exist')
   })
 
   it('sets a hostOnly cookie by default', () => {
-    cy.visit('http://domain.foobar.com:2292')
-    // this sets a hostOnly cookie for domain.foobar.com
+    // this sets a hostOnly cookie for www.foobar.com
     cy.setCookie('foobar', '1')
 
-    // this redirects to www.foobar.com, which should not have access to
-    // domain.foobar.com cookies
-    cy.visit('http://localhost:2292/domainRedirect')
-    cy.document().its('cookie').should('equal', '')
+    cy.request('http://domain.foobar.com:2292/cookies')
+    .its('body.cookie')
+    .should('not.exist')
   })
 
   it('issue #361: incorrect cookie synchronization between cy.request redirects', () => {
