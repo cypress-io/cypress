@@ -922,7 +922,8 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       completeNext(1)
     })
 
-    itSkipIfWindows('should fetch newer runs and maintain them when navigating', () => {
+    // TODO: unskip https://github.com/cypress-io/cypress/issues/24575
+    it.skip('should fetch newer runs and maintain them when navigating', () => {
       cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', RUNNING_COUNT).should('be.visible')
 
       cy.remoteGraphQLIntercept(async (obj) => {
