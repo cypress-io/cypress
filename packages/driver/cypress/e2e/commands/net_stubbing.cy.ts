@@ -31,15 +31,9 @@ describe('network stubbing - not skipped', () => {
 
     cy.window()
     .then((win) => {
-      const stub = cy.stub()
-
       const xhr = new win.XMLHttpRequest()
 
       xhr.open('POST', '/users/')
-
-      xhr.abort = stub // this should not get called
-      xhr.onerror = stub // this should not fire
-      xhr.onload = stub // this should not fire
 
       xhr.send()
 
