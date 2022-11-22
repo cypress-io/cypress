@@ -10,7 +10,8 @@ export default function (options: any): Rule {
         skipTests: true,
       }),
       (tree: Tree, _context: SchematicContext) => {
-        const componentPath = tree.actions.filter((a) => a.path.includes(`${options.name}.component.ts`))
+        const componentName = path.parse(options.name).name
+        const componentPath = tree.actions.filter((a) => a.path.includes(`${componentName}.component.ts`))
         .map((a) => path.dirname(a.path))
         .at(0)
 
@@ -18,6 +19,7 @@ export default function (options: any): Rule {
           ...options,
           component: true,
           path: componentPath,
+          name: componentName,
         }) : noop()
       },
     ])

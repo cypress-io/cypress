@@ -48,4 +48,13 @@ describe('ng-generate @cypress/schematic:component', () => {
     expect(tree.files.filter((f) => f === '/projects/sandbox/src/app/foo/foo.component.cy.ts').length).to.eq(1)
     expect(tree.files.filter((f) => f === '/projects/sandbox/src/app/foo/foo.component.css').length).to.eq(1)
   })
+
+  it('should generate component given a component containing a directory', async () => {
+    const tree = await schematicRunner.runSchematicAsync('component', { name: 'foo/bar', project: 'sandbox' }, appTree).toPromise()
+
+    expect(tree.files).to.contain('/projects/sandbox/src/app/foo/bar/bar.component.ts')
+    expect(tree.files).to.contain('/projects/sandbox/src/app/foo/bar/bar.component.html')
+    expect(tree.files).to.contain('/projects/sandbox/src/app/foo/bar/bar.component.cy.ts')
+    expect(tree.files).to.contain('/projects/sandbox/src/app/foo/bar/bar.component.css')
+  })
 })
