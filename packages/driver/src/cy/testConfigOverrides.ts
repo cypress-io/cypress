@@ -123,7 +123,7 @@ function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, en
 
 // this is called during test onRunnable time
 // in order to resolve the test config upfront before test runs
-// note: must return as an object to meet the dashboard recording API
+// note: must return as an object to meet the Cypress Cloud recording API
 export function getResolvedTestConfigOverride (test): ResolvedTestConfigOverride {
   let curr = test
   let testConfigList: TestConfig[] = []
@@ -147,7 +147,7 @@ export function getResolvedTestConfigOverride (test): ResolvedTestConfigOverride
 
   const testConfig = {
     testConfigList: testConfigList.filter(({ overrides }) => overrides !== undefined),
-    // collect test overrides to send to the dashboard api when @packages/server is ran in record mode
+    // collect test overrides to send to the Cypress Cloud api when @packages/server is ran in record mode
     unverifiedTestConfig: _.reduce(testConfigList, (acc, { overrides }) => _.extend(acc, overrides), {}),
   }
 
