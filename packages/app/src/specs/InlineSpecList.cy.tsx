@@ -16,7 +16,7 @@ const hoverRunAllSpecs = (directory?: string, specNumber?: number) => {
   return command.realHover().then(() => {
     cy.get('[data-cy=play-button]').should('exist')
     cy.get('[data-cy=run-all-specs]').realHover().then(() => {
-      cy.get('[data-cy=tooltip-content]').should('contain.text', ` Run ${specNumber} specs `)
+      cy.get('[data-cy=tooltip-content]').should('contain.text', `Run ${specNumber} spec`)
     })
   })
 }
