@@ -232,7 +232,7 @@ function runSpecCT (config, spec: SpecFile) {
 
   const specSrc = getSpecUrl(config.namespace, spec.absolute)
 
-  autIframe.visitBlankPage()
+  autIframe._showInitialBlankPage()
   $autIframe.prop('src', specSrc)
 
   // initialize Cypress (driver) with the AUT!
