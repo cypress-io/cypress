@@ -1,6 +1,5 @@
 const _ = require('lodash')
 const path = require('path')
-const Promise = require('bluebird')
 const cwd = require('../cwd')
 const debug = require('debug')('cypress:server:controllers')
 const { escapeFilenameInUrl } = require('../util/escape_filename')
@@ -69,17 +68,6 @@ module.exports = {
       return this.prepareForBrowser(convertedSpec, config.projectRoot, config.namespace)
     }
 
-    const specFilter = _.get(extraOptions, 'specFilter')
-
-    debug('specFilter %o', { specFilter })
-    const specFilterContains = (spec) => {
-      // only makes sense if there is specFilter string
-      // the filter should match the logic in
-      // desktop-gui/src/specs/specs-store.js
-      return spec.relative.toLowerCase().includes(specFilter.toLowerCase())
-    }
-    const specFilterFn = specFilter ? specFilterContains : () => true
-
     const getSpecsHelper = async () => {
       // grab all of the specs if this is ci
       if (spec === '__all') {
@@ -87,36 +75,18 @@ module.exports = {
 
         const ctx = getCtx()
 
-        const [e2ePatterns, componentPatterns] = await Promise.all([
-          ctx.project.specPatternsForTestingType(ctx.project.projectRoot, 'e2e'),
-          ctx.project.specPatternsForTestingType(ctx.project.projectRoot, 'component'),
-        ])
+        // In case the user clicked "run all specs" and deleted a spec in the list, we will
+        // only include specs we know to exist
+        const existingSpecs = new Set(ctx.project.specs.map(({ relative }) => relative))
+        const filteredSpecs = ctx.project.runAllSpecs.reduce((acc, relSpec) => {
+          if (existingSpecs.has(relSpec)) {
+            acc.push(convertSpecPath(relSpec))
+          }
 
-        // It's possible that the E2E pattern matches some component tests, for example
-        // e2e.specPattern: src/**/*.cy.ts
-        // component.specPattern: src/components/**/*.cy.ts
-        // in this case, we want to remove anything that matches
-        // - the component.specPattern
-        // - the e2e.excludeSpecPattern
-        return ctx.project.findSpecs({
-          projectRoot: config.projectRoot,
-          testingType: 'e2e',
-          specPattern: e2ePatterns.specPattern,
-          configSpecPattern: e2ePatterns.specPattern,
-          excludeSpecPattern: e2ePatterns.excludeSpecPattern,
-          additionalIgnorePattern: componentPatterns.specPattern,
-        })
-        .then((specs) => {
-          debug('found __all specs %o', specs)
+          return acc
+        }, [])
 
-          return specs
-        })
-        .filter(specFilterFn)
-        .then((specs) => {
-          debug('filtered __all specs %o', specs)
-
-          return specs
-        }).map(convertSpecPath)
+        return filteredSpecs
       }
 
       debug('normalizing spec %o', { spec })
@@ -125,10 +95,7 @@ module.exports = {
       return [convertSpecPath(spec)]
     }
 
-    return Promise
-    .try(() => {
-      return getSpecsHelper()
-    })
+    return getSpecsHelper()
   },
 
   prepareForBrowser (filePath, projectRoot, namespace) {
