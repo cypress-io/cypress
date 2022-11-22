@@ -25,28 +25,28 @@ describe('<DebugPageHeader />', {
       },
       render: (gqlVal) => {
         return (
-          <DebugPageHeader gql={gqlVal} runNumber={468} commitsAhead={'You are 2 commits ahead'} commitHash={'b5e6fde'}/>
+          <DebugPageHeader gql={gqlVal} runNumber={468} commitsAhead='You are 2 commits ahead' commitHash='b5e6fde'/>
         )
       },
     })
 
-    cy.get('[data-cy=debug-header]').children().should('have.length', 2)
-    cy.get('[data-cy=debug-test-summary]')
+    cy.findByTestId('debug-header').children().should('have.length', 2)
+    cy.findByTestId('debug-test-summary')
     .should('have.text', 'Adding a hover state to the button component')
 
-    cy.get('[data-cy=debug-runCommit-info]').children().should('have.length', 3)
-    cy.get('[data-cy=debug-runNumber]')
+    cy.findByTestId('debug-runCommit-info').children().should('have.length', 3)
+    cy.findByTestId('debug-runNumber')
     .should('have.text', ' Run #468')
     .should('have.css', 'color', 'rgb(90, 95, 122)')
 
-    cy.get('[data-cy=debug-commitsAhead]')
+    cy.findByTestId('debug-commitsAhead')
     .should('have.text', 'You are 2 commits ahead')
     .should('have.css', 'color', 'rgb(189, 88, 0)')
 
-    cy.get('[data-cy=debug-results]').should('be.visible')
+    cy.findByTestId('debug-results').should('be.visible')
 
     defaults.forEach((obj) => {
-      cy.get(`[data-cy=${obj.attr}]`)
+      cy.findByTestId(obj.attr)
       .should('have.text', obj.text)
       .children().should('have.length', 2)
     })
