@@ -257,11 +257,11 @@ We dynamically generated a new test to display this failure.
 `
 
 exports['e2e record api interaction errors project 404 errors and exits 1'] = `
-We could not find a Dashboard project with the projectId: pid123
+We could not find a Cypress Cloud project with the projectId: pid123
 
 This projectId came from your cypress-with-project-id.config.js file or an environment variable.
 
-Please log into the Dashboard and find your project.
+Please log into Cypress Cloud and find your project.
 
 We will list the correct projectId in the 'Settings' tab.
 
@@ -386,7 +386,7 @@ Your Record Key f858a...ee7e1 is not valid with this projectId: pid123
 
 It may have been recently revoked by you or another user.
 
-Please log into the Dashboard to see the valid Record Keys.
+Please log into Cypress Cloud to see the valid Record Keys.
 
 https://on.cypress.io/dashboard/projects/pid123
 
@@ -555,7 +555,7 @@ This error will not alter the exit code.
 exports['e2e record api interaction errors create run 422 errors and exits when group name is in use 1'] = `
 You passed the --group flag, but this group name has already been used for this run.
 
-The existing run is: https://dashboard.cypress.io/runs/12345
+The existing run is: https://cloud.cypress.io/runs/12345
 
 The --group flag you passed was: e2e-tests
 
@@ -1081,7 +1081,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 `
 
 exports['e2e record api interaction warnings create run warnings unknown warning warns with unknown warning code 1'] = `
-Warning from Cypress Dashboard: You are almost out of time
+Warning from Cypress Cloud: You are almost out of time
 
 Details:
 
@@ -1424,7 +1424,7 @@ exports['e2e record passing passes 2'] = [
 exports['e2e record api interaction warnings create run warnings grace period - over private tests limit warns when over private test results 1'] = `
 You've exceeded the limit of private test results under your free plan this month. The limit is 500 private test results.
 
-Your plan is now in a grace period, which means your tests will still be recorded until 2999-12-31. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
+Your plan is now in a grace period, which means your tests will still be recorded until 2999-12-31. Please upgrade your plan to continue recording tests on Cypress Cloud in the future.
 
 https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
