@@ -5,6 +5,7 @@
   "main": "index.js",
   "browser": "src/index.ts",
   "scripts": {
+    "build": "yarn gulp generateFrontendSchema",
     "build-prod": "tsc --noEmit || echo 'built, with errors'",
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",

@@ -5,6 +5,7 @@
   "main": "index.js",
   "browser": "src/index.ts",
   "scripts": {
+    "build": "yarn check-ts",
     "build-prod": "tsc || echo 'built, with type errors'",
     "check-ts": "tsc --noEmit",
     "clean": "rimraf src/*.js src/**/*.js",
