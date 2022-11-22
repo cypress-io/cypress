@@ -123,6 +123,7 @@ describe('e2e subdomain', () => {
     spec: 'subdomain.cy.js',
     snapshot: true,
     config: {
+      video: false,
       hosts: {
         '*.foobar.com': '127.0.0.1',
       },

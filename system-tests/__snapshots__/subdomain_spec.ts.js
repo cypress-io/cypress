@@ -31,13 +31,6 @@ exports['e2e subdomain / passes'] = `
 
   9 passing
 
-Warning: We failed processing this video.
-
-This error will not alter the exit code.
-
-TimeoutError: operation timed out
-      [stack trace lines]
-
 
   (Results)
 
