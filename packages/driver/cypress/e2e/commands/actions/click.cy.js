@@ -1378,7 +1378,7 @@ describe('src/cy/commands/actions/click', () => {
         })
 
         cy.get('#button-covered-in-span').click({ force: true }).then(() => {
-          expect(retries).to.be.gt(0)
+          expect(retries).to.be.eq(0)
           expect(clicked).to.be.true
         })
       })
