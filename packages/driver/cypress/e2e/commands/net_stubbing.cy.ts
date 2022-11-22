@@ -66,8 +66,8 @@ describe('network stubbing - not skipped', () => {
         // do nothing on an abort
       })
 
-      // if you abort too fast in firefox, the fetch is never sent to the server for us to intercept
-      if (Cypress.isBrowser('firefox')) {
+      // if you abort too fast in firefox or safari, the fetch is never sent to the server for us to intercept
+      if (!Cypress.isBrowser('chrome')) {
         setTimeout(() => {
           controller.abort()
         }, 100)
