@@ -163,7 +163,7 @@ describe('src/cy/commands/cookies - no stub', () => {
 
     it('can return the cookie from the subdomain matching the AUT by default when AUT is a subdomain', () => {
       cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
-      setCookies()
+      cy.setCookie('key', 'www.barbaz.com value', { domain: 'www.barbaz.com', log: false })
 
       cy.getCookie('key').then((cookie) => {
         expect(cookie.value).to.equal('www.barbaz.com value')
@@ -175,6 +175,7 @@ describe('src/cy/commands/cookies - no stub', () => {
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
+        cy.setCookie('key', 'www.foobar.com value', { domain: 'www.foobar.com', log: false })
 
         cy.getCookie('key').then((cookie) => {
           expect(cookie.value).to.equal('www.foobar.com value')
@@ -185,9 +186,7 @@ describe('src/cy/commands/cookies - no stub', () => {
 
     it('can return the cookie from the bare domain matching the AUT by default when AUT is a subdomain', () => {
       cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
-      setCookies()
-      cy.clearCookie('key', { domain: 'www.barbaz.com' })
-      cy.clearCookie('key', { domain: 'www.foobar.com' })
+      cy.setCookie('key', 'barbaz.com value', { domain: 'barbaz.com', log: false })
 
       cy.getCookie('key').then((cookie) => {
         expect(cookie.value).to.equal('barbaz.com value')
@@ -199,6 +198,7 @@ describe('src/cy/commands/cookies - no stub', () => {
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
+        cy.setCookie('key', 'foobar.com value', { domain: 'foobar.com', log: false })
 
         cy.getCookie('key').then((cookie) => {
           expect(cookie.value).to.equal('foobar.com value')
