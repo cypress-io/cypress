@@ -172,15 +172,6 @@
     ]
   },
   "nx": {
-    "implicitDependencies": [
-      "@cypress/angular",
-      "@cypress/mount-utils",
-      "@cypress/react",
-      "@cypress/react18",
-      "@cypress/svelte",
-      "@cypress/vue",
-      "@cypress/vue2"
-    ],
     "targets": {
       "postinstall": {
         "dependsOn": [
