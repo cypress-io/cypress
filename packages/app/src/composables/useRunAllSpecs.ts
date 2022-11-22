@@ -27,9 +27,9 @@ mutation RunAllSpecs ($specPath: String!, $runAllSpecs: [String!]!) {
 `
 
 const isRunMode = window.__CYPRESS_MODE__ === 'run' && window.top === window
-const separator = getSeparator()
 
 export function useRunAllSpecs (list: ComputedRef<{tree: UseCollapsibleTreeNode<SpecTreeNode>[]}>) {
+  const separator = getSeparator()
   const router = useRouter()
   const query = useQuery({ query: RunAllSpecs_ConfigDocument, pause: isRunMode })
   const setRunAllSpecsMutation = useMutation(RunAllSpecsDocument)
