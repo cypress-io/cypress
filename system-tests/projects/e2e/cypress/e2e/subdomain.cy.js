@@ -25,8 +25,7 @@ describe('subdomains', () => {
     })
 
     cy.getCookies().then((cookies) => {
-      // only cookies matching this subdomain should be yielded
-      expect(cookies.length).to.eq(2)
+      expect(cookies.length).to.eq(3)
     })
   })
 
@@ -82,26 +81,31 @@ describe('subdomains', () => {
     })
   })
 
-  it.skip('issue #362: do not set domain based (non hostOnly) cookies by default', () => {
+  // https://github.com/cypress-io/cypress/issues/363
+  it('does not set domain based (non hostOnly) cookies by default', () => {
     cy.setCookie('foobar', '1', {
       domain: 'subdomain.foobar.com',
     })
 
-    // send a request to localhost but get
-    // redirected back to foobar
-    cy.request('http://localhost:2292/redirect')
-    .its('body.cookie')
-    .should('not.exist')
+    cy.getCookies({ domain: 'www.foobar.com' }).then((cookies) => {
+      console.log('cookies:', cookies)
+    })
+
+    // this redirects to www.foobar.com, which should not have access to
+    // domain.foobar.com cookies
+    cy.visit('http://localhost:2292/domainRedirect')
+    cy.document().its('cookie').should('equal', '')
   })
 
-  it.skip('sets a hostOnly cookie by default', () => {
-    // this should set a hostOnly cookie for
-    // www.foobar.com
+  it('sets a hostOnly cookie by default', () => {
+    cy.visit('http://domain.foobar.com:2292')
+    // this sets a hostOnly cookie for domain.foobar.com
     cy.setCookie('foobar', '1')
 
-    cy.request('http://domain.foobar.com:2292/cookies')
-    .its('body.cookie')
-    .should('not.exist')
+    // this redirects to www.foobar.com, which should not have access to
+    // domain.foobar.com cookies
+    cy.visit('http://localhost:2292/domainRedirect')
+    cy.document().its('cookie').should('equal', '')
   })
 
   it('issue #361: incorrect cookie synchronization between cy.request redirects', () => {

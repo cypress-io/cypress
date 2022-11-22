@@ -418,79 +418,42 @@ describe('src/cy/commands/cookies - no stub', () => {
     it('can clear the cookie from the subdomain matching the AUT by default when AUT is a subdomain', () => {
       cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       cy.setCookie('key', 'www.barbaz.com value', { domain: 'www.barbaz.com', log: false })
-      cy.setCookie('key', 'barbaz.com value', { domain: 'barbaz.com', log: false })
-      cy.setCookie('key', 'www.foobar.com value', { domain: 'www.foobar.com', log: false })
-      cy.setCookie('key', 'foobar.com value', { domain: 'foobar.com', log: false })
 
       cy.clearCookie('key')
 
-      cy.getCookie('key').then((cookie) => {
-        // the www cookie is gone, but the non-www one will still exist
-        expect(cookie).to.exist
-        expect(cookie.domain).to.match(/\.?barbaz\.com/)
-      })
-
-      cy.getCookie('key', { domain: 'www.foobar.com' }).should('exist')
-      cy.getCookie('key', { domain: 'foobar.com' }).should('exist')
+      cy.getCookie('key').should('not.exist')
 
       // webkit does not support cy.origin()
       if (isWebkit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
-        // put back cookie removed above
-        cy.setCookie('key', 'value1', { domain: 'www.barbaz.com' })
+        cy.setCookie('key', 'www.foobar.com value', { domain: 'www.foobar.com', log: false })
 
         cy.clearCookie('key')
 
-        cy.getCookie('key').then((cookie) => {
-          // the www cookie is gone, but the non-www one will still exist
-          expect(cookie).to.exist
-          expect(cookie.domain).to.match(/\.?foobar\.com/)
-        })
-
-        cy.getCookie('key', { domain: 'foobar.com' }).should('exist')
-        cy.getCookie('key', { domain: 'barbaz.com' }).should('exist')
-        cy.getCookie('key', { domain: 'www.barbaz.com' }).should('exist')
+        cy.getCookie('key').should('not.exist')
       })
     })
 
     it('can clear the cookie from the bare domain matching the AUT by default when AUT is a subdomain', () => {
       cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       cy.setCookie('key', 'barbaz.com value', { domain: 'barbaz.com', log: false })
-      cy.setCookie('key', 'www.barbaz.com value', { domain: 'www.barbaz.com', log: false })
-      cy.setCookie('key', 'foobar.com value', { domain: 'foobar.com', log: false })
-      cy.setCookie('key', 'www.foobar.com value', { domain: 'www.foobar.com', log: false })
 
       cy.clearCookie('key')
 
-      cy.getCookie('key').then((cookie) => {
-        // the non-www cookie is gone, but the www one will still exist
-        expect(cookie).to.exist
-        expect(cookie.domain).to.match(/\.?www\.barbaz\.com/)
-      })
-
-      cy.getCookie('key', { domain: 'www.barbaz.com' }).should('exist')
-      cy.getCookie('key', { domain: 'www.foobar.com' }).should('exist')
+      cy.getCookie('key').should('not.exist')
 
       // webkit does not support cy.origin()
       if (isWebkit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
-        // put back cookie removed above
-        cy.setCookie('key', 'value1', { domain: 'barbaz.com' })
+        cy.setCookie('key', 'foobar.com value', { domain: 'foobar.com', log: false })
 
         cy.clearCookie('key')
 
-        cy.getCookie('key').then((cookie) => {
-          // the non-www cookie is gone, but the www one will still exist
-          expect(cookie).to.exist
-          expect(cookie.domain).to.match(/\.?www\.foobar\.com/)
-        })
-
-        cy.getCookie('key', { domain: 'barbaz.com' }).should('exist')
-        cy.getCookie('key', { domain: 'www.barbaz.com' }).should('exist')
+        cy.getCookie('key').should('not.exist')
       })
     })
 

@@ -259,7 +259,11 @@ const automation = {
 
   clearCookie (filter, fn) {
     return this.getCookie(filter)
-    .then(clearOneCookie)
+    .then((cookie) => {
+      if (!cookie) return null
+
+      return clearOneCookie(cookie)
+    })
     .then(fn)
   },
 
