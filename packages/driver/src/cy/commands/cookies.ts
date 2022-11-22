@@ -74,7 +74,7 @@ function validateDomainOption (domain: any, commandName: string, log: Log | unde
 
 export default function (Commands, Cypress, cy, state, config) {
   const getDefaultDomain = () => {
-    const hostname = state('window').location.hostname
+    const hostname = state('window')?.location.hostname
 
     // if hostname is undefined, the AUT is on about:blank, so use the
     // spec frame's hostname instead
