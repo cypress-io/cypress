@@ -227,7 +227,7 @@ const automation = {
     // return cookies for example.com and all subdomains, whereas we want an
     // exact match for only "example.com".
     return Promise.try(() => {
-      return browser.cookies.getAll({})
+      return browser.cookies.getAll({ url: filter.url })
       .then((cookies) => {
         return cookies.filter((cookie) => {
           return cookieMatches(cookie, filter)
