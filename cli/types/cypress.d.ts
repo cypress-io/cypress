@@ -660,7 +660,7 @@ declare namespace Cypress {
      * Whether or not to persist the session across all specs in the run.
      * @default {false}
      */
-    cacheAcrossSpecs?: boolean,
+    cacheAcrossSpecs?: boolean
     /**
      * Function to run immediately after the session is created and `setup` function runs or
      * after a session is restored and the page is cleared. If this returns `false`, throws an
@@ -2983,7 +2983,7 @@ declare namespace Cypress {
      * Override default config options for E2E Testing runner.
      * @default {}
      */
-    e2e: Omit<CoreConfigOptions, 'indexHtmlFile'>
+    e2e: EndToEndConfigOptions
 
     /**
      * An array of objects defining the certificates
@@ -2996,6 +2996,14 @@ declare namespace Cypress {
     setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => Promise<PluginConfigOptions | void> | PluginConfigOptions | void
 
     indexHtmlFile: string
+  }
+
+  interface EndToEndConfigOptions extends Omit<CoreConfigOptions, 'indexHtmlFile'> {
+    /**
+     * Enables the "Run All Specs" UI feature, allowing the execution of multiple specs sequentially.
+     * @default false
+     */
+    experimentalRunAllSpecs?: boolean
   }
 
   /**
@@ -3121,7 +3129,7 @@ declare namespace Cypress {
   type DevServerFn<ComponentDevServerOpts = any> = (cypressDevServerConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
 
   type ConfigHandler<T> = T
-    | (() => T | Promise<T>)
+  | (() => T | Promise<T>)
 
   type DevServerConfigOptions = {
     bundler: 'webpack'
@@ -3132,9 +3140,9 @@ declare namespace Cypress {
     framework: 'react' | 'vue' | 'svelte'
     viteConfig?: ConfigHandler<Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>>
   } | {
-    bundler: 'webpack',
-    framework: 'angular',
-    webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>,
+    bundler: 'webpack'
+    framework: 'angular'
+    webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>
     options?: {
       projectConfig: AngularDevServerProjectConfig
     }
