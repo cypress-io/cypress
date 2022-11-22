@@ -70,7 +70,7 @@ describe('gui/menu', function () {
       expect(electron.shell.openExternal).to.be.calledWith('https://on.cypress.io/changelog')
     })
 
-    it('opens dashboard when Manage Account is clicked', () => {
+    it('opens Cypress Cloud when Manage Account is clicked', () => {
       menu.set()
       getSubMenuItem(getMenuItem('File'), 'Manage Account').click()
       expect(electron.shell.openExternal).to.be.calledWith('https://on.cypress.io/dashboard')

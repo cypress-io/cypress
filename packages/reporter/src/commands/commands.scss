@@ -252,6 +252,30 @@
     }
   }
 
+  .command-state-warned {
+    color: $warn-text;
+
+    &:not(.command-type-system) {
+      border-left: $warn-border;
+    }
+
+    .command-number-column,
+    .command-method,
+    .command-message {
+      color: $warn-text;
+    }
+
+    .command-group {
+      border-color: $warn-text;
+      @include nested-command-dashes($warn-text);
+
+      .command-group-block {
+        border-color: $warn-text;
+        @include nested-command-dashes($warn-text);
+      }
+    }
+  }
+
   .command-state-failed {
     color: $err-header-text;
 
@@ -286,6 +310,7 @@
   }
 
   // Custom Styles for Specific Commands
+  // NOTE: assert does not support warned state
   .command-name-assert {
     .command-method {
       span {

@@ -161,9 +161,9 @@ const getDocsType = (): string => {
       return 'docsHomepage'
     case errorType.includes('RECORD'):
     case errorType.includes('PROJECT'):
-    case errorType.includes('DASHBOARD'):
+    case errorType.includes('CLOUD'):
     case errorType.includes('PLAN'):
-      return 'dashboardGuide'
+      return 'cloudGuide'
     default:
       return 'configGuide'
   }
