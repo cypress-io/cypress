@@ -2389,6 +2389,8 @@ jobs:
       - store-npm-logs
 
 linux-x64-workflow: &linux-x64-workflow
+  environment:
+    CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
   jobs:
     - node_modules_install
     - build:
@@ -2711,6 +2713,8 @@ linux-x64-workflow: &linux-x64-workflow
           - system-tests-node-modules-install
 
 linux-arm64-workflow: &linux-arm64-workflow
+  environment:
+    CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
   jobs:
     - node_modules_install:
         name: linux-arm64-node-modules-install
