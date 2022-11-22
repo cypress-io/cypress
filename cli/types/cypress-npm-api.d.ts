@@ -229,6 +229,7 @@ declare namespace CypressCommandLine {
       startedAt: dateTimeISO
       endedAt: dateTimeISO
       duration: ms
+      wallClockDuration?: number
     }
     /**
      * Reporter name like "spec"
@@ -259,8 +260,10 @@ declare namespace CypressCommandLine {
        * resolved filename of the spec
        */
       absolute: string
+      relativeToCommonRoot: string
     }
     shouldUploadVideo: boolean
+    skippedSpec: boolean
   }
 
   /**

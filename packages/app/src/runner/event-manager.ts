@@ -416,7 +416,7 @@ export class EventManager {
 
           if (config.isTextTerminal && !runState.currentId) {
             // we are in run mode and it's the first load
-            // store runnables in backend and maybe send to dashboard
+            // store runnables in backend and maybe send to Cypress Cloud
             return this.ws.emit('set:runnables:and:maybe:record:tests', runnables, run)
           }
 

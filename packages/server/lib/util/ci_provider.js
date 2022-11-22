@@ -1,5 +1,8 @@
 const _ = require('lodash')
+const isCi = require('is-ci')
 const debug = require('debug')('cypress:server')
+
+const getIsCi = () => isCi
 
 const join = (char, ...pieces) => {
   return _.chain(pieces).compact().join(char).value()
@@ -668,6 +671,8 @@ const detectableCiBuildIdProviders = () => {
 }
 
 module.exports = {
+  getIsCi,
+
   list,
 
   provider,

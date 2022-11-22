@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /// <reference path="./cypress-npm-api.d.ts" />
 /// <reference path="./cypress-eventemitter.d.ts" />
 /// <reference path="./cypress-type-helpers.d.ts" />
@@ -470,19 +471,19 @@ declare namespace Cypress {
       add<T extends keyof Chainable>(name: T, options: CommandOptions & {prevSubject: false}, fn: CommandFn<T>): void
       add<T extends keyof Chainable, S = any>(name: T, options: CommandOptions & {prevSubject: true}, fn: CommandFnWithSubject<T, S>): void
       add<T extends keyof Chainable, S extends PrevSubject>(
-          name: T, options: CommandOptions & { prevSubject: S | ['optional'] }, fn: CommandFnWithSubject<T, PrevSubjectMap[S]>,
+        name: T, options: CommandOptions & { prevSubject: S | ['optional'] }, fn: CommandFnWithSubject<T, PrevSubjectMap[S]>,
       ): void
       add<T extends keyof Chainable, S extends PrevSubject>(
-          name: T, options: CommandOptions & { prevSubject: S[] }, fn: CommandFnWithSubject<T, PrevSubjectMap<void>[S]>,
+        name: T, options: CommandOptions & { prevSubject: S[] }, fn: CommandFnWithSubject<T, PrevSubjectMap<void>[S]>,
       ): void
       addAll<T extends keyof Chainable>(fns: CommandFns): void
       addAll<T extends keyof Chainable>(options: CommandOptions & {prevSubject: false}, fns: CommandFns): void
       addAll<T extends keyof Chainable, S = any>(options: CommandOptions & { prevSubject: true }, fns: CommandFnsWithSubject<S>): void
       addAll<T extends keyof Chainable, S extends PrevSubject>(
-          options: CommandOptions & { prevSubject: S | ['optional'] }, fns: CommandFnsWithSubject<PrevSubjectMap[S]>,
+        options: CommandOptions & { prevSubject: S | ['optional'] }, fns: CommandFnsWithSubject<PrevSubjectMap[S]>,
       ): void
       addAll<T extends keyof Chainable, S extends PrevSubject>(
-          options: CommandOptions & { prevSubject: S[] }, fns: CommandFnsWithSubject<PrevSubjectMap<void>[S]>,
+        options: CommandOptions & { prevSubject: S[] }, fns: CommandFnsWithSubject<PrevSubjectMap<void>[S]>,
       ): void
       overwrite<T extends keyof Chainable>(name: T, fn: CommandFnWithOriginalFn<T>): void
       overwrite<T extends keyof Chainable, S extends PrevSubject>(name: T, fn: CommandFnWithOriginalFnAndSubject<T, PrevSubjectMap[S]>): void
@@ -659,7 +660,7 @@ declare namespace Cypress {
      * Whether or not to persist the session across all specs in the run.
      * @default {false}
      */
-    cacheAcrossSpecs?: boolean,
+    cacheAcrossSpecs?: boolean
     /**
      * Function to run immediately after the session is created and `setup` function runs or
      * after a session is restored and the page is cleared. If this returns `false`, throws an
@@ -676,8 +677,8 @@ declare namespace Cypress {
   type CanReturnChainable = void | Chainable | Promise<unknown>
   type ThenReturn<S, R> =
     R extends void ? Chainable<S> :
-    R extends R | undefined ? Chainable<S | Exclude<R, undefined>> :
-    Chainable<S>
+      R extends R | undefined ? Chainable<S | Exclude<R, undefined>> :
+        Chainable<S>
 
   /**
    * Chainable interface for non-array Subjects
@@ -2373,8 +2374,8 @@ declare namespace Cypress {
 
   type ChainableMethods<Subject = any> = {
     [P in keyof Chainable<Subject>]: Chainable<Subject>[P] extends ((...args: any[]) => any)
-        ? Chainable<Subject>[P]
-        : never
+      ? Chainable<Subject>[P]
+      : never
   }
 
   interface SinonSpyAgent<A extends sinon.SinonSpy> {
@@ -2863,7 +2864,7 @@ declare namespace Cypress {
      */
     video: boolean
     /**
-     * Whether Cypress will upload the video to the Dashboard even if all tests are passing. This applies only when recording your runs to the Dashboard. Turn this off if you'd like the video uploaded only when there are failing tests.
+     * Whether Cypress will upload the video to Cypress Cloud even if all tests are passing. This applies only when recording your runs to Cypress Cloud. Turn this off if you'd like the video uploaded only when there are failing tests.
      * @default true
      */
     videoUploadOnPasses: boolean
@@ -2982,7 +2983,7 @@ declare namespace Cypress {
      * Override default config options for E2E Testing runner.
      * @default {}
      */
-    e2e: Omit<CoreConfigOptions, 'indexHtmlFile'>
+    e2e: EndToEndConfigOptions
 
     /**
      * An array of objects defining the certificates
@@ -2995,6 +2996,14 @@ declare namespace Cypress {
     setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => Promise<PluginConfigOptions | void> | PluginConfigOptions | void
 
     indexHtmlFile: string
+  }
+
+  interface EndToEndConfigOptions extends Omit<CoreConfigOptions, 'indexHtmlFile'> {
+    /**
+     * Enables the "Run All Specs" UI feature, allowing the execution of multiple specs sequentially.
+     * @default false
+     */
+    experimentalRunAllSpecs?: boolean
   }
 
   /**
@@ -3112,15 +3121,15 @@ declare namespace Cypress {
   type PickConfigOpt<T> = T extends keyof DefineDevServerConfig ? DefineDevServerConfig[T] : any
 
   interface AngularDevServerProjectConfig {
-    root: string,
-    sourceRoot: string,
+    root: string
+    sourceRoot: string
     buildOptions: Record<string, any>
   }
 
   type DevServerFn<ComponentDevServerOpts = any> = (cypressDevServerConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
 
   type ConfigHandler<T> = T
-    | (() => T | Promise<T>)
+  | (() => T | Promise<T>)
 
   type DevServerConfigOptions = {
     bundler: 'webpack'
@@ -3131,9 +3140,9 @@ declare namespace Cypress {
     framework: 'react' | 'vue' | 'svelte'
     viteConfig?: ConfigHandler<Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>>
   } | {
-    bundler: 'webpack',
-    framework: 'angular',
-    webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>,
+    bundler: 'webpack'
+    framework: 'angular'
+    webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>
     options?: {
       projectConfig: AngularDevServerProjectConfig
     }
@@ -3162,7 +3171,7 @@ declare namespace Cypress {
     /**
      * Hosts mappings to IP addresses.
      */
-     hosts?: null | {[key: string]: string}
+    hosts?: null | {[key: string]: string}
   }
 
   interface PluginConfigOptions extends ResolvedConfigOptions, RuntimeConfigOptions {
