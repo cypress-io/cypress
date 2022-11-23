@@ -4,7 +4,6 @@
   "description": "Launches Webpack Dev Server for Component Testing",
   "main": "dist/index.js",
   "scripts": {
-    "prebuild": "rimraf dist",
     "build": "tsc || echo 'built, with type errors'",
     "build-prod": "yarn build",
     "check-ts": "tsc --noEmit",

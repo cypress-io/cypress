@@ -8,8 +8,6 @@ const shell = require('shelljs')
 const { join } = require('path')
 const resolvePkg = require('resolve-pkg')
 
-require('./clean')
-
 shell.set('-v') // verbose
 shell.set('-e') // any error is fatal
 

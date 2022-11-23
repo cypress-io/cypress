@@ -92,7 +92,8 @@
     "targets": {
       "build": {
         "outputs": [
-          "cli/react"
+          "cli/react",
+          "npm/react/dist"
         ]
       }
     }

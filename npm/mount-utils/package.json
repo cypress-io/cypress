@@ -38,7 +38,8 @@
     "targets": {
       "build": {
         "outputs": [
-          "cli/mount-utils"
+          "cli/mount-utils",
+          "npm/mount-utils/dist"
         ]
       }
     }

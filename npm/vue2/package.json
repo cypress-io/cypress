@@ -54,7 +54,8 @@
     "targets": {
       "build": {
         "outputs": [
-          "cli/vue2"
+          "cli/vue2",
+          "npm/vue2/dist"
         ]
       }
     }
