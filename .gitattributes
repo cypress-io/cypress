@@ -2,4 +2,6 @@
 
 *.json text eol=lf
 
+**/.eslintrc text eol=lf
+
 packages/errors/__snapshot-html__/** linguist-generated=true
