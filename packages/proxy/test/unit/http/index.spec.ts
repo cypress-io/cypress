@@ -55,7 +55,7 @@ describe('http', function () {
         expect(incomingResponse, 'incomingResponse').to.be.calledOnce
         expect(error).to.not.be.called
         expect(on).to.be.calledOnce
-        expect(off).to.be.calledOnce
+        expect(off).to.be.calledTwice
       })
     })
 
@@ -75,7 +75,7 @@ describe('http', function () {
         expect(incomingResponse).to.not.be.called
         expect(error).to.be.calledOnce
         expect(on).to.not.be.called
-        expect(off).to.not.be.called
+        expect(off).to.be.calledThrice
       })
     })
 
@@ -100,7 +100,7 @@ describe('http', function () {
         expect(incomingResponse).to.be.calledOnce
         expect(error).to.be.calledOnce
         expect(on).to.be.calledOnce
-        expect(off).to.be.calledTwice
+        expect(off).to.have.callCount(4)
       })
     })
 
@@ -170,7 +170,7 @@ describe('http', function () {
         })
 
         expect(on).to.be.calledTwice
-        expect(off).to.have.callCount(4)
+        expect(off).to.have.callCount(10)
       })
     })
   })

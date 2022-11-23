@@ -93,6 +93,8 @@ export const InterceptRequest: RequestMiddleware = async function () {
       }
 
       const onClose = (): void => {
+        req.body = ''
+
         return resolve()
       }
 
