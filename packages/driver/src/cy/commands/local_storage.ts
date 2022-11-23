@@ -20,7 +20,7 @@ const clearLocalStorage = (state, keys) => {
   return remote
 }
 
-export default (Commands, Cypress, cy, state) => {
+export default (Commands, Cypress: InternalCypress.Cypress, cy, state, config) => {
   // TODO: Cypress sessions will clear local storage on its own before each test.
   // Once experimentalSessionAndOrigin is made GA, remove this logic. Leave clearing
   // session data (cookies / local storage / session storage) to reset functionality
@@ -37,7 +37,44 @@ export default (Commands, Cypress, cy, state) => {
     })
   }
 
+  type Options = Partial<Cypress.Loggable & Cypress.Timeoutable>
+
   Commands.addAll({
+    async getAllLocalStorage (userOptions: Options = {}) {
+      const options: Options = _.defaults({}, userOptions, {
+        log: true,
+        timeout: config('responseTimeout'),
+      })
+
+      let localStorageByOrigin: Cypress.StorageByOrigin = {}
+
+      if (options.log) {
+        Cypress.log({
+          message: '',
+          timeout: options.timeout,
+          consoleProps () {
+            const obj = {}
+
+            if (Object.keys(localStorageByOrigin).length) {
+              obj['Yielded'] = localStorageByOrigin
+            }
+
+            return obj
+          },
+        })
+      }
+
+      const storages = await (Cypress.session as InternalCypress.Session).getStorage({ origin: '*' })
+
+      localStorageByOrigin = storages.localStorage.reduce((memo, storage) => {
+        memo[storage.origin] = storage.value
+
+        return memo
+      }, {} as Cypress.StorageByOrigin)
+
+      return localStorageByOrigin
+    },
+
     clearLocalStorage (keys, options: Partial<Cypress.Loggable> = {}) {
       if (_.isPlainObject(keys)) {
         options = keys

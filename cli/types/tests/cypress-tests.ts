@@ -1062,3 +1062,11 @@ namespace CypressClearCookiesTests {
   cy.clearCookies({ timeout: '10' }) // $ExpectError
   cy.clearCookies({ domain: false }) // $ExpectError
 }
+
+namespace CypressLocalStorageTests {
+  cy.getAllLocalStorage().then((result) => {
+    result // $ExpectType Cypress.StorageByOrigin
+  })
+  cy.getAllLocalStorage({ log: 'true' }) // $ExpectError
+  cy.getAllLocalStorage({ timeout: '10' }) // $ExpectError
+}

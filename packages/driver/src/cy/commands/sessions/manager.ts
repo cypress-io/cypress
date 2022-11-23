@@ -227,7 +227,7 @@ export default class SessionsManager {
       *      send a message telling our proxy server to intercept the next req to the https domain,
       *      then follow 2)
       */
-    getStorage: async (options = {}) => {
+    getStorage: async (options: InternalCypress.StorageOptions = {}): Promise<Cypress.Storages> => {
       const specWindow = this.cy.state('specWindow')
 
       if (!_.isObject(options)) {
@@ -243,8 +243,8 @@ export default class SessionsManager {
       const origins: Array<string> = await this.mapOrigins(opts.origin)
 
       const results = {
-        localStorage: [] as any[],
-        sessionStorage: [] as any[],
+        localStorage: [] as Cypress.OriginStorage[],
+        sessionStorage: [] as Cypress.OriginStorage[],
       }
 
       function pushValue (origin, value) {

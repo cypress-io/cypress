@@ -34,6 +34,9 @@ declare namespace Cypress {
     Location: {
       create: (url: string) => ({ domain: string, superDomain: string })
     }
+    session: Cypress.Session & {
+      getStorage: (options: StorageOptions) => Promise<Storages>
+    }
   }
 
   interface CypressUtils {
@@ -63,6 +66,18 @@ declare namespace Cypress {
 
   interface Backend {
     (task: 'cross:origin:cookies:received'): Promise<void>
+  }
+}
+
+declare namespace InternalCypress {
+  interface Cypress extends Cypress.Cypress, NodeEventEmitter {}
+
+  interface Session extends Cypress.Session {
+    getStorage: (options: StorageOptions) => Promise<Cypress.Storages>
+  }
+
+  interface StorageOptions {
+    origin?: '*' | 'currentOrigin' | string
   }
 }
 

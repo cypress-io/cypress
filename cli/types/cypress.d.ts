@@ -142,6 +142,30 @@ declare namespace Cypress {
     clear: (keys?: string[]) => void
   }
 
+  type Storable =
+    | string
+    | number
+    | boolean
+    | null
+    | { [property: string]: Storable }
+    | Storable[]
+
+  type StorableRecord = Record<string, Storable>
+
+  interface OriginStorage {
+    origin: string
+    value: StorableRecord
+  }
+
+  interface Storages {
+    localStorage: OriginStorage[]
+    sessionStorage: OriginStorage[]
+  }
+
+  interface StorageByOrigin {
+    [key: string]: StorableRecord
+  }
+
   type IsBrowserMatcher = BrowserName | Partial<Browser> | Array<BrowserName | Partial<Browser>>
 
   interface ViewportPosition extends WindowPosition {
@@ -792,7 +816,13 @@ declare namespace Cypress {
     clearCookies(options?: CookieOptions): Chainable<null>
 
     /**
-     * Clear data in local storage.
+     * Get local storage for all origins.
+     *
+     * @see https://on.cypress.io/getalllocalstorage
+     */
+    getAllLocalStorage(): Chainable<StorageByOrigin>
+    /**
+     * Clear data in local storage for the current origin.
      * Cypress automatically runs this command before each test to prevent state from being
      * shared across tests. You shouldn't need to use this command unless you're using it
      * to clear localStorage inside a single test. Yields `localStorage` object.

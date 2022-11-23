@@ -1,0 +1,10 @@
+<h1>Set storage</h1>
+<script>
+  const urlParams = new URLSearchParams(window.location.search)
+  const type = urlParams.get('type')
+  const nums = urlParams.get('nums').split(',')
+
+  nums.forEach((num) => {
+    window[type].setItem(`key${num}`, `value${num}`)
+  })
+</script>
