@@ -8,7 +8,8 @@
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "build-prod": "yarn build",
     "check-ts": "tsc --noEmit",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "lint": "eslint --ext .js,.ts,.json, ."
   },
   "dependencies": {},
   "devDependencies": {

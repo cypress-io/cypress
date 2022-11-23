@@ -37,9 +37,14 @@
     color: $jade-300;
   }
 
+  &.warned-status {
+    background-color: $gray-1000;
+    border: $gray-900 1px solid;
+    color: $warn-text;
+  }
+
   &.failed-status {
     background-color: $red-500;
-    font-weight: 500;
   }
 
   &.reporter-tag-has-count {
