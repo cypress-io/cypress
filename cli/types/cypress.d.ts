@@ -824,7 +824,7 @@ declare namespace Cypress {
     clear(options?: Partial<ClearOptions>): Chainable<Subject>
 
     /**
-     * Clear a specific browser cookie for the current superdomain or for the domain specified.
+     * Clear a specific browser cookie for the current hostname or for the domain specified.
      * Cypress automatically clears all cookies before each test to prevent state from being shared across tests. You shouldn't need to use this command unless you're using it to clear a specific cookie inside a single test.
      *
      * @see https://on.cypress.io/clearcookie
@@ -832,7 +832,7 @@ declare namespace Cypress {
     clearCookie(name: string, options?: CookieOptions): Chainable<null>
 
     /**
-     * Clear all browser cookies for the current superdomain or for the domain specified.
+     * Clear all browser cookies for the current hostname or for the domain specified.
      * Cypress automatically clears all cookies before each test to prevent state from being shared across tests. You shouldn't need to use this command unless you're using it to clear all cookies or specific cookies inside a single test.
      *
      * @see https://on.cypress.io/clearcookies
@@ -1295,14 +1295,14 @@ declare namespace Cypress {
     get<S = any>(alias: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<S>
 
     /**
-     * Get a browser cookie by its name for the current superdomain or for the domain specified.
+     * Get a browser cookie by its name for the current hostname or for the domain specified.
      *
      * @see https://on.cypress.io/getcookie
      */
     getCookie(name: string, options?: CookieOptions): Chainable<Cookie | null>
 
     /**
-     * Get all of the browser cookies for the current superdomain or for the domain specified.
+     * Get all of the browser cookies for the current hostname or for the domain specified.
      *
      * @see https://on.cypress.io/getcookies
      */
@@ -2599,7 +2599,7 @@ declare namespace Cypress {
   interface CookieOptions extends Partial<Loggable & Timeoutable> {
     /**
      * Domain to set cookies on or get cookies from
-     * @default superdomain of the current app under test
+     * @default hostname of the current app under test
      */
     domain?: string
   }

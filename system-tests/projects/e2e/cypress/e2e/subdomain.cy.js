@@ -16,9 +16,9 @@ describe('subdomains', () => {
     cy.visit('http://help.foobar.com:2292')
     cy.get('h1').should('contain', 'Help')
     cy.document().then((document) => {
-    // set cookies that are just on this subdomain
-    // and cookies on the superdomain
-    // and then regular cookies too
+      // set cookies that are just on this subdomain
+      // and cookies on the superdomain
+      // and then regular cookies too
       document.cookie = 'help=true; domain=help.foobar.com'
       document.cookie = 'asdf=asdf; domain=foobar.com'
       document.cookie = 'foo=bar'
@@ -55,7 +55,7 @@ describe('subdomains', () => {
     cy.visit('http://domain.foobar.com:2292')
     cy.getCookies().should('have.length', 1)
     cy.getCookie('nomnom').should('include', {
-      domain: '.foobar.com',
+      domain: '.domain.foobar.com',
       name: 'nomnom',
       value: 'good',
       path: '/',
@@ -68,7 +68,7 @@ describe('subdomains', () => {
         const xhr = new win.XMLHttpRequest
 
         xhr.withCredentials = true
-        xhr.open('GET', 'http://www.foobar.com:2292/cookies')
+        xhr.open('GET', 'http://domain.foobar.com:2292/cookies')
         xhr.send()
         xhr.onload = () => {
           return resolve(JSON.parse(xhr.response).cookie)
@@ -81,21 +81,21 @@ describe('subdomains', () => {
     })
   })
 
-  it.skip('issue #362: do not set domain based (non hostOnly) cookies by default', () => {
+  // https://github.com/cypress-io/cypress/issues/363
+  it('does not set domain based (non hostOnly) cookies by default', () => {
     cy.setCookie('foobar', '1', {
       domain: 'subdomain.foobar.com',
     })
 
-    // send a request to localhost but get
-    // redirected back to foobar
+    // sends a request to localhost but gets redirected back
+    // to www.foobar.com
     cy.request('http://localhost:2292/redirect')
     .its('body.cookie')
     .should('not.exist')
   })
 
-  it.skip('sets a hostOnly cookie by default', () => {
-    // this should set a hostOnly cookie for
-    // www.foobar.com
+  it('sets a hostOnly cookie by default', () => {
+    // this sets a hostOnly cookie for www.foobar.com
     cy.setCookie('foobar', '1')
 
     cy.request('http://domain.foobar.com:2292/cookies')
