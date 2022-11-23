@@ -143,39 +143,44 @@ declare namespace Cypress {
     isElement(subject: any, commandName: string, cy: Chainable): void
 
     /**
-     * Throws an error if `subject` is not a `window`.
-     */
-    isWindow(subject: any, commandName: string, cy: Chainable): void
-
-    /**
      * Throws an error if `subject` is not a `document`.
      */
     isDocument(subject: any, commandName: string, cy: Chainable): void
 
     /**
+     * Throws an error if `subject` is not a `window`.
+     */
+    isWindow(subject: any, commandName: string, cy: Chainable): void
+
+    /**
      * Throws an error if `subject` is not a DOM element attached to the application under test.
      */
-    isAttached(subject: any, commandName: string, cy: Chainable, onFail?: any): void
+    isAttached(subject: any, commandName: string, cy: Chainable, onFail?: Log): void
 
     /**
      * Throws an error if `subject` is a disabled DOM element.
      */
-    isNotDisabled(subject: any, commandName: string, onFail?: any): void
-
-    /**
-     * Throws an error if `subject` is a read-only form element.
-     */
-    isNotReadonly(subject: any, commandName: string, onFail?: any): void
-
-    /**
-     * Throws an error if `subject` is not a DOM element visible in the AUT.
-     */
-    isVisible(subject: any, commandName: string, onFail?: any): void
+    isNotDisabled(subject: any, commandName: string, onFail?: Log): void
 
     /**
      * Throws an error if `subject` is hidden by any of its parent elements.
      */
-    isNotHiddenByAncestors(subject: any, commandName: string, onFail?: any): void
+    isNotHiddenByAncestors(subject: any, commandName: string, onFail?: Log): void
+
+    /**
+     * Throws an error if `subject` is a read-only form element.
+     */
+    isNotReadonly(subject: any, commandName: string, onFail?: Log): void
+
+    /**
+     * Throws an error if `subject` is a read-only form element.
+     */
+    isScrollable(subject: any, commandName: string, onFail?: Log): void
+
+    /**
+     * Throws an error if `subject` is not a DOM element visible in the AUT.
+     */
+    isVisible(subject: any, commandName: string, onFail?: Log): void
   }
 
   interface LocalStorage {

@@ -92,7 +92,7 @@ const isType = (subject, type, name: string, cy: $Cy) => {
   }
 }
 
-const isChildCommand = (command, args) => {
+const isChildCommand = (command, args, cy: $Cy) => {
   if (cy.subjectChain(command.get('chainerId')) === undefined) {
     const stringifiedArg = $utils.stringifyActual(args[0])
 
@@ -230,32 +230,7 @@ const isDocument = (subject, name: string, cy: $Cy) => {
   }
 }
 
-const exists = (subject, cy: $Cy) => {
-  // prevent any additional logs since this is an implicit assertion
-  cy.state('onBeforeLog', () => false)
-
-  // verify the $el exists and use our default error messages
-  try {
-    cy.expect(subject).to.exist
-  } finally {
-    cy.state('onBeforeLog', null)
-  }
-}
-
-const elExists = ($el, cy: $Cy) => {
-  // ensure that we either had some assertions
-  // or that the element existed
-  if ($el && $el.length) {
-    return
-  }
-
-  // TODO: REFACTOR THIS TO CALL THE CHAI-OVERRIDES DIRECTLY
-  // OR GO THROUGH I18N
-
-  return exists($el, cy)
-}
-
-const isScrollable = ($el, name): true | void => {
+const isScrollable = ($el, name, onFail?): true | void => {
   if ($dom.isScrollable($el)) {
     return true
   }
@@ -263,6 +238,7 @@ const isScrollable = ($el, name): true | void => {
   const node = $dom.stringify($el)
 
   $errUtils.throwErrByPath('dom.not_scrollable', {
+    onFail,
     args: { cmd: name, node },
   })
 }
@@ -294,21 +270,20 @@ const commandCanCommunicateWithAUT = (cy: $Cy, err?): boolean => {
 }
 
 export default {
+  isType,
   isElement,
-  isAttached,
-  isWindow,
   isDocument,
+  isWindow,
+
+  isAttached,
   isNotDisabled,
-  isNotReadonly,
-  isVisible,
-  isStrictlyVisible,
   isNotHiddenByAncestors,
-  exists,
-  elExists,
+  isNotReadonly,
   isScrollable,
-  commandCanCommunicateWithAUT,
+  isVisible,
 
   // internal functions
-  isType,
+  commandCanCommunicateWithAUT,
   isChildCommand,
+  isStrictlyVisible,
 }

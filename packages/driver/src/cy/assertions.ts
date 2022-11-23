@@ -54,6 +54,31 @@ const isDomSubjectAndMatchesValue = (value, subject) => {
   return false
 }
 
+const exists = (subject, cy: $Cy) => {
+  // prevent any additional logs since this is an implicit assertion
+  cy.state('onBeforeLog', () => false)
+
+  // verify the $el exists and use our default error messages
+  try {
+    cy.expect(subject).to.exist
+  } finally {
+    cy.state('onBeforeLog', null)
+  }
+}
+
+const elExists = ($el, cy: $Cy) => {
+  // ensure that we either had some assertions
+  // or that the element existed
+  if ($el && $el.length) {
+    return
+  }
+
+  // TODO: REFACTOR THIS TO CALL THE CHAI-OVERRIDES DIRECTLY
+  // OR GO THROUGH I18N
+
+  return exists($el, cy)
+}
+
 type Parsed = {
   subject?: JQuery<any>
   actual?: any
@@ -276,10 +301,10 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
               return
             }
 
-            return Cypress.ensure.elExists($el, cy)
+            return elExists($el, cy)
           }
           case 'subject':
-            return Cypress.ensure.exists(subject, cy)
+            return exists(subject, cy)
 
           default:
             return
