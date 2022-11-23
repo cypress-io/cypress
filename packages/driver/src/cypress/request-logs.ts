@@ -6,7 +6,7 @@ import Debug from 'debug'
 
 const debug = Debug('cypress:driver:request-logs')
 
-function formatInterception ({ route, interception }: ProxyRequest['interceptions'][number]) {
+function formatInterception ({ route, interception }: RequestLog['interceptions'][number]) {
   const ret = {
     'RouteMatcher': route.options,
     'RouteHandler Type': !_.isNil(route.handler) ? (_.isFunction(route.handler) ? 'Function' : 'StaticResponse stub') : 'Spy',
@@ -33,7 +33,7 @@ function getDisplayUrl (url: string) {
   return url
 }
 
-function getDynamicRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.InternalLogConfig> {
+function getDynamicRequestLogConfig (req: Omit<RequestLog, 'log'>): Partial<Cypress.InternalLogConfig> {
   const last = _.last(req.interceptions)
   let alias = last ? last.interception.request.alias || last.route.alias : undefined
 
@@ -43,7 +43,7 @@ function getDynamicRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cy
   }
 }
 
-function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.InternalLogConfig> {
+function getRequestLogConfig (req: Omit<RequestLog, 'log'>): Partial<Cypress.InternalLogConfig> {
   function getStatus (): string | undefined {
     const { stubbed, reqModified, resModified } = req.flags
 
@@ -111,7 +111,7 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.I
   }
 }
 
-class ProxyRequest {
+class RequestLog {
   log?: Cypress.Log
   preRequest: BrowserPreRequest
   responseReceived?: BrowserResponseReceived
@@ -131,7 +131,7 @@ class ProxyRequest {
   // @see https://github.com/cypress-io/cypress/issues/17656
   readonly consoleProps: any
 
-  constructor (preRequest: BrowserPreRequest, opts?: Partial<ProxyRequest>) {
+  constructor (preRequest: BrowserPreRequest, opts?: Partial<RequestLog>) {
     this.preRequest = preRequest
     opts && _.assign(this, opts)
 
@@ -203,7 +203,7 @@ class ProxyRequest {
     }
   }
 
-  setFlag = (flag: keyof ProxyRequest['flags']) => {
+  setFlag = (flag: keyof RequestLog['flags']) => {
     this.flags[flag] = true
     this.log?.set({})
   }
@@ -212,7 +212,7 @@ class ProxyRequest {
 type FilterFnOpts = BrowserPreRequest & { matchedIntercept: boolean }
 
 export default class RequestLogs {
-  private proxyRequests: Array<ProxyRequest> = []
+  private proxyRequests: Array<RequestLog> = []
 
   // public API properties:
   public showAllIntercepts = true
@@ -259,7 +259,7 @@ export default class RequestLogs {
   /**
    * Returns a setter which can be used to update the request's log as `cy.intercept()` rules run.
    */
-  getFlagSetter (interception: Interception, route: Route): ProxyRequest['setFlag'] | undefined {
+  getFlagSetter (interception: Interception, route: Route): RequestLog['setFlag'] | undefined {
     let proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === interception.browserRequestId)
 
     if (!proxyRequest) {
@@ -315,13 +315,13 @@ export default class RequestLogs {
     )
   }
 
-  private createProxyRequestLog ({ browserPreRequest, matchedIntercept }: { browserPreRequest: BrowserPreRequest, matchedIntercept: boolean }): ProxyRequest | undefined {
+  private createProxyRequestLog ({ browserPreRequest, matchedIntercept }: { browserPreRequest: BrowserPreRequest, matchedIntercept: boolean }): RequestLog | undefined {
     if (!this.shouldDisplay({ ...browserPreRequest, matchedIntercept })) {
       return
     }
 
-    const proxyRequest = new ProxyRequest(browserPreRequest)
-    const logConfig = getRequestLogConfig(proxyRequest as Omit<ProxyRequest, 'log'>)
+    const proxyRequest = new RequestLog(browserPreRequest)
+    const logConfig = getRequestLogConfig(proxyRequest as Omit<RequestLog, 'log'>)
 
     // TODO: Figure out what is causing the race condition here
     //       Follow up on latest log regression fix to see if this is resolved.
@@ -329,7 +329,7 @@ export default class RequestLogs {
       proxyRequest.log = this.Cypress.log(logConfig)?.snapshot('request')
     }
 
-    this.proxyRequests.push(proxyRequest as ProxyRequest)
+    this.proxyRequests.push(proxyRequest as RequestLog)
 
     return proxyRequest
   }
