@@ -107,7 +107,7 @@ export type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<
   skipMiddleware: (name: string) => void
 }>
 
-export function _runStage (type: HttpStages, ctx: any, onError: Function, res?: CypressOutgoingResponse) {
+export function _runStage (type: HttpStages, ctx: any, onError: Function) {
   ctx.stage = HttpStages[type]
 
   const runMiddlewareStack = (): Promise<void> => {
@@ -145,12 +145,12 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function, res?: 
           return
         }
 
-        res?.off('close', onClose)
+        ctx.res.off('close', onClose)
         _end(onError(error))
       }
 
       function onClose () {
-        if (!res?.writableFinished) {
+        if (!ctx.res.writableFinished) {
           _onError(new Error('Socket closed before finished writing response.'))
         }
       }
@@ -159,11 +159,11 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function, res?: 
       // If the response is closed before the middleware completes, it implies the that request was canceled by the browser.
       // The request phase is handled elsewhere because we always want the request phase to complete before erroring on canceled.
       if (type === HttpStages.IncomingResponse) {
-        res?.on('close', onClose)
+        ctx.res.on('close', onClose)
       }
 
       function _end (retval?) {
-        res?.off('close', onClose)
+        ctx.res.off('close', onClose)
         if (ended) {
           return
         }
@@ -187,7 +187,7 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function, res?: 
 
           copyChangedCtx()
 
-          res?.off('close', onClose)
+          ctx.res.off('close', onClose)
           _end(runMiddlewareStack())
         },
         end: _end,
@@ -331,7 +331,7 @@ export class Http {
       }
 
       if (ctx.incomingRes) {
-        return _runStage(HttpStages.IncomingResponse, ctx, onError, res)
+        return _runStage(HttpStages.IncomingResponse, ctx, onError)
       }
 
       return ctx.debug('Warning: Request was not fulfilled with a response.')

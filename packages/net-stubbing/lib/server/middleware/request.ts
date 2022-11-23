@@ -93,8 +93,6 @@ export const InterceptRequest: RequestMiddleware = async function () {
       }
 
       const onClose = (): void => {
-        req.body = 'Request canceled before body could be determined.'
-
         return resolve()
       }
 
