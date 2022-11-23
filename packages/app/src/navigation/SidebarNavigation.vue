@@ -94,6 +94,7 @@ import { gql, useMutation, useQuery } from '@urql/vue'
 import SidebarNavigationRow from './SidebarNavigationRow.vue'
 import KeyboardBindingsModal from './KeyboardBindingsModal.vue'
 import {
+  IconStatusFailedOutline, // not available in size 24
   IconTechnologyCodeEditor,
   IconTechnologyTestResults,
   IconObjectGear,
@@ -112,6 +113,7 @@ const { t } = useI18n()
 const navigation = [
   { name: 'Specs', icon: IconTechnologyCodeEditor, href: '/specs' },
   { name: 'Runs', icon: IconTechnologyTestResults, href: '/runs' },
+  { name: 'Debug', icon: IconStatusFailedOutline, href: '/debug' },
   { name: 'Settings', icon: IconObjectGear, href: '/settings' },
 ] as const
 

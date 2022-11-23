@@ -1,5 +1,6 @@
 import SidebarNavigationRow from './SidebarNavigationRow.vue'
 import {
+  IconStatusFailedOutline,
   IconTechnologyCodeEditor,
   IconTechnologyTestResults,
   IconObjectGear,
@@ -14,6 +15,7 @@ describe('SidebarNavigationRow', () => {
       >
         <h2 class="text-white text-sm uppercase truncate">Tab Style</h2>
         <SidebarNavigationRow icon={IconTechnologyCodeEditor} name="book" active isNavBarExpanded/>
+        <SidebarNavigationRow icon={IconStatusFailedOutline} name="debug" isNavBarExpanded/>
         <SidebarNavigationRow icon={IconTechnologyTestResults} name="settings" isNavBarExpanded/>
         <SidebarNavigationRow icon={IconObjectGear} name="test-results" isNavBarExpanded/>
         <SidebarNavigationRow icon={IconGeneralPlaceholder} name="placeholder" isNavBarExpanded/>
