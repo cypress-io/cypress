@@ -1,11 +1,12 @@
 import Debug from 'debug'
 import type playwright from 'playwright-webkit'
 import type { Automation } from '../automation'
-import { cookieMatches, normalizeResourceType, CyCookieFilter } from './cdp_automation'
+import { normalizeResourceType } from './cdp_automation'
 import os from 'os'
 import type { RunModeVideoApi } from '@packages/types'
 import path from 'path'
 import mime from 'mime'
+import { cookieMatches, CyCookieFilter } from '../automation/util'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
 
@@ -262,16 +263,14 @@ export class WebKitAutomation {
     if (!cookies.length) return null
 
     const cookie = cookies.find((cookie) => {
-      return cookieMatches(cookie, {
-        domain: filter.domain,
-        name: filter.name,
-      })
+      return cookieMatches(cookie, filter)
     })
 
     if (!cookie) return null
 
     return normalizeGetCookieProps(cookie)
   }
+
   /**
    * Clears one specific cookie
    * @param filter the cookie to be cleared
@@ -281,9 +280,18 @@ export class WebKitAutomation {
     // webkit doesn't have a way to only clear certain cookies, so we have
     // to clear all cookies and put back the ones we don't want cleared
     const allCookies = await this.context.cookies()
-    const persistCookies = allCookies.filter((cookie) => {
-      return !cookieMatches(cookie, filter)
-    })
+    // persist everything but the first cookie that matches
+    const persistCookies = allCookies.reduce((memo, cookie) => {
+      if (memo.matched || !cookieMatches(cookie, filter)) {
+        memo.cookies.push(cookie)
+
+        return memo
+      }
+
+      memo.matched = true
+
+      return memo
+    }, { matched: false, cookies: [] as playwright.Cookie[] }).cookies
 
     await this.context.clearCookies()
 

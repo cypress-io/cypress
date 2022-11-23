@@ -7,15 +7,6 @@ const httpsUrl = Cypress.env('httpsUrl')
 const otherUrl = Cypress.env('otherUrl')
 const otherHttpsUrl = Cypress.env('otherHttpsUrl')
 
-const baseUrlLocation = new Cypress.Location(Cypress.config('baseUrl'))
-
-// setcookie sets on the superdomain by default
-let setCookieDomain = `.${baseUrlLocation.getSuperDomain()}`
-
-if (['localhost', '127.0.0.1'].includes(expectedDomain)) {
-  setCookieDomain = expectedDomain
-}
-
 // chrome defaults to "unspecified"
 let defaultSameSite = undefined
 
@@ -147,12 +138,25 @@ describe('cookies', () => {
         })
       })
 
-      context('with Domain = superdomain', () => {
+      context('with Domain = hostname', () => {
+        const getCookieUrl = () => {
+          return cy.location().its('hostname').then((hostname) => {
+            let setCookieDomain = hostname
+
+            if (['localhost', '127.0.0.1'].includes(expectedDomain)) {
+              setCookieDomain = expectedDomain
+            }
+
+            return `${Cypress.config('baseUrl')}/setDomainCookie?domain=${setCookieDomain}`
+          })
+        }
+
         const requestCookiesUrl = `${Cypress.config('baseUrl')}/requestCookies`
-        const setDomainCookieUrl = `${Cypress.config('baseUrl')}/setDomainCookie?domain=${setCookieDomain}`
 
         it('is set properly with no redirects', () => {
-          cy[cmd](setDomainCookieUrl)
+          getCookieUrl().then((setDomainCookieUrl) => {
+            cy[cmd](setDomainCookieUrl)
+          })
 
           cy.getCookies()
           .then((cookies) => {
@@ -168,7 +172,9 @@ describe('cookies', () => {
         })
 
         it('is set properly with redirects', () => {
-          cy[cmd](`${setDomainCookieUrl}&redirect=/requestCookiesHtml`)
+          getCookieUrl().then((setDomainCookieUrl) => {
+            cy[cmd](`${setDomainCookieUrl}&redirect=/requestCookiesHtml`)
+          })
 
           cy.getCookies()
           .then((cookies) => {

@@ -60,8 +60,10 @@
     "./packages/server/lib/socket-ct.ts",
     "./packages/server/lib/util/process_profiler.ts",
     "./packages/server/node_modules/@benmalka/foxdriver/node_modules/graceful-fs/polyfills.js",
+    "./packages/server/node_modules/ci-info/index.js",
     "./packages/server/node_modules/glob/node_modules/minimatch/minimatch.js",
     "./packages/server/node_modules/graceful-fs/polyfills.js",
+    "./packages/server/node_modules/is-ci/index.js",
     "./packages/server/node_modules/mocha/node_modules/debug/src/node.js",
     "./packages/server/node_modules/signal-exit/index.js",
     "./process-nextick-args/index.js",
@@ -3435,6 +3437,7 @@
     "./packages/server/node_modules/@benmalka/foxdriver/node_modules/graceful-fs/legacy-streams.js",
     "./packages/server/node_modules/@benmalka/foxdriver/package.json",
     "./packages/server/node_modules/ansi-regex/index.js",
+    "./packages/server/node_modules/ci-info/vendors.json",
     "./packages/server/node_modules/cli-table3/index.js",
     "./packages/server/node_modules/cli-table3/src/cell.js",
     "./packages/server/node_modules/cli-table3/src/layout-manager.js",
@@ -3539,5 +3542,5 @@
     "./tooling/v8-snapshot/cache/dev-darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "eb4216bba529bdbb6d1a709f0b73d1332a78af3ec3d3b2b5a4191f872f905e21"
+  "deferredHash": "5f915e88ec6068dfce5f8adb2982fa045cdf3f27f34869c368443478e645b1e4"
 }

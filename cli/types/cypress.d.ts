@@ -761,7 +761,7 @@ declare namespace Cypress {
      * Whether or not to persist the session across all specs in the run.
      * @default {false}
      */
-    cacheAcrossSpecs?: boolean,
+    cacheAcrossSpecs?: boolean
     /**
      * Function to run immediately after the session is created and `setup` function runs or
      * after a session is restored and the page is cleared. If this returns `false`, throws an
@@ -877,7 +877,7 @@ declare namespace Cypress {
     clear(options?: Partial<ClearOptions>): Chainable<Subject>
 
     /**
-     * Clear a specific browser cookie for the current superdomain or for the domain specified.
+     * Clear a specific browser cookie for the current hostname or for the domain specified.
      * Cypress automatically clears all cookies before each test to prevent state from being shared across tests. You shouldn't need to use this command unless you're using it to clear a specific cookie inside a single test.
      *
      * @see https://on.cypress.io/clearcookie
@@ -885,7 +885,7 @@ declare namespace Cypress {
     clearCookie(name: string, options?: CookieOptions): Chainable<null>
 
     /**
-     * Clear all browser cookies for the current superdomain or for the domain specified.
+     * Clear all browser cookies for the current hostname or for the domain specified.
      * Cypress automatically clears all cookies before each test to prevent state from being shared across tests. You shouldn't need to use this command unless you're using it to clear all cookies or specific cookies inside a single test.
      *
      * @see https://on.cypress.io/clearcookies
@@ -1348,14 +1348,14 @@ declare namespace Cypress {
     get<S = any>(alias: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<S>
 
     /**
-     * Get a browser cookie by its name for the current superdomain or for the domain specified.
+     * Get a browser cookie by its name for the current hostname or for the domain specified.
      *
      * @see https://on.cypress.io/getcookie
      */
     getCookie(name: string, options?: CookieOptions): Chainable<Cookie | null>
 
     /**
-     * Get all of the browser cookies for the current superdomain or for the domain specified.
+     * Get all of the browser cookies for the current hostname or for the domain specified.
      *
      * @see https://on.cypress.io/getcookies
      */
@@ -2659,7 +2659,7 @@ declare namespace Cypress {
   interface CookieOptions extends Partial<Loggable & Timeoutable> {
     /**
      * Domain to set cookies on or get cookies from
-     * @default superdomain of the current app under test
+     * @default hostname of the current app under test
      */
     domain?: string
   }
@@ -2717,7 +2717,7 @@ declare namespace Cypress {
      */
     env: { [key: string]: any }
     /**
-     * A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.
+     * A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using a tool to test what files would match.
      * @default "*.hot-update.js"
      */
     excludeSpecPattern: string | string[]
@@ -2999,7 +2999,7 @@ declare namespace Cypress {
      * Override default config options for E2E Testing runner.
      * @default {}
      */
-    e2e: Omit<CoreConfigOptions, 'indexHtmlFile'>
+    e2e: EndToEndConfigOptions
 
     /**
      * An array of objects defining the certificates
@@ -3012,6 +3012,14 @@ declare namespace Cypress {
     setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => Promise<PluginConfigOptions | void> | PluginConfigOptions | void
 
     indexHtmlFile: string
+  }
+
+  interface EndToEndConfigOptions extends Omit<CoreConfigOptions, 'indexHtmlFile'> {
+    /**
+     * Enables the "Run All Specs" UI feature, allowing the execution of multiple specs sequentially.
+     * @default false
+     */
+    experimentalRunAllSpecs?: boolean
   }
 
   /**
@@ -3135,7 +3143,7 @@ declare namespace Cypress {
   type DevServerFn<ComponentDevServerOpts = any> = (cypressDevServerConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
 
   type ConfigHandler<T> = T
-    | (() => T | Promise<T>)
+  | (() => T | Promise<T>)
 
   type DevServerConfigOptions = {
     bundler: 'webpack'
@@ -3146,9 +3154,9 @@ declare namespace Cypress {
     framework: 'react' | 'vue' | 'svelte'
     viteConfig?: ConfigHandler<Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>>
   } | {
-    bundler: 'webpack',
-    framework: 'angular',
-    webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>,
+    bundler: 'webpack'
+    framework: 'angular'
+    webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>
     options?: {
       projectConfig: AngularDevServerProjectConfig
     }
