@@ -4,7 +4,7 @@ import type { BrowserPreRequest, BrowserResponseReceived, RequestError } from '@
 import $errUtils from './error_utils'
 import Debug from 'debug'
 
-const debug = Debug('cypress:driver:network-logs')
+const debug = Debug('cypress:driver:request-logs')
 
 function formatInterception ({ route, interception }: ProxyRequest['interceptions'][number]) {
   const ret = {
@@ -211,7 +211,7 @@ class ProxyRequest {
 
 type FilterFnOpts = BrowserPreRequest & { matchedIntercept: boolean }
 
-export default class NetworkLogs {
+export default class RequestLogs {
   private proxyRequests: Array<ProxyRequest> = []
 
   // public API properties:

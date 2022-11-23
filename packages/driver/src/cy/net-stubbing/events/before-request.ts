@@ -302,7 +302,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     resolve = _resolve
   })
 
-  request.setLogFlag = Cypress.NetworkLogs['getFlagSetter'](request, route)
+  request.setLogFlag = Cypress.RequestLogs['getFlagSetter'](request, route)
 
   // consider a function to be 'spying' until it actually stubs/modifies the response
   request.setLogFlag?.(!_.isNil(route.handler) && !_.isFunction(route.handler) ? 'stubbed' : 'spied')

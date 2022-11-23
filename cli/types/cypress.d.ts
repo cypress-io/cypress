@@ -210,7 +210,7 @@ declare namespace Cypress {
    */
   type Config = ResolvedConfigOptions & RuntimeConfigOptions & RuntimeServerConfigOptions
 
-  type NetworkLogsFilterFn = (req: {
+  type RequestLogsFilterFn = (req: {
     requestId: string
     method: HttpMethod
     url: string
@@ -666,7 +666,7 @@ declare namespace Cypress {
       defaults(options: Partial<KeyboardDefaultsOptions>): void
     }
 
-    NetworkLogs: {
+    RequestLogs: {
       /**
        * If true, all XHRs and fetch requests will be displayed in the command log. Set to false to disable.
        * @default true
@@ -682,9 +682,9 @@ declare namespace Cypress {
        * `filter` is only called if `showXhrFetch` and `showIntercepts` do not apply to the request.
        * @default undefined
        * @param filterFn a function that returns true if the request should be logged and false otherwise
-       * @see https://on.cypress.io/network-logs
+       * @see https://on.cypress.io/request-logs
        */
-      filter: NetworkLogsFilterFn | undefined
+      filter: RequestLogsFilterFn | undefined
     }
 
     /**
