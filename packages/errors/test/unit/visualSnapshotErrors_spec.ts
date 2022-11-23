@@ -485,6 +485,23 @@ describe('visual error templates', () => {
               browserVersion: '59.1.2.3',
               specs: [
                 'cypress/integration/app_spec.js',
+                'cypress/integration/foo_spec.js',
+                'cypress/integration/bar_spec.js',
+              ],
+            },
+            payload: {
+              differentParams: {
+                browserName: {
+                  detected: 'Chrome',
+                  expected: 'Electron',
+                },
+                browserVersion: {
+                  detected: '65',
+                  expected: '64',
+                },
+              },
+              differentSpecs: [
+                'cypress/integration/foo_spec.js',
               ],
             },
           },

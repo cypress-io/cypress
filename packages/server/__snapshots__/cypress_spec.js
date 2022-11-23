@@ -203,10 +203,10 @@ This machine sent the following parameters:
 {
   "osName": "darwin",
   "osVersion": "v1",
-  "browserName": "Electron",
-  "browserVersion": "59.1.2.3",
-  "specs": [
-    "cypress/e2e/app.cy.js"
+  "browserName": "Electron.... (Expected: Electron)",
+  "browserVersion": "59.1.2.3.... (Expected: 64)",
+  "differentSpecs": [
+    "cypress/integration/foo_spec.js"
   ]
 }
 
