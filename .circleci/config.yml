@@ -58,7 +58,13 @@ jobs:
       - run:
           name: Download .circleci/workflows.yaml
           command: |
-            curl -o workflows.yml https://raw.githubusercontent.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}/.circleci/workflows.yml
+            if [[ "$CIRCLE_BRANCH" == "pulls/"* ]]; then
+              curl -o workflows.yml https://raw.githubusercontent.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/develop/.circleci/workflows.yml
+            else 
+              curl -o workflows.yml https://raw.githubusercontent.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}/.circleci/workflows.yml
+            fi
+
+            [[ $(cat workflows.yml) =~ '404: Not Found' ]] && echo 'failed to download workflows.yml...' && exit 1
       - continuation/continue:
           configuration_path: workflows.yml
 
