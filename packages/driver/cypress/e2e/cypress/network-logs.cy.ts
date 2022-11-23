@@ -121,12 +121,17 @@ describe('Network Logs', () => {
       img.src = `/fixtures/media/cypress.png?${Date.now()}`
     })
 
-    context('with custom filter functions', () => {
+    context('with custom filter rules', () => {
       afterEach(() => {
-        Cypress.NetworkLogs.filter = Cypress.NetworkLogs.defaultFilter
+        Cypress.NetworkLogs.filter = undefined
+        Cypress.NetworkLogs.showAllIntercepts = true
+        Cypress.NetworkLogs.showAllXhrFetch = true
       })
 
-      it('can ignore a fetch log and still display other logs', async () => {
+      it('can ignore a fetch log and still display xhr logs', async () => {
+        // disable default behavior of showing all XHRs and fetches
+        Cypress.NetworkLogs.showAllXhrFetch = false
+        // set a custom filter to show everything that's not fetch
         Cypress.NetworkLogs.filter = ({ resourceType, matchedIntercept }) => {
           expect(matchedIntercept).to.be.false
 
@@ -147,9 +152,14 @@ describe('Network Logs', () => {
         expect(sawXhr).to.be.true
       })
 
-      it('can ignore an intercept log', async () => {
+      it('can ignore an intercept log', () => {
+        // disable default behavior of showing all XHRs and fetches
+        Cypress.NetworkLogs.showAllXhrFetch = false
+        // disable default behavior of showing all matched intercepts
+        Cypress.NetworkLogs.showAllIntercepts = false
+        // set a custom filter to show everything that's not an intercept
         Cypress.NetworkLogs.filter = (req) => {
-          return Cypress.NetworkLogs.defaultFilter(req) && !req.matchedIntercept
+          return !req.matchedIntercept
         }
 
         cy.on('log:added', (log) => {
@@ -163,22 +173,37 @@ describe('Network Logs', () => {
         .wait('@aliased')
       })
 
+      it('logs no requests if showAllXhrFetch and showAllIntercepts are both false', () => {
+        Cypress.NetworkLogs.showAllXhrFetch = false
+        Cypress.NetworkLogs.showAllIntercepts = false
+
+        cy.on('log:added', (log) => {
+          expect(log.name).to.not.eq('request', 'no request logs should be emitted')
+        })
+
+        cy.intercept('*').as('aliased')
+        .then(async () => {
+          await Promise.all([
+            Cypress.$.get('/'),
+            fetch('/'),
+            new Promise((resolve) => {
+              // should error, not load, since '/' isn't an image
+              Cypress.$('<img src="/"/>')[0].addEventListener('error', resolve)
+            }),
+          ])
+        })
+        .get('@aliased.all').should('have.length', 3)
+      })
+
       it('errors if set to a non-function', () => {
         try {
           // @ts-ignore
           Cypress.NetworkLogs.filter = 4
           throw new Error('should not reach')
         } catch (err) {
-          expect(Cypress.NetworkLogs.filter).to.eq(Cypress.NetworkLogs.defaultFilter)
+          expect(Cypress.NetworkLogs.filter).to.eq(undefined)
           expect(err.message).to.include('NetworkLogs.filter should be set to a function')
         }
-      })
-
-      it('restores default if set to undefined', () => {
-        Cypress.NetworkLogs.filter = () => false
-        // @ts-ignore
-        Cypress.NetworkLogs.filter = undefined
-        expect(Cypress.NetworkLogs.filter).to.eq(Cypress.NetworkLogs.defaultFilter)
       })
     })
 

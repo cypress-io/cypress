@@ -212,12 +212,15 @@ class ProxyRequest {
 type FilterFnOpts = BrowserPreRequest & { matchedIntercept: boolean }
 
 export default class NetworkLogs {
-  proxyRequests: Array<ProxyRequest> = []
-  _filter: (requestInfo: FilterFnOpts) => boolean
+  private proxyRequests: Array<ProxyRequest> = []
+
+  // public API properties:
+  public showAllIntercepts = true
+  public showAllXhrFetch = true
+  // set via `filter` setter
+  private _filter: ((requestInfo: FilterFnOpts) => boolean) | undefined
 
   constructor (private Cypress: Cypress.Cypress) {
-    this._filter = this.defaultFilter
-
     Cypress.on('request:event', (eventName, data) => {
       switch (eventName) {
         case 'incoming:request':
@@ -246,15 +249,11 @@ export default class NetworkLogs {
       $errUtils.throwErrByPath('network_logs.filter_must_be_function', { args: { filterFn } })
     }
 
-    this._filter = filterFn || this.defaultFilter
+    this._filter = filterFn
   }
 
   get filter () {
     return this._filter
-  }
-
-  readonly defaultFilter: typeof this._filter = (requestInfo) => {
-    return ['xhr', 'fetch'].includes(requestInfo.resourceType) || requestInfo.matchedIntercept
   }
 
   /**
@@ -308,8 +307,16 @@ export default class NetworkLogs {
     proxyRequest.log?.snapshot('error').error(proxyRequest.error)
   }
 
+  private shouldDisplay (requestInfo: FilterFnOpts) {
+    return (
+      (this.showAllXhrFetch && ['xhr', 'fetch'].includes(requestInfo.resourceType))
+      || (this.showAllIntercepts && requestInfo.matchedIntercept)
+      || (this._filter?.(requestInfo))
+    )
+  }
+
   private createProxyRequestLog ({ browserPreRequest, matchedIntercept }: { browserPreRequest: BrowserPreRequest, matchedIntercept: boolean }): ProxyRequest | undefined {
-    if (!this._filter({ ...browserPreRequest, matchedIntercept })) {
+    if (!this.shouldDisplay({ ...browserPreRequest, matchedIntercept })) {
       return
     }
 

@@ -668,19 +668,23 @@ declare namespace Cypress {
 
     NetworkLogs: {
       /**
-       * The default rules for network log filtering:
-       * 1. Display all XHRs and fetch requests
-       * 2. Display all requests matched by a `cy.intercept()` route
-       * @see https://on.cypress.io/network-logs
+       * If true, all XHRs and fetch requests will be displayed in the command log. Set to false to disable.
+       * @default true
        */
-      readonly defaultFilter: NetworkLogsFilterFn
+      showAllXhrFetch: boolean
+      /**
+       * If true, all requests that match a `cy.intercept()` rule will be displayed in the command log. Set to false to disable.
+       * @default true
+       */
+      showAllIntercepts: boolean
       /**
        * Set custom filtering rules for network logs.
-       * @default Cypress.NetworkLogs.defaultFilter
+       * `filter` is only called if `showXhrFetch` and `showIntercepts` do not apply to the request.
+       * @default undefined
        * @param filterFn a function that returns true if the request should be logged and false otherwise
        * @see https://on.cypress.io/network-logs
        */
-      filter: NetworkLogsFilterFn
+      filter: NetworkLogsFilterFn | undefined
     }
 
     /**
