@@ -43,7 +43,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', RUNNING_COUNT).should('be.visible')
 
       cy.remoteGraphQLIntercept(async (obj) => {
-        await new Promise((resolve) => setTimeout(resolve, 500))
+        await new Promise((resolve) => setTimeout(resolve, 1000))
 
         if (obj.result.data?.cloudNode?.newerRuns?.nodes) {
           obj.result.data.cloudNode.newerRuns.nodes = []
@@ -62,7 +62,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       function completeNext (passed) {
         cy.wrap(obj).invoke('toCall').then(() => {
-          cy.wait(1000)
+          cy.wait(2000)
           cy.get('[data-cy="run-card-icon-PASSED"]').should('have.length', passed).should('be.visible')
           if (passed < RUNNING_COUNT) {
             completeNext(passed + 1)
