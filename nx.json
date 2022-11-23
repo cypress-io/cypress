@@ -51,6 +51,7 @@
     },
     "build-prod": {
       "dependsOn": [
+        "build",
         "^build",
         "^build-prod-ui"
       ]

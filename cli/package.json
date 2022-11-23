@@ -187,7 +187,15 @@
           "patch-package"
         ]
       },
+      "prebuild": {
+        "dependsOn": [
+          "postinstall"
+        ]
+      },
       "build": {
+        "outputs": [
+          "cli/build"
+        ],
         "dependsOn": [
           "prebuild",
           "^build"
