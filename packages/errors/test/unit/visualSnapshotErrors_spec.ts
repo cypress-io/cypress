@@ -485,6 +485,23 @@ describe('visual error templates', () => {
               browserVersion: '59.1.2.3',
               specs: [
                 'cypress/integration/app_spec.js',
+              ],
+            },
+            payload: {},
+          },
+        ],
+        differentParams: [
+          {
+            group: 'foo',
+            runUrl: 'https://cloud.cypress.io/project/abcd/runs/1',
+            ciBuildId: 'test-ciBuildId-123',
+            parameters: {
+              osName: 'darwin',
+              osVersion: 'v1',
+              browserName: 'Electron',
+              browserVersion: '59.1.2.3',
+              specs: [
+                'cypress/integration/app_spec.js',
                 'cypress/integration/foo_spec.js',
                 'cypress/integration/bar_spec.js',
               ],
