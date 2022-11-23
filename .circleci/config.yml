@@ -64,9 +64,7 @@ jobs:
               curl -o workflows.yml https://raw.githubusercontent.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}/.circleci/workflows.yml
             fi
 
-            cat workflows.yml 
-
-            [[ $(cat workflows.yml) =~ '404: Not Found' ]] && echo 'failed to download workflows.yml...'
+            # [[ $(cat workflows.yml) =~ '404: Not Found' ]] && echo 'failed to download workflows.yml...'
       - continuation/continue:
           configuration_path: workflows.yml
 
