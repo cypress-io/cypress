@@ -6,6 +6,7 @@ const esbuild = require('esbuild')
 const snapshotMetadata = require('@tooling/v8-snapshot/cache/prod-darwin/snapshot-meta.cache.json')
 const tempDir = require('temp-dir')
 const workingDir = path.join(tempDir, 'binary-cleanup-workdir')
+const bytenode = require('bytenode')
 
 fs.ensureDirSync(workingDir)
 
@@ -39,8 +40,6 @@ async function removeEmptyDirectories (directory) {
 const getDependencyPathsToKeep = async (buildAppDir) => {
   const unixBuildAppDir = buildAppDir.split(path.sep).join(path.posix.sep)
   const startingEntryPoints = [
-    'packages/server/index.js',
-    'packages/server/hook-require.js',
     'packages/server/lib/plugins/child/require_async_child.js',
     'packages/server/lib/plugins/child/register_ts_node.js',
     'packages/rewriter/lib/threads/worker.js',
@@ -114,13 +113,48 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
   return [...Object.keys(esbuildResult.metafile.inputs), ...entryPoints]
 }
 
+const createServerEntryPointBundle = async (buildAppDir) => {
+  const unixBuildAppDir = buildAppDir.split(path.sep).join(path.posix.sep)
+  const entryPoints = [path.join(unixBuildAppDir, 'packages/server/index.js')]
+  const esbuildResult = await esbuild.build({
+    entryPoints,
+    bundle: true,
+    outdir: workingDir,
+    platform: 'node',
+    metafile: true,
+    absWorkingDir: unixBuildAppDir,
+    external: [
+      './transpile-ts',
+      './server-entry',
+    ],
+  })
+
+  console.log(`copying server entry point bundle from ${path.join(workingDir, 'index.js')} to ${path.join(buildAppDir, 'packages', 'server', 'index.js')}`)
+
+  await fs.copy(path.join(workingDir, 'index.js'), path.join(buildAppDir, 'packages', 'server', 'backup.js'))
+  await fs.copy(path.join(workingDir, 'index.js'), path.join(buildAppDir, 'packages', 'server', 'index.js'))
+
+  await bytenode.compileFile({
+    filename: path.join(buildAppDir, 'packages', 'server', 'index.js'),
+    output: path.join(buildAppDir, 'packages', 'server', 'index.jsc'),
+    electron: true,
+  })
+
+  return [...Object.keys(esbuildResult.metafile.inputs)].map((input) => `./${input}`)
+}
+
 const cleanup = async (buildAppDir) => {
   // 1. Retrieve all dependencies that still need to be kept in the binary. In theory, we could use the bundles generated here as single files within the binary,
   // but for now, we just track on the dependencies that get pulled in
-  const keptDependencies = [...await getDependencyPathsToKeep(buildAppDir), 'package.json', 'packages/server/server-entry.js']
+  const keptDependencies = [...await getDependencyPathsToKeep(buildAppDir), 'package.json']
 
   // 2. Gather the dependencies that could potentially be removed from the binary due to being in the snapshot
-  const potentiallyRemovedDependencies = [...snapshotMetadata.healthy, ...snapshotMetadata.deferred, ...snapshotMetadata.norewrite]
+  const potentiallyRemovedDependencies = [
+    ...snapshotMetadata.healthy,
+    ...snapshotMetadata.deferred,
+    ...snapshotMetadata.norewrite,
+    ...await createServerEntryPointBundle(buildAppDir),
+  ]
 
   // 3. Remove all dependencies that are in the snapshot but not in the list of kept dependencies from the binary
   await Promise.all(potentiallyRemovedDependencies.map(async (dependency) => {

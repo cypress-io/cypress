@@ -7,6 +7,7 @@ const path = require('path')
 const { setupV8Snapshots } = require('@tooling/v8-snapshot')
 const { flipFuses, FuseVersion, FuseV1Options } = require('@electron/fuses')
 const { cleanup } = require('./binary/binary-cleanup')
+const { getIntegrityCheckSource } = require('./binary/binary-integrity-check')
 
 module.exports = async function (params) {
   console.log('****************************')
@@ -63,7 +64,7 @@ module.exports = async function (params) {
       },
     )
 
-    await setupV8Snapshots(params.appOutDir)
     await cleanup(outputFolder)
+    await setupV8Snapshots({ cypressAppPath: params.appOutDir, integrityCheckSource: getIntegrityCheckSource(outputFolder) })
   }
 }

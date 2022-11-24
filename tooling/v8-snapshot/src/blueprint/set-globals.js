@@ -56,4 +56,9 @@ function setGlobals (
   console = newConsole
   __pathResolver = newPathResolver
   require = nodeRequire
+
+  if (typeof integrityCheck === 'function') {
+    // eslint-disable-next-line no-undef
+    integrityCheck({ stackToMatch: ['setGlobals', 'snapshotRequire', 'runWithSnapshot', 'hookRequire', 'run'] })
+  }
 }

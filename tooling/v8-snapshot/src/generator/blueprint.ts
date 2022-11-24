@@ -51,6 +51,7 @@ export type BlueprintConfig = {
   sourceMap: Buffer | undefined
   processedSourceMapPath: string | undefined
   supportTypeScript: boolean
+  integrityCheckSource: string | undefined
 }
 
 const pathSep = path.sep === '\\' ? '\\\\' : path.sep
@@ -101,6 +102,7 @@ export function scriptFromBlueprint (config: BlueprintConfig): {
     basedir,
     sourceMap,
     supportTypeScript,
+    integrityCheckSource,
   } = config
 
   const normalizedMainModuleRequirePath = forwardSlash(mainModuleRequirePath)
@@ -169,14 +171,30 @@ function generateSnapshot() {
   ${customRequire}
   ${includeStrictVerifiers ? 'require.isStrict = true' : ''}
 
+  ${integrityCheckSource || ''}
+
   customRequire(${normalizedMainModuleRequirePath}, ${normalizedMainModuleRequirePath})
-  return {
-    customRequire,
-    setGlobals: ${setGlobals},
-  }
+  const result = {}
+  Object.defineProperties(result, {
+    customRequire: {
+      writable: false,
+      value: customRequire
+    },
+    setGlobals: {
+      writable: false,
+      value: ${setGlobals}
+    }
+  })
+  return result
 }
 
-var snapshotResult = generateSnapshot.call({})
+const snapshotResult = generateSnapshot.call({})
+Object.defineProperty(this, 'getSnapshotResult', {
+  writable: false,
+  value: function () {
+    return snapshotResult
+  },
+})
 var supportTypeScript = ${supportTypeScript}
 generateSnapshot = null
 `,

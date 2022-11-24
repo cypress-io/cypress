@@ -174,12 +174,9 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   }, { spaces: 2 })
 
   fs.writeFileSync(meta.distDir('index.js'), `\
-${!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE) ?
-`if (!global.snapshotResult && process.versions?.electron) {
-  throw new Error('global.snapshotResult is not defined. This binary has been built incorrectly.')
-}` : ''}
 process.env.CYPRESS_INTERNAL_ENV = process.env.CYPRESS_INTERNAL_ENV || 'production'
-require('./packages/server')\
+require('./node_modules/bytenode/lib/index.js')
+require('./packages/server/index.js')
 `)
 
   // removeTypeScript
@@ -259,6 +256,8 @@ require('./packages/server')\
     ...jsonRoot,
     version,
   }, { spaces: 2 })
+
+  fs.writeFileSync(meta.distDir('index.js'), fs.readFileSync(meta.distDir('index.js'), 'utf8').replace('server/index.js', 'server/index.jsc'))
 
   try {
     await execa('electron-builder', args, {
