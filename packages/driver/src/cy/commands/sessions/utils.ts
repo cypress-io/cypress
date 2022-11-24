@@ -194,16 +194,42 @@ const getPostMessageLocalStorage = (specWindow, origins): Promise<any[]> => {
 }
 
 function navigateAboutBlank (session: boolean = true) {
-  if (Cypress.config('testIsolation') === 'off') {
-    return
+  // Component testing does not support navigation and handles clearing the page via mount utils
+  if (Cypress.testingType === 'component' || Cypress.config('testIsolation') === 'off') {
+    return Promise.resolve()
   }
 
-  Cypress.action('cy:url:changed', '')
+  return new Promise((resolve) => {
+    cy.once('window:load', resolve)
 
-  return Cypress.action('cy:visit:blank', { type: session ? 'session' : 'session-lifecycle' }) as unknown as Promise<void>
+    Cypress.action('cy:url:changed', '')
+
+    return Cypress.action('cy:visit:blank', { type: session ? 'session' : 'session-lifecycle' }) as unknown as Promise<void>
+  })
+}
+
+const enum SESSION_STEPS {
+  create = 'create',
+  restore = 'restore',
+  recreate = 'recreate',
+  validate = 'validate',
 }
 
 const statusMap = {
+  commandState: (status: string) => {
+    switch (status) {
+      case 'failed':
+        return 'failed'
+      case 'recreating':
+      case 'recreated':
+        return 'warned'
+      case 'created':
+      case 'restored':
+        return 'passed'
+      default:
+        return 'pending'
+    }
+  },
   inProgress: (step) => {
     switch (step) {
       case 'create':
@@ -250,5 +276,6 @@ export {
   getConsoleProps,
   getPostMessageLocalStorage,
   navigateAboutBlank,
+  SESSION_STEPS,
   statusMap,
 }

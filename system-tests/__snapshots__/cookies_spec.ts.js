@@ -27,7 +27,7 @@ exports['e2e cookies with baseurl'] = `
     in a cy.visit
       ✓ can successfully send cookies as a Cookie header
       ✓ ignores invalid set-cookie headers that contain control chars
-      with Domain = superdomain
+      with Domain = hostname
         ✓ is set properly with no redirects
         ✓ is set properly with redirects
       with SameSite
@@ -43,7 +43,7 @@ exports['e2e cookies with baseurl'] = `
     in a cy.request
       ✓ can successfully send cookies as a Cookie header
       ✓ ignores invalid set-cookie headers that contain control chars
-      with Domain = superdomain
+      with Domain = hostname
         ✓ is set properly with no redirects
         ✓ is set properly with redirects
       with SameSite

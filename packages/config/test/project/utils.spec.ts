@@ -27,6 +27,10 @@ import path from 'node:path'
 const debug = Debug('test')
 
 describe('config/src/project/utils', () => {
+  beforeEach(function () {
+    delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
+  })
+
   before(function () {
     this.env = process.env;
 
@@ -1050,6 +1054,7 @@ describe('config/src/project/utils', () => {
             experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
+            experimentalRunAllSpecs: { value: false, from: 'default' },
             experimentalSingleTabRunMode: { value: false, from: 'default' },
             experimentalStudio: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
@@ -1143,6 +1148,7 @@ describe('config/src/project/utils', () => {
             experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
+            experimentalRunAllSpecs: { value: false, from: 'default' },
             experimentalSingleTabRunMode: { value: false, from: 'default' },
             experimentalStudio: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },

@@ -82,7 +82,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
         - Go into a project, run a quick test, make sure things look right
     - Optionally, install the new version into an established project and run the tests there
         - [cypress-realworld-app](https://github.com/cypress-io/cypress-realworld-app) uses yarn and represents a typical consumer implementation.
-    - Optionally, do more thorough tests, for example test the new version of Cypress against the Cypress Dashboard repo.
+    - Optionally, do more thorough tests, for example test the new version of Cypress against the Cypress Cloud repo.
 
 5. Log into AWS SSO with `aws sso login --profile <name_of_profile>`. If you have setup your credentials under a different profile than `prod`, be sure to set the `AWS_PROFILE` environment variable to that profile name for the remaining steps. For example, if you are using `production` instead of `prod`, do `export AWS_PROFILE=production`.
 
@@ -119,7 +119,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
         - Go into a project, run a quick test, make sure things look right
     - Install the new version into an established project and run the tests there
         - [cypress-realworld-app](https://github.com/cypress-io/cypress-realworld-app) uses yarn and represents a typical consumer implementation.
-    - Optionally, do more thorough tests, for example test the new version of Cypress against the Cypress Dashboard repo.
+    - Optionally, do more thorough tests, for example test the new version of Cypress against the Cypress Cloud repo.
 
 11. Create or review the release-specific documentation and changelog in [cypress-documentation](https://github.com/cypress-io/cypress-documentation). If there is not already a release-specific PR open, create one. This PR must be merged, built, and deployed before moving to the next step.
      - Use [`release-automations`](https://github.com/cypress-io/release-automations)'s `issues-in-release` tool to generate a starting point for the changelog, based off of ZenHub:

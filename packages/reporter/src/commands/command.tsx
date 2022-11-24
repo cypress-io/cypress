@@ -14,6 +14,7 @@ import Tag from '../lib/tag'
 import { TimeoutID } from '../lib/types'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import { Alias, AliasObject } from '../instruments/instrument-model'
+import { determineTagType } from '../sessions/utils'
 
 import CommandModel, { RenderProps } from './command-model'
 import TestError from '../errors/test-error'
@@ -298,7 +299,7 @@ const CommandControls = observer(({ model, commandName, events }) => {
       {isSessionCommand && (
         <Tag
           content={model.sessionInfo?.status}
-          type={`${model.sessionInfo?.status === 'failed' ? 'failed' : 'successful'}-status`}
+          type={determineTagType(model.state)}
         />
       )}
       {!model.visible && (
