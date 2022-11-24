@@ -16,8 +16,8 @@ function integrityCheck (options) {
   origError.prepareStackTrace = originalStackTrace
 
   options.stackToMatch.forEach((functionName, index) => {
-    if (stack[index].getFunctionName() !== functionName) {
-      throw new Error(`Integrity check failed at index ${ index } with function name ${ functionName } and expected function name ${ stack[index].getFunctionName()}`)
+    if (stack[index].getFunctionName() !== functionName || !['evalmachine.<anonymous>', '<embedded>'].includes(stack[index].getFileName())) {
+      throw new Error(`Integrity check failed at index ${ index } with function name ${ functionName } and expected function name ${stack[index].getFunctionName()} from ${stack[index].getFileName()}`)
     }
   })
 
