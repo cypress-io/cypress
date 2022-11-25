@@ -38,6 +38,10 @@ describe('http/response-middleware', function () {
     }
 
     testMiddleware([middleware], {
+      res: {
+        on: (event, listener) => {},
+        off: (event, listener) => {},
+      },
       onError (err) {
         expect(err.message).to.equal('Error running proxy middleware: Cannot call this.next() more than once in the same middleware function. Doing so can cause unintended issues.')
 
@@ -55,6 +59,10 @@ describe('http/response-middleware', function () {
     }
 
     return testMiddleware([middleware1, middleware2], {
+      res: {
+        on: (event, listener) => {},
+        off: (event, listener) => {},
+      },
       onError () {
         throw new Error('onError should not be called')
       },
@@ -152,6 +160,8 @@ describe('http/response-middleware', function () {
         res: {
           set: sinon.stub(),
           removeHeader: sinon.stub(),
+          on: (event, listener) => {},
+          off: (event, listener) => {},
         },
         incomingRes: {
           headers,
@@ -534,6 +544,8 @@ describe('http/response-middleware', function () {
         res: {
           headers: {},
           setHeader: sinon.stub(),
+          on: (event, listener) => {},
+          off: (event, listener) => {},
           ...props.res,
         },
         req: {
@@ -1291,7 +1303,8 @@ describe('http/response-middleware', function () {
         },
         res: {
           headers: {},
-          on () {},
+          on: (event, listener) => {},
+          off: (event, listener) => {},
           ...props.res,
         },
         req: {
@@ -1459,6 +1472,8 @@ describe('http/response-middleware', function () {
         res: {
           wantsInjection: 'full',
           wantsSecurityRemoved: true,
+          on: (event, listener) => {},
+          off: (event, listener) => {},
           ...props.res,
         },
         req: {
@@ -1574,6 +1589,8 @@ describe('http/response-middleware', function () {
         res: {
           wantsInjection: 'full',
           wantsSecurityRemoved: true,
+          on: (event, listener) => {},
+          off: (event, listener) => {},
           ...props.res,
         },
         req: {

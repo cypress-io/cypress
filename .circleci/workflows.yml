@@ -49,6 +49,8 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
+
+# uncomment & add to the branch conditions below to disable the main linux
 # flow if we don't want to test it for a certain branch
 linuxWorkflowExcludeFilters: &linux-x64-workflow-exclude-filters
   unless:
@@ -61,7 +63,6 @@ windowsWorkflowFilters: &windows-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'feature/run-all-specs', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -1322,7 +1323,7 @@ jobs:
           condition:
             equal: [ *darwin-arm64-executor, << parameters.executor >> ]
           steps:
-            - run: rm -f /tmp/cypress/junit/*
+            - run: rm -f /tmp/cypress/junit/* 
       - unless:
           condition:
             or:
@@ -2818,4 +2819,3 @@ workflows:
   windows:
     <<: *windows-workflow
     <<: *windows-workflow-filters
-  
