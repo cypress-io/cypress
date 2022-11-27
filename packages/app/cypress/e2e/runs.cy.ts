@@ -39,11 +39,11 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     const RUNNING_COUNT = 3
 
-    it('should re-query for executing runs', () => {
+    it('should re-query for executing runs', { defaultCommandTimeout: 7500 }, () => {
       cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', RUNNING_COUNT).should('be.visible')
 
       cy.remoteGraphQLIntercept(async (obj) => {
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        await new Promise((resolve) => setTimeout(resolve, 2000))
 
         if (obj.result.data?.cloudNode?.newerRuns?.nodes) {
           obj.result.data.cloudNode.newerRuns.nodes = []
@@ -62,7 +62,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       function completeNext (passed) {
         cy.wrap(obj).invoke('toCall').then(() => {
-          cy.wait(2000)
+          cy.wait(3500)
           cy.get('[data-cy="run-card-icon-PASSED"]').should('have.length', passed).should('be.visible')
           if (passed < RUNNING_COUNT) {
             completeNext(passed + 1)
