@@ -112,6 +112,8 @@ export function scriptFromBlueprint (config: BlueprintConfig): {
 const PATH_SEP = '${pathSep}'
 var snapshotAuxiliaryData = ${auxiliaryData}
 
+${integrityCheckSource || ''}
+
 function generateSnapshot() {
   //
   // <process>
@@ -171,8 +173,6 @@ function generateSnapshot() {
   ${customRequire}
   ${includeStrictVerifiers ? 'require.isStrict = true' : ''}
 
-  ${integrityCheckSource || ''}
-
   customRequire(${normalizedMainModuleRequirePath}, ${normalizedMainModuleRequirePath})
   const result = {}
   Object.defineProperties(result, {
@@ -192,6 +192,10 @@ const snapshotResult = generateSnapshot.call({})
 Object.defineProperty(this, 'getSnapshotResult', {
   writable: false,
   value: function () {
+    if (typeof stackIntegrityCheck === 'function') {
+      // eslint-disable-next-line no-undef
+      stackIntegrityCheck({ stackToMatch: ['value', 'snapshotRequire', 'runWithSnapshot', 'hookRequire', 'run'] })
+    }
     return snapshotResult
   },
 })

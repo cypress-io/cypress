@@ -15,6 +15,11 @@ function setGlobals (
   newPathResolver,
   nodeRequire,
 ) {
+  if (typeof stackIntegrityCheck === 'function') {
+    // eslint-disable-next-line no-undef
+    stackIntegrityCheck({ stackToMatch: ['setGlobals', 'snapshotRequire', 'runWithSnapshot', 'hookRequire', 'run'] })
+  }
+
   // Populate the global function trampoline with the real global functions defined on newGlobal.
   globalFunctionTrampoline = newGlobal
 
@@ -57,8 +62,8 @@ function setGlobals (
   __pathResolver = newPathResolver
   require = nodeRequire
 
-  if (typeof integrityCheck === 'function') {
+  if (typeof fileIntegrityCheck === 'function') {
     // eslint-disable-next-line no-undef
-    integrityCheck({ stackToMatch: ['setGlobals', 'snapshotRequire', 'runWithSnapshot', 'hookRequire', 'run'] })
+    fileIntegrityCheck({ require, pathResolver: __pathResolver })
   }
 }
