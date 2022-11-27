@@ -197,6 +197,7 @@
     "lib",
     "patches",
     "server-entry.js",
+    "snapshot-entry.js",
     "hook-require.js"
   ],
   "types": "index.d.ts",
