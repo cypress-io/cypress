@@ -31,7 +31,12 @@
               'text-gray-500': browser.disabled || !browser.isVersionSupported
             }"
           >
-            {{ browser.displayName }}
+            {{
+              truncateString({
+                strToTruncate: browser.displayName,
+                maxLength: 16,
+              })
+            }}
           </button>
           <div
             class="font-normal mr-20px text-gray-500 text-14px filter whitespace-nowrap group-focus-within:mix-blend-luminosity
@@ -85,6 +90,7 @@ import { gql, useMutation } from '@urql/vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import Tooltip from '../../components/Tooltip.vue'
 import sortBrowsers from '@packages/frontend-shared/src/utils/sortBrowsers'
+import truncateString from '@packages/frontend-shared/src/utils/truncateString'
 
 const { t } = useI18n()
 
