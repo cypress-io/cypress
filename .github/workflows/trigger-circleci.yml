@@ -15,15 +15,22 @@ jobs:
       - if: ${{ github.event.pull_request.draft == true }} 
         run: echo "This PR is still in draft. Not triggering the CircleCi Pipeline"
       - if: ${{ github.event.pull_request.draft == false }}
-        # uses: CircleCI-Public/trigger-circleci-pipeline-action@v1.0.5
         shell: bash
         env:
           CIRCLE_TOKEN: ${{ secrets.CIRCLE_TOKEN }}
+          BASE_ORG_AND_REPO: ${{ github.event.pull_request.head.full_name }}
           PULL_ID: ${{ github.event.pull_request.number }}
         run: |
-          echo "Triggering CircleCI pipeline for $GITHUB_HEAD_REF. $GITHUB_REF. $GITHUB_BASE_REF. $GITHUB_REF_NAME & $GITHUB_REPOSITORY & $GITHUB_REPOSITORY_OWNER"
           echo "${{ toJSON(github) }}"
-          echo "$PULL_ID"
+
+          BRANCH="$GITHUB_HEAD_REF"
+
+          if [[ "$BASE_ORG_AND_REPO" != "cypress-io/cypress" ]]; then
+            echo "Triggering pipeline for outside contributor."
+            BRANCH="pull/$PULL_ID/head"
+          fi
+
+          echo "Triggering CircleCI pipeline for $BRANCH"
 
           response=$(curl -X POST https://circleci.com/api/v2/project/github/cypress-io/cypress/pipeline \
             --header "Circle-Token:$CIRCLE_TOKEN" \
