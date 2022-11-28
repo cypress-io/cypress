@@ -9,7 +9,7 @@ if (require.name !== 'customRequire') {
 
   const { hookRequire } = require(`@packages/server/${hook}-require`)
 
-  hookRequire(true)
+  hookRequire({ forceTypeScript: true })
 }
 
 require('../lib/threads/worker.ts')

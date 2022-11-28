@@ -14,7 +14,7 @@ const runMainProcess = async () => {
 
     const { hookRequire } = require(`${hook}-require`)
 
-    hookRequire(false)
+    hookRequire({ forceTypeScript: false })
   }
 
   await require('./server-entry')
