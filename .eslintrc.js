@@ -34,6 +34,7 @@ module.exports = {
     'plugin:@cypress/dev/tests',
   ],
   parser: '@typescript-eslint/parser',
+  // cli types are checked by dtslint
   ignorePatterns: ['cli/types/**'],
   overrides: [
     {
