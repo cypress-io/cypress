@@ -1,0 +1,21 @@
+name: "Semantic Pull Request"
+
+on:
+  pull_request:
+    types:
+      - opened
+      - ready_for_review
+
+jobs:
+  main:
+    name: Trigger CircleCi  Pipeline if PR is ready for review
+    runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.draft == true }}
+    steps:
+      - run: echo "This PR is still in draft. Not triggering the CircleCi Pipeline"
+    if: ${{ github.event.pull_request.draft == false }}
+    steps:
+      - run: echo "This PR is ready for review."
+      - uses: CircleCI-Public/trigger-circleci-pipeline-action@v1.0.5
+        env:
+          CCI_TOKEN: ${{ secrets.CIRCLE_TOKEN }}
