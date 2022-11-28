@@ -11,7 +11,6 @@
     "watch": "tsc -w",
     "lint": "eslint --ext .js,.ts,.json, ."
   },
-  "dependencies": {},
   "devDependencies": {
     "@cypress/mount-utils": "0.0.0-development",
     "@rollup/plugin-commonjs": "^17.1.0",
