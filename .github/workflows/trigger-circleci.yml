@@ -24,4 +24,4 @@ jobs:
           curl -X POST https://circleci.com/api/v2/project/github/cypress-io/cypress/pipeline \
           --header "Circle-Token:${{ env.CIRCLE_TOKEN }}" \
           --header "content-type:application/json" \
-          --data '{"branch":"${{ env.GITHUB_HEAD_REF }}"}'
+          --data '{"branch":"$GITHUB_HEAD_REF"}'
