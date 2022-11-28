@@ -29,7 +29,7 @@ jobs:
             --silent
           )
 
-          if [ "$( jq 'has("message")' <<< $response )" == "true" ]; then
-            Echo "Error triggering pipeline."
+          if [ "$(jq 'has("message")' <<< $response )" == "true" ]; then
+            echo "error triggering"
             exit 1;
           fi
