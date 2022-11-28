@@ -1065,7 +1065,7 @@ namespace CypressClearCookiesTests {
 
 namespace CypressLocalStorageTests {
   cy.getAllLocalStorage().then((result) => {
-    result // $ExpectType Cypress.StorageByOrigin
+    result // $ExpectType StorageByOrigin
   })
   cy.getAllLocalStorage({ log: 'true' }) // $ExpectError
   cy.getAllLocalStorage({ timeout: '10' }) // $ExpectError
@@ -1073,7 +1073,7 @@ namespace CypressLocalStorageTests {
 
 namespace CypressLocalStorageTests {
   cy.getAllLocalStorage().then((result) => {
-    result // $ExpectType Cypress.StorageByOrigin
+    result // $ExpectType StorageByOrigin
   })
   cy.getAllLocalStorage({ log: false })
   cy.getAllLocalStorage({ log: 'true' }) // $ExpectError
@@ -1085,7 +1085,7 @@ namespace CypressLocalStorageTests {
   cy.clearAllLocalStorage({ log: 'true' }) // $ExpectError
 
   cy.getAllSessionStorage().then((result) => {
-    result // $ExpectType Cypress.StorageByOrigin
+    result // $ExpectType StorageByOrigin
   })
   cy.getAllSessionStorage({ log: false })
   cy.getAllSessionStorage({ log: 'true' }) // $ExpectError
