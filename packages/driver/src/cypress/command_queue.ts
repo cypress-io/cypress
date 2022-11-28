@@ -575,8 +575,8 @@ export class CommandQueue extends Queue<$Command> {
       // Once a command has resolved, and its chainer is no longer referenced
       // by future commands, we can throw away the reference to the function
       // and its subject to free memory.
-      if (command.get('subject') && stillNeeded.indexOf(command.get('chainerId')) !== -1) {
-        command.set({ fn: null, subject: null, _log: null, logs: null, userInvocationStack: null, queryFn: null })
+      if (command.get('subject') && stillNeeded.indexOf(command.get('chainerId')) === -1) {
+        command.set({ fn: null, subject: null, queryFn: null })
       }
     })
 
