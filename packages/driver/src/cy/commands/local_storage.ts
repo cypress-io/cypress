@@ -22,7 +22,7 @@ const clearLocalStorage = (state, keys) => {
   return remote
 }
 
-const getAllStorage = async (type: 'sessionStorage' | 'localStorage', Cypress: InternalCypress.Cypress, userOptions: Options = {}) => {
+const getAllStorage = async (type: InternalCypress.StorageType, Cypress: InternalCypress.Cypress, userOptions: Options = {}) => {
   const options: Options = {
     log: true,
     ...userOptions,
@@ -55,7 +55,7 @@ const getAllStorage = async (type: 'sessionStorage' | 'localStorage', Cypress: I
   return storageByOrigin
 }
 
-const clearAllStorage = async (type: 'sessionStorage' | 'localStorage', Cypress: InternalCypress.Cypress, userOptions: Options = {}) => {
+const clearAllStorage = async (type: InternalCypress.StorageType, Cypress: InternalCypress.Cypress, userOptions: Options = {}) => {
   const options: Options = {
     log: true,
     ...userOptions,
