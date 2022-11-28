@@ -86,15 +86,13 @@ function cypressGrepPlugin (config) {
         const text = fs.readFileSync(specFile, { encoding: 'utf8' })
 
         try {
-          const names = getTestNames(text)
-          const testAndSuiteNames = names.suiteNames.concat(names.testNames)
-
+          const result = getTestNames(text, true)
+          const testNames = result.fullTestNames
           debug('spec file %s', specFile)
-          debug('suite and test names: %o', testAndSuiteNames)
+          debug('full test names: %o', testNames)
 
-          return testAndSuiteNames.some((name) => {
+          return testNames.some((name) => {
             const shouldRun = shouldTestRun(parsedGrep, name)
-
             return shouldRun
           })
         } catch (err) {
