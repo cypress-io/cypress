@@ -12,8 +12,6 @@ jobs:
     name: Trigger CircleCi Pipeline when PR is ready for review
     runs-on: ubuntu-latest
     steps:
-      - if: ${{ github.event.pull_request.draft == true }} 
-        run: echo "This PR is still in draft. Not triggering the CircleCi Pipeline"
       - if: ${{ github.event.pull_request.draft == false }}
         shell: bash
         env:
