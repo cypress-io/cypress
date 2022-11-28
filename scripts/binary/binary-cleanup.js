@@ -131,8 +131,9 @@ const createServerEntryPointBundle = async (buildAppDir) => {
 
   console.log(`copying server entry point bundle from ${path.join(workingDir, 'index.js')} to ${path.join(buildAppDir, 'packages', 'server', 'index.js')}`)
 
-  await fs.copy(path.join(workingDir, 'index.js'), path.join(buildAppDir, 'packages', 'server', 'backup.js'))
   await fs.copy(path.join(workingDir, 'index.js'), path.join(buildAppDir, 'packages', 'server', 'index.js'))
+
+  console.log(`compiling server entry point bundle to ${path.join(buildAppDir, 'packages', 'server', 'index.jsc')}`)
 
   await bytenode.compileFile({
     filename: path.join(buildAppDir, 'packages', 'server', 'index.js'),
