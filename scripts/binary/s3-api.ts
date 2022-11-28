@@ -2,10 +2,9 @@ const debug = require('debug')('cypress:binary')
 import la from 'lazy-ass'
 import is from 'check-more-types'
 import S3 from 'aws-sdk/clients/s3'
-import { prop, values, all } from 'ramda'
 
 export const hasOnlyStringValues = (o) => {
-  return all(is.unemptyString, values(o))
+  return Object.values(o).every((v) => is.unemptyString(v))
 }
 
 /**
@@ -14,12 +13,18 @@ export const hasOnlyStringValues = (o) => {
  */
 export const s3helpers = {
   makeS3 (aws) {
-    la(is.unemptyString(aws.key), 'missing aws key')
-    la(is.unemptyString(aws.secret), 'missing aws secret')
+    la(is.unemptyString(aws.accessKeyId), 'missing aws accessKeyId')
+    la(is.unemptyString(aws.secretAccessKey), 'missing aws secretAccessKey')
+
+    if (!process.env.CIRCLECI) {
+      // sso is not required for CirceCI
+      la(is.unemptyString(aws.sessionToken), 'missing aws sessionToken')
+    }
 
     return new S3({
-      accessKeyId: aws.key,
-      secretAccessKey: aws.secret,
+      accessKeyId: aws.accessKeyId,
+      secretAccessKey: aws.secretAccessKey,
+      sessionToken: aws.sessionToken,
     })
   },
 
@@ -41,7 +46,7 @@ export const s3helpers = {
 
         debug('s3 data for %s', zipFile)
         debug(data)
-        resolve()
+        resolve(null)
       })
     })
   },
@@ -67,7 +72,7 @@ export const s3helpers = {
         debug('AWS result in %s %s', bucket, prefix)
         debug('%o', result)
 
-        resolve(result.CommonPrefixes.map(prop('Prefix')))
+        resolve(result.CommonPrefixes.map((val) => val.Prefix))
       })
     })
   },

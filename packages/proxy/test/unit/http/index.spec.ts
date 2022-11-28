@@ -5,20 +5,21 @@ import sinon from 'sinon'
 describe('http', function () {
   context('Http.handle', function () {
     let config
-    let getRemoteState
     let middleware
     let incomingRequest
     let incomingResponse
     let error
     let httpOpts
+    let on
+    let off
 
     beforeEach(function () {
       config = {}
-      getRemoteState = sinon.stub().returns({})
-
       incomingRequest = sinon.stub()
       incomingResponse = sinon.stub()
       error = sinon.stub()
+      on = sinon.stub()
+      off = sinon.stub()
 
       middleware = {
         [HttpStages.IncomingRequest]: [incomingRequest],
@@ -26,7 +27,7 @@ describe('http', function () {
         [HttpStages.Error]: [error],
       }
 
-      httpOpts = { config, getRemoteState, middleware }
+      httpOpts = { config, middleware }
     })
 
     it('calls IncomingRequest stack, then IncomingResponse stack', function () {
@@ -47,11 +48,14 @@ describe('http', function () {
       })
 
       return new Http(httpOpts)
-      .handle({}, {})
+      // @ts-ignore
+      .handle({}, { on, off })
       .then(function () {
         expect(incomingRequest, 'incomingRequest').to.be.calledOnce
         expect(incomingResponse, 'incomingResponse').to.be.calledOnce
         expect(error).to.not.be.called
+        expect(on).to.be.calledOnce
+        expect(off).to.be.calledTwice
       })
     })
 
@@ -64,11 +68,14 @@ describe('http', function () {
       })
 
       return new Http(httpOpts)
-      .handle({}, {})
+      // @ts-ignore
+      .handle({}, { on, off })
       .then(function () {
         expect(incomingRequest).to.be.calledOnce
         expect(incomingResponse).to.not.be.called
         expect(error).to.be.calledOnce
+        expect(on).to.not.be.called
+        expect(off).to.be.calledThrice
       })
     })
 
@@ -86,11 +93,14 @@ describe('http', function () {
       })
 
       return new Http(httpOpts)
-      .handle({}, {})
+      // @ts-ignore
+      .handle({}, { on, off })
       .then(function () {
         expect(incomingRequest).to.be.calledOnce
         expect(incomingResponse).to.be.calledOnce
         expect(error).to.be.calledOnce
+        expect(on).to.be.calledOnce
+        expect(off).to.have.callCount(4)
       })
     })
 
@@ -99,7 +109,7 @@ describe('http', function () {
       const resAdded = {}
       const errorAdded = {}
 
-      let expectedKeys = ['req', 'res', 'config', 'getRemoteState', 'middleware']
+      let expectedKeys = ['req', 'res', 'config', 'middleware']
 
       incomingRequest.callsFake(function () {
         expect(this).to.include.keys(expectedKeys)
@@ -148,7 +158,8 @@ describe('http', function () {
       middleware[HttpStages.Error].push(error2)
 
       return new Http(httpOpts)
-      .handle({}, {})
+      // @ts-ignore
+      .handle({}, { on, off })
       .then(function () {
         [
           incomingRequest, incomingRequest2,
@@ -157,6 +168,9 @@ describe('http', function () {
         ].forEach(function (fn) {
           expect(fn).to.be.calledOnce
         })
+
+        expect(on).to.be.calledTwice
+        expect(off).to.have.callCount(10)
       })
     })
   })

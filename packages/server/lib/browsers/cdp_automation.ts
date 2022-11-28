@@ -2,11 +2,20 @@
 
 import _ from 'lodash'
 import Bluebird from 'bluebird'
+import type playwright from 'playwright-webkit'
 import type { Protocol } from 'devtools-protocol'
-import { cors } from '@packages/network'
+import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
+import { cors, uri } from '@packages/network'
 import debugModule from 'debug'
+import { URL } from 'url'
+
 import type { Automation } from '../automation'
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
+import type { WriteVideoFrame } from '@packages/types'
+
+export type CdpCommand = keyof ProtocolMapping.Commands
+
+export type CdpEvent = keyof ProtocolMapping.Events
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
 
@@ -17,11 +26,13 @@ export type CyCookie = Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expiratio
 
 // Cypress uses the webextension-style filtering
 // https://developer.chrome.com/extensions/cookies#method-getAll
-type CyCookieFilter = chrome.cookies.GetAllDetails
+export type CyCookieFilter = chrome.cookies.GetAllDetails
 
-export const screencastOpts: Protocol.Page.StartScreencastRequest = {
-  format: 'jpeg',
-  everyNthFrame: Number(process.env.CYPRESS_EVERY_NTH_FRAME || 5),
+export function screencastOpts (everyNthFrame = Number(process.env.CYPRESS_EVERY_NTH_FRAME || 5)): Protocol.Page.StartScreencastRequest {
+  return {
+    format: 'jpeg',
+    everyNthFrame,
+  }
 }
 
 function convertSameSiteExtensionToCdp (str: CyCookie['sameSite']): Protocol.Network.CookieSameSite | undefined {
@@ -51,7 +62,7 @@ export const _domainIsWithinSuperdomain = (domain: string, suffix: string) => {
   return _.isEqual(suffixParts, domainParts.slice(domainParts.length - suffixParts.length))
 }
 
-export const _cookieMatches = (cookie: CyCookie, filter: CyCookieFilter) => {
+export const cookieMatches = (cookie: CyCookie | playwright.Cookie, filter: CyCookieFilter) => {
   if (filter.domain && !(cookie.domain && _domainIsWithinSuperdomain(cookie.domain, filter.domain))) {
     return false
   }
@@ -146,7 +157,7 @@ const normalizeSetCookieProps = (cookie: CyCookie): Protocol.Network.SetCookieRe
   return setCookieRequest
 }
 
-const normalizeResourceType = (resourceType: string | undefined): ResourceType => {
+export const normalizeResourceType = (resourceType: string | undefined): ResourceType => {
   resourceType = resourceType ? resourceType.toLowerCase() : 'unknown'
   if (validResourceTypes.includes(resourceType as ResourceType)) {
     return resourceType as ResourceType
@@ -159,8 +170,9 @@ const normalizeResourceType = (resourceType: string | undefined): ResourceType =
   return ffToStandardResourceTypeMap[resourceType] || 'other'
 }
 
-type SendDebuggerCommand = (message: string, data?: any) => Bluebird<any>
-type OnFn = (eventName: string, cb: Function) => void
+type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: any) => Promise<ProtocolMapping.Commands[T]['returnType']>
+type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any> | void
+type OnFn = <T extends CdpEvent>(eventName: T, cb: (data: ProtocolMapping.Events[T][0]) => void) => void
 
 // the intersection of what's valid in CDP and what's valid in FFCDP
 // Firefox: https://searchfox.org/mozilla-central/rev/98a9257ca2847fad9a19631ac76199474516b31e/remote/cdp/domains/parent/Network.jsm#22
@@ -173,14 +185,30 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
 }
 
 export class CdpAutomation {
-  constructor (private sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, private automation: Automation) {
+  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private experimentalSessionAndOrigin: boolean) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
-    sendDebuggerCommandFn('Network.enable', {
+  }
+
+  async startVideoRecording (writeVideoFrame: WriteVideoFrame, screencastOpts?) {
+    this.onFn('Page.screencastFrame', async (e) => {
+      writeVideoFrame(Buffer.from(e.data, 'base64'))
+      await this.sendDebuggerCommandFn('Page.screencastFrameAck', { sessionId: e.sessionId })
+    })
+
+    await this.sendDebuggerCommandFn('Page.startScreencast', screencastOpts)
+  }
+
+  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, experimentalSessionAndOrigin: boolean): Promise<CdpAutomation> {
+    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, sendCloseCommandFn, automation, experimentalSessionAndOrigin)
+
+    await sendDebuggerCommandFn('Network.enable', {
       maxTotalBufferSize: 0,
       maxResourceBufferSize: 0,
       maxPostDataSize: 0,
     })
+
+    return cdpAutomation
   }
 
   private onNetworkRequestWillBeSent = (params: Protocol.Network.RequestWillBeSentEvent) => {
@@ -189,6 +217,15 @@ export class CdpAutomation {
 
     // in Firefox, the hash is incorrectly included in the URL: https://bugzilla.mozilla.org/show_bug.cgi?id=1715366
     if (url.includes('#')) url = url.slice(0, url.indexOf('#'))
+
+    // Filter out "data:" urls from being cached - fixes: https://github.com/cypress-io/cypress/issues/17853
+    // Chrome sends `Network.requestWillBeSent` events with data urls which won't actually be fetched
+    // Example data url: "data:font/woff;base64,<base64 encoded string>"
+    if (url.startsWith('data:')) {
+      debugVerbose('skipping `data:` url %s', url)
+
+      return
+    }
 
     // Firefox: https://searchfox.org/mozilla-central/rev/98a9257ca2847fad9a19631ac76199474516b31e/remote/cdp/domains/parent/Network.jsm#397
     // Firefox lacks support for urlFragment and initiator, two nice-to-haves
@@ -219,7 +256,7 @@ export class CdpAutomation {
     .then((result: Protocol.Network.GetAllCookiesResponse) => {
       return normalizeGetCookies(result.cookies)
       .filter((cookie: CyCookie) => {
-        const matches = _cookieMatches(cookie, filter)
+        const matches = cookieMatches(cookie, filter)
 
         debugVerbose('cookie matches filter? %o', { matches, cookie, filter })
 
@@ -228,19 +265,34 @@ export class CdpAutomation {
     })
   }
 
-  private getCookiesByUrl = (url): Bluebird<CyCookie[]> => {
+  private getCookiesByUrl = (url): Promise<CyCookie[]> => {
     return this.sendDebuggerCommandFn('Network.getCookies', {
       urls: [url],
     })
     .then((result: Protocol.Network.GetCookiesResponse) => {
+      const isLocalhost = uri.isLocalhost(new URL(url))
+
       return normalizeGetCookies(result.cookies)
       .filter((cookie) => {
+        // Chrome returns all cookies for a URL, even if they wouldn't normally
+        // be sent with a request. This standardizes it by filtering out ones
+        // that are secure but not on a secure context
+
+        if (this.experimentalSessionAndOrigin) {
+          // localhost is considered a secure context (even when http:)
+          // and it's required for cross origin support when visiting a secondary
+          // origin so that all its cookies are sent. This may be a
+          // breaking change, so put it behind the flag for now. Need to
+          // investigate further when we remove the experimental flag.
+          return !(cookie.secure && url.startsWith('http:') && !isLocalhost)
+        }
+
         return !(url.startsWith('http:') && cookie.secure)
       })
     })
   }
 
-  private getCookie = (filter: CyCookieFilter): Bluebird<CyCookie | null> => {
+  private getCookie = (filter: CyCookieFilter): Promise<CyCookie | null> => {
     return this.getAllCookies(filter)
     .then((cookies) => {
       return _.get(cookies, 0, null)
@@ -273,6 +325,11 @@ export class CdpAutomation {
           return this.getCookie(data)
         })
 
+      case 'add:cookies':
+        setCookie = data.map((cookie) => normalizeSetCookieProps(cookie)) as Protocol.Network.SetCookieRequest[]
+
+        return this.sendDebuggerCommandFn('Network.setCookies', { cookies: setCookie })
+
       case 'set:cookies':
         setCookie = data.map((cookie) => normalizeSetCookieProps(cookie))
 
@@ -283,15 +340,18 @@ export class CdpAutomation {
 
       case 'clear:cookie':
         return this.getCookie(data)
-        // tap, so we can resolve with the value of the removed cookie
-        // also, getting the cookie via CDP first will ensure that we send a cookie `domain` to CDP
-        // that matches the cookie domain that is really stored
-        .tap((cookieToBeCleared) => {
+        // always resolve with the value of the removed cookie. also, getting
+        // the cookie via CDP first will ensure that we send a cookie `domain`
+        // to CDP that matches the cookie domain that is really stored
+        .then((cookieToBeCleared) => {
           if (!cookieToBeCleared) {
-            return
+            return cookieToBeCleared
           }
 
           return this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
+          .then(() => {
+            return cookieToBeCleared
+          })
         })
 
       case 'clear:cookies':
@@ -320,6 +380,15 @@ export class CdpAutomation {
         .then(({ data }) => {
           return `data:image/png;base64,${data}`
         })
+      case 'reset:browser:state':
+        return Promise.all([
+          this.sendDebuggerCommandFn('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'all' }),
+          this.sendDebuggerCommandFn('Network.clearBrowserCache'),
+        ])
+      case 'reset:browser:tabs:for:next:test':
+        return this.sendCloseCommandFn(data.shouldKeepTabOpen)
+      case 'focus:browser:window':
+        return this.sendDebuggerCommandFn('Page.bringToFront')
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }

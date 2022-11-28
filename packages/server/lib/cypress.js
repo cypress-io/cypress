@@ -9,11 +9,10 @@ require('./environment')
 // essentially do it all again when we boot the correct
 // mode.
 
-const R = require('ramda')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:cypress')
+const { getPublicConfigKeys } = require('@packages/config')
 const argsUtils = require('./util/args')
-const chalk = require('chalk')
 
 const warning = (code, args) => {
   return require('./errors').warning(code, args)
@@ -29,8 +28,9 @@ const exit = (code = 0) => {
 }
 
 const showWarningForInvalidConfig = (options) => {
+  const publicConfigKeys = getPublicConfigKeys()
   const invalidConfigOptions = require('lodash').keys(options.config).reduce((invalid, option) => {
-    if (!require('./config').getConfigKeys().find((configKey) => configKey === option)) {
+    if (!publicConfigKeys.find((configKey) => configKey === option)) {
       invalid.push(option)
     }
 
@@ -106,15 +106,12 @@ module.exports = {
 
         debug('electron open arguments %o', args)
 
-        return cypressElectron.open('.', args, fn)
+        // const mainEntryFile = require.main.filename
+        const serverMain = require('./cwd')()
+
+        return cypressElectron.open(serverMain, args, fn)
       })
     })
-  },
-
-  openProject (options) {
-    // this code actually starts a project
-    // and is spawned from nodemon
-    return require('./open_project').open(options.project, options)
   },
 
   start (argv = []) {
@@ -122,7 +119,7 @@ module.exports = {
 
     // if the CLI passed "--" somewhere, we need to remove it
     // for https://github.com/cypress-io/cypress/issues/5466
-    argv = R.without('--', argv)
+    argv = argv.filter((val) => val !== '--')
 
     let options
 
@@ -171,10 +168,6 @@ module.exports = {
         mode = 'smokeTest'
       } else if (options.returnPkg) {
         mode = 'returnPkg'
-      } else if (options.logs) {
-        mode = 'logs'
-      } else if (options.clearLogs) {
-        mode = 'clearLogs'
       } else if (!(options.exitWithCode == null)) {
         mode = 'exitWithCode'
       } else if (options.runProject) {
@@ -226,18 +219,6 @@ module.exports = {
         }).then(exit0)
         .catch(exitErr)
 
-      case 'logs':
-        // print the logs + exit
-        return require('./gui/logs').print()
-        .then(exit0)
-        .catch(exitErr)
-
-      case 'clearLogs':
-        // clear the logs + exit
-        return require('./gui/logs').clear()
-        .then(exit0)
-        .catch(exitErr)
-
       case 'exitWithCode':
         return require('./modes/exit')(options)
         .then(exit)
@@ -253,7 +234,7 @@ module.exports = {
 
             if (isCanceled) {
               // eslint-disable-next-line no-console
-              console.log(chalk.magenta('\n  Exiting with non-zero exit code because the run was canceled.'))
+              console.log(require('chalk').magenta('\n  Exiting with non-zero exit code because the run was canceled.'))
 
               return 1
             }
@@ -266,10 +247,6 @@ module.exports = {
 
       case 'interactive':
         return this.runElectron(mode, options)
-
-      case 'openProject':
-        // open + start the project
-        return this.openProject(options)
 
       default:
         throw new Error(`Cannot start. Invalid mode: '${mode}'`)

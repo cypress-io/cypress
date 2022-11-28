@@ -1,11 +1,12 @@
-body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,button,textarea,p,blockquote,th,td{margin:0;padding:0;}table{border-collapse:collapse;border-spacing:0;}fieldset,img,a img{border:none;}address,caption,cite,code,dfn,em,strong,th,var,optgroup{font-style:inherit;font-weight:inherit;}del,ins{text-decoration:none;}li{list-style:none;}caption,th{text-align:left;}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}q:before,q:after{content:'';}abbr,acronym{border:0;font-variant:normal;}sup{vertical-align:baseline;}sub{vertical-align:baseline;}legend{color:#000;}
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,button,textarea,p,blockquote,th,td{margin:0;padding:0;}table{border-collapse:collapse;border-spacing:0;}fieldset,img,a img{border:none;}address,caption,cite,code,dfn,em,strong,th,var,optgroup{font-style:inherit;font-weight:inherit;}del,ins{text-decoration:none;}li{list-style:none;}caption,th{text-align:left;}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}q:before,q:after{content:'';}abbr,acronym{border:0;font-variant:normal;}sup{vertical-align:baseline;}sub{vertical-align:baseline;}legend{color:$white;}
 
 .reporter {
-  background-color: #F6F6F6;
+  background-color: $gray-1000;
   bottom: 0;
-  color: #555;
+  color: $gray-200;
   display: flex;
   flex-direction: column;
+  font-family: $font-system;
   font-size: 12px;
   left: 0;
   position: absolute;
@@ -28,22 +29,27 @@ body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input
   }
 
   a {
-    color: #3380FF;
+    color: $indigo-400;
     text-decoration: none;
     outline: none;
 
     &:hover,
     &:active,
     &:focus {
-      color: #2363CC;
+      color: $indigo-300;
       text-decoration: underline;
       outline: inherit;
     }
   }
 
   strong {
-    color: #222;
+    color: $gray-50;
     font-weight: bold;
+  }
+
+  svg {
+    display: inline-block;
+    vertical-align: initial;
   }
 
   em {
@@ -51,10 +57,10 @@ body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input
   }
 
   button {
-    background: #fff;
+    background: $black;
     border: none;
     border-radius: 2px;
-    color: #4f4f4f;
+    color: $gray-200;
     cursor: pointer;
     display: inline-block;
     font-size: 14px;
@@ -74,10 +80,10 @@ body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input
   }
 
   pre {
-    background-color: #f5f5f5;
-    border: 1px solid #ccc;
+    background-color: $gray-1000;
+    border: 1px solid $gray-800;
     border-radius: 2px;
-    color: #333;
+    color: $gray-100;
     display: block;
     font-family: $open-sans;
     font-size: 1.05em;
@@ -103,7 +109,7 @@ body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input
     > tbody > tr > td,
     > tfoot > tr > th,
     > tfoot > tr > td {
-      border-top: 1px solid #ddd;
+      border-top: 1px solid rgba($gray-900, 0.4);
       line-height: 1.42857;
       padding: 5px;
       vertical-align: top;
@@ -111,7 +117,7 @@ body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input
 
     > thead > tr > th {
       vertical-align: bottom;
-      border-bottom: 2px solid #ddd;
+      border-bottom: 2px solid rgba($gray-900, 0.4);
     }
 
     > caption + thead > tr:first-child > th,
@@ -129,9 +135,9 @@ body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input
   }
 
   label {
-    background-color: #333;
+    background-color: $gray-100;
     border-radius: .25em;
-    color: #fff;
+    color: $black;
     display: inline;
     font-size: 75%;
     font-weight: bold;

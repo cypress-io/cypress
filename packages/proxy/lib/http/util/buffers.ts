@@ -12,6 +12,7 @@ export type HttpBuffer = {
   response: IncomingMessage
   stream: Readable
   url: string
+  urlDoesNotMatchPolicyBasedOnDomain: boolean
 }
 
 const stripPort = (url) => {

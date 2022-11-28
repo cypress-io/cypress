@@ -1,21 +1,31 @@
 export * from './types'
 
-export * from './find'
+import * as Find from './find'
 
-export * from './complexElements'
+import * as ComplexElements from './complexElements'
 
-export * from './shadow'
+import * as ShadowElements from './shadow'
 
-export * from './elementHelpers'
+import * as ElementHelpers from './elementHelpers'
 
-export * from './nativeProps'
+import * as NativeProps from './nativeProps'
 
-export * from './input'
+import * as InputElements from './input'
 
-export * from './contentEditable'
+import * as ContentEditable from './contentEditable'
 
-export * from './detached'
+import * as DetachedElements from './detached'
 
-export * from './utils'
+import * as ElementUtils from './utils'
 
-export * from '../visibility'
+export default {
+  ...Find,
+  ...ComplexElements,
+  ...ShadowElements,
+  ...ElementHelpers,
+  ...NativeProps,
+  ...InputElements,
+  ...ContentEditable,
+  ...DetachedElements,
+  ...ElementUtils,
+}

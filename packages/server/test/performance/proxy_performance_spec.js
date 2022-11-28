@@ -1,5 +1,9 @@
 require('../spec_helper')
 
+const { makeDataContext, setCtx, getCtx } = require('../../lib/makeDataContext')
+
+setCtx(makeDataContext({}))
+
 const cp = require('child_process')
 const fse = require('fs-extra')
 const os = require('os')
@@ -9,16 +13,15 @@ const { expect } = require('chai')
 const debug = require('debug')('test:proxy-performance')
 const DebuggingProxy = require('@cypress/debugging-proxy')
 const HarCapturer = require('chrome-har-capturer')
-const performance = require('../support/helpers/performance')
+const performance = require('@tooling/system-tests/lib/performance')
 const Promise = require('bluebird')
 const sanitizeFilename = require('sanitize-filename')
-const { createRoutes } = require(`${root}lib/routes`)
-const { SpecsStore } = require(`${root}/lib/specs-store`)
+const { createRoutes } = require(`../../lib/routes`)
 
 process.env.CYPRESS_INTERNAL_ENV = 'development'
 
 const CA = require('@packages/https-proxy').CA
-const Config = require('../../lib/config')
+const { setupFullConfigWithDefaults } = require('@packages/config')
 const { ServerE2E } = require('../../lib/server-e2e')
 const { SocketE2E } = require('../../lib/socket-e2e')
 const { _getArgs } = require('../../lib/browsers/chrome')
@@ -220,9 +223,9 @@ const runBrowserTest = (urlUnderTest, testCase) => {
   }
 
   if (testCase.cyIntercept) {
-    cyServer._onDomainSet(urlUnderTest)
+    cyServer.remoteStates.set(urlUnderTest)
   } else {
-    cyServer._onDomainSet('<root>')
+    cyServer.remoteStates.set('<root>')
   }
 
   let cmd = CHROME_PATH
@@ -331,6 +334,10 @@ describe('Proxy Performance', function () {
   })
 
   before(function () {
+    setCtx(makeDataContext({}))
+
+    const getFilesByGlob = getCtx().file.getFilesByGlob
+
     return CA.create()
     .then((ca) => {
       return ca.generateServerCertificateKeys('localhost')
@@ -343,9 +350,12 @@ describe('Proxy Performance', function () {
           https: { cert, key },
         }).start(HTTPS_PROXY_PORT),
 
-        Config.set({
+        setupFullConfigWithDefaults({
           projectRoot: '/tmp/a',
-        }).then((config) => {
+          config: {
+            supportFile: false,
+          },
+        }, getFilesByGlob).then((config) => {
           config.port = CY_PROXY_PORT
 
           // turn off morgan
@@ -356,8 +366,8 @@ describe('Proxy Performance', function () {
           return cyServer.open(config, {
             SocketCtor: SocketE2E,
             createRoutes,
-            specsStore: new SpecsStore({}, 'e2e'),
             testingType: 'e2e',
+            getCurrentBrowser: () => null,
           })
         }),
       )
@@ -365,7 +375,8 @@ describe('Proxy Performance', function () {
   })
 
   URLS_UNDER_TEST.map((urlUnderTest) => {
-    describe(urlUnderTest, function () {
+    // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23214
+    describe.skip(urlUnderTest, function () {
       let baseline
       const testCases = _.cloneDeep(TEST_CASES)
 

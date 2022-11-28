@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "typescript": "4.6.3"
+  },
+  "_cySkipDepInstall": true
+}

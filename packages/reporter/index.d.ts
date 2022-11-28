@@ -16,3 +16,8 @@ declare namespace Cypress {
     percySnapshot (): Chainable
   }
 }
+
+declare module "*.svg" {
+  const content: any;
+  export default content;
+}

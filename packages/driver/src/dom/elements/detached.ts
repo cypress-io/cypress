@@ -1,5 +1,5 @@
 import $window from '../window'
-import * as $document from '../document'
+import $document from '../document'
 import $ from 'jquery'
 import $jquery from '../jquery'
 
@@ -9,7 +9,7 @@ export const isDetached = ($el) => {
 
 export const isAttached = function ($el) {
   // if we're being given window
-  // then these are automaticallyed attached
+  // then these are automatically attached
   if ($window.isWindow($el)) {
     // there is a code path when forcing focus and
     // blur on the window where this check is necessary.
@@ -44,10 +44,10 @@ export const isAttached = function ($el) {
   })
 }
 
-export const isDetachedEl = (el: HTMLElement) => {
+export const isDetachedEl = (el: HTMLElement | JQuery<any>) => {
   return !isAttachedEl(el)
 }
 
-export const isAttachedEl = function (el: HTMLElement) {
+export const isAttachedEl = function (el: HTMLElement | JQuery<any>) {
   return isAttached($(el))
 }

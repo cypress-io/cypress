@@ -18,6 +18,8 @@ const expect = require('chai').expect
 const snapshot = require('../../support/snapshot')
 
 const cwd = process.cwd()
+const execPath = process.execPath
+const nodeVersion = process.versions.node
 
 const defaultBinaryDir = '/default/binary/dir'
 
@@ -40,6 +42,9 @@ describe('lib/exec/spawn', function () {
         pipe: sinon.stub().returns(undefined),
         on: sinon.stub().returns(undefined),
       },
+      kill: sinon.stub(),
+      // expected by sinon
+      cancel: sinon.stub(),
     }
 
     // process.stdin is both an event emitter and a readable stream
@@ -63,6 +68,15 @@ describe('lib/exec/spawn', function () {
         [46454:0702/140217.292555:ERROR:gles2_cmd_decoder.cc(4439)] [.RenderWorker-0x7f8bc5815a00.GpuRasterization]GL ERROR :GL_INVALID_FRAMEBUFFER_OPERATION : glDrawElements: framebuffer incomplete
         [46454:0702/140217.292584:ERROR:gles2_cmd_decoder.cc(4439)] [.RenderWorker-0x7f8bc5815a00.GpuRasterization]GL ERROR :GL_INVALID_FRAMEBUFFER_OPERATION : glClear: framebuffer incomplete
         [46454:0702/140217.292612:ERROR:gles2_cmd_decoder.cc(4439)] [.RenderWorker-0x7f8bc5815a00.GpuRasterization]GL ERROR :GL_INVALID_FRAMEBUFFER_OPERATION : glDrawElements: framebuffer incomplete'
+
+        [1957:0406/160550.146820:ERROR:bus.cc(392)] Failed to connect to the bus: Failed to connect to socket /var/run/dbus/system_bus_socket: No such file or directory
+        [1957:0406/160550.147994:ERROR:bus.cc(392)] Failed to connect to the bus: Address does not contain a colon
+
+        [3801:0606/152837.383892:ERROR:cert_verify_proc_builtin.cc(681)] CertVerifyProcBuiltin for www.googletagmanager.com failed:
+        ----- Certificate i=0 (OU=Cypress Proxy Server Certificate,O=Cypress Proxy CA,L=Internet,ST=Internet,C=Internet,CN=www.googletagmanager.com) -----
+        ERROR: No matching issuer found
+
+        objc[60540]: Class WebSwapCGLLayer is implemented in both /System/Library/Frameworks/WebKit.framework/Versions/A/Frameworks/WebCore.framework/Versions/A/Frameworks/libANGLE-shared.dylib (0x7ffa5a006318) and /{path/to/app}/node_modules/electron/dist/Electron.app/Contents/Frameworks/Electron Framework.framework/Versions/A/Libraries/libGLESv2.dylib (0x10f8a89c8). One of the two will be used. Which one is undefined.
       `
 
       const lines = _
@@ -98,6 +112,10 @@ describe('lib/exec/spawn', function () {
           '--foo',
           '--cwd',
           cwd,
+          '--userNodePath',
+          execPath,
+          '--userNodeVersion',
+          nodeVersion,
         ], {
           detached: false,
           stdio: ['inherit', 'inherit', 'pipe'],
@@ -122,6 +140,10 @@ describe('lib/exec/spawn', function () {
           '--foo',
           '--cwd',
           cwd,
+          '--userNodePath',
+          execPath,
+          '--userNodeVersion',
+          nodeVersion,
         ]
 
         expect(args).to.deep.equal(['/path/to/cypress', expectedCliArgs])
@@ -142,6 +164,10 @@ describe('lib/exec/spawn', function () {
           '--foo',
           '--cwd',
           cwd,
+          '--userNodePath',
+          execPath,
+          '--userNodeVersion',
+          nodeVersion,
         ], {
           detached: false,
           stdio: ['inherit', 'inherit', 'pipe'],
@@ -163,6 +189,10 @@ describe('lib/exec/spawn', function () {
           '--foo',
           '--cwd',
           cwd,
+          '--userNodePath',
+          execPath,
+          '--userNodeVersion',
+          nodeVersion,
         ], {
           detached: false,
           stdio: ['inherit', 'inherit', 'pipe'],

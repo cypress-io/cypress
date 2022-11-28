@@ -2,7 +2,7 @@ require('../spec_helper')
 
 const os = require('os')
 const path = require('path')
-const R = require('ramda')
+const _ = require('lodash')
 const snapshot = require('../support/snapshot')
 const Promise = require('bluebird')
 const tmp = Promise.promisifyAll(require('tmp'))
@@ -27,11 +27,10 @@ describe('cypress', function () {
       sinon.stub(open, 'start').resolves()
     })
 
-    const getCallArgs = R.path(['lastCall', 'args', 0])
     const getStartArgs = () => {
       expect(open.start).to.be.called
 
-      return getCallArgs(open.start)
+      return _.get(open.start, ['lastCall', 'args', 0])
     }
 
     it('calls open#start, passing in options', function () {
@@ -52,18 +51,6 @@ describe('cypress', function () {
       .then(getStartArgs)
       .then((args) => {
         expect(args).to.deep.eq({ config: JSON.stringify(config) })
-      })
-    })
-
-    it('passes configFile: false', () => {
-      const opts = {
-        configFile: false,
-      }
-
-      return cypress.open(opts)
-      .then(getStartArgs)
-      .then((args) => {
-        expect(args).to.deep.eq(opts)
       })
     })
   })
@@ -100,7 +87,6 @@ describe('cypress', function () {
       })
     })
 
-    const getCallArgs = R.path(['lastCall', 'args', 0])
     const normalizeCallArgs = (args) => {
       expect(args.outputPath).to.equal(outputPath)
       delete args.outputPath
@@ -110,7 +96,7 @@ describe('cypress', function () {
     const getStartArgs = () => {
       expect(run.start).to.be.called
 
-      return normalizeCallArgs(getCallArgs(run.start))
+      return normalizeCallArgs(_.get(run.start, ['lastCall', 'args', 0]))
     }
 
     it('calls run#start, passing in options', () => {
@@ -152,18 +138,6 @@ describe('cypress', function () {
 
     it('resolves with contents of tmp file', () => {
       return cypress.run().then(snapshot)
-    })
-
-    it('passes configFile: false', () => {
-      const opts = {
-        configFile: false,
-      }
-
-      return cypress.run(opts)
-      .then(getStartArgs)
-      .then((args) => {
-        expect(args).to.deep.eq(opts)
-      })
     })
 
     it('rejects if project is an empty string', () => {
@@ -225,30 +199,12 @@ describe('cypress', function () {
         })
       })
 
-      it('coerces --config-file false to boolean', async () => {
-        const args = 'cypress run --config-file false'.split(' ')
+      it('coerces --config-file cypress.config.js to string', async () => {
+        const args = 'cypress run --config-file cypress.config.js'.split(' ')
         const options = await cypress.cli.parseRunArguments(args)
 
         expect(options).to.deep.equal({
-          configFile: false,
-        })
-      })
-
-      it('coerces --config-file cypress.json to string', async () => {
-        const args = 'cypress run --config-file cypress.json'.split(' ')
-        const options = await cypress.cli.parseRunArguments(args)
-
-        expect(options).to.deep.equal({
-          configFile: 'cypress.json',
-        })
-      })
-
-      it('parses config file false', async () => {
-        const args = 'cypress run --config-file false'.split(' ')
-        const options = await cypress.cli.parseRunArguments(args)
-
-        expect(options).to.deep.equal({
-          configFile: false,
+          configFile: 'cypress.config.js',
         })
       })
 

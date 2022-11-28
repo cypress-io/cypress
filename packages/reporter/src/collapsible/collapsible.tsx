@@ -3,6 +3,8 @@ import React, { Component, CSSProperties, MouseEvent, ReactNode, RefObject } fro
 
 import { onEnterOrSpace } from '../lib/util'
 
+import ChevronIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/chevron-down-small_x8.svg'
+
 interface Props {
   isOpen?: boolean
   headerClass?: string
@@ -11,6 +13,7 @@ interface Props {
   headerExtras?: ReactNode
   containerRef?: RefObject<HTMLDivElement>
   contentClass?: string
+  hideExpander: boolean
 }
 
 interface State {
@@ -23,6 +26,7 @@ class Collapsible extends Component<Props, State> {
     headerClass: '',
     headerStyle: {},
     contentClass: '',
+    hideExpander: false,
   }
 
   constructor (props: Props) {
@@ -54,7 +58,7 @@ class Collapsible extends Component<Props, State> {
               style={this.props.headerStyle}
               tabIndex={-1}
             >
-              <i className='collapsible-indicator fa-fw fas' />
+              {!this.props.hideExpander && <ChevronIcon className='collapsible-indicator' />}
               <span className='collapsible-header-text'>
                 {this.props.header}
               </span>
@@ -62,9 +66,11 @@ class Collapsible extends Component<Props, State> {
           </div>
           {this.props.headerExtras}
         </div>
-        <div className={cs('collapsible-content', this.props.contentClass)}>
-          {this.state.isOpen && this.props.children}
-        </div>
+        {this.state.isOpen && (
+          <div className={cs('collapsible-content', this.props.contentClass)}>
+            {this.props.children}
+          </div>
+        )}
       </div>
     )
   }

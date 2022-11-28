@@ -1,9 +1,10 @@
-import type { Url } from 'url'
+import { URL, Url } from 'url'
 import debugModule from 'debug'
 import minimatch from 'minimatch'
 import Forge from 'node-forge'
 import fs from 'fs-extra'
 import { clientCertificateStore } from './agent'
+
 const { pki, asn1, pkcs12, util } = Forge
 
 const debug = debugModule('cypress:network:client-certificates')
@@ -203,7 +204,7 @@ export function loadClientCertificateConfig (config) {
     clientCertificateStore.clear()
 
     // The basic validation of the certificate configuration has already been done by this point
-    // within the 'isValidClientCertificatesSet' function within packages/server/lib/util/validation.js
+    // within the 'isValidClientCertificatesSet' function within packages/config/src/validation.js
     if (clientCertificates) {
       clientCertificates.forEach((item) => {
         debug(`loading client cert at index ${index}`)
@@ -218,7 +219,7 @@ export function loadClientCertificateConfig (config) {
 
               try {
                 pki.certificateFromPem(caRaw)
-              } catch (error) {
+              } catch (error: any) {
                 throw new Error(`Cannot parse CA cert: ${error.message}`)
               }
 
@@ -251,7 +252,7 @@ export function loadClientCertificateConfig (config) {
 
             try {
               pemParsed = pki.certificateFromPem(pemRaw)
-            } catch (error) {
+            } catch (error: any) {
               throw new Error(`Cannot parse PEM cert: ${error.message}`)
             }
 
@@ -271,7 +272,7 @@ export function loadClientCertificateConfig (config) {
               if (passphrase) {
                 if (!pki.decryptRsaPrivateKey(pemKeyRaw, passphrase)) {
                   throw new Error(
-                    'Cannot decrypt PEM key with supplied passphrase (check the passphrase file content and that it doesn\'t have unexpected whitespace at the end)',
+                    `Cannot decrypt PEM key with supplied passphrase (check the passphrase file content and that it doesn't have unexpected whitespace at the end)`,
                   )
                 }
               } else {
@@ -279,7 +280,7 @@ export function loadClientCertificateConfig (config) {
                   throw new Error('Cannot load PEM key')
                 }
               }
-            } catch (error) {
+            } catch (error: any) {
               throw new Error(`Cannot parse PEM key: ${error.message}`)
             }
 
@@ -332,7 +333,7 @@ export function loadClientCertificateConfig (config) {
         `loaded client certificates for ${clientCertificateStore.getCertCount()} URL(s)`,
       )
     }
-  } catch (e) {
+  } catch (e: any) {
     debug(
       `Failed to load client certificate for clientCertificates[${index}]: ${e.message} ${e.stack}`,
     )
@@ -346,12 +347,16 @@ export function loadClientCertificateConfig (config) {
 function loadBinaryFromFile (filepath: string): Buffer {
   debug(`loadCertificateFile: ${filepath}`)
 
+  // TODO: update to async
+  // eslint-disable-next-line no-restricted-syntax
   return fs.readFileSync(filepath)
 }
 
 function loadTextFromFile (filepath: string): string {
   debug(`loadPassphraseFile: ${filepath}`)
 
+  // TODO: update to async
+  // eslint-disable-next-line no-restricted-syntax
   return fs.readFileSync(filepath, 'utf8').toString()
 }
 
@@ -363,7 +368,7 @@ function extractSubjectFromPem (pem): string {
     return pem.subject.attributes
     .map((attr) => [attr.shortName, attr.value].join('='))
     .join(', ')
-  } catch (e) {
+  } catch (e: any) {
     throw new Error(`Unable to extract subject from PEM file: ${e.message}`)
   }
 }
@@ -377,7 +382,7 @@ function loadPfx (pfx: Buffer, passphrase: string | undefined) {
     const certAsn1 = asn1.fromDer(certDer)
 
     return pkcs12.pkcs12FromAsn1(certAsn1, passphrase)
-  } catch (e) {
+  } catch (e: any) {
     debug(`loadPfx fail: ${e.message} ${e.stackTrace}`)
     throw new Error(`Unable to load PFX file: ${e.message}`)
   }
@@ -391,7 +396,7 @@ function extractSubjectFromPfx (pfx) {
     const certs = pfx.getBags({ bagType: pki.oids.certBag })[pki.oids.certBag].map((item) => item.cert)
 
     return certs[0].subject.attributes.map((attr) => [attr.shortName, attr.value].join('=')).join(', ')
-  } catch (e) {
+  } catch (e: any) {
     throw new Error(`Unable to extract subject from PFX file: ${e.message}`)
   }
 }

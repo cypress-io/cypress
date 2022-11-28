@@ -7,7 +7,7 @@ import type {
 } from './external-types'
 
 export type FixtureOpts = {
-  encoding: string
+  encoding: string | null
   filePath: string
 }
 

@@ -2,13 +2,16 @@ import cs from 'classnames'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React from 'react'
-import { FileDetails } from '@packages/ui-components'
+import { FileDetails } from '@packages/types'
 
 import appState, { AppState } from '../lib/app-state'
 import Command from '../commands/command'
 import Collapsible from '../collapsible/collapsible'
 import HookModel, { HookName } from './hook-model'
-import FileOpener from '../lib/file-opener'
+
+import ArrowRightIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/arrow-right_x16.svg'
+import OpenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/technology-code-editor_x16.svg'
+import OpenFileInIDE from '../lib/open-file-in-ide'
 
 export interface HookHeaderProps {
   model: HookModel
@@ -16,8 +19,9 @@ export interface HookHeaderProps {
 }
 
 const HookHeader = ({ model, number }: HookHeaderProps) => (
-  <span className='hook-name'>
-    {model.hookName} {number && `(${number})`} <span className='hook-failed-message'>(failed)</span>
+  <span className='hook-name' data-cy={`hook-name-${model.hookName}`}>
+    {model.hookName} {number && `(${number})`}
+    {model.failed && <span className='hook-failed-message'> (failed)</span>}
   </span>
 )
 
@@ -25,11 +29,13 @@ export interface HookOpenInIDEProps {
   invocationDetails: FileDetails
 }
 
-const HookOpenInIDE = ({ invocationDetails }: HookOpenInIDEProps) => (
-  <FileOpener fileDetails={invocationDetails} className='hook-open-in-ide'>
-    <i className='fas fa-external-link-alt fa-sm' /> <span>Open in IDE</span>
-  </FileOpener>
-)
+const HookOpenInIDE = ({ invocationDetails }: HookOpenInIDEProps) => {
+  return (
+    <OpenFileInIDE fileDetails={invocationDetails} className='hook-open-in-ide'>
+      <OpenIcon viewBox="0 0 16 16" width="12" height="12" /> <span>Open in IDE</span>
+    </OpenFileInIDE>
+  )
+}
 
 const StudioNoCommands = () => (
   <li className='command command-name-get command-state-pending command-type-parent studio-prompt'>
@@ -42,7 +48,7 @@ const StudioNoCommands = () => (
             </span>
           </span>
           <span className='command-controls'>
-            <i className='fa fa-arrow-right' />
+            <ArrowRightIcon />
           </span>
         </div>
       </div>
@@ -60,8 +66,8 @@ const Hook = observer(({ model, showNumber }: HookProps) => (
     <Collapsible
       header={<HookHeader model={model} number={showNumber ? model.hookNumber : undefined} />}
       headerClass='hook-header'
-      headerExtras={model.invocationDetails && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
-      isOpen={true}
+      headerExtras={model.invocationDetails && Cypress.testingType !== 'component' && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
+      isOpen
     >
       <ul className='commands-container'>
         {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}

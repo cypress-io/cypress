@@ -12,6 +12,7 @@ const debugXvfb = Debug('cypress:xvfb')
 debug.Debug = debugXvfb.Debug = Debug
 
 const xvfbOptions = {
+  displayNum: process.env.XVFB_DISPLAY_NUM,
   timeout: 30000, // milliseconds
   // need to explicitly define screen otherwise electron will crash
   // https://github.com/cypress-io/cypress/issues/6184

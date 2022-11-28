@@ -9,7 +9,7 @@ const debug = debugModule('cypress:server:ensure-url')
 
 type RetryOptions = {
   retryIntervals: number[]
-  onRetry: Function
+  onRetry(o: {delay: number, attempt: number, remaining: number}): void
 }
 
 export const retryIsListening = (urlStr: string, options: RetryOptions) => {

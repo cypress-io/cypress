@@ -5,9 +5,9 @@ let fs = require('fs-extra')
 const path = require('path')
 const gulp = require('gulp')
 const Promise = require('bluebird')
-const meta = require('./meta')
 const la = require('lazy-ass')
 const check = require('check-more-types')
+
 const uploadUtils = require('./util/upload')
 
 fs = Promise.promisifyAll(fs)
@@ -15,52 +15,42 @@ fs = Promise.promisifyAll(fs)
 // TODO: refactor this
 // system expects desktop application to be inside a file
 // with this name
-const zipName = 'cypress.zip'
+const zipName = uploadUtils.S3Configuration.binaryZipName
 
 module.exports = {
   zipName,
 
-  getPublisher () {
-    return uploadUtils.getPublisher(this.getAwsObj)
-  },
-
-  getAwsObj () {
-    return uploadUtils.getS3Credentials()
+  async getPublisher () {
+    return uploadUtils.getPublisher()
   },
 
   // returns desktop folder for a given folder without platform
   // something like desktop/0.20.1
-  getUploadeVersionFolder (aws, version) {
+  getUploadVersionFolder (aws, version) {
     la(check.unemptyString(aws.folder), 'aws object is missing desktop folder', aws.folder)
     const dirName = [aws.folder, version].join('/')
 
     return dirName
   },
 
-  getFullUploadName ({ folder, version, platformArch, name }) {
-    la(check.unemptyString(folder), 'missing folder', folder)
-    la(check.semver(version), 'missing or invalid version', version)
-    la(check.unemptyString(name), 'missing file name', name)
+  // store uploaded application in subfolders by version and platform
+  // something like desktop/0.20.1/darwin-x64/
+  getFullUploadPath (options) {
+    let { folder, version, platformArch, name } = options
+
+    if (!folder) {
+      folder = uploadUtils.S3Configuration.releaseFolder
+    }
+
+    la(check.unemptyString(folder), 'missing folder', options)
+    la(check.semver(version), 'missing or invalid version', options)
+    la(check.unemptyString(name), 'missing file name', options)
     la(uploadUtils.isValidPlatformArch(platformArch),
       'invalid platform and arch', platformArch)
 
     const fileName = [folder, version, platformArch, name].join('/')
 
     return fileName
-  },
-
-  // store uploaded application in subfolders by platform and version
-  // something like desktop/0.20.1/darwin-x64/
-  getUploadDirName ({ version, platform }) {
-    const aws = this.getAwsObj()
-    const platformArch = uploadUtils.getUploadNameByOsAndArch(platform)
-
-    const versionFolder = this.getUploadeVersionFolder(aws, version)
-    const dirName = [versionFolder, platformArch, null].join('/')
-
-    console.log('target directory %s', dirName)
-
-    return dirName
   },
 
   getManifestUrl (folder, version, uploadOsName) {
@@ -86,19 +76,18 @@ module.exports = {
         // keep these for compatibility purposes
         // although they are now deprecated
         mac: getUrl('darwin-x64'),
-        win: getUrl('win32-ia32'),
         linux64: getUrl('linux-x64'),
 
         // start adding the new ones
         // using node's platform
         darwin: getUrl('darwin-x64'),
-        win32: getUrl('win32-ia32'),
         linux: getUrl('linux-x64'),
 
         // the new-new names that use platform and arch as is
         'darwin-x64': getUrl('darwin-x64'),
+        'darwin-arm64': getUrl('darwin-arm64'),
         'linux-x64': getUrl('linux-x64'),
-        'win32-ia32': getUrl('win32-ia32'),
+        'linux-arm64': getUrl('linux-arm64'),
         'win32-x64': getUrl('win32-x64'),
       },
     }
@@ -113,79 +102,67 @@ module.exports = {
   },
 
   s3Manifest (version) {
-    const publisher = this.getPublisher()
+    return this.getPublisher()
+    .then((publisher) => {
+      const { releaseFolder } = uploadUtils.S3Configuration
 
-    const aws = this.getAwsObj()
+      const headers = {
+        'Cache-Control': 'no-cache',
+      }
+      let manifest = null
 
-    const headers = {}
+      return new Promise((resolve, reject) => {
+        return this.createRemoteManifest(releaseFolder, version)
+        .then((src) => {
+          manifest = src
 
-    headers['Cache-Control'] = 'no-cache'
+          return gulp.src(src)
+          .pipe(rename((p) => {
+            p.dirname = `${releaseFolder}/${p.dirname}`
 
-    let manifest = null
-
-    return new Promise((resolve, reject) => {
-      return this.createRemoteManifest(aws.folder, version)
-      .then((src) => {
-        manifest = src
-
-        return gulp.src(src)
-        .pipe(rename((p) => {
-          p.dirname = `${aws.folder}/${p.dirname}`
-
-          return p
-        })).pipe(gulpDebug())
-        .pipe(publisher.publish(headers))
-        .pipe(awspublish.reporter())
-        .on('error', reject)
-        .on('end', resolve)
+            return p
+          })).pipe(gulpDebug())
+          .pipe(publisher.publish(headers))
+          .pipe(awspublish.reporter())
+          .on('error', reject)
+          .on('end', resolve)
+        })
+      }).finally(() => {
+        return fs.removeAsync(manifest)
       })
-    }).finally(() => {
-      return fs.removeAsync(manifest)
     })
   },
 
-  toS3 ({ zipFile, version, platform }) {
+  toS3 ({ file, uploadPath }) {
     console.log('#uploadToS3 ⏳')
+    console.log('uploading', file, 'to', uploadPath)
 
-    la(check.unemptyString(version), 'expected version string', version)
-    la(check.unemptyString(zipFile), 'expected zip filename', zipFile)
-    la(check.extension('zip', zipFile),
-      'zip filename should end with .zip', zipFile)
+    la(check.unemptyString(file), 'missing file to upload', file)
+    la(fs.existsSync(file), 'cannot find file', file)
+    la(check.extension(path.extname(uploadPath))(file),
+      'invalid file to upload extension', file)
 
-    la(meta.isValidPlatform(platform), 'invalid platform', platform)
+    return this.getPublisher()
+    .then((publisher) => {
+      const headers = {
+        'Cache-Control': 'no-cache',
+      }
 
-    console.log(`zip filename ${zipFile}`)
-
-    if (!fs.existsSync(zipFile)) {
-      throw new Error(`Cannot find zip file ${zipFile}`)
-    }
-
-    const upload = () => {
       return new Promise((resolve, reject) => {
-        const publisher = this.getPublisher()
-
-        const headers = {}
-
-        headers['Cache-Control'] = 'no-cache'
-
-        return gulp.src(zipFile)
+        return gulp.src(file)
         .pipe(rename((p) => {
-          // rename to standard filename zipName
-          p.basename = path.basename(zipName, p.extname)
-          p.dirname = this.getUploadDirName({ version, platform })
+          // rename to standard filename for upload
+          p.basename = path.basename(uploadPath, path.extname(uploadPath))
+          p.dirname = path.dirname(uploadPath)
 
           return p
-        })).pipe(gulpDebug())
+        }))
+        .pipe(gulpDebug())
         .pipe(publisher.publish(headers))
         .pipe(awspublish.reporter())
         .on('error', reject)
         .on('end', resolve)
       })
-    }
-
-    return upload()
-    .then(() => {
-      return uploadUtils.purgeDesktopAppFromCache({ version, platform, zipName })
     })
   },
 }

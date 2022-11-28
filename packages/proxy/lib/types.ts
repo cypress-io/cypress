@@ -12,14 +12,23 @@ export type CypressIncomingRequest = Request & {
   body?: string
   responseTimeout?: number
   followRedirect?: boolean
+  isAUTFrame: boolean
+  requestedWith?: RequestResourceType
+  credentialsLevel?: RequestCredentialLevel
 }
+
+export type RequestResourceType = 'fetch' | 'xhr'
+
+export type RequestCredentialLevel = 'same-origin' | 'include' | 'omit' | boolean
+
+export type CypressWantsInjection = 'full' | 'fullCrossOrigin' | 'partial' | false
 
 /**
  * An outgoing response to an incoming request to the Cypress web server.
  */
 export type CypressOutgoingResponse = Response & {
   isInitial: null | boolean
-  wantsInjection: 'full' | 'partial' | false
+  wantsInjection: CypressWantsInjection
   wantsSecurityRemoved: null | boolean
   body?: string | Readable
 }

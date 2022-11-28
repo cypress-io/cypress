@@ -21,6 +21,7 @@ module.exports = {
     },
     disableHardwareAcceleration () {},
     async whenReady () {},
+    once () {},
   },
   systemPreferences: {
     isDarkMode () {},

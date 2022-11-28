@@ -2,18 +2,31 @@ $cy-tooltip-class: 'cy-tooltip';
 @import '../../node_modules/@cypress/react-tooltip/dist/tooltip.scss';
 
 .cy-tooltip {
+  background-color: $gray-50;
+  border-color: $gray-50;
+  color: $gray-1000;
   font-family: $font-sans;
   word-wrap: break-word;
-  background-color: #242424;
+
+  .cy-tooltip-arrow {
+    overflow: visible;
+    svg {
+      fill: $gray-50;
+      max-width: 12px;
+      max-height: 10px;
+      overflow: visible;
+      stroke: $gray-50;
+    }
+  }
 
   .kbd {
-    color:rgb(243, 243, 243);
+    color: $gray-1000;
     padding: 1px 4px;
     font-weight: 600;
     border-radius: 2px;
-    background-color: #282828;
-    border: 1px solid black;
-    box-shadow: 0 0.5px 0 1px rgb(95, 95, 95);
+    background-color: $gray-50;
+    border: 1px solid $white;
+    box-shadow: 0 0.5px 0 1px $gray-300;
     font-family: monospace, monospace;
   }
 

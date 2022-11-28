@@ -4,13 +4,13 @@
   min-height: 0; // needed for firefox or else scrolling gets funky
 
   .container {
-    box-shadow: 0 1px 2px #aaa;
+    background-color: $gray-1000;
     flex-grow: 2;
     overflow-y: auto;
   }
 
   .wrap {
-    box-shadow: 0 1px 2px #aaa;
+    border-bottom: 1px solid $gray-900;
     margin-bottom: 40px;
     padding-left: 0;
     width: 100%;
@@ -21,12 +21,12 @@
   }
 
   .no-tests {
-    background-color: #f5f5f5;
+    background-color: $gray-1000;
     min-height: 20px;
     padding: 24px;
 
     h2 {
-      color: #e94f5f;
+      color: $red-400;
       font-size: 1.3em;
       font-weight: 500;
       line-height: 1.4;
@@ -34,7 +34,7 @@
     }
 
     h3 {
-      color: #3386d4;
+      color: $indigo-400;
       font-size: 1.2em;
       font-weight: 500;
       line-height: 1.4;
@@ -46,17 +46,13 @@
       font-size: 1.1em;
 
       &.text-muted {
-        color: #b4b5bc;
+        color: $gray-600;
       }
     }
 
     a {
-      color: #3386d4;
+      color: $indigo-300;
       cursor: pointer;
-    }
-
-    i {
-      margin-right: 5px;
     }
 
     hr {
@@ -64,44 +60,52 @@
       margin-bottom: 1.6em;
       border: none;
       height: 1px;
-      color: #dadade;
-      background-color: #dadade;
+      color: $gray-900;
+      background-color: $gray-900;
     }
 
-    .open-studio,
-    .open-studio-desc {
-      display: none;
+    svg {
+      margin-right: 5px;
+      vertical-align: text-top;
+
+      &.warning-icon {
+        margin-top: 2px;
+      }
+
+      .icon-light {
+        fill: $indigo-600;
+      }
     }
   }
 
-  &.experimental-studio-enabled .no-tests .open-studio,
-  &.experimental-studio-enabled .no-tests .open-studio-desc {
+  .open-studio,
+  .open-studio-desc {
     display: inline;
   }
 
   .runnable {
     width: 100%;
-    color: #6c6c6c;
-    background-color: #fff;
+    color: $gray-400;
+    background-color: $gray-1000;
     overflow: auto;
     line-height: 18px;
     padding-left: 0;
 
     .runnable-wrapper {
-      border-left: 5px solid transparent;
-      padding: 0;
+      border-left: 4px solid transparent;
+      padding: 0 0 0 4px;
 
       .collapsible-header {
         &:focus {
           .collapsible-header-inner {
-            background-color: #f7f8f9;
+            background-color: $gray-1000;
             cursor: pointer;
           }
         }
 
         .collapsible-header-inner {
           &:hover {
-            background-color: #f7f8f9;
+            background-color: $gray-900;
             cursor: pointer;
           }
 
@@ -132,13 +136,7 @@
       }
 
       .hooks-container, .runnable-err-wrapper {
-        border-color: #828282;
-      }
-    }
-
-    &.runnable-active {
-      .runnable-state {
-        @include runnable-state-active;
+        border-color: $gray-500;
       }
     }
 
@@ -147,93 +145,62 @@
       line-height: 18px;
       margin-right: 5px;
       min-width: 12px;
-      height: 18px;
       text-align: center;
       font-size: 11px;
     }
 
-    &.suite .collapsible-indicator  {
-      padding-left: 2px;
-      font-size: 14px;
-      color: #bbbcbd;
-    }
-
-
-    &.test.runnable-processing  {
-      .runnable-state {
-        @include runnable-state-processing;
+    &.suite .collapsible-indicator {
+      margin-left: 2px;
+      .icon-dark {
+        stroke: $gray-800;
       }
     }
 
     &.runnable-failed > div > .runnable-wrapper,
     &.runnable-failed > div > .runnable-instruments {
-      border-left: 5px solid $fail;
-
-      .fa-exclamation-triangle.has-command-failures {
-        visibility: visible;
-      }
+      border-left: 4px solid $fail;
     }
 
     &.runnable-pending > div > .runnable-wrapper,
     &.runnable-pending > div > .runnable-instruments {
-      border-left: 5px solid lighten($pending, 25%);
+      border-left: 4px solid $pending;
       padding-bottom: 0;
     }
 
     &.runnable-passed > div > .runnable-wrapper,
     &.runnable-passed > div > .runnable-instruments {
-      border-left: 5px solid $pass;
+      border-left: 4px solid $pass;
     }
 
     .runnable-retried > div > .runnable-wrapper,
     .runnable-retried > div > .runnable-instruments {
-      border-left: 5px solid $retried;
+      border-left: 4px solid $retried;
     }
 
     &.runnable-studio.runnable-passed > div > .runnable-wrapper,
     &.runnable-studio.runnable-passed > div > .runnable-instruments {
-      border-left: 5px solid #3386d4;
+      border-left: 4px solid $purple-400;
     }
 
     &.runnable-skipped > .runnable-wrapper {
-      .runnable-state {
-        @include runnable-state-skipped;
-      }
-
       .runnable-title {
-        color: #aaa;
+        color: $gray-600;
       }
     }
 
     &.runnable-skipped > div > .runnable-wrapper,
     &.runnable-skipped > div > .runnable-instruments {
-      border-left: 5px solid #9a9aaa;
-    }
-
-    &.test.runnable-failed {
-      .runnable-state {
-        @include runnable-state-failed;
-      }
+      border-left: 4px solid $gray-500;
     }
 
     &.suite > div > .runnable-wrapper {
       .runnable-title {
-        color: #111;
+        color: $gray-50;
         font-size: 13px;
       }
     }
 
-    &.test.runnable-passed {
-      .runnable-state {
-        @include runnable-state-passed;
-      }
-    }
-
     &.test.runnable-passed.runnable-studio {
-      .runnable-state {
-        @include studio-state-passed;
-      }
-
       .studio-controls {
         display: flex;
 
@@ -244,11 +211,8 @@
     }
 
     &.test.runnable-pending {
-      .runnable-state {
-        @include runnable-state-pending;
-      }
       .runnable-title {
-        color: lighten($pending, 25%);
+        color: $indigo-300;
       }
 
       .runnable-commands-region {
@@ -265,20 +229,40 @@
         display: flex;
       }
     }
+
+    .runnable-state-icon {
+      flex-shrink: 0;
+      margin-right: 5px;
+      margin-top: 4px;
+
+      &.fa-spin {
+        .icon-light {
+          stroke: $gray-800;
+        }
+      }
+
+      &.wand-icon {
+        .icon-light {
+          fill: $purple-300;
+          stroke: $purple-300;
+        }
+      }
+    }
   }
 
   .runnable-instruments {
-    border-left: 5px solid transparent;
+    border-left: 4px solid transparent;
     padding-bottom: 5px;
   }
 
   .runnable-title {
+    font-family: $font-system;
     font-size: 12.5px;
     min-width: $reporter-contents-min-width;
     white-space: pre-line;
 
     &:focus {
-      outline: 1px dotted #6c6c6c;
+      outline: 1px dotted $gray-400;
     }
   }
 
@@ -289,7 +273,7 @@
     width: 100%;
 
     &:focus {
-      outline: 1px dotted #6c6c6c;
+      outline: 1px dotted $gray-400;
       outline-offset: 3px;
     }
   }
@@ -303,6 +287,7 @@
 
   .runnable-controls {
     float: right;
+    height: 18px;
 
     label {
       padding: 2px 4px;
@@ -310,28 +295,19 @@
 
     .runnable-controls-status {
       margin: 0 2px;
-      color: #999;
+      color: $gray-500;
       visibility: hidden;
       font-size: 15px;
     }
 
     .runnable-controls-studio {
-      color: #3386d4;
+      color: $purple-300;
       opacity: 0;
-      display: none;
     }
   }
 
   .test.runnable-failed .runnable-controls .runnable-controls-status {
     visibility: visible;
-  }
-
-  &.experimental-studio-enabled .runnable-controls .runnable-controls-studio {
-    display: inline;
-  }
-
-  &.studio-active .runnable-controls .runnable-controls-studio {
-    display: none;
   }
 
   .test .collapsible {
@@ -356,30 +332,31 @@
     display: flex;
   }
 
-  .test > .collapsible > .runnable-wrapper > .collapsible-header > .collapsible-header-inner > .collapsible-indicator {
-    display: none;
-  }
-
   .runnable-header {
-    background: #f2f2f2;
-    box-shadow: 0 2px 7px rgba(0, 0, 0, 0.25);
-    display: block;
-    font-size: 13px;
-    line-height: 24px;
-    overflow-wrap: break-word;
-    padding: 5px 10px;
-    position: sticky;
-    top: 0;
-    width: 100%;
-    z-index: 1;
+    @include inner-header;
 
-    span > span > a:before,
-    span > span > span:before {
-      @extend .#{$fa-css-prefix};
-      @extend .#{$fa-css-prefix}-file;
-      color: #bdbdbd;
-      display: inline;
-      margin-right: 5px;
+    span > span > a > svg {
+      margin-bottom: -2px;
+      margin-right: 8px;
+    }
+
+    a, a:active, a:focus, a:hover {
+      color: $gray-700;
+      font-weight: 300;
+      strong {
+        font-weight: 500;
+      }
+    }
+
+    .duration {
+      border: 1px solid $gray-900;
+      border-radius: 16px;
+      color: $gray-600;
+      float: right;
+      font-size: 12px;
+      line-height: 16px;
+      padding: 2px 6px;
+      font-variant-numeric: tabular-nums;
     }
   }
 
@@ -398,16 +375,17 @@
       }
 
       &:not(.studio-copy):active {
-        box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+        box-shadow: inset 0 3px 5px rgba($white, 0.125);
       }
     }
 
     .studio-cancel {
-      background-color: #e8e8ec;
-      color: #777;
+      color: rgba($white, 0.75);
+      cursor: pointer;
+      margin: 7px 0 0 5px;
 
       &:hover {
-        background-color: darken(#e8e8ec, 5%);
+        text-decoration: underline;
       }
     }
 
@@ -415,17 +393,14 @@
       margin-left: auto;
 
       .studio-copy {
-        color: #3386d4;
+        background-color: $indigo-50;
+        color: $indigo-500;
         display: none;
         font-size: 16px;
-        padding: 3px 10px;
-
-        i {
-          width: 15px;
-        }
+        padding: 4px 10px 2px;
 
         &:hover, &:focus {
-          color: darken(#3386d4, 5%);
+          background-color: $indigo-100;
         }
 
         &.studio-copy-success {
@@ -435,32 +410,36 @@
         &[disabled],
         &[disabled]:hover,
         &[disabled]:active {
-          color: #3386d4;
-          opacity: 0.5;
+          color: $white;
+          background-color: $gray-500;
+          cursor: not-allowed;
         }
       }
     }
 
     .studio-save {
-      background-color: #3386d4;
-      color: #fff;
+      background-color: $indigo-500;
+      color: $white;
       display: none;
       margin-left: 4px;
 
       &:hover {
-        background-color: darken(#3386d4, 10%);
+        background-color: $indigo-400;
       }
 
       &[disabled],
       &[disabled]:hover,
       &[disabled]:active {
-        background-color: #3386d4;
-        opacity: 0.5;
+        color: $white;
+        background-color: $gray-500;
+        cursor: not-allowed;
       }
     }
   }
 
   .runnable-loading {
+    font-family: $font-system;
+  
     .runnable-loading-animation {
       display: flex;
       margin: 3.5rem auto 1.5rem;
@@ -478,27 +457,27 @@
 
       div:nth-child(1) {
         animation-delay:0.1s;
-        background: #56b790;
+        background: $jade-400;
       }
 
       div:nth-child(2) {
         animation-delay:0.2s;
-        background: #4a88cc;
+        background: $indigo-400;
       }
 
       div:nth-child(3) {
         animation-delay:0.3s;
-        background: #b96162;
+        background: $red-400;
       }
 
       div:nth-child(4) {
         animation-delay:0.4s;
-        background: #e3b065;
+        background: $orange-400;
       }
 
       div:nth-child(5) {
         animation-delay:0.5s;
-        background: #a9abad;
+        background: $gray-400;
       }
 
       @keyframes scaling {

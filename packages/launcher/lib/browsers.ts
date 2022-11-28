@@ -1,15 +1,39 @@
-import { log } from './log'
+import Debug from 'debug'
 import * as cp from 'child_process'
-import type { Browser, FoundBrowser } from './types'
+import type { Browser, BrowserValidatorResult, FoundBrowser } from '@packages/types'
+import type { Readable } from 'stream'
+
+export const debug = Debug('cypress:launcher:browsers')
 
 // Chrome started exposing CDP 1.3 in 64
-const MIN_CHROME_VERSION = 64
+export const MIN_CHROME_VERSION = 64
+
 // Firefox started exposing CDP in 86
-const MIN_FIREFOX_VERSION = 86
+export const MIN_FIREFOX_VERSION = 86
+
 // Edge switched to Blink in 79
-const MIN_EDGE_VERSION = 79
+export const MIN_EDGE_VERSION = 79
+
+// Compares a detected browser's major version to its minimum supported version
+// to determine if the browser is supported by Cypress.
+export const validateMinVersion = (browser: FoundBrowser): BrowserValidatorResult => {
+  const minSupportedVersion = browser.minSupportedVersion
+  const majorVersion = browser.majorVersion
+
+  if (majorVersion && minSupportedVersion && parseInt(majorVersion) < minSupportedVersion) {
+    return {
+      isSupported: false,
+      warningMessage: `Cypress does not support running ${browser.displayName} version ${majorVersion}. To use ${browser.displayName} with Cypress, install a version of ${browser.displayName} newer than or equal to ${minSupportedVersion}.`,
+    }
+  }
+
+  return {
+    isSupported: true,
+  }
+}
 
 /** list of the browsers we can detect and use by default */
+
 export const browsers: Browser[] = [
   {
     name: 'chrome',
@@ -57,6 +81,20 @@ export const browsers: Browser[] = [
     versionRegex: /^Mozilla Firefox ([^\sab]+)$/m,
     binary: 'firefox',
     minSupportedVersion: MIN_FIREFOX_VERSION,
+    validator: (browser: FoundBrowser, platform: NodeJS.Platform): BrowserValidatorResult => {
+      // Firefox 101 and 102 on Windows features a bug that results in Cypress being unable
+      // to connect to the launched browser. A fix was first released in stable 103.
+      // See https://github.com/cypress-io/cypress/issues/22086 for related info.
+
+      if (platform === 'win32' && browser.majorVersion && ['101', '102'].includes(browser.majorVersion)) {
+        return {
+          isSupported: false,
+          warningMessage: `Cypress does not support running ${browser.displayName} version ${browser.majorVersion} on Windows due to a blocking bug in ${browser.displayName}. To use ${browser.displayName} with Cypress on Windows, install version 103 or newer.`,
+        }
+      }
+
+      return validateMinVersion(browser)
+    },
   },
   {
     name: 'firefox',
@@ -119,13 +157,17 @@ export const browsers: Browser[] = [
 ]
 
 /** starts a found browser and opens URL if given one */
+
+export type LaunchedBrowser = cp.ChildProcessByStdio<null, Readable, Readable>
+
 export function launch (
   browser: FoundBrowser,
   url: string,
+  debuggingPort: number,
   args: string[] = [],
-  defaultBrowserEnv = {},
+  browserEnv = {},
 ) {
-  log('launching browser %o', { browser, url })
+  debug('launching browser %o', { browser, url })
 
   if (!browser.path) {
     throw new Error(`Browser ${browser.name} is missing path`)
@@ -135,24 +177,26 @@ export function launch (
     args = [url].concat(args)
   }
 
-  log('spawning browser with args %o', { args })
+  debug('spawning browser with args %o', { args })
 
   // allow setting default env vars such as MOZ_HEADLESS_WIDTH
   // but only if it's not already set by the environment
-  const env = Object.assign({}, defaultBrowserEnv, process.env)
+  const env = Object.assign({}, browserEnv, process.env)
+
+  debug('spawning browser with environment %o', { env })
 
   const proc = cp.spawn(browser.path, args, { stdio: ['ignore', 'pipe', 'pipe'], env })
 
   proc.stdout.on('data', (buf) => {
-    log('%s stdout: %s', browser.name, String(buf).trim())
+    debug('%s stdout: %s', browser.name, String(buf).trim())
   })
 
   proc.stderr.on('data', (buf) => {
-    log('%s stderr: %s', browser.name, String(buf).trim())
+    debug('%s stderr: %s', browser.name, String(buf).trim())
   })
 
   proc.on('exit', (code, signal) => {
-    log('%s exited: %o', browser.name, { code, signal })
+    debug('%s exited: %o', browser.name, { code, signal })
   })
 
   return proc

@@ -4,13 +4,11 @@ import { expect } from 'chai'
 import 'sinon-chai'
 
 import _ from 'lodash'
-import path from 'path'
 import Promise from 'bluebird'
 import { EventEmitter } from 'events'
 import { BrowserWindow } from 'electron'
 import * as Windows from '../../../lib/gui/windows'
-import savedState from '../../../lib/saved_state'
-import { getPathToDesktopIndex } from '@packages/resolve-dist'
+import * as savedState from '../../../lib/saved_state'
 
 const DEFAULT_USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0 Chrome/59.0.3071.115 Electron/1.8.2 Safari/537.36'
 
@@ -43,8 +41,9 @@ describe('lib/gui/windows', () => {
 
   context('.open', () => {
     it('sets default options', function () {
-      const options: Windows.WindowOptions = {
+      const options: Windows.WindowOpenOptions = {
         type: 'INDEX',
+        url: 'foo',
       }
 
       return Windows.open('/path/to/project', options, () => this.win)
@@ -54,14 +53,9 @@ describe('lib/gui/windows', () => {
           width: 600,
           type: 'INDEX',
           show: true,
-          url: getPathToDesktopIndex(),
         })
 
-        expect(options.webPreferences).to.include({
-          preload: path.resolve('lib', 'ipc', 'ipc.js'),
-        })
-
-        expect(win.loadURL).to.be.calledWith(getPathToDesktopIndex())
+        expect(win.loadURL).to.be.calledWith('foo')
       })
     })
   })
@@ -93,7 +87,7 @@ describe('lib/gui/windows', () => {
           height: 'someHeight',
           x: 'anX',
           y: 'aY',
-          devTools: 'whatsUpWithDevTools',
+          devTools: 'whatsUpwithInternalDevTools',
         }
       })
     })
@@ -170,7 +164,7 @@ describe('lib/gui/windows', () => {
       return Promise
       .delay(100)
       .then(() => {
-        expect(this.state.set).to.be.calledWith({ whatsUpWithDevTools: true })
+        expect(this.state.set).to.be.calledWith({ whatsUpwithInternalDevTools: true })
       })
     })
 
@@ -181,7 +175,7 @@ describe('lib/gui/windows', () => {
       return Promise
       .delay(100)
       .then(() => {
-        expect(this.state.set).to.be.calledWith({ whatsUpWithDevTools: false })
+        expect(this.state.set).to.be.calledWith({ whatsUpwithInternalDevTools: false })
       })
     })
   })

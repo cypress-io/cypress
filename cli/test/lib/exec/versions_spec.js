@@ -18,6 +18,7 @@ describe('lib/exec/versions', function () {
     })
 
     sinon.stub(util, 'pkgVersion').returns('4.5.6')
+    sinon.stub(util, 'pkgBuildInfo').returns({ stable: true })
   })
 
   describe('.getVersions', function () {
@@ -48,6 +49,22 @@ describe('lib/exec/versions', function () {
         expect(package).to.eql('4.5.6')
         expect(binary).to.eql('7.8.9')
       })
+    })
+
+    it('appends pre-release if not stable', async function () {
+      util.pkgBuildInfo.returns({ stable: false })
+
+      const v = await versions.getVersions()
+
+      expect(v.package).to.eql('4.5.6 (pre-release)')
+    })
+
+    it('appends development if missing buildInfo', async function () {
+      util.pkgBuildInfo.returns(undefined)
+
+      const v = await versions.getVersions()
+
+      expect(v.package).to.eql('4.5.6 (development)')
     })
 
     it('reports default versions if not found', function () {

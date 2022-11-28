@@ -1,10 +1,11 @@
-const _ = require('lodash')
 const path = require('path')
 const check = require('syntax-error')
 const debug = require('debug')('cypress:server:fixture')
 const coffee = require('coffeescript')
 const Promise = require('bluebird')
 const jsonlint = require('jsonlint')
+const stripAnsi = require('strip-ansi')
+
 const errors = require('./errors')
 const { fs } = require('./util/fs')
 const glob = require('./util/glob')
@@ -55,12 +56,20 @@ module.exports = {
       return glob(pattern, {
         nosort: true,
         nodir: true,
-      }).bind(this)
+      })
+      .bind(this)
       .then(function (matches) {
         if (matches.length === 0) {
           const relativePath = path.relative('.', p)
 
-          errors.throw('FIXTURE_NOT_FOUND', relativePath, extensions)
+          // TODO: there's no reason this error should be in
+          // the @packages/error list, it should be written in
+          // the driver since this error can only occur within
+          // driver commands and not outside of the test runner
+          const err = errors.get('FIXTURE_NOT_FOUND', relativePath, extensions)
+
+          err.message = stripAnsi(err.message)
+          throw err
         }
 
         debug('fixture matches found, using the first', matches)
@@ -116,15 +125,24 @@ module.exports = {
   },
 
   parseFileByExtension (p, fixture, ext, options = {}) {
+    // https://github.com/cypress-io/cypress/issues/1558
+    // If the user explicitly specifies `null` as the encoding, we treat the
+    // file as binary regardless of extension. We base64 encode them for
+    // transmission over the websocket. There is a matching Buffer.from()
+    // in packages/driver/src/cy/commands/fixtures.ts
+    if (options.encoding === null) {
+      return this.parse(p, fixture)
+    }
+
     switch (ext) {
       case '.json': return this.parseJson(p, fixture)
       case '.js': return this.parseJs(p, fixture)
       case '.coffee': return this.parseCoffee(p, fixture)
       case '.html': return this.parseHtml(p, fixture)
       case '.png': case '.jpg': case '.jpeg': case '.gif': case '.tif': case '.tiff': case '.zip':
-        return this.parse(p, fixture, _.isNull(options.encoding) ? null : (options.encoding || 'base64'))
+        return this.parse(p, fixture, options.encoding)
       default:
-        return this.parse(p, fixture, _.isNull(options.encoding) ? null : options.encoding)
+        return this.parse(p, fixture, options.encoding || 'utf8')
     }
   },
 
@@ -157,7 +175,7 @@ module.exports = {
 
       return obj
     }).catch((err) => {
-      throw new Error(`'${fixture}' is not a valid JavaScript object.${err.toString()}`)
+      throw new Error(`'${fixture}' is not a valid JavaScript object.\n${err.toString()}`)
     })
   },
 
@@ -182,10 +200,16 @@ module.exports = {
   parseHtml (p, fixture) {
     return fs.readFileAsync(p, 'utf8')
     .bind(this)
+    .catch((err) => {
+      throw new Error(`Unable to parse '${fixture}'.\n${err.toString()}`)
+    })
   },
 
-  parse (p, fixture, encoding = 'utf8') {
+  parse (p, fixture, encoding) {
     return fs.readFileAsync(p, encoding)
     .bind(this)
+    .catch((err) => {
+      throw new Error(`Unable to parse '${fixture}'.\n${err.toString()}`)
+    })
   },
 }

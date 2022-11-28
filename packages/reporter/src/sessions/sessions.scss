@@ -1,31 +1,66 @@
-.sessions-container.instruments-container {
-  .instrument-content {
-    padding: 0;
+.sessions-container {
+  .session-content {
+    font-family: $monospace;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    padding: 0 !important;
   }
 
   .clear-sessions {
     text-transform: none;
-    color: #6a6b6c;
+    color: $gray-400;
     display: flex;
     align-items: center;
-    padding: 4px 10px;
+    padding: 4px;
     cursor: pointer;
+
     &:hover,
     &:focus {
-      color: rgb(48, 48, 48);
+      color: $gray-50;
+    }
+  }
+
+  .session-content .session-item-wrapper {
+    display: block;
+    margin-top: -1px;
+    padding: 0 2px 0 12px;
+
+    &:hover {
+      cursor: pointer;
+      background-color: $gray-900;
+    }
+  }
+
+  .session-content .session-item-wrapper:last-child {
+    .session-item {
+      border-bottom: none;
     }
   }
 
   .session-item {
-    padding: 3px 10px;
+    align-items: center;
+    border-bottom: 1px solid rgba($gray-900, 0.4);
+    display: flex;
+    color: $gray-400;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    min-height: 29px;
+  }
 
-    background-color: #eef1f4;
-    color: #777;
-    min-height: 20px;
+  .session-info {
+    padding-left: 8px;
 
-    &:hover {
-      cursor: pointer;
-      background-color: #e0e5e7;
+    &.spec-session {
+      padding-left: 24px;
     }
+  }
+  .session-tag {
+    margin-left: 4px;
+  }
+
+  .global-session-icon {
+    margin-right: 4px;
+    vertical-align: middle;
   }
 }

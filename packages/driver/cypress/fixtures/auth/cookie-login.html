@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+  <fieldset>
+    <label for="name">Cookie Key: </label>
+    <input data-cy="cookieKey" type="text" value="user">
+  </fieldset>
+  <fieldset>
+    <label for="name">Username: </label>
+    <input data-cy="username" type="text" required>
+  </fieldset>
+  <fieldset>
+    <label for="cookieProps">CookieProps (idp.com or both): </label>
+    <input data-cy="cookieProps" type="text" />
+  </fieldset>
+  <fieldset>
+    <label for="localhostCookieProps">CookieProps (localhost): </label>
+    <input data-cy="localhostCookieProps" type="text" />
+  </fieldset>
+  <fieldset>
+    <button data-cy="login">Login</button>
+  </fieldset>
+
+  <script>
+    document.querySelector('[data-cy="login"]').addEventListener('click', () => {
+      const urlParams = new URLSearchParams(window.location.search)
+      const redirect = urlParams.get('redirect')
+      const useSubdomain = urlParams.get('subdomain')
+      const useAlias = urlParams.get('alias')
+      const cookieKey = document.querySelector('[data-cy=cookieKey]').value
+      const username = document.querySelector('[data-cy=username]').value
+      const cookieProps = document.querySelector('[data-cy=cookieProps]').value
+      const localhostCookieProps = document.querySelector('[data-cy=localhostCookieProps]').value || cookieProps
+      const cookie = `${cookieKey}=${username}; ${cookieProps}`
+      const localhostCookie = `${cookieKey}=${username}; ${localhostCookieProps}`
+      const subdomain = useSubdomain ? 'baz' : 'www'
+      const port = location.protocol === 'https:' ? '3502' : '3501'
+      const hostname = useAlias ? 'localalias' : `${subdomain}.idp.com`
+      const queryString = [
+        `redirect=${redirect}`,
+        `username=${username}`,
+        `cookie=${encodeURIComponent(cookie)}`,
+        `localhostCookie=${encodeURIComponent(localhostCookie)}`,
+      ].join('&')
+
+      window.location.href = `${location.protocol}//${hostname}:${port}/cookie-login?${queryString}`
+    })
+  </script>
+</body>
+</html>

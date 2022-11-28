@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+  <p>Go to different origin:</p>
+  <ul>
+    <li><a data-cy="cross-origin-secondary-link" href="http://www.foobar.com:3500/fixtures/secondary-origin.html">http://www.foobar.com:3500/fixtures/secondary-origin.html</a></li>
+    <li><a data-cy="dom-link" href="http://www.foobar.com:3500/fixtures/dom.html">http://www.foobar.com:3500/fixtures/dom.html</a></li>
+    <li><a data-cy="scrolling-link" href="http://www.foobar.com:3500/fixtures/scrolling.html">http://www.foobar.com:3500/fixtures/scrolling.html</a></li>
+    <li><a data-cy="request-link" href="http://www.foobar.com:3500/fixtures/request.html">http://www.foobar.com:3500/fixtures/request.html</a></li>
+    <li><a data-cy="shadow-dom-link" href="http://www.foobar.com:3500/fixtures/shadow-dom.html">http://www.foobar.com:3500/fixtures/shadow-dom.html</a></li>
+    <li><a data-cy="files-form-link" href="http://www.foobar.com:3500/fixtures/files-form.html">http://www.foobar.com:3500/fixtures/files-form.html</a></li>
+    <li><a data-cy="errors-link" href="http://www.foobar.com:3500/fixtures/errors.html">http://www.foobar.com:3500/fixtures/errors.html</a></li>
+    <li><a data-cy="screenshots-link" href="http://www.foobar.com:3500/fixtures/screenshots.html">http://www.foobar.com:3500/fixtures/screenshots.html</a></li>
+    <li><a data-cy="xhr-fetch-requests-onload" href="http://www.foobar.com:3500/fixtures/xhr-fetch-requests.html?fireOnload=true">http://www.foobar.com:3500/fixtures/xhr-fetch-requests.html onLoad</a></li>
+    <li><a data-cy="xhr-fetch-requests" href="http://www.foobar.com:3500/fixtures/xhr-fetch-requests.html">http://www.foobar.com:3500/fixtures/xhr-fetch-requests.html</a></li>
+    <li><a data-cy="integrity-link" href="http://www.foobar.com:3500/fixtures/scripts-with-integrity.html">http://www.foobar.com:3500/fixtures/scripts-with-integrity.html</a></li>
+    <li><a data-cy="cookie-http" href="http://www.foobar.com:3500/fixtures/secondary-origin.html">Visit foobar.com over http</a></li>
+    <li><a data-cy="cookie-https" href="https://www.foobar.com:3502/fixtures/secondary-origin.html">Visit foobar.com over https</a></li>
+    <li><a data-cy="document-cookie" href="http://www.foobar.com:3500/fixtures/auth/document-cookie.html">http://www.foobar.com:3500/fixtures/auth/document-cookie.html</a></li>
+    <li><a data-cy="cookie-login">Login with Social</a></li>
+    <li><a data-cy="cookie-login-https">Login with Social (https)</a></li>
+    <li><a data-cy="cookie-login-subdomain">Login with Social (subdomain)</a></li>
+    <li><a data-cy="cookie-login-alias">Login with Social (aliased localhost)</a></li>
+    <li><a data-cy="cookie-login-override">Login with Social (cookie override)</a></li>
+    <li><a data-cy="cookie-login-land-on-idp">Login with Social (lands on idp)</a></li>
+    <li><a data-cy="cookie-login-land-on-document-cookie">Login with Social (lands on document.cookie)</a></li>
+  </ul>
+  <script>
+    function setHref (dataCy, redirect2, primaryQueryAddition = '') {
+      const isHttps = redirect2.startsWith('https')
+      const url = isHttps ? 'https://localhost:3502' : 'http://localhost:3500'
+      const redirect1Path = '/fixtures/auth/cookie-login.html'
+      const redirect = encodeURIComponent(isHttps
+        ? `https://www.foobar.com:3502${redirect1Path}?redirect=${redirect2}`
+        : `http://www.foobar.com:3500${redirect1Path}?redirect=${redirect2}`)
+
+      document.querySelector(`[data-cy="${dataCy}"]`).href = (
+        `${url}/prelogin?redirect=${redirect}${primaryQueryAddition}`
+      )
+    }
+
+    setHref('cookie-login', 'http://localhost:3500/login')
+    setHref('cookie-login-https', 'https://localhost:3502/login')
+    setHref('cookie-login-subdomain', 'http://localhost:3500/login&subdomain=true')
+    setHref('cookie-login-alias', 'http://localhost:3500/login&alias=true')
+    setHref('cookie-login-override', 'https://localhost:3502/login', '&override=true')
+    setHref('cookie-login-land-on-idp', 'http://www.idp.com:3501/welcome')
+    setHref('cookie-login-land-on-document-cookie', 'http://www.idp.com:3501/fixtures/auth/document-cookie.html')
+  </script>
+</body>
+</html>

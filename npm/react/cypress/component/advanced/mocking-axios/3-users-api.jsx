@@ -1,6 +1,6 @@
 import React from 'react'
 // import wrapped Axios method
-import { get } from './axios-api'
+import axiosApi from './axios-api'
 
 export class Users extends React.Component {
   constructor (props) {
@@ -11,7 +11,8 @@ export class Users extends React.Component {
   }
 
   componentDidMount () {
-    get('https://jsonplaceholder.cypress.io/users?_limit=3').then((response) => {
+    console.log({ axiosApi })
+    axiosApi.get('https://jsonplaceholder.cypress.io/users?_limit=3').then((response) => {
       // JSON responses are automatically parsed.
       this.setState({
         users: response.data,

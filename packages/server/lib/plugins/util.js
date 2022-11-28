@@ -1,16 +1,30 @@
 const _ = require('lodash')
 const EE = require('events')
-const debug = require('debug')('cypress:server:plugins')
 const Promise = require('bluebird')
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
 const serializeError = (err) => {
-  return _.pick(err, 'name', 'message', 'stack', 'code', 'annotated', 'type')
+  const obj = _.pick(err,
+    'name', 'message', 'stack', 'code', 'annotated', 'type',
+    'details', 'isCypressErr', 'messageMarkdown',
+    'originalError',
+    // Location of the error when a TSError or a esbuild error occurs (parse error from ts-node or esbuild)
+    'compilerErrorLocation')
+
+  if (obj.originalError) {
+    obj.originalError = serializeError(obj.originalError)
+  }
+
+  return obj
 }
 
 module.exports = {
   serializeError,
+
+  nonNodeRequires () {
+    return Object.keys(require.cache).filter((c) => !c.includes('/node_modules/'))
+  },
 
   wrapIpc (aProcess) {
     const emitter = new EE()
@@ -25,7 +39,7 @@ module.exports = {
 
     return {
       send (event, ...args) {
-        if (aProcess.killed) {
+        if (aProcess.killed || !aProcess.connected) {
           return
         }
 
@@ -54,35 +68,6 @@ module.exports = {
       return ipc.send(`promise:fulfilled:${ids.invocationId}`, null, value)
     }).catch((err) => {
       return ipc.send(`promise:fulfilled:${ids.invocationId}`, serializeError(err))
-    })
-  },
-
-  wrapParentPromise (ipc, eventId, callback) {
-    const invocationId = _.uniqueId('inv')
-
-    return new Promise((resolve, reject) => {
-      const handler = function (err, value) {
-        ipc.removeListener(`promise:fulfilled:${invocationId}`, handler)
-
-        if (err) {
-          debug('promise rejected for id %s %o', invocationId, ':', err.stack)
-          reject(_.extend(new Error(err.message), err))
-
-          return
-        }
-
-        if (value === UNDEFINED_SERIALIZED) {
-          value = undefined
-        }
-
-        debug(`promise resolved for id '${invocationId}' with value`, value)
-
-        return resolve(value)
-      }
-
-      ipc.on(`promise:fulfilled:${invocationId}`, handler)
-
-      return callback(invocationId)
     })
   },
 }

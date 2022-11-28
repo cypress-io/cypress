@@ -20,7 +20,10 @@
 <template>
   <div id="app">
     <label for="locale">locale</label>
-    <select v-model="locale" id="locale">
+    <select
+      id="locale"
+      v-model="locale"
+    >
       <option>en</option>
       <option>fa</option>
       <option>ja</option>
@@ -39,7 +42,7 @@ export default {
   watch: {
     locale (val) {
       this.$i18n.locale = val
-    }
-  }
+    },
+  },
 }
 </script>

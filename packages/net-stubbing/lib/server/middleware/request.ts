@@ -10,7 +10,7 @@ import {
   CyHttpMessages,
   SERIALIZABLE_REQ_PROPS,
 } from '../../types'
-import { getRouteForRequest, matchesRoutePreflight } from '../route-matching'
+import { getRoutesForRequest, matchesRoutePreflight } from '../route-matching'
 import {
   sendStaticResponse,
   setDefaultHeaders,
@@ -41,21 +41,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
     })
   }
 
-  const matchingRoutes: BackendRoute[] = []
-
-  const populateMatchingRoutes = (prevRoute?) => {
-    const route = getRouteForRequest(this.netStubbingState.routes, this.req, prevRoute)
-
-    if (!route) {
-      return
-    }
-
-    matchingRoutes.push(route)
-
-    populateMatchingRoutes(route)
-  }
-
-  populateMatchingRoutes()
+  const matchingRoutes: BackendRoute[] = [...getRoutesForRequest(this.netStubbingState.routes, this.req)]
 
   if (!matchingRoutes.length) {
     // not intercepted, carry on normally...
@@ -106,8 +92,23 @@ export const InterceptRequest: RequestMiddleware = async function () {
         return resolve()
       }
 
+      const onClose = (): void => {
+        req.body = ''
+
+        return resolve()
+      }
+
+      // If the response has been destroyed we won't be able to get the body from the stream.
+      if (request.res.destroyed) {
+        onClose()
+      }
+
+      // Also listen the response close in case it happens while we are piping the request stream.
+      request.res.once('close', onClose)
+
       request.req.pipe(concatStream((reqBody) => {
         req.body = reqBody
+        request.res.off('close', onClose)
         resolve()
       }))
     })

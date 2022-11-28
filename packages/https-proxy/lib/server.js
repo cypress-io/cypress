@@ -34,6 +34,16 @@ class Server {
   }
 
   connect (req, browserSocket, head, options = {}) {
+    // the SNI server requires a hostname, so if the hostname is blank,
+    // destroy the socket and fail fast
+    const { hostname } = url.parse(`https://${req.url}`)
+
+    if (!hostname) {
+      browserSocket.destroy()
+
+      return debug(`Invalid hostname for request url ${req.url}`)
+    }
+
     // don't buffer writes - thanks a lot, Nagle
     // https://github.com/cypress-io/cypress/issues/3192
     browserSocket.setNoDelay(true)
@@ -198,6 +208,17 @@ class Server {
         leave()
 
         return makeConnection(port)
+      })
+      .catch((err) => {
+        debug('Error making connection %o', { err })
+
+        browserSocket.destroy(err)
+
+        leave()
+
+        if (this._onError) {
+          return this._onError(err, browserSocket, head)
+        }
       })
     })
   }

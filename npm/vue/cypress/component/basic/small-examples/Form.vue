@@ -1,26 +1,41 @@
 <template>
   <form action="">
     <label for="name">Name</label>
-    <input type="text" name="name" id="name" v-model="name" />
+    <input
+      id="name"
+      v-model="name"
+      type="text"
+      name="name"
+    >
     <label for="email">Email</label>
-    <input type="email" name="email" id="email" v-model="email" />
-    <button type="submit" :disabled="!hasValidFields">Submit</button>
+    <input
+      id="email"
+      v-model="email"
+      type="email"
+      name="email"
+    >
+    <button
+      type="submit"
+      :disabled="!hasValidFields"
+    >
+      Submit
+    </button>
   </form>
 </template>
 <script>
 export default {
   name: 'AppForm',
-  data() {
+  data () {
     return {
       name: '',
       email: '',
-    };
+    }
   },
   computed: {
-    hasValidFields() {
-      return Boolean(this.email && this.name);
+    hasValidFields () {
+      return Boolean(this.email && this.name)
     },
   },
-};
+}
 </script>
 <style></style>

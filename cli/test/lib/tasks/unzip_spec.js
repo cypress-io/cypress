@@ -30,26 +30,44 @@ describe('lib/tasks/unzip', function () {
 
   afterEach(function () {
     stdout.restore()
-
-    // return fs.removeAsync(installationDir)
   })
 
-  it('throws when cannot unzip', function () {
-    const ctx = this
-
-    return unzip
-    .start({
-      zipFilePath: path.join('test', 'fixture', 'bad_example.zip'),
-      installDir,
-    })
-    .then(() => {
-      throw new Error('should have failed')
-    })
-    .catch((err) => {
+  it('throws when cannot unzip', async function () {
+    try {
+      await unzip.start({
+        zipFilePath: path.join('test', 'fixture', 'bad_example.zip'),
+        installDir,
+      })
+    } catch (err) {
       logger.error(err)
 
-      snapshot('unzip error 1', normalize(ctx.stdout.toString()))
-    })
+      return snapshot(normalize(this.stdout.toString()))
+    }
+
+    throw new Error('should have failed')
+  })
+
+  it('throws max path length error when cannot unzip due to realpath ENOENT on windows', async function () {
+    const err = new Error('failed')
+
+    err.code = 'ENOENT'
+    err.syscall = 'realpath'
+
+    os.platform.returns('win32')
+    sinon.stub(fs, 'ensureDirAsync').rejects(err)
+
+    try {
+      await unzip.start({
+        zipFilePath: path.join('test', 'fixture', 'bad_example.zip'),
+        installDir,
+      })
+    } catch (err) {
+      logger.error(err)
+
+      return snapshot(normalize(this.stdout.toString()))
+    }
+
+    throw new Error('should have failed')
   })
 
   it('can really unzip', function () {

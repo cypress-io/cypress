@@ -1,23 +1,26 @@
 import _ from 'lodash'
-import Bluebird from 'bluebird'
 import fs from 'fs-extra'
 import Debug from 'debug'
 import getPort from 'get-port'
 import path from 'path'
 import urlUtil from 'url'
-import { launch } from '@packages/launcher/lib/browsers'
+import { debug as launcherDebug, launch } from '@packages/launcher/lib/browsers'
+import { doubleEscape } from '@packages/launcher/lib/windows'
 import FirefoxProfile from 'firefox-profile'
+import * as errors from '../errors'
 import firefoxUtil from './firefox-util'
 import utils from './utils'
-import * as launcherDebug from '@packages/launcher/lib/log'
 import type { Browser, BrowserInstance } from './types'
 import { EventEmitter } from 'events'
 import os from 'os'
 import treeKill from 'tree-kill'
 import mimeDb from 'mime-db'
 import { getRemoteDebuggingPort } from './protocol'
-
-const errors = require('../errors')
+import type { BrowserCriClient } from './browser-cri-client'
+import type { Automation } from '../automation'
+import { getCtx } from '@packages/data-context'
+import { getError } from '@packages/errors'
+import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
 
 const debug = Debug('cypress:server:browsers:firefox')
 
@@ -82,6 +85,9 @@ const defaultPreferences = {
   'browser.startup.homepage_override.mstone': 'ignore',
   // Start with a blank page about:blank
   'browser.startup.page': 0,
+  // Disable notification banners related to session restoration.
+  // Any presented banners can result in incorrectly sized screenshots.
+  'browser.startup.couldRestoreSession.count': 0,
 
   // Do not allow background tabs to be zombified on Android: otherwise for
   // tests that open additional tabs: the test harness tab itself might get
@@ -299,7 +305,7 @@ const defaultPreferences = {
   'media.devices.insecure.enabled':	true,
   'media.getusermedia.insecure.enabled': true,
 
-  'marionette.log.level': launcherDebug.log.enabled ? 'Debug' : undefined,
+  'marionette.log.level': launcherDebug.enabled ? 'Debug' : undefined,
 
   // where to download files
   // 0: desktop
@@ -341,13 +347,21 @@ toolbar {
 
 `
 
-export function _createDetachedInstance (browserInstance: BrowserInstance): BrowserInstance {
+let browserCriClient
+
+export function _createDetachedInstance (browserInstance: BrowserInstance, browserCriClient?: BrowserCriClient): BrowserInstance {
   const detachedInstance: BrowserInstance = new EventEmitter() as BrowserInstance
 
   detachedInstance.pid = browserInstance.pid
 
   // kill the entire process tree, from the spawned instance up
   detachedInstance.kill = (): void => {
+    // Close browser cri client socket. Do nothing on failure here since we're shutting down anyway
+    if (browserCriClient) {
+      browserCriClient.close().catch()
+      browserCriClient = undefined
+    }
+
     treeKill(browserInstance.pid, (err?, result?) => {
       debug('force-exit of process tree complete %o', { err, result })
       detachedInstance.emit('exit')
@@ -357,7 +371,32 @@ export function _createDetachedInstance (browserInstance: BrowserInstance): Brow
   return detachedInstance
 }
 
-export async function open (browser: Browser, url, options: any = {}, automation): Promise<BrowserInstance> {
+/**
+* Clear instance state for the chrome instance, this is normally called in on kill or on exit.
+*/
+export function clearInstanceState () {
+  debug('closing remote interface client')
+  if (browserCriClient) {
+    browserCriClient.close().catch()
+    browserCriClient = undefined
+  }
+}
+
+export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
+  await firefoxUtil.connectToNewSpec(options, automation, browserCriClient)
+}
+
+export function connectToExisting () {
+  getCtx().onWarning(getError('UNEXPECTED_INTERNAL_ERROR', new Error('Attempting to connect to existing browser for Cypress in Cypress which is not yet implemented for firefox')))
+}
+
+async function recordVideo (videoApi: RunModeVideoApi) {
+  const { writeVideoFrame } = await videoApi.useFfmpegVideoController({ webmInput: true })
+
+  videoApi.onProjectCaptureVideoFrames(writeVideoFrame)
+}
+
+export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
   // see revision comment here https://wiki.mozilla.org/index.php?title=WebDriver/RemoteProtocol&oldid=1234946
   const hasCdp = browser.majorVersion >= 86
   const defaultLaunchOptions = utils.getDefaultLaunchOptions({
@@ -406,7 +445,7 @@ export async function open (browser: Browser, url, options: any = {}, automation
       'network.proxy.http_port': +port,
       'network.proxy.ssl_port': +port,
       'network.proxy.no_proxies_on': '',
-      'browser.download.dir': options.downloadsFolder,
+      'browser.download.dir': os.platform() === 'win32' ? doubleEscape(options.downloadsFolder) : options.downloadsFolder,
     })
   }
 
@@ -419,7 +458,7 @@ export async function open (browser: Browser, url, options: any = {}, automation
   const [
     foxdriverPort,
     marionettePort,
-  ] = await Bluebird.all([getPort(), getPort()])
+  ] = await Promise.all([getPort(), getPort()])
 
   defaultLaunchOptions.preferences['devtools.debugger.remote-port'] = foxdriverPort
   defaultLaunchOptions.preferences['marionette.port'] = marionettePort
@@ -430,10 +469,11 @@ export async function open (browser: Browser, url, options: any = {}, automation
     cacheDir,
     extensionDest,
     launchOptions,
-  ] = await Bluebird.all([
+  ] = await Promise.all([
     utils.ensureCleanCache(browser, options.isTextTerminal),
     utils.writeExtension(browser, options.isTextTerminal, options.proxyUrl, options.socketIoRoute),
     utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options),
+    options.videoApi && recordVideo(options.videoApi),
   ])
 
   if (Array.isArray(launchOptions.extensions)) {
@@ -502,23 +542,36 @@ export async function open (browser: Browser, url, options: any = {}, automation
 
   debug('launch in firefox', { url, args: launchOptions.args })
 
-  const browserInstance = await launch(browser, 'about:blank', launchOptions.args, {
+  const browserInstance = launch(browser, 'about:blank', remotePort, launchOptions.args, {
     // sets headless resolution to 1280x720 by default
     // user can overwrite this default with these env vars or --height, --width arguments
     MOZ_HEADLESS_WIDTH: '1280',
     MOZ_HEADLESS_HEIGHT: '721',
+    ...launchOptions.env,
   })
 
   try {
-    await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })
-  } catch (err) {
-    errors.throw('FIREFOX_COULD_NOT_CONNECT', err)
-  }
+    browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError, options })
 
-  if (os.platform() === 'win32') {
-    // override the .kill method for Windows so that the detached Firefox process closes between specs
-    // @see https://github.com/cypress-io/cypress/issues/6392
-    return _createDetachedInstance(browserInstance)
+    if (os.platform() === 'win32') {
+      // override the .kill method for Windows so that the detached Firefox process closes between specs
+      // @see https://github.com/cypress-io/cypress/issues/6392
+      return _createDetachedInstance(browserInstance, browserCriClient)
+    }
+
+    // monkey-patch the .kill method to that the CDP connection is closed
+    const originalBrowserKill = browserInstance.kill
+
+    browserInstance.kill = (...args) => {
+      // Do nothing on failure here since we're shutting down anyway
+      clearInstanceState()
+
+      debug('closing firefox')
+
+      return originalBrowserKill.apply(browserInstance, args)
+    }
+  } catch (err) {
+    errors.throwErr('FIREFOX_COULD_NOT_CONNECT', err)
   }
 
   return browserInstance

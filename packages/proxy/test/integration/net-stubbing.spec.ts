@@ -1,4 +1,4 @@
-import { NetworkProxy } from '../../'
+import { NetworkProxy, RequestResourceType } from '../../'
 import {
   netStubbingState as _netStubbingState,
   NetStubbingState,
@@ -11,13 +11,15 @@ import { expect } from 'chai'
 import supertest from 'supertest'
 import { allowDestroy } from '@packages/network'
 import { EventEmitter } from 'events'
+import { RemoteStates } from '@packages/server/lib/remote_states'
+import { CookieJar } from '@packages/server/lib/util/cookies'
 
 const Request = require('@packages/server/lib/request')
 const getFixture = async () => {}
 
 context('network stubbing', () => {
   let config
-  let remoteState
+  let remoteStates: RemoteStates
   let netStubbingState: NetStubbingState
   let app
   let destinationApp
@@ -27,7 +29,7 @@ context('network stubbing', () => {
 
   beforeEach((done) => {
     config = {}
-    remoteState = {}
+    remoteStates = new RemoteStates(() => {})
     socket = new EventEmitter()
     socket.toDriver = sinon.stub()
     app = express()
@@ -38,9 +40,22 @@ context('network stubbing', () => {
       netStubbingState,
       config,
       middleware: defaultMiddleware,
-      getRemoteState: () => remoteState,
+      getCookieJar: () => new CookieJar(),
+      remoteStates,
       getFileServerToken: () => 'fake-token',
       request: new Request(),
+      getRenderedHTMLOrigins: () => ({}),
+      serverBus: new EventEmitter(),
+      resourceTypeAndCredentialManager: {
+        get (url: string, optionalResourceType?: RequestResourceType) {
+          return {
+            resourceType: 'xhr',
+            credentialStatus: 'same-origin',
+          }
+        },
+        set () {},
+        clear () {},
+      },
     })
 
     app.use((req, res, next) => {
@@ -59,6 +74,7 @@ context('network stubbing', () => {
 
     server = allowDestroy(destinationApp.listen(() => {
       destinationPort = server.address().port
+      remoteStates.set(`http://localhost:${destinationPort}`)
       done()
     }))
   })
@@ -92,6 +108,7 @@ context('network stubbing', () => {
         body: 'foo',
       },
       getFixture: async () => {},
+      matches: 1,
     })
 
     return supertest(app)
@@ -120,6 +137,7 @@ context('network stubbing', () => {
         },
       },
       getFixture: async () => {},
+      matches: 1,
     })
 
     return supertest(app)
@@ -142,6 +160,7 @@ context('network stubbing', () => {
         body: 'foo',
       },
       getFixture: async () => {},
+      matches: 1,
     })
 
     return supertest(app)
@@ -162,6 +181,7 @@ context('network stubbing', () => {
       },
       hasInterceptor: true,
       getFixture,
+      matches: 1,
     })
 
     socket.toDriver.callsFake((_, event, data) => {
@@ -179,6 +199,9 @@ context('network stubbing', () => {
           state: netStubbingState,
           getFixture,
           args: [],
+          socket: {
+            toDriver () {},
+          },
         })
       }
     })
@@ -229,6 +252,7 @@ context('network stubbing', () => {
       },
       hasInterceptor: true,
       getFixture,
+      matches: 1,
     })
 
     socket.toDriver.callsFake((_, event, data) => {
@@ -246,6 +270,9 @@ context('network stubbing', () => {
           state: netStubbingState,
           getFixture,
           args: [],
+          socket: {
+            toDriver () {},
+          },
         })
       }
     })

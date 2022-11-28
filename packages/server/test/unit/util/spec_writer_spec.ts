@@ -5,7 +5,7 @@ import sinon from 'sinon'
 import snapshot from 'snap-shot-it'
 import { expect } from 'chai'
 
-import Fixtures from '../../support/helpers/fixtures'
+import Fixtures from '@tooling/system-tests'
 import { fs } from '../../../lib/util/fs'
 import {
   generateCypressCommand,
@@ -18,10 +18,6 @@ import {
   createFile,
   countStudioUsage,
 } from '../../../lib/util/spec_writer'
-
-const mockSpec = Fixtures.get('projects/studio/cypress/integration/unwritten.spec.js')
-const emptyCommentsSpec = Fixtures.get('projects/studio/cypress/integration/empty-comments.spec.js')
-const writtenSpec = Fixtures.get('projects/studio/cypress/integration/written.spec.js')
 
 const exampleTestCommands = [
   {
@@ -46,10 +42,15 @@ const verifyOutput = (ast) => {
 }
 
 describe('lib/util/spec_writer', () => {
-  let readFile
+  let readFile; let mockSpec; let emptyCommentsSpec; let writtenSpec
 
   // recast doesn't play nicely with mockfs so we do it manually
   beforeEach(() => {
+    Fixtures.scaffold()
+    mockSpec = fs.readFileSync(Fixtures.projectPath('studio/cypress/e2e/unwritten.spec.js'))
+    emptyCommentsSpec = fs.readFileSync(Fixtures.projectPath('studio/cypress/e2e/empty-comments.spec.js'))
+    writtenSpec = fs.readFileSync(Fixtures.projectPath('studio/cypress/e2e/written.spec.js'))
+
     readFile = sinon.stub(fs, 'readFile').resolves(mockSpec)
     sinon.stub(fs, 'writeFile').callsFake((path, output) => {
       snapshot(output)
@@ -456,7 +457,7 @@ describe('lib/util/spec_writer', () => {
 
   describe('#createFile', () => {
     it('creates a new file with templated comments', () => {
-      return createFile('/path/to/project/cypress/integration/my_new_spec.js')
+      return createFile('/path/to/project/cypress/e2e/my_new_spec.js')
     })
   })
 

@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import $jquery from '../jquery'
 import $ from 'jquery'
-import * as $document from '../document'
+import $document from '../document'
 import $window from '../window'
 import { getHostContenteditable, isContentEditable, isDesignModeDocumentElement } from './contentEditable'
 import { isInputType } from './input'
@@ -314,7 +314,7 @@ export const isScrollable = ($el) => {
 /**
  * Getters where DOM state like focus, styling, and actionability affect the return value
  */
-export const getFirstFixedOrStickyPositionParent = ($el) => {
+export const getFirstFixedOrStickyPositionParent = ($el): JQuery<any> | null => {
   if (isUndefinedOrHTMLBodyDoc($el)) {
     return null
   }

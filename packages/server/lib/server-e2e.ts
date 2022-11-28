@@ -5,9 +5,11 @@ import _ from 'lodash'
 import stream from 'stream'
 import url from 'url'
 import httpsProxy from '@packages/https-proxy'
-import { getRouteForRequest } from '@packages/net-stubbing'
+import { getRoutesForRequest } from '@packages/net-stubbing'
 import { concatStream, cors } from '@packages/network'
-import errors from './errors'
+import { graphqlWS } from '@packages/graphql/src/makeGraphQLServer'
+
+import * as errors from './errors'
 import fileServer from './file_server'
 import { OpenServerOptions, ServerBase } from './server-base'
 import type { SocketE2E } from './socket-e2e'
@@ -75,6 +77,8 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
       this.server.once('error', onError)
 
+      this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`)
+
       return this._listen(port, (err) => {
         // if the server bombs before starting
         // and the err no is EADDRINUSE
@@ -107,22 +111,23 @@ export class ServerE2E extends ServerBase<SocketE2E> {
               .catch((e) => {
                 debug(e)
 
-                return reject(errors.get('CANNOT_CONNECT_BASE_URL', baseUrl))
+                return reject(errors.get('CANNOT_CONNECT_BASE_URL'))
               })
             }
 
             return ensureUrl.isListening(baseUrl)
             .return(null)
             .catch((err) => {
+              debug('ensuring baseUrl (%s) errored: %o', baseUrl, err)
+
               return errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)
             })
           }
         }).then((warning) => {
-          // once we open set the domain
-          // to root by default
+          // once we open set the domain to root by default
           // which prevents a situation where navigating
           // to http sites redirects to /__/ cypress
-          this._onDomainSet(baseUrl != null ? baseUrl : '<root>')
+          this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
 
           return resolve([port, warning])
         })
@@ -160,7 +165,9 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     const request = this.request
 
     let handlingLocalFile = false
-    const previousState = _.clone(this._getRemoteState())
+    const previousRemoteState = this._remoteStates.current()
+    const previousRemoteStateIsPrimary = this._remoteStates.isPrimarySuperDomainOrigin(previousRemoteState.origin)
+    const primaryRemoteState = this._remoteStates.getPrimary()
 
     // nuke any hashes from our url since
     // those those are client only and do
@@ -186,7 +193,11 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       }
 
       // @ts-ignore
-      return !!getRouteForRequest(this.netStubbingState?.routes, proxiedReq)
+      const iterator = getRoutesForRequest(this.netStubbingState?.routes, proxiedReq)
+      // If the iterator is exhausted (done) on the first try, then 0 matches were found
+      const zeroMatches = iterator.next().done
+
+      return !zeroMatches
     }
 
     return this._urlResolver = (p = new Bluebird<Record<string, any>>((resolve, reject, onCancel) => {
@@ -209,22 +220,18 @@ export class ServerE2E extends ServerBase<SocketE2E> {
 
         options.headers['x-cypress-authorization'] = this._fileServer.token
 
-        this._remoteVisitingUrl = true
+        const state = this._remoteStates.set(urlStr, options)
 
-        this._onDomainSet(urlStr, options)
-
-        // TODO: instead of joining remoteOrigin here
-        // we can simply join our fileServer origin
-        // and bypass all the remoteState.visiting shit
-        urlFile = url.resolve(this._remoteFileServer as string, urlStr)
-        urlStr = url.resolve(this._remoteOrigin as string, urlStr)
+        // TODO: Update url.resolve signature to not use deprecated methods
+        urlFile = url.resolve(state.fileServer as string, urlStr)
+        urlStr = url.resolve(state.origin as string, urlStr)
       }
 
       const onReqError = (err) => {
         // only restore the previous state
         // if our promise is still pending
         if (p.isPending()) {
-          restorePreviousState()
+          restorePreviousRemoteState(previousRemoteState, previousRemoteStateIsPrimary)
         }
 
         return reject(err)
@@ -251,8 +258,6 @@ export class ServerE2E extends ServerBase<SocketE2E> {
               domain: cors.getSuperDomain(newUrl),
             })
             .then((cookies) => {
-              this._remoteVisitingUrl = false
-
               const statusIs2xxOrAllowedFailure = () => {
                 // is our status code in the 2xx range, or have we disabled failing
                 // on status code?
@@ -298,15 +303,14 @@ export class ServerE2E extends ServerBase<SocketE2E> {
 
                 details.totalTime = Date.now() - startTime
 
-                // TODO: think about moving this logic back into the
-                // frontend so that the driver can be in control of
-                // when the server should cache the request buffer
-                // and set the domain vs not
+                // buffer the response and set the remote state if this is a successful html response
+                // TODO: think about moving this logic back into the frontend so that the driver can be in control
+                // of when to buffer and set the remote state
                 if (isOk && details.isHtml) {
-                  // reset the domain to the new url if we're not
-                  // handling a local file
+                  const urlDoesNotMatchPolicyBasedOnDomain = options.hasAlreadyVisitedUrl && !cors.urlMatchesPolicyBasedOnDomain(primaryRemoteState.origin, newUrl || '') || options.isFromSpecBridge
+
                   if (!handlingLocalFile) {
-                    this._onDomainSet(newUrl, options)
+                    this._remoteStates.set(newUrl as string, options, !urlDoesNotMatchPolicyBasedOnDomain)
                   }
 
                   const responseBufferStream = new stream.PassThrough({
@@ -321,12 +325,15 @@ export class ServerE2E extends ServerBase<SocketE2E> {
                     details,
                     originalUrl,
                     response: incomingRes,
+                    urlDoesNotMatchPolicyBasedOnDomain,
                   })
                 } else {
                   // TODO: move this logic to the driver too for
                   // the same reasons listed above
-                  restorePreviousState()
+                  restorePreviousRemoteState(previousRemoteState, previousRemoteStateIsPrimary)
                 }
+
+                details.isPrimarySuperDomainOrigin = this._remoteStates.isPrimarySuperDomainOrigin(newUrl!)
 
                 return resolve(details)
               })
@@ -337,14 +344,8 @@ export class ServerE2E extends ServerBase<SocketE2E> {
         })
       }
 
-      const restorePreviousState = () => {
-        this._remoteAuth = previousState.auth
-        this._remoteProps = previousState.props
-        this._remoteOrigin = previousState.origin
-        this._remoteStrategy = previousState.strategy
-        this._remoteFileServer = previousState.fileServer
-        this._remoteDomainName = previousState.domainName
-        this._remoteVisitingUrl = previousState.visiting
+      const restorePreviousRemoteState = (previousRemoteState: Cypress.RemoteState, previousRemoteStateIsPrimary: boolean) => {
+        this._remoteStates.set(previousRemoteState, {}, previousRemoteStateIsPrimary)
       }
 
       // if they're POSTing an object, querystringify their POST body

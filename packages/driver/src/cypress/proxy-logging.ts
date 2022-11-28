@@ -1,6 +1,7 @@
+import _ from 'lodash'
 import type { Interception, Route } from '@packages/net-stubbing/lib/types'
 import type { BrowserPreRequest, BrowserResponseReceived, RequestError } from '@packages/proxy/lib/types'
-import * as $errUtils from './error_utils'
+import $errUtils from './error_utils'
 import Debug from 'debug'
 
 const debug = Debug('cypress:driver:proxy-logging')
@@ -49,7 +50,7 @@ function getDisplayUrl (url: string) {
   return url
 }
 
-function getDynamicRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.LogConfig> {
+function getDynamicRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.InternalLogConfig> {
   const last = _.last(req.interceptions)
   let alias = last ? last.interception.request.alias || last.route.alias : undefined
 
@@ -63,7 +64,7 @@ function getDynamicRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cy
   }
 }
 
-function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.LogConfig> {
+function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.InternalLogConfig> {
   function getStatus (): string | undefined {
     const { stubbed, reqModified, resModified } = req.flags
 
@@ -87,66 +88,7 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.L
     url: req.preRequest.url,
     method: req.preRequest.method,
     timeout: 0,
-    consoleProps: () => {
-      // high-level request information
-      const consoleProps = {
-        'Resource Type': req.preRequest.resourceType,
-        Method: req.preRequest.method,
-        URL: req.preRequest.url,
-        'Request went to origin?': req.flags.stubbed ? 'no (response was stubbed, see below)' : 'yes',
-      }
-
-      if (req.flags.reqModified) consoleProps['Request modified?'] = 'yes'
-
-      if (req.flags.resModified) consoleProps['Response modified?'] = 'yes'
-
-      // details on matched XHR/intercept
-      if (req.xhr) consoleProps['XHR'] = req.xhr.xhr
-
-      if (req.interceptions.length) {
-        if (req.interceptions.length > 1) {
-          consoleProps['Matched `cy.intercept()`s'] = req.interceptions.map(formatInterception)
-        } else {
-          consoleProps['Matched `cy.intercept()`'] = formatInterception(req.interceptions[0])
-        }
-      }
-
-      if (req.stack) {
-        consoleProps['groups'] = () => {
-          return [
-            {
-              name: 'Initiator',
-              items: [req.stack],
-              label: false,
-            },
-          ]
-        }
-      }
-
-      // details on request/response/errors
-      consoleProps['Request Headers'] = req.preRequest.headers
-
-      if (req.responseReceived) {
-        _.assign(consoleProps, {
-          'Response Status Code': req.responseReceived.status,
-          'Response Headers': req.responseReceived.headers,
-        })
-      }
-
-      let resBody
-
-      if (req.xhr) {
-        consoleProps['Response Body'] = req.xhr.responseBody
-      } else if ((resBody = _.chain(req.interceptions).last().get('interception.response.body').value())) {
-        consoleProps['Response Body'] = resBody
-      }
-
-      if (req.error) {
-        consoleProps['Error'] = req.error
-      }
-
-      return consoleProps
-    },
+    consoleProps: () => req.consoleProps,
     renderProps: () => {
       function getIndicator (): 'aborted' | 'pending' | 'successful' | 'bad' {
         if (!req.responseReceived) {
@@ -211,9 +153,89 @@ class ProxyRequest {
     resModified?: boolean
   } = {}
 
+  // constant reference to consoleProps so changes reach the console
+  // @see https://github.com/cypress-io/cypress/issues/17656
+  readonly consoleProps: any
+
   constructor (preRequest: BrowserPreRequest, opts?: Partial<ProxyRequest>) {
     this.preRequest = preRequest
     opts && _.assign(this, opts)
+
+    // high-level request information
+    this.consoleProps = {
+      'Resource Type': preRequest.resourceType,
+      Method: preRequest.method,
+      URL: preRequest.url,
+    }
+
+    this.updateConsoleProps()
+  }
+
+  updateConsoleProps () {
+    const { consoleProps } = this
+
+    consoleProps['Request went to origin?'] = this.flags.stubbed ? 'no (response was stubbed, see below)' : 'yes'
+
+    if (this.flags.reqModified) consoleProps['Request modified?'] = 'yes'
+
+    if (this.flags.resModified) consoleProps['Response modified?'] = 'yes'
+
+    // details on matched XHR/intercept
+    if (this.xhr) consoleProps['XHR'] = this.xhr.xhr
+
+    if (this.interceptions.length) {
+      if (this.interceptions.length > 1) {
+        consoleProps['Matched `cy.intercept()`s'] = this.interceptions.map(formatInterception)
+      } else {
+        consoleProps['Matched `cy.intercept()`'] = formatInterception(this.interceptions[0])
+      }
+    }
+
+    if (this.stack) {
+      consoleProps['groups'] = () => {
+        return [
+          {
+            name: 'Initiator',
+            items: [this.stack],
+            label: false,
+          },
+        ]
+      }
+    }
+
+    // ensure these fields are always ordered correctly regardless of when they are added
+    ['Response Status Code', 'Response Headers', 'Response Body', 'Request Headers', 'Request Body'].forEach((k) => delete consoleProps[k])
+
+    // details on request
+    consoleProps['Request Headers'] = this.preRequest.headers
+
+    const reqBody = _.chain(this.interceptions).last().get('interception.request.body').value()
+
+    if (reqBody) consoleProps['Request Body'] = reqBody
+
+    if (this.responseReceived) {
+      _.assign(consoleProps, {
+        'Response Status Code': this.responseReceived.status,
+        'Response Headers': this.responseReceived.headers,
+      })
+    }
+
+    // details on response
+    let resBody
+
+    if (this.xhr) {
+      if (!consoleProps['Response Headers']) consoleProps['Response Headers'] = this.xhr.responseHeaders
+
+      if (!consoleProps['Response Status Code']) consoleProps['Response Status Code'] = this.xhr.xhr.status
+
+      consoleProps['Response Body'] = this.xhr.xhr.response
+    } else if ((resBody = _.chain(this.interceptions).last().get('interception.response.body').value())) {
+      consoleProps['Response Body'] = resBody
+    }
+
+    if (this.error) {
+      consoleProps['Error'] = this.error
+    }
   }
 
   setFlag = (flag: keyof ProxyRequest['flags']) => {
@@ -229,7 +251,7 @@ type UnmatchedXhrLog = {
   stack?: string
 }
 
-export class ProxyLogging {
+export default class ProxyLogging {
   unloggedPreRequests: Array<BrowserPreRequest> = []
   unmatchedXhrLogs: Array<UnmatchedXhrLog> = []
   proxyRequests: Array<ProxyRequest> = []
@@ -302,6 +324,19 @@ export class ProxyLogging {
     return proxyRequest
   }
 
+  private updateProxyRequestWithResponse (proxyRequest, responseReceived) {
+    proxyRequest.responseReceived = responseReceived
+
+    proxyRequest.updateConsoleProps()
+
+    // @ts-ignore
+    const hasResponseSnapshot = proxyRequest.log?.get('snapshots')?.find((v) => v.name === 'response')
+
+    if (!hasResponseSnapshot) proxyRequest.log?.snapshot('response')
+
+    proxyRequest.log?.end()
+  }
+
   private updateRequestWithResponse (responseReceived: BrowserResponseReceived): void {
     const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === responseReceived.requestId)
 
@@ -309,8 +344,13 @@ export class ProxyLogging {
       return debug('unmatched responseReceived event %o', responseReceived)
     }
 
-    proxyRequest.responseReceived = responseReceived
-    proxyRequest.log?.snapshot('response').end()
+    if (proxyRequest.xhr && proxyRequest.xhr.xhr.readyState !== XMLHttpRequest.DONE) {
+      proxyRequest.xhr.xhr.addEventListener('load', () => {
+        this.updateProxyRequestWithResponse(proxyRequest, responseReceived)
+      })
+    } else {
+      this.updateProxyRequestWithResponse(proxyRequest, responseReceived)
+    }
   }
 
   private updateRequestWithError (error: RequestError): void {
@@ -321,6 +361,7 @@ export class ProxyLogging {
     }
 
     proxyRequest.error = $errUtils.makeErrFromObj(error.error)
+    proxyRequest.updateConsoleProps()
     proxyRequest.log?.snapshot('error').error(proxyRequest.error)
   }
 
@@ -361,7 +402,11 @@ export class ProxyLogging {
     const proxyRequest = new ProxyRequest(preRequest)
     const logConfig = getRequestLogConfig(proxyRequest as Omit<ProxyRequest, 'log'>)
 
-    proxyRequest.log = this.Cypress.log(logConfig).snapshot('request')
+    // TODO: Figure out what is causing the race condition here
+    //       Follow up on latest log regression fix to see if this is resolved.
+    if (this.Cypress.log) {
+      proxyRequest.log = this.Cypress.log(logConfig)?.snapshot('request')
+    }
 
     this.proxyRequests.push(proxyRequest as ProxyRequest)
 

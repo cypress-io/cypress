@@ -14,7 +14,7 @@ You can also try clearing the cache with 'cypress cache clear' and reinstalling.
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -48,7 +48,7 @@ ENOENT: no such file or directory, stat '/custom/'
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -89,7 +89,7 @@ https://on.cypress.io/not-installed-ci-error
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -105,7 +105,7 @@ Cypress executable not found at: /cache/Cypress/1.2.3/Cypress.app/Contents/MacOS
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -126,7 +126,7 @@ an error about dependencies
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -144,7 +144,7 @@ Error: EPERM NOT PERMITTED
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -166,7 +166,7 @@ some stderr
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -188,7 +188,7 @@ some stderr
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -210,7 +210,7 @@ some stdout
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -232,7 +232,7 @@ ENOENT: no such file or directory, stat '/custom/'
 
 ----------
 
-Platform: linux (Foo-OsVersion)
+Platform: linux-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -248,7 +248,7 @@ Cypress executable not found at: /cache/Cypress/1.2.3/Cypress.app/Contents/MacOS
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -264,7 +264,7 @@ Cypress executable not found at: /cache/Cypress/1.2.3/Cypress.app/Contents/MacOS
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -363,7 +363,7 @@ ENOENT: no such file or directory, stat '/custom/'
 
 ----------
 
-Platform: win32 (Foo-OsVersion)
+Platform: win32-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -385,7 +385,7 @@ Error: test without xvfb
 
 ----------
 
-Platform: darwin (Foo-OsVersion)
+Platform: darwin-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 
 `
@@ -412,6 +412,6 @@ Please refer to the error above for more detail.
 
 ----------
 
-Platform: linux (Foo-OsVersion)
+Platform: linux-x64 (Foo-OsVersion)
 Cypress Version: 1.2.3
 `

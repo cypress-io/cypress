@@ -1,5 +1,11 @@
 <p align="center">
-  <img src="https://cloud.githubusercontent.com/assets/1268976/20607953/d7ae489c-b24a-11e6-9cc4-91c6c74c5e88.png"/>
+  <a href="https://www.cypress.io">
+    <picture>
+      <source media="(prefers-color-scheme: dark)"  srcset="./assets/cypress-logo-dark.png">
+      <source media="(prefers-color-scheme: light)" srcset="./assets/cypress-logo-light.png">
+      <img alt="Cypress Logo" src="./assets/cypress-logo-light.png">
+    </picture>    
+  </a>
 </p>
 <p align="center">
   <a href="https://on.cypress.io">Documentation</a> |
@@ -42,7 +48,7 @@
 
 [![npm version](https://badge.fury.io/js/cypress.svg)](https://badge.fury.io/js/cypress)
 
-Install Cypress for Mac, Linux, or Windows, then [get started](https://docs.cypress.io/guides/getting-started/installing-cypress.html).
+Install Cypress for Mac, Linux, or Windows, then [get started](https://on.cypress.io/install).
 
 ```bash
 npm install cypress --save-dev
@@ -58,13 +64,16 @@ yarn add cypress --dev
 ## Contributing
 
 - [![CircleCI](https://circleci.com/gh/cypress-io/cypress/tree/develop.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress/tree/develop) - `develop` branch
-- [![CircleCI](https://circleci.com/gh/cypress-io/cypress/tree/master.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress/tree/master) - `master` branch
 
 Please see our [Contributing Guideline](./CONTRIBUTING.md) which explains repo organization, linting, testing, and other steps.
 
+## How we work
+
+At Cypress we value our community and strive to be as open and transparent with them as possible.  Check out [our guide](./cypress-prioritization-and-triage.md) on how we prioritize community issues.
+
 ## License
 
-[![license](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/cypress-io/cypress/blob/master/LICENSE)
+[![license](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/cypress-io/cypress/blob/develop/LICENSE)
 
 This project is licensed under the terms of the [MIT license](/LICENSE).
 

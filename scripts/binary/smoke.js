@@ -6,7 +6,8 @@ const path = require('path')
 const Promise = require('bluebird')
 const os = require('os')
 const verify = require('../../cli/lib/tasks/verify')
-const Fixtures = require('../../packages/server/test/support/helpers/fixtures')
+const Fixtures = require('@tooling/system-tests')
+const { scaffoldCommonNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 
 const fs = Promise.promisifyAll(fse)
 
@@ -82,7 +83,7 @@ const runProjectTest = function (buildAppExecutable, e2e) {
 
     const args = [
       `--run-project=${e2e}`,
-      `--spec=${e2e}/cypress/integration/simple_passing_spec.js`,
+      `--spec=${e2e}/cypress/e2e/simple_passing.cy.js`,
     ]
 
     if (verify.needsSandbox()) {
@@ -117,8 +118,8 @@ const runFailingProjectTest = function (buildAppExecutable, e2e) {
   console.log('running failing project test')
 
   const verifyScreenshots = function () {
-    const screenshot1 = path.join(e2e, 'cypress', 'screenshots', 'simple_failing_spec.js', 'simple failing spec -- fails1 (failed).png')
-    const screenshot2 = path.join(e2e, 'cypress', 'screenshots', 'simple_failing_spec.js', 'simple failing spec -- fails2 (failed).png')
+    const screenshot1 = path.join(e2e, 'cypress', 'screenshots', 'simple_failing.cy.js', 'simple failing spec -- fails1 (failed).png')
+    const screenshot2 = path.join(e2e, 'cypress', 'screenshots', 'simple_failing.cy.js', 'simple failing spec -- fails2 (failed).png')
 
     return Promise.all([
       fs.statAsync(screenshot1),
@@ -132,7 +133,7 @@ const runFailingProjectTest = function (buildAppExecutable, e2e) {
 
       const args = [
         `--run-project=${e2e}`,
-        `--spec=${e2e}/cypress/integration/simple_failing_spec.js`,
+        `--spec=${e2e}/cypress/e2e/simple_failing.cy.js`,
       ]
 
       if (verify.needsSandbox()) {
@@ -159,21 +160,69 @@ const runFailingProjectTest = function (buildAppExecutable, e2e) {
   .then(verifyScreenshots)
 }
 
-const test = function (buildAppExecutable) {
-  Fixtures.scaffold()
+const runV8SnapshotProjectTest = function (buildAppExecutable, e2e) {
+  if (shouldSkipProjectTest()) {
+    console.log('skipping failing project test')
 
+    return Promise.resolve()
+  }
+
+  console.log('running v8 snapshot project test')
+
+  const spawn = () => {
+    return new Promise((resolve, reject) => {
+      const env = _.omit(process.env, 'CYPRESS_INTERNAL_ENV')
+
+      const args = [
+        `--run-project=${e2e}`,
+        `--spec=${e2e}/cypress/e2e/simple_v8_snapshot.cy.js`,
+      ]
+
+      if (verify.needsSandbox()) {
+        args.push('--no-sandbox')
+      }
+
+      const options = {
+        stdio: 'inherit',
+        env,
+      }
+
+      return cp.spawn(buildAppExecutable, args, options)
+      .on('exit', (code) => {
+        if (code === 0) {
+          return resolve()
+        }
+
+        return reject(new Error(`running project tests failed with: '${code}' errors.`))
+      })
+    })
+  }
+
+  return spawn()
+}
+
+const test = async function (buildAppExecutable) {
+  await scaffoldCommonNodeModules()
+  await Fixtures.scaffoldProject('e2e')
   const e2e = Fixtures.projectPath('e2e')
 
-  return runSmokeTest(buildAppExecutable)
-  .then(() => {
-    return runProjectTest(buildAppExecutable, e2e)
-  }).then(() => {
-    return runFailingProjectTest(buildAppExecutable, e2e)
-  }).then(() => {
-    return Fixtures.remove()
-  })
+  await runSmokeTest(buildAppExecutable)
+  await runProjectTest(buildAppExecutable, e2e)
+  await runFailingProjectTest(buildAppExecutable, e2e)
+  if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE)) {
+    await runV8SnapshotProjectTest(buildAppExecutable, e2e)
+  }
+
+  Fixtures.remove()
 }
 
 module.exports = {
   test,
+}
+
+if (require.main === module) {
+  const buildAppExecutable = path.join(__dirname, `../../build/${os.platform()}-unpacked/Cypress`)
+
+  console.log('Script invoked directly, running smoke tests.')
+  test(buildAppExecutable)
 }

@@ -3,51 +3,58 @@ import Bluebird from 'bluebird'
 interface QueueRunProps {
   onRun: () => Bluebird<any> | Promise<any>
   onError: (err: Error) => void
-  onFinish: () => void
+  onFinish: () => Bluebird<any> | Promise<any>
 }
 
-export const create = <T>(queueables: T[] = []) => {
-  let stopped = false
+export class Queue<T> {
+  private queueables: T[] = []
+  private _stopped = false
+  index: number = 0
 
-  const get = (): T[] => {
-    return queueables
+  constructor (queueables: T[] = []) {
+    this.queueables = queueables
   }
 
-  const add = (queueable: T) => {
-    queueables.push(queueable)
+  get (): T[] {
+    return this.queueables
   }
 
-  const insert = (index: number, queueable: T) => {
-    if (index < 0 || index > queueables.length) {
+  add (queueable: T) {
+    this.queueables.push(queueable)
+  }
+
+  insert (index: number, queueable: T) {
+    if (index < 0 || index > this.queueables.length) {
       throw new Error(`queue.insert must be called with a valid index - the index (${index}) is out of bounds`)
     }
 
-    queueables.splice(index, 0, queueable)
+    this.queueables.splice(index, 0, queueable)
 
     return queueable
   }
 
-  const slice = (index: number) => {
-    return queueables.slice(index)
+  slice (index: number) {
+    return this.queueables.slice(index)
   }
 
-  const at = (index: number): T => {
-    return get()[index]
+  at (index: number): T {
+    return this.queueables[index]
   }
 
-  const reset = () => {
-    stopped = false
+  reset () {
+    this._stopped = false
   }
 
-  const clear = () => {
-    queueables.length = 0
+  clear () {
+    this.index = 0
+    this.queueables.length = 0
   }
 
-  const stop = () => {
-    stopped = true
+  stop () {
+    this._stopped = true
   }
 
-  const run = ({ onRun, onError, onFinish }: QueueRunProps) => {
+  run ({ onRun, onError, onFinish }: QueueRunProps) {
     let inner
     let rejectOuterAndCancelInner
 
@@ -76,7 +83,7 @@ export const create = <T>(queueables: T[] = []) => {
       }
     })
     .catch(onError)
-    .finally(onFinish)
+    .then(onFinish)
 
     const cancel = () => {
       promise.cancel()
@@ -92,23 +99,23 @@ export const create = <T>(queueables: T[] = []) => {
     }
   }
 
-  return {
-    get,
-    add,
-    insert,
-    slice,
-    at,
-    reset,
-    clear,
-    stop,
-    run,
+  get length () {
+    return this.queueables.length
+  }
 
-    get length () {
-      return queueables.length
-    },
+  get stopped () {
+    return this._stopped
+  }
 
-    get stopped () {
-      return stopped
-    },
+  /**
+   * Helper function to return the last item in the queue.
+   * @returns The last item or undefined if the queue is empty.
+   */
+  last (): T | undefined {
+    if (this.length < 1) {
+      return undefined
+    }
+
+    return this.at(this.length - 1)
   }
 }

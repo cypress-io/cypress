@@ -1,5 +1,8 @@
 const _ = require('lodash')
+const isCi = require('is-ci')
 const debug = require('debug')('cypress:server')
+
+const getIsCi = () => isCi
 
 const join = (char, ...pieces) => {
   return _.chain(pieces).compact().join(char).value()
@@ -246,6 +249,7 @@ const _providerCiParams = () => {
       'GITHUB_ACTION',
       'GITHUB_EVENT_NAME',
       'GITHUB_RUN_ID',
+      'GITHUB_RUN_ATTEMPT',
       'GITHUB_REPOSITORY',
     ]),
     // see https://docs.gitlab.com/ee/ci/variables/
@@ -500,11 +504,12 @@ const _providerCommitParams = () => {
     },
     drone: {
       sha: env.DRONE_COMMIT_SHA,
-      branch: env.DRONE_COMMIT_BRANCH,
+      // https://docs.drone.io/pipeline/environment/reference/drone-source-branch/
+      branch: env.DRONE_SOURCE_BRANCH,
       message: env.DRONE_COMMIT_MESSAGE,
       authorName: env.DRONE_COMMIT_AUTHOR,
       authorEmail: env.DRONE_COMMIT_AUTHOR_EMAIL,
-      // remoteOrigin: ???
+      remoteOrigin: env.DRONE_GIT_HTTP_URL,
       defaultBranch: env.DRONE_REPO_BRANCH,
     },
     githubActions: {
@@ -512,6 +517,7 @@ const _providerCommitParams = () => {
       branch: env.GH_BRANCH || env.GITHUB_REF,
       defaultBranch: env.GITHUB_BASE_REF,
       remoteBranch: env.GITHUB_HEAD_REF,
+      runAttempt: env.GITHUB_RUN_ATTEMPT,
     },
     gitlab: {
       sha: env.CI_COMMIT_SHA,
@@ -665,6 +671,8 @@ const detectableCiBuildIdProviders = () => {
 }
 
 module.exports = {
+  getIsCi,
+
   list,
 
   provider,

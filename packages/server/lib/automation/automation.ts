@@ -3,28 +3,18 @@ import { v4 as uuidv4 } from 'uuid'
 import { Cookies } from './cookies'
 import { Screenshot } from './screenshot'
 import type { BrowserPreRequest } from '@packages/proxy'
-
-type NullableMiddlewareHook = (() => void) | null
+import type { AutomationMiddleware, OnRequestEvent } from '@packages/types'
+import { cookieJar } from '../util/cookies'
 
 export type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => void
 
-export type onRequestEvent = (eventName: string, data: any) => void
-
-interface IMiddleware {
-  onPush: NullableMiddlewareHook
-  onBeforeRequest: NullableMiddlewareHook
-  onRequest: ((msg: string, data: unknown) => void) | null
-  onResponse: NullableMiddlewareHook
-  onAfterResponse: NullableMiddlewareHook
-}
-
 export class Automation {
   private requests: Record<number, (any) => void>
-  private middleware: IMiddleware
+  private middleware: AutomationMiddleware
   private cookies: Cookies
   private screenshot: { capture: (data: any, automate: any) => any }
 
-  constructor (cyNamespace?: string, cookieNamespace?: string, screenshotsFolder?: string | false, public onBrowserPreRequest?: OnBrowserPreRequest, public onRequestEvent?: onRequestEvent) {
+  constructor (cyNamespace?: string, cookieNamespace?: string, screenshotsFolder?: string | false, public onBrowserPreRequest?: OnBrowserPreRequest, public onRequestEvent?: OnRequestEvent) {
     this.requests = {}
 
     // set the middleware
@@ -34,7 +24,7 @@ export class Automation {
     this.screenshot = Screenshot(screenshotsFolder)
   }
 
-  initializeMiddleware = (): IMiddleware => {
+  initializeMiddleware = (): AutomationMiddleware => {
     return {
       onPush: this.middleware?.onPush || null,
       onBeforeRequest: null,
@@ -120,10 +110,20 @@ export class Automation {
           return this.cookies.setCookie(data, automate)
         case 'set:cookies':
           return this.cookies.setCookies(data, automate)
+        case 'add:cookies':
+          return this.cookies.addCookies(data, automate)
         case 'clear:cookies':
-          return this.cookies.clearCookies(data, automate)
+          return Bluebird.all([
+            this.cookies.clearCookies(data, automate),
+            cookieJar.removeAllCookies(),
+          ])
+          .spread((automationResult) => automationResult)
         case 'clear:cookie':
-          return this.cookies.clearCookie(data, automate)
+          return Bluebird.all([
+            this.cookies.clearCookie(data, automate),
+            cookieJar.removeCookie(data),
+          ])
+          .spread((automationResult) => automationResult)
         case 'change:cookie':
           return this.cookies.changeCookie(data)
         case 'create:download':
@@ -143,7 +143,7 @@ export class Automation {
     return this.middleware
   }
 
-  use (middlewares: IMiddleware) {
+  use (middlewares: AutomationMiddleware) {
     return this.middleware = {
       ...this.middleware,
       ...middlewares,
@@ -184,7 +184,7 @@ export class Automation {
     }
   }
 
-  get = (fn: keyof IMiddleware) => {
+  get = <K extends keyof AutomationMiddleware>(fn: K): AutomationMiddleware[K] => {
     return this.middleware[fn]
   }
 }

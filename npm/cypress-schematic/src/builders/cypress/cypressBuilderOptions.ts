@@ -2,12 +2,15 @@ import { JsonObject } from '@angular-devkit/core'
 
 export interface CypressBuilderOptions extends JsonObject {
   baseUrl: string
-  configFile: string | false
-  browser: 'electron' | 'chrome' | 'chromium' | 'canary' | 'firefox' | string
+  configFile: string
+  browser: 'electron' | 'chrome' | 'chromium' | 'canary' | 'firefox' | 'edge' | string
   devServerTarget: string
+  e2e: boolean
+  component: boolean
   env: Record<string, string>
   quiet: boolean
   exit: boolean
+  headed: boolean
   headless: boolean
   key: string
   parallel: boolean
@@ -18,4 +21,5 @@ export interface CypressBuilderOptions extends JsonObject {
   spec: string
   tsConfig: string
   watch: boolean
+  testingType: 'e2e' | 'component'
 }

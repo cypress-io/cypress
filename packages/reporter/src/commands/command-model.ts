@@ -1,58 +1,62 @@
 import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
 
-import Err from '../errors/err-model'
+import Err, { ErrProps } from '../errors/err-model'
 import Instrument, { InstrumentProps } from '../instruments/instrument-model'
 import type { TimeoutID } from '../lib/types'
+import { SessionProps } from '../sessions/sessions-model'
 
 const LONG_RUNNING_THRESHOLD = 1000
 
-interface RenderProps {
+type InterceptStatuses = 'req modified' | 'req + res modified' | 'res modified'
+type XHRStatuses = '---' | '(canceled)' | '(aborted)' | string // string = any xhr status
+
+export interface RenderProps {
   message?: string
-  indicator?: string
+  indicator?: 'successful' | 'pending' | 'aborted' | 'bad'
   interceptions?: Array<{
     command: 'intercept' | 'route'
     alias?: string
     type: 'function' | 'stub' | 'spy'
   }>
-  status?: string
+  status?: InterceptStatuses | XHRStatuses
   wentToOrigin?: boolean
 }
 
 export interface CommandProps extends InstrumentProps {
-  err?: Err
+  err?: ErrProps
   event?: boolean
   number?: number
   numElements: number
   renderProps?: RenderProps
+  sessionInfo?: SessionProps['sessionInfo']
   timeout?: number
   visible?: boolean
   wallClockStartedAt?: string
   hookId: string
   isStudio?: boolean
-  showError?: boolean
   group?: number
+  groupLevel?: number
   hasSnapshot?: boolean
   hasConsoleProps?: boolean
-
 }
 
 export default class Command extends Instrument {
   @observable.struct renderProps: RenderProps = {}
-  @observable err = new Err({})
+  @observable.struct sessionInfo?: SessionProps['sessionInfo']
+  @observable err?: Err
   @observable event?: boolean = false
   @observable isLongRunning = false
   @observable number?: number
   @observable numElements: number
   @observable timeout?: number
-  @observable visible?: boolean = true
+  @observable visible?: boolean
   @observable wallClockStartedAt?: string
   @observable children: Array<Command> = []
-  @observable isChild = false
   @observable hookId: string
   @observable isStudio: boolean
-  @observable showError?: boolean = false
   @observable group?: number
+  @observable groupLevel?: number
   @observable hasSnapshot?: boolean
   @observable hasConsoleProps?: boolean
   @observable _isOpen: boolean|null = null
@@ -64,9 +68,21 @@ export default class Command extends Instrument {
     return this.renderProps.message || this.message
   }
 
+  private countNestedCommands (children) {
+    if (children.length === 0) {
+      return 0
+    }
+
+    return children.length + children.reduce((previousValue, child) => previousValue + this.countNestedCommands(child.children), 0)
+  }
+
   @computed get numChildren () {
-    // and one to include self so it's the total number of same events
-    return this.children.length + 1
+    if (this.event) {
+      // add one to include self so it's the total number of same events
+      return this.children.length + 1
+    }
+
+    return this.countNestedCommands(this.children)
   }
 
   @computed get isOpen () {
@@ -74,11 +90,18 @@ export default class Command extends Instrument {
 
     return this._isOpen || (this._isOpen === null
       && (
-        (this.group && this.type === 'system' && this.hasChildren) ||
-        _.some(this.children, (v) => v.hasChildren) ||
-        _.last(this.children)?.isOpen ||
+        this.err?.isRecovered ||
+        (this.name === 'session' && this.state === 'failed') ||
+        // command has nested commands
+        (this.name !== 'session' && this.hasChildren && !this.event && this.type !== 'system') ||
+        // command has nested commands with children
+        (this.name !== 'session' && _.some(this.children, (v) => v.hasChildren)) ||
+        // last nested command is open
+        (this.name !== 'session' && _.last(this.children)?.isOpen) ||
+        // show slow command when test is running
         (_.some(this.children, (v) => v.isLongRunning) && _.last(this.children)?.state === 'pending') ||
-        _.some(this.children, (v) => v.state === 'failed')
+        // at last nested command failed
+        _.last(this.children)?.state === 'failed'
       )
     )
   }
@@ -88,26 +111,46 @@ export default class Command extends Instrument {
   }
 
   @computed get hasChildren () {
-    return this.numChildren > 1
+    if (this.event) {
+      // if the command is an event log, we add one to the number of children count to include
+      // itself in the total number of same events that render when the group is closed
+      return this.numChildren > 1
+    }
+
+    return this.numChildren > 0
+  }
+
+  @computed get showError () {
+    if (this.hasChildren) {
+      return (this.err?.isRecovered && this.isOpen)
+    }
+
+    return this.err?.isRecovered
   }
 
   constructor (props: CommandProps) {
     super(props)
 
-    this.err.update(props.err)
+    if (props.err) {
+      this.err = new Err(props.err)
+    }
+
     this.event = props.event
     this.number = props.number
     this.numElements = props.numElements
     this.renderProps = props.renderProps || {}
+    this.sessionInfo = props.sessionInfo
     this.timeout = props.timeout
-    this.visible = props.visible
+    // command log that are not associated with elements will not have a visibility
+    // attribute set. i.e. cy.visit(), cy.readFile() or cy.log()
+    this.visible = props.visible === undefined || props.visible
     this.wallClockStartedAt = props.wallClockStartedAt
     this.hookId = props.hookId
     this.isStudio = !!props.isStudio
-    this.showError = props.showError
     this.group = props.group
-    this.hasSnapshot = props.hasSnapshot
-    this.hasConsoleProps = props.hasConsoleProps
+    this.hasSnapshot = !!props.hasSnapshot
+    this.hasConsoleProps = !!props.hasConsoleProps
+    this.groupLevel = props.groupLevel || 0
 
     this._checkLongRunning()
   }
@@ -115,15 +158,24 @@ export default class Command extends Instrument {
   update (props: CommandProps) {
     super.update(props)
 
-    this.err.update(props.err)
+    if (props.err) {
+      if (!this.err) {
+        this.err = new Err(props.err)
+      } else {
+        this.err.update(props.err)
+      }
+    }
+
     this.event = props.event
     this.numElements = props.numElements
     this.renderProps = props.renderProps || {}
-    this.visible = props.visible
+    this.sessionInfo = props.sessionInfo
+    // command log that are not associated with elements will not have a visibility
+    // attribute set. i.e. cy.visit(), cy.readFile() or cy.log()
+    this.visible = props.visible === undefined || props.visible
     this.timeout = props.timeout
     this.hasSnapshot = props.hasSnapshot
     this.hasConsoleProps = props.hasConsoleProps
-    this.showError = props.showError
 
     this._checkLongRunning()
   }
@@ -142,7 +194,6 @@ export default class Command extends Instrument {
   }
 
   addChild (command: Command) {
-    command.isChild = true
     command.setGroup(this.id)
     this.children.push(command)
   }

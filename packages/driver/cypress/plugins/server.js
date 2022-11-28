@@ -8,10 +8,12 @@ const path = require('path')
 const Promise = require('bluebird')
 const multer = require('multer')
 const upload = multer({ dest: 'cypress/_test-output/' })
+const { cors } = require('@packages/network')
 
 const PATH_TO_SERVER_PKG = path.dirname(require.resolve('@packages/server'))
+
 const httpPorts = [3500, 3501]
-const httpsPort = 3502
+const httpsPorts = [3502, 3503]
 
 const createApp = (port) => {
   const app = express()
@@ -25,6 +27,7 @@ const createApp = (port) => {
   })
 
   app.use(require('cors')())
+  app.use(require('cookie-parser')())
   app.use(require('compression')())
   app.use(bodyParser.urlencoded({ extended: false }))
   app.use(bodyParser.json())
@@ -35,9 +38,21 @@ const createApp = (port) => {
     return res.sendStatus(200)
   })
 
+  app.get('/', (req, res) => {
+    return res.send('<html><body>root page</body></html>')
+  })
+
   app.get('/timeout', (req, res) => {
     return Promise
     .delay(req.query.ms || 0)
+    .then(() => {
+      return res.send('<html><body>timeout</body></html>')
+    })
+  })
+
+  app.get('/redirect-timeout', (req, res) => {
+    return Promise
+    .delay(100)
     .then(() => {
       return res.send('<html><body>timeout</body></html>')
     })
@@ -119,6 +134,7 @@ const createApp = (port) => {
 
     return res
     .set('WWW-Authenticate', 'Basic')
+    .type('html')
     .sendStatus(401)
   })
 
@@ -180,6 +196,126 @@ const createApp = (port) => {
     .send('<html><body>server error</body></html>')
   })
 
+  app.get('/prelogin', (req, res) => {
+    const { redirect, override } = req.query
+    let cookie = 'prelogin=true'
+
+    // if testing overridden cookies, need to make it cross-origin so it's
+    // included in the cross-origin `/login` request
+    if (override) {
+      cookie += '; SameSite=None; Secure'
+    }
+
+    res
+    .header('Set-Cookie', cookie)
+    .redirect(302, redirect)
+  })
+
+  app.get('/cookie-login', (req, res) => {
+    const { cookie, localhostCookie, username, redirect } = req.query
+
+    res
+    .header('Set-Cookie', decodeURIComponent(cookie))
+    .redirect(302, `/verify-cookie-login?username=${username}&redirect=${redirect}&cookie=${localhostCookie}`)
+  })
+
+  const getUserCookie = (req) => {
+    return req.cookies.user || req.cookies['__Host-user'] || req.cookies['__Secure-user']
+  }
+
+  app.get('/verify-cookie-login', (req, res) => {
+    if (!getUserCookie(req)) {
+      return res
+      .send('<html><body><h1>Not logged in</h1></body></html>')
+    }
+
+    const { cookie, username, redirect } = req.query
+
+    res.send(`
+      <html>
+        <body>
+          <h1>Redirecting ${username}...</h1>
+          <script>
+            setTimeout(() => {
+              window.location.href = '${redirect}?username=${username}&cookie=${cookie}'
+            }, 500)
+          </script>
+        </body>
+      </html>
+    `)
+  })
+
+  app.get('/login', (req, res) => {
+    const { cookie, username } = req.query
+
+    if (!username) {
+      return res.send('<html><body><h1>Must specify username to log in</h1></body></html>')
+    }
+
+    if (!req.cookies.prelogin) {
+      return res.send('<html><body><h1>Social login failed</h1></body></html>')
+    }
+
+    const decodedCookie = decodeURIComponent(cookie)
+
+    res
+    .append('Set-Cookie', decodedCookie)
+    .append('Set-Cookie', 'prelogin=verified')
+    .redirect(302, '/welcome')
+  })
+
+  app.get('/logout', (req, res) => {
+    res
+    .header('Set-Cookie', 'user=')
+    .redirect(302, '/welcome')
+  })
+
+  app.get('/welcome', (req, res) => {
+    const user = getUserCookie(req)
+
+    if (!user) {
+      return res.send('<html><body><h1>No user found</h1></body></html>')
+    }
+
+    if (req.cookies.prelogin !== 'verified') {
+      return res.send('<html><body><h1>Login not verified</h1></body></html>')
+    }
+
+    res.send(`<html><body><h1>Welcome, ${user}!</h1></body></html>`)
+  })
+
+  app.get('/test-request', (req, res) => {
+    res.sendStatus(200)
+  })
+
+  app.get('/set-cookie', (req, res) => {
+    const { cookie } = req.query
+
+    res
+    .append('Set-Cookie', cookie)
+    .sendStatus(200)
+  })
+
+  app.get('/test-request-credentials', (req, res) => {
+    const origin = cors.getOrigin(req['headers']['referer'])
+
+    res
+    .setHeader('Access-Control-Allow-Origin', origin)
+    .setHeader('Access-Control-Allow-Credentials', 'true')
+    .sendStatus(200)
+  })
+
+  app.get('/set-cookie-credentials', (req, res) => {
+    const { cookie } = req.query
+    const origin = cors.getOrigin(req['headers']['referer'])
+
+    res
+    .setHeader('Access-Control-Allow-Origin', origin)
+    .setHeader('Access-Control-Allow-Credentials', 'true')
+    .append('Set-Cookie', cookie)
+    .sendStatus(200)
+  })
+
   let _var = ''
 
   app.get('/set-var', (req, res) => {
@@ -212,10 +348,14 @@ httpPorts.forEach((port) => {
   })
 })
 
-const httpsApp = createApp(httpsPort)
-const httpsServer = httpsProxy.httpsServer(httpsApp)
+// Have two HTTPS ports in order to test same-site cookie behavior in `cookie_behavior.cy.ts` for experimentalSessionAndOrigin
+// Cookies can be same site if the port is different, and we need a way to test this E2E style to make sure we implement cookie handling correctly
+httpsPorts.forEach((port) => {
+  const httpsApp = createApp(port)
+  const httpsServer = httpsProxy.httpsServer(httpsApp)
 
-httpsServer.listen(httpsPort, () => {
-  // eslint-disable-next-line no-console
-  return console.log('Express server listening on port', httpsPort, '(HTTPS)')
+  return httpsServer.listen(port, () => {
+    // eslint-disable-next-line no-console
+    return console.log('Express server listening on port', port, '(HTTPS)')
+  })
 })

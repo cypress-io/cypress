@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "module": "es2015",
+    "preserveValueImports": true
+  }
+}

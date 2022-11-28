@@ -2,7 +2,7 @@ require('../spec_helper')
 
 const _ = require('lodash')
 const os = require('os')
-const exec = require(`${root}lib/exec`)
+const exec = require(`../../lib/exec`)
 
 const isWindows = () => {
   return os.platform() === 'win32'

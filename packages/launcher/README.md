@@ -30,6 +30,7 @@ Uses [debug](https://github.com/visionmedia/debug#readme)
 to output debug log messages. To turn on, use
 
 ```sh
-DEBUG=cypress:launcher yarn workspace @packages/launcher test
+DEBUG=cypress:launcher:* yarn workspace @packages/launcher test
 ```
 
+Verbose messages, including detailed stdout, are available under `cypress-verbose:launcher:*`.

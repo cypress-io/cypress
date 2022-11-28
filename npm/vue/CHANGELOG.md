@@ -1,3 +1,135 @@
+# [@cypress/vue-v5.0.2](https://github.com/cypress-io/cypress/compare/@cypress/vue-v5.0.1...@cypress/vue-v5.0.2) (2022-11-23)
+
+
+### Bug Fixes
+
+* fix windows-lint CI job ([#24758](https://github.com/cypress-io/cypress/issues/24758)) ([2166ba0](https://github.com/cypress-io/cypress/commit/2166ba0d9496037df843d55f07517f83817171a3))
+
+# [@cypress/vue-v5.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v5.0.0...@cypress/vue-v5.0.1) (2022-11-08)
+
+
+### Bug Fixes
+
+* make component derived info not throw ([#24571](https://github.com/cypress-io/cypress/issues/24571)) ([838dd4f](https://github.com/cypress-io/cypress/commit/838dd4fa2e0ec56633d0af2faf10a47d190b5594))
+
+# [@cypress/vue-v5.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vue-v4.2.2...@cypress/vue-v5.0.0) (2022-11-07)
+
+
+### Bug Fixes
+
+* remove dependence on @cypress/<dep> types ([#24415](https://github.com/cypress-io/cypress/issues/24415)) ([58e0ab9](https://github.com/cypress-io/cypress/commit/58e0ab91604618ea6f75932622f7e66e419270e6))
+* remove last mounted component upon subsequent mount calls ([#24470](https://github.com/cypress-io/cypress/issues/24470)) ([f39eb1c](https://github.com/cypress-io/cypress/commit/f39eb1c19e0923bda7ae263168fc6448da942d54))
+* remove some CT functions and props ([#24419](https://github.com/cypress-io/cypress/issues/24419)) ([294985f](https://github.com/cypress-io/cypress/commit/294985f8b3e0fa00ed66d25f88c8814603766074))
+
+
+### Features
+
+* include component and wrapper in return type for vue mount adapter ([#24479](https://github.com/cypress-io/cypress/issues/24479)) ([33875d7](https://github.com/cypress-io/cypress/commit/33875d75505416b1f65ca7c6d5dedc46f3289f1b))
+
+
+### BREAKING CHANGES
+
+* remove last mounted component upon subsequent mount calls of mount
+* Vue mount returns wrapper and component rather than wrapper only
+
+# [@cypress/vue-v4.2.2](https://github.com/cypress-io/cypress/compare/@cypress/vue-v4.2.1...@cypress/vue-v4.2.2) (2022-11-01)
+
+
+### Bug Fixes
+
+* Hovering over mount in command log does not show component in AUT ([#24346](https://github.com/cypress-io/cypress/issues/24346)) ([355d210](https://github.com/cypress-io/cypress/commit/355d2101d38ea4d1e93b9c571cf77babab2bbbfc))
+
+# [@cypress/vue-v4.2.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v4.2.0...@cypress/vue-v4.2.1) (2022-10-13)
+
+
+### Bug Fixes
+
+* fix regression in npm/vue ([#23954](https://github.com/cypress-io/cypress/issues/23954)) ([78779a2](https://github.com/cypress-io/cypress/commit/78779a2db13ca6555a6b830dbabeefd3d37bbfe5))
+* **npm/vue:** update types ([#23890](https://github.com/cypress-io/cypress/issues/23890)) ([eb8ae02](https://github.com/cypress-io/cypress/commit/eb8ae02b61304d034136f7627da1ab23537e3ba4))
+
+# [@cypress/vue-v4.2.0](https://github.com/cypress-io/cypress/compare/@cypress/vue-v4.1.0...@cypress/vue-v4.2.0) (2022-08-30)
+
+
+### Features
+
+* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
+
+# [@cypress/vue-v4.1.0](https://github.com/cypress-io/cypress/compare/@cypress/vue-v4.0.0...@cypress/vue-v4.1.0) (2022-08-11)
+
+
+### Bug Fixes
+
+* remove CT side effects from mount when e2e testing ([#22633](https://github.com/cypress-io/cypress/issues/22633)) ([a9476ec](https://github.com/cypress-io/cypress/commit/a9476ecb3d43f628b689e060294a1952937cb1a7))
+* remove dependency causing semantic-release to fail ([#23142](https://github.com/cypress-io/cypress/issues/23142)) ([20f89bf](https://github.com/cypress-io/cypress/commit/20f89bfa32636baa8922896e719962c703129abd))
+
+
+### Features
+
+* **npm/vue:** expose Test Utils API ([#22757](https://github.com/cypress-io/cypress/issues/22757)) ([8e07318](https://github.com/cypress-io/cypress/commit/8e07318a9f72c3df012be47d500007571165a87e))
+* update to Vite 3 ([#22915](https://github.com/cypress-io/cypress/issues/22915)) ([6adba46](https://github.com/cypress-io/cypress/commit/6adba462ea6b76dbb96f99aa3837492ca1f17ed3))
+
+# [@cypress/vue-v4.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.1.2...@cypress/vue-v4.0.0) (2022-06-13)
+
+
+### Bug Fixes
+
+* display cy.mount command log ([#21500](https://github.com/cypress-io/cypress/issues/21500)) ([140b4ba](https://github.com/cypress-io/cypress/commit/140b4ba2110243712a614a39b2408c30cce4d0b1))
+* Doc changes around vue2 ([#21066](https://github.com/cypress-io/cypress/issues/21066)) ([17905a7](https://github.com/cypress-io/cypress/commit/17905a79ee5106b0d72c8e74bb717fcd7b796dee))
+
+
+### chore
+
+* prep npm packages for use with Cypress v10 ([b924d08](https://github.com/cypress-io/cypress/commit/b924d086ee2e2ccc93303731e001b2c9e9d0af17))
+
+
+### Features
+
+* Update "typescript" dev dependency ([e977b60](https://github.com/cypress-io/cypress/commit/e977b60521b863a227eb37189ab1b3081af00d9f))
+* embedding mount into the cypress binary (real dependency) ([#20930](https://github.com/cypress-io/cypress/issues/20930)) ([3fe5f50](https://github.com/cypress-io/cypress/commit/3fe5f50e7832a4bfb20df8e71648434eb7f263d5))
+* swap the #__cy_root id selector to become data-cy-root for component mounting ([#20951](https://github.com/cypress-io/cypress/issues/20951)) ([0e7b555](https://github.com/cypress-io/cypress/commit/0e7b555f93fb403f431c5de4a07ae7ad6ac89ba2))
+* update on-links ([#19235](https://github.com/cypress-io/cypress/issues/19235)) ([cc2d734](https://github.com/cypress-io/cypress/commit/cc2d7348185e2a090c60d92d9319ab460d8c7827))
+* Update "@vue/test-utils" dependency ([#20956](https://github.com/cypress-io/cypress/issues/20956)) ([57659c4](https://github.com/cypress-io/cypress/commit/57659c42468591265143aae2ff06bae4e440085f))
+
+
+### BREAKING CHANGES
+
+* new version of packages for Cypress v10
+
+# [@cypress/vue-v3.1.2](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.1.1...@cypress/vue-v3.1.2) (2022-05-03)
+
+
+### Bug Fixes
+
+* head content reset, fix [#19721](https://github.com/cypress-io/cypress/issues/19721) ([#21291](https://github.com/cypress-io/cypress/issues/21291)) ([77ab6a5](https://github.com/cypress-io/cypress/commit/77ab6a51a0de1929171a2275e9cec9580c57241d))
+
+# [@cypress/vue-v3.1.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.1.0...@cypress/vue-v3.1.1) (2022-02-10)
+
+
+### Bug Fixes
+
+* create a dummy commit to trigger release ([97e6c14](https://github.com/cypress-io/cypress/commit/97e6c14b91661658b856038da8a0f5fa4319b19b))
+
+# [@cypress/vue-v3.1.0](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.0.5...@cypress/vue-v3.1.0) (2021-12-16)
+
+
+### Features
+
+* use hoisted yarn install in binary build ([#17285](https://github.com/cypress-io/cypress/issues/17285)) ([e4f5b10](https://github.com/cypress-io/cypress/commit/e4f5b106d49d6ac0857c5fdac886f83b99558c88))
+
+# [@cypress/vue-v3.0.5](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.0.4...@cypress/vue-v3.0.5) (2021-11-10)
+
+
+### Bug Fixes
+
+* remove outdated npm registry links ([#18727](https://github.com/cypress-io/cypress/issues/18727)) ([4ded6c9](https://github.com/cypress-io/cypress/commit/4ded6c9624134fe6203f5377d62d62809cd27cda))
+
+# [@cypress/vue-v3.0.4](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.0.3...@cypress/vue-v3.0.4) (2021-10-29)
+
+
+### Bug Fixes
+
+* remove outdated registry link ([#18710](https://github.com/cypress-io/cypress/issues/18710)) ([e2a869d](https://github.com/cypress-io/cypress/commit/e2a869d2a984abb6703aec966dd9124ee693b8c1))
+
 # [@cypress/vue-v3.0.3](https://github.com/cypress-io/cypress/compare/@cypress/vue-v3.0.2...@cypress/vue-v3.0.3) (2021-07-31)
 
 

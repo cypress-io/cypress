@@ -10,7 +10,8 @@ const {
   getCIName,
   getCIBuildUrl,
 } = require('./utils')
-const { addCommitComment } = require('@cypress/github-commit-status-check')
+const { Octokit } = require('@octokit/core')
+const { createAppAuth } = require('@octokit/auth-app')
 const { stripIndent } = require('common-tags')
 
 /* eslint-disable no-console */
@@ -26,6 +27,16 @@ la(is.object(commitInfo), 'could not determine current commit information')
 const { sha } = commitInfo
 
 la(is.commitId(sha), 'could not find commit SHA')
+
+const appId = process.env.GITHUB_APP_ID
+
+la(appId, 'missing GITHUB_APP_ID')
+const privateKey = process.env.GITHUB_PRIVATE_KEY
+
+la(privateKey, 'missing GITHUB_PRIVATE_KEY')
+const installationId = process.env.GITHUB_APP_CYPRESS_INSTALLATION_ID
+
+la(installationId, 'missing GITHUB_APP_CYPRESS_INSTALLATION_ID')
 
 const platform = os.platform()
 const arch = os.arch()
@@ -55,11 +66,21 @@ const getInstallMessage = () => {
   `
 }
 
-addCommitComment({
-  owner: 'cypress-io',
-  repo: 'cypress',
-  sha,
-  comment: getInstallMessage(),
-}).then(() => {
-  console.log('Comment posted for commit %s ✅', sha)
+const appOctokit = new Octokit({
+  authStrategy: createAppAuth,
+  auth: {
+    appId,
+    privateKey: Buffer.from(privateKey, 'base64').toString(),
+    installationId,
+  },
 })
+
+appOctokit.request(
+  'POST /repos/{owner}/{repo}/commits/{commit_sha}/comments',
+  {
+    owner: 'cypress-io',
+    repo: 'cypress',
+    commit_sha: sha,
+    body: getInstallMessage(),
+  },
+).then((response) => console.log(response))

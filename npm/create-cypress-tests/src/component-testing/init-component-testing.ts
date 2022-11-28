@@ -8,6 +8,7 @@ import { guessTemplate } from './templates/guessTemplate'
 import { installFrameworkAdapter } from './installFrameworkAdapter'
 import { injectPluginsCode, getPluginsSourceExample } from './babel/babelTransform'
 import { installDependency } from '../utils'
+import { insertValuesInConfigFile } from './config-file-updater/configFileUpdater'
 
 async function injectOrShowConfigCode (injectFn: () => Promise<boolean>, {
   code,
@@ -51,27 +52,15 @@ async function injectOrShowConfigCode (injectFn: () => Promise<boolean>, {
   injected ? printSuccess() : printFailure()
 }
 
-async function injectAndShowCypressJsonConfig (
+async function injectAndShowCypressConfig (
   cypressJsonPath: string,
   componentFolder: string,
 ) {
   const configToInject = {
-    componentFolder,
-    testFiles: '**/*.spec.{js,ts,jsx,tsx}',
+    specPattern: `${componentFolder}/**/*.spec.{js,ts,jsx,tsx}`,
   }
 
-  async function autoInjectCypressJson () {
-    const currentConfig = JSON.parse(await fs.readFile(cypressJsonPath, { encoding: 'utf-8' }))
-
-    await fs.writeFile(cypressJsonPath, JSON.stringify({
-      ...currentConfig,
-      ...configToInject,
-    }, null, 2))
-
-    return true
-  }
-
-  await injectOrShowConfigCode(autoInjectCypressJson, {
+  await injectOrShowConfigCode(() => insertValuesInConfigFile(cypressJsonPath, configToInject), {
     code: JSON.stringify(configToInject, null, 2),
     language: 'js',
     filePath: cypressJsonPath,
@@ -94,7 +83,7 @@ async function injectAndShowPluginConfig<T> (template: Template<T>, {
     code: await getPluginsSourceExample(ast),
     language: 'js',
     filePath: pluginsFilePath,
-    fallbackFileMessage: 'plugins file (https://docs.cypress.io/guides/core-concepts/writing-and-organizing-tests.html#Plugin-files)',
+    fallbackFileMessage: 'plugins file (https://on.cypress.io/plugins-file)',
   })
 }
 
@@ -171,7 +160,7 @@ export async function initComponentTesting<T> ({ config, useYarn, cypressConfigP
   console.log(`Let's setup everything for component testing with ${chalk.cyan(chosenTemplateName)}:`)
   console.log()
 
-  await injectAndShowCypressJsonConfig(cypressConfigPath, componentFolder)
+  await injectAndShowCypressConfig(cypressConfigPath, componentFolder)
   await injectAndShowPluginConfig(chosenTemplate, {
     templatePayload,
     pluginsFilePath,

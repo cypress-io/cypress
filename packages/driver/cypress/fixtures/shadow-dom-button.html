@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <title>Shadow DOM Button test</title>
+    </head>
+
+    <body>
+      <cy-test-element id='element'>Click me!</cy-test-element>
+      <script>
+        class CyTestElement extends HTMLElement {
+          constructor() {
+            super();
+
+            this.attachShadow({ mode: 'open' });
+            const button = document.createElement('button');
+            const slot = document.createElement('slot');
+
+            button.setAttribute('data-test-id', 'my-button')
+
+            button.appendChild(slot);
+
+            button.addEventListener('click', () => {
+              const div = document.createElement('div');
+              div.textContent = 'Clicked'
+
+              this.shadowRoot.appendChild(div);
+            });
+
+            this.shadowRoot.appendChild(
+                button
+            );
+          }
+        }
+
+        customElements.define('cy-test-element', CyTestElement);
+      </script>
+    </body>
+</html>

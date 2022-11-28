@@ -1,18 +1,45 @@
 // This file is merged in a <script type=module> into index.html
 // it will be used to load and kick start the selected spec
 
-const supportPath = import.meta.env.__cypress_supportPath
-const originAutUrl = import.meta.env.__cypress_originAutUrl
+const CypressInstance = window.Cypress = parent.Cypress
 
-const specPath = window.location.pathname.replace(originAutUrl, '')
+const importsToLoad = []
 
-const importsToLoad = [() => import(/* @vite-ignore */ specPath)]
+/* Support file import logic, this should be removed once we
+ * are able to return relative paths from the supportFile
+ * Jira #UNIFY-1260
+ */
+const supportFile = CypressInstance.config('supportFile')
+const projectRoot = CypressInstance.config('projectRoot')
+const devServerPublicPathRoute = CypressInstance.config('devServerPublicPathRoute')
 
-if (supportPath) {
-  importsToLoad.unshift(() => import(/* @vite-ignore */ supportPath))
+if (supportFile) {
+  let supportRelativeToProjectRoot = supportFile.replace(projectRoot, '')
+
+  if (CypressInstance.config('platform') === 'win32') {
+    const platformProjectRoot = projectRoot.replaceAll('/', '\\')
+
+    supportRelativeToProjectRoot = supportFile.replace(platformProjectRoot, '')
+  }
+
+  // We need a slash before /cypress/supportFile.js, this happens by default
+  // with the current string replacement logic.
+  importsToLoad.push({
+    load: () => import(`${devServerPublicPathRoute}${supportRelativeToProjectRoot}`),
+    absolute: supportFile,
+    relative: supportRelativeToProjectRoot,
+    relativeUrl: `${devServerPublicPathRoute}${supportRelativeToProjectRoot}`,
+  })
 }
 
-const CypressInstance = window.Cypress = parent.Cypress
+/* Spec file import logic */
+// We need a slash before /src/my-spec.js, this does not happen by default.
+importsToLoad.push({
+  load: () => import(`${devServerPublicPathRoute}/${CypressInstance.spec.relative}`),
+  absolute: CypressInstance.spec.absolute,
+  relative: CypressInstance.spec.relative,
+  relativeUrl: `${devServerPublicPathRoute}/${CypressInstance.spec.relative}`,
+})
 
 if (!CypressInstance) {
   throw new Error('Tests cannot run without a reference to Cypress!')
@@ -46,3 +73,4 @@ CypressInstance.on('test:before:run', () => {
 
 // Make usage of node test plugins possible
 window.global = window
+window.process = typeof process !== 'undefined' ? process : {}

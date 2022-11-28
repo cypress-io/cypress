@@ -1,11 +1,11 @@
 import _ from 'lodash'
 import $ from 'jquery'
-import * as $document from '../document'
+import $document from '../document'
 import $jquery from '../jquery'
 import { getTagName } from './elementHelpers'
 import { isWithinShadowRoot, getShadowElementFromPoint } from './shadow'
 import { normalizeWhitespaces } from './utils'
-import $utils from '../../cypress/utils'
+import { escapeQuotes, escapeBackslashes } from '../../util/escape'
 
 /**
  * Find Parents relative to an initial element
@@ -126,8 +126,14 @@ export const getFirstDeepestElement = ($el: JQuery, index = 0) => {
   const $current = $el.slice(index, index + 1)
   const $next = $el.slice(index + 1, index + 2)
 
-  if (!$next) {
+  if (!$next || $current.length === 0) {
     return $current
+  }
+
+  // https://github.com/cypress-io/cypress/issues/14861
+  // filter out the <script> and <style> tags
+  if ($current && ['SCRIPT', 'STYLE'].includes($current.prop('tagName'))) {
+    return getFirstDeepestElement($el, index + 1)
   }
 
   // does current contain next?
@@ -155,7 +161,7 @@ export const getFirstDeepestElement = ($el: JQuery, index = 0) => {
 /**
  * By XY Coordinate
  */
-export const elementFromPoint = (doc, x, y) => {
+export const elementFromPoint = (doc, x, y): HTMLElement => {
   // first try the native elementFromPoint method
   let elFromPoint = doc.elementFromPoint(x, y)
 
@@ -223,7 +229,9 @@ export const getContainsSelector = (text, filter = '', options: {
 } = {}) => {
   const $expr = $.expr[':']
 
-  const escapedText = $utils.escapeQuotes(text)
+  const escapedText = escapeQuotes(
+    escapeBackslashes(text),
+  )
 
   // they may have written the filter as
   // comma separated dom els, so we want to search all
@@ -239,7 +247,11 @@ export const getContainsSelector = (text, filter = '', options: {
 
     // taken from jquery's normal contains method
     cyContainsSelector = function (elem) {
-      let testText = normalizeWhitespaces(elem)
+      if (elem.type === 'submit' && elem.tagName === 'INPUT') {
+        return text.test(elem.value)
+      }
+
+      const testText = normalizeWhitespaces(elem)
 
       return text.test(testText)
     }
@@ -269,8 +281,27 @@ export const getContainsSelector = (text, filter = '', options: {
     const textToFind = escapedText.includes(`\'`) ? `"${escapedText}"` : `'${escapedText}'`
 
     // use custom cy-contains selector that is registered above
-    return `${filter}:not(script,style):cy-contains(${textToFind}), ${filter}[type='submit'][value~=${textToFind}]`
+    return `${filter}:cy-contains(${textToFind}), ${filter}[type='submit'][value~=${textToFind}]`
   })
 
   return selectors.join()
+}
+
+export const getInputFromLabel = ($el) => {
+  if (!$el.is('label')) {
+    return $([])
+  }
+
+  // If an element has a "for" attribute, then clicking on it won't
+  // focus / activate any contained inputs, even if the "for" target doesn't
+  // exist.
+  if ($el.attr('for')) {
+    // The parent().last() is the current document, which is where we want to
+    // search from.
+    return $(`#${$el.attr('for')}`, $el.parents().last())
+  }
+
+  // Alternately, if a label contains inputs, clicking it focuses / activates
+  // the first one.
+  return $('input', $el).first()
 }

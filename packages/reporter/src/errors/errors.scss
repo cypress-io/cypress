@@ -1,19 +1,17 @@
+$code-border-radius: 4px;
+
 .reporter {
   .error {
-    background-color: #f5f5f5;
+    background-color: $gray-1000;
     min-height: 20px;
     padding: 24px;
 
     h2 {
-      color: #e94f5f;
+      color: $err-text;
       font-size: 1.3em;
       font-weight: 500;
       line-height: 1.4;
       margin-bottom: 0.6em;
-
-      > i {
-        margin-right: 5px;
-      }
 
       a {
         float: right;
@@ -25,7 +23,8 @@
     }
 
     pre {
-      background: #fcf8e3;
+      border-color: $orange-300;
+      color: $orange-300;
       display: block;
       width: 100%;
       white-space: initial;
@@ -52,29 +51,54 @@
     }
   }
 
-  .runnable-err-wrapper {
-    cursor: default;
-    margin: 5px 0 5px 5px;
-    padding-left: 10px;
-    border-left: 1px dotted #DDD;
+  .recovered-test-err {
+    .runnable-err-header,
+    .runnable-err-body {
+      padding-left: 49px;
+      display: flex;
+
+      .err-group-block {
+        border-left: 1px dotted $err-header-text;
+        border-image-slice: 0 0 0 1;
+        border-image-source: repeating-linear-gradient(0deg, transparent, $err-header-text, $err-header-text 4px);
+        width: 12px;
+        min-width: 12px;
+
+        &:first-of-type {
+          width: 13px;
+          min-width: 13px;
+        }
+    } 
+  }
+
+    .runnable-err-header > .runnable-err-name {
+      padding: 5px 4px 5px 15px;
+    }
+
+    .runnable-err-content {
+      padding: 0 12px 0 0;
+    }
+  }
+
+  .runnable-err-content {
+    width: 100%;
+    overflow: scroll;
+    padding: 0 18px;
   }
 
   .studio-err-wrapper {
-    display: none;
     text-align: center;
   }
 
-  &.studio-active .attempt-failed .studio-err-wrapper {
-    display: block;
-  }
-
   .runnable-err {
-    border-left: 2px solid $fail;
     background-color: $err-background;
+    border-left: $err-border;
     clear: both;
     color: $err-text;
+    font-family: $monospace;
+    font-style: normal;
     margin-bottom: 0;
-    margin-top: 5px;
+    margin-top: 2px;
     white-space: pre-wrap;
     word-break: break-word;
     user-select: initial;
@@ -82,51 +106,60 @@
   }
 
   .runnable-err-header {
-    display: flex;
-    justify-content: space-between;
     background-color: $err-header-background;
-    padding: 5px 10px;
+    display: flex;
     font-weight: bold;
+    justify-content: space-between;
+    padding-left: 18px;
+
+    svg {
+      color: $red-400;
+      align-self: center
+    }
 
     .runnable-err-name {
-      flex-grow: 2;
-      font-size: 13px;
-      line-height: 22px;;
-
-      i {
-        font-size: 10px;
-        margin-right: 10px;
-      }
+      color: $err-header-text;
+      flex: auto;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 20px;
+      padding: 5px 4px 5px 24px;
     }
   }
 
   .runnable-err-docs-url {
     margin-left: 0.5em;
     cursor: pointer;
-    font-family: $font-sans;
+    font-family: $font-system;
   }
 
   .runnable-err-message {
-    padding: 10px;
-    font-family: $monospace;
-    color: $err-text;
-    font-size: 1em;
+    font-family: $font-system;
+    font-size: 14px;
+    font-weight: 400;
+    padding: 10px 0;
 
     code {
-      background-color: $err-code-background;
-      border-radius: 5px;
+      background-color: rgba($black, 0.2);
+      border-radius: 4px;
+      color: $err-code-text;
+      font-size: 12px;
+      font-family: $monospace;
       padding: 2px 5px;
     }
 
     strong {
-      color: $err-text;
+      color: $err-code-text;
       font-weight: bold;
     }
   }
 
   .runnable-err-stack-expander {
+    align-items: center;
+    border-top: 1px dashed rgba($red-400, 0.1);
     display: flex;
-
+    padding: 10px 0;
+    flex-wrap: wrap-reverse;
     .collapsible-header {
       flex-grow: 1;
 
@@ -134,33 +167,39 @@
         outline: 0;
 
         div {
-          background: #fee0e3;
+          background: $red-900;
+        }
+      }
+
+      &:active,
+      &:hover {
+        .collapsible-header-text {
+          color: $red-100;
+        }
+        .collapsible-indicator {
+          .icon-dark {
+            stroke: $red-200;
+          }
         }
       }
 
       div {
-        background: #ffeaec;
         cursor: pointer;
         outline: none;
-        padding: 7px 5px;
+        padding: 6px 0;
         width: 100%;
 
-        &:hover {
-          background: $err-header-background;
-        }
-
-        &:active {
-          background: darken($err-header-background, 2%);
-        }
-
         .collapsible-header-text {
-          color: #4f4f4f;
-          font-size: 13px;
+          color: $red-300;
+          font-size: 14px;
+          font-weight: 500;
         }
 
         .collapsible-indicator {
           line-height: 18px;
-          color: #bbbcbd !important;
+          .icon-dark {
+            stroke: $red-400;
+          }
         }
       }
     }
@@ -168,38 +207,35 @@
     .runnable-err-print {
       &:focus {
         outline: none;
+      }
 
+      &:active,
+      &:hover {
         div {
-          background: $err-header-background;
+          color: $red-100;
+        }
+
+        svg {
+          color: $red-200;
         }
       }
 
       div {
-        background: #ffeaec;
-        color: #4f4f4f;
+        color: $red-300;
         cursor: pointer;
-        font-size: 13px;
+        font-family: $font-system;
+        font-size: 14px;
+        font-weight: 500;
         height: 100%;
-        padding: 7px 10px;
         width: 100%;
 
         &:focus {
           outline: none;
         }
 
-        &:hover {
-          background: $err-header-background;
-        }
-
-        &:active {
-          background: darken($err-header-background, 2%);
-        }
-
-        i {
-          border: solid 1px #4f4f4f;
-          border-radius: 4px;
-          font-size: 6px;
-          padding: 4px 3px;
+        svg {
+          color: $red-400;
+          margin: 4px 3px;
           vertical-align: middle;
         }
 
@@ -213,7 +249,7 @@
   .runnable-err-stack-trace {
     font-family: $monospace;
     overflow: auto;
-    padding: 10px;
+    padding: 0 10px 10px;
 
     .err-stack-line {
       white-space: pre;
@@ -226,30 +262,33 @@
   }
 
   .test-err-code-frame {
-    background-color: #fff;
-    border: 1px solid #ffe4e7;
-    margin: 0 10px 10px;
+    background-color: $gray-1000;
+    border: 1px dashed rgba(245, 154, 169, 0.1);
+    border-radius: $code-border-radius;
+    margin: 0 0 10px;
 
     .runnable-err-file-path {
-      &:before {
-        @extend .#{$fa-css-prefix};
-        @extend .#{$fa-css-prefix}-file;
-        color: #bdbdbd;
-        margin-right: 5px;
-      }
-
-      background: #f6f6f6;
+      background: rgba($gray-900, 0.5);
+      border-top-left-radius: $code-border-radius;
+      border-top-right-radius: $code-border-radius;
       display: block;
-      font-size: 13px;
-      line-height: 24px;
-      padding: 3px 10px;
+      font-size: 14px;
+      line-height: 20px;
+      padding: 8px;
       word-break: break-all;
+
+      svg {
+        margin-right: 6px;
+        vertical-align: middle;
+      }
     }
 
     pre {
-      background-color: #fff;
       border: 0;
+      border-bottom-left-radius: $code-border-radius;
+      border-bottom-right-radius: $code-border-radius;
       padding-left: 10px;
     }
   }
 }
+

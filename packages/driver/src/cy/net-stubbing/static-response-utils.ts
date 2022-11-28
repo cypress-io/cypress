@@ -8,7 +8,7 @@ import type {
 import {
   caseInsensitiveHas,
 } from '@packages/net-stubbing/lib/util'
-import * as $errUtils from '../../cypress/error_utils'
+import $errUtils from '../../cypress/error_utils'
 
 // user-facing StaticResponse only
 export const STATIC_RESPONSE_KEYS: (keyof StaticResponse)[] = ['body', 'fixture', 'statusCode', 'headers', 'forceNetworkError', 'throttleKbps', 'delay', 'delayMs']
@@ -22,6 +22,10 @@ export function validateStaticResponse (cmd: string, staticResponse: StaticRespo
 
   if (forceNetworkError && (body || statusCode || headers)) {
     err('`forceNetworkError`, if passed, must be the only option in the StaticResponse.')
+  }
+
+  if (forceNetworkError && Cypress.isBrowser('webkit')) {
+    err('`forceNetworkError` was passed, but it is not currently supported in experimental WebKit.')
   }
 
   if (body && fixture) {
@@ -95,7 +99,7 @@ export function parseStaticResponseShorthand (statusCodeOrBody: number | string 
 function getFixtureOpts (fixture: string): FixtureOpts {
   const [filePath, encoding] = fixture.split(',')
 
-  return { filePath, encoding }
+  return { filePath, encoding: encoding === 'null' ? null : encoding }
 }
 
 export function getBackendStaticResponse (staticResponse: Readonly<StaticResponse>): BackendStaticResponseWithArrayBuffer {

@@ -1,0 +1,29 @@
+{
+  "extends": [
+    "plugin:@cypress/dev/general",
+    "plugin:@cypress/dev/tests"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "env": {
+    "cypress/globals": true
+  },
+  "plugins": [
+    "cypress"
+  ],
+  "rules": {
+    "@typescript-eslint/no-unused-vars": "off"
+  },
+  "overrides": [
+    {
+      "files": [
+        "./src/entities/**/*.ts"
+      ],
+      "rules": {
+        "no-useless-constructor": "off",
+        "@typescript-eslint/explicit-function-return-type": [
+          "error"
+        ]
+      }
+    }
+  ]
+}

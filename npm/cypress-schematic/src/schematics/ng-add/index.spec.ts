@@ -1,5 +1,7 @@
+/// <reference path="../../../../../cli/types/mocha/index.d.ts" />
+
 import { SchematicTestRunner, UnitTestTree } from '@angular-devkit/schematics/testing'
-import { join, resolve } from 'path'
+import { join } from 'path'
 import { expect } from 'chai'
 
 describe('@cypress/schematic: ng-add', () => {
@@ -29,16 +31,31 @@ describe('@cypress/schematic: ng-add', () => {
     appTree = await schematicRunner.runExternalSchematicAsync('@schematics/angular', 'application', appOptions, appTree).toPromise()
   })
 
-  it('should create cypress files', async () => {
-    const files = ['cypress/integration/spec.ts', 'cypress/plugins/index.ts', 'cypress/support/commands.ts', 'cypress/support/index.ts', 'cypress/tsconfig.json', 'cypress.json']
-    const homePath = '/projects/sandbox/'
+  it('should create cypress files for e2e testing by default', async () => {
+    await schematicRunner.runSchematicAsync('ng-add', {}, appTree).toPromise().then((tree: UnitTestTree) => {
+      const files = tree.files
 
-    return schematicRunner.runSchematicAsync('ng-add', {}, appTree).toPromise().then((tree) => {
-      files.forEach((f) => {
-        const pathToFile = resolve(homePath, f)
+      expect(files).to.contain('/projects/sandbox/cypress/e2e/spec.cy.ts')
+      expect(files).to.contain('/projects/sandbox/cypress/support/e2e.ts')
+      expect(files).to.contain('/projects/sandbox/cypress/support/commands.ts')
+      expect(files).to.contain('/projects/sandbox/cypress/tsconfig.json')
+      expect(files).to.contain('/projects/sandbox/cypress.config.ts')
+      expect(files).to.contain('/projects/sandbox/cypress/fixtures/example.json')
+    })
+  })
 
-        expect(tree.exists(pathToFile), pathToFile).equal(true)
-      })
+  it('should create cypress files for component testing', async () => {
+    await schematicRunner.runSchematicAsync('ng-add', { 'component': true }, appTree).toPromise().then((tree: UnitTestTree) => {
+      const files = tree.files
+
+      expect(files).to.contain('/projects/sandbox/cypress/support/component.ts')
+      expect(files).to.contain('/projects/sandbox/cypress/support/component-index.html')
+      expect(files).to.contain('/projects/sandbox/cypress/e2e/spec.cy.ts')
+      expect(files).to.contain('/projects/sandbox/cypress/support/e2e.ts')
+      expect(files).to.contain('/projects/sandbox/cypress/support/commands.ts')
+      expect(files).to.contain('/projects/sandbox/cypress/tsconfig.json')
+      expect(files).to.contain('/projects/sandbox/cypress.config.ts')
+      expect(files).to.contain('/projects/sandbox/cypress/fixtures/example.json')
     })
   })
 })

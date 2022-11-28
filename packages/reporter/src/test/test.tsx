@@ -13,10 +13,17 @@ import TestModel from './test-model'
 
 import scroller, { Scroller } from '../lib/scroller'
 import Attempts from '../attempts/attempts'
+import StateIcon from '../lib/state-icon'
+import { LaunchStudioIcon } from '../components/LaunchStudioIcon'
+
+import CheckIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/checkmark_x16.svg'
+import ClipboardIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/general-clipboard_x16.svg'
+import WarningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/warning_x16.svg'
 
 interface StudioControlsProps {
   events: Events
   model: TestModel
+  canSaveStudioLogs: boolean
 }
 
 interface StudioControlsState {
@@ -60,31 +67,35 @@ class StudioControls extends Component<StudioControlsProps, StudioControlsState>
   }
 
   render () {
-    const { studioIsNotEmpty } = this.props.model
+    const { canSaveStudioLogs } = this.props
     const { copySuccess } = this.state
 
     return (
       <div className='studio-controls'>
-        <button className='studio-cancel' onClick={this._cancel}>Cancel</button>
+        <a className='studio-cancel' onClick={this._cancel}>Cancel</a>
         <Tooltip
           title={copySuccess ? 'Commands Copied!' : 'Copy Commands to Clipboard'}
           className='cy-tooltip'
           wrapperClassName='studio-copy-wrapper'
-          visible={!studioIsNotEmpty ? false : null}
+          visible={!canSaveStudioLogs ? false : null}
           updateCue={copySuccess}
         >
           <button
             className={cs('studio-copy', {
               'studio-copy-success': copySuccess,
             })}
-            disabled={!studioIsNotEmpty}
+            disabled={!canSaveStudioLogs}
             onClick={this._copy}
             onMouseLeave={this._endCopySuccess}
           >
-            <i className={copySuccess ? 'fas fa-check' : 'far fa-copy'} />
+            {copySuccess ? (
+              <CheckIcon />
+            ) : (
+              <ClipboardIcon />
+            )}
           </button>
         </Tooltip>
-        <button className='studio-save' disabled={!studioIsNotEmpty} onClick={this._save}>Save Commands</button>
+        <button className='studio-save' disabled={!canSaveStudioLogs} onClick={this._save}>Save Commands</button>
       </div>
     )
   }
@@ -96,6 +107,8 @@ interface TestProps {
   runnablesStore: RunnablesStore
   scroller: Scroller
   model: TestModel
+  studioEnabled: boolean
+  canSaveStudioLogs: boolean
 }
 
 @observer
@@ -149,6 +162,7 @@ class Test extends Component<TestProps> {
         headerStyle={{ paddingLeft: indent(model.level) }}
         contentClass='runnable-instruments'
         isOpen={model.isOpen}
+        hideExpander
       >
         {this._contents()}
       </Collapsible>
@@ -156,25 +170,50 @@ class Test extends Component<TestProps> {
   }
 
   _header () {
-    const { model } = this.props
+    const { appState, model } = this.props
 
     return (<>
-      <i aria-hidden='true' className='runnable-state fas' />
+      <StateIcon aria-hidden className="runnable-state-icon" state={model.state} isStudio={appState.studioActive} />
       <span className='runnable-title'>
         <span>{model.title}</span>
         <span className='visually-hidden'>{model.state}</span>
       </span>
-      <span className='runnable-controls'>
-        <Tooltip placement='top' title='One or more commands failed' className='cy-tooltip'>
-          <i className='fas fa-exclamation-triangle runnable-controls-status' />
-        </Tooltip>
-        <Tooltip placement='right' title='Add Commands to Test' className='cy-tooltip'>
-          <a onClick={this._launchStudio} className='runnable-controls-studio'>
-            <i className='fas fa-magic' />
-          </a>
-        </Tooltip>
-      </span>
+      {this._controls()}
     </>)
+  }
+
+  _controls () {
+    let controls: Array<JSX.Element> = []
+
+    if (this.props.model.state === 'failed') {
+      controls.push(
+        <Tooltip key={`test-failed-${this.props.model}`} placement='top' title='One or more commands failed' className='cy-tooltip'>
+          <span>
+            <WarningIcon className="runnable-controls-status" />
+          </span>
+        </Tooltip>,
+      )
+    }
+
+    if (this.props.studioEnabled && !appState.studioActive) {
+      controls.push(
+        <LaunchStudioIcon
+          key={`studio-command-${this.props.model}`}
+          title='Add Commands to Test'
+          onClick={this._launchStudio}
+        />,
+      )
+    }
+
+    if (controls.length === 0) {
+      return null
+    }
+
+    return (
+      <span className='runnable-controls'>
+        {controls}
+      </span>
+    )
   }
 
   _contents () {
@@ -182,8 +221,8 @@ class Test extends Component<TestProps> {
 
     return (
       <div style={{ paddingLeft: indent(model.level) }}>
-        <Attempts test={model} scrollIntoView={() => this._scrollIntoView()} />
-        { appState.studioActive && <StudioControls model={model} /> }
+        <Attempts studioActive={appState.studioActive} test={model} scrollIntoView={() => this._scrollIntoView()} />
+        {appState.studioActive && <StudioControls model={model} canSaveStudioLogs={this.props.canSaveStudioLogs}/>}
       </div>
     )
   }

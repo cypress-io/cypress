@@ -1,17 +1,18 @@
 import _ from 'lodash'
 
 import {
+  SERIALIZABLE_REQ_PROPS,
   Interception,
   CyHttpMessages,
-  SERIALIZABLE_REQ_PROPS,
   Subscription,
 } from '../types'
+
 import { parseJsonBody, stringifyJsonBody } from './utils'
 import {
   validateStaticResponse,
   parseStaticResponseShorthand,
 } from '../static-response-utils'
-import * as $errUtils from '../../../cypress/error_utils'
+import $errUtils from '../../../cypress/error_utils'
 import type { HandlerFn, HandlerResult } from '.'
 import Bluebird from 'bluebird'
 import type { NetEvent } from '@packages/net-stubbing/lib/types'
@@ -166,7 +167,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     },
     on (eventName, handler) {
       if (!validEvents.includes(eventName)) {
-        return $errUtils.throwErrByPath('net_stubbing.request_handling.unknown_event', {
+        $errUtils.throwErrByPath('net_stubbing.request_handling.unknown_event', {
           args: {
             validEvents,
             eventName,
@@ -175,7 +176,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       }
 
       if (!_.isFunction(handler)) {
-        return $errUtils.throwErrByPath('net_stubbing.request_handling.event_needs_handler')
+        $errUtils.throwErrByPath('net_stubbing.request_handling.event_needs_handler')
       }
 
       subscribe(eventName, handler)

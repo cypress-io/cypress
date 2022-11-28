@@ -1,0 +1,6 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "e2e": {
+    "projectId": "abc1234"
+  }
+}

@@ -52,7 +52,7 @@ if (!run || !run.length) {
 
       $ yarn test-unit
       $ yarn test-integration
-      $ yarn test-e2e
+      $ yarn test-performance
   `)
 }
 

@@ -15,7 +15,7 @@ type InstallCypressOpts = {
 async function copyFiles ({ ignoreExamples, useTypescript }: InstallCypressOpts) {
   let fileSpinner = ora('Creating config files').start()
 
-  await fs.outputFile(path.resolve(process.cwd(), 'cypress.json'), '{}\n')
+  await fs.outputFile(path.resolve(process.cwd(), useTypescript ? 'cypress.config.ts' : 'cypress.config.js'), useTypescript ? `export default {}` : `module.exports = {}\n`)
   await fs.copy(
     initialTemplate.getInitialPluginsFilePath(),
     path.resolve('cypress', 'plugins/index.js'),
@@ -44,9 +44,10 @@ async function copyFiles ({ ignoreExamples, useTypescript }: InstallCypressOpts)
       '',
     ].join('\n')
 
-    const specFileToCreate = path.resolve('cypress', 'integration', useTypescript ? 'spec.ts' : 'spec.js')
+    const specFileName = useTypescript ? 'spec.cy.ts' : 'spec.cy.js'
+    const specFileToCreate = path.resolve('cypress', 'e2e', specFileName)
 
-    await fs.outputFile(path.resolve('cypress', 'integration', useTypescript ? 'spec.js' : 'spec.ts'), dummySpec)
+    await fs.outputFile(specFileToCreate, dummySpec)
     console.log(`In order to ignore examples a spec file ${chalk.green(path.relative(process.cwd(), specFileToCreate))}.`)
   }
 
@@ -54,23 +55,24 @@ async function copyFiles ({ ignoreExamples, useTypescript }: InstallCypressOpts)
 }
 
 export async function findInstalledOrInstallCypress (options: InstallCypressOpts) {
-  let cypressJsonPath = await findUp('cypress.json')
+  const configFile = options.useTypescript ? 'cypress.config.ts' : 'cypress.config.js'
+  let cypressConfigPath = await findUp(configFile)
 
-  if (!cypressJsonPath) {
+  if (!cypressConfigPath) {
     await installDependency('cypress', options)
     await copyFiles(options)
 
-    cypressJsonPath = await findUp('cypress.json')
+    cypressConfigPath = await findUp(configFile)
   }
 
-  if (!cypressJsonPath) {
+  if (!cypressConfigPath) {
     throw new Error('Unexpected error during cypress installation.')
   }
 
+  const config = await import(cypressConfigPath)
+
   return {
-    cypressConfigPath: cypressJsonPath,
-    config: JSON.parse(
-      fs.readFileSync(cypressJsonPath, { encoding: 'utf-8' }).toString(),
-    ) as Record<string, string>,
+    cypressConfigPath,
+    config: config.default,
   }
 }

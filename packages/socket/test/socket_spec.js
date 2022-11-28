@@ -3,9 +3,11 @@ const path = require('path')
 const server = require('socket.io')
 const client = require('socket.io-client')
 const parser = require('socket.io-parser')
+const { hasBinary } = require('socket.io-parser/dist/is-binary')
 const expect = require('chai').expect
 const pkg = require('../package.json')
 const lib = require('../index')
+const browserLib = require('../lib/browser')
 const resolvePkg = require('resolve-pkg')
 
 const { PacketType } = parser
@@ -15,8 +17,26 @@ describe('Socket', function () {
     expect(lib.server).to.eq(server)
   })
 
-  it('exports client', function () {
-    expect(lib.client).to.eq(client)
+  it('exports client from lib/browser', function () {
+    expect(browserLib.client).to.eq(client)
+  })
+
+  it('exports createWebSocket from lib/browser', function () {
+    expect(browserLib.createWebsocket).to.be.defined
+  })
+
+  it('creates a websocket for non webkit browsers', function () {
+    const socket = browserLib.createWebsocket({ path: '/path', browserFamily: 'chromium' })
+
+    expect(socket.io.opts.path).to.eq('/path')
+    expect(socket.io.opts.transports[0]).to.eq('websocket')
+  })
+
+  it('creates a websocket for non webkit browsers', function () {
+    const socket = browserLib.createWebsocket({ path: '/path', browserFamily: 'webkit' })
+
+    expect(socket.io.opts.path).to.eq('/path')
+    expect(socket.io.opts.transports[0]).to.eq('polling')
   })
 
   context('.getPathToClientSource', function () {
@@ -34,19 +54,6 @@ describe('Socket', function () {
   context('.getClientVersion', function () {
     it('returns client version', function () {
       expect(lib.getClientVersion()).to.eq(pkg.dependencies['socket.io-client'])
-    })
-  })
-
-  context('.getClientSource', function () {
-    it('returns client source as a string', function (done) {
-      const clientPath = path.join(resolvePkg('socket.io-client'), 'dist', 'socket.io.js')
-
-      fs.readFile(clientPath, 'utf8', function (err, str) {
-        if (err) done(err)
-
-        expect(lib.getClientSource()).to.eq(str)
-        done()
-      })
     })
   })
 
@@ -215,6 +222,20 @@ describe('Socket', function () {
       for (let i = 0; i < encodedPackets.length; i++) {
         decoder.add(encodedPackets[i])
       }
+    })
+  })
+
+  context('hasBinary', () => {
+    it('hasBinary handles binary data in toJSON()', () => {
+      const x = {
+        toJSON () {
+          return Buffer.from('123', 'utf8')
+        },
+      }
+
+      const data = ['a', x]
+
+      expect(hasBinary(data)).to.be.true
     })
   })
 })

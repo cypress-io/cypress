@@ -1,8 +1,10 @@
 import _ from 'lodash'
-import * as $document from './document'
-import * as $elements from './elements'
+import $document from './document'
+import $elements from './elements'
 
-const debug = require('debug')('cypress:driver:selection')
+import debugFn from 'debug'
+
+const debug = debugFn('cypress:driver:selection')
 
 const INTERNAL_STATE = '__Cypress_state__'
 
@@ -418,12 +420,6 @@ const _moveCursorToLineStartOrEnd = function (toStart: boolean, el: HTMLElement)
 
         return
       }
-      // const doc = $document.getDocumentFromElement(el)
-      // console.log(doc.activeElement)
-      // $elements.callNativeMethod(doc, 'execCommand', 'selectall', false)
-      // $elements.callNativeMethod(el, 'select')
-      // _getSelectionByEl(el).ca
-      // toStart ? _getSelectionByEl(el).collapseToStart : _getSelectionByEl(el).collapseToEnd()
 
       if (isTextarea) {
         const bounds = _getSelectionBoundsFromTextarea(el)
@@ -579,19 +575,7 @@ const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options = 
         $elements.callNativeMethod(doc, 'execCommand', 'selectAll', false, null)
       }
     } else {
-      let range
-
-      // Sometimes, selection.rangeCount is 0 when there is no selection.
-      // In that case, it fails in Chrome.
-      // We're creating a new range and add it to the selection to avoid the case.
-      if (selection.rangeCount === 0) {
-        range = doc.createRange()
-        selection.addRange(range)
-      } else {
-        range = selection.getRangeAt(0)
-      }
-
-      range.selectNodeContents(el)
+      selection.selectAllChildren(el)
     }
 
     toStart ? selection.collapseToStart() : selection.collapseToEnd()
@@ -643,7 +627,7 @@ const getCaretPosition = function (el) {
   return null
 }
 
-const interceptSelect = function () {
+const interceptSelect = function (this: any) {
   if ($elements.isInput(this) && !$elements.canSetSelectionRangeElement(this)) {
     setSelectionRange(this, 0, $elements.getNativeProp(this, 'value').length)
   }
@@ -726,7 +710,7 @@ const interceptSelect = function () {
 //     el = el.firstChild
 //   return el
 
-export {
+export default {
   getSelectionBounds,
   deleteRightOfCursor,
   deleteLeftOfCursor,

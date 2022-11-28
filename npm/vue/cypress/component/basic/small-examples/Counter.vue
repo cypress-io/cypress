@@ -2,8 +2,12 @@
   <div>
     <h3>Count: {{ counter }}</h3>
     <div class="button-container">
-      <button @click="increment">Add</button>
-      <button @click="decrement">Subtract</button>
+      <button @click="increment">
+        Add
+      </button>
+      <button @click="decrement">
+        Subtract
+      </button>
     </div>
   </div>
 </template>
@@ -11,18 +15,18 @@
 <script>
 export default {
   name: 'Counter',
-  data() {
+  data () {
     return {
       counter: 0,
-    };
+    }
   },
   methods: {
-    increment() {
-      this.counter++;
+    increment () {
+      this.counter++
     },
-    decrement() {
-      this.counter--;
+    decrement () {
+      this.counter--
     },
   },
-};
+}
 </script>

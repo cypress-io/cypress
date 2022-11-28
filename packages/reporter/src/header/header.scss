@@ -1,13 +1,17 @@
+$color-transition: color 150ms ease-out;
+
 .reporter {
   header {
-    background-color: #f8f8f8;
-    border-bottom: 1px solid #ddd;
+    background-color: $gray-1000;
     display: flex;
     flex-shrink: 0;
     flex-wrap: wrap;
+    gap: 8px;
+    font-family: $font-system;
     min-height: $header-height;
     outline: 0;
     overflow: hidden;
+    padding: 20px 16px;
     width: 100%;
     z-index: 1;
 
@@ -16,22 +20,18 @@
     }
 
     button {
-      background-color: #f8f8f8;
+      background-color: transparent;
       border-color: transparent;
       border-radius: 0;
-      display: block;
+      display: inline-block;
+      font-weight: 300;
       line-height: 26px;
       outline: 0;
-      padding: 10px 0;
+      padding: 0 8px;
       text-align: center;
-      width: 40px;
 
       &:hover {
-        background-color: #e9e9e9;
-      }
-
-      &:active {
-        box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+        background-color: $gray-900;
       }
 
       &[disabled],
@@ -39,141 +39,122 @@
       &[disabled]:active {
         background: none;
         box-shadow: none;
-        color: #999;
+        color: $gray-500;
       }
     }
   }
 
-  .focus-tests {
+  .toggle-specs-wrapper {
     display: flex;
+    height: 24px;
 
     button {
-      border-right: 1px solid #ddd;
-      font-weight: 400;
-      padding: 10px 12px;
+      color: $gray-700;
+      font-size: 16px;
+      font-weight: 300;
+      padding-left: 0;
+      padding-right: 8px;
+      transition: $color-transition;
       width: auto !important;
 
-      span {
-        display: none;
+      &:focus,
+      &:hover {
+        background-color: initial;
+
+        svg {
+          color: $gray-400;
+          transition: $color-transition;
+        }
+
+        .toggle-specs-text {
+          color: $gray-400;
+          transition: $color-transition;
+        }
       }
 
-      i {
-        margin-right: 5px;
+      .toggle-specs-text {
+        color: $gray-500;
+        transition: $color-transition;
+      }
+
+      svg {
+        margin-right: 8px;
+        margin-bottom: -2px;
       }
     }
   }
 
   .stats {
+    align-items: center;
+    border: 1px solid $gray-900;
+    border-radius: 4px;
     display: flex;
     flex-wrap: wrap;
-    margin-bottom: 0;
-    padding: 0;
+    height: 24px;
+    justify-content: space-between;
+    padding: 0 4px;
+    min-width: 124px;
 
     li {
-      display: block;
-      font-size: 16px;
-      height: 46px;
-      line-height: 26px;
-      list-style-type: none;
-      padding: 10px 5px;
-
-      &.passed {
-        color: #23AE89;
-      }
-
-      &.failed {
-        color: #E94B3B;
-      }
-
-      &.pending {
-        color: #aaa;
-      }
-
-      i {
-        margin: 5px;
-      }
-    }
-
-    .duration {
-      border-left: 1px solid #ddd;
-      border-right: 1px solid #ddd;
-      padding-left: 10px;
-      padding-right: 10px;
-    }
-  }
-
-  .controls {
-    display: flex;
-    flex-wrap: wrap;
-
-    > span {
       display: flex;
+      font-size: 12px;
+      font-weight: 600;
+      list-style-type: none;
+      padding: 0 4px;
 
-      &:last-child button {
-        border-right: 1px solid #ddd;
-      }
-    }
-
-    .paused-label {
-      align-items: center;
-      margin-right: 5px;
-
-      label {
-        background-color: #CC4239;
-      }
-    }
-
-    i {
-      font-size: 90%;
-      margin: 5px;
-
-      &.fa-redo {
-        font-size: 100%;
-        position: relative;
-        top: 1px;
-      }
-    }
-
-    .toggle-auto-scrolling {
-      line-height: 25px;
-
-      i {
-        font-size: 100%;
+      svg {
+        margin-right: 2px;
       }
 
-      i:first-child {
-        @extend .far;
-        @extend .#{$fa-css-prefix}-circle;
-        color: #999;
-        font-size: 80%;
-        margin-right: 3px;
-        position: relative;
-        top: -1px;
-      }
+      .num {
+        color: $white;
+        line-height: 12px;
+        vertical-align: text-top;
+        min-width: 16px;
+        display: inline-block;
+        text-align: center;
 
-      &.auto-scrolling-enabled {
-        i:first-child {
-          @extend .fas;
-          @extend .#{$fa-css-prefix}-circle;
-          color: $yellow-dark;
+        &.empty {
+          color: $gray-800;
         }
       }
     }
   }
 
-  // utilizing element size queries: https://github.com/marcj/css-element-queries
-  // styles take effect when width is greater than or equal to the specified amount
-  &[min-width~="398px"] {
-    header button {
-      width: 50px;
+  .controls {
+    align-items: center;
+    border: 1px solid $gray-900;
+    border-radius: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    height: 24px;
+
+    .testing-preferences-toggle {
+      border-left: none;
+      color: $gray-700;
+      margin-left: 0;
+
+      &.open {
+        background-color: $gray-900;
+        color: $white;
+      }
     }
 
-    .focus-tests button span {
-      display: inline;
-    }
+    span {
+      height: 100%;
 
-    .stats li {
-      padding: 10px;
+      button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        color: $gray-400;
+        width: 31px;
+        padding: 0px;
+        border-left: 1px solid $gray-900;
+        margin-left: -1px;
+      }
     }
   }
 }

@@ -2,7 +2,7 @@ const debug = require('debug')('cypress:server:controllers:client')
 const socketIo = require('@packages/socket')
 
 // hold onto the client source + version in memory
-const clientSource = socketIo.getClientSource()
+const clientSourcePath = socketIo.getPathToClientSource()
 const clientVersion = socketIo.getClientVersion()
 
 module.exports = {
@@ -19,6 +19,7 @@ module.exports = {
     .type('application/javascript')
     .set('ETag', clientVersion)
     .status(200)
-    .send(clientSource)
+    // TODO: replace this entire file and sendFile call with `express.static`.
+    .sendFile(clientSourcePath)
   },
 }

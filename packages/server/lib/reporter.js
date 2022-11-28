@@ -1,13 +1,14 @@
 const _ = require('lodash')
 const path = require('path')
-const stackUtils = require('./util/stack_utils')
+const { stackUtils } = require('@packages/errors')
 // mocha-* is used to allow us to have later versions of mocha specified in devDependencies
-// and prevents accidently upgrading this one
+// and prevents accidentally upgrading this one
 // TODO: look into upgrading this to version in driver
 const Mocha = require('mocha-7.0.1')
 const mochaReporters = require('mocha-7.0.1/lib/reporters')
 const mochaCreateStatsCollector = require('mocha-7.0.1/lib/stats-collector')
 const mochaColor = mochaReporters.Base.color
+const mochaSymbols = mochaReporters.Base.symbols
 
 const debug = require('debug')('cypress:server:reporter')
 const Promise = require('bluebird')
@@ -40,31 +41,23 @@ overrideRequire((depPath, _load) => {
 // Mocha.Runnable.prototype.titlePath = ->
 //   @parent.titlePath().concat([@title])
 
-const getParentTitle = function (runnable, titles) {
-  // if the browser/reporter changed the runnable title (for display purposes)
-  // it will have .originalTitle which is the name of the test before title change
-  let p
-
+const getTitlePath = function (runnable, titles = []) {
+  // `originalTitle` is a Mocha Hook concept used to associated the
+  // hook to the test that executed it
   if (runnable.originalTitle) {
     runnable.title = runnable.originalTitle
   }
 
-  if (!titles) {
-    titles = [runnable.title]
+  if (runnable.title) {
+    // sanitize the title which may have been altered by a suite-/
+    // test-level browser skip to ensure the original title is used
+    const BROWSER_SKIP_TITLE = ' (skipped due to browser)'
+
+    titles.unshift(runnable.title.replace(BROWSER_SKIP_TITLE, ''))
   }
 
-  p = runnable.parent
-
-  if (p) {
-    let t
-
-    t = p.title
-
-    if (t) {
-      titles.unshift(t)
-    }
-
-    return getParentTitle(p, titles)
+  if (runnable.parent) {
+    return getTitlePath(runnable.parent, titles)
   }
 
   return titles
@@ -244,11 +237,6 @@ const events = {
   'test:before:run': mergeRunnable('test:before:run'), // our own custom event
 }
 
-const reporters = {
-  teamcity: 'mocha-teamcity-reporter',
-  junit: 'mocha-junit-reporter',
-}
-
 class Reporter {
   constructor (reporterName = 'spec', reporterOptions = {}, projectRoot) {
     if (!(this instanceof Reporter)) {
@@ -292,6 +280,34 @@ class Reporter {
     this.reporter = new this.mocha._reporter(this.runner, {
       reporterOptions: this.reporterOptions,
     })
+
+    if (this.reporterName === 'spec') {
+      // Unfortunately the reporter doesn't expose its indentation logic, so we have to replicate it here
+      let indents = 0
+
+      this.runner.on('suite', function (suite) {
+        ++indents
+      })
+
+      this.runner.on('suite end', function () {
+        --indents
+      })
+
+      // Override the default reporter to always show test timing even for fast tests
+      // and display slow ones in yellow rather than red
+      this.runner._events.pass[2] = function (test) {
+        const durationColor = test.speed === 'slow' ? 'medium' : 'fast'
+        const fmt =
+          Array(indents).join('  ') +
+          mochaColor('checkmark', `  ${ mochaSymbols.ok}`) +
+          mochaColor('pass', ' %s') +
+          mochaColor(durationColor, ' (%dms)')
+
+        // Log: `✓ test title (300ms)` when a test passes
+        // eslint-disable-next-line no-console
+        console.log(fmt, test.title, test.duration)
+      }
+    }
 
     this.runner.ignoreLeaks = true
   }
@@ -356,7 +372,7 @@ class Reporter {
     return {
       hookId: hook.hookId,
       hookName: hook.hookName,
-      title: getParentTitle(hook),
+      title: getTitlePath(hook),
       body: hook.body,
     }
   }
@@ -364,7 +380,7 @@ class Reporter {
   normalizeTest (test = {}) {
     const normalizedTest = {
       testId: orNull(test.id),
-      title: getParentTitle(test),
+      title: getTitlePath(test),
       state: orNull(test.state),
       body: orNull(test.body),
       displayError: orNull(test.err && test.err.stack),
@@ -477,16 +493,22 @@ class Reporter {
   }
 
   static loadReporter (reporterName, projectRoot) {
-    let p; let r
+    let p
 
     debug('trying to load reporter:', reporterName)
 
-    r = reporters[reporterName]
-
-    if (r) {
+    // Explicitly require this here (rather than dynamically) so that it gets included in the v8 snapshot
+    if (reporterName === 'teamcity') {
       debug(`${reporterName} is built-in reporter`)
 
-      return require(r)
+      return require('mocha-teamcity-reporter')
+    }
+
+    // Explicitly require this here (rather than dynamically) so that it gets included in the v8 snapshot
+    if (reporterName === 'junit') {
+      debug(`${reporterName} is built-in reporter`)
+
+      return require('mocha-junit-reporter')
     }
 
     if (mochaReporters[reporterName]) {

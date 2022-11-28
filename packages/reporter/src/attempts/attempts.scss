@@ -14,15 +14,15 @@
 
     > .collapsible {
       position: relative;
-      margin-right: 20px;
+      margin-right: 16px;
       .collapsible-header-inner {
         outline: none;
       }
 
       &:before {
-        border-left: 1px solid #dcdcdc;
+        border-left: 1px solid $gray-900;
         content: '';
-        left: 5px;
+        left: 9px;
         position: absolute;
         top: 22px;
         height: 15px;
@@ -38,57 +38,40 @@
     }
 
     > .is-open .open-close-indicator {
-        i.fa-angle-down {
-          margin-top: 0;
-        }
-
-        i.fa-angle-up {
-          order: 1;
-          margin-top: -4px;
-        }
+      svg.collapse-icon {
+        display: block;
       }
 
-    .open-close-indicator {
-      display: flex;
-      flex-direction: column;
+      svg.expand-icon {
+        display: none;
+      }
+    }
 
-      i {
-        margin-right: 5px;
+  .open-close-indicator {
+    svg {
+      margin-right: 3px;
 
-        &.fa-angle-down {
-          margin-top: -4px;
-        }
+      &.collapse-icon {
+        display: none;
+      }
+
+      &.expand-icon {
+        display: block;
       }
     }
   }
 
+  .attempt-content {
+    padding-left: 5px;
+  }
+}
 
-  .attempt-state-active {
-    .attempt-state {
-      @include runnable-state-active;
-    }
-  }
-  .attempt-state-processing {
-    .attempt-state {
-      @include runnable-state-processing;
-    }
-  }
   .attempt-state-failed {
-    .attempt-state {
-      @include runnable-state-failed;
-    }
-
     .attempt-name:after {
       color: $fail;
     }
   }
   .attempt-state-passed {
-    .attempt-state {
-
-    @include runnable-state-passed;
-    }
-
-
     .attempt-name:after {
       color: $pass;
     }
@@ -102,7 +85,7 @@
     width: 100%;
 
     &:before {
-      border-top: 1px solid #dcdcdc;
+      border-top: 1px solid $gray-900;
       content: '';
       left: 15px;
       position: absolute;
@@ -111,38 +94,38 @@
     }
 
     &:after {
-      color: #a2a2a2;
+      color: $gray-600;
       content: '•';
-      left: 3px;
+      left: 7px;
       position: absolute;
-      top: 6px;
+      top: 4px;
     }
 
     .attempt-tag {
       align-items: center;
-      border: 1px solid #d5d5d5;
+      border: 1px solid $gray-900;
       border-radius: 7px;
-      box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.20);
+      box-shadow: 0 1px 1px 0 rgba($white, 0.20);
       display: flex;
       font-size: 11px;
       padding: 2px 5px;
       position: relative;
-      background-color: #fff;
+      background-color: $black;
       user-select: none;
       cursor: pointer;
 
       &:hover {
-        background-color: #e8e8e8;
+        background-color: $gray-1000;
       }
     }
 
-    .collapsible-indicator,
     .collapsible-more {
       display: none;
     }
 
-    .attempt-state {
+    .attempt-tag > .attempt-state {
       margin-left: 3px;
+      margin-right: 0;
     }
   }
 }

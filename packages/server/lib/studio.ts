@@ -1,4 +1,4 @@
-import savedState from './saved_state'
+import * as savedState from './saved_state'
 import { Command, SaveDetails, createNewTestInFile, appendCommandsToTest, createNewTestInSuite, convertCommandsToText } from './util/spec_writer'
 
 interface SaveInfo extends SaveDetails {
@@ -13,13 +13,6 @@ class StudioSaveError extends Error {
     super(StudioSaveError.errMessage(isSuite))
     this.name = 'StudioSaveError'
   }
-}
-
-export const setStudioModalShown = () => {
-  return savedState.create()
-  .then((state) => {
-    state.set('showedStudioModal', true)
-  })
 }
 
 export const getStudioModalShown = () => {
@@ -45,14 +38,11 @@ export const save = (saveInfo: SaveInfo) => {
 
   return saveToFile()
   .then((success) => {
-    return setStudioModalShown()
-    .then(() => {
-      if (!success) {
-        throw new StudioSaveError(isSuite)
-      }
+    if (!success) {
+      throw new StudioSaveError(isSuite)
+    }
 
-      return null
-    })
+    return null
   })
   .catch((err) => {
     return {

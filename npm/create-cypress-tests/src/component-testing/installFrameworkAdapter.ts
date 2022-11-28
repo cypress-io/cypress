@@ -48,10 +48,16 @@ type InstallAdapterOptions = {
   useYarn: boolean
 }
 
+const frameworkDependencies = {
+  react: '@cypress/react',
+  'vue@2': '@cypress/vue2',
+  'vue@3': '@cypress/vue',
+}
+
 export async function installFrameworkAdapter (cwd: string, options: InstallAdapterOptions) {
   const framework = await guessOrAskForFramework(cwd)
 
-  await installDependency(`@cypress/${framework}`, options)
+  await installDependency(frameworkDependencies[framework], options)
 
   return framework
 }

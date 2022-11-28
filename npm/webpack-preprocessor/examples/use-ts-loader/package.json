@@ -6,11 +6,11 @@
   "scripts": {
     "cy:open": "node ../../../../scripts/cypress open",
     "test": "node ../../../../scripts/cypress run",
-    "types": "tsc --noEmit --lib es2015,dom --types cypress cypress/integration/*.ts"
+    "types": "tsc --noEmit --lib es2015,dom --types cypress cypress/e2e/*.ts"
   },
   "devDependencies": {
-    "ts-loader": "7.0.4",
-    "typescript": "^4.2.3"
+    "ts-loader": "8.4.0",
+    "typescript": "^4.7.4"
   },
   "license": "ISC",
   "keywords": []

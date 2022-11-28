@@ -173,6 +173,12 @@ namespace BlobTests {
   })
 }
 
+namespace BufferTests {
+  const buffer = Cypress.Buffer.from('sometext')
+  Cypress.Buffer.isBuffer(buffer)
+  buffer.length
+}
+
 cy.window().then(window => {
   window // $ExpectType AUTWindow
 

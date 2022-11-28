@@ -8,10 +8,52 @@ import url from 'url'
 import { createRetryingSocket, getAddress } from './connect'
 import { lenientOptions } from './http-utils'
 import { ClientCertificateStore } from './client-certificates'
+import { CaOptions, getCaOptions } from './ca'
 
 const debug = debugModule('cypress:network:agent')
 const CRLF = '\r\n'
 const statusCodeRe = /^HTTP\/1.[01] (\d*)/
+
+let baseCaOptions: CaOptions | undefined
+const getCaOptionsPromise = (): Promise<CaOptions> => {
+  return getCaOptions().then((options: CaOptions) => {
+    baseCaOptions = options
+
+    return options
+  }).catch(() => {
+    // Errors reading the config are treated as warnings by npm and node and handled by those processes separately
+    // from what we're doing here.
+    return {}
+  })
+}
+let baseCaOptionsPromise: Promise<CaOptions> = getCaOptionsPromise()
+
+// This is for testing purposes only
+export const _resetBaseCaOptionsPromise = () => {
+  baseCaOptions = undefined
+  baseCaOptionsPromise = getCaOptionsPromise()
+}
+
+const mergeCAOptions = (options: https.RequestOptions, caOptions: CaOptions): https.RequestOptions => {
+  if (!caOptions.ca) {
+    return options
+  }
+
+  if (!options.ca) {
+    return {
+      ...options,
+      ca: caOptions.ca,
+    }
+  }
+
+  // First, normalize the options.ca option. It can be a string, a Buffer, an array of strings, or an array of Buffers
+  const caArray = _.castArray(options.ca).map((caOption) => caOption.toString())
+
+  return {
+    ...options,
+    ca: [...caArray, ...caOptions.ca],
+  }
+}
 
 export const clientCertificateStore = new ClientCertificateStore()
 
@@ -38,7 +80,7 @@ export function buildConnectReqHead (hostname: string, port: string, proxy: url.
   connectReq.push(`Host: ${hostname}:${port}`)
 
   if (proxy.auth) {
-    connectReq.push(`Proxy-Authorization: basic ${Buffer.from(proxy.auth).toString('base64')}`)
+    connectReq.push(`Proxy-Authorization: Basic ${Buffer.from(proxy.auth).toString('base64')}`)
   }
 
   return connectReq.join(CRLF) + _.repeat(CRLF, 2)
@@ -52,8 +94,8 @@ interface CreateProxySockOpts {
 type CreateProxySockCb = (
   (err: undefined, result: net.Socket, triggerRetry: (err: Error) => void) => void
 ) & (
-    (err: Error) => void
-  )
+  (err: Error) => void
+)
 
 export const createProxySock = (opts: CreateProxySockOpts, cb: CreateProxySockCb) => {
   if (opts.proxy.protocol !== 'https:' && opts.proxy.protocol !== 'http:') {
@@ -179,10 +221,10 @@ export class CombinedAgent {
         hostname: options.host,
         port: options.port,
       }) + options.path
+    }
 
-      if (!options.uri) {
-        options.uri = url.parse(options.href)
-      }
+    if (!options.uri) {
+      options.uri = url.parse(options.href)
     }
 
     debug('addRequest called %o', { isHttps, ..._.pick(options, 'href') })
@@ -195,12 +237,26 @@ export class CombinedAgent {
       if (isHttps) {
         _.assign(options, clientCertificateStore.getClientCertificateAgentOptionsForUrl(options.uri))
 
-        return this.httpsAgent.addRequest(req, options)
+        return this.httpsAgent.addRequest(req, options as https.RequestOptions)
       }
 
       this.httpAgent.addRequest(req, options)
     })
   }
+}
+
+const getProxyOrTargetOverrideForUrl = (href) => {
+  // HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS is used for Cypress in Cypress E2E testing and will
+  // force the parent Cypress server to treat the child Cypress server like a proxy without
+  // having HTTP_PROXY set and will force traffic ONLY bound to that origin to behave
+  // like a proxy
+  const targetHost = process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS
+
+  if (targetHost && href.includes(targetHost)) {
+    return targetHost
+  }
+
+  return getProxyForUrl(href)
 }
 
 class HttpAgent extends http.Agent {
@@ -214,8 +270,8 @@ class HttpAgent extends http.Agent {
   }
 
   addRequest (req: http.ClientRequest, options: http.RequestOptions) {
-    if (process.env.HTTP_PROXY) {
-      const proxy = getProxyForUrl(options.href)
+    if (process.env.HTTP_PROXY || process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS) {
+      const proxy = getProxyOrTargetOverrideForUrl(options.href)
 
       if (proxy) {
         options.proxy = proxy
@@ -267,6 +323,25 @@ class HttpsAgent extends https.Agent {
   constructor (opts: https.AgentOptions = {}) {
     opts.keepAlive = true
     super(opts)
+  }
+
+  addRequest (req: http.ClientRequest, options: https.RequestOptions) {
+    // Ensure we have a proper port defined otherwise node has assumed we are port 80
+    // (https://github.com/nodejs/node/blob/master/lib/_http_client.js#L164) since we are a combined agent
+    // rather than an http or https agent. This will cause issues with fetch requests (@cypress/request already handles it:
+    // https://github.com/cypress-io/request/blob/master/request.js#L301-L303)
+    if (!options.uri.port && options.uri.protocol === 'https:') {
+      options.uri.port = String(443)
+      options.port = 443
+    }
+
+    if (baseCaOptions) {
+      super.addRequest(req, mergeCAOptions(options, baseCaOptions))
+    } else {
+      baseCaOptionsPromise.then((caOptions) => {
+        super.addRequest(req, mergeCAOptions(options, caOptions))
+      })
+    }
   }
 
   createConnection (options: HttpsRequestOptions, cb: http.SocketCallback) {

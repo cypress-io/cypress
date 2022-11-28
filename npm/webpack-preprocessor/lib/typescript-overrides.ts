@@ -17,7 +17,15 @@ export const overrideSourceMaps = (sourceMap: boolean, typescriptPath?: string) 
       return
     }
 
-    const typescript = require(typescriptPath || 'typescript') as typeof import('typescript')
+    // when using webpack-preprocessor as a local filesystem dependency (`file:...`),
+    // require(typescript) will resolve to this repo's `typescript` devDependency, not the
+    // targeted project's `typescript`, which breaks monkeypatching. resolving from the
+    // CWD avoids this issue.
+    const projectTsPath = require.resolve(typescriptPath || 'typescript', {
+      paths: [process.cwd()],
+    })
+
+    const typescript = require(projectTsPath) as typeof import('typescript')
     const { createProgram } = typescript
 
     debug('typescript found, overriding typescript.createProgram()')

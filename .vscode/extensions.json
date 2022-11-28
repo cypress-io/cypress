@@ -1,0 +1,88 @@
+{
+	// To see these extensions in VS Code:
+	// 1. Open the Command Palette:
+	//   - Non-Mac Users: (Ctrl+Shift+P)
+	//   - Mac Users: (Cmd+Shift+P)
+	// 2. Select "Extensions: Show Recommended Extensions"
+	// See https://go.microsoft.com/fwlink/?LinkId=827846 to learn about workspace recommendations.
+
+	// List of extensions which are recommended for Cypress contributors using VS Code:
+	"recommendations": [
+    // -----------------------------
+    //      Critical Extensions
+    // -----------------------------
+    // If you do not have these, you will experience a significantly degraded DX.
+    // You may also be committing incorrectly formatted code.
+
+    // Name: ESLint
+		// Description: Integrates ESLint JavaScript into VS Code.
+    "dbaeumer.vscode-eslint",
+
+    // Name: Apollo GraphQL
+    // Description: Adds syntax highlighting for all gql tags.
+    "apollographql.vscode-apollo",
+
+    // Name: WindiCSS Intellisense
+    // Description: Automatically sorts your WindiCSS classes.
+    "voorjaar.windicss-intellisense",
+
+    // Name: Volar
+    // Description: Language server for Vue. Required for any syntax highlighting in Vue files.
+    "Vue.volar",
+
+    // Name: Code Spell Checker
+    // Description: Add spell-checking help to your code.
+    "streetsidesoftware.code-spell-checker",
+
+    // -----------------------------
+    //    Recommended Extensions
+    // -----------------------------
+
+    // Name: i18n-ally
+    // Description: Preview and edit any hardcoded strings directly in your source code.
+    "lokalise.i18n-ally",
+
+    // Name: Iconify Intellisense
+    // Description: Preview shortcodes as SVG Icons for common libraries like Font Awesome.
+    "antfu.iconify",
+
+    // Name: Excalidraw Schema Editor
+    // Description: Read and write *.excalidraw files.
+    "pomdtr.excalidraw-editor",
+
+    // Name: Test Utils
+		// Description: Add, remove, and move .only in tests
+    "chrisbreiding.test-utils",
+
+    // Name: Terminals Manager
+		// Description: An extension for setting-up multiple terminals at once, or just running some commands
+		// There are several Terminals defined in `.vscode/terminals.json` that can be used via this plugin.
+    "fabiospampinato.vscode-terminals",
+
+    // Name: GitHub linker
+		// Description: Create links to fragments of code in GitHub
+    "gimenete.github-linker",
+
+    // Name: GitLens — Git supercharged
+		// Description: Supercharge the Git capabilities built into Visual Studio Code — Visualize code authorship at a glance via Git blame annotations and code lens, seamlessly navigate and explore Git repositories, gain valuable insights via powerful comparison commands, and so much more
+    "eamodio.gitlens",
+
+    // Name: Toggle Quotes
+		// Description: Toggle cycle " -> ' -> `
+		"britesnow.vscode-toggle-quotes",
+
+    // Name: Gremlins tracker for Visual Studio Code
+    // Description: When you paste from Slack, Figma, or Google Docs, you'll get stylized quotes.
+    // This extension reveals some characters that can be harmful because they are invisible or otherwise non-obvious. 
+    "nhoizey.gremlins"
+  ],
+
+	// List of extensions recommended by VS Code that should not be recommended for Cypress contributors using VS Code:
+	"unwantedRecommendations": [
+    // Name: Vetur
+    // Description: Vue syntax highlighting and language support.
+    // Vetur used to be recommended but has now been replaced by Volar.
+    // Volar and Vetur conflict, so Vetur should be turned off.
+    "octref.vetur"
+	]
+}

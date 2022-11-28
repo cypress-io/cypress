@@ -1,8 +1,10 @@
 import gulp from 'gulp'
 import rimraf from 'rimraf'
-import webpack from 'webpack'
-import cypressIcons from '@cypress/icons'
-import webpackConfig from './webpack.config.js'
+import * as cypressIcons from '@packages/icons'
+import cp from 'child_process'
+import * as path from 'path'
+
+const nodeWebpack = path.join(__dirname, '..', '..', 'scripts', 'run-webpack.js')
 
 const clean = (done) => {
   rimraf('dist', done)
@@ -14,9 +16,9 @@ const manifest = () => {
 }
 
 const background = (cb) => {
-  const compiler = webpack(webpackConfig as webpack.Configuration)
-
-  compiler.run(cb)
+  cp.fork(nodeWebpack, { stdio: 'inherit' }).on('exit', (code) => {
+    cb(code === 0 ? null : new Error(`Webpack process exited with code ${code}`))
+  })
 }
 
 const html = () => {

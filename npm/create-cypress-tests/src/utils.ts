@@ -60,3 +60,17 @@ export async function installDependency (name: string, options: { useYarn: boole
 
   cliSpinner.succeed()
 }
+
+export async function prettifyCode (finalCode?: string | null) {
+  try {
+    const maybePrettier = require('prettier')
+
+    if (maybePrettier && maybePrettier.format) {
+      finalCode = maybePrettier.format(finalCode, { parser: 'babel' })
+    }
+  } catch (e) {
+    return null
+  } finally {
+    return finalCode
+  }
+}

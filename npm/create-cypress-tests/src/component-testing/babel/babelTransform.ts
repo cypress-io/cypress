@@ -2,6 +2,7 @@ import path from 'path'
 import * as fs from 'fs-extra'
 import * as babel from '@babel/core'
 import * as babelTypes from '@babel/types'
+import { prettifyCode } from '../../utils'
 
 type AST = ReturnType<typeof babel.template.ast>
 
@@ -11,13 +12,6 @@ export type PluginsConfigAst = {
   requiresReturnConfig?: true
 }
 
-function tryRequirePrettier () {
-  try {
-    return require('prettier')
-  } catch (e) {
-    return null
-  }
-}
 const sharedBabelOptions = {
   // disable user config
   configFile: false,
@@ -47,11 +41,7 @@ async function transformFileViaPlugin (filePath: string, babelPlugin: babel.Plug
       return false
     }
 
-    const maybePrettier = tryRequirePrettier()
-
-    if (maybePrettier && maybePrettier.format) {
-      finalCode = maybePrettier.format(finalCode, { parser: 'babel' })
-    }
+    finalCode = await prettifyCode(finalCode)
 
     await fs.writeFile(filePath, finalCode)
 

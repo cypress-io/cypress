@@ -3,7 +3,8 @@
 
 import debugFn from 'debug'
 import * as path from 'path'
-import { CypressCTWebpackContext } from './plugin'
+import type { LoaderContext } from 'webpack'
+import type { CypressCTWebpackContext } from './CypressCTWebpackPlugin'
 const debug = debugFn('cypress:webpack-dev-server:webpack')
 
 /**
@@ -19,12 +20,14 @@ const makeImport = (file: Cypress.Cypress['spec'], filename: string, chunkName: 
   return `"${filename}": {
     shouldLoad: () => document.location.pathname.includes("${encodeURI(file.absolute)}"),
     load: () => import("${file.absolute}" ${magicComments}),
-    chunkName: "${chunkName}",
+    absolute: "${file.absolute.split(path.sep).join(path.posix.sep)}",
+    relative: "${file.relative.split(path.sep).join(path.posix.sep)}",
+    relativeUrl: "/__cypress/src/${chunkName}.js",
   }`
 }
 
 /**
- * Creates a object maping a spec file to an object mapping
+ * Creates a object mapping a spec file to an object mapping
  * the spec name to the result of `makeImport`.
  *
  * @returns {Record<string, ReturnType<makeImport>}
@@ -49,13 +52,18 @@ function buildSpecs (projectRoot: string, files: Cypress.Cypress['spec'][] = [])
 }
 
 // Runs the tests inside the iframe
-export default function loader (this: CypressCTWebpackContext) {
-  const { files, projectRoot, supportFile } = this._cypress
+export default function loader (this: unknown) {
+  const ctx = this as CypressCTWebpackContext & LoaderContext<void>
+
+  // In Webpack 5, a spec added after the dev-server is created won't
+  // be included in the compilation. Disabling the caching of this loader ensures
+  // we regenerate our specs and include any new ones in the compilation.
+  ctx.cacheable(false)
+  const { files, projectRoot, supportFile } = ctx._cypress
 
   const supportFileAbsolutePath = supportFile ? JSON.stringify(path.resolve(projectRoot, supportFile)) : undefined
-
-  return `
-  var loadSupportFile = ${supportFile ? `() => import(${supportFileAbsolutePath})` : `() => Promise.resolve()`}
+  const supportFileRelativePath = supportFile ? JSON.stringify(path.relative(projectRoot, supportFileAbsolutePath || '')) : undefined
+  const result = `
   var allTheSpecs = ${buildSpecs(projectRoot, files)};
 
   var { init } = require(${JSON.stringify(require.resolve('./aut-runner'))})
@@ -63,11 +71,23 @@ export default function loader (this: CypressCTWebpackContext) {
   var scriptLoaders = Object.values(allTheSpecs).reduce(
     (accSpecLoaders, specLoader) => {
       if (specLoader.shouldLoad()) {
-        accSpecLoaders.push(specLoader.load)
+        accSpecLoaders.push(specLoader)
       }
       return accSpecLoaders
-  }, [loadSupportFile])
+  }, [])
+
+  if (${!!supportFile}) {
+    var supportFile = {
+      absolute: ${supportFileAbsolutePath},
+      relative: ${supportFileRelativePath},
+      relativeUrl: "/__cypress/src/cypress-support-file.js",
+      load: () => import(${supportFileAbsolutePath} /* webpackChunkName: "cypress-support-file" */),
+    }
+    scriptLoaders.unshift(supportFile)
+  }
 
   init(scriptLoaders)
   `
+
+  return result
 }

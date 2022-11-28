@@ -13,15 +13,15 @@ type PackageJsonLike = {
 
 type FindPackageJsonResult =
   | {
-      packageData: PackageJsonLike
-      filename: string
-      done: false
-    }
+    packageData: PackageJsonLike
+    filename: string
+    done: false
+  }
   | {
-      packageData: undefined
-      filename: undefined
-      done: true
-    }
+    packageData: undefined
+    filename: undefined
+    done: true
+  }
 
 /**
  * Return the parsed package.json that we find in a parent folder.
@@ -104,7 +104,7 @@ export function scanFSForAvailableDependency (cwd: string, lookingForDeps: Recor
       .some(([dependency, version]) => {
         return (
           Boolean(lookingForDeps[dependency])
-          && validateSemverVersion(version, lookingForDeps[dependency], dependency)
+          && validateSemverVersion(version, lookingForDeps[dependency] as string, dependency)
         )
       }),
     }

@@ -1,6 +1,6 @@
 require('../../spec_helper')
 
-const AppData = require(`${root}../lib/util/app_data`)
+const AppData = require(`../../../lib/util/app_data`)
 
 describe('lib/util/app_data', () => {
   context('#toHashName', () => {

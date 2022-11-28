@@ -11,12 +11,12 @@ The actual example repo you're probably looking for is [the kitchen sink app her
 
 **THERE'S LIKELY NO REASON YOU NEED TO EDIT ANY OF THE CODE ON THIS REPO.**
 
-- Want to edit the `example` tests? -> edit it [here](https://github.com/cypress-io/cypress-example-kitchensink/blob/master/cypress/integration) instead.
+- Want to edit the `example` tests? -> edit it [here](https://github.com/cypress-io/cypress-example-kitchensink/blob/master/cypress/e2e) instead.
 - Want to edit the actual [https://example.cypress.io](https://example.cypress.io) website? edit it [here](https://github.com/cypress-io/cypress-example-kitchensink/tree/master/app) instead.
 
 ## Updating the `example` app
 
-After [releasing a new version](https://github.com/cypress-io/cypress-example-kitchensink/blob/master/CONTRIBUTING.md#deployment) on the [`cypress-example-kitchen-sink` repo](https://github.com/cypress-io/cypress-example-kitchensink/blob/master/cypress/integration/examples), you now want to update the `example`'s dependency to match the newly released version.
+After [releasing a new version](https://github.com/cypress-io/cypress-example-kitchensink/blob/master/CONTRIBUTING.md#deployment) on the [`cypress-example-kitchen-sink` repo](https://github.com/cypress-io/cypress-example-kitchensink/tree/master/cypress/e2e/2-advanced-examples), you now want to update the `example`'s dependency to match the newly released version.
 
 1. Bump the `cypress-example-kitchensink` `devDependency` within this package's [`package.json`](https://github.com/cypress-io/cypress/blob/develop/packages/example/package.json).
 

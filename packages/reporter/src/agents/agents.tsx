@@ -13,7 +13,7 @@ export interface AgentProps {
 
 const Agent = observer(({ model }: AgentProps) => (
   <tr className={cs('agent-item', { 'no-calls': !model.callCount })}>
-    <td>{model.type}</td>
+    <td>{model.name}</td>
     <td>{model.functionName}</td>
     <td>{([] as Array<Alias>).concat(model.alias || []).join(', ')}</td>
     <td className='call-count'>{model.callCount || '-'}</td>
@@ -34,37 +34,38 @@ const AgentsList = observer(({ model }: AgentsProps) => (
   </tbody>
 ))
 
-const Agents = observer(({ model }: AgentsProps) => (
-  <div
-    className={cs('runnable-agents-region', {
-      'no-agents': !model.agents.length,
-    })}
-  >
-    <div className='instruments-container'>
-      <ul className='hooks-container'>
-        <li className='hook-item'>
-          <Collapsible
-            header={`Spies / Stubs (${model.agents.length})`}
-            headerClass='hook-header'
-            contentClass='instrument-content'
-          >
-            <table>
-              <thead>
-                <tr>
-                  <th>Type</th>
-                  <th>Function</th>
-                  <th>Alias(es)</th>
-                  <th className='call-count'># Calls</th>
-                </tr>
-              </thead>
-              <AgentsList model={model} />
-            </table>
-          </Collapsible>
-        </li>
-      </ul>
-    </div>
-  </div>
-))
+const Agents = observer(({ model }: AgentsProps) => {
+  if (!model.agents.length) {
+    return null
+  }
+
+  return (
+    <div className='runnable-agents-region'>
+      <div className='instruments-container'>
+        <ul className='hooks-container'>
+          <li className='hook-item'>
+            <Collapsible
+              header={`Spies / Stubs (${model.agents.length})`}
+              headerClass='hook-header'
+              contentClass='instrument-content'
+            >
+              <table>
+                <thead>
+                  <tr>
+                    <th>Type</th>{/* the spy/stub's name provided by the driver */}
+                    <th>Function</th>
+                    <th>Alias(es)</th>
+                    <th className='call-count'># Calls</th>
+                  </tr>
+                </thead>
+                <AgentsList model={model} />
+              </table>
+            </Collapsible>
+          </li>
+        </ul>
+      </div>
+    </div>)
+})
 
 export { Agent, AgentsList }
 

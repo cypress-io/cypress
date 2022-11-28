@@ -1,7 +1,7 @@
 import {
   _doesRouteMatch,
   _getMatchableForRequest,
-  getRouteForRequest,
+  getRoutesForRequest,
 } from '../../lib/server/route-matching'
 import { RouteMatcherOptions } from '../../lib/types'
 import { expect } from 'chai'
@@ -90,7 +90,7 @@ describe('intercept-request', function () {
       })
     })
 
-    it('doesn\'t match on a partial match', function () {
+    it(`doesn't match on a partial match`, function () {
       tryMatch({
         headers: {
           authorization: 'basic Zm9vOmJhcg==',
@@ -172,7 +172,7 @@ describe('intercept-request', function () {
     })
   })
 
-  context('.getRouteForRequest', function () {
+  context('.getRoutesForRequest', function () {
     it('matches middleware, then handlers', function () {
       const routes: Partial<BackendRoute>[] = [
         {
@@ -209,15 +209,53 @@ describe('intercept-request', function () {
         proxiedUrl: 'http://bar.baz/foo?_',
       }
 
-      let prevRoute: BackendRoute
-      let e: string[] = []
+      const e: string[] = []
 
       // @ts-ignore
-      while ((prevRoute = getRouteForRequest(routes, req, prevRoute))) {
-        e.push(prevRoute.id)
+      for (const route of getRoutesForRequest(routes, req)) {
+        e.push(route.id)
       }
 
       expect(e).to.deep.eq(['1', '3', '4', '2'])
+    })
+
+    it('yields identical matches', function () {
+      // This is a reproduction of issue #22693
+      const routes: Partial<BackendRoute>[] = [
+        {
+          id: '1',
+          routeMatcher: {
+            pathname: '/foo',
+          },
+        },
+        {
+          id: '1',
+          routeMatcher: {
+            pathname: '/foo',
+          },
+        },
+        {
+          id: '2',
+          routeMatcher: {
+            pathname: '/bar',
+          },
+        },
+      ]
+
+      const req: Partial<CypressIncomingRequest> = {
+        method: 'GET',
+        headers: {},
+        proxiedUrl: 'https://example.com/foo',
+      }
+
+      const matchedRouteIds: string[] = []
+
+      // @ts-ignore
+      for (const route of getRoutesForRequest(routes, req)) {
+        matchedRouteIds.push(route.id)
+      }
+
+      expect(matchedRouteIds).to.deep.eq(['1', '1'])
     })
   })
 })

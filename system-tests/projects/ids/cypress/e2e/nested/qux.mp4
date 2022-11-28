@@ -1,0 +1,8 @@
+describe('dummy file', () => {
+  it('should never execute', () => {
+    throw Error(`
+      This is an mp4 file, and should never be executed. 
+      If you are seeing this, something is wrong with the spec detection logic.
+    `)
+  })
+})

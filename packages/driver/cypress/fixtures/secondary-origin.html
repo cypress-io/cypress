@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+  <p data-cy="dom-check">From a secondary origin</p>
+  <p data-cy="cypress-check"></p>
+  <p data-cy="window-before-load"></p>
+  <input data-cy="text-input" type="text"/>
+  <form action="/fixtures/generic.html" method="get" target="_top">
+    <button type="submit">Submit</button>
+  </form>
+  <button data-cy="alert">Alert</button>
+  <button data-cy="confirm">Confirm</button>
+  <button data-cy="reload">reload</button>
+  <a data-cy="hashChange" href='#hashChange'>hashChange</a>
+  <a data-cy="cross-origin-page" href="/fixtures/primary-origin.html">/fixtures/primary-origin.html</a>
+  <a data-cy="cross-origin-tertiary-link" href="http://www.idp.com:3500/fixtures/generic.html">http://www.idp.com:3500/fixtures/generic.html</a>
+
+  <script>
+    if (window.Cypress) {
+      document.querySelector('[data-cy="cypress-check"]').innerText = 'Has window.Cypress'
+    }
+
+    if (window.testSecondaryWindowBeforeLoad){
+      document.querySelector('[data-cy="window-before-load"]').innerText = 'Window Before Load Called'
+    }
+
+    document.querySelector('[data-cy="alert"]').addEventListener('click', () => {
+      window.alert('the alert text')
+    })
+
+    document.querySelector('[data-cy="confirm"]').addEventListener('click', () => {
+      window.confirm('the confirm text')
+    })
+
+    document.querySelector('[data-cy="reload"]').addEventListener('click', () => {
+      window.location.reload()
+    })
+  </script>
+</body>
+</html>

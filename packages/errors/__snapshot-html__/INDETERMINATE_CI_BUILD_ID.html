@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8" />
+      
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap" rel="stylesheet">
+    <style>
+  
+        body {
+          font-family: "Courier Prime", Courier, monospace;
+          padding: 0 1em;
+          line-height: 1.4;
+          color: #eee;
+          background-color: #111;
+        }
+        pre {
+          padding: 0 0;
+          margin: 0 0;
+          font-family: "Courier Prime", Courier, monospace;
+        }
+      
+    body {
+      margin: 5px;
+      padding: 0;
+      overflow: hidden;
+    }
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      -webkit-font-smoothing: antialiased;
+    }
+    </style>
+  
+    </head>
+    <body><pre><span style="color:#e05561">You passed the <span style="color:#de73ff">--group<span style="color:#e05561"> or <span style="color:#de73ff">--parallel<span style="color:#e05561"> flag but we could not automatically determine or generate a ciBuildId.<span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561">The --group flag you passed was: <span style="color:#e5e510">foo<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561">The --parallel flag you passed was: <span style="color:#e5e510">false<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561">In order to use either of these features a ciBuildId must be determined.<span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561">The ciBuildId is automatically detected if you are running Cypress in any of the these CI providers:<span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">appveyor<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">azure<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">awsCodeBuild<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">bamboo<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">bitbucket<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">buildkite<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">circle<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">codeshipBasic<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">codeshipPro<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">concourse<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">codeFresh<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">drone<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">githubActions<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">gitlab<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">goCD<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">googleCloud<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">jenkins<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">semaphore<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">shippable<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">teamfoundation<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">travis<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">netlify<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#4f5666"> - <span style="color:#e05561"><span style="color:#4ec4ff">layerci<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561">Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.<span style="color:#e6e6e6">
+<span style="color:#e05561"><span style="color:#e6e6e6">
+<span style="color:#e05561">https://on.cypress.io/indeterminate-ci-build-id<span style="color:#e6e6e6"></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+</pre></body></html>

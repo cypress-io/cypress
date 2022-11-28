@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+  <label for="name">Username: </label>
+  <input data-cy="username" type="text" name="name" id="name" required>
+  <button data-cy="login">Login</button>
+  <button data-cy="slow-login">Slow Login</button>
+
+  <script>
+    const createToken = (username) => {
+      const expiry = new Date()
+      // Expire in 10 minutes
+      expiry.setMinutes(expiry.getMinutes() + 10)
+      // create faux jwt
+      return {
+        header: {
+          alg: 'string',
+          type: 'JWT'
+        },
+        body: {
+          username,
+          expiry: expiry.toISOString()
+        }
+      }
+    }
+
+    const getRedirectHref = () => {
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+      let redirect = urlParams.get('redirect')
+
+      if (redirect){
+        return decodeURIComponent(redirect)
+      }
+
+      return 'http://localhost:3500/fixtures/auth/index.html'
+    }
+
+    const addTokenToRedirect = (href, token) => {
+      const redirectUrl = new URL(href)
+      const redirectUrlParams = new URLSearchParams(redirectUrl.search);
+      redirectUrlParams.append('token', encodeURIComponent(JSON.stringify(token)))
+      redirectUrl.search = redirectUrlParams.toString()
+      return redirectUrl.href
+    }
+
+    document.querySelector('[data-cy="login"]').addEventListener('click', () => {
+      const token = createToken(document.querySelector('[data-cy="username"]').value)
+
+      const redirectHref = getRedirectHref()
+
+      window.location.href = addTokenToRedirect(redirectHref, token)
+    })
+
+    document.querySelector('[data-cy="slow-login"]').addEventListener('click', () => {
+      const token = createToken(document.querySelector('[data-cy="username"]').value)
+
+      const redirectHref = getRedirectHref()
+
+      setTimeout(() => {
+        window.location.href = addTokenToRedirect(redirectHref, token)
+      }, 5000);
+    })
+  </script>
+</body>
+</html>
