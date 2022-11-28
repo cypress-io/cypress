@@ -5,12 +5,12 @@ import { getContainerEl } from '@cypress/mount-utils'
 import {
   makeMountFn,
   makeUnmountFn,
-} from '@cypress/react'
+} from '@cypress/react-mount-utils'
 import type {
   MountOptions,
   InternalMountOptions,
   UnmountArgs,
-} from '@cypress/react'
+} from '@cypress/react-mount-utils'
 
 let root: ReactDOM.Root | null
 

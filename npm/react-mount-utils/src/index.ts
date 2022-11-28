@@ -134,7 +134,6 @@ export const makeMountFn = (
           component: userComponent,
           rerender: (newComponent) => makeMountFn('rerender', newComponent, options, key, internalMountOptions),
           unmount: () => {
-            // @ts-expect-error - undocumented API
             Cypress.utils.throwErrByPath('mount.unmount')
           },
         }, { log: false })
@@ -293,6 +292,5 @@ export function getDisplayName (
  * @see https://on.cypress.io/migration-11-0-0-component-testing-updates
  */
 export const mountHook = <T>(hookFn: (...args: any[]) => T) => {
-  // @ts-expect-error - internal API
   Cypress.utils.throwErrByPath('mount.mount_hook')
 }
