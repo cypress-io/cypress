@@ -1,7 +1,6 @@
 import { getContainerEl } from '@cypress/mount-utils'
 import React from 'react'
 import ReactDOM from 'react-dom'
-import major from 'semver/functions/major'
 import { InternalMountOptions, makeMountFn, makeUnmountFn, MountOptions } from '@cypress/react-mount-utils'
 
 let lastReactDom: typeof ReactDOM
@@ -35,14 +34,6 @@ const cleanup = () => {
  * }
  */
 export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerenderKey?: string) {
-  if (major(React.version) === 18) {
-    const message = '[cypress/react]: You are using `cypress/react`, which is designed for React <= 17. Consider changing to `cypress/react18`, which is designed for React 18.'
-
-    // eslint-disable-next-line no-console
-    console.error(message)
-    Cypress.log({ name: 'warning', message })
-  }
-
   // Remove last mounted component if cy.mount is called more than once in a test
   cleanup()
 

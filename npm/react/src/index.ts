@@ -2,6 +2,7 @@ import React from 'react'
 // @ts-expect-error
 import ReactDOM from 'react-dom/client'
 import { getContainerEl } from '@cypress/mount-utils'
+import major from 'semver/functions/major'
 import {
   makeMountFn,
   makeUnmountFn,
@@ -47,6 +48,14 @@ const cleanup = () => {
  * @returns {Cypress.Chainable<MountReturn>} The mounted component.
  */
 export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerenderKey?: string) {
+  if (major(React.version) <= 17) {
+    const message = '[cypress/react]: You are using `cypress/react`, which works with React 18. Please change to `cypress/react17`, which works with React <= 17.'
+
+    // eslint-disable-next-line no-console
+    console.error(message)
+    Cypress.log({ name: 'warning', message })
+  }
+
   // Remove last mounted component if cy.mount is called more than once in a test
   // React by default removes the last component when calling render, but we should remove the root
   // to wipe away any state
