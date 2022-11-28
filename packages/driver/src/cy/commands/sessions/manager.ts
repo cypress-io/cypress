@@ -9,6 +9,18 @@ import {
 
 type ActiveSessions = Cypress.Commands.Session.ActiveSessions
 type SessionData = Cypress.Commands.Session.SessionData
+type StorageType = 'both' | 'localStorage' | 'sessionStorage'
+
+interface OriginStorageOptions {
+  clear?: boolean
+  origin: string
+  value?: any
+}
+
+interface SetStorageOptions {
+  localStorage?: OriginStorageOptions[]
+  sessionStorage?: OriginStorageOptions[]
+}
 
 const LOGS = {
   clearCurrentSessionData: {
@@ -283,41 +295,34 @@ export default class SessionsManager {
       return results
     },
 
-    clearStorage: async () => {
+    clearStorage: async (type: StorageType = 'both') => {
       const origins = await this.getAllHtmlOrigins()
+      const originOptions = origins.map((origin) => ({ origin, clear: true }))
+      const options: SetStorageOptions = {}
 
-      const originOptions = origins.map((v) => ({ origin: v, clear: true }))
+      if (type === 'both' || type === 'localStorage') {
+        options.localStorage = originOptions
+      }
 
-      await this.sessions.setStorage({
-        localStorage: originOptions,
-        sessionStorage: originOptions,
-      })
+      if (type === 'both' || type === 'sessionStorage') {
+        options.sessionStorage = originOptions
+      }
+
+      await this.sessions.setStorage(options)
     },
 
-    setStorage: async (options: any, clearAll = false) => {
+    setStorage: async (options: SetStorageOptions) => {
       const currentOrigin = $Location.create(window.location.href).origin as string
 
       const mapToCurrentOrigin = (v) => ({ ...v, origin: (v.origin && v.origin !== 'currentOrigin') ? $Location.create(v.origin).origin : currentOrigin })
 
       const mappedLocalStorage = _.map(options.localStorage, (v) => {
-        const mapped = { origin: v.origin, localStorage: _.pick(v, 'value', 'clear') }
-
-        if (clearAll) {
-          mapped.localStorage.clear = true
-        }
-
-        return mapped
-      }).map(mapToCurrentOrigin)
+        return mapToCurrentOrigin({ origin: v.origin, localStorage: _.pick(v, 'value', 'clear') })
+      })
 
       const mappedSessionStorage = _.map(options.sessionStorage, (v) => {
-        const mapped = { origin: v.origin, sessionStorage: _.pick(v, 'value', 'clear') }
-
-        if (clearAll) {
-          mapped.sessionStorage.clear = true
-        }
-
-        return mapped
-      }).map(mapToCurrentOrigin)
+        return mapToCurrentOrigin({ origin: v.origin, sessionStorage: _.pick(v, 'value', 'clear') })
+      })
 
       const storageOptions = _.map(_.groupBy(mappedLocalStorage.concat(mappedSessionStorage), 'origin'), (v) => _.merge({}, ...v))
 
