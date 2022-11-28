@@ -11281,10 +11281,10 @@ byte-size@^5.0.1:
   resolved "https://registry.yarnpkg.com/byte-size/-/byte-size-5.0.1.tgz#4b651039a5ecd96767e71a3d7ed380e48bed4191"
   integrity sha512-/XuKeqWocKsYa/cBY1YbSJSWWqTi4cFgr9S6OyM7PBaPbr9zvNGwWP33vt0uqGhwDdN+y3yhbXVILEUpnwEWGw==
 
-bytenode@^1.2.1:
-  version "1.3.6"
-  resolved "https://registry.yarnpkg.com/bytenode/-/bytenode-1.3.6.tgz#7195a78c5d98b8f50a640d10f9762e733213deea"
-  integrity sha512-t/e1psHP/r9ipj136i9FUOznv/9el1DcY7mB8nBM1FPDqYTvQY73J8uVwRPciWdKZzZrS5yxEyzNEEnB835Fyg==
+bytenode@1.3.7:
+  version "1.3.7"
+  resolved "https://registry.yarnpkg.com/bytenode/-/bytenode-1.3.7.tgz#72b1426d08910ff0731099e4f40ee2929174ae34"
+  integrity sha512-TKvemYL2VJQIBE095FIYudjTsLagVBLpKXIYj+MaDUgzhdNL74SM1bizcXgwQs51mnXyO38tlqusDZqY8/XdTQ==
 
 bytes@1:
   version "1.0.0"

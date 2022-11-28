@@ -157,6 +157,8 @@ const cleanup = async (buildAppDir) => {
     ...await createServerEntryPointBundle(buildAppDir),
   ]
 
+  console.log(`potentially removing ${potentiallyRemovedDependencies.length} dependencies`)
+
   // 3. Remove all dependencies that are in the snapshot but not in the list of kept dependencies from the binary
   await Promise.all(potentiallyRemovedDependencies.map(async (dependency) => {
     const typeScriptlessDependency = dependency.replace(/\.ts$/, '.js')
