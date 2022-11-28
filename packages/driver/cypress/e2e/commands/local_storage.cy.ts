@@ -263,7 +263,7 @@ describe('src/cy/commands/local_storage', () => {
           done()
         })
 
-        // A number is used as an object will be considered as `options`
+        // @ts-expect-error
         cy.clearLocalStorage(1)
       })
     })
