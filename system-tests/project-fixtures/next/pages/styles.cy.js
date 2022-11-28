@@ -1,4 +1,4 @@
-import { mount } from "cypress/react"
+import { mount } from "cypress/react17"
 import Index from "./index.js"
 
 describe('<Index />', () => {
