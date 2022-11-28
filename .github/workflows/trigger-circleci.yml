@@ -23,7 +23,7 @@ jobs:
           PULL_ID: ${{ github.event.pull_request.number }}
         run: |
           echo "Triggering CircleCI pipeline for $GITHUB_HEAD_REF. $GITHUB_REF. $GITHUB_BASE_REF. $GITHUB_REF_NAME & $GITHUB_REPOSITORY & $GITHUB_REPOSITORY_OWNER"
-
+          echo "${{ github.event }}"
           echo "$HEAD_ORG & $PULL_ID"
 
           response=$(curl -X POST https://circleci.com/api/v2/project/github/cypress-io/cypress/pipeline \
