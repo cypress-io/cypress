@@ -81,7 +81,7 @@ export class SpecOptions {
   }
 
   private async getFrameworkComponentOptions () {
-    const componentName = this.parsedPath.name
+    const componentName = this.buildComponentNameFromFilename(this.parsedPath.name)
 
     const extension = await this.getVueExtension()
 
@@ -138,11 +138,23 @@ export class SpecOptions {
     return foundSpecExtension || ''
   }
 
+  private buildComponentNameFromFilename (fileNameWithoutExt: string): string {
+    const sanitizedName = fileNameWithoutExt
+    // Remove any characters from the filename that aren't allowed within a JS variable name (but leave periods to tell name groupings apart)
+    .replaceAll(/[^a-z_\d$.]/gi, '')
+    // Remove any groupings of multiple periods (eg, '...all') but leave single periods alone
+    .replaceAll(/[.]{2,}/g, '')
+
+    // Use portion of name up to the first period - this allows us to use the 'significant' portion of the filename
+    // eg, 'test.page.ts' => 'test'
+    return sanitizedName.slice(0, /[.]/.exec(sanitizedName)?.index)
+  }
+
   private buildComponentSpecFilename (specExt: string, filePath?: ParsedPath) {
     const { dir, base, ext } = filePath || this.parsedPath
     const cyWithExt = this.getSpecExtension(filePath) + ext
 
-    const name = base.slice(0, base.indexOf('.'))
+    const name = base.slice(0, -cyWithExt.length)
 
     const finalExtension = filePath ? cyWithExt : specExt
 
