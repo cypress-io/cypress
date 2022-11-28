@@ -34,9 +34,6 @@ declare namespace Cypress {
     Location: {
       create: (url: string) => ({ domain: string, superDomain: string })
     }
-    session: Cypress.Session & {
-      getStorage: (options: StorageOptions) => Promise<Storages>
-    }
   }
 
   interface CypressUtils {
