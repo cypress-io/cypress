@@ -1078,15 +1078,21 @@ namespace CypressLocalStorageTests {
   cy.getAllLocalStorage({ log: false })
   cy.getAllLocalStorage({ log: 'true' }) // $ExpectError
 
+  cy.clearAllLocalStorage().then((result) => {
+    result // $ExpectType null
+  })
+  cy.clearAllLocalStorage({ log: false })
+  cy.clearAllLocalStorage({ log: 'true' }) // $ExpectError
+
   cy.getAllSessionStorage().then((result) => {
     result // $ExpectType Cypress.StorageByOrigin
   })
   cy.getAllSessionStorage({ log: false })
   cy.getAllSessionStorage({ log: 'true' }) // $ExpectError
 
-  cy.clearAllLocalStorage().then((result) => {
+  cy.clearAllSessionStorage().then((result) => {
     result // $ExpectType null
   })
-  cy.clearAllLocalStorage({ log: false })
-  cy.clearAllLocalStorage({ log: 'true' }) // $ExpectError
+  cy.clearAllSessionStorage({ log: false })
+  cy.clearAllSessionStorage({ log: 'true' }) // $ExpectError
 }

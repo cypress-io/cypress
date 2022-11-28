@@ -837,6 +837,13 @@ declare namespace Cypress {
     getAllSessionStorage(options?: Partial<Loggable>): Chainable<StorageByOrigin>
 
     /**
+     * Clear session storage for all origins.
+     *
+     * @see https://on.cypress.io/clearallsessionstorage
+     */
+     clearAllSessionStorage(options?: Partial<Loggable>): Chainable<null>
+
+    /**
      * Clear data in local storage for the current origin.
      * Cypress automatically runs this command before each test to prevent state from being
      * shared across tests. You shouldn't need to use this command unless you're using it

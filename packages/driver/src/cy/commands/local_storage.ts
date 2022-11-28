@@ -92,6 +92,7 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy, state, config) =
     getAllSessionStorage: getAllStorage.bind(null, 'sessionStorage', Cypress),
 
     clearAllLocalStorage: clearAllStorage.bind(null, 'localStorage', Cypress),
+    clearAllSessionStorage: clearAllStorage.bind(null, 'sessionStorage', Cypress),
 
     clearLocalStorage (keys, options: Options = {}) {
       if (_.isPlainObject(keys)) {
