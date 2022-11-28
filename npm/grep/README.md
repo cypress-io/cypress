@@ -207,7 +207,7 @@ $ npx cypress run --env grep="-hello world"
 $ npx cypress run --env grep="hello; -world"
 ```
 
-**Note:** Inverted title filter is not compativle with the `grepFilterSpecs` option
+**Note:** Inverted title filter is not compatible with the `grepFilterSpecs` option
 
 ## Filter with tags
 
@@ -277,7 +277,7 @@ If you want to run all tests with tag `@slow` but without tag `@smoke`:
 --env grepTags=@slow+-@smoke
 ```
 
-**Note:** Inverted tag filter is not compativle with the `grepFilterSpecs` option
+**Note:** Inverted tag filter is not compatible with the `grepFilterSpecs` option
 
 ### NOT tags
 
@@ -417,7 +417,7 @@ This package comes with [src/index.d.ts](./src/index.d.ts) definition file that 
 
 ```js
 // cypress/integration/my-spec.js
-/// <reference types="cypress-grep" />
+/// <reference types="@cypress/grep" />
 ```
 
 If you have `tsconfig.json` file, add this library to the types list
@@ -427,7 +427,7 @@ If you have `tsconfig.json` file, add this library to the types list
   "compilerOptions": {
     "target": "es5",
     "lib": ["es5", "dom"],
-    "types": ["cypress", "cypress-grep"]
+    "types": ["cypress", "@cypress/grep"]
   },
   "include": ["**/*.ts"]
 }
