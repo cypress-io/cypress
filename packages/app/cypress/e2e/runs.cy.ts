@@ -890,7 +890,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     const itSkipIfWindows = Cypress.platform === 'win32' ? it.skip : it
 
     it('should re-query for executing runs', () => {
-      cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', RUNNING_COUNT).should('be.visible')
+      cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', RUNNING_COUNT + 1).should('be.visible')
 
       cy.remoteGraphQLIntercept(async (obj) => {
         await new Promise((resolve) => setTimeout(resolve, 1000))
@@ -924,7 +924,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
 
     itSkipIfWindows('should fetch newer runs and maintain them when navigating', () => {
-      cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', RUNNING_COUNT).should('be.visible')
+      cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', RUNNING_COUNT + 1).should('be.visible')
 
       cy.remoteGraphQLIntercept(async (obj) => {
         await new Promise((resolve) => setTimeout(resolve, 100))
