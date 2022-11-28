@@ -6,9 +6,15 @@ describe('run-all-specs', () => {
     spec2: { relative: 'cypress/e2e/folder-a/spec-b.cy.js', name: 'runs folder-a/spec-b' },
     spec3: { relative: 'cypress/e2e/folder-b/spec-a.cy.js', name: 'runs folder-b/spec-a' },
     spec4: { relative: 'cypress/e2e/folder-b/spec-b.cy.js', name: 'runs folder-b/spec-b' },
+    spec5: { relative: 'folder-c/spec-a.cy.js', name: 'runs folder-c/spec-a' },
+    spec6: { relative: 'folder-c/spec-b.cy.js', name: 'runs folder-c/spec-b' },
   }
 
   const clickRunAllSpecs = (directory: string) => {
+    if (directory === 'all') {
+      return cy.get('[data-cy=run-all-specs-for-all]').click()
+    }
+
     const command = cy.get('[data-cy=spec-item-directory]').contains(directory)
 
     return command.realHover().then(() => {
@@ -87,16 +93,16 @@ describe('run-all-specs', () => {
     // Verify "Run All Specs" live-reload
     cy.get('[data-cy=sidebar-link-specs-page]').click()
     cy.findByLabelText('Search specs').clear()
-    cy.get('[data-cy=spec-list-file]').should('have.length', 4)
+    cy.get('[data-cy=spec-list-file]').should('have.length', 6)
 
-    clickRunAllSpecs('cypress/e2e')
+    clickRunAllSpecs('all')
 
     cy.withCtx((ctx, { specs, runAllSpecsKey }) => {
       expect(ctx.actions.project.launchProject).to.have.been.calledWith('e2e', undefined, runAllSpecsKey)
       expect(ctx.project.runAllSpecs).to.include.members(specs.map((spec) => spec.relative))
     }, { specs: Object.values(ALL_SPECS), runAllSpecsKey: RUN_ALL_SPECS_KEY })
 
-    cy.waitForSpecToFinish({ passCount: 4 })
+    cy.waitForSpecToFinish({ passCount: 6 })
 
     for (const spec of Object.values(ALL_SPECS)) {
       cy.get('.runnable-title').contains(spec.name)
@@ -111,6 +117,6 @@ describe('run-all-specs', () => {
       await ctx.actions.file.writeFileInProject(spec.relative, newContent)
     }, { spec: ALL_SPECS.spec1 })
 
-    cy.waitForSpecToFinish({ passCount: 3, failCount: 1 })
+    cy.waitForSpecToFinish({ passCount: 5, failCount: 1 })
   })
 })

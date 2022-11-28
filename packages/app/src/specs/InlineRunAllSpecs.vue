@@ -1,16 +1,18 @@
 <template>
   <Tooltip
     placement="right"
-    class="h-full truncate"
-    data-cy="tooltip"
+    :data-cy="`run-all-specs-for-${directory}`"
   >
-    <button @click.stop="emits('runAllSpecs')">
+    <button
+      class="flex h-full w-full items-center justify-center"
+      @click.stop="emits('runAllSpecs')"
+    >
       <IconActionPlaySmall
         size="16"
-        stroke-color="gray-700"
+        :stroke-color="grayscale ? 'gray-200' : 'gray-700'"
         fill-color="transparent"
-        hocus-stroke-color="indigo-500"
-        hocus-fill-color="indigo-100"
+        :hocus-stroke-color="grayscale ? 'inherit' : 'indigo-500'"
+        :hocus-fill-color="grayscale ? 'inherit' : 'indigo-100'"
         class="inline-flex align-text-bottom"
         data-cy="play-button"
       />
@@ -22,7 +24,7 @@
         class="font-normal text-sm inline-flex"
         data-cy="tooltip-content"
       >
-        {{ t('specPage.runAllSpecs', specNumber) }}
+        {{ specNumber === 'all' ? t('specPage.runAllSpecs') : t('specPage.runSelectedSpecs', specNumber) }}
       </span>
     </template>
   </Tooltip>
@@ -36,8 +38,9 @@ import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 
 defineProps<{
-  specNumber: number
+  specNumber: number | 'all'
   directory: string
+  grayscale?: boolean
 }>()
 
 const emits = defineEmits<{

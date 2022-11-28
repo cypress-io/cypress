@@ -18,7 +18,7 @@
       class="font-normal text-sm"
       data-cy="run-all-specs-text"
     >
-      {{ t('specPage.runAllSpecs', specNumber) }}
+      {{ specNumber === 'all' ? t('specPage.runAllSpecs') : t('specPage.runSelectedSpecs', specNumber) }}
     </span>
   </button>
 </template>
@@ -30,7 +30,7 @@ import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 
 defineProps<{
-  specNumber: number
+  specNumber: number | 'all'
   directory: string
 }>()
 
