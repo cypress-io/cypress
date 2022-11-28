@@ -263,7 +263,7 @@ require('./packages/server/index.js')
     await execa('electron-builder', args, {
       stdio: 'inherit',
       env: {
-        NODE_OPTIONS: '--max_old_space_size=8192',
+        NODE_OPTIONS: '--max_old_space_size=16384',
       },
     })
   } catch (e) {
