@@ -5,56 +5,106 @@
   >
     <div
       data-cy="debug-spec-item"
-      class="w-full overflow-hidden flex flex-col items-start box-border bg-white border-1px border-red-600 rounded"
+      class="w-full overflow-hidden flex flex-col items-start box-border border-1px rounded"
     >
-      <div
+      <ul
         data-cy="debug-spec-header"
-        class="flex-row border-b-1px border-b-gray-100 items-center rounded-t"
+        class="w-full flex flex-row items-center py-12px bg-gray-50 border-b-1px border-b-gray-100 rounded-t"
       >
-        <span>
-          {{ spec.relativePath }}
-        </span>
-      </div>
+        <li
+          data-cy="spec-contents"
+          class="flex flex-row px-16px items-center gap-x-2"
+        >
+          <span
+            data-cy="text-contents"
+            class="w-145 non-italic text-base"
+          >
+            <span
+              class="font-normal text-gray-600"
+            >
+              {{ specData.initialPath }}
+            </span>
+            <span
+              class="font-medium text-gray-900"
+            >
+              {{ specData.specName.split('.')[0] }}
+            </span>
+            <span
+              class="font-normal text-gray-600"
+            >
+              {{ "." + specData.specName.split('.').slice(1, specData.specName.length).join('.') }}
+            </span>
+          </span>
+          <button
+            v-if="!disabled"
+            data-cy="run-failures"
+            class="inline-flex gap-x-10px whitespace-nowrap h-8 justify-center items-center
+            isolate rounded border border-gray-100 bg-white non-italic text-sm text-indigo-500 font-medium px-12px"
+          >
+            <IconActionRefresh stroke-color="indigo-500" />
+            Run Failures
+          </button>
+          <button
+            v-else
+            data-cy="run-failures-disabled"
+            class="inline-flex gap-x-10px whitespace-nowrap h-8 justify-center items-center
+            isolate rounded border border-gray-100 bg-white non-italic text-sm text-gray-500 font-medium px-12px"
+          >
+            <IconActionRefresh stroke-color="gray-500" />
+            Run Failures
+          </button>
+        </li>
+      </ul>
+      <ul
+        v-for="test in specData.failedTests.titleParts"
+        :key="`test-${test.length}`"
+        data-cy="test-group"
+        class="w-full flex flex-col flex-start h-12"
+      >
+        <DebugFailedTest
+          :failed-test="test"
+        />
+      </ul>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
+export interface Spec {
+  id: string
+  path: string
+}
+
+export interface TestResults {
+  id: string
+  titleParts: string[]
+}
+
 import { computed } from 'vue'
+import { IconActionRefresh } from '@cypress-design/vue-icon'
+import DebugFailedTest from './DebugFailedTest.vue'
 
 const props = defineProps<{
-  gql: any
-  foundInLocalProject: boolean
+  spec: Spec
+  testResults: TestResults
+  disabled: boolean
 }>()
 
-interface defaultTestType {
-  testName: string
-  testDescription: string
-}
-interface defaultTypes {
-  relativePath: string
-  failedTests: defaultTestType[]
-}
+const splitHeader = (relativePath: string) => {
+  const before = relativePath.split('/')
 
-const createTest = (name: string, description: string): defaultTestType => {
   return {
-    testName: name,
-    testDescription: description,
+    initialPath: `${before.slice(0, before.length - 1).join('/') }/`,
+    specName: before.slice(-1)[0],
   }
 }
 
-const defaultTest = createTest('Bank Accounts', 'creates new bank account')
+const specData = computed(() => {
+  const header = splitHeader(props.spec.path)
 
-const defaults: defaultTypes = {
-  relativePath: 'cypress/tests/bankaccounts.spec.ts',
-  failedTests: [defaultTest],
-}
-
-const spec = computed(() => {
-  if (props.gql) {
-    return props.gql
+  return {
+    ...header,
+    failedTests: props.testResults,
   }
-
-  return defaults
 })
 
 </script>
