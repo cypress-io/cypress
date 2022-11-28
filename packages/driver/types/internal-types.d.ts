@@ -79,11 +79,14 @@ declare namespace InternalCypress {
 
   interface Session extends Cypress.Session {
     getStorage: (options: StorageOptions) => Promise<Cypress.Storages>
+    clearStorage: (type: StorageType) => Promise<void>
   }
 
   interface StorageOptions {
     origin?: '*' | 'currentOrigin' | string
   }
+
+  type StorageType = 'localStorage' | 'sessionStorage'
 }
 
 type AliasedRequest = {

@@ -9,7 +9,6 @@ import {
 
 type ActiveSessions = Cypress.Commands.Session.ActiveSessions
 type SessionData = Cypress.Commands.Session.SessionData
-type StorageType = 'both' | 'localStorage' | 'sessionStorage'
 
 interface OriginStorageOptions {
   clear?: boolean
@@ -295,16 +294,16 @@ export default class SessionsManager {
       return results
     },
 
-    clearStorage: async (type: StorageType = 'both') => {
+    clearStorage: async (type?: InternalCypress.StorageType) => {
       const origins = await this.getAllHtmlOrigins()
       const originOptions = origins.map((origin) => ({ origin, clear: true }))
       const options: SetStorageOptions = {}
 
-      if (type === 'both' || type === 'localStorage') {
+      if (!type || type === 'localStorage') {
         options.localStorage = originOptions
       }
 
-      if (type === 'both' || type === 'sessionStorage') {
+      if (!type || type === 'sessionStorage') {
         options.sessionStorage = originOptions
       }
 

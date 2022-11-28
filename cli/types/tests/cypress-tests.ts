@@ -1083,4 +1083,10 @@ namespace CypressLocalStorageTests {
   })
   cy.getAllSessionStorage({ log: false })
   cy.getAllSessionStorage({ log: 'true' }) // $ExpectError
+
+  cy.clearAllLocalStorage().then((result) => {
+    result // $ExpectType null
+  })
+  cy.clearAllLocalStorage({ log: false })
+  cy.clearAllLocalStorage({ log: 'true' }) // $ExpectError
 }

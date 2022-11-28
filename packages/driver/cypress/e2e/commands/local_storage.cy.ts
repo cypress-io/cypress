@@ -81,7 +81,7 @@ describe('src/cy/commands/local_storage', () => {
     })
   })
 
-  context('#getSessionLocalStorage', () => {
+  context('#getAllSessionStorage', () => {
     beforeEach(() => {
       cy.visit('/fixtures/set-storage-on-multiple-origins.html')
     })
@@ -147,6 +147,32 @@ describe('src/cy/commands/local_storage', () => {
             },
           },
         })
+      })
+    })
+  })
+
+  context('#clearAllLocalStorage', () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/set-storage-on-multiple-origins.html')
+    })
+
+    it('clears local storage for all origins', () => {
+      cy.clearAllLocalStorage()
+      cy.getAllLocalStorage().should('deep.equal', {})
+    })
+
+    it('logs once', () => {
+      cy.clearAllLocalStorage().then(() => {
+        assertLogLength(logs, 2)
+        expect(logs[0].get('name')).to.eq('visit')
+        expect(logs[1].get('name')).to.eq('clearAllLocalStorage')
+      })
+    })
+
+    it('does not log when log: false', () => {
+      cy.clearAllLocalStorage({ log: false }).then(() => {
+        assertLogLength(logs, 1)
+        expect(logs[0].get('name')).to.eq('visit')
       })
     })
   })
