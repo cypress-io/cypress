@@ -19,7 +19,7 @@ function read ({ file, baseDirectory }) {
 }
 
 const getIntegrityCheckSource = (baseDirectory) => {
-  return read({ part: 'binary-integrity-check-source.js', baseDirectory })
+  return read({ file: 'binary-integrity-check-source.js', baseDirectory })
 }
 
 module.exports = {
