@@ -20,7 +20,7 @@ jobs:
         env:
           CIRCLE_TOKEN: ${{ secrets.CIRCLE_TOKEN }}
         run: |
-          echo "Triggering CircleCI pipeline for $GITHUB_HEAD_REF."
+          echo "Triggering CircleCI pipeline for $GITHUB_HEAD_REF. $GITHUB_REF_NAME & $GITHUB_REPOSITORY_OWNER"
 
           response=$(curl -X POST https://circleci.com/api/v2/project/github/cypress-io/cypress/pipeline \
             --header "Circle-Token:$CIRCLE_TOKEN" \
