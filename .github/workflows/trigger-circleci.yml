@@ -22,7 +22,7 @@ jobs:
         run: |
           echo "Triggering CircleCI pipeline for $GITHUB_HEAD_REF. $GITHUB_REF. $GITHUB_BASE_REF. $GITHUB_REF_NAME & $GITHUB_REPOSITORY & $GITHUB_REPOSITORY_OWNER"
 
-          echo "$github.event.pull_request"
+          echo "${{ github.event.pull_request }}"
 
           response=$(curl -X POST https://circleci.com/api/v2/project/github/cypress-io/cypress/pipeline \
             --header "Circle-Token:$CIRCLE_TOKEN" \
