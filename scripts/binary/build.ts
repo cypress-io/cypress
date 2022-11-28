@@ -19,6 +19,7 @@ import execa from 'execa'
 import { testStaticAssets } from './util/testStaticAssets'
 import performanceTracking from '../../system-tests/lib/performance'
 import verify from '../../cli/lib/tasks/verify'
+import * as electronBuilder from 'electron-builder'
 
 const globAsync = promisify(glob)
 
@@ -260,12 +261,16 @@ require('./packages/server/index.js')
   fs.writeFileSync(meta.distDir('index.js'), fs.readFileSync(meta.distDir('index.js'), 'utf8').replace('server/index.js', 'server/index.jsc'))
 
   try {
-    execSync(`electron-builder ${args.join(' ')}`, {
-      stdio: 'inherit',
-      env: {
-        ...process.env,
-        NODE_OPTIONS: '--max_old_space_size=32768',
-        DEBUG: 'cypress:snapgen:info',
+    await electronBuilder.build({
+      publish: 'never',
+      config: {
+        electronVersion,
+        directories: {
+          app: appFolder,
+          output: outputFolder,
+        },
+        icon: iconFilename,
+        asar: false,
       },
     })
   } catch (e) {
