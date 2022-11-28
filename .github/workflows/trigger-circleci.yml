@@ -8,13 +8,13 @@ on:
 
 jobs:
   main:
-    name: Trigger CircleCi  Pipeline if PR is ready for review
+    name: Trigger CircleCi Pipeline when PR is ready for review
     runs-on: ubuntu-latest
+    # if: ${{ github.event.pull_request.draft == false }} 
     steps:
       - if: ${{ github.event.pull_request.draft == true }} 
         run: echo "This PR is still in draft. Not triggering the CircleCi Pipeline"
-      - if: ${{ github.event.pull_request.draft == false }} 
-        name: 'PR ready for review.'
+      - if: ${{ github.event.pull_request.draft == false }}
         uses: CircleCI-Public/trigger-circleci-pipeline-action@v1.0.5
         env:
           CCI_TOKEN: ${{ secrets.CIRCLE_TOKEN }}
