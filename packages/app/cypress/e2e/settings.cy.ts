@@ -411,7 +411,7 @@ describe('App: Settings without cloud', () => {
     cy.findByText('Dashboard settings').click()
     cy.findByText('Project ID').should('not.exist')
     cy.withCtx((ctx, o) => {
-      o.sinon.spy(ctx._apis.authApi, 'logIn')
+      o.sinon.stub(ctx._apis.authApi, 'logIn')
     })
 
     cy.contains('button', 'Log in to the Cypress Dashboard').click()
