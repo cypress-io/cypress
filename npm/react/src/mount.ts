@@ -2,14 +2,7 @@ import { getContainerEl } from '@cypress/mount-utils'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import major from 'semver/functions/major'
-import {
-  makeMountFn,
-  makeUnmountFn,
-} from './createMount'
-import type {
-  MountOptions,
-  InternalMountOptions,
-} from './types'
+import { InternalMountOptions, makeMountFn, makeUnmountFn, MountOptions } from './utils'
 
 let lastReactDom: typeof ReactDOM
 

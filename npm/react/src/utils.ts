@@ -1,12 +1,64 @@
 import * as React from 'react'
-import getDisplayName from './getDisplayName'
+import type { ReactNode } from 'react'
 import {
   getContainerEl,
   ROOT_SELECTOR,
   setupHooks,
   checkForRemovedStyleOptions,
 } from '@cypress/mount-utils'
-import type { InternalMountOptions, MountOptions, MountReturn, UnmountArgs } from './types'
+
+export interface UnmountArgs {
+  log: boolean
+  boundComponentMessage?: string
+}
+
+export type MountOptions = Partial<MountReactComponentOptions>
+
+export interface MountReactComponentOptions {
+  ReactDom: typeof import('react-dom')
+  /**
+   * Log the mounting command into Cypress Command Log,
+   * true by default.
+   */
+  log: boolean
+  /**
+   * Render component in React [strict mode](https://reactjs.org/docs/strict-mode.html)
+   * It activates additional checks and warnings for child components.
+   */
+  strict: boolean
+}
+
+export interface InternalMountOptions {
+  reactDom: typeof import('react-dom')
+  render: (
+    reactComponent: ReturnType<typeof React.createElement>,
+    el: HTMLElement,
+    reactDomToUse: typeof import('react-dom')
+  ) => void
+  unmount: (options: UnmountArgs) => void
+  cleanup: () => boolean
+
+  // globalThis.Cypress.Chainable<MountReturn>
+}
+
+export interface MountReturn {
+  /**
+   * The component that was rendered.
+   */
+  component: React.ReactNode
+  /**
+   * Rerenders the specified component with new props. This allows testing of components that store state (`setState`)
+   * or have asynchronous updates (`useEffect`, `useLayoutEffect`).
+   */
+  rerender: (component: React.ReactNode) => globalThis.Cypress.Chainable<MountReturn>
+  /**
+   * Removes the mounted component.
+   *
+   * Removed as of Cypress 11.0.0.
+   * @see https://on.cypress.io/migration-11-0-0-component-testing-updates
+   */
+  unmount: (payload: UnmountArgs) => void // globalThis.Cypress.Chainable<JQuery<HTMLElement>>
+}
 
 let mountCleanup: InternalMountOptions['cleanup']
 
@@ -182,3 +234,65 @@ export const createMount = (defaultOptions: MountOptions) => {
 // because `mount` can be called after some preparation that can side effect unmount
 // @see npm/react/cypress/component/advanced/set-timeout-example/loading-indicator-spec.js
 setupHooks(preMountCleanup)
+
+type JSX = Function & { displayName: string }
+
+/**
+ * Gets the display name of the component when possible.
+ * @param type {JSX} The type object returned from creating the react element.
+ * @param fallbackName {string} The alias, or fallback name to use when the name cannot be derived.
+ * @link https://github.com/facebook/react-devtools/blob/master/backend/getDisplayName.js
+ */
+export function getDisplayName (
+  node: ReactNode,
+  fallbackName: string = 'Unknown',
+): string {
+  const type: JSX | undefined = (node as any)?.type
+
+  if (!type) {
+    return fallbackName
+  }
+
+  let displayName: string | null = null
+
+  // The displayName property is not guaranteed to be a string.
+  // It's only safe to use for our purposes if it's a string.
+  // github.com/facebook/react-devtools/issues/803
+  if (typeof type.displayName === 'string') {
+    displayName = type.displayName
+  }
+
+  if (!displayName) {
+    displayName = type.name || fallbackName
+  }
+
+  // Facebook-specific hack to turn "Image [from Image.react]" into just "Image".
+  // We need displayName with module name for error reports but it clutters the DevTools.
+  const match = displayName.match(/^(.*) \[from (.*)\]$/)
+
+  if (match) {
+    const componentName = match[1]
+    const moduleName = match[2]
+
+    if (componentName && moduleName) {
+      if (
+        moduleName === componentName ||
+        moduleName.startsWith(`${componentName}.`)
+      ) {
+        displayName = componentName
+      }
+    }
+  }
+
+  return displayName
+}
+
+/**
+ * Mounts a React hook function in a test component for testing.
+ * Removed as of Cypress 11.0.0.
+ * @see https://on.cypress.io/migration-11-0-0-component-testing-updates
+ */
+export const mountHook = <T>(hookFn: (...args: any[]) => T) => {
+  // @ts-expect-error - internal API
+  Cypress.utils.throwErrByPath('mount.mount_hook')
+}

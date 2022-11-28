@@ -1,7 +1,3 @@
-export * from './createMount'
+export * from './utils'
 
 export * from './mount'
-
-export * from './mountHook'
-
-export * from './types'
