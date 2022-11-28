@@ -1,8 +1,20 @@
 describe('src/cy/commands/local_storage', () => {
-  context('#getAllLocalStorage', () => {
-    it('gets local storage from all origins', () => {
-      cy.visit('/fixtures/set-storage-on-multiple-origins.html')
+  let logs
 
+  beforeEach(() => {
+    logs = []
+
+    cy.on('log:added', (attrs, log) => {
+      return logs.push(log)
+    })
+  })
+
+  context('#getAllLocalStorage', () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/set-storage-on-multiple-origins.html')
+    })
+
+    it('gets local storage from all origins', () => {
       cy.getAllLocalStorage().should('deep.equal', {
         'http://localhost:3500': {
           key1: 'value1',
@@ -22,12 +34,42 @@ describe('src/cy/commands/local_storage', () => {
         },
       })
     })
+
+    it('consoleProps includes the storage yielded', () => {
+      cy.getAllLocalStorage().then(() => {
+        const consoleProps = logs[1].get('consoleProps')()
+
+        expect(consoleProps).to.deep.equal({
+          Command: 'getAllLocalStorage',
+          Yielded: {
+            'http://localhost:3500': {
+              key1: 'value1',
+              key2: 'value2',
+            },
+            'http://www.foobar.com:3500': {
+              key3: 'value3',
+              key4: 'value4',
+            },
+            'http://other.foobar.com:3500': {
+              key5: 'value5',
+              key6: 'value6',
+            },
+            'http://barbaz.com:3500': {
+              key7: 'value7',
+              key8: 'value8',
+            },
+          },
+        })
+      })
+    })
   })
 
   context('#getSessionLocalStorage', () => {
-    it('gets local storage from all origins', () => {
+    beforeEach(() => {
       cy.visit('/fixtures/set-storage-on-multiple-origins.html')
+    })
 
+    it('gets local storage from all origins', () => {
       cy.getAllSessionStorage().should('deep.equal', {
         'http://localhost:3500': {
           key11: 'value11',
@@ -45,6 +87,34 @@ describe('src/cy/commands/local_storage', () => {
           key17: 'value17',
           key18: 'value18',
         },
+      })
+    })
+
+    it('consoleProps includes the storage yielded', () => {
+      cy.getAllSessionStorage().then(() => {
+        const consoleProps = logs[1].get('consoleProps')()
+
+        expect(consoleProps).to.deep.equal({
+          Command: 'getAllSessionStorage',
+          Yielded: {
+            'http://localhost:3500': {
+              key11: 'value11',
+              key12: 'value12',
+            },
+            'http://www.foobar.com:3500': {
+              key13: 'value13',
+              key14: 'value14',
+            },
+            'http://other.foobar.com:3500': {
+              key15: 'value15',
+              key16: 'value16',
+            },
+            'http://barbaz.com:3500': {
+              key17: 'value17',
+              key18: 'value18',
+            },
+          },
+        })
       })
     })
   })

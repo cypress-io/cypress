@@ -46,11 +46,13 @@ const getAllStorage = async (type: 'sessionStorage' | 'localStorage', Cypress: I
 
   const storages = await (Cypress.session as InternalCypress.Session).getStorage({ origin: '*' })
 
-  return storages[type].reduce((memo, storage) => {
+  storageByOrigin = storages[type].reduce((memo, storage) => {
     memo[storage.origin] = storage.value
 
     return memo
   }, {} as Cypress.StorageByOrigin)
+
+  return storageByOrigin
 }
 
 export default (Commands, Cypress: InternalCypress.Cypress, cy, state, config) => {
