@@ -111,7 +111,8 @@
     "react18",
     "angular",
     "svelte",
-    "react-mount-utils"
+    "react-mount-utils",
+    "react17"
   ],
   "bin": {
     "cypress": "bin/cypress"
@@ -167,6 +168,11 @@
     "./react-mount-utils": {
       "require": "./react-mount-utils/dist/index.js",
       "types": "./react-mount-utils/dist/index.d.ts"
+    },
+    "./react17": {
+      "import": "./react17/dist/cypress-react.esm-bundler.js",
+      "require": "./react17/dist/cypress-react.cjs.js",
+      "types": "./react17/dist/index.d.ts"
     }
   },
   "workspaces": {
