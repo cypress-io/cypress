@@ -110,7 +110,7 @@ const descriptions = {
   exit: 'keep the browser open after tests finish',
   forceInstall: 'force install the Cypress binary',
   global: 'force Cypress into global mode as if its globally installed',
-  group: 'a named group for recorded runs in the Cypress Dashboard',
+  group: 'a named group for recorded runs in Cypress Cloud',
   headed: 'displays the browser instead of running headlessly',
   headless: 'hide the browser instead of running headed (default for cypress run)',
   key: 'your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.',
@@ -118,11 +118,11 @@ const descriptions = {
   port: 'runs Cypress on a specific port. overrides any value in cypress.config.{js,ts,mjs,cjs}.',
   project: 'path to the project',
   quiet: 'run quietly, using only the configured reporter',
-  record: 'records the run. sends test results, screenshots and videos to your Cypress Dashboard.',
+  record: 'records the run. sends test results, screenshots and videos to Cypress Cloud.',
   reporter: 'runs a specific mocha reporter. pass a path to use a custom reporter. defaults to "spec"',
   reporterOptions: 'options for the mocha reporter. defaults to "null"',
   spec: 'runs specific spec file(s). defaults to "all"',
-  tag: 'named tag(s) for recorded runs in the Cypress Dashboard',
+  tag: 'named tag(s) for recorded runs in Cypress Cloud',
   version: 'prints Cypress version',
 }
 

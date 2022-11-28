@@ -8,7 +8,8 @@
     "build-prod": "yarn build",
     "build": "ts-node ./scripts/build.ts && ts-node ./scripts/ico.ts",
     "test-unit": "NODE_ENV=test mocha -r @packages/ts/register test/*.ts",
-    "test": "yarn test-unit"
+    "test": "yarn test-unit",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "devDependencies": {
     "@types/mocha": "^8.0.3",
