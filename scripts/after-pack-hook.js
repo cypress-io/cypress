@@ -56,6 +56,7 @@ module.exports = async function (params) {
   }
 
   if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE)) {
+    await fs.writeFile(path.join(outputFolder, 'index.js'), await fs.readFile(path.join(outputFolder, 'index.js'), 'utf8').replace('server/index.js', 'server/index.jsc'))
     await flipFuses(
       exePathPerPlatform[os.platform()],
       {

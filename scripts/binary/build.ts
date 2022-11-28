@@ -258,8 +258,6 @@ require('./packages/server/index.js')
     version,
   }, { spaces: 2 })
 
-  fs.writeFileSync(meta.distDir('index.js'), fs.readFileSync(meta.distDir('index.js'), 'utf8').replace('server/index.js', 'server/index.jsc'))
-
   try {
     await electronBuilder.build({
       publish: 'never',
