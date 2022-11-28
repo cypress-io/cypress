@@ -17,7 +17,7 @@ function stackIntegrityCheck (options) {
 
   options.stackToMatch.forEach((functionName, index) => {
     if (stack[index].getFunctionName() !== functionName || !['evalmachine.<anonymous>', '<embedded>'].includes(stack[index].getFileName())) {
-      throw new Error(`Integrity check failed at index ${ index } with function name ${ functionName } and expected function name ${stack[index].getFunctionName()} from ${stack[index].getFileName()}`)
+      throw new Error(`Integrity check failed at index ${ index } with function name ${stack[index].getFunctionName()} and expected function name ${functionName} from ${stack[index].getFileName()}`)
     }
   })
 }

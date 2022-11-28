@@ -17,7 +17,7 @@ function setGlobals (
 ) {
   if (typeof stackIntegrityCheck === 'function') {
     // eslint-disable-next-line no-undef
-    stackIntegrityCheck({ stackToMatch: ['setGlobals', 'snapshotRequire', 'runWithSnapshot', 'hookRequire', 'run'] })
+    stackIntegrityCheck({ stackToMatch: ['value', 'snapshotRequire', 'runWithSnapshot', 'hookRequire', 'run'] })
   }
 
   // Populate the global function trampoline with the real global functions defined on newGlobal.
