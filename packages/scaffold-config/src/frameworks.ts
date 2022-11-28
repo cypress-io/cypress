@@ -72,7 +72,7 @@ const reactMountModule = async (projectPath: string) => {
     return 'cypress/react'
   }
 
-  return semver.major(reactPkg.detectedVersion) === 18 ? 'cypress/react18' : 'cypress/react'
+  return semver.major(reactPkg.detectedVersion) === 18 ? 'cypress/react' : 'cypress/react17'
 }
 
 export const WIZARD_FRAMEWORKS = [
