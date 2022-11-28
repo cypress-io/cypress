@@ -1070,3 +1070,17 @@ namespace CypressLocalStorageTests {
   cy.getAllLocalStorage({ log: 'true' }) // $ExpectError
   cy.getAllLocalStorage({ timeout: '10' }) // $ExpectError
 }
+
+namespace CypressLocalStorageTests {
+  cy.getAllLocalStorage().then((result) => {
+    result // $ExpectType Cypress.StorageByOrigin
+  })
+  cy.getAllLocalStorage({ log: false })
+  cy.getAllLocalStorage({ log: 'true' }) // $ExpectError
+
+  cy.getAllSessionStorage().then((result) => {
+    result // $ExpectType Cypress.StorageByOrigin
+  })
+  cy.getAllSessionStorage({ log: false })
+  cy.getAllSessionStorage({ log: 'true' }) // $ExpectError
+}

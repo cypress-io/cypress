@@ -1,7 +1,7 @@
 describe('src/cy/commands/local_storage', () => {
   context('#getAllLocalStorage', () => {
     it('gets local storage from all origins', () => {
-      cy.visit('/fixtures/set-storage-on-multiple-origins.html?type=localStorage')
+      cy.visit('/fixtures/set-storage-on-multiple-origins.html')
 
       cy.getAllLocalStorage().should('deep.equal', {
         'http://localhost:3500': {
@@ -19,6 +19,31 @@ describe('src/cy/commands/local_storage', () => {
         'http://barbaz.com:3500': {
           key7: 'value7',
           key8: 'value8',
+        },
+      })
+    })
+  })
+
+  context('#getSessionLocalStorage', () => {
+    it('gets local storage from all origins', () => {
+      cy.visit('/fixtures/set-storage-on-multiple-origins.html')
+
+      cy.getAllSessionStorage().should('deep.equal', {
+        'http://localhost:3500': {
+          key11: 'value11',
+          key12: 'value12',
+        },
+        'http://www.foobar.com:3500': {
+          key13: 'value13',
+          key14: 'value14',
+        },
+        'http://other.foobar.com:3500': {
+          key15: 'value15',
+          key16: 'value16',
+        },
+        'http://barbaz.com:3500': {
+          key17: 'value17',
+          key18: 'value18',
         },
       })
     })

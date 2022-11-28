@@ -820,7 +820,14 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/getalllocalstorage
      */
-    getAllLocalStorage(): Chainable<StorageByOrigin>
+    getAllLocalStorage(options?: Partial<Loggable>): Chainable<StorageByOrigin>
+
+    /**
+     * Get session storage for all origins.
+     *
+     * @see https://on.cypress.io/getallsessionstorage
+     */
+    getAllSessionStorage(options?: Partial<Loggable>): Chainable<StorageByOrigin>
     /**
      * Clear data in local storage for the current origin.
      * Cypress automatically runs this command before each test to prevent state from being

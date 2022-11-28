@@ -34,6 +34,7 @@ module.exports = {
     'plugin:@cypress/dev/tests',
   ],
   parser: '@typescript-eslint/parser',
+  ignorePatterns: ['cli/types/**'],
   overrides: [
     {
       files: [
