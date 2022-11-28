@@ -5,6 +5,7 @@ on:
     types:
       - opened
       - ready_for_review
+      - synchronize
 
 jobs:
   main:
@@ -15,10 +16,11 @@ jobs:
         run: echo "This PR is still in draft. Not triggering the CircleCi Pipeline"
       - if: ${{ github.event.pull_request.draft == false }}
         # uses: CircleCI-Public/trigger-circleci-pipeline-action@v1.0.5
+        shell: bash
         env:
           CIRCLE_TOKEN: ${{ secrets.CIRCLE_TOKEN }}
         run: |
-          echo 'Triggering CircleCI pipeline for ${{ env.GITHUB_HEAD_REF }}'
+          echo "Triggering CircleCI pipeline for $GITHUB_HEAD_REF / $""
           curl -X --fail-with-body POST https://circleci.com/api/v2/project/github/cypress-io/cypress/pipeline \
           --header "Circle-Token:${{ env.CIRCLE_TOKEN }}" \
           --header "content-type:application/json" \
