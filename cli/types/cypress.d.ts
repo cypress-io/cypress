@@ -163,7 +163,7 @@ declare namespace Cypress {
     isNotDisabled(subject: any, commandName: string, onFail?: Log): void
 
     /**
-     * Throws an error if `subject` is hidden by any of its parent elements.
+     * Throws an error if `subject` is a DOM element hidden by any of its parent elements.
      */
     isNotHiddenByAncestors(subject: any, commandName: string, onFail?: Log): void
 
