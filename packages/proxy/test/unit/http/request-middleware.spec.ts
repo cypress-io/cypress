@@ -42,6 +42,10 @@ describe('http/request-middleware', () => {
             'x-cypress-is-aut-frame': 'true',
           },
         } as Partial<CypressIncomingRequest>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
       }
 
       await testMiddleware([ExtractCypressMetadataHeaders], ctx)
@@ -60,6 +64,10 @@ describe('http/request-middleware', () => {
         req: {
           headers: {},
         } as Partial<CypressIncomingRequest>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
       }
 
       await testMiddleware([ExtractCypressMetadataHeaders], ctx)
@@ -80,6 +88,10 @@ describe('http/request-middleware', () => {
             'x-cypress-is-xhr-or-fetch': 'true',
           },
         } as Partial<CypressIncomingRequest>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
       }
 
       await testMiddleware([ExtractCypressMetadataHeaders], ctx)
@@ -97,6 +109,10 @@ describe('http/request-middleware', () => {
         req: {
           headers: {},
         } as Partial<CypressIncomingRequest>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
       }
 
       await testMiddleware([ExtractCypressMetadataHeaders], ctx)
@@ -113,6 +129,10 @@ describe('http/request-middleware', () => {
             'x-cypress-is-xhr-or-fetch': 'true',
           },
         } as Partial<CypressIncomingRequest>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
       }
 
       await testMiddleware([ExtractCypressMetadataHeaders], ctx)
@@ -133,6 +153,10 @@ describe('http/request-middleware', () => {
             'x-cypress-is-xhr-or-fetch': 'sub_frame',
           },
         } as Partial<CypressIncomingRequest>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
       }
 
       await testMiddleware([ExtractCypressMetadataHeaders], ctx)
@@ -158,6 +182,10 @@ describe('http/request-middleware', () => {
             'x-cypress-is-xhr-or-fetch': 'xhr',
           },
         } as Partial<CypressIncomingRequest>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
       }
 
       await testMiddleware([ExtractCypressMetadataHeaders], ctx)
@@ -182,6 +210,10 @@ describe('http/request-middleware', () => {
             'x-cypress-is-xhr-or-fetch': 'fetch',
           },
         } as Partial<CypressIncomingRequest>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
       }
 
       await testMiddleware([ExtractCypressMetadataHeaders], ctx)
@@ -208,6 +240,10 @@ describe('http/request-middleware', () => {
             'x-cypress-is-xhr-or-fetch': 'true',
           },
         } as Partial<CypressIncomingRequest>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
       }
 
       await testMiddleware([ExtractCypressMetadataHeaders], ctx)
@@ -231,6 +267,10 @@ describe('http/request-middleware', () => {
             'sec-fetch-dest': 'iframe',
           },
         },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
       }
 
       await testMiddleware([MaybeSimulateSecHeaders], ctx)
@@ -248,6 +288,10 @@ describe('http/request-middleware', () => {
           headers: {
             'sec-fetch-dest': 'iframe',
           },
+        },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
         },
       }
 
@@ -267,6 +311,10 @@ describe('http/request-middleware', () => {
             'sec-fetch-dest': 'video',
           },
         },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
       }
 
       await testMiddleware([MaybeSimulateSecHeaders], ctx)
@@ -284,6 +332,10 @@ describe('http/request-middleware', () => {
           headers: {
             'sec-fetch-dest': 'iframe',
           },
+        },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
         },
       }
 
@@ -510,6 +562,10 @@ describe('http/request-middleware', () => {
             cookie: requestCookieStrings.join('; ') || undefined,
           },
         },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
       } as HttpMiddlewareThis<any>
     }
   })
@@ -528,7 +584,10 @@ describe('http/request-middleware', () => {
         req: {
           proxiedUrl: 'https://www.cypress.io/',
         },
-        res: {} as Partial<CypressOutgoingResponse>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        } as Partial<CypressOutgoingResponse>,
       }
 
       await testMiddleware([MaybeEndRequestWithBufferedResponse], ctx)
@@ -548,7 +607,10 @@ describe('http/request-middleware', () => {
         req: {
           proxiedUrl: 'https://www.cypress.io/',
         },
-        res: {} as Partial<CypressOutgoingResponse>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        } as Partial<CypressOutgoingResponse>,
       }
 
       await testMiddleware([MaybeEndRequestWithBufferedResponse], ctx)
@@ -568,7 +630,10 @@ describe('http/request-middleware', () => {
         req: {
           proxiedUrl: 'https://www.not-cypress.io/',
         },
-        res: {} as Partial<CypressOutgoingResponse>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        } as Partial<CypressOutgoingResponse>,
       }
 
       await testMiddleware([MaybeEndRequestWithBufferedResponse], ctx)
@@ -592,7 +657,10 @@ describe('http/request-middleware', () => {
           proxiedUrl: 'https://www.cypress.io/',
           headers,
         },
-        res: {} as Partial<CypressOutgoingResponse>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        } as Partial<CypressOutgoingResponse>,
         remoteStates,
       }
 
@@ -615,7 +683,10 @@ describe('http/request-middleware', () => {
           proxiedUrl: 'https://www.cypress.io/',
           headers,
         },
-        res: {} as Partial<CypressOutgoingResponse>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        } as Partial<CypressOutgoingResponse>,
         remoteStates,
       }
 
@@ -636,7 +707,10 @@ describe('http/request-middleware', () => {
           proxiedUrl: 'https://www.cypress.io/',
           headers,
         },
-        res: {} as Partial<CypressOutgoingResponse>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        } as Partial<CypressOutgoingResponse>,
         remoteStates,
       }
 
@@ -657,7 +731,10 @@ describe('http/request-middleware', () => {
           proxiedUrl: 'https://www.cypress.io/',
           headers,
         },
-        res: {} as Partial<CypressOutgoingResponse>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        } as Partial<CypressOutgoingResponse>,
         remoteStates,
       }
 
@@ -680,7 +757,10 @@ describe('http/request-middleware', () => {
           proxiedUrl: 'https://www.cypress.io/',
           headers,
         },
-        res: {} as Partial<CypressOutgoingResponse>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        } as Partial<CypressOutgoingResponse>,
         remoteStates,
       }
 
