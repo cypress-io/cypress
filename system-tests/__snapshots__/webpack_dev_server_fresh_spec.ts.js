@@ -450,7 +450,7 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 8)
-   50 modules
+   52 modules
 
 ERROR in ./src/AppCompilationError.cy.jsx
 Module build failed (from [..]):
@@ -1328,7 +1328,7 @@ exports['@cypress/webpack-dev-server react executes all of the tests for webpack
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 8)
 15 assets
-66 modules
+65 modules
 
 ERROR in ./src/AppCompilationError.cy.jsx
 Module build failed (from [..]):
