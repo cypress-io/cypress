@@ -49,4 +49,44 @@ describe('<ResultCounts />', () => {
 
     cy.percySnapshot()
   })
+
+  it('changes order of status signs with the order prop', () => {
+    cy.mount(() => (
+      <ResultCounts
+        data-cy='result-count'
+        totalFailed={3}
+        totalPassed={4}
+        totalPending={5}
+        totalSkipped={6}
+        order={['SKIPPED', 'FAILED', 'PASSED', 'PENDING']}
+      />
+    ))
+
+    cy.get('[data-cy=result-count]').children().then((status) => {
+      expect(status[0]).to.contain(6)
+      expect(status[1]).to.contain(3)
+      expect(status[2]).to.contain(4)
+      expect(status[3]).to.contain(5)
+    })
+  })
+
+  const slotContent = {
+    prefix: () => <div class="h-full bg-emerald-100">Prefix</div>,
+  }
+
+  it('tests if the prefix slot shows up in the Result counts', () => {
+    cy.mount(() => (
+      <ResultCounts
+        data-cy='result-count'
+        totalFailed={3}
+        totalPassed={4}
+        totalPending={5}
+        totalSkipped={6}
+        v-slots={slotContent}
+        order={['SKIPPED', 'FAILED', 'PASSED', 'PENDING']}
+      />
+    ))
+
+    cy.findByText('Prefix').should('be.visible')
+  })
 })
