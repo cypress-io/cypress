@@ -17,7 +17,7 @@ exports['React major versions with Webpack executes all of the tests for React v
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  App.cy.jsx                                                                      (1 of 5)
-   49 modules
+   48 modules
 
 
   ✓ renders hello world
@@ -90,7 +90,7 @@ exports['React major versions with Webpack executes all of the tests for React v
 
 
   using legacy mount
-    ✓ issues a warning encouraging user to update
+    ✓ does not warning or log
 
 
   1 passing
@@ -300,19 +300,20 @@ exports['React major versions with Webpack executes all of the tests for React v
 
 
   using legacy mount
-    ✓ does not warning or log
+    - issues a warning encouraging user to update
 
 
-  1 passing
+  0 passing
+  1 pending
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
+  │ Passing:      0                                                                                │
   │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
+  │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
@@ -407,13 +408,13 @@ exports['React major versions with Webpack executes all of the tests for React v
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  UsingLegacyMount.cy.jsx                  XX:XX        1        1        -        -        - │
+  │ ✔  UsingLegacyMount.cy.jsx                  XX:XX        1        -        -        1        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  Rerendering.cy.jsx                       XX:XX        1        1        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  mount.cy.jsx                             XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       10       10        -        -        -  
+    ✔  All specs passed!                        XX:XX       10        9        -        1        -  
 
 
 `
