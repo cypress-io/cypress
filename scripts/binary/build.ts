@@ -264,6 +264,7 @@ require('./packages/server/index.js')
       stdio: 'inherit',
       env: {
         NODE_OPTIONS: '--max_old_space_size=16384',
+        DEBUG: 'cypress:snapgen:info',
       },
     })
   } catch (e) {
