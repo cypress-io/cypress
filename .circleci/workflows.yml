@@ -1119,7 +1119,7 @@ commands:
           command: ls -la types
           working_directory: cli/build
       - run:
-          command: ls -la vue vue2 mount-utils react
+          command: ls -la vue vue2 mount-utils react react-mount-utils
           working_directory: cli/build
       - unless:
           condition:
@@ -1909,6 +1909,15 @@ jobs:
           command: yarn workspace @cypress/mount-utils build
       - store-npm-logs
 
+  npm-react-mount-utils:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Build
+          command: yarn workspace @cypress/react-mount-utils build
+      - store-npm-logs
+
   npm-xpath:
     <<: *defaults
     resource_class: small
@@ -2559,6 +2568,9 @@ linux-x64-workflow: &linux-x64-workflow
     - npm-angular:
         requires:
           - build
+    - npm-react-mount-utils:
+        requires:
+          - build
     - npm-mount-utils:
         requires:
           - build
@@ -2585,6 +2597,7 @@ linux-x64-workflow: &linux-x64-workflow
           - npm-angular
           - npm-eslint-plugin-dev
           - npm-create-cypress-tests
+          - npm-react-mount-utils
           - npm-react
           - npm-mount-utils
           - npm-vue
