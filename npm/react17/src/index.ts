@@ -1,24 +1,16 @@
-import React from 'react'
-// @ts-expect-error
-import ReactDOM from 'react-dom/client'
 import { getContainerEl } from '@cypress/mount-utils'
-import {
-  makeMountFn,
-  makeUnmountFn,
-} from '@cypress/react-mount-utils'
-import type {
-  MountOptions,
-  InternalMountOptions,
-  UnmountArgs,
-} from '@cypress/react-mount-utils'
+import React from 'react'
+import ReactDOM from 'react-dom'
+import major from 'semver/functions/major'
+import { InternalMountOptions, makeMountFn, makeUnmountFn, MountOptions } from '@cypress/react-mount-utils'
 
-let root: ReactDOM.Root | null
+let lastReactDom: typeof ReactDOM
 
 const cleanup = () => {
-  if (root) {
-    root.unmount()
+  if (lastReactDom) {
+    const root = getContainerEl()
 
-    root = null
+    lastReactDom.unmountComponentAtNode(root)
 
     return true
   }
@@ -28,10 +20,10 @@ const cleanup = () => {
 
 /**
  * Mounts a React component into the DOM.
- * @param {import('react').JSX.Element} jsx The React component to mount.
- * @param {MountOptions} options Options to pass to the mount function.
- * @param {string} rerenderKey A key to use to force a rerender.
- *
+ * @param jsx {React.ReactNode} The React component to mount.
+ * @param options {MountOptions} [options={}] options to pass to the mount function.
+ * @param rerenderKey {string} [rerenderKey] A key to use to force a rerender.
+ * @see {@link https://on.cypress.io/mounting-react} for more details.
  * @example
  * import { mount } from '@cypress/react'
  * import { Stepper } from './Stepper'
@@ -41,24 +33,26 @@ const cleanup = () => {
  *   cy.get('[data-cy=increment]').click()
  *   cy.get('[data-cy=counter]').should('have.text', '1')
  * }
- *
- * @see {@link https://on.cypress.io/mounting-react} for more details.
- *
- * @returns {Cypress.Chainable<MountReturn>} The mounted component.
  */
 export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerenderKey?: string) {
+  if (major(React.version) === 18) {
+    const message = '[cypress/react]: You are using `cypress/react`, which is designed for React <= 17. Consider changing to `cypress/react18`, which is designed for React 18.'
+
+    // eslint-disable-next-line no-console
+    console.error(message)
+    Cypress.log({ name: 'warning', message })
+  }
+
   // Remove last mounted component if cy.mount is called more than once in a test
-  // React by default removes the last component when calling render, but we should remove the root
-  // to wipe away any state
   cleanup()
+
   const internalOptions: InternalMountOptions = {
     reactDom: ReactDOM,
-    render: (reactComponent: ReturnType<typeof React.createElement>, el: HTMLElement) => {
-      if (!root) {
-        root = ReactDOM.createRoot(el)
-      }
+    // @ts-ignore
+    render: (reactComponent: ReturnType<typeof React.createElement>, el: HTMLElement, reactDomToUse: typeof ReactDOM) => {
+      lastReactDom = (reactDomToUse || ReactDOM)
 
-      return root.render(reactComponent)
+      return lastReactDom.render(reactComponent, el)
     },
     unmount: internalUnmount,
     cleanup,
@@ -67,14 +61,20 @@ export function mount (jsx: React.ReactNode, options: MountOptions = {}, rerende
   return makeMountFn('mount', jsx, { ReactDom: ReactDOM, ...options }, rerenderKey, internalOptions)
 }
 
+/**
+ * Unmounts the component from the DOM.
+ * @internal
+ * @param options - Options for unmounting.
+ */
 function internalUnmount (options = { log: true }) {
   return makeUnmountFn(options)
 }
+
 /**
  * Removed as of Cypress 11.0.0.
  * @see https://on.cypress.io/migration-11-0-0-component-testing-updates
  */
-export function unmount (options: UnmountArgs = { log: true }) {
+export function unmount (options = { log: true }) {
   // @ts-expect-error - undocumented API
   Cypress.utils.throwErrByPath('mount.unmount')
 }
