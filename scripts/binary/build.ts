@@ -260,9 +260,10 @@ require('./packages/server/index.js')
   fs.writeFileSync(meta.distDir('index.js'), fs.readFileSync(meta.distDir('index.js'), 'utf8').replace('server/index.js', 'server/index.jsc'))
 
   try {
-    await execa('electron-builder', args, {
+    execSync(`electron-builder ${args.join(' ')}`, {
       stdio: 'inherit',
       env: {
+        ...process.env,
         NODE_OPTIONS: '--max_old_space_size=32768',
         DEBUG: 'cypress:snapgen:info',
       },
