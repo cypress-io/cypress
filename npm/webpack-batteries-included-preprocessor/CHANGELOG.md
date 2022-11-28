@@ -1,3 +1,10 @@
+# [@cypress/webpack-batteries-included-preprocessor-v2.2.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v2.2.3...@cypress/webpack-batteries-included-preprocessor-v2.2.4) (2022-11-23)
+
+
+### Bug Fixes
+
+* fix windows-lint CI job ([#24758](https://github.com/cypress-io/cypress/issues/24758)) ([2166ba0](https://github.com/cypress-io/cypress/commit/2166ba0d9496037df843d55f07517f83817171a3))
+
 # [@cypress/webpack-batteries-included-preprocessor-v2.2.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v2.2.2...@cypress/webpack-batteries-included-preprocessor-v2.2.3) (2021-07-31)
 
 
