@@ -215,7 +215,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.withCtx(async (ctx, o) => {
         await ctx.actions.file.writeFileInProject(o.path, `
   import React from 'react'
-  import { mount } from 'cypress/react'
+  import { mount } from 'cypress/react17'
 
   describe('TestComponent', () => {
     it('renders the new test component', () => {

@@ -1,4 +1,4 @@
-import { mount } from 'cypress/react'
+import { mount } from 'cypress/react17'
 import 'cypress-real-events/support'
 import { installCustomPercyCommand } from '@packages/frontend-shared/cypress/support/customPercyCommand'
 
