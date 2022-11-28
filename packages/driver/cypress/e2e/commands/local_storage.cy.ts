@@ -1,3 +1,5 @@
+import { assertLogLength } from '../../support/utils'
+
 describe('src/cy/commands/local_storage', () => {
   let logs: Cypress.Log[]
 
@@ -36,7 +38,18 @@ describe('src/cy/commands/local_storage', () => {
     })
 
     it('logs once', () => {
+      cy.getAllLocalStorage().then(() => {
+        assertLogLength(logs, 2)
+        expect(logs[0].get('name')).to.eq('visit')
+        expect(logs[1].get('name')).to.eq('getAllLocalStorage')
+      })
+    })
 
+    it('does not log when log: false', () => {
+      cy.getAllLocalStorage({ log: false }).then(() => {
+        assertLogLength(logs, 1)
+        expect(logs[0].get('name')).to.eq('visit')
+      })
     })
 
     it('consoleProps includes the storage yielded', () => {
@@ -91,6 +104,21 @@ describe('src/cy/commands/local_storage', () => {
           key17: 'value17',
           key18: 'value18',
         },
+      })
+    })
+
+    it('logs once', () => {
+      cy.getAllSessionStorage().then(() => {
+        assertLogLength(logs, 2)
+        expect(logs[0].get('name')).to.eq('visit')
+        expect(logs[1].get('name')).to.eq('getAllSessionStorage')
+      })
+    })
+
+    it('does not log when log: false', () => {
+      cy.getAllSessionStorage({ log: false }).then(() => {
+        assertLogLength(logs, 1)
+        expect(logs[0].get('name')).to.eq('visit')
       })
     })
 
