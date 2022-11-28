@@ -1,10 +1,10 @@
 describe('src/cy/commands/local_storage', () => {
-  let logs
+  let logs: Cypress.Log[]
 
   beforeEach(() => {
     logs = []
 
-    cy.on('log:added', (attrs, log) => {
+    cy.on('log:added', (attrs, log: Cypress.Log) => {
       return logs.push(log)
     })
   })
@@ -33,6 +33,10 @@ describe('src/cy/commands/local_storage', () => {
           key8: 'value8',
         },
       })
+    })
+
+    it('logs once', () => {
+
     })
 
     it('consoleProps includes the storage yielded', () => {
@@ -134,7 +138,7 @@ describe('src/cy/commands/local_storage', () => {
       } = window
       const remoteStorage = cy.state('window').localStorage
 
-      const setStorages = cy.spy(Cypress.LocalStorage, 'setStorages')
+      const setStorages = cy.spy<InternalCypress.LocalStorage>(Cypress.LocalStorage as InternalCypress.LocalStorage, 'setStorages')
 
       cy.clearLocalStorage().then(() => {
         expect(setStorages).to.be.calledWith(localStorage, remoteStorage)
@@ -142,7 +146,7 @@ describe('src/cy/commands/local_storage', () => {
     })
 
     it('unsets the storages', () => {
-      const unsetStorages = cy.spy(Cypress.LocalStorage, 'unsetStorages')
+      const unsetStorages = cy.spy<InternalCypress.LocalStorage>(Cypress.LocalStorage as InternalCypress.LocalStorage, 'unsetStorages')
 
       cy.clearLocalStorage().then(() => {
         expect(unsetStorages).to.be.called
