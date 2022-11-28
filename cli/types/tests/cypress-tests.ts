@@ -1067,14 +1067,6 @@ namespace CypressLocalStorageTests {
   cy.getAllLocalStorage().then((result) => {
     result // $ExpectType StorageByOrigin
   })
-  cy.getAllLocalStorage({ log: 'true' }) // $ExpectError
-  cy.getAllLocalStorage({ timeout: '10' }) // $ExpectError
-}
-
-namespace CypressLocalStorageTests {
-  cy.getAllLocalStorage().then((result) => {
-    result // $ExpectType StorageByOrigin
-  })
   cy.getAllLocalStorage({ log: false })
   cy.getAllLocalStorage({ log: 'true' }) // $ExpectError
 
