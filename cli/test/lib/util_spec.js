@@ -548,7 +548,6 @@ describe('util', () => {
       expect(util.getEnv('CYPRESS_FOO_FOO')).to.eql('bazz')
     })
 
-
     it('throws on non-string name', () => {
       expect(() => {
         util.getEnv()
