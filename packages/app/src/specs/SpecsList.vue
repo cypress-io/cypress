@@ -188,9 +188,14 @@ import SpecListGitInfo from './SpecListGitInfo.vue'
 import RunStatusDots from './RunStatusDots.vue'
 import AverageDuration from './AverageDuration.vue'
 import SpecsListRowItem from './SpecsListRowItem.vue'
-import { gql, useSubscription } from '@urql/vue'
-import { computed, ref, toRef, watch } from 'vue'
-import { Specs_SpecsListFragment, SpecsList_GitInfoUpdatedDocument, SpecsListFragment } from '../generated/graphql'
+import { gql, useSubscription, useMutation } from '@urql/vue'
+import { computed, ref, toRef, watch, onMounted } from 'vue'
+import {
+  Specs_SpecsListFragment,
+  SpecsList_GitInfoUpdatedDocument,
+  SpecsListFragment,
+  SpecsList_FocusActiveBrowserWindowDocument,
+} from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { buildSpecTree, FuzzyFoundSpec, useCollapsibleTree } from './tree/useCollapsibleTree'
 import { fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
@@ -209,6 +214,12 @@ import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-
 import SpecsRunAllSpecs from './SpecsRunAllSpecs.vue'
 import { useRunAllSpecs } from '../composables/useRunAllSpecs'
 
+gql`
+mutation SpecsList_FocusActiveBrowserWindow {
+  focusActiveBrowserWindow
+}
+`
+
 const { openLoginConnectModal } = useLoginConnectStore()
 
 const route = useRoute()
@@ -218,6 +229,12 @@ const isOnline = useOnline()
 const isOffline = ref(false)
 
 watch(isOnline, (newIsOnlineValue) => isOffline.value = !newIsOnlineValue, { immediate: true })
+
+const focusActiveBrowserWindow = useMutation(SpecsList_FocusActiveBrowserWindowDocument)
+
+onMounted(() => {
+  focusActiveBrowserWindow.executeMutation({})
+})
 
 const tableGridColumns = 'grid-cols-[1fr,135px,130px] md:grid-cols-[1fr,135px,130px,130px] lg:grid-cols-[1fr,160px,160px,180px]'
 
