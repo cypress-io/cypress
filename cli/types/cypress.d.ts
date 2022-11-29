@@ -143,15 +143,21 @@ declare namespace Cypress {
   }
 
   // TODO: raise minimum required TypeScript version to 3.7
-  // and make this recursive (replace 'any' with Storable)
+  // and make this recursive
   // https://github.com/cypress-io/cypress/issues/24875
   type Storable =
     | string
     | number
     | boolean
     | null
-    | { [property: string]: any }
-    | any[]
+    | StorableObject
+    | StorableArray
+
+  interface StorableObject {
+    [key: string]: Storable;
+  }
+
+  interface StorableArray extends Array<Storable> { }
 
   type StorableRecord = Record<string, Storable>
 
