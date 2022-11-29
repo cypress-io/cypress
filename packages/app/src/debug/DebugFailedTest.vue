@@ -6,24 +6,28 @@
     <span
       data-cy="test-title"
     >
-      {{ props.failedTest.split(' ')[0] }}
+      {{ testData[0] }}
     </span>
     <IconChevronRightSmall
       size="8"
       stroke-color="gray-200"
       fill-color="gray-200"
     />
-    <span>
-      {{ props.failedTest.split(' ').slice(1).join(' ') }}
+    <span
+      data-cy="test-description"
+    >
+      {{ testData[1] }}
     </span>
   </li>
 </template>
 <script lang="ts" setup>
+import { computed } from 'vue'
 import { IconChevronRightSmall } from '@cypress-design/vue-icon'
 
 const props = defineProps<{
-  failedTest: string
+  failedTest: string[]
 }>()
 
-// figure out proper caret sign placement
+const testData = computed(() => props.failedTest)
+
 </script>

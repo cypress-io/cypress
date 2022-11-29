@@ -16,7 +16,7 @@
           class="flex flex-row px-16px items-center gap-x-2"
         >
           <span
-            data-cy="text-contents"
+            data-cy="spec-path"
             class="w-145 non-italic text-base"
           >
             <span
@@ -41,7 +41,10 @@
             class="inline-flex gap-x-10px whitespace-nowrap h-8 justify-center items-center
             isolate rounded border border-gray-100 bg-white non-italic text-sm text-indigo-500 font-medium px-12px"
           >
-            <IconActionRefresh stroke-color="indigo-500" />
+            <IconActionRefresh
+              data-cy="icon-refresh"
+              stroke-color="indigo-500"
+            />
             Run Failures
           </button>
           <button
@@ -49,6 +52,7 @@
             data-cy="run-failures-disabled"
             class="inline-flex gap-x-10px whitespace-nowrap h-8 justify-center items-center
             isolate rounded border border-gray-100 bg-white non-italic text-sm text-gray-500 font-medium px-12px"
+            :disabled="disabled"
           >
             <IconActionRefresh stroke-color="gray-500" />
             Run Failures
@@ -56,13 +60,14 @@
         </li>
       </ul>
       <ul
-        v-for="test in specData.failedTests.titleParts"
-        :key="`test-${test.length}`"
+        v-for="test in specData.failedTests"
+        :key="`test-${test.id}`"
         data-cy="test-group"
         class="w-full flex flex-col flex-start h-12"
       >
         <DebugFailedTest
-          :failed-test="test"
+          :failed-test="test.titleParts"
+          :data-cy="`test-${test.id}`"
         />
       </ul>
     </div>
@@ -85,8 +90,8 @@ import DebugFailedTest from './DebugFailedTest.vue'
 
 const props = defineProps<{
   spec: Spec
-  testResults: TestResults
-  disabled: boolean
+  testResults: TestResults[]
+  disabled?: boolean
 }>()
 
 const splitHeader = (relativePath: string) => {
