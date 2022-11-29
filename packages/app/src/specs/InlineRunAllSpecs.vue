@@ -11,8 +11,8 @@
         size="16"
         :stroke-color="grayscale ? 'gray-200' : 'gray-700'"
         fill-color="transparent"
-        :hocus-stroke-color="grayscale ? 'inherit' : 'indigo-500'"
-        :hocus-fill-color="grayscale ? 'inherit' : 'indigo-100'"
+        :hocus-stroke-color="grayscale ? undefined : 'indigo-500'"
+        :hocus-fill-color="grayscale ? undefined : 'indigo-100'"
         class="inline-flex align-text-bottom"
         data-cy="play-button"
       />
