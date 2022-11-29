@@ -917,13 +917,15 @@ export default {
         message: stripIndent`\
         The command was expected to run against origin \`${commandOrigin}\` but the application is at origin \`${autOrigin}\`.
 
-        This commonly happens when you have either not navigated to the expected origin, have navigated away unexpectedly, or likely forgot to use ${cmd('origin')}.
+        This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
+        
+        Using ${cmd('origin')} to wrap the commands run on \`${autOrigin}\` will likely fix this issue.
 
         \`cy.origin('${autOrigin}', () => {\`
         \`  <commands targeting ${autOrigin} go here>\`
         \`})\`
         `,
-        docsUrl: 'https://on.cypress.io/cy-visit-succeeded-but-commands-are-timing-out-because-you-visited-a-different-origin-domain-without-using-cy-origin',
+        docsUrl: 'https://on.cypress.io/cy-visit-succeeded-but-commands-fail',
       }
     },
   },
