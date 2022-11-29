@@ -215,6 +215,19 @@ describe('src/cy/commands/connectors', () => {
         })
       })
 
+      it('completely resets the subject chain when queries are used', () => {
+        cy.wrap('foo')
+        .then(() => cy.get('body'))
+        .then(() => {
+          // We expect the current subject chain to look like [undefined, get()],
+          // inherited from .get() inside the first .then().
+
+          // There was a regression where it would instead look like ['foo', get()],
+          // mixing the subjects from .wrap() and .get().
+          expect(cy.subjectChain()[0]).to.be.undefined
+        })
+      })
+
       describe('errors', {
         defaultCommandTimeout: 100,
       }, () => {

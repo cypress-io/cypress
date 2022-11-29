@@ -1278,19 +1278,19 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
    * elsewhere, consider if there's a way you can use existing functionality to achieve it instead.
    *
    * The command_queue calls setSubjectForChainer after a command has finished resolving, when we have the
-   * final (non-$Chainer, non-promise) return value. This value becomes the current $Chainer's new subject - and the
-   * new subject for any chainers it's linked to (see cy.linkSubject for details on that process).
+   * final (non-$Chainer, non-promise) return value. This value becomes the current $Chainer's new subjectChain - and
+   * the new subjectChain for any chainers it's linked to (see cy.linkSubject for details on that process).
    */
-  setSubjectForChainer (chainerId: string, subject: any) {
+  setSubjectForChainer (chainerId: string, subjectChain: SubjectChain) {
     const cySubjects = this.state('subjects') || {} as Record<string, SubjectChain>
 
-    cySubjects[chainerId] = [subject]
+    cySubjects[chainerId] = subjectChain
     this.state('subjects', cySubjects)
 
     const links = this.state('subjectLinks') || {} as Record<string, string>
 
     if (links[chainerId]) {
-      this.setSubjectForChainer(links[chainerId], subject)
+      this.setSubjectForChainer(links[chainerId], subjectChain)
     }
   }
 
@@ -1315,7 +1315,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     const links = this.state('subjectLinks') || {} as Record<string, string>
 
     if (links[chainerId]) {
-      this.addQueryToChainer(links[chainerId], queryFn)
+      this.setSubjectForChainer(links[chainerId], cySubjects[chainerId])
     }
   }
 
