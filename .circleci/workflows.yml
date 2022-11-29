@@ -2273,7 +2273,7 @@ jobs:
 
   test-binary-against-cypress-realworld-app:
     <<: *defaults
-    resource_class: large
+    resource_class: medium+
     steps:
       - test-binary-against-rwa:
           repo: cypress-realworld-app
