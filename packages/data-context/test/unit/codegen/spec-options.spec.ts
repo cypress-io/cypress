@@ -246,10 +246,12 @@ describe('spec-options', () => {
       context('file name contains special characters', async () => {
         [
           { condition: 'braces', fileName: '[...MyComponent].vue', expectedFileName: '[...MyComponent].cy.js', expectedComponentName: 'MyComponent' },
-          { condition: 'hyphens', fileName: 'my-component.vue', expectedFileName: 'my-component.cy.js', expectedComponentName: 'mycomponent' },
+          { condition: 'hyphens', fileName: 'my-component.vue', expectedFileName: 'my-component.cy.js', expectedComponentName: 'MyComponent' },
           { condition: 'parentheses', fileName: 'My(Component).js', expectedFileName: 'My(Component).cy.js', expectedComponentName: 'MyComponent' },
-          { condition: 'period-separated', fileName: 'my.component.js', expectedFileName: 'my.component.cy.js', expectedComponentName: 'my' },
+          { condition: 'period-separated', fileName: 'my.component.js', expectedFileName: 'my.component.cy.js', expectedComponentName: 'MyComponent' },
           { condition: 'dollar', fileName: '$MyComponent.js', expectedFileName: '$MyComponent.cy.js', expectedComponentName: '$MyComponent' },
+          { condition: 'underscores', fileName: 'My_Component.js', expectedFileName: 'My_Component.cy.js', expectedComponentName: 'My_Component' },
+          { condition: 'mixed period- and hypen-delimited', fileName: 'about-us.component.js', expectedFileName: 'about-us.component.cy.js', expectedComponentName: 'AboutUsComponent' },
         ].forEach(({ condition, fileName, expectedFileName, expectedComponentName }) => {
           it(`generates options for ${condition}`, async () => {
             const testSpecOptions = new SpecOptions({
