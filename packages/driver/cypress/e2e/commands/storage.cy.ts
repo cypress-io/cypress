@@ -1,6 +1,6 @@
 import { assertLogLength } from '../../support/utils'
 
-describe('src/cy/commands/local_storage', () => {
+describe('src/cy/commands/storage', () => {
   let logs: Cypress.Log[]
 
   beforeEach(() => {
