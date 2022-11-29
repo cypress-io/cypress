@@ -14,6 +14,8 @@ import { insertValuesInConfigFile } from '../util'
 import { getError } from '@packages/errors'
 import { resetIssuedWarnings } from '@packages/config'
 import { WizardFrontendFramework, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import * as reactDocgen from 'react-docgen'
+import fs from 'fs-extra'
 
 export interface ProjectApiShape {
   /**
@@ -74,6 +76,11 @@ export interface FindSpecs<T> {
 type SetForceReconfigureProjectByTestingType = {
   forceReconfigureProject: boolean
   testingType?: TestingType
+}
+
+interface ReactComponentDescriptor {
+  description: string
+  displayName: string
 }
 
 export class ProjectActions {
@@ -345,7 +352,17 @@ export class ProjectActions {
     this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, args)
   }
 
-  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType): Promise<NexusGenUnions['GeneratedSpecResult']> {
+  async getReactComponentsFromFile (filePath: string): Promise<ReactComponentDescriptor[]> {
+    const project = this.ctx.currentProject
+
+    assert(project, 'Cannot create spec without currentProject.')
+
+    const src = await fs.readFile(this.ctx.path.join(project, filePath), 'utf8')
+
+    return reactDocgen.parse(src, reactDocgen.resolver.findAllExportedComponentDefinitions)
+  }
+
+  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType, componentName?: string): Promise<NexusGenUnions['GeneratedSpecResult']> {
     const project = this.ctx.currentProject
 
     assert(project, 'Cannot create spec without currentProject.')
@@ -371,6 +388,7 @@ export class ProjectActions {
       specPattern,
       currentProject: this.ctx.currentProject,
       specs: this.ctx.project.specs,
+      componentName,
     })
 
     let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()

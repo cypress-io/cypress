@@ -3,6 +3,7 @@ import { ProjectActions } from '../../../src/actions/ProjectActions'
 import { createTestDataContext } from '../helper'
 import { expect } from 'chai'
 import sinon from 'sinon'
+import path from 'path'
 import { SpecWithRelativeRoot } from '@packages/types'
 
 describe('ProjectActions', () => {
@@ -15,6 +16,35 @@ describe('ProjectActions', () => {
     ctx = createTestDataContext('open')
 
     actions = new ProjectActions(ctx)
+  })
+
+  context('getReactComponentsFromFile', () => {
+    beforeEach(async () => {
+      ctx.update((s) => {
+        s.currentProject = path.resolve('test/unit/actions/project')
+      })
+    })
+
+    it('returns React components from file with class component', async () => {
+      const reactComponents = await actions.getReactComponentsFromFile('./counter-class.jsx')
+
+      expect(reactComponents).to.have.length(1)
+      expect(reactComponents[0].displayName).to.equal('Counter')
+    })
+
+    it('returns React components from file with functional component', async () => {
+      const reactComponents = await actions.getReactComponentsFromFile('./counter-functional.jsx')
+
+      expect(reactComponents).to.have.length(1)
+      expect(reactComponents[0].displayName).to.equal('Counter')
+    })
+
+    it('returns only exported React components from file with functional components', async () => {
+      const reactComponents = await actions.getReactComponentsFromFile('./counter-multiple-components.jsx')
+
+      expect(reactComponents).to.have.length(1)
+      expect(reactComponents[0].displayName).to.equal('CounterContainer')
+    })
   })
 
   context('hasNonExampleSpec', () => {

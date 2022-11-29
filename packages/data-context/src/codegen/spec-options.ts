@@ -2,6 +2,7 @@ import type { ParsedPath } from 'path'
 import type { CodeGenType } from '@packages/graphql/src/gen/nxs.gen'
 import type { WizardFrontendFramework } from '@packages/scaffold-config'
 import fs from 'fs-extra'
+import { uniq } from 'lodash'
 import path from 'path'
 import { getDefaultSpecFileName } from '../sources/migration/utils'
 import { toPosix } from '../util'
@@ -15,6 +16,7 @@ interface CodeGenOptions {
   currentProject: string | null
   framework?: WizardFrontendFramework
   specs?: FoundSpec[]
+  componentName?: string
 }
 
 // Spec file extensions that we will preserve when updating the file name
@@ -27,7 +29,7 @@ interface CodeGenOptions {
 export const expectedSpecExtensions = ['.cy', '.spec', '.test', '-spec', '-test', '_spec']
 
 type ComponentExtension = `.cy.${'js' | 'ts' | 'jsx' | 'tsx'}`
-type TemplateKey = 'e2e' | 'componentEmpty' | 'vueComponent'
+type TemplateKey = 'e2e' | 'componentEmpty' | 'vueComponent' | 'reactComponent'
 export class SpecOptions {
   private parsedPath: ParsedPath;
 
@@ -53,17 +55,18 @@ export class SpecOptions {
       throw new Error('Cannot generate a spec without a framework')
     }
 
-    // This only works for Vue projects right now. If the framework is not Vue, we're generating an empty component test
-    if (this.options.framework.codeGenFramework !== 'vue') {
-      return {
-        codeGenType: this.options.codeGenType,
-        fileName: await this.buildFileName(),
-        templateKey: 'componentEmpty' as TemplateKey,
-        overrideCodeGenDir: '',
-      }
-    }
+    let frameworkOptions
 
-    const frameworkOptions = await this.getFrameworkComponentOptions()
+    switch (this.options.framework.codeGenFramework) {
+      case 'react':
+        frameworkOptions = await this.getReactSpecOptions()
+        break
+      case 'vue':
+        frameworkOptions = await this.getVueSpecOptions()
+        break
+      default:
+        throw new Error(`Unable to generate spec for ${this.options.framework.codeGenFramework}`)
+    }
 
     return frameworkOptions
   }
@@ -80,7 +83,7 @@ export class SpecOptions {
     return `./${this.parsedPath.base}`
   }
 
-  private async getFrameworkComponentOptions () {
+  private async getVueSpecOptions () {
     const componentName = this.parsedPath.name
 
     const extension = await this.getVueExtension()
@@ -91,7 +94,7 @@ export class SpecOptions {
     if (!this.options.isDefaultSpecPattern) {
       parsedSpecPath = path.parse(await getDefaultSpecFileName({
         currentProject: this.options.currentProject,
-        testingType: this.options.codeGenType === 'componentEmpty' || this.options.codeGenType === 'component' ? 'component' : 'e2e',
+        testingType: 'component',
         fileExtensionToUse: (extension === '.cy.ts' || extension === '.cy.tsx') ? 'ts' : 'js',
         specPattern: this.options.specPattern,
         name: componentName,
@@ -107,6 +110,39 @@ export class SpecOptions {
       componentPath,
       fileName: await this.buildComponentSpecFilename(extension, parsedSpecPath),
       templateKey: 'vueComponent' as TemplateKey,
+      overrideCodeGenDir: parsedSpecPath?.dir,
+    }
+  }
+
+  private async getReactSpecOptions () {
+    // For React specs, use the component name that the user selected. Otherwise fall back to the component file name.
+    const componentName = this.options.componentName || this.parsedPath.name
+
+    const extension = `.cy${this.parsedPath.ext}`
+
+    let parsedSpecPath: ParsedPath | undefined
+
+    // If we have a custom spec pattern, write the spec to a path that matches the pattern instead of the component directory
+    if (!this.options.isDefaultSpecPattern) {
+      parsedSpecPath = path.parse(await getDefaultSpecFileName({
+        currentProject: this.options.currentProject,
+        testingType: 'component',
+        fileExtensionToUse: (extension === '.cy.ts' || extension === '.cy.tsx') ? 'ts' : 'js',
+        specPattern: this.options.specPattern,
+        name: componentName,
+        specs: this.options.specs }))
+    }
+
+    // The path to import the component from
+    const componentPath = this.getRelativePathToComponent(parsedSpecPath)
+
+    return {
+      codeGenType: this.options.codeGenType,
+      componentName,
+      componentPath,
+      // If the component name and file name are different, the spec file should be combined (ex: SpecNameComponentName.cy.xx)
+      fileName: await this.buildComponentSpecFilename(extension, parsedSpecPath, uniq([this.parsedPath.name, componentName]).join('')),
+      templateKey: 'reactComponent' as TemplateKey,
       overrideCodeGenDir: parsedSpecPath?.dir,
     }
   }
@@ -138,11 +174,11 @@ export class SpecOptions {
     return foundSpecExtension || ''
   }
 
-  private buildComponentSpecFilename (specExt: string, filePath?: ParsedPath) {
+  private buildComponentSpecFilename (specExt: string, filePath?: ParsedPath, fileName?: string) {
     const { dir, base, ext } = filePath || this.parsedPath
     const cyWithExt = this.getSpecExtension(filePath) + ext
 
-    const name = base.slice(0, base.indexOf('.'))
+    const name = fileName || base.slice(0, base.indexOf('.'))
 
     const finalExtension = filePath ? cyWithExt : specExt
 

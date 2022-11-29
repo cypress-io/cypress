@@ -1247,7 +1247,12 @@ type Mutation {
   focusActiveBrowserWindow: Boolean!
 
   """Generate spec from source"""
-  generateSpecFromSource(codeGenCandidate: String!, type: CodeGenType!): GenerateSpecResponse
+  generateSpecFromSource(codeGenCandidate: String!, componentName: String, type: CodeGenType!): GenerateSpecResponse
+
+  """
+  Parse a JS or TS file to see any exported React components that are defined in the file
+  """
+  getReactComponentsFromFile(filePath: String!): [ReactComponentDescriptor!]!
   internal_clearAllProjectPreferencesCache: Boolean
   internal_clearLatestProjectCache: Boolean
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
@@ -1574,6 +1579,15 @@ type Query {
 
   """Metadata about the wizard"""
   wizard: Wizard!
+}
+
+"""Properties describing a React component"""
+type ReactComponentDescriptor {
+  """A description for the component"""
+  description: String!
+
+  """The name of the component"""
+  displayName: String!
 }
 
 """
