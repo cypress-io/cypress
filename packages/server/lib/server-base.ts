@@ -523,11 +523,11 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   end () {
-    return this._socket && this._socket.end()
+    return this._socket?.end()
   }
 
   async sendFocusBrowserMessage () {
-    this._socket && await this._socket.sendFocusBrowserMessage()
+    await this._socket?.sendFocusBrowserMessage()
   }
 
   onRequest (fn) {

@@ -61,10 +61,10 @@ const retry = (fn: (res: any) => void) => {
 }
 
 export class SocketBase {
-  private _sendResetBrowserTabsForNextTestMessage
-  private _sendResetBrowserStateMessage
-  private _isRunnerSocketConnected
-  private _sendFocusBrowserMessage
+  private _sendResetBrowserTabsForNextTestMessage?: (shouldKeepTabOpen: boolean) => Promise<void>
+  private _sendResetBrowserStateMessage?: () => Promise<void>
+  private _isRunnerSocketConnected?: () => void
+  private _sendFocusBrowserMessage?: () => Promise<void>
 
   protected supportsRunEvents: boolean
   protected experimentalSessionAndOrigin: boolean
