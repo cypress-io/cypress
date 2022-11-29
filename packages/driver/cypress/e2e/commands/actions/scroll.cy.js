@@ -352,10 +352,10 @@ describe('src/cy/commands/actions/scroll', () => {
         const scrollTo = cy.spy($.fn, 'scrollTo')
 
         cy.get('button:first').scrollTo('bottom', { ensureScrollable: false }).then(() => {
-          cy.stub(cy, 'ensureScrollability')
+          cy.stub(Cypress.ensure, 'isScrollable')
 
           expect(scrollTo).to.be.calledWithMatch({}, { ensureScrollable: false })
-          expect(cy.ensureScrollability).not.to.be.called
+          expect(Cypress.ensure.isScrollable).not.to.be.called
         })
       })
     })
@@ -390,17 +390,17 @@ describe('src/cy/commands/actions/scroll', () => {
       })
 
       it('waits until the subject is scrollable', () => {
-        cy.stub(cy, 'ensureScrollability')
+        cy.stub(Cypress.ensure, 'isScrollable')
         .onFirstCall().throws(new Error())
 
         cy.on('command:retry', () => {
-          return cy.ensureScrollability.returns()
+          return Cypress.ensure.isScrollable.returns()
         })
 
         cy
         .get('#scroll-into-view-horizontal')
         .scrollTo('right').then(() => {
-          expect(cy.ensureScrollability).to.be.calledTwice
+          expect(Cypress.ensure.isScrollable).to.be.calledTwice
         })
       })
     })

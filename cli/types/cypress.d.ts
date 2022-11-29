@@ -51,7 +51,7 @@ declare namespace Cypress {
     (this: Mocha.Context, originalFn: CommandOriginalFnWithSubject<T, S>, prevSubject: S, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
   }
   interface QueryFn<T extends keyof ChainableMethods> {
-    (...args: Parameters<ChainableMethods[T]>): (subject: any) => any
+    (this: Command, ...args: Parameters<ChainableMethods[T]>): (subject: any) => any
   }
   interface ObjectLike {
     [key: string]: any
@@ -129,6 +129,58 @@ declare namespace Cypress {
      * If `true`, this browser is too old to be supported by Cypress.
      */
     unsupportedVersion?: boolean
+  }
+
+  interface Ensure {
+    /**
+     * Throws an error if `subject` is not one of the passed in `type`s.
+     */
+    isType(subject: any, type: PrevSubject[], commandName: string, cy: Chainable): void
+
+    /**
+     * Throws an error if `subject` is not a DOM element.
+     */
+    isElement(subject: any, commandName: string, cy: Chainable): void
+
+    /**
+     * Throws an error if `subject` is not a `document`.
+     */
+    isDocument(subject: any, commandName: string, cy: Chainable): void
+
+    /**
+     * Throws an error if `subject` is not a `window`.
+     */
+    isWindow(subject: any, commandName: string, cy: Chainable): void
+
+    /**
+     * Throws an error if `subject` is not a DOM element attached to the application under test.
+     */
+    isAttached(subject: any, commandName: string, cy: Chainable, onFail?: Log): void
+
+    /**
+     * Throws an error if `subject` is a disabled DOM element.
+     */
+    isNotDisabled(subject: any, commandName: string, onFail?: Log): void
+
+    /**
+     * Throws an error if `subject` is a DOM element hidden by any of its parent elements.
+     */
+    isNotHiddenByAncestors(subject: any, commandName: string, onFail?: Log): void
+
+    /**
+     * Throws an error if `subject` is a read-only form element.
+     */
+    isNotReadonly(subject: any, commandName: string, onFail?: Log): void
+
+    /**
+     * Throws an error if `subject` is a read-only form element.
+     */
+    isScrollable(subject: any, commandName: string, onFail?: Log): void
+
+    /**
+     * Throws an error if `subject` is not a DOM element visible in the AUT.
+     */
+    isVisible(subject: any, commandName: string, onFail?: Log): void
   }
 
   interface LocalStorage {
@@ -274,6 +326,12 @@ declare namespace Cypress {
      * @see https://example.cypress.io/commands/spies-stubs-clocks
      */
     sinon: sinon.SinonStatic
+
+    /**
+     * Utility functions for ensuring various properties about a subject.
+     * @see https://on.cypress.io/custom-queries
+     */
+    ensure: Ensure
 
     /**
      * Cypress version string. i.e. "1.1.2"
@@ -549,7 +607,7 @@ declare namespace Cypress {
 
       /**
        * Add a custom query
-       * @see https://on.cypress.io/api/commands#Queries
+       * @see https://on.cypress.io/api/custom-queries
        */
       addQuery<T extends keyof Chainable>(name: T, fn: QueryFn<T>): void
     }
@@ -1475,6 +1533,13 @@ declare namespace Cypress {
      * @see https://on.cypress.io/not
      */
     not(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery>
+
+    /**
+     * Invoke a command synchronously, without using the command queue.
+     *
+     * @see https://on.cypress.io/custom-queries
+     */
+    now(name: string, ...args: any[]): Promise<any> | ((subject: any) => any)
 
     /**
      * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
@@ -5848,6 +5913,13 @@ declare namespace Cypress {
     userInvocationStack?: string
     query?: boolean
     fn(...args: any[]): any
+  }
+
+  interface Command {
+    get<K extends keyof EnqueuedCommandAttributes>(attr: K): EnqueuedCommandAttributes[K]
+    get(): EnqueuedCommandAttributes
+    set<K extends keyof EnqueuedCommandAttributes>(key: K, value: EnqueuedCommandAttributes[K]): Log
+    set(options: Partial<EnqueuedCommandAttributes>): Log
   }
 
   interface Exec {
