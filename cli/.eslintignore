@@ -7,8 +7,10 @@
 # these are all copied from dist'd builds from the individual libs
 /angular
 /react
+/react17
 /react18
 /vue
 /vue2
 /svelte
 /mount-utils
+/react-mount-utils

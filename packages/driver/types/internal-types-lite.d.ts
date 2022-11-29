@@ -22,6 +22,7 @@ declare namespace Cypress {
      */
     getNextAlias: IAliases['getNextAlias']
     noop: <T>(v: T) => Cypress.Chainable<T>
+    now: <T>(string, v: T) => Cypress.Chainable<T>
     queue: CommandQueue
     retry: IRetries['retry']
     state: State
@@ -33,6 +34,7 @@ declare namespace Cypress {
     isStable: IStability['isStable']
     fail: (err: Error, options:{ async?: boolean }) => Error
     getRemoteLocation: ILocation['getRemoteLocation']
+    subjectChain: (chainerId?: string) => SubjectChain
 
     createSnapshot:  ISnapshots['createSnapshot']
     getStyles: ISnapshots['getStyles']

@@ -6091,10 +6091,9 @@
   dependencies:
     defer-to-connect "^2.0.0"
 
-"@testing-library/cypress@8.0.0":
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/@testing-library/cypress/-/cypress-8.0.0.tgz#290d9bd7d60a3398e9fd965cb45764023f8fcc05"
-  integrity sha512-hx1YYzS6oqQTMiQcTCqoEpB/sYOZWXDDyPw1Akr+LVLDFLRbvOG/lLVI4wpb12dJ2AzPm5dYjLGh5w3hbx/mGQ==
+"@testing-library/cypress@BlueWinds/cypress-testing-library#119054b5963b0d2e064b13c5cc6fc9db32c8b7b5":
+  version "0.0.0-semantically-released"
+  resolved "https://codeload.github.com/BlueWinds/cypress-testing-library/tar.gz/119054b5963b0d2e064b13c5cc6fc9db32c8b7b5"
   dependencies:
     "@babel/runtime" "^7.14.6"
     "@testing-library/dom" "^8.1.0"
@@ -6935,6 +6934,13 @@
   dependencies:
     "@types/react" "*"
 
+"@types/react-dom@^16":
+  version "16.9.17"
+  resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-16.9.17.tgz#29100cbcc422d7b7dba7de24bb906de56680dd34"
+  integrity sha512-qSRyxEsrm5btPXnowDOs5jSkgT8ldAA0j6Qp+otHUh+xHzy3sXmgNfyhucZjAjkgpdAUw9rJe0QRtX/l+yaS4g==
+  dependencies:
+    "@types/react" "^16"
+
 "@types/react-dom@^17":
   version "17.0.18"
   resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-17.0.18.tgz#8f7af38f5d9b42f79162eea7492e5a1caff70dc2"
@@ -6942,7 +6948,7 @@
   dependencies:
     "@types/react" "^17"
 
-"@types/react@*", "@types/react@16.9.50", "@types/react@^17":
+"@types/react@*", "@types/react@16.9.50", "@types/react@^16", "@types/react@^17":
   version "16.9.50"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-16.9.50.tgz#cb5f2c22d42de33ca1f5efc6a0959feb784a3a2d"
   integrity sha512-kPx5YsNnKDJejTk1P+lqThwxN2PczrocwsvqXnjvVvKpFescoY62ZiM3TV7dH1T8lFhlHZF+PE5xUyimUwqEGA==
@@ -8584,11 +8590,6 @@ amdefine@>=0.0.4:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/amdefine/-/amdefine-1.0.1.tgz#4a5282ac164729e93619bcfd3ad151f817ce91f5"
   integrity sha1-SlKCrBZHKek2Gbz9OtFR+BfOkfU=
-
-angular@1.8.0:
-  version "1.8.0"
-  resolved "https://registry.yarnpkg.com/angular/-/angular-1.8.0.tgz#b1ec179887869215cab6dfd0df2e42caa65b1b51"
-  integrity sha512-VdaMx+Qk0Skla7B5gw77a8hzlcOakwF8mjlW13DpIWIDlfqwAbSSLfd8N/qZnzEmQF4jC4iofInd3gE7vL8ZZg==
 
 ansi-align@^2.0.0:
   version "2.0.0"
@@ -28402,7 +28403,7 @@ react-dom@^15.3.2:
     object-assign "^4.1.0"
     prop-types "^15.5.10"
 
-react-dom@^16.0.0:
+react-dom@^16, react-dom@^16.0.0:
   version "16.14.0"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.14.0.tgz#7ad838ec29a777fb3c75c3a190f661cf92ab8b89"
   integrity sha512-1gCeQXDLoIqMgqD3IO2Ah9bnf0w9kzhwN5q4FGnHZ67hBm9yePzB5JJAIQCc8x3pFnNlwFq4RidZggNAAkzWWw==
@@ -28639,7 +28640,7 @@ react@^15.3.2:
     object-assign "^4.1.0"
     prop-types "^15.5.10"
 
-react@^16.0.0, react@^16.13.1:
+react@^16, react@^16.0.0, react@^16.13.1:
   version "16.14.0"
   resolved "https://registry.yarnpkg.com/react/-/react-16.14.0.tgz#94d776ddd0aaa37da3eda8fc5b6b18a4c9a3114d"
   integrity sha512-0X2CImDkJGApiAlcf0ODKIneSwBPhqJawOa5wCtKbu7ZECrmS26NvtSILynQ66cgkT/RJ4LidJOc3bUESwmU8g==

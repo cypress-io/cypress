@@ -20,7 +20,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
   // into an array and loop through each and verify
   // each element in the array is valid. as it stands
   // we only validate the first
-  const validateType = (subject, type, cmd) => {
+  const validateType = (subject, type, cmd = state('current')) => {
     const name = cmd.get('name')
 
     switch (type) {
@@ -45,10 +45,8 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     }
   }
 
-  const ensureSubjectByType = (subject, type) => {
-    const current = state('current')
-
-    let types: string[] = [].concat(type)
+  const ensureSubjectByType = (subject, type, command) => {
+    let types: (string | boolean)[] = [].concat(type)
 
     // if we have an optional subject and nothing's
     // here then just return cuz we good to go
@@ -71,11 +69,18 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
 
     for (type of types) {
       try {
-        validateType(subject, type, current)
+        validateType(subject, type, command)
       } catch (error) {
         err = error
         errors.push(err)
       }
+    }
+
+    function wordJoin (array) {
+      const copy = [...array]
+      const last = copy.pop()
+
+      return `${copy.join(', ')} or ${last}`
     }
 
     // every validation failed and we had more than one validation
@@ -84,7 +89,8 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
 
       if (types.length > 1) {
         // append a nice error message telling the user this
-        const errProps = $errUtils.appendErrMsg(err, `All ${types.length} subject validations failed on this subject.`)
+        const msg = err.message.replace(/(failed because it requires .*)\./, `${wordJoin(['$1', ...types.slice(1)]) }.`)
+        const errProps = $errUtils.modifyErrMsg(err, '', () => msg)
 
         $errUtils.mergeErrProps(err, errProps)
       }
@@ -98,6 +104,19 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
       $errUtils.throwErrByPath('miscellaneous.outside_test_with_cmd', {
         args: {
           cmd: name,
+        },
+      })
+    }
+  }
+
+  const ensureChildCommand = (command, args) => {
+    if (cy.subjectChain(command.get('chainerId')) === undefined) {
+      const stringifiedArg = $utils.stringifyActual(args[0])
+
+      $errUtils.throwErrByPath('miscellaneous.invoking_child_without_parent', {
+        args: {
+          cmd: command.get('name'),
+          args: _.isString(args[0]) ? `\"${stringifiedArg}\"` : stringifiedArg,
         },
       })
     }
@@ -187,28 +206,41 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     if ($dom.isDetached(subject)) {
       const current = state('current')
 
-      const cmd = name ?? current.get('name')
+      name = name ?? current.get('name')
+      const subjectChain = cy.subjectChain(current.get('chainerId'))
 
-      const prev = current.get('prev') ? current.get('prev').get('name') : current.get('name')
-      const node = $dom.stringify(subject)
-
-      $errUtils.throwErrByPath('subject.not_attached', {
+      $errUtils.throwErrByPath('subject.detached_after_command', {
         onFail,
-        args: { cmd, prev, node },
+        args: { name, subjectChain },
       })
     }
   }
 
   const ensureElement = (subject, name, onFail?) => {
     if (!$dom.isElement(subject)) {
-      const prev = state('current').get('prev')
+      const current = state('current')
+
+      if ($dom.isJquery(subject) && subject.length === 0) {
+        const subjectChain = cy.subjectChain(current.get('chainerId'))
+        const prevCommandWasQuery = current.get('prev').get('query')
+
+        if (prevCommandWasQuery) {
+          $errUtils.throwErrByPath('subject.not_element_empty_subject', {
+            onFail,
+            args: {
+              name: current.get('name'),
+              subjectChain,
+            },
+          })
+        }
+      }
 
       $errUtils.throwErrByPath('subject.not_element', {
         onFail,
         args: {
           name,
           subject: $utils.stringifyActual(subject),
-          previous: prev.get('name'),
+          previous: current.get('prev').get('name'),
         },
       })
     }
@@ -257,9 +289,6 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
   }
 
   const ensureElExistence = ($el) => {
-    // dont throw if this isnt even a DOM object
-    // return if not $dom.isJquery($el)
-
     // ensure that we either had some assertions
     // or that the element existed
     if ($el && $el.length) {
@@ -432,6 +461,7 @@ export const create = (state: StateFunc, expect: $Cy['expect']) => {
     // internal functions
     ensureSubjectByType,
     ensureRunnable,
+    ensureChildCommand,
   }
 }
 

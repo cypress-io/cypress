@@ -110,8 +110,7 @@ describe('driver/src/cypress/validate_config', () => {
           expect(overrideLevel).to.eq('suite')
 
           expect(() => {
-            // TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
-            validateConfig(state, { testIsolation: Cypress.config('experimentalSessionAndOrigin') ? 'on' : null })
+            validateConfig(state, { testIsolation: 'on' })
           }).not.to.throw()
         })
 
@@ -193,8 +192,7 @@ describe('driver/src/cypress/validate_config', () => {
       })
 
       expect(() => {
-        // TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
-        validateConfig(state, { testIsolation: Cypress.config('experimentalSessionAndOrigin') ? 'off' : null })
+        validateConfig(state, { testIsolation: 'on' })
       }).not.to.throw()
     })
 

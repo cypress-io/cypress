@@ -53,7 +53,6 @@ interface StringValues {
 const _summaries: StringValues = {
   experimentalFetchPolyfill: 'Polyfills `window.fetch` to enable Network spying and stubbing.',
   experimentalInteractiveRunEvents: 'Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file during interactive mode.',
-  experimentalSessionAndOrigin: 'Enables cross-origin and improved session support, including the `cy.origin` and `cy.session` commands.',
   experimentalModifyObstructiveThirdPartyCode: 'Applies `modifyObstructiveCode` to third party `.html` and `.js`, removes subresource integrity, and modifies the user agent in Electron.',
   experimentalSourceRewriting: 'Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.',
   experimentalSingleTabRunMode: 'Runs all component specs in a single tab, trading spec isolation for faster run mode execution.',
@@ -75,7 +74,6 @@ const _summaries: StringValues = {
 const _names: StringValues = {
   experimentalFetchPolyfill: 'Fetch Polyfill',
   experimentalInteractiveRunEvents: 'Interactive Mode Run Events',
-  experimentalSessionAndOrigin: 'Cross-origin and Session',
   experimentalModifyObstructiveThirdPartyCode: 'Modify Obstructive Third Party Code',
   experimentalSingleTabRunMode: 'Single Tab Run Mode',
   experimentalSourceRewriting: 'Improved Source Rewriting',

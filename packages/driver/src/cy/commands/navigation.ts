@@ -35,12 +35,8 @@ const reset = (test: any = {}) => {
   // before each test run!
   previouslyVisitedLocation = undefined
 
-  // TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
-  const { experimentalSessionAndOrigin } = Cypress.config()
-
-  // make sure we reset that we haven't visited about blank again
-  // strict test isolation resets the navigation history for us.
-  hasVisitedAboutBlank = experimentalSessionAndOrigin
+  // TODO: clean this up and remove any unnecessary logic
+  hasVisitedAboutBlank = true
 
   currentlyVisitingAboutBlank = false
 
@@ -63,40 +59,6 @@ const timedOutWaitingForPageLoad = (ms, log) => {
     },
     onFail: log,
   })
-}
-
-// TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
-const cannotVisitDifferentOrigin = ({ remote, existing, originalUrl, previouslyVisitedLocation, log, isCrossOriginSpecBridge = false }) => {
-  const differences: string[] = []
-
-  if (remote.protocol !== existing.protocol) {
-    differences.push('protocol')
-  }
-
-  if (remote.port !== existing.port) {
-    differences.push('port')
-  }
-
-  if (remote.superDomain !== existing.superDomain) {
-    differences.push('superdomain')
-  }
-
-  const errOpts = {
-    onFail: log,
-    args: {
-      differences: differences.join(', '),
-      previousUrl: previouslyVisitedLocation,
-      attemptedUrl: remote,
-      originalUrl,
-      isCrossOriginSpecBridge,
-      experimentalSessionAndOrigin: Cypress.config('experimentalSessionAndOrigin'),
-    },
-    errProps: {
-      isCrossOrigin: true,
-    },
-  }
-
-  $errUtils.throwErrByPath('visit.cannot_visit_different_origin', errOpts)
 }
 
 const specifyFileByRelativePath = (url, log) => {
@@ -303,6 +265,11 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
     message: '--waiting for new page to load--',
     event: true,
     timeout: options.timeout,
+    // If this was triggered as part of a cypress command, eg, clicking a form submit button, we don't want our
+    // snapshot timing tied to when the current command resolves. This empty 'snapshots' array prevents
+    // command.snapshotLogs() - which the command queue calls as part of resolving each command - from creating a
+    // snapshot too early.
+    snapshots: [],
     consoleProps () {
       return {
         Note: 'This event initially fires when your application fires its \'beforeunload\' event and completes when your application fires its \'load\' event after the next page loads.',
@@ -1098,13 +1065,12 @@ export default (Commands, Cypress, cy, state, config) => {
 
           remote = $Location.create(url)
 
-          // if the super domain origin currently matches
-          // or if we have previously visited a location or are a spec bridge
+          // if the origin currently matches,
+          // or we have previously visited a location,
+          // or are a spec bridge,
           // then go ahead and change the iframe's src
           // we use the super domain origin as we can interact with subdomains based document.domain set to the super domain origin
-          if (remote.superDomainOrigin === existing.superDomainOrigin
-            || ((previouslyVisitedLocation || Cypress.isCrossOriginSpecBridge) && Cypress.config('experimentalSessionAndOrigin'))
-          ) {
+          if (remote.superDomainOrigin === existing.superDomainOrigin || previouslyVisitedLocation || Cypress.isCrossOriginSpecBridge) {
             if (!previouslyVisitedLocation) {
               previouslyVisitedLocation = remote
             }
@@ -1115,19 +1081,6 @@ export default (Commands, Cypress, cy, state, config) => {
             .then(() => {
               return onLoad(resp)
             })
-          }
-
-          // if we've already cy.visit'ed in the test and we are visiting a new origin,
-          // throw an error, else we'd be in a endless loop,
-          // we also need to disable retries to prevent the endless loop
-          if (previouslyVisitedLocation) {
-            // _retries is `private`. We're not using `retries()` method here because it breaks some tests.
-            // @ts-ignore
-            $utils.getTestFromRunnable(state('runnable'))._retries = 0
-
-            const params = { remote, existing, originalUrl, previouslyVisitedLocation, log: options._log }
-
-            return cannotVisitDifferentOrigin(params)
           }
 
           // tell our backend we're changing origins

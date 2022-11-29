@@ -11,7 +11,6 @@ const onServer = function (app) {
   })
 }
 const commonConfig = {
-  experimentalSessionAndOrigin: true,
   hosts: {
     '*.foobar.com': '127.0.0.1',
   },

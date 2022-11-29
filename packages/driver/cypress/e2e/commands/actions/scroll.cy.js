@@ -323,7 +323,7 @@ describe('src/cy/commands/actions/scroll', () => {
       })
 
       it('retries until element is scrollable', () => {
-        const $container = cy.$$('#nonscroll-becomes-scrollable')
+        let $container = cy.$$('#nonscroll-becomes-scrollable')
 
         expect($container.get(0).scrollTop).to.eq(0)
         expect($container.get(0).scrollLeft).to.eq(0)
@@ -331,6 +331,11 @@ describe('src/cy/commands/actions/scroll', () => {
         let retried = false
 
         cy.on('command:retry', _.after(2, () => {
+          // Replacing the element with itself to ensure that .scrollTo() is requerying the DOM
+          // as necessary
+          $container.replaceWith($container[0].outerHTML)
+          $container = cy.$$('#nonscroll-becomes-scrollable')
+
           $container.css('overflow', 'scroll')
           retried = true
         }))
@@ -430,7 +435,7 @@ describe('src/cy/commands/actions/scroll', () => {
       context('subject errors', () => {
         it('throws when not passed DOM element as subject', (done) => {
           cy.on('fail', (err) => {
-            expect(err.message).to.include('`cy.scrollTo()` failed because it requires a DOM element.')
+            expect(err.message).to.include('`cy.scrollTo()` failed because it requires a DOM element or window.')
             expect(err.message).to.include('{foo: bar}')
             expect(err.message).to.include('> `cy.noop()`')
 
@@ -449,6 +454,17 @@ describe('src/cy/commands/actions/scroll', () => {
           })
 
           cy.get('button').scrollTo('500px')
+        })
+
+        it('throws if subject disappears while waiting for scrollability', (done) => {
+          cy.on('command:retry', () => cy.$$('#nonscroll-becomes-scrollable').remove())
+
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('`cy.scrollTo()` failed because the page updated')
+            done()
+          })
+
+          cy.get('#nonscroll-becomes-scrollable').scrollTo(500, 300)
         })
       })
 

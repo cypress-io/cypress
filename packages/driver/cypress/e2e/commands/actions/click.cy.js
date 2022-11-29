@@ -738,6 +738,27 @@ describe('src/cy/commands/actions/click', () => {
       })
     })
 
+    it('requeries if the DOM rerenders during actionability', () => {
+      cy.$$('[name=colors]').first().prop('disabled', true)
+
+      const listener = _.after(3, () => {
+        cy.$$('[name=colors]').first().prop('disabled', false)
+
+        const parent = cy.$$('[name=colors]').parent()
+
+        parent.replaceWith(parent[0].outerHTML)
+        cy.off('command:retry', listener)
+      })
+
+      cy.on('command:retry', listener)
+
+      cy.get('[name=colors]').first().click().then(($inputs) => {
+        $inputs.each((i, el) => {
+          expect($(el)).to.be.checked
+        })
+      })
+    })
+
     it('increases the timeout delta after each click', () => {
       const count = cy.$$('#three-buttons button').length
 
@@ -813,22 +834,20 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     it('places cursor at the end of [contenteditable]', () => {
-      cy.get('[contenteditable]:first')
-      .invoke('html', '<div><br></div>').click()
-      .then(expectCaret(0))
+      cy.get('[contenteditable]:first').as('edit')
 
-      cy.get('[contenteditable]:first')
-      .invoke('html', 'foo').click()
-      .then(expectCaret(3))
+      cy.get('@edit').invoke('html', '<div><br></div>')
+      cy.get('@edit').click().then(expectCaret(0))
 
-      cy.get('[contenteditable]:first')
-      .invoke('html', '<div>foo</div>').click()
-      .then(expectCaret(3))
+      cy.get('@edit').invoke('html', 'foo')
+      cy.get('@edit').click().then(expectCaret(3))
 
-      cy.get('[contenteditable]:first')
+      cy.get('@edit').invoke('html', '<div>foo</div>')
+      cy.get('@edit').click().then(expectCaret(3))
+
       // firefox headless: prevent contenteditable from disappearing (dont set to empty)
-      .invoke('html', '<br>').click()
-      .then(expectCaret(0))
+      cy.get('@edit').invoke('html', '<br>')
+      cy.get('@edit').click().then(expectCaret(0))
     })
 
     it('can click SVG elements', () => {
@@ -1587,6 +1606,16 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
+      it('succeeds when DOM rerenders and returns new subject', () => {
+        const $btn = cy.$$('#button').prop('disabled', true)
+
+        cy.on('command:retry', _.after(3, () => {
+          $btn.replaceWith('<button id="button">New Button</button>')
+        }))
+
+        cy.get('#button').click().should('contain', 'New Button')
+      })
+
       it('waits until element stops animating', () => {
         let retries = 0
 
@@ -2110,41 +2139,21 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('.badge-multi').click()
       })
 
-      it('throws when subject is not in the document', (done) => {
-        let clicked = 0
+      // This is an instance of an unfixable detached DOM error: .then() is a command, so it sets the subject to a
+      // *specific element*, which then gets detached.
 
-        const $checkbox = cy.$$(':checkbox:first').click(() => {
-          clicked += 1
-          $checkbox.remove()
-
-          return false
-        })
-
-        cy.on('fail', (err) => {
-          expect(clicked).to.eq(1)
-          expect(err.message).to.include('`cy.click()` failed because this element is detached from the DOM')
-
-          done()
-        })
-
-        cy.get(':checkbox:first').click().click()
-      })
-
+      // The error message tells the user exactly how to fix this case.
       it('throws when subject is detached during actionability', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.click()` failed because this element is detached from the DOM')
+          expect(err.message).to.include('`cy.click()` failed because the page updated while this command was executing.')
+          expect(err.message).to.include('You can typically solve this by breaking up a chain.')
 
           done()
         })
 
         cy.get('input:first')
         .then(($el) => {
-          // This represents an asynchronous re-render
-          // since we fire the 'scrolled' event during actionability
-          // if we use el.on('scroll'), headless electron is flaky
-          cy.on('scrolled', () => {
-            $el.remove()
-          })
+          cy.on('scrolled', () => $el.remove())
         })
         .click()
       })
@@ -3259,26 +3268,6 @@ describe('src/cy/commands/actions/click', () => {
         cy.dblclick()
       })
 
-      it('throws when subject is not in the document', (done) => {
-        let dblclicked = 0
-
-        const $button = cy.$$('button:first').dblclick(() => {
-          dblclicked += 1
-          $button.remove()
-
-          return false
-        })
-
-        cy.on('fail', (err) => {
-          expect(dblclicked).to.eq(1)
-          expect(err.message).to.include('`cy.dblclick()` failed because this element')
-
-          done()
-        })
-
-        cy.get('button:first').dblclick().dblclick()
-      })
-
       it('logs once when not dom subject', function (done) {
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -3696,26 +3685,6 @@ describe('src/cy/commands/actions/click', () => {
         })
 
         cy.rightclick()
-      })
-
-      it('throws when subject is not in the document', (done) => {
-        let rightclicked = 0
-
-        const $button = cy.$$('button:first').on('contextmenu', () => {
-          rightclicked += 1
-          $button.remove()
-
-          return false
-        })
-
-        cy.on('fail', (err) => {
-          expect(rightclicked).to.eq(1)
-          expect(err.message).to.include('`cy.rightclick()` failed because this element')
-
-          done()
-        })
-
-        cy.get('button:first').rightclick().rightclick()
       })
 
       it('logs once when not dom subject', function (done) {

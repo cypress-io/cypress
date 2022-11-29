@@ -146,7 +146,7 @@ context('cy.origin querying', { browser: '!webkit' }, () => {
         const { consoleProps } = findCrossOriginLogs('contains', logs, 'foobar.com')
 
         expect(consoleProps.Command).to.equal('contains')
-        expect(consoleProps['Applied To']).to.be.undefined
+        expect(consoleProps['Applied To']).to.have.property('tagName').that.equals('BODY')
         expect(consoleProps.Elements).to.equal(1)
         expect(consoleProps.Content).to.equal('Nested Find')
         expect(consoleProps.Yielded).to.have.property('tagName').that.equals('DIV')

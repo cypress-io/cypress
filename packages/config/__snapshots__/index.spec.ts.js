@@ -6,6 +6,7 @@ exports['config/src/index .getBreakingKeys returns list of breaking config keys 
   'experimentalNetworkStubbing',
   'experimentalRunEvents',
   'experimentalSessionSupport',
+  'experimentalSessionAndOrigin',
   'experimentalShadowDomSupport',
   'firefoxGcInterval',
   'ignoreTestFiles',
@@ -36,7 +37,6 @@ exports['config/src/index .getDefaultValues returns list of public config keys 1
   'experimentalFetchPolyfill': false,
   'experimentalInteractiveRunEvents': false,
   'experimentalRunAllSpecs': false,
-  'experimentalSessionAndOrigin': false,
   'experimentalModifyObstructiveThirdPartyCode': false,
   'experimentalSourceRewriting': false,
   'experimentalSingleTabRunMode': false,
@@ -70,7 +70,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys 1
   'supportFile': 'cypress/support/e2e.{js,jsx,ts,tsx}',
   'supportFolder': false,
   'taskTimeout': 60000,
-  'testIsolation': null,
+  'testIsolation': 'on',
   'trashAssetsBeforeRuns': true,
   'userAgent': null,
   'video': true,
@@ -99,7 +99,6 @@ exports['config/src/index .getDefaultValues returns list of public config keys 1
   'socketId': null,
   'socketIoCookie': '__socket',
   'socketIoRoute': '/__socket',
-  'xhrRoute': '/xhrs/',
 }
 
 exports['config/src/index .getDefaultValues returns list of public config keys for selected testing type 1'] = {
@@ -122,7 +121,6 @@ exports['config/src/index .getDefaultValues returns list of public config keys f
   'experimentalFetchPolyfill': false,
   'experimentalInteractiveRunEvents': false,
   'experimentalRunAllSpecs': false,
-  'experimentalSessionAndOrigin': false,
   'experimentalModifyObstructiveThirdPartyCode': false,
   'experimentalSourceRewriting': false,
   'experimentalSingleTabRunMode': false,
@@ -156,7 +154,7 @@ exports['config/src/index .getDefaultValues returns list of public config keys f
   'supportFile': 'cypress/support/e2e.{js,jsx,ts,tsx}',
   'supportFolder': false,
   'taskTimeout': 60000,
-  'testIsolation': null,
+  'testIsolation': 'on',
   'trashAssetsBeforeRuns': true,
   'userAgent': null,
   'video': true,
@@ -185,7 +183,6 @@ exports['config/src/index .getDefaultValues returns list of public config keys f
   'socketId': null,
   'socketIoCookie': '__socket',
   'socketIoRoute': '/__socket',
-  'xhrRoute': '/xhrs/',
 }
 
 exports['config/src/index .getPublicConfigKeys returns list of public config keys 1'] = [
@@ -204,7 +201,6 @@ exports['config/src/index .getPublicConfigKeys returns list of public config key
   'experimentalFetchPolyfill',
   'experimentalInteractiveRunEvents',
   'experimentalRunAllSpecs',
-  'experimentalSessionAndOrigin',
   'experimentalModifyObstructiveThirdPartyCode',
   'experimentalSourceRewriting',
   'experimentalSingleTabRunMode',

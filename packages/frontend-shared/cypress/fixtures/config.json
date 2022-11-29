@@ -100,11 +100,6 @@
   {
     "value": false,
     "from": "default",
-    "field": "experimentalSessionAndOrigin"
-  },
-  {
-    "value": false,
-    "from": "default",
     "field": "experimentalWebKitSupport"
   },
   {

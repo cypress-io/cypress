@@ -403,8 +403,6 @@ export function mergeDefaults (
 
   const defaultsForRuntime = getDefaultValues({
     ...options,
-    // TODO: clean this up. Fixed with: https://github.com/cypress-io/cypress/issues/21471
-    experimentalSessionAndOrigin: config.experimentalSessionAndOrigin,
   })
 
   _.defaultsDeep(config, defaultsForRuntime)
@@ -480,11 +478,7 @@ export function mergeDefaults (
     throw makeConfigError(errors.get(err, ...args))
   }, testingType)
 
-  // TODO: https://github.com/cypress-io/cypress/issues/23093
-  // testIsolation should equal 'on' by default when experimentalSessionAndOrigin=true
-  // Once experimentalSessionAndOrigin is made GA, remove this logic and update the defaultValue
-  // to be be 'on'
-  if (testingType === 'e2e' && config.experimentalSessionAndOrigin) {
+  if (testingType === 'e2e') {
     if (config.rawJson.testIsolation) {
       config.resolved.testIsolation.from = 'config'
     } else {
