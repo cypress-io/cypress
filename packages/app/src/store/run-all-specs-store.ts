@@ -5,6 +5,7 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { RunAllSpecsDataDocument, RunAllSpecsDocument } from '../generated/graphql-test'
 import { getSeparator, SpecTreeNode, UseCollapsibleTreeNode } from '../specs/tree/useCollapsibleTree'
+import { isRunMode } from '@packages/frontend-shared/src/utils/isRunMode'
 
 type ResolvedConfig = { value: any, from: 'string', field: string }[]
 
@@ -26,8 +27,6 @@ mutation RunAllSpecs ($specPath: String!, $runAllSpecs: [String!]!) {
   }
 }
 `
-
-const isRunMode = window.__CYPRESS_MODE__ === 'run' && window.top === window
 
 export const useRunAllSpecsStore = defineStore('runAllSpecs', () => {
   const allSpecsRef = ref<string[]>([])
@@ -87,7 +86,6 @@ export const useRunAllSpecsStore = defineStore('runAllSpecs', () => {
 
   return {
     isRunAllSpecsAllowed,
-    allSpecs: allSpecsRef,
     directoryChildren: directoryChildrenRef,
     runAllSpecs,
     runSelectedSpecs,
