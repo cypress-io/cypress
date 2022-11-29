@@ -1,28 +1,9 @@
-import Uppy from '@uppy/core'
-import Dashboard from '@uppy/dashboard'
-
 import Dropzone from 'dropzone'
 
-// TODO(origin): fails in testIsolation: 'on' mode with ResizeObserver loop limit exceeded
-// error. Using Cypress.on('uncaught:exception') does not catch the error as it appears to be
-// happening when we are visiting about:blank.
-describe('selectFile', { testIsolation: 'off' }, () => {
+describe('selectFile', () => {
   describe('uppy', () => {
     beforeEach(() => {
-      cy.document().then((doc) => {
-        doc.body.innerHTML = `
-          <link rel="stylesheet" href="/node_modules/@uppy/core/dist/style.css" />
-          <link rel="stylesheet" href="/node_modules/@uppy/dashboard/dist/style.css" />
-          <div id="uppy"></div>
-        `
-      })
-
-      cy.get('#uppy').then((div) => {
-        new Uppy().use(Dashboard, {
-          inline: true,
-          target: div[0],
-        })
-      })
+      cy.visit('cypress/fixtures/uppy.html')
     })
 
     it('can input files', () => {

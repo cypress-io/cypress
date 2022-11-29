@@ -41,7 +41,7 @@ export default function (Commands, Cypress, cy) {
         return
       }
 
-      return navigateAboutBlank(false)
+      return navigateAboutBlank()
       .then(() => sessions.clearCurrentSessionData())
       .then(() => Cypress.backend('reset:rendered:html:origins'))
     })
