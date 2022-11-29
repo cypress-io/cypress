@@ -34,8 +34,12 @@ module.exports = {
     'plugin:@cypress/dev/tests',
   ],
   parser: '@typescript-eslint/parser',
-  // cli types are checked by dtslint
-  ignorePatterns: ['cli/types/**'],
+  ignorePatterns: [
+    // cli types are checked by dtslint
+    'cli/types/**',
+    // these fixtures are supposed to fail linting
+    'npm/eslint-plugin-dev/fxitures/**',
+  ],
   overrides: [
     {
       files: [
