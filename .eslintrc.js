@@ -38,7 +38,7 @@ module.exports = {
     // cli types are checked by dtslint
     'cli/types/**',
     // these fixtures are supposed to fail linting
-    'npm/eslint-plugin-dev/fxitures/**',
+    'npm/eslint-plugin-dev/test/fixtures/**',
   ],
   overrides: [
     {
