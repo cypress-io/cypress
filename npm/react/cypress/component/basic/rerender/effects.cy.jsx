@@ -1,8 +1,7 @@
 /// <reference types="cypress" />
 
 import React, { useLayoutEffect, useEffect } from 'react'
-import ReactDom from 'react-dom'
-import { mount, getContainerEl } from '@cypress/react'
+import { mount } from '@cypress/react'
 
 it('should not run unmount effect cleanup when rerendering', () => {
   const layoutEffectCleanup = cy.stub()
@@ -36,8 +35,13 @@ it('should not run unmount effect cleanup when rerendering', () => {
   })
 })
 
-// TODO: is this still valid in React 18? Does re-rendering cause previous effects to be cleaned up?
-it.skip('should run unmount effect cleanup when unmounting', () => {
+function unmount () {
+  const Stub = () => <div />
+
+  return cy.mount(<Stub />)
+}
+
+it('should run unmount effect cleanup when unmounting', () => {
   const layoutEffectCleanup = cy.stub()
   const effectCleanup = cy.stub()
 
@@ -62,8 +66,7 @@ it.skip('should run unmount effect cleanup when unmounting', () => {
       expect(effectCleanup).to.have.been.callCount(0)
     })
 
-    cy
-    .then(() => ReactDom.unmountComponentAtNode(getContainerEl()))
+    unmount()
     .then(() => {
       expect(layoutEffectCleanup).to.have.been.callCount(1)
       expect(effectCleanup).to.have.been.callCount(1)
