@@ -629,6 +629,7 @@ commands:
       - run:
           name: Run system tests
           command: |
+            CYPRESS_COMMERCIAL_RECOMMENDATIONS=0
             ALL_SPECS=`circleci tests glob "/root/cypress/system-tests/test/*spec*"`
             SPECS=
             for file in $ALL_SPECS; do
@@ -656,6 +657,7 @@ commands:
       - run:
           name: Run system tests
           command: |
+            CYPRESS_COMMERCIAL_RECOMMENDATIONS=0
             ALL_SPECS=`circleci tests glob "$HOME/cypress/system-tests/test-binary/*spec*"`
             SPECS=`echo $ALL_SPECS | xargs -n 1 | circleci tests split --split-by=timings`
             echo SPECS=$SPECS
@@ -1527,7 +1529,7 @@ jobs:
     steps:
       - restore_cached_workspace
       - run:
-          command:  yarn workspace @tooling/system-tests test:ci "test/non_root*spec*" --browser electron
+          command: CYPRESS_COMMERCIAL_RECOMMENDATIONS=0 yarn workspace @tooling/system-tests test:ci "test/non_root*spec*" --browser electron
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
