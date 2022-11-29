@@ -44,7 +44,7 @@ const getAllStorage = async (type: InternalCypress.StorageType, Cypress: Interna
     })
   }
 
-  const storages = await (Cypress.session as InternalCypress.Session).getStorage({ origin: '*' })
+  const storages = await Cypress._session.getStorage({ origin: '*' })
 
   storageByOrigin = storages[type].reduce((memo, storage) => {
     memo[storage.origin] = storage.value
@@ -65,7 +65,7 @@ const clearAllStorage = async (type: InternalCypress.StorageType, Cypress: Inter
     Cypress.log({})
   }
 
-  await (Cypress.session as InternalCypress.Session).clearStorage(type)
+  await Cypress._session.clearStorage(type)
 
   return null
 }

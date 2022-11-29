@@ -515,4 +515,8 @@ export default function (Commands, Cypress, cy) {
   })
 
   Cypress.session = sessions
+  // Cypress.session is currently unsupported within the cy.origin() callback.
+  // This also stops us from using it internally, because we replace it with
+  // a proxy that throws an error. We can use this reference internally instead.
+  Cypress._session = sessions
 }
