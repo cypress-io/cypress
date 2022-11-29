@@ -45,6 +45,26 @@ describe('ProjectActions', () => {
       expect(reactComponents).to.have.length(1)
       expect(reactComponents[0].displayName).to.equal('CounterContainer')
     })
+
+    it('returns React components from a tsx file', async () => {
+      const reactComponents = await actions.getReactComponentsFromFile('./counter.tsx')
+
+      expect(reactComponents).to.have.length(1)
+      expect(reactComponents[0].displayName).to.equal('Counter')
+    })
+
+    it('returns React components that are exported by default', async () => {
+      const reactComponents = await actions.getReactComponentsFromFile('./counter-default.tsx')
+
+      expect(reactComponents).to.have.length(1)
+      expect(reactComponents[0].displayName).to.equal('CounterDefault')
+    })
+
+    it('does not throw while parsing empty file', async () => {
+      const reactComponents = await actions.getReactComponentsFromFile('./empty.jsx')
+
+      expect(reactComponents).to.have.length(0)
+    })
   })
 
   context('hasNonExampleSpec', () => {

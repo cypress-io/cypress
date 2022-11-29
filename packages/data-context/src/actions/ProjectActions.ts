@@ -16,6 +16,9 @@ import { resetIssuedWarnings } from '@packages/config'
 import { WizardFrontendFramework, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import * as reactDocgen from 'react-docgen'
 import fs from 'fs-extra'
+import Debug from 'debug'
+
+const debug = Debug('cypress:data-context:sources:ProjectActions')
 
 export interface ProjectApiShape {
   /**
@@ -357,9 +360,15 @@ export class ProjectActions {
 
     assert(project, 'Cannot create spec without currentProject.')
 
-    const src = await fs.readFile(this.ctx.path.join(project, filePath), 'utf8')
+    try {
+      const src = await fs.readFile(this.ctx.path.join(project, filePath), 'utf8')
 
-    return reactDocgen.parse(src, reactDocgen.resolver.findAllExportedComponentDefinitions)
+      return reactDocgen.parse(src, reactDocgen.resolver.findAllExportedComponentDefinitions)
+    } catch (err) {
+      debug(err)
+
+      return []
+    }
   }
 
   async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType, componentName?: string): Promise<NexusGenUnions['GeneratedSpecResult']> {
