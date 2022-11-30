@@ -1,4 +1,4 @@
-import Bluebird from 'Bluebird'
+import Bluebird from 'bluebird'
 import { $Location } from '../../../cypress/location'
 
 export async function mapOrigins (Cypress: Cypress.Cypress, origins: string | Array<string>): Promise<Array<string>> {
