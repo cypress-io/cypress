@@ -201,7 +201,7 @@ const runV8SnapshotProjectTest = function (buildAppExecutable, e2e) {
   return spawn()
 }
 
-const runErroringProjectTest = function (buildAppExecutable, e2e, testName) {
+const runErroringProjectTest = function (buildAppExecutable, e2e, testName, errorMessage) {
   if (shouldSkipProjectTest()) {
     console.log('skipping project test')
 
@@ -226,16 +226,26 @@ const runErroringProjectTest = function (buildAppExecutable, e2e, testName) {
     }
 
     const options = {
-      stdio: 'inherit', env,
+      stdio: ['inherit', 'inherit', 'pipe'], env,
     }
 
     console.log('running project test')
     console.log(buildAppExecutable, args.join(' '))
 
-    return cp.spawn(buildAppExecutable, args, options)
-    .on('exit', (code) => {
+    const childProcess = cp.spawn(buildAppExecutable, args, options)
+    let errorOutput = ''
+
+    childProcess.stderr.on('data', (data) => {
+      errorOutput += data.toString()
+    })
+
+    childProcess.on('exit', (code) => {
       if (code === 0) {
         return reject(new Error(`running project tests should have failed for test: ${testName}`))
+      }
+
+      if (!errorOutput.includes(errorMessage)) {
+        return reject(new Error(`running project tests failed with errors but did not include the expected error message: '${errorMessage}'`))
       }
 
       return resolve()
@@ -250,19 +260,19 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
     return
   }
 
-  const testCorruptingFile = async (file) => {
+  const testCorruptingFile = async (file, errorMessage) => {
     const contents = await fs.readFile(file)
 
-    await fs.writeFile(file, `console.log('modified code')\n${contents}`)
-    await runErroringProjectTest(buildAppExecutable, e2e, `corrupting ${file}`)
+    await fs.writeFile(file, Buffer.concat([contents, Buffer.from(`\nconsole.log('modified code')`)]))
+    await runErroringProjectTest(buildAppExecutable, e2e, `corrupting ${file}`, errorMessage)
     await fs.writeFile(file, contents)
   }
 
-  await testCorruptingFile(path.join(buildAppDir, 'index.js'))
-  await testCorruptingFile(path.join(buildAppDir, 'packages', 'server', 'index.jsc'))
-  await testCorruptingFile(path.join(buildAppDir, 'node_modules', 'bytenode', 'lib', 'index.js'))
+  await testCorruptingFile(path.join(buildAppDir, 'index.js'), 'Error: Integrity check failed for main index.js file')
+  await testCorruptingFile(path.join(buildAppDir, 'packages', 'server', 'index.jsc'), 'Error: Integrity check failed for main server index.jsc file')
+  await testCorruptingFile(path.join(buildAppDir, 'node_modules', 'bytenode', 'lib', 'index.js'), 'Error: Integrity check failed for main bytenode.js file')
 
-  const testAlteringEntryPoint = async (additionalCode) => {
+  const testAlteringEntryPoint = async (additionalCode, errorMessage) => {
     const packageJsonContents = await fs.readJSON(path.join(buildAppDir, 'package.json'))
 
     await fs.writeJSON(path.join(buildAppDir, 'package.json'), {
@@ -271,12 +281,13 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
     })
 
     await fs.writeFile(path.join(buildAppDir, 'index2.js'), `${additionalCode}\nrequire("./index.js")`)
-    await runErroringProjectTest(buildAppExecutable, e2e, 'altering entry point')
+    await runErroringProjectTest(buildAppExecutable, e2e, 'altering entry point', errorMessage)
     await fs.writeJson(path.join(buildAppDir, 'package.json'), packageJsonContents)
     await fs.remove(path.join(buildAppDir, 'index2.js'))
   }
 
-  await testAlteringEntryPoint('console.log(global.getSnapshotResult())')
+  await testAlteringEntryPoint('console.log("simple alteration")', 'Error: Integrity check failed with expected stack length 9 but got 10')
+  await testAlteringEntryPoint('console.log("accessing " + global.getSnapshotResult())', 'Error: getSnapshotResult can only be called once')
 }
 
 const test = async function (buildAppExecutable, buildAppDir) {

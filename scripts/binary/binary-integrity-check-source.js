@@ -5,7 +5,10 @@ const callFn = Function.call
 
 // eslint-disable-next-line no-unused-vars
 const stackIntegrityCheck = function stackIntegrityCheck (options) {
+  const originalStackTraceLimit = Error.stackTraceLimit
   const originalStackTrace = OrigError.prepareStackTrace
+
+  Error.stackTraceLimit = Infinity
 
   OrigError.prepareStackTrace = function (_, stack) {
     return stack
@@ -14,9 +17,10 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
   const tempError = new OrigError
 
   captureStackTrace(tempError, arguments.callee)
-  const stack = tempError.stack
+  const stack = tempError.stack.filter((frame) => !frame.getFileName().startsWith('node:internal') && !frame.getFileName().startsWith('node:electron'))
 
   OrigError.prepareStackTrace = originalStackTrace
+  Error.stackTraceLimit = originalStackTraceLimit
 
   if (stack.length !== options.stackToMatch.length) {
     throw new Error(`Integrity check failed with expected stack length ${options.stackToMatch.length} but got ${stack.length}`)
@@ -127,10 +131,6 @@ function fileIntegrityCheck (options) {
       },
       {
         fileName: path.join(appPath, 'index.js'),
-      },
-      {
-        functionName: 'Module._compile',
-        fileName: 'node:internal/modules/cjs/loader',
       },
     ],
   })
