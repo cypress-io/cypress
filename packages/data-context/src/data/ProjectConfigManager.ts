@@ -465,7 +465,7 @@ export class ProjectConfigManager {
     /*
       Used to detect the correct file path when a test fails.
       It is derived and assigned in the packages/driver in stack_utils.
-      It's needed to show the correct link to files in repo mgmt tools like GitHub in the dashboard.
+      It's needed to show the correct link to files in repo mgmt tools like GitHub in Cypress Cloud.
       Right now we assume the repoRoot is where the `.git` dir is located.
     */
     return this.options.ctx.git?.gitBaseDir

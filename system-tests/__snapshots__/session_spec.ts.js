@@ -51,10 +51,6 @@ exports['e2e sessions / session tests'] = `
   multiple sessions in test - can switch without redefining
     ✓ switch session during test
 
-  options.validate reruns steps when returning false
-    ✓ t1
-    ✓ t2
-
   options.validate reruns steps when resolving false
     ✓ t1
     ✓ t2
@@ -104,15 +100,15 @@ exports['e2e sessions / session tests'] = `
       ✓ clears only secure context data - 2/2
 
 
-  42 passing
+  40 passing
   1 pending
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        43                                                                               │
-  │ Passing:      42                                                                               │
+  │ Tests:        41                                                                               │
+  │ Passing:      40                                                                               │
   │ Failing:      0                                                                                │
   │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
@@ -130,9 +126,9 @@ exports['e2e sessions / session tests'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  session.cy.js                            XX:XX       43       42        -        1        - │
+  │ ✔  session.cy.js                            XX:XX       41       40        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       43       42        -        1        -  
+    ✔  All specs passed!                        XX:XX       41       40        -        1        -  
 
 
 `

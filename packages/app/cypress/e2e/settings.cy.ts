@@ -21,7 +21,7 @@ describe('App: Settings', () => {
 
     cy.findByText('Device settings').should('be.visible')
     cy.findByText('Project settings').should('be.visible')
-    cy.findByText('Dashboard settings').should('be.visible')
+    cy.findByText('Cypress Cloud settings').should('be.visible')
   })
 
   describe('Cloud Settings', () => {
@@ -33,7 +33,7 @@ describe('App: Settings', () => {
       cy.startAppServer('e2e')
       cy.visitApp()
       cy.get(SidebarSettingsLinkSelector).click()
-      cy.findByText('Dashboard settings').click()
+      cy.findByText('Cypress Cloud settings').click()
       cy.findByText('Project ID').should('be.visible')
       cy.get('[data-cy="code-box"]').should('contain', 'fromCli')
       cy.findByText('Copy').click()
@@ -49,7 +49,7 @@ describe('App: Settings', () => {
 
       cy.visitApp()
       cy.get(SidebarSettingsLinkSelector).click()
-      cy.findByText('Dashboard settings').click()
+      cy.findByText('Cypress Cloud settings').click()
       cy.findByText('Record key').should('be.visible')
     })
 
@@ -59,7 +59,7 @@ describe('App: Settings', () => {
 
       cy.visitApp()
       cy.get(SidebarSettingsLinkSelector).click()
-      cy.findByText('Dashboard settings').click()
+      cy.findByText('Cypress Cloud settings').click()
       cy.get('[data-cy="code-box"]').should('contain', '***')
       cy.get('[aria-label="Record Key Visibility Toggle"]').click()
       cy.get('[data-cy="code-box"]').should('contain', '2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
@@ -69,7 +69,7 @@ describe('App: Settings', () => {
       cy.startAppServer('e2e')
       cy.loginUser()
       cy.visitApp('settings')
-      cy.findByText('Dashboard settings').click()
+      cy.findByText('Cypress Cloud settings').click()
       cy.findByText('Manage keys').click()
       cy.withRetryableCtx((ctx) => {
         expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.eq('http:/test.cloud/cloud-project/settings')
@@ -97,7 +97,7 @@ describe('App: Settings', () => {
       // Wait for the test to pass, so the test is completed
       cy.get('.passed > .num').should('contain', 1)
       cy.get(SidebarSettingsLinkSelector).click()
-      cy.contains('Dashboard settings').click()
+      cy.contains('Cypress Cloud settings').click()
       // Assert the data is not there before it arrives
       cy.contains('Record key').should('not.exist')
       cy.contains('Record key')
@@ -112,7 +112,7 @@ describe('App: Settings', () => {
       })
 
       cy.findByTestId('sidebar-link-settings-page').click()
-      cy.contains('Dashboard settings').click()
+      cy.contains('Cypress Cloud settings').click()
       cy.contains('Record key').should('exist')
       cy.findByTestId('sidebar-link-runs-page').click()
       cy.findByTestId('user-avatar-title').click()
@@ -123,7 +123,7 @@ describe('App: Settings', () => {
       })
 
       cy.findByTestId('sidebar-link-settings-page').click()
-      cy.contains('Dashboard settings').click()
+      cy.contains('Cypress Cloud settings').click()
       cy.contains('Record key').should('not.exist')
     })
   })
@@ -408,13 +408,13 @@ describe('App: Settings without cloud', () => {
 
     cy.visitApp()
     cy.get(SidebarSettingsLinkSelector).click()
-    cy.findByText('Dashboard settings').click()
+    cy.findByText('Cypress Cloud settings').click()
     cy.findByText('Project ID').should('not.exist')
     cy.withCtx((ctx, o) => {
       o.sinon.spy(ctx._apis.authApi, 'logIn')
     })
 
-    cy.contains('button', 'Log in to the Cypress Dashboard').click()
+    cy.contains('button', 'Log in to Cypress Cloud').click()
     cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
       cy.contains('button', 'Log in').click()
     })

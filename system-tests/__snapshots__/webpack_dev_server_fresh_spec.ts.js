@@ -374,19 +374,20 @@ https://on.cypress.io/uncaught-exception-from-application
 
 
   mount
+    ✓ does not error when rendering primitives
     teardown
       ✓ should mount
       ✓ should remove previous mounted component
 
 
-  2 passing
+  3 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
-  │ Passing:      2                                                                                │
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -424,9 +425,9 @@ https://on.cypress.io/uncaught-exception-from-application
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  mount.cy.jsx                             XX:XX        2        2        -        -        - │
+  │ ✔  mount.cy.jsx                             XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  4 of 8 failed (50%)                      XX:XX       15        8        7        -        -  
+    ✖  4 of 8 failed (50%)                      XX:XX       16        9        7        -        -  
 
 
 `
@@ -816,19 +817,20 @@ https://on.cypress.io/uncaught-exception-from-application
 
 
   mount
+    ✓ does not error when rendering primitives
     teardown
       ✓ should mount
       ✓ should remove previous mounted component
 
 
-  2 passing
+  3 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
-  │ Passing:      2                                                                                │
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -866,9 +868,9 @@ https://on.cypress.io/uncaught-exception-from-application
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  mount.cy.jsx                             XX:XX        2        2        -        -        - │
+  │ ✔  mount.cy.jsx                             XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  4 of 8 failed (50%)                      XX:XX       15        8        7        -        -  
+    ✖  4 of 8 failed (50%)                      XX:XX       16        9        7        -        -  
 
 
 `
@@ -1249,19 +1251,20 @@ https://on.cypress.io/uncaught-exception-from-application
 
 
   mount
+    ✓ does not error when rendering primitives
     teardown
       ✓ should mount
       ✓ should remove previous mounted component
 
 
-  2 passing
+  3 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
-  │ Passing:      2                                                                                │
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -1299,9 +1302,9 @@ https://on.cypress.io/uncaught-exception-from-application
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  mount.cy.jsx                             XX:XX        2        2        -        -        - │
+  │ ✔  mount.cy.jsx                             XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  4 of 8 failed (50%)                      XX:XX       15        8        7        -        -  
+    ✖  4 of 8 failed (50%)                      XX:XX       16        9        7        -        -  
 
 
 `
@@ -1694,19 +1697,20 @@ https://on.cypress.io/uncaught-exception-from-application
 
 
   mount
+    ✓ does not error when rendering primitives
     teardown
       ✓ should mount
       ✓ should remove previous mounted component
 
 
-  2 passing
+  3 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
-  │ Passing:      2                                                                                │
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -1744,9 +1748,9 @@ https://on.cypress.io/uncaught-exception-from-application
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  mount.cy.jsx                             XX:XX        2        2        -        -        - │
+  │ ✔  mount.cy.jsx                             XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  4 of 8 failed (50%)                      XX:XX       15        8        7        -        -  
+    ✖  4 of 8 failed (50%)                      XX:XX       16        9        7        -        -  
 
 
 `

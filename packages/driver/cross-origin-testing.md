@@ -201,7 +201,7 @@ Certain APIs are currently not supported in the **cy.origin()** callback. Depend
 
 ### cy.origin()
 
-Nesting **cy.origin()** inside the callback is not currently not supported, but support will likely be added in the future. In most use-cases, the desired functionality of nesting it can be achieved calling **cy.origin()** back-to-back at the top level of the test.
+Nesting **cy.origin()** inside the callback is not currently supported, but support will likely be added in the future. In most use-cases, the desired functionality of nesting it can be achieved calling **cy.origin()** back-to-back at the top level of the test.
 
 ### cy.session() / Cypress.session.*
 

@@ -55,9 +55,9 @@ function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer,
   return 'latin1'
 }
 
-function reqMatchesSuperDomainOrigin (req: CypressIncomingRequest, remoteState) {
+function reqMatchesPolicyBasedOnDomain (req: CypressIncomingRequest, remoteState) {
   if (remoteState.strategy === 'http') {
-    return cors.urlMatchesSuperDomainOriginProps(req.proxiedUrl, remoteState.props)
+    return cors.urlMatchesPolicyBasedOnDomainProps(req.proxiedUrl, remoteState.props)
   }
 
   if (remoteState.strategy === 'file') {
@@ -250,7 +250,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
 
   this.debug('determine injection')
 
-  const isReqMatchSuperDomainOrigin = reqMatchesSuperDomainOrigin(this.req, this.remoteStates.current())
+  const isReqMatchSuperDomainOrigin = reqMatchesPolicyBasedOnDomain(this.req, this.remoteStates.current())
   const getInjectionLevel = () => {
     if (this.incomingRes.headers['x-cypress-file-server-error'] && !this.res.isInitial) {
       this.debug('- partial injection (x-cypress-file-server-error)')
@@ -259,11 +259,11 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     }
 
     // NOTE: Only inject fullCrossOrigin if the super domain origins do not match in order to keep parity with cypress application reloads
-    const isCrossSuperDomainOrigin = !reqMatchesSuperDomainOrigin(this.req, this.remoteStates.getPrimary())
+    const urlDoesNotMatchPolicyBasedOnDomain = !reqMatchesPolicyBasedOnDomain(this.req, this.remoteStates.getPrimary())
     const isAUTFrame = this.req.isAUTFrame
     const isHTMLLike = isHTML || isRenderedHTML
 
-    if (this.config.experimentalSessionAndOrigin && isCrossSuperDomainOrigin && isAUTFrame && isHTMLLike) {
+    if (this.config.experimentalSessionAndOrigin && urlDoesNotMatchPolicyBasedOnDomain && isAUTFrame && isHTMLLike) {
       this.debug('- cross origin injection')
 
       return 'fullCrossOrigin'

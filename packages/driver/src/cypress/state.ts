@@ -31,7 +31,6 @@ export interface StateFunc {
   (k: 'runnable', v?: CypressRunnable): CypressRunnable
   (k: 'isStable', v?: boolean): boolean
   (k: 'whenStable', v?: null | (() => Promise<any>)): () => Promise<any>
-  (k: 'index', v?: number): number
   (k: 'current', v?: $Command): $Command
   (k: 'canceld', v?: boolean): boolean
   (k: 'error', v?: Error): Error
@@ -52,7 +51,7 @@ export interface StateFunc {
   (k: 'commandIntermediateValue', v?: any): any
   (k: 'subject', v?: any): any
   (k: 'onPaused', v?: (fn: any) => void): (fn: any) => void
-  (k: 'onCommandFailed', v?: (err: any, queue: any) => boolean): (err: any, queue: any) => boolean
+  (k: 'onQueueFailed', v?: (err, queue?: any) => Error): (err, queue?: any) => Error
   (k: 'promise', v?: Bluebird<unknown>): Bluebird<unknown>
   (k: 'reject', v?: (err: any) => any): (err: any) => any
   (k: 'cancel', v?: () => void): () => void

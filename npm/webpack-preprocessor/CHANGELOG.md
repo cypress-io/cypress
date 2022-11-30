@@ -1,3 +1,17 @@
+# [@cypress/webpack-preprocessor-v5.15.5](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.15.4...@cypress/webpack-preprocessor-v5.15.5) (2022-11-10)
+
+
+### Bug Fixes
+
+* custom reporter and experimentalSessionAndOrigin crashes ([#24630](https://github.com/cypress-io/cypress/issues/24630)) ([e9e8cad](https://github.com/cypress-io/cypress/commit/e9e8cadda4fb14d601079018b57425b221a005d9))
+
+# [@cypress/webpack-preprocessor-v5.15.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.15.3...@cypress/webpack-preprocessor-v5.15.4) (2022-11-07)
+
+
+### Bug Fixes
+
+* remove some CT functions and props ([#24419](https://github.com/cypress-io/cypress/issues/24419)) ([294985f](https://github.com/cypress-io/cypress/commit/294985f8b3e0fa00ed66d25f88c8814603766074))
+
 # [@cypress/webpack-preprocessor-v5.15.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.15.2...@cypress/webpack-preprocessor-v5.15.3) (2022-11-02)
 
 

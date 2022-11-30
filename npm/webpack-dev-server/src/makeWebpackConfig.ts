@@ -1,11 +1,12 @@
 import { debug as debugFn } from 'debug'
 import * as path from 'path'
 import { merge } from 'webpack-merge'
+import { importModule } from 'local-pkg'
 import type { Configuration, EntryObject } from 'webpack'
 import { makeCypressWebpackConfig } from './makeDefaultWebpackConfig'
 import type { CreateFinalWebpackConfig } from './createWebpackDevServer'
 import { configFiles } from './constants'
-import { dynamicAbsoluteImport, dynamicImport } from './dynamic-import'
+import { dynamicImport } from './dynamic-import'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
 
@@ -90,7 +91,7 @@ export async function makeWebpackConfig (
 
     if (configFile) {
       debug('found webpack config %s', configFile)
-      const sourcedConfig = await dynamicAbsoluteImport(configFile)
+      const sourcedConfig = await importModule(configFile)
 
       debug('config contains %o', sourcedConfig)
       if (sourcedConfig && typeof sourcedConfig === 'object') {

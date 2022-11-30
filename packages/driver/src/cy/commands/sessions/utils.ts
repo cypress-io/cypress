@@ -5,10 +5,11 @@ import { $Location } from '../../../cypress/location'
 
 type SessionData = Cypress.Commands.Session.SessionData
 
-const getSessionDetailsForTable = (sessState: SessionData) => {
+const getSessionDetailsByDomain = (sessState: SessionData) => {
   return _.merge(
     _.mapValues(_.groupBy(sessState.cookies, 'domain'), (v) => ({ cookies: v })),
     ..._.map(sessState.localStorage, (v) => ({ [$Location.create(v.origin).hostname]: { localStorage: v } })),
+    ..._.map(sessState.sessionStorage, (v) => ({ [$Location.create(v.origin).hostname]: { sessionStorage: v } })),
   )
 }
 
@@ -97,39 +98,48 @@ const setPostMessageLocalStorage = async (specWindow, originOptions) => {
   })
 }
 
-const getConsoleProps = (sessState: SessionData) => {
-  const sessionDetails = getSessionDetailsForTable(sessState)
+const getConsoleProps = (session: SessionData) => {
+  const sessionDetails = getSessionDetailsByDomain(session)
 
-  const tables = _.flatMap(sessionDetails, (val, domain) => {
-    const cookiesTable = () => {
-      return {
-        name: `🍪 Cookies - ${domain} (${val.cookies.length})`,
-        data: val.cookies,
-      }
+  const groupsByDomain = _.flatMap(sessionDetails, (val, domain) => {
+    return {
+      name: `${domain} data:`,
+      expand: true,
+      label: false,
+      groups: _.compact([
+        val.cookies && {
+          name: `🍪 Cookies - (${val.cookies.length})`,
+          expand: true,
+          items: val.cookies,
+        },
+        val.localStorage && {
+          name: `📁 Local Storage - (${_.keys(val.localStorage.value).length})`,
+          label: true,
+          expand: true,
+          items: val.localStorage.value,
+        },
+        val.sessionStorage && {
+          name: `📁 Session Storage - (${_.keys(val.sessionStorage.value).length})`,
+          expand: true,
+          label: true,
+          items: val.sessionStorage.value,
+        },
+      ]),
     }
-
-    const localStorageTable = () => {
-      return {
-        name: `📁 Storage - ${domain} (${_.keys(val.localStorage.value).length})`,
-        data: _.map(val.localStorage.value, (value, key) => {
-          return {
-            key,
-            value,
-          }
-        }),
-      }
-    }
-
-    return [
-      val.cookies && cookiesTable,
-      val.localStorage && localStorageTable,
-    ]
   })
 
-  return {
-    id: sessState.id,
-    table: _.compact(tables),
+  const props = {
+    id: session.id,
+    ...(!groupsByDomain.length && {
+      Warning: '⚠️ There are no cookies, local storage nor session storage associated with this session',
+    }),
+    ...(groupsByDomain.length && {
+      Domains: `This session captured data from ${Object.keys(sessionDetails).join(' and ')}.`,
+    }),
+    groups: _.compact(groupsByDomain),
   }
+
+  return props
 }
 
 const getPostMessageLocalStorage = (specWindow, origins): Promise<any[]> => {
@@ -184,13 +194,80 @@ const getPostMessageLocalStorage = (specWindow, origins): Promise<any[]> => {
 }
 
 function navigateAboutBlank (session: boolean = true) {
-  if (Cypress.config('testIsolation') === 'off') {
-    return
+  // Component testing does not support navigation and handles clearing the page via mount utils
+  if (Cypress.testingType === 'component' || Cypress.config('testIsolation') === 'off') {
+    return Promise.resolve()
   }
 
-  Cypress.action('cy:url:changed', '')
+  return new Promise((resolve) => {
+    cy.once('window:load', resolve)
 
-  return Cypress.action('cy:visit:blank', { type: session ? 'session' : 'session-lifecycle' }) as unknown as Promise<void>
+    Cypress.action('cy:url:changed', '')
+
+    return Cypress.action('cy:visit:blank', { type: session ? 'session' : 'session-lifecycle' }) as unknown as Promise<void>
+  })
+}
+
+const enum SESSION_STEPS {
+  create = 'create',
+  restore = 'restore',
+  recreate = 'recreate',
+  validate = 'validate',
+}
+
+const statusMap = {
+  commandState: (status: string) => {
+    switch (status) {
+      case 'failed':
+        return 'failed'
+      case 'recreating':
+      case 'recreated':
+        return 'warned'
+      case 'created':
+      case 'restored':
+        return 'passed'
+      default:
+        return 'pending'
+    }
+  },
+  inProgress: (step) => {
+    switch (step) {
+      case 'create':
+        return 'creating'
+      case 'restore':
+        return 'restoring'
+      case 'recreate':
+        return 'recreating'
+      default:
+        throw new Error(`${step} is not a valid session step.`)
+    }
+  },
+  stepName: (step) => {
+    switch (step) {
+      case 'create':
+        return 'Create new session'
+      case 'restore':
+        return 'Restore saved session'
+      case 'recreate':
+        return 'Recreate session'
+      case 'validate':
+        return 'Validate session'
+      default:
+        throw new Error(`${step} is not a valid session step.`)
+    }
+  },
+  complete: (step) => {
+    switch (step) {
+      case 'create':
+        return 'created'
+      case 'restore':
+        return 'restored'
+      case 'recreate':
+        return 'recreated'
+      default:
+        throw new Error(`${step} is not a valid session step.`)
+    }
+  },
 }
 
 export {
@@ -199,4 +276,6 @@ export {
   getConsoleProps,
   getPostMessageLocalStorage,
   navigateAboutBlank,
+  SESSION_STEPS,
+  statusMap,
 }

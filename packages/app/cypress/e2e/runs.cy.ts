@@ -279,7 +279,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         name: 'Test User A',
       } })
 
-      cy.contains('button', 'Log in to the Cypress Dashboard').click()
+      cy.contains('button', 'Log in to Cypress Cloud').click()
 
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).as('logInModal').within(() => {
         cy.findByRole('button', { name: 'Log in' }).click()
@@ -578,7 +578,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   })
 
   context('Runs - No Runs', () => {
-    it('when no runs and not connected, shows connect to dashboard button', () => {
+    it('when no runs and not connected, shows connect to Cypress Cloud button', () => {
       cy.scaffoldProject('component-tests')
       cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
       cy.startAppServer('component')
@@ -722,7 +722,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       moveToRunsPage()
 
-      cy.contains('h2', 'Cannot connect to the Cypress Dashboard')
+      cy.contains('h2', 'Cannot connect to Cypress Cloud')
       // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
       cy.remoteGraphQLIntercept((obj) => {
@@ -755,7 +755,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[data-cy=warning-alert]')
       .should('contain.text', 'You have no internet connection')
-      .and('contain.text', 'Check your internet connection to pull the latest data from the dashboard')
+      .and('contain.text', 'Check your internet connection to pull the latest data from Cypress Cloud')
     })
 
     it('should remove the alert warning if the app reconnects to the internet', () => {
@@ -769,7 +769,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[data-cy=warning-alert]')
       .should('contain.text', 'You have no internet connection')
-      .and('contain.text', 'Check your internet connection to pull the latest data from the dashboard')
+      .and('contain.text', 'Check your internet connection to pull the latest data from Cypress Cloud')
 
       cy.goOnline()
 
@@ -810,7 +810,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[data-cy=standard-modal]')
       .should('contain.text', 'You have no internet connection')
-      .and('contain.text', 'Check your internet connection to pull the latest data from the dashboard')
+      .and('contain.text', 'Check your internet connection to pull the latest data from Cypress Cloud')
     })
 
     it('shows correct message on connect project modal', () => {
@@ -844,13 +844,14 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[data-cy=standard-modal]')
       .should('contain.text', 'You have no internet connection')
-      .and('contain.text', 'Check your internet connection to pull the latest data from the dashboard')
+      .and('contain.text', 'Check your internet connection to pull the latest data from Cypress Cloud')
     })
   })
 
+  const RUNNING_COUNT = 3
+
   describe('refetching', () => {
     let obj: {toCall?: Function} = {}
-    const RUNNING_COUNT = 3
 
     beforeEach(() => {
       cy.scaffoldProject('component-tests')
@@ -874,7 +875,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
           const setTimeout = win.setTimeout
 
           // @ts-expect-error
-          win.setTimeout = function (fn, time) {
+          win.setTimeout = function (fn: () => void, time: number) {
             if (fn.name === 'fetchNewerRuns') {
               obj.toCall = fn
             } else {
@@ -885,7 +886,10 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
     })
 
-    it('should re-query for executing runs', () => {
+    // https://github.com/cypress-io/cypress/issues/24575
+    const itSkipIfWindows = Cypress.platform === 'win32' ? it.skip : it
+
+    itSkipIfWindows('should re-query for executing runs', () => {
       cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', RUNNING_COUNT).should('be.visible')
 
       cy.remoteGraphQLIntercept(async (obj) => {
@@ -918,7 +922,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       completeNext(1)
     })
 
-    it('should fetch newer runs and maintain them when navigating', () => {
+    itSkipIfWindows('should fetch newer runs and maintain them when navigating', () => {
       cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', RUNNING_COUNT).should('be.visible')
 
       cy.remoteGraphQLIntercept(async (obj) => {
