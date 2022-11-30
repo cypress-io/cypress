@@ -79,8 +79,8 @@ import FileChooser from '../FileChooser.vue'
 import GeneratorSuccess from '../GeneratorSuccess.vue'
 import { computed, ref } from 'vue'
 import { gql, useQuery, useMutation } from '@urql/vue'
-import type { ComponentGeneratorStepOne_CodeGenGlobFragment, GeneratorSuccessFileFragment } from '../../../generated/graphql'
-import { ComponentGeneratorStepOneDocument, ComponentGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
+import type { VueComponentGeneratorStepOne_CodeGenGlobFragment, GeneratorSuccessFileFragment } from '../../../generated/graphql'
+import { VueComponentGeneratorStepOneDocument, VueComponentGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import Button from '@cy/components/Button.vue'
 import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
@@ -88,7 +88,7 @@ import TestResultsIcon from '~icons/cy/test-results_x24.svg'
 import EmptyGenerator from '../EmptyGenerator.vue'
 const props = defineProps<{
   title: string
-  gql: ComponentGeneratorStepOne_CodeGenGlobFragment
+  gql: VueComponentGeneratorStepOne_CodeGenGlobFragment
 }>()
 const { t } = useI18n()
 const emits = defineEmits<{
@@ -101,17 +101,18 @@ const { title } = useVModels(props, emits)
 
 title.value = t('createSpec.component.importFromComponent.chooseAComponentHeader')
 gql`
-fragment ComponentGeneratorStepOne_codeGenGlob on CurrentProject {
+fragment VueComponentGeneratorStepOne_codeGenGlob on CurrentProject {
   id
   codeGenGlobs {
     id
     component
   }
+  codeGenFramework
 }
 `
 
 gql`
-query ComponentGeneratorStepOne($glob: String!) {
+query VueComponentGeneratorStepOne($glob: String!) {
   currentProject {
     id
     codeGenCandidates(glob: $glob) {
@@ -132,7 +133,7 @@ query ComponentGeneratorStepOne($glob: String!) {
 `
 
 gql`
-mutation ComponentGeneratorStepOne_generateSpec($codeGenCandidate: String!, $type: CodeGenType!) {
+mutation VueComponentGeneratorStepOne_generateSpec($codeGenCandidate: String!, $type: CodeGenType!) {
   generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type) {
     ...GeneratorSuccess
     currentProject {
@@ -147,11 +148,11 @@ mutation ComponentGeneratorStepOne_generateSpec($codeGenCandidate: String!, $typ
   }
 }`
 
-const mutation = useMutation(ComponentGeneratorStepOne_GenerateSpecDocument)
+const mutation = useMutation(VueComponentGeneratorStepOne_GenerateSpecDocument)
 const extensionPattern = ref(props.gql.codeGenGlobs.component)
 
 const query = useQuery({
-  query: ComponentGeneratorStepOneDocument,
+  query: VueComponentGeneratorStepOneDocument,
   // @ts-ignore
   variables: { glob: extensionPattern },
 })

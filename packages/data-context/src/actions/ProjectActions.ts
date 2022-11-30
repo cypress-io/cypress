@@ -361,7 +361,7 @@ export class ProjectActions {
     assert(project, 'Cannot create spec without currentProject.')
 
     try {
-      const src = await fs.readFile(this.ctx.path.join(project, filePath), 'utf8')
+      const src = await fs.readFile(filePath, 'utf8')
 
       return reactDocgen.parse(src, reactDocgen.resolver.findAllExportedComponentDefinitions)
     } catch (err) {

@@ -9,6 +9,7 @@ type CurrentProject = {
   readonly codeGenGlobs?: {
     readonly component: string
   }
+  readonly codeGenFramework?: string
 }
 
 export interface SpecGenerator {

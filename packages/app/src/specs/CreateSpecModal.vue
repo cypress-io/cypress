@@ -78,7 +78,7 @@ fragment CreateSpecModal on Query {
     id
     fileExtensionToUse
     defaultSpecFileName
-    ...ComponentGeneratorStepOne_codeGenGlob
+    ...VueComponentGeneratorStepOne_codeGenGlob
     ...EmptyGenerator
   }
 }

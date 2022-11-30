@@ -607,6 +607,7 @@ type CurrentProject implements Node & ProjectLike {
 
   """List of all code generation candidates stories"""
   codeGenCandidates(glob: String!): [FileParts]
+  codeGenFramework: String
   codeGenGlobs: CodeGenGlobs!
 
   """Project configuration"""
