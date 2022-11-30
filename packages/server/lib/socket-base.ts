@@ -611,7 +611,7 @@ export class SocketBase {
   }
 
   async sendFocusBrowserMessage () {
-    await this._sendFocusBrowserMessage()
+    await this._sendFocusBrowserMessage?.()
   }
 
   close () {
