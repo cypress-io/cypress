@@ -379,7 +379,7 @@ export class CommandQueue extends Queue<$Command> {
       } else {
         // For commands, the "subject" here is the command's return value, which replaces
         // the current subject chain. We cannot re-invoke commands - the return value here is final.
-        this.cy.setSubjectForChainer(command.get('chainerId'), subject)
+        this.cy.setSubjectForChainer(command.get('chainerId'), [subject])
       }
 
       this.cleanSubjects()
@@ -417,7 +417,7 @@ export class CommandQueue extends Queue<$Command> {
           next: this.at(this.index + 1),
         })
 
-        this.cy.setSubjectForChainer(command.get('chainerId'), command.get('subject'))
+        this.cy.setSubjectForChainer(command.get('chainerId'), [command.get('subject')])
 
         if (command.state === 'skipped') {
           Cypress.action('cy:skipped:command:end', command)
