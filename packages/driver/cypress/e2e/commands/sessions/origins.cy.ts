@@ -1,7 +1,7 @@
 import { getAllHtmlOrigins, mapOrigins } from '../../../../src/cy/commands/sessions/origins'
 const $Cypress = require('../../../../src/cypress').default
 
-describe('src/cy/commands/sessions/manager.ts', () => {
+describe('src/cy/commands/sessions/origins', () => {
   let CypressInstance
   let baseUrl
 

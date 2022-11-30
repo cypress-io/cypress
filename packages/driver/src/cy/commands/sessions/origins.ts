@@ -1,7 +1,7 @@
 import Bluebird from 'bluebird'
 import { $Location } from '../../../cypress/location'
 
-export async function mapOrigins (Cypress: Cypress.Cypress, origins: string | Array<string>): Promise<Array<string>> {
+export async function mapOrigins (Cypress: Cypress.Cypress, origins: string | string[]): Promise<string[]> {
   const getOrigins = Bluebird.map(
     ([] as string[]).concat(origins), async (origin) => {
       if (origin === '*') {

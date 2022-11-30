@@ -4,23 +4,22 @@ import { $Location } from '../../../cypress/location'
 import { getAllHtmlOrigins, mapOrigins } from './origins'
 import { getCurrentOriginStorage, getPostMessageLocalStorage, setPostMessageLocalStorage } from './utils'
 
+export type StorageType = 'localStorage' | 'sessionStorage'
+
+interface GetStorageOptions {
+  origin?: '*' | 'currentOrigin' | string | string[]
+}
+
 interface OriginStorageOptions {
   clear?: boolean
-  origin: string
+  origin?: string | string[]
   value?: any
 }
 
-interface SetStorageOptions {
+interface SetStoragesOptions {
   localStorage?: OriginStorageOptions[]
   sessionStorage?: OriginStorageOptions[]
 }
-
-interface StorageOptions {
-  origin?: '*' | 'currentOrigin' | string
-}
-
-export type StorageType = 'localStorage' | 'sessionStorage'
-
 /**
   * 1) if we only need currentOrigin localStorage, access sync
   * 2) if cross-origin http, we need to load in iframe from our proxy that will intercept all http reqs at /__cypress/automation/*
@@ -29,7 +28,7 @@ export type StorageType = 'localStorage' | 'sessionStorage'
   *      send a message telling our proxy server to intercept the next req to the https domain,
   *      then follow 2)
   */
-export async function getStorage (Cypress: Cypress.Cypress, options: StorageOptions = {}): Promise<Cypress.Storages> {
+export async function getStorage (Cypress: Cypress.Cypress, options: GetStorageOptions = {}): Promise<Cypress.Storages> {
   const specWindow = Cypress.state('specWindow')
 
   if (!_.isObject(options)) {
@@ -88,7 +87,7 @@ export async function getStorage (Cypress: Cypress.Cypress, options: StorageOpti
 export async function clearStorage (Cypress: Cypress.Cypress, type?: StorageType) {
   const origins = await getAllHtmlOrigins(Cypress)
   const originOptions = origins.map((origin) => ({ origin, clear: true }))
-  const options: SetStorageOptions = {}
+  const options: SetStoragesOptions = {}
 
   if (!type || type === 'localStorage') {
     options.localStorage = originOptions
@@ -135,10 +134,17 @@ async function setStorageOnOrigins (Cypress: Cypress.Cypress, originOptions) {
   await setPostMessageLocalStorage(specWindow, originOptions)
 }
 
-export async function setStorage (Cypress: Cypress.Cypress, options: SetStorageOptions) {
+export async function setStorage (Cypress: Cypress.Cypress, options: SetStoragesOptions) {
   const currentOrigin = $Location.create(window.location.href).origin as string
 
-  const mapToCurrentOrigin = (v) => ({ ...v, origin: (v.origin && v.origin !== 'currentOrigin') ? $Location.create(v.origin).origin : currentOrigin })
+  function mapToCurrentOrigin (v) {
+    return {
+      ...v,
+      origin: (v.origin && v.origin !== 'currentOrigin')
+        ? $Location.create(v.origin).origin
+        : currentOrigin,
+    }
+  }
 
   const mappedLocalStorage = _.map(options.localStorage, (v) => {
     return mapToCurrentOrigin({ origin: v.origin, localStorage: _.pick(v, 'value', 'clear') })
