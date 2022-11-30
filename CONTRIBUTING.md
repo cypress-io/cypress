@@ -358,7 +358,7 @@ This is to ensure that links do not go dead in older versions of Cypress when th
 
 ### Tests
 
-For most packages there are typically unit and integration tests. For UI packages there are e2e and component tests.
+For most packages there are typically unit and integration tests. For UI packages there are E2E and component tests.
 
 Please refer to each packages' `README.md` which documents how to run tests. It is not feasible to try to run all of the tests together. We run our entire test fleet across over a dozen containers in CI.
 
