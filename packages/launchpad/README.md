@@ -9,7 +9,7 @@ It replaces the original electron app, `desktop-gui`.
 - Allow users to log in through Cypress Cloud
 - Onboarding for new users (configure Component Testing dev server, install dependencies, etc)
 - Select testing mode (E2E, Component)
-- Provide UI to perform automated migration steps (for example migrating `cypress.json` to `cypress.config.js`
+- Provide UI to perform automated migration steps (for example migrating `cypress.json` to `cypress.config.js` for projects upgrading from 9.x or below)
 - Provide a dismissable Welcome Screen for every major release of Cypress
 
 It is using the following technologies:
