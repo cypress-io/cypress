@@ -154,7 +154,7 @@ declare namespace Cypress {
     | StorableArray
 
   interface StorableObject {
-    [key: string]: Storable;
+    [key: string]: Storable
   }
 
   interface StorableArray extends Array<Storable> { }
