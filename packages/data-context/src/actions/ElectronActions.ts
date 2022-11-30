@@ -18,7 +18,7 @@ export interface ElectronApiShape {
 export class ElectronActions {
   constructor (private ctx: DataContext) { }
 
-  get electron () {
+  private get electron () {
     return this.ctx.coreData.electron
   }
 
