@@ -62,9 +62,10 @@ describe('cy.session', { retries: 0 }, () => {
           await Cypress.action('runner:test:before:run:async', {})
 
           expect(Cypress.action).to.be.calledWith('cy:url:changed', '')
-          expect(Cypress.action).to.be.calledWith('cy:visit:blank', { type: 'session-lifecycle' })
+          expect(Cypress.action).to.be.calledWith('cy:visit:blank', { testIsolationLevel: 'on' })
         })
-        .url('about:blank')
+        .url()
+        .should('eq', 'about:blank')
       })
 
       it('clears session data before each run', async () => {
@@ -96,7 +97,7 @@ describe('cy.session', { retries: 0 }, () => {
           await Cypress.action('runner:test:before:run:async', {})
 
           expect(Cypress.action).to.be.calledWith('cy:url:changed', '')
-          expect(Cypress.action).to.be.calledWith('cy:visit:blank', { type: 'session-lifecycle' })
+          expect(Cypress.action).to.be.calledWith('cy:visit:blank', { testIsolationLevel: 'on' })
         })
 
         cy.window().its('cookie').should('be.undefined')

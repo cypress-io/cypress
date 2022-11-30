@@ -112,8 +112,8 @@ export default (Commands, Cypress, cy) => {
 
         // throw if <select> is disabled
         if (!options.force) {
-          cy.ensureElement(options.$el, 'select', options._log)
-          cy.ensureNotDisabled(options.$el, options._log)
+          Cypress.ensure.isElement(options.$el, 'select', options._log)
+          Cypress.ensure.isNotDisabled(options.$el, 'select', options._log)
         }
 
         const values: string[] = []

@@ -15,6 +15,7 @@ import $Commands from './cypress/commands'
 import { $Cy } from './cypress/cy'
 import $dom from './dom'
 import $Downloads from './cypress/downloads'
+import $ensure from './cypress/ensure'
 import $errorMessages from './cypress/error_messages'
 import $errUtils from './cypress/error_utils'
 import { create as createLogFn, LogUtils } from './cypress/log'
@@ -126,6 +127,7 @@ class $Cypress {
   Chainer = $Chainer
   Command = $Command
   dom = $dom
+  ensure = $ensure
   errorMessages = $errorMessages
   Keyboard = $Keyboard
   Location = $Location

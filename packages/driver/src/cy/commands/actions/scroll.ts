@@ -5,6 +5,7 @@ import Promise from 'bluebird'
 import $dom from '../../../dom'
 import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
+import $actionability from '../../actionability'
 import type { Log } from '../../../cypress/log'
 
 const findScrollableParent = ($el, win) => {
@@ -196,7 +197,7 @@ export default (Commands, Cypress, cy, state) => {
         } else {
           position = xOrPosition
           // make sure it's one of the valid position strings
-          cy.ensureValidPosition(position)
+          $actionability.ensureIsValidPosition(position)
         }
       } else {
         x = xOrPosition
@@ -356,7 +357,7 @@ export default (Commands, Cypress, cy, state) => {
               })
             }
 
-            cy.ensureElement(options.$el, 'scrollTo')
+            Cypress.ensure.isElement(options.$el, 'scrollTo')
           }
 
           // throw if we're trying to scroll multiple containers
@@ -369,7 +370,7 @@ export default (Commands, Cypress, cy, state) => {
           // Some elements are not scrollable, user may opt out of error checking
           // https://github.com/cypress-io/cypress/issues/1924
           if (options.ensureScrollable) {
-            cy.ensureScrollability(options.$el, 'scrollTo')
+            Cypress.ensure.isScrollable(options.$el, 'scrollTo')
           }
         } catch (err) {
           options.error = err

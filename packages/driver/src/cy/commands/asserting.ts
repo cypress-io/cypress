@@ -177,7 +177,7 @@ export default function (Commands, Cypress, cy, state) {
       // element which has left the DOM and we always
       // want to auto-fail on those
       if (!isCheckingLengthOrExistence && $dom.isElement(subject)) {
-        cy.ensureAttached(subject, 'should')
+        Cypress.ensure.isAttached(subject, 'should', cy)
       }
 
       const newExp = _.reduce(chainers, (memo, value) => {

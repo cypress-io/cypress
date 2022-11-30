@@ -158,7 +158,7 @@ describe('xhrs', () => {
           return win.location.href = '/index.html'
         })
 
-        cy.wait('@createUser').its('canceled').should('be.true')
+        cy.wait('@createUser').its('state').should('eq', 'Errored')
       })
     })
   })

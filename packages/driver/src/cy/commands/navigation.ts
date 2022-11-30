@@ -17,8 +17,6 @@ const debug = debugFn('cypress:driver:navigation')
 
 let id = null
 let previouslyVisitedLocation: LocationObject | undefined
-let hasVisitedAboutBlank: boolean = false
-let currentlyVisitingAboutBlank: boolean = false
 let knownCommandCausedInstability: boolean = false
 
 const REQUEST_URL_OPTS = 'auth failOnStatusCode retryOnNetworkFailure retryOnStatusCodeFailure retryIntervals method body headers'
@@ -31,14 +29,7 @@ const VISIT_OPTS = 'url log onBeforeLoad onLoad timeout requestTimeout'
 const reset = (test: any = {}) => {
   knownCommandCausedInstability = false
 
-  // continuously reset this
-  // before each test run!
   previouslyVisitedLocation = undefined
-
-  // TODO: clean this up and remove any unnecessary logic
-  hasVisitedAboutBlank = true
-
-  currentlyVisitingAboutBlank = false
 
   id = test.id
 }
@@ -67,14 +58,6 @@ const specifyFileByRelativePath = (url, log) => {
     args: {
       attemptedUrl: url,
     },
-  })
-}
-
-const aboutBlank = (cy, win) => {
-  return new Promise((resolve) => {
-    cy.once('window:load', resolve)
-
-    return $utils.locHref('about:blank', win)
   })
 }
 
@@ -196,20 +179,6 @@ const pageLoading = (bool, Cypress, state) => {
 
 const stabilityChanged = async (Cypress, state, config, stable) => {
   debug('stabilityChanged:', stable)
-  if (currentlyVisitingAboutBlank) {
-    if (stable === false) {
-      // if we're currently visiting about blank
-      // and becoming unstable for the first time
-      // notifiy that we're page loading
-      pageLoading(true, Cypress, state)
-
-      return
-    }
-
-    // else wait until after we finish visiting
-    // about blank
-    return
-  }
 
   // let the world know that the app is page:loading
   pageLoading(!stable, Cypress, state)
@@ -957,7 +926,7 @@ export default (Commands, Cypress, cy, state, config) => {
         return Promise.resolve(win)
       }
 
-      const go = () => {
+      const visit = () => {
         // hold onto our existing url
         const existing = $utils.locExisting()
 
@@ -1182,34 +1151,6 @@ export default (Commands, Cypress, cy, state, config) => {
             })
           })
         })
-      }
-
-      const visit = () => {
-        // REMOVE THIS ONCE GA HITS. Sessions will handle visiting
-        // about blank.
-        // Fixed with: https://github.com/cypress-io/cypress/issues/21471
-        //
-        // if we've visiting for the first time during
-        // a test then we want to first visit about:blank
-        // so that we nuke the previous state. subsequent
-        // visits will not navigate to about:blank so that
-        // our history entries are intact
-        // skip for cross origin spec bridges since they require
-        // session support which already visits
-        // about:blank between tests
-        if (!hasVisitedAboutBlank && !Cypress.isCrossOriginSpecBridge) {
-          hasVisitedAboutBlank = true
-          currentlyVisitingAboutBlank = true
-
-          return aboutBlank(cy, win)
-          .then(() => {
-            currentlyVisitingAboutBlank = false
-
-            return go()
-          })
-        }
-
-        return go()
       }
 
       return visit()
