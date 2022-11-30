@@ -1,5 +1,10 @@
 process.title = 'Cypress: Config Manager'
 
+const v8 = require('node:v8')
+
+console.log(process.env.NODE_OPTIONS) // eslint-disable-line no-console
+console.log(v8.getHeapStatistics()) // eslint-disable-line no-console
+
 require('../../util/suppress_warnings').suppress()
 
 process.on('disconnect', () => {
