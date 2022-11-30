@@ -1173,7 +1173,7 @@ export default {
 
   network_logs: {
     docsUrl: 'https://on.cypress.io/request-logs',
-    filter_must_be_function: ({ filterFn }) => `RequestLogs.filter should be set to a function, but a ${typeof filterFn} was passed.`,
+    filter_must_be_function: ({ filterFn }) => `RequestLogs.filter should be set to a function, but you tried to assign ${format(filterFn)}.`,
   },
 
   ng: {
