@@ -114,7 +114,7 @@ video | Problems with video recordings | [open](https://github.com/cypress-io/cy
 ## Writing Documentation
 
 Cypress documentation lives in a separate repository with its own dependencies and build tools.
-See [Documentation Contributing Guideline](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
+See [Documentation Contributing Guidelines](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
 
 ## Writing code
 
