@@ -44,6 +44,14 @@ export class BrowserActions {
     await this.browserApi.focusActiveBrowserWindow()
   }
 
+  resetFocusIfMacOS () {
+    if (this.ctx.util.isMac) {
+      this.ctx.actions.electron.showBrowserWindow()
+      this.ctx.actions.electron.hideBrowserWindow()
+      this.focusActiveBrowserWindow()
+    }
+  }
+
   async relaunchBrowser () {
     await this.browserApi.relaunchBrowser()
   }

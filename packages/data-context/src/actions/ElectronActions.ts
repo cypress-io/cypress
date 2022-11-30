@@ -18,12 +18,8 @@ export interface ElectronApiShape {
 export class ElectronActions {
   constructor (private ctx: DataContext) { }
 
-  private get electron () {
+  get electron () {
     return this.ctx.coreData.electron
-  }
-
-  private get isMac () {
-    return os.platform() === 'darwin'
   }
 
   setElectronApp (app: App) {
@@ -34,10 +30,14 @@ export class ElectronActions {
     this.electron.browserWindow = window
   }
 
+  hideBrowserWindow () {
+    this.electron.browserWindow?.hide()
+  }
+
   showBrowserWindow () {
     this.electron.browserWindow?.show()
 
-    if (this.isMac) {
+    if (this.ctx.util.isMac) {
       this.ctx.electronApp?.dock.show().catch((e) => {
         this.ctx.logTraceError(e)
       })

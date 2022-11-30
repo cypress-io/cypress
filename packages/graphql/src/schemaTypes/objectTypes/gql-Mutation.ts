@@ -404,7 +404,6 @@ export const mutation = mutationType({
       type: 'Boolean',
       description: 'Sets focus to the active browser window',
       resolve: async (_, args, ctx) => {
-        ctx.actions.electron.showBrowserWindow()
         await ctx.actions.browser.focusActiveBrowserWindow()
 
         return true
