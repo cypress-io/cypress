@@ -1,33 +1,31 @@
 <template>
-  <li
+  <div
     data-cy="test-row"
-    class="flex flex-row items-center py-12px pr-12px pl-16px gap-x-2.5 non-italic text-base text-gray-700 font-normal border-b-gray-100 border-b-1px"
+    class="flex flex-row items-center gap-x-2.5 non-italic text-base text-gray-700 font-normal"
   >
-    <span
-      data-cy="test-title"
+    <li
+      v-for="(titlePart, index) in props.failedTestResult.titleParts"
+      :key="`${titlePart}-${index}`"
+      class="flex flew-row items-center gap-x-2.5"
+      :data-cy="`titleParts-${index}`"
     >
-      {{ testData[0] }}
-    </span>
-    <IconChevronRightSmall
-      size="8"
-      stroke-color="gray-200"
-      fill-color="gray-200"
-    />
-    <span
-      data-cy="test-description"
-    >
-      {{ testData[1] }}
-    </span>
-  </li>
+      {{ titlePart }}
+      <IconChevronRightSmall
+        v-if="(index != props.failedTestResult.titleParts.length - 1)"
+        data-cy="right-chevron"
+        size="8"
+        stroke-color="gray-200"
+        fill-color="gray-200"
+      />
+    </li>
+  </div>
 </template>
 <script lang="ts" setup>
-import { computed } from 'vue'
 import { IconChevronRightSmall } from '@cypress-design/vue-icon'
+import type { TestResults } from './DebugSpec.vue'
 
 const props = defineProps<{
-  failedTest: string[]
+  failedTestResult: TestResults
 }>()
-
-const testData = computed(() => props.failedTest)
 
 </script>

@@ -5,68 +5,65 @@
   >
     <div
       data-cy="debug-spec-item"
-      class="w-full overflow-hidden flex flex-col items-start box-border border-1px rounded"
+      class="w-full overflow-hidden flex flex-col items-start box-border border-t-1px border-x-1px rounded"
     >
-      <ul
+      <div
         data-cy="debug-spec-header"
         class="w-full flex flex-row items-center py-12px bg-gray-50 border-b-1px border-b-gray-100 rounded-t"
       >
-        <li
+        <div
           data-cy="spec-contents"
-          class="flex flex-row px-16px items-center gap-x-2"
+          class="w-full flex flex-row px-16px items-center"
         >
-          <span
+          <div
             data-cy="spec-path"
-            class="w-145 non-italic text-base"
+            class="flex-grow non-italic text-base truncate"
           >
             <span
               class="font-normal text-gray-600"
             >
-              {{ specData.initialPath }}
+              {{ specData.path }}
             </span>
             <span
               class="font-medium text-gray-900"
             >
-              {{ specData.specName.split('.')[0] }}
+              {{ specData.fileName }}
             </span>
             <span
               class="font-normal text-gray-600"
             >
-              {{ "." + specData.specName.split('.').slice(1, specData.specName.length).join('.') }}
+              {{ specData.extension }}
             </span>
-          </span>
-          <button
-            v-if="!disabled"
-            data-cy="run-failures"
-            class="inline-flex gap-x-10px whitespace-nowrap h-8 justify-center items-center
-            isolate rounded border border-gray-100 bg-white non-italic text-sm text-indigo-500 font-medium px-12px"
+          </div>
+          <div
+            class="ml-10px"
           >
-            <IconActionRefresh
-              data-cy="icon-refresh"
-              stroke-color="indigo-500"
-            />
-            Run Failures
-          </button>
-          <button
-            v-else
-            data-cy="run-failures-disabled"
-            class="inline-flex gap-x-10px whitespace-nowrap h-8 justify-center items-center
-            isolate rounded border border-gray-100 bg-white non-italic text-sm text-gray-500 font-medium px-12px"
-            :disabled="disabled"
-          >
-            <IconActionRefresh stroke-color="gray-500" />
-            Run Failures
-          </button>
-        </li>
-      </ul>
+            <Button
+              data-cy="run-failures"
+              variant="white"
+              class="inline-flex gap-x-10px whitespace-nowrap justify-center items-center isolate"
+              :disabled="isDisabled"
+              :to="{ path: '/specs/runner', query: { file: (specData.path + specData.fileName + specData.extension).replace(/\\/g, '/') } }"
+            >
+              <template #prefix>
+                <IconActionRefresh
+                  data-cy="icon-refresh"
+                  stroke-color="indigo-500"
+                />
+              </template>
+              Run Failures
+            </Button>
+          </div>
+        </div>
+      </div>
       <ul
         v-for="test in specData.failedTests"
         :key="`test-${test.id}`"
         data-cy="test-group"
-        class="w-full flex flex-col flex-start h-12"
+        class="w-full flex flex-col flex-start h-12 items-start justify-center pl-16px border-b-gray-100 border-b-1px"
       >
         <DebugFailedTest
-          :failed-test="test.titleParts"
+          :failed-test-result="test"
           :data-cy="`test-${test.id}`"
         />
       </ul>
@@ -87,19 +84,29 @@ export interface TestResults {
 import { computed } from 'vue'
 import { IconActionRefresh } from '@cypress-design/vue-icon'
 import DebugFailedTest from './DebugFailedTest.vue'
+import Button from '@packages/frontend-shared/src/components/Button.vue'
 
 const props = defineProps<{
   spec: Spec
   testResults: TestResults[]
-  disabled?: boolean
+  isDisabled?: boolean
 }>()
 
+/**
+ * @param relativePath: The relative path of a failed test e.g. cypress/test/auth.spec.ts
+ * We split the relative path into 3 pieces and return an object containing this split sections
+ * so we can correctly style the relative path in the debug spec header. For example:
+ * path: cypress/tests/ ; fileName: auth ; extension: .spec.ts
+ */
 const splitHeader = (relativePath: string) => {
   const before = relativePath.split('/')
+  const specName = before.slice(-1)[0]
+  const splitSpecName = specName.split('.')
 
   return {
-    initialPath: `${before.slice(0, before.length - 1).join('/') }/`,
-    specName: before.slice(-1)[0],
+    path: `${before.slice(0, before.length - 1).join('/') }/`,
+    fileName: splitSpecName[0],
+    extension: `.${ splitSpecName.slice(1, specName.length).join('.')}`,
   }
 }
 

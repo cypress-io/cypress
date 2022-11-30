@@ -1,20 +1,38 @@
 import DebugFailedTest from './DebugFailedTest.vue'
 
-describe('<DebugSpec/>', () => {
+describe('<DebugFailedTest/>', () => {
   it('mounts correctly', () => {
-    const failedTest: string[] = ['App: Runs', 'should fetch newer runs and maintain them when navigating']
+    const testResult = {
+      id: '676df87878',
+      titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
+    }
 
     cy.mount(() => (
-      <DebugFailedTest failedTest={failedTest} />
+      <DebugFailedTest failedTestResult={testResult} />
     ))
 
-    cy.findByTestId('test-row').children().should('have.length', 3)
-    cy.findByTestId('test-title')
-    .should('have.text', 'App: Runs')
-    .should('have.css', 'color', 'rgb(90, 95, 122)')
+    cy.findByTestId('test-row').children().should('have.length', 2).then((ele) => {
+      expect(ele).to.have.css('color', 'rgb(90, 95, 122)')
+    })
 
-    cy.findByTestId('test-description')
-    .should('have.text', 'should fetch newer runs and maintain them when navigating')
-    .should('have.css', 'color', 'rgb(90, 95, 122)')
+    testResult.titleParts.forEach((title, index) => {
+      cy.findByTestId(`titleParts-${index}`).should('have.text', `${title } `)
+    })
+  })
+
+  it('contains multiple titleParts segments', () => {
+    const multipleTitleParts = {
+      id: '676df87878',
+      titleParts: ['Login', 'Describe', 'it', 'context', 'Should redirect unauthenticated user to signin page'],
+    }
+
+    cy.mount(() => (
+      <DebugFailedTest failedTestResult={multipleTitleParts} />
+    ))
+
+    cy.findByTestId('test-row').children().should('have.length', 5).should('be.visible')
+    multipleTitleParts.titleParts.forEach((title, index) => {
+      cy.findByTestId(`titleParts-${index}`).should('have.text', `${title } `)
+    })
   })
 })
