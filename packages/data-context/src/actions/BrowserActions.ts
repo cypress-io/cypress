@@ -48,7 +48,7 @@ export class BrowserActions {
     if (this.ctx.util.isMac) {
       this.ctx.actions.electron.showBrowserWindow()
       this.ctx.actions.electron.hideBrowserWindow()
-      this.focusActiveBrowserWindow()
+      this.focusActiveBrowserWindow().catch(this.ctx.onError)
     }
   }
 
