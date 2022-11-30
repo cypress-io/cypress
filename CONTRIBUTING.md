@@ -112,7 +112,7 @@ video | Problems with video recordings | [open](https://github.com/cypress-io/cy
 
 
 ## Writing Documentation
-
+ 
 Cypress documentation lives in a separate repository with its own dependencies and build tools.
 See [Documentation Contributing Guidelines](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
 
@@ -164,7 +164,7 @@ Here is a list of the core packages in this repository with a short description,
  | [ts](./packages/ts)                   | `@packages/ts`          | A centralized version of typescript.                                         |
  | [types](./packages/types)             | `@packages/types`          | The shared internal Cypress types.                                         |
  | [v8-snapshot-require](./packages/v8-snapshot-require) | `@packages/v8-snapshot-requie` | Tool to load a snapshot for Electron applications that was created by `@tooling/v8-snapshot`. |
- | [web-config](./packages/web-config)             | `@packages/ui-components`          | The web-related configuration.                                         |
+ | [web-config](./packages/web-config)             | `@packages/web-config`          | The web-related configuration.                                         |
 
 Private packages involved in development of the app live within the [`tooling`](./tooling) directory and are in the `@tooling/` namespace. They are discrete modules with different responsibilities, but each is necessary for development of the Cypress app and is not necessarily useful outside of the Cypress app.
 
