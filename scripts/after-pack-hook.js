@@ -7,7 +7,7 @@ const path = require('path')
 const { setupV8Snapshots } = require('@tooling/v8-snapshot')
 const { flipFuses, FuseVersion, FuseV1Options } = require('@electron/fuses')
 const { cleanup } = require('./binary/binary-cleanup')
-const { getIntegrityCheckSource } = require('./binary/binary-integrity-check')
+const { getIntegrityCheckSource, getBinaryEntryPointSource } = require('./binary/binary-sources')
 
 module.exports = async function (params) {
   console.log('****************************')
@@ -56,26 +56,7 @@ module.exports = async function (params) {
   }
 
   if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE)) {
-    await fs.writeFile(path.join(outputFolder, 'index.js'), `const Module = require('module')
-const path = require('path')
-
-process.env.CYPRESS_INTERNAL_ENV = process.env.CYPRESS_INTERNAL_ENV || 'production'
-try {
-  require('./node_modules/bytenode/lib/index.js')
-  const filename = path.join(__dirname, 'packages', 'server', 'index.jsc')
-  Module._extensions['.jsc']({
-    require: module.require,
-    id: filename,
-    filename,
-    loaded: false,
-    path: path.dirname(filename),
-    paths: Module._nodeModulePaths(path.dirname(filename))
-  }, filename)
-} catch (error) {
-  console.error(error)
-  process.exit(1)
-} 
-`)
+    await fs.writeFile(path.join(outputFolder, 'index.js'), getBinaryEntryPointSource())
 
     await flipFuses(
       exePathPerPlatform[os.platform()],

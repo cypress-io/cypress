@@ -201,7 +201,7 @@ const runV8SnapshotProjectTest = function (buildAppExecutable, e2e) {
   return spawn()
 }
 
-const runErroringProjectTest = function (buildAppExecutable, e2e) {
+const runErroringProjectTest = function (buildAppExecutable, e2e, testName) {
   if (shouldSkipProjectTest()) {
     console.log('skipping project test')
 
@@ -235,7 +235,7 @@ const runErroringProjectTest = function (buildAppExecutable, e2e) {
     return cp.spawn(buildAppExecutable, args, options)
     .on('exit', (code) => {
       if (code === 0) {
-        return reject(new Error('running project tests should have failed'))
+        return reject(new Error(`running project tests should have failed for test: ${testName}`))
       }
 
       return resolve()
@@ -250,17 +250,33 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
     return
   }
 
-  const testFile = async (file) => {
+  const testCorruptingFile = async (file) => {
     const contents = await fs.readFile(file)
 
     await fs.writeFile(file, `console.log('modified code')\n${contents}`)
-    await runErroringProjectTest(buildAppExecutable, e2e)
+    await runErroringProjectTest(buildAppExecutable, e2e, `corrupting ${file}`)
     await fs.writeFile(file, contents)
   }
 
-  await testFile(path.join(buildAppDir, 'index.js'))
-  await testFile(path.join(buildAppDir, 'packages', 'server', 'index.jsc'))
-  await testFile(path.join(buildAppDir, 'node_modules', 'bytenode', 'lib', 'index.js'))
+  await testCorruptingFile(path.join(buildAppDir, 'index.js'))
+  await testCorruptingFile(path.join(buildAppDir, 'packages', 'server', 'index.jsc'))
+  await testCorruptingFile(path.join(buildAppDir, 'node_modules', 'bytenode', 'lib', 'index.js'))
+
+  const testAlteringEntryPoint = async (additionalCode) => {
+    const packageJsonContents = await fs.readJSON(path.join(buildAppDir, 'package.json'))
+
+    await fs.writeJSON(path.join(buildAppDir, 'package.json'), {
+      ...packageJsonContents,
+      main: 'index2.js',
+    })
+
+    await fs.writeFile(path.join(buildAppDir, 'index2.js'), `${additionalCode}\nrequire("./index.js")`)
+    await runErroringProjectTest(buildAppExecutable, e2e, 'altering entry point')
+    await fs.writeJson(path.join(buildAppDir, 'package.json'), packageJsonContents)
+    await fs.remove(path.join(buildAppDir, 'index2.js'))
+  }
+
+  await testAlteringEntryPoint('console.log(global.getSnapshotResult())')
 }
 
 const test = async function (buildAppExecutable, buildAppDir) {

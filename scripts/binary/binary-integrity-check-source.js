@@ -1,5 +1,7 @@
 const OrigError = Error
 const captureStackTrace = Error.captureStackTrace
+const toString = Function.prototype.toString
+const callFn = Function.call
 
 // eslint-disable-next-line no-unused-vars
 const stackIntegrityCheck = function stackIntegrityCheck (options) {
@@ -36,34 +38,40 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
   }
 }
 
+function validateToString () {
+  if (toString.call !== callFn) {
+    throw new Error('Integrity check failed for toString.call')
+  }
+}
+
 function validateElectron (electron) {
-  if (electron.app.getAppPath.toString() !== 'function getAppPath() { [native code] }') {
+  if (toString.call(electron.app.getAppPath) !== 'function getAppPath() { [native code] }') {
     throw new Error(`Integrity check failed for electron.app.getAppPath.toString()`)
   }
 }
 
 function validateFs (fs) {
-  if (fs.readFileSync.toString() !== `function(t,r){const n=splitPath(t);if(!n.isAsar)return g.apply(this,arguments);const{asarPath:i,filePath:a}=n,o=getOrCreateArchive(i);if(!o)throw createError("INVALID_ARCHIVE",{asarPath:i});const c=o.getFileInfo(a);if(!c)throw createError("NOT_FOUND",{asarPath:i,filePath:a});if(0===c.size)return r?"":s.Buffer.alloc(0);if(c.unpacked){const t=o.copyFileOut(a);return e.readFileSync(t,r)}if(r){if("string"==typeof r)r={encoding:r};else if("object"!=typeof r)throw new TypeError("Bad arguments")}else r={encoding:null};const{encoding:f}=r,l=s.Buffer.alloc(c.size),u=o.getFdAndValidateIntegrityLater();if(!(u>=0))throw createError("NOT_FOUND",{asarPath:i,filePath:a});return logASARAccess(i,a,c.offset),e.readSync(u,l,0,c.size,c.offset),validateBufferIntegrity(l,c.integrity),f?l.toString(f):l}`) {
+  if (toString.call(fs.readFileSync) !== `function(t,r){const n=splitPath(t);if(!n.isAsar)return g.apply(this,arguments);const{asarPath:i,filePath:a}=n,o=getOrCreateArchive(i);if(!o)throw createError("INVALID_ARCHIVE",{asarPath:i});const c=o.getFileInfo(a);if(!c)throw createError("NOT_FOUND",{asarPath:i,filePath:a});if(0===c.size)return r?"":s.Buffer.alloc(0);if(c.unpacked){const t=o.copyFileOut(a);return e.readFileSync(t,r)}if(r){if("string"==typeof r)r={encoding:r};else if("object"!=typeof r)throw new TypeError("Bad arguments")}else r={encoding:null};const{encoding:f}=r,l=s.Buffer.alloc(c.size),u=o.getFdAndValidateIntegrityLater();if(!(u>=0))throw createError("NOT_FOUND",{asarPath:i,filePath:a});return logASARAccess(i,a,c.offset),e.readSync(u,l,0,c.size,c.offset),validateBufferIntegrity(l,c.integrity),f?l.toString(f):l}`) {
     throw new Error(`Integrity check failed for fs.readFileSync.toString()`)
   }
 }
 
 function validatePath (path) {
-  if (path.join.toString() !== `PATH_JOIN_TO_STRING`) {
+  if (toString.call(path.join) !== `PATH_JOIN_TO_STRING`) {
     throw new Error(`Integrity check failed for path.join.toString()`)
   }
 }
 
 function validateCrypto (crypto) {
-  if (crypto.createHmac.toString() !== `CRYPTO_CREATE_HMAC_TO_STRING`) {
+  if (toString.call(crypto.createHmac) !== `CRYPTO_CREATE_HMAC_TO_STRING`) {
     throw new Error(`Integrity check failed for crypto.createHmac.toString()`)
   }
 
-  if (crypto.Hmac.prototype.update.toString() !== `CRYPTO_HMAC_UPDATE_TO_STRING`) {
+  if (toString.call(crypto.Hmac.prototype.update) !== `CRYPTO_HMAC_UPDATE_TO_STRING`) {
     throw new Error(`Integrity check failed for crypto.Hmac.prototype.update.toString()`)
   }
 
-  if (crypto.Hmac.prototype.digest.toString() !== `CRYPTO_HMAC_DIGEST_TO_STRING`) {
+  if (toString.call(crypto.Hmac.prototype.digest) !== `CRYPTO_HMAC_DIGEST_TO_STRING`) {
     throw new Error(`Integrity check failed for crypto.Hmac.prototype.digest.toString()`)
   }
 }
@@ -76,6 +84,7 @@ function fileIntegrityCheck (options) {
   const path = require('path')
   const crypto = require('crypto')
 
+  validateToString()
   validateElectron(electron)
   validateFs(fs)
   validatePath(path)
