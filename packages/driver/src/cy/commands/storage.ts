@@ -2,6 +2,7 @@ import _ from 'lodash'
 
 import $errUtils from '../../cypress/error_utils'
 import $LocalStorage from '../../cypress/local_storage'
+import { clearStorage, getStorage, StorageType } from './sessions/storage'
 
 type Options = Partial<Cypress.Loggable>
 
@@ -22,7 +23,7 @@ const clearLocalStorage = (state, keys) => {
   return remote
 }
 
-const getAllStorage = async (type: InternalCypress.StorageType, Cypress: InternalCypress.Cypress, userOptions: Options = {}) => {
+const getAllStorage = async (type: StorageType, Cypress: InternalCypress.Cypress, userOptions: Options = {}) => {
   const options: Options = {
     log: true,
     ...userOptions,
@@ -44,7 +45,7 @@ const getAllStorage = async (type: InternalCypress.StorageType, Cypress: Interna
     })
   }
 
-  const storages = await Cypress._session.getStorage({ origin: '*' })
+  const storages = await getStorage(Cypress, { origin: '*' })
 
   storageByOrigin = storages[type].reduce((memo, storage) => {
     memo[storage.origin] = storage.value
@@ -55,7 +56,7 @@ const getAllStorage = async (type: InternalCypress.StorageType, Cypress: Interna
   return storageByOrigin
 }
 
-const clearAllStorage = async (type: InternalCypress.StorageType, Cypress: InternalCypress.Cypress, userOptions: Options = {}) => {
+const clearAllStorage = async (type: StorageType, Cypress: InternalCypress.Cypress, userOptions: Options = {}) => {
   const options: Options = {
     log: true,
     ...userOptions,
@@ -65,7 +66,7 @@ const clearAllStorage = async (type: InternalCypress.StorageType, Cypress: Inter
     Cypress.log({})
   }
 
-  await Cypress._session.clearStorage(type)
+  await clearStorage(Cypress, type)
 
   return null
 }

@@ -63,29 +63,17 @@ declare namespace Cypress {
 
   interface Backend {
     (task: 'cross:origin:cookies:received'): Promise<void>
+    (task: 'get:rendered:html:origins'): Promise<string[]>
   }
 }
 
 declare namespace InternalCypress {
-  interface Cypress extends Cypress.Cypress, NodeEventEmitter {
-    _session: Session
-  }
+  interface Cypress extends Cypress.Cypress, NodeEventEmitter {}
 
   interface LocalStorage extends Cypress.LocalStorage {
     setStorages: (local, remote) => LocalStorage
     unsetStorages: () => LocalStorage
   }
-
-  interface Session extends Cypress.Session {
-    getStorage: (options: StorageOptions) => Promise<Cypress.Storages>
-    clearStorage: (type: StorageType) => Promise<void>
-  }
-
-  interface StorageOptions {
-    origin?: '*' | 'currentOrigin' | string
-  }
-
-  type StorageType = 'localStorage' | 'sessionStorage'
 }
 
 type AliasedRequest = {
