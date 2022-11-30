@@ -211,6 +211,10 @@ export = {
 
     options.onBrowserOpen()
     ctx?.browser.setBrowserStatus('open')
+
+    // work around for a focus MacOS specific issue where the
+    // browser is not correctly focused when launched.
+    // https://github.com/cypress-io/cypress/issues/21743
     ctx?.actions.browser.resetFocusIfMacOS()
 
     return instance
