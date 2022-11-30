@@ -234,7 +234,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
         // `responseHandler` is a StaticResponse
         validateStaticResponse('req.reply', responseHandler)
 
-        request.setLogFlag?.('stubbed')
+        request.setLogFlag('stubbed')
 
         sendStaticResponse(requestId, responseHandler)
 
@@ -287,7 +287,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     }
 
     if (!_.isEqual(req, reqClone)) {
-      request.setLogFlag?.('reqModified')
+      request.setLogFlag('reqModified')
     }
 
     resolve({
@@ -302,10 +302,19 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     resolve = _resolve
   })
 
-  request.setLogFlag = Cypress.RequestLogs['getFlagSetter'](request, route)
+  // After adding Cypress.RequestLogs to cypress.d.ts, it seems to override the Cypress.RequestLogs declaration
+  // in the driver's internal type instead of merging with it. Since getFlagSetter isn't on the public API, it's
+  // no longer typed when we get here.
+  // @ts-ignore
+  request.setLogFlag = Cypress.RequestLogs.getFlagSetter(request, route)
 
-  // consider a function to be 'spying' until it actually stubs/modifies the response
-  request.setLogFlag?.(!_.isNil(route.handler) && !_.isFunction(route.handler) ? 'stubbed' : 'spied')
+  if (!_.isNil(route.handler) && !_.isFunction(route.handler)) {
+    // a StaticResponse has been passed as the handler, mark as 'stubbed'
+    request.setLogFlag('stubbed')
+  } else {
+    // otherwise, consider the handler to be 'spying' until it actually stubs/modifies the response
+    request.setLogFlag('spied')
+  }
 
   // TODO: this misnomer is a holdover from XHR, should be numRequests
   route.log.set('numResponses', (route.log.get('numResponses') || 0) + 1)

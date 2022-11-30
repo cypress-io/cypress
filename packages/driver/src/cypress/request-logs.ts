@@ -259,14 +259,14 @@ export default class RequestLogs {
   /**
    * Returns a setter which can be used to update the request's log as `cy.intercept()` rules run.
    */
-  getFlagSetter (interception: Interception, route: Route): RequestLog['setFlag'] | undefined {
+  getFlagSetter (interception: Interception, route: Route): RequestLog['setFlag'] {
     let proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === interception.browserRequestId)
 
     if (!proxyRequest) {
-      // a custom `.filter` can cause the proxyRequest to not exist
+      // a custom `.filter` can cause the proxyRequest to not exist, so just return a no-op
       debug('Missing proxyRequest in logInterception %o', { interception, route })
 
-      return
+      return () => {}
     }
 
     proxyRequest.interceptions.push({ interception, route })

@@ -271,7 +271,7 @@ export interface Interception {
   browserRequestId?: string
   routeId: string
   /* @internal */
-  setLogFlag?: (flag: 'spied' | 'stubbed' | 'reqModified' | 'resModified') => void
+  setLogFlag: (flag: 'spied' | 'stubbed' | 'reqModified' | 'resModified') => void
   request: CyHttpMessages.IncomingRequest
   /**
    * Was `cy.wait()` used to wait on this request?
