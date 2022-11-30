@@ -2,6 +2,8 @@ const fs = require('fs')
 const crypto = require('crypto')
 const path = require('path')
 
+const escapeString = (string) => string.replaceAll(`\``, `\\\``).replaceAll(`$`, `\\$`)
+
 function read ({ file, baseDirectory }) {
   const pathToFile = require.resolve(`./${file}`)
   const fileSource = fs.readFileSync(pathToFile, 'utf8')
@@ -16,6 +18,10 @@ function read ({ file, baseDirectory }) {
   .replaceAll('BYTENODE_HASH', bytenodeHash)
   .replaceAll('INDEX_JSC_HASH', indexJscHash)
   .replaceAll('HMAC_SECRET', secret)
+  .replaceAll('PATH_JOIN_TO_STRING', escapeString(path.join.toString()))
+  .replaceAll('CRYPTO_CREATE_HMAC_TO_STRING', escapeString(crypto.createHmac.toString()))
+  .replaceAll('CRYPTO_HMAC_UPDATE_TO_STRING', escapeString(crypto.Hmac.prototype.update.toString()))
+  .replaceAll('CRYPTO_HMAC_DIGEST_TO_STRING', escapeString(crypto.Hmac.prototype.digest.toString()))
 }
 
 const getIntegrityCheckSource = (baseDirectory) => {

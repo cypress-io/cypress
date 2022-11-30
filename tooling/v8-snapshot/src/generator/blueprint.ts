@@ -188,14 +188,15 @@ function generateSnapshot() {
   return result
 }
 
+let numberOfGetSnapshotResultCalls = 0
 const snapshotResult = generateSnapshot.call({})
 Object.defineProperty(this, 'getSnapshotResult', {
   writable: false,
   value: function () {
-    if (typeof stackIntegrityCheck === 'function') {
-      // eslint-disable-next-line no-undef
-      stackIntegrityCheck({ stackToMatch: ['value', 'snapshotRequire', 'runWithSnapshot', 'hookRequire', 'run'] })
+    if (numberOfGetSnapshotResultCalls > 0) {
+      throw new Error('getSnapshotResult can only be called once')
     }
+    numberOfGetSnapshotResultCalls++
     return snapshotResult
   },
 })

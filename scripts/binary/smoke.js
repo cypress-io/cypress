@@ -201,7 +201,69 @@ const runV8SnapshotProjectTest = function (buildAppExecutable, e2e) {
   return spawn()
 }
 
-const test = async function (buildAppExecutable) {
+const runErroringProjectTest = function (buildAppExecutable, e2e) {
+  if (shouldSkipProjectTest()) {
+    console.log('skipping project test')
+
+    return Promise.resolve()
+  }
+
+  return new Promise((resolve, reject) => {
+    const env = _.omit(process.env, 'CYPRESS_INTERNAL_ENV')
+
+    if (!canRecordVideo()) {
+      console.log('cannot record video on this platform yet, disabling')
+      env.CYPRESS_VIDEO_RECORDING = 'false'
+    }
+
+    const args = [
+      `--run-project=${e2e}`,
+      `--spec=${e2e}/cypress/e2e/simple_passing.cy.js`,
+    ]
+
+    if (verify.needsSandbox()) {
+      args.push('--no-sandbox')
+    }
+
+    const options = {
+      stdio: 'inherit', env,
+    }
+
+    console.log('running project test')
+    console.log(buildAppExecutable, args.join(' '))
+
+    return cp.spawn(buildAppExecutable, args, options)
+    .on('exit', (code) => {
+      if (code === 0) {
+        return reject(new Error('running project tests should have failed'))
+      }
+
+      return resolve()
+    })
+  })
+}
+
+const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
+  if (shouldSkipProjectTest()) {
+    console.log('skipping failing project test')
+
+    return
+  }
+
+  const testFile = async (file) => {
+    const contents = await fs.readFile(file)
+
+    await fs.writeFile(file, `console.log('modified code')\n${contents}`)
+    await runErroringProjectTest(buildAppExecutable, e2e)
+    await fs.writeFile(file, contents)
+  }
+
+  await testFile(path.join(buildAppDir, 'index.js'))
+  await testFile(path.join(buildAppDir, 'packages', 'server', 'index.jsc'))
+  await testFile(path.join(buildAppDir, 'node_modules', 'bytenode', 'lib', 'index.js'))
+}
+
+const test = async function (buildAppExecutable, buildAppDir) {
   await scaffoldCommonNodeModules()
   await Fixtures.scaffoldProject('e2e')
   const e2e = Fixtures.projectPath('e2e')
@@ -209,6 +271,7 @@ const test = async function (buildAppExecutable) {
   await runSmokeTest(buildAppExecutable)
   await runProjectTest(buildAppExecutable, e2e)
   await runFailingProjectTest(buildAppExecutable, e2e)
+  await runIntegrityTest(buildAppExecutable, buildAppDir, e2e)
   if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE)) {
     await runV8SnapshotProjectTest(buildAppExecutable, e2e)
   }

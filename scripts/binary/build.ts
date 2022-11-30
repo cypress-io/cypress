@@ -302,7 +302,7 @@ require('./packages/server/index.js')
 
     const executablePath = meta.buildAppExecutable()
 
-    await smoke.test(executablePath)
+    await smoke.test(executablePath, meta.buildAppDir())
   } finally {
     if (usingXvfb) {
       await xvfb.stop()

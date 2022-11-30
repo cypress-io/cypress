@@ -56,9 +56,27 @@ module.exports = async function (params) {
   }
 
   if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE)) {
-    const indexFileContents = await fs.readFile(path.join(outputFolder, 'index.js'), 'utf8')
+    await fs.writeFile(path.join(outputFolder, 'index.js'), `const Module = require('module')
+const path = require('path')
 
-    await fs.writeFile(path.join(outputFolder, 'index.js'), indexFileContents.replace('server/index.js', 'server/index.jsc'))
+process.env.CYPRESS_INTERNAL_ENV = process.env.CYPRESS_INTERNAL_ENV || 'production'
+try {
+  require('./node_modules/bytenode/lib/index.js')
+  const filename = path.join(__dirname, 'packages', 'server', 'index.jsc')
+  Module._extensions['.jsc']({
+    require: module.require,
+    id: filename,
+    filename,
+    loaded: false,
+    path: path.dirname(filename),
+    paths: Module._nodeModulePaths(path.dirname(filename))
+  }, filename)
+} catch (error) {
+  console.error(error)
+  process.exit(1)
+} 
+`)
+
     await flipFuses(
       exePathPerPlatform[os.platform()],
       {
