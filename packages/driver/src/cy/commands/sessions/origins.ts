@@ -9,7 +9,7 @@ export async function mapOrigins (Cypress: Cypress.Cypress, origins: string | st
       }
 
       if (origin === 'currentOrigin') {
-        return $Location.create(window.location.href).origin
+        return window.location.origin
       }
 
       return $Location.create(origin).origin
@@ -20,7 +20,7 @@ export async function mapOrigins (Cypress: Cypress.Cypress, origins: string | st
 }
 
 export async function getAllHtmlOrigins (Cypress: Cypress.Cypress) {
-  const currentOrigin = $Location.create(window.location.href).origin
+  const currentOrigin = window.location.origin
   const storedOrigins = await Cypress.backend('get:rendered:html:origins')
   const origins = [..._.keys(storedOrigins), currentOrigin]
 

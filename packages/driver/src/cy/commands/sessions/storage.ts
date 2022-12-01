@@ -39,10 +39,8 @@ export async function getStorage (Cypress: Cypress.Cypress, options: GetStorageO
     origin: 'currentOrigin',
   })
 
-  const currentOrigin = $Location.create(window.location.href).origin
-
+  const currentOrigin = window.location.origin
   const origins: Array<string> = await mapOrigins(Cypress, opts.origin)
-
   const results = {
     localStorage: [] as Cypress.OriginStorage[],
     sessionStorage: [] as Cypress.OriginStorage[],
@@ -103,7 +101,7 @@ export async function clearStorage (Cypress: Cypress.Cypress, type?: StorageType
 async function setStorageOnOrigins (Cypress: Cypress.Cypress, originOptions) {
   const specWindow = Cypress.state('specWindow')
 
-  const currentOrigin = $Location.create(window.location.href).origin
+  const currentOrigin = window.location.origin
 
   const currentOriginIndex = _.findIndex(originOptions, { origin: currentOrigin })
 
@@ -135,7 +133,7 @@ async function setStorageOnOrigins (Cypress: Cypress.Cypress, originOptions) {
 }
 
 export async function setStorage (Cypress: Cypress.Cypress, options: SetStoragesOptions) {
-  const currentOrigin = $Location.create(window.location.href).origin as string
+  const currentOrigin = window.location.origin
 
   function mapToCurrentOrigin (v) {
     return {
