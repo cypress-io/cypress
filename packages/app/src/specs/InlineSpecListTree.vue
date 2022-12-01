@@ -18,7 +18,7 @@
         relative"
         data-cy="spec-row-item"
         :data-selected-spec="isCurrentSpec(row.data)"
-        @click.self="submit(row.data, row.index)"
+        @click.self="submitOrToggle(row.data, row.index)"
       >
         <RouterLink
           :ref="el => setItemRef(el, row.index)"
@@ -32,8 +32,8 @@
           }"
           :to="{ path: '/specs/runner', query: { file: row.data.data?.relative?.replace(/\\/g, '/') } }"
           @focus="resetFocusIfNecessary(row, row.index)"
-          @click.capture.prevent="submit(row.data, row.index)"
-          @keydown.enter.space.prevent.stop="submit(row.data, row.index)"
+          @click.prevent="submitOrToggle(row.data, row.index)"
+          @keydown.enter.space.prevent.stop="submitOrToggle(row.data, row.index, $event)"
           @keydown.left.right.prevent.stop="toggle(row.data, row.index)"
         >
           <SpecFileItem
@@ -124,7 +124,16 @@ const toggle = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, idx: 
   row.toggle()
 }
 
-const submit = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, idx: number) => {
+const submitOrToggle = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, idx: number, event?: KeyboardEvent) => {
+  if (event) {
+    const target = event.target as HTMLElement
+
+    if (target?.closest('[data-run-all-specs-button]')) {
+    // event was fired from a button inside the row, do nothing up here
+      return
+    }
+  }
+
   // If the user selects a new spec while in studio mode, turn studio mode off
   const studioStore = useStudioStore()
 

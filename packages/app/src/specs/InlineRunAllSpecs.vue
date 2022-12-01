@@ -6,6 +6,7 @@
     <button
       class="flex h-full w-full items-center justify-center"
       data-cy="run-all-specs-button"
+      data-run-all-specs-button
       :disabled="specNumber === 0"
       @click.stop="emits('runAllSpecs')"
     >
@@ -48,4 +49,5 @@ defineProps<{
 const emits = defineEmits<{
   (event: 'runAllSpecs'): void
 }>()
+
 </script>
