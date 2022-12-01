@@ -36,7 +36,7 @@
               </p>
 
               <h2 class="font-bold text-18px text-jade-1000">
-                Testing Multi-Origin WorkFlows
+                Testing Multi-Origin Workflows
               </h2>
 
               <p>
