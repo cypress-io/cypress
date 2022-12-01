@@ -56,15 +56,10 @@
             >
           </div>
           <div
-            class="font-medium pt-2 text-18px leading-28px"
+            class="font-medium pt-2 text-18px leading-28px truncate "
             :class="checked ? 'text-jade-600' : ( browser.disabled || !browser.isVersionSupported ) ? 'text-gray-500' : 'text-indigo-600'"
           >
-            {{
-              truncateString({
-                strToTruncate: browser.displayName,
-                maxLength: 16,
-              })
-            }}
+            {{ browser.displayName }}
           </div>
           <div class="text-gray-500 text-14px leading-20px">
             v{{ browser.majorVersion }}
@@ -172,7 +167,6 @@ import StatusRunningIcon from '~icons/cy/status-running_x16'
 import { RadioGroup, RadioGroupOption, RadioGroupLabel } from '@headlessui/vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import sortBrowsers from '@packages/frontend-shared/src/utils/sortBrowsers'
-import truncateString from '@packages/frontend-shared/src/utils/truncateString'
 
 import type { OpenBrowserListFragment } from '../generated/graphql'
 import { OpenBrowserList_SetBrowserDocument, OpenBrowserList_BrowserStatusChangeDocument } from '../generated/graphql'
