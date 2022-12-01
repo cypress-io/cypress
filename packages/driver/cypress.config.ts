@@ -18,6 +18,7 @@ export default defineConfig({
     configFile: '../../mocha-reporter-config.json',
   },
   e2e: {
+    experimentalOriginDependencies: true,
     setupNodeEvents: (on, config) => {
       return require('./cypress/plugins')(on, config)
     },
