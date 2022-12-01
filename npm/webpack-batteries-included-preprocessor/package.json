@@ -4,7 +4,8 @@
   "description": "Cypress preprocessor for bundling JavaScript via webpack with dependencies included and support for various ES features, TypeScript, and CoffeeScript",
   "private": false,
   "scripts": {
-    "test": "mocha test/e2e/*.spec.* --timeout 4000"
+    "test": "mocha test/e2e/*.spec.* --timeout 4000",
+    "lint": "eslint --ext .js,.ts,.json, ."
   },
   "dependencies": {
     "@babel/core": "^7.11.1",

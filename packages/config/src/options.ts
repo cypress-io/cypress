@@ -205,6 +205,11 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     isExperimental: true,
     requireRestartOnChange: 'server',
   }, {
+    name: 'experimentalRunAllSpecs',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+  }, {
     // TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
     name: 'experimentalSessionAndOrigin',
     defaultValue: false,
@@ -690,6 +695,11 @@ export const breakingRootOptions: Array<BreakingOption> = [
     errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
     isWarning: false,
     testingTypes: ['e2e'],
+  }, {
+    name: 'experimentalRunAllSpecs',
+    errorKey: 'EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY',
+    isWarning: false,
+    testingTypes: ['e2e'],
   },
 ]
 
@@ -728,6 +738,12 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
       name: 'testIsolation',
       errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
       isWarning: false,
+    },
+    {
+      name: 'experimentalRunAllSpecs',
+      errorKey: 'EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY',
+      isWarning: false,
+      testingTypes: ['component'],
     },
   ],
 }

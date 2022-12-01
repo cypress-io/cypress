@@ -119,7 +119,7 @@ export class ProjectConfigIpc extends EventEmitter {
   loadConfig (): Promise<LoadConfigReply> {
     return new Promise((resolve, reject) => {
       if (this._childProcess.stdout && this._childProcess.stderr) {
-        // manually pipe plugin stdout and stderr for dashboard capture
+        // manually pipe plugin stdout and stderr for Cypress Cloud capture
         // @see https://github.com/cypress-io/cypress/issues/7434
         this._childProcess.stdout.on('data', (data) => process.stdout.write(data))
         this._childProcess.stderr.on('data', (data) => process.stderr.write(data))

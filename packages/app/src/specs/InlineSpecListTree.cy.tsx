@@ -1,7 +1,7 @@
-import type { FuzzyFoundSpec } from './spec-utils'
 import { ref } from 'vue'
 import { useSpecStore } from '../store'
 import InlineSpecListTree from './InlineSpecListTree.vue'
+import type { FuzzyFoundSpec } from './tree/useCollapsibleTree'
 
 describe('InlineSpecListTree', () => {
   let foundSpecs: FuzzyFoundSpec[]

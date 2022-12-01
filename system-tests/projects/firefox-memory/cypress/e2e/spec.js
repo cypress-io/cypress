@@ -70,7 +70,7 @@ describe('memory leak finder', function () {
     context('social login buttons', function () {
       Cypress._.times(NUM_TESTS, (n) => {
         it(`test #${n + 1}: displays login button on route visit`, function () {
-          cy.visit('https://dashboard.cypress.io/login')
+          cy.visit('https://cloud.cypress.io/login')
           cy.contains('Log In with GitHub')
           // cy.wait(2000)
         })
