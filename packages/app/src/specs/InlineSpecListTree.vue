@@ -55,12 +55,11 @@
           >
             <template #run-all-specs>
               <InlineRunAllSpecs
-                v-if="isRunAllSpecsAllowed"
-                data-cy="run-all-specs"
+                v-if="runAllSpecsStore.isRunAllSpecsAllowed"
                 :directory="row.data.name"
-                class="opacity-0 run-all"
-                :spec-number="directoryChildren[row.data.id].length"
-                @runAllSpecs="onRunAllSpecs(row.data.id)"
+                class="flex h-full opacity-0 run-all justify-center items-center"
+                :spec-number="runAllSpecsStore.directoryChildren[row.data.id].length"
+                @runAllSpecs="() => runAllSpecsStore.runSelectedSpecs(row.data.id)"
               />
             </template>
           </DirectoryItem>
@@ -81,7 +80,7 @@ import { useVirtualList } from './tree/useVirtualList'
 import { useVirtualListNavigation } from './tree/useVirtualListNavigation'
 import { useStudioStore } from '../store/studio-store'
 import InlineRunAllSpecs from './InlineRunAllSpecs.vue'
-import { useRunAllSpecs } from '../composables/useRunAllSpecs'
+import { useRunAllSpecsStore } from '../store/run-all-specs-store'
 
 const props = defineProps<{
   specs: FuzzyFoundSpec[]
@@ -166,11 +165,11 @@ const resetFocusIfNecessary = (row, index) => {
   }
 }
 
-const { runAllSpecs, isRunAllSpecsAllowed, directoryChildren } = useRunAllSpecs(collapsible)
+const runAllSpecsStore = useRunAllSpecsStore()
 
-function onRunAllSpecs (rowId: string) {
-  runAllSpecs(directoryChildren.value[rowId])
-}
+watch(collapsible, () => {
+  runAllSpecsStore.setRunAllSpecsData(collapsible.value.tree)
+}, { immediate: true })
 
 </script>
 
