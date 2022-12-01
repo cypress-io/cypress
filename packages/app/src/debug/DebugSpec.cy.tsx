@@ -26,7 +26,7 @@ describe('<DebugSpec/> with multiple test results', () => {
     cy.findByTestId('debug-spec-item').children().should('have.length', 3)
     cy.findByTestId('spec-contents').children().should('have.length', 2)
     cy.findByTestId('spec-path').should('have.text', 'cypress/tests/auth.spec.ts')
-    cy.contains('auth').should('have.css', 'color', 'rgb(46, 50, 71)')
+    cy.contains('auth').should('have.css', 'color', 'rgb(67, 72, 97)')
     cy.findByTestId('run-failures').should('not.be.disabled')
     .should('have.text', ' Run Failures ')
     .should('have.css', 'color', 'rgb(73, 86, 227)')
@@ -72,7 +72,7 @@ describe('<DebugSpec/> responsive UI', () => {
 
     cy.findByTestId('spec-contents').children().should('have.length', 2)
     cy.findByTestId('spec-path').should('have.text', 'cypress/tests/AlertBar.spec.ts')
-    cy.contains('AlertBar').should('have.css', 'color', 'rgb(46, 50, 71)')
+    cy.contains('AlertBar').should('have.css', 'color', 'rgb(67, 72, 97)')
     cy.findByTestId('run-failures').should('be.visible')
 
     cy.percySnapshot()

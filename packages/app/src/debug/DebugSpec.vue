@@ -25,17 +25,16 @@
               {{ specData.path }}
             </span>
             <span
-              class="font-medium text-gray-900"
+              class="inline-flex items-center"
             >
-              {{ specData.fileName }}
-            </span>
-            <span
-              class="font-normal text-gray-600"
-            >
-              {{ specData.extension }}
+              <SpecNameDisplay
+                :spec-file-name="specData.fileName"
+                :spec-file-extension="specData.extension"
+              />
             </span>
           </div>
           <div
+            type="button"
             class="ml-10px"
           >
             <Button
@@ -43,7 +42,7 @@
               variant="white"
               class="inline-flex gap-x-10px whitespace-nowrap justify-center items-center isolate"
               :disabled="isDisabled"
-              :to="{ path: '/specs/runner', query: { file: (specData.path + specData.fileName + specData.extension).replace(/\\/g, '/') } }"
+              :to="{ path: '/specs/runner', query: { file: (spec.path).replace(/\\/g, '/') } }"
             >
               <template #prefix>
                 <IconActionRefresh
@@ -85,6 +84,7 @@ import { computed } from 'vue'
 import { IconActionRefresh } from '@cypress-design/vue-icon'
 import DebugFailedTest from './DebugFailedTest.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
+import SpecNameDisplay from '../specs/SpecNameDisplay.vue'
 
 const props = defineProps<{
   spec: Spec
