@@ -149,7 +149,7 @@ const cleanup = async (buildAppDir) => {
   // but for now, we just track on the dependencies that get pulled in
   const keptDependencies = [...await getDependencyPathsToKeep(buildAppDir), 'package.json']
 
-  // 2. Gather the dependencies that could potentially be removed from the binary due to being in the snapshot
+  // 2. Create the entry point bundle and then gather the dependencies that could potentially be removed from the binary due to being in the snapshot or in the entry point bundle
   const potentiallyRemovedDependencies = [
     ...snapshotMetadata.healthy,
     ...snapshotMetadata.deferred,
