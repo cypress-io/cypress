@@ -33,7 +33,7 @@ The content is bundled with the launchpad and at the time of writing it lives in
 
 A constant named `MAJOR_VERSION_FOR_CONTENT` defines which major version the content is associated with for the purposes of recording user dismissal in persisted state. This needs to be bumped to match the major version that will be going out, since that value is the key that records the dismissal.
 
-All changes to the content itself, and to the `MAJOR_VERSION_FOR_CONTENT`, must be made as Pull Requests into the `release` branch for that major version, not merged directly to develop. A new Major Version Landing page is considered a "breaking change" that shouldn't be on `develop`, since it would be incorrect if we released a patch and users started to see a Welcome Screen for the next major. 
+All changes to the content itself, and to the `MAJOR_VERSION_FOR_CONTENT`, must be made as Pull Requests into the `release/x.x.x` branch for that major version, not merged directly to develop. A new Major Version Landing page is considered a "breaking change" that shouldn't be on `develop`, since it would be incorrect if we released a patch and users started to see a Welcome Screen for the next major. 
 
 ## Building
 
