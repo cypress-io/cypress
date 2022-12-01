@@ -26,6 +26,8 @@ describe('<Button />', { viewportWidth: 300, viewportHeight: 400 }, () => {
         <Button variant="text" disabled>Text with text disabled</Button>
         <Button variant="secondary">Secondary with text</Button>
         <Button variant="secondary" disabled>Secondary with text disabled</Button>
+        <Button variant="white" size="md">White with text</Button>
+        <Button variant="white" size="md" disabled>White with text disabled</Button>
       </div>
     ))
 
