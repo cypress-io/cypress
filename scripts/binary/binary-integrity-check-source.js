@@ -74,6 +74,14 @@ function validateCrypto (crypto) {
   }
 }
 
+function validateFile ({ filePath, crypto, fs, expectedHash, errorMessage }) {
+  const hash = crypto.createHmac('md5', 'HMAC_SECRET').update(fs.readFileSync(filePath, 'utf8')).digest('hex')
+
+  if (hash !== expectedHash) {
+    throw new Error(errorMessage)
+  }
+}
+
 // eslint-disable-next-line no-unused-vars
 function integrityCheck (options) {
   const require = options.require
@@ -81,6 +89,7 @@ function integrityCheck (options) {
   const fs = require('fs')
   const crypto = require('crypto')
 
+  // 1. Validate that the native functions we are using haven't been tampered with
   validateToString()
   validateElectron(electron)
   validateFs(fs)
@@ -88,6 +97,7 @@ function integrityCheck (options) {
 
   const appPath = electron.app.getAppPath()
 
+  // 2. Validate that the stack trace is what we expect
   stackIntegrityCheck({ stackToMatch:
     [
       {
@@ -128,24 +138,31 @@ function integrityCheck (options) {
     ],
   })
 
-  // eslint-disable-next-line no-undef
-  const mainIndexHash = crypto.createHmac('md5', 'HMAC_SECRET').update(fs.readFileSync([appPath, 'index.js'].join(PATH_SEP), 'utf8')).digest('hex')
+  // 3. Validate the three pieces of the entry point: the main index file, the bundled jsc file, and the bytenode node module
+  validateFile({
+    // eslint-disable-next-line no-undef
+    filePath: [appPath, 'index.js'].join(PATH_SEP),
+    crypto,
+    fs,
+    expectedHash: 'MAIN_INDEX_HASH',
+    errorMessage: 'Error: Integrity check failed for main index.js file',
+  })
 
-  if (mainIndexHash !== 'MAIN_INDEX_HASH') {
-    throw new Error(`Integrity check failed for main index.js file`)
-  }
+  validateFile({
+    // eslint-disable-next-line no-undef
+    filePath: [appPath, 'node_modules', 'bytenode', 'lib', 'index.js'].join(PATH_SEP),
+    crypto,
+    fs,
+    expectedHash: 'BYTENODE_HASH',
+    errorMessage: 'Error: Integrity check failed for main bytenode.js file',
+  })
 
-  // eslint-disable-next-line no-undef
-  const bytenodeHash = crypto.createHmac('md5', 'HMAC_SECRET').update(fs.readFileSync([appPath, 'node_modules', 'bytenode', 'lib', 'index.js'].join(PATH_SEP), 'utf8')).digest('hex')
-
-  if (bytenodeHash !== 'BYTENODE_HASH') {
-    throw new Error(`Integrity check failed for main bytenode.js file`)
-  }
-
-  // eslint-disable-next-line no-undef
-  const indexJscHash = crypto.createHmac('md5', 'HMAC_SECRET').update(fs.readFileSync([appPath, 'packages', 'server', 'index.jsc'].join(PATH_SEP), 'utf8')).digest('hex')
-
-  if (indexJscHash !== 'INDEX_JSC_HASH') {
-    throw new Error(`Integrity check failed for main server index.jsc file`)
-  }
+  validateFile({
+    // eslint-disable-next-line no-undef
+    filePath: [appPath, 'packages', 'server', 'index.jsc'].join(PATH_SEP),
+    crypto,
+    fs,
+    expectedHash: 'INDEX_JSC_HASH',
+    errorMessage: 'Error: Integrity check failed for main server index.jsc file',
+  })
 }

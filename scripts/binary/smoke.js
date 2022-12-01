@@ -239,7 +239,7 @@ const runErroringProjectTest = function (buildAppExecutable, e2e, testName, erro
       }
 
       if (!errorOutput.includes(errorMessage)) {
-        return reject(new Error(`running project tests failed with errors but did not include the expected error message: '${errorMessage}'`))
+        return reject(new Error(`running project tests failed with errors: ${errorOutput} but did not include the expected error message: '${errorMessage}'`))
       }
 
       return resolve()
