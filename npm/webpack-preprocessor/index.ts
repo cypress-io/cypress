@@ -163,7 +163,7 @@ interface WebpackPreprocessor extends WebpackPreprocessorFn {
 const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): FilePreprocessor => {
   debug('user options: %o', options)
 
-  // let crossOriginCallbackLoaderAdded = false
+  let crossOriginCallbackLoaderAdded = false
 
   // we return function that accepts the arguments provided by
   // the event 'file:preprocessor'
@@ -243,21 +243,22 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
     const callbackReplacementCommands = global.__cypressCallbackReplacementCommands
 
-    // if (!crossOriginCallbackLoaderAdded && !!callbackReplacementCommands) {
-    //   // webpack runs loaders last-to-first and we want ours to run last
-    //   // so that it's working with plain javascript
-    //   webpackOptions.module.rules.unshift({
-    //     test: /\.(js|ts|jsx|tsx)$/,
-    //     use: [{
-    //       loader: require.resolve('@cypress/webpack-preprocessor/dist/lib/cross-origin-callback-loader.js'),
-    //       options: {
-    //         commands: callbackReplacementCommands,
-    //       },
-    //     }],
-    //   })
+    if (!crossOriginCallbackLoaderAdded && !!callbackReplacementCommands) {
+      // webpack runs loaders last-to-first and we want ours to run last
+      // so that it's working with plain javascript
+      webpackOptions.module.rules.unshift({
+        test: /\.(js|ts|jsx|tsx)$/,
+        exclude: /node_modules/,
+        use: [{
+          loader: require.resolve('@cypress/webpack-preprocessor/dist/lib/cross-origin-callback-loader.js'),
+          options: {
+            commands: callbackReplacementCommands,
+          },
+        }],
+      })
 
-    //   crossOriginCallbackLoaderAdded = true
-    // }
+      crossOriginCallbackLoaderAdded = true
+    }
 
     debug('webpackOptions: %o', webpackOptions)
     debug('watchOptions: %o', watchOptions)
