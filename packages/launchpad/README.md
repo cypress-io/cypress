@@ -35,6 +35,8 @@ A constant named `MAJOR_VERSION_FOR_CONTENT` defines which major version the con
 
 All changes to the content itself, and to the `MAJOR_VERSION_FOR_CONTENT`, must be made as Pull Requests into the `release/x.x.x` branch for that major version, not merged directly to develop. A new Major Version Landing page is considered a "breaking change" that shouldn't be on `develop`, since it would be incorrect if we released a patch and users started to see a Welcome Screen for the next major. 
 
+Note: release dates displayed on this page are stored in the code, not pulled from npm, with entries in the `versionReleaseDates` computed value. This is so they work offline and render right away without waiting for a network call.
+
 ## Building
 
 ### For development
