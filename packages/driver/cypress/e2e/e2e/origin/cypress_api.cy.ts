@@ -230,7 +230,7 @@ describe('cy.origin Cypress API', { browser: '!webkit' }, () => {
 
     it('throws an error when a user attempts to call Cypress.session.clearAllSavedSessions() inside of cy.origin', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.equal('`Cypress.session.*` methods are not supported in the `cy.switchToDomain()` callback. Consider using them outside of the callback instead.')
+        expect(err.message).to.equal('`Cypress.session.*` methods are not supported in the `cy.origin()` callback. Consider using them outside of the callback instead.')
         expect(err.docsUrl).to.equal('https://on.cypress.io/session-api')
         done()
       })

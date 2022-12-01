@@ -2,6 +2,9 @@ import _ from 'lodash'
 
 import $errUtils from '../../cypress/error_utils'
 import $LocalStorage from '../../cypress/local_storage'
+import { clearStorage, getStorage, StorageType } from './sessions/storage'
+
+type Options = Partial<Cypress.Loggable>
 
 const clearLocalStorage = (state, keys) => {
   const local = window.localStorage
@@ -20,7 +23,55 @@ const clearLocalStorage = (state, keys) => {
   return remote
 }
 
-export default (Commands, Cypress, cy, state) => {
+const getAllStorage = async (type: StorageType, Cypress: InternalCypress.Cypress, userOptions: Options = {}) => {
+  const options: Options = {
+    log: true,
+    ...userOptions,
+  }
+
+  let storageByOrigin: Cypress.StorageByOrigin = {}
+
+  if (options.log) {
+    Cypress.log({
+      consoleProps () {
+        const obj = {}
+
+        if (Object.keys(storageByOrigin).length) {
+          obj['Yielded'] = storageByOrigin
+        }
+
+        return obj
+      },
+    })
+  }
+
+  const storages = await getStorage(Cypress, { origin: '*' })
+
+  storageByOrigin = storages[type].reduce((memo, storage) => {
+    memo[storage.origin] = storage.value
+
+    return memo
+  }, {} as Cypress.StorageByOrigin)
+
+  return storageByOrigin
+}
+
+const clearAllStorage = async (type: StorageType, Cypress: InternalCypress.Cypress, userOptions: Options = {}) => {
+  const options: Options = {
+    log: true,
+    ...userOptions,
+  }
+
+  if (options.log) {
+    Cypress.log({})
+  }
+
+  await clearStorage(Cypress, type)
+
+  return null
+}
+
+export default (Commands, Cypress: InternalCypress.Cypress, cy, state, config) => {
   // TODO: Cypress sessions will clear local storage on its own before each test.
   // Once experimentalSessionAndOrigin is made GA, remove this logic. Leave clearing
   // session data (cookies / local storage / session storage) to reset functionality
@@ -38,7 +89,13 @@ export default (Commands, Cypress, cy, state) => {
   }
 
   Commands.addAll({
-    clearLocalStorage (keys, options: Partial<Cypress.Loggable> = {}) {
+    getAllLocalStorage: getAllStorage.bind(null, 'localStorage', Cypress),
+    getAllSessionStorage: getAllStorage.bind(null, 'sessionStorage', Cypress),
+
+    clearAllLocalStorage: clearAllStorage.bind(null, 'localStorage', Cypress),
+    clearAllSessionStorage: clearAllStorage.bind(null, 'sessionStorage', Cypress),
+
+    clearLocalStorage (keys, options: Options = {}) {
       if (_.isPlainObject(keys)) {
         options = keys
         keys = null
