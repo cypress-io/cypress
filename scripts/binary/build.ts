@@ -260,6 +260,7 @@ require('./packages/server/index.js')
       },
     })
   } catch (e) {
+    console.log(e)
     if (!skipSigning) {
       throw e
     }

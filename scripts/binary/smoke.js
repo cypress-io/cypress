@@ -294,7 +294,7 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
     await runErroringProjectTest(buildAppExecutable, e2e, 'altering entry point', errorMessage)
 
     // Restore original state
-    await fs.move(path.join(buildAppDir, 'package.json'), path.join(buildAppDir, 'package.json.bak'), { overwrite: true })
+    await fs.move(path.join(buildAppDir, 'package.json.bak'), path.join(buildAppDir, 'package.json'), { overwrite: true })
     await fs.remove(path.join(buildAppDir, 'index2.js'))
   }
 
