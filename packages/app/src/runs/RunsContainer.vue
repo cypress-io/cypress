@@ -127,7 +127,11 @@ mutation RunsContainer_FetchNewerRuns(
 
 const currentProject = computed(() => props.gql.currentProject)
 const cloudViewer = computed(() => props.gql.cloudViewer)
-const runs = computed(() => props.gql.currentProject?.cloudProject?.runs?.nodes)
+const runs = computed(() =>{
+ const d = props.gql.currentProject?.cloudProject?.runs?.nodes
+console.log(d)
+ return d
+})
 
 const variables = computed(() => {
   if (currentProject.value?.cloudProject?.__typename === 'CloudProject') {
