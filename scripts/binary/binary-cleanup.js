@@ -116,6 +116,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
 const createServerEntryPointBundle = async (buildAppDir) => {
   const unixBuildAppDir = buildAppDir.split(path.sep).join(path.posix.sep)
   const entryPoints = [path.join(unixBuildAppDir, 'packages/server/index.js')]
+  // Build the binary entry point ignoring anything that happens in the server-entry since that will be in the v8 snapshot
   const esbuildResult = await esbuild.build({
     entryPoints,
     bundle: true,
