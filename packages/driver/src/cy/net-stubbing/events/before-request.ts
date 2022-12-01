@@ -302,11 +302,11 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     resolve = _resolve
   })
 
-  // After adding Cypress.RequestLogs to cypress.d.ts, it seems to override the Cypress.RequestLogs declaration
+  // After adding Cypress.NetworkLogs to cypress.d.ts, it seems to override the Cypress.NetworkLogs declaration
   // in the driver's internal type instead of merging with it. Since getFlagSetter isn't on the public API, it's
   // no longer typed when we get here.
   // @ts-ignore
-  request.setLogFlag = Cypress.RequestLogs.getFlagSetter(request, route)
+  request.setLogFlag = Cypress.NetworkLogs.getFlagSetter(request, route)
 
   if (!_.isNil(route.handler) && !_.isFunction(route.handler)) {
     // a StaticResponse has been passed as the handler, mark as 'stubbed'

@@ -417,7 +417,7 @@ export class Log {
     // dont set back to passed if we've already ended
     if (this.get('ended')) {
       // we do need to trigger the change event since
-      // xhr onLoad and request-logs updateRequestWithResponse can sometimes
+      // xhr onLoad and network-logs updateRequestWithResponse can sometimes
       // happen in a different order and the log data in each is different
       this.fireChangeEvent(this)
 

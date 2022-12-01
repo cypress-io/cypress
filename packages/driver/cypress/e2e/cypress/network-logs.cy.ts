@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 
-describe('Request Logs', () => {
+describe('Network Logs', () => {
   const { _ } = Cypress
 
   const url = '/testFlag'
@@ -122,16 +122,16 @@ describe('Request Logs', () => {
 
   context('with custom filter rules', () => {
     afterEach(() => {
-      Cypress.RequestLogs.filter = undefined
-      Cypress.RequestLogs.showAllIntercepts = true
-      Cypress.RequestLogs.showAllXhrFetch = true
+      Cypress.NetworkLogs.filter = undefined
+      Cypress.NetworkLogs.showAllIntercepts = true
+      Cypress.NetworkLogs.showAllXhrFetch = true
     })
 
     it('can ignore a fetch log and still display xhr logs', async () => {
       // disable default behavior of showing all XHRs and fetches
-      Cypress.RequestLogs.showAllXhrFetch = false
+      Cypress.NetworkLogs.showAllXhrFetch = false
       // set a custom filter to show everything that's not fetch
-      Cypress.RequestLogs.filter = ({ resourceType, matchedIntercept }) => {
+      Cypress.NetworkLogs.filter = ({ resourceType, matchedIntercept }) => {
         expect(matchedIntercept).to.be.false
 
         return resourceType !== 'fetch'
@@ -153,11 +153,11 @@ describe('Request Logs', () => {
 
     it('can ignore an intercept log', () => {
       // disable default behavior of showing all XHRs and fetches
-      Cypress.RequestLogs.showAllXhrFetch = false
+      Cypress.NetworkLogs.showAllXhrFetch = false
       // disable default behavior of showing all matched intercepts
-      Cypress.RequestLogs.showAllIntercepts = false
+      Cypress.NetworkLogs.showAllIntercepts = false
       // set a custom filter to show everything that's not an intercept
-      Cypress.RequestLogs.filter = (req) => {
+      Cypress.NetworkLogs.filter = (req) => {
         return !req.matchedIntercept
       }
 
@@ -173,8 +173,8 @@ describe('Request Logs', () => {
     })
 
     it('logs no requests if showAllXhrFetch and showAllIntercepts are both false', () => {
-      Cypress.RequestLogs.showAllXhrFetch = false
-      Cypress.RequestLogs.showAllIntercepts = false
+      Cypress.NetworkLogs.showAllXhrFetch = false
+      Cypress.NetworkLogs.showAllIntercepts = false
 
       cy.on('log:added', (log) => {
         expect(log.name).to.not.eq('request', 'no request logs should be emitted')
@@ -197,11 +197,11 @@ describe('Request Logs', () => {
     it('errors if set to a non-function', () => {
       try {
         // @ts-ignore
-        Cypress.RequestLogs.filter = 4
+        Cypress.NetworkLogs.filter = 4
         throw new Error('should not reach')
       } catch (err) {
-        expect(Cypress.RequestLogs.filter).to.eq(undefined)
-        expect(err.message).to.include('RequestLogs.filter should be set to a function')
+        expect(Cypress.NetworkLogs.filter).to.eq(undefined)
+        expect(err.message).to.include('NetworkLogs.filter should be set to a function')
       }
     })
   })
