@@ -3025,6 +3025,11 @@ declare namespace Cypress {
      * @default false
      */
     experimentalRunAllSpecs?: boolean
+    /**
+     * Enables support for require/import within cy.origin.
+     * @default false
+     */
+    experimentalOriginDependencies?: boolean
   }
 
   /**
