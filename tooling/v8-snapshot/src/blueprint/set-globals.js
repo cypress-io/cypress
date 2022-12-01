@@ -67,9 +67,9 @@
     __pathResolver = newPathResolver
     require = nodeRequire
 
-    if (typeof fileIntegrityCheck === 'function') {
-    // eslint-disable-next-line no-undef
-      fileIntegrityCheck({ require, pathResolver: __pathResolver })
+    if (typeof integrityCheck === 'function') {
+      // eslint-disable-next-line no-undef
+      integrityCheck({ require, pathResolver: __pathResolver })
     }
   }
 })()

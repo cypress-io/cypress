@@ -32,11 +32,11 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
     const expectedFileName = options.stackToMatch[index].fileName
     const actualFileName = stack[index].getFileName()
 
-    if (expectedFunctionName && !actualFunctionName.endsWith(expectedFunctionName)) {
+    if (expectedFunctionName && actualFunctionName !== expectedFunctionName) {
       throw new Error(`Integrity check failed with expected function name ${expectedFunctionName} but got ${actualFunctionName}`)
     }
 
-    if (!actualFileName.endsWith(expectedFileName)) {
+    if (expectedFileName && actualFileName !== expectedFileName) {
       throw new Error(`Integrity check failed with expected file name ${expectedFileName} but got ${actualFileName}`)
     }
   }
@@ -81,7 +81,7 @@ function validateCrypto (crypto) {
 }
 
 // eslint-disable-next-line no-unused-vars
-function fileIntegrityCheck (options) {
+function integrityCheck (options) {
   const require = options.require
   const electron = require('electron')
   const fs = require('fs')
@@ -99,7 +99,7 @@ function fileIntegrityCheck (options) {
   stackIntegrityCheck({ stackToMatch:
     [
       {
-        functionName: 'fileIntegrityCheck',
+        functionName: 'integrityCheck',
         fileName: '<embedded>',
       },
       {
