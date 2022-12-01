@@ -27,7 +27,7 @@ export const PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm'] as const
 // for a new major version of Cypress
 export const MAJOR_VERSION_FOR_CONTENT = '11'
 
-export const RUN_ALL_SPECS_KEY = '__all'
+export const RUN_ALL_SPECS_KEY = '__all' as const
 
 export const RUN_ALL_SPECS: SpecFile = {
   name: 'All E2E Specs',
