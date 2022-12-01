@@ -32,7 +32,7 @@
         class="mx-auto mb-24px"
       />
       <RunCard
-        v-for="run of currentProject?.cloudProject?.runs?.nodes"
+        v-for="run of runs"
         :key="run.id"
         :gql="run"
       />
@@ -127,6 +127,7 @@ mutation RunsContainer_FetchNewerRuns(
 
 const currentProject = computed(() => props.gql.currentProject)
 const cloudViewer = computed(() => props.gql.cloudViewer)
+const runs = computed(() => props.gql.currentProject?.cloudProject?.runs?.nodes)
 
 const variables = computed(() => {
   if (currentProject.value?.cloudProject?.__typename === 'CloudProject') {
