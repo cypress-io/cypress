@@ -30,6 +30,7 @@
             <div class="children:mb-16px">
               <p>
                 For a complete list of updates and breaking changes in v12.0.0, please review our
+                <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
                 <ExternalLink href="https://on.cypress.io/changelog#12-0-0">
                   changelog
                 </ExternalLink>.
@@ -115,6 +116,7 @@
               <br>
               <br>
               Read about the v11.0.0 changes in our
+              <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
               <ExternalLink href="https://on.cypress.io/cypress-11-release">
                 blog post
               </ExternalLink>.
@@ -137,6 +139,7 @@
               <br>
               Read about breaking changes in our
 
+              <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
               <ExternalLink href="https://on.cypress.io/cypress-10-release">
                 blog post
               </ExternalLink>.
