@@ -263,9 +263,15 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
   const testCorruptingFile = async (file, errorMessage) => {
     const contents = await fs.readFile(file)
 
+    // Backup state
+    await fs.move(file, `${file}.bak`)
+
+    // Modify app
     await fs.writeFile(file, Buffer.concat([contents, Buffer.from(`\nconsole.log('modified code')`)]))
     await runErroringProjectTest(buildAppExecutable, e2e, `corrupting ${file}`, errorMessage)
-    await fs.writeFile(file, contents)
+
+    // Restore original state
+    await fs.move(`${file}.bak`, file)
   }
 
   await testCorruptingFile(path.join(buildAppDir, 'index.js'), 'Error: Integrity check failed for main index.js file')
@@ -275,6 +281,10 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
   const testAlteringEntryPoint = async (additionalCode, errorMessage) => {
     const packageJsonContents = await fs.readJSON(path.join(buildAppDir, 'package.json'))
 
+    // Backup state
+    await fs.move(path.join(buildAppDir, 'package.json'), path.join(buildAppDir, 'package.json.bak'))
+
+    // Modify app
     await fs.writeJSON(path.join(buildAppDir, 'package.json'), {
       ...packageJsonContents,
       main: 'index2.js',
@@ -282,7 +292,9 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
 
     await fs.writeFile(path.join(buildAppDir, 'index2.js'), `${additionalCode}\nrequire("./index.js")`)
     await runErroringProjectTest(buildAppExecutable, e2e, 'altering entry point', errorMessage)
-    await fs.writeJson(path.join(buildAppDir, 'package.json'), packageJsonContents, { spaces: 2 })
+
+    // Restore original state
+    await fs.move(path.join(buildAppDir, 'package.json'), path.join(buildAppDir, 'package.json.bak'))
     await fs.remove(path.join(buildAppDir, 'index2.js'))
   }
 
