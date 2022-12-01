@@ -235,23 +235,6 @@ require('./packages/server/index.js')
 
   console.log(`output folder: ${outputFolder}`)
 
-  const args = [
-    '--publish=never',
-    `--c.electronVersion=${electronVersion}`,
-    `--c.directories.app=${appFolder}`,
-    `--c.directories.output=${outputFolder}`,
-    `--c.icon=${iconFilename}`,
-    // for now we cannot pack source files in asar file
-    // because electron-builder does not copy nested folders
-    // from packages/*/node_modules
-    // see https://github.com/electron-userland/electron-builder/issues/3185
-    // so we will copy those folders later ourselves
-    '--c.asar=false',
-  ]
-
-  console.log('electron-builder arguments:')
-  console.log(args.join(' '))
-
   // Update the root package.json with the next app version so that it is snapshot properly
   fs.writeJSONSync(path.join(CY_ROOT_DIR, 'package.json'), {
     ...jsonRoot,
@@ -268,6 +251,11 @@ require('./packages/server/index.js')
           output: outputFolder,
         },
         icon: iconFilename,
+        // for now we cannot pack source files in asar file
+        // because electron-builder does not copy nested folders
+        // from packages/*/node_modules
+        // see https://github.com/electron-userland/electron-builder/issues/3185
+        // so we will copy those folders later ourselves
         asar: false,
       },
     })

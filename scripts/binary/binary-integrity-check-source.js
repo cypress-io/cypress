@@ -103,7 +103,6 @@ function integrityCheck (options) {
         fileName: '<embedded>',
       },
       {
-        functionName: 'setGlobals',
         fileName: '<embedded>',
       },
       {
