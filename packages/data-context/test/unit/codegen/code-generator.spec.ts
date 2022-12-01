@@ -255,7 +255,7 @@ describe('code-generator', () => {
 
           describe('<${codeGenArgs.componentName} />', () => {
             it('renders', () => {
-              // see: https://docs.cypress.io/guides/component-testing/react/api
+              // see: https://on.cypress.io/mounting-react
               cy.mount(<${codeGenArgs.componentName} />)
             })
           })`,

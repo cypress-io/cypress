@@ -19,49 +19,45 @@ describe('ProjectActions', () => {
   })
 
   context('getReactComponentsFromFile', () => {
-    beforeEach(async () => {
-      ctx.update((s) => {
-        s.currentProject = path.resolve('test/unit/actions/project')
-      })
-    })
+    const absolutePathPrefix = path.resolve('./test/unit/actions/project')
 
     it('returns React components from file with class component', async () => {
-      const reactComponents = await actions.getReactComponentsFromFile('./counter-class.jsx')
+      const reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter-class.jsx`)
 
       expect(reactComponents).to.have.length(1)
       expect(reactComponents[0].displayName).to.equal('Counter')
     })
 
     it('returns React components from file with functional component', async () => {
-      const reactComponents = await actions.getReactComponentsFromFile('./counter-functional.jsx')
+      const reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter-functional.jsx`)
 
       expect(reactComponents).to.have.length(1)
       expect(reactComponents[0].displayName).to.equal('Counter')
     })
 
     it('returns only exported React components from file with functional components', async () => {
-      const reactComponents = await actions.getReactComponentsFromFile('./counter-multiple-components.jsx')
+      const reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter-multiple-components.jsx`)
 
       expect(reactComponents).to.have.length(1)
       expect(reactComponents[0].displayName).to.equal('CounterContainer')
     })
 
     it('returns React components from a tsx file', async () => {
-      const reactComponents = await actions.getReactComponentsFromFile('./counter.tsx')
+      const reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter.tsx`)
 
       expect(reactComponents).to.have.length(1)
       expect(reactComponents[0].displayName).to.equal('Counter')
     })
 
     it('returns React components that are exported by default', async () => {
-      const reactComponents = await actions.getReactComponentsFromFile('./counter-default.tsx')
+      const reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter-default.tsx`)
 
       expect(reactComponents).to.have.length(1)
       expect(reactComponents[0].displayName).to.equal('CounterDefault')
     })
 
     it('does not throw while parsing empty file', async () => {
-      const reactComponents = await actions.getReactComponentsFromFile('./empty.jsx')
+      const reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/empty.jsx`)
 
       expect(reactComponents).to.have.length(0)
     })

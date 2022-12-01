@@ -55,20 +55,14 @@ export class SpecOptions {
       throw new Error('Cannot generate a spec without a framework')
     }
 
-    let frameworkOptions
-
     switch (this.options.framework.codeGenFramework) {
       case 'react':
-        frameworkOptions = await this.getReactSpecOptions()
-        break
+        return await this.getReactSpecOptions()
       case 'vue':
-        frameworkOptions = await this.getVueSpecOptions()
-        break
+        return await this.getVueSpecOptions()
       default:
         throw new Error(`Unable to generate spec for ${this.options.framework.codeGenFramework}`)
     }
-
-    return frameworkOptions
   }
 
   private getRelativePathToComponent (specParsedPath?: ParsedPath) {
