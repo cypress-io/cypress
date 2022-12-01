@@ -359,19 +359,4 @@ export default {
     // even though Marionette is not used past this point, we have to keep the session open
     // or else `acceptInsecureCerts` will cease to apply and SSL validation prompts will appear.
   },
-
-  async windowFocus () {
-  // in order to utilize focusmanager.testingmode and trick browser into being in focus even when not focused
-  // this is critical for headless mode since otherwise the browser never gains focus
-    return sendMarionette({
-      name: 'WebDriver:ExecuteScript',
-      parameters: {
-        'args': [],
-        'script': `return (() => {
-        top.focus()
-      }).apply(null, arguments)\
-      `,
-      },
-    })
-  },
 }
