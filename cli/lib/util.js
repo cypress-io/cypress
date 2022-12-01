@@ -533,6 +533,7 @@ const util = {
     la(is.unemptyString(varName), 'expected environment variable name, not', varName)
 
     const configVarName = `npm_config_${varName}`
+    const configVarNameLower = configVarName.toLowerCase()
     const packageConfigVarName = `npm_package_config_${varName}`
 
     let result
@@ -545,6 +546,10 @@ const util = {
       debug(`Using ${varName} from npm config`)
 
       result = process.env[configVarName]
+    } else if (process.env.hasOwnProperty(configVarNameLower)) {
+      debug(`Using ${varName.toLowerCase()} from npm config`)
+
+      result = process.env[configVarNameLower]
     } else if (process.env.hasOwnProperty(packageConfigVarName)) {
       debug(`Using ${varName} from package.json config`)
 
