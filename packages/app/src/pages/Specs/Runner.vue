@@ -31,6 +31,7 @@ import SpecRunnerContainerOpenMode from '../../runner/SpecRunnerContainerOpenMod
 import SpecRunnerContainerRunMode from '../../runner/SpecRunnerContainerRunMode.vue'
 import { useEventManager } from '../../runner/useEventManager'
 import { useSpecStore } from '../../store'
+import { isRunMode } from '@packages/frontend-shared/src/utils/isRunMode'
 
 gql`
 query SpecPageContainer {
@@ -59,18 +60,14 @@ subscription Runner_ConfigChange {
 }
 `
 
-const isRunMode = window.__CYPRESS_MODE__ === 'run'
-
 // subscriptions are used to trigger live updates without
 // reloading the page.
 // this is only useful in open mode - in run mode, we don't
 // use GraphQL, so we pause the
 // subscriptions so they never execute.
-const shouldPauseSubscriptions = isRunMode && window.top === window
-
 useSubscription({
   query: SpecPageContainer_SpecsChangeDocument,
-  pause: shouldPauseSubscriptions,
+  pause: isRunMode,
 })
 
 // in run mode, we are not using GraphQL or urql
@@ -80,7 +77,7 @@ useSubscription({
 // requests, which is what we want.
 const query = useQuery({
   query: SpecPageContainerDocument,
-  pause: shouldPauseSubscriptions,
+  pause: isRunMode,
 })
 
 let initialLoad = true

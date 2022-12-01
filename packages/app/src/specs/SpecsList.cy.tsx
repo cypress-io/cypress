@@ -293,6 +293,14 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
       })
     }
 
+    it('does not show feature unless experimentalRunAllSpecs is enabled', () => {
+      mountWithTestingType({ experimentalRunAllSpecs: false })
+
+      cy.contains('button', 'Run all specs').should('not.exist')
+      cy.contains('[data-cy=spec-item-directory]', '__test__').realHover()
+      cy.contains('button', 'Run 5 specs').should('not.exist')
+    })
+
     it('displays runAllSpecs when hovering over a spec-list directory row', () => {
       mountWithTestingType({ experimentalRunAllSpecs: true })
       hoverRunAllSpecs('__test__', 5)
