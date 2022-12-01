@@ -60,14 +60,6 @@ function validateFs (fs) {
   }
 }
 
-function validatePath (path, crypto) {
-  const pathJoinHash = crypto.createHmac('md5', 'HMAC_SECRET').update(toString.call(path.join)).digest('hex')
-
-  if (pathJoinHash !== 'PATH_JOIN_HASH') {
-    throw new Error(`Integrity check failed for path.join.toString()`)
-  }
-}
-
 function validateCrypto (crypto) {
   if (toString.call(crypto.createHmac) !== `CRYPTO_CREATE_HMAC_TO_STRING`) {
     throw new Error(`Integrity check failed for crypto.createHmac.toString()`)
@@ -87,14 +79,12 @@ function integrityCheck (options) {
   const require = options.require
   const electron = require('electron')
   const fs = require('fs')
-  const path = require('path')
   const crypto = require('crypto')
 
   validateToString()
   validateElectron(electron)
   validateFs(fs)
   validateCrypto(crypto)
-  validatePath(path, crypto)
 
   const appPath = electron.app.getAppPath()
 
@@ -128,30 +118,32 @@ function integrityCheck (options) {
       },
       {
         functionName: 'Module._extensions.<computed>',
-        fileName: path.join(appPath, 'node_modules', 'bytenode', 'lib', 'index.js'),
+        // eslint-disable-next-line no-undef
+        fileName: [appPath, 'node_modules', 'bytenode', 'lib', 'index.js'].join(PATH_SEP),
       },
       {
-        fileName: path.join(appPath, 'index.js'),
+        // eslint-disable-next-line no-undef
+        fileName: [appPath, 'index.js'].join(PATH_SEP),
       },
     ],
   })
 
   // eslint-disable-next-line no-undef
-  const mainIndexHash = crypto.createHmac('md5', 'HMAC_SECRET').update(fs.readFileSync(path.join(appPath, 'index.js'), 'utf8')).digest('hex')
+  const mainIndexHash = crypto.createHmac('md5', 'HMAC_SECRET').update(fs.readFileSync([appPath, 'index.js'].join(PATH_SEP), 'utf8')).digest('hex')
 
   if (mainIndexHash !== 'MAIN_INDEX_HASH') {
     throw new Error(`Integrity check failed for main index.js file`)
   }
 
   // eslint-disable-next-line no-undef
-  const bytenodeHash = crypto.createHmac('md5', 'HMAC_SECRET').update(fs.readFileSync(path.join(appPath, 'node_modules', 'bytenode', 'lib', 'index.js'), 'utf8')).digest('hex')
+  const bytenodeHash = crypto.createHmac('md5', 'HMAC_SECRET').update(fs.readFileSync([appPath, 'node_modules', 'bytenode', 'lib', 'index.js'].join(PATH_SEP), 'utf8')).digest('hex')
 
   if (bytenodeHash !== 'BYTENODE_HASH') {
     throw new Error(`Integrity check failed for main bytenode.js file`)
   }
 
   // eslint-disable-next-line no-undef
-  const indexJscHash = crypto.createHmac('md5', 'HMAC_SECRET').update(fs.readFileSync(path.join(appPath, 'packages', 'server', 'index.jsc'), 'utf8')).digest('hex')
+  const indexJscHash = crypto.createHmac('md5', 'HMAC_SECRET').update(fs.readFileSync([appPath, 'packages', 'server', 'index.jsc'].join(PATH_SEP), 'utf8')).digest('hex')
 
   if (indexJscHash !== 'INDEX_JSC_HASH') {
     throw new Error(`Integrity check failed for main server index.jsc file`)

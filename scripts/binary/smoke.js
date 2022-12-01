@@ -202,12 +202,6 @@ const runV8SnapshotProjectTest = function (buildAppExecutable, e2e) {
 }
 
 const runErroringProjectTest = function (buildAppExecutable, e2e, testName, errorMessage) {
-  if (shouldSkipProjectTest()) {
-    console.log('skipping project test')
-
-    return Promise.resolve()
-  }
-
   return new Promise((resolve, reject) => {
     const env = _.omit(process.env, 'CYPRESS_INTERNAL_ENV')
 
@@ -254,12 +248,6 @@ const runErroringProjectTest = function (buildAppExecutable, e2e, testName, erro
 }
 
 const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
-  if (shouldSkipProjectTest()) {
-    console.log('skipping failing project test')
-
-    return
-  }
-
   const testCorruptingFile = async (file, errorMessage) => {
     const contents = await fs.readFile(file)
 
