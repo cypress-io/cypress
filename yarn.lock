@@ -2470,7 +2470,7 @@
   resolved "https://registry.yarnpkg.com/@cypress/sinon-chai/-/sinon-chai-2.9.1.tgz#1705c0341bc286740979b1b1cac89b7f5d34d6bc"
   integrity sha512-qwFQ1urghF3mv7CFSDw/LEqIQP12qqKLuW7p6mXR92HP5fPNlgNiZVITWVsupDg7JpOEKfeRTVearo9mkk/5eg==
 
-"@cypress/snapbuild-android-arm64@1.0.":
+"@cypress/snapbuild-android-arm64@1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@cypress/snapbuild-android-arm64/-/snapbuild-android-arm64-1.0.1.tgz#f4f67ee22e4dcd4738499dc6e16af6dd50dc3268"
   integrity sha512-I8gM7t63gL78+NcP1zNQBgzsyp7xRlFiZhMzn5F0LAX/TrT8tZGctZEWNjPbl3M8JLCPtat/HrCbhaP1h+0Y4g==
@@ -31237,7 +31237,7 @@ source-map@0.6.1, source-map@^0.6.0, source-map@^0.6.1, source-map@~0.6.0, sourc
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
   integrity sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==
 
-source-map@0.7.4, source-map@^0.7.3, source-map@~0.7.2:
+source-map@0.7.4, source-map@^0.7.3:
   version "0.7.4"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.7.4.tgz#a9bbe705c9d8846f4e08ff6765acf0f1b0898656"
   integrity sha512-l3BikUxvPOcn5E74dZiq5BGsTb5yEwhaTSzccU6t4sDOH8NWJCstKO5QT2CvtFoK6F0saL7p9xHAqHOlCPJygA==
