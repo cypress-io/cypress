@@ -271,7 +271,7 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
     await runErroringProjectTest(buildAppExecutable, e2e, `corrupting ${file}`, errorMessage)
 
     // Restore original state
-    await fs.move(`${file}.bak`, file)
+    await fs.move(`${file}.bak`, file, { overwrite: true })
   }
 
   await testCorruptingFile(path.join(buildAppDir, 'index.js'), 'Error: Integrity check failed for main index.js file')
@@ -294,7 +294,7 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
     await runErroringProjectTest(buildAppExecutable, e2e, 'altering entry point', errorMessage)
 
     // Restore original state
-    await fs.move(path.join(buildAppDir, 'package.json'), path.join(buildAppDir, 'package.json.bak'))
+    await fs.move(path.join(buildAppDir, 'package.json'), path.join(buildAppDir, 'package.json.bak'), { overwrite: true })
     await fs.remove(path.join(buildAppDir, 'index2.js'))
   }
 
