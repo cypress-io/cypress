@@ -26,7 +26,7 @@ describe('<InlineRunAllSpecs/>', { viewportHeight: 50, viewportWidth: 150 }, () 
       })
     })
 
-    it('emits expected event on click', () => {
+    it('emits expected event on click and with keyboard', () => {
       cy.get('button')
       .click()
       .type(' ')
