@@ -21,7 +21,7 @@ const platformString = process.platform
 const snapshotCacheBaseDir = path.resolve(__dirname, '..', '..', 'cache')
 
 const projectBaseDir = path.join(__dirname, '..', '..', '..', '..')
-const appEntryFile = require.resolve('@packages/server/snapshot-entry.js')
+const appEntryFile = require.resolve('@packages/server/v8-snapshot-entry')
 
 const cypressAppSnapshotDir = (cypressAppPath?: string) => {
   const electronPackageDir = path.join(projectBaseDir, 'packages', 'electron')

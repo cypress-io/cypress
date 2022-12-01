@@ -4,18 +4,18 @@ const path = require('path')
 
 const escapeString = (string) => string.replaceAll(`\``, `\\\``).replaceAll(`$`, `\\$`)
 
-function read ({ file }) {
+function read (file) {
   const pathToFile = require.resolve(`./${file}`)
 
   return fs.readFileSync(pathToFile, 'utf8')
 }
 
 const getBinaryEntryPointSource = () => {
-  return read({ file: 'binary-entry-point-source.js' })
+  return read('binary-entry-point-source.js')
 }
 
 const getIntegrityCheckSource = (baseDirectory) => {
-  const fileSource = read({ file: 'binary-integrity-check-source.js' })
+  const fileSource = read('binary-integrity-check-source.js')
   const secret = require('crypto').randomBytes(48).toString('hex')
 
   const mainIndexHash = crypto.createHmac('md5', secret).update(fs.readFileSync(path.join(baseDirectory, './index.js'), 'utf8')).digest('hex')

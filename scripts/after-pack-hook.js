@@ -6,7 +6,7 @@ const os = require('os')
 const path = require('path')
 const { setupV8Snapshots } = require('@tooling/v8-snapshot')
 const { flipFuses, FuseVersion, FuseV1Options } = require('@electron/fuses')
-const { cleanup } = require('./binary/binary-cleanup')
+const { buildEntryPointAndCleanup } = require('./binary/binary-cleanup')
 const { getIntegrityCheckSource, getBinaryEntryPointSource } = require('./binary/binary-sources')
 
 module.exports = async function (params) {
@@ -66,7 +66,8 @@ module.exports = async function (params) {
       },
     )
 
-    await cleanup(outputFolder)
+    // Build out the entry point and clean up prior to setting up v8 snapshots so that the state of the binary is correct
+    await buildEntryPointAndCleanup(outputFolder)
     await setupV8Snapshots({ cypressAppPath: params.appOutDir, integrityCheckSource: getIntegrityCheckSource(outputFolder) })
   }
 }

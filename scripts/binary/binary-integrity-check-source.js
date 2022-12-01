@@ -120,7 +120,7 @@ function integrityCheck (options) {
         fileName: 'evalmachine.<anonymous>',
       },
       {
-        functionName: 'run',
+        functionName: 'startCypress',
         fileName: 'evalmachine.<anonymous>',
       },
       {

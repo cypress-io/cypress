@@ -80,7 +80,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
       absWorkingDir: unixBuildAppDir,
       external: [
         './transpile-ts',
-        './server-entry',
+        './start-cypress',
         'fsevents',
         'pnpapi',
         '@swc/core',
@@ -116,7 +116,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
 const createServerEntryPointBundle = async (buildAppDir) => {
   const unixBuildAppDir = buildAppDir.split(path.sep).join(path.posix.sep)
   const entryPoints = [path.join(unixBuildAppDir, 'packages/server/index.js')]
-  // Build the binary entry point ignoring anything that happens in the server-entry since that will be in the v8 snapshot
+  // Build the binary entry point ignoring anything that happens in start-cypress since that will be in the v8 snapshot
   const esbuildResult = await esbuild.build({
     entryPoints,
     bundle: true,
@@ -126,7 +126,7 @@ const createServerEntryPointBundle = async (buildAppDir) => {
     absWorkingDir: unixBuildAppDir,
     external: [
       './transpile-ts',
-      './server-entry',
+      './start-cypress',
     ],
   })
 
@@ -146,7 +146,7 @@ const createServerEntryPointBundle = async (buildAppDir) => {
   return [...Object.keys(esbuildResult.metafile.inputs)].map((input) => `./${input}`)
 }
 
-const cleanup = async (buildAppDir) => {
+const buildEntryPointAndCleanup = async (buildAppDir) => {
   // 1. Retrieve all dependencies that still need to be kept in the binary. In theory, we could use the bundles generated here as single files within the binary,
   // but for now, we just track on the dependencies that get pulled in
   const keptDependencies = [...await getDependencyPathsToKeep(buildAppDir), 'package.json']
@@ -231,5 +231,5 @@ const cleanup = async (buildAppDir) => {
 }
 
 module.exports = {
-  cleanup,
+  buildEntryPointAndCleanup,
 }

@@ -1,6 +1,6 @@
 const { initializeStartTime } = require('./lib/util/performance_benchmark')
 
-const run = async () => {
+const startCypress = async () => {
   try {
     initializeStartTime()
 
@@ -8,7 +8,7 @@ const run = async () => {
 
     hookRequire({ forceTypeScript: false })
 
-    await require('./server-entry')
+    await require('./start-cypress')
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error)
@@ -16,4 +16,4 @@ const run = async () => {
   }
 }
 
-module.exports = run()
+module.exports = startCypress()
