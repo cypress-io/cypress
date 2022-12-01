@@ -20,10 +20,10 @@
         :data-selected-spec="isCurrentSpec(row.data)"
         @click.self="submitOrToggle(row.data, row.index)"
       >
-        <RouterLink
+        <component
+          :is="row.data.isLeaf ? RouterLink : 'button'"
           :ref="el => setItemRef(el, row.index)"
           :key="row.data.data?.absolute"
-          :tabindex="isTabbable(row, row.index) ? '0' : '-1'"
           :style="{ paddingLeft: `${(row.data.depth - 2) * 10 + 16}px` }"
           class="border-transparent outline-none border-1 w-full group focus-visible:bg-gray-900 before:(border-r-4 border-transparent h-28px rounded-r-4px absolute left-[-4px] w-8px) "
           :class="{
@@ -31,6 +31,7 @@
             'before:focus:border-r-indigo-300 before:focus-visible:border-r-transparent before:hover:border-r-indigo-300': !isCurrentSpec(row.data)
           }"
           :to="{ path: '/specs/runner', query: { file: row.data.data?.relative?.replace(/\\/g, '/') } }"
+          :aria-expanded="row.data.isLeaf ? null : row.data.expanded"
           @focus="resetFocusIfNecessary(row, row.index)"
           @click.prevent="submitOrToggle(row.data, row.index)"
           @keydown.enter.space.prevent.stop="submitOrToggle(row.data, row.index, $event)"
@@ -63,7 +64,7 @@
               />
             </template>
           </DirectoryItem>
-        </RouterLink>
+        </component>
       </li>
     </ul>
   </div>
