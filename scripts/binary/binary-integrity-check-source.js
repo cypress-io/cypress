@@ -60,8 +60,10 @@ function validateFs (fs) {
   }
 }
 
-function validatePath (path) {
-  if (toString.call(path.join) !== `PATH_JOIN_TO_STRING`) {
+function validatePath (path, crypto) {
+  const pathJoinHash = crypto.createHmac('md5', 'HMAC_SECRET').update(toString.call(path.join)).digest('hex')
+
+  if (pathJoinHash !== 'PATH_JOIN_HASH') {
     throw new Error(`Integrity check failed for path.join.toString()`)
   }
 }
@@ -91,8 +93,8 @@ function integrityCheck (options) {
   validateToString()
   validateElectron(electron)
   validateFs(fs)
-  validatePath(path)
   validateCrypto(crypto)
+  validatePath(path, crypto)
 
   const appPath = electron.app.getAppPath()
 

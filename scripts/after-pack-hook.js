@@ -67,11 +67,6 @@ module.exports = async function (params) {
     )
 
     await cleanup(outputFolder)
-
-    try {
-      await setupV8Snapshots({ cypressAppPath: params.appOutDir, integrityCheckSource: getIntegrityCheckSource(outputFolder) })
-    } catch (error) {
-      console.log(error)
-    }
+    await setupV8Snapshots({ cypressAppPath: params.appOutDir, integrityCheckSource: getIntegrityCheckSource(outputFolder) })
   }
 }
