@@ -29,7 +29,7 @@ Cypress' entire back-end is powered by the `@packages/server` package. Launchpad
 
 ## Major Version Welcome Content
 
-The content is bundled with the launchpad and at the time of writing it lives in `src/migration/MajorVersionWelcome.vue`. Shipping it as part of the app means there will never be a delay in displaying it and it will always work offline. Guidelines for the management of the content itself are documented internally in our `prod-eng-docs`, but the implementation is documented here.
+The content is bundled with the launchpad and at the time of writing this, it lives in `src/migration/MajorVersionWelcome.vue`. Shipping it as part of the app means it is always available upon release and it will always work offline. Guidelines for the management of the content itself are documented internally in our `prod-eng-docs`, but the implementation is documented here.
 
 A constant named `MAJOR_VERSION_FOR_CONTENT` defines which major version the content is associated with for the purposes of recording user dismissal in persisted state. This needs to be bumped to match the major version that will be going out, since that value is the key that records the dismissal.
 
