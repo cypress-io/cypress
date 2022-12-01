@@ -136,6 +136,7 @@ const createServerEntryPointBundle = async (buildAppDir) => {
 
   console.log(`compiling server entry point bundle to ${path.join(buildAppDir, 'packages', 'server', 'index.jsc')}`)
 
+  // Use bytenode to compile the entry point bundle. This will save time on the v8 compile step and ensure the integrity of the entry point
   await bytenode.compileFile({
     filename: path.join(buildAppDir, 'packages', 'server', 'index.js'),
     output: path.join(buildAppDir, 'packages', 'server', 'index.jsc'),
