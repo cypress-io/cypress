@@ -4,7 +4,7 @@
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
-    "binary-build": "cross-env NODE_OPTIONS=--max_old_space_size=8192 node ./scripts/binary.js build",
+    "binary-build": "cross-env DEBUG=cypress:*snap* NODE_OPTIONS=--max_old_space_size=16384 node ./scripts/binary.js build",
     "binary-deploy": "node ./scripts/binary.js deploy",
     "binary-deploy-linux": "./scripts/build-linux-binary.sh",
     "binary-ensure": "node ./scripts/binary.js ensure",

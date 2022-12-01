@@ -282,7 +282,7 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
 
     await fs.writeFile(path.join(buildAppDir, 'index2.js'), `${additionalCode}\nrequire("./index.js")`)
     await runErroringProjectTest(buildAppExecutable, e2e, 'altering entry point', errorMessage)
-    await fs.writeJson(path.join(buildAppDir, 'package.json'), packageJsonContents)
+    await fs.writeJson(path.join(buildAppDir, 'package.json'), packageJsonContents, { spaces: 2 })
     await fs.remove(path.join(buildAppDir, 'index2.js'))
   }
 
