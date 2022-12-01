@@ -922,7 +922,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       completeNext(1)
     })
 
-    itSkipIfWindows('should fetch newer runs and maintain them when navigating', () => {
+    it.only('should fetch newer runs and maintain them when navigating', () => {
       cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', RUNNING_COUNT).should('be.visible')
 
       cy.remoteGraphQLIntercept(async (obj) => {
@@ -939,10 +939,12 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', 3).should('be.visible')
-      cy.wrap(obj).invoke('toCall')
-
-      cy.get('[data-cy="run-card-icon-PASSED"]').should('have.length', 3).should('be.visible').within(() => {
-        cy.get('[data-cy="runResults-passed-count"]').should('contain', 100)
+      cy.pause()
+      cy.wrap(obj).invoke('toCall').then(() => {
+        cy.pause()
+        cy.get('[data-cy="run-card-icon-PASSED"]').should('have.length', 3).should('be.visible').within(() => {
+          cy.get('[data-cy="runResults-passed-count"]').should('contain', 100)
+        })
       })
 
       cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', 2).should('be.visible')

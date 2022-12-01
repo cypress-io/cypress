@@ -239,6 +239,7 @@ async function makeE2ETasks () {
             return result
           }
 
+          console.log('Returning', JSON.stringify(result, null, 2))
           return new Response(JSON.stringify(result), { status: 200 })
         }
 
