@@ -16,7 +16,7 @@ describe('<DebugFailedTest/>', () => {
     })
 
     testResult.titleParts.forEach((title, index) => {
-      cy.findByTestId(`titleParts-${index}`).should('have.text', `${title } `)
+      cy.findByTestId(`titleParts-${index}`).should('have.text', ` ${title }`)
     })
   })
 
@@ -32,7 +32,9 @@ describe('<DebugFailedTest/>', () => {
 
     cy.findByTestId('test-row').children().should('have.length', 5).should('be.visible')
     multipleTitleParts.titleParts.forEach((title, index) => {
-      cy.findByTestId(`titleParts-${index}`).should('have.text', `${title } `)
+      cy.findByTestId(`titleParts-${index}`).should('have.text', ` ${title }`)
     })
+
+    cy.percySnapshot()
   })
 })

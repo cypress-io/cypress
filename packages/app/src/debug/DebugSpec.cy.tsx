@@ -32,6 +32,8 @@ describe('<DebugSpec/> with multiple test results', () => {
     .should('have.css', 'color', 'rgb(73, 86, 227)')
 
     cy.findAllByTestId('test-group').should('have.length', 2)
+
+    cy.percySnapshot()
   })
 
   it('renders correctly with disabled run-failures button', () => {
@@ -41,6 +43,8 @@ describe('<DebugSpec/> with multiple test results', () => {
 
     cy.findByTestId('run-failures').should('be.disabled')
     .should('have.css', 'color', 'rgb(73, 86, 227)')
+
+    cy.percySnapshot()
   })
 })
 
@@ -70,6 +74,8 @@ describe('<DebugSpec/> responsive UI', () => {
     cy.findByTestId('spec-path').should('have.text', 'cypress/tests/AlertBar.spec.ts')
     cy.contains('AlertBar').should('have.css', 'color', 'rgb(46, 50, 71)')
     cy.findByTestId('run-failures').should('be.visible')
+
+    cy.percySnapshot()
   })
 
   it('shows complete spec component header with long relative filePath', () => {
@@ -84,5 +90,7 @@ describe('<DebugSpec/> responsive UI', () => {
 
     cy.findByTestId('spec-path').should('have.css', 'text-overflow', 'ellipsis')
     cy.findByTestId('run-failures').should('be.visible')
+
+    cy.percySnapshot()
   })
 })
