@@ -628,6 +628,14 @@
       }
     }
   },
+  "debugPage": {
+    "notLoggedIn": "Not logged in",
+    "notConnected": "Not connected",
+    "noRuns": "No runs",
+    "header": {
+      "runUrl": "View in Cypress Cloud"
+    }
+  },
   "testingType": {
     "modalTitle": "Choose a testing type",
     "e2e": {

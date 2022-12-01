@@ -20,12 +20,13 @@ describe('<DebugPageHeader />', {
             result.commitInfo.summary = 'Adding a hover state to the button component'
             result.commitInfo.branch = 'feature/DESIGN-183'
             result.commitInfo.authorName = 'cypressDTest'
+            result.commitInfo.sha = 'b5e6fde'
           }
         }
       },
       render: (gqlVal) => {
         return (
-          <DebugPageHeader gql={gqlVal} runNumber={468} commitsAhead='You are 2 commits ahead' commitHash='b5e6fde'/>
+          <DebugPageHeader gql={gqlVal} commitsAhead='You are 2 commits ahead' commitHash='b5e6fde'/>
         )
       },
     })
@@ -36,7 +37,7 @@ describe('<DebugPageHeader />', {
 
     cy.findByTestId('debug-runCommit-info').children().should('have.length', 3)
     cy.findByTestId('debug-runNumber')
-    .should('have.text', ' Run #468')
+    .should('have.text', ' Run #432')
     .should('have.css', 'color', 'rgb(90, 95, 122)')
 
     cy.findByTestId('debug-commitsAhead')
