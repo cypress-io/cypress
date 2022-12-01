@@ -81,7 +81,7 @@
               </h2>
 
               <p>
-                We have made enhancements to how Cypress manages DOM element resolution to reduce the likelihood of hitting the dreaded detached DOM errors due to maintaining stale DOM references we have all experienced from time-to-time. We've updated our
+                We have made enhancements to how Cypress manages DOM element resolution to reduce the likelihood of hitting the dreaded detached DOM errors due to maintaining stale DOM references. We've updated our
 
                 <ExternalLink href="https://on.cypress.io/retry-ability">
                   Retry-ability Guide
