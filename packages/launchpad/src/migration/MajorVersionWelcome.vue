@@ -30,10 +30,9 @@
             <div class="children:mb-16px">
               <p>
                 For a complete list of updates and breaking changes in v12.0.0, please review our
-                <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
                 <ExternalLink href="https://on.cypress.io/changelog#12-0-0">
-                  changelog
-                </ExternalLink>.
+                  <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
+                  changelog</ExternalLink>.
               </p>
 
               <h2 class="font-bold text-18px text-jade-1000">
@@ -45,9 +44,9 @@
                   <code>cy.origin()</code>
                 </ExternalLink> command! To take a deep-dive into how this works, read our
 
-                <ExternalLink href="https://www.cypress.io/blog/2022/12/02/the-journey-behind-cy-origin/">
-                  blog post.
-                </ExternalLink>
+                <ExternalLink href="https://on.cypress.io/cy-origin-journey">
+                  <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
+                  blog post</ExternalLink>.
               </p>
 
               <h2 class="font-bold mt-24px mb-16px text-18px text-jade-1000">
@@ -116,10 +115,9 @@
               <br>
               <br>
               Read about the v11.0.0 changes in our
-              <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
               <ExternalLink href="https://on.cypress.io/cypress-11-release">
-                blog post
-              </ExternalLink>.
+                <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
+                blog post</ExternalLink>.
             </p>
             <br>
             <div class="pb-8px">
@@ -139,10 +137,9 @@
               <br>
               Read about breaking changes in our
 
-              <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
               <ExternalLink href="https://on.cypress.io/cypress-10-release">
-                blog post
-              </ExternalLink>.
+                <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
+                blog post</ExternalLink>.
             </p>
           </div>
         </div>
