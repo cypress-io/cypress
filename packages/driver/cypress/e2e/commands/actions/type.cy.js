@@ -93,6 +93,10 @@ describe('src/cy/commands/actions/type - #type', () => {
     cy.get('input:text:first').type('bar')
   })
 
+  it('can type into an input when given a wrapper element', () => {
+    cy.get('#focus div span').type('foo')
+  })
+
   it('lists the input as the focused element', () => {
     const $input = cy.$$('input:text:first')
 
