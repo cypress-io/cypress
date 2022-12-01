@@ -100,7 +100,6 @@
     "./node_modules/@babel/types/lib/validators/isPlaceholderType.js",
     "./node_modules/@babel/types/lib/validators/isType.js",
     "./node_modules/@babel/types/lib/validators/validate.js",
-    "./node_modules/@cspotcode/source-map-support/node_modules/@jridgewell/trace-mapping/dist/trace-mapping.umd.js",
     "./node_modules/@cypress/commit-info/node_modules/debug/src/browser.js",
     "./node_modules/@cypress/commit-info/node_modules/debug/src/index.js",
     "./node_modules/@cypress/commit-info/node_modules/execa/lib/errname.js",
@@ -146,6 +145,7 @@
     "./node_modules/@jimp/tiff/dist/index.js",
     "./node_modules/@jimp/types/dist/index.js",
     "./node_modules/@jridgewell/sourcemap-codec/dist/sourcemap-codec.umd.js",
+    "./node_modules/@jridgewell/trace-mapping/dist/trace-mapping.umd.js",
     "./node_modules/@kwsites/file-exists/dist/index.js",
     "./node_modules/@kwsites/file-exists/dist/src/index.js",
     "./node_modules/@nodelib/fs.scandir/out/adapters/fs.js",
@@ -3936,5 +3936,5 @@
     "./tooling/v8-snapshot/cache/prod-win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "6a80733e7a88dda11de7cc3251f5dcfe54fd064d40e39fbc52a55c4d9ae9471c"
+  "deferredHash": "7a05f23c5bcd4b5daed5b113c4a56ec620c8686ee7d956edecb5b117e41903bb"
 }
