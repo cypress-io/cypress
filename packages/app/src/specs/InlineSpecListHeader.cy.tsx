@@ -1,6 +1,7 @@
 import InlineSpecListHeader from './InlineSpecListHeader.vue'
 import { ref } from 'vue'
 import { defaultMessages } from '@cy/i18n'
+import { defineStore } from 'pinia'
 
 describe('InlineSpecListHeader', () => {
   const mountWithProps = (props: {resultCount?: number, isRunAllSpecsAllowed?: boolean} = {}) => {
@@ -70,12 +71,21 @@ describe('InlineSpecListHeader', () => {
   })
 
   it('renders "Run All Specs" button with flag and emits on click', () => {
-    mountWithProps({ isRunAllSpecsAllowed: true })
+    const EXPECTED_SPEC_COUNT = 2
 
+    // make a small store to simulate some specs existing
+    // without touching any of the gql used by the real store
+    const useRunAllSpecsStore = defineStore('runAllSpecs', {
+      state: () => ({ allSpecsRef: ref(Array(EXPECTED_SPEC_COUNT)) }),
+    })
+
+    useRunAllSpecsStore()
+
+    mountWithProps({ isRunAllSpecsAllowed: true })
     cy.percySnapshot()
 
     cy.get('[data-cy=run-all-specs-for-all]').as('run-all-btn').realHover()
-    cy.contains('Run all specs').should('be.visible')
+    cy.contains(`Run ${EXPECTED_SPEC_COUNT} specs`).should('be.visible')
 
     cy.percySnapshot('with tooltip')
 
