@@ -1,3 +1,5 @@
+import { RUN_ALL_SPECS_KEY } from '@packages/types/src'
+
 describe('run-all-specs', () => {
   const ALL_SPECS = {
     spec1: { relative: 'cypress/e2e/folder-a/spec-a.cy.js', name: 'runs folder-a/spec-a' },
@@ -98,7 +100,7 @@ describe('run-all-specs', () => {
     cy.withCtx((ctx, { specs, runAllSpecsKey }) => {
       expect(ctx.actions.project.launchProject).to.have.been.calledWith('e2e', undefined, runAllSpecsKey)
       expect(ctx.project.runAllSpecs).to.include.members(specs.map((spec) => spec.relative))
-    }, { specs: Object.values(ALL_SPECS), runAllSpecsKey: 'all' })
+    }, { specs: Object.values(ALL_SPECS), runAllSpecsKey: RUN_ALL_SPECS_KEY })
 
     cy.waitForSpecToFinish({ passCount: 6 })
 
