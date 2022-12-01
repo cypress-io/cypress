@@ -190,14 +190,8 @@ describe('InlineSpecList', () => {
   })
 
   describe('Run all Specs', () => {
-    const hoverRunAllSpecs = (directory?: string, specNumber?: number) => {
-      let command
-
-      if (directory) {
-        command = cy.contains('[data-cy=directory-item]', directory)
-      } else {
-        command = cy.get('[data-cy=directory-item]').first()
-      }
+    const hoverRunAllSpecs = (directory: string, specNumber: number) => {
+      let command = cy.contains('[data-cy=directory-item]', directory)
 
       return command.realHover().then(() => {
         cy.get('[data-cy=play-button]').should('exist')

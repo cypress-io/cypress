@@ -3,11 +3,11 @@ import { gql, useMutation, useQuery } from '@urql/vue'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { RunAllSpecsDataDocument, RunAllSpecsDocument } from '../generated/graphql-test'
+import { RunAllSpecsDataDocument, RunAllSpecsDocument } from '../generated/graphql'
 import { getSeparator, SpecTreeNode, UseCollapsibleTreeNode } from '../specs/tree/useCollapsibleTree'
 import { isRunMode } from '@packages/frontend-shared/src/utils/isRunMode'
 
-type ResolvedConfig = { value: any, from: 'string', field: string }[]
+type ResolvedConfig = Array<{ value: any, from: string, field: string }>
 
 gql`
 query RunAllSpecsData {
@@ -28,6 +28,8 @@ mutation RunAllSpecs ($specPath: String!, $runAllSpecs: [String!]!) {
 }
 `
 
+// TODO: This is a "setup store" - see https://pinia.vuejs.org/core-concepts/#setup-stores
+// Can we make it an "options store" like the others? https://pinia.vuejs.org/core-concepts/#option-stores
 export const useRunAllSpecsStore = defineStore('runAllSpecs', () => {
   const allSpecsRef = ref<string[]>([])
   const directoryChildrenRef = ref<Record<string, string[]>>({})
@@ -79,15 +81,16 @@ export const useRunAllSpecsStore = defineStore('runAllSpecs', () => {
     const isE2E = query.data.value?.currentProject?.currentTestingType === 'e2e'
 
     const config: ResolvedConfig = query.data.value?.currentProject?.config || []
-    const hasExperiment = config.find(({ field, value }) => field === 'experimentalRunAllSpecs' && value === true)
+    const hasExperiment = config.some(({ field, value }) => field === 'experimentalRunAllSpecs' && value === true)
 
-    return Boolean(isE2E && hasExperiment)
+    return (isE2E && hasExperiment)
   })
 
   return {
     isRunAllSpecsAllowed,
     directoryChildren: directoryChildrenRef,
     runAllSpecs,
+    allSpecsRef,
     runSelectedSpecs,
     setRunAllSpecsData,
   }

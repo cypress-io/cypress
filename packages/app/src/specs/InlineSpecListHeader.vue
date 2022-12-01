@@ -74,7 +74,7 @@
     </Tooltip>
     <InlineRunAllSpecs
       v-if="isRunAllSpecsAllowed"
-      spec-number="all"
+      :spec-number="runAllSpecsStore.allSpecsRef.length"
       directory="all"
       grayscale
       class="rounded-md flex outline-none border-1 border-gray-900 h-24px w-24px duration-300 hocus-default items-center justify-center hocus:ring-0 hocus:border-indigo-300"
@@ -94,6 +94,7 @@ import { ref } from 'vue'
 import { useI18n } from '@cy/i18n'
 import InlineRunAllSpecs from './InlineRunAllSpecs.vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
+import { useRunAllSpecsStore } from '../store/run-all-specs-store'
 
 const { t } = useI18n()
 const props = defineProps<{
@@ -107,6 +108,8 @@ const emit = defineEmits<{
   (e: 'newSpec'): void
   (e: 'runAllSpecs'): void
 }>()
+
+const runAllSpecsStore = useRunAllSpecsStore()
 
 const inputFocused = ref(false)
 const input = ref<HTMLInputElement>()

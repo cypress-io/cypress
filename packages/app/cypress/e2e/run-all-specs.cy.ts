@@ -1,5 +1,3 @@
-import { RUN_ALL_SPECS_KEY } from '@packages/types/src'
-
 describe('run-all-specs', () => {
   const ALL_SPECS = {
     spec1: { relative: 'cypress/e2e/folder-a/spec-a.cy.js', name: 'runs folder-a/spec-a' },
@@ -12,7 +10,7 @@ describe('run-all-specs', () => {
 
   const clickRunAllSpecs = (directory: string) => {
     if (directory === 'all') {
-      return cy.get('[data-cy=run-all-specs-for-all]').click()
+      return cy.findByTestId('run-all-specs-for-all').click()
     }
 
     const command = cy.get('[data-cy=spec-item-directory]').contains(directory)
@@ -36,7 +34,7 @@ describe('run-all-specs', () => {
     // Verify "Run All Specs" with sub-directory
     const subDirectorySpecs = [ALL_SPECS.spec1, ALL_SPECS.spec2]
 
-    cy.get('[data-cy=sidebar-link-specs-page]').click()
+    cy.findByTestId('sidebar-link-specs-page').click()
 
     clickRunAllSpecs('folder-a')
 
@@ -100,7 +98,7 @@ describe('run-all-specs', () => {
     cy.withCtx((ctx, { specs, runAllSpecsKey }) => {
       expect(ctx.actions.project.launchProject).to.have.been.calledWith('e2e', undefined, runAllSpecsKey)
       expect(ctx.project.runAllSpecs).to.include.members(specs.map((spec) => spec.relative))
-    }, { specs: Object.values(ALL_SPECS), runAllSpecsKey: RUN_ALL_SPECS_KEY })
+    }, { specs: Object.values(ALL_SPECS), runAllSpecsKey: 'all' })
 
     cy.waitForSpecToFinish({ passCount: 6 })
 

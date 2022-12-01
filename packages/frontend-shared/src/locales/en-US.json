@@ -218,8 +218,7 @@
         "content": "Record a run to see your test results in Cypress Cloud. You can then optimize your test suite, debug failing and flaky tests, and integrate with your favorite tools."
       }
     },
-    "runSelectedSpecs": "Run {n} spec | Run {n} specs",
-    "runAllSpecs": "Run all specs"
+    "runSelectedSpecs": "Run {n} spec | Run {n} specs"
   },
   "noResults": {
     "defaultMessage": "No results matched your search:",

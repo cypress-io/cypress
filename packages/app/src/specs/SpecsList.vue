@@ -42,7 +42,7 @@
         </span>
         <SpecsRunAllSpecs
           v-if="runAllSpecsStore.isRunAllSpecsAllowed"
-          spec-number="all"
+          :spec-number="runAllSpecsStore.allSpecsRef.length"
           directory="all"
           @runAllSpecs="runAllSpecsStore.runAllSpecs"
         />

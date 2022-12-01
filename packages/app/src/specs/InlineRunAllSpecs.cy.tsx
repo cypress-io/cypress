@@ -24,4 +24,16 @@ describe('<InlineRunAllSpecs/>', () => {
       })
     })
   })
+
+  it('disables button when no specs are available', () => {
+    cy.mount(() => {
+      return (
+        <div class="flex justify-center">
+          <InlineRunAllSpecs specNumber={0} directory='cypress/e2e' />
+        </div>
+      )
+    })
+
+    cy.findByTestId('run-all-specs-button').should('be.disabled')
+  })
 })

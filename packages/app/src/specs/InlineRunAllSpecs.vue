@@ -5,6 +5,8 @@
   >
     <button
       class="flex h-full w-full items-center justify-center"
+      data-cy="run-all-specs-button"
+      :disabled="specNumber === 0"
       @click.stop="emits('runAllSpecs')"
     >
       <IconActionPlaySmall
@@ -24,7 +26,7 @@
         class="font-normal text-sm inline-flex"
         data-cy="tooltip-content"
       >
-        {{ specNumber === 'all' ? t('specPage.runAllSpecs') : t('specPage.runSelectedSpecs', specNumber) }}
+        {{ t('specPage.runSelectedSpecs', specNumber) }}
       </span>
     </template>
   </Tooltip>
@@ -38,7 +40,7 @@ import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 
 defineProps<{
-  specNumber: number | 'all'
+  specNumber: number
   directory: string
   grayscale?: boolean
 }>()

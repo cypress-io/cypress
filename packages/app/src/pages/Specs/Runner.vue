@@ -65,11 +65,9 @@ subscription Runner_ConfigChange {
 // this is only useful in open mode - in run mode, we don't
 // use GraphQL, so we pause the
 // subscriptions so they never execute.
-const shouldPauseSubscriptions = isRunMode
-
 useSubscription({
   query: SpecPageContainer_SpecsChangeDocument,
-  pause: shouldPauseSubscriptions,
+  pause: isRunMode,
 })
 
 // in run mode, we are not using GraphQL or urql
@@ -79,7 +77,7 @@ useSubscription({
 // requests, which is what we want.
 const query = useQuery({
   query: SpecPageContainerDocument,
-  pause: shouldPauseSubscriptions,
+  pause: isRunMode,
 })
 
 let initialLoad = true
