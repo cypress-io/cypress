@@ -1642,6 +1642,7 @@ jobs:
 
   driver-integration-tests-webkit:
     <<: *defaults
+    resource_class: medium+
     parallelism: 5
     steps:
       - run-driver-integration-tests:
