@@ -219,7 +219,7 @@ it('verifies number of cy commands', () => {
     'focused', 'get', 'contains', 'shadow', 'within', 'request', 'session', 'screenshot', 'task', 'find', 'filter', 'not',
     'children', 'eq', 'closest', 'first', 'last', 'next', 'nextAll', 'nextUntil', 'parent', 'parents', 'parentsUntil', 'prev',
     'prevAll', 'prevUntil', 'siblings', 'wait', 'title', 'window', 'document', 'viewport', 'server', 'route', 'intercept', 'origin',
-    'mount', 'as', 'root',
+    'mount', 'as', 'root', 'getAllLocalStorage', 'clearAllLocalStorage', 'getAllSessionStorage', 'clearAllSessionStorage',
   ]
   const addedCommands = Cypress._.difference(actualCommands, expectedCommands)
   const removedCommands = Cypress._.difference(expectedCommands, actualCommands)

@@ -14,6 +14,9 @@ const commonConfig = {
   hosts: {
     '*.foobar.com': '127.0.0.1',
   },
+  e2e: {
+    experimentalOriginDependencies: true,
+  },
 }
 
 // TODO: This is probably more appropriate for a cy-in-cy test
@@ -54,7 +57,19 @@ describe('e2e cy.origin errors', () => {
     async onRun (exec) {
       const res = await exec()
 
-      expect(res.stdout).to.contain('Using `require()` or `import()` to include dependencies requires using the latest version of `@cypress/webpack-preprocessor`')
+      expect(res.stdout).to.contain('Using `require()` or `import()` to include dependencies requires enabling the `experimentalOriginDependencies` flag and using the latest version of `@cypress/webpack-preprocessor`')
+    },
+  })
+
+  systemTests.it('errors when the experimentalOriginDependencies flag is not set', {
+    browser: '!webkit', // TODO(webkit): results in "TypeError: expecting an array or an iterable object but got [object Null]"
+    spec: 'cy_origin_experimental_dependencies_error.cy.ts',
+    expectedExitCode: 1,
+    config: { ...commonConfig, e2e: { experimentalOriginDependencies: false } },
+    async onRun (exec) {
+      const res = await exec()
+
+      expect(res.stdout).to.contain('Using `require()` or `import()` to include dependencies requires enabling the `experimentalOriginDependencies` flag and using the latest version of `@cypress/webpack-preprocessor`')
     },
   })
 })
