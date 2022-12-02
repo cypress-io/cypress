@@ -261,8 +261,6 @@ export function snapshotRequire (
             return path.resolve(projectBaseDir, p)
           } catch (err) {
             logError(err)
-            // eslint-disable-next-line no-debugger
-            debugger
           }
 
           return

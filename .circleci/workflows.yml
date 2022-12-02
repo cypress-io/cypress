@@ -613,8 +613,9 @@ commands:
             - install-webkit-deps
       - run:
           name: Run system tests
+          environment:
+            CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
           command: |
-            CYPRESS_COMMERCIAL_RECOMMENDATIONS=0
             ALL_SPECS=`circleci tests glob "/root/cypress/system-tests/test/*spec*"`
             SPECS=
             for file in $ALL_SPECS; do
@@ -641,8 +642,9 @@ commands:
       - restore_cached_system_tests_deps
       - run:
           name: Run system tests
+          environment:
+            CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
           command: |
-            CYPRESS_COMMERCIAL_RECOMMENDATIONS=0
             ALL_SPECS=`circleci tests glob "$HOME/cypress/system-tests/test-binary/*spec*"`
             SPECS=`echo $ALL_SPECS | xargs -n 1 | circleci tests split --split-by=timings`
             echo SPECS=$SPECS
@@ -1325,7 +1327,7 @@ jobs:
           condition:
             equal: [ *darwin-arm64-executor, << parameters.executor >> ]
           steps:
-            - run: rm -f /tmp/cypress/junit/* 
+            - run: rm -f /tmp/cypress/junit/*
       - unless:
           condition:
             or:
@@ -1514,7 +1516,9 @@ jobs:
     steps:
       - restore_cached_workspace
       - run:
-          command: CYPRESS_COMMERCIAL_RECOMMENDATIONS=0 yarn workspace @tooling/system-tests test:ci "test/non_root*spec*" --browser electron
+          environment:
+            CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
+          command: yarn workspace @tooling/system-tests test:ci "test/non_root*spec*" --browser electron
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
