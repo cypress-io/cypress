@@ -2651,7 +2651,7 @@ describe('Routes', () => {
         })
       })
 
-      it('injects document.domain on AUT iframe requests that do not match current superDomain', function () {
+      it('does not inject document.domain on AUT iframe requests that do not match current superDomain', function () {
         nock('http://www.foobar.com')
         .get('/')
         .reply(200, '<html><head></head><body>hi</body></html>', {
@@ -2671,7 +2671,7 @@ describe('Routes', () => {
 
           const body = cleanResponseBody(res.body)
 
-          expect(body).to.include(`<html><head> <script type='text/javascript'> document.domain = 'foobar.com';`)
+          expect(body).to.eq('<html><head></head></html>')
         })
       })
 
