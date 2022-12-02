@@ -50,7 +50,7 @@ function validateToString () {
 
 function validateElectron (electron) {
   if (toString.call(electron.app.getAppPath) !== 'function getAppPath() { [native code] }') {
-    throw new Error(`Integrity check failed for electron.app.getAppPath.toString()`)
+    throw new Error(`Integrity check failed for toString.call(electron.app.getAppPath)`)
   }
 }
 
