@@ -54,10 +54,6 @@ function getDynamicRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cy
   const last = _.last(req.interceptions)
   let alias = last ? last.interception.request.alias || last.route.alias : undefined
 
-  if (!alias && req.xhr && req.route) {
-    alias = req.route.alias
-  }
-
   return {
     alias,
     aliasType: alias ? 'route' : undefined,
@@ -141,7 +137,6 @@ class ProxyRequest {
   preRequest: BrowserPreRequest
   responseReceived?: BrowserResponseReceived
   error?: Error
-  xhr?: Cypress.WaitXHR
   route?: any
   stack?: string
   interceptions: Array<{ interception: Interception, route: Route }> = []
@@ -179,9 +174,6 @@ class ProxyRequest {
     if (this.flags.reqModified) consoleProps['Request modified?'] = 'yes'
 
     if (this.flags.resModified) consoleProps['Response modified?'] = 'yes'
-
-    // details on matched XHR/intercept
-    if (this.xhr) consoleProps['XHR'] = this.xhr.xhr
 
     if (this.interceptions.length) {
       if (this.interceptions.length > 1) {
@@ -223,13 +215,7 @@ class ProxyRequest {
     // details on response
     let resBody
 
-    if (this.xhr) {
-      if (!consoleProps['Response Headers']) consoleProps['Response Headers'] = this.xhr.responseHeaders
-
-      if (!consoleProps['Response Status Code']) consoleProps['Response Status Code'] = this.xhr.xhr.status
-
-      consoleProps['Response Body'] = this.xhr.xhr.response
-    } else if ((resBody = _.chain(this.interceptions).last().get('interception.response.body').value())) {
+    if ((resBody = _.chain(this.interceptions).last().get('interception.response.body').value())) {
       consoleProps['Response Body'] = resBody
     }
 
@@ -244,16 +230,8 @@ class ProxyRequest {
   }
 }
 
-type UnmatchedXhrLog = {
-  xhr: Cypress.WaitXHR
-  route?: any
-  log: Cypress.Log
-  stack?: string
-}
-
 export default class ProxyLogging {
   unloggedPreRequests: Array<BrowserPreRequest> = []
-  unmatchedXhrLogs: Array<UnmatchedXhrLog> = []
   proxyRequests: Array<ProxyRequest> = []
 
   constructor (private Cypress: Cypress.Cypress) {
@@ -278,15 +256,7 @@ export default class ProxyLogging {
       }
       this.unloggedPreRequests = []
       this.proxyRequests = []
-      this.unmatchedXhrLogs = []
     })
-  }
-
-  /**
-   * The `cy.route()` XHR stub functions will log before a proxy log is received, so this queues an XHR log to be overridden by a proxy log later.
-   */
-  addXhrLog (xhrLog: UnmatchedXhrLog) {
-    this.unmatchedXhrLogs.push(xhrLog)
   }
 
   /**
@@ -324,7 +294,13 @@ export default class ProxyLogging {
     return proxyRequest
   }
 
-  private updateProxyRequestWithResponse (proxyRequest, responseReceived) {
+  private updateRequestWithResponse (responseReceived: BrowserResponseReceived): void {
+    const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === responseReceived.requestId)
+
+    if (!proxyRequest) {
+      return debug('unmatched responseReceived event %o', responseReceived)
+    }
+
     proxyRequest.responseReceived = responseReceived
 
     proxyRequest.updateConsoleProps()
@@ -335,22 +311,6 @@ export default class ProxyLogging {
     if (!hasResponseSnapshot) proxyRequest.log?.snapshot('response')
 
     proxyRequest.log?.end()
-  }
-
-  private updateRequestWithResponse (responseReceived: BrowserResponseReceived): void {
-    const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === responseReceived.requestId)
-
-    if (!proxyRequest) {
-      return debug('unmatched responseReceived event %o', responseReceived)
-    }
-
-    if (proxyRequest.xhr && proxyRequest.xhr.xhr.readyState !== XMLHttpRequest.DONE) {
-      proxyRequest.xhr.xhr.addEventListener('load', () => {
-        this.updateProxyRequestWithResponse(proxyRequest, responseReceived)
-      })
-    } else {
-      this.updateProxyRequestWithResponse(proxyRequest, responseReceived)
-    }
   }
 
   private updateRequestWithError (error: RequestError): void {
@@ -369,26 +329,6 @@ export default class ProxyLogging {
    * Create a Cypress.Log for an incoming proxy request, or store the metadata for later if it is ignored.
    */
   private logIncomingRequest (preRequest: BrowserPreRequest): void {
-    // if this is an XHR, check to see if it matches an XHR log that is missing a pre-request
-    if (preRequest.resourceType === 'xhr') {
-      const unmatchedXhrLog = take(this.unmatchedXhrLogs, ({ xhr }) => xhr.url === preRequest.url && xhr.method === preRequest.method)
-
-      if (unmatchedXhrLog) {
-        const { log, route } = unmatchedXhrLog
-        const proxyRequest = new ProxyRequest(preRequest, unmatchedXhrLog)
-
-        if (route) {
-          proxyRequest.setFlag(_.isNil(route.response) ? 'spied' : 'stubbed')
-        }
-
-        log.set(getRequestLogConfig(proxyRequest))
-
-        this.proxyRequests.push(proxyRequest)
-
-        return
-      }
-    }
-
     if (!shouldLog(preRequest)) {
       this.unloggedPreRequests.push(preRequest)
 

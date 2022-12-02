@@ -347,13 +347,19 @@ describe('runner/cypress sessions.ui.spec', {
     // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
   })
 
-  describe('errors', () => {
+  describe('errors', { testIsolation: 'off' }, () => {
     describe('created session', () => {
       before(() => {
-        loadSpec({
-          projectName: 'session-and-origin-e2e-specs',
-          filePath: 'session/errors.cy.js',
-          failCount: 7,
+        cy.then(async () => {
+          await Cypress.action('cy:url:changed', '')
+          await Cypress.action('cy:visit:blank', { type: 'on' })
+        })
+        .then(() => {
+          loadSpec({
+            projectName: 'session-and-origin-e2e-specs',
+            filePath: 'session/errors.cy.js',
+            failCount: 7,
+          })
         })
       })
 
@@ -423,11 +429,7 @@ describe('runner/cypress sessions.ui.spec', {
             systemTestTitle: 'validate - throws an error',
             errMessage: 'Something went wrong!',
           },
-        ].forEach((opts, index) => {
-          if (index !== 5) {
-            return
-          }
-
+        ].forEach((opts) => {
           const { testCase, systemTestTitle, errMessage } = opts
 
           it(`has test error when validate ${testCase}`, () => {
@@ -544,20 +546,26 @@ describe('runner/cypress sessions.ui.spec', {
 
       describe('successfully recreated session', () => {
         before(() => {
-          loadSpec({
-            projectName: 'session-and-origin-e2e-specs',
-            filePath: 'session/errors.cy.js',
-            passCount: 7,
-            failCount: 0,
-            setup () {
-              cy.window().then((win) => {
+          cy.then(async () => {
+            await Cypress.action('cy:url:changed', '')
+            await Cypress.action('cy:visit:blank', { type: 'on' })
+          })
+          .then(() => {
+            loadSpec({
+              projectName: 'session-and-origin-e2e-specs',
+              filePath: 'session/errors.cy.js',
+              passCount: 7,
+              failCount: 0,
+              setup () {
+                cy.window().then((win) => {
                 // @ts-ignore
-                return win.CYPRESS_TEST_DATA = {
-                  restoreSessionWithValidationFailure: true,
-                  successfullyRecreatedSession: true,
-                }
-              })
-            },
+                  return win.CYPRESS_TEST_DATA = {
+                    restoreSessionWithValidationFailure: true,
+                    successfullyRecreatedSession: true,
+                  }
+                })
+              },
+            })
           })
         })
 
@@ -593,6 +601,10 @@ describe('runner/cypress sessions.ui.spec', {
             errMessage: 'Something went wrong!',
           },
         ].forEach(({ testCase, systemTestTitle, errMessage }, index) => {
+          if (index !== 0) {
+            return
+          }
+
           it(`has test error when validate ${testCase}`, () => {
             cy.contains('.test', systemTestTitle).as('example_test')
 
@@ -614,20 +626,26 @@ describe('runner/cypress sessions.ui.spec', {
 
       describe('failed to recreated session', () => {
         before(() => {
-          loadSpec({
-            projectName: 'session-and-origin-e2e-specs',
-            filePath: 'session/errors.cy.js',
-            passCount: 0,
-            failCount: 7,
-            setup () {
-              cy.window().then((win) => {
+          cy.then(async () => {
+            await Cypress.action('cy:url:changed', '')
+            await Cypress.action('cy:visit:blank', { type: 'on' })
+          })
+          .then(() => {
+            loadSpec({
+              projectName: 'session-and-origin-e2e-specs',
+              filePath: 'session/errors.cy.js',
+              passCount: 0,
+              failCount: 7,
+              setup () {
+                cy.window().then((win) => {
                 // @ts-ignore
-                return win.CYPRESS_TEST_DATA = {
-                  restoreSessionWithValidationFailure: true,
-                  successfullyRecreatedSession: false,
-                }
-              })
-            },
+                  return win.CYPRESS_TEST_DATA = {
+                    restoreSessionWithValidationFailure: true,
+                    successfullyRecreatedSession: false,
+                  }
+                })
+              },
+            })
           })
         })
 

@@ -126,11 +126,11 @@ class RunPlugins {
     .then((modifiedCfg) => {
       debug('plugins file successfully loaded')
 
-      // if the experimentalSessionAndOrigin flag is true, specify which
+      // if the experimentalOriginDependencies flag is true, specify which
       // commands should (potentially) have their callbacks replaced. this is
-      // currently used by the webpack preprocessor. see its implmentation for
+      // currently used by the webpack preprocessor. see its implementation for
       // more details
-      if (this._getExperimentalSessionAndOriginValue(initialConfig, modifiedCfg)) {
+      if (this._getExperimentalOriginDependenciesValue(initialConfig, modifiedCfg)) {
         global.__cypressCallbackReplacementCommands = ['origin']
       }
 
@@ -151,17 +151,17 @@ class RunPlugins {
     })
   }
 
-  _getExperimentalSessionAndOriginValue (initialConfig, modifiedConfig) {
+  _getExperimentalOriginDependenciesValue (initialConfig, modifiedConfig) {
     // prefer the modified value if it's specified
     if (
       typeof modifiedConfig === 'object'
-      && typeof modifiedConfig.experimentalSessionAndOrigin === 'boolean'
+      && typeof modifiedConfig.experimentalOriginDependencies === 'boolean'
     ) {
-      return modifiedConfig.experimentalSessionAndOrigin
+      return modifiedConfig.experimentalOriginDependencies
     }
 
     // otherwise, use the initial value
-    return initialConfig.experimentalSessionAndOrigin
+    return initialConfig.experimentalOriginDependencies
   }
 
   execute (event, ids, args = []) {

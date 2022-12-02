@@ -25,18 +25,6 @@ type SessionData = Cypress.Commands.Session.SessionData
  *  - session data SHOULD be cleared between specs in run mode
  */
 export default function (Commands, Cypress, cy) {
-  function throwIfNoSessionSupport () {
-    if (!Cypress.config('experimentalSessionAndOrigin')) {
-      $errUtils.throwErrByPath('sessions.experimentNotEnabled', {
-        args: {
-          // determine if using experimental session opt-in flag (removed in 9.6.0) to
-          // generate a coherent error message
-          experimentalSessionSupport: Cypress.config('experimentalSessionSupport'),
-        },
-      })
-    }
-  }
-
   const sessionsManager = new SessionsManager(Cypress, cy)
   const sessions = sessionsManager.sessions
 
@@ -49,24 +37,18 @@ export default function (Commands, Cypress, cy) {
     })
 
     Cypress.on('test:before:run:async', () => {
-      if (Cypress.config('experimentalSessionAndOrigin')) {
-        if (Cypress.config('testIsolation') === 'off') {
-          return
-        }
-
-        return navigateAboutBlank(false)
-        .then(() => sessions.clearCurrentSessionData())
-        .then(() => Cypress.backend('reset:rendered:html:origins'))
+      if (Cypress.config('testIsolation') === 'off') {
+        return
       }
 
-      return
+      return navigateAboutBlank()
+      .then(() => sessions.clearCurrentSessionData())
+      .then(() => Cypress.backend('reset:rendered:html:origins'))
     })
   })
 
   Commands.addAll({
     session (id: string | object, setup: () => void, options: Cypress.SessionOptions = { cacheAcrossSpecs: false }) {
-      throwIfNoSessionSupport()
-
       if (!id || !_.isString(id) && !_.isObject(id)) {
         $errUtils.throwErrByPath('sessions.session.wrongArgId')
       }
@@ -80,7 +62,7 @@ export default function (Commands, Cypress, cy) {
 
       // backup session command so we can set it as codeFrame location for errors later on
       const sessionCommand = cy.state('current')
-      const withinSubject = cy.state('withinSubject')
+      const withinSubjectChain = cy.state('withinSubjectChain')
 
       if (options) {
         if (!_.isObject(options)) {
@@ -189,7 +171,11 @@ export default function (Commands, Cypress, cy) {
               return err
             })
 
-            return existingSession.setup()
+            try {
+              return existingSession.setup()
+            } finally {
+              cy.breakSubjectLinksToCurrentChainer()
+            }
           })
           .then(async () => {
             cy.state('onQueueFailed', null)
@@ -326,7 +312,7 @@ export default function (Commands, Cypress, cy) {
 
                 // restore within subject back to the original subject used when
                 // the session command kicked off
-                Cypress.state('withinSubject', withinSubject)
+                Cypress.state('withinSubjectChain', withinSubjectChain)
 
                 // move to _commandToRunAfterValidation's index to ensure failures are
                 // handled correctly if next index was not found, the error was caused by
