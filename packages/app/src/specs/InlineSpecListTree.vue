@@ -34,8 +34,7 @@
           :aria-expanded="row.data.isLeaf ? null : row.data.expanded"
           @focus="resetFocusIfNecessary(row, row.index)"
           @click.prevent="submitOrToggle(row.data, row.index)"
-          @keyup.enter.space.prevent.stop="submitOrToggle(row.data, row.index, $event)"
-          @keyup.left.right.prevent.stop="toggle(row.data, row.index)"
+          @keydown.left.right.prevent.stop="toggle(row.data, row.index)"
         >
           <SpecFileItem
             v-if="row.data.isLeaf"
