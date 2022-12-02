@@ -17,7 +17,7 @@
 }
 
 .reporter-tag.reporter-tag-content {
-  &.route, // alias for xhr stubs/spies through cy.intercept() & cy.route()
+  &.route, // alias for xhr stubs/spies through cy.intercept()
   &.agent, // alias for spies/stubs through cy.spy() and cy.stub()
   &.primitive { // default
     background-color: $purple-500;
@@ -30,7 +30,7 @@
   &.count { // num of children or num of element tag
     background-color: rgba($gray-600, .25);
   }
-  
+
   &.successful-status {
     background-color: $gray-1000;
     border: $gray-900 1px solid;
@@ -52,11 +52,11 @@
     padding: 0 2px 0 4px;
   }
 }
- 
+
 .reporter-tag.reporter-tag-count {
   border-radius: 0 4px 4px 0;
 
-  &.route, // alias for xhr stubs/spies through cy.intercept() & cy.route()
+  &.route, // alias for xhr stubs/spies through cy.intercept()
   &.agent, // alias for spies/stubs through cy.spy() and cy.stub()
   &.primitive { // default
     background-color: $purple-400;

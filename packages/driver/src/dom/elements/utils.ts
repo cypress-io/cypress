@@ -43,6 +43,10 @@ export function switchCase (value, casesObj, defaultKey = 'default') {
 }
 
 export const stringify = (el, form = 'long') => {
+  if (_.isString(el)) {
+    return el
+  }
+
   // if we are formatting the window object
   if ($window.isWindow(el)) {
     return '<window>'
@@ -82,7 +86,7 @@ export const stringify = (el, form = 'long') => {
   const short = () => {
     const id = $el.prop('id')
     const klass = $el.attr('class')
-    let str = $el.prop('tagName').toLowerCase()
+    let str = $el.length ? $el.prop('tagName').toLowerCase() : el.selector
 
     if (id) {
       str += `#${id}`

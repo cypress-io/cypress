@@ -4,6 +4,23 @@ import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types/src'
 
 describe('Launchpad: Open Mode', () => {
   describe('global mode', () => {
+    it('shows a loading spinner before application mounts, and cleans up after mount', () => {
+      cy.openGlobalMode()
+
+      // Since these elements are removed when JS runs and the app mounts,
+      // they are gone by the time Cypress can assert about them
+      // but we can still make sure they are provided in the HTML payload
+      cy.request(`/__launchpad/index.html`)
+      .should(({ body }) => {
+        expect(body.includes('data-cy="plain-html-loading-spinner"')).to.be.true
+        expect(body.includes('data-cy="plain-html-spinner-styles"')).to.be.true
+      })
+
+      cy.visitLaunchpad()
+      cy.findByTestId('plain-html-loading-spinner').should('not.exist')
+      cy.findByTestId('plain-html-spinner-styles').should('not.exist')
+    })
+
     it('shows Add Project when no projects have been added', () => {
       cy.openGlobalMode()
       cy.visitLaunchpad()

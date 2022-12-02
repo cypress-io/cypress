@@ -100,16 +100,17 @@ export const attachListeners = (listenerArr) => {
 }
 
 const getAllFn = (...aliases) => {
+  let getFns
+
   if (aliases.length > 1) {
-    return getAllFn((_.isArray(aliases[1]) ? aliases[1] : aliases[1].split(' ')).map((alias) => `@${aliases[0]}:${alias}`).join(' '))
+    const aliasArray = _.isArray(aliases[1]) ? aliases[1] : aliases[1].split(' ')
+
+    getFns = aliasArray.map((alias) => cy.now('get', `@${aliases[0]}:${alias}`))
+  } else {
+    getFns = aliases[0].split(' ').map((alias) => cy.now('get', `@${aliases[0]}:${alias}`))
   }
 
-  return Promise.all(
-    aliases[0].split(' ').map((alias) => {
-      // @ts-ignore
-      return cy.now('get', alias)
-    }),
-  )
+  return () => getFns.map((fn) => fn())
 }
 
 const shouldWithTimeout = (cb, timeout = 250) => {
@@ -171,7 +172,7 @@ export const makeRequestForCookieBehaviorTests = (
   })
 }
 
-Cypress.Commands.add('getAll', getAllFn)
+Cypress.Commands.addQuery('getAll', getAllFn)
 
 Cypress.Commands.add('shouldWithTimeout', shouldWithTimeout)
 

@@ -1072,9 +1072,20 @@ export const AllCypressErrors = {
   },
   EXPERIMENTAL_SESSION_SUPPORT_REMOVED: () => {
     return errTemplate`\
-        The ${fmt.highlight(`experimentalSessionSupport`)} configuration option was removed in ${fmt.cypressVersion(`9.6.0`)} and replaced with ${fmt.highlight(`experimentalSessionAndOrigin`)}. Please update your config to use ${fmt.highlight(`experimentalSessionAndOrigin`)} instead.
+        The ${fmt.highlight(`experimentalSessionSupport`)} configuration option was removed in ${fmt.cypressVersion(`9.6.0`)}.
+
+        You can safely remove this option from your config.
         
         https://on.cypress.io/session`
+  },
+  EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED: () => {
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalSessionAndOrigin`)} configuration option was removed in ${fmt.cypressVersion(`12.0.0`)}.
+
+        You can safely remove this option from your config.
+        
+        https://on.cypress.io/session
+        https://on.cypress.io/origin`
   },
   EXPERIMENTAL_SHADOW_DOM_REMOVED: () => {
     return errTemplate`\
@@ -1130,6 +1141,19 @@ export const AllCypressErrors = {
         ${fmt.code(code)}
 
         If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/run-all-specs`
+  },
+  EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY: () => {
+    const code = errPartial`
+    {
+      e2e: {
+        experimentalOriginDependencies: true
+      },
+    }`
+
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalOriginDependencies`)} experiment is currently only supported for End to End Testing and must be configured as an e2e testing type property: ${fmt.highlightSecondary(`e2e.experimentalOriginDependencies`)}.
+
+        ${fmt.code(code)}`
   },
   FIREFOX_GC_INTERVAL_REMOVED: () => {
     return errTemplate`\

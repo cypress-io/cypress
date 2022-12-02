@@ -30,8 +30,7 @@ describe('cy.origin logging', { browser: '!webkit' }, () => {
     })
   })
 
-  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/21300
-  it.skip('logs cy.origin as group when failing with validation failure', () => {
+  it('logs cy.origin as group when failing with validation failure', () => {
     const logs: any[] = []
 
     cy.on('log:added', (attrs) => {
@@ -51,8 +50,7 @@ describe('cy.origin logging', { browser: '!webkit' }, () => {
     cy.origin(false, () => {})
   })
 
-  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/21300
-  it.skip('logs cy.origin as group when failing with serialization failure', () => {
+  it('logs cy.origin as group when failing with serialization failure', () => {
     const logs: any[] = []
 
     cy.on('log:added', (attrs) => {

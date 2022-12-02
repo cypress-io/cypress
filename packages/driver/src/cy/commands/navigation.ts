@@ -17,8 +17,6 @@ const debug = debugFn('cypress:driver:navigation')
 
 let id = null
 let previouslyVisitedLocation: LocationObject | undefined
-let hasVisitedAboutBlank: boolean = false
-let currentlyVisitingAboutBlank: boolean = false
 let knownCommandCausedInstability: boolean = false
 
 const REQUEST_URL_OPTS = 'auth failOnStatusCode retryOnNetworkFailure retryOnStatusCodeFailure retryIntervals method body headers'
@@ -31,18 +29,7 @@ const VISIT_OPTS = 'url log onBeforeLoad onLoad timeout requestTimeout'
 const reset = (test: any = {}) => {
   knownCommandCausedInstability = false
 
-  // continuously reset this
-  // before each test run!
   previouslyVisitedLocation = undefined
-
-  // TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
-  const { experimentalSessionAndOrigin } = Cypress.config()
-
-  // make sure we reset that we haven't visited about blank again
-  // strict test isolation resets the navigation history for us.
-  hasVisitedAboutBlank = experimentalSessionAndOrigin
-
-  currentlyVisitingAboutBlank = false
 
   id = test.id
 }
@@ -65,54 +52,12 @@ const timedOutWaitingForPageLoad = (ms, log) => {
   })
 }
 
-// TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
-const cannotVisitDifferentOrigin = ({ remote, existing, originalUrl, previouslyVisitedLocation, log, isCrossOriginSpecBridge = false }) => {
-  const differences: string[] = []
-
-  if (remote.protocol !== existing.protocol) {
-    differences.push('protocol')
-  }
-
-  if (remote.port !== existing.port) {
-    differences.push('port')
-  }
-
-  if (remote.superDomain !== existing.superDomain) {
-    differences.push('superdomain')
-  }
-
-  const errOpts = {
-    onFail: log,
-    args: {
-      differences: differences.join(', '),
-      previousUrl: previouslyVisitedLocation,
-      attemptedUrl: remote,
-      originalUrl,
-      isCrossOriginSpecBridge,
-      experimentalSessionAndOrigin: Cypress.config('experimentalSessionAndOrigin'),
-    },
-    errProps: {
-      isCrossOrigin: true,
-    },
-  }
-
-  $errUtils.throwErrByPath('visit.cannot_visit_different_origin', errOpts)
-}
-
 const specifyFileByRelativePath = (url, log) => {
   $errUtils.throwErrByPath('visit.specify_file_by_relative_path', {
     onFail: log,
     args: {
       attemptedUrl: url,
     },
-  })
-}
-
-const aboutBlank = (cy, win) => {
-  return new Promise((resolve) => {
-    cy.once('window:load', resolve)
-
-    return $utils.locHref('about:blank', win)
   })
 }
 
@@ -234,20 +179,6 @@ const pageLoading = (bool, Cypress, state) => {
 
 const stabilityChanged = async (Cypress, state, config, stable) => {
   debug('stabilityChanged:', stable)
-  if (currentlyVisitingAboutBlank) {
-    if (stable === false) {
-      // if we're currently visiting about blank
-      // and becoming unstable for the first time
-      // notifiy that we're page loading
-      pageLoading(true, Cypress, state)
-
-      return
-    }
-
-    // else wait until after we finish visiting
-    // about blank
-    return
-  }
 
   // let the world know that the app is page:loading
   pageLoading(!stable, Cypress, state)
@@ -303,6 +234,11 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
     message: '--waiting for new page to load--',
     event: true,
     timeout: options.timeout,
+    // If this was triggered as part of a cypress command, eg, clicking a form submit button, we don't want our
+    // snapshot timing tied to when the current command resolves. This empty 'snapshots' array prevents
+    // command.snapshotLogs() - which the command queue calls as part of resolving each command - from creating a
+    // snapshot too early.
+    snapshots: [],
     consoleProps () {
       return {
         Note: 'This event initially fires when your application fires its \'beforeunload\' event and completes when your application fires its \'load\' event after the next page loads.',
@@ -990,7 +926,7 @@ export default (Commands, Cypress, cy, state, config) => {
         return Promise.resolve(win)
       }
 
-      const go = () => {
+      const visit = () => {
         // hold onto our existing url
         const existing = $utils.locExisting()
 
@@ -1098,13 +1034,12 @@ export default (Commands, Cypress, cy, state, config) => {
 
           remote = $Location.create(url)
 
-          // if the super domain origin currently matches
-          // or if we have previously visited a location or are a spec bridge
+          // if the origin currently matches,
+          // or we have previously visited a location,
+          // or are a spec bridge,
           // then go ahead and change the iframe's src
           // we use the super domain origin as we can interact with subdomains based document.domain set to the super domain origin
-          if (remote.superDomainOrigin === existing.superDomainOrigin
-            || ((previouslyVisitedLocation || Cypress.isCrossOriginSpecBridge) && Cypress.config('experimentalSessionAndOrigin'))
-          ) {
+          if (remote.superDomainOrigin === existing.superDomainOrigin || previouslyVisitedLocation || Cypress.isCrossOriginSpecBridge) {
             if (!previouslyVisitedLocation) {
               previouslyVisitedLocation = remote
             }
@@ -1115,19 +1050,6 @@ export default (Commands, Cypress, cy, state, config) => {
             .then(() => {
               return onLoad(resp)
             })
-          }
-
-          // if we've already cy.visit'ed in the test and we are visiting a new origin,
-          // throw an error, else we'd be in a endless loop,
-          // we also need to disable retries to prevent the endless loop
-          if (previouslyVisitedLocation) {
-            // _retries is `private`. We're not using `retries()` method here because it breaks some tests.
-            // @ts-ignore
-            $utils.getTestFromRunnable(state('runnable'))._retries = 0
-
-            const params = { remote, existing, originalUrl, previouslyVisitedLocation, log: options._log }
-
-            return cannotVisitDifferentOrigin(params)
           }
 
           // tell our backend we're changing origins
@@ -1229,34 +1151,6 @@ export default (Commands, Cypress, cy, state, config) => {
             })
           })
         })
-      }
-
-      const visit = () => {
-        // REMOVE THIS ONCE GA HITS. Sessions will handle visiting
-        // about blank.
-        // Fixed with: https://github.com/cypress-io/cypress/issues/21471
-        //
-        // if we've visiting for the first time during
-        // a test then we want to first visit about:blank
-        // so that we nuke the previous state. subsequent
-        // visits will not navigate to about:blank so that
-        // our history entries are intact
-        // skip for cross origin spec bridges since they require
-        // session support which already visits
-        // about:blank between tests
-        if (!hasVisitedAboutBlank && !Cypress.isCrossOriginSpecBridge) {
-          hasVisitedAboutBlank = true
-          currentlyVisitingAboutBlank = true
-
-          return aboutBlank(cy, win)
-          .then(() => {
-            currentlyVisitingAboutBlank = false
-
-            return go()
-          })
-        }
-
-        return go()
       }
 
       return visit()

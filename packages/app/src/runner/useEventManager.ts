@@ -47,8 +47,8 @@ export function useEventManager () {
       getAutIframeModel().reattachStudio()
     })
 
-    eventManager.on('visit:blank', ({ type }) => {
-      getAutIframeModel().visitBlank({ type })
+    eventManager.on('visit:blank', ({ testIsolation }) => {
+      getAutIframeModel().visitBlankPage(testIsolation)
     })
 
     eventManager.on('run:end', () => {
