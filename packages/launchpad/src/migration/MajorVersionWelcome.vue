@@ -1,3 +1,17 @@
+<!--
+  MajorVersionWelcome.vue
+
+  This is the landing page that all users will see when they upgrade
+  to a new major version.
+
+  See the README of this package for details about this component.
+
+  Internal Cypress employees: the process around managing this content
+  is documented in `prod-eng-docs`. Refer to those docs when modifying
+  this component or reviewing changes. Changes should go through
+  a specific approval process.
+ -->
+
 <template>
   <div class="bg-no-repeat bg-cover h-screen min-h-700px lp-wrapper">
     <div
