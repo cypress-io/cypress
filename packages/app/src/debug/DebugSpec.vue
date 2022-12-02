@@ -29,12 +29,11 @@
             >
               <SpecNameDisplay
                 :spec-file-name="specData.fileName"
-                :spec-file-extension="specData.extension"
+                :spec-file-extension="specData.fileExtension"
               />
             </span>
           </div>
           <div
-            type="button"
             class="ml-10px"
           >
             <Button
@@ -42,7 +41,7 @@
               variant="white"
               class="inline-flex gap-x-10px whitespace-nowrap justify-center items-center isolate"
               :disabled="isDisabled"
-              :to="{ path: '/specs/runner', query: { file: (spec.path).replace(/\\/g, '/') } }"
+              :to="{ path: '/specs/runner', query: { file: (specData.path).replace(/\\/g, '/') } }"
             >
               <template #prefix>
                 <IconActionRefresh
@@ -50,12 +49,15 @@
                   stroke-color="indigo-500"
                 />
               </template>
-              Run Failures
+              <!-- Wrapping this with a default template to avoid an unneeded space -->
+              <template #default>
+                {{ t('debugPage.runFailures') }}
+              </template>
             </Button>
           </div>
         </div>
       </div>
-      <ul
+      <div
         v-for="test in specData.failedTests"
         :key="`test-${test.id}`"
         data-cy="test-group"
@@ -65,7 +67,7 @@
           :failed-test-result="test"
           :data-cy="`test-${test.id}`"
         />
-      </ul>
+      </div>
     </div>
   </div>
 </template>
@@ -73,6 +75,8 @@
 export interface Spec {
   id: string
   path: string
+  fileName: string
+  fileExtension: string
 }
 
 export interface TestResults {
@@ -85,6 +89,9 @@ import { IconActionRefresh } from '@cypress-design/vue-icon'
 import DebugFailedTest from './DebugFailedTest.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import SpecNameDisplay from '../specs/SpecNameDisplay.vue'
+import { useI18n } from '@cy/i18n'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   spec: Spec
@@ -92,29 +99,11 @@ const props = defineProps<{
   isDisabled?: boolean
 }>()
 
-/**
- * @param relativePath: The relative path of a failed test e.g. cypress/test/auth.spec.ts
- * We split the relative path into 3 pieces and return an object containing this split sections
- * so we can correctly style the relative path in the debug spec header. For example:
- * path: cypress/tests/ ; fileName: auth ; extension: .spec.ts
- */
-const splitHeader = (relativePath: string) => {
-  const before = relativePath.split('/')
-  const specName = before.slice(-1)[0]
-  const splitSpecName = specName.split('.')
-
-  return {
-    path: `${before.slice(0, before.length - 1).join('/') }/`,
-    fileName: splitSpecName[0],
-    extension: `.${ splitSpecName.slice(1, specName.length).join('.')}`,
-  }
-}
-
 const specData = computed(() => {
-  const header = splitHeader(props.spec.path)
-
   return {
-    ...header,
+    path: `${props.spec.path}/`,
+    fileName: props.spec.fileName,
+    fileExtension: props.spec.fileExtension,
     failedTests: props.testResults,
   }
 })

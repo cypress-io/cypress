@@ -11,9 +11,7 @@ describe('<DebugFailedTest/>', () => {
       <DebugFailedTest failedTestResult={testResult} />
     ))
 
-    cy.findByTestId('test-row').children()
-    .should('have.length', 2)
-    .and('have.css', 'color', 'rgb(90, 95, 122)')
+    cy.findByTestId('test-row').children().should('have.length', 2)
 
     testResult.titleParts.forEach((title, index) => {
       cy.findByTestId(`titleParts-${index}`).should('have.text', `${title}`)

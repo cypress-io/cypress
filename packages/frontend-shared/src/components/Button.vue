@@ -1,6 +1,6 @@
 <template>
   <button
-    v-if="((!props.href && !props.to) || (props.disabled && props.to))"
+    v-if="!props.href && !props.to"
     style="width: fit-content"
     class="border rounded flex outline-none leading-tight gap-8px items-center"
     :class="classes"
@@ -143,6 +143,10 @@ const classes = computed(() => {
 const linkVersion = computed(() => {
   if (!props.to) {
     return props.internalLink ? BaseLink : ExternalLink
+  }
+
+  if (props.disabled) {
+    return BaseLink
   }
 
   return RouterLink

@@ -98,4 +98,14 @@ describe('<Button />', { viewportWidth: 300, viewportHeight: 400 }, () => {
 
     cy.get('[data-cy="coffee-icon"]').should('be.visible')
   })
+
+  it('renders button as disabled with a disabled and to prop', () => {
+    cy.mount(() => (
+      <Button disabled to="cypress.io"> test </Button>
+    ))
+
+    cy.contains('a', 'test').should('not.have.attr', 'href')
+    cy.contains('a', 'test').should('have.attr', 'aria-disabled', 'disabled')
+    cy.contains('a', 'test').should('have.attr', 'role', 'link')
+  })
 })

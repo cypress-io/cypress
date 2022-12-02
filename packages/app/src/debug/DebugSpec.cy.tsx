@@ -1,10 +1,13 @@
 import type { Spec, TestResults } from './DebugSpec.vue'
 import DebugSpec from './DebugSpec.vue'
+import { defaultMessages } from '@cy/i18n'
 
 describe('<DebugSpec/> with multiple test results', () => {
   const spec: Spec = {
     id: '8879798756s88d',
-    path: 'cypress/tests/auth.spec.ts',
+    path: 'cypress/tests',
+    fileName: 'auth',
+    fileExtension: '.spec.ts',
   }
 
   const testResults: TestResults[] = [
@@ -26,10 +29,9 @@ describe('<DebugSpec/> with multiple test results', () => {
     cy.findByTestId('debug-spec-item').children().should('have.length', 3)
     cy.findByTestId('spec-contents').children().should('have.length', 2)
     cy.findByTestId('spec-path').should('have.text', 'cypress/tests/auth.spec.ts')
-    cy.contains('auth').should('have.css', 'color', 'rgb(67, 72, 97)')
+    cy.contains('auth').should('be.visible')
     cy.findByTestId('run-failures').should('not.be.disabled')
-    .should('have.text', ' Run Failures ')
-    .should('have.css', 'color', 'rgb(73, 86, 227)')
+    .contains(defaultMessages.debugPage.runFailures)
 
     cy.findAllByTestId('test-group').should('have.length', 2)
 
@@ -41,8 +43,8 @@ describe('<DebugSpec/> with multiple test results', () => {
       <DebugSpec spec={spec} testResults={testResults} isDisabled={true} />
     ))
 
-    cy.findByTestId('run-failures').should('be.disabled')
-    .should('have.css', 'color', 'rgb(73, 86, 227)')
+    cy.findByTestId('run-failures').should('have.attr', 'aria-disabled', 'disabled')
+    .should('not.have.attr', 'href')
 
     cy.percySnapshot()
   })
@@ -63,7 +65,9 @@ describe('<DebugSpec/> responsive UI', () => {
   it('renders complete UI on smaller viewports', { viewportHeight: 300, viewportWidth: 450 }, () => {
     const spec: Spec = {
       id: '5479adf90s7f',
-      path: 'cypress/tests/AlertBar.spec.ts',
+      path: 'cypress/tests',
+      fileName: 'AlertBar',
+      fileExtension: '.spec.ts',
     }
 
     cy.mount(() => (
@@ -72,7 +76,7 @@ describe('<DebugSpec/> responsive UI', () => {
 
     cy.findByTestId('spec-contents').children().should('have.length', 2)
     cy.findByTestId('spec-path').should('have.text', 'cypress/tests/AlertBar.spec.ts')
-    cy.contains('AlertBar').should('have.css', 'color', 'rgb(67, 72, 97)')
+    cy.contains('AlertBar').should('be.visible')
     cy.findByTestId('run-failures').should('be.visible')
 
     cy.percySnapshot()
@@ -81,7 +85,9 @@ describe('<DebugSpec/> responsive UI', () => {
   it('shows complete spec component header with long relative filePath', () => {
     const spec: Spec = {
       id: '547a0dG90s7f',
-      path: 'src/shared/frontend/cow/packages/foo/cypress/tests/e2e/components/AlertBar.spec.ts',
+      path: 'src/shared/frontend/cow/packages/foo/cypress/tests/e2e/components',
+      fileName: 'AlertBar',
+      fileExtension: '.spec.ts',
     }
 
     cy.mount(() => (
