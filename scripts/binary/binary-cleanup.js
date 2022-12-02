@@ -110,7 +110,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     })
   }
 
-  return [...Object.keys(esbuildResult.metafile.inputs), ...entryPoints]
+  return [...Object.keys(esbuildResult.metafile.inputs), ...entryPoints, 'package.json']
 }
 
 const createServerEntryPointBundle = async (buildAppDir) => {
@@ -143,25 +143,30 @@ const createServerEntryPointBundle = async (buildAppDir) => {
     electron: true,
   })
 
+  // Convert these inputs to a relative file path. Note that these paths are posix paths.
   return [...Object.keys(esbuildResult.metafile.inputs)].map((input) => `./${input}`)
 }
 
 const buildEntryPointAndCleanup = async (buildAppDir) => {
-  // 1. Retrieve all dependencies that still need to be kept in the binary. In theory, we could use the bundles generated here as single files within the binary,
-  // but for now, we just track on the dependencies that get pulled in
-  const keptDependencies = [...await getDependencyPathsToKeep(buildAppDir), 'package.json']
+  const [keptDependencies, serverEntryPointBundleDependencies] = await Promise.all([
+    // 1. Retrieve all dependencies that still need to be kept in the binary. In theory, we could use the bundles generated here as single files within the binary,
+    // but for now, we just track on the dependencies that get pulled in
+    getDependencyPathsToKeep(buildAppDir),
+    // 2. Create a bundle for the server entry point. This will be used to start the server in the binary. It returns the dependencies that are pulled in by this bundle that potentially can now be removed
+    createServerEntryPointBundle(buildAppDir),
+  ])
 
-  // 2. Create the entry point bundle and then gather the dependencies that could potentially be removed from the binary due to being in the snapshot or in the entry point bundle
+  // 3. Gather the dependencies that could potentially be removed from the binary due to being in the snapshot or in the entry point bundle
   const potentiallyRemovedDependencies = [
     ...snapshotMetadata.healthy,
     ...snapshotMetadata.deferred,
     ...snapshotMetadata.norewrite,
-    ...await createServerEntryPointBundle(buildAppDir),
+    ...serverEntryPointBundleDependencies,
   ]
 
   console.log(`potentially removing ${potentiallyRemovedDependencies.length} dependencies`)
 
-  // 3. Remove all dependencies that are in the snapshot but not in the list of kept dependencies from the binary
+  // 4. Remove all dependencies that are in the snapshot but not in the list of kept dependencies from the binary
   await Promise.all(potentiallyRemovedDependencies.map(async (dependency) => {
     const typeScriptlessDependency = dependency.replace(/\.ts$/, '.js')
 
@@ -171,10 +176,10 @@ const buildEntryPointAndCleanup = async (buildAppDir) => {
     }
   }))
 
-  // 4. Consolidate dependencies that are safe to consolidate (`lodash` and `bluebird`)
+  // 5. Consolidate dependencies that are safe to consolidate (`lodash` and `bluebird`)
   await consolidateDeps({ projectBaseDir: buildAppDir })
 
-  // 5. Remove various unnecessary files from the binary to further clean things up. Likely, there is additional work that can be done here
+  // 6. Remove various unnecessary files from the binary to further clean things up. Likely, there is additional work that can be done here
   await del([
     // Remove test files
     path.join(buildAppDir, '**', 'test'),
@@ -226,7 +231,7 @@ const buildEntryPointAndCleanup = async (buildAppDir) => {
     path.join(buildAppDir, '**', 'yarn.lock'),
   ], { force: true })
 
-  // 6. Remove any empty directories as a result of the rest of the cleanup
+  // 7. Remove any empty directories as a result of the rest of the cleanup
   await removeEmptyDirectories(buildAppDir)
 }
 

@@ -3,10 +3,9 @@ const captureStackTrace = Error.captureStackTrace
 const toString = Function.prototype.toString
 const callFn = Function.call
 
-// eslint-disable-next-line no-unused-vars
 const stackIntegrityCheck = function stackIntegrityCheck (options) {
   const originalStackTraceLimit = OrigError.stackTraceLimit
-  const originalStackTrace = OrigError.prepareStackTrace
+  const originalPrepareStackTrace = OrigError.prepareStackTrace
 
   OrigError.stackTraceLimit = Infinity
 
@@ -19,7 +18,7 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
   captureStackTrace(tempError, arguments.callee)
   const stack = tempError.stack.filter((frame) => !frame.getFileName().startsWith('node:internal') && !frame.getFileName().startsWith('node:electron'))
 
-  OrigError.prepareStackTrace = originalStackTrace
+  OrigError.prepareStackTrace = originalPrepareStackTrace
   OrigError.stackTraceLimit = originalStackTraceLimit
 
   if (stack.length !== options.stackToMatch.length) {
@@ -27,9 +26,8 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
   }
 
   for (let index = 0; index < options.stackToMatch.length; index++) {
-    const expectedFunctionName = options.stackToMatch[index].functionName
+    const { functionName: expectedFunctionName, fileName: expectedFileName } = options.stackToMatch[index]
     const actualFunctionName = stack[index].getFunctionName()
-    const expectedFileName = options.stackToMatch[index].fileName
     const actualFileName = stack[index].getFileName()
 
     if (expectedFunctionName && actualFunctionName !== expectedFunctionName) {
@@ -49,12 +47,14 @@ function validateToString () {
 }
 
 function validateElectron (electron) {
+  // Hard coded function as this is electron code and there's not an easy way to get the function string at package time. If this fails on an updated version of electron, we'll need to update this.
   if (toString.call(electron.app.getAppPath) !== 'function getAppPath() { [native code] }') {
     throw new Error(`Integrity check failed for toString.call(electron.app.getAppPath)`)
   }
 }
 
 function validateFs (fs) {
+  // Hard coded function as this is electron code and there's not an easy way to get the function string at package time. If this fails on an updated version of electron, we'll need to update this.
   if (toString.call(fs.readFileSync) !== `function(t,r){const n=splitPath(t);if(!n.isAsar)return g.apply(this,arguments);const{asarPath:i,filePath:a}=n,o=getOrCreateArchive(i);if(!o)throw createError("INVALID_ARCHIVE",{asarPath:i});const c=o.getFileInfo(a);if(!c)throw createError("NOT_FOUND",{asarPath:i,filePath:a});if(0===c.size)return r?"":s.Buffer.alloc(0);if(c.unpacked){const t=o.copyFileOut(a);return e.readFileSync(t,r)}if(r){if("string"==typeof r)r={encoding:r};else if("object"!=typeof r)throw new TypeError("Bad arguments")}else r={encoding:null};const{encoding:f}=r,l=s.Buffer.alloc(c.size),u=o.getFdAndValidateIntegrityLater();if(!(u>=0))throw createError("NOT_FOUND",{asarPath:i,filePath:a});return logASARAccess(i,a,c.offset),e.readSync(u,l,0,c.size,c.offset),validateBufferIntegrity(l,c.integrity),f?l.toString(f):l}`) {
     throw new Error(`Integrity check failed for toString.call(fs.readFileSync)`)
   }
