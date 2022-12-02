@@ -2671,7 +2671,7 @@ describe('Routes', () => {
 
           const body = cleanResponseBody(res.body)
 
-          expect(body).to.eq('<html><head></head></html>')
+          expect(body).not.to.include('document.domain =')
         })
       })
 
