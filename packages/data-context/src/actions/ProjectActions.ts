@@ -358,7 +358,7 @@ export class ProjectActions {
     try {
       const src = await fs.readFile(filePath, 'utf8')
 
-      let result = parseReactComponent(src, reactDocgenResolvers.findAllExportedComponentDefinitions)
+      const result = parseReactComponent(src, reactDocgenResolvers.findAllExportedComponentDefinitions)
       // types appear to be incorrect in react-docgen@6.0.0-alpha.3
       // TODO: update when 6.0.0 stable is out for fixed types.
       const defs = (Array.isArray(result) ? result : [result]) as ReactComponentDescriptor[]

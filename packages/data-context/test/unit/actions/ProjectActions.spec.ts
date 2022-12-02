@@ -38,8 +38,17 @@ describe('ProjectActions', () => {
     it('returns only exported React components from file with functional components', async () => {
       const reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter-multiple-components.jsx`)
 
-      expect(reactComponents).to.have.length(1)
+      expect(reactComponents).to.have.length(2)
       expect(reactComponents[0].displayName).to.equal('CounterContainer')
+      expect(reactComponents[1].displayName).to.equal('CounterView')
+    })
+
+    it('returns both named and default exports', async () => {
+      const reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter-mixed-multiple-components.tsx`)
+
+      expect(reactComponents).to.have.length(2)
+      expect(reactComponents[0].displayName).to.equal('CounterContainer')
+      expect(reactComponents[1].displayName).to.equal('CounterView')
     })
 
     it('returns React components from a tsx file', async () => {
@@ -54,6 +63,21 @@ describe('ProjectActions', () => {
 
       expect(reactComponents).to.have.length(1)
       expect(reactComponents[0].displayName).to.equal('CounterDefault')
+    })
+
+    it('returns React components defined with arrow functions', async () => {
+      const reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter-arrow-function.jsx`)
+
+      expect(reactComponents).to.have.length(1)
+      expect(reactComponents[0].displayName).to.equal('Counter')
+    })
+
+    it('returns React components from a file with multiple separate export statements', async () => {
+      const reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter-separate-exports.jsx`)
+
+      expect(reactComponents).to.have.length(2)
+      expect(reactComponents[0].displayName).to.equal('CounterView')
+      expect(reactComponents[1].displayName).to.equal('CounterContainer')
     })
 
     it('does not throw while parsing empty file', async () => {
