@@ -230,53 +230,7 @@ describe('http/response-middleware', function () {
       })
     })
 
-    it('doesn\'t inject anything when html does not match origin policy and "experimentalSessionAndOrigin" config flag is NOT set to true', function () {
-      prepareContext({
-        req: {
-          proxiedUrl: 'http://foobar.com',
-          isAUTFrame: true,
-          cookies: {},
-          headers: {},
-        },
-        incomingRes: {
-          headers: {
-            'content-type': 'text/html',
-          },
-        },
-      })
-
-      return testMiddleware([SetInjectionLevel], ctx)
-      .then(() => {
-        expect(ctx.res.wantsInjection).to.be.false
-      })
-    })
-
-    it('injects "fullCrossOrigin" when "experimentalSessionAndOrigin" config flag is set to true for cross-origin html"', function () {
-      prepareContext({
-        req: {
-          proxiedUrl: 'http://foobar.com',
-          isAUTFrame: true,
-          cookies: {},
-          headers: {},
-        },
-        incomingRes: {
-          headers: {
-            'content-type': 'text/html',
-          },
-        },
-        secondaryOrigins: ['http://foobar.com'],
-        config: {
-          experimentalSessionAndOrigin: true,
-        },
-      })
-
-      return testMiddleware([SetInjectionLevel], ctx)
-      .then(() => {
-        expect(ctx.res.wantsInjection).to.equal('fullCrossOrigin')
-      })
-    })
-
-    it('injects "fullCrossOrigin" when request is in origin stack for cross-origin html"', function () {
+    it('injects "fullCrossOrigin" when request is cross-origin html', function () {
       prepareContext({
         req: {
           proxiedUrl: 'http://example.com',
@@ -288,10 +242,6 @@ describe('http/response-middleware', function () {
           headers: {
             'content-type': 'text/html',
           },
-        },
-        secondaryOrigins: ['http://example.com', 'http://foobar.com'],
-        config: {
-          experimentalSessionAndOrigin: true,
         },
       })
 
@@ -330,7 +280,7 @@ describe('http/response-middleware', function () {
           return this.renderedHTMLOrigins
         },
         req: {
-          proxiedUrl: 'http://foobar.com',
+          proxiedUrl: 'http://127.0.0.1:3501/',
           isAUTFrame: true,
           cookies: {},
           headers: {
@@ -374,10 +324,6 @@ describe('http/response-middleware', function () {
           headers: {
             'content-type': 'text/html',
           },
-        },
-        secondaryOrigins: ['http://foobar.com'],
-        config: {
-          experimentalSessionAndOrigin: true,
         },
       })
 
@@ -590,11 +536,6 @@ describe('http/response-middleware', function () {
       // set the primary remote state
       remoteStates.set('http://127.0.0.1:3501')
 
-      // set the secondary remote states
-      props.secondaryOrigins?.forEach((origin) => {
-        remoteStates.set(origin, {}, false)
-      })
-
       ctx = {
         incomingRes: {
           headers: {},
@@ -691,38 +632,6 @@ describe('http/response-middleware', function () {
       ctx.getAUTUrl = () => 'http://www.foobar.com/index.html'
       // set the primaryOrigin to true to signal we do NOT need to simulate top
       ctx.remoteStates.isPrimarySuperDomainOrigin = () => true
-
-      await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
-
-      expect(cookieJar.setCookie).not.to.have.been.called
-      expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value')
-    })
-
-    it('is a noop in the cookie jar when experimentalSessionAndOrigin is false', async function () {
-      const appendStub = sinon.stub()
-
-      const cookieJar = {
-        getAllCookies: () => [{ key: 'cookie', value: 'value' }],
-        setCookie: sinon.stub(),
-      }
-
-      const ctx = prepareContext({
-        cookieJar,
-        res: {
-          append: appendStub,
-        },
-        incomingRes: {
-          headers: {
-            'set-cookie': 'cookie=value',
-          },
-        },
-      })
-
-      ctx.config.experimentalSessionAndOrigin = false
-
-      // a case where top would need to be simulated, but the experimental flag is off
-      ctx.getAUTUrl = () => 'http://www.foobar.com/index.html'
-      ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
 
       await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
@@ -1380,11 +1289,6 @@ describe('http/response-middleware', function () {
       // set the primary remote state
       remoteStates.set('http://foobar.com')
 
-      // set the secondary remote states
-      props.secondaryOrigins?.forEach((origin) => {
-        remoteStates.set(origin, {}, false)
-      })
-
       remoteStates.isPrimarySuperDomainOrigin = () => false
 
       const cookieJar = props.cookieJar || {
@@ -1412,9 +1316,6 @@ describe('http/response-middleware', function () {
           pipe () {
             return { on () {} }
           },
-        },
-        config: {
-          experimentalSessionAndOrigin: true,
         },
         getCookieJar: () => cookieJar,
         getAUTUrl: () => 'http://www.foobar.com/primary-origin.html',

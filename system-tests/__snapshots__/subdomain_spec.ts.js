@@ -22,36 +22,29 @@ exports['e2e subdomain / passes'] = `
     ✓ can directly visit a subdomain in another test
     ✓ issue: #207: does not duplicate or hostOnly cookies as a domain cookie
     ✓ correctly sets domain based cookies
-    - issue #362: do not set domain based (non hostOnly) cookies by default
-    - sets a hostOnly cookie by default
+    ✓ does not set domain based (non hostOnly) cookies by default
+    ✓ sets a hostOnly cookie by default
     ✓ issue #361: incorrect cookie synchronization between cy.request redirects
     ✓ issue #362: incorrect cookie synchronization between cy.visit redirects
     ✓ issue #600 can visit between nested subdomains
 
 
-  7 passing
-  2 pending
+  9 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Tests:        9                                                                                │
-  │ Passing:      7                                                                                │
+  │ Passing:      9                                                                                │
   │ Failing:      0                                                                                │
-  │ Pending:      2                                                                                │
+  │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     subdomain.cy.js                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/subdomain.cy.js.mp4                 (X second)
 
 
 ====================================================================================================
@@ -61,9 +54,9 @@ exports['e2e subdomain / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  subdomain.cy.js                          XX:XX        9        7        -        2        - │
+  │ ✔  subdomain.cy.js                          XX:XX        9        9        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        9        7        -        2        -  
+    ✔  All specs passed!                        XX:XX        9        9        -        -        -  
 
 
 `

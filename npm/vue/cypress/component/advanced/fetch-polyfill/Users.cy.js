@@ -10,21 +10,18 @@ describe('Fetching users with polyfill', () => {
   })
 
   it('can spy on the fetch requests', () => {
-    cy.server()
-    cy.route('/users?_limit=3').as('users')
+    cy.intercept('/users?_limit=3').as('users')
     mount(Users)
     cy.wait('@users')
-    .its('responseBody.length')
+    .its('response.body.length')
     .then((length) => {
       cy.get('.user').should('have.length', length)
     })
   })
 
   it('shows loading UI while fetch is happening', () => {
-    cy.server()
-    cy.route({
-      url: '/users?_limit=3',
-      response: 'fixture:users',
+    cy.intercept('/users?_limit=3', {
+      fixture: 'users',
       delay: 1000,
     })
 
