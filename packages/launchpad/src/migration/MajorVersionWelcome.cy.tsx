@@ -23,13 +23,13 @@ describe('<MajorVersionWelcome />', { viewportWidth: 1280, viewportHeight: 1400 
     })
 
     cy.get('[data-cy="previous-release-highlights"]').within(() => {
-      cy.contains('a[href="https://on.cypress.io/changelog#11-0-0"]', '11.0.0').should('be.visible')
-      cy.contains('a[href="https://on.cypress.io/changelog#10-0-0"]', '10.0.0').should('be.visible')
+      cy.contains('a[href="https://on.cypress.io/changelog#11-0-0"]', '11.0.0')
+      cy.contains('a[href="https://on.cypress.io/changelog#10-0-0"]', '10.0.0')
     })
 
     cy.get('[data-cy="major-version-welcome-footer"]').within(() => {
-      cy.contains('a[href="https://on.cypress.io/changelog"]', text.linkReleaseNotes).should('be.visible')
-      cy.contains('button', text.actionContinue).should('be.visible')
+      cy.contains('a[href="https://on.cypress.io/changelog"]', text.linkReleaseNotes)
+      cy.contains('button', text.actionContinue).scrollIntoView()
       cy.contains('button', text.actionContinue).click()
     })
 
