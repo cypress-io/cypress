@@ -185,8 +185,8 @@ describe('src/cy/commands/sessions/utils.ts', () => {
         navigateAboutBlank()
         navigateAboutBlank(true)
         expect(stub).to.have.been.calledTwice
-        expect(stub.args[0]).to.deep.eq(['cy:visit:blank', { testIsolationLevel: 'on' }])
-        expect(stub.args[1]).to.deep.eq(['cy:visit:blank', { testIsolationLevel: 'on' }])
+        expect(stub.args[0]).to.deep.eq(['cy:visit:blank', { testIsolation: true }])
+        expect(stub.args[1]).to.deep.eq(['cy:visit:blank', { testIsolation: true }])
       })
     })
   })
