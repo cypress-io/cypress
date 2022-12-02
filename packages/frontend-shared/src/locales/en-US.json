@@ -515,6 +515,10 @@
       "experimentalRunAllSpecs": {
         "name": "Run All Specs",
         "description": "Enables the \"Run All Specs\" UI feature, allowing the execution of multiple specs sequentially."
+      },
+      "experimentalOriginDependencies": {
+        "name": "Origin Dependencies",
+        "description": "Enables support for `require`/`import` within `cy.origin`."
       }
     },
     "device": {

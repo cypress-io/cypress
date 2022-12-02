@@ -59,6 +59,7 @@ const _summaries: StringValues = {
   experimentalStudio: 'Generate and save commands directly to your test suite by interacting with your app as an end user would.',
   experimentalWebKitSupport: 'Adds support for testing in the WebKit browser engine used by Safari. See https://on.cypress.io/webkit-experiment for more information.',
   experimentalRunAllSpecs: 'Enables the "Run All Specs" UI feature, allowing the execution of multiple specs sequentially',
+  experimentalOriginDependencies: 'Enables support for `require`/`import` within `cy.origin`',
 }
 
 /**
@@ -80,6 +81,7 @@ const _names: StringValues = {
   experimentalStudio: 'Studio',
   experimentalWebKitSupport: 'WebKit Support',
   experimentalRunAllSpecs: 'Run All Specs',
+  experimentalOriginDependencies: 'Origin Dependencies',
 }
 
 /**

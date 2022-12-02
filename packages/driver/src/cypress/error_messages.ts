@@ -1218,7 +1218,7 @@ export default {
 
         Variables must either be defined within the ${cmd('origin')} command or passed in using the args option.
 
-        Using \`require()\` or \`import()\` to include dependencies requires using the latest version of \`@cypress/webpack-preprocessor\`.`,
+        Using \`require()\` or \`import()\` to include dependencies requires enabling the \`experimentalOriginDependencies\` flag and using the latest version of \`@cypress/webpack-preprocessor\`.`,
     },
     callback_mixes_sync_and_async: {
       message: stripIndent`\
