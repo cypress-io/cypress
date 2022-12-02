@@ -229,7 +229,7 @@ describe('src/cy/commands/querying/within', () => {
 
       it('provides additional information in console prop', () => {
         cy.get('div').within(() => {})
-        .then(function () {
+        cy.then(function () {
           const { lastLog } = this
 
           const consoleProps = lastLog.get('consoleProps')()
