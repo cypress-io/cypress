@@ -913,10 +913,20 @@ export default {
     },
     test_stopped: 'Cypress test was stopped while running this command.',
     cross_origin_command ({ commandOrigin, autOrigin }) {
-      return stripIndent`\
-        The command was expected to run against origin \`${commandOrigin }\` but the application is at origin \`${autOrigin}\`.
+      return {
+        message: stripIndent`\
+        The command was expected to run against origin \`${commandOrigin}\` but the application is at origin \`${autOrigin}\`.
 
-        This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.`
+        This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
+        
+        Using ${cmd('origin')} to wrap the commands run on \`${autOrigin}\` will likely fix this issue.
+
+        \`cy.origin('${autOrigin}', () => {\`
+        \`  <commands targeting ${autOrigin} go here>\`
+        \`})\`
+        `,
+        docsUrl: 'https://on.cypress.io/cy-visit-succeeded-but-commands-fail',
+      }
     },
   },
 
