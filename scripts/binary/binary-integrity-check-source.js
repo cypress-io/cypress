@@ -4,7 +4,7 @@ const toString = Function.prototype.toString
 const callFn = Function.call
 
 const integrityErrorMessage = `
-We detected an issue with the integrity of the Cypress binary. It may have been compromised and is not safe to run. We recommend re-installing the Cypress binary with:
+We detected an issue with the integrity of the Cypress binary. It may have been modified and is not safe to run. We recommend re-installing the Cypress binary with:
 
 \`cypress cache clear && cypress install\`
 `
