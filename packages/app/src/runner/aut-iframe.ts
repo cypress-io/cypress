@@ -122,7 +122,7 @@ export class AutIframe {
     this.$iframe?.removeAttr('src')
   }
 
-  visitBlankPage = (testIsolationLevel?: 'on') => {
+  visitBlankPage = (testIsolation?: true) => {
     return new Promise<void>((resolve) => {
       if (!this.$iframe) {
         return
@@ -131,12 +131,10 @@ export class AutIframe {
       this.$iframe[0].src = 'about:blank'
 
       this.$iframe.one('load', () => {
-        switch (testIsolationLevel) {
-          case 'on':
-            this._showTestIsolationBlankPage()
-            break
-          default:
-            this._showInitialBlankPage()
+        if (testIsolation) {
+          this._showTestIsolationBlankPage()
+        } else {
+          this._showInitialBlankPage()
         }
 
         resolve()

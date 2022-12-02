@@ -1089,7 +1089,7 @@ describe('config/src/project/utils', () => {
             supportFile: { value: false, from: 'config' },
             supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
-            testIsolation: { value: 'on', from: 'default' },
+            testIsolation: { value: true, from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
             userAgent: { value: null, from: 'default' },
             video: { value: true, from: 'default' },
@@ -1206,7 +1206,7 @@ describe('config/src/project/utils', () => {
             supportFile: { value: false, from: 'config' },
             supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
-            testIsolation: { value: 'on', from: 'default' },
+            testIsolation: { value: true, from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
             userAgent: { value: null, from: 'default' },
             video: { value: true, from: 'default' },
@@ -1229,7 +1229,7 @@ describe('config/src/project/utils', () => {
           projectRoot: '/foo/bar',
           supportFile: false,
           baseUrl: 'http://localhost:8080',
-          testIsolation: 'off',
+          testIsolation: false,
         }
 
         const options = {
@@ -1241,7 +1241,7 @@ describe('config/src/project/utils', () => {
         return mergeDefaults(obj, options, {}, getFilesByGlob)
         .then((cfg) => {
           expect(cfg.resolved).to.have.property('testIsolation')
-          expect(cfg.resolved.testIsolation).to.deep.eq({ value: 'off', from: 'config' })
+          expect(cfg.resolved.testIsolation).to.deep.eq({ value: false, from: 'config' })
         })
       })
     })
