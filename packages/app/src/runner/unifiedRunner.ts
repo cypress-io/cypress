@@ -2,7 +2,7 @@ import { Ref, onMounted, ref, watch, watchEffect, onBeforeUnmount, readonly } fr
 import { getAutIframeModel, UnifiedRunnerAPI } from '../runner'
 import { useSpecStore } from '../store'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
-import type { SpecFile } from '@packages/types/src'
+import { RUN_ALL_SPECS, RUN_ALL_SPECS_KEY, SpecFile } from '@packages/types/src'
 import { useRoute } from 'vue-router'
 import { getPathForPlatform } from '../paths'
 
@@ -33,6 +33,10 @@ export function useUnifiedRunner () {
           // no file param, we are not showing a file
           // so no action needed when specs list updates
           return
+        }
+
+        if (queryFile === RUN_ALL_SPECS_KEY) {
+          return specStore.setActiveSpec(RUN_ALL_SPECS)
         }
 
         const activeSpecInSpecsList = specs.value.find((x) => x.relative === queryFile)

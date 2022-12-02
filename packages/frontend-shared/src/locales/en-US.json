@@ -217,7 +217,8 @@
         "title": "Record your first run",
         "content": "Record a run to see your test results in Cypress Cloud. You can then optimize your test suite, debug failing and flaky tests, and integrate with your favorite tools."
       }
-    }
+    },
+    "runSelectedSpecs": "Run {n} spec | Run {n} specs"
   },
   "noResults": {
     "defaultMessage": "No results matched your search:",
@@ -514,6 +515,10 @@
       "experimentalWebKitSupport": {
         "name": "WebKit Support",
         "description": "Adds support for testing in the WebKit browser engine used by Safari. See https://on.cypress.io/webkit-experiment for more information."
+      },
+      "experimentalRunAllSpecs": {
+        "name": "Run All Specs",
+        "description": "Enables the \"Run All Specs\" UI feature, allowing the execution of multiple specs sequentially."
       }
     },
     "device": {
