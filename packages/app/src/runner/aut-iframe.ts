@@ -122,7 +122,7 @@ export class AutIframe {
     this.$iframe?.removeAttr('src')
   }
 
-  visitBlankPage = (testIsolation?: true) => {
+  visitBlankPage = (testIsolation?: boolean) => {
     return new Promise<void>((resolve) => {
       if (!this.$iframe) {
         return
