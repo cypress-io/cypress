@@ -354,7 +354,6 @@ export class ProjectActions {
     this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, args)
   }
 
-  // @ts-ignore
   async getReactComponentsFromFile (filePath: string): Promise<ReactComponentDescriptor[]> {
     try {
       const src = await fs.readFile(filePath, 'utf8')
