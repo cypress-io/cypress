@@ -6,7 +6,6 @@ import path from 'path'
 import assert from 'assert'
 
 import type { ProjectShape } from '../data/coreDataShape'
-
 import type { DataContext } from '..'
 import { codeGenerator, SpecOptions, hasNonExampleSpec } from '../codegen'
 import templates from '../codegen/templates'
