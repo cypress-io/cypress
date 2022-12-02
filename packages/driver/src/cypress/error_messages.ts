@@ -1277,7 +1277,7 @@ export default {
         docsUrl: 'https://on.cypress.io/github-issue/20721',
       },
       Cypress_session: {
-        message: `\`Cypress.session.*\` methods are not supported in the ${cmd('switchToDomain')} callback. Consider using them outside of the callback instead.`,
+        message: `\`Cypress.session.*\` methods are not supported in the ${cmd('origin')} callback. Consider using them outside of the callback instead.`,
         docsUrl: 'https://on.cypress.io/session-api',
       },
     },
