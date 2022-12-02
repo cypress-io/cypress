@@ -73,7 +73,7 @@ describe('e2e cy.origin errors', () => {
     },
   })
 
-  systemTests.it.only('errors when using a plugin that has a custom command that uses cy.origin with a dependency', {
+  systemTests.it('errors when using a plugin that has a custom command that uses cy.origin with a dependency', {
     browser: '!webkit', // TODO(webkit): cy.origin is not currently supported in webkit
     project: 'origin-dependencies',
     spec: 'cross_origin.cy.js',
