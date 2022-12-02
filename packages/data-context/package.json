@@ -75,7 +75,7 @@
     "@types/sinon-chai": "3.2.8",
     "@types/stringify-object": "^3.0.0",
     "mocha": "7.0.1",
-    "react-docgen": "5.4.3",
+    "react-docgen": "6.0.0-alpha.3",
     "rimraf": "3.0.2",
     "sinon": "13.0.2",
     "sinon-chai": "3.7.0",
