@@ -124,16 +124,7 @@ const toggle = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, idx: 
   row.toggle()
 }
 
-const submitOrToggle = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, idx: number, event?: KeyboardEvent) => {
-  if (event) {
-    const target = event.target as HTMLElement
-
-    if (target?.closest('[data-run-all-specs-button]')) {
-    // event was fired from a button inside the row, do nothing up here
-      return
-    }
-  }
-
+const submitOrToggle = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, idx: number) => {
   // If the user selects a new spec while in studio mode, turn studio mode off
   const studioStore = useStudioStore()
 
