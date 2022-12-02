@@ -85,6 +85,13 @@ describe('src/cy/commands/querying/within', () => {
       })
     })
 
+    it('supports multiple subjects', () => {
+      cy.get('ul li').should('have.length', 23)
+      cy.get('ul').within(() => {
+        cy.get('li').should('have.length', 23)
+      })
+    })
+
     it('supports complicated nested withins', () => {
       const span1 = cy.$$('#button-text a span')
       const span2 = cy.$$('#button-text button span')
