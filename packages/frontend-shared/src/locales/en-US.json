@@ -862,5 +862,8 @@
     "alpha": "Alpha",
     "beta": "Beta",
     "new": "New"
+  },
+  "debugPage": {
+    "runFailures": "Run Failures"
   }
 }

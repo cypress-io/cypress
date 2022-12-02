@@ -59,11 +59,11 @@
       <template #default>
         <slot />
       </template>
-      <template #suffix>
-        <slot
-          v-if="suffixIcon || $slots.suffix"
-          name="suffix"
-        >
+      <template
+        v-if="suffixIcon || $slots.suffix"
+        #suffix
+      >
+        <slot name="suffix">
           <component
             :is="suffixIcon"
             :class="suffixIconClass"
@@ -88,6 +88,7 @@ const VariantClassesTable = {
   linkBold: 'border-transparent text-indigo-500 font-medium',
   text: 'border-0',
   secondary: 'bg-jade-500 text-white hocus-secondary',
+  white: 'bg-white text-indigo-500 font-medium hocus-default',
 } as const
 
 const SizeClassesTable = {
@@ -142,6 +143,10 @@ const classes = computed(() => {
 const linkVersion = computed(() => {
   if (!props.to) {
     return props.internalLink ? BaseLink : ExternalLink
+  }
+
+  if (props.disabled) {
+    return BaseLink
   }
 
   return RouterLink
