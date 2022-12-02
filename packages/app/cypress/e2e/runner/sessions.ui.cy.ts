@@ -347,7 +347,7 @@ describe('runner/cypress sessions.ui.spec', {
     // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
   })
 
-  describe('errors', { testIsolation: 'off' }, () => {
+  describe('errors', { testIsolation: false }, () => {
     describe('created session', () => {
       before(() => {
         cy.then(async () => {

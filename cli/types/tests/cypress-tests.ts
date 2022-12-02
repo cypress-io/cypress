@@ -39,7 +39,7 @@ namespace CypressConfigTests {
   Cypress.config({ e2e: { baseUrl: '.', }}) // $ExpectError
   Cypress.config({ component: { baseUrl: '.', devServer: () => ({} as any) } }) // $ExpectError
   Cypress.config({ e2e: { indexHtmlFile: 'index.html' } }) // $ExpectError
-  Cypress.config({ testIsolation: 'off' }) // $ExpectError
+  Cypress.config({ testIsolation: false }) // $ExpectError
 
   Cypress.config('taskTimeout') // $ExpectType number
   Cypress.config('includeShadowDom') // $ExpectType boolean
@@ -890,7 +890,7 @@ namespace CypressTestConfigOverridesTests {
     retries: { run: 3 } // $ExpectError
   }, () => { })
   it('test', {
-    testIsolation: 'off', // $ExpectError
+    testIsolation: false, // $ExpectError
   }, () => { })
 
   it.skip('test', {}, () => {})
@@ -909,7 +909,7 @@ namespace CypressTestConfigOverridesTests {
   }, () => {})
 
   describe('suite', {
-    testIsolation: 'off',
+    testIsolation: false,
   }, () => {})
 
   context('suite', {}, () => {})

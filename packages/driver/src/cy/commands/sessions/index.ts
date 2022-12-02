@@ -37,7 +37,7 @@ export default function (Commands, Cypress, cy) {
     })
 
     Cypress.on('test:before:run:async', () => {
-      if (Cypress.config('testIsolation') === 'off') {
+      if (!Cypress.config('testIsolation')) {
         return
       }
 

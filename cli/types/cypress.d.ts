@@ -2913,23 +2913,23 @@ declare namespace Cypress {
      * Note: the [`cy.session()`](https://on.cypress.io/session) command will inherent this value to determine whether
      * or not the page is cleared when the command executes. This command is only available in end-to-end testing.
      *
-     *  - on - The page is cleared before each test. Cookies, local storage and session storage in all domains are cleared
+     *  - true - The page is cleared before each test. Cookies, local storage and session storage in all domains are cleared
      *         before each test. The `cy.session()` command will also clear the page and current browser context when creating
      *         or restoring the browser session.
-     *  - off - The current browser state will persist between tests. The page does not clear before the test and cookies, local
+     *  - false - The current browser state will persist between tests. The page does not clear before the test and cookies, local
      *          storage and session storage will be available in the next test. The `cy.session()` command will only clear the
      *          current browser context when creating or restoring the browser session - the current page will not clear.
      *
      * Tradeoffs:
      *      Turning test isolation off may improve performance of end-to-end tests, however, previous tests could impact the
      *      browser state of the next test and cause inconsistency when using .only(). Be mindful to write isolated tests when
-     *      test isolation is off. If a test in the suite impacts the state of other tests and it were to fail, you could see
+     *      test isolation is false. If a test in the suite impacts the state of other tests and it were to fail, you could see
      *      misleading errors in later tests which makes debugging clunky. See the [documentation](https://on.cypress.io/test-isolation)
      *      for more information.
      *
-     * @default 'on'
+     * @default true
      */
-    testIsolation: 'on' | 'off'
+    testIsolation: boolean
     /**
      * Path to folder where videos will be saved after a headless or CI run
      * @default "cypress/videos"

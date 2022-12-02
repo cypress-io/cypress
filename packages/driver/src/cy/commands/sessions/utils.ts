@@ -195,7 +195,7 @@ const getPostMessageLocalStorage = (specWindow, origins): Promise<any[]> => {
 
 function navigateAboutBlank () {
   // Component testing does not support navigation and handles clearing the page via mount utils
-  if (Cypress.testingType === 'component' || Cypress.config('testIsolation') === 'off') {
+  if (Cypress.testingType === 'component' || !Cypress.config('testIsolation')) {
     return Promise.resolve()
   }
 
@@ -204,7 +204,7 @@ function navigateAboutBlank () {
 
     Cypress.action('cy:url:changed', '')
 
-    return Cypress.action('cy:visit:blank', { testIsolationLevel: 'on' }) as unknown as Promise<void>
+    return Cypress.action('cy:visit:blank', { testIsolation: true }) as unknown as Promise<void>
   })
 }
 
