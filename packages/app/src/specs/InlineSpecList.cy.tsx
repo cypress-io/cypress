@@ -233,11 +233,16 @@ describe('InlineSpecList', () => {
       })
 
       cy.findAllByTestId('spec-file-item').should('have.length', 4)
-      cy.findAllByTestId('run-all-specs-button').eq(0).click()
-      cy.findAllByTestId('run-all-specs-button').eq(0).type(' ')
+      cy.findAllByTestId('run-all-specs-button').eq(0)
+      .click()
+      .type(' ')
+
       // make sure typing didn't change displayed items
       cy.findAllByTestId('spec-file-item').should('have.length', 4)
-      cy.findAllByTestId('run-all-specs-button').eq(1).type('{enter}')
+      cy.findAllByTestId('run-all-specs-button').eq(1)
+      .focus()
+      .type('{enter}')
+
       // make sure typing didn't change displayed items
       cy.findAllByTestId('spec-file-item').should('have.length', 4)
       cy.get('@mutationStub').should('have.been.calledThrice')
