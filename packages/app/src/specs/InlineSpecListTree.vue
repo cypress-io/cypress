@@ -52,7 +52,17 @@
             :expanded="treeSpecList[row.index].expanded.value"
             :indexes="row.data.highlightIndexes"
             data-cy="directory-item"
-          />
+          >
+            <template #run-all-specs>
+              <InlineRunAllSpecs
+                v-if="runAllSpecsStore.isRunAllSpecsAllowed"
+                :directory="row.data.name"
+                class="flex h-full opacity-0 run-all justify-center items-center"
+                :spec-number="runAllSpecsStore.directoryChildren[row.data.id].length"
+                @runAllSpecs="() => runAllSpecsStore.runSelectedSpecs(row.data.id)"
+              />
+            </template>
+          </DirectoryItem>
         </RouterLink>
       </li>
     </ul>
@@ -69,6 +79,8 @@ import { useSpecStore } from '../store'
 import { useVirtualList } from './tree/useVirtualList'
 import { useVirtualListNavigation } from './tree/useVirtualListNavigation'
 import { useStudioStore } from '../store/studio-store'
+import InlineRunAllSpecs from './InlineRunAllSpecs.vue'
+import { useRunAllSpecsStore } from '../store/run-all-specs-store'
 
 const props = defineProps<{
   specs: FuzzyFoundSpec[]
@@ -153,6 +165,12 @@ const resetFocusIfNecessary = (row, index) => {
   }
 }
 
+const runAllSpecsStore = useRunAllSpecsStore()
+
+watch(collapsible, () => {
+  runAllSpecsStore.setRunAllSpecsData(collapsible.value.tree)
+}, { immediate: true })
+
 </script>
 
 <style scoped>
@@ -164,6 +182,11 @@ a::before {
 /** Header is 64px, padding-top is 8px **/
 .specs-list-container {
   height: calc(100vh - 64px - 8px);
+}
+
+/** For run all specs group hover to work */
+[data-cy=spec-row-item]:hover .run-all, [data-cy=spec-row-item]:focus-within .run-all {
+  opacity: 1 !important;
 }
 
 </style>

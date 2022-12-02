@@ -142,6 +142,39 @@ declare namespace Cypress {
     clear: (keys?: string[]) => void
   }
 
+  // TODO: raise minimum required TypeScript version to 3.7
+  // and make this recursive
+  // https://github.com/cypress-io/cypress/issues/24875
+  type Storable =
+    | string
+    | number
+    | boolean
+    | null
+    | StorableObject
+    | StorableArray
+
+  interface StorableObject {
+    [key: string]: Storable
+  }
+
+  interface StorableArray extends Array<Storable> { }
+
+  type StorableRecord = Record<string, Storable>
+
+  interface OriginStorage {
+    origin: string
+    value: StorableRecord
+  }
+
+  interface Storages {
+    localStorage: OriginStorage[]
+    sessionStorage: OriginStorage[]
+  }
+
+  interface StorageByOrigin {
+    [key: string]: StorableRecord
+  }
+
   type IsBrowserMatcher = BrowserName | Partial<Browser> | Array<BrowserName | Partial<Browser>>
 
   interface ViewportPosition extends WindowPosition {
@@ -660,7 +693,7 @@ declare namespace Cypress {
      * Whether or not to persist the session across all specs in the run.
      * @default {false}
      */
-    cacheAcrossSpecs?: boolean,
+    cacheAcrossSpecs?: boolean
     /**
      * Function to run immediately after the session is created and `setup` function runs or
      * after a session is restored and the page is cleared. If this returns `false`, throws an
@@ -792,7 +825,35 @@ declare namespace Cypress {
     clearCookies(options?: CookieOptions): Chainable<null>
 
     /**
-     * Clear data in local storage.
+     * Get local storage for all origins.
+     *
+     * @see https://on.cypress.io/getalllocalstorage
+     */
+    getAllLocalStorage(options?: Partial<Loggable>): Chainable<StorageByOrigin>
+
+    /**
+     * Clear local storage for all origins.
+     *
+     * @see https://on.cypress.io/clearalllocalstorage
+     */
+    clearAllLocalStorage(options?: Partial<Loggable>): Chainable<null>
+
+    /**
+     * Get session storage for all origins.
+     *
+     * @see https://on.cypress.io/getallsessionstorage
+     */
+    getAllSessionStorage(options?: Partial<Loggable>): Chainable<StorageByOrigin>
+
+    /**
+     * Clear session storage for all origins.
+     *
+     * @see https://on.cypress.io/clearallsessionstorage
+     */
+     clearAllSessionStorage(options?: Partial<Loggable>): Chainable<null>
+
+    /**
+     * Clear data in local storage for the current origin.
      * Cypress automatically runs this command before each test to prevent state from being
      * shared across tests. You shouldn't need to use this command unless you're using it
      * to clear localStorage inside a single test. Yields `localStorage` object.
@@ -2695,7 +2756,7 @@ declare namespace Cypress {
      */
     env: { [key: string]: any }
     /**
-     * A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.
+     * A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using a tool to test what files would match.
      * @default "*.hot-update.js"
      */
     excludeSpecPattern: string | string[]
@@ -2983,7 +3044,7 @@ declare namespace Cypress {
      * Override default config options for E2E Testing runner.
      * @default {}
      */
-    e2e: Omit<CoreConfigOptions, 'indexHtmlFile'>
+    e2e: EndToEndConfigOptions
 
     /**
      * An array of objects defining the certificates
@@ -2996,6 +3057,14 @@ declare namespace Cypress {
     setupNodeEvents: (on: PluginEvents, config: PluginConfigOptions) => Promise<PluginConfigOptions | void> | PluginConfigOptions | void
 
     indexHtmlFile: string
+  }
+
+  interface EndToEndConfigOptions extends Omit<CoreConfigOptions, 'indexHtmlFile'> {
+    /**
+     * Enables the "Run All Specs" UI feature, allowing the execution of multiple specs sequentially.
+     * @default false
+     */
+    experimentalRunAllSpecs?: boolean
   }
 
   /**
@@ -3121,7 +3190,7 @@ declare namespace Cypress {
   type DevServerFn<ComponentDevServerOpts = any> = (cypressDevServerConfig: DevServerConfig, devServerConfig: ComponentDevServerOpts) => ResolvedDevServerConfig | Promise<ResolvedDevServerConfig>
 
   type ConfigHandler<T> = T
-    | (() => T | Promise<T>)
+  | (() => T | Promise<T>)
 
   type DevServerConfigOptions = {
     bundler: 'webpack'
@@ -3132,9 +3201,9 @@ declare namespace Cypress {
     framework: 'react' | 'vue' | 'svelte'
     viteConfig?: ConfigHandler<Omit<Exclude<PickConfigOpt<'viteConfig'>, undefined>, 'base' | 'root'>>
   } | {
-    bundler: 'webpack',
-    framework: 'angular',
-    webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>,
+    bundler: 'webpack'
+    framework: 'angular'
+    webpackConfig?: ConfigHandler<PickConfigOpt<'webpackConfig'>>
     options?: {
       projectConfig: AngularDevServerProjectConfig
     }

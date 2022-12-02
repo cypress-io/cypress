@@ -2592,10 +2592,10 @@
     ajv "^6.12.0"
     ajv-keywords "^3.4.1"
 
-"@electron/fuses@1.6.0":
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/@electron/fuses/-/fuses-1.6.0.tgz#d4ca0b4701c286424b8096c55458b5ab91191b61"
-  integrity sha512-UnZgLfVO1jf7QoYVEEB27CCP1JjT5plhbWU1U8ji1OaXnvNe5UT6KPuRJ3Z12mwa5ZBAASU2tgxVuI06/2x6nQ==
+"@electron/fuses@1.6.1":
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/@electron/fuses/-/fuses-1.6.1.tgz#c639e018202a59e3cd8911fa943e22c63dd3e6fc"
+  integrity sha512-J7kRMlc0vP03uzUuhHNEqffqZMZ6FRe0YGMOJO4kJObmYkOg38mMTvbbktEj+oteH5nfyhbQUkHIYnMSh7T/CQ==
   dependencies:
     chalk "^4.1.1"
     fs-extra "^9.0.1"
