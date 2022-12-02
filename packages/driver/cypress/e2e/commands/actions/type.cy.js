@@ -93,6 +93,10 @@ describe('src/cy/commands/actions/type - #type', () => {
     cy.get('input:text:first').type('bar')
   })
 
+  it('can type into an input when given a wrapper element', () => {
+    cy.get('#focus div span').type('foo')
+  })
+
   it('lists the input as the focused element', () => {
     const $input = cy.$$('input:text:first')
 
@@ -200,6 +204,15 @@ describe('src/cy/commands/actions/type - #type', () => {
   })
 
   describe('actionability', () => {
+    let retries = 0
+
+    beforeEach(() => {
+      retries = 0
+      cy.on('command:retry', () => {
+        retries += 1
+      })
+    })
+
     it('can forcibly type + click even when element is invisible', () => {
       const $txt = cy.$$(':text:first').hide()
 
@@ -261,35 +274,32 @@ describe('src/cy/commands/actions/type - #type', () => {
     it('waits until element becomes visible', () => {
       const $txt = cy.$$(':text:first').hide()
 
-      const retried = cy.stub()
-
       cy.on('command:retry', _.after(3, () => {
-        $txt.show()
-        retried()
+        // Replace the element with a copy of itself, to ensure that .type() requeries the DOM
+        // while retrying actionability
+        $txt.replaceWith($txt[0].innerHTML)
+        cy.$$(':text:first').show()
       }))
 
       cy.get(':text:first').type('foo').then(() => {
-        expect(retried).to.be.called
+        expect(retries).to.be.gt(1)
       })
     })
 
     it('waits until element is no longer disabled', () => {
       const $txt = cy.$$(':text:first').prop('disabled', true)
 
-      const retried = cy.stub()
       const clicked = cy.stub()
 
       $txt.on('click', clicked)
 
       cy.on('command:retry', _.after(3, () => {
         $txt.prop('disabled', false)
-        retried()
       }))
 
       cy.get(':text:first').type('foo').then(() => {
         expect(clicked).to.be.calledOnce
-
-        expect(retried).to.be.called
+        expect(retries).to.be.gt(1)
       })
     })
 
@@ -314,67 +324,44 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('waits until element stops animating', () => {
-      const retried = cy.stub()
-
-      cy.on('command:retry', retried)
-
-      cy.stub(cy, 'ensureElementIsNotAnimating')
-      .throws(new Error('animating!'))
-      .onThirdCall().returns()
-
-      cy.get(':text:first').type('foo').then(() => {
-        // - retry animation coords
-        // - retry animation
-        // - retry animation
-        expect(retried).to.be.calledThrice
-
-        expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
+      cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).type('foo').then(() => {
+        expect(retries).to.be.gt(1)
       })
     })
 
-    it('does not throw when waiting for animations is disabled', {
+    it('does not wait when waiting for animations is disabled', {
       waitForAnimations: false,
     }, () => {
-      cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
-
-      cy.get(':text:first').type('foo').then(() => {
-        expect(cy.ensureElementIsNotAnimating).not.to.be.called
+      cy.get(':text:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).type('foo').then(() => {
+        expect(retries).to.eq(0)
       })
     })
 
-    it('does not throw when turning off waitForAnimations in options', () => {
-      cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
-
-      cy.get(':text:first').type('foo', { waitForAnimations: false }).then(() => {
-        expect(cy.ensureElementIsNotAnimating).not.to.be.called
+    it('does not wait when turning off waitForAnimations in options', () => {
+      cy.get(':text:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).type('foo', { waitForAnimations: false }).then(() => {
+        expect(retries).to.eq(0)
       })
     })
 
-    it('passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
-      cy.spy(cy, 'ensureElementIsNotAnimating')
-
-      cy.get(':text:first').type('foo', { animationDistanceThreshold: 1000 }).then(($txt) => {
-        const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
-        const { args } = cy.ensureElementIsNotAnimating.firstCall
-
-        expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
-
-        expect(args[2]).to.eq(1000)
+    it('passes options.animationDistanceThreshold to ensureElementIsNotAnimating', () => {
+      cy.get(':text:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).type('foo', { animationDistanceThreshold: 1000 }).then(($txt) => {
+        // One retry, because $actionability always waits for two sets of points to determine if an element is animating.
+        expect(retries).to.eq(1)
       })
     })
 
-    it('passes config.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
-      const animationDistanceThreshold = Cypress.config('animationDistanceThreshold')
+    it('passes config.animationDistanceThreshold to ensureElementIsNotAnimating', () => {
+      let old = Cypress.config('animationDistanceThreshold')
 
-      cy.spy(cy, 'ensureElementIsNotAnimating')
+      Cypress.config('animationDistanceThreshold', 1000)
 
-      cy.get(':text:first').type('foo').then(($txt) => {
-        const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
-        const { args } = cy.ensureElementIsNotAnimating.firstCall
-
-        expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
-
-        expect(args[2]).to.eq(animationDistanceThreshold)
+      cy.get(':text:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).type('foo').then(($txt) => {
+        // One retry, because $actionability always waits for two sets of points to determine if an element is animating.
+        try {
+          expect(retries).to.eq(1)
+        } finally {
+          Cypress.config('animationDistanceThreshold', old)
+        }
       })
     })
 
@@ -924,7 +911,8 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('inserts text after existing text input by invoking val', () => {
-      cy.get('#input-without-value').invoke('val', 'foo').type(' bar').then(($text) => {
+      cy.get('#input-without-value').invoke('val', 'foo')
+      cy.get('#input-without-value').type(' bar').then(($text) => {
         expect($text).to.have.value('foo bar')
       })
     })
@@ -1224,7 +1212,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
 
       it('inserts text after existing text input by invoking val', () => {
-        cy.get('#number-without-value').invoke('val', '12').type('34').then(($text) => {
+        cy.get('#number-without-value').invoke('val', '12')
+        cy.get('#number-without-value').type('34').then(($text) => {
           expect($text).to.have.value('1234')
         })
       })
@@ -1344,7 +1333,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
 
       it('inserts text after existing text input by invoking val', () => {
-        cy.get('#email-without-value').invoke('val', 'brian@foo.c').type('om').then(($text) => {
+        cy.get('#email-without-value').invoke('val', 'brian@foo.c')
+        cy.get('#email-without-value').type('om').then(($text) => {
           expect($text).to.have.value('brian@foo.com')
         })
       })
@@ -1384,7 +1374,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
 
       it('inserts text after existing text input by invoking val', () => {
-        cy.get('#password-without-value').invoke('val', 'secr').type('et').then(($text) => {
+        cy.get('#password-without-value').invoke('val', 'secr')
+        cy.get('#password-without-value').type('et').then(($text) => {
           expect($text).to.have.value('secret')
         })
       })
@@ -1441,7 +1432,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
 
       it('overwrites existing value input by invoking val', () => {
-        cy.get('#date-without-value').invoke('val', '2016-01-01').type('1959-09-13').then(($text) => {
+        cy.get('#date-without-value').invoke('val', '2016-01-01')
+        cy.get('#date-without-value').type('1959-09-13').then(($text) => {
           expect($text).to.have.value('1959-09-13')
         })
       })
@@ -1531,7 +1523,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
 
       it('overwrites existing value input by invoking val', () => {
-        cy.get('[type="datetime-local"]').invoke('val', '2016-01-01T05:05').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
+        cy.get('[type="datetime-local"]').invoke('val', '2016-01-01T05:05')
+        cy.get('[type="datetime-local"]').type('1959-09-13T10:10').should('have.value', '1959-09-13T10:10')
       })
 
       it('errors when invalid datetime', (done) => {
@@ -1559,7 +1552,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
 
       it('overwrites existing value input by invoking val', () => {
-        cy.get('#month-without-value').invoke('val', '2016-01').type('1959-09').then(($text) => {
+        cy.get('#month-without-value').invoke('val', '2016-01')
+        cy.get('#month-without-value').type('1959-09').then(($text) => {
           expect($text).to.have.value('1959-09')
         })
       })
@@ -1579,7 +1573,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
 
       it('overwrites existing value input by invoking val', () => {
-        cy.get('#week-without-value').invoke('val', '2016-W01').type('1959-W09').then(($text) => {
+        cy.get('#week-without-value').invoke('val', '2016-W01')
+        cy.get('#week-without-value').type('1959-W09').then(($text) => {
           expect($text).to.have.value('1959-W09')
         })
       })
@@ -1599,7 +1594,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
 
       it('overwrites existing value input by invoking val', () => {
-        cy.get('#time-without-value').invoke('val', '01:23:45').type('12:34:56').then(($text) => {
+        cy.get('#time-without-value').invoke('val', '01:23:45')
+        cy.get('#time-without-value').type('12:34:56').then(($text) => {
           expect($text).to.have.value('12:34:56')
         })
       })
@@ -1643,7 +1639,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
 
       it('inserts text after existing text', () => {
-        cy.get('#input-types [contenteditable]').invoke('text', 'foo').type(' bar').then(($text) => {
+        cy.get('#input-types [contenteditable]').invoke('text', 'foo')
+        cy.get('#input-types [contenteditable]').type(' bar').then(($text) => {
           expect($text).to.have.text('foo bar')
         })
       })
@@ -1668,9 +1665,8 @@ describe('src/cy/commands/actions/type - #type', () => {
 
         attachKeyListeners({ ce })
 
-        cy.get('#input-types [contenteditable]')
-        .invoke('text', 'foo')
-        .type('{enter}')
+        cy.get('#input-types [contenteditable]').invoke('text', 'foo')
+        cy.get('#input-types [contenteditable]').type('{enter}')
         .should(($text) => {
           expect(trimInnerText($text)).eq('foo')
         })
@@ -2488,7 +2484,8 @@ describe('src/cy/commands/actions/type - #type', () => {
 
   describe('case-insensitivity', () => {
     it('special chars are case-insensitive', () => {
-      cy.get(':text:first').invoke('val', 'bar').type('{leftarrow}{DeL}').then(($input) => {
+      cy.get(':text:first').invoke('val', 'bar')
+      cy.get(':text:first').type('{leftarrow}{DeL}').then(($input) => {
         expect($input).to.have.value('ba')
       })
     })
@@ -2787,9 +2784,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       //  even if actual and expected appear the same.
       const expected = '{\n  foo:   1\n  bar:   2\n  baz:   3\n}'
 
-      cy.get('[contenteditable]:first')
-      .invoke('html', '<div><br></div>')
-      .type('{{}{enter}  foo:   1{enter}  bar:   2{enter}  baz:   3{enter}}')
+      cy.get('[contenteditable]:first').invoke('html', '<div><br></div>')
+      cy.get('[contenteditable]:first').type('{{}{enter}  foo:   1{enter}  bar:   2{enter}  baz:   3{enter}}')
       .should(($el) => {
         expectMatchInnerText($el, expected)
       })

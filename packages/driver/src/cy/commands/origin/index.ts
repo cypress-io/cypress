@@ -41,10 +41,6 @@ export default (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: State
       // origin run, so it can't have its own timeout except in the case where we're creating the spec bridge.
       cy.clearTimeout()
 
-      if (!config('experimentalSessionAndOrigin')) {
-        $errUtils.throwErrByPath('origin.experiment_not_enabled')
-      }
-
       let options
       let callbackFn
       const timeout = Cypress.config('defaultCommandTimeout')
