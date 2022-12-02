@@ -3,6 +3,12 @@ const captureStackTrace = Error.captureStackTrace
 const toString = Function.prototype.toString
 const callFn = Function.call
 
+const integrityErrorMessage = `
+We detected an issue with the integrity of the Cypress binary. It may have been compromised and is not safe to run. We recommend re-installing the Cypress binary with:
+
+\`cypress cache clear && cypress install\`
+`
+
 const stackIntegrityCheck = function stackIntegrityCheck (options) {
   const originalStackTraceLimit = OrigError.stackTraceLimit
   const originalPrepareStackTrace = OrigError.prepareStackTrace
@@ -22,7 +28,8 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
   OrigError.stackTraceLimit = originalStackTraceLimit
 
   if (stack.length !== options.stackToMatch.length) {
-    throw new Error(`Integrity check failed with expected stack length ${options.stackToMatch.length} but got ${stack.length}`)
+    console.error(`Integrity check failed with expected stack length ${options.stackToMatch.length} but got ${stack.length}`)
+    throw new Error(integrityErrorMessage)
   }
 
   for (let index = 0; index < options.stackToMatch.length; index++) {
@@ -31,17 +38,20 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
     const actualFileName = stack[index].getFileName()
 
     if (expectedFunctionName && actualFunctionName !== expectedFunctionName) {
-      throw new Error(`Integrity check failed with expected function name ${expectedFunctionName} but got ${actualFunctionName}`)
+      console.error(`Integrity check failed with expected function name ${expectedFunctionName} but got ${actualFunctionName}`)
+      throw new Error(integrityErrorMessage)
     }
 
     if (expectedFileName && actualFileName !== expectedFileName) {
-      throw new Error(`Integrity check failed with expected file name ${expectedFileName} but got ${actualFileName}`)
+      console.error(`Integrity check failed with expected file name ${expectedFileName} but got ${actualFileName}`)
+      throw new Error(integrityErrorMessage)
     }
   }
 }
 
 function validateToString () {
   if (toString.call !== callFn) {
+    console.error(`Integrity check failed for toString.call`)
     throw new Error('Integrity check failed for toString.call')
   }
 }
@@ -49,6 +59,7 @@ function validateToString () {
 function validateElectron (electron) {
   // Hard coded function as this is electron code and there's not an easy way to get the function string at package time. If this fails on an updated version of electron, we'll need to update this.
   if (toString.call(electron.app.getAppPath) !== 'function getAppPath() { [native code] }') {
+    console.error(`Integrity check failed for toString.call(electron.app.getAppPath)`)
     throw new Error(`Integrity check failed for toString.call(electron.app.getAppPath)`)
   }
 }
@@ -56,21 +67,25 @@ function validateElectron (electron) {
 function validateFs (fs) {
   // Hard coded function as this is electron code and there's not an easy way to get the function string at package time. If this fails on an updated version of electron, we'll need to update this.
   if (toString.call(fs.readFileSync) !== `function(t,r){const n=splitPath(t);if(!n.isAsar)return g.apply(this,arguments);const{asarPath:i,filePath:a}=n,o=getOrCreateArchive(i);if(!o)throw createError("INVALID_ARCHIVE",{asarPath:i});const c=o.getFileInfo(a);if(!c)throw createError("NOT_FOUND",{asarPath:i,filePath:a});if(0===c.size)return r?"":s.Buffer.alloc(0);if(c.unpacked){const t=o.copyFileOut(a);return e.readFileSync(t,r)}if(r){if("string"==typeof r)r={encoding:r};else if("object"!=typeof r)throw new TypeError("Bad arguments")}else r={encoding:null};const{encoding:f}=r,l=s.Buffer.alloc(c.size),u=o.getFdAndValidateIntegrityLater();if(!(u>=0))throw createError("NOT_FOUND",{asarPath:i,filePath:a});return logASARAccess(i,a,c.offset),e.readSync(u,l,0,c.size,c.offset),validateBufferIntegrity(l,c.integrity),f?l.toString(f):l}`) {
-    throw new Error(`Integrity check failed for toString.call(fs.readFileSync)`)
+    console.error(`Integrity check failed for toString.call(fs.readFileSync)`)
+    throw new Error(integrityErrorMessage)
   }
 }
 
 function validateCrypto (crypto) {
   if (toString.call(crypto.createHmac) !== `CRYPTO_CREATE_HMAC_TO_STRING`) {
-    throw new Error(`Integrity check failed for crypto.createHmac.toString()`)
+    console.error(`Integrity check failed for toString.call(crypto.createHmac)`)
+    throw new Error(integrityErrorMessage)
   }
 
   if (toString.call(crypto.Hmac.prototype.update) !== `CRYPTO_HMAC_UPDATE_TO_STRING`) {
-    throw new Error(`Integrity check failed for crypto.Hmac.prototype.update.toString()`)
+    console.error(`Integrity check failed for toString.call(crypto.Hmac.prototype.update)`)
+    throw new Error(integrityErrorMessage)
   }
 
   if (toString.call(crypto.Hmac.prototype.digest) !== `CRYPTO_HMAC_DIGEST_TO_STRING`) {
-    throw new Error(`Integrity check failed for crypto.Hmac.prototype.digest.toString()`)
+    console.error(`Integrity check failed for toString.call(crypto.Hmac.prototype.digest)`)
+    throw new Error(integrityErrorMessage)
   }
 }
 
@@ -78,7 +93,8 @@ function validateFile ({ filePath, crypto, fs, expectedHash, errorMessage }) {
   const hash = crypto.createHmac('md5', 'HMAC_SECRET').update(fs.readFileSync(filePath, 'utf8')).digest('hex')
 
   if (hash !== expectedHash) {
-    throw new Error(errorMessage)
+    console.error(errorMessage)
+    throw new Error(integrityErrorMessage)
   }
 }
 
@@ -145,7 +161,7 @@ function integrityCheck (options) {
     crypto,
     fs,
     expectedHash: 'MAIN_INDEX_HASH',
-    errorMessage: 'Error: Integrity check failed for main index.js file',
+    errorMessage: 'Integrity check failed for main index.js file',
   })
 
   validateFile({
@@ -154,7 +170,7 @@ function integrityCheck (options) {
     crypto,
     fs,
     expectedHash: 'BYTENODE_HASH',
-    errorMessage: 'Error: Integrity check failed for main bytenode.js file',
+    errorMessage: 'Integrity check failed for main bytenode.js file',
   })
 
   validateFile({
@@ -163,6 +179,6 @@ function integrityCheck (options) {
     crypto,
     fs,
     expectedHash: 'INDEX_JSC_HASH',
-    errorMessage: 'Error: Integrity check failed for main server index.jsc file',
+    errorMessage: 'Integrity check failed for main server index.jsc file',
   })
 }

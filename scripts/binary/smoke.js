@@ -262,9 +262,9 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
     await fs.move(`${file}.bak`, file, { overwrite: true })
   }
 
-  await testCorruptingFile(path.join(buildAppDir, 'index.js'), 'Error: Integrity check failed for main index.js file')
-  await testCorruptingFile(path.join(buildAppDir, 'packages', 'server', 'index.jsc'), 'Error: Integrity check failed for main server index.jsc file')
-  await testCorruptingFile(path.join(buildAppDir, 'node_modules', 'bytenode', 'lib', 'index.js'), 'Error: Integrity check failed for main bytenode.js file')
+  await testCorruptingFile(path.join(buildAppDir, 'index.js'), 'Integrity check failed for main index.js file')
+  await testCorruptingFile(path.join(buildAppDir, 'packages', 'server', 'index.jsc'), 'Integrity check failed for main server index.jsc file')
+  await testCorruptingFile(path.join(buildAppDir, 'node_modules', 'bytenode', 'lib', 'index.js'), 'Integrity check failed for main bytenode.js file')
 
   const testAlteringEntryPoint = async (additionalCode, errorMessage) => {
     const packageJsonContents = await fs.readJSON(path.join(buildAppDir, 'package.json'))
@@ -286,8 +286,8 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
     await fs.remove(path.join(buildAppDir, 'index2.js'))
   }
 
-  await testAlteringEntryPoint('console.log("simple alteration")', 'Error: Integrity check failed with expected stack length 9 but got 10')
-  await testAlteringEntryPoint('console.log("accessing " + global.getSnapshotResult())', 'Error: getSnapshotResult can only be called once')
+  await testAlteringEntryPoint('console.log("simple alteration")', 'Integrity check failed with expected stack length 9 but got 10')
+  await testAlteringEntryPoint('console.log("accessing " + global.getSnapshotResult())', 'getSnapshotResult can only be called once')
 }
 
 const test = async function (buildAppExecutable, buildAppDir) {
