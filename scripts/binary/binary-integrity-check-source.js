@@ -8,7 +8,7 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
   const originalStackTraceLimit = OrigError.stackTraceLimit
   const originalStackTrace = OrigError.prepareStackTrace
 
-  Error.stackTraceLimit = Infinity
+  OrigError.stackTraceLimit = Infinity
 
   OrigError.prepareStackTrace = function (_, stack) {
     return stack
