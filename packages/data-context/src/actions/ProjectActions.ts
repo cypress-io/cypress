@@ -6,7 +6,6 @@ import path from 'path'
 import assert from 'assert'
 
 import type { ProjectShape } from '../data/coreDataShape'
-
 import type { DataContext } from '..'
 import { codeGenerator, SpecOptions, hasNonExampleSpec } from '../codegen'
 import templates from '../codegen/templates'
@@ -14,7 +13,7 @@ import { insertValuesInConfigFile } from '../util'
 import { getError } from '@packages/errors'
 import { resetIssuedWarnings } from '@packages/config'
 import { WizardFrontendFramework, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
-import * as reactDocgen from 'react-docgen'
+import { parse as parseReactComponent, resolver as reactDocgenResolvers } from 'react-docgen'
 import fs from 'fs-extra'
 import Debug from 'debug'
 
@@ -356,14 +355,15 @@ export class ProjectActions {
   }
 
   async getReactComponentsFromFile (filePath: string): Promise<ReactComponentDescriptor[]> {
-    const project = this.ctx.currentProject
-
-    assert(project, 'Cannot create spec without currentProject.')
-
     try {
       const src = await fs.readFile(filePath, 'utf8')
 
-      return reactDocgen.parse(src, reactDocgen.resolver.findAllExportedComponentDefinitions)
+      let result = parseReactComponent(src, reactDocgenResolvers.findAllExportedComponentDefinitions)
+      // types appear to be incorrect in react-docgen@6.0.0-alpha.3
+      // TODO: update when 6.0.0 stable is out for fixed types.
+      const defs = (Array.isArray(result) ? result : [result]) as ReactComponentDescriptor[]
+
+      return defs
     } catch (err) {
       debug(err)
 

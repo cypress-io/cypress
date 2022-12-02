@@ -14,6 +14,15 @@ const atob = global.atob ?? function atob (str: string) {
 
 export const stubMutation: MaybeResolver<Mutation> = {
   __typename: 'Mutation',
+  getReactComponentsFromFile (source, args, ctx) {
+    return [
+      {
+        __typename: 'ReactComponentDescriptor',
+        description: 'React Component',
+        displayName: 'FooBar',
+      },
+    ]
+  },
   addProject (source, args, ctx) {
     if (!args.path) {
       return {}

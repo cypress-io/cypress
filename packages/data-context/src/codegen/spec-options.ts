@@ -2,7 +2,7 @@ import type { ParsedPath } from 'path'
 import type { CodeGenType } from '@packages/graphql/src/gen/nxs.gen'
 import type { WizardFrontendFramework } from '@packages/scaffold-config'
 import fs from 'fs-extra'
-import { uniq } from 'lodash'
+import { uniq, upperFirst } from 'lodash'
 import path from 'path'
 import { getDefaultSpecFileName } from '../sources/migration/utils'
 import { toPosix } from '../util'
@@ -55,20 +55,14 @@ export class SpecOptions {
       throw new Error('Cannot generate a spec without a framework')
     }
 
-    let frameworkOptions
-
     switch (this.options.framework.codeGenFramework) {
       case 'react':
-        frameworkOptions = await this.getReactSpecOptions()
-        break
+        return await this.getReactSpecOptions()
       case 'vue':
-        frameworkOptions = await this.getVueSpecOptions()
-        break
+        return await this.getVueSpecOptions()
       default:
         throw new Error(`Unable to generate spec for ${this.options.framework.codeGenFramework}`)
     }
-
-    return frameworkOptions
   }
 
   private getRelativePathToComponent (specParsedPath?: ParsedPath) {
@@ -84,7 +78,7 @@ export class SpecOptions {
   }
 
   private async getVueSpecOptions () {
-    const componentName = this.parsedPath.name
+    const componentName = this.buildComponentNameFromFilename(this.parsedPath.name)
 
     const extension = await this.getVueExtension()
 
@@ -174,11 +168,25 @@ export class SpecOptions {
     return foundSpecExtension || ''
   }
 
+  private buildComponentNameFromFilename (fileNameWithoutExt: string): string {
+    const sanitizedName = fileNameWithoutExt
+    // Remove any characters from the filename that aren't allowed within a JS variable name (but leave periods and hyphens)
+    .replaceAll(/[^a-z_\d$.-]/gi, '')
+    // Remove any groupings of multiple periods (eg, '...all') but leave single periods alone
+    .replaceAll(/[.]{2,}/g, '')
+
+    // Convert period- and hyphen-delimited portions to PascalCase
+    // eg, 'test.page.ts' => 'TestPage', 'about.component.vue' => 'AboutComponent'
+    return sanitizedName.split(/[-.]/g)
+    .map(upperFirst)
+    .join('')
+  }
+
   private buildComponentSpecFilename (specExt: string, filePath?: ParsedPath, fileName?: string) {
     const { dir, base, ext } = filePath || this.parsedPath
     const cyWithExt = this.getSpecExtension(filePath) + ext
 
-    const name = fileName || base.slice(0, base.indexOf('.'))
+    const name = fileName || base.slice(0, -cyWithExt.length)
 
     const finalExtension = filePath ? cyWithExt : specExt
 

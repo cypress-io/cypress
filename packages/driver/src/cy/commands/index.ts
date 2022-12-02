@@ -24,7 +24,7 @@ import * as Files from './files'
 
 import * as Fixtures from './fixtures'
 
-import LocalStorage from './local_storage'
+import Storage from './storage'
 
 import * as Location from './location'
 
@@ -68,7 +68,7 @@ export const allCommands = {
   Exec,
   Files,
   Fixtures,
-  LocalStorage,
+  Storage,
   Location,
   Misc,
   Origin,
