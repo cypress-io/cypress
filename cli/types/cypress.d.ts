@@ -2927,7 +2927,7 @@ declare namespace Cypress {
      *      misleading errors in later tests which makes debugging clunky. See the [documentation](https://on.cypress.io/test-isolation)
      *      for more information.
      *
-     * @default 'true'
+     * @default true
      */
     testIsolation: boolean
     /**
