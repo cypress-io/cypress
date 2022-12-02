@@ -5,7 +5,7 @@ const callFn = Function.call
 
 // eslint-disable-next-line no-unused-vars
 const stackIntegrityCheck = function stackIntegrityCheck (options) {
-  const originalStackTraceLimit = Error.stackTraceLimit
+  const originalStackTraceLimit = OrigError.stackTraceLimit
   const originalStackTrace = OrigError.prepareStackTrace
 
   Error.stackTraceLimit = Infinity
