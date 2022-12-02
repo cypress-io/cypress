@@ -20,7 +20,7 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
   const stack = tempError.stack.filter((frame) => !frame.getFileName().startsWith('node:internal') && !frame.getFileName().startsWith('node:electron'))
 
   OrigError.prepareStackTrace = originalStackTrace
-  Error.stackTraceLimit = originalStackTraceLimit
+  OrigError.stackTraceLimit = originalStackTraceLimit
 
   if (stack.length !== options.stackToMatch.length) {
     throw new Error(`Integrity check failed with expected stack length ${options.stackToMatch.length} but got ${stack.length}`)
