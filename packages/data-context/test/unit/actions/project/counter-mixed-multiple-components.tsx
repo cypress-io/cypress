@@ -1,6 +1,6 @@
 import React from 'react'
 
-export function CounterContainer () {
+export default function CounterContainer () {
   const [count, setCount] = React.useState(0)
 
   return <CounterView count={count} setCount={setCount} />
