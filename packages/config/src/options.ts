@@ -381,11 +381,11 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     overrideLevel: 'any',
   }, {
     name: 'testIsolation',
-    defaultValue: 'on',
+    defaultValue: true,
     validation: (key: string, value: any, opts: ValidationOptions) => {
       const { testingType } = opts
 
-      let configOpts = ['on', 'off']
+      let configOpts = [true, false]
 
       if (testingType === 'component') {
         configOpts.pop()
