@@ -1002,7 +1002,6 @@
     "./node_modules/@babel/types/lib/validators/matchesPattern.js",
     "./node_modules/@babel/types/lib/validators/react/isCompatTag.js",
     "./node_modules/@babel/types/lib/validators/react/isReactComponent.js",
-    "./node_modules/@cspotcode/source-map-support/node_modules/@jridgewell/resolve-uri/dist/resolve-uri.umd.js",
     "./node_modules/@cypress/commit-info/node_modules/cross-spawn/index.js",
     "./node_modules/@cypress/commit-info/node_modules/cross-spawn/lib/enoent.js",
     "./node_modules/@cypress/commit-info/node_modules/cross-spawn/lib/parse.js",
