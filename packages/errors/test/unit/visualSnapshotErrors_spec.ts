@@ -1228,5 +1228,11 @@ describe('visual error templates', () => {
         default: ['electron', ['env']],
       }
     },
+
+    EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY: () => {
+      return {
+        default: [],
+      }
+    },
   })
 })

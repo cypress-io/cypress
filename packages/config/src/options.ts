@@ -216,6 +216,11 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     isExperimental: true,
     requireRestartOnChange: 'server',
   }, {
+    name: 'experimentalOriginDependencies',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+  }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -668,6 +673,12 @@ export const breakingRootOptions: Array<BreakingOption> = [
     isWarning: false,
     testingTypes: ['e2e'],
   },
+  {
+    name: 'experimentalOriginDependencies',
+    errorKey: 'EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY',
+    isWarning: false,
+    testingTypes: ['e2e'],
+  },
 ]
 
 export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component: Array<BreakingOption> } = {
@@ -676,7 +687,6 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
       name: 'experimentalSingleTabRunMode',
       errorKey: 'EXPERIMENTAL_SINGLE_TAB_RUN_MODE',
       isWarning: false,
-      testingTypes: ['e2e'],
     },
     {
       name: 'indexHtmlFile',
@@ -694,7 +704,6 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
       name: 'experimentalStudio',
       errorKey: 'EXPERIMENTAL_STUDIO_E2E_ONLY',
       isWarning: false,
-      testingTypes: ['component'],
     },
     {
       name: 'testIsolation',
@@ -705,7 +714,11 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
       name: 'experimentalRunAllSpecs',
       errorKey: 'EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY',
       isWarning: false,
-      testingTypes: ['component'],
+    },
+    {
+      name: 'experimentalOriginDependencies',
+      errorKey: 'EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY',
+      isWarning: false,
     },
   ],
 }

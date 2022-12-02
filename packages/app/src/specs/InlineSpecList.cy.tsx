@@ -4,23 +4,6 @@ import { defaultMessages } from '@cy/i18n'
 
 let specs: Array<any> = []
 
-const hoverRunAllSpecs = (directory?: string, specNumber?: number) => {
-  let command
-
-  if (directory) {
-    command = cy.contains('[data-cy=directory-item]', directory)
-  } else {
-    command = cy.get('[data-cy=directory-item]').first()
-  }
-
-  return command.realHover().then(() => {
-    cy.get('[data-cy=play-button]').should('exist')
-    cy.get('[data-cy=run-all-specs]').realHover().then(() => {
-      cy.get('[data-cy=tooltip-content]').should('contain.text', `Run ${specNumber} spec`)
-    })
-  })
-}
-
 describe('InlineSpecList', () => {
   const mountInlineSpecList = ({ specFilter, experimentalRunAllSpecs }: {specFilter?: string, experimentalRunAllSpecs?: boolean} = {}) => cy.mountFragment(Specs_InlineSpecListFragmentDoc, {
     onResult: (ctx) => {
@@ -207,8 +190,27 @@ describe('InlineSpecList', () => {
   })
 
   describe('Run all Specs', () => {
+    const hoverRunAllSpecs = (directory: string, specNumber: number) => {
+      let command = cy.contains('[data-cy=directory-item]', directory)
+
+      return command.realHover().then(() => {
+        cy.get('[data-cy=play-button]').should('exist')
+        cy.get(`[data-cy="run-all-specs-for-${directory}"]`).realHover().then(() => {
+          cy.get('[data-cy=tooltip-content]').should('contain.text', `Run ${specNumber} spec`)
+        })
+      })
+    }
+
     beforeEach(() => {
       cy.fixture('found-specs').then((foundSpecs) => specs = foundSpecs)
+    })
+
+    it('does not show feature unless experimentalRunAllSpecs is enabled', () => {
+      mountInlineSpecList({ experimentalRunAllSpecs: false })
+
+      cy.findByTestId('run-all-specs-for-all').should('not.exist')
+      cy.contains('[data-cy=directory-item]', 'src').realHover()
+      cy.findByTestId('run-all-specs-for-src').should('not.exist')
     })
 
     it('displays runAllSpecs when hovering over a spec-list directory row', () => {
@@ -218,7 +220,7 @@ describe('InlineSpecList', () => {
 
     it('checks if functionality works after a search', () => {
       mountInlineSpecList({ experimentalRunAllSpecs: true, specFilter: 'B' })
-      hoverRunAllSpecs('src', 1)
+      hoverRunAllSpecs('src/components', 1)
     })
   })
 })
