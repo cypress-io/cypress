@@ -25,8 +25,8 @@ jobs:
     runs-on: ${{ matrix.platform }}
     env:
       CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
-      BASE_BRANCH: inputs.branch || github.ref
-      GENERATE_FROM_SCRATCH: inputs.generate_from_scratch 
+      BASE_BRANCH: ${{ inputs.branch || github.ref }}
+      GENERATE_FROM_SCRATCH: ${{ inputs.generate_from_scratch }}
     steps:
       - name: Determine snapshot files - Windows
         if: ${{ matrix.platform == 'windows-latest' }}
