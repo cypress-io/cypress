@@ -84,7 +84,7 @@ jobs:
         id: check-need-for-pr
         run: |
           echo "needs_pr=${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' && steps.check-branch.outputs.branch_exists != 'true' }}" >> $GITHUB_OUTPUT
-          echo "needs_branch_update::${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' && steps.check-branch.outputs.branch_exists == 'true' }}" >> $GITHUB_OUTPUT
+          echo "needs_branch_update=${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' && steps.check-branch.outputs.branch_exists == 'true' }}" >> $GITHUB_OUTPUT
       ## Update available and a branch/PR already exists
       - name: Checkout existing branch
         if: ${{ steps.check-need-for-pr.outputs.needs_branch_update == 'true' }}
