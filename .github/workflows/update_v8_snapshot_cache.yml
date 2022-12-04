@@ -72,19 +72,19 @@ jobs:
       - name: Check for v8 snapshot cache changes
         id: check-for-v8-snapshot-cache-changes
         run: |
-          echo "::set-output name=has_changes::$(test "$(git status --porcelain -- ${{ env.SNAPSHOT_FILES }})" && echo 'true')"
+          echo "has_changes=$(test "$(git status --porcelain -- ${{ env.SNAPSHOT_FILES }})" && echo 'true')" >> $GITHUB_OUTPUT
       - name: Determine name of new branch and if it already exists
         id: check-branch
         env:
           BRANCH_NAME: update-v8-snapshot-cache-on-${{ env.BASE_BRANCH }}
         run: |
-          echo "::set-output name=branch_name::${{ env.BRANCH_NAME }}"
-          echo "::set-output name=branch_exists::$(git show-ref --verify --quiet refs/remotes/origin/${{ env.BRANCH_NAME }} && echo 'true')"
+          echo "branch_name=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
+          echo "branch_exists=$(git show-ref --verify --quiet refs/remotes/origin/${{ env.BRANCH_NAME }} && echo 'true')" >> $GITHUB_OUTPUT
       - name: Check need for PR or branch update
         id: check-need-for-pr
         run: |
-          echo "::set-output name=needs_pr::${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' && steps.check-branch.outputs.branch_exists != 'true' }}"
-          echo "::set-output name=needs_branch_update::${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' && steps.check-branch.outputs.branch_exists == 'true' }}"
+          echo "needs_pr=${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' && steps.check-branch.outputs.branch_exists != 'true' }}" >> $GITHUB_OUTPUT
+          echo "needs_branch_update::${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' && steps.check-branch.outputs.branch_exists == 'true' }}" >> $GITHUB_OUTPUT
       ## Update available and a branch/PR already exists
       - name: Checkout existing branch
         if: ${{ steps.check-need-for-pr.outputs.needs_branch_update == 'true' }}
@@ -97,15 +97,16 @@ jobs:
       - name: Checkout new branch
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
         run: git checkout -b ${{ steps.check-branch.outputs.branch_name }} ${{ env.BASE_BRANCH }}
-      ## Both
+      ## Commit changes if present
       - name: Commit the changes
         if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
         run: |
           git diff-index --quiet HEAD || git commit -am "chore: updating v8 snapshot cache"
+      ## Push branch
       - name: Push branch to remote
         if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
         run: git push origin ${{ steps.check-branch.outputs.branch_name }}
-      # Update available and a PR doesn't already exist
+      # PR needs to be created
       - name: Create Pull Request
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
         uses: actions/github-script@v4
