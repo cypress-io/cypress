@@ -3,21 +3,20 @@ const runChildProcess = async (entryPoint) => {
   require(entryPoint)
 }
 
-const runMainProcess = async () => {
+const startCypress = async () => {
   const { initializeStartTime } = require('./lib/util/performance_benchmark')
 
   initializeStartTime()
 
-  if (require.name !== 'customRequire') {
-    // Purposefully make this a dynamic require so that it doesn't have the potential to get picked up by snapshotting mechanism
-    const hook = './hook'
+  const { hookRequire } = require('./hook-require')
 
-    const { hookRequire } = require(`${hook}-require`)
+  hookRequire({ forceTypeScript: false })
 
-    hookRequire({ forceTypeScript: false })
-  }
-
-  await require('./server-entry')
+  await require('./start-cypress')
+} catch (error) {
+  // eslint-disable-next-line no-console
+  console.error(error)
+  process.exit(1)
 }
 
 const { entryPoint } = require('minimist')(process.argv.slice(1))
@@ -25,5 +24,5 @@ const { entryPoint } = require('minimist')(process.argv.slice(1))
 if (entryPoint) {
   module.exports = runChildProcess(entryPoint)
 } else {
-  module.exports = runMainProcess()
+  module.exports = startCypress()
 }

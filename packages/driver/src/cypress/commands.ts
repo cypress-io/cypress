@@ -4,6 +4,8 @@ import { addCommand as addNetstubbingCommand } from '../cy/net-stubbing'
 import $errUtils from './error_utils'
 import $stackUtils from './stack_utils'
 
+import type { QueryFunction } from './state'
+
 const PLACEHOLDER_COMMANDS = ['mount', 'hover']
 
 const builtInCommands = [
@@ -25,77 +27,32 @@ const getTypeByPrevSubject = (prevSubject) => {
   return 'parent'
 }
 
+const internalError = (path, name) => {
+  $errUtils.throwErrByPath(path, {
+    args: {
+      name,
+    },
+    stack: (new cy.state('specWindow').Error('add command stack')).stack,
+    errProps: {
+      appendToStack: {
+        title: 'From Cypress Internals',
+        content: $stackUtils.stackWithoutMessage((new Error('add command internal stack')).stack || ''),
+      } },
+  })
+}
+
 export default {
   create: (Cypress, cy, state, config) => {
     const reservedCommandNames = new Set(Object.keys(cy))
-    // create a single instance
-    // of commands
     const commands = {}
-    const commandBackups = {}
+    const queries = {}
+
     // we track built in commands to ensure users cannot
     // add custom commands with the same name
     const builtInCommandNames = {}
     let addingBuiltIns
 
-    const store = (obj) => {
-      commands[obj.name] = obj
-
-      return cy.addCommand(obj)
-    }
-
-    const storeOverride = (name, fn) => {
-      // grab the original function if its been backed up
-      // or grab it from the command store
-      const original = commandBackups[name] || commands[name]
-
-      if (!original) {
-        $errUtils.throwErrByPath('miscellaneous.invalid_overwrite', {
-          args: {
-            name,
-          },
-        })
-      }
-
-      // store the backup again now
-      commandBackups[name] = original
-
-      function originalFn (...args) {
-        const current = state('current')
-        let storedArgs = args
-
-        if (current.get('type') === 'child') {
-          storedArgs = args.slice(1)
-        }
-
-        current.set('args', storedArgs)
-
-        return original.fn.apply(this, args)
-      }
-
-      const overridden = _.clone(original)
-
-      overridden.fn = function (...args) {
-        args = ([] as any).concat(originalFn, args)
-
-        return fn.apply(this, args)
-      }
-
-      return cy.addCommand(overridden)
-    }
-
     const Commands = {
-      each (fn) {
-        // perf loop
-        for (let name in commands) {
-          const command = commands[name]
-
-          fn(command)
-        }
-
-        // prevent loop comprehension
-        return null
-      },
-
       addAllSync (obj) {
         // perf loop
         for (let name in obj) {
@@ -131,31 +88,11 @@ export default {
 
       add (name, options, fn) {
         if (builtInCommandNames[name]) {
-          $errUtils.throwErrByPath('miscellaneous.invalid_new_command', {
-            args: {
-              name,
-            },
-            stack: (new state('specWindow').Error('add command stack')).stack,
-            errProps: {
-              appendToStack: {
-                title: 'From Cypress Internals',
-                content: $stackUtils.stackWithoutMessage((new Error('add command internal stack')).stack || ''),
-              } },
-          })
+          internalError('miscellaneous.invalid_new_command', name)
         }
 
         if (reservedCommandNames.has(name)) {
-          $errUtils.throwErrByPath('miscellaneous.reserved_command', {
-            args: {
-              name,
-            },
-            stack: (new state('specWindow').Error('add command stack')).stack,
-            errProps: {
-              appendToStack: {
-                title: 'From Cypress Internals',
-                content: $stackUtils.stackWithoutMessage((new Error('add command internal stack')).stack!),
-              } },
-          })
+          internalError('miscellaneous.reserved_command', name)
         }
 
         // .hover & .mount are special case commands. allow as builtins so users
@@ -173,27 +110,73 @@ export default {
 
         // normalize type by how they validate their
         // previous subject (unless they're explicitly set)
-        options.type = options.type ?? getTypeByPrevSubject(prevSubject)
-        const type = options.type
+        const type = options.type ?? getTypeByPrevSubject(prevSubject)
 
-        return store({
+        commands[name] = {
           name,
           fn,
           type,
           prevSubject,
-        })
+        }
+
+        return cy.addCommand(commands[name])
       },
 
       overwrite (name, fn) {
-        return storeOverride(name, fn)
+        const original = commands[name]
+
+        if (queries[name]) {
+          internalError('miscellaneous.invalid_overwrite_query_with_command', name)
+        }
+
+        if (!original) {
+          internalError('miscellaneous.invalid_overwrite', name)
+        }
+
+        function originalFn (...args) {
+          const current = state('current')
+          let storedArgs = args
+
+          if (current.get('type') === 'child') {
+            storedArgs = args.slice(1)
+          }
+
+          current.set('args', storedArgs)
+
+          return original.fn.apply(this, args)
+        }
+
+        const overridden = _.clone(original)
+
+        overridden.fn = function (...args) {
+          args = ([] as any).concat(originalFn, args)
+
+          return fn.apply(this, args)
+        }
+
+        return cy.addCommand(overridden)
+      },
+
+      addQuery (name: string, fn: () => QueryFunction) {
+        if (reservedCommandNames.has(name)) {
+          internalError('miscellaneous.reserved_command_query', name)
+        }
+
+        if (cy[name]) {
+          internalError('miscellaneous.invalid_new_query', name)
+        }
+
+        if (addingBuiltIns) {
+          builtInCommandNames[name] = true
+        }
+
+        queries[name] = fn
+        cy.addQuery({ name, fn })
       },
     }
 
     addingBuiltIns = true
-    // perf loop
     for (let cmd of builtInCommands) {
-      // support "export default" syntax
-      cmd = cmd.default || cmd
       cmd(Commands, Cypress, cy, state, config)
     }
     addingBuiltIns = false

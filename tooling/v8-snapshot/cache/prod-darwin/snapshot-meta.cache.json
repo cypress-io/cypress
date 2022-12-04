@@ -62,8 +62,10 @@
     "./packages/server/lib/util/process_profiler.ts",
     "./packages/server/lib/util/suppress_warnings.js",
     "./packages/server/node_modules/@benmalka/foxdriver/node_modules/graceful-fs/polyfills.js",
+    "./packages/server/node_modules/ci-info/index.js",
     "./packages/server/node_modules/glob/node_modules/minimatch/minimatch.js",
     "./packages/server/node_modules/graceful-fs/polyfills.js",
+    "./packages/server/node_modules/is-ci/index.js",
     "./packages/server/node_modules/mocha/node_modules/debug/src/node.js",
     "./packages/server/node_modules/signal-exit/index.js",
     "./process-nextick-args/index.js",
@@ -935,7 +937,8 @@
     "./packages/server/node_modules/uuid/dist/v3.js",
     "./packages/server/node_modules/uuid/dist/v4.js",
     "./packages/server/node_modules/uuid/dist/v5.js",
-    "./packages/server/server-entry.js",
+    "./packages/server/start-cypress.js",
+    "./packages/server/v8-snapshot-entry.js",
     "./packages/socket/index.js",
     "./packages/socket/lib/socket.ts",
     "./packages/socket/node_modules/socket.io/dist/broadcast-operator.js",
@@ -3807,6 +3810,7 @@
     "./packages/server/node_modules/@benmalka/foxdriver/node_modules/graceful-fs/legacy-streams.js",
     "./packages/server/node_modules/@benmalka/foxdriver/package.json",
     "./packages/server/node_modules/ansi-regex/index.js",
+    "./packages/server/node_modules/ci-info/vendors.json",
     "./packages/server/node_modules/cli-table3/index.js",
     "./packages/server/node_modules/cli-table3/src/cell.js",
     "./packages/server/node_modules/cli-table3/src/layout-manager.js",
@@ -3930,5 +3934,5 @@
     "./tooling/v8-snapshot/cache/prod-darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "8b71698b89d3804ed712295c20a140cfcd674fa5c3ad9569530282dd6c3e9906"
+  "deferredHash": "844da7908a41692a3b04716c88e2f0cdad85ece6f94f6ab89fbd1ffe5c332fd2"
 }
