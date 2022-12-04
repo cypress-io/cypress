@@ -1,5 +1,18 @@
 name: Update V8 Snapshot Cache
-on: [push, workflow_dispatch]
+on: 
+  push:
+    branches:
+      - feature/v8-snapshots-auto-pr
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to update'
+        required: true
+        default: 'develop'
+      generate_from_scratch:
+        description: 'Generate from scratch'
+        type: boolean
+        default: false
 concurrency: 
   group: ${{ github.ref }}
   cancel-in-progress: true
@@ -12,7 +25,8 @@ jobs:
     runs-on: ${{ matrix.platform }}
     env:
       CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
-      BASE_BRANCH: feature/v8-snapshots-auto-pr
+      BASE_BRANCH: inputs.branch || github.ref
+      GENERATE_FROM_SCRATCH: inputs.generate_from_scratch 
     steps:
       - name: Determine snapshot files - Windows
         if: ${{ matrix.platform == 'windows-latest' }}
@@ -24,19 +38,16 @@ jobs:
         if: ${{ matrix.platform == 'macos-latest' }}
         run: echo "SNAPSHOT_FILES=tooling/v8-snapshot/cache/dev-darwin/snapshot-meta.cache.json tooling/v8-snapshot/cache/prod-darwin/snapshot-meta.cache.json" >> $GITHUB_ENV
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ env.BASE_BRANCH }}
       - name: Set committer info
         ## attribute the commit to cypress-bot: https://github.community/t/logging-into-git-as-a-github-app/115916
         run: |
           git config --local user.email "${{ env.CYPRESS_BOT_APP_ID }}+cypress-bot[bot]@users.noreply.github.com"
           git config --local user.name "cypress-bot[bot]"
-      - name: Checkout base branch
-        run: |
-          git fetch origin
-          git checkout ${{ env.BASE_BRANCH }}
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
@@ -47,9 +58,15 @@ jobs:
       - name: Run build
         run: yarn build
       - name: Generate dev snapshot
-        run: yarn build-v8-snapshot-dev
+        if: ${{ env.GENERATE_FROM_SCRATCH }}
+          run: V8_SNAPSHOT_FROM_SCRATCH=1 yarn build-v8-snapshot-dev
+        else:
+          run: yarn build-v8-snapshot-dev
       - name: Generate prod snapshot
-        run: yarn build-v8-snapshot-prod
+        if: ${{ env.GENERATE_FROM_SCRATCH }}
+          run: V8_SNAPSHOT_FROM_SCRATCH=1 yarn build-v8-snapshot-prod
+        else:
+          run: yarn build-v8-snapshot-prod
       - name: Check for v8 snapshot cache changes
         id: check-for-v8-snapshot-cache-changes
         run: |
