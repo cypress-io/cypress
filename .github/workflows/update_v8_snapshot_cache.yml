@@ -57,15 +57,17 @@ jobs:
         run: yarn
       - name: Run build
         run: yarn build
-      - name: Generate dev snapshot
+      - name: Generate dev snapshot from scratch
         if: ${{ env.GENERATE_FROM_SCRATCH }}
           run: V8_SNAPSHOT_FROM_SCRATCH=1 yarn build-v8-snapshot-dev
-        else:
+      - name: Generate dev snapshot iteratively
+        if: ${{ !env.GENERATE_FROM_SCRATCH }}
           run: yarn build-v8-snapshot-dev
-      - name: Generate prod snapshot
+      - name: Generate prod snapshot from scratch
         if: ${{ env.GENERATE_FROM_SCRATCH }}
           run: V8_SNAPSHOT_FROM_SCRATCH=1 yarn build-v8-snapshot-prod
-        else:
+      - name: Generate prod snapshot iteratively
+        if: ${{ !env.GENERATE_FROM_SCRATCH }}
           run: yarn build-v8-snapshot-prod
       - name: Check for v8 snapshot cache changes
         id: check-for-v8-snapshot-cache-changes
