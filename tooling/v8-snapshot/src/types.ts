@@ -85,6 +85,7 @@ export type CreateBundleOpts = {
   baseSourcemapExternalPath?: string
   processedSourcemapExternalPath?: string
   supportTypeScript: boolean
+  integrityCheckSource: string | undefined
 }
 
 /**
@@ -121,6 +122,8 @@ export type ProcessScriptOpts = {
 
   nodeEnv: string
   supportTypeScript: boolean
+
+  integrityCheckSource: string | undefined
 }
 
 /**
