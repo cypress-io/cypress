@@ -6,8 +6,9 @@ The goal of this document is to give a technical overview of the architecture be
 
 See [Node.js’s URL doc](https://nodejs.org/api/url.html#url-strings-and-url-objects) for a handy breakdown of URL parts
 
-- **domain**: A hostname without the subdomain (for the purposes of this doc). May also be referred to as **superdomain** (e.g. `example.com`, `example.co.uk`, `localhost`)
-- **origin**: The combination of the protocol, hostname, and port of a URL. For the purposes of Cypress, the subdomain is irrelevant. (e.g. `http://example.com:3500`)
+- **domain**: The hostname portion of a URL. (e.g. `example.com`, `www.example.com`, `www.example.co.uk`, `localhost`)
+- **superdomain**: A domain without the subdomain. (e.g. `example.com`, `example.co.uk`, `localhost`)
+- **origin**: The combination of the protocol, hostname, and port of a URL (e.g. `http://www.example.com:3500`)
 - **top**: The main window/frame of the browser
 - **primary origin**: The origin that top is on
 - **secondary origin**: Any origin that is not the primary origin
@@ -209,13 +210,4 @@ Nesting **cy.origin()** inside the callback is not currently supported, but supp
 
 ### cy.intercept()
 
-Most use-cases for **cy.intercept()** can be accomplished by using it outside of the **cy.origin()** callback. Since there may be use-cases where setting up a response, for example, requires the scope within the **cy.origin()** callback, we will likely [add support for **cy.intercept()** in the future](https://github.com/cypress-io/cypress/issues/20720). 
-
-### Deprecated commands / methods
-
-All deprecated APIs are not supported in the **cy.origin()** callback and we do not plan to ever add support for them. If a user attempts to use one, we throw an error that points them to the preferred API that superseded it. The following are deprecated APIs that are not supported:
-
-- **cy.route()**: Superseded by **cy.intercept()**
-- **cy.server()**: Superseded by **cy.intercept()**
-- **Cypress.Server.defaults()**: Superseded by **cy.intercept()**
-- **Cypress.Cookies.preserveOnce()**: Superseded by sessions
+Most use-cases for **cy.intercept()** can be accomplished by using it outside of the **cy.origin()** callback. Since there may be use-cases where setting up a response, for example, requires the scope within the **cy.origin()** callback, we will likely [add support for **cy.intercept()** in the future](https://github.com/cypress-io/cypress/issues/20720).

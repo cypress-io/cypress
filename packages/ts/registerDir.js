@@ -8,8 +8,8 @@ const path = require('path')
 // build has been done correctly
 module.exports = function (scopeDir) {
   // Only set up ts-node if we're not using the snapshot
-  // @ts-ignore snapshotResult is a global defined in the v8 snapshot
-  if (['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE) || typeof snapshotResult === 'undefined') {
+  // @ts-ignore getSnapshotResult is a global defined in the v8 snapshot
+  if (['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE) || typeof getSnapshotResult === 'undefined') {
     try {
     // Prevent double-compiling if we're testing the app and already have ts-node hook installed
     // TODO(tim): e2e testing does not like this, I guess b/c it's currently using the tsconfig
