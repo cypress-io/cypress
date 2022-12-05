@@ -3428,9 +3428,9 @@ declare namespace Cypress {
     id: string
     hydrated: boolean
     cacheAcrossSpecs: SessionOptions['cacheAcrossSpecs']
-    cookies?: Array<Cypress.Cookie> | null
-    localStorage?: Array<OriginStorage> | null
-    sessionStorage?: Array<OriginStorage> | null
+    cookies?: Cookie[] | null
+    localStorage?: OriginStorage[] | null
+    sessionStorage?: OriginStorage[] | null
     setup: () => void
     validate?: SessionOptions['validate']
   }
