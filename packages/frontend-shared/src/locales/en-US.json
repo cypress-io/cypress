@@ -61,6 +61,7 @@
     "newSpec": "New spec",
     "createSpec": "Create spec",
     "done": "Done!",
+    "noComponentsFound": "No components found",
     "updateSpecPattern": "Update spec pattern",
     "newSpecModalTitle": "Create a new spec",
     "successPage": {

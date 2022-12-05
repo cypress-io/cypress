@@ -201,7 +201,7 @@ export const CurrentProject = objectType({
 
     t.string('codeGenFramework', {
       resolve: (src, args, ctx) => {
-        return ctx.actions.project.getWizardFrameworkFromConfig()?.codeGenFramework || null
+        return ctx.actions.codegen.getWizardFrameworkFromConfig()?.codeGenFramework || null
       },
     })
 

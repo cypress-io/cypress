@@ -8,7 +8,7 @@ import type { CodeGenType } from '../gen/graphcache-config.gen'
 import { WizardFrontendFramework, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import { parse as parseReactComponent, resolver as reactDocgenResolvers } from 'react-docgen'
 
-interface ReactComponentDescriptor {
+export interface ReactComponentDescriptor {
   displayName: string
 }
 

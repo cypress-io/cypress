@@ -8,5 +8,5 @@ export const VueComponentGenerator: SpecGenerator = {
   entry: VueComponentGeneratorStepOne,
   show: (currentProject) => !!(currentProject?.codeGenFramework && currentProject?.codeGenFramework === 'vue'),
   matches: filters.matchesCT,
-  id: 'component',
+  id: 'vueComponent',
 }

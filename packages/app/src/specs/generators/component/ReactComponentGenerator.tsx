@@ -8,5 +8,5 @@ export const ReactComponentGenerator: SpecGenerator = {
   entry: ReactComponentGeneratorStepOne,
   show: (currentProject) => !!(currentProject?.codeGenFramework && currentProject?.codeGenFramework === 'react'),
   matches: filters.matchesCT,
-  id: 'component',
+  id: 'reactComponent',
 }

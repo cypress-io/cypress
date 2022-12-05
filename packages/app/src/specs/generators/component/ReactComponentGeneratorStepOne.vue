@@ -19,17 +19,16 @@
           class="mt-48px w-full inline-flex items-center justify-center"
         >
           <i-cy-loading_x16 class="h-48px mr-12px animate-spin w-48px" />
-          "This is the React generator"
           <p class="text-lg">
             Loading
           </p>
         </div>
-        <FileChooser
+        <ExpandableFileChooser
           v-else-if="!result"
           v-model:extensionPattern="extensionPattern"
           :files="allFiles"
           :loading="query.fetching.value"
-          @selectFile="getComponents"
+          @select-item="makeSpec"
         />
         <GeneratorSuccess
           v-else
@@ -76,17 +75,18 @@
 <script setup lang="ts">
 import { useVModels, whenever } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'
-import FileChooser from '../FileChooser.vue'
+import ExpandableFileChooser from '../ExpandableFileChooser.vue'
 import GeneratorSuccess from '../GeneratorSuccess.vue'
 import { computed, ref } from 'vue'
 import { gql, useQuery, useMutation } from '@urql/vue'
 import type { ReactComponentGeneratorStepOne_CodeGenGlobFragment, GeneratorSuccessFileFragment } from '../../../generated/graphql'
-import { ReactComponentGeneratorStepOneDocument, ReactComponentGeneratorStepOne_GenerateSpecDocument, ReactComponentGeneratorStepOne_GetReactComponentsFromFileDocument } from '../../../generated/graphql'
+import { ReactComponentGeneratorStepOneDocument, ReactComponentGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import Button from '@cy/components/Button.vue'
 import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
 import TestResultsIcon from '~icons/cy/test-results_x24.svg'
 import EmptyGenerator from '../EmptyGenerator.vue'
+
 const props = defineProps<{
   title: string
   gql: ReactComponentGeneratorStepOne_CodeGenGlobFragment
@@ -134,13 +134,6 @@ query ReactComponentGeneratorStepOne($glob: String!) {
 `
 
 gql`
-mutation ReactComponentGeneratorStepOne_getReactComponentsFromFile($filePath: String!) {
-  getReactComponentsFromFile(filePath: $filePath) {
-    displayName
-  }
-}`
-
-gql`
 mutation ReactComponentGeneratorStepOne_generateSpec($codeGenCandidate: String!, $type: CodeGenType!, $componentName: String!) {
   generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type, componentName: $componentName) {
     ...GeneratorSuccess
@@ -156,7 +149,6 @@ mutation ReactComponentGeneratorStepOne_generateSpec($codeGenCandidate: String!,
   }
 }`
 
-const getReactComponentsMutation = useMutation(ReactComponentGeneratorStepOne_GetReactComponentsFromFileDocument)
 const generateSpecMutation = useMutation(ReactComponentGeneratorStepOne_GenerateSpecDocument)
 const extensionPattern = ref(props.gql.codeGenGlobs.component)
 
@@ -184,19 +176,11 @@ whenever(generatedSpecError, () => {
   title.value = t('createSpec.component.importEmptySpec.header')
 })
 
-const getComponents = async (file) => {
-  const { data } = await getReactComponentsMutation.executeMutation({
-    filePath: file.absolute,
-  })
-
-  console.log('DATA', data)
-}
-
-const makeSpec = async (file) => {
+const makeSpec = async ({ file, item }) => {
   const { data } = await generateSpecMutation.executeMutation({
     codeGenCandidate: file.absolute,
     type: 'component',
-    componentName: '',
+    componentName: item,
   })
 
   generateSpecFromSource.value = data?.generateSpecFromSource
