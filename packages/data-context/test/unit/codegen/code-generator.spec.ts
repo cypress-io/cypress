@@ -228,6 +228,51 @@ describe('code-generator', () => {
     expect(() => babelParse(fileContent)).not.throw()
   })
 
+  it('should generate from React component template', async () => {
+    const fileName = 'counter.cy.tsx'
+    const target = path.join(tmpPath, 'component')
+    const fileAbsolute = path.join(target, fileName)
+    const action: Action = {
+      templateDir: templates.reactComponent,
+      target,
+    }
+    const codeGenArgs = {
+      componentName: 'Counter',
+      componentPath: 'path/to/component',
+      fileName,
+    }
+
+    const codeGenResults = await codeGenerator(action, codeGenArgs)
+    const expected: CodeGenResults = {
+      files: [
+        {
+          type: 'text',
+          status: 'add',
+          file: fileAbsolute,
+          content: dedent`
+          import React from 'react'
+          import { ${codeGenArgs.componentName} } from '${codeGenArgs.componentPath}'
+
+          describe('<${codeGenArgs.componentName} />', () => {
+            it('renders', () => {
+              // see: https://on.cypress.io/mounting-react
+              cy.mount(<${codeGenArgs.componentName} />)
+            })
+          })`,
+        },
+      ],
+      failed: [],
+    }
+
+    expect(codeGenResults).deep.eq(expected)
+
+    const fileContent = (await fs.readFile(fileAbsolute)).toString()
+
+    expect(fileContent).eq(expected.files[0].content)
+
+    expect(() => babelParse(fileContent)).not.throw()
+  })
+
   it('should generate from scaffoldIntegration', async () => {
     const target = path.join(tmpPath, 'scaffold-integration')
     const action: Action = {

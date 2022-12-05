@@ -8,6 +8,7 @@ import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
 import { CurrentProject } from './gql-CurrentProject'
 import { GenerateSpecResponse } from './gql-GenerateSpecResponse'
 import { Cohort, CohortInput } from './gql-Cohorts'
+import { ReactComponentDescriptor } from './gql-ReactComponentDescriptor'
 import { Query } from './gql-Query'
 import { ScaffoldedFile } from './gql-ScaffoldedFile'
 import { WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
@@ -246,22 +247,34 @@ export const mutation = mutationType({
       },
     })
 
+    t.nonNull.list.nonNull.field('getReactComponentsFromFile', {
+      type: ReactComponentDescriptor,
+      description: 'Parse a JS or TS file to see any exported React components that are defined in the file',
+      args: {
+        filePath: nonNull(stringArg()),
+      },
+      resolve: (_, args, ctx) => {
+        return ctx.actions.codegen.getReactComponentsFromFile(args.filePath)
+      },
+    })
+
     t.field('generateSpecFromSource', {
       type: GenerateSpecResponse,
       description: 'Generate spec from source',
       args: {
         codeGenCandidate: nonNull(stringArg()),
         type: nonNull(CodeGenTypeEnum),
+        componentName: stringArg(),
       },
       resolve: (_, args, ctx) => {
-        return ctx.actions.project.codeGenSpec(args.codeGenCandidate, args.type)
+        return ctx.actions.codegen.codeGenSpec(args.codeGenCandidate, args.type, args.componentName || undefined)
       },
     })
 
     t.nonNull.list.nonNull.field('scaffoldIntegration', {
       type: ScaffoldedFile,
       resolve: (src, args, ctx) => {
-        return ctx.actions.project.scaffoldIntegration()
+        return ctx.actions.codegen.scaffoldIntegration()
       },
     })
 
