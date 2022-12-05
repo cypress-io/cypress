@@ -106,6 +106,7 @@ describe('runner/cypress sessions.ui.spec', {
     validateSessionsInstrumentPanel(['blank_session'])
 
     cy.get('.command-name-session')
+    .first()
     .within(() => {
       cy.contains('blank_session')
       cy.contains('failed')

@@ -2407,7 +2407,7 @@ export default {
     multiple_elements (args) {
       return {
         message: stripIndent`
-        ${cmd('within')} can only be called on a single element. Your subject contained {{num}} elements. Narrow down your subject to a single element before calling \`.within()\`.
+        ${cmd('within')} can only be called on a single element. Your subject contained {{num}} elements. Narrow down your subject to a single element (using \`.first()\`, for example) before calling \`.within()\`.
 
         To run \`.within()\` over multiple subjects, use \`.each()\`.
 
