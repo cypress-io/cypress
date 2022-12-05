@@ -254,7 +254,7 @@ export const mutation = mutationType({
         filePath: nonNull(stringArg()),
       },
       resolve: (_, args, ctx) => {
-        return ctx.actions.project.getReactComponentsFromFile(args.filePath)
+        return ctx.actions.codegen.getReactComponentsFromFile(args.filePath)
       },
     })
 
@@ -267,14 +267,14 @@ export const mutation = mutationType({
         componentName: stringArg(),
       },
       resolve: (_, args, ctx) => {
-        return ctx.actions.project.codeGenSpec(args.codeGenCandidate, args.type, args.componentName || undefined)
+        return ctx.actions.codegen.codeGenSpec(args.codeGenCandidate, args.type, args.componentName || undefined)
       },
     })
 
     t.nonNull.list.nonNull.field('scaffoldIntegration', {
       type: ScaffoldedFile,
       resolve: (src, args, ctx) => {
-        return ctx.actions.project.scaffoldIntegration()
+        return ctx.actions.codegen.scaffoldIntegration()
       },
     })
 
