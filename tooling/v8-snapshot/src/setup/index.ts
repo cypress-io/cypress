@@ -4,7 +4,6 @@ import { generateMetadata } from './generate-metadata'
 import minimist from 'minimist'
 import { generateEntry } from './generate-entry'
 import { installSnapshot } from './install-snapshot'
-import fs from 'fs-extra'
 
 const setupV8Snapshots = async (baseCypressAppPath?: string) => {
   try {
@@ -17,8 +16,6 @@ const setupV8Snapshots = async (baseCypressAppPath?: string) => {
 
     await generateEntry(config)
     const snapshotFileLocation = await installSnapshot(config, meta.resolverMap)
-
-    await fs.copyFile(config.snapshotMetaFile, config.snapshotMetaPrevFile)
 
     return snapshotFileLocation
   } catch (err) {
