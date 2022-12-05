@@ -4,19 +4,21 @@ const runChildProcess = async (entryPoint) => {
 }
 
 const startCypress = async () => {
-  const { initializeStartTime } = require('./lib/util/performance_benchmark')
+  try {
+    const { initializeStartTime } = require('./lib/util/performance_benchmark')
 
-  initializeStartTime()
+    initializeStartTime()
 
-  const { hookRequire } = require('./hook-require')
+    const { hookRequire } = require('./hook-require')
 
-  hookRequire({ forceTypeScript: false })
+    hookRequire({ forceTypeScript: false })
 
-  await require('./start-cypress')
-} catch (error) {
+    await require('./start-cypress')
+  } catch (error) {
   // eslint-disable-next-line no-console
-  console.error(error)
-  process.exit(1)
+    console.error(error)
+    process.exit(1)
+  }
 }
 
 const { entryPoint } = require('minimist')(process.argv.slice(1))
