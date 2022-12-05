@@ -22,7 +22,7 @@ describe('SpecItem', () => {
           const parentColor = getComputedStyle($el.parent()[0]).color
           const highlightedElementColor = getComputedStyle($el[0]).color
 
-          cy.wrap(highlightedElementColor).should('not.equal', parentColor)
+          expect(highlightedElementColor).not.to.equal(parentColor)
         })
       })
 
@@ -35,7 +35,7 @@ describe('SpecItem', () => {
         const parentColor = getComputedStyle($el.parent()[0]).color
         const highlightedElementColor = getComputedStyle($el[0]).color
 
-        cy.wrap(highlightedElementColor).should('equal', parentColor)
+        expect(highlightedElementColor).to.equal(parentColor)
       })
     })
 

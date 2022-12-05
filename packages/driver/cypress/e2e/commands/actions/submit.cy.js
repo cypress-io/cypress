@@ -255,7 +255,7 @@ describe('src/cy/commands/actions/submit', () => {
 
         cy.on('fail', (err) => {
           expect(submitted).to.eq(1)
-          expect(err.message).to.include('`cy.submit()` failed because this element')
+          expect(err.message).to.include('`cy.submit()` failed because the page')
 
           done()
         })

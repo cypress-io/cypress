@@ -11,7 +11,6 @@ import type $Command from './command'
 import type { StateFunc } from './state'
 import type { $Cy } from './cy'
 import type { IStability } from '../cy/stability'
-import type { ITimeouts } from '../cy/timeouts'
 
 const debugErrors = Debug('cypress:driver:errors')
 
@@ -62,34 +61,71 @@ const commandRunningFailed = (Cypress, err, current?: $Command) => {
   })
 }
 
+/*
+ * Queries are simple beasts: They take arguments, and return an idempotent function. They contain no retry
+ * logic, have no awareness of cy.stop(), and are entirely synchronous.
+ *
+ * retryQuery is where we intergrate this simplicity with Cypress' retryability. It verifies the return value is
+ * a sync function, and retries queries until they pass or time out. Commands invoke cy.verifyUpcomingAssertions
+ * directly, but the command_queue is responsible for retrying queries.
+ */
+function retryQuery (command: $Command, ret: any, cy: $Cy) {
+  if ($utils.isPromiseLike(ret) && !cy.isCy(ret)) {
+    $errUtils.throwErrByPath(
+      'query_command.returned_promise', {
+        args: { name: command.get('name') },
+      },
+    )
+  }
+
+  if (!_.isFunction(ret)) {
+    $errUtils.throwErrByPath(
+      'query_command.returned_non_function', {
+        args: { name: command.get('name'), returned: ret },
+      },
+    )
+  }
+
+  const options = {
+    timeout: command.get('timeout'),
+    error: null,
+    _log: command.get('_log'),
+  }
+
+  const onRetry = () => {
+    return cy.verifyUpcomingAssertions(undefined, options, {
+      onRetry,
+      onFail: command.get('onFail'),
+      ensureExistenceFor: command.get('ensureExistenceFor'),
+      subjectFn: () => {
+        const subject = cy.subject(command.get('chainerId'))
+
+        // @ts-ignore
+        Cypress.ensure.isType(subject, command.get('prevSubject'), command.get('name'), cy)
+
+        return ret(subject)
+      },
+    })
+  }
+
+  return onRetry()
+}
+
 export class CommandQueue extends Queue<$Command> {
   state: StateFunc
-  timeout: $Cy['timeout']
   stability: IStability
-  fail: $Cy['fail']
-  isCy: $Cy['isCy']
-  clearTimeout: ITimeouts['clearTimeout']
-  setSubjectForChainer: $Cy['setSubjectForChainer']
+  cy: $Cy
 
   constructor (
     state: StateFunc,
-    timeout: $Cy['timeout'],
     stability: IStability,
-    fail: $Cy['fail'],
-    isCy: $Cy['isCy'],
-    clearTimeout: ITimeouts['clearTimeout'],
-    setSubjectForChainer: $Cy['setSubjectForChainer'],
+    cy: $Cy,
   ) {
     super()
 
     this.state = state
-    this.timeout = timeout
     this.stability = stability
-    this.fail = fail
-    this.isCy = isCy
-    this.clearTimeout = clearTimeout
-    this.setSubjectForChainer = setSubjectForChainer
-
+    this.cy = cy
     this.run = this.run.bind(this)
   }
 
@@ -190,6 +226,9 @@ export class CommandQueue extends Queue<$Command> {
   }
 
   private runCommand (command: $Command) {
+    const isQuery = command.get('query')
+    const name = command.get('name')
+
     // bail here prior to creating a new promise
     // because we could have stopped / canceled
     // prior to ever making it through our first
@@ -212,7 +251,21 @@ export class CommandQueue extends Queue<$Command> {
       let ret
       let enqueuedCmd
 
-      const commandEnqueued = (obj) => {
+      // Queries can invoke other queries - they are synchronous, and get added to the subject chain without
+      // issue. But they cannot contain commands, which are async.
+      // This callback watches to ensure users don't try and invoke any commands while inside a query.
+      const commandEnqueued = (obj: Cypress.EnqueuedCommandAttributes) => {
+        if (isQuery && !obj.query) {
+          $errUtils.throwErrByPath(
+            'query_command.invoked_action', {
+              args: {
+                name,
+                action: obj.name,
+              },
+            },
+          )
+        }
+
         return enqueuedCmd = obj
       }
 
@@ -231,6 +284,14 @@ export class CommandQueue extends Queue<$Command> {
       try {
         command.start()
         ret = __stackReplacementMarker(command.get('fn'), args)
+
+        // Queries return a function which takes the current subject and returns the next subject. We wrap this in
+        // retryQuery() - and let it retry until it passes, times out or is cancelled.
+        // We save the original return value on the $Command though - it's what gets added to the subject chain later.
+        if (isQuery) {
+          command.set('queryFn', ret)
+          ret = retryQuery(command, ret, this.cy)
+        }
       } catch (err) {
         throw err
       } finally {
@@ -243,7 +304,7 @@ export class CommandQueue extends Queue<$Command> {
       // we cannot pass our cypress instance or our chainer
       // back into bluebird else it will create a thenable
       // which is never resolved
-      if (this.isCy(ret)) {
+      if (this.cy.isCy(ret)) {
         return null
       }
 
@@ -251,7 +312,7 @@ export class CommandQueue extends Queue<$Command> {
         $errUtils.throwErrByPath(
           'miscellaneous.command_returned_promise_and_commands', {
             args: {
-              current: command.get('name'),
+              current: name,
               called: enqueuedCmd.name,
             },
           },
@@ -268,10 +329,7 @@ export class CommandQueue extends Queue<$Command> {
         // or an undefined value then throw
         $errUtils.throwErrByPath(
           'miscellaneous.returned_value_and_commands_from_custom_command', {
-            args: {
-              current: command.get('name'),
-              returned: ret,
-            },
+            args: { current: name, returned: ret },
           },
         )
       }
@@ -304,7 +362,29 @@ export class CommandQueue extends Queue<$Command> {
       // end / snapshot our logs if they need it
       command.finishLogs()
 
-      this.setSubjectForChainer(command.get('chainerId'), subject)
+      if (isQuery) {
+        subject = command.get('queryFn')
+        // For queries, the "subject" here is the query's return value, which is a function which
+        // accepts a subject and returns a subject, and can be re-invoked at any time.
+
+        subject.commandName = name
+        subject.args = command.get('args')
+
+        // Even though we've snapshotted, we only end the logs a query's logs if we're at the end of a query
+        // chain - either there is no next command (end of a test), the next command is an action, or the next
+        // command belongs to another chainer (end of a chain).
+
+        // This is done so that any query's logs remain in the 'pending' state until the subject chain is finished.
+        this.cy.addQueryToChainer(command.get('chainerId'), subject)
+      } else {
+        // For commands, the "subject" here is the command's return value, which replaces
+        // the current subject chain. We cannot re-invoke commands - the return value here is final.
+        this.cy.setSubjectForChainer(command.get('chainerId'), [subject])
+      }
+
+      // TODO: This line was causing subjects to be cleaned up prematurely in some instances (Specifically seen on the within command)
+      // The command log would print the yielded value as null if checked outside of the current command chain.
+      // this.cleanSubjects()
 
       this.state({
         commandIntermediateValue: undefined,
@@ -339,7 +419,7 @@ export class CommandQueue extends Queue<$Command> {
           next: this.at(this.index + 1),
         })
 
-        this.setSubjectForChainer(command.get('chainerId'), command.get('subject'))
+        this.cy.setSubjectForChainer(command.get('chainerId'), [command.get('subject')])
 
         if (command.state === 'skipped') {
           Cypress.action('cy:skipped:command:end', command)
@@ -375,12 +455,12 @@ export class CommandQueue extends Queue<$Command> {
       }
 
       // store the previous timeout
-      const prevTimeout = this.timeout()
+      const prevTimeout = this.cy.timeout()
 
       // If we have created a timeout but are in an unstable state, clear the
       // timeout in favor of the on load timeout already running.
       if (!this.state('isStable')) {
-        this.clearTimeout()
+        this.cy.clearTimeout()
       }
 
       // store the current runnable
@@ -398,7 +478,7 @@ export class CommandQueue extends Queue<$Command> {
         // mocha expects the test to be done
 
         if (!runnable.state) {
-          this.timeout(prevTimeout)
+          this.cy.timeout(prevTimeout)
         }
 
         Cypress.action('cy:command:end', command)
@@ -463,7 +543,7 @@ export class CommandQueue extends Queue<$Command> {
 
       this.cleanup()
 
-      return this.fail(err)
+      return this.cy.fail(err)
     }
 
     const { promise, reject, cancel } = super.run({
@@ -481,5 +561,28 @@ export class CommandQueue extends Queue<$Command> {
     })
 
     return promise
+  }
+
+  // This function iterates through all upcoming commands in the queue, then
+  // discards the subject chain for every chainer that can't be referenced
+  // in the future (eg, no upcoming commands belong to the same chain).
+
+  // This is safe because aliases (which might be referenced later) are stored
+  // separately, in state('aliases'), and any subjects that "flow upwards" (eg.
+  // the subject of a chain inside a .then() command) have already replaced
+  // the subject of their parent chainer by the time this is called.
+  cleanSubjects () {
+    const stillNeeded = this.queueables.slice(this.index).map((c) => c.get('chainerId'))
+
+    this.queueables.slice(0, this.index).forEach((command) => {
+      // Once a command has resolved, and its chainer is no longer referenced
+      // by future commands, we can throw away the reference to the function
+      // and its subject to free memory.
+      if (command.get('subject') && stillNeeded.indexOf(command.get('chainerId')) === -1) {
+        command.set({ fn: null, subject: null, queryFn: null })
+      }
+    })
+
+    this.cy.state('subjects', _.pick(this.cy.state('subjects'), stillNeeded))
   }
 }
