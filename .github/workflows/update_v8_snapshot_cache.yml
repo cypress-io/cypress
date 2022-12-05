@@ -59,10 +59,10 @@ jobs:
         run: yarn build
       - name: Generate prod snapshot from scratch
         if: ${{ env.GENERATE_FROM_SCRATCH }}
-        run: cross-env V8_SNAPSHOT_FROM_SCRATCH=1 V8_UPDATE_METAFILE=1 yarn build-v8-snapshot-prod
+        run: yarn cross-env V8_SNAPSHOT_FROM_SCRATCH=1 V8_UPDATE_METAFILE=1 yarn build-v8-snapshot-prod
       - name: Generate prod snapshot iteratively
         if: ${{ !env.GENERATE_FROM_SCRATCH }}
-        run: cross-env V8_UPDATE_METAFILE=1 yarn build-v8-snapshot-prod
+        run: yarn cross-env V8_UPDATE_METAFILE=1 yarn build-v8-snapshot-prod
       - name: Check for v8 snapshot cache changes
         id: check-for-v8-snapshot-cache-changes
         run: |
