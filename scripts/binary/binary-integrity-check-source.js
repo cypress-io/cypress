@@ -143,9 +143,9 @@ function integrityCheck (options) {
         fileName: 'evalmachine.<anonymous>',
       },
       {
-        functionName: 'Module._extensions.<computed>',
+        functionName: 'Module2._extensions.<computed>',
         // eslint-disable-next-line no-undef
-        fileName: [appPath, 'node_modules', 'bytenode', 'lib', 'index.js'].join(PATH_SEP),
+        fileName: [appPath, 'index.js'].join(PATH_SEP),
       },
       {
         // eslint-disable-next-line no-undef
@@ -162,15 +162,6 @@ function integrityCheck (options) {
     fs,
     expectedHash: 'MAIN_INDEX_HASH',
     errorMessage: 'Integrity check failed for main index.js file',
-  })
-
-  validateFile({
-    // eslint-disable-next-line no-undef
-    filePath: [appPath, 'node_modules', 'bytenode', 'lib', 'index.js'].join(PATH_SEP),
-    crypto,
-    fs,
-    expectedHash: 'BYTENODE_HASH',
-    errorMessage: 'Integrity check failed for main bytenode.js file',
   })
 
   validateFile({
