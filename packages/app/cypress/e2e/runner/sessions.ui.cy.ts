@@ -302,6 +302,7 @@ describe('runner/cypress sessions.ui.spec', {
       validateSessionsInstrumentPanel(['user1'])
 
       cy.get('.command-name-session')
+      .first()
       .within(() => {
         cy.contains('failed')
 
