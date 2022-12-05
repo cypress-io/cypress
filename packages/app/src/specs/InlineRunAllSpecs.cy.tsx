@@ -26,13 +26,10 @@ describe('<InlineRunAllSpecs/>', { viewportHeight: 50, viewportWidth: 150 }, () 
       })
     })
 
-    it('emits expected event on click and with keyboard', () => {
-      cy.get('button')
-      .click()
-      .type(' ')
-      .type('{enter}')
+    it('emits expected event', () => {
+      cy.get('button').click()
 
-      cy.get('@runAllStub').should('have.been.calledThrice')
+      cy.get('@runAllStub').should('have.been.calledOnce')
     })
   })
 
