@@ -1,37 +1,84 @@
 <template>
-  <div
-    v-for="spec in props.gql"
-    :key="spec?.id"
-  >
-    Failed Spec
-    <div
-      v-for="test in spec?.testResults"
-      :key="test?.id"
-    >
-      {{ test?.title }}
-    </div>
-  </div>
+  <DebugSpec
+    v-for="spec in specs"
+    :key="spec.spec.id"
+    :spec="spec.spec"
+    :test-results="spec.tests"
+  />
 </template>
 
 <script setup lang="ts">
 import { gql } from '@urql/core'
-import type { DebugSpecListFragment } from '../generated/graphql'
+import { computed } from '@vue/reactivity'
+import type { DebugSpecListSpecFragment, DebugSpecListTestsFragment } from '../generated/graphql'
+import DebugSpec from './DebugSpec.vue'
 
 gql`
-fragment DebugSpecList on TestForReviewSpec {
+fragment DebugSpecListSpec on CloudSpecRun {
   id
   path
-  testResults {
+  extension
+  shortPath
+  groupIds
+  testsPassed {
+    min
+    max
+  }
+  testsFailed {
+    min
+    max
+  }
+  testsPending {
+    min
+    max
+  }
+}
+`
+
+gql`
+fragment DebugSpecListTests on TestResult {
+  id
+  specId
+  title(depth: 2)
+  titleParts
+  duration
+  isFlaky
+  testUrl
+  instance {
     id
-    title(depth: 5)
-    titleParts
-    duration
+    status
+    groupId
+    totalPassed
+    totalFailed
+    totalPending
+    totalSkipped
+    totalRunning
+    hasStdout
+    stdoutUrl
+    hasScreenshots
+    screenshotsUrl
+    hasVideo
+    videoUrl
   }
 }
 `
 
 const props = defineProps<{
-  gql: DebugSpecListFragment[]
+  specs: { spec: DebugSpecListSpecFragment, tests: DebugSpecListTestsFragment[] }[]
 }>()
+
+const specs = computed(() => {
+  return props.specs.map((specItem) => {
+    return {
+      spec: {
+        id: specItem.spec.id,
+        path: specItem.spec.path,
+        fileName: specItem.spec.basename,
+        fileExtension: specItem.spec.basename.substring(specItem.spec.basename.indexOf('.')),
+      },
+      tests: specItem.tests,
+    }
+  })
+})
 
 </script>

@@ -8,7 +8,7 @@
         commits-ahead="0"
       />
       <DebugSpecList
-        :gql="specs"
+        :specs="specsList"
       />
     </div>
     <div
@@ -30,14 +30,14 @@
         {{ t('debugPage.noRuns') }}
       </div>
     </div>
-    {{ props.gql }}
+    <!-- <pre>{{ JSON.stringify(props.gql, null, 2) }}</pre> -->
   </div>
 </template>
 
 <script setup lang="ts">
 import { gql } from '@urql/vue'
 import { computed } from '@vue/reactivity'
-import type { DebugSpecsFragment } from '../generated/graphql-test'
+import type { DebugSpecsFragment } from '../generated/graphql'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import DebugPageHeader from './DebugPageHeader.vue'
 import DebugSpecList from './DebugSpecList.vue'
@@ -58,13 +58,15 @@ gql`
             id
             runNumber
             status
-            overLimitActionTitle
+            overLimitActionType
             overLimitActionUrl
             testsForReview {
-              specs(viewBy: FAILED, page:1, perPage: 2) {
-                id
-               ...DebugSpecList 
-              }
+              id
+              ...DebugSpecListTests
+            }
+            specs {
+              id
+              ...DebugSpecListSpec
             }
           }
         }
@@ -83,9 +85,38 @@ const run = computed(() => {
   return props.gql.currentProject?.cloudProject?.__typename === 'CloudProject' && props.gql.currentProject.cloudProject.runByNumber
 })
 
-const specs = computed(() => {
+const specsList = computed(() => {
   if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProject') {
-    return props.gql.currentProject.cloudProject.runByNumber?.testsForReview?.specs || []
+    const specs = props.gql.currentProject.cloudProject.runByNumber?.specs || []
+    const tests = props.gql.currentProject.cloudProject.runByNumber?.testsForReview || []
+
+    const mappedTests = tests.reduce((acc, curr) => {
+      // console.log(`test specId = ${ curr.specId}`)
+      let spec = acc[curr.specId]
+
+      if (!spec) {
+        const foundSpec = specs.find((spec) => spec.id === curr.specId)
+
+        spec = { spec: foundSpec }
+        // console.log('looking for spec', spec)
+        if (foundSpec) {
+          acc[curr.specId] = spec
+        } else {
+          //TODO better handle error case
+          throw new Error(`Could not find spec for id ${ curr.specId}`)
+        }
+      }
+
+      spec.tests = [...(spec.tests || []), curr]
+
+      // console.log('spec.tests', spec.tests)
+
+      return acc
+    }, {})
+
+    // console.log(mappedTests)
+
+    return Object.values(mappedTests)
   }
 
   return []

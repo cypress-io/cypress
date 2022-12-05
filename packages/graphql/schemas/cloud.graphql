@@ -223,6 +223,21 @@ type CloudProject implements Node {
   ): CloudRunConnection
 
   """
+  Returns runs associated to the given git commit SHAs hashes. The returned runs are ordered in the same way as the provided hashes.
+  """
+  runsByCommitShas(
+    """
+    An ordered list of git commit sha1 hashes.
+    """
+    commitShas: [String!]!
+
+    """
+    A limit to apply to the sorted list of found runs.
+    """
+    runLimit: Int! = 100
+  ): [CloudRun]
+
+  """
   Unique identifier for a Project
   """
   slug: String!
@@ -435,12 +450,13 @@ type CloudRun implements Node {
   """
   id: ID!
   isHiddenByUsageLimits: Boolean!
-  overLimitActionTitle: String!
+  overLimitActionType: OverLimitActionTypeEnum!
   overLimitActionUrl: String!
   runNumber: Int
+  specs: [CloudSpecRun!]!
   status: CloudRunStatus
   tags: [CloudRunTag]
-  testsForReview: TestForReview!
+  testsForReview(limit: Int! = 100): [TestResult!]!
 
   """
   Total duration of the run in milliseconds, accounting for any parallelization
@@ -552,30 +568,14 @@ type CloudRunGroup {
   The type of the test
   """
   testingType: String!
-
-  """
-  This is the number of failed tests for the instance
-  """
   totalFailures: Int!
-
-  """
-  This is the number of passed tests for the instance
-  """
   totalPasses: Int!
-
-  """
-  This is the number of pending tests for the instance
-  """
   totalPending: Int!
-
-  """
-  This is the number of skipped tests for the instance
-  """
   totalSkipped: Int!
 }
 
 """
-Possible check status of the instances run
+Possible check status of a run group
 """
 enum CloudRunGroupStatusEnum {
   CANCELLED
@@ -614,6 +614,8 @@ type CloudRunTag implements Node {
 A Recorded run of a given spec from the Test Runner, typically to the cloud
 """
 type CloudSpecRun implements Node {
+  basename: String!
+
   """
   When the run was completed
   """
@@ -623,21 +625,25 @@ type CloudSpecRun implements Node {
   When the run was created
   """
   createdAt: DateTime
+  extension: String!
 
   """
   Amount of groups this spec was run in
   """
   groupCount: Int
+  groupIds: [String]
 
   """
   Globally unique identifier representing a concrete GraphQL ObjectType
   """
   id: ID!
+  path: String!
 
   """
   Incremental run number assigned
   """
   runNumber: Int
+  shortPath: String
 
   """
   Aggregate information about how long the spec took to run in the groups
@@ -842,10 +848,6 @@ type OperatingSystem {
   The platform of the OS, e.g. `linux`
   """
   platform: OperatingSystemsEnum
-
-  """
-  The name of the operating system as stored in the db
-  """
   unformattedName: String
 
   """
@@ -862,6 +864,11 @@ enum OperatingSystemsEnum {
   MAC
   UNKNOWN
   WINDOWS
+}
+
+enum OverLimitActionTypeEnum {
+  CONTACT_ADMIN
+  UPGRADE
 }
 
 """
@@ -905,7 +912,7 @@ type Query {
     projectSlug: String!
 
     """
-    Datetime since the fetched data
+    DateTime since the fetched data
     """
     sinceDateTime: DateTime
   ): CloudLatestRunUpdateSpecData
@@ -997,6 +1004,31 @@ type RunInstance {
   stdoutUrl: String
 
   """
+  This is the number of failed tests for the instance
+  """
+  totalFailed: Int
+
+  """
+  This is the number of passed tests for the instance
+  """
+  totalPassed: Int
+
+  """
+  This is the number of pending tests for the instance
+  """
+  totalPending: Int
+
+  """
+  This is the number of running tests for the instance
+  """
+  totalRunning: Int
+
+  """
+  This is the number of skipped tests for the instance
+  """
+  totalSkipped: Int
+
+  """
   Link to Cypress Cloud to view stdout, if available
   """
   videoUrl: String
@@ -1031,27 +1063,6 @@ type SpecDataAggregate {
   min: Int
 }
 
-type TestForReview {
-  specs(
-    page: Int!
-    perPage: Int! = 30
-    viewBy: TestsForReviewViewByEnum
-  ): [TestForReviewSpec!]!
-  totalCount: Int!
-}
-
-type TestForReviewSpec {
-  basename: String!
-  extension: String!
-  id: String!
-  path: String!
-  shortPath: String
-  testResults: [TestResult!]!
-  totalFailed: Int!
-  totalPassed: Int!
-  totalPending: Int!
-}
-
 type TestResult {
   bodyHash: String!
 
@@ -1071,6 +1082,7 @@ type TestResult {
   If the test result was muted in the current run
   """
   isMuted: Boolean!
+  specId: String!
   state: TestResultStateEnum!
   testId: String
   testUrl: String!
@@ -1096,14 +1108,4 @@ enum TestResultStateEnum {
   SKIPPED
   TIMEDOUT
   UNKNOWN
-}
-
-"""
-The characteristic to viewBy the tests for review
-"""
-enum TestsForReviewViewByEnum {
-  FAILED
-  FAILED_OR_FLAKY
-  FLAKY
-  MODIFIED
 }

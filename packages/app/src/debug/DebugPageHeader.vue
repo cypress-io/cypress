@@ -1,7 +1,7 @@
 <template>
   <div
     data-cy="debug"
-    class="flex flex-col pb-24px gap-16px"
+    class="flex flex-col gap-16px"
   >
     <div
       data-cy="debug-header"
@@ -19,7 +19,6 @@
           {{ debug.commitInfo.summary }}
         </li>
         <div
-          v-if="debug.runNumber && props.commitsAhead"
           class="border rounded flex border-gray-100 h-6 text-sm items-center"
           data-cy="debug-runCommit-info"
         >
@@ -31,10 +30,11 @@
           </span>
           <div class="bg-gray-100 h-3 my-6px w-px" />
           <span
+            v-if="props.commitsAhead"
             class="font-normal mx-px px-2 text-orange-500 items-center"
             data-cy="debug-commitsAhead"
           >
-            {{ props.commitsAhead }}
+            {{ t('debugPage.header.commitsAhead', {commits: props.commitsAhead}) }}
           </span>
         </div>
         <li class="-mt-8px text-lg text-gray-400">

@@ -1,23 +1,23 @@
 <template>
   <div
     data-cy="debug-spec-col"
-    class="grid flex flex-col px-24px gap-24px self-stretch"
+    class="flex flex-col grid px-24px gap-24px self-stretch"
   >
     <div
       data-cy="debug-spec-item"
-      class="w-full overflow-hidden flex flex-col items-start box-border border-t-1px border-x-1px rounded"
+      class="rounded flex flex-col border-t-1px border-x-1px w-full overflow-hidden items-start box-border"
     >
       <div
         data-cy="debug-spec-header"
-        class="w-full flex flex-row items-center py-12px bg-gray-50 border-b-1px border-b-gray-100 rounded-t"
+        class="rounded-t flex flex-row bg-gray-50 border-b-1px border-b-gray-100 w-full py-12px items-center"
       >
         <div
           data-cy="spec-contents"
-          class="w-full flex flex-row px-16px items-center"
+          class="flex flex-row w-full px-16px items-center"
         >
           <div
             data-cy="spec-path"
-            class="flex-grow non-italic text-base truncate"
+            class="flex-grow text-base non-italic truncate"
           >
             <span
               class="font-normal text-gray-600"
@@ -39,7 +39,7 @@
             <Button
               data-cy="run-failures"
               variant="white"
-              class="inline-flex gap-x-10px whitespace-nowrap justify-center items-center isolate"
+              class="gap-x-10px inline-flex whitespace-nowrap justify-center items-center isolate"
               :disabled="isDisabled"
               :to="{ path: '/specs/runner', query: { file: (specData.path).replace(/\\/g, '/') } }"
             >
@@ -61,7 +61,7 @@
         v-for="test in specData.failedTests"
         :key="`test-${test.id}`"
         data-cy="test-group"
-        class="w-full flex flex-col flex-start h-12 items-start justify-center pl-16px border-b-gray-100 border-b-1px"
+        class="flex flex-col flex-start border-b-gray-100 border-b-1px h-12 w-full pl-16px items-start justify-center"
       >
         <DebugFailedTest
           :failed-test-result="test"
@@ -101,7 +101,7 @@ const props = defineProps<{
 
 const specData = computed(() => {
   return {
-    path: `${props.spec.path}/`,
+    path: props.spec.path,
     fileName: props.spec.fileName,
     fileExtension: props.spec.fileExtension,
     failedTests: props.testResults,

@@ -634,11 +634,13 @@
     }
   },
   "debugPage": {
+    "runFailures": "Run Failures",
     "notLoggedIn": "Not logged in",
     "notConnected": "Not connected",
     "noRuns": "No runs",
     "header": {
-      "runUrl": "View in Cypress Cloud"
+      "runUrl": "View in Cypress Cloud",
+      "commitsAhead": "You are {commits} commits ahead"
     }
   },
   "testingType": {
@@ -862,8 +864,5 @@
     "alpha": "Alpha",
     "beta": "Beta",
     "new": "New"
-  },
-  "debugPage": {
-    "runFailures": "Run Failures"
   }
 }
