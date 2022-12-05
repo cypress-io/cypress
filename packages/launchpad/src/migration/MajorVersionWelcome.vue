@@ -54,7 +54,7 @@
               </h2>
 
               <p>
-                Cypress now has full support for testing multiple domains of different origins in a single test with the <ExternalLink href="https://on.cypress.io/origin">
+                Cypress now has full support for testing multiple origins in a single test with the <ExternalLink href="https://on.cypress.io/origin">
                   <code>cy.origin()</code>
                 </ExternalLink> command! To take a deep-dive into how this works, read our
 
