@@ -3409,7 +3409,7 @@ declare namespace Cypress {
      */
     clearAllSavedSessions: () => Promise<void>
     /**
-     * Clear all storage and cookie date across all origins associated with the current session.
+     * Clear all storage and cookie data across all origins associated with the current session.
      */
     clearCurrentSessionData: () => Promise<void>
     /**
