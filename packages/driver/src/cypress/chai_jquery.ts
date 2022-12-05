@@ -67,7 +67,7 @@ export const $chaiJquery = (chai, chaiUtils, callbacks: Callbacks) => {
         // From jQuery 3.x .selector API is deprecated. (https://api.jquery.com/selector/)
         // Because of that, wrap() above removes selector property.
         // That's why we're caching the value of selector above and using it here.
-        ctx._obj = selector
+        ctx._obj = selector ?? 'subject'
         // if no element found, fail the existence check
         // depends on the negate flag
         ctx.assert(!!ctx.__flags.negate, ...args)

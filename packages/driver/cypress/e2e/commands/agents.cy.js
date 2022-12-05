@@ -323,10 +323,6 @@ describe('src/cy/commands/agents', () => {
           expect(cy.state('aliases').myStub).to.exist
         })
 
-        it('stores the agent as the subject', function () {
-          expect(cy.state('aliases').myStub.subject).to.eq(this.stub)
-        })
-
         it('assigns subject to runnable ctx', function () {
           expect(this.myStub).to.eq(this.stub)
         })
@@ -402,10 +398,6 @@ describe('src/cy/commands/agents', () => {
 
         it('stores the lookup as an alias', () => {
           expect(cy.state('aliases')['my.stub']).to.exist
-        })
-
-        it('stores the agent as the subject', function () {
-          expect(cy.state('aliases')['my.stub'].subject).to.eq(this.stub)
         })
 
         it('assigns subject to runnable ctx', function () {

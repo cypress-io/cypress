@@ -5,7 +5,7 @@
   "dependencies": {},
   "devDependencies": {
     "@cypress/vite-dev-server": "file:../../../npm/vite-dev-server",
-    "@testing-library/cypress": "8.0.2",
+    "@testing-library/cypress": "BlueWinds/cypress-testing-library#119054b5963b0d2e064b13c5cc6fc9db32c8b7b5",
     "typescript": "4.2.3",
     "vite": "2.7.10"
   }

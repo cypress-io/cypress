@@ -72,22 +72,6 @@ const clearAllStorage = async (type: StorageType, Cypress: InternalCypress.Cypre
 }
 
 export default (Commands, Cypress: InternalCypress.Cypress, cy, state, config) => {
-  // TODO: Cypress sessions will clear local storage on its own before each test.
-  // Once experimentalSessionAndOrigin is made GA, remove this logic. Leave clearing
-  // session data (cookies / local storage / session storage) to reset functionality
-  if (!Cypress.config('experimentalSessionAndOrigin')) {
-    // this MUST be prepended before anything else
-    Cypress.prependListener('test:before:run', () => {
-      try {
-        // this may fail if the current
-        // window is bound to another origin
-        return clearLocalStorage(state, [])
-      } catch (error) {
-        return null
-      }
-    })
-  }
-
   Commands.addAll({
     getAllLocalStorage: getAllStorage.bind(null, 'localStorage', Cypress),
     getAllSessionStorage: getAllStorage.bind(null, 'sessionStorage', Cypress),
