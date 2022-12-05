@@ -104,9 +104,7 @@ describe('basic login', { browser: '!webkit' }, () => {
         }, {
           validate: () => {
             cy.window().then((win) => {
-              const cypressAuthToken = win.sessionStorage.getItem('cypressAuthToken')
-
-              return !!cypressAuthToken
+              expect(win.sessionStorage.getItem('cypressAuthToken')).to.exist
             })
           },
         })

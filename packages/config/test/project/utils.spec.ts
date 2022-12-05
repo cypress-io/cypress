@@ -27,6 +27,10 @@ import path from 'node:path'
 const debug = Debug('test')
 
 describe('config/src/project/utils', () => {
+  beforeEach(function () {
+    delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
+  })
+
   before(function () {
     this.env = process.env;
 
@@ -968,6 +972,16 @@ describe('config/src/project/utils', () => {
       expect(warning).to.be.calledWith('EXPERIMENTAL_SESSION_SUPPORT_REMOVED')
     })
 
+    it('warns if experimentalSessionAndOrigin is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('experimentalSessionAndOrigin', true, {
+        experimentalSessionAndOrigin: true,
+      })
+
+      expect(warning).to.be.calledWith('EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED')
+    })
+
     it('warns if experimentalShadowDomSupport is passed', async function () {
       const warning = sinon.spy(errors, 'warning')
 
@@ -1040,7 +1054,8 @@ describe('config/src/project/utils', () => {
             experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
-            experimentalSessionAndOrigin: { value: false, from: 'default' },
+            experimentalOriginDependencies: { value: false, from: 'default' },
+            experimentalRunAllSpecs: { value: false, from: 'default' },
             experimentalSingleTabRunMode: { value: false, from: 'default' },
             experimentalStudio: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
@@ -1074,7 +1089,7 @@ describe('config/src/project/utils', () => {
             supportFile: { value: false, from: 'config' },
             supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
-            testIsolation: { value: null, from: 'default' },
+            testIsolation: { value: true, from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
             userAgent: { value: null, from: 'default' },
             video: { value: true, from: 'default' },
@@ -1134,7 +1149,8 @@ describe('config/src/project/utils', () => {
             experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalInteractiveRunEvents: { value: false, from: 'default' },
-            experimentalSessionAndOrigin: { value: false, from: 'default' },
+            experimentalOriginDependencies: { value: false, from: 'default' },
+            experimentalRunAllSpecs: { value: false, from: 'default' },
             experimentalSingleTabRunMode: { value: false, from: 'default' },
             experimentalStudio: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
@@ -1190,7 +1206,7 @@ describe('config/src/project/utils', () => {
             supportFile: { value: false, from: 'config' },
             supportFolder: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
-            testIsolation: { value: null, from: 'default' },
+            testIsolation: { value: true, from: 'default' },
             trashAssetsBeforeRuns: { value: true, from: 'default' },
             userAgent: { value: null, from: 'default' },
             video: { value: true, from: 'default' },
@@ -1206,14 +1222,14 @@ describe('config/src/project/utils', () => {
         })
       })
 
-      it('sets testIsolation=on by default when experimentalSessionAndOrigin=true and e2e testing', () => {
+      it('honors user config for testIsolation', () => {
         sinon.stub(utils, 'getProcessEnvVars').returns({})
 
         const obj = {
           projectRoot: '/foo/bar',
           supportFile: false,
           baseUrl: 'http://localhost:8080',
-          experimentalSessionAndOrigin: true,
+          testIsolation: false,
         }
 
         const options = {
@@ -1224,36 +1240,8 @@ describe('config/src/project/utils', () => {
 
         return mergeDefaults(obj, options, {}, getFilesByGlob)
         .then((cfg) => {
-          expect(cfg.resolved).to.have.property('experimentalSessionAndOrigin')
-          expect(cfg.resolved.experimentalSessionAndOrigin).to.deep.eq({ value: true, from: 'config' })
           expect(cfg.resolved).to.have.property('testIsolation')
-          expect(cfg.resolved.testIsolation).to.deep.eq({ value: 'on', from: 'default' })
-        })
-      })
-
-      it('honors user config for testIsolation when experimentalSessionAndOrigin=true and e2e testing', () => {
-        sinon.stub(utils, 'getProcessEnvVars').returns({})
-
-        const obj = {
-          projectRoot: '/foo/bar',
-          supportFile: false,
-          baseUrl: 'http://localhost:8080',
-          experimentalSessionAndOrigin: true,
-          testIsolation: 'on',
-        }
-
-        const options = {
-          testingType: 'e2e',
-        }
-
-        const getFilesByGlob = sinon.stub().returns(['path/to/file.ts'])
-
-        return mergeDefaults(obj, options, {}, getFilesByGlob)
-        .then((cfg) => {
-          expect(cfg.resolved).to.have.property('experimentalSessionAndOrigin')
-          expect(cfg.resolved.experimentalSessionAndOrigin).to.deep.eq({ value: true, from: 'config' })
-          expect(cfg.resolved).to.have.property('testIsolation')
-          expect(cfg.resolved.testIsolation).to.deep.eq({ value: 'on', from: 'config' })
+          expect(cfg.resolved.testIsolation).to.deep.eq({ value: false, from: 'config' })
         })
       })
     })

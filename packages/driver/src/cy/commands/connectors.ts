@@ -3,7 +3,7 @@ import Promise from 'bluebird'
 
 import $dom from '../../dom'
 import $utils from '../../cypress/utils'
-import $errUtils, { CypressError } from '../../cypress/error_utils'
+import $errUtils from '../../cypress/error_utils'
 
 const returnFalseIfThenable = (key, ...args): boolean => {
   if ((key === 'then') && _.isFunction(args[0]) && _.isFunction(args[1])) {
@@ -24,24 +24,22 @@ const returnFalseIfThenable = (key, ...args): boolean => {
   return true
 }
 
-const primitiveToObject = (memo) => {
-  if (_.isString(memo)) {
-    return new String(memo)
-  }
-
-  if (_.isNumber(memo)) {
-    return new Number(memo)
-  }
-
-  return memo
-}
-
 const getFormattedElement = ($el) => {
   if ($dom.isElement($el)) {
     return $dom.getElements($el)
   }
 
   return $el
+}
+
+const upcomingAssertion = (next) => {
+  if (!next || next.get('type') !== 'assertion') {
+    return false
+  }
+
+  const arg = next.get('args')[0]
+
+  return arg === 'not.exist' || arg === 'be.undefined' || arg === 'not.be.ok' || arg === 'be.null' || arg === 'eq' || arg === 'not.eq'
 }
 
 export default function (Commands, Cypress, cy, state) {
@@ -142,303 +140,158 @@ export default function (Commands, Cypress, cy, state) {
     .finally(cleanup)
   }
 
-  const invokeItsFn = (subject, str, userOptions, ...args) => {
-    return invokeBaseFn(userOptions || { log: true }, subject, str, ...args)
-  }
+  // to allow the falsy value 0 to be used
+  const isPath = (str) => (!!str || str === 0)
 
-  const invokeFn = (subject, userOptionsOrStr, ...args) => {
-    const userOptionsPassed = _.isObject(userOptionsOrStr) && !_.isFunction(userOptionsOrStr)
-    let userOptions: Record<string, any> | null = null
-    let str = null
+  Commands.addQuery('its', function its (path, options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}, ...args) {
+    // If we're being used in .invoke(), we us it. For any other current command (.its itself or a custom command),
+    // we fall back to the .its() error messages.
+    const cmd = this.get('name') === 'invoke' ? 'invoke' : 'its'
 
-    if (!userOptionsPassed) {
-      str = userOptionsOrStr
-      userOptions = { log: true }
-    } else {
-      userOptions = userOptionsOrStr
-      if (args.length > 0) {
-        str = args[0]
-        args = args.slice(1)
-      }
+    Cypress.ensure.isChildCommand(this, arguments, cy)
+
+    if (args.length) {
+      $errUtils.throwErrByPath('invoke_its.invalid_num_of_args', { args: { cmd } })
     }
 
-    return invokeBaseFn(userOptions, subject, str, ...args)
-  }
-
-  const invokeBaseFn = (userOptions, subject, str, ...args) => {
-    const name = state('current').get('name')
-
-    const isCmdIts = name === 'its'
-    const isCmdInvoke = name === 'invoke'
-
-    const getMessage = () => {
-      if (isCmdIts) {
-        return `.${str}`
-      }
-
-      return `.${str}(${$utils.stringify(args)})`
+    if (!_.isObject(options)) {
+      $errUtils.throwErrByPath('invoke_its.invalid_options_arg', { args: { cmd } })
     }
 
-    // to allow the falsy value 0 to be used
-    const isProp = (str) => {
-      return !!str || (str === 0)
-    }
-
-    const message = getMessage()
-
-    let traversalErr: CypressError | null = null
-
-    // copy userOptions because _log is added below.
-    const options = _.extend({}, userOptions)
-
-    if (options.log) {
-      options._log = Cypress.log({
-        message,
-        $el: $dom.isElement(subject) ? subject : null,
-        timeout: options.timeout,
-        consoleProps () {
-          return { Subject: subject }
-        },
-      })
-    }
-
-    // check for false positive (negative?) with 0 given as index
-    if (!isProp(str)) {
+    if (!isPath(path)) {
       $errUtils.throwErrByPath('invoke_its.null_or_undefined_property_name', {
-        onFail: options._log,
-        args: { cmd: name, identifier: isCmdIts ? 'property' : 'function' },
+        args: { cmd, identifier: 'property' },
       })
     }
 
-    if (!_.isString(str) && !_.isNumber(str)) {
+    if (!_.isString(path) && !_.isNumber(path)) {
       $errUtils.throwErrByPath('invoke_its.invalid_prop_name_arg', {
-        onFail: options._log,
-        args: { cmd: name, identifier: isCmdIts ? 'property' : 'function' },
+        args: { cmd, identifier: 'property' },
       })
     }
 
-    if (!_.isObject(userOptions) || _.isFunction(userOptions)) {
-      $errUtils.throwErrByPath('invoke_its.invalid_options_arg', {
-        onFail: options._log,
-        args: { cmd: name },
-      })
-    }
+    const log = this.get('_log') || (options.log !== false && Cypress.log({
+      message: `.${path}`,
+      timeout: options.timeout,
+    }))
 
-    if (isCmdIts && args && args.length > 0) {
-      $errUtils.throwErrByPath('invoke_its.invalid_num_of_args', {
-        onFail: options._log,
-        args: { cmd: name },
-      })
-    }
+    this.set('timeout', options.timeout)
+    this.set('ensureExistenceFor', 'subject')
 
-    const propertyNotOnSubjectErr = (prop) => {
-      return $errUtils.cypressErrByPath('invoke_its.nonexistent_prop', {
-        args: {
-          prop,
-          cmd: name,
-        },
-      })
-    }
-
-    const propertyValueNullOrUndefinedErr = (prop, value) => {
-      const errMessagePath = isCmdIts ? 'its' : 'invoke'
-
-      return $errUtils.cypressErrByPath(`${errMessagePath}.null_or_undefined_prop_value`, {
-        args: {
-          prop,
-          value,
-        },
-        cmd: name,
-      })
-    }
-
-    const subjectNullOrUndefinedErr = (prop, value) => {
-      const errMessagePath = isCmdIts ? 'its' : 'invoke'
-
-      return $errUtils.cypressErrByPath(`${errMessagePath}.subject_null_or_undefined`, {
-        args: {
-          prop,
-          cmd: name,
-          value,
-        },
-      })
-    }
-
-    const propertyNotOnPreviousNullOrUndefinedValueErr = (prop, value, previousProp) => {
-      return $errUtils.cypressErrByPath('invoke_its.previous_prop_null_or_undefined', {
-        args: {
-          prop,
-          value,
-          previousProp,
-          cmd: name,
-        },
-      })
-    }
-
-    const traverseObjectAtPath = (acc, pathsArray, updatedSubject, index = 0) => {
-      // traverse at this depth
-      const prop = pathsArray[index]
-      const previousProp = pathsArray[index - 1]
-      const valIsNullOrUndefined = _.isNil(acc)
-
-      // if we're attempting to tunnel into
-      // a null or undefined object...
-      if (isProp(prop) && valIsNullOrUndefined) {
-        if (index === 0) {
-          // give an error stating the current subject is nil
-          traversalErr = subjectNullOrUndefinedErr(prop, acc)
-        } else {
-          // else refer to the previous property so users know which prop
-          // caused us to hit this dead end
-          traversalErr = propertyNotOnPreviousNullOrUndefinedValueErr(prop, acc, previousProp)
-        }
-
-        return { prop: acc, updatedSubject }
-      }
-
-      // if we have no more properties to traverse
-      if (!isProp(prop)) {
-        if (valIsNullOrUndefined) {
-          // set traversal error that the final value is null or undefined
-          traversalErr = propertyValueNullOrUndefinedErr(previousProp, acc)
-        }
-
-        // finally return the reduced traversed accumulator here
-        return { prop: acc, updatedSubject }
-      }
-
-      // attempt to lookup this property on the acc
-      // if our property does not exist then allow
-      // undefined to pass through but set the traversalErr
-      // since if we don't have any assertions we want to
-      // provide a very specific error message and not the
-      // generic existence one
-      if (!(prop in primitiveToObject(acc))) {
-        traversalErr = propertyNotOnSubjectErr(prop)
-
-        return { prop: undefined, updatedSubject }
-      }
-
-      // if we succeeded then continue to traverse
-      return traverseObjectAtPath(acc[prop], pathsArray, acc, index + 1)
-    }
-
-    const getSettledValue = (value, subject, propAtLastPath) => {
-      if (isCmdIts) {
-        return value
-      }
-
-      if (_.isFunction(value)) {
-        return value.apply(subject, args)
-      }
-
-      // TODO: this logic should likely be part of
-      // traverseObjectAtPath(...) rather be further
-      // away from the handling of traversals. this
-      // causes us to need to separately handle
-      // the 'propAtLastPath' argument since we're
-      // outside of the reduced accumulator.
-
-      // if we're not a function and we have a traversal
-      // error then throw it now - since that provide a
-      // more specific error regarding non-existant
-      // properties or null or undefined values
-      if (traversalErr) {
-        throw traversalErr
-      }
-
-      // else throw that prop isn't a function
-      $errUtils.throwErrByPath('invoke.prop_not_a_function', {
-        onFail: options._log,
-        args: {
-          prop: propAtLastPath,
-          type: $utils.stringifyFriendlyTypeof(value),
-        },
-      })
-    }
-
-    const getValue = () => {
-      // reset this on each go around so previous errors
-      // don't leak into new failures or upcoming assertion errors
-      traversalErr = null
-
-      const remoteSubject = cy.getRemotejQueryInstance(subject)
-
-      let actualSubject = remoteSubject || subject
-
-      let paths = _.isString(str) ? str.split('.') : [str]
-
-      const { prop, updatedSubject } = traverseObjectAtPath(actualSubject, paths, actualSubject)
-
-      actualSubject = updatedSubject
-
-      const value = getSettledValue(prop, actualSubject, _.last(paths))
-
-      if (options._log) {
-        options._log.set({
-          consoleProps () {
-            const obj = {}
-
-            if (isCmdInvoke) {
-              obj['Function'] = message
-              if (args.length) {
-                obj['With Arguments'] = args
-              }
-            } else {
-              obj['Property'] = message
-            }
-
-            _.extend(obj, {
-              Subject: getFormattedElement(actualSubject),
-              Yielded: getFormattedElement(value),
-            })
-
-            return obj
-          },
+    return (subject) => {
+      if (subject == null) {
+        $errUtils.throwErrByPath(`${cmd}.subject_null_or_undefined`, {
+          args: { prop: path, cmd, value: subject },
         })
+      }
+
+      subject = cy.getRemotejQueryInstance(subject) || subject
+
+      const value = _.get(subject, path)
+
+      log && cy.state('current') === this && log.set({
+        $el: $dom.isElement(subject) ? subject : null,
+        consoleProps () {
+          const obj = {
+            Property: `.${path}`,
+            Subject: subject,
+            Yielded: getFormattedElement(value),
+          }
+
+          return obj
+        },
+      })
+
+      if (value == null && !upcomingAssertion(this.get('next'))) {
+        if (!_.has(subject, path)) {
+          $errUtils.throwErrByPath('invoke_its.nonexistent_prop', { args: { cmd, prop: path, value } })
+        }
+
+        $errUtils.throwErrByPath(`${cmd}.null_or_undefined_prop_value`, { args: { prop: path, value } })
       }
 
       return value
     }
+  })
 
-    // by default we want to only add the default assertion
-    // of ensuring existence for cy.its() not cy.invoke() because
-    // invoking a function can legitimately return null or undefined
-    const ensureExistenceFor = isCmdIts ? 'subject' : false
+  Commands.addQuery('invoke', function invoke (optionsOrPath, argOrOptions, ...args) {
+    let options
+    let path
 
-    // wrap retrying into its own
-    // separate function
-    const retryValue = () => {
-      return Promise
-      .try(getValue)
-      .catch((err) => {
-        options.error = err
-
-        return cy.retry(retryValue, options)
-      })
+    if (_.isString(optionsOrPath) || _.isNumber(optionsOrPath)) {
+      options = {}
+      path = optionsOrPath
+      if (arguments.length > 1) {
+        args.unshift(argOrOptions)
+      }
+    } else {
+      options = optionsOrPath
+      path = argOrOptions
     }
 
-    const resolveValue = () => {
-      return Promise
-      .try(retryValue)
-      .then((value) => {
-        return cy.verifyUpcomingAssertions(value, options, {
-          ensureExistenceFor,
-          onRetry: resolveValue,
-          onFail () {
-            // if we failed our upcoming assertions and also
-            // exited early out of getting the value of our
-            // subject then reset the error to this one
-            if (traversalErr) {
-              options.error = traversalErr
-            }
-          },
-        })
-      })
+    if (!_.isString(path) && !_.isNumber(path)) {
+      if (path == null && _.isObject(options) && !_.isFunction(options)) {
+        $errUtils.throwErrByPath('invoke_its.null_or_undefined_property_name', { args: {
+          cmd: 'invoke',
+          identifier: 'function',
+        } })
+      }
+
+      $errUtils.throwErrByPath('invoke_its.invalid_prop_name_arg', { args: {
+        cmd: 'invoke',
+        identifier: 'function',
+      } })
     }
 
-    return resolveValue()
-  }
+    const log = options.log !== false && Cypress.log({
+      message: `.${path}()`,
+      timeout: options.timeout,
+    })
+
+    this.set('_log', log)
+
+    const itsFn = cy.now('its', path, options)
+
+    // .its() has an implicit assertions that the return value shouldn't be null, but
+    // .invoke() has no such requirement. Removing ensureExistenceFor resests implicit
+    // assertion that .its() added
+    this.set('ensureExistenceFor', null)
+
+    return (subject) => {
+      subject = cy.getRemotejQueryInstance(subject) || subject
+
+      // We use its for its validation, even though we ignore the returned value.
+      itsFn(subject)
+
+      const pathParts = path.toString().split('.')
+      const last = pathParts.pop()
+      const parent = pathParts.length === 0 ? subject : _.get(subject, pathParts)
+
+      if (!_.isFunction(parent[last])) {
+        $errUtils.throwErrByPath('invoke.prop_not_a_function', { args: {
+          prop: path,
+          type: $utils.stringifyFriendlyTypeof(parent[last]),
+        } })
+      }
+
+      let value = parent[last](...args)
+
+      log && cy.state('current') === this && log.set({
+        $el: $dom.isElement(subject) ? subject : null,
+        consoleProps: () => {
+          return {
+            Command: 'invoke',
+            Function: `.${path}(${$utils.stringify(args)})`,
+            Subject: subject,
+            'With Arguments': args,
+            Yielded: value,
+          }
+        },
+      })
+
+      return value
+    }
+  })
 
   Commands.addAll({ prevSubject: true }, {
     spread (subject, options, fn) {
@@ -515,29 +368,10 @@ export default function (Commands, Cypress, cy, state) {
     },
   })
 
-  // temporarily keeping this as a dual command
-  // but it will move to a child command once
-  // cy.resolve + cy.wrap are upgraded to handle
-  // promises
   Commands.addAll({ prevSubject: 'optional' }, {
     then (subject, userOptions, fn) {
       // eslint-disable-next-line prefer-rest-params
       return thenFn.apply(this, [subject, userOptions, fn])
-    },
-  })
-
-  Commands.addAll({ prevSubject: true }, {
-    // making this a dual command due to child commands
-    // automatically returning their subject when their
-    // return values are undefined.  prob should rethink
-    // this and investigate why that is the default behavior
-    // of child commands
-    invoke (subject, optionsOrStr, ...args) {
-      return invokeFn.apply(this, [subject, optionsOrStr, ...args])
-    },
-
-    its (subject, str, options, ...args) {
-      return invokeItsFn.apply(this, [subject, str, options, ...args])
     },
   })
 }

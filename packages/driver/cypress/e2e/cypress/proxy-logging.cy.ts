@@ -460,61 +460,6 @@ describe('Proxy Logging', () => {
         ))
       })
     })
-
-    context('with cy.route()', () => {
-      context('flags', () => {
-        let $XMLHttpRequest
-
-        const testFlagXhr = (expectStatus, expectInterceptions, setupFn) => {
-          return testFlag(expectStatus, expectInterceptions, setupFn, (url) => {
-            const xhr = new $XMLHttpRequest()
-
-            xhr.open('GET', url)
-            xhr.send()
-          })
-        }
-
-        beforeEach(() => {
-          cy.visit('/fixtures/empty.html')
-          cy.window()
-          .then(({ XMLHttpRequest }) => {
-            $XMLHttpRequest = XMLHttpRequest
-          })
-        })
-
-        it('is unflagged when not routed', testFlagXhr(
-          undefined,
-          [],
-          () => {},
-        ))
-
-        it('spied flagged as expected', testFlagXhr(
-          undefined,
-          [{
-            command: 'route',
-            alias,
-            type: 'spy',
-          }],
-          () => {
-            cy.server()
-            cy.route(`${url}`).as(alias)
-          },
-        ))
-
-        it('stubbed flagged as expected', testFlagXhr(
-          undefined,
-          [{
-            command: 'route',
-            alias,
-            type: 'stub',
-          }],
-          () => {
-            cy.server()
-            cy.route(url, 'stubbed response').as(alias)
-          },
-        ))
-      })
-    })
   })
 
   context('Cypress.ProxyLogging', () => {

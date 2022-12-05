@@ -789,8 +789,11 @@ enum ErrorTypeEnum {
   ERROR_WRITING_FILE
   EXPERIMENTAL_COMPONENT_TESTING_REMOVED
   EXPERIMENTAL_NETWORK_STUBBING_REMOVED
+  EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY
+  EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY
   EXPERIMENTAL_RUN_EVENTS_REMOVED
   EXPERIMENTAL_SAMESITE_REMOVED
+  EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED
   EXPERIMENTAL_SESSION_SUPPORT_REMOVED
   EXPERIMENTAL_SHADOW_DOM_REMOVED
   EXPERIMENTAL_SINGLE_TAB_RUN_MODE
@@ -1373,6 +1376,9 @@ type Mutation {
 
   """Save the prompt-shown state for this project"""
   setPromptShown(slug: String!): Boolean
+
+  """List of specs to run for the "Run All Specs" Feature"""
+  setRunAllSpecs(runAllSpecs: [String!]!): Boolean
 
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean

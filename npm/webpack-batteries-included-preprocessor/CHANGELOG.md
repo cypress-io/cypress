@@ -1,3 +1,17 @@
+# [@cypress/webpack-batteries-included-preprocessor-v2.3.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v2.2.4...@cypress/webpack-batteries-included-preprocessor-v2.3.0) (2022-12-02)
+
+
+### Features
+
+* Create public `Cypress.ensure` API for use with custom queries ([#24697](https://github.com/cypress-io/cypress/issues/24697)) ([8ff38cd](https://github.com/cypress-io/cypress/commit/8ff38cdb01adb1a4d317154d5baafa2eff5bad3d))
+
+# [@cypress/webpack-batteries-included-preprocessor-v2.2.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v2.2.3...@cypress/webpack-batteries-included-preprocessor-v2.2.4) (2022-11-23)
+
+
+### Bug Fixes
+
+* fix windows-lint CI job ([#24758](https://github.com/cypress-io/cypress/issues/24758)) ([2166ba0](https://github.com/cypress-io/cypress/commit/2166ba0d9496037df843d55f07517f83817171a3))
+
 # [@cypress/webpack-batteries-included-preprocessor-v2.2.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v2.2.2...@cypress/webpack-batteries-included-preprocessor-v2.2.3) (2021-07-31)
 
 
