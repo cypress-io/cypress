@@ -965,6 +965,10 @@ namespace CypressSessionsTests {
   cy.session('user', () => {}, {
     validate: { foo: true } // $ExpectError
   })
+
+  const option: Cypress.ServerSessionData = {
+    id: 'hi'
+  }
 }
 
 namespace CypressCurrentTest {
