@@ -1584,9 +1584,6 @@ type Query {
 
 """Properties describing a React component"""
 type ReactComponentDescriptor {
-  """A description for the component"""
-  description: String!
-
   """The name of the component"""
   displayName: String!
 }

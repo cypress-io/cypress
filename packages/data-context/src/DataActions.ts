@@ -11,6 +11,7 @@ import {
   DevActions,
   AuthActions,
   CohortsActions,
+  CodegenActions,
 } from './actions'
 import { ErrorActions } from './actions/ErrorActions'
 import { EventCollectorActions } from './actions/EventCollectorActions'
@@ -88,5 +89,10 @@ export class DataActions {
   @cached
   get cohorts () {
     return new CohortsActions(this.ctx)
+  }
+
+  @cached
+  get codegen () {
+    return new CodegenActions(this.ctx)
   }
 }

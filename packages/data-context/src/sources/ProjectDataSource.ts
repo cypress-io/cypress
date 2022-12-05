@@ -475,7 +475,7 @@ export class ProjectDataSource {
 
     const looseComponentGlob = '*.{js,jsx,ts,tsx,vue}'
 
-    const framework = this.ctx.actions.project.getWizardFrameworkFromConfig()
+    const framework = this.ctx.actions.codegen.getWizardFrameworkFromConfig()
 
     return {
       component: framework?.glob ?? looseComponentGlob,
