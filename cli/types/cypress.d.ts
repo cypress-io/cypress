@@ -3417,7 +3417,7 @@ declare namespace Cypress {
      */
     getCurrentSessionData: () => Promise<SessionData>
     /**
-     * Get all storage and cookie date saved on the backend associated with the provided session id.
+     * Get all storage and cookie data saved on the backend associated with the provided session id.
      */
     getSession: (id: string) => Promise<ServerSessionData>
   }
