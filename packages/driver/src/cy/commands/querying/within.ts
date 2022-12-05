@@ -107,6 +107,10 @@ export default (Commands, Cypress, cy, state) => {
           $errUtils.throwErrByPath('within.invalid_argument', { onFail: log })
         }
 
+        if (subject.length > 1) {
+          $errUtils.throwErrByPath('within.multiple_elements', { args: { num: subject.length }, onFail: log })
+        }
+
         return withinFn(subject, fn)
       })
     },
