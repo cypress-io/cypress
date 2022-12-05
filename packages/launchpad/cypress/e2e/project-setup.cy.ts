@@ -1,3 +1,4 @@
+import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types/src'
 import { getPathForPlatform } from './support/getPathForPlatform'
 
 function verifyScaffoldedFiles (testingType: string) {
@@ -34,9 +35,16 @@ describe('Launchpad: Setup Project', () => {
     cy.scaffoldProject(name)
     cy.openProject(name, args)
 
-    // Delete the fixtures folder so it scaffold correctly the example
-    cy.withCtx(async (ctx) => {
+    cy.withCtx(async (ctx, o) => {
+      o.sinon.stub(ctx.project, 'projectId').resolves(null)
+      o.sinon.stub(ctx._apis.localSettingsApi, 'getPreferences').resolves({ majorVersionWelcomeDismissed: {
+        [o.MAJOR_VERSION_FOR_CONTENT]: Date.now(),
+      } })
+
+      // Delete the fixtures folder so it scaffold correctly the example
       await ctx.actions.file.removeFileInProject('cypress/fixtures')
+    }, {
+      MAJOR_VERSION_FOR_CONTENT,
     })
   }
 
@@ -47,7 +55,7 @@ describe('Launchpad: Setup Project', () => {
   }
 
   const verifyChooseABrowserPage = () => {
-    cy.contains('Choose a Browser', { timeout: 15000 })
+    cy.contains('Choose a browser', { timeout: 15000 })
 
     cy.findByRole('radio', { name: 'Chrome v1' })
     cy.findByRole('radio', { name: 'Firefox v5' })
@@ -74,8 +82,9 @@ describe('Launchpad: Setup Project', () => {
     cy.scaffoldProject('pristine')
     cy.openProject('pristine', ['--e2e'])
     cy.visitLaunchpad()
+    cy.skipWelcome()
 
-    cy.contains('h1', 'Configuration Files')
+    cy.contains('h1', 'Configuration files')
     cy.findByText('We added the following files to your project:')
 
     cy.get('[data-cy=valid]').within(() => {
@@ -85,6 +94,10 @@ describe('Launchpad: Setup Project', () => {
       cy.containsPath('cypress/fixtures/example.json')
     })
 
+    cy.get('[data-cy=valid] [data-cy=collapsible-header]').each((element) => {
+      cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
+    })
+
     verifyScaffoldedFiles('e2e')
   })
 
@@ -92,7 +105,8 @@ describe('Launchpad: Setup Project', () => {
     cy.scaffoldProject('pristine')
     cy.openProject('pristine', ['--component'])
     cy.visitLaunchpad()
-    cy.get('h1').should('contain', 'Project Setup')
+    cy.skipWelcome()
+    cy.get('h1').should('contain', 'Project setup')
   })
 
   describe('"learn about testing types" modal', () => {
@@ -107,17 +121,17 @@ describe('Launchpad: Setup Project', () => {
 
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
 
-      cy.findByRole('dialog', { name: 'Key Differences' }).should('be.visible')
+      cy.findByRole('dialog', { name: 'Key differences' }).should('be.visible')
       cy.contains('Need help').should('be.visible')
 
       cy.get('[data-cy="end-to-end-comparison"]').within(() => {
-        cy.contains('End-to-end Tests').should('be.visible')
+        cy.contains('End-to-end tests').should('be.visible')
         cy.get('li').should('have.length', 3)
         cy.contains('Code Example').should('be.visible')
       })
 
       cy.get('[data-cy="component-comparison"]').within(() => {
-        cy.contains('Component Tests').should('be.visible')
+        cy.contains('Component tests').should('be.visible')
         cy.get('li').should('have.length', 3)
         cy.contains('Code Example').should('be.visible')
       })
@@ -127,7 +141,7 @@ describe('Launchpad: Setup Project', () => {
       cy.contains('Review the differences').click()
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
 
-      cy.findByRole('dialog', { name: 'Key Differences' })
+      cy.findByRole('dialog', { name: 'Key differences' })
       .as('aboutTestingTypes')
       .should('be.visible')
 
@@ -140,7 +154,7 @@ describe('Launchpad: Setup Project', () => {
       cy.contains('Review the differences').click()
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
 
-      cy.findByRole('dialog', { name: 'Key Differences' })
+      cy.findByRole('dialog', { name: 'Key differences' })
       .as('aboutTestingTypes')
       .should('be.visible')
 
@@ -153,11 +167,11 @@ describe('Launchpad: Setup Project', () => {
       cy.contains('Review the differences').click()
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
 
-      cy.findByRole('dialog', { name: 'Key Differences' })
+      cy.findByRole('dialog', { name: 'Key differences' })
       .as('aboutTestingTypes')
       .should('be.visible')
       .within(() => {
-        cy.get('h2').contains('Key Differences').should('be.visible')
+        cy.get('h2').contains('Key differences').should('be.visible')
       })
 
       cy.findByRole('button', { name: 'Close' }).click()
@@ -169,11 +183,11 @@ describe('Launchpad: Setup Project', () => {
       cy.contains('Review the differences').click()
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
 
-      cy.findByRole('dialog', { name: 'Key Differences' })
+      cy.findByRole('dialog', { name: 'Key differences' })
       .as('aboutTestingTypes')
       .should('be.visible')
       .within(() => {
-        cy.get('h2').contains('Key Differences').should('be.visible')
+        cy.get('h2').contains('Key differences').should('be.visible')
 
         cy.findByRole('button', { name: 'Close' })
         .focus()
@@ -188,7 +202,7 @@ describe('Launchpad: Setup Project', () => {
       cy.contains('Review the differences').click()
       cy.get('#app').should('have.attr', 'aria-hidden', 'true')
 
-      cy.findByRole('dialog', { name: 'Key Differences' })
+      cy.findByRole('dialog', { name: 'Key differences' })
       .should('be.visible')
       .within(() => {
         cy.validateExternalLink({
@@ -230,7 +244,7 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy-testingtype="e2e"]').click()
 
-        cy.contains('h1', 'Configuration Files')
+        cy.contains('h1', 'Configuration files')
         cy.findByText('We added the following files to your project:')
 
         cy.get('[data-cy=valid]').within(() => {
@@ -238,6 +252,10 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/support/e2e.js')
           cy.containsPath('cypress/support/commands.js')
           cy.containsPath('cypress/fixtures/example.json')
+        })
+
+        cy.get('[data-cy=valid] [data-cy=collapsible-header]').each((element) => {
+          cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
         })
 
         verifyScaffoldedFiles('e2e')
@@ -249,7 +267,7 @@ describe('Launchpad: Setup Project', () => {
         verifyChooseABrowserPage()
       })
 
-      it('moves to "Choose a Browser" page after clicking "Continue" button in first step in configuration page', () => {
+      it('moves to "Choose a browser" page after clicking "Continue" button in first step in configuration page', () => {
         scaffoldAndOpenProject('pristine')
         cy.visitLaunchpad()
 
@@ -257,7 +275,7 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy-testingtype="e2e"]').click()
 
-        cy.contains('h1', 'Configuration Files')
+        cy.contains('h1', 'Configuration files')
         cy.findByText('We added the following files to your project:')
 
         cy.get('[data-cy=valid]').within(() => {
@@ -296,7 +314,7 @@ describe('Launchpad: Setup Project', () => {
         .should('have.focus')
         .realPress('Enter')
 
-        cy.contains('h1', 'Configuration Files')
+        cy.contains('h1', 'Configuration files')
         cy.findByText('We added the following files to your project:')
 
         cy.get('[data-cy=valid]').within(() => {
@@ -304,6 +322,10 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/support/e2e.js')
           cy.containsPath('cypress/support/commands.js')
           cy.containsPath('cypress/fixtures/example.json')
+        })
+
+        cy.get('[data-cy=valid] [data-cy=collapsible-header]').each((element) => {
+          cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
         })
 
         verifyScaffoldedFiles('e2e')
@@ -328,7 +350,7 @@ describe('Launchpad: Setup Project', () => {
         .should('have.focus')
         .realPress('Enter')
 
-        cy.contains('h1', 'Configuration Files')
+        cy.contains('h1', 'Configuration files')
         cy.findByText('We added the following files to your project:')
 
         cy.get('[data-cy=valid]').within(() => {
@@ -336,6 +358,10 @@ describe('Launchpad: Setup Project', () => {
           cy.containsPath('cypress/support/e2e.ts')
           cy.containsPath('cypress/support/commands.ts')
           cy.containsPath('cypress/fixtures/example.json')
+        })
+
+        cy.get('[data-cy=valid] [data-cy=collapsible-header]').each((element) => {
+          cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
         })
 
         verifyScaffoldedFiles('e2e')
@@ -363,24 +389,24 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('option', { name: 'Create React App' }).click()
 
         cy.get('[data-testid="select-bundler"').should('not.exist')
-        cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
+        cy.findByRole('button', { name: 'Next step' }).should('not.have.disabled')
 
         cy.findByRole('button', { name: 'Back' }).click()
         cy.get('[data-cy-testingtype="component"]').click()
 
-        cy.findByRole('button', { name: 'Next Step' }).should('have.disabled')
+        cy.findByRole('button', { name: 'Next step' }).should('have.disabled')
 
         cy.contains('Pick a framework').click()
         cy.findByRole('option', { name: 'Create React App' }).click()
-        cy.findByRole('button', { name: 'Bundler(Dev Server) Webpack' }).should('not.exist')
-        cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
+        cy.findByRole('button', { name: 'Bundler(dev server) Webpack' }).should('not.exist')
+        cy.findByRole('button', { name: 'Next step' }).should('not.have.disabled')
 
-        cy.findByRole('button', { name: 'Next Step' }).click()
+        cy.findByRole('button', { name: 'Next step' }).click()
         cy.findByRole('button', { name: 'Waiting for you to install the dependencies...' })
 
-        cy.contains('li', 'webpack')
         cy.contains('li', 'react-scripts')
         cy.contains('li', 'react')
+        cy.contains('li', 'react-dom')
 
         cy.findByRole('button', { name: 'Skip' }).click()
 
@@ -414,12 +440,13 @@ describe('Launchpad: Setup Project', () => {
 
         cy.get('[data-cy-testingtype="component"]').click()
 
-        cy.contains('Project Setup')
+        cy.contains('Project setup')
       })
 
       it('can move forward to choose browser if e2e is configured', () => {
         cy.openProject('pristine-with-e2e-testing')
         cy.visitLaunchpad()
+        cy.skipWelcome()
 
         verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
 
@@ -431,6 +458,7 @@ describe('Launchpad: Setup Project', () => {
       it('can move forward to choose browser if component is configured', () => {
         cy.openProject('pristine-with-ct-testing')
         cy.visitLaunchpad()
+        cy.skipWelcome()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
 
@@ -465,7 +493,7 @@ describe('Launchpad: Setup Project', () => {
       scaffoldAndOpenProject('pristine-with-e2e-testing', ['--component'])
       cy.visitLaunchpad()
 
-      cy.get('h1').should('contain', 'Project Setup')
+      cy.get('h1').should('contain', 'Project setup')
       cy.contains('Confirm the front-end framework and bundler used in your project.')
     })
 
@@ -487,7 +515,7 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('option', { name: 'Create React App' }).click()
 
         cy.get('[data-testid="select-bundler"').should('not.exist')
-        cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
+        cy.findByRole('button', { name: 'Next step' }).should('not.have.disabled')
 
         cy.findByRole('button', { name: 'Back' }).click()
         cy.get('[data-cy-testingtype="component"]').click()
@@ -495,12 +523,12 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'Front-end Framework React.js (detected)' }).click()
         cy.findByRole('option', { name: 'Vue.js 3' }).click()
 
-        cy.findByRole('button', { name: 'Bundler(Dev Server) Pick a bundler' }).click()
+        cy.findByRole('button', { name: 'Bundler(dev server) Pick a bundler' }).click()
         cy.findByRole('option', { name: 'Vite' }).click()
 
         cy.findByRole('button', { name: 'TypeScript' }).click()
-        cy.findByRole('button', { name: 'Next Step' }).should('not.have.disabled')
-        cy.findByRole('button', { name: 'Next Step' }).click()
+        cy.findByRole('button', { name: 'Next step' }).should('not.have.disabled')
+        cy.findByRole('button', { name: 'Next step' }).click()
 
         cy.findByRole('button', { name: 'Skip' }).click()
 
@@ -534,7 +562,7 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('option', { name: 'Create React App' }).click()
         cy.findByRole('button', { name: 'TypeScript' }).click()
 
-        cy.findByRole('button', { name: 'Next Step' }).click()
+        cy.findByRole('button', { name: 'Next step' }).click()
         cy.findByRole('button', { name: 'Skip' }).click()
 
         cy.get('[data-cy=valid]').within(() => {
@@ -563,11 +591,12 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-cy-testingtype="component"]').click()
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Create React App').click()
-      cy.findByText('Next Step').click()
-      cy.get('code').should('contain.text', 'yarn add -D ')
+      cy.findByText('Next step').click()
+      cy.findByDisplayValue('yarn add -D react-scripts react-dom react').should('be.visible')
     })
 
-    it('makes the right command for pnpm', () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23153
+    it.skip('makes the right command for pnpm', () => {
       scaffoldAndOpenProject('pristine-pnpm')
 
       cy.visitLaunchpad()
@@ -575,11 +604,12 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-cy-testingtype="component"]').click()
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Create React App').click()
-      cy.findByText('Next Step').click()
+      cy.findByText('Next step').click()
       cy.get('code').should('contain.text', 'pnpm install -D ')
     })
 
-    it('makes the right command for npm', () => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23153
+    it.skip('makes the right command for npm', () => {
       scaffoldAndOpenProject('pristine-npm')
 
       cy.visitLaunchpad()
@@ -587,7 +617,7 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-cy-testingtype="component"]').click()
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Create React App').click()
-      cy.findByText('Next Step').click()
+      cy.findByText('Next step').click()
       cy.get('code').should('contain.text', 'npm install -D ')
     })
   })
@@ -603,7 +633,7 @@ describe('Launchpad: Setup Project', () => {
       cy.findByText('Vue.js 3').click()
       cy.contains('button', 'Pick a bundler').click()
       cy.findByText('Webpack').click()
-      cy.findByRole('button', { name: 'Next Step' }).should('not.be.disabled').click()
+      cy.findByRole('button', { name: 'Next step' }).should('not.be.disabled').click()
       cy.withCtx(async (ctx) => {
         Object.defineProperty(ctx.coreData, 'scaffoldedFiles', {
           get () {
@@ -637,7 +667,7 @@ describe('Launchpad: Setup Project', () => {
       verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
 
       cy.get('[data-cy-testingtype="component"]').click()
-      cy.contains('h1', 'Choose a Browser')
+      cy.contains('h1', 'Choose a browser')
 
       // Execute same function that is called in the browser to switch testing types
       cy.withCtx(async (ctx, { sinon }) => {
@@ -649,17 +679,18 @@ describe('Launchpad: Setup Project', () => {
 
       cy.reload()
 
-      cy.contains('h1', 'Configuration Files')
+      cy.contains('h1', 'Configuration files')
       verifyScaffoldedFiles('e2e')
     })
 
-    it('takes the user to first step of ct setup when switching from app', () => {
+    // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23418
+    it.skip('takes the user to first step of ct setup when switching from app', () => {
       scaffoldAndOpenProject('pristine-with-e2e-testing')
       cy.visitLaunchpad()
       verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
 
       cy.get('[data-cy-testingtype="e2e"]').click()
-      cy.contains('h1', 'Choose a Browser')
+      cy.contains('h1', 'Choose a browser')
 
       // Execute same function that is called in the browser to switch testing types
       cy.withCtx(async (ctx, { sinon }) => {
@@ -671,7 +702,7 @@ describe('Launchpad: Setup Project', () => {
 
       cy.reload()
 
-      cy.contains('h1', 'Project Setup')
+      cy.contains('h1', 'Project setup')
     })
   })
 })

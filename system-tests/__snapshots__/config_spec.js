@@ -154,7 +154,7 @@ Your configFile at /foo/bar/.projects/config-with-invalid-browser/cypress.config
 
 The error occurred while validating the browsers list.
 
-Expected family to be either chromium or firefox.
+Expected family to be either chromium, firefox or webkit.
 
 Instead the value was: 
 
@@ -402,21 +402,6 @@ Please remove this option or add this as a component testing type property: comp
 {
   e2e: {
     indexHtmlFile: '...',
-  }
-}
-
-https://on.cypress.io/migration-guide
-
-`
-
-exports['e2e config throws an error if experimentalSessionAndOrigin is set on the component level 1'] = `
-The component.experimentalSessionAndOrigin configuration option is not valid for component testing.
-
-Please remove this option or add this as an e2e testing type property: e2e.experimentalSessionAndOrigin
-
-{
-  e2e: {
-    experimentalSessionAndOrigin: '...',
   }
 }
 

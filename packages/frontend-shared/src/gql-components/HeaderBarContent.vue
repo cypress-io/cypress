@@ -5,10 +5,10 @@
   >
     <div class="flex h-full gap-12px items-center justify-between">
       <div
-        v-if="pageName"
+        v-if="props.pageName"
         class="whitespace-nowrap"
       >
-        {{ pageName }}
+        {{ props.pageName }}
       </div>
       <div
         v-else
@@ -45,7 +45,7 @@
               <li
                 v-if="props.gql.isGlobalMode"
                 class="mx-2px align-middle inline-block"
-                aria-hidden
+                aria-hidden="true"
               >
                 <i-cy-chevron-right_x16 class="icon-dark-gray-200" />
               </li>
@@ -74,7 +74,7 @@
               <template v-if="currentProject.currentTestingType">
                 <li
                   class="mx-2px inline-block align-middle"
-                  aria-hidden
+                  aria-hidden="true"
                 >
                   <i-cy-chevron-right_x16 class="icon-dark-gray-200" />
                 </li>
@@ -94,18 +94,18 @@
           @clear-force-open="isForceOpenAllowed = false"
         >
           <template
-            v-if="userData"
+            v-if="loginConnectStore.user.isLoggedIn"
             #login-title
           >
             <UserAvatar
-              :email="userData?.email"
+              :email="loginConnectStore.userData?.email"
               class="h-24px w-24px"
               data-cy="user-avatar-title"
             />
             <span class="sr-only">{{ t('topNav.login.profileMenuLabel') }}</span>
           </template>
           <template
-            v-if="userData"
+            v-if="loginConnectStore.userData"
             #login-panel
           >
             <div
@@ -114,14 +114,14 @@
             >
               <div class="border-b flex border-b-gray-100 p-16px">
                 <UserAvatar
-                  :email="userData?.email"
+                  :email="loginConnectStore.userData?.email"
                   class="h-48px mr-16px w-48px"
                   data-cy="user-avatar-panel"
                 />
                 <div>
-                  <span class="text-gray-800">{{ userData?.fullName }}</span>
+                  <span class="text-gray-800">{{ loginConnectStore.userData?.fullName }}</span>
                   <br>
-                  <span class="text-gray-600">{{ userData?.email }}</span>
+                  <span class="text-gray-600">{{ loginConnectStore.userData?.email }}</span>
                   <br>
                   <ExternalLink
                     href="https://on.cypress.io/dashboard/profile"
@@ -141,10 +141,10 @@
             </div>
           </template>
         </TopNav>
-        <div v-if="!userData">
+        <div v-if="!loginConnectStore.user.isLoggedIn">
           <button
             class="flex text-gray-600 items-center group focus:outline-transparent"
-            @click="openLogin"
+            @click="loginConnectStore.openLoginConnectModal({ utmMedium: 'Nav' })"
           >
             <i-cy-profile_x16
               class="h-16px mr-8px w-16px block icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
@@ -153,25 +153,19 @@
           </button>
         </div>
       </div>
-      <LoginModal
-        v-model="isLoginOpen"
-        :gql="props.gql"
-        utm-medium="Nav"
-      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { gql, useMutation, useSubscription } from '@urql/vue'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import type { HeaderBar_HeaderBarContentFragment } from '../generated/graphql'
 import {
   GlobalPageHeader_ClearCurrentProjectDocument,
   HeaderBarContent_AuthChangeDocument,
 } from '../generated/graphql'
 import TopNav from './topnav/TopNav.vue'
-import LoginModal from './topnav/LoginModal.vue'
 import UserAvatar from './topnav/UserAvatar.vue'
 import Auth from './Auth.vue'
 import { useI18n } from '@cy/i18n'
@@ -179,6 +173,10 @@ import ExternalLink from './ExternalLink.vue'
 import interval from 'human-interval'
 import { sortBy } from 'lodash'
 import Tooltip from '../components/Tooltip.vue'
+import type { AllowedState } from '@packages/types'
+import { useLoginConnectStore } from '../store/login-connect-store'
+
+const loginConnectStore = useLoginConnectStore()
 
 gql`
 fragment HeaderBarContent_Auth on Query {
@@ -240,25 +238,17 @@ fragment HeaderBar_HeaderBarContent on Query {
 }
 `
 
-const userData = computed(() => {
-  return props.gql.cloudViewer ?? props.gql.cachedUser
-})
-
 const savedState = computed(() => {
-  return props.gql?.currentProject?.savedState
-})
-const cloudProjectId = computed(() => {
-  return props.gql?.currentProject?.config?.find((item: { field: string }) => item.field === 'projectId')?.value
+  return props.gql?.currentProject?.savedState as AllowedState
 })
 
 const currentProject = computed(() => props.gql.currentProject)
 
-const isLoginOpen = ref(false)
-const clearCurrentProjectMutation = useMutation(GlobalPageHeader_ClearCurrentProjectDocument)
+const cloudProjectId = computed(() => {
+  return props.gql?.currentProject?.config?.find((item: { field: string }) => item.field === 'projectId')?.value
+})
 
-const openLogin = () => {
-  isLoginOpen.value = true
-}
+const clearCurrentProjectMutation = useMutation(GlobalPageHeader_ClearCurrentProjectDocument)
 
 const clearCurrentProject = () => {
   if (currentProject.value) {
@@ -286,7 +276,20 @@ const prompts = sortBy([
   },
 ], 'interval')
 const isForceOpenAllowed = ref(true)
+const isOpenDelayElapsed = ref(false)
+
+onMounted(() => {
+  setTimeout(() => isOpenDelayElapsed.value = true, 2000)
+})
+
 const isShowablePromptInSavedState = computed(() => {
+  // We do not want to show a prompt if a banner is going to be shown, but some banners rely on cloud data
+  // getting loaded before deciding whether to display. Add a delay here of a few seconds to give banners
+  // a chance to display before deciding whether to show a prompt.
+  if (!isOpenDelayElapsed.value) {
+    return false
+  }
+
   if (savedState.value) {
     for (const prompt of prompts) {
       if (shouldShowPrompt(prompt)) {
@@ -305,8 +308,9 @@ function shouldShowPrompt (prompt: { slug: string, noProjectId: boolean, interva
   }
 
   const now = Date.now()
-  const timeSinceOpened = now - savedState.value?.firstOpened
+  const timeSinceOpened = now - (savedState.value?.firstOpened ?? now)
   const allPromptShownTimes: number[] = Object.values(savedState.value?.promptsShown ?? {})
+  const bannersLastShown = Object.values(savedState.value?.banners ?? {}).map((banner) => typeof banner === 'object' && banner?.lastShown).filter((val): val is number => !!val)
 
   // prompt has been shown
   if (savedState.value?.promptsShown?.[prompt.slug]) {
@@ -315,6 +319,11 @@ function shouldShowPrompt (prompt: { slug: string, noProjectId: boolean, interva
 
   // any other prompt has been shown in the last 24 hours
   if (allPromptShownTimes?.find((time) => (now - time) < interval('24 hours'))) {
+    return false
+  }
+
+  // If any tracked banners have been shown in the last 24 hours
+  if (bannersLastShown.some((bannerLastShown) => (now - bannerLastShown) < interval('24 hours'))) {
     return false
   }
 

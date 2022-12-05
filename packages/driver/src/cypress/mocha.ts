@@ -35,13 +35,22 @@ const suiteAfterEach = Suite.prototype.afterEach
 delete (window as any).mocha
 delete (window as any).Mocha
 
-function invokeFnWithOriginalTitle (ctx, originalTitle, mochaArgs, fn, _testConfig) {
-  const ret = fn.apply(ctx, mochaArgs)
+type MochaArgs = [string, Function | undefined]
+function createRunnable (ctx, fnType: 'Test' | 'Suite', mochaArgs: MochaArgs, runnableFn: Function, testCallback: Function | string = '', _testConfig?: Record<string, any>) {
+  const runnable = runnableFn.apply(ctx, mochaArgs)
 
-  ret._testConfig = _testConfig
-  ret.originalTitle = originalTitle
+  // attached testConfigOverrides will execute before `runner:test:before:run` event
+  if (_testConfig) {
+    runnable._testConfig = _testConfig
+  }
 
-  return ret
+  if (fnType === 'Test') {
+    // persist the original callback so we can send it to the cloud
+    // to prevent it from being registered as a modified test
+    runnable.body = testCallback.toString()
+  }
+
+  return runnable
 }
 
 function overloadMochaFnForConfig (fnName, specWindow) {
@@ -66,40 +75,44 @@ function overloadMochaFnForConfig (fnName, specWindow) {
 
       const origFn = subFn ? _fn[subFn] : _fn
 
+      // fallback to empty string for stubbed runnables written like:
+      // - describe('concept')
+      // - it('does something')
+      let testCallback = args[1]
+
       if (args.length > 2 && _.isObject(args[1])) {
         const _testConfig = _.extend({}, args[1]) as any
 
-        const mochaArgs = [args[0], args[2]]
+        const mochaArgs: MochaArgs = [args[0], args[2]]
+        const originalTitle = mochaArgs[0]
+
+        // fallback to empty string for stubbed runnables written like:
+        // - describe('concept')
+        // - it('does something')
+        testCallback = mochaArgs[1]
 
         const configMatchesBrowser = _testConfig.browser == null || Cypress.isBrowser(_testConfig.browser, `${fnType} config value \`{ browser }\``)
 
         if (!configMatchesBrowser) {
-          // TODO: this would mess up the dashboard since it would be registered as a new test
-          const originalTitle = mochaArgs[0]
-
           mochaArgs[0] = `${originalTitle} (skipped due to browser)`
 
-          // TODO: weird edge case where you have an .only but also skipped the test due to the browser
+          // skip test at run-time when test is marked with .only but should also be skipped the test due to the browser
           if (subFn === 'only') {
             mochaArgs[1] = function () {
               this.skip()
             }
 
-            return invokeFnWithOriginalTitle(this, originalTitle, mochaArgs, origFn, _testConfig)
+            return createRunnable(this, fnType, mochaArgs, origFn, testCallback, _testConfig)
           }
 
-          return invokeFnWithOriginalTitle(this, originalTitle, mochaArgs, _fn['skip'], _testConfig)
+          // skip test with .skip func to ignore the test case and not run it
+          return createRunnable(this, fnType, mochaArgs, _fn['skip'], testCallback, _testConfig)
         }
 
-        const ret = origFn.apply(this, mochaArgs)
-
-        // attached testConfigOverrides will execute before `runner:test:before:run` event
-        ret._testConfig = _testConfig
-
-        return ret
+        return createRunnable(this, fnType, mochaArgs, origFn, testCallback, _testConfig)
       }
 
-      return origFn.apply(this, args)
+      return createRunnable(this, fnType, args as MochaArgs, origFn, testCallback)
     }
   }
 
@@ -257,7 +270,7 @@ const patchHookRetries = () => {
       })
 
       // so this error doesn't cause a retry
-      getTestFromRunnable(this)._retries = -1
+      getTestFromRunnable(this).retries(-1)
 
       throw err
     }

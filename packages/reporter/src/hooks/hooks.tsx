@@ -19,7 +19,7 @@ export interface HookHeaderProps {
 }
 
 const HookHeader = ({ model, number }: HookHeaderProps) => (
-  <span className='hook-name'>
+  <span className='hook-name' data-cy={`hook-name-${model.hookName}`}>
     {model.hookName} {number && `(${number})`}
     {model.failed && <span className='hook-failed-message'> (failed)</span>}
   </span>
@@ -66,7 +66,7 @@ const Hook = observer(({ model, showNumber }: HookProps) => (
     <Collapsible
       header={<HookHeader model={model} number={showNumber ? model.hookNumber : undefined} />}
       headerClass='hook-header'
-      headerExtras={model.invocationDetails && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
+      headerExtras={model.invocationDetails && Cypress.testingType !== 'component' && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
       isOpen
     >
       <ul className='commands-container'>

@@ -38,6 +38,11 @@ export const CurrentProject = objectType({
       description: 'Whether or not the full config is ready',
     })
 
+    t.boolean('hasNonExampleSpec', {
+      description: 'Whether the project has any specs found that do not match an example spec',
+      resolve: (_, args, ctx) => ctx.project.hasNonExampleSpec,
+    })
+
     t.field('currentTestingType', {
       description: 'The mode the interactive runner was launched in',
       type: TestingTypeEnum,
@@ -59,7 +64,7 @@ export const CurrentProject = objectType({
 
     t.field('cloudProject', {
       type: 'CloudProjectResult',
-      description: 'The remote associated project from Cypress Dashboard',
+      description: 'The remote associated project from Cypress Cloud',
       resolve: async (source, args, ctx, info) => {
         const projectId = await ctx.project.projectId()
 
@@ -77,7 +82,7 @@ export const CurrentProject = objectType({
     })
 
     t.string('projectId', {
-      description: 'Used to associate project with Cypress dashboard',
+      description: 'Used to associate project with Cypress Cloud',
       resolve: (source, args, ctx) => ctx.project.projectId(),
     })
 

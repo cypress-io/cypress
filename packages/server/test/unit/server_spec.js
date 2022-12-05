@@ -5,11 +5,12 @@ const os = require('os')
 const express = require('express')
 const Promise = require('bluebird')
 const { connect } = require('@packages/network')
-const config = require(`../../lib/config`)
+const { setupFullConfigWithDefaults } = require('@packages/config')
 const { ServerE2E } = require(`../../lib/server-e2e`)
 const { SocketE2E } = require(`../../lib/socket-e2e`)
 const fileServer = require(`../../lib/file_server`)
 const ensureUrl = require(`../../lib/util/ensure-url`)
+const { getCtx } = require('@packages/data-context')
 
 const morganFn = function () {}
 
@@ -21,7 +22,7 @@ describe('lib/server', () => {
   beforeEach(function () {
     this.server = new ServerE2E()
 
-    return config.setupFullConfigWithDefaults({ projectRoot: '/foo/bar/', config: { supportFile: false } })
+    return setupFullConfigWithDefaults({ projectRoot: '/foo/bar/', config: { supportFile: false } }, getCtx().file.getFilesByGlob)
     .then((cfg) => {
       this.config = cfg
     })
@@ -37,7 +38,7 @@ describe('lib/server', () => {
 })
 
 // TODO: Figure out correct configuration to run these tests and/or which ones we need to keep.
-// The introducion of server-base/socket-base and the `ensureProp` function made unit testing
+// The introduction of server-base/socket-base and the `ensureProp` function made unit testing
 // the server difficult.
 describe.skip('lib/server', () => {
   beforeEach(function () {
@@ -50,7 +51,7 @@ describe.skip('lib/server', () => {
 
     sinon.stub(fileServer, 'create').returns(this.fileServer)
 
-    return config.setupFullConfigWithDefaults({ projectRoot: '/foo/bar/' })
+    return setupFullConfigWithDefaults({ projectRoot: '/foo/bar/' }, getCtx().file.getFilesByGlob)
     .then((cfg) => {
       this.config = cfg
       this.server = new ServerE2E()

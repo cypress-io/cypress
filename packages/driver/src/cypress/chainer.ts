@@ -1,5 +1,6 @@
-import _ from 'lodash'
 import $stackUtils from './stack_utils'
+
+let idCounter = 1
 
 export class $Chainer {
   specWindow: Window
@@ -10,7 +11,7 @@ export class $Chainer {
     // The id prefix needs to be unique per origin, so there are not
     // collisions when chainers created in a secondary origin are passed
     // to the primary origin for the command log, etc.
-    this.chainerId = _.uniqueId(`ch-${window.location.origin}-`)
+    this.chainerId = `ch-${window.location.origin}-${idCounter++}`
   }
 
   static remove (key) {

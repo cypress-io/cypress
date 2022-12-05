@@ -1,5 +1,5 @@
 const shouldNotExecute = () => {
-  throw new Error('Test Override validation should have failed & it block should not have executed.')
+  expect(1).to.eq(1) // should not execute - use passing test to ensure correct fail count in system test
 }
 
 it('inline test config override throws error', () => {
@@ -50,6 +50,55 @@ describe('throws error correctly when before hook', () => {
 describe('throws error correctly when beforeEach hook', () => {
   beforeEach(() => {})
   it('test config override throws error', { retries: '1' }, () => {
+    shouldNotExecute()
+  })
+})
+
+it('throws error when invalid test-level override', { testIsolation: false }, () => {
+  shouldNotExecute()
+})
+
+it('throws error when invalid config opt in Cypress.config() in test', () => {
+  Cypress.config({ testIsolation: false })
+  shouldNotExecute()
+})
+
+describe('throws error when invalid config opt in Cypress.config() in before hook', () => {
+  before(() => {
+    Cypress.config({ testIsolation: false })
+  })
+
+  it('4', () => {
+    shouldNotExecute()
+  })
+})
+
+describe('throws error when invalid config opt in Cypress.config() in beforeEach hook', () => {
+  beforeEach(() => {
+    Cypress.config({ testIsolation: false })
+  })
+
+  it('5', () => {
+    shouldNotExecute()
+  })
+})
+
+describe('throws error when invalid config opt in Cypress.config() in after hook', () => {
+  after(() => {
+    Cypress.config({ testIsolation: false })
+  })
+
+  it('5', () => {
+    shouldNotExecute()
+  })
+})
+
+describe('throws error when invalid config opt in Cypress.config() in afterEach hook', () => {
+  afterEach(() => {
+    Cypress.config({ testIsolation: false })
+  })
+
+  it('5', () => {
     shouldNotExecute()
   })
 })

@@ -110,7 +110,7 @@ const descriptions = {
   exit: 'keep the browser open after tests finish',
   forceInstall: 'force install the Cypress binary',
   global: 'force Cypress into global mode as if its globally installed',
-  group: 'a named group for recorded runs in the Cypress Dashboard',
+  group: 'a named group for recorded runs in Cypress Cloud',
   headed: 'displays the browser instead of running headlessly',
   headless: 'hide the browser instead of running headed (default for cypress run)',
   key: 'your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.',
@@ -118,11 +118,11 @@ const descriptions = {
   port: 'runs Cypress on a specific port. overrides any value in cypress.config.{js,ts,mjs,cjs}.',
   project: 'path to the project',
   quiet: 'run quietly, using only the configured reporter',
-  record: 'records the run. sends test results, screenshots and videos to your Cypress Dashboard.',
+  record: 'records the run. sends test results, screenshots and videos to Cypress Cloud.',
   reporter: 'runs a specific mocha reporter. pass a path to use a custom reporter. defaults to "spec"',
   reporterOptions: 'options for the mocha reporter. defaults to "null"',
   spec: 'runs specific spec file(s). defaults to "all"',
-  tag: 'named tag(s) for recorded runs in the Cypress Dashboard',
+  tag: 'named tag(s) for recorded runs in Cypress Cloud',
   version: 'prints Cypress version',
 }
 
@@ -405,7 +405,21 @@ module.exports = {
       args = process.argv
     }
 
-    const { CYPRESS_INTERNAL_ENV } = process.env
+    const { CYPRESS_INTERNAL_ENV, CYPRESS_DOWNLOAD_USE_CA } = process.env
+
+    if (process.env.CYPRESS_DOWNLOAD_USE_CA) {
+      let msg = `
+        ${logSymbols.warning} Warning: It looks like you're setting CYPRESS_DOWNLOAD_USE_CA=${CYPRESS_DOWNLOAD_USE_CA}
+
+        The environment variable "CYPRESS_DOWNLOAD_USE_CA" is no longer required to be set.
+        
+        You can safely unset this environment variable.
+      `
+
+      logger.log()
+      logger.warn(stripIndent(msg))
+      logger.log()
+    }
 
     if (!util.isValidCypressInternalEnvValue(CYPRESS_INTERNAL_ENV)) {
       debug('invalid CYPRESS_INTERNAL_ENV value', CYPRESS_INTERNAL_ENV)

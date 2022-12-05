@@ -2,12 +2,13 @@ import cs from 'classnames'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
+import { TestState } from '@packages/types'
 import Agents from '../agents/agents'
 import Collapsible from '../collapsible/collapsible'
 import Hooks from '../hooks/hooks'
 import Routes from '../routes/routes'
 import TestError from '../errors/test-error'
-import TestModel, { TestState } from '../test/test-model'
+import TestModel from '../test/test-model'
 import AttemptModel from './attempt-model'
 import Sessions from '../sessions/sessions'
 
@@ -54,10 +55,12 @@ function renderAttemptContent (model: AttemptModel, studioActive: boolean) {
       <div ref='commands' className='runnable-commands-region'>
         {model.hasCommands ? <Hooks model={model} /> : <NoCommands />}
       </div>
-      <div className='attempt-error-region'>
-        <TestError model={model} />
-        {studioActive && <StudioError />}
-      </div>
+      {model.state === 'failed' && (
+        <div className='attempt-error-region'>
+          <TestError {...model.error} />
+          {studioActive && <StudioError />}
+        </div>
+      )}
     </div>
   )
 }
@@ -83,13 +86,12 @@ class Attempt extends Component<AttemptProps> {
     return (
       <li
         key={model.id}
-        className={cs('attempt-item', `attempt-state-${model.state}`, {
-          'attempt-failed': model.state === 'failed',
-        })}
+        className={cs('attempt-item', `attempt-state-${model.state}`)}
         ref="container"
       >
         <Collapsible
           header={<AttemptHeader index={model.id} state={model.state} />}
+          hideExpander
           headerClass='attempt-name'
           contentClass='attempt-content'
           isOpen={model.isOpen}

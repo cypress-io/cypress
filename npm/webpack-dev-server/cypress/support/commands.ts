@@ -1,4 +1,6 @@
 /// <reference types="cypress" />
+import type { ExpectedResults } from '@packages/app/cypress/e2e/support/execute-spec'
+import { waitForSpecToFinish } from '@packages/app/cypress/e2e/support/execute-spec'
 
 declare global {
   namespace Cypress {
@@ -11,24 +13,9 @@ declare global {
        * 3. Waits (with a timeout of 30s) for the Rerun all tests button to be present. This ensures all tests have completed
        *
        */
-      waitForSpecToFinish()
+      waitForSpecToFinish(expectedResults?: ExpectedResults, timeout?: number): void
     }
   }
-}
-
-// Here we export the function with no intention to import it
-// This only tells the typescript type checker that this definitely is a module
-// This way, we are allowed to use the global namespace declaration
-export const waitForSpecToFinish = () => {
-  // First ensure the test is loaded
-  cy.get('.passed > .num').should('contain', '--')
-  cy.get('.failed > .num').should('contain', '--')
-
-  // Then ensure the tests are running
-  cy.contains('Your tests are loading...').should('not.exist')
-
-  // Then ensure the tests have finished
-  cy.get('[aria-label="Rerun all tests"]', { timeout: 30000 })
 }
 
 Cypress.Commands.add('waitForSpecToFinish', waitForSpecToFinish)

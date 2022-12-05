@@ -39,6 +39,9 @@ fragment RequestAccessButton on Query {
         message
         hasRequestedAccess
       }
+      ... on CloudProject {
+        id
+      }
     }
   }
 }

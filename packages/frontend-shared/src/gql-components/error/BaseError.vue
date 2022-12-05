@@ -8,7 +8,7 @@
         <h1
           v-if="baseError.title"
           class="font-medium leading-snug text-32px text-gray-900"
-          data-testid="error-header"
+          data-cy="error-header"
         >
           <slot name="header">
             {{ baseError.title }}
@@ -161,9 +161,9 @@ const getDocsType = (): string => {
       return 'docsHomepage'
     case errorType.includes('RECORD'):
     case errorType.includes('PROJECT'):
-    case errorType.includes('DASHBOARD'):
+    case errorType.includes('CLOUD'):
     case errorType.includes('PLAN'):
-      return 'dashboardGuide'
+      return 'cloudGuide'
     default:
       return 'configGuide'
   }

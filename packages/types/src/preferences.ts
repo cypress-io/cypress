@@ -1,4 +1,4 @@
-import type { Editor } from '.'
+import type { BannersState, Editor, MajorVersionWelcomeDismissed } from '.'
 
 export const defaultPreferences: AllowedState = {
   autoScrollingEnabled: true,
@@ -12,6 +12,7 @@ export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
   'appX',
   'appY',
   'autoScrollingEnabled',
+  'banners',
   'browserWidth',
   'browserHeight',
   'browserX',
@@ -24,10 +25,7 @@ export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
   'firstOpenedCypress',
   'showedStudioModal',
   'preferredOpener',
-  'ctReporterWidth',
-  'ctIsSpecsListOpen',
   'isSpecsListOpen',
-  'ctSpecListWidth',
   'firstOpened',
   'lastOpened',
   'lastProjectId',
@@ -36,6 +34,7 @@ export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
   'preferredEditorBinary',
   'isSideNavigationOpen',
   'lastBrowser',
+  'majorVersionWelcomeDismissed',
 ] as const
 
 type Maybe<T> = T | null | undefined
@@ -47,6 +46,7 @@ export type AllowedState = Partial<{
   appY: Maybe<number>
   isSpecsListOpen: Maybe<boolean>
   autoScrollingEnabled: Maybe<boolean>
+  banners: Maybe<BannersState>
   browserWidth: Maybe<number>
   browserHeight: Maybe<number>
   browserX: Maybe<number>
@@ -59,9 +59,6 @@ export type AllowedState = Partial<{
   firstOpenedCypress: Maybe<number>
   showedStudioModal: Maybe<boolean>
   preferredOpener: Editor | undefined
-  ctReporterWidth: Maybe<number>
-  ctIsSpecsListOpen: Maybe<boolean>
-  ctSpecListWidth: Maybe<number>
   lastProjectId: Maybe<string>
   firstOpened: Maybe<number>
   lastOpened: Maybe<number>
@@ -71,4 +68,5 @@ export type AllowedState = Partial<{
   isSideNavigationOpen: Maybe<boolean>
   testingType: 'e2e' | 'component'
   lastBrowser: { name: string, channel: string }
+  majorVersionWelcomeDismissed: Maybe<MajorVersionWelcomeDismissed>
 }>

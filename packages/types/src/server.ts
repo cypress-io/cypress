@@ -1,16 +1,30 @@
 import type { FoundBrowser } from './browser'
+import type { ReceivedCypressOptions } from './config'
 import type { PlatformName } from './platform'
+import type { RunModeVideoApi } from './video'
 
-export interface LaunchOpts {
-  browser?: FoundBrowser
-  url?: string
-  automationMiddleware?: AutomationMiddleware
-  projectRoot?: string
-  shouldLaunchNewTab?: boolean
+export type OpenProjectLaunchOpts = {
+  projectRoot: string
+  shouldLaunchNewTab: boolean
+  automationMiddleware: AutomationMiddleware
+  videoApi?: RunModeVideoApi
+  onWarning: (err: Error) => void
+  onError: (err: Error) => void
+}
+
+export type BrowserLaunchOpts = {
+  browsers: FoundBrowser[]
+  browser: FoundBrowser & { isHeadless: boolean }
+  url: string | undefined
+  proxyServer: string
+  isTextTerminal: boolean
   onBrowserClose?: (...args: unknown[]) => void
   onBrowserOpen?: (...args: unknown[]) => void
-  onError?: (err: Error) => void
-}
+  relaunchBrowser?: () => Promise<any>
+} & Partial<OpenProjectLaunchOpts> // TODO: remove the `Partial` here by making it impossible for openProject.launch to be called w/o OpenProjectLaunchOpts
+& Pick<ReceivedCypressOptions, 'userAgent' | 'proxyUrl' | 'socketIoRoute' | 'chromeWebSecurity' | 'downloadsFolder' | 'experimentalModifyObstructiveThirdPartyCode' | 'experimentalWebKitSupport'>
+
+export type BrowserNewTabOpts = { onInitializeNewBrowserTab: () => void } & BrowserLaunchOpts
 
 export interface LaunchArgs {
   _: [string] // Cypress App binary location
@@ -46,7 +60,7 @@ export interface AutomationMiddleware {
   onBeforeRequest?: OnRequestEvent | null
   onRequest?: OnRequestEvent | null
   onResponse?: NullableMiddlewareHook
-  onAfterResponse?: NullableMiddlewareHook
+  onAfterResponse?: ((eventName: string, data: any, resp: any) => void) | null
 }
 
 type WebSocketOptionsCallback = (...args: any[]) => any

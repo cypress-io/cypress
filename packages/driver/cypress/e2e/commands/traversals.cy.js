@@ -1,8 +1,6 @@
 const { assertLogLength } = require('../../support/utils')
 const { _, $, dom } = Cypress
 
-const helpers = require('../../support/helpers')
-
 describe('src/cy/commands/traversals', () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
@@ -95,7 +93,7 @@ describe('src/cy/commands/traversals', () => {
           })
 
           cy.on('fail', (err) => {
-            expect(err.message).to.include(`\`cy.${name}()\` failed because this element`)
+            expect(err.message).to.include(`\`cy.${name}()\` failed because it requires a DOM element`)
 
             done()
           })
@@ -108,7 +106,7 @@ describe('src/cy/commands/traversals', () => {
             node = dom.stringify(cy.$$(node), 'short')
 
             cy.on('fail', (err) => {
-              expect(err.message).to.include(`Expected to find element: \`${el}\`, but never found it. Queried from element: ${node}`)
+              expect(err.message).to.include(`Expected to find element: \`${el}\`, but never found it. Queried from:`)
 
               done()
             })
@@ -208,7 +206,7 @@ describe('src/cy/commands/traversals', () => {
             const yielded = Cypress.dom.getElements($el)
 
             _.extend(obj, {
-              'Applied To': helpers.getFirstSubjectByName('get').get(0),
+              'Applied To': cy.$$('#list')[0],
               Yielded: yielded,
               Elements: $el.length,
             })
@@ -324,7 +322,7 @@ describe('src/cy/commands/traversals', () => {
 
     it('errors after timing out not finding element', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.include('Expected to find element: `span`, but never found it. Queried from element: <li.item>')
+        expect(err.message).to.include('Expected to find element: `span`, but never found it. Queried from:')
 
         done()
       })
@@ -346,16 +344,27 @@ describe('src/cy/commands/traversals', () => {
       const button = cy.$$('#button').hide()
 
       cy.on('fail', (err) => {
-        const log = this.logs[1]
+        assertLogLength(this.logs, 3)
 
-        expect(log.get('state')).to.eq('failed')
-        expect(err.message).to.include(log.get('error').message)
-        expect(log.get('$el').get(0)).to.eq(button.get(0))
+        const getLog = this.logs[0]
+        const findLog = this.logs[1]
+        const assertionLog = this.logs[2]
 
-        const consoleProps = log.invoke('consoleProps')
+        expect(err.message).to.contain('This element `<button#button>` is not visible because it has CSS property: `display: none`')
+
+        expect(getLog.get('state')).to.eq('passed')
+        expect(getLog.get('error')).to.be.undefined
+
+        expect(findLog.get('state')).to.eq('passed')
+        expect(findLog.get('error')).to.be.undefined
+        expect(findLog.get('$el').get(0)).to.eq(button.get(0))
+        const consoleProps = findLog.invoke('consoleProps')
 
         expect(consoleProps.Yielded).to.eq(button.get(0))
         expect(consoleProps.Elements).to.eq(button.length)
+
+        expect(assertionLog.get('state')).to.eq('failed')
+        expect(err.message).to.include(assertionLog.get('error').message)
 
         done()
       })

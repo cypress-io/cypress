@@ -450,7 +450,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
       .should('have.class', 'command-is-pinned')
       .find('.command-pin')
 
-      cy.wrap(runner.emit).should('be.calledWith', 'runner:pin:snapshot', 2)
+      cy.wrap(runner.emit).should('be.calledWith', 'runner:pin:snapshot', 'r3', 2)
       cy.percySnapshot()
     })
 
@@ -469,13 +469,13 @@ describe('commands', { viewportHeight: 1000 }, () => {
     it('prints to console', () => {
       cy.spy(runner, 'emit')
       cy.contains('#exists').click()
-      cy.wrap(runner.emit).should('be.calledWith', 'runner:console:log', 2)
+      cy.wrap(runner.emit).should('be.calledWith', 'runner:console:log', 'r3', 2)
     })
 
     it('shows the snapshot', () => {
       cy.spy(runner, 'emit')
       cy.contains('#exists').click()
-      cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', 2)
+      cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', 'r3', 2)
     })
 
     it('unpins after clicking again, does not re-print to the console', () => {
@@ -794,7 +794,8 @@ describe('commands', { viewportHeight: 1000 }, () => {
           const nestedSessionGroupId = addCommand(runner, {
             name: 'session',
             displayName: 'validate',
-            type: 'child',
+            state: 'failed',
+            type: 'system',
             group: nestedGroupId,
           })
 
@@ -842,12 +843,12 @@ describe('commands', { viewportHeight: 1000 }, () => {
         .should('have.class', 'command-is-pinned')
         .find('.command-pin')
 
-        cy.wrap(runner.emit).should('be.calledWith', 'runner:pin:snapshot', fakeIdForTest)
+        cy.wrap(runner.emit).should('be.calledWith', 'runner:pin:snapshot', 'r3', fakeIdForTest)
         cy.percySnapshot()
       })
 
       it('shows a tooltip', () => {
-        cy.get('.command-name-within').click()
+        cy.get('.command-name-within').click('top')
         cy.get('.cy-tooltip').should('have.text', 'Printed output to your console')
       })
 
@@ -862,13 +863,13 @@ describe('commands', { viewportHeight: 1000 }, () => {
         cy.spy(runner, 'emit')
         cy.get('.command-name-within').click('top')
 
-        cy.wrap(runner.emit).should('be.calledWith', 'runner:console:log', fakeIdForTest)
+        cy.wrap(runner.emit).should('be.calledWith', 'runner:console:log', 'r3', fakeIdForTest)
       })
 
       it('shows the snapshot', () => {
         cy.spy(runner, 'emit')
         cy.get('.command-name-within').click('top')
-        cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', fakeIdForTest)
+        cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', 'r3', fakeIdForTest)
       })
 
       it('unpins after clicking again, does not re-print to the console', () => {
@@ -903,7 +904,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
     it('shows snapshot after 50ms passes', () => {
       cy.wrap(runner.emit).should('not.be.calledWith', 'runner:show:snapshot')
       cy.tick(50)
-      cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', 1)
+      cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', 'r3', 1)
       cy.wrap(runner.emit).should('be.calledOnce')
     })
 
@@ -915,7 +916,7 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
       it('hides the snapshot after 50ms pass without another mouse over', () => {
         cy.tick(50)
-        cy.wrap(runner.emit).should('be.calledWith', 'runner:hide:snapshot', 1)
+        cy.wrap(runner.emit).should('be.calledWith', 'runner:hide:snapshot', 'r3', 1)
       })
 
       it('does not hide the snapshot if there is another mouseover before 50ms passes', () => {
@@ -926,24 +927,30 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
   context('test error', () => {
     // this is a unique error permutation currently only observed in cy.session() where an error
-    // message should be presented during the session validation of a saves/restored session and the
-    // session command will attempt to recreate a valid session.
-    it('renders error instead of command', () => {
-      // font-family: $font-system;
+    // message should be presented if the session validation fails for a restored session because the
+    // session command recover and attempt to recreate a valid session.
+    it('renders recovered error for command', () => {
       cy.fixture('command_error').then((_commandErr) => {
-        addCommand(runner, {
-          id: 10,
-          number: 7,
-          name: 'validate',
-          displayMessage: 'mock session validation',
-          state: 'failed',
-          showError: true,
-          err: _commandErr,
-          type: 'parent',
+        const groupId = addCommand(runner, {
+          name: 'session',
+          message: 'mock restore',
+          state: 'passed',
+          type: 'system',
         })
 
         addCommand(runner, {
-          id: 11,
+          type: 'system',
+          name: 'validate',
+          state: 'failed',
+          err: {
+            ..._commandErr,
+            isRecovered: true,
+          },
+          groupLevel: 1,
+          group: groupId,
+        })
+
+        addCommand(runner, {
           name: 'recreate session',
           message: 'mock recreate session cmd',
           state: 'success',
@@ -955,10 +962,61 @@ describe('commands', { viewportHeight: 1000 }, () => {
       cy.contains('recreate session')
       cy.percySnapshot()
     })
+
+    it('renders recovered error for nested group command', () => {
+      cy.fixture('command_error').then((_commandErr) => {
+        const groupId = addCommand(runner, {
+          name: 'session',
+          message: 'mock restore',
+          state: 'passed',
+          type: 'system',
+        })
+
+        const nested = addCommand(runner, {
+          type: 'system',
+          name: 'validate',
+          state: 'failed',
+          group: groupId,
+        })
+
+        addCommand(runner, {
+          number: 8,
+          name: 'get',
+          message: 'does_not_exist',
+          state: 'failed',
+          err: {
+            ..._commandErr,
+            isRecovered: true,
+          },
+          type: 'parent',
+          groupLevel: 2,
+          group: nested,
+        })
+
+        addCommand(runner, {
+          id: 12,
+          name: 'recreate session',
+          message: 'mock recreate session cmd',
+          state: 'success',
+          type: 'parent',
+        })
+      })
+
+      cy.contains('.command', 'validate').as('validate')
+      .find('.command-expander')
+      .should('have.class', 'command-expander-is-open')
+
+      cy.get('@validate').within(() => {
+        cy.contains('CommandError')
+      })
+
+      cy.contains('recreate session')
+
+      cy.percySnapshot()
+    })
   })
 
-  // FIXME: When studio support is re-introduced we can enable these tests.
-  context.skip('studio commands', () => {
+  context('studio commands', () => {
     beforeEach(() => {
       addCommand(runner, {
         id: 10,
@@ -990,10 +1048,10 @@ describe('commands', { viewportHeight: 1000 }, () => {
 
     it('only parent studio commands display remove button', () => {
       cy.contains('#studio-command-parent').closest('.command')
-      .find('.studio-command-remove').should('be.visible')
+      .find('.studio-command-remove').should('exist')
 
       cy.contains('#studio-command-child').closest('.command')
-      .find('.studio-command-remove').should('not.be.visible')
+      .find('.studio-command-remove').should('not.exist')
     })
 
     it('emits studio:remove:command with number when delete button is clicked', () => {

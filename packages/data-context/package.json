@@ -11,7 +11,8 @@
     "tslint": "tslint --config ../ts/tslint.json --project .",
     "clean": "rimraf --glob \"./{src,test}/**/*.js\"",
     "test": "yarn test-unit",
-    "test-unit": "mocha -r @packages/ts/register --config ./test/.mocharc.js"
+    "test-unit": "mocha -r @packages/ts/register --config ./test/.mocharc.js --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "lint": "eslint --ext .js,.ts,.json, ."
   },
   "dependencies": {
     "@babel/code-frame": "7.8.3",

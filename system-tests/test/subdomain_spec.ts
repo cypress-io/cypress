@@ -93,7 +93,7 @@ const onServer = function (app) {
 
         case 'domain.foobar.com:2292':
           res.cookie('nomnom', 'good', {
-            domain: '.foobar.com',
+            domain: '.domain.foobar.com',
           })
 
           return getText('Domain')
@@ -119,9 +119,11 @@ describe('e2e subdomain', () => {
   })
 
   systemTests.it('passes', {
+    browser: '!webkit', // TODO(webkit): fix+unskip
     spec: 'subdomain.cy.js',
     snapshot: true,
     config: {
+      video: false,
       hosts: {
         '*.foobar.com': '127.0.0.1',
       },

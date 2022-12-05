@@ -75,9 +75,20 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     it('clicking the login button will open the login modal', () => {
       cy.visitApp()
       moveToRunsPage()
-      cy.contains('Log In').click()
+      cy.contains(defaultMessages.runs.connect.buttonUser).click()
+      cy.withCtx((ctx, o) => {
+        o.sinon.spy(ctx._apis.authApi, 'logIn')
+      })
+
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
-        cy.get('button').contains('Log In')
+        cy.contains('button', 'Log in').click()
+      })
+
+      cy.withCtx((ctx, o) => {
+        // validate utmSource
+        expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[1]).to.eq('Binary: App')
+        // validate utmMedium
+        expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[2]).to.eq('Runs Tab')
       })
     })
 
@@ -103,6 +114,10 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.remoteGraphQLIntercept(async (obj) => {
         if (obj.result.data?.cloudViewer?.organizations?.nodes) {
           obj.result.data.cloudViewer.organizations.nodes = []
+        }
+
+        if (obj.result.data?.cloudViewer?.firstOrganization?.nodes) {
+          obj.result.data.cloudViewer.firstOrganization.nodes = []
         }
 
         return obj.result
@@ -139,9 +154,13 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.startAppServer('component')
 
       cy.remoteGraphQLIntercept(async (obj) => {
-        if ((obj.operationName === 'CheckCloudOrganizations_cloudViewerChange_cloudViewer' || obj.operationName === 'Runs_cloudViewer' || obj.operationName === 'SpecsPageContainer_cloudViewer')) {
+        if ((obj.operationName !== 'CreateCloudOrgModal_CloudOrganizationsCheck_refreshOrganizations_cloudViewer')) {
           if (obj.result.data?.cloudViewer?.organizations?.nodes) {
             obj.result.data.cloudViewer.organizations.nodes = []
+          }
+
+          if (obj.result.data?.cloudViewer?.firstOrganization?.nodes) {
+            obj.result.data.cloudViewer.firstOrganization.nodes = []
           }
         }
 
@@ -156,9 +175,44 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
       cy.get('[aria-modal="true"]').should('exist')
 
+      // Clear existing remote GQL intercept to allow new queries to execute normally
+      cy.remoteGraphQLIntercept(async (obj) => {
+        return obj.result
+      })
+
       cy.contains('button', defaultMessages.runs.connect.modal.createOrg.refreshButton).click()
 
       cy.findByText(defaultMessages.runs.connect.modal.selectProject.manageOrgs)
+    })
+
+    it('refetches cloudViewer data on open', () => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.startAppServer('component')
+
+      cy.remoteGraphQLIntercept(async (obj, testState) => {
+        if (obj.operationName === 'LoginConnectModals_LoginConnectModalsQuery_cloudViewer') {
+          testState.refetchCalled = true
+        }
+
+        if (obj.result.data?.cloudViewer?.organizations?.nodes) {
+          obj.result.data.cloudViewer.organizations.nodes = []
+        }
+
+        return obj.result
+      })
+
+      cy.loginUser()
+      cy.visitApp()
+
+      moveToRunsPage()
+
+      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.get('[aria-modal="true"]').should('exist')
+
+      cy.withCtx((_, o) => {
+        expect(o.testState.refetchCalled).to.eql(true)
+      })
     })
   })
 
@@ -196,11 +250,52 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.get('button').get('[aria-label="Close"').click()
       cy.get('[aria-modal="true"]').should('not.exist')
     })
+
+    it('shows "Connect project" button if a project is not connected after login', () => {
+      cy.scaffoldProject('component-tests')
+      cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
+      cy.startAppServer('component')
+
+      cy.visitApp()
+      moveToRunsPage()
+
+      cy.withCtx(async (ctx, options) => {
+        ctx.coreData.app.browserStatus = 'open'
+        options.sinon.stub(ctx._apis.electronApi, 'isMainWindowFocused').returns(false)
+        options.sinon.stub(ctx._apis.authApi, 'logIn').callsFake(async (onMessage) => {
+          setTimeout(() => {
+            onMessage({ browserOpened: true })
+          }, 500)
+
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              resolve(options.user)
+            }, 1000)
+          })
+        })
+      }, { user: {
+        authToken: 'test1',
+        email: 'test_user_a@example.com',
+        name: 'Test User A',
+      } })
+
+      cy.contains('button', 'Log in to Cypress Cloud').click()
+
+      cy.findByRole('dialog', { name: 'Log in to Cypress' }).as('logInModal').within(() => {
+        cy.findByRole('button', { name: 'Log in' }).click()
+      })
+
+      cy.findByRole('dialog', { name: 'Login successful' }).within(() => {
+        cy.findByRole('button', { name: 'Connect project' }).click()
+      })
+
+      cy.findByRole('dialog', { name: 'Create project' }).should('be.visible')
+    })
   })
 
   context('Runs - Create Project', () => {
-    it('when a project is created, injects new projectId into the config file', () => {
-      cy.remoteGraphQLIntercept(async (obj) => {
+    it('when a project is created, injects new projectId into the config file, and sends expected UTM params', () => {
+      cy.remoteGraphQLIntercept((obj) => {
         if (obj.operationName === 'SelectCloudProjectModal_CreateCloudProject_cloudProjectCreate') {
           obj.result.data!.cloudProjectCreate = {
             slug: 'newProjectId',
@@ -217,7 +312,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.loginUser()
       cy.visitApp()
 
-      cy.withCtx(async (ctx) => {
+      cy.withCtx(async (ctx, o) => {
+        o.sinon.spy(ctx.cloud, 'executeRemoteGraphQL')
+
         const config = await ctx.project.getConfig()
 
         expect(config.projectId).to.not.equal('newProjectId')
@@ -225,13 +322,19 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       moveToRunsPage()
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
-      cy.get('button').contains(defaultMessages.runs.connect.modal.selectProject.createProject).click()
+      cy.contains('button', defaultMessages.runs.connect.modal.selectProject.createProject).click()
       cy.findByText(defaultMessages.runs.connectSuccessAlert.title).should('be.visible')
 
       cy.withCtx(async (ctx) => {
         const config = await ctx.project.getConfig()
 
         expect(config.projectId).to.equal('newProjectId')
+        expect(ctx.cloud.executeRemoteGraphQL).to.have.been.calledWithMatch({
+          fieldName: 'cloudProjectCreate',
+          operationVariables: {
+            medium: 'Runs Tab',
+            source: 'Binary: App',
+          } })
       })
     })
 
@@ -258,7 +361,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[href="#/runs"]').click()
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
-      cy.get('button').contains(defaultMessages.runs.connect.modal.selectProject.createProject).click()
+      cy.contains('button', defaultMessages.runs.connect.modal.selectProject.createProject).click()
 
       cy.get('[data-cy="alert"]').within(() => {
         cy.contains(defaultMessages.runs.connect.errors.baseError.title)
@@ -293,7 +396,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[href="#/runs"]').click()
       cy.findByText(defaultMessages.runs.connect.buttonProject).click()
-      cy.get('button').contains(defaultMessages.runs.connect.modal.selectProject.createProject).click()
+      cy.contains('button', defaultMessages.runs.connect.modal.selectProject.createProject).click()
 
       cy.get('[data-cy="alert"]').within(() => {
         cy.contains(defaultMessages.runs.connect.errors.internalServerError.title)
@@ -324,7 +427,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         }
 
         if (obj.result.data?.cloudViewer?.organizations?.nodes) {
-          const projectNodes = obj.result.data?.cloudViewer.organizations.nodes[0].projects.nodes
+          const projectNodes = obj.result.data.cloudViewer.organizations.nodes[0].projects.nodes
 
           projectNodes.push({
             __typename: 'CloudProject',
@@ -347,11 +450,11 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
 
     it('opens Connect Project modal after clicking Reconnect Project button', () => {
-      cy.findByText(defaultMessages.runs.errors.notFound.button).should('be.visible').click()
+      cy.findByText(defaultMessages.runs.errors.notFound.button).click()
+
       cy.get('[aria-modal="true"]').should('exist')
-      cy.get('[data-cy="selectProject"] button').click()
-      cy.findByText('Mock Project').click()
-      cy.findByText(defaultMessages.runs.connect.modal.selectProject.connectProject).click()
+      cy.contains('[data-cy="selectProject"] button', 'Mock Project')
+      cy.get('[data-cy="connect-project"]').click()
       cy.get('[data-cy="runs"]', { timeout: 7500 })
     })
   })
@@ -418,12 +521,13 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
     it('updates the button text when the request access button is clicked', () => {
       cy.remoteGraphQLIntercept(async (obj, testState) => {
-        if (obj.operationName === 'Runs_currentProject_cloudProject_cloudProjectBySlug') {
+        if (obj.operationName?.includes('cloudProject_cloudProjectBySlug')) {
           const proj = obj!.result!.data!.cloudProjectBySlug
 
           proj.__typename = 'CloudProjectUnauthorized'
           proj.message = 'Cloud Project Unauthorized'
           proj.hasRequestedAccess = false
+
           testState.project = proj
         } else if (obj.operationName === 'RunsErrorRenderer_RequestAccess_cloudProjectRequestAccess') {
           obj!.result!.data!.cloudProjectRequestAccess = {
@@ -474,7 +578,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   })
 
   context('Runs - No Runs', () => {
-    it('when no runs and not connected, shows connect to dashboard button', () => {
+    it('when no runs and not connected, shows connect to Cypress Cloud button', () => {
       cy.scaffoldProject('component-tests')
       cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
       cy.startAppServer('component')
@@ -499,7 +603,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       scaffoldTestingTypeAndVisitRunsPage('component')
       cy.contains(defaultMessages.runs.empty.title).should('be.visible')
       cy.contains(defaultMessages.runs.empty.description).should('be.visible')
-      cy.contains('cypress run --component --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
+      cy.findByDisplayValue('npx cypress run --component --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
     })
 
     it('displays how to record prompt when connected and no runs in E2E', () => {
@@ -507,7 +611,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.contains(defaultMessages.runs.empty.title).should('be.visible')
       cy.contains(defaultMessages.runs.empty.description).should('be.visible')
-      cy.contains('cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
+      cy.findByDisplayValue('npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
     })
 
     it('displays a copy button and copies correct command in Component Testing', () => {
@@ -519,7 +623,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.get('[data-cy="copy-button"]').click()
       cy.contains('Copied!')
       cy.withRetryableCtx((ctx) => {
-        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('cypress run --component --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('npx cypress run --component --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
       })
     })
 
@@ -532,7 +636,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.get('[data-cy="copy-button"]').click()
       cy.contains('Copied!')
       cy.withRetryableCtx((ctx) => {
-        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+        expect(ctx.electronApi.copyTextToClipboard as SinonStub).to.have.been.calledWith('npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
       })
     })
   })
@@ -604,7 +708,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.loginUser()
       cy.remoteGraphQLIntercept((obj) => {
-        if (obj.operationName === 'Runs_currentProject_cloudProject_cloudProjectBySlug') {
+        if (obj.operationName?.includes('cloudProject_cloudProjectBySlug')) {
           cloudData = obj.result
           obj.result = {}
 
@@ -618,11 +722,11 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       moveToRunsPage()
 
-      cy.contains('h2', 'Cannot connect to the Cypress Dashboard')
-      cy.percySnapshot()
+      cy.contains('h2', 'Cannot connect to Cypress Cloud')
+      // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
       cy.remoteGraphQLIntercept((obj) => {
-        if (obj.operationName === 'Runs_currentProject_cloudProject_cloudProjectBySlug') {
+        if (obj.operationName?.includes('cloudProject_cloudProjectBySlug')) {
           return cloudData
         }
 
@@ -640,10 +744,6 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.startAppServer('component')
     })
 
-    afterEach(() => {
-      cy.goOnline()
-    })
-
     it('shows alert warning if runs have been returned already', () => {
       cy.loginUser()
       cy.visitApp()
@@ -655,7 +755,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[data-cy=warning-alert]')
       .should('contain.text', 'You have no internet connection')
-      .and('contain.text', 'Check your internet connection to pull the latest data from the dashboard')
+      .and('contain.text', 'Check your internet connection to pull the latest data from Cypress Cloud')
     })
 
     it('should remove the alert warning if the app reconnects to the internet', () => {
@@ -669,7 +769,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[data-cy=warning-alert]')
       .should('contain.text', 'You have no internet connection')
-      .and('contain.text', 'Check your internet connection to pull the latest data from the dashboard')
+      .and('contain.text', 'Check your internet connection to pull the latest data from Cypress Cloud')
 
       cy.goOnline()
 
@@ -681,9 +781,13 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
       cy.startAppServer('component')
 
-      cy.remoteGraphQLIntercept(async (obj) => {
+      cy.remoteGraphQLIntercept((obj) => {
         if (obj.result.data?.cloudViewer?.organizations?.nodes) {
           obj.result.data.cloudViewer.organizations.nodes = []
+        }
+
+        if (obj.result.data?.cloudViewer?.firstOrganization?.nodes) {
+          obj.result.data.cloudViewer.firstOrganization.nodes = []
         }
 
         return obj.result
@@ -706,7 +810,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[data-cy=standard-modal]')
       .should('contain.text', 'You have no internet connection')
-      .and('contain.text', 'Check your internet connection to pull the latest data from the dashboard')
+      .and('contain.text', 'Check your internet connection to pull the latest data from Cypress Cloud')
     })
 
     it('shows correct message on connect project modal', () => {
@@ -740,20 +844,21 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[data-cy=standard-modal]')
       .should('contain.text', 'You have no internet connection')
-      .and('contain.text', 'Check your internet connection to pull the latest data from the dashboard')
+      .and('contain.text', 'Check your internet connection to pull the latest data from Cypress Cloud')
     })
   })
 
+  const RUNNING_COUNT = 3
+
   describe('refetching', () => {
     let obj: {toCall?: Function} = {}
-    const RUNNING_COUNT = 3
 
     beforeEach(() => {
       cy.scaffoldProject('component-tests')
       cy.openProject('component-tests')
       cy.startAppServer('component')
       cy.loginUser()
-      cy.remoteGraphQLIntercept((obj, testState) => {
+      cy.remoteGraphQLIntercept((obj) => {
         if (obj.result.data?.cloudProjectBySlug?.runs?.nodes.length) {
           obj.result.data.cloudProjectBySlug.runs.nodes.map((run) => {
             run.status = 'RUNNING'
@@ -770,7 +875,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
           const setTimeout = win.setTimeout
 
           // @ts-expect-error
-          win.setTimeout = function (fn, time) {
+          win.setTimeout = function (fn: () => void, time: number) {
             if (fn.name === 'fetchNewerRuns') {
               obj.toCall = fn
             } else {
@@ -781,7 +886,10 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
     })
 
-    it('should re-query for executing runs', () => {
+    // https://github.com/cypress-io/cypress/issues/24575
+    const itSkipIfWindows = Cypress.platform === 'win32' ? it.skip : it
+
+    itSkipIfWindows('should re-query for executing runs', () => {
       cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', RUNNING_COUNT).should('be.visible')
 
       cy.remoteGraphQLIntercept(async (obj) => {
@@ -814,7 +922,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       completeNext(1)
     })
 
-    it('should fetch newer runs and maintain them when navigating', () => {
+    itSkipIfWindows('should fetch newer runs and maintain them when navigating', () => {
       cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', RUNNING_COUNT).should('be.visible')
 
       cy.remoteGraphQLIntercept(async (obj) => {

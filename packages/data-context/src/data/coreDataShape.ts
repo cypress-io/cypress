@@ -1,4 +1,4 @@
-import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep } from '@packages/types'
+import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep, BannerState } from '@packages/types'
 import type { WizardFrontendFramework, WizardBundler } from '@packages/scaffold-config'
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
@@ -35,6 +35,7 @@ export interface SavedStateShape {
   firstOpened?: number | null
   lastOpened?: number | null
   promptsShown?: object | null
+  banners?: BannerState | null
   lastProjectId?: string | null
   specFilter?: string | null
 }
@@ -74,7 +75,6 @@ export interface WizardDataShape {
 export interface MigrationDataShape {
   // TODO: have the model of migration here
   step: MigrationStep
-  videoEmbedHtml: string | null
   legacyConfigForMigration?: LegacyCypressConfigJson | null
   filteredSteps: MigrationStep[]
   flags: {
@@ -118,6 +118,7 @@ export interface CoreDataShape {
   cliTestingType: string | null
   activeBrowser: FoundBrowser | null
   machineBrowsers: Promise<FoundBrowser[]> | null
+  allBrowsers: Promise<FoundBrowser[]> | null
   servers: {
     appServer?: Maybe<Server>
     appServerPort?: Maybe<number>
@@ -128,7 +129,7 @@ export interface CoreDataShape {
     gqlSocketServer?: Maybe<SocketIONamespace>
   }
   hasInitializedMode: 'run' | 'open' | null
-  dashboardGraphQLError: ErrorWrapperSource | null
+  cloudGraphQLError: ErrorWrapperSource | null
   dev: DevStateShape
   localSettings: LocalSettingsDataShape
   app: AppDataShape
@@ -159,8 +160,9 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     cliBrowser: modeOptions.browser ?? null,
     cliTestingType: modeOptions.testingType ?? null,
     machineBrowsers: null,
+    allBrowsers: null,
     hasInitializedMode: null,
-    dashboardGraphQLError: null,
+    cloudGraphQLError: null,
     dev: {
       refreshState: null,
     },
@@ -193,7 +195,6 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     },
     migration: {
       step: 'renameAuto',
-      videoEmbedHtml: null,
       legacyConfigForMigration: null,
       filteredSteps: [...MIGRATION_STEPS],
       flags: {

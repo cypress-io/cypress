@@ -196,7 +196,9 @@ export class WizardActions {
       description = 'The support file that is bundled and loaded before each E2E spec.'
     } else if (fileName === 'component') {
       assert(this.ctx.coreData.wizard.chosenFramework)
-      fileContent = supportFileComponent(language, this.ctx.coreData.wizard.chosenFramework)
+      const mountModule = await this.ctx.coreData.wizard.chosenFramework.mountModule(this.projectRoot)
+
+      fileContent = supportFileComponent(language, mountModule)
       description = 'The support file that is bundled and loaded before each component testing spec.'
     }
 

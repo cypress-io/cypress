@@ -23,14 +23,25 @@
         >
           <i-cy-crosshairs_x16 :class="[selectorPlaygroundStore.show ? 'icon-dark-indigo-500' : 'icon-dark-gray-500']" />
         </Button>
-        <a
+        <input
+          ref="autUrlInputRef"
           target="_blank"
-          :href="autStore.url"
-          class="mr-12px leading-normal max-w-100% text-indigo-500 self-center hocus-link-default truncate"
+          :value="studioStore.needsUrl ? urlInProgress : autUrl"
+          data-cy="aut-url-input"
+          class="flex flex-grow mr-12px leading-normal max-w-100% text-indigo-500 z-51 self-center hocus-link-default truncate"
+          @input="setStudioUrl"
+          @click="openInNewTab"
+          @keyup.enter="visitUrl"
         >
-          {{ autStore.url }}
-        </a>
+        <StudioUrlPrompt
+          v-if="studioStore.needsUrl"
+          :aut-url-input-ref="autUrlInputRef"
+          :url-in-progress="urlInProgress"
+          @submit="visitUrl"
+          @cancel="() => eventManager.emit('studio:cancel', undefined)"
+        />
       </div>
+
       <div
         v-else
         class="flex-grow"
@@ -54,7 +65,7 @@
         <template #heading>
           <img
             class="min-w-16px w-16px"
-            :src="allBrowsersIcons[selectedBrowser.displayName]"
+            :src="allBrowsersIcons[selectedBrowser.displayName] || allBrowsersIcons.generic"
             :alt="selectedBrowser.displayName"
           >
           {{ selectedBrowser.displayName }} {{ selectedBrowser.majorVersion }}
@@ -100,11 +111,16 @@
               keypath="runner.viewportTooltip.configText"
               class="mb-24px"
             >
-              <!-- disable rule to prevent trailing space from being added to <InlineCodeFragment/> -->
-              <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
-              <InlineCodeFragment class="font-medium text-xs leading-5">{{ props.gql.configFile }}</InlineCodeFragment>
-              <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
-              <InlineCodeFragment class="font-medium text-xs leading-5">cy.viewport()</InlineCodeFragment>
+              <template #configFile>
+                <!-- disable rule to prevent trailing space from being added to <InlineCodeFragment/> content -->
+                <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
+                <InlineCodeFragment class="font-medium text-xs leading-5">{{ props.gql.configFile }}</InlineCodeFragment>
+              </template>
+              <template #viewportCommand>
+                <!-- disable rule to prevent trailing space from being added to <InlineCodeFragment/> content -->
+                <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
+                <InlineCodeFragment class="font-medium text-xs leading-5">cy.viewport()</InlineCodeFragment>
+              </template>
             </i18n-t>
             <div class="flex justify-center">
               <Button
@@ -128,6 +144,8 @@
       :get-aut-iframe="getAutIframe"
       :event-manager="eventManager"
     />
+
+    <StudioControls v-if="studioStore.isActive" />
 
     <Alert
       v-model="showAlert"
@@ -160,11 +178,14 @@ import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import Alert from '@packages/frontend-shared/src/components/Alert.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
+import StudioControls from './studio/StudioControls.vue'
+import StudioUrlPrompt from './studio/StudioUrlPrompt.vue'
 import VerticalBrowserListItems from '@packages/frontend-shared/src/gql-components/topnav/VerticalBrowserListItems.vue'
 import InlineCodeFragment from '@packages/frontend-shared/src/components/InlineCodeFragment.vue'
 import SpecRunnerDropdown from './SpecRunnerDropdown.vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import BookIcon from '~icons/cy/book_x16'
+import { useStudioStore } from '../store/studio-store'
 
 gql`
 fragment SpecRunnerHeader on CurrentProject {
@@ -189,6 +210,12 @@ const specStore = useSpecStore()
 
 const route = useRoute()
 
+const studioStore = useStudioStore()
+
+const urlInProgress = ref('')
+
+const autUrlInputRef = ref<HTMLInputElement>()
+
 const props = defineProps<{
   gql: SpecRunnerHeaderFragment
   eventManager: EventManager
@@ -209,6 +236,14 @@ const displayScale = computed(() => {
   return autStore.scale < 1 ? `${Math.round(autStore.scale * 100) }%` : 0
 })
 
+const autUrl = computed(() => {
+  if (studioStore.isActive && studioStore.url) {
+    return studioStore.url
+  }
+
+  return autStore.url
+})
+
 const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
 const togglePlayground = () => _togglePlayground(autIframe)
@@ -220,4 +255,21 @@ const activeSpecPath = specStore.activeSpec?.absolute
 
 const isDisabled = computed(() => autStore.isRunning || autStore.isLoading)
 
+function setStudioUrl (event: Event) {
+  const url = (event.currentTarget as HTMLInputElement).value
+
+  urlInProgress.value = url
+}
+
+function visitUrl () {
+  studioStore.visitUrl(urlInProgress.value)
+}
+
+function openInNewTab () {
+  if (!autStore.url || studioStore.isActive) {
+    return
+  }
+
+  window.open(autStore.url, '_blank')?.focus()
+}
 </script>

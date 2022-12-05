@@ -1,41 +1,7 @@
-context('cy.origin unsupported commands', () => {
+context('cy.origin unsupported commands', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
-  })
-
-  afterEach(() => {
-    // FIXME: Tests that end with a cy.origin command and enqueue no further cy
-    // commands may have origin's unload event bleed into subsequent tests
-    // and prevent stability from being reached, causing those tests to hang.
-    // We enqueue another cy command after each test to ensure stability
-    // is reached for the next test. This additional command can be removed with the
-    // completion of: https://github.com/cypress-io/cypress/issues/21300
-    cy.then(() => { /* ensuring stability */ })
-  })
-
-  it('cy.route() method is deprecated', (done) => {
-    cy.on('fail', (err) => {
-      expect(err.message).to.equal('`cy.route()` has been deprecated and its use is not supported in the `cy.origin()` callback. Consider using `cy.intercept()` (outside of the callback) instead.')
-      expect(err.docsUrl).to.equal('https://on.cypress.io/intercept')
-      done()
-    })
-
-    cy.origin('http://foobar.com:3500', () => {
-      cy.route('api')
-    })
-  })
-
-  it('cy.server() method is deprecated', (done) => {
-    cy.on('fail', (err) => {
-      expect(err.message).to.equal('`cy.server()` has been deprecated and its use is not supported in the `cy.origin()` callback. Consider using `cy.intercept()` (outside of the callback) instead.')
-      expect(err.docsUrl).to.equal('https://on.cypress.io/intercept')
-      done()
-    })
-
-    cy.origin('http://foobar.com:3500', () => {
-      cy.server()
-    })
   })
 
   it('cy.origin() is not yet supported', (done) => {
@@ -45,7 +11,7 @@ context('cy.origin unsupported commands', () => {
       done()
     })
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.origin('barbaz.com', () => {})
     })
   })
@@ -57,7 +23,7 @@ context('cy.origin unsupported commands', () => {
       done()
     })
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.intercept('/foo')
     })
   })
@@ -69,8 +35,8 @@ context('cy.origin unsupported commands', () => {
       done()
     })
 
-    cy.origin('http://foobar.com:3500', () => {
-      cy.session('/foo')
+    cy.origin('http://www.foobar.com:3500', () => {
+      cy.session('/foo', () => {})
     })
   })
 })

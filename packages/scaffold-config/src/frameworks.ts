@@ -61,6 +61,20 @@ function getBundlerDependency (bundler: WizardBundler['type'], projectPath: stri
   }
 }
 
+export type WizardMountModule = Awaited<ReturnType<typeof WIZARD_FRAMEWORKS[number]['mountModule']>>
+
+const mountModule = <T extends string>(mountModule: T) => (projectPath: string) => Promise.resolve(mountModule)
+
+const reactMountModule = async (projectPath: string) => {
+  const reactPkg = await isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT, projectPath)
+
+  if (!reactPkg.detectedVersion || !semver.valid(reactPkg.detectedVersion)) {
+    return 'cypress/react'
+  }
+
+  return semver.major(reactPkg.detectedVersion) === 18 ? 'cypress/react18' : 'cypress/react'
+}
+
 export const WIZARD_FRAMEWORKS = [
   {
     type: 'reactscripts',
@@ -72,14 +86,13 @@ export const WIZARD_FRAMEWORKS = [
     dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
       return Promise.all([
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT_SCRIPTS, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT_DOM, projectPath),
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_REACT, projectPath),
       ])
     },
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
-    mountModule: 'cypress/react',
+    mountModule: reactMountModule,
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
@@ -93,13 +106,12 @@ export const WIZARD_FRAMEWORKS = [
     dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
       return Promise.all([
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_2, projectPath),
       ])
     },
     codeGenFramework: 'vue',
     glob: '*.vue',
-    mountModule: 'cypress/vue2',
+    mountModule: mountModule('cypress/vue2'),
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
@@ -113,13 +125,12 @@ export const WIZARD_FRAMEWORKS = [
     dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
       return Promise.all([
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_CLI_SERVICE, projectPath),
-        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_WEBPACK, projectPath),
         isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_VUE_3, projectPath),
       ])
     },
     codeGenFramework: 'vue',
     glob: '*.vue',
-    mountModule: 'cypress/vue',
+    mountModule: mountModule('cypress/vue'),
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
@@ -139,8 +150,8 @@ export const WIZARD_FRAMEWORKS = [
     },
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
-    mountModule: 'cypress/react',
-    supportStatus: 'alpha',
+    mountModule: reactMountModule,
+    supportStatus: 'full',
     /**
      * Next.js uses style-loader to inject CSS and requires this element to exist in the HTML.
      * @see: https://github.com/vercel/next.js/blob/5f3351dbb8de71bcdbc91d869c04bc862a25da5f/packages/next/build/webpack/config/blocks/css/loaders/client.ts#L24
@@ -165,7 +176,7 @@ export const WIZARD_FRAMEWORKS = [
     },
     codeGenFramework: 'vue',
     glob: '*.vue',
-    mountModule: 'cypress/vue2',
+    mountModule: mountModule('cypress/vue2'),
     supportStatus: 'alpha',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
@@ -184,7 +195,7 @@ export const WIZARD_FRAMEWORKS = [
     },
     codeGenFramework: 'vue',
     glob: '*.vue',
-    mountModule: 'cypress/vue2',
+    mountModule: mountModule('cypress/vue2'),
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
@@ -203,7 +214,7 @@ export const WIZARD_FRAMEWORKS = [
     },
     codeGenFramework: 'vue',
     glob: '*.vue',
-    mountModule: 'cypress/vue',
+    mountModule: mountModule('cypress/vue'),
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
@@ -223,7 +234,7 @@ export const WIZARD_FRAMEWORKS = [
     },
     codeGenFramework: 'react',
     glob: '*.{js,jsx,tsx}',
-    mountModule: 'cypress/react',
+    mountModule: reactMountModule,
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
@@ -245,9 +256,28 @@ export const WIZARD_FRAMEWORKS = [
     },
     codeGenFramework: 'angular',
     glob: '*.component.ts',
-    mountModule: 'cypress/angular',
+    mountModule: mountModule('cypress/angular'),
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
     specPattern: '**/*.cy.ts',
+  },
+  {
+    type: 'svelte',
+    configFramework: 'svelte',
+    category: 'library',
+    name: 'Svelte.js',
+    detectors: [dependencies.WIZARD_DEPENDENCY_SVELTE],
+    supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
+    dependencies: (bundler: WizardBundler['type'], projectPath: string): Promise<DependencyToInstall[]> => {
+      return Promise.all([
+        getBundlerDependency(bundler, projectPath),
+        isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_SVELTE, projectPath),
+      ])
+    },
+    codeGenFramework: 'svelte',
+    glob: '*.svelte',
+    mountModule: mountModule('cypress/svelte'),
+    supportStatus: 'alpha',
+    componentIndexHtml: componentIndexHtmlGenerator(),
   },
 ] as const

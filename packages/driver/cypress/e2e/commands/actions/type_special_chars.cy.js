@@ -75,18 +75,17 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
   })
 
   context('parseSpecialCharSequences: false', () => {
-    it('types special character sequences literally', (done) => {
+    it('types special character sequences literally', () => {
       cy.get(':text:first').invoke('val', 'foo')
       .type('{{}{backspace}', { parseSpecialCharSequences: false }).then(($input) => {
         expect($input).to.have.value('foo{{}{backspace}')
-
-        done()
       })
     })
   })
 
   context('{{}', () => {
-    it('sets which and keyCode to 219', (done) => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23160
+    it.skip('sets which and keyCode to 219', (done) => {
       cy.$$(':text:first').on('keydown', (e) => {
         expect(e.which).to.eq(219)
         expect(e.keyCode).to.eq(219)
@@ -107,16 +106,28 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       })
 
       cy.get(':text:first').invoke('val', 'ab').type('{{}')
+      .then(() => {
+        done(new Error('keypress event did not fire as expected'))
+      })
     })
 
     it('fires textInput event with e.data', (done) => {
       cy.$$(':text:first').on('textInput', (e) => {
-        expect(e.originalEvent.data).to.eq('{')
+        if (Cypress.isBrowser('webkit')) {
+          // For WebKit, the simulated textInput event is not
+          // emitted with the char data to prevent double entry.
+          expect(e.originalEvent.data).to.eq('')
+        } else {
+          expect(e.originalEvent.data).to.eq('{')
+        }
 
         done()
       })
 
       cy.get(':text:first').invoke('val', 'ab').type('{{}')
+      .then(() => {
+        done(new Error('textInput event did not fire as expected'))
+      })
     })
 
     it('fires input event', (done) => {
@@ -125,6 +136,9 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       })
 
       cy.get(':text:first').invoke('val', 'ab').type('{{}')
+      .then(() => {
+        done(new Error('input event did not fire'))
+      })
     })
 
     it('can prevent default character insertion', () => {
@@ -155,11 +169,14 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       })
 
       cy.get(':text:first').invoke('val', 'ab').type('{esc}')
+      .then(() => {
+        done(new Error('events did not fire as expected'))
+      })
     })
 
     it('does not fire textInput event', (done) => {
       cy.$$(':text:first').on('textInput', (e) => {
-        done('textInput should not have fired')
+        done(new Error('textInput should not have fired'))
       })
 
       cy.get(':text:first').invoke('val', 'ab').type('{esc}').then(() => {
@@ -169,7 +186,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
     it('does not fire input event', (done) => {
       cy.$$(':text:first').on('input', (e) => {
-        done('input should not have fired')
+        done(new Error('input should not have fired'))
       })
 
       cy.get(':text:first').invoke('val', 'ab').type('{esc}').then(() => {
@@ -177,17 +194,19 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       })
     })
 
-    it('can prevent default esc movement', (done) => {
+    it('can prevent default esc movement', () => {
+      let didPreventDefault = false
+
       cy.$$(':text:first').on('keydown', (e) => {
         if (e.keyCode === 27) {
           e.preventDefault()
+          didPreventDefault = true
         }
       })
 
       cy.get(':text:first').invoke('val', 'foo').type('d{esc}').then(($input) => {
         expect($input).to.have.value('food')
-
-        done()
+        expect(didPreventDefault).to.be.true
       })
     })
   })
@@ -218,7 +237,8 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       .should('have.value', 'b')
     })
 
-    it('sets which and keyCode to 8 and does not fire keypress events', (done) => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23160
+    it.skip('sets which and keyCode to 8 and does not fire keypress events', (done) => {
       cy.$$(':text:first').on('keypress', () => {
         done('should not have received keypress')
       })
@@ -234,9 +254,10 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       cy.get(':text:first').invoke('val', 'ab').type('{leftarrow}{backspace}')
     })
 
-    it('does not fire textInput event', (done) => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23160
+    it.skip('does not fire textInput event', (done) => {
       cy.$$(':text:first').on('textInput', (e) => {
-        done('textInput should not have fired')
+        done(new Error('textInput should not have fired'))
       })
 
       cy.get(':text:first').invoke('val', 'ab').type('{backspace}').then(() => {
@@ -244,7 +265,8 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       })
     })
 
-    it('can prevent default backspace movement', (done) => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23160
+    it.skip('can prevent default backspace movement', (done) => {
       cy.$$(':text:first').on('keydown', (e) => {
         if (e.keyCode === 8) {
           e.preventDefault()
@@ -292,8 +314,8 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       attachKeyListeners({ input })
 
       cy.get(':text:first').invoke('val', 'ab')
-      .then(($input) => $input[0].setSelectionRange(0, 0))
       .focus()
+      .then(($input) => $input[0].setSelectionRange(0, 0))
       .type('{backspace}')
       .should('have.value', 'ab')
 
@@ -335,8 +357,8 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       attachKeyListeners({ input })
 
       cy.get('textarea:first').invoke('val', 'ab')
-      .then(($textarea) => $textarea[0].setSelectionRange(0, 0))
       .focus()
+      .then(($textarea) => $textarea[0].setSelectionRange(0, 0))
       .type('{backspace}')
       .should('have.value', 'ab')
 
@@ -430,9 +452,8 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       attachKeyListeners({ input })
 
       cy.get(':text:first').invoke('val', 'ab')
-
-      .then(($input) => $input[0].setSelectionRange(0, 0))
       .focus()
+      .then(($input) => $input[0].setSelectionRange(0, 0))
       .type('{del}')
       .should('have.value', 'b')
 
@@ -476,8 +497,8 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       attachKeyListeners({ textarea })
 
       cy.get('textarea:first').invoke('val', 'ab')
-      .then(($textarea) => $textarea[0].setSelectionRange(0, 0))
       .focus()
+      .then(($textarea) => $textarea[0].setSelectionRange(0, 0))
       .type('{del}')
       .should('have.value', 'b')
 
@@ -559,7 +580,8 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       cy.getAll('ce', 'keypress textInput input').each(shouldNotBeCalled)
     })
 
-    it('can prevent default del movement', (done) => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23160
+    it.skip('can prevent default del movement', (done) => {
       cy.$$(':text:first').on('keydown', (e) => {
         if (e.keyCode === 46) {
           e.preventDefault()
@@ -981,7 +1003,10 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       cy.get('input[type="number"]:first')
       .invoke('val', '12.34')
       .type('{uparrow}{uparrow}')
-      .should('have.value', '14')
+      // WebKit does not round to the step value when calling stepUp/stepDown,
+      // as we do here for the ArrowUp handler.
+      // https://bugs.webkit.org/show_bug.cgi?id=244206
+      .should('have.value', Cypress.isBrowser('webkit') ? '14.34' : '14')
     })
   })
 
@@ -1039,7 +1064,10 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       cy.get('input[type="number"]:first')
       .invoke('val', '12.34')
       .type('{downarrow}{downarrow}')
-      .should('have.value', '11')
+      // WebKit does not round to the step value when calling stepUp/stepDown,
+      // as we do here for the ArrowDown handler
+      // https://bugs.webkit.org/show_bug.cgi?id=244206
+      .should('have.value', Cypress.isBrowser('webkit') ? '10.34' : '11')
     })
 
     it('downarrow ignores current selection', () => {
@@ -1211,7 +1239,8 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/3405
-    it('does fire input event when text inserted', (done) => {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23160
+    it.skip('does fire input event when text inserted', (done) => {
       cy.$$('[contenteditable]:first').on('input', (e) => {
         done()
       })
@@ -1251,7 +1280,8 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
     })
 
     context('1 input, no \'submit\' elements', () => {
-      it('triggers form submit', function (done) {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23160
+      it.skip('triggers form submit', function (done) {
         this.foo = {}
 
         this.$forms.find('#single-input').submit((e) => {
@@ -1272,7 +1302,6 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
         this.$forms.find('#single-input').submit((e) => {
           e.preventDefault()
-
           events.push('submit')
         })
 
@@ -1280,10 +1309,14 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
           const state = log.get('state')
 
           if (state === 'pending') {
-            log.on('state:changed', (state) => {
-              return events.push(`${log.get('name')}:log:${state}`)
-            })
+            events.push(`${log.get('name')}:log:${state}`)
+          }
+        })
 
+        cy.on('command:log:changed', (attrs, log) => {
+          const state = log.get('state')
+
+          if (state === 'pending') {
             events.push(`${log.get('name')}:log:${state}`)
           }
         })
@@ -1294,7 +1327,14 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
         cy.get('#single-input input').type('f{enter}').then(() => {
           expect(events).to.deep.eq([
-            'get:start', 'get:log:pending', 'get:end', 'type:start', 'type:log:pending', 'submit', 'type:end', 'then:start',
+            'get:start',
+            'get:log:pending',
+            'get:end',
+            'type:start',
+            'type:log:pending',
+            'submit',
+            'type:end',
+            'then:start',
           ])
         })
       })
@@ -1315,7 +1355,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
       it('does not submit when keydown is defaultPrevented on input', function (done) {
         const form = this.$forms.find('#single-input').submit(() => {
-          done('err: should not have submitted')
+          done(new Error('should not have submitted'))
         })
 
         form.find('input').keydown((e) => {
@@ -1329,7 +1369,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
       it('does not submit when keydown is defaultPrevented on wrapper', function (done) {
         const form = this.$forms.find('#single-input').submit(() => {
-          done('err: should not have submitted')
+          done(new Error('should not have submitted'))
         })
 
         form.find('div').keydown((e) => {
@@ -1343,7 +1383,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
       it('does not submit when keydown is defaultPrevented on form', function (done) {
         const form = this.$forms.find('#single-input').submit(() => {
-          done('err: should not have submitted')
+          done(new Error('should not have submitted'))
         })
 
         form.keydown((e) => {
@@ -1357,7 +1397,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
       it('does not submit when keypress is defaultPrevented on input', function (done) {
         const form = this.$forms.find('#single-input').submit(() => {
-          done('err: should not have submitted')
+          done(new Error('should not have submitted'))
         })
 
         form.find('input').keypress((e) => {
@@ -1371,7 +1411,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
       it('does not submit when keypress is defaultPrevented on wrapper', function (done) {
         const form = this.$forms.find('#single-input').submit(() => {
-          done('err: should not have submitted')
+          done(new Error('should not have submitted'))
         })
 
         form.find('div').keypress((e) => {
@@ -1385,7 +1425,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
       it('does not submit when keypress is defaultPrevented on form', function (done) {
         const form = this.$forms.find('#single-input').submit(() => {
-          done('err: should not have submitted')
+          done(new Error('should not have submitted'))
         })
 
         form.keypress((e) => {
@@ -1402,7 +1442,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
     context('2 inputs, no \'submit\' elements, no inputs allowing implicit submission', () => {
       it('does not trigger submit event', function (done) {
         this.$forms.find('#no-buttons-more-than-one-input-allowing-implicit-submission').submit(() => {
-          done('err: should not have submitted')
+          done(new Error('should not have submitted'))
         })
 
         cy.get('#no-buttons-more-than-one-input-allowing-implicit-submission input:first').type('f').type('{enter}').then(() => {
@@ -1430,7 +1470,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
     context('2 inputs, no \'submit\' elements but 1 button[type=button]', () => {
       it('does not trigger submit event', function (done) {
         this.$forms.find('#one-button-type-button').submit(() => {
-          done('err: should not have submitted')
+          done(new Error('should not have submitted'))
         })
 
         cy.get('#one-button-type-button input:first').type('f').type('{enter}').then(() => {
@@ -1440,7 +1480,8 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
     })
 
     context('2 inputs, 1 \'submit\' element input[type=submit]', () => {
-      it('triggers form submit', function (done) {
+      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23160
+      it.skip('triggers form submit', function (done) {
         this.$forms.find('#multiple-inputs-and-input-submit').submit((e) => {
           e.preventDefault()
 
@@ -1462,7 +1503,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
       it('does not cause click event on the input[type=submit] if keydown is defaultPrevented on input', function (done) {
         const form = this.$forms.find('#multiple-inputs-and-input-submit').submit(() => {
-          done('err: should not have submitted')
+          done(new Error('should not have submitted'))
         })
 
         form.find('input').keypress((e) => {
@@ -1484,6 +1525,9 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
         })
 
         cy.get('#multiple-inputs-and-button-submit input:first').type('foo{enter}')
+        .then(() => {
+          done(new Error('Submit event not triggered'))
+        })
       })
 
       it('triggers form submit when the submit button is outside of the form', function (done) {
@@ -1494,6 +1538,9 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
         })
 
         cy.get('[id="multiple-inputs-and-button-submit.outside-form"] input:first').type('foo{enter}')
+        .then(() => {
+          done(new Error('Submit event not triggered'))
+        })
       })
 
       it('causes click event on the button[type=submit]', function (done) {
@@ -1504,11 +1551,14 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
         })
 
         cy.get('#multiple-inputs-and-button-submit input:first').type('foo{enter}')
+        .then(() => {
+          done(new Error('Click event not triggered'))
+        })
       })
 
       it('does not cause click event on the button[type=submit] if keydown is defaultPrevented on input', function (done) {
         const form = this.$forms.find('#multiple-inputs-and-button-submit').submit(() => {
-          done('err: should not have submitted')
+          done(new Error('should not have submitted'))
         })
 
         form.find('input').keypress((e) => {
@@ -1546,11 +1596,14 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
         })
 
         cy.get('#multiple-inputs-and-reset-and-submit-buttons input:first').type('foo{enter}')
+        .then(() => {
+          done(new Error('Click event not triggered'))
+        })
       })
 
       it('does not cause click event on the button[type=submit] if keydown is defaultPrevented on input', function (done) {
         const form = this.$forms.find('#multiple-inputs-and-reset-and-submit-buttons').submit(() => {
-          done('err: should not have submitted')
+          done(new Error('should not have submitted'))
         })
 
         form.find('input').keypress((e) => {
@@ -1572,6 +1625,9 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
         })
 
         cy.get('#multiple-inputs-and-other-type-buttons-and-button-with-no-type input:first').type('foo{enter}')
+        .then(() => {
+          done(new Error('Submit event not triggered'))
+        })
       })
 
       it('causes click event on the button', function (done) {
@@ -1582,11 +1638,14 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
         })
 
         cy.get('#multiple-inputs-and-other-type-buttons-and-button-with-no-type input:first').type('foo{enter}')
+        .then(() => {
+          done(new Error('Click event not triggered'))
+        })
       })
 
       it('does not cause click event on the button if keydown is defaultPrevented on input', function (done) {
         const form = this.$forms.find('#multiple-inputs-and-other-type-buttons-and-button-with-no-type').submit(() => {
-          done('err: should not have submitted')
+          done(new Error('should not have submitted'))
         })
 
         form.find('input').keypress((e) => {
@@ -1608,21 +1667,26 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
         })
 
         cy.get('#multiple-inputs-and-button-with-no-type input:first').type('foo{enter}')
+        .then(() => {
+          done(new Error('Submit event not triggered'))
+        })
       })
 
       it('causes click event on the button', function (done) {
-        this.$forms.find('#multiple-inputs-and-button-with-no-type button').click((e) => {
+        this.$forms.find('#multiple-inputs-and-button-with-no-type button').click(function (e) {
           e.preventDefault()
-
           done()
         })
 
         cy.get('#multiple-inputs-and-button-with-no-type input:first').type('foo{enter}')
+        .then(() => {
+          done(new Error('Click event not triggered'))
+        })
       })
 
       it('does not cause click event on the button if keydown is defaultPrevented on input', function (done) {
         const form = this.$forms.find('#multiple-inputs-and-button-with-no-type').submit(() => {
-          done('err: should not have submitted')
+          done(new Error('should not have submitted'))
         })
 
         form.find('input').keypress((e) => {
@@ -1644,6 +1708,9 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
         })
 
         cy.get('#multiple-inputs-and-multiple-submits input:first').type('foo{enter}')
+        .then(() => {
+          done(new Error('Submit event not triggered'))
+        })
       })
 
       it('causes click event on the button', function (done) {
@@ -1654,11 +1721,14 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
         })
 
         cy.get('#multiple-inputs-and-multiple-submits input:first').type('foo{enter}')
+        .then(() => {
+          done(new Error('Click event not triggered'))
+        })
       })
 
       it('does not cause click event on the button if keydown is defaultPrevented on input', function (done) {
         const form = this.$forms.find('#multiple-inputs-and-multiple-submits').submit(() => {
-          done('err: should not have submitted')
+          done(new Error('should not have submitted'))
         })
 
         form.find('input').keypress((e) => {
@@ -1678,7 +1748,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
       it('will not receive click event', function (done) {
         this.$forms.find('#multiple-inputs-and-multiple-submits button').click(() => {
-          done('err: should not receive click event')
+          done(new Error('should not receive click event'))
         })
 
         cy.get('#multiple-inputs-and-multiple-submits input:first').type('foo{enter}').then(() => {
@@ -1686,9 +1756,10 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
         })
       })
 
-      it('will not submit the form', function (done) {
+      // WebKit still emits the submit event on the form in this configuration.
+      it('will not submit the form', { browser: '!webkit' }, function (done) {
         this.$forms.find('#multiple-inputs-and-multiple-submits').submit(() => {
-          done('err: should not receive submit event')
+          done(new Error('should not receive submit event'))
         })
 
         cy.get('#multiple-inputs-and-multiple-submits input:first').type('foo{enter}').then(() => {
@@ -1701,7 +1772,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
   context('{insert}', () => {
     it('sets which and keyCode to 45 and does not fire keypress events', (done) => {
       cy.$$(':text:first').on('keypress', () => {
-        done('should not have received keypress')
+        done(new Error('should not have received keypress'))
       })
 
       cy.$$(':text:first').on('keydown', (e) => {
@@ -1717,7 +1788,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
     it('does not fire textInput event', (done) => {
       cy.$$(':text:first').on('textInput', (e) => {
-        done('textInput should not have fired')
+        done(new Error('textInput should not have fired'))
       })
 
       cy.get(':text:first').invoke('val', 'ab').type('{insert}').then(() => {

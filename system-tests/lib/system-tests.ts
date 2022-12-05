@@ -8,7 +8,6 @@ import Express from 'express'
 import Fixtures from './fixtures'
 import * as DepInstaller from './dep-installer'
 import {
-  e2ePath,
   DEFAULT_BROWSERS,
   replaceStackTraceLines,
   pathUpToProjectName,
@@ -40,8 +39,8 @@ require(`@packages/server/lib/project-base`)
 
 type CypressConfig = { [key: string]: any }
 
-export type BrowserName = 'electron' | 'firefox' | 'chrome'
-| '!electron' | '!chrome' | '!firefox'
+export type BrowserName = 'electron' | 'firefox' | 'chrome' | 'webkit'
+| '!electron' | '!chrome' | '!firefox' | '!webkit'
 
 type ExecResult = {
   code: number
@@ -180,7 +179,7 @@ type ExecOptions = {
    */
   ciBuildId?: string
   /**
-   * Run Cypress with a record key.
+   * Run Cypress with a Record Key.
    */
   key?: string
   /**
@@ -280,6 +279,7 @@ export type SpawnerResult = {
   on(event: 'error', cb: (err: Error) => void): void
   on(event: 'exit', cb: (exitCode: number) => void): void
   kill: ChildProcess['kill']
+  pid: number
 }
 
 const cpSpawner: Spawner = (cmd, args, env, options) => {
@@ -401,14 +401,14 @@ const startServer = function (obj) {
 
 const stopServer = (srv) => srv.destroyAsync()
 
-const copy = function () {
+const copy = function (projectPath: string) {
   const ca = process.env.CIRCLE_ARTIFACTS
 
   debug('Should copy Circle Artifacts?', Boolean(ca))
 
   if (ca) {
-    const videosFolder = path.join(e2ePath, 'cypress/videos')
-    const screenshotsFolder = path.join(e2ePath, 'cypress/screenshots')
+    const videosFolder = path.join(projectPath, 'cypress/videos')
+    const screenshotsFolder = path.join(projectPath, 'cypress/screenshots')
 
     debug('Copying Circle Artifacts', ca, videosFolder, screenshotsFolder)
 
@@ -796,6 +796,7 @@ const systemTests = {
     const args = options.args || this.args(options)
 
     const specifiedBrowser = process.env.BROWSER
+    const projectPath = Fixtures.projectPath(options.project)
 
     if (specifiedBrowser && (![].concat(options.browser).includes(specifiedBrowser))) {
       ctx.skip()
@@ -805,7 +806,7 @@ const systemTests = {
       // symlinks won't work via docker
       options.dockerImage || await DepInstaller.scaffoldCommonNodeModules()
       await Fixtures.scaffoldProject(options.project)
-      await DepInstaller.scaffoldProjectNodeModules(options.project)
+      await DepInstaller.scaffoldProjectNodeModules({ project: options.project })
     }
 
     if (process.env.NO_EXIT) {
@@ -813,7 +814,7 @@ const systemTests = {
     }
 
     if (ctx.settings) {
-      await settings.writeForTesting(e2ePath, ctx.settings)
+      await settings.writeForTesting(projectPath, ctx.settings)
     }
 
     let stdout = ''
@@ -854,7 +855,7 @@ const systemTests = {
           const { browser } = options
 
           if (browser && !customBrowserPath) {
-            expect(_.capitalize(browser)).to.eq(browserName)
+            expect(String(browser).toLowerCase()).to.eq(browserName.toLowerCase())
           }
 
           expect(parseFloat(version)).to.be.a.number
@@ -926,6 +927,13 @@ const systemTests = {
 
       // force file watching for use with --no-exit
       ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
+
+      // opt in to WebKit experimental support if we are running w WebKit
+      ...(specifiedBrowser === 'webkit' ? {
+        CYPRESS_experimentalWebKitSupport: 'true',
+        // prevent snapshots from failing due to "Experiments:  experimentalWebKitSupport=true" difference
+        CYPRESS_INTERNAL_SKIP_EXPERIMENT_LOGS: '1',
+      } : {}),
     })
     .extend(options.processEnv)
     .value()
@@ -962,7 +970,7 @@ const systemTests = {
       sp.on('exit', resolve)
     })
 
-    await copy()
+    await copy(projectPath)
 
     return exit(exitCode)
   },

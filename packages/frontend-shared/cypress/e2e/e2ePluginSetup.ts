@@ -2,7 +2,7 @@ import path from 'path'
 import execa from 'execa'
 import _ from 'lodash'
 
-import type { CyTaskResult, OpenGlobalModeOptions, RemoteGraphQLBatchInterceptor, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from './support/e2eSupport'
+import type { CyTaskResult, OpenGlobalModeOptions, RemoteGraphQLBatchInterceptor, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from '../support/e2e'
 import { fixtureDirs } from '@tooling/system-tests'
 // import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
 import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
@@ -129,7 +129,7 @@ async function makeE2ETasks () {
     await scaffoldCommonNodeModules()
 
     try {
-      await scaffoldProjectNodeModules(projectName)
+      await scaffoldProjectNodeModules({ project: projectName })
     } catch (e) {
       if (isRetry) {
         throw e
@@ -176,6 +176,7 @@ async function makeE2ETasks () {
      * Called before each test to do global setup/cleanup
      */
     async __internal__beforeEach () {
+      process.chdir(cachedCwd)
       testState = {}
       await DataContext.waitForActiveRequestsToFlush()
       await globalPubSub.emitThen('test:cleanup')
@@ -318,18 +319,6 @@ async function makeE2ETasks () {
             'time': {
               [pkg.version]: '2022-02-10T01:07:37.369Z',
             },
-          }), { status: 200 })
-        }
-
-        if (String(url).startsWith('https://on.cypress.io/v10-video-embed/')) {
-          return new Response(JSON.stringify({
-            videoHtml: `<iframe
-              src="https://player.vimeo.com/video/668764401?h=0cbc785eef"
-              class="rounded h-full bg-gray-1000 w-full"
-              frameborder="0"
-              allow="autoplay; fullscreen; picture-in-picture"
-              allowfullscreen
-            />`,
           }), { status: 200 })
         }
 

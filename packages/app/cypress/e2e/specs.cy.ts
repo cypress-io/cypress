@@ -61,7 +61,7 @@ describe('App: Specs', () => {
         }).should('be.visible').within(() => {
           cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io/test-type-options' })
           cy.findByRole('button', { name: 'Close' }).should('be.visible').as('CloseDialogButton')
-          cy.get('[data-cy="file-match-indicator"]').contains('No Matches')
+          cy.get('[data-cy="file-match-indicator"]').contains('No matches')
           cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.cy.{js,jsx,ts,tsx}')
         })
 
@@ -120,7 +120,7 @@ describe('App: Specs', () => {
             })).to.have.lengthOf(options.expectedScaffoldPathsForPlatform.length)
           }, { expectedScaffoldPathsForPlatform })
 
-          cy.percySnapshot()
+          // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
           // Dismisses dialog with close button press
           cy.get('@CloseDialogButton').click()
@@ -163,7 +163,7 @@ describe('App: Specs', () => {
             cy.get('[data-cy="card"]').contains(defaultMessages.createSpec.e2e.importEmptySpec.header).click()
           })
 
-          cy.percySnapshot('Default')
+          // cy.percySnapshot('Default') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
           cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
           .as('enterSpecInput')
@@ -178,7 +178,7 @@ describe('App: Specs', () => {
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning)
           cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
 
-          cy.percySnapshot('Invalid spec error')
+          // cy.percySnapshot('Invalid spec error') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
           // Create spec
           cy.get('@enterSpecInput').clear().type(getPathForPlatform('cypress/e2e/MyTest.cy.js'))
@@ -189,7 +189,7 @@ describe('App: Specs', () => {
 
           cy.get('pre').should('contain', 'describe(\'empty spec\'')
 
-          cy.percySnapshot('Generator success')
+          // cy.percySnapshot('Generator success') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
           cy.get('[aria-label="Close"]').click()
 
@@ -272,7 +272,7 @@ describe('App: Specs', () => {
             cy.get('[data-cy="card"]').contains(defaultMessages.createSpec.e2e.importEmptySpec.header).click()
           })
 
-          cy.percySnapshot('Default')
+          // cy.percySnapshot('Default') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
           cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
           .as('enterSpecInput')
@@ -287,7 +287,7 @@ describe('App: Specs', () => {
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning)
           cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
 
-          cy.percySnapshot('Invalid spec error')
+          // cy.percySnapshot('Invalid spec error') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
           // Create spec
           cy.get('@enterSpecInput').clear().type(getPathForPlatform('cypress/e2e/MyTest.cy.ts'))
@@ -296,7 +296,7 @@ describe('App: Specs', () => {
 
           cy.get('[data-cy="file-row"]').contains(getPathForPlatform('cypress/e2e/MyTest.cy.ts')).click()
 
-          cy.percySnapshot('Generator success')
+          // cy.percySnapshot('Generator success') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
           cy.get('pre').should('contain', 'describe(\'empty spec\'')
 
@@ -340,12 +340,12 @@ describe('App: Specs', () => {
         .should('be.visible')
         .and('contain', defaultMessages.createSpec.page.customPatternNoSpecs.description.split('{0}')[0])
 
-        cy.findByTestId('file-match-indicator').should('contain', 'No Matches')
+        cy.findByTestId('file-match-indicator').should('contain', 'No matches')
         cy.findByRole('button', { name: 'cypress.config.js' })
         cy.findByTestId('spec-pattern').should('contain', 'src/**/*.{cy,spec}.{js,jsx}')
 
         cy.contains('button', defaultMessages.createSpec.updateSpecPattern)
-        cy.findByRole('button', { name: 'New Spec', exact: false })
+        cy.findByRole('button', { name: 'New spec', exact: false })
       })
 
       it('opens config file in ide from SpecPattern', () => {
@@ -385,7 +385,7 @@ describe('App: Specs', () => {
       })
 
       it('shows new spec button to start creation workflow', () => {
-        cy.findByRole('button', { name: 'New Spec', exact: false }).click()
+        cy.findByRole('button', { name: 'New spec', exact: false }).click()
 
         cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
           cy.findAllByTestId('card').eq(0)
@@ -398,7 +398,7 @@ describe('App: Specs', () => {
 
       context('scaffold empty spec', () => {
         it('should generate empty spec', () => {
-          cy.findByRole('button', { name: 'New Spec', exact: false }).click()
+          cy.findByRole('button', { name: 'New spec', exact: false }).click()
 
           cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
             cy.findAllByTestId('card').eq(0)
@@ -423,7 +423,7 @@ describe('App: Specs', () => {
           cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.invalidSpecWarning)
           cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
 
-          cy.percySnapshot('Invalid spec error')
+          // cy.percySnapshot('Invalid spec error') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
           // Create spec
           cy.get('@enterSpecInput').clear().type(getPathForPlatform('src/MyTest.cy.js'))
@@ -434,7 +434,7 @@ describe('App: Specs', () => {
 
           cy.get('pre').should('contain', 'describe(\'empty spec\'')
 
-          cy.percySnapshot('Generator success')
+          // cy.percySnapshot('Generator success') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
           cy.get('[aria-label="Close"]').click()
 
@@ -454,9 +454,10 @@ describe('App: Specs', () => {
           })
 
           // Timeout is increased here to allow ample time for the config change to be processed
-          cy.contains('No Specs Found', { timeout: 10000 }).should('be.visible')
+          cy.contains('src/e2e/**/*.{js,jsx}', { timeout: 12000 }).should('be.visible')
+          cy.contains('No specs found').should('be.visible')
 
-          cy.findByRole('button', { name: 'New Spec' }).click()
+          cy.findByRole('button', { name: 'New spec' }).click()
           cy.contains('Create new empty spec').click()
 
           cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
@@ -473,7 +474,7 @@ describe('App: Specs', () => {
       })
 
       it('shows extension warning', () => {
-        cy.findByRole('button', { name: 'New Spec', exact: false }).click()
+        cy.findByRole('button', { name: 'New spec', exact: false }).click()
 
         cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
           cy.findAllByTestId('card').eq(0)
@@ -491,7 +492,8 @@ describe('App: Specs', () => {
         cy.get('@enterSpecInput').clear().type(getPathForPlatform('src/e2e/MyTest.spec.jsx'))
 
         cy.contains(defaultMessages.createSpec.e2e.importEmptySpec.specExtensionWarning)
-        cy.percySnapshot('Non-recommended spec pattern warning')
+        // cy.percySnapshot('Non-recommended spec pattern warning') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
+
         cy.contains('span', '{filename}.cy.jsx')
       })
     })
@@ -570,7 +572,7 @@ describe('App: Specs', () => {
 
             cy.findByLabelText('Enter a relative path...').clear().type('cypress/my-empty-spec.cy.js')
 
-            cy.findByRole('button', { name: 'Create Spec' }).click()
+            cy.findByRole('button', { name: 'Create spec' }).click()
           })
 
           cy.findByRole('dialog', {
@@ -596,7 +598,7 @@ describe('App: Specs', () => {
 
             cy.findByLabelText('Enter a relative path...').clear().type('cypress/my-empty-spec.cy.js')
 
-            cy.findByRole('button', { name: 'Create Spec' }).click()
+            cy.findByRole('button', { name: 'Create spec' }).click()
           })
 
           cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).within(() => {
@@ -616,7 +618,7 @@ describe('App: Specs', () => {
 
             cy.findByLabelText('Enter a relative path...').clear().type('cypress/my-empty-spec.cy.js')
 
-            cy.findByRole('button', { name: 'Create Spec' }).click()
+            cy.findByRole('button', { name: 'Create spec' }).click()
           })
 
           cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).within(() => {
@@ -636,98 +638,6 @@ describe('App: Specs', () => {
           cy.get('[data-cy=spec-file-item]').last().click()
           cy.get('#spec-runner-header').should('not.contain', 'Review the docs')
         })
-      })
-    })
-
-    context('Create from component card', () => {
-      beforeEach(() => {
-        cy.scaffoldProject('no-specs-vue-2')
-        cy.openProject('no-specs-vue-2')
-        cy.startAppServer('component')
-        cy.visitApp()
-
-        cy.findAllByTestId('card').eq(0).as('ComponentCard')
-      })
-
-      it('Shows create from component card for Vue projects with default spec patterns', () => {
-        cy.get('@ComponentCard')
-        .within(() => {
-          cy.findByRole('button', {
-            name: 'Create from component',
-          }).should('be.visible')
-          .and('not.be.disabled')
-        })
-      })
-
-      it('Can be closed with the x button', () => {
-        cy.get('@ComponentCard').click()
-
-        cy.findByRole('button', { name: 'Close' }).as('DialogCloseButton')
-
-        cy.get('@DialogCloseButton').click()
-        cy.findByRole('dialog', {
-          name: 'Choose a component',
-        }).should('not.exist')
-      })
-
-      it('Lists Vue components in the project', () => {
-        cy.get('@ComponentCard').click()
-
-        cy.findByText('2 Matches').should('be.visible')
-
-        cy.findByText('App').should('be.visible')
-        cy.findByText('HelloWorld').should('be.visible')
-      })
-
-      it('Allows for the user to search through their components', () => {
-        cy.get('@ComponentCard').click()
-
-        cy.findByText('*.vue').should('be.visible')
-        cy.findByText('2 Matches').should('be.visible')
-        cy.findByLabelText('file-name-input').type('HelloWorld')
-
-        cy.findByText('HelloWorld').should('be.visible')
-        cy.findByText('1 of 2 Matches').should('be.visible')
-        cy.findByText('App').should('not.exist')
-      })
-
-      it('shows success modal when component spec is created', () => {
-        cy.get('@ComponentCard').click()
-
-        cy.findByText('HelloWorld').should('be.visible').click()
-
-        cy.findByRole('dialog', {
-          name: defaultMessages.createSpec.successPage.header,
-        }).as('SuccessDialog').within(() => {
-          cy.contains(getPathForPlatform('src/components/HelloWorld.cy.js')).should('be.visible')
-          cy.findByRole('button', { name: 'Close' }).should('be.visible')
-
-          cy.findByRole('link', { name: 'Okay, run the spec' })
-          .should('have.attr', 'href', `#/specs/runner?file=src/components/HelloWorld.cy.js`)
-
-          cy.findByRole('button', { name: 'Create another spec' }).click()
-        })
-
-        // 'Create from component' card appears again when the user selects "create another spec"
-        cy.findByText('Create from component').should('be.visible')
-      })
-
-      it('runs generated spec', () => {
-        cy.get('@ComponentCard').click()
-
-        cy.findByText('HelloWorld').should('be.visible').click()
-
-        cy.findByRole('dialog', {
-          name: defaultMessages.createSpec.successPage.header,
-        }).as('SuccessDialog').within(() => {
-          cy.contains(getPathForPlatform('src/components/HelloWorld.cy.js')).should('be.visible')
-          cy.findByRole('button', { name: 'Close' }).should('be.visible')
-
-          cy.findByRole('link', { name: 'Okay, run the spec' })
-          .should('have.attr', 'href', `#/specs/runner?file=src/components/HelloWorld.cy.js`).click()
-        })
-
-        cy.findByText('<HelloWorld ... />').should('be.visible')
       })
     })
 
@@ -764,12 +674,12 @@ describe('App: Specs', () => {
         .should('be.visible')
         .and('contain', defaultMessages.createSpec.page.customPatternNoSpecs.description.split('{0}')[0])
 
-        cy.findByTestId('file-match-indicator').should('contain', 'No Matches')
+        cy.findByTestId('file-match-indicator').should('contain', 'No matches')
         cy.findByRole('button', { name: 'cypress.config.js' })
         cy.findByTestId('spec-pattern').should('contain', 'src/specs-folder/*.cy.{js,jsx}')
 
         cy.contains('button', defaultMessages.createSpec.updateSpecPattern)
-        cy.findByRole('button', { name: 'New Spec', exact: false })
+        cy.findByRole('button', { name: 'New spec', exact: false })
       })
 
       it('opens config file in ide from SpecPattern', () => {
@@ -797,13 +707,13 @@ describe('App: Specs', () => {
       })
 
       it('shows new spec button to start creation workflow', () => {
-        cy.findByRole('button', { name: 'New Spec', exact: false }).click()
+        cy.findByRole('button', { name: 'New spec', exact: false }).click()
 
         cy.findByRole('dialog', { name: 'Enter the path for your new spec' }).should('be.visible')
       })
 
       it('shows create first spec page with create empty option and goes back if it is cancel', () => {
-        cy.findByRole('button', { name: 'New Spec', exact: false }).click()
+        cy.findByRole('button', { name: 'New spec', exact: false }).click()
 
         cy.contains('Cancel').click()
 
@@ -823,15 +733,17 @@ describe('App: Specs', () => {
         })
 
         // Timeout is increased here to allow ample time for the config change to be processed
-        cy.contains('No Specs Found', { timeout: 12000 }).should('be.visible')
-        cy.findByRole('button', { name: 'New Spec' }).click({ timeout: 12000 })
+        cy.contains('src/specs-folder/*.{js,jsx}', { timeout: 12000 }).should('be.visible')
+        cy.contains('No specs found').should('be.visible')
+
+        cy.findByRole('button', { name: 'New spec' }).click()
 
         cy.findByRole('dialog', {
           name: 'Enter the path for your new spec',
         }).within(() => {
           cy.findByLabelText('Enter a relative path...').invoke('val').should('eq', getPathForPlatform('src/specs-folder/ComponentName.js'))
 
-          cy.findByRole('button', { name: 'Create Spec' }).click()
+          cy.findByRole('button', { name: 'Create spec' }).click()
         })
 
         cy.findByRole('dialog', {
@@ -956,7 +868,7 @@ describe('App: Specs', () => {
         }
       }, { specs })
 
-      cy.contains('20 Matches')
+      cy.contains('20 matches')
 
       cy.withRetryableCtx((ctx, o) => {
         // setSpecs is debounced, the number of calls should be less than the number of files removed

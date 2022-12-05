@@ -52,6 +52,26 @@ describe('src/cy/commands/actions/type - #clear', () => {
     })
   })
 
+  it('requeries if the DOM rerenders during actionability', () => {
+    const clicked = cy.stub()
+    const retried = cy.stub()
+
+    const textarea = cy.$$('#comments').val('foo bar').prop('disabled', true)
+
+    cy.on('command:retry', _.after(3, () => {
+      if (!retried.callCount) {
+        textarea.replaceWith(textarea[0].outerHTML)
+        cy.$$('#comments').prop('disabled', false).on('click', clicked)
+        retried()
+      }
+    }))
+
+    cy.get('#comments').clear().then(() => {
+      expect(clicked).to.be.calledOnce
+      expect(retried).to.be.called
+    })
+  })
+
   it('can force clear even when being covered by another element', () => {
     const $input = $('<input />')
     .attr('id', 'input-covered-in-span')
@@ -275,7 +295,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
 
       cy.on('fail', (err) => {
         expect(cleared).to.be.calledOnce
-        expect(err.message).to.include('`cy.clear()` failed because this element')
+        expect(err.message).to.include('`cy.clear()` failed because the page updated')
 
         done()
       })

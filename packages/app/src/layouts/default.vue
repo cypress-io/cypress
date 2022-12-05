@@ -9,7 +9,6 @@
       v-if="renderSidebar"
       class="row-span-full"
     />
-
     <HeaderBar
       v-if="showHeader"
       :show-browsers="true"
@@ -111,4 +110,5 @@ const resetErrorAndLoadConfig = (id: string) => {
 }
 
 const renderSidebar = window.__CYPRESS_MODE__ !== 'run'
+
 </script>

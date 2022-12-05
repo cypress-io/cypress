@@ -94,7 +94,7 @@ export const WIZARD_DEPENDENCY_NEXT = {
   package: 'next',
   installer: 'next',
   description: 'The React Framework for Production',
-  minVersion: '^=10.0.0 || ^=11.0.0 || ^=12.0.0',
+  minVersion: '^=10.0.0 || ^=11.0.0 || ^=12.0.0 || ^=13.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_ANGULAR_CLI = {
@@ -142,6 +142,15 @@ export const WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC = {
   minVersion: '>=13.0.0',
 } as const
 
+export const WIZARD_DEPENDENCY_SVELTE = {
+  type: 'svelte',
+  name: 'Svelte.js',
+  package: 'svelte',
+  installer: 'svelte',
+  description: 'Cybernetically enhanced web apps',
+  minVersion: '^3.0.0',
+} as const
+
 export const WIZARD_DEPENDENCIES = [
   WIZARD_DEPENDENCY_WEBPACK,
   WIZARD_DEPENDENCY_TYPESCRIPT,
@@ -159,6 +168,7 @@ export const WIZARD_DEPENDENCIES = [
   WIZARD_DEPENDENCY_ANGULAR_CORE,
   WIZARD_DEPENDENCY_ANGULAR_COMMON,
   WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC,
+  WIZARD_DEPENDENCY_SVELTE,
 ] as const
 
 export const WIZARD_BUNDLERS = [

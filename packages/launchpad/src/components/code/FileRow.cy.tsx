@@ -54,6 +54,13 @@ describe('FileRow', () => {
           description={description}
           fileExtension=".js"
         />
+        <FileRow
+          status="valid"
+          content={content}
+          filePath="cypress/integration/function.ts"
+          description={description}
+          fileExtension=".ts"
+        />
       </div>
     ))
 
@@ -63,6 +70,23 @@ describe('FileRow', () => {
     cy.contains('cypress/integration/command.js')
     cy.contains('cypress.config.js')
     cy.contains('cypress/integration/index.js')
+    cy.contains('cypress/integration/function.ts')
+
+    cy.get('[data-cy=valid] [data-cy=collapsible-header]').each((element) => {
+      cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
+    })
+
+    cy.get('[data-cy=changes] [data-cy=collapsible-header]').each((element) => {
+      cy.wrap(element).should('have.attr', 'aria-expanded', 'true')
+    })
+
+    cy.get('[data-cy=skipped] [data-cy=collapsible-header]').each((element) => {
+      cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
+    })
+
+    cy.get('[data-cy=error] [data-cy=collapsible-header]').each((element) => {
+      cy.wrap(element).should('have.attr', 'aria-expanded', 'true')
+    })
 
     cy.percySnapshot()
   })
@@ -89,7 +113,7 @@ describe('FileRow', () => {
 
     cy.contains('cypress/integration/command.js')
     cy.contains(messages.changesRequiredLabel).should('be.visible')
-    cy.contains(messages.changesRequiredBadge).should('not.exist') // Hide badge when row is expanded
+    cy.get('[data-cy=changes-required-badge]').should('not.exist') // Hide badge when row is expanded
     cy.contains(changesRequiredDescription).should('be.visible')
     cy.get('pre').should('have.length', 2)
 
@@ -116,7 +140,7 @@ describe('FileRow', () => {
 
     cy.contains('cypress/integration/command.js')
     cy.contains(messages.changesRequiredLabel).should('be.visible')
-    cy.contains(messages.changesRequiredBadge).should('not.exist')
+    cy.get('[data-cy=changes-required-badge]').should('not.exist')
     cy.contains(changesRequiredDescription).should('be.visible')
     cy.get('pre').should('exist')
 

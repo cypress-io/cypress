@@ -146,16 +146,19 @@ describe('src/cy/commands/actions/select', () => {
       cy.get('#select-maps').select('de_train')
     })
 
-    it('can forcibly click even when being covered by another element', (done) => {
+    it('can forcibly click even when being covered by another element', () => {
+      let clicked = false
       const select = $('<select><option>foo</option></select>').attr('id', 'select-covered-in-span').prependTo(cy.$$('body'))
 
       $('<span>span on select</span>').css({ position: 'absolute', left: select.offset().left, top: select.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo(cy.$$('body'))
 
       select.on('click', () => {
-        done()
+        clicked = true
       })
 
-      cy.get('#select-covered-in-span').select('foo', { force: true })
+      cy.get('#select-covered-in-span').select('foo', { force: true }).then(() => {
+        expect(clicked).to.be.true
+      })
     })
 
     it('passes timeout and interval down to click', (done) => {
@@ -173,14 +176,18 @@ describe('src/cy/commands/actions/select', () => {
       cy.get('#select-covered-in-span').select('foobar', { timeout: 1000, interval: 60 })
     })
 
-    it('can forcibly click even when element is invisible', (done) => {
+    it('can forcibly click even when element is invisible', () => {
+      let clicked = false
+
       const select = cy.$$('#select-maps').hide()
 
       select.click(() => {
-        done()
+        clicked = true
       })
 
-      cy.get('#select-maps').select('de_dust2', { force: true })
+      cy.get('#select-maps').select('de_dust2', { force: true }).then(() => {
+        expect(clicked).to.be.true
+      })
     })
 
     it('can forcibly click when select is disabled', () => {
@@ -207,11 +214,13 @@ describe('src/cy/commands/actions/select', () => {
       const select = cy.$$('select[name=disabled]')
 
       cy.on('command:retry', _.once(() => {
-        select.prop('disabled', false)
+        // Replace the element with a copy of itself, to ensure .select() is requerying the DOM
+        select.replaceWith(select[0].outerHTML)
+        cy.$$('select[name=disabled]').prop('disabled', false)
       }))
 
       cy.get('select[name=disabled]').select('foo')
-      .invoke('val').should('eq', 'foo')
+      cy.get('select[name=disabled]').invoke('val').should('eq', 'foo')
     })
 
     it('retries until <optgroup> is no longer disabled', () => {
@@ -369,7 +378,7 @@ describe('src/cy/commands/actions/select', () => {
 
         cy.on('fail', (err) => {
           expect(selected).to.eq(1)
-          expect(err.message).to.include('`cy.select()` failed because this element')
+          expect(err.message).to.include('`cy.select()` failed because the page updated')
 
           done()
         })
@@ -536,8 +545,7 @@ describe('src/cy/commands/actions/select', () => {
 
       it('throws when the <select> itself is disabled', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` failed because this element is currently disabled:')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/select')
+          expect(err.message).to.include('`cy.select()` failed because this element is `disabled`:')
 
           done()
         })
@@ -547,8 +555,7 @@ describe('src/cy/commands/actions/select', () => {
 
       it('throws when the <select> is disabled by a disabled <fieldset>', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` failed because this element is currently disabled:')
-          expect(err.docsUrl).to.eq('https://on.cypress.io/select')
+          expect(err.message).to.include('`cy.select()` failed because this element is `disabled`:')
 
           done()
         })
@@ -641,7 +648,7 @@ describe('src/cy/commands/actions/select', () => {
         cy.get('#select-maps').select('de_dust2').then(function ($select) {
           const { lastLog } = this
 
-          expect(lastLog.get('$el')).to.eq($select)
+          expect(lastLog.get('$el')).to.eql($select)
         })
       })
 

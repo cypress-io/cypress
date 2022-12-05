@@ -1,76 +1,76 @@
-import _ from 'lodash'
 import cs from 'classnames'
 import React from 'react'
 import { observer } from 'mobx-react'
+import GlobeIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/globe_x12.svg'
 
-import events, { Events } from '../lib/events'
 import SessionsModel from './sessions-model'
+import events from '../lib/events'
 import Collapsible from '../collapsible/collapsible'
+import Tag from '../lib/tag'
 import FlashOnClick from '../lib/flash-on-click'
 
-export interface SessionsProps {
+export interface SessionPanelProps {
   model: Record<string, SessionsModel>
-  events: Events
 }
 
-@observer
-class Sessions extends React.Component<SessionsProps> {
-  static defaultProps = {
-    events,
+const SessionRow = (model: SessionsModel) => {
+  const { name, isGlobalSession, id, status, testId } = model
+
+  const printToConsole = (id) => {
+    events.emit('show:command', testId, id)
   }
 
-  printToConsole = (name) => {
-    const logId = this.props.model[name].id
-
-    this.props.events.emit('show:command', logId)
-  }
-
-  render () {
-    const model = this.props.model
-
-    if (!_.size(model)) {
-      return null
-    }
-
-    return (
-      <div
-        className={cs('runnable-agents-region', {
-          'no-agents': !_.size(model),
-        })}
-      >
-
-        <div className='instruments-container sessions-container'>
-          <ul className='hooks-container'>
-            <li className='hook-item'>
-              <Collapsible
-                header={<>
-                  Sessions <i style={{ textTransform: 'none' }}>({_.size(model)})</i>
-                </>
-                }
-                headerClass='hook-header'
-                headerExtras={
-                  <div className="clear-sessions"
-                    onClick={() => events.emit('clear:session')}
-                  ><span><i className="fas fa-ban" /> Clear All Sessions</span></div>}
-                contentClass='instrument-content'
-              >
-                <div>
-                  {_.map(model, (sess) => {
-                    return (<FlashOnClick
-                      key={sess.name}
-                      message='Printed output to your console'
-                      onClick={() => this.printToConsole(sess.name)}
-                      shouldShowMessage={() => true}
-                    ><div className="session-item" >{sess.name}</div></FlashOnClick>)
-                  })}
-                </div>
-              </Collapsible>
-            </li>
-          </ul>
-        </div>
+  return (
+    <FlashOnClick
+      key={name}
+      message='Printed output to your console'
+      onClick={() => printToConsole(id)}
+      shouldShowMessage={() => true}
+      wrapperClassName='session-item-wrapper'
+    >
+      <div className='session-item'>
+        <span className={cs('session-info', { 'spec-session': !isGlobalSession })}>
+          {isGlobalSession && <GlobeIcon className='global-session-icon' />}
+          {name}
+        </span>
+        <Tag
+          customClassName='session-status'
+          content={status}
+          type={model.tagType}
+        />
       </div>
-    )
-  }
+    </FlashOnClick>
+  )
 }
 
-export default Sessions
+const Sessions = ({ model }: SessionPanelProps) => {
+  const sessions = Object.values(model)
+
+  if (sessions.length === 0) {
+    return null
+  }
+
+  return (
+    <ul className='instruments-container hooks-container sessions-container'>
+      <li className='hook-item'>
+        <Collapsible
+          header={<>Sessions <i style={{ textTransform: 'none' }}>({sessions.length})</i></>}
+          headerClass='hook-header'
+          headerExtras={
+            <div
+              className="clear-sessions"
+              onClick={() => events.emit('clear:all:sessions')}
+            >
+              <span><i className="fas fa-ban" /> Clear All Sessions</span>
+            </div>
+          }
+          contentClass='instrument-content session-content'
+        >
+          {sessions.map((session) => (<SessionRow key={session.id} {...session} />))}
+        </Collapsible>
+      </li>
+    </ul>
+  )
+}
+
+export default observer(Sessions)

@@ -1,7 +1,5 @@
 import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
 import electron, { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from 'electron'
-import pkg from '@packages/root'
-import * as configUtils from '@packages/config'
 
 import { isListening } from './util/ensure-url'
 import { isMainWindowFocused, focusMainWindow } from './gui/windows'
@@ -9,21 +7,21 @@ import { isMainWindowFocused, focusMainWindow } from './gui/windows'
 import type {
   AllModeOptions,
   AllowedState,
+  OpenProjectLaunchOpts,
   FoundBrowser,
   InitializeProjectOptions,
-  LaunchOpts,
   OpenProjectLaunchOptions,
   Preferences,
 } from '@packages/types'
 
 import browserUtils from './browsers/utils'
-import auth from './gui/auth'
-import user from './user'
-import * as config from './config'
+import auth from './cloud/auth'
+import user from './cloud/user'
+import cohorts from './cohorts'
 import { openProject } from './open_project'
 import cache from './cache'
 import { graphqlSchema } from '@packages/graphql/src/schema'
-import { openExternal } from '@packages/server/lib/gui/links'
+import { openExternal } from './gui/links'
 import { getUserEditor } from './util/editors'
 import * as savedState from './saved_state'
 import appData from './util/app_data'
@@ -49,23 +47,16 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       close: browsers.close,
       getBrowsers,
       async ensureAndGetByNameOrPath (nameOrPath: string) {
-        const browsers = await ctx.browser.machineBrowsers()
+        const browsers = await ctx.browser.allBrowsers()
 
         return await ensureAndGetByNameOrPath(nameOrPath, false, browsers)
       },
       async focusActiveBrowserWindow () {
         return openProject.sendFocusBrowserMessage()
       },
-      relaunchBrowser () {
-        return openProject.relaunchBrowser ? openProject.relaunchBrowser() : null
+      async relaunchBrowser () {
+        await openProject.relaunchBrowser()
       },
-    },
-    configApi: {
-      allowedConfig: configUtils.allowed,
-      cypressVersion: pkg.version,
-      validateConfig: configUtils.validate,
-      updateWithPluginValues: config.updateWithPluginValues,
-      setupFullConfigWithDefaults: config.setupFullConfigWithDefaults,
     },
     appApi: {
       appData,
@@ -74,8 +65,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       getUser () {
         return user.get()
       },
-      logIn (onMessage, utmSource, utmMedium) {
-        return auth.start(onMessage, utmSource, utmMedium)
+      logIn (onMessage, utmSource, utmMedium, utmContent) {
+        return auth.start(onMessage, utmSource, utmMedium, utmContent)
       },
       logOut () {
         return user.logOut()
@@ -85,8 +76,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
     },
     projectApi: {
-      launchProject (browser: FoundBrowser, spec: Cypress.Spec, options?: LaunchOpts) {
-        return openProject.launch({ ...browser }, spec, options)
+      async launchProject (browser: FoundBrowser, spec: Cypress.Spec, options: OpenProjectLaunchOpts) {
+        await openProject.launch({ ...browser }, spec, options)
       },
       openProjectCreate (args: InitializeProjectOptions, options: OpenProjectLaunchOptions) {
         return openProject.create(args.projectRoot, args, options)
@@ -128,7 +119,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return openProject.closeActiveProject()
       },
       getCurrentBrowser () {
-        return (openProject?.projectBase?.browser) ?? undefined
+        return (openProject?.getProject()?.browser) ?? undefined
       },
       getConfig () {
         return openProject.getConfig()
@@ -203,6 +194,17 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         const { availableEditors } = await getUserEditor(true)
 
         return availableEditors
+      },
+    },
+    cohortsApi: {
+      async getCohorts () {
+        return cohorts.get()
+      },
+      async getCohort (name: string) {
+        return cohorts.getByName(name)
+      },
+      async insertCohort (cohort) {
+        cohorts.set(cohort)
       },
     },
   })

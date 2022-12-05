@@ -101,9 +101,29 @@ describe('<Select />', () => {
   })
 
   describe('#icons', () => {
-    // TODO: Enable with completion of UNIFY-1375
-    it.skip('marks the selected item with a check by default', () => {
+    it('marks the selected item with a check by default', () => {
       mountSelect().then(openSelect)
+      .then(selectFirstOption)
+      .then(openSelect)
+      .get(optionsSelector).first()
+      .find(checkIconSelector).should('be.visible')
+      .percySnapshot('Selected has check icon')
+    })
+
+    it('marks the selected item with custom itemKey', () => {
+      const nestedOptions = [
+        { profile: { firstName: 'Lachlan' }, id: 'ewiofjdew' },
+        { profile: { firstName: 'Jess' }, id: '1i24u' },
+        { profile: { firstName: 'Bart' }, id: 'ewopf' },
+      ]
+
+      mountSelect({
+        options: nestedOptions,
+        // To break strict equality
+        modelValue: { ...nestedOptions[0] },
+        itemKey: 'id',
+        itemValue: 'profile.firstName',
+      }).then(openSelect)
       .then(selectFirstOption)
       .then(openSelect)
       .get(optionsSelector).first()
@@ -152,7 +172,8 @@ describe('<Select />', () => {
         .should('contain.text', 'A placeholder')
         .then(openSelect)
         .then(selectFirstOption)
-        .get(inputSelector)
+
+        cy.get(inputSelector)
         .should('not.contain.text', 'A placeholder')
       })
     })
@@ -199,7 +220,7 @@ describe('<Select />', () => {
       .then(selectFirstOption)
 
       // The options list should be closed
-      .get(optionsSelector).should('not.exist')
+      cy.get(optionsSelector).should('not.exist')
       .get(inputSelector).should('have.text', 'Selected')
       .then(openSelect)
 

@@ -4,7 +4,7 @@ import { BaseErrorFragmentDoc } from '../../../../launchpad/src/generated/graphq
 import dedent from 'dedent'
 
 // Selectors
-const headerSelector = 'h1[data-testid=error-header]'
+const headerSelector = 'h1[data-cy=error-header]'
 const messageSelector = '[data-testid=error-message]'
 const retryButtonSelector = 'button[data-testid=error-retry-button]'
 const docsButtonSelector = 'a[data-testid=error-docs-button]'
@@ -57,13 +57,13 @@ describe('<BaseError />', () => {
       .should('have.attr', 'href', docsButton.docsHomepage.link)
     })
 
-    it('renders the expected docs button for dashboard errors', () => {
-      mountFragmentWithError({ errorType: 'DASHBOARD_GRAPHQL_ERROR' })
-      cy.contains(docsButtonSelector, docsButton.dashboardGuide.text)
-      .should('have.attr', 'href', docsButton.dashboardGuide.link)
+    it('renders the expected docs button for Cypress Cloud errors', () => {
+      mountFragmentWithError({ errorType: 'CLOUD_GRAPHQL_ERROR' })
+      cy.contains(docsButtonSelector, docsButton.cloudGuide.text)
+      .should('have.attr', 'href', docsButton.cloudGuide.link)
     })
 
-    it('renders the expected docs button for errors that are known and unrelated to the dashboard', () => {
+    it('renders the expected docs button for errors that are known and unrelated to Cypress Cloud', () => {
       mountFragmentWithError({ errorType: 'CONFIG_VALIDATION_ERROR' })
       cy.contains(docsButtonSelector, docsButton.configGuide.text)
       .should('have.attr', 'href', docsButton.configGuide.link)

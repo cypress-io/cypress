@@ -45,7 +45,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
 
     snapshotAUTPanel('cy.get selector')
 
-    cy.findByTestId('playground-num-elements').contains('3 Matches')
+    cy.findByTestId('playground-num-elements').contains('3 matches')
 
     // This validates that each matching element is covered by the playground highlighting
     cy.get('iframe.aut-iframe').its('0.contentDocument.body').then(cy.wrap).within(() => {
@@ -59,19 +59,21 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
       })
     })
 
-    cy.findByLabelText('Selector Methods').click()
+    cy.findByLabelText('Selector methods').click()
     cy.findByRole('menuitem', { name: 'cy.contains' }).click()
 
     cy.findByTestId('playground-selector').clear().type('Item 1')
 
     snapshotAUTPanel('cy.contains selector')
 
-    cy.findByTestId('playground-num-elements').contains('1 Match')
+    cy.findByTestId('playground-num-elements').contains('1 match')
 
     cy.window().then((win) => cy.spy(win.console, 'log'))
     cy.findByTestId('playground-print').click().window().then((win) => {
       expect(win.console.log).to.have.been.calledWith('%cCommand:  ', 'font-weight: bold', 'cy.contains(\'Item 1\')')
     })
+
+    cy.get('.hook-open-in-ide').should('exist')
   })
 
   it('navigation between specs and other parts of the app works', () => {
@@ -110,7 +112,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     .its('href')
     .should('eq', 'http://localhost:4455/__/#/specs')
 
-    cy.percySnapshot()
+    // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
     // should clear after reload
     cy.reload()
@@ -148,7 +150,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
   })
 
   it('shows a compilation error with a malformed spec', { viewportHeight: 596, viewportWidth: 1000 }, () => {
-    const expectedAutHeight = 500 // based on explicitly setting viewport in this test to 596
+    const expectedAutHeight = 456 // based on explicitly setting viewport in this test to 596
 
     cy.visitApp()
 
@@ -172,7 +174,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     // We could consider removing this after percy is
     // up and running for e2e tests.
 
-    cy.percySnapshot()
+    // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
   })
 
   it('should show visit failure blank page', () => {
@@ -181,7 +183,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     .click()
 
     cy.get('[data-model-state="failed"]').should('contain', 'renders the blank page')
-    cy.percySnapshot()
+    // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
   })
 
   it('set the correct viewport values from CLI', () => {
@@ -202,7 +204,7 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.contains('withFailure.spec').click()
     cy.contains('[aria-controls=reporter-inline-specs-list]', 'Specs')
     cy.get('body').type('f')
-    cy.contains('Search Specs')
+    cy.contains('Search specs')
     cy.contains('withWait.spec').click()
     cy.waitForSpecToFinish()
 

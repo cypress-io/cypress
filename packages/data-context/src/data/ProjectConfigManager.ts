@@ -6,7 +6,14 @@ import debugLib from 'debug'
 import path from 'path'
 import _ from 'lodash'
 import chokidar from 'chokidar'
-import { validate as validateConfig, validateNoBreakingConfigLaunchpad, validateNoBreakingConfigRoot, validateNoBreakingTestingTypeConfig } from '@packages/config'
+import {
+  validate as validateConfig,
+  validateNoBreakingConfigLaunchpad,
+  validateNoBreakingConfigRoot,
+  validateNoBreakingTestingTypeConfig,
+  setupFullConfigWithDefaults,
+  updateWithPluginValues,
+} from '@packages/config'
 import { CypressEnv } from './CypressEnv'
 import { autoBindDebug } from '../util/autoBindDebug'
 import type { EventRegistrar } from './EventRegistrar'
@@ -184,12 +191,6 @@ export class ProjectConfigManager {
       return
     }
 
-    const result = await isDependencyInstalled(bundler, this.options.projectRoot)
-
-    if (!result.satisfied) {
-      unsupportedDeps.set(result.dependency.type, result)
-    }
-
     const isFrameworkSatisfied = async (bundler: typeof WIZARD_BUNDLERS[number], framework: typeof WIZARD_FRAMEWORKS[number]) => {
       for (const dep of await (framework.dependencies(bundler.type, this.options.projectRoot))) {
         const res = await isDependencyInstalled(dep.dependency, this.options.projectRoot)
@@ -310,7 +311,7 @@ export class ProjectConfigManager {
     const cypressEnv = await this.loadCypressEnvFile()
     const fullConfig = await this.buildBaseFullConfig(loadConfigReply.initialConfig, cypressEnv, this.options.ctx.modeOptions)
 
-    const finalConfig = this._cachedFullConfig = this.options.ctx._apis.configApi.updateWithPluginValues(fullConfig, result.setupConfig ?? {}, this._testingType ?? 'e2e')
+    const finalConfig = this._cachedFullConfig = updateWithPluginValues(fullConfig, result.setupConfig ?? {}, this._testingType ?? 'e2e')
 
     // Check if the config file has a before:browser:launch task, and if it's the case
     // we should restart the browser if it is open
@@ -366,7 +367,7 @@ export class ProjectConfigManager {
       }
 
       throw getError('CONFIG_VALIDATION_ERROR', 'configFile', file || null, errMsg)
-    })
+    }, this._testingType)
 
     return validateNoBreakingConfigLaunchpad(
       config,
@@ -460,6 +461,16 @@ export class ProjectConfigManager {
     )
   }
 
+  get repoRoot () {
+    /*
+      Used to detect the correct file path when a test fails.
+      It is derived and assigned in the packages/driver in stack_utils.
+      It's needed to show the correct link to files in repo mgmt tools like GitHub in Cypress Cloud.
+      Right now we assume the repoRoot is where the `.git` dir is located.
+    */
+    return this.options.ctx.git?.gitBaseDir
+  }
+
   private async buildBaseFullConfig (configFileContents: Cypress.ConfigOptions, envFile: Cypress.ConfigOptions, options: Partial<AllModeOptions>, withBrowsers = true) {
     assert(this._testingType, 'Cannot build base full config without a testing type')
     this.validateConfigRoot(configFileContents, this._testingType)
@@ -474,10 +485,11 @@ export class ProjectConfigManager {
     configFileContents = { ...configFileContents, ...testingTypeOverrides, ...optionsOverrides }
 
     // TODO: Convert this to be synchronous, it's just FS checks
-    let fullConfig = await this.options.ctx._apis.configApi.setupFullConfigWithDefaults({
+    let fullConfig = await setupFullConfigWithDefaults({
       cliConfig: options.config ?? {},
       projectName: path.basename(this.options.projectRoot),
       projectRoot: this.options.projectRoot,
+      repoRoot: this.repoRoot,
       config: _.cloneDeep(configFileContents),
       envFile: _.cloneDeep(envFile),
       options: {
@@ -485,7 +497,8 @@ export class ProjectConfigManager {
         testingType: this._testingType,
         configFile: path.basename(this.configFilePath),
       },
-    })
+      configFile: this.options.ctx.lifecycleManager.configFile,
+    }, this.options.ctx.file.getFilesByGlob)
 
     if (withBrowsers) {
       const browsers = await this.options.ctx.browser.machineBrowsers()
@@ -498,14 +511,22 @@ export class ProjectConfigManager {
       }
 
       fullConfig.browsers = fullConfig.browsers?.map((browser) => {
-        if (browser.family === 'chromium' || fullConfig.chromeWebSecurity) {
-          return browser
+        if (browser.family === 'webkit' && !fullConfig.experimentalWebKitSupport) {
+          return {
+            ...browser,
+            disabled: true,
+            warning: '`playwright-webkit` is installed and WebKit is detected, but `experimentalWebKitSupport` is not enabled in your Cypress config. Set it to `true` to use WebKit.',
+          }
         }
 
-        return {
-          ...browser,
-          warning: browser.warning || getError('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name).message,
+        if (browser.family !== 'chromium' && fullConfig.chromeWebSecurity) {
+          return {
+            ...browser,
+            warning: browser.warning || getError('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name).message,
+          }
         }
+
+        return browser
       })
 
       // If we have withBrowsers set to false, it means we're coming from the legacy config.get API
@@ -517,6 +538,7 @@ export class ProjectConfigManager {
   }
 
   async getFullInitialConfig (options: Partial<AllModeOptions> = this.options.ctx.modeOptions, withBrowsers = true): Promise<FullConfig> {
+    // return cached configuration for new spec and/or new navigating load when Cypress is running tests
     if (this._cachedFullConfig) {
       return this._cachedFullConfig
     }

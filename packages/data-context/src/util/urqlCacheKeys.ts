@@ -39,6 +39,7 @@ export const urqlCacheKeys: Partial<UrqlCacheKeys> = {
     CloudProjectSpecNotFound: (data) => null,
     CloudProjectUnauthorized: (data) => data.__typename,
     CloudLatestRunUpdateSpecData: (data) => null,
+    CloudProjectSpecFlakyStatus: (data) => null,
     GeneratedSpecError: () => null,
     GenerateSpecResponse: (data) => data.__typename,
   },

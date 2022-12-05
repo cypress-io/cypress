@@ -13,7 +13,8 @@
     "test": "yarn test-unit",
     "test:clean": "find ./test/__fixtures__ -depth -name 'output.*' -type f -exec rm {} \\;",
     "test-debug": "yarn test-unit --inspect-brk=5566",
-    "test-unit": "mocha --configFile=../../mocha-reporter-config.json -r @packages/ts/register 'test/**/*.spec.ts' --exit --timeout 5000"
+    "test-unit": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json -r @packages/ts/register 'test/**/*.spec.ts' --exit --timeout 5000",
+    "lint": "eslint --ext .js,.ts,.json, ."
   },
   "dependencies": {
     "@babel/core": "^7",
@@ -27,9 +28,11 @@
     "debug": "^4.3.2",
     "fs-extra": "^9.1.0",
     "lodash": "^4.17.21",
-    "recast": "0.20.4"
+    "recast": "0.20.4",
+    "return-deep-diff": "0.4.0"
   },
   "devDependencies": {
+    "@packages/errors": "0.0.0-development",
     "@packages/root": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
