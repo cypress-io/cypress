@@ -3413,7 +3413,7 @@ declare namespace Cypress {
      */
     clearCurrentSessionData: () => Promise<void>
     /**
-     * Get all storage and cookie date across all origins associated with the current session.
+     * Get all storage and cookie data across all origins associated with the current session.
      */
     getCurrentSessionData: () => Promise<SessionData>
     /**
