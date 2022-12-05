@@ -15,14 +15,8 @@ context('Users', () => {
   })
 
   describe('Network State', () => {
-    beforeEach(() => {
-      cy.server()
-      // mount the component after defining routes in tests
-      // preventing race conditions where you wait on untouched routes
-    })
-
     it('can inspect real data in XHR', () => {
-      cy.route('/users?_limit=3').as('users')
+      cy.intercept('/users?_limit=3').as('users')
       mount(<Users />)
       cy.wait('@users')
       .its('response.body')
@@ -34,7 +28,7 @@ context('Users', () => {
     it('can display mock XHR response', () => {
       const users = [{ id: 1, name: 'foo' }]
 
-      cy.route('GET', '/users?_limit=3', users).as('users')
+      cy.intercept('GET', '/users?_limit=3', users).as('users')
       mount(<Users />)
       cy.get('li')
       .should('have.length', 1)
@@ -45,7 +39,7 @@ context('Users', () => {
     it('can inspect mocked XHR', () => {
       const users = [{ id: 1, name: 'foo' }]
 
-      cy.route('GET', '/users?_limit=3', users).as('users')
+      cy.intercept('GET', '/users?_limit=3', users).as('users')
       mount(<Users />)
       cy.wait('@users')
       .its('response.body')
@@ -55,10 +49,8 @@ context('Users', () => {
     it('can delay and wait on XHR', () => {
       const users = [{ id: 1, name: 'foo' }]
 
-      cy.route({
-        method: 'GET',
-        url: '/users?_limit=3',
-        response: users,
+      cy.intercept('GET', '/users?_limit=3', {
+        body: users,
         delay: 1000,
       }).as('users')
 

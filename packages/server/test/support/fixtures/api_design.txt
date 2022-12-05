@@ -34,9 +34,6 @@ Cypress.Log.command()
 Cypress.Log.route()
 Cypress.Log.spy()
 
-// Server
-Cypress.Server.defaults()
-
 // Request
 Cypress.Request.defaults()
 
