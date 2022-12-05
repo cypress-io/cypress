@@ -224,6 +224,8 @@ describe('InlineSpecList', () => {
     })
 
     it('allows keyboard interactions to run spec groups without toggling sections', () => {
+      // this test is specifically to catch regressions of a bug caused by nesting controls: https://github.com/cypress-io/cypress/issues/24762
+      // TODO: #24966 remove this test when the structure of controls in this area has been flattened out
       mountInlineSpecList({ experimentalRunAllSpecs: true })
 
       const mutationStub = cy.stub().as('mutationStub')
