@@ -25,18 +25,18 @@ jobs:
     runs-on: ${{ matrix.platform }}
     env:
       CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
-      BASE_BRANCH: ${{ inputs.branch || github.ref }}
+      BASE_BRANCH: ${{ inputs.branch || ryanm/feature/v8-snapshots-auto-pr }}
       GENERATE_FROM_SCRATCH: ${{ inputs.generate_from_scratch }}
     steps:
       - name: Determine snapshot files - Windows
         if: ${{ matrix.platform == 'windows-latest' }}
-        run: echo "SNAPSHOT_FILES=tooling\v8-snapshot\cache\win32\snapshot-meta.json tooling\v8-snapshot\cache\win32\snapshot-meta.json" >> $GITHUB_ENV
+        run: echo "SNAPSHOT_FILES='tooling\v8-snapshot\cache\win32\snapshot-meta.json'" >> $GITHUB_ENV
       - name: Determine snapshot files - Linux
         if: ${{ matrix.platform == 'ubuntu-latest' }}
-        run: echo "SNAPSHOT_FILES=tooling/v8-snapshot/cache/linux/snapshot-meta.json tooling/v8-snapshot/cache/linux/snapshot-meta.json" >> $GITHUB_ENV
+        run: echo "SNAPSHOT_FILES='tooling/v8-snapshot/cache/linux/snapshot-meta.json'" >> $GITHUB_ENV
       - name: Determine snapshot files - Mac
         if: ${{ matrix.platform == 'macos-latest' }}
-        run: echo "SNAPSHOT_FILES=tooling/v8-snapshot/cache/darwin/snapshot-meta.json tooling/v8-snapshot/cache/darwin/snapshot-meta.json" >> $GITHUB_ENV
+        run: echo "SNAPSHOT_FILES='tooling/v8-snapshot/cache/darwin/snapshot-meta.json'" >> $GITHUB_ENV
       - name: Checkout
         uses: actions/checkout@v3
         with:
