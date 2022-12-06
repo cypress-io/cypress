@@ -1020,6 +1020,19 @@ namespace CypressGetCookiesTests {
   cy.getCookies({ domain: false }) // $ExpectError
 }
 
+namespace CypressGetAllCookiesTests {
+  cy.getAllCookies().then((cookies) => {
+    cookies // $ExpectType Cookie[]
+  })
+  cy.getAllCookies({ log: true })
+  cy.getAllCookies({ timeout: 10 })
+  cy.getAllCookies({ log: true, timeout: 10 })
+
+  cy.getAllCookies({ log: 'true' }) // $ExpectError
+  cy.getAllCookies({ timeout: '10' }) // $ExpectError
+  cy.getAllCookies({ other: true }) // $ExpectError
+}
+
 namespace CypressGetCookieTests {
   cy.getCookie('name').then((cookie) => {
     cookie // $ExpectType Cookie | null

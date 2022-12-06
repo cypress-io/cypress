@@ -3,14 +3,11 @@ import Promise from 'bluebird'
 
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
-import type { Log } from '../../cypress/log'
 
 // TODO: add hostOnly to COOKIE_PROPS
 // https://github.com/cypress-io/cypress/issues/363
 // https://github.com/cypress-io/cypress/issues/17527
 const COOKIE_PROPS = 'name value path secure httpOnly expiry domain sameSite'.split(' ')
-
-const commandNameRe = /(:)(\w)/
 
 function pickCookieProps (cookie) {
   if (!cookie) return cookie
@@ -22,12 +19,6 @@ function pickCookieProps (cookie) {
   return _.pick(cookie, COOKIE_PROPS)
 }
 
-const getCommandFromEvent = (event) => {
-  return event.replace(commandNameRe, (match, p1, p2) => {
-    return p2.toUpperCase()
-  })
-}
-
 // from https://developer.chrome.com/extensions/cookies#type-SameSiteStatus
 // note that `unspecified` is purposely omitted - Firefox and Chrome set
 // different defaults, and Firefox lacks support for `unspecified`, so
@@ -35,7 +26,7 @@ const getCommandFromEvent = (event) => {
 // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1624668
 const VALID_SAMESITE_VALUES = ['no_restriction', 'lax', 'strict']
 
-const normalizeSameSite = (sameSite) => {
+function normalizeSameSite (sameSite?: string) {
   if (_.isUndefined(sameSite)) {
     return sameSite
   }
@@ -56,12 +47,13 @@ const normalizeSameSite = (sameSite) => {
 function cookieValidatesHostPrefix (options) {
   return options.secure === false || (options.path && options.path !== '/')
 }
+
 function cookieValidatesSecurePrefix (options) {
   return options.secure === false
 }
 
-function validateDomainOption (domain: any, commandName: string, log: Log | undefined) {
-  if (domain !== undefined && domain !== null && !_.isString(domain)) {
+function validateDomainOption (domain: any, commandName: string, log: Cypress.Log | undefined) {
+  if (typeof domain !== 'string') {
     $errUtils.throwErrByPath('cookies.invalid_domain', {
       onFail: log,
       args: {
@@ -72,33 +64,60 @@ function validateDomainOption (domain: any, commandName: string, log: Log | unde
   }
 }
 
-export default function (Commands, Cypress, cy, state, config) {
-  const getDefaultDomain = () => {
-    const hostname = state('window')?.location.hostname
+interface AutomationEventsAndOptions {
+  'get:cookie': {
+    domain: string
+    name: string
+  }
+  'get:cookies': {
+    domain?: string
+  }
+  'get:all:cookies': {}
+  'set:cookie': {
+    domain: string
+    expiry: number
+    httpOnly: boolean
+    path: string
+    secure: boolean
+  }
+  'clear:cookie': {
+    domain: string
+    name: string
+  }
+  'clear:cookies': Cypress.Cookie[]
+}
+
+type CommandName = 'getCookie' | 'getCookies' | 'getAllCookies' | 'setCookie' | 'clearCookie' | 'clearCookies'
+
+interface AutomateOptions<T extends keyof AutomationEventsAndOptions> {
+  event: T
+  options: AutomationEventsAndOptions[T]
+  commandName: CommandName
+  log?: Cypress.Log
+  timeout: number
+}
+
+export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, config) {
+  function getDefaultDomain () {
+    const win = state('window') as Window | undefined
+    const hostname = win?.location.hostname
 
     // if hostname is undefined, the AUT is on about:blank, so use the
     // spec frame's hostname instead
     return hostname || window.location.hostname
   }
 
-  const mergeDefaults = function (obj) {
-    // set the default domain to be the AUT hostname
-    const merge = (o) => {
-      return _.defaults(o, { domain: getDefaultDomain() })
-    }
-
-    if (_.isArray(obj)) {
-      return _.map(obj, merge)
-    }
-
-    return merge(obj)
-  }
-
-  const automateCookies = function (event, obj = {}, log, timeout) {
+  function automateCookies<T extends keyof AutomationEventsAndOptions> ({
+    event,
+    options,
+    commandName,
+    log,
+    timeout,
+  }: AutomateOptions<T>) {
     const automate = () => {
-      return Cypress.automation(event, mergeDefaults(obj))
+      return Cypress.automation(event, options)
       .catch((err) => {
-        return $errUtils.throwErr(err, { onFail: log })
+        $errUtils.throwErr(err, { onFail: log })
       })
     }
 
@@ -116,22 +135,34 @@ export default function (Commands, Cypress, cy, state, config) {
       return $errUtils.throwErrByPath('cookies.timed_out', {
         onFail: log,
         args: {
-          cmd: getCommandFromEvent(event),
+          cmd: commandName,
           timeout,
         },
       })
     })
   }
 
-  const getAndClear = (log?, timeout?, options = {}) => {
-    return automateCookies('get:cookies', options, log, timeout)
-    .then((resp) => {
+  const getAndClear = (log: Cypress.Log | undefined, timeout: number, options: AutomationEventsAndOptions['get:cookies']) => {
+    return automateCookies({
+      event: 'get:cookies',
+      commandName: 'clearCookies',
+      options,
+      log,
+      timeout,
+    })
+    .then((cookies: Cypress.Cookie[]) => {
       // bail early if we got no cookies!
-      if (resp && (resp.length === 0)) {
-        return resp
+      if (cookies && cookies.length === 0) {
+        return cookies
       }
 
-      return automateCookies('clear:cookies', resp, log, timeout)
+      return automateCookies({
+        event: 'clear:cookies',
+        commandName: 'clearCookies',
+        options: cookies,
+        log,
+        timeout,
+      })
     })
     .then(pickCookieProps)
   }
@@ -165,8 +196,9 @@ export default function (Commands, Cypress, cy, state, config) {
   }
 
   return Commands.addAll({
-    getCookie (name, userOptions: Cypress.CookieOptions = {}) {
+    getCookie (name: string, userOptions: Cypress.CookieOptions = {}) {
       const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
+        domain: getDefaultDomain(),
         log: true,
       })
 
@@ -175,7 +207,7 @@ export default function (Commands, Cypress, cy, state, config) {
       options.timeout = options.timeout || config('defaultCommandTimeout')
 
       let cookie: Cypress.Cookie
-      let log: Log | undefined
+      let log: Cypress.Log | undefined
 
       if (options.log) {
         log = Cypress.log({
@@ -203,7 +235,13 @@ export default function (Commands, Cypress, cy, state, config) {
       validateDomainOption(options.domain, 'getCookie', log)
 
       return cy.retryIfCommandAUTOriginMismatch(() => {
-        return automateCookies('get:cookie', { name, domain: options.domain }, log, responseTimeout)
+        return automateCookies({
+          event: 'get:cookie',
+          commandName: 'getCookie',
+          options: { name, domain: options.domain! },
+          timeout: responseTimeout,
+          log,
+        })
         .then(pickCookieProps)
         .tap((result) => {
           cookie = result
@@ -214,6 +252,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
     getCookies (userOptions: Cypress.CookieOptions = {}) {
       const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
+        domain: getDefaultDomain(),
         log: true,
       })
 
@@ -222,7 +261,7 @@ export default function (Commands, Cypress, cy, state, config) {
       options.timeout = options.timeout || config('defaultCommandTimeout')
 
       let cookies: Cypress.Cookie[] = []
-      let log: Log | undefined
+      let log: Cypress.Log | undefined
 
       if (options.log) {
         log = Cypress.log({
@@ -244,7 +283,13 @@ export default function (Commands, Cypress, cy, state, config) {
       validateDomainOption(options.domain, 'getCookies', log)
 
       return cy.retryIfCommandAUTOriginMismatch(() => {
-        return automateCookies('get:cookies', _.pick(options, 'domain'), log, responseTimeout)
+        return automateCookies({
+          event: 'get:cookies',
+          options: { domain: options.domain! },
+          commandName: 'getCookies',
+          timeout: responseTimeout,
+          log,
+        })
         .then(pickCookieProps)
         .tap((result: Cypress.Cookie[]) => {
           cookies = result
@@ -253,8 +298,49 @@ export default function (Commands, Cypress, cy, state, config) {
       }, options.timeout)
     },
 
-    setCookie (name, value, userOptions: Partial<Cypress.SetCookieOptions> = {}) {
+    getAllCookies (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+      const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
+        log: true,
+        timeout: config('responseTimeout'),
+      })
+
+      let cookies: Cypress.Cookie[] = []
+      let log: Cypress.Log | undefined
+
+      if (options.log) {
+        log = Cypress.log({
+          message: '',
+          timeout: options.timeout,
+          consoleProps () {
+            const obj = {}
+
+            if (cookies.length) {
+              obj['Yielded'] = cookies
+              obj['Num Cookies'] = cookies.length
+            }
+
+            return obj
+          },
+        })
+      }
+
+      return automateCookies({
+        event: 'get:cookies',
+        commandName: 'getAllCookies',
+        options: {},
+        timeout: options.timeout!,
+        log,
+      })
+      .then(pickCookieProps)
+      .tap((result: Cypress.Cookie[]) => {
+        cookies = result
+      })
+      .catch(handleBackendError('getAllCookies', 'reading cookies from', log))
+    },
+
+    setCookie (name: string, value: string, userOptions: Partial<Cypress.SetCookieOptions> = {}) {
       const options: Partial<Cypress.SetCookieOptions> = _.defaults({}, userOptions, {
+        domain: getDefaultDomain(),
         path: '/',
         secure: false,
         httpOnly: false,
@@ -268,7 +354,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
       const cookie = _.extend(pickCookieProps(options), { name, value })
       let resultingCookie: Cypress.Cookie
-      let log: Log | undefined
+      let log: Cypress.Log | undefined
 
       if (options.log) {
         log = Cypress.log({
@@ -326,7 +412,13 @@ export default function (Commands, Cypress, cy, state, config) {
       Cypress.emit('set:cookie', cookie)
 
       return cy.retryIfCommandAUTOriginMismatch(() => {
-        return automateCookies('set:cookie', cookie, log, responseTimeout)
+        return automateCookies({
+          event: 'set:cookie',
+          commandName: 'setCookie',
+          options: cookie,
+          timeout: responseTimeout,
+          log,
+        })
         .then(pickCookieProps)
         .tap((result) => {
           resultingCookie = result
@@ -334,8 +426,9 @@ export default function (Commands, Cypress, cy, state, config) {
       }, options.timeout)
     },
 
-    clearCookie (name, userOptions: Cypress.CookieOptions = {}) {
+    clearCookie (name: string, userOptions: Cypress.CookieOptions = {}) {
       const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
+        domain: getDefaultDomain(),
         log: true,
       })
 
@@ -344,7 +437,7 @@ export default function (Commands, Cypress, cy, state, config) {
       options.timeout = options.timeout || config('defaultCommandTimeout')
 
       let cookie: Cypress.Cookie
-      let log: Log | undefined
+      let log: Cypress.Log | undefined
 
       if (options.log) {
         log = Cypress.log({
@@ -376,7 +469,13 @@ export default function (Commands, Cypress, cy, state, config) {
 
       // TODO: prevent clearing a cypress namespace
       return cy.retryIfCommandAUTOriginMismatch(() => {
-        return automateCookies('clear:cookie', { name, domain: options.domain }, log, responseTimeout)
+        return automateCookies({
+          event: 'clear:cookie',
+          commandName: 'clearCookie',
+          options: { name, domain: options.domain! },
+          timeout: responseTimeout,
+          log,
+        })
         .then(pickCookieProps)
         .then((result) => {
           cookie = result
@@ -390,6 +489,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
     clearCookies (userOptions: Cypress.CookieOptions = {}) {
       const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
+        domain: getDefaultDomain(),
         log: true,
       })
 
@@ -398,11 +498,11 @@ export default function (Commands, Cypress, cy, state, config) {
       options.timeout = options.timeout || config('defaultCommandTimeout')
 
       let cookies: Cypress.Cookie[] = []
-      let log: Log | undefined
+      let log: Cypress.Log | undefined
 
       if (options.log) {
         log = Cypress.log({
-          message: userOptions.domain ? { domain: userOptions.domain } : '',
+          message: userOptions.domain ? { domain: userOptions.domain! } : '',
           timeout: responseTimeout,
           consoleProps () {
             const obj = {}
@@ -426,7 +526,7 @@ export default function (Commands, Cypress, cy, state, config) {
       Cypress.emit('clear:cookies')
 
       return cy.retryIfCommandAUTOriginMismatch(() => {
-        return getAndClear(log, responseTimeout, { domain: options.domain })
+        return getAndClear(log, responseTimeout, { domain: options.domain! })
         .then((result) => {
           cookies = result
 

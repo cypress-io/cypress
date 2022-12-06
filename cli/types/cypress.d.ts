@@ -1428,6 +1428,13 @@ declare namespace Cypress {
     getCookies(options?: CookieOptions): Chainable<Cookie[]>
 
     /**
+     * Get all browser cookies
+     *
+     * @see https://on.cypress.io/getallcookies
+     */
+    getAllCookies(options?: Partial<Loggable & Timeoutable>): Chainable<Cookie[]>
+
+    /**
      * Navigate back or forward to the previous or next URL in the browser's history.
      *
      * @see https://on.cypress.io/go
