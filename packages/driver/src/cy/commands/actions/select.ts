@@ -127,6 +127,11 @@ export default (Commands, Cypress, cy) => {
           if (valueOrTextOrIndex.includes(value) || valueOrTextOrIndex.includes(index)) {
             optionEls.push(optEl)
             values.push(value)
+
+            // https://github.com/cypress-io/cypress/issues/24739
+            if (options.$el.find(`option[value="${value}"]`).length > 1) {
+              notAllUniqueValues = true
+            }
           }
 
           // replace new line chars, then trim spaces
@@ -183,9 +188,7 @@ export default (Commands, Cypress, cy) => {
               args: { node },
             })
           }
-        })
 
-        _.each(optionEls, ($el) => {
           if ($el.closest('optgroup').prop('disabled')) {
             node = $dom.stringify($el)
 
@@ -271,7 +274,7 @@ export default (Commands, Cypress, cy) => {
 
             if (notAllUniqueValues) {
               // if all the values are the same and the user is trying to
-              // select based on the text, setting the val() will just
+              // select based on the text or index, setting the val() will just
               // select the first one
               let selectedIndex = 0
 
