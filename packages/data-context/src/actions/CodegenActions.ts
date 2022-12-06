@@ -158,7 +158,7 @@ export class CodegenActions {
   }
 }
 
-type ExportResolver = Map<string, { exportName: string, isDefault: boolean }>
+type ExportResolver = Map<string, ReactComponentDescriptor>
 
 function findAllWithLink (exportResolver: ExportResolver) {
   return (ast: any, parser: any, importer: any) => {
