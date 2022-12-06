@@ -1888,6 +1888,9 @@ jobs:
     steps:
       - restore_cached_workspace
       - run:
+          name: Install Cypress
+          command: npx cypress install
+      - run:
           name: Run tests
           command: yarn workspace @cypress/grep test
       - store_test_results:
