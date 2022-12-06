@@ -138,7 +138,6 @@ describe('spec-options', () => {
           expect(result.codeGenType).to.eq('component')
           expect(result.templateKey).to.eq('reactComponent')
           expect(result.fileName).to.eq('Counter.cy.tsx')
-          // expect(result.importStatement).to.eq()
         })
 
         it('creates a spec file with file and component names combined if they are different', async () => {
