@@ -1890,6 +1890,7 @@ jobs:
       - run:
           name: Install Cypress
           command: npx cypress install
+          working_directory: npm/grep
       - run:
           name: Run tests
           command: yarn workspace @cypress/grep test
