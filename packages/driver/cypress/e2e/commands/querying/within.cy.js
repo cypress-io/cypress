@@ -228,7 +228,7 @@ describe('src/cy/commands/querying/within', () => {
       })
 
       it('provides additional information in console prop', () => {
-        cy.get('div').within(() => {})
+        cy.get('div').first().within(() => {})
         cy.then(function () {
           const { lastLog } = this
 
@@ -237,7 +237,6 @@ describe('src/cy/commands/querying/within', () => {
           expect(consoleProps).to.be.an('object')
           expect(consoleProps.Command).to.eq('within')
           expect(consoleProps.Yielded).to.not.be.null
-          expect(consoleProps.Yielded).to.have.length(55)
         })
       })
     })
@@ -303,6 +302,16 @@ describe('src/cy/commands/querying/within', () => {
         })
 
         cy.get('#list').within(() => {})
+      })
+
+      it('throws when given multiple subjects', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.within()` can only be called on a single element. Your subject contained 9 elements.')
+
+          done()
+        })
+
+        cy.get('ul').within(() => {})
       })
     })
   })

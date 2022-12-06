@@ -1,4 +1,3 @@
-/// <reference path="./cy/commands/session.d.ts" />
 /// <reference path="./cy/logGroup.d.ts" />
 /// <reference path="./cypress/log.d.ts" />
 
@@ -32,11 +31,11 @@ declare namespace Cypress {
     // We should decide whether calling with id is correct or not.
     clearTimeout: ITimeouts['clearTimeout']
     isStable: IStability['isStable']
-    fail: (err: Error, options:{ async?: boolean }) => Error
+    fail: (err: Error, options: { async?: boolean }) => Error
     getRemoteLocation: ILocation['getRemoteLocation']
     subjectChain: (chainerId?: string) => SubjectChain
 
-    createSnapshot:  ISnapshots['createSnapshot']
+    createSnapshot: ISnapshots['createSnapshot']
     getStyles: ISnapshots['getStyles']
   }
 }
