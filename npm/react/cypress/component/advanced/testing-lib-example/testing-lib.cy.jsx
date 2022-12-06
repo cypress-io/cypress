@@ -7,8 +7,7 @@ import Fetcher from './fetcher'
 
 // NOTE: this doesn't work because of update to the @testing/library v7. Looks like build issue with current webpack config
 it.skip('loads and displays greeting (testing-lib)', () => {
-  cy.server()
-  cy.route('/greeting', { greeting: 'Hello there' }).as('greet')
+  cy.intercept('/greeting', { greeting: 'Hello there' }).as('greet')
 
   const url = '/greeting'
 
@@ -21,6 +20,6 @@ it.skip('loads and displays greeting (testing-lib)', () => {
   cy.findByRole('heading').should('have.text', 'Hello there')
   cy.findByRole('button').should('be.disabled')
   cy.get('@greet')
-  .its('url')
+  .its('response.url')
   .should('match', /\/greeting$/)
 })

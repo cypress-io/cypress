@@ -31,7 +31,9 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
   const { state } = Cypress
 
   function getRoute (routeId) {
-    return state('routes')[routeId]
+    const routes = state('routes') || {}
+
+    return routes[routeId]
   }
 
   function getRequest (routeId: string, requestId: string): Interception | undefined {

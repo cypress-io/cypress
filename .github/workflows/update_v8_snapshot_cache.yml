@@ -1,0 +1,10 @@
+name: Update V8 Snapshot Cache
+on: [workflow_dispatch]
+concurrency: 
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  update-v8-snapshot-cache:
+    steps:
+      - name: Dummy step
+        run: echo "Dummy step"
