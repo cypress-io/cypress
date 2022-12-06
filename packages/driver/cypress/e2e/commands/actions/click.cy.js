@@ -295,6 +295,14 @@ describe('src/cy/commands/actions/click', () => {
       cy.getAll('el', 'focus focusin').each(shouldBeCalledOnce)
     })
 
+    // https://github.com/cypress-io/cypress/issues/24900
+    it('retains focus after clicking', () => {
+      cy.$$('#button').on('blur', cy.stub().as('blur'))
+
+      cy.get('#button').click()
+      cy.get('@blur').should('not.be.called')
+    })
+
     // https://github.com/cypress-io/cypress/issues/5430
     it('does not attempt to click element outside viewport', (done) => {
       cy.timeout(100)
