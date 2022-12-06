@@ -301,7 +301,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
   }
 
   if (this.res.wantsInjection) {
-    // Chrome plans to make document.domain immutable in Chrome 106, with the default value
+    // Chrome plans to make document.domain immutable in Chrome 109, with the default value
     // of the Origin-Agent-Cluster header becoming 'true'. We explicitly disable this header
     // so that we can continue to support tests that visit multiple subdomains in a single spec.
     // https://github.com/cypress-io/cypress/issues/20147
