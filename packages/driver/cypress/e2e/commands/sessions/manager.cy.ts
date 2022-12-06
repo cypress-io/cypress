@@ -22,7 +22,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
     it('adds session when none were previously added', () => {
       const cySpy = cy.spy(cy, 'state').withArgs('activeSessions')
 
-      const activeSession: Cypress.Commands.Session.ActiveSessions = {
+      const activeSession: Cypress.ActiveSessions = {
         'session_1': {
           id: 'session_1',
           setup: () => {},
@@ -42,7 +42,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
     })
 
     it('adds session when other sessions were previously added', () => {
-      const existingSessions: Cypress.Commands.Session.ActiveSessions = {
+      const existingSessions: Cypress.ActiveSessions = {
         'session_1': {
           id: 'session_1',
           setup: () => {},
@@ -59,7 +59,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
 
       const cySpy = cy.stub(cy, 'state').callThrough().withArgs('activeSessions').returns(existingSessions)
 
-      const activeSession: Cypress.Commands.Session.ActiveSessions = {
+      const activeSession: Cypress.ActiveSessions = {
         'session_3': {
           id: 'session_3',
           setup: () => {},
@@ -94,7 +94,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
     })
 
     it('returns session when found', () => {
-      const activeSessions: Cypress.Commands.Session.ActiveSessions = {
+      const activeSessions: Cypress.ActiveSessions = {
         'session_1': {
           id: 'session_1',
           setup: () => {},
@@ -135,7 +135,7 @@ describe('src/cy/commands/sessions/manager.ts', () => {
     })
 
     it('updates the existing active sessions to "hydrated: false"', () => {
-      const existingSessions: Cypress.Commands.Session.ActiveSessions = {
+      const existingSessions: Cypress.ActiveSessions = {
         'session_1': {
           id: 'session_1',
           setup: () => {},
@@ -166,24 +166,41 @@ describe('src/cy/commands/sessions/manager.ts', () => {
     })
   })
 
-  describe('.sessions', () => {
-    it('sessions.defineSession()', () => {
-      const sessionsManager = new SessionsManager(CypressInstance, cy)
-      const setup = cy.stub()
-      const sess = sessionsManager.sessions.defineSession({ id: '1', setup })
+  it('.defineSession()', () => {
+    const sessionsManager = new SessionsManager(CypressInstance, cy)
+    const setup = cy.stub()
+    const sess = sessionsManager.defineSession({ id: '1', setup })
 
-      expect(sess).to.deep.eq({
-        id: '1',
-        setup,
-        validate: undefined,
-        cookies: null,
-        cacheAcrossSpecs: false,
-        localStorage: null,
-        sessionStorage: null,
-        hydrated: false,
-      })
+    expect(sess).to.deep.eq({
+      id: '1',
+      setup,
+      validate: undefined,
+      cookies: null,
+      cacheAcrossSpecs: false,
+      localStorage: null,
+      sessionStorage: null,
+      hydrated: false,
     })
+  })
 
+  it('.saveSessionData()', async () => {
+    const cypressSpy = cy.stub(CypressInstance, 'backend').callThrough().withArgs('save:session').resolves(null)
+
+    const sessionsManager = new SessionsManager(CypressInstance, cy)
+    const sessionsSpy = cy.stub(sessionsManager, 'setActiveSession')
+
+    const setup = cy.stub()
+    const sess = { id: '1', setup }
+
+    await sessionsManager.saveSessionData(sess)
+
+    expect(sessionsSpy).to.be.calledOnce
+    expect(sessionsSpy.getCall(0).args[0]).to.deep.eq({ 1: sess })
+
+    expect(cypressSpy).to.be.calledOnceWith('save:session')
+  })
+
+  describe('.sessions', () => {
     it('sessions.clearAllSavedSessions()', async () => {
       const cypressSpy = cy.stub(CypressInstance, 'backend').callThrough().withArgs('clear:sessions', true).resolves(null)
 
@@ -259,26 +276,6 @@ describe('src/cy/commands/sessions/manager.ts', () => {
         expect(CypressInstance.log).not.to.be.called
       })
     })
-
-    it('sessions.saveSessionData', async () => {
-      const cypressSpy = cy.stub(CypressInstance, 'backend').callThrough().withArgs('save:session').resolves(null)
-
-      const sessionsManager = new SessionsManager(CypressInstance, cy)
-      const sessionsSpy = cy.stub(sessionsManager, 'setActiveSession')
-
-      const setup = cy.stub()
-      const sess = { id: '1', setup }
-
-      await sessionsManager.sessions.saveSessionData(sess)
-
-      expect(sessionsSpy).to.be.calledOnce
-      expect(sessionsSpy.getCall(0).args[0]).to.deep.eq({ 1: sess })
-
-      expect(cypressSpy).to.be.calledOnceWith('save:session')
-    })
-
-    // TODO:
-    describe('sessions.setSessionData', () => {})
 
     it('sessions.getCookies()', async () => {
       const cookies = [{ id: 'cookie' }]
