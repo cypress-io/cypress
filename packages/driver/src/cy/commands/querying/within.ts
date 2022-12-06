@@ -9,16 +9,17 @@ export default (Commands, Cypress, cy, state) => {
     // reference the next command after this
     // within.  when that command runs we'll
     // know to remove withinSubject
-    const next = state('current').get('next')
+    const current = state('current')
+    const next = current.get('next')
 
     // backup the current withinSubject
     // this prevents a bug where we null out
     // withinSubject when there are nested .withins()
     // we want the inner within to restore the outer
     // once its done
-    const prevWithinSubject = state('withinSubject')
+    const prevWithinSubject = state('withinSubjectChain')
 
-    state('withinSubject', subject)
+    state('withinSubjectChain', cy.subjectChain())
 
     // https://github.com/cypress-io/cypress/pull/8699
     // An internal command is inserted to create a divider between
@@ -55,7 +56,7 @@ export default (Commands, Cypress, cy, state) => {
       // resetting withinSubject more than once.  If they point
       // to different 'next's then its okay
       if (next !== state('nextWithinSubject')) {
-        state('withinSubject', prevWithinSubject || null)
+        state('withinSubjectChain', prevWithinSubject || null)
         state('nextWithinSubject', next)
       }
 
@@ -72,7 +73,7 @@ export default (Commands, Cypress, cy, state) => {
       // event which will finalize cleanup if there was no next obj
       cy.once('command:queue:before:end', () => {
         cleanup()
-        state('withinSubject', null)
+        state('withinSubjectChain', null)
       })
     }
 
@@ -104,6 +105,10 @@ export default (Commands, Cypress, cy, state) => {
       return group(Cypress, groupOptions, (log) => {
         if (!_.isFunction(fn)) {
           $errUtils.throwErrByPath('within.invalid_argument', { onFail: log })
+        }
+
+        if (subject.length > 1) {
+          $errUtils.throwErrByPath('within.multiple_elements', { args: { num: subject.length }, onFail: log })
         }
 
         return withinFn(subject, fn)

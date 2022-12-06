@@ -1,16 +1,20 @@
 <template>
   <Tooltip
     placement="right"
-    class="h-full truncate"
-    data-cy="tooltip"
+    :data-cy="`run-all-specs-for-${directory}`"
   >
-    <button @click.stop="emits('runAllSpecs')">
+    <button
+      class="flex h-full w-full items-center justify-center"
+      data-cy="run-all-specs-button"
+      :disabled="specNumber === 0"
+      @click.stop="emits('runAllSpecs')"
+    >
       <IconActionPlaySmall
         size="16"
-        stroke-color="gray-700"
+        :stroke-color="grayscale ? 'gray-200' : 'gray-700'"
         fill-color="transparent"
-        hocus-stroke-color="indigo-500"
-        hocus-fill-color="indigo-100"
+        :hocus-stroke-color="grayscale ? undefined : 'indigo-500'"
+        :hocus-fill-color="grayscale ? undefined : 'indigo-100'"
         class="inline-flex align-text-bottom"
         data-cy="play-button"
       />
@@ -22,7 +26,7 @@
         class="font-normal text-sm inline-flex"
         data-cy="tooltip-content"
       >
-        {{ t('specPage.runAllSpecs', specNumber) }}
+        {{ t('specPage.runSelectedSpecs', specNumber) }}
       </span>
     </template>
   </Tooltip>
@@ -38,9 +42,11 @@ const { t } = useI18n()
 defineProps<{
   specNumber: number
   directory: string
+  grayscale?: boolean
 }>()
 
 const emits = defineEmits<{
   (event: 'runAllSpecs'): void
 }>()
+
 </script>

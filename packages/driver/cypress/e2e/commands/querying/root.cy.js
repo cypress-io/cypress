@@ -17,7 +17,7 @@ describe('src/cy/commands/querying', () => {
     it('returns withinSubject if exists', () => {
       const form = cy.$$('form')
 
-      cy.get('form').within(() => {
+      cy.get('form').first().within(() => {
         cy
         .get('input')
         .root().then(($root) => {
@@ -100,7 +100,7 @@ describe('src/cy/commands/querying', () => {
       it('sets $el to withinSubject', () => {
         const form = cy.$$('form')
 
-        cy.get('form').within(() => {
+        cy.get('form').first().within(() => {
           cy
           .get('input')
           .root().then(function ($root) {

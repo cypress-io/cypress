@@ -75,6 +75,7 @@
     <CloudViewerAndProject />
     <LoginConnectModals />
   </template>
+  <Spinner v-else />
   <div data-e2e />
 </template>
 

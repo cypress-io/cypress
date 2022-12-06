@@ -104,7 +104,7 @@ describe('src/cy/commands/querying/within', () => {
       })
     })
 
-    it('clears withinSubject after within is over', () => {
+    it('clears withinSubjectChain after within is over', () => {
       const input = cy.$$('input:first')
       const span = cy.$$('#button-text button span')
 
@@ -133,17 +133,17 @@ describe('src/cy/commands/querying/within', () => {
       })
     })
 
-    it('clears withinSubject even if next is null', (done) => {
+    it('clears withinSubjectChain even if next is null', (done) => {
       const span = cy.$$('#button-text button span')
 
       // should be defined here because next would have been
-      // null and withinSubject would not have been cleared
+      // null and withinSubjectChain would not have been cleared
       cy.once('command:queue:before:end', () => {
-        expect(cy.state('withinSubject')).not.to.be.undefined
+        expect(cy.state('withinSubjectChain')).not.to.be.undefined
       })
 
       cy.once('command:queue:end', () => {
-        expect(cy.state('withinSubject')).to.be.null
+        expect(cy.state('withinSubjectChain')).to.be.null
 
         done()
       })
@@ -167,6 +167,16 @@ describe('src/cy/commands/querying/within', () => {
     it('contains() works after within() call', () => {
       cy.get(`#wrapper`).within(() => cy.get(`#upper`)).should(`contain.text`, `New York`)
       cy.contains(`button`, `button`).should(`exist`)
+    })
+
+    it('re-queries if withinSubject is detached from dom', () => {
+      cy.on('command:retry', _.after(2, (options) => {
+        cy.$$('#wrapper').replaceWith('<div id="wrapper"><div id="upper">Newer York</div></div>')
+      }))
+
+      cy.get('#wrapper').within(() => {
+        cy.get(`#upper`).should(`contain.text`, `Newer York`)
+      })
     })
 
     describe('.log', () => {
@@ -218,8 +228,8 @@ describe('src/cy/commands/querying/within', () => {
       })
 
       it('provides additional information in console prop', () => {
-        cy.get('div').within(() => {})
-        .then(function () {
+        cy.get('div').first().within(() => {})
+        cy.then(function () {
           const { lastLog } = this
 
           const consoleProps = lastLog.get('consoleProps')()
@@ -227,7 +237,6 @@ describe('src/cy/commands/querying/within', () => {
           expect(consoleProps).to.be.an('object')
           expect(consoleProps.Command).to.eq('within')
           expect(consoleProps.Yielded).to.not.be.null
-          expect(consoleProps.Yielded).to.have.length(55)
         })
       })
     })
@@ -287,12 +296,22 @@ describe('src/cy/commands/querying/within', () => {
         })
 
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.within()` failed because this element')
+          expect(err.message).to.include('`cy.within()` failed because it requires a DOM element')
 
           done()
         })
 
         cy.get('#list').within(() => {})
+      })
+
+      it('throws when given multiple subjects', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.within()` can only be called on a single element. Your subject contained 9 elements.')
+
+          done()
+        })
+
+        cy.get('ul').within(() => {})
       })
     })
   })

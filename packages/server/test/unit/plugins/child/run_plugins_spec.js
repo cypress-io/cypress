@@ -268,13 +268,23 @@ describe.skip('lib/plugins/child/run_plugins', () => {
       })
     })
 
-    it('defines global __cypressCallbackReplacementCommands if experimentalSessionAndOrigin: true', function () {
+    it('defines global __cypressCallbackReplacementCommands', function () {
+      const setupNodeEventsFn = sinon.spy()
+
+      runPlugins.runSetupNodeEvents(setupNodeEventsFn)
+
+      this.ipc.on.withArgs('load:plugins').yield()
+
+      expect(global.__cypressCallbackReplacementCommands).to.deep.equal(['origin'])
+    })
+
+    it('defines global __cypressCallbackReplacementCommands if experimentalOriginDependencies: true', function () {
       const setupNodeEventsFn = sinon.spy()
 
       runPlugins.runSetupNodeEvents(setupNodeEventsFn)
 
       const config = {
-        experimentalSessionAndOrigin: true,
+        experimentalOriginDependencies: true,
       }
 
       this.ipc.on.withArgs('load:plugins').yield(config)
@@ -282,13 +292,13 @@ describe.skip('lib/plugins/child/run_plugins', () => {
       expect(global.__cypressCallbackReplacementCommands).to.deep.equal(['origin'])
     })
 
-    it('does not define global __cypressCallbackReplacementCommands if experimentalSessionAndOrigin: false', function () {
+    it('does not define global __cypressCallbackReplacementCommands if experimentalOriginDependencies: false', function () {
       const setupNodeEventsFn = sinon.spy()
 
       runPlugins.runSetupNodeEvents(setupNodeEventsFn)
 
       const config = {
-        experimentalSessionAndOrigin: false,
+        experimentalOriginDependencies: false,
       }
 
       this.ipc.on.withArgs('load:plugins').yield(config)

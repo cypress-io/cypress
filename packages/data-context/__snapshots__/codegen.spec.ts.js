@@ -28,7 +28,6 @@ module.exports = defineConfig({
       return require('./cypress/plugins/index.js')(on, config)
     },
     baseUrl: 'localhost:3000',
-    experimentalSessionAndOrigin: true,
   },
   component: {
     setupNodeEvents(on, config) {},
@@ -69,7 +68,6 @@ module.exports = defineConfig({
     },
     retries: 2,
     baseUrl: 'localhost:300',
-    experimentalSessionAndOrigin: true,
     slowTestThreshold: 500,
   },
   component: {

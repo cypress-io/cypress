@@ -543,6 +543,11 @@ describe('util', () => {
       expect(util.getEnv('CYPRESS_FOO')).to.eql('')
     })
 
+    it('npm config set should work', () => {
+      process.env.npm_config_cypress_foo_foo = 'bazz'
+      expect(util.getEnv('CYPRESS_FOO_FOO')).to.eql('bazz')
+    })
+
     it('throws on non-string name', () => {
       expect(() => {
         util.getEnv()

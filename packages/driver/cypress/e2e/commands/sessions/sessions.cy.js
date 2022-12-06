@@ -52,7 +52,7 @@ describe('cy.session', { retries: 0 }, () => {
     })
   })
 
-  describe('testIsolation=on', { testIsolation: 'on' }, () => {
+  describe('testIsolation=true', { testIsolation: true }, () => {
     describe('test:before:run:async', () => {
       it('clears page before each run', () => {
         cy.visit('/fixtures/form.html')
@@ -62,9 +62,10 @@ describe('cy.session', { retries: 0 }, () => {
           await Cypress.action('runner:test:before:run:async', {})
 
           expect(Cypress.action).to.be.calledWith('cy:url:changed', '')
-          expect(Cypress.action).to.be.calledWith('cy:visit:blank', { type: 'session-lifecycle' })
+          expect(Cypress.action).to.be.calledWith('cy:visit:blank', { testIsolation: true })
         })
-        .url('about:blank')
+        .url()
+        .should('eq', 'about:blank')
       })
 
       it('clears session data before each run', async () => {
@@ -96,7 +97,7 @@ describe('cy.session', { retries: 0 }, () => {
           await Cypress.action('runner:test:before:run:async', {})
 
           expect(Cypress.action).to.be.calledWith('cy:url:changed', '')
-          expect(Cypress.action).to.be.calledWith('cy:visit:blank', { type: 'session-lifecycle' })
+          expect(Cypress.action).to.be.calledWith('cy:visit:blank', { testIsolation: true })
         })
 
         cy.window().its('cookie').should('be.undefined')
@@ -775,7 +776,7 @@ describe('cy.session', { retries: 0 }, () => {
     })
   })
 
-  describe('testIsolation=off', { testIsolation: 'off' }, () => {
+  describe('testIsolation=false', { testIsolation: false }, () => {
     before(async () => {
       // manually ensure clear browser state! since we turned testIsolation off
       await Cypress.session.clearCurrentSessionData()
@@ -1457,50 +1458,6 @@ describe('cy.session', { retries: 0 }, () => {
       })
 
       return null
-    })
-
-    it('throws error when experimentalSessionAndOrigin not enabled', { experimentalSessionAndOrigin: false, experimentalSessionSupport: false }, (done) => {
-      cy.once('fail', (err) => {
-        expect(lastSessionLog).to.eq(lastLog)
-        expect(lastSessionLog.get('error')).to.eq(err)
-        expect(lastSessionLog.get('state')).to.eq('failed')
-        expect(err.message).to.eq('`cy.session()` requires enabling the `experimentalSessionAndOrigin` flag.')
-        expect(err.docsUrl).to.eq('https://on.cypress.io/session')
-
-        done()
-      })
-
-      cy.session('sessions-not-enabled')
-    })
-
-    it('throws error when experimentalSessionSupport is enabled through test config', { experimentalSessionAndOrigin: false, experimentalSessionSupport: true }, (done) => {
-      cy.once('fail', (err) => {
-        expect(lastSessionLog).to.eq(lastLog)
-        expect(lastSessionLog.get('error')).to.eq(err)
-        expect(lastSessionLog.get('state')).to.eq('failed')
-        expect(err.message).to.eq('\`cy.session()\` requires enabling the \`experimentalSessionAndOrigin\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0.')
-        expect(err.docsUrl).to.eq('https://on.cypress.io/session')
-
-        done()
-      })
-
-      cy.session('sessions-not-enabled')
-    })
-
-    it('throws error when experimentalSessionSupport is enabled through Cypress.config', { experimentalSessionAndOrigin: false }, (done) => {
-      Cypress.config('experimentalSessionSupport', true)
-
-      cy.once('fail', (err) => {
-        Cypress.config('experimentalSessionSupport', false)
-        expect(lastSessionLog).to.eq(lastLog)
-        expect(lastLog.get('error')).to.eq(err)
-        expect(lastLog.get('state')).to.eq('failed')
-        expect(err.message).to.eq('\`cy.session()\` requires enabling the \`experimentalSessionAndOrigin\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0.')
-        expect(err.docsUrl).to.eq('https://on.cypress.io/session')
-        done()
-      })
-
-      cy.session('sessions-not-enabled')
     })
 
     it('throws when sessionId argument was not provided', function (done) {

@@ -443,7 +443,7 @@ const _handlePausedRequests = async (client) => {
 }
 
 const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
-  const cdpAutomation = await CdpAutomation.create(client.send, client.on, resetBrowserTargets, automation, !!options.experimentalSessionAndOrigin)
+  const cdpAutomation = await CdpAutomation.create(client.send, client.on, resetBrowserTargets, automation)
 
   automation.use(cdpAutomation)
 
@@ -636,10 +636,8 @@ export = {
 
     await this._navigateUsingCRI(pageCriClient, url)
 
-    if (options.experimentalSessionAndOrigin) {
-      await this._handlePausedRequests(pageCriClient)
-      _listenForFrameTreeChanges(pageCriClient)
-    }
+    await this._handlePausedRequests(pageCriClient)
+    _listenForFrameTreeChanges(pageCriClient)
 
     return cdpAutomation
   },

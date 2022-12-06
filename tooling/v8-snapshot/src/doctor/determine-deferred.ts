@@ -20,6 +20,7 @@ export async function determineDeferred (
     forceNoRewrite: Set<string>
     useHashBasedCache: boolean
     nodeEnv: string
+    integrityCheckSource: string | undefined
   },
 ) {
   const jsonPath = path.join(cacheDir, 'snapshot-meta.json')
@@ -73,6 +74,7 @@ export async function determineDeferred (
     forceNoRewrite: opts.forceNoRewrite,
     nodeEnv: opts.nodeEnv,
     supportTypeScript: opts.nodeModulesOnly,
+    integrityCheckSource: opts.integrityCheckSource,
   })
 
   const {
