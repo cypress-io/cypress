@@ -1,0 +1,7 @@
+{
+  "TodoMVC - React": {
+    "No Todos": {
+      "should hide #main and #footer": "pass"
+    }
+  }
+}

@@ -1889,11 +1889,14 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Run tests
-          command: yarn workspace @cypress/grep cy:run
+          command: yarn workspace @cypress/grep test
       - store_test_results:
           path: npm/grep/test_results
       - store_artifacts:
           path: npm/grep/test_results
+      - run:
+          name: Run e2e tests
+          command: yarn workspace @cypress/grep cy:run
       - store-npm-logs
 
   npm-create-cypress-tests:

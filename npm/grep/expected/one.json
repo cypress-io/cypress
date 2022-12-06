@@ -1,0 +1,7 @@
+{
+  "TodoMVC - React": {
+    "Mark all as completed": {
+      "complete all checkbox should update state when items are completed / cleared": "pass"
+    }
+  }
+}

@@ -24,5 +24,9 @@
         "runs too": "passing"
       }
     }
+  },
+  "should run these tests": {
+    "parameterized title": "passed",
+    "split title": "passed"
   }
 }

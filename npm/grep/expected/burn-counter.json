@@ -1,0 +1,12 @@
+{
+  "TodoMVC - React": {
+    "Counter": {
+      "should not exist without items: burning 1 of 3": "pass",
+      "should not exist without items: burning 2 of 3": "pass",
+      "should not exist without items: burning 3 of 3": "pass",
+      "should display the current number of todo items: burning 1 of 3": "pass",
+      "should display the current number of todo items: burning 2 of 3": "pass",
+      "should display the current number of todo items: burning 3 of 3": "pass"
+    }
+  }
+}

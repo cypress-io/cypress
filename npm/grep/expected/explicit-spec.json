@@ -1,0 +1,9 @@
+{
+  "tag1": "passed",
+  "tag2": "pending",
+  "tag3": "pending",
+  "tag1 and 2": "pending",
+  "tag1 and 3": "passed",
+  "tag2 and 3": "pending",
+  "all tags": "pending"
+}

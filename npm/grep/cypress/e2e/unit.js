@@ -158,7 +158,7 @@ describe('utils', () => {
       ])
     })
 
-    // TODO: would need to change the tokenizer
+    // NOTE: would need to change the tokenizer
     it.skip('parses tag1 but not tag2', () => {
       const parsed = parseTagsGrep('@tag1-@tag2')
 
@@ -177,6 +177,14 @@ describe('utils', () => {
         [{ tag: '@tag1', invert: true }, { tag: '@tag2', invert: true }],
       ])
     })
+
+    it('filters out explicit not tags', () => {
+      const parsed = parseTagsGrep('@tag1 --@tag2 -@tag3')
+
+      expect(parsed).to.deep.equal([
+        [{ tag: '@tag1', invert: false }, { tag: '@tag2', invert: true }],
+        [{ tag: '@tag3', invert: true }, { tag: '@tag2', invert: true }],
+      ])
   })
 
   context('parseGrep', () => {
