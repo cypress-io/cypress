@@ -25,6 +25,7 @@ export function useSpecFilter (savedFilter?: string) {
 
   function setSpecFilter (specFilter: string) {
     if (specStore.specFilter !== specFilter) {
+      specStore.setSpecFilter(specFilter)
       saveSpecFilter.executeMutation({ value: JSON.stringify({ specFilter }) })
     }
   }
