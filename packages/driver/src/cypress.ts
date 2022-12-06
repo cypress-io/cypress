@@ -180,10 +180,9 @@ class $Cypress {
   configure (config: Record<string, any> = {}) {
     const domainName = config.remote ? config.remote.domainName : undefined
 
-    // set domainName but allow us to turn off this feature in testing. not
-    // needed for cross-origin spec bridge, since it is strictly used
-    // same-origin
-    if (domainName && !this.isCrossOriginSpecBridge && config.testingType === 'e2e') {
+    // set domainName but allow us to turn
+    // off this feature in testing
+    if (domainName && config.testingType === 'e2e') {
       document.domain = domainName
     }
 
