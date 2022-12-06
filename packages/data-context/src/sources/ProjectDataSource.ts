@@ -522,7 +522,12 @@ export class ProjectDataSource {
       throw Error(`Cannot find components without currentProject.`)
     }
 
-    const codeGenCandidates = await this.ctx.file.getFilesByGlob(projectRoot, glob, { expandDirectories: true })
+    const codeGenCandidates = await this.ctx.file.getFilesByGlob(
+      projectRoot,
+      glob,
+      // ignore configuration files and Cypress-related files
+      { expandDirectories: true, ignore: ['**/*.config.{js,ts}', '**/*.{cy,spec}.{js,ts,jsx,tsx}', 'cypress/**'] },
+    )
 
     return codeGenCandidates.map((absolute) => ({ absolute }))
   }
