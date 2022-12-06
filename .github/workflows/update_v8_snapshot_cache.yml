@@ -13,6 +13,10 @@ on:
         description: 'Generate from scratch'
         type: boolean
         default: false
+      commit_directly_to_branch:
+        description: 'Commit directly to branch'
+        type: boolean
+        default: false
 concurrency: 
   group: ${{ inputs.branch || github.ref }}
   cancel-in-progress: true
@@ -30,7 +34,8 @@ jobs:
     steps:
       - name: Determine snapshot files - Windows
         if: ${{ matrix.platform == 'windows-latest' }}
-        run: echo "SNAPSHOT_FILES='tooling\v8-snapshot\cache\win32\snapshot-meta.json'" | Out-File -FilePath $env:GITHUB_ENV -Append
+        run: echo "SNAPSHOT_FILES='tooling\v8-snapshot\cache\win32\snapshot-meta.json'" >> $GITHUB_ENV
+        shell: bash
       - name: Determine snapshot files - Linux
         if: ${{ matrix.platform == 'ubuntu-latest' }}
         run: echo "SNAPSHOT_FILES='tooling/v8-snapshot/cache/linux/snapshot-meta.json'" >> $GITHUB_ENV
@@ -68,13 +73,19 @@ jobs:
         run: |
           echo "has_changes=$(test "$(git status --porcelain -- ${{ env.SNAPSHOT_FILES }})" && echo 'true')" >> $GITHUB_OUTPUT
         shell: bash
-      - name: Determine name of new branch and if it already exists
+      - name: Determine branch name - commit directly to branch
         id: check-branch
-        env:
-          BRANCH_NAME: update-v8-snapshot-cache-on-${{ env.BASE_BRANCH }}
+        if: ${{ inputs.commit_directly_to_branch }}
         run: |
-          echo "branch_name=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
-          echo "branch_exists=$(git show-ref --verify --quiet refs/remotes/origin/${{ env.BRANCH_NAME }} && echo 'true')" >> $GITHUB_OUTPUT
+          echo "branch_name=${{ env.BASE_BRANCH }}" >> $GITHUB_ENV
+          echo "branch_exists=$(git show-ref --verify --quiet refs/remotes/origin/${{ env.BASE_BRANCH }} && echo 'true')" >> $GITHUB_OUTPUT
+        shell: bash
+      - name: Determine branch name - commit to separate branch
+        id: check-branch
+        if: ${{ !inputs.commit_directly_to_branch }}
+        run: |
+          echo "branch_name=update-v8-snapshot-cache-on-${{ env.BASE_BRANCH }}" >> $GITHUB_OUTPUT
+          echo "branch_exists=$(git show-ref --verify --quiet refs/remotes/origin/update-v8-snapshot-cache-on-${{ env.BASE_BRANCH }} && echo 'true')" >> $GITHUB_OUTPUT
         shell: bash
       - name: Check need for PR or branch update
         id: check-need-for-pr
