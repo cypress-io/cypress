@@ -1,5 +1,10 @@
 const runChildProcess = async (entryPoint) => {
   require('./lib/plugins/child/register_ts_node')
+
+  const { hookRequire } = require('@packages/server/hook-require')
+
+  hookRequire({ forceTypeScript: false })
+
   require(entryPoint)
 }
 

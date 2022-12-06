@@ -1,7 +1,3 @@
-const { hookRequire } = require('@packages/server/hook-require')
-
-hookRequire({ forceTypeScript: false })
-
 import path from 'path'
 import execa from 'execa'
 
