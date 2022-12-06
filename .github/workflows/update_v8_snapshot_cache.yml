@@ -30,7 +30,7 @@ jobs:
     steps:
       - name: Determine snapshot files - Windows
         if: ${{ matrix.platform == 'windows-latest' }}
-        run: echo "SNAPSHOT_FILES='tooling\v8-snapshot\cache\win32\snapshot-meta.json'" >> $GITHUB_ENV
+        run: echo "SNAPSHOT_FILES='tooling\v8-snapshot\cache\win32\snapshot-meta.json'" | Out-File -FilePath $env:GITHUB_ENV -Append
       - name: Determine snapshot files - Linux
         if: ${{ matrix.platform == 'ubuntu-latest' }}
         run: echo "SNAPSHOT_FILES='tooling/v8-snapshot/cache/linux/snapshot-meta.json'" >> $GITHUB_ENV
