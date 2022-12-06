@@ -38,7 +38,7 @@
             group-hover:mix-blend-luminosity
             "
           >
-            {{ t('topNav.version') }} {{ browser.version }}
+            {{ t('topNav.version') }} {{ browser.majorVersion }}
           </div>
         </div>
       </div>
