@@ -38,7 +38,7 @@
             group-hover:mix-blend-luminosity
             "
           >
-            {{ t('topNav.version') }} {{ browser.majorVersion }}
+            {{ t('topNav.version') }} {{ browser.version }}
           </div>
         </div>
       </div>
@@ -95,7 +95,6 @@ fragment VerticalBrowserListItems on CurrentProject {
     id
     isSelected
     displayName
-    version
     majorVersion
     isVersionSupported
     warning
