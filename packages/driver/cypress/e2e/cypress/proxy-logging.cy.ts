@@ -49,7 +49,7 @@ describe('Proxy Logging', () => {
     it('fetch log shows resource type, url, method, and status code and has expected snapshots and consoleProps', {
       // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23443
       retries: 15,
-      // TODO(webkit): fix+unskip for experimental webkit release
+      // TODO(webkit): fix+unskip for webkit release
       browser: '!webkit',
     }, (done) => {
       fetch('/some-url')

@@ -1803,7 +1803,7 @@ describe('src/cy/commands/navigation', () => {
     })
   })
 
-  // TODO(webkit): fix+unskip for experimental webkit release
+  // TODO(webkit): fix+unskip for webkit release
   context('#page load', { browser: '!webkit' }, () => {
     it('sets initial=true and then removes', () => {
       Cookie.remove('__cypress.initial')
@@ -2200,7 +2200,7 @@ describe('src/cy/commands/navigation', () => {
     })
   })
 
-  // TODO(webkit): fix+unskip for experimental webkit release
+  // TODO(webkit): fix+unskip for webkit release
   context('#url:changed', { browser: '!webkit' }, () => {
     beforeEach(function () {
       this.logs = []
