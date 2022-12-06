@@ -32,11 +32,20 @@
       :class="tableGridColumns"
     >
       <div
-        class="flex items-center justify-between"
+        class="flex items-center"
         data-cy="specs-testing-type-header"
       >
-        {{ props.gql.currentProject?.currentTestingType === 'component' ?
-          t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
+        <span>
+          {{ props.gql.currentProject?.currentTestingType === 'component'
+            ? t('specPage.componentSpecsHeader')
+            : t('specPage.e2eSpecsHeader') }}
+        </span>
+        <SpecsRunAllSpecs
+          v-if="runAllSpecsStore.isRunAllSpecsAllowed"
+          :spec-number="runAllSpecsStore.allSpecsRef.length"
+          directory="all"
+          @runAllSpecs="runAllSpecsStore.runAllSpecs"
+        />
       </div>
       <div class="flex items-center justify-between truncate">
         <LastUpdatedHeader :is-git-available="isGitAvailable" />
@@ -83,7 +92,7 @@
           :data-cy-row="row.data.data?.baseName"
           :is-leaf="row.data.isLeaf"
           :is-project-connected="projectConnectionStatus === 'CONNECTED'"
-          :grid-columns="tableGridColumns"
+          :grid-columns="row.data.isLeaf ? tableGridColumns : 'grid-cols-[1fr]'"
           :route="{ path: '/specs/runner', query: { file: row.data.data?.relative?.replace(/\\/g, '/') } }"
           @toggleRow="row.data.toggle"
         >
@@ -112,8 +121,16 @@
               :style="{ paddingLeft: `${(row.data.depth - 2) * 10}px` }"
               :indexes="row.data.highlightIndexes"
               :aria-controls="getIdIfDirectory(row)"
-              @click.stop="row.data.toggle"
-            />
+              @toggle="() => row.data.toggle()"
+            >
+              <SpecsRunAllSpecs
+                v-if="runAllSpecsStore.isRunAllSpecsAllowed"
+                :directory="row.data.name"
+                class="opacity-0 run-all"
+                :spec-number="runAllSpecsStore.directoryChildren[row.data.id].length"
+                @runAllSpecs="() => runAllSpecsStore.runSelectedSpecs(row.data.id)"
+              />
+            </RowDirectory>
           </template>
 
           <template #git-info>
@@ -183,12 +200,11 @@ import { gql, useSubscription } from '@urql/vue'
 import { computed, ref, toRef, watch } from 'vue'
 import { Specs_SpecsListFragment, SpecsList_GitInfoUpdatedDocument, SpecsListFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { buildSpecTree, fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
-import type { FuzzyFoundSpec } from './spec-utils'
-import { useCollapsibleTree } from '@packages/frontend-shared/src/composables/useCollapsibleTree'
+import { buildSpecTree, FuzzyFoundSpec, useCollapsibleTree } from './tree/useCollapsibleTree'
+import { fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
 import RowDirectory from './RowDirectory.vue'
 import SpecItem from './SpecItem.vue'
-import { useVirtualList } from '@packages/frontend-shared/src/composables/useVirtualList'
+import { useVirtualList } from './tree/useVirtualList'
 import NoResults from '@cy/components/NoResults.vue'
 import SpecPatternModal from '../components/SpecPatternModal.vue'
 import { useOnline, useResizeObserver } from '@vueuse/core'
@@ -198,6 +214,8 @@ import { useCloudSpecData } from '../composables/useCloudSpecData'
 import { useSpecFilter } from '../composables/useSpecFilter'
 import { useRequestAccess } from '../composables/useRequestAccess'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import SpecsRunAllSpecs from './SpecsRunAllSpecs.vue'
+import { useRunAllSpecsStore } from '../store/run-all-specs-store'
 
 const { openLoginConnectModal } = useLoginConnectStore()
 
@@ -417,6 +435,12 @@ const { refetchFailedCloudData } = useCloudSpecData(
   props.gql.currentProject?.specs as SpecsListFragment[] || [],
 )
 
+const runAllSpecsStore = useRunAllSpecsStore()
+
+watch(collapsible, () => {
+  runAllSpecsStore.setRunAllSpecsData(collapsible.value.tree)
+}, { immediate: true })
+
 </script>
 
 <style scoped>
@@ -430,5 +454,13 @@ const { refetchFailedCloudData } = useCloudSpecData(
 /** Search bar is 72px + List header is 40px = 112px offset */
 .spec-list-container {
   height: calc(100% - 112px)
+}
+
+/**
+ * Can't put a group on the parent element as it has downstream effects on the styling of child components
+ * that have individual group stylings.
+ */
+[data-cy=spec-list-directory]:hover .run-all, [data-cy=spec-list-directory]:focus-within .run-all {
+  opacity: 1 !important;
 }
 </style>

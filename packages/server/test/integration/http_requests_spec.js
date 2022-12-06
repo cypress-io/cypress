@@ -2628,7 +2628,7 @@ describe('Routes', () => {
         })
       })
 
-      it('injects document.domain on matching super domains but different subdomain', function () {
+      it('does not inject document.domain on matching super domains but different subdomain - when the domain is set to strict same origin (google)', function () {
         nock('http://mail.google.com')
         .get('/iframe')
         .reply(200, '<html><head></head></html>', {
@@ -2647,11 +2647,11 @@ describe('Routes', () => {
 
           const body = cleanResponseBody(res.body)
 
-          expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = \'google.com\'; </script></head></html>')
+          expect(body).to.eq('<html><head></head></html>')
         })
       })
 
-      it('injects document.domain on AUT iframe requests that do not match current superDomain', function () {
+      it('does not inject document.domain on AUT iframe requests that do not match current superDomain', function () {
         nock('http://www.foobar.com')
         .get('/')
         .reply(200, '<html><head></head><body>hi</body></html>', {
@@ -2671,7 +2671,7 @@ describe('Routes', () => {
 
           const body = cleanResponseBody(res.body)
 
-          expect(body).to.include(`<html><head> <script type='text/javascript'> document.domain = 'foobar.com';`)
+          expect(body).not.to.include('document.domain =')
         })
       })
 
@@ -2787,6 +2787,35 @@ describe('Routes', () => {
 
             expect(body).to.eq('<html><head></head></html>')
           })
+        })
+      })
+    })
+
+    context('content injection', () => {
+      beforeEach(function () {
+        return this.setup('http://www.foo.com')
+      })
+
+      it('injects document.domain on matching super domains but different subdomain - non google domain', function () {
+        nock('http://mail.foo.com')
+        .get('/iframe')
+        .reply(200, '<html><head></head></html>', {
+          'Content-Type': 'text/html',
+        })
+
+        return this.rp({
+          url: 'http://mail.foo.com/iframe',
+          headers: {
+            'Cookie': '__cypress.initial=false',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          },
+        })
+        .then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          const body = cleanResponseBody(res.body)
+
+          expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = \'foo.com\'; </script></head></html>')
         })
       })
     })

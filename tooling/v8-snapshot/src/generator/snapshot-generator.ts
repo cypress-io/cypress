@@ -100,6 +100,7 @@ export type GenerationOpts = {
   nodeEnv: string
   minify: boolean
   supportTypeScript: boolean
+  integrityCheckSource: string | undefined
 }
 
 function getDefaultGenerationOpts (projectBaseDir: string): GenerationOpts {
@@ -114,6 +115,7 @@ function getDefaultGenerationOpts (projectBaseDir: string): GenerationOpts {
     nodeEnv: 'development',
     minify: false,
     supportTypeScript: false,
+    integrityCheckSource: undefined,
   }
 }
 
@@ -156,6 +158,8 @@ export class SnapshotGenerator {
   private readonly nodeEnv: string
   /** See {@link GenerationOpts} minify */
   private readonly minify: boolean
+  /** See {@link GenerationOpts} integrityCheckSource */
+  private readonly integrityCheckSource: string | undefined
   /**
    * Path to the Go bundler binary used to generate the bundle with rewritten code
    * {@link https://github.com/cypress-io/esbuild/tree/thlorenz/snap}
@@ -208,6 +212,7 @@ export class SnapshotGenerator {
       flags: mode,
       nodeEnv,
       minify,
+      integrityCheckSource,
     }: GenerationOpts = Object.assign(
       getDefaultGenerationOpts(projectBaseDir),
       opts,
@@ -234,6 +239,7 @@ export class SnapshotGenerator {
     this._flags = new GeneratorFlags(mode)
     this.bundlerPath = getBundlerPath()
     this.minify = minify
+    this.integrityCheckSource = integrityCheckSource
 
     const auxiliaryDataKeys = Object.keys(this.auxiliaryData || {})
 
@@ -282,6 +288,7 @@ export class SnapshotGenerator {
           forceNoRewrite: this.forceNoRewrite,
           useHashBasedCache: this._flags.has(Flag.ReuseDoctorArtifacts),
           nodeEnv: this.nodeEnv,
+          integrityCheckSource: this.integrityCheckSource,
         },
       ))
     } catch (err) {
@@ -309,6 +316,7 @@ export class SnapshotGenerator {
         processedSourcemapExternalPath: this.snapshotScriptPath.replace('snapshot.js', 'processed.snapshot.js.map'),
         nodeEnv: this.nodeEnv,
         supportTypeScript: this.nodeModulesOnly,
+        integrityCheckSource: this.integrityCheckSource,
       })
     } catch (err) {
       logError('Failed creating script')
@@ -388,6 +396,7 @@ export class SnapshotGenerator {
           forceNoRewrite: this.forceNoRewrite,
           useHashBasedCache: this._flags.has(Flag.ReuseDoctorArtifacts),
           nodeEnv: this.nodeEnv,
+          integrityCheckSource: this.integrityCheckSource,
         },
       ))
     } catch (err) {
@@ -413,6 +422,7 @@ export class SnapshotGenerator {
         auxiliaryData: this.auxiliaryData,
         nodeEnv: this.nodeEnv,
         supportTypeScript: this.nodeModulesOnly,
+        integrityCheckSource: this.integrityCheckSource,
       })
     } catch (err) {
       logError('Failed creating script')

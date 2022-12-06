@@ -12,7 +12,7 @@ export type HttpBuffer = {
   response: IncomingMessage
   stream: Readable
   url: string
-  isCrossSuperDomainOrigin: boolean
+  urlDoesNotMatchPolicyBasedOnDomain: boolean
 }
 
 const stripPort = (url) => {

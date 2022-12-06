@@ -20,7 +20,7 @@ export function readSnapshotResult (cacheDir: string) {
   const sourcemapComment = snapshotFileContent.split('\n').pop()
 
   const { snapshotResult, snapshotAuxiliaryData } = eval(
-    `(function () {\n${snapshotFileContent};\n return { snapshotResult, snapshotAuxiliaryData };})()`,
+    `(function () {\n${snapshotFileContent};\n return { snapshotResult, snapshotAuxiliaryData };}).bind({})()`,
   )
 
   return { meta, snapshotResult, snapshotAuxiliaryData, sourcemapComment }

@@ -68,7 +68,7 @@ const onInvoke = function (Cypress, obj, args) {
   const logProps: Record<string, any> = {
     name: agentName,
     message: obj.message,
-    error: obj.error,
+    state: obj.error ? 'failed' : 'passed',
     type: 'parent',
     end: true,
     snapshot: !agent._noSnapshot,
@@ -235,7 +235,7 @@ export default function (Commands, Cypress, cy, state) {
     agent.as = (alias) => {
       cy.validateAlias(alias)
       cy.addAlias(ctx, {
-        subject: agent,
+        subjectChain: [agent],
         command: log,
         alias,
       })

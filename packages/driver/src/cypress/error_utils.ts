@@ -148,6 +148,7 @@ const getUserInvocationStack = (err, state) => {
     !userInvocationStack
     || err.isDefaultAssertionErr
     || (currentAssertionCommand && !current?.get('followedByShouldCallback'))
+    || withInvocationStack?.get('selector')
   ) {
     userInvocationStack = withInvocationStack?.get('userInvocationStack')
   }
@@ -212,12 +213,12 @@ const makeErrFromErr = (err, options: any = {}) => {
   // assume onFail is a command if
   // onFail is present and isn't a function
   if (onFail && !_.isFunction(onFail)) {
-    const command = onFail
+    const log = onFail
 
     // redefine onFail and automatically
     // hook this into our command
     onFail = (err) => {
-      return command.error(err)
+      return log.error(err)
     }
   }
 
@@ -262,7 +263,8 @@ const warnByPath = (errPath, options: any = {}) => {
 }
 
 export class InternalCypressError extends Error {
-  onFail?: undefined | Function
+  onFail?: Function
+  isRecovered?: boolean
 
   constructor (message) {
     super(message)
@@ -279,7 +281,8 @@ export class CypressError extends Error {
   docsUrl?: string
   retry?: boolean
   userInvocationStack?: any
-  onFail?: undefined | Function
+  onFail?: Function
+  isRecovered?: boolean
 
   constructor (message) {
     super(message)

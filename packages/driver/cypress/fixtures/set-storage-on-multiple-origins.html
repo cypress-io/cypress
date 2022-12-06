@@ -1,0 +1,9 @@
+<h1>Set storage on multiple origins</h1>
+<script>
+  const $ = Cypress.$
+
+  $(`<iframe src="http://localhost:3500/fixtures/set-storage.html?nums=1,2"></iframe>`).appendTo($('body'))
+  $(`<iframe src="http://www.foobar.com:3500/fixtures/set-storage.html?nums=3,4"></iframe>`).appendTo($('body'))
+  $(`<iframe src="http://other.foobar.com:3500/fixtures/set-storage.html?nums=5,6"></iframe>`).appendTo($('body'))
+  $(`<iframe src="http://barbaz.com:3500/fixtures/set-storage.html?nums=7,8"></iframe>`).appendTo($('body'))
+</script>

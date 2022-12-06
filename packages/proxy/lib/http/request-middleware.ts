@@ -35,8 +35,7 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
     delete this.req.headers['x-cypress-is-xhr-or-fetch']
   }
 
-  if (!this.config.experimentalSessionAndOrigin ||
-    !doesTopNeedToBeSimulated(this) ||
+  if (!doesTopNeedToBeSimulated(this) ||
     // this should be unreachable, as the x-cypress-is-xhr-or-fetch header is only attached if
     // the resource type is 'xhr' or 'fetch or 'true' (in the case of electron|extension).
     // This is only needed for defensive purposes.
@@ -72,7 +71,7 @@ const MaybeSimulateSecHeaders: RequestMiddleware = function () {
 }
 
 const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
-  if (!this.config.experimentalSessionAndOrigin || !doesTopNeedToBeSimulated(this)) {
+  if (!doesTopNeedToBeSimulated(this)) {
     return this.next()
   }
 
@@ -159,7 +158,7 @@ const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
     this.debug('ending request with buffered response')
     // NOTE: Only inject fullCrossOrigin here if experimental is on and
     // the super domain origins do not match in order to keep parity with cypress application reloads
-    this.res.wantsInjection = this.config.experimentalSessionAndOrigin && buffer.isCrossSuperDomainOrigin ? 'fullCrossOrigin' : 'full'
+    this.res.wantsInjection = buffer.urlDoesNotMatchPolicyBasedOnDomain ? 'fullCrossOrigin' : 'full'
 
     return this.onResponse(buffer.response, buffer.stream)
   }

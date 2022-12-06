@@ -222,7 +222,7 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
     })
     .tap((opts) => {
       if (opts.devtool === false) {
-        // disable any overrides if we've explictly turned off sourcemaps
+        // disable any overrides if we've explicitly turned off sourcemaps
         overrideSourceMaps(false, options.typescript)
 
         return
@@ -248,8 +248,9 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
       // so that it's working with plain javascript
       webpackOptions.module.rules.unshift({
         test: /\.(js|ts|jsx|tsx)$/,
+        exclude: /node_modules/,
         use: [{
-          loader: path.join(__dirname, 'lib/cross-origin-callback-loader'),
+          loader: require.resolve('@cypress/webpack-preprocessor/dist/lib/cross-origin-callback-loader.js'),
           options: {
             commands: callbackReplacementCommands,
           },

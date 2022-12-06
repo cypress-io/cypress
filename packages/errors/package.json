@@ -14,7 +14,8 @@
     "clean": "rimraf ./src/*.js ./src/**/*.js ./src/**/**/*.js ./test/**/*.js || echo 'cleaned'",
     "pretest-unit": "yarn clean",
     "test-unit": "mocha",
-    "test-electron": "HTML_IMAGE_CONVERSION=1 xvfb-maybe electron --no-sandbox ./node_modules/.bin/_mocha"
+    "test-electron": "HTML_IMAGE_CONVERSION=1 xvfb-maybe electron --no-sandbox ./node_modules/.bin/_mocha",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {
     "ansi_up": "5.0.0",

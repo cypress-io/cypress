@@ -54,6 +54,31 @@ const isDomSubjectAndMatchesValue = (value, subject) => {
   return false
 }
 
+const exists = (subject, cy: $Cy) => {
+  // prevent any additional logs since this is an implicit assertion
+  cy.state('onBeforeLog', () => false)
+
+  // verify the $el exists and use our default error messages
+  try {
+    cy.expect(subject).to.exist
+  } finally {
+    cy.state('onBeforeLog', null)
+  }
+}
+
+const elExists = ($el, cy: $Cy) => {
+  // ensure that we either had some assertions
+  // or that the element existed
+  if ($el && $el.length) {
+    return
+  }
+
+  // TODO: REFACTOR THIS TO CALL THE CHAI-OVERRIDES DIRECTLY
+  // OR GO THROUGH I18N
+
+  return exists($el, cy)
+}
+
 type Parsed = {
   subject?: JQuery<any>
   actual?: any
@@ -81,7 +106,7 @@ const parseValueActualAndExpected = (value, actual, expected) => {
 
 export const create = (Cypress: ICypress, cy: $Cy) => {
   const getUpcomingAssertions = () => {
-    const index = cy.state('index') + 1
+    const index = cy.queue.index + 1
 
     const assertions: any[] = []
 
@@ -102,10 +127,6 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
     }
 
     return assertions
-  }
-
-  const injectAssertionFns = (cmds) => {
-    return _.map(cmds, injectAssertion)
   }
 
   const injectAssertion = (cmd) => {
@@ -187,8 +208,6 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
 
     _.extend(obj, {
       name: 'assert',
-      // end:      true
-      // snapshot: true
       message,
       passed,
       selector: value ? value.selector : undefined,
@@ -222,26 +241,36 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
     return null
   }
 
-  const finishAssertions = () => {
-    cy.state('current').get('logs').forEach((log) => {
-      if (log.get('next') || !log.get('snapshots')) {
-        log.snapshot()
+  const finishAssertions = (err?: Error) => {
+    const logs = cy.state('current').get('logs')
+
+    let hasLoggedError = false
+
+    logs.reverse().forEach((log, index) => {
+      if (log._shouldAutoEnd()) {
+        if (log.get('next') || !log.get('snapshots')) {
+          log.snapshot()
+        }
+
+        // @ts-ignore
+        if (err && (!hasLoggedError || (err.issuesCommunicatingOrFinding && index === logs.length - 1))) {
+          hasLoggedError = true
+
+          return log.error(err)
+        }
+
+        return log.end()
       }
-
-      const e = log.get('_error')
-
-      if (e) {
-        return log.error(e)
-      }
-
-      return log.end()
     })
+
+    cy.state('current').finishLogs()
   }
 
   type VerifyUpcomingAssertionsCallbacks = {
     ensureExistenceFor?: 'subject' | 'dom' | boolean
     onFail?: (err?, isDefaultAssertionErr?: boolean, cmds?: any[]) => void
     onRetry?: () => any
+    subjectFn?: () => any
   }
 
   return {
@@ -272,10 +301,10 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
               return
             }
 
-            return cy.ensureElExistence($el)
+            return elExists($el, cy)
           }
           case 'subject':
-            return cy.ensureExistence(subject)
+            return exists(subject, cy)
 
           default:
             return
@@ -307,10 +336,9 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         // ensure the error is about existence not about
         // the downstream assertion.
         try {
-          // Ensure the command is on the same origin as the AUT
-          cy.ensureCommandCanCommunicateWithAUT(err)
-          ensureExistence()
+          callbacks.ensureExistenceFor === 'dom' && ensureExistence()
         } catch (e2) {
+          e2.issuesCommunicatingOrFinding = true
           err = e2
         }
 
@@ -319,13 +347,10 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
 
         options.error = err
 
-        if (err.retry === false) {
-          throw err
-        }
-
         const { onFail, onRetry } = callbacks
 
-        if (!onFail && !onRetry) {
+        if (err.retry === false || (!onFail && !onRetry)) {
+          err.onFail = finishAssertions
           throw err
         }
 
@@ -338,7 +363,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
             onFail.call(this, err, isDefaultAssertionErr, cmds)
           }
         } catch (e3) {
-          finishAssertions()
+          e3.onFail = finishAssertions
           throw e3
         }
 
@@ -348,6 +373,14 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         }
 
         return
+      }
+
+      if (callbacks.subjectFn) {
+        try {
+          subject = callbacks.subjectFn()
+        } catch (err) {
+          return onFailFn(err)
+        }
       }
 
       // bail if we have no assertions and apply
@@ -382,7 +415,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         return assertFn.apply(this, args.concat(true) as any)
       }
 
-      const fns = injectAssertionFns(cmds)
+      const fns = _.map(cmds, injectAssertion)
 
       // TODO: remove any when the type of subject, the first argument of this function is specified.
       const subjects: any[] = []
@@ -396,7 +429,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
           const cmd = cmds[i]
 
           cmd.set('subject', subject)
-          cmd.skip()
+          cmd.skip() // technically this passed because it already ran
         })
 
         return cmds
@@ -442,15 +475,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
 
         // when we're told not to retry
         if (err.retry === false) {
-          // finish the assertions
-          finishAssertions()
-
-          // and then push our command into this err
-          try {
-            $errUtils.throwErr(err, { onFail: options._log })
-          } catch (e) {
-            err = e
-          }
+          throw $errUtils.throwErr(err, { onFail: finishAssertions })
         }
 
         throw err

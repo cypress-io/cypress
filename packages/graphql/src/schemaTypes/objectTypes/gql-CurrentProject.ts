@@ -64,7 +64,7 @@ export const CurrentProject = objectType({
 
     t.field('cloudProject', {
       type: 'CloudProjectResult',
-      description: 'The remote associated project from Cypress Dashboard',
+      description: 'The remote associated project from Cypress Cloud',
       resolve: async (source, args, ctx, info) => {
         const projectId = await ctx.project.projectId()
 
@@ -82,7 +82,7 @@ export const CurrentProject = objectType({
     })
 
     t.string('projectId', {
-      description: 'Used to associate project with Cypress Dashboard',
+      description: 'Used to associate project with Cypress Cloud',
       resolve: (source, args, ctx) => ctx.project.projectId(),
     })
 

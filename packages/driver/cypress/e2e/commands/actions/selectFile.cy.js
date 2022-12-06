@@ -336,7 +336,7 @@ describe('src/cy/commands/actions/selectFile', () => {
     })
 
     describe('errors', {
-      defaultCommandTimeout: 500,
+      defaultCommandTimeout: 100,
     }, () => {
       it('is a child command', (done) => {
         cy.on('fail', (err) => {
@@ -358,17 +358,17 @@ describe('src/cy/commands/actions/selectFile', () => {
 
       it('throws when non-input subject', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.selectFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing one. Your subject is: `<body>...</body>`')
+          expect(err.message).to.include('`cy.selectFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing a file input, but received the element:')
           expect(err.docsUrl).to.eq('https://on.cypress.io/selectfile')
           done()
         })
 
-        cy.get('body').selectFile({ contents: '@foo' })
+        cy.get('body').selectFile({ contents: '@foo' }, { timeout: 0 })
       })
 
       it('throws when non-file input', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.selectFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing one. Your subject is: `<input type="text" id="text-input">`')
+          expect(err.message).to.include('`cy.selectFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing a file input, but received the element:')
           expect(err.docsUrl).to.eq('https://on.cypress.io/selectfile')
           done()
         })
@@ -378,7 +378,7 @@ describe('src/cy/commands/actions/selectFile', () => {
 
       it('throws when label for non-file input', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.selectFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing one. Your subject is: `<label for="text-input" id="text-label">Text label</label>`')
+          expect(err.message).to.include('`cy.selectFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing a file input, but received the element:')
           expect(err.docsUrl).to.eq('https://on.cypress.io/selectfile')
           done()
         })
@@ -390,7 +390,7 @@ describe('src/cy/commands/actions/selectFile', () => {
         // Even though this label contains a file input, testing on real browsers confirms that clicking it
         // does *not* activate the contained input.
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.selectFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing one. Your subject is: `<label for="nonexistent" id="nonexistent-label">...</label>`')
+          expect(err.message).to.include('`cy.selectFile()` can only be called on an `<input type="file">` or a `<label for="fileInput">` pointing to or containing a file input, but received the element:')
           expect(err.docsUrl).to.eq('https://on.cypress.io/selectfile')
           done()
         })
@@ -511,6 +511,32 @@ describe('src/cy/commands/actions/selectFile', () => {
       })
     })
 
+    it('retries until label is not disabled', () => {
+      cy.on('command:retry', () => {
+        // Replace the label with a copy of itself, to ensure selectFile is requerying the DOM
+        const hidden = cy.$$('#hidden-basic-label')
+
+        hidden.replaceWith(hidden[0].outerHTML)
+
+        cy.$$('#hidden-basic-label').show()
+      })
+
+      cy.get('#hidden-basic-label').selectFile({ contents: '@foo' })
+    })
+
+    it('retries until input is not disabled', () => {
+      cy.on('command:retry', () => {
+        // Replace the input with a copy of itself, to ensure selectFile is requerying the DOM
+        const disabled = cy.$$('#disabled')
+
+        disabled.replaceWith(disabled[0].outerHTML)
+
+        cy.$$('#disabled').attr('disabled', false)
+      })
+
+      cy.get('#disabled-label').selectFile({ contents: '@foo' })
+    })
+
     /*
      * The tests around actionability are somewhat limited, since the functionality is thoroughly tested in the
      * `cy.trigger()` unit tests. We include a few tests directly on `cy.selectFile()` in order to ensure we're
@@ -625,25 +651,6 @@ is being covered by another element:
         cy.get('#scroll-label').selectFile({ contents: '@foo' }, { force: true })
         .then(() => {
           expect(scrolled).to.be.empty
-        })
-      })
-
-      it('waits until input stops animating', {
-        defaultCommandTimeout: 1000,
-      }, () => {
-        let retries = 0
-
-        cy.on('command:retry', (obj) => {
-          retries += 1
-        })
-
-        cy.stub(cy, 'ensureElementIsNotAnimating')
-        .throws(new Error('animating!'))
-        .onThirdCall().returns()
-
-        cy.get('#basic').selectFile({ contents: '@foo' }).then(() => {
-          expect(retries).to.eq(3)
-          expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
         })
       })
 

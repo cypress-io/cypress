@@ -21,21 +21,7 @@ export interface Emissions {
   ended: Record<string, boolean>
 }
 
-interface HtmlWebStorage {
-  origin: string
-  value: Record<string, any>
-}
-
-export interface ServerSessionData {
-  id: string
-  cacheAcrossSpecs: boolean
-  cookies: Cypress.Cookie[] | null
-  localStorage: Array<HtmlWebStorage> | null
-  sessionStorage: Array<HtmlWebStorage> | null
-  setup: string
-}
-
-export type StoredSessions = Record<string, ServerSessionData>
+export type StoredSessions = Record<string, Cypress.ServerSessionData>
 
 export interface CachedTestState {
   activeSessions: StoredSessions
@@ -43,4 +29,4 @@ export interface CachedTestState {
 
 export type Instrument = 'agent' | 'command' | 'route'
 
-export type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing'
+export type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing' | 'warned'

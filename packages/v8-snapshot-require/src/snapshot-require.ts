@@ -181,8 +181,8 @@ export function snapshotRequire (
   // 1. Assign snapshot which is a global if it was embedded
   const sr: Snapshot =
     opts.snapshotOverride ||
-    // @ts-ignore global snapshotResult
-    (typeof snapshotResult !== 'undefined' ? snapshotResult : undefined)
+    // @ts-ignore global getSnapshotResult
+    (typeof getSnapshotResult !== 'undefined' ? getSnapshotResult() : undefined)
 
   // If we have no snapshot we don't need to hook anything
   if (sr != null || alwaysHook) {
@@ -239,10 +239,7 @@ export function snapshotRequire (
         moduleNeedsReload,
       })
 
-    // @ts-ignore global snapshotResult
-    // 8. Ensure that the user passed the project base dir since the loader
-    //    cannot resolve modules without it
-    if (typeof snapshotResult !== 'undefined') {
+    if (typeof sr !== 'undefined') {
       const projectBaseDir = process.env.PROJECT_BASE_DIR
 
       if (projectBaseDir == null) {
@@ -261,8 +258,6 @@ export function snapshotRequire (
             return path.resolve(projectBaseDir, p)
           } catch (err) {
             logError(err)
-            // eslint-disable-next-line no-debugger
-            debugger
           }
 
           return
@@ -292,8 +287,8 @@ export function snapshotRequire (
 
       // 11. Inject those globals
 
-      // @ts-ignore global snapshotResult
-      snapshotResult.setGlobals(
+      // @ts-ignore setGlobals is a function on global sr
+      sr.setGlobals(
         global,
         checked_process,
         checked_window,
@@ -307,8 +302,8 @@ export function snapshotRequire (
 
       // @ts-ignore private module var
       require.cache = Module._cache
-      // @ts-ignore global snapshotResult
-      snapshotResult.customRequire.cache = require.cache
+      // @ts-ignore customRequire is a property of global sr
+      sr.customRequire.cache = require.cache
 
       // 12. Add some 'magic' functions that we can use from inside the
       //    snapshot in order to integrate module loading

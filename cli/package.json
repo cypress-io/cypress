@@ -16,6 +16,7 @@
     "test-unit": "yarn unit",
     "test-watch": "yarn unit --watch",
     "types": "yarn dtslint",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.vue .",
     "unit": "cross-env BLUEBIRD_DEBUG=1 NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
   },
   "dependencies": {
@@ -115,7 +116,7 @@
     "cypress": "bin/cypress"
   },
   "engines": {
-    "node": ">=12.0.0"
+    "node": "^14.0.0 || ^16.0.0 || >=18.0.0"
   },
   "types": "types",
   "exports": {

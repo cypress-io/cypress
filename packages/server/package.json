@@ -17,7 +17,8 @@
     "test": "node ./test/scripts/run.js",
     "test-integration": "node ./test/scripts/run.js --glob-in-dir=test/integration",
     "test-performance": "node ./test/scripts/run.js --glob-in-dir=test/performance",
-    "test-unit": "node ./test/scripts/run.js --glob-in-dir=test/unit"
+    "test-unit": "node ./test/scripts/run.js --glob-in-dir=test/unit",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {
     "@babel/parser": "7.13.0",
@@ -73,6 +74,7 @@
     "http-proxy": "https://github.com/cypress-io/node-http-proxy.git#9322b4b69b34f13a6f3874e660a35df3305179c6",
     "human-interval": "1.0.0",
     "image-size": "0.8.3",
+    "is-ci": "^3.0.0",
     "is-fork-pr": "2.5.0",
     "is-html": "2.0.0",
     "jimp": "0.14.0",
@@ -192,10 +194,11 @@
   },
   "files": [
     "config",
+    "hook-require.js",
     "lib",
     "patches",
-    "server-entry.js",
-    "hook-require.js"
+    "start-cypress.js",
+    "v8-snapshot-entry.js"
   ],
   "types": "index.d.ts",
   "productName": "Cypress",

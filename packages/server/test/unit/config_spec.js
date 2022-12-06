@@ -25,6 +25,8 @@ describe('lib/config', () => {
 
   context('.get', () => {
     beforeEach(async function () {
+      delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
+
       this.ctx = getCtx()
 
       this.projectRoot = '/_test-output/path/to/project'

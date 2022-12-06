@@ -257,11 +257,11 @@ We dynamically generated a new test to display this failure.
 `
 
 exports['e2e record api interaction errors project 404 errors and exits 1'] = `
-We could not find a Dashboard project with the projectId: pid123
+We could not find a Cypress Cloud project with the projectId: pid123
 
 This projectId came from your cypress-with-project-id.config.js file or an environment variable.
 
-Please log into the Dashboard and find your project.
+Please log into Cypress Cloud and find your project.
 
 We will list the correct projectId in the 'Settings' tab.
 
@@ -386,7 +386,7 @@ Your Record Key f858a...ee7e1 is not valid with this projectId: pid123
 
 It may have been recently revoked by you or another user.
 
-Please log into the Dashboard to see the valid Record Keys.
+Please log into Cypress Cloud to see the valid Record Keys.
 
 https://on.cypress.io/dashboard/projects/pid123
 
@@ -555,7 +555,7 @@ This error will not alter the exit code.
 exports['e2e record api interaction errors create run 422 errors and exits when group name is in use 1'] = `
 You passed the --group flag, but this group name has already been used for this run.
 
-The existing run is: https://dashboard.cypress.io/runs/12345
+The existing run is: https://cloud.cypress.io/runs/12345
 
 The --group flag you passed was: e2e-tests
 
@@ -1081,7 +1081,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 `
 
 exports['e2e record api interaction warnings create run warnings unknown warning warns with unknown warning code 1'] = `
-Warning from Cypress Dashboard: You are almost out of time
+Warning from Cypress Cloud: You are almost out of time
 
 Details:
 
@@ -1167,264 +1167,264 @@ Details:
 
 exports['e2e record passing passes 2'] = [
   {
-    "stats": {
-      "suites": 1,
-      "tests": 2,
-      "passes": 0,
-      "pending": 0,
-      "skipped": 1,
-      "failures": 1,
-      "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-      "wallClockEndedAt": "2018-02-01T20:14:19.323Z",
-      "wallClockDuration": 1234
+    'stats': {
+      'suites': 1,
+      'tests': 2,
+      'passes': 0,
+      'pending': 0,
+      'skipped': 1,
+      'failures': 1,
+      'wallClockStartedAt': '2018-02-01T20:14:19.323Z',
+      'wallClockEndedAt': '2018-02-01T20:14:19.323Z',
+      'wallClockDuration': 1234,
     },
-    "tests": [
+    'tests': [
       {
-        "clientId": "r3",
-        "state": "failed",
-        "displayError": "Error: foo\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `record fails`\n      [stack trace lines]",
-        "attempts": [
+        'clientId': 'r3',
+        'state': 'failed',
+        'displayError': 'Error: foo\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `record fails`\n      [stack trace lines]',
+        'attempts': [
           {
-            "state": "failed",
-            "error": {
-              "name": "Error",
-              "message": "foo\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `record fails`",
-              "stack": "[stack trace lines]",
-              "codeFrame": {
-                "line": 3,
-                "column": 11,
-                "originalFile": "cypress/e2e/record_fail.cy.js",
-                "relativeFile": "cypress/e2e/record_fail.cy.js",
-                "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/record_fail.cy.js",
-                "frame": "  1 | describe('record fails', () => {\n  2 |   beforeEach(() => {\n> 3 |     throw new Error('foo')\n    |           ^\n  4 |   })\n  5 | \n  6 |   it('fails 1', () => {})",
-                "language": "js"
-              }
+            'state': 'failed',
+            'error': {
+              'name': 'Error',
+              'message': 'foo\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `record fails`',
+              'stack': '[stack trace lines]',
+              'codeFrame': {
+                'line': 3,
+                'column': 11,
+                'originalFile': 'cypress/e2e/record_fail.cy.js',
+                'relativeFile': 'cypress/e2e/record_fail.cy.js',
+                'absoluteFile': '/foo/bar/.projects/e2e/cypress/e2e/record_fail.cy.js',
+                'frame': '  1 | describe(\'record fails\', () => {\n  2 |   beforeEach(() => {\n> 3 |     throw new Error(\'foo\')\n    |           ^\n  4 |   })\n  5 | \n  6 |   it(\'fails 1\', () => {})',
+                'language': 'js',
+              },
             },
-            "timings": {
-              "lifecycle": 100,
-              "before each": [
+            'timings': {
+              'lifecycle': 100,
+              'before each': [
                 {
-                  "hookId": "h1",
-                  "fnDuration": 400,
-                  "afterFnDuration": 200
-                }
-              ]
+                  'hookId': 'h1',
+                  'fnDuration': 400,
+                  'afterFnDuration': 200,
+                },
+              ],
             },
-            "failedFromHookId": "h1",
-            "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-            "wallClockDuration": 1234,
-            "videoTimestamp": 9999
-          }
-        ]
+            'failedFromHookId': 'h1',
+            'wallClockStartedAt': '2018-02-01T20:14:19.323Z',
+            'wallClockDuration': 1234,
+            'videoTimestamp': 9999,
+          },
+        ],
       },
       {
-        "clientId": "r4",
-        "state": "skipped",
-        "displayError": null,
-        "attempts": [
+        'clientId': 'r4',
+        'state': 'skipped',
+        'displayError': null,
+        'attempts': [
           {
-            "state": "skipped",
-            "error": null,
-            "timings": null,
-            "failedFromHookId": null,
-            "wallClockStartedAt": null,
-            "wallClockDuration": null,
-            "videoTimestamp": null
-          }
-        ]
-      }
+            'state': 'skipped',
+            'error': null,
+            'timings': null,
+            'failedFromHookId': null,
+            'wallClockStartedAt': null,
+            'wallClockDuration': null,
+            'videoTimestamp': null,
+          },
+        ],
+      },
     ],
-    "exception": null,
-    "video": true,
-    "screenshots": [
+    'exception': null,
+    'video': true,
+    'screenshots': [
       {
-        "screenshotId": "some-random-id",
-        "name": null,
-        "testId": "r3",
-        "testAttemptIndex": 0,
-        "takenAt": "2018-02-01T20:14:19.323Z",
-        "height": 720,
-        "width": 1280
-      }
+        'screenshotId': 'some-random-id',
+        'name': null,
+        'testId': 'r3',
+        'testAttemptIndex': 0,
+        'takenAt': '2018-02-01T20:14:19.323Z',
+        'height': 720,
+        'width': 1280,
+      },
     ],
-    "reporterStats": {
-      "suites": 1,
-      "tests": 1,
-      "passes": 0,
-      "pending": 0,
-      "failures": 1,
-      "start": "2018-02-01T20:14:19.323Z",
-      "end": "2018-02-01T20:14:19.323Z",
-      "duration": 1234
+    'reporterStats': {
+      'suites': 1,
+      'tests': 1,
+      'passes': 0,
+      'pending': 0,
+      'failures': 1,
+      'start': '2018-02-01T20:14:19.323Z',
+      'end': '2018-02-01T20:14:19.323Z',
+      'duration': 1234,
     },
-    "metadata": {
-      "studioCreated": 0,
-      "studioExtended": 0
-    }
+    'metadata': {
+      'studioCreated': 0,
+      'studioExtended': 0,
+    },
   },
   {
-    "stats": {
-      "suites": 1,
-      "tests": 2,
-      "passes": 1,
-      "pending": 1,
-      "skipped": 0,
-      "failures": 0,
-      "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-      "wallClockEndedAt": "2018-02-01T20:14:19.323Z",
-      "wallClockDuration": 1234
+    'stats': {
+      'suites': 1,
+      'tests': 2,
+      'passes': 1,
+      'pending': 1,
+      'skipped': 0,
+      'failures': 0,
+      'wallClockStartedAt': '2018-02-01T20:14:19.323Z',
+      'wallClockEndedAt': '2018-02-01T20:14:19.323Z',
+      'wallClockDuration': 1234,
     },
-    "tests": [
+    'tests': [
       {
-        "clientId": "r3",
-        "state": "passed",
-        "displayError": null,
-        "attempts": [
+        'clientId': 'r3',
+        'state': 'passed',
+        'displayError': null,
+        'attempts': [
           {
-            "state": "passed",
-            "error": null,
-            "timings": {
-              "lifecycle": 100,
-              "test": {
-                "fnDuration": 400,
-                "afterFnDuration": 200
-              }
+            'state': 'passed',
+            'error': null,
+            'timings': {
+              'lifecycle': 100,
+              'test': {
+                'fnDuration': 400,
+                'afterFnDuration': 200,
+              },
             },
-            "failedFromHookId": null,
-            "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-            "wallClockDuration": 1234,
-            "videoTimestamp": 9999
-          }
-        ]
+            'failedFromHookId': null,
+            'wallClockStartedAt': '2018-02-01T20:14:19.323Z',
+            'wallClockDuration': 1234,
+            'videoTimestamp': 9999,
+          },
+        ],
       },
       {
-        "clientId": "r4",
-        "state": "pending",
-        "displayError": null,
-        "attempts": [
+        'clientId': 'r4',
+        'state': 'pending',
+        'displayError': null,
+        'attempts': [
           {
-            "state": "pending",
-            "error": null,
-            "timings": null,
-            "failedFromHookId": null,
-            "wallClockStartedAt": null,
-            "wallClockDuration": null,
-            "videoTimestamp": null
-          }
-        ]
-      }
+            'state': 'pending',
+            'error': null,
+            'timings': null,
+            'failedFromHookId': null,
+            'wallClockStartedAt': null,
+            'wallClockDuration': null,
+            'videoTimestamp': null,
+          },
+        ],
+      },
     ],
-    "exception": null,
-    "video": false,
-    "screenshots": [
+    'exception': null,
+    'video': false,
+    'screenshots': [
       {
-        "screenshotId": "some-random-id",
-        "name": "yay it passes",
-        "testId": "r3",
-        "testAttemptIndex": 0,
-        "takenAt": "2018-02-01T20:14:19.323Z",
-        "height": 1022,
-        "width": 400
-      }
+        'screenshotId': 'some-random-id',
+        'name': 'yay it passes',
+        'testId': 'r3',
+        'testAttemptIndex': 0,
+        'takenAt': '2018-02-01T20:14:19.323Z',
+        'height': 1022,
+        'width': 400,
+      },
     ],
-    "reporterStats": {
-      "suites": 1,
-      "tests": 2,
-      "passes": 1,
-      "pending": 1,
-      "failures": 0,
-      "start": "2018-02-01T20:14:19.323Z",
-      "end": "2018-02-01T20:14:19.323Z",
-      "duration": 1234
+    'reporterStats': {
+      'suites': 1,
+      'tests': 2,
+      'passes': 1,
+      'pending': 1,
+      'failures': 0,
+      'start': '2018-02-01T20:14:19.323Z',
+      'end': '2018-02-01T20:14:19.323Z',
+      'duration': 1234,
     },
-    "metadata": {
-      "studioCreated": 0,
-      "studioExtended": 0
-    }
+    'metadata': {
+      'studioCreated': 0,
+      'studioExtended': 0,
+    },
   },
   {
-    "stats": {
-      "suites": 0,
-      "tests": 1,
-      "passes": 0,
-      "pending": 0,
-      "skipped": 0,
-      "failures": 1,
-      "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-      "wallClockEndedAt": "2018-02-01T20:14:19.323Z",
-      "wallClockDuration": 1234
+    'stats': {
+      'suites': 0,
+      'tests': 1,
+      'passes': 0,
+      'pending': 0,
+      'skipped': 0,
+      'failures': 1,
+      'wallClockStartedAt': '2018-02-01T20:14:19.323Z',
+      'wallClockEndedAt': '2018-02-01T20:14:19.323Z',
+      'wallClockDuration': 1234,
     },
-    "tests": [
+    'tests': [
       {
-        "clientId": "r2",
-        "state": "failed",
-        "displayError": "Error: The following error originated from your test code, not from Cypress.\n\n  > instantly fails\n\nWhen Cypress detects uncaught errors originating from your test code it will automatically fail the current test.\n\nCypress could not associate this error to any specific test.\n\nWe dynamically generated a new test to display this failure.\n      [stack trace lines]",
-        "attempts": [
+        'clientId': 'r2',
+        'state': 'failed',
+        'displayError': 'Error: The following error originated from your test code, not from Cypress.\n\n  > instantly fails\n\nWhen Cypress detects uncaught errors originating from your test code it will automatically fail the current test.\n\nCypress could not associate this error to any specific test.\n\nWe dynamically generated a new test to display this failure.\n      [stack trace lines]',
+        'attempts': [
           {
-            "state": "failed",
-            "error": {
-              "name": "Error",
-              "message": "The following error originated from your test code, not from Cypress.\n\n  > instantly fails\n\nWhen Cypress detects uncaught errors originating from your test code it will automatically fail the current test.\n\nCypress could not associate this error to any specific test.\n\nWe dynamically generated a new test to display this failure.",
-              "stack": "[stack trace lines]",
-              "codeFrame": {
-                "line": 1,
-                "column": 7,
-                "originalFile": "cypress/e2e/record_uncaught.cy.js",
-                "relativeFile": "cypress/e2e/record_uncaught.cy.js",
-                "absoluteFile": "/foo/bar/.projects/e2e/cypress/e2e/record_uncaught.cy.js",
-                "frame": "> 1 | throw new Error('instantly fails')\n    |       ^\n  2 | ",
-                "language": "js"
-              }
+            'state': 'failed',
+            'error': {
+              'name': 'Error',
+              'message': 'The following error originated from your test code, not from Cypress.\n\n  > instantly fails\n\nWhen Cypress detects uncaught errors originating from your test code it will automatically fail the current test.\n\nCypress could not associate this error to any specific test.\n\nWe dynamically generated a new test to display this failure.',
+              'stack': '[stack trace lines]',
+              'codeFrame': {
+                'line': 1,
+                'column': 7,
+                'originalFile': 'cypress/e2e/record_uncaught.cy.js',
+                'relativeFile': 'cypress/e2e/record_uncaught.cy.js',
+                'absoluteFile': '/foo/bar/.projects/e2e/cypress/e2e/record_uncaught.cy.js',
+                'frame': '> 1 | throw new Error(\'instantly fails\')\n    |       ^\n  2 | ',
+                'language': 'js',
+              },
             },
-            "timings": {
-              "lifecycle": 100,
-              "test": {
-                "fnDuration": 400,
-                "afterFnDuration": 200
-              }
+            'timings': {
+              'lifecycle': 100,
+              'test': {
+                'fnDuration': 400,
+                'afterFnDuration': 200,
+              },
             },
-            "failedFromHookId": null,
-            "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-            "wallClockDuration": 1234,
-            "videoTimestamp": 9999
-          }
-        ]
-      }
+            'failedFromHookId': null,
+            'wallClockStartedAt': '2018-02-01T20:14:19.323Z',
+            'wallClockDuration': 1234,
+            'videoTimestamp': 9999,
+          },
+        ],
+      },
     ],
-    "exception": null,
-    "video": true,
-    "screenshots": [
+    'exception': null,
+    'video': true,
+    'screenshots': [
       {
-        "screenshotId": "some-random-id",
-        "name": null,
-        "testId": "r2",
-        "testAttemptIndex": 0,
-        "takenAt": "2018-02-01T20:14:19.323Z",
-        "height": 720,
-        "width": 1280
-      }
+        'screenshotId': 'some-random-id',
+        'name': null,
+        'testId': 'r2',
+        'testAttemptIndex': 0,
+        'takenAt': '2018-02-01T20:14:19.323Z',
+        'height': 720,
+        'width': 1280,
+      },
     ],
-    "reporterStats": {
-      "suites": 0,
-      "tests": 1,
-      "passes": 0,
-      "pending": 0,
-      "failures": 1,
-      "start": "2018-02-01T20:14:19.323Z",
-      "end": "2018-02-01T20:14:19.323Z",
-      "duration": 1234
+    'reporterStats': {
+      'suites': 0,
+      'tests': 1,
+      'passes': 0,
+      'pending': 0,
+      'failures': 1,
+      'start': '2018-02-01T20:14:19.323Z',
+      'end': '2018-02-01T20:14:19.323Z',
+      'duration': 1234,
     },
-    "metadata": {
-      "studioCreated": 0,
-      "studioExtended": 0
-    }
-  }
+    'metadata': {
+      'studioCreated': 0,
+      'studioExtended': 0,
+    },
+  },
 ]
 
 exports['e2e record api interaction warnings create run warnings grace period - over private tests limit warns when over private test results 1'] = `
 You've exceeded the limit of private test results under your free plan this month. The limit is 500 private test results.
 
-Your plan is now in a grace period, which means your tests will still be recorded until 2999-12-31. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
+Your plan is now in a grace period, which means your tests will still be recorded until 2999-12-31. Please upgrade your plan to continue recording tests on Cypress Cloud in the future.
 
 https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 

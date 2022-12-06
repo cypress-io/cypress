@@ -48,7 +48,7 @@ describe('src/cy/commands/assertions', () => {
       this.logs = []
 
       cy.on('log:added', (attrs, log) => {
-        this.logs.push(log)
+        this.logs?.push(log)
         this.lastLog = log
       })
 
@@ -56,8 +56,8 @@ describe('src/cy/commands/assertions', () => {
     })
 
     it('returns the subject for chainability', () => {
-      cy
-      .noop({ foo: 'bar' }).should('deep.eq', { foo: 'bar' })
+      cy.noop({ foo: 'bar' })
+      .should('deep.eq', { foo: 'bar' })
       .then((obj) => {
         expect(testCommands()).to.eql([
           { name: 'visit', snapshots: 1, retries: 0 },
@@ -132,21 +132,6 @@ describe('src/cy/commands/assertions', () => {
       const obj = { requestJSON: { teamIds: [2] } }
 
       cy.noop(obj).its('requestJSON').should('have.property', 'teamIds').should('deep.eq', [2])
-    })
-
-    // TODO: make cy.then retry
-    // https://github.com/cypress-io/cypress/issues/627
-    it.skip('outer assertions retry on cy.then', () => {
-      const obj = { foo: 'bar' }
-
-      cy.wrap(obj).then(() => {
-        setTimeout(() => {
-          obj.foo = 'baz'
-        }
-        , 1000)
-
-        return obj
-      }).should('deep.eq', { foo: 'baz' })
     })
 
     it('does it retry when wrapped', () => {
@@ -325,6 +310,19 @@ describe('src/cy/commands/assertions', () => {
         })
       })
 
+      // https://github.com/cypress-io/cypress/issues/22587
+      it('does not allow cypress commands inside the callback', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq('`cy.should()` failed because you invoked a command inside the callback. `cy.should()` retries the inner function, which would result in commands being added to the queue multiple times. Use `cy.then()` instead of `cy.should()`, or move any commands outside the callback function.\n\nThe command invoked was:\n\n  > `cy.log()`')
+
+          done()
+        })
+
+        cy.window().should((win) => {
+          cy.log(win)
+        })
+      })
+
       context('remote jQuery instances', () => {
         beforeEach(function () {
           this.remoteWindow = cy.state('window')
@@ -368,7 +366,7 @@ describe('src/cy/commands/assertions', () => {
 
         cy.on('log:added', (attrs, log) => {
           if (log.get('name') === 'assert') {
-            logs.push(log)
+            logs?.push(log)
 
             if (logs.length === 3) {
               done()
@@ -416,21 +414,26 @@ describe('src/cy/commands/assertions', () => {
       it('does not log extra commands on fail and properly fails command + assertions', function (done) {
         cy.on('fail', (err) => {
           assertLogLength(this.logs, 6)
+          expect(err.message).to.eq('You must provide a valid number to a `length` assertion. You passed: `asdf`')
 
           expect(this.logs[3].get('name')).to.eq('get')
-          expect(this.logs[3].get('state')).to.eq('failed')
-          expect(this.logs[3].get('error')).to.eq(err)
+          expect(this.logs[3].get('state')).to.eq('passed')
+          expect(this.logs[3].get('error')).to.be.undefined
 
           expect(this.logs[4].get('name')).to.eq('assert')
           expect(this.logs[4].get('state')).to.eq('failed')
-          expect(this.logs[4].get('error').name).to.eq('AssertionError')
+          expect(this.logs[4].get('error').name).to.eq('CypressError')
+          expect(this.logs[4].get('error')).to.eq(err)
 
           done()
         })
 
         cy
-        .root().should('exist').and('contain', 'foo')
-        .get('button').should('have.length', 'asdf')
+        .root()
+        .should('exist')
+        .and('contain', 'foo')
+        .get('button')
+        .should('have.length', 'asdf')
       })
 
       it('finishes failed assertions and does not log extra commands when cy.contains fails', function (done) {
@@ -438,17 +441,18 @@ describe('src/cy/commands/assertions', () => {
           assertLogLength(this.logs, 2)
 
           expect(this.logs[0].get('name')).to.eq('contains')
-          expect(this.logs[0].get('state')).to.eq('failed')
-          expect(this.logs[0].get('error')).to.eq(err)
+          expect(this.logs[0].get('state')).to.eq('passed')
+          expect(this.logs[0].get('error')).to.be.undefined
 
           expect(this.logs[1].get('name')).to.eq('assert')
           expect(this.logs[1].get('state')).to.eq('failed')
           expect(this.logs[1].get('error').name).to.eq('AssertionError')
+          expect(this.logs[1].get('error')).to.eq(err)
 
           done()
         })
 
-        cy.contains('Nested Find').should('have.length', 2)
+        cy.contains('Nested Find', { timeout: 50 }).should('have.length', 2)
       })
 
       // https://github.com/cypress-io/cypress/issues/6384
@@ -645,7 +649,7 @@ describe('src/cy/commands/assertions', () => {
           done()
         })
 
-        cy.get('button:first', { timeout: 100 }).should('have.class', 'does-not-have-class')
+        cy.get('button:first', { timeout: 500 }).should('have.class', 'does-not-have-class')
       })
 
       it('has a pending state while retrying for commands with onFail', (done) => {
@@ -660,29 +664,7 @@ describe('src/cy/commands/assertions', () => {
 
         cy.on('fail', () => {})
 
-        cy.readFile('does-not-exist.json').should('exist')
-      })
-
-      it('throws when the subject isnt in the DOM', function (done) {
-        cy.$$('button:first').click(function () {
-          $(this).addClass('foo').remove()
-        })
-
-        cy.on('fail', (err) => {
-          const names = _.invokeMap(this.logs, 'get', 'name')
-
-          // the 'should' is not here because based on
-          // when we check for the element to be detached
-          // it never actually runs the assertion
-          expect(names).to.deep.eq(['get', 'click'])
-          expect(err.message).to.include('`cy.should()` failed because this element is detached')
-
-          done()
-        })
-
-        cy.get('button:first').click().should('have.class', 'foo').then(() => {
-          done('cy.should was supposed to fail')
-        })
+        cy.readFile('does-not-exist.json', { timeout: 500 }).should('exist')
       })
 
       it('throws when the subject eventually isnt in the DOM', function (done) {
@@ -699,14 +681,12 @@ describe('src/cy/commands/assertions', () => {
 
           // should is present here due to the retry
           expect(names).to.deep.eq(['get', 'click', 'assert'])
-          expect(err.message).to.include('`cy.should()` failed because this element is detached')
+          expect(err.message).to.include('`cy.should()` failed because the page updated')
 
           done()
         })
 
-        cy.get('button:first').click().should('have.class', 'foo').then(() => {
-          done('cy.should was supposed to fail')
-        })
+        cy.get('button:first').click().should('have.class', 'foo')
       })
 
       it('throws when should(\'have.length\') isnt a number', function (done) {
@@ -731,7 +711,7 @@ describe('src/cy/commands/assertions', () => {
       })
 
       it('does not additionally log when .should is the current command', function (done) {
-        cy.on('fail', (err) => {
+        cy.once('fail', (err) => {
           const { lastLog } = this
 
           assertLogLength(this.logs, 1)
@@ -822,7 +802,7 @@ describe('src/cy/commands/assertions', () => {
       this.logs = []
 
       cy.on('log:added', (attrs, log) => {
-        this.logs.push(log)
+        this.logs?.push(log)
 
         if (attrs.name === 'assert') {
           this.lastLog = log
@@ -832,7 +812,7 @@ describe('src/cy/commands/assertions', () => {
       return null
     })
 
-    it('does not output should logs on failures', function (done) {
+    it('does not output should logs on failures', { defaultCommandTimeout: 50 }, function (done) {
       cy.on('fail', () => {
         const { length } = this.logs
 
@@ -858,23 +838,8 @@ describe('src/cy/commands/assertions', () => {
         done()
       })
 
-      cy.get('body').then(() => {
-        expect(cy.currentSubject()).to.match('body')
-      })
-    })
-
-    it('sets type to child when subject matches', (done) => {
-      cy.on('log:added', (attrs, log) => {
-        if (attrs.name === 'assert') {
-          cy.removeAllListeners('log:added')
-          expect(log.get('type')).to.eq('child')
-
-          done()
-        }
-      })
-
-      cy.wrap('foo').then(() => {
-        expect('foo').to.eq('foo')
+      cy.get('body').then((subject) => {
+        expect(subject).to.match('body')
       })
     })
 
@@ -1017,16 +982,21 @@ describe('src/cy/commands/assertions', () => {
       cy.on('log:added', (attrs, log) => {
         if (attrs.name === 'assert') {
           cy.removeAllListeners('log:added')
+          let err
 
-          expect(log.invoke('consoleProps')).to.deep.eq({
-            Command: 'assert',
-            expected: false,
-            actual: true,
-            Message: 'expected true to be false',
-            Error: log.get('error').stack,
-          })
+          try {
+            expect(log.invoke('consoleProps')).to.deep.contain({
+              Command: 'assert',
+              expected: false,
+              actual: true,
+              Message: 'expected true to be false',
+              Error: log.get('error').stack,
+            })
+          } catch (e) {
+            err = e
+          }
 
-          done()
+          done(err)
         }
       })
 
@@ -1179,7 +1149,7 @@ describe('src/cy/commands/assertions', () => {
       this.logs = []
 
       cy.on('log:added', (attrs, log) => {
-        this.logs.push(log)
+        this.logs?.push(log)
       })
 
       return null
@@ -1528,7 +1498,7 @@ describe('src/cy/commands/assertions', () => {
 
         it('fails not.visible for detached DOM', function (done) {
           cy.on('fail', (err) => {
-            expect(err.message).include('detached')
+            expect(err.message).include('`cy.should()` failed because the page updated')
             done()
           })
 
@@ -1621,7 +1591,7 @@ describe('src/cy/commands/assertions', () => {
       }
 
       cy.on('log:added', (attrs, log) => {
-        this.logs.push(log)
+        this.logs?.push(log)
       })
 
       return null
@@ -2106,6 +2076,20 @@ describe('src/cy/commands/assertions', () => {
 
         cy.wrap(undefined).should('have.value', 'somevalue')
       })
+
+      it('shows subject instead of undefined when a previous traversal errors', (done) => {
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'assert') {
+            cy.removeAllListeners('log:added')
+            expect(log.get('message')).to.eq('expected **subject** to have class **updated**')
+            done()
+          }
+        })
+
+        cy.get('body')
+        .contains('Does not exist')
+        .should('have.class', 'updated')
+      })
     })
 
     context('descendants', () => {
@@ -2171,6 +2155,14 @@ describe('src/cy/commands/assertions', () => {
       })
 
       it('visible, not visible, adds to error', function () {
+        cy.once('fail', (err) => {
+          const l6 = this.logs[5]
+
+          // the error on this log should have this message appended to it
+          expect(l6.get('error').message).to.include(`expected '<div>' to be 'visible'`)
+          expect(err.message).to.include(`This element \`<div>\` is not visible because it has CSS property: \`display: none\``)
+        })
+
         expect(this.$div).to.be.visible // 1
         expect(this.$div2).not.to.be.visible // 2
 
@@ -2187,15 +2179,7 @@ describe('src/cy/commands/assertions', () => {
           'expected **<div>** not to be **visible**',
         )
 
-        try {
-          expect(this.$div2).to.be.visible
-        } catch (err) {
-          const l6 = this.logs[5]
-
-          // the error on this log should have this message appended to it
-          expect(l6.get('error').message).to.include(`expected '<div>' to be 'visible'`)
-          expect(l6.get('error').message).to.include(`This element \`<div>\` is not visible because it has CSS property: \`display: none\``)
-        }
+        expect(this.$div2).to.be.visible
       })
 
       it('throws when obj is not DOM', function (done) {
