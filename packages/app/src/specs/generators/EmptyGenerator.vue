@@ -94,7 +94,7 @@
           :to="{
             name: 'SpecRunner',
             query: {
-              file: result.file.relative?.replace(/\\/g, '/')
+              file: posixify(result.file.relative)
             },
             params: props.type === 'component' || props.type === 'componentEmpty'
               ? {
@@ -140,6 +140,7 @@ import StandardModalFooter from '@packages/frontend-shared/src/components/Standa
 import GeneratorSuccess from './GeneratorSuccess.vue'
 import TestResultsIcon from '~icons/cy/test-results_x24.svg'
 import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
+import { posixify } from '../../paths'
 
 const props = defineProps<{
   title: string

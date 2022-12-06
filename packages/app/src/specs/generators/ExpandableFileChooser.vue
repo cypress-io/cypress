@@ -82,9 +82,11 @@ import ExpandableFileList from './ExpandableFileList.vue'
 import FileMatch from '../../components/FileMatch.vue'
 import ReactComponentList from './component/ReactComponentList.vue'
 import { gql } from '@urql/core'
+import type { FileParts } from '@packages/data-context/src/gen/graphcache-config.gen'
+import type { FileListItemFragment } from '../../generated/graphql'
 
 const props = withDefaults(defineProps<{
-  files: any[]
+  files: FileParts[]
   extensionPattern: string
   loading?: boolean
 }>(), {
@@ -103,7 +105,7 @@ fragment FileChooser on FileParts {
 `
 
 const emits = defineEmits<{
-  (eventName: 'selectItem', { file: File, item: string })
+  (eventName: 'selectItem', value: {file: FileListItemFragment, item: string})
   (eventName: 'update:extensionPattern', value: string)
 }>()
 
@@ -157,9 +159,13 @@ const noResults = computed(() => {
   return {
     search: filePathSearch.value || debouncedExtensionPattern.value,
     message: filePathSearch.value ? t('noResults.defaultMessage') : t('components.fileSearch.noMatchesForExtension'),
-    clear: filePathSearch.value ?
-      () => filePathSearch.value = '' :
-      () => localExtensionPattern.value = initialExtensionPattern,
+    clear: () => {
+      if (filePathSearch.value) {
+        filePathSearch.value = ''
+      } else {
+        localExtensionPattern.value = initialExtensionPattern
+      }
+    },
   }
 })
 

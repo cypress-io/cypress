@@ -70,7 +70,7 @@ const props = defineProps<{
 }>()
 
 defineEmits<{
-  (eventName: 'selectItem', value: {file: FileListItemFragment, item: string})
+  (eventName: 'selectItem', value: { file: FileListItemFragment, item: string })
 }>()
 
 onMounted(() => {

@@ -73,9 +73,10 @@ import CreateSpecModalBody from './CreateSpecModalBody.vue'
 import FileList from './FileList.vue'
 import FileMatch from '../../components/FileMatch.vue'
 import { gql } from '@urql/core'
+import type { FileParts } from '@packages/data-context/src/gen/graphcache-config.gen'
 
 const props = withDefaults(defineProps<{
-  files: any[]
+  files: FileParts[]
   extensionPattern: string
   loading?: boolean
 }>(), {
@@ -148,9 +149,13 @@ const noResults = computed(() => {
   return {
     search: filePathSearch.value || debouncedExtensionPattern.value,
     message: filePathSearch.value ? t('noResults.defaultMessage') : t('components.fileSearch.noMatchesForExtension'),
-    clear: filePathSearch.value ?
-      () => filePathSearch.value = '' :
-      () => localExtensionPattern.value = initialExtensionPattern,
+    clear: () => {
+      if (filePathSearch.value) {
+        filePathSearch.value = ''
+      } else {
+        localExtensionPattern.value = initialExtensionPattern
+      }
+    },
   }
 })
 

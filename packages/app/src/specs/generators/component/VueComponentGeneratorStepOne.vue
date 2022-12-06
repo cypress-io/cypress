@@ -40,20 +40,15 @@
           v-if="result"
           class="flex gap-16px items-center"
         >
-          <router-link
-            class="outline-none"
-            :to="{ name: 'SpecRunner', query: { file: result.file.relative?.replace(/\\/g, '/') }, params: { shouldShowTroubleRenderingAlert: true } }
-            "
+          <Button
+            size="lg"
+            :to="{ name: 'SpecRunner', query: { file: posixify(result.file.relative) }, params: { shouldShowTroubleRenderingAlert: true } }"
+            :prefix-icon="TestResultsIcon"
+            prefix-icon-class="w-16px h-16px icon-dark-white"
+            @click="emits('close')"
           >
-            <Button
-              size="lg"
-              :prefix-icon="TestResultsIcon"
-              prefix-icon-class="w-16px h-16px icon-dark-white"
-              @click="emits('close')"
-            >
-              {{ t('createSpec.successPage.runSpecButton') }}
-            </Button>
-          </router-link>
+            {{ t('createSpec.successPage.runSpecButton') }}
+          </Button>
           <Button
             size="lg"
             :prefix-icon="PlusButtonIcon"
@@ -86,6 +81,8 @@ import Button from '@cy/components/Button.vue'
 import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
 import TestResultsIcon from '~icons/cy/test-results_x24.svg'
 import EmptyGenerator from '../EmptyGenerator.vue'
+import { posixify } from '../../../paths'
+
 const props = defineProps<{
   title: string
   gql: VueComponentGeneratorStepOne_CodeGenGlobFragment

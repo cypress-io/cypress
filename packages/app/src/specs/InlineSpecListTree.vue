@@ -30,7 +30,7 @@
             'before:border-r-indigo-300': isCurrentSpec(row.data),
             'before:focus:border-r-indigo-300 before:focus-visible:border-r-transparent before:hover:border-r-indigo-300': !isCurrentSpec(row.data)
           }"
-          :to="{ path: '/specs/runner', query: { file: row.data.data?.relative?.replace(/\\/g, '/') } }"
+          :to="{ path: '/specs/runner', query: { file: posixify(row.data.data?.relative) } }"
           @focus="resetFocusIfNecessary(row, row.index)"
           @click.capture.prevent="submit(row.data, row.index)"
           @keydown.enter.space.prevent.stop="submit(row.data, row.index)"
@@ -81,6 +81,7 @@ import { useVirtualListNavigation } from './tree/useVirtualListNavigation'
 import { useStudioStore } from '../store/studio-store'
 import InlineRunAllSpecs from './InlineRunAllSpecs.vue'
 import { useRunAllSpecsStore } from '../store/run-all-specs-store'
+import { posixify } from '../paths'
 
 const props = defineProps<{
   specs: FuzzyFoundSpec[]
@@ -137,7 +138,7 @@ const submit = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, idx: 
       return
     }
 
-    router.push({ path: '/specs/runner', query: { file: row.data.relative.replace(/\\/g, '/') } })
+    router.push({ path: '/specs/runner', query: { file: posixify(row.data.relative) } })
   } else {
     row.toggle()
   }
