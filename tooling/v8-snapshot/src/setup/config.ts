@@ -87,7 +87,7 @@ export function createConfig ({
   const nodeModulesOnly = env === 'dev'
   const minify = !process.env.V8_SNAPSHOT_DISABLE_MINIFY && env === 'prod'
 
-  const snapshotCacheDir = path.join(snapshotCacheBaseDir, platformString)
+  const snapshotCacheDir = getSnapshotCacheDir()
 
   const snapshotEntryFile = path.join(snapshotCacheDir, 'snapshot-entry.js')
   const metaFile = path.join(snapshotCacheDir, 'esbuild-meta.json')
@@ -104,4 +104,8 @@ export function createConfig ({
     minify,
     integrityCheckSource,
   }
+}
+
+export function getSnapshotCacheDir () {
+  return path.join(snapshotCacheBaseDir, platformString)
 }
