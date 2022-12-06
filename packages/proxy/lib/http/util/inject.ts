@@ -28,11 +28,13 @@ export function full (domain) {
   })
 }
 
-export async function fullCrossOrigin (options: FullCrossOriginOpts) {
+export async function fullCrossOrigin (domain, options: FullCrossOriginOpts) {
   const contents = await getRunnerCrossOriginInjectionContents()
 
   return oneLine`
     <script type='text/javascript'>
+      document.domain = '${domain}';
+
       (function (cypressConfig) {
         ${contents}
       }(${JSON.stringify(options)}));
