@@ -1,11 +1,6 @@
-import type { ServerSessionData } from '@packages/types'
 import _ from 'lodash'
-
 import { getAllHtmlOrigins } from './origins'
 import { clearStorage, getStorage, setStorage } from './storage'
-
-type ActiveSessions = Cypress.Commands.Session.ActiveSessions
-type SessionData = Cypress.Commands.Session.SessionData
 
 const LOGS = {
   clearCurrentSessionData: {
@@ -39,7 +34,7 @@ export default class SessionsManager {
     this.cy = cy
   }
 
-  setActiveSession = (obj: ActiveSessions) => {
+  setActiveSession = (obj: Cypress.ActiveSessions) => {
     const currentSessions = this.cy.state('activeSessions') || {}
 
     const newSessions = { ...currentSessions, ...obj }
@@ -47,7 +42,7 @@ export default class SessionsManager {
     this.cy.state('activeSessions', newSessions)
   }
 
-  getActiveSession = (id: string): SessionData => {
+  getActiveSession = (id: string): Cypress.SessionData => {
     const currentSessions = this.cy.state('activeSessions') || {}
 
     return currentSessions[id]
@@ -55,26 +50,56 @@ export default class SessionsManager {
 
   clearActiveSessions = () => {
     const curSessions = this.cy.state('activeSessions') || {}
-    const clearedSessions: ActiveSessions = _.mapValues(curSessions, (v) => ({ ...v, hydrated: false }))
+    const clearedSessions: Cypress.ActiveSessions = _.mapValues(curSessions, (v) => ({ ...v, hydrated: false }))
 
     this.cy.state('activeSessions', clearedSessions)
   }
 
+  defineSession = (options = {} as any): Cypress.SessionData => {
+    return {
+      id: options.id,
+      cookies: null,
+      localStorage: null,
+      sessionStorage: null,
+      setup: options.setup,
+      hydrated: false,
+      validate: options.validate,
+      cacheAcrossSpecs: !!options.cacheAcrossSpecs,
+    }
+  }
+
+  saveSessionData = async (data) => {
+    this.setActiveSession({ [data.id]: data })
+
+    // persist the session to the server. Only matters in openMode OR if there's a top navigation on a future test.
+    // eslint-disable-next-line no-console
+    return this.Cypress.backend('save:session', { ...data, setup: data.setup.toString(), validate: data.validate?.toString() }).catch(console.error)
+  }
+
+  setSessionData = async (data) => {
+    const allHtmlOrigins = await getAllHtmlOrigins(this.Cypress)
+
+    let _localStorage = data.localStorage || []
+    let _sessionStorage = data.sessionStorage || []
+
+    _.each(allHtmlOrigins, (v) => {
+      if (!_.find(_localStorage, v)) {
+        _localStorage = _localStorage.concat({ origin: v, clear: true })
+      }
+
+      if (!_.find(_sessionStorage, v)) {
+        _sessionStorage = _sessionStorage.concat({ origin: v, clear: true })
+      }
+    })
+
+    await Promise.all([
+      setStorage(this.Cypress, { localStorage: _localStorage, sessionStorage: _sessionStorage }),
+      this.sessions.setCookies(data.cookies),
+    ])
+  }
+
   // this the public api exposed to consumers as Cypress.session
   sessions = {
-    defineSession: (options = {} as any): SessionData => {
-      return {
-        id: options.id,
-        cookies: null,
-        localStorage: null,
-        sessionStorage: null,
-        setup: options.setup,
-        hydrated: false,
-        validate: options.validate,
-        cacheAcrossSpecs: !!options.cacheAcrossSpecs,
-      }
-    },
-
     clearAllSavedSessions: async () => {
       this.clearActiveSessions()
       this.registeredSessions.clear()
@@ -95,36 +120,6 @@ export default class SessionsManager {
       await Promise.all([
         clearStorage(this.Cypress),
         this.sessions.clearCookies(),
-      ])
-    },
-
-    saveSessionData: async (data) => {
-      this.setActiveSession({ [data.id]: data })
-
-      // persist the session to the server. Only matters in openMode OR if there's a top navigation on a future test.
-      // eslint-disable-next-line no-console
-      return this.Cypress.backend('save:session', { ...data, setup: data.setup.toString(), validate: data.validate?.toString() }).catch(console.error)
-    },
-
-    setSessionData: async (data) => {
-      const allHtmlOrigins = await getAllHtmlOrigins(this.Cypress)
-
-      let _localStorage = data.localStorage || []
-      let _sessionStorage = data.sessionStorage || []
-
-      _.each(allHtmlOrigins, (v) => {
-        if (!_.find(_localStorage, v)) {
-          _localStorage = _localStorage.concat({ origin: v, clear: true })
-        }
-
-        if (!_.find(_sessionStorage, v)) {
-          _sessionStorage = _sessionStorage.concat({ origin: v, clear: true })
-        }
-      })
-
-      await Promise.all([
-        setStorage(this.Cypress, { localStorage: _localStorage, sessionStorage: _sessionStorage }),
-        this.sessions.setCookies(data.cookies),
       ])
     },
 
@@ -152,7 +147,7 @@ export default class SessionsManager {
       }
     },
 
-    getSession: (id: string): Promise<ServerSessionData> => {
+    getSession: (id: string): Promise<Cypress.ServerSessionData> => {
       return this.Cypress.backend('get:session', id)
     },
   }

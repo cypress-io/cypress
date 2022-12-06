@@ -913,10 +913,20 @@ export default {
     },
     test_stopped: 'Cypress test was stopped while running this command.',
     cross_origin_command ({ commandOrigin, autOrigin }) {
-      return stripIndent`\
-        The command was expected to run against origin \`${commandOrigin }\` but the application is at origin \`${autOrigin}\`.
+      return {
+        message: stripIndent`\
+        The command was expected to run against origin \`${commandOrigin}\` but the application is at origin \`${autOrigin}\`.
 
-        This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.`
+        This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
+        
+        Using ${cmd('origin')} to wrap the commands run on \`${autOrigin}\` will likely fix this issue.
+
+        \`cy.origin('${autOrigin}', () => {\`
+        \`  <commands targeting ${autOrigin} go here>\`
+        \`})\`
+        `,
+        docsUrl: 'https://on.cypress.io/cy-visit-succeeded-but-commands-fail',
+      }
     },
   },
 
@@ -1218,7 +1228,9 @@ export default {
 
         Variables must either be defined within the ${cmd('origin')} command or passed in using the args option.
 
-        Using \`require()\` or \`import()\` to include dependencies requires enabling the \`experimentalOriginDependencies\` flag and using the latest version of \`@cypress/webpack-preprocessor\`.`,
+        Using \`require()\` or \`import()\` to include dependencies requires enabling the \`experimentalOriginDependencies\` flag and using the latest version of \`@cypress/webpack-preprocessor\`.
+        
+        Note: Using \`require()\` or \`import()\` within ${cmd('origin')} from a \`node_modules\` plugin is not currently supported.`,
     },
     callback_mixes_sync_and_async: {
       message: stripIndent`\
@@ -2391,6 +2403,20 @@ export default {
     invalid_argument: {
       message: `${cmd('within')} must be called with a function.`,
       docsUrl: 'https://on.cypress.io/within',
+    },
+    multiple_elements (args) {
+      return {
+        message: stripIndent`
+        ${cmd('within')} can only be called on a single element. Your subject contained {{num}} elements. Narrow down your subject to a single element (using \`.first()\`, for example) before calling \`.within()\`.
+
+        To run \`.within()\` over multiple subjects, use \`.each()\`.
+
+          \`cy.get('div').each($div => {\`
+          \`  cy.wrap($div).within(() => { ... })\`
+          \`})\`
+        `,
+        docsUrl: 'https://on.cypress.io/within',
+      }
     },
   },
 

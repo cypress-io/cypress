@@ -382,7 +382,9 @@ export class CommandQueue extends Queue<$Command> {
         this.cy.setSubjectForChainer(command.get('chainerId'), [subject])
       }
 
-      this.cleanSubjects()
+      // TODO: This line was causing subjects to be cleaned up prematurely in some instances (Specifically seen on the within command)
+      // The command log would print the yielded value as null if checked outside of the current command chain.
+      // this.cleanSubjects()
 
       this.state({
         commandIntermediateValue: undefined,

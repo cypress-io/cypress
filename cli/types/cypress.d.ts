@@ -794,25 +794,6 @@ declare namespace Cypress {
     onSpecWindow: (window: Window, specList: string[] | Array<() => Promise<void>>) => void
   }
 
-  interface SessionOptions {
-    /**
-     * Whether or not to persist the session across all specs in the run.
-     * @default {false}
-     */
-    cacheAcrossSpecs?: boolean
-    /**
-     * Function to run immediately after the session is created and `setup` function runs or
-     * after a session is restored and the page is cleared. If this returns `false`, throws an
-     * exception, returns a Promise which resolves to `false` or rejects or contains any failing
-     * Cypress command, the session is considered invalid.
-     *
-     * If validation fails immediately after `setup`, the test will fail.
-     * If validation fails after restoring a session, `setup` will re-run.
-     * @default {false}
-     */
-    validate?: () => Promise<false | void> | void
-  }
-
   type CanReturnChainable = void | Chainable | Promise<unknown>
   type ThenReturn<S, R> =
     R extends void ? Chainable<S> :
@@ -2913,23 +2894,23 @@ declare namespace Cypress {
      * Note: the [`cy.session()`](https://on.cypress.io/session) command will inherent this value to determine whether
      * or not the page is cleared when the command executes. This command is only available in end-to-end testing.
      *
-     *  - on - The page is cleared before each test. Cookies, local storage and session storage in all domains are cleared
+     *  - true - The page is cleared before each test. Cookies, local storage and session storage in all domains are cleared
      *         before each test. The `cy.session()` command will also clear the page and current browser context when creating
      *         or restoring the browser session.
-     *  - off - The current browser state will persist between tests. The page does not clear before the test and cookies, local
+     *  - false - The current browser state will persist between tests. The page does not clear before the test and cookies, local
      *          storage and session storage will be available in the next test. The `cy.session()` command will only clear the
      *          current browser context when creating or restoring the browser session - the current page will not clear.
      *
      * Tradeoffs:
      *      Turning test isolation off may improve performance of end-to-end tests, however, previous tests could impact the
      *      browser state of the next test and cause inconsistency when using .only(). Be mindful to write isolated tests when
-     *      test isolation is off. If a test in the suite impacts the state of other tests and it were to fail, you could see
+     *      test isolation is false. If a test in the suite impacts the state of other tests and it were to fail, you could see
      *      misleading errors in later tests which makes debugging clunky. See the [documentation](https://on.cypress.io/test-isolation)
      *      for more information.
      *
-     * @default 'on'
+     * @default true
      */
-    testIsolation: 'on' | 'off'
+    testIsolation: boolean
     /**
      * Path to folder where videos will be saved after a headless or CI run
      * @default "cypress/videos"
@@ -3423,8 +3404,59 @@ declare namespace Cypress {
   }
 
   interface Session {
-    // Clear all saved sessions and re-run the current spec file.
+    /**
+     * Clear all sessions saved on the backend, including cached global sessions.
+     */
     clearAllSavedSessions: () => Promise<void>
+    /**
+     * Clear all storage and cookie data across all origins associated with the current session.
+     */
+    clearCurrentSessionData: () => Promise<void>
+    /**
+     * Get all storage and cookie data across all origins associated with the current session.
+     */
+    getCurrentSessionData: () => Promise<SessionData>
+    /**
+     * Get all storage and cookie data saved on the backend associated with the provided session id.
+     */
+    getSession: (id: string) => Promise<ServerSessionData>
+  }
+
+  type ActiveSessions = Record<string, SessionData>
+
+  interface SessionData {
+    id: string
+    hydrated: boolean
+    cacheAcrossSpecs: SessionOptions['cacheAcrossSpecs']
+    cookies?: Cookie[] | null
+    localStorage?: OriginStorage[] | null
+    sessionStorage?: OriginStorage[] | null
+    setup: () => void
+    validate?: SessionOptions['validate']
+  }
+
+  interface ServerSessionData extends Omit<SessionData, 'setup' |'validate'> {
+    setup: string
+    validate?: string
+  }
+
+  interface SessionOptions {
+    /**
+     * Whether or not to persist the session across all specs in the run.
+     * @default {false}
+     */
+    cacheAcrossSpecs?: boolean
+    /**
+     * Function to run immediately after the session is created and `setup` function runs or
+     * after a session is restored and the page is cleared. If this returns `false`, throws an
+     * exception, returns a Promise which resolves to `false` or rejects or contains any failing
+     * Cypress command, the session is considered invalid.
+     *
+     * If validation fails immediately after `setup`, the test will fail.
+     * If validation fails after restoring a session, `setup` will re-run.
+     * @default {false}
+     */
+    validate?: () => Promise<false | void> | void
   }
 
   type SameSiteStatus = 'no_restriction' | 'strict' | 'lax'

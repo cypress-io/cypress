@@ -53,7 +53,7 @@ export type SocketToDriverMap = {
 }
 
 export type DriverToLocalBus = {
-  'visit:blank': { testIsolationLevel?: 'on' }
+  'visit:blank': { testIsolation?: boolean }
   'visit:failed': { status?: string, statusText: string, contentType?: () => string }
   'page:loading': boolean
 }

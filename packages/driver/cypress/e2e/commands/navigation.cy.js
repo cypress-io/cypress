@@ -581,7 +581,7 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    describe('removes window:load listeners when testIsolation=on', () => {
+    describe('removes window:load listeners when testIsolation=true', () => {
       it('removes for first url visit', () => {
         const listeners = cy.listeners('window:load')
 
@@ -778,7 +778,7 @@ describe('src/cy/commands/navigation', () => {
       cy.visit('fixtures/redirection-loop-a.html')
     })
 
-    describe('when only hashes are changing when testIsolation=on', () => {
+    describe('when only hashes are changing when testIsolation=true', () => {
       it('short circuits the visit if the page will not refresh', () => {
         let count = 0
         const urls = []
@@ -2373,7 +2373,7 @@ describe('src/cy/commands/navigation', () => {
         })
       })
 
-      describe('filters page load events when going back with window navigation when testIsolation=on', () => {
+      describe('filters page load events when going back with window navigation when testIsolation=true', () => {
         // https://github.com/cypress-io/cypress/issues/19230
         it('when going back with window navigation', () => {
           const emit = cy.spy(Cypress, 'emit').log(false).withArgs('navigation:changed')
