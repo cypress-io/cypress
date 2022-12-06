@@ -8,6 +8,7 @@
     "./../ts/index.d.ts"
   ],
   "compilerOptions": {
+    "lib": ["esnext"],
     "strict": true,
     "allowJs": false,
     "noImplicitAny": true,
