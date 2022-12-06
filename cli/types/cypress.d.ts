@@ -923,12 +923,19 @@ declare namespace Cypress {
     clearCookie(name: string, options?: CookieOptions): Chainable<null>
 
     /**
-     * Clear all browser cookies for the current hostname or for the domain specified.
+     * Clear browser cookies for the current hostname or for the domain specified.
      * Cypress automatically clears all cookies before each test to prevent state from being shared across tests. You shouldn't need to use this command unless you're using it to clear all cookies or specific cookies inside a single test.
      *
      * @see https://on.cypress.io/clearcookies
      */
     clearCookies(options?: CookieOptions): Chainable<null>
+
+    /**
+     * Clear all browser cookies
+     *
+     * @see https://on.cypress.io/clearallcookies
+     */
+     clearAllCookies(options?: Partial<Loggable & Timeoutable>): Chainable<Cookie[]>
 
     /**
      * Get local storage for all origins.
@@ -1421,7 +1428,7 @@ declare namespace Cypress {
     getCookie(name: string, options?: CookieOptions): Chainable<Cookie | null>
 
     /**
-     * Get all of the browser cookies for the current hostname or for the domain specified.
+     * Get browser cookies for the current hostname or for the domain specified.
      *
      * @see https://on.cypress.io/getcookies
      */

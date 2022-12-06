@@ -426,6 +426,36 @@ describe('src/cy/commands/cookies - no stub', () => {
     })
   })
 
+  context('#clearAllCookies', () => {
+    it('clears cookies from all domains', () => {
+      cy.visit('http://barbaz.com:3500/fixtures/generic.html')
+      setCookies()
+      cy.clearAllCookies()
+
+      cy.getAllCookies().its('length').should('equal', 0)
+
+      // webkit does not support cy.origin()
+      if (isWebkit) return
+
+      cy.origin('http://foobar.com:3500', () => {
+        cy.visit('http://foobar.com:3500/fixtures/generic.html')
+        // put back cookies removed above
+        cy.setCookie('key1', 'value1', { domain: 'www.foobar.com', log: false })
+        cy.setCookie('key2', 'value2', { domain: 'foobar.com', log: false })
+        cy.setCookie('key3', 'value3', { domain: 'www.barbaz.com', log: false })
+        cy.setCookie('key4', 'value4', { domain: '.www.barbaz.com', log: false })
+        cy.setCookie('key5', 'value5', { domain: 'barbaz.com', log: false })
+        cy.setCookie('key6', 'value6', { domain: '.barbaz.com', log: false })
+        cy.setCookie('key7', 'value7', { domain: 'www2.barbaz.com', log: false })
+        cy.setCookie('key8', 'value8', { domain: 'www2.foobar.com', log: false })
+
+        cy.clearAllCookies()
+
+        cy.getAllCookies().its('length').should('equal', 0)
+      })
+    })
+  })
+
   context('#clearCookie', () => {
     const setCookies = () => {
       cy.log('set cookies')
@@ -1962,6 +1992,290 @@ describe('src/cy/commands/cookies', () => {
 
       it('#consoleProps', () => {
         cy.clearCookies().then(function (cookies) {
+          expect(cookies).to.be.null
+          const c = this.lastLog.invoke('consoleProps')
+
+          expect(c['Yielded']).to.eq('null')
+          expect(c['Cleared Cookies']).to.be.undefined
+          expect(c['Note']).to.eq('No cookies were found or removed.')
+        })
+      })
+    })
+  })
+
+  context('#clearAllCookies', () => {
+    it('returns null', () => {
+      Cypress.automation.withArgs('get:cookies').resolves([])
+
+      cy.clearAllCookies().should('be.null')
+    })
+
+    it('does not call \'clear:cookies\' when no cookies were returned', () => {
+      Cypress.automation.withArgs('get:cookies').resolves([])
+
+      cy.clearAllCookies().then(() => {
+        expect(Cypress.automation).not.to.be.calledWith(
+          'clear:cookies',
+        )
+      })
+    })
+
+    it('calls \'clear:cookies\' with all cookies', () => {
+      Cypress.automation
+      .withArgs('get:cookies')
+      .resolves([
+        { name: 'foo', domain: 'localhost' },
+        { name: 'bar', domain: 'bar.com' },
+        { name: 'qux', domain: 'qux.com' },
+      ])
+      .withArgs('clear:cookies', [
+        { name: 'foo', domain: 'localhost' },
+        { name: 'bar', domain: 'bar.com' },
+        { name: 'qux', domain: 'qux.com' },
+      ])
+      .resolves([
+        { name: 'foo', domain: 'localhost' },
+        { name: 'bar', domain: 'bar.com' },
+        { name: 'qux', domain: 'qux.com' },
+      ])
+
+      cy
+      .clearAllCookies().should('be.null').then(() => {
+        expect(Cypress.automation).to.be.calledWith(
+          'clear:cookies', [
+            { name: 'foo', domain: 'localhost' },
+            { name: 'bar', domain: 'bar.com' },
+            { name: 'qux', domain: 'qux.com' },
+          ],
+        )
+      })
+    })
+
+    describe('timeout', () => {
+      beforeEach(() => {
+        Cypress.automation
+        .withArgs('get:cookies')
+        .resolves([{}])
+        .withArgs('clear:cookies')
+        .resolves({})
+      })
+
+      it('sets timeout to Cypress.config(responseTimeout)', {
+        responseTimeout: 2500,
+      }, () => {
+        Cypress.automation.resolves([])
+
+        const timeout = cy.spy(Promise.prototype, 'timeout')
+
+        cy.clearAllCookies().then(() => {
+          expect(timeout).to.be.calledWith(2500)
+        })
+      })
+
+      it('can override timeout', () => {
+        Cypress.automation.resolves([])
+
+        const timeout = cy.spy(Promise.prototype, 'timeout')
+
+        cy.clearAllCookies({ timeout: 1000 }).then(() => {
+          expect(timeout).to.be.calledWith(1000)
+        })
+      })
+
+      it('clears the current timeout and restores after success', () => {
+        cy.timeout(100)
+
+        cy.spy(cy, 'clearTimeout')
+
+        cy.clearAllCookies().then(() => {
+          expect(cy.clearTimeout).to.be.calledWith('get:cookies')
+          expect(cy.clearTimeout).to.be.calledWith('clear:cookies')
+
+          // restores the timeout afterwards
+          expect(cy.timeout()).to.eq(100)
+        })
+      })
+    })
+
+    describe('errors', { defaultCommandTimeout: 100 }, () => {
+      beforeEach(function () {
+        this.logs = []
+
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'clearAllCookies') {
+            this.lastLog = log
+            this.logs.push(log)
+          }
+        })
+
+        return null
+      })
+
+      it('logs once on \'get:cookies\' error', function (done) {
+        const error = new Error('some err message')
+
+        error.name = 'foo'
+        error.stack = 'some err message\n  at fn (foo.js:1:1)'
+
+        Cypress.automation.rejects(error)
+
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 1)
+          expect(lastLog.get('error').message).to.contain(`\`cy.clearAllCookies()\` had an unexpected error clearing cookies in ${Cypress.browser.displayName}.`)
+          expect(lastLog.get('error').message).to.contain('some err message')
+          expect(lastLog.get('error')).to.eq(err)
+
+          done()
+        })
+
+        cy.clearAllCookies()
+      })
+
+      it('throws after timing out', function (done) {
+        Cypress.automation.resolves([{ name: 'foo' }])
+        Cypress.automation.withArgs('clear:cookies').resolves(Promise.delay(1000))
+
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 1)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(lastLog.get('name')).to.eq('clearAllCookies')
+          expect(lastLog.get('message')).to.eq('')
+          expect(err.message).to.eq('`cy.clearAllCookies()` timed out waiting `50ms` to complete.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/clearallcookies')
+
+          done()
+        })
+
+        cy.clearAllCookies({ timeout: 50 })
+      })
+
+      it('logs once on \'clear:cookies\' error', function (done) {
+        Cypress.automation.withArgs('get:cookies').resolves([
+          { name: 'foo' }, { name: 'bar' },
+        ])
+
+        const error = new Error('some err message')
+
+        error.name = 'foo'
+        error.stack = 'stack'
+
+        Cypress.automation.withArgs('clear:cookies').rejects(error)
+
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 1)
+          expect(lastLog.get('error').message).to.contain(`\`cy.clearAllCookies()\` had an unexpected error clearing cookies in ${Cypress.browser.displayName}.`)
+          expect(lastLog.get('error').message).to.contain('some err message')
+          expect(lastLog.get('error')).to.eq(err)
+
+          done()
+        })
+
+        cy.clearAllCookies()
+      })
+    })
+
+    describe('.log', () => {
+      beforeEach(function () {
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'clearAllCookies') {
+            this.lastLog = log
+          }
+        })
+
+        Cypress.automation
+        .withArgs('get:cookies', {})
+        .resolves([{ name: 'foo', domain: 'localhost' }])
+        .withArgs('clear:cookies', [{ name: 'foo', domain: 'localhost' }])
+        .resolves([
+          { name: 'foo' },
+        ])
+      })
+
+      it('can turn off logging', () => {
+        cy.clearAllCookies({ log: false }).then(function () {
+          expect(this.log).to.be.undefined
+        })
+      })
+
+      it('ends immediately', () => {
+        cy.clearAllCookies().then(function () {
+          const { lastLog } = this
+
+          expect(lastLog.get('ended')).to.be.true
+          expect(lastLog.get('state')).to.eq('passed')
+        })
+      })
+
+      it('snapshots immediately', () => {
+        cy.clearAllCookies().then(function () {
+          const { lastLog } = this
+
+          expect(lastLog.get('snapshots').length).to.eq(1)
+          expect(lastLog.get('snapshots')[0]).to.be.an('object')
+        })
+      })
+
+      it('#consoleProps', () => {
+        cy.clearAllCookies().then(function (cookies) {
+          expect(cookies).to.be.null
+          const c = this.lastLog.invoke('consoleProps')
+
+          expect(c['Yielded']).to.eq('null')
+          expect(c['Cleared Cookies']).to.deep.eq([{ name: 'foo' }])
+          expect(c['Num Cookies']).to.eq(1)
+        })
+      })
+    })
+
+    describe('.log with no cookies returned', () => {
+      beforeEach(function () {
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'clearAllCookies') {
+            this.lastLog = log
+          }
+        })
+
+        Cypress.automation
+        .withArgs('get:cookies')
+        .resolves([])
+      })
+
+      it('#consoleProps', () => {
+        cy.clearAllCookies().then(function (cookies) {
+          expect(cookies).to.be.null
+          const c = this.lastLog.invoke('consoleProps')
+
+          expect(c['Yielded']).to.eq('null')
+          expect(c['Cleared Cookies']).to.be.undefined
+          expect(c['Note']).to.eq('No cookies were found or removed.')
+        })
+      })
+    })
+
+    describe('.log when no cookies were cleared', () => {
+      beforeEach(function () {
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'clearAllCookies') {
+            this.lastLog = log
+          }
+        })
+
+        Cypress.automation
+        .withArgs('get:cookies', {})
+        .resolves([{ name: 'foo', domain: 'localhost' }])
+        .withArgs('clear:cookies', [{ name: 'foo', domain: 'localhost' }])
+        .resolves([])
+      })
+
+      it('#consoleProps', () => {
+        cy.clearAllCookies().then(function (cookies) {
           expect(cookies).to.be.null
           const c = this.lastLog.invoke('consoleProps')
 

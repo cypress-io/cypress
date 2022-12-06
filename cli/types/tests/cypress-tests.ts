@@ -1098,6 +1098,19 @@ namespace CypressClearCookiesTests {
   cy.clearCookies({ domain: false }) // $ExpectError
 }
 
+namespace CypressGetAllCookiesTests {
+  cy.clearAllCookies().then((cookies) => {
+    cookies // $ExpectType null
+  })
+  cy.clearAllCookies({ log: true })
+  cy.clearAllCookies({ timeout: 10 })
+  cy.clearAllCookies({ log: true, timeout: 10 })
+
+  cy.clearAllCookies({ log: 'true' }) // $ExpectError
+  cy.clearAllCookies({ timeout: '10' }) // $ExpectError
+  cy.clearAllCookies({ other: true }) // $ExpectError
+}
+
 namespace CypressLocalStorageTests {
   cy.getAllLocalStorage().then((result) => {
     result // $ExpectType StorageByOrigin

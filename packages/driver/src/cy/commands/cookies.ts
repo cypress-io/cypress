@@ -87,13 +87,20 @@ interface AutomationEventsAndOptions {
   'clear:cookies': Cypress.Cookie[]
 }
 
-type CommandName = 'getCookie' | 'getCookies' | 'getAllCookies' | 'setCookie' | 'clearCookie' | 'clearCookies'
+type CommandName = 'getCookie' | 'getCookies' | 'getAllCookies' | 'setCookie' | 'clearCookie' | 'clearCookies' | 'clearAllCookies'
 
 interface AutomateOptions<T extends keyof AutomationEventsAndOptions> {
   event: T
   options: AutomationEventsAndOptions[T]
   commandName: CommandName
   log?: Cypress.Log
+  timeout: number
+}
+
+interface GetAndClearOptions {
+  commandName: CommandName
+  log?: Cypress.Log
+  options: AutomationEventsAndOptions['get:cookies']
   timeout: number
 }
 
@@ -142,10 +149,10 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
     })
   }
 
-  const getAndClear = (log: Cypress.Log | undefined, timeout: number, options: AutomationEventsAndOptions['get:cookies']) => {
+  const getAndClear = ({ commandName, log, options, timeout }: GetAndClearOptions) => {
     return automateCookies({
       event: 'get:cookies',
-      commandName: 'clearCookies',
+      commandName,
       options,
       log,
       timeout,
@@ -158,7 +165,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
 
       return automateCookies({
         event: 'clear:cookies',
-        commandName: 'clearCookies',
+        commandName,
         options: cookies,
         log,
         timeout,
@@ -167,7 +174,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
     .then(pickCookieProps)
   }
 
-  const handleBackendError = (command, action, onFail) => {
+  const handleBackendError = (command: CommandName, action: string, onFail?: Cypress.Log) => {
     return (err) => {
       if (!_.includes(err.stack, err.message)) {
         err.stack = `${err.message}\n${err.stack}`
@@ -526,19 +533,67 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
       Cypress.emit('clear:cookies')
 
       return cy.retryIfCommandAUTOriginMismatch(() => {
-        return getAndClear(log, responseTimeout, { domain: options.domain! })
+        return getAndClear({
+          log,
+          timeout: responseTimeout,
+          options: { domain: options.domain! },
+          commandName: 'clearCookies',
+        })
         .then((result) => {
           cookies = result
 
           // null out the current subject
           return null
-        }).catch((err) => {
-        // make sure we always say to clearCookies
-          err.message = err.message.replace('getCookies', 'clearCookies')
-          throw err
         })
         .catch(handleBackendError('clearCookies', 'clearing cookies in', log))
       }, options.timeout)
+    },
+
+    clearAllCookies (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable>) {
+      const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
+        log: true,
+        timeout: config('responseTimeout'),
+      })
+
+      let cookies: Cypress.Cookie[] = []
+      let log: Cypress.Log | undefined
+
+      if (options.log) {
+        log = Cypress.log({
+          message: '',
+          timeout: options.timeout,
+          consoleProps () {
+            const obj = {}
+
+            obj['Yielded'] = 'null'
+
+            if (cookies.length) {
+              obj['Cleared Cookies'] = cookies
+              obj['Num Cookies'] = cookies.length
+            } else {
+              obj['Note'] = 'No cookies were found or removed.'
+            }
+
+            return obj
+          },
+        })
+      }
+
+      Cypress.emit('clear:cookies')
+
+      return getAndClear({
+        log,
+        timeout: options.timeout!,
+        options: {},
+        commandName: 'clearAllCookies',
+      })
+      .then((result) => {
+        cookies = result
+
+        // null out the current subject
+        return null
+      })
+      .catch(handleBackendError('clearAllCookies', 'clearing cookies in', log))
     },
   })
 }
