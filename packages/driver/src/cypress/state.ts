@@ -1,4 +1,3 @@
-/// <reference path="../../types/cy/commands/session.d.ts" />
 /// <reference path="../../types/cypress/log.d.ts" />
 
 import type Bluebird from 'bluebird'
@@ -16,7 +15,7 @@ export type SubjectChain = [any, ...QueryFunction[]]
 export interface StateFunc {
   (): Record<string, any>
   (v: Record<string, any>): Record<string, any>
-  (k: 'activeSessions', v?: Cypress.Commands.Session.ActiveSessions): Cypress.Commands.Session.ActiveSessions | undefined
+  (k: 'activeSessions', v?: Cypress.ActiveSessions): Cypress.ActiveSessions | undefined
   (k: '$autIframe', v?: JQuery<HTMLIFrameElement>): JQuery<HTMLIFrameElement> | undefined
   (k: 'routes', v?: RouteMap): RouteMap
   (k: 'aliasedRequests', v?: AliasedRequest[]): AliasedRequest[]

@@ -12,10 +12,6 @@ import {
   statusMap,
 } from './utils'
 
-import type { ServerSessionData } from '@packages/types'
-
-type SessionData = Cypress.Commands.Session.SessionData
-
 /**
  * Session data should be cleared with spec browser launch.
  *
@@ -30,7 +26,7 @@ export default function (Commands, Cypress, cy) {
 
   Cypress.on('run:start', () => {
     // @ts-ignore
-    Object.values(Cypress.state('activeSessions') || {}).forEach((sessionData: ServerSessionData) => {
+    Object.values(Cypress.state('activeSessions') || {}).forEach((sessionData: Cypress.ServerSessionData) => {
       if (sessionData.cacheAcrossSpecs) {
         sessionsManager.registeredSessions.set(sessionData.id, true)
       }
@@ -89,7 +85,7 @@ export default function (Commands, Cypress, cy) {
         })
       }
 
-      let session: SessionData = sessionsManager.getActiveSession(id)
+      let session: Cypress.SessionData = sessionsManager.getActiveSession(id)
       const isRegisteredSessionForSpec = sessionsManager.registeredSessions.has(id)
 
       if (session) {
@@ -120,7 +116,7 @@ export default function (Commands, Cypress, cy) {
           $errUtils.throwErrByPath('sessions.session.duplicateId', { args: { id } })
         }
 
-        session = sessions.defineSession({
+        session = sessionsManager.defineSession({
           id,
           setup,
           validate: options.validate,
@@ -215,7 +211,7 @@ export default function (Commands, Cypress, cy) {
 
         _log.set({ consoleProps: () => getConsoleProps(testSession) })
 
-        return sessions.setSessionData(testSession)
+        return sessionsManager.setSessionData(testSession)
       }
 
       function validateSession (existingSession, step: keyof typeof SESSION_STEPS) {
@@ -428,7 +424,7 @@ export default function (Commands, Cypress, cy) {
           }
 
           sessionsManager.registeredSessions.set(existingSession.id, true)
-          await sessions.saveSessionData(existingSession)
+          await sessionsManager.saveSessionData(existingSession)
 
           return statusMap.complete(step)
         })
@@ -440,7 +436,7 @@ export default function (Commands, Cypress, cy) {
        *   2. validate session
        *   3. if validation fails, catch error and recreate session
        */
-      const restoreSessionWorkflow = (existingSession: SessionData) => {
+      const restoreSessionWorkflow = (existingSession: Cypress.SessionData) => {
         return cy.then(async () => {
           setSessionLogStatus(statusMap.inProgress(SESSION_STEPS.restore))
           await navigateAboutBlank()
