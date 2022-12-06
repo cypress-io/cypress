@@ -15,7 +15,7 @@ const startCypress = async () => {
 
     await require('./start-cypress')
   } catch (error) {
-  // eslint-disable-next-line no-console
+    // eslint-disable-next-line no-console
     console.error(error)
     process.exit(1)
   }
