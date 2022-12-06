@@ -245,8 +245,7 @@ describe('App: Spec List (E2E)', () => {
         cy.findByText('No specs matched your search:').should('not.be.visible')
       })
 
-      // TODO: FIGURE OUT WHY THIS IS NOW FAILING CONSTANTLY
-      it.skip('saves the filter when navigating to a spec and back', function () {
+      it('saves the filter when navigating to a spec and back', function () {
         const targetSpecFile = 'accounts_list.spec.js'
 
         clearSearchAndType(targetSpecFile)
