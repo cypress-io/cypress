@@ -1,4 +1,4 @@
-describe('suite-level-only overrides run as expected', { testIsolation: 'off' }, () => {
+describe('suite-level-only overrides run as expected', { testIsolation: false }, () => {
   it('1st test passes', () => {
     cy.visit('https://example.cypress.io')
   })
@@ -13,7 +13,7 @@ describe('suite-level-only overrides run as expected', { testIsolation: 'off' },
 })
 
 describe('nested contexts ', () => {
-  describe('nested suite-level-only overrides run as expected', { testIsolation: 'off' }, () => {
+  describe('nested suite-level-only overrides run as expected', { testIsolation: false }, () => {
     it('1st test passes', () => {
       cy.visit('https://example.cypress.io')
     })

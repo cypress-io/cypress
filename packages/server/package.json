@@ -194,10 +194,11 @@
   },
   "files": [
     "config",
+    "hook-require.js",
     "lib",
     "patches",
-    "server-entry.js",
-    "hook-require.js"
+    "start-cypress.js",
+    "v8-snapshot-entry.js"
   ],
   "types": "index.d.ts",
   "productName": "Cypress",

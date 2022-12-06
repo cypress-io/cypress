@@ -182,9 +182,7 @@ describe('lib/socket', () => {
         })
 
         it('does not return cypress namespace or socket io cookies', function (done) {
-          sinon.stub(chrome.cookies, 'getAll')
-          .withArgs({ domain: 'localhost' })
-          .yieldsAsync([
+          sinon.stub(chrome.cookies, 'getAll').yieldsAsync([
             { name: 'foo', value: 'f', path: '/', domain: 'localhost', secure: true, httpOnly: true, expirationDate: 123, a: 'a', b: 'c' },
             { name: 'bar', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456, c: 'a', d: 'c' },
             { name: '__cypress.foo', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456, c: 'a', d: 'c' },
@@ -192,7 +190,7 @@ describe('lib/socket', () => {
             { name: '__socket', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456, c: 'a', d: 'c' },
           ])
 
-          return this.client.emit('automation:request', 'get:cookies', { domain: 'localhost' }, (resp) => {
+          this.client.emit('automation:request', 'get:cookies', { domain: 'localhost' }, (resp) => {
             expect(resp).to.deep.eq({
               response: [
                 { name: 'foo', value: 'f', path: '/', domain: 'localhost', secure: true, httpOnly: true, expiry: 123 },
@@ -200,7 +198,7 @@ describe('lib/socket', () => {
               ],
             })
 
-            return done()
+            done()
           })
         })
 

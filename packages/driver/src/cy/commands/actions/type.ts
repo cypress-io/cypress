@@ -476,6 +476,8 @@ export default function (Commands, Cypress, cy, state, config) {
       })
     }
 
+    const subjectChain = cy.subjectChain()
+
     const handleFocused = function () {
       // if it's the body, don't need to worry about focus
       // (unless it can be modified i.e we're in designMode or contenteditable)
@@ -509,6 +511,8 @@ export default function (Commands, Cypress, cy, state, config) {
       }
 
       return $actionability.verify(cy, options.$el, config, options, {
+        subjectFn: () => cy.getSubjectFromChain(subjectChain),
+
         onScroll ($el, type) {
           return Cypress.action('cy:scrolled', $el, type)
         },
@@ -527,7 +531,6 @@ export default function (Commands, Cypress, cy, state, config) {
           // cannot just call .focus, since children of contenteditable will not receive cursor
           // with .focus()
           return cy.now('click', $elToClick, {
-            $el: $elToClick,
             log: false,
             verify: false,
             _log: options._log,
@@ -536,6 +539,7 @@ export default function (Commands, Cypress, cy, state, config) {
             interval: options.interval,
             errorOnSelect: false,
             scrollBehavior: options.scrollBehavior,
+            subjectFn: () => $elToClick,
           })
           .then(() => {
             let activeElement = $elements.getActiveElByDocument($elToClick)

@@ -48,4 +48,5 @@ defineProps<{
 const emits = defineEmits<{
   (event: 'runAllSpecs'): void
 }>()
+
 </script>

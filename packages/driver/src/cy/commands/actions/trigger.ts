@@ -117,12 +117,16 @@ export default (Commands, Cypress, cy, state, config) => {
         subject = options.$el.first()
       }
 
+      const subjectChain = cy.subjectChain()
+
       const trigger = () => {
         if (dispatchEarly) {
           return dispatch(subject, state('window'), eventName, eventOptions)
         }
 
         return $actionability.verify(cy, subject, config, options, {
+          subjectFn: () => cy.getSubjectFromChain(subjectChain),
+
           onScroll ($el, type) {
             Cypress.action('cy:scrolled', $el, type)
           },
