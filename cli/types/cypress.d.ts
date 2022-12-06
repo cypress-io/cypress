@@ -3405,7 +3405,7 @@ declare namespace Cypress {
 
   interface Session {
     /**
-     * Clear all sessions, include cached global sessions, saved on the backend.
+     * Clear all sessions saved on the backend, including cached global sessions.
      */
     clearAllSavedSessions: () => Promise<void>
     /**
