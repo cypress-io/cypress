@@ -25,7 +25,7 @@ jobs:
     runs-on: ${{ matrix.platform }}
     env:
       CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
-      BASE_BRANCH: ${{ inputs.branch || ryanm/feature/v8-snapshots-auto-pr }}
+      BASE_BRANCH: ${{ inputs.branch || 'ryanm/feature/v8-snapshots-auto-pr' }}
       GENERATE_FROM_SCRATCH: ${{ inputs.generate_from_scratch }}
     steps:
       - name: Determine snapshot files - Windows
