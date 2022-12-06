@@ -51,6 +51,7 @@ export type BlueprintConfig = {
   sourceMap: Buffer | undefined
   processedSourceMapPath: string | undefined
   supportTypeScript: boolean
+  integrityCheckSource: string | undefined
 }
 
 const pathSep = path.sep === '\\' ? '\\\\' : path.sep
@@ -101,6 +102,7 @@ export function scriptFromBlueprint (config: BlueprintConfig): {
     basedir,
     sourceMap,
     supportTypeScript,
+    integrityCheckSource,
   } = config
 
   const normalizedMainModuleRequirePath = forwardSlash(mainModuleRequirePath)
@@ -109,6 +111,8 @@ export function scriptFromBlueprint (config: BlueprintConfig): {
     `
 const PATH_SEP = '${pathSep}'
 var snapshotAuxiliaryData = ${auxiliaryData}
+
+${integrityCheckSource || ''}
 
 function generateSnapshot() {
   //
@@ -170,13 +174,32 @@ function generateSnapshot() {
   ${includeStrictVerifiers ? 'require.isStrict = true' : ''}
 
   customRequire(${normalizedMainModuleRequirePath}, ${normalizedMainModuleRequirePath})
-  return {
-    customRequire,
-    setGlobals: ${setGlobals},
-  }
+  const result = {}
+  Object.defineProperties(result, {
+    customRequire: {
+      writable: false,
+      value: customRequire
+    },
+    setGlobals: {
+      writable: false,
+      value: ${setGlobals}
+    }
+  })
+  return result
 }
 
-var snapshotResult = generateSnapshot.call({})
+let numberOfGetSnapshotResultCalls = 0
+const snapshotResult = generateSnapshot.call({})
+Object.defineProperty(this, 'getSnapshotResult', {
+  writable: false,
+  value: function () {
+    if (numberOfGetSnapshotResultCalls > 0) {
+      throw new Error('getSnapshotResult can only be called once')
+    }
+    numberOfGetSnapshotResultCalls++
+    return snapshotResult
+  },
+})
 var supportTypeScript = ${supportTypeScript}
 generateSnapshot = null
 `,

@@ -20,6 +20,7 @@ class SnapshotEntryGeneratorViaWalk {
     readonly fullPathToSnapshotEntry: string,
     readonly nodeModulesOnly: boolean,
     readonly pathsMapper: PathsMapper,
+    readonly integrityCheckSource: string | undefined,
   ) {
     this.bundlerPath = getBundlerPath()
   }
@@ -59,6 +60,7 @@ class SnapshotEntryGeneratorViaWalk {
       nodeModulesOnly: this.nodeModulesOnly,
       sourcemap: false,
       supportTypeScript: this.nodeModulesOnly,
+      integrityCheckSource: this.integrityCheckSource,
     }
     const { meta } = await createBundleAsync(opts)
 
@@ -78,6 +80,7 @@ type GenerateDepsDataOpts = {
   entryFile: string
   nodeModulesOnly?: boolean
   pathsMapper?: PathsMapper
+  integrityCheckSource: string | undefined
 }
 
 export type BundlerMetadata = Metadata & { projectBaseDir: string }
@@ -94,6 +97,7 @@ export async function generateBundlerMetadata (
     fullPathToSnapshotEntry,
     fullConf.nodeModulesOnly,
     fullConf.pathsMapper,
+    config.integrityCheckSource,
   )
   const meta = await generator.getMetadata()
 
@@ -120,6 +124,7 @@ export async function generateSnapshotEntryFromEntryDependencies (
     fullPathToSnapshotEntry,
     fullConf.nodeModulesOnly,
     fullConf.pathsMapper,
+    config.integrityCheckSource,
   )
 
   try {

@@ -3,199 +3,143 @@ import _ from 'lodash'
 import $dom from '../../dom'
 import $elements from '../../dom/elements'
 import { resolveShadowDomInclusion } from '../../cypress/shadow_dom_utils'
+import { subjectChainToString } from '../../cypress/error_messages'
+
+type TraversalOptions = Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Shadow>
 
 const traversals = 'find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings'.split(' ')
 
-const optInShadowTraversals = {
-  find: (cy, $el, arg1, arg2) => {
-    const roots = $el.map((i, el) => {
-      return $dom.findAllShadowRoots(el)
-    })
+export default (Commands, Cypress, cy) => {
+  const sortedUnique = ($el) => {
+    // we want _.uniq() to keep the elements with higher indexes instead of lower
+    // so we reverse, uniq, then reverse again
+    // so [div1, body, html, div2, body, html]
+    // becomes [div1, div2, body, html] and not [div1, body, html, div2]
+    return cy.$$(_($el).reverse().uniq().reverse().value())
+  }
 
-    // add the roots to the existing selection
-    const elementsWithShadow = $el.add(_.flatten(roots))
+  const getEl = (traversal, includeShadowDom, subject, arg1, arg2) => {
+    if (traversal === 'find' && includeShadowDom) {
+      const roots = subject.map((i, el) => $dom.findAllShadowRoots(el))
 
-    // query the entire set of [selection + shadow roots]
-    return elementsWithShadow.find(arg1, arg2)
-  },
-}
+      // add the roots to the existing selection
+      const elementsWithShadow = subject.add(_.flatten(roots))
 
-const sortedUnique = (cy, $el) => {
-  // we want _.uniq() to keep the elements with higher indexes instead of lower
-  // so we reverse, uniq, then reverse again
-  // so [div1, body, html, div2, body, html]
-  // becomes [div1, div2, body, html] and not [div1, body, html, div2]
-  return cy.$$(_($el).reverse().uniq().reverse().value())
-}
+      // query the entire set of [selection + shadow roots]
+      return elementsWithShadow.find(arg1, arg2)
+    }
 
-const autoShadowTraversals = {
-  closest: (cy, $el, selector) => {
-    const nodes = _.reduce($el, (nodes, el) => {
-      const getClosest = (node) => {
-        const closestNode = node.closest(selector)
+    if (traversal === 'closest' && $dom.isWithinShadowRoot(subject[0])) {
+      const nodes = _.reduce(subject, (nodes, el) => {
+        const getClosest = (node) => {
+          const closestNode = node.closest(arg1)
 
-        if (closestNode) return nodes.concat(closestNode)
+          if (closestNode) return nodes.concat(closestNode)
 
-        const root = el.getRootNode()
+          const root = el.getRootNode()
 
-        if (!$elements.isShadowRoot(root)) return nodes
+          if (!$elements.isShadowRoot(root)) return nodes
 
-        return getClosest(root.host)
+          return getClosest(root.host)
+        }
+
+        return getClosest(el)
+      }, [])
+
+      return sortedUnique(nodes)
+    }
+
+    if (traversal === 'parent' && $dom.isWithinShadowRoot(subject[0])) {
+      const parents = subject.map((i, el) => $elements.getParentNode(el))
+
+      return sortedUnique(parents)
+    }
+
+    if (traversal === 'parents' && $dom.isWithinShadowRoot(subject[0])) {
+      let $parents = subject.map((i, el) => $elements.getAllParents(el))
+
+      if (subject.length > 1) {
+        $parents = sortedUnique($parents)
       }
 
-      return getClosest(el)
-    }, [])
-
-    return sortedUnique(cy, nodes)
-  },
-  parent: (cy, $el) => {
-    const parents = $el.map((i, el) => {
-      return $elements.getParentNode(el)
-    })
-
-    return sortedUnique(cy, parents)
-  },
-  parents: (cy, $el, selector) => {
-    let $parents = $el.map((i, el) => {
-      return $elements.getAllParents(el)
-    })
-
-    if ($el.length > 1) {
-      $parents = sortedUnique(cy, $parents)
+      return arg1 ? $parents.filter(arg1) : $parents
     }
 
-    if (!selector) {
-      return $parents
+    if (traversal === 'parentsUntil' && $dom.isWithinShadowRoot(subject[0])) {
+      let $parents = subject.map((i, el) => $elements.getAllParents(el, arg1))
+
+      if (subject.length > 1) {
+        $parents = sortedUnique($parents)
+      }
+
+      return arg2 ? $parents.filter(arg2) : $parents
     }
 
-    return $parents.filter(selector)
-  },
-  parentsUntil: (cy, $el, selectorOrEl, filter) => {
-    let $parents = $el.map((i, el) => {
-      return $elements.getAllParents(el, selectorOrEl)
-    })
+    return subject[traversal].call(subject, arg1, arg2)
+  }
 
-    if ($el.length > 1) {
-      $parents = sortedUnique(cy, $parents)
-    }
-
-    if (!filter) {
-      return $parents
-    }
-
-    return $parents.filter(filter)
-  },
-}
-
-type EachConsoleProps = {
-  Selector: string
-  'Applied To': any
-  Yielded?: any
-  Elements?: number | undefined
-}
-
-export default (Commands, Cypress, cy) => {
   _.each(traversals, (traversal) => {
-    Commands.add(traversal, { prevSubject: ['element', 'document'] }, (subject, arg1, arg2, options) => {
+    Commands.addQuery(traversal, function traversalFn (arg1, arg2, userOptions: TraversalOptions = {}) {
       if (_.isObject(arg1) && !_.isFunction(arg1)) {
-        options = arg1
+        userOptions = arg1
       }
 
       if (_.isObject(arg2) && !_.isFunction(arg2)) {
-        options = arg2
+        userOptions = arg2
       }
 
-      const userOptions = options || {}
+      // Omit any null or undefined arguments
+      const selector = _.filter([arg1, arg2], (a) => (a != null && !_.isFunction(a) && !_.isObject(a))).join(', ')
 
-      options = _.defaults({}, userOptions, { log: true })
+      const log = userOptions.log !== false && Cypress.log({
+        message: selector,
+        timeout: userOptions.timeout,
+        consoleProps: () => ({}),
+      })
 
-      const getSelector = () => {
-        let args = _.chain([arg1, arg2]).reject(_.isFunction).reject(_.isObject).value()
+      this.set('timeout', userOptions.timeout)
 
-        args = _.without(args, null, undefined)
+      this.set('onFail', (err) => {
+        switch (err.type) {
+          case 'existence': {
+            const subjectChain = cy.subjectChain(this.get('chainerId'))
 
-        return args.join(', ')
-      }
+            err.message += ` Queried from:
 
-      const consoleProps: EachConsoleProps = {
-        Selector: getSelector(),
-        'Applied To': $dom.getElements(subject),
-      }
+              > ${subjectChainToString(subjectChain)}`
 
-      if (options.log !== false) {
-        options._log = Cypress.log({
-          message: getSelector(),
-          timeout: options.timeout,
-          consoleProps () {
-            return consoleProps
-          },
-        })
-      }
-
-      const getEl = () => {
-        const includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
-        const optInShadowTraversal = optInShadowTraversals[traversal]
-        const autoShadowTraversal = autoShadowTraversals[traversal]
-
-        if (includeShadowDom && optInShadowTraversal) {
-          // if we're told explicitly to ignore shadow boundaries,
-          // use the replacement traversal function if one exists
-          // so we can cross boundaries
-          return optInShadowTraversal(cy, subject, arg1, arg2)
-        }
-
-        if (autoShadowTraversal && $dom.isWithinShadowRoot(subject[0])) {
-          // if we detect the element is within a shadow root and we're using
-          // .closest() or .parents(), automatically cross shadow boundaries
-          return autoShadowTraversal(cy, subject, arg1, arg2)
-        }
-
-        return subject[traversal].call(subject, arg1, arg2)
-      }
-
-      const setEl = ($el) => {
-        if (options.log === false) {
-          return
-        }
-
-        consoleProps.Yielded = $dom.getElements($el)
-        consoleProps.Elements = $el?.length
-
-        return options._log.set({ $el })
-      }
-
-      const getElements = () => {
-        let $el
-
-        try {
-          $el = getEl()
-
-          // normalize the selector since jQuery won't have it
-          // or completely borks it
-          $el.selector = getSelector()
-        } catch (e: any) {
-          e.onFail = () => {
-            return options._log.error(e)
+            break
           }
-
-          throw e
+          default:
+            break
         }
+      })
 
-        setEl($el)
+      const includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
 
-        return cy.verifyUpcomingAssertions($el, options, {
-          onRetry: getElements,
-          onFail (err) {
-            if (err.type === 'existence') {
-              const node = $dom.stringify(subject, 'short')
+      return (subject) => {
+        Cypress.ensure.isType(subject, ['element', 'document'], traversal, cy)
 
-              err.message += ` Queried from element: ${node}`
+        const $el = getEl(traversal, includeShadowDom, cy.$$(subject), arg1, arg2)
+
+        // normalize the selector since jQuery won't have it
+        // or completely borks it
+        $el.selector = selector || traversal
+
+        log && cy.state('current') === this && log.set({
+          $el,
+          consoleProps: () => {
+            return {
+              Selector: selector,
+              'Applied To': $dom.getElements(subject),
+              Yielded: $dom.getElements($el),
+              Elements: $el?.length,
             }
           },
         })
-      }
 
-      return getElements()
+        return $el
+      }
     })
   })
 }

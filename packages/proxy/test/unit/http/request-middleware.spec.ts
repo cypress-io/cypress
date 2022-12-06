@@ -33,6 +33,10 @@ describe('http/request-middleware', () => {
 
     it('removes x-cypress-is-aut-frame header when it exists, sets in on the req', async () => {
       const ctx = {
+        getAUTUrl: sinon.stub().returns('http://localhost:8080'),
+        remoteStates: {
+          isPrimarySuperDomainOrigin: sinon.stub().returns(false),
+        },
         req: {
           headers: {
             'x-cypress-is-aut-frame': 'true',
@@ -53,6 +57,10 @@ describe('http/request-middleware', () => {
 
     it('removes x-cypress-is-aut-frame header when it does not exist, sets in on the req', async () => {
       const ctx = {
+        getAUTUrl: sinon.stub().returns('http://localhost:8080'),
+        remoteStates: {
+          isPrimarySuperDomainOrigin: sinon.stub().returns(false),
+        },
         req: {
           headers: {},
         } as Partial<CypressIncomingRequest>,
@@ -71,6 +79,10 @@ describe('http/request-middleware', () => {
 
     it('removes x-cypress-is-xhr-or-fetch header when it exists', async () => {
       const ctx = {
+        getAUTUrl: sinon.stub().returns('http://localhost:8080'),
+        remoteStates: {
+          isPrimarySuperDomainOrigin: sinon.stub().returns(true),
+        },
         req: {
           headers: {
             'x-cypress-is-xhr-or-fetch': 'true',
@@ -90,6 +102,10 @@ describe('http/request-middleware', () => {
 
     it('removes x-cypress-is-xhr-or-fetch header when it does not exist', async () => {
       const ctx = {
+        getAUTUrl: sinon.stub().returns('http://localhost:8080'),
+        remoteStates: {
+          isPrimarySuperDomainOrigin: sinon.stub().returns(false),
+        },
         req: {
           headers: {},
         } as Partial<CypressIncomingRequest>,
@@ -105,34 +121,8 @@ describe('http/request-middleware', () => {
       })
     })
 
-    it('does not set requestedWith or credentialLevel on the request if the the experimentalSessionAndOrigin flag is off', async () => {
-      const ctx = {
-        config: {
-          experimentalSessionAndOrigin: false,
-        },
-        req: {
-          headers: {
-            'x-cypress-is-xhr-or-fetch': 'true',
-          },
-        } as Partial<CypressIncomingRequest>,
-        res: {
-          on: (event, listener) => {},
-          off: (event, listener) => {},
-        },
-      }
-
-      await testMiddleware([ExtractCypressMetadataHeaders], ctx)
-      .then(() => {
-        expect(ctx.req.requestedWith).not.to.exist
-        expect(ctx.req.credentialsLevel).not.to.exist
-      })
-    })
-
     it('does not set requestedWith or credentialLevel on the request if top does NOT need to be simulated', async () => {
       const ctx = {
-        config: {
-          experimentalSessionAndOrigin: true,
-        },
         getAUTUrl: sinon.stub().returns(undefined),
         req: {
           headers: {
@@ -154,9 +144,6 @@ describe('http/request-middleware', () => {
 
     it('does not set requestedWith or credentialLevel on the request if x-cypress-is-xhr-or-fetch has invalid values', async () => {
       const ctx = {
-        config: {
-          experimentalSessionAndOrigin: true,
-        },
         getAUTUrl: sinon.stub().returns('http://localhost:8080'),
         remoteStates: {
           isPrimarySuperDomainOrigin: sinon.stub().returns(false),
@@ -182,9 +169,6 @@ describe('http/request-middleware', () => {
     // CDP can determine whether or not the request is xhr | fetch, but the extension or electron cannot
     it('provides resourceTypeAndCredentialManager with resourceType if able to determine from header (xhr)', async () => {
       const ctx = {
-        config: {
-          experimentalSessionAndOrigin: true,
-        },
         getAUTUrl: sinon.stub().returns('http://localhost:8080'),
         remoteStates: {
           isPrimarySuperDomainOrigin: sinon.stub().returns(false),
@@ -213,9 +197,6 @@ describe('http/request-middleware', () => {
     // CDP can determine whether or not the request is xhr | fetch, but the extension or electron cannot
     it('provides resourceTypeAndCredentialManager with resourceType if able to determine from header (fetch)', async () => {
       const ctx = {
-        config: {
-          experimentalSessionAndOrigin: true,
-        },
         getAUTUrl: sinon.stub().returns('http://localhost:8080'),
         remoteStates: {
           isPrimarySuperDomainOrigin: sinon.stub().returns(false),
@@ -243,9 +224,6 @@ describe('http/request-middleware', () => {
 
     it('sets the resourceType and credentialsLevel on the request from whatever is returned by resourceTypeAndCredentialManager if conditions apply', async () => {
       const ctx = {
-        config: {
-          experimentalSessionAndOrigin: true,
-        },
         getAUTUrl: sinon.stub().returns('http://localhost:8080'),
         remoteStates: {
           isPrimarySuperDomainOrigin: sinon.stub().returns(false),
@@ -369,16 +347,6 @@ describe('http/request-middleware', () => {
 
   describe('MaybeAttachCrossOriginCookies', () => {
     const { MaybeAttachCrossOriginCookies } = RequestMiddleware
-
-    it('is a noop if experimental flag is off', async () => {
-      const ctx = await getContext()
-
-      ctx.config.experimentalSessionAndOrigin = false
-
-      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
-
-      expect(ctx.req.headers['cookie']).to.equal('request=cookie')
-    })
 
     it('is a noop if no current AUT URL', async () => {
       const ctx = await getContext()
@@ -587,7 +555,6 @@ describe('http/request-middleware', () => {
         remoteStates: {
           isPrimarySuperDomainOrigin: sinon.stub().returns(false),
         },
-        config: { experimentalSessionAndOrigin: true },
         req: {
           proxiedUrl: requestUrl,
           isAUTFrame: true,
@@ -629,7 +596,7 @@ describe('http/request-middleware', () => {
       })
     })
 
-    it('sets wantsInjection to fullCrossOrigin when a cross origin request is buffered and experimentalSessionAndOrigin=true', async () => {
+    it('sets wantsInjection to fullCrossOrigin when a cross origin request is buffered', async () => {
       const buffers = new HttpBuffers()
       const buffer = { url: 'https://www.cypress.io/', urlDoesNotMatchPolicyBasedOnDomain: true } as HttpBuffer
 
@@ -639,9 +606,6 @@ describe('http/request-middleware', () => {
         buffers,
         req: {
           proxiedUrl: 'https://www.cypress.io/',
-        },
-        config: {
-          experimentalSessionAndOrigin: true,
         },
         res: {
           on: (event, listener) => {},
@@ -652,32 +616,6 @@ describe('http/request-middleware', () => {
       await testMiddleware([MaybeEndRequestWithBufferedResponse], ctx)
       .then(() => {
         expect(ctx.res.wantsInjection).to.equal('fullCrossOrigin')
-      })
-    })
-
-    it('sets wantsInjection to full when a cross origin request is buffered and experimentalSessionAndOrigin=false', async () => {
-      const buffers = new HttpBuffers()
-      const buffer = { url: 'https://www.cypress.io/', urlDoesNotMatchPolicyBasedOnDomain: true } as HttpBuffer
-
-      buffers.set(buffer)
-
-      const ctx = {
-        buffers,
-        req: {
-          proxiedUrl: 'https://www.cypress.io/',
-        },
-        config: {
-          experimentalSessionAndOrigin: false,
-        },
-        res: {
-          on: (event, listener) => {},
-          off: (event, listener) => {},
-        } as Partial<CypressOutgoingResponse>,
-      }
-
-      await testMiddleware([MaybeEndRequestWithBufferedResponse], ctx)
-      .then(() => {
-        expect(ctx.res.wantsInjection).to.equal('full')
       })
     })
 

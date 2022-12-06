@@ -4,30 +4,6 @@ context('cy.origin unsupported commands', { browser: '!webkit' }, () => {
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
   })
 
-  it('cy.route() method is deprecated', (done) => {
-    cy.on('fail', (err) => {
-      expect(err.message).to.equal('`cy.route()` has been deprecated and its use is not supported in the `cy.origin()` callback. Consider using `cy.intercept()` (outside of the callback) instead.')
-      expect(err.docsUrl).to.equal('https://on.cypress.io/intercept')
-      done()
-    })
-
-    cy.origin('http://www.foobar.com:3500', () => {
-      cy.route('api')
-    })
-  })
-
-  it('cy.server() method is deprecated', (done) => {
-    cy.on('fail', (err) => {
-      expect(err.message).to.equal('`cy.server()` has been deprecated and its use is not supported in the `cy.origin()` callback. Consider using `cy.intercept()` (outside of the callback) instead.')
-      expect(err.docsUrl).to.equal('https://on.cypress.io/intercept')
-      done()
-    })
-
-    cy.origin('http://www.foobar.com:3500', () => {
-      cy.server()
-    })
-  })
-
   it('cy.origin() is not yet supported', (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.equal('`cy.origin()` use is not currently supported in the `cy.origin()` callback, but is planned for a future release. Please 👍 the following issue and leave a comment with your use-case:')

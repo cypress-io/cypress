@@ -79,6 +79,7 @@ const createDataTransfer = (files: Cypress.FileReferenceObject[], eventTarget: J
 interface InternalSelectFileOptions extends Cypress.SelectFileOptions {
   _log: any
   $el: JQuery
+  eventTarget: JQuery
 }
 
 const ACTIONS = {
@@ -127,15 +128,17 @@ export default (Commands, Cypress, cy, state, config) => {
       return
     }
 
-    if (aliasObj.subject == null) {
+    const contents = cy.getSubjectFromChain(aliasObj.subjectChain)
+
+    if (contents == null) {
       $errUtils.throwErrByPath('selectFile.invalid_alias', {
         onFail: options._log,
-        args: { alias: file.contents, subject: aliasObj.subject },
+        args: { alias: file.contents, subject: contents },
       })
     }
 
-    if ($dom.isElement(aliasObj.subject)) {
-      const subject = $dom.stringify(aliasObj.subject)
+    if ($dom.isElement(contents)) {
+      const subject = $dom.stringify(contents)
 
       $errUtils.throwErrByPath('selectFile.invalid_alias', {
         onFail: options._log,
@@ -146,7 +149,7 @@ export default (Commands, Cypress, cy, state, config) => {
     return {
       fileName: aliasObj.fileName,
       ...file,
-      contents: aliasObj.subject,
+      contents,
     }
   }
 
@@ -226,6 +229,7 @@ export default (Commands, Cypress, cy, state, config) => {
         action: 'select',
         log: true,
         $el: subject,
+        eventTarget: subject,
       })
 
       if (options.log) {
@@ -257,37 +261,48 @@ export default (Commands, Cypress, cy, state, config) => {
         })
       }
 
-      let eventTarget = subject
+      const getEventTargetFromSubject = (subject) => {
+        let eventTarget = subject
 
-      // drag-drop always targets the subject directly, but select
-      // may switch <label> -> <input> element
-      if (options.action === 'select') {
-        if (eventTarget.is('label')) {
-          eventTarget = $dom.getInputFromLabel(eventTarget)
+        if (options.action === 'select') {
+          if (eventTarget.is('label')) {
+            eventTarget = $dom.getInputFromLabel(eventTarget)
+          }
+
+          if (eventTarget.length < 1 || !$dom.isInputType(eventTarget, 'file')) {
+            const node = $dom.stringify(options.$el)
+
+            $errUtils.throwErrByPath('selectFile.not_file_input', {
+              onFail: options._log,
+              args: { node },
+            })
+          }
         }
 
-        if (eventTarget.length < 1 || !$dom.isInputType(eventTarget, 'file')) {
-          const node = $dom.stringify(options.$el)
-
-          $errUtils.throwErrByPath('selectFile.not_file_input', {
-            onFail: options._log,
-            args: { node },
-          })
+        if (!options.force) {
+          Cypress.ensure.isNotDisabled(eventTarget, 'selectFile', options._log)
         }
-      }
 
-      if (!options.force) {
-        cy.ensureNotDisabled(eventTarget, options._log)
+        return eventTarget
       }
 
       // Make sure files is an array even if the user only passed in one
       const filesArray = await Promise.all(([] as Cypress.FileReference[]).concat(files).map(parseFile(options)))
+
+      const subjectChain = cy.subjectChain()
 
       // We verify actionability on the subject, rather than the eventTarget,
       // in order to allow for a hidden <input> with a visible <label>
       // Similarly, this is why we implement something similar, but not identical to,
       // cy.trigger() to dispatch our events.
       await $actionability.verify(cy, subject, config, options, {
+        subjectFn () {
+          subject = cy.getSubjectFromChain(subjectChain)
+          options.eventTarget = getEventTargetFromSubject(subject)
+
+          return subject
+        },
+
         onScroll ($el, type) {
           Cypress.action('cy:scrolled', $el, type)
         },
@@ -304,9 +319,9 @@ export default (Commands, Cypress, cy, state, config) => {
             })
           }
 
-          const dataTransfer = createDataTransfer(filesArray, eventTarget)
+          const dataTransfer = createDataTransfer(filesArray, options.eventTarget as JQuery<HTMLElement>)
 
-          ACTIONS[options.action as string](eventTarget.get(0), dataTransfer, coords, state)
+          ACTIONS[options.action as string](options.eventTarget?.get(0), dataTransfer, coords, state)
 
           return $elToClick
         },
