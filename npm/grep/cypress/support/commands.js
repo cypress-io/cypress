@@ -92,16 +92,3 @@ Cypress.Commands.add('createTodo', function (todo) {
     cmd.set({ $el: $li }).snapshot().end()
   })
 })
-
-Cypress.Commands.add('addAxeCode', () => {
-  cy.window({ log: false }).then((win) => {
-    return new Promise((resolve) => {
-      const script = win.document.createElement('script')
-
-      script.src = '/node_modules/axe-core/axe.min.js'
-      script.addEventListener('load', resolve)
-
-      win.document.head.appendChild(script)
-    })
-  })
-})
