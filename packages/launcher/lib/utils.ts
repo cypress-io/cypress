@@ -7,7 +7,7 @@ export const utils = {
   execa,
   wrapSpawnOptsWithArch: (cmd: string, args: string[]) => {
     if (process.platform !== 'darwin') {
-      return { cmd, args, opts: {} }
+      return { cmd, args, opts: { env: {} } }
     }
 
     // when Cypress spawns processes on macOS with a Intel process as Cypress's parent,
