@@ -130,6 +130,7 @@ describe('spec-options', () => {
             framework: WIZARD_FRAMEWORKS[0],
             specPattern: [defaultSpecPattern.component],
             componentName: 'Counter',
+            isDefault: true,
           })
 
           const result = await testSpecOptions.getCodeGenOptions()
