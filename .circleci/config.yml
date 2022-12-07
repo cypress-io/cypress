@@ -59,9 +59,14 @@ jobs:
       - run:
           name: Download .circleci/workflows.yaml
           command: |
+            echo "CIRCLE_BRANCH: $CIRCLE_BRANCH"
+            echo "CIRCLE_PROJECT_USERNAME: $CIRCLE_PROJECT_USERNAME"
+            echo "CIRCLE_PROJECT_USERNAME: $CIRCLE_PROJECT_USERNAME"
             if [[ "$CIRCLE_BRANCH" == "pull/"* ]]; then
+              echo "downloading https://raw.githubusercontent.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/develop/.circleci/workflows.yml"
               curl -o workflows.yml https://raw.githubusercontent.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/develop/.circleci/workflows.yml
             else 
+              echo "downloading https://raw.githubusercontent.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/$CIRCLE_BRANCH/.circleci/workflows.yml"
               curl -o workflows.yml https://raw.githubusercontent.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}/.circleci/workflows.yml
             fi
       - continuation/continue:
