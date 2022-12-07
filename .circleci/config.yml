@@ -2049,6 +2049,24 @@ jobs:
       - upload-build-artifacts
       - post-install-comment
 
+  checkout_and_build_cypress_artifacts:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: xlarge
+    resource_class: << parameters.resource_class >>
+    steps:
+      - checkout
+      - restore_cached_workspace
+      - build-binary
+      - build-cypress-npm-package:
+          executor: << parameters.executor >>
+      - verify_should_persist_artifacts
+      - upload-build-artifacts
+      - post-install-comment
+
   test-kitchensink:
     <<: *defaults
     parameters:
@@ -2934,7 +2952,7 @@ emily-workflow: &emily-workflow
         requires:
           - checkout_and_build
     
-    - create-build-artifacts:
+    - checkout_and_build_cypress_artifacts:
         context:
           - test-runner:upload
           - test-runner:commit-status-checks
