@@ -1,4 +1,4 @@
-import { createConfig } from './config'
+import { createConfig, getSnapshotCacheDir } from './config'
 import { consolidateDeps } from './consolidate-deps'
 import { generateMetadata } from './generate-metadata'
 import minimist from 'minimist'
@@ -29,4 +29,4 @@ Note that this may take a while.`)
   }
 }
 
-export { setupV8Snapshots, consolidateDeps }
+export { setupV8Snapshots, consolidateDeps, getSnapshotCacheDir }
