@@ -985,6 +985,11 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/25025
+    it('searches multiple subject elements', () => {
+      cy.get('ul').contains('li', 'asdf 3')
+    })
+
     it('resets the subject between chain invocations', () => {
       const span = cy.$$('.k-in:contains(Quality Control):last')
       const label = cy.$$('#complex-contains label')
@@ -1005,7 +1010,6 @@ describe('src/cy/commands/querying', () => {
 
       cy.get('#click-me a').contains('click').then(($span) => {
         expect($span.length).to.eq(1)
-
         expect($span.get(0)).to.eq(span.get(0))
       })
     })
@@ -1013,7 +1017,6 @@ describe('src/cy/commands/querying', () => {
     it('can find input type=submits by value', () => {
       cy.contains('input contains submit').then(($el) => {
         expect($el.length).to.eq(1)
-
         expect($el).to.match('input[type=submit]')
       })
     })
@@ -1022,7 +1025,6 @@ describe('src/cy/commands/querying', () => {
     it('can find input type=submits by Regex', () => {
       cy.contains(/input contains submit/).then(($el) => {
         expect($el.length).to.eq(1)
-
         expect($el).to.match('input[type=submit]')
       })
     })
@@ -1030,7 +1032,6 @@ describe('src/cy/commands/querying', () => {
     it('has an optional filter argument', () => {
       cy.contains('ul', 'li 0').then(($el) => {
         expect($el.length).to.eq(1)
-
         expect($el).to.match('ul')
       })
     })
@@ -1046,7 +1047,6 @@ describe('src/cy/commands/querying', () => {
     it('searches all els in comma separated filter', () => {
       cy.contains('a,button', 'Naruto').then(($el) => {
         expect($el.length).to.eq(1)
-
         expect($el).to.match('a')
       })
 
