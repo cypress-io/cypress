@@ -8,7 +8,7 @@
         commits-ahead="0"
       />
       <DebugSpecList
-        :specs="specsList"
+        :specs="debugSpecsArray"
       />
     </div>
     <div
@@ -42,6 +42,7 @@ import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-
 import DebugPageHeader from './DebugPageHeader.vue'
 import DebugSpecList from './DebugSpecList.vue'
 import { useI18n } from 'vue-i18n'
+import { specsList } from './utils/UtilsDebugMapping'
 
 const { t } = useI18n()
 
@@ -53,7 +54,7 @@ gql`
         __typename
         ... on CloudProject {
           id
-          runByNumber(runNumber: 2) {
+          runByNumber(runNumber: 1) {
             ...DebugPage
             id
             runNumber
@@ -85,38 +86,12 @@ const run = computed(() => {
   return props.gql.currentProject?.cloudProject?.__typename === 'CloudProject' && props.gql.currentProject.cloudProject.runByNumber
 })
 
-const specsList = computed(() => {
+const debugSpecsArray = computed(() => {
   if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProject') {
     const specs = props.gql.currentProject.cloudProject.runByNumber?.specs || []
     const tests = props.gql.currentProject.cloudProject.runByNumber?.testsForReview || []
 
-    const mappedTests = tests.reduce((acc, curr) => {
-      // console.log(`test specId = ${ curr.specId}`)
-      let spec = acc[curr.specId]
-
-      if (!spec) {
-        const foundSpec = specs.find((spec) => spec.id === curr.specId)
-
-        spec = { spec: foundSpec }
-        // console.log('looking for spec', spec)
-        if (foundSpec) {
-          acc[curr.specId] = spec
-        } else {
-          //TODO better handle error case
-          throw new Error(`Could not find spec for id ${ curr.specId}`)
-        }
-      }
-
-      spec.tests = [...(spec.tests || []), curr]
-
-      // console.log('spec.tests', spec.tests)
-
-      return acc
-    }, {})
-
-    // console.log(mappedTests)
-
-    return Object.values(mappedTests)
+    return specsList(specs, tests)
   }
 
   return []

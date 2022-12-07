@@ -1,10 +1,15 @@
 <template>
-  <DebugSpec
-    v-for="spec in specs"
-    :key="spec.spec.id"
-    :spec="spec.spec"
-    :test-results="spec.tests"
-  />
+  <div
+    data-cy="debug-spec-col"
+    class="flex flex-col grid px-24px gap-24px self-stretch mb-24px"
+  >
+    <DebugSpec
+      v-for="spec in specs"
+      :key="spec.spec.id"
+      :spec="spec.spec"
+      :test-results="spec.tests"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -17,6 +22,7 @@ gql`
 fragment DebugSpecListSpec on CloudSpecRun {
   id
   path
+  basename
   extension
   shortPath
   groupIds
@@ -72,7 +78,7 @@ const specs = computed(() => {
     return {
       spec: {
         id: specItem.spec.id,
-        path: specItem.spec.path,
+        path: specItem.spec.path.replace(specItem.spec.basename, ''),
         fileName: specItem.spec.basename,
         fileExtension: specItem.spec.basename.substring(specItem.spec.basename.indexOf('.')),
       },
