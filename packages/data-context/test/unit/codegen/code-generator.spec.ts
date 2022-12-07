@@ -207,7 +207,7 @@ describe('code-generator', () => {
 
           describe('<${codeGenArgs.componentName} />', () => {
             it('renders', () => {
-              // see: https://test-utils.vuejs.org/guide/
+              // see: https://on.cypress.io/mounting-vue
               cy.mount(${codeGenArgs.componentName})
             })
           })`,
