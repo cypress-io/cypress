@@ -12,6 +12,7 @@
         :key="exportName"
       >
         <div
+          data-cy="react-component-row"
           class="cursor-pointer flex border-b-1 border-b-gray-50 leading-normal pl-56px text-16px
     gap-8px group items-center last last:py-0 last:items-start children:h-40px children:py-8px"
           @click="$emit('selectItem', {file, item: {exportName, isDefault}})"

@@ -21,7 +21,7 @@ import { toPosix } from '../util/file'
 import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
 import type { ProjectShape } from '../data'
 import type { FindSpecs } from '../actions'
-import { getDefaultSpecFileName } from './migration/utils'
+import { FileExtension, getDefaultSpecFileName } from './migration/utils'
 
 interface MatchedSpecs {
   projectRoot: string
@@ -140,7 +140,7 @@ export function getPathFromSpecPattern ({
   name = '' }:
 { specPattern: string
   testingType: TestingType
-  fileExtensionToUse?: 'js' | 'ts'
+  fileExtensionToUse?: FileExtension
   name?: string}) {
   function replaceWildCard (s: string, fallback: string) {
     return s.replace(/\*/g, fallback)
@@ -176,7 +176,13 @@ export function getPathFromSpecPattern ({
 
   const globWithoutBraces = micromatch.braces(glob, { expand: true })
 
-  let finalGlob = globWithoutBraces[0]
+  let finalGlob
+
+  if (fileExtensionToUse) {
+    finalGlob = globWithoutBraces.find((glob) => glob.includes(fileExtensionToUse))
+  } else {
+    finalGlob = globWithoutBraces[0]
+  }
 
   if (fileExtensionToUse) {
     const filteredGlob = micromatch(globWithoutBraces, `*.${fileExtensionToUse}`, { basename: true })

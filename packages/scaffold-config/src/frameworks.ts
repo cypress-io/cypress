@@ -91,7 +91,7 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'react',
-    glob: '*.{js,jsx,tsx}',
+    glob: '*.{js,jsx,ts,tsx}',
     mountModule: reactMountModule,
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
@@ -149,7 +149,7 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'react',
-    glob: '*.{js,jsx,tsx}',
+    glob: '*.{js,jsx,ts,tsx}',
     mountModule: reactMountModule,
     supportStatus: 'full',
     /**
@@ -233,7 +233,7 @@ export const WIZARD_FRAMEWORKS = [
       ])
     },
     codeGenFramework: 'react',
-    glob: '*.{js,jsx,tsx}',
+    glob: '*.{js,jsx,ts,tsx}',
     mountModule: reactMountModule,
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),

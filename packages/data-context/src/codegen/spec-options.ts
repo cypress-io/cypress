@@ -4,7 +4,7 @@ import type { WizardFrontendFramework } from '@packages/scaffold-config'
 import fs from 'fs-extra'
 import { uniq, upperFirst } from 'lodash'
 import path from 'path'
-import { getDefaultSpecFileName } from '../sources/migration/utils'
+import { FileExtension, getDefaultSpecFileName } from '../sources/migration/utils'
 import { toPosix } from '../util'
 import type { FoundSpec } from '@packages/types'
 
@@ -113,8 +113,6 @@ export class SpecOptions {
     // For React specs, use the component name that the user selected. Otherwise fall back to the component file name.
     const componentName = this.options.componentName || this.parsedPath.name
 
-    const extension = `.cy${this.parsedPath.ext}`
-
     let parsedSpecPath: ParsedPath | undefined
 
     // If we have a custom spec pattern, write the spec to a path that matches the pattern instead of the component directory
@@ -122,7 +120,7 @@ export class SpecOptions {
       parsedSpecPath = path.parse(await getDefaultSpecFileName({
         currentProject: this.options.currentProject,
         testingType: 'component',
-        fileExtensionToUse: (extension === '.cy.ts' || extension === '.cy.tsx') ? 'ts' : 'js',
+        fileExtensionToUse: this.parsedPath.ext as FileExtension,
         specPattern: this.options.specPattern,
         name: componentName,
         specs: this.options.specs }))
@@ -130,6 +128,8 @@ export class SpecOptions {
 
     // The path to import the component from
     const componentPath = path.parse(this.getRelativePathToComponent(parsedSpecPath))
+
+    const extension = `.cy${this.parsedPath.ext}`
 
     return {
       codeGenType: this.options.codeGenType,
