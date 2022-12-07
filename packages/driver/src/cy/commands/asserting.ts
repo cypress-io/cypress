@@ -34,11 +34,25 @@ export default function (Commands, Cypress, cy, state) {
   const shouldFnWithCallback = function (subject, fn) {
     state('current')?.set('followedByShouldCallback', true)
 
+    const commandEnqueued = (obj: Cypress.EnqueuedCommandAttributes) => {
+      $errUtils.throwErrByPath(
+        'should.command_inside_should', {
+          args: { action: obj.name },
+          errProps: { retry: false },
+        },
+      )
+    }
+
     return Promise
     .try(() => {
       const remoteSubject = cy.getRemotejQueryInstance(subject)
 
+      Cypress.once('command:enqueued', commandEnqueued)
+
       return fn.call(this, remoteSubject ? remoteSubject : subject)
+    })
+    .finally(() => {
+      Cypress.removeListener('command:enqueued', commandEnqueued)
     })
     .tap(() => {
       state('current')?.set('followedByShouldCallback', false)
@@ -125,9 +139,9 @@ export default function (Commands, Cypress, cy, state) {
 
       try {
         if (value === lastChainer && !isCheckingExistence) {
-        // https://github.com/cypress-io/cypress/issues/16006
-        // Referring some commands like 'visible'  triggers assert function in chai_jquery.js
-        // It creates duplicated messages and confuses users.
+          // https://github.com/cypress-io/cypress/issues/16006
+          // Referring some commands like 'visible'  triggers assert function in chai_jquery.js
+          // It creates duplicated messages and confuses users.
           const cmd = memo[value]
 
           if (_.isFunction(cmd)) {
@@ -163,7 +177,7 @@ export default function (Commands, Cypress, cy, state) {
       // element which has left the DOM and we always
       // want to auto-fail on those
       if (!isCheckingLengthOrExistence && $dom.isElement(subject)) {
-        cy.ensureAttached(subject, 'should')
+        Cypress.ensure.isAttached(subject, 'should', cy)
       }
 
       const newExp = _.reduce(chainers, (memo, value) => {

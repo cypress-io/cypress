@@ -7,7 +7,7 @@ interface QueueRunProps {
 }
 
 export class Queue<T> {
-  private queueables: T[] = []
+  protected queueables: T[] = []
   private _stopped = false
   index: number = 0
 

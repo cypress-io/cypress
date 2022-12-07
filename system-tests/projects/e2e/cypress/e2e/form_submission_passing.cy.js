@@ -5,8 +5,7 @@ describe('form submissions', () => {
   })
 
   it('will find \'form success\' message by default (after retrying)', () => {
-    cy.server()
-    cy.route('POST', '/users', {})
+    cy.intercept('POST', '/users', {})
     cy.get('input[name=name]').type('brian')
     cy.get('#submit').click()
     cy.get('form span').then(($span) => {
@@ -15,8 +14,7 @@ describe('form submissions', () => {
   })
 
   it('needs an explicit should when an element is immediately found', () => {
-    cy.server()
-    cy.route('POST', '/users', {})
+    cy.intercept('POST', '/users', {})
     cy.get('input[name=name]').type('brian')
     cy.get('#submit').click()
     cy.get('form').should(($form) => {

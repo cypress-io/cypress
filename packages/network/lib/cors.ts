@@ -227,11 +227,14 @@ export function getOrigin (url: string) {
 }
 
 /**
- * We use the super domain origin in the driver to determine whether or not we need to reload/interact with the AUT, and
- * currently in the spec bridge to interact with the AUT frame, which uses document.domain set to the super domain
+ * Returns the super-domain of a URL
+ *
+ * The primary driver uses the super-domain origin to allow tests to
+ * navigate between subdomains of the same super-domain by setting
+ * document.domain to the super-domain
  * @param url - the full absolute url
- * @returns the super domain origin -
- * ex: http://www.example.com:8081/my/path -> http://example.com:8081/my/path
+ * @returns the super domain origin
+ * ex: http://www.example.com:8081/my/path -> http://example.com:8081
  */
 export function getSuperDomainOrigin (url: string) {
   // @ts-ignore

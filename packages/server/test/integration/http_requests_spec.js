@@ -322,6 +322,17 @@ describe('Routes', () => {
       })
     })
 
+    it('correctly sets the "origin-agent-cluster" to opt in to setting document.domain on spec bridge iframes', function () {
+      return this.rp('http://localhost:2020/__cypress/spec-bridge-iframes')
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
+
+        expect(res.body).to.match(/document.domain = \'localhost\'/)
+
+        expect(res.headers['origin-agent-cluster']).to.eq('?0')
+      })
+    })
+
     it('sets title to projectName', function () {
       return this.rp('http://localhost:2020/__')
       .then((res) => {

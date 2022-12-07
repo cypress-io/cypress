@@ -409,21 +409,6 @@ https://on.cypress.io/migration-guide
 
 `
 
-exports['e2e config throws an error if experimentalSessionAndOrigin is set on the component level 1'] = `
-The component.experimentalSessionAndOrigin configuration option is not valid for component testing.
-
-Please remove this option or add this as an e2e testing type property: e2e.experimentalSessionAndOrigin
-
-{
-  e2e: {
-    experimentalSessionAndOrigin: '...',
-  }
-}
-
-https://on.cypress.io/migration-guide
-
-`
-
 exports['e2e config finds supportFiles in projects containing glob syntax 1'] = `
 
 ====================================================================================================

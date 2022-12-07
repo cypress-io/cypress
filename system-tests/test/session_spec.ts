@@ -186,7 +186,6 @@ describe('e2e sessions', () => {
     spec: 'session/session.cy.js',
     snapshot: true,
     config: {
-      experimentalSessionAndOrigin: true,
       video: false,
     },
   })
@@ -198,7 +197,6 @@ describe('e2e sessions', () => {
     snapshot: true,
     config: {
       env: { SYSTEM_TESTS: true },
-      experimentalSessionAndOrigin: true,
       video: false,
     },
   })

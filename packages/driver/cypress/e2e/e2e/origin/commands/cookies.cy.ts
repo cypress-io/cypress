@@ -58,7 +58,7 @@ describe('cy.origin cookies', { browser: '!webkit' }, () => {
           expect(logs[0].get('state')).to.eq('failed')
           expect(logs[0].get('name')).to.eq('getCookie')
           expect(logs[0].get('message')).to.eq('foo')
-          expect(err.message).to.eq('Timed out retrying after 100ms: The command was expected to run against origin `http://localhost:3500` but the application is at origin `http://www.foobar.com:3500`.\n\nThis commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.')
+          expect(err.message).to.include('Timed out retrying after 100ms: The command was expected to run against origin `http://localhost:3500` but the application is at origin `http://www.foobar.com:3500`.\n\nThis commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.')
 
           done()
         })
@@ -73,7 +73,7 @@ describe('cy.origin cookies', { browser: '!webkit' }, () => {
           expect(logs[0].get('state')).to.eq('failed')
           expect(logs[0].get('name')).to.eq('getCookies')
           expect(logs[0].get('message')).to.eq('')
-          expect(err.message).to.eq('Timed out retrying after 100ms: The command was expected to run against origin `http://localhost:3500` but the application is at origin `http://www.foobar.com:3500`.\n\nThis commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.')
+          expect(err.message).to.include('Timed out retrying after 100ms: The command was expected to run against origin `http://localhost:3500` but the application is at origin `http://www.foobar.com:3500`.\n\nThis commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.')
 
           done()
         })
@@ -88,7 +88,7 @@ describe('cy.origin cookies', { browser: '!webkit' }, () => {
           expect(logs[0].get('state')).to.eq('failed')
           expect(logs[0].get('name')).to.eq('setCookie')
           expect(logs[0].get('message')).to.eq('foo, bar')
-          expect(err.message).to.eq('Timed out retrying after 100ms: The command was expected to run against origin `http://localhost:3500` but the application is at origin `http://www.foobar.com:3500`.\n\nThis commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.')
+          expect(err.message).to.include('Timed out retrying after 100ms: The command was expected to run against origin `http://localhost:3500` but the application is at origin `http://www.foobar.com:3500`.\n\nThis commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.')
 
           done()
         })
@@ -103,7 +103,7 @@ describe('cy.origin cookies', { browser: '!webkit' }, () => {
           expect(logs[0].get('state')).to.eq('failed')
           expect(logs[0].get('name')).to.eq('clearCookie')
           expect(logs[0].get('message')).to.eq('foo')
-          expect(err.message).to.eq('Timed out retrying after 100ms: The command was expected to run against origin `http://localhost:3500` but the application is at origin `http://www.foobar.com:3500`.\n\nThis commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.')
+          expect(err.message).to.include('Timed out retrying after 100ms: The command was expected to run against origin `http://localhost:3500` but the application is at origin `http://www.foobar.com:3500`.\n\nThis commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.')
 
           done()
         })
@@ -118,7 +118,7 @@ describe('cy.origin cookies', { browser: '!webkit' }, () => {
           expect(logs[0].get('state')).to.eq('failed')
           expect(logs[0].get('name')).to.eq('clearCookies')
           expect(logs[0].get('message')).to.eq('')
-          expect(err.message).to.eq('Timed out retrying after 100ms: The command was expected to run against origin `http://localhost:3500` but the application is at origin `http://www.foobar.com:3500`.\n\nThis commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.')
+          expect(err.message).to.include('Timed out retrying after 100ms: The command was expected to run against origin `http://localhost:3500` but the application is at origin `http://www.foobar.com:3500`.\n\nThis commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.')
 
           done()
         })

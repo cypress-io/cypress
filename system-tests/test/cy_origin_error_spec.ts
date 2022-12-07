@@ -11,9 +11,11 @@ const onServer = function (app) {
   })
 }
 const commonConfig = {
-  experimentalSessionAndOrigin: true,
   hosts: {
     '*.foobar.com': '127.0.0.1',
+  },
+  e2e: {
+    experimentalOriginDependencies: true,
   },
 }
 
@@ -55,7 +57,33 @@ describe('e2e cy.origin errors', () => {
     async onRun (exec) {
       const res = await exec()
 
-      expect(res.stdout).to.contain('Using `require()` or `import()` to include dependencies requires using the latest version of `@cypress/webpack-preprocessor`')
+      expect(res.stdout).to.contain('Using `require()` or `import()` to include dependencies requires enabling the `experimentalOriginDependencies` flag and using the latest version of `@cypress/webpack-preprocessor`')
+    },
+  })
+
+  systemTests.it('errors when the experimentalOriginDependencies flag is not set', {
+    browser: '!webkit', // TODO(webkit): results in "TypeError: expecting an array or an iterable object but got [object Null]"
+    spec: 'cy_origin_experimental_dependencies_error.cy.ts',
+    expectedExitCode: 1,
+    config: { ...commonConfig, e2e: { experimentalOriginDependencies: false } },
+    async onRun (exec) {
+      const res = await exec()
+
+      expect(res.stdout).to.contain('Using `require()` or `import()` to include dependencies requires enabling the `experimentalOriginDependencies` flag and using the latest version of `@cypress/webpack-preprocessor`')
+    },
+  })
+
+  systemTests.it('errors when using a plugin that has a custom command that uses cy.origin with a dependency', {
+    browser: '!webkit', // TODO(webkit): cy.origin is not currently supported in webkit
+    project: 'origin-dependencies',
+    spec: 'cross_origin.cy.js',
+    expectedExitCode: 1,
+    config: commonConfig,
+    async onRun (exec) {
+      const res = await exec()
+
+      expect(res.stdout).to.contain('Using `require()` or `import()` to include dependencies requires enabling the `experimentalOriginDependencies` flag and using the latest version of `@cypress/webpack-preprocessor`')
+      expect(res.stdout).to.contain('Note: Using `require()` or `import()` within `cy.origin()` from a `node_modules` plugin is not currently supported.')
     },
   })
 })

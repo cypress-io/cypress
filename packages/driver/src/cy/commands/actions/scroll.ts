@@ -5,6 +5,7 @@ import Promise from 'bluebird'
 import $dom from '../../../dom'
 import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
+import $actionability from '../../actionability'
 import type { Log } from '../../../cypress/log'
 
 const findScrollableParent = ($el, win) => {
@@ -196,7 +197,7 @@ export default (Commands, Cypress, cy, state) => {
         } else {
           position = xOrPosition
           // make sure it's one of the valid position strings
-          cy.ensureValidPosition(position)
+          $actionability.ensureIsValidPosition(position)
         }
       } else {
         x = xOrPosition
@@ -248,31 +249,10 @@ export default (Commands, Cypress, cy, state) => {
         x = 0
       }
 
-      let $container
       let isWin
 
-      // if our subject is window let it fall through
-      if (subject && !$dom.isWindow(subject)) {
-        // if they passed something here, its a DOM element
-        $container = subject
-      } else {
-        isWin = true
-        // if we don't have a subject, then we are a parent command
-        // assume they want to scroll the entire window.
-        $container = state('window')
-
-        // jQuery scrollTo looks for the prop contentWindow
-        // otherwise it'll use the wrong window to scroll :(
-        $container.contentWindow = $container
-      }
-
-      // throw if we're trying to scroll multiple containers
-      if (!isWin && $container.length > 1) {
-        $errUtils.throwErrByPath('scrollTo.multiple_containers', { args: { num: $container.length } })
-      }
-
       const options: InternalScrollToOptions = _.defaults({}, userOptions, {
-        $el: $container,
+        $el: subject,
         log: true,
         duration: 0,
         easing: 'swing',
@@ -345,23 +325,53 @@ export default (Commands, Cypress, cy, state) => {
           },
         }
 
-        if (!isWin) {
-          log.$el = options.$el
-        }
-
         options._log = Cypress.log(log)
       }
 
-      const ensureScrollability = () => {
-        // Some elements are not scrollable, user may opt out of error checking
-        // https://github.com/cypress-io/cypress/issues/1924
-        if (!options.ensureScrollable) {
-          return
-        }
+      const subjectChain = cy.subjectChain()
 
+      const ensureScrollability = () => {
         try {
-          // make sure our container can even be scrolled
-          return cy.ensureScrollability($container, 'scrollTo')
+          subject = cy.getSubjectFromChain(subjectChain)
+
+          if (!subject || $dom.isWindow(subject)) {
+            isWin = true
+            // if we don't have a subject, then we are a parent command
+            // assume they want to scroll the entire window.
+            options.$el = state('window')
+
+            // jQuery scrollTo looks for the prop contentWindow
+            // otherwise it'll use the wrong window to scroll :(
+            options.$el.contentWindow = options.$el
+          } else {
+            // if they passed something here, its a DOM element
+            options.$el = subject
+
+            // scrollTo does not use the normal $actionability check, because that check contains, itself, scrolling
+            // logic. But we still want to throw the same error if our subject disappears while retrying.
+            if (options.$el.length === 0 || $dom.isDetached(options.$el)) {
+              const current = cy.state('current')
+
+              $errUtils.throwErrByPath('subject.detached_during_actionability', {
+                args: { name: current.get('name'), subjectChain },
+              })
+            }
+
+            Cypress.ensure.isElement(options.$el, 'scrollTo')
+          }
+
+          // throw if we're trying to scroll multiple containers
+          if (!isWin && options.$el.length > 1) {
+            $errUtils.throwErrByPath('scrollTo.multiple_containers', { args: { num: options.$el.length } })
+          }
+
+          options._log?.set('$el', options.$el)
+
+          // Some elements are not scrollable, user may opt out of error checking
+          // https://github.com/cypress-io/cypress/issues/1924
+          if (options.ensureScrollable) {
+            Cypress.ensure.isScrollable(options.$el, 'scrollTo')
+          }
         } catch (err) {
           options.error = err
 
