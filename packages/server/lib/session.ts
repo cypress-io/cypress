@@ -1,4 +1,4 @@
-import type { ServerSessionData, StoredSessions } from '@packages/types'
+import type { StoredSessions } from '@packages/types'
 
 type State = {
   globalSessions: StoredSessions
@@ -10,7 +10,7 @@ const state: State = {
   specSessions: {},
 }
 
-export function saveSession (data: ServerSessionData): void {
+export function saveSession (data: Cypress.ServerSessionData): void {
   if (!data.id) throw new Error('session data had no id')
 
   if (data.cacheAcrossSpecs) {
@@ -26,7 +26,7 @@ export function getActiveSessions (): StoredSessions {
   return state.globalSessions
 }
 
-export function getSession (id: string): ServerSessionData {
+export function getSession (id: string): Cypress.ServerSessionData {
   const session = state.globalSessions[id] || state.specSessions[id]
 
   if (!session) throw new Error(`session with id "${id}" not found`)
