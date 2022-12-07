@@ -1,5 +1,8 @@
 name: Update V8 Snapshot Cache
-on: 
+on:
+  schedule:
+    # Run every Wednesday at 00:00 UTC
+    - cron: '30 17 * * 3'
   push:
     branches:
       - ryanm/feature/v8-snapshots-auto-pr
@@ -30,7 +33,7 @@ jobs:
     env:
       CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
       BASE_BRANCH: ${{ inputs.branch || 'ryanm/feature/v8-snapshots-auto-pr' }}
-      GENERATE_FROM_SCRATCH: ${{ inputs.generate_from_scratch }}
+      GENERATE_FROM_SCRATCH: ${{ inputs.generate_from_scratch == 'true' || event.schedule != null }}
     steps:
       - name: Determine snapshot files - Windows
         if: ${{ matrix.platform == 'windows-latest' }}
