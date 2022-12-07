@@ -132,6 +132,15 @@ const _detectProviderName = () => {
   })
 }
 
+// useProvided environment variables are used to allow users to define their own
+// values should the CI provider not have an existing or correct mapping from the list below.
+const _userProvidedProviderCiParams = () => {
+  return extract([
+    'CYPRESS_PULL_REQUEST_ID',
+    'CYPRESS_PULL_REQUEST_URL',
+    'CYPRESS_CI_BUILD_URL',
+  ])
+}
 // TODO: don't forget about buildNumber!
 // look at the old commit that was removed to see how we did it
 const _providerCiParams = () => {
@@ -304,6 +313,9 @@ const _providerCiParams = () => {
       'BUILD_URL',
       'BUILD_NUMBER',
       'ghprbPullId',
+      // Jenkins pipeline options
+      'CHANGE_ID',
+      'CHANGE_URL',
     ]),
     // https://semaphoreci.com/docs/available-environment-variables.html
     // some come from v1, some from v2 of semaphore
@@ -617,7 +629,12 @@ const _get = (fn) => {
 }
 
 const ciParams = () => {
-  return _get(_providerCiParams)
+  const ciParams = {
+    ..._.chain(_userProvidedProviderCiParams()).thru(omitUndefined).defaultTo(null).value(),
+    ..._get(_providerCiParams),
+  }
+
+  return Object.keys(ciParams).length > 0 ? ciParams : null
 }
 
 const commitParams = () => {

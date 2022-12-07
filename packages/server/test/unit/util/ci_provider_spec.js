@@ -40,6 +40,23 @@ describe('lib/util/ci_provider', () => {
     return expectsCommitParams(null)
   })
 
+  it('allows for user provided environment variables', () => {
+    resetEnv = mockedEnv({
+      CYPRESS_PULL_REQUEST_ID: 'cypressPullRequestId',
+      CYPRESS_PULL_REQUEST_URL: 'cypressPullRequestUrl',
+      CYPRESS_CI_BUILD_URL: 'cypressCiBuildUrl',
+    }, { clear: true })
+
+    expectsName(null)
+    expectsCiParams({
+      cypressPullRequestId: 'cypressPullRequestId',
+      cypressPullRequestUrl: 'cypressPullRequestUrl',
+      cypressCiBuildUrl: 'cypressCiBuildUrl',
+    })
+
+    return expectsCommitParams(null)
+  })
+
   it('does not extract from commit environment variables yet', () => {
     // see fallback environment variables
     // https://github.com/cypress-io/commit-info#fallback-environment-variables
@@ -741,6 +758,7 @@ describe('lib/util/ci_provider', () => {
       BUILD_URL: 'buildUrl',
       BUILD_NUMBER: 'buildNumber',
       ghprbPullId: 'gbprbPullId',
+      CHANGE_ID: 'changeId',
 
       GIT_COMMIT: 'gitCommit',
       GIT_BRANCH: 'gitBranch',
@@ -752,6 +770,7 @@ describe('lib/util/ci_provider', () => {
       buildUrl: 'buildUrl',
       buildNumber: 'buildNumber',
       ghprbPullId: 'gbprbPullId',
+      changeId: 'changeId',
     })
 
     expectsCommitParams({
@@ -782,6 +801,35 @@ describe('lib/util/ci_provider', () => {
     }, { clear: true })
 
     return expectsName('jenkins')
+  })
+
+  it('jenkins with userProvided', () => {
+    resetEnv = mockedEnv({
+      JENKINS_URL: 'true',
+
+      BUILD_ID: 'buildId',
+      BUILD_NUMBER: 'buildNumber',
+      CYPRESS_PULL_REQUEST_ID: 'cypressPullRequestId',
+      CYPRESS_PULL_REQUEST_URL: 'cypressPullRequestUrl',
+      CYPRESS_CI_BUILD_URL: 'cypressCiBuildUrl',
+
+      GIT_COMMIT: 'gitCommit',
+      GIT_BRANCH: 'gitBranch',
+    }, { clear: true })
+
+    expectsName('jenkins')
+    expectsCiParams({
+      buildId: 'buildId',
+      buildNumber: 'buildNumber',
+      cypressPullRequestId: 'cypressPullRequestId',
+      cypressPullRequestUrl: 'cypressPullRequestUrl',
+      cypressCiBuildUrl: 'cypressCiBuildUrl',
+    })
+
+    return expectsCommitParams({
+      sha: 'gitCommit',
+      branch: 'gitBranch',
+    })
   })
 
   it('semaphore', () => {
