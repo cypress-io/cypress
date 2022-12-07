@@ -380,7 +380,7 @@ commands:
         type: boolean
         default: false
     steps:
-      - restore_cached_workspace
+      - unpack-dependencies
       # - install_cache_helpers_dependencies
       # - run:
       #     name: Generate Circle Cache Key
@@ -2930,8 +2930,7 @@ emily-workflow: &emily-workflow
     - lint-types:
         requires:
           - checkout_and_build
-    - system-tests-non-root:
-        context: test-runner:performance-tracking
+    - v8-integration-tests:
         requires:
           - checkout_and_build
 
