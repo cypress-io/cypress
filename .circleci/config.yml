@@ -1282,7 +1282,6 @@ jobs:
       - persist_to_workspace:
           root: ~/
           paths:
-            - cypress
             - .nvm # mac / linux
             - ProgramData/nvm # windows
       - install_cypress_node_modules:
