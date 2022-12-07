@@ -1014,6 +1014,11 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/25019
+    it('can locate elements contained inside <form> containers', () => {
+      cy.get('#focus').contains('button', 'focusable')
+    })
+
     it('can find input type=submits by value', () => {
       cy.contains('input contains submit').then(($el) => {
         expect($el.length).to.eq(1)
