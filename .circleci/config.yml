@@ -2934,7 +2934,7 @@ emily-workflow: &emily-workflow
         requires:
           - checkout_and_build
     
-binary-workflow: &emibinaryly-workflow
+binary-workflow: &binary-workflow
     - create-build-artifacts:
         context:
           - test-runner:upload
