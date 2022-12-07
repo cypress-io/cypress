@@ -61,7 +61,7 @@
         </StandardModalFooter>
         <div
           v-else
-          class="bg-white rounded-b h-24px bottom-0 left-0 absolute ghost-div"
+          class="bg-white rounded-b h-24px bottom-0 left-0 w-[calc(100%-24px)] absolute"
         />
       </div>
     </template>
@@ -178,8 +178,3 @@ const cancelSpecNameCreation = () => {
   generatedSpecError.value = null
 }
 </script>
-<style scoped>
-.ghost-div {
-  width: calc(100% - 24px);
-}
-</style>

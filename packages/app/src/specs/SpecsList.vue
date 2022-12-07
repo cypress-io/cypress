@@ -93,7 +93,7 @@
           :is-leaf="row.data.isLeaf"
           :is-project-connected="projectConnectionStatus === 'CONNECTED'"
           :grid-columns="row.data.isLeaf ? tableGridColumns : 'grid-cols-[1fr]'"
-          :route="{ path: '/specs/runner', query: { file: posixify(row.data.data?.relative) } }"
+          :route="{ path: '/specs/runner', query: { file: posixify(row.data.data?.relative || '') } }"
           @toggleRow="row.data.toggle"
         >
           <template #file>
