@@ -42,7 +42,7 @@
   </StandardModal>
 </template>
 
-<script lang  ="ts" setup>
+<script lang="ts" setup>
 import { generators, getFilteredGeneratorList } from './generators'
 import type { GeneratorId } from './generators'
 import { DialogOverlay } from '@headlessui/vue'
@@ -72,13 +72,24 @@ const emits = defineEmits<{
 const iteration = ref(0)
 
 gql`
+fragment ComponentGeneratorStepOne_codeGenGlob on CurrentProject {
+  id
+  codeGenGlobs {
+    id
+    component
+  }
+  codeGenFramework
+}
+`
+
+gql`
 fragment CreateSpecModal on Query {
   ...CreateSpecCards
   currentProject {
     id
     fileExtensionToUse
     defaultSpecFileName
-    ...VueComponentGeneratorStepOne_codeGenGlob
+    ...ComponentGeneratorStepOne_codeGenGlob
     ...EmptyGenerator
   }
 }

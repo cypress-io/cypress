@@ -74,7 +74,7 @@ import ExpandableFileChooser from '../ExpandableFileChooser.vue'
 import GeneratorSuccess from '../GeneratorSuccess.vue'
 import { computed, ref } from 'vue'
 import { gql, useQuery, useMutation } from '@urql/vue'
-import type { ReactComponentGeneratorStepOne_CodeGenGlobFragment, GeneratorSuccessFileFragment } from '../../../generated/graphql'
+import type { ComponentGeneratorStepOne_CodeGenGlobFragment, GeneratorSuccessFileFragment } from '../../../generated/graphql'
 import { ReactComponentGeneratorStepOneDocument, ReactComponentGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import Button from '@cy/components/Button.vue'
@@ -85,7 +85,7 @@ import { posixify } from '../../../paths'
 
 const props = defineProps<{
   title: string
-  gql: ReactComponentGeneratorStepOne_CodeGenGlobFragment
+  gql: ComponentGeneratorStepOne_CodeGenGlobFragment
 }>()
 const { t } = useI18n()
 const emits = defineEmits<{
@@ -97,16 +97,6 @@ const emits = defineEmits<{
 const { title } = useVModels(props, emits)
 
 title.value = t('createSpec.component.importFromComponent.chooseAComponentHeader')
-gql`
-fragment ReactComponentGeneratorStepOne_codeGenGlob on CurrentProject {
-  id
-  codeGenGlobs {
-    id
-    component
-  }
-  codeGenFramework
-}
-`
 
 gql`
 query ReactComponentGeneratorStepOne($glob: String!) {
