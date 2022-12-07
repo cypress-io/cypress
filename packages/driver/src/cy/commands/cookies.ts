@@ -53,7 +53,7 @@ function cookieValidatesSecurePrefix (options) {
 }
 
 function validateDomainOption (domain: any, commandName: string, log: Cypress.Log | undefined) {
-  if (typeof domain !== 'string') {
+  if (domain !== undefined && typeof domain !== 'string') {
     $errUtils.throwErrByPath('cookies.invalid_domain', {
       onFail: log,
       args: {
@@ -205,7 +205,6 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
   return Commands.addAll({
     getCookie (name: string, userOptions: Cypress.CookieOptions = {}) {
       const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
-        domain: getDefaultDomain(),
         log: true,
       })
 
@@ -239,13 +238,19 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
         $errUtils.throwErrByPath('getCookie.invalid_argument', { onFail: log })
       }
 
-      validateDomainOption(options.domain, 'getCookie', log)
+      validateDomainOption(userOptions.domain, 'getCookie', log)
 
       return cy.retryIfCommandAUTOriginMismatch(() => {
         return automateCookies({
           event: 'get:cookie',
           commandName: 'getCookie',
-          options: { name, domain: options.domain! },
+          options: {
+            name,
+            // getDefaultDomain() needs to be called inside
+            // cy.retryIfCommandAUTOriginMismatch() (instead of above
+            // where default options are set) in case it errors
+            domain: options.domain || getDefaultDomain(),
+          },
           timeout: responseTimeout,
           log,
         })
@@ -259,7 +264,6 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
 
     getCookies (userOptions: Cypress.CookieOptions = {}) {
       const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
-        domain: getDefaultDomain(),
         log: true,
       })
 
@@ -287,12 +291,17 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
         })
       }
 
-      validateDomainOption(options.domain, 'getCookies', log)
+      validateDomainOption(userOptions.domain, 'getCookies', log)
 
       return cy.retryIfCommandAUTOriginMismatch(() => {
         return automateCookies({
           event: 'get:cookies',
-          options: { domain: options.domain! },
+          options: {
+            // getDefaultDomain() needs to be called inside
+            // cy.retryIfCommandAUTOriginMismatch() (instead of above
+            // where default options are set) in case it errors
+            domain: options.domain || getDefaultDomain(),
+          },
           commandName: 'getCookies',
           timeout: responseTimeout,
           log,
@@ -347,7 +356,6 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
 
     setCookie (name: string, value: string, userOptions: Partial<Cypress.SetCookieOptions> = {}) {
       const options: Partial<Cypress.SetCookieOptions> = _.defaults({}, userOptions, {
-        domain: getDefaultDomain(),
         path: '/',
         secure: false,
         httpOnly: false,
@@ -414,11 +422,16 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
         $errUtils.throwErrByPath('setCookie.host_prefix', { onFail: log })
       }
 
-      validateDomainOption(options.domain, 'setCookie', log)
+      validateDomainOption(userOptions.domain, 'setCookie', log)
 
       Cypress.emit('set:cookie', cookie)
 
       return cy.retryIfCommandAUTOriginMismatch(() => {
+        // getDefaultDomain() needs to be called inside
+        // cy.retryIfCommandAUTOriginMismatch() (instead of above
+        // where default options are set) in case it errors
+        cookie.domain = options.domain || getDefaultDomain()
+
         return automateCookies({
           event: 'set:cookie',
           commandName: 'setCookie',
@@ -435,7 +448,6 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
 
     clearCookie (name: string, userOptions: Cypress.CookieOptions = {}) {
       const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
-        domain: getDefaultDomain(),
         log: true,
       })
 
@@ -470,7 +482,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
         $errUtils.throwErrByPath('clearCookie.invalid_argument', { onFail: log })
       }
 
-      validateDomainOption(options.domain, 'clearCookie', log)
+      validateDomainOption(userOptions.domain, 'clearCookie', log)
 
       Cypress.emit('clear:cookie', name)
 
@@ -479,7 +491,13 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
         return automateCookies({
           event: 'clear:cookie',
           commandName: 'clearCookie',
-          options: { name, domain: options.domain! },
+          options: {
+            name,
+            // getDefaultDomain() needs to be called inside
+            // cy.retryIfCommandAUTOriginMismatch() (instead of above
+            // where default options are set) in case it errors
+            domain: options.domain || getDefaultDomain(),
+          },
           timeout: responseTimeout,
           log,
         })
@@ -496,7 +514,6 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
 
     clearCookies (userOptions: Cypress.CookieOptions = {}) {
       const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
-        domain: getDefaultDomain(),
         log: true,
       })
 
@@ -528,7 +545,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
         })
       }
 
-      validateDomainOption(options.domain, 'clearCookies', log)
+      validateDomainOption(userOptions.domain, 'clearCookies', log)
 
       Cypress.emit('clear:cookies')
 
@@ -536,7 +553,12 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
         return getAndClear({
           log,
           timeout: responseTimeout,
-          options: { domain: options.domain! },
+          options: {
+            // getDefaultDomain() needs to be called inside
+            // cy.retryIfCommandAUTOriginMismatch() (instead of above
+            // where default options are set) in case it errors
+            domain: options.domain || getDefaultDomain(),
+          },
           commandName: 'clearCookies',
         })
         .then((result) => {
