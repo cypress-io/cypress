@@ -156,7 +156,7 @@ const buildEntryPointAndCleanup = async (buildAppDir) => {
   ])
 
   // 3. Gather the dependencies that could potentially be removed from the binary due to being in the snapshot or in the entry point bundle
-  const snapshotMetadata = require(path.join(getSnapshotCacheDir(), 'metadata.json'))
+  const snapshotMetadata = require(path.join(getSnapshotCacheDir(), 'snapshot-meta.json'))
   const potentiallyRemovedDependencies = [
     ...snapshotMetadata.healthy,
     ...snapshotMetadata.deferred,
