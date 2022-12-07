@@ -525,8 +525,7 @@ export class ProjectDataSource {
     const codeGenCandidates = await this.ctx.file.getFilesByGlob(
       projectRoot,
       glob,
-      // ignore configuration files and Cypress-related files
-      { expandDirectories: true, ignore: ['**/*.config.{js,ts}', '**/*.{cy,spec}.{js,ts,jsx,tsx}', 'cypress/**'] },
+      { expandDirectories: true, ignore: ['**/*.config.{js,ts}', '**/*.{cy,spec}.{js,ts,jsx,tsx}'] },
     )
 
     return codeGenCandidates.map((absolute) => ({ absolute }))

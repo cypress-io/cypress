@@ -30,7 +30,7 @@
             'before:border-r-indigo-300': isCurrentSpec(row.data),
             'before:focus:border-r-indigo-300 before:focus-visible:border-r-transparent before:hover:border-r-indigo-300': !isCurrentSpec(row.data)
           }"
-          :to="{ path: '/specs/runner', query: { file: posixify(row.data.data?.relative) } }"
+          :to="{ path: '/specs/runner', query: { file: posixify(row.data.data?.relative || '') } }"
           @focus="resetFocusIfNecessary(row, row.index)"
           @click.capture.prevent="submit(row.data, row.index)"
           @keydown.enter.space.prevent.stop="submit(row.data, row.index)"

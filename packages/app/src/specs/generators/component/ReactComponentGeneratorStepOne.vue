@@ -142,6 +142,7 @@ const query = useQuery({
   query: ReactComponentGeneratorStepOneDocument,
   // @ts-ignore
   variables: { glob: extensionPattern },
+  requestPolicy: 'network-only',
 })
 const allFiles = computed((): any => {
   if (query.data.value?.currentProject?.codeGenCandidates) {
