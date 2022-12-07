@@ -281,11 +281,11 @@ commands:
               echo "No updates to system tests node modules, exiting"
               circleci-agent step halt
             fi
-      - restore_cache:
-          name: Restore system tests node_modules cache
-          keys:
-            - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
-            - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-
+      # - restore_cache:
+      #     name: Restore system tests node_modules cache
+      #     keys:
+      #       - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+      #       - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-
       - run:
           name: Update system-tests node_modules cache
           command: yarn workspace @tooling/system-tests projects:yarn:install
@@ -1431,7 +1431,7 @@ jobs:
     parallelism: 1
     steps:
       - restore_cached_workspace
-      - restore_cached_system_tests_deps
+      # - restore_cached_system_tests_deps
       # TODO: Remove this once we switch off self-hosted M1 runners
       - when:
           condition:
@@ -2933,10 +2933,23 @@ emily-workflow: &emily-workflow
     - v8-integration-tests:
         requires:
           - checkout_and_build
+    
+binary-workflow: &emibinaryly-workflow
+    - create-build-artifacts:
+        context:
+          - test-runner:upload
+          - test-runner:commit-status-checks
+    - test-npm-module-on-minimum-node-version:
+        requires:
+          - create-build-artifacts
+    - test-types-cypress-and-jest:
+        requires:
+          - create-build-artifacts
 
 workflows:
   emily:
     <<: *emily-workflow
+    <<: *binary-workflow
   # linux-x64:
   #   <<: *linux-x64-workflow
   #   <<: *linux-x64-workflow-exclude-filters
