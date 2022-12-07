@@ -42,7 +42,7 @@ import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-
 import DebugPageHeader from './DebugPageHeader.vue'
 import DebugSpecList from './DebugSpecList.vue'
 import { useI18n } from 'vue-i18n'
-import { specsList } from './utils/UtilsDebugMapping'
+import { specsList } from './utils/DebugMapping'
 
 const { t } = useI18n()
 

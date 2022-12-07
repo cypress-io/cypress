@@ -75,12 +75,15 @@ const props = defineProps<{
 
 const specs = computed(() => {
   return props.specs.map((specItem) => {
+    const fileName = specItem.spec.basename
+    const fileExtension = specItem.spec.extension
+
     return {
       spec: {
         id: specItem.spec.id,
-        path: specItem.spec.path.replace(specItem.spec.basename, ''),
-        fileName: specItem.spec.basename,
-        fileExtension: specItem.spec.basename.substring(specItem.spec.basename.indexOf('.')),
+        path: specItem.spec.path.replace(fileName + fileExtension, ''),
+        fileName,
+        fileExtension,
       },
       tests: specItem.tests,
     }
