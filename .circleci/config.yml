@@ -2934,7 +2934,6 @@ emily-workflow: &emily-workflow
         requires:
           - checkout_and_build
     
-binary-workflow: &binary-workflow
     - create-build-artifacts:
         context:
           - test-runner:upload
@@ -2949,7 +2948,6 @@ binary-workflow: &binary-workflow
 workflows:
   emily:
     <<: *emily-workflow
-    <<: *binary-workflow
   # linux-x64:
   #   <<: *linux-x64-workflow
   #   <<: *linux-x64-workflow-exclude-filters
