@@ -175,7 +175,7 @@ export default (Commands, Cypress, cy, state) => {
         let scope = userOptions.withinSubject || cy.getSubjectFromChain(withinSubject)
 
         if (includeShadowDom) {
-          const root = scope || cy.state('document')
+          const root = scope.get(0) || cy.state('document')
           const elementsWithShadow = $dom.findAllShadowRoots(root)
 
           scope = elementsWithShadow.concat(root)
@@ -323,7 +323,7 @@ export default (Commands, Cypress, cy, state) => {
       let $el = cy.$$()
 
       subject.each((index, element) => {
-        getOptions.withinSubject = element
+        getOptions.withinSubject = cy.$$(element)
         $el = $el.add(getFn())
       })
 
