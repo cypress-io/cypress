@@ -2958,10 +2958,10 @@ emily-workflow: &emily-workflow
           - test-runner:commit-status-checks
     - test-npm-module-on-minimum-node-version:
         requires:
-          - create-build-artifacts
+          - checkout_and_build_cypress_artifacts
     - test-types-cypress-and-jest:
         requires:
-          - create-build-artifacts
+          - checkout_and_build_cypress_artifacts
 
 workflows:
   emily:
