@@ -14,11 +14,13 @@ async function createMeta ({
   pathsMapper,
   projectBaseDir,
   snapshotEntryFile,
+  integrityCheckSource,
 }) {
   return generateBundlerMetadata(projectBaseDir, snapshotEntryFile, {
     entryFile: appEntryFile,
     pathsMapper,
     nodeModulesOnly,
+    integrityCheckSource,
   })
 }
 
@@ -38,6 +40,7 @@ export async function generateMetadata ({
   pathsMapper,
   projectBaseDir,
   snapshotEntryFile,
+  integrityCheckSource,
 }: {
   appEntryFile: string
   metaFile: string
@@ -45,6 +48,7 @@ export async function generateMetadata ({
   pathsMapper: (file: string) => string
   projectBaseDir: string
   snapshotEntryFile: string
+  integrityCheckSource: string | undefined
 }): Promise<BundlerMetadata> {
   try {
     logInfo('Creating snapshot metadata %o', { nodeModulesOnly })
@@ -55,6 +59,7 @@ export async function generateMetadata ({
       pathsMapper,
       projectBaseDir,
       snapshotEntryFile,
+      integrityCheckSource,
     })
 
     ensureDirSync(path.dirname(metaFile))

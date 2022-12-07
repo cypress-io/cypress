@@ -32,11 +32,20 @@
       :class="tableGridColumns"
     >
       <div
-        class="flex items-center justify-between"
+        class="flex items-center"
         data-cy="specs-testing-type-header"
       >
-        {{ props.gql.currentProject?.currentTestingType === 'component' ?
-          t('specPage.componentSpecsHeader') : t('specPage.e2eSpecsHeader') }}
+        <span>
+          {{ props.gql.currentProject?.currentTestingType === 'component'
+            ? t('specPage.componentSpecsHeader')
+            : t('specPage.e2eSpecsHeader') }}
+        </span>
+        <SpecsRunAllSpecs
+          v-if="runAllSpecsStore.isRunAllSpecsAllowed"
+          :spec-number="runAllSpecsStore.allSpecsRef.length"
+          directory="all"
+          @runAllSpecs="runAllSpecsStore.runAllSpecs"
+        />
       </div>
       <div class="flex items-center justify-between truncate">
         <LastUpdatedHeader :is-git-available="isGitAvailable" />
@@ -111,16 +120,15 @@
               :depth="row.data.depth - 2"
               :style="{ paddingLeft: `${(row.data.depth - 2) * 10}px` }"
               :indexes="row.data.highlightIndexes"
-              :is-run-all-specs-allowed="isRunAllSpecsAllowed"
               :aria-controls="getIdIfDirectory(row)"
               @toggle="() => row.data.toggle()"
             >
               <SpecsRunAllSpecs
-                v-if="isRunAllSpecsAllowed"
+                v-if="runAllSpecsStore.isRunAllSpecsAllowed"
                 :directory="row.data.name"
                 class="opacity-0 run-all"
-                :spec-number="directoryChildren[row.data.id].length"
-                @runAllSpecs="onRunAllSpecs(row.data.id)"
+                :spec-number="runAllSpecsStore.directoryChildren[row.data.id].length"
+                @runAllSpecs="() => runAllSpecsStore.runSelectedSpecs(row.data.id)"
               />
             </RowDirectory>
           </template>
@@ -207,7 +215,7 @@ import { useSpecFilter } from '../composables/useSpecFilter'
 import { useRequestAccess } from '../composables/useRequestAccess'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import SpecsRunAllSpecs from './SpecsRunAllSpecs.vue'
-import { useRunAllSpecs } from '../composables/useRunAllSpecs'
+import { useRunAllSpecsStore } from '../store/run-all-specs-store'
 
 const { openLoginConnectModal } = useLoginConnectStore()
 
@@ -427,11 +435,11 @@ const { refetchFailedCloudData } = useCloudSpecData(
   props.gql.currentProject?.specs as SpecsListFragment[] || [],
 )
 
-const { runAllSpecs, isRunAllSpecsAllowed, directoryChildren } = useRunAllSpecs(collapsible)
+const runAllSpecsStore = useRunAllSpecsStore()
 
-function onRunAllSpecs (rowId: string) {
-  runAllSpecs(directoryChildren.value[rowId])
-}
+watch(collapsible, () => {
+  runAllSpecsStore.setRunAllSpecsData(collapsible.value.tree)
+}, { immediate: true })
 
 </script>
 

@@ -1,29 +1,32 @@
 import InlineSpecListHeader from './InlineSpecListHeader.vue'
 import { ref } from 'vue'
 import { defaultMessages } from '@cy/i18n'
+import { defineStore } from 'pinia'
 
 describe('InlineSpecListHeader', () => {
-  const mountWithResultCount = (resultCount = 0) => {
+  const mountWithProps = (props: {resultCount?: number, isRunAllSpecsAllowed?: boolean} = {}) => {
     const specFilterModel = ref('')
-    const onNewSpec = cy.spy().as('new-spec')
 
-    cy.wrap(specFilterModel).as('specFilterModel')
-
-    const methods = {
+    const propsWithDefaults = {
+      resultCount: props.resultCount ?? 0,
+      isRunAllSpecsAllowed: props.isRunAllSpecsAllowed ?? false,
       'onUpdate:specFilterModel': (val: string) => {
         specFilterModel.value = val
       },
-      onNewSpec,
+      onNewSpec: cy.spy().as('new-spec'),
+      onRunAllSpecs: cy.spy().as('run-all-specs'),
     }
+
+    cy.wrap(specFilterModel).as('specFilterModel')
 
     cy.mount(() =>
       (<div class="bg-gray-1000">
-        <InlineSpecListHeader {...methods} specFilterModel={specFilterModel.value} resultCount={resultCount} />
+        <InlineSpecListHeader {...propsWithDefaults} specFilterModel={specFilterModel.value} />
       </div>))
   }
 
   it('should allow search', () => {
-    mountWithResultCount(0)
+    mountWithProps({ resultCount: 0 })
     const searchString = 'my/component.cy.tsx'
 
     cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
@@ -33,7 +36,7 @@ describe('InlineSpecListHeader', () => {
   })
 
   it('should emit add spec', () => {
-    mountWithResultCount(0)
+    mountWithProps({ resultCount: 0 })
     cy.findAllByLabelText(defaultMessages.specPage.newSpecButton)
     .click()
     .get('@new-spec')
@@ -41,7 +44,7 @@ describe('InlineSpecListHeader', () => {
   })
 
   it('clears search field when clear button is clicked', () => {
-    mountWithResultCount(0)
+    mountWithProps({ resultCount: 0 })
 
     cy.findByTestId('clear-search-button')
     .should('not.exist')
@@ -56,14 +59,37 @@ describe('InlineSpecListHeader', () => {
   })
 
   it('exposes the result count correctly to assistive tech', () => {
-    mountWithResultCount(0)
+    mountWithProps({ resultCount: 0 })
     cy.contains('No matches')
     .should('have.class', 'sr-only')
     .and('have.attr', 'aria-live', 'polite')
 
-    mountWithResultCount(1)
+    mountWithProps({ resultCount: 1 })
     cy.contains('1 match').should('have.class', 'sr-only')
-    mountWithResultCount(100)
+    mountWithProps({ resultCount: 100 })
     cy.contains('100 matches').should('have.class', 'sr-only')
+  })
+
+  it('renders "Run All Specs" button with flag and emits on click', () => {
+    const EXPECTED_SPEC_COUNT = 2
+
+    // make a small store to simulate some specs existing
+    // without touching any of the gql used by the real store
+    const useRunAllSpecsStore = defineStore('runAllSpecs', {
+      state: () => ({ allSpecsRef: ref(Array(EXPECTED_SPEC_COUNT)) }),
+    })
+
+    useRunAllSpecsStore()
+
+    mountWithProps({ isRunAllSpecsAllowed: true })
+    cy.percySnapshot()
+
+    cy.get('[data-cy=run-all-specs-for-all]').as('run-all-btn').realHover()
+    cy.contains(`Run ${EXPECTED_SPEC_COUNT} specs`).should('be.visible')
+
+    cy.percySnapshot('with tooltip')
+
+    cy.get('@run-all-btn').click()
+    cy.get('@run-all-specs').should('have.been.called')
   })
 })

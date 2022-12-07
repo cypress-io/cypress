@@ -27,19 +27,20 @@ exports['e2e xhr / passes in global mode'] = `
     server with 1 visit
       ✓ response body
       ✓ request body
-      ✓ aborts
+      - aborts
 
 
-  9 passing
+  8 passing
+  1 pending
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Tests:        9                                                                                │
-  │ Passing:      9                                                                                │
+  │ Passing:      8                                                                                │
   │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
+  │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
@@ -61,9 +62,9 @@ exports['e2e xhr / passes in global mode'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  xhr.cy.js                                XX:XX        9        9        -        -        - │
+  │ ✔  xhr.cy.js                                XX:XX        9        8        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        9        9        -        -        -  
+    ✔  All specs passed!                        XX:XX        9        8        -        1        -  
 
 
 `
@@ -97,19 +98,20 @@ exports['e2e xhr / passes through CLI'] = `
     server with 1 visit
       ✓ response body
       ✓ request body
-      ✓ aborts
+      - aborts
 
 
-  9 passing
+  8 passing
+  1 pending
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Tests:        9                                                                                │
-  │ Passing:      9                                                                                │
+  │ Passing:      8                                                                                │
   │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
+  │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
@@ -131,9 +133,9 @@ exports['e2e xhr / passes through CLI'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  xhr.cy.js                                XX:XX        9        9        -        -        - │
+  │ ✔  xhr.cy.js                                XX:XX        9        8        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        9        9        -        -        -  
+    ✔  All specs passed!                        XX:XX        9        8        -        1        -  
 
 
 `

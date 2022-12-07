@@ -33,7 +33,6 @@ describe('e2e cy.origin retries', () => {
     snapshot: true,
     expectedExitCode: 1,
     config: {
-      experimentalSessionAndOrigin: true,
       retries: 2,
     },
     async onRun (exec) {

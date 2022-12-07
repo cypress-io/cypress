@@ -3,7 +3,6 @@ import { defineConfig } from 'cypress'
 export default defineConfig({
   projectId: 'ypt4pf',
   e2e: {
-    experimentalSessionAndOrigin: true,
     defaultCommandTimeout: 10000, // these take a bit longer b/c they're e2e open mode test
     async setupNodeEvents (on, config) {
       if (!process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS) {

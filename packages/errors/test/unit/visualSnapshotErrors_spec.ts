@@ -1035,6 +1035,11 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
     EXPERIMENTAL_SHADOW_DOM_REMOVED: () => {
       return {
         default: [],
@@ -1255,6 +1260,12 @@ describe('visual error templates', () => {
     BROWSER_UNSUPPORTED_LAUNCH_OPTION: () => {
       return {
         default: ['electron', ['env']],
+      }
+    },
+
+    EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY: () => {
+      return {
+        default: [],
       }
     },
   })

@@ -1,71 +1,8 @@
 const { expect, sinon } = require('../../spec_helper')
 
-import {
-  CdpAutomation,
-  cookieMatches,
-  _domainIsWithinSuperdomain,
-  CyCookie,
-} from '../../../lib/browsers/cdp_automation'
+import { CdpAutomation } from '../../../lib/browsers/cdp_automation'
 
 context('lib/browsers/cdp_automation', () => {
-  context('._domainIsWithinSuperdomain', () => {
-    it('matches as expected', () => {
-      [
-        {
-          domain: 'a.com',
-          suffix: 'a.com',
-          expected: true,
-        },
-        {
-          domain: 'a.com',
-          suffix: 'b.com',
-          expected: false,
-        },
-        {
-          domain: 'c.a.com',
-          suffix: 'a.com',
-          expected: true,
-        },
-        {
-          domain: 'localhost',
-          suffix: 'localhost',
-          expected: true,
-        },
-        {
-          domain: '.localhost',
-          suffix: '.localhost',
-          expected: true,
-        },
-        {
-          domain: '.localhost',
-          suffix: 'reddit.com',
-          expected: false,
-        },
-      ].forEach(({ domain, suffix, expected }, i) => {
-        expect(_domainIsWithinSuperdomain(domain, suffix)).to.eq(expected)
-      })
-    })
-  })
-
-  context('.cookieMatches', () => {
-    it('matches as expected', () => {
-      [
-        {
-          cookie: { domain: 'example.com' },
-          filter: { domain: 'example.com' },
-          expected: true,
-        },
-        {
-          cookie: { domain: 'example.com' },
-          filter: { domain: '.example.com' },
-          expected: true,
-        },
-      ].forEach(({ cookie, filter, expected }) => {
-        expect(cookieMatches(cookie as CyCookie, filter)).to.eq(expected)
-      })
-    })
-  })
-
   context('.CdpAutomation', () => {
     let cdpAutomation: CdpAutomation
 

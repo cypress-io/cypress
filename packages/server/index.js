@@ -1,18 +1,19 @@
 const { initializeStartTime } = require('./lib/util/performance_benchmark')
 
-const run = async () => {
-  initializeStartTime()
+const startCypress = async () => {
+  try {
+    initializeStartTime()
 
-  if (require.name !== 'customRequire') {
-    // Purposefully make this a dynamic require so that it doesn't have the potential to get picked up by snapshotting mechanism
-    const hook = './hook'
+    const { hookRequire } = require('./hook-require')
 
-    const { hookRequire } = require(`${hook}-require`)
+    hookRequire({ forceTypeScript: false })
 
-    hookRequire(false)
+    await require('./start-cypress')
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error)
+    process.exit(1)
   }
-
-  await require('./server-entry')
 }
 
-module.exports = run()
+module.exports = startCypress()

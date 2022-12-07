@@ -330,21 +330,7 @@ describe('lib/browsers/electron', () => {
       })
     })
 
-    it('does not listen to `onBeforeSendHeaders` if experimental flag is off', function () {
-      this.options.experimentalSessionAndOrigin = false
-      sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
-
-      return electron._launch(this.win, this.url, this.automation, this.options)
-      .then(() => {
-        expect(this.win.webContents.session.webRequest.onBeforeSendHeaders).not.to.be.called
-      })
-    })
-
     describe('adding header aut iframe requests', function () {
-      beforeEach(function () {
-        this.options.experimentalSessionAndOrigin = true
-      })
-
       it('does not add header if not a sub frame', function () {
         sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
 

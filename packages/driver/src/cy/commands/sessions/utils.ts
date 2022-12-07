@@ -3,9 +3,7 @@ import $ from 'jquery'
 import Bluebird from 'bluebird'
 import { $Location } from '../../../cypress/location'
 
-type SessionData = Cypress.Commands.Session.SessionData
-
-const getSessionDetailsByDomain = (sessState: SessionData) => {
+const getSessionDetailsByDomain = (sessState: Cypress.SessionData) => {
   return _.merge(
     _.mapValues(_.groupBy(sessState.cookies, 'domain'), (v) => ({ cookies: v })),
     ..._.map(sessState.localStorage, (v) => ({ [$Location.create(v.origin).hostname]: { localStorage: v } })),
@@ -98,7 +96,7 @@ const setPostMessageLocalStorage = async (specWindow, originOptions) => {
   })
 }
 
-const getConsoleProps = (session: SessionData) => {
+const getConsoleProps = (session: Cypress.SessionData) => {
   const sessionDetails = getSessionDetailsByDomain(session)
 
   const groupsByDomain = _.flatMap(sessionDetails, (val, domain) => {
@@ -193,9 +191,9 @@ const getPostMessageLocalStorage = (specWindow, origins): Promise<any[]> => {
   })
 }
 
-function navigateAboutBlank (session: boolean = true) {
+function navigateAboutBlank () {
   // Component testing does not support navigation and handles clearing the page via mount utils
-  if (Cypress.testingType === 'component' || Cypress.config('testIsolation') === 'off') {
+  if (Cypress.testingType === 'component' || !Cypress.config('testIsolation')) {
     return Promise.resolve()
   }
 
@@ -204,7 +202,7 @@ function navigateAboutBlank (session: boolean = true) {
 
     Cypress.action('cy:url:changed', '')
 
-    return Cypress.action('cy:visit:blank', { type: session ? 'session' : 'session-lifecycle' }) as unknown as Promise<void>
+    return Cypress.action('cy:visit:blank', { testIsolation: true }) as unknown as Promise<void>
   })
 }
 
