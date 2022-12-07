@@ -1098,7 +1098,7 @@ namespace CypressClearCookiesTests {
   cy.clearCookies({ domain: false }) // $ExpectError
 }
 
-namespace CypressGetAllCookiesTests {
+namespace CypressClearAllCookiesTests {
   cy.clearAllCookies().then((cookies) => {
     cookies // $ExpectType null
   })
