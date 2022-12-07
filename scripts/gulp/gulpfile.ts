@@ -115,7 +115,7 @@ gulp.task('open', startCypressWatch)
  *  Tasks that aren't watched. Usually composed together with other tasks.
  *------------------------------------------------------------------------**/
 
-gulp.task('buildProd',
+gulp.task('generateStaticAssets',
   gulp.series(
     viteClean,
     e2eTestScaffold,
@@ -128,16 +128,9 @@ gulp.task('buildProd',
     gulp.parallel(
       viteBuildApp,
       viteBuildLaunchpad,
+      exitAfterAll,
     ),
   ))
-
-gulp.task(
-  'postinstall',
-  gulp.series(
-    'buildProd',
-    exitAfterAll,
-  ),
-)
 
 gulp.task('watchForE2E', gulp.series(
   'codegen',
