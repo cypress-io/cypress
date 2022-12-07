@@ -404,8 +404,8 @@ commands:
             PERCY_POSTINSTALL_BROWSER=true \
             yarn --prefer-offline --frozen-lockfile --cache-folder ~/.yarn
           no_output_timeout: 20m
-            - run:
-      name: Generate v8 snapshot
+      - run:
+          name: Generate v8 snapshot
           command: |
             source ./scripts/ensure-node.sh
             yarn build-v8-snapshot-prod
