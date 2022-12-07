@@ -130,8 +130,8 @@ query ReactComponentGeneratorStepOne($glob: String!) {
 `
 
 gql`
-mutation ReactComponentGeneratorStepOne_generateSpec($codeGenCandidate: String!, $type: CodeGenType!, $componentName: String!) {
-  generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type, componentName: $componentName) {
+mutation ReactComponentGeneratorStepOne_generateSpec($codeGenCandidate: String!, $type: CodeGenType!, $componentName: String!, $isDefault: Boolean!) {
+  generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type, componentName: $componentName, isDefault: $isDefault) {
     ...GeneratorSuccess
     currentProject {
       id
@@ -176,7 +176,8 @@ const makeSpec = async ({ file, item }) => {
   const { data } = await generateSpecMutation.executeMutation({
     codeGenCandidate: file.absolute,
     type: 'component',
-    componentName: item,
+    componentName: item.exportName,
+    isDefault: item.isDefault,
   })
 
   generateSpecFromSource.value = data?.generateSpecFromSource

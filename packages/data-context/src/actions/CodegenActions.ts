@@ -50,7 +50,7 @@ export class CodegenActions {
     }
   }
 
-  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType, componentName?: string): Promise<NexusGenUnions['GeneratedSpecResult']> {
+  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType, componentName?: string, isDefault?: boolean): Promise<NexusGenUnions['GeneratedSpecResult']> {
     const project = this.ctx.currentProject
 
     assert(project, 'Cannot create spec without currentProject.')
@@ -77,6 +77,7 @@ export class CodegenActions {
       currentProject: this.ctx.currentProject,
       specs: this.ctx.project.specs,
       componentName,
+      isDefault,
     })
 
     let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()

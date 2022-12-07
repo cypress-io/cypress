@@ -8,13 +8,13 @@
     </div>
     <ul v-else>
       <li
-        v-for="{displayName} in components"
-        :key="displayName"
+        v-for="{exportName, isDefault} in components"
+        :key="exportName"
       >
         <div
           class="cursor-pointer flex border-b-1 border-b-gray-50 leading-normal pl-56px text-16px
     gap-8px group items-center last last:py-0 last:items-start children:h-40px children:py-8px"
-          @click="$emit('selectItem', {file, item: displayName})"
+          @click="$emit('selectItem', {file, item: {exportName, isDefault}})"
         >
           <div
             class="h-full inline-flex whitespace-nowrap items-center overflow-hidden"
@@ -25,7 +25,7 @@
             <span
               class="font-medium text-indigo-500 group-hocus:text-indigo-500"
             >
-              {{ displayName }}</span>
+              {{ exportName }}</span>
           </div>
         </div>
       </li>
@@ -47,7 +47,8 @@ const components = ref<readonly ReactComponentDescriptor[]>([])
 gql`
 mutation ComponentList_getReactComponentsFromFile($filePath: String!) {
   getReactComponentsFromFile(filePath: $filePath) {
-    displayName
+    exportName
+    isDefault
   }
 }`
 
@@ -70,7 +71,7 @@ const props = defineProps<{
 }>()
 
 defineEmits<{
-  (eventName: 'selectItem', value: { file: FileListItemFragment, item: string })
+  (eventName: 'selectItem', value: { file: FileListItemFragment, item: ReactComponentDescriptor })
 }>()
 
 onMounted(() => {

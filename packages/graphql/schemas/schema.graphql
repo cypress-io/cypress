@@ -1248,7 +1248,7 @@ type Mutation {
   focusActiveBrowserWindow: Boolean!
 
   """Generate spec from source"""
-  generateSpecFromSource(codeGenCandidate: String!, componentName: String, type: CodeGenType!): GenerateSpecResponse
+  generateSpecFromSource(codeGenCandidate: String!, componentName: String, isDefault: Boolean, type: CodeGenType!): GenerateSpecResponse
 
   """
   Parse a JS or TS file to see any exported React components that are defined in the file

@@ -105,7 +105,7 @@ fragment FileChooser on FileParts {
 `
 
 const emits = defineEmits<{
-  (eventName: 'selectItem', value: {file: FileListItemFragment, item: string})
+  (eventName: 'selectItem', value: {file: FileListItemFragment, item: any})
   (eventName: 'update:extensionPattern', value: string)
 }>()
 

@@ -129,12 +129,12 @@ export class SpecOptions {
     }
 
     // The path to import the component from
-    const componentPath = this.getRelativePathToComponent(parsedSpecPath)
+    const componentPath = path.parse(this.getRelativePathToComponent(parsedSpecPath))
 
     return {
       codeGenType: this.options.codeGenType,
       componentName,
-      componentPath,
+      componentPath: `${componentPath.dir}/${componentPath.name}`,
       // If the component name and file name are different, the spec file should be combined (ex: SpecNameComponentName.cy.xx)
       fileName: await this.buildComponentSpecFilename(extension, parsedSpecPath, uniq([this.parsedPath.name, componentName]).join('')),
       templateKey: 'reactComponent' as TemplateKey,
