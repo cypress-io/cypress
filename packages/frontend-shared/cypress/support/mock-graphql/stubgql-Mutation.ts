@@ -19,7 +19,8 @@ export const stubMutation: MaybeResolver<Mutation> = {
       {
         __typename: 'ReactComponentDescriptor',
         description: 'React Component',
-        displayName: 'FooBar',
+        exportName: 'FooBar',
+        isDefault: false,
       },
     ]
   },

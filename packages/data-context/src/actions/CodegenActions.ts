@@ -7,9 +7,11 @@ import templates from '../codegen/templates'
 import type { CodeGenType } from '../gen/graphcache-config.gen'
 import { WizardFrontendFramework, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import { parse as parseReactComponent, resolver as reactDocgenResolvers } from 'react-docgen'
+import { visit } from 'ast-types'
 
 export interface ReactComponentDescriptor {
-  displayName: string
+  exportName: string
+  isDefault: boolean
 }
 
 export class CodegenActions {
@@ -19,12 +21,28 @@ export class CodegenActions {
     try {
       const src = await this.ctx.fs.readFile(filePath, 'utf8')
 
-      const result = parseReactComponent(src, reactDocgenResolvers.findAllExportedComponentDefinitions)
+      const exportResolver: ExportResolver = new Map()
+      let result = parseReactComponent(src, findAllWithLink(exportResolver))
+
       // types appear to be incorrect in react-docgen@6.0.0-alpha.3
       // TODO: update when 6.0.0 stable is out for fixed types.
-      const defs = (Array.isArray(result) ? result : [result]) as ReactComponentDescriptor[]
+      const defs = (Array.isArray(result) ? result : [result]) as { displayName: string }[]
 
-      return defs
+      const resolvedDefs = defs.reduce<ReactComponentDescriptor[]>((acc, descriptor) => {
+        const displayName = descriptor.displayName || ''
+        const resolved = exportResolver.get(displayName)
+
+        // Limitation of resolving an export to a detected react component means we will filter out
+        // some valid components, but trying to generate them without knowing what the exportName is or
+        // if it is a default export will lead to bugs
+        if (resolved) {
+          acc.push(resolved)
+        }
+
+        return acc
+      }, [])
+
+      return resolvedDefs
     } catch (err) {
       this.ctx.debug(err)
 
@@ -137,5 +155,73 @@ export class CodegenActions {
 
     // @ts-ignore - because of the conditional above, we know that devServer isn't a function
     return WIZARD_FRAMEWORKS.find((framework) => framework.configFramework === config?.component?.devServer.framework)
+  }
+}
+
+type ExportResolver = Map<string, ReactComponentDescriptor>
+
+function findAllWithLink (exportResolver: ExportResolver) {
+  return (ast: any, parser: any, importer: any) => {
+    visit(ast, {
+      // export const Foo, export { Foo, Bar }, export function FooBar () { ... }
+      visitExportNamedDeclaration: (path) => {
+        const declaration = path.node.declaration as any
+
+        if (declaration) { // export const Foo
+          if (declaration.id) {
+            exportResolver.set(declaration.id.name, { exportName: declaration.id.name, isDefault: false })
+          } else { // export const Foo, Bar
+            (path.node.declaration as any).declarations.forEach((node: any) => {
+              const id = node.name ?? node.id?.name
+
+              if (id) {
+                exportResolver.set(id, { exportName: id, isDefault: false })
+              }
+            })
+          }
+        } else { // export { Foo, Bar }
+          path.node.specifiers?.forEach((node) => {
+            if (!node.local?.name) {
+              return
+            }
+
+            if (node.exported?.name === 'default') { // export { Foo as default }
+              exportResolver.set(node.local.name, {
+                exportName: node.local.name,
+                isDefault: true,
+              })
+            } else {
+              exportResolver.set(node.local.name, {
+                exportName: node.exported.name,
+                isDefault: false,
+              })
+            }
+          })
+        }
+
+        return false
+      },
+      // export default Foo
+      visitExportDefaultDeclaration: (path) => {
+        const declaration: any = path.node.declaration
+        const id: string = declaration.name || declaration.id?.name
+
+        if (id) { // export default Foo
+          exportResolver.set(id, {
+            exportName: id,
+            isDefault: true,
+          })
+        } else { // export default () => {}
+          exportResolver.set('', {
+            exportName: 'Component',
+            isDefault: true,
+          })
+        }
+
+        return false
+      },
+    })
+
+    return reactDocgenResolvers.findAllExportedComponentDefinitions(ast, parser, importer)
   }
 }

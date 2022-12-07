@@ -1584,8 +1584,15 @@ type Query {
 
 """Properties describing a React component"""
 type ReactComponentDescriptor {
-  """The name of the component"""
-  displayName: String!
+  """
+  The name of the component export e.g. "export const Foo"
+  """
+  exportName: String!
+
+  """
+  Whether the component is a default export e.g. "export default Foo"
+  """
+  isDefault: Boolean!
 }
 
 """

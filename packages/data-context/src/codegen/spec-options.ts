@@ -17,6 +17,7 @@ interface CodeGenOptions {
   framework?: WizardFrontendFramework
   specs?: FoundSpec[]
   componentName?: string
+  isDefault?: boolean
 }
 
 // Spec file extensions that we will preserve when updating the file name
@@ -138,6 +139,7 @@ export class SpecOptions {
       fileName: await this.buildComponentSpecFilename(extension, parsedSpecPath, uniq([this.parsedPath.name, componentName]).join('')),
       templateKey: 'reactComponent' as TemplateKey,
       overrideCodeGenDir: parsedSpecPath?.dir,
+      isDefault: this.options.isDefault,
     }
   }
 
