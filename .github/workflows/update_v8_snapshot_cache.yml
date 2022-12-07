@@ -33,7 +33,7 @@ jobs:
     env:
       CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
       BASE_BRANCH: ${{ inputs.branch || 'ryanm/feature/v8-snapshots-auto-pr' }}
-      GENERATE_FROM_SCRATCH: ${{ inputs.generate_from_scratch == 'true' || event.schedule != null }}
+      GENERATE_FROM_SCRATCH: ${{ inputs.generate_from_scratch == 'true' || github.event_name == 'schedule' }}
     steps:
       - name: Determine snapshot files - Windows
         if: ${{ matrix.platform == 'windows-latest' }}
