@@ -209,6 +209,7 @@ export function scriptFromBlueprint (config: BlueprintConfig): {
       value: ${supportTypeScript},
     },
   })
+  generateSnapshot = null
 }).call(this)
 `,
       'utf8',
