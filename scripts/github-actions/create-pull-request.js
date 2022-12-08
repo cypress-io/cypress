@@ -1,5 +1,5 @@
 const createPullRequest = async ({ context, github, baseBranch, branchName, description, body, reviewers }) => {
-  const { number } = await github.pulls.create({
+  const { data: { number } } = await github.pulls.create({
     owner: context.repo.owner,
     repo: context.repo.repo,
     base: baseBranch,
