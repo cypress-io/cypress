@@ -1,24 +1,27 @@
 import { RUN_ALL_SPECS_KEY } from '@packages/types/src'
+import { getPathForPlatform } from '../../src/paths'
 
 describe('run-all-specs', () => {
   const ALL_SPECS = {
-    spec1: { relative: 'cypress/e2e/folder-a/spec-a.cy.js', name: 'runs folder-a/spec-a' },
-    spec2: { relative: 'cypress/e2e/folder-a/spec-b.cy.js', name: 'runs folder-a/spec-b' },
-    spec3: { relative: 'cypress/e2e/folder-b/spec-a.cy.js', name: 'runs folder-b/spec-a' },
-    spec4: { relative: 'cypress/e2e/folder-b/spec-b.cy.js', name: 'runs folder-b/spec-b' },
-    spec5: { relative: 'folder-c/spec-a.cy.js', name: 'runs folder-c/spec-a' },
-    spec6: { relative: 'folder-c/spec-b.cy.js', name: 'runs folder-c/spec-b' },
+    spec1: { relative: getPathForPlatform('cypress/e2e/folder-a/spec-a.cy.js'), name: 'runs folder-a/spec-a' },
+    spec2: { relative: getPathForPlatform('cypress/e2e/folder-a/spec-b.cy.js'), name: 'runs folder-a/spec-b' },
+    spec3: { relative: getPathForPlatform('cypress/e2e/folder-b/spec-a.cy.js'), name: 'runs folder-b/spec-a' },
+    spec4: { relative: getPathForPlatform('cypress/e2e/folder-b/spec-b.cy.js'), name: 'runs folder-b/spec-b' },
+    spec5: { relative: getPathForPlatform('folder-c/spec-a.cy.js'), name: 'runs folder-c/spec-a' },
+    spec6: { relative: getPathForPlatform('folder-c/spec-b.cy.js'), name: 'runs folder-c/spec-b' },
   }
 
   const clickRunAllSpecs = (directory: string) => {
+    const platformDir = getPathForPlatform(directory)
+
     if (directory === 'all') {
       return cy.findByTestId('run-all-specs-for-all').click()
     }
 
-    const command = cy.get('[data-cy=spec-item-directory]').contains(directory)
+    const command = cy.get('[data-cy=spec-item-directory]').contains(platformDir)
 
     return command.realHover().then(() => {
-      cy.get(`[data-cy="run-all-specs-for-${directory}"]`).click({ force: true })
+      cy.get(`[data-cy="run-all-specs-for-${platformDir.replace('\\', '\\\\')}"]`).click({ force: true })
     })
   }
 

@@ -354,7 +354,7 @@ describe('runner/cypress sessions.ui.spec', {
       before(() => {
         cy.then(async () => {
           await Cypress.action('cy:url:changed', '')
-          await Cypress.action('cy:visit:blank', { type: 'on' })
+          await Cypress.action('cy:visit:blank', { testIsolation: false })
         })
         .then(() => {
           loadSpec({
@@ -550,7 +550,7 @@ describe('runner/cypress sessions.ui.spec', {
         before(() => {
           cy.then(async () => {
             await Cypress.action('cy:url:changed', '')
-            await Cypress.action('cy:visit:blank', { type: 'on' })
+            await Cypress.action('cy:visit:blank', { testIsolation: false })
           })
           .then(() => {
             loadSpec({
@@ -630,7 +630,7 @@ describe('runner/cypress sessions.ui.spec', {
         before(() => {
           cy.then(async () => {
             await Cypress.action('cy:url:changed', '')
-            await Cypress.action('cy:visit:blank', { type: 'on' })
+            await Cypress.action('cy:visit:blank', { testIsolation: false })
           })
           .then(() => {
             loadSpec({
