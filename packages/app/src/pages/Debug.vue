@@ -1,11 +1,13 @@
 <template>
   <div
     v-if="!query.data.value"
+    data-cy="debug-loader"
   >
     Loading
   </div>
   <DebugContainer
     v-else
+    data-cy="debug-container"
     :gql="query.data.value"
   />
 </template>
