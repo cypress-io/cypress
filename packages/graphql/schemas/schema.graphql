@@ -904,7 +904,9 @@ input FileDetailsInput {
 
 enum FileExtensionEnum {
   js
+  jsx
   ts
+  tsx
 }
 
 """Represents a file on the file system"""
