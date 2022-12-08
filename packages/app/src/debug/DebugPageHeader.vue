@@ -138,7 +138,7 @@ fragment DebugPage on CloudRun {
 
 const props = defineProps<{
   gql: DebugPageFragment
-  commitsAhead: string
+  commitsAhead: number
 }>()
 
 const debug = computed(() => props.gql)

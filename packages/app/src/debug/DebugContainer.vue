@@ -5,7 +5,7 @@
     >
       <DebugPageHeader
         :gql="run"
-        commits-ahead="0"
+        :commits-ahead="0"
       />
       <DebugSpecList
         :specs="debugSpecsArray"
@@ -54,7 +54,7 @@ gql`
         __typename
         ... on CloudProject {
           id
-          runByNumber(runNumber: 1) {
+          runByNumber(runNumber: 2) {
             ...DebugPage
             id
             runNumber

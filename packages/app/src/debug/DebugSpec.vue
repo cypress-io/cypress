@@ -75,8 +75,8 @@ export interface Spec {
 }
 
 export interface TestResults {
-  id: string
-  titleParts: string[]
+  readonly id: string
+  readonly titleParts: ReadonlyArray<string>
 }
 
 import { computed } from 'vue'

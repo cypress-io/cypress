@@ -1,7 +1,7 @@
 <template>
   <div
     data-cy="debug-spec-col"
-    class="flex flex-col grid px-24px gap-24px self-stretch mb-24px"
+    class="flex flex-col mb-24px grid px-24px gap-24px self-stretch"
   >
     <DebugSpec
       v-for="spec in specs"
