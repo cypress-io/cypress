@@ -45,7 +45,7 @@
               <li><a href="/commands/waiting">Waiting</a></li>
               <li><a href="/commands/network-requests">Network Requests</a></li>
               <li><a href="/commands/files">Files</a></li>
-              <li class="active"><a href="/commands/local-storage">Local Storage</a></li>
+              <li class="active"><a href="/commands/storage">Storage</a></li>
               <li><a href="/commands/cookies">Cookies</a></li>
               <li><a href="/commands/spies-stubs-clocks">Spies, Stubs &amp; Clocks</a></li>
             </ul>
@@ -62,8 +62,8 @@
 
   <div class="banner">
     <div class="container">
-      <h1>Local Storage</h1>
-      <p>Examples of managing local storage in Cypress, for a full reference of commands, go to <a href="https://on.cypress.io/api" target="_blank">docs.cypress.io</a>
+      <h1>Storage</h1>
+      <p>Examples of managing localStorage and sessionStorage in Cypress, for a full reference of commands, go to <a href="https://on.cypress.io/api" target="_blank">docs.cypress.io</a>
       </p>
     </div>
   </div>
@@ -72,8 +72,8 @@
       <div class="row">
 
         <div class="col-xs-7">
-          <h4 id="clearLocalStorage"><a href="https://on.cypress.io/clearlocalstorage">cy.clearLocalStorage()</a></h4>
-          <p>To clear all data in local storage, use the <a href="https://on.cypress.io/clearlocalstorage"><code>cy.clearLocalStorage()</code></a> command.</p>
+          <h4><a href="https://on.cypress.io/clearlocalstorage">cy.clearLocalStorage()</a></h4>
+          <p>To clear all data in localStorage for the current origin, use the <a href="https://on.cypress.io/clearlocalstorage"><code>cy.clearLocalStorage()</code></a> command.</p>
           <pre><code class="javascript">cy.get('.ls-btn').click().should(() => {
   expect(localStorage.getItem('prop1')).to.eq('red')
   expect(localStorage.getItem('prop2')).to.eq('blue')
@@ -87,7 +87,7 @@ cy.clearLocalStorage().should((ls) => {
   expect(ls.getItem('prop3')).to.be.null
 })
 
-// Clear key matching string in Local Storage
+// Clear key matching string in localStorage
 cy.get('.ls-btn').click().should(() => {
   expect(localStorage.getItem('prop1')).to.eq('red')
   expect(localStorage.getItem('prop2')).to.eq('blue')
@@ -100,7 +100,7 @@ cy.clearLocalStorage('prop1').should((ls) => {
   expect(ls.getItem('prop3')).to.eq('magenta')
 })
 
-// Clear keys matching regex in Local Storage
+// Clear keys matching regex in localStorage
 cy.get('.ls-btn').click().should(() => {
   expect(localStorage.getItem('prop1')).to.eq('red')
   expect(localStorage.getItem('prop2')).to.eq('blue')
@@ -115,8 +115,106 @@ cy.clearLocalStorage(/prop1|2/).should((ls) => {
         </div>
         <div class="col-xs-5">
           <div class="well">
-            <button class="ls-btn btn btn-success">Populate Local Storage</button>
+            <button class="ls-btn btn btn-success">Populate localStorage and sessionStorage</button>
           </div>
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+      </div>
+    </div>
+
+    <div id="getalllocalstorage">
+      <div class="row">
+
+        <div class="col-xs-7">
+          <h4><a href="https://on.cypress.io/getalllocalstorage">cy.getAllLocalStorage()</a></h4>
+          <p>To get all data in localStorage for all origins, use the <a href="https://on.cypress.io/getalllocalstorage"><code>cy.getAllLocalStorage()</code></a> command.</p>
+          <pre><code class="javascript">cy.get('.ls-btn').click()
+
+// getAllLocalStorage() yields a map of origins to localStorage values
+cy.getAllLocalStorage().should((storageMap) => {
+  expect(storageMap).to.deep.equal({
+    // other origins will also be present if localStorage is set on them
+    'https://example.cypress.io': {
+      'prop1': 'red',
+      'prop2': 'blue',
+      'prop3': 'magenta',
+    },
+  })
+})</code></pre>
+        </div>
+        <div class="col-xs-5">
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+      </div>
+    </div>
+
+    <div id="clearalllocalstorage">
+      <div class="row">
+
+        <div class="col-xs-7">
+          <h4><a href="https://on.cypress.io/clearalllocalstorage">cy.clearAllLocalStorage()</a></h4>
+          <p>To clear all data in localStorage for all origins, use the <a href="https://on.cypress.io/clearalllocalstorage"><code>cy.clearAllLocalStorage()</code></a> command.</p>
+          <pre><code class="javascript">cy.get('.ls-btn').click()
+
+// clearAllLocalStorage() yields null
+cy.clearAllLocalStorage().should(() => {
+  expect(sessionStorage.getItem('prop1')).to.be.null
+  expect(sessionStorage.getItem('prop2')).to.be.null
+  expect(sessionStorage.getItem('prop3')).to.be.null
+})</code></pre>
+        </div>
+        <div class="col-xs-5">
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+      </div>
+    </div>
+
+    <div id="getallsessionstorage">
+      <div class="row">
+
+        <div class="col-xs-7">
+          <h4><a href="https://on.cypress.io/getallsessionstorage">cy.getAllSessionStorage()</a></h4>
+          <p>To get all data in sessionStorage for all origins, use the <a href="https://on.cypress.io/getallsessionstorage"><code>cy.getAllSessionStorage()</code></a> command.</p>
+          <pre><code class="javascript">cy.get('.ls-btn').click()
+
+// getAllSessionStorage() yields a map of origins to sessionStorage values
+cy.getAllSessionStorage().should((storageMap) => {
+  expect(storageMap).to.deep.equal({
+    // other origins will also be present if sessionStorage is set on them
+    'https://example.cypress.io': {
+      'prop4': 'cyan',
+      'prop5': 'yellow',
+      'prop6': 'black',
+    },
+  })
+})</code></pre>
+        </div>
+        <div class="col-xs-5">
+        </div>
+
+        <div class="col-xs-12"><hr></div>
+      </div>
+    </div>
+
+    <div id="clearallsessionstorage">
+      <div class="row">
+
+        <div class="col-xs-7">
+          <h4><a href="https://on.cypress.io/clearallsessionstorage">cy.clearAllSessionStorage()</a></h4>
+          <p>To clear all data in sessionStorage for all origins, use the <a href="https://on.cypress.io/clearallsessionstorage"><code>cy.clearAllSessionStorage()</code></a> command.</p>
+          <pre><code class="javascript">cy.get('.ls-btn').click()
+
+// clearAllSessionStorage() yields null
+cy.clearAllSessionStorage().should(() => {
+  expect(sessionStorage.getItem('prop4')).to.be.null
+  expect(sessionStorage.getItem('prop5')).to.be.null
+  expect(sessionStorage.getItem('prop6')).to.be.null
+})</code></pre>
+        </div>
+        <div class="col-xs-5">
         </div>
 
         <div class="col-xs-12"><hr></div>
@@ -127,6 +225,6 @@ cy.clearLocalStorage(/prop1|2/).should((ls) => {
   <script src="/assets/js/vendor/jquery-1.12.0.min.cbb11b58.js"></script>
   <script src="/assets/js/vendor/bootstrap.min.c5b5b2fa.js"></script>
   <script src="/assets/js/vendor/highlight.pack.4cbe7783.js"></script>
-  <script src="/assets/js/scripts.4a26d59a.js"></script>
+  <script src="/assets/js/scripts.65b859b5.js"></script>
 </body>
 </html>

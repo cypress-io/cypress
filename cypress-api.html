@@ -45,7 +45,7 @@
               <li><a href="/commands/waiting">Waiting</a></li>
               <li><a href="/commands/network-requests">Network Requests</a></li>
               <li><a href="/commands/files">Files</a></li>
-              <li><a href="/commands/local-storage">Local Storage</a></li>
+              <li><a href="/commands/storage">Storage</a></li>
               <li><a href="/commands/cookies">Cookies</a></li>
               <li><a href="/commands/spies-stubs-clocks">Spies, Stubs &amp; Clocks</a></li>
             </ul>
@@ -99,29 +99,6 @@ cy.setCookie('fakeCookie', '123ABC')
 cy.clearCookie('fakeCookie')
 cy.setCookie('fakeCookie', '123ABC')
 </code></pre>
-        </div>
-
-        <div class="col-xs-12"><hr></div>
-
-        <div class="col-xs-12">
-          <h4 id="Cookies.preserveOnce"><a href="https://on.cypress.io/cookies">Cypress.Cookies.preserveOnce()</a></h4>
-          <p>To preserve cookies by its key, use <a href="https://on.cypress.io/cookies"><code>Cypress.Cookies.preserveOnce()</code></a>.</p>
-          <pre><code class="javascript">cy.getCookie('fakeCookie').should('not.be.ok')
-
-// preserving a cookie will not clear it when
-// the next test starts
-cy.setCookie('lastCookie', '789XYZ')
-Cypress.Cookies.preserveOnce('lastCookie')</code></pre>
-        </div>
-
-        <div class="col-xs-12"><hr></div>
-
-        <div class="col-xs-12">
-          <h4 id="Cookies.default"><a href="https://on.cypress.io/cookies">Cypress.Cookies.default()</a></h4>
-          <p>To set defaults for all cookies, use <a href="https://on.cypress.io/cookies"><code>Cypress.Cookies.default()</code></a>.</p>
-          <pre><code class="javascript">Cypress.Cookies.defaults({
-  preserve: 'session_id'
-})</code></pre>
         </div>
 
         <div class="col-xs-12"><hr></div>
@@ -235,6 +212,6 @@ expect(Cypress.env()).to.have.property('api_server', 'http://localhost:8888/v2/'
   <script src="/assets/js/vendor/jquery-1.12.0.min.cbb11b58.js"></script>
   <script src="/assets/js/vendor/bootstrap.min.c5b5b2fa.js"></script>
   <script src="/assets/js/vendor/highlight.pack.4cbe7783.js"></script>
-  <script src="/assets/js/scripts.4a26d59a.js"></script>
+  <script src="/assets/js/scripts.65b859b5.js"></script>
 </body>
 </html>
