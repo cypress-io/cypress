@@ -21,9 +21,12 @@ const setupV8Snapshots = async ({ cypressAppPath, integrityCheckSource }: { cypr
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error(`Snapshot generation has failed. If you continue to see this error, you can generate snapshots from scratch by running:
-\`V8_SNAPSHOT_FROM_SCRATCH=1 yarn build-v8-snapshot-{prod or dev}\`
 
-Note that this may take a while.`)
+  \`V8_SNAPSHOT_FROM_SCRATCH=1 yarn build-v8-snapshot-{prod or dev}\`
+
+Note that this may take a while.
+
+Alternatively, you can run the Update V8 Snapshot Cache github action against your branch to generate the snapshots for you on all platforms: https://github.com/cypress-io/cypress/actions/workflows/update_v8_snapshot_cache.yml`)
 
     process.exit(1)
   }
