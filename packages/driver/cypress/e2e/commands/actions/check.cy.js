@@ -98,6 +98,27 @@ describe('src/cy/commands/actions/check', () => {
       cy.get(checkbox).check()
     })
 
+    it('requeries if the DOM rerenders during actionability', () => {
+      cy.$$('[name=colors]').first().prop('disabled', true)
+
+      const listener = _.after(3, () => {
+        cy.$$('[name=colors]').first().prop('disabled', false)
+
+        const parent = cy.$$('[name=colors]').parent()
+
+        parent.replaceWith(parent[0].outerHTML)
+        cy.off('command:retry', listener)
+      })
+
+      cy.on('command:retry', listener)
+
+      cy.get('[name=colors]').check().then(($inputs) => {
+        $inputs.each((i, el) => {
+          expect($(el)).to.be.checked
+        })
+      })
+    })
+
     // readonly should only be limited to inputs, not checkboxes
     it('can check readonly checkboxes', () => {
       cy.get('#readonly-checkbox').check().then(($checkbox) => {
@@ -302,24 +323,27 @@ describe('src/cy/commands/actions/check', () => {
     })
 
     it('can set options.waitForAnimations', () => {
-      cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
+      let retries = 0
 
-      cy.get(':checkbox:first').check({ waitForAnimations: false }).then(() => {
-        expect(cy.ensureElementIsNotAnimating).not.to.be.called
+      cy.on('command:retry', () => {
+        retries += 1
+      })
+
+      cy.get(':checkbox:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).check({ waitForAnimations: false }).then(() => {
+        expect(retries).to.eq(0)
       })
     })
 
     it('can set options.animationDistanceThreshold', () => {
-      const $btn = cy.$$(':checkbox:first')
+      let retries = 0
 
-      cy.spy(cy, 'ensureElementIsNotAnimating')
-      cy.get(':checkbox:first').check({ animationDistanceThreshold: 1000 }).then(() => {
-        const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
-        const { args } = cy.ensureElementIsNotAnimating.firstCall
+      cy.on('command:retry', () => {
+        retries += 1
+      })
 
-        expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
-
-        expect(args[2]).to.eq(1000)
+      cy.get(':checkbox:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).check({ animationDistanceThreshold: 1000 }).then(() => {
+        // One retry, because $actionability always waits for two sets of points to determine if an element is animating.
+        expect(retries).to.eq(1)
       })
     })
 
@@ -437,7 +461,7 @@ describe('src/cy/commands/actions/check', () => {
 
         cy.on('fail', (err) => {
           expect(checked).to.eq(1)
-          expect(err.message).to.include('`cy.check()` failed because this element')
+          expect(err.message).to.include('`cy.check()` failed because the page updated')
 
           done()
         })
@@ -1079,7 +1103,7 @@ describe('src/cy/commands/actions/check', () => {
 
         cy.on('fail', (err) => {
           expect(unchecked).to.eq(1)
-          expect(err.message).to.include('`cy.uncheck()` failed because this element')
+          expect(err.message).to.include('`cy.uncheck()` failed because the page updated')
 
           done()
         })

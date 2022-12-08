@@ -35,6 +35,7 @@ function getSnapshotGenerator ({
   usePreviousSnapshotMetadata,
   resolverMap,
   minify,
+  integrityCheckSource,
 }: {
   nodeModulesOnly: boolean
   projectBaseDir: string
@@ -44,6 +45,7 @@ function getSnapshotGenerator ({
   usePreviousSnapshotMetadata: boolean
   resolverMap: Record<string, string>
   minify: boolean
+  integrityCheckSource: string | undefined
 }) {
   const {
     previousNoRewrite,
@@ -66,6 +68,7 @@ function getSnapshotGenerator ({
     resolverMap,
     forceNoRewrite,
     minify,
+    integrityCheckSource,
   })
 }
 
@@ -87,6 +90,7 @@ export async function installSnapshot (
     snapshotMetaPrevFile,
     usePreviousSnapshotMetadata,
     minify,
+    integrityCheckSource,
   },
   resolverMap,
 ) {
@@ -105,6 +109,7 @@ export async function installSnapshot (
       usePreviousSnapshotMetadata,
       resolverMap,
       minify,
+      integrityCheckSource,
     })
 
     await snapshotGenerator.createScript()

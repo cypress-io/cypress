@@ -4,6 +4,8 @@ const pick = require('lodash/pick')
 const once = require('lodash/once')
 const Promise = require('bluebird')
 const browser = require('webextension-polyfill')
+const { cookieMatches } = require('@packages/server/lib/automation/util')
+
 const client = require('./client')
 const util = require('../lib/util')
 
@@ -159,10 +161,7 @@ const connect = function (host, path, extraOpts) {
     // Non-Firefox browsers use CDP for these instead
     if (isFirefox) {
       listenToDownloads()
-
-      if (config.experimentalSessionAndOrigin) {
-        listenToOnBeforeHeaders()
-      }
+      listenToOnBeforeHeaders()
     }
   })
 
@@ -223,8 +222,17 @@ const automation = {
   getAll (filter = {}) {
     filter = pick(filter, GET_ALL_PROPS)
 
+    // Firefox's filtering doesn't match the behavior we want, so we do it
+    // ourselves. for example, getting { domain: example.com } cookies will
+    // return cookies for example.com and all subdomains, whereas we want an
+    // exact match for only "example.com".
     return Promise.try(() => {
-      return browser.cookies.getAll(filter)
+      return browser.cookies.getAll({ url: filter.url })
+      .then((cookies) => {
+        return cookies.filter((cookie) => {
+          return cookieMatches(cookie, filter)
+        })
+      })
     })
   },
 
@@ -250,9 +258,12 @@ const automation = {
   },
 
   clearCookie (filter, fn) {
-    return this.getAll(filter)
-    .then(clearAllCookies)
-    .then(firstOrNull)
+    return this.getCookie(filter)
+    .then((cookie) => {
+      if (!cookie) return null
+
+      return clearOneCookie(cookie)
+    })
     .then(fn)
   },
 

@@ -47,8 +47,8 @@ export default (Commands, Cypress, cy) => {
         const deltaOptions = $utils.filterOutOptions(options)
 
         options._log = Cypress.log({
-          message: deltaOptions,
           $el: options.$el,
+          message: deltaOptions,
           timeout: options.timeout,
           consoleProps () {
             // merge into consoleProps without mutating it
@@ -104,13 +104,16 @@ export default (Commands, Cypress, cy) => {
         $errUtils.throwErrByPath('select.invalid_multiple')
       }
 
+      const subjectChain = cy.subjectChain()
+
       const getOptions = () => {
+        options.$el = cy.getSubjectFromChain(subjectChain)
         let notAllUniqueValues
 
         // throw if <select> is disabled
-        if (!options.force && options.$el.prop('disabled')) {
-          node = $dom.stringify(options.$el)
-          $errUtils.throwErrByPath('select.disabled', { args: { node } })
+        if (!options.force) {
+          Cypress.ensure.isElement(options.$el, 'select', options._log)
+          Cypress.ensure.isNotDisabled(options.$el, 'select', options._log)
         }
 
         const values: string[] = []
@@ -235,12 +238,12 @@ export default (Commands, Cypress, cy) => {
           const activeElement = $elements.getActiveElByDocument(options.$el)
 
           if (!options.force && activeElement === null) {
-            const node = $dom.stringify(options.$el)
-            const onFail = options._log
-
-            $errUtils.throwErrByPath('select.disabled', {
-              onFail,
-              args: { node },
+            $errUtils.throwErrByPath('dom.disabled', {
+              onFail: options._log,
+              args: {
+                cmd: 'select',
+                node: $dom.stringify(options.$el),
+              },
             })
           }
 
