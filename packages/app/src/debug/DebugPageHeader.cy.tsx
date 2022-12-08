@@ -1,5 +1,6 @@
 import { DebugPageFragmentDoc, DebugResultsFragmentDoc } from '../generated/graphql-test'
 import DebugPageHeader from './DebugPageHeader.vue'
+import { defaultMessages } from '@cy/i18n'
 
 describe('<DebugPageHeader />', {
   viewportWidth: 1032,
@@ -10,7 +11,6 @@ describe('<DebugPageHeader />', {
     { attr: 'debug-header-commitHash', text: 'Commit Hash: b5e6fde' },
     { attr: 'debug-header-author', text: 'Commit Author: cypressDTest' },
     { attr: 'debug-header-createdAt', text: 'Run Total Duration: 60000 (an hour ago) ' },
-    { attr: 'debug-flaky-badge', text: '6 Flaky ' },
   ]
 
   const mountingFragment = (flakyTest: number, status: string, commitsAhead: string, hash: string) => {
@@ -23,6 +23,10 @@ describe('<DebugPageHeader />', {
               result.commitInfo.branch = 'feature/DESIGN-183'
               result.commitInfo.authorName = 'cypressDTest'
               result.totalFlakyTests = flakyTest
+              result.totalPassed = 1
+              result.totalFailed = 7
+              result.totalSkipped = 6
+              result.totalPending = 6
             }
           }
         },
@@ -54,16 +58,13 @@ describe('<DebugPageHeader />', {
     .should('have.text', '#468')
     .children().should('have.length', 2)
 
+    cy.findByTestId('debug-flaky-badge')
+    .contains(defaultMessages.specPage.flaky.badgeLabel)
+
     defaults.forEach((obj) => {
-      if (obj.attr === 'debug-flaky-badge') {
-        cy.findByTestId(obj.attr)
-        .should('have.text', obj.text)
-        .children().should('have.length', 3)
-      } else {
-        cy.findByTestId(obj.attr)
-        .should('have.text', obj.text)
-        .children().should('have.length', 2)
-      }
+      cy.findByTestId(obj.attr)
+      .should('have.text', obj.text)
+      .children().should('have.length', 2)
     })
   })
 
@@ -82,7 +83,6 @@ describe('<DebugPageHeader />', {
   })
 })
 
-// to complete in order to test the debugResults properly
 describe('<DebugResults />', () => {
   it('shows the failed icon and the number of passed, skipped, pending, failed tests passed through gql props', () => {
     cy.mountFragment(DebugResultsFragmentDoc, {

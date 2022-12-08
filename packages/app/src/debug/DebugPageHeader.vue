@@ -18,8 +18,8 @@
         >
           {{ debug.commitInfo.summary }}
         </li>
-        <div
-          v-if="props.runNumber && props.commitsAhead"
+        <li
+          v-if="props.commitsAhead"
           class="border rounded border-gray-100 items-center flex text-sm h-6"
         >
           <span
@@ -28,7 +28,7 @@
           >
             {{ props.commitsAhead }}
           </span>
-        </div>
+        </li>
         <li class="-mt-8px text-lg text-gray-400">
           .
         </li>
@@ -50,16 +50,15 @@
           class="text-sm items-center justify-center flex flex-row gap-x-2"
         >
           <div
+            v-if="props.runNumber"
             class="flex flex-row border rounded border-gray-200 font-semibold items-center px-2 bg-gray-50 justify-center gap-x-1 h-6"
             :data-cy="`debug-runNumber-${props.status}`"
           >
-            <iconStatus
+            <IconStatus
               size="16"
               :stroke-color="iconColor"
             />
-            <span
-              :class="runNumberColor"
-            >
+            <span :class="runNumberColor">
               {{ `#${props.runNumber}` }}
             </span>
           </div>
@@ -84,7 +83,7 @@
             </span>
             <div class="w-px my-6px h-6 border-orange-200 border" />
             <span class="font-semibold pl-1">
-              Flaky
+              {{ t('specPage.flaky.badgeLabel') }}
             </span>
           </div>
         </li>
@@ -139,6 +138,9 @@ import { IconTimeStopwatch, IconStatusFailedSolid, IconStatusPassedSolid, IconSt
 import CommitIcon from '~icons/cy/commit_x14'
 import { gql } from '@urql/core'
 import { dayjs } from '../runs/utils/day.js'
+import { useI18n } from '@cy/i18n'
+
+const { t } = useI18n()
 
 // runNumber and commitHash dont currently exist in the query and therefore are being obtained as props instead
 gql`
@@ -193,7 +195,7 @@ const ICON_MAP = {
   RUNNING: { icon: IconStatusRunningOutline, iconColor: 'indigo-400', textColor: 'text-indigo-400' },
 } as const
 
-const iconStatus = computed(() => ICON_MAP[props.status]['icon'])
+const IconStatus = computed(() => ICON_MAP[props.status]['icon'])
 const iconColor = computed(() => ICON_MAP[props.status]['iconColor'])
 const runNumberColor = computed(() => ICON_MAP[props.status]['textColor'])
 
