@@ -1305,28 +1305,28 @@ jobs:
       - store-npm-logs
 
   ## restores node_modules from previous step & builds if first step skipped
-  build:
-    <<: *defaults
-    parameters:
-      <<: *defaultsParameters
-      resource_class:
-        type: string
-        default: large
-    resource_class: << parameters.resource_class >>
-    steps:
-      - restore_cached_workspace
-      - run:
-          name: Top level packages
-          command: yarn list --depth=0 || true
-      - run:
-          name: Check env canaries on Linux
-          command: |
-            # only Docker has the required env data for this
-            if [[ $CI_DOCKER == 'true' ]]; then
-              node ./scripts/circle-env.js --check-canaries
-            fi
-      - build-and-persist
-      - store-npm-logs
+  # build:
+  #   <<: *defaults
+  #   parameters:
+  #     <<: *defaultsParameters
+  #     resource_class:
+  #       type: string
+  #       default: large
+  #   resource_class: << parameters.resource_class >>
+  #   steps:
+  #     - restore_cached_workspace
+  #     - run:
+  #         name: Top level packages
+  #         command: yarn list --depth=0 || true
+  #     - run:
+  #         name: Check env canaries on Linux
+  #         command: |
+  #           # only Docker has the required env data for this
+  #           if [[ $CI_DOCKER == 'true' ]]; then
+  #             node ./scripts/circle-env.js --check-canaries
+  #           fi
+  #     - build-and-persist
+  #     - store-npm-logs
 
   lint:
     <<: *defaults
@@ -2463,11 +2463,11 @@ jobs:
 
 linux-x64-workflow: &linux-x64-workflow
   jobs:
-    - node_modules_install
+    # - node_modules_install
     - build:
         context: test-runner:env-canary
-        requires:
-          - node_modules_install
+        # requires:
+          # - node_modules_install
     - check-ts:
         requires:
           - build
@@ -2965,7 +2965,8 @@ emily-workflow: &emily-workflow
 
 workflows:
   emily:
-    <<: *emily-workflow
+    <<: *linux-x64-workflow
+    # <<: *emily-workflow
   # linux-x64:
   #   <<: *linux-x64-workflow
   #   <<: *linux-x64-workflow-exclude-filters
