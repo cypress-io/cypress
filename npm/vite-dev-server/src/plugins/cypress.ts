@@ -106,7 +106,6 @@ export const Cypress = (
     },
     handleHotUpdate: ({ server, file }) => {
       debug('handleHotUpdate - file', file)
-
       // If the user provided IndexHtml is changed, do a full-reload
       if (vite.normalizePath(file) === path.resolve(projectRoot, indexHtmlFile)) {
         server.ws.send({
@@ -132,6 +131,13 @@ export const Cypress = (
 
         // as soon as we find one of the specs, we trigger the re-run of tests
         for (const mod of moduleImporters.values()) {
+          if (mod.file?.endsWith('css')) {
+            // always reload CSS modules to ensure we have the latest styles
+            // https://github.com/cypress-io/cypress/pull/24965
+            // NOTE: `reloadModule` was introduced in Vite 3.2, so we do a null check.
+            server.reloadModule?.(mod)
+          }
+
           debug('handleHotUpdate - mod.file', mod.file)
           if (mod.file === supportFilePath) {
             debug('handleHotUpdate - support compile success')
