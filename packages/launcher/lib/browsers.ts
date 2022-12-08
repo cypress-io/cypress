@@ -184,7 +184,7 @@ export function launch (
 
   // allow setting default env vars such as MOZ_HEADLESS_WIDTH
   // but only if it's not already set by the environment
-  const env = { ...wrapped.opts.env, ...process.env, ...browserEnv }
+  const env = { ...process.env, ...wrapped.opts.env, ...browserEnv }
 
   debug('spawning browser with environment %o', { env })
 
