@@ -2269,8 +2269,6 @@ describe('src/cy/commands/cookies', () => {
 
         Cypress.automation
         .withArgs('get:cookies', {})
-        .resolves([{ name: 'foo', domain: 'localhost' }])
-        .withArgs('clear:cookies', [{ name: 'foo', domain: 'localhost' }])
         .resolves([])
       })
 

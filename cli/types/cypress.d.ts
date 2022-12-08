@@ -912,7 +912,7 @@ declare namespace Cypress {
     clearCookies(options?: CookieOptions): Chainable<null>
 
     /**
-     * Clear all browser cookies
+     * Clear all browser cookies.
      *
      * @see https://on.cypress.io/clearallcookies
      */
@@ -1416,7 +1416,7 @@ declare namespace Cypress {
     getCookies(options?: CookieOptions): Chainable<Cookie[]>
 
     /**
-     * Get all browser cookies
+     * Get all browser cookies.
      *
      * @see https://on.cypress.io/getallcookies
      */
