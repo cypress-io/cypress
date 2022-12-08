@@ -1272,7 +1272,8 @@ jobs:
           only-cache-for-root-user: <<parameters.only-cache-for-root-user>>
       - store-npm-logs
 
-  checkout_and_build:
+  # checkout_and_build:
+  build:
     <<: *defaults
     parameters:
       <<: *defaultsParameters
@@ -2938,30 +2939,30 @@ windows-workflow: &windows-workflow
         requires:
           - windows-build
 
-emily-workflow: &emily-workflow
-  jobs:
-    - checkout_and_build:
-        context: test-runner:env-canary
-    - npm-mount-utils:
-        requires:
-          - checkout_and_build
-    - lint-types:
-        requires:
-          - checkout_and_build
-    - v8-integration-tests:
-        requires:
-          - checkout_and_build
+# emily-workflow: &emily-workflow
+#   jobs:
+#     - checkout_and_build:
+#         context: test-runner:env-canary
+#     - npm-mount-utils:
+#         requires:
+#           - checkout_and_build
+#     - lint-types:
+#         requires:
+#           - checkout_and_build
+#     - v8-integration-tests:
+#         requires:
+#           - checkout_and_build
     
-    - checkout_and_build_cypress_artifacts:
-        context:
-          - test-runner:upload
-          - test-runner:commit-status-checks
-    - test-npm-module-on-minimum-node-version:
-        requires:
-          - checkout_and_build_cypress_artifacts
-    - test-types-cypress-and-jest:
-        requires:
-          - checkout_and_build_cypress_artifacts
+#     - checkout_and_build_cypress_artifacts:
+#         context:
+#           - test-runner:upload
+#           - test-runner:commit-status-checks
+#     - test-npm-module-on-minimum-node-version:
+#         requires:
+#           - checkout_and_build_cypress_artifacts
+#     - test-types-cypress-and-jest:
+#         requires:
+#           - checkout_and_build_cypress_artifacts
 
 workflows:
   emily:
