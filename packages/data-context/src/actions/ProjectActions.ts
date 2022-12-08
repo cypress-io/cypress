@@ -475,13 +475,13 @@ export class ProjectActions {
     return path.join(projectRoot, 'cypress', 'e2e')
   }
 
-  async scaffoldIntegration (): Promise<NexusGenObjects['ScaffoldedFile'][]> {
+  async e2eExamples (): Promise<NexusGenObjects['ScaffoldedFile'][]> {
     const projectRoot = this.ctx.currentProject
 
     assert(projectRoot, `Cannot create spec without currentProject.`)
 
     const results = await codeGenerator(
-      { templateDir: templates['scaffoldIntegration'], target: this.defaultE2EPath },
+      { templateDir: templates['e2eExamples'], target: this.defaultE2EPath },
       {},
     )
 
@@ -503,7 +503,7 @@ export class ProjectActions {
 
     switch (this.ctx.coreData.currentTestingType) {
       case 'e2e':
-        return hasNonExampleSpec(templates.scaffoldIntegration, specs)
+        return hasNonExampleSpec(templates.e2eExamples, specs)
       case 'component':
         return specs.length > 0
       case null:
