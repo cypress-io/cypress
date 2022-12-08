@@ -13,8 +13,11 @@ const {
   checkNeedForBranchUpdate,
   updateBrowserVersionsFile,
   updatePRTitle,
-  createPullRequest,
 } = require('../../github-actions/update-browser-versions')
+
+const {
+  createPullRequest,
+} = require('../../github-actions/create-pull-request')
 
 const coreStub = () => {
   return {
