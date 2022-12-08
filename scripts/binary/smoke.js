@@ -264,7 +264,6 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
 
   await testCorruptingFile(path.join(buildAppDir, 'index.js'), 'Integrity check failed for main index.js file')
   await testCorruptingFile(path.join(buildAppDir, 'packages', 'server', 'index.jsc'), 'Integrity check failed for main server index.jsc file')
-  await testCorruptingFile(path.join(buildAppDir, 'node_modules', 'bytenode', 'lib', 'index.js'), 'Integrity check failed for main bytenode.js file')
 
   const testAlteringEntryPoint = async (additionalCode, errorMessage) => {
     const packageJsonContents = await fs.readJSON(path.join(buildAppDir, 'package.json'))
