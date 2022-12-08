@@ -286,7 +286,7 @@ export const AllCypressErrors = {
       params = {}
 
       _.map(arg1.parameters, (value, key) => {
-        if (key === 'specs') {
+        if (key === 'specs' && arg1.payload.differentSpecs?.length) {
           params['differentSpecs'] = arg1.payload.differentSpecs ?? []
         } else if (arg1.payload.differentParams[key]?.expected) {
           params[key] = `${value}.... (Expected: ${(arg1.payload.differentParams[key].expected)})`
