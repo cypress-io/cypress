@@ -13,19 +13,6 @@ describe('Config options', () => {
     cy.waitForSpecToFinish()
     cy.get('.passed > .num').should('contain', 1)
     cy.withCtx(async (ctx) => {
-      await ctx.actions.file.writeFileInProject(
-        'src/App.jsx', `
-        import React from 'react'
-        export const App = () => {
-          return (
-            <div className='bg-blue-100'>
-              Hello
-            </div>
-          )
-        }
-        `,
-      )
-
       // Add a new spec with bg-blue-100 that asserts the style is correct
       // If HMR + Tailwind is working properly, it'll pass.
       await ctx.actions.file.writeFileInProject(
