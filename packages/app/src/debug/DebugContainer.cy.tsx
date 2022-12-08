@@ -3,6 +3,7 @@ import DebugContainer from './DebugContainer.vue'
 import { defaultMessages } from '@cy/i18n'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import { specsList } from './utils/DebugMapping'
+import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
 
 describe('<DebugContainer />', () => {
   context('empty states', () => {
@@ -48,6 +49,36 @@ describe('<DebugContainer />', () => {
       })
 
       cy.findByTestId('debug-empty').contains(defaultMessages.debugPage.noRuns)
+    })
+  })
+
+  describe('render specs and tests', () => {
+    it('renders data when logged in and connected', () => {
+      const loginConnectStore = useLoginConnectStore()
+
+      loginConnectStore.setUserFlag('isLoggedIn', true)
+      loginConnectStore.setProjectFlag('isProjectConnected', true)
+      cy.mountFragment(DebugSpecsFragmentDoc, {
+        onResult: (result) => {
+          if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
+            const test = result.currentProject.cloudProject.runByNumber
+            const other = CloudRunStubs.failingWithTests as typeof test
+
+            result.currentProject.cloudProject.runByNumber = other
+          }
+        },
+        render: (gqlVal) => {
+          return (
+            <DebugContainer
+              gql={gqlVal}
+            />
+          )
+        },
+      })
+
+      // Only asserting that it is rendering the components for failed specs
+      cy.findByTestId('debug-header').should('be.visible')
+      cy.findByTestId('debug-spec-item').should('be.visible')
     })
   })
 
