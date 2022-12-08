@@ -71,6 +71,7 @@
   },
   "dependencies": {
     "bytenode": "1.3.7",
+    "danger": "11.2.0",
     "nvm": "0.0.4"
   },
   "devDependencies": {

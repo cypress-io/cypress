@@ -683,7 +683,7 @@ commands:
         type: string
     steps:
       - restore_cached_workspace
-      - restore_cached_system_tests_deps
+      # - restore_cached_system_tests_deps
       - when:
           condition:
             equal: [ webkit, << parameters.browser >> ]
@@ -2505,31 +2505,36 @@ linux-x64-workflow: &linux-x64-workflow
     - server-performance-tests:
         requires:
           - build
-    - system-tests-node-modules-install:
-        context: test-runner:performance-tracking
-        requires:
-          - build
+    # - system-tests-node-modules-install:
+    #     context: test-runner:performance-tracking
+    #     requires:
+    #       - build
     - system-tests-chrome:
         context: test-runner:performance-tracking
         requires:
-          - system-tests-node-modules-install
+          - build
+          # - system-tests-node-modules-install
     - system-tests-electron:
         context: test-runner:performance-tracking
         requires:
-          - system-tests-node-modules-install
+          - build
+          # - system-tests-node-modules-install
     - system-tests-firefox:
         context: test-runner:performance-tracking
         requires:
-          - system-tests-node-modules-install
+          - build
+          # - system-tests-node-modules-install
     - system-tests-webkit:
         context: test-runner:performance-tracking
         requires:
-          - system-tests-node-modules-install
+          - build
+          # - system-tests-node-modules-install
     - system-tests-non-root:
         context: test-runner:performance-tracking
         executor: non-root-docker-user
         requires:
-          - system-tests-node-modules-install
+          - build
+          # - system-tests-node-modules-install
     - driver-integration-tests-chrome:
         context: test-runner:cypress-record-key
         requires:
@@ -2573,11 +2578,13 @@ linux-x64-workflow: &linux-x64-workflow
     - run-webpack-dev-server-integration-tests:
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
-          - system-tests-node-modules-install
+          - build
+          # - system-tests-node-modules-install
     - run-vite-dev-server-integration-tests:
         context: [test-runner:cypress-record-key, test-runner:percy]
         requires:
-          - system-tests-node-modules-install
+          - build
+          # - system-tests-node-modules-install
     - run-app-component-tests-chrome:
         context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
         percy: true
@@ -2594,7 +2601,8 @@ linux-x64-workflow: &linux-x64-workflow
           - build
     - npm-webpack-dev-server:
         requires:
-          - system-tests-node-modules-install
+          - build
+          # - system-tests-node-modules-install
     - npm-vite-dev-server:
         requires:
           - build
@@ -2627,7 +2635,8 @@ linux-x64-workflow: &linux-x64-workflow
           - build
     - v8-integration-tests:
         requires:
-          - system-tests-node-modules-install
+          - build
+          # - system-tests-node-modules-install
     # This release definition must be updated with any new jobs
     # Any attempts to automate this are welcome
     # If CircleCI provided an "after all" hook, then this wouldn't be necessary
@@ -2758,7 +2767,8 @@ linux-x64-workflow: &linux-x64-workflow
     - binary-system-tests:
         requires:
           - create-build-artifacts
-          - system-tests-node-modules-install
+          - build
+          # - system-tests-node-modules-install
 
 linux-arm64-workflow: &linux-arm64-workflow
   jobs:
