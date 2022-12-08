@@ -6,6 +6,8 @@ on:
   push:
     branches:
       - ryanm/feature/v8-snapshots-auto-pr
+      - develop
+      - 'release/**'
   workflow_dispatch:
     inputs:
       branch:
@@ -32,7 +34,7 @@ jobs:
     runs-on: ${{ matrix.platform }}
     env:
       CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
-      BASE_BRANCH: ${{ inputs.branch || 'ryanm/feature/v8-snapshots-auto-pr' }}
+      BASE_BRANCH: ${{ inputs.branch || github.ref_name }}
       GENERATE_FROM_SCRATCH: ${{ inputs.generate_from_scratch == 'true' || github.event_name == 'schedule' }}
     steps:
       - name: Determine snapshot files - Windows
