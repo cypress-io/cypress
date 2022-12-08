@@ -28,8 +28,14 @@
           v-model:extensionPattern="extensionPattern"
           :files="allFiles"
           :loading="query.fetching.value"
-          @select-item="makeSpec"
-        />
+        >
+          <template #item="{ file }">
+            <ReactComponentList
+              :file="file"
+              @selectItem="makeSpec"
+            />
+          </template>
+        </ExpandableFileChooser>
         <GeneratorSuccess
           v-else
           :file="result.file"
@@ -81,6 +87,7 @@ import Button from '@cy/components/Button.vue'
 import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
 import TestResultsIcon from '~icons/cy/test-results_x24.svg'
 import EmptyGenerator from '../EmptyGenerator.vue'
+import ReactComponentList from './ReactComponentList.vue'
 import { posixify } from '../../../paths'
 
 const props = defineProps<{
