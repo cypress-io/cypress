@@ -176,7 +176,6 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
 
   fs.writeFileSync(meta.distDir('index.js'), `\
 process.env.CYPRESS_INTERNAL_ENV = process.env.CYPRESS_INTERNAL_ENV || 'production'
-require('./node_modules/bytenode/lib/index.js')
 require('./packages/server/index.js')
 `)
 

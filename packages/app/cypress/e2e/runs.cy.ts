@@ -77,7 +77,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       moveToRunsPage()
       cy.contains(defaultMessages.runs.connect.buttonUser).click()
       cy.withCtx((ctx, o) => {
-        o.sinon.spy(ctx._apis.authApi, 'logIn')
+        o.sinon.stub(ctx._apis.authApi, 'logIn')
       })
 
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
