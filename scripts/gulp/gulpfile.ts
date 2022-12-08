@@ -115,7 +115,7 @@ gulp.task('open', startCypressWatch)
  *  Tasks that aren't watched. Usually composed together with other tasks.
  *------------------------------------------------------------------------**/
 
-gulp.task('buildProd',
+gulp.task('generateStaticAssets',
   gulp.series(
     viteClean,
     e2eTestScaffold,
@@ -134,7 +134,7 @@ gulp.task('buildProd',
 gulp.task(
   'postinstall',
   gulp.series(
-    'buildProd',
+    'generateStaticAssets',
     exitAfterAll,
   ),
 )
@@ -170,7 +170,7 @@ gulp.task('watchForE2E', gulp.series(
 
 gulp.task('cyRunLaunchpadE2E', gulp.series(
   // 1. Build the Cypress App itself
-  'buildProd',
+  'generateStaticAssets',
 
   // Ensure we have no existing cypress processes running
   killExistingCypress,
@@ -183,7 +183,7 @@ gulp.task('cyRunLaunchpadE2E', gulp.series(
 
 gulp.task('cyRunAppE2E', gulp.series(
   // 1. Build the Cypress App itself
-  'buildProd',
+  'generateStaticAssets',
 
   killExistingCypress,
 
