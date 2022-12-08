@@ -1,4 +1,4 @@
-import { DebugPageFragmentDoc, DebugResultsFragmentDoc } from '../generated/graphql-test'
+import { CloudRunStatus, DebugPageFragmentDoc } from '../generated/graphql-test'
 import DebugPageHeader from './DebugPageHeader.vue'
 import { defaultMessages } from '@cy/i18n'
 
@@ -13,7 +13,7 @@ describe('<DebugPageHeader />', {
     { attr: 'debug-header-createdAt', text: 'Run Total Duration: 60000 (an hour ago) ' },
   ]
 
-  const mountingFragment = (flakyTest: number, status: string, commitsAhead: string, hash: string) => {
+  const mountingFragment = (flakyTests: number, status: CloudRunStatus) => {
     return (
       cy.mountFragment(DebugPageFragmentDoc, {
         onResult (result) {
@@ -22,17 +22,18 @@ describe('<DebugPageHeader />', {
               result.commitInfo.summary = 'Adding a hover state to the button component'
               result.commitInfo.branch = 'feature/DESIGN-183'
               result.commitInfo.authorName = 'cypressDTest'
-              result.totalFlakyTests = flakyTest
+              result.totalFlakyTests = flakyTests
               result.totalPassed = 1
               result.totalFailed = 7
               result.totalSkipped = 6
               result.totalPending = 6
+              result.status = status
             }
           }
         },
         render: (gqlVal) => {
           return (
-            <DebugPageHeader gql={gqlVal} runNumber={468} commitsAhead={commitsAhead} commitHash={hash} status={status}/>
+            <DebugPageHeader gql={gqlVal} runNumber={468} commitsAhead='You are 2 commits ahead' commitHash='b5e6fde'/>
           )
         },
       })
@@ -42,10 +43,8 @@ describe('<DebugPageHeader />', {
   it('renders with passed in gql props', () => {
     const flakyTests = 6
     const status = 'FAILED'
-    const commitsAhead = 'You are 2 commits ahead'
-    const hash = 'b5e6fde'
 
-    mountingFragment(flakyTests, status, commitsAhead, hash)
+    mountingFragment(flakyTests, status)
 
     cy.findByTestId('debug-header').children().should('have.length', 2)
     cy.findByTestId('debug-test-summary').should('have.text', 'Adding a hover state to the button component')
@@ -68,47 +67,12 @@ describe('<DebugPageHeader />', {
     })
   })
 
-  it('does not show flaky component when flakyTests are < 1', () => {
-    mountingFragment(0, 'FAILED', '', '')
-    cy.contains('Flaky').should('not.exist')
-  })
-
   it('checks if all run status are accounted for', () => {
-    const statuses = ['PASSED', 'FAILED', 'CANCELLED', 'RUNNING', 'ERRORED']
+    const statuses: CloudRunStatus[] = ['PASSED', 'FAILED', 'CANCELLED', 'RUNNING', 'ERRORED']
 
     statuses.forEach((status) => {
-      mountingFragment(6, status, '', '')
+      mountingFragment(6, status)
       cy.findByTestId(`debug-runNumber-${status}`).should('be.visible')
-    })
-  })
-})
-
-describe('<DebugResults />', () => {
-  it('shows the failed icon and the number of passed, skipped, pending, failed tests passed through gql props', () => {
-    cy.mountFragment(DebugResultsFragmentDoc, {
-      onResult (result) {
-        if (result) {
-          result.totalPassed = 1
-          result.totalFailed = 7
-          result.totalSkipped = 2
-          result.totalPending = 3
-        }
-      },
-      render: (gqlVal) => {
-        return (
-          <DebugPageHeader gql={gqlVal} runNumber={468} commitsAhead='You are 2 commits ahead' commitHash='b5e6fde' status='FAILED'/>
-        )
-      },
-    })
-
-    const debugResultsChildren = cy.findByTestId('debug-results').children()
-
-    debugResultsChildren.should('have.length', 4)
-    debugResultsChildren.then((status) => {
-      status[0].innerText === 'passed1'
-      status[1].innerText === 'failed7'
-      status[2].innerText === 'skipped2'
-      status[3].innerText === 'pending3'
     })
   })
 })

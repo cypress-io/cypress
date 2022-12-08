@@ -50,42 +50,22 @@
           class="text-sm items-center justify-center flex flex-row gap-x-2"
         >
           <div
-            v-if="props.runNumber"
+            v-if="(props.runNumber && debug.status)"
             class="flex flex-row border rounded border-gray-200 font-semibold items-center px-2 bg-gray-50 justify-center gap-x-1 h-6"
-            :data-cy="`debug-runNumber-${props.status}`"
+            :data-cy="`debug-runNumber-${debug.status}`"
           >
-            <IconStatus
+            <SolidStatusIcon
               size="16"
-              :stroke-color="iconColor"
+              :status="debug.status.toLowerCase()"
             />
             <span :class="runNumberColor">
               {{ `#${props.runNumber}` }}
             </span>
           </div>
-          <ResultCounts
-            :total-passed="results.totalPassed"
-            :total-failed="results.totalFailed"
-            :total-skipped="results.totalSkipped"
-            :total-pending="results.totalPending"
-            :order="['PASSED', 'FAILED', 'SKIPPED', 'PENDING']"
+          <DebugResults
+            :gql="props.gql"
             data-cy="debug-results"
           />
-          <div
-            v-if="(results.totalFlakyTests && results.totalFlakyTests > 0)"
-            data-cy="debug-flaky-badge"
-            class="border rounded flex flex-row gap-8px items-center h-6 bg-orange-50 border-orange-200 text-sm text-orange-600 px-2 gap-x-1 border-1"
-          >
-            <span
-              data-cy="total-flaky-tests"
-              class="font-medium pr-1 opacity-70"
-            >
-              {{ results.totalFlakyTests }}
-            </span>
-            <div class="w-px my-6px h-6 border-orange-200 border" />
-            <span class="font-semibold pl-1">
-              {{ t('specPage.flaky.badgeLabel') }}
-            </span>
-          </div>
         </li>
         <li
           v-if="debug?.commitInfo?.branch"
@@ -131,16 +111,14 @@
 </template>
 <script lang="ts" setup>
 import { computed } from 'vue'
-import ResultCounts from '@packages/frontend-shared/src/components/ResultCounts.vue'
+import DebugResults from './DebugResults.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
-import type { DebugPageFragment, DebugResultsFragment } from '../generated/graphql'
-import { IconTimeStopwatch, IconStatusFailedSolid, IconStatusPassedSolid, IconStatusCancelledSolid, IconStatusErroredSolid, IconStatusRunningOutline } from '@cypress-design/vue-icon'
+import type { DebugPageFragment } from '../generated/graphql'
+import { IconTimeStopwatch } from '@cypress-design/vue-icon'
+import { SolidStatusIcon } from '@cypress-design/vue-statusicon'
 import CommitIcon from '~icons/cy/commit_x14'
 import { gql } from '@urql/core'
 import { dayjs } from '../runs/utils/day.js'
-import { useI18n } from '@cy/i18n'
-
-const { t } = useI18n()
 
 // runNumber and commitHash dont currently exist in the query and therefore are being obtained as props instead
 gql`
@@ -164,40 +142,24 @@ fragment DebugPage on CloudRun {
 }
 `
 
-gql`
-fragment DebugResults on CloudRun {
-  id
-  totalPassed
-  totalFailed
-  totalPending
-  totalSkipped
-  totalFlakyTests
-}
-`
-
 const props = defineProps<{
   gql: DebugPageFragment
   commitsAhead: string
   commitHash: string
   runNumber: number
-  status: string
 }>()
 
 const debug = computed(() => props.gql)
 
-const results = computed(() => props.gql as DebugResultsFragment)
-
 const ICON_MAP = {
-  PASSED: { icon: IconStatusPassedSolid, iconColor: 'jade-400', textColor: 'text-jade-400' },
-  FAILED: { icon: IconStatusFailedSolid, iconColor: 'red-400', textColor: 'text-red-400' },
-  CANCELLED: { icon: IconStatusCancelledSolid, iconColor: 'gray-400', textColor: 'text-gray-500' },
-  ERRORED: { icon: IconStatusErroredSolid, iconColor: 'orange-400', textColor: 'text-orange-400' },
-  RUNNING: { icon: IconStatusRunningOutline, iconColor: 'indigo-400', textColor: 'text-indigo-400' },
-} as const
+  PASSED: { textColor: 'text-jade-400' },
+  FAILED: { textColor: 'text-red-400' },
+  CANCELLED: { textColor: 'text-gray-500' },
+  ERRORED: { textColor: 'text-orange-400' },
+  RUNNING: { textColor: 'text-indigo-500' },
+}
 
-const IconStatus = computed(() => ICON_MAP[props.status]['icon'])
-const iconColor = computed(() => ICON_MAP[props.status]['iconColor'])
-const runNumberColor = computed(() => ICON_MAP[props.status]['textColor'])
+const runNumberColor = computed(() => ICON_MAP[String(props.gql.status)]['textColor'])
 
 const relativeCreatedAt = computed(() => dayjs(new Date(debug.value.createdAt!)).fromNow())
 
