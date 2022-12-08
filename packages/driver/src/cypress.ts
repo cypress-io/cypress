@@ -180,10 +180,9 @@ class $Cypress {
   configure (config: Record<string, any> = {}) {
     const domainName = config.remote ? config.remote.domainName : undefined
 
-    // set domainName but allow us to turn off this feature in testing. not
-    // needed for cross-origin spec bridge, since it is strictly used
-    // same-origin
-    if (domainName && !this.isCrossOriginSpecBridge && config.testingType === 'e2e') {
+    // set domainName but allow us to turn
+    // off this feature in testing
+    if (domainName && config.testingType === 'e2e') {
       document.domain = domainName
     }
 
@@ -352,21 +351,6 @@ class $Cypress {
           this._onInitialize = resolve
         }
       }))
-    })
-    .then(() => {
-      // in order to utilize focusmanager.testingmode and trick browser into being in focus even when not focused
-      // this is critical for headless mode since otherwise the browser never gains focus
-      if (this.browser.isHeadless && this.isBrowser({ family: 'firefox' })) {
-        window.addEventListener('blur', () => {
-          this.backend('firefox:window:focus')
-        })
-
-        if (!document.hasFocus()) {
-          return this.backend('firefox:window:focus')
-        }
-      }
-
-      return
     })
     .then(() => {
       this.cy.initialize(this.$autIframe)

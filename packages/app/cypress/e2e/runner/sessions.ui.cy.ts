@@ -106,6 +106,7 @@ describe('runner/cypress sessions.ui.spec', {
     validateSessionsInstrumentPanel(['blank_session'])
 
     cy.get('.command-name-session')
+    .first()
     .within(() => {
       cy.contains('blank_session')
       cy.contains('failed')
@@ -301,6 +302,7 @@ describe('runner/cypress sessions.ui.spec', {
       validateSessionsInstrumentPanel(['user1'])
 
       cy.get('.command-name-session')
+      .first()
       .within(() => {
         cy.contains('failed')
 
@@ -352,7 +354,7 @@ describe('runner/cypress sessions.ui.spec', {
       before(() => {
         cy.then(async () => {
           await Cypress.action('cy:url:changed', '')
-          await Cypress.action('cy:visit:blank', { type: 'on' })
+          await Cypress.action('cy:visit:blank', { testIsolation: false })
         })
         .then(() => {
           loadSpec({
@@ -548,7 +550,7 @@ describe('runner/cypress sessions.ui.spec', {
         before(() => {
           cy.then(async () => {
             await Cypress.action('cy:url:changed', '')
-            await Cypress.action('cy:visit:blank', { type: 'on' })
+            await Cypress.action('cy:visit:blank', { testIsolation: false })
           })
           .then(() => {
             loadSpec({
@@ -628,7 +630,7 @@ describe('runner/cypress sessions.ui.spec', {
         before(() => {
           cy.then(async () => {
             await Cypress.action('cy:url:changed', '')
-            await Cypress.action('cy:visit:blank', { type: 'on' })
+            await Cypress.action('cy:visit:blank', { testIsolation: false })
           })
           .then(() => {
             loadSpec({
