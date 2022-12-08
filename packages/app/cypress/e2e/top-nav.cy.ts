@@ -417,7 +417,7 @@ describe('App Top Nav Workflows', () => {
             return new Promise((resolve) => {
               setTimeout(() => {
                 resolve(options.user)
-              }, 1000)
+              }, 2000)
             })
           })
         }, { user })
