@@ -549,9 +549,11 @@ const errorFromUncaughtEvent = (handlerType: HandlerType, event) => {
     errorFromProjectRejectionEvent(event)
 }
 
-const logError = (Cypress, handlerType: HandlerType, err, handled = false) => {
+const logError = (Cypress, handlerType: HandlerType, err: unknown, handled = false) => {
+  const error = toLoggableError(err)
+
   Cypress.log({
-    message: `${err.name}: ${err.message}`,
+    message: `${error.name}: ${error.message}`,
     name: 'uncaught exception',
     type: 'parent',
     // specifying the error causes the log to be red/failed
@@ -570,6 +572,25 @@ const logError = (Cypress, handlerType: HandlerType, err, handled = false) => {
       return consoleObj
     },
   })
+}
+
+const isLogabbleError = (error: unknown): error is Error => {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof (error as Record<string, unknown>).message === 'string'
+  )
+}
+
+const toLoggableError = (maybeError: unknown): Error => {
+  if (isLogabbleError(maybeError)) return maybeError
+
+  try {
+    return new Error(JSON.stringify(maybeError))
+  } catch {
+    return new Error(String(maybeError))
+  }
 }
 
 const getUnsupportedPlugin = (runnable) => {
