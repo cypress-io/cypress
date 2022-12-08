@@ -6,7 +6,7 @@ import ComponentGeneratorCard from './ComponentGeneratorCard.vue'
 export const VueComponentGenerator: SpecGenerator = {
   card: ComponentGeneratorCard,
   entry: VueComponentGeneratorStepOne,
-  show: (currentProject) => !!(currentProject?.codeGenFramework && currentProject?.codeGenFramework === 'vue'),
+  show: (currentProject) => currentProject?.codeGenFramework === 'vue',
   matches: filters.matchesCT,
   id: 'vueComponent',
 }
