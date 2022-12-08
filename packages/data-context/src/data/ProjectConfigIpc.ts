@@ -1,7 +1,7 @@
 /* eslint-disable no-dupe-class-members */
 import { CypressError, getError } from '@packages/errors'
 import type { FullConfig, TestingType } from '@packages/types'
-import { ChildProcess, fork, ForkOptions } from 'child_process'
+import { ChildProcess, fork, ForkOptions, spawn } from 'child_process'
 import EventEmitter from 'events'
 import fs from 'fs-extra'
 import path from 'path'
@@ -10,6 +10,7 @@ import debugLib from 'debug'
 import { autoBindDebug, hasTypeScriptInstalled, toPosix } from '../util'
 import _ from 'lodash'
 import { pathToFileURL } from 'url'
+import os from 'os'
 
 const pkg = require('@packages/root')
 const debug = debugLib(`cypress:lifecycle:ProjectConfigIpc`)
@@ -20,6 +21,14 @@ const tsNodeEsm = pathToFileURL(require.resolve('ts-node/esm/transpile-only')).h
 const tsNode = toPosix(require.resolve('@packages/server/lib/plugins/child/register_ts_node'))
 
 export type IpcHandler = (ipc: ProjectConfigIpc) => void
+
+/**
+ * If running as root on Linux, no-sandbox must be passed or Chrome will not start
+ */
+const isSandboxNeeded = () => {
+  // eslint-disable-next-line no-restricted-properties
+  return (os.platform() === 'linux') && (process.geteuid && process.geteuid() === 0)
+}
 
 export interface SetupNodeEventsReply {
   setupConfig: Cypress.ConfigOptions | null
@@ -308,6 +317,17 @@ export class ProjectConfigIpc extends EventEmitter {
       // Just use Node's built-in ESM support.
       // TODO: Consider using userland `esbuild` with Node's --loader API to handle ESM.
       debug(`no typescript found, just use regular Node.js`)
+    }
+
+    if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
+      if (isSandboxNeeded()) {
+        configProcessArgs.push('--no-sandbox')
+      }
+
+      return spawn(process.execPath, ['--entryPoint', CHILD_PROCESS_FILE_PATH, ...configProcessArgs], {
+        ...childOptions,
+        stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
+      })
     }
 
     return fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
