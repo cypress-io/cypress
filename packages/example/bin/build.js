@@ -18,7 +18,7 @@ async function build () {
 
   await Promise.all([
     fs.copy(join(resolvePkg('cypress-example-kitchensink'), 'app'), path.join(EXAMPLE_DIR, 'app')),
-    fs.copy(join(resolvePkg('cypress-example-kitchensink'), 'cypress'), path.join(EXAMPLE_DIR, 'cypress')),
+    fs.copy(join(resolvePkg('cypress-example-kitchensink'), 'cypress'), path.join(EXAMPLE_DIR, 'cypress', 'e2e')),
   ])
 
   childProcess.execSync('node ./bin/convert.js', {
