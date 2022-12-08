@@ -179,7 +179,7 @@ export function getPathFromSpecPattern ({
   let finalGlob
 
   if (fileExtensionToUse) {
-    finalGlob = globWithoutBraces.find((glob) => glob.includes(fileExtensionToUse))
+    finalGlob = globWithoutBraces.find((glob) => glob.includes(fileExtensionToUse)) || globWithoutBraces[0]
   } else {
     finalGlob = globWithoutBraces[0]
   }

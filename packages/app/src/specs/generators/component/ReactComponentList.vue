@@ -1,8 +1,14 @@
 <template>
   <div class="h-full">
     <div
-      v-if="!loading && !components.length"
-      class="border-b-1 border-b-gray-50 py-2 pl-56px"
+      v-if="getReactComponentsMutation.error.value"
+      class="border-b-1 border-b-gray-50 py-2 pl-56px text-gray-700"
+    >
+      {{ t('createSpec.unableToParseFile') }}
+    </div>
+    <div
+      v-else-if="!getReactComponentsMutation.fetching.value && !components.length"
+      class="border-b-1 border-b-gray-50 py-2 pl-56px text-gray-700"
     >
       {{ t('createSpec.noComponentsFound') }}
     </div>
@@ -42,7 +48,6 @@ import { ref, onMounted } from 'vue'
 import { ComponentList_GetReactComponentsFromFileDocument, FileListItemFragment } from '../../../generated/graphql'
 
 const { t } = useI18n()
-const loading = ref(false)
 const components = ref<readonly ReactComponentDescriptor[]>([])
 
 gql`
@@ -56,15 +61,11 @@ mutation ComponentList_getReactComponentsFromFile($filePath: String!) {
 const getReactComponentsMutation = useMutation(ComponentList_GetReactComponentsFromFileDocument)
 
 const getComponents = async (file) => {
-  loading.value = true
-
   const { data } = await getReactComponentsMutation.executeMutation({
     filePath: file.absolute,
   })
 
   components.value = data?.getReactComponentsFromFile || []
-
-  loading.value = false
 }
 
 const props = defineProps<{

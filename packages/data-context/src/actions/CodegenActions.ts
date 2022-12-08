@@ -46,7 +46,13 @@ export class CodegenActions {
     } catch (err) {
       this.ctx.debug(err)
 
-      return []
+      // react-docgen throws an error if it doesn't find any components in a file.
+      // This is okay for our purposes, so if this is the error, catch it and return [].
+      if (err.message === 'No suitable component definition found.') {
+        return []
+      }
+
+      throw new Error('Error parsing React component file', { cause: err })
     }
   }
 
