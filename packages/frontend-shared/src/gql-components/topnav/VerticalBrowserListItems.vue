@@ -24,7 +24,7 @@
       <div class="flex-grow">
         <div>
           <button
-            class="font-medium truncate box-border focus:outline-none"
+            class="font-medium box-border focus:outline-none"
             :class="{
               'text-indigo-500 group-hover:text-indigo-700': !browser.isSelected && !browser.disabled && browser.isVersionSupported,
               'text-jade-700': browser.isSelected,
