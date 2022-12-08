@@ -1289,7 +1289,7 @@ jobs:
       - persist_to_workspace:
           root: ~/
           paths:
-            - .nvm # mac / linux
+            - .nvm # mac & linux
             - ProgramData/nvm # windows
       - install_cypress_node_modules:
           only-cache-for-root-user: <<parameters.only-cache-for-root-user>>
