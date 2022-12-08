@@ -1,3 +1,17 @@
+# [@cypress/webpack-preprocessor-v5.15.6](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.15.5...@cypress/webpack-preprocessor-v5.15.6) (2022-12-02)
+
+
+### Bug Fixes
+
+* **breaking:** exclude node_modules from cross-origin-callback-loader ([#24952](https://github.com/cypress-io/cypress/issues/24952)) ([27c425d](https://github.com/cypress-io/cypress/commit/27c425dda318c316f751a000b77b39fe727999d5))
+
+# [@cypress/webpack-preprocessor-v5.15.5](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.15.4...@cypress/webpack-preprocessor-v5.15.5) (2022-11-10)
+
+
+### Bug Fixes
+
+* custom reporter and experimentalSessionAndOrigin crashes ([#24630](https://github.com/cypress-io/cypress/issues/24630)) ([e9e8cad](https://github.com/cypress-io/cypress/commit/e9e8cadda4fb14d601079018b57425b221a005d9))
+
 # [@cypress/webpack-preprocessor-v5.15.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.15.3...@cypress/webpack-preprocessor-v5.15.4) (2022-11-07)
 
 

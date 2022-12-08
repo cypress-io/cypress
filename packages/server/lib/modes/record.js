@@ -47,8 +47,8 @@ const warnIfProjectIdButNoRecordOption = (projectId, options) => {
   }
 }
 
-const throwDashboardCannotProceed = ({ parallel, ciBuildId, group, err }) => {
-  const errMsg = parallel ? 'DASHBOARD_CANNOT_PROCEED_IN_PARALLEL' : 'DASHBOARD_CANNOT_PROCEED_IN_SERIAL'
+const throwCloudCannotProceed = ({ parallel, ciBuildId, group, err }) => {
+  const errMsg = parallel ? 'CLOUD_CANNOT_PROCEED_IN_PARALLEL' : 'CLOUD_CANNOT_PROCEED_IN_SERIAL'
 
   const errToThrow = errors.get(errMsg, {
     response: err,
@@ -165,7 +165,7 @@ const uploadArtifacts = (options = {}) => {
   return Promise
   .all(uploads)
   .catch((err) => {
-    errors.warning('DASHBOARD_CANNOT_UPLOAD_RESULTS', err)
+    errors.warning('CLOUD_CANNOT_UPLOAD_RESULTS', err)
 
     return exception.create(err)
   })
@@ -185,7 +185,7 @@ const updateInstanceStdout = (options = {}) => {
       stack: err.stack,
     })
 
-    errors.warning('DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE', err)
+    errors.warning('CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE', err)
 
     // dont log exceptions if we have a 503 status code
     if (err.statusCode !== 503) {
@@ -228,7 +228,7 @@ const postInstanceResults = (options = {}) => {
       stack: err.stack,
     })
 
-    throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
+    throwCloudCannotProceed({ parallel, ciBuildId, group, err })
   })
 }
 
@@ -375,7 +375,7 @@ const createRun = Promise.method((options = {}) => {
             link: billingLink(warning.orgId),
           })
         default:
-          return errors.warning('DASHBOARD_UNKNOWN_CREATE_RUN_WARNING', {
+          return errors.warning('CLOUD_UNKNOWN_CREATE_RUN_WARNING', {
             message: warning.message,
             props: _.omit(warning, 'message'),
           })
@@ -396,7 +396,7 @@ const createRun = Promise.method((options = {}) => {
           recordKey = 'undefined'
         }
 
-        return errors.throwErr('DASHBOARD_RECORD_KEY_NOT_VALID', recordKey, projectId)
+        return errors.throwErr('CLOUD_RECORD_KEY_NOT_VALID', recordKey, projectId)
       case 402: {
         const { code, payload } = err.error
 
@@ -425,7 +425,7 @@ const createRun = Promise.method((options = {}) => {
               link: billingLink(orgId),
             })
           default:
-            return errors.throwErr('DASHBOARD_UNKNOWN_INVALID_REQUEST', {
+            return errors.throwErr('CLOUD_UNKNOWN_INVALID_REQUEST', {
               response: err,
               flags: {
                 group,
@@ -437,9 +437,9 @@ const createRun = Promise.method((options = {}) => {
         }
       }
       case 404:
-        return errors.throwErr('DASHBOARD_PROJECT_NOT_FOUND', projectId, path.basename(options.configFile))
+        return errors.throwErr('CLOUD_PROJECT_NOT_FOUND', projectId, path.basename(options.configFile))
       case 412:
-        return errors.throwErr('DASHBOARD_INVALID_RUN_REQUEST', err.error)
+        return errors.throwErr('CLOUD_INVALID_RUN_REQUEST', err.error)
       case 422: {
         const { code, payload } = err.error
 
@@ -447,7 +447,7 @@ const createRun = Promise.method((options = {}) => {
 
         switch (code) {
           case 'RUN_GROUP_NAME_NOT_UNIQUE':
-            return errors.throwErr('DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE', {
+            return errors.throwErr('CLOUD_RUN_GROUP_NAME_NOT_UNIQUE', {
               group,
               runUrl,
               ciBuildId,
@@ -455,7 +455,7 @@ const createRun = Promise.method((options = {}) => {
           case 'PARALLEL_GROUP_PARAMS_MISMATCH': {
             const { browserName, browserVersion, osName, osVersion } = platform
 
-            return errors.throwErr('DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH', {
+            return errors.throwErr('CLOUD_PARALLEL_GROUP_PARAMS_MISMATCH', {
               group,
               runUrl,
               ciBuildId,
@@ -469,21 +469,21 @@ const createRun = Promise.method((options = {}) => {
             })
           }
           case 'PARALLEL_DISALLOWED':
-            return errors.throwErr('DASHBOARD_PARALLEL_DISALLOWED', {
+            return errors.throwErr('CLOUD_PARALLEL_DISALLOWED', {
               tags,
               group,
               runUrl,
               ciBuildId,
             })
           case 'PARALLEL_REQUIRED':
-            return errors.throwErr('DASHBOARD_PARALLEL_REQUIRED', {
+            return errors.throwErr('CLOUD_PARALLEL_REQUIRED', {
               tags,
               group,
               runUrl,
               ciBuildId,
             })
           case 'ALREADY_COMPLETE':
-            return errors.throwErr('DASHBOARD_ALREADY_COMPLETE', {
+            return errors.throwErr('CLOUD_ALREADY_COMPLETE', {
               runUrl,
               tags,
               group,
@@ -491,7 +491,7 @@ const createRun = Promise.method((options = {}) => {
               ciBuildId,
             })
           case 'STALE_RUN':
-            return errors.throwErr('DASHBOARD_STALE_RUN', {
+            return errors.throwErr('CLOUD_STALE_RUN', {
               runUrl,
               tags,
               group,
@@ -499,7 +499,7 @@ const createRun = Promise.method((options = {}) => {
               ciBuildId,
             })
           default:
-            return errors.throwErr('DASHBOARD_UNKNOWN_INVALID_REQUEST', {
+            return errors.throwErr('CLOUD_UNKNOWN_INVALID_REQUEST', {
               response: err,
               flags: {
                 tags,
@@ -511,7 +511,7 @@ const createRun = Promise.method((options = {}) => {
         }
       }
       default:
-        throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
+        throwCloudCannotProceed({ parallel, ciBuildId, group, err })
     }
   })
 })
@@ -533,7 +533,7 @@ const createInstance = (options = {}) => {
       stack: err.stack,
     })
 
-    throwDashboardCannotProceed({
+    throwCloudCannotProceed({
       err,
       group,
       ciBuildId,
@@ -560,7 +560,7 @@ const _postInstanceTests = ({
     hooks,
   })
   .catch((err) => {
-    throwDashboardCannotProceed({ parallel, ciBuildId, group, err })
+    throwCloudCannotProceed({ parallel, ciBuildId, group, err })
   })
 }
 
@@ -794,7 +794,7 @@ const createRunAndRecordSpecs = (options = {}) => {
         }
 
         if (_.some(response.actions, { type: 'SPEC', action: 'SKIP' })) {
-          errors.warning('DASHBOARD_CANCEL_SKIPPED_SPEC')
+          errors.warning('CLOUD_CANCEL_SKIPPED_SPEC')
 
           // set a property on the response so the browser runner
           // knows not to start executing tests

@@ -135,9 +135,9 @@
       "header": "Latest runs",
       "headerShort": "Runs",
       "tooltip": {
-        "connected": "The {0} in the Cypress Dashboard",
-        "notConnected": "Connect to the Cypress Dashboard to see the {0}",
-        "noAccess": "Request access to this project in the Cypress Dashboard to view the {0}",
+        "connected": "The {0} in Cypress Cloud",
+        "notConnected": "Connect to Cypress Cloud to see the {0}",
+        "noAccess": "Request access to this project in Cypress Cloud to view the {0}",
         "linkText": "status of your latest runs"
       }
     },
@@ -145,9 +145,9 @@
       "header": "Average duration",
       "headerShort": "Duration",
       "tooltip": {
-        "connected": "The {0} of your latest runs in the Cypress Dashboard",
-        "notConnected": "Connect to the Cypress Dashboard to see the {0} of your latest runs",
-        "noAccess": "Request access to this project in the Cypress Dashboard to view the {0} of your latest runs",
+        "connected": "The {0} of your latest runs in Cypress Cloud",
+        "notConnected": "Connect to Cypress Cloud to see the {0} of your latest runs",
+        "noAccess": "Request access to this project in Cypress Cloud to view the {0} of your latest runs",
         "linkText": "average spec durations"
       }
     },
@@ -170,7 +170,7 @@
       "requestSentShort": "Sent"
     },
     "connectProjectButton": "Connect your project",
-    "dashboardLoginButton": "Log in to the Dashboard",
+    "cloudLoginButton": "Log in to Cypress Cloud",
     "reconnectProjectButton": "Reconnect your project",
     "unauthorizedBannerTitle": "Request access to project",
     "requestAccessButton": "Request access",
@@ -186,38 +186,39 @@
     },
     "offlineWarning": {
       "title": "No internet connection",
-      "explainer": "Please check your internet connection to resolve this issue. When your internet connection is fixed, we will automatically attempt to fetch the run metrics from the Cypress Dashboard."
+      "explainer": "Please check your internet connection to resolve this issue. When your internet connection is fixed, we will automatically attempt to fetch the run metrics from Cypress Cloud."
     },
     "fetchFailedWarning": {
       "title": "Lost connection",
-      "explainer1": "The request timed out or failed when trying to retrieve the recorded run metrics from the Cypress Dashboard. The information that you're seeing in the table below may be incomplete as a result.",
+      "explainer1": "The request timed out or failed when trying to retrieve the recorded run metrics from Cypress Cloud. The information that you're seeing in the table below may be incomplete as a result.",
       "explainer2": "Please refresh the page to try again and visit our {0} if this behavior continues.",
       "refreshButton": "Try again"
     },
     "banners": {
       "login": {
-        "title": "Optimize and record your CI test runs with Cypress Dashboard",
+        "title": "Optimize and record your CI test runs with Cypress Cloud",
         "contentA": "Parallelize your tests in CI and visualize every error by watching full video recordings of each test you run.",
-        "contentB": "When you configure Cypress to record tests to the Cypress Dashboard, you'll see data from your latest recorded runs in the Cypress app. This increased visibility into your test history allows you to debug your tests faster and more effectively, all within your local workflow.",
-        "buttonLabel": "Get started with Cypress Dashboard"
+        "contentB": "When you configure Cypress to record tests to Cypress Cloud, you'll see data from your latest recorded runs in the Cypress app. This increased visibility into your test history allows you to debug your tests faster and more effectively, all within your local workflow.",
+        "buttonLabel": "Get started with Cypress Cloud"
       },
       "createOrganization": {
-        "titleA": "Finish setting up Cypress Dashboard",
+        "titleA": "Finish setting up Cypress Cloud",
         "titleB": "Create or join an organization",
-        "content": "Join or create an organization in Cypress Dashboard to access your projects and recorded test runs.",
+        "content": "Join or create an organization in Cypress Cloud to access your projects and recorded test runs.",
         "buttonLabel": "Set up your organization"
       },
       "connectProject": {
-        "title": "Connect your project to Cypress Dashboard",
+        "title": "Connect your project to Cypress Cloud",
         "contentA": "View recorded test runs directly in the Cypress app to monitor, run, and fix tests locally.",
         "contentB": "Bring your recorded test results into your local development workflow to monitor, run, and fix tests all in the Cypress app.",
         "buttonLabel": "Connect your project"
       },
       "record": {
         "title": "Record your first run",
-        "content": "Record a run to see your test results in Cypress Dashboard. You can then optimize your test suite, debug failing and flaky tests, and integrate with your favorite tools."
+        "content": "Record a run to see your test results in Cypress Cloud. You can then optimize your test suite, debug failing and flaky tests, and integrate with your favorite tools."
       }
-    }
+    },
+    "runSelectedSpecs": "Run {n} spec | Run {n} specs"
   },
   "noResults": {
     "defaultMessage": "No results matched your search:",
@@ -281,12 +282,12 @@
       }
     },
     "login": {
-      "bodyInitial": "Logging in gives you access to the {0}. You can set up projects to be recorded and see test data from your project.",
+      "bodyInitial": "Logging in gives you access to {0}. You can set up projects to be recorded and see test data from your project.",
       "bodySuccess": "You are now logged in as {0}.",
       "bodyError": "An error occurred while attempting to log in:",
       "bodyBrowserError": "The browser could not be opened.",
       "bodyBrowserErrorDetails": "Cypress was unable to open your installed browser. To continue logging in, please paste this URL into your web browser:",
-      "cloud": "Cypress Dashboard service",
+      "cloud": "Cypress Cloud",
       "titleInitial": "Log in to Cypress",
       "titleSuccess": "Login successful",
       "titleFailed": "Login failed",
@@ -322,9 +323,9 @@
           "text": "Configuration guide",
           "link": "https://docs.cypress.io/guides/references/configuration"
         },
-        "dashboardGuide": {
-          "text": "Cypress Dashboard guide",
-          "link": "https://docs.cypress.io/guides/dashboard/introduction"
+        "cloudGuide": {
+          "text": "Cypress Cloud guide",
+          "link": "https://on.cypress.io/features-dashboard"
         },
         "docsHomepage": {
           "text": "Cypress docs",
@@ -334,7 +335,7 @@
     },
     "noInternet": {
       "header": "You have no internet connection",
-      "message": "Check your internet connection to pull the latest data from the dashboard.",
+      "message": "Check your internet connection to pull the latest data from Cypress Cloud.",
       "connectProject": "Please check your internet connection to resolve this issue. When your internet connection is fixed, we will automatically attempt to fetch your latest runs for this project."
     }
   },
@@ -452,7 +453,7 @@
     },
     "projectId": {
       "title": "Project ID",
-      "description": "The Project ID configured for this project inside of Cypress Dashboard. {0}"
+      "description": "The Project ID configured for this project inside of Cypress Cloud. {0}"
     },
     "specPattern": {
       "title": "Spec patterns",
@@ -460,7 +461,7 @@
     },
     "recordKey": {
       "title": "Record key",
-      "description": "The Record Key configured for this project inside of Cypress Dashboard. {0}",
+      "description": "The Record Key configured for this project inside of Cypress Cloud. {0}",
       "manageKeys": "Manage keys",
       "errorEmpty": "You do not have permission to record on this project",
       "errorEmptyButton": "Request record rights",
@@ -469,16 +470,16 @@
       "errorAccessButton": "Request access",
       "errorNotFound": "Project not found",
       "errorNotFoundButton": "Connect it again",
-      "errorNotLoggedIn": "You are not connected to the Cypress Dashboard",
-      "errorNotLoggedInButton": "Log in to the Cypress Dashboard"
+      "errorNotLoggedIn": "You are not connected to Cypress Cloud",
+      "errorNotLoggedInButton": "Log in to Cypress Cloud"
     },
     "project": {
       "title": "Project settings",
       "description": "Review the configuration settings currently in use for this project."
     },
     "cloud": {
-      "title": "Dashboard settings",
-      "description": "Review the configuration settings for recording to the Cypress Dashboard."
+      "title": "Cypress Cloud settings",
+      "description": "Review the configuration settings for recording to Cypress Cloud."
     },
     "experiments": {
       "title": "Experiments",
@@ -490,10 +491,6 @@
       "experimentalInteractiveRunEvents": {
         "name": "Interactive run events",
         "description": "Allows listening to the [`before:run`](https://on.cypress.io/before-run), [`after:run`](https://on.cypress.io/after-run), [`before:spec`](https://on.cypress.io/before-spec), and [`after:spec`](https://on.cypress.io/after-spec) events in plugins during interactive mode."
-      },
-      "experimentalSessionAndOrigin": {
-        "name": "Cross-origin and session",
-        "description": "Enables cross-origin and improved session support, including the [`cy.origin()`](https://on.cypress.io/origin) and [`cy.session()`](https://on.cypress.io/session) commands."
       },
       "experimentalModifyObstructiveThirdPartyCode": {
         "name": "Modify obstructive third party code",
@@ -514,6 +511,14 @@
       "experimentalWebKitSupport": {
         "name": "WebKit Support",
         "description": "Adds support for testing in the WebKit browser engine used by Safari. See https://on.cypress.io/webkit-experiment for more information."
+      },
+      "experimentalRunAllSpecs": {
+        "name": "Run All Specs",
+        "description": "Enables the \"Run All Specs\" UI feature, allowing the execution of multiple specs sequentially."
+      },
+      "experimentalOriginDependencies": {
+        "name": "Origin Dependencies",
+        "description": "Enables support for `require`/`import` within `cy.origin`."
       }
     },
     "device": {
@@ -536,17 +541,17 @@
   },
   "runs": {
     "connect": {
-      "title": "View your recorded runs from the Cypress Dashboard",
+      "title": "View your recorded runs from Cypress Cloud",
       "smartText": "Scale your test runs with built-in Smart Orchestration.",
       "debugText": "Debug tests that fail in CI with visual feedback.",
       "chartText": "Keep your tests in tip-top shape with powerful analytics.",
-      "buttonUser": "Log in to the Cypress Dashboard",
-      "buttonProject": "Connect your project to the Cypress Dashboard",
+      "buttonUser": "Log in to Cypress Cloud",
+      "buttonProject": "Connect your project to Cypress Cloud",
       "modal": {
         "title": "Connect project",
         "cancel": "Cancel",
         "createOrg": {
-          "description": "You need to create an organization in the Cypress Dashboard to continue.",
+          "description": "You need to create an organization in Cypress Cloud to continue.",
           "button": "Create organization",
           "waitingButton": "Waiting for you to create an organization...",
           "refreshButton": "Refresh organizations list"
@@ -580,22 +585,22 @@
       },
       "errors": {
         "baseError": {
-          "title": "Cypress Dashboard error"
+          "title": "Cypress Cloud error"
         },
         "internalServerError": {
-          "title": "Cannot connect to the Cypress Dashboard",
-          "description": "The request times out when trying to retrieve the info from the Cypress Dashboard. Please refresh the page to try again and visit out {0} if this behavior continues.",
+          "title": "Cannot connect to Cypress Cloud",
+          "description": "The request times out when trying to retrieve the info from Cypress Cloud. Please refresh the page to try again and visit out {0} if this behavior continues.",
           "link": "Support Page"
         }
       }
     },
     "connectSuccessAlert": {
-      "title": "This project is now connected to the Cypress Dashboard!",
+      "title": "This project is now connected to Cypress Cloud!",
       "item1": "We automatically added the {projectId} to your {configFile} file.",
       "item2": "Please ensure that your {0} file is checked into source control."
     },
     "empty": {
-      "title": "Record your first run to the Cypress Dashboard",
+      "title": "Record your first run to Cypress Cloud",
       "description": "Run the command below in your local development terminal or in CI."
     },
     "results": {
@@ -621,8 +626,8 @@
         "button": "Request Sent"
       },
       "connectionFailed": {
-        "title": "Cannot connect to the Cypress Dashboard",
-        "description": "The request times out when trying to retrieve the recorded runs from the Cypress Dashboard. Please refresh the page to try again and visit out {0} if this behavior continues.",
+        "title": "Cannot connect to Cypress Cloud",
+        "description": "The request times out when trying to retrieve the recorded runs from Cypress Cloud. Please refresh the page to try again and visit out {0} if this behavior continues.",
         "link": "Support page",
         "button": "Try again"
       }
@@ -769,7 +774,7 @@
   "openBrowser": {
     "startComponent": "Start Component Testing in {browser}",
     "startE2E": "Start E2E Testing in {browser}",
-    "openingComponent": "Opening component testing in {browser}",
+    "openingComponent": "Opening Component Testing in {browser}",
     "openingE2E": "Opening E2E Testing in {browser}",
     "running": "Running {browser}",
     "focus": "Focus",

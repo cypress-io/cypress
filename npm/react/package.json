@@ -12,6 +12,7 @@
     "cy:run": "node ../../scripts/cypress.js run --component",
     "cy:run:debug": "node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
     "test": "yarn cy:run",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
   "devDependencies": {

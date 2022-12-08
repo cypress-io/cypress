@@ -1309,10 +1309,14 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
           const state = log.get('state')
 
           if (state === 'pending') {
-            log.on('state:changed', (state) => {
-              return events.push(`${log.get('name')}:log:${state}`)
-            })
+            events.push(`${log.get('name')}:log:${state}`)
+          }
+        })
 
+        cy.on('command:log:changed', (attrs, log) => {
+          const state = log.get('state')
+
+          if (state === 'pending') {
             events.push(`${log.get('name')}:log:${state}`)
           }
         })
@@ -1323,7 +1327,14 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
         cy.get('#single-input input').type('f{enter}').then(() => {
           expect(events).to.deep.eq([
-            'get:start', 'get:log:pending', 'get:end', 'type:start', 'type:log:pending', 'submit', 'type:end', 'then:start',
+            'get:start',
+            'get:log:pending',
+            'get:end',
+            'type:start',
+            'type:log:pending',
+            'submit',
+            'type:end',
+            'then:start',
           ])
         })
       })

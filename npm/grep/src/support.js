@@ -4,7 +4,7 @@
 const { parseGrep, shouldTestRun } = require('./utils')
 // @ts-ignore
 const { version } = require('../package.json')
-const debug = require('debug')('cypress-grep')
+const debug = require('debug')('@cypress/grep')
 
 debug.log = console.info.bind(console)
 

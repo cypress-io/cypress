@@ -606,6 +606,7 @@ describe('Server', () => {
                 domain: 'go',
                 tld: 'com',
                 port: '80',
+                subdomain: 'espn',
                 protocol: 'http:',
               },
             })
@@ -923,6 +924,7 @@ describe('Server', () => {
               domain: 'google',
               tld: 'com',
               port: '80',
+              subdomain: null,
               protocol: 'http:',
             },
           })
@@ -954,6 +956,7 @@ describe('Server', () => {
               domain: 'cypress',
               port: '80',
               tld: 'io',
+              subdomain: null,
               protocol: 'http:',
             },
             origin: 'http://cypress.io',
@@ -983,7 +986,7 @@ describe('Server', () => {
             const buffer = this.buffers.take('http://www.cypress.io/')
 
             expect(buffer).to.not.be.empty
-            expect(buffer.isCrossSuperDomainOrigin).to.be.true
+            expect(buffer.urlDoesNotMatchPolicyBasedOnDomain).to.be.true
 
             // Verify the secondary remote state is returned
             expect(this.server.remoteStates.current()).to.deep.eq({
@@ -992,6 +995,7 @@ describe('Server', () => {
                 domain: 'cypress',
                 port: '80',
                 tld: 'io',
+                subdomain: 'www',
                 protocol: 'http:',
               },
               origin: 'http://www.cypress.io',
@@ -1026,6 +1030,7 @@ describe('Server', () => {
                 domain: '',
                 port: '3500',
                 tld: 'localhost',
+                subdomain: null,
                 protocol: 'http:',
               },
               origin: 'http://localhost:3500',
@@ -1057,6 +1062,7 @@ describe('Server', () => {
                 domain: '',
                 port: '3500',
                 tld: 'localhost',
+                subdomain: null,
                 protocol: 'http:',
               },
               origin: 'http://localhost:3500',
@@ -1093,6 +1099,7 @@ describe('Server', () => {
                 domain: '',
                 port: '3500',
                 tld: 'localhost',
+                subdomain: null,
                 protocol: 'http:',
               },
               origin: 'http://localhost:3500',
@@ -1182,6 +1189,7 @@ describe('Server', () => {
               domain: 'google',
               tld: 'com',
               port: '80',
+              subdomain: 'www',
               protocol: 'http:',
             },
           })
@@ -1265,6 +1273,7 @@ describe('Server', () => {
               domain: 'google',
               tld: 'com',
               port: '80',
+              subdomain: 'www',
               protocol: 'http:',
             },
           })
@@ -1339,6 +1348,7 @@ describe('Server', () => {
                 domain: 'google',
                 tld: 'com',
                 port: '80',
+                subdomain: 'www',
                 protocol: 'http:',
               },
             })
@@ -1384,6 +1394,7 @@ describe('Server', () => {
               domain: 'foobar',
               tld: 'com',
               port: '8443',
+              subdomain: 'www',
               protocol: 'https:',
             },
           })
@@ -1458,6 +1469,7 @@ describe('Server', () => {
                 domain: 'foobar',
                 tld: 'com',
                 port: '8443',
+                subdomain: 'www',
                 protocol: 'https:',
               },
             })
@@ -1511,6 +1523,7 @@ describe('Server', () => {
               domain: '',
               tld: 's3.amazonaws.com',
               port: '443',
+              subdomain: null,
               protocol: 'https:',
             },
           })
@@ -1591,6 +1604,7 @@ describe('Server', () => {
                 domain: '',
                 tld: 's3.amazonaws.com',
                 port: '443',
+                subdomain: null,
                 protocol: 'https:',
               },
             })

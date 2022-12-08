@@ -569,7 +569,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
     reporterStats: null,
   })
 
-  // dashboard told us to skip this spec
+  // Cypress Cloud told us to skip this spec
   const skippedSpec = results.skippedSpec
 
   if (screenshots) {
@@ -1012,6 +1012,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
 
     if (!options.quiet) {
       printResults.renderSummaryTable(runUrl, results)
+      printResults.maybeLogCloudRecommendationMessage(results.runs || [], record)
     }
 
     return results

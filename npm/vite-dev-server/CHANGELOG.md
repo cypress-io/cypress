@@ -1,3 +1,29 @@
+# [@cypress/vite-dev-server-v5.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.0.0...@cypress/vite-dev-server-v5.0.1) (2022-12-08)
+
+
+### Bug Fixes
+
+* add v8 snapshot usage to cypress in cypress testing ([#24860](https://github.com/cypress-io/cypress/issues/24860)) ([c540284](https://github.com/cypress-io/cypress/commit/c540284f5080d46a8597e53dd2213cb6fb133078))
+
+# [@cypress/vite-dev-server-v5.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v4.0.1...@cypress/vite-dev-server-v5.0.0) (2022-12-02)
+
+
+### chore
+
+* remove experimentalSessionAndOrigin flag ([#24340](https://github.com/cypress-io/cypress/issues/24340)) ([69873ae](https://github.com/cypress-io/cypress/commit/69873ae9884228f15310fd151e42cbc0cb712817))
+
+
+### BREAKING CHANGES
+
+* removed experimentalSessionAndOrigin flag. testIsolation defaults to strict
+
+# [@cypress/vite-dev-server-v4.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v4.0.0...@cypress/vite-dev-server-v4.0.1) (2022-11-08)
+
+
+### Bug Fixes
+
+* vite-dev-server hoisting issue in binary ([#24599](https://github.com/cypress-io/cypress/issues/24599)) ([2513bea](https://github.com/cypress-io/cypress/commit/2513beac307e95267ab736a93a39cd1cd1280506))
+
 # [@cypress/vite-dev-server-v4.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.4.0...@cypress/vite-dev-server-v4.0.0) (2022-11-07)
 
 

@@ -7,7 +7,8 @@
     "build": "rimraf dist && rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "build-prod": "yarn build",
-    "watch": "yarn build --watch --watch.exclude ./dist/**/*"
+    "watch": "yarn build --watch --watch.exclude ./dist/**/*",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "devDependencies": {
     "@cypress/mount-utils": "0.0.0-development",

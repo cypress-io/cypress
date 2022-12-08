@@ -34,11 +34,12 @@ namespace CypressConfigTests {
 
   // setters
   Cypress.config('baseUrl', '.') // $ExpectType void
-  Cypress.config({ e2e: { baseUrl: '.' }}) // $ExpectType void
-  Cypress.config({ e2e: { baseUrl: null }}) // $ExpectType void
-  Cypress.config({ e2e: { baseUrl: '.', }}) // $ExpectType void
+  Cypress.config({ e2e: { baseUrl: '.' }}) // $ExpectError
+  Cypress.config({ e2e: { baseUrl: null }}) // $ExpectError
+  Cypress.config({ e2e: { baseUrl: '.', }}) // $ExpectError
   Cypress.config({ component: { baseUrl: '.', devServer: () => ({} as any) } }) // $ExpectError
   Cypress.config({ e2e: { indexHtmlFile: 'index.html' } }) // $ExpectError
+  Cypress.config({ testIsolation: false }) // $ExpectError
 
   Cypress.config('taskTimeout') // $ExpectType number
   Cypress.config('includeShadowDom') // $ExpectType boolean
@@ -68,6 +69,7 @@ namespace CypressIsCyTests {
 declare namespace Cypress {
   interface Chainable {
     newCommand: (arg: string) => Chainable<number>
+    newQuery: (arg: string) => Chainable<number>
   }
 }
 
@@ -290,6 +292,27 @@ namespace CypressCommandsTests {
 
     return originalFn(element, text, options)
   })
+
+  Cypress.Commands.addQuery('newQuery', function(arg) {
+    this // $ExpectType Command
+    arg // $ExpectType string
+    return () => 3
+  })
+}
+
+namespace CypressNowTest {
+  cy.now('get') // $ExpectType Promise<any> | ((subject: any) => any)
+}
+
+namespace CypressEnsuresTest {
+  Cypress.ensure.isType('', ['optional', 'element'], 'newQuery', cy) // $ExpectType void
+  Cypress.ensure.isElement('', 'newQuery', cy) // $ExpectType void
+  Cypress.ensure.isWindow('', 'newQuery', cy) // $ExpectType void
+  Cypress.ensure.isDocument('', 'newQuery', cy) // $ExpectType void
+
+  Cypress.ensure.isAttached('', 'newQuery', cy) // $ExpectType void
+  Cypress.ensure.isNotDisabled('', 'newQuery') // $ExpectType void
+  Cypress.ensure.isVisible('', 'newQuery') // $ExpectType void
 }
 
 namespace CypressLogsTest {
@@ -866,6 +889,9 @@ namespace CypressTestConfigOverridesTests {
   it('test', {
     retries: { run: 3 } // $ExpectError
   }, () => { })
+  it('test', {
+    testIsolation: false, // $ExpectError
+  }, () => { })
 
   it.skip('test', {}, () => {})
   it.only('test', {}, () => {})
@@ -880,6 +906,10 @@ namespace CypressTestConfigOverridesTests {
   describe('suite', {
     browser: {family: 'firefox'},
     keystrokeDelay: 0
+  }, () => {})
+
+  describe('suite', {
+    testIsolation: false,
   }, () => {})
 
   context('suite', {}, () => {})
@@ -1053,4 +1083,30 @@ namespace CypressClearCookiesTests {
   cy.clearCookies({ log: 'true' }) // $ExpectError
   cy.clearCookies({ timeout: '10' }) // $ExpectError
   cy.clearCookies({ domain: false }) // $ExpectError
+}
+
+namespace CypressLocalStorageTests {
+  cy.getAllLocalStorage().then((result) => {
+    result // $ExpectType StorageByOrigin
+  })
+  cy.getAllLocalStorage({ log: false })
+  cy.getAllLocalStorage({ log: 'true' }) // $ExpectError
+
+  cy.clearAllLocalStorage().then((result) => {
+    result // $ExpectType null
+  })
+  cy.clearAllLocalStorage({ log: false })
+  cy.clearAllLocalStorage({ log: 'true' }) // $ExpectError
+
+  cy.getAllSessionStorage().then((result) => {
+    result // $ExpectType StorageByOrigin
+  })
+  cy.getAllSessionStorage({ log: false })
+  cy.getAllSessionStorage({ log: 'true' }) // $ExpectError
+
+  cy.clearAllSessionStorage().then((result) => {
+    result // $ExpectType null
+  })
+  cy.clearAllSessionStorage({ log: false })
+  cy.clearAllSessionStorage({ log: 'true' }) // $ExpectError
 }

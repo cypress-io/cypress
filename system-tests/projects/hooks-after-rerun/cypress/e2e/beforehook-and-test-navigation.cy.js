@@ -1,5 +1,3 @@
-// should fail since before hooks are rerun on domain change
-
 const urls = [
   'http://localhost:3434',
   'http://localhost:4545',
@@ -24,7 +22,7 @@ describe('suite', () => {
   })
 })
 
-describe('navigation error in beforeEach', () => {
+describe('navigation in beforeEach', () => {
   before(() => {
     cy.visit(urls[1])
   })
@@ -33,5 +31,5 @@ describe('navigation error in beforeEach', () => {
     cy.visit(urls[2])
   })
 
-  it('never gets here', () => {})
+  it('test', () => {})
 })

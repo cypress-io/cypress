@@ -267,7 +267,7 @@ export const mutation = mutationType({
 
     t.field('login', {
       type: Query,
-      description: 'Auth with Cypress Dashboard',
+      description: 'Auth with Cypress Cloud',
       args: {
         utmMedium: nonNull(stringArg()),
         utmContent: stringArg(),
@@ -282,7 +282,7 @@ export const mutation = mutationType({
 
     t.field('logout', {
       type: Query,
-      description: 'Log out of Cypress Dashboard',
+      description: 'Log out of Cypress Cloud',
       resolve: async (_, args, ctx) => {
         await ctx.actions.auth.logout()
 
@@ -703,7 +703,7 @@ export const mutation = mutationType({
 
     t.field('recordEvent', {
       type: 'Boolean',
-      description: 'Dispatch an event to the dashboard to be recorded. Events are completely anonymous and are only used to identify aggregate usage patterns across all Cypress users.',
+      description: 'Dispatch an event to Cypress Cloud to be recorded. Events are completely anonymous and are only used to identify aggregate usage patterns across all Cypress users.',
       args: {
         campaign: nonNull(stringArg({})),
         messageId: nonNull(stringArg({})),
@@ -735,6 +735,18 @@ export const mutation = mutationType({
         const { data } = await ctx.cloud.getCache()
 
         return data
+      },
+    })
+
+    t.boolean('setRunAllSpecs', {
+      description: 'List of specs to run for the "Run All Specs" Feature',
+      args: {
+        runAllSpecs: nonNull(list(nonNull(stringArg()))),
+      },
+      resolve: (source, args, ctx) => {
+        ctx.project.setRunAllSpecs(args.runAllSpecs)
+
+        return true
       },
     })
   },

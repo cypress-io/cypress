@@ -20,6 +20,60 @@ const uniqueRoute = (route) => {
   return `${route}-${routeCount}`
 }
 
+describe('network stubbing - not skipped', () => {
+  it('stops waiting when an xhr request is canceled', () => {
+    cy.visit('http://localhost:3500/fixtures/generic.html')
+
+    cy.intercept('POST', /users/, {
+      body: { name: 'b' },
+      delay: 2000,
+    }).as('createUser')
+
+    cy.window()
+    .then((win) => {
+      const xhr = new win.XMLHttpRequest()
+
+      xhr.open('POST', '/users/')
+
+      xhr.send()
+
+      win.location.reload()
+
+      cy.wait('@createUser').its('state').should('eq', 'Errored')
+    })
+  })
+
+  it('stops waiting when an fetch request is canceled', () => {
+    cy.visit('http://localhost:3500/fixtures/generic.html')
+
+    cy.intercept('POST', /users/, {
+      body: { name: 'b' },
+      delay: 2000,
+    }).as('createUser')
+
+    cy.window()
+    .then((win) => {
+      const controller = new AbortController()
+      const { signal } = controller
+
+      fetch('/users/', { signal, method: 'POST' }).catch((e) => {
+        // do nothing on an abort
+      })
+
+      // if you abort too fast in firefox or safari, the fetch is never sent to the server for us to intercept
+      if (!Cypress.isBrowser('chrome')) {
+        setTimeout(() => {
+          controller.abort()
+        }, 100)
+      } else {
+        controller.abort()
+      }
+
+      cy.wait('@createUser').its('state').should('eq', 'Errored')
+    })
+  })
+})
+
 // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23434
 describe.skip('network stubbing', function () {
   const { $, _, sinon, state, Promise } = Cypress

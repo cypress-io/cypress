@@ -2,7 +2,7 @@
 /**==============================================
  * *             LoginConnectModals.vue
  *
- * Logging in to the Cypress Dashboard and connecting/creating projects
+ * Logging in to Cypress Cloud and connecting/creating projects
  * represent a set of mutually-exclusive steps in a flow.
  *
  * The LoginConnectModals component is intended to be rendered
