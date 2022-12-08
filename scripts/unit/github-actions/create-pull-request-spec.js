@@ -9,7 +9,7 @@ describe('pull requests', () => {
     it('creates pull request with correct properties', async () => {
       const github = {
         pulls: {
-          create: sinon.stub().returns(Promise.resolve({ number: 123 })),
+          create: sinon.stub().returns(Promise.resolve({ data: { number: 123 } })),
         },
       }
 
@@ -43,7 +43,7 @@ describe('pull requests', () => {
     it('creates pull request with correct properties including reviewers', async () => {
       const github = {
         pulls: {
-          create: sinon.stub().returns(Promise.resolve({ number: 123 })),
+          create: sinon.stub().returns(Promise.resolve({ data: { number: 123 } })),
           requestReviewers: sinon.stub().returns(Promise.resolve()),
         },
       }
