@@ -54,7 +54,7 @@
               </h2>
 
               <p>
-                Cypress now has full support for testing multiple domains of different origins in a single test with the <ExternalLink href="https://on.cypress.io/origin">
+                Cypress now has full support for testing multiple origins in a single test with the <ExternalLink href="https://on.cypress.io/origin">
                   <code>cy.origin()</code>
                 </ExternalLink> command! To take a deep-dive into how this works, read our
 
@@ -208,9 +208,10 @@ const handleClick = () => {
 
 const versionReleaseDates = computed(() => {
   return {
+    // Note, months are zero indexed.
     '10': useTimeAgo(Date.UTC(2022, 5, 1)).value,
     '11': useTimeAgo(Date.UTC(2022, 10, 8)).value,
-    '12': useTimeAgo(Date.UTC(2022, 12, 6)).value,
+    '12': useTimeAgo(Date.UTC(2022, 11, 6)).value,
   }
 })
 
