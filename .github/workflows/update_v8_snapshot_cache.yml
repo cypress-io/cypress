@@ -35,7 +35,7 @@ jobs:
     env:
       CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
       BASE_BRANCH: ${{ inputs.branch || github.ref_name }}
-      GENERATE_FROM_SCRATCH: ${{ inputs.generate_from_scratch == 'true' || github.event_name == 'schedule' }}
+      GENERATE_FROM_SCRATCH: ${{ inputs.generate_from_scratch == true || github.event_name == 'schedule' }}
     steps:
       - name: Determine snapshot files - Windows
         if: ${{ matrix.platform == 'windows-latest' }}
@@ -79,13 +79,13 @@ jobs:
           echo "has_changes=$(test "$(git status --porcelain -- ${{ env.SNAPSHOT_FILES }})" && echo 'true')" >> $GITHUB_OUTPUT
         shell: bash
       - name: Determine branch name - commit directly to branch
-        if: ${{ inputs.commit_directly_to_branch == 'true' }}
+        if: ${{ inputs.commit_directly_to_branch == true }}
         run: |
           echo "BRANCH_NAME=${{ env.BASE_BRANCH }}" >> $GITHUB_ENV
           echo "BRANCH_EXISTS=true" >> $GITHUB_ENV
         shell: bash
       - name: Determine branch name - commit to separate branch
-        if: ${{ !inputs.commit_directly_to_branch != 'true' }}
+        if: ${{ !inputs.commit_directly_to_branch != true }}
         run: |
           echo "BRANCH_NAME=update-v8-snapshot-cache-on-${{ env.BASE_BRANCH }}" >> $GITHUB_ENV
           echo "BRANCH_EXISTS=$(git show-ref --verify --quiet refs/remotes/origin/update-v8-snapshot-cache-on-${{ env.BASE_BRANCH }} && echo 'true')" >> $GITHUB_ENV
