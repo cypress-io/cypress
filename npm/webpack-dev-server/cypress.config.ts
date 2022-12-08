@@ -11,6 +11,7 @@ export default defineConfig({
 
       // Delete this as we only want to honor it on parent Cypress when doing E2E Cypress in Cypress testing
       delete process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS
+      delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
       process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
       const { e2ePluginSetup } = require('@packages/frontend-shared/cypress/e2e/e2ePluginSetup') as typeof import('@packages/frontend-shared/cypress/e2e/e2ePluginSetup')
 
