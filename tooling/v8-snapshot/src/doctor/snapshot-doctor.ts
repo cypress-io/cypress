@@ -266,6 +266,7 @@ export class SnapshotDoctor {
   private readonly nodeEnv: string
   private readonly _scriptProcessor: AsyncScriptProcessor
   private readonly _warningsProcessor: WarningsProcessor
+  private readonly integrityCheckSource: string | undefined
 
   /**
    * Creates an instance of the {@link SnapshotDoctor}
@@ -284,6 +285,7 @@ export class SnapshotDoctor {
     this.previousNoRewrite = unpathify(opts.previousNoRewrite)
     this.forceNoRewrite = unpathify(opts.forceNoRewrite)
     this.nodeEnv = opts.nodeEnv
+    this.integrityCheckSource = opts.integrityCheckSource
   }
 
   /**
@@ -499,6 +501,7 @@ export class SnapshotDoctor {
             entryPoint: `./${key}`,
             nodeEnv: this.nodeEnv,
             supportTypeScript: this.nodeModulesOnly,
+            integrityCheckSource: this.integrityCheckSource,
           })
 
           assert(result != null, 'expected result from script processor')
@@ -605,6 +608,7 @@ export class SnapshotDoctor {
         deferred: deferredArg,
         norewrite: norewriteArg,
         supportTypeScript: this.nodeModulesOnly,
+        integrityCheckSource: this.integrityCheckSource,
       })
 
       return { warnings, meta: meta as Metadata, bundle }

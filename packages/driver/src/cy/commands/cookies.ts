@@ -4,7 +4,6 @@ import Promise from 'bluebird'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
-import { $Location } from '../../cypress/location'
 
 // TODO: add hostOnly to COOKIE_PROPS
 // https://github.com/cypress-io/cypress/issues/363
@@ -27,24 +26,6 @@ const getCommandFromEvent = (event) => {
   return event.replace(commandNameRe, (match, p1, p2) => {
     return p2.toUpperCase()
   })
-}
-
-const mergeDefaults = function (obj) {
-  // we always want to be able to see and influence cookies
-  // on our superdomain
-  const { superDomain } = $Location.create(window.location.href)
-
-  // and if the user did not provide a domain
-  // then we know to set the default to be origin
-  const merge = (o) => {
-    return _.defaults(o, { domain: superDomain })
-  }
-
-  if (_.isArray(obj)) {
-    return _.map(obj, merge)
-  }
-
-  return merge(obj)
 }
 
 // from https://developer.chrome.com/extensions/cookies#type-SameSiteStatus
@@ -92,6 +73,27 @@ function validateDomainOption (domain: any, commandName: string, log: Log | unde
 }
 
 export default function (Commands, Cypress, cy, state, config) {
+  const getDefaultDomain = () => {
+    const hostname = state('window')?.location.hostname
+
+    // if hostname is undefined, the AUT is on about:blank, so use the
+    // spec frame's hostname instead
+    return hostname || window.location.hostname
+  }
+
+  const mergeDefaults = function (obj) {
+    // set the default domain to be the AUT hostname
+    const merge = (o) => {
+      return _.defaults(o, { domain: getDefaultDomain() })
+    }
+
+    if (_.isArray(obj)) {
+      return _.map(obj, merge)
+    }
+
+    return merge(obj)
+  }
+
   const automateCookies = function (event, obj = {}, log, timeout) {
     const automate = () => {
       return Cypress.automation(event, mergeDefaults(obj))
@@ -129,11 +131,7 @@ export default function (Commands, Cypress, cy, state, config) {
         return resp
       }
 
-      // iterate over all of these and ensure none are allowed
-      // or preserved
-      const cookies = Cypress.Cookies.getClearableCookies(resp)
-
-      return automateCookies('clear:cookies', cookies, log, timeout)
+      return automateCookies('clear:cookies', resp, log, timeout)
     })
     .then(pickCookieProps)
   }
@@ -166,19 +164,6 @@ export default function (Commands, Cypress, cy, state, config) {
     }
   }
 
-  // TODO: https://github.com/cypress-io/cypress/issues/23093
-  // Cypress sessions will clear cookies on its own before each test.
-  // Once experimentalSessionAndOrigin is made GA, remove this logic. Leave clearing
-  // session data (cookies / local storage / session storage) to reset functionality.
-  if (!Cypress.config('experimentalSessionAndOrigin')) {
-    // TODO: handle failure here somehow
-    // maybe by tapping into the Cypress reset
-    // stuff, or handling this in the runner itself?
-    Cypress.on('test:before:run:async', () => {
-      return getAndClear()
-    })
-  }
-
   return Commands.addAll({
     getCookie (name, userOptions: Cypress.CookieOptions = {}) {
       const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
@@ -194,7 +179,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
       if (options.log) {
         log = Cypress.log({
-          message: name,
+          message: userOptions.domain ? [name, { domain: userOptions.domain }] : name,
           timeout: responseTimeout,
           consoleProps () {
             const obj = {}
@@ -241,7 +226,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
       if (options.log) {
         log = Cypress.log({
-          message: '',
+          message: userOptions.domain ? { domain: userOptions.domain } : '',
           timeout: responseTimeout,
           consoleProps () {
             const obj = {}
@@ -287,7 +272,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
       if (options.log) {
         log = Cypress.log({
-          message: [name, value],
+          message: userOptions.domain ? [name, value, { domain: userOptions.domain }] : [name, value],
           timeout: responseTimeout,
           consoleProps () {
             const obj = {}
@@ -363,7 +348,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
       if (options.log) {
         log = Cypress.log({
-          message: name,
+          message: userOptions.domain ? [name, { domain: userOptions.domain }] : [name],
           timeout: responseTimeout,
           consoleProps () {
             const obj = {}
@@ -417,7 +402,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
       if (options.log) {
         log = Cypress.log({
-          message: '',
+          message: userOptions.domain ? { domain: userOptions.domain } : '',
           timeout: responseTimeout,
           consoleProps () {
             const obj = {}
