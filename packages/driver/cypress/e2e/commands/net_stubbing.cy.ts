@@ -75,7 +75,7 @@ describe('network stubbing - not skipped', () => {
 })
 
 // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23434
-describe.skip('network stubbing', function () {
+describe('network stubbing', { retries: 15 }, function () {
   const { $, _, sinon, state, Promise } = Cypress
 
   beforeEach(function () {
@@ -2364,6 +2364,39 @@ describe.skip('network stubbing', function () {
           })
         })
       })
+
+      context('with `resourceType`', function () {
+        it('can match a proxied image request by resourceType', () => {
+          cy.intercept({ resourceType: 'image' }, (req) => {
+            expect(req.resourceType).to.eq('image')
+            req.reply({ fixture: 'media/cypress.png' })
+          })
+          .as('imagesOnly')
+          .then(async () => {
+            await Promise.all([
+              // should not match
+              fetch('/'),
+              // should match
+              new Promise((resolve) => {
+                $('<img src="/image">')[0].onload = () => resolve()
+              }),
+            ])
+          })
+          .get('@imagesOnly.all').should('have.length', 1)
+        })
+
+        it('can match a cy.visit() document request by resourceType', () => {
+          cy.intercept({ resourceType: 'document' }, (req) => {
+            expect(req.resourceType).to.eq('document')
+            req.reply({ fixture: 'content-in-body.html' })
+          })
+          .as('documentsOnly')
+          .visit('/stubbed-html.html') // should match
+          .contains('Script and Style in the body')
+          .then(() => fetch('/')) // should not match
+          .get('@documentsOnly.all').should('have.length', 1)
+        })
+      })
     })
 
     context('with StaticResponse shorthand', function () {
@@ -3651,7 +3684,9 @@ describe.skip('network stubbing', function () {
         })
       })
 
-      it('gets indexed Interception by alias.number', function () {
+      // TODO: fix+document this behavior
+      // @see https://github.com/cypress-io/cypress/issues/7663
+      it.skip('gets indexed Interception by alias.number', function () {
         let interception
         const url = uniqueRoute('/foo')
 

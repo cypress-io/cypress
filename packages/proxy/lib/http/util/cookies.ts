@@ -4,7 +4,7 @@ import { URL } from 'url'
 import { cors } from '@packages/network'
 import { urlOriginsMatch, urlSameSiteMatch } from '@packages/network/lib/cors'
 import { AutomationCookie, Cookie, CookieJar, toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
-import type { RequestCredentialLevel, RequestResourceType } from '../../types'
+import type { RequestCredentialLevel, ResourceType } from '../../types'
 
 type SiteContext = 'same-origin' | 'same-site' | 'cross-site'
 
@@ -12,7 +12,7 @@ interface RequestDetails {
   url: string
   isAUTFrame: boolean
   doesTopNeedSimulating: boolean
-  resourceType?: RequestResourceType
+  resourceType?: ResourceType
   credentialLevel?: RequestCredentialLevel
 }
 
@@ -23,13 +23,13 @@ interface RequestDetails {
  * which is critical for lax cookies
  * @param {string} requestUrl - the url of the request
  * @param {string} AUTUrl - The current url of the app under test
- * @param {RequestResourceType} [resourceType] -
+ * @param {ResourceType} [resourceType] -
  * @param {RequestCredentialLevel} [credentialLevel] - The credentialLevel of the request. For `fetch` this is `omit|same-origin|include` (defaults to same-origin)
  * and for `XmlHttpRequest` it is `true|false` (defaults to false)
  * @param {isAutFrame} [boolean] - whether or not the request is from the AUT Iframe or not
  * @returns {boolean}
  */
-export const shouldAttachAndSetCookies = (requestUrl: string, AUTUrl: string | undefined, resourceType?: RequestResourceType, credentialLevel?: RequestCredentialLevel, isAutFrame?: boolean): boolean => {
+export const shouldAttachAndSetCookies = (requestUrl: string, AUTUrl: string | undefined, resourceType?: ResourceType, credentialLevel?: RequestCredentialLevel, isAutFrame?: boolean): boolean => {
   if (!AUTUrl) return false
 
   const siteContext = calculateSiteContext(requestUrl, AUTUrl)

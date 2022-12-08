@@ -1,9 +1,9 @@
 import md5 from 'md5'
 import Debug from 'debug'
-import type { RequestCredentialLevel, RequestResourceType } from '@packages/proxy'
+import type { RequestCredentialLevel, ResourceType } from '@packages/proxy'
 
 type AppliedCredentialByUrlAndResourceMap = Map<string, Array<{
-  resourceType: RequestResourceType
+  resourceType: ResourceType
   credentialStatus: RequestCredentialLevel
 }>>
 
@@ -17,15 +17,15 @@ const hashUrl = (url: string): string => {
 const _appliedCredentialByUrlAndResourceMap: AppliedCredentialByUrlAndResourceMap = new Map()
 
 class ResourceTypeAndCredentialManagerClass {
-  get (url: string, optionalResourceType?: RequestResourceType): {
-    resourceType: RequestResourceType
+  get (url: string, optionalResourceType?: ResourceType): {
+    resourceType: ResourceType
     credentialStatus: RequestCredentialLevel
   } {
     const hashKey = hashUrl(url)
 
     debug(`credentials request received for request url ${url}, hashKey ${hashKey}`)
     let value: {
-      resourceType: RequestResourceType
+      resourceType: ResourceType
       credentialStatus: RequestCredentialLevel
     } | undefined
 
@@ -54,7 +54,7 @@ class ResourceTypeAndCredentialManagerClass {
     credentialStatus,
   }: {
     url: string
-    resourceType: RequestResourceType
+    resourceType: ResourceType
     credentialStatus: RequestCredentialLevel
   }) {
     const hashKey = hashUrl(url)

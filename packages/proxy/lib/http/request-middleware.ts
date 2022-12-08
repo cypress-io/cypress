@@ -50,7 +50,7 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
 
   this.debug(`credentials calculated for ${resourceType}:${credentialStatus}`)
 
-  this.req.requestedWith = resourceType
+  this.req.resourceType = resourceType
   this.req.credentialsLevel = credentialStatus
   this.next()
 }
@@ -75,9 +75,9 @@ const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
     return this.next()
   }
 
-  // Top needs to be simulated since the AUT is in a cross origin state. Get the requestedWith and credentials and see what cookies need to be attached
+  // Top needs to be simulated since the AUT is in a cross origin state. Get the resourceType and credentials and see what cookies need to be attached
   const currentAUTUrl = this.getAUTUrl()
-  const shouldCookiesBeAttachedToRequest = shouldAttachAndSetCookies(this.req.proxiedUrl, currentAUTUrl, this.req.requestedWith, this.req.credentialsLevel, this.req.isAUTFrame)
+  const shouldCookiesBeAttachedToRequest = shouldAttachAndSetCookies(this.req.proxiedUrl, currentAUTUrl, this.req.resourceType, this.req.credentialsLevel, this.req.isAUTFrame)
 
   this.debug(`should cookies be attached to request?: ${shouldCookiesBeAttachedToRequest}`)
   if (!shouldCookiesBeAttachedToRequest) {
@@ -108,6 +108,12 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
     return this.next()
   }
 
+  const copyResourceTypeAndNext = () => {
+    this.req.resourceType = this.req.browserPreRequest?.resourceType
+
+    this.next()
+  }
+
   if (this.req.headers['x-cypress-resolving-url']) {
     this.debug('skipping prerequest for resolve:url')
     delete this.req.headers['x-cypress-resolving-url']
@@ -131,13 +137,13 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
       })
     })
 
-    return this.next()
+    return copyResourceTypeAndNext()
   }
 
   this.debug('waiting for prerequest')
   this.getPreRequest(((browserPreRequest) => {
     this.req.browserPreRequest = browserPreRequest
-    this.next()
+    copyResourceTypeAndNext()
   }))
 }
 
