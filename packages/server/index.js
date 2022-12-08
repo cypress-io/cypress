@@ -1,7 +1,12 @@
-const { initializeStartTime } = require('./lib/util/performance_benchmark')
+const runChildProcess = async (entryPoint) => {
+  require('./lib/plugins/child/register_ts_node')
+  require(entryPoint)
+}
 
 const startCypress = async () => {
   try {
+    const { initializeStartTime } = require('./lib/util/performance_benchmark')
+
     initializeStartTime()
 
     const { hookRequire } = require('./hook-require')
@@ -16,4 +21,10 @@ const startCypress = async () => {
   }
 }
 
-module.exports = startCypress()
+const { entryPoint } = require('minimist')(process.argv.slice(1))
+
+if (entryPoint) {
+  module.exports = runChildProcess(entryPoint)
+} else {
+  module.exports = startCypress()
+}

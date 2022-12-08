@@ -1,3 +1,10 @@
+# [@cypress/vite-dev-server-v5.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.0.0...@cypress/vite-dev-server-v5.0.1) (2022-12-08)
+
+
+### Bug Fixes
+
+* add v8 snapshot usage to cypress in cypress testing ([#24860](https://github.com/cypress-io/cypress/issues/24860)) ([c540284](https://github.com/cypress-io/cypress/commit/c540284f5080d46a8597e53dd2213cb6fb133078))
+
 # [@cypress/vite-dev-server-v5.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v4.0.1...@cypress/vite-dev-server-v5.0.0) (2022-12-02)
 
 
