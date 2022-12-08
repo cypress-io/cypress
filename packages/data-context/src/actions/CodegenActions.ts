@@ -52,7 +52,7 @@ export class CodegenActions {
         return []
       }
 
-      throw new Error('Error parsing React component file', { cause: err })
+      throw new Error('Error parsing React component file')
     }
   }
 
