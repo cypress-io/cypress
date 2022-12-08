@@ -276,12 +276,12 @@ describe('cookies', () => {
               expectedGetCookiesArray = _.reverse(_.sortBy(expectedGetCookiesArray, _.property('name')))
 
               // sanity check
-              cy.clearCookies({ domain: null })
-              cy.getCookies({ domain: null }).should('have.length', 0)
+              cy.clearAllCookies()
+              cy.getAllCookies().should('have.length', 0)
 
               cy[cmd](`/setCascadingCookies?n=${n}&a=${altUrl}&b=${Cypress.env('baseUrl')}`)
 
-              cy.getCookies({ domain: null }).then((cookies) => {
+              cy.getAllCookies().then((cookies) => {
                 // reverse them so they'll be in the order they were set
                 cookies = _.reverse(_.sortBy(cookies, _.property('name')))
 
