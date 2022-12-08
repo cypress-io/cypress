@@ -15,10 +15,6 @@ const {
   updatePRTitle,
 } = require('../../github-actions/update-browser-versions')
 
-const {
-  createPullRequest,
-} = require('../../github-actions/create-pull-request')
-
 const coreStub = () => {
   return {
     setOutput: sinon.stub(),
@@ -356,41 +352,6 @@ describe('update browser version github action', () => {
       expect(github.pulls.update).not.to.be.called
       // eslint-disable-next-line no-console
       expect(console.log).to.be.calledWith('Could not find PR for branch:', 'some-branch-name')
-    })
-  })
-
-  context('.createPullRequest', () => {
-    it('creates pull request with correct properties', async () => {
-      const github = {
-        pulls: {
-          create: sinon.stub().returns(Promise.resolve()),
-        },
-      }
-
-      const context = {
-        repo: {
-          owner: 'cypress-io',
-          repo: 'cypress',
-        },
-      }
-
-      await createPullRequest({
-        context,
-        github,
-        baseBranch: 'develop',
-        branchName: 'some-branch-name',
-        description: 'Update Chrome',
-      })
-
-      expect(github.pulls.create).to.be.calledWith({
-        owner: 'cypress-io',
-        repo: 'cypress',
-        base: 'develop',
-        head: 'some-branch-name',
-        title: 'chore: Update Chrome',
-        body: 'This PR was auto-generated to update the version(s) of Chrome for driver tests',
-        maintainer_can_modify: true,
-      })
     })
   })
 })
