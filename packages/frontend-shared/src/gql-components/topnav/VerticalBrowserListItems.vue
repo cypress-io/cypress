@@ -39,6 +39,9 @@
             "
           >
             {{ t('topNav.version') }} {{ browser.majorVersion }}
+            <span v-if="browser.version === 'unsupported'">
+              ({{ t('topNav.versionUnsupported') }})
+            </span>
           </div>
         </div>
       </div>
@@ -95,6 +98,7 @@ fragment VerticalBrowserListItems on CurrentProject {
     id
     isSelected
     displayName
+    version
     majorVersion
     isVersionSupported
     warning
