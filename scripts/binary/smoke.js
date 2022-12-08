@@ -293,12 +293,8 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
     const childProcess = require('child_process')
     const nodeGlobalKeys = JSON.parse(childProcess.spawnSync('node -p "const x = Object.getOwnPropertyNames(global);JSON.stringify(x)"', { shell: true, encoding: 'utf8' }).stdout)
 
-    const extraKeys = []
-
-    Object.getOwnPropertyNames(global).forEach((key) => {
-      if (!nodeGlobalKeys.includes(key)) {
-        extraKeys.push(key)
-      }
+    const extraKeys = Object.getOwnPropertyNames(global).filter((key) => {
+      return !nodeGlobalKeys.includes(key)
     })
 
     console.error(`extra keys in electron process: ${extraKeys}`)
