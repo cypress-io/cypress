@@ -10,7 +10,7 @@ const createPullRequest = async ({ context, github, baseBranch, branchName, desc
   })
 
   if (reviewers) {
-    await github.pulls.createReviewRequest({
+    await github.pulls.requestReviewers({
       owner: context.repo.owner,
       repo: context.repo.repo,
       pull_number: number,
