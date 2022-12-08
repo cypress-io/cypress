@@ -896,20 +896,40 @@ declare namespace Cypress {
     clear(options?: Partial<ClearOptions>): Chainable<Subject>
 
     /**
-     * Clear a specific browser cookie for the current hostname or for the domain specified.
-     * Cypress automatically clears all cookies before each test to prevent state from being shared across tests. You shouldn't need to use this command unless you're using it to clear a specific cookie inside a single test.
+     * Clear a specific browser cookie for a domain.
+     *
+     * Cypress automatically clears all cookies _before_ each test to prevent
+     * state from being shared across tests when test isolation is enabled.
+     * You shouldn't need to use this command unless you're using it to clear
+     * a specific cookie inside a single test or test isolation is disabled.
      *
      * @see https://on.cypress.io/clearcookie
      */
     clearCookie(name: string, options?: CookieOptions): Chainable<null>
 
     /**
-     * Clear all browser cookies for the current hostname or for the domain specified.
-     * Cypress automatically clears all cookies before each test to prevent state from being shared across tests. You shouldn't need to use this command unless you're using it to clear all cookies or specific cookies inside a single test.
+     * Clear browser cookies for a domain.
+     *
+     * Cypress automatically clears all cookies _before_ each test to prevent
+     * state from being shared across tests when test isolation is enabled.
+     * You shouldn't need to use this command unless you're using it to clear
+     * specific cookies inside a single test or test isolation is disabled.
      *
      * @see https://on.cypress.io/clearcookies
      */
     clearCookies(options?: CookieOptions): Chainable<null>
+
+    /**
+     * Clear all browser cookies.
+     *
+     * Cypress automatically clears all cookies _before_ each test to prevent
+     * state from being shared across tests when test isolation is enabled.
+     * You shouldn't need to use this command unless you're using it to clear
+     * all cookie inside a single test or test isolation is disabled.
+     *
+     * @see https://on.cypress.io/clearallcookies
+     */
+     clearAllCookies(options?: Partial<Loggable & Timeoutable>): Chainable<null>
 
     /**
      * Get local storage for all origins.
@@ -920,6 +940,11 @@ declare namespace Cypress {
 
     /**
      * Clear local storage for all origins.
+     *
+     * Cypress automatically clears all local storage _before_ each test to
+     * prevent state from being shared across tests when test isolation
+     * is enabled. You shouldn't need to use this command unless you're using it
+     * to clear localStorage inside a single test or test isolation is disabled.
      *
      * @see https://on.cypress.io/clearalllocalstorage
      */
@@ -941,9 +966,11 @@ declare namespace Cypress {
 
     /**
      * Clear data in local storage for the current origin.
-     * Cypress automatically runs this command before each test to prevent state from being
-     * shared across tests. You shouldn't need to use this command unless you're using it
-     * to clear localStorage inside a single test. Yields `localStorage` object.
+     *
+     * Cypress automatically clears all local storage _before_ each test to
+     * prevent state from being shared across tests when test isolation
+     * is enabled. You shouldn't need to use this command unless you're using it
+     * to clear localStorage inside a single test or test isolation is disabled.
      *
      * @see https://on.cypress.io/clearlocalstorage
      * @param {string} [key] - name of a particular item to remove (optional).
@@ -1395,18 +1422,25 @@ declare namespace Cypress {
     get<S = any>(alias: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<S>
 
     /**
-     * Get a browser cookie by its name for the current hostname or for the domain specified.
+     * Get a browser cookie by its name.
      *
      * @see https://on.cypress.io/getcookie
      */
     getCookie(name: string, options?: CookieOptions): Chainable<Cookie | null>
 
     /**
-     * Get all of the browser cookies for the current hostname or for the domain specified.
+     * Get browser cookies for a domain.
      *
      * @see https://on.cypress.io/getcookies
      */
     getCookies(options?: CookieOptions): Chainable<Cookie[]>
+
+    /**
+     * Get all browser cookies.
+     *
+     * @see https://on.cypress.io/getallcookies
+     */
+    getAllCookies(options?: Partial<Loggable & Timeoutable>): Chainable<Cookie[]>
 
     /**
      * Navigate back or forward to the previous or next URL in the browser's history.

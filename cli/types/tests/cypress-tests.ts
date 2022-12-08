@@ -1020,6 +1020,19 @@ namespace CypressGetCookiesTests {
   cy.getCookies({ domain: false }) // $ExpectError
 }
 
+namespace CypressGetAllCookiesTests {
+  cy.getAllCookies().then((cookies) => {
+    cookies // $ExpectType Cookie[]
+  })
+  cy.getAllCookies({ log: true })
+  cy.getAllCookies({ timeout: 10 })
+  cy.getAllCookies({ log: true, timeout: 10 })
+
+  cy.getAllCookies({ log: 'true' }) // $ExpectError
+  cy.getAllCookies({ timeout: '10' }) // $ExpectError
+  cy.getAllCookies({ other: true }) // $ExpectError
+}
+
 namespace CypressGetCookieTests {
   cy.getCookie('name').then((cookie) => {
     cookie // $ExpectType Cookie | null
@@ -1083,6 +1096,19 @@ namespace CypressClearCookiesTests {
   cy.clearCookies({ log: 'true' }) // $ExpectError
   cy.clearCookies({ timeout: '10' }) // $ExpectError
   cy.clearCookies({ domain: false }) // $ExpectError
+}
+
+namespace CypressClearAllCookiesTests {
+  cy.clearAllCookies().then((cookies) => {
+    cookies // $ExpectType null
+  })
+  cy.clearAllCookies({ log: true })
+  cy.clearAllCookies({ timeout: 10 })
+  cy.clearAllCookies({ log: true, timeout: 10 })
+
+  cy.clearAllCookies({ log: 'true' }) // $ExpectError
+  cy.clearAllCookies({ timeout: '10' }) // $ExpectError
+  cy.clearAllCookies({ other: true }) // $ExpectError
 }
 
 namespace CypressLocalStorageTests {
