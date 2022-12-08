@@ -127,7 +127,7 @@ export const Cypress = (
         if (iterationNumber > HMR_DEPENDENCY_LOOKUP_MAX_ITERATION) {
           debug(`max hmr iteration reached: ${HMR_DEPENDENCY_LOOKUP_MAX_ITERATION}; Rerun will not happen on this file change.`)
 
-          return []
+          return
         }
 
         // as soon as we find one of the specs, we trigger the re-run of tests
@@ -139,7 +139,7 @@ export const Cypress = (
 
             // if we update support we know we have to re-run it all
             // no need to check further
-            return []
+            return
           }
 
           if (mod.file && specsPathsSet.has(mod.file)) {
@@ -156,7 +156,7 @@ export const Cypress = (
         iterationNumber += 1
       }
 
-      return []
+      return
     },
   }
 }
