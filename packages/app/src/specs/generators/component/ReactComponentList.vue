@@ -19,18 +19,17 @@
       >
         <div
           data-cy="react-component-row"
-          class="cursor-pointer flex border-b-1 border-b-gray-50 leading-normal pl-56px text-16px
-    gap-8px group items-center last last:py-0 last:items-start children:h-40px children:py-8px"
+          class="cursor-pointer flex border-b-1 border-b-gray-50 leading-normal pl-56px text-16px group items-center children:h-40px children:py-8px"
           @click="$emit('selectItem', {file, item: {exportName, isDefault}})"
         >
           <div
             class="h-full inline-flex whitespace-nowrap items-center overflow-hidden"
           >
             <i-cy-puzzle-piece_x16
-              class="mr-8px text-sm fill-gray-50 stroke-gray-300"
+              class="mr-8px text-sm fill-gray-50 stroke-gray-300 group-hocus:stroke-indigo-500 group-hocus:fill-indigo-50"
             />
             <span
-              class="font-medium text-indigo-500 group-hocus:text-indigo-500"
+              class="font-medium text-indigo-600 truncate"
             >
               {{ exportName }}</span>
           </div>

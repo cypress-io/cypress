@@ -18,19 +18,12 @@
             @click="() => toggleExpandRow(file.id)"
           >
             <i-cy-chevron-down-small_x16
-              class="
-          mr-8px text-sm icon-dark-gray-300
-          group-hocus:(icon-dark-gray-700)
-        "
+              class="mr-8px text-sm icon-dark-gray-300 group-hocus:icon-dark-gray-700"
               :class="{'transform rotate-270': !isRowExpanded(file.id)}"
             />
             <i-cy-document-blank_x16 class="min-w-16px min-h-16px icon-light-gray-50 icon-dark-gray-300" />
             <div class="h-full inline-flex whitespace-nowrap items-center overflow-hidden">
-              <span
-                class="font-medium text-indigo-500
-          group-hocus:text-indigo-500"
-              >{{
-                name(file) }}</span>
+              <span class="font-medium text-gray-600">{{ name(file) }}</span>
               <span class="font-light text-gray-400">{{ file.fileExtension }}</span>
               <span class="font-light ml-20px opacity-0 text-gray-600 duration-200 truncate group-hocus:opacity-60">{{ file.relative }}</span>
             </div>
