@@ -636,7 +636,7 @@ describe('App: Specs', () => {
           })
 
           cy.contains('Review the docs')
-          .should('have.attr', 'href', 'https://on.cypress.io/mount')
+          .should('have.attr', 'href', 'https://on.cypress.io/styling-components')
 
           cy.log('should not contain the link if you navigate away and back')
           cy.get('body').type('f')
