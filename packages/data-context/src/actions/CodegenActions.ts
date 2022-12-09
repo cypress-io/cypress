@@ -17,7 +17,7 @@ export interface ReactComponentDescriptor {
 export class CodegenActions {
   constructor (private ctx: DataContext) {}
 
-  async getReactComponentsFromFile (filePath: string): Promise<ReactComponentDescriptor[]> {
+  async getReactComponentsFromFile (filePath: string): Promise<{components: ReactComponentDescriptor[], errored?: boolean }> {
     try {
       const src = await this.ctx.fs.readFile(filePath, 'utf8')
 
@@ -42,17 +42,17 @@ export class CodegenActions {
         return acc
       }, [])
 
-      return resolvedDefs
+      return { components: resolvedDefs }
     } catch (err) {
       this.ctx.debug(err)
 
       // react-docgen throws an error if it doesn't find any components in a file.
       // This is okay for our purposes, so if this is the error, catch it and return [].
       if (err.message === 'No suitable component definition found.') {
-        return []
+        return { components: [] }
       }
 
-      throw new Error('Error parsing React component file')
+      return { errored: true, components: [] }
     }
   }
 
