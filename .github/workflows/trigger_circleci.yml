@@ -63,12 +63,14 @@ jobs:
             exit 1;
           fi
 
-          if ![[ "$COMMIT_MESSAGE" =~ "run ci" ]]; then
+          echo "Always run CI when the commit message includes 'run ci'."
+          echo "Commit message: $COMMIT_MESSAGE"
+
+          if ! [[ "$COMMIT_MESSAGE" =~ "run ci" ]]; then
             echo "Skipping running in CircleCI; branch in progress - $TRIGGER_INSTRUCTIONS"
             exit 0
           fi
 
-          echo "Always run CI when the commit message includes 'run ci'."
 
           response=$(curl -X POST https://circleci.com/api/v2/project/github/cypress-io/cypress/pipeline \
             --header "Circle-Token:$CIRCLE_TOKEN" \
