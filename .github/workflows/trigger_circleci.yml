@@ -6,7 +6,7 @@ on:
       - opened
       - synchronize
       - ready_for_review
-  push
+  push:
 
 jobs:
   main:
