@@ -54,9 +54,9 @@
       :search="filePathSearch"
     >
       <template #expanded-content="{file}">
-        <ReactComponentList
+        <slot
+          name="item"
           :file="file"
-          @selectItem="selectItem"
         />
       </template>
       <template #no-results>
@@ -80,10 +80,8 @@ import NoResults from '@cy/components/NoResults.vue'
 import CreateSpecModalBody from './CreateSpecModalBody.vue'
 import ExpandableFileList from './ExpandableFileList.vue'
 import FileMatch from '../../components/FileMatch.vue'
-import ReactComponentList from './component/ReactComponentList.vue'
 import { gql } from '@urql/core'
 import type { FileParts } from '@packages/data-context/src/gen/graphcache-config.gen'
-import type { FileListItemFragment } from '../../generated/graphql'
 
 const props = withDefaults(defineProps<{
   files: FileParts[]
@@ -105,7 +103,6 @@ fragment FileChooser on FileParts {
 `
 
 const emits = defineEmits<{
-  (eventName: 'selectItem', value: {file: FileListItemFragment, item: any})
   (eventName: 'update:extensionPattern', value: string)
 }>()
 
@@ -113,10 +110,6 @@ const emits = defineEmits<{
 const initialExtensionPattern = props.extensionPattern
 const localExtensionPattern = ref(props.extensionPattern)
 const filePathSearch = ref('')
-
-const selectItem = ({ file, item }) => {
-  emits('selectItem', { file, item })
-}
 
 ///*------- Styling -------*/
 
