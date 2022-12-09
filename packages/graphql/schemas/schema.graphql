@@ -45,52 +45,10 @@ enum BrowserFamily {
   webkit
 }
 
-type BrowserInfo {
-  """The formatted name of the browser, e.g. `Electron`"""
-  formattedName: String
-
-  """
-  The formatted name of the browser with the current version i.e `Electron 59.0.278`
-  """
-  formattedNameWithVersion: String
-
-  """The version of the browser, i.e. `59`"""
-  formattedVersion: String
-  id: String
-
-  """The ID of the browser, e.g. `electron`"""
-  unformattedName: String
-
-  """The unformatted version of the browser, i.e. `59.0.278`"""
-  unformattedVersion: String
-}
-
 enum BrowserStatus {
   closed
   open
   opening
-}
-
-type CIBuildInfo {
-  """CI build ID extracted from the environment (if available)"""
-  ciBuildNumber: String
-
-  """Formatted CI build ID extracted from the environment (if available)"""
-  ciBuildNumberFormatted: String
-
-  """
-  The formatted name of the provider that performed the associated run, e.g. `CircleCI`
-  """
-  formattedProvider: String
-  id: String
-
-  """
-  The ID of the provider that performed the associated run, e.g. `circleci`
-  """
-  provider: String
-
-  """A link to the build details for the associated run"""
-  url: String
 }
 
 """
@@ -108,6 +66,50 @@ type CachedUser implements Node {
   id: ID!
 }
 
+type CloudBrowserInfo implements Node {
+  """The formatted name of the browser, e.g. `Electron`"""
+  formattedName: String
+
+  """
+  The formatted name of the browser with the current version i.e `Electron 59.0.278`
+  """
+  formattedNameWithVersion: String
+
+  """The version of the browser, i.e. `59`"""
+  formattedVersion: String
+  id: ID!
+
+  """The ID of the browser, e.g. `electron`"""
+  unformattedName: String
+
+  """The unformatted version of the browser, i.e. `59.0.278`"""
+  unformattedVersion: String
+}
+
+type CloudCiBuildInfo implements Node {
+  """CI build ID extracted from the environment (if available)"""
+  ciBuildNumber: String
+
+  """Formatted CI build ID extracted from the environment (if available)"""
+  ciBuildNumberFormatted: String
+
+  """
+  The formatted name of the provider that performed the associated run, e.g. `CircleCI`
+  """
+  formattedProvider: String
+
+  """Globally unique identifier representing a concrete GraphQL ObjectType"""
+  id: ID!
+
+  """
+  The ID of the provider that performed the associated run, e.g. `circleci`
+  """
+  provider: String
+
+  """A link to the build details for the associated run"""
+  url: String
+}
+
 """Feature not available for subscription"""
 type CloudFeatureNotEnabled {
   """an error message"""
@@ -123,6 +125,25 @@ type CloudLatestRunUpdateSpecData {
 
   """Recommended seconds to wait before next poll."""
   pollingInterval: Int
+}
+
+type CloudOperatingSystem implements Node {
+  id: ID!
+
+  """The formatted name of the operating system, e.g. `linux`"""
+  name: String
+
+  """
+  The formatted name of the operating system with the version, e.g. `linux 14.04`
+  """
+  nameWithVersion: String
+
+  """The platform of the OS, e.g. `linux`"""
+  platform: OperatingSystemsEnum
+  unformattedName: String
+
+  """The version of the operating system, e.g. `14.04`"""
+  version: String
 }
 
 """
@@ -368,7 +389,7 @@ type CloudRun implements Node {
   cancelledAt: DateTime
 
   """Information about the CI provider that performed the build"""
-  ci: CIBuildInfo!
+  ci: CloudCiBuildInfo!
   commitInfo: CloudRunCommitInfo
   completedAt: DateTime
   createdAt: DateTime!
@@ -383,7 +404,7 @@ type CloudRun implements Node {
   specs: [CloudSpecRun!]!
   status: CloudRunStatus
   tags: [CloudRunTag]
-  testsForReview(limit: Int! = 100): [TestResult!]!
+  testsForReview(limit: Int! = 100): [CloudTestResult!]!
 
   """
   Total duration of the run in milliseconds, accounting for any parallelization
@@ -453,16 +474,16 @@ type CloudRunEdge {
   node: CloudRun!
 }
 
-type CloudRunGroup {
-  browser: BrowserInfo!
+type CloudRunGroup implements Node {
+  browser: CloudBrowserInfo!
   completedAt: DateTime
   createdAt: DateTime!
 
   """This is the duration of the instance"""
   duration: Int!
   groupName: String
-  id: String!
-  os: OperatingSystem!
+  id: ID!
+  os: CloudOperatingSystem!
   status: CloudRunGroupStatusEnum!
 
   """The type of the test"""
@@ -483,6 +504,45 @@ enum CloudRunGroupStatusEnum {
   RUNNING
   TIMEDOUT
   UNCLAIMED
+}
+
+type CloudRunInstance implements Node {
+  groupId: String!
+
+  """Used to determine if the instance has screenshots"""
+  hasScreenshots: Boolean!
+
+  """Used to determine if the instance has stdout"""
+  hasStdout: Boolean!
+
+  """Used to determine if the instance has screenshots"""
+  hasVideo: Boolean!
+  id: ID!
+
+  """Link to Cypress Cloud to view stdout, if available"""
+  screenshotsUrl: String
+  status: RunInstanceStatusEnum!
+
+  """Link to Cypress Cloud to view stdout, if available"""
+  stdoutUrl: String
+
+  """This is the number of failed tests for the instance"""
+  totalFailed: Int
+
+  """This is the number of passed tests for the instance"""
+  totalPassed: Int
+
+  """This is the number of pending tests for the instance"""
+  totalPending: Int
+
+  """This is the number of running tests for the instance"""
+  totalRunning: Int
+
+  """This is the number of skipped tests for the instance"""
+  totalSkipped: Int
+
+  """Link to Cypress Cloud to view stdout, if available"""
+  videoUrl: String
 }
 
 """Possible check status of the test run"""
@@ -519,8 +579,6 @@ type CloudSpecRun implements Node {
   """Amount of groups this spec was run in"""
   groupCount: Int
   groupIds: [String]
-
-  """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
   path: String!
 
@@ -573,6 +631,43 @@ type CloudSpecRunEdge {
 
   """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
   node: CloudSpecRun!
+}
+
+type CloudTestResult implements Node {
+  bodyHash: String!
+
+  """This is the duration of the test result"""
+  duration: Int
+  id: ID!
+  instance: CloudRunInstance
+
+  """If the test result was flaky in the current run"""
+  isFlaky: Boolean!
+
+  """If the test result was muted in the current run"""
+  isMuted: Boolean!
+  specId: String!
+  state: CloudTestResultStateEnum!
+  testId: String
+  testUrl: String!
+  title(
+    """This will trim the test title to the provided depth"""
+    depth: Int!
+  ): String!
+  titleParts: [String!]!
+}
+
+"""State of the test result"""
+enum CloudTestResultStateEnum {
+  CANCELLED
+  ERRORED
+  FAILED
+  PASSED
+  PENDING
+  RUNNING
+  SKIPPED
+  TIMEDOUT
+  UNKNOWN
 }
 
 """A CloudUser represents an User stored in the Cypress Cloud"""
@@ -1485,25 +1580,6 @@ interface Node {
   id: ID!
 }
 
-type OperatingSystem {
-  id: String
-
-  """The formatted name of the operating system, e.g. `linux`"""
-  name: String
-
-  """
-  The formatted name of the operating system with the version, e.g. `linux 14.04`
-  """
-  nameWithVersion: String
-
-  """The platform of the OS, e.g. `linux`"""
-  platform: OperatingSystemsEnum
-  unformattedName: String
-
-  """The version of the operating system, e.g. `14.04`"""
-  version: String
-}
-
 """Possible operating systems for a build"""
 enum OperatingSystemsEnum {
   LINUX
@@ -1806,45 +1882,6 @@ enum RemoteFetchableStatus {
   NOT_FETCHED
 }
 
-type RunInstance {
-  groupId: String!
-
-  """Used to determine if the instance has screenshots"""
-  hasScreenshots: Boolean!
-
-  """Used to determine if the instance has stdout"""
-  hasStdout: Boolean!
-
-  """Used to determine if the instance has screenshots"""
-  hasVideo: Boolean!
-  id: String!
-
-  """Link to Cypress Cloud to view stdout, if available"""
-  screenshotsUrl: String
-  status: RunInstanceStatusEnum!
-
-  """Link to Cypress Cloud to view stdout, if available"""
-  stdoutUrl: String
-
-  """This is the number of failed tests for the instance"""
-  totalFailed: Int
-
-  """This is the number of passed tests for the instance"""
-  totalPassed: Int
-
-  """This is the number of pending tests for the instance"""
-  totalPending: Int
-
-  """This is the number of running tests for the instance"""
-  totalRunning: Int
-
-  """This is the number of skipped tests for the instance"""
-  totalSkipped: Int
-
-  """Link to Cypress Cloud to view stdout, if available"""
-  videoUrl: String
-}
-
 """Possible check status of the instances run"""
 enum RunInstanceStatusEnum {
   CANCELLED
@@ -1979,43 +2016,6 @@ enum SupportStatusEnum {
 enum SupportedBundlers {
   vite
   webpack
-}
-
-type TestResult {
-  bodyHash: String!
-
-  """This is the duration of the test result"""
-  duration: Int
-  id: String!
-  instance: RunInstance
-
-  """If the test result was flaky in the current run"""
-  isFlaky: Boolean!
-
-  """If the test result was muted in the current run"""
-  isMuted: Boolean!
-  specId: String!
-  state: TestResultStateEnum!
-  testId: String
-  testUrl: String!
-  title(
-    """This will trim the test title to the provided depth"""
-    depth: Int!
-  ): String!
-  titleParts: [String!]!
-}
-
-"""State of the test result"""
-enum TestResultStateEnum {
-  CANCELLED
-  ERRORED
-  FAILED
-  PASSED
-  PENDING
-  RUNNING
-  SKIPPED
-  TIMEDOUT
-  UNKNOWN
 }
 
 enum TestingTypeEnum {

@@ -42,7 +42,7 @@ fragment DebugSpecListSpec on CloudSpecRun {
 `
 
 gql`
-fragment DebugSpecListTests on TestResult {
+fragment DebugSpecListTests on CloudTestResult {
   id
   specId
   title(depth: 2)

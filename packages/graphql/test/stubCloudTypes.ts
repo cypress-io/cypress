@@ -25,7 +25,7 @@ import type {
   CloudProjectSpecResult,
   CloudRunStatus,
   CloudSpecRun,
-  TestResult,
+  CloudTestResult,
 } from '../src/gen/test-cloud-graphql-types.gen'
 import type { GraphQLResolveInfo } from 'graphql'
 
@@ -187,7 +187,8 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
     completedAt: null,
     cancelledAt: null,
     ci: {
-      __typename: 'CIBuildInfo',
+      __typename: 'CloudCiBuildInfo',
+      id: 'ci_id',
     },
     groups: [],
     isHiddenByUsageLimits: false,
@@ -216,8 +217,8 @@ function addFailedTests (run: CloudRun) {
     path: 'src/Test.cy.ts',
   }
 
-  const test: TestResult = {
-    __typename: 'TestResult',
+  const test: CloudTestResult = {
+    __typename: 'CloudTestResult',
     bodyHash: 'acs123',
     id: '123',
     isFlaky: false,
