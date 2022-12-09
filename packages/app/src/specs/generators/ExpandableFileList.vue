@@ -4,7 +4,7 @@
       v-if="files.length"
       class="h-full relative"
     >
-      <ul class="h-full">
+      <ul class="h-full pb-24px overflow-auto">
         <!-- TODO: UNIFY-864 - up arrow and down arrow navigation -->
         <li
           v-for="file in files"
