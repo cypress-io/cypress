@@ -2,21 +2,22 @@ name: "Trigger CircleCi Pipeline"
 
 on:
   - push
-  # pull_request_target:
-  #   types:
-  #     - opened
-  #     - synchronize
-  #     - ready_for_review
-
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+      - ready_for_review
+env:
+  CIRCLE_TOKEN: ${{ secrets.CIRCLE_TOKEN }}
+  TRIGGER_INSTRUCTIONS: "to trigger CI , include 'run ci' in the commit message or click the 'Trigger Pipeline' button in the CircleCI UI."
 jobs:
-  main:
-    name: Trigger CircleCi Pipeline when PR is ready for review
+  pull_request:
+    name: Trigger CircleCI for push to Pull Request
     runs-on: ubuntu-latest
     steps:
-      - name: Step
+      - if: ${{ github.event_name == 'pull_request' && github.event.pull_request.draft == false }}
+        name: 
         shell: bash
-        env:
-          CIRCLE_TOKEN: ${{ secrets.CIRCLE_TOKEN }}
         run: |
           if [[ "${CIRCLE_TOKEN}" == "" ]]; then
             echo "The CIRCLE_TOKEN is unset. Cannot trigger pipeline..."
@@ -51,3 +52,41 @@ jobs:
           #   echo "Error triggering pipeline..."
           #   exit 1;
           # fi
+  push:
+    name: Trigger CircleCI for Commit
+    runs-on: ubuntu-latest
+    steps:
+      - if: ${{ github.event_name != 'pull_request' }}
+        name: 
+        shell: bash
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          if [[ "${CIRCLE_TOKEN}" == "" ]]; then
+            echo "The CIRCLE_TOKEN is unset. Cannot trigger pipeline..."
+            exit 1;
+          fi
+
+          echo "Determine whether or not to trigger CircleCi pipeline"
+          printenv
+
+          if ![[ "$LAST_COMMIT_MESSAGE" =~ "run ci" ]]; then
+            echo "Skipping running in CircleCI; branch in progress - $TRIGGER_INSTRUCTIONS"
+            exit 0
+          fi
+
+          echo "Always run CI when the commit message includes 'run ci'."
+  
+          response=$(curl -X POST https://circleci.com/api/v2/project/github/cypress-io/cypress/pipeline \
+            --header "Circle-Token:$CIRCLE_TOKEN" \
+            --header "content-type:application/json" \
+            --data "{\"branch\":\"$BRANCH\"}" \
+            --silent
+          )
+
+          echo "$response"
+
+          if [ "$(jq 'has("message")' <<< $response )" == "true" ]; then
+            echo "Error triggering pipeline..."
+            exit 1;
+          fi
