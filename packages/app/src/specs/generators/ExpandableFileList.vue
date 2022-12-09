@@ -10,29 +10,35 @@
           v-for="file in files"
           :key="file.id"
         >
-          <div
-            class="cursor-pointer flex border-b-1 border-b-gray-50 leading-normal text-16px gap-8px
-    group items-center last last:py-0 last:items-start children:h-40px children:py-8px"
+          <Collapsible
+            lazy
             data-cy="file-list-row"
-            @click="() => toggleExpandRow(file.id)"
           >
-            <i-cy-chevron-down-small_x16
-              class="mr-8px text-sm icon-dark-gray-300 group-hocus:icon-dark-gray-700"
-              :class="{'transform rotate-270': !isRowExpanded(file.id)}"
-            />
-            <i-cy-document-blank_x16 class="min-w-16px min-h-16px icon-light-gray-50 icon-dark-gray-300" />
-            <div class="h-full inline-flex whitespace-nowrap items-center overflow-hidden">
-              <span class="font-medium text-gray-600">{{ name(file) }}</span>
-              <span class="font-light text-gray-400">{{ file.fileExtension }}</span>
-              <span class="font-light ml-20px opacity-0 text-gray-600 duration-200 truncate group-hocus:opacity-60">{{ file.relative }}</span>
-            </div>
-          </div>
-          <div v-if="isRowExpanded(file.id)">
-            <slot
-              :file="file"
-              name="expanded-content"
-            />
-          </div>
+            <template #target="{ open }">
+              <div
+                class="cursor-pointer flex border-b-1 border-b-gray-50 leading-normal text-16px gap-8px
+    group items-center last last:py-0 last:items-start children:h-40px children:py-8px"
+                data-cy="file-list-row"
+              >
+                <i-cy-chevron-down-small_x16
+                  class="mr-8px text-sm icon-dark-gray-300 group-hocus:icon-dark-gray-700"
+                  :class="{'transform rotate-270': !open}"
+                />
+                <i-cy-document-blank_x16 class="min-w-16px min-h-16px icon-light-gray-50 icon-dark-gray-300" />
+                <div class="h-full inline-flex whitespace-nowrap items-center overflow-hidden">
+                  <span class="font-medium text-gray-600">{{ name(file) }}</span>
+                  <span class="font-light text-gray-400">{{ file.fileExtension }}</span>
+                  <span class="font-light ml-20px opacity-0 text-gray-600 duration-200 truncate group-hocus:opacity-60">{{ file.relative }}</span>
+                </div>
+              </div>
+              <div v-if="open">
+                <slot
+                  :file="file"
+                  name="expanded-content"
+                />
+              </div>
+            </template>
+          </Collapsible>
         </li>
       </ul>
     </div>
@@ -47,8 +53,8 @@
 
 <script setup lang="ts">
 import { gql } from '@urql/vue'
-import { ref } from 'vue'
 import type { FileListItemFragment } from '../../generated/graphql'
+import Collapsible from '@cy/components/Collapsible.vue'
 
 gql`
 fragment FileListItem on FileParts {
@@ -67,20 +73,6 @@ defineProps<{
 defineEmits<{
   (eventName: 'selectItem', value: {file: FileListItemFragment, item: any})
 }>()
-
-const expandedRowId = ref<string>('')
-
-function isRowExpanded (id: string) {
-  return (expandedRowId.value === id)
-}
-
-function toggleExpandRow (id: string) {
-  if (expandedRowId.value === id) {
-    expandedRowId.value = ''
-  } else {
-    expandedRowId.value = id
-  }
-}
 
 // [...all].vue returns as [ when using the normal fileName
 const name = (file) => {
