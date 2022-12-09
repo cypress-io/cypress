@@ -20,60 +20,6 @@ const uniqueRoute = (route) => {
   return `${route}-${routeCount}`
 }
 
-describe('network stubbing - not skipped', () => {
-  it('stops waiting when an xhr request is canceled', () => {
-    cy.visit('http://localhost:3500/fixtures/generic.html')
-
-    cy.intercept('POST', /users/, {
-      body: { name: 'b' },
-      delay: 2000,
-    }).as('createUser')
-
-    cy.window()
-    .then((win) => {
-      const xhr = new win.XMLHttpRequest()
-
-      xhr.open('POST', '/users/')
-
-      xhr.send()
-
-      win.location.reload()
-
-      cy.wait('@createUser').its('state').should('eq', 'Errored')
-    })
-  })
-
-  it('stops waiting when an fetch request is canceled', () => {
-    cy.visit('http://localhost:3500/fixtures/generic.html')
-
-    cy.intercept('POST', /users/, {
-      body: { name: 'b' },
-      delay: 2000,
-    }).as('createUser')
-
-    cy.window()
-    .then((win) => {
-      const controller = new AbortController()
-      const { signal } = controller
-
-      fetch('/users/', { signal, method: 'POST' }).catch((e) => {
-        // do nothing on an abort
-      })
-
-      // if you abort too fast in firefox or safari, the fetch is never sent to the server for us to intercept
-      if (!Cypress.isBrowser('chrome')) {
-        setTimeout(() => {
-          controller.abort()
-        }, 100)
-      } else {
-        controller.abort()
-      }
-
-      cy.wait('@createUser').its('state').should('eq', 'Errored')
-    })
-  })
-})
-
 // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23434
 describe('network stubbing', { retries: 15 }, function () {
   const { $, _, sinon, state, Promise } = Cypress
@@ -1253,7 +1199,8 @@ describe('network stubbing', { retries: 15 }, function () {
       })
     })
 
-    it('can stub a response with a network error', function (done) {
+    // TODO(webkit): fix forceNetworkError https://github.com/cypress-io/cypress/issues/23810
+    it('can stub a response with a network error', { browser: '!webkit' }, function (done) {
       cy.intercept('/*', {
         forceNetworkError: true,
       }).then(() => {
@@ -2484,8 +2431,7 @@ describe('network stubbing', { retries: 15 }, function () {
         .and('include', 'content-type: application/json')
       })
 
-      // TODO(webkit): extremely flaky for some reason. need to figure out why and either fix
-      // or disable forceNetworkError for experimental release
+      // TODO(webkit): fix forceNetworkError https://github.com/cypress-io/cypress/issues/23810
       it('can forceNetworkError', { browser: '!webkit' }, function (done) {
         const url = uniqueRoute('/foo')
 
@@ -3171,8 +3117,7 @@ describe('network stubbing', { retries: 15 }, function () {
         .should('include', { foo: 1 })
       })
 
-      // TODO(webkit): extremely flaky for some reason. need to figure out why and either fix
-      // or disable forceNetworkError for experimental release
+      // TODO(webkit): fix forceNetworkError https://github.com/cypress-io/cypress/issues/23810
       it('can forceNetworkError', { browser: '!webkit' }, function (done) {
         const url = uniqueRoute('/foo')
 
@@ -3601,17 +3546,72 @@ describe('network stubbing', { retries: 15 }, function () {
       .wait('@status2').its('response.statusCode').should('eq', 301)
     })
 
-    // https://github.com/cypress-io/cypress/issues/9549
-    it('should handle aborted requests', () => {
-      cy.intercept('https://jsonplaceholder.cypress.io/todos/1').as('xhr')
-      cy.visit('fixtures/xhr-abort.html')
-      cy.get('#btn').click()
-      cy.get('pre').contains('delectus') // response body renders to page
-      cy.wait('@xhr')
+    context('abort and cancel', () => {
+      // https://github.com/cypress-io/cypress/issues/9549
+      it('should handle aborted requests', () => {
+        cy.intercept('https://jsonplaceholder.cypress.io/todos/1').as('xhr')
+        cy.visit('fixtures/xhr-abort.html')
+        cy.get('#btn').click()
+        cy.get('pre').contains('delectus') // response body renders to page
+        cy.wait('@xhr')
+      })
+
+      it('stops waiting when an xhr request is canceled', () => {
+        cy.visit('http://localhost:3500/fixtures/generic.html')
+
+        cy.intercept('POST', /users/, {
+          body: { name: 'b' },
+          delay: 2000,
+        }).as('createUser')
+
+        cy.window()
+        .then((win) => {
+          const xhr = new win.XMLHttpRequest()
+
+          xhr.open('POST', '/users/')
+
+          xhr.send()
+
+          win.location.reload()
+
+          cy.wait('@createUser').its('state').should('eq', 'Errored')
+        })
+      })
+
+      it('stops waiting when an fetch request is canceled', () => {
+        cy.visit('http://localhost:3500/fixtures/generic.html')
+
+        cy.intercept('POST', /users/, {
+          body: { name: 'b' },
+          delay: 2000,
+        }).as('createUser')
+
+        cy.window()
+        .then((win) => {
+          const controller = new AbortController()
+          const { signal } = controller
+
+          fetch('/users/', { signal, method: 'POST' }).catch((e) => {
+          // do nothing on an abort
+          })
+
+          // if you abort too fast in firefox or safari, the fetch is never sent to the server for us to intercept
+          if (!Cypress.isBrowser('chrome')) {
+            setTimeout(() => {
+              controller.abort()
+            }, 100)
+          } else {
+            controller.abort()
+          }
+
+          cy.wait('@createUser').its('state').should('eq', 'Errored')
+        })
+      })
     })
 
+    // TODO(webkit): fix forceNetworkError https://github.com/cypress-io/cypress/issues/23810
     // @see https://github.com/cypress-io/cypress/issues/9062
-    it('can spy on a request using forceNetworkError', function () {
+    it('can spy on a request using forceNetworkError', { browser: '!webkit' }, function () {
       const url = uniqueRoute('/foo')
 
       cy.intercept(`${url}*`, { forceNetworkError: true })
