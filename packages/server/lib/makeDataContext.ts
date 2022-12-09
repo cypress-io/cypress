@@ -159,7 +159,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return openProject.resetBrowserTabsForNextTest(shouldKeepTabOpen)
       },
       resetServer () {
-        return openProject.getProject()?.reset()
+        return openProject.getProject()?.server.reset()
       },
     },
     electronApi: {
