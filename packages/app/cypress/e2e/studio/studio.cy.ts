@@ -273,7 +273,9 @@ it('visits a basic html page', () => {
       .find('.assertion-type-text:first').realHover()
 
       cy.get('.__cypress-studio-assertions-menu').shadow()
-      .find('.assertion-option').should('have.text', 'Hello, Studio!')
+      .find('.assertion-option')
+      .should('have.text', 'Hello, Studio!')
+      .should('be.visible')
     })
   })
 })
