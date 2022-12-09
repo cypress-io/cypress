@@ -3,7 +3,6 @@
     <div
       v-if="files.length"
       class="h-full relative"
-      tabindex="0"
     >
       <ul class="h-full">
         <!-- TODO: UNIFY-864 - up arrow and down arrow navigation -->

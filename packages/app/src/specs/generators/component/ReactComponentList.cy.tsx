@@ -12,12 +12,22 @@ describe('ReactComponentList', () => {
 
   it('renders empty state if no components are returned', () => {
     cy.stubMutationResolver(ComponentList_GetReactComponentsFromFileDocument, (defineResult) => {
-      return defineResult({ getReactComponentsFromFile: [] })
+      return defineResult({ getReactComponentsFromFile: { components: [], errored: false } })
     })
 
     cy.mount(<ReactComponentList file={mockFile} />)
 
     cy.contains('No components found').should('be.visible')
+  })
+
+  it('renders error state if errored is true', () => {
+    cy.stubMutationResolver(ComponentList_GetReactComponentsFromFileDocument, (defineResult) => {
+      return defineResult({ getReactComponentsFromFile: { components: [], errored: true } })
+    })
+
+    cy.mount(<ReactComponentList file={mockFile} />)
+
+    cy.contains('Unable to parse file').should('be.visible')
   })
 
   it('fetches and displays a list of components', () => {

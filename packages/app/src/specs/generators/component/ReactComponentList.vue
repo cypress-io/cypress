@@ -1,7 +1,7 @@
 <template>
   <div class="h-full">
     <div
-      v-if="getReactComponentsMutation.error.value"
+      v-if="errored"
       class="border-b-1 border-b-gray-50 py-2 pl-56px text-gray-700"
     >
       {{ t('createSpec.unableToParseFile') }}
@@ -47,13 +47,17 @@ import { ref, onMounted } from 'vue'
 import { ComponentList_GetReactComponentsFromFileDocument, FileListItemFragment } from '../../../generated/graphql'
 
 const { t } = useI18n()
+const errored = ref<boolean | undefined>(false)
 const components = ref<readonly ReactComponentDescriptor[]>([])
 
 gql`
 mutation ComponentList_getReactComponentsFromFile($filePath: String!) {
   getReactComponentsFromFile(filePath: $filePath) {
-    exportName
-    isDefault
+    components {
+      exportName
+      isDefault
+    }
+    errored
   }
 }`
 
@@ -64,7 +68,8 @@ const getComponents = async (file) => {
     filePath: file.absolute,
   })
 
-  components.value = data?.getReactComponentsFromFile || []
+  errored.value = data?.getReactComponentsFromFile?.errored || undefined
+  components.value = data?.getReactComponentsFromFile?.components || []
 }
 
 const props = defineProps<{
