@@ -4,7 +4,7 @@ export default defineConfig({
   component: {
     devServer: {
       framework: 'vue',
-      bundler: 'vite'
-    }
+      bundler: 'vite',
+    },
   },
 })
