@@ -1,19 +1,19 @@
 import execa from 'execa'
 import cp from 'child_process'
+import os from 'os'
 import Bluebird from 'bluebird'
 
 // export an object for easy method stubbing
 export const utils = {
   execa,
   wrapSpawnOptsWithArch: (cmd: string, args: string[]) => {
-    if (process.platform !== 'darwin') {
+    if (!(os.platform() === 'darwin' && os.arch() === 'arm64')) {
       return { cmd, args, opts: { env: {} } }
     }
 
-    // when Cypress spawns processes on macOS with a Intel process as Cypress's parent,
-    // macOS will launch the rosetta-interpreted version (slow) by default. this wraps
-    // the spawn options to prefer arm64 over x86_64 (rosetta)
-
+    // when Cypress spawns processes on Apple macOS with a Intel process as Cypress's parent,
+    // macOS will launch the rosetta-interpreted version (slow) by default. this wraps the
+    // spawn options to prefer arm64 over x86_64 (rosetta)
     return {
       cmd: 'arch',
       args: [cmd, ...args],
@@ -25,7 +25,7 @@ export const utils = {
     }
   },
   getOutput: (cmd: string, args: string[]): Bluebird<{ stdout: string, stderr?: string }> => {
-    if (process.platform === 'win32') {
+    if (os.platform() === 'win32') {
       // execa has better support for windows spawning conventions
       throw new Error('getOutput should not be used on Windows - use execa instead')
     }

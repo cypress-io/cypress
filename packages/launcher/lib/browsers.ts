@@ -178,21 +178,18 @@ export function launch (
     args = [url].concat(args)
   }
 
-  debug('spawning browser with args %o', { args })
-
   const wrapped = utils.wrapSpawnOptsWithArch(browser.path, args)
-
-  // allow setting default env vars such as MOZ_HEADLESS_WIDTH
-  // but only if it's not already set by the environment
-  const env = { ...wrapped.opts.env, ...browserEnv, ...process.env }
-
-  debug('spawning browser with environment %o', { env })
-
-  const proc = cp.spawn(wrapped.cmd, wrapped.args, {
+  const spawnOpts: cp.SpawnOptionsWithStdioTuple<cp.StdioNull, cp.StdioPipe, cp.StdioPipe> = {
     ...wrapped.opts,
     stdio: ['ignore', 'pipe', 'pipe'],
-    env: wrapped.opts.env,
-  })
+    // allow setting default env vars such as MOZ_HEADLESS_WIDTH
+    // but only if it's not already set by the environment
+    env: { ...wrapped.opts.env, ...browserEnv, ...process.env },
+  }
+
+  debug('spawning browser with opts %o', { browser, url, spawnOpts })
+
+  const proc = cp.spawn(wrapped.cmd, wrapped.args, spawnOpts)
 
   proc.stdout.on('data', (buf) => {
     debug('%s stdout: %s', browser.name, String(buf).trim())
