@@ -5,7 +5,8 @@ allowTsModuleStubbing()
 import $stackUtils from '@packages/driver/src/cypress/stack_utils'
 import $errUtils, { CypressError } from '@packages/driver/src/cypress/error_utils'
 import $errorMessages from '@packages/driver/src/cypress/error_messages'
-import sinon from 'sinon'
+
+const { sinon } = Cypress
 
 describe('driver/src/cypress/error_utils', () => {
   context('.modifyErrMsg', () => {
