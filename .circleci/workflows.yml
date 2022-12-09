@@ -63,7 +63,7 @@ windowsWorkflowFilters: &windows-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/fix/issue-with-integrity-check', << pipeline.git.branch >> ]
+    - equal: [ 'mschile/fix_windows_flake', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
