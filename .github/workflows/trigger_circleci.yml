@@ -70,7 +70,7 @@ jobs:
             response=$(curl -X POST https://circleci.com/api/v2/project/github/cypress-io/cypress/pipeline \
               --header "Circle-Token:$CIRCLE_TOKEN" \
               --header "content-type:application/json" \
-              --data "{\"branch\":\"${GITHUB_REF#refs/heads/}"}\
+              --data "{\"branch\":\"${GITHUB_REF#refs/heads/}\"}" \
               --silent
             )
 
