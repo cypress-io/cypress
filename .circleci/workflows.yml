@@ -36,6 +36,7 @@ macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ 'zachw/angular-ct-source-root', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -43,6 +44,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ 'zachw/angular-ct-source-root', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -60,7 +62,7 @@ windowsWorkflowFilters: &windows-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'mschile/fix_windows_flake', << pipeline.git.branch >> ]
+    - equal: [ 'zachw/angular-ct-source-root', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -126,7 +128,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "ryanm/fix/issue-with-integrity-check" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "zachw/angular-ct-source-root" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
