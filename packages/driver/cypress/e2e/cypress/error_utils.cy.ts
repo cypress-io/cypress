@@ -671,14 +671,24 @@ describe('driver/src/cypress/error_utils', () => {
       }
     })
 
-    it('calls Cypress.log with error type and message when error is instance of Error', () => {
+    it('calls Cypress.log with error name and message when error is instance of Error', () => {
       $errUtils.logError(cypressMock, 'error', new Error('Some error'))
       expect(cypressMock.log).to.have.been.calledWithMatch(sinon.match.has('message', `Error: Some error`))
     })
 
-    it('calls Cypress.log with error type and message when error a string', () => {
-      $errUtils.logError(cypressMock, 'error', 'Some error')
-      expect(cypressMock.log).to.have.been.calledWithMatch(sinon.match.has('message', `Error: \"Some error\"`))
+    it('calls Cypress.log with error name and message when error a string', () => {
+      $errUtils.logError(cypressMock, 'error', 'Some string error')
+      expect(cypressMock.log).to.have.been.calledWithMatch(sinon.match.has('message', `Error: \"Some string error\"`))
+    })
+
+    it('calls Cypress.log with default error name and provided message message when error is an object with a message', () => {
+      $errUtils.logError(cypressMock, 'error', { message: 'Some object error with message' })
+      expect(cypressMock.log).to.have.been.calledWithMatch(sinon.match.has('message', `Error: Some object error with message`))
+    })
+
+    it('calls Cypress.log with error name and message when error is an object', () => {
+      $errUtils.logError(cypressMock, 'error', { err: 'Error details' })
+      expect(cypressMock.log).to.have.been.calledWithMatch(sinon.match.has('message', `Error: {"err":"Error details"}`))
     })
   })
 })

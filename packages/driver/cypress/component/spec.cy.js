@@ -1,4 +1,4 @@
-import sinon from 'sinon'
+const { sinon } = Cypress
 
 describe('component testing', () => {
   /** @type {Cypress.Agent<sinon.SinonSpy>} */

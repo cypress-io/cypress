@@ -553,7 +553,7 @@ const logError = (Cypress, handlerType: HandlerType, err: unknown, handled = fal
   const error = toLoggableError(err)
 
   Cypress.log({
-    message: `${error.name}: ${error.message}`,
+    message: `${error.name || 'Error'}: ${error.message}`,
     name: 'uncaught exception',
     type: 'parent',
     // specifying the error causes the log to be red/failed
@@ -574,7 +574,9 @@ const logError = (Cypress, handlerType: HandlerType, err: unknown, handled = fal
   })
 }
 
-const isLogabbleError = (error: unknown): error is Error => {
+interface LoggableError { name?: string, message: string }
+
+const isLoggabbleError = (error: unknown): error is LoggableError => {
   return (
     typeof error === 'object' &&
     error !== null &&
@@ -583,8 +585,8 @@ const isLogabbleError = (error: unknown): error is Error => {
   )
 }
 
-const toLoggableError = (maybeError: unknown): Error => {
-  if (isLogabbleError(maybeError)) return maybeError
+const toLoggableError = (maybeError: unknown): LoggableError => {
+  if (isLoggabbleError(maybeError)) return maybeError
 
   try {
     return new Error(JSON.stringify(maybeError))
