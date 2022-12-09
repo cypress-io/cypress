@@ -11,8 +11,8 @@ env:
   CIRCLE_TOKEN: ${{ secrets.CIRCLE_TOKEN }}
   TRIGGER_INSTRUCTIONS: "to trigger CI , include 'run ci' in the commit message or click the 'Trigger Pipeline' button in the CircleCI UI."
 jobs:
-  pull_request:
-    name: Trigger CircleCI for push to Pull Request
+  main:
+    name: Trigger CircleCI?
     runs-on: ubuntu-latest
     steps:
       - if: ${{ github.event_name == 'pull_request' && github.event.pull_request.draft == false }}
@@ -52,12 +52,8 @@ jobs:
           #   echo "Error triggering pipeline..."
           #   exit 1;
           # fi
-  push:
-    name: Trigger CircleCI for Commit
-    runs-on: ubuntu-latest
-    steps:
       - if: ${{ github.event_name != 'pull_request' }}
-        name: 
+        name: Push to branch in Progress
         shell: bash
         env:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
@@ -76,11 +72,14 @@ jobs:
           fi
 
           echo "Always run CI when the commit message includes 'run ci'."
-  
+
+          BRANCH=$(echo )
+          echo "$BRANCH"
+
           response=$(curl -X POST https://circleci.com/api/v2/project/github/cypress-io/cypress/pipeline \
             --header "Circle-Token:$CIRCLE_TOKEN" \
             --header "content-type:application/json" \
-            --data "{\"branch\":\"$BRANCH\"}" \
+            --data "{\"branch\":\"${GITHUB_REF#refs/heads/}\"}" \
             --silent
           )
 
