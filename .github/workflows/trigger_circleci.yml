@@ -1,12 +1,12 @@
 name: "Trigger CircleCi Pipeline"
 
 on:
-  push
   pull_request_target:
     types:
       - opened
       - synchronize
       - ready_for_review
+  push
 
 jobs:
   main:
