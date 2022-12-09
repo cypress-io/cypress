@@ -98,6 +98,13 @@ export const createRoutesE2E = ({
   routesE2E.get('/__cypress/spec-bridge-iframes', (req, res) => {
     debug('handling cross-origin iframe for domain: %s', req.hostname)
 
+    // Chrome plans to make document.domain immutable in Chrome 109, with the default value
+    // of the Origin-Agent-Cluster header becoming 'true'. We explicitly disable this header
+    // in the spec-bridge-iframe to allow setting document.domain to the bare domain
+    // to guarantee the spec bridge can communicate with the injected code.
+    // @see https://github.com/cypress-io/cypress/issues/25010
+    res.setHeader('Origin-Agent-Cluster', '?0')
+
     files.handleCrossOriginIframe(req, res, config.namespace)
   })
 

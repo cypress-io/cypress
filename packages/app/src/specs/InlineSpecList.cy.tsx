@@ -1,4 +1,4 @@
-import { Specs_InlineSpecListFragment, Specs_InlineSpecListFragmentDoc, SpecFilter_SetPreferencesDocument } from '../generated/graphql-test'
+import { Specs_InlineSpecListFragment, Specs_InlineSpecListFragmentDoc, SpecFilter_SetPreferencesDocument, RunAllSpecsDocument } from '../generated/graphql-test'
 import InlineSpecList from './InlineSpecList.vue'
 import { defaultMessages } from '@cy/i18n'
 
@@ -221,6 +221,33 @@ describe('InlineSpecList', () => {
     it('checks if functionality works after a search', () => {
       mountInlineSpecList({ experimentalRunAllSpecs: true, specFilter: 'B' })
       hoverRunAllSpecs('src/components', 1)
+    })
+
+    it('allows keyboard interactions to run spec groups without toggling sections', () => {
+      // this test is specifically to catch regressions of a bug caused by nesting controls: https://github.com/cypress-io/cypress/issues/24762
+      // TODO: #24966 remove this test when the structure of controls in this area has been flattened out
+      mountInlineSpecList({ experimentalRunAllSpecs: true })
+
+      const mutationStub = cy.stub().as('mutationStub')
+
+      cy.stubMutationResolver(RunAllSpecsDocument, () => {
+        mutationStub()
+      })
+
+      cy.findAllByTestId('spec-file-item').should('have.length', 4)
+      cy.findAllByTestId('run-all-specs-button').eq(0)
+      .click()
+      .type(' ')
+
+      // make sure typing didn't change displayed items
+      cy.findAllByTestId('spec-file-item').should('have.length', 4)
+      cy.findAllByTestId('run-all-specs-button').eq(1)
+      .focus()
+      .type('{enter}')
+
+      // make sure typing didn't change displayed items
+      cy.findAllByTestId('spec-file-item').should('have.length', 4)
+      cy.get('@mutationStub').should('have.been.calledThrice')
     })
   })
 })

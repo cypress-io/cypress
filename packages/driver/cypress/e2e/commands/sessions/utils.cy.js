@@ -176,7 +176,7 @@ describe('src/cy/commands/sessions/utils.ts', () => {
   })
 
   describe('.navigateAboutBlank', () => {
-    it('triggers session blank page visit', () => {
+    it('triggers test isolation blank page visit', () => {
       const stub = cy.stub(Cypress, 'action').log(false)
       .callThrough()
       .withArgs('cy:visit:blank')
@@ -185,19 +185,8 @@ describe('src/cy/commands/sessions/utils.ts', () => {
         navigateAboutBlank()
         navigateAboutBlank(true)
         expect(stub).to.have.been.calledTwice
-        expect(stub.args[0]).to.deep.eq(['cy:visit:blank', { type: 'session' }])
-        expect(stub.args[1]).to.deep.eq(['cy:visit:blank', { type: 'session' }])
-      })
-    })
-
-    it('triggers session-lifecycle blank page visit', () => {
-      const stub = cy.stub(Cypress, 'action').log(false)
-      .callThrough()
-      .withArgs('cy:visit:blank')
-
-      cy.then(() => {
-        navigateAboutBlank(false)
-        expect(stub).to.have.been.calledWith('cy:visit:blank', { type: 'session-lifecycle' })
+        expect(stub.args[0]).to.deep.eq(['cy:visit:blank', { testIsolation: true }])
+        expect(stub.args[1]).to.deep.eq(['cy:visit:blank', { testIsolation: true }])
       })
     })
   })

@@ -295,6 +295,14 @@ describe('src/cy/commands/actions/click', () => {
       cy.getAll('el', 'focus focusin').each(shouldBeCalledOnce)
     })
 
+    // https://github.com/cypress-io/cypress/issues/24900
+    it('retains focus after clicking', () => {
+      cy.$$('#button').on('blur', cy.stub().as('blur'))
+
+      cy.get('#button').click()
+      cy.get('@blur').should('not.be.called')
+    })
+
     // https://github.com/cypress-io/cypress/issues/5430
     it('does not attempt to click element outside viewport', (done) => {
       cy.timeout(100)
@@ -738,6 +746,27 @@ describe('src/cy/commands/actions/click', () => {
       })
     })
 
+    it('requeries if the DOM rerenders during actionability', () => {
+      cy.$$('[name=colors]').first().prop('disabled', true)
+
+      const listener = _.after(3, () => {
+        cy.$$('[name=colors]').first().prop('disabled', false)
+
+        const parent = cy.$$('[name=colors]').parent()
+
+        parent.replaceWith(parent[0].outerHTML)
+        cy.off('command:retry', listener)
+      })
+
+      cy.on('command:retry', listener)
+
+      cy.get('[name=colors]').first().click().then(($inputs) => {
+        $inputs.each((i, el) => {
+          expect($(el)).to.be.checked
+        })
+      })
+    })
+
     it('increases the timeout delta after each click', () => {
       const count = cy.$$('#three-buttons button').length
 
@@ -813,22 +842,20 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     it('places cursor at the end of [contenteditable]', () => {
-      cy.get('[contenteditable]:first')
-      .invoke('html', '<div><br></div>').click()
-      .then(expectCaret(0))
+      cy.get('[contenteditable]:first').as('edit')
 
-      cy.get('[contenteditable]:first')
-      .invoke('html', 'foo').click()
-      .then(expectCaret(3))
+      cy.get('@edit').invoke('html', '<div><br></div>')
+      cy.get('@edit').click().then(expectCaret(0))
 
-      cy.get('[contenteditable]:first')
-      .invoke('html', '<div>foo</div>').click()
-      .then(expectCaret(3))
+      cy.get('@edit').invoke('html', 'foo')
+      cy.get('@edit').click().then(expectCaret(3))
 
-      cy.get('[contenteditable]:first')
+      cy.get('@edit').invoke('html', '<div>foo</div>')
+      cy.get('@edit').click().then(expectCaret(3))
+
       // firefox headless: prevent contenteditable from disappearing (dont set to empty)
-      .invoke('html', '<br>').click()
-      .then(expectCaret(0))
+      cy.get('@edit').invoke('html', '<br>')
+      cy.get('@edit').click().then(expectCaret(0))
     })
 
     it('can click SVG elements', () => {
@@ -1034,6 +1061,15 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     describe('actionability', () => {
+      let retries = 0
+
+      beforeEach(() => {
+        retries = 0
+        cy.on('command:retry', () => {
+          retries += 1
+        })
+      })
+
       it('can click on inline elements that wrap lines', () => {
         cy.get('#overflow-link').find('.wrapped').click()
       })
@@ -1320,15 +1356,10 @@ describe('src/cy/commands/actions/click', () => {
         $('<span>span on button</span>').css({ position: 'absolute', left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo(cy.$$('body'))
 
         const scrolled = []
-        let retried = false
         let clicked = false
 
         cy.on('scrolled', ($el, type) => {
           scrolled.push(type)
-        })
-
-        cy.on('command:retry', () => {
-          retried = true
         })
 
         $btn.on('click', () => {
@@ -1337,7 +1368,7 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.get('#button-covered-in-span').click({ force: true }).then(() => {
           expect(scrolled).to.be.empty
-          expect(retried).to.be.false
+          expect(retries).to.eq(0)
 
           expect(clicked).to.be.true
         })
@@ -1348,19 +1379,14 @@ describe('src/cy/commands/actions/click', () => {
 
         $('<span>span on button</span>').css({ opacity: 0, position: 'absolute', left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: 'inline-block' }).prependTo(cy.$$('body'))
 
-        let retried = false
         let clicked = false
-
-        cy.on('command:retry', () => {
-          retried = true
-        })
 
         $btn.on('click', () => {
           clicked = true
         })
 
         cy.get('#button-covered-in-span').click({ force: true }).then(() => {
-          expect(retried).to.be.false
+          expect(retries).to.be.eq(0)
           expect(clicked).to.be.true
         })
       })
@@ -1380,7 +1406,6 @@ describe('src/cy/commands/actions/click', () => {
         }).prependTo(cy.$$('body'))
 
         const scrolled = []
-        let retried = false
 
         cy.on('scrolled', ($el, type) => {
           scrolled.push(type)
@@ -1388,11 +1413,10 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.on('command:retry', _.after(3, () => {
           $span.hide()
-          retried = true
         }))
 
         cy.get('#button-covered-in-span').click().then(() => {
-          expect(retried).to.be.true
+          expect(retries).to.be.gt(0)
 
           // - element scrollIntoView
           // - element scrollIntoView (retry animation coords)
@@ -1553,22 +1577,18 @@ describe('src/cy/commands/actions/click', () => {
       it('waits until element becomes visible', () => {
         const $btn = cy.$$('#button').hide()
 
-        let retried = false
-
         cy.on('command:retry', _.after(3, () => {
           $btn.show()
-          retried = true
         }))
 
         cy.get('#button').click().then(() => {
-          expect(retried).to.be.true
+          expect(retries).to.be.gt(0)
         })
       })
 
       it('waits until element is no longer disabled', () => {
         const $btn = cy.$$('#button').prop('disabled', true)
 
-        let retried = false
         let clicks = 0
 
         $btn.on('click', () => {
@@ -1577,83 +1597,64 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.on('command:retry', _.after(3, () => {
           $btn.prop('disabled', false)
-          retried = true
         }))
 
         cy.get('#button').click().then(() => {
           expect(clicks).to.eq(1)
 
-          expect(retried).to.be.true
+          expect(retries).to.be.gt(0)
         })
       })
 
+      it('succeeds when DOM rerenders and returns new subject', () => {
+        const $btn = cy.$$('#button').prop('disabled', true)
+
+        cy.on('command:retry', _.after(3, () => {
+          $btn.replaceWith('<button id="button">New Button</button>')
+        }))
+
+        cy.get('#button').click().should('contain', 'New Button')
+      })
+
       it('waits until element stops animating', () => {
-        let retries = 0
-
-        cy.on('command:retry', () => {
-          retries += 1
-        })
-
-        cy.stub(cy, 'ensureElementIsNotAnimating')
-        .throws(new Error('animating!'))
-        .onThirdCall().returns()
-
-        cy.get('button:first').click().then(() => {
-          // - retry animation coords
-          // - retry animation
-          // - retry animation
-          expect(retries).to.eq(3)
-
-          expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
+        cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).click().then(() => {
+          expect(retries).to.gt(1)
         })
       })
 
       it('does not throw when waiting for animations is disabled', {
         waitForAnimations: false,
       }, () => {
-        cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
-
-        cy.get('button:first').click().then(() => {
-          expect(cy.ensureElementIsNotAnimating).not.to.be.called
+        cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).click().then(() => {
+          expect(retries).to.eq(0)
         })
       })
 
       it('does not throw when turning off waitForAnimations in options', () => {
-        cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
-
-        cy.get('button:first').click({ waitForAnimations: false }).then(() => {
-          expect(cy.ensureElementIsNotAnimating).not.to.be.called
+        cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).click({ waitForAnimations: false }).then(() => {
+          expect(retries).to.eql(0)
         })
       })
 
-      it('passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
-        const $btn = cy.$$('button:first')
-
-        cy.spy(cy, 'ensureElementIsNotAnimating')
-        cy.get('button:first').click({ animationDistanceThreshold: 1000 }).then(() => {
-          const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
-          const { args } = cy.ensureElementIsNotAnimating.firstCall
-
-          expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
-
-          expect(args[2]).to.eq(1000)
+      it('passes options.animationDistanceThreshold to $actionability.ensureElIsNotAnimating', () => {
+        cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).click({ animationDistanceThreshold: 1000 }).then(() => {
+          // One retry, because $actionability waits for two sets of position coordinates.
+          expect(retries).to.eq(1)
         })
       })
 
-      it('passes config.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
-        const animationDistanceThreshold = Cypress.config('animationDistanceThreshold')
+      it('passes config.animationDistanceThreshold to $actionability.ensureElIsNotAnimating', () => {
+        let old = Cypress.config('animationDistanceThreshold')
 
-        const $btn = cy.$$('button:first')
+        Cypress.config('animationDistanceThreshold', 1000)
 
-        cy.spy(cy, 'ensureElementIsNotAnimating')
-
-        cy.get('button:first').click().then(() => {
-          const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
-          const { args } = cy.ensureElementIsNotAnimating.firstCall
-
-          expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
-
-          expect(args[2]).to.eq(animationDistanceThreshold)
+        cy.get('button:first').then(($btn) => $btn.animate({ width: '30em' }, 100)).click().then(() => {
+          try {
+            // One retry, because $actionability waits for two sets of position coordinates.
+            expect(retries).to.eq(1)
+          } finally {
+            Cypress.config('animationDistanceThreshold', old)
+          }
         })
       })
 
@@ -2110,41 +2111,21 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('.badge-multi').click()
       })
 
-      it('throws when subject is not in the document', (done) => {
-        let clicked = 0
+      // This is an instance of an unfixable detached DOM error: .then() is a command, so it sets the subject to a
+      // *specific element*, which then gets detached.
 
-        const $checkbox = cy.$$(':checkbox:first').click(() => {
-          clicked += 1
-          $checkbox.remove()
-
-          return false
-        })
-
-        cy.on('fail', (err) => {
-          expect(clicked).to.eq(1)
-          expect(err.message).to.include('`cy.click()` failed because this element is detached from the DOM')
-
-          done()
-        })
-
-        cy.get(':checkbox:first').click().click()
-      })
-
+      // The error message tells the user exactly how to fix this case.
       it('throws when subject is detached during actionability', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.click()` failed because this element is detached from the DOM')
+          expect(err.message).to.include('`cy.click()` failed because the page updated while this command was executing.')
+          expect(err.message).to.include('You can typically solve this by breaking up a chain.')
 
           done()
         })
 
         cy.get('input:first')
         .then(($el) => {
-          // This represents an asynchronous re-render
-          // since we fire the 'scrolled' event during actionability
-          // if we use el.on('scroll'), headless electron is flaky
-          cy.on('scrolled', () => {
-            $el.remove()
-          })
+          cy.on('scrolled', () => $el.remove())
         })
         .click()
       })
@@ -3259,26 +3240,6 @@ describe('src/cy/commands/actions/click', () => {
         cy.dblclick()
       })
 
-      it('throws when subject is not in the document', (done) => {
-        let dblclicked = 0
-
-        const $button = cy.$$('button:first').dblclick(() => {
-          dblclicked += 1
-          $button.remove()
-
-          return false
-        })
-
-        cy.on('fail', (err) => {
-          expect(dblclicked).to.eq(1)
-          expect(err.message).to.include('`cy.dblclick()` failed because this element')
-
-          done()
-        })
-
-        cy.get('button:first').dblclick().dblclick()
-      })
-
       it('logs once when not dom subject', function (done) {
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -3347,21 +3308,6 @@ describe('src/cy/commands/actions/click', () => {
           expect(lastLog.get('snapshots')).to.have.length(2)
           expect(lastLog.get('snapshots')[0]).to.containSubset({ name: 'before' })
           expect(lastLog.get('snapshots')[1]).to.containSubset({ name: 'after' })
-        })
-      })
-
-      // TODO: remove this after 4.0 when {multiple:true} is no longer default
-      // https://github.com/cypress-io/cypress/issues/5406
-      it('does not log default option {multiple:true}', () => {
-        const logs = []
-
-        cy.on('log:added', (attrs, log) => {
-          logs.push(log)
-        })
-
-        cy.get('button:first').dblclick().then(() => {
-          expect(logs[1].get('message')).to.eq('')
-          expect(logs[1].invoke('consoleProps').Options).not.ok
         })
       })
 
@@ -3696,26 +3642,6 @@ describe('src/cy/commands/actions/click', () => {
         })
 
         cy.rightclick()
-      })
-
-      it('throws when subject is not in the document', (done) => {
-        let rightclicked = 0
-
-        const $button = cy.$$('button:first').on('contextmenu', () => {
-          rightclicked += 1
-          $button.remove()
-
-          return false
-        })
-
-        cy.on('fail', (err) => {
-          expect(rightclicked).to.eq(1)
-          expect(err.message).to.include('`cy.rightclick()` failed because this element')
-
-          done()
-        })
-
-        cy.get('button:first').rightclick().rightclick()
       })
 
       it('logs once when not dom subject', function (done) {

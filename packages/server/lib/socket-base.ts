@@ -67,14 +67,12 @@ export class SocketBase {
   private _sendFocusBrowserMessage
 
   protected supportsRunEvents: boolean
-  protected experimentalSessionAndOrigin: boolean
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
   localBus: EventEmitter
 
   constructor (config: Record<string, any>) {
     this.supportsRunEvents = config.isTextTerminal || config.experimentalInteractiveRunEvents
-    this.experimentalSessionAndOrigin = config.experimentalSessionAndOrigin
     this.ended = false
     this.localBus = new EventEmitter()
   }
@@ -225,9 +223,7 @@ export class SocketBase {
         debug('automation:client connected')
 
         // only send the necessary config
-        automationClient.emit('automation:config', {
-          experimentalSessionAndOrigin: this.experimentalSessionAndOrigin,
-        })
+        automationClient.emit('automation:config', {})
 
         // if our automation disconnects then we're
         // in trouble and should probably bomb everything
@@ -429,8 +425,6 @@ export class SocketBase {
               return firefoxUtil.log()
             case 'firefox:force:gc':
               return firefoxUtil.collectGarbage()
-            case 'firefox:window:focus':
-              return firefoxUtil.windowFocus()
             case 'get:fixture':
               return getFixture(args[0], args[1])
             case 'read:file':

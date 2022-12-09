@@ -1,3 +1,15 @@
+# [@cypress/mount-utils-v4.0.0](https://github.com/cypress-io/cypress/compare/@cypress/mount-utils-v3.0.0...@cypress/mount-utils-v4.0.0) (2022-12-02)
+
+
+### chore
+
+* remove experimentalSessionAndOrigin flag ([#24340](https://github.com/cypress-io/cypress/issues/24340)) ([69873ae](https://github.com/cypress-io/cypress/commit/69873ae9884228f15310fd151e42cbc0cb712817))
+
+
+### BREAKING CHANGES
+
+* removed experimentalSessionAndOrigin flag. testIsolation defaults to strict
+
 # [@cypress/mount-utils-v3.0.0](https://github.com/cypress-io/cypress/compare/@cypress/mount-utils-v2.1.0...@cypress/mount-utils-v3.0.0) (2022-11-07)
 
 

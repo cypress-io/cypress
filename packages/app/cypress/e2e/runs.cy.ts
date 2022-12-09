@@ -77,7 +77,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       moveToRunsPage()
       cy.contains(defaultMessages.runs.connect.buttonUser).click()
       cy.withCtx((ctx, o) => {
-        o.sinon.spy(ctx._apis.authApi, 'logIn')
+        o.sinon.stub(ctx._apis.authApi, 'logIn')
       })
 
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
@@ -941,7 +941,10 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', 3).should('be.visible')
       cy.wrap(obj).invoke('toCall')
 
-      cy.get('[data-cy="run-card-icon-PASSED"]').should('have.length', 3).should('be.visible').within(() => {
+      cy.get('[data-cy="run-card-icon-PASSED"]')
+      .should('have.length', 3)
+      .should('be.visible')
+      .first().within(() => {
         cy.get('[data-cy="runResults-passed-count"]').should('contain', 100)
       })
 

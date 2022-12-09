@@ -1,3 +1,17 @@
+<!--
+  MajorVersionWelcome.vue
+
+  This is the landing page that all users will see when they upgrade
+  to a new major version.
+
+  See the README of this package for details about this component.
+
+  Internal Cypress employees: the process around managing this content
+  is documented in `prod-eng-docs`. Refer to those docs when modifying
+  this component or reviewing changes. Changes should go through
+  a specific approval process.
+ -->
+
 <template>
   <div class="bg-no-repeat bg-cover h-screen min-h-700px lp-wrapper">
     <div
@@ -9,11 +23,97 @@
         class="bg-white rounded-b max-h-72vh pb-90px overflow-scroll"
       >
         <div class="h-full">
-          <div class="p-16px">
+          <div
+            class="p-16px"
+            data-cy="release-highlights"
+          >
             <h1 class="font-medium mt-4px text-center mb-32px tracking-tighter text-22px text-gray-1000">
               {{ t('majorVersionWelcome.title') }}
             </h1>
             <div class="mb-16px">
+              <ExternalLink
+                href="https://on.cypress.io/changelog#12-0-0"
+                class="font-bold text-indigo-500"
+              >
+                12.0.0
+              </ExternalLink>
+              <span class="font-light pl-10px text-gray-500 text-14px">
+                Released {{ versionReleaseDates['12'] }}
+              </span>
+            </div>
+            <div class="children:mb-16px">
+              <p>
+                For a complete list of updates and breaking changes in v12.0.0, please review our
+                <ExternalLink href="https://on.cypress.io/changelog#12-0-0">
+                  <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
+                  changelog</ExternalLink>.
+              </p>
+
+              <h2 class="font-bold text-18px text-jade-1000">
+                Testing Multi-Origin Workflows
+              </h2>
+
+              <p>
+                Cypress now has full support for testing multiple origins in a single test with the <ExternalLink href="https://on.cypress.io/origin">
+                  <code>cy.origin()</code>
+                </ExternalLink> command! To take a deep-dive into how this works, read our
+
+                <ExternalLink href="https://on.cypress.io/cy-origin-journey">
+                  <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
+                  blog post</ExternalLink>.
+              </p>
+
+              <h2 class="font-bold mt-24px mb-16px text-18px text-jade-1000">
+                Test Isolation
+              </h2>
+
+              <p>
+                Cypress now ensures each test runs in a clean browser context by default. We now clear the page, <code>cookies</code>, <code>localStorage</code>, and <code>sessionStorage</code> before each test to guide developers towards writing independent tests from the start.
+              </p>
+              <p>
+                If your existing tests relied on a previous test to run successfully, you might need to make some modifications to your test suite. See the
+
+                <ExternalLink href="https://on.cypress.io/migration-guide#Migrating-to-Cypress-12-0">
+                  Migration Guide
+                </ExternalLink>
+
+                for more details on what you can expect.
+              </p>
+
+              <h2 class="font-bold mt-24px mb-16px text-18px text-jade-1000">
+                We Now Store The Browser Context, So You Don’t Have To
+              </h2>
+
+              <p>
+                The <ExternalLink href="https://on.cypress.io/session">
+                  <code>cy.session()</code>
+                </ExternalLink> command complements test isolation by providing a way to save and share browser contexts between tests and specs in a single run on the same machine.
+              </p>
+
+              <h2 class="font-bold mt-24px mb-16px text-18px text-jade-1000">
+                Detaching Ourselves From Detached Dom Errors
+              </h2>
+
+              <p>
+                We have made enhancements to how Cypress manages DOM element resolution to reduce the likelihood of hitting the dreaded detached DOM errors due to maintaining stale DOM references. We've updated our
+
+                <ExternalLink href="https://on.cypress.io/retry-ability">
+                  Retry-ability Guide
+                </ExternalLink>
+
+                with all the details if you'd like to learn more.
+              </p>
+            </div>
+          </div>
+          <hr class="border-gray-100">
+          <div
+            class="px-16px pt-12px"
+            data-cy="previous-release-highlights"
+          >
+            <h2 class="font-bold mt-24px mb-12px text-14px text-gray-600">
+              Previous release highlights
+            </h2>
+            <div class="pb-8px">
               <ExternalLink
                 href="https://on.cypress.io/changelog#11-0-0"
                 class="font-bold text-indigo-500"
@@ -24,49 +124,16 @@
                 Released {{ versionReleaseDates['11'] }}
               </span>
             </div>
-            <div class="children:mb-16px">
-              <h2 class="font-bold text-18px text-jade-1000">
-                Component Testing Released
-              </h2>
-
-              <p>
-                Component Testing is now generally available for projects using React, Next.js, Angular, and Vue!
-              </p>
-              <p>
-                Component tests allow you to see and test your application’s components in a real browser as you work. You can use your favorite Cypress commands and features to develop your components without running your whole app. <ExternalLink href="https://on.cypress.io/cypress-11-release">
-                  Learn more in our blog post.
-                </ExternalLink>
-              </p>
-              <p>
-                Existing Component Testing users, see the
-                <ExternalLink
-                  href="https://on.cypress.io/changelog#11-0-0"
-                >
-                  <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
-                  changelog</ExternalLink>
-                to learn about breaking changes.
-              </p>
-              <h2 class="font-bold mt-24px mb-16px text-18px text-jade-1000">
-                Faster Startup Time
-              </h2>
-
-              <p>
-                We have also massively improved our startup performance by shipping a snapshot of our binary instead of the source files. Results will vary based on your situation, but we saw up to 84% faster startup times!
-              </p>
-              <p>
-                For a complete list of updates in v11, please review our <ExternalLink
-                  href="https://on.cypress.io/changelog#11-0-0"
-                >
-                  <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
-                  changelog</ExternalLink>.
-              </p>
-            </div>
-          </div>
-          <hr class="border-gray-100">
-          <div class="px-16px pt-12px">
-            <h2 class="font-bold mt-24px mb-12px text-14px text-gray-600">
-              Previous release highlights
-            </h2>
+            <p class="text-14px leading-20px">
+              We made Component Testing generally available for projects using React, Next.js, Angular, and Vue which allows you to test your application's components without running your whole app! We also massively improved our startup performance with up to 84% faster startup times!
+              <br>
+              <br>
+              Read about the v11.0.0 changes in our
+              <ExternalLink href="https://on.cypress.io/cypress-11-release">
+                <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
+                blog post</ExternalLink>.
+            </p>
+            <br>
             <div class="pb-8px">
               <ExternalLink
                 href="https://on.cypress.io/changelog#10-0-0"
@@ -79,9 +146,14 @@
               </span>
             </div>
             <p class="text-14px leading-20px">
-              We've reworked the Cypress app from the ground up to modernize the interface, streamline workflows and integrate better into your overall development experience. Read about breaking changes in our
-              <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
-              <ExternalLink href="https://on.cypress.io/cypress-10-release">blog post</ExternalLink>.
+              We've reworked the Cypress app from the ground up to modernize the interface, streamline workflows and integrate better into your overall development experience.
+              <br>
+              <br>
+              Read about breaking changes in our
+
+              <ExternalLink href="https://on.cypress.io/cypress-10-release">
+                <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
+                blog post</ExternalLink>.
             </p>
           </div>
         </div>
@@ -136,8 +208,10 @@ const handleClick = () => {
 
 const versionReleaseDates = computed(() => {
   return {
+    // Note, months are zero indexed.
     '10': useTimeAgo(Date.UTC(2022, 5, 1)).value,
     '11': useTimeAgo(Date.UTC(2022, 10, 8)).value,
+    '12': useTimeAgo(Date.UTC(2022, 11, 6)).value,
   }
 })
 

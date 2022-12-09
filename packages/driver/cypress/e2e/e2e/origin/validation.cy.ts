@@ -258,18 +258,6 @@ describe('cy.origin', { browser: '!webkit' }, () => {
   })
 
   describe('errors', () => {
-    // @ts-ignore
-    it('errors if experimental flag is not enabled', { experimentalSessionAndOrigin: false }, (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).to.equal('`cy.origin()` requires enabling the experimentalSessionAndOrigin flag')
-
-        done()
-      })
-
-      // @ts-ignore
-      cy.origin()
-    })
-
     it('errors if passed a non-string for the origin argument', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.equal('`cy.origin()` requires the first argument to be either a url (`https://www.example.com/path`) or a domain name (`example.com`). Query parameters are not allowed. You passed: ``')

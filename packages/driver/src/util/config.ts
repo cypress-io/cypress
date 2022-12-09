@@ -113,12 +113,6 @@ export const validateConfig = (state: State, config: Record<string, any>, skipCo
     })
   }
 
-  config = {
-    // TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
-    experimentalSessionAndOrigin: Cypress.originalConfig.experimentalSessionAndOrigin,
-    ...config,
-  }
-
   validateConfigValues(config, (errResult: ErrResult | string) => {
     const stringify = (str) => format(JSON.stringify(str))
 

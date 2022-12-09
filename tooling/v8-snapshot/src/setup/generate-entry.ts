@@ -18,12 +18,14 @@ export async function generateEntry ({
   pathsMapper,
   projectBaseDir,
   snapshotEntryFile,
+  integrityCheckSource,
 }: {
   appEntryFile: string
   nodeModulesOnly: boolean
   pathsMapper: (file: string) => string
   projectBaseDir: string
   snapshotEntryFile: string
+  integrityCheckSource: string | undefined
 }): Promise<void> {
   logInfo('Creating snapshot generation entry file %o', { nodeModulesOnly })
 
@@ -37,6 +39,7 @@ export async function generateEntry ({
         entryFile: appEntryFile,
         pathsMapper,
         nodeModulesOnly,
+        integrityCheckSource,
       },
     )
 
