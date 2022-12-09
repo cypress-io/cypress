@@ -443,7 +443,7 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
       url: this.req.proxiedUrl,
       isAUTFrame: this.req.isAUTFrame,
       doesTopNeedSimulating,
-      resourceType: this.req.resourceType,
+      requestedWith: this.req.requestedWith,
       credentialLevel: this.req.credentialsLevel,
     },
   })

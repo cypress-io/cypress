@@ -14,9 +14,15 @@ export type CypressIncomingRequest = Request & {
   responseTimeout?: number
   followRedirect?: boolean
   isAUTFrame: boolean
-  resourceType?: ResourceType
+  requestedWith?: RequestedWithHeader
   credentialsLevel?: RequestCredentialLevel
+  /**
+   * Resource type from browserPreRequest. Copied to req so intercept matching can work.
+   */
+  resourceType?: ResourceType
 }
+
+export type RequestedWithHeader = 'fetch' | 'xhr' | 'true'
 
 export type RequestCredentialLevel = 'same-origin' | 'include' | 'omit' | boolean
 

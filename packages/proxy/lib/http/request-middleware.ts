@@ -46,11 +46,11 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
   }
 
   this.debug(`looking up credentials for ${this.req.proxiedUrl}`)
-  let { resourceType, credentialStatus } = this.resourceTypeAndCredentialManager.get(this.req.proxiedUrl, requestIsXhrOrFetch !== 'true' ? requestIsXhrOrFetch : undefined)
+  const { requestedWith, credentialStatus } = this.requestedWithAndCredentialManager.get(this.req.proxiedUrl, requestIsXhrOrFetch !== 'true' ? requestIsXhrOrFetch : undefined)
 
-  this.debug(`credentials calculated for ${resourceType}:${credentialStatus}`)
+  this.debug(`credentials calculated for ${requestedWith}:${credentialStatus}`)
 
-  this.req.resourceType = resourceType
+  this.req.requestedWith = requestedWith
   this.req.credentialsLevel = credentialStatus
   this.next()
 }
@@ -75,9 +75,9 @@ const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
     return this.next()
   }
 
-  // Top needs to be simulated since the AUT is in a cross origin state. Get the resourceType and credentials and see what cookies need to be attached
+  // Top needs to be simulated since the AUT is in a cross origin state. Get the "requested with" and credentials and see what cookies need to be attached
   const currentAUTUrl = this.getAUTUrl()
-  const shouldCookiesBeAttachedToRequest = shouldAttachAndSetCookies(this.req.proxiedUrl, currentAUTUrl, this.req.resourceType, this.req.credentialsLevel, this.req.isAUTFrame)
+  const shouldCookiesBeAttachedToRequest = shouldAttachAndSetCookies(this.req.proxiedUrl, currentAUTUrl, this.req.requestedWith, this.req.credentialsLevel, this.req.isAUTFrame)
 
   this.debug(`should cookies be attached to request?: ${shouldCookiesBeAttachedToRequest}`)
   if (!shouldCookiesBeAttachedToRequest) {

@@ -1,4 +1,4 @@
-import { NetworkProxy, ResourceType } from '../../'
+import { NetworkProxy } from '../../'
 import {
   netStubbingState as _netStubbingState,
   NetStubbingState,
@@ -46,10 +46,10 @@ context('network stubbing', () => {
       request: new Request(),
       getRenderedHTMLOrigins: () => ({}),
       serverBus: new EventEmitter(),
-      resourceTypeAndCredentialManager: {
-        get (url: string, optionalResourceType?: ResourceType) {
+      requestedWithAndCredentialManager: {
+        get () {
           return {
-            resourceType: 'xhr',
+            requestedWith: 'xhr',
             credentialStatus: 'same-origin',
           }
         },
