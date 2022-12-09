@@ -1,9 +1,11 @@
 name: "Trigger CircleCi Pipeline"
 
 on:
+  push
   pull_request_target:
     types:
       - opened
+      - synchronize
       - ready_for_review
 
 jobs:
@@ -11,37 +13,47 @@ jobs:
     name: Trigger CircleCi Pipeline when PR is ready for review
     runs-on: ubuntu-latest
     steps:
-      - if: ${{ github.event.pull_request.draft == false }}
+      # - if: ${{ github.event.pull_request.draft == false }}
+      - name: Step
         shell: bash
         env:
           CIRCLE_TOKEN: ${{ secrets.CIRCLE_TOKEN }}
           BASE_ORG_AND_REPO: ${{ github.event.pull_request.head.full_name }}
           PULL_ID: ${{ github.event.pull_request.number }}
+          EVENT: ${{ github.event }}
         run: |
           if [[ "${CIRCLE_TOKEN}" == "" ]]; then
             echo "The CIRCLE_TOKEN is unset. Cannot trigger pipeline..."
             exit 1;
           fi
+          env
+
+          echo "Determine whether or not to trigger CircleCi pipeline"
+          printenv
+
+          echo " - repo $BASE_ORG_AND_REPO"
+          echo " - branch $GITHUB_HEAD_REF"
+          echo " - pull $PULL_ID"
+          echo " - event $EVENT"
 
           BRANCH="$GITHUB_HEAD_REF"
 
-          if [[ "$BASE_ORG_AND_REPO" != "cypress-io/cypress" ]]; then
+          if [[ "$BASE_ORG_AND_REPO" === "" "$BASE_ORG_AND_REPO" != "cypress-io/cypress" ]]; then
             echo "Triggering CircleCi pipeline for outside contributor."
             BRANCH="pull/$PULL_ID/head"
           fi
 
-          echo "Triggering CircleCi pipeline for $BRANCH"
 
-          response=$(curl -X POST https://circleci.com/api/v2/project/github/cypress-io/cypress/pipeline \
-            --header "Circle-Token:$CIRCLE_TOKEN" \
-            --header "content-type:application/json" \
-            --data "{\"branch\":\"$BRANCH\"}" \
-            --silent
-          )
+          # response=$(curl -X POST https://circleci.com/api/v2/project/github/cypress-io/cypress/pipeline \
+          #   --header "Circle-Token:$CIRCLE_TOKEN" \
+          #   --header "content-type:application/json" \
+          #   --data "{\"branch\":\"$BRANCH\"}" \
+          #   --silent
+          # )
 
-          echo "$response"
+          # echo "$response"
 
-          if [ "$(jq 'has("message")' <<< $response )" == "true" ]; then
-            echo "Error triggering pipeline..."
-            exit 1;
-          fi
+          # if [ "$(jq 'has("message")' <<< $response )" == "true" ]; then
+          #   echo "Error triggering pipeline..."
+          #   exit 1;
+          # fi
