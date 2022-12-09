@@ -100,7 +100,7 @@ describe('darwin browser detection', () => {
       it('uses arch and ARCHPREFERENCE on arm64', async () => {
         const cpSpawn = stubForArch('arm64')
 
-        // this will error since we aronlyen't setting stdout
+        // this will error since we aren't setting stdout
         await (darwinHelper.detect(browsers[0]).catch(() => {}))
 
         // first call is mdfind, second call is getVersionString
