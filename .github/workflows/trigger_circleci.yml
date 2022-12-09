@@ -9,7 +9,7 @@ on:
       - ready_for_review
 env:
   CIRCLE_TOKEN: ${{ secrets.CIRCLE_TOKEN }}
-  TRIGGER_INSTRUCTIONS: "to trigger CI , include 'run ci' in the commit message or click the 'Trigger Pipeline' button in the CircleCI UI."
+  TRIGGER_INSTRUCTIONS: "To trigger a CI run, include 'run ci' in the commit message or click the 'Trigger Pipeline' button in the CircleCI UI."
 jobs:
   main:
     name: Trigger CircleCI?
@@ -53,7 +53,7 @@ jobs:
           #   exit 1;
           # fi
       - if: ${{ github.event_name != 'pull_request' }}
-        name: Trigger CircleCi for branch in-progress if commit includes 'run ci'
+        name: If the commit includes 'run ci', trigger CircleCi for the in-progress branch
         shell: bash
         env:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
@@ -67,10 +67,9 @@ jobs:
           echo "Commit message: $COMMIT_MESSAGE"
 
           if ! [[ "$COMMIT_MESSAGE" =~ "run ci" ]]; then
-            echo "Skipping running in CircleCI; branch in progress - $TRIGGER_INSTRUCTIONS"
+            echo "Don't trigger CircleCI run because the branch is in-progress. $TRIGGER_INSTRUCTIONS"
             exit 0
           fi
-
 
           response=$(curl -X POST https://circleci.com/api/v2/project/github/cypress-io/cypress/pipeline \
             --header "Circle-Token:$CIRCLE_TOKEN" \
