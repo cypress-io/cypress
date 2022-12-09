@@ -519,7 +519,7 @@ export class ProjectConfigManager {
           }
         }
 
-        if (browser.family !== 'chromium' && fullConfig.chromeWebSecurity) {
+        if (browser.family !== 'chromium' && !fullConfig.chromeWebSecurity) {
           return {
             ...browser,
             warning: browser.warning || getError('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name).message,

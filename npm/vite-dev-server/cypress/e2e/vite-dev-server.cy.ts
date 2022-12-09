@@ -3,6 +3,45 @@
 import dedent from 'dedent'
 
 describe('Config options', () => {
+  it('works with tailwind', () => {
+    cy.scaffoldProject('tailwind-vite')
+    cy.openProject('tailwind-vite')
+    cy.startAppServer('component')
+
+    cy.visitApp()
+    cy.contains('App.cy.jsx').click()
+    cy.waitForSpecToFinish()
+    cy.get('.passed > .num').should('contain', 1)
+    cy.withCtx(async (ctx) => {
+      // Add a new spec with bg-blue-100 that asserts the style is correct
+      // If HMR + Tailwind is working properly, it'll pass.
+      await ctx.actions.file.writeFileInProject(
+        'src/App.cy.jsx', `
+        import React from 'react'
+        import { mount } from 'cypress/react18'
+
+        export const App = () => {
+          return (
+            <div className='bg-blue-100' id='hello'>
+              Hello
+            </div>
+          )
+        }
+
+        it('works', () => {
+          mount(<App />)
+          cy.get('#hello').should('have.css', 'background-color', 'rgb(219, 234, 254)')
+        })
+
+        it('dummy', () => {})
+        `,
+      )
+    })
+
+    cy.waitForSpecToFinish()
+    cy.get('.passed > .num').should('contain', 2)
+  })
+
   it('supports supportFile = false', () => {
     cy.scaffoldProject('vite2.9.1-react')
     cy.openProject('vite2.9.1-react', ['--config-file', 'cypress-vite-no-support.config.ts'])
