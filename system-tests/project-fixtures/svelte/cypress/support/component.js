@@ -1,4 +1,4 @@
-import { mount } from "cypress/svelte";
-import "../../src/styles.css"
+import { mount } from 'cypress/svelte'
+import '../../src/styles.css'
 
-Cypress.Commands.add("mount", mount);
+Cypress.Commands.add('mount', mount)
