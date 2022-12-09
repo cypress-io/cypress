@@ -205,9 +205,12 @@ This machine sent the following parameters:
   "osVersion": "v1",
   "browserName": "Electron.... (Expected: Electron)",
   "browserVersion": "59.1.2.3.... (Expected: 64)",
-  "differentSpecs": [
-    "cypress/integration/foo_spec.js"
-  ]
+  "differentSpecs": {
+    "added": [],
+    "missing": [
+      "cypress/integration/foo_spec.js"
+    ]
+  }
 }
 
 https://on.cypress.io/parallel-group-params-mismatch
