@@ -64,7 +64,7 @@ export async function scaffoldProject (project: ProjectFixtureDir): Promise<stri
   const to = _path.join(cyTmpDir, project)
   const from = projectFixturePath(project)
 
-  await fs.copy(from, to)
+  fs.copySync(from, to)
 
   try {
     const packageJson = require(`${to}/package.json`)

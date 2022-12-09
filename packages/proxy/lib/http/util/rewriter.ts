@@ -42,7 +42,7 @@ function getHtmlToInject (opts: InjectionOpts & SecurityOpts) {
     case 'full':
       return inject.full(domainName)
     case 'fullCrossOrigin':
-      return inject.fullCrossOrigin({
+      return inject.fullCrossOrigin(domainName, {
         modifyObstructiveThirdPartyCode,
         modifyObstructiveCode,
         simulatedCookies,

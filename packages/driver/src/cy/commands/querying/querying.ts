@@ -174,12 +174,8 @@ export default (Commands, Cypress, cy, state) => {
       try {
         let scope = userOptions.withinSubject || cy.getSubjectFromChain(withinSubject)
 
-        if (scope && scope[0]) {
-          scope = scope[0]
-        }
-
         if (includeShadowDom) {
-          const root = scope || cy.state('document')
+          const root = scope?.get(0) || cy.state('document')
           const elementsWithShadow = $dom.findAllShadowRoots(root)
 
           scope = elementsWithShadow.concat(root)
@@ -324,17 +320,19 @@ export default (Commands, Cypress, cy, state) => {
         subject = cy.getSubjectFromChain(withinSubject || [cy.$$('body')])
       }
 
-      getOptions.withinSubject = subject[0] ?? subject
-      let $el = getFn()
+      let $el = cy.$$()
 
-      // .get() looks for elements *inside* the current subject, while contains() wants to also match the current
-      // subject itself if no child matches.
-      if (!$el.length) {
-        $el = (subject as JQuery).filter(selector)
-      }
+      subject.each((index, element) => {
+        getOptions.withinSubject = cy.$$(element)
+        $el = $el.add(getFn())
+      })
 
       if ($el.length) {
         $el = $dom.getFirstDeepestElement($el)
+      } else {
+        // .get() looks for elements *inside* the current subject, while contains() wants to also match the current
+        // subject itself if no child matches.
+        $el = (subject as JQuery).filter(selector)
       }
 
       log && cy.state('current') === this && log.set({
