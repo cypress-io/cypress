@@ -20,7 +20,7 @@ jobs:
         shell: bash
         run: |
           if [[ "${CIRCLE_TOKEN}" == "" ]]; then
-            echo "The CIRCLE_TOKEN is unset. Cannot trigger pipeline..."
+            echo "The CIRCLE_TOKEN is not set. Cannot trigger pipeline..."
             exit 1;
           fi
 
@@ -53,28 +53,22 @@ jobs:
           #   exit 1;
           # fi
       - if: ${{ github.event_name != 'pull_request' }}
-        name: Push to branch in Progress
+        name: Trigger CircleCi for branch in-progress if commit includes 'run ci'
         shell: bash
         env:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           if [[ "${CIRCLE_TOKEN}" == "" ]]; then
-            echo "The CIRCLE_TOKEN is unset. Cannot trigger pipeline..."
+            echo "The CIRCLE_TOKEN is not set. Cannot trigger pipeline..."
             exit 1;
           fi
 
-          echo "Determine whether or not to trigger CircleCi pipeline"
-          printenv
-
-          if ![[ "$LAST_COMMIT_MESSAGE" =~ "run ci" ]]; then
+          if ![[ "$COMMIT_MESSAGE" =~ "run ci" ]]; then
             echo "Skipping running in CircleCI; branch in progress - $TRIGGER_INSTRUCTIONS"
             exit 0
           fi
 
           echo "Always run CI when the commit message includes 'run ci'."
-
-          BRANCH=$(echo )
-          echo "$BRANCH"
 
           response=$(curl -X POST https://circleci.com/api/v2/project/github/cypress-io/cypress/pipeline \
             --header "Circle-Token:$CIRCLE_TOKEN" \
