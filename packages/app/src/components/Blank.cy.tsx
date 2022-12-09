@@ -1,4 +1,4 @@
-import { initial, session, sessionLifecycle, visitFailure } from './Blank'
+import { initial, testIsolationBlankPage, visitFailure } from './Blank'
 import { getContainerEl } from '@cypress/mount-utils'
 
 describe('initial', () => {
@@ -13,28 +13,9 @@ describe('initial', () => {
   })
 })
 
-describe('session', () => {
+describe('testIsolationBlankPage', () => {
   it('works', () => {
-    getContainerEl()!.innerHTML = session()
-
-    cy.get('[data-cy="cypress-logo"]')
-    cy.get('[data-cy="text"]').should('have.text', 'Default blank page')
-    cy.get('[data-cy="subtext"]').should('have.text', 'This page was cleared by navigating to about:blank.')
-
-    cy.percySnapshot()
-  })
-
-  it('works with small viewport', () => {
-    cy.viewport(200, 500)
-    getContainerEl()!.innerHTML = session()
-
-    cy.percySnapshot()
-  })
-})
-
-describe('sessionLifecycle', () => {
-  it('works', () => {
-    getContainerEl()!.innerHTML = sessionLifecycle()
+    getContainerEl()!.innerHTML = testIsolationBlankPage()
 
     cy.get('[data-cy="cypress-logo"]')
     cy.get('[data-cy="text"]').should('have.text', 'Default blank page')
@@ -45,7 +26,7 @@ describe('sessionLifecycle', () => {
 
   it('works with small viewport', () => {
     cy.viewport(200, 500)
-    getContainerEl()!.innerHTML = sessionLifecycle()
+    getContainerEl()!.innerHTML = testIsolationBlankPage()
 
     cy.percySnapshot()
   })

@@ -32,6 +32,12 @@ declare namespace Cypress {
     Message?: string
     actual?: any
     expected?: any
+    Method?: any,
+    URL?: any,
+    Status?: any,
+    'Route Matcher'?: any,
+    'Static Response'?: any,
+    Alias?: any,
   }
 
   type RenderProps = {
@@ -51,7 +57,7 @@ declare namespace Cypress {
     commandName?: string
     // provide the content to display in the dev tool's console when a log is
     // clicked from the Reporter's Command Log
-    consoleProps?: () => Command | Command
+    consoleProps?: () => ConsoleProps | ConsoleProps
     coords?: {
       left: number
       leftCenter: number

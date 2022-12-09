@@ -25,6 +25,7 @@
     "resolve-from": "^5.0.0",
     "source-map-js": "^0.6.2",
     "temp-dir": "^2.0.0",
+    "terser": "5.12.1",
     "tslib": "^2.0.1",
     "worker-nodes": "^2.3.0"
   },

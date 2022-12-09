@@ -6,10 +6,10 @@ import { generateEntry } from './generate-entry'
 import { installSnapshot } from './install-snapshot'
 import fs from 'fs-extra'
 
-const setupV8Snapshots = async (baseCypressAppPath?: string) => {
+const setupV8Snapshots = async ({ cypressAppPath, integrityCheckSource }: { cypressAppPath?: string, integrityCheckSource?: string} = {}) => {
   try {
     const args = minimist(process.argv.slice(2))
-    const config = createConfig(args.env, baseCypressAppPath)
+    const config = createConfig({ env: args.env, cypressAppPath, integrityCheckSource })
 
     await consolidateDeps(config)
 

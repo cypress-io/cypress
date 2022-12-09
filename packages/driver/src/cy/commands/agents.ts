@@ -235,7 +235,7 @@ export default function (Commands, Cypress, cy, state) {
     agent.as = (alias) => {
       cy.validateAlias(alias)
       cy.addAlias(ctx, {
-        subject: agent,
+        subjectChain: [agent],
         command: log,
         alias,
       })

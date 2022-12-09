@@ -494,10 +494,6 @@
         "name": "Interactive run events",
         "description": "Allows listening to the [`before:run`](https://on.cypress.io/before-run), [`after:run`](https://on.cypress.io/after-run), [`before:spec`](https://on.cypress.io/before-spec), and [`after:spec`](https://on.cypress.io/after-spec) events in plugins during interactive mode."
       },
-      "experimentalSessionAndOrigin": {
-        "name": "Cross-origin and session",
-        "description": "Enables cross-origin and improved session support, including the [`cy.origin()`](https://on.cypress.io/origin) and [`cy.session()`](https://on.cypress.io/session) commands."
-      },
       "experimentalModifyObstructiveThirdPartyCode": {
         "name": "Modify obstructive third party code",
         "description": "Applies `modifyObstructiveCode` to third party `.html` and `.js`, removes subresource integrity, and modifies the user agent in Electron."
@@ -521,6 +517,10 @@
       "experimentalRunAllSpecs": {
         "name": "Run All Specs",
         "description": "Enables the \"Run All Specs\" UI feature, allowing the execution of multiple specs sequentially."
+      },
+      "experimentalOriginDependencies": {
+        "name": "Origin Dependencies",
+        "description": "Enables support for `require`/`import` within `cy.origin`."
       }
     },
     "device": {
@@ -776,7 +776,7 @@
   "openBrowser": {
     "startComponent": "Start Component Testing in {browser}",
     "startE2E": "Start E2E Testing in {browser}",
-    "openingComponent": "Opening component testing in {browser}",
+    "openingComponent": "Opening Component Testing in {browser}",
     "openingE2E": "Opening E2E Testing in {browser}",
     "running": "Running {browser}",
     "focus": "Focus",

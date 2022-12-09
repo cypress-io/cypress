@@ -18,12 +18,12 @@
         relative"
         data-cy="spec-row-item"
         :data-selected-spec="isCurrentSpec(row.data)"
-        @click.self="submit(row.data, row.index)"
+        @click.self="submitOrToggle(row.data, row.index)"
       >
-        <RouterLink
+        <component
+          :is="row.data.isLeaf ? RouterLink : 'button'"
           :ref="el => setItemRef(el, row.index)"
           :key="row.data.data?.absolute"
-          :tabindex="isTabbable(row, row.index) ? '0' : '-1'"
           :style="{ paddingLeft: `${(row.data.depth - 2) * 10 + 16}px` }"
           class="border-transparent outline-none border-1 w-full group focus-visible:bg-gray-900 before:(border-r-4 border-transparent h-28px rounded-r-4px absolute left-[-4px] w-8px) "
           :class="{
@@ -31,9 +31,9 @@
             'before:focus:border-r-indigo-300 before:focus-visible:border-r-transparent before:hover:border-r-indigo-300': !isCurrentSpec(row.data)
           }"
           :to="{ path: '/specs/runner', query: { file: posixify(row.data.data?.relative || '') } }"
+          :aria-expanded="row.data.isLeaf ? null : row.data.expanded"
           @focus="resetFocusIfNecessary(row, row.index)"
-          @click.capture.prevent="submit(row.data, row.index)"
-          @keydown.enter.space.prevent.stop="submit(row.data, row.index)"
+          @click.prevent="submitOrToggle(row.data, row.index)"
           @keydown.left.right.prevent.stop="toggle(row.data, row.index)"
         >
           <SpecFileItem
@@ -63,7 +63,7 @@
               />
             </template>
           </DirectoryItem>
-        </RouterLink>
+        </component>
       </li>
     </ul>
   </div>
@@ -125,7 +125,7 @@ const toggle = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, idx: 
   row.toggle()
 }
 
-const submit = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, idx: number) => {
+const submitOrToggle = (row: UseCollapsibleTreeNode<SpecTreeNode<FuzzyFoundSpec>>, idx: number) => {
   // If the user selects a new spec while in studio mode, turn studio mode off
   const studioStore = useStudioStore()
 

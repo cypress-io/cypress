@@ -172,7 +172,8 @@ describe('<Select />', () => {
         .should('contain.text', 'A placeholder')
         .then(openSelect)
         .then(selectFirstOption)
-        .get(inputSelector)
+
+        cy.get(inputSelector)
         .should('not.contain.text', 'A placeholder')
       })
     })
@@ -219,7 +220,7 @@ describe('<Select />', () => {
       .then(selectFirstOption)
 
       // The options list should be closed
-      .get(optionsSelector).should('not.exist')
+      cy.get(optionsSelector).should('not.exist')
       .get(inputSelector).should('have.text', 'Selected')
       .then(openSelect)
 

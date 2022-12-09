@@ -115,11 +115,24 @@ describe('config/src/index', () => {
   describe('.validate', () => {
     it('validates config', () => {
       const errorFn = sinon.spy()
+      const config = {
+        e2e: {
+          testIsolation: false,
+          'baseUrl': 'https://',
+          viewportHeight: 200,
+        },
+        component: {
+          indexHtmlFile: 'index.html',
+        },
+      }
 
-      configUtil.validate({
-        'baseUrl': 'https://',
-      }, errorFn, 'e2e')
+      configUtil.validate(config, errorFn, null)
+      expect(errorFn).to.have.callCount(0)
 
+      configUtil.validate(config, errorFn, 'e2e')
+      expect(errorFn).to.have.callCount(0)
+
+      configUtil.validate(config, errorFn, 'component')
       expect(errorFn).to.have.callCount(0)
     })
 
@@ -195,7 +208,7 @@ describe('config/src/index', () => {
 
         const isSuiteOverride = true
 
-        configUtil.validateOverridableAtRunTime({ testIsolation: 'on' }, isSuiteOverride, errorFn)
+        configUtil.validateOverridableAtRunTime({ testIsolation: true }, isSuiteOverride, errorFn)
 
         expect(errorFn).to.have.callCount(0)
       })
@@ -205,7 +218,7 @@ describe('config/src/index', () => {
 
         const isSuiteOverride = false
 
-        configUtil.validateOverridableAtRunTime({ testIsolation: false }, isSuiteOverride, errorFn)
+        configUtil.validateOverridableAtRunTime({ testIsolation: 'off' }, isSuiteOverride, errorFn)
 
         expect(errorFn).to.have.callCount(1)
         expect(errorFn).to.have.been.calledWithMatch({
