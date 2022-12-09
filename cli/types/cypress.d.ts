@@ -362,7 +362,7 @@ declare namespace Cypress {
 
     /**
      * Utility functions for ensuring various properties about a subject.
-     * @see https://on.cypress.io/custom-queries
+     * @see https://on.cypress.io/api/custom-queries
      */
     ensure: Ensure
 
@@ -1613,7 +1613,7 @@ declare namespace Cypress {
     /**
      * Invoke a command synchronously, without using the command queue.
      *
-     * @see https://on.cypress.io/custom-queries
+     * @see https://on.cypress.io/api/custom-queries
      */
     now(name: string, ...args: any[]): Promise<any> | ((subject: any) => any)
 
