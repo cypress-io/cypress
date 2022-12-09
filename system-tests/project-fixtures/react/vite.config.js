@@ -1,4 +1,4 @@
-const {defineConfig} = require('vite')
+const { defineConfig } = require('vite')
 
 module.exports = defineConfig({
   resolve: {
@@ -7,5 +7,5 @@ module.exports = defineConfig({
       'react-dom': require.resolve('react-dom'),
     },
   },
-  logLevel: 'silent'
+  logLevel: 'silent',
 })
