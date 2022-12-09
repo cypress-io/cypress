@@ -109,101 +109,110 @@ export function scriptFromBlueprint (config: BlueprintConfig): {
 
   const wrapperOpen = Buffer.from(
     `
-const PATH_SEP = '${pathSep}'
-var snapshotAuxiliaryData = ${auxiliaryData}
+(function () {
+  const PATH_SEP = '${pathSep}'
+  ${integrityCheckSource || ''}
 
-${integrityCheckSource || ''}
-
-function generateSnapshot() {
-  //
-  // <process>
-  //
-  function cannotAccess(proto, prop) {
-    return function () {
-      throw 'Cannot access ' + proto + '.' + prop + ' during snapshot creation'
+  function generateSnapshot() {
+    //
+    // <process>
+    //
+    function cannotAccess(proto, prop) {
+      return function () {
+        throw 'Cannot access ' + proto + '.' + prop + ' during snapshot creation'
+      }
     }
-  }
-  function getPrevent(proto, prop) {
-    return {
-      get: cannotAccess(proto, prop)
+    function getPrevent(proto, prop) {
+      return {
+        get: cannotAccess(proto, prop)
+      }
     }
-  }
 
-  let process = {}
-  Object.defineProperties(process, {
-    platform: {
-      value: '${processPlatform}',
-      enumerable: false,
-    },
-    argv: {
-      value: [],
-      enumerable: false,
-    },
-    env: {
-      value: {
-        NODE_ENV: '${nodeEnv}',
+    let process = {}
+    Object.defineProperties(process, {
+      platform: {
+        value: '${processPlatform}',
+        enumerable: false,
       },
-      enumerable: false,
-    },
-    version: {
-      value: '${processNodeVersion}',
-      enumerable: false,
-    },
-    versions: {
-      value: { node: '${processNodeVersion}' },
-      enumerable: false,
-    },
-    nextTick: getPrevent('process', 'nextTick')
-  })
+      argv: {
+        value: [],
+        enumerable: false,
+      },
+      env: {
+        value: {
+          NODE_ENV: '${nodeEnv}',
+        },
+        enumerable: false,
+      },
+      version: {
+        value: '${processNodeVersion}',
+        enumerable: false,
+      },
+      versions: {
+        value: { node: '${processNodeVersion}' },
+        enumerable: false,
+      },
+      nextTick: getPrevent('process', 'nextTick')
+    })
 
-  function get_process() {
-    return process
-  }
-  //
-  // </process>
-  //
+    function get_process() {
+      return process
+    }
+    //
+    // </process>
+    //
 
-  ${globals}
-  ${includeStrictVerifiers ? strictGlobals : ''}
+    ${globals}
+    ${includeStrictVerifiers ? strictGlobals : ''}
 `,
     'utf8',
   )
   const wrapperClose = Buffer.from(
-    `
-  ${customRequire}
-  ${includeStrictVerifiers ? 'require.isStrict = true' : ''}
+      `
+    ${customRequire}
+    ${includeStrictVerifiers ? 'require.isStrict = true' : ''}
 
-  customRequire(${normalizedMainModuleRequirePath}, ${normalizedMainModuleRequirePath})
-  const result = {}
-  Object.defineProperties(result, {
-    customRequire: {
+    customRequire(${normalizedMainModuleRequirePath}, ${normalizedMainModuleRequirePath})
+    const result = {}
+    Object.defineProperties(result, {
+      customRequire: {
+        writable: false,
+        value: customRequire
+      },
+      setGlobals: {
+        writable: false,
+        value: ${setGlobals}
+      },
+      snapshotAuxiliaryData: {
+        writable: false,
+        value: ${auxiliaryData},
+      },
+    })
+    return result
+  }
+
+  let numberOfGetSnapshotResultCalls = 0
+  const snapshotResult = generateSnapshot.call({})
+  Object.defineProperties(this, {
+    getSnapshotResult: {
       writable: false,
-      value: customRequire
+      value: function () {
+        if (numberOfGetSnapshotResultCalls > 0) {
+          throw new Error('getSnapshotResult can only be called once')
+        }
+        numberOfGetSnapshotResultCalls++
+        return snapshotResult
+      },
     },
-    setGlobals: {
+    supportTypeScript: {
       writable: false,
-      value: ${setGlobals}
-    }
+      value: ${supportTypeScript},
+    },
   })
-  return result
-}
-
-let numberOfGetSnapshotResultCalls = 0
-const snapshotResult = generateSnapshot.call({})
-Object.defineProperty(this, 'getSnapshotResult', {
-  writable: false,
-  value: function () {
-    if (numberOfGetSnapshotResultCalls > 0) {
-      throw new Error('getSnapshotResult can only be called once')
-    }
-    numberOfGetSnapshotResultCalls++
-    return snapshotResult
-  },
-})
-var supportTypeScript = ${supportTypeScript}
-generateSnapshot = null
+  generateSnapshot = null
+}).call(this)
 `,
-    'utf8',
+      'utf8',
   )
 
   const buffers = [wrapperOpen, customRequireDefinitions, wrapperClose]

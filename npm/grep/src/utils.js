@@ -86,6 +86,10 @@ function parseTagsGrep (s) {
     ORS_filtered.forEach((OR, index) => {
       ORS_filtered[index] = OR.concat(explicitNotTags)
     })
+
+    if (ORS_filtered.length === 0) {
+      ORS_filtered[ 0 ] = explicitNotTags
+    }
   }
 
   return ORS_filtered
