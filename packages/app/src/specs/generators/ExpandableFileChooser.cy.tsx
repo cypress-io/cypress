@@ -244,14 +244,11 @@ describe('<ExpandableFileChooser />', () => {
   })
 
   it('renders expanded content slot when row is clicked', () => {
-    const onSelectFileStub = cy.stub()
-
     cy.contains('This is the expanded content').should('not.exist')
 
     cy.mount(() => (
       <ExpandableFileChooser
         v-slots={{ item: <div>This is the expanded content</div> }}
-        onSelectFile={onSelectFileStub}
         extensionPattern={extensionPattern}
         files={allFiles}>
       </ExpandableFileChooser>

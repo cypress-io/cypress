@@ -20,10 +20,10 @@ describe('<FileList />', { viewportHeight: 500, viewportWidth: 400 }, () => {
     const files = allFiles
 
     beforeEach(() => {
-      const selectFileSpy = cy.spy().as('selectFileSpy')
+      const selectItemStub = cy.stub()
 
       cy.mount(() => (<div class="m-2 min-w-300px resize overflow-auto">
-        <ExpandableFileList onSelectFile={selectFileSpy} files={files} />
+        <ExpandableFileList onSelectItem={selectItemStub} files={files} />
       </div>))
     })
 
