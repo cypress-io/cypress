@@ -52,8 +52,9 @@ jobs:
           #   echo "Error triggering pipeline..."
           #   exit 1;
           # fi
+
       - if: ${{ github.event_name != 'pull_request' }}
-        name: If the commit includes 'run ci', trigger CircleCi for the in-progress branch
+        name: Determine whether or not to trigger CircleCi for the in-progress branch...
         shell: bash
         env:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
@@ -63,24 +64,37 @@ jobs:
             exit 1;
           fi
 
-          echo "Always run CI when the commit message includes 'run ci'."
           echo "Commit message: $COMMIT_MESSAGE"
 
-          if ! [[ "$COMMIT_MESSAGE" =~ "run ci" ]]; then
-            echo "Don't trigger CircleCI run because the branch is in-progress. $TRIGGER_INSTRUCTIONS"
+          trigger_circleci () {
+            response=$(curl -X POST https://circleci.com/api/v2/project/github/cypress-io/cypress/pipeline \
+              --header "Circle-Token:$CIRCLE_TOKEN" \
+              --header "content-type:application/json" \
+              --data "{\"branch\":\"${GITHUB_REF#refs/heads/}"}\
+              --silent
+            )
+
+            echo "$response"
+
+            if [ "$(jq 'has("message")' <<< $response )" == "true" ]; then
+              echo "Error triggering pipeline..."
+              exit 1;
+            fi
+            
             exit 0
+          }
+
+          if [[ "$GITHUB_REF" == "refs/heads/develop" || "$GITHUB_REF" == "refs/heads/release/"* ]]; then
+            echo "Always run CI for develop and for release candidate branches."
+            trigger_circleci
           fi
 
-          response=$(curl -X POST https://circleci.com/api/v2/project/github/cypress-io/cypress/pipeline \
-            --header "Circle-Token:$CIRCLE_TOKEN" \
-            --header "content-type:application/json" \
-            --data "{\"branch\":\"${GITHUB_REF#refs/heads/}\"}" \
-            --silent
-          )
-
-          echo "$response"
-
-          if [ "$(jq 'has("message")' <<< $response )" == "true" ]; then
-            echo "Error triggering pipeline..."
-            exit 1;
+          if [[ "$COMMIT_MESSAGE" =~ "run ci" ]]; then
+            echo "Always run CI when the commit message includes 'run ci'."
+            trigger_circleci 
           fi
+
+          echo "Didn't trigger CircleCI run because the branch is in-progress. $TRIGGER_INSTRUCTIONS"
+
+
+
