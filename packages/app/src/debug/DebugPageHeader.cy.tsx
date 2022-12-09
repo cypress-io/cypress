@@ -26,7 +26,7 @@ describe('<DebugPageHeader />', {
       },
       render: (gqlVal) => {
         return (
-          <DebugPageHeader gql={gqlVal} commitsAhead={2} commitHash="b5e6fde"/>
+          <DebugPageHeader gql={gqlVal} commitsAhead={2}/>
         )
       },
     })
