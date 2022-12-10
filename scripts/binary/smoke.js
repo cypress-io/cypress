@@ -302,6 +302,24 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
   const allowList = ['regeneratorRuntime', '__core-js_shared__', 'getSnapshotResult', 'supportTypeScript']
 
   await testAlteringEntryPoint(`(${compareGlobals.toString()})()`, `extra keys in electron process: ${allowList}\nIntegrity check failed with expected stack length 9 but got 10`)
+
+  const testTemporarilyRewritingEntryPoint = async () => {
+    const file = path.join(buildAppDir, 'index.js')
+    const backupFile = path.join(buildAppDir, 'index.js.bak')
+    const contents = await fs.readFile(file)
+
+    // Backup state
+    await fs.move(file, backupFile)
+
+    // Modify app
+    await fs.writeFile(file, `console.log("rewritten code");const fs=require('fs');fs.writeFileSync('${file}',fs.readFileSync('${backupFile}'));${contents}`)
+    await runErroringProjectTest(buildAppExecutable, e2e, 'temporarily rewriting index.js', 'Integrity check failed with expected column number 4364 but got 4708')
+
+    // Restore original state
+    await fs.move(backupFile, file, { overwrite: true })
+  }
+
+  await testTemporarilyRewritingEntryPoint()
 }
 
 const test = async function (buildAppExecutable, buildAppDir) {
