@@ -189,8 +189,8 @@ function integrityCheck (options) {
       {
         // eslint-disable-next-line no-undef
         fileName: [appPath, 'index.js'].join(PATH_SEP),
-        line: 4,
-        column: 385,
+        line: 1,
+        column: 5049,
       },
     ],
   })
