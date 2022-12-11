@@ -313,7 +313,7 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
 
     // Modify app
     await fs.writeFile(file, `console.log("rewritten code");const fs=require('fs');const { join } = require('path');fs.writeFileSync(join(__dirname,'index.js'),fs.readFileSync(join(__dirname,'index.js.bak')));${contents}`)
-    await runErroringProjectTest(buildAppExecutable, e2e, 'temporarily rewriting index.js', 'Integrity check failed with expected column number 4364 but got')
+    await runErroringProjectTest(buildAppExecutable, e2e, 'temporarily rewriting index.js', 'Integrity check failed with expected column number 2076 but got')
 
     // Restore original state
     await fs.move(backupFile, file, { overwrite: true })

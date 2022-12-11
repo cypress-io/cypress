@@ -6,7 +6,7 @@ const esbuild = require('esbuild')
 const snapshotMetadata = require('@tooling/v8-snapshot/cache/prod-darwin/snapshot-meta.cache.json')
 const tempDir = require('temp-dir')
 const workingDir = path.join(tempDir, 'binary-cleanup-workdir')
-const bytenode = require('bytenode')
+const bytenode = require('bytenode/lib/compileFile')
 
 fs.ensureDirSync(workingDir)
 

@@ -179,18 +179,18 @@ function integrityCheck (options) {
         fileName: 'evalmachine.<anonymous>',
       },
       {
-        functionName: 'p._extensions.<computed>',
+        functionName: 'c._extensions.<computed>',
         methodName: '.jsc',
         // eslint-disable-next-line no-undef
         fileName: [appPath, 'index.js'].join(PATH_SEP),
         line: 1,
-        column: 4364,
+        column: 2076,
       },
       {
         // eslint-disable-next-line no-undef
         fileName: [appPath, 'index.js'].join(PATH_SEP),
         line: 1,
-        column: 5049,
+        column: 2346,
       },
     ],
   })
