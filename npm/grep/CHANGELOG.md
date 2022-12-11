@@ -1,3 +1,17 @@
+# [@cypress/grep-v3.1.2](https://github.com/cypress-io/cypress/compare/@cypress/grep-v3.1.1...@cypress/grep-v3.1.2) (2022-12-09)
+
+
+### Bug Fixes
+
+* declare used babel dependencies ([#24842](https://github.com/cypress-io/cypress/issues/24842)) ([910f912](https://github.com/cypress-io/cypress/commit/910f912373bf857a196e2a0d1a73606e3ee199be))
+
+# [@cypress/grep-v3.1.1](https://github.com/cypress-io/cypress/compare/@cypress/grep-v3.1.0...@cypress/grep-v3.1.1) (2022-12-08)
+
+
+### Bug Fixes
+
+* fix behavior when only using inverted tags ([#24413](https://github.com/cypress-io/cypress/issues/24413)) ([b2a2e50](https://github.com/cypress-io/cypress/commit/b2a2e508638d5132fc30e01d707de81d22fde359))
+
 # [@cypress/grep-v3.1.0](https://github.com/cypress-io/cypress/compare/@cypress/grep-v3.0.3...@cypress/grep-v3.1.0) (2022-10-21)
 
 

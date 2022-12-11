@@ -19,6 +19,7 @@ import execa from 'execa'
 import { testStaticAssets } from './util/testStaticAssets'
 import performanceTracking from '../../system-tests/lib/performance'
 import verify from '../../cli/lib/tasks/verify'
+import * as electronBuilder from 'electron-builder'
 
 const globAsync = promisify(glob)
 
@@ -174,12 +175,8 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
   }, { spaces: 2 })
 
   fs.writeFileSync(meta.distDir('index.js'), `\
-${!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE) ?
-`if (!global.snapshotResult && process.versions?.electron) {
-  throw new Error('global.snapshotResult is not defined. This binary has been built incorrectly.')
-}` : ''}
 process.env.CYPRESS_INTERNAL_ENV = process.env.CYPRESS_INTERNAL_ENV || 'production'
-require('./packages/server')\
+require('./packages/server/index.js')
 `)
 
   // removeTypeScript
@@ -237,23 +234,6 @@ require('./packages/server')\
 
   console.log(`output folder: ${outputFolder}`)
 
-  const args = [
-    '--publish=never',
-    `--c.electronVersion=${electronVersion}`,
-    `--c.directories.app=${appFolder}`,
-    `--c.directories.output=${outputFolder}`,
-    `--c.icon=${iconFilename}`,
-    // for now we cannot pack source files in asar file
-    // because electron-builder does not copy nested folders
-    // from packages/*/node_modules
-    // see https://github.com/electron-userland/electron-builder/issues/3185
-    // so we will copy those folders later ourselves
-    '--c.asar=false',
-  ]
-
-  console.log('electron-builder arguments:')
-  console.log(args.join(' '))
-
   // Update the root package.json with the next app version so that it is snapshot properly
   fs.writeJSONSync(path.join(CY_ROOT_DIR, 'package.json'), {
     ...jsonRoot,
@@ -261,10 +241,21 @@ require('./packages/server')\
   }, { spaces: 2 })
 
   try {
-    await execa('electron-builder', args, {
-      stdio: 'inherit',
-      env: {
-        NODE_OPTIONS: '--max_old_space_size=8192',
+    await electronBuilder.build({
+      publish: 'never',
+      config: {
+        electronVersion,
+        directories: {
+          app: appFolder,
+          output: outputFolder,
+        },
+        icon: iconFilename,
+        // for now we cannot pack source files in asar file
+        // because electron-builder does not copy nested folders
+        // from packages/*/node_modules
+        // see https://github.com/electron-userland/electron-builder/issues/3185
+        // so we will copy those folders later ourselves
+        asar: false,
       },
     })
   } catch (e) {
@@ -298,7 +289,7 @@ require('./packages/server')\
 
     const executablePath = meta.buildAppExecutable()
 
-    await smoke.test(executablePath)
+    await smoke.test(executablePath, meta.buildAppDir())
   } finally {
     if (usingXvfb) {
       await xvfb.stop()

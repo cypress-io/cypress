@@ -1,5 +1,3 @@
-const helpers = require('../../../support/helpers')
-
 const { _ } = Cypress
 
 describe('src/cy/commands/querying - shadow dom', () => {
@@ -218,7 +216,7 @@ describe('src/cy/commands/querying - shadow dom', () => {
         cy.get('#shadow-element-1').shadow()
         .then(function ($el) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
-            'Applied To': helpers.getFirstSubjectByName('get').get(0),
+            'Applied To': cy.$$('#shadow-element-1')[0],
             Yielded: Cypress.dom.getElements($el),
             Elements: $el.length,
             Command: 'shadow',

@@ -1,6 +1,8 @@
 import _ from 'lodash'
 import utils from './utils'
 
+let idCounter = 1
+
 export class $Command {
   attributes!: Record<string, any>
   state: 'queued' | 'pending' | 'passed' | 'recovered' | 'failed' | 'skipped'
@@ -14,7 +16,7 @@ export class $Command {
       // the id prefix needs to be unique per origin, so there are not
       // collisions when commands created in a secondary origin are passed
       // to the primary origin for the command log, etc.
-      attrs.id = _.uniqueId(`cmd-${window.location.origin}-`)
+      attrs.id = `${attrs.chainerId}-cmd-${idCounter++}`
     }
 
     this.set(attrs)
@@ -56,8 +58,22 @@ export class $Command {
   }
 
   finishLogs () {
-    // finish each of the logs we have
-    return _.invokeMap(this.get('logs'), 'finish')
+    // TODO: Investigate whether or not we can reuse snapshots between logs
+    // that snapshot at the same time
+
+    // Finish each of the logs we have, turning any potential errors into actual ones.
+    this.get('logs').forEach((log) => {
+      if (log.get('next') || !log.get('snapshots')) {
+        log.snapshot()
+      }
+
+      if (log.get('_error')) {
+        log.error(log.get('_error'))
+      } else {
+        log.set('snapshot', false)
+        log.finish()
+      }
+    })
   }
 
   log (log) {

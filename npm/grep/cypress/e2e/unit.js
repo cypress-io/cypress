@@ -14,6 +14,7 @@ describe('utils', () => {
   context('parseTitleGrep', () => {
     it('grabs the positive title', () => {
       const parsed = parseTitleGrep('hello w')
+
       expect(parsed).to.deep.equal({
         title: 'hello w',
         invert: false,
@@ -22,6 +23,7 @@ describe('utils', () => {
 
     it('trims the string', () => {
       const parsed = parseTitleGrep('   hello w  ')
+
       expect(parsed).to.deep.equal({
         title: 'hello w',
         invert: false,
@@ -30,6 +32,7 @@ describe('utils', () => {
 
     it('inverts the string', () => {
       const parsed = parseTitleGrep('-hello w')
+
       expect(parsed).to.deep.equal({
         title: 'hello w',
         invert: true,
@@ -38,6 +41,7 @@ describe('utils', () => {
 
     it('trims the inverted the string', () => {
       const parsed = parseTitleGrep('  -hello w  ')
+
       expect(parsed).to.deep.equal({
         title: 'hello w',
         invert: true,
@@ -46,6 +50,7 @@ describe('utils', () => {
 
     it('returns null for undefined input', () => {
       const parsed = parseTitleGrep()
+
       expect(parsed).to.equal(null)
     })
   })
@@ -53,6 +58,7 @@ describe('utils', () => {
   context('parseFullTitleGrep', () => {
     it('returns list of title greps', () => {
       const parsed = parseFullTitleGrep('hello; one; -two')
+
       expect(parsed).to.deep.equal([
         { title: 'hello', invert: false },
         { title: 'one', invert: false },
@@ -65,6 +71,7 @@ describe('utils', () => {
     it('parses AND tags', () => {
       // run only the tests with all 3 tags
       const parsed = parseTagsGrep('@tag1+@tag2+@tag3')
+
       expect(parsed).to.deep.equal([
         // single OR part
         [
@@ -78,6 +85,7 @@ describe('utils', () => {
 
     it('handles dashes in the tag', () => {
       const parsed = parseTagsGrep('@smoke+@screen-b')
+
       expect(parsed).to.deep.equal([
         [
           { tag: '@smoke', invert: false },
@@ -89,6 +97,7 @@ describe('utils', () => {
     it('parses OR tags spaces', () => {
       // run tests with tag1 OR tag2 or tag3
       const parsed = parseTagsGrep('@tag1 @tag2 @tag3')
+
       expect(parsed).to.deep.equal([
         [{ tag: '@tag1', invert: false }],
         [{ tag: '@tag2', invert: false }],
@@ -99,6 +108,7 @@ describe('utils', () => {
     it('parses OR tags commas', () => {
       // run tests with tag1 OR tag2 or tag3
       const parsed = parseTagsGrep('@tag1,@tag2,@tag3')
+
       expect(parsed).to.deep.equal([
         [{ tag: '@tag1', invert: false }],
         [{ tag: '@tag2', invert: false }],
@@ -108,11 +118,13 @@ describe('utils', () => {
 
     it('parses inverted tag', () => {
       const parsed = parseTagsGrep('-@tag1')
+
       expect(parsed).to.deep.equal([[{ tag: '@tag1', invert: true }]])
     })
 
     it('parses tag1 but not tag2 with space', () => {
       const parsed = parseTagsGrep('@tag1 -@tag2')
+
       expect(parsed).to.deep.equal([
         [{ tag: '@tag1', invert: false }],
         [{ tag: '@tag2', invert: true }],
@@ -121,6 +133,7 @@ describe('utils', () => {
 
     it('forgives extra spaces', () => {
       const parsed = parseTagsGrep('  @tag1   -@tag2 ')
+
       expect(parsed).to.deep.equal([
         [{ tag: '@tag1', invert: false }],
         [{ tag: '@tag2', invert: true }],
@@ -129,6 +142,7 @@ describe('utils', () => {
 
     it('parses tag1 but not tag2 with comma', () => {
       const parsed = parseTagsGrep('@tag1,-@tag2')
+
       expect(parsed).to.deep.equal([
         [{ tag: '@tag1', invert: false }],
         [{ tag: '@tag2', invert: true }],
@@ -137,20 +151,30 @@ describe('utils', () => {
 
     it('filters out empty tags', () => {
       const parsed = parseTagsGrep(',, @tag1,-@tag2,, ,, ,')
+
       expect(parsed).to.deep.equal([
         [{ tag: '@tag1', invert: false }],
         [{ tag: '@tag2', invert: true }],
       ])
     })
 
-    // would need to change the tokenizer
+    // TODO: would need to change the tokenizer
     it.skip('parses tag1 but not tag2', () => {
       const parsed = parseTagsGrep('@tag1-@tag2')
+
       expect(parsed).to.deep.equal([
         [
           { tag: '@tag1', invert: false },
           { tag: '@tag2', invert: true },
         ],
+      ])
+    })
+
+    it('allows all tags to be inverted', () => {
+      const parsed = parseTagsGrep('--@tag1,--@tag2')
+
+      expect(parsed).to.deep.equal([
+        [{ tag: '@tag1', invert: true }, { tag: '@tag2', invert: true }],
       ])
     })
   })
@@ -163,6 +187,7 @@ describe('utils', () => {
 
     it('creates just the title grep', () => {
       const parsed = parseGrep('hello w')
+
       expect(parsed).to.deep.equal({
         title: [
           {
@@ -176,6 +201,7 @@ describe('utils', () => {
 
     it('creates object from the grep string only', () => {
       const parsed = parseGrep('hello w')
+
       expect(parsed).to.deep.equal({
         title: [
           {
@@ -217,6 +243,7 @@ describe('utils', () => {
 
     it('creates object from the grep string and tags', () => {
       const parsed = parseGrep('hello w', '@tag1+@tag2+@tag3')
+
       expect(parsed).to.deep.equal({
         title: [
           {
@@ -244,6 +271,7 @@ describe('utils', () => {
       expect(
         shouldTestRun(parsed, ['@tag1', '@tag2', '@tag3', '@tag4']),
       ).to.equal(true)
+
       // title matches, but tags do not
       expect(shouldTestRun(parsed, 'hello w', ['@tag1', '@tag2'])).to.equal(
         false,
@@ -262,6 +290,7 @@ describe('utils', () => {
     // our parsing and decision logic computes the expected result
     const shouldIt = (used, tags, expected) => {
       const parsedTags = parseTagsGrep(used)
+
       expect(
         shouldTestRunTags(parsedTags, tags),
         `"${used}" against "${tags}"`,
@@ -301,29 +330,34 @@ describe('utils', () => {
     // and apply the first argument in shouldTestRun
     const checkName = (grep, grepTags) => {
       const parsed = parseGrep(grep, grepTags)
+
       expect(parsed).to.be.an('object')
 
       return (testName, testTags = []) => {
         expect(testName, 'test title').to.be.a('string')
         expect(testTags, 'test tags').to.be.an('array')
+
         return shouldTestRun(parsed, testName, testTags)
       }
     }
 
     it('simple tag', () => {
       const parsed = parseGrep('@tag1')
+
       expect(shouldTestRun(parsed, 'no tag1 here')).to.be.false
       expect(shouldTestRun(parsed, 'has @tag1 in the name')).to.be.true
     })
 
     it('with invert title', () => {
       const t = checkName('-hello')
+
       expect(t('no greetings')).to.be.true
       expect(t('has hello world')).to.be.false
     })
 
     it('with invert option', () => {
       const t = checkName(null, '-@tag1')
+
       expect(t('no tags here')).to.be.true
       expect(t('has tag1', ['@tag1'])).to.be.false
       expect(t('has other tags', ['@tag2'])).to.be.true
@@ -331,6 +365,7 @@ describe('utils', () => {
 
     it('with AND option', () => {
       const t = checkName('', '@tag1+@tag2')
+
       expect(t('no tag1 here')).to.be.false
       expect(t('has only @tag1', ['@tag1'])).to.be.false
       expect(t('has only @tag2', ['@tag2'])).to.be.false
@@ -339,20 +374,23 @@ describe('utils', () => {
 
     it('with OR option', () => {
       const t = checkName(null, '@tag1 @tag2')
+
       expect(t('no tag1 here')).to.be.false
       expect(t('has only @tag1 in the name', ['@tag1'])).to.be.true
       expect(t('has only @tag2 in the name', ['@tag2'])).to.be.true
       expect(t('has @tag1 and @tag2 in the name', ['@tag1', '@tag2'])).to.be
-        .true
+      .true
     })
 
     it('OR with AND option', () => {
       const t = checkName(null, '@tag1 @tag2+@tag3')
+
       expect(t('no tag1 here')).to.be.false
       expect(t('has only @tag1 in the name', ['@tag1'])).to.be.true
       expect(t('has only @tag2 in the name', ['@tag2'])).to.be.false
       expect(t('has only @tag2 in the name and also @tag3', ['@tag2', '@tag3']))
-        .to.be.true
+      .to.be.true
+
       expect(
         t('has @tag1 and @tag2 and @tag3 in the name', [
           '@tag1',
@@ -364,8 +402,9 @@ describe('utils', () => {
 
     it('Multiple invert strings and a simple one', () => {
       const t = checkName('-name;-hey;number')
+
       expect(t('number should only be matches without a n-a-m-e')).to.be.true
-      expect(t("number can't be name")).to.be.false
+      expect(t('number can\'t be name')).to.be.false
       expect(t('The man needs a name')).to.be.false
       expect(t('number hey name')).to.be.false
       expect(t('numbers hey name')).to.be.false
@@ -375,8 +414,9 @@ describe('utils', () => {
 
     it('Only inverted strings', () => {
       const t = checkName('-name;-hey')
-      expect(t("I'm matched")).to.be.true
-      expect(t("hey! I'm not")).to.be.false
+
+      expect(t('I\'m matched')).to.be.true
+      expect(t('hey! I\'m not')).to.be.false
       expect(t('My name is weird')).to.be.false
     })
   })
@@ -384,6 +424,7 @@ describe('utils', () => {
   context('parseFullTitleGrep', () => {
     const shouldIt = (search, testName, expected) => {
       const parsed = parseFullTitleGrep(search)
+
       expect(
         shouldTestRunTitle(parsed, testName),
         `"${search}" against title "${testName}"`,

@@ -53,7 +53,6 @@ export class HtmlDataSource {
       'testingType',
       'componentTesting',
       'reporterUrl',
-      'xhrUrl',
       'namespace',
       'socketIoRoute',
     ]

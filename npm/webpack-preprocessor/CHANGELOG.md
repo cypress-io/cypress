@@ -1,3 +1,17 @@
+# [@cypress/webpack-preprocessor-v5.15.7](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.15.6...@cypress/webpack-preprocessor-v5.15.7) (2022-12-09)
+
+
+### Bug Fixes
+
+* declare used babel dependencies ([#24842](https://github.com/cypress-io/cypress/issues/24842)) ([910f912](https://github.com/cypress-io/cypress/commit/910f912373bf857a196e2a0d1a73606e3ee199be))
+
+# [@cypress/webpack-preprocessor-v5.15.6](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.15.5...@cypress/webpack-preprocessor-v5.15.6) (2022-12-02)
+
+
+### Bug Fixes
+
+* **breaking:** exclude node_modules from cross-origin-callback-loader ([#24952](https://github.com/cypress-io/cypress/issues/24952)) ([27c425d](https://github.com/cypress-io/cypress/commit/27c425dda318c316f751a000b77b39fe727999d5))
+
 # [@cypress/webpack-preprocessor-v5.15.5](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.15.4...@cypress/webpack-preprocessor-v5.15.5) (2022-11-10)
 
 

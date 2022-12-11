@@ -202,18 +202,6 @@ describe('App: Settings', () => {
           })
         })
 
-        cy.get('[data-cy="experiment-experimentalSessionAndOrigin"]').within(() => {
-          cy.validateExternalLink({
-            name: 'cy.session()',
-            href: 'https://on.cypress.io/session',
-          })
-
-          cy.validateExternalLink({
-            name: 'cy.origin()',
-            href: 'https://on.cypress.io/origin',
-          })
-        })
-
         cy.get('[data-cy="experiment-experimentalSourceRewriting"]').within(() => {
           cy.validateExternalLink({
             name: '#5273',
@@ -411,7 +399,7 @@ describe('App: Settings without cloud', () => {
     cy.findByText('Cypress Cloud settings').click()
     cy.findByText('Project ID').should('not.exist')
     cy.withCtx((ctx, o) => {
-      o.sinon.spy(ctx._apis.authApi, 'logIn')
+      o.sinon.stub(ctx._apis.authApi, 'logIn')
     })
 
     cy.contains('button', 'Log in to Cypress Cloud').click()

@@ -61,8 +61,7 @@ describe('memory leak finder', function () {
   beforeEach(() => {
     lastSample && cy.task('console', lastSample)
     // // cy.wait(50000)
-    // cy.server()
-    // cy.route('/logout', {})
+    // cy.intercept('/logout', {})
     // cy.fixture('current-user').as('currentUser')
   })
 

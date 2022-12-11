@@ -10,6 +10,10 @@ const it = systemTests.it
 const onServer = function (app) {
   app.use(parser())
 
+  app.get('/', (req, res) => {
+    return res.send('<html></html>')
+  })
+
   app.get('/logout', (req, res) => {
     return res.send('<html>logged out</html>')
   })
@@ -159,13 +163,8 @@ const otherDomain = 'quux.bar.net'
 const otherUrl = `http://${otherDomain}${haveRoot ? '' : `:${httpPort}`}`
 const otherHttpsUrl = `https://${otherDomain}${haveRoot ? '' : `:${httpsPort}`}`
 
-const chromiumSameSiteFeatures = '--enable-features=SameSiteByDefaultCookies,CookiesWithoutSameSiteMustBeSecure'
-
-// SameSite is loosely enforced in some versions of FF/Electron/Chromium,
-// but all have options we can use to force it to be strict
 const FORCED_SAMESITE_ENV = {
-  ELECTRON_EXTRA_LAUNCH_ARGS: chromiumSameSiteFeatures,
-  CHROMIUM_EXTRA_LAUNCH_ARGS: chromiumSameSiteFeatures,
+  // SameSite is loosely enforced in Firefox
   FIREFOX_FORCE_STRICT_SAMESITE: 1,
 }
 
