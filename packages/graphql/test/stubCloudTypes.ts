@@ -212,22 +212,19 @@ function addFailedTests (run: CloudRun) {
   const spec: CloudSpecRun = {
     __typename: 'CloudSpecRun',
     id: specId,
-    basename: 'Test',
+    basename: 'Test.cy.ts',
     extension: '.cy.ts',
     path: 'src/Test.cy.ts',
   }
 
   const test: CloudTestResult = {
     __typename: 'CloudTestResult',
-    bodyHash: 'acs123',
     id: '123',
     isFlaky: false,
-    isMuted: false,
     specId,
     state: 'FAILED' as const,
     duration: null,
     instance: null,
-    testId: null,
     testUrl: 'http://cloudurl',
     title: '<test/> Should render',
     titleParts: ['<test/>', 'should render'],

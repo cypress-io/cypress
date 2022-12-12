@@ -77,12 +77,13 @@ const specs = computed(() => {
   return props.specs.map((specItem) => {
     const fileName = specItem.spec.basename
     const fileExtension = specItem.spec.extension
+    const fileNameWithoutExtension = fileName.replace(fileExtension, '')
 
     return {
       spec: {
         id: specItem.spec.id,
-        path: specItem.spec.path.replace(fileName + fileExtension, ''),
-        fileName,
+        path: specItem.spec.path.replace(fileNameWithoutExtension + fileExtension, ''),
+        fileName: fileNameWithoutExtension,
         fileExtension,
       },
       tests: specItem.tests,
