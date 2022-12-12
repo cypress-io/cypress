@@ -83,13 +83,13 @@ const props = defineProps<{
 const loginConnectStore = useLoginConnectStore()
 
 const run = computed(() => {
-  return props.gql.currentProject?.cloudProject?.__typename === 'CloudProject' && props.gql.currentProject.cloudProject.runByNumber
+  return props.gql.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject.runByNumber : null
 })
 
 const debugSpecsArray = computed(() => {
-  if (props.gql.currentProject?.cloudProject?.__typename === 'CloudProject') {
-    const specs = props.gql.currentProject.cloudProject.runByNumber?.specs || []
-    const tests = props.gql.currentProject.cloudProject.runByNumber?.testsForReview || []
+  if (run.value) {
+    const specs = run.value.specs || []
+    const tests = run.value.testsForReview || []
 
     return specsList(specs, tests)
   }
