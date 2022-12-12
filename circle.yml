@@ -35,7 +35,7 @@ macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'tbiethman/22272-globbing-working-dir', << pipeline.git.branch >> ]
+    - equal: [ 'matth/test/without-webkit-video', << pipeline.git.branch >> ]
     - equal: [ 'skip-or-fix-flaky-tests-2', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
