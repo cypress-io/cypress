@@ -66,6 +66,7 @@ type CachedUser implements Node {
   id: ID!
 }
 
+"""Information about the browser the tests were run on"""
 type CloudBrowserInfo implements Node {
   """The formatted name of the browser, e.g. `Electron`"""
   formattedName: String
@@ -86,11 +87,14 @@ type CloudBrowserInfo implements Node {
   unformattedVersion: String
 }
 
+"""Information about the CI provider that performed a run"""
 type CloudCiBuildInfo implements Node {
-  """CI build ID extracted from the environment (if available)"""
+  """CI build ID as extracted from the CI worker environment (if available)"""
   ciBuildNumber: String
 
-  """Formatted CI build ID extracted from the environment (if available)"""
+  """
+  Formatted CI build ID as extracted from the CI worker environment (if available)
+  """
   ciBuildNumberFormatted: String
 
   """
@@ -106,7 +110,9 @@ type CloudCiBuildInfo implements Node {
   """
   provider: String
 
-  """A link to the build details for the associated run"""
+  """
+  A link to the build details for the associated run within the CI provider (if available)
+  """
   url: String
 }
 
@@ -127,6 +133,7 @@ type CloudLatestRunUpdateSpecData {
   pollingInterval: Int
 }
 
+"""The operating system the tests were run on"""
 type CloudOperatingSystem implements Node {
   id: ID!
 
@@ -386,24 +393,39 @@ type CloudRecordKey implements Node {
 
 """A Recorded run of the Test Runner, typically to the cloud"""
 type CloudRun implements Node {
+  """When the run was cancelled, null if not cancelled"""
   cancelledAt: DateTime
 
-  """Information about the CI provider that performed the build"""
+  """Information about the CI provider that performed the run"""
   ci: CloudCiBuildInfo!
   commitInfo: CloudRunCommitInfo
   completedAt: DateTime
+
+  """When the run was created"""
   createdAt: DateTime!
+
+  """All groups within this run"""
   groups: [CloudRunGroup!]!
 
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
+
+  """Whether this run is hidden by usage limits"""
   isHiddenByUsageLimits: Boolean!
+
+  """What to do when the run is over the limit"""
   overLimitActionType: OverLimitActionTypeEnum!
+
+  """A link to upgrade or contact an admin"""
   overLimitActionUrl: String!
   runNumber: Int
+
+  """All specs within this run"""
   specs: [CloudSpecRun!]!
   status: CloudRunStatus
   tags: [CloudRunTag]
+
+  """Tests within this run that failed and need to be reviewed"""
   testsForReview(limit: Int! = 100): [CloudTestResult!]!
 
   """
@@ -474,23 +496,41 @@ type CloudRunEdge {
   node: CloudRun!
 }
 
+"""A group of tests that are executed together within a run"""
 type CloudRunGroup implements Node {
+  """The browser the tests were run on"""
   browser: CloudBrowserInfo!
+
+  """The date and time the group was completed"""
   completedAt: DateTime
+
+  """The date and time the group was created"""
   createdAt: DateTime!
 
-  """This is the duration of the instance"""
+  """The overall duration of the tests in the group in milliseconds"""
   duration: Int!
+
+  """The name of the group"""
   groupName: String
   id: ID!
+
+  """The operating system the tests were run on"""
   os: CloudOperatingSystem!
   status: CloudRunGroupStatusEnum!
 
   """The type of the test"""
   testingType: String!
+
+  """The total number of tests that failed within the group"""
   totalFailures: Int!
+
+  """The total number of tests that passed within the group"""
   totalPasses: Int!
+
+  """The total number of tests that are pending within the group"""
   totalPending: Int!
+
+  """The total number of tests that are skipped within the group"""
   totalSkipped: Int!
 }
 
@@ -506,7 +546,9 @@ enum CloudRunGroupStatusEnum {
   UNCLAIMED
 }
 
+"""An instance of executing a single test within a run"""
 type CloudRunInstance implements Node {
+  """The ID of the group that this instance belongs to"""
   groupId: String!
 
   """Used to determine if the instance has screenshots"""
@@ -521,6 +563,8 @@ type CloudRunInstance implements Node {
 
   """Link to Cypress Cloud to view stdout, if available"""
   screenshotsUrl: String
+
+  """The status of the instance"""
   status: RunInstanceStatusEnum!
 
   """Link to Cypress Cloud to view stdout, if available"""
@@ -564,26 +608,35 @@ type CloudRunTag implements Node {
 }
 
 """
-A Recorded run of a given spec from the Test Runner, typically to the cloud
+Details of test recording in Cypress Cloud for a spec file within a run
 """
 type CloudSpecRun implements Node {
+  """Basename of the spec file"""
   basename: String!
 
-  """When the run was completed"""
+  """When the spec was completed"""
   completedAt: DateTime
 
-  """When the run was created"""
+  """When the spec was registered to run"""
   createdAt: DateTime
+
+  """Extension of the spec file"""
   extension: String!
 
   """Amount of groups this spec was run in"""
   groupCount: Int
+
+  """Unique identifiers for each group this spec was run in"""
   groupIds: [String]
   id: ID!
+
+  """Full path to the spec file"""
   path: String!
 
   """Incremental run number assigned"""
   runNumber: Int
+
+  """Short path to the spec file without leading Cypress directories"""
   shortPath: String
 
   """
@@ -606,7 +659,7 @@ type CloudSpecRun implements Node {
   """Aggregate information about how many tests were skipped in the groups"""
   testsSkipped: SpecDataAggregate
 
-  """A link to the run overview page filtered by spec"""
+  """A link to the run overview page in Cypress Cloud filtered by spec"""
   url: String
 }
 
@@ -633,27 +686,34 @@ type CloudSpecRunEdge {
   node: CloudSpecRun!
 }
 
+"""Details of a recording in Cypress Cloud for a single test within a run"""
 type CloudTestResult implements Node {
-  bodyHash: String!
-
-  """This is the duration of the test result"""
+  """This is the duration of the test result in milliseconds"""
   duration: Int
   id: ID!
+
+  """The instance of running the test result within the corresponding run"""
   instance: CloudRunInstance
 
   """If the test result was flaky in the current run"""
   isFlaky: Boolean!
 
-  """If the test result was muted in the current run"""
-  isMuted: Boolean!
+  """The spec ID of the test result"""
   specId: String!
+
+  """The state of the test result"""
   state: CloudTestResultStateEnum!
-  testId: String
+
+  """The URL to the test result in Cypress Cloud"""
   testUrl: String!
+
+  """The title of the test result: describe/context > it/test"""
   title(
     """This will trim the test title to the provided depth"""
     depth: Int!
   ): String!
+
+  """The title of the test result split into parts"""
   titleParts: [String!]!
 }
 
@@ -1588,6 +1648,7 @@ enum OperatingSystemsEnum {
   WINDOWS
 }
 
+"""What to do when the run is over the limit"""
 enum OverLimitActionTypeEnum {
   CONTACT_ADMIN
   UPGRADE
