@@ -1491,6 +1491,19 @@ describe('lib/cypress', () => {
         code: 'PARALLEL_GROUP_PARAMS_MISMATCH',
         payload: {
           runUrl: 'https://cloud.cypress.io/runs/12345',
+          differentParams: {
+            browserName: {
+              detected: 'Chrome',
+              expected: 'Electron',
+            },
+            browserVersion: {
+              detected: '65',
+              expected: '64',
+            },
+          },
+          differentSpecs: [
+            'cypress/integration/foo_spec.js',
+          ],
         },
       }
 
