@@ -118,19 +118,16 @@ describe('<DebugContainer />', () => {
 
       const debugMappingArray = specsList(specs, tests)
 
-      expect(debugMappingArray).to.have.length(3)
-      debugMappingArray.forEach((mapping) => {
-        if (mapping.spec.id === '123') {
-          expect(mapping.tests).to.deep.equal([{ specId: '123', id: 'random1' }, { specId: '123', id: 'random6' }])
-        } else if (mapping.spec.id === '456') {
-          expect(mapping.tests).to.deep.equal([{ specId: '456', id: 'random2' }, { specId: '456', id: 'random3' }])
-        } else if (mapping.spec.id === '789') {
-          expect(mapping.tests).to.deep.equal([{ specId: '789', id: 'random4' }])
-        }
-      })
+      const expected = [
+        { spec: { id: '123' }, tests: [{ specId: '123', id: 'random1' }, { specId: '123', id: 'random6' }] },
+        { spec: { id: '456' }, tests: [{ specId: '456', id: 'random2' }, { specId: '456', id: 'random3' }] },
+        { spec: { id: '789' }, tests: [{ specId: '789', id: 'random4' }] },
+      ]
+
+      expect(debugMappingArray).to.deep.equal(expected)
     })
 
-    it('maps does not show specs that dont have tests', () => {
+    it('maps does not show specs that do not have tests', () => {
       const specs = createSpecs(['123', '456', '789'])
       const tests = [{ specId: '123', id: 'random1' }]
 
