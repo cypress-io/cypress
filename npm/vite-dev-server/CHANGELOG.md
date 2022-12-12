@@ -1,3 +1,10 @@
+# [@cypress/vite-dev-server-v5.0.2](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.0.1...@cypress/vite-dev-server-v5.0.2) (2022-12-09)
+
+
+### Bug Fixes
+
+* **vite-dev-server:** ensure assets are correctly reloaded ([#24965](https://github.com/cypress-io/cypress/issues/24965)) ([89c013f](https://github.com/cypress-io/cypress/commit/89c013fcedc2509850ec820f938d33f08f9cbb42))
+
 # [@cypress/vite-dev-server-v5.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.0.0...@cypress/vite-dev-server-v5.0.1) (2022-12-08)
 
 

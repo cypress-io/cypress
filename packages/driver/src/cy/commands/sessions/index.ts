@@ -185,6 +185,8 @@ export default function (Commands, Cypress, cy) {
               consoleProps: () => {
                 return {
                   Step: statusMap.stepName(step),
+                  Message: 'The following is the collected session data after the session was successfully setup:',
+
                   ...getConsoleProps(existingSession),
                 }
               },
@@ -395,6 +397,20 @@ export default function (Commands, Cypress, cy) {
                   return failValidation($errUtils.errByPath('sessions.validate_callback_false', { reason: 'callback yielded false' }))
                 }
               }
+
+              // collect all session data again that may have been updated during the validation check
+              const data = await sessions.getCurrentSessionData()
+
+              _.extend(existingSession, data)
+              validateLog.set({
+                consoleProps: () => {
+                  return {
+                    Step: 'Validate Session',
+                    Message: 'The following is the collected session data after the session was successfully validated:',
+                    ...getConsoleProps(existingSession),
+                  }
+                },
+              })
 
               return isValidSession
             })
