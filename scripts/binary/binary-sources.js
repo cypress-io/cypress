@@ -18,6 +18,7 @@ const getBinaryEntryPointSource = async () => {
     platform: 'node',
     write: false,
     minify: true,
+    treeShaking: true,
   })
 
   return esbuildResult.outputFiles[0].text

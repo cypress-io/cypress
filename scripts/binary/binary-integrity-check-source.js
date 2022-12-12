@@ -35,20 +35,14 @@ const stackIntegrityCheck = function stackIntegrityCheck (options) {
   }
 
   for (let index = 0; index < options.stackToMatch.length; index++) {
-    const { functionName: expectedFunctionName, methodName: expectedMethodName, fileName: expectedFileName, line: expectedLineNumber, column: expectedColumnNumber } = options.stackToMatch[index]
+    const { functionName: expectedFunctionName, fileName: expectedFileName, line: expectedLineNumber, column: expectedColumnNumber } = options.stackToMatch[index]
     const actualFunctionName = stack[index].getFunctionName()
     const actualFileName = stack[index].getFileName()
     const actualColumnNumber = stack[index].getColumnNumber()
     const actualLineNumber = stack[index].getLineNumber()
-    const actualMethodName = stack[index].getMethodName()
 
     if (expectedFunctionName && actualFunctionName !== expectedFunctionName) {
       console.error(`Integrity check failed with expected function name ${expectedFunctionName} but got ${actualFunctionName}`)
-      throw new Error(integrityErrorMessage)
-    }
-
-    if (expectedMethodName && actualMethodName !== expectedMethodName) {
-      console.error(`Integrity check failed with expected method name ${expectedMethodName} but got ${actualMethodName}`)
       throw new Error(integrityErrorMessage)
     }
 
@@ -157,6 +151,7 @@ function integrityCheck (options) {
         fileName: '<embedded>',
       },
       {
+        functionName: 'setGlobals',
         fileName: '<embedded>',
       },
       {
@@ -179,18 +174,17 @@ function integrityCheck (options) {
         fileName: 'evalmachine.<anonymous>',
       },
       {
-        functionName: 'c._extensions.<computed>',
-        methodName: '.jsc',
+        functionName: 'v',
         // eslint-disable-next-line no-undef
         fileName: [appPath, 'index.js'].join(PATH_SEP),
         line: 1,
-        column: 2076,
+        column: 2573,
       },
       {
         // eslint-disable-next-line no-undef
         fileName: [appPath, 'index.js'].join(PATH_SEP),
         line: 1,
-        column: 2346,
+        column: 2764,
       },
     ],
   })
