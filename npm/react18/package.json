@@ -13,15 +13,15 @@
   "devDependencies": {
     "@cypress/mount-utils": "0.0.0-development",
     "@cypress/react": "0.0.0-development",
-    "@rollup/plugin-commonjs": "^17.1.0",
-    "@rollup/plugin-node-resolve": "^11.1.1",
+    "@rollup/plugin-commonjs": "^23.0.4",
+    "@rollup/plugin-node-resolve": "^15.0.1",
     "@types/react": "^16",
     "@types/react-dom": "^16",
     "cypress": "0.0.0-development",
     "react": "^16",
     "react-dom": "^16",
     "rollup": "3.7.2",
-    "rollup-plugin-typescript2": "^0.29.0",
+    "rollup-plugin-typescript2": "^0.34.1",
     "typescript": "^4.7.4"
   },
   "peerDependencies": {

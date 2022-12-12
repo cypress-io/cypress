@@ -13,11 +13,11 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^17.1.0",
-    "@rollup/plugin-node-resolve": "^11.1.1",
+    "@rollup/plugin-commonjs": "^23.0.4",
+    "@rollup/plugin-node-resolve": "^15.0.1",
     "rollup": "3.7.2",
-    "rollup-plugin-dts": "^4.2.3",
-    "rollup-plugin-typescript2": "^0.29.0",
+    "rollup-plugin-dts": "^5.0.0",
+    "rollup-plugin-typescript2": "^0.34.1",
     "typescript": "^4.7.4"
   },
   "files": [
