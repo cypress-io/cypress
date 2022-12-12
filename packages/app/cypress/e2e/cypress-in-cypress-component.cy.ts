@@ -147,7 +147,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
         expect(ctx.actions.browser.setActiveBrowserById).to.have.been.calledWith(browserId)
         expect(genId).to.eql('firefox-firefox-stable')
         expect(ctx.actions.project.launchProject).to.have.been.calledWith(
-          ctx.coreData.currentTestingType, undefined, o.sinon.match(new RegExp('cypress\-in\-cypress\/src\/TestComponent\.spec\.jsx$')),
+          ctx.coreData.currentTestingType, { shouldLaunchNewTab: false }, o.sinon.match(new RegExp('cypress\-in\-cypress\/src\/TestComponent\.spec\.jsx$')),
         )
       })
     })
