@@ -132,7 +132,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "tbiethman/23380-root-spec-pattern" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "matth/test/without-webkit-video" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -892,7 +892,7 @@ commands:
               fi
 
               curl -L https://raw.githubusercontent.com/cypress-io/cypress/$branch/scripts/ensure-node.sh --output ci-ensure-node.sh
-            else 
+            else
               # if no .node-version file exists, we no-op the node script and use the global yarn
               echo '' > ci-ensure-node.sh
             fi
