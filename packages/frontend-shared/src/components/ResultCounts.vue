@@ -13,10 +13,14 @@
     >
       <component
         :is="result.icon"
+        v-if="result.value"
         class="mt-px h-12px mr-1 w-12px"
         :class="result.class"
       />
-      <span class="sr-only">{{ result.name }}</span>
+      <span
+        v-if="result.value"
+        class="sr-only"
+      >{{ result.name }}</span>
       {{ result.value }}
     </div>
   </div>
@@ -25,14 +29,15 @@
 <script lang="ts" setup>
 
 export interface ResultCountsProps {
-  totalPassed: number|string|null
-  totalFailed: number|string|null
-  totalPending: number|string|null
-  totalSkipped: number|string|null
+  totalPassed?: number|string|null|SpecDataAggregate
+  totalFailed?: number|string|null|SpecDataAggregate
+  totalPending?: number|string|null|SpecDataAggregate
+  totalSkipped?: number|string|null|SpecDataAggregate
   order?: string[]
 }
 
 import { computed, FunctionalComponent, SVGAttributes } from 'vue'
+import type { SpecDataAggregate } from '@packages/data-context/src/gen/graphcache-config.gen'
 import SkippedIcon from '~icons/cy/status-skipped_x12.svg'
 import PassedIcon from '~icons/cy/status-passed_x12.svg'
 import FailedIcon from '~icons/cy/status-failed_x12.svg'
@@ -45,7 +50,7 @@ const props = defineProps<ResultCountsProps>()
 type CountType= 'SKIPPED' | 'PENDING' | 'PASSED' | 'FAILED'
 
 interface Status {
-  value: number|string|null
+  value: number|string|null|SpecDataAggregate
   class: string
   icon: FunctionalComponent<SVGAttributes, {}>
   name: string
@@ -53,25 +58,25 @@ interface Status {
 
 const ORDER_MAP: Record<CountType, Status> = {
   'SKIPPED': {
-    value: props.totalSkipped,
+    value: props.totalSkipped!,
     class: 'icon-dark-gray-400',
     icon: SkippedIcon,
     name: t('runs.results.skipped'),
   },
   'PENDING': {
-    value: props.totalPending,
+    value: props.totalPending!,
     class: 'icon-dark-gray-400 icon-light-white',
     icon: PendingIcon,
     name: t('runs.results.pending'),
   },
   'PASSED': {
-    value: props.totalPassed,
+    value: props.totalPassed!,
     class: 'icon-dark-jade-400',
     icon: PassedIcon,
     name: t('runs.results.passed'),
   },
   'FAILED': {
-    value: props.totalFailed,
+    value: props.totalFailed!,
     class: 'icon-dark-red-400',
     icon: FailedIcon,
     name: t('runs.results.failed'),

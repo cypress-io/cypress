@@ -99,4 +99,66 @@ describe('<DebugSpec/> responsive UI', () => {
 
     cy.percySnapshot()
   })
+
+  it('debug-results-header single group', { viewportWidth: 1032 }, () => {
+    const group1 = {
+      os: {
+        name: 'Linux',
+      },
+      browser: {
+        formattedName: 'Chrome',
+      },
+    }
+    const spec = {
+      id: '8879798756s88d',
+      path: 'cypress/tests',
+      fileName: 'auth',
+      fileExtension: '.spec.ts',
+      testsPassed: 2,
+      testsFailed: 22,
+      testsPending: 1,
+      specDuration: '2:23',
+      groups: [group1],
+      testingType: 'component',
+    }
+
+    cy.mount(() => (
+      <DebugSpec spec={spec} testResults={testResults} />
+    ))
+  })
+
+  it('debug-results-header multiple groups', { viewportWidth: 1032 }, () => {
+    const group1 = {
+      os: {
+        name: 'Linux',
+      },
+      browser: {
+        formattedName: 'Chrome',
+      },
+    }
+    const group2 = {
+      os: {
+        name: 'Unix',
+      },
+      browser: {
+        formattedName: 'Firefox',
+      },
+    }
+    const spec = {
+      id: '8879798756s88d',
+      path: 'cypress/tests',
+      fileName: 'auth',
+      fileExtension: '.spec.ts',
+      testsPassed: '22-23',
+      testsFailed: '1-2',
+      testsPending: '1-2',
+      specDuration: '2:23-3:40',
+      groups: [group1, group2],
+      testingType: 'e2e',
+    }
+
+    cy.mount(() => (
+      <DebugSpec spec={spec} testResults={testResults} />
+    ))
+  })
 })
