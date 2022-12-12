@@ -2722,6 +2722,8 @@ darwin-arm64-workflow: &darwin-arm64-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
         executor: darwin-arm64
+        # resource_class is passed as a job parameter to override `xlarge`, which isn't available on M1
+        resource_class: macos.m1.large.gen1
         requires:
           - darwin-arm64-build
 
