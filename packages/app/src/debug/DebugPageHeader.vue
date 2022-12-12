@@ -34,7 +34,7 @@
             class="font-normal mx-px px-2 text-orange-500 items-center"
             data-cy="debug-commitsAhead"
           >
-            {{ t('debugPage.header.commitsAhead', {commits: props.commitsAhead}) }}
+            {{ t('debugPage.header.commitsAhead', props.commitsAhead) }}
           </span>
         </div>
         <li class="-mt-8px text-lg text-gray-400">
@@ -118,21 +118,21 @@ const { t } = useI18n()
 
 gql`
 fragment DebugPage on CloudRun {
-	id
+  id
   runNumber
-	createdAt
-	status
+  createdAt
+  status
   totalDuration
   commitInfo {
     sha
   }
   url
-	...RunResults
-	commitInfo {
-		authorName
-		summary
-		branch
-	}
+  ...RunResults
+  commitInfo {
+    authorName
+    summary
+    branch
+  }
 }
 `
 
@@ -144,6 +144,15 @@ const props = defineProps<{
 const debug = computed(() => props.gql)
 
 const relativeCreatedAt = computed(() => dayjs(new Date(debug.value.createdAt!)).fromNow())
+
+/*
+  Format duration to in HH:mm:ss format. The `totalDuration` field is milliseconds. Remove the leading "00:" if the value is less
+  than an hour. Currently, there is no expectation that a run duration will be greater 24 hours or greater, so it is okay that
+  this format would "roll-over" in that scenario.
+  Ex: 1 second which is 1000ms = 00:01
+  Ex: 1 hour and 1 second which is 3601000ms = 01:00:01
+*/
+
 const totalDuration = computed(() => dayjs.duration(debug.value.totalDuration!).format('HH:mm:ss').replace(/^0+:/, ''))
 
 </script>

@@ -12,6 +12,7 @@
       />
     </div>
     <div
+      v-else
       data-cy="debug-empty"
     >
       <div
@@ -20,17 +21,16 @@
         {{ t('debugPage.notLoggedIn') }}
       </div>
       <div
-        v-if="loginConnectStore.user.isLoggedIn && !loginConnectStore.project.isProjectConnected"
+        v-else-if="!loginConnectStore.project.isProjectConnected"
       >
         {{ t('debugPage.notConnected' ) }}
       </div>
       <div
-        v-if="loginConnectStore.user.isLoggedIn && loginConnectStore.project.isProjectConnected && !run"
+        v-else-if="!run"
       >
         {{ t('debugPage.noRuns') }}
       </div>
     </div>
-    <!-- <pre>{{ JSON.stringify(props.gql, null, 2) }}</pre> -->
   </div>
 </template>
 

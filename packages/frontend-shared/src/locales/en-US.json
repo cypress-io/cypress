@@ -640,7 +640,7 @@
     "noRuns": "No runs",
     "header": {
       "runUrl": "View in Cypress Cloud",
-      "commitsAhead": "You are {commits} commits ahead"
+      "commitsAhead": "You are {n} commit ahead | You are {n} commits ahead"
     }
   },
   "testingType": {

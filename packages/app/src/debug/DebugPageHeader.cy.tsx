@@ -52,4 +52,29 @@ describe('<DebugPageHeader />', {
       .children().should('have.length', 2)
     })
   })
+
+  it('renders singular commit message', () => {
+    cy.mountFragment(DebugPageFragmentDoc, {
+      render: (gqlVal) => {
+        return (
+          <DebugPageHeader gql={gqlVal} commitsAhead={1}/>
+        )
+      },
+    })
+
+    cy.findByTestId('debug-commitsAhead')
+    .should('have.text', 'You are 1 commit ahead')
+  })
+
+  it('renders no commit message', () => {
+    cy.mountFragment(DebugPageFragmentDoc, {
+      render: (gqlVal) => {
+        return (
+          <DebugPageHeader gql={gqlVal} commitsAhead={0}/>
+        )
+      },
+    })
+
+    cy.findByTestId('debug-commitsAhead').should('not.exist')
+  })
 })

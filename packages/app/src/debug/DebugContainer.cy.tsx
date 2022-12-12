@@ -83,10 +83,6 @@ describe('<DebugContainer />', () => {
   })
 
   describe('testing util function: debugMapping', () => {
-    const mappingList = (specs: {id: string}[], tests: {specId: string, id: string}[]) => {
-      return specsList(specs, tests)
-    }
-
     const createSpecs = (idArr: string[]) => {
       const acc: {id: string}[] = []
 
@@ -104,7 +100,7 @@ describe('<DebugContainer />', () => {
         { specId: 'a1c', id: 'random2' },
       ]
 
-      const debugMappingArray = mappingList(spec, tests)
+      const debugMappingArray = specsList(spec, tests)
 
       expect(debugMappingArray).to.have.length(1)
       expect(debugMappingArray[0]).to.deep.equal({ spec: { id: 'a1c' }, tests: [{ specId: 'a1c', id: 'random1' }, { specId: 'a1c', id: 'random2' }] })
@@ -120,7 +116,7 @@ describe('<DebugContainer />', () => {
         { specId: '123', id: 'random6' },
       ]
 
-      const debugMappingArray = mappingList(specs, tests)
+      const debugMappingArray = specsList(specs, tests)
 
       expect(debugMappingArray).to.have.length(3)
       debugMappingArray.forEach((mapping) => {
@@ -138,7 +134,7 @@ describe('<DebugContainer />', () => {
       const specs = createSpecs(['123', '456', '789'])
       const tests = [{ specId: '123', id: 'random1' }]
 
-      const debugMappingArray = mappingList(specs, tests)
+      const debugMappingArray = specsList(specs, tests)
 
       expect(debugMappingArray).to.have.length(1)
       expect(debugMappingArray).to.deep.equal([{ spec: { id: '123' }, tests: [{ specId: '123', id: 'random1' }] }])
@@ -151,11 +147,11 @@ describe('<DebugContainer />', () => {
         { specId: '456', id: 'random2' },
       ]
 
-      let debugMappingArray = function () {
-        mappingList(specs, tests)
+      const specsListWrapper = () => {
+        return specsList(specs, tests)
       }
 
-      expect(debugMappingArray).to.throw('Could not find spec for id 456')
+      expect(specsListWrapper).to.throw('Could not find spec for id 456')
     })
   })
 })
