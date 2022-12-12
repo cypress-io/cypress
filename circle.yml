@@ -35,7 +35,7 @@ macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'matth/fix/at-video-refactor', << pipeline.git.branch >> ]
+    - equal: [ 'matth/test/at-video-refactor', << pipeline.git.branch >> ]
     - equal: [ 'skip-or-fix-flaky-tests-2', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
@@ -132,7 +132,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "matth/fix/at-video-refactor" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "matth/test/at-video-refactor" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
