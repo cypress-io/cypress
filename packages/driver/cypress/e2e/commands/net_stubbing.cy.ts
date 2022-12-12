@@ -3596,7 +3596,7 @@ describe('network stubbing', { retries: 15 }, function () {
           })
 
           // if you abort too fast in firefox or safari, the fetch is never sent to the server for us to intercept
-          if (!Cypress.isBrowser('chrome')) {
+          if (!Cypress.isBrowser({ family: 'chromium' })) {
             setTimeout(() => {
               controller.abort()
             }, 100)
