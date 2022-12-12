@@ -28,7 +28,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - /^release\/\d+\.\d+\.\d+$/
-        - 'ryanm/fix/column-line'
+        - 'circle-m1'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -37,7 +37,7 @@ macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/fix/column-line', << pipeline.git.branch >> ]
+    - equal: [ 'circle-m1', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -45,7 +45,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/fix/column-line', << pipeline.git.branch >> ]
+    - equal: [ 'circle-m1', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -63,7 +63,7 @@ windowsWorkflowFilters: &windows-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/fix/column-line', << pipeline.git.branch >> ]
+    - equal: [ 'circle-m1', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -89,11 +89,18 @@ executors:
   # executor to run on Mac OS
   # https://circleci.com/docs/2.0/executor-types/#using-macos
   # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
-  mac:
+  darwin-x64:
     macos:
       # Executor should have Node >= required version
       xcode: "14.0.0"
     resource_class: macos.x86.medium.gen2
+    environment:
+      PLATFORM: darwin
+
+  darwin-arm64:
+    macos:
+      xcode: "14.0.1"
+    resource_class: macos.m1.large.gen1
     environment:
       PLATFORM: darwin
 
@@ -108,11 +115,6 @@ executors:
     resource_class: windows.large
     environment:
       PLATFORM: windows
-
-  darwin-arm64: &darwin-arm64-executor
-    machine: true
-    environment:
-      PLATFORM: darwin
 
   linux-arm64: &linux-arm64-executor
     machine:
@@ -129,7 +131,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "ryanm/fix/column-line" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "circle-m1" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1323,12 +1325,6 @@ jobs:
     steps:
       - restore_cached_workspace
       - restore_cached_system_tests_deps
-      # TODO: Remove this once we switch off self-hosted M1 runners
-      - when:
-          condition:
-            equal: [ *darwin-arm64-executor, << parameters.executor >> ]
-          steps:
-            - run: rm -f /tmp/cypress/junit/*
       - unless:
           condition:
             or:
@@ -2668,21 +2664,19 @@ darwin-x64-workflow: &darwin-x64-workflow
   jobs:
     - node_modules_install:
         name: darwin-x64-node-modules-install
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-x64
         only-cache-for-root-user: true
 
     - build:
         name: darwin-x64-build
         context: test-runner:env-canary
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-x64
         requires:
           - darwin-x64-node-modules-install
 
     - lint:
         name: darwin-x64-lint
-        executor: mac
+        executor: darwin-x64
         requires:
           - darwin-x64-build
 
@@ -2692,21 +2686,19 @@ darwin-x64-workflow: &darwin-x64-workflow
           - test-runner:sign-mac-binary
           - test-runner:upload
           - test-runner:commit-status-checks
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-x64
         requires:
           - darwin-x64-build
 
     - test-kitchensink:
         name: darwin-x64-test-kitchensink
-        executor: mac
+        executor: darwin-x64
         requires:
           - darwin-x64-build
 
     - v8-integration-tests:
         name: darwin-x64-v8-integration-tests
-        executor: mac
-        resource_class: macos.x86.medium.gen2
+        executor: darwin-x64
         requires:
           - darwin-x64-build
 
@@ -2715,13 +2707,11 @@ darwin-arm64-workflow: &darwin-arm64-workflow
     - node_modules_install:
         name: darwin-arm64-node-modules-install
         executor: darwin-arm64
-        resource_class: cypress-io/latest_m1
         only-cache-for-root-user: true
 
     - build:
         name: darwin-arm64-build
         executor: darwin-arm64
-        resource_class: cypress-io/latest_m1
         requires:
           - darwin-arm64-node-modules-install
 
@@ -2732,14 +2722,12 @@ darwin-arm64-workflow: &darwin-arm64-workflow
           - test-runner:upload
           - test-runner:commit-status-checks
         executor: darwin-arm64
-        resource_class: cypress-io/latest_m1
         requires:
           - darwin-arm64-build
 
     - v8-integration-tests:
         name: darwin-arm64-v8-integration-tests
         executor: darwin-arm64
-        resource_class: cypress-io/latest_m1
         requires:
           - darwin-arm64-build
 
