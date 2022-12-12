@@ -13,7 +13,7 @@
 
 
     if (newToken) {
-      sessionStorage.setItem('cypressAuthToken', decodeURIComponent(newToken));
+      sessionStorage.setItem('cypressAuthToken', decodeURIComponent(newToken))
       urlParams.delete('token')
       const newSearchParams = urlParams.toString()
 
@@ -43,12 +43,22 @@
 
       // Add Login button that redirects to the idp
       const loginBtn = document.createElement("button");
-      loginBtn.innerHTML = "Login IDP"
-      loginBtn.dataset.cy = "login-idp"
+      loginBtn.innerHTML = "Login Same Origin"
+      loginBtn.dataset.cy = "login-same-origin"
       loginBtn.onclick = function () {
-        window.location.href = `http://www.idp.com:3500/fixtures/auth/idp.html?redirect=${encodeURIComponent(window.location.href)}`
+        window.location.href = `http://localhost:3500/fixtures/auth/idp.html?redirect=${encodeURIComponent(window.location.href)}`
       };
       document.body.appendChild(loginBtn);
+
+
+      // Add Login button that redirects to the idp
+      const loginIDPBtn = document.createElement("button");
+      loginIDPBtn.innerHTML = "Login IDP"
+      loginIDPBtn.dataset.cy = "login-idp"
+      loginIDPBtn.onclick = function () {
+        window.location.href = `http://www.idp.com:3500/fixtures/auth/idp.html?redirect=${encodeURIComponent(window.location.href)}`
+      };
+      document.body.appendChild(loginIDPBtn);
 
       // Add Login button that redirects to the idp
       const loginFoobarBtn = document.createElement("button");
