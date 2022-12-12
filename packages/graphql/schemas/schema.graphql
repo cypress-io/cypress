@@ -1255,7 +1255,7 @@ type Mutation {
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
 
   """Launches project from open_project global singleton"""
-  launchOpenProject(specPath: String): CurrentProject
+  launchOpenProject(shouldLaunchNewTab: Boolean, specPath: String): CurrentProject
 
   """Sets the active browser"""
   launchpadSetBrowser(
