@@ -4,7 +4,7 @@ module.exports = defineConfig({
   e2e: {
     defaultCommandTimeout: 1000,
     setupNodeEvents (on, config) {
-      require('./src/plugin')(config)
+      require('@cypress/grep/src/plugin')(config)
 
       return config
     },

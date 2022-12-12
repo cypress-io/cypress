@@ -3,6 +3,7 @@
 /// <reference types="@cypress/grep" />
 
 declare namespace Cypress {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface Chainable<Subject> {
     /**
      * Create several Todo items via UI
