@@ -466,6 +466,7 @@ const createRun = async (options = {}) => {
                 browserVersion,
                 specs,
               },
+              payload,
             })
           }
           case 'PARALLEL_DISALLOWED':
