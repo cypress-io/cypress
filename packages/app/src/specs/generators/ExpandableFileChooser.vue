@@ -38,14 +38,6 @@
         <i-cy-loading_x16 class="h-24px mr-10px animate-spin w-24px" />
       </template>
     </FileMatch>
-
-    <div
-      v-show="loading"
-      data-testid="loading"
-    >
-      <!-- TODO(ryan) UNIFY-865: Get mocks for a loading state here -->
-      Loading
-    </div>
     <ExpandableFileList
       v-show="!loading"
       :style="{ paddingTop: `${fileMatchHeight + 36}px` }"
