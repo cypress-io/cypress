@@ -2326,19 +2326,17 @@
     windicss "^3.5.1"
     windicss-webpack-plugin "^1.6.10"
 
-"@cypress-design/icon-registry@^0.4.2":
-  version "0.4.2"
-  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.4.2.tgz#bc2d913208acb33b5dfb1d8f6d7929b153e32ba0"
-  integrity sha512-iyH5xFc2abpwVPTEjoJ2ILIQy79DaR6ata76HAk9NHPWVUwG/yUPEzvp3m2T8IqgebNEuTtl4mBHM/u+jycxng==
-  dependencies:
-    camelcase "^6.3.0"
+"@cypress-design/icon-registry@^0.14.0":
+  version "0.14.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.14.0.tgz#c30cbb013b7a86700941677da661229d81493399"
+  integrity sha512-wIXr00J7azl8Jl+3DLhSK8WkWXRUvfqDKUnLrEyxQjrzbwNIQIPL0bqgY30CZbx8xoPXCIewJDYXvhgbWZQOhQ==
 
-"@cypress-design/vue-icon@^0.4.2":
-  version "0.4.2"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.4.2.tgz#3574a749efbdaf83f48251108c016c3d383160bd"
-  integrity sha512-i7YWizC/c1LFdxVZSbyTIOrj4LeiIxypemCXdygacmvogQS2buBC+CovqCMFAzKqnfBZUBGiQajMWWM5rzIduw==
+"@cypress-design/vue-icon@^0.12.1":
+  version "0.12.1"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.12.1.tgz#cb348fb697dd65305c927522643b4ede6b113821"
+  integrity sha512-AI5XUqzL9AwoNL0rvQNWzyrP5WQNGYPI2phC7b0MhO7hjrZN6Qv+Le7kHhEpAIpWuVi222t699jlvXoTRNr1Jw==
   dependencies:
-    "@cypress-design/icon-registry" "^0.4.2"
+    "@cypress-design/icon-registry" "^0.14.0"
 
 "@cypress/commit-info@2.2.0":
   version "2.2.0"
@@ -11570,7 +11568,7 @@ camelcase@^5.0.0, camelcase@^5.2.0, camelcase@^5.3.1:
   resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-5.3.1.tgz#e3c9b31569e106811df242f715725a1f4c494320"
   integrity sha512-L28STB170nwWS63UjtlEOE3dldQApaJXZkOI1uMFfzf3rRuPegHaHesyee+YxQ+W6SvRDQV6UrdOdRiR153wJg==
 
-camelcase@^6.0.0, camelcase@^6.2.0, camelcase@^6.3.0:
+camelcase@^6.0.0, camelcase@^6.2.0:
   version "6.3.0"
   resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-6.3.0.tgz#5685b95eb209ac9c0c177467778c9c84df58ba9a"
   integrity sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==

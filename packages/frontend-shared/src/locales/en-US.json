@@ -633,6 +633,16 @@
       }
     }
   },
+  "debugPage": {
+    "runFailures": "Run Failures",
+    "notLoggedIn": "Not logged in",
+    "notConnected": "Not connected",
+    "noRuns": "No runs",
+    "header": {
+      "runUrl": "View in Cypress Cloud",
+      "commitsAhead": "You are {n} commit ahead | You are {n} commits ahead"
+    }
+  },
   "testingType": {
     "modalTitle": "Choose a testing type",
     "e2e": {
@@ -854,8 +864,5 @@
     "alpha": "Alpha",
     "beta": "Beta",
     "new": "New"
-  },
-  "debugPage": {
-    "runFailures": "Run Failures"
   }
 }
