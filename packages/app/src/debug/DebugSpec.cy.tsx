@@ -5,7 +5,7 @@ import { defaultMessages } from '@cy/i18n'
 describe('<DebugSpec/> with multiple test results', () => {
   const spec: Spec = {
     id: '8879798756s88d',
-    path: 'cypress/tests',
+    path: 'cypress/tests/',
     fileName: 'auth',
     fileExtension: '.spec.ts',
   }
@@ -65,7 +65,7 @@ describe('<DebugSpec/> responsive UI', () => {
   it('renders complete UI on smaller viewports', { viewportHeight: 300, viewportWidth: 450 }, () => {
     const spec: Spec = {
       id: '5479adf90s7f',
-      path: 'cypress/tests',
+      path: 'cypress/tests/',
       fileName: 'AlertBar',
       fileExtension: '.spec.ts',
     }

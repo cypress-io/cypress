@@ -30,10 +30,9 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
-"@testing-library/cypress@8.0.2":
-  version "8.0.2"
-  resolved "https://registry.yarnpkg.com/@testing-library/cypress/-/cypress-8.0.2.tgz#b13f0ff2424dec4368b6670dfbfb7e43af8eefc9"
-  integrity sha512-KVdm7n37sg/A4e3wKMD4zUl0NpzzVhx06V9Tf0hZHZ7nrZ4yFva6Zwg2EFF1VzHkEfN/ahUzRtT1qiW+vuWnJw==
+"@testing-library/cypress@BlueWinds/cypress-testing-library#119054b5963b0d2e064b13c5cc6fc9db32c8b7b5":
+  version "0.0.0-semantically-released"
+  resolved "https://codeload.github.com/BlueWinds/cypress-testing-library/tar.gz/119054b5963b0d2e064b13c5cc6fc9db32c8b7b5"
   dependencies:
     "@babel/runtime" "^7.14.6"
     "@testing-library/dom" "^8.1.0"

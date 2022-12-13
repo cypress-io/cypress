@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import Promise from 'bluebird'
 
-import $errUtils from '../cypress/error_utils'
+import $errUtils, { CypressError } from '../cypress/error_utils'
 import type { ICypress } from '../cypress'
 import type { $Cy } from '../cypress/cy'
 import type { StateFunc } from '../cypress/state'
@@ -16,7 +16,7 @@ type retryOptions = {
   _runnable?: any
   _runnableTimeout?: number
   _start?: Date
-  error?: Error
+  error?: CypressError
   interval: number
   log: boolean
   onFail?: Function
@@ -74,7 +74,7 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
 
       ({ error, onFail } = options)
 
-      const prependMsg = errByPath('miscellaneous.retry_timed_out', {
+      const prependMsg = error?.retry === false ? '' : errByPath('miscellaneous.retry_timed_out', {
         ms: options._runnableTimeout,
       }).message
 
@@ -155,7 +155,8 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
       return Promise
       .try(() => {
         // If command is not same origin, this will throw an error. also, in this instance, this is cy
-        this.ensureCommandCanCommunicateWithAUT()
+        // @ts-ignore
+        Cypress.ensure.commandCanCommunicateWithAUT(cy)
       })
       .catch((err) => {
         options.error = err

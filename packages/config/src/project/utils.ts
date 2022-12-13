@@ -403,8 +403,6 @@ export function mergeDefaults (
 
   const defaultsForRuntime = getDefaultValues({
     ...options,
-    // TODO: clean this up. Fixed with: https://github.com/cypress-io/cypress/issues/21471
-    experimentalSessionAndOrigin: config.experimentalSessionAndOrigin,
   })
 
   _.defaultsDeep(config, defaultsForRuntime)
@@ -479,20 +477,6 @@ export function mergeDefaults (
   validateNoBreakingConfig(config, errors.warning, (err, ...args) => {
     throw makeConfigError(errors.get(err, ...args))
   }, testingType)
-
-  // TODO: https://github.com/cypress-io/cypress/issues/23093
-  // testIsolation should equal 'on' by default when experimentalSessionAndOrigin=true
-  // Once experimentalSessionAndOrigin is made GA, remove this logic and update the defaultValue
-  // to be be 'on'
-  if (testingType === 'e2e' && config.experimentalSessionAndOrigin) {
-    if (config.rawJson.testIsolation) {
-      config.resolved.testIsolation.from = 'config'
-    } else {
-      config.testIsolation = 'on'
-      config.resolved.testIsolation.value = 'on'
-      config.resolved.testIsolation.from === 'default'
-    }
-  }
 
   // We need to remove the nested propertied by testing type because it has been
   // flattened/compacted based on the current testing type that is selected

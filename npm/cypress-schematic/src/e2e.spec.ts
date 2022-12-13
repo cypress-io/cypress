@@ -27,7 +27,7 @@ const cypressSchematicPackagePath = path.join(__dirname, '..')
 const ANGULAR_PROJECTS: ProjectFixtureDir[] = ['angular-13', 'angular-14']
 
 describe('ng add @cypress/schematic / only e2e', function () {
-  this.timeout(1000 * 60 * 4)
+  this.timeout(1000 * 60 * 5)
 
   for (const project of ANGULAR_PROJECTS) {
     it('should install e2e files by default', async () => {

@@ -348,8 +348,9 @@ httpPorts.forEach((port) => {
   })
 })
 
-// Have two HTTPS ports in order to test same-site cookie behavior in `cookie_behavior.cy.ts` for experimentalSessionAndOrigin
-// Cookies can be same site if the port is different, and we need a way to test this E2E style to make sure we implement cookie handling correctly
+// Have two HTTPS ports in order to test same-site cookie behavior in `cookie_behavior.cy.ts`
+// Cookies can be same site if the port is different, and we need a way to test this E2E
+// style to make sure we implement cookie handling correctly
 httpsPorts.forEach((port) => {
   const httpsApp = createApp(port)
   const httpsServer = httpsProxy.httpsServer(httpsApp)

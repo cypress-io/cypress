@@ -173,7 +173,7 @@ declare namespace CypressCommandLine {
     title: string[]
     state: string
     body: string
-     /**
+    /**
      * Error string as it's presented in console if the test fails
      */
     displayError: string | null

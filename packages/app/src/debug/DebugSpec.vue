@@ -1,73 +1,68 @@
 <template>
   <div
-    data-cy="debug-spec-col"
-    class="grid flex flex-col px-24px gap-24px self-stretch"
+    data-cy="debug-spec-item"
+    class="rounded flex flex-col border-t-1px border-x-1px w-full overflow-hidden items-start box-border"
   >
     <div
-      data-cy="debug-spec-item"
-      class="w-full overflow-hidden flex flex-col items-start box-border border-t-1px border-x-1px rounded"
+      data-cy="debug-spec-header"
+      class="rounded-t flex flex-row bg-gray-50 border-b-1px border-b-gray-100 w-full py-12px items-center"
     >
       <div
-        data-cy="debug-spec-header"
-        class="w-full flex flex-row items-center py-12px bg-gray-50 border-b-1px border-b-gray-100 rounded-t"
+        data-cy="spec-contents"
+        class="flex flex-row w-full px-16px items-center"
       >
         <div
-          data-cy="spec-contents"
-          class="w-full flex flex-row px-16px items-center"
+          data-cy="spec-path"
+          class="flex-grow text-base non-italic truncate"
         >
-          <div
-            data-cy="spec-path"
-            class="flex-grow non-italic text-base truncate"
+          <span
+            class="font-normal text-gray-600"
           >
-            <span
-              class="font-normal text-gray-600"
-            >
-              {{ specData.path }}
-            </span>
-            <span
-              class="inline-flex items-center"
-            >
-              <SpecNameDisplay
-                :spec-file-name="specData.fileName"
-                :spec-file-extension="specData.fileExtension"
+            {{ specData.path }}
+          </span>
+          <span
+            class="inline-flex items-center"
+          >
+            <SpecNameDisplay
+              :spec-file-name="specData.fileName"
+              :spec-file-extension="specData.fileExtension"
+            />
+          </span>
+        </div>
+        <div
+          class="ml-10px"
+        >
+          <Button
+            data-cy="run-failures"
+            variant="white"
+            class="gap-x-10px inline-flex whitespace-nowrap justify-center items-center isolate"
+            :disabled="isDisabled"
+            :to="{ path: '/specs/runner', query: { file: (specData.path).replace(/\\/g, '/') } }"
+          >
+            <template #prefix>
+              <IconActionRefresh
+                data-cy="icon-refresh"
+                stroke-color="indigo-500"
               />
-            </span>
-          </div>
-          <div
-            class="ml-10px"
-          >
-            <Button
-              data-cy="run-failures"
-              variant="white"
-              class="inline-flex gap-x-10px whitespace-nowrap justify-center items-center isolate"
-              :disabled="isDisabled"
-              :to="{ path: '/specs/runner', query: { file: (specData.path).replace(/\\/g, '/') } }"
-            >
-              <template #prefix>
-                <IconActionRefresh
-                  data-cy="icon-refresh"
-                  stroke-color="indigo-500"
-                />
-              </template>
-              <!-- Wrapping this with a default template to avoid an unneeded space -->
-              <template #default>
-                {{ t('debugPage.runFailures') }}
-              </template>
-            </Button>
-          </div>
+            </template>
+            <!-- Wrapping this with a default template to avoid an unneeded space -->
+            <template #default>
+              {{ t('debugPage.runFailures') }}
+            </template>
+          </Button>
         </div>
       </div>
-      <div
-        v-for="test in specData.failedTests"
-        :key="`test-${test.id}`"
-        data-cy="test-group"
-        class="w-full flex flex-col flex-start h-12 items-start justify-center pl-16px border-b-gray-100 border-b-1px"
-      >
-        <DebugFailedTest
-          :failed-test-result="test"
-          :data-cy="`test-${test.id}`"
-        />
-      </div>
+    </div>
+    <div
+      v-for="test in specData.failedTests"
+      :key="`test-${test.id}`"
+      data-cy="test-group"
+      class="flex flex-col flex-start border-b-gray-100 border-b-1px h-12 w-full pl-16px items-start justify-center"
+    >
+      <DebugFailedTest
+        :failed-test-result="test"
+        :data-cy="`test-${test.id}`"
+      />
     </div>
   </div>
 </template>
@@ -80,8 +75,8 @@ export interface Spec {
 }
 
 export interface TestResults {
-  id: string
-  titleParts: string[]
+  readonly id: string
+  readonly titleParts: ReadonlyArray<string>
 }
 
 import { computed } from 'vue'
@@ -101,7 +96,7 @@ const props = defineProps<{
 
 const specData = computed(() => {
   return {
-    path: `${props.spec.path}/`,
+    path: props.spec.path,
     fileName: props.spec.fileName,
     fileExtension: props.spec.fileExtension,
     failedTests: props.testResults,

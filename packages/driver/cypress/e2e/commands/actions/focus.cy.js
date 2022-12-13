@@ -336,7 +336,7 @@ describe('src/cy/commands/actions/focus', () => {
 
         cy.on('fail', (err) => {
           expect(focused).to.eq(1)
-          expect(err.message).to.include('`cy.focus()` failed because this element')
+          expect(err.message).to.include('`cy.focus()` failed because the page updated')
 
           done()
         })
@@ -791,7 +791,7 @@ describe('src/cy/commands/actions/focus', () => {
 
         cy.on('fail', (err) => {
           expect(blurred).to.eq(1)
-          expect(err.message).to.include('`cy.blur()` failed because this element')
+          expect(err.message).to.include('`cy.blur()` failed because the page')
           expect(err.docsUrl).to.include('https://on.cypress.io/element-has-detached-from-dom')
 
           done()

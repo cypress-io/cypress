@@ -11,7 +11,6 @@ const createCommand = (props = {}) => {
     type: 'parent',
     chainerId: _.uniqueId('ch'),
     userInvocationStack: '',
-    injected: false,
     fn () {},
   }, props))
 }
@@ -25,15 +24,17 @@ const log = (props = {}) => {
 describe('src/cypress/command_queue', () => {
   let queue
   const state = (() => {}) as StateFunc
-  const timeout = () => {}
   const whenStable = {} as IStability
-  const fail = () => {}
-  const isCy = () => true
-  const clearTimeout = () => {}
-  const setSubjectForChainer = () => {}
+  const stubCy = {
+    timeout: () => {},
+    fail: () => {},
+    isCy: () => true,
+    clearTimeout: () => {},
+    setSubjectForChainer: () => {},
+  }
 
   beforeEach(() => {
-    queue = new CommandQueue(state, timeout, whenStable, fail, isCy, clearTimeout, setSubjectForChainer)
+    queue = new CommandQueue(state, whenStable, stubCy as any)
 
     queue.add(createCommand({
       name: 'get',

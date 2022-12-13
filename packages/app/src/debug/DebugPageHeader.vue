@@ -1,15 +1,15 @@
 <template>
   <div
     data-cy="debug"
-    class="flex flex-col pb-24px gap-16px"
+    class="flex flex-col gap-16px"
   >
     <div
-      :data-cy="`debug-header`"
-      class="grid px-24px w-full overflow-hidden flex items-center gap-y-2 py-24px"
+      data-cy="debug-header"
+      class="flex w-full grid py-24px px-24px gap-y-2 overflow-hidden items-center"
     >
       <ul
         data-cy="header-top"
-        class="flex self-stretch items-center gap-x-2 flex-row whitespace-nowrap"
+        class="flex flex-row gap-x-2 self-stretch items-center whitespace-nowrap"
       >
         <li
           v-if="debug?.commitInfo?.summary"
@@ -20,13 +20,14 @@
         </li>
         <li
           v-if="props.commitsAhead"
-          class="border rounded border-gray-100 items-center flex text-sm h-6"
+          class="border rounded flex border-gray-100 h-6 text-sm items-center"
         >
           <span
-            class="font-normal text-orange-500 px-2 mx-px items-center"
+            v-if="props.commitsAhead"
+            class="font-normal mx-px px-2 text-orange-500 items-center"
             data-cy="debug-commitsAhead"
           >
-            {{ props.commitsAhead }}
+            {{ t('debugPage.header.commitsAhead', props.commitsAhead) }}
           </span>
         </li>
         <li class="-mt-8px text-lg text-gray-400">
@@ -38,20 +39,20 @@
             :href="debug.url || '#'"
             :use-default-hocus="false"
           >
-            <span class="sr-only">Dashboard Link:</span> View in the dashboard
+            <span class="sr-only">Dashboard Link:</span> {{ t('debugPage.header.runUrl') }}
           </ExternalLink>
         </li>
       </ul>
       <ul
         data-cy="metadata"
-        class="flex flex-wrap gap-x-2 items-center whitespace-nowrap children:flex children:items-center font-normal text-sm text-gray-700"
+        class="flex flex-wrap font-normal text-sm text-gray-700 gap-x-2 items-center whitespace-nowrap children:flex children:items-center"
       >
         <li
-          class="text-sm items-center justify-center flex flex-row gap-x-2"
+          class="flex flex-row text-sm gap-x-2 items-center justify-center"
         >
           <div
-            v-if="(props.runNumber && debug.status)"
-            class="flex flex-row border rounded border-gray-200 font-semibold items-center px-2 bg-gray-50 justify-center gap-x-1 h-6"
+            v-if="(debug.runNumber && debug.status)"
+            class="border rounded flex flex-row font-semibold bg-gray-50 border-gray-200 h-6 px-2 gap-x-1 items-center justify-center"
             :data-cy="`debug-runNumber-${debug.status}`"
           >
             <SolidStatusIcon
@@ -59,7 +60,7 @@
               :status="debug.status.toLowerCase()"
             />
             <span :class="runNumberColor">
-              {{ `#${props.runNumber}` }}
+              {{ `#${debug.runNumber}` }}
             </span>
           </div>
           <DebugResults
@@ -71,24 +72,24 @@
           v-if="debug?.commitInfo?.branch"
           data-cy="debug-header-branch"
         >
-          <i-cy-tech-branch-h_x16 class="mr-1 icon-dark-gray-300 mr-8px" />
+          <i-cy-tech-branch-h_x16 class="mr-1 mr-8px icon-dark-gray-300" />
           <span class="sr-only">Branch Name:</span> {{ debug.commitInfo.branch }}
         </li>
         <li
-          v-if="props.commitHash"
+          v-if="debug.commitInfo?.sha"
           data-cy="debug-header-commitHash"
         >
           <CommitIcon
-            class="fill-white h-16px w-16px mr-11px"
+            class="h-16px fill-white mr-11px w-16px"
           />
-          <span class="sr-only">Commit Hash:</span> {{ props.commitHash }}
+          <span class="sr-only">Commit Hash:</span> {{ debug.commitInfo?.sha?.substring(0,7) }}
         </li>
         <li
           v-if="debug?.commitInfo?.authorName"
           data-cy="debug-header-author"
         >
           <i-cy-general-user_x16
-            class="mr-1 icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200 mr-11px"
+            class="mr-1 mr-11px icon-dark-gray-500 icon-light-gray-100 icon-secondary-light-gray-200"
             data-cy="debug-header-avatar"
           />
           <span class="sr-only">Commit Author:</span> {{ debug.commitInfo.authorName }}
@@ -103,7 +104,7 @@
             stroke-color="gray-500"
             fill-color="gray-50"
           />
-          <span class="sr-only">Run Total Duration:</span> {{ debug.totalDuration }} ({{ relativeCreatedAt }})
+          <span class="sr-only">Run Total Duration:</span> {{ totalDuration }} ({{ relativeCreatedAt }})
         </li>
       </ul>
     </div>
@@ -119,34 +120,34 @@ import { SolidStatusIcon } from '@cypress-design/vue-statusicon'
 import CommitIcon from '~icons/cy/commit_x14'
 import { gql } from '@urql/core'
 import { dayjs } from '../runs/utils/day.js'
+import { useI18n } from 'vue-i18n'
+import { useDurationFormat } from '../composables/useDurationFormat'
 
-// runNumber and commitHash dont currently exist in the query and therefore are being obtained as props instead
+const { t } = useI18n()
+
 gql`
 fragment DebugPage on CloudRun {
-	id
-	createdAt
-	status
+  id
+  runNumber
+  createdAt
+  status
   totalDuration
-  url
-  tags {
-    id
-    name
+  commitInfo {
+    sha
   }
-	...RunResults
-	commitInfo {
-		authorName
-		authorEmail
-		summary
-		branch
-	}
+  url
+  ...RunResults
+  commitInfo {
+    authorName
+    summary
+    branch
+  }
 }
 `
 
 const props = defineProps<{
   gql: DebugPageFragment
-  commitsAhead: string
-  commitHash: string
-  runNumber: number
+  commitsAhead: number
 }>()
 
 const debug = computed(() => props.gql)
@@ -162,6 +163,8 @@ const ICON_MAP = {
 const runNumberColor = computed(() => ICON_MAP[String(props.gql.status)]['textColor'])
 
 const relativeCreatedAt = computed(() => dayjs(new Date(debug.value.createdAt!)).fromNow())
+
+const totalDuration = useDurationFormat(debug.value.totalDuration ?? 0)
 
 </script>
 <style scoped>
