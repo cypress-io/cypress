@@ -20,7 +20,7 @@ export interface ProjectApiShape {
    *   order for CT to startup
    */
   openProjectCreate(args: InitializeProjectOptions, options: OpenProjectLaunchOptions): Promise<unknown>
-  launchProject(browser: FoundBrowser, spec: Cypress.Spec, options?: OpenProjectLaunchOpts): Promise<void>
+  launchProject(browser: FoundBrowser, spec: Cypress.Spec, options?: Partial<OpenProjectLaunchOpts>): Promise<void>
   insertProjectToCache(projectRoot: string): Promise<void>
   removeProjectFromCache(projectRoot: string): Promise<void>
   getProjectRootsFromCache(): Promise<ProjectShape[]>
@@ -44,6 +44,8 @@ export interface ProjectApiShape {
     emitter: EventEmitter
   }
   isListening: (url: string) => Promise<void>
+  resetBrowserTabsForNextTest(shouldKeepTabOpen: boolean): Promise<void>
+  resetServer(): void
 }
 
 export interface FindSpecs<T> {
@@ -226,7 +228,7 @@ export class ProjectActions {
     }
   }
 
-  async launchProject (testingType: Cypress.TestingType | null, options?: OpenProjectLaunchOpts, specPath?: string | null) {
+  async launchProject (testingType: Cypress.TestingType | null, options?: Partial<OpenProjectLaunchOpts>, specPath?: string | null) {
     if (!this.ctx.currentProject) {
       return null
     }
@@ -257,6 +259,12 @@ export class ProjectActions {
       absolute: '',
       relative: '',
       specType: testingType === 'e2e' ? 'integration' : 'component',
+    }
+
+    // Used for run-all-specs feature
+    if (options?.shouldLaunchNewTab) {
+      await this.api.resetBrowserTabsForNextTest(true)
+      this.api.resetServer()
     }
 
     await this.api.launchProject(browser, activeSpec ?? emptySpec, options)
