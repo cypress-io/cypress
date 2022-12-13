@@ -37,7 +37,7 @@ const cypressModuleApi = {
     .then((outputPath) => {
       ['SIGINT', 'SIGTERM'].forEach(signal => {
         process.on(signal, () => {
-          fs.unlinkSync(outputPath)
+          fs.unlink(outputPath)
           process.exit()
         })
       })
