@@ -8,7 +8,7 @@ import type { NetworkProxy } from '@packages/proxy'
 import type { Cfg } from './project-base'
 import xhrs from './controllers/xhrs'
 import { runner } from './controllers/runner'
-import { iframesController } from './controllers/iframes'
+import { iframesController, proxyRequestToDevServer } from './controllers/iframes'
 import type { FoundSpec } from '@packages/types'
 import { getCtx } from '@packages/data-context'
 import { graphQLHTTP } from '@packages/graphql/src/makeGraphQLServer'
@@ -101,6 +101,30 @@ export const createCommonRoutes = ({
 
     return send(req, pathToFile).pipe(res)
   })
+
+  if (testingType === 'component') {
+    router.get('*', (req, res) => {
+      if (req.hostname !== 'localhost') {
+        // Just proxy to the outside world as usual
+        networkProxy.handleHttpRequest(req, res)
+      } else {
+        /**
+         * This is a work-around for issues such where we cannot handle the routing
+         * of asset requests in the same way as a some development environments expect.
+         * This is usually because some frameworks and templates (eg Angular) do not
+         * expose certain internal configuration variables.
+         * We only proxy requests made to localhost, eg `/assets/foo.png, and not things like
+         * http://some-real-cdn.com/foo.png.
+         * Anything else continues through the usual network proxy.
+         * @see https://github.com/cypress-io/cypress/issues/24272
+         */
+        const proxyToDevServer = `${config.devServerPublicPathRoute}${req.url}`
+
+        req.url = proxyToDevServer
+        proxyRequestToDevServer(nodeProxy)(req, res)
+      }
+    })
+  }
 
   router.all('*', (req, res) => {
     networkProxy.handleHttpRequest(req, res)

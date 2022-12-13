@@ -3,6 +3,7 @@ import { Request, Response, Router } from 'express'
 import type { InitializeRoutes } from './routes'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
+import { proxyRequestToDevServer } from './controllers/iframes'
 
 const debug = Debug('cypress:server:routes-ct')
 
@@ -33,12 +34,7 @@ export const createRoutesCT = ({
     // user the node proxy here instead of the network proxy
     // to avoid the user accidentally intercepting and modifying
     // their own app.js files + spec.js files
-    nodeProxy.web(req, res, {}, (e) => {
-      if (e) {
-        // eslint-disable-next-line
-        debug('Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available', e)
-      }
-    })
+    proxyRequestToDevServer(nodeProxy)(req, res)
   })
 
   const clientRoute = config.clientRoute

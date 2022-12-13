@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express'
-import type httpProxy from 'http-proxy'
+import type HttpProxy from 'http-proxy'
 import Debug from 'debug'
 import files from './files'
 import type { Cfg } from '../project-base'
@@ -18,7 +18,18 @@ interface E2E extends IFramesController {
 }
 
 interface CT extends IFramesController {
-  nodeProxy: httpProxy
+  nodeProxy: HttpProxy
+}
+
+export function proxyRequestToDevServer (nodeProxy: HttpProxy) {
+  return (req: Request, res: Response) => {
+    nodeProxy.web(req, res, {}, (e) => {
+      if (e) {
+        // eslint-disable-next-line
+        debug('Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available', e)
+      }
+    })
+  }
 }
 
 export const iframesController = {
@@ -53,11 +64,6 @@ export const iframesController = {
     // to avoid the user accidentally intercepting and modifying
     // our internal index.html handler
 
-    nodeProxy.web(req, res, {}, (e) => {
-      if (e) {
-        // eslint-disable-next-line
-        debug('Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available', e)
-      }
-    })
+    proxyRequestToDevServer(nodeProxy)(req, res)
   },
 }
