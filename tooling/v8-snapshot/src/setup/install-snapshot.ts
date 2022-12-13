@@ -8,31 +8,11 @@ const debug = require('debug')
 const logInfo = debug('cypress:snapgen:info')
 const logDebug = debug('cypress:snapgen:debug')
 
-/*
- * Tries to resolve results from the previous step for the given environment.
- * Returns empty object if resolution failed.
- */
-function resolvePrevious ({ snapshotMetaPrevFile }) {
-  try {
-    const {
-      norewrite: previousNoRewrite,
-      deferred: previousDeferred,
-      healthy: previousHealthy,
-    } = require(snapshotMetaPrevFile)
-
-    return { previousNoRewrite, previousDeferred, previousHealthy }
-  } catch (_) {
-    return { previousNoRewrite: [], previousDeferred: [], previousHealthy: [] }
-  }
-}
-
 function getSnapshotGenerator ({
   nodeModulesOnly,
   projectBaseDir,
   snapshotCacheDir,
   snapshotEntryFile,
-  snapshotMetaPrevFile,
-  usePreviousSnapshotMetadata,
   resolverMap,
   minify,
   integrityCheckSource,
@@ -41,29 +21,12 @@ function getSnapshotGenerator ({
   projectBaseDir: string
   snapshotCacheDir: string
   snapshotEntryFile: string
-  snapshotMetaPrevFile: string
-  usePreviousSnapshotMetadata: boolean
   resolverMap: Record<string, string>
   minify: boolean
   integrityCheckSource: string | undefined
 }) {
-  const {
-    previousNoRewrite,
-    previousDeferred,
-    previousHealthy,
-  } = usePreviousSnapshotMetadata
-    ? resolvePrevious({
-      snapshotMetaPrevFile,
-    })
-    : {
-      previousNoRewrite: [], previousDeferred: [], previousHealthy: [],
-    }
-
   return new SnapshotGenerator(projectBaseDir, snapshotEntryFile, {
     cacheDir: snapshotCacheDir,
-    previousDeferred,
-    previousHealthy,
-    previousNoRewrite,
     nodeModulesOnly,
     resolverMap,
     forceNoRewrite,
@@ -87,8 +50,6 @@ export async function installSnapshot (
     projectBaseDir,
     snapshotCacheDir,
     snapshotEntryFile,
-    snapshotMetaPrevFile,
-    usePreviousSnapshotMetadata,
     minify,
     integrityCheckSource,
   },
@@ -97,7 +58,6 @@ export async function installSnapshot (
   try {
     logInfo('Generating snapshot %o', {
       nodeModulesOnly,
-      usePreviousSnapshotMetadata,
     })
 
     const snapshotGenerator = getSnapshotGenerator({
@@ -105,8 +65,6 @@ export async function installSnapshot (
       projectBaseDir,
       snapshotCacheDir,
       snapshotEntryFile,
-      snapshotMetaPrevFile,
-      usePreviousSnapshotMetadata,
       resolverMap,
       minify,
       integrityCheckSource,
