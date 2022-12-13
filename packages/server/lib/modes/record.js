@@ -258,7 +258,7 @@ const gracePeriodMessage = (gracePeriodEnds) => {
   return gracePeriodEnds || 'the grace period ends'
 }
 
-const createRun = Promise.method((options = {}) => {
+const createRun = async (options = {}) => {
   _.defaults(options, {
     group: null,
     tags: null,
@@ -308,7 +308,7 @@ const createRun = Promise.method((options = {}) => {
   debugCiInfo('commit information %o', commit)
   debugCiInfo('CI provider information %o', ci)
 
-  return api.createRun({
+  return await api.createRun({
     specs,
     group,
     tags,
@@ -514,7 +514,7 @@ const createRun = Promise.method((options = {}) => {
         throwCloudCannotProceed({ parallel, ciBuildId, group, err })
     }
   })
-})
+}
 
 const createInstance = (options = {}) => {
   let { runId, group, groupId, parallel, machineId, ciBuildId, platform, spec } = options

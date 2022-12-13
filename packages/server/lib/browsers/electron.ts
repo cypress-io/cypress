@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import EE from 'events'
+import EE from 'eventemitter2'
 import path from 'path'
 import Debug from 'debug'
 import menu from '../gui/menu'

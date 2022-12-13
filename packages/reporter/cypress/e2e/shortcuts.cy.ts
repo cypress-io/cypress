@@ -1,5 +1,5 @@
 import sinon, { SinonStub, SinonSpy } from 'sinon'
-import { EventEmitter } from 'events'
+import EventEmitter from 'eventemitter2'
 
 type EventEmitterStub = EventEmitter & Stub
 

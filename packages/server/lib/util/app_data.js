@@ -2,8 +2,6 @@ const os = require('os')
 const path = require('path')
 const ospath = require('ospath')
 const Promise = require('bluebird')
-const la = require('lazy-ass')
-const check = require('check-more-types')
 const log = require('debug')('cypress:server:appdata')
 const pkg = require('@packages/root')
 const { fs } = require('../util/fs')
@@ -12,9 +10,17 @@ const md5 = require('md5')
 const sanitize = require('sanitize-filename')
 
 const PRODUCT_NAME = pkg.productName || pkg.name
-const OS_DATA_PATH = ospath.data()
 
-const ELECTRON_APP_DATA_PATH = path.join(OS_DATA_PATH, PRODUCT_NAME)
+let electronAppDataPath
+const getElectronAppDataPath = () => {
+  const osDataPath = ospath.data()
+
+  if (!electronAppDataPath) {
+    electronAppDataPath = path.join(osDataPath, PRODUCT_NAME)
+  }
+
+  return electronAppDataPath
+}
 
 if (!PRODUCT_NAME) {
   throw new Error('Root package is missing name')
@@ -88,9 +94,6 @@ module.exports = {
   path (...paths) {
     const { env } = process
 
-    la(check.unemptyString(env.CYPRESS_INTERNAL_ENV),
-      'expected CYPRESS_INTERNAL_ENV, found', env.CYPRESS_INTERNAL_ENV)
-
     // allow overriding the app_data folder
     let folder = env.CYPRESS_CONFIG_ENV || env.CYPRESS_INTERNAL_ENV
 
@@ -98,7 +101,7 @@ module.exports = {
       folder = `${folder}-e2e-test`
     }
 
-    const p = path.join(ELECTRON_APP_DATA_PATH, 'cy', folder, ...paths)
+    const p = path.join(getElectronAppDataPath(), 'cy', folder, ...paths)
 
     log('path: %s', p)
 
@@ -106,7 +109,7 @@ module.exports = {
   },
 
   electronPartitionsPath () {
-    return path.join(ELECTRON_APP_DATA_PATH, 'Partitions')
+    return path.join(getElectronAppDataPath(), 'Partitions')
   },
 
   projectsPath (...paths) {

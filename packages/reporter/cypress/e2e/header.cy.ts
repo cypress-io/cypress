@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events'
+import EventEmitter from 'eventemitter2'
 import { RootRunnable } from '../../src/runnables/runnables-store'
 
 const { _ } = Cypress

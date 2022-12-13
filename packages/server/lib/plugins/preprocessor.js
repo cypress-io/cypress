@@ -1,7 +1,7 @@
 require('../cwd')
 
 const _ = require('lodash')
-const EE = require('events')
+const EE = require('eventemitter2')
 const path = require('path')
 const debug = require('debug')('cypress:server:preprocessor')
 const Promise = require('bluebird')

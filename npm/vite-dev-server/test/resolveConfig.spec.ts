@@ -1,5 +1,5 @@
 import Chai, { expect } from 'chai'
-import { EventEmitter } from 'events'
+import EventEmitter from 'eventemitter2'
 import * as vite from 'vite'
 import { scaffoldSystemTestProject } from './test-helpers/scaffoldProject'
 import { createViteDevServerConfig } from '../src/resolveConfig'

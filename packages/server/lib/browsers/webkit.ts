@@ -1,5 +1,5 @@
 import Debug from 'debug'
-import { EventEmitter } from 'events'
+import EventEmitter from 'eventemitter2'
 import type playwright from 'playwright-webkit'
 import type { Browser, BrowserInstance } from './types'
 import type { Automation } from '../automation'

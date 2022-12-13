@@ -7,9 +7,11 @@ const path = require('path')
 // built Electron app without ts-node hook. Assume the
 // build has been done correctly
 module.exports = function (scopeDir) {
+  const isSnapshotting = typeof global.isSnapshotting !== 'undefined' && global.isSnapshotting
+
   // Only set up ts-node if we're not using the snapshot
   // @ts-ignore getSnapshotResult is a global defined in the v8 snapshot
-  if (['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE) || typeof getSnapshotResult === 'undefined') {
+  if (!isSnapshotting && (['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE) || typeof getSnapshotResult === 'undefined')) {
     try {
     // Prevent double-compiling if we're testing the app and already have ts-node hook installed
     // TODO(tim): e2e testing does not like this, I guess b/c it's currently using the tsconfig

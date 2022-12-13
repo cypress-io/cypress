@@ -5,7 +5,7 @@ const cp = require('child_process')
 const os = require('os')
 const tty = require('tty')
 const path = require('path')
-const EE = require('events')
+const EE = require('eventemitter2')
 const mockedEnv = require('mocked-env')
 const debug = require('debug')('test')
 

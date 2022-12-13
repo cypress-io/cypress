@@ -1,5 +1,5 @@
 const _ = require('lodash')
-const EE = require('events')
+const EE = require('eventemitter2')
 const Promise = require('bluebird')
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'

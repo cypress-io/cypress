@@ -14,7 +14,6 @@ import { cookieJar } from './util/cookies'
 import { getSpecUrl } from './project_utils'
 import type { BrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions, OpenProjectLaunchOpts, FoundBrowser } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
-import { autoBindDebug } from '@packages/data-context/src/util'
 import type { BrowserInstance } from './browsers/types'
 
 const debug = Debug('cypress:server:open_project')
@@ -23,10 +22,6 @@ export class OpenProject {
   private projectBase: ProjectBase<any> | null = null
   relaunchBrowser: (() => Promise<BrowserInstance | null>) = () => {
     throw new Error('bad relaunch')
-  }
-
-  constructor () {
-    return autoBindDebug(this)
   }
 
   resetOpenProject () {

@@ -3,7 +3,7 @@ import '../../spec_helper'
 import { expect } from 'chai'
 import { Request } from 'express'
 import { SocketAllowed } from '../../../lib/util/socket_allowed'
-import { EventEmitter } from 'events'
+import EventEmitter from 'eventemitter2'
 import { Socket } from 'net'
 
 describe('lib/util/socket_allowed', function () {

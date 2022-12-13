@@ -1,6 +1,6 @@
 const { expect } = require('../spec_helper')
 
-const EE = require('events')
+const EE = require('eventemitter2')
 const Server = require('../../lib/server')
 
 describe('lib/server', () => {

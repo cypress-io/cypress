@@ -1,0 +1,20 @@
+{
+  "name": "@cypress/snapbuild-linux-ppc64le",
+  "version": "1.0.2",
+  "description": "The Linux PowerPC 64-bit Little Endian binary for snapbuild, a snapshot bundler.",
+  "main": "bin/snapshot",
+  "license": "MIT",
+  "repository": "https://github.com/cypress-io/esbuild",
+  "directories": {
+    "bin": "bin"
+  },
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "ppc64"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

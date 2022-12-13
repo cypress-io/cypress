@@ -1,6 +1,6 @@
 import Bluebird from 'bluebird'
 import Debug from 'debug'
-import EventEmitter from 'events'
+import EventEmitter from 'eventemitter2'
 import _ from 'lodash'
 import path from 'path'
 import { getCtx } from '@packages/data-context'

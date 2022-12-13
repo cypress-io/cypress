@@ -1,6 +1,6 @@
 require('../cwd')
 
-const EE = require('events')
+const EE = require('eventemitter2')
 const debug = require('debug')('cypress:ct:dev-server')
 const plugins = require('../plugins')
 const errors = require('../errors')

@@ -1,4 +1,4 @@
-const EE = require('events')
+const EE = require('eventemitter2')
 const util = require('../util')
 
 const wrap = (ipc, invoke, ids, args) => {

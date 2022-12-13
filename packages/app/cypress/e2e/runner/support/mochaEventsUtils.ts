@@ -1,7 +1,7 @@
 import type { CypressInCypressMochaEvent } from '../../../../src/runner/event-manager'
 import _ from 'lodash'
 import type { MochaLifecycleData, SanitizedMochaLifecycleData } from './mochaTypes'
-import EventEmitter from 'events'
+import EventEmitter from 'eventemitter2'
 import disparity from 'disparity'
 
 const hooks = {

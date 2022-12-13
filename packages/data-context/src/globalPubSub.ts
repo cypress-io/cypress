@@ -1,5 +1,5 @@
 /* eslint-disable no-dupe-class-members */
-import EventEmitter from 'events'
+import EventEmitter from 'eventemitter2'
 import type { DataContext } from './DataContext'
 
 type MenuItem = 'log:out'

@@ -1,5 +1,5 @@
 import Chai, { expect } from 'chai'
-import EventEmitter from 'events'
+import EventEmitter from 'eventemitter2'
 import snapshot from 'snap-shot-it'
 import { IgnorePlugin } from 'webpack'
 import { WebpackDevServerConfig } from '../src/devServer'

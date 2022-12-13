@@ -2,7 +2,7 @@ require('../../spec_helper')
 
 import 'chai-as-promised'
 import { expect } from 'chai'
-import { EventEmitter } from 'events'
+import EventEmitter from 'eventemitter2'
 import Marionette from 'marionette-client'
 import os from 'os'
 import sinon from 'sinon'
