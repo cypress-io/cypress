@@ -35,6 +35,11 @@ const cypressModuleApi = {
 
     return tmp.fileAsync()
     .then((outputPath) => {
+      process.on('SIGINT', () => {
+        fs.unlink(outputPath)
+        process.exit()
+      })
+      
       options.outputPath = outputPath
 
       return run.start(options)
