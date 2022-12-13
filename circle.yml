@@ -66,7 +66,7 @@ windowsWorkflowFilters: &windows-workflow-filters
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
     - equal: [ linux-arm64, << pipeline.git.branch >> ]
-    - equal: [ 'marktnoonan/windows-path-fix', << pipeline.git.branch >> ]
+    - equal: [ 'matth/test/at-video-refactor', << pipeline.git.branch >> ]
     - equal: [ 'skip-or-fix-flaky-tests-2', << pipeline.git.branch >> ]
     - matches:
           pattern: "-release$"
