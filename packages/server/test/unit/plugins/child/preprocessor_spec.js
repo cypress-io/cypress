@@ -1,6 +1,6 @@
 require('../../../spec_helper')
 
-const EE = require('events')
+const EE = require('eventemitter2')
 
 const util = require(`../../../../lib/plugins/util`)
 const preprocessor = require(`../../../../lib/plugins/child/preprocessor`)

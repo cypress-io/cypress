@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events'
+import EventEmitter from 'eventemitter2'
 import { action } from 'mobx'
 import appState, { AppState } from './app-state'
 import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from '../runnables/runnables-store'

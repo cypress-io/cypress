@@ -1,7 +1,7 @@
 import Bluebird from 'bluebird'
 import Debug from 'debug'
 import _ from 'lodash'
-import * as events from 'events'
+import * as events from 'eventemitter2'
 import * as path from 'path'
 import webpack from 'webpack'
 import utils from './lib/utils'

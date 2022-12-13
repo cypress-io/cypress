@@ -1,5 +1,5 @@
 import debugFn from 'debug'
-import { EventEmitter } from 'events'
+import EventEmitter from 'eventemitter2'
 import { preprocessConfig, preprocessEnv } from '../util/config'
 import { preprocessForSerialization, reifySerializedError } from '../util/serialization'
 import { $Location } from '../cypress/location'

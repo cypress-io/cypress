@@ -1,7 +1,7 @@
 const path = require('path')
 
-const serverPath = path.join(__dirname, '..')
-
 module.exports = (...args) => {
+  const serverPath = path.join(__dirname, '..')
+
   return path.join(serverPath, ...args)
 }

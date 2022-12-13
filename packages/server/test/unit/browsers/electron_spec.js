@@ -1,7 +1,7 @@
 require('../../spec_helper')
 
 const _ = require('lodash')
-const EE = require('events')
+const EE = require('eventemitter2')
 const la = require('lazy-ass')
 const check = require('check-more-types')
 

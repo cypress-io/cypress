@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events'
+import EventEmitter from 'eventemitter2'
 import { itHandlesFileOpening } from '../support/utils'
 
 describe('spec title', () => {

@@ -5,7 +5,7 @@ import 'sinon-chai'
 
 import _ from 'lodash'
 import Promise from 'bluebird'
-import { EventEmitter } from 'events'
+import EventEmitter from 'eventemitter2'
 import { BrowserWindow } from 'electron'
 import * as Windows from '../../../lib/gui/windows'
 import * as savedState from '../../../lib/saved_state'

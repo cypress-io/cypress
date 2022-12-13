@@ -1,6 +1,6 @@
 import check from 'check-more-types'
 import Debug from 'debug'
-import EE from 'events'
+import EE from 'eventemitter2'
 import _ from 'lodash'
 import path from 'path'
 import pkg from '@packages/root'

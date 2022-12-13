@@ -1,6 +1,6 @@
 import path from 'path'
 import { expect } from 'chai'
-import { once, EventEmitter } from 'events'
+import { once, EventEmitter } from 'eventemitter2'
 import http from 'http'
 import fs from 'fs-extra'
 

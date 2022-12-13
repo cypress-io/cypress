@@ -37,10 +37,10 @@ const parseArgs = function (url, args: any[] = []) {
   return url
 }
 
-const makeRoutes = (baseUrl: string, routes: typeof CLOUD_ENDPOINTS) => {
-  return _.reduce(routes, (memo, value, key) => {
+const makeRoutes = (routes: typeof CLOUD_ENDPOINTS) => {
+  return Object.entries(routes).reduce((memo, [key, value]) => {
     memo[key] = function (...args: any[]) {
-      let url = new UrlParse(baseUrl, true)
+      let url = new UrlParse(apiUrl, true)
 
       if (value) {
         url.set('pathname', value)
@@ -57,7 +57,7 @@ const makeRoutes = (baseUrl: string, routes: typeof CLOUD_ENDPOINTS) => {
   }, {} as Record<keyof typeof CLOUD_ENDPOINTS, (...args: any[]) => string>)
 }
 
-const apiRoutes = makeRoutes(apiUrl, CLOUD_ENDPOINTS)
+const apiRoutes = makeRoutes(CLOUD_ENDPOINTS)
 
 module.exports = {
   apiRoutes,

@@ -19,11 +19,18 @@ const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
 const TWO_MINUTES = humanInterval('2 minutes')
 
-const DELAYS = process.env.API_RETRY_INTERVALS ? process.env.API_RETRY_INTERVALS.split(',').map(_.toNumber) : [
-  THIRTY_SECONDS,
-  SIXTY_SECONDS,
-  TWO_MINUTES,
-]
+let delays
+const getDelays = () => {
+  if (!delays) {
+    delays = process.env.API_RETRY_INTERVALS ? process.env.API_RETRY_INTERVALS.split(',').map(_.toNumber) : [
+      THIRTY_SECONDS,
+      SIXTY_SECONDS,
+      TWO_MINUTES,
+    ]
+  }
+
+  return delays
+}
 
 const runnerCapabilities = {
   'dynamicSpecsInSerialMode': true,
@@ -100,16 +107,16 @@ const retryWithBackoff = (fn) => {
     return Promise
     .try(() => fn(retryIndex))
     .catch(isRetriableError, (err) => {
-      if (retryIndex > DELAYS.length) {
+      if (retryIndex > getDelays().length) {
         throw err
       }
 
-      const delay = DELAYS[retryIndex]
+      const delay = getDelays()[retryIndex]
 
       errors.warning(
         'CLOUD_API_RESPONSE_FAILED_RETRYING', {
           delay,
-          tries: DELAYS.length - retryIndex,
+          tries: getDelays().length - retryIndex,
           response: err,
         },
       )
@@ -169,8 +176,6 @@ export type CreateRunOptions = {
 }
 
 module.exports = {
-  rp,
-
   ping () {
     return rp.get(apiRoutes.ping())
     .catch(tagError)

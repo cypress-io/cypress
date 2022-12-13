@@ -109,6 +109,7 @@ export function scriptFromBlueprint (config: BlueprintConfig): {
 
   const wrapperOpen = Buffer.from(
     `
+var isSnapshotting = true;
 (function () {
   const PATH_SEP = '${pathSep}'
   ${integrityCheckSource || ''}
@@ -152,7 +153,8 @@ export function scriptFromBlueprint (config: BlueprintConfig): {
         value: { node: '${processNodeVersion}' },
         enumerable: false,
       },
-      nextTick: getPrevent('process', 'nextTick')
+      nextTick: getPrevent('process', 'nextTick'),
+      once: getPrevent('process', 'once'),
     })
 
     function get_process() {
@@ -211,6 +213,7 @@ export function scriptFromBlueprint (config: BlueprintConfig): {
   })
   generateSnapshot = null
 }).call(this)
+isSnapshotting = false
 `,
       'utf8',
   )

@@ -1,0 +1,20 @@
+{
+  "name": "@cypress/snapbuild-windows-32",
+  "version": "1.0.2",
+  "description": "The Windows 32-bit binary for snapbuild, a snapshot bundler.",
+  "main": "bin/snapshot.exe",
+  "license": "MIT",
+  "repository": "https://github.com/cypress-io/esbuild",
+  "directories": {
+    "bin": "bin"
+  },
+  "os": [
+    "win32"
+  ],
+  "cpu": [
+    "ia32"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -28,8 +28,6 @@ export default [
 
   // TODO: Figure out why these don't properly get flagged as norewrite: https://github.com/cypress-io/cypress/issues/23986
   'node_modules/@cspotcode/source-map-support/source-map-support.js',
-  'packages/server/lib/modes/record.js',
-  'packages/server/lib/modes/run.ts',
   'node_modules/debug/src/node.js',
   'node_modules/body-parser/node_modules/debug/src/node.js',
   'node_modules/compression/node_modules/debug/src/node.js',
@@ -55,13 +53,6 @@ export default [
   'packages/network/node_modules/minimatch/minimatch.js',
   'packages/server/node_modules/glob/node_modules/minimatch/minimatch.js',
   'node_modules/js-yaml/lib/js-yaml/type/js/function.js',
-  'packages/server/lib/open_project.ts',
-  'packages/server/lib/project-base.ts',
-  'packages/server/lib/socket-ct.ts',
-  'packages/server/lib/browsers/utils.ts',
-  'packages/server/lib/cloud/exception.ts',
-  'packages/server/lib/errors.ts',
-  'packages/server/lib/util/process_profiler.ts',
   'node_modules/prettier/index.js',
   'node_modules/prettier/parser-babel.js',
   'node_modules/prettier/parser-espree.js',

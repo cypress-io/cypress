@@ -2,7 +2,7 @@
 import { CypressError, getError } from '@packages/errors'
 import type { FullConfig, TestingType } from '@packages/types'
 import { ChildProcess, fork, ForkOptions, spawn } from 'child_process'
-import EventEmitter from 'events'
+import EventEmitter from 'eventemitter2'
 import fs from 'fs-extra'
 import path from 'path'
 import inspector from 'inspector'

@@ -1,0 +1,20 @@
+{
+  "name": "@cypress/snapbuild-linux-arm",
+  "version": "1.0.2",
+  "description": "The Linux ARM binary for snapbuild, a snapshot bundler.",
+  "main": "bin/snapshot",
+  "license": "MIT",
+  "repository": "https://github.com/cypress-io/esbuild",
+  "directories": {
+    "bin": "bin"
+  },
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "arm"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

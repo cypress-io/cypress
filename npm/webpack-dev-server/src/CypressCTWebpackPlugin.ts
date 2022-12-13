@@ -1,6 +1,6 @@
 import type { Compiler, Compilation } from 'webpack'
 import type webpack from 'webpack'
-import type { EventEmitter } from 'events'
+import type EventEmitter from 'eventemitter2'
 import _ from 'lodash'
 import fs, { PathLike } from 'fs-extra'
 import path from 'path'

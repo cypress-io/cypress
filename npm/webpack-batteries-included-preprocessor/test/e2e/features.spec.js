@@ -1,4 +1,4 @@
-const EventEmitter = require('events').EventEmitter
+const EventEmitter = require('eventemitter2')
 const { expect } = require('chai')
 const fs = require('fs-extra')
 const path = require('path')

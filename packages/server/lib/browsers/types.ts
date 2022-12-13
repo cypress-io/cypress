@@ -1,5 +1,5 @@
 import type { FoundBrowser, BrowserLaunchOpts, BrowserNewTabOpts } from '@packages/types'
-import type { EventEmitter } from 'events'
+import type EventEmitter from 'eventemitter2'
 import type { Automation } from '../automation'
 
 export type Browser = FoundBrowser & {

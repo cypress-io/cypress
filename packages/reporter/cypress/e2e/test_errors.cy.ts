@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events'
+import EventEmitter from 'eventemitter2'
 import { itHandlesFileOpening } from '../support/utils'
 import Err from '../../src/errors/err-model'
 import { RootRunnable } from '../../src/runnables/runnables-store'

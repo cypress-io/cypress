@@ -3,7 +3,7 @@ import proxyquire from 'proxyquire'
 import { expect } from 'chai'
 
 import { createModuleMatrixResult } from './test-helpers/createModuleMatrixResult'
-import EventEmitter from 'events'
+import EventEmitter from 'eventemitter2'
 
 const cypressConfig = {
   projectRoot: path.join(__dirname, 'test-fixtures'),

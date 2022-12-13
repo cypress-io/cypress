@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import type EventEmitter from 'events'
+import type EventEmitter from 'eventemitter2'
 import type CyServer from '@packages/server'
 import type {
   CypressIncomingRequest,

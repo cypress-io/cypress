@@ -10,7 +10,7 @@ import sinon from 'sinon'
 import { expect } from 'chai'
 import supertest from 'supertest'
 import { allowDestroy } from '@packages/network'
-import { EventEmitter } from 'events'
+import EventEmitter from 'eventemitter2'
 import { RemoteStates } from '@packages/server/lib/remote_states'
 import { CookieJar } from '@packages/server/lib/util/cookies'
 

@@ -1,6 +1,6 @@
 /* eslint-disable no-dupe-class-members */
 import type { ChildProcess } from 'child_process'
-import EventEmitter from 'events'
+import EventEmitter from 'eventemitter2'
 import type { CypressError } from '@packages/errors'
 import type { LegacyCypressConfigJson } from '../sources'
 

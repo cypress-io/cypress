@@ -152,7 +152,7 @@ const stopServer = () => {
   authRedirectReached = false
 }
 
-const launchNativeAuth = Promise.method((loginUrl, sendMessage) => {
+const launchNativeAuth = async (loginUrl, sendMessage) => {
   const warnCouldNotLaunch = () => {
     if (openExternalAttempted && !authRedirectReached) {
       sendMessage('AUTH_COULD_NOT_LAUNCH_BROWSER', loginUrl)
@@ -165,12 +165,12 @@ const launchNativeAuth = Promise.method((loginUrl, sendMessage) => {
 
   openExternalAttempted = true
 
-  return shell.openExternal(loginUrl)
+  return await shell.openExternal(loginUrl)
   .catch((err) => {
     debug('Error launching native auth: %o', { err })
     warnCouldNotLaunch()
   })
-})
+}
 
 /**
  * Grouping internal APIs under separate export to allow for stubbing

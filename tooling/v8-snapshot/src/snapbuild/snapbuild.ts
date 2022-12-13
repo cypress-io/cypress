@@ -23,4 +23,4 @@ const uri = packages.get(platformKey)
 
 assert(uri, `no binary package found for platform '{platformKey}'`)
 
-export const binary = require.resolve(uri)
+export const binary = require.resolve(`./${uri}`)

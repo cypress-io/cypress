@@ -1,5 +1,5 @@
 import { MobxRunnerStore } from '@packages/app/src/store'
-import { EventEmitter } from 'events'
+import EventEmitter from 'eventemitter2'
 import { RootRunnable } from '../../src/runnables/runnables-store'
 
 const runnerStore = new MobxRunnerStore('e2e')

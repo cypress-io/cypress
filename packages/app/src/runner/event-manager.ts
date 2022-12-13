@@ -1,5 +1,5 @@
 import Bluebird from 'bluebird'
-import { EventEmitter } from 'events'
+import EventEmitter from 'eventemitter2'
 import type { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 import type MobX from 'mobx'
 import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriverMap } from './event-manager-types'

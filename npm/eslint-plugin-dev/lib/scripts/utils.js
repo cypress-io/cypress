@@ -1,5 +1,5 @@
 const _ = require('lodash')
-const EE = require('events')
+const EE = require('eventemitter2')
 const sh = require('shelljs')
 // const chalk = require('chalk')
 const Promise = require('bluebird')

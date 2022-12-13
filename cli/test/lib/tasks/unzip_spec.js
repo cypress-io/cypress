@@ -1,6 +1,6 @@
 require('../../spec_helper')
 
-const events = require('events')
+const events = require('eventemitter2')
 const os = require('os')
 const path = require('path')
 const snapshot = require('../../support/snapshot')
