@@ -9,7 +9,7 @@ import { WizardFrontendFramework, WIZARD_FRAMEWORKS } from '@packages/scaffold-c
 import { parse as parseReactComponent, resolver as reactDocgenResolvers } from 'react-docgen'
 import { visit } from 'ast-types'
 
-interface ReactComponentDescriptor {
+export interface ReactComponentDescriptor {
   exportName: string
   isDefault: boolean
 }
@@ -17,7 +17,7 @@ interface ReactComponentDescriptor {
 export class CodegenActions {
   constructor (private ctx: DataContext) {}
 
-  async getReactComponentsFromFile (filePath: string): Promise<ReactComponentDescriptor[]> {
+  async getReactComponentsFromFile (filePath: string): Promise<{components: ReactComponentDescriptor[], errored?: boolean }> {
     try {
       const src = await this.ctx.fs.readFile(filePath, 'utf8')
 
@@ -42,15 +42,21 @@ export class CodegenActions {
         return acc
       }, [])
 
-      return resolvedDefs
+      return { components: resolvedDefs }
     } catch (err) {
       this.ctx.debug(err)
 
-      return []
+      // react-docgen throws an error if it doesn't find any components in a file.
+      // This is okay for our purposes, so if this is the error, catch it and return [].
+      if (err.message === 'No suitable component definition found.') {
+        return { components: [] }
+      }
+
+      return { errored: true, components: [] }
     }
   }
 
-  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType, componentName?: string): Promise<NexusGenUnions['GeneratedSpecResult']> {
+  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType, componentName?: string, isDefault?: boolean): Promise<NexusGenUnions['GeneratedSpecResult']> {
     const project = this.ctx.currentProject
 
     assert(project, 'Cannot create spec without currentProject.')
@@ -77,6 +83,7 @@ export class CodegenActions {
       currentProject: this.ctx.currentProject,
       specs: this.ctx.project.specs,
       componentName,
+      isDefault,
     })
 
     let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
