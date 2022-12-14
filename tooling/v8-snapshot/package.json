@@ -5,7 +5,7 @@
   "private": true,
   "main": "dist/v8-snapshot.js",
   "scripts": {
-    "build": "tsc && (rimraf ./dist/blueprint && cpr ./src/blueprint ./dist/blueprint && cpr ./src/snapbuild/@cypress ./dist/snapbuild/@cypress)",
+    "build": "tsc && (rimraf ./dist/blueprint && cpr ./src/blueprint ./dist/blueprint)",
     "build-prod": "yarn build",
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
@@ -43,18 +43,18 @@
   ],
   "types": "src/v8-snapshot.ts",
   "optionalDependencies": {
-    "@cypress/snapbuild-android-arm64": "1.0.2",
-    "@cypress/snapbuild-darwin-64": "1.0.2",
-    "@cypress/snapbuild-darwin-arm64": "1.0.2",
-    "@cypress/snapbuild-freebsd-64": "1.0.2",
-    "@cypress/snapbuild-freebsd-arm64": "1.0.2",
-    "@cypress/snapbuild-linux-32": "1.0.2",
-    "@cypress/snapbuild-linux-64": "1.0.2",
-    "@cypress/snapbuild-linux-arm": "1.0.2",
-    "@cypress/snapbuild-linux-arm64": "1.0.2",
-    "@cypress/snapbuild-linux-mips64le": "1.0.2",
-    "@cypress/snapbuild-linux-ppc64le": "1.0.2",
-    "@cypress/snapbuild-windows-32": "1.0.2",
-    "@cypress/snapbuild-windows-64": "1.0.2"
+    "@cypress/snapbuild-android-arm64": "1.0.3",
+    "@cypress/snapbuild-darwin-64": "1.0.3",
+    "@cypress/snapbuild-darwin-arm64": "1.0.3",
+    "@cypress/snapbuild-freebsd-64": "1.0.3",
+    "@cypress/snapbuild-freebsd-arm64": "1.0.3",
+    "@cypress/snapbuild-linux-32": "1.0.3",
+    "@cypress/snapbuild-linux-64": "1.0.3",
+    "@cypress/snapbuild-linux-arm": "1.0.3",
+    "@cypress/snapbuild-linux-arm64": "1.0.3",
+    "@cypress/snapbuild-linux-mips64le": "1.0.3",
+    "@cypress/snapbuild-linux-ppc64le": "1.0.3",
+    "@cypress/snapbuild-windows-32": "1.0.3",
+    "@cypress/snapbuild-windows-64": "1.0.3"
   }
 }

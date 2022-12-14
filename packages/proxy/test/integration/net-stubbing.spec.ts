@@ -1,4 +1,4 @@
-import { NetworkProxy, RequestResourceType } from '../../'
+import { NetworkProxy } from '../../'
 import {
   netStubbingState as _netStubbingState,
   NetStubbingState,
@@ -46,10 +46,10 @@ context('network stubbing', () => {
       request: new Request(),
       getRenderedHTMLOrigins: () => ({}),
       serverBus: new EventEmitter(),
-      resourceTypeAndCredentialManager: {
-        get (url: string, optionalResourceType?: RequestResourceType) {
+      requestedWithAndCredentialManager: {
+        get () {
           return {
-            resourceType: 'xhr',
+            requestedWith: 'xhr',
             credentialStatus: 'same-origin',
           }
         },
@@ -223,7 +223,7 @@ context('network stubbing', () => {
     let realContentLength = ''
 
     destinationApp.post('/', (req, res) => {
-      const chunks = []
+      const chunks: Buffer[] = []
 
       req.on('data', (chunk) => {
         chunks.push(chunk)
