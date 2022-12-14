@@ -8,11 +8,11 @@ import { WizardUpdateInput } from '../inputTypes/gql-WizardUpdateInput'
 import { CurrentProject } from './gql-CurrentProject'
 import { GenerateSpecResponse } from './gql-GenerateSpecResponse'
 import { Cohort, CohortInput } from './gql-Cohorts'
-import { ReactComponentDescriptor } from './gql-ReactComponentDescriptor'
 import { Query } from './gql-Query'
 import { ScaffoldedFile } from './gql-ScaffoldedFile'
 import { WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import debugLib from 'debug'
+import { ReactComponentResponse } from './gql-ReactComponentResponse'
 
 const debug = debugLib('cypress:graphql:mutation')
 
@@ -247,8 +247,8 @@ export const mutation = mutationType({
       },
     })
 
-    t.nonNull.list.nonNull.field('getReactComponentsFromFile', {
-      type: ReactComponentDescriptor,
+    t.field('getReactComponentsFromFile', {
+      type: ReactComponentResponse,
       description: 'Parse a JS or TS file to see any exported React components that are defined in the file',
       args: {
         filePath: nonNull(stringArg()),
@@ -265,9 +265,10 @@ export const mutation = mutationType({
         codeGenCandidate: nonNull(stringArg()),
         type: nonNull(CodeGenTypeEnum),
         componentName: stringArg(),
+        isDefault: booleanArg(),
       },
       resolve: (_, args, ctx) => {
-        return ctx.actions.codegen.codeGenSpec(args.codeGenCandidate, args.type, args.componentName || undefined)
+        return ctx.actions.codegen.codeGenSpec(args.codeGenCandidate, args.type, args.componentName || undefined, args.isDefault || undefined)
       },
     })
 

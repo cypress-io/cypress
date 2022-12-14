@@ -21,101 +21,101 @@ describe('CodegenActions', () => {
     const absolutePathPrefix = path.resolve('./test/unit/actions/project')
 
     it('returns React components from file with class component', async () => {
-      const reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter-class.jsx`)
+      const { components } = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter-class.jsx`)
 
-      expect(reactComponents).to.have.length(1)
-      expect(reactComponents[0].exportName).to.equal('Counter')
-      expect(reactComponents[0].isDefault).to.equal(false)
+      expect(components).to.have.length(1)
+      expect(components[0].exportName).to.equal('Counter')
+      expect(components[0].isDefault).to.equal(false)
     })
 
     it('returns React components from file with functional component', async () => {
-      const reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter-functional.jsx`)
+      const { components } = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter-functional.jsx`)
 
-      expect(reactComponents).to.have.length(1)
-      expect(reactComponents[0].exportName).to.equal('Counter')
-      expect(reactComponents[0].isDefault).to.equal(false)
+      expect(components).to.have.length(1)
+      expect(components[0].exportName).to.equal('Counter')
+      expect(components[0].isDefault).to.equal(false)
     })
 
     it('returns only exported React components from file with functional components', async () => {
-      const reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter-multiple-components.jsx`)
+      const { components } = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter-multiple-components.jsx`)
 
-      expect(reactComponents).to.have.length(2)
-      expect(reactComponents[0].exportName).to.equal('CounterContainer')
-      expect(reactComponents[0].isDefault).to.equal(false)
+      expect(components).to.have.length(2)
+      expect(components[0].exportName).to.equal('CounterContainer')
+      expect(components[0].isDefault).to.equal(false)
 
-      expect(reactComponents[1].exportName).to.equal('CounterView')
-      expect(reactComponents[1].isDefault).to.equal(false)
+      expect(components[1].exportName).to.equal('CounterView')
+      expect(components[1].isDefault).to.equal(false)
     })
 
     it('returns React components from a tsx file', async () => {
-      const reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter.tsx`)
+      const { components } = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter.tsx`)
 
-      expect(reactComponents).to.have.length(1)
-      expect(reactComponents[0].exportName).to.equal('Counter')
-      expect(reactComponents[0].isDefault).to.equal(false)
+      expect(components).to.have.length(1)
+      expect(components[0].exportName).to.equal('Counter')
+      expect(components[0].isDefault).to.equal(false)
     })
 
     it('returns React components that are exported by default', async () => {
-      let reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter-default.tsx`)
+      let reactComponents = await (await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter-default.tsx`)).components
 
       expect(reactComponents).to.have.length(1)
       expect(reactComponents[0].exportName).to.equal('CounterDefault')
       expect(reactComponents[0].isDefault).to.equal(true)
 
-      reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/default-anonymous.jsx`)
+      reactComponents = await (await actions.getReactComponentsFromFile(`${absolutePathPrefix}/default-anonymous.jsx`)).components
       expect(reactComponents).to.have.length(1)
       expect(reactComponents[0].exportName).to.equal('Component')
       expect(reactComponents[0].isDefault).to.equal(true)
 
-      reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/default-function.jsx`)
+      reactComponents = await (await actions.getReactComponentsFromFile(`${absolutePathPrefix}/default-function.jsx`)).components
       expect(reactComponents).to.have.length(1)
       expect(reactComponents[0].exportName).to.equal('HelloWorld')
       expect(reactComponents[0].isDefault).to.equal(true)
 
-      reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/default-class.jsx`)
+      reactComponents = await (await actions.getReactComponentsFromFile(`${absolutePathPrefix}/default-class.jsx`)).components
       expect(reactComponents).to.have.length(1)
       expect(reactComponents[0].exportName).to.equal('HelloWorld')
       expect(reactComponents[0].isDefault).to.equal(true)
 
-      reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/default-specifier.jsx`)
+      reactComponents = await (await actions.getReactComponentsFromFile(`${absolutePathPrefix}/default-specifier.jsx`)).components
       expect(reactComponents).to.have.length(1)
       expect(reactComponents[0].exportName).to.equal('HelloWorld')
       expect(reactComponents[0].isDefault).to.equal(true)
     })
 
     it('returns React components defined with arrow functions', async () => {
-      const reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter-arrow-function.jsx`)
+      const { components } = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter-arrow-function.jsx`)
 
-      expect(reactComponents).to.have.length(1)
-      expect(reactComponents[0].exportName).to.equal('Counter')
-      expect(reactComponents[0].isDefault).to.equal(false)
+      expect(components).to.have.length(1)
+      expect(components[0].exportName).to.equal('Counter')
+      expect(components[0].isDefault).to.equal(false)
     })
 
     it('returns React components from a file with multiple separate export statements', async () => {
-      const reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter-separate-exports.jsx`)
+      const { components } = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter-separate-exports.jsx`)
 
-      expect(reactComponents).to.have.length(2)
-      expect(reactComponents[0].exportName).to.equal('CounterView')
-      expect(reactComponents[0].isDefault).to.equal(false)
-      expect(reactComponents[1].exportName).to.equal('CounterContainer')
-      expect(reactComponents[1].isDefault).to.equal(true)
+      expect(components).to.have.length(2)
+      expect(components[0].exportName).to.equal('CounterView')
+      expect(components[0].isDefault).to.equal(false)
+      expect(components[1].exportName).to.equal('CounterContainer')
+      expect(components[1].isDefault).to.equal(true)
     })
 
     it('returns React components that are exported and aliased', async () => {
-      const reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/export-alias.jsx`)
+      const { components } = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/export-alias.jsx`)
 
-      expect(reactComponents).to.have.length(1)
-      expect(reactComponents[0].exportName).to.equal('HelloWorld')
-      expect(reactComponents[0].isDefault).to.equal(false)
+      expect(components).to.have.length(1)
+      expect(components[0].exportName).to.equal('HelloWorld')
+      expect(components[0].isDefault).to.equal(false)
     })
 
     // TODO: "react-docgen" will resolve HOCs but our export detection does not. Can fall back to displayName here
     it.skip('handles higher-order-components', async () => {
-      const reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter-hoc.jsx`)
+      const { components } = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter-hoc.jsx`)
 
-      expect(reactComponents).to.have.length(1)
-      expect(reactComponents[0].exportName).to.equal('Counter')
-      expect(reactComponents[0].isDefault).to.equal(true)
+      expect(components).to.have.length(1)
+      expect(components[0].exportName).to.equal('Counter')
+      expect(components[0].isDefault).to.equal(true)
     })
 
     it('correctly parses typescript files', async () => {
@@ -127,9 +127,9 @@ describe('CodegenActions', () => {
     })
 
     it('does not throw while parsing empty file', async () => {
-      const reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/empty.jsx`)
+      const { components } = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/empty.jsx`)
 
-      expect(reactComponents).to.have.length(0)
+      expect(components).to.have.length(0)
     })
   })
 })

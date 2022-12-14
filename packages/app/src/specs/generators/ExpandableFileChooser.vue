@@ -1,11 +1,14 @@
 <!--
 /**==============================================
- * *             FileChooser.vue
+ * *          ExpandableFileChooser.vue
  * Filter a list of files by a mix of glob pattern
  * and a search string that includes a file's relative
  * path.
  *
- * Features to note: debouncing + loading
+ * When clicked, the files will expand to display the
+ * #expanded-content slot.
+ *
+ * Features to note: debouncing + loading + row expanding
  * ==============================================
  * *                Debouncing
  *
@@ -35,22 +38,19 @@
         <i-cy-loading_x16 class="h-24px mr-10px animate-spin w-24px" />
       </template>
     </FileMatch>
-
-    <div
-      v-show="loading"
-      data-testid="loading"
-    >
-      <!-- TODO(ryan) UNIFY-865: Get mocks for a loading state here -->
-      Loading
-    </div>
-    <FileList
+    <ExpandableFileList
       v-show="!loading"
       :style="{ paddingTop: `${fileMatchHeight + 36}px` }"
       class="right-24px left-24px absolute"
       :files="filteredFiles"
       :search="filePathSearch"
-      @selectFile="selectFile"
     >
+      <template #expanded-content="{file}">
+        <slot
+          name="item"
+          :file="file"
+        />
+      </template>
       <template #no-results>
         <NoResults
           empty-search
@@ -59,7 +59,7 @@
           @clear="noResults.clear"
         />
       </template>
-    </FileList>
+    </ExpandableFileList>
   </CreateSpecModalBody>
 </template>
 
@@ -70,7 +70,7 @@ import { useI18n } from '@cy/i18n'
 
 import NoResults from '@cy/components/NoResults.vue'
 import CreateSpecModalBody from './CreateSpecModalBody.vue'
-import FileList from './FileList.vue'
+import ExpandableFileList from './ExpandableFileList.vue'
 import FileMatch from '../../components/FileMatch.vue'
 import { gql } from '@urql/core'
 import type { FileParts } from '@packages/data-context/src/gen/graphcache-config.gen'
@@ -95,7 +95,6 @@ fragment FileChooser on FileParts {
 `
 
 const emits = defineEmits<{
-  (eventName: 'selectFile', value: File)
   (eventName: 'update:extensionPattern', value: string)
 }>()
 
@@ -103,10 +102,6 @@ const emits = defineEmits<{
 const initialExtensionPattern = props.extensionPattern
 const localExtensionPattern = ref(props.extensionPattern)
 const filePathSearch = ref('')
-
-const selectFile = (file) => {
-  emits('selectFile', file)
-}
 
 ///*------- Styling -------*/
 
