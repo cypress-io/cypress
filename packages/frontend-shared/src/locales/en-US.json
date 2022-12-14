@@ -237,6 +237,13 @@
     },
     "nav": {
       "ariaLabel": "Pages"
+    },
+    "debug": {
+      "new": "New",
+      "debugFeature": "New Debug feature",
+      "passed": "Last recorded run passed",
+      "failed": "Last recorded run had {n} test failure | Last recorded run had {n} test failures",
+      "errored": "Last recorded run had an error"
     }
   },
   "topNav": {
