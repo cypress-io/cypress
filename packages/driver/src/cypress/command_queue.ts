@@ -382,10 +382,6 @@ export class CommandQueue extends Queue<$Command> {
         this.cy.setSubjectForChainer(command.get('chainerId'), [subject])
       }
 
-      // TODO: This line was causing subjects to be cleaned up prematurely in some instances (Specifically seen on the within command)
-      // The command log would print the yielded value as null if checked outside of the current command chain.
-      // this.cleanSubjects()
-
       this.state({
         commandIntermediateValue: undefined,
         // reset the nestedIndex back to null
@@ -418,8 +414,6 @@ export class CommandQueue extends Queue<$Command> {
           prev: this.at(this.index - 1),
           next: this.at(this.index + 1),
         })
-
-        this.cy.setSubjectForChainer(command.get('chainerId'), [command.get('subject')])
 
         if (command.state === 'skipped') {
           Cypress.action('cy:skipped:command:end', command)
@@ -561,28 +555,5 @@ export class CommandQueue extends Queue<$Command> {
     })
 
     return promise
-  }
-
-  // This function iterates through all upcoming commands in the queue, then
-  // discards the subject chain for every chainer that can't be referenced
-  // in the future (eg, no upcoming commands belong to the same chain).
-
-  // This is safe because aliases (which might be referenced later) are stored
-  // separately, in state('aliases'), and any subjects that "flow upwards" (eg.
-  // the subject of a chain inside a .then() command) have already replaced
-  // the subject of their parent chainer by the time this is called.
-  cleanSubjects () {
-    const stillNeeded = this.queueables.slice(this.index).map((c) => c.get('chainerId'))
-
-    this.queueables.slice(0, this.index).forEach((command) => {
-      // Once a command has resolved, and its chainer is no longer referenced
-      // by future commands, we can throw away the reference to the function
-      // and its subject to free memory.
-      if (command.get('subject') && stillNeeded.indexOf(command.get('chainerId')) === -1) {
-        command.set({ fn: null, subject: null, queryFn: null })
-      }
-    })
-
-    this.cy.state('subjects', _.pick(this.cy.state('subjects'), stillNeeded))
   }
 }

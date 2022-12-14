@@ -565,5 +565,21 @@ describe('driver/src/cypress/cy', () => {
 
       cy.get('body').find('#specific-contains').children().should('have.class', 'active')
     })
+
+    it('assertions do not break subjectChains', { defaultCommandTimeout: 1000 }, () => {
+      Cypress.Commands.addQuery('noop2', () => (n) => n)
+      const list = [0]
+
+      cy.on('command:retry', () => list[0]++)
+
+      // .wrap() is overwritten by the 'overwrite custom command' tests,
+      // mangling the return value, so we use .then() instead for the same
+      // effect.
+      cy.then(() => list)
+      .its(0)
+      .should('be.gt', 0)
+      .noop2()
+      .should('equal', 3)
+    })
   })
 })
