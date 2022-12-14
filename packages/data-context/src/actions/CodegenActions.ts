@@ -22,7 +22,7 @@ export class CodegenActions {
       const src = await this.ctx.fs.readFile(filePath, 'utf8')
 
       const exportResolver: ExportResolver = new Map()
-      let result = parseReactComponent(src, findAllWithLink(exportResolver))
+      let result = parseReactComponent(src, findAllWithLink(exportResolver), undefined, { parserOptions: { plugins: ['typescript', 'jsx'] } })
 
       // types appear to be incorrect in react-docgen@6.0.0-alpha.3
       // TODO: update when 6.0.0 stable is out for fixed types.

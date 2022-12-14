@@ -118,6 +118,14 @@ describe('CodegenActions', () => {
       expect(reactComponents[0].isDefault).to.equal(true)
     })
 
+    it('correctly parses typescript files', async () => {
+      const reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/LoginForm.tsx`)
+
+      expect(reactComponents).to.have.length(1)
+      expect(reactComponents[0].exportName).to.equal('LoginForm')
+      expect(reactComponents[0].isDefault).to.equal(true)
+    })
+
     it('does not throw while parsing empty file', async () => {
       const reactComponents = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/empty.jsx`)
 
