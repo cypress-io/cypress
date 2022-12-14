@@ -122,7 +122,7 @@ function validateCreateFromReactComponentCard (beforeEachFn: () => void, expecte
   it('Allows for the user to search through their components', () => {
     cy.get('@ComponentCard').click()
 
-    cy.findByText('*.{js,jsx,ts,tsx}').should('be.visible')
+    cy.findByText('*.{js,jsx,tsx}').should('be.visible')
     cy.findByText('5 matches').should('be.visible')
     cy.findByLabelText('file-name-input').type('App')
 
@@ -193,7 +193,7 @@ function validateCreateFromReactComponentCard (beforeEachFn: () => void, expecte
 
       // There appears to be a race condition here where sometimes we try to run the spec
       // before the file has been written to. Waiting here for 1 second resolves the issue.
-      cy.wait(1000)
+      cy.wait(2000)
 
       cy.findByRole('link', { name: 'Okay, run the spec' })
       .should('have.attr', 'href', `#/specs/runner?file=${expectedSpecPath}`).click()
