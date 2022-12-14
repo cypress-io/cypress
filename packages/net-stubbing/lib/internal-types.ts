@@ -24,6 +24,7 @@ export const SERIALIZABLE_REQ_PROPS = [
   'responseTimeout',
   'followRedirect',
   'resourceType',
+  'query',
 ]
 
 export const SERIALIZABLE_RES_PROPS = _.concat(
