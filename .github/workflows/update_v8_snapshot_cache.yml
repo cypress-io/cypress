@@ -88,7 +88,7 @@ jobs:
         if: ${{ inputs.commit_directly_to_branch != true }}
         run: |
           echo "BRANCH_NAME=update-v8-snapshot-cache-on-${{ env.BASE_BRANCH }}" >> $GITHUB_ENV
-          echo "BRANCH_EXISTS=$(git show-ref --verify --quiet refs/remotes/origin/${{ env.BRANCH_NAME }} && echo 'true')" >> $GITHUB_ENV
+          echo "BRANCH_EXISTS=$(git show-ref --verify --quiet refs/remotes/origin/update-v8-snapshot-cache-on-${{ env.BASE_BRANCH }} && echo 'true')" >> $GITHUB_ENV
         shell: bash
       - name: Check need for PR or branch update
         id: check-need-for-pr
