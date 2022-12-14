@@ -4,6 +4,7 @@
     "./get-stream/buffer-stream.js",
     "./graceful-fs/polyfills.js",
     "./lockfile/lockfile.js",
+    "./node_modules/@babel/traverse/lib/index.js",
     "./node_modules/@babel/traverse/lib/path/comments.js",
     "./node_modules/@babel/traverse/lib/path/conversion.js",
     "./node_modules/@babel/traverse/lib/path/family.js",
@@ -97,14 +98,12 @@
     "./node_modules/@babel/helper-environment-visitor/lib/index.js",
     "./node_modules/@babel/helper-module-transforms/lib/index.js",
     "./node_modules/@babel/traverse/lib/context.js",
-    "./node_modules/@babel/traverse/lib/index.js",
     "./node_modules/@babel/traverse/lib/path/ancestry.js",
     "./node_modules/@babel/traverse/lib/path/context.js",
     "./node_modules/@babel/traverse/lib/path/index.js",
     "./node_modules/@babel/traverse/lib/path/modification.js",
     "./node_modules/@babel/traverse/lib/path/removal.js",
     "./node_modules/@babel/traverse/lib/path/replacement.js",
-    "./node_modules/@babel/traverse/lib/scope/index.js",
     "./node_modules/@babel/traverse/lib/traverse-node.js",
     "./node_modules/@babel/types/lib/definitions/core.js",
     "./node_modules/@babel/types/lib/definitions/experimental.js",
@@ -938,6 +937,7 @@
     "./node_modules/@babel/traverse/lib/path/lib/removal-hooks.js",
     "./node_modules/@babel/traverse/lib/path/lib/virtual-types.js",
     "./node_modules/@babel/traverse/lib/scope/binding.js",
+    "./node_modules/@babel/traverse/lib/scope/index.js",
     "./node_modules/@babel/traverse/lib/scope/lib/renamer.js",
     "./node_modules/@babel/traverse/lib/visitors.js",
     "./node_modules/@babel/types/lib/asserts/assertNode.js",
@@ -3865,5 +3865,5 @@
     "./tooling/v8-snapshot/cache/dev-win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "2b3d89f7a1a265c82dca136389090ad2ea2e7792f9ad58f6eb05166fafad127f"
+  "deferredHash": "9d8a0e7c56c6c450d8c89f26b71f493bddbf8eaef55005375741bd48fabaaacf"
 }
