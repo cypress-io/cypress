@@ -2,14 +2,29 @@ import { hookRequire } from '@packages/server/hook-require'
 
 hookRequire({ forceTypeScript: false })
 
+// Important!!! Ensure to import the prod dependencies (i.e. things that will be executing from the inner Cypress of Cypress in Cypress)
+// from ./prod-dependencies.ts as this is pre-loaded in the v8 snapshot via ./v8-snapshot-entry.ts. Otherwise, these dependencies
+// will not properly be marked as loaded in the v8 snapshot and may be reloaded when referenced from within the snapshot itself.
+import {
+  getOperationName,
+  Response,
+  makeGraphQLServer,
+  clearCtx,
+  DataContext,
+  globalPubSub,
+  setCtx,
+  buildSchema,
+  execute,
+  ExecutionResult,
+  GraphQLError,
+  parse,
+} from './prod-dependencies'
+
 import path from 'path'
 import execa from 'execa'
 
 import type { CyTaskResult, OpenGlobalModeOptions, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from '../support/e2e'
 import { fixtureDirs } from '@tooling/system-tests'
-// import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
-// Ensure to import the prod dependencies from the file that is loaded via the v8 snapshot so that they are included in the snapshot
-import { getOperationName, Response, makeGraphQLServer, clearCtx, DataContext, globalPubSub, setCtx, buildSchema, execute, ExecutionResult, GraphQLError, parse } from './prod-dependencies'
 import * as inspector from 'inspector'
 import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
