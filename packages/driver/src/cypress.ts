@@ -544,7 +544,8 @@ class $Cypress {
       case 'runner:test:after:run':
         this.runner.cleanupQueue(this.config('numTestsKeptInMemory'))
 
-        if (args[0].order % 5 === 0) {
+        // run garbage collection every 5th test in Chromium-based browsers
+        if (Cypress.isBrowser({ family: 'chromium' }) && args[0].order % 5 === 0) {
           Cypress.automation('remote:debugger:protocol', { command: 'HeapProfiler.collectGarbage' })
         }
 
