@@ -8,17 +8,12 @@ import execa from 'execa'
 import type { CyTaskResult, OpenGlobalModeOptions, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from '../support/e2e'
 import { fixtureDirs } from '@tooling/system-tests'
 // import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
-import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
-import { clearCtx, DataContext, globalPubSub, setCtx } from '@packages/data-context'
+import { getOperationName, Response, makeGraphQLServer, clearCtx, DataContext, globalPubSub, setCtx, fs, buildSchema, execute, ExecutionResult, GraphQLError, parse } from './dependencies'
 import * as inspector from 'inspector'
 import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
-import fs from 'fs-extra'
-import { buildSchema, execute, ExecutionResult, GraphQLError, parse } from 'graphql'
-import { Response } from 'cross-fetch'
 
 import { CloudQuery } from '@packages/graphql/test/stubCloudTypes'
-import { getOperationName } from '@urql/core'
 import pDefer from 'p-defer'
 
 const pkg = require('@packages/root')
@@ -90,7 +85,7 @@ async function makeE2ETasks () {
   // require'd from @packages/server & @tooling/system-tests so we don't import
   // types which would pollute strict type checking
   const argUtils = require('@packages/server/lib/util/args')
-  const { makeDataContext } = require('@packages/server/lib/makeDataContext')
+  const { makeDataContext } = require('./dependencies')
   const Fixtures = require('@tooling/system-tests') as FixturesShape
   const { scaffoldCommonNodeModules, scaffoldProjectNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 
