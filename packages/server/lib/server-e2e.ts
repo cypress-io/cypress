@@ -1,11 +1,12 @@
 import Bluebird from 'bluebird'
 import Debug from 'debug'
+import type { IncomingHttpHeaders } from 'http'
 import isHtml from 'is-html'
 import _ from 'lodash'
 import stream from 'stream'
 import url from 'url'
 import httpsProxy from '@packages/https-proxy'
-import { getRoutesForRequest } from '@packages/net-stubbing'
+import { getRoutesForRequest, NetStubbingState } from '@packages/net-stubbing'
 import { concatStream, cors } from '@packages/network'
 import { graphqlWS } from '@packages/graphql/src/makeGraphQLServer'
 
@@ -18,6 +19,20 @@ import * as ensureUrl from './util/ensure-url'
 import headersUtil from './util/headers'
 import statusCode from './util/status_code'
 import type { Cfg } from './project-base'
+
+export const matchesNetStubbingRoute = (requestOptions: { url: string, headers: IncomingHttpHeaders, method: string }, netStubbingState: NetStubbingState) => {
+  // @ts-ignore
+  const iterator = getRoutesForRequest(netStubbingState?.routes, {
+    proxiedUrl: requestOptions.url,
+    headers: requestOptions.headers,
+    method: requestOptions.method,
+  })
+
+  // If the iterator is exhausted (done) on the first try, then 0 matches were found
+  const zeroMatches = iterator.next().done
+
+  return !zeroMatches
+}
 
 type WarningErr = Record<string, any>
 
@@ -183,21 +198,6 @@ export class ServerE2E extends ServerBase<SocketE2E> {
 
     const runPhase = (fn) => {
       return currentPromisePhase = fn()
-    }
-
-    const matchesNetStubbingRoute = (requestOptions) => {
-      const proxiedReq = {
-        proxiedUrl: requestOptions.url,
-        ..._.pick(requestOptions, ['headers', 'method']),
-        // TODO: add `body` here once bodies can be statically matched
-      }
-
-      // @ts-ignore
-      const iterator = getRoutesForRequest(this.netStubbingState?.routes, proxiedReq)
-      // If the iterator is exhausted (done) on the first try, then 0 matches were found
-      const zeroMatches = iterator.next().done
-
-      return !zeroMatches
     }
 
     return this._urlResolver = (p = new Bluebird<Record<string, any>>((resolve, reject, onCancel) => {
@@ -377,7 +377,8 @@ export class ServerE2E extends ServerBase<SocketE2E> {
         },
       })
 
-      if (matchesNetStubbingRoute(options)) {
+      // @ts-ignore
+      if (matchesNetStubbingRoute(options, this.netStubbingState)) {
         // TODO: this is being used to force cy.visits to be interceptable by network stubbing
         // however, network errors will be obsfucated by the proxying so this is not an ideal solution
         _.merge(options, {

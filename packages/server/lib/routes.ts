@@ -3,7 +3,6 @@ import Debug from 'debug'
 import { ErrorRequestHandler, Request, Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
-import { getRoutesForRequest } from '@packages/net-stubbing'
 
 import type { NetworkProxy } from '@packages/proxy'
 import type { Cfg } from './project-base'
@@ -15,7 +14,7 @@ import { getCtx } from '@packages/data-context'
 import { graphQLHTTP } from '@packages/graphql/src/makeGraphQLServer'
 import type { RemoteStates } from './remote_states'
 import type { NetStubbingState } from '@packages/net-stubbing/lib/server'
-import type { IncomingHttpHeaders } from 'http'
+import { matchesNetStubbingRoute } from './server-e2e'
 
 const debug = Debug('cypress:server:routes')
 
@@ -107,25 +106,9 @@ export const createCommonRoutes = ({
     return send(req, pathToFile).pipe(res)
   })
 
-  const matchesNetStubbingRoute = (url: string, method: string, headers: IncomingHttpHeaders) => {
-    const proxiedReq = {
-      proxiedUrl: url,
-      headers,
-      method,
-      // TODO: add `body` here once bodies can be statically matched
-    }
-
-    // @ts-ignore
-    const iterator = getRoutesForRequest(netStubbingState?.routes, proxiedReq)
-    // If the iterator is exhausted (done) on the first try, then 0 matches were found
-    const zeroMatches = iterator.next().done
-
-    return !zeroMatches
-  }
-
   if (testingType === 'component') {
     router.get('*', (req, res) => {
-      const isCyInterceptReq = matchesNetStubbingRoute(req.url, req.method, req.headers)
+      const isCyInterceptReq = matchesNetStubbingRoute(req, netStubbingState)
 
       // If it's not a request a route or asset served by the user's own app,
       // or it's a request that the user wants to intercept via `cy.intercept`
