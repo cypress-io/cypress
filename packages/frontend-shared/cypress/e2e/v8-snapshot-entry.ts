@@ -1,1 +1,1 @@
-import './dependencies'
+import './prod-dependencies'
