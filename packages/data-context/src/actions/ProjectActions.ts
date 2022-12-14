@@ -1,6 +1,6 @@
 import type { CodeGenType, MutationSetProjectPreferencesInGlobalCacheArgs, NexusGenObjects, NexusGenUnions } from '@packages/graphql/src/gen/nxs.gen'
 import { InitializeProjectOptions, FoundBrowser, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig, AllowedState, SpecWithRelativeRoot, OpenProjectLaunchOpts, RUN_ALL_SPECS, RUN_ALL_SPECS_KEY } from '@packages/types'
-import type { EventEmitter } from 'eventemitter2'
+import type EventEmitter from 'eventemitter2'
 import execa from 'execa'
 import path from 'path'
 import assert from 'assert'
