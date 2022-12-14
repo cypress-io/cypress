@@ -174,7 +174,7 @@
     "inquirer": "3.3.0",
     "inquirer-confirm": "2.0.3",
     "lazy-ass": "1.6.0",
-    "lerna": "3.22.1",
+    "lerna": "6.2.0",
     "lint-staged": "11.1.2",
     "listr2": "3.8.3",
     "lodash": "^4.17.21",
