@@ -274,7 +274,7 @@ export = {
 
     automation.use(cdpAutomation)
     await Promise.all([
-      options.writeVideoFrame && cdpAutomation.startVideoRecording(options.writeVideoFrame),
+      options.writeVideoFrame && cdpAutomation.startVideoRecording(options.writeVideoFrame, screencastOpts()),
       this._handleDownloads(win, options.downloadsFolder, automation),
     ])
 

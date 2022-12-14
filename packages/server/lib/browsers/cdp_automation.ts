@@ -189,10 +189,10 @@ export class CdpAutomation {
     onFn('Network.responseReceived', this.onResponseReceived)
   }
 
-  async startVideoRecording (writeVideoFrame: WriteVideoFrame, screencastOpts?) {
-    this.onFn('Page.screencastFrame', (e) => {
+  async startVideoRecording (writeVideoFrame: WriteVideoFrame, screencastOpts) {
+    this.onFn('Page.screencastFrame', async (e) => {
       writeVideoFrame(Buffer.from(e.data, 'base64'))
-      this.sendDebuggerCommandFn('Page.screencastFrameAck', { sessionId: e.sessionId })
+      await this.sendDebuggerCommandFn('Page.screencastFrameAck', { sessionId: e.sessionId })
     })
 
     await this.sendDebuggerCommandFn('Page.startScreencast', screencastOpts)
