@@ -4,7 +4,7 @@ import { URL } from 'url'
 import { cors } from '@packages/network'
 import { urlOriginsMatch, urlSameSiteMatch } from '@packages/network/lib/cors'
 import { AutomationCookie, Cookie, CookieJar, toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
-import type { RequestCredentialLevel, RequestResourceType } from '../../types'
+import type { RequestCredentialLevel, RequestedWithHeader } from '../../types'
 
 type SiteContext = 'same-origin' | 'same-site' | 'cross-site'
 
@@ -12,7 +12,7 @@ interface RequestDetails {
   url: string
   isAUTFrame: boolean
   doesTopNeedSimulating: boolean
-  resourceType?: RequestResourceType
+  requestedWith?: RequestedWithHeader
   credentialLevel?: RequestCredentialLevel
 }
 
@@ -23,18 +23,18 @@ interface RequestDetails {
  * which is critical for lax cookies
  * @param {string} requestUrl - the url of the request
  * @param {string} AUTUrl - The current url of the app under test
- * @param {RequestResourceType} [resourceType] -
+ * @param {requestedWith} [requestedWith] -
  * @param {RequestCredentialLevel} [credentialLevel] - The credentialLevel of the request. For `fetch` this is `omit|same-origin|include` (defaults to same-origin)
  * and for `XmlHttpRequest` it is `true|false` (defaults to false)
  * @param {isAutFrame} [boolean] - whether or not the request is from the AUT Iframe or not
  * @returns {boolean}
  */
-export const shouldAttachAndSetCookies = (requestUrl: string, AUTUrl: string | undefined, resourceType?: RequestResourceType, credentialLevel?: RequestCredentialLevel, isAutFrame?: boolean): boolean => {
+export const shouldAttachAndSetCookies = (requestUrl: string, AUTUrl: string | undefined, requestedWith?: RequestedWithHeader, credentialLevel?: RequestCredentialLevel, isAutFrame?: boolean): boolean => {
   if (!AUTUrl) return false
 
   const siteContext = calculateSiteContext(requestUrl, AUTUrl)
 
-  switch (resourceType) {
+  switch (requestedWith) {
     case 'fetch':
       // never attach cookies regardless of siteContext if omit is optioned
       if (credentialLevel === 'omit') {
@@ -220,7 +220,7 @@ export class CookiesHelper {
     // cross site cookies cannot set lax/strict cookies in the browser for xhr/fetch requests (but ok with navigation/document requests)
     // NOTE: This is allowable in firefox as the default cookie behavior is no_restriction (none). However, this shouldn't
     // impact what is happening in the server-side cookie jar as Set-Cookie is still called and firefox will allow it to be set in the browser
-    if (this.request.resourceType && this.siteContext === 'cross-site' && toughCookie.sameSite !== 'none') {
+    if (this.request.requestedWith && this.siteContext === 'cross-site' && toughCookie.sameSite !== 'none') {
       this.debug(`cannot set cookie with SameSite=${toughCookie.sameSite} when site context is ${this.siteContext}`)
 
       return
@@ -228,10 +228,10 @@ export class CookiesHelper {
 
     // don't set the cookie in our own cookie jar if the cookie would otherwise fail being set in the browser if the AUT Url
     // was actually top. This prevents cookies from being applied to our cookie jar when they shouldn't, preventing possible security implications.
-    const shouldSetCookieGivenSiteContext = shouldAttachAndSetCookies(this.request.url, this.currentAUTUrl, this.request.resourceType, this.request.credentialLevel, this.request.isAUTFrame)
+    const shouldSetCookieGivenSiteContext = shouldAttachAndSetCookies(this.request.url, this.currentAUTUrl, this.request.requestedWith, this.request.credentialLevel, this.request.isAUTFrame)
 
     if (!shouldSetCookieGivenSiteContext) {
-      this.debug(`not setting cookie for ${this.request.url} with simulated top ${ this.currentAUTUrl} for ${ this.request.resourceType}:${this.request.credentialLevel}, cookie: ${toughCookie}`)
+      this.debug(`not setting cookie for ${this.request.url} with simulated top ${ this.currentAUTUrl} for ${ this.request.requestedWith}:${this.request.credentialLevel}, cookie: ${toughCookie}`)
 
       return
     }

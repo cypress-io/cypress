@@ -870,7 +870,7 @@
     "./packages/server/lib/util/fs.ts",
     "./packages/server/lib/util/glob.js",
     "./packages/server/lib/util/proxy.ts",
-    "./packages/server/lib/util/resourceTypeAndCredentialManager.ts",
+    "./packages/server/lib/util/requestedWithAndCredentialManager.ts",
     "./packages/server/lib/util/socket_allowed.ts",
     "./packages/server/lib/util/stream_buffer.ts",
     "./packages/server/lib/video_capture.ts",

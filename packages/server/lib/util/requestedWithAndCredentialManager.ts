@@ -1,9 +1,9 @@
 import md5 from 'md5'
 import Debug from 'debug'
-import type { RequestCredentialLevel, RequestResourceType } from '@packages/proxy'
+import type { RequestCredentialLevel, RequestedWithHeader } from '@packages/proxy'
 
 type AppliedCredentialByUrlAndResourceMap = Map<string, Array<{
-  resourceType: RequestResourceType
+  requestedWith: RequestedWithHeader
   credentialStatus: RequestCredentialLevel
 }>>
 
@@ -16,16 +16,16 @@ const hashUrl = (url: string): string => {
 // leverage a singleton Map throughout the server to prevent clashes with this context bindings
 const _appliedCredentialByUrlAndResourceMap: AppliedCredentialByUrlAndResourceMap = new Map()
 
-class ResourceTypeAndCredentialManagerClass {
-  get (url: string, optionalResourceType?: RequestResourceType): {
-    resourceType: RequestResourceType
+class RequestedWithAndCredentialManagerClass {
+  get (url: string, optionalRequestedWith?: RequestedWithHeader): {
+    requestedWith: RequestedWithHeader
     credentialStatus: RequestCredentialLevel
   } {
     const hashKey = hashUrl(url)
 
     debug(`credentials request received for request url ${url}, hashKey ${hashKey}`)
     let value: {
-      resourceType: RequestResourceType
+      requestedWith: RequestedWithHeader
       credentialStatus: RequestCredentialLevel
     } | undefined
 
@@ -37,12 +37,12 @@ class ResourceTypeAndCredentialManagerClass {
       debug(`credential value found ${value}`)
     }
 
-    // if value is undefined for any reason, apply defaults and assume xhr if no optionalResourceType
-    // optionalResourceType should be provided with CDP based browsers, so at least we have a fallback that is more accurate
+    // if value is undefined for any reason, apply defaults and assume xhr if no optionalRequestedWith
+    // optionalRequestedWith should be provided with CDP based browsers, so at least we have a fallback that is more accurate
     if (value === undefined) {
       value = {
-        resourceType: optionalResourceType || 'xhr',
-        credentialStatus: optionalResourceType === 'fetch' ? 'same-origin' : false,
+        requestedWith: optionalRequestedWith || 'xhr',
+        credentialStatus: optionalRequestedWith === 'fetch' ? 'same-origin' : false,
       }
     }
 
@@ -50,27 +50,27 @@ class ResourceTypeAndCredentialManagerClass {
   }
 
   set ({ url,
-    resourceType,
+    requestedWith,
     credentialStatus,
   }: {
     url: string
-    resourceType: RequestResourceType
+    requestedWith: RequestedWithHeader
     credentialStatus: RequestCredentialLevel
   }) {
     const hashKey = hashUrl(url)
 
-    debug(`credentials request stored for request url ${url}, resourceType ${resourceType}, hashKey ${hashKey}`)
+    debug(`credentials request stored for request url ${url}, requestedWith ${requestedWith}, hashKey ${hashKey}`)
 
     let urlHashValue = _appliedCredentialByUrlAndResourceMap.get(hashKey)
 
     if (!urlHashValue) {
       _appliedCredentialByUrlAndResourceMap.set(hashKey, [{
-        resourceType,
+        requestedWith,
         credentialStatus,
       }])
     } else {
       urlHashValue.push({
-        resourceType,
+        requestedWith,
         credentialStatus,
       })
     }
@@ -82,7 +82,7 @@ class ResourceTypeAndCredentialManagerClass {
 }
 
 // export as a singleton
-export const resourceTypeAndCredentialManager = new ResourceTypeAndCredentialManagerClass()
+export const requestedWithAndCredentialManager = new RequestedWithAndCredentialManagerClass()
 
 // export but only as a type. We do NOT want others to create instances of the class as it is intended to be a singleton
-export type ResourceTypeAndCredentialManager = ResourceTypeAndCredentialManagerClass
+export type RequestedWithAndCredentialManager = RequestedWithAndCredentialManagerClass
