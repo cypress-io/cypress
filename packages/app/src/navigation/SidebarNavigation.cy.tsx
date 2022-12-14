@@ -186,28 +186,4 @@ describe('SidebarNavigation', () => {
       cy.findByLabelText('New Debug feature').should('not.exist')
     })
   })
-
-  // it.only('debug status badge', { viewportWidth: 1280 }, () => {
-  //   const loginConnectStore = useLoginConnectStore()
-
-  //   loginConnectStore.setUserFlag('isLoggedIn', true)
-  //   loginConnectStore.setProjectFlag('isProjectConnected', true)
-  //   mountComponent()
-
-  //   // cy.findByLabelText(defaultMessages.sidebar.toggleLabel.collapsed, {
-  //   //   selector: 'button',
-  //   // }).click()
-  // })
-
-  // it('debug status badge', () => {
-  //   const loginConnectStore = useLoginConnectStore()
-
-  //   loginConnectStore.setUserFlag('isLoggedIn', true)
-  //   loginConnectStore.setProjectFlag('isProjectConnected', true)
-  //   mountComponent()
-
-  //   // cy.findByLabelText(defaultMessages.sidebar.toggleLabel.collapsed, {
-  //   //   selector: 'button',
-  //   // }).click()
-  // })
 })
