@@ -6,6 +6,8 @@ import type {
   InterceptedRequest,
 } from './intercepted-request'
 
+export { ResourceType } from '../types'
+
 export type GetFixtureFn = (path: string, opts?: { encoding?: string | null }) => Promise<any>
 
 export interface BackendRoute {
