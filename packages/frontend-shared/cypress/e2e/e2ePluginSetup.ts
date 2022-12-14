@@ -8,10 +8,12 @@ import execa from 'execa'
 import type { CyTaskResult, OpenGlobalModeOptions, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from '../support/e2e'
 import { fixtureDirs } from '@tooling/system-tests'
 // import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
-import { getOperationName, Response, makeGraphQLServer, clearCtx, DataContext, globalPubSub, setCtx, fs, buildSchema, execute, ExecutionResult, GraphQLError, parse } from './dependencies'
+// Ensure to import the prod dependencies from the file that is loaded via the v8 snapshot so that they are included in the snapshot
+import { getOperationName, Response, makeGraphQLServer, clearCtx, DataContext, globalPubSub, setCtx, buildSchema, execute, ExecutionResult, GraphQLError, parse } from './prod-dependencies'
 import * as inspector from 'inspector'
 import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
+import fs from 'fs-extra'
 
 import { CloudQuery } from '@packages/graphql/test/stubCloudTypes'
 import pDefer from 'p-defer'
