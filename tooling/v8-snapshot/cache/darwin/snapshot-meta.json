@@ -3608,6 +3608,7 @@
     "./packages/extension/index.js",
     "./packages/extension/lib/extension.js",
     "./packages/extension/lib/util.js",
+    "./packages/frontend-shared/cypress/e2e/prod-dependencies.ts",
     "./packages/frontend-shared/cypress/e2e/v8-snapshot-entry.ts",
     "./packages/graphql/node_modules/chalk/source/templates.js",
     "./packages/graphql/node_modules/chalk/source/util.js",
