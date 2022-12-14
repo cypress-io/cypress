@@ -1,6 +1,5 @@
 import ExpandableFileChooser from './ExpandableFileChooser.vue'
 
-import { ref } from 'vue'
 import { defaultMessages } from '@cy/i18n'
 import data from '../../../cypress/fixtures/FileChooser.json'
 import type { FileParts } from '@packages/data-context/src/gen/graphcache-config.gen'
@@ -28,9 +27,6 @@ const fileMatchIndicatorSelector = '[data-cy=file-match-indicator]'
 // No Results
 const noResultsSelector = '[data-testid=no-results]'
 const noResultsClearButtonSelector = '[data-cy=no-results-clear]'
-
-// Loading
-const loadingSelector = '[data-testid=loading]'
 
 describe('<ExpandableFileChooser />', () => {
   it('renders files in a list', () => {
@@ -176,30 +172,6 @@ describe('<ExpandableFileChooser />', () => {
         .get(noResultsClearButtonSelector).click()
         .get(extensionInputSelector).should('have.value', extensionPattern)
       })
-    })
-  })
-
-  describe('loading', () => {
-    it('is not loading by default', () => {
-      cy.mount(() => (<ExpandableFileChooser
-        extensionPattern={extensionPattern}
-        files={[]} />))
-      .get(loadingSelector).should('not.be.visible')
-    })
-
-    it('toggles a reactive loading indicator', () => {
-      // Use a button to toggle "loading" state externally
-      const loading = ref(true)
-      const buttonSelector = '[data-testid=toggle-button]'
-
-      cy.mount(() => (<div>
-        <button data-testid="toggle-button" onClick={() => loading.value = !loading.value}>Toggle Loading</button>
-        <ExpandableFileChooser files={allFiles} loading={loading.value} extensionPattern={extensionPattern} /></div>))
-      .get(loadingSelector).should('be.visible')
-      .get(buttonSelector).click()
-      .get(loadingSelector).should('not.be.visible')
-      .get(buttonSelector).click()
-      .get(loadingSelector).should('be.visible')
     })
   })
 
