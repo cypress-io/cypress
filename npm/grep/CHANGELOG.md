@@ -1,3 +1,10 @@
+# [@cypress/grep-v3.1.3](https://github.com/cypress-io/cypress/compare/@cypress/grep-v3.1.2...@cypress/grep-v3.1.3) (2022-12-14)
+
+
+### Bug Fixes
+
+* **grep:** @cypress/grep types ([#24844](https://github.com/cypress-io/cypress/issues/24844)) ([55058e7](https://github.com/cypress-io/cypress/commit/55058e7783420d0946bd19eeb72a08ccf3f3a86e))
+
 # [@cypress/grep-v3.1.2](https://github.com/cypress-io/cypress/compare/@cypress/grep-v3.1.1...@cypress/grep-v3.1.2) (2022-12-09)
 
 
