@@ -104,9 +104,11 @@ describe('<DebugSpec/> responsive UI', () => {
     const group1 = {
       os: {
         name: 'Linux',
+        nameWithVersion: 'Linux Debian',
       },
       browser: {
         formattedName: 'Chrome',
+        formattedNameWithVersion: 'Chrome 106',
       },
     }
     const spec = {
@@ -122,6 +124,33 @@ describe('<DebugSpec/> responsive UI', () => {
       testingType: 'component',
     }
 
+    const testResults: TestResults[] = [
+      {
+        id: '676df87878',
+        titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
+        instance: [{
+          hasScreenshots: true,
+          hasStdout: true,
+          hasVideo: true,
+          screenshotsUrl: 'www.cypress.io',
+          stdoutUrl: 'www.cypress.io',
+          videoUrl: 'www.cypress.io',
+        }],
+      },
+      {
+        id: '78hjkdf987d9f',
+        titleParts: ['Login', 'redirects to stored path after login'],
+        instance: [{
+          hasScreenshots: true,
+          hasStdout: true,
+          hasVideo: true,
+          screenshotsUrl: 'www.cypress.io',
+          stdoutUrl: 'www.cypress.io',
+          videoUrl: 'www.cypress.io',
+        }],
+      },
+    ]
+
     cy.mount(() => (
       <DebugSpec spec={spec} testResults={testResults} />
     ))
@@ -131,17 +160,21 @@ describe('<DebugSpec/> responsive UI', () => {
     const group1 = {
       os: {
         name: 'Linux',
+        nameWithVersion: 'Linux Debian',
       },
       browser: {
         formattedName: 'Chrome',
+        formattedNameWithVersion: 'Chrome 106',
       },
     }
     const group2 = {
       os: {
-        name: 'Unix',
+        name: 'Apple',
+        nameWithVersion: 'macOS 12.3',
       },
       browser: {
         formattedName: 'Firefox',
+        formattedNameWithVersion: 'Firefox 95.2',
       },
     }
     const spec = {
@@ -156,6 +189,33 @@ describe('<DebugSpec/> responsive UI', () => {
       groups: [group1, group2],
       testingType: 'e2e',
     }
+
+    const testResults: TestResults[] = [
+      {
+        id: '676df87878',
+        titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
+        instance: [{
+          hasScreenshots: true,
+          hasStdout: true,
+          hasVideo: true,
+          screenshotsUrl: 'www.cypress.io',
+          stdoutUrl: 'www.cypress.io',
+          videoUrl: 'www.cypress.io',
+        }],
+      },
+      {
+        id: '78hjkdf987d9f',
+        titleParts: ['Login', 'redirects to stored path after login'],
+        instance: [{
+          hasScreenshots: true,
+          hasStdout: true,
+          hasVideo: true,
+          screenshotsUrl: 'www.cypress.io',
+          stdoutUrl: 'www.cypress.io',
+          videoUrl: 'www.cypress.io',
+        }],
+      },
+    ]
 
     cy.mount(() => (
       <DebugSpec spec={spec} testResults={testResults} />

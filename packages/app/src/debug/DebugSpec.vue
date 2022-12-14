@@ -53,12 +53,16 @@
                 :order="['FAILED', 'PASSED', 'PENDING']"
               />
             </li>
+            <div class="-mt-8px text-lg text-gray-400">
+              .
+            </div>
             <StatsMetaData
               v-if="(specData.groups.length === 1)"
               :order="['DURATION','OS','BROWSER','TESTING']"
               :spec-duration="specData.specDuration"
               :testing="specData.testingType"
               :groups="[specData.groups[0]]"
+              staging="production"
             />
             <StatsMetaData
               v-else-if="(specData.groups.length > 1)"
@@ -66,11 +70,12 @@
               :spec-duration="specData.specDuration"
               :testing="specData.testingType"
               :groups="specData.groups"
+              staging="staging"
             />
           </ul>
         </div>
         <div
-          class="mr-16px"
+          class="mr-32px"
         >
           <Button
             data-cy="run-failures"
@@ -96,12 +101,35 @@
         v-for="test in specData.failedTests"
         :key="`test-${test.id}`"
         data-cy="test-group"
-        class="w-full flex flex-col flex-start h-12 items-start justify-center pl-16px border-b-gray-100 border-b-1px"
+        class="w-full flex flex-col flex-start justify-center pl-16px border-b-gray-100 border-b-1px hover:bg-gray-50"
+        :class="specData.groups.length > 1 ? 'pb-16px': ''"
       >
         <DebugFailedTest
           :failed-test-result="test"
           :data-cy="`test-${test.id}`"
         />
+        <span
+          v-if="(specData.groups.length > 1)"
+        >
+          <div
+            v-for="(group, i) in specData.groups"
+            :key="i"
+            class="w-952px flex flex-col flex-start items-start justify-center pl-16px border-gray-100 border-1 rounded mr-16px"
+          >
+            <div
+              class="flex flex-row h-12 items-center gap-x-2.5 non-italic text-base text-gray-700 font-normal border-b-gray-100"
+              data-cy="test-failed-metadata"
+            >
+              <StatsMetaData
+                :order="['STAGING', 'OS', 'BROWSER']"
+                :spec-duration="specData.specDuration"
+                :testing="specData.testingType"
+                :groups="[group]"
+                staging="Production"
+              />
+            </div>
+          </div>
+        </span>
       </div>
     </div>
   </div>
@@ -159,16 +187,5 @@ const specData = computed(() => {
     testingType: props.spec.testingType,
   }
 })
-// You need to alter the metadata depending on whether there are multiple groups or not so that proper stuff is shown
-// IconTechnologyOS does not exist
-// Linux OS icon does not exist. Looks like OS icons do not exist
-// browser icons do not exist
-// Fix the v-if for the statsmetadata for groups and non-groups
 
 </script>
-<style scoped>
-[data-cy=spec-header-metadata] li:not(:first-child)::before {
-  content: '.';
-  @apply -mt-8px text-lg text-gray-400 pr-8px
-}
-</style>
