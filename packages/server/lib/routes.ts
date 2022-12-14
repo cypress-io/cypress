@@ -3,6 +3,7 @@ import Debug from 'debug'
 import { ErrorRequestHandler, Request, Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
+import { getRoutesForRequest } from '@packages/net-stubbing'
 
 import type { NetworkProxy } from '@packages/proxy'
 import type { Cfg } from './project-base'
@@ -13,6 +14,8 @@ import type { FoundSpec } from '@packages/types'
 import { getCtx } from '@packages/data-context'
 import { graphQLHTTP } from '@packages/graphql/src/makeGraphQLServer'
 import type { RemoteStates } from './remote_states'
+import type { NetStubbingState } from '@packages/net-stubbing/lib/server'
+import type { IncomingHttpHeaders } from 'http'
 
 const debug = Debug('cypress:server:routes')
 
@@ -24,6 +27,7 @@ export interface InitializeRoutes {
   remoteStates: RemoteStates
   onError: (...args: unknown[]) => any
   testingType: Cypress.TestingType
+  netStubbingState: NetStubbingState
 }
 
 export const createCommonRoutes = ({
@@ -33,6 +37,7 @@ export const createCommonRoutes = ({
   getSpec,
   remoteStates,
   nodeProxy,
+  netStubbingState,
 }: InitializeRoutes) => {
   const router = Router()
   const { clientRoute, namespace } = config
@@ -102,10 +107,30 @@ export const createCommonRoutes = ({
     return send(req, pathToFile).pipe(res)
   })
 
+  const matchesNetStubbingRoute = (url: string, method: string, headers: IncomingHttpHeaders) => {
+    const proxiedReq = {
+      proxiedUrl: url,
+      headers,
+      method,
+      // TODO: add `body` here once bodies can be statically matched
+    }
+
+    // @ts-ignore
+    const iterator = getRoutesForRequest(netStubbingState?.routes, proxiedReq)
+    // If the iterator is exhausted (done) on the first try, then 0 matches were found
+    const zeroMatches = iterator.next().done
+
+    return !zeroMatches
+  }
+
   if (testingType === 'component') {
     router.get('*', (req, res) => {
-      if (req.hostname !== 'localhost') {
-        // Just proxy to the outside world as usual
+      const isCyInterceptReq = matchesNetStubbingRoute(req.url, req.method, req.headers)
+
+      // If it's not a request a route or asset served by the user's own app,
+      // or it's a request that the user wants to intercept via `cy.intercept`
+      // carry on as usual.
+      if (req.hostname !== 'localhost' || isCyInterceptReq) {
         networkProxy.handleHttpRequest(req, res)
       } else {
         /**
@@ -115,6 +140,8 @@ export const createCommonRoutes = ({
          * expose certain internal configuration variables.
          * We only proxy requests made to localhost, eg `/assets/foo.png, and not things like
          * http://some-real-cdn.com/foo.png.
+         * Rather than fix it on a case-by-case basis, we just forward all traffic to the user's
+         * dev server and let their underlying configuration handle it.
          * Anything else continues through the usual network proxy.
          * @see https://github.com/cypress-io/cypress/issues/24272
          */

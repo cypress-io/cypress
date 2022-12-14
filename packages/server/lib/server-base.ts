@@ -236,6 +236,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     const routeOptions: InitializeRoutes = {
       config,
+      netStubbingState: this.netStubbingState,
       remoteStates: this._remoteStates,
       nodeProxy: this.nodeProxy,
       networkProxy: this._networkProxy!,
