@@ -23,6 +23,7 @@ export const SERIALIZABLE_REQ_PROPS = [
   'httpVersion',
   'responseTimeout',
   'followRedirect',
+  'query',
 ]
 
 export const SERIALIZABLE_RES_PROPS = _.concat(

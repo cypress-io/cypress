@@ -1823,6 +1823,7 @@ describe.skip('network stubbing', function () {
       // It's because XHR is not sent on Firefox and it's flaky on Chrome.
       it('parse query correctly', () => {
         cy.intercept({ url: '/users*' }, (req) => {
+          // Assert that query attributes are available in `intercept` callback
           expect(req.query.someKey).to.deep.equal('someValue')
           expect(req.query).to.deep.equal({ someKey: 'someValue' })
         }).as('getUrl')
@@ -1835,6 +1836,11 @@ describe.skip('network stubbing', function () {
         })
 
         cy.wait('@getUrl')
+        .then((interception) => {
+          // Assert that query attributes are maintained once interception is yielded
+          expect(interception.request.query.someKey).to.deep.equal('someValue')
+          expect(interception.request.query).to.deep.equal({ someKey: 'someValue' })
+        })
       })
 
       context('reconcile changes', () => {
