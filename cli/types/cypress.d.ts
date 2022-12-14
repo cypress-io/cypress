@@ -1602,7 +1602,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/nextuntil
      */
     nextUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
-    
+
     /**
      * Filter DOM element(s) from a set of DOM elements. Opposite of `.filter()`
      *
