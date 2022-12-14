@@ -2331,6 +2331,11 @@
   resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.14.0.tgz#c30cbb013b7a86700941677da661229d81493399"
   integrity sha512-wIXr00J7azl8Jl+3DLhSK8WkWXRUvfqDKUnLrEyxQjrzbwNIQIPL0bqgY30CZbx8xoPXCIewJDYXvhgbWZQOhQ==
 
+"@cypress-design/icon-registry@^0.15.0":
+  version "0.15.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.15.0.tgz#0fee4fd0e0565b169b1d352e04ee4e80035efb74"
+  integrity sha512-hpecktncQW+9oCNT43/fabBtEEmlB07Dvhv6an48596suuPdTdqGISLyfZeX1UkDDKLAoWZbyni/J33PlPgN2Q==
+
 "@cypress-design/vue-icon@^0.12.1":
   version "0.12.1"
   resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.12.1.tgz#cb348fb697dd65305c927522643b4ede6b113821"
@@ -2338,13 +2343,20 @@
   dependencies:
     "@cypress-design/icon-registry" "^0.14.0"
 
-"@cypress-design/vue-statusicon@0.1.2":
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-statusicon/-/vue-statusicon-0.1.2.tgz#7fbc6d4bbc9f66152f2660bb200c697d245b33d3"
-  integrity sha512-um8lw7fvqX5rlZW3l5Bxs7TFw1SAGpOAUndH1q1QftH1/6qEIsNtRYlyS6JKAsrBvhzwrwkTDQujHLu7eOQtpA==
+"@cypress-design/vue-icon@^0.13.0":
+  version "0.13.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.13.0.tgz#837bde8fe3d052cde9a2e2bcf52567523826749a"
+  integrity sha512-S0+RZFy1hK1tKOAeYAjeIF3nF1MC7uB7dNqO2Sp3ZIEktcDRnWhodDUxNJ9TpMB2dIqJL6ATUhYTVJFEiPdPfg==
   dependencies:
-    "@cypress-design/icon-registry" "^0.14.0"
-    "@cypress-design/vue-icon" "^0.12.1"
+    "@cypress-design/icon-registry" "^0.15.0"
+
+"@cypress-design/vue-statusicon@0.1.4":
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-statusicon/-/vue-statusicon-0.1.4.tgz#651947180b6fb0d17c85ff2659f27414ecd22b69"
+  integrity sha512-L7bl44XgZMkXFFQqr8ZQIzOoAgfkDXeGtm5/dyn8DWPdXAej4kw+nacPFW/qbxnfDQMWZ3KDoAihV5MZqXhv2g==
+  dependencies:
+    "@cypress-design/icon-registry" "^0.15.0"
+    "@cypress-design/vue-icon" "^0.13.0"
 
 "@cypress/commit-info@2.2.0":
   version "2.2.0"
