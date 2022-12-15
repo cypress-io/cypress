@@ -704,7 +704,7 @@
       "line4": "In the next screen, you'll be able to reconfigure component testing in a new guided configuration wizard."
     },
     "wizard": {
-      "title": "Migrating to Cypress 11",
+      "title": "Migrating to Cypress {version}",
       "description": "Your project requires updates to work with this version.",
       "typicalMigrationLabel": "Typical migration:",
       "typicalMigrationTime": "5-10 minutes",
