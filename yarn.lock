@@ -2331,17 +2331,21 @@
   resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.14.0.tgz#c30cbb013b7a86700941677da661229d81493399"
   integrity sha512-wIXr00J7azl8Jl+3DLhSK8WkWXRUvfqDKUnLrEyxQjrzbwNIQIPL0bqgY30CZbx8xoPXCIewJDYXvhgbWZQOhQ==
 
+<<<<<<< HEAD
 "@cypress-design/icon-registry@^0.15.0":
   version "0.15.0"
   resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.15.0.tgz#0fee4fd0e0565b169b1d352e04ee4e80035efb74"
   integrity sha512-hpecktncQW+9oCNT43/fabBtEEmlB07Dvhv6an48596suuPdTdqGISLyfZeX1UkDDKLAoWZbyni/J33PlPgN2Q==
 
+=======
+>>>>>>> feature/IATR-M0
 "@cypress-design/vue-icon@^0.12.1":
   version "0.12.1"
   resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.12.1.tgz#cb348fb697dd65305c927522643b4ede6b113821"
   integrity sha512-AI5XUqzL9AwoNL0rvQNWzyrP5WQNGYPI2phC7b0MhO7hjrZN6Qv+Le7kHhEpAIpWuVi222t699jlvXoTRNr1Jw==
   dependencies:
     "@cypress-design/icon-registry" "^0.14.0"
+<<<<<<< HEAD
 
 "@cypress-design/vue-icon@^0.13.0":
   version "0.13.0"
@@ -2357,6 +2361,8 @@
   dependencies:
     "@cypress-design/icon-registry" "^0.14.0"
     "@cypress-design/vue-icon" "^0.12.1"
+=======
+>>>>>>> feature/IATR-M0
 
 "@cypress/commit-info@2.2.0":
   version "2.2.0"

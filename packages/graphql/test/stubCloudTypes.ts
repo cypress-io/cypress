@@ -25,6 +25,7 @@ import type {
   CloudProjectSpecResult,
   CloudRunStatus,
   CloudSpecRun,
+  CloudTestResult,
 } from '../src/gen/test-cloud-graphql-types.gen'
 import type { GraphQLResolveInfo } from 'graphql'
 
@@ -184,6 +185,17 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
     url: 'http://dummy.cypress.io/runs/1',
     createdAt: new Date(Date.now() - 1000 * 60 * 61).toISOString(),
     completedAt: null,
+    cancelledAt: null,
+    ci: {
+      __typename: 'CloudCiBuildInfo',
+      id: 'ci_id',
+    },
+    groups: [],
+    isHiddenByUsageLimits: false,
+    overLimitActionType: 'UPGRADE',
+    overLimitActionUrl: '',
+    specs: [],
+    testsForReview: [],
     commitInfo: createCloudRunCommitInfo({
       sha: `fake-sha-${getNodeIdx('CloudRun')}`,
       summary: `fix: make gql work ${config.status ?? 'PASSED'}`,
@@ -192,6 +204,36 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
   }
 
   return indexNode(cloudRunData)
+}
+
+function addFailedTests (run: CloudRun) {
+  const specId = 'hash123'
+
+  const spec: CloudSpecRun = {
+    __typename: 'CloudSpecRun',
+    id: specId,
+    basename: 'Test.cy.ts',
+    extension: '.cy.ts',
+    path: 'src/Test.cy.ts',
+  }
+
+  const test: CloudTestResult = {
+    __typename: 'CloudTestResult',
+    id: '123',
+    isFlaky: false,
+    specId,
+    state: 'FAILED' as const,
+    duration: null,
+    instance: null,
+    testUrl: 'http://cloudurl',
+    title: '<test/> Should render',
+    titleParts: ['<test/>', 'should render'],
+  }
+
+  run.specs = [spec]
+  run.testsForReview = [test]
+
+  return run
 }
 
 export function createCloudOrganization (config: Partial<CloudOrganization>): Required<CloudOrganization> {
@@ -249,6 +291,7 @@ export const CloudRunStubs = {
   someSkipped: createCloudRun({ status: 'PASSED', totalPassed: 7, totalSkipped: 3 }),
   somePending: createCloudRun({ status: 'PASSED', totalPassed: 100, totalSkipped: 3000, totalPending: 20 }),
   allSkipped: createCloudRun({ status: 'ERRORED', totalPassed: 0, totalSkipped: 10 }),
+  failingWithTests: addFailedTests(createCloudRun({ status: 'FAILED', totalPassed: 8, totalFailed: 2 })),
 } as Record<string, Required<CloudRun>>
 
 export const CloudUserStubs = {

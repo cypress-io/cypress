@@ -19,7 +19,7 @@ describe('mounts correctly', () => {
       <StatsMetadata
         order={['DURATION', 'GROUPS', 'G_OS', 'G_BROWSERS', 'TESTING']}
         specDuration={'2:23-3:40'}
-        os={['LINUX', 'UNIX']}
+        os={['LINUX', 'APPLE']}
         browser={['CHROME', 'SAFARI', 'FIREFOX']}
         testing={'e2e'}
         groups={['a', 'b']}

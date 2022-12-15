@@ -101,35 +101,14 @@
         v-for="test in specData.failedTests"
         :key="`test-${test.id}`"
         data-cy="test-group"
-        class="w-full flex flex-col flex-start justify-center pl-16px border-b-gray-100 border-b-1px hover:bg-gray-50"
-        :class="specData.groups.length > 1 ? 'pb-16px': ''"
+        class="w-full flex flex-col flex-start justify-center pl-16px border-b-gray-100 border-b-1px test-group-class"
+        :class="specData.groups.length > 1 ? 'pb-16px': 'hover:bg-gray-50'"
       >
         <DebugFailedTest
           :failed-test-result="test"
           :data-cy="`test-${test.id}`"
+          :groups="specData.groups"
         />
-        <span
-          v-if="(specData.groups.length > 1)"
-        >
-          <div
-            v-for="(group, i) in specData.groups"
-            :key="i"
-            class="w-952px flex flex-col flex-start items-start justify-center pl-16px border-gray-100 border-1 rounded mr-16px"
-          >
-            <div
-              class="flex flex-row h-12 items-center gap-x-2.5 non-italic text-base text-gray-700 font-normal border-b-gray-100"
-              data-cy="test-failed-metadata"
-            >
-              <StatsMetaData
-                :order="['STAGING', 'OS', 'BROWSER']"
-                :spec-duration="specData.specDuration"
-                :testing="specData.testingType"
-                :groups="[group]"
-                staging="Production"
-              />
-            </div>
-          </div>
-        </span>
       </div>
     </div>
   </div>
@@ -150,14 +129,14 @@ export interface Spec {
 }
 
 export interface TestResults {
-  id: string
-  titleParts: string[]
-  instance: RunInstance[]
+  readonly id: string
+  readonly titleParts: string[]
+  instance: CloudRunInstance[]
 }
 
 import { computed } from 'vue'
 import { IconActionRefresh, IconDocumentText } from '@cypress-design/vue-icon'
-import type { SpecDataAggregate, RunInstance, CloudRunGroup } from '@packages/data-context/src/gen/graphcache-config.gen'
+import type { SpecDataAggregate, CloudRunInstance, CloudRunGroup } from '@packages/data-context/src/gen/graphcache-config.gen'
 import DebugFailedTest from './DebugFailedTest.vue'
 import StatsMetaData from './StatsMetadata.vue'
 import ResultCounts from '@packages/frontend-shared/src/components/ResultCounts.vue'

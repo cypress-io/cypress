@@ -3,21 +3,53 @@ import DebugSpec from './DebugSpec.vue'
 import { defaultMessages } from '@cy/i18n'
 
 describe('<DebugSpec/> with multiple test results', () => {
-  const spec: Spec = {
+  const group1 = {
+    os: {
+      name: 'Linux',
+      nameWithVersion: 'Linux Debian',
+    },
+    browser: {
+      formattedName: 'Chrome',
+      formattedNameWithVersion: 'Chrome 106',
+    },
+  }
+  const spec = {
     id: '8879798756s88d',
     path: 'cypress/tests',
     fileName: 'auth',
     fileExtension: '.spec.ts',
+    testsPassed: 2,
+    testsFailed: 22,
+    testsPending: 1,
+    specDuration: '2:23',
+    groups: [group1],
+    testingType: 'component',
   }
 
   const testResults: TestResults[] = [
     {
       id: '676df87878',
       titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
+      instance: [{
+        hasScreenshots: true,
+        hasStdout: true,
+        hasVideo: true,
+        screenshotsUrl: 'www.cypress.io',
+        stdoutUrl: 'www.cypress.io',
+        videoUrl: 'www.cypress.io',
+      }],
     },
     {
       id: '78hjkdf987d9f',
       titleParts: ['Login', 'redirects to stored path after login'],
+      instance: [{
+        hasScreenshots: true,
+        hasStdout: true,
+        hasVideo: true,
+        screenshotsUrl: 'www.cypress.io',
+        stdoutUrl: 'www.cypress.io',
+        videoUrl: 'www.cypress.io',
+      }],
     },
   ]
 
@@ -51,23 +83,56 @@ describe('<DebugSpec/> with multiple test results', () => {
 })
 
 describe('<DebugSpec/> responsive UI', () => {
+  const group1 = {
+    os: {
+      name: 'Linux',
+      nameWithVersion: 'Linux Debian',
+    },
+    browser: {
+      formattedName: 'Chrome',
+      formattedNameWithVersion: 'Chrome 106',
+    },
+  }
+
   const testResults: TestResults[] = [
     {
-      id: 'ab78dkb300js',
-      titleParts: ['Alert Bar with state', 'Alert Bar shows passing message'],
+      id: '676df87878',
+      titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
+      instance: [{
+        hasScreenshots: true,
+        hasStdout: true,
+        hasVideo: true,
+        screenshotsUrl: 'www.cypress.io',
+        stdoutUrl: 'www.cypress.io',
+        videoUrl: 'www.cypress.io',
+      }],
     },
     {
-      id: 'ab78dkb590js',
-      titleParts: ['Alert Bar with state', 'Alert Bar shows failure message'],
+      id: '78hjkdf987d9f',
+      titleParts: ['Login', 'redirects to stored path after login'],
+      instance: [{
+        hasScreenshots: true,
+        hasStdout: true,
+        hasVideo: true,
+        screenshotsUrl: 'www.cypress.io',
+        stdoutUrl: 'www.cypress.io',
+        videoUrl: 'www.cypress.io',
+      }],
     },
   ]
 
   it('renders complete UI on smaller viewports', { viewportHeight: 300, viewportWidth: 450 }, () => {
     const spec: Spec = {
-      id: '5479adf90s7f',
+      id: '8879798756s88d',
       path: 'cypress/tests',
       fileName: 'AlertBar',
       fileExtension: '.spec.ts',
+      testsPassed: 2,
+      testsFailed: 22,
+      testsPending: 1,
+      specDuration: '2:23',
+      groups: [group1],
+      testingType: 'component',
     }
 
     cy.mount(() => (
@@ -99,7 +164,9 @@ describe('<DebugSpec/> responsive UI', () => {
 
     cy.percySnapshot()
   })
+})
 
+describe('testing groupings', () => {
   it('debug-results-header single group', { viewportWidth: 1032 }, () => {
     const group1 = {
       os: {

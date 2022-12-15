@@ -207,20 +207,16 @@ export function snapshotRequire (
     let moduleNeedsReload: ModuleNeedsReload | undefined
 
     // @ts-ignore global snapshotAuxiliaryData
-    if (typeof snapshotAuxiliaryData !== 'undefined') {
-      // @ts-ignore global snapshotAuxiliaryData
-      resolverMap = snapshotAuxiliaryData.resolverMap
-      const dependencyMapArray: DependencyMapArray =
-        // @ts-ignore global snapshotAuxiliaryData
-        snapshotAuxiliaryData.dependencyMapArray
+    resolverMap = sr.snapshotAuxiliaryData.resolverMap
+    // @ts-ignore global snapshotAuxiliaryData
+    const dependencyMapArray: DependencyMapArray = sr.snapshotAuxiliaryData.dependencyMapArray
 
-      // 5. Setup the module needs reload predicate with the dependency map
-      if (dependencyMapArray != null) {
-        moduleNeedsReload = createModuleNeedsReload(
-          dependencyMapArray,
-          projectBaseDir,
-        )
-      }
+    // 5. Setup the module needs reload predicate with the dependency map
+    if (dependencyMapArray != null) {
+      moduleNeedsReload = createModuleNeedsReload(
+        dependencyMapArray,
+        projectBaseDir,
+      )
     }
 
     // 6. Setup the module key resolver with the resolver map

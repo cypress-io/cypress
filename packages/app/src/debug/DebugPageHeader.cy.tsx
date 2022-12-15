@@ -5,7 +5,7 @@ const defaults = [
   { attr: 'debug-header-branch', text: 'Branch Name: feature/DESIGN-183' },
   { attr: 'debug-header-commitHash', text: 'Commit Hash: b5e6fde' },
   { attr: 'debug-header-author', text: 'Commit Author: cypressDTest' },
-  { attr: 'debug-header-createdAt', text: 'Run Total Duration: 60000 (an hour ago) ' },
+  { attr: 'debug-header-createdAt', text: 'Run Total Duration: 01:00 (an hour ago) ' },
 ]
 
 describe('<DebugPageHeader />', {
@@ -20,12 +20,13 @@ describe('<DebugPageHeader />', {
             result.commitInfo.summary = 'Adding a hover state to the button component'
             result.commitInfo.branch = 'feature/DESIGN-183'
             result.commitInfo.authorName = 'cypressDTest'
+            result.commitInfo.sha = 'b5e6fde'
           }
         }
       },
       render: (gqlVal) => {
         return (
-          <DebugPageHeader gql={gqlVal} runNumber={468} commitsAhead='You are 2 commits ahead' commitHash='b5e6fde'/>
+          <DebugPageHeader gql={gqlVal} commitsAhead={2}/>
         )
       },
     })
@@ -36,7 +37,7 @@ describe('<DebugPageHeader />', {
 
     cy.findByTestId('debug-runCommit-info').children().should('have.length', 3)
     cy.findByTestId('debug-runNumber')
-    .should('have.text', ' Run #468')
+    .should('have.text', ' Run #432')
     .should('have.css', 'color', 'rgb(90, 95, 122)')
 
     cy.findByTestId('debug-commitsAhead')
@@ -50,5 +51,30 @@ describe('<DebugPageHeader />', {
       .should('have.text', obj.text)
       .children().should('have.length', 2)
     })
+  })
+
+  it('renders singular commit message', () => {
+    cy.mountFragment(DebugPageFragmentDoc, {
+      render: (gqlVal) => {
+        return (
+          <DebugPageHeader gql={gqlVal} commitsAhead={1}/>
+        )
+      },
+    })
+
+    cy.findByTestId('debug-commitsAhead')
+    .should('have.text', 'You are 1 commit ahead')
+  })
+
+  it('renders no commit message', () => {
+    cy.mountFragment(DebugPageFragmentDoc, {
+      render: (gqlVal) => {
+        return (
+          <DebugPageHeader gql={gqlVal} commitsAhead={0}/>
+        )
+      },
+    })
+
+    cy.findByTestId('debug-commitsAhead').should('not.exist')
   })
 })

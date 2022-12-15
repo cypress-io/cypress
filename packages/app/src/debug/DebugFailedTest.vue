@@ -25,6 +25,7 @@
       </span>
     </div>
     <div
+      v-if="(props.groups.length === 1)"
       data-cy="debug-artifacts"
       class="flex flex-grow justify-end space-x-4.5 opacity-0 test-row-artifacts pr-18px"
     >
@@ -41,16 +42,24 @@
       </div>
     </div>
   </div>
+  <GroupedDebugFailedTestVue
+    v-if="(props.groups.length > 1)"
+    :groups="props.groups"
+    :debug-artifacts="debugArtifacts"
+  />
 </template>
 <script lang="ts" setup>
 import { IconChevronRightSmall } from '@cypress-design/vue-icon'
 import { SolidStatusIcon } from '@cypress-design/vue-statusicon'
 import type { TestResults } from './DebugSpec.vue'
 import DebugArtifacts from './DebugArtifacts.vue'
+import GroupedDebugFailedTestVue from './GroupedDebugFailedTest.vue'
+import type { CloudRunGroup } from '@packages/data-context/src/gen/graphcache-config.gen'
 import { computed } from 'vue'
 
 const props = defineProps<{
   failedTestResult: TestResults
+  groups: CloudRunGroup[]
 }>()
 
 const debugArtifacts = computed(() => {

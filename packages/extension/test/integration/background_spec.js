@@ -562,7 +562,7 @@ describe('app/background', () => {
         ])
       })
 
-      it('returns all cookies that match filter', function (done) {
+      it('returns cookies that match filter', function (done) {
         this.socket.on('automation:response', (id, obj = {}) => {
           expect(id).to.eq(123)
           expect(obj.response).to.deep.eq([{ cookie: '1', domain: 'example.com' }])
@@ -571,6 +571,20 @@ describe('app/background', () => {
         })
 
         this.server.emit('automation:request', 123, 'get:cookies', { domain: 'example.com' })
+      })
+
+      it('returns all cookies if there is no filter', function (done) {
+        this.socket.on('automation:response', (id, obj = {}) => {
+          expect(id).to.eq(123)
+          expect(obj.response).to.deep.eq([
+            { cookie: '1', domain: 'example.com' },
+            { cookie: '2', domain: 'www.example.com' },
+          ])
+
+          done()
+        })
+
+        this.server.emit('automation:request', 123, 'get:cookies', {})
       })
     })
 

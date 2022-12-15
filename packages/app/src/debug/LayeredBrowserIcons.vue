@@ -6,11 +6,10 @@
     <li
       v-for="(result, i) in results"
       :key="i"
-      class="-ml-8px"
+      class="-ml-8px rounded-full h-5 w-5 flex items-center justify-center bg-gray-50 rounded"
     >
       <component
         :is="result"
-        class="flex inline-flex items-center justify-center"
         size="16"
       />
     </li>
