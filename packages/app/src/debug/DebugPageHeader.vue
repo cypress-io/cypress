@@ -5,11 +5,11 @@
   >
     <div
       data-cy="debug-header"
-      class="flex w-full grid py-24px px-24px gap-y-2 overflow-hidden items-center"
+      class="flex w-full grid py-24px px-24px gap-y-2 items-center overflow-hidden"
     >
       <ul
         data-cy="header-top"
-        class="flex flex-row gap-x-2 self-stretch items-center whitespace-nowrap"
+        class="flex flex-row gap-x-2 items-center self-stretch whitespace-nowrap"
       >
         <li
           v-if="debug?.commitInfo?.summary"
@@ -18,17 +18,10 @@
         >
           {{ debug.commitInfo.summary }}
         </li>
-        <div
+        <li
+          v-if="props.commitsAhead"
           class="border rounded flex border-gray-100 h-6 text-sm items-center"
-          data-cy="debug-runCommit-info"
         >
-          <span
-            class="font-medium mx-px px-2 text-gray-700 items-center"
-            data-cy="debug-runNumber"
-          >
-            Run #{{ debug.runNumber }}
-          </span>
-          <div class="bg-gray-100 h-3 my-6px w-px" />
           <span
             v-if="props.commitsAhead"
             class="font-normal mx-px px-2 text-orange-500 items-center"
@@ -36,7 +29,7 @@
           >
             {{ t('debugPage.header.commitsAhead', props.commitsAhead) }}
           </span>
-        </div>
+        </li>
         <li class="-mt-8px text-lg text-gray-400">
           .
         </li>
@@ -55,10 +48,24 @@
         class="flex flex-wrap font-normal text-sm text-gray-700 gap-x-2 items-center whitespace-nowrap children:flex children:items-center"
       >
         <li
-          :data-cy="'debug-results'"
+          class="flex flex-row text-sm gap-x-2 items-center justify-center"
         >
+          <div
+            v-if="(debug.runNumber && debug.status)"
+            class="border rounded flex flex-row font-semibold bg-gray-50 border-gray-200 h-6 px-2 gap-x-1 items-center justify-center"
+            :data-cy="`debug-runNumber-${debug.status}`"
+          >
+            <SolidStatusIcon
+              size="16"
+              :status="ICON_MAP[debug.status].type"
+            />
+            <span :class="runNumberColor">
+              {{ `#${debug.runNumber}` }}
+            </span>
+          </div>
           <DebugResults
             :gql="props.gql"
+            data-cy="debug-results"
           />
         </li>
         <li
@@ -107,9 +114,10 @@
 import { computed } from 'vue'
 import DebugResults from './DebugResults.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
-import type { DebugPageFragment } from '../generated/graphql'
-import CommitIcon from '~icons/cy/commit_x14'
+import type { DebugPageFragment, CloudRunStatus } from '../generated/graphql'
 import { IconTimeStopwatch } from '@cypress-design/vue-icon'
+import { SolidStatusIcon, StatusType } from '@cypress-design/vue-statusicon'
+import CommitIcon from '~icons/cy/commit_x14'
 import { gql } from '@urql/core'
 import { dayjs } from '../runs/utils/day.js'
 import { useI18n } from 'vue-i18n'
@@ -143,6 +151,25 @@ const props = defineProps<{
 }>()
 
 const debug = computed(() => props.gql)
+
+const ICON_MAP: Record<CloudRunStatus, { textColor: string, type: StatusType }> = {
+  PASSED: { textColor: 'text-jade-400', type: 'passed' },
+  FAILED: { textColor: 'text-red-400', type: 'failed' },
+  CANCELLED: { textColor: 'text-gray-500', type: 'cancelled' },
+  ERRORED: { textColor: 'text-orange-400', type: 'errored' },
+  RUNNING: { textColor: 'text-indigo-500', type: 'running' },
+  NOTESTS: { textColor: 'text-indigo-500', type: 'noTests' },
+  OVERLIMIT: { textColor: 'text-indigo-500', type: 'overLimit' },
+  TIMEDOUT: { textColor: 'text-indigo-500', type: 'timedOut' },
+} as const
+
+const runNumberColor = computed(() => {
+  if (props.gql.status) {
+    return ICON_MAP[props.gql.status].textColor
+  }
+
+  return ''
+})
 
 const relativeCreatedAt = computed(() => dayjs(new Date(debug.value.createdAt!)).fromNow())
 

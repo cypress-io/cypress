@@ -2338,6 +2338,14 @@
   dependencies:
     "@cypress-design/icon-registry" "^0.16.0"
 
+"@cypress-design/vue-statusicon@0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-statusicon/-/vue-statusicon-0.2.0.tgz#77212db72d05c30e60e4de96374e8c77bcdb3478"
+  integrity sha512-azGf5JF94GepvE90fupAlMD4MHPKE18m3XkdziRxg6FTG3YiJKS5qsEO8FcXlI4Z9tOv95kpjSTSVVzG2TLLPQ==
+  dependencies:
+    "@cypress-design/icon-registry" "^0.16.0"
+    "@cypress-design/vue-icon" "^0.14.0"
+
 "@cypress/commit-info@2.2.0":
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@cypress/commit-info/-/commit-info-2.2.0.tgz#6086d478975edb7ac7c9ffdd5cfd5be2b9fe44f2"

@@ -1,5 +1,6 @@
-import { DebugPageFragmentDoc } from '../generated/graphql-test'
+import { CloudRunStatus, DebugPageFragmentDoc } from '../generated/graphql-test'
 import DebugPageHeader from './DebugPageHeader.vue'
+import { defaultMessages } from '@cy/i18n'
 
 const defaults = [
   { attr: 'debug-header-branch', text: 'Branch Name: feature/DESIGN-183' },
@@ -16,6 +17,7 @@ describe('<DebugPageHeader />', {
     cy.mountFragment(DebugPageFragmentDoc, {
       onResult (result) {
         if (result) {
+          result.status = 'FAILED'
           if (result.commitInfo) {
             result.commitInfo.summary = 'Adding a hover state to the button component'
             result.commitInfo.branch = 'feature/DESIGN-183'
@@ -32,24 +34,68 @@ describe('<DebugPageHeader />', {
     })
 
     cy.findByTestId('debug-header').children().should('have.length', 2)
-    cy.findByTestId('debug-test-summary')
-    .should('have.text', 'Adding a hover state to the button component')
+    cy.findByTestId('debug-test-summary').should('have.text', 'Adding a hover state to the button component')
 
-    cy.findByTestId('debug-runCommit-info').children().should('have.length', 3)
-    cy.findByTestId('debug-runNumber')
-    .should('have.text', ' Run #432')
-    .should('have.css', 'color', 'rgb(90, 95, 122)')
-
-    cy.findByTestId('debug-commitsAhead')
-    .should('have.text', 'You are 2 commits ahead')
-    .should('have.css', 'color', 'rgb(189, 88, 0)')
+    cy.findByTestId('debug-commitsAhead').should('have.text', 'You are 2 commits ahead')
 
     cy.findByTestId('debug-results').should('be.visible')
+
+    cy.findByTestId('debug-runNumber-FAILED')
+    .should('have.text', '#432')
+    .children().should('have.length', 2)
+
+    cy.findByTestId('debug-flaky-badge')
+    .should('not.exist')
 
     defaults.forEach((obj) => {
       cy.findByTestId(obj.attr)
       .should('have.text', obj.text)
       .children().should('have.length', 2)
+    })
+  })
+
+  it('displays a flaky badge', () => {
+    const flakyCount = 4
+
+    cy.mountFragment(DebugPageFragmentDoc, {
+      onResult: (result) => {
+        if (result) {
+          result.totalFlakyTests = flakyCount
+        }
+      },
+      render: (gqlVal) => {
+        return (
+          <DebugPageHeader gql={gqlVal} commitsAhead={0}/>
+        )
+      },
+    })
+
+    cy.findByTestId('debug-flaky-badge')
+    .contains(defaultMessages.specPage.flaky.badgeLabel)
+
+    cy.findByTestId('total-flaky-tests')
+    .contains(flakyCount)
+  })
+
+  it('displays each run status', () => {
+    const statuses: CloudRunStatus[] = ['PASSED', 'FAILED', 'CANCELLED', 'RUNNING', 'ERRORED']
+
+    statuses.forEach((status) => {
+      cy.mountFragment(DebugPageFragmentDoc, {
+        onResult: (result) => {
+          if (result) {
+            result.status = status
+          }
+        },
+        render: (gqlVal) => {
+          return (
+            <DebugPageHeader gql={gqlVal} commitsAhead={0}/>
+          )
+        },
+      })
+
+      cy.findByTestId(`debug-runNumber-${status}`).should('be.visible')
+      cy.percySnapshot()
     })
   })
 

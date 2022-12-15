@@ -481,12 +481,7 @@
     "./node_modules/pngjs/lib/parser-sync.js",
     "./node_modules/pngjs/lib/png.js",
     "./node_modules/pngjs/lib/sync-inflate.js",
-    "./node_modules/prettier/parser-babel.js",
-    "./node_modules/prettier/parser-espree.js",
-    "./node_modules/prettier/parser-flow.js",
     "./node_modules/prettier/parser-glimmer.js",
-    "./node_modules/prettier/parser-meriyah.js",
-    "./node_modules/prettier/parser-typescript.js",
     "./node_modules/process-nextick-args/index.js",
     "./node_modules/pseudomap/map.js",
     "./node_modules/pumpify/index.js",
@@ -3540,5 +3535,5 @@
     "./tooling/v8-snapshot/cache/dev-darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "bd778e798cdfc4567700c53011b59cb82220606c310af46f1bd0c6d955f0d8ab"
+  "deferredHash": "1bec142e65f0d78aea3a0e2758ea1c97b85c319273d4a0ccf1528e340ddc50ec"
 }
