@@ -188,6 +188,8 @@ describe('errors ui', {
         'The following error originated from your test code',
         'It was caused by an unhandled promise rejection',
       ],
+      stackRegex: /.*/,
+      hasCodeFrame: false,
     })
 
     verify('spec unhandled rejection with done', {

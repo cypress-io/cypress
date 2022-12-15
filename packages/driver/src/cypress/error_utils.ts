@@ -580,7 +580,7 @@ const logError = (Cypress, handlerType: HandlerType, err: unknown, handled = fal
 
 interface LoggableError { name?: string, message: string }
 
-const isLoggabbleError = (error: unknown): error is LoggableError => {
+const isLoggableError = (error: unknown): error is LoggableError => {
   return (
     typeof error === 'object' &&
     error !== null &&
@@ -588,7 +588,7 @@ const isLoggabbleError = (error: unknown): error is LoggableError => {
 }
 
 const toLoggableError = (maybeError: unknown): LoggableError => {
-  if (isLoggabbleError(maybeError)) return maybeError
+  if (isLoggableError(maybeError)) return maybeError
 
   try {
     return { message: JSON.stringify(maybeError) }
