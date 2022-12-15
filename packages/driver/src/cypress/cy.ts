@@ -1292,7 +1292,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     // We only override linked subject chains when we're at the end of a a chain. This prevents the case where
     // commands inside an overwritten command replace the subject chain too early, preventing
     // the originalFn from having access to the original subjectChain.
-    if (links[chainerId] && this.state('current').get('next')?.get('chainerId') !== chainerId) {
+    if (links[chainerId] && this.state('current')?.get('next')?.get('chainerId') !== chainerId) {
       this.setSubjectForChainer(links[chainerId], subjectChain)
     }
   }
