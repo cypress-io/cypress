@@ -5,35 +5,35 @@
   >
     <div
       data-cy="debug-header"
-      class="flex w-full grid py-24px px-24px gap-y-2 overflow-hidden items-center"
+      class="flex grid items-center w-full overflow-hidden py-24px px-24px gap-y-2"
     >
       <ul
         data-cy="header-top"
-        class="flex flex-row gap-x-2 self-stretch items-center whitespace-nowrap"
+        class="flex flex-row items-center self-stretch gap-x-2 whitespace-nowrap"
       >
         <li
           v-if="debug?.commitInfo?.summary"
-          class="font-medium text-lg text-gray-900"
+          class="text-lg font-medium text-gray-900"
           data-cy="debug-test-summary"
         >
           {{ debug.commitInfo.summary }}
         </li>
         <li
           v-if="props.commitsAhead"
-          class="border rounded flex border-gray-100 h-6 text-sm items-center"
+          class="flex items-center h-6 text-sm border border-gray-100 rounded"
         >
           <span
             v-if="props.commitsAhead"
-            class="font-normal mx-px px-2 text-orange-500 items-center"
+            class="items-center px-2 mx-px font-normal text-orange-500"
             data-cy="debug-commitsAhead"
           >
             {{ t('debugPage.header.commitsAhead', props.commitsAhead) }}
           </span>
         </li>
-        <li class="-mt-8px text-lg text-gray-400">
+        <li class="text-lg text-gray-400 -mt-8px">
           .
         </li>
-        <li class="font-normal text-sm text-indigo-500">
+        <li class="text-sm font-normal text-indigo-500">
           <ExternalLink
             data-cy="debug-header-dashboard-link"
             :href="debug.url || '#'"
@@ -45,19 +45,19 @@
       </ul>
       <ul
         data-cy="metadata"
-        class="flex flex-wrap font-normal text-sm text-gray-700 gap-x-2 items-center whitespace-nowrap children:flex children:items-center"
+        class="flex flex-wrap items-center text-sm font-normal text-gray-700 gap-x-2 whitespace-nowrap children:flex children:items-center"
       >
         <li
-          class="flex flex-row text-sm gap-x-2 items-center justify-center"
+          class="flex flex-row items-center justify-center text-sm gap-x-2"
         >
           <div
             v-if="(debug.runNumber && debug.status)"
-            class="border rounded flex flex-row font-semibold bg-gray-50 border-gray-200 h-6 px-2 gap-x-1 items-center justify-center"
+            class="flex flex-row items-center justify-center h-6 px-2 font-semibold border border-gray-200 rounded bg-gray-50 gap-x-1"
             :data-cy="`debug-runNumber-${debug.status}`"
           >
             <SolidStatusIcon
               size="16"
-              :status="debug.status.toLowerCase()"
+              :status="ICON_MAP[debug.status].type"
             />
             <span :class="runNumberColor">
               {{ `#${debug.runNumber}` }}
@@ -117,6 +117,7 @@ import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import type { DebugPageFragment, CloudRunStatus } from '../generated/graphql'
 import { IconTimeStopwatch } from '@cypress-design/vue-icon'
 import { SolidStatusIcon } from '@cypress-design/vue-statusicon'
+import type { statusTypes } from '@cypress-design/vue-statusicon/dist/StatusIcon/constants'
 import CommitIcon from '~icons/cy/commit_x14'
 import { gql } from '@urql/core'
 import { dayjs } from '../runs/utils/day.js'
@@ -152,15 +153,15 @@ const props = defineProps<{
 
 const debug = computed(() => props.gql)
 
-const ICON_MAP: Record<CloudRunStatus, { textColor: string }> = {
-  PASSED: { textColor: 'text-jade-400' },
-  FAILED: { textColor: 'text-red-400' },
-  CANCELLED: { textColor: 'text-gray-500' },
-  ERRORED: { textColor: 'text-orange-400' },
-  RUNNING: { textColor: 'text-indigo-500' },
-  NOTESTS: { textColor: 'text-indigo-500' },
-  OVERLIMIT: { textColor: 'text-indigo-500' },
-  TIMEDOUT: { textColor: 'text-indigo-500' },
+const ICON_MAP: Record<CloudRunStatus, { textColor: string, type: statusTypes }> = {
+  PASSED: { textColor: 'text-jade-400', type: 'passed' },
+  FAILED: { textColor: 'text-red-400', type: 'failed' },
+  CANCELLED: { textColor: 'text-gray-500', type: 'cancelled' },
+  ERRORED: { textColor: 'text-orange-400', type: 'errored' },
+  RUNNING: { textColor: 'text-indigo-500', type: 'running' },
+  NOTESTS: { textColor: 'text-indigo-500', type: 'noTests' },
+  OVERLIMIT: { textColor: 'text-indigo-500', type: 'overLimit' },
+  TIMEDOUT: { textColor: 'text-indigo-500', type: 'timedOut' },
 } as const
 
 const runNumberColor = computed(() => {
