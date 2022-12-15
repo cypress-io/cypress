@@ -3759,7 +3759,7 @@
     "./packages/server/lib/util/profile_cleaner.js",
     "./packages/server/lib/util/proxy.ts",
     "./packages/server/lib/util/random.js",
-    "./packages/server/lib/util/resourceTypeAndCredentialManager.ts",
+    "./packages/server/lib/util/requestedWithAndCredentialManager.ts",
     "./packages/server/lib/util/server_destroy.ts",
     "./packages/server/lib/util/shell.js",
     "./packages/server/lib/util/socket_allowed.ts",
@@ -3933,5 +3933,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "e3284609fae68d1f93650b72b05bc2cc3de129c02e8e789b461057c601d7eba3"
+  "deferredHash": "744194547e7267c5bda079045f4214139035c823fa1a6976f236a759e1282fc7"
 }
