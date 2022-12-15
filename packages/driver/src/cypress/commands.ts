@@ -133,6 +133,31 @@ export default {
           internalError('miscellaneous.invalid_overwrite', name)
         }
 
+        /*
+         * When an overwriten command is first hit - in overwriten.fn below -
+         * we store a reference to the current $command object, and when
+         * originalFn is called, we insert this back into the Cypress state.
+         *
+         * This is done so that when originalFn is called, it has access to
+         * the "real" chainerId and $Command object, rather than those of
+         * any other Cypress commands that were invoked in the meantime.
+         * For example:
+         *
+         * Cypress.Commands.overwrite('click', (originalFn, ...args) => {
+         *   // When we enter this function, the current command is 'click', in chainer-1.
+         *   cy.wait(0)
+         *     .then(() => {
+         *       // Now the current command is 'then', in chainer-2
+         *       // We set state(current) and state(chainerId) back to 'click' / chainer-1
+         *       // so that originalFn() can access the original command name and subject chain.
+         *       originalFn(...args)
+         *     })
+         * })
+         *
+         * cy.get('button').click()
+         */
+        let overwritenCommand
+
         function originalFn (...args) {
           const current = state('current')
           let storedArgs = args
@@ -143,18 +168,22 @@ export default {
 
           current.set('args', storedArgs)
 
+          state('current', overwritenCommand)
+          state('chainerId', overwritenCommand.get('chainerId'))
+
           return original.fn.apply(this, args)
         }
 
-        const overridden = _.clone(original)
+        const overwriten = _.clone(original)
 
-        overridden.fn = function (...args) {
+        overwriten.fn = function (...args) {
+          overwritenCommand = state('current')
           args = ([] as any).concat(originalFn, args)
 
           return fn.apply(this, args)
         }
 
-        return cy.addCommand(overridden)
+        return cy.addCommand(overwriten)
       },
 
       addQuery (name: string, fn: () => QueryFunction) {

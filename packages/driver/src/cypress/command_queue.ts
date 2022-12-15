@@ -111,6 +111,8 @@ function retryQuery (command: $Command, ret: any, cy: $Cy) {
   return onRetry()
 }
 
+const returnedCy = Symbol('Command returned cy')
+
 export class CommandQueue extends Queue<$Command> {
   state: StateFunc
   stability: IStability
@@ -305,7 +307,7 @@ export class CommandQueue extends Queue<$Command> {
       // back into bluebird else it will create a thenable
       // which is never resolved
       if (this.cy.isCy(ret)) {
-        return null
+        return returnedCy
       }
 
       if (!(!enqueuedCmd || !$utils.isPromiseLike(ret))) {
@@ -362,7 +364,10 @@ export class CommandQueue extends Queue<$Command> {
       // end / snapshot our logs if they need it
       command.finishLogs()
 
-      if (isQuery) {
+      if (subject === returnedCy) {
+        // The command returned a $Chainer object - don't update the subject at all.
+        // It will eventually be updated when the returned command chain resolves.
+      } else if (isQuery) {
         subject = command.get('queryFn')
         // For queries, the "subject" here is the query's return value, which is a function which
         // accepts a subject and returns a subject, and can be re-invoked at any time.

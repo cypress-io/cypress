@@ -474,6 +474,26 @@ describe('driver/src/cypress/cy', () => {
 
       cy.bar()
     })
+
+    it('originalFn is called with correct chainerId and subject', () => {
+      const logs = []
+
+      cy.on('log:added', (attrs, log) => logs.push(log))
+
+      Cypress.Commands.overwrite('click', function (originalFn, ...args) {
+        return cy.wait(0).then(() => originalFn(...args, { timeout: 50 }))
+      })
+
+      cy.get('#wrapper').click()
+      cy.then(() => {
+        const wrapper = cy.$$('#wrapper').get(0)
+        const click = logs[2]
+
+        expect(click.get('name')).to.eq('click')
+        expect(click.get('state')).to.eq('passed')
+        expect(click.get('consoleProps')()['Applied To']).to.eq(wrapper)
+      })
+    })
   })
 
   context('queries', {
