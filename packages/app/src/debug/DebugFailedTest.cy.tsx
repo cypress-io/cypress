@@ -11,8 +11,8 @@ describe('<DebugFailedTest/>', () => {
       <DebugFailedTest failedTestResult={testResult} />
     ))
 
-    cy.findByTestId('test-row').children().should('have.length', 2)
-
+    cy.findByTestId('test-row').children().should('have.length', 3)
+    cy.findByTestId('failed-icon').should('be.visible')
     testResult.titleParts.forEach((title, index) => {
       cy.findByTestId(`titleParts-${index}`).should('have.text', `${title}`)
     })
@@ -28,7 +28,7 @@ describe('<DebugFailedTest/>', () => {
       <DebugFailedTest failedTestResult={multipleTitleParts} />
     ))
 
-    cy.findByTestId('test-row').children().should('have.length', 5).should('be.visible')
+    cy.findByTestId('test-row').children().should('have.length', 6).should('be.visible')
     multipleTitleParts.titleParts.forEach((title, index) => {
       cy.findByTestId(`titleParts-${index}`).should('have.text', `${title}`)
     })
@@ -36,3 +36,5 @@ describe('<DebugFailedTest/>', () => {
     cy.percySnapshot()
   })
 })
+
+// test with group

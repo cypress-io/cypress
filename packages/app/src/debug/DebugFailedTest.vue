@@ -6,6 +6,7 @@
     <SolidStatusIcon
       size="16"
       status="failed"
+      data-cy="failed-icon"
     />
     <div
       v-for="(titlePart, index) in props.failedTestResult.titleParts"
@@ -25,7 +26,7 @@
       </span>
     </div>
     <div
-      v-if="(props.groups.length === 1)"
+      v-if="(props.groups && props.groups.length === 1)"
       data-cy="debug-artifacts"
       class="flex flex-grow justify-end space-x-4.5 opacity-0 test-row-artifacts pr-18px"
     >
@@ -43,7 +44,7 @@
     </div>
   </div>
   <GroupedDebugFailedTestVue
-    v-if="(props.groups.length > 1)"
+    v-if="(props.groups && props.groups.length > 1)"
     :groups="props.groups"
     :debug-artifacts="debugArtifacts"
   />
@@ -59,7 +60,7 @@ import { computed } from 'vue'
 
 const props = defineProps<{
   failedTestResult: TestResults
-  groups: CloudRunGroup[]
+  groups?: CloudRunGroup[]
 }>()
 
 const debugArtifacts = computed(() => {
