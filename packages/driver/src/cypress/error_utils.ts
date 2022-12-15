@@ -189,6 +189,10 @@ const appendErrMsg = (err, errMsg) => {
 }
 
 const makeErrFromObj = (obj) => {
+  if (_.isString(obj)) {
+    return new Error(obj)
+  }
+
   const err2 = new Error(obj.message)
 
   err2.name = obj.name
@@ -580,18 +584,16 @@ const isLoggabbleError = (error: unknown): error is LoggableError => {
   return (
     typeof error === 'object' &&
     error !== null &&
-    'message' in error &&
-    typeof (error as Record<string, unknown>).message === 'string'
-  )
+    'message' in error)
 }
 
 const toLoggableError = (maybeError: unknown): LoggableError => {
   if (isLoggabbleError(maybeError)) return maybeError
 
   try {
-    return new Error(JSON.stringify(maybeError))
+    return { message: JSON.stringify(maybeError) }
   } catch {
-    return new Error(String(maybeError))
+    return { message: String(maybeError) }
   }
 }
 

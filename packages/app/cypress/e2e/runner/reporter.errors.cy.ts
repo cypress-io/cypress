@@ -180,6 +180,16 @@ describe('errors ui', {
       ],
     })
 
+    verify('spec unhandled rejection with string content', {
+      uncaught: true,
+      column: 20,
+      originalMessage: 'Unhandled promise rejection with string content from the spec',
+      message: [
+        'The following error originated from your test code',
+        'It was caused by an unhandled promise rejection',
+      ],
+    })
+
     verify('spec unhandled rejection with done', {
       uncaught: true,
       column: 20,
