@@ -1,3 +1,7 @@
+import { hookRequire } from '@packages/server/hook-require'
+
+hookRequire({ forceTypeScript: false })
+
 import path from 'path'
 import execa from 'execa'
 
@@ -43,6 +47,11 @@ chai.use(chaiSubset)
 chai.use(sinonChai)
 
 export async function e2ePluginSetup (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
+  // @ts-ignore snapshotAuxiliaryData is injected by the snapshot script
+  if (typeof global.snapshotAuxiliaryData === 'undefined') {
+    throw new Error('snapshotAuxiliaryData is undefined. v8 snapshots are not being used in Cypress in Cypress')
+  }
+
   process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
   delete process.env.CYPRESS_INTERNAL_GRAPHQL_PORT
   delete process.env.CYPRESS_INTERNAL_VITE_DEV
