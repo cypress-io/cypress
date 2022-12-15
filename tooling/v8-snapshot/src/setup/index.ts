@@ -5,10 +5,10 @@ import minimist from 'minimist'
 import { generateEntry } from './generate-entry'
 import { installSnapshot } from './install-snapshot'
 
-const setupV8Snapshots = async ({ cypressAppPath, integrityCheckSource }: { cypressAppPath?: string, integrityCheckSource?: string} = {}) => {
+const setupV8Snapshots = async ({ cypressAppPath, integrityCheckSource, supportCypressInCypress }: { cypressAppPath?: string, integrityCheckSource?: string, supportCypressInCypress?: boolean} = {}) => {
   try {
     const args = minimist(process.argv.slice(2))
-    const config = createConfig({ env: args.env, cypressAppPath, integrityCheckSource })
+    const config = createConfig({ env: args.env, cypressAppPath, integrityCheckSource, supportCypressInCypress })
 
     await consolidateDeps(config)
 
