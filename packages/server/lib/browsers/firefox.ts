@@ -350,7 +350,7 @@ toolbar {
 let browserCriClient
 
 export function _createDetachedInstance (browserInstance: BrowserInstance, browserCriClient?: BrowserCriClient): BrowserInstance {
-  const detachedInstance: BrowserInstance = new EventEmitter() as BrowserInstance
+  const detachedInstance: BrowserInstance = new EventEmitter() as unknown as BrowserInstance
 
   detachedInstance.pid = browserInstance.pid
 
@@ -548,7 +548,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     MOZ_HEADLESS_WIDTH: '1280',
     MOZ_HEADLESS_HEIGHT: '721',
     ...launchOptions.env,
-  })
+  }) as unknown as BrowserInstance
 
   try {
     browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })

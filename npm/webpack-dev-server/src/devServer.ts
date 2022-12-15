@@ -13,6 +13,7 @@ import { createReactAppHandler } from './helpers/createReactAppHandler'
 import { nextHandler } from './helpers/nextHandler'
 import { sourceDefaultWebpackDependencies, SourceRelativeWebpackResult } from './helpers/sourceRelativeWebpackModules'
 import { angularHandler } from './helpers/angularHandler'
+import type EventEmitter from 'eventemitter2'
 
 const debug = debugLib('cypress:webpack-dev-server:devServer')
 
@@ -34,7 +35,7 @@ export type ConfigHandler =
 export type WebpackDevServerConfig = {
   specs: Cypress.Spec[]
   cypressConfig: Cypress.PluginConfigOptions
-  devServerEvents: NodeJS.EventEmitter
+  devServerEvents: EventEmitter
   onConfigNotFound?: (devServer: 'webpack', cwd: string, lookedIn: string[]) => void
   webpackConfig?: ConfigHandler // Derived from the user's webpack config
 } & FrameworkConfig
