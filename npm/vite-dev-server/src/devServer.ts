@@ -1,7 +1,8 @@
 import debugFn from 'debug'
-import type { InlineConfig, UserConfig } from 'vite'
+import type { UserConfig } from 'vite'
 import { getVite, Vite } from './getVite'
 import { createViteDevServerConfig } from './resolveConfig'
+import type EventEmitter from 'eventemitter2'
 
 const debug = debugFn('cypress:vite-dev-server:devServer')
 
@@ -12,7 +13,7 @@ type ConfigHandler = UserConfig | (() => UserConfig | Promise<UserConfig>)
 export type ViteDevServerConfig = {
   specs: Cypress.Spec[]
   cypressConfig: Cypress.PluginConfigOptions
-  devServerEvents: NodeJS.EventEmitter
+  devServerEvents: EventEmitter
   onConfigNotFound?: (devServer: 'vite', cwd: string, lookedIn: string[]) => void
 } & {
   framework?: typeof ALL_FRAMEWORKS[number] // Add frameworks here as we implement

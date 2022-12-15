@@ -109,7 +109,6 @@ export function scriptFromBlueprint (config: BlueprintConfig): {
 
   const wrapperOpen = Buffer.from(
     `
-var isSnapshotting = true;
 (function () {
   const PATH_SEP = '${pathSep}'
   ${integrityCheckSource || ''}
@@ -213,7 +212,6 @@ var isSnapshotting = true;
   })
   generateSnapshot = null
 }).call(this)
-isSnapshotting = false
 `,
       'utf8',
   )

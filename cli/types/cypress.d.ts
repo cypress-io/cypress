@@ -5746,7 +5746,7 @@ declare namespace Cypress {
   interface DevServerConfig {
     specs: Spec[]
     cypressConfig: PluginConfigOptions
-    devServerEvents: NodeJS.EventEmitter
+    devServerEvents: EventEmitter2
   }
 
   interface ResolvedDevServerConfig {
