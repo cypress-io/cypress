@@ -1,7 +1,7 @@
 import Bluebird from 'bluebird'
 import Debug from 'debug'
 import _ from 'lodash'
-import * as events from 'eventemitter2'
+import type EventEmitter from 'eventemitter2'
 import * as path from 'path'
 import webpack from 'webpack'
 import utils from './lib/utils'
@@ -114,7 +114,7 @@ interface PreprocessorOptions {
   additionalEntries?: string[]
 }
 
-interface FileEvent extends events.EventEmitter {
+interface FileEvent extends EventEmitter {
   filePath: FilePath
   outputPath: string
   shouldWatch: boolean
