@@ -3759,7 +3759,7 @@
     "./packages/server/lib/util/profile_cleaner.js",
     "./packages/server/lib/util/proxy.ts",
     "./packages/server/lib/util/random.js",
-    "./packages/server/lib/util/resourceTypeAndCredentialManager.ts",
+    "./packages/server/lib/util/requestedWithAndCredentialManager.ts",
     "./packages/server/lib/util/server_destroy.ts",
     "./packages/server/lib/util/shell.js",
     "./packages/server/lib/util/socket_allowed.ts",
@@ -3933,5 +3933,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "5b6d771c65b73ac41acb4499aba9ee013cbbce0406b01a75a07383f69aca4494"
+  "deferredHash": "261c35fb72ffb2cbcc3e8d585a21e20206d7566f81d2cc02469afce17ce089e8"
 }
