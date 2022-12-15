@@ -5,35 +5,35 @@
   >
     <div
       data-cy="debug-header"
-      class="flex grid items-center w-full overflow-hidden py-24px px-24px gap-y-2"
+      class="flex w-full grid py-24px px-24px gap-y-2 items-center overflow-hidden"
     >
       <ul
         data-cy="header-top"
-        class="flex flex-row items-center self-stretch gap-x-2 whitespace-nowrap"
+        class="flex flex-row gap-x-2 items-center self-stretch whitespace-nowrap"
       >
         <li
           v-if="debug?.commitInfo?.summary"
-          class="text-lg font-medium text-gray-900"
+          class="font-medium text-lg text-gray-900"
           data-cy="debug-test-summary"
         >
           {{ debug.commitInfo.summary }}
         </li>
         <li
           v-if="props.commitsAhead"
-          class="flex items-center h-6 text-sm border border-gray-100 rounded"
+          class="border rounded flex border-gray-100 h-6 text-sm items-center"
         >
           <span
             v-if="props.commitsAhead"
-            class="items-center px-2 mx-px font-normal text-orange-500"
+            class="font-normal mx-px px-2 text-orange-500 items-center"
             data-cy="debug-commitsAhead"
           >
             {{ t('debugPage.header.commitsAhead', props.commitsAhead) }}
           </span>
         </li>
-        <li class="text-lg text-gray-400 -mt-8px">
+        <li class="-mt-8px text-lg text-gray-400">
           .
         </li>
-        <li class="text-sm font-normal text-indigo-500">
+        <li class="font-normal text-sm text-indigo-500">
           <ExternalLink
             data-cy="debug-header-dashboard-link"
             :href="debug.url || '#'"
@@ -45,14 +45,14 @@
       </ul>
       <ul
         data-cy="metadata"
-        class="flex flex-wrap items-center text-sm font-normal text-gray-700 gap-x-2 whitespace-nowrap children:flex children:items-center"
+        class="flex flex-wrap font-normal text-sm text-gray-700 gap-x-2 items-center whitespace-nowrap children:flex children:items-center"
       >
         <li
-          class="flex flex-row items-center justify-center text-sm gap-x-2"
+          class="flex flex-row text-sm gap-x-2 items-center justify-center"
         >
           <div
             v-if="(debug.runNumber && debug.status)"
-            class="flex flex-row items-center justify-center h-6 px-2 font-semibold border border-gray-200 rounded bg-gray-50 gap-x-1"
+            class="border rounded flex flex-row font-semibold bg-gray-50 border-gray-200 h-6 px-2 gap-x-1 items-center justify-center"
             :data-cy="`debug-runNumber-${debug.status}`"
           >
             <SolidStatusIcon
@@ -116,8 +116,7 @@ import DebugResults from './DebugResults.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import type { DebugPageFragment, CloudRunStatus } from '../generated/graphql'
 import { IconTimeStopwatch } from '@cypress-design/vue-icon'
-import { SolidStatusIcon } from '@cypress-design/vue-statusicon'
-import type { statusTypes } from '@cypress-design/vue-statusicon/dist/StatusIcon/constants'
+import { SolidStatusIcon, StatusType } from '@cypress-design/vue-statusicon'
 import CommitIcon from '~icons/cy/commit_x14'
 import { gql } from '@urql/core'
 import { dayjs } from '../runs/utils/day.js'
@@ -153,7 +152,7 @@ const props = defineProps<{
 
 const debug = computed(() => props.gql)
 
-const ICON_MAP: Record<CloudRunStatus, { textColor: string, type: statusTypes }> = {
+const ICON_MAP: Record<CloudRunStatus, { textColor: string, type: StatusType }> = {
   PASSED: { textColor: 'text-jade-400', type: 'passed' },
   FAILED: { textColor: 'text-red-400', type: 'failed' },
   CANCELLED: { textColor: 'text-gray-500', type: 'cancelled' },
