@@ -95,10 +95,10 @@ import { gql, useMutation } from '@urql/vue'
 import SidebarNavigationRow, { Badge } from './SidebarNavigationRow.vue'
 import KeyboardBindingsModal from './KeyboardBindingsModal.vue'
 import {
-  IconStatusFailedOutline, // not available in size 24
   IconTechnologyCodeEditor,
   IconTechnologyTestResults,
   IconObjectGear,
+  IconObjectBug,
 } from '@cypress-design/vue-icon'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import HideDuringScreenshot from '../runner/screenshot/HideDuringScreenshot.vue'
@@ -196,7 +196,7 @@ const navigation = computed<{ name: string, icon: FunctionalComponent, href: str
   return [
     { name: 'Specs', icon: IconTechnologyCodeEditor, href: '/specs' },
     { name: 'Runs', icon: IconTechnologyTestResults, href: '/runs' },
-    { name: 'Debug', icon: IconStatusFailedOutline, href: '/debug', badge: debugBadge.value },
+    { name: 'Debug', icon: IconObjectBug, href: '/debug', badge: debugBadge.value },
     { name: 'Settings', icon: IconObjectGear, href: '/settings' },
   ]
 })

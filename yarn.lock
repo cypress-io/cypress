@@ -2326,17 +2326,17 @@
     windicss "^3.5.1"
     windicss-webpack-plugin "^1.6.10"
 
-"@cypress-design/icon-registry@^0.14.0":
-  version "0.14.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.14.0.tgz#c30cbb013b7a86700941677da661229d81493399"
-  integrity sha512-wIXr00J7azl8Jl+3DLhSK8WkWXRUvfqDKUnLrEyxQjrzbwNIQIPL0bqgY30CZbx8xoPXCIewJDYXvhgbWZQOhQ==
+"@cypress-design/icon-registry@^0.16.0":
+  version "0.16.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-0.16.0.tgz#5b3ae12373e568ebbe028ad87c8bcecc9bf941a8"
+  integrity sha512-9cYntpV2EDg8G+IN4P4FFXiQRAwZTbvMuyjf/Y3UxXevuvibfqN4riDowcUQIYncFUQ95ofb5hC0Ti8R1leLlg==
 
-"@cypress-design/vue-icon@^0.12.1":
-  version "0.12.1"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.12.1.tgz#cb348fb697dd65305c927522643b4ede6b113821"
-  integrity sha512-AI5XUqzL9AwoNL0rvQNWzyrP5WQNGYPI2phC7b0MhO7hjrZN6Qv+Le7kHhEpAIpWuVi222t699jlvXoTRNr1Jw==
+"@cypress-design/vue-icon@^0.14.0":
+  version "0.14.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-icon/-/vue-icon-0.14.0.tgz#25cfb39af69e9d2328732f3a13d2837f287795fe"
+  integrity sha512-dw3qrhzwe9s9ARA5UhmMNHM26QMZjmiIVcXNPGAZToG8vUIXUvCxBiuVXsWXjqJ7bfwM/F91X4RT0Ly3Y8Ncew==
   dependencies:
-    "@cypress-design/icon-registry" "^0.14.0"
+    "@cypress-design/icon-registry" "^0.16.0"
 
 "@cypress/commit-info@2.2.0":
   version "2.2.0"
