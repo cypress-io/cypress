@@ -9,21 +9,23 @@
       :total-skipped="results.totalSkipped"
       :total-pending="results.totalPending"
       :order="['PASSED', 'FAILED', 'SKIPPED', 'PENDING']"
+    />
+    <div
+      v-if="results?.totalFlakyTests"
+      data-cy="debug-flaky-badge"
+      class="border rounded flex flex-row gap-8px items-center h-6 bg-orange-50 border-orange-200 text-sm text-orange-600 px-2 gap-x-1 border-1"
     >
-      <template #prefix>
-        <div
-          class="text-red-400 font-semibold text-sm flex items-center px-2"
-        >
-          <component
-            :is="icon[0]"
-            class="h-16px w-16px pr-2"
-            data-cy="icon-prefix"
-          />
-          {{ icon[1] }}
-        </div>
-        <div class="w-px h-3 my-6px bg-gray-100" />
-      </template>
-    </ResultCounts>
+      <span
+        data-cy="total-flaky-tests"
+        class="font-medium pr-1 opacity-70"
+      >
+        {{ results.totalFlakyTests }}
+      </span>
+      <div class="w-px my-6px h-6 border-orange-200 border" />
+      <span class="font-semibold pl-1">
+        {{ t('specPage.flaky.badgeLabel') }}
+      </span>
+    </div>
   </div>
 </template>
 
@@ -31,9 +33,10 @@
 import { computed } from 'vue'
 import type { DebugResultsFragment } from '../generated/graphql'
 import { gql } from '@urql/core'
-import FailedSolidIcon from '~icons/cy/status-failed-solid_x24.svg'
-import PassedIcon from '~icons/cy/passed-solid_x16.svg'
 import ResultCounts from '@packages/frontend-shared/src/components/ResultCounts.vue'
+import { useI18n } from '@cy/i18n'
+
+const { t } = useI18n()
 
 gql`
 fragment DebugResults on CloudRun {
@@ -50,13 +53,5 @@ const props = defineProps<{
   gql: DebugResultsFragment
 }>()
 
-const ICON_MAP = {
-  PASSED: [PassedIcon, 'Passed'],
-  FAILED: [FailedSolidIcon, 'Failed'],
-} as const
-
-const icon = computed(() => ICON_MAP['FAILED'])
-
 const results = computed(() => props.gql)
-
 </script>
