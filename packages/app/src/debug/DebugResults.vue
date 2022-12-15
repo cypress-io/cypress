@@ -11,7 +11,7 @@
       :order="['PASSED', 'FAILED', 'SKIPPED', 'PENDING']"
     />
     <div
-      v-if="(results.totalFlakyTests && results.totalFlakyTests > 0)"
+      v-if="results?.totalFlakyTests"
       data-cy="debug-flaky-badge"
       class="border rounded flex flex-row gap-8px items-center h-6 bg-orange-50 border-orange-200 text-sm text-orange-600 px-2 gap-x-1 border-1"
     >

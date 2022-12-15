@@ -114,7 +114,7 @@
 import { computed } from 'vue'
 import DebugResults from './DebugResults.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
-import type { DebugPageFragment } from '../generated/graphql'
+import type { DebugPageFragment, CloudRunStatus } from '../generated/graphql'
 import { IconTimeStopwatch } from '@cypress-design/vue-icon'
 import { SolidStatusIcon } from '@cypress-design/vue-statusicon'
 import CommitIcon from '~icons/cy/commit_x14'
@@ -152,15 +152,24 @@ const props = defineProps<{
 
 const debug = computed(() => props.gql)
 
-const ICON_MAP = {
+const ICON_MAP: Record<CloudRunStatus, { textColor: string }> = {
   PASSED: { textColor: 'text-jade-400' },
   FAILED: { textColor: 'text-red-400' },
   CANCELLED: { textColor: 'text-gray-500' },
   ERRORED: { textColor: 'text-orange-400' },
   RUNNING: { textColor: 'text-indigo-500' },
-}
+  NOTESTS: { textColor: 'text-indigo-500' },
+  OVERLIMIT: { textColor: 'text-indigo-500' },
+  TIMEDOUT: { textColor: 'text-indigo-500' },
+} as const
 
-const runNumberColor = computed(() => ICON_MAP[String(props.gql.status)]['textColor'])
+const runNumberColor = computed(() => {
+  if (props.gql.status) {
+    return ICON_MAP[props.gql.status].textColor
+  }
+
+  return ''
+})
 
 const relativeCreatedAt = computed(() => dayjs(new Date(debug.value.createdAt!)).fromNow())
 

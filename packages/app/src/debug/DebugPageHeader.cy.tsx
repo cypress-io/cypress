@@ -77,7 +77,7 @@ describe('<DebugPageHeader />', {
     .contains(flakyCount)
   })
 
-  it('checks if all run status are accounted for', () => {
+  it('displays each run status', () => {
     const statuses: CloudRunStatus[] = ['PASSED', 'FAILED', 'CANCELLED', 'RUNNING', 'ERRORED']
 
     statuses.forEach((status) => {
