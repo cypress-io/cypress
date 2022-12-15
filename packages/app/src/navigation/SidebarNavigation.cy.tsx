@@ -3,6 +3,8 @@ import { defaultMessages } from '@cy/i18n'
 import { CloudRunStatus, SidebarNavigationFragment, SidebarNavigationFragmentDoc, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql-test'
 import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
 import { cloneDeep } from 'lodash'
+import { IATR_RELEASE } from '@packages/frontend-shared/src/utils/isAllowedFeature'
+import interval from 'human-interval'
 
 function mountComponent (props: { initialNavExpandedVal?: boolean, cloudProject?: { status: CloudRunStatus, numFailedTests: number }, isLoading?: boolean} = {}) {
   const withDefaults = { initialNavExpandedVal: false, isLoading: false, ...props }
@@ -119,7 +121,7 @@ describe('SidebarNavigation', () => {
 
   context('debug status badge', () => {
     it('renders new badge without cloudProject', { viewportWidth: 1280 }, () => {
-      cy.clock(new Date('December 20, 2022'))
+      cy.clock(IATR_RELEASE)
 
       mountComponent()
 
@@ -134,7 +136,7 @@ describe('SidebarNavigation', () => {
     })
 
     it('renders new badge when run status is "NOTESTS" or "RUNNING"', () => {
-      cy.clock(new Date('December 20, 2022'))
+      cy.clock(IATR_RELEASE + interval('1 month'))
 
       for (const status of ['NOTESTS', 'RUNNING'] as CloudRunStatus[]) {
         mountComponent({ cloudProject: { status, numFailedTests: 0 } })
@@ -144,44 +146,46 @@ describe('SidebarNavigation', () => {
 
     it('renders no badge if no cloudProject and released > 2 months ago', () => {
       // Set to February 15, 2023 to see this fail
-      cy.clock(new Date('February 20, 2023'))
+      cy.clock(IATR_RELEASE + interval('3 months'))
       mountComponent()
       cy.findByLabelText('New Debug feature').should('not.exist')
     })
 
     it('renders success badge when status is "PASSED"', () => {
       mountComponent({ cloudProject: { status: 'PASSED', numFailedTests: 0 } })
-      cy.findByLabelText('Last recorded run passed').should('be.visible').contains('0')
+      cy.findByLabelText('Relevant run passed').should('be.visible').contains('0')
       cy.percySnapshot('Debug Badge:passed')
     })
 
     it('renders failure badge', () => {
       mountComponent({ cloudProject: { status: 'FAILED', numFailedTests: 1 } })
-      cy.findByLabelText('Last recorded run had 1 test failure').should('be.visible').contains('1')
+      cy.findByLabelText('Relevant run had 1 test failure').should('be.visible').contains('1')
       cy.percySnapshot('Debug Badge:failed')
 
       mountComponent({ cloudProject: { status: 'FAILED', numFailedTests: 10 } })
-      cy.findByLabelText('Last recorded run had 10 test failures').should('be.visible').contains('9+')
+      cy.findByLabelText('Relevant run had 10 test failures').should('be.visible').contains('9+')
       cy.percySnapshot('Debug Badge:failed:truncated')
     })
 
     it('renders failure badge when failing tests and abnormal status', () => {
       for (const status of ['CANCELLED', 'ERRORED', 'OVERLIMIT', 'TIMEDOUT'] as CloudRunStatus[]) {
         mountComponent({ cloudProject: { status, numFailedTests: 4 } })
-        cy.findByLabelText('Last recorded run had 4 test failures').should('be.visible').contains('4')
+        cy.findByLabelText('Relevant run had 4 test failures').should('be.visible').contains('4')
       }
     })
 
     it('renders error badge when no tests and abnormal status', () => {
       for (const status of ['CANCELLED', 'ERRORED', 'OVERLIMIT', 'TIMEDOUT'] as CloudRunStatus[]) {
         mountComponent({ cloudProject: { status, numFailedTests: 0 } })
-        cy.findByLabelText('Last recorded run had an error').should('be.visible').contains('0')
+        cy.findByLabelText('Relevant run had an error').should('be.visible').contains('0')
       }
 
       cy.percySnapshot('Debug Badge:errored')
     })
 
     it('renders no badge when query is loading', () => {
+      cy.clock(IATR_RELEASE)
+
       mountComponent({ isLoading: true })
       cy.findByLabelText('New Debug feature').should('not.exist')
     })

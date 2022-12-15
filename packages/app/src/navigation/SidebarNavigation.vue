@@ -164,12 +164,13 @@ const debugBadge = computed<Badge | undefined>(() => {
   }
 
   const showNewBadge = isAllowedFeature('debugNewBadge', loginConnectStore)
+  const newBadge: Badge = { value: t('sidebar.debug.new'), status: 'success', label: t('sidebar.debug.debugFeature') }
 
   if (props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject') {
     const { status, testsForReview } = props.gql.currentProject.cloudProject.runByNumber || {}
 
     if (status === 'NOTESTS' || status === 'RUNNING') {
-      return showNewBadge ? { value: t('sidebar.debug.new'), status: 'success', label: t('sidebar.debug.debugFeature') } : undefined
+      return showNewBadge ? newBadge : undefined
     }
 
     if (status === 'PASSED') {
@@ -189,7 +190,7 @@ const debugBadge = computed<Badge | undefined>(() => {
     return { value: '0', status: 'error', label: t('sidebar.debug.errored') }
   }
 
-  return showNewBadge ? { value: t('sidebar.debug.new'), status: 'success', label: t('sidebar.debug.debugFeature') } : undefined
+  return showNewBadge ? newBadge : undefined
 })
 
 const navigation = computed<{ name: string, icon: FunctionalComponent, href: string, badge?: Badge }[]>(() => {

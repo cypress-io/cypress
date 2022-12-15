@@ -33,6 +33,8 @@ const minTimeSinceEvent = (eventTime: number | undefined, waitTime: string) => {
   return (Date.now() - eventTime) > waitTimestamp
 }
 
+export const IATR_RELEASE = new Date('2022-12-20T00:00:00').getTime()
+
 export const isAllowedFeature = (
   featureName: Feature,
   loginConnectStore: LoginConnectStore,
@@ -51,7 +53,6 @@ export const isAllowedFeature = (
     navCiPromptAutoOpened: promptsShown.ci1,
     loginModalRecordPromptShown: promptsShown.loginModalRecord,
     latestSmartBannerShown: latestBannerShownTime,
-    debugPageRelease: new Date('2022-12-20T00:00:00').getTime(),
   }
 
   function bannerForCurrentStatusWasNotDismissed () {
@@ -95,7 +96,7 @@ export const isAllowedFeature = (
       allTasksCompleted: [],
     },
     debugNewBadge: {
-      base: [!minTimeSinceEvent(events.debugPageRelease, '2 months')],
+      base: [!minTimeSinceEvent(IATR_RELEASE, '2 months')],
       needsRecordedRun: [],
       needsOrgConnect: [],
       needsProjectConnect: [],
