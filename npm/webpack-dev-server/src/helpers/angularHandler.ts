@@ -217,7 +217,7 @@ function createFakeContext (projectRoot: string, defaultProjectConfig: Cypress.A
     getProjectMetadata: () => {
       return {
         root: defaultProjectConfig.root,
-        sourceRoot: defaultProjectConfig.root,
+        sourceRoot: defaultProjectConfig.sourceRoot,
         projectType: 'application',
       }
     },
