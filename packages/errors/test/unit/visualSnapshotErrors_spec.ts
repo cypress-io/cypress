@@ -1198,7 +1198,7 @@ describe('visual error templates', () => {
     },
     MIGRATION_MISMATCHED_CYPRESS_VERSIONS: () => {
       return {
-        default: ['9.6.0'],
+        default: ['9.6.0', '10.0.0'],
       }
     },
     MIGRATION_CYPRESS_NOT_FOUND: () => {
