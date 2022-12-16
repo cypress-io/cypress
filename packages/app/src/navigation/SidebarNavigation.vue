@@ -26,10 +26,10 @@
         />
       </div>
     </button>
-    <div class="flex flex-col flex-1 overflow-y-auto ">
+    <div class="flex flex-col flex-1 ">
       <SidebarNavigationHeader
-        v-if="query.data.value"
-        :gql="query.data.value"
+        v-if="props.gql"
+        :gql="props.gql"
         :is-nav-bar-expanded="isNavBarExpanded"
       />
       <nav
@@ -48,6 +48,7 @@
             :icon="item.icon"
             :name="item.name"
             :is-nav-bar-expanded="isNavBarExpanded"
+            :badge="item.badge"
           />
         </RouterLink>
       </nav>
@@ -89,33 +90,28 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watchEffect } from 'vue'
-import { gql, useMutation, useQuery } from '@urql/vue'
-import SidebarNavigationRow from './SidebarNavigationRow.vue'
+import { computed, FunctionalComponent, ref, watchEffect } from 'vue'
+import { gql, useMutation } from '@urql/vue'
+import SidebarNavigationRow, { Badge } from './SidebarNavigationRow.vue'
 import KeyboardBindingsModal from './KeyboardBindingsModal.vue'
 import {
-  IconStatusFailedOutline, // not available in size 24
   IconTechnologyCodeEditor,
   IconTechnologyTestResults,
   IconObjectGear,
+  IconObjectBug,
 } from '@cypress-design/vue-icon'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import HideDuringScreenshot from '../runner/screenshot/HideDuringScreenshot.vue'
-import { SideBarNavigationDocument, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql'
+import { SidebarNavigationFragment, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql'
 import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.png'
 import { useI18n } from '@cy/i18n'
 import { useRoute } from 'vue-router'
 import SidebarNavigationHeader from './SidebarNavigationHeader.vue'
 import { useWindowSize } from '@vueuse/core'
+import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import { isAllowedFeature } from '@packages/frontend-shared/src/utils/isAllowedFeature'
 
 const { t } = useI18n()
-
-const navigation = [
-  { name: 'Specs', icon: IconTechnologyCodeEditor, href: '/specs' },
-  { name: 'Runs', icon: IconTechnologyTestResults, href: '/runs' },
-  { name: 'Debug', icon: IconStatusFailedOutline, href: '/debug' },
-  { name: 'Settings', icon: IconObjectGear, href: '/settings' },
-] as const
 
 gql`
 fragment SidebarNavigation on Query {
@@ -128,6 +124,24 @@ fragment SidebarNavigation on Query {
       specListWidth
     }
   }
+  currentProject {
+    id
+    cloudProject {
+      __typename
+      ... on CloudProject {
+        id
+        runByNumber(runNumber: 6) {
+          id
+          status
+          testsForReview {
+            id
+            state
+          }
+        }
+      }
+    }
+  }
+  ...SidebarNavigationHeader
 }
 `
 
@@ -138,16 +152,55 @@ mutation SideBarNavigation_SetPreferences ($value: String!) {
   }
 }`
 
-gql`
-query SideBarNavigation {
-  ...SidebarNavigationHeader
-  ...SidebarNavigation
-}
-`
+const props = defineProps<{ gql: SidebarNavigationFragment | undefined, isLoading: boolean }>()
 
 const NAV_EXPAND_MIN_SCREEN_WIDTH = 1024
 
-const query = useQuery({ query: SideBarNavigationDocument })
+const loginConnectStore = useLoginConnectStore()
+
+const debugBadge = computed<Badge | undefined>(() => {
+  if (props.isLoading) {
+    return undefined
+  }
+
+  const showNewBadge = isAllowedFeature('debugNewBadge', loginConnectStore)
+  const newBadge: Badge = { value: t('sidebar.debug.new'), status: 'success', label: t('sidebar.debug.debugFeature') }
+
+  if (props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject') {
+    const { status, testsForReview } = props.gql.currentProject.cloudProject.runByNumber || {}
+
+    if (status === 'NOTESTS' || status === 'RUNNING') {
+      return showNewBadge ? newBadge : undefined
+    }
+
+    if (status === 'PASSED') {
+      return { value: '0', status: 'success', label: t('sidebar.debug.passed') }
+    }
+
+    if (testsForReview?.length) {
+      return {
+        value: testsForReview.length < 9
+          ? String(testsForReview.length)
+          : '9+',
+        status: 'failed',
+        label: t('sidebar.debug.failed', testsForReview.length),
+      }
+    }
+
+    return { value: '0', status: 'error', label: t('sidebar.debug.errored') }
+  }
+
+  return showNewBadge ? newBadge : undefined
+})
+
+const navigation = computed<{ name: string, icon: FunctionalComponent, href: string, badge?: Badge }[]>(() => {
+  return [
+    { name: 'Specs', icon: IconTechnologyCodeEditor, href: '/specs' },
+    { name: 'Runs', icon: IconTechnologyTestResults, href: '/runs' },
+    { name: 'Debug', icon: IconObjectBug, href: '/debug', badge: debugBadge.value },
+    { name: 'Settings', icon: IconObjectGear, href: '/settings' },
+  ]
+})
 
 const setPreferences = useMutation(SideBarNavigation_SetPreferencesDocument)
 
@@ -165,7 +218,7 @@ watchEffect(() => {
   if (width.value < NAV_EXPAND_MIN_SCREEN_WIDTH || route.meta?.navBarExpandedAllowed === false) {
     isNavBarExpanded.value = false
   } else {
-    isNavBarExpanded.value = query.data?.value?.localSettings.preferences.isSideNavigationOpen ?? true
+    isNavBarExpanded.value = props.gql?.localSettings.preferences.isSideNavigationOpen ?? true
   }
 })
 

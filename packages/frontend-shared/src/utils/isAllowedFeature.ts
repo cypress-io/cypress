@@ -1,6 +1,10 @@
 import interval from 'human-interval'
 import { BannerIds } from '@packages/types'
-import type { LoginConnectStore } from '../store'
+import type { LoginConnectStore, UserStatus } from '../store'
+
+type Feature = 'specsListBanner' | 'docsCiPrompt' | 'debugNewBadge'
+type RulesSet = { base: boolean[] } & Partial<Record<UserStatus, boolean[]>>
+type Rules = Record<Feature, RulesSet>
 
 const bannerIds = {
   isLoggedOut: BannerIds.ACI_082022_LOGIN,
@@ -10,7 +14,7 @@ const bannerIds = {
 }
 
 /**
- * Enures a cooldown period between two cypress-triggered events, if one has already happened
+ * Ensures a cooldown period between two cypress-triggered events, if one has already happened
  * @param eventTime - timestamp of an event - if undefined, this function will always return true, no cooldown is needed
  * @param waitTime - time to compare with, such as `1 day`, `20 minutes`, etc, to be parsed by `human-interval` package
  */
@@ -29,8 +33,10 @@ const minTimeSinceEvent = (eventTime: number | undefined, waitTime: string) => {
   return (Date.now() - eventTime) > waitTimestamp
 }
 
+export const IATR_RELEASE = new Date('2022-12-20T00:00:00').getTime()
+
 export const isAllowedFeature = (
-  featureName: 'specsListBanner' | 'docsCiPrompt',
+  featureName: Feature,
   loginConnectStore: LoginConnectStore,
 ) => {
   const {
@@ -62,7 +68,7 @@ export const isAllowedFeature = (
   // For each feature, we define an array of rules for every `UserStatus`.
   // The `base` rule is applied to all statuses, additional rules are
   // nested in their respective statuses.
-  const rules = {
+  const rules: Rules = {
     specsListBanner: {
       base: [
         minTimeSinceEvent(events.cypressFirstOpened, '4 days'),
@@ -83,6 +89,14 @@ export const isAllowedFeature = (
         minTimeSinceEvent(events.cypressFirstOpened, '4 days'),
         minTimeSinceEvent(events.latestSmartBannerShown, '1 day'),
       ],
+      needsRecordedRun: [],
+      needsOrgConnect: [],
+      needsProjectConnect: [],
+      isLoggedOut: [],
+      allTasksCompleted: [],
+    },
+    debugNewBadge: {
+      base: [!minTimeSinceEvent(IATR_RELEASE, '2 months')],
       needsRecordedRun: [],
       needsOrgConnect: [],
       needsProjectConnect: [],

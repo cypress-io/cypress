@@ -47,33 +47,33 @@ import { specsList } from './utils/DebugMapping'
 const { t } = useI18n()
 
 gql`
-  fragment DebugSpecs on Query {
-    currentProject {
-      id
-      cloudProject {
-        __typename
-        ... on CloudProject {
+fragment DebugSpecs on Query {
+  currentProject {
+    id
+    cloudProject {
+      __typename
+      ... on CloudProject {
+        id
+        runByNumber(runNumber: 6) {
+          ...DebugPage
           id
-          runByNumber(runNumber: 2) {
-            ...DebugPage
+          runNumber
+          status
+          overLimitActionType
+          overLimitActionUrl
+          testsForReview {
             id
-            runNumber
-            status
-            overLimitActionType
-            overLimitActionUrl
-            testsForReview {
-              id
-              ...DebugSpecListTests
-            }
-            specs {
-              id
-              ...DebugSpecListSpec
-            }
+            ...DebugSpecListTests
+          }
+          specs {
+            id
+            ...DebugSpecListSpec
           }
         }
       }
     }
   }
+}
 `
 
 const props = defineProps<{
