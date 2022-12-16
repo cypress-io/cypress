@@ -870,7 +870,7 @@
     "./packages/server/lib/util/fs.ts",
     "./packages/server/lib/util/glob.js",
     "./packages/server/lib/util/proxy.ts",
-    "./packages/server/lib/util/resourceTypeAndCredentialManager.ts",
+    "./packages/server/lib/util/requestedWithAndCredentialManager.ts",
     "./packages/server/lib/util/socket_allowed.ts",
     "./packages/server/lib/util/stream_buffer.ts",
     "./packages/server/lib/video_capture.ts",
@@ -952,7 +952,8 @@
     "./packages/socket/node_modules/socket.io/node_modules/engine.io/lib/transports/polling.js",
     "./packages/socket/node_modules/socket.io/node_modules/engine.io/lib/transports/websocket.js",
     "./packages/ts/register.js",
-    "./packages/types/index.js"
+    "./packages/types/index.js",
+    "./tooling/v8-snapshot/dist/setup/v8-snapshot-entry-cy-in-cy.js"
   ],
   "healthy": [
     "./node_modules/@babel/code-frame/lib/index.js",
@@ -3606,6 +3607,8 @@
     "./packages/extension/index.js",
     "./packages/extension/lib/extension.js",
     "./packages/extension/lib/util.js",
+    "./packages/frontend-shared/cypress/e2e/prod-dependencies.ts",
+    "./packages/frontend-shared/cypress/e2e/v8-snapshot-entry.ts",
     "./packages/graphql/node_modules/chalk/source/templates.js",
     "./packages/graphql/node_modules/chalk/source/util.js",
     "./packages/graphql/node_modules/debug/node_modules/ms/index.js",
