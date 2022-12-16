@@ -552,8 +552,8 @@
       "smartText": "Scale your test runs with built-in Smart Orchestration.",
       "debugText": "Debug tests that fail in CI with visual feedback.",
       "chartText": "Keep your tests in tip-top shape with powerful analytics.",
-      "buttonUser": "Log in to Cypress Cloud",
-      "buttonProject": "Connect your project to Cypress Cloud",
+      "buttonUser": "Connect to Cypress Cloud",
+      "buttonProject": "Connect a Cypress Cloud project",
       "modal": {
         "title": "Connect project",
         "cancel": "Cancel",
@@ -645,6 +645,11 @@
     "notLoggedIn": "Not logged in",
     "notConnected": "Not connected",
     "noRuns": "No runs",
+    "emptyStates": {
+      "debugDirectlyInCypress": "Debug failed CI runs directly in Cypress",
+      "reviewRerunAndDebug": "Review, rerun, and debug failed CI test runs that are recorded to Cypress Cloud – all from within your local Cypress app.",
+      "connectToCypressCloud": "Connect to Cypress Cloud"
+    },
     "header": {
       "runUrl": "View in Cypress Cloud",
       "commitsAhead": "You are {n} commit ahead | You are {n} commits ahead"

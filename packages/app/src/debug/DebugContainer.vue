@@ -15,11 +15,7 @@
       v-else
       data-cy="debug-empty"
     >
-      <div
-        v-if="!loginConnectStore.user.isLoggedIn"
-      >
-        {{ t('debugPage.notLoggedIn') }}
-      </div>
+      <DebugNotLoggedIn v-if="!loginConnectStore.user.isLoggedIn" />
       <div
         v-else-if="!loginConnectStore.project.isProjectConnected"
       >
@@ -41,6 +37,7 @@ import type { DebugSpecsFragment } from '../generated/graphql'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import DebugPageHeader from './DebugPageHeader.vue'
 import DebugSpecList from './DebugSpecList.vue'
+import DebugNotLoggedIn from './DebugNotLoggedIn.vue'
 import { useI18n } from 'vue-i18n'
 import { specsList } from './utils/DebugMapping'
 
