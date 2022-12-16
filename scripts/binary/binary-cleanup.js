@@ -1,9 +1,8 @@
 const fs = require('fs-extra')
 const path = require('path')
-const { consolidateDeps } = require('@tooling/v8-snapshot')
+const { consolidateDeps, getSnapshotCacheDir } = require('@tooling/v8-snapshot')
 const del = require('del')
 const esbuild = require('esbuild')
-const snapshotMetadata = require('@tooling/v8-snapshot/cache/prod-darwin/snapshot-meta.cache.json')
 const tempDir = require('temp-dir')
 const workingDir = path.join(tempDir, 'binary-cleanup-workdir')
 
@@ -39,8 +38,6 @@ async function removeEmptyDirectories (directory) {
 const getDependencyPathsToKeep = async (buildAppDir) => {
   const unixBuildAppDir = buildAppDir.split(path.sep).join(path.posix.sep)
   const startingEntryPoints = [
-    'packages/server/index.js',
-    'packages/server/hook-require.js',
     'packages/server/lib/plugins/child/require_async_child.js',
     'packages/server/lib/plugins/child/register_ts_node.js',
     'packages/rewriter/lib/threads/worker.js',
@@ -81,7 +78,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
       absWorkingDir: unixBuildAppDir,
       external: [
         './transpile-ts',
-        './server-entry',
+        './start-cypress',
         'fsevents',
         'pnpapi',
         '@swc/core',
@@ -111,18 +108,66 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     })
   }
 
-  return [...Object.keys(esbuildResult.metafile.inputs), ...entryPoints]
+  return [...Object.keys(esbuildResult.metafile.inputs), ...entryPoints, 'package.json']
 }
 
-const cleanup = async (buildAppDir) => {
-  // 1. Retrieve all dependencies that still need to be kept in the binary. In theory, we could use the bundles generated here as single files within the binary,
-  // but for now, we just track on the dependencies that get pulled in
-  const keptDependencies = [...await getDependencyPathsToKeep(buildAppDir), 'package.json', 'packages/server/server-entry.js']
+const createServerEntryPointBundle = async (buildAppDir) => {
+  const unixBuildAppDir = buildAppDir.split(path.sep).join(path.posix.sep)
+  const entryPoints = [path.join(unixBuildAppDir, 'packages/server/index.js')]
+  // Build the binary entry point ignoring anything that happens in start-cypress since that will be in the v8 snapshot
+  const esbuildResult = await esbuild.build({
+    entryPoints,
+    bundle: true,
+    outdir: workingDir,
+    platform: 'node',
+    metafile: true,
+    absWorkingDir: unixBuildAppDir,
+    external: [
+      './transpile-ts',
+      './start-cypress',
+    ],
+  })
 
-  // 2. Gather the dependencies that could potentially be removed from the binary due to being in the snapshot
-  const potentiallyRemovedDependencies = [...snapshotMetadata.healthy, ...snapshotMetadata.deferred, ...snapshotMetadata.norewrite]
+  console.log(`copying server entry point bundle from ${path.join(workingDir, 'index.js')} to ${path.join(buildAppDir, 'packages', 'server', 'index.js')}`)
 
-  // 3. Remove all dependencies that are in the snapshot but not in the list of kept dependencies from the binary
+  await fs.copy(path.join(workingDir, 'index.js'), path.join(buildAppDir, 'packages', 'server', 'index.js'))
+
+  console.log(`compiling server entry point bundle to ${path.join(buildAppDir, 'packages', 'server', 'index.jsc')}`)
+
+  // Use bytenode to compile the entry point bundle. This will save time on the v8 compile step and ensure the integrity of the entry point
+  const bytenode = await import('bytenode')
+
+  await bytenode.compileFile({
+    filename: path.join(buildAppDir, 'packages', 'server', 'index.js'),
+    output: path.join(buildAppDir, 'packages', 'server', 'index.jsc'),
+    electron: true,
+  })
+
+  // Convert these inputs to a relative file path. Note that these paths are posix paths.
+  return [...Object.keys(esbuildResult.metafile.inputs)].map((input) => `./${input}`)
+}
+
+const buildEntryPointAndCleanup = async (buildAppDir) => {
+  const [keptDependencies, serverEntryPointBundleDependencies] = await Promise.all([
+    // 1. Retrieve all dependencies that still need to be kept in the binary. In theory, we could use the bundles generated here as single files within the binary,
+    // but for now, we just track on the dependencies that get pulled in
+    getDependencyPathsToKeep(buildAppDir),
+    // 2. Create a bundle for the server entry point. This will be used to start the server in the binary. It returns the dependencies that are pulled in by this bundle that potentially can now be removed
+    createServerEntryPointBundle(buildAppDir),
+  ])
+
+  // 3. Gather the dependencies that could potentially be removed from the binary due to being in the snapshot or in the entry point bundle
+  const snapshotMetadata = require(path.join(getSnapshotCacheDir(), 'snapshot-meta.json'))
+  const potentiallyRemovedDependencies = [
+    ...snapshotMetadata.healthy,
+    ...snapshotMetadata.deferred,
+    ...snapshotMetadata.norewrite,
+    ...serverEntryPointBundleDependencies,
+  ]
+
+  console.log(`potentially removing ${potentiallyRemovedDependencies.length} dependencies`)
+
+  // 4. Remove all dependencies that are in the snapshot but not in the list of kept dependencies from the binary
   await Promise.all(potentiallyRemovedDependencies.map(async (dependency) => {
     const typeScriptlessDependency = dependency.replace(/\.ts$/, '.js')
 
@@ -132,10 +177,10 @@ const cleanup = async (buildAppDir) => {
     }
   }))
 
-  // 4. Consolidate dependencies that are safe to consolidate (`lodash` and `bluebird`)
+  // 5. Consolidate dependencies that are safe to consolidate (`lodash` and `bluebird`)
   await consolidateDeps({ projectBaseDir: buildAppDir })
 
-  // 5. Remove various unnecessary files from the binary to further clean things up. Likely, there is additional work that can be done here
+  // 6. Remove various unnecessary files from the binary to further clean things up. Likely, there is additional work that can be done here
   await del([
     // Remove test files
     path.join(buildAppDir, '**', 'test'),
@@ -187,10 +232,10 @@ const cleanup = async (buildAppDir) => {
     path.join(buildAppDir, '**', 'yarn.lock'),
   ], { force: true })
 
-  // 6. Remove any empty directories as a result of the rest of the cleanup
+  // 7. Remove any empty directories as a result of the rest of the cleanup
   await removeEmptyDirectories(buildAppDir)
 }
 
 module.exports = {
-  cleanup,
+  buildEntryPointAndCleanup,
 }

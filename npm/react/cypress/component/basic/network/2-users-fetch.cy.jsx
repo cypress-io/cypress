@@ -13,15 +13,9 @@ describe('Users with Fetch', () => {
 
   // https://github.com/bahmutov/@cypress/react/issues/347
   context('mocking', () => {
-    beforeEach(() => {
-      cy.server()
-      // mount the component after defining routes in tests
-      // preventing race conditions where you wait on untouched routes
-    })
-
     it('can inspect real data from the server', () => {
       // spy on the request
-      cy.route('/users?_limit=3').as('users')
+      cy.intercept('/users?_limit=3').as('users')
       mount(<Users />)
       cy.wait('@users')
       .its('response.body')
@@ -34,7 +28,7 @@ describe('Users with Fetch', () => {
       const users = [{ id: 1, name: 'foo' }]
 
       // stub the request
-      cy.route('GET', '/users?_limit=3', users).as('users')
+      cy.intercept('GET', '/users?_limit=3', users).as('users')
       mount(<Users />)
       cy.get('li')
       .should('have.length', 1)
@@ -45,7 +39,7 @@ describe('Users with Fetch', () => {
     it('can inspect mocked network reaponse', () => {
       const users = [{ id: 1, name: 'foo' }]
 
-      cy.route('GET', '/users?_limit=3', users).as('users')
+      cy.intercept('GET', '/users?_limit=3', users).as('users')
       mount(<Users />)
       cy.wait('@users')
       .its('response.body')
@@ -55,10 +49,8 @@ describe('Users with Fetch', () => {
     it('can delay and wait on Ajax call', () => {
       const users = [{ id: 1, name: 'foo' }]
 
-      cy.route({
-        method: 'GET',
-        url: '/users?_limit=3',
-        response: users,
+      cy.intercept('GET', '/users?_limit=3', {
+        body: users,
         delay: 1000,
       }).as('users')
 

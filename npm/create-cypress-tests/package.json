@@ -9,7 +9,8 @@
     "prepare-example": "node scripts/example copy-to ./initial-template",
     "prepare-copy-templates": "node scripts/copy-templates copy-to ./dist/src",
     "test": "cross-env TS_NODE_PROJECT=./tsconfig.test.json mocha --config .mocharc.json './src/**/*.test.ts'",
-    "test:watch": "yarn test -w"
+    "test:watch": "yarn test -w",
+    "lint": "eslint --ext .js,.ts,.json, ."
   },
   "dependencies": {
     "@babel/core": "^7.5.4",

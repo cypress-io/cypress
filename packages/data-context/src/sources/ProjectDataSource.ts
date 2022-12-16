@@ -200,6 +200,8 @@ export class ProjectDataSource {
   private _specs: SpecWithRelativeRoot[] = []
   private _hasNonExampleSpec: boolean = false
 
+  #runAllSpecs: string[] = []
+
   constructor (private ctx: DataContext) {}
 
   private get api () {
@@ -228,6 +230,14 @@ export class ProjectDataSource {
 
   setSpecs (specs: SpecWithRelativeRoot[]) {
     this._specs = specs
+  }
+
+  get runAllSpecs () {
+    return this.#runAllSpecs
+  }
+
+  setRunAllSpecs (specs: string[]) {
+    this.#runAllSpecs = specs
   }
 
   get hasNonExampleSpec () {

@@ -11,14 +11,14 @@ declare namespace Cypress {
   }
 
   type ReferenceAlias = {
-    cardinal: number,
-    name: string,
-    ordinal: string,
+    cardinal: number
+    name: string
+    ordinal: string
   }
 
   type Snapshot = {
-    body?: {get: () => any},
-    htmlAttrs?: {[key: string]: any},
+    body?: {get: () => any}
+    htmlAttrs?: {[key: string]: any}
     name?: string
   }
 
@@ -32,6 +32,12 @@ declare namespace Cypress {
     Message?: string
     actual?: any
     expected?: any
+    Method?: any
+    URL?: any
+    Status?: any
+    'Route Matcher'?: any
+    'Static Response'?: any
+    Alias?: any
   }
 
   type RenderProps = {
@@ -51,7 +57,7 @@ declare namespace Cypress {
     commandName?: string
     // provide the content to display in the dev tool's console when a log is
     // clicked from the Reporter's Command Log
-    consoleProps?: () => Command | Command
+    consoleProps?: () => ConsoleProps | ConsoleProps
     coords?: {
       left: number
       leftCenter: number
@@ -107,7 +113,7 @@ declare namespace Cypress {
     }
     snapshot?: boolean
     snapshots?: []
-    state?: "failed" | "passed" | "pending" // representative of Mocha.Runnable.constants (not publicly exposed by Mocha types)
+    state?: 'failed' | 'passed' | 'pending' // representative of Mocha.Runnable.constants (not publicly exposed by Mocha types)
     status?: number
     testCurrentRetry?: number
     testId?: string

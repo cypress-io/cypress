@@ -12,7 +12,8 @@
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
     "test-unit": "cross-env NODE_ENV=test mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "test-watch": "cross-env NODE_ENV=test mocha -r @packages/ts/register --watch"
+    "test-watch": "cross-env NODE_ENV=test mocha -r @packages/ts/register --watch",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {
     "circular-json": "0.5.9",

@@ -1,3 +1,10 @@
+# [@cypress/vue2-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vue2-v2.0.0...@cypress/vue2-v2.0.1) (2022-11-14)
+
+
+### Bug Fixes
+
+* vue2 global directives in component testing ([#24488](https://github.com/cypress-io/cypress/issues/24488)) ([741019d](https://github.com/cypress-io/cypress/commit/741019d9618b7be79db64c9039ebca07741dd5c7))
+
 # [@cypress/vue2-v2.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vue2-v1.1.2...@cypress/vue2-v2.0.0) (2022-11-07)
 
 

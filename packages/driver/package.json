@@ -6,17 +6,17 @@
     "check-ts": "tsc --noEmit",
     "clean-deps": "rimraf node_modules",
     "cypress:open": "node ../../scripts/cypress open",
-    "cypress:run": "node ../../scripts/cypress run --spec \"cypress/e2e/*/*\",\"cypress/e2e/*/!(origin|sessions)/**/*\"",
-    "cypress:open-experimentalSessionAndOrigin": "node ../../scripts/cypress open --config experimentalSessionAndOrigin=true,experimentalModifyObstructiveThirdPartyCode=true",
-    "cypress:run-experimentalSessionAndOrigin": "node ../../scripts/cypress run --config experimentalSessionAndOrigin=true,experimentalModifyObstructiveThirdPartyCode=true",
+    "cypress:run": "node ../../scripts/cypress run",
     "postinstall": "patch-package",
-    "start": "node -e 'console.log(require(`chalk`).red(`\nError:\n\tRunning \\`yarn start\\` is no longer needed for driver/cypress tests.\n\tWe now automatically spawn the server in e2e.setupNodeEvents config.\n\tChanges to the server will be watched and reloaded automatically.`))'"
+    "start": "node -e 'console.log(require(`chalk`).red(`\nError:\n\tRunning \\`yarn start\\` is no longer needed for driver/cypress tests.\n\tWe now automatically spawn the server in e2e.setupNodeEvents config.\n\tChanges to the server will be watched and reloaded automatically.`))'",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {},
   "devDependencies": {
     "@babel/code-frame": "7.8.3",
     "@cypress/sinon-chai": "2.9.1",
     "@cypress/unique-selector": "0.4.4",
+    "@cypress/webpack-dev-server": "0.0.0-development",
     "@cypress/webpack-preprocessor": "0.0.0-development",
     "@cypress/what-is-circular": "1.0.1",
     "@packages/config": "0.0.0-development",
@@ -33,7 +33,6 @@
     "@types/jquery.scrollto": "1.4.29",
     "@types/mocha": "^8.0.3",
     "@types/sinonjs__fake-timers": "8.1.1",
-    "angular": "1.8.0",
     "basic-auth": "2.0.1",
     "blob-util": "2.0.2",
     "bluebird": "3.5.3",
@@ -83,7 +82,7 @@
     "unfetch": "4.1.0",
     "url-parse": "1.5.9",
     "vanilla-text-mask": "5.1.1",
-    "vite": "3.1.0",
+    "vite": "4.0.1",
     "webpack": "^4.44.2",
     "zone.js": "0.9.0"
   },

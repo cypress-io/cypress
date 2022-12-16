@@ -1,9 +1,11 @@
 describe('cy assertion', {
   numTestsKeptInMemory: 1,
 }, () => {
-  it('visits fixture', () => {
+  beforeEach(() => {
     cy.visit('cypress/fixtures/example.html')
+  })
 
+  it('visits fixture', () => {
     cy.get('html').should('exist')
   })
 

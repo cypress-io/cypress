@@ -44,6 +44,7 @@ const electronApp = require('../../lib/util/electron-app')
 const savedState = require(`../../lib/saved_state`)
 const { getCtx, clearCtx, setCtx, makeDataContext } = require(`../../lib/makeDataContext`)
 const { BrowserCriClient } = require(`../../lib/browsers/browser-cri-client`)
+const { cloudRecommendationMessage } = require('../../lib/util/print-run')
 
 const TYPICAL_BROWSERS = [
   {
@@ -347,6 +348,58 @@ describe('lib/cypress', () => {
       sinon.stub(browsers, 'open')
       sinon.stub(browsers, 'connectToNewSpec')
       sinon.stub(commitInfo, 'getRemoteOrigin').resolves('remoteOrigin')
+    })
+
+    describe('cloud recommendation message', () => {
+      it('gets logged when in CI and there is a failure', function () {
+        const relativePath = path.relative(cwd(), this.todosPath)
+
+        sinon.stub(ciProvider, 'getIsCi').returns(true)
+        delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
+        globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
+
+        return cypress.start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test1.js`]).then(() => {
+          expect(console.log).to.be.calledWith(cloudRecommendationMessage)
+
+          snapshotConsoleLogs('CLOUD_RECOMMENDATION_MESSAGE')
+        })
+      })
+
+      it('does not get logged if CYPRESS_COMMERCIAL_RECOMMENDATIONS is set to 0', function () {
+        const relativePath = path.relative(cwd(), this.todosPath)
+
+        sinon.stub(ciProvider, 'getIsCi').returns(true)
+        process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS = '0'
+        globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
+
+        return cypress.start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test1.js`]).then(() => {
+          expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
+        })
+      })
+
+      it('does not get logged if all tests pass', function () {
+        const relativePath = path.relative(cwd(), this.todosPath)
+
+        sinon.stub(ciProvider, 'getIsCi').returns(true)
+        delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
+        globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 0 } }
+
+        return cypress.start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test1.js`]).then(() => {
+          expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
+        })
+      })
+
+      it('does not get logged if not running in CI', function () {
+        const relativePath = path.relative(cwd(), this.todosPath)
+
+        sinon.stub(ciProvider, 'getIsCi').returns(undefined)
+        delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
+        globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
+
+        return cypress.start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test1.js`]).then(() => {
+          expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
+        })
+      })
     })
 
     it('runs project headlessly and exits with exit code 0', function () {
@@ -881,6 +934,10 @@ describe('lib/cypress', () => {
     })
 
     describe('config overrides', () => {
+      beforeEach(function () {
+        delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
+      })
+
       it('can override default values', function () {
         return cypress.start([`--run-project=${this.todosPath}`, '--config=requestTimeout=1234,videoCompression=false'])
         .then(() => {
@@ -1069,6 +1126,7 @@ describe('lib/cypress', () => {
     describe('--env', () => {
       beforeEach(() => {
         process.env = _.omit(process.env, 'CYPRESS_DEBUG')
+        delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
 
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 0 } }
       })
@@ -1370,10 +1428,10 @@ describe('lib/cypress', () => {
       sinon.stub(Windows, 'create').returns(ee)
     })
 
-    it('does not truncate a really long dashboard url', function () {
+    it('does not truncate a really long Cypress Cloud url', function () {
       api.createRun.resolves({
         warnings: [],
-        runUrl: `http://dashboard.cypress.io/this-is-a${'-long'.repeat(50)}-url`,
+        runUrl: `http://cloud.cypress.io/this-is-a${'-long'.repeat(50)}-url`,
       })
 
       return cypress.start([
@@ -1384,7 +1442,7 @@ describe('lib/cypress', () => {
         '--ciBuildId=ciBuildId123',
       ])
       .then(() => {
-        return snapshotConsoleLogs('Long Dashboard URL')
+        return snapshotConsoleLogs('Long Cypress Cloud URL')
       })
     })
 
@@ -1395,7 +1453,7 @@ describe('lib/cypress', () => {
       err.error = {
         code: 'RUN_GROUP_NAME_NOT_UNIQUE',
         payload: {
-          runUrl: 'https://dashboard.cypress.io/runs/12345',
+          runUrl: 'https://cloud.cypress.io/runs/12345',
         },
       }
 
@@ -1409,9 +1467,9 @@ describe('lib/cypress', () => {
         '--ciBuildId=ciBuildId123',
       ])
       .then(() => {
-        this.expectExitWithErr('DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE')
+        this.expectExitWithErr('CLOUD_RUN_GROUP_NAME_NOT_UNIQUE')
 
-        return snapshotConsoleLogs('DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE 1')
+        return snapshotConsoleLogs('CLOUD_RUN_GROUP_NAME_NOT_UNIQUE 1')
       })
     })
 
@@ -1432,7 +1490,20 @@ describe('lib/cypress', () => {
       err.error = {
         code: 'PARALLEL_GROUP_PARAMS_MISMATCH',
         payload: {
-          runUrl: 'https://dashboard.cypress.io/runs/12345',
+          runUrl: 'https://cloud.cypress.io/runs/12345',
+          differentParams: {
+            browserName: {
+              detected: 'Chrome',
+              expected: 'Electron',
+            },
+            browserVersion: {
+              detected: '65',
+              expected: '64',
+            },
+          },
+          differentSpecs: [
+            'cypress/integration/foo_spec.js',
+          ],
         },
       }
 
@@ -1447,9 +1518,9 @@ describe('lib/cypress', () => {
         '--ciBuildId=ciBuildId123',
       ])
       .then(() => {
-        this.expectExitWithErr('DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH')
+        this.expectExitWithErr('CLOUD_PARALLEL_GROUP_PARAMS_MISMATCH')
 
-        return snapshotConsoleLogs('DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH 1')
+        return snapshotConsoleLogs('CLOUD_PARALLEL_GROUP_PARAMS_MISMATCH 1')
       })
     })
 
@@ -1460,7 +1531,7 @@ describe('lib/cypress', () => {
       err.error = {
         code: 'PARALLEL_DISALLOWED',
         payload: {
-          runUrl: 'https://dashboard.cypress.io/runs/12345',
+          runUrl: 'https://cloud.cypress.io/runs/12345',
         },
       }
 
@@ -1475,9 +1546,9 @@ describe('lib/cypress', () => {
         '--ciBuildId=ciBuildId123',
       ])
       .then(() => {
-        this.expectExitWithErr('DASHBOARD_PARALLEL_DISALLOWED')
+        this.expectExitWithErr('CLOUD_PARALLEL_DISALLOWED')
 
-        return snapshotConsoleLogs('DASHBOARD_PARALLEL_DISALLOWED 1')
+        return snapshotConsoleLogs('CLOUD_PARALLEL_DISALLOWED 1')
       })
     })
 
@@ -1488,7 +1559,7 @@ describe('lib/cypress', () => {
       err.error = {
         code: 'PARALLEL_REQUIRED',
         payload: {
-          runUrl: 'https://dashboard.cypress.io/runs/12345',
+          runUrl: 'https://cloud.cypress.io/runs/12345',
         },
       }
 
@@ -1504,9 +1575,9 @@ describe('lib/cypress', () => {
         '--ciBuildId=ciBuildId123',
       ])
       .then(() => {
-        this.expectExitWithErr('DASHBOARD_PARALLEL_REQUIRED')
+        this.expectExitWithErr('CLOUD_PARALLEL_REQUIRED')
 
-        return snapshotConsoleLogs('DASHBOARD_PARALLEL_REQUIRED 1')
+        return snapshotConsoleLogs('CLOUD_PARALLEL_REQUIRED 1')
       })
     })
 
@@ -1517,7 +1588,7 @@ describe('lib/cypress', () => {
       err.error = {
         code: 'ALREADY_COMPLETE',
         payload: {
-          runUrl: 'https://dashboard.cypress.io/runs/12345',
+          runUrl: 'https://cloud.cypress.io/runs/12345',
         },
       }
 
@@ -1532,9 +1603,9 @@ describe('lib/cypress', () => {
         '--ciBuildId=ciBuildId123',
       ])
       .then(() => {
-        this.expectExitWithErr('DASHBOARD_ALREADY_COMPLETE')
+        this.expectExitWithErr('CLOUD_ALREADY_COMPLETE')
 
-        return snapshotConsoleLogs('DASHBOARD_ALREADY_COMPLETE 1')
+        return snapshotConsoleLogs('CLOUD_ALREADY_COMPLETE 1')
       })
     })
 
@@ -1545,7 +1616,7 @@ describe('lib/cypress', () => {
       err.error = {
         code: 'STALE_RUN',
         payload: {
-          runUrl: 'https://dashboard.cypress.io/runs/12345',
+          runUrl: 'https://cloud.cypress.io/runs/12345',
         },
       }
 
@@ -1561,9 +1632,28 @@ describe('lib/cypress', () => {
         '--ciBuildId=ciBuildId123',
       ])
       .then(() => {
-        this.expectExitWithErr('DASHBOARD_STALE_RUN')
+        this.expectExitWithErr('CLOUD_STALE_RUN')
 
-        return snapshotConsoleLogs('DASHBOARD_STALE_RUN 1')
+        return snapshotConsoleLogs('CLOUD_STALE_RUN 1')
+      })
+    })
+
+    describe('cloud recommendation message', () => {
+      it('does not display if --record is passed', function () {
+        sinon.stub(ciProvider, 'getIsCi').returns(true)
+        delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
+        globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
+
+        return cypress.start([
+          `--run-project=${this.recordPath}`,
+          '--record',
+          '--key=token-123',
+          '--group=electron-smoke-tests',
+          '--ciBuildId=ciBuildId123',
+        ])
+        .then(() => {
+          expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
+        })
       })
     })
   })
@@ -1670,9 +1760,9 @@ describe('lib/cypress', () => {
         // this should be overridden by the env argument
         json.baseUrl = 'http://localhost:8080'
 
-        const { supportFile, specPattern, excludeSpecPattern, baseUrl, experimentalSessionAndOrigin, slowTestThreshold, testIsolation, ...rest } = json
+        const { supportFile, specPattern, excludeSpecPattern, baseUrl, slowTestThreshold, testIsolation, ...rest } = json
 
-        return settings.writeForTesting(this.todosPath, { ...rest, e2e: { baseUrl, experimentalSessionAndOrigin, supportFile, specPattern, testIsolation, excludeSpecPattern } })
+        return settings.writeForTesting(this.todosPath, { ...rest, e2e: { baseUrl, supportFile, specPattern, testIsolation, excludeSpecPattern } })
       }).then(async () => {
         await clearCtx()
 
@@ -1703,7 +1793,6 @@ describe('lib/cypress', () => {
         expect(cfg.pageLoadTimeout).to.eq(1000)
         expect(cfg.port).to.eq(2121)
         expect(cfg.baseUrl).to.eq('http://localhost')
-        expect(cfg.experimentalSessionAndOrigin).to.be.false
         expect(cfg.watchForFileChanges).to.be.false
         expect(cfg.responseTimeout).to.eq(5555)
         expect(cfg.env.baz).to.eq('baz')

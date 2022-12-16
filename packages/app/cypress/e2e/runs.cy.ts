@@ -77,7 +77,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       moveToRunsPage()
       cy.contains(defaultMessages.runs.connect.buttonUser).click()
       cy.withCtx((ctx, o) => {
-        o.sinon.spy(ctx._apis.authApi, 'logIn')
+        o.sinon.stub(ctx._apis.authApi, 'logIn')
       })
 
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
@@ -279,7 +279,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         name: 'Test User A',
       } })
 
-      cy.contains('button', 'Log in to the Cypress Dashboard').click()
+      cy.contains('button', 'Log in to Cypress Cloud').click()
 
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).as('logInModal').within(() => {
         cy.findByRole('button', { name: 'Log in' }).click()
@@ -578,7 +578,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
   })
 
   context('Runs - No Runs', () => {
-    it('when no runs and not connected, shows connect to dashboard button', () => {
+    it('when no runs and not connected, shows connect to Cypress Cloud button', () => {
       cy.scaffoldProject('component-tests')
       cy.openProject('component-tests', ['--config-file', 'cypressWithoutProjectId.config.js'])
       cy.startAppServer('component')
@@ -722,7 +722,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       moveToRunsPage()
 
-      cy.contains('h2', 'Cannot connect to the Cypress Dashboard')
+      cy.contains('h2', 'Cannot connect to Cypress Cloud')
       // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
       cy.remoteGraphQLIntercept((obj) => {
@@ -755,7 +755,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[data-cy=warning-alert]')
       .should('contain.text', 'You have no internet connection')
-      .and('contain.text', 'Check your internet connection to pull the latest data from the dashboard')
+      .and('contain.text', 'Check your internet connection to pull the latest data from Cypress Cloud')
     })
 
     it('should remove the alert warning if the app reconnects to the internet', () => {
@@ -769,7 +769,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[data-cy=warning-alert]')
       .should('contain.text', 'You have no internet connection')
-      .and('contain.text', 'Check your internet connection to pull the latest data from the dashboard')
+      .and('contain.text', 'Check your internet connection to pull the latest data from Cypress Cloud')
 
       cy.goOnline()
 
@@ -810,7 +810,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[data-cy=standard-modal]')
       .should('contain.text', 'You have no internet connection')
-      .and('contain.text', 'Check your internet connection to pull the latest data from the dashboard')
+      .and('contain.text', 'Check your internet connection to pull the latest data from Cypress Cloud')
     })
 
     it('shows correct message on connect project modal', () => {
@@ -844,7 +844,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[data-cy=standard-modal]')
       .should('contain.text', 'You have no internet connection')
-      .and('contain.text', 'Check your internet connection to pull the latest data from the dashboard')
+      .and('contain.text', 'Check your internet connection to pull the latest data from Cypress Cloud')
     })
   })
 
@@ -941,7 +941,10 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', 3).should('be.visible')
       cy.wrap(obj).invoke('toCall')
 
-      cy.get('[data-cy="run-card-icon-PASSED"]').should('have.length', 3).should('be.visible').within(() => {
+      cy.get('[data-cy="run-card-icon-PASSED"]')
+      .should('have.length', 3)
+      .should('be.visible')
+      .first().within(() => {
         cy.get('[data-cy="runResults-passed-count"]').should('contain', 100)
       })
 

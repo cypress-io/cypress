@@ -593,7 +593,7 @@ type CurrentProject implements Node & ProjectLike {
   """Browsers found that are compatible with Cypress"""
   browsers: [Browser!]
 
-  """The remote associated project from Cypress Dashboard"""
+  """The remote associated project from Cypress Cloud"""
   cloudProject: CloudProjectResult
 
   """
@@ -668,7 +668,7 @@ type CurrentProject implements Node & ProjectLike {
   """Cached preferences for this project"""
   preferences: ProjectPreferences
 
-  """Used to associate project with Cypress Dashboard"""
+  """Used to associate project with Cypress Cloud"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""
@@ -743,6 +743,24 @@ enum ErrorTypeEnum {
   CDP_RETRYING_CONNECTION
   CDP_VERSION_TOO_OLD
   CHROME_WEB_SECURITY_NOT_SUPPORTED
+  CLOUD_ALREADY_COMPLETE
+  CLOUD_API_RESPONSE_FAILED_RETRYING
+  CLOUD_CANCEL_SKIPPED_SPEC
+  CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE
+  CLOUD_CANNOT_PROCEED_IN_PARALLEL
+  CLOUD_CANNOT_PROCEED_IN_SERIAL
+  CLOUD_CANNOT_UPLOAD_RESULTS
+  CLOUD_GRAPHQL_ERROR
+  CLOUD_INVALID_RUN_REQUEST
+  CLOUD_PARALLEL_DISALLOWED
+  CLOUD_PARALLEL_GROUP_PARAMS_MISMATCH
+  CLOUD_PARALLEL_REQUIRED
+  CLOUD_PROJECT_NOT_FOUND
+  CLOUD_RECORD_KEY_NOT_VALID
+  CLOUD_RUN_GROUP_NAME_NOT_UNIQUE
+  CLOUD_STALE_RUN
+  CLOUD_UNKNOWN_CREATE_RUN_WARNING
+  CLOUD_UNKNOWN_INVALID_REQUEST
   COMPONENT_FOLDER_REMOVED
   COMPONENT_TESTING_MISMATCHED_DEPENDENCIES
   CONFIG_FILES_LANGUAGE_CONFLICT
@@ -763,24 +781,6 @@ enum ErrorTypeEnum {
   CONFIG_VALIDATION_MSG_ERROR
   COULD_NOT_FIND_SYSTEM_NODE
   COULD_NOT_PARSE_ARGUMENTS
-  DASHBOARD_ALREADY_COMPLETE
-  DASHBOARD_API_RESPONSE_FAILED_RETRYING
-  DASHBOARD_CANCEL_SKIPPED_SPEC
-  DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE
-  DASHBOARD_CANNOT_PROCEED_IN_PARALLEL
-  DASHBOARD_CANNOT_PROCEED_IN_SERIAL
-  DASHBOARD_CANNOT_UPLOAD_RESULTS
-  DASHBOARD_GRAPHQL_ERROR
-  DASHBOARD_INVALID_RUN_REQUEST
-  DASHBOARD_PARALLEL_DISALLOWED
-  DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH
-  DASHBOARD_PARALLEL_REQUIRED
-  DASHBOARD_PROJECT_NOT_FOUND
-  DASHBOARD_RECORD_KEY_NOT_VALID
-  DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE
-  DASHBOARD_STALE_RUN
-  DASHBOARD_UNKNOWN_CREATE_RUN_WARNING
-  DASHBOARD_UNKNOWN_INVALID_REQUEST
   DEFAULT_SUPPORT_FILE_NOT_FOUND
   DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS
   DEV_SERVER_CONFIG_FILE_NOT_FOUND
@@ -789,8 +789,11 @@ enum ErrorTypeEnum {
   ERROR_WRITING_FILE
   EXPERIMENTAL_COMPONENT_TESTING_REMOVED
   EXPERIMENTAL_NETWORK_STUBBING_REMOVED
+  EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY
+  EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY
   EXPERIMENTAL_RUN_EVENTS_REMOVED
   EXPERIMENTAL_SAMESITE_REMOVED
+  EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED
   EXPERIMENTAL_SESSION_SUPPORT_REMOVED
   EXPERIMENTAL_SHADOW_DOM_REMOVED
   EXPERIMENTAL_SINGLE_TAB_RUN_MODE
@@ -1016,7 +1019,7 @@ type GlobalProject implements Node & ProjectLike {
   """Relay style Node ID field for the GlobalProject field"""
   id: ID!
 
-  """Used to associate project with Cypress Dashboard"""
+  """Used to associate project with Cypress Cloud"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""
@@ -1252,7 +1255,7 @@ type Mutation {
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
 
   """Launches project from open_project global singleton"""
-  launchOpenProject(specPath: String): CurrentProject
+  launchOpenProject(shouldLaunchNewTab: Boolean, specPath: String): CurrentProject
 
   """Sets the active browser"""
   launchpadSetBrowser(
@@ -1266,10 +1269,10 @@ type Mutation {
     ids: [ID!]!
   ): [RemoteFetchable]!
 
-  """Auth with Cypress Dashboard"""
+  """Auth with Cypress Cloud"""
   login(utmContent: String, utmMedium: String!, utmSource: String!): Query
 
-  """Log out of Cypress Dashboard"""
+  """Log out of Cypress Cloud"""
   logout: Query
 
   """Check if a give spec file will match the project spec pattern"""
@@ -1323,7 +1326,7 @@ type Mutation {
   reconfigureProject: Boolean!
 
   """
-  Dispatch an event to the dashboard to be recorded. Events are completely anonymous and are only used to identify aggregate usage patterns across all Cypress users.
+  Dispatch an event to Cypress Cloud to be recorded. Events are completely anonymous and are only used to identify aggregate usage patterns across all Cypress users.
   """
   recordEvent(campaign: String!, cohort: String, medium: String!, messageId: String!): Boolean
 
@@ -1373,6 +1376,9 @@ type Mutation {
 
   """Save the prompt-shown state for this project"""
   setPromptShown(slug: String!): Boolean
+
+  """List of specs to run for the "Run All Specs" Feature"""
+  setRunAllSpecs(runAllSpecs: [String!]!): Boolean
 
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
@@ -1441,7 +1447,7 @@ interface ProjectLike {
     name: String!
   ): RemoteFetchableCloudProjectResult
 
-  """Used to associate project with Cypress Dashboard"""
+  """Used to associate project with Cypress Cloud"""
   projectId: String
 
   """Absolute path to the project on the filesystem"""

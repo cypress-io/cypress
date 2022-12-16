@@ -164,9 +164,9 @@ export const validate = (cfg: any, onErr: (property: ErrResult | string) => void
     // key has a validation rule & value different from the default
     if (validationFn && value !== defaultValues[key]) {
       const result = validationFn(key, value, {
-        testingType,
-        // TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
-        experimentalSessionAndOrigin: cfg.e2e?.experimentalSessionAndOrigin || cfg.experimentalSessionAndOrigin,
+        // if we are validating the e2e or component-specific configuration values, pass
+        // the key testing type as the testing type to ensure correct validation
+        testingType: (key === 'e2e' || key === 'component') ? key : testingType,
       })
 
       if (result !== true) {

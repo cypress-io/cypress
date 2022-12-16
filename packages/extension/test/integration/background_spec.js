@@ -274,18 +274,6 @@ describe('app/background', () => {
   })
 
   context('add header to aut iframe requests', () => {
-    const withExperimentalFlagOn = {
-      experimentalSessionAndOrigin: true,
-    }
-
-    it('does not listen to `onBeforeSendHeaders` if experimental flag is off', async function () {
-      sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
-
-      await this.connect()
-
-      expect(browser.webRequest.onBeforeSendHeaders.addListener).not.to.be.called
-    })
-
     it('does not add header if it is the top frame', async function () {
       const details = {
         parentFrameId: -1,
@@ -293,7 +281,7 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect(withExperimentalFlagOn)
+      await this.connect()
 
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
@@ -307,7 +295,7 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect(withExperimentalFlagOn)
+      await this.connect()
 
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
@@ -322,7 +310,7 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect(withExperimentalFlagOn)
+      await this.connect()
 
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
@@ -338,7 +326,7 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect(withExperimentalFlagOn)
+      await this.connect()
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
       expect(result).to.deep.equal({ requestHeaders: [] })
@@ -356,7 +344,7 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect(withExperimentalFlagOn)
+      await this.connect()
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
       expect(result).to.deep.equal({
@@ -385,7 +373,7 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect(withExperimentalFlagOn)
+      await this.connect()
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
       expect(result).to.deep.equal({
@@ -414,7 +402,7 @@ describe('app/background', () => {
 
       sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect(withExperimentalFlagOn)
+      await this.connect()
       const result = browser.webRequest.onBeforeSendHeaders.addListener.lastCall.args[0](details)
 
       expect(result).to.not.deep.equal({
@@ -432,7 +420,7 @@ describe('app/background', () => {
 
       const onBeforeSendHeaders = sinon.stub(browser.webRequest.onBeforeSendHeaders, 'addListener')
 
-      await this.connect(withExperimentalFlagOn)
+      await this.connect()
 
       expect(onBeforeSendHeaders).not.to.be.called
     })
@@ -440,18 +428,17 @@ describe('app/background', () => {
 
   context('.getAll', () => {
     it('resolves with specific cookie properties', () => {
-      sinon.stub(browser.cookies, 'getAll')
-      .withArgs({ domain: 'localhost' })
-      .resolves([
-        { name: 'foo', value: 'f', path: '/', domain: 'localhost', secure: true, httpOnly: true, expirationDate: 123 },
-        { name: 'bar', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456 },
+      sinon.stub(browser.cookies, 'getAll').resolves([
+        { name: 'key1', value: 'value1', path: '/', domain: 'localhost', secure: true, httpOnly: true, expirationDate: 123 },
+        { name: 'key2', value: 'value2', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456 },
+        { name: 'key3', value: 'value3', path: '/', domain: 'foobar.com', secure: false, httpOnly: false, expirationDate: 456 },
+        { name: 'key4', value: 'value4', path: '/', domain: 'www.foobar.com', secure: false, httpOnly: false, expirationDate: 456 },
       ])
 
-      return background.getAll({ domain: 'localhost' })
+      return background.getAll({ domain: 'foobar.com' })
       .then((cookies) => {
         expect(cookies).to.deep.eq([
-          { name: 'foo', value: 'f', path: '/', domain: 'localhost', secure: true, httpOnly: true, expirationDate: 123 },
-          { name: 'bar', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456 },
+          { name: 'key3', value: 'value3', path: '/', domain: 'foobar.com', secure: false, httpOnly: false, expirationDate: 456 },
         ])
       })
     })
@@ -561,7 +548,7 @@ describe('app/background', () => {
       this.server.on('connection', (socket1) => {
         this.socket = socket1
 
-        return done()
+        done()
       })
 
       this.client = background.connect(`http://localhost:${PORT}`, '/__socket')
@@ -569,43 +556,54 @@ describe('app/background', () => {
 
     describe('get:cookies', () => {
       beforeEach(() => {
-        return sinon.stub(browser.cookies, 'getAll')
-        .withArgs({ domain: 'google.com' })
-        .resolves([{}, {}])
+        sinon.stub(browser.cookies, 'getAll').resolves([
+          { cookie: '1', domain: 'example.com' },
+          { cookie: '2', domain: 'www.example.com' },
+        ])
       })
 
-      it('returns all cookies', function (done) {
+      it('returns cookies that match filter', function (done) {
         this.socket.on('automation:response', (id, obj = {}) => {
           expect(id).to.eq(123)
-          expect(obj.response).to.deep.eq([{}, {}])
+          expect(obj.response).to.deep.eq([{ cookie: '1', domain: 'example.com' }])
 
-          return done()
+          done()
         })
 
-        return this.server.emit('automation:request', 123, 'get:cookies', { domain: 'google.com' })
+        this.server.emit('automation:request', 123, 'get:cookies', { domain: 'example.com' })
+      })
+
+      it('returns all cookies if there is no filter', function (done) {
+        this.socket.on('automation:response', (id, obj = {}) => {
+          expect(id).to.eq(123)
+          expect(obj.response).to.deep.eq([
+            { cookie: '1', domain: 'example.com' },
+            { cookie: '2', domain: 'www.example.com' },
+          ])
+
+          done()
+        })
+
+        this.server.emit('automation:request', 123, 'get:cookies', {})
       })
     })
 
     describe('get:cookie', () => {
       beforeEach(() => {
-        return sinon.stub(browser.cookies, 'getAll')
-        .withArgs({ domain: 'google.com', name: 'session' })
-        .resolves([
-          { name: 'session', value: 'key', path: '/login', domain: 'google', secure: true, httpOnly: true, expirationDate: 123 },
+        sinon.stub(browser.cookies, 'getAll').resolves([
+          { name: 'session', value: 'key', path: '/login', domain: 'example.com', secure: true, httpOnly: true, expirationDate: 123 },
         ])
-        .withArgs({ domain: 'google.com', name: 'doesNotExist' })
-        .resolves([])
       })
 
       it('returns a specific cookie by name', function (done) {
         this.socket.on('automation:response', (id, obj = {}) => {
           expect(id).to.eq(123)
-          expect(obj.response).to.deep.eq({ name: 'session', value: 'key', path: '/login', domain: 'google', secure: true, httpOnly: true, expirationDate: 123 })
+          expect(obj.response).to.deep.eq({ name: 'session', value: 'key', path: '/login', domain: 'example.com', secure: true, httpOnly: true, expirationDate: 123 })
 
-          return done()
+          done()
         })
 
-        return this.server.emit('automation:request', 123, 'get:cookie', { domain: 'google.com', name: 'session' })
+        this.server.emit('automation:request', 123, 'get:cookie', { domain: 'example.com', name: 'session' })
       })
 
       it('returns null when no cookie by name is found', function (done) {
@@ -613,10 +611,10 @@ describe('app/background', () => {
           expect(id).to.eq(123)
           expect(obj.response).to.be.null
 
-          return done()
+          done()
         })
 
-        return this.server.emit('automation:request', 123, 'get:cookie', { domain: 'google.com', name: 'doesNotExist' })
+        this.server.emit('automation:request', 123, 'get:cookie', { domain: 'example.com', name: 'doesNotExist' })
       })
     })
 
@@ -625,13 +623,13 @@ describe('app/background', () => {
         browser.runtime.lastError = { message: 'some error' }
 
         return sinon.stub(browser.cookies, 'set')
-        .withArgs({ domain: 'google.com', name: 'session', value: 'key', path: '/', secure: false, url: 'http://google.com/' })
+        .withArgs({ domain: 'example.com', name: 'session', value: 'key', path: '/', secure: false, url: 'http://example.com/' })
         .resolves(
-          { name: 'session', value: 'key', path: '/', domain: 'google', secure: false, httpOnly: false },
+          { name: 'session', value: 'key', path: '/', domain: 'example', secure: false, httpOnly: false },
         )
-        .withArgs({ url: 'https://www.google.com', name: 'session', value: 'key' })
+        .withArgs({ url: 'https://www.example.com', name: 'session', value: 'key' })
         .resolves(
-          { name: 'session', value: 'key', path: '/', domain: 'google.com', secure: true, httpOnly: false },
+          { name: 'session', value: 'key', path: '/', domain: 'example.com', secure: true, httpOnly: false },
         )
         // 'domain' cannot not set when it's localhost
         .withArgs({ name: 'foo', value: 'bar', secure: true, path: '/foo', url: 'https://localhost/foo' })
@@ -641,23 +639,23 @@ describe('app/background', () => {
       it('resolves with the cookie details', function (done) {
         this.socket.on('automation:response', (id, obj = {}) => {
           expect(id).to.eq(123)
-          expect(obj.response).to.deep.eq({ name: 'session', value: 'key', path: '/', domain: 'google', secure: false, httpOnly: false })
+          expect(obj.response).to.deep.eq({ name: 'session', value: 'key', path: '/', domain: 'example', secure: false, httpOnly: false })
 
-          return done()
+          done()
         })
 
-        return this.server.emit('automation:request', 123, 'set:cookie', { domain: 'google.com', name: 'session', secure: false, value: 'key', path: '/' })
+        this.server.emit('automation:request', 123, 'set:cookie', { domain: 'example.com', name: 'session', secure: false, value: 'key', path: '/' })
       })
 
       it('does not set url when already present', function (done) {
         this.socket.on('automation:response', (id, obj = {}) => {
           expect(id).to.eq(123)
-          expect(obj.response).to.deep.eq({ name: 'session', value: 'key', path: '/', domain: 'google.com', secure: true, httpOnly: false })
+          expect(obj.response).to.deep.eq({ name: 'session', value: 'key', path: '/', domain: 'example.com', secure: true, httpOnly: false })
 
-          return done()
+          done()
         })
 
-        return this.server.emit('automation:request', 123, 'set:cookie', { url: 'https://www.google.com', name: 'session', value: 'key' })
+        this.server.emit('automation:request', 123, 'set:cookie', { url: 'https://www.example.com', name: 'session', value: 'key' })
       })
 
       it('rejects with error', function (done) {
@@ -665,10 +663,10 @@ describe('app/background', () => {
           expect(id).to.eq(123)
           expect(obj.__error).to.eq('some error')
 
-          return done()
+          done()
         })
 
-        return this.server.emit('automation:request', 123, 'set:cookie', { name: 'foo', value: 'bar', domain: 'localhost', secure: true, path: '/foo' })
+        this.server.emit('automation:request', 123, 'set:cookie', { name: 'foo', value: 'bar', domain: 'localhost', secure: true, path: '/foo' })
       })
     })
 
@@ -681,13 +679,13 @@ describe('app/background', () => {
           // eslint-disable-next-line no-console
           console.log('unstubbed browser.cookies.remove', ...arguments)
         })
-        .withArgs({ url: 'https://google.com', name: 'foo' })
+        .withArgs({ url: 'https://example.com', name: 'foo' })
         .resolves(
-          { name: 'session', url: 'https://google.com/', storeId: '123' },
+          { name: 'session', url: 'https://example.com/', storeId: '123' },
         )
-        .withArgs({ name: 'foo', url: 'http://google.com/foo' })
+        .withArgs({ name: 'foo', url: 'http://example.com/foo' })
         .resolves(
-          { name: 'foo', url: 'https://google.com/foo', storeId: '123' },
+          { name: 'foo', url: 'https://example.com/foo', storeId: '123' },
         )
         .withArgs({ name: 'noDetails', url: 'http://no.details' })
         .resolves(null)
@@ -696,16 +694,16 @@ describe('app/background', () => {
       })
 
       it('resolves with array of removed cookies', function (done) {
-        const cookieArr = [{ domain: 'google.com', name: 'foo', secure: true }]
+        const cookieArr = [{ domain: 'example.com', name: 'foo', secure: true }]
 
         this.socket.on('automation:response', (id, obj = {}) => {
           expect(id).to.eq(123)
           expect(obj.response).to.deep.eq(cookieArr)
 
-          return done()
+          done()
         })
 
-        return this.server.emit('automation:request', 123, 'clear:cookies', cookieArr)
+        this.server.emit('automation:request', 123, 'clear:cookies', cookieArr)
       })
 
       it('rejects when no cookie.name', function (done) {
@@ -713,10 +711,10 @@ describe('app/background', () => {
           expect(id).to.eq(123)
           expect(obj.__error).to.contain('did not include a name')
 
-          return done()
+          done()
         })
 
-        return this.server.emit('automation:request', 123, 'clear:cookies', [{ domain: 'should.throw' }])
+        this.server.emit('automation:request', 123, 'clear:cookies', [{ domain: 'should.throw' }])
       })
 
       it('rejects with error thrown in browser.cookies.remove', function (done) {
@@ -724,10 +722,10 @@ describe('app/background', () => {
           expect(id).to.eq(123)
           expect(obj.__error).to.eq('some error')
 
-          return done()
+          done()
         })
 
-        return this.server.emit('automation:request', 123, 'clear:cookies', [{ domain: 'should.throw', name: 'shouldThrow' }])
+        this.server.emit('automation:request', 123, 'clear:cookies', [{ domain: 'should.throw', name: 'shouldThrow' }])
       })
 
       it('doesnt fail when no found cookie', function (done) {
@@ -737,10 +735,10 @@ describe('app/background', () => {
           expect(id).to.eq(123)
           expect(obj.response).to.deep.eq(cookieArr)
 
-          return done()
+          done()
         })
 
-        return this.server.emit('automation:request', 123, 'clear:cookies', cookieArr)
+        this.server.emit('automation:request', 123, 'clear:cookies', cookieArr)
       })
     })
 
@@ -748,22 +746,14 @@ describe('app/background', () => {
       beforeEach(() => {
         browser.runtime.lastError = { message: 'some error' }
 
-        sinon.stub(browser.cookies, 'getAll')
-        .withArgs({ domain: 'google.com', name: 'session' })
-        .resolves([
-          { name: 'session', value: 'key', path: '/', domain: 'google.com', secure: true, httpOnly: true, expirationDate: 123 },
-        ])
-        .withArgs({ domain: 'google.com', name: 'doesNotExist' })
-        .resolves([])
-        .withArgs({ domain: 'cdn.github.com', name: 'shouldThrow' })
-        .resolves([
-          { name: 'shouldThrow', value: 'key', path: '/assets', domain: 'cdn.github.com', secure: false, httpOnly: true, expirationDate: 123 },
+        sinon.stub(browser.cookies, 'getAll').resolves([
+          { name: 'session', value: 'key', path: '/', domain: 'example.com', secure: true, httpOnly: true, expirationDate: 123 },
         ])
 
         return sinon.stub(browser.cookies, 'remove')
-        .withArgs({ name: 'session', url: 'https://google.com/' })
+        .withArgs({ name: 'session', url: 'https://example.com/' })
         .resolves(
-          { name: 'session', url: 'https://google.com/', storeId: '123' },
+          { name: 'session', url: 'https://example.com/', storeId: '123' },
         )
         .withArgs({ name: 'shouldThrow', url: 'http://cdn.github.com/assets' })
         .rejects({ message: 'some error' })
@@ -773,13 +763,13 @@ describe('app/background', () => {
         this.socket.on('automation:response', (id, obj = {}) => {
           expect(id).to.eq(123)
           expect(obj.response).to.deep.eq(
-            { name: 'session', value: 'key', path: '/', domain: 'google.com', secure: true, httpOnly: true, expirationDate: 123 },
+            { name: 'session', value: 'key', path: '/', domain: 'example.com', secure: true, httpOnly: true, expirationDate: 123 },
           )
 
-          return done()
+          done()
         })
 
-        return this.server.emit('automation:request', 123, 'clear:cookie', { domain: 'google.com', name: 'session' })
+        this.server.emit('automation:request', 123, 'clear:cookie', { domain: 'example.com', name: 'session' })
       })
 
       it('returns null when no cookie by name is found', function (done) {
@@ -787,21 +777,25 @@ describe('app/background', () => {
           expect(id).to.eq(123)
           expect(obj.response).to.be.null
 
-          return done()
+          done()
         })
 
-        return this.server.emit('automation:request', 123, 'clear:cookie', { domain: 'google.com', name: 'doesNotExist' })
+        this.server.emit('automation:request', 123, 'clear:cookie', { domain: 'example.com', name: 'doesNotExist' })
       })
 
       it('rejects with error', function (done) {
+        browser.cookies.getAll.resolves([
+          { name: 'shouldThrow', value: 'key', path: '/assets', domain: 'cdn.github.com', secure: false, httpOnly: true, expirationDate: 123 },
+        ])
+
         this.socket.on('automation:response', (id, obj = {}) => {
           expect(id).to.eq(123)
           expect(obj.__error).to.eq('some error')
 
-          return done()
+          done()
         })
 
-        return this.server.emit('automation:request', 123, 'clear:cookie', { domain: 'cdn.github.com', name: 'shouldThrow' })
+        this.server.emit('automation:request', 123, 'clear:cookie', { domain: 'cdn.github.com', name: 'shouldThrow' })
       })
     })
 
@@ -817,10 +811,10 @@ describe('app/background', () => {
           expect(id).to.eq(123)
           expect(obj.response).to.be.undefined
 
-          return done()
+          done()
         })
 
-        return this.server.emit('automation:request', 123, 'is:automation:client:connected')
+        this.server.emit('automation:request', 123, 'is:automation:client:connected')
       })
     })
 
@@ -841,7 +835,7 @@ describe('app/background', () => {
           done()
         })
 
-        return this.server.emit('automation:request', 123, 'focus:browser:window')
+        this.server.emit('automation:request', 123, 'focus:browser:window')
       })
     })
 
@@ -863,10 +857,10 @@ describe('app/background', () => {
           expect(id).to.eq(123)
           expect(obj.response).to.eq('foobarbaz')
 
-          return done()
+          done()
         })
 
-        return this.server.emit('automation:request', 123, 'take:screenshot')
+        this.server.emit('automation:request', 123, 'take:screenshot')
       })
 
       it('rejects with browser.runtime.lastError', function (done) {
@@ -876,10 +870,10 @@ describe('app/background', () => {
           expect(id).to.eq(123)
           expect(obj.__error).to.eq('some error')
 
-          return done()
+          done()
         })
 
-        return this.server.emit('automation:request', 123, 'take:screenshot')
+        this.server.emit('automation:request', 123, 'take:screenshot')
       })
     })
 
@@ -898,7 +892,7 @@ describe('app/background', () => {
           done()
         })
 
-        return this.server.emit('automation:request', 123, 'reset:browser:state')
+        this.server.emit('automation:request', 123, 'reset:browser:state')
       })
     })
 
@@ -921,7 +915,7 @@ describe('app/background', () => {
           done()
         })
 
-        return this.server.emit('automation:request', 123, 'reset:browser:tabs:for:next:test')
+        this.server.emit('automation:request', 123, 'reset:browser:tabs:for:next:test')
       })
     })
   })

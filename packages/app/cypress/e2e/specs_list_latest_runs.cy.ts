@@ -198,9 +198,9 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
     it('shows correct tooltips with log in buttons', () => {
       cy.findByTestId('latest-runs-header').trigger('mouseenter')
       cy.get('.v-popper__popper--shown')
-      .should('contain', 'Connect to the Cypress Dashboard to see the status of your latest runs')
+      .should('contain', 'Connect to Cypress Cloud to see the status of your latest runs')
       .find('button')
-      .should('have.text', 'Log in to the Dashboard')
+      .should('have.text', 'Log in to Cypress Cloud')
       .click()
 
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
@@ -212,9 +212,9 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
 
       cy.findByTestId('average-duration-header').trigger('mouseenter')
       cy.get('.v-popper__popper--shown')
-      .should('contain', 'Connect to the Cypress Dashboard to see the average spec durations of your latest runs')
+      .should('contain', 'Connect to Cypress Cloud to see the average spec durations of your latest runs')
       .find('button')
-      .should('have.text', 'Log in to the Dashboard')
+      .should('have.text', 'Log in to Cypress Cloud')
       .click()
 
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
@@ -267,7 +267,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
     it('shows correct tooltips with log in buttons', () => {
       cy.findByTestId('latest-runs-header').trigger('mouseenter')
       cy.get('.v-popper__popper--shown')
-      .should('contain', 'Connect to the Cypress Dashboard to see the status of your latest runs')
+      .should('contain', 'Connect to Cypress Cloud to see the status of your latest runs')
       .find('button')
       .should('have.text', 'Connect your project')
       .click()
@@ -280,7 +280,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
 
       cy.findByTestId('average-duration-header').trigger('mouseenter')
       cy.get('.v-popper__popper--shown')
-      .should('contain', 'Connect to the Cypress Dashboard to see the average spec durations of your latest runs')
+      .should('contain', 'Connect to Cypress Cloud to see the average spec durations of your latest runs')
       .find('button')
       .should('have.text', 'Connect your project')
       .click()
@@ -323,7 +323,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
     it('shows correct tooltips', () => {
       cy.findByTestId('latest-runs-header').trigger('mouseenter')
       cy.get('.v-popper__popper--shown')
-      .should('contain', 'The status of your latest runs in the Cypress Dashboard')
+      .should('contain', 'The status of your latest runs in Cypress Cloud')
       .find('button')
       .should('not.exist')
 
@@ -331,7 +331,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
 
       cy.findByTestId('average-duration-header').trigger('mouseenter')
       cy.get('.v-popper__popper--shown')
-      .should('contain', 'The average spec durations of your latest runs in the Cypress Dashboard')
+      .should('contain', 'The average spec durations of your latest runs in Cypress Cloud')
       .find('button')
       .should('not.exist')
 

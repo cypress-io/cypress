@@ -21,7 +21,7 @@ const uniqueRoute = (route) => {
 }
 
 // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23434
-describe.skip('network stubbing', function () {
+describe('network stubbing', { retries: 15 }, function () {
   const { $, _, sinon, state, Promise } = Cypress
 
   beforeEach(function () {
@@ -1199,7 +1199,8 @@ describe.skip('network stubbing', function () {
       })
     })
 
-    it('can stub a response with a network error', function (done) {
+    // TODO(webkit): fix forceNetworkError https://github.com/cypress-io/cypress/issues/23810
+    it('can stub a response with a network error', { browser: '!webkit' }, function (done) {
       cy.intercept('/*', {
         forceNetworkError: true,
       }).then(() => {
@@ -1769,6 +1770,7 @@ describe.skip('network stubbing', function () {
       // It's because XHR is not sent on Firefox and it's flaky on Chrome.
       it('parse query correctly', () => {
         cy.intercept({ url: '/users*' }, (req) => {
+          // Assert that query attributes are available in `intercept` callback
           expect(req.query.someKey).to.deep.equal('someValue')
           expect(req.query).to.deep.equal({ someKey: 'someValue' })
         }).as('getUrl')
@@ -1781,6 +1783,11 @@ describe.skip('network stubbing', function () {
         })
 
         cy.wait('@getUrl')
+        .then((interception) => {
+          // Assert that query attributes are maintained once interception is yielded
+          expect(interception.request.query.someKey).to.deep.equal('someValue')
+          expect(interception.request.query).to.deep.equal({ someKey: 'someValue' })
+        })
       })
 
       context('reconcile changes', () => {
@@ -2310,6 +2317,39 @@ describe.skip('network stubbing', function () {
           })
         })
       })
+
+      context('with `resourceType`', function () {
+        it('can match a proxied image request by resourceType', () => {
+          cy.intercept({ resourceType: 'image' }, (req) => {
+            expect(req.resourceType).to.eq('image')
+            req.reply({ fixture: 'media/cypress.png' })
+          })
+          .as('imagesOnly')
+          .then(async () => {
+            await Promise.all([
+              // should not match
+              fetch('/'),
+              // should match
+              new Promise((resolve) => {
+                $('<img src="/image">')[0].onload = () => resolve()
+              }),
+            ])
+          })
+          .get('@imagesOnly.all').should('have.length', 1)
+        })
+
+        it('can match a cy.visit() document request by resourceType', () => {
+          cy.intercept({ resourceType: 'document' }, (req) => {
+            expect(req.resourceType).to.eq('document')
+            req.reply({ fixture: 'content-in-body.html' })
+          })
+          .as('documentsOnly')
+          .visit('/stubbed-html.html') // should match
+          .contains('Script and Style in the body')
+          .then(() => fetch('/')) // should not match
+          .get('@documentsOnly.all').should('have.length', 1)
+        })
+      })
     })
 
     context('with StaticResponse shorthand', function () {
@@ -2397,8 +2437,7 @@ describe.skip('network stubbing', function () {
         .and('include', 'content-type: application/json')
       })
 
-      // TODO(webkit): extremely flaky for some reason. need to figure out why and either fix
-      // or disable forceNetworkError for experimental release
+      // TODO(webkit): fix forceNetworkError https://github.com/cypress-io/cypress/issues/23810
       it('can forceNetworkError', { browser: '!webkit' }, function (done) {
         const url = uniqueRoute('/foo')
 
@@ -3084,8 +3123,7 @@ describe.skip('network stubbing', function () {
         .should('include', { foo: 1 })
       })
 
-      // TODO(webkit): extremely flaky for some reason. need to figure out why and either fix
-      // or disable forceNetworkError for experimental release
+      // TODO(webkit): fix forceNetworkError https://github.com/cypress-io/cypress/issues/23810
       it('can forceNetworkError', { browser: '!webkit' }, function (done) {
         const url = uniqueRoute('/foo')
 
@@ -3514,17 +3552,72 @@ describe.skip('network stubbing', function () {
       .wait('@status2').its('response.statusCode').should('eq', 301)
     })
 
-    // https://github.com/cypress-io/cypress/issues/9549
-    it('should handle aborted requests', () => {
-      cy.intercept('https://jsonplaceholder.cypress.io/todos/1').as('xhr')
-      cy.visit('fixtures/xhr-abort.html')
-      cy.get('#btn').click()
-      cy.get('pre').contains('delectus') // response body renders to page
-      cy.wait('@xhr')
+    context('abort and cancel', () => {
+      // https://github.com/cypress-io/cypress/issues/9549
+      it('should handle aborted requests', () => {
+        cy.intercept('https://jsonplaceholder.cypress.io/todos/1').as('xhr')
+        cy.visit('fixtures/xhr-abort.html')
+        cy.get('#btn').click()
+        cy.get('pre').contains('delectus') // response body renders to page
+        cy.wait('@xhr')
+      })
+
+      it('stops waiting when an xhr request is canceled', () => {
+        cy.visit('http://localhost:3500/fixtures/generic.html')
+
+        cy.intercept('POST', /users/, {
+          body: { name: 'b' },
+          delay: 2000,
+        }).as('createUser')
+
+        cy.window()
+        .then((win) => {
+          const xhr = new win.XMLHttpRequest()
+
+          xhr.open('POST', '/users/')
+
+          xhr.send()
+
+          win.location.reload()
+
+          cy.wait('@createUser').its('state').should('eq', 'Errored')
+        })
+      })
+
+      it('stops waiting when an fetch request is canceled', () => {
+        cy.visit('http://localhost:3500/fixtures/generic.html')
+
+        cy.intercept('POST', /users/, {
+          body: { name: 'b' },
+          delay: 2000,
+        }).as('createUser')
+
+        cy.window()
+        .then((win) => {
+          const controller = new AbortController()
+          const { signal } = controller
+
+          fetch('/users/', { signal, method: 'POST' }).catch((e) => {
+          // do nothing on an abort
+          })
+
+          // if you abort too fast in firefox or safari, the fetch is never sent to the server for us to intercept
+          if (!Cypress.isBrowser({ family: 'chromium' })) {
+            setTimeout(() => {
+              controller.abort()
+            }, 100)
+          } else {
+            controller.abort()
+          }
+
+          cy.wait('@createUser').its('state').should('eq', 'Errored')
+        })
+      })
     })
 
+    // TODO(webkit): fix forceNetworkError https://github.com/cypress-io/cypress/issues/23810
     // @see https://github.com/cypress-io/cypress/issues/9062
-    it('can spy on a request using forceNetworkError', function () {
+    it('can spy on a request using forceNetworkError', { browser: '!webkit' }, function () {
       const url = uniqueRoute('/foo')
 
       cy.intercept(`${url}*`, { forceNetworkError: true })
@@ -3597,7 +3690,9 @@ describe.skip('network stubbing', function () {
         })
       })
 
-      it('gets indexed Interception by alias.number', function () {
+      // TODO: fix+document this behavior
+      // @see https://github.com/cypress-io/cypress/issues/7663
+      it.skip('gets indexed Interception by alias.number', function () {
         let interception
         const url = uniqueRoute('/foo')
 

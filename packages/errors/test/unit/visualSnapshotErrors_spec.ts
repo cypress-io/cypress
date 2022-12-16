@@ -366,12 +366,12 @@ describe('visual error templates', () => {
         default: [],
       }
     },
-    DASHBOARD_CANCEL_SKIPPED_SPEC: () => {
+    CLOUD_CANCEL_SKIPPED_SPEC: () => {
       return {
         default: [],
       }
     },
-    DASHBOARD_API_RESPONSE_FAILED_RETRYING: () => {
+    CLOUD_API_RESPONSE_FAILED_RETRYING: () => {
       return {
         default: [{
           tries: 3,
@@ -385,7 +385,7 @@ describe('visual error templates', () => {
         }],
       }
     },
-    DASHBOARD_CANNOT_PROCEED_IN_PARALLEL: () => {
+    CLOUD_CANNOT_PROCEED_IN_PARALLEL: () => {
       return {
         default: [{
           flags: {
@@ -396,7 +396,7 @@ describe('visual error templates', () => {
         }],
       }
     },
-    DASHBOARD_CANNOT_PROCEED_IN_SERIAL: () => {
+    CLOUD_CANNOT_PROCEED_IN_SERIAL: () => {
       return {
         default: [{
           flags: {
@@ -407,7 +407,7 @@ describe('visual error templates', () => {
         }],
       }
     },
-    DASHBOARD_UNKNOWN_INVALID_REQUEST: () => {
+    CLOUD_UNKNOWN_INVALID_REQUEST: () => {
       return {
         default: [{
           flags: {
@@ -418,7 +418,7 @@ describe('visual error templates', () => {
         }],
       }
     },
-    DASHBOARD_UNKNOWN_CREATE_RUN_WARNING: () => {
+    CLOUD_UNKNOWN_CREATE_RUN_WARNING: () => {
       return {
         default: [{
           props: {
@@ -431,52 +431,52 @@ describe('visual error templates', () => {
         }],
       }
     },
-    DASHBOARD_STALE_RUN: () => {
+    CLOUD_STALE_RUN: () => {
       return {
         default: [{
-          runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1',
+          runUrl: 'https://cloud.cypress.io/project/abcd/runs/1',
           tag: '123',
           group: 'foo',
           parallel: true,
         }],
       }
     },
-    DASHBOARD_ALREADY_COMPLETE: () => {
+    CLOUD_ALREADY_COMPLETE: () => {
       return {
         default: [{
-          runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1',
+          runUrl: 'https://cloud.cypress.io/project/abcd/runs/1',
           tag: '123',
           group: 'foo',
           parallel: true,
         }],
       }
     },
-    DASHBOARD_PARALLEL_REQUIRED: () => {
+    CLOUD_PARALLEL_REQUIRED: () => {
       return {
         default: [{
-          runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1',
+          runUrl: 'https://cloud.cypress.io/project/abcd/runs/1',
           tag: '123',
           group: 'foo',
           parallel: true,
         }],
       }
     },
-    DASHBOARD_PARALLEL_DISALLOWED: () => {
+    CLOUD_PARALLEL_DISALLOWED: () => {
       return {
         default: [{
-          runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1',
+          runUrl: 'https://cloud.cypress.io/project/abcd/runs/1',
           tag: '123',
           group: 'foo',
           parallel: true,
         }],
       }
     },
-    DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH: () => {
+    CLOUD_PARALLEL_GROUP_PARAMS_MISMATCH: () => {
       return {
         default: [
           {
             group: 'foo',
-            runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1',
+            runUrl: 'https://cloud.cypress.io/project/abcd/runs/1',
             ciBuildId: 'test-ciBuildId-123',
             parameters: {
               osName: 'darwin',
@@ -487,14 +487,48 @@ describe('visual error templates', () => {
                 'cypress/integration/app_spec.js',
               ],
             },
+            payload: {},
+          },
+        ],
+        differentParams: [
+          {
+            group: 'foo',
+            runUrl: 'https://cloud.cypress.io/project/abcd/runs/1',
+            ciBuildId: 'test-ciBuildId-123',
+            parameters: {
+              osName: 'darwin',
+              osVersion: 'v1',
+              browserName: 'Electron',
+              browserVersion: '59.1.2.3',
+              specs: [
+                'cypress/integration/app_spec.js',
+                'cypress/integration/foo_spec.js',
+                'cypress/integration/bar_spec.js',
+              ],
+            },
+            payload: {
+              differentParams: {
+                browserName: {
+                  detected: 'Chrome',
+                  expected: 'Electron',
+                },
+                browserVersion: {
+                  detected: '65',
+                  expected: '64',
+                },
+              },
+              differentSpecs: [
+                'cypress/integration/foo_spec.js',
+              ],
+            },
           },
         ],
       }
     },
-    DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE: () => {
+    CLOUD_RUN_GROUP_NAME_NOT_UNIQUE: () => {
       return {
         default: [{
-          runUrl: 'https://dashboard.cypress.io/project/abcd/runs/1',
+          runUrl: 'https://cloud.cypress.io/project/abcd/runs/1',
           tag: '123',
           group: 'foo',
           parallel: true,
@@ -547,7 +581,7 @@ describe('visual error templates', () => {
         default: ['project-id-123'],
       }
     },
-    DASHBOARD_INVALID_RUN_REQUEST: () => {
+    CLOUD_INVALID_RUN_REQUEST: () => {
       return {
         default: [{
           message: 'request should follow postRunRequest@2.0.0 schema',
@@ -568,26 +602,26 @@ describe('visual error templates', () => {
         default: [],
       }
     },
-    DASHBOARD_CANNOT_UPLOAD_RESULTS: () => {
+    CLOUD_CANNOT_UPLOAD_RESULTS: () => {
       const err = makeApiErr()
 
       return {
         default: [err],
       }
     },
-    DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE: () => {
+    CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE: () => {
       const err = makeApiErr()
 
       return {
         default: [err],
       }
     },
-    DASHBOARD_RECORD_KEY_NOT_VALID: () => {
+    CLOUD_RECORD_KEY_NOT_VALID: () => {
       return {
         default: ['record-key-123', 'project-id-123'],
       }
     },
-    DASHBOARD_PROJECT_NOT_FOUND: () => {
+    CLOUD_PROJECT_NOT_FOUND: () => {
       return {
         default: ['project-id-123', '/path/to/cypress.json'],
       }
@@ -819,7 +853,7 @@ describe('visual error templates', () => {
     FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS: () => {
       return {
         default: [{
-          link: 'https://dashboard.cypress.io/project/abcd',
+          link: 'https://cloud.cypress.io/project/abcd',
           limit: 500,
           usedTestsMessage: 'test',
         }],
@@ -828,7 +862,7 @@ describe('visual error templates', () => {
     FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS: () => {
       return {
         default: [{
-          link: 'https://dashboard.cypress.io/project/abcd',
+          link: 'https://cloud.cypress.io/project/abcd',
           limit: 500,
           usedTestsMessage: 'test',
           gracePeriodMessage: 'the grace period ends',
@@ -1001,6 +1035,11 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
     EXPERIMENTAL_SHADOW_DOM_REMOVED: () => {
       return {
         default: [],
@@ -1132,7 +1171,7 @@ describe('visual error templates', () => {
         default: ['wizardUpdate', {}, makeErr()],
       }
     },
-    DASHBOARD_GRAPHQL_ERROR: () => {
+    CLOUD_GRAPHQL_ERROR: () => {
       return {
         default: [makeErr()],
       }
@@ -1159,7 +1198,7 @@ describe('visual error templates', () => {
     },
     MIGRATION_MISMATCHED_CYPRESS_VERSIONS: () => {
       return {
-        default: ['9.6.0'],
+        default: ['9.6.0', '10.0.0'],
       }
     },
     MIGRATION_CYPRESS_NOT_FOUND: () => {
@@ -1212,9 +1251,21 @@ describe('visual error templates', () => {
       }
     },
 
+    EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY: () => {
+      return {
+        default: [],
+      }
+    },
+
     BROWSER_UNSUPPORTED_LAUNCH_OPTION: () => {
       return {
         default: ['electron', ['env']],
+      }
+    },
+
+    EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY: () => {
+      return {
+        default: [],
       }
     },
   })

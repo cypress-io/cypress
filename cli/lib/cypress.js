@@ -31,6 +31,8 @@ const cypressModuleApi = {
 
     options = util.normalizeModuleOptions(options)
 
+    tmp.setGracefulCleanup()
+
     return tmp.fileAsync()
     .then((outputPath) => {
       options.outputPath = outputPath

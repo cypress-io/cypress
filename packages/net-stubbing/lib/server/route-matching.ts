@@ -93,7 +93,7 @@ export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: Cypress
 }
 
 export function _getMatchableForRequest (req: CypressIncomingRequest) {
-  let matchable: any = _.pick(req, ['headers', 'method'])
+  let matchable: any = _.pick(req, ['headers', 'method', 'resourceType'])
 
   const authorization = req.headers['authorization']
 

@@ -107,7 +107,7 @@ const retryWithBackoff = (fn) => {
       const delay = DELAYS[retryIndex]
 
       errors.warning(
-        'DASHBOARD_API_RESPONSE_FAILED_RETRYING', {
+        'CLOUD_API_RESPONSE_FAILED_RETRYING', {
           delay,
           tries: DELAYS.length - retryIndex,
           response: err,
