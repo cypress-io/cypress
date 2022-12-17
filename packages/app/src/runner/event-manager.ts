@@ -568,8 +568,10 @@ export class EventManager {
       this.localBus.emit('script:error', err)
     })
 
-    Cypress.on('test:before:run:async', (_attr, test) => {
+    Cypress.on('test:before:run:async', async (_attr, test) => {
       this.studioStore.interceptTest(test)
+
+      await Cypress.automation('force:garbage:collection', {})
     })
 
     Cypress.on('test:after:run', (test) => {

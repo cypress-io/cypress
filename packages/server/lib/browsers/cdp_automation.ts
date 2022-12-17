@@ -18,6 +18,7 @@ export type CdpCommand = keyof ProtocolMapping.Commands
 export type CdpEvent = keyof ProtocolMapping.Events
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
+const debugVerboseMemory = debugModule('cypress-verbose:server:browsers:cdp_automation:memory')
 
 export function screencastOpts (everyNthFrame = Number(process.env.CYPRESS_EVERY_NTH_FRAME || 5)): Protocol.Page.StartScreencastRequest {
   return {
@@ -176,6 +177,8 @@ export class CdpAutomation {
       maxPostDataSize: 0,
     })
 
+    await sendDebuggerCommandFn('Performance.enable')
+
     return cdpAutomation
   }
 
@@ -259,6 +262,34 @@ export class CdpAutomation {
     .then((cookies) => {
       return _.get(cookies, 0, null)
     })
+  }
+
+  private collectGarbage = async () => {
+    const performanceMemory = (await this.sendDebuggerCommandFn('Runtime.evaluate', { expression: 'memory = { usedJSHeapSize: performance.memory.usedJSHeapSize, totalJSHeapSize: performance.memory.totalJSHeapSize, jsHeapSizeLimit: performance.memory.jsHeapSizeLimit }', returnByValue: true })).result.value
+
+    debugVerboseMemory('performance.memory usage before: %o', performanceMemory)
+
+    const metrics = await this.sendDebuggerCommandFn('Performance.getMetrics')
+
+    debugVerboseMemory('Performance.getMetrics usage before: %o', { JSHeapUsedSize: metrics.metrics.find((m) => m.name === 'JSHeapUsedSize')?.value, JSHeapTotalSize: metrics.metrics.find((m) => m.name === 'JSHeapTotalSize')?.value })
+
+    const heapMetrics = await this.sendDebuggerCommandFn('Runtime.getHeapUsage')
+
+    debugVerboseMemory('Runtime.getHeapUsage usage before: %o', { JSHeapUsedSize: heapMetrics.usedSize, JSHeapTotalSize: heapMetrics.totalSize })
+
+    // only collect garbage if we're using more than 50% of the heap
+    // const shouldCollectGarbage = (performanceMemory.usedJSHeapSize / performanceMemory.jsHeapSizeLimit) > 0.50
+
+    // if (shouldCollectGarbage) {
+    //   debugVerboseMemory('forcing garbage collection')
+    //   performance.mark('gc-start')
+    //   await this.sendDebuggerCommandFn('HeapProfiler.collectGarbage')
+    //   performance.mark('gc-end')
+
+    //   debugVerboseMemory('garbage collection measurement %o', performance.measure('garbage collection', 'gc-start', 'gc-end'))
+    // } else {
+    //   debugVerboseMemory('skipping garbage collection')
+    // }
   }
 
   onRequest = (message, data) => {
@@ -351,6 +382,8 @@ export class CdpAutomation {
         return this.sendCloseCommandFn(data.shouldKeepTabOpen)
       case 'focus:browser:window':
         return this.sendDebuggerCommandFn('Page.bringToFront')
+      case 'force:garbage:collection':
+        return this.collectGarbage()
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }
