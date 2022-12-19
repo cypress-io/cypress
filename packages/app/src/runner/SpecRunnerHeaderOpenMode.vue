@@ -153,8 +153,8 @@
       dismissible
     >
       <template #title>
-        <ExternalLink href="https://on.cypress.io/mount">
-          <i-cy-book_x16 class="inline-block icon-dark-indigo-500 icon-light-indigo-200" />
+        <i-cy-book_x16 class="pr-2px inline-block icon-dark-indigo-500 icon-light-indigo-200" />
+        <ExternalLink href="https://on.cypress.io/styling-components">
           {{ t('runner.header.reviewDocs') }}
         </ExternalLink>
         {{ t('runner.header.troubleRendering') }}

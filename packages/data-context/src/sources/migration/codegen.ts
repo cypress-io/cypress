@@ -535,7 +535,7 @@ export function getSpecPattern (cfg: LegacyCypressConfigJson, testingType: Testi
 function formatWithBundledBabel (config: string) {
   const ast = parse(config)
 
-  // @ts-ignore - conflict between readonly and mutable types due to conflicting babel deps.
+  // @ts-ignore - transitive babel types have a minor conflict - readonly vs non readonly.
   let { code } = generate(ast, {}, config)
   // By default babel generates imports like this:
   // const {

@@ -40,20 +40,15 @@
           v-if="result"
           class="flex gap-16px items-center"
         >
-          <router-link
-            class="outline-none"
-            :to="{ name: 'SpecRunner', query: { file: result.file.relative?.replace(/\\/g, '/') }, params: { shouldShowTroubleRenderingAlert: true } }
-            "
+          <Button
+            size="lg"
+            :to="{ name: 'SpecRunner', query: { file: posixify(result.file.relative) }, params: { shouldShowTroubleRenderingAlert: true } }"
+            :prefix-icon="TestResultsIcon"
+            prefix-icon-class="w-16px h-16px icon-dark-white"
+            @click="emits('close')"
           >
-            <Button
-              size="lg"
-              :prefix-icon="TestResultsIcon"
-              prefix-icon-class="w-16px h-16px icon-dark-white"
-              @click="emits('close')"
-            >
-              {{ t('createSpec.successPage.runSpecButton') }}
-            </Button>
-          </router-link>
+            {{ t('createSpec.successPage.runSpecButton') }}
+          </Button>
           <Button
             size="lg"
             :prefix-icon="PlusButtonIcon"
@@ -66,7 +61,7 @@
         </StandardModalFooter>
         <div
           v-else
-          class="bg-white rounded-b h-24px bottom-0 left-0 absolute ghost-div"
+          class="bg-white rounded-b h-24px bottom-0 left-0 w-[calc(100%-24px)] absolute"
         />
       </div>
     </template>
@@ -80,12 +75,14 @@ import GeneratorSuccess from '../GeneratorSuccess.vue'
 import { computed, ref } from 'vue'
 import { gql, useQuery, useMutation } from '@urql/vue'
 import type { ComponentGeneratorStepOne_CodeGenGlobFragment, GeneratorSuccessFileFragment } from '../../../generated/graphql'
-import { ComponentGeneratorStepOneDocument, ComponentGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
+import { VueComponentGeneratorStepOneDocument, VueComponentGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import Button from '@cy/components/Button.vue'
 import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
 import TestResultsIcon from '~icons/cy/test-results_x24.svg'
 import EmptyGenerator from '../EmptyGenerator.vue'
+import { posixify } from '../../../paths'
+
 const props = defineProps<{
   title: string
   gql: ComponentGeneratorStepOne_CodeGenGlobFragment
@@ -100,18 +97,9 @@ const emits = defineEmits<{
 const { title } = useVModels(props, emits)
 
 title.value = t('createSpec.component.importFromComponent.chooseAComponentHeader')
-gql`
-fragment ComponentGeneratorStepOne_codeGenGlob on CurrentProject {
-  id
-  codeGenGlobs {
-    id
-    component
-  }
-}
-`
 
 gql`
-query ComponentGeneratorStepOne($glob: String!) {
+query VueComponentGeneratorStepOne($glob: String!) {
   currentProject {
     id
     codeGenCandidates(glob: $glob) {
@@ -132,7 +120,7 @@ query ComponentGeneratorStepOne($glob: String!) {
 `
 
 gql`
-mutation ComponentGeneratorStepOne_generateSpec($codeGenCandidate: String!, $type: CodeGenType!) {
+mutation VueComponentGeneratorStepOne_generateSpec($codeGenCandidate: String!, $type: CodeGenType!) {
   generateSpecFromSource(codeGenCandidate: $codeGenCandidate, type: $type) {
     ...GeneratorSuccess
     currentProject {
@@ -147,13 +135,14 @@ mutation ComponentGeneratorStepOne_generateSpec($codeGenCandidate: String!, $typ
   }
 }`
 
-const mutation = useMutation(ComponentGeneratorStepOne_GenerateSpecDocument)
+const mutation = useMutation(VueComponentGeneratorStepOne_GenerateSpecDocument)
 const extensionPattern = ref(props.gql.codeGenGlobs.component)
 
 const query = useQuery({
-  query: ComponentGeneratorStepOneDocument,
+  query: VueComponentGeneratorStepOneDocument,
   // @ts-ignore
   variables: { glob: extensionPattern },
+  requestPolicy: 'network-only',
 })
 const allFiles = computed((): any => {
   if (query.data.value?.currentProject?.codeGenCandidates) {
@@ -188,8 +177,3 @@ const cancelSpecNameCreation = () => {
   generatedSpecError.value = null
 }
 </script>
-<style scoped>
-.ghost-div {
-  width: calc(100% - 24px);
-}
-</style>

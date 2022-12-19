@@ -93,7 +93,7 @@
           :is-leaf="row.data.isLeaf"
           :is-project-connected="projectConnectionStatus === 'CONNECTED'"
           :grid-columns="row.data.isLeaf ? tableGridColumns : 'grid-cols-[1fr]'"
-          :route="{ path: '/specs/runner', query: { file: row.data.data?.relative?.replace(/\\/g, '/') } }"
+          :route="{ path: '/specs/runner', query: { file: posixify(row.data.data?.relative || '') } }"
           @toggleRow="row.data.toggle"
         >
           <template #file>
@@ -216,6 +216,7 @@ import { useRequestAccess } from '../composables/useRequestAccess'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import SpecsRunAllSpecs from './SpecsRunAllSpecs.vue'
 import { useRunAllSpecsStore } from '../store/run-all-specs-store'
+import { posixify } from '../paths'
 
 const { openLoginConnectModal } = useLoginConnectStore()
 

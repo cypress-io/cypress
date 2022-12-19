@@ -1616,11 +1616,11 @@ export const AllCypressErrors = {
       `
   },
 
-  MIGRATION_MISMATCHED_CYPRESS_VERSIONS: (version: string) => {
+  MIGRATION_MISMATCHED_CYPRESS_VERSIONS: (version: string, currentVersion: string) => {
     return errTemplate`
-      You are running Cypress version 10 in global mode, but you are attempting to migrate a project where ${fmt.cypressVersion(version)} is installed. 
+      You are running ${fmt.cypressVersion(currentVersion)} in global mode, but you are attempting to migrate a project where ${fmt.cypressVersion(version)} is installed. 
 
-      Ensure the project you are migrating has Cypress version 10 installed.
+      Ensure the project you are migrating has Cypress version ${fmt.cypressVersion(currentVersion)} installed.
 
       https://on.cypress.io/migration-guide
     `
