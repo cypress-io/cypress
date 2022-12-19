@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import type { SpecGenerator, GeneratorId } from './types'
 import { ScaffoldGenerator } from './scaffold'
 import { EmptyGenerator } from './empty'
-import { ComponentGenerator } from './component'
+import { VueComponentGenerator, ReactComponentGenerator } from './component'
 
 export * from './types'
 
@@ -14,7 +14,8 @@ export * from './scaffold'
 export * from './empty'
 
 export const generatorList: SpecGenerator[] = [
-  ComponentGenerator,
+  VueComponentGenerator,
+  ReactComponentGenerator,
   ScaffoldGenerator,
   EmptyGenerator,
 ]
