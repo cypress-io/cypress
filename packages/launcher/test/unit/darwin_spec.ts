@@ -7,7 +7,8 @@ import * as darwinUtil from '../../lib/darwin/util'
 import { utils } from '../../lib/utils'
 import { expect } from 'chai'
 import sinon, { SinonStub } from 'sinon'
-import { browsers, launch } from '../../lib/browsers'
+import { launch } from '../../lib/browsers'
+import { knownBrowsers } from '../../lib/known-browsers'
 import Bluebird from 'bluebird'
 import fse from 'fs-extra'
 import snapshot from 'snap-shot-it'
@@ -71,7 +72,7 @@ describe('darwin browser detection', () => {
     })
 
     // then, it uses the main browsers list to attempt detection of all browsers, which should succeed
-    const detected = (await Bluebird.mapSeries(browsers, (browser) => {
+    const detected = (await Bluebird.mapSeries(knownBrowsers, (browser) => {
       return darwinHelper.detect(browser)
       .then((foundBrowser) => {
         const findAppParams = darwinHelper.browsers[browser.name][browser.channel]
@@ -101,13 +102,13 @@ describe('darwin browser detection', () => {
         const cpSpawn = stubForArch('arm64')
 
         // this will error since we aren't setting stdout
-        await (darwinHelper.detect(browsers[0]).catch(() => {}))
+        await (darwinHelper.detect(knownBrowsers[0]).catch(() => {}))
 
         // first call is mdfind, second call is getVersionString
         const { args } = cpSpawn.getCall(1)
 
         expect(args[0]).to.eq('arch')
-        expect(args[1]).to.deep.eq([browsers[0].binary, '--version'])
+        expect(args[1]).to.deep.eq([knownBrowsers[0].binary, '--version'])
         expect(args[2].env).to.deep.include({
           ARCHPREFERENCE: 'arm64,x86_64',
         })
@@ -117,12 +118,12 @@ describe('darwin browser detection', () => {
         const cpSpawn = stubForArch('x64')
 
         // this will error since we aren't setting stdout
-        await (darwinHelper.detect(browsers[0]).catch(() => {}))
+        await (darwinHelper.detect(knownBrowsers[0]).catch(() => {}))
 
         // first call is mdfind, second call is getVersionString
         const { args } = cpSpawn.getCall(1)
 
-        expect(args[0]).to.eq(browsers[0].binary)
+        expect(args[0]).to.eq(knownBrowsers[0].binary)
         expect(args[1]).to.deep.eq(['--version'])
         expect(args[2].env).to.not.have.property('ARCHPREFERENCE')
       })
