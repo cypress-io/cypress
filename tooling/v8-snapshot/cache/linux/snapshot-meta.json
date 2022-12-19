@@ -824,6 +824,7 @@
     "./packages/server/lib/fixture.js",
     "./packages/server/lib/log.js",
     "./packages/server/lib/makeDataContext.ts",
+    "./packages/server/lib/modes/info.js",
     "./packages/server/lib/modes/interactive.ts",
     "./packages/server/lib/plugins/dev-server.js",
     "./packages/server/lib/plugins/preprocessor.js",
@@ -918,7 +919,8 @@
     "./packages/socket/node_modules/socket.io/node_modules/engine.io/lib/transports/polling.js",
     "./packages/socket/node_modules/socket.io/node_modules/engine.io/lib/transports/websocket.js",
     "./packages/ts/register.js",
-    "./packages/types/index.js"
+    "./packages/types/index.js",
+    "./tooling/v8-snapshot/dist/setup/v8-snapshot-entry-cy-in-cy.js"
   ],
   "healthy": [
     "./node_modules/@babel/code-frame/lib/index.js",
@@ -1108,7 +1110,6 @@
     "./node_modules/@babel/types/lib/validators/matchesPattern.js",
     "./node_modules/@babel/types/lib/validators/react/isCompatTag.js",
     "./node_modules/@babel/types/lib/validators/react/isReactComponent.js",
-    "./node_modules/@cspotcode/source-map-support/node_modules/@jridgewell/resolve-uri/dist/resolve-uri.umd.js",
     "./node_modules/@cypress/commit-info/node_modules/cross-spawn/index.js",
     "./node_modules/@cypress/commit-info/node_modules/cross-spawn/lib/enoent.js",
     "./node_modules/@cypress/commit-info/node_modules/cross-spawn/lib/parse.js",
@@ -3886,6 +3887,8 @@
     "./packages/extension/index.js",
     "./packages/extension/lib/extension.js",
     "./packages/extension/lib/util.js",
+    "./packages/frontend-shared/cypress/e2e/prod-dependencies.ts",
+    "./packages/frontend-shared/cypress/e2e/v8-snapshot-entry.ts",
     "./packages/graphql/node_modules/chalk/source/templates.js",
     "./packages/graphql/node_modules/chalk/source/util.js",
     "./packages/graphql/node_modules/debug/node_modules/ms/index.js",
@@ -3942,6 +3945,7 @@
     "./packages/graphql/src/schemaTypes/objectTypes/gql-LocalSettings.ts",
     "./packages/graphql/src/schemaTypes/objectTypes/gql-ProjectPreferences.ts",
     "./packages/graphql/src/schemaTypes/objectTypes/gql-ReactComponentDescriptor.ts",
+    "./packages/graphql/src/schemaTypes/objectTypes/gql-ReactComponentResponse.ts",
     "./packages/graphql/src/schemaTypes/objectTypes/gql-ScaffoldedFile.ts",
     "./packages/graphql/src/schemaTypes/objectTypes/gql-Spec.ts",
     "./packages/graphql/src/schemaTypes/objectTypes/gql-TestingTypeInfo.ts",
@@ -4141,7 +4145,7 @@
     "./packages/server/lib/util/print-run.ts",
     "./packages/server/lib/util/proxy.ts",
     "./packages/server/lib/util/random.js",
-    "./packages/server/lib/util/resourceTypeAndCredentialManager.ts",
+    "./packages/server/lib/util/requestedWithAndCredentialManager.ts",
     "./packages/server/lib/util/server_destroy.ts",
     "./packages/server/lib/util/shell.js",
     "./packages/server/lib/util/socket_allowed.ts",
@@ -4314,5 +4318,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "bc9faf157631da7f9749d97c919d73776a08b68f855dd2e0c3cb9e4912cb581e"
+  "deferredHash": "b9086828ab95abc964408f52aa3240754f89537b7ae42d656eb9076e0fb38153"
 }
