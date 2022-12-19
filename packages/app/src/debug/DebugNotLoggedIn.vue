@@ -2,8 +2,9 @@
   <DebugEmptyView
     :title="t('debugPage.emptyStates.debugDirectlyInCypress')"
     :description="t('debugPage.emptyStates.reviewRerunAndDebug')"
+    example-test-name="Connect to Cypress Cloud to locally debug failed CI test runs"
   >
-    <template #cta-button>
+    <template #cta>
       <CloudConnectButton utm-medium="Debug Tab" />
     </template>
   </DebugEmptyView>
