@@ -46,11 +46,11 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
   }
 
   this.debug(`looking up credentials for ${this.req.proxiedUrl}`)
-  let { resourceType, credentialStatus } = this.resourceTypeAndCredentialManager.get(this.req.proxiedUrl, requestIsXhrOrFetch !== 'true' ? requestIsXhrOrFetch : undefined)
+  const { requestedWith, credentialStatus } = this.requestedWithAndCredentialManager.get(this.req.proxiedUrl, requestIsXhrOrFetch !== 'true' ? requestIsXhrOrFetch : undefined)
 
-  this.debug(`credentials calculated for ${resourceType}:${credentialStatus}`)
+  this.debug(`credentials calculated for ${requestedWith}:${credentialStatus}`)
 
-  this.req.requestedWith = resourceType
+  this.req.requestedWith = requestedWith
   this.req.credentialsLevel = credentialStatus
   this.next()
 }
@@ -75,7 +75,7 @@ const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
     return this.next()
   }
 
-  // Top needs to be simulated since the AUT is in a cross origin state. Get the requestedWith and credentials and see what cookies need to be attached
+  // Top needs to be simulated since the AUT is in a cross origin state. Get the "requested with" and credentials and see what cookies need to be attached
   const currentAUTUrl = this.getAUTUrl()
   const shouldCookiesBeAttachedToRequest = shouldAttachAndSetCookies(this.req.proxiedUrl, currentAUTUrl, this.req.requestedWith, this.req.credentialsLevel, this.req.isAUTFrame)
 
@@ -108,6 +108,12 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
     return this.next()
   }
 
+  const copyResourceTypeAndNext = () => {
+    this.req.resourceType = this.req.browserPreRequest?.resourceType
+
+    this.next()
+  }
+
   if (this.req.headers['x-cypress-resolving-url']) {
     this.debug('skipping prerequest for resolve:url')
     delete this.req.headers['x-cypress-resolving-url']
@@ -131,13 +137,13 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
       })
     })
 
-    return this.next()
+    return copyResourceTypeAndNext()
   }
 
   this.debug('waiting for prerequest')
   this.getPreRequest(((browserPreRequest) => {
     this.req.browserPreRequest = browserPreRequest
-    this.next()
+    copyResourceTypeAndNext()
   }))
 }
 

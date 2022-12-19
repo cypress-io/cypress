@@ -21,7 +21,10 @@
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {
-    "@babel/parser": "7.13.0",
+    "@babel/core": "^7.0.1",
+    "@babel/generator": "^7.17.9",
+    "@babel/parser": "^7.13.0",
+    "@babel/traverse": "^7.17.9",
     "bluebird": "3.7.1",
     "debug": "^4.3.2",
     "fs-extra": "^10.1.0",
@@ -32,7 +35,6 @@
     "webpack-virtual-modules": "^0.4.4"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.1",
     "@babel/plugin-proposal-nullish-coalescing-operator": "7.8.3",
     "@babel/preset-env": "^7.0.0",
     "@fellow/eslint-plugin-coffee": "0.4.13",

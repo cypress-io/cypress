@@ -279,7 +279,37 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/parallel-disallowed`
   },
-  CLOUD_PARALLEL_GROUP_PARAMS_MISMATCH: (arg1: {runUrl: string, parameters: any}) => {
+  CLOUD_PARALLEL_GROUP_PARAMS_MISMATCH: (arg1: {runUrl: string, parameters: any, payload: any }) => {
+    let params: any = arg1.parameters
+
+    if (arg1.payload?.differentParams) {
+      params = {}
+
+      _.map(arg1.parameters, (value, key) => {
+        if (key === 'specs' && arg1.payload.differentSpecs?.length) {
+          const addedSpecs: string[] = []
+          const missingSpecs: string[] = []
+
+          _.forEach(arg1.payload.differentSpecs, (s) => {
+            if (value.includes(s)) {
+              addedSpecs.push(s)
+            } else {
+              missingSpecs.push(s)
+            }
+          })
+
+          params['differentSpecs'] = {
+            added: addedSpecs,
+            missing: missingSpecs,
+          }
+        } else if (arg1.payload.differentParams[key]?.expected) {
+          params[key] = `${value}.... (Expected: ${(arg1.payload.differentParams[key].expected)})`
+        } else {
+          params[key] = value
+        }
+      })
+    }
+
     return errTemplate`\
         You passed the ${fmt.flag(`--parallel`)} flag, but we do not parallelize tests across different environments.
 
@@ -299,7 +329,7 @@ export const AllCypressErrors = {
 
         This machine sent the following parameters:
 
-        ${fmt.meta(arg1.parameters)}
+        ${fmt.meta(params)}
 
         https://on.cypress.io/parallel-group-params-mismatch`
   },
@@ -1586,11 +1616,11 @@ export const AllCypressErrors = {
       `
   },
 
-  MIGRATION_MISMATCHED_CYPRESS_VERSIONS: (version: string) => {
+  MIGRATION_MISMATCHED_CYPRESS_VERSIONS: (version: string, currentVersion: string) => {
     return errTemplate`
-      You are running Cypress version 10 in global mode, but you are attempting to migrate a project where ${fmt.cypressVersion(version)} is installed. 
+      You are running ${fmt.cypressVersion(currentVersion)} in global mode, but you are attempting to migrate a project where ${fmt.cypressVersion(version)} is installed. 
 
-      Ensure the project you are migrating has Cypress version 10 installed.
+      Ensure the project you are migrating has Cypress version ${fmt.cypressVersion(currentVersion)} installed.
 
       https://on.cypress.io/migration-guide
     `

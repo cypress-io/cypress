@@ -6,45 +6,7 @@ const modalCloseSelector = '[aria-label=Close]'
 const triggerButtonSelector = '[data-testid=trigger]'
 const modalSelector = '[data-cy=create-spec-modal]'
 
-describe('<CreateSpecModal />', () => {
-  beforeEach(() => {
-    const show = ref(true)
-
-    cy.mount(() => (<div>
-      <CreateSpecModal
-        gql={{
-          currentProject: {
-            id: 'id',
-            codeGenGlobs: {
-              id: 'super-unique-id',
-              __typename: 'CodeGenGlobs',
-              component: '**.vue',
-            },
-            currentTestingType: 'component',
-            configFile: 'cypress.config.js',
-            configFileAbsolutePath: '/path/to/cypress.config.js',
-            config: [{
-              field: 'e2e',
-              value: {
-                specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
-              },
-            }, {
-              field: 'component',
-              value: {
-                specPattern: '**/*.cy.{js,jsx,ts,tsx}',
-              },
-            }],
-            specs: [],
-            fileExtensionToUse: 'js',
-            defaultSpecFileName: 'cypress/e2e/ComponentName.cy.js',
-          },
-        }}
-        show={show.value}
-        onClose={() => show.value = false}
-      />
-    </div>))
-  })
-
+function testEmptySpecModal (fullDefaultSpecFileName: string, specName: string) {
   it('renders a modal', () => {
     cy.get(modalSelector).should('be.visible')
 
@@ -69,6 +31,10 @@ describe('<CreateSpecModal />', () => {
   })
 
   describe('form behavior', () => {
+    beforeEach(() => {
+      cy.findByRole('button', { name: 'Create new empty spec' }).should('be.visible').click()
+    })
+
     it('enter should call create spec function', () => {
       //submit default path
       cy.get('input')
@@ -99,103 +65,172 @@ describe('<CreateSpecModal />', () => {
       cy.get('@submit').should('be.disabled')
     })
   })
-})
 
-describe('Modal Text Input', () => {
-  it('focuses text input and selects file name by default', () => {
-    const show = ref(true)
+  describe('text Input', () => {
+    beforeEach(() => {
+      cy.findByRole('button', { name: 'Create new empty spec' }).should('be.visible').click()
+    })
 
-    cy.mount(() => (<div>
-      <CreateSpecModal
-        gql={{
-          currentProject: {
-            id: 'id',
-            codeGenGlobs: {
-              id: 'super-unique-id',
-              __typename: 'CodeGenGlobs',
-              component: '**.vue',
-            },
-            currentTestingType: 'component',
-            configFile: 'cypress.config.js',
-            configFileAbsolutePath: '/path/to/cypress.config.js',
-            config: [{
-              field: 'e2e',
-              value: {
-                specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+    it('focuses text input and selects file name by default', () => {
+      cy.focused().as('specNameInput')
+
+      // focused should yield the input element since it should be auto-focused
+      cy.get('@specNameInput').invoke('val').should('equal', fullDefaultSpecFileName)
+
+      // only the file name should be focused, so backspacing should erase the whole file name
+      cy.get('@specNameInput').type('{backspace}')
+
+      cy.get('@specNameInput').invoke('val').should('equal', fullDefaultSpecFileName.replace(specName, ''))
+    })
+  })
+}
+
+describe('<CreateSpecModal />', () => {
+  context('create empty spec', () => {
+    context('e2e', () => {
+      const defaultSpecName = 'spec'
+      const defaultSpecFileName = 'cypress/e2e/spec.cy.js'
+
+      beforeEach(() => {
+        const show = ref(true)
+
+        cy.mount(() => (<div>
+          <CreateSpecModal
+            gql={{
+              currentProject: {
+                id: 'id',
+                codeGenGlobs: {
+                  id: 'super-unique-id',
+                  __typename: 'CodeGenGlobs',
+                  component: '**.vue',
+                },
+                codeGenFramework: 'vue',
+                currentTestingType: 'e2e',
+                configFile: 'cypress.config.js',
+                configFileAbsolutePath: '/path/to/cypress.config.js',
+                config: [{
+                  field: 'e2e',
+                  value: {
+                    specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+                  },
+                }, {
+                  field: 'component',
+                  value: {
+                    specPattern: '**/*.cy.{js,jsx,ts,tsx}',
+                  },
+                }],
+                specs: [],
+                fileExtensionToUse: 'js',
+                defaultSpecFileName,
               },
-            }, {
-              field: 'component',
-              value: {
-                specPattern: '**/*.cy.{js,jsx,ts,tsx}',
+            }}
+            show={show.value}
+            onClose={() => show.value = false}
+          />
+        </div>))
+      })
+
+      testEmptySpecModal(defaultSpecFileName, defaultSpecName)
+    })
+
+    context('component', () => {
+      const defaultSpecName = 'ComponentName'
+      const defaultSpecFileName = 'src/components/ComponentName.cy.jsx'
+
+      beforeEach(() => {
+        const show = ref(true)
+
+        cy.mount(() => (<div>
+          <CreateSpecModal
+            gql={{
+              currentProject: {
+                id: 'id',
+                codeGenGlobs: {
+                  id: 'super-unique-id',
+                  __typename: 'CodeGenGlobs',
+                  component: '**.vue',
+                },
+                codeGenFramework: 'vue',
+                currentTestingType: 'component',
+                configFile: 'cypress.config.js',
+                configFileAbsolutePath: '/path/to/cypress.config.js',
+                config: [{
+                  field: 'e2e',
+                  value: {
+                    specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+                  },
+                }, {
+                  field: 'component',
+                  value: {
+                    specPattern: '**/*.cy.{js,jsx,ts,tsx}',
+                  },
+                }],
+                specs: [],
+                fileExtensionToUse: 'jsx',
+                defaultSpecFileName,
               },
-            }],
-            specs: [],
-            fileExtensionToUse: 'js',
-            defaultSpecFileName: 'cypress/e2e/ComponentName.cy.js',
-          },
-        }}
-        show={show.value}
-        onClose={() => show.value = false}
-      />
-    </div>))
+            }}
+            show={show.value}
+            onClose={() => show.value = false}
+          />
+        </div>))
+      })
 
-    cy.focused().as('specNameInput')
-
-    // focused should yield the input element since it should be auto-focused
-    cy.get('@specNameInput').invoke('val').should('equal', 'cypress/e2e/ComponentName.cy.js')
-
-    // only the file name should be focused, so backspacing should erase the whole file name
-    cy.get('@specNameInput').type('{backspace}')
-
-    cy.get('@specNameInput').invoke('val').should('equal', 'cypress/e2e/.cy.js')
+      testEmptySpecModal(defaultSpecFileName, defaultSpecName)
+    })
   })
 
-  it('focuses text input but does not select if default file name does not match regex', () => {
-    const show = ref(true)
+  context('general', () => {
+    it('focuses text input but does not select if default file name does not match regex', () => {
+      const show = ref(true)
 
-    cy.mount(() => (<div>
-      <CreateSpecModal
-        gql={{
-          currentProject: {
-            id: 'id',
-            codeGenGlobs: {
-              id: 'super-unique-id',
-              __typename: 'CodeGenGlobs',
-              component: '**.vue',
+      cy.mount(() => (<div>
+        <CreateSpecModal
+          gql={{
+            currentProject: {
+              id: 'id',
+              codeGenGlobs: {
+                id: 'super-unique-id',
+                __typename: 'CodeGenGlobs',
+                component: '**.vue',
+              },
+              codeGenFramework: 'vue',
+              currentTestingType: 'component',
+              configFile: 'cypress.config.js',
+              configFileAbsolutePath: '/path/to/cypress.config.js',
+              config: [{
+                field: 'e2e',
+                value: {
+                  specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+                },
+              }, {
+                field: 'component',
+                value: {
+                  specPattern: '**/*.cy.{js,jsx,ts,tsx}',
+                },
+              }],
+              specs: [],
+              fileExtensionToUse: 'js',
+              defaultSpecFileName: 'this/path/does/not/produce/regex/match-',
             },
-            currentTestingType: 'component',
-            configFile: 'cypress.config.js',
-            configFileAbsolutePath: '/path/to/cypress.config.js',
-            config: [{
-              field: 'e2e',
-              value: {
-                specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
-              },
-            }, {
-              field: 'component',
-              value: {
-                specPattern: '**/*.cy.{js,jsx,ts,tsx}',
-              },
-            }],
-            specs: [],
-            fileExtensionToUse: 'js',
-            defaultSpecFileName: 'this/path/does/not/produce/regex/match-',
-          },
-        }}
-        show={show.value}
-        onClose={() => show.value = false}
-      />
-    </div>))
+          }}
+          show={show.value}
+          onClose={() => show.value = false}
+        />
+      </div>))
 
-    cy.focused().as('specNameInput')
+      cy.findByRole('button', { name: 'Create new empty spec' }).should('be.visible').click()
 
-    // focused should yield the input element since it should be auto-focused
-    cy.get('@specNameInput').invoke('val').should('equal', 'this/path/does/not/produce/regex/match-')
+      cy.focused().as('specNameInput')
 
-    // nothing should be selected, so backspacing should only delete the last character in the file path
-    cy.get('@specNameInput').type('{backspace}')
+      // focused should yield the input element since it should be auto-focused
+      cy.get('@specNameInput').invoke('val').should('equal', 'this/path/does/not/produce/regex/match-')
 
-    cy.get('@specNameInput').invoke('val').should('equal', 'this/path/does/not/produce/regex/match')
+      // nothing should be selected, so backspacing should only delete the last character in the file path
+      cy.get('@specNameInput').type('{backspace}')
+
+      cy.get('@specNameInput').invoke('val').should('equal', 'this/path/does/not/produce/regex/match')
+    })
   })
 })
 
@@ -215,6 +250,7 @@ describe('playground', () => {
               __typename: 'CodeGenGlobs',
               component: '**.vue',
             },
+            codeGenFramework: 'vue',
             currentTestingType: 'component',
             configFile: 'cypress.config.js',
             configFileAbsolutePath: '/path/to/cypress.config.js',
