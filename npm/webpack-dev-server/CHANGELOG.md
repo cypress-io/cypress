@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v3.1.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.1.1...@cypress/webpack-dev-server-v3.1.2) (2022-12-16)
+
+
+### Bug Fixes
+
+* use srcRoot for angular build context ([#25090](https://github.com/cypress-io/cypress/issues/25090)) ([7c36118](https://github.com/cypress-io/cypress/commit/7c361187e31c3681f415da8a9073221d807987f6))
+
 # [@cypress/webpack-dev-server-v3.1.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.1.0...@cypress/webpack-dev-server-v3.1.1) (2022-12-08)
 
 

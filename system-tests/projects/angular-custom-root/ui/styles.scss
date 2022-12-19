@@ -1,0 +1,3 @@
+* {
+  box-sizing: border-box;
+}

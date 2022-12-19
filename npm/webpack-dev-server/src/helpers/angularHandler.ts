@@ -1,10 +1,13 @@
 import * as fs from 'fs-extra'
 import { tmpdir } from 'os'
 import * as path from 'path'
-import type { Configuration } from 'webpack'
+import type { Configuration, RuleSetRule } from 'webpack'
 import type { PresetHandlerResult, WebpackDevServerConfig } from '../devServer'
 import { dynamicAbsoluteImport, dynamicImport } from '../dynamic-import'
 import { sourceDefaultWebpackDependencies } from './sourceRelativeWebpackModules'
+import debugLib from 'debug'
+
+const debug = debugLib('cypress:webpack-dev-server:angularHandler')
 
 export type BuildOptions = Record<string, any>
 
@@ -217,7 +220,7 @@ function createFakeContext (projectRoot: string, defaultProjectConfig: Cypress.A
     getProjectMetadata: () => {
       return {
         root: defaultProjectConfig.root,
-        sourceRoot: defaultProjectConfig.root,
+        sourceRoot: defaultProjectConfig.sourceRoot,
         projectType: 'application',
       }
     },
@@ -250,7 +253,33 @@ async function getAngularCliWebpackConfig (devServerConfig: AngularWebpackDevSer
   const { config } = await generateBrowserWebpackConfigFromContext(
     buildOptions,
     context,
-    (wco: any) => [getCommonConfig(wco), getStylesConfig(wco)],
+    (wco: any) => {
+      const stylesConfig = getStylesConfig(wco)
+
+      // We modify resolve-url-loader and set `root` to be `projectRoot` + `sourceRoot` to ensure
+      // imports in scss, sass, etc are correctly resolved.
+      // https://github.com/cypress-io/cypress/issues/24272
+      stylesConfig.module.rules.forEach((rule: RuleSetRule) => {
+        rule.rules?.forEach((ruleSet) => {
+          if (!Array.isArray(ruleSet.use)) {
+            return
+          }
+
+          ruleSet.use.map((loader) => {
+            if (typeof loader !== 'object' || typeof loader.options !== 'object' || !loader.loader?.includes('resolve-url-loader')) {
+              return
+            }
+
+            const root = path.join(devServerConfig.cypressConfig.projectRoot, projectConfig.sourceRoot)
+
+            debug('Adding root %s to resolve-url-loader options', root)
+            loader.options.root = path.join(devServerConfig.cypressConfig.projectRoot, projectConfig.sourceRoot)
+          })
+        })
+      })
+
+      return [getCommonConfig(wco), stylesConfig]
+    },
   )
 
   delete config.entry.main

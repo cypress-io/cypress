@@ -172,7 +172,7 @@ export default (Commands, Cypress, cy, state) => {
       let $el
 
       try {
-        let scope = userOptions.withinSubject || cy.getSubjectFromChain(withinSubject)
+        let scope = userOptions.withinSubject !== undefined ? userOptions.withinSubject : cy.getSubjectFromChain(withinSubject)
 
         if (includeShadowDom) {
           const root = scope?.get(0) || cy.state('document')
