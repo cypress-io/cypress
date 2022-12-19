@@ -1,4 +1,4 @@
-import type { CodeGenType, MutationSetProjectPreferencesInGlobalCacheArgs, NexusGenObjects, NexusGenUnions } from '@packages/graphql/src/gen/nxs.gen'
+import type { MutationSetProjectPreferencesInGlobalCacheArgs, NexusGenObjects, NexusGenUnions } from '@packages/graphql/src/gen/nxs.gen'
 import { InitializeProjectOptions, FoundBrowser, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig, AllowedState, SpecWithRelativeRoot, OpenProjectLaunchOpts, RUN_ALL_SPECS, RUN_ALL_SPECS_KEY } from '@packages/types'
 import type { EventEmitter } from 'events'
 import execa from 'execa'
@@ -6,14 +6,12 @@ import path from 'path'
 import assert from 'assert'
 
 import type { ProjectShape } from '../data/coreDataShape'
-
 import type { DataContext } from '..'
-import { codeGenerator, SpecOptions, hasNonExampleSpec } from '../codegen'
+import { hasNonExampleSpec } from '../codegen'
 import templates from '../codegen/templates'
 import { insertValuesInConfigFile } from '../util'
 import { getError } from '@packages/errors'
 import { resetIssuedWarnings } from '@packages/config'
-import { WizardFrontendFramework, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 
 export interface ProjectApiShape {
   /**
@@ -353,69 +351,6 @@ export class ProjectActions {
     this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, args)
   }
 
-  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType): Promise<NexusGenUnions['GeneratedSpecResult']> {
-    const project = this.ctx.currentProject
-
-    assert(project, 'Cannot create spec without currentProject.')
-
-    const getCodeGenPath = () => {
-      return codeGenType === 'e2e'
-        ? this.ctx.path.join(
-          project,
-          codeGenCandidate,
-        )
-        : codeGenCandidate
-    }
-
-    const codeGenPath = getCodeGenPath()
-
-    const { specPattern = [] } = await this.ctx.project.specPatterns()
-
-    const newSpecCodeGenOptions = new SpecOptions({
-      codeGenPath,
-      codeGenType,
-      framework: this.getWizardFrameworkFromConfig(),
-      isDefaultSpecPattern: await this.ctx.project.getIsDefaultSpecPattern(),
-      specPattern,
-      currentProject: this.ctx.currentProject,
-      specs: this.ctx.project.specs,
-    })
-
-    let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
-
-    const codeGenResults = await codeGenerator(
-      { templateDir: templates[codeGenOptions.templateKey], target: codeGenOptions.overrideCodeGenDir || path.parse(codeGenPath).dir },
-      codeGenOptions,
-    )
-
-    if (!codeGenResults.files[0] || codeGenResults.failed[0]) {
-      throw (codeGenResults.failed[0] || 'Unable to generate spec')
-    }
-
-    const [newSpec] = codeGenResults.files
-
-    const cfg = await this.ctx.project.getConfig()
-
-    if (cfg && this.ctx.currentProject) {
-      const testingType = (codeGenType === 'component') ? 'component' : 'e2e'
-
-      await this.setSpecsFoundBySpecPattern({
-        projectRoot: this.ctx.currentProject,
-        testingType,
-        specPattern: cfg.specPattern ?? [],
-        configSpecPattern: cfg.specPattern ?? [],
-        excludeSpecPattern: cfg.excludeSpecPattern,
-        additionalIgnorePattern: cfg.additionalIgnorePattern,
-      })
-    }
-
-    return {
-      status: 'valid',
-      file: { absolute: newSpec.file, contents: newSpec.content },
-      description: 'Generated spec',
-    }
-  }
-
   async setSpecsFoundBySpecPattern ({ projectRoot, testingType, specPattern, configSpecPattern, excludeSpecPattern, additionalIgnorePattern }: FindSpecs<string | string[] | undefined>) {
     const toArray = (val?: string | string[]) => val ? typeof val === 'string' ? [val] : val : []
 
@@ -475,37 +410,6 @@ export class ProjectActions {
     this.ctx.actions.electron.showBrowserWindow()
   }
 
-  get defaultE2EPath () {
-    const projectRoot = this.ctx.currentProject
-
-    assert(projectRoot, `Cannot create e2e directory without currentProject.`)
-
-    return path.join(projectRoot, 'cypress', 'e2e')
-  }
-
-  async scaffoldIntegration (): Promise<NexusGenObjects['ScaffoldedFile'][]> {
-    const projectRoot = this.ctx.currentProject
-
-    assert(projectRoot, `Cannot create spec without currentProject.`)
-
-    const results = await codeGenerator(
-      { templateDir: templates['scaffoldIntegration'], target: this.defaultE2EPath },
-      {},
-    )
-
-    if (results.failed.length) {
-      throw new Error(`Failed generating files: ${results.failed.map((e) => `${e}`)}`)
-    }
-
-    return results.files.map(({ status, file, content }) => {
-      return {
-        status: (status === 'add' || status === 'overwrite') ? 'valid' : 'skipped',
-        file: { absolute: file, contents: content },
-        description: 'Generated spec',
-      }
-    })
-  }
-
   async hasNonExampleSpec () {
     const specs = this.ctx.project.specs?.map((spec) => spec.relativeToCommonRoot)
 
@@ -552,17 +456,5 @@ export class ProjectActions {
       // E2E doesn't have a wizard, so if we have a testing type on load we just create/update their cypress.config.js.
       await this.ctx.actions.wizard.scaffoldTestingType()
     }
-  }
-
-  getWizardFrameworkFromConfig (): WizardFrontendFramework | undefined {
-    const config = this.ctx.lifecycleManager.loadedConfigFile
-
-    // If devServer is a function, they are using a custom dev server.
-    if (!config?.component?.devServer || typeof config?.component?.devServer === 'function') {
-      return undefined
-    }
-
-    // @ts-ignore - because of the conditional above, we know that devServer isn't a function
-    return WIZARD_FRAMEWORKS.find((framework) => framework.configFramework === config?.component?.devServer.framework)
   }
 }

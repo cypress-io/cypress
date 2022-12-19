@@ -18,13 +18,10 @@ const tmpPath = path.join(__dirname, 'tmp/test-code-gen')
 const babelParse = (content: string) => parse(content, { sourceType: 'module', plugins: ['jsx', 'typescript'] })
 
 describe('code-generator', () => {
-  before(async () => {
-    await fs.remove(tmpPath)
-  })
-
   let ctx: DataContext
 
   beforeEach(async () => {
+    await fs.remove(tmpPath)
     ctx = createTestDataContext()
 
     ctx.update((s) => {
@@ -210,8 +207,102 @@ describe('code-generator', () => {
 
           describe('<${codeGenArgs.componentName} />', () => {
             it('renders', () => {
-              // see: https://test-utils.vuejs.org/guide/
+              // see: https://on.cypress.io/mounting-vue
               cy.mount(${codeGenArgs.componentName})
+            })
+          })`,
+        },
+      ],
+      failed: [],
+    }
+
+    expect(codeGenResults).deep.eq(expected)
+
+    const fileContent = (await fs.readFile(fileAbsolute)).toString()
+
+    expect(fileContent).eq(expected.files[0].content)
+
+    expect(() => babelParse(fileContent)).not.throw()
+  })
+
+  it('should generate from React component template', async () => {
+    const fileName = 'counter.cy.tsx'
+    const target = path.join(tmpPath, 'component')
+    const fileAbsolute = path.join(target, fileName)
+    const action: Action = {
+      templateDir: templates.reactComponent,
+      target,
+    }
+    const codeGenArgs = {
+      componentName: 'Counter',
+      componentPath: 'path/to/component',
+      fileName,
+      isDefault: false,
+    }
+
+    const codeGenResults = await codeGenerator(action, codeGenArgs)
+
+    const expected: CodeGenResults = {
+      files: [
+        {
+          type: 'text',
+          status: 'add',
+          file: fileAbsolute,
+          content: dedent`
+          import React from 'react'
+          import { ${codeGenArgs.componentName} } from '${codeGenArgs.componentPath}'
+
+          describe('<${codeGenArgs.componentName} />', () => {
+            it('renders', () => {
+              // see: https://on.cypress.io/mounting-react
+              cy.mount(<${codeGenArgs.componentName} />)
+            })
+          })`,
+        },
+      ],
+      failed: [],
+    }
+
+    expect(codeGenResults).deep.eq(expected)
+
+    const fileContent = (await fs.readFile(fileAbsolute)).toString()
+
+    expect(fileContent).eq(expected.files[0].content)
+
+    expect(() => babelParse(fileContent)).not.throw()
+  })
+
+  it('should generate from React component template with default export', async () => {
+    const fileName = 'counter.cy.tsx'
+    const target = path.join(tmpPath, 'component')
+    const fileAbsolute = path.join(target, fileName)
+    const action: Action = {
+      templateDir: templates.reactComponent,
+      target,
+    }
+    const codeGenArgs = {
+      componentName: 'Counter',
+      componentPath: 'path/to/component',
+      fileName,
+      isDefault: true,
+    }
+
+    const codeGenResults = await codeGenerator(action, codeGenArgs)
+
+    const expected: CodeGenResults = {
+      files: [
+        {
+          type: 'text',
+          status: 'add',
+          file: fileAbsolute,
+          content: dedent`
+          import React from 'react'
+          import ${codeGenArgs.componentName} from '${codeGenArgs.componentPath}'
+
+          describe('<${codeGenArgs.componentName} />', () => {
+            it('renders', () => {
+              // see: https://on.cypress.io/mounting-react
+              cy.mount(<${codeGenArgs.componentName} />)
             })
           })`,
         },

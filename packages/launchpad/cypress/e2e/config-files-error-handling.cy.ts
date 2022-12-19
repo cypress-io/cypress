@@ -1,4 +1,5 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+import pkg from '../../../../package.json'
 
 const expectStackToBe = (mode: 'open' | 'closed') => {
   cy.get(`[data-cy="stack-open-${mode === 'open' ? 'true' : 'false'}"]`)
@@ -45,7 +46,7 @@ describe('Config files error handling', () => {
     cy.visitLaunchpad()
     cy.skipWelcome()
 
-    cy.get('body').should('contain.text', defaultMessages.migration.wizard.title)
+    cy.get('body').should('contain.text', defaultMessages.migration.wizard.title.replace('{version}', pkg.version.split('.')[0]))
     cy.get('body').should('contain.text', defaultMessages.migration.wizard.description)
   })
 
