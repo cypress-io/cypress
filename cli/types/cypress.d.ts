@@ -2786,8 +2786,6 @@ declare namespace Cypress {
     certs: PEMCert[] | PFXCert[]
   }
 
-  // interface 
-
   interface ResolvedConfigOptions<ComponentDevServerOpts = any> {
     /**
      * Url used as prefix for [cy.visit()](https://on.cypress.io/visit) or [cy.request()](https://on.cypress.io/request) command's url
@@ -3032,10 +3030,10 @@ declare namespace Cypress {
      */
     experimentalWebKitSupport: boolean
     /**
-     * Adds support for testing in the WebKit browser engine used by Safari. See https://on.cypress.io/webkit-experiment for more information.
+     * Enables support for improved memory management.
      * @default false
      */
-    experimentalMemoryImprovements: boolean
+    experimentalMemoryManagement: boolean
     /**
      * Number of times to retry a failed test.
      * If a number is set, tests will retry in both runMode and openMode.

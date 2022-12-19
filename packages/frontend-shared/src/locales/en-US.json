@@ -519,6 +519,10 @@
       "experimentalOriginDependencies": {
         "name": "Origin Dependencies",
         "description": "Enables support for `require`/`import` within `cy.origin`."
+      },
+      "experimentalMemoryImprovements": {
+        "name": "Memory Improvements",
+        "description": "Enables support for memory improvements."
       }
     },
     "device": {

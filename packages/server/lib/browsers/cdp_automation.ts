@@ -9,7 +9,7 @@ import debugModule from 'debug'
 import { URL } from 'url'
 
 import si from 'systeminformation'
-import pidusage from 'pidusage'
+// import pidusage from 'pidusage'
 import browsers from '../browsers'
 
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
@@ -271,47 +271,42 @@ export class CdpAutomation {
   private collectGarbage = async () => {
     const performanceMemory = (await this.sendDebuggerCommandFn('Runtime.evaluate', { expression: 'memory = { usedJSHeapSize: performance.memory.usedJSHeapSize, totalJSHeapSize: performance.memory.totalJSHeapSize, jsHeapSizeLimit: performance.memory.jsHeapSizeLimit }', returnByValue: true })).result.value
 
-    debugVerboseMemory('performance.memory usage before: %o', performanceMemory)
-
-    // const metrics = await this.sendDebuggerCommandFn('Performance.getMetrics')
-
-    // debugVerboseMemory('Performance.getMetrics usage before: %o', { JSHeapUsedSize: metrics.metrics.find((m) => m.name === 'JSHeapUsedSize')?.value, JSHeapTotalSize: metrics.metrics.find((m) => m.name === 'JSHeapTotalSize')?.value })
-
-    // const heapMetrics = await this.sendDebuggerCommandFn('Runtime.getHeapUsage')
-
-    // debugVerboseMemory('Runtime.getHeapUsage usage before: %o', { JSHeapUsedSize: heapMetrics.usedSize, JSHeapTotalSize: heapMetrics.totalSize })
+    // debugVerboseMemory('performance.memory usage before: %o', performanceMemory)
 
     const processes = await si.processes()
     const browserPid = browsers.getBrowserInstance()?.pid
 
     const childBrowserProcesses = processes.list.filter((process) => process.parentPid === browserPid && process.params.includes('--type=renderer'))
 
-    // debugVerboseMemory('renderer processes: %o', childBrowserProcesses.map((process) => {
-    //   return {
-    //     memVsz: process.memVsz,
-    //     memRss: process.memRss,
-    //   }
-    // }))
+    // const pageSize = 16384
 
-    childBrowserProcesses.forEach(async (process) => {
-      const stats = await pidusage(process.pid)
+    debugVerboseMemory('systeminformation renderer processes: %o', childBrowserProcesses.map((process) => {
+      return {
+        memRss: process.memRss * 1024 * 100,
+        memVsz: process.memVsz,
+      }
+    }))
 
-      debugVerboseMemory('pidusage renderer processes: %o', stats)
-    })
+    // let stats
+
+    // for (const process of childBrowserProcesses) {
+    //   stats = await pidusage(process.pid)
+    //   debugVerboseMemory('pidusage renderer processes: %o', stats)
+    // }
 
     // only collect garbage if we're using more than 50% of the heap
-    // const shouldCollectGarbage = (performanceMemory.usedJSHeapSize / performanceMemory.jsHeapSizeLimit) > 0.50
+    const shouldCollectGarbage = ((childBrowserProcesses[0].memRss * 1024 * 100) / performanceMemory.jsHeapSizeLimit) > 0.50
 
-    // if (shouldCollectGarbage) {
-    //   debugVerboseMemory('forcing garbage collection')
-    //   performance.mark('gc-start')
-    // await this.sendDebuggerCommandFn('HeapProfiler.collectGarbage')
-    //   performance.mark('gc-end')
+    if (shouldCollectGarbage) {
+      debugVerboseMemory('forcing garbage collection')
+      performance.mark('gc-start')
+      await this.sendDebuggerCommandFn('HeapProfiler.collectGarbage')
+      performance.mark('gc-end')
 
-    //   debugVerboseMemory('garbage collection measurement %o', performance.measure('garbage collection', 'gc-start', 'gc-end'))
-    // } else {
-    //   debugVerboseMemory('skipping garbage collection')
-    // }
+      debugVerboseMemory('garbage collection measurement %o', performance.measure('garbage collection', 'gc-start', 'gc-end'))
+    } else {
+      debugVerboseMemory('skipping garbage collection')
+    }
   }
 
   onRequest = (message, data) => {

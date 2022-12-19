@@ -365,6 +365,8 @@ export class WebKitAutomation {
         if (data.shouldKeepTabOpen) return await this.reset({})
 
         return await this.context.browser()?.close()
+      case 'force:garbage:collection':
+        return
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }

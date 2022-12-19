@@ -210,6 +210,11 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: validate.isBoolean,
     isExperimental: true,
   }, {
+    name: 'experimentalMemoryManagement',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
+  }, {
     name: 'experimentalModifyObstructiveThirdPartyCode',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -220,6 +225,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
+    requireRestartOnChange: 'server',
   }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
