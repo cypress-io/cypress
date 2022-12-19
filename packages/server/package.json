@@ -99,6 +99,7 @@
     "ospath": "1.2.2",
     "p-defer": "^3.0.0",
     "p-queue": "6.1.0",
+    "pidusage": "3.0.2",
     "pluralize": "8.0.0",
     "randomstring": "1.1.5",
     "recast": "0.20.4",
