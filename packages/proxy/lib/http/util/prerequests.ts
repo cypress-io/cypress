@@ -80,7 +80,7 @@ export class PreRequests {
   requestTimeout: number
   pendingPreRequests = new StackMap<PendingPreRequest>()
   pendingRequests = new StackMap<PendingRequest>()
-  sweepIntervalId: NodeJS.Timeout
+  sweepIntervalTimer: NodeJS.Timeout
   sweepInterval = 1000 * 10 // 10 seconds
 
   constructor (requestTimeout = 500) {
@@ -95,7 +95,7 @@ export class PreRequests {
     // make sure we don't discard any pre-requests prematurely but that we don't leak memory over time
     // if a large number of pre-requests don't match up
     // fixes: https://github.com/cypress-io/cypress/issues/17853
-    this.sweepIntervalId = setInterval(() => {
+    this.sweepIntervalTimer = setInterval(() => {
       const now = Date.now()
 
       this.pendingPreRequests.removeMatching(({ timestamp, browserPreRequest }) => {
