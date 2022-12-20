@@ -6,10 +6,6 @@ import { specsList } from './utils/DebugMapping'
 import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
 
 describe('<DebugContainer />', () => {
-  before(() => {
-    (window as any).CYPRESS_RUN_TESTING_TYPE = 'e2e'
-  })
-
   context('empty states', () => {
     const validateEmptyState = (expectedMessage: string) => {
       cy.mountFragment(DebugSpecsFragmentDoc, {
