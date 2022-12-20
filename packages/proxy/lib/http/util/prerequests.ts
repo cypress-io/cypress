@@ -78,16 +78,21 @@ class StackMap<T> {
 // ever comes in, we don't want to block proxied requests indefinitely.
 export class PreRequests {
   requestTimeout: number
+  sweepInterval: number
   pendingPreRequests = new StackMap<PendingPreRequest>()
   pendingRequests = new StackMap<PendingRequest>()
   sweepIntervalTimer: NodeJS.Timeout
-  sweepInterval = 1000 * 10 // 10 seconds
 
-  constructor (requestTimeout = 500) {
+  constructor (
+    requestTimeout = 500,
+    // 10 seconds
+    sweepInterval = 1000 * 10,
+  ) {
     // If a request comes in and we don't have a matching pre-request after this timeout,
     // we invoke the request callback to tell the server to proceed (we don't want to block
     // user requests indefinitely).
     this.requestTimeout = requestTimeout
+    this.sweepInterval = sweepInterval
 
     // Discarding prerequests on the other hand is not urgent, so we do it on a regular interval
     // rather than with a separate timer for each one.
