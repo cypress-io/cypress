@@ -49,7 +49,12 @@ describe('e2e video compression', () => {
           MS_PER_TEST,
         },
       },
-      async onRun (exec) {
+      async onRun (exec, browserName) {
+        if (browserName === 'webkit') {
+          // TODO(webkit): fix video recording flake in webkit
+          this.retries(15)
+        }
+
         process.env.VIDEO_COMPRESSION_THROTTLE = 10
 
         const { stdout } = await exec()
