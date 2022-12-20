@@ -99,7 +99,7 @@ describe('<DebugContainer />', () => {
       })
 
       cy.findByTestId('debug-empty').should('not.exist')
-      cy.findByTestId('debug-loading').should('not-exist')
+      cy.findByTestId('debug-loading').should('not.exist')
       cy.findByTestId('debug-alert').should('be.visible')
     })
   })
