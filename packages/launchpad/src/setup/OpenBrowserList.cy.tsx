@@ -135,7 +135,7 @@ describe('<OpenBrowserList />', () => {
   })
 
   // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23099
-  it.skip('throws when activeBrowser is null', (done) => {
+  it('throws when activeBrowser is null', { retries: 15 }, (done) => {
     cy.once('uncaught:exception', (err) => {
       expect(err.message).to.include('Missing activeBrowser in selectedBrowserId')
       done()
