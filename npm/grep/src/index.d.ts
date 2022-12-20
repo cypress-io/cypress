@@ -1,6 +1,17 @@
 /// <reference types="cypress" />
 
 declare namespace Cypress {
+  interface SuiteConfigOverrides {
+    /**
+     * List of tags for this suite
+     * @example a single tag
+     *  describe('block with config tag', { tags: '@smoke' }, () => {})
+     * @example multiple tags
+     *  describe('block with config tag', { tags: ['@smoke', '@slow'] }, () => {})
+     */
+    tags?: string | string[]
+  }
+
   // specify additional properties in the TestConfig object
   // in our case we will add "tags" property
   interface TestConfigOverrides {

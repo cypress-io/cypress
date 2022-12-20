@@ -61,6 +61,12 @@ describe('uncaught errors', { defaultCommandTimeout: 0 }, () => {
     cy.wait(10000)
   })
 
+  it('spec unhandled rejection with string content', () => {
+    Promise.reject('Unhandled promise rejection with string content from the spec')
+
+    cy.wait(10000)
+  })
+
   // eslint-disable-next-line mocha/handle-done-callback
   it('spec unhandled rejection with done', (done) => {
     Promise.reject(new Error('Unhandled promise rejection from the spec'))

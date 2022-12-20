@@ -129,6 +129,8 @@ for (const project of WEBPACK_REACT) {
 
       // 4. recreate spec, with same name as removed spec
       cy.findByTestId('new-spec-button').click()
+      cy.findByRole('button', { name: 'Create new empty spec' }).should('be.visible').click()
+
       cy.findByRole('dialog').within(() => {
         cy.get('input').clear().type('src/App.cy.jsx')
         cy.contains('button', 'Create spec').click()

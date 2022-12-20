@@ -20,7 +20,7 @@
     "cypress": "0.0.0-development",
     "react": "^16",
     "react-dom": "^16",
-    "rollup": "^2.38.5",
+    "rollup": "3.7.3",
     "rollup-plugin-typescript2": "^0.29.0",
     "typescript": "^4.7.4"
   },
