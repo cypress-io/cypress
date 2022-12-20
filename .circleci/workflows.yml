@@ -2378,7 +2378,6 @@ linux-x64-workflow: &linux-x64-workflow
           - build
     - store_artifacts:
           path: packages/driver/memory.json
-          destination: artifact-file
           working_directory: packages/driver
           requires:
             - linux-tests-chrome
@@ -2403,7 +2402,6 @@ darwin-x64-workflow: &darwin-x64-workflow
           - darwin-x64-build
     - store_artifacts:
           path: packages/driver/memory.json
-          destination: artifact-file
           working_directory: packages/driver
           requires:
             - darwin-tests-chrome
@@ -2428,7 +2426,6 @@ windows-workflow: &windows-workflow
           - windows-build
     - store_artifacts:
         path: packages/driver/memory.json
-        destination: artifact-file
         working_directory: packages/driver
         requires:
           - windows-tests-chrome
