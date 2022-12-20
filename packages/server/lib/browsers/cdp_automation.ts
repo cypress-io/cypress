@@ -9,9 +9,6 @@ import debugModule from 'debug'
 import { URL } from 'url'
 
 import si from 'systeminformation'
-import fs from 'fs-extra'
-import path from 'path'
-import { fork } from 'child_process'
 import browsers from '../browsers'
 
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
@@ -145,25 +142,6 @@ export const normalizeResourceType = (resourceType: string | undefined): Resourc
   return ffToStandardResourceTypeMap[resourceType] || 'other'
 }
 
-const startTopChildProcess = async () => {
-  const browserPid = browsers.getBrowserInstance()?.pid
-
-  if (!browserPid) {
-    setTimeout(startTopChildProcess, 50)
-
-    return
-  }
-
-  const processes = await si.processes()
-
-  // filter down to the child processes of the browser that are renderer processes
-  const childBrowserProcesses = processes.list.filter((process) => process.parentPid === browserPid && process.params.includes('--type=renderer'))
-
-  const program = path.resolve('/Users/mschile/Projects/cypress/packages/server/lib/browsers/child_top.js')
-
-  childProcess = fork(program, [childBrowserProcesses[0].pid.toString()])
-}
-
 type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: any) => Promise<ProtocolMapping.Commands[T]['returnType']>
 type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any> | void
 type OnFn = <T extends CdpEvent>(eventName: T, cb: (data: ProtocolMapping.Events[T][0]) => void) => void
@@ -177,9 +155,6 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
   'csp': 'cspviolationreport',
   'webmanifest': 'manifest',
 }
-
-let testCount = 0
-let childProcess
 
 export class CdpAutomation {
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation) {
@@ -293,16 +268,6 @@ export class CdpAutomation {
     })
   }
 
-  private requestTopStats = () => {
-    return new Promise((resolve) => {
-      childProcess.once('message', (message) => {
-        resolve(message)
-      })
-
-      childProcess.send('stats')
-    })
-  }
-
   private collectGarbage = async () => {
     const jsHeapSizeLimit = (await this.sendDebuggerCommandFn('Runtime.evaluate', { expression: 'performance.memory?.jsHeapSizeLimit', returnByValue: true })).result.value
 
@@ -324,8 +289,6 @@ export class CdpAutomation {
     // only collect garbage if we're using more than 50% of the heap
     const shouldCollectGarbage = ((maxRendererProcess.memRss * 1024) / jsHeapSizeLimit) >= 0.50
 
-    const topStats = await this.requestTopStats()
-
     let measurement
 
     if (shouldCollectGarbage) {
@@ -339,28 +302,6 @@ export class CdpAutomation {
     } else {
       debugVerboseMemory('skipping garbage collection')
     }
-
-    this.logMemory({ topStats, memRss: childBrowserProcesses[0].memRss * 1024, garbageCollected: shouldCollectGarbage, gcDuration: measurement?.duration })
-  }
-
-  private logMemory = ({ topStats, memRss, garbageCollected, gcDuration }) => {
-    testCount++
-    const log = {
-      test: testCount,
-      pid: topStats[0],
-      mem: topStats[1],
-      rprvt: topStats[2],
-      purg: topStats[3],
-      vsize: topStats[4],
-      vprvt: topStats[5],
-      kprvt: topStats[6],
-      kshrd: topStats[7],
-      memRss,
-      garbageCollected,
-      gcDuration,
-    }
-
-    fs.appendFile('memory.json', JSON.stringify(log))
   }
 
   onRequest = (message, data) => {
