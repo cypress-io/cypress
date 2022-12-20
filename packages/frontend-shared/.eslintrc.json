@@ -12,7 +12,7 @@
   "extends": [
     "plugin:@cypress/dev/general",
     "plugin:@cypress/dev/tests",
-    "../reporter/src/.eslintrc.json",
+    "../reporter/.eslintrc.json",
     "plugin:vue/vue3-recommended"
   ],
   "parser": "vue-eslint-parser",
@@ -40,31 +40,20 @@
     },
     {
       "files": [
-        "lib/*"
-      ],
-      "rules": {
-        "no-console": 1
-      }
-    },
-    {
-      "files": [
-        "**/*.json"
-      ],
-      "rules": {
-        "quotes": "off",
-        "comma-dangle": "off"
-      }
-    },
-    {
-      "files": [
         "*.tsx",
         "*.jsx"
       ],
       "rules": {
-        "no-unused-vars": "off",
         "react/jsx-no-bind": "off",
         "react/react-in-jsx-scope": "off",
-        "react/no-unknown-property": "off"
+        "react/no-unknown-property": [
+          "error",
+          {
+            "ignore": [
+              "class"
+            ]
+          }
+        ]
       }
     }
   ]
