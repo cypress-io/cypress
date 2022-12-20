@@ -229,6 +229,22 @@ describe('lib/util/args', () => {
     })
   })
 
+  context('--auto-cancel-after-failures', () => {
+    it('converts to integer', function () {
+      const options = this.setup('--auto-cancel-after-failures', '4')
+
+      expect(options.autoCancelAfterFailures).to.eq(4)
+    })
+  })
+
+  context('--no-auto-cancel-after-failures', () => {
+    it('converts to false', function () {
+      const options = this.setup('--no-auto-cancel-after-failures')
+
+      expect(options.autoCancelAfterFailures).to.eq(false)
+    })
+  })
+
   context('--port', () => {
     it('converts to Number', function () {
       const options = this.setup('--port', '8080')

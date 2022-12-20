@@ -1,5 +1,5 @@
 exports['RECORD_PARAMS_WITHOUT_RECORDING-ciBuildId 1'] = `
-You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
+You passed the --ci-build-id, --group, --tag, --auto-cancel-after-failures, --no-auto-cancel-after-failures, or --parallel flag without also passing the --record flag.
 
 The --ci-build-id flag you passed was: ciBuildId123
 
@@ -19,7 +19,7 @@ https://on.cypress.io/incorrect-ci-build-id-usage
 `
 
 exports['RECORD_PARAMS_WITHOUT_RECORDING-group 1'] = `
-You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
+You passed the --ci-build-id, --group, --tag, --auto-cancel-after-failures, --no-auto-cancel-after-failures, or --parallel flag without also passing the --record flag.
 
 The --group flag you passed was: e2e-tests
 
@@ -29,7 +29,7 @@ https://on.cypress.io/record-params-without-recording
 `
 
 exports['RECORD_PARAMS_WITHOUT_RECORDING-parallel 1'] = `
-You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
+You passed the --ci-build-id, --group, --tag, --auto-cancel-after-failures, --no-auto-cancel-after-failures, or --parallel flag without also passing the --record flag.
 
 The --parallel flag you passed was: true
 
@@ -39,7 +39,7 @@ https://on.cypress.io/record-params-without-recording
 `
 
 exports['RECORD_PARAMS_WITHOUT_RECORDING-group-parallel 1'] = `
-You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
+You passed the --ci-build-id, --group, --tag, --auto-cancel-after-failures, --no-auto-cancel-after-failures, or --parallel flag without also passing the --record flag.
 
 The --group flag you passed was: electron-smoke-tests
 The --parallel flag you passed was: true
@@ -273,7 +273,7 @@ https://on.cypress.io/stale-run
 `
 
 exports['RECORD_PARAMS_WITHOUT_RECORDING-tag 1'] = `
-You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
+You passed the --ci-build-id, --group, --tag, --auto-cancel-after-failures, --no-auto-cancel-after-failures, or --parallel flag without also passing the --record flag.
 
 These flags can only be used when recording to Cypress Cloud.
 
@@ -325,7 +325,7 @@ exports['Long Cypress Cloud URL'] = `
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (app.cy.js)                                                                │
   │ Searched:   cypress/e2e/**/*.cy.{js,jsx,ts,tsx}                                                │
-  │ Params:     Tag: false, Group: electron-smoke-tests, Parallel: false                           │
+  │ Params:     Tag: false, Group: electron-smoke-tests, Parallel: false, Auto Cancel After Failu… │
   │ Run URL:    http://cloud.cypress.io/this-is-a-long-long-long-long-long-long-long-long-long-lon │
   │             g-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long- │
   │             long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-lo │
@@ -409,4 +409,22 @@ exports['CLOUD_RECOMMENDATION_MESSAGE'] = `
   >> https://on.cypress.io/cloud-get-started
 
 ----------------------------------------------------------------------------------------------------
+`
+
+exports['RECORD_PARAMS_WITHOUT_RECORDING-no-auto-cancel-after-failures 1'] = `
+You passed the --ci-build-id, --group, --tag, --auto-cancel-after-failures, --no-auto-cancel-after-failures, or --parallel flag without also passing the --record flag.
+
+These flags can only be used when recording to Cypress Cloud.
+
+https://on.cypress.io/record-params-without-recording
+`
+
+exports['RECORD_PARAMS_WITHOUT_RECORDING-auto-cancel-after-failures 1'] = `
+You passed the --ci-build-id, --group, --tag, --auto-cancel-after-failures, --no-auto-cancel-after-failures, or --parallel flag without also passing the --record flag.
+
+The --auto-cancel-after-failures flag you passed was: 4
+
+These flags can only be used when recording to Cypress Cloud.
+
+https://on.cypress.io/record-params-without-recording
 `

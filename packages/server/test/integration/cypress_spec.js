@@ -1419,6 +1419,30 @@ describe('lib/cypress', () => {
       })
     })
 
+    it('errors and exits when using --auto-cancel-after-failures without recording', function () {
+      return cypress.start([
+        `--run-project=${this.recordPath}`,
+        '--auto-cancel-after-failures=4',
+      ])
+      .then(() => {
+        this.expectExitWithErr('RECORD_PARAMS_WITHOUT_RECORDING')
+
+        return snapshotConsoleLogs('RECORD_PARAMS_WITHOUT_RECORDING-auto-cancel-after-failures 1')
+      })
+    })
+
+    it('errors and exits when using --no-auto-cancel-after-failures without recording', function () {
+      return cypress.start([
+        `--run-project=${this.recordPath}`,
+        '--no-auto-cancel-after-failures',
+      ])
+      .then(() => {
+        this.expectExitWithErr('RECORD_PARAMS_WITHOUT_RECORDING')
+
+        return snapshotConsoleLogs('RECORD_PARAMS_WITHOUT_RECORDING-no-auto-cancel-after-failures 1')
+      })
+    })
+
     beforeEach(() => {
       browsers.open.restore()
 
@@ -1573,6 +1597,7 @@ describe('lib/cypress', () => {
         '--tag=nightly',
         '--group=electron-smoke-tests',
         '--ciBuildId=ciBuildId123',
+        '--auto-cancel-after-failures=4',
       ])
       .then(() => {
         this.expectExitWithErr('CLOUD_PARALLEL_REQUIRED')
@@ -1601,6 +1626,7 @@ describe('lib/cypress', () => {
         '--tag=nightly',
         '--group=electron-smoke-tests',
         '--ciBuildId=ciBuildId123',
+        '--auto-cancel-after-failures=4',
       ])
       .then(() => {
         this.expectExitWithErr('CLOUD_ALREADY_COMPLETE')
@@ -1630,6 +1656,7 @@ describe('lib/cypress', () => {
         '--tag=nightly',
         '--group=electron-smoke-tests',
         '--ciBuildId=ciBuildId123',
+        '--auto-cancel-after-failures=4',
       ])
       .then(() => {
         this.expectExitWithErr('CLOUD_STALE_RUN')
@@ -1650,6 +1677,7 @@ describe('lib/cypress', () => {
           '--key=token-123',
           '--group=electron-smoke-tests',
           '--ciBuildId=ciBuildId123',
+          '--auto-cancel-after-failures=4',
         ])
         .then(() => {
           expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
