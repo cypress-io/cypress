@@ -3,9 +3,6 @@
     "cypress",
     "@cypress/dev"
   ],
-  "extends": [
-    "../../.eslintrc.js"
-  ],
   "env": {
     "cypress/globals": true
   }
