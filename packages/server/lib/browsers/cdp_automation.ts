@@ -309,17 +309,20 @@ export class CdpAutomation {
     debugVerboseMemory('jsHeapSizeLimit:', jsHeapSizeLimit)
 
     const processes = await si.processes()
-    const browserPid = browsers.getBrowserInstance()?.pid
+    const instance = browsers.getBrowserInstance()
+    // electron will return a list of pids, since it's not a hierarchy
+    const pids: number[] = instance?.allPids ? instance.allPids : [instance?.pid]
 
-    // filter down to the child processes of the browser that are renderer processes
-    const childBrowserProcesses = processes.list.filter((process) => process.parentPid === browserPid && process.params.includes('--type=renderer'))
+    // filter down to renderer processes, they could be a child process (chrome, edge, etc) or the main process (electron)
+    const childBrowserProcesses = processes.list.filter((process) => (pids.includes(process.parentPid) || pids.includes(process.pid)) && process.params.includes('--type=renderer'))
 
-    debugVerboseMemory('renderer processes memory: %o', childBrowserProcesses.map((process) => {
-      return { 'memRss(bytes)': process.memRss * 1024 }
-    }))
+    // assume the renderer process with the most memory is the one we're interested in
+    const maxRendererProcess = childBrowserProcesses.reduce((prev, current) => (prev.memRss > current.memRss) ? prev : current)
+
+    debugVerboseMemory('renderer processes memory: %o', { pid: maxRendererProcess.pid, 'memRss(bytes)': maxRendererProcess.memRss * 1024 })
 
     // only collect garbage if we're using more than 50% of the heap
-    const shouldCollectGarbage = ((childBrowserProcesses[0].memRss * 1024) / jsHeapSizeLimit) > 0.75
+    const shouldCollectGarbage = ((maxRendererProcess.memRss * 1024) / jsHeapSizeLimit) >= 0.50
 
     const topStats = await this.requestTopStats()
 
@@ -353,7 +356,7 @@ export class CdpAutomation {
       garbageCollected,
     }
 
-    fs.appendFile('/Users/mschile/Desktop/memory.json', JSON.stringify(log))
+    fs.appendFile('memory.json', JSON.stringify(log))
   }
 
   onRequest = (message, data) => {

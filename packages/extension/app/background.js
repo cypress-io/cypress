@@ -149,8 +149,6 @@ const connect = function (host, path, extraOpts) {
         return invoke('resetBrowserState', id)
       case 'reset:browser:tabs:for:next:test':
         return invoke('resetBrowserTabsForNextTest', id)
-      case 'force:garbage:collection':
-        return invoke('forceGarbageCollection', id)
       default:
         return fail(id, { message: `No handler registered for: '${msg}'` })
     }
