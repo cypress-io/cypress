@@ -96,7 +96,6 @@ describe('lib/agent', function () {
       // Disabling the eslint for geteuid since we are explicitly catching if there's a problem with it
       // eslint-disable-next-line
       if (os.platform() === 'linux' && process.geteuid && process.geteuid() !== 0) {
-        // eslint-disable-next-line no-console
         console.error('You must be a root user to run these tests since we specifically test hosting a server at 443 which requires root access')
       }
     } catch (error) {

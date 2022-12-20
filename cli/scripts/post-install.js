@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 // @ts-check
-/* eslint-disable no-console */
 const fs = require('fs-extra')
 const { includeTypes } = require('./utils')
 const shell = require('shelljs')

@@ -22,11 +22,8 @@ const rewritePackageNames = (fileStr, buildRoot, filePath, onFound) => {
 
     const replaceString = `${match[1]}${replaceWith}${afterPkg}`
 
-    // eslint-disable-next-line no-console
     console.log()
-    // eslint-disable-next-line no-console
     console.log('resolve:', chalk.grey(pkgPath), '\nfrom:', chalk.grey(filePath))
-    // eslint-disable-next-line no-console
     console.log(chalk.yellow(`@packages/${pkg}`), '->', chalk.green(replaceWith))
 
     onFound && onFound(replaceString)
