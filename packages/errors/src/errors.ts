@@ -390,13 +390,14 @@ export const AllCypressErrors = {
   },
   RECORD_PARAMS_WITHOUT_RECORDING: (arg1: Record<string, string>) => {
     return errTemplate`\
-        You passed the ${fmt.flag(`--ci-build-id`)}, ${fmt.flag(`--group`)}, ${fmt.flag(`--tag`)}, or ${fmt.flag(`--parallel`)} flag without also passing the ${fmt.flag(`--record`)} flag.
+        You passed the ${fmt.flag(`--ci-build-id`)}, ${fmt.flag(`--group`)}, ${fmt.flag(`--tag`)}, ${fmt.flag(`--auto-cancel-after-failures`)}, ${fmt.flag(`--no-auto-cancel-after-failures`)}, or ${fmt.flag(`--parallel`)} flag without also passing the ${fmt.flag(`--record`)} flag.
 
         ${fmt.listFlags(arg1, {
       ciBuildId: '--ci-build-id',
       tags: '--tag',
       group: '--group',
       parallel: '--parallel',
+      autoCancelAfterFailures: '--auto-cancel-after-failures',
     })}
 
         These flags can only be used when recording to Cypress Cloud.

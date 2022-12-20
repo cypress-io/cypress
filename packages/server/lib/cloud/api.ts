@@ -216,6 +216,7 @@ module.exports = {
     return retryWithBackoff((attemptIndex) => {
       const body = {
         ..._.pick(options, [
+          'autoCancelAfterFailures',
           'ci',
           'specs',
           'commit',

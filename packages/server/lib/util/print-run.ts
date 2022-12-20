@@ -168,16 +168,16 @@ function formatNodeVersion ({ resolvedNodeVersion, resolvedNodePath }: Pick<Cfg,
   return
 }
 
-function formatRecordParams (runUrl?: string, parallel?: boolean, group?: string, tag?: string) {
+function formatRecordParams (runUrl?: string, parallel?: boolean, group?: string, tag?: string, autoCancelAfterFailures?: number | false) {
   if (runUrl) {
-    return `Tag: ${tag || 'false'}, Group: ${group || 'false'}, Parallel: ${Boolean(parallel)}`
+    return `Tag: ${tag || 'false'}, Group: ${group || 'false'}, Parallel: ${Boolean(parallel)}, Auto Cancel After Failures: ${autoCancelAfterFailures || 'false'}`
   }
 
   return
 }
 
-export function displayRunStarting (options: { browser: Browser, config: Cfg, group: string | undefined, parallel?: boolean, runUrl?: string, specPattern: string | RegExp | string[], specs: SpecFile[], tag: string | undefined }) {
-  const { browser, config, group, parallel, runUrl, specPattern, specs, tag } = options
+export function displayRunStarting (options: { browser: Browser, config: Cfg, group: string | undefined, parallel?: boolean, runUrl?: string, specPattern: string | RegExp | string[], specs: SpecFile[], tag: string | undefined, autoCancelAfterFailures?: number | false }) {
+  const { browser, config, group, parallel, runUrl, specPattern, specs, tag, autoCancelAfterFailures } = options
 
   console.log('')
 
@@ -232,7 +232,7 @@ export function displayRunStarting (options: { browser: Browser, config: Cfg, gr
     [gray('Node Version:'), formatNodeVersion(config, getWidth(table, 1))],
     [gray('Specs:'), formatSpecs(specs)],
     [gray('Searched:'), formatPath(Array.isArray(specPattern) ? specPattern.join(', ') : String(specPattern), getWidth(table, 1))],
-    [gray('Params:'), formatRecordParams(runUrl, parallel, group, tag)],
+    [gray('Params:'), formatRecordParams(runUrl, parallel, group, tag, autoCancelAfterFailures)],
     [gray('Run URL:'), runUrl ? formatPath(runUrl, getWidth(table, 1)) : ''],
     [gray('Experiments:'), hasExperiments ? experiments.formatExperiments(enabledExperiments) : ''],
   ])
