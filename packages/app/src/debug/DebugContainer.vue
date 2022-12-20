@@ -1,7 +1,10 @@
 <template>
   <div>
+    <DebugError
+      v-if="showError"
+    />
     <div
-      v-if="loginConnectStore.user.isLoggedIn && loginConnectStore.project.isProjectConnected && run"
+      v-else-if="loginConnectStore.user.isLoggedIn && loginConnectStore.project.isProjectConnected && run"
     >
       <DebugPageHeader
         :gql="run"
@@ -36,6 +39,7 @@ import DebugNotLoggedIn from './DebugNotLoggedIn.vue'
 import DebugNoProject from './DebugNoProject.vue'
 import DebugNoRuns from './DebugNoRuns.vue'
 import DebugLoading from './DebugLoading.vue'
+import DebugError from './DebugError.vue'
 import { specsList } from './utils/DebugMapping'
 
 gql`
@@ -71,6 +75,7 @@ fragment DebugSpecs on Query {
 const props = defineProps<{
   gql?: DebugSpecsFragment
   loading: boolean
+  showError?: boolean
 }>()
 
 const loginConnectStore = useLoginConnectStore()

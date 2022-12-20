@@ -80,6 +80,28 @@ describe('<DebugContainer />', () => {
       cy.findByTestId('debug-empty').should('not.exist')
       cy.findByTestId('debug-loading').should('be.visible')
     })
+
+    it('errors', () => {
+      const loginConnectStore = useLoginConnectStore()
+
+      loginConnectStore.setUserFlag('isLoggedIn', true)
+      loginConnectStore.setProjectFlag('isProjectConnected', true)
+      cy.mountFragment(DebugSpecsFragmentDoc, {
+        render: (gqlVal) => {
+          return (
+            <DebugContainer
+              loading={false}
+              gql={gqlVal}
+              showError={true}
+            />
+          )
+        },
+      })
+
+      cy.findByTestId('debug-empty').should('not.exist')
+      cy.findByTestId('debug-loading').should('not-exist')
+      cy.findByTestId('debug-alert').should('be.visible')
+    })
   })
 
   describe('render specs and tests', () => {

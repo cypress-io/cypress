@@ -2,6 +2,7 @@ import DebugNotLoggedIn from './DebugNotLoggedIn.vue'
 import DebugNoProject from './DebugNoProject.vue'
 import DebugNoRuns from './DebugNoRuns.vue'
 import DebugLoading from './DebugLoading.vue'
+import DebugError from './DebugError.vue'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 
 describe('Debug page empty states', () => {
@@ -46,6 +47,14 @@ describe('Debug page empty states', () => {
   context('loading', () => {
     it('renders', () => {
       cy.mount(<DebugLoading />)
+
+      cy.percySnapshot()
+    })
+  })
+
+  context('error', () => {
+    it('renders', () => {
+      cy.mount(<DebugError />)
 
       cy.percySnapshot()
     })
