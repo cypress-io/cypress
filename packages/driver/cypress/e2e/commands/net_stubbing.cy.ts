@@ -1639,7 +1639,7 @@ describe('network stubbing', { retries: 15 }, function () {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23422
-    it.skip('can add a body to a request that does not have one', function () {
+    it('can add a body to a request that does not have one', { retries: 15 }, function () {
       const body = '{"foo":"bar"}'
 
       cy.intercept('/post-only', function (req) {
@@ -1670,7 +1670,7 @@ describe('network stubbing', { retries: 15 }, function () {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23303
-    it.skip('can delay and throttle a StaticResponse', function (done) {
+    it('can delay and throttle a StaticResponse', { retries: 15 }, function (done) {
       const payload = 'A'.repeat(10 * 1024)
       const throttleKbps = 10
       const delay = 250
@@ -1696,7 +1696,7 @@ describe('network stubbing', { retries: 15 }, function () {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23404
-    it.skip('can delay with deprecated delayMs param', function () {
+    it('can delay with deprecated delayMs param', { retries: 15 }, function () {
       const delayMs = 250
 
       cy.intercept('/timeout*', (req) => {
@@ -1714,7 +1714,7 @@ describe('network stubbing', { retries: 15 }, function () {
 
     // @see https://github.com/cypress-io/cypress/issues/14446
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23406
-    it.skip('should delay the same amount on every response', () => {
+    it('should delay the same amount on every response', { retries: 15 }, () => {
       const delay = 250
 
       const testDelay = () => {
@@ -1829,7 +1829,7 @@ describe('network stubbing', { retries: 15 }, function () {
         })
 
         // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23407
-        it.skip('by doing both', () => {
+        it('by doing both', { retries: 15 }, () => {
           cy.intercept({ url: '/users*' }, (req) => {
             req.query = {
               a: 'b',
@@ -1852,7 +1852,7 @@ describe('network stubbing', { retries: 15 }, function () {
         })
 
         // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23414
-        it.skip('by deleting query member', () => {
+        it('by deleting query member', { retries: 15 }, () => {
           cy.intercept({ url: '/users*' }, (req) => {
             req.query = {
               a: 'b',
@@ -1876,7 +1876,7 @@ describe('network stubbing', { retries: 15 }, function () {
 
         context('by setting new url', () => {
           // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23415
-          it.skip('absolute path', () => {
+          it('absolute path', { retries: 15 }, () => {
             cy.intercept({ url: '/users*' }, (req) => {
               req.url = 'http://localhost:3500/users?a=b'
 
@@ -1894,7 +1894,7 @@ describe('network stubbing', { retries: 15 }, function () {
           })
 
           // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23433
-          it.skip('relative path', () => {
+          it('relative path', { retries: 15 }, () => {
             cy.intercept({ url: '/users*' }, (req) => {
               req.url = '/users?a=b'
 
@@ -1913,7 +1913,7 @@ describe('network stubbing', { retries: 15 }, function () {
           })
 
           // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23434
-          it.skip('empty string', () => {
+          it('empty string', { retries: 15 }, () => {
             cy.intercept({ url: '/users*' }, (req) => {
               req.url = ''
 
@@ -1933,7 +1933,7 @@ describe('network stubbing', { retries: 15 }, function () {
 
         context('throwing errors correctly', () => {
           // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23423
-          it.skip('defineproperty', (done) => {
+          it('defineproperty', { retries: 15 }, (done) => {
             cy.on('fail', (err) => {
               expect(err.message).to.eq('`defineProperty()` is not allowed.')
 
@@ -1962,7 +1962,7 @@ describe('network stubbing', { retries: 15 }, function () {
           })
 
           // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23147
-          it.skip('setPrototypeOf', (done) => {
+          it('setPrototypeOf', { retries: 15 }, (done) => {
             cy.on('fail', (err) => {
               expect(err.message).to.eq('`setPrototypeOf()` is not allowed.')
 
@@ -1992,7 +1992,7 @@ describe('network stubbing', { retries: 15 }, function () {
       context('can end response', () => {
         for (const eventName of ['before:response', 'response']) {
           // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23434
-          it.skip(`in \`${eventName}\``, () => {
+          it(`in \`${eventName}\``, { retries: 15 }, () => {
             const url = uniqueRoute('/foo')
             const expectBeforeResponse = eventName === 'response'
             let beforeResponseCalled = false
@@ -2203,7 +2203,7 @@ describe('network stubbing', { retries: 15 }, function () {
 
       context('with `times`', function () {
         // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23434
-        it.skip('only uses each handler N times', function () {
+        it('only uses each handler N times', { retries: 15 }, function () {
           const url = uniqueRoute('/foo')
           const third = sinon.stub()
 

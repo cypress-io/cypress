@@ -671,7 +671,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23419
-    it.skip('shows offline alert then hides it after coming online', () => {
+    it('shows offline alert then hides it after coming online', { retries: 15 }, () => {
       cy.findByTestId('offline-alert')
       .should('contain.text', defaultMessages.specPage.offlineWarning.title)
       .and('contain.text', defaultMessages.specPage.offlineWarning.explainer)

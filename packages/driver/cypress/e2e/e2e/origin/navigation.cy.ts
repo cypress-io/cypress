@@ -396,7 +396,7 @@ describe('errors', { browser: '!webkit' }, () => {
   })
 
   // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23481
-  it.skip('fails in cy.origin when a command is run after we return to localhost', { defaultCommandTimeout: 50 }, (done) => {
+  it('fails in cy.origin when a command is run after we return to localhost', { defaultCommandTimeout: 50, retries: 15 }, (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.include(`Timed out retrying after 50ms:`)
       expect(err.message).to.include(`The command was expected to run against origin \`http://www.idp.com:3500\` but the application is at origin \`http://localhost:3500\`.`)
