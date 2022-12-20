@@ -125,7 +125,7 @@ describe('darwin browser detection', () => {
 
         expect(args[0]).to.eq(knownBrowsers[0].binary)
         expect(args[1]).to.deep.eq(['--version'])
-        expect(args[2].env).to.not.have.property('ARCHPREFERENCE')
+        expect(args[2].env).to.not.exist
       })
     })
 

@@ -6,23 +6,25 @@ import Bluebird from 'bluebird'
 // export an object for easy method stubbing
 export const utils = {
   execa,
-  wrapSpawnOptsWithArch: (cmd: string, args: string[]) => {
+  spawnWithArch: <T extends cp.SpawnOptionsWithStdioTuple<cp.StdioNull, cp.StdioPipe, cp.StdioPipe>>(cmd: string, args: string[], opts: T) => {
     if (!(os.platform() === 'darwin' && os.arch() === 'arm64')) {
-      return { cmd, args, opts: { env: {} } }
+      return cp.spawn(cmd, args, opts)
     }
 
     // when Cypress spawns processes on Apple macOS with a Intel process as Cypress's parent,
     // macOS will launch the rosetta-interpreted version (slow) by default. this wraps the
     // spawn options to prefer arm64 over x86_64 (rosetta)
-    return {
-      cmd: 'arch',
-      args: [cmd, ...args],
-      opts: {
+    return cp.spawn(
+      'arch',
+      [cmd, ...args],
+      {
+        ...opts,
         env: {
           ARCHPREFERENCE: 'arm64,x86_64',
+          ...opts.env,
         },
-      },
-    }
+      } as T,
+    )
   },
   getOutput: (cmd: string, args: string[]): Bluebird<{ stdout: string, stderr?: string }> => {
     if (os.platform() === 'win32') {
@@ -34,8 +36,7 @@ export const utils = {
       let stdout = ''
       let stderr = ''
 
-      const wrapped = utils.wrapSpawnOptsWithArch(cmd, args)
-      const proc = cp.spawn(wrapped.cmd, wrapped.args, wrapped.opts)
+      const proc = utils.spawnWithArch(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'] })
 
       const finish = () => {
         proc.kill()

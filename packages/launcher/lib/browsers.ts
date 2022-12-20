@@ -1,5 +1,5 @@
 import Debug from 'debug'
-import * as cp from 'child_process'
+import type * as cp from 'child_process'
 import { utils } from './utils'
 import type { FoundBrowser } from '@packages/types'
 import type { Readable } from 'stream'
@@ -26,18 +26,16 @@ export function launch (
     args = [url].concat(args)
   }
 
-  const wrapped = utils.wrapSpawnOptsWithArch(browser.path, args)
   const spawnOpts: cp.SpawnOptionsWithStdioTuple<cp.StdioNull, cp.StdioPipe, cp.StdioPipe> = {
-    ...wrapped.opts,
     stdio: ['ignore', 'pipe', 'pipe'],
     // allow setting default env vars such as MOZ_HEADLESS_WIDTH
     // but only if it's not already set by the environment
-    env: { ...wrapped.opts.env, ...browserEnv, ...process.env },
+    env: { ...browserEnv, ...process.env },
   }
 
   debug('spawning browser with opts %o', { browser, url, spawnOpts })
 
-  const proc = cp.spawn(wrapped.cmd, wrapped.args, spawnOpts)
+  const proc = utils.spawnWithArch(browser.path, args, spawnOpts)
 
   proc.stdout.on('data', (buf) => {
     debug('%s stdout: %s', browser.name, String(buf).trim())
