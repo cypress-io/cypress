@@ -128,7 +128,7 @@ const attrs = useAttrs() as ButtonHTMLAttributes
 
 const variantClasses = computed(() => {
   return (VariantClassesTable[props.variant || 'primary']).split(' ').filter((css) => {
-    return css !== 'hocus-default' || !props.disabled
+    return !(css === 'hocus-default' && props.disabled)
   }).join(' ')
 })
 
