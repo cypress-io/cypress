@@ -326,21 +326,24 @@ export class CdpAutomation {
 
     const topStats = await this.requestTopStats()
 
+    let measurement
+
     if (shouldCollectGarbage) {
       debugVerboseMemory('forcing garbage collection')
       performance.mark('gc-start')
       await this.sendDebuggerCommandFn('HeapProfiler.collectGarbage')
       performance.mark('gc-end')
 
-      debugVerboseMemory(performance.measure('garbage collection', 'gc-start', 'gc-end'))
+      measurement = performance.measure('garbage collection', 'gc-start', 'gc-end')
+      debugVerboseMemory(measurement)
     } else {
       debugVerboseMemory('skipping garbage collection')
     }
 
-    this.logMemory({ topStats, memRss: childBrowserProcesses[0].memRss * 1024, garbageCollected: shouldCollectGarbage })
+    this.logMemory({ topStats, memRss: childBrowserProcesses[0].memRss * 1024, garbageCollected: shouldCollectGarbage, gcDuration: measurement?.duration })
   }
 
-  private logMemory = ({ topStats, memRss, garbageCollected }) => {
+  private logMemory = ({ topStats, memRss, garbageCollected, gcDuration }) => {
     testCount++
     const log = {
       test: testCount,
@@ -354,6 +357,7 @@ export class CdpAutomation {
       kshrd: topStats[7],
       memRss,
       garbageCollected,
+      gcDuration,
     }
 
     fs.appendFile('memory.json', JSON.stringify(log))

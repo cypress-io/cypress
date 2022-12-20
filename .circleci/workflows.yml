@@ -2372,9 +2372,16 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - driver-integration-tests-chrome:
+        name: linux-test-chrome
         context: test-runner:cypress-record-key
         requires:
           - build
+    - store_artifacts:
+          path: packages/driver/memory.json
+          destination: artifact-file
+          working_directory: packages/driver
+          requires:
+            - linux-tests-chrome
 darwin-x64-workflow: &darwin-x64-workflow
   jobs:
     - node_modules_install:
@@ -2390,9 +2397,16 @@ darwin-x64-workflow: &darwin-x64-workflow
         requires:
           - darwin-x64-node-modules-install
     - driver-integration-tests-chrome:
+        name: 'darwin-tests-chrome'
         context: test-runner:cypress-record-key
         requires:
-          - build
+          - darwin-x64-build
+    - store_artifacts:
+          path: packages/driver/memory.json
+          destination: artifact-file
+          working_directory: packages/driver
+          requires:
+            - darwin-tests-chrome
 windows-workflow: &windows-workflow
   jobs:
     - node_modules_install:
@@ -2408,9 +2422,16 @@ windows-workflow: &windows-workflow
         requires:
           - windows-node-modules-install
     - driver-integration-tests-chrome:
+        name: windows-tests-chrome
         context: test-runner:cypress-record-key
         requires:
-          - build
+          - windows-build
+    - store_artifacts:
+        path: packages/driver/memory.json
+        destination: artifact-file
+        working_directory: packages/driver
+        requires:
+          - windows-tests-chrome
 workflows:
   linux-x64:
     <<: *linux-x64-workflow
