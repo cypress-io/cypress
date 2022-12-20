@@ -16,8 +16,8 @@ import type { BrowserLaunchOpts, Preferences, RunModeVideoApi } from '@packages/
 // TODO: unmix these two types
 type ElectronOpts = Windows.WindowOptions & BrowserLaunchOpts
 
-const debug = Debug('cypress:server:browsers:electron')
-const debugVerbose = Debug('cypress-verbose:server:browsers:electron')
+const debug = Debug('cypress:server:browsers:chromium:electron')
+const debugVerbose = Debug('cypress-verbose:server:browsers:chromium:electron')
 
 // additional events that are nice to know about to be logged
 // https://electronjs.org/docs/api/browser-window#instance-events

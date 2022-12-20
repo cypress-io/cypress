@@ -6,13 +6,13 @@ import { Command } from 'marionette-client/lib/marionette/message.js'
 import util from 'util'
 import Foxdriver from '@benmalka/foxdriver'
 import * as protocol from '../protocol'
-import { CdpAutomation } from './cdp_automation'
+import { CdpAutomation } from '../cdp/cdp_automation'
 import { BrowserCriClient } from '../cdp/browser-cri-client'
 import type { Automation } from '../../automation'
 
 const errors = require('../errors')
 
-const debug = Debug('cypress:server:browsers:firefox-util')
+const debug = Debug('cypress:server:browsers:firefox:firefox-util')
 
 let forceGcCc: () => Promise<void>
 

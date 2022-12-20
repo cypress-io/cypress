@@ -20,7 +20,7 @@ export type CdpCommand = keyof ProtocolMapping.Commands
 
 export type CdpEvent = keyof ProtocolMapping.Events
 
-const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
+const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp:cdp_automation')
 const debugVerboseMemory = debugModule('cypress-verbose:server:browsers:cdp_automation:memory')
 
 export function screencastOpts (everyNthFrame = Number(process.env.CYPRESS_EVERY_NTH_FRAME || 5)): Protocol.Page.StartScreencastRequest {

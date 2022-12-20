@@ -8,7 +8,7 @@ import * as unhandledExceptions from '../../unhandled_exceptions'
 import type { BrowserLaunchOpts, BrowserNewTabOpts } from '@packages/types'
 import utils from '../utils'
 
-const debug = Debug('cypress:server:browsers:webkit')
+const debug = Debug('cypress:server:browsers:webkit:webkit')
 
 let wkAutomation: WebKitAutomation | undefined
 

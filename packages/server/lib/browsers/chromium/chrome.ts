@@ -22,7 +22,7 @@ import type { CriClient } from '../cdp/cri-client'
 import type { Automation } from '../../automation'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
 
-const debug = debugModule('cypress:server:browsers:chrome')
+const debug = debugModule('cypress:server:browsers:chromium:chrome')
 
 const LOAD_EXTENSION = '--load-extension='
 const CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = '66 67'.split(' ')

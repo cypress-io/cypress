@@ -7,22 +7,22 @@ import urlUtil from 'url'
 import { debug as launcherDebug, launch } from '@packages/launcher/lib/browsers'
 import { doubleEscape } from '@packages/launcher/lib/windows'
 import FirefoxProfile from 'firefox-profile'
-import * as errors from '../errors'
+import * as errors from '../../errors'
 import firefoxUtil from './firefox-util'
-import utils from './utils'
-import type { Browser, BrowserInstance } from './types'
+import utils from '../utils'
+import type { Browser, BrowserInstance } from '../types'
 import { EventEmitter } from 'events'
 import os from 'os'
 import treeKill from 'tree-kill'
 import mimeDb from 'mime-db'
-import { getRemoteDebuggingPort } from './protocol'
-import type { BrowserCriClient } from './chromium/browser-cri-client'
-import type { Automation } from '../automation'
+import { getRemoteDebuggingPort } from '../protocol'
+import type { BrowserCriClient } from '../cdp/browser-cri-client'
+import type { Automation } from '../../automation'
 import { getCtx } from '@packages/data-context'
 import { getError } from '@packages/errors'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
 
-const debug = Debug('cypress:server:browsers:firefox')
+const debug = Debug('cypress:server:browsers:firefox:firefox')
 
 // used to prevent the download prompt for the specified file types.
 // this should cover most/all file types, but if it's necessary to

@@ -4,7 +4,7 @@ import { _connectAsync, _getDelayMsForRetry } from '../protocol'
 import * as errors from '../../errors'
 import { create, CriClient } from './cri-client'
 
-const debug = Debug('cypress:server:browsers:browser-cri-client')
+const debug = Debug('cypress:server:browsers:cdp:browser-cri-client')
 
 interface Version {
   major: number
