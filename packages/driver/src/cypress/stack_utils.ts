@@ -305,12 +305,12 @@ const stripCustomProtocol = (filePath) => {
   return filePath.replace(customProtocolRegex, '')
 }
 
-type LineDetail =
-{
+interface MessageLineDetail {
   message: any
   whitespace: any
-} |
-{
+}
+
+interface StackLineDetail {
   function: any
   fileUrl: any
   originalFile: any
@@ -321,7 +321,7 @@ type LineDetail =
   whitespace: any
 }
 
-const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
+const getSourceDetailsForLine = (projectRoot, line): MessageLineDetail | StackLineDetail => {
   const whitespace = getWhitespace(line)
   const generatedDetails = parseLine(line)
 
@@ -382,7 +382,7 @@ const getSourceDetailsForFirstLine = (stack, projectRoot) => {
 
   if (!line) return
 
-  return getSourceDetailsForLine(projectRoot, line)
+  return getSourceDetailsForLine(projectRoot, line) as StackLineDetail
 }
 
 const reconstructStack = (parsedStack) => {

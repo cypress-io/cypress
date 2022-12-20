@@ -5,18 +5,13 @@ import { $Location } from '../cypress/location'
 import { syncConfigToCurrentOrigin, syncEnvToCurrentOrigin } from '../util/config'
 import type { Runnable, Test } from 'mocha'
 import { LogUtils } from '../cypress/log'
-import $networkUtils from '../cypress/network_utils'
-
-interface CrossOriginCallbackObject {
-  callbackName: string
-  outputFilePath: string
-}
 
 interface RunOriginFnOptions {
   config: Cypress.Config
   args: any
   env: Cypress.ObjectLike
-  fn: string | CrossOriginCallbackObject
+  file?: string
+  fn: string
   skipConfigValidation: boolean
   state: {}
   logCounter: number
@@ -66,6 +61,34 @@ const rehydrateRunnable = (data: serializedRunnable): Runnable|Test => {
   return runnable
 }
 
+const getCallbackFn = async (fn: string, file?: string) => {
+  if (!fn.includes('Cypress.require') && !fn.includes('Cypress.import')) {
+    return fn
+  }
+
+  const callbackName = '__cypressCallback'
+  const response = await fetch('/__cypress/process-origin-callback', {
+    body: JSON.stringify({ file, fn: `${callbackName} = ${fn};` }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    method: 'POST',
+  })
+  const result = await response.json() as GetFileResult
+
+  if (result.error) {
+    $errUtils.throwErrByPath('origin.failed_to_get_callback', {
+      args: { error: result.error },
+    })
+  }
+
+  return `(args) => {
+    let ${callbackName};
+    ${result.contents};
+    return ${callbackName}(args);
+  }`
+}
+
 export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
   const reset = (state) => {
     cy.reset({})
@@ -98,7 +121,7 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
   }
 
   Cypress.specBridgeCommunicator.on('run:origin:fn', async (options: RunOriginFnOptions) => {
-    const { config, args, env, fn, state, skipConfigValidation, logCounter } = options
+    const { config, args, env, file, fn, state, skipConfigValidation, logCounter } = options
 
     let queueFinished = false
 
@@ -139,27 +162,8 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
     })
 
     try {
-      let value
-
-      if (_.isString(fn)) {
-        value = window.eval(`(${fn})`)(args)
-      } else {
-        const { callbackName, outputFilePath } = fn
-        const rawResult = await $networkUtils.fetch(`/__cypress/get-file/${encodeURIComponent(outputFilePath)}`) as string
-        const result = JSON.parse(rawResult) as GetFileResult
-
-        if (result.error) {
-          $errUtils.throwErrByPath('origin.failed_to_get_callback', {
-            args: { error: result.error },
-          })
-        }
-
-        value = window.eval(`(args) => {
-          let ${callbackName};
-          ${result.contents}
-          return ${callbackName}(args);
-        }`)(args)
-      }
+      const callback = await getCallbackFn(fn, file)
+      const value = window.eval(callback)(args)
 
       // If we detect a non promise value with commands in queue, throw an error
       if (value && cy.queue.length > 0 && !value.then) {
