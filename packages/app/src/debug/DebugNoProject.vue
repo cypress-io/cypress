@@ -2,7 +2,7 @@
   <DebugEmptyView
     :title="t('debugPage.emptyStates.debugDirectlyInCypress')"
     :description="t('debugPage.emptyStates.reviewRerunAndDebug')"
-    :example-test-name="t('debugPage.emptyStates.notLoggedInTestMessage')"
+    :example-test-name="t('debugPage.emptyStates.noProjectTestMessage')"
   >
     <template #cta>
       <CloudConnectButton utm-medium="Debug Tab" />

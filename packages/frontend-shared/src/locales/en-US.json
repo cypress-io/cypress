@@ -650,7 +650,12 @@
     "emptyStates": {
       "debugDirectlyInCypress": "Debug failed CI runs directly in Cypress",
       "reviewRerunAndDebug": "Review, rerun, and debug failed CI test runs that are recorded to Cypress Cloud – all from within your local Cypress app.",
-      "connectToCypressCloud": "Connect to Cypress Cloud"
+      "connectToCypressCloud": "Connect to Cypress Cloud",
+      "notLoggedInTestMessage": "Connect to Cypress Cloud to locally debug failed CI test runs",
+      "noProjectTestMessage": "Connect a Cypress Cloud project to locally debug failed CI test runs",
+      "recordYourFirstRun": "Record your first test run to Cypress Cloud",
+      "almostThere": "You're almost there! Start recording your test runs to Cypress Cloud by running the command below in your local or CI terminal.",
+      "noRunsTestMessage": "Record your first test run to Cypress Cloud to locally debug failed CI test runs"
     },
     "header": {
       "runUrl": "View in Cypress Cloud",

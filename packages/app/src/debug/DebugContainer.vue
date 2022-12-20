@@ -11,21 +11,16 @@
         :specs="debugSpecsArray"
       />
     </div>
+    <div v-else-if="loading">
+      <DebugLoading />
+    </div>
     <div
       v-else
       data-cy="debug-empty"
     >
       <DebugNotLoggedIn v-if="!loginConnectStore.user.isLoggedIn" />
-      <div
-        v-else-if="!loginConnectStore.project.isProjectConnected"
-      >
-        {{ t('debugPage.notConnected' ) }}
-      </div>
-      <div
-        v-else-if="!run"
-      >
-        {{ t('debugPage.noRuns') }}
-      </div>
+      <DebugNoProject v-else-if="!loginConnectStore.project.isProjectConnected" />
+      <DebugNoRuns v-else-if="!run" />
     </div>
   </div>
 </template>
@@ -38,10 +33,10 @@ import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-
 import DebugPageHeader from './DebugPageHeader.vue'
 import DebugSpecList from './DebugSpecList.vue'
 import DebugNotLoggedIn from './DebugNotLoggedIn.vue'
-import { useI18n } from 'vue-i18n'
+import DebugNoProject from './DebugNoProject.vue'
+import DebugNoRuns from './DebugNoRuns.vue'
+import DebugLoading from './DebugLoading.vue'
 import { specsList } from './utils/DebugMapping'
-
-const { t } = useI18n()
 
 gql`
 fragment DebugSpecs on Query {
@@ -74,13 +69,14 @@ fragment DebugSpecs on Query {
 `
 
 const props = defineProps<{
-  gql: DebugSpecsFragment
+  gql?: DebugSpecsFragment
+  loading: boolean
 }>()
 
 const loginConnectStore = useLoginConnectStore()
 
 const run = computed(() => {
-  return props.gql.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject.runByNumber : null
+  return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject.runByNumber : null
 })
 
 const debugSpecsArray = computed(() => {

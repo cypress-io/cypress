@@ -7,30 +7,36 @@ import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
 
 describe('<DebugContainer />', () => {
   context('empty states', () => {
-    const validateEmptyState = (expectedMessage: string) => {
+    const validateEmptyState = (expectedMessages: string[]) => {
       cy.mountFragment(DebugSpecsFragmentDoc, {
         render: (gqlVal) => {
           return (
             <DebugContainer
+              loading={false}
               gql={gqlVal}
             />
           )
         },
       })
 
-      cy.findByTestId('debug-empty').contains(expectedMessage)
+      expectedMessages.forEach((message) => {
+        cy.findByTestId('debug-empty').contains(message)
+      })
     }
 
     it('shows not logged in', () => {
-      validateEmptyState(defaultMessages.debugPage.notLoggedIn)
+      validateEmptyState([defaultMessages.debugPage.emptyStates.connectToCypressCloud, defaultMessages.debugPage.emptyStates.debugDirectlyInCypress, defaultMessages.debugPage.emptyStates.notLoggedInTestMessage])
+      cy.findByRole('button', { name: 'Connect to Cypress Cloud' }).should('be.visible')
     })
 
-    it('is logged in', () => {
+    it('is logged in with no project', () => {
       const loginConnectStore = useLoginConnectStore()
 
       loginConnectStore.setUserFlag('isLoggedIn', true)
+      loginConnectStore.setProjectFlag('isProjectConnected', false)
 
-      validateEmptyState(defaultMessages.debugPage.notConnected)
+      validateEmptyState([defaultMessages.debugPage.emptyStates.debugDirectlyInCypress, defaultMessages.debugPage.emptyStates.reviewRerunAndDebug, defaultMessages.debugPage.emptyStates.noProjectTestMessage])
+      cy.findByRole('button', { name: 'Connect a Cypress Cloud project' }).should('be.visible')
     })
 
     it('has no runs', () => {
@@ -42,13 +48,37 @@ describe('<DebugContainer />', () => {
         render: (gqlVal) => {
           return (
             <DebugContainer
+              loading={false}
               gql={gqlVal}
             />
           )
         },
       })
 
-      cy.findByTestId('debug-empty').contains(defaultMessages.debugPage.noRuns)
+      cy.findByTestId('debug-empty').contains(defaultMessages.debugPage.emptyStates.recordYourFirstRun)
+      cy.findByTestId('debug-empty').contains(defaultMessages.debugPage.emptyStates.almostThere)
+      cy.findByTestId('debug-empty').contains(defaultMessages.debugPage.emptyStates.noRunsTestMessage)
+      cy.findByDisplayValue('npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
+    })
+
+    it('is loading', () => {
+      const loginConnectStore = useLoginConnectStore()
+
+      loginConnectStore.setUserFlag('isLoggedIn', true)
+      loginConnectStore.setProjectFlag('isProjectConnected', true)
+      cy.mountFragment(DebugSpecsFragmentDoc, {
+        render: (gqlVal) => {
+          return (
+            <DebugContainer
+              loading={true}
+              gql={gqlVal}
+            />
+          )
+        },
+      })
+
+      cy.findByTestId('debug-empty').should('not.exist')
+      cy.findByTestId('debug-loading').should('be.visible')
     })
   })
 
@@ -70,6 +100,7 @@ describe('<DebugContainer />', () => {
         render: (gqlVal) => {
           return (
             <DebugContainer
+              loading={false}
               gql={gqlVal}
             />
           )
