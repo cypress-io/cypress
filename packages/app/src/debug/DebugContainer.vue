@@ -14,9 +14,7 @@
         :specs="debugSpecsArray"
       />
     </div>
-    <div v-else-if="loading">
-      <DebugLoading />
-    </div>
+    <DebugLoading v-else-if="loading" />
     <div
       v-else
       data-cy="debug-empty"

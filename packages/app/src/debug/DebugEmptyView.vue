@@ -61,9 +61,9 @@
 <script lang="ts" setup>
 
 defineProps<{
-  title: String
-  description?: String
-  exampleTestName?: String
+  title: string
+  description?: string
+  exampleTestName?: string
 }>()
 
 const loadingRows = [
