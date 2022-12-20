@@ -200,6 +200,9 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
       sha: `fake-sha-${getNodeIdx('CloudRun')}`,
       summary: `fix: make gql work ${config.status ?? 'PASSED'}`,
     }),
+    cancelOnFailure: false,
+    cancelledBy: null,
+    errors: [],
     ...config,
   }
 
@@ -228,6 +231,7 @@ function addFailedTests (run: CloudRun) {
     testUrl: 'http://cloudurl',
     title: '<test/> Should render',
     titleParts: ['<test/>', 'should render'],
+    thumbprint: 'abc123',
   }
 
   run.specs = [spec]
@@ -269,6 +273,7 @@ export function createCloudProjectSpecResult (config: Partial<CloudProjectSpec>)
       __typename: 'CloudProjectSpecFlakyStatus',
       severity: 'NONE',
     },
+    specRunsForRunIds: [],
     ...config,
   }
 
@@ -292,6 +297,7 @@ export const CloudRunStubs = {
   somePending: createCloudRun({ status: 'PASSED', totalPassed: 100, totalSkipped: 3000, totalPending: 20 }),
   allSkipped: createCloudRun({ status: 'ERRORED', totalPassed: 0, totalSkipped: 10 }),
   failingWithTests: addFailedTests(createCloudRun({ status: 'FAILED', totalPassed: 8, totalFailed: 2 })),
+  errored: createCloudRun({ status: 'ERRORED', totalPassed: 1, totalFailed: 0, errors: ['There was an error'] }),
 } as Record<string, Required<CloudRun>>
 
 export const CloudUserStubs = {
