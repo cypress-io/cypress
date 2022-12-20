@@ -1,6 +1,6 @@
 let changed = 0
 
-// TODO(webkit): fix+unskip for experimental webkit release
+// TODO(webkit): fix+unskip for webkit release
 describe('src/cy/commands/actions/type text_mask_spec', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/text-mask.html')
