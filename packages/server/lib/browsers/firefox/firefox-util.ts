@@ -5,10 +5,10 @@ import Marionette from 'marionette-client'
 import { Command } from 'marionette-client/lib/marionette/message.js'
 import util from 'util'
 import Foxdriver from '@benmalka/foxdriver'
-import * as protocol from './protocol'
+import * as protocol from '../protocol'
 import { CdpAutomation } from './cdp_automation'
-import { BrowserCriClient } from './browser-cri-client'
-import type { Automation } from '../automation'
+import { BrowserCriClient } from '../cdp/browser-cri-client'
+import type { Automation } from '../../automation'
 
 const errors = require('../errors')
 

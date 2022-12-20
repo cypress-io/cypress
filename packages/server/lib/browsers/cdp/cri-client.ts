@@ -1,8 +1,8 @@
 import debugModule from 'debug'
 import _ from 'lodash'
 import CRI from 'chrome-remote-interface'
-import * as errors from '../errors'
-import type { CdpCommand, CdpEvent } from './cdp_automation'
+import * as errors from '../../errors'
+import type { CdpCommand, CdpEvent } from '../cdp/cdp_automation'
 
 const debug = debugModule('cypress:server:browsers:cri-client')
 // debug using cypress-verbose:server:browsers:cri-client:send:*

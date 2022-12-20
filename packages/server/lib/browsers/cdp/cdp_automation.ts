@@ -9,12 +9,12 @@ import debugModule from 'debug'
 import { URL } from 'url'
 
 import si from 'systeminformation'
-import browsers from '../browsers'
+import browsers from '../../browsers'
 
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
 import type { WriteVideoFrame } from '@packages/types'
-import type { Automation } from '../automation'
-import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
+import type { Automation } from '../../automation'
+import { cookieMatches, CyCookie, CyCookieFilter } from '../../automation/util'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
@@ -160,7 +160,6 @@ export class CdpAutomation {
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
-    startTopChildProcess()
   }
 
   async startVideoRecording (writeVideoFrame: WriteVideoFrame, screencastOpts?) {

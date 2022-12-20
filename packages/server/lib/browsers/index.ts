@@ -75,13 +75,13 @@ async function setFocus () {
 async function getBrowserLauncher (browser: Browser, browsers: FoundBrowser[]): Promise<BrowserLauncher> {
   debug('getBrowserLauncher %o', { browser })
 
-  if (browser.name === 'electron') return await import('./electron')
+  if (browser.name === 'electron') return await import('./chromium/electron')
 
-  if (browser.family === 'chromium') return await import('./chrome')
+  if (browser.family === 'chromium') return await import('./chromium/chrome')
 
-  if (browser.family === 'firefox') return await import('./firefox')
+  if (browser.family === 'firefox') return await import('./firefox/firefox')
 
-  if (browser.family === 'webkit') return await import('./webkit')
+  if (browser.family === 'webkit') return await import('./webkit/webkit')
 
   return utils.throwBrowserNotFound(browser.name, browsers)
 }

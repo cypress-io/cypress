@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import Debug from 'debug'
 import extension from '@packages/extension'
-import { isHostOnlyCookie } from '../browsers/cdp_automation'
+import { isHostOnlyCookie } from '../browsers/cdp/cdp_automation'
 
 export interface AutomationCookie {
   domain: string
