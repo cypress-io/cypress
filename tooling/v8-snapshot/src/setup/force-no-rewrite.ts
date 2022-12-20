@@ -71,4 +71,5 @@ export default [
   'node_modules/prettier/third-party.js',
   'packages/server/node_modules/is-ci/index.js',
   'packages/server/node_modules/ci-info/index.js',
+  'node_modules/@babel/traverse/lib/index.js',
 ]

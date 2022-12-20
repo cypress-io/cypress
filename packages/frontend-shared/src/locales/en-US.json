@@ -61,6 +61,8 @@
     "newSpec": "New spec",
     "createSpec": "Create spec",
     "done": "Done!",
+    "noComponentsFound": "No components found",
+    "unableToParseFile": "Unable to parse file",
     "updateSpecPattern": "Update spec pattern",
     "newSpecModalTitle": "Create a new spec",
     "successPage": {
@@ -705,7 +707,7 @@
       "line4": "In the next screen, you'll be able to reconfigure component testing in a new guided configuration wizard."
     },
     "wizard": {
-      "title": "Migrating to Cypress 11",
+      "title": "Migrating to Cypress {version}",
       "description": "Your project requires updates to work with this version.",
       "typicalMigrationLabel": "Typical migration:",
       "typicalMigrationTime": "5-10 minutes",

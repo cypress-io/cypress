@@ -199,6 +199,12 @@ export const CurrentProject = objectType({
       },
     })
 
+    t.string('codeGenFramework', {
+      resolve: (src, args, ctx) => {
+        return ctx.actions.codegen.getWizardFrameworkFromConfig()?.codeGenFramework || null
+      },
+    })
+
     t.nonNull.field('codeGenGlobs', {
       type: CodeGenGlobs,
       resolve: (src, args, ctx) => ctx.project.getCodeGenGlobs(),

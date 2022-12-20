@@ -11,7 +11,7 @@ describe('issue 1244', () => {
 
   for (const [el, target, action] of [['button', 'form', 'submit'], ['a', 'a', 'click']]) {
     // <form> submit, <a> click
-    // TODO(webkit): fix+unskip for experimental webkit release, or make skip more specific (only 4 of these generated tests fail in webkit)
+    // TODO(webkit): fix+unskip for webkit release, or make skip more specific (only 4 of these generated tests fail in webkit)
     describe(`<${target}> ${action}`, { browser: '!webkit' }, () => {
       it('correctly redirects when target=_top with target.target =', () => {
         cy.get(`${el}.setTarget`).click()

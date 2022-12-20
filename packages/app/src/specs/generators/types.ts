@@ -1,7 +1,7 @@
 import type { TestingType } from '@packages/types'
 import type { Component } from 'vue'
 
-export type GeneratorId = 'component' | 'empty' | 'scaffold'
+export type GeneratorId = 'vueComponent' | 'reactComponent' | 'empty' | 'scaffold'
 
 type CurrentProject = {
   readonly __typename?: 'CurrentProject' | undefined
@@ -9,6 +9,7 @@ type CurrentProject = {
   readonly codeGenGlobs?: {
     readonly component: string
   }
+  readonly codeGenFramework?: string
 }
 
 export interface SpecGenerator {

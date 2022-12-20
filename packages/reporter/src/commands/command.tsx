@@ -79,7 +79,7 @@ const shouldShowCount = (aliasesWithDuplicates: Array<Alias> | null, aliasName: 
 const NavColumns = observer(({ model, isPinned, toggleColumnPin }) => (
   <>
     <div className='command-number-column' onClick={toggleColumnPin}>
-      {model._isPending() && <RunningIcon className='fa-spin' />}
+      {model._isPending() && <RunningIcon data-cy="reporter-running-icon" className='fa-spin' />}
       {(!model._isPending() && isPinned) && <PinIcon className='command-pin' />}
       {(!model._isPending() && !isPinned) && model.number}
     </div>
