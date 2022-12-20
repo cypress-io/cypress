@@ -8,16 +8,5 @@
   ],
   "env": {
     "cypress/globals": true
-  },
-  "overrides": [
-    {
-      "files": [
-        "*.ts",
-        "*.tsx"
-      ],
-      "rules": {
-        "@typescript-eslint/no-unused-vars": "off"
-      }
-    }
-  ]
+  }
 }
