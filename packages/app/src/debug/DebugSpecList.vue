@@ -1,3 +1,4 @@
+clear
 <template>
   <div
     data-cy="debug-spec-col"
@@ -65,6 +66,21 @@ fragment DebugSpecListTests on CloudTestResult {
     screenshotsUrl
     hasVideo
     videoUrl
+  }
+}
+`
+
+gql`
+fragment DebugSpecListGroups on CloudRunGroup {
+  id
+  testingType
+  os {
+    id
+    name
+  }
+  browser {
+    id
+    formattedName
   }
 }
 `

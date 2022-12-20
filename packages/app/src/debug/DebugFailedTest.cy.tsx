@@ -36,5 +36,3 @@ describe('<DebugFailedTest/>', () => {
     cy.percySnapshot()
   })
 })
-
-// test with group

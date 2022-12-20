@@ -41,7 +41,7 @@
           </div>
           <ul
             data-cy="spec-header-metadata"
-            class="flex items-center gap-x-3 text-gray-700 whitespace-nowrap children:flex children:items-center font-normal text-sm"
+            class="flex flex-grow truncate items-center gap-x-3 text-gray-700 whitespace-nowrap children:flex children:items-center font-normal text-sm"
           >
             <li
               :data-cy="'debugHeader-results'"
@@ -100,8 +100,8 @@
       <div
         v-for="test in specData.failedTests"
         :key="`test-${test.id}`"
-        data-cy="test-group"
-        class="w-full flex flex-col flex-start justify-center pl-16px border-b-gray-100 border-b-1px test-group-class"
+        :data-cy="`test-group`"
+        class="w-full flex flex-col flex-start justify-center pl-16px border-b-gray-100 border-b-1px test-group-class pr-16px"
         :class="specData.groups.length > 1 ? 'pb-16px': 'hover:bg-gray-50'"
       >
         <DebugFailedTest

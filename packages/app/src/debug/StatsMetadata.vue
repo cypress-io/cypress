@@ -9,17 +9,18 @@
       :data-cy="`metaData-Results-${result.name}`"
     >
       <span
-        v-if="(result.value && result.name === 'browser-groups')"
+        v-if="(result.value && (result.name === 'browser' || result.name === 'browser-groups'))"
         class="flex inline-flex items-center"
       >
         <LayeredBrowserIcon
           :order="result.icon"
+          :data-cy="`${result.name} ${result.value}`"
         />
         <span class="sr-only">{{ result.name }}</span>
         {{ result.value }}
       </span>
       <span
-        v-else-if="(result.value && result.name !== 'browser-groups')"
+        v-else-if="result.value"
         class="flex inline-flex items-center"
       >
         <component
@@ -27,6 +28,7 @@
           class="mr-8px"
           stroke-color="gray-500"
           fill-color="gray-100"
+          :data-cy="`${result.name} ${result.value}`"
         />
         <span class="sr-only">{{ result.name }}</span>
         {{ result.value }}
@@ -40,13 +42,6 @@
 import { computed } from 'vue'
 import type { SpecDataAggregate, CloudRunGroup } from '@packages/data-context/src/gen/graphcache-config.gen'
 import { IconTimeStopwatch,
-  IconBrowserChrome,
-  IconBrowserChromeCanary,
-  IconBrowserSafari,
-  IconBrowserMozillaFirefox,
-  IconBrowserEdge,
-  IconBrowserWebkit,
-  IconBrowserElectronLight,
   IconOsLinux,
   IconOsApple,
   IconOsGeneric,
@@ -70,15 +65,6 @@ interface MetadataProps {
 
 const props = defineProps<MetadataProps>()
 
-const results = computed(() => {
-  if (props.order) {
-    return props.order.map((status) => ORDER_MAP[status])
-  }
-
-  return []
-})
-
-type BrowserType = 'CHROME' | 'SAFARI' | 'FIREFOX' | 'CHROME-CANARY' | 'EDGE' | 'WEBKIT' | 'ELECTRON'
 type OSType = 'LINUX' | 'APPLE' | 'WINDOWS' | 'GROUP'
 type TestingType = 'e2e' | 'component'
 
@@ -86,16 +72,6 @@ interface Metadata {
   value: number | string | null | SpecDataAggregate
   icon: any
   name: string
-}
-
-const BROWSER_MAP: Record<BrowserType, any> = {
-  'CHROME': { icon: IconBrowserChrome },
-  'CHROME-CANARY': { icon: IconBrowserChromeCanary },
-  'SAFARI': { icon: IconBrowserSafari },
-  'FIREFOX': { icon: IconBrowserMozillaFirefox },
-  'EDGE': { icon: IconBrowserEdge },
-  'WEBKIT': { icon: IconBrowserWebkit },
-  'ELECTRON': { icon: IconBrowserElectronLight },
 }
 
 const OS_MAP: Record<OSType, any> = {
@@ -106,9 +82,17 @@ const OS_MAP: Record<OSType, any> = {
 }
 
 const TESTING_MAP: Record<TestingType, any> = {
-  'e2e': { icon: IconTestingTypeE2E, text: 'E2E' },
+  'e2e': { icon: IconTestingTypeE2E, text: 'e2e' },
   'component': { icon: IconTestingTypeComponent, text: 'component' },
 }
+
+const results = computed(() => {
+  if (props.order) {
+    return props.order.map((status) => ORDER_MAP[status])
+  }
+
+  return []
+})
 
 const browserMapping = computed(() => {
   const acc: string[] = []
@@ -133,7 +117,7 @@ const ORDER_MAP: Record<StatType, Metadata> = {
   },
   'BROWSER': {
     value: props.groups![0].browser.formattedNameWithVersion!,
-    icon: BROWSER_MAP[props.groups![0].browser.formattedName!.toUpperCase()]['icon'],
+    icon: browserMapping.value,
     name: 'browser',
   },
   'TESTING': {

@@ -6,7 +6,8 @@
     <li
       v-for="(result, i) in results"
       :key="i"
-      class="-ml-8px rounded-full h-5 w-5 flex items-center justify-center bg-gray-50 rounded"
+      class="-ml-8px rounded-full h-5 w-5 flex items-center justify-center rounded"
+      :class="(results.length > 1 ? 'bg-gray-50' : '')"
     >
       <component
         :is="result"
