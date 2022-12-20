@@ -126,7 +126,11 @@ const props = defineProps<{
 
 const attrs = useAttrs() as ButtonHTMLAttributes
 
-const variantClasses = computed(() => (VariantClassesTable[props.variant || 'primary']))
+const variantClasses = computed(() => {
+  return (VariantClassesTable[props.variant || 'primary']).split(' ').filter((css) => {
+    return css !== 'hocus-default' || !props.disabled
+  }).join(' ')
+})
 
 const sizeClasses = computed(() => (SizeClassesTable[props.size || 'md']))
 

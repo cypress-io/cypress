@@ -47,6 +47,14 @@ import { specsList } from './utils/DebugMapping'
 const { t } = useI18n()
 
 gql`
+fragment DebugLocalSpecs on Spec {
+  id
+  absolute
+  relative
+}
+`
+
+gql`
 fragment DebugSpecs on Query {
   currentProject {
     id
@@ -54,7 +62,7 @@ fragment DebugSpecs on Query {
       __typename
       ... on CloudProject {
         id
-        runByNumber(runNumber: 6) {
+        runByNumber(runNumber: 11) {
           ...DebugPage
           id
           runNumber
@@ -69,9 +77,18 @@ fragment DebugSpecs on Query {
             id
             ...DebugSpecListSpec
           }
+          groups {
+            id,
+            ...DebugSpecListGroups
+          }
         }
       }
     }
+    specs {
+      id
+      ...DebugLocalSpecs
+    }
+    currentTestingType
   }
 }
 `
@@ -86,15 +103,25 @@ const run = computed(() => {
   return props.gql.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject.runByNumber : null
 })
 
+const localSpecs = computed(() => {
+  return props.gql.currentProject?.specs || []
+})
+
 const debugSpecsArray = computed(() => {
   if (run.value) {
     const specs = run.value.specs || []
     const tests = run.value.testsForReview || []
+    const currentTestingType = props.gql.currentProject?.currentTestingType || 'e2e'
 
-    return specsList(specs, tests)
+    return specsList({
+      specs,
+      tests,
+      groups: run.value.groups,
+      localSpecs: localSpecs.value,
+      currentTestingType,
+    })
   }
 
   return []
 })
-
 </script>
