@@ -571,7 +571,9 @@ export class EventManager {
     Cypress.on('test:before:run:async', async (_attr, test) => {
       this.studioStore.interceptTest(test)
 
-      await Cypress.automation('force:garbage:collection', {})
+      if (Cypress.config('experimentalMemoryManagement')) {
+        return await Cypress.automation('force:garbage:collection', {})
+      }
     })
 
     Cypress.on('test:after:run', (test) => {
