@@ -1,4 +1,4 @@
-// TODO(webkit): fix+unskip for experimental webkit release
+// TODO(webkit): fix+unskip for webkit release
 describe('react v16.0.0', { browser: '!webkit' }, () => {
   context('fires onChange events', () => {
     beforeEach(() => {

@@ -110,7 +110,7 @@ describe('App Top Nav Workflows', () => {
           expect(ctx.actions.browser.setActiveBrowserById).to.have.been.calledWith(browserId)
           expect(genId).to.eql('edge-chromium-stable')
           expect(ctx.actions.project.launchProject).to.have.been.calledWith(
-            ctx.coreData.currentTestingType, undefined, undefined,
+            ctx.coreData.currentTestingType, { shouldLaunchNewTab: false }, undefined,
           )
         })
       })
@@ -417,7 +417,7 @@ describe('App Top Nav Workflows', () => {
             return new Promise((resolve) => {
               setTimeout(() => {
                 resolve(options.user)
-              }, 1000)
+              }, 2000)
             })
           })
         }, { user })

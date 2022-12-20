@@ -188,6 +188,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     const matchesNetStubbingRoute = (requestOptions) => {
       const proxiedReq = {
         proxiedUrl: requestOptions.url,
+        resourceType: 'document',
         ..._.pick(requestOptions, ['headers', 'method']),
         // TODO: add `body` here once bodies can be statically matched
       }
