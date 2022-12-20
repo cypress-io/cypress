@@ -2377,10 +2377,10 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - store_artifacts:
-          path: packages/driver/memory.json
-          working_directory: packages/driver
-          requires:
-            - linux-tests-chrome
+        path: packages/driver/memory.json
+        working_directory: packages/driver
+        requires:
+          - linux-tests-chrome
 darwin-x64-workflow: &darwin-x64-workflow
   jobs:
     - node_modules_install:
@@ -2401,10 +2401,10 @@ darwin-x64-workflow: &darwin-x64-workflow
         requires:
           - darwin-x64-build
     - store_artifacts:
-          path: packages/driver/memory.json
-          working_directory: packages/driver
-          requires:
-            - darwin-tests-chrome
+        path: packages/driver/memory.json
+        working_directory: packages/driver
+        requires:
+          - darwin-tests-chrome
 windows-workflow: &windows-workflow
   jobs:
     - node_modules_install:
