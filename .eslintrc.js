@@ -25,6 +25,7 @@ const validators = specifiedRules
 )
 
 module.exports = {
+  root: true,
   plugins: [
     '@cypress/dev',
     'graphql',
