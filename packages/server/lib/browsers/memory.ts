@@ -1,9 +1,10 @@
 import debugModule from 'debug'
 import si from 'systeminformation'
-import { _groupCyProcesses } from '../../util/process_profiler'
+import { _groupCyProcesses } from '../util/process_profiler'
 import type { SendDebuggerCommand } from './cdp_automation'
 
-const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp:memory')
+const debug = debugModule('cypress:server:browsers:memory')
+const debugVerbose = debugModule('cypress-verbose:server:browsers:memory')
 
 const MEMORY_THRESHOLD_PERCENTAGE = 50
 const KILOBYTE = 1024
@@ -32,6 +33,12 @@ const findRendererProcess = async () => {
 const checkMemoryAndCollectGarbage = async (sendDebuggerCommandFn: SendDebuggerCommand) => {
   const jsHeapSizeLimit = await getJsHeapSizeLimit({ sendDebuggerCommandFn })
 
+  if (!jsHeapSizeLimit) {
+    debugVerbose('no heap size limit found, skipping garbage collection')
+
+    return
+  }
+
   debugVerbose('jsHeapSizeLimit:', jsHeapSizeLimit)
 
   const rendererProcess = await findRendererProcess()
@@ -46,14 +53,14 @@ const checkMemoryAndCollectGarbage = async (sendDebuggerCommandFn: SendDebuggerC
   const shouldCollectGarbage = ((rendererProcess.memRss * KILOBYTE) / jsHeapSizeLimit) >= MEMORY_THRESHOLD_PERCENTAGE
 
   if (shouldCollectGarbage) {
-    debugVerbose('forcing garbage collection')
+    debug('forcing garbage collection')
     performance.mark('gc-start')
     await sendDebuggerCommandFn('HeapProfiler.collectGarbage')
     performance.mark('gc-end')
 
     debugVerbose(performance.measure('garbage collection', 'gc-start', 'gc-end'))
   } else {
-    debugVerbose('skipping garbage collection')
+    debug('skipping garbage collection')
   }
 }
 

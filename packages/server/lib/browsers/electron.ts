@@ -2,22 +2,22 @@ import _ from 'lodash'
 import EE from 'events'
 import path from 'path'
 import Debug from 'debug'
-import menu from '../../gui/menu'
-import * as Windows from '../../gui/windows'
-import { CdpAutomation, screencastOpts, CdpCommand, CdpEvent } from '../cdp/cdp_automation'
-import * as savedState from '../../saved_state'
-import utils from '../utils'
-import * as errors from '../../errors'
-import type { Browser, BrowserInstance } from '../types'
+import menu from '../gui/menu'
+import * as Windows from '../gui/windows'
+import { CdpAutomation, screencastOpts, CdpCommand, CdpEvent } from './cdp_automation'
+import * as savedState from '../saved_state'
+import utils from './utils'
+import * as errors from '../errors'
+import type { Browser, BrowserInstance } from './types'
 import type { BrowserWindow, WebContents } from 'electron'
-import type { Automation } from '../../automation'
+import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, Preferences, RunModeVideoApi } from '@packages/types'
 
 // TODO: unmix these two types
 type ElectronOpts = Windows.WindowOptions & BrowserLaunchOpts
 
-const debug = Debug('cypress:server:browsers:chromium:electron')
-const debugVerbose = Debug('cypress-verbose:server:browsers:chromium:electron')
+const debug = Debug('cypress:server:browsers:electron')
+const debugVerbose = Debug('cypress-verbose:server:browsers:electron')
 
 // additional events that are nice to know about to be logged
 // https://electronjs.org/docs/api/browser-window#instance-events

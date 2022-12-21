@@ -10,15 +10,15 @@ import { URL } from 'url'
 
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
 import type { WriteVideoFrame } from '@packages/types'
-import type { Automation } from '../../automation'
-import { cookieMatches, CyCookie, CyCookieFilter } from '../../automation/util'
-import { checkMemoryAndCollectGarbage } from '../cdp/memory'
+import type { Automation } from '../automation'
+import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
+import { checkMemoryAndCollectGarbage } from './memory'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
 export type CdpEvent = keyof ProtocolMapping.Events
 
-const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp:cdp_automation')
+const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
 
 export function screencastOpts (everyNthFrame = Number(process.env.CYPRESS_EVERY_NTH_FRAME || 5)): Protocol.Page.StartScreencastRequest {
   return {

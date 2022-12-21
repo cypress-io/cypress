@@ -10,19 +10,19 @@ import mime from 'mime'
 import { launch } from '@packages/launcher'
 import type { Protocol } from 'devtools-protocol'
 
-import appData from '../../util/app_data'
-import { fs } from '../../util/fs'
-import { CdpAutomation, screencastOpts } from '../cdp/cdp_automation'
-import * as protocol from '../protocol'
-import utils from '../utils'
-import * as errors from '../../errors'
-import type { Browser, BrowserInstance } from '../types'
-import { BrowserCriClient } from '../cdp/browser-cri-client'
-import type { CriClient } from '../cdp/cri-client'
-import type { Automation } from '../../automation'
+import appData from '../util/app_data'
+import { fs } from '../util/fs'
+import { CdpAutomation, screencastOpts } from './cdp_automation'
+import * as protocol from './protocol'
+import utils from './utils'
+import * as errors from '../errors'
+import type { Browser, BrowserInstance } from './types'
+import { BrowserCriClient } from './browser-cri-client'
+import type { CriClient } from './cri-client'
+import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
 
-const debug = debugModule('cypress:server:browsers:chromium:chrome')
+const debug = debugModule('cypress:server:browsers:chrome')
 
 const LOAD_EXTENSION = '--load-extension='
 const CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = '66 67'.split(' ')

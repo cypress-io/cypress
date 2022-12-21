@@ -8,7 +8,7 @@ import { handleGraphQLSocketRequest } from '@packages/graphql/src/makeGraphQLSer
 import { onNetStubbingEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
 
-import firefoxUtil from './browsers/firefox/firefox-util'
+import firefoxUtil from './browsers/firefox-util'
 import * as errors from './errors'
 import exec from './exec'
 import files from './files'

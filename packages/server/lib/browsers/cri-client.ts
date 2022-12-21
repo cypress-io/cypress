@@ -1,14 +1,14 @@
 import debugModule from 'debug'
 import _ from 'lodash'
 import CRI from 'chrome-remote-interface'
-import * as errors from '../../errors'
-import type { CdpCommand, CdpEvent } from '../cdp/cdp_automation'
+import * as errors from '../errors'
+import type { CdpCommand, CdpEvent } from './cdp_automation'
 
 const debug = debugModule('cypress:server:browsers:cdp:cri-client')
 // debug using cypress-verbose:server:browsers:cri-client:send:*
-const debugVerboseSend = debugModule('cypress-verbose:server:browsers:cdp:cri-client:send:[-->]')
+const debugVerboseSend = debugModule('cypress-verbose:server:browsers:cri-client:send:[-->]')
 // debug using cypress-verbose:server:browsers:cri-client:recv:*
-const debugVerboseReceive = debugModule('cypress-verbose:server:browsers:cdp:cri-client:recv:[<--]')
+const debugVerboseReceive = debugModule('cypress-verbose:server:browsers:cri-client:recv:[<--]')
 
 const WEBSOCKET_NOT_OPEN_RE = /^WebSocket is (?:not open|already in CLOSING or CLOSED state)/
 

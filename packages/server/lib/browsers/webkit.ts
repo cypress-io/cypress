@@ -1,14 +1,14 @@
 import Debug from 'debug'
 import { EventEmitter } from 'events'
 import type playwright from 'playwright-webkit'
-import type { Browser, BrowserInstance } from '../types'
-import type { Automation } from '../../automation'
+import type { Browser, BrowserInstance } from './types'
+import type { Automation } from '../automation'
 import { WebKitAutomation } from './webkit-automation'
-import * as unhandledExceptions from '../../unhandled_exceptions'
+import * as unhandledExceptions from '../unhandled_exceptions'
 import type { BrowserLaunchOpts, BrowserNewTabOpts } from '@packages/types'
-import utils from '../utils'
+import utils from './utils'
 
-const debug = Debug('cypress:server:browsers:webkit:webkit')
+const debug = Debug('cypress:server:browsers:webkit')
 
 let wkAutomation: WebKitAutomation | undefined
 

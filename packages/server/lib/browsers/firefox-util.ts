@@ -5,14 +5,14 @@ import Marionette from 'marionette-client'
 import { Command } from 'marionette-client/lib/marionette/message.js'
 import util from 'util'
 import Foxdriver from '@benmalka/foxdriver'
-import * as protocol from '../protocol'
-import { CdpAutomation } from '../cdp/cdp_automation'
-import { BrowserCriClient } from '../cdp/browser-cri-client'
-import type { Automation } from '../../automation'
+import * as protocol from './protocol'
+import { CdpAutomation } from './cdp_automation'
+import { BrowserCriClient } from './browser-cri-client'
+import type { Automation } from '../automation'
 
-const errors = require('../../errors')
+const errors = require('../errors')
 
-const debug = Debug('cypress:server:browsers:firefox:firefox-util')
+const debug = Debug('cypress:server:browsers:firefox-util')
 
 let forceGcCc: () => Promise<void>
 
