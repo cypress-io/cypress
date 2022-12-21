@@ -3,7 +3,7 @@ import $dom from '../../dom'
 import $errUtils from '../../cypress/error_utils'
 
 export default function (Commands, Cypress, cy) {
-  Commands.addQuery('as', function asFn (alias, options = {}) {
+  Commands.addQuery('as', function asFn (alias, options = {} as Partial<Cypress.AsOptions>) {
     Cypress.ensure.isChildCommand(this, [alias], cy)
     cy.validateAlias(alias)
 
