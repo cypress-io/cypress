@@ -10,7 +10,7 @@ import { CdpAutomation } from '../cdp/cdp_automation'
 import { BrowserCriClient } from '../cdp/browser-cri-client'
 import type { Automation } from '../../automation'
 
-const errors = require('../errors')
+const errors = require('../../errors')
 
 const debug = Debug('cypress:server:browsers:firefox:firefox-util')
 
