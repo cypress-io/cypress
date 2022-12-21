@@ -8,20 +8,17 @@ import { cors, uri } from '@packages/network'
 import debugModule from 'debug'
 import { URL } from 'url'
 
-import si from 'systeminformation'
-import browsers from '../../browsers'
-
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
 import type { WriteVideoFrame } from '@packages/types'
 import type { Automation } from '../../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../../automation/util'
+import { checkMemoryAndCollectGarbage } from '../cdp/memory'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
 export type CdpEvent = keyof ProtocolMapping.Events
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp:cdp_automation')
-const debugVerboseMemory = debugModule('cypress-verbose:server:browsers:cdp_automation:memory')
 
 export function screencastOpts (everyNthFrame = Number(process.env.CYPRESS_EVERY_NTH_FRAME || 5)): Protocol.Page.StartScreencastRequest {
   return {
@@ -142,7 +139,8 @@ export const normalizeResourceType = (resourceType: string | undefined): Resourc
   return ffToStandardResourceTypeMap[resourceType] || 'other'
 }
 
-type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: any) => Promise<ProtocolMapping.Commands[T]['returnType']>
+export type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: any) => Promise<ProtocolMapping.Commands[T]['returnType']>
+
 type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any> | void
 type OnFn = <T extends CdpEvent>(eventName: T, cb: (data: ProtocolMapping.Events[T][0]) => void) => void
 
@@ -267,42 +265,6 @@ export class CdpAutomation {
     })
   }
 
-  private collectGarbage = async () => {
-    const jsHeapSizeLimit = (await this.sendDebuggerCommandFn('Runtime.evaluate', { expression: 'performance.memory?.jsHeapSizeLimit', returnByValue: true })).result.value
-
-    debugVerboseMemory('jsHeapSizeLimit:', jsHeapSizeLimit)
-
-    const processes = await si.processes()
-    const instance = browsers.getBrowserInstance()
-    // electron will return a list of pids, since it's not a hierarchy
-    const pids: number[] = instance?.allPids ? instance.allPids : [instance?.pid]
-
-    // filter down to renderer processes, they could be a child process (chrome, edge, etc) or the main process (electron)
-    const childBrowserProcesses = processes.list.filter((process) => (pids.includes(process.parentPid) || pids.includes(process.pid)) && process.params.includes('--type=renderer'))
-
-    // assume the renderer process with the most memory is the one we're interested in
-    const maxRendererProcess = childBrowserProcesses.reduce((prev, current) => (prev.memRss > current.memRss) ? prev : current)
-
-    debugVerboseMemory('renderer processes memory: %o', { pid: maxRendererProcess.pid, 'memRss(bytes)': maxRendererProcess.memRss * 1024 })
-
-    // only collect garbage if we're using more than 50% of the heap
-    const shouldCollectGarbage = ((maxRendererProcess.memRss * 1024) / jsHeapSizeLimit) >= 0.50
-
-    let measurement
-
-    if (shouldCollectGarbage) {
-      debugVerboseMemory('forcing garbage collection')
-      performance.mark('gc-start')
-      await this.sendDebuggerCommandFn('HeapProfiler.collectGarbage')
-      performance.mark('gc-end')
-
-      measurement = performance.measure('garbage collection', 'gc-start', 'gc-end')
-      debugVerboseMemory(measurement)
-    } else {
-      debugVerboseMemory('skipping garbage collection')
-    }
-  }
-
   onRequest = (message, data) => {
     let setCookie
 
@@ -394,7 +356,7 @@ export class CdpAutomation {
       case 'focus:browser:window':
         return this.sendDebuggerCommandFn('Page.bringToFront')
       case 'force:garbage:collection':
-        return this.collectGarbage()
+        return checkMemoryAndCollectGarbage(this.sendDebuggerCommandFn)
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }
