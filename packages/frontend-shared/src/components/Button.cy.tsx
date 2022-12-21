@@ -1,4 +1,4 @@
-import Button from './Button.vue'
+import Button, { ButtonVariants } from './Button.vue'
 import IconCoffee from '~icons/mdi/coffee'
 import { createRouter, createWebHistory } from 'vue-router'
 
@@ -110,7 +110,7 @@ describe('<Button />', { viewportWidth: 300, viewportHeight: 400 }, () => {
   })
 
   it('does not allow hocus styling when disabled', () => {
-    const buttonVariants = ['link', 'text', 'primary', 'outline', 'tertiary', 'pending', 'linkBold', 'secondary', 'white']
+    const buttonVariants: ButtonVariants[] = ['link', 'text', 'primary', 'outline', 'tertiary', 'pending', 'linkBold', 'secondary', 'white']
 
     cy.mount(() => <div>{buttonVariants.map((variant) => <Button variant={variant} disabled>{variant}</Button>)}</div>)
 

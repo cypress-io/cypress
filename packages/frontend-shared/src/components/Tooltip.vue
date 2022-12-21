@@ -97,12 +97,15 @@ const actualPopperClass = computed(() => {
 
 .cypress-v-tooltip-dark {
   .v-popper__inner {
-    @apply bg-gray-900 text-white py-2 px-4;
+    @apply bg-gray-900 border-0 text-white py-2 px-4;
   }
-  .v-popper__arrow-inner,
   .v-popper__arrow-outer {
     // NOTE: we can't use @apply to here because having !important breaks things
     border-color: #2e3247;
+  }
+
+  .v-popper__arrow-inner{
+    visibility: hidden;
   }
 
   &[data-popper-placement="top"] {
