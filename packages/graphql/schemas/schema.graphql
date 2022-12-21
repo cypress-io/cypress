@@ -342,7 +342,16 @@ type CloudProjectSpec implements Node {
 
     """Returns the last n elements from the list."""
     last: Int
-  ): CloudSpecRunConnection
+  ): CloudSpecRunConnection @deprecated(reason: "Cypress app should utilize specRunsForRunIds to retrieve more relevant data based on local state")
+
+  """
+  Runs this spec has been involved with, limited to the provided list of CloudRun ids.
+  Runs will be returned in the same order as the runs provided, where matches are found.
+  """
+  specRunsForRunIds(
+    """A list of IDs for a CloudRun Node, conforming to the Relay spec"""
+    cloudRunIds: [ID!]!
+  ): [CloudSpecRun]
 }
 
 union CloudProjectSpecFlakyResult = CloudFeatureNotEnabled | CloudProjectSpecFlakyStatus
@@ -393,8 +402,16 @@ type CloudRecordKey implements Node {
 
 """A Recorded run of the Test Runner, typically to the cloud"""
 type CloudRun implements Node {
+  """Whether or not the run was canceled due to a failure"""
+  cancelOnFailure: Boolean
+
   """When the run was cancelled, null if not cancelled"""
   cancelledAt: DateTime
+
+  """
+  The user who manually cancelled the run, null if not cancelled manually
+  """
+  cancelledBy: CloudUser
 
   """Information about the CI provider that performed the run"""
   ci: CloudCiBuildInfo!
@@ -403,6 +420,11 @@ type CloudRun implements Node {
 
   """When the run was created"""
   createdAt: DateTime!
+
+  """
+  Errors recorded against tests within this run, as reported by the Cypress App during recording
+  """
+  errors: [String!]!
 
   """All groups within this run"""
   groups: [CloudRunGroup!]!
@@ -719,6 +741,11 @@ type CloudTestResult implements Node {
   """The URL to the test result in Cypress Cloud"""
   testUrl: String!
 
+  """
+  The thumbprint of the test result, allows for deduping tests sharing the same title in the same spec
+  """
+  thumbprint: String!
+
   """The title of the test result: describe/context > it/test"""
   title(
     """This will trim the test title to the provided depth"""
@@ -933,6 +960,7 @@ type CurrentProject implements Node & ProjectLike {
 
   """Absolute path to the project on the filesystem"""
   projectRoot: String!
+  relevantRuns: [Int]
 
   """Project saved state"""
   savedState: JSON
@@ -1881,6 +1909,10 @@ type ReactComponentResponse {
   errored: Boolean
 }
 
+type RelevantRunResponse {
+  hash: String!
+}
+
 """
 Represents a container for a piece of remote data stitched into the graph
 """
@@ -2099,6 +2131,11 @@ type Subscription {
   When we have resolved a section of a query, and want to update the local normalized cache, we "push" the fragment to the frontend to merge in the client side cache
   """
   pushFragment: [PushFragmentPayload!]!
+
+  """
+  Return the runs from the Cloud relevant to the current local git commit
+  """
+  relevantRuns: [RelevantRunResponse!]
 
   """Issued when the watched specs for the project changes"""
   specsChange: CurrentProject

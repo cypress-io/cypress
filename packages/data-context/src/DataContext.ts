@@ -27,6 +27,7 @@ import {
   UtilDataSource,
   BrowserApiShape,
   MigrationDataSource,
+  RelevantRunsDataSource,
 } from './sources/'
 import { cached } from './util/cached'
 import type { GraphQLSchema, OperationTypeNode, DocumentNode } from 'graphql'
@@ -221,6 +222,11 @@ export class DataContext {
   @cached
   get remotePolling () {
     return new RemotePollingDataSource(this)
+  }
+
+  @cached
+  get relevantRuns () {
+    return new RelevantRunsDataSource(this)
   }
 
   @cached

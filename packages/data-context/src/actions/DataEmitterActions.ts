@@ -89,6 +89,11 @@ abstract class DataEmitterEvents {
     this._emit('specsChange')
   }
 
+  /** */
+  relevantRunChange (runs: { runId: number}) {
+    this._emit('relevantRunChange', runs)
+  }
+
   /**
    * When we want to update the cache with known values from the server, without
    * triggering a full refresh, we can send down a specific fragment / data to update

@@ -2,7 +2,7 @@ import { defineConfig } from 'cypress'
 import { initGitRepoForTestProject, resetGitRepoForTestProject } from './cypress/tasks/git'
 
 export default defineConfig({
-  projectId: 'ypt4pf',
+  projectId: 'v9rxyo',
   retries: {
     runMode: 2,
     openMode: 0,

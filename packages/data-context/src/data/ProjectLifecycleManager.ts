@@ -412,6 +412,10 @@ export class ProjectLifecycleManager {
         onGitInfoChange: (specPaths) => {
           this.ctx.emitter.gitInfoChange(specPaths)
         },
+        onGitLogChange: (hashes) => {
+          //TODO remove hardcoded runId
+          this.ctx.emitter.relevantRunChange({ runId: 2 })
+        },
       })
 
       s.diagnostics = { error: null, warnings: [] }

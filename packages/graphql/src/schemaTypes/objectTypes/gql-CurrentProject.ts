@@ -238,6 +238,13 @@ export const CurrentProject = objectType({
       description: 'If the browser is open or not',
       resolve: (source, args, ctx) => ctx.coreData.app.browserStatus,
     })
+
+    t.list.int('relevantRuns', {
+      resolve: async (source, args, ctx) => {
+        // return ctx.project.getRelevantRuns(source.git?.currentHashes)
+        return ctx.relevantRuns.getRelevantRuns(source.git?.currentHashes || [])
+      },
+    })
   },
   sourceType: {
     module: '@packages/data-context/src/data/ProjectLifecycleManager',

@@ -8,7 +8,7 @@ import os from 'os'
 import Debug from 'debug'
 import type { gitStatusType } from '@packages/types'
 import chokidar from 'chokidar'
-import _ from 'lodash'
+import { isEqual } from 'lodash'
 
 const debug = Debug('cypress:data-context:sources:GitDataSource')
 const debugVerbose = Debug('cypress-verbose:data-context:sources:GitDataSource')
@@ -61,6 +61,8 @@ export interface GitDataSourceConfig {
    */
   onGitInfoChange(specPath: string[]): void
   onError(err: any): void
+
+  onGitLogChange?(hashes: string[]): void
 }
 
 /**
@@ -78,6 +80,7 @@ export class GitDataSource {
   #gitBaseDir?: string
   #gitBaseDirWatcher?: chokidar.FSWatcher
   #gitMeta = new Map<string, GitInfo | null>()
+  #gitHashes?: string[]
   #currentBranch: string | null = null
   #intervalTimer?: NodeJS.Timeout
 
@@ -120,6 +123,7 @@ export class GitDataSource {
   }
 
   #refreshAllGitData () {
+    debug('Refreshing git data')
     this.#verifyGitRepo().then(() => {
       const toAwait = [
         this.#loadAndWatchCurrentBranch(),
@@ -129,9 +133,14 @@ export class GitDataSource {
         toAwait.push(this.#loadBulkGitInfo(this.#specs))
       }
 
+      toAwait.push(this.#loadGitHashes())
+
       Promise.all(toAwait).then(() => {
+        if (this.#destroyed) {
+          return
+        }
+
         this.#intervalTimer = setTimeout(() => {
-          debug('Refreshing git data')
           this.#refreshAllGitData()
         }, SIXTY_SECONDS)
       }).catch(this.config.onError)
@@ -162,7 +171,12 @@ export class GitDataSource {
     return this.#currentBranch
   }
 
+  get currentHashes () {
+    return this.#gitHashes
+  }
+
   async destroy () {
+    debug('Stopping timer and watcher')
     this.#destroyed = true
     if (this.#intervalTimer) {
       clearTimeout(this.#intervalTimer)
@@ -195,6 +209,7 @@ export class GitDataSource {
       }
 
       if (!this.config.isRunMode) {
+        debug('Creating watcher')
         this.#gitBaseDirWatcher = chokidar.watch(path.join(this.#gitBaseDir, '.git', 'HEAD'), {
           ignoreInitial: true,
           ignorePermissionErrors: true,
@@ -326,7 +341,7 @@ export class GitDataSource {
         }
 
         this.#gitMeta.set(file, toSet)
-        if (!_.isEqual(toSet, current)) {
+        if (!isEqual(toSet, current)) {
           changed.push(file)
         }
       }
@@ -408,5 +423,22 @@ export class GitDataSource {
     }
 
     return output
+  }
+
+  async getRootLog () {
+    return await this.#git?.log({ maxCount: 100 })
+  }
+
+  async #loadGitHashes () {
+    debug('Loading git hashes')
+    const logResponse = await this.#git?.log({ maxCount: 100 })
+    const currentHashes = logResponse?.all.map((log) => log.hash)
+
+    if (!isEqual(this.#gitHashes, currentHashes)) {
+      this.#gitHashes = currentHashes || []
+
+      debug(`Calling onGitLogChange: callback defined ${!!this.config.onGitLogChange}, git hash count ${currentHashes?.length}`)
+      this.config.onGitLogChange?.(this.#gitHashes)
+    }
   }
 }

@@ -124,5 +124,22 @@ export const Subscription = subscriptionType({
       },
       resolve: (o: string | null) => o,
     })
+
+    t.field('relevantRuns', {
+      type: list(nonNull(objectType({
+        name: 'RelevantRunResponse',
+        definition (t) {
+          t.nonNull.string('hash')
+        },
+      }))),
+      description: 'Return the runs from the Cloud relevant to the current local git commit',
+      subscribe: (source, args, ctx) => {
+        return ctx.emitter.subscribeTo('relevantRunChange')
+      },
+      resolve: (source, args, ctx) => {
+        //TODO Fix hardcoded response
+        return [{ hash: '7ijfd88d' }]
+      },
+    })
   },
 })

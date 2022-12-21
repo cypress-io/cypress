@@ -569,4 +569,8 @@ export class ProjectDataSource {
     // (implement this in the future, if we ever want to display runs for a project in global mode)
     return null
   }
+
+  async getRelevantRuns (hashes: string[] | undefined) {
+    return hashes || []
+  }
 }

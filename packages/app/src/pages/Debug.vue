@@ -16,14 +16,38 @@
 
 import DebugContainer from '../debug/DebugContainer.vue'
 import { gql, useQuery } from '@urql/vue'
-import { DebugDocument } from '../generated/graphql'
+import { DebugDocument, Debug_RelevantRunsDocument } from '../generated/graphql'
+import { ref, watchEffect } from 'vue'
 
 gql `
-query Debug {
+query Debug($runNumber: Int!) {
    ...DebugSpecs
 }
 `
 
-const query = useQuery({ query: DebugDocument })
+gql`
+  query Debug_RelevantRuns {
+    currentProject {
+      id
+      relevantRuns
+    }
+  }
+`
+
+const runsQuery = useQuery({ query: Debug_RelevantRunsDocument })
+
+const variables = ref({ runNumber: -1 })
+
+const query = useQuery({ query: DebugDocument, variables, pause: true })
+
+watchEffect(() => {
+  const relevantRuns = runsQuery.data.value?.currentProject?.relevantRuns
+  const relevantRun = relevantRuns ? relevantRuns[0] : undefined
+
+  if (relevantRun) {
+    variables.value.runNumber = relevantRun
+    query.executeQuery()
+  }
+})
 
 </script>

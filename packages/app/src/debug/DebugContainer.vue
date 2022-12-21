@@ -54,7 +54,7 @@ fragment DebugSpecs on Query {
       __typename
       ... on CloudProject {
         id
-        runByNumber(runNumber: 6) {
+        runByNumber(runNumber: $runNumber) {
           ...DebugPage
           id
           runNumber

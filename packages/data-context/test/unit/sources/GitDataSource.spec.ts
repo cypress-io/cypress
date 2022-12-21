@@ -37,7 +37,10 @@ describe('GitDataSource', () => {
   })
 
   afterEach(() => {
-    gitInfo.destroy()
+    if (gitInfo) {
+      gitInfo.destroy()
+    }
+
     gitInfo = undefined
 
     sinon.restore()
@@ -220,5 +223,26 @@ describe('GitDataSource', () => {
     expect(result).to.eq((await git.branch()).current)
 
     expect(errorStub).to.be.callCount(1)
+  })
+
+  it('handles a get info change', async () => {
+    const dfd = pDefer<string[]>()
+
+    const logCallback = (hashes: string[]) => {
+      dfd.resolve(hashes)
+    }
+
+    gitInfo = new GitDataSource({
+      isRunMode: false,
+      projectRoot: projectPath,
+      onBranchChange: sinon.stub(),
+      onGitInfoChange: sinon.stub(),
+      onError: sinon.stub(),
+      onGitLogChange: logCallback,
+    })
+
+    const result = await dfd.promise
+
+    expect(result).to.have.length(1)
   })
 })
