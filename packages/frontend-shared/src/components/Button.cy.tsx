@@ -108,4 +108,16 @@ describe('<Button />', { viewportWidth: 300, viewportHeight: 400 }, () => {
     cy.contains('a', 'test').should('have.attr', 'aria-disabled', 'disabled')
     cy.contains('a', 'test').should('have.attr', 'role', 'link')
   })
+
+  it('does not allow hocus styling when disabled', () => {
+    const buttonVariants = ['link', 'text', 'primary', 'outline', 'tertiary', 'pending', 'linkBold', 'secondary', 'white']
+
+    cy.mount(() => <div>{buttonVariants.map((variant) => <Button variant={variant} disabled>{variant}</Button>)}</div>)
+
+    for (const variant of buttonVariants) {
+      cy.contains('button', variant).realHover()
+      .should('not.have.class', 'hocus-default')
+      .and('not.have.class', 'hocus-secondary')
+    }
+  })
 })

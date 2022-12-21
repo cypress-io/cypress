@@ -126,10 +126,15 @@ const props = defineProps<{
 
 const attrs = useAttrs() as ButtonHTMLAttributes
 
+// Disabled buttons should not have hover/focus styles so filter out classes including "hocus"
+function filterHocus (classes: string): string {
+  return classes.split(' ').filter((css) => !(css.startsWith('hocus') && props.disabled)).join(' ')
+}
+
 const variantClasses = computed(() => {
-  return (VariantClassesTable[props.variant || 'primary']).split(' ').filter((css) => {
-    return !(css === 'hocus-default' && props.disabled)
-  }).join(' ')
+  const variantClasses = VariantClassesTable[props.variant || 'primary']
+
+  return props.disabled ? filterHocus(variantClasses) : variantClasses
 })
 
 const sizeClasses = computed(() => (SizeClassesTable[props.size || 'md']))

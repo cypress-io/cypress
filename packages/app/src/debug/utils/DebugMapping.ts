@@ -40,8 +40,8 @@ export const specsList = ({ specs, tests, localSpecs, currentTestingType, groups
 
         return acc
       }, [])
-      // should always exist, the testingType should not differ between groups
-      const testingType = (groups[0]?.testingType || 'e2e') as TestingTypeEnum
+      // The testingType will not differ between groups
+      const testingType = groups[0]?.testingType as TestingTypeEnum
 
       debugResult = {
         spec: foundSpec,

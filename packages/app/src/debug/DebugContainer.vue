@@ -37,7 +37,7 @@
 <script setup lang="ts">
 import { gql } from '@urql/vue'
 import { computed } from '@vue/reactivity'
-import type { DebugSpecsFragment } from '../generated/graphql'
+import type { DebugSpecsFragment, TestingTypeEnum } from '../generated/graphql'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import DebugPageHeader from './DebugPageHeader.vue'
 import DebugSpecList from './DebugSpecList.vue'
@@ -103,21 +103,20 @@ const run = computed(() => {
   return props.gql.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject.runByNumber : null
 })
 
-const localSpecs = computed(() => {
-  return props.gql.currentProject?.specs || []
-})
-
 const debugSpecsArray = computed(() => {
-  if (run.value) {
+  if (run.value && props.gql.currentProject) {
     const specs = run.value.specs || []
     const tests = run.value.testsForReview || []
-    const currentTestingType = props.gql.currentProject?.currentTestingType || 'e2e'
+    const groups = run.value.groups || []
+    // Will be defined so ignore the possibility of null for testingType
+    const currentTestingType = props.gql.currentProject.currentTestingType as TestingTypeEnum
+    const localSpecs = props.gql.currentProject.specs
 
     return specsList({
       specs,
       tests,
-      groups: run.value.groups,
-      localSpecs: localSpecs.value,
+      groups,
+      localSpecs,
       currentTestingType,
     })
   }
