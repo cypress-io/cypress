@@ -1,10 +1,19 @@
 import _ from 'lodash'
 import $dom from '../../dom'
+import $errUtils from '../../cypress/error_utils'
 
 export default function (Commands, Cypress, cy) {
-  Commands.addQuery('as', function asFn (alias) {
+  Commands.addQuery('as', function asFn (alias, options = {}) {
     Cypress.ensure.isChildCommand(this, [alias], cy)
     cy.validateAlias(alias)
+
+    if (!_.isObject(options)) {
+      $errUtils.throwErrByPath('as.invalid_options', { args: { arg: options } })
+    }
+
+    if (options.type && !options.type.match(/query|value/)) {
+      $errUtils.throwErrByPath('as.invalid_options_type', { args: { type: options.type } })
+    }
 
     const prevCommand = cy.state('current').get('prev')
 
@@ -12,7 +21,14 @@ export default function (Commands, Cypress, cy) {
 
     // Shallow clone of the existing subject chain, so that future commands running on the same chainer
     // don't apply here as well.
-    const subjectChain = [...cy.subjectChain()]
+    let subjectChain = [...cy.subjectChain()]
+
+    // If the user wants us to store a specific value, rather than requery it live, we replace
+    // the subject chain with a resolved value.
+    // https://github.com/cypress-io/cypress/issues/25173
+    if (options.type === 'value') {
+      subjectChain = [cy.getSubjectFromChain(subjectChain)]
+    }
 
     const fileName = prevCommand.get('fileName')
 
