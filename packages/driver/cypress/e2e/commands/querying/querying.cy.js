@@ -1020,6 +1020,11 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/25225
+    it('returns one element when given multiple subjects with no children', () => {
+      cy.get('button').contains('submit').should('have.length', 1)
+    })
+
     // https://github.com/cypress-io/cypress/issues/25019
     it('can locate elements contained inside <form> containers', () => {
       cy.get('#focus').contains('button', 'focusable')
