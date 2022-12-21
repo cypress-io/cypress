@@ -55,18 +55,20 @@ const getTotalMemoryLimit = () => {
   return limit
 }
 
-const getMemoryUsage = () => {
-  let usage
+const getAvailableMemory = async () => {
+  let available
 
   if (isCgroupMemoryAvailable) {
-    usage = Number(execSync('cat /sys/fs/cgroup/memory/memory.usage_in_bytes', { encoding: 'utf8' }))
+    const usage = Number(execSync('cat /sys/fs/cgroup/memory/memory.usage_in_bytes', { encoding: 'utf8' }))
+
+    available = totalMemoryLimit - usage
   } else {
-    usage = os.totalmem() - os.freemem()
+    available = (await si.mem()).available
   }
 
-  debugVerbose('memory usage', usage)
+  debugVerbose('memory available', available)
 
-  return usage
+  return available
 }
 
 // retrieve the total memory limit for the container/host at startup
@@ -112,14 +114,14 @@ const checkMemoryAndCollectGarbage = async (sendDebuggerCommandFn: SendDebuggerC
     return
   }
 
-  const currentMemoryUsage = getMemoryUsage()
+  const currentAvailableMemory = await getAvailableMemory()
 
-  const maxAvailableRendererMemory = Math.min(jsHeapSizeLimit, (totalMemoryLimit - currentMemoryUsage - rendererProcess.memRss))
+  const maxAvailableRendererMemory = Math.min(jsHeapSizeLimit, (currentAvailableMemory - rendererProcess.memRss))
 
   debugVerbose('maxAvailableRendererMemory:', maxAvailableRendererMemory, 'bytes')
 
   // only collect garbage if less than the MEMORY_THRESHOLD_PERCENTAGE of the heap left
-  const shouldCollectGarbage = ((maxAvailableRendererMemory - (rendererProcess.memRss * KIBIBYTE)) / maxAvailableRendererMemory) <= MEMORY_THRESHOLD_PERCENTAGE
+  const shouldCollectGarbage = ((maxAvailableRendererMemory - (rendererProcess.memRss * KIBIBYTE)) / maxAvailableRendererMemory) * 100 <= MEMORY_THRESHOLD_PERCENTAGE
 
   if (shouldCollectGarbage) {
     debug('forcing garbage collection')
