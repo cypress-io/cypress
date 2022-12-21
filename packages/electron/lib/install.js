@@ -140,6 +140,7 @@ module.exports = {
           version: FuseVersion.V1,
           resetAdHocDarwinSignature: platform === 'darwin' && arch === 'arm64',
           [FuseV1Options.LoadBrowserProcessSpecificV8Snapshot]: true,
+          [FuseV1Options.EnableNodeCliInspectArguments]: false,
         },
       ) : Promise.resolve()
     }).catch((err) => {
