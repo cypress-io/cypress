@@ -13,52 +13,34 @@
       <slot name="cta" />
     </div>
     <div class="flex flex-col my-40px w-full items-center">
-      <div class="border-t border-l border-r rounded-t-md bg-gray-50 border-0 border-gray-100 py-20px px-15px w-[75%]">
-        <div class="bg-white border rounded-md flex border-gray-100 w-max p-5px text-14px text-gray-700">
-          <div><i-cy-status-failed_x12 /></div>
-          <div class="mx-1">
-            -
-          </div>
-          <div
-            v-if="exampleTestName"
-            class="mx-1 pb-1px text-gray-100"
-          >
-            |
-          </div>
-          <div
-            v-if="exampleTestName"
-            class="mx-1 text-14px text-gray-700"
-          >
-            {{ exampleTestName }}
-          </div>
-        </div>
-      </div>
-      <div
-        v-for="(row, i) in loadingRows"
-        :key="i"
-        class="bg-white border flex border-b-0 border-gray-100 py-5 px-17px w-[75%] items-center overflow-hidden last:border-b last:rounded-b-md"
+      <DebugTestLoadingContainer
+        width-class="w-[75%]"
+        dot-class="icon-light-gray-200"
+        :rows="loadingRows"
       >
-        <div>
-          <i-cy-dot-solid_x4 class="icon-light-gray-200" />
-        </div>
-        <div class="ml-10px">
-          <div class="rounded-full bg-gray-50 h-16px w-40px" />
-        </div>
-        <div class="ml-10px">
-          <i-cy-chevron-right_x16 class="icon-dark-gray-200" />
-        </div>
-        <div class="ml-10px">
-          <div
-            class="rounded-full bg-gray-50 h-16px"
-            :class="row.widthClass"
-          />
-        </div>
-      </div>
+        <template #header>
+          <div class="bg-white border rounded-md flex border-gray-100 w-max p-5px text-14px text-gray-700">
+            <div><i-cy-status-failed_x12 /></div>
+            <div class="bg-gray-700 h-1px mx-5px mt-7px w-5px" />
+            <div
+              v-if="exampleTestName"
+              class="bg-gray-100 h-13px mx-1 pb-1px w-1px"
+            />
+            <div
+              v-if="exampleTestName"
+              class="mx-1 text-14px text-gray-700"
+            >
+              {{ exampleTestName }}
+            </div>
+          </div>
+        </template>
+      </DebugTestLoadingContainer>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import DebugTestLoadingContainer from './DebugTestLoadingContainer.vue'
 
 defineProps<{
   title: string
@@ -67,9 +49,9 @@ defineProps<{
 }>()
 
 const loadingRows = [
-  { widthClass: 'w-341px' },
-  { widthClass: 'w-407px' },
-  { widthClass: 'w-505px' },
+  ['w-40px', 'w-[40%]'],
+  ['w-40px', 'w-[50%]'],
+  ['w-40px', 'w-[65%]'],
 ]
 
 </script>

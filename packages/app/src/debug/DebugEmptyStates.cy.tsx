@@ -6,10 +6,6 @@ import DebugError from './DebugError.vue'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 
 describe('Debug page empty states', () => {
-  beforeEach(() => {
-    cy.viewport(900, 800)
-  })
-
   context('not logged in', () => {
     it('renders', () => {
       const loginConnectStore = useLoginConnectStore()

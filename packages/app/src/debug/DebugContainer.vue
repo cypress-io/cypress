@@ -14,7 +14,6 @@
         :specs="debugSpecsArray"
       />
     </div>
-    <DebugLoading v-else-if="loading" />
     <div
       v-else
       data-cy="debug-empty"
@@ -36,7 +35,6 @@ import DebugSpecList from './DebugSpecList.vue'
 import DebugNotLoggedIn from './DebugNotLoggedIn.vue'
 import DebugNoProject from './DebugNoProject.vue'
 import DebugNoRuns from './DebugNoRuns.vue'
-import DebugLoading from './DebugLoading.vue'
 import DebugError from './DebugError.vue'
 import { specsList } from './utils/DebugMapping'
 
@@ -72,7 +70,7 @@ fragment DebugSpecs on Query {
 
 const props = defineProps<{
   gql?: DebugSpecsFragment
-  loading: boolean
+  // This prop is just to stub the error state for now
   showError?: boolean
 }>()
 

@@ -657,7 +657,7 @@
       "almostThere": "You're almost there! Start recording your test runs to Cypress Cloud by running the command below in your local or CI terminal.",
       "noRunsTestMessage": "Record your first test run to Cypress Cloud to locally debug failed CI test runs",
       "gitRepositoryNotDetected": "Git repository not detected",
-      "ensureGitSetupCorrectly": "Cypress uses git to associate runs with your local state. Please ensure that version control is set up correctly."
+      "ensureGitSetupCorrectly": "Cypress uses Git to associate runs with your local state. Please ensure that version control is set up correctly."
     },
     "header": {
       "runUrl": "View in Cypress Cloud",

@@ -12,7 +12,6 @@ describe('<DebugContainer />', () => {
         render: (gqlVal) => {
           return (
             <DebugContainer
-              loading={false}
               gql={gqlVal}
             />
           )
@@ -45,40 +44,11 @@ describe('<DebugContainer />', () => {
       loginConnectStore.setUserFlag('isLoggedIn', true)
       loginConnectStore.setProjectFlag('isProjectConnected', true)
       cy.mountFragment(DebugSpecsFragmentDoc, {
-        render: (gqlVal) => {
-          return (
-            <DebugContainer
-              loading={false}
-              gql={gqlVal}
-            />
-          )
-        },
+        render: (gqlVal) => <DebugContainer gql={gqlVal} />,
       })
 
-      cy.findByTestId('debug-empty').contains(defaultMessages.debugPage.emptyStates.recordYourFirstRun)
-      cy.findByTestId('debug-empty').contains(defaultMessages.debugPage.emptyStates.almostThere)
-      cy.findByTestId('debug-empty').contains(defaultMessages.debugPage.emptyStates.noRunsTestMessage)
+      validateEmptyState([defaultMessages.debugPage.emptyStates.recordYourFirstRun, defaultMessages.debugPage.emptyStates.almostThere, defaultMessages.debugPage.emptyStates.noRunsTestMessage])
       cy.findByDisplayValue('npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
-    })
-
-    it('is loading', () => {
-      const loginConnectStore = useLoginConnectStore()
-
-      loginConnectStore.setUserFlag('isLoggedIn', true)
-      loginConnectStore.setProjectFlag('isProjectConnected', true)
-      cy.mountFragment(DebugSpecsFragmentDoc, {
-        render: (gqlVal) => {
-          return (
-            <DebugContainer
-              loading={true}
-              gql={gqlVal}
-            />
-          )
-        },
-      })
-
-      cy.findByTestId('debug-empty').should('not.exist')
-      cy.findByTestId('debug-loading').should('be.visible')
     })
 
     it('errors', () => {
@@ -87,19 +57,10 @@ describe('<DebugContainer />', () => {
       loginConnectStore.setUserFlag('isLoggedIn', true)
       loginConnectStore.setProjectFlag('isProjectConnected', true)
       cy.mountFragment(DebugSpecsFragmentDoc, {
-        render: (gqlVal) => {
-          return (
-            <DebugContainer
-              loading={false}
-              gql={gqlVal}
-              showError={true}
-            />
-          )
-        },
+        render: (gqlVal) => <DebugContainer gql={gqlVal} showError={true} />,
       })
 
       cy.findByTestId('debug-empty').should('not.exist')
-      cy.findByTestId('debug-loading').should('not.exist')
       cy.findByTestId('debug-alert').should('be.visible')
     })
   })
@@ -122,7 +83,6 @@ describe('<DebugContainer />', () => {
         render: (gqlVal) => {
           return (
             <DebugContainer
-              loading={false}
               gql={gqlVal}
             />
           )
