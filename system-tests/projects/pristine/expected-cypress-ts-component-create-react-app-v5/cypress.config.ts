@@ -1,10 +1,11 @@
-import { defineConfig } from "cypress";
+import { defineConfig } from 'cypress'
 
 export default defineConfig({
   component: {
+    experimentalSingleTabRunMode: true,
     devServer: {
-      framework: "create-react-app",
-      bundler: "webpack",
+      framework: 'create-react-app',
+      bundler: 'webpack',
     },
   },
-});
+})
