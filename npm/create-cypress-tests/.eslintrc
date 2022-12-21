@@ -15,24 +15,5 @@
     "no-console": "off",
     "mocha/no-global-tests": "off",
     "@typescript-eslint/no-unused-vars": "off"
-  },
-  "overrides": [
-    {
-      "files": [
-        "lib/*"
-      ],
-      "rules": {
-        "no-console": 1
-      }
-    },
-    {
-      "files": [
-        "**/*.json"
-      ],
-      "rules": {
-        "quotes": "off",
-        "comma-dangle": "off"
-      }
-    }
-  ]
+  }
 }

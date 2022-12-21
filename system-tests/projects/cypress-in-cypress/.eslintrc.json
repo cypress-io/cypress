@@ -27,23 +27,6 @@
     },
     {
       "files": [
-        "lib/*"
-      ],
-      "rules": {
-        "no-console": 1
-      }
-    },
-    {
-      "files": [
-        "**/*.json"
-      ],
-      "rules": {
-        "quotes": "off",
-        "comma-dangle": "off"
-      }
-    },
-    {
-      "files": [
         "*.tsx",
         "*.jsx"
       ],
