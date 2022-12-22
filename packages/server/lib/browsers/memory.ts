@@ -139,7 +139,7 @@ const checkMemoryAndCollectGarbage = async (sendDebuggerCommandFn: SendDebuggerC
 
   const currentAvailableMemory = await getAvailableMemory()
 
-  const maxAvailableRendererMemory = Math.min(jsHeapSizeLimit, currentAvailableMemory)
+  const maxAvailableRendererMemory = Math.min(jsHeapSizeLimit, currentAvailableMemory + (rendererProcess.memRss * KIBIBYTE))
 
   debugVerbose('maxAvailableRendererMemory:', maxAvailableRendererMemory, 'bytes')
 
