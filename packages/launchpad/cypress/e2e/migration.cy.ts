@@ -170,6 +170,9 @@ describe('Opening unmigrated project', () => {
     cy.contains(cy.i18n.majorVersionWelcome.title).should('not.exist')
     cy.contains('h1', `Migrating to Cypress ${Cypress.version.split('.')[0]}`).should('be.visible')
 
+    // Wait for migration prompt to load before taking a snapshot
+    cy.get('.spinner').should('not.exist')
+
     cy.percySnapshot()
   })
 })
