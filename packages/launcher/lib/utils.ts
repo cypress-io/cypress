@@ -7,24 +7,30 @@ import Bluebird from 'bluebird'
 export const utils = {
   execa,
   spawnWithArch: <T extends cp.SpawnOptionsWithStdioTuple<cp.StdioNull, cp.StdioPipe, cp.StdioPipe>>(cmd: string, args: string[], opts: T) => {
-    if (!(os.platform() === 'darwin' && os.arch() === 'arm64')) {
-      return cp.spawn(cmd, args, opts)
+    if (os.platform() === 'darwin' && os.arch() === 'arm64') {
+      // On macOS, browsers are distributed as "universal apps" which have both arm64 and x86_64 binaries
+      // in the same file. The OS decides which architecture to use based on heuristics. If Cypress was
+      // launched from an x86_64 process on arm64 macOS (like if an x64 version of Node.js is being used),
+      // even though the Cypress CLI will correctly spawn the arm64 version of Cypress, when we spawn the
+      // browser macOS will decide to use the x86_64 version, not the arm64 version. This is problematic
+      // because the Rosetta translation is painfully slow. To work around this, we wrap the spawn with
+      // the `arch` utility, which will launch the correct architecture (arm64) if it is available in the
+      // universal app, otherwise falling back to x86_64.
+      return cp.spawn(
+        'arch',
+        [cmd, ...args],
+        {
+          ...opts,
+          env: {
+            ARCHPREFERENCE: 'arm64,x86_64',
+            ...opts.env,
+          },
+        } as T,
+      )
     }
 
-    // when Cypress spawns processes on Apple macOS with a Intel process as Cypress's parent,
-    // macOS will launch the rosetta-interpreted version (slow) by default. this wraps the
-    // spawn options to prefer arm64 over x86_64 (rosetta)
-    return cp.spawn(
-      'arch',
-      [cmd, ...args],
-      {
-        ...opts,
-        env: {
-          ARCHPREFERENCE: 'arm64,x86_64',
-          ...opts.env,
-        },
-      } as T,
-    )
+    // Outside of darwin-arm64, we can rely on the OS to launch the correct architecture of the browser.
+    return cp.spawn(cmd, args, opts)
   },
   getOutput: (cmd: string, args: string[]): Bluebird<{ stdout: string, stderr?: string }> => {
     if (os.platform() === 'win32') {
