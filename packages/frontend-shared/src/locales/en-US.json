@@ -554,8 +554,8 @@
       "smartText": "Scale your test runs with built-in Smart Orchestration.",
       "debugText": "Debug tests that fail in CI with visual feedback.",
       "chartText": "Keep your tests in tip-top shape with powerful analytics.",
-      "buttonUser": "Log in to Cypress Cloud",
-      "buttonProject": "Connect your project to Cypress Cloud",
+      "buttonUser": "Connect to Cypress Cloud",
+      "buttonProject": "Connect a Cypress Cloud project",
       "modal": {
         "title": "Connect project",
         "cancel": "Cancel",
@@ -643,10 +643,27 @@
     }
   },
   "debugPage": {
-    "runFailures": "Run Failures",
+    "runFailures": {
+      "btn": "Run Failures",
+      "notFoundLocally": "Spec was not found locally",
+      "switchTestingTypeInfo": "There is {n} {testingType} test failing in this spec. To run it locally switch to {testingType} testing. | There are {n} {testingType} tests failing in this spec. To run them locally switch to {testingType} testing.",
+      "switchTestingTypeAction": "Switch to {testingType} testing"
+    },
     "notLoggedIn": "Not logged in",
     "notConnected": "Not connected",
     "noRuns": "No runs",
+    "emptyStates": {
+      "debugDirectlyInCypress": "Debug failed CI runs directly in Cypress",
+      "reviewRerunAndDebug": "Review, rerun, and debug failed CI test runs that are recorded to Cypress Cloud – all from within your local Cypress app.",
+      "connectToCypressCloud": "Connect to Cypress Cloud",
+      "notLoggedInTestMessage": "Connect to Cypress Cloud to locally debug failed CI test runs",
+      "noProjectTestMessage": "Connect a Cypress Cloud project to locally debug failed CI test runs",
+      "recordYourFirstRun": "Record your first test run to Cypress Cloud",
+      "almostThere": "You're almost there! Start recording your test runs to Cypress Cloud by running the command below in your local or CI terminal.",
+      "noRunsTestMessage": "Record your first test run to Cypress Cloud to locally debug failed CI test runs",
+      "gitRepositoryNotDetected": "Git repository not detected",
+      "ensureGitSetupCorrectly": "Cypress uses Git to associate runs with your local state. Please ensure that version control is set up correctly."
+    },
     "header": {
       "runUrl": "View in Cypress Cloud",
       "commitsAhead": "You are {n} commit ahead | You are {n} commits ahead"
