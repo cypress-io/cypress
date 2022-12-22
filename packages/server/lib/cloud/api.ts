@@ -45,7 +45,7 @@ TcPUDbzAgAV5HeDCJ+46FIK5oIduyZ8WAD1DaIE42XpF69aZ4dpMubtyT0HmpGxr
 -----END PUBLIC KEY-----
 `.trim())
 
-const ENCRYPTION_ENABLED = true // process.env.ENCRYPTION_ENABLED
+const ENCRYPTION_ENABLED = Boolean(process.env.ENCRYPTION_ENABLED)
 const secretKey = crypto.createSecretKey(crypto.randomBytes(16))
 
 const rp = request.defaults((params, callback) => {
