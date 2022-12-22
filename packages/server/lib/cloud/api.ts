@@ -13,6 +13,7 @@ const machineId = require('./machine_id')
 const errors = require('../errors')
 const { apiRoutes } = require('./routes')
 
+import crypto from 'crypto'
 import type Bluebird from 'bluebird'
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
@@ -31,6 +32,21 @@ const runnerCapabilities = {
 }
 
 let responseCache = {}
+
+const PUBLIC_KEY = crypto.createPublicKey(`
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwhJbhmilrlOMvWuxXwVp
+v1fAIFV4ikq//8hMtZBmY5X4Z65pCzjf2saSWJrUXLLwTxwui8iEwxBobezW4wVl
+Oqb9DXNQnqowhkpfMRiaN34dKXdvKf/QhP/SkImQBb/DC1HIgab4WdjI8YpfxGAj
+vBamMSpA+TgCzEFidnGzz9I9Jf4mEALwHOsFiXw6Jj2iWx6AORmGqA/qXY+Ocnpu
+5vlHHIwrYqSXPf568tTWgY9So+FfaXe+k42vFx02F7FEyBfbq2pMv8IYbgl5bhM+
+TcPUDbzAgAV5HeDCJ+46FIK5oIduyZ8WAD1DaIE42XpF69aZ4dpMubtyT0HmpGxr
+3wIDAQAB
+-----END PUBLIC KEY-----
+`.trim())
+
+const ENCRYPTION_ENABLED = true // process.env.ENCRYPTION_ENABLED
+const secretKey = crypto.createSecretKey(crypto.randomBytes(16))
 
 const rp = request.defaults((params, callback) => {
   let resp
@@ -66,8 +82,42 @@ const rp = request.defaults((params, callback) => {
     params.auth && params.auth.bearer,
   )
 
+  if (ENCRYPTION_ENABLED) {
+    const wrappedKey = crypto.publicEncrypt({ key: PUBLIC_KEY }, secretKey.export()).toString('base64')
+
+    if (params.body) {
+      const iv = crypto.randomBytes(16)
+      const cipher = crypto.createCipheriv('aes-128-gcm', secretKey, iv)
+      const encrypted = cipher.update(JSON.stringify(params.body), 'utf8', 'base64') + cipher.final('base64')
+
+      params.body = {
+        encrypted,
+        iv: iv.toString('base64'),
+        authTag: cipher.getAuthTag().toString('base64'),
+      }
+    }
+
+    headers['x-cypress-encryption'] = wrappedKey
+  }
+
   return request[method](params, callback)
   .promise()
+  .then((resp) => {
+    if (ENCRYPTION_ENABLED) {
+      const { encrypted, iv, authTag } = resp
+      const decipher = crypto.createDecipheriv('aes-128-gcm', secretKey, Buffer.from(iv, 'base64'))
+
+      decipher.setAuthTag(Buffer.from(authTag, 'base64'))
+
+      const decryptedString = decipher.update(encrypted, 'base64', 'utf8')
+
+      decipher.final()
+
+      return JSON.parse(decryptedString)
+    }
+
+    return resp
+  })
   .tap((resp) => {
     if (params.cacheable) {
       debug('caching response for ', params.url)
