@@ -1,13 +1,24 @@
 <template>
-  <div>
+  <div class="h-full">
     <div
       v-if="loginConnectStore.user.isLoggedIn && loginConnectStore.project.isProjectConnected && run"
+      class="h-full flex flex-col"
     >
       <DebugPageHeader
         :gql="run"
         :commits-ahead="0"
       />
+      <DebugPageDetails
+        :status="run.status"
+        :specs="run.specs"
+        :total-skipped-count="run.totalSkippedCount"
+        :canceled-at="run.cancelledAt"
+        :canceled-by-full-name="run.cancelledBy.fullName"
+        :is-hidden-by-usage-limits="run.isHiddenByUsageLimits"
+        :over-limit-action-type="run.overLimitActionType"
+      />
       <DebugSpecList
+        v-if="run.totalFailed > 0 && ['ERRORED','CANCELLED','TIMEDOUT'].includes(run.status)"
         :specs="debugSpecsArray"
       />
     </div>
@@ -41,6 +52,7 @@ import type { DebugSpecsFragment } from '../generated/graphql'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import DebugPageHeader from './DebugPageHeader.vue'
 import DebugSpecList from './DebugSpecList.vue'
+import DebugPageDetails from './DebugPageDetails.vue'
 import { useI18n } from 'vue-i18n'
 import { specsList } from './utils/DebugMapping'
 
@@ -54,19 +66,28 @@ fragment DebugSpecs on Query {
       __typename
       ... on CloudProject {
         id
-        runByNumber(runNumber: 6) {
+        runByNumber(runNumber: 1) {
           ...DebugPage
+          cancelledBy {
+            id
+            fullName
+          }
+          cancelledAt
           id
           runNumber
           status
           overLimitActionType
           overLimitActionUrl
+          isHiddenByUsageLimits
+          totalSkipped
+          totalTests
           testsForReview {
             id
             ...DebugSpecListTests
           }
           specs {
             id
+            status
             ...DebugSpecListSpec
           }
         }
