@@ -10,7 +10,7 @@ exports['e2e record passing passes 1'] = `
   │ Specs:      4 found (record_error.cy.js, record_fail.cy.js, record_pass.cy.js, record_uncaught │
   │             .cy.js)                                                                            │
   │ Searched:   cypress/e2e/record*                                                                │
-  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Params:     Tag: false, Group: false, Parallel: false, Auto Cancel After Failures: false       │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -282,7 +282,7 @@ exports['e2e record api interaction errors update instance stdout warns but proc
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
-  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Params:     Tag: false, Group: false, Parallel: false, Auto Cancel After Failures: false       │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -403,7 +403,7 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
-  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Params:     Tag: false, Group: false, Parallel: false, Auto Cancel After Failures: false       │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -936,7 +936,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
-  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Params:     Tag: false, Group: false, Parallel: false, Auto Cancel After Failures: false       │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1016,7 +1016,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
-  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Params:     Tag: false, Group: false, Parallel: false, Auto Cancel After Failures: false       │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1101,7 +1101,7 @@ Details:
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
-  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Params:     Tag: false, Group: false, Parallel: false, Auto Cancel After Failures: false       │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1437,7 +1437,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
-  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Params:     Tag: false, Group: false, Parallel: false, Auto Cancel After Failures: false       │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1519,7 +1519,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
-  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Params:     Tag: false, Group: false, Parallel: false, Auto Cancel After Failures: false       │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1599,7 +1599,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
-  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Params:     Tag: false, Group: false, Parallel: false, Auto Cancel After Failures: false       │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1679,7 +1679,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
-  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Params:     Tag: false, Group: false, Parallel: false, Auto Cancel After Failures: false       │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1759,7 +1759,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
-  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Params:     Tag: false, Group: false, Parallel: false, Auto Cancel After Failures: false       │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1855,7 +1855,7 @@ exports['e2e record api interaction errors create instance 500 without paralleli
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (a_record.cy.js, b_record.cy.js)                                           │
   │ Searched:   cypress/e2e/a_record.cy.js, cypress/e2e/b_record.cy.js                             │
-  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Params:     Tag: false, Group: false, Parallel: false, Auto Cancel After Failures: false       │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1878,7 +1878,7 @@ exports['e2e record api interaction errors create instance errors and exits on c
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (a_record_instantfail.cy.js)                                               │
   │ Searched:   cypress/e2e/a_record_instantfail.cy.js                                             │
-  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Params:     Tag: false, Group: false, Parallel: false, Auto Cancel After Failures: false       │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1965,7 +1965,7 @@ exports['e2e record api interaction errors postInstanceResults errors and exits 
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
-  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Params:     Tag: false, Group: false, Parallel: false, Auto Cancel After Failures: false       │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -2027,7 +2027,7 @@ exports['e2e record api skips specs records tests and exits without executing 1'
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (a_record_instantfail.cy.js, b_record.cy.js)                               │
   │ Searched:   cypress/e2e/a_record_instantfail.cy.js, cypress/e2e/b_record.cy.js                 │
-  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Params:     Tag: false, Group: false, Parallel: false, Auto Cancel After Failures: false       │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -2185,7 +2185,7 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (empty_suite.cy.js, empty.cy.js)                                           │
   │ Searched:   cypress/e2e/empty_suite.cy.js, cypress/e2e/empty.cy.js                             │
-  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Params:     Tag: false, Group: false, Parallel: false, Auto Cancel After Failures: false       │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -2354,7 +2354,7 @@ exports['e2e record video recording when videoUploadOnPasses=false does not uplo
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (record_fail.cy.js, record_pass.cy.js)                                     │
   │ Searched:   cypress/e2e/record_fail*, cypress/e2e/record_pass*                                 │
-  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Params:     Tag: false, Group: false, Parallel: false, Auto Cancel After Failures: false       │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -2488,7 +2488,7 @@ exports['e2e record video recording when video=false does not upload when not en
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
-  │ Params:     Tag: false, Group: false, Parallel: false                                          │
+  │ Params:     Tag: false, Group: false, Parallel: false, Auto Cancel After Failures: false       │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
