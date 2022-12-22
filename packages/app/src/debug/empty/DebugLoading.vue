@@ -14,14 +14,13 @@
         <div class="rounded-full bg-gray-50 h-16px w-72px" />
         <div class="rounded-full bg-gray-50 h-16px ml-8px w-160px" />
         <div class="rounded-full bg-gray-50 h-16px ml-8px w-72px" />
-        <DebugLoadingDivider />
-        <div class="rounded-full bg-gray-50 h-8px ml-8px w-80px" />
-        <DebugLoadingDivider />
-        <div class="rounded-full bg-gray-50 h-8px ml-8px w-80px" />
-        <DebugLoadingDivider />
-        <div class="rounded-full bg-gray-50 h-8px ml-8px w-80px" />
-        <DebugLoadingDivider />
-        <div class="rounded-full bg-gray-50 h-8px ml-8px w-80px" />
+        <template
+          v-for="n in 4"
+          :key="n"
+        >
+          <DebugLoadingDivider />
+          <div class="rounded-full bg-gray-50 h-8px ml-8px w-80px" />
+        </template>
       </div>
     </div>
     <div class="mt-20px">

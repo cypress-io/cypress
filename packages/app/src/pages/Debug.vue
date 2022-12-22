@@ -10,7 +10,7 @@
 <script setup lang="ts">
 
 import DebugContainer from '../debug/DebugContainer.vue'
-import DebugLoading from '../debug/DebugLoading.vue'
+import DebugLoading from '../debug/empty/DebugLoading.vue'
 import { gql, useQuery } from '@urql/vue'
 import { DebugDocument } from '../generated/graphql'
 

@@ -297,7 +297,6 @@ export const CloudRunStubs = {
   somePending: createCloudRun({ status: 'PASSED', totalPassed: 100, totalSkipped: 3000, totalPending: 20 }),
   allSkipped: createCloudRun({ status: 'ERRORED', totalPassed: 0, totalSkipped: 10 }),
   failingWithTests: addFailedTests(createCloudRun({ status: 'FAILED', totalPassed: 8, totalFailed: 2 })),
-  errored: createCloudRun({ status: 'ERRORED', totalPassed: 1, totalFailed: 0, errors: ['There was an error'] }),
 } as Record<string, Required<CloudRun>>
 
 export const CloudUserStubs = {
