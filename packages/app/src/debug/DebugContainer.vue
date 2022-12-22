@@ -98,7 +98,7 @@ const run = computed(() => {
 })
 
 const debugSpecsArray = computed(() => {
-  if (run.value && props.gql.currentProject) {
+  if (run.value && props.gql?.currentProject) {
     const specs = run.value.specs || []
     const tests = run.value.testsForReview || []
     const groups = run.value.groups || []
