@@ -1,10 +1,5 @@
 <template>
-  <div
-    v-if="!query.data.value"
-    data-cy="debug-loader"
-  >
-    Loading
-  </div>
+  <DebugLoading v-if="query.fetching.value" />
   <DebugContainer
     v-else
     data-cy="debug-container"
@@ -15,6 +10,7 @@
 <script setup lang="ts">
 
 import DebugContainer from '../debug/DebugContainer.vue'
+import DebugLoading from '../debug/empty/DebugLoading.vue'
 import { gql, useQuery, useSubscription } from '@urql/vue'
 import { DebugDocument, Debug_SpecsChangeDocument } from '../generated/graphql'
 

@@ -1,7 +1,10 @@
 <template>
   <div>
+    <DebugError
+      v-if="showError"
+    />
     <div
-      v-if="loginConnectStore.user.isLoggedIn && loginConnectStore.project.isProjectConnected && run"
+      v-else-if="loginConnectStore.user.isLoggedIn && loginConnectStore.project.isProjectConnected && run"
     >
       <DebugPageHeader
         :gql="run"
@@ -15,21 +18,9 @@
       v-else
       data-cy="debug-empty"
     >
-      <div
-        v-if="!loginConnectStore.user.isLoggedIn"
-      >
-        {{ t('debugPage.notLoggedIn') }}
-      </div>
-      <div
-        v-else-if="!loginConnectStore.project.isProjectConnected"
-      >
-        {{ t('debugPage.notConnected' ) }}
-      </div>
-      <div
-        v-else-if="!run"
-      >
-        {{ t('debugPage.noRuns') }}
-      </div>
+      <DebugNotLoggedIn v-if="!loginConnectStore.user.isLoggedIn" />
+      <DebugNoProject v-else-if="!loginConnectStore.project.isProjectConnected" />
+      <DebugNoRuns v-else-if="!run" />
     </div>
   </div>
 </template>
@@ -41,10 +32,11 @@ import type { DebugSpecsFragment, TestingTypeEnum } from '../generated/graphql'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import DebugPageHeader from './DebugPageHeader.vue'
 import DebugSpecList from './DebugSpecList.vue'
-import { useI18n } from 'vue-i18n'
+import DebugNotLoggedIn from './empty/DebugNotLoggedIn.vue'
+import DebugNoProject from './empty/DebugNoProject.vue'
+import DebugNoRuns from './empty/DebugNoRuns.vue'
+import DebugError from './empty/DebugError.vue'
 import { specsList } from './utils/DebugMapping'
-
-const { t } = useI18n()
 
 gql`
 fragment DebugLocalSpecs on Spec {
@@ -94,17 +86,19 @@ fragment DebugSpecs on Query {
 `
 
 const props = defineProps<{
-  gql: DebugSpecsFragment
+  gql?: DebugSpecsFragment
+  // This prop is just to stub the error state for now
+  showError?: boolean
 }>()
 
 const loginConnectStore = useLoginConnectStore()
 
 const run = computed(() => {
-  return props.gql.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject.runByNumber : null
+  return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject.runByNumber : null
 })
 
 const debugSpecsArray = computed(() => {
-  if (run.value && props.gql.currentProject) {
+  if (run.value && props.gql?.currentProject) {
     const specs = run.value.specs || []
     const tests = run.value.testsForReview || []
     const groups = run.value.groups || []

@@ -273,8 +273,8 @@ export function createCloudProjectSpecResult (config: Partial<CloudProjectSpec>)
       __typename: 'CloudProjectSpecFlakyStatus',
       severity: 'NONE',
     },
+    specRunsForRunIds: [],
     ...config,
-    specRunsForRunIds: null,
   }
 
   return indexNode(specResult)
