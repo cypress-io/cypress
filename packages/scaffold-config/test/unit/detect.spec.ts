@@ -279,6 +279,30 @@ describe('detectLanguage', () => {
     expect(actual).to.eq('js')
   })
 
+  it('existing project with custom TS cypress config file', async () => {
+    const projectRoot = await scaffoldMigrationProject('config-with-ts')
+
+    fs.rmSync(path.join(projectRoot, 'cypress.config.ts'))
+    await fs.mkdirp(path.join(projectRoot, 'custom_config'))
+    await fs.writeFile(path.join(projectRoot, 'custom_config', 'cypress.config-custom.ts'), '')
+
+    const actual = detectLanguage({ projectRoot, customConfigFile: 'custom_config/cypress.config-custom.ts', pkgJson: {} as PkgJson })
+
+    expect(actual).to.eq('ts')
+  })
+
+  it('existing project with custom JS cypress config file', async () => {
+    const projectRoot = await scaffoldMigrationProject('config-with-js')
+
+    fs.rmSync(path.join(projectRoot, 'cypress.config.js'))
+    await fs.mkdirp(path.join(projectRoot, 'custom_config'))
+    await fs.writeFile(path.join(projectRoot, 'custom_config', 'cypress.config-custom.js'), '')
+
+    const actual = detectLanguage({ projectRoot, customConfigFile: 'custom_config/cypress.config-custom.js', pkgJson: {} as PkgJson })
+
+    expect(actual).to.eq('js')
+  })
+
   it('pristine project with typescript in package.json', async () => {
     const projectRoot = await scaffoldMigrationProject('pristine-yarn')
 
