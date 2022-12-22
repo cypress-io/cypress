@@ -10,7 +10,7 @@ import type { SendDebuggerCommand } from './cdp_automation'
 const debug = debugModule('cypress:server:browsers:memory')
 const debugVerbose = debugModule('cypress-verbose:server:browsers:memory')
 
-// const MEMORY_THRESHOLD_PERCENTAGE = 75
+const MEMORY_THRESHOLD_PERCENTAGE = 50
 const KIBIBYTE = 1024
 const FOUR_GIBIBYTES = 4294967296
 
@@ -144,8 +144,8 @@ const checkMemoryAndCollectGarbage = async (sendDebuggerCommandFn: SendDebuggerC
   debugVerbose('maxAvailableRendererMemory:', maxAvailableRendererMemory, 'bytes')
 
   // only collect garbage if less than the MEMORY_THRESHOLD_PERCENTAGE of the heap left
-  // const shouldCollectGarbage = ((rendererProcess.memRss * KIBIBYTE) / maxAvailableRendererMemory) * 100 >= MEMORY_THRESHOLD_PERCENTAGE
-  const shouldCollectGarbage = testCount === 24
+  const shouldCollectGarbage = ((rendererProcess.memRss * KIBIBYTE) / maxAvailableRendererMemory) * 100 >= MEMORY_THRESHOLD_PERCENTAGE
+  // const shouldCollectGarbage = testCount === 24
 
   let measurement
 
