@@ -1,55 +1,147 @@
-import type { Spec, TestResults } from './DebugSpec.vue'
+import type { TestResults, Spec } from './DebugSpec.vue'
 import DebugSpec from './DebugSpec.vue'
 import { defaultMessages } from '@cy/i18n'
 
-const group1 = {
-  os: {
-    name: 'Linux',
-    nameWithVersion: 'Linux Debian',
+const resultCounts = (min: number, max: number) => {
+  return {
+    min,
+    max,
+  }
+}
+
+const mutlipleGroups: {[groupId: string]: any} = {
+  '123': {
+    os: {
+      name: 'Linux',
+      nameWithVersion: 'Linux Debian',
+    },
+    browser: {
+      formattedName: 'Chrome',
+      formattedNameWithVersion: 'Chrome 106',
+    },
+    groupName: 'Staging',
+    id: '123',
   },
-  browser: {
-    formattedName: 'Chrome',
-    formattedNameWithVersion: 'Chrome 106',
+  '456': {
+    os: {
+      name: 'Apple',
+      nameWithVersion: 'macOS 12.3',
+    },
+    browser: {
+      formattedName: 'Firefox',
+      formattedNameWithVersion: 'Firefox 95.2',
+    },
+    groupName: 'Production',
+    id: '456',
   },
 }
 
-const group2 = {
-  os: {
-    name: 'Apple',
-    nameWithVersion: 'macOS 12.3',
-  },
-  browser: {
-    formattedName: 'Firefox',
-    formattedNameWithVersion: 'Firefox 95.2',
+const singleGroup: {[groupId: string]: any} = {
+  '123': {
+    os: {
+      name: 'Linux',
+      nameWithVersion: 'Linux Debian',
+    },
+    browser: {
+      formattedName: 'Chrome',
+      formattedNameWithVersion: 'Chrome 106',
+    },
+    groupName: 'Staging',
+    id: '123',
   },
 }
 
-const testResults: TestResults[] = [
-  {
-    id: '676df87878',
-    titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
-    instance: [{
-      hasScreenshots: true,
-      hasStdout: true,
-      hasVideo: true,
-      screenshotsUrl: 'www.cypress.io',
-      stdoutUrl: 'www.cypress.io',
-      videoUrl: 'www.cypress.io',
-    }],
-  },
-  {
-    id: '78hjkdf987d9f',
-    titleParts: ['Login', 'redirects to stored path after login'],
-    instance: [{
-      hasScreenshots: true,
-      hasStdout: true,
-      hasVideo: true,
-      screenshotsUrl: 'www.cypress.io',
-      stdoutUrl: 'www.cypress.io',
-      videoUrl: 'www.cypress.io',
-    }],
-  },
-]
+const testResultMultipleGroups: {[thumbprint: string]: TestResults[]} = {
+  'abcd': [
+    {
+      id: '676df87878',
+      titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
+      instance: {
+        groupId: '123',
+        hasScreenshots: true,
+        hasStdout: true,
+        hasVideo: true,
+        screenshotsUrl: 'www.cypress.io',
+        stdoutUrl: 'www.cypress.io',
+        videoUrl: 'www.cypress.io',
+      },
+    },
+    {
+      id: '78afba8sf89',
+      titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
+      instance: {
+        groupId: '456',
+        hasScreenshots: true,
+        hasStdout: true,
+        hasVideo: true,
+        screenshotsUrl: 'www.cypress.io',
+        stdoutUrl: 'www.cypress.io',
+        videoUrl: 'www.cypress.io',
+      },
+    },
+  ],
+  'efgh': [
+    {
+      id: '78hjkdf987d9f',
+      titleParts: ['Login', 'redirects to stored path after login'],
+      instance: {
+        groupId: '123',
+        hasScreenshots: true,
+        hasStdout: true,
+        hasVideo: true,
+        screenshotsUrl: 'www.cypress.io',
+        stdoutUrl: 'www.cypress.io',
+        videoUrl: 'www.cypress.io',
+      },
+    },
+    {
+      id: '283sbd0snd8',
+      titleParts: ['Login', 'redirects to stored path after login'],
+      instance: {
+        groupId: '456',
+        hasScreenshots: true,
+        hasStdout: true,
+        hasVideo: true,
+        screenshotsUrl: 'www.cypress.io',
+        stdoutUrl: 'www.cypress.io',
+        videoUrl: 'www.cypress.io',
+      },
+    },
+  ],
+}
+
+const testResultSingleGroup: {[thumprint: string]: TestResults[]} = {
+  'abcd': [
+    {
+      id: '676df87878',
+      titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
+      instance: {
+        groupId: '123',
+        hasScreenshots: true,
+        hasStdout: true,
+        hasVideo: true,
+        screenshotsUrl: 'www.cypress.io',
+        stdoutUrl: 'www.cypress.io',
+        videoUrl: 'www.cypress.io',
+      },
+    },
+  ],
+  'efgh': [
+    {
+      id: '78hjkdf987d9f',
+      titleParts: ['Login', 'redirects to stored path after login'],
+      instance: {
+        groupId: '123',
+        hasScreenshots: true,
+        hasStdout: true,
+        hasVideo: true,
+        screenshotsUrl: 'www.cypress.io',
+        stdoutUrl: 'www.cypress.io',
+        videoUrl: 'www.cypress.io',
+      },
+    },
+  ],
+}
 
 describe('<DebugSpec/> with multiple test results', () => {
   const spec = {
@@ -57,17 +149,18 @@ describe('<DebugSpec/> with multiple test results', () => {
     path: 'cypress/tests',
     fileName: 'auth',
     fileExtension: '.spec.ts',
-    testsPassed: 2,
-    testsFailed: 22,
-    testsPending: 1,
-    specDuration: '2:23',
-    groups: [group1],
-    testingType: 'component',
+    testsPassed: resultCounts(22, 22),
+    testsFailed: resultCounts(2, 2),
+    testsPending: resultCounts(1, 1),
+    specDuration: {
+      min: 143000,
+      max: 143000,
+    },
   }
 
-  it('mounts correctly', () => {
+  it('mounts correctly for single groups', () => {
     cy.mount(() => (
-      <DebugSpec spec={spec} testResults={testResults} />
+      <DebugSpec spec={spec} testResults={testResultSingleGroup} groups={singleGroup} testingType={'component'} />
     ))
 
     cy.findByTestId('debug-spec-item').children().should('have.length', 3)
@@ -80,6 +173,12 @@ describe('<DebugSpec/> with multiple test results', () => {
 
     cy.findByTestId('spec-header-metadata').children().should('have.length', 3)
     cy.findByTestId('debugHeader-results').should('be.visible')
+
+    // testing debugResultsCalc method
+    cy.findByTestId('runResults-failed-count').should('have.text', 'failed 2')
+    cy.findByTestId('runResults-passed-count').should('have.text', 'passed 22')
+    cy.findByTestId('runResults-pending-count').should('have.text', 'pending 1')
+    cy.findByTestId('metaData-Results-spec-duration').should('have.text', 'spec-duration 02:23')
 
     cy.findAllByTestId('test-group').each((ele) => {
       cy.wrap(ele).within(() => {
@@ -95,7 +194,7 @@ describe('<DebugSpec/> with multiple test results', () => {
 
   it('renders correctly with disabled run-failures button', () => {
     cy.mount(() => (
-      <DebugSpec spec={spec} testResults={testResults} isDisabled={true} />
+      <DebugSpec spec={spec} testResults={testResultSingleGroup} isDisabled={true} groups={singleGroup} testingType={'e2e'}/>
     ))
 
     cy.findByTestId('run-failures').should('have.attr', 'aria-disabled', 'disabled')
@@ -106,22 +205,23 @@ describe('<DebugSpec/> with multiple test results', () => {
 })
 
 describe('<DebugSpec/> responsive UI', () => {
-  it('renders complete UI on smaller viewports', { viewportHeight: 300, viewportWidth: 700 }, () => {
+  it('renders complete UI on smaller viewports', { viewportHeight: 300, viewportWidth: 580 }, () => {
     const spec: Spec = {
       id: '8879798756s88d',
       path: 'cypress/tests',
       fileName: 'AlertBar',
       fileExtension: '.spec.ts',
-      testsPassed: 2,
-      testsFailed: 22,
-      testsPending: 1,
-      specDuration: '2:23',
-      groups: [group1],
-      testingType: 'component',
+      testsPassed: resultCounts(2, 2),
+      testsFailed: resultCounts(22, 22),
+      testsPending: resultCounts(1, 1),
+      specDuration: {
+        min: 143000,
+        max: 143000,
+      },
     }
 
     cy.mount(() => (
-      <DebugSpec spec={spec} testResults={testResults} />
+      <DebugSpec spec={spec} testResults={testResultSingleGroup} groups={singleGroup} testingType={'component'} />
     ))
 
     cy.findByTestId('spec-contents').children().should('have.length', 2)
@@ -132,22 +232,23 @@ describe('<DebugSpec/> responsive UI', () => {
     cy.percySnapshot()
   })
 
-  it('shows complete spec component header with long relative filePath', { viewportHeight: 400, viewportWidth: 600 }, () => {
+  it('shows complete spec component header with long relative filePath', { viewportHeight: 400, viewportWidth: 700 }, () => {
     const spec: Spec = {
       id: '547a0dG90s7f',
       path: 'src/shared/frontend/cow/packages/foo/cypress/tests/e2e/components',
       fileName: 'AlertBar',
       fileExtension: '.spec.ts',
-      testsPassed: 2,
-      testsFailed: 22,
-      testsPending: 1,
-      specDuration: '2:23',
-      groups: [group1],
-      testingType: 'e2e',
+      testsPassed: resultCounts(2, 2),
+      testsFailed: resultCounts(22, 22),
+      testsPending: resultCounts(1, 1),
+      specDuration: {
+        min: 143000,
+        max: 143000,
+      },
     }
 
     cy.mount(() => (
-      <DebugSpec spec={spec} testResults={testResults} />
+      <DebugSpec spec={spec} testResults={testResultSingleGroup} groups={singleGroup} testingType={'e2e'} />
     ))
 
     cy.findByTestId('spec-path').should('have.css', 'text-overflow', 'ellipsis')
@@ -158,22 +259,23 @@ describe('<DebugSpec/> responsive UI', () => {
 })
 
 describe('testing groupings', () => {
-  it('debug-results-header multiple groups', { viewportWidth: 1032 }, () => {
+  it('tests debug spec with multiple groups', { viewportWidth: 1032 }, () => {
     const spec = {
       id: '8879798756s88d',
       path: 'cypress/tests',
       fileName: 'auth',
       fileExtension: '.spec.ts',
-      testsPassed: '22-23',
-      testsFailed: '1-2',
-      testsPending: '1-2',
-      specDuration: '2:23-3:40',
-      groups: [group1, group2],
-      testingType: 'e2e',
+      testsPassed: resultCounts(22, 23),
+      testsFailed: resultCounts(1, 2),
+      testsPending: resultCounts(1, 2),
+      specDuration: {
+        min: 143000,
+        max: 220000,
+      },
     }
 
     cy.mount(() => (
-      <DebugSpec spec={spec} testResults={testResults} />
+      <DebugSpec spec={spec} testResults={testResultMultipleGroups} groups={mutlipleGroups} testingType={'e2e'} />
     ))
 
     cy.findByTestId('debug-spec-item').children().should('have.length', 3)
@@ -189,5 +291,87 @@ describe('testing groupings', () => {
         cy.findAllByTestId('grouped-row').should('have.length', 2)
       })
     })
+  })
+
+  it('test results with multiple groups and repeated browsers and a single group', { viewportWidth: 1200 }, () => {
+    const spec = {
+      id: '8879798756s88d',
+      path: 'cypress/tests',
+      fileName: 'Debug',
+      fileExtension: '.spec.ts',
+      testsPassed: resultCounts(22, 25),
+      testsFailed: resultCounts(1, 3),
+      testsPending: resultCounts(1, 3),
+      specDuration: {
+        min: 143000,
+        max: 220000,
+      },
+    }
+
+    const repeatedValueGroups: {[groupId: string]: any} = {
+      '456': {
+        os: {
+          name: 'Apple',
+          nameWithVersion: 'MacOS 11.4',
+        },
+        browser: {
+          formattedName: 'Chrome',
+          formattedNameWithVersion: 'Chrome 106',
+        },
+        groupName: 'Staging',
+        id: '456',
+      },
+      '123': {
+        os: {
+          name: 'Apple',
+          nameWithVersion: 'MacOS 10.0',
+        },
+        browser: {
+          formattedName: 'Chrome',
+          formattedNameWithVersion: 'Chrome 106',
+        },
+        groupName: 'Production',
+        id: '123',
+      },
+    }
+
+    const tests: {[thumbprint: string]: TestResults[]} = {
+      'abcd': [
+        {
+          id: '676df87878',
+          titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
+          instance: { groupId: '123' },
+        },
+        {
+          id: '78afba8sf89',
+          titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
+          instance: { groupId: '456' },
+        },
+      ],
+      'efgh': [
+        {
+          id: '78hjkdf987d9f',
+          titleParts: ['Login', 'redirects to stored path after login'],
+          instance: { groupId: '456' },
+        },
+      ],
+    }
+
+    cy.mount(() => (
+      <DebugSpec spec={spec} testResults={tests} groups={repeatedValueGroups} testingType={'component'} />
+    ))
+
+    // testing debugResultsCalc method
+    cy.findByTestId('runResults-failed-count').should('have.text', 'failed 1-3')
+    cy.findByTestId('runResults-passed-count').should('have.text', 'passed 22-25')
+    cy.findByTestId('runResults-pending-count').should('have.text', 'pending 1-3')
+    cy.findByTestId('metaData-Results-spec-duration').should('have.text', 'spec-duration 02:23-03:40')
+
+    // testing single OS and browser UI
+    cy.findByTestId('metaData-Results-operating-system-groups').should('have.text', 'operating-system-groups 1 operating system')
+    cy.findByTestId('metaData-Results-browser-groups').should('have.text', 'browser-groups 1 browser')
+
+    cy.findAllByTestId('test-group').should('have.length', 2)
+    cy.findAllByTestId('grouped-row').should('have.length', 3)
   })
 })

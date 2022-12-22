@@ -41,6 +41,7 @@
 
 import { computed } from 'vue'
 import type { SpecDataAggregate, CloudRunGroup } from '@packages/data-context/src/gen/graphcache-config.gen'
+import type { TestingTypeEnum } from '../generated/graphql'
 import { IconTimeStopwatch,
   IconOsLinux,
   IconOsApple,
@@ -53,26 +54,25 @@ import { IconTimeStopwatch,
 
 import LayeredBrowserIcon from './LayeredBrowserIcons.vue'
 
-type StatType = 'DURATION' | 'OS' | 'BROWSER' | 'TESTING' | 'G_OS' | 'GROUPS' | 'G_BROWSERS' | 'STAGING'
+type StatType = 'DURATION' | 'OS' | 'BROWSER' | 'TESTING' | 'G_OS' | 'GROUPS' | 'G_BROWSERS' | 'GROUP_NAME'
 
 interface MetadataProps {
   order?: StatType[]
-  specDuration?: string | SpecDataAggregate
-  testing?: 'e2e' | 'component'
+  specDuration?: string | number
+  testing?: TestingTypeEnum
   groups?: CloudRunGroup[]
-  staging?: string
+  groupName?: string
 }
 
 const props = defineProps<MetadataProps>()
 
-type OSType = 'LINUX' | 'APPLE' | 'WINDOWS' | 'GROUP'
-type TestingType = 'e2e' | 'component'
-
 interface Metadata {
-  value: number | string | null | SpecDataAggregate
+  value: number | string | null | SpecDataAggregate | TestingTypeEnum
   icon: any
   name: string
 }
+
+type OSType = 'LINUX' | 'APPLE' | 'WINDOWS' | 'GROUP'
 
 const OS_MAP: Record<OSType, any> = {
   'LINUX': IconOsLinux,
@@ -81,9 +81,9 @@ const OS_MAP: Record<OSType, any> = {
   'GROUP': IconOsGeneric,
 }
 
-const TESTING_MAP: Record<TestingType, any> = {
-  'e2e': { icon: IconTestingTypeE2E, text: 'e2e' },
-  'component': { icon: IconTestingTypeComponent, text: 'component' },
+const TESTING_MAP: Record<TestingTypeEnum, any> = {
+  'e2e': IconTestingTypeE2E,
+  'component': IconTestingTypeComponent,
 }
 
 const results = computed(() => {
@@ -94,11 +94,26 @@ const results = computed(() => {
   return []
 })
 
-const browserMapping = computed(() => {
-  const acc: string[] = []
+const arrMapping = computed(() => {
+  const acc: {browser: string[], os: string[], firstBrowser: string, firstOS: string} = { browser: [], os: [], firstBrowser: '', firstOS: '' }
+  const uniqueBrowser: Set<string> = new Set()
+  const uniqueOS: Set<string> = new Set()
 
-  props.groups?.forEach((group) => {
-    acc.push(group.browser.formattedName!.toUpperCase())
+  props.groups!.forEach((group: CloudRunGroup, index) => {
+    const formattedName = group.browser.formattedName!.toUpperCase()
+    const osName = group.os.name!.toUpperCase()
+
+    if (!uniqueBrowser.has(formattedName)) {
+      uniqueBrowser.add(formattedName)
+      acc.browser.push(formattedName)
+      if (index === 0) acc.firstBrowser = group.browser.formattedNameWithVersion!
+    }
+
+    if (!uniqueOS.has(osName)) {
+      uniqueOS.add(osName)
+      acc.os.push(osName)
+      if (index === 0) acc.firstOS = group.os.nameWithVersion!
+    }
   })
 
   return acc
@@ -111,39 +126,39 @@ const ORDER_MAP: Record<StatType, Metadata> = {
     name: 'spec-duration',
   },
   'OS': {
-    value: props.groups![0].os.nameWithVersion!,
-    icon: OS_MAP[props.groups![0].os.name!.toUpperCase()],
+    value: arrMapping.value.firstOS,
+    icon: OS_MAP[arrMapping.value.os[0]],
     name: 'operating-system',
   },
   'BROWSER': {
-    value: props.groups![0].browser.formattedNameWithVersion!,
-    icon: browserMapping.value,
+    value: arrMapping.value.firstBrowser,
+    icon: arrMapping.value.browser,
     name: 'browser',
   },
   'TESTING': {
-    value: TESTING_MAP[props.testing!]['text'],
-    icon: TESTING_MAP[props.testing!]['icon'],
+    value: props.testing!,
+    icon: TESTING_MAP[props.testing!],
     name: 'testing-type',
   },
   'GROUPS': {
-    value: `${props.groups!.length } groups`,
+    value: props.groups!.length > 1 ? `${props.groups!.length} groups` : `${props.groups!.length} group`,
     icon: IconTechnologyServer,
     name: 'group-server',
   },
   'G_OS': {
-    value: `${props.groups!.length } operating systems`,
+    value: arrMapping.value.os.length > 1 ? `${arrMapping.value.os.length} operating systems` : `${arrMapping.value.os.length} operating system`,
     icon: OS_MAP['GROUP'],
     name: 'operating-system-groups',
   },
   'G_BROWSERS': {
-    value: `${props.groups!.length } browsers`,
-    icon: browserMapping.value,
+    value: arrMapping.value.browser.length > 1 ? `${arrMapping.value.browser.length} browsers` : `${arrMapping.value.browser.length} browser`,
+    icon: arrMapping.value.browser,
     name: 'browser-groups',
   },
-  'STAGING': {
-    value: props.staging!,
+  'GROUP_NAME': {
+    value: props.groupName!,
     icon: IconTechnologyServer,
-    name: 'staging',
+    name: 'group_name',
   },
 }
 

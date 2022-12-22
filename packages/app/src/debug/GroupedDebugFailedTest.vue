@@ -6,29 +6,27 @@
     :data-cy="`grouped-row`"
   >
     <div
-      class="flex flex-start h-12 items-center gap-x-2.5 non-italic text-base text-gray-700 font-normal border-b-gray-100"
+      class="flex flex-start flex-row h-12 items-center gap-x-2.5 non-italic text-base text-gray-700 font-normal border-b-gray-100"
       data-cy="test-failed-metadata"
     >
-      <StatsMetaData
-        :order="['STAGING', 'OS', 'BROWSER']"
-        spec-duration="0"
-        testing="component"
+      <StatsMetadata
+        :order="['GROUP_NAME', 'OS', 'BROWSER']"
         :groups="[group]"
-        staging="Production"
+        :group-name="group.groupName!"
       />
       <div
         data-cy="debug-artifacts"
         class="flex flex-grow justify-end space-x-4.5 opacity-0 grouped-row-artifacts pr-18px"
       >
         <div
-          v-for="(result, i) in debugArtifacts"
-          :key="i"
-          :data-cy="`artifact--${result.icon}`"
+          v-for="artifact, l in debugArtifacts[group.id]"
+          :key="l"
+          :data-cy="`artifact-${artifact.icon}`"
         >
           <DebugArtifacts
-            :icon="result.icon"
-            :popper-text="result.text"
-            :url="result.url"
+            :icon="artifact.icon"
+            :popper-text="artifact.text"
+            :url="artifact.url"
           />
         </div>
       </div>
@@ -37,13 +35,28 @@
 </template>
 <script lang="ts" setup>
 import type { CloudRunGroup } from '@packages/data-context/src/gen/graphcache-config.gen'
-import StatsMetaData from './StatsMetadata.vue'
+import type { TestResults } from './DebugSpec.vue'
+import StatsMetadata from './StatsMetadata.vue'
 import DebugArtifacts from './DebugArtifacts.vue'
+import { computed } from 'vue'
 
 const props = defineProps<{
+  failedTests: TestResults[]
   groups: CloudRunGroup[]
-  debugArtifacts: {icon: string, text: string, url: string}[]
 }>()
+
+// type: {[groupID: string] : [{icon: string, text: string, url: string | null | undefined}]}
+const debugArtifacts = computed(() => {
+  return props.failedTests.reduce((acc, curr) => {
+    acc[curr.instance.groupId] = [
+      { icon: 'TERMINAL_LOG', text: 'View Log', url: curr.instance!.stdoutUrl ?? '' },
+      { icon: 'IMAGE_SCREENSHOT', text: 'View Screenshot', url: curr.instance!.screenshotsUrl ?? '' },
+      { icon: 'PLAY', text: 'View Video', url: curr.instance!.videoUrl ?? '' },
+    ]
+
+    return acc
+  }, {})
+})
 
 </script>
 <style scoped>

@@ -9,6 +9,8 @@ clear
       :key="spec.spec.id"
       :spec="spec.spec"
       :test-results="spec.tests"
+      :testing-type="spec.testingType"
+      :groups="spec.groups"
     />
   </div>
 </template>
@@ -16,8 +18,8 @@ clear
 <script setup lang="ts">
 import { gql } from '@urql/core'
 import { computed } from '@vue/reactivity'
-import type { DebugSpecListSpecFragment, DebugSpecListTestsFragment } from '../generated/graphql'
 import DebugSpec from './DebugSpec.vue'
+import type { CloudDebugSpec } from './utils/DebugMapping'
 
 gql`
 fragment DebugSpecListSpec on CloudSpecRun {
@@ -51,6 +53,7 @@ fragment DebugSpecListTests on CloudTestResult {
   duration
   isFlaky
   testUrl
+  thumbprint
   instance {
     id
     status
@@ -74,6 +77,7 @@ gql`
 fragment DebugSpecListGroups on CloudRunGroup {
   id
   testingType
+  groupName
   os {
     id
     name
@@ -86,7 +90,7 @@ fragment DebugSpecListGroups on CloudRunGroup {
 `
 
 const props = defineProps<{
-  specs: { spec: DebugSpecListSpecFragment, tests: DebugSpecListTestsFragment[] }[]
+  specs: CloudDebugSpec[]
 }>()
 
 const specs = computed(() => {
@@ -101,8 +105,11 @@ const specs = computed(() => {
         path: specItem.spec.path.replace(fileNameWithoutExtension + fileExtension, ''),
         fileName: fileNameWithoutExtension,
         fileExtension,
+        fullPath: specItem.spec.path,
       },
       tests: specItem.tests,
+      groups: specItem.groups,
+      testingType: specItem.testingType,
     }
   })
 })

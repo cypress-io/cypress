@@ -1,14 +1,34 @@
 import GroupedDebugFailedTest from './GroupedDebugFailedTest.vue'
+import type { TestResult } from './DebugSpec.vue'
 
 describe('<GroupedDebugFailedTest/>', () => {
-  const debugArtifacts: {icon: string, text: string, url: string}[] = [
-    { icon: 'TERMINAL_LOG', text: 'View Log', url: 'www.cypress.io' },
-    { icon: 'IMAGE_SCREENSHOT', text: 'View Screenshot', url: 'www.cypress.io' },
-    { icon: 'PLAY', text: 'View Video', url: 'www.cypress.io' },
+  const testResult: TestResult[] = [
+    {
+      id: '676df87878',
+      titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
+      instance: {
+        groupId: '123',
+        screenshotsUrl: 'www.cypress.io',
+        stdoutUrl: 'www.cypress.io',
+        videoUrl: 'www.cypress.io',
+      },
+    },
+    {
+      id: 'adfkd33829',
+      titleParts: ['Groups', 'Testing across multiple groups'],
+      instance: {
+        groupId: '456',
+        screenshotsUrl: 'cloud.cypress.io',
+        stdoutUrl: 'cloud.cypress.io',
+        videoUrl: 'cloud.cypress.io',
+      },
+    },
   ]
 
   const groups = [
     {
+      id: '123',
+      groupName: 'Staging',
       os: {
         name: 'Linux',
         nameWithVersion: 'Linux Debian',
@@ -19,6 +39,8 @@ describe('<GroupedDebugFailedTest/>', () => {
       },
     },
     {
+      id: '456',
+      groupName: 'Production',
       os: {
         name: 'Windows',
         nameWithVersion: 'Windows 11.2',
@@ -33,7 +55,7 @@ describe('<GroupedDebugFailedTest/>', () => {
   it('mounts correctly and shows artifacts on hover', () => {
     cy.mount(() => (
       <div class='pt-24px'>
-        <GroupedDebugFailedTest debugArtifacts={debugArtifacts} groups={groups} />
+        <GroupedDebugFailedTest groups={groups} failedTests={testResult} />
       </div>
     ))
 

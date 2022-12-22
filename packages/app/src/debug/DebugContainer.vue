@@ -47,53 +47,38 @@ import { specsList } from './utils/DebugMapping'
 const { t } = useI18n()
 
 gql`
-  fragment DebugSpecs on Query {
-    currentProject {
-      id
-      cloudProject {
-        __typename
-        ... on CloudProject {
+fragment DebugSpecs on Query {
+  currentProject {
+    id
+    cloudProject {
+      __typename
+      ... on CloudProject {
+        id
+        runByNumber(runNumber: 1) {
+          ...DebugPage
           id
-          runByNumber(runNumber: 1) {
-            ...DebugPage
+          runNumber
+          status
+          overLimitActionType
+          overLimitActionUrl
+          testsForReview {
             id
-            runNumber
-            status
-            overLimitActionType
-            overLimitActionUrl
-            testsForReview {
-              id
-              ...DebugSpecListTests
-            }
-            specs {
-              id
-              ...DebugSpecListSpec
-            }
-            groups {
-              id
-              testingType
-              os {
-                id
-                name
-                unformattedName
-                version
-                platform
-                nameWithVersion
-              }
-              browser {
-                id
-                unformattedName
-                formattedName
-                unformattedVersion
-                formattedVersion
-                formattedNameWithVersion
-              }
-            }
+            ...DebugSpecListTests
+          }
+          specs {
+            id
+            ...DebugSpecListSpec
+          }
+          groups {
+            id,
+            ...DebugSpecListGroups
           }
         }
       }
     }
+    currentTestingType
   }
+}
 `
 
 const props = defineProps<{
@@ -110,11 +95,16 @@ const debugSpecsArray = computed(() => {
   if (run.value) {
     const specs = run.value.specs || []
     const tests = run.value.testsForReview || []
+    const currentTestingType = props.gql.currentProject?.currentTestingType || 'e2e'
 
-    return specsList(specs, tests)
+    return specsList({
+      specs,
+      tests,
+      groups: run.value.groups,
+      currentTestingType,
+    })
   }
 
   return []
 })
-
 </script>

@@ -3,10 +3,11 @@
     placement="bottom"
     :data-cy="`artifact-for-${icon}`"
   >
-    <button
+    <ExternalLink
       class="flex h-full w-full items-center justify-center"
       :data-cy="`${icon}-button`"
-      @click="props.url"
+      :href="props.url || '#'"
+      :use-default-hocus="true"
     >
       <component
         :is="ICON_MAP[icon]"
@@ -15,7 +16,7 @@
         hocus-stroke-color="indigo-500"
         hocus-fill-color="indigo-100"
       />
-    </button>
+    </ExternalLink>
     <template #popper>
       <span
         class="font-normal text-sm inline-flex"
@@ -29,11 +30,12 @@
 <script lang="ts" setup>
 import { IconTechnologyTerminalLog, IconTechnologyImageScreenshot, IconActionPlaySmall } from '@cypress-design/vue-icon'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 
 const props = defineProps<{
   icon: string
   popperText: string
-  url: string
+  url: string | null | undefined
 }>()
 
 type ArtifactType = 'TERMINAL_LOG' | 'IMAGE_SCREENSHOT' | 'PLAY'
