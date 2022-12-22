@@ -611,7 +611,7 @@ exports['e2e record api interaction errors create instance 500 does not proceed 
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
-  │ Params:     Tag: nightly, Group: foo, Parallel: true                                           │
+  │ Params:     Tag: nightly, Group: foo, Parallel: true, Auto Cancel After Failures: false        │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -639,7 +639,7 @@ exports['e2e record api interaction errors update instance 500 does not proceed 
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
-  │ Params:     Tag: nightly, Group: foo, Parallel: true                                           │
+  │ Params:     Tag: nightly, Group: foo, Parallel: true, Auto Cancel After Failures: false        │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -727,7 +727,7 @@ StatusCodeError: 500 - "Internal Server Error"
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (record_pass.cy.js)                                                        │
   │ Searched:   cypress/e2e/record_pass*                                                           │
-  │ Params:     Tag: nightly, Group: foo, Parallel: true                                           │
+  │ Params:     Tag: nightly, Group: foo, Parallel: true, Auto Cancel After Failures: false        │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1901,7 +1901,7 @@ exports['e2e record api interaction errors postInstanceTests without paralleliza
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (a_record.cy.js, b_record.cy.js)                                           │
   │ Searched:   cypress/e2e/a_record.cy.js, cypress/e2e/b_record.cy.js                             │
-  │ Params:     Tag: false, Group: foo, Parallel: false                                            │
+  │ Params:     Tag: false, Group: foo, Parallel: false, Auto Cancel After Failures: false         │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1932,7 +1932,7 @@ exports['e2e record api interaction errors postInstanceTests with parallelizatio
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (a_record.cy.js, b_record.cy.js)                                           │
   │ Searched:   cypress/e2e/a_record.cy.js, cypress/e2e/b_record.cy.js                             │
-  │ Params:     Tag: false, Group: foo, Parallel: true                                             │
+  │ Params:     Tag: false, Group: foo, Parallel: true, Auto Cancel After Failures: false          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -2106,7 +2106,7 @@ exports['e2e record api skips specs records tests and exits without executing in
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      2 found (a_record_instantfail.cy.js, b_record.cy.js)                               │
   │ Searched:   cypress/e2e/a_record_instantfail.cy.js, cypress/e2e/b_record.cy.js                 │
-  │ Params:     Tag: false, Group: abc, Parallel: true                                             │
+  │ Params:     Tag: false, Group: abc, Parallel: true, Auto Cancel After Failures: false          │
   │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
