@@ -8,15 +8,21 @@
       :key="spec.spec.id"
       :spec="spec.spec"
       :test-results="spec.tests"
+      :found-locally="spec.foundLocally"
+      :testing-type="spec.testingType"
+      :matches-current-testing-type="spec.matchesCurrentTestingType"
+      @switchTestingType="switchTestingType"
     />
   </div>
 </template>
 
 <script setup lang="ts">
 import { gql } from '@urql/core'
+import { useMutation } from '@urql/vue'
 import { computed } from '@vue/reactivity'
-import type { DebugSpecListSpecFragment, DebugSpecListTestsFragment } from '../generated/graphql'
+import { SwitchTestingTypeAndRelaunchDocument, TestingTypeEnum } from '../generated/graphql'
 import DebugSpec from './DebugSpec.vue'
+import type { CloudDebugSpec } from './utils/DebugMapping'
 
 gql`
 fragment DebugSpecListSpec on CloudSpecRun {
@@ -69,9 +75,26 @@ fragment DebugSpecListTests on CloudTestResult {
 }
 `
 
+gql`
+fragment DebugSpecListGroups on CloudRunGroup {
+  id
+  testingType
+  os {
+    id
+    name
+  }
+  browser {
+    id
+    formattedName
+  }
+}
+`
+
 const props = defineProps<{
-  specs: { spec: DebugSpecListSpecFragment, tests: DebugSpecListTestsFragment[] }[]
+  specs: CloudDebugSpec[]
 }>()
+
+const switchTestingTypeMutation = useMutation(SwitchTestingTypeAndRelaunchDocument)
 
 const specs = computed(() => {
   return props.specs.map((specItem) => {
@@ -85,10 +108,18 @@ const specs = computed(() => {
         path: specItem.spec.path.replace(fileNameWithoutExtension + fileExtension, ''),
         fileName: fileNameWithoutExtension,
         fileExtension,
+        fullPath: specItem.spec.path,
       },
       tests: specItem.tests,
+      foundLocally: specItem.foundLocally,
+      testingType: specItem.testingType,
+      matchesCurrentTestingType: specItem.matchesCurrentTestingType,
     }
   })
 })
+
+function switchTestingType (testingType: TestingTypeEnum) {
+  switchTestingTypeMutation.executeMutation({ testingType })
+}
 
 </script>
