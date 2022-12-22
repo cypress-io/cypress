@@ -57,15 +57,15 @@ const getTotalMemoryLimit = () => {
   return limit
 }
 
+let usage
 const getAvailableMemory = async () => {
   let available
 
   if (isCgroupMemoryAvailable) {
-    const usage = Number(execSync('cat /sys/fs/cgroup/memory/memory.usage_in_bytes', { encoding: 'utf8' }))
+    usage = Number(execSync('cat /sys/fs/cgroup/memory/memory.usage_in_bytes', { encoding: 'utf8' }))
+    const stats = getMemoryStats()
 
-    debugVerbose('memory usage from cgroup', usage)
-
-    available = totalMemoryLimit - usage
+    available = totalMemoryLimit - (usage - stats.total_inactive_file)
   } else {
     available = (await si.mem()).available
   }
@@ -148,7 +148,7 @@ const checkMemoryAndCollectGarbage = async (sendDebuggerCommandFn: SendDebuggerC
 
   const memoryStats = getMemoryStats()
 
-  if (testCount === 25) {
+  if (shouldCollectGarbage) {
     debug('forcing garbage collection')
     performance.mark('gc-start')
     await sendDebuggerCommandFn('HeapProfiler.collectGarbage')
@@ -186,6 +186,7 @@ const logMemory = ({ memRss, garbageCollected, gcDuration, currentAvailableMemor
     jsHeapSizeLimit,
     memoryStats: {
       ...memoryStats,
+      usage_in_bytes: usage,
     },
   }
 
