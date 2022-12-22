@@ -3966,6 +3966,7 @@
     "./packages/launcher/lib/darwin/util.ts",
     "./packages/launcher/lib/detect.ts",
     "./packages/launcher/lib/errors.ts",
+    "./packages/launcher/lib/known-browsers.ts",
     "./packages/launcher/lib/linux/index.ts",
     "./packages/launcher/lib/types.ts",
     "./packages/launcher/lib/utils.ts",
