@@ -75,6 +75,23 @@ const getAvailableMemory = async () => {
   return available
 }
 
+const getMemoryStats = () => {
+  if (isCgroupMemoryAvailable) {
+    const rawStats = execSync('cat /sys/fs/cgroup/memory/memory.stat', { encoding: 'utf8' })
+    const stats = rawStats.split('\n').filter(Boolean).reduce((acc, arr) => {
+      const stat = arr.split(' ')
+
+      acc[stat[0]] = stat[1]
+
+      return acc
+    }, {})
+
+    return stats
+  }
+
+  return {}
+}
+
 // retrieve the total memory limit for the container/host at startup
 const totalMemoryLimit = getTotalMemoryLimit()
 
@@ -129,7 +146,9 @@ const checkMemoryAndCollectGarbage = async (sendDebuggerCommandFn: SendDebuggerC
 
   let measurement
 
-  if (shouldCollectGarbage) {
+  const memoryStats = getMemoryStats()
+
+  if (testCount === 25) {
     debug('forcing garbage collection')
     performance.mark('gc-start')
     await sendDebuggerCommandFn('HeapProfiler.collectGarbage')
@@ -149,12 +168,13 @@ const checkMemoryAndCollectGarbage = async (sendDebuggerCommandFn: SendDebuggerC
       currentAvailableMemory,
       maxAvailableRendererMemory,
       jsHeapSizeLimit,
+      memoryStats,
     })
   }
 }
 
 let testCount = 0
-const logMemory = ({ memRss, garbageCollected, gcDuration, currentAvailableMemory, maxAvailableRendererMemory, jsHeapSizeLimit }) => {
+const logMemory = ({ memRss, garbageCollected, gcDuration, currentAvailableMemory, maxAvailableRendererMemory, jsHeapSizeLimit, memoryStats }) => {
   testCount++
   const log = {
     test: testCount,
@@ -164,6 +184,9 @@ const logMemory = ({ memRss, garbageCollected, gcDuration, currentAvailableMemor
     currentAvailableMemory,
     maxAvailableRendererMemory,
     jsHeapSizeLimit,
+    memoryStats: {
+      ...memoryStats,
+    },
   }
 
   fs.appendFile('/tmp/memory.json', JSON.stringify(log))
