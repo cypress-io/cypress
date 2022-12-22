@@ -2,7 +2,7 @@ import Bluebird from 'bluebird'
 import _, { compact, extend, find } from 'lodash'
 import os from 'os'
 import { removeDuplicateBrowsers } from '@packages/data-context/src/sources/BrowserDataSource'
-import { browsers, validateMinVersion } from './browsers'
+import { knownBrowsers, validateMinVersion } from './known-browsers'
 import * as darwinHelper from './darwin'
 import { notDetectedAtPathErr } from './errors'
 import * as linuxHelper from './linux'
@@ -148,7 +148,7 @@ export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
   // we can detect same browser under different aliases
   // tell them apart by the name and the version property
   if (!goalBrowsers) {
-    goalBrowsers = browsers
+    goalBrowsers = knownBrowsers
   }
 
   const compactFalse = (browsers: any[]) => {
@@ -168,7 +168,7 @@ export const detectByPath = (
   goalBrowsers?: Browser[],
 ): Promise<FoundBrowser> => {
   if (!goalBrowsers) {
-    goalBrowsers = browsers
+    goalBrowsers = knownBrowsers
   }
 
   const helper = getHelper()
