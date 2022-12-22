@@ -3,7 +3,7 @@ import si from 'systeminformation'
 import os from 'os'
 import fs from 'fs-extra'
 import { execSync } from 'child_process'
-import { _groupCyProcesses } from '../util/process_profiler'
+import { groupCyProcesses } from '../util/process_profiler'
 
 import type { SendDebuggerCommand } from './cdp_automation'
 
@@ -22,9 +22,9 @@ const FOUR_GIBIBYTES = 4294967296
 *
 * Before each test:
  *   1. set current mem usage for the container/host by reading off cgroup memory usage (if available) otherwise use si.mem().available
- *   2. set current renderer mem usage (using ps, top, or systemd-cgtop)
+ *   2. set current renderer mem usage
  *   3. set max avail render mem to minimum of v8 heap size limit and (total mem limit - current mem usage)
- *   4. calc % of memory used,  current renderer mem usage / max avail render mem
+ *   4. calc % of memory used, current renderer mem usage / max avail render mem
  *   5. if that exceeds the defined memory threshold percentage (e.g. 50%) do a GC
  */
 
@@ -86,7 +86,7 @@ const findRendererProcess = async () => {
   const processes = await si.processes()
 
   // filter down to the renderer processes
-  const groupedProcesses = _groupCyProcesses(processes)
+  const groupedProcesses = groupCyProcesses(processes)
   const rendererProcesses = groupedProcesses.filter((p) => p.group === 'browser' && (p.command.includes('--type=renderer') || p.params.includes('--type=renderer')))
 
   if (rendererProcesses.length === 0) return null
@@ -142,7 +142,14 @@ const checkMemoryAndCollectGarbage = async (sendDebuggerCommandFn: SendDebuggerC
   }
 
   if (debugVerbose.enabled) {
-    logMemory({ memRss: rendererProcess.memRss * KIBIBYTE, garbageCollected: shouldCollectGarbage, gcDuration: measurement?.duration, currentAvailableMemory, maxAvailableRendererMemory, jsHeapSizeLimit })
+    logMemory({
+      memRss: rendererProcess.memRss * KIBIBYTE,
+      garbageCollected: shouldCollectGarbage,
+      gcDuration: measurement?.duration,
+      currentAvailableMemory,
+      maxAvailableRendererMemory,
+      jsHeapSizeLimit,
+    })
   }
 }
 
