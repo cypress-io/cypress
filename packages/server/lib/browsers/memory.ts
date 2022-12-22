@@ -10,7 +10,7 @@ import type { SendDebuggerCommand } from './cdp_automation'
 const debug = debugModule('cypress:server:browsers:memory')
 const debugVerbose = debugModule('cypress-verbose:server:browsers:memory')
 
-const MEMORY_THRESHOLD_PERCENTAGE = 75
+// const MEMORY_THRESHOLD_PERCENTAGE = 75
 const KIBIBYTE = 1024
 const FOUR_GIBIBYTES = 4294967296
 
@@ -117,6 +117,8 @@ const findRendererProcess = async () => {
 }
 
 const checkMemoryAndCollectGarbage = async (sendDebuggerCommandFn: SendDebuggerCommand) => {
+  performance.mark('check-and-collect-gc-start')
+
   let jsHeapSizeLimit = (await getJsHeapSizeLimit({ sendDebuggerCommandFn }))
 
   if (!jsHeapSizeLimit) {
@@ -142,7 +144,8 @@ const checkMemoryAndCollectGarbage = async (sendDebuggerCommandFn: SendDebuggerC
   debugVerbose('maxAvailableRendererMemory:', maxAvailableRendererMemory, 'bytes')
 
   // only collect garbage if less than the MEMORY_THRESHOLD_PERCENTAGE of the heap left
-  const shouldCollectGarbage = ((rendererProcess.memRss * KIBIBYTE) / maxAvailableRendererMemory) * 100 >= MEMORY_THRESHOLD_PERCENTAGE
+  // const shouldCollectGarbage = ((rendererProcess.memRss * KIBIBYTE) / maxAvailableRendererMemory) * 100 >= MEMORY_THRESHOLD_PERCENTAGE
+  const shouldCollectGarbage = testCount === 24
 
   let measurement
 
@@ -160,11 +163,15 @@ const checkMemoryAndCollectGarbage = async (sendDebuggerCommandFn: SendDebuggerC
     debug('skipping garbage collection')
   }
 
+  performance.mark('check-and-collect-gc-end')
+  const checkAndCollectGcMeasurement = performance.measure('garbage collection', 'check-and-collect-gc-start', 'check-and-collect-gc-end')
+
   if (debugVerbose.enabled) {
     logMemory({
       memRss: rendererProcess.memRss * KIBIBYTE,
       garbageCollected: shouldCollectGarbage,
       gcDuration: measurement?.duration,
+      checkAndCollectGcDuration: checkAndCollectGcMeasurement.duration,
       currentAvailableMemory,
       maxAvailableRendererMemory,
       jsHeapSizeLimit,
@@ -174,13 +181,14 @@ const checkMemoryAndCollectGarbage = async (sendDebuggerCommandFn: SendDebuggerC
 }
 
 let testCount = 0
-const logMemory = ({ memRss, garbageCollected, gcDuration, currentAvailableMemory, maxAvailableRendererMemory, jsHeapSizeLimit, memoryStats }) => {
+const logMemory = ({ memRss, garbageCollected, gcDuration, currentAvailableMemory, maxAvailableRendererMemory, jsHeapSizeLimit, memoryStats, checkAndCollectGcDuration }) => {
   testCount++
   const log = {
     test: testCount,
     memRss,
     garbageCollected,
     gcDuration,
+    checkAndCollectGcDuration,
     currentAvailableMemory,
     maxAvailableRendererMemory,
     jsHeapSizeLimit,
