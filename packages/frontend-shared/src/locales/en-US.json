@@ -643,7 +643,12 @@
     }
   },
   "debugPage": {
-    "runFailures": "Run Failures",
+    "runFailures": {
+      "btn": "Run Failures",
+      "notFoundLocally": "Spec was not found locally",
+      "switchTestingTypeInfo": "There is {n} {testingType} test failing in this spec. To run it locally switch to {testingType} testing. | There are {n} {testingType} tests failing in this spec. To run them locally switch to {testingType} testing.",
+      "switchTestingTypeAction": "Switch to {testingType} testing"
+    },
     "notLoggedIn": "Not logged in",
     "notConnected": "Not connected",
     "noRuns": "No runs",

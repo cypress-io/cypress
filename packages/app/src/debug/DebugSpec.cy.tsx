@@ -1,5 +1,4 @@
-import type { Spec, TestResults } from './DebugSpec.vue'
-import DebugSpec from './DebugSpec.vue'
+import DebugSpec, { Spec, TestResults } from './DebugSpec.vue'
 import { defaultMessages } from '@cy/i18n'
 
 describe('<DebugSpec/> with multiple test results', () => {
@@ -8,6 +7,7 @@ describe('<DebugSpec/> with multiple test results', () => {
     path: 'cypress/tests/',
     fileName: 'auth',
     fileExtension: '.spec.ts',
+    fullPath: 'cypress/tests/auth.spec.ts',
   }
 
   const testResults: TestResults[] = [
@@ -23,7 +23,7 @@ describe('<DebugSpec/> with multiple test results', () => {
 
   it('mounts correctly', () => {
     cy.mount(() => (
-      <DebugSpec spec={spec} testResults={testResults} />
+      <DebugSpec spec={spec} testResults={testResults} foundLocally={true} testingType={'e2e'} matchesCurrentTestingType={true} />
     ))
 
     cy.findByTestId('debug-spec-item').children().should('have.length', 3)
@@ -31,20 +31,9 @@ describe('<DebugSpec/> with multiple test results', () => {
     cy.findByTestId('spec-path').should('have.text', 'cypress/tests/auth.spec.ts')
     cy.contains('auth').should('be.visible')
     cy.findByTestId('run-failures').should('not.be.disabled')
-    .contains(defaultMessages.debugPage.runFailures)
+    .contains(defaultMessages.debugPage.runFailures.btn)
 
     cy.findAllByTestId('test-group').should('have.length', 2)
-
-    cy.percySnapshot()
-  })
-
-  it('renders correctly with disabled run-failures button', () => {
-    cy.mount(() => (
-      <DebugSpec spec={spec} testResults={testResults} isDisabled={true} />
-    ))
-
-    cy.findByTestId('run-failures').should('have.attr', 'aria-disabled', 'disabled')
-    .should('not.have.attr', 'href')
 
     cy.percySnapshot()
   })
@@ -68,10 +57,11 @@ describe('<DebugSpec/> responsive UI', () => {
       path: 'cypress/tests/',
       fileName: 'AlertBar',
       fileExtension: '.spec.ts',
+      fullPath: 'cypress/tests/AlertBar.spec.ts',
     }
 
     cy.mount(() => (
-      <DebugSpec spec={spec} testResults={testResults} />
+      <DebugSpec spec={spec} testResults={testResults} foundLocally={true} testingType={'e2e'} matchesCurrentTestingType={true} />
     ))
 
     cy.findByTestId('spec-contents').children().should('have.length', 2)
@@ -88,15 +78,84 @@ describe('<DebugSpec/> responsive UI', () => {
       path: 'src/shared/frontend/cow/packages/foo/cypress/tests/e2e/components',
       fileName: 'AlertBar',
       fileExtension: '.spec.ts',
+      fullPath: 'src/shared/frontend/cow/packages/foo/cypress/tests/e2e/components/AlertBar.spec.ts',
     }
 
     cy.mount(() => (
-      <DebugSpec spec={spec} testResults={testResults} />
+      <DebugSpec spec={spec} testResults={testResults} foundLocally={true} testingType={'e2e'} matchesCurrentTestingType={true} />
     ))
 
     cy.findByTestId('spec-path').should('have.css', 'text-overflow', 'ellipsis')
     cy.findByTestId('run-failures').should('be.visible')
 
     cy.percySnapshot()
+  })
+})
+
+describe('Run Failures button', () => {
+  const spec: Spec = {
+    id: '1',
+    path: 'cypress/tests/',
+    fileName: 'auth',
+    fileExtension: '.spec.ts',
+    fullPath: 'cypress/tests/auth.spec.ts',
+  }
+
+  const testResults: TestResults[] = [
+    {
+      id: '2',
+      titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
+    },
+    {
+      id: '3',
+      titleParts: ['Login', 'redirects to stored path after login'],
+    },
+  ]
+
+  it('is disabled if spec is not found locally', () => {
+    cy.mount(() => <DebugSpec spec={spec} testResults={testResults} foundLocally={false} testingType={'e2e'} matchesCurrentTestingType={true}/>)
+
+    cy.findByTestId('run-failures')
+    .should('have.attr', 'aria-disabled', 'disabled')
+    .should('not.have.attr', 'href')
+
+    cy.findByTestId('run-failures').realHover()
+
+    cy.findByTestId('run-all-failures-tooltip').should('be.visible').contains('Spec was not found locally')
+
+    cy.percySnapshot()
+  })
+
+  it('is disabled if run testing-type differs from the current testing-type', () => {
+    cy.mount(() => (
+      <DebugSpec
+        spec={spec}
+        testResults={testResults}
+        foundLocally={true}
+        testingType='e2e'
+        matchesCurrentTestingType={false}
+        onSwitchTestingType={cy.spy().as('switchTestingType')}/>
+    ))
+
+    cy.findByTestId('run-failures')
+    .should('have.attr', 'aria-disabled', 'disabled')
+    .should('not.have.attr', 'href')
+
+    cy.findByTestId('run-failures').realHover()
+
+    cy.findByTestId('run-all-failures-tooltip').should('be.visible').within(() => {
+      cy.contains('span', 'There are 2 e2e tests failing in this spec. To run them locally switch to e2e testing.')
+      cy.contains('button', 'Switch to e2e testing').click()
+
+      cy.get('@switchTestingType').should('have.been.calledWith', 'e2e')
+    })
+  })
+
+  it('is enabled if found locally and same testing type', () => {
+    cy.mount(() => <DebugSpec spec={spec} testResults={testResults} foundLocally={true} testingType={'e2e'} matchesCurrentTestingType={true}/>)
+
+    cy.findByTestId('run-failures')
+    .should('have.attr', 'href', '#/specs/runner?file=cypress/tests/auth.spec.ts')
+    .and('not.have.attr', 'aria-disabled')
   })
 })

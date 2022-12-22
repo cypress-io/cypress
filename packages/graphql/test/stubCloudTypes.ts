@@ -186,6 +186,9 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
     createdAt: new Date(Date.now() - 1000 * 60 * 61).toISOString(),
     completedAt: null,
     cancelledAt: null,
+    cancelOnFailure: null,
+    cancelledBy: null,
+    errors: [],
     ci: {
       __typename: 'CloudCiBuildInfo',
       id: 'ci_id',
@@ -200,9 +203,6 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
       sha: `fake-sha-${getNodeIdx('CloudRun')}`,
       summary: `fix: make gql work ${config.status ?? 'PASSED'}`,
     }),
-    cancelOnFailure: false,
-    cancelledBy: null,
-    errors: [],
     ...config,
   }
 
@@ -231,7 +231,7 @@ function addFailedTests (run: CloudRun) {
     testUrl: 'http://cloudurl',
     title: '<test/> Should render',
     titleParts: ['<test/>', 'should render'],
-    thumbprint: 'abc123',
+    thumbprint: 'abc',
   }
 
   run.specs = [spec]
