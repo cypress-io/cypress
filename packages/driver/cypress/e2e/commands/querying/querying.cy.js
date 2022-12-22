@@ -82,6 +82,12 @@ describe('src/cy/commands/querying', () => {
       cy.get('doesNotExist')
     })
 
+    it('respects null withinSubject', () => {
+      cy.get('#list').within(() => {
+        cy.get('#upper', { withinSubject: null })
+      })
+    })
+
     describe('custom elements', () => {
       // <foobarbazquux>custom element</foobarbazquux>
 
