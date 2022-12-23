@@ -161,11 +161,11 @@ describe('<DebugSpec/> with multiple test results', () => {
 
   it('mounts correctly for single groups', () => {
     cy.mount(() => (
-      <DebugSpec spec={spec} 
-        testResults={testResultSingleGroup} 
-        groups={singleGroup} 
-        testingType={'e2e'} 
-        foundLocally={true} 
+      <DebugSpec spec={spec}
+        testResults={testResultSingleGroup}
+        groups={singleGroup}
+        testingType={'e2e'}
+        foundLocally={true}
         matchesCurrentTestingType={true}
         fullPath={'cypress/tests/auth.spec.ts'}
       />
@@ -210,7 +210,6 @@ describe('<DebugSpec/> with multiple test results', () => {
 
     cy.percySnapshot()
   })
-
 })
 
 describe('<DebugSpec/> responsive UI', () => {
@@ -389,7 +388,6 @@ describe('testing groupings', () => {
   })
 })
 
-
 describe('Run Failures button', () => {
   const spec: Spec = {
     id: '1',
@@ -425,7 +423,7 @@ describe('Run Failures button', () => {
       <DebugSpec
         spec={spec}
         testResults={testResultSingleGroup}
-        groups={singleGroup} 
+        groups={singleGroup}
         foundLocally={true}
         testingType='e2e'
         matchesCurrentTestingType={false}
@@ -438,7 +436,7 @@ describe('Run Failures button', () => {
     .should('not.have.attr', 'href')
 
     cy.findByTestId('run-failures').realHover()
-    
+
     cy.findByTestId('run-all-failures-tooltip').should('be.visible').within(() => {
       cy.contains('span', 'There are 2 e2e tests failing in this spec. To run them locally switch to e2e testing.')
       cy.contains('button', 'Switch to e2e testing').click()

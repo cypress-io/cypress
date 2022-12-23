@@ -76,8 +76,7 @@ describe('<DebugContainer />', () => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
             const test = result.currentProject.cloudProject.runByNumber
             const other = CloudRunStubs.failingWithTests as typeof test
-            // result.currentProject.cloudProject.runByNumber?.groups = [] // [
-            //   { id: 'a', testingType: 'e2e' },
+
             result.currentProject.cloudProject.runByNumber = other
           }
         },
@@ -111,17 +110,18 @@ describe('<DebugContainer />', () => {
       ] as DebugSpecListGroupsFragment[]
 
       const debugMappingArray = specsList({ specs, tests, groups, localSpecs: [], currentTestingType: 'e2e' })
+
       // [{ specId: 'a1c', id: 'random1' }, { specId: 'a1c', id: 'random2' }], groups: [{ id: 'a', testingType: 'e2e' }]
       expect(debugMappingArray).to.have.length(1)
       expect(debugMappingArray[0]).to.deep.equal(
-        { 
-          spec: { id: 'a1c', groupIds: ['a'] }, 
-          tests: {'unique1': [{ specId: 'a1c', id: 'random1', thumbprint: 'unique1' }], 'unique2': [{ specId: 'a1c', id: 'random2', thumbprint: 'unique2' }]},
-          groups: {'a': { id: 'a', testingType: 'e2e' }},
-          foundLocally: false, 
-          testingType: 'e2e', 
-          matchesCurrentTestingType: true
-       }
+        {
+          spec: { id: 'a1c', groupIds: ['a'] },
+          tests: { 'unique1': [{ specId: 'a1c', id: 'random1', thumbprint: 'unique1' }], 'unique2': [{ specId: 'a1c', id: 'random2', thumbprint: 'unique2' }] },
+          groups: { 'a': { id: 'a', testingType: 'e2e' } },
+          foundLocally: false,
+          testingType: 'e2e',
+          matchesCurrentTestingType: true,
+        },
       )
     })
 
@@ -132,12 +132,12 @@ describe('<DebugContainer />', () => {
         { id: '789', groupIds: ['a', 'b'] },
       ] as DebugSpecListSpecFragment[]
       const tests = [
-        { specId: '123', id: 'random1', thumbprint: 'unique1'},
+        { specId: '123', id: 'random1', thumbprint: 'unique1' },
         { specId: '456', id: 'random2', thumbprint: 'unique2' },
         { specId: '456', id: 'random3', thumbprint: 'unique3' },
         { specId: '789', id: 'random4', thumbprint: 'unique4' },
         { specId: '123', id: 'random6', thumbprint: 'unique5' },
-        { specId: '789', id: 'random7', thumbprint: 'unique4' }
+        { specId: '789', id: 'random7', thumbprint: 'unique4' },
       ] as DebugSpecListTestsFragment[]
       const groups = [
         { id: 'a', testingType: 'e2e' },
@@ -145,35 +145,35 @@ describe('<DebugContainer />', () => {
       ] as DebugSpecListGroupsFragment[]
 
       const debugMappingArray = specsList({ specs, tests, localSpecs: [], currentTestingType: 'e2e', groups })
-      const expectedSpec123 = { 
+      const expectedSpec123 = {
         spec: { id: '123', groupIds: ['a'] },
-        tests: { 'unique1': [{ specId: '123', id: 'random1', thumbprint: 'unique1' }], 'unique5': [{ specId: '123', id: 'random6', thumbprint: 'unique5' }]}, 
-        groups: {'a': { id: 'a', testingType: 'e2e' }}, 
-        foundLocally: false, 
-        testingType: 'e2e', 
-        matchesCurrentTestingType: true
+        tests: { 'unique1': [{ specId: '123', id: 'random1', thumbprint: 'unique1' }], 'unique5': [{ specId: '123', id: 'random6', thumbprint: 'unique5' }] },
+        groups: { 'a': { id: 'a', testingType: 'e2e' } },
+        foundLocally: false,
+        testingType: 'e2e',
+        matchesCurrentTestingType: true,
       }
 
       const expectedSpec456 = {
         spec: { id: '456', groupIds: ['b'] },
-        tests: { 'unique2': [{ specId: '456', id: 'random2', thumbprint: 'unique2' }], 'unique3': [{ specId: '456', id: 'random3', thumbprint: 'unique3' }]}, 
-        groups: {'b': { id: 'b', testingType: 'e2e' }}, 
-        foundLocally: false, 
-        testingType: 'e2e', 
-        matchesCurrentTestingType: true
+        tests: { 'unique2': [{ specId: '456', id: 'random2', thumbprint: 'unique2' }], 'unique3': [{ specId: '456', id: 'random3', thumbprint: 'unique3' }] },
+        groups: { 'b': { id: 'b', testingType: 'e2e' } },
+        foundLocally: false,
+        testingType: 'e2e',
+        matchesCurrentTestingType: true,
       }
 
       const expectedSpec789 = {
-        spec: { id: '789', groupIds: ['a','b'] },
-        tests: { 'unique4': [{ specId: '789', id: 'random4', thumbprint: 'unique4' }, {specId: '789', id: 'random7', thumbprint: 'unique4'}]}, 
-        groups: {'a': { id: 'a', testingType: 'e2e' }, 'b': { id: 'b', testingType: 'e2e' }}, 
-        foundLocally: false, 
-        testingType: 'e2e', 
-        matchesCurrentTestingType: true
+        spec: { id: '789', groupIds: ['a', 'b'] },
+        tests: { 'unique4': [{ specId: '789', id: 'random4', thumbprint: 'unique4' }, { specId: '789', id: 'random7', thumbprint: 'unique4' }] },
+        groups: { 'a': { id: 'a', testingType: 'e2e' }, 'b': { id: 'b', testingType: 'e2e' } },
+        foundLocally: false,
+        testingType: 'e2e',
+        matchesCurrentTestingType: true,
       }
 
       const expected = [
-        expectedSpec123, expectedSpec456, expectedSpec789
+        expectedSpec123, expectedSpec456, expectedSpec789,
       ]
 
       expect(debugMappingArray).to.deep.equal(expected)
@@ -193,15 +193,15 @@ describe('<DebugContainer />', () => {
       expect(debugMappingArray).to.have.length(1)
       expect(debugMappingArray).to.deep.equal(
         [
-          { 
-            spec: { id: '123', groupIds: ['a'] }, 
-            tests: {'unique1': [{ specId: '123', id: 'random1', thumbprint: 'unique1' }]}, 
-            groups: {'a': { id: 'a', testingType: 'e2e' }}, 
-            foundLocally: false, 
-            testingType: 'e2e', 
-            matchesCurrentTestingType: true 
-          }
-        ]
+          {
+            spec: { id: '123', groupIds: ['a'] },
+            tests: { 'unique1': [{ specId: '123', id: 'random1', thumbprint: 'unique1' }] },
+            groups: { 'a': { id: 'a', testingType: 'e2e' } },
+            foundLocally: false,
+            testingType: 'e2e',
+            matchesCurrentTestingType: true,
+          },
+        ],
       )
     })
 
