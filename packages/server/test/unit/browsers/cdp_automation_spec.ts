@@ -1,6 +1,7 @@
 const { expect, sinon } = require('../../spec_helper')
 
 import { CdpAutomation } from '../../../lib/browsers/cdp_automation'
+import * as memory from '../../../lib/browsers/memory'
 
 context('lib/browsers/cdp_automation', () => {
   context('.CdpAutomation', () => {
@@ -15,13 +16,7 @@ context('lib/browsers/cdp_automation', () => {
         onRequestEvent: sinon.stub(),
       }
 
-      cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, this.automation, false)
-
-      this.sendDebuggerCommand
-      .throws(new Error('not stubbed'))
-      .withArgs('Browser.getVersion')
-      .resolves()
-
+      cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, this.automation)
       this.onRequest = cdpAutomation.onRequest
     })
 
@@ -307,6 +302,14 @@ context('lib/browsers/cdp_automation', () => {
         this.sendDebuggerCommand.withArgs('Page.bringToFront').resolves()
 
         return this.onRequest('focus:browser:window').then((resp) => expect(resp).to.be.undefined)
+      })
+    })
+
+    describe('maybe:collect:garbage', function () {
+      it('calls memory.checkMemoryAndCollectGarbage', function () {
+        sinon.stub(memory, 'checkMemoryAndCollectGarbage').withArgs(this.sendDebuggerCommand).resolves()
+
+        return this.onRequest('maybe:collect:garbage').then((resp) => expect(resp).to.be.undefined)
       })
     })
   })

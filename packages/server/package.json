@@ -179,7 +179,7 @@
     "react": "16.8.6",
     "repl.history": "0.1.4",
     "rimraf": "3.0.2",
-    "sinon": "5.1.1",
+    "sinon": "15.0.1",
     "snap-shot-it": "7.9.3",
     "ssestream": "1.0.1",
     "supertest": "4.0.2",

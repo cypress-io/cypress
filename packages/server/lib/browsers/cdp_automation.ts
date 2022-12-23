@@ -12,7 +12,7 @@ import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@
 import type { WriteVideoFrame } from '@packages/types'
 import type { Automation } from '../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
-import { checkMemoryAndCollectGarbage } from './memory'
+import Memory from './memory'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
@@ -155,7 +155,7 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
 }
 
 export class CdpAutomation {
-  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation) {
+  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private memory: Memory) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
   }
@@ -170,7 +170,8 @@ export class CdpAutomation {
   }
 
   static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation): Promise<CdpAutomation> {
-    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, sendCloseCommandFn, automation)
+    const memory = new Memory(sendDebuggerCommandFn)
+    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, sendCloseCommandFn, automation, memory)
 
     await sendDebuggerCommandFn('Network.enable', {
       maxTotalBufferSize: 0,
@@ -355,8 +356,8 @@ export class CdpAutomation {
         return this.sendCloseCommandFn(data.shouldKeepTabOpen)
       case 'focus:browser:window':
         return this.sendDebuggerCommandFn('Page.bringToFront')
-      case 'force:garbage:collection':
-        return checkMemoryAndCollectGarbage(this.sendDebuggerCommandFn)
+      case 'maybe:collect:garbage':
+        return this.memory.checkMemoryAndCollectGarbage(this.sendDebuggerCommandFn)
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }
