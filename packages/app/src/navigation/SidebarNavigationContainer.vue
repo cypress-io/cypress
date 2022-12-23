@@ -9,12 +9,25 @@
 import SidebarNavigation from './SidebarNavigation.vue'
 import { gql, useQuery } from '@urql/vue'
 import { SideBarNavigationContainerDocument } from '../generated/graphql'
+import { useRelevantRun } from '@packages/app/src/composables/useRelevantRun'
+import { ref, watchEffect } from 'vue'
 
 gql`
-query SideBarNavigationContainer {
+query SideBarNavigationContainer($runNumber: Int!) {
   ...SidebarNavigation
 }
 `
 
-const query = useQuery({ query: SideBarNavigationContainerDocument })
+const relevantRun = useRelevantRun()
+
+const variables = ref({ runNumber: -1 })
+
+const query = useQuery({ query: SideBarNavigationContainerDocument, variables, pause: true })
+
+watchEffect(() => {
+  if (relevantRun.value) {
+    variables.value.runNumber = relevantRun.value
+    query.executeQuery()
+  }
+})
 </script>

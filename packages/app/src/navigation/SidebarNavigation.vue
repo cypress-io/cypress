@@ -114,7 +114,7 @@ import { isAllowedFeature } from '@packages/frontend-shared/src/utils/isAllowedF
 const { t } = useI18n()
 
 gql`
-fragment SidebarNavigation on Query {
+fragment SidebarNavigation_Settings on Query {
   localSettings {
     preferences {
       isSideNavigationOpen
@@ -124,13 +124,19 @@ fragment SidebarNavigation on Query {
       specListWidth
     }
   }
+}
+`
+
+gql`
+fragment SidebarNavigation on Query {
+  ...SidebarNavigation_Settings
   currentProject {
     id
     cloudProject {
       __typename
       ... on CloudProject {
         id
-        runByNumber(runNumber: 2) {
+        runByNumber(runNumber: $runNumber) {
           id
           status
           testsForReview {
@@ -148,7 +154,7 @@ fragment SidebarNavigation on Query {
 gql`
 mutation SideBarNavigation_SetPreferences ($value: String!) {
   setPreferences (value: $value, type: global) {
-    ...SidebarNavigation
+    ...SidebarNavigation_Settings
   }
 }`
 
