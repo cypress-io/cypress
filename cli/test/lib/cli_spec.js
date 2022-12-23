@@ -496,17 +496,12 @@ describe('cli', () => {
 
     it('call run with --auto-cancel-after-failures', () => {
       this.exec('run --auto-cancel-after-failures 4')
-      expect(run.start).to.be.calledWith({ autoCancelAfterFailures: 4 })
+      expect(run.start).to.be.calledWith({ autoCancelAfterFailures: '4' })
     })
 
     it('call run with --auto-cancel-after-failures with false', () => {
       this.exec('run --auto-cancel-after-failures false')
-      expect(run.start).to.be.calledWith({ autoCancelAfterFailures: false })
-    })
-
-    it('removes double quotes from --auto-cancel-after-failures', () => {
-      this.exec('run --auto-cancel-after-failures "4"')
-      expect(run.start).to.be.calledWith({ autoCancelAfterFailures: 4 })
+      expect(run.start).to.be.calledWith({ autoCancelAfterFailures: 'false' })
     })
 
     it('call run with --no-auto-cancel-after-failures', () => {
