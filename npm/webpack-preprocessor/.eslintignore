@@ -6,4 +6,3 @@
 **/test/fixtures
 **/_test-output
 /cypress/tests/e2e/compile-error.js
-/examples/use-babelrc/cypress/e2e/spec.cy.js
