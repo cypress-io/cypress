@@ -255,4 +255,27 @@ it('visits a basic html page', () => {
     // Cypress in Cypress, it redirects us the the spec page, which is not what normally
     // would happen in production.
   })
+
+  it('shows menu and submenu correctly', () => {
+    launchStudio()
+
+    cy.getAutIframe().within(() => {
+      // Show menu
+      cy.get('h1').realClick({
+        button: 'right',
+      })
+
+      cy.get('.__cypress-studio-assertions-menu').shadow()
+      .find('.assertions-menu').should('be.visible')
+
+      // Show submenu
+      cy.get('.__cypress-studio-assertions-menu').shadow()
+      .find('.assertion-type-text:first').realHover()
+
+      cy.get('.__cypress-studio-assertions-menu').shadow()
+      .find('.assertion-option')
+      .should('have.text', 'Hello, Studio!')
+      .should('be.visible')
+    })
+  })
 })
