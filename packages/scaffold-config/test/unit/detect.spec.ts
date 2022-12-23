@@ -441,19 +441,6 @@ describe('detectLanguage', () => {
       expect(actual).to.eq('ts')
     })
 
-    it('cwith a TypeScript integration specs', async () => {
-      const projectRoot = await scaffoldMigrationProject('migration-ts-files-only')
-
-      fakeDepsInNodeModules(projectRoot, [{ devDependency: 'typescript', version: '4.3.6' }])
-
-      // detected based on `integration/**/*.tsx
-      removeAllTsFilesExcept(projectRoot, 'integration')
-
-      const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
-
-      expect(actual).to.eq('ts')
-    })
-
     it('with a TypeScript integration spec', async () => {
       const projectRoot = await scaffoldMigrationProject('migration-ts-files-only')
 
