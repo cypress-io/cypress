@@ -235,6 +235,10 @@ export class EventManager {
       this.saveState(state)
     })
 
+    this.reporterBus.on('debug:dismiss', () => {
+      this.localBus.emit('debug:dismiss')
+    })
+
     this.reporterBus.on('clear:all:sessions', () => {
       if (!Cypress) return
 

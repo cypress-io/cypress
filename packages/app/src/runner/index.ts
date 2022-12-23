@@ -14,7 +14,7 @@
  *
  */
 import { watchEffect } from 'vue'
-import { getMobxRunnerStore, initializeMobxStore, useAutStore, useRunnerUiStore } from '../store'
+import { getMobxRunnerStore, initializeMobxStore, SpecWithFilter, useAutStore, useRunnerUiStore } from '../store'
 import { dfd } from './injectBundle'
 import type { SpecFile } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
@@ -382,7 +382,7 @@ async function initialize () {
  * 5. Setup the spec. This involves a few things, see the `runSpecCT` function's
  *    description for more information.
  */
-async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
+async function executeSpec (spec: SpecWithFilter, isRerun: boolean = false) {
   await teardownSpec(isRerun)
 
   const mobxRunnerStore = getMobxRunnerStore()

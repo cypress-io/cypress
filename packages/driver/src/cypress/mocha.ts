@@ -369,6 +369,14 @@ const patchSuiteAddTest = (specWindow, config) => {
   Suite.prototype.addTest = function (...args) {
     const test = args[0]
 
+    const testFilter = Cypress.spec.testFilter
+
+    const titlePath = [this.fullTitle(), test.title].join(' ')
+
+    if (testFilter && !testFilter.tests.includes(titlePath)) {
+      return
+    }
+
     if (!test.invocationDetails) {
       test.invocationDetails = $stackUtils.getInvocationDetails(specWindow, config)
     }

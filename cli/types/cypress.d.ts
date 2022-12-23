@@ -279,6 +279,10 @@ declare namespace Cypress {
     absolute: string // "/Users/janelane/app/cypress/integration/config_passing_spec.js"
     specFilter?: string // optional spec filter used by the user
     specType?: CypressSpecType
+    testFilter?: {
+      tests: string[]
+      total: number
+    }
   }
 
   /**

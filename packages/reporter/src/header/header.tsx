@@ -12,14 +12,16 @@ import { action } from 'mobx'
 import Controls from './controls'
 import Stats from './stats'
 import { StatsStore } from './stats-store'
+import { DebugDismiss } from './DebugDismiss'
 
 export interface ReporterHeaderProps {
   appState: AppState
   events?: Events
   statsStore: StatsStore
+  spec: Cypress.Spec
 }
 
-const Header = observer(({ appState, events = defaultEvents, statsStore }: ReporterHeaderProps) => (
+const Header = observer(({ appState, events = defaultEvents, statsStore, spec }: ReporterHeaderProps) => (
   <header>
     <Tooltip placement='bottom' title={<p>{appState.isSpecsListOpen ? 'Collapse' : 'Expand'} Specs List <span className='kbd'>F</span></p>} wrapperClassName='toggle-specs-wrapper' className='cy-tooltip'>
       <button
@@ -38,6 +40,7 @@ const Header = observer(({ appState, events = defaultEvents, statsStore }: Repor
       </button>
     </Tooltip>
     <div className='spacer' />
+    {spec.testFilter ? <DebugDismiss testFilter={spec.testFilter} /> : null}
     <Stats stats={statsStore} />
     <Controls appState={appState} />
   </header>

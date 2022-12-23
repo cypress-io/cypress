@@ -1,14 +1,31 @@
-import { Ref, onMounted, ref, watch, watchEffect, onBeforeUnmount, readonly } from 'vue'
+import { Ref, onMounted, ref, watch, watchEffect, onBeforeUnmount, readonly, computed } from 'vue'
 import { getAutIframeModel, UnifiedRunnerAPI } from '../runner'
-import { useSpecStore } from '../store'
+import { SpecWithFilter, useSpecStore } from '../store'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import { RUN_ALL_SPECS, RUN_ALL_SPECS_KEY, SpecFile } from '@packages/types/src'
-import { useRoute } from 'vue-router'
+import { LocationQuery, useRoute } from 'vue-router'
 import { getPathForPlatform } from '../paths'
+import { isEqual } from 'lodash'
+import { gql, useQuery } from '@urql/vue'
+import { TestsForRunDocument } from '../generated/graphql'
+
+gql`
+query TestsForRun ($runId: String!) {
+  currentProject {
+    id
+    testsForRun (runId: $runId) {
+      status
+      titlePath
+    }
+  }
+}
+`
 
 const initialized = ref(false)
 
 export function useUnifiedRunner () {
+  let prevQuery: LocationQuery
+
   onMounted(async () => {
     await UnifiedRunnerAPI.initialize()
     initialized.value = true
@@ -25,26 +42,47 @@ export function useUnifiedRunner () {
       const specStore = useSpecStore()
       const route = useRoute()
       const selectorPlaygroundStore = useSelectorPlaygroundStore()
+      const runId = computed(() => route.query.runId as string)
+      const query = useQuery({ query: TestsForRunDocument, pause: true, requestPolicy: 'network-only', variables: { runId: runId as any } })
 
-      watchEffect(() => {
+      watchEffect(async () => {
         const queryFile = getPathForPlatform(route.query.file as string)
 
-        if (!queryFile) {
+        if (!queryFile || isEqual(route.query, prevQuery)) {
           // no file param, we are not showing a file
           // so no action needed when specs list updates
           return
         }
 
+        prevQuery = route.query
+
         if (queryFile === RUN_ALL_SPECS_KEY) {
           return specStore.setActiveSpec(RUN_ALL_SPECS)
         }
 
-        const activeSpecInSpecsList = specs.value.find((x) => x.relative === queryFile)
+        let activeSpecInSpecsList: SpecWithFilter | undefined = specs.value.find((x) => x.relative === queryFile)
 
-        if (activeSpecInSpecsList && specStore.activeSpec?.relative !== activeSpecInSpecsList.relative) {
+        if (!activeSpecInSpecsList) {
+          return specStore.setActiveSpec(null)
+        }
+
+        if (route.query.runId) {
+          const queryRes = await query.executeQuery({ runId: route.query.runId })
+          const testResults = queryRes.data.value?.currentProject?.testsForRun || []
+
+          const failedTests = (queryRes.data.value?.currentProject?.testsForRun || []).reduce<string[]>((acc, test) => {
+            if (test.status === 'FAILED') acc.push(test.titlePath)
+
+            return acc
+          }, [])
+
+          if (failedTests.length) {
+            activeSpecInSpecsList = { ...activeSpecInSpecsList, testFilter: { tests: failedTests, total: testResults.length } }
+          }
+        }
+
+        if (!isEqual(activeSpecInSpecsList, specStore.activeSpec)) {
           specStore.setActiveSpec(activeSpecInSpecsList)
-        } else if (!activeSpecInSpecsList) {
-          specStore.setActiveSpec(null)
         }
       })
 

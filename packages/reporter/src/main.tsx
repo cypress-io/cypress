@@ -68,7 +68,7 @@ class Reporter extends Component<SingleReporterProps> {
       <div className={cs(className, 'reporter', {
         'studio-active': appState.studioActive,
       })}>
-        {renderReporterHeader({ appState, statsStore })}
+        {renderReporterHeader({ appState, statsStore, spec: this.props.runnerStore.spec! })}
         {appState?.isPreferencesMenuOpen ? (
           <TestingPreferences appState={appState} />
         ) : (

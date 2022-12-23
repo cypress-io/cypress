@@ -1,4 +1,5 @@
 import { watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { addCrossOriginIframe, getAutIframeModel, getEventManager, UnifiedRunnerAPI } from '.'
 import { useAutStore, useSpecStore } from '../store'
 import { useStudioStore } from '../store/studio-store'
@@ -10,6 +11,7 @@ export function useEventManager () {
   const autStore = useAutStore()
   const specStore = useSpecStore()
   const studioStore = useStudioStore()
+  const router = useRouter()
 
   function runSpec (isRerun: boolean = false) {
     if (!specStore.activeSpec) {
@@ -58,6 +60,17 @@ export function useEventManager () {
     })
 
     eventManager.on('expect:origin', addCrossOriginIframe)
+
+    eventManager.on('debug:dismiss', () => {
+      const currentRoute = router.currentRoute.value
+
+      const { runId, ...query } = currentRoute.query
+
+      // Delete runId from query which will remove the test filter
+      router.replace({ ...currentRoute, query })
+
+      specStore.setActiveSpec({ ...specStore.activeSpec!, testFilter: undefined })
+    })
   }
 
   const startSpecWatcher = () => {
