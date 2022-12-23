@@ -1,5 +1,5 @@
 import '@testing-library/cypress/add-commands'
-import { browsers } from '@packages/launcher/lib/browsers'
+import { knownBrowsers } from '@packages/launcher/lib/known-browsers'
 import { configure } from '@testing-library/cypress'
 import { fixtureDirs, ProjectFixtureDir } from '@tooling/system-tests'
 import type { DataContext } from '@packages/data-context'
@@ -444,7 +444,7 @@ function findBrowsers (options: FindBrowsersOptions = {}) {
       return result
     }
 
-    filteredBrowsers = [...browsers, {
+    filteredBrowsers = [...knownBrowsers, {
       name: 'electron',
       channel: 'stable',
       family: 'chromium',
