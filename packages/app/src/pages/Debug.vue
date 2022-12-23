@@ -1,10 +1,5 @@
 <template>
-  <div
-    v-if="!query.data.value"
-    data-cy="debug-loader"
-  >
-    Loading
-  </div>
+  <DebugLoading v-if="query.fetching.value" />
   <DebugContainer
     v-else
     data-cy="debug-container"
@@ -15,9 +10,22 @@
 <script setup lang="ts">
 
 import DebugContainer from '../debug/DebugContainer.vue'
-import { gql, useQuery } from '@urql/vue'
-import { DebugDocument, Debug_RelevantRunsDocument } from '../generated/graphql'
+import DebugLoading from '../debug/empty/DebugLoading.vue'
+import { gql, useQuery, useSubscription } from '@urql/vue'
+import { DebugDocument, Debug_SpecsChangeDocument, Debug_RelevantRunsDocument } from '../generated/graphql'
 import { ref, watchEffect } from 'vue'
+
+gql`
+subscription Debug_specsChange {
+  specsChange {
+    id
+    specs {
+      id
+      ...DebugLocalSpecs
+    }
+  }
+}
+`
 
 gql `
 query Debug($runNumber: Int!) {
@@ -49,5 +57,7 @@ watchEffect(() => {
     query.executeQuery()
   }
 })
+
+useSubscription({ query: Debug_SpecsChangeDocument })
 
 </script>
