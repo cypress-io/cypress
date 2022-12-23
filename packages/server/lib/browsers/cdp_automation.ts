@@ -170,7 +170,7 @@ export class CdpAutomation {
   }
 
   static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation): Promise<CdpAutomation> {
-    const memory = new Memory(sendDebuggerCommandFn)
+    const memory = await Memory.create(sendDebuggerCommandFn)
     const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, sendCloseCommandFn, automation, memory)
 
     await sendDebuggerCommandFn('Network.enable', {

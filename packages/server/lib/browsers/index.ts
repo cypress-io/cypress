@@ -8,7 +8,6 @@ import { exec } from 'child_process'
 import util from 'util'
 import os from 'os'
 import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser } from '@packages/types'
-import memory from './memory'
 import type { Browser, BrowserInstance, BrowserLauncher } from './types'
 import type { Automation } from '../automation'
 
@@ -153,8 +152,6 @@ export = {
 
     instance = _instance
     instance.browser = browser
-
-    memory.setup()
 
     // TODO: normalizing opening and closing / exiting
     // so that there is a default for each browser but
