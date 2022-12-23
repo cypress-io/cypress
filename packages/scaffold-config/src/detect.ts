@@ -129,13 +129,16 @@ export function detectLanguage ({ projectRoot, customConfigFile, pkgJson, isMigr
   try {
     if (customConfigFile) {
       debug('Evaluating custom Cypress config file \'%s\'', customConfigFile)
-      if (/.ts$/.test(customConfigFile)) {
+
+      // .ts, .mts extensions
+      if (/\.[m]?ts$/i.test(customConfigFile)) {
         debug('Custom config file is Typescript - using TS')
 
         return 'ts'
       }
 
-      if (/.js$/.test(customConfigFile)) {
+      // .js, .cjs, .mjs extensions
+      if (/\.[c|m]?js$/i.test(customConfigFile)) {
         debug('Custom config file is Javascript - using JS')
 
         return 'js'
@@ -146,16 +149,20 @@ export function detectLanguage ({ projectRoot, customConfigFile, pkgJson, isMigr
 
     debug('Checking for default Cypress config file')
 
-    if (fs.existsSync(path.join(projectRoot, 'cypress.config.ts'))) {
-      debug('Detected cypress.config.ts - using TS')
+    for (let extension of ['ts', 'mts']) {
+      if (fs.existsSync(path.join(projectRoot, `cypress.config.${extension}`))) {
+        debug(`Detected cypress.config.${extension} - using TS`)
 
-      return 'ts'
+        return 'ts'
+      }
     }
 
-    if (fs.existsSync(path.join(projectRoot, 'cypress.config.js'))) {
-      debug('Detected cypress.config.js - using JS')
+    for (let extension of ['js', 'cjs', 'mjs']) {
+      if (fs.existsSync(path.join(projectRoot, `cypress.config.${extension}`))) {
+        debug(`Detected cypress.config.${extension} - using JS`)
 
-      return 'js'
+        return 'js'
+      }
     }
   } catch (e) {
     debug('Did not find cypress.config file')
