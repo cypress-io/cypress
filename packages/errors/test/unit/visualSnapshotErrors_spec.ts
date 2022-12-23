@@ -18,7 +18,7 @@ const isCi = require('is-ci')
 const { terminalBanner } = require('terminal-banner')
 const ciProvider = require('@packages/server/lib/util/ci_provider')
 const browsers = require('@packages/server/lib/browsers')
-const launcherBrowsers = require('@packages/launcher/lib/browsers')
+const { knownBrowsers } = require('@packages/launcher/lib/known-browsers')
 
 const debug = Debug(isCi ? '*' : 'visualSnapshotErrors')
 
@@ -339,8 +339,8 @@ describe('visual error templates', () => {
     },
     BROWSER_NOT_FOUND_BY_NAME: () => {
       return {
-        default: ['invalid-browser', browsers.formatBrowsersToOptions(launcherBrowsers.browsers)],
-        canary: ['canary', browsers.formatBrowsersToOptions(launcherBrowsers.browsers)],
+        default: ['invalid-browser', browsers.formatBrowsersToOptions(knownBrowsers)],
+        canary: ['canary', browsers.formatBrowsersToOptions(knownBrowsers)],
       }
     },
     BROWSER_NOT_FOUND_BY_PATH: () => {
