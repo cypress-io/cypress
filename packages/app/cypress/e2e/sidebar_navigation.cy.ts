@@ -245,7 +245,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
     it('has a menu item labeled "Debug" which takes you to the Debug page', () => {
       cy.get('[data-cy="app-header-bar"]').findByText('Debug').should('not.exist')
 
-      cy.findByTestId('sidebar-link-debug-page').should('have.text', 'Debug').should('be.visible').click()
+      cy.findByTestId('sidebar-link-debug-page').should('contain', 'Debug').should('be.visible').click()
       cy.get('[data-cy="app-header-bar"]').findByText('Debug').should('be.visible')
       cy.get('.router-link-active').findByText('Debug').should('be.visible')
     })

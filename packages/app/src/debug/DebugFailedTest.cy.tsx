@@ -88,7 +88,7 @@ describe('<DebugFailedTest/>', () => {
     ]
 
     cy.mount(() => (
-      <DebugFailedTest failedTestResult={testResults} groups={[group1, group2]} />
+      <DebugFailedTest failedTestResult={testResults} groups={[group1, group2]} expandable={true}/>
     ))
 
     cy.findAllByTestId('grouped-row').should('have.length', 2)

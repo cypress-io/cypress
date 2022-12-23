@@ -11,9 +11,9 @@ describe('<Logo />', () => {
       },
       data () {
         return {
-          foo: 'bar'
+          foo: 'bar',
         }
-      }
+      },
     })
     .then(({ wrapper, component }) => {
       expect(wrapper.find('.hello').text()).to.contain(slotContent)

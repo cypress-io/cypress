@@ -115,7 +115,7 @@ describe('mounts correctly', () => {
     ))
 
     const testingOrder = [
-      'spec-duration 02:23-03:40',
+      'spec-duration 2:23-3:40',
       'group-server 3 groups',
       'operating-system-groups 2 operating systems',
       'browser-groups 2 browsers',

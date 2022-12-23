@@ -3,7 +3,7 @@
     v-for="(group, j) in props.groups"
     :key="j"
     class="w-full flex flex-col flex-start justify-center pl-16px border-gray-100 border-1 rounded hover:bg-gray-50"
-    :data-cy="`grouped-row`"
+    data-cy="grouped-row"
   >
     <div
       class="flex flex-start flex-row h-12 items-center gap-x-2.5 non-italic text-base text-gray-700 font-normal border-b-gray-100"

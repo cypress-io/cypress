@@ -853,11 +853,11 @@ export default {
     },
     invalid_new_query: {
       message: '`Cypress.Commands.addQuery()` is used to create new queries, but `{{name}}` is an existing Cypress command or query, or is reserved internally by Cypress.\n\n If you want to override an existing command or query, use `Cypress.Commands.overrideQuery()` instead.',
-      docsUrl: 'https://on.cypress.io/custom-queries',
+      docsUrl: 'https://on.cypress.io/api/custom-queries',
     },
     reserved_command_query: {
       message: '`Cypress.Commands.addQuery()` cannot create a new query named `{{name}}` because that name is reserved internally by Cypress.',
-      docsUrl: 'https://on.cypress.io/custom-queries',
+      docsUrl: 'https://on.cypress.io/api/custom-queries',
     },
     invalid_overwrite: {
       message: 'Cannot overwite command for: `{{name}}`. An existing command does not exist by that name.',

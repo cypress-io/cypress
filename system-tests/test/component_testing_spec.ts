@@ -135,6 +135,14 @@ describe(`Angular CLI major versions`, () => {
     browser: 'chrome',
     expectedExitCode: 0,
   })
+
+  systemTests.it('angular custom root', {
+    project: 'angular-custom-root',
+    spec: 'ui/app/app.component.cy.ts',
+    testingType: 'component',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
 })
 
 describe('svelte component testing', () => {

@@ -42,7 +42,7 @@
           </div>
           <ul
             data-cy="spec-header-metadata"
-            class="flex truncate items-center gap-x-3 text-gray-700 whitespace-nowrap children:flex children:items-center font-normal text-sm"
+            class="flex items-center gap-x-3 text-gray-700 whitespace-nowrap children:flex children:items-center font-normal text-sm"
           >
             <li
               :data-cy="'debugHeader-results'"
@@ -76,24 +76,50 @@
         <div
           class="mr-16px"
         >
-          <Button
-            data-cy="run-failures"
-            variant="white"
-            class="inline-flex gap-x-10px whitespace-nowrap justify-center items-center isolate"
-            :disabled="isDisabled"
-            :to="{ path: '/specs/runner', query: { file: (specData.path).replace(/\\/g, '/') } }"
+          <Tooltip
+            placement="bottom"
+            color="dark"
+            :is-interactive="!!(runAllFailuresState.cta)"
+            :disabled="!runAllFailuresState.disabled"
           >
-            <template #prefix>
-              <IconActionRefresh
-                data-cy="icon-refresh"
-                stroke-color="indigo-500"
-              />
+            <Button
+              data-cy="run-failures"
+              variant="white"
+              class="gap-x-10px inline-flex whitespace-nowrap justify-center items-center isolate"
+              :disabled="runAllFailuresState.disabled"
+              :to="{ path: '/specs/runner', query: { file: posixify(specData.fullPath) } }"
+            >
+              <template #prefix>
+                <IconActionRefresh
+                  data-cy="icon-refresh"
+                  stroke-color="indigo-500"
+                />
+              </template>
+              <!-- Wrapping this with a default template to avoid an unneeded space -->
+              <template #default>
+                {{ t('debugPage.runFailures.btn') }}
+              </template>
+            </Button>
+            <template
+              v-if="runAllFailuresState.disabled"
+              #popper
+            >
+              <div
+                class="flex flex-col text-sm max-w-350px items-center"
+                data-cy="run-all-failures-tooltip"
+              >
+                <span class="text-center">{{ runAllFailuresState.message }}</span>
+                <Button
+                  v-if="runAllFailuresState.cta"
+                  variant="text"
+                  class="rounded-md font-medium bg-gray-800 my-12px"
+                  @click="runAllFailuresState.cta?.action"
+                >
+                  {{ runAllFailuresState.cta.message }}
+                </Button>
+              </div>
             </template>
-            <!-- Wrapping this with a default template to avoid an unneeded space -->
-            <template #default>
-              {{ t('debugPage.runFailures') }}
-            </template>
-          </Button>
+          </Tooltip>
         </div>
       </div>
       <div
@@ -123,6 +149,7 @@ export interface Spec {
   testsFailed: SpecDataAggregate
   testsPending: SpecDataAggregate
   specDuration: SpecDataAggregate
+  fullPath: string
 }
 
 export interface TestResults {
@@ -138,9 +165,11 @@ import DebugFailedTest from './DebugFailedTest.vue'
 import StatsMetaData from './StatsMetadata.vue'
 import ResultCounts from '@packages/frontend-shared/src/components/ResultCounts.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
+import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import SpecNameDisplay from '../specs/SpecNameDisplay.vue'
 import { useI18n } from '@cy/i18n'
 import { useDurationFormat } from '../composables/useDurationFormat'
+import { posixify } from '../paths'
 import type { TestingTypeEnum } from '../generated/graphql'
 
 const { t } = useI18n()
@@ -151,6 +180,12 @@ const props = defineProps<{
   groups: {[groupId: string]: CloudRunGroup }
   testingType: TestingTypeEnum
   isDisabled?: boolean
+  foundLocally: boolean
+  matchesCurrentTestingType: boolean
+}>()
+
+const emits = defineEmits<{
+  (event: 'switchTestingType', value: TestingTypeEnum): void
 }>()
 
 // helper function for formatting the number of passed, failed, and pending tests
@@ -163,17 +198,22 @@ const debugResultsCalc = (min: number, max: number, specDuration: boolean = fals
 }
 
 const specData = computed(() => {
+  const testsPassed = props.spec.testsPassed ?? 0
+  const testsFailed = props.spec.testsFailed  ?? 0
+  const testsPending = props.spec.testsPending ?? 0
+  const specDuration = props.spec.specDuration ?? 0
   return {
     path: `${props.spec.path}/`,
     fileName: props.spec.fileName,
     fileExtension: props.spec.fileExtension,
     failedTests: props.testResults,
-    testsPassed: debugResultsCalc(props.spec.testsPassed.min!, props.spec.testsPassed.max!),
-    testsFailed: debugResultsCalc(props.spec.testsFailed.min!, props.spec.testsFailed.max!),
-    testsPending: debugResultsCalc(props.spec.testsPending.min!, props.spec.testsPending.max!),
-    specDuration: debugResultsCalc(props.spec.specDuration.min!, props.spec.specDuration.max!, true),
+    testsPassed: debugResultsCalc(testsPassed.min ?? 0, testsPassed.max ?? 0),
+    testsFailed: debugResultsCalc(testsFailed.min ?? 0, testsFailed.max ?? 0),
+    testsPending: debugResultsCalc(testsPending.min ?? 0, testsPending.max ?? 0),
+    specDuration: debugResultsCalc(specDuration.min ?? 0, specDuration.max ?? 0, true),
     groups: props.groups,
     testingType: props.testingType,
+    fullPath: props.spec.fullPath,
   }
 })
 
@@ -208,6 +248,28 @@ const groupsT = computed(() => {
 
     return acc
   }, [])
+})
+
+const runAllFailuresState = computed(() => {
+  if (!props.matchesCurrentTestingType) {
+    return {
+      disabled: true,
+      message: t('debugPage.runFailures.switchTestingTypeInfo', { n: Object.keys(props.testResults).length, testingType: props.testingType }),
+      cta: {
+        message: t('debugPage.runFailures.switchTestingTypeAction', { testingType: props.testingType }),
+        action: () => emits('switchTestingType', props.testingType),
+      },
+    }
+  }
+
+  if (!props.foundLocally) {
+    return {
+      disabled: true,
+      message: t('debugPage.runFailures.notFoundLocally'),
+    }
+  }
+
+  return { disabled: false }
 })
 
 </script>

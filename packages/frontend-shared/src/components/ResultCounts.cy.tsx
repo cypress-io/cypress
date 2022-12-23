@@ -69,24 +69,4 @@ describe('<ResultCounts />', () => {
       expect(status[3]).to.contain(5)
     })
   })
-
-  const slotContent = {
-    prefix: () => <div class="h-full bg-emerald-100">Prefix</div>,
-  }
-
-  it('tests if the prefix slot shows up in the Result counts', () => {
-    cy.mount(() => (
-      <ResultCounts
-        data-cy='result-count'
-        totalFailed={3}
-        totalPassed={4}
-        totalPending={5}
-        totalSkipped={6}
-        v-slots={slotContent}
-        order={['SKIPPED', 'FAILED', 'PASSED', 'PENDING']}
-      />
-    ))
-
-    cy.findByText('Prefix').should('be.visible')
-  })
 })

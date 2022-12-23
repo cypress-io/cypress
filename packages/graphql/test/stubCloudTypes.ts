@@ -26,6 +26,7 @@ import type {
   CloudRunStatus,
   CloudSpecRun,
   CloudTestResult,
+  CloudRunGroup,
 } from '../src/gen/test-cloud-graphql-types.gen'
 import type { GraphQLResolveInfo } from 'graphql'
 
@@ -186,6 +187,9 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
     createdAt: new Date(Date.now() - 1000 * 60 * 61).toISOString(),
     completedAt: null,
     cancelledAt: null,
+    cancelOnFailure: null,
+    cancelledBy: null,
+    errors: [],
     ci: {
       __typename: 'CloudCiBuildInfo',
       id: 'ci_id',
@@ -215,6 +219,7 @@ function addFailedTests (run: CloudRun) {
     basename: 'Test.cy.ts',
     extension: '.cy.ts',
     path: 'src/Test.cy.ts',
+    groupIds: ['groupID1'],
   }
 
   const test: CloudTestResult = {
@@ -224,14 +229,59 @@ function addFailedTests (run: CloudRun) {
     specId,
     state: 'FAILED' as const,
     duration: null,
-    instance: null,
+    instance: {
+      __typename: 'CloudRunInstance',
+      "id": "instanceID",
+      "status": "FAILED",
+      "groupId": "groupID1",
+      "hasStdout": true,
+      "stdoutUrl": "www.cypress.io",
+      "hasScreenshots": true,
+      "screenshotsUrl": "www.cypress.io",
+      "hasVideo": true,
+      "videoUrl": "www.cypress.io"
+    },
     testUrl: 'http://cloudurl',
     title: '<test/> Should render',
     titleParts: ['<test/>', 'should render'],
+    thumbprint: 'abc',
+  }
+
+  const group: CloudRunGroup = {
+    __typename: "CloudRunGroup",
+    "id": "groupID1",
+    "groupName": null,
+    "testingType": "e2e",
+    "totalPasses": 2,
+    "totalFailures": 33,
+    "totalPending": 0,
+    "totalSkipped": 85,
+    "createdAt": "",
+    "status": "FAILED",
+    "duration": 0,
+    "os":  {
+      __typename: 'CloudOperatingSystem',
+      "id": "osID",
+      "name": "Mac",
+      "unformattedName": "darwin",
+      "version": "22.1.0",
+      "platform": "MAC",
+      "nameWithVersion": "Mac 22.1.0"
+    },
+    "browser": {
+      __typename: 'CloudBrowserInfo',
+      "id": "browserID",
+      "unformattedName": "electron",
+      "formattedName": "Electron",
+      "unformattedVersion": "106.0.5249.51",
+      "formattedVersion": "106",
+      "formattedNameWithVersion": "Electron 106"
+    }
   }
 
   run.specs = [spec]
   run.testsForReview = [test]
+  run.groups = [group]
 
   return run
 }
@@ -269,6 +319,7 @@ export function createCloudProjectSpecResult (config: Partial<CloudProjectSpec>)
       __typename: 'CloudProjectSpecFlakyStatus',
       severity: 'NONE',
     },
+    specRunsForRunIds: [],
     ...config,
   }
 

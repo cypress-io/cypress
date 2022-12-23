@@ -1136,3 +1136,29 @@ namespace CypressLocalStorageTests {
   cy.clearAllSessionStorage({ log: false })
   cy.clearAllSessionStorage({ log: 'true' }) // $ExpectError
 }
+
+namespace CypressTraversalTests {
+  cy.wrap({}).prevUntil('a') // $ExpectType Chainable<JQuery<HTMLAnchorElement>>
+  cy.wrap({}).prevUntil('#myItem') // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).prevUntil('span', 'a') // $ExpectType Chainable<JQuery<HTMLSpanElement>>
+  cy.wrap({}).prevUntil('#myItem', 'a') // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).prevUntil('div', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
+  cy.wrap({}).prevUntil('#myItem', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).prevUntil('#myItem', 'a', { log: 'true' }) // $ExpectError
+
+  cy.wrap({}).nextUntil('a') // $ExpectType Chainable<JQuery<HTMLAnchorElement>>
+  cy.wrap({}).nextUntil('#myItem') // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).nextUntil('span', 'a') // $ExpectType Chainable<JQuery<HTMLSpanElement>>
+  cy.wrap({}).nextUntil('#myItem', 'a') // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).nextUntil('div', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
+  cy.wrap({}).nextUntil('#myItem', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).nextUntil('#myItem', 'a', { log: 'true' }) // $ExpectError
+
+  cy.wrap({}).parentsUntil('a') // $ExpectType Chainable<JQuery<HTMLAnchorElement>>
+  cy.wrap({}).parentsUntil('#myItem') // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).parentsUntil('span', 'a') // $ExpectType Chainable<JQuery<HTMLSpanElement>>
+  cy.wrap({}).parentsUntil('#myItem', 'a') // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).parentsUntil('div', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
+  cy.wrap({}).parentsUntil('#myItem', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).parentsUntil('#myItem', 'a', { log: 'true' }) // $ExpectError
+}

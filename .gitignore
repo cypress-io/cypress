@@ -389,3 +389,11 @@ globbed_node_modules
 # Snapshot Binaries
 snapshot_blob.bin
 v8_context_snapshot.x86_64.bin
+
+# Legacy snapshot cache files
+tooling/v8-snapshot/cache/dev-darwin
+tooling/v8-snapshot/cache/dev-linux
+tooling/v8-snapshot/cache/dev-win32
+tooling/v8-snapshot/cache/prod-darwin
+tooling/v8-snapshot/cache/prod-linux
+tooling/v8-snapshot/cache/prod-win32

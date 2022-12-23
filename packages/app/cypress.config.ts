@@ -38,7 +38,6 @@ export default defineConfig({
       delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
       process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
       process.env.CYPRESS_INTERNAL_VITE_OPEN_MODE_TESTING = 'true'
-      // process.env.DEBUG = '*'
       const { e2ePluginSetup } = require('@packages/frontend-shared/cypress/e2e/e2ePluginSetup')
 
       on('task', {

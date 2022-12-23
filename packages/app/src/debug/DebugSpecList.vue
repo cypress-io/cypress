@@ -11,13 +11,18 @@ clear
       :test-results="spec.tests"
       :testing-type="spec.testingType"
       :groups="spec.groups"
+      :found-locally="spec.foundLocally"
+      :matches-current-testing-type="spec.matchesCurrentTestingType"
+      @switchTestingType="switchTestingType"
     />
   </div>
 </template>
 
 <script setup lang="ts">
 import { gql } from '@urql/core'
+import { useMutation } from '@urql/vue'
 import { computed } from '@vue/reactivity'
+import { SwitchTestingTypeAndRelaunchDocument, TestingTypeEnum } from '../generated/graphql'
 import DebugSpec from './DebugSpec.vue'
 import type { CloudDebugSpec } from './utils/DebugMapping'
 
@@ -93,6 +98,8 @@ const props = defineProps<{
   specs: CloudDebugSpec[]
 }>()
 
+const switchTestingTypeMutation = useMutation(SwitchTestingTypeAndRelaunchDocument)
+
 const specs = computed(() => {
   return props.specs.map((specItem) => {
     const fileName = specItem.spec.basename
@@ -110,8 +117,14 @@ const specs = computed(() => {
       tests: specItem.tests,
       groups: specItem.groups,
       testingType: specItem.testingType,
+      foundLocally: specItem.foundLocally,
+      matchesCurrentTestingType: specItem.matchesCurrentTestingType,
     }
   })
 })
+
+function switchTestingType (testingType: TestingTypeEnum) {
+  switchTestingTypeMutation.executeMutation({ testingType })
+}
 
 </script>

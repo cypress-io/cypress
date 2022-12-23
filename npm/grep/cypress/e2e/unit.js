@@ -158,7 +158,7 @@ describe('utils', () => {
       ])
     })
 
-    //NOTE: would need to change the tokenizer
+    // TODO: would need to change the tokenizer
     it.skip('parses tag1 but not tag2', () => {
       const parsed = parseTagsGrep('@tag1-@tag2')
 
