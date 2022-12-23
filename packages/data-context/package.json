@@ -12,7 +12,6 @@
     "clean": "rimraf --glob \"./{src,test}/**/*.js\"",
     "test": "yarn test-unit",
     "test-unit": "mocha -r @packages/ts/register --config ./test/.mocharc.js --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "test-watch": "yarn test-unit --watch",
     "lint": "eslint --ext .js,.ts,.json, ."
   },
   "dependencies": {
