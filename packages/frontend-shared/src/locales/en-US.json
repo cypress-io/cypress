@@ -251,6 +251,7 @@
   "topNav": {
     "released": "Released",
     "version": "Version",
+    "versionUnsupported": "Unsupported",
     "installed": "Installed",
     "latest": "Latest",
     "seeAllReleases": "See all releases",
