@@ -1,7 +1,7 @@
 <template>
   <ul
     data-cy="stats-metadata"
-    class="flex flex-wrap items-center gap-x-2 text-gray-700 whitespace-nowrap children:flex children:items-center font-normal text-sm w-full"
+    class="flex flex-row items-center gap-x-2 text-gray-700 whitespace-nowrap children:flex children:items-center font-normal text-sm w-full"
   >
     <li
       v-for="(result, i) in results"

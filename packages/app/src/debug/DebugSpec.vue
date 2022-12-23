@@ -42,7 +42,7 @@
           </div>
           <ul
             data-cy="spec-header-metadata"
-            class="flex items-center gap-x-3 text-gray-700 whitespace-nowrap children:flex children:items-center font-normal text-sm"
+            class="flex flex-row truncate items-center gap-x-3 text-gray-700 whitespace-nowrap children:flex children:items-center font-normal text-sm"
           >
             <li
               :data-cy="'debugHeader-results'"
@@ -199,9 +199,10 @@ const debugResultsCalc = (min: number, max: number, specDuration: boolean = fals
 
 const specData = computed(() => {
   const testsPassed = props.spec.testsPassed ?? 0
-  const testsFailed = props.spec.testsFailed  ?? 0
+  const testsFailed = props.spec.testsFailed ?? 0
   const testsPending = props.spec.testsPending ?? 0
   const specDuration = props.spec.specDuration ?? 0
+
   return {
     path: `${props.spec.path}/`,
     fileName: props.spec.fileName,
