@@ -7,7 +7,7 @@ const execAsync = util.promisify(exec)
 const debugVerbose = debugModule('cypress-verbose:server:browsers:memory:cgroupV2')
 
 const getTotalMemoryLimit = async () => {
-  const limit = Number((await exec('cat /sys/fs/cgroup/memory/memory.limit_in_bytes', { encoding: 'utf8' })).stdout)
+  const limit = Number((await execAsync('cat /sys/fs/cgroup/memory/memory.limit_in_bytes', { encoding: 'utf8' })).stdout)
 
   debugVerbose('total memory limit', limit)
 
