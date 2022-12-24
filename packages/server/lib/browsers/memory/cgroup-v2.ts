@@ -1,5 +1,8 @@
 import debugModule from 'debug'
-import { exec } from '../../util/child_process'
+import { exec } from 'child_process'
+import util from 'util'
+
+const execAsync = util.promisify(exec)
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:memory:cgroupV2')
 
@@ -27,8 +30,8 @@ const getAvailableMemory = async (totalMemoryLimit: number) => {
   let available
 
   const [usageExec, rawStats] = await Promise.all([
-    exec('cat /sys/fs/cgroup/memory/memory.usage_in_bytes', { encoding: 'utf8' }),
-    exec('cat /sys/fs/cgroup/memory/memory.stat', { encoding: 'utf8' }),
+    execAsync('cat /sys/fs/cgroup/memory/memory.usage_in_bytes', { encoding: 'utf8' }),
+    execAsync('cat /sys/fs/cgroup/memory/memory.stat', { encoding: 'utf8' }),
   ])
 
   const stats = processRawStats(rawStats.stdout)
