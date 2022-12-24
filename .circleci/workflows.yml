@@ -484,7 +484,7 @@ commands:
             if [[ -v MAIN_RECORD_KEY ]]; then
               # internal PR
               # CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
-              DEBUG=cypress*:server:browsers:memory yarn cypress:run --browser <<parameters.browser>> --spec "cypress/e2e/memory.cy.js" --config baseUrl="https://earth.google.com/web/"
+              DEBUG=cypress*:server:browsers:memory* yarn cypress:run --browser <<parameters.browser>> --spec "cypress/e2e/memory.cy.js" --config baseUrl="https://earth.google.com/web/"
             else
               # external PR
               TESTFILES=$(circleci tests glob "cypress/e2e/**/*.cy.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
