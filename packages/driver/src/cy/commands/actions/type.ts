@@ -220,7 +220,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
         const clickedDefaultButton = function (button) {
           // find the 'default button' as per HTML spec and click it natively
-          // do not issue mousedown / mouseup since this is supposed to be synthentic
+          // do not issue mousedown / mouseup since this is supposed to be synthetic
           if (button.length) {
             button.get(0).click()
 
@@ -234,14 +234,14 @@ export default function (Commands, Cypress, cy, state, config) {
           return getDefaultButtons(form).first()
         }
 
-        const defaultButtonisDisabled = (button) => {
+        const defaultButtonIsDisabled = (button) => {
           return button.prop('disabled')
         }
 
         const defaultButton = getDefaultButton(form)
 
         // bail if the default button is in a 'disabled' state
-        if (defaultButtonisDisabled(defaultButton)) {
+        if (defaultButtonIsDisabled(defaultButton)) {
           return
         }
 
@@ -464,10 +464,6 @@ export default function (Commands, Cypress, cy, state, config) {
         },
 
         onNoMatchingSpecialChars (chars, allChars) {
-          if (chars === 'tab') {
-            $errUtils.throwErrByPath('type.tab', { onFail: options._log })
-          }
-
           $errUtils.throwErrByPath('type.invalid', {
             onFail: options._log,
             args: { chars: `{${chars}}`, allChars },
