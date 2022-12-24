@@ -140,7 +140,7 @@ export default class Memory {
       debugVerbose('rendererProcess.memRss:', rendererProcessMemRss, 'bytes')
       debugVerbose('maxAvailableRendererMemory:', maxAvailableRendererMemory, 'bytes')
 
-      // only collect garbage if less than the MEMORY_THRESHOLD_PERCENTAGE of the heap left
+      // if we're using more than MEMORY_THRESHOLD_PERCENTAGE of the available memory, force a garbage collection
       const shouldCollectGarbage = (rendererProcessMemRss / maxAvailableRendererMemory) * 100 >= MEMORY_THRESHOLD_PERCENTAGE
 
       if (shouldCollectGarbage) {
