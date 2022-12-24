@@ -655,6 +655,7 @@ const keyboardMappings: { [key: string]: KeyDetailsPartial } = {
   pageUp: USKeyboard.PageUp,
   pageDown: USKeyboard.PageDown,
   '{': USKeyboard.BracketLeft,
+  tab: USKeyboard.Tab,
 }
 
 const keyToModifierMap = {
@@ -754,6 +755,13 @@ export class Keyboard {
             this.simulateShortcut(activeEl, key, options)
 
             return null
+          }
+
+          if (key.key === 'Tab') {
+            Cypress.automation('remote:debugger:protocol', {
+              command: 'Input.dispatchKeyEvent',
+              params: { ...key, type: 'rawKeyDown', text: '' },
+            })
           }
 
           debug('typing key:', key.key)
