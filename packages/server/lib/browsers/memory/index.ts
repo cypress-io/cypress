@@ -51,10 +51,13 @@ const getJsHeapSizeLimit = async (sendDebuggerCommandFn) => {
 
 const getMemoryHandler = async (): Promise<MemoryHandler> => {
   if (os.platform() === 'linux') {
-    debug('using cgroup v2 memory handler')
+    if (await fs.pathExists('/sys/fs/cgroup/cgroup.controllers')) {
+      // TODO: need to support cgroup v2
+    } else {
+      debug('using cgroup v1 memory handler')
 
-    // TODO: need to actually check for cgroup v2
-    return (await import('./cgroup-v2')).default
+      return (await import('./cgroup-v1')).default
+    }
   }
 
   debug('using default memory handler')
