@@ -37,7 +37,7 @@ const getAvailableMemory = async (totalMemoryLimit: number) => {
   const stats = processRawStats(rawStats.stdout)
   const usage = Number(usageExec.stdout)
 
-  available = totalMemoryLimit - usage + stats.total_inactive_file
+  available = totalMemoryLimit - usage + Number(stats.total_inactive_file)
 
   debugVerbose('memory available', available)
 
