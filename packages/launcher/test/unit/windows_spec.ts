@@ -3,7 +3,7 @@ import { expect } from 'chai'
 import * as windowsHelper from '../../lib/windows'
 import { normalize } from 'path'
 import sinon, { SinonStub } from 'sinon'
-import { browsers } from '../../lib/browsers'
+import { knownBrowsers } from '../../lib/known-browsers'
 import Bluebird from 'bluebird'
 import fse from 'fs-extra'
 import os from 'os'
@@ -68,12 +68,12 @@ describe('windows browser detection', () => {
     // edge canary is installed in homedir
     stubBrowser(`${HOMEDIR}/AppData/Local/Microsoft/Edge SxS/Application/msedge.exe`, '14')
 
-    snapshot(await detect(browsers))
+    snapshot(await detect(knownBrowsers))
   })
 
   it('detects 64-bit Chrome Beta app path', async () => {
     stubBrowser('C:/Program Files/Google/Chrome Beta/Application/chrome.exe', '9.0.1')
-    const chrome = _.find(browsers, { name: 'chrome', channel: 'beta' })
+    const chrome = _.find(knownBrowsers, { name: 'chrome', channel: 'beta' })
 
     snapshot(await windowsHelper.detect(chrome))
   })
@@ -81,7 +81,7 @@ describe('windows browser detection', () => {
   // @see https://github.com/cypress-io/cypress/issues/8425
   it('detects new Chrome 64-bit app path', async () => {
     stubBrowser('C:/Program Files/Google/Chrome/Application/chrome.exe', '4.4.4')
-    const chrome = _.find(browsers, { name: 'chrome', channel: 'stable' })
+    const chrome = _.find(knownBrowsers, { name: 'chrome', channel: 'stable' })
 
     snapshot(await windowsHelper.detect(chrome))
   })
@@ -92,7 +92,7 @@ describe('windows browser detection', () => {
     stubBrowser(`${HOMEDIR}/AppData/Local/Firefox Nightly/firefox.exe`, '200')
     stubBrowser(`${HOMEDIR}/AppData/Local/Firefox Developer Edition/firefox.exe`, '300')
 
-    const firefoxes = _.filter(browsers, { family: 'firefox' })
+    const firefoxes = _.filter(knownBrowsers, { family: 'firefox' })
 
     snapshot(await detect(firefoxes))
   })
@@ -129,7 +129,7 @@ describe('windows browser detection', () => {
 
     return detectByPath(path).then((browser) => {
       expect(browser).to.deep.equal(
-        Object.assign({}, browsers.find((gb) => {
+        Object.assign({}, knownBrowsers.find((gb) => {
           return gb.name === 'chrome'
         }), {
           displayName: 'Custom Chrome',

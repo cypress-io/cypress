@@ -14,6 +14,7 @@ export default defineConfig({
   },
   experimentalInteractiveRunEvents: true,
   component: {
+    experimentalSingleTabRunMode: true,
     viewportWidth: 800,
     viewportHeight: 850,
     supportFile: 'cypress/component/support/index.ts',
