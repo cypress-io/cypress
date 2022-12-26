@@ -408,7 +408,7 @@ describe('App: Specs', () => {
             .and('contain', defaultMessages.createSpec.e2e.importEmptySpec.header)
           })
 
-          cy.contains('Create new empty spec').click()
+          cy.contains('Create starter spec').click()
 
           cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
           .as('enterSpecInput')
@@ -458,7 +458,7 @@ describe('App: Specs', () => {
           cy.contains('No specs found').should('be.visible')
 
           cy.findByRole('button', { name: 'New spec' }).click()
-          cy.contains('Create new empty spec').click()
+          cy.contains('Create starter spec').click()
 
           cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
           .as('enterSpecInput')
@@ -484,7 +484,7 @@ describe('App: Specs', () => {
           .and('contain', defaultMessages.createSpec.e2e.importEmptySpec.header)
         })
 
-        cy.contains('Create new empty spec').click()
+        cy.contains('Create starter spec').click()
 
         cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
         .as('enterSpecInput')
@@ -544,11 +544,11 @@ describe('App: Specs', () => {
         cy.findAllByTestId('card').eq(1).as('EmptyCard')
       })
 
-      it('shows create new empty spec card', () => {
+      it('shows Create starter spec card', () => {
         cy.get('@EmptyCard')
         .within(() => {
           cy.findByRole('button', {
-            name: 'Create new empty spec',
+            name: 'Create starter spec',
           }).should('be.visible')
           .and('not.be.disabled')
         })
