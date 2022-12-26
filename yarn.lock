@@ -32370,10 +32370,10 @@ syntax-error@1.4.0:
   dependencies:
     acorn-node "^1.2.0"
 
-systeminformation@5.6.4:
-  version "5.6.4"
-  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.6.4.tgz#5f32fcb05a5849e2a0e71b182c1f56ce32219310"
-  integrity sha512-b2tvW1R+qjNEoAGgh734EGLgqbDMghjsHRaWo36skAC6JM1tw1pitcGz/REt+qSIRSXbE4PKECojhaSrBRrEmw==
+systeminformation@5.16.9:
+  version "5.16.9"
+  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-5.16.9.tgz#8a5419c293afea142d93d98dde6850dceb4677b6"
+  integrity sha512-QTlv3GGSromPeLVW3pzM6uxU8RbkacW9e0+ZX23GAXaX+XE0UToSygAxCJDHSty6RB9lAFHCHg+FfiXFChi/+w==
 
 systemjs@^6.12.4:
   version "6.12.6"
