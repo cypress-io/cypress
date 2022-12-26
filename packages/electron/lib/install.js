@@ -168,11 +168,12 @@ module.exports = {
     })
     // Promise.resolve("tmp\\Cypress-win32-x64")
     .then((appPath) => {
-      // and now move the tmp into dist
-      console.debug('moving created file from', appPath)
-      console.debug('to', options.dist)
+      const { dist } = options
 
-      return this.move(appPath, options.dist)
+      // and now move the tmp into dist
+      debug('moving created file %o', { from: appPath, to: dist })
+
+      return this.move(appPath, dist)
     })
     .then(() => {
       return !['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE) ? flipFuses(
@@ -184,7 +185,7 @@ module.exports = {
         },
       ) : Promise.resolve()
     }).catch((err) => {
-      console.debug(err.stack)
+      console.log(err.stack)
 
       return process.exit(1)
     })
