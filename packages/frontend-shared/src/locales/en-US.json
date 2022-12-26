@@ -64,7 +64,7 @@
     "noComponentsFound": "No components found",
     "unableToParseFile": "Unable to parse file",
     "updateSpecPattern": "Update spec pattern",
-    "newSpecModalTitle": "Create a new spec",
+    "newSpecModalTitle": "Create starter spec",
     "successPage": {
       "header": "Great! The spec was successfully added",
       "runSpecButton": "Okay, run the spec",
@@ -96,8 +96,8 @@
         "specsAddingHeader": "Adding specs..."
       },
       "importEmptySpec": {
-        "header": "Create new empty spec",
-        "description": "We'll generate an empty spec file which can be used to start testing your application.",
+        "header": "Create starter spec",
+        "description": "We'll generate a starter spec file which can be used to start testing your application.",
         "chooseFilenameHeader": "Enter the path for your new spec",
         "inputPlaceholder": "Enter a relative path...",
         "invalidSpecWarning": "This path is invalid because it doesn't match the following ",
@@ -111,8 +111,8 @@
         "chooseAComponentHeader": "Choose a component"
       },
       "importEmptySpec": {
-        "header": "Create a new spec",
-        "description": "We'll generate an empty spec file to start testing components.",
+        "header": "Create starter spec",
+        "description": "We'll generate a starter spec file to start testing components.",
         "invalidComponentWarning": "We couldn't generate a valid path matching your custom "
       }
     }

@@ -296,7 +296,7 @@ describe('defaultSpecFileName', () => {
       },
     })
 
-    cy.findByText('Create new empty spec').click()
+    cy.findByText('Create starter spec').click()
     cy.get('input').invoke('val').should('contain', 'spec.cy.js')
 
     cy.percySnapshot()
