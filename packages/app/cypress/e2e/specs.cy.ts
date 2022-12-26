@@ -527,7 +527,7 @@ describe('App: Specs', () => {
   function selectEmptySpecCard () {
     cy.findAllByTestId('card').should('have.length', 2)
     cy.findByRole('button', { name: 'Create from component' }).should('be.visible')
-    cy.findByRole('button', { name: 'Create new empty spec' }).should('be.visible').click()
+    cy.findByRole('button', { name: 'Create starter spec' }).should('be.visible').click()
   }
 
   describe('Testing Type: Component', {
@@ -596,7 +596,7 @@ describe('App: Specs', () => {
           // 'Create starter spec' dialog presents with options when user indicates they want to create
           // another spec.
           cy.findAllByTestId('card').should('have.length', 2)
-          cy.findByRole('button', { name: 'Create new empty spec' }).should('be.visible')
+          cy.findByRole('button', { name: 'Create starter spec' }).should('be.visible')
           cy.findByRole('button', { name: 'Create from component' }).should('be.visible')
         })
 
