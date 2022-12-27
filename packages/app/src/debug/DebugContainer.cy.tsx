@@ -116,7 +116,7 @@ describe('<DebugContainer />', () => {
           onResult: (result) => {
             if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
               const test = result.currentProject.cloudProject.runByNumber
-              const other = CloudRunStubs.failingWithTests as typeof test
+              const other = CloudRunStubs.running as typeof test
 
               result.currentProject.cloudProject.runByNumber = other
             }
@@ -126,8 +126,8 @@ describe('<DebugContainer />', () => {
 
         cy.findByTestId('newer-relevant-run')
         .should('be.visible')
-        .and('contain.text', 'fix: make gql work FAILED')
-        .and('contain.text', '8 of 10 runs completed')
+        .and('contain.text', 'fix: make gql work RUNNING')
+        .and('contain.text', '8 of 10 specs completed')
       })
 
       it('displays newer run with link when complete', () => {
