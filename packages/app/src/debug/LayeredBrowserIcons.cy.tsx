@@ -1,7 +1,8 @@
 import LayeredBrowserIcons from './LayeredBrowserIcons.vue'
+import type { BrowserType } from './LayeredBrowserIcons.vue'
 
 describe('<LayeredBrowserIcons/>', () => {
-  const browsers = ['CHROME', 'CHROME-CANARY', 'FIREFOX', 'WEBKIT', 'EDGE', 'ELECTRON']
+  const browsers: BrowserType = ['CHROME', 'CHROME-CANARY', 'FIREFOX', 'WEBKIT', 'EDGE', 'ELECTRON']
 
   it('mounts correctly for single browser', () => {
     browsers.forEach((ele) => {

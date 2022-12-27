@@ -1,4 +1,3 @@
-clear
 <template>
   <div
     data-cy="debug-spec-col"
@@ -34,6 +33,10 @@ fragment DebugSpecListSpec on CloudSpecRun {
   extension
   shortPath
   groupIds
+  specDuration {
+    min
+    max
+  }
   testsPassed {
     min
     max
@@ -108,6 +111,7 @@ const specs = computed(() => {
 
     return {
       spec: {
+        ...specItem.spec,
         id: specItem.spec.id,
         path: specItem.spec.path.replace(fileNameWithoutExtension + fileExtension, ''),
         fileName: fileNameWithoutExtension,

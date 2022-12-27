@@ -146,7 +146,7 @@ const testResultSingleGroup: {[thumprint: string]: TestResults[]} = {
 describe('<DebugSpec/> with multiple test results', () => {
   const spec = {
     id: '8879798756s88d',
-    path: 'cypress/tests',
+    path: 'cypress/tests/',
     fileName: 'auth',
     fileExtension: '.spec.ts',
     fullPath: 'cypress/tests/auth.spec.ts',
@@ -161,14 +161,16 @@ describe('<DebugSpec/> with multiple test results', () => {
 
   it('mounts correctly for single groups', () => {
     cy.mount(() => (
-      <DebugSpec spec={spec}
-        testResults={testResultSingleGroup}
-        groups={singleGroup}
-        testingType={'e2e'}
-        foundLocally={true}
-        matchesCurrentTestingType={true}
-        fullPath={'cypress/tests/auth.spec.ts'}
-      />
+      <div class="px-24px">
+        <DebugSpec spec={spec}
+          testResults={testResultSingleGroup}
+          groups={singleGroup}
+          testingType={'e2e'}
+          foundLocally={true}
+          matchesCurrentTestingType={true}
+          fullPath={'cypress/tests/auth.spec.ts'}
+        />
+      </div>
     ))
 
     cy.findByTestId('debug-spec-item').children().should('have.length', 3)
@@ -202,7 +204,9 @@ describe('<DebugSpec/> with multiple test results', () => {
 
   it('renders correctly with disabled run-failures button', () => {
     cy.mount(() => (
-      <DebugSpec spec={spec} testResults={testResultSingleGroup} isDisabled={true} groups={singleGroup} testingType={'e2e'}/>
+      <div class="px-24px">
+        <DebugSpec spec={spec} testResults={testResultSingleGroup} isDisabled={true} groups={singleGroup} testingType={'e2e'}/>
+      </div>
     ))
 
     cy.findByTestId('run-failures').should('have.attr', 'aria-disabled', 'disabled')
@@ -216,7 +220,7 @@ describe('<DebugSpec/> responsive UI', () => {
   it('renders complete UI on smaller viewports', { viewportHeight: 300, viewportWidth: 580 }, () => {
     const spec: Spec = {
       id: '8879798756s88d',
-      path: 'cypress/tests',
+      path: 'cypress/tests/',
       fileName: 'AlertBar',
       fileExtension: '.spec.ts',
       fullPath: 'cypress/tests/AlertBar.spec.ts',
@@ -230,7 +234,9 @@ describe('<DebugSpec/> responsive UI', () => {
     }
 
     cy.mount(() => (
-      <DebugSpec spec={spec} testResults={testResultSingleGroup} groups={singleGroup} testingType={'component'} foundLocally={true} matchesCurrentTestingType={true}/>
+      <div class="px-24px">
+        <DebugSpec spec={spec} testResults={testResultSingleGroup} groups={singleGroup} testingType={'component'} foundLocally={true} matchesCurrentTestingType={true}/>
+      </div>
     ))
 
     cy.findByTestId('spec-contents').children().should('have.length', 2)
@@ -244,7 +250,7 @@ describe('<DebugSpec/> responsive UI', () => {
   it('shows complete spec component header with long relative filePath', { viewportHeight: 400, viewportWidth: 700 }, () => {
     const spec: Spec = {
       id: '547a0dG90s7f',
-      path: 'src/shared/frontend/cow/packages/foo/cypress/tests/e2e/components',
+      path: 'src/shared/frontend/cow/packages/foo/cypress/tests/e2e/components/',
       fileName: 'AlertBar',
       fileExtension: '.spec.ts',
       fullPath: 'src/shared/frontend/cow/packages/foo/cypress/tests/e2e/components/AlertBar.spec.ts',
@@ -258,7 +264,9 @@ describe('<DebugSpec/> responsive UI', () => {
     }
 
     cy.mount(() => (
-      <DebugSpec spec={spec} testResults={testResultSingleGroup} groups={singleGroup} testingType={'e2e'} matchesCurrentTestingType={true}/>
+      <div class="px-24px">
+        <DebugSpec spec={spec} testResults={testResultSingleGroup} groups={singleGroup} testingType={'e2e'} matchesCurrentTestingType={true}/>
+      </div>
     ))
 
     cy.findByTestId('spec-path').should('have.css', 'text-overflow', 'ellipsis')
@@ -272,7 +280,7 @@ describe('testing groupings', () => {
   it('tests debug spec with multiple groups', { viewportWidth: 1032 }, () => {
     const spec = {
       id: '8879798756s88d',
-      path: 'cypress/tests',
+      path: 'cypress/tests/',
       fileName: 'auth',
       fileExtension: '.spec.ts',
       fullPath: 'cypress/tests/auth.spec.ts',
@@ -286,7 +294,9 @@ describe('testing groupings', () => {
     }
 
     cy.mount(() => (
-      <DebugSpec spec={spec} testResults={testResultMultipleGroups} groups={mutlipleGroups} testingType={'e2e'} />
+      <div class="px-24px">
+        <DebugSpec spec={spec} testResults={testResultMultipleGroups} groups={mutlipleGroups} testingType={'e2e'} />
+      </div>
     ))
 
     cy.findByTestId('debug-spec-item').children().should('have.length', 3)
@@ -307,7 +317,7 @@ describe('testing groupings', () => {
   it('test results with multiple groups and repeated browsers and a single group', { viewportWidth: 1200 }, () => {
     const spec = {
       id: '8879798756s88d',
-      path: 'cypress/tests',
+      path: 'cypress/tests/',
       fileName: 'Debug',
       fileExtension: '.spec.ts',
       fullPath: 'cypress/tests/Debug.spec.ts',
@@ -370,7 +380,9 @@ describe('testing groupings', () => {
     }
 
     cy.mount(() => (
-      <DebugSpec spec={spec} testResults={tests} groups={repeatedValueGroups} testingType={'component'} />
+      <div class="px-24px">
+        <DebugSpec spec={spec} testResults={tests} groups={repeatedValueGroups} testingType={'component'} />
+      </div>
     ))
 
     // testing debugResultsCalc method
@@ -405,7 +417,11 @@ describe('Run Failures button', () => {
   }
 
   it('is disabled if spec is not found locally', () => {
-    cy.mount(() => <DebugSpec spec={spec} testResults={testResultSingleGroup} groups={singleGroup} foundLocally={false} testingType={'e2e'} matchesCurrentTestingType={true}/>)
+    cy.mount(() => (
+      <div class="px-24px">
+        <DebugSpec spec={spec} testResults={testResultSingleGroup} groups={singleGroup} foundLocally={false} testingType={'e2e'} matchesCurrentTestingType={true}/>
+      </div>
+    ))
 
     cy.findByTestId('run-failures')
     .should('have.attr', 'aria-disabled', 'disabled')
@@ -420,15 +436,17 @@ describe('Run Failures button', () => {
 
   it('is disabled if run testing-type differs from the current testing-type', () => {
     cy.mount(() => (
-      <DebugSpec
-        spec={spec}
-        testResults={testResultSingleGroup}
-        groups={singleGroup}
-        foundLocally={true}
-        testingType='e2e'
-        matchesCurrentTestingType={false}
-        onSwitchTestingType={cy.spy().as('switchTestingType')}
-      />
+      <div class="px-24px">
+        <DebugSpec
+          spec={spec}
+          testResults={testResultSingleGroup}
+          groups={singleGroup}
+          foundLocally={true}
+          testingType='e2e'
+          matchesCurrentTestingType={false}
+          onSwitchTestingType={cy.spy().as('switchTestingType')}
+        />
+      </div>
     ))
 
     cy.findByTestId('run-failures')
@@ -446,7 +464,11 @@ describe('Run Failures button', () => {
   })
 
   it('is enabled if found locally and same testing type', () => {
-    cy.mount(() => <DebugSpec spec={spec} testResults={testResultSingleGroup} groups={singleGroup} foundLocally={true} testingType={'e2e'} matchesCurrentTestingType={true}/>)
+    cy.mount(() => (
+      <div class="px-24px">
+        <DebugSpec spec={spec} testResults={testResultSingleGroup} groups={singleGroup} foundLocally={true} testingType={'e2e'} matchesCurrentTestingType={true}/>
+      </div>
+    ))
 
     cy.findByTestId('run-failures')
     .should('have.attr', 'href', '#/specs/runner?file=cypress/tests/auth.spec.ts')

@@ -1,7 +1,7 @@
 <template>
   <ul
     data-cy="stats-metadata"
-    class="flex flex-row items-center gap-x-2 text-gray-700 whitespace-nowrap children:flex children:items-center font-normal text-sm w-full"
+    class="flex flex-row items-center gap-x-2 text-gray-700 whitespace-nowrap children:flex children:items-center font-normal text-sm w-full stats-metadata-class"
   >
     <li
       v-for="(result, i) in results"
@@ -88,88 +88,85 @@ const TESTING_MAP: Record<TestingTypeEnum, any> = {
 
 const results = computed(() => {
   if (props.order) {
-    return props.order.map((status) => ORDER_MAP[status])
+    return props.order.map((status) => ORDER_MAP.value[status])
   }
 
   return []
 })
 
 const arrMapping = computed(() => {
-  const acc: {browser: string[], os: string[], firstBrowser: string, firstOS: string} = { browser: [], os: [], firstBrowser: '', firstOS: '' }
-  const uniqueBrowser: Set<string> = new Set()
-  const uniqueOS: Set<string> = new Set()
+  const acc: {browsers: string[], oses: string[], firstBrowser: string, firstOs: string} = { browsers: [], oses: [], firstBrowser: '', firstOs: '' }
+  const uniqueBrowsers = new Set<string>()
+  const uniqueOSes = new Set<string>()
 
-  props.groups!.forEach((group: CloudRunGroup, index) => {
-    const formattedName = group.browser.formattedName!.toUpperCase()
-    const osName = group.os.name!.toUpperCase()
+  if (props.groups) {
+    props.groups.forEach((group: CloudRunGroup, index) => {
+      const browserName = group.browser.formattedName!.toUpperCase()
+      const osName = group.os.name!.toUpperCase()
 
-    if (!uniqueBrowser.has(formattedName)) {
-      uniqueBrowser.add(formattedName)
-      acc.browser.push(formattedName)
-      if (index === 0) acc.firstBrowser = group.browser.formattedNameWithVersion!
-    }
+      uniqueBrowsers.add(browserName)
+      uniqueOSes.add(osName)
+      if (index === 0) {
+        acc.firstBrowser = group.browser.formattedNameWithVersion!
+        acc.firstOs = group.os.nameWithVersion!
+      }
+    })
+  }
 
-    if (!uniqueOS.has(osName)) {
-      uniqueOS.add(osName)
-      acc.os.push(osName)
-      if (index === 0) acc.firstOS = group.os.nameWithVersion!
-    }
-  })
+  acc.browsers = Array.from(uniqueBrowsers)
+  acc.oses = Array.from(uniqueOSes)
 
   return acc
 })
 
-const ORDER_MAP: Record<StatType, Metadata> = {
-  'DURATION': {
-    value: props.specDuration!,
-    icon: IconTimeStopwatch,
-    name: 'spec-duration',
-  },
-  'OS': {
-    value: arrMapping.value.firstOS,
-    icon: OS_MAP[arrMapping.value.os[0]],
-    name: 'operating-system',
-  },
-  'BROWSER': {
-    value: arrMapping.value.firstBrowser,
-    icon: arrMapping.value.browser,
-    name: 'browser',
-  },
-  'TESTING': {
-    value: props.testing!,
-    icon: TESTING_MAP[props.testing!],
-    name: 'testing-type',
-  },
-  'GROUPS': {
-    value: props.groups!.length > 1 ? `${props.groups!.length} groups` : `${props.groups!.length} group`,
-    icon: IconTechnologyServer,
-    name: 'group-server',
-  },
-  'G_OS': {
-    value: arrMapping.value.os.length > 1 ? `${arrMapping.value.os.length} operating systems` : `${arrMapping.value.os.length} operating system`,
-    icon: OS_MAP['GROUP'],
-    name: 'operating-system-groups',
-  },
-  'G_BROWSERS': {
-    value: arrMapping.value.browser.length > 1 ? `${arrMapping.value.browser.length} browsers` : `${arrMapping.value.browser.length} browser`,
-    icon: arrMapping.value.browser,
-    name: 'browser-groups',
-  },
-  'GROUP_NAME': {
-    value: props.groupName!,
-    icon: IconTechnologyServer,
-    name: 'group_name',
-  },
-}
-
-// default props if nothing is passed in: need to be figured out
-// change all the group icons e.g. G_OS G_BROWSERS
-// metaDataItems
-// Fix this so that it does not require all the props to be passed all the time
+const ORDER_MAP = computed<Record<StatType, Metadata>>(() => {
+  return {
+    'DURATION': {
+      value: props.specDuration!,
+      icon: IconTimeStopwatch,
+      name: 'spec-duration',
+    },
+    'OS': {
+      value: arrMapping.value.firstOs,
+      icon: OS_MAP[arrMapping.value.oses[0]],
+      name: 'operating-system',
+    },
+    'BROWSER': {
+      value: arrMapping.value.firstBrowser,
+      icon: arrMapping.value.browsers,
+      name: 'browser',
+    },
+    'TESTING': {
+      value: props.testing!,
+      icon: TESTING_MAP[props.testing!],
+      name: 'testing-type',
+    },
+    'GROUPS': {
+      value: props.groups!.length > 1 ? `${props.groups!.length} groups` : `${props.groups!.length} group`,
+      icon: IconTechnologyServer,
+      name: 'group-server',
+    },
+    'G_OS': {
+      value: arrMapping.value.oses.length > 1 ? `${arrMapping.value.oses.length} operating systems` : `${arrMapping.value.oses.length} operating system`,
+      icon: OS_MAP['GROUP'],
+      name: 'operating-system-groups',
+    },
+    'G_BROWSERS': {
+      value: arrMapping.value.browsers.length > 1 ? `${arrMapping.value.browsers.length} browsers` : `${arrMapping.value.browsers.length} browser`,
+      icon: arrMapping.value.browsers,
+      name: 'browser-groups',
+    },
+    'GROUP_NAME': {
+      value: props.groupName!,
+      icon: IconTechnologyServer,
+      name: 'group_name',
+    },
+  }
+})
 
 </script>
 <style scoped>
-[data-cy=stats-metadata] li:not(:first-child)::before {
+.stats-metadata-class li:not(:first-child)::before {
   content: '.';
   @apply -mt-8px text-lg text-gray-400 pr-8px
 }

@@ -1,7 +1,7 @@
 <template>
   <div
     data-cy="debug-spec-col"
-    class="grid flex flex-col px-24px gap-24px self-stretch pt-24px"
+    class="grid flex flex-col gap-24px self-stretch pt-24px"
   >
     <div
       data-cy="debug-spec-item"
@@ -62,14 +62,14 @@
               :order="['DURATION','OS','BROWSER','TESTING']"
               :spec-duration="specData.specDuration!"
               :testing="specData.testingType"
-              :groups="groupsT"
+              :groups="Object.values(specData.groups)"
             />
             <StatsMetaData
               v-else-if="(Object.keys(specData.groups).length > 1)"
               :order="['DURATION', 'GROUPS', 'G_OS', 'G_BROWSERS', 'TESTING']"
               :spec-duration="specData.specDuration!"
               :testing="specData.testingType"
-              :groups="groupsT"
+              :groups="Object.values(specData.groups)"
             />
           </ul>
         </div>
@@ -130,7 +130,8 @@
         :class="Object.keys(specData.groups).length > 1 ? 'pb-16px': 'hover:bg-gray-50'"
       >
         <DebugFailedTest
-          :failed-test-result="specData.failedTests[thumbprint]"
+          v-if="specData.failedTests[thumbprint].length >= 1"
+          :failed-tests-result="specData.failedTests[thumbprint]"
           :groups="groupsPerTest[thumbprint]"
           :expandable="Object.keys(specData.groups).length > 1"
         />
@@ -204,7 +205,7 @@ const specData = computed(() => {
   const specDuration = props.spec.specDuration ?? 0
 
   return {
-    path: `${props.spec.path}/`,
+    path: props.spec.path,
     fileName: props.spec.fileName,
     fileExtension: props.spec.fileExtension,
     failedTests: props.testResults,
@@ -218,14 +219,11 @@ const specData = computed(() => {
   }
 })
 
-const uniqueGrpIds: Set<string> = new Set()
-
 /**
  * Helper function that maps each test's thumprint to all the groups in it
- * return type: {[thumbprint: string]: CloudRunGroup[]}
  */
 const groupsPerTest = computed(() => {
-  return Object.keys(props.testResults).reduce((acc, currThumbprint) => {
+  return Object.keys(props.testResults).reduce<Record<string, CloudRunGroup[]>>((acc, currThumbprint) => {
     acc[currThumbprint] = props.testResults[currThumbprint].map((test) => props.groups[test.instance?.groupId])
 
     return acc
@@ -234,22 +232,23 @@ const groupsPerTest = computed(() => {
 
 /**
  * Helper function that extracts all the unique groups for a specific spec
- * return type: CloudRunGroup[]
  */
-const groupsT = computed(() => {
-  return Object.keys(props.testResults).reduce((acc: CloudRunGroup[], currThumbprint) => {
-    props.testResults[currThumbprint].map((test) => {
-      const groupId = test.instance?.groupId!
+// const groupsT = computed(() => {
+//   const uniqueGrpIds = new Set<string>()
 
-      if (!uniqueGrpIds.has(groupId)) {
-        uniqueGrpIds.add(groupId)
-        acc.push(props.groups[groupId])
-      }
-    })
+//   return Object.keys(props.testResults).reduce<CloudRunGroup[]>((acc: CloudRunGroup[], currThumbprint) => {
+//     props.testResults[currThumbprint].map((test) => {
+//       const groupId = test.instance?.groupId
 
-    return acc
-  }, [])
-})
+//       if (groupId && !uniqueGrpIds.has(groupId)) {
+//         uniqueGrpIds.add(groupId)
+//         acc.push(props.groups[groupId])
+//       }
+//     })
+
+//     return acc
+//   }, [])
+// })
 
 const runAllFailuresState = computed(() => {
   if (!props.matchesCurrentTestingType) {

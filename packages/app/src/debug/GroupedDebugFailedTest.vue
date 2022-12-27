@@ -2,7 +2,7 @@
   <div
     v-for="(group, j) in props.groups"
     :key="j"
-    class="w-full flex flex-col flex-start justify-center pl-16px border-gray-100 border-1 rounded hover:bg-gray-50"
+    class="w-full flex flex-col flex-start justify-center pl-16px hover:bg-gray-50 grouped-row-class"
     data-cy="grouped-row"
   >
     <div
@@ -23,7 +23,7 @@
           :key="l"
           :data-cy="`artifact-${artifact.icon}`"
         >
-          <DebugArtifacts
+          <DebugArtifactLink
             :icon="artifact.icon"
             :popper-text="artifact.text"
             :url="artifact.url"
@@ -37,7 +37,7 @@
 import type { CloudRunGroup } from '@packages/data-context/src/gen/graphcache-config.gen'
 import type { TestResults } from './DebugSpec.vue'
 import StatsMetadata from './StatsMetadata.vue'
-import DebugArtifacts from './DebugArtifacts.vue'
+import DebugArtifactLink from './DebugArtifactLink.vue'
 import { computed } from 'vue'
 
 const props = defineProps<{
@@ -45,9 +45,8 @@ const props = defineProps<{
   groups: CloudRunGroup[]
 }>()
 
-// type: {[groupID: string] : [{icon: string, text: string, url: string | null | undefined}]}
 const debugArtifacts = computed(() => {
-  return props.failedTests.reduce((acc, curr) => {
+  return props.failedTests.reduce<{[groupID: string]: {icon: string, text: string, url: string | null | undefined }[] }>((acc, curr) => {
     acc[curr.instance.groupId] = [
       { icon: 'TERMINAL_LOG', text: 'View Log', url: curr.instance!.stdoutUrl ?? '' },
       { icon: 'IMAGE_SCREENSHOT', text: 'View Screenshot', url: curr.instance!.screenshotsUrl ?? '' },
@@ -60,7 +59,7 @@ const debugArtifacts = computed(() => {
 
 </script>
 <style scoped>
-[data-cy=grouped-row]:hover .grouped-row-artifacts, [data-cy=grouped-row]:focus-within .grouped-row-artifacts {
+.grouped-row-class:hover .grouped-row-artifacts, .grouped-row-class:focus-within .grouped-row-artifacts {
   opacity: 1 !important;
 }
 

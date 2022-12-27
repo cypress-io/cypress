@@ -38,7 +38,9 @@ describe('<DebugFailedTest/>', () => {
     }
 
     cy.mount(() => (
-      <DebugFailedTest failedTestResult={[testResult]} groups={[group1]} />
+      <div data-cy="test-group">
+        <DebugFailedTest failedTestsResult={[testResult]} groups={[group1]} expandable={false}/>
+      </div>
     ))
 
     cy.findByTestId('test-row').children().should('have.length', 4)
@@ -46,6 +48,11 @@ describe('<DebugFailedTest/>', () => {
     testResult.titleParts.forEach((title, index) => {
       cy.findByTestId(`titleParts-${index}`).should('have.text', `${title}`)
     })
+
+    cy.findByTestId('test-group').realHover()
+    cy.findByTestId('debug-artifacts').should('be.visible').children().should('have.length', 3)
+
+    cy.percySnapshot()
   })
 
   it('contains multiple titleParts segments', () => {
@@ -58,7 +65,7 @@ describe('<DebugFailedTest/>', () => {
     }
 
     cy.mount(() => (
-      <DebugFailedTest failedTestResult={[multipleTitleParts]} groups={[group1]} />
+      <DebugFailedTest failedTestsResult={[multipleTitleParts]} groups={[group1]} />
     ))
 
     cy.findByTestId('test-row').children().should('have.length', 7).should('be.visible')
@@ -88,9 +95,12 @@ describe('<DebugFailedTest/>', () => {
     ]
 
     cy.mount(() => (
-      <DebugFailedTest failedTestResult={testResults} groups={[group1, group2]} expandable={true}/>
+      <DebugFailedTest failedTestsResult={testResults} groups={[group1, group2]} expandable={true}/>
     ))
 
     cy.findAllByTestId('grouped-row').should('have.length', 2)
+    cy.findAllByTestId('grouped-row').first().realHover()
+    cy.findAllByTestId('debug-artifacts').first().should('be.visible').children().should('have.length', 3)
+    cy.percySnapshot()
   })
 })

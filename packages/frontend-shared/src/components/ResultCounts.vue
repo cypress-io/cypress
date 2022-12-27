@@ -25,15 +25,14 @@
 <script lang="ts" setup>
 
 export interface ResultCountsProps {
-  totalPassed?: number|string|null|SpecDataAggregate
-  totalFailed?: number|string|null|SpecDataAggregate
-  totalPending?: number|string|null|SpecDataAggregate
-  totalSkipped?: number|string|null|SpecDataAggregate
+  totalPassed?: number | string | null
+  totalFailed?: number | string | null
+  totalPending?: number | string | null
+  totalSkipped?: number | string | null
   order?: string[]
 }
 
 import { computed, FunctionalComponent, SVGAttributes } from 'vue'
-import type { SpecDataAggregate } from '@packages/data-context/src/gen/graphcache-config.gen'
 import SkippedIcon from '~icons/cy/status-skipped_x12.svg'
 import PassedIcon from '~icons/cy/status-passed_x12.svg'
 import FailedIcon from '~icons/cy/status-failed_x12.svg'
@@ -46,43 +45,47 @@ const props = defineProps<ResultCountsProps>()
 type CountType= 'SKIPPED' | 'PENDING' | 'PASSED' | 'FAILED'
 
 interface Status {
-  value: number|string|null|SpecDataAggregate
+  value: number | string | null
   class: string
   icon: FunctionalComponent<SVGAttributes, {}>
   name: string
 }
 
-const ORDER_MAP: Record<CountType, Status> = {
-  'SKIPPED': {
-    value: props.totalSkipped!,
-    class: 'icon-dark-gray-400',
-    icon: SkippedIcon,
-    name: t('runs.results.skipped'),
-  },
-  'PENDING': {
-    value: props.totalPending!,
-    class: 'icon-dark-gray-400 icon-light-white',
-    icon: PendingIcon,
-    name: t('runs.results.pending'),
-  },
-  'PASSED': {
-    value: props.totalPassed!,
-    class: 'icon-dark-jade-400',
-    icon: PassedIcon,
-    name: t('runs.results.passed'),
-  },
-  'FAILED': {
-    value: props.totalFailed!,
-    class: 'icon-dark-red-400',
-    icon: FailedIcon,
-    name: t('runs.results.failed'),
-  },
-}
+const ORDER_MAP = computed<Record<CountType, Status>>(() => {
+  return {
+    'SKIPPED': {
+      value: props.totalSkipped!,
+      class: 'icon-dark-gray-400',
+      icon: SkippedIcon,
+      name: t('runs.results.skipped'),
+    },
+    'PENDING': {
+      value: props.totalPending!,
+      class: 'icon-dark-gray-400 icon-light-white',
+      icon: PendingIcon,
+      name: t('runs.results.pending'),
+    },
+    'PASSED': {
+      value: props.totalPassed!,
+      class: 'icon-dark-jade-400',
+      icon: PassedIcon,
+      name: t('runs.results.passed'),
+    },
+    'FAILED': {
+      value: props.totalFailed!,
+      class: 'icon-dark-red-400',
+      icon: FailedIcon,
+      name: t('runs.results.failed'),
+    },
+  }
+})
 
 const results = computed(() => {
   const order = props.order || ['SKIPPED', 'PENDING', 'PASSED', 'FAILED']
 
-  return order.map((status) => ORDER_MAP[status])
+  const ans = order.map((status) => ORDER_MAP.value[status])
+
+  return ans
 })
 
 </script>

@@ -1,4 +1,4 @@
-import DebugArtifacts from './DebugArtifacts.vue'
+import DebugArtifactLink from './DebugArtifactLink.vue'
 
 describe('<DebugArtifacts />', () => {
   const artifactMapping: {icon: string, text: string, url: string}[] = [
@@ -10,23 +10,23 @@ describe('<DebugArtifacts />', () => {
   it('mounts correctly, provides expected tooltip content, and emits correct event', () => {
     artifactMapping.forEach((artifact) => {
       cy.mount(() => (
-        <DebugArtifacts icon={artifact.icon} popperText={artifact.text} url={artifact.url}/>
+        <DebugArtifactLink icon={artifact.icon} popperText={artifact.text} url={artifact.url}/>
       ))
 
       cy.findByTestId(`artifact-for-${artifact.icon}`).should('have.length', 1)
       cy.findByTestId(`${artifact.icon}-button`).should('be.visible')
-      cy.findByTestId(`artifact-for-${artifact.icon}`).realHover().then(() => {
-        cy.findByTestId('tooltip-content').should('contain.text', `${artifact.text}`)
-      })
+      cy.findByTestId(`artifact-for-${artifact.icon}`).realHover()
+      cy.findByTestId('tooltip-content').should('be.visible').contains(artifact.text)
+      cy.percySnapshot()
     })
   })
 
   it('mounts correctly for all icons together and has correct URLs', () => {
     cy.mount(() => (
       <div class="flex flex-grow justify-center space-x-4.5 pt-24px" data-cy='debug-artifacts-all'>
-        <DebugArtifacts icon={'TERMINAL_LOG'} popperText={'View Log'} url={'www.cypress.io'}/>
-        <DebugArtifacts icon={'IMAGE_SCREENSHOT'} popperText={'View Screenshot'} url={'cloud.cypress.io'}/>
-        <DebugArtifacts icon={'PLAY'} popperText={'View Video'} url={'www.cypress.io'}/>
+        <DebugArtifactLink icon={'TERMINAL_LOG'} popperText={'View Log'} url={'www.cypress.io'}/>
+        <DebugArtifactLink icon={'IMAGE_SCREENSHOT'} popperText={'View Screenshot'} url={'cloud.cypress.io'}/>
+        <DebugArtifactLink icon={'PLAY'} popperText={'View Video'} url={'www.cypress.io'}/>
       </div>
     ))
 

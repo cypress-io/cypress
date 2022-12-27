@@ -231,15 +231,15 @@ function addFailedTests (run: CloudRun) {
     duration: null,
     instance: {
       __typename: 'CloudRunInstance',
-      "id": "instanceID",
-      "status": "FAILED",
-      "groupId": "groupID1",
-      "hasStdout": true,
-      "stdoutUrl": "www.cypress.io",
-      "hasScreenshots": true,
-      "screenshotsUrl": "www.cypress.io",
-      "hasVideo": true,
-      "videoUrl": "www.cypress.io"
+      id: 'instanceID',
+      status: 'FAILED',
+      groupId: 'groupID1',
+      hasStdout: true,
+      stdoutUrl: 'www.cypress.io',
+      hasScreenshots: true,
+      screenshotsUrl: 'www.cypress.io',
+      hasVideo: true,
+      videoUrl: 'www.cypress.io',
     },
     testUrl: 'http://cloudurl',
     title: '<test/> Should render',
@@ -248,35 +248,35 @@ function addFailedTests (run: CloudRun) {
   }
 
   const group: CloudRunGroup = {
-    __typename: "CloudRunGroup",
-    "id": "groupID1",
-    "groupName": null,
-    "testingType": "e2e",
-    "totalPasses": 2,
-    "totalFailures": 33,
-    "totalPending": 0,
-    "totalSkipped": 85,
-    "createdAt": "",
-    "status": "FAILED",
-    "duration": 0,
-    "os":  {
+    __typename: 'CloudRunGroup',
+    id: 'groupID1',
+    groupName: null,
+    testingType: 'e2e',
+    totalPasses: 2,
+    totalFailures: 33,
+    totalPending: 0,
+    totalSkipped: 85,
+    createdAt: '',
+    status: 'FAILED',
+    duration: 0,
+    os: {
       __typename: 'CloudOperatingSystem',
-      "id": "osID",
-      "name": "Mac",
-      "unformattedName": "darwin",
-      "version": "22.1.0",
-      "platform": "MAC",
-      "nameWithVersion": "Mac 22.1.0"
+      id: 'osID',
+      name: 'Mac',
+      unformattedName: 'darwin',
+      version: '22.1.0',
+      platform: 'MAC',
+      nameWithVersion: 'Mac 22.1.0',
     },
-    "browser": {
+    browser: {
       __typename: 'CloudBrowserInfo',
-      "id": "browserID",
-      "unformattedName": "electron",
-      "formattedName": "Electron",
-      "unformattedVersion": "106.0.5249.51",
-      "formattedVersion": "106",
-      "formattedNameWithVersion": "Electron 106"
-    }
+      id: 'browserID',
+      unformattedName: 'electron',
+      formattedName: 'Electron',
+      unformattedVersion: '106.0.5249.51',
+      formattedVersion: '106',
+      formattedNameWithVersion: 'Electron 106',
+    },
   }
 
   run.specs = [spec]

@@ -111,9 +111,8 @@ describe('<DebugContainer />', () => {
 
       const debugMappingArray = specsList({ specs, tests, groups, localSpecs: [], currentTestingType: 'e2e' })
 
-      // [{ specId: 'a1c', id: 'random1' }, { specId: 'a1c', id: 'random2' }], groups: [{ id: 'a', testingType: 'e2e' }]
       expect(debugMappingArray).to.have.length(1)
-      expect(debugMappingArray[0]).to.deep.equal(
+      expect(debugMappingArray).to.have.eql([
         {
           spec: { id: 'a1c', groupIds: ['a'] },
           tests: { 'unique1': [{ specId: 'a1c', id: 'random1', thumbprint: 'unique1' }], 'unique2': [{ specId: 'a1c', id: 'random2', thumbprint: 'unique2' }] },
@@ -122,7 +121,7 @@ describe('<DebugContainer />', () => {
           testingType: 'e2e',
           matchesCurrentTestingType: true,
         },
-      )
+      ])
     })
 
     it('maps correctly for multiple specs and test', () => {
@@ -190,7 +189,6 @@ describe('<DebugContainer />', () => {
 
       const debugMappingArray = specsList({ specs, tests, localSpecs: [], currentTestingType: 'e2e', groups })
 
-      expect(debugMappingArray).to.have.length(1)
       expect(debugMappingArray).to.deep.equal(
         [
           {

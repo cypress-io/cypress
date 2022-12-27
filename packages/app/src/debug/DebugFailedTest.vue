@@ -10,7 +10,7 @@
       class="isolate"
     />
     <div
-      v-for="titlePart, index in props.failedTestResult[0].titleParts"
+      v-for="titlePart, index in failedTestData.result.titleParts"
       :key="`${titlePart}-${index}`"
       class="flex items-center gap-x-2.5 flex-row"
       :data-cy="`titleParts-${index}`"
@@ -32,11 +32,11 @@
       class="flex flex-grow justify-end space-x-4.5 opacity-0 test-row-artifacts pr-18px"
     >
       <div
-        v-for="(result, i) in debugArtifacts"
+        v-for="result, i in failedTestData.debugArtifacts"
         :key="i"
         :data-cy="`artifact--${result.icon}`"
       >
-        <DebugArtifacts
+        <DebugArtifactLink
           :icon="result.icon"
           :popper-text="result.text"
           :url="result.url"
@@ -44,37 +44,42 @@
       </div>
     </div>
   </div>
-  <GroupedDebugFailedTestVue
+  <div
     v-if="props.expandable"
-    :failed-tests="props.failedTestResult"
-    :groups="props.groups"
-  />
+    class="border-gray-100 border-1 rounded divide-y"
+  >
+    <GroupedDebugFailedTestVue
+      :failed-tests="props.failedTestsResult"
+      :groups="props.groups"
+    />
+  </div>
 </template>
 <script lang="ts" setup>
 import { IconChevronRightSmall } from '@cypress-design/vue-icon'
 import { SolidStatusIcon } from '@cypress-design/vue-statusicon'
-import DebugArtifacts from './DebugArtifacts.vue'
+import DebugArtifactLink from './DebugArtifactLink.vue'
 import GroupedDebugFailedTestVue from './GroupedDebugFailedTest.vue'
 import { computed } from 'vue'
 import type { TestResults } from './DebugSpec.vue'
 import type { CloudRunGroup } from '@packages/data-context/src/gen/graphcache-config.gen'
 
 const props = defineProps<{
-  failedTestResult: TestResults[]
+  failedTestsResult: TestResults[]
   groups: CloudRunGroup[]
   expandable: boolean
 }>()
 
-const debugArtifacts = computed(() => {
-  const runInstance = props.failedTestResult[0].instance
+const failedTestData = computed(() => {
+  const runInstance = props.failedTestsResult[0].instance
 
-  return (
-    [
+  return {
+    debugArtifacts: [
       { icon: 'TERMINAL_LOG', text: 'View Log', url: runInstance?.stdoutUrl! },
       { icon: 'IMAGE_SCREENSHOT', text: 'View Screenshot', url: runInstance?.screenshotsUrl! },
       { icon: 'PLAY', text: 'View Video', url: runInstance?.videoUrl! },
-    ]
-  )
+    ],
+    result: props.failedTestsResult[0],
+  }
 })
 
 </script>

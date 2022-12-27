@@ -29,7 +29,7 @@ import { IconBrowserChrome,
 } from '@cypress-design/vue-icon'
 
 interface LayeredProps {
-  order: string[]
+  order: BrowserType[]
 }
 
 const props = defineProps<LayeredProps>()
