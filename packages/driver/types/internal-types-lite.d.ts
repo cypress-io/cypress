@@ -1,4 +1,3 @@
-/// <reference path="./cy/commands/session.d.ts" />
 /// <reference path="./cy/logGroup.d.ts" />
 /// <reference path="./cypress/log.d.ts" />
 
@@ -16,18 +15,13 @@ declare namespace Cypress {
     (action: 'after:screenshot', config: {})
   }
 
-  interface Backend {
-    (task: 'cross:origin:release:html'): boolean
-    (task: 'cross:origin:bridge:ready', args: { originPolicy?: string }): boolean
-    (task: 'cross:origin:finished', originPolicy: string): boolean
-  }
-
   interface cy {
     /**
      * If `as` is chained to the current command, return the alias name used.
      */
     getNextAlias: IAliases['getNextAlias']
     noop: <T>(v: T) => Cypress.Chainable<T>
+    now: <T>(string, v: T) => Cypress.Chainable<T>
     queue: CommandQueue
     retry: IRetries['retry']
     state: State
@@ -37,10 +31,11 @@ declare namespace Cypress {
     // We should decide whether calling with id is correct or not.
     clearTimeout: ITimeouts['clearTimeout']
     isStable: IStability['isStable']
-    isAnticipatingCrossOriginResponseFor: IStability['isAnticipatingCrossOriginResponseFor']
-    fail: (err: Error, options:{ async?: boolean }) => Error
+    fail: (err: Error, options: { async?: boolean }) => Error
     getRemoteLocation: ILocation['getRemoteLocation']
-    createSnapshot:  ISnapshots['createSnapshot']
+    subjectChain: (chainerId?: string) => SubjectChain
+
+    createSnapshot: ISnapshots['createSnapshot']
     getStyles: ISnapshots['getStyles']
   }
 }

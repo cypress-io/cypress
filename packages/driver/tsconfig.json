@@ -2,7 +2,7 @@
   "extends": "./../ts/tsconfig.json",
   "compilerOptions": {
     "target": "ES2016",
-    "lib": ["ES2018", "DOM", "DOM.Iterable"],
+    "lib": ["ES2018", "DOM", "DOM.Iterable", "ES2021.String"],
     "module": "commonjs",
     "allowJs": true,
     "noImplicitAny": false,

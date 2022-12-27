@@ -87,14 +87,8 @@ export default function (Commands, Cypress, cy, state, config) {
         }
       }
 
-      // transform table object into object with zero based index as keys
       const getTableData = () => {
-        return _.reduce(_.values(table), (memo, value, index) => {
-          memo[index + 1] = value
-
-          return memo
-        }
-        , {})
+        return _.values(table)
       }
 
       options._log = Cypress.log({
@@ -255,7 +249,10 @@ export default function (Commands, Cypress, cy, state, config) {
         // when we send {Enter} KeyboardEvent to the input fields.
         // Because of that, we don't have to click the submit buttons.
         // Otherwise, we trigger submit events twice.
-        if (!isFirefoxBefore98) {
+        //
+        // WebKit will send the submit with an Enter keypress event,
+        // so we do need to click the default button in this case.
+        if (!isFirefoxBefore98 && !Cypress.isBrowser('webkit')) {
           // issue the click event to the 'default button' of the form
           // we need this to be synchronous so not going through our
           // own click command
@@ -479,6 +476,8 @@ export default function (Commands, Cypress, cy, state, config) {
       })
     }
 
+    const subjectChain = cy.subjectChain()
+
     const handleFocused = function () {
       // if it's the body, don't need to worry about focus
       // (unless it can be modified i.e we're in designMode or contenteditable)
@@ -512,6 +511,8 @@ export default function (Commands, Cypress, cy, state, config) {
       }
 
       return $actionability.verify(cy, options.$el, config, options, {
+        subjectFn: () => cy.getSubjectFromChain(subjectChain),
+
         onScroll ($el, type) {
           return Cypress.action('cy:scrolled', $el, type)
         },
@@ -530,7 +531,6 @@ export default function (Commands, Cypress, cy, state, config) {
           // cannot just call .focus, since children of contenteditable will not receive cursor
           // with .focus()
           return cy.now('click', $elToClick, {
-            $el: $elToClick,
             log: false,
             verify: false,
             _log: options._log,
@@ -539,6 +539,7 @@ export default function (Commands, Cypress, cy, state, config) {
             interval: options.interval,
             errorOnSelect: false,
             scrollBehavior: options.scrollBehavior,
+            subjectFn: () => $elToClick,
           })
           .then(() => {
             let activeElement = $elements.getActiveElByDocument($elToClick)

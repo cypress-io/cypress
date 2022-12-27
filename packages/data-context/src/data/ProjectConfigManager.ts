@@ -6,11 +6,19 @@ import debugLib from 'debug'
 import path from 'path'
 import _ from 'lodash'
 import chokidar from 'chokidar'
-import { validate as validateConfig, validateNoBreakingConfigLaunchpad, validateNoBreakingConfigRoot, validateNoBreakingTestingTypeConfig } from '@packages/config'
+import {
+  validate as validateConfig,
+  validateNoBreakingConfigLaunchpad,
+  validateNoBreakingConfigRoot,
+  validateNoBreakingTestingTypeConfig,
+  setupFullConfigWithDefaults,
+  updateWithPluginValues,
+} from '@packages/config'
 import { CypressEnv } from './CypressEnv'
 import { autoBindDebug } from '../util/autoBindDebug'
 import type { EventRegistrar } from './EventRegistrar'
 import type { DataContext } from '../DataContext'
+import { DependencyToInstall, isDependencyInstalled, WIZARD_BUNDLERS, WIZARD_DEPENDENCIES, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 
 const debug = debugLib(`cypress:lifecycle:ProjectConfigManager`)
 
@@ -153,8 +161,78 @@ export class ProjectConfigManager {
     if (this._registeredEventsTarget && this._testingType !== this._registeredEventsTarget) {
       this.options.refreshLifecycle().catch(this.onLoadError)
     } else if (this._eventsIpc && !this._registeredEventsTarget && this._cachedLoadConfig) {
-      this.setupNodeEvents(this._cachedLoadConfig).catch(this.onLoadError)
+      this.setupNodeEvents(this._cachedLoadConfig)
+      .then(async () => {
+        if (this._testingType === 'component') {
+          await this.checkDependenciesForComponentTesting()
+        }
+      })
+      .catch(this.onLoadError)
     }
+  }
+
+  async checkDependenciesForComponentTesting () {
+    // if it's a function, for example, the user is created their own dev server,
+    // and not using one of our presets. Assume they know what they are doing and
+    // what dependencies they require.
+    if (typeof this._cachedLoadConfig?.initialConfig?.component?.devServer !== 'object') {
+      return
+    }
+
+    const devServerOptions = this._cachedLoadConfig.initialConfig.component.devServer
+
+    const bundler = WIZARD_BUNDLERS.find((x) => x.type === devServerOptions.bundler)
+
+    // Use a map since sometimes the same dependency can appear in `bundler` and `framework`,
+    // for example webpack appears in both `bundler: 'webpack', framework: 'react-scripts'`
+    const unsupportedDeps = new Map<DependencyToInstall['dependency']['type'], DependencyToInstall>()
+
+    if (!bundler) {
+      return
+    }
+
+    const isFrameworkSatisfied = async (bundler: typeof WIZARD_BUNDLERS[number], framework: typeof WIZARD_FRAMEWORKS[number]) => {
+      for (const dep of await (framework.dependencies(bundler.type, this.options.projectRoot))) {
+        const res = await isDependencyInstalled(dep.dependency, this.options.projectRoot)
+
+        if (!res.satisfied) {
+          return false
+        }
+      }
+
+      return true
+    }
+
+    const frameworks = WIZARD_FRAMEWORKS.filter((x) => x.configFramework === devServerOptions.framework)
+
+    const mismatchedFrameworkDeps = new Map<typeof WIZARD_DEPENDENCIES[number]['type'], DependencyToInstall>()
+
+    let isSatisfied = false
+
+    for (const framework of frameworks) {
+      if (await isFrameworkSatisfied(bundler, framework)) {
+        isSatisfied = true
+        break
+      } else {
+        for (const dep of await framework.dependencies(bundler.type, this.options.projectRoot)) {
+          mismatchedFrameworkDeps.set(dep.dependency.type, dep)
+        }
+      }
+    }
+
+    if (!isSatisfied) {
+      for (const dep of Array.from(mismatchedFrameworkDeps.values())) {
+        if (!dep.satisfied) {
+          unsupportedDeps.set(dep.dependency.type, dep)
+        }
+      }
+    }
+
+    if (unsupportedDeps.size === 0) {
+      return
+    }
+
+    this.options.ctx.onWarning(getError('COMPONENT_TESTING_MISMATCHED_DEPENDENCIES', Array.from(unsupportedDeps.values())))
   }
 
   private async setupNodeEvents (loadConfigReply: LoadConfigReply): Promise<void> {
@@ -233,7 +311,7 @@ export class ProjectConfigManager {
     const cypressEnv = await this.loadCypressEnvFile()
     const fullConfig = await this.buildBaseFullConfig(loadConfigReply.initialConfig, cypressEnv, this.options.ctx.modeOptions)
 
-    const finalConfig = this._cachedFullConfig = this.options.ctx._apis.configApi.updateWithPluginValues(fullConfig, result.setupConfig ?? {}, this._testingType ?? 'e2e')
+    const finalConfig = this._cachedFullConfig = updateWithPluginValues(fullConfig, result.setupConfig ?? {}, this._testingType ?? 'e2e')
 
     // Check if the config file has a before:browser:launch task, and if it's the case
     // we should restart the browser if it is open
@@ -289,7 +367,7 @@ export class ProjectConfigManager {
       }
 
       throw getError('CONFIG_VALIDATION_ERROR', 'configFile', file || null, errMsg)
-    })
+    }, this._testingType)
 
     return validateNoBreakingConfigLaunchpad(
       config,
@@ -383,6 +461,16 @@ export class ProjectConfigManager {
     )
   }
 
+  get repoRoot () {
+    /*
+      Used to detect the correct file path when a test fails.
+      It is derived and assigned in the packages/driver in stack_utils.
+      It's needed to show the correct link to files in repo mgmt tools like GitHub in Cypress Cloud.
+      Right now we assume the repoRoot is where the `.git` dir is located.
+    */
+    return this.options.ctx.git?.gitBaseDir
+  }
+
   private async buildBaseFullConfig (configFileContents: Cypress.ConfigOptions, envFile: Cypress.ConfigOptions, options: Partial<AllModeOptions>, withBrowsers = true) {
     assert(this._testingType, 'Cannot build base full config without a testing type')
     this.validateConfigRoot(configFileContents, this._testingType)
@@ -397,10 +485,11 @@ export class ProjectConfigManager {
     configFileContents = { ...configFileContents, ...testingTypeOverrides, ...optionsOverrides }
 
     // TODO: Convert this to be synchronous, it's just FS checks
-    let fullConfig = await this.options.ctx._apis.configApi.setupFullConfigWithDefaults({
+    let fullConfig = await setupFullConfigWithDefaults({
       cliConfig: options.config ?? {},
       projectName: path.basename(this.options.projectRoot),
       projectRoot: this.options.projectRoot,
+      repoRoot: this.repoRoot,
       config: _.cloneDeep(configFileContents),
       envFile: _.cloneDeep(envFile),
       options: {
@@ -408,7 +497,8 @@ export class ProjectConfigManager {
         testingType: this._testingType,
         configFile: path.basename(this.configFilePath),
       },
-    })
+      configFile: this.options.ctx.lifecycleManager.configFile,
+    }, this.options.ctx.file.getFilesByGlob)
 
     if (withBrowsers) {
       const browsers = await this.options.ctx.browser.machineBrowsers()
@@ -421,14 +511,22 @@ export class ProjectConfigManager {
       }
 
       fullConfig.browsers = fullConfig.browsers?.map((browser) => {
-        if (browser.family === 'chromium' || fullConfig.chromeWebSecurity) {
-          return browser
+        if (browser.family === 'webkit' && !fullConfig.experimentalWebKitSupport) {
+          return {
+            ...browser,
+            disabled: true,
+            warning: '`playwright-webkit` is installed and WebKit is detected, but `experimentalWebKitSupport` is not enabled in your Cypress config. Set it to `true` to use WebKit.',
+          }
         }
 
-        return {
-          ...browser,
-          warning: browser.warning || getError('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name).message,
+        if (browser.family !== 'chromium' && !fullConfig.chromeWebSecurity) {
+          return {
+            ...browser,
+            warning: browser.warning || getError('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name).message,
+          }
         }
+
+        return browser
       })
 
       // If we have withBrowsers set to false, it means we're coming from the legacy config.get API
@@ -440,6 +538,7 @@ export class ProjectConfigManager {
   }
 
   async getFullInitialConfig (options: Partial<AllModeOptions> = this.options.ctx.modeOptions, withBrowsers = true): Promise<FullConfig> {
+    // return cached configuration for new spec and/or new navigating load when Cypress is running tests
     if (this._cachedFullConfig) {
       return this._cachedFullConfig
     }

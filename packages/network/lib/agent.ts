@@ -8,10 +8,52 @@ import url from 'url'
 import { createRetryingSocket, getAddress } from './connect'
 import { lenientOptions } from './http-utils'
 import { ClientCertificateStore } from './client-certificates'
+import { CaOptions, getCaOptions } from './ca'
 
 const debug = debugModule('cypress:network:agent')
 const CRLF = '\r\n'
 const statusCodeRe = /^HTTP\/1.[01] (\d*)/
+
+let baseCaOptions: CaOptions | undefined
+const getCaOptionsPromise = (): Promise<CaOptions> => {
+  return getCaOptions().then((options: CaOptions) => {
+    baseCaOptions = options
+
+    return options
+  }).catch(() => {
+    // Errors reading the config are treated as warnings by npm and node and handled by those processes separately
+    // from what we're doing here.
+    return {}
+  })
+}
+let baseCaOptionsPromise: Promise<CaOptions> = getCaOptionsPromise()
+
+// This is for testing purposes only
+export const _resetBaseCaOptionsPromise = () => {
+  baseCaOptions = undefined
+  baseCaOptionsPromise = getCaOptionsPromise()
+}
+
+const mergeCAOptions = (options: https.RequestOptions, caOptions: CaOptions): https.RequestOptions => {
+  if (!caOptions.ca) {
+    return options
+  }
+
+  if (!options.ca) {
+    return {
+      ...options,
+      ca: caOptions.ca,
+    }
+  }
+
+  // First, normalize the options.ca option. It can be a string, a Buffer, an array of strings, or an array of Buffers
+  const caArray = _.castArray(options.ca).map((caOption) => caOption.toString())
+
+  return {
+    ...options,
+    ca: [...caArray, ...caOptions.ca],
+  }
+}
 
 export const clientCertificateStore = new ClientCertificateStore()
 
@@ -181,6 +223,10 @@ export class CombinedAgent {
       }) + options.path
     }
 
+    if (!options.uri) {
+      options.uri = url.parse(options.href)
+    }
+
     debug('addRequest called %o', { isHttps, ..._.pick(options, 'href') })
 
     return getFirstWorkingFamily(options, this.familyCache, (family: net.family) => {
@@ -191,7 +237,7 @@ export class CombinedAgent {
       if (isHttps) {
         _.assign(options, clientCertificateStore.getClientCertificateAgentOptionsForUrl(options.uri))
 
-        return this.httpsAgent.addRequest(req, options)
+        return this.httpsAgent.addRequest(req, options as https.RequestOptions)
       }
 
       this.httpAgent.addRequest(req, options)
@@ -279,11 +325,7 @@ class HttpsAgent extends https.Agent {
     super(opts)
   }
 
-  addRequest (req: http.ClientRequest, options: http.RequestOptions) {
-    if (!options.uri) {
-      options.uri = url.parse(options.href)
-    }
-
+  addRequest (req: http.ClientRequest, options: https.RequestOptions) {
     // Ensure we have a proper port defined otherwise node has assumed we are port 80
     // (https://github.com/nodejs/node/blob/master/lib/_http_client.js#L164) since we are a combined agent
     // rather than an http or https agent. This will cause issues with fetch requests (@cypress/request already handles it:
@@ -293,7 +335,13 @@ class HttpsAgent extends https.Agent {
       options.port = 443
     }
 
-    super.addRequest(req, options)
+    if (baseCaOptions) {
+      super.addRequest(req, mergeCAOptions(options, baseCaOptions))
+    } else {
+      baseCaOptionsPromise.then((caOptions) => {
+        super.addRequest(req, mergeCAOptions(options, caOptions))
+      })
+    }
   }
 
   createConnection (options: HttpsRequestOptions, cb: http.SocketCallback) {

@@ -29,11 +29,13 @@ describe('e2e xhr', () => {
   })
 
   systemTests.it('passes in global mode', {
+    browser: '!webkit', // TODO(webkit): fix+unskip
     spec: 'xhr.cy.js',
     snapshot: true,
   })
 
   systemTests.it('passes through CLI', {
+    browser: '!webkit', // TODO(webkit): fix+unskip
     spec: 'xhr.cy.js',
     snapshot: true,
     useCli: true,

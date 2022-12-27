@@ -6,6 +6,8 @@ import faker from 'faker'
 import { ref } from 'vue'
 const fileMatchButtonSelector = '[data-cy=file-match-button]'
 
+faker.seed(1)
+
 describe('<FileMatchButton />', () => {
   it('renders a small extension', () => {
     cy.mount(() => (<div class="p-12">

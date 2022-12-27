@@ -1,6 +1,6 @@
 describe('Blank Contents', () => {
   it('renders the blank page', () => {
-    cy.contains('cy.visit()')
+    cy.get('[data-cy="cypress-logo"]')
   })
 
   it('renders the visit failure page', () => {

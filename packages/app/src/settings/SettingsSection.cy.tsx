@@ -5,7 +5,7 @@ describe('<SettingsSection />', () => {
     cy.viewport(800, 200)
 
     const title = 'Project Id'
-    const description = 'A Cypress config setting used to uniquely identify your project when recording runs to Cypress Dashboard. Learn more.'
+    const description = 'A Cypress config setting used to uniquely identify your project when recording runs to Cypress Cloud. Learn more.'
     const slots = {
       description: () => <p>{description}</p>,
       title: () => <h1>{title}</h1>,

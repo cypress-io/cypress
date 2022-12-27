@@ -3,6 +3,8 @@ import Warning from './Warning.vue'
 import faker from 'faker'
 import { ref } from 'vue'
 
+faker.seed(1)
+
 const title = faker.hacker.noun()
 const message = `
 # Hello!

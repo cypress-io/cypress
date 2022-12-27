@@ -1,6 +1,8 @@
 import FileMatchIndicator from './FileMatchIndicator.vue'
 import faker from 'faker'
 
+faker.seed(1)
+
 describe('<FileMatchIndicator />', () => {
   it('renders a reasonable length text', () => {
     cy.mount(() => (<div class="p-12">

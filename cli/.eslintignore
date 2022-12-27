@@ -1,0 +1,14 @@
+**/__snapshots__
+/build
+
+# cli/types is linted by tslint/dtslint
+/types
+
+# these are all copied from dist'd builds from the individual libs
+/angular
+/react
+/react18
+/vue
+/vue2
+/svelte
+/mount-utils

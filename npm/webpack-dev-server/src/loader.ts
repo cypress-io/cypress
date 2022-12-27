@@ -20,7 +20,9 @@ const makeImport = (file: Cypress.Cypress['spec'], filename: string, chunkName: 
   return `"${filename}": {
     shouldLoad: () => document.location.pathname.includes("${encodeURI(file.absolute)}"),
     load: () => import("${file.absolute}" ${magicComments}),
-    chunkName: "${chunkName}",
+    absolute: "${file.absolute.split(path.sep).join(path.posix.sep)}",
+    relative: "${file.relative.split(path.sep).join(path.posix.sep)}",
+    relativeUrl: "/__cypress/src/${chunkName}.js",
   }`
 }
 
@@ -60,9 +62,8 @@ export default function loader (this: unknown) {
   const { files, projectRoot, supportFile } = ctx._cypress
 
   const supportFileAbsolutePath = supportFile ? JSON.stringify(path.resolve(projectRoot, supportFile)) : undefined
-
-  return `
-  var loadSupportFile = ${supportFile ? `() => import(${supportFileAbsolutePath})` : `() => Promise.resolve()`}
+  const supportFileRelativePath = supportFile ? JSON.stringify(path.relative(projectRoot, supportFileAbsolutePath || '')) : undefined
+  const result = `
   var allTheSpecs = ${buildSpecs(projectRoot, files)};
 
   var { init } = require(${JSON.stringify(require.resolve('./aut-runner'))})
@@ -70,11 +71,23 @@ export default function loader (this: unknown) {
   var scriptLoaders = Object.values(allTheSpecs).reduce(
     (accSpecLoaders, specLoader) => {
       if (specLoader.shouldLoad()) {
-        accSpecLoaders.push(specLoader.load)
+        accSpecLoaders.push(specLoader)
       }
       return accSpecLoaders
-  }, [loadSupportFile])
+  }, [])
+
+  if (${!!supportFile}) {
+    var supportFile = {
+      absolute: ${supportFileAbsolutePath},
+      relative: ${supportFileRelativePath},
+      relativeUrl: "/__cypress/src/cypress-support-file.js",
+      load: () => import(${supportFileAbsolutePath} /* webpackChunkName: "cypress-support-file" */),
+    }
+    scriptLoaders.unshift(supportFile)
+  }
 
   init(scriptLoaders)
   `
+
+  return result
 }

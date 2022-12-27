@@ -549,6 +549,7 @@ describe('lib/util/ci_provider', () => {
       GITHUB_ACTION: 'ciGitHubActionId',
       GITHUB_EVENT_NAME: 'ciEventName',
       GITHUB_RUN_ID: 'ciGithubRunId',
+      GITHUB_RUN_ATTEMPT: 'ciGithubRunAttempt',
       GITHUB_REPOSITORY: 'ciGithubRepository',
       GH_BRANCH: '',
 
@@ -566,12 +567,14 @@ describe('lib/util/ci_provider', () => {
       githubEventName: 'ciEventName',
       githubWorkflow: 'ciGitHubWorkflowName',
       githubRepository: 'ciGithubRepository',
+      githubRunAttempt: 'ciGithubRunAttempt',
       githubRunId: 'ciGithubRunId',
     })
 
     expectsCommitParams({
       sha: 'ciCommitSha',
       defaultBranch: 'ciBaseRef',
+      runAttempt: 'ciGithubRunAttempt',
       remoteBranch: 'ciHeadRef',
       branch: 'ciCommitRef',
     })
@@ -580,10 +583,12 @@ describe('lib/util/ci_provider', () => {
       GITHUB_ACTIONS: 'true',
       GITHUB_REF: 'ciCommitRef',
       GH_BRANCH: 'GHCommitBranch',
+      GITHUB_RUN_ATTEMPT: 'ciGithubRunAttempt',
     }, { clear: true })
 
     return expectsCommitParams({
       branch: 'GHCommitBranch',
+      runAttempt: 'ciGithubRunAttempt',
     })
   })
 

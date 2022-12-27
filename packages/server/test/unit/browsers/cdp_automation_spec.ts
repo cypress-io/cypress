@@ -1,72 +1,11 @@
 const { expect, sinon } = require('../../spec_helper')
 
-import {
-  CdpAutomation,
-  _cookieMatches,
-  _domainIsWithinSuperdomain,
-  CyCookie,
-} from '../../../lib/browsers/cdp_automation'
+import { CdpAutomation } from '../../../lib/browsers/cdp_automation'
 
 context('lib/browsers/cdp_automation', () => {
-  context('._domainIsWithinSuperdomain', () => {
-    it('matches as expected', () => {
-      [
-        {
-          domain: 'a.com',
-          suffix: 'a.com',
-          expected: true,
-        },
-        {
-          domain: 'a.com',
-          suffix: 'b.com',
-          expected: false,
-        },
-        {
-          domain: 'c.a.com',
-          suffix: 'a.com',
-          expected: true,
-        },
-        {
-          domain: 'localhost',
-          suffix: 'localhost',
-          expected: true,
-        },
-        {
-          domain: '.localhost',
-          suffix: '.localhost',
-          expected: true,
-        },
-        {
-          domain: '.localhost',
-          suffix: 'reddit.com',
-          expected: false,
-        },
-      ].forEach(({ domain, suffix, expected }, i) => {
-        expect(_domainIsWithinSuperdomain(domain, suffix)).to.eq(expected)
-      })
-    })
-  })
-
-  context('._cookieMatches', () => {
-    it('matches as expected', () => {
-      [
-        {
-          cookie: { domain: 'example.com' },
-          filter: { domain: 'example.com' },
-          expected: true,
-        },
-        {
-          cookie: { domain: 'example.com' },
-          filter: { domain: '.example.com' },
-          expected: true,
-        },
-      ].forEach(({ cookie, filter, expected }) => {
-        expect(_cookieMatches(cookie as CyCookie, filter)).to.eq(expected)
-      })
-    })
-  })
-
   context('.CdpAutomation', () => {
+    let cdpAutomation: CdpAutomation
+
     beforeEach(async function () {
       this.sendDebuggerCommand = sinon.stub()
       this.onFn = sinon.stub()
@@ -76,14 +15,35 @@ context('lib/browsers/cdp_automation', () => {
         onRequestEvent: sinon.stub(),
       }
 
-      this.cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, this.automation, false)
+      cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, this.automation, false)
 
       this.sendDebuggerCommand
       .throws(new Error('not stubbed'))
       .withArgs('Browser.getVersion')
       .resolves()
 
-      this.onRequest = this.cdpAutomation.onRequest
+      this.onRequest = cdpAutomation.onRequest
+    })
+
+    describe('.startVideoRecording', function () {
+      // https://github.com/cypress-io/cypress/issues/9265
+      it('respond ACK after receiving new screenshot frame', async function () {
+        const writeVideoFrame = sinon.stub()
+        const frameMeta = { data: Buffer.from('foo'), sessionId: '1' }
+
+        this.onFn.withArgs('Page.screencastFrame').callsFake((e, fn) => {
+          fn(frameMeta)
+        })
+
+        const startScreencast = this.sendDebuggerCommand.withArgs('Page.startScreencast').resolves()
+        const screencastFrameAck = this.sendDebuggerCommand.withArgs('Page.screencastFrameAck').resolves()
+
+        await cdpAutomation.startVideoRecording(writeVideoFrame)
+
+        expect(startScreencast).to.have.been.calledWith('Page.startScreencast')
+        expect(writeVideoFrame).to.have.been.calledWithMatch((arg) => Buffer.isBuffer(arg) && arg.length > 0)
+        expect(screencastFrameAck).to.have.been.calledWith('Page.screencastFrameAck', { sessionId: frameMeta.sessionId })
+      })
     })
 
     describe('.onNetworkRequestWillBeSent', function () {
@@ -177,16 +137,28 @@ context('lib/browsers/cdp_automation', () => {
           cookies: [
             { name: 'foo', value: 'f', path: '/', domain: 'localhost', secure: true, httpOnly: true, expires: 123 },
             { name: 'bar', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expires: 456 },
+            { name: 'qux', value: 'q', path: '/', domain: 'foobar.com', secure: false, httpOnly: false, expires: 789 },
           ],
         })
       })
 
-      it('returns all cookies', function () {
+      it('returns cookies that match filter', function () {
         return this.onRequest('get:cookies', { domain: 'localhost' })
         .then((resp) => {
           expect(resp).to.deep.eq([
             { name: 'foo', value: 'f', path: '/', domain: 'localhost', secure: true, httpOnly: true, expirationDate: 123, sameSite: undefined },
             { name: 'bar', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456, sameSite: undefined },
+          ])
+        })
+      })
+
+      it('returns all cookies if there is no filter', function () {
+        return this.onRequest('get:cookies', {})
+        .then((resp) => {
+          expect(resp).to.deep.eq([
+            { name: 'foo', value: 'f', path: '/', domain: 'localhost', secure: true, httpOnly: true, expirationDate: 123, sameSite: undefined },
+            { name: 'bar', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456, sameSite: undefined },
+            { name: 'qux', value: 'q', path: '/', domain: 'foobar.com', secure: false, hostOnly: true, httpOnly: false, expirationDate: 789, sameSite: undefined },
           ])
         })
       })

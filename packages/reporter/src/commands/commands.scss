@@ -1,7 +1,12 @@
+@mixin nested-command-dashes($color) {
+  border-left: 1px dotted $color;
+  border-image-slice: 0 0 0 1;
+  border-image-source: repeating-linear-gradient(0deg, transparent, $color, $color 4px);
+}
+
 .reporter {
   // rendered within ../hooks/hooks.tsx
   .commands-container {
-    font-family: $monospace;
     background-color: $reporter-section-background;
     min-width: $reporter-contents-min-width;
     padding: 0;
@@ -13,21 +18,29 @@
 
   .command {
     min-height: 28px;
+    font-family: $monospace;
   }
 
-  // System Command Styles
-  .command-type-system.command-is-event {
-    user-select: none;
-    font-style: unset;
+  .command-is-studio {
+    cursor: auto;
+    
+    &.command-type-parent .commands-controls .studio-command-remove {
+      display: block;
+      padding-left: 5px;
 
-    .command-method,
-    .command-message {
-      color: $gray-200;
-      font-weight: 700;
+      &:hover {
+        color: #565554;
+      }
     }
   }
 
+  // System Command Styles
+  .command-type-system {
+    user-select: none;
+  }
+
   // Event Styles
+  .command-type-system,
   .command-is-event {
     font-style: italic;
 
@@ -78,76 +91,19 @@
       }
     }
 
-    .command-alias,
-    .command-interceptions {
-      border-radius: 4px;
-      color: $white;
-      display: inline-block;
-      font-family: $font-sans;
-      font-size: 10px;
-      margin-left: 5px;
-      line-height: 16px;
-      max-width: 200px;
-      overflow: hidden;
-      padding: 0 4px;
-      text-overflow: ellipsis;
-      vertical-align: text-top;
-      white-space: nowrap;
-
-      &.route {
-        background-color: $teal-500;
-      }
-
-      &.dom {
-        background-color: $indigo-500;
-      }
-
-      &.agent,
-      &.primitive {
-        background-color: $red-500;
-      }
-
-      &.has-multiple-aliases,
-      &.has-multiple-interceptions {
-        border-radius: 4px 0 0 4px;
-        padding: 0 2px 0 4px;
-      }
-    }
-
     // ensures alias & number of children commands don't break if reporter width is narrow
     .alias-container {
+      margin-left: 0;
       white-space: nowrap;
   
-      > {
+      > * {
         display: inline-block;
+        margin-left: 2px;
       }
-    }
-
-    .command-alias-count,
-    .command-interceptions-count {
-      border-radius: 0 4px 4px 0;
-      color: $white;
-      display: inline-block;
-      line-height: 16px;
-      padding: 0 4px;
-      vertical-align: text-top;
-
-      &.route {
-        background-color: $teal-400;
+    
+      > *:first-child {
+        margin-left: 0;
       }
-
-      &.dom {
-        background-color: $indigo-400;
-      }
-
-      &.agent,
-      &.primitive {
-        background-color: $red-400;
-      }
-    }
-
-    .num-children.has-alias {
-      margin-left: 2px;
     }
   }
 
@@ -169,23 +125,27 @@
   }
 
   .command-pin-target.command-group {
-    border-left: 1px dotted $gray-600;
+    @include nested-command-dashes($gray-600);
     padding-left: 12px;
     min-height: 28px;
 
     .command-group-block {
-      border-left: 1px dotted $gray-600;
-      width: 11px;
+      @include nested-command-dashes($gray-600);
+      width: 12px;
       min-height: 28px;
-      min-width: 11px;
+      min-width: 12px;
     }
   }
 
   .command-info {
-    padding-top: 4px;
-    padding-bottom: 4px;
+    display: -webkit-box;
+    font-weight: 600;
     margin-left: 0;
     overflow: hidden;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    -webkit-line-clamp: 50;
+    -webkit-box-orient: vertical;
     width: 100%;
 
     .command-aliases,
@@ -224,7 +184,6 @@
   .command-method {
     font-size: 12px;
     margin-right: 12px;
-    font-weight: 600;
     min-width: fit-content;
   }
 
@@ -240,7 +199,7 @@
       color: $gray-700;
     }
   
-    &:not(.command-is-event) .command-method {
+    &:not(.command-is-event, .command-type-system) .command-method {
       color: $gray-200;
     }
 
@@ -293,13 +252,40 @@
     }
   }
 
+  .command-state-warned {
+    color: $warn-text;
+
+    &:not(.command-type-system) {
+      border-left: $warn-border;
+    }
+
+    .command-number-column,
+    .command-method,
+    .command-message {
+      color: $warn-text;
+    }
+
+    .command-group {
+      border-color: $warn-text;
+      @include nested-command-dashes($warn-text);
+
+      .command-group-block {
+        border-color: $warn-text;
+        @include nested-command-dashes($warn-text);
+      }
+    }
+  }
+
   .command-state-failed {
-    border-left: 2px solid $fail;
-    background-color: $err-header-background;
     color: $err-header-text;
 
-    &.command-is-interactive:hover {
-      background: rgba($red-400, 0.3);
+    &:not(.command-type-system) {
+      border-left: $err-border;
+      background-color: $err-header-background;
+
+      &.command-is-interactive:hover {
+        background: rgba($red-400, 0.3);
+      }
     }
 
     .command-number-column,
@@ -308,34 +294,23 @@
       color: $err-header-text;
     }
 
+    .failed-indicator {
+      vertical-align: middle;
+    }
+
     .command-group {
       border-color: $err-header-text;
+      @include nested-command-dashes($err-header-text);
 
       .command-group-block {
         border-color: $err-header-text;
+        @include nested-command-dashes($err-header-text);
       }
     }
   }
 
-  .command-state-warn {
-    font-style: unset;
-    background-color: $warn-background;
-    border-left: 2px solid $orange-700;
-    color: $warn-text;
-
-    &.command-is-interactive:hover {
-      background-color: $warn-header-background;
-    }
-  }
-
-  .command .runnable-err-wrapper {
-    padding: 0;
-    border: 0;
-    margin: 0;
-    margin-bottom: 5px;
-  }
-
   // Custom Styles for Specific Commands
+  // NOTE: assert does not support warned state
   .command-name-assert {
     .command-method {
       span {
@@ -351,7 +326,6 @@
       color: $gray-500;
 
       strong {
-        font-weight: 600;
         margin: 0 3px;
       }
     }
@@ -429,8 +403,6 @@
     white-space: initial;
     word-wrap: inherit;
     width: 100%;
-    -webkit-line-clamp: 50;
-    -webkit-box-orient: vertical;
   }
 
   // Styles for Uncaught Exception
@@ -448,6 +420,7 @@
     padding-top: 4px;
 
     svg {
+      color: rgba($gray-600, .25);
       color: $gray-600;
       vertical-align: text-top;
     }
@@ -460,6 +433,15 @@
 
     label {
       font-size: 85%;
+    }
+
+    > * {
+      display: inline-block;
+      margin-left: 2px;
+    }
+  
+    > *:first-child {
+      margin-left: 0;
     }
   }
 
@@ -532,19 +514,5 @@
     min-height: 28px;
     padding: 9px;
   }
-
-  // additional styles on top of the shared.scss styles
-  .num-children,
-  .num-elements {
-    background-color: $gray-600;
-    border-radius: 4px;
-    color: $black;
-    display: inline-block;
-    font-family: $font-sans;
-    font-style: normal;
-    font-size: 10px;
-    line-height: 1.5;
-    padding: 0px 5px !important;
-    vertical-align: text-top;
-  }
 }
+

@@ -22,7 +22,7 @@
     :button-text="t('runs.errors.notFound.button')"
     :button-icon="ConnectIcon"
     :message="t('runs.errors.notFound.title')"
-    @button-click="showConnectDialog = true"
+    @button-click="openLoginConnectModal({utmMedium: 'Runs Tab'})"
   >
     <i18n-t
       scope="global"
@@ -58,13 +58,6 @@
       {{ t('runs.errors.unauthorized.description') }}
     </RunsError>
   </template>
-  <CloudConnectModals
-    v-if="showConnectDialog"
-    :show="showConnectDialog"
-    :gql="props.gql"
-    @cancel="showConnectDialog = false"
-    @success="showConnectDialog = false"
-  />
 </template>
 
 <script lang="ts" setup>
@@ -77,8 +70,10 @@ import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import SendIcon from '~icons/cy/paper-airplane_x16.svg'
 import { useI18n } from '@cy/i18n'
 import CodeTag from '../../../frontend-shared/src/components/CodeTag.vue'
-import CloudConnectModals from './modals/CloudConnectModals.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
+import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+
+const { openLoginConnectModal } = useLoginConnectStore()
 
 const { t } = useI18n()
 
@@ -98,7 +93,6 @@ fragment RunsErrorRenderer on Query {
       }
     }
   }
-  ...CloudConnectModals
 }
 `
 
@@ -111,8 +105,6 @@ const emit = defineEmits<{
 }>()
 
 const currentProject = computed(() => props.gql.currentProject)
-
-const showConnectDialog = ref(false)
 
 gql`
 mutation RunsErrorRenderer_RequestAccess( $projectId: String! ) {

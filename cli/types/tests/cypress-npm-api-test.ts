@@ -1,6 +1,6 @@
 // type tests for Cypress NPM module
 // https://on.cypress.io/module-api
-import cypress from 'cypress'
+import cypress, { defineConfig } from 'cypress'
 
 cypress.run // $ExpectType (options?: Partial<CypressRunOptions> | undefined) => Promise<CypressRunResult | CypressFailedRunResult>
 cypress.open // $ExpectType (options?: Partial<CypressOpenOptions> | undefined) => Promise<void>
@@ -49,6 +49,10 @@ cypress.run().then(results => {
     results // $ExpectType CypressRunResult
     results.status // $ExpectType "finished"
   }
+})
+
+const config = defineConfig({
+  modifyObstructiveCode: true
 })
 
 // component options

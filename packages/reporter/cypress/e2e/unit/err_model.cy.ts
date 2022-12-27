@@ -69,6 +69,12 @@ describe('Err model', () => {
       expect(err.stack).to.equal('the stack (path/to/file.js 45:203)')
     })
 
+    it('updates isRecovered if specified', () => {
+      expect(err.isRecovered).to.be.false
+      err.update({ isRecovered: true })
+      expect(err.isRecovered).to.be.true
+    })
+
     it('does nothing if props is undefined', () => {
       err.update()
       expect(err.name).to.equal('BadError')

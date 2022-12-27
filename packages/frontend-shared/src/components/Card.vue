@@ -11,11 +11,11 @@
     @click="!disabled && emits('click')"
   >
     <div
-      v-if="title === t('testingType.component.name')"
+      v-if="badgeText"
       class="top-0 right-0 text-teal-600 ribbon absolute"
       aria-hidden="true"
     >
-      {{ t('versions.beta') }}
+      {{ badgeText }}
     </div>
     <div
       class="mx-auto children:transition-all children:duration-300"
@@ -53,21 +53,12 @@
       <slot>{{ description }}</slot>
     </p>
     <slot name="footer" />
-    <div
-      v-if="title === t('testingType.component.name')"
-      class="sr-only"
-    >
-      Support is in {{ t('versions.beta') }}
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { FunctionalComponent, SVGAttributes } from 'vue'
 import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-
-const { t } = useI18n()
 
 const props = withDefaults(defineProps<{
   title: string
@@ -77,9 +68,11 @@ const props = withDefaults(defineProps<{
   variant: 'indigo' | 'jade'
   iconSize: 64 | 48
   disabled?: boolean
+  badgeText?: string
 }>(), {
   disabled: false,
   hoverIcon: undefined,
+  badgeText: '',
 })
 
 const classMap = {

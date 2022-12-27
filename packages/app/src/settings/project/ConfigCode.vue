@@ -24,18 +24,22 @@
           :key="field"
         >
           {{ field }}:
-          <RenderObject
-            v-if="value && typeof value === 'object'"
-            :value="value"
-            :color-classes="`rounded-sm px-2px ${colorMap[from]}`"
-            :from="from"
-          />
-          <span
+          <template v-if="value && typeof value === 'object'">
+            <RenderObject
+              :value="value"
+              :color-classes="`rounded-sm px-2px ${colorMap[from]}`"
+              :from="from"
+            />
+            <span>,</span>
+          </template>
+          <RenderPrimitive
             v-else
+            :from="from"
+            :value="value"
+            :data-cy-config="from"
             class="rounded-sm px-2px"
             :class="colorMap[from]"
-            :data-cy-config="from"
-          >{{ renderPrimitive(value) }}</span>,
+          />
           <br>
         </span>
       </div>
@@ -50,10 +54,10 @@ import IconCode from '~icons/mdi/code'
 import { useI18n } from '@cy/i18n'
 import { CONFIG_LEGEND_COLOR_MAP } from './ConfigSourceColors'
 import RenderObject from './renderers/RenderObject.vue'
-import { renderPrimitive } from './renderers/renderPrimitive'
 import { gql } from '@urql/core'
 import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
 import type { ConfigCodeFragment } from '../../generated/graphql'
+import RenderPrimitive from './renderers/RenderPrimitive.vue'
 
 gql`
 fragment ConfigCode on CurrentProject {

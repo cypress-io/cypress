@@ -53,27 +53,23 @@ describe('header', () => {
   })
 
   describe('stats', () => {
-    let addStat: Function
-
-    beforeEach(() => {
-      addStat = (state: string, times: number) => {
+    it('displays numbers for passed, failed, and pending tests', () => {
+      const addStat = (state: string, times: number) => {
         _.times(times, () => {
           runner.emit('test:after:run', { state, final: true })
         })
       }
-    })
 
-    it('displays numbers for passed, failed, and pending tests', () => {
-      addStat('passed', 2)
-      addStat('failed', 3)
-      addStat('pending', 1)
+      addStat('passed', 4)
+      addStat('failed', 2)
+      addStat('pending', 2)
 
-      cy.get('.passed .num').should('have.text', '2')
-      cy.get('.failed .num').should('have.text', '3')
-      cy.get('.pending .num').should('have.text', '1')
+      cy.get('.passed .num').should('have.text', '4')
+      cy.get('.failed .num').should('have.text', '2')
+      cy.get('.pending .num').should('have.text', '2')
 
       // ensure the page is loaded before taking snapshot
-      cy.contains('test 4').should('be.visible')
+      cy.contains('suite 1').should('be.visible')
       cy.percySnapshot()
     })
 

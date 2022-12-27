@@ -101,11 +101,6 @@ export class SocketE2E extends SocketBase {
           return cb()
         })
 
-        socket.on('studio:init', (cb) => {
-          studio.getStudioModalShown()
-          .then(cb)
-        })
-
         socket.on('studio:save', (saveInfo, cb) => {
           // even if the user has turned off file watching
           // we want to force a reload on save

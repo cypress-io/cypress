@@ -4,6 +4,8 @@ import faker from 'faker'
 import { defaultMessages } from '@cy/i18n'
 import { WarningList_RemoveWarningDocument } from '../generated/graphql'
 
+faker.seed(1)
+
 const warningSelector = '[data-cy=warning-alert]'
 
 const createWarning = (props = {}) => ({

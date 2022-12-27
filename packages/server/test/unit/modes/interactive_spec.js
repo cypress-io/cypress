@@ -6,7 +6,6 @@ const electron = require('electron')
 const DataContext = require('@packages/data-context')
 const savedState = require(`../../../lib/saved_state`)
 const menu = require(`../../../lib/gui/menu`)
-const Events = require(`../../../lib/gui/events`)
 const Windows = require(`../../../lib/gui/windows`)
 const interactiveMode = require(`../../../lib/modes/interactive`)
 
@@ -28,13 +27,13 @@ describe('gui/interactive', () => {
   context('.getWindowArgs', () => {
     it('quits app when onClose is called', () => {
       electron.app.quit = sinon.stub()
-      interactiveMode.getWindowArgs({}).onClose()
+      interactiveMode.getWindowArgs('http://app', {}).onClose()
 
       expect(electron.app.quit).to.be.called
     })
 
     it('tracks state properties', () => {
-      const { trackState } = interactiveMode.getWindowArgs({})
+      const { trackState } = interactiveMode.getWindowArgs('http://app', {})
 
       const args = _.pick(trackState, 'width', 'height', 'x', 'y', 'devTools')
 
@@ -52,49 +51,49 @@ describe('gui/interactive', () => {
       // Use the saved value if it's valid
       describe('when no dimension', () => {
         it('renders with preferred width if no width saved', () => {
-          expect(interactiveMode.getWindowArgs({}).width).to.equal(1200)
+          expect(interactiveMode.getWindowArgs('http://app', {}).width).to.equal(1200)
         })
 
         it('renders with preferred height if no height saved', () => {
-          expect(interactiveMode.getWindowArgs({}).height).to.equal(800)
+          expect(interactiveMode.getWindowArgs('http://app', {}).height).to.equal(800)
         })
       })
 
       describe('when saved dimension is too small', () => {
         it('uses the preferred width', () => {
-          expect(interactiveMode.getWindowArgs({ appWidth: 1 }).width).to.equal(1200)
+          expect(interactiveMode.getWindowArgs('http://app', { appWidth: 1 }).width).to.equal(1200)
         })
 
         it('uses the preferred height', () => {
-          expect(interactiveMode.getWindowArgs({ appHeight: 1 }).height).to.equal(800)
+          expect(interactiveMode.getWindowArgs('http://app', { appHeight: 1 }).height).to.equal(800)
         })
       })
 
       describe('when saved dimension is within min/max dimension', () => {
         it('uses the saved width', () => {
-          expect(interactiveMode.getWindowArgs({ appWidth: 1500 }).width).to.equal(1500)
+          expect(interactiveMode.getWindowArgs('http://app', { appWidth: 1500 }).width).to.equal(1500)
         })
 
         it('uses the saved height', () => {
-          expect(interactiveMode.getWindowArgs({ appHeight: 1500 }).height).to.equal(1500)
+          expect(interactiveMode.getWindowArgs('http://app', { appHeight: 1500 }).height).to.equal(1500)
         })
       })
     })
 
     it('renders with saved x if it exists', () => {
-      expect(interactiveMode.getWindowArgs({ appX: 3 }).x).to.equal(3)
+      expect(interactiveMode.getWindowArgs('http://app', { appX: 3 }).x).to.equal(3)
     })
 
     it('renders with no x if no x saved', () => {
-      expect(interactiveMode.getWindowArgs({}).x).to.be.undefined
+      expect(interactiveMode.getWindowArgs('http://app', {}).x).to.be.undefined
     })
 
     it('renders with saved y if it exists', () => {
-      expect(interactiveMode.getWindowArgs({ appY: 4 }).y).to.equal(4)
+      expect(interactiveMode.getWindowArgs('http://app', { appY: 4 }).y).to.equal(4)
     })
 
     it('renders with no y if no y saved', () => {
-      expect(interactiveMode.getWindowArgs({}).y).to.be.undefined
+      expect(interactiveMode.getWindowArgs('http://app', {}).y).to.be.undefined
     })
 
     describe('on window focus', () => {
@@ -106,7 +105,7 @@ describe('gui/interactive', () => {
         const env = process.env['CYPRESS_INTERNAL_ENV']
 
         process.env['CYPRESS_INTERNAL_ENV'] = 'development'
-        interactiveMode.getWindowArgs({}).onFocus()
+        interactiveMode.getWindowArgs('http://app', {}).onFocus()
         expect(menu.set.lastCall.args[0].withInternalDevTools).to.be.true
         process.env['CYPRESS_INTERNAL_ENV'] = env
       })
@@ -115,7 +114,7 @@ describe('gui/interactive', () => {
         const env = process.env['CYPRESS_INTERNAL_ENV']
 
         process.env['CYPRESS_INTERNAL_ENV'] = 'production'
-        interactiveMode.getWindowArgs({}).onFocus()
+        interactiveMode.getWindowArgs('http://app', {}).onFocus()
         expect(menu.set.lastCall.args[0].withInternalDevTools).to.be.false
         process.env['CYPRESS_INTERNAL_ENV'] = env
       })
@@ -128,25 +127,12 @@ describe('gui/interactive', () => {
       this.state = {}
 
       sinon.stub(menu, 'set')
-      sinon.stub(Events, 'start')
       sinon.stub(Windows, 'open').resolves(this.win)
       sinon.stub(Windows, 'trackState')
 
       const state = savedState.create()
 
       sinon.stub(state, 'get').resolves(this.state)
-    })
-
-    it('calls Events.start with options, adding env, onFocusTests, and os', () => {
-      sinon.stub(os, 'platform').returns('someOs')
-      const opts = {}
-
-      return interactiveMode.ready(opts).then(() => {
-        expect(Events.start).to.be.called
-        expect(Events.start.lastCall.args[0].onFocusTests).to.be.a('function')
-
-        expect(Events.start.lastCall.args[0].os).to.equal('someOs')
-      })
     })
 
     it('calls menu.set', () => {

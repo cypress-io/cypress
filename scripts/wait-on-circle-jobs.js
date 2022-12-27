@@ -15,7 +15,7 @@ const jobName = process.env.CIRCLE_JOB || 'wait-on-circle-jobs'
 
 const workflowId = process.env.CIRCLE_WORKFLOW_ID
 
-const branchesToAlwaysFinalize = ['develop', '10.0-release']
+const branchesToAlwaysFinalize = ['develop']
 
 const requireAllJobsToPass = !branchesToAlwaysFinalize.includes(process.env.CIRCLE_BRANCH)
 

@@ -131,6 +131,7 @@ describe('e2e visit', () => {
     })
 
     systemTests.it('passes', {
+      browser: '!webkit', // TODO(webkit): fix+unskip
       spec: 'visit.cy.js',
       snapshot: true,
       onRun (exec) {
@@ -145,6 +146,7 @@ describe('e2e visit', () => {
     })
 
     systemTests.it('passes with experimentalSourceRewriting', {
+      browser: '!webkit', // TODO(webkit): fix+unskip
       spec: 'source_rewriting.cy.js',
       config: {
         experimentalSourceRewriting: true,
@@ -161,7 +163,8 @@ describe('e2e visit', () => {
       },
     })
 
-    systemTests.it('fails when network connection immediately fails', {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23252
+    systemTests.it.skip('fails when network connection immediately fails', {
       spec: 'visit_http_network_error_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
@@ -173,7 +176,8 @@ describe('e2e visit', () => {
       expectedExitCode: 1,
     })
 
-    systemTests.it('fails when file server responds with 404', {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23162
+    systemTests.it.skip('fails when file server responds with 404', {
       spec: 'visit_file_404_response_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,

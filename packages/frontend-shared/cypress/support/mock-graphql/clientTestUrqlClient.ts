@@ -128,6 +128,23 @@ const testFieldResolver: GraphQLFieldResolver<any, ClientTestContext> = function
     return testFieldResolver(GQLStubRegistry[info.parentType.name], args, ctx, info)
   }
 
+  if (info.parentType.name.startsWith('RemoteFetchable')) {
+    const typenameForRemoteFetchable = info.parentType.name.replace(/^RemoteFetchable/, '')
+
+    // `data` serves as a wrapper field for remote fetches, so assume we actually want to grab a stubbed type if one exists
+    if (info.fieldName === 'data') {
+      const stubForRemoteFetchable = GQLStubRegistry[typenameForRemoteFetchable]
+
+      if (stubForRemoteFetchable) {
+        return stubForRemoteFetchable
+      }
+    }
+
+    if (GQLStubRegistry[typenameForRemoteFetchable] && source !== GQLStubRegistry[typenameForRemoteFetchable]) {
+      return testFieldResolver(GQLStubRegistry[typenameForRemoteFetchable], args, ctx, info)
+    }
+  }
+
   if (isNonNullType(info.returnType)) {
     throw new Error(dedent`
       Missing required field at path [${directPath.join('.')}] for fragment ${getMountedFragmentName(info)}.

@@ -267,7 +267,7 @@ describe('util', () => {
     })
 
     it('copy NODE_OPTIONS to ORIGINAL_NODE_OPTIONS', () => {
-      sandbox.stub(process.versions, 'node').value('v16.13.2')
+      sandbox.stub(process.versions, 'node').value('v16.14.2')
       sandbox.stub(process.versions, 'openssl').value('1.0.0')
 
       restoreEnv = mockedEnv({
@@ -322,7 +322,7 @@ describe('util', () => {
 
     // https://github.com/cypress-io/cypress/issues/18914
     it('does not include --openssl-legacy-provider in Node <=16', () => {
-      sandbox.stub(process.versions, 'node').value('v16.13.2')
+      sandbox.stub(process.versions, 'node').value('v16.14.2')
       sandbox.stub(process.versions, 'openssl').value('1.0.0')
 
       restoreEnv = mockedEnv({})
@@ -541,6 +541,11 @@ describe('util', () => {
       process.env.npm_package_config_CYPRESS_FOO = 'baz'
       process.env.npm_config_CYPRESS_FOO = ''
       expect(util.getEnv('CYPRESS_FOO')).to.eql('')
+    })
+
+    it('npm config set should work', () => {
+      process.env.npm_config_cypress_foo_foo = 'bazz'
+      expect(util.getEnv('CYPRESS_FOO_FOO')).to.eql('bazz')
     })
 
     it('throws on non-string name', () => {

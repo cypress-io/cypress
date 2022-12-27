@@ -18,3 +18,7 @@ export function getPathForPlatform (posixPath?: string) {
 
   return posixPath
 }
+
+export function posixify (path: string): string {
+  return path.replace(/\\/g, '/')
+}

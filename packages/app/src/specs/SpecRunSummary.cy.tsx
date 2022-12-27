@@ -8,7 +8,7 @@ function validateTopBorder (color: string): void {
 }
 
 function validateFilename (expected: string): void {
-  cy.findByTestId('spec-run-filename').should('have.text', expected)
+  cy.findByTestId('spec-filename').should('have.text', expected)
 }
 
 function validateTimeAgo (expected: string): void {

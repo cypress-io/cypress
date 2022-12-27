@@ -343,7 +343,8 @@ describe('e2e record', () => {
 
     setupStubbedServer(routes)
 
-    it('passes in parallel with group', function () {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23152
+    it.skip('passes in parallel with group', function () {
       this.retries(3)
 
       return Promise.all([
@@ -392,7 +393,8 @@ describe('e2e record', () => {
   context('metadata', () => {
     setupStubbedServer(createRoutes())
 
-    it('sends Studio usage metadata', function () {
+    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23151
+    it.skip('sends Studio usage metadata', function () {
       return systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         configFile: 'cypress-with-project-id.config.js',
@@ -587,10 +589,26 @@ describe('e2e record', () => {
         retries: 2,
       })
 
+      expect(requests[2].body.tests[1].title).deep.eq([
+        'record pass',
+        'is pending',
+      ])
+
+      expect(requests[2].body.tests[1].body).to.eq('')
+
+      expect(requests[2].body.tests[2].title).deep.eq([
+        'record pass',
+        'is pending due to .skip',
+      ])
+
+      expect(requests[2].body.tests[2].body).to.eq('() => {\n    console.log(\'stuff\');\n  }')
+
       expect(requests[2].body.tests[3].title).deep.eq([
         'record pass',
         'is skipped due to browser',
       ])
+
+      expect(requests[2].body.tests[3].body).eq('() => {}')
 
       expect(requests[2].body.tests[3].config).deep.eq({
         defaultCommandTimeout: 1234,
@@ -711,15 +729,78 @@ describe('e2e record', () => {
   })
 
   context('video recording', () => {
-    setupStubbedServer(createRoutes())
+    describe('when video=false', () => {
+      setupStubbedServer(createRoutes())
 
-    it('does not upload when not enabled', function () {
-      return systemTests.exec(this, {
-        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-        configFile: 'cypress-with-project-id-without-video.config.js',
-        spec: 'record_pass*',
-        record: true,
-        snapshot: true,
+      it('does not upload when not enabled', async function () {
+        const { stdout } = await systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id-without-video.config.js',
+          spec: 'record_pass*',
+          record: true,
+          snapshot: true,
+          config: {
+            env: {
+              'TEST_STDIO': '1',
+            },
+          },
+        })
+
+        console.log(stdout)
+
+        expect(stdout).to.include('Run URL:')
+        expect(stdout).to.include(runUrl)
+
+        const postRun = requests[0]
+
+        // ensure its relative to projectRoot
+        expect(postRun.body.specs).to.deep.eq([
+          'cypress/e2e/record_pass.cy.js',
+        ])
+
+        const runResults = requests[3]
+
+        expect(runResults.body.video).to.be.false
+      })
+    })
+
+    describe('when videoUploadOnPasses=false', () => {
+      setupStubbedServer(createRoutes())
+      it('does not upload when specs pass', async function () {
+        const { stdout } = await systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_fail*,record_pass*',
+          record: true,
+          snapshot: true,
+          expectedExitCode: 1,
+          config: {
+            env: {
+              'TEST_STDIO': '1',
+            },
+          },
+        })
+
+        console.log(stdout)
+
+        expect(stdout).to.include('Run URL:')
+        expect(stdout).to.include(runUrl)
+
+        const postRun = requests[0]
+
+        // ensure its relative to projectRoot
+        expect(postRun.body.specs).to.deep.eq([
+          'cypress/e2e/record_fail.cy.js',
+          'cypress/e2e/record_pass.cy.js',
+        ])
+
+        const recordFailSpecResults = requests[3]
+
+        expect(recordFailSpecResults.body.video).to.be.true // failed spec has video
+
+        const recordPassSpecResults = requests[9]
+
+        expect(recordPassSpecResults.body.video).to.be.false // passing spec does not have video
       })
     })
   })
@@ -965,7 +1046,7 @@ describe('e2e record', () => {
               code: 'RUN_GROUP_NAME_NOT_UNIQUE',
               message: 'Run group name cannot be used again without passing the parallel flag.',
               payload: {
-                runUrl: 'https://dashboard.cypress.io/runs/12345',
+                runUrl: 'https://cloud.cypress.io/runs/12345',
               },
             })
           },
@@ -1730,7 +1811,7 @@ describe('e2e record', () => {
                 tags,
                 warnings: [{
                   name: 'FreePlanExceedsMonthlyTests',
-                  message: 'Warning from Cypress Dashboard: Organization with free plan has exceeded monthly test results limit.',
+                  message: 'Warning from Cypress Cloud: Organization with free plan has exceeded monthly test results limit.',
                   code: 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS_V2',
                   used: 700,
                   limit: 500,

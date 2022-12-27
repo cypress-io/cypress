@@ -23,7 +23,7 @@ import { EventRegistrar } from './EventRegistrar'
 import { getServerPluginHandlers, resetPluginHandlers } from '../util/pluginHandlers'
 import { detectLanguage } from '@packages/scaffold-config'
 import { validateNeedToRestartOnChange } from '@packages/config'
-import { makeTestingTypeData } from './coreDataShape'
+import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 
 export interface SetupFullConfigOptions {
   projectName: string
@@ -233,7 +233,7 @@ export class ProjectLifecycleManager {
           const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
 
           if (!devServerOptions?.port) {
-            this.ctx.onError(getError('CONFIG_FILE_DEV_SERVER_INVALID_RETURN', devServerOptions))
+            throw getError('CONFIG_FILE_DEV_SERVER_INVALID_RETURN', devServerOptions)
           }
 
           finalConfig.baseUrl = `http://localhost:${devServerOptions?.port}`
@@ -284,11 +284,17 @@ export class ProjectLifecycleManager {
     if (this.ctx.coreData.cliBrowser) {
       await this.setActiveBrowserByNameOrPath(this.ctx.coreData.cliBrowser)
 
+      const preferences = await this.ctx._apis.localSettingsApi.getPreferences()
+
+      const hasWelcomeBeenDismissed = Boolean(preferences.majorVersionWelcomeDismissed?.[MAJOR_VERSION_FOR_CONTENT])
+
       // only continue if the browser was successfully set - we must have an activeBrowser once this function resolves
-      if (this.ctx.coreData.activeBrowser) {
+      // but if the user needs to dismiss a landing page, don't continue, the active browser will be opened
+      // by a mutation called from the client side when the user dismisses the welcome screen
+      if (this.ctx.coreData.activeBrowser && hasWelcomeBeenDismissed) {
         // if `cypress open` was launched with a `--project` and `--testingType`, go ahead and launch the `--browser`
         if (this.ctx.modeOptions.project && this.ctx.modeOptions.testingType) {
-          await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType, {})
+          await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType)
         }
 
         return
@@ -297,7 +303,7 @@ export class ProjectLifecycleManager {
 
     // lastBrowser is cached per-project.
     const prefs = await this.ctx.project.getProjectPreferences(path.basename(this.projectRoot))
-    const browsers = await this.ctx.browser.machineBrowsers()
+    const browsers = await this.ctx.browser.allBrowsers()
 
     if (!browsers[0]) {
       this.ctx.onError(getError('UNEXPECTED_INTERNAL_ERROR', new Error('No browsers found, cannot set a browser')))
@@ -381,6 +387,8 @@ export class ProjectLifecycleManager {
   }
 
   private _setCurrentProject (projectRoot: string) {
+    process.chdir(projectRoot)
+
     this._projectRoot = projectRoot
     this._initializedProject = undefined
 
@@ -394,21 +402,19 @@ export class ProjectLifecycleManager {
     this.ctx.update((s) => {
       s.currentProject = projectRoot
       s.currentProjectGitInfo?.destroy()
-      if (!this.ctx.isRunMode) {
-        s.currentProjectGitInfo = new GitDataSource({
-          isRunMode: this.ctx.isRunMode,
-          projectRoot,
-          onError: this.ctx.onError,
-          onBranchChange: () => {
-            this.ctx.emitter.branchChange()
-          },
-          onGitInfoChange: (specPaths) => {
-            this.ctx.emitter.gitInfoChange(specPaths)
-          },
-        })
-      }
+      s.currentProjectGitInfo = new GitDataSource({
+        isRunMode: this.ctx.isRunMode,
+        projectRoot,
+        onError: this.ctx.onError,
+        onBranchChange: () => {
+          this.ctx.emitter.branchChange()
+        },
+        onGitInfoChange: (specPaths) => {
+          this.ctx.emitter.gitInfoChange(specPaths)
+        },
+      })
 
-      s.currentProjectData = { error: null, warnings: [], testingTypeData: null }
+      s.diagnostics = { error: null, warnings: [] }
       s.packageManager = packageManagerUsed
     })
 
@@ -495,8 +501,11 @@ export class ProjectLifecycleManager {
       d.currentTestingType = testingType
       d.wizard.chosenBundler = null
       d.wizard.chosenFramework = null
-      if (d.currentProjectData) {
-        d.currentProjectData.testingTypeData = makeTestingTypeData(testingType)
+      if (testingType) {
+        d.diagnostics = {
+          error: null,
+          warnings: [],
+        }
       }
     })
 
@@ -516,9 +525,6 @@ export class ProjectLifecycleManager {
       d.currentTestingType = testingType
       d.wizard.chosenBundler = null
       d.wizard.chosenFramework = null
-      if (d.currentProjectData) {
-        d.currentProjectData.testingTypeData = makeTestingTypeData(testingType)
-      }
     })
 
     if (this._currentTestingType === testingType) {
@@ -624,7 +630,12 @@ export class ProjectLifecycleManager {
         metaState.isProjectUsingESModules = true
       }
 
-      metaState.isUsingTypeScript = detectLanguage({ projectRoot: this.projectRoot, pkgJson, isMigrating: metaState.hasLegacyCypressJson }) === 'ts'
+      metaState.isUsingTypeScript = detectLanguage({
+        projectRoot: this.projectRoot,
+        customConfigFile: configFile,
+        pkgJson,
+        isMigrating: metaState.hasLegacyCypressJson,
+      }) === 'ts'
     } catch {
       // No need to handle
     }

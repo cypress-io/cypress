@@ -43,7 +43,6 @@ const eventCleanseMap = {
   stack: () => 'match.string',
   file: (arg: string) => arg ? 'relative/path/to/spec.js' : undefined,
   message: () => '[error message]',
-  sourceMappedStack: () => 'match.string',
   parsedStack: () => 'match.array',
   name: (n: string) => n === 'Error' ? 'AssertionError' : n,
   err: () => {
@@ -51,7 +50,6 @@ const eventCleanseMap = {
       message: '[error message]',
       name: 'AssertionError',
       stack: 'match.string',
-      sourceMappedStack: 'match.string',
       parsedStack: 'match.array',
     }
   },
@@ -136,13 +134,6 @@ declare global {
   }
 }
 
-class SnapshotError extends Error {
-  constructor (message: string) {
-    super()
-    this.message = `\n${message}`
-  }
-}
-
 export function runCypressInCypressMochaEventsTest<T> (snapshots: T, snapToCompare: keyof T, done: Mocha.Done) {
   const bus = new EventEmitter()
   const outerRunner = window.top!.window
@@ -159,10 +150,17 @@ export function runCypressInCypressMochaEventsTest<T> (snapshots: T, snapToCompa
     if (diff !== '') {
       /* eslint-disable no-console */
       console.info('Received snapshot:', JSON.stringify(snapshot, null, 2))
-      throw new SnapshotError(diff)
+
+      return cy.fail(new Error(`The captured mocha events did not match the "${String(snapToCompare)}" snapshot.\n${diff}`), { async: false })
     }
 
-    done()
+    Cypress.log({
+      name: 'assert',
+      message: `The captured mocha events for the spec matched the "${String(snapToCompare)}" snapshot!`,
+      state: 'passed',
+    })
+
+    return done()
   })
 
   const assertMatchingSnapshot = (win: Cypress.AUTWindow) => {

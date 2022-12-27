@@ -60,7 +60,7 @@ mutation OpenBrowser_LaunchProject ($testingType: TestingTypeEnum!)  {
   launchOpenProject {
     id
   }
-  setProjectPreferences(testingType: $testingType) {
+  setProjectPreferencesInGlobalCache(testingType: $testingType) {
     currentProject {
       id
       title

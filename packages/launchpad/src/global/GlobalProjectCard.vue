@@ -34,7 +34,7 @@
 
     <Menu #="{ open }">
       <MenuButton
-        aria-label="Project Actions"
+        aria-label="Project actions"
         tabindex="-1"
         class="flex h-32px text-white w-32px items-center
       justify-center focus:outline-transparent focus:text-gray-300"

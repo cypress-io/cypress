@@ -1,0 +1,7 @@
+import { <%= classify(name) %> } from './<%= fileName %>.component'
+
+describe('<%= classify(name) %>', () => {
+  it('should mount', () => {
+    cy.mount(<%= classify(name) %>)
+  })
+})

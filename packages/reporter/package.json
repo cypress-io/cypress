@@ -9,7 +9,8 @@
     "cypress:open": "node ../../scripts/cypress open --project .",
     "cypress:run": "node ../../scripts/cypress run --project .",
     "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run --component --project .",
-    "watch": "yarn build-for-tests --watch --progress"
+    "watch": "yarn build-for-tests --watch --progress",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "devDependencies": {
     "@cypress/react-tooltip": "0.5.3",
@@ -17,6 +18,7 @@
     "@fontsource/open-sans": "4.3.0",
     "@fortawesome/fontawesome-free": "6.0.0",
     "@packages/driver": "0.0.0-development",
+    "@packages/types": "0.0.0-development",
     "@packages/web-config": "0.0.0-development",
     "@reach/dialog": "0.10.5",
     "classnames": "2.3.1",

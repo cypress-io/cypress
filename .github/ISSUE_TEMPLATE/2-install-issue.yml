@@ -12,7 +12,7 @@ body:
     id: current-behavior
     attributes:
       label: Current behavior
-      description: A description including screenshots, stack traces, DEBUG logs, etc. [Troubleshooting tips](https://on.cypress.io/troubleshooting).
+      description: Please provide a description including screenshots, stack traces, DEBUG logs, etc. [Troubleshooting tips](https://on.cypress.io/troubleshooting)
       placeholder: When I try to download Cypress...
     validations:
       required: true
@@ -22,12 +22,21 @@ body:
       label: Debug logs
       description: Include DEBUG logs setting [`DEBUG=cypress:*`](https://on.cypress.io/troubleshooting#Print-DEBUG-logs/). Include npm/yarn logs if applicable.
       placeholder: Debug logs
+      render: Text
   - type: input
     id: version
     attributes:
       label: Cypress Version
-      description: The version you're trying to install
-      placeholder: ex. 7.6.0
+      description: What version of Cypress are you trying to install?
+      placeholder: ex. 10.3.1
+    validations:
+      required: true
+  - type: input
+    id: node-version
+    attributes:
+      label: Node version
+      description: What version of node.js are you using to run Cypress?
+      placeholder: ex. v16.16.0
     validations:
       required: true
   - type: dropdown
@@ -42,6 +51,13 @@ body:
         - other
     validations:
       required: true
+  - type: input
+    id: package-manager-version
+    attributes:
+      label: Package Manager Version
+      description: What is the version of your chosen package manager?
+    validations:
+      required: true
   - type: dropdown
     id: operating-system
     attributes:
@@ -51,6 +67,14 @@ body:
         - Mac
         - Windows
         - other
+    validations:
+      required: true
+  - type: input
+    id: os-version
+    attributes:
+      label: Operating System Version
+      description: What is the version of the operating system you are running Cypress on?
+      placeholder: ex 12.4
     validations:
       required: true
   - type: textarea

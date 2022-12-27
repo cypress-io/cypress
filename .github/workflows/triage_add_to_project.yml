@@ -1,0 +1,20 @@
+name: 'Triage: add issue/PR to project'
+
+on:
+  issues:
+    types:
+      - opened
+  pull_request_target:
+    types:
+      - opened
+
+jobs:
+  add-to-triage-project:
+    name: Add to triage project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/add-to-project@v0.3.0
+        with:
+          project-url: https://github.com/orgs/cypress-io/projects/9
+          github-token: ${{ secrets.ADD_TO_PROJECT_TOKEN }}
+          

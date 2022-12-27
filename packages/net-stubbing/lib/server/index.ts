@@ -6,9 +6,9 @@ export { InterceptRequest } from './middleware/request'
 
 export { InterceptResponse } from './middleware/response'
 
-export { NetStubbingState } from './types'
+export { NetStubbingState, ResourceType } from './types'
 
-export { getRouteForRequest } from './route-matching'
+export { getRoutesForRequest } from './route-matching'
 
 import { state } from './state'
 

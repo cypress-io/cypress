@@ -9,13 +9,15 @@
     "clean-deps": "rimraf node_modules",
     "test": "yarn cypress:run:ct && yarn types",
     "windi": "yarn windicss-analysis",
-    "cypress:open": "cross-env TZ=America/New_York gulp open --project .",
-    "cypress:open:ct": "cross-env TZ=America/New_York gulp open --component --project .",
-    "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run --component --project .",
-    "cypress:run:e2e": "cross-env TZ=America/New_York node ../../scripts/cypress run --e2e --project .",
-    "dev": "yarn gulp dev --project .",
+    "cypress:run-cypress-in-cypress": "cross-env CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=1 TZ=America/New_York",
+    "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project .",
+    "cypress:open:ct": "yarn cypress:run-cypress-in-cypress gulp open --component --project .",
+    "cypress:run:ct": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --component --project .",
+    "cypress:run:e2e": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --e2e --project .",
+    "dev": "yarn cypress:run-cypress-in-cypress gulp dev --project .",
     "start": "echo 'run yarn dev from the root' && exit 1",
-    "watch": "echo 'run yarn dev from the root' && exit 1"
+    "watch": "echo 'run yarn dev from the root' && exit 1",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {},
   "devDependencies": {
@@ -28,7 +30,7 @@
     "@packages/frontend-shared": "0.0.0-development",
     "@percy/cypress": "^3.1.0",
     "@purge-icons/generated": "0.8.1",
-    "@testing-library/cypress": "8.0.0",
+    "@testing-library/cypress": "BlueWinds/cypress-testing-library#119054b5963b0d2e064b13c5cc6fc9db32c8b7b5",
     "@tooling/system-tests": "0.0.0-development",
     "@toycode/markdown-it-class": "1.2.3",
     "@types/dedent": "^0.7.0",
@@ -49,6 +51,7 @@
     "cypress-real-events": "1.6.0",
     "dedent": "^0.7.0",
     "disparity": "^3.0.0",
+    "engine.io-client": "3.5.2",
     "fs-extra": "8.1.0",
     "globby": "^11.0.1",
     "graphql": "^15.5.1",
@@ -59,11 +62,10 @@
     "rimraf": "3.0.2",
     "rollup-plugin-polyfill-node": "^0.7.0",
     "type-fest": "^2.3.4",
-    "vite": "2.9.0-beta.3",
+    "vite": "4.0.1",
     "vite-plugin-components": "0.11.3",
     "vite-plugin-optimize-persist": "0.0.5",
     "vite-plugin-package-config": "0.0.3",
-    "vite-plugin-windicss": "1.2.4",
     "vite-svg-loader": "3.1.2",
     "vue": "3.2.31",
     "vue-i18n": "9.2.0-beta.7",
@@ -74,44 +76,5 @@
   },
   "files": [
     "dist"
-  ],
-  "vite": {
-    "optimizeDeps": {
-      "include": [
-        "@headlessui/vue",
-        "@iconify/iconify",
-        "@iconify/vue",
-        "@percy/cypress",
-        "@purge-icons/generated",
-        "@testing-library/cypress/add-commands",
-        "@urql/core",
-        "@urql/devtools",
-        "@urql/exchange-execute",
-        "@urql/exchange-graphcache",
-        "@urql/vue",
-        "@vue/test-utils",
-        "@vueuse/core",
-        "dedent",
-        "fake-uuid",
-        "floating-vue",
-        "graphql",
-        "graphql-relay",
-        "graphql/jsutils/Path",
-        "gravatar",
-        "lodash",
-        "lodash/clone",
-        "markdown-it",
-        "@toycode/markdown-it-class",
-        "shiki",
-        "socket.io-client",
-        "vue",
-        "vue-router",
-        "vue-demi",
-        "vue-i18n",
-        "vue-toastification",
-        "vue3-file-selector",
-        "wonka"
-      ]
-    }
-  }
+  ]
 }

@@ -1,17 +1,11 @@
 import React from 'react'
 import App, { toggleOneTodo } from './App'
 import { mount } from '@cypress/react'
+import 'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.css'
 
 describe('App', () => {
   beforeEach(() => {
-    mount(
-      <App />,
-      {
-        stylesheets: [
-          'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.css',
-        ],
-      },
-    )
+    mount(<App />)
   })
 
   it('works', () => {
