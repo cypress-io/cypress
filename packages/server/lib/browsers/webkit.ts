@@ -104,7 +104,6 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     browser: pwBrowser,
     initialUrl: url,
     downloadsFolder: options.downloadsFolder,
-    shouldMarkAutIframeRequests: !!options.experimentalSessionAndOrigin,
     videoApi: options.videoApi,
   })
 

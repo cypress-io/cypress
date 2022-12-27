@@ -47,11 +47,7 @@ export const create = (state: StateFunc) => ({
 
       autLocation = $Location.create(remoteUrl)
     } catch (e) {
-      if (Cypress.config('experimentalSessionAndOrigin')) {
-        autLocation = await getRemoteLocationFromCrossOriginWindow(autWindow)
-      } else {
-        autLocation = $Location.create('')
-      }
+      autLocation = await getRemoteLocationFromCrossOriginWindow(autWindow)
     }
 
     return autLocation

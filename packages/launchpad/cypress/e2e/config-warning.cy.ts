@@ -151,6 +151,78 @@ describe('experimentalStudio', () => {
   })
 })
 
+describe('experimentalRunAllSpecs', () => {
+  it('is a valid config for e2e testing', { defaultCommandTimeout: THIRTY_SECONDS }, () => {
+    cy.scaffoldProject('run-all-specs')
+    cy.openProject('run-all-specs')
+
+    cy.visitLaunchpad()
+    cy.skipWelcome()
+    cy.get('[data-cy-testingtype="e2e"]').click()
+    cy.findByTestId('launchpad-Choose a browser')
+    cy.get('h1').contains('Choose a browser')
+  })
+
+  it('is not a valid config for component testing', () => {
+    cy.scaffoldProject('run-all-specs')
+    cy.openProject('run-all-specs', ['--config-file', 'cypress-invalid-component.config.js'])
+
+    cy.visitLaunchpad()
+    cy.skipWelcome()
+    cy.get('[data-cy-testingtype="component"]').click()
+    cy.findByTestId('error-header')
+    cy.contains('The experimentalRunAllSpecs experiment is currently only supported for End to End Testing')
+  })
+
+  it('is not valid config when specified at root', { defaultCommandTimeout: THIRTY_SECONDS }, () => {
+    cy.scaffoldProject('run-all-specs')
+    cy.openProject('run-all-specs', ['--config-file', 'cypress-invalid-root.config.js'])
+
+    cy.visitLaunchpad()
+    cy.skipWelcome()
+    cy.get('[data-cy-testingtype="e2e"]').click()
+    cy.findByTestId('error-header')
+    cy.contains('The experimentalRunAllSpecs experiment is currently only supported for End to End Testing')
+  })
+})
+
+describe('experimentalOriginDependencies', () => {
+  it('is a valid config for e2e testing', () => {
+    cy.scaffoldProject('session-and-origin-e2e-specs')
+    cy.openProject('session-and-origin-e2e-specs')
+
+    cy.visitLaunchpad()
+    cy.skipWelcome()
+    cy.get('[data-cy-testingtype="e2e"]').click()
+    cy.findByTestId('launchpad-Choose a browser')
+    cy.get('h1').contains('Choose a browser')
+  })
+
+  it('is not a valid config for component testing', () => {
+    cy.scaffoldProject('session-and-origin-e2e-specs')
+    // TODO: remove config file from session-and-origin-e2e-specs project once the experimental flag is removed
+    cy.openProject('session-and-origin-e2e-specs', ['--config-file', 'cypress-invalid-component.config.js'])
+
+    cy.visitLaunchpad()
+    cy.skipWelcome()
+    cy.get('[data-cy-testingtype="component"]').click()
+    cy.findByTestId('error-header')
+    cy.contains('The experimentalOriginDependencies experiment is currently only supported for End to End Testing')
+  })
+
+  it('is not valid config when specified at root', () => {
+    cy.scaffoldProject('session-and-origin-e2e-specs')
+    // TODO: remove config file from session-and-origin-e2e-specs project once the experimental flag is removed
+    cy.openProject('session-and-origin-e2e-specs', ['--config-file', 'cypress-invalid-root.config.js'])
+
+    cy.visitLaunchpad()
+    cy.skipWelcome()
+    cy.get('[data-cy-testingtype="e2e"]').click()
+    cy.findByTestId('error-header')
+    cy.contains('The experimentalOriginDependencies experiment is currently only supported for End to End Testing')
+  })
+})
+
 describe('component testing dependency warnings', () => {
   it('warns against outdated react and vite version', () => {
     cy.scaffoldProject('component-testing-outdated-dependencies')
@@ -172,7 +244,7 @@ describe('component testing dependency warnings', () => {
   })
 
   // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23154
-  it.skip('warns against outdated @vue/cli dependency', () => {
+  it('warns against outdated @vue/cli dependency', { retries: 15 }, () => {
     cy.scaffoldProject('outdated-deps-vuecli3')
     cy.addProject('outdated-deps-vuecli3')
     cy.openGlobalMode()

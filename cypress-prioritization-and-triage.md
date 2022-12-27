@@ -118,7 +118,7 @@ There are a number of reasons why a ticket may be closed without any change or P
 The best place for asking questions is our [Discord server](https://discord.gg/cypress) which has a very active community of folks with a diverse set of knowledge. Other available channels to explore include [Cypress GitHub discussions](https://github.com/cypress-io/cypress/discussions), [community chat](https://on.cypress.io/chat), and [Stack Overflow](https://stackoverflow.com/questions/tagged/cypress).
 We also offer support via email with our [paid plans](https://www.cypress.io/pricing/).
 
-- **Feature request for Cypress Dashboard** - Thank you for your support as a Cypress Dashboard user! These issues are routed to our Cypress Dashboard team's ticketing system. Your customer success representative is available for follow-up and will reach out you directly via email if more information is needed.
+- **Feature request for Cypress Cloud** - Thank you for your support as a Cypress Cloud user! These issues are routed to our Cypress Cloud team's ticketing system. Your customer success representative is available for follow-up and will reach out you directly via email if more information is needed.
 
 - **The fix or feature is not within our vision for Cypress** - There will inevitably be suggestions that will not fit within the scope of Cypress' vision for our product. We will do our best to explain why we will not be addressing this issue.
 

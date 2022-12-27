@@ -10,7 +10,8 @@
     "run-mocha": "mocha -r @packages/ts/register -r test/pretest.ts --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "test": "CYPRESS_INTERNAL_ENV=test yarn run-mocha \"test/integration/*.spec.ts\" \"test/unit/**/*.spec.ts\"",
     "test-integration": "CYPRESS_INTERNAL_ENV=test yarn run-mocha \"test/integration/*.spec.ts\"",
-    "test-unit": "CYPRESS_INTERNAL_ENV=test yarn run-mocha \"test/unit/**/*.spec.ts\""
+    "test-unit": "CYPRESS_INTERNAL_ENV=test yarn run-mocha \"test/unit/**/*.spec.ts\"",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {
     "bluebird": "3.5.3",

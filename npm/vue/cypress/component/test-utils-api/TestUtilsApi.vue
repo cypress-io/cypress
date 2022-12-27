@@ -6,7 +6,10 @@
 <script>
 export default {
   props: {
-    msg: String,
+    msg: {
+      type: String,
+      default: '',
+    },
   },
   data () {
     return {

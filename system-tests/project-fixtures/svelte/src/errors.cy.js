@@ -1,7 +1,6 @@
 import Errors from './Errors.svelte'
 
 describe('Errors', () => {
-
   it('error on mount', () => {
     cy.mount(Errors, { props: { throwError: true } })
   })

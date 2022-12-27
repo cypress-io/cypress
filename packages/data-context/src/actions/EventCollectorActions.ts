@@ -25,10 +25,10 @@ export class EventCollectorActions {
 
   async recordEvent (event: CollectableEvent): Promise<boolean> {
     try {
-      const dashboardUrl = this.ctx.cloud.getDashboardUrl(cloudEnv)
+      const cloudUrl = this.ctx.cloud.getCloudUrl(cloudEnv)
 
       await this.ctx.util.fetch(
-        `${dashboardUrl}/anon-collect`,
+        `${cloudUrl}/anon-collect`,
         {
           method: 'POST',
           headers: {

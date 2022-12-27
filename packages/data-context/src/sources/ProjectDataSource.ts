@@ -21,7 +21,7 @@ import { toPosix } from '../util/file'
 import type { FilePartsShape } from '@packages/graphql/src/schemaTypes/objectTypes/gql-FileParts'
 import type { ProjectShape } from '../data'
 import type { FindSpecs } from '../actions'
-import { getDefaultSpecFileName } from './migration/utils'
+import { FileExtension, getDefaultSpecFileName } from './migration/utils'
 
 interface MatchedSpecs {
   projectRoot: string
@@ -140,7 +140,7 @@ export function getPathFromSpecPattern ({
   name = '' }:
 { specPattern: string
   testingType: TestingType
-  fileExtensionToUse?: 'js' | 'ts'
+  fileExtensionToUse?: FileExtension
   name?: string}) {
   function replaceWildCard (s: string, fallback: string) {
     return s.replace(/\*/g, fallback)
@@ -176,7 +176,13 @@ export function getPathFromSpecPattern ({
 
   const globWithoutBraces = micromatch.braces(glob, { expand: true })
 
-  let finalGlob = globWithoutBraces[0]
+  let finalGlob
+
+  if (fileExtensionToUse) {
+    finalGlob = globWithoutBraces.find((glob) => glob.includes(fileExtensionToUse)) || globWithoutBraces[0]
+  } else {
+    finalGlob = globWithoutBraces[0]
+  }
 
   if (fileExtensionToUse) {
     const filteredGlob = micromatch(globWithoutBraces, `*.${fileExtensionToUse}`, { basename: true })
@@ -199,6 +205,8 @@ export class ProjectDataSource {
   private _specWatcher: FSWatcher | null = null
   private _specs: SpecWithRelativeRoot[] = []
   private _hasNonExampleSpec: boolean = false
+
+  #runAllSpecs: string[] = []
 
   constructor (private ctx: DataContext) {}
 
@@ -228,6 +236,14 @@ export class ProjectDataSource {
 
   setSpecs (specs: SpecWithRelativeRoot[]) {
     this._specs = specs
+  }
+
+  get runAllSpecs () {
+    return this.#runAllSpecs
+  }
+
+  setRunAllSpecs (specs: string[]) {
+    this.#runAllSpecs = specs
   }
 
   get hasNonExampleSpec () {
@@ -465,7 +481,7 @@ export class ProjectDataSource {
 
     const looseComponentGlob = '*.{js,jsx,ts,tsx,vue}'
 
-    const framework = this.ctx.actions.project.getWizardFrameworkFromConfig()
+    const framework = this.ctx.actions.codegen.getWizardFrameworkFromConfig()
 
     return {
       component: framework?.glob ?? looseComponentGlob,
@@ -512,7 +528,11 @@ export class ProjectDataSource {
       throw Error(`Cannot find components without currentProject.`)
     }
 
-    const codeGenCandidates = await this.ctx.file.getFilesByGlob(projectRoot, glob, { expandDirectories: true })
+    const codeGenCandidates = await this.ctx.file.getFilesByGlob(
+      projectRoot,
+      glob,
+      { expandDirectories: true, ignore: ['**/*.config.{js,ts}', '**/*.{cy,spec}.{js,ts,jsx,tsx}'] },
+    )
 
     return codeGenCandidates.map((absolute) => ({ absolute }))
   }

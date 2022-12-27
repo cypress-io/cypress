@@ -204,33 +204,9 @@ describe('cy.origin Cypress API', { browser: '!webkit' }, () => {
   })
 
   context('not supported', () => {
-    it('throws an error when a user attempts to configure Cypress.Server.defaults() inside of cy.origin', (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).to.equal('`Cypress.Server.*` has been deprecated and its use is not supported in the `cy.origin()` callback. Consider using `cy.intercept()` (outside of the callback) instead.')
-        expect(err.docsUrl).to.equal('https://on.cypress.io/intercept')
-        done()
-      })
-
-      cy.origin('http://www.foobar.com:3500', () => {
-        Cypress.Server.defaults({})
-      })
-    })
-
-    it('throws an error when a user attempts to configure Cypress.Cookies.preserveOnce() inside of cy.origin', (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).to.equal('`Cypress.Cookies.preserveOnce` use is not supported in the `cy.origin()` callback. Consider using `cy.session()` (outside of the callback) instead.')
-        expect(err.docsUrl).to.equal('https://on.cypress.io/session')
-        done()
-      })
-
-      cy.origin('http://www.foobar.com:3500', () => {
-        Cypress.Cookies.preserveOnce('')
-      })
-    })
-
     it('throws an error when a user attempts to call Cypress.session.clearAllSavedSessions() inside of cy.origin', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.equal('`Cypress.session.*` methods are not supported in the `cy.switchToDomain()` callback. Consider using them outside of the callback instead.')
+        expect(err.message).to.equal('`Cypress.session.*` methods are not supported in the `cy.origin()` callback. Consider using them outside of the callback instead.')
         expect(err.docsUrl).to.equal('https://on.cypress.io/session-api')
         done()
       })

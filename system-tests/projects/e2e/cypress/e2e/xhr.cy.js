@@ -7,8 +7,7 @@ describe('xhrs', () => {
       }
     }
 
-    cy.server()
-    cy.route(/api/, getResp()).as('getApi')
+    cy.intercept(/api/, getResp()).as('getApi')
     cy.visit('/index.html')
     cy.window().then((win) => {
       const xhr = new win.XMLHttpRequest
@@ -19,7 +18,7 @@ describe('xhrs', () => {
     })
 
     cy.wait('@getApi')
-    .its('url').should('include', 'api/v1')
+    .its('request.url').should('include', 'api/v1')
   })
 
   it('ensures that request headers + body go out and reach the server unscathed', () => {
@@ -93,20 +92,15 @@ describe('xhrs', () => {
   })
 
   it('works prior to visit', () => {
-    cy.server()
+    cy.intercept('/foo')
   })
 
   // https://github.com/cypress-io/cypress/issues/5431
   it('can stub a 100kb response', (done) => {
     const body = 'X'.repeat(100 * 1024)
 
-    cy.server()
-    cy.route({
-      method: 'POST',
-      url: '/foo',
-      response: {
-        'bar': body,
-      },
+    cy.intercept('POST', '/foo', {
+      'bar': body,
     })
 
     cy.visit('/index.html')
@@ -129,38 +123,34 @@ describe('xhrs', () => {
   })
 
   describe('server with 1 visit', () => {
-    before(() => {
-      cy.visit('/xhr.html')
-    })
-
     beforeEach(() => {
-      cy.server()
-      cy.route(/users/, [{}, {}]).as('getUsers')
+      cy.visit('/xhr.html')
+      cy.intercept(/users/, [{}, {}]).as('getUsers')
     })
 
     it('response body', () => {
       cy.get('#fetch').click()
       cy.wait('@getUsers').then((xhr) => {
-        expect(xhr.url).to.include('/users')
+        expect(xhr.request.url).to.include('/users')
 
-        expect(xhr.responseBody).to.deep.eq([{}, {}])
+        expect(xhr.response.body).to.deep.eq([{}, {}])
       })
     })
 
     it('request body', () => {
-      cy.route('POST', /users/, { name: 'b' }).as('createUser')
+      cy.intercept('POST', /users/, { name: 'b' }).as('createUser')
       cy.get('#create').click()
-      cy.wait('@createUser').its('requestBody')
-      .should('deep.eq', { some: 'data' })
+      cy.wait('@createUser')
+      .its('request.body')
+      .should('equal', '{\"some\":\"data\"}')
     })
 
-    it('aborts', () => {
+    // TODO: When Intercepted, aborted XHR requests do not resolve the cy.wait command. https://github.com/cypress-io/cypress/issues/24492
+    it.skip('aborts', () => {
       cy.window()
       .then((win) => {
-        cy.route({
-          method: 'POST',
-          url: /users/,
-          response: { name: 'b' },
+        cy.intercept('POST', /users/, {
+          body: { name: 'b' },
           delay: 2000,
         }).as('createUser')
 
@@ -168,7 +158,7 @@ describe('xhrs', () => {
           return win.location.href = '/index.html'
         })
 
-        cy.wait('@createUser').its('canceled').should('be.true')
+        cy.wait('@createUser').its('state').should('eq', 'Errored')
       })
     })
   })

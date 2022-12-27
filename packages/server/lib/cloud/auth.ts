@@ -68,7 +68,7 @@ const getOriginFromUrl = (originalUrl) => {
  */
 const launchServer = (baseLoginUrl, sendMessage, utmSource, utmMedium, utmContent) => {
   if (!server) {
-    // launch an express server to listen for the auth callback from dashboard
+    // launch an express server to listen for the auth callback from Cypress Cloud
     const origin = getOriginFromUrl(baseLoginUrl)
 
     debug('Launching auth server with origin', origin)
@@ -95,13 +95,13 @@ const launchServer = (baseLoginUrl, sendMessage, utmSource, utmMedium, utmConten
       }
 
       /**
-       * Cypress Dashboard can redirect to us with an error; or, if Electron's shell.openExternal
+       * Cypress Cloud can redirect to us with an error; or, if Electron's shell.openExternal
        * is bugging out, `authCallback` can be undefined and reaching this point makes no sense.
        * @see https://github.com/cypress-io/cypress/pull/5243
        */
       if (_.get(req.query, 'status') === 'error' || !authCallback) {
         if (authCallback) {
-          authCallback(new Error('There was an error authenticating to the Cypress dashboard.'))
+          authCallback(new Error('There was an error authenticating to Cypress Cloud.'))
         }
 
         return redirectToStatus('error')

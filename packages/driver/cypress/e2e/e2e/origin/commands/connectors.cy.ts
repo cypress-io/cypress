@@ -111,8 +111,8 @@ context('cy.origin connectors', { browser: '!webkit' }, () => {
         expect(consoleProps.Function).to.equal('.text()')
         expect(consoleProps.Yielded).to.equal('button')
 
-        expect(consoleProps.Subject).to.have.property('tagName').that.equals('BUTTON')
-        expect(consoleProps.Subject).to.have.property('id').that.equals('button')
+        expect(consoleProps.Subject[0]).to.have.property('tagName').that.equals('BUTTON')
+        expect(consoleProps.Subject[0]).to.have.property('id').that.equals('button')
       })
     })
   })

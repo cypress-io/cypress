@@ -39,7 +39,7 @@ namespace CypressConfigTests {
   Cypress.config({ e2e: { baseUrl: '.', }}) // $ExpectError
   Cypress.config({ component: { baseUrl: '.', devServer: () => ({} as any) } }) // $ExpectError
   Cypress.config({ e2e: { indexHtmlFile: 'index.html' } }) // $ExpectError
-  Cypress.config({ testIsolation: 'off' }) // $ExpectError
+  Cypress.config({ testIsolation: false }) // $ExpectError
 
   Cypress.config('taskTimeout') // $ExpectType number
   Cypress.config('includeShadowDom') // $ExpectType boolean
@@ -69,6 +69,7 @@ namespace CypressIsCyTests {
 declare namespace Cypress {
   interface Chainable {
     newCommand: (arg: string) => Chainable<number>
+    newQuery: (arg: string) => Chainable<number>
   }
 }
 
@@ -291,6 +292,27 @@ namespace CypressCommandsTests {
 
     return originalFn(element, text, options)
   })
+
+  Cypress.Commands.addQuery('newQuery', function(arg) {
+    this // $ExpectType Command
+    arg // $ExpectType string
+    return () => 3
+  })
+}
+
+namespace CypressNowTest {
+  cy.now('get') // $ExpectType Promise<any> | ((subject: any) => any)
+}
+
+namespace CypressEnsuresTest {
+  Cypress.ensure.isType('', ['optional', 'element'], 'newQuery', cy) // $ExpectType void
+  Cypress.ensure.isElement('', 'newQuery', cy) // $ExpectType void
+  Cypress.ensure.isWindow('', 'newQuery', cy) // $ExpectType void
+  Cypress.ensure.isDocument('', 'newQuery', cy) // $ExpectType void
+
+  Cypress.ensure.isAttached('', 'newQuery', cy) // $ExpectType void
+  Cypress.ensure.isNotDisabled('', 'newQuery') // $ExpectType void
+  Cypress.ensure.isVisible('', 'newQuery') // $ExpectType void
 }
 
 namespace CypressLogsTest {
@@ -868,7 +890,7 @@ namespace CypressTestConfigOverridesTests {
     retries: { run: 3 } // $ExpectError
   }, () => { })
   it('test', {
-    testIsolation: 'off', // $ExpectError
+    testIsolation: false, // $ExpectError
   }, () => { })
 
   it.skip('test', {}, () => {})
@@ -887,7 +909,7 @@ namespace CypressTestConfigOverridesTests {
   }, () => {})
 
   describe('suite', {
-    testIsolation: 'off',
+    testIsolation: false,
   }, () => {})
 
   context('suite', {}, () => {})
@@ -998,6 +1020,19 @@ namespace CypressGetCookiesTests {
   cy.getCookies({ domain: false }) // $ExpectError
 }
 
+namespace CypressGetAllCookiesTests {
+  cy.getAllCookies().then((cookies) => {
+    cookies // $ExpectType Cookie[]
+  })
+  cy.getAllCookies({ log: true })
+  cy.getAllCookies({ timeout: 10 })
+  cy.getAllCookies({ log: true, timeout: 10 })
+
+  cy.getAllCookies({ log: 'true' }) // $ExpectError
+  cy.getAllCookies({ timeout: '10' }) // $ExpectError
+  cy.getAllCookies({ other: true }) // $ExpectError
+}
+
 namespace CypressGetCookieTests {
   cy.getCookie('name').then((cookie) => {
     cookie // $ExpectType Cookie | null
@@ -1061,4 +1096,69 @@ namespace CypressClearCookiesTests {
   cy.clearCookies({ log: 'true' }) // $ExpectError
   cy.clearCookies({ timeout: '10' }) // $ExpectError
   cy.clearCookies({ domain: false }) // $ExpectError
+}
+
+namespace CypressClearAllCookiesTests {
+  cy.clearAllCookies().then((cookies) => {
+    cookies // $ExpectType null
+  })
+  cy.clearAllCookies({ log: true })
+  cy.clearAllCookies({ timeout: 10 })
+  cy.clearAllCookies({ log: true, timeout: 10 })
+
+  cy.clearAllCookies({ log: 'true' }) // $ExpectError
+  cy.clearAllCookies({ timeout: '10' }) // $ExpectError
+  cy.clearAllCookies({ other: true }) // $ExpectError
+}
+
+namespace CypressLocalStorageTests {
+  cy.getAllLocalStorage().then((result) => {
+    result // $ExpectType StorageByOrigin
+  })
+  cy.getAllLocalStorage({ log: false })
+  cy.getAllLocalStorage({ log: 'true' }) // $ExpectError
+
+  cy.clearAllLocalStorage().then((result) => {
+    result // $ExpectType null
+  })
+  cy.clearAllLocalStorage({ log: false })
+  cy.clearAllLocalStorage({ log: 'true' }) // $ExpectError
+
+  cy.getAllSessionStorage().then((result) => {
+    result // $ExpectType StorageByOrigin
+  })
+  cy.getAllSessionStorage({ log: false })
+  cy.getAllSessionStorage({ log: 'true' }) // $ExpectError
+
+  cy.clearAllSessionStorage().then((result) => {
+    result // $ExpectType null
+  })
+  cy.clearAllSessionStorage({ log: false })
+  cy.clearAllSessionStorage({ log: 'true' }) // $ExpectError
+}
+
+namespace CypressTraversalTests {
+  cy.wrap({}).prevUntil('a') // $ExpectType Chainable<JQuery<HTMLAnchorElement>>
+  cy.wrap({}).prevUntil('#myItem') // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).prevUntil('span', 'a') // $ExpectType Chainable<JQuery<HTMLSpanElement>>
+  cy.wrap({}).prevUntil('#myItem', 'a') // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).prevUntil('div', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
+  cy.wrap({}).prevUntil('#myItem', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).prevUntil('#myItem', 'a', { log: 'true' }) // $ExpectError
+
+  cy.wrap({}).nextUntil('a') // $ExpectType Chainable<JQuery<HTMLAnchorElement>>
+  cy.wrap({}).nextUntil('#myItem') // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).nextUntil('span', 'a') // $ExpectType Chainable<JQuery<HTMLSpanElement>>
+  cy.wrap({}).nextUntil('#myItem', 'a') // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).nextUntil('div', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
+  cy.wrap({}).nextUntil('#myItem', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).nextUntil('#myItem', 'a', { log: 'true' }) // $ExpectError
+
+  cy.wrap({}).parentsUntil('a') // $ExpectType Chainable<JQuery<HTMLAnchorElement>>
+  cy.wrap({}).parentsUntil('#myItem') // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).parentsUntil('span', 'a') // $ExpectType Chainable<JQuery<HTMLSpanElement>>
+  cy.wrap({}).parentsUntil('#myItem', 'a') // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).parentsUntil('div', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLDivElement>>
+  cy.wrap({}).parentsUntil('#myItem', 'a', { log: false, timeout: 100 }) // $ExpectType Chainable<JQuery<HTMLElement>>
+  cy.wrap({}).parentsUntil('#myItem', 'a', { log: 'true' }) // $ExpectError
 }

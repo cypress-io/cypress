@@ -74,7 +74,7 @@ exports['shows help for run --foo 1'] = `
     -C, --config-file <config-file>            path to script file where configuration values are set. defaults to "cypress.config.{js,ts,mjs,cjs}".
     --e2e                                      runs end to end tests
     -e, --env <env>                            sets environment variables. separate multiple values with a comma. overrides any value in cypress.config.{js,ts,mjs,cjs} or cypress.env.json
-    --group <name>                             a named group for recorded runs in the Cypress Dashboard
+    --group <name>                             a named group for recorded runs in Cypress Cloud
     -k, --key <record-key>                     your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.
     --headed                                   displays the browser instead of running headlessly
     --headless                                 hide the browser instead of running headed (default for cypress run)
@@ -83,11 +83,11 @@ exports['shows help for run --foo 1'] = `
     -p, --port <port>                          runs Cypress on a specific port. overrides any value in cypress.config.{js,ts,mjs,cjs}.
     -P, --project <project-path>               path to the project
     -q, --quiet                                run quietly, using only the configured reporter
-    --record [bool]                            records the run. sends test results, screenshots and videos to your Cypress Dashboard.
+    --record [bool]                            records the run. sends test results, screenshots and videos to Cypress Cloud.
     -r, --reporter <reporter>                  runs a specific mocha reporter. pass a path to use a custom reporter. defaults to "spec"
     -o, --reporter-options <reporter-options>  options for the mocha reporter. defaults to "null"
     -s, --spec <spec>                          runs specific spec file(s). defaults to "all"
-    -t, --tag <tag>                            named tag(s) for recorded runs in the Cypress Dashboard
+    -t, --tag <tag>                            named tag(s) for recorded runs in Cypress Cloud
     --dev                                      runs cypress in development and bypasses binary check
     -h, --help                                 display help for command
   -------

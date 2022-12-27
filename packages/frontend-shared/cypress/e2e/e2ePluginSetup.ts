@@ -1,20 +1,36 @@
+import { hookRequire } from '@packages/server/hook-require'
+
+hookRequire({ forceTypeScript: false })
+
+// Important!!! Ensure to import the prod dependencies (i.e. things that will be executing from the inner Cypress of Cypress in Cypress)
+// from ./prod-dependencies.ts as this is pre-loaded in the v8 snapshot via ./v8-snapshot-entry.ts. Otherwise, these dependencies
+// will not properly be marked as loaded in the v8 snapshot and may be reloaded when referenced from within the snapshot itself.
+import {
+  getOperationName,
+  Response,
+  makeGraphQLServer,
+  clearCtx,
+  DataContext,
+  globalPubSub,
+  setCtx,
+  buildSchema,
+  execute,
+  ExecutionResult,
+  GraphQLError,
+  parse,
+} from './prod-dependencies'
+
 import path from 'path'
 import execa from 'execa'
 
 import type { CyTaskResult, OpenGlobalModeOptions, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from '../support/e2e'
 import { fixtureDirs } from '@tooling/system-tests'
-// import type { CloudExecuteRemote } from '@packages/data-context/src/sources'
-import { makeGraphQLServer } from '@packages/graphql/src/makeGraphQLServer'
-import { clearCtx, DataContext, globalPubSub, setCtx } from '@packages/data-context'
 import * as inspector from 'inspector'
 import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
 import fs from 'fs-extra'
-import { buildSchema, execute, ExecutionResult, GraphQLError, parse } from 'graphql'
-import { Response } from 'cross-fetch'
 
 import { CloudQuery } from '@packages/graphql/test/stubCloudTypes'
-import { getOperationName } from '@urql/core'
 import pDefer from 'p-defer'
 
 const pkg = require('@packages/root')
@@ -43,6 +59,11 @@ chai.use(chaiSubset)
 chai.use(sinonChai)
 
 export async function e2ePluginSetup (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
+  // @ts-ignore getSnapshotResult is injected by the snapshot script
+  if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE) && typeof global.getSnapshotResult === 'undefined') {
+    throw new Error('getSnapshotResult is undefined. v8 snapshots are not being used in Cypress in Cypress. This can happen if CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT is not set')
+  }
+
   process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
   delete process.env.CYPRESS_INTERNAL_GRAPHQL_PORT
   delete process.env.CYPRESS_INTERNAL_VITE_DEV
@@ -81,7 +102,7 @@ async function makeE2ETasks () {
   // require'd from @packages/server & @tooling/system-tests so we don't import
   // types which would pollute strict type checking
   const argUtils = require('@packages/server/lib/util/args')
-  const { makeDataContext } = require('@packages/server/lib/makeDataContext')
+  const { makeDataContext } = require('./prod-dependencies')
   const Fixtures = require('@tooling/system-tests') as FixturesShape
   const { scaffoldCommonNodeModules, scaffoldProjectNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 
