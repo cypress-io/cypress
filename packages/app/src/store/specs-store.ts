@@ -1,29 +1,31 @@
 import type { SpecFile } from '@packages/types/src'
 import { defineStore } from 'pinia'
 
-export type SpecWithFilter = SpecFile & { testFilter?: Cypress.Spec['testFilter'] }
-
 export interface SpecState {
-  activeSpec: SpecWithFilter | undefined | null
+  activeSpec: SpecFile | null | undefined
   specFilter?: string
+  testFilter: Cypress.TestFilter | null
 }
 
 export const useSpecStore = defineStore({
   id: 'spec',
-
   state (): SpecState {
     return {
       activeSpec: undefined,
       specFilter: undefined,
+      testFilter: null,
     }
   },
 
   actions: {
-    setActiveSpec (activeSpec: SpecState['activeSpec']) {
+    setActiveSpec (activeSpec: SpecFile | null) {
       this.activeSpec = activeSpec
     },
     setSpecFilter (filter: string) {
       this.specFilter = filter
+    },
+    setTestFilter (filter: SpecState['testFilter']) {
+      this.testFilter = filter
     },
   },
 })

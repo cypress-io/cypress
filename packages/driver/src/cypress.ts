@@ -95,6 +95,7 @@ class $Cypress {
   $: any
   arch: any
   spec: any
+  testFilter: Cypress.TestFilter = null
   version: any
   browser: any
   platform: any
@@ -194,6 +195,7 @@ class $Cypress {
     this.browser = config.browser
     this.platform = config.platform
     this.testingType = config.testingType
+    this.testFilter = config.testFilter
 
     // normalize this into boolean
     config.isTextTerminal = !!config.isTextTerminal

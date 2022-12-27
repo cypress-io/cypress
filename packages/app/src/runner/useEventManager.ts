@@ -19,7 +19,7 @@ export function useEventManager () {
     }
 
     autStore.setScriptError(null)
-    UnifiedRunnerAPI.executeSpec(specStore.activeSpec, isRerun)
+    UnifiedRunnerAPI.executeSpec(specStore.activeSpec, isRerun, specStore.testFilter)
   }
 
   function initializeRunnerLifecycleEvents () {
@@ -66,10 +66,8 @@ export function useEventManager () {
 
       const { runId, ...query } = currentRoute.query
 
-      // Delete runId from query which will remove the test filter
+      // Delete runId from query which will remove the test filter and trigger a rerun
       router.replace({ ...currentRoute, query })
-
-      specStore.setActiveSpec({ ...specStore.activeSpec!, testFilter: undefined })
     })
   }
 

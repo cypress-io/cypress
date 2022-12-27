@@ -1,6 +1,6 @@
 import Bluebird from 'bluebird'
 import { EventEmitter } from 'events'
-import type { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
+import { getMobxRunnerStore, MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 import type MobX from 'mobx'
 import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriverMap } from './event-manager-types'
 import type { RunState, CachedTestState, AutomationElementId, FileDetails, ReporterStartInfo, ReporterRunState } from '@packages/types'
@@ -408,6 +408,9 @@ export class EventManager {
 
           if (!hideCommandLog) {
             this.reporterBus.emit('runnables:ready', runnables)
+            this.Mobx.runInAction(() => {
+              getMobxRunnerStore().setTotalTests(Cypress.mocha.getTotalTests())
+            })
           }
 
           if (runState?.numLogs) {

@@ -279,11 +279,12 @@ declare namespace Cypress {
     absolute: string // "/Users/janelane/app/cypress/integration/config_passing_spec.js"
     specFilter?: string // optional spec filter used by the user
     specType?: CypressSpecType
-    testFilter?: {
-      tests: string[]
-      total: number
-    }
   }
+
+  /**
+   * List of spec titlePaths (parent suite names + test name)
+   */
+  type TestFilter = string[] | null // could make this a callback/regex in the future
 
   /**
    * Window type for Application Under Test(AUT)
@@ -415,6 +416,11 @@ declare namespace Cypress {
      * ```
      */
     spec: Spec
+
+    /**
+     * Active test filter for currently executing spec.
+     */
+    testFilter: TestFilter
 
     /**
      * Currently executing test runnable instance.
@@ -3185,6 +3191,7 @@ declare namespace Cypress {
     socketIoRoute: string
     spec: Cypress['spec'] | null
     specs: Array<Cypress['spec']>
+    testFilter: Cypress['testFilter']
   }
 
   interface SuiteConfigOverrides extends Partial<

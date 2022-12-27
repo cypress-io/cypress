@@ -969,7 +969,6 @@ type CurrentProject implements Node & ProjectLike {
 
   """A list of specs for the currently open testing type of a project"""
   specs: [Spec!]!
-  testsForRun(runId: String!): [TestForRun!]
   title: String!
 }
 
@@ -1677,6 +1676,7 @@ type Mutation {
 
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
+  testsForRun(runId: String!): [TestForRun!]
 
   """Updates the different fields of the wizard data store"""
   wizardUpdate(input: WizardUpdateInput!): Wizard

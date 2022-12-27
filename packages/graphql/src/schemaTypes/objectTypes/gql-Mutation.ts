@@ -13,6 +13,7 @@ import { ScaffoldedFile } from './gql-ScaffoldedFile'
 import { WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import debugLib from 'debug'
 import { ReactComponentResponse } from './gql-ReactComponentResponse'
+import { TestForRun } from './gql-TestForRun'
 
 const debug = debugLib('cypress:graphql:mutation')
 
@@ -762,6 +763,46 @@ export const mutation = mutationType({
         ctx.project.setRunAllSpecs(args.runAllSpecs)
 
         return true
+      },
+    })
+
+    // TODO: replace stub with cloud query
+    t.list.nonNull.field('testsForRun', {
+      type: TestForRun,
+      args: {
+        runId: nonNull(stringArg()),
+      },
+      resolve: (source, args, ctx) => {
+        return [
+          {
+            'titlePath': 'example to-do app displays two todo items by default',
+            'status': 'FAILED',
+          },
+          {
+            'titlePath': 'example to-do app can add new todo items',
+            'status': 'PASSED',
+          },
+          {
+            'titlePath': 'example to-do app can check off an item as completed',
+            'status': 'FAILED',
+          },
+          {
+            'titlePath': 'example to-do app with a checked task can filter for uncompleted tasks',
+            'status': 'PASSED',
+          },
+          {
+            'titlePath': 'example to-do app with a checked task can filter for completed tasks',
+            'status': 'PASSED',
+          },
+          {
+            'titlePath': 'example to-do app with a checked task can delete all completed tasks',
+            'status': 'PASSED',
+          },
+          {
+            'titlePath': 'example to-do app hello should work',
+            'status': 'PASSED',
+          },
+        ]
       },
     })
   },

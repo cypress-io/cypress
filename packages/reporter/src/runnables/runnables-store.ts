@@ -50,6 +50,7 @@ export class RunnablesStore {
    * content: RunnableArray
    */
   @observable runnablesHistory: Record<string, RunnableArray> = {}
+  @observable totalRunnables: number = 0
 
   runningSpec: string | null = null
 
@@ -79,6 +80,7 @@ export class RunnablesStore {
 
     this.hasTests = numTests > 0
     this.hasSingleTest = numTests === 1
+    this.totalRunnables = numTests
 
     this._finishedInitialRendering()
   }
@@ -195,6 +197,7 @@ export class RunnablesStore {
     this.runnablesHistory = {}
     this._tests = {}
     this._runnablesQueue = []
+    this.totalRunnables = 0
   }
 
   @action

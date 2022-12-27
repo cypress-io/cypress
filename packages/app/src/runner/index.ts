@@ -14,7 +14,7 @@
  *
  */
 import { watchEffect } from 'vue'
-import { getMobxRunnerStore, initializeMobxStore, SpecWithFilter, useAutStore, useRunnerUiStore } from '../store'
+import { getMobxRunnerStore, initializeMobxStore, useAutStore, useRunnerUiStore } from '../store'
 import { dfd } from './injectBundle'
 import type { SpecFile } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
@@ -382,12 +382,13 @@ async function initialize () {
  * 5. Setup the spec. This involves a few things, see the `runSpecCT` function's
  *    description for more information.
  */
-async function executeSpec (spec: SpecWithFilter, isRerun: boolean = false) {
+async function executeSpec (spec: SpecFile, isRerun: boolean = false, testFilter: Cypress.TestFilter) {
   await teardownSpec(isRerun)
 
   const mobxRunnerStore = getMobxRunnerStore()
 
   mobxRunnerStore.setSpec(spec)
+  mobxRunnerStore.setTestFilter(testFilter)
 
   await UnifiedReporterAPI.resetReporter()
 
@@ -398,6 +399,7 @@ async function executeSpec (spec: SpecWithFilter, isRerun: boolean = false) {
 
   // this is how the Cypress driver knows which spec to run.
   config.spec = setSpecForDriver(spec)
+  config.testFilter = testFilter
 
   // creates a new instance of the Cypress driver for this spec,
   // initializes a bunch of listeners watches spec file for changes.

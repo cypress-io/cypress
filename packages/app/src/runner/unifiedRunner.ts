@@ -1,22 +1,19 @@
-import { Ref, onMounted, ref, watch, watchEffect, onBeforeUnmount, readonly, computed } from 'vue'
+import { Ref, onMounted, ref, watch, watchEffect, onBeforeUnmount, readonly } from 'vue'
 import { getAutIframeModel, UnifiedRunnerAPI } from '../runner'
-import { SpecWithFilter, useSpecStore } from '../store'
+import { useSpecStore } from '../store'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import { RUN_ALL_SPECS, RUN_ALL_SPECS_KEY, SpecFile } from '@packages/types/src'
 import { LocationQuery, useRoute } from 'vue-router'
 import { getPathForPlatform } from '../paths'
 import { isEqual } from 'lodash'
-import { gql, useQuery } from '@urql/vue'
+import { gql, useMutation } from '@urql/vue'
 import { TestsForRunDocument } from '../generated/graphql'
 
 gql`
-query TestsForRun ($runId: String!) {
-  currentProject {
-    id
-    testsForRun (runId: $runId) {
-      status
-      titlePath
-    }
+mutation TestsForRun ($runId: String!) {
+  testsForRun (runId: $runId) {
+    status
+    titlePath
   }
 }
 `
@@ -42,8 +39,7 @@ export function useUnifiedRunner () {
       const specStore = useSpecStore()
       const route = useRoute()
       const selectorPlaygroundStore = useSelectorPlaygroundStore()
-      const runId = computed(() => route.query.runId as string)
-      const query = useQuery({ query: TestsForRunDocument, pause: true, requestPolicy: 'network-only', variables: { runId: runId as any } })
+      const testsForRunMutation = useMutation(TestsForRunDocument)
 
       watchEffect(async () => {
         const queryFile = getPathForPlatform(route.query.file as string)
@@ -60,30 +56,31 @@ export function useUnifiedRunner () {
           return specStore.setActiveSpec(RUN_ALL_SPECS)
         }
 
-        let activeSpecInSpecsList: SpecWithFilter | undefined = specs.value.find((x) => x.relative === queryFile)
+        let activeSpecInSpecsList = specs.value.find((x) => x.relative === queryFile)
 
         if (!activeSpecInSpecsList) {
           return specStore.setActiveSpec(null)
         }
 
         if (route.query.runId) {
-          const queryRes = await query.executeQuery({ runId: route.query.runId })
-          const testResults = queryRes.data.value?.currentProject?.testsForRun || []
+          const res = await testsForRunMutation.executeMutation({ runId: route.query.runId as string })
 
-          const failedTests = (queryRes.data.value?.currentProject?.testsForRun || []).reduce<string[]>((acc, test) => {
+          const testResults = res.data?.testsForRun || []
+
+          const failedTests = testResults.reduce<string[]>((acc, test) => {
             if (test.status === 'FAILED') acc.push(test.titlePath)
 
             return acc
           }, [])
 
-          if (failedTests.length) {
-            activeSpecInSpecsList = { ...activeSpecInSpecsList, testFilter: { tests: failedTests, total: testResults.length } }
-          }
+          specStore.setTestFilter(failedTests.length ? failedTests : null)
+        } else {
+          specStore.setTestFilter(null)
         }
 
-        if (!isEqual(activeSpecInSpecsList, specStore.activeSpec)) {
-          specStore.setActiveSpec(activeSpecInSpecsList)
-        }
+        // if (!isEqual(activeSpecInSpecsList, specStore.activeSpec)) {
+        specStore.setActiveSpec({ ...activeSpecInSpecsList })
+        // }
       })
 
       watch(() => getPathForPlatform(route.query.file as string), () => {

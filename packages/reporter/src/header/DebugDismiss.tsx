@@ -3,10 +3,10 @@ import DebuggerIcon from '-!react-svg-loader!@packages/frontend-shared/src/asset
 import DeleteIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-failed_x12.svg'
 import events from '../lib/events'
 
-export const DebugDismiss = (props: { testFilter: { tests: string[], total: number } }) => {
+export const DebugDismiss = (props: { matched: number, total: number }) => {
   return (<button className="debug-dismiss" onClick={() => events.emit('debug:dismiss')}>
     <DebuggerIcon />
-    <span>{props.testFilter.tests.length} / {props.testFilter.total} tests</span>
+    <span>{props.matched} / {props.total} tests</span>
     <DeleteIcon className="delete-icon" />
   </button>)
 }

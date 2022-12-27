@@ -13,15 +13,18 @@ import Controls from './controls'
 import Stats from './stats'
 import { StatsStore } from './stats-store'
 import { DebugDismiss } from './DebugDismiss'
+import type { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
+import { RunnablesStore } from '../runnables/runnables-store'
 
 export interface ReporterHeaderProps {
   appState: AppState
   events?: Events
   statsStore: StatsStore
-  spec: Cypress.Spec
+  runnerStore: MobxRunnerStore
+  runnablesStore: RunnablesStore
 }
 
-const Header = observer(({ appState, events = defaultEvents, statsStore, spec }: ReporterHeaderProps) => (
+const Header = observer(({ appState, events = defaultEvents, statsStore, runnerStore, runnablesStore }: ReporterHeaderProps) => (
   <header>
     <Tooltip placement='bottom' title={<p>{appState.isSpecsListOpen ? 'Collapse' : 'Expand'} Specs List <span className='kbd'>F</span></p>} wrapperClassName='toggle-specs-wrapper' className='cy-tooltip'>
       <button
@@ -40,7 +43,7 @@ const Header = observer(({ appState, events = defaultEvents, statsStore, spec }:
       </button>
     </Tooltip>
     <div className='spacer' />
-    {spec.testFilter ? <DebugDismiss testFilter={spec.testFilter} /> : null}
+    {runnerStore.testFilter ? <DebugDismiss matched={runnablesStore.totalRunnables} total={runnerStore.totalTests} /> : null}
     <Stats stats={statsStore} />
     <Controls appState={appState} />
   </header>

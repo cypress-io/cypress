@@ -1,7 +1,7 @@
 import { PACKAGE_MANAGERS } from '@packages/types'
 import { enumType, nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
-import { BrowserStatusEnum, FileExtensionEnum, TestForRun } from '..'
+import { BrowserStatusEnum, FileExtensionEnum } from '..'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { Browser } from './gql-Browser'
 import { CodeGenGlobs } from './gql-CodeGenGlobs'
@@ -237,46 +237,6 @@ export const CurrentProject = objectType({
       type: BrowserStatusEnum,
       description: 'If the browser is open or not',
       resolve: (source, args, ctx) => ctx.coreData.app.browserStatus,
-    })
-
-    // TODO: replace stub with cloud query
-    t.list.nonNull.field('testsForRun', {
-      type: TestForRun,
-      args: {
-        runId: nonNull(stringArg()),
-      },
-      resolve: (source, args, ctx) => {
-        return [
-          {
-            'titlePath': 'example to-do app displays two todo items by default',
-            'status': 'FAILED',
-          },
-          {
-            'titlePath': 'example to-do app can add new todo items',
-            'status': 'PASSED',
-          },
-          {
-            'titlePath': 'example to-do app can check off an item as completed',
-            'status': 'FAILED',
-          },
-          {
-            'titlePath': 'example to-do app with a checked task can filter for uncompleted tasks',
-            'status': 'PASSED',
-          },
-          {
-            'titlePath': 'example to-do app with a checked task can filter for completed tasks',
-            'status': 'PASSED',
-          },
-          {
-            'titlePath': 'example to-do app with a checked task can delete all completed tasks',
-            'status': 'PASSED',
-          },
-          {
-            'titlePath': 'example to-do app hello should work',
-            'status': 'PASSED',
-          },
-        ]
-      },
     })
   },
   sourceType: {
