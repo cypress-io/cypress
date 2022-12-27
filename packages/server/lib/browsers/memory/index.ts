@@ -33,9 +33,9 @@ export type MemoryHandler = {
  *   5. if that exceeds the defined memory threshold percentage (e.g. 50%) do a GC
  */
 
-const getJsHeapSizeLimit = async (sendDebuggerCommandFn) => {
+export const getJsHeapSizeLimit = async (sendDebuggerCommandFn) => {
   return measure('getJsHeapSizeLimit', async () => {
-    let heapLimit = (await sendDebuggerCommandFn('Runtime.evaluate', { expression: 'performance?.memory?.jsHeapSizeLimit', returnByValue: true }))?.result?.value
+    let heapLimit = (await sendDebuggerCommandFn('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' })).result?.value
 
     if (!heapLimit) {
       debugVerbose('no heap size limit found, using default of four kibibytes')
@@ -49,10 +49,10 @@ const getJsHeapSizeLimit = async (sendDebuggerCommandFn) => {
   })
 }
 
-const getMemoryHandler = async (): Promise<MemoryHandler> => {
+export const getMemoryHandler = async (): Promise<MemoryHandler> => {
   if (os.platform() === 'linux') {
     if (await fs.pathExists('/sys/fs/cgroup/cgroup.controllers')) {
-      // TODO: need to support cgroup v2
+      // cgroup v2 can use the default handler so just pass through
     } else {
       debug('using cgroup v1 memory handler')
 
@@ -65,29 +65,29 @@ const getMemoryHandler = async (): Promise<MemoryHandler> => {
   return (await import('./default')).default
 }
 
-const measure = (name: string, fn: () => Promise<any>) => {
+const measure = async (name: string, fn: () => Promise<any>) => {
   performance.mark(`${name}-start`)
 
-  return fn().then((result) => {
-    performance.mark(`${name}-end`)
-    const measurement = performance.measure(name, `${name}-start`, `${name}-end`)
+  const result = await fn()
 
-    debugVerbose('%s took %dms', name, measurement.duration)
+  performance.mark(`${name}-end`)
+  const measurement = performance.measure(name, `${name}-start`, `${name}-end`)
 
-    return result
-  })
+  debugVerbose('%s took %dms', name, measurement.duration)
+
+  return result
 }
 
 export default class Memory {
   private rendererProcess: any
   private testCount: number = 0
 
-  constructor (private sendDebuggerCommand: SendDebuggerCommand, private handler: MemoryHandler, private totalMemoryLimit: number, private jsHeapSizeLimit: number) {}
+  constructor (private handler: MemoryHandler, private totalMemoryLimit: number, private jsHeapSizeLimit: number) {}
 
   static async create (sendDebuggerCommand: SendDebuggerCommand) {
     const handler = await getMemoryHandler()
     const [totalMemoryLimit, jsHeapSizeLimit] = await Promise.all([handler.getTotalMemoryLimit(), getJsHeapSizeLimit(sendDebuggerCommand)])
-    const memory = new Memory(sendDebuggerCommand, handler, totalMemoryLimit, jsHeapSizeLimit)
+    const memory = new Memory(handler, totalMemoryLimit, jsHeapSizeLimit)
 
     return memory
   }
@@ -95,7 +95,9 @@ export default class Memory {
   private getRendererProcess = (processes: si.Systeminformation.ProcessesData) => {
     // filter down to the renderer processes
     const groupedProcesses = groupCyProcesses(processes)
-    const rendererProcesses = groupedProcesses.filter((p) => p.group === 'browser' && (p.command.includes('--type=renderer') || p.params.includes('--type=renderer')))
+    const rendererProcesses = groupedProcesses.filter(
+      (p) => p.group === 'browser' && (p.command.includes('--type=renderer') || p.params.includes('--type=renderer')),
+    )
 
     if (rendererProcesses.length === 0) return null
 
@@ -127,7 +129,10 @@ export default class Memory {
 
   async checkMemoryAndCollectGarbage (sendDebuggerCommandFn: SendDebuggerCommand) {
     return measure('checkMemoryAndCollectGarbage', async () => {
-      const [currentAvailableMemory, rendererProcessMemRss] = await Promise.all([this.handler.getAvailableMemory(this.totalMemoryLimit), this.getRendererMemoryUsage()])
+      const [currentAvailableMemory, rendererProcessMemRss] = await Promise.all([
+        this.handler.getAvailableMemory(this.totalMemoryLimit),
+        this.getRendererMemoryUsage(),
+      ])
 
       if (rendererProcessMemRss === null) {
         debugVerbose('no renderer process found, skipping garbage collection')
