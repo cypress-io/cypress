@@ -265,8 +265,8 @@ describe('Vue', {
         'Timed out retrying',
         'element-that-does-not-exist',
       ],
-      codeFrameRegex: /Errors\.cy\.js:26/,
-      stackRegex: /Errors\.cy\.js:26/,
+      codeFrameRegex: /Errors\.cy\.js:25/,
+      stackRegex: /Errors\.cy\.js:25/,
     })
   })
 })

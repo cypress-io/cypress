@@ -70,25 +70,25 @@ describe('App Top Nav Workflows', () => {
 
         cy.get('@browserItems').eq(0)
         .should('contain', 'Chrome')
-        .and('contain', 'Version 1.2.3')
+        .and('contain', 'Version 1')
         .findByTestId('top-nav-browser-list-selected-item')
         .should('exist')
 
         cy.get('@browserItems').eq(1)
         .should('contain', 'Edge')
-        .and('contain', 'Version 8.9.10')
+        .and('contain', 'Version 8')
         .findByTestId('top-nav-browser-list-selected-item')
         .should('not.exist')
 
         cy.get('@browserItems').eq(2)
         .should('contain', 'Electron')
-        .and('contain', 'Version 12.13.14')
+        .and('contain', 'Version 12')
         .findByTestId('top-nav-browser-list-selected-item')
         .should('not.exist')
 
         cy.get('@browserItems').eq(3)
         .should('contain', 'Firefox')
-        .and('contain', 'Version 5.6.7')
+        .and('contain', 'Version 5')
         .findByTestId('top-nav-browser-list-selected-item')
         .should('not.exist')
       })
@@ -110,7 +110,7 @@ describe('App Top Nav Workflows', () => {
           expect(ctx.actions.browser.setActiveBrowserById).to.have.been.calledWith(browserId)
           expect(genId).to.eql('edge-chromium-stable')
           expect(ctx.actions.project.launchProject).to.have.been.calledWith(
-            ctx.coreData.currentTestingType, undefined, undefined,
+            ctx.coreData.currentTestingType, { shouldLaunchNewTab: false }, undefined,
           )
         })
       })
@@ -417,7 +417,7 @@ describe('App Top Nav Workflows', () => {
             return new Promise((resolve) => {
               setTimeout(() => {
                 resolve(options.user)
-              }, 1000)
+              }, 2000)
             })
           })
         }, { user })

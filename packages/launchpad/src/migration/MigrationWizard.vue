@@ -1,7 +1,7 @@
 <template>
   <div class="pb-8px">
     <h1 class="font-medium text-center pt-20px text-32px text-body-gray-900">
-      {{ t('migration.wizard.title') }}
+      {{ t('migration.wizard.title', { version: cypressMajorVersion }) }}
     </h1>
     <p
       class="mx-42px mt-12px text-center text-body-gray-600 text-18px"
@@ -183,6 +183,12 @@ fragment MigrationBaseError on Query {
 
 gql`
 fragment MigrationWizardData on Query {
+  versions {
+    current {
+      id
+      version
+    }
+  }
   migration {
     filteredSteps {
       id
@@ -404,4 +410,6 @@ const buttonTitle = computed(() => {
 
   return t('migration.wizard.step1.button')
 })
+
+const cypressMajorVersion = computed(() => query.data.value?.versions?.current.version.split('.')[0] ?? '')
 </script>

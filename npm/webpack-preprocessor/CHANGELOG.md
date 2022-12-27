@@ -1,3 +1,17 @@
+# [@cypress/webpack-preprocessor-v5.16.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.15.7...@cypress/webpack-preprocessor-v5.16.0) (2022-12-19)
+
+
+### Features
+
+* create from React component ([#25168](https://github.com/cypress-io/cypress/issues/25168)) ([166b694](https://github.com/cypress-io/cypress/commit/166b69414c5e347ef825c121330b0b561a4caa3b)), closes [#24881](https://github.com/cypress-io/cypress/issues/24881) [#24954](https://github.com/cypress-io/cypress/issues/24954) [#24982](https://github.com/cypress-io/cypress/issues/24982) [#25079](https://github.com/cypress-io/cypress/issues/25079) [#25145](https://github.com/cypress-io/cypress/issues/25145)
+
+# [@cypress/webpack-preprocessor-v5.15.7](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.15.6...@cypress/webpack-preprocessor-v5.15.7) (2022-12-09)
+
+
+### Bug Fixes
+
+* declare used babel dependencies ([#24842](https://github.com/cypress-io/cypress/issues/24842)) ([910f912](https://github.com/cypress-io/cypress/commit/910f912373bf857a196e2a0d1a73606e3ee199be))
+
 # [@cypress/webpack-preprocessor-v5.15.6](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.15.5...@cypress/webpack-preprocessor-v5.15.6) (2022-12-02)
 
 

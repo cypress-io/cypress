@@ -2,12 +2,11 @@ import Errors from './Errors.vue'
 import { mount } from 'cypress/vue'
 
 describe('Errors', () => {
-
   it('error on mount', () => {
     mount(Errors, {
       propsData: {
-        throwError: true
-      }
+        throwError: true,
+      },
     })
   })
 

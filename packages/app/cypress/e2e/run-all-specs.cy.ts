@@ -45,9 +45,10 @@ describe('run-all-specs', () => {
 
     cy.waitForSpecToFinish({ passCount: 2 })
 
-    cy.withCtx((ctx, { specs }) => {
+    cy.withCtx((ctx, { specs, RUN_ALL_SPECS_KEY }) => {
+      expect(ctx.actions.project.launchProject).to.have.been.calledWith('e2e', { shouldLaunchNewTab: true }, RUN_ALL_SPECS_KEY)
       expect(ctx.project.runAllSpecs).to.include.members(specs.map((spec) => spec.relative))
-    }, { specs: subDirectorySpecs })
+    }, { specs: subDirectorySpecs, RUN_ALL_SPECS_KEY })
 
     for (const spec of subDirectorySpecs) {
       cy.get('.runnable-title').contains(spec.name)
@@ -100,10 +101,9 @@ describe('run-all-specs', () => {
 
     clickRunAllSpecs('all')
 
-    cy.withCtx((ctx, { specs, runAllSpecsKey }) => {
-      expect(ctx.actions.project.launchProject).to.have.been.calledWith('e2e', undefined, runAllSpecsKey)
+    cy.withCtx((ctx, { specs }) => {
       expect(ctx.project.runAllSpecs).to.include.members(specs.map((spec) => spec.relative))
-    }, { specs: Object.values(ALL_SPECS), runAllSpecsKey: RUN_ALL_SPECS_KEY })
+    }, { specs: Object.values(ALL_SPECS) })
 
     cy.waitForSpecToFinish({ passCount: 6 })
 
