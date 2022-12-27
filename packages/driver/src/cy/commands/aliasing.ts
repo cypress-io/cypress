@@ -58,7 +58,7 @@ export default function (Commands, Cypress, cy) {
 
       if (!alreadyAliasedLog && log) {
         log.set({
-          alias,
+          alias: `@${alias}${options.type ? ` (${ options.type })` : ''}`,
           aliasType: $dom.isElement(subject) ? 'dom' : 'primitive',
         })
       }

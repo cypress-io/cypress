@@ -68,15 +68,15 @@ describe('src/cy/commands/aliasing', () => {
     it('allows users to store a static value', () => {
       const obj = { foo: 'bar' }
 
-      cy.wrap(obj).its('foo').as('value', { type: 'value' })
-      cy.wrap(obj).its('foo').as('query', { type: 'query' })
+      cy.wrap(obj).its('foo').as('alias1', { type: 'value' })
+      cy.wrap(obj).its('foo').as('alias2', { type: 'query' })
 
       cy.then(() => {
         obj.foo = 'baz'
       })
 
-      cy.get('@value').should('eq', 'bar')
-      cy.get('@query').should('eq', 'baz')
+      cy.get('@alias1').should('eq', 'bar')
+      cy.get('@alias2').should('eq', 'baz')
     })
 
     it('allows dot in alias names', () => {
@@ -320,8 +320,16 @@ describe('src/cy/commands/aliasing', () => {
           const { lastLog } = this
 
           assertLogLength(this.logs, 1)
-          expect(lastLog.get('alias')).to.eq('foo')
+          expect(lastLog.get('alias')).to.eq('@foo')
           expect(lastLog.get('aliasType')).to.eq('dom')
+        })
+      })
+
+      it('includes the alias `type` when explicitly set', () => {
+        cy.wrap({}).as('foo', { type: 'value' }).then(function () {
+          const { lastLog } = this
+
+          expect(lastLog.get('alias')).to.eq('@foo (value)')
         })
       })
 
