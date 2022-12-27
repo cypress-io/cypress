@@ -82,7 +82,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23159
-    it.skip('redirects to the specs list with error if a spec is not found', () => {
+    it('redirects to the specs list with error if a spec is not found', { retries: 15 }, () => {
       cy.visitApp()
       const { title, intro, explainer } = defaultMessages.specPage.noSpecError
       const badFilePath = 'src/DoesNotExist.spec.js'

@@ -273,7 +273,6 @@ describe('src/cy/commands/navigation', () => {
 
   // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23308
   context.skip('#go', () => {
-    // TODO: fix this
     it('sets timeout to Cypress.config(pageLoadTimeout)', {
       pageLoadTimeout: 4567,
     }, () => {
@@ -816,7 +815,7 @@ describe('src/cy/commands/navigation', () => {
 
     // https://github.com/cypress-io/cypress/issues/1311
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23201
-    it.skip('window immediately resolves and doesn\'t reload when visiting the same URL with hashes', () => {
+    it('window immediately resolves and doesn\'t reload when visiting the same URL with hashes', { retries: 15 }, () => {
       const onLoad = cy.stub()
 
       cy
@@ -1803,7 +1802,7 @@ describe('src/cy/commands/navigation', () => {
     })
   })
 
-  // TODO(webkit): fix+unskip for experimental webkit release
+  // TODO(webkit): fix+unskip for webkit release
   context('#page load', { browser: '!webkit' }, () => {
     it('sets initial=true and then removes', () => {
       Cookie.remove('__cypress.initial')
@@ -2200,7 +2199,7 @@ describe('src/cy/commands/navigation', () => {
     })
   })
 
-  // TODO(webkit): fix+unskip for experimental webkit release
+  // TODO(webkit): fix+unskip for webkit release
   context('#url:changed', { browser: '!webkit' }, () => {
     beforeEach(function () {
       this.logs = []
