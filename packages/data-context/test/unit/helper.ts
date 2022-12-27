@@ -8,13 +8,14 @@ import { DataContext, DataContextConfig } from '../../src'
 import { graphqlSchema } from '@packages/graphql/src/schema'
 import { remoteSchemaWrapped as schemaCloud } from '@packages/graphql/src/stitching/remoteSchemaWrapped'
 import type { BrowserApiShape } from '../../src/sources/BrowserDataSource'
-import type { AppApiShape, AuthApiShape, ElectronApiShape, LocalSettingsApiShape, ProjectApiShape } from '../../src/actions'
+import type { AppApiShape, AuthApiShape, ElectronApiShape, LocalSettingsApiShape, ProjectApiShape, CohortsApiShape } from '../../src/actions'
 import sinon from 'sinon'
 import { execute, parse } from 'graphql'
 import { getOperationName } from '@urql/core'
 import { CloudQuery } from '@packages/graphql/test/stubCloudTypes'
 import { remoteSchema } from '@packages/graphql/src/stitching/remoteSchema'
 import type { OpenModeOptions, RunModeOptions } from '@packages/types'
+import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 
 type SystemTestProject = typeof fixtureDirs[number]
 type SystemTestProjectPath<T extends SystemTestProject> = `${string}/system-tests/projects/${T}`
@@ -44,7 +45,9 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
     mode,
     modeOptions,
     appApi: {} as AppApiShape,
-    localSettingsApi: {} as LocalSettingsApiShape,
+    localSettingsApi: {
+      getPreferences: sinon.stub().resolves({ majorVersionWelcomeDismissed: { [MAJOR_VERSION_FOR_CONTENT]: 123456 } }),
+    } as unknown as LocalSettingsApiShape,
     authApi: {
       logIn: sinon.stub().throws('not stubbed'),
       resetAuthState: sinon.stub(),
@@ -63,6 +66,12 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
       focusActiveBrowserWindow: sinon.stub(),
       getBrowsers: sinon.stub().resolves([]),
     } as unknown as BrowserApiShape,
+    cohortsApi: {
+      getCohorts: sinon.stub().resolves(),
+      getCohort: sinon.stub().resolves(),
+      insertCohort: sinon.stub(),
+      determineCohort: sinon.stub().resolves(),
+    } as unknown as CohortsApiShape,
   })
 
   const origFetch = ctx.util.fetch

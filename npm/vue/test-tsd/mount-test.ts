@@ -1,4 +1,4 @@
-import { expectError, expectType } from './index'
+import { expectType } from './index'
 import { mount, VueTestUtils } from '../dist'
 import * as VTU from '@vue/test-utils'
 import { defineComponent } from 'vue'

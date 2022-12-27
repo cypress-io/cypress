@@ -8,12 +8,12 @@ window.Mocha['__zone_patch__'] = false
 import 'zone.js/testing'
 
 import { CommonModule } from '@angular/common'
-import { Component, EventEmitter, Type } from '@angular/core'
+import { Component, ErrorHandler, EventEmitter, Injectable, SimpleChange, SimpleChanges, Type, OnChanges } from '@angular/core'
 import {
   ComponentFixture,
   getTestBed,
-  TestBed,
   TestModuleMetadata,
+  TestBed,
 } from '@angular/core/testing'
 import {
   BrowserDynamicTestingModule,
@@ -72,6 +72,23 @@ export interface MountConfig<T> extends TestModuleMetadata {
   componentProperties?: Partial<{ [P in keyof T]: T[P] }>
 }
 
+let activeFixture: ComponentFixture<any> | null = null
+
+function cleanup () {
+  // Not public, we need to call this to remove the last component from the DOM
+  try {
+    (getTestBed() as any).tearDownTestingModule()
+  } catch (e) {
+    const notSupportedError = new Error(`Failed to teardown component. The version of Angular you are using may not be officially supported.`)
+
+    ;(notSupportedError as any).docsUrl = 'https://on.cypress.io/component-framework-configuration'
+    throw notSupportedError
+  }
+
+  getTestBed().resetTestingModule()
+  activeFixture = null
+}
+
 /**
  * Type that the `mount` function returns
  * @type MountResponse<T>
@@ -94,6 +111,18 @@ export type MountResponse<T> = {
   component: T
 };
 
+// 'zone.js/testing' is not properly aliasing `it.skip` but it does provide `xit`/`xspecify`
+// Written up under https://github.com/angular/angular/issues/46297 but is not seeing movement
+// so we'll patch here pending a fix in that library
+globalThis.it.skip = globalThis.xit
+
+@Injectable()
+class CypressAngularErrorHandler implements ErrorHandler {
+  handleError (error: Error): void {
+    throw error
+  }
+}
+
 /**
  * Bootstraps the TestModuleMetaData passed to the TestBed
  *
@@ -115,8 +144,19 @@ function bootstrapModule<T> (
     testModuleMetaData.imports = []
   }
 
+  if (!testModuleMetaData.providers) {
+    testModuleMetaData.providers = []
+  }
+
+  // Replace default error handler since it will swallow uncaught exceptions.
+  // We want these to be uncaught so Cypress catches it and fails the test
+  testModuleMetaData.providers.push({
+    provide: ErrorHandler,
+    useClass: CypressAngularErrorHandler,
+  })
+
   // check if the component is a standalone component
-  if ((component as any).ɵcmp.standalone) {
+  if ((component as any).ɵcmp?.standalone) {
     testModuleMetaData.imports.push(component)
   } else {
     testModuleMetaData.declarations.push(component)
@@ -140,21 +180,11 @@ function initTestBed<T> (
   component: Type<T> | string,
   config: MountConfig<T>,
 ): Type<T> {
-  const { providers, ...configRest } = config
-
   const componentFixture = createComponentFixture(component) as Type<T>
 
-  TestBed.configureTestingModule({
-    ...bootstrapModule(componentFixture, configRest),
+  getTestBed().configureTestingModule({
+    ...bootstrapModule(componentFixture, config),
   })
-
-  if (providers != null) {
-    TestBed.overrideComponent(componentFixture, {
-      add: {
-        providers,
-      },
-    })
-  }
 
   return componentFixture
 }
@@ -172,6 +202,8 @@ function createComponentFixture<T> (
   component: Type<T> | string,
 ): Type<T | WrapperComponent> {
   if (typeof component === 'string') {
+    // getTestBed().overrideTemplate is available in v14+
+    // The static TestBed.overrideTemplate is available across versions
     TestBed.overrideTemplate(WrapperComponent, component)
 
     return WrapperComponent
@@ -192,7 +224,9 @@ function setupFixture<T> (
   component: Type<T>,
   config: MountConfig<T>,
 ): ComponentFixture<T> {
-  const fixture = TestBed.createComponent(component)
+  const fixture = getTestBed().createComponent(component)
+
+  setupComponent(config, fixture)
 
   fixture.whenStable().then(() => {
     fixture.autoDetectChanges(config.autoDetectChanges ?? true)
@@ -211,15 +245,15 @@ function setupFixture<T> (
 function setupComponent<T> (
   config: MountConfig<T>,
   fixture: ComponentFixture<T>,
-): T {
-  let component: T = fixture.componentInstance
+): void {
+  let component = fixture.componentInstance as unknown as { [key: string]: any } & Partial<OnChanges>
 
   if (config?.componentProperties) {
     component = Object.assign(component, config.componentProperties)
   }
 
   if (config.autoSpyOutputs) {
-    Object.keys(component).forEach((key: string, index: number, keys: string[]) => {
+    Object.keys(component).forEach((key) => {
       const property = component[key]
 
       if (property instanceof EventEmitter) {
@@ -228,49 +262,71 @@ function setupComponent<T> (
     })
   }
 
-  return component
+  // Manually call ngOnChanges when mounting components using the class syntax.
+  // This is necessary because we are assigning input values to the class directly
+  // on mount and therefore the ngOnChanges() lifecycle is not triggered.
+  if (component.ngOnChanges && config.componentProperties) {
+    const { componentProperties } = config
+
+    const simpleChanges: SimpleChanges = Object.entries(componentProperties).reduce((acc, [key, value]) => {
+      acc[key] = new SimpleChange(null, value, true)
+
+      return acc
+    }, {} as {[key: string]: SimpleChange})
+
+    if (Object.keys(componentProperties).length > 0) {
+      component.ngOnChanges(simpleChanges)
+    }
+  }
 }
 
 /**
  * Mounts an Angular component inside Cypress browser
  *
- * @param {Type<T> | string} component Angular component being mounted or its template
- * @param {MountConfig<T>} config configuration used to configure the TestBed
+ * @param component Angular component being mounted or its template
+ * @param config configuration used to configure the TestBed
  * @example
- * import { HelloWorldComponent } from 'hello-world/hello-world.component'
+ * import { mount } from '@cypress/angular'
+ * import { StepperComponent } from './stepper.component'
  * import { MyService } from 'services/my.service'
  * import { SharedModule } from 'shared/shared.module';
- * import { mount } from '@cypress/angular'
- * it('can mount', () => {
- *  mount(HelloWorldComponent, {
- *    providers: [MyService],
- *    imports: [SharedModule]
- *  })
- *  cy.get('h1').contains('Hello World')
+ * it('mounts', () => {
+ *    mount(StepperComponent, {
+ *      providers: [MyService],
+ *      imports: [SharedModule]
+ *    })
+ *    cy.get('[data-cy=increment]').click()
+ *    cy.get('[data-cy=counter]').should('have.text', '1')
  * })
  *
- * or
+ * // or
  *
- * it('can mount with template', () => {
- *  mount('<app-hello-world></app-hello-world>', {
- *    declarations: [HelloWorldComponent],
- *    providers: [MyService],
- *    imports: [SharedModule]
- *  })
+ * it('mounts with template', () => {
+ *   mount('<app-stepper></app-stepper>', {
+ *     declarations: [StepperComponent],
+ *   })
  * })
- * @returns Cypress.Chainable<MountResponse<T>>
+ *
+ * @see {@link https://on.cypress.io/mounting-angular} for more details.
+ *
+ * @returns A component and component fixture
  */
 export function mount<T> (
   component: Type<T> | string,
   config: MountConfig<T> = { },
 ): Cypress.Chainable<MountResponse<T>> {
+  // Remove last mounted component if cy.mount is called more than once in a test
+  if (activeFixture) {
+    cleanup()
+  }
+
   const componentFixture = initTestBed(component, config)
-  const fixture = setupFixture(componentFixture, config)
-  const componentInstance = setupComponent(config, fixture)
+
+  activeFixture = setupFixture(componentFixture, config)
 
   const mountResponse: MountResponse<T> = {
-    fixture,
-    component: componentInstance,
+    fixture: activeFixture,
+    component: activeFixture.componentInstance,
   }
 
   const logMessage = typeof component === 'string' ? 'Component' : componentFixture.name
@@ -289,6 +345,15 @@ export function mount<T> (
  *
  * @param {string} alias name you want to use for your cy.spy() alias
  * @returns EventEmitter<T>
+ * @example
+ * import { StepperComponent } from './stepper.component'
+ * import { mount, createOutputSpy } from '@cypress/angular'
+ *
+ * it('Has spy', () => {
+ *   mount(StepperComponent, { change: createOutputSpy('changeSpy') })
+ *   cy.get('[data-cy=increment]').click()
+ *   cy.get('@changeSpy').should('have.been.called')
+ * })
  */
 export const createOutputSpy = <T>(alias: string) => {
   const emitter = new EventEmitter<T>()
@@ -307,8 +372,4 @@ getTestBed().initTestEnvironment(
   },
 )
 
-setupHooks(() => {
-  // Not public, we need to call this to remove the last component from the DOM
-  TestBed['tearDownTestingModule']()
-  TestBed.resetTestingModule()
-})
+setupHooks(cleanup)

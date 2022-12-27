@@ -1,9 +1,13 @@
 import * as fs from 'fs-extra'
 import { tmpdir } from 'os'
 import * as path from 'path'
-import { pathToFileURL } from 'url'
+import type { Configuration, RuleSetRule } from 'webpack'
 import type { PresetHandlerResult, WebpackDevServerConfig } from '../devServer'
+import { dynamicAbsoluteImport, dynamicImport } from '../dynamic-import'
 import { sourceDefaultWebpackDependencies } from './sourceRelativeWebpackModules'
+import debugLib from 'debug'
+
+const debug = debugLib('cypress:webpack-dev-server:angularHandler')
 
 export type BuildOptions = Record<string, any>
 
@@ -30,8 +34,6 @@ type AngularJson = {
     [project: string]: AngularJsonProjectConfig
   }
 }
-
-const dynamicImport = new Function('specifier', 'return import(specifier)')
 
 export async function getProjectConfig (projectRoot: string): Promise<Cypress.AngularDevServerProjectConfig> {
   const angularJson = await getAngularJson(projectRoot)
@@ -123,9 +125,11 @@ export async function generateTsConfig (devServerConfig: AngularWebpackDevServer
   }
 
   if (buildOptions.polyfills) {
-    const polyfills = getProjectFilePath(buildOptions.polyfills)
+    const polyfills = Array.isArray(buildOptions.polyfills)
+      ? buildOptions.polyfills.filter((p: string) => devServerConfig.options?.projectConfig.sourceRoot && p.startsWith(devServerConfig.options?.projectConfig.sourceRoot))
+      : [buildOptions.polyfills]
 
-    includePaths.push(polyfills)
+    includePaths.push(...polyfills.map((p: string) => getProjectFilePath(p)))
   }
 
   const cypressTypes = getProjectFilePath('node_modules', 'cypress', 'types', 'index.d.ts')
@@ -133,7 +137,7 @@ export async function generateTsConfig (devServerConfig: AngularWebpackDevServer
   includePaths.push(cypressTypes)
 
   const tsConfigContent = JSON.stringify({
-    extends: getProjectFilePath('tsconfig.json'),
+    extends: getProjectFilePath(buildOptions.tsConfig ?? 'tsconfig.json'),
     compilerOptions: {
       outDir: getProjectFilePath('out-tsc/cy'),
       allowSyntheticDefaultImports: true,
@@ -158,21 +162,21 @@ export async function getTempDir (): Promise<string> {
 }
 
 export async function getAngularCliModules (projectRoot: string) {
+  const angularCLiModules = [
+    '@angular-devkit/build-angular/src/utils/webpack-browser-config.js',
+    '@angular-devkit/build-angular/src/webpack/configs/common.js',
+    '@angular-devkit/build-angular/src/webpack/configs/styles.js',
+  ] as const
+
   const [
     { generateBrowserWebpackConfigFromContext },
     { getCommonConfig },
     { getStylesConfig },
-  ] = await Promise.all([
-    '@angular-devkit/build-angular/src/utils/webpack-browser-config.js',
-    '@angular-devkit/build-angular/src/webpack/configs/common.js',
-    '@angular-devkit/build-angular/src/webpack/configs/styles.js',
-  ].map((dep) => {
+  ] = await Promise.all(angularCLiModules.map((dep) => {
     try {
       const depPath = require.resolve(dep, { paths: [projectRoot] })
 
-      const url = pathToFileURL(depPath).href
-
-      return dynamicImport(url)
+      return dynamicAbsoluteImport(depPath)
     } catch (e) {
       throw new Error(`Could not resolve "${dep}". Do you have "@angular-devkit/build-angular" installed?`)
     }
@@ -186,7 +190,7 @@ export async function getAngularCliModules (projectRoot: string) {
 }
 
 export async function getAngularJson (projectRoot: string): Promise<AngularJson> {
-  const { findUp } = await dynamicImport('find-up') as typeof import('find-up')
+  const { findUp } = await dynamicImport<typeof import('find-up')>('find-up')
 
   const angularJsonPath = await findUp('angular.json', { cwd: projectRoot })
 
@@ -201,7 +205,11 @@ export async function getAngularJson (projectRoot: string): Promise<AngularJson>
 
 function createFakeContext (projectRoot: string, defaultProjectConfig: Cypress.AngularDevServerProjectConfig) {
   const logger = {
-    createChild: () => ({}),
+    createChild: () => {
+      return {
+        warn: () => {},
+      }
+    },
   }
 
   const context = {
@@ -212,7 +220,7 @@ function createFakeContext (projectRoot: string, defaultProjectConfig: Cypress.A
     getProjectMetadata: () => {
       return {
         root: defaultProjectConfig.root,
-        sourceRoot: defaultProjectConfig.root,
+        sourceRoot: defaultProjectConfig.sourceRoot,
         projectType: 'application',
       }
     },
@@ -245,7 +253,33 @@ async function getAngularCliWebpackConfig (devServerConfig: AngularWebpackDevSer
   const { config } = await generateBrowserWebpackConfigFromContext(
     buildOptions,
     context,
-    (wco: any) => [getCommonConfig(wco), getStylesConfig(wco)],
+    (wco: any) => {
+      const stylesConfig = getStylesConfig(wco)
+
+      // We modify resolve-url-loader and set `root` to be `projectRoot` + `sourceRoot` to ensure
+      // imports in scss, sass, etc are correctly resolved.
+      // https://github.com/cypress-io/cypress/issues/24272
+      stylesConfig.module.rules.forEach((rule: RuleSetRule) => {
+        rule.rules?.forEach((ruleSet) => {
+          if (!Array.isArray(ruleSet.use)) {
+            return
+          }
+
+          ruleSet.use.map((loader) => {
+            if (typeof loader !== 'object' || typeof loader.options !== 'object' || !loader.loader?.includes('resolve-url-loader')) {
+              return
+            }
+
+            const root = path.join(devServerConfig.cypressConfig.projectRoot, projectConfig.sourceRoot)
+
+            debug('Adding root %s to resolve-url-loader options', root)
+            loader.options.root = path.join(devServerConfig.cypressConfig.projectRoot, projectConfig.sourceRoot)
+          })
+        })
+      })
+
+      return [getCommonConfig(wco), stylesConfig]
+    },
   )
 
   delete config.entry.main
@@ -253,8 +287,16 @@ async function getAngularCliWebpackConfig (devServerConfig: AngularWebpackDevSer
   return config
 }
 
+function removeSourceMapPlugin (config: Configuration) {
+  config.plugins = config.plugins?.filter((plugin) => {
+    return plugin?.constructor?.name !== 'SourceMapDevToolPlugin'
+  })
+}
+
 export async function angularHandler (devServerConfig: AngularWebpackDevServerConfig): Promise<PresetHandlerResult> {
   const webpackConfig = await getAngularCliWebpackConfig(devServerConfig)
+
+  removeSourceMapPlugin(webpackConfig)
 
   return { frameworkConfig: webpackConfig, sourceWebpackModulesResult: sourceDefaultWebpackDependencies(devServerConfig) }
 }

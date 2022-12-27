@@ -17,7 +17,7 @@
       >
         <slot name="header" />
       </h2>
-      <p class="font-normal text-sm text-gray-600 select-none">
+      <p class="font-normal text-sm text-gray-700 select-none">
         <slot name="description">
           <span>{{ description }}</span>
         </slot>

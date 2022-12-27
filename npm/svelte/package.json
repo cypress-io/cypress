@@ -8,6 +8,7 @@
     "build": "rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "build-prod": "yarn build",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "check-ts": "tsc --noEmit"
   },
   "devDependencies": {
@@ -28,7 +29,7 @@
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
-  "homepage": "https://github.com/cypress-io/cypress/blob/master/npm/svelte/#readme",
+  "homepage": "https://github.com/cypress-io/cypress/blob/develop/npm/svelte/#readme",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fsvelte&template=1-bug-report.md&title=",
   "keywords": [
     "cypress",

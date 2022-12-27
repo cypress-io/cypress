@@ -668,10 +668,14 @@ type Mutation {
   Create a project in the dashboard and return its object
   """
   cloudProjectCreate(
+    campaign: String
     ciProviders: [String!]
+    cohort: String
+    medium: String
     name: String!
     orgId: ID!
     public: Boolean!
+    source: String
   ): CloudProject
 
   """

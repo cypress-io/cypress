@@ -1,19 +1,17 @@
-import type { CodeGenType, MutationSetProjectPreferencesInGlobalCacheArgs, NexusGenObjects, NexusGenUnions } from '@packages/graphql/src/gen/nxs.gen'
-import type { InitializeProjectOptions, FoundBrowser, FoundSpec, LaunchOpts, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig, AllowedState, SpecWithRelativeRoot } from '@packages/types'
+import type { MutationSetProjectPreferencesInGlobalCacheArgs, NexusGenObjects, NexusGenUnions } from '@packages/graphql/src/gen/nxs.gen'
+import { InitializeProjectOptions, FoundBrowser, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig, AllowedState, SpecWithRelativeRoot, OpenProjectLaunchOpts, RUN_ALL_SPECS, RUN_ALL_SPECS_KEY } from '@packages/types'
 import type { EventEmitter } from 'events'
 import execa from 'execa'
 import path from 'path'
 import assert from 'assert'
 
 import type { ProjectShape } from '../data/coreDataShape'
-
 import type { DataContext } from '..'
-import { codeGenerator, SpecOptions } from '../codegen'
+import { hasNonExampleSpec } from '../codegen'
 import templates from '../codegen/templates'
 import { insertValuesInConfigFile } from '../util'
 import { getError } from '@packages/errors'
 import { resetIssuedWarnings } from '@packages/config'
-import { WizardFrontendFramework, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 
 export interface ProjectApiShape {
   /**
@@ -22,7 +20,7 @@ export interface ProjectApiShape {
    *   order for CT to startup
    */
   openProjectCreate(args: InitializeProjectOptions, options: OpenProjectLaunchOptions): Promise<unknown>
-  launchProject(browser: FoundBrowser, spec: Cypress.Spec, options: LaunchOpts): Promise<void>
+  launchProject(browser: FoundBrowser, spec: Cypress.Spec, options?: Partial<OpenProjectLaunchOpts>): Promise<void>
   insertProjectToCache(projectRoot: string): Promise<void>
   removeProjectFromCache(projectRoot: string): Promise<void>
   getProjectRootsFromCache(): Promise<ProjectShape[]>
@@ -46,6 +44,8 @@ export interface ProjectApiShape {
     emitter: EventEmitter
   }
   isListening: (url: string) => Promise<void>
+  resetBrowserTabsForNextTest(shouldKeepTabOpen: boolean): Promise<void>
+  resetServer(): void
 }
 
 export interface FindSpecs<T> {
@@ -175,7 +175,7 @@ export class ProjectActions {
         // When switching testing type, the project should be relaunched in the previously selected browser
         if (this.ctx.coreData.app.relaunchBrowser) {
           this.ctx.project.setRelaunchBrowser(false)
-          await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType, {})
+          await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType)
         }
       })
     } catch (e) {
@@ -228,7 +228,7 @@ export class ProjectActions {
     }
   }
 
-  async launchProject (testingType: Cypress.TestingType | null, options: LaunchOpts, specPath?: string | null) {
+  async launchProject (testingType: Cypress.TestingType | null, options?: Partial<OpenProjectLaunchOpts>, specPath?: string | null) {
     if (!this.ctx.currentProject) {
       return null
     }
@@ -246,10 +246,10 @@ export class ProjectActions {
 
     if (!browser) throw new Error('Missing browser in launchProject')
 
-    let activeSpec: FoundSpec | undefined
+    let activeSpec: Cypress.Spec | undefined
 
     if (specPath) {
-      activeSpec = this.ctx.project.getCurrentSpecByAbsolute(specPath)
+      activeSpec = specPath === RUN_ALL_SPECS_KEY ? RUN_ALL_SPECS : this.ctx.project.getCurrentSpecByAbsolute(specPath)
     }
 
     // launchProject expects a spec when opening browser for url navigation.
@@ -259,6 +259,12 @@ export class ProjectActions {
       absolute: '',
       relative: '',
       specType: testingType === 'e2e' ? 'integration' : 'component',
+    }
+
+    // Used for run-all-specs feature
+    if (options?.shouldLaunchNewTab) {
+      await this.api.resetBrowserTabsForNextTest(true)
+      this.api.resetServer()
     }
 
     await this.api.launchProject(browser, activeSpec ?? emptySpec, options)
@@ -317,6 +323,15 @@ export class ProjectActions {
     this.ctx.project.setSpecs(specs)
     this.refreshSpecs(specs)
 
+    // only check for non-example specs when the specs change
+    this.hasNonExampleSpec().then((result) => {
+      this.ctx.project.setHasNonExampleSpec(result)
+    })
+    .catch((e) => {
+      this.ctx.project.setHasNonExampleSpec(false)
+      this.ctx.logTraceError(e)
+    })
+
     if (this.ctx.coreData.currentTestingType === 'component') {
       this.api.getDevServer().updateSpecs(specs)
     }
@@ -334,69 +349,6 @@ export class ProjectActions {
     }
 
     this.api.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, args)
-  }
-
-  async codeGenSpec (codeGenCandidate: string, codeGenType: CodeGenType): Promise<NexusGenUnions['GeneratedSpecResult']> {
-    const project = this.ctx.currentProject
-
-    assert(project, 'Cannot create spec without currentProject.')
-
-    const getCodeGenPath = () => {
-      return codeGenType === 'e2e'
-        ? this.ctx.path.join(
-          project,
-          codeGenCandidate,
-        )
-        : codeGenCandidate
-    }
-
-    const codeGenPath = getCodeGenPath()
-
-    const { specPattern = [] } = await this.ctx.project.specPatterns()
-
-    const newSpecCodeGenOptions = new SpecOptions({
-      codeGenPath,
-      codeGenType,
-      framework: this.getWizardFrameworkFromConfig(),
-      isDefaultSpecPattern: await this.ctx.project.getIsDefaultSpecPattern(),
-      specPattern,
-      currentProject: this.ctx.currentProject,
-      specs: this.ctx.project.specs,
-    })
-
-    let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
-
-    const codeGenResults = await codeGenerator(
-      { templateDir: templates[codeGenOptions.templateKey], target: codeGenOptions.overrideCodeGenDir || path.parse(codeGenPath).dir },
-      codeGenOptions,
-    )
-
-    if (!codeGenResults.files[0] || codeGenResults.failed[0]) {
-      throw (codeGenResults.failed[0] || 'Unable to generate spec')
-    }
-
-    const [newSpec] = codeGenResults.files
-
-    const cfg = await this.ctx.project.getConfig()
-
-    if (cfg && this.ctx.currentProject) {
-      const testingType = (codeGenType === 'component') ? 'component' : 'e2e'
-
-      await this.setSpecsFoundBySpecPattern({
-        projectRoot: this.ctx.currentProject,
-        testingType,
-        specPattern: cfg.specPattern ?? [],
-        configSpecPattern: cfg.specPattern ?? [],
-        excludeSpecPattern: cfg.excludeSpecPattern,
-        additionalIgnorePattern: cfg.additionalIgnorePattern,
-      })
-    }
-
-    return {
-      status: 'valid',
-      file: { absolute: newSpec.file, contents: newSpec.content },
-      description: 'Generated spec',
-    }
   }
 
   async setSpecsFoundBySpecPattern ({ projectRoot, testingType, specPattern, configSpecPattern, excludeSpecPattern, additionalIgnorePattern }: FindSpecs<string | string[] | undefined>) {
@@ -458,35 +410,19 @@ export class ProjectActions {
     this.ctx.actions.electron.showBrowserWindow()
   }
 
-  get defaultE2EPath () {
-    const projectRoot = this.ctx.currentProject
+  async hasNonExampleSpec () {
+    const specs = this.ctx.project.specs?.map((spec) => spec.relativeToCommonRoot)
 
-    assert(projectRoot, `Cannot create e2e directory without currentProject.`)
-
-    return path.join(projectRoot, 'cypress', 'e2e')
-  }
-
-  async scaffoldIntegration (): Promise<NexusGenObjects['ScaffoldedFile'][]> {
-    const projectRoot = this.ctx.currentProject
-
-    assert(projectRoot, `Cannot create spec without currentProject.`)
-
-    const results = await codeGenerator(
-      { templateDir: templates['scaffoldIntegration'], target: this.defaultE2EPath },
-      {},
-    )
-
-    if (results.failed.length) {
-      throw new Error(`Failed generating files: ${results.failed.map((e) => `${e}`)}`)
+    switch (this.ctx.coreData.currentTestingType) {
+      case 'e2e':
+        return hasNonExampleSpec(templates.scaffoldIntegration, specs)
+      case 'component':
+        return specs.length > 0
+      case null:
+        return false
+      default:
+        throw new Error(`Unsupported testing type ${this.ctx.coreData.currentTestingType}`)
     }
-
-    return results.files.map(({ status, file, content }) => {
-      return {
-        status: (status === 'add' || status === 'overwrite') ? 'valid' : 'skipped',
-        file: { absolute: file, contents: content },
-        description: 'Generated spec',
-      }
-    })
   }
 
   async pingBaseUrl () {
@@ -520,17 +456,5 @@ export class ProjectActions {
       // E2E doesn't have a wizard, so if we have a testing type on load we just create/update their cypress.config.js.
       await this.ctx.actions.wizard.scaffoldTestingType()
     }
-  }
-
-  getWizardFrameworkFromConfig (): WizardFrontendFramework | undefined {
-    const config = this.ctx.lifecycleManager.loadedConfigFile
-
-    // If devServer is a function, they are using a custom dev server.
-    if (typeof config?.component?.devServer === 'function') {
-      return undefined
-    }
-
-    // @ts-ignore - because of the conditional above, we know that devServer isn't a function
-    return WIZARD_FRAMEWORKS.find((framework) => framework.configFramework === config?.component?.devServer.framework)
   }
 }

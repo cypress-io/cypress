@@ -4,9 +4,16 @@ import { logger } from './logger'
 import _ from 'lodash'
 /* eslint-disable no-duplicate-imports */
 import type { DebouncedFunc } from 'lodash'
+import { useStudioStore } from '../store/studio-store'
+import { getElementDimensions, setOffset } from './dimensions'
+import { getOrCreateHelperDom, getSelectorHighlightStyles, getZIndex, INT32_MAX } from './dom'
+import highlightMounter from './selector-playground/highlight-mounter'
+import Highlight from './selector-playground/Highlight.ce.vue'
 
 // JQuery bundled w/ Cypress
 type $CypressJQuery = any
+
+const sizzleRe = /sizzle/i
 
 export class AutIframe {
   debouncedToggleSelectorPlayground: DebouncedFunc<(isEnabled: any) => void>
@@ -17,8 +24,6 @@ export class AutIframe {
     private projectName: string,
     private eventManager: any,
     private $: $CypressJQuery,
-    private dom: any,
-    private studioRecorder: any,
   ) {
     this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
   }
@@ -43,16 +48,12 @@ export class AutIframe {
     this.$iframe.remove()
   }
 
-  showInitialBlankContents () {
+  _showInitialBlankPage () {
     this._showContents(blankContents.initial())
   }
 
-  showSessionBlankContents () {
-    this._showContents(blankContents.session())
-  }
-
-  showSessionLifecycleBlankContents () {
-    this._showContents(blankContents.sessionLifecycle())
+  _showTestIsolationBlankPage () {
+    this._showContents(blankContents.testIsolationBlankPage())
   }
 
   showVisitFailure = (props) => {
@@ -76,7 +77,7 @@ export class AutIframe {
   }
 
   _body () {
-    return this._contents()?.find('body')
+    return this._contents()?.find('body') as unknown as JQuery<HTMLBodyElement>
   }
 
   detachDom = () => {
@@ -88,12 +89,12 @@ export class AutIframe {
   }
 
   /**
-   * If the AUT is cross origin relative to top, a security error is thrown and the method returns false
-   * If the AUT is cross origin relative to top and chromeWebSecurity is false, origins of the AUT and top need to be compared and returns false
-   * Otherwise, if top and the AUT match origins, the method returns true.
+   * If the AUT is cross super domain origin relative to top, a security error is thrown and the method returns false
+   * If the AUT is cross super domain origin relative to top and chromeWebSecurity is false, origins of the AUT and top need to be compared and returns false
+   * Otherwise, if top and the AUT match super domain origins, the method returns true.
    * If the AUT origin is "about://blank", that means the src attribute has been stripped off the iframe and is adhering to same origin policy
    */
-  doesAUTMatchTopOriginPolicy = () => {
+  doesAUTMatchTopSuperDomainOrigin = () => {
     const Cypress = this.eventManager.getCypress()
 
     if (!Cypress) return true
@@ -103,7 +104,7 @@ export class AutIframe {
       const locationTop = Cypress.Location.create(window.location.href)
       const locationAUT = Cypress.Location.create(currentHref)
 
-      return locationTop.originPolicy === locationAUT.originPolicy || locationAUT.originPolicy === 'about://blank'
+      return locationTop.superDomainOrigin === locationAUT.superDomainOrigin || locationAUT.superDomainOrigin === 'about://blank'
     } catch (err) {
       if (err.name === 'SecurityError') {
         return false
@@ -121,7 +122,7 @@ export class AutIframe {
     this.$iframe?.removeAttr('src')
   }
 
-  visitBlank = ({ type }: { type?: 'session' | 'session-lifecycle' }) => {
+  visitBlankPage = (testIsolation?: boolean) => {
     return new Promise<void>((resolve) => {
       if (!this.$iframe) {
         return
@@ -130,15 +131,10 @@ export class AutIframe {
       this.$iframe[0].src = 'about:blank'
 
       this.$iframe.one('load', () => {
-        switch (type) {
-          case 'session':
-            this.showSessionBlankContents()
-            break
-          case 'session-lifecycle':
-            this.showSessionLifecycleBlankContents()
-            break
-          default:
-            this.showInitialBlankContents()
+        if (testIsolation) {
+          this._showTestIsolationBlankPage()
+        } else {
+          this._showInitialBlankPage()
         }
 
         resolve()
@@ -147,7 +143,7 @@ export class AutIframe {
   }
 
   restoreDom = (snapshot) => {
-    if (!this.doesAUTMatchTopOriginPolicy()) {
+    if (!this.doesAUTMatchTopSuperDomainOrigin()) {
       /**
        * A load event fires here when the src is removed (as does an unload event).
        * This is equivalent to loading about:blank (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-src).
@@ -158,7 +154,8 @@ export class AutIframe {
         this.restoreDom(snapshot)
       })
 
-      // The iframe is in a cross origin state. Remove the src attribute to adhere to same origin policy. NOTE: This should only be done ONCE.
+      // The iframe is in a cross origin state.
+      // Remove the src attribute to adhere to same super domain origin so we can interact with the frame. NOTE: This should only be done ONCE.
       this.removeSrcAttribute()
 
       return
@@ -307,22 +304,22 @@ export class AutIframe {
       // bail if our el no longer exists in the parent body
       if (!this.$.contains(body, element)) return
 
-      // switch to using outerWidth + outerHeight
+      // switch to using offsetWidth + offsetHeight
       // because we want to highlight our element even
       // if it only has margin and zero content height / width
-      const dimensions = this.dom.getOuterSize($_el)
+      const dimensions = this._getOffsetSize($_el.get(0))
 
       // dont show anything if our element displaces nothing
       if (dimensions.width === 0 || dimensions.height === 0 || $_el.css('display') === 'none') {
         return
       }
 
-      this.dom.addElementBoxModelLayers($_el, $body).attr('data-highlight-el', true)
+      this._addElementBoxModelLayers($_el, $body).setAttribute('data-highlight-el', `true`)
     })
 
     if (coords) {
       requestAnimationFrame(() => {
-        this.dom.addHitBoxLayer(coords, $body).attr('data-highlight-hitbox', true)
+        this._addHitBoxLayer(coords, $body.get(0)).setAttribute('data-highlight-hitbox', 'true')
       })
     }
   }
@@ -388,10 +385,10 @@ export class AutIframe {
     const selector = Cypress.SelectorPlayground.getSelector($el)
     const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
-    this.dom.addOrUpdateSelectorPlaygroundHighlight({
+    this._addOrUpdateSelectorPlaygroundHighlight({
       $el,
-      selector,
       $body,
+      selector,
       showTooltip: true,
       onClick: () => {
         selectorPlaygroundStore.setNumElements(1)
@@ -407,7 +404,11 @@ export class AutIframe {
 
     if (!$body) return
 
-    this.dom.addOrUpdateSelectorPlaygroundHighlight({ $el: null, $body })
+    this._addOrUpdateSelectorPlaygroundHighlight({
+      $el: null,
+      $body,
+    })
+
     if (this._highlightedEl) {
       this._highlightedEl = undefined
     }
@@ -432,14 +433,14 @@ export class AutIframe {
       selectorPlaygroundStore.setNumElements($el.length)
 
       if ($el.length) {
-        this.dom.scrollIntoView(this._window(), $el[0])
+        this._scrollIntoView(this._window(), $el[0])
       }
     }
 
-    this.dom.addOrUpdateSelectorPlaygroundHighlight({
+    this._addOrUpdateSelectorPlaygroundHighlight({
       $el: $el && $el.length ? $el : null,
-      selector: selectorPlaygroundStore.selector,
       $body: this._body(),
+      selector: selectorPlaygroundStore.selector,
       showTooltip: false,
     })
   }
@@ -450,7 +451,7 @@ export class AutIframe {
 
     if (!$contents || !selectorPlaygroundStore.selector) return
 
-    return this.dom.getElementsForSelector({
+    return this._getElementsForSelector({
       method: selectorPlaygroundStore.method,
       selector: selectorPlaygroundStore.selector,
       cypressDom,
@@ -481,15 +482,307 @@ export class AutIframe {
     })
   }
 
-  startStudio = () => {
-    if (this.studioRecorder.isLoading) {
-      this.studioRecorder.start(this._body()?.[0])
+  startStudio () {
+    const studioStore = useStudioStore()
+
+    if (studioStore.isLoading) {
+      studioStore.start(this._body()?.[0])
     }
   }
 
-  reattachStudio = () => {
-    if (this.studioRecorder.isActive) {
-      this.studioRecorder.attachListeners(this._body()?.[0])
+  reattachStudio () {
+    const studioStore = useStudioStore()
+
+    if (studioStore.isActive) {
+      const body = this._body()?.[0]
+
+      if (!body) {
+        throw Error(`Cannot reattach Studio without the HTMLBodyElement for the app`)
+      }
+
+      studioStore.attachListeners(body)
     }
+  }
+
+  private _scrollIntoView (win: Window, el: HTMLElement) {
+    if (!el || this._isInViewport(win, el)) return
+
+    el.scrollIntoView()
+  }
+
+  private _isInViewport = (win: Window, el: HTMLElement) => {
+    let rect = el.getBoundingClientRect()
+
+    return (
+      rect.top >= 0 &&
+      rect.left >= 0 &&
+      rect.bottom <= win.innerHeight &&
+      rect.right <= win.innerWidth
+    )
+  }
+
+  private _getElementsForSelector ({ $root, selector, method, cypressDom }) {
+    let $el: JQuery<HTMLElement> | null = null
+
+    try {
+      if (method === 'contains') {
+        $el = $root.find(cypressDom.getContainsSelector(selector)) as JQuery<HTMLElement>
+        if ($el.length) {
+          $el = cypressDom.getFirstDeepestElement($el)
+        }
+      } else {
+        $el = $root.find(selector)
+      }
+    } catch (err) {
+      // if not a sizzle error, ignore it and let $el be null
+      if (!sizzleRe.test(err.stack)) throw err
+    }
+
+    return $el
+  }
+
+  private _addHitBoxLayer (coords: { x: number, y: number }, body: HTMLBodyElement) {
+    const height = 10
+    const width = 10
+
+    const dotHeight = 4
+    const dotWidth = 4
+
+    const top = coords.y - height / 2
+    const left = coords.x - width / 2
+
+    const dotTop = height / 2 - dotHeight / 2
+    const dotLeft = width / 2 - dotWidth / 2
+
+    const resetStyles: Partial<CSSStyleDeclaration> = {
+      border: 'none !important',
+      margin: '0 !important',
+      padding: '0 !important',
+    }
+
+    // Create box
+
+    const boxStyles: Partial<CSSStyleDeclaration> = {
+      ...resetStyles,
+      position: 'absolute',
+      top: `${top}px`,
+      left: `${left}px`,
+      width: `${width}px`,
+      height: `${height}px`,
+      backgroundColor: 'red',
+      borderRadius: '5px',
+      boxShadow: '0 0 5px #333',
+      zIndex: '2147483647',
+    }
+
+    const box = document.createElement('div')
+
+    box.classList.add('__cypress-highlight')
+
+    for (const key in boxStyles) {
+      box.style[key!] = boxStyles[key]
+    }
+
+    // Create wrapper
+
+    const wrapperStyles: Partial<CSSStyleDeclaration> = {
+      ...resetStyles,
+      position: 'relative',
+    }
+
+    const wrapper = document.createElement('div')
+
+    for (const key in wrapperStyles) {
+      wrapper.style[key!] = wrapperStyles[key]
+    }
+
+    // Create dot
+
+    const dotStyles: Partial<CSSStyleDeclaration> = {
+      ...resetStyles,
+      position: 'absolute',
+      top: `${dotTop}px`,
+      left: `${dotLeft}px`,
+      height: `${dotHeight}px`,
+      width: `${dotWidth}px`,
+      backgroundColor: 'pink',
+      borderRadius: '5px',
+    }
+
+    const dot = document.createElement('div')
+
+    for (const key in dotStyles) {
+      dot.style[key!] = dotStyles[key]
+    }
+
+    body.appendChild(box)
+    box.appendChild(wrapper)
+    wrapper.appendChild(dot)
+
+    return box
+  }
+
+  private _getOffsetSize (el: HTMLElement) {
+    return {
+      width: el.offsetWidth,
+      height: el.offsetHeight,
+    }
+  }
+
+  private _addElementBoxModelLayers ($el, $body) {
+    $body = $body || $('body')
+
+    const el = $el.get(0)
+    const body = $body.get(0)
+
+    const dimensions = getElementDimensions(el)
+
+    const container = document.createElement('div')
+
+    container.classList.add('__cypress-highlight')
+
+    container.style.opacity = `0.7`
+    container.style.position = 'absolute'
+    container.style.zIndex = `${INT32_MAX}`
+
+    const layers = {
+      Content: '#9FC4E7',
+      Padding: '#C1CD89',
+      Border: '#FCDB9A',
+      Margin: '#F9CC9D',
+    }
+
+    // create the margin / bottom / padding layers
+    _.each(layers, (color, attr) => {
+      let obj
+
+      switch (attr) {
+        case 'Content':
+          // rearrange the contents offset so
+          // its inside of our border + padding
+          obj = {
+            width: dimensions.width,
+            height: dimensions.height,
+            top: dimensions.offset.top + dimensions.borderTop + dimensions.paddingTop,
+            left: dimensions.offset.left + dimensions.borderLeft + dimensions.paddingLeft,
+          }
+
+          break
+        default:
+          obj = {
+            width: this._getDimensionsFor(dimensions, attr, 'width'),
+            height: this._getDimensionsFor(dimensions, attr, 'height'),
+            top: dimensions.offset.top,
+            left: dimensions.offset.left,
+          }
+      }
+
+      // if attr is margin then we need to additional
+      // subtract what the actual marginTop + marginLeft
+      // values are, since offset disregards margin completely
+      if (attr === 'Margin') {
+        obj.top -= dimensions.marginTop
+        obj.left -= dimensions.marginLeft
+      }
+
+      if (attr === 'Padding') {
+        obj.top += dimensions.borderTop
+        obj.left += dimensions.borderLeft
+      }
+
+      // bail if the dimensions of this layer match the previous one
+      // so we dont create unnecessary layers
+      if (this._dimensionsMatchPreviousLayer(obj, container)) return
+
+      this._createLayer($el.get(0), attr, color, container, obj)
+    })
+
+    body.appendChild(container)
+
+    for (let i = 0; i < container.children.length; i++) {
+      const el = container.children[i] as HTMLElement
+      const top = parseFloat(el.getAttribute('data-top')!)
+      const left = parseFloat(el.getAttribute('data-left')!)
+
+      setOffset(el, { top, left })
+    }
+
+    return container
+  }
+
+  private _createLayer (el, attr, color, container, dimensions) {
+    const div = document.createElement('div')
+
+    div.style.transform = getComputedStyle(el, null).transform
+    div.style.width = `${dimensions.width}px`
+    div.style.height = `${dimensions.height}px`
+    div.style.position = 'absolute'
+    div.style.zIndex = `${getZIndex(el)}`
+    div.style.backgroundColor = color
+
+    div.setAttribute('data-top', dimensions.top)
+    div.setAttribute('data-left', dimensions.left)
+    div.setAttribute('data-layer', attr)
+
+    container.prepend(div)
+
+    return div
+  }
+
+  private _dimensionsMatchPreviousLayer (obj, container) {
+    // since we're prepending to the container that
+    // means the previous layer is actually the first child element
+    const previousLayer = container.childNodes[0]
+
+    // bail if there is no previous layer
+    if (!previousLayer) {
+      return
+    }
+
+    return obj.width === previousLayer.offsetWidth &&
+      obj.height === previousLayer.offsetHeight
+  }
+
+  private _getDimensionsFor (dimensions, attr, dimension) {
+    return dimensions[`${dimension}With${attr}`]
+  }
+
+  private listeners: any[] = []
+
+  private _addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showTooltip, onClick }: any) {
+    const { container, vueContainer } = getOrCreateHelperDom({
+      body: $body?.get(0) || document.body,
+      className: '__cypress-selector-playground',
+      css: Highlight.styles[0],
+    })
+
+    const removeContainerClickListeners = () => {
+      this.listeners.forEach((listener) => {
+        vueContainer.removeEventListener('click', listener)
+      })
+
+      this.listeners = []
+    }
+
+    if (!$el) {
+      removeContainerClickListeners()
+      container.remove()
+
+      return
+    }
+
+    const elements = $el.get()
+    const styles = getSelectorHighlightStyles(elements)
+
+    if (elements.length === 1) {
+      removeContainerClickListeners()
+
+      if (onClick) {
+        vueContainer.addEventListener('click', onClick)
+        this.listeners.push(onClick)
+      }
+    }
+
+    highlightMounter.mount(vueContainer, selector, styles)
   }
 }

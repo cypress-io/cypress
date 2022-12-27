@@ -1,5 +1,12 @@
 import { oneLine } from 'common-tags'
 import { getRunnerInjectionContents, getRunnerCrossOriginInjectionContents } from '@packages/resolve-dist'
+import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
+
+interface FullCrossOriginOpts {
+  modifyObstructiveThirdPartyCode: boolean
+  modifyObstructiveCode: boolean
+  simulatedCookies: AutomationCookie[]
+}
 
 export function partial (domain) {
   return oneLine`
@@ -21,14 +28,16 @@ export function full (domain) {
   })
 }
 
-export function fullCrossOrigin (domain) {
-  return getRunnerCrossOriginInjectionContents().then((contents) => {
-    return oneLine`
-      <script type='text/javascript'>
-        document.domain = '${domain}';
+export async function fullCrossOrigin (domain, options: FullCrossOriginOpts) {
+  const contents = await getRunnerCrossOriginInjectionContents()
 
+  return oneLine`
+    <script type='text/javascript'>
+      document.domain = '${domain}';
+
+      (function (cypressConfig) {
         ${contents}
-      </script>
-    `
-  })
+      }(${JSON.stringify(options)}));
+    </script>
+  `
 }

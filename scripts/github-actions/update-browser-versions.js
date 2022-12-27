@@ -77,13 +77,14 @@ const checkNeedForBranchUpdate = ({ core, latestStableVersion, latestBetaVersion
 }
 
 const updateBrowserVersionsFile = ({ latestBetaVersion, latestStableVersion }) => {
-  const versions = {
+  const currentBrowserVersions = JSON.parse(fs.readFileSync('./browser-versions.json'))
+  const newVersions = Object.assign(currentBrowserVersions, {
     'chrome:beta': latestBetaVersion,
     'chrome:stable': latestStableVersion,
-  }
+  })
 
   // file path is relative to repo root
-  fs.writeFileSync('./browser-versions.json', `${JSON.stringify(versions, null, 2) }\n`)
+  fs.writeFileSync('./browser-versions.json', `${JSON.stringify(newVersions, null, 2) }\n`)
 }
 
 const updatePRTitle = async ({ context, github, baseBranch, branchName, description }) => {
@@ -109,22 +110,9 @@ const updatePRTitle = async ({ context, github, baseBranch, branchName, descript
   })
 }
 
-const createPullRequest = async ({ context, github, baseBranch, branchName, description }) => {
-  await github.pulls.create({
-    owner: context.repo.owner,
-    repo: context.repo.repo,
-    base: baseBranch,
-    head: branchName,
-    title: `chore: ${description}`,
-    body: 'This PR was auto-generated to update the version(s) of Chrome for driver tests',
-    maintainer_can_modify: true,
-  })
-}
-
 module.exports = {
   getVersions,
   checkNeedForBranchUpdate,
   updateBrowserVersionsFile,
   updatePRTitle,
-  createPullRequest,
 }

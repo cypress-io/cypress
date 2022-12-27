@@ -26,10 +26,13 @@
           />
           <span>,</span>
         </template>
-
-        <span v-else>
-          {{ renderPrimitive(v) }},
-        </span>
+        <RenderPrimitive
+          v-else
+          :from="from"
+          :value="v"
+          placement="right"
+          :data-cy-config="from"
+        />
         <br>
       </span>
       <span
@@ -58,11 +61,15 @@
         :color-classes="props.colorClasses"
         :depth="props.depth + 1"
         :from="props.from"
-      /><span
+      />
+      <RenderPrimitive
         v-else
+        :from="props.from"
+        :value="val"
+        placement="right"
         :class="props.colorClasses"
         :data-cy-config="props.from"
-      >{{ renderPrimitive(val) }},</span><br>
+      /><br>
     </template>
     <span
       :class="props.colorClasses"
@@ -73,7 +80,7 @@
 </template>
 
 <script lang="ts" setup>
-import { renderPrimitive } from './renderPrimitive'
+import RenderPrimitive from './RenderPrimitive.vue'
 
 const props = withDefaults(defineProps<{
   value: Record<string, any> | any[]

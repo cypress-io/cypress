@@ -28,6 +28,8 @@ export {
   RESOLVED_FROM,
 } from './config'
 
+export * from './reporter'
+
 export * from './server'
 
 export * from './util'
@@ -37,3 +39,5 @@ export * from './warning'
 export * from './modeOptions'
 
 export * from './git'
+
+export * from './video'

@@ -155,15 +155,19 @@ export const matchesConfigKey = (key: string) => {
   return
 }
 
-export const validate = (cfg: any, onErr: (property: ErrResult | string) => void) => {
-  debug('validating configuration')
+export const validate = (cfg: any, onErr: (property: ErrResult | string) => void, testingType: TestingType | null) => {
+  debug('validating configuration', cfg)
 
   return _.each(cfg, (value, key) => {
     const validationFn = validationRules[key]
 
     // key has a validation rule & value different from the default
     if (validationFn && value !== defaultValues[key]) {
-      const result = validationFn(key, value)
+      const result = validationFn(key, value, {
+        // if we are validating the e2e or component-specific configuration values, pass
+        // the key testing type as the testing type to ensure correct validation
+        testingType: (key === 'e2e' || key === 'component') ? key : testingType,
+      })
 
       if (result !== true) {
         return onErr(result)
@@ -198,6 +202,9 @@ export const validateOverridableAtRunTime = (config: any, isSuiteLevelOverride: 
       // non-cypress configuration option. skip validation
       return
     }
+
+    // TODO: add a hook to ensure valid testing-type configuration is being set at runtime for all configuration values.
+    // https://github.com/cypress-io/cypress/issues/24365
 
     if (overrideLevel === 'never' || (overrideLevel === 'suite' && !isSuiteLevelOverride)) {
       onErr({

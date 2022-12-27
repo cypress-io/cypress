@@ -401,7 +401,9 @@ export function mergeDefaults (
     config.baseUrl = url.replace(/\/\/+$/, '/')
   }
 
-  const defaultsForRuntime = getDefaultValues(options)
+  const defaultsForRuntime = getDefaultValues({
+    ...options,
+  })
 
   _.defaultsDeep(config, defaultsForRuntime)
 
@@ -454,7 +456,7 @@ export function mergeDefaults (
     }
 
     return errors.throwErr('CONFIG_VALIDATION_ERROR', null, null, validationResult)
-  })
+  }, testingType)
 
   config = setAbsolutePaths(config)
 
@@ -476,20 +478,6 @@ export function mergeDefaults (
     throw makeConfigError(errors.get(err, ...args))
   }, testingType)
 
-  // TODO: https://github.com/cypress-io/cypress/issues/23093
-  // testIsolation should equal 'strict' by default when experimentalSessionAndOrigin=true
-  // Once experimentalSessionAndOrigin is made GA, remove this logic and update the defaultValue
-  // to be be 'strict'
-  if (testingType === 'e2e' && config.experimentalSessionAndOrigin) {
-    if (config.rawJson.testIsolation) {
-      config.resolved.testIsolation.from = 'config'
-    } else {
-      config.testIsolation = 'strict'
-      config.resolved.testIsolation.value = 'strict'
-      config.resolved.testIsolation.from === 'default'
-    }
-  }
-
   // We need to remove the nested propertied by testing type because it has been
   // flattened/compacted based on the current testing type that is selected
   // making the config only available with the properties that are valid,
@@ -503,7 +491,7 @@ export function mergeDefaults (
 }
 
 function isValidCypressInternalEnvValue (value: string) {
-  // names of config environments, see "config/app.yml"
+  // names of config environments, see "config/app.json"
   const names = ['development', 'test', 'staging', 'production']
 
   return _.includes(names, value)

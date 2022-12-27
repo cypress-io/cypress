@@ -6,6 +6,8 @@ import $stackUtils from '@packages/driver/src/cypress/stack_utils'
 import $errUtils, { CypressError } from '@packages/driver/src/cypress/error_utils'
 import $errorMessages from '@packages/driver/src/cypress/error_messages'
 
+const { sinon } = Cypress
+
 describe('driver/src/cypress/error_utils', () => {
   context('.modifyErrMsg', () => {
     let originalErr
@@ -90,7 +92,7 @@ describe('driver/src/cypress/error_utils', () => {
     })
 
     it('attaches onFail to the error when it is a function', () => {
-      const onFail = function () {}
+      const onFail = function () { }
       const fn = () => $errUtils.throwErr(new Error('foo'), { onFail })
 
       expect(fn).throw().and.satisfy((err) => {
@@ -392,23 +394,16 @@ describe('driver/src/cypress/error_utils', () => {
 
     beforeEach(() => {
       $stackUtils.replacedStack = cy.stub().returns('replaced stack')
-      $stackUtils.stackWithUserInvocationStackSpliced = cy.stub().returns({ stack: 'spliced stack' })
       $stackUtils.getSourceStack = cy.stub().returns(sourceStack)
       $stackUtils.getCodeFrame = cy.stub().returns(codeFrame)
 
       err = { stack: 'Error: original stack message\n at originalStack (foo.js:1:1)' }
     })
 
-    it('replaces stack with user invocation stack', () => {
+    it('replaces stack with source map stack', () => {
       const result = $errUtils.enhanceStack({ err, userInvocationStack })
 
-      expect(result.stack).to.equal('replaced stack')
-    })
-
-    it('attaches source mapped stack', () => {
-      const result = $errUtils.enhanceStack({ err, userInvocationStack })
-
-      expect(result.sourceMappedStack).to.equal(sourceStack.sourceMapped)
+      expect(result.stack).to.equal(sourceStack.sourceMapped)
     })
 
     it('attaches parsed stack', () => {
@@ -426,17 +421,16 @@ describe('driver/src/cypress/error_utils', () => {
     it('appends user invocation stack when it is a cypress error', () => {
       err.name = 'CypressError'
 
-      const result = $errUtils.enhanceStack({ err, userInvocationStack })
-
-      expect(result.stack).to.equal('spliced stack')
+      cy.spy($stackUtils, 'stackWithUserInvocationStackSpliced')
+      $errUtils.enhanceStack({ err, userInvocationStack })
+      expect($stackUtils.stackWithUserInvocationStackSpliced).to.be.called
     })
 
     it('appends user invocation stack when it is a chai validation error', () => {
       err.message = 'Invalid Chai property'
-
-      const result = $errUtils.enhanceStack({ err, userInvocationStack })
-
-      expect(result.stack).to.equal('spliced stack')
+      cy.spy($stackUtils, 'stackWithUserInvocationStackSpliced')
+      $errUtils.enhanceStack({ err, userInvocationStack })
+      expect($stackUtils.stackWithUserInvocationStackSpliced).to.be.called
     })
 
     it('does not replaced or append stack when there is no invocation stack', () => {
@@ -569,7 +563,7 @@ describe('driver/src/cypress/error_utils', () => {
 
     it('does not error if no last log', () => {
       state.returns({
-        getLastLog: () => {},
+        getLastLog: () => { },
       })
 
       const result = $errUtils.createUncaughtException({
@@ -666,6 +660,36 @@ describe('driver/src/cypress/error_utils', () => {
       })
 
       expect(unsupportedPlugin).to.eq(null)
+    })
+  })
+
+  context('.logError', () => {
+    let cypressMock
+
+    beforeEach(() => {
+      cypressMock = {
+        log: cy.stub(),
+      }
+    })
+
+    it('calls Cypress.log with error name and message when error is instance of Error', () => {
+      $errUtils.logError(cypressMock, 'error', new Error('Some error'))
+      expect(cypressMock.log).to.have.been.calledWithMatch(sinon.match.has('message', `Error: Some error`))
+    })
+
+    it('calls Cypress.log with error name and message when error a string', () => {
+      $errUtils.logError(cypressMock, 'error', 'Some string error')
+      expect(cypressMock.log).to.have.been.calledWithMatch(sinon.match.has('message', `Error: \"Some string error\"`))
+    })
+
+    it('calls Cypress.log with default error name and provided message message when error is an object with a message', () => {
+      $errUtils.logError(cypressMock, 'error', { message: 'Some object error with message' })
+      expect(cypressMock.log).to.have.been.calledWithMatch(sinon.match.has('message', `Error: Some object error with message`))
+    })
+
+    it('calls Cypress.log with error name and message when error is an object', () => {
+      $errUtils.logError(cypressMock, 'error', { err: 'Error details' })
+      expect(cypressMock.log).to.have.been.calledWithMatch(sinon.match.has('message', `Error: {"err":"Error details"}`))
     })
   })
 })

@@ -125,7 +125,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
       },
     })
 
-    cy.contains(url).should('exist').should('have.attr', 'href', url)
+    cy.findByTestId('aut-url-input').invoke('val').should('contain', url)
     cy.percySnapshot()
   })
 

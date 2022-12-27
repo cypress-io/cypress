@@ -1,0 +1,7 @@
+{
+  "this context": {
+    "preserves the test context: burning 1 of 3": "passed",
+    "preserves the test context: burning 2 of 3": "passed",
+    "preserves the test context: burning 3 of 3": "passed"
+  }
+}

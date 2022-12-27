@@ -10,6 +10,10 @@ import {
 } from '../src/project/utils'
 
 describe('config/src/utils', () => {
+  beforeEach(function () {
+    delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
+  })
+
   describe('hideKeys', () => {
     it('removes middle part of the string', () => {
       const hidden = hideKeys('12345-xxxx-abcde')

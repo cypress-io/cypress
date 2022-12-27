@@ -1,0 +1,137 @@
+name: Update V8 Snapshot Cache
+on:
+  schedule:
+    # Run every Wednesday at 00:00 UTC
+    - cron: '0 0 * * 3'
+  push:
+    branches:
+      - ryanm/feature/v8-snapshots-auto-pr
+      - develop
+      - 'release/**'
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to update'
+        required: true
+        default: 'develop'
+      generate_from_scratch:
+        description: 'Generate from scratch'
+        type: boolean
+        default: false
+      commit_directly_to_branch:
+        description: 'Commit directly to branch'
+        type: boolean
+        default: false
+concurrency: 
+  group: ${{ inputs.branch || github.ref }}
+  cancel-in-progress: true
+jobs:
+  update-v8-snapshot-cache:
+    strategy:
+      max-parallel: 1
+      matrix:
+        platform: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.platform }}
+    env:
+      CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
+      BASE_BRANCH: ${{ inputs.branch || github.ref_name }}
+      GENERATE_FROM_SCRATCH: ${{ inputs.generate_from_scratch == true || github.event_name == 'schedule' }}
+    steps:
+      - name: Determine snapshot files - Windows
+        if: ${{ matrix.platform == 'windows-latest' }}
+        run: echo "SNAPSHOT_FILES='tooling\v8-snapshot\cache\win32\snapshot-meta.json'" >> $GITHUB_ENV
+        shell: bash
+      - name: Determine snapshot files - Linux
+        if: ${{ matrix.platform == 'ubuntu-latest' }}
+        run: echo "SNAPSHOT_FILES='tooling/v8-snapshot/cache/linux/snapshot-meta.json'" >> $GITHUB_ENV
+      - name: Determine snapshot files - Mac
+        if: ${{ matrix.platform == 'macos-latest' }}
+        run: echo "SNAPSHOT_FILES='tooling/v8-snapshot/cache/darwin/snapshot-meta.json'" >> $GITHUB_ENV
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ env.BASE_BRANCH }}
+      - name: Set committer info
+        ## attribute the commit to cypress-bot: https://github.community/t/logging-into-git-as-a-github-app/115916
+        run: |
+          git config --local user.email "${{ env.CYPRESS_BOT_APP_ID }}+cypress-bot[bot]@users.noreply.github.com"
+          git config --local user.name "cypress-bot[bot]"
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+          cache: 'yarn'
+      - name: Run yarn
+        run: yarn
+      - name: Run build
+        run: yarn build
+      - name: Generate prod snapshot from scratch
+        if: ${{ env.GENERATE_FROM_SCRATCH == 'true' }}
+        run: yarn cross-env V8_SNAPSHOT_FROM_SCRATCH=1 V8_UPDATE_METAFILE=1 yarn build-v8-snapshot-prod
+      - name: Generate prod snapshot iteratively
+        if: ${{ env.GENERATE_FROM_SCRATCH != 'true' }}
+        run: yarn cross-env V8_UPDATE_METAFILE=1 yarn build-v8-snapshot-prod
+      - name: Check for v8 snapshot cache changes
+        id: check-for-v8-snapshot-cache-changes
+        run: |
+          echo "has_changes=$(test "$(git status --porcelain -- ${{ env.SNAPSHOT_FILES }})" && echo 'true')" >> $GITHUB_OUTPUT
+        shell: bash
+      - name: Determine branch name - commit directly to branch
+        if: ${{ inputs.commit_directly_to_branch == true }}
+        run: |
+          echo "BRANCH_NAME=${{ env.BASE_BRANCH }}" >> $GITHUB_ENV
+          echo "BRANCH_EXISTS=true" >> $GITHUB_ENV
+        shell: bash
+      - name: Determine branch name - commit to separate branch
+        if: ${{ inputs.commit_directly_to_branch != true }}
+        run: |
+          echo "BRANCH_NAME=update-v8-snapshot-cache-on-${{ env.BASE_BRANCH }}" >> $GITHUB_ENV
+          echo "BRANCH_EXISTS=$(git show-ref --verify --quiet refs/remotes/origin/update-v8-snapshot-cache-on-${{ env.BASE_BRANCH }} && echo 'true')" >> $GITHUB_ENV
+        shell: bash
+      - name: Check need for PR or branch update
+        id: check-need-for-pr
+        run: |
+          echo "needs_pr=${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' && env.BRANCH_EXISTS != 'true' }}" >> $GITHUB_OUTPUT
+          echo "needs_branch_update=${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' && env.BRANCH_EXISTS == 'true' }}" >> $GITHUB_OUTPUT
+        shell: bash
+      ## Update available and a branch/PR already exists
+      - name: Checkout existing branch
+        if: ${{ steps.check-need-for-pr.outputs.needs_branch_update == 'true' }}
+        run: |
+          git stash push -- ${{ env.SNAPSHOT_FILES }}
+          git reset --hard
+          git checkout ${{ env.BRANCH_NAME }}
+          git pull origin ${{ env.BRANCH_NAME }}
+          git merge --squash -Xtheirs stash
+      ## Update available and a PR doesn't already exist
+      - name: Checkout new branch
+        if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
+        run: git checkout -b ${{ env.BRANCH_NAME }} ${{ env.BASE_BRANCH }}
+      ## Commit changes if present
+      - name: Commit the changes
+        if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
+        run: |
+          git diff-index --quiet HEAD || git commit -am "chore: updating v8 snapshot cache"
+      ## Push branch
+      - name: Push branch to remote
+        if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
+        run: git push origin ${{ env.BRANCH_NAME }}
+      # PR needs to be created
+      - name: Create Pull Request
+        if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const { createPullRequest } = require('./scripts/github-actions/create-pull-request.js')
+
+            await createPullRequest({
+              context,
+              github,
+              baseBranch: '${{ env.BASE_BRANCH }}',
+              branchName: '${{ env.BRANCH_NAME }}',
+              description: 'Update v8 snapshot cache',
+              body: 'This PR was automatically generated by the [update-v8-snapshot-cache](https://github.com/cypress-io/cypress/actions/workflows/update_v8_snapshot_cache.yml) github action.',
+              reviewers: ['ryanthemanuel']
+            })

@@ -5,6 +5,7 @@
     :title="title"
     :model-value="show"
     :help-link="helpLink"
+    :no-help="!helpLink"
     data-cy="create-spec-modal"
     @update:model-value="close"
   >
@@ -41,7 +42,7 @@
   </StandardModal>
 </template>
 
-<script lang  ="ts" setup>
+<script lang="ts" setup>
 import { generators, getFilteredGeneratorList } from './generators'
 import type { GeneratorId } from './generators'
 import { DialogOverlay } from '@headlessui/vue'
@@ -69,6 +70,17 @@ const emits = defineEmits<{
 // on each restart we need to increment the iteration
 // to have a different key for the generator
 const iteration = ref(0)
+
+gql`
+fragment ComponentGeneratorStepOne_codeGenGlob on CurrentProject {
+  id
+  codeGenGlobs {
+    id
+    component
+  }
+  codeGenFramework
+}
+`
 
 gql`
 fragment CreateSpecModal on Query {

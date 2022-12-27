@@ -1,0 +1,6 @@
+{
+  "Runs before and beforeEach when first test is skipped": {
+    "A": "pending",
+    "B": "passed"
+  }
+}

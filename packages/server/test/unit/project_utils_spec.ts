@@ -1,8 +1,7 @@
 import Chai from 'chai'
 import path from 'path'
-import { getSpecUrl, checkSupportFile } from '../../lib/project_utils'
+import { getSpecUrl } from '../../lib/project_utils'
 import Fixtures from '@tooling/system-tests'
-import stripAnsi from 'strip-ansi'
 
 const todosPath = Fixtures.projectPath('todos')
 
@@ -91,28 +90,6 @@ describe('lib/project_utils', () => {
       })
 
       expect(str).to.eq('http://localhost:8888/__/#/specs/runner?file=tests/s%25%26%3Fub/a.spec.js')
-    })
-  })
-
-  describe('checkSupportFile', () => {
-    it('does nothing when {supportFile: false}', async () => {
-      const ret = await checkSupportFile({
-        configFile: 'cypress.config.ts',
-        supportFile: false,
-      })
-
-      expect(ret).to.be.undefined
-    })
-
-    it('throws when support file does not exist', async () => {
-      try {
-        await checkSupportFile({
-          configFile: 'cypress.config.ts',
-          supportFile: '/this/file/does/not/exist/foo/bar/cypress/support/e2e.js',
-        })
-      } catch (e) {
-        expect(stripAnsi(e.message)).to.include('Your supportFile is missing or invalid')
-      }
     })
   })
 })

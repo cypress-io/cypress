@@ -1,7 +1,7 @@
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import type { SinonStub } from 'sinon'
 
-describe('App: Runs', { viewportWidth: 1200 }, () => {
+describe('CreateCloudOrgModalSubscription', { viewportWidth: 1200 }, () => {
   beforeEach(() => {
     cy.scaffoldProject('component-tests')
     cy.openProject('component-tests')
@@ -18,10 +18,12 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       // Simulate no orgs
       cy.remoteGraphQLIntercept(async (obj) => {
-        if ((obj.operationName === 'CheckCloudOrganizations_cloudViewerChange_cloudViewer' || obj.operationName === 'Runs_cloudViewer' || obj.operationName === 'SpecsPageContainer_cloudViewer')) {
-          if (obj.result.data?.cloudViewer?.organizations?.nodes) {
-            obj.result.data.cloudViewer.organizations.nodes = []
-          }
+        if (obj.result.data?.cloudViewer?.organizations?.nodes) {
+          obj.result.data.cloudViewer.organizations.nodes = []
+        }
+
+        if (obj.result.data?.cloudViewer?.firstOrganization?.nodes) {
+          obj.result.data.cloudViewer.firstOrganization.nodes = []
         }
 
         return obj.result

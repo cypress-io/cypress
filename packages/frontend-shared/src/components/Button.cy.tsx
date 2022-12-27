@@ -5,17 +5,27 @@ import { createRouter, createWebHistory } from 'vue-router'
 const prefixIcon = () => <IconCoffee data-cy="coffee-icon"/>
 
 describe('<Button />', { viewportWidth: 300, viewportHeight: 400 }, () => {
-  it('playground', () => {
+  it('playground', { viewportWidth: 300, viewportHeight: 800 }, () => {
     cy.mount(() => (
       <div class="grid p-6 gap-2">
         <Button size="sm">Primary with text</Button>
         <Button size="md">Primary with text</Button>
         <Button size="lg">Primary with text</Button>
-        <Button variant="outline" size="sm" prefixIcon={IconCoffee}>Primary with text</Button>
+        <Button variant="outline" size="sm" prefixIcon={IconCoffee}>Outline with text and icon</Button>
         <Button variant="outline">Outline with text</Button>
         <Button variant="outline" disabled>Outline disabled</Button>
         <Button disabled>Primary disabled</Button>
         <Button prefixIcon={prefixIcon}>Has a Prefix Icon</Button>
+        <Button variant="tertiary">Tertiary with text</Button>
+        <Button variant="tertiary" disabled>Tertiary with text</Button>
+        <Button variant="link">Link with text</Button>
+        <Button variant="link" disabled>Link with text disabled</Button>
+        <Button variant="linkBold">Link bold with text</Button>
+        <Button variant="linkBold" disabled>Link bold with text disabled</Button>
+        <Button variant="text">Text with text</Button>
+        <Button variant="text" disabled>Text with text disabled</Button>
+        <Button variant="secondary">Secondary with text</Button>
+        <Button variant="secondary" disabled>Secondary with text disabled</Button>
       </div>
     ))
 

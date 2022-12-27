@@ -17,6 +17,7 @@
       "@cy/i18n": ["../frontend-shared/src/locales/i18n"],
       "@cy/components/*": ["../frontend-shared/src/components/*"],
       "@cy/gql-components/*": ["../frontend-shared/src/gql-components/*"],
+      "@cy/store/*": ["../frontend-shared/src/store/*"],
       "@packages/*": ["../*"]
     },
     "allowJs": true,

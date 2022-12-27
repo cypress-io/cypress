@@ -4,7 +4,8 @@
   "description": "Cypress preprocessor for bundling JavaScript via webpack with dependencies included and support for various ES features, TypeScript, and CoffeeScript",
   "private": false,
   "scripts": {
-    "test": "mocha test/e2e/*.spec.* --timeout 4000"
+    "test": "mocha test/e2e/*.spec.* --timeout 4000",
+    "lint": "eslint --ext .js,.ts,.json, ."
   },
   "dependencies": {
     "@babel/core": "^7.11.1",
@@ -55,7 +56,7 @@
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
-  "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/webpack-batteries-included-preprocessor#readme",
+  "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/webpack-batteries-included-preprocessor#readme",
   "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20webpack-batteries-included-preprocessor&template=1-bug-report.md&title=",
   "keywords": [
     "cypress",

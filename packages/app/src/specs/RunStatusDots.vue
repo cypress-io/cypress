@@ -1,63 +1,78 @@
 <template>
-  <component
-    :is="latestRun? Tooltip : 'div'"
-    placement="top"
-    :is-interactive="true"
-    class="h-16px"
-    :hide-delay="0"
-    :show-group="props.gql?.id"
-    :distance="7"
-    popper-class="RunStatusDots_Tooltip"
-  >
+  <div>
     <component
-      :is="latestRun? ExternalLink : 'div'"
-      :href="dashboardUrl"
+      :is="latestRun? Tooltip : 'div'"
+      v-if="isRunsLoaded"
+      placement="top"
+      :is-interactive="true"
+      class="h-16px"
+      :hide-delay="0"
+      :show-group="props.gql?.id"
+      :distance="7"
+      popper-class="RunStatusDots_Tooltip"
     >
-      <div
-        class="flex justify-end items-center"
-        data-cy="run-status-dots"
+      <component
+        :is="latestRun? ExternalLink : 'div'"
+        :href="cloudUrl"
       >
         <div
-          v-for="(dot,i) in dotClasses"
-          :key="i"
-          class="ml-4px"
+          v-if="isRunsLoaded"
+          class="flex justify-end items-center"
+          data-cy="run-status-dots"
         >
-          <i-cy-dot-solid_x4
-            width="4"
-            height="4"
-            :class="dot"
-            :data-cy="'run-status-dot-'+i"
-          />
-        </div>
-        <div>
-          <component
-            :is="latestDot.icon"
-            width="16"
-            height="16"
-            :class="{'animate-spin': latestDot.spin}"
-            :data-cy="'run-status-dot-latest'"
-            :data-cy-run-status="latestDot.status"
+          <div
+            v-for="(dot,i) in dotClasses"
+            :key="i"
             class="ml-4px"
-          />
+          >
+            <i-cy-dot-solid_x4
+              width="4"
+              height="4"
+              :class="dot"
+              :data-cy="'run-status-dot-'+i"
+            />
+          </div>
+          <div>
+            <component
+              :is="latestDot.icon"
+              width="16"
+              height="16"
+              :class="{'animate-spin': latestDot.spin}"
+              :data-cy="'run-status-dot-latest'"
+              :data-cy-run-status="latestDot.status"
+              class="ml-4px"
+            />
+          </div>
+          <span
+            v-if="latestRun"
+            class="sr-only"
+          >{{ props.specFileName }}{{ props.specFileExtension }} test results</span>
         </div>
-      </div>
-    </component>
-    <template
-      #popper
-    >
-      <ExternalLink
-        v-if="latestRun"
-        :href="dashboardUrl"
-        :use-default-hocus="false"
+      </component>
+      <template
+        #popper
       >
-        <SpecRunSummary
-          :run="latestRun"
-          :spec-file-no-extension="props.specFileName"
-          :spec-file-extension="props.specFileExtension"
-        />
-      </ExternalLink>
-    </template>
-  </component>
+        <ExternalLink
+          v-if="latestRun"
+          :href="cloudUrl"
+          :use-default-hocus="false"
+        >
+          <SpecRunSummary
+            :run="latestRun"
+            :spec-file-no-extension="props.specFileName"
+            :spec-file-extension="props.specFileExtension"
+          />
+        </ExternalLink>
+      </template>
+    </component>
+    <div
+      v-if="!isRunsLoaded"
+      data-cy="run-status-empty"
+      class="text-gray-400"
+    >
+      --
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -135,6 +150,10 @@ const runs = computed(() => {
   return props.gql?.data?.__typename === 'CloudProjectSpec' ? props.gql?.data?.specRuns?.nodes ?? [] : []
 })
 
+const isRunsLoaded = computed(() => {
+  return !!props.gql?.data
+})
+
 const dotClasses = computed(() => {
   const statuses = ['placeholder', 'placeholder', 'placeholder']
 
@@ -194,7 +213,7 @@ const latestDot = computed(() => {
   }
 })
 
-const dashboardUrl = computed(() => {
+const cloudUrl = computed(() => {
   if (latestRun.value?.url) {
     return getUrlWithParams({
       url: latestRun.value.url,

@@ -1,4 +1,4 @@
-import '@packages/frontend-shared/cypress/e2e/support/e2eSupport'
+import '@packages/frontend-shared/cypress/support/e2e'
 import 'cypress-real-events/support'
 import './execute-spec'
 

@@ -93,7 +93,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23307
-    it.skip(`scales the AUT correctly in ${testingType}`, () => {
+    it(`scales the AUT correctly in ${testingType}`, { retries: 15 }, () => {
       const assertNoScaleShown = () => {
         // check that no message about scale % is shown,
         // meaning the AUT is at 100% scale
@@ -224,7 +224,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
         cy.get('body').click()
       })
 
-      cy.get('[data-cy="playground-num-elements"]').contains('1 Match')
+      cy.get('[data-cy="playground-num-elements"]').contains('1 match')
     })
 
     it(`hides reporter when NO_COMMAND_LOG is set in open mode for ${testingType}`, () => {
@@ -247,11 +247,47 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       cy.visitApp()
       cy.contains('dom-content.spec').click()
 
-      cy.contains('http://localhost:4455/cypress/e2e/dom-content.html').should('be.visible')
+      cy.findByTestId('aut-url-input').invoke('val').should('contain', 'http://localhost:4455/cypress/e2e/dom-content.html')
       cy.findByLabelText('Stats').should('not.exist')
       cy.findByTestId('specs-list-panel').should('not.be.visible')
       cy.findByTestId('reporter-panel').should('not.be.visible')
       cy.findByTestId('sidebar').should('be.visible')
+    })
+
+    it(`checks that specs load when devServer configuration is not set in open mode for ${testingType}`, () => {
+      cy.scaffoldProject('cypress-in-cypress')
+      cy.findBrowsers()
+      cy.openProject('cypress-in-cypress')
+      cy.startAppServer()
+      cy.visitApp()
+      cy.contains('dom-content.spec').should('exist')
+      cy.withCtx(async (ctx, o) => {
+        ctx.coreData.app.browserStatus = 'open'
+
+        let config = await ctx.actions.file.readFileInProject('cypress.config.js')
+
+        let oldFramework = `framework: 'react',`
+        let oldBundler = `bundler: 'webpack',`
+        let oldWebPackConfig = `webpackConfig: require('./webpack.config.js'),`
+
+        config = config.replace(oldFramework, ``).replace(oldBundler, ``).replace(oldWebPackConfig, ``).replace(`devServer: {`, ``).replace(/},/i, ``)
+
+        await ctx.actions.file.writeFileInProject('cypress.config.js', config)
+
+        o.sinon.stub(ctx.actions.browser, 'closeBrowser')
+        o.sinon.stub(ctx.actions.browser, 'relaunchBrowser')
+      })
+
+      cy.get('[data-cy="loading-spinner"]').should('be.visible')
+      cy.get('[data-cy="loading-spinner"]').should('not.exist')
+
+      // We navigate to another page to ensure the specs page re-renders with the updated changes in cypress config
+      // so we can assert on an up to date specs page when we navigate back to it.
+
+      cy.get('[href="#/runs"]').click()
+      cy.location('hash').should('eq', '#/runs')
+      cy.get('[href="#/specs"').click()
+      cy.contains('accounts_list.spec').should('be.visible')
     })
   })
 
@@ -265,6 +301,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       let config = await ctx.actions.file.readFileInProject('cypress.config.js')
 
       config = config.replace(`e2e: {`, `e2e: {\n  chromeWebSecurity: false,\n`)
+
       await ctx.actions.file.writeFileInProject('cypress.config.js', config)
 
       o.sinon.stub(ctx.actions.browser, 'closeBrowser')

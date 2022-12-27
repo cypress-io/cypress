@@ -117,8 +117,8 @@ export default class Hook implements HookProps {
     this.commands.splice(commandIndex, 1)
   }
 
-  commandMatchingErr (errToMatch: Err) {
-    return _(this.commands)
+  commandMatchingErr (errToMatch: Err): CommandModel | undefined {
+    return _(this.commands) // @ts-ignore
     .filter(({ err }) => {
       return err && err.message === errToMatch.message && err.message !== undefined
     })

@@ -35,7 +35,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
       .should('have.attr', 'aria-label', 'Expand sidebar')
 
       cy.findByTestId('keyboard-modal-trigger')
-      .should('have.attr', 'aria-label', 'Keyboard Shortcuts')
+      .should('have.attr', 'aria-label', 'Keyboard shortcuts')
 
       cy.get('nav')
       .should('have.attr', 'aria-label', 'Pages')
@@ -116,7 +116,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
       cy.findByTestId('sidebar').should('have.css', 'width', '64px') // assert width to ensure transition has finished
 
       cy.findByTestId('keyboard-modal-trigger').should('be.visible').click()
-      cy.contains('h2', 'Keyboard Shortcuts').should('be.visible')
+      cy.contains('h2', 'Keyboard shortcuts').should('be.visible')
       cy.get('li p').contains('Re-run tests').should('be.visible')
       cy.get('li p').contains('Stop tests').should('be.visible')
       cy.get('li p').contains('Toggle specs list').should('be.visible')
@@ -209,7 +209,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
 
     it('has menu item that shows the keyboard shortcuts modal (expanded state)', () => {
       cy.findByTestId('keyboard-modal-trigger').should('be.visible').click()
-      cy.contains('h2', 'Keyboard Shortcuts').should('be.visible')
+      cy.contains('h2', 'Keyboard shortcuts').should('be.visible')
       cy.get('li p').contains('Re-run tests').should('be.visible')
       cy.get('li p').contains('Stop tests').should('be.visible')
       cy.get('li p').contains('Toggle specs list').should('be.visible')
@@ -217,7 +217,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
       cy.get('li span').contains('s')
       cy.get('li span').contains('f')
       cy.get('[aria-label="Close"]').click()
-      cy.findByText('Keyboard Shortcuts').should('not.exist')
+      cy.findByText('Keyboard shortcuts').should('not.exist')
     })
 
     it('has a menu item labeled "Runs" which takes you to the Runs page', () => {

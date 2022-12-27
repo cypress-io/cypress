@@ -85,6 +85,7 @@ const VariantClassesTable = {
   tertiary: 'text-indigo-500 bg-indigo-50 border-transparent hocus-default',
   pending: 'bg-gray-500 text-white',
   link: 'border-transparent text-indigo-600 hocus-default',
+  linkBold: 'border-transparent text-indigo-500 font-medium',
   text: 'border-0',
   secondary: 'bg-jade-500 text-white hocus-secondary',
 } as const

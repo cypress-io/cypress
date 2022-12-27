@@ -3,23 +3,21 @@
 import _ from 'lodash'
 import Bluebird from 'bluebird'
 import type { Protocol } from 'devtools-protocol'
+import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import { cors, uri } from '@packages/network'
 import debugModule from 'debug'
 import { URL } from 'url'
 
-import type { Automation } from '../automation'
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
+import type { WriteVideoFrame } from '@packages/types'
+import type { Automation } from '../automation'
+import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
+
+export type CdpCommand = keyof ProtocolMapping.Commands
+
+export type CdpEvent = keyof ProtocolMapping.Events
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
-
-export type CyCookie = Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expirationDate' | 'hostOnly' | 'domain' | 'path' | 'secure' | 'httpOnly'> & {
-  // use `undefined` instead of `unspecified`
-  sameSite?: 'no_restriction' | 'lax' | 'strict'
-}
-
-// Cypress uses the webextension-style filtering
-// https://developer.chrome.com/extensions/cookies#method-getAll
-type CyCookieFilter = chrome.cookies.GetAllDetails
 
 export function screencastOpts (everyNthFrame = Number(process.env.CYPRESS_EVERY_NTH_FRAME || 5)): Protocol.Page.StartScreencastRequest {
   return {
@@ -46,29 +44,6 @@ function convertSameSiteCdpToExtension (str: Protocol.Network.CookieSameSite): c
   }
 
   return str.toLowerCase() as chrome.cookies.SameSiteStatus
-}
-
-export const _domainIsWithinSuperdomain = (domain: string, suffix: string) => {
-  const suffixParts = suffix.split('.').filter(_.identity)
-  const domainParts = domain.split('.').filter(_.identity)
-
-  return _.isEqual(suffixParts, domainParts.slice(domainParts.length - suffixParts.length))
-}
-
-export const _cookieMatches = (cookie: CyCookie, filter: CyCookieFilter) => {
-  if (filter.domain && !(cookie.domain && _domainIsWithinSuperdomain(cookie.domain, filter.domain))) {
-    return false
-  }
-
-  if (filter.path && filter.path !== cookie.path) {
-    return false
-  }
-
-  if (filter.name && filter.name !== cookie.name) {
-    return false
-  }
-
-  return true
 }
 
 // without this logic, a cookie being set on 'foo.com' will only be set for 'foo.com', not other subdomains
@@ -163,9 +138,9 @@ export const normalizeResourceType = (resourceType: string | undefined): Resourc
   return ffToStandardResourceTypeMap[resourceType] || 'other'
 }
 
-type SendDebuggerCommand = (message: string, data?: any) => Promise<any>
-type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any>
-type OnFn = (eventName: string, cb: Function) => void
+type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: any) => Promise<ProtocolMapping.Commands[T]['returnType']>
+type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any> | void
+type OnFn = <T extends CdpEvent>(eventName: T, cb: (data: ProtocolMapping.Events[T][0]) => void) => void
 
 // the intersection of what's valid in CDP and what's valid in FFCDP
 // Firefox: https://searchfox.org/mozilla-central/rev/98a9257ca2847fad9a19631ac76199474516b31e/remote/cdp/domains/parent/Network.jsm#22
@@ -178,13 +153,22 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
 }
 
 export class CdpAutomation {
-  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private experimentalSessionAndOrigin: boolean) {
+  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
   }
 
-  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, experimentalSessionAndOrigin: boolean): Promise<CdpAutomation> {
-    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, sendCloseCommandFn, automation, experimentalSessionAndOrigin)
+  async startVideoRecording (writeVideoFrame: WriteVideoFrame, screencastOpts) {
+    this.onFn('Page.screencastFrame', async (e) => {
+      writeVideoFrame(Buffer.from(e.data, 'base64'))
+      await this.sendDebuggerCommandFn('Page.screencastFrameAck', { sessionId: e.sessionId })
+    })
+
+    await this.sendDebuggerCommandFn('Page.startScreencast', screencastOpts)
+  }
+
+  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation): Promise<CdpAutomation> {
+    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, sendCloseCommandFn, automation)
 
     await sendDebuggerCommandFn('Network.enable', {
       maxTotalBufferSize: 0,
@@ -240,7 +224,7 @@ export class CdpAutomation {
     .then((result: Protocol.Network.GetAllCookiesResponse) => {
       return normalizeGetCookies(result.cookies)
       .filter((cookie: CyCookie) => {
-        const matches = _cookieMatches(cookie, filter)
+        const matches = cookieMatches(cookie, filter)
 
         debugVerbose('cookie matches filter? %o', { matches, cookie, filter })
 
@@ -262,16 +246,10 @@ export class CdpAutomation {
         // be sent with a request. This standardizes it by filtering out ones
         // that are secure but not on a secure context
 
-        if (this.experimentalSessionAndOrigin) {
-          // localhost is considered a secure context (even when http:)
-          // and it's required for cross origin support when visiting a secondary
-          // origin so that all its cookies are sent. This may be a
-          // breaking change, so put it behind the flag for now. Need to
-          // investigate further when we remove the experimental flag.
-          return !(cookie.secure && url.startsWith('http:') && !isLocalhost)
-        }
-
-        return !(url.startsWith('http:') && cookie.secure)
+        // localhost is considered a secure context (even when http:)
+        // and it's required for cross origin support when visiting a secondary
+        // origin so that all its cookies are sent.
+        return !(cookie.secure && url.startsWith('http:') && !isLocalhost)
       })
     })
   }

@@ -1,0 +1,7 @@
+{
+  "tags in the config object": {
+    "works as an array": "passed",
+    "works as a string": "passed",
+    "does not use tags": "pending"
+  }
+}

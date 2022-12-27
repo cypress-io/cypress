@@ -13,17 +13,17 @@
  - element distance from top of container
 */
 
-import { TimeoutID } from './types'
-
-type UserScrollCallback = () => void
+export type UserScrollCallback = () => void
 
 const PADDING = 100
+const SCROLL_THRESHOLD_MS = 50
 
 export class Scroller {
   private _container: Element | null = null
   private _userScrollCount = 0
   private _userScroll = true
-  private _countUserScrollsTimeout?: TimeoutID
+  private _countUserScrollsTimeout?: number
+  private _userScrollThresholdMs = SCROLL_THRESHOLD_MS
 
   setContainer (container: Element, onUserScroll?: UserScrollCallback) {
     this._container = container
@@ -53,7 +53,7 @@ export class Scroller {
           onUserScroll()
         }
 
-        clearTimeout(this._countUserScrollsTimeout as TimeoutID)
+        clearTimeout(this._countUserScrollsTimeout)
         this._countUserScrollsTimeout = undefined
         this._userScrollCount = 0
 
@@ -62,10 +62,10 @@ export class Scroller {
 
       if (this._countUserScrollsTimeout) return
 
-      this._countUserScrollsTimeout = setTimeout(() => {
+      this._countUserScrollsTimeout = window.setTimeout(() => {
         this._countUserScrollsTimeout = undefined
         this._userScrollCount = 0
-      }, 50)
+      }, this._userScrollThresholdMs)
     })
   }
 
@@ -129,8 +129,20 @@ export class Scroller {
     this._container = null
     this._userScroll = true
     this._userScrollCount = 0
-    clearTimeout(this._countUserScrollsTimeout as TimeoutID)
+    clearTimeout(this._countUserScrollsTimeout)
     this._countUserScrollsTimeout = undefined
+    this._userScrollThresholdMs = SCROLL_THRESHOLD_MS
+  }
+
+  __setScrollThreholdMs (ms: number) {
+    const isCypressInCypress = document.defaultView !== top
+
+    // only allow this to be set in testing
+    if (!isCypressInCypress) {
+      return
+    }
+
+    this._userScrollThresholdMs = ms
   }
 }
 
