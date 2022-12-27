@@ -1021,7 +1021,7 @@ describe('src/cy/commands/querying', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/25225
-    it('returns one element when given multiple subjects with no children', () => {
+    it('returns only one element when given multiple subjects directly match selector', () => {
       cy.get('button').contains('submit').should('have.length', 1)
     })
 
