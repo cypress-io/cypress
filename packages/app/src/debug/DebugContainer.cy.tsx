@@ -9,13 +9,7 @@ describe('<DebugContainer />', () => {
   context('empty states', () => {
     const validateEmptyState = (expectedMessages: string[]) => {
       cy.mountFragment(DebugSpecsFragmentDoc, {
-        render: (gqlVal) => {
-          return (
-            <DebugContainer
-              gql={gqlVal}
-            />
-          )
-        },
+        render: (gqlVal) => <DebugContainer gql={gqlVal} />,
       })
 
       expectedMessages.forEach((message) => {
@@ -65,12 +59,40 @@ describe('<DebugContainer />', () => {
     })
   })
 
-  describe('render specs and tests', () => {
-    it('renders data when logged in and connected', () => {
-      const loginConnectStore = useLoginConnectStore()
+  describe('when logged in and connected', () => {
+    let loginConnectStore
+
+    beforeEach(() => {
+      loginConnectStore = useLoginConnectStore()
 
       loginConnectStore.setUserFlag('isLoggedIn', true)
       loginConnectStore.setProjectFlag('isProjectConnected', true)
+    })
+
+    it('render first pending run', () => {
+      cy.mountFragment(DebugSpecsFragmentDoc, {
+        onResult: (result) => {
+          if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
+            const test = result.currentProject.cloudProject.runByNumber
+            const other = CloudRunStubs.running as typeof test
+
+            other!.runNumber = 1
+
+            result.currentProject.cloudProject.runByNumber = other
+          }
+        },
+        render: (gqlVal) => <DebugContainer gql={gqlVal} />,
+      })
+
+      cy.findByTestId('debug-header').should('be.visible')
+      cy.findByTestId('debug-pending-splash')
+      .should('be.visible')
+      .within(() => {
+        cy.findByTestId('debug-pending-counts').should('have.text', '8 of 10 specs completed')
+      })
+    })
+
+    it('renders specs and tests when completed run available', () => {
       cy.mountFragment(DebugSpecsFragmentDoc, {
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
@@ -80,18 +102,52 @@ describe('<DebugContainer />', () => {
             result.currentProject.cloudProject.runByNumber = other
           }
         },
-        render: (gqlVal) => {
-          return (
-            <DebugContainer
-              gql={gqlVal}
-            />
-          )
-        },
+        render: (gqlVal) => <DebugContainer gql={gqlVal} />,
       })
 
       // Only asserting that it is rendering the components for failed specs
       cy.findByTestId('debug-header').should('be.visible')
       cy.findByTestId('debug-spec-item').should('be.visible')
+    })
+
+    context('newer relevant run available', () => {
+      it('displays newer run with progress when running', () => {
+        cy.mountFragment(DebugSpecsFragmentDoc, {
+          onResult: (result) => {
+            if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
+              const test = result.currentProject.cloudProject.runByNumber
+              const other = CloudRunStubs.failingWithTests as typeof test
+
+              result.currentProject.cloudProject.runByNumber = other
+            }
+          },
+          render: (gqlVal) => <DebugContainer gql={gqlVal} />,
+        })
+
+        cy.findByTestId('newer-relevant-run')
+        .should('be.visible')
+        .and('contain.text', 'fix: make gql work FAILED')
+        .and('contain.text', '8 of 10 runs completed')
+      })
+
+      it('displays newer run with link when complete', () => {
+        cy.mountFragment(DebugSpecsFragmentDoc, {
+          onResult: (result) => {
+            if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
+              const test = result.currentProject.cloudProject.runByNumber
+              const other = CloudRunStubs.failingWithTests as typeof test
+
+              result.currentProject.cloudProject.runByNumber = other
+            }
+          },
+          render: (gqlVal) => <DebugContainer gql={gqlVal} />,
+        })
+
+        cy.findByTestId('newer-relevant-run')
+        .should('be.visible')
+        .and('contain.text', 'fix: make gql work FAILED')
+        .and('contain.text', 'View run')
+      })
     })
   })
 

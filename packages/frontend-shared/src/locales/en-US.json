@@ -653,6 +653,7 @@
     "notLoggedIn": "Not logged in",
     "notConnected": "Not connected",
     "noRuns": "No runs",
+    "viewRun": "View run",
     "emptyStates": {
       "debugDirectlyInCypress": "Debug failed CI runs directly in Cypress",
       "reviewRerunAndDebug": "Review, rerun, and debug failed CI test runs that are recorded to Cypress Cloud – all from within your local Cypress app.",
@@ -664,6 +665,10 @@
       "noRunsTestMessage": "Record your first test run to Cypress Cloud to locally debug failed CI test runs",
       "gitRepositoryNotDetected": "Git repository not detected",
       "ensureGitSetupCorrectly": "Cypress uses Git to associate runs with your local state. Please ensure that version control is set up correctly."
+    },
+    "pending": {
+      "title": "Testing",
+      "pendingCount": "{completed} of {total} specs completed"
     },
     "header": {
       "runUrl": "View in Cypress Cloud",

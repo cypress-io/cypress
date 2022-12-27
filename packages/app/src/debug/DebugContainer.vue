@@ -10,7 +10,20 @@
         :gql="run"
         :commits-ahead="0"
       />
+      <DebugNewRelevantRunBar
+        v-if="newerRelevantRun"
+        :gql="newerRelevantRun"
+      />
+
+      <DebugPendingRunSplash
+        v-if="isFirstPendingRun"
+        :total-skipped="run.totalSkipped || 0"
+        :total-failed="run.totalFailed || 0"
+        :total-passed="run.totalPassed || 0"
+        :total-tests="run.totalTests || 0"
+      />
       <DebugSpecList
+        v-else
         :specs="debugSpecsArray"
       />
     </div>
@@ -31,11 +44,13 @@ import { computed } from '@vue/reactivity'
 import type { DebugSpecsFragment, TestingTypeEnum } from '../generated/graphql'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import DebugPageHeader from './DebugPageHeader.vue'
+import DebugPendingRunSplash from './DebugPendingRunSplash.vue'
 import DebugSpecList from './DebugSpecList.vue'
 import DebugNotLoggedIn from './empty/DebugNotLoggedIn.vue'
 import DebugNoProject from './empty/DebugNoProject.vue'
 import DebugNoRuns from './empty/DebugNoRuns.vue'
 import DebugError from './empty/DebugError.vue'
+import DebugNewRelevantRunBar from './DebugNewRelevantRunBar.vue'
 import { specsList } from './utils/DebugMapping'
 
 gql`
@@ -55,7 +70,7 @@ fragment DebugSpecs on Query {
       ... on CloudProject {
         id
         runByNumber(runNumber: 11) {
-          ...DebugPage
+          ...DebugPageHeader
           id
           runNumber
           status
@@ -73,6 +88,8 @@ fragment DebugSpecs on Query {
             id,
             ...DebugSpecListGroups
           }
+          ...DebugPendingRunSplash
+          ...DebugNewRelevantRunBar
         }
       }
     }
@@ -117,4 +134,10 @@ const debugSpecsArray = computed(() => {
 
   return []
 })
+
+// TODO Re-map to relevant run data point (stubbed with current run)
+const newerRelevantRun = computed(() => run.value)
+
+// TODO Validate logic for determining whether this is the "first" run - use runNumber, or some other flag?
+const isFirstPendingRun = computed(() => run.value && run.value.runNumber === 1 && run.value.status === 'RUNNING')
 </script>
