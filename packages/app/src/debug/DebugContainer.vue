@@ -17,6 +17,7 @@
 
       <DebugPendingRunSplash
         v-if="isFirstPendingRun"
+        class="mt-8"
         :total-skipped="run.totalSkipped || 0"
         :total-failed="run.totalFailed || 0"
         :total-passed="run.totalPassed || 0"
@@ -135,7 +136,7 @@ const debugSpecsArray = computed(() => {
   return []
 })
 
-// TODO Re-map to relevant run data point (stubbed with current run)
+// TODO Re-map to use relevant run data point (currently stubbed with current run)
 const newerRelevantRun = computed(() => run.value)
 
 // TODO Validate logic for determining whether this is the "first" run - use runNumber, or some other flag?

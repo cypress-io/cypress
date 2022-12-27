@@ -25,13 +25,13 @@
           :total-passed="data.totalPassed || 0"
           :total-tests="data.totalTests || 0"
         />
-        <RouterLink
+        <span
           v-else
           class="cursor-pointer text-indigo-500 hocus-link hover:underline"
-          :to="relevantRunLink"
+          @click="navigateToNewerRun"
         >
           {{ t('debugPage.viewRun') }}
-        </RouterLink>
+        </span>
       </li>
     </ul>
   </div>
@@ -68,11 +68,10 @@ const props = defineProps<{
 
 const data = computed(() => props.gql)
 
-const relevantRunLink = computed(() => {
-  // TODO Do we plan to handle run navigation via the router, or via the store?
-  // This is stubbed assuming the router will handle via a path param/variable
-  return '#'
-})
+function navigateToNewerRun () {
+  // TODO Stubbed pending Stokes' updates so this can be managed via store
+  return
+}
 
 </script>
 <style scoped>
