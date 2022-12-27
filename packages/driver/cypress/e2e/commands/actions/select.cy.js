@@ -51,6 +51,14 @@ describe('src/cy/commands/actions/select', () => {
       })
     })
 
+    it('can handle index when all values are identical', () => {
+      cy.$$('select[name=maps] option').attr('value', 'foo')
+
+      cy.get('select[name=maps]').select(2).then(($select) => {
+        expect($select[0].selectedOptions[0].text).to.eq('nuke')
+      })
+    })
+
     it('can select an array of values', () => {
       cy.get('select[name=movies]').select(['apoc', 'br', 'co']).then(($select) => {
         expect($select.val()).to.deep.eq(['apoc', 'br', 'co'])

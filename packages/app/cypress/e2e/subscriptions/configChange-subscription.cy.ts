@@ -40,7 +40,6 @@ describe('configChange subscription', () => {
       updateViewportHeightInCypressConfig(888)
 
       // validate the spinner appears and then goes away
-
       cy.contains('[role="alert"]', 'Loading')
       cy.get('[data-cy="loading-spinner"]').should('be.visible')
       cy.get('[data-cy="loading-spinner"]').should('not.be.exist')
@@ -59,6 +58,11 @@ describe('configChange subscription', () => {
 
       // update the config - the spec should re-execute with the new viewportHeight
       updateViewportHeightInCypressConfig(777)
+
+      // validate the spinner appears and then goes away
+      cy.contains('[role="alert"]', 'Loading')
+      cy.get('[data-cy="loading-spinner"]').should('be.visible')
+      cy.get('[data-cy="loading-spinner"]').should('not.be.exist')
 
       cy.waitForSpecToFinish()
       cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')

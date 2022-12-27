@@ -3,10 +3,11 @@ import FileChooser from './FileChooser.vue'
 import { ref } from 'vue'
 import { defaultMessages } from '@cy/i18n'
 import data from '../../../cypress/fixtures/FileChooser.json'
+import type { FileParts } from '@packages/data-context/src/gen/graphcache-config.gen'
 
 /*----------  Fixtures  ----------*/
 const numFiles = data.length
-const allFiles = data
+const allFiles = data as unknown as FileParts[]
 const extensionPattern = '*.jsx'
 const existentExtensionPattern = '*.tsx'
 const nonExistentFileName = 'non existent file'
@@ -243,12 +244,16 @@ describe('<FileChooser />', () => {
   })
 
   it('fires a selectFile event when a file is clicked on', () => {
-    const onSelectFileSpy = cy.spy().as('onSelectFileSpy')
+    const onSelectFileStub = cy.stub()
 
     cy.mount(() => (
       <FileChooser
-        onSelectFile={onSelectFileSpy}
+        onSelectFile={onSelectFileStub}
         extensionPattern={extensionPattern}
         files={allFiles}></FileChooser>))
+
+    cy.findAllByTestId('file-list-row').first().click().then(() => {
+      expect(onSelectFileStub).to.be.calledOnce
+    })
   })
 })

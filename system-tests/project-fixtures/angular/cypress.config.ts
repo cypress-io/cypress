@@ -2,6 +2,7 @@ import { defineConfig } from 'cypress'
 
 export default defineConfig({
   component: {
+    experimentalSingleTabRunMode: true,
     devServer: {
       framework: 'angular',
       bundler: 'webpack',
@@ -18,10 +19,10 @@ export default defineConfig({
             '@angular/platform-browser-dynamic': require.resolve('@angular/platform-browser-dynamic'),
             'zone.js/testing': require.resolve('zone.js/dist/zone-testing'),
             'zone.js': require.resolve('zone.js'),
-          }
-        }
-      }
+          },
+        },
+      },
     },
-    specPattern: 'src/**/*.cy.ts'
+    specPattern: 'src/**/*.cy.ts',
   },
 })

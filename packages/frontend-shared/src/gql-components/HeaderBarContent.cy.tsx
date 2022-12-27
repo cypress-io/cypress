@@ -44,7 +44,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.get('[data-cy="top-nav-browser-list-item"]').parent()
     .should('have.class', 'overflow-auto')
 
-    cy.contains('Version unsupported')
+    cy.contains('(Unsupported)')
     .scrollIntoView()
     .should('be.visible')
     .closest('[data-cy="top-nav-browser-list-item"]')
@@ -85,10 +85,12 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       })
 
       it('truncates the branch name if it is long', () => {
-        mountFragmentWithData({ currentProject: {
-          title: 'app',
-          branch: 'application-program/hard-drive-parse',
-        } })
+        mountFragmentWithData({
+          currentProject: {
+            title: 'app',
+            branch: 'application-program/hard-drive-parse',
+          },
+        })
 
         cy.get('.truncate').contains('application-program/hard-drive-parse').should('be.visible')
 
@@ -378,7 +380,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
           cy.clock().invoke('restore')
         })
 
-        function mountWithSavedState (options?: {state?: object, projectId?: string }) {
+        function mountWithSavedState (options?: { state?: object, projectId?: string }) {
           const mountResult = cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
             onResult: (result) => {
               if (!result.currentProject) {
@@ -392,7 +394,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
                 ...(options?.state ?? {}),
               }
 
-              const projectId = result.currentProject.config.find((item: {field: string, value: string}) => item.field = 'projectId')
+              const projectId = result.currentProject.config.find((item: { field: string, value: string }) => item.field = 'projectId')
 
               if (projectId) {
                 projectId.value = options?.projectId

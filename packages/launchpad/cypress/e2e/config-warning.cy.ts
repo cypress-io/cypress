@@ -244,7 +244,7 @@ describe('component testing dependency warnings', () => {
   })
 
   // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23154
-  it.skip('warns against outdated @vue/cli dependency', () => {
+  it('warns against outdated @vue/cli dependency', { retries: 15 }, () => {
     cy.scaffoldProject('outdated-deps-vuecli3')
     cy.addProject('outdated-deps-vuecli3')
     cy.openGlobalMode()
