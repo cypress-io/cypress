@@ -88,7 +88,12 @@ export async function detectFramework (projectPath: string): Promise<DetectFrame
  * If `cypress.config` exists, we derive the language
  * from the extension.
  *
- * IF HAS_CYPRESS_CONFIG
+ * IF HAS_CUSTOM_CYPRESS_CONFIG
+ *   IF CYPRESS_CONFIG_TS
+ *     HAS TYPESCRIPT
+ *   ELSE
+ *     DOES NOT HAVE TYPESCRIPT
+ * IF HAS_DEFAULT_CYPRESS_CONFIG
  *   IF CYPRESS_CONFIG_TS
  *     HAS TYPESCRIPT
  *   ELSE
@@ -113,18 +118,51 @@ export async function detectFramework (projectPath: string): Promise<DetectFrame
  * END
  */
 
-export function detectLanguage ({ projectRoot, pkgJson, isMigrating = false }: { projectRoot: string, pkgJson: PkgJson, isMigrating?: boolean }): 'js' | 'ts' {
-  try {
-    if (fs.existsSync(path.join(projectRoot, 'cypress.config.ts'))) {
-      debug('Detected cypress.config.ts - using TS')
+type DetectLanguageParams = {
+  projectRoot: string
+  customConfigFile?: string | null
+  pkgJson: PkgJson
+  isMigrating?: boolean
+}
 
-      return 'ts'
+export function detectLanguage ({ projectRoot, customConfigFile, pkgJson, isMigrating = false }: DetectLanguageParams): 'js' | 'ts' {
+  try {
+    if (customConfigFile) {
+      debug('Evaluating custom Cypress config file \'%s\'', customConfigFile)
+
+      // .ts, .mts extensions
+      if (/\.[m]?ts$/i.test(customConfigFile)) {
+        debug('Custom config file is Typescript - using TS')
+
+        return 'ts'
+      }
+
+      // .js, .cjs, .mjs extensions
+      if (/\.[c|m]?js$/i.test(customConfigFile)) {
+        debug('Custom config file is Javascript - using JS')
+
+        return 'js'
+      }
+
+      debug('Unable to determine language from custom Cypress config file extension')
     }
 
-    if (fs.existsSync(path.join(projectRoot, 'cypress.config.js'))) {
-      debug('Detected cypress.config.js - using JS')
+    debug('Checking for default Cypress config file')
 
-      return 'js'
+    for (let extension of ['ts', 'mts']) {
+      if (fs.existsSync(path.join(projectRoot, `cypress.config.${extension}`))) {
+        debug(`Detected cypress.config.${extension} - using TS`)
+
+        return 'ts'
+      }
+    }
+
+    for (let extension of ['js', 'cjs', 'mjs']) {
+      if (fs.existsSync(path.join(projectRoot, `cypress.config.${extension}`))) {
+        debug(`Detected cypress.config.${extension} - using JS`)
+
+        return 'js'
+      }
     }
   } catch (e) {
     debug('Did not find cypress.config file')
