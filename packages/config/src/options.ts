@@ -21,6 +21,7 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'EXPERIMENTAL_NETWORK_STUBBING_REMOVED',
   'EXPERIMENTAL_RUN_EVENTS_REMOVED',
   'EXPERIMENTAL_SESSION_SUPPORT_REMOVED',
+  'EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED',
   'EXPERIMENTAL_SINGLE_TAB_RUN_MODE',
   'EXPERIMENTAL_SHADOW_DOM_REMOVED',
   'FIREFOX_GC_INTERVAL_REMOVED',
@@ -33,7 +34,6 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
 
 type ValidationOptions = {
   testingType: TestingType | null
-  experimentalSessionAndOrigin: boolean
 }
 
 export type BreakingOptionErrorKey = typeof BREAKING_OPTION_ERROR_KEY[number]
@@ -205,8 +205,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     isExperimental: true,
     requireRestartOnChange: 'server',
   }, {
-    // TODO: remove with experimentalSessionAndOrigin. Fixed with: https://github.com/cypress-io/cypress/issues/21471
-    name: 'experimentalSessionAndOrigin',
+    name: 'experimentalRunAllSpecs',
     defaultValue: false,
     validation: validate.isBoolean,
     isExperimental: true,
@@ -216,6 +215,11 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: validate.isBoolean,
     isExperimental: true,
     requireRestartOnChange: 'server',
+  }, {
+    name: 'experimentalOriginDependencies',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isExperimental: true,
   }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
@@ -377,38 +381,17 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     overrideLevel: 'any',
   }, {
     name: 'testIsolation',
-    // TODO: https://github.com/cypress-io/cypress/issues/23093
-    // When experimentalSessionAndOrigin is removed and released as GA,
-    // update the defaultValue from undefined to 'on' and
-    // update this code to remove the check/override specific to enable
-    // 'on' by default when experimentalSessionAndOrigin=true
-    defaultValue: (options: Record<string, any> = {}) => {
-      if (options.testingType === 'component') {
-        return null
-      }
-
-      return options?.experimentalSessionAndOrigin || options?.config?.e2e?.experimentalSessionAndOrigin ? 'on' : null
-    },
+    defaultValue: true,
     validation: (key: string, value: any, opts: ValidationOptions) => {
-      const { testingType, experimentalSessionAndOrigin } = opts
+      const { testingType } = opts
 
-      if (testingType == null || testingType === 'component') {
-        return true
+      let configOpts = [true, false]
+
+      if (testingType === 'component') {
+        configOpts.pop()
       }
 
-      if (experimentalSessionAndOrigin && testingType === 'e2e') {
-        return validate.isOneOf('on', 'off')(key, value)
-      }
-
-      if (value == null) {
-        return true
-      }
-
-      return {
-        key,
-        value,
-        type: 'not set unless the experimentalSessionAndOrigin flag is turned on',
-      }
+      return validate.isOneOf(...configOpts)(key, value)
     },
     overrideLevel: 'suite',
   }, {
@@ -564,11 +547,6 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     defaultValue: pkg.version,
     validation: validate.isString,
     isInternal: true,
-  }, {
-    name: 'xhrRoute',
-    defaultValue: '/xhrs/',
-    validation: validate.isString,
-    isInternal: true,
   },
 ]
 
@@ -609,6 +587,10 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
   }, {
     name: 'experimentalSessionSupport',
     errorKey: 'EXPERIMENTAL_SESSION_SUPPORT_REMOVED',
+    isWarning: true,
+  }, {
+    name: 'experimentalSessionAndOrigin',
+    errorKey: 'EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED',
     isWarning: true,
   }, {
     name: 'experimentalShadowDomSupport',
@@ -656,11 +638,6 @@ export const breakingRootOptions: Array<BreakingOption> = [
     isWarning: false,
     testingTypes: ['e2e'],
   }, {
-    name: 'experimentalSessionAndOrigin',
-    errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG_E2E',
-    isWarning: false,
-    testingTypes: ['e2e'],
-  }, {
     name: 'excludeSpecPattern',
     errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
     isWarning: false,
@@ -690,6 +667,17 @@ export const breakingRootOptions: Array<BreakingOption> = [
     errorKey: 'CONFIG_FILE_INVALID_ROOT_CONFIG',
     isWarning: false,
     testingTypes: ['e2e'],
+  }, {
+    name: 'experimentalRunAllSpecs',
+    errorKey: 'EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY',
+    isWarning: false,
+    testingTypes: ['e2e'],
+  },
+  {
+    name: 'experimentalOriginDependencies',
+    errorKey: 'EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY',
+    isWarning: false,
+    testingTypes: ['e2e'],
   },
 ]
 
@@ -699,7 +687,6 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
       name: 'experimentalSingleTabRunMode',
       errorKey: 'EXPERIMENTAL_SINGLE_TAB_RUN_MODE',
       isWarning: false,
-      testingTypes: ['e2e'],
     },
     {
       name: 'indexHtmlFile',
@@ -714,19 +701,23 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
       isWarning: false,
     },
     {
-      name: 'experimentalSessionAndOrigin',
-      errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
-      isWarning: false,
-    },
-    {
       name: 'experimentalStudio',
       errorKey: 'EXPERIMENTAL_STUDIO_E2E_ONLY',
       isWarning: false,
-      testingTypes: ['component'],
     },
     {
       name: 'testIsolation',
       errorKey: 'CONFIG_FILE_INVALID_TESTING_TYPE_CONFIG_COMPONENT',
+      isWarning: false,
+    },
+    {
+      name: 'experimentalRunAllSpecs',
+      errorKey: 'EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY',
+      isWarning: false,
+    },
+    {
+      name: 'experimentalOriginDependencies',
+      errorKey: 'EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY',
       isWarning: false,
     },
   ],

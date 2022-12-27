@@ -1,73 +1,30 @@
-import _ from 'lodash'
-import Promise from 'bluebird'
-
 import $dom from '../../../dom'
-import type { Log } from '../../../cypress/log'
-
-interface InternalFocusedOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable>{
-  _log?: Log
-  verify: boolean
-}
 
 export default (Commands, Cypress, cy, state) => {
-  Commands.addAll({
-    focused (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
-      const options: InternalFocusedOptions = _.defaults({}, userOptions, {
-        verify: true,
-        log: true,
+  Commands.addQuery('focused', function focused (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+    const log = options.log !== false && Cypress.log({ timeout: options.timeout })
+
+    this.set('timeout', options.timeout)
+
+    return () => {
+      let $el = cy.getFocused()
+
+      log && cy.state('current') === this && log.set({
+        $el,
+        consoleProps: () => {
+          return {
+            Yielded: $el?.length ? $dom.getElements($el) : '--nothing--',
+            Elements: $el != null ? $el.length : 0,
+          }
+        },
       })
 
-      if (options.log) {
-        options._log = Cypress.log({ timeout: options.timeout })
+      if (!$el) {
+        $el = $dom.wrap(null)
+        $el.selector = 'focused'
       }
 
-      const log = ($el) => {
-        if (options.log === false) {
-          return
-        }
-
-        options._log!.set({
-          $el,
-          consoleProps () {
-            const ret = $el ? $dom.getElements($el) : '--nothing--'
-
-            return {
-              Yielded: ret,
-              Elements: $el != null ? $el.length : 0,
-            }
-          },
-        })
-      }
-
-      const getFocused = () => {
-        const focused = cy.getFocused()
-
-        log(focused)
-
-        return focused
-      }
-
-      const resolveFocused = () => {
-        return Promise
-        .try(getFocused)
-        .then(($el) => {
-          if (options.verify === false) {
-            return $el
-          }
-
-          if (!$el) {
-            $el = $dom.wrap(null)
-            $el.selector = 'focused'
-          }
-
-          // pass in a null jquery object for assertions
-          return cy.verifyUpcomingAssertions($el, options, {
-            onRetry: resolveFocused,
-          })
-        })
-      }
-
-      return resolveFocused()
-    },
+      return $el
+    }
   })
 }

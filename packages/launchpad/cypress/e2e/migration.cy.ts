@@ -86,8 +86,8 @@ describe('global mode', () => {
     cy.addProject('migration-e2e-custom-integration-with-projectId')
     cy.visitLaunchpad()
 
-    cy.withCtx((ctx, o) => {
-      o.sinon.stub(ctx.actions.migration, 'locallyInstalledCypressVersion').resolves('10.0.0')
+    cy.withCtx(async (ctx, o) => {
+      o.sinon.stub(ctx.actions.migration, 'locallyInstalledCypressVersion').resolves((await ctx.versions.versionData()).current.version)
     })
 
     cy.contains('button', cy.i18n.majorVersionWelcome.actionContinue).click()
@@ -168,7 +168,10 @@ describe('Opening unmigrated project', () => {
 
     cy.contains('button', cy.i18n.majorVersionWelcome.actionContinue).click()
     cy.contains(cy.i18n.majorVersionWelcome.title).should('not.exist')
-    cy.contains('h1', 'Migrating to Cypress 11').should('be.visible')
+    cy.contains('h1', `Migrating to Cypress ${Cypress.version.split('.')[0]}`).should('be.visible')
+
+    // Wait for migration prompt to load before taking a snapshot
+    cy.get('.spinner').should('not.exist')
 
     cy.percySnapshot()
   })

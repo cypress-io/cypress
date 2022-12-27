@@ -38,102 +38,6 @@ const sessionUser = (name = 'user0', cacheAcrossSpecs = false) => {
   })
 }
 
-describe('cross origin automations', function () {
-  it('get storage', () => {
-    cy.visit('https://localhost:4466/cross_origin_iframe/foo')
-    .then(() => {
-      localStorage.key1 = 'val1'
-    })
-
-    .then(() => Cypress.session.getStorage({ origin: ['https://127.0.0.1:44665', 'current_origin'] }))
-    .then((result) => {
-      expect(result).deep.eq({
-        localStorage: [
-          { origin: 'https://localhost:4466', value: { key1: 'val1' } },
-          { origin: 'https://127.0.0.1:44665', value: { name: 'foo' } },
-        ],
-        sessionStorage: [],
-      })
-    })
-  })
-
-  it('get storage w/ sessionStorage', () => {
-    cy.visit('https://localhost:4466/cross_origin_iframe/foo')
-    .then(() => {
-      localStorage.key1 = 'val'
-      sessionStorage.key1 = 'val'
-    })
-
-    .then(() => Cypress.session.getStorage({ origin: ['https://127.0.0.1:44665', 'current_origin'] }))
-    .then((result) => {
-      expect(result).deep.eq({
-        localStorage: [
-          { origin: 'https://localhost:4466', value: { key1: 'val' } },
-          { origin: 'https://127.0.0.1:44665', value: { name: 'foo' } },
-        ],
-        sessionStorage: [
-          { origin: 'https://localhost:4466', value: { key1: 'val' } },
-        ],
-      })
-    })
-  })
-
-  it('set storage', () => {
-    cy.visit('https://localhost:4466/cross_origin_iframe/foo')
-    .then(() => {
-      localStorage.key1 = 'val1'
-    })
-    .then(() => Cypress.session.setStorage({ localStorage: [{ value: { key2: 'val2' } }] }))
-    .then(() => {
-      expect(window.localStorage.key2).eq('val2')
-    })
-    .then(() => {
-      return Cypress.session.setStorage({
-        localStorage: [
-        // set localStorage on different origin
-          { origin: 'https://127.0.0.1:44665', value: { key2: 'val' }, clear: true },
-          // set localStorage on current origin
-          { value: { key3: 'val' }, clear: true },
-        ],
-      })
-    })
-    .then(() => Cypress.session.getStorage({ origin: ['current_url', 'https://127.0.0.1:44665'] }))
-    .then((result) => {
-      expect(result).deep.eq({
-        localStorage: [
-          { origin: 'https://localhost:4466', value: { key3: 'val' } },
-          { origin: 'https://127.0.0.1:44665', value: { key2: 'val' } },
-        ],
-        sessionStorage: [],
-      })
-    })
-  })
-
-  it('get localStorage from all origins', () => {
-    cy.visit('https://localhost:4466/cross_origin_iframe/foo')
-    .then(() => {
-      localStorage.key1 = 'val1'
-    })
-
-    .then(() => Cypress.session.getStorage({ origin: '*' }))
-    .then((result) => {
-      expect(result.localStorage).deep.eq([{ origin: 'https://localhost:4466', value: { key1: 'val1' } }, { origin: 'https://127.0.0.1:44665', value: { name: 'foo' } }])
-    })
-  })
-
-  it('only gets localStorage from origins visited in test', () => {
-    cy.visit('https://localhost:4466/form')
-    .then(() => {
-      localStorage.key1 = 'val1'
-    })
-
-    .then(() => Cypress.session.getStorage({ origin: '*' }))
-    .then((result) => {
-      expect(result.localStorage).deep.eq([{ origin: 'https://localhost:4466', value: { key1: 'val1' } }])
-    })
-  })
-})
-
 describe('with a blank session', () => {
   beforeEach(() => {
     cy.session('sess1',
@@ -554,19 +458,19 @@ describe.skip('consoleProps', () => {
 
 // because browsers prevent an https page from embedding http domains, we filter out
 // insecure origins (contexts) when top is a secure context when we clear cross origin session data
-// the first test in each suite visits insecure origin with sessionSupport OFF so data is not cleared
+// the first test in each suite visits insecure origin with so data is not cleared
 // on test:before:run, which allows the next run to switch top back to a secure context
-// and finally we turn sessionSupport back ON for the 3rd tests, which will now try to clear insecure
+// and finally for the 3rd tests, which will now try to clear insecure
 // bar.foo.com data.
 describe('ignores setting insecure context data when on secure context', () => {
   describe('no cross origin secure origins, nothing to clear', () => {
-    it('sets insecure content', { experimentalSessionAndOrigin: false }, () => {
+    it('sets insecure content', () => {
       cy.visit('http://bar.foo.com:4465/form')
     })
 
     let logSpy
 
-    it('nothing to clear - 1/2', { experimentalSessionAndOrigin: false }, () => {
+    it('nothing to clear - 1/2', () => {
       cy.visit('https://localhost:4466/form')
       .then(() => {
         logSpy = Cypress.sinon.spy(Cypress, 'log')
@@ -580,13 +484,13 @@ describe('ignores setting insecure context data when on secure context', () => {
   })
 
   describe('only secure origins cleared', () => {
-    it('sets insecure content', { experimentalSessionAndOrigin: false }, () => {
+    it('sets insecure content', () => {
       cy.visit('http://bar.foo.com:4465/form')
     })
 
     let logSpy
 
-    it('switches to secure context - clears only secure context data - 1/2', { experimentalSessionAndOrigin: false }, () => {
+    it('switches to secure context - clears only secure context data - 1/2', () => {
       cy.visit('https://localhost:4466/cross_origin_iframe/foo')
       .then(() => {
         logSpy = Cypress.sinon.spy(Cypress, 'log')

@@ -193,23 +193,8 @@ export default (Commands, Cypress, cy, state) => {
 
       const isInterceptAlias = (alias) => Boolean(findInterceptAlias(alias))
 
-      const isRouteAlias = (alias) => {
-        // has all aliases saved using cy.as() command
-        const aliases = cy.state('aliases') || {}
-
-        const aliasObject = aliases[alias]
-
-        if (!aliasObject) {
-          return false
-        }
-
-        // cy.route aliases have subject that has all XHR properties
-        // let's check one of them
-        return aliasObj.subject && Boolean(aliasObject.subject.xhrUrl)
-      }
-
       if (command && !isNetworkInterceptCommand(command)) {
-        if (!isInterceptAlias(alias) && !isRouteAlias(alias)) {
+        if (!isInterceptAlias(alias)) {
           $errUtils.throwErrByPath('wait.invalid_alias', {
             onFail: options._log,
             args: { alias },

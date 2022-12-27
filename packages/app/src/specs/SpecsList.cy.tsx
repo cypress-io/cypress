@@ -5,11 +5,11 @@ import { defaultMessages } from '@cy/i18n'
 describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
   let specs: Array<SpecsListFragment>
 
-  function mountWithTestingType (testingType: TestingTypeEnum | undefined, specFilter?: string) {
+  function mountWithTestingType ({ testingType, specFilter, experimentalRunAllSpecs }: { testingType?: TestingTypeEnum, specFilter?: string, experimentalRunAllSpecs?: boolean } = {}) {
     specs = []
     const showCreateSpecModalSpy = cy.spy().as('showCreateSpecModalSpy')
 
-    cy.mountFragment(Specs_SpecsListFragmentDoc, {
+    return cy.mountFragment(Specs_SpecsListFragmentDoc, {
       variableTypes: {
         hasBranch: 'Boolean',
       },
@@ -28,6 +28,10 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
           ctx.currentProject.savedState = { specFilter }
         }
 
+        if (experimentalRunAllSpecs) {
+          ctx.currentProject.config = [{ field: 'experimentalRunAllSpecs', value: true }]
+        }
+
         return ctx
       },
       render: (gqlVal) => {
@@ -39,7 +43,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
   context('when testingType is unset', () => {
     describe('with no saved filter', () => {
       beforeEach(() => {
-        mountWithTestingType(undefined)
+        mountWithTestingType({})
       })
 
       it('should filter specs', () => {
@@ -198,7 +202,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
 
     describe('with a saved spec filter', () => {
       beforeEach(() => {
-        mountWithTestingType(undefined, 'saved-search-term 🗑')
+        mountWithTestingType({ specFilter: 'saved-search-term 🗑' })
         cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
         .as('searchField')
 
@@ -263,7 +267,7 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
 
   context('when testingType is e2e', () => {
     beforeEach(() => {
-      mountWithTestingType('e2e')
+      mountWithTestingType({ testingType: 'e2e' })
     })
 
     it('should display the e2e testing header', () => {
@@ -273,11 +277,55 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
 
   context('when testingType is component', () => {
     beforeEach(() => {
-      mountWithTestingType('component')
+      mountWithTestingType({ testingType: 'component' })
     })
 
     it('should display the component testing header', () => {
       cy.findByTestId('specs-testing-type-header').should('have.text', 'Component specs')
+    })
+  })
+
+  describe('Run all Specs', () => {
+    const hoverRunAllSpecs = (directory: string, specNumber: number) => {
+      cy.contains('[data-cy=spec-item-directory]', directory).realHover().then(() => {
+        cy.get(`[data-cy="run-all-specs-for-${directory}"]`).should('contain.text', `Run ${specNumber} spec${specNumber > 1 ? 's' : ''}`)
+        cy.get('[data-cy="play-button"]').should('exist')
+      })
+    }
+
+    it('does not show feature unless experimentalRunAllSpecs is enabled', () => {
+      mountWithTestingType({ experimentalRunAllSpecs: false })
+
+      cy.contains('button', 'Run all specs').should('not.exist')
+      cy.contains('[data-cy=spec-item-directory]', '__test__').realHover()
+      cy.contains('button', 'Run 5 specs').should('not.exist')
+    })
+
+    it('displays runAllSpecs when hovering over a spec-list directory row', () => {
+      mountWithTestingType({ experimentalRunAllSpecs: true })
+      hoverRunAllSpecs('__test__', 5)
+      hoverRunAllSpecs('frontend', 11)
+      hoverRunAllSpecs('components', 6)
+
+      cy.percySnapshot()
+    })
+
+    it('checks if functionality works after a search', () => {
+      mountWithTestingType({ experimentalRunAllSpecs: true, specFilter: 'base' })
+      hoverRunAllSpecs('__test__', 2)
+      hoverRunAllSpecs('frontend/components', 2)
+      hoverRunAllSpecs('Cell/test', 1)
+    })
+
+    it('can tab into run-all', () => {
+      mountWithTestingType({ experimentalRunAllSpecs: true })
+      cy.get('[data-cy=run-all-specs-for-__test__]').should('not.be.visible')
+
+      cy.tabUntil(($el) => {
+        return $el.text().includes('Run 5 specs')
+      })
+
+      cy.get('[data-cy=run-all-specs-for-__test__]').should('be.visible')
     })
   })
 })

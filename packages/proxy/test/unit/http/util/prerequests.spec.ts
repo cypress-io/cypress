@@ -62,6 +62,7 @@ describe('http/util/prerequests', () => {
 
   // https://github.com/cypress-io/cypress/issues/17853
   it('eventually discards pre-requests that don\'t match requests', (done) => {
+    preRequests = new PreRequests(10, 200)
     preRequests.addPending({ requestId: '1234', url: 'foo', method: 'GET' } as BrowserPreRequest)
 
     // preRequests garbage collects pre-requests that never matched up with an incoming request after around
@@ -75,6 +76,6 @@ describe('http/util/prerequests', () => {
       }
 
       preRequests.get({ proxiedUrl: 'foo', method: 'GET' } as CypressIncomingRequest, () => {}, cb)
-    }, 50)
+    }, 1200)
   })
 })

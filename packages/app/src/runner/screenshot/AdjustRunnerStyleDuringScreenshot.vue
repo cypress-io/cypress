@@ -8,12 +8,12 @@
 </template>
 
 <script lang="ts" setup>
+import { isRunMode } from '@packages/frontend-shared/src/utils/isRunMode'
 import { computed } from 'vue'
 import { useScreenshotStore } from '../../store'
 import { runnerConstants } from '../runner-constants'
 
 const screenshotStore = useScreenshotStore()
-const isRunMode = window.__CYPRESS_MODE__ === 'run'
 
 const style = computed(() => {
   if (screenshotStore.isScreenshotting) {

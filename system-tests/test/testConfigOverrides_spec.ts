@@ -16,7 +16,6 @@ describe('testConfigOverrides', () => {
     expectedExitCode: 0,
     browser: 'electron',
     config: {
-      experimentalSessionAndOrigin: true,
       video: false,
     },
   })
@@ -57,7 +56,7 @@ describe('testConfigOverrides', () => {
       console.log(results.runs[0].tests)
       // make sure we've respected alway include test body even when skipped
       expect(results.runs[0].tests[0].body).eq('() => {}')
-      expect(results.runs[0].tests[1].body).eq('() => {// do something\n  }')
+      expect(results.runs[0].tests[1].body).eq('() => {\n    // do something\n  }')
     },
   })
 

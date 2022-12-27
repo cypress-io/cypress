@@ -38,7 +38,10 @@
             group-hover:mix-blend-luminosity
             "
           >
-            {{ t('topNav.version') }} {{ browser.version }}
+            {{ t('topNav.version') }} {{ browser.majorVersion }}
+            <span v-if="browser.version === 'unsupported'">
+              ({{ t('topNav.versionUnsupported') }})
+            </span>
           </div>
         </div>
       </div>

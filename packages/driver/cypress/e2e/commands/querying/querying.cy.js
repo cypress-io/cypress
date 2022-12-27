@@ -18,23 +18,6 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
-    // NOTE: FLAKY in CI, need to investigate further
-    it.skip('retries finding elements until something is found', () => {
-      const missingEl = $('<div />', { id: 'missing-el' })
-
-      // wait until we're ALMOST about to time out before
-      // appending the missingEl
-      cy.on('command:retry', (options) => {
-        if ((options.total + (options._interval * 4)) > options._runnableTimeout) {
-          cy.$$('body').append(missingEl)
-        }
-      })
-
-      cy.get('#missing-el').then(($div) => {
-        expect($div).to.match(missingEl)
-      })
-    })
-
     it('can increase the timeout', () => {
       const missingEl = $('<div />', { id: 'missing-el' })
 
@@ -97,6 +80,12 @@ describe('src/cy/commands/querying', () => {
       })
 
       cy.get('doesNotExist')
+    })
+
+    it('respects null withinSubject', () => {
+      cy.get('#list').within(() => {
+        cy.get('#upper', { withinSubject: null })
+      })
     })
 
     describe('custom elements', () => {
@@ -287,7 +276,7 @@ describe('src/cy/commands/querying', () => {
         })
       })
 
-      it('retries an alias when too many elements found without replaying commands', () => {
+      it('retries an alias when too many elements found', () => {
         // add 500ms to the delta
         cy.timeout(500, true)
 
@@ -295,24 +284,15 @@ describe('src/cy/commands/querying', () => {
 
         const length = buttons.length - 2
 
-        const replayCommandsFrom = cy.spy(cy, 'replayCommandsFrom')
-
         cy.on('command:retry', () => {
           buttons.last().remove()
           buttons = cy.$$('button')
         })
 
-        const existingLen = cy.queue.length
-
         // should eventually resolve after adding 1 button
         cy
         .get('button').as('btns')
         .get('@btns').should('have.length', length).then(($buttons) => {
-          expect(replayCommandsFrom).not.to.be.called
-
-          // get, as, get, should, then == 5
-          expect(cy.queue.length - existingLen).to.eq(5) // we should not have replayed any commands
-
           expect($buttons.length).to.eq(length)
         })
       })
@@ -380,10 +360,9 @@ describe('src/cy/commands/querying', () => {
         })
       })
 
-      it('logs route aliases', () => {
+      it('logs intercept aliases', () => {
         cy.visit('http://localhost:3500/fixtures/jquery.html')
-        cy.server()
-        cy.route(/users/, {}).as('get.users')
+        cy.intercept(/users/, {}).as('get.users')
         cy.window().then({ timeout: 2000 }, (win) => {
           win.$.get('/users')
         })
@@ -392,35 +371,27 @@ describe('src/cy/commands/querying', () => {
           expect(this.lastLog.pick('message', 'referencesAlias', 'aliasType')).to.deep.eq({
             message: '@get.users',
             referencesAlias: { name: 'get.users' },
-            aliasType: 'route',
+            aliasType: 'intercept',
           })
         })
       })
 
-      it('logs primitive aliases', (done) => {
-        cy.on('log:added', (attrs, log) => {
-          if (attrs.name === 'get') {
-            expect(log.pick('$el', 'numRetries', 'referencesAlias', 'aliasType')).to.deep.eq({
-              referencesAlias: { name: 'f' },
-              aliasType: 'primitive',
-            })
-
-            done()
-          }
+      it('logs primitive aliases', () => {
+        cy.noop('foo').as('f')
+        .get('@f').then(function () {
+          expect(this.lastLog.pick('$el', 'numRetries', 'referencesAlias', 'aliasType')).to.deep.eq({
+            referencesAlias: { name: 'f' },
+            aliasType: 'primitive',
+          })
         })
-
-        cy
-        .noop('foo').as('f')
-        .get('@f')
       })
 
       it('logs immediately before resolving', (done) => {
         cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'get') {
-            expect(log.pick('state', 'referencesAlias', 'aliasType')).to.deep.eq({
+            expect(log.pick('state', 'referencesAlias')).to.deep.eq({
               state: 'pending',
               referencesAlias: undefined,
-              aliasType: 'dom',
             })
 
             done()
@@ -453,10 +424,10 @@ describe('src/cy/commands/querying', () => {
             referencesAlias: undefined,
           }
 
-          expect(this.lastLog.get('$el').get(0)).to.eq($body.get(0))
+          expect(this.lastLog.get('$el')).to.eql($body)
 
           _.each(obj, (value, key) => {
-            expect(this.lastLog.get(key)).deep.eq(value, `expected key: ${key} to eq value: ${value}`)
+            expect(this.lastLog.get(key)).to.eq(value, `expected key: ${key} to eq value: ${value}`)
           })
         })
       })
@@ -493,14 +464,13 @@ describe('src/cy/commands/querying', () => {
         })
       })
 
-      it('#consoleProps with a route alias', () => {
+      it('#consoleProps with an intercept alias', () => {
         cy
-        .server()
-        .route(/users/, {}).as('getUsers')
+        .intercept(/users/, {}).as('getUsers')
         .visit('http://localhost:3500/fixtures/jquery.html')
         .window().then({ timeout: 2000 }, (win) => {
           return win.$.get('/users')
-        }).get('@getUsers').then(function (obj) {
+        }).wait('@getUsers').get('@getUsers').then(function (obj) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
             Command: 'get',
             Alias: '@getUsers',
@@ -556,36 +526,33 @@ describe('src/cy/commands/querying', () => {
         })
       })
 
-      describe('route aliases', () => {
+      describe('intercept aliases', () => {
         it('returns the xhr', () => {
           cy
-          .server()
-          .route(/users/, {}).as('getUsers')
+          .intercept(/users/, {}).as('getUsers')
           .visit('http://localhost:3500/fixtures/jquery.html')
           .window().then({ timeout: 2000 }, (win) => {
             return win.$.get('/users')
-          }).get('@getUsers').then((xhr) => {
-            expect(xhr.url).to.include('/users')
+          }).wait('@getUsers').get('@getUsers').then((xhr) => {
+            expect(xhr.response.url).to.include('/users')
           })
         })
 
         it('handles dots in alias name', () => {
-          cy.server()
-          cy.route(/users/, {}).as('get.users')
+          cy.intercept(/users/, {}).as('get.users')
           cy.visit('http://localhost:3500/fixtures/jquery.html')
           cy.window().then({ timeout: 2000 }, (win) => {
             return win.$.get('/users')
           })
 
-          cy.get('@get.users').then((xhr) => {
-            expect(xhr.url).to.include('/users')
+          cy.wait('@get.users').get('@get.users').then((xhr) => {
+            expect(xhr.response.url).to.include('/users')
           })
         })
 
         it('returns null if no xhr is found', () => {
           cy
-          .server()
-          .route(/users/, {}).as('getUsers')
+          .intercept(/users/, {}).as('getUsers')
           .visit('http://localhost:3500/fixtures/jquery.html')
           .get('@getUsers').then((xhr) => {
             expect(xhr).to.be.null
@@ -595,25 +562,23 @@ describe('src/cy/commands/querying', () => {
         it('returns an array of xhrs', () => {
           cy
           .visit('http://localhost:3500/fixtures/jquery.html')
-          .server()
-          .route(/users/, {}).as('getUsers')
+          .intercept(/users/, {}).as('getUsers')
           .window().then({ timeout: 2000 }, (win) => {
             return Promise.all([
               win.$.get('/users', { num: 1 }),
               win.$.get('/users', { num: 2 }),
             ])
-          }).get('@getUsers.all').then((xhrs) => {
+          }).wait('@getUsers').wait('@getUsers').get('@getUsers.all').then((xhrs) => {
             expect(xhrs).to.be.an('array')
-            expect(xhrs[0].url).to.include('/users?num=1')
+            expect(xhrs[0].response.url).to.include('/users?num=1')
 
-            expect(xhrs[1].url).to.include('/users?num=2')
+            expect(xhrs[1].response.url).to.include('/users?num=2')
           })
         })
 
         it('returns an array of xhrs when dots in alias name', () => {
           cy.visit('http://localhost:3500/fixtures/jquery.html')
-          cy.server()
-          cy.route(/users/, {}).as('get.users')
+          cy.intercept(/users/, {}).as('get.users')
           cy.window().then({ timeout: 2000 }, (win) => {
             return Promise.all([
               win.$.get('/users', { num: 1 }),
@@ -621,48 +586,45 @@ describe('src/cy/commands/querying', () => {
             ])
           })
 
-          cy.get('@get.users.all').then((xhrs) => {
+          cy.wait('@get.users').wait('@get.users').get('@get.users.all').then((xhrs) => {
             expect(xhrs).to.be.an('array')
-            expect(xhrs[0].url).to.include('/users?num=1')
+            expect(xhrs[0].response.url).to.include('/users?num=1')
 
-            expect(xhrs[1].url).to.include('/users?num=2')
+            expect(xhrs[1].response.url).to.include('/users?num=2')
           })
         })
 
         it('returns the 1st xhr', () => {
           cy
           .visit('http://localhost:3500/fixtures/jquery.html')
-          .server()
-          .route(/users/, {}).as('getUsers')
+          .intercept(/users/, {}).as('getUsers')
           .window().then({ timeout: 2000 }, (win) => {
             return Promise.all([
               win.$.get('/users', { num: 1 }),
               win.$.get('/users', { num: 2 }),
             ])
-          }).get('@getUsers.1').then((xhr1) => {
-            expect(xhr1.url).to.include('/users?num=1')
+          }).wait('@getUsers').wait('@getUsers').get('@getUsers.1').then((xhr1) => {
+            expect(xhr1.response.url).to.include('/users?num=1')
           })
         })
 
         it('returns the 2nd xhr', () => {
           cy
           .visit('http://localhost:3500/fixtures/jquery.html')
-          .server()
-          .route(/users/, {}).as('getUsers')
+          .intercept(/users/, {}).as('getUsers')
           .window().then({ timeout: 2000 }, (win) => {
             return Promise.all([
               win.$.get('/users', { num: 1 }),
               win.$.get('/users', { num: 2 }),
             ])
-          }).get('@getUsers.2').then((xhr2) => {
-            expect(xhr2.url).to.include('/users?num=2')
+          }).wait('@getUsers').wait('@getUsers').get('@getUsers.2').then((xhr2) => {
+            expect(xhr2.response.url).to.include('/users?num=2')
           })
         })
 
         it('returns the 2nd xhr when dots in alias', () => {
           cy.visit('http://localhost:3500/fixtures/jquery.html')
-          cy.server()
-          cy.route(/users/, {}).as('get.users')
+          cy.intercept(/users/, {}).as('get.users')
           cy.window().then({ timeout: 2000 }, (win) => {
             return Promise.all([
               win.$.get('/users', { num: 1 }),
@@ -670,67 +632,26 @@ describe('src/cy/commands/querying', () => {
             ])
           })
 
-          cy.get('@get.users.2').then((xhr2) => {
-            expect(xhr2.url).to.include('/users?num=2')
+          cy.wait('@get.users').wait('@get.users').get('@get.users.2').then((xhr2) => {
+            expect(xhr2.response.url).to.include('/users?num=2')
           })
         })
 
         it('returns the 3rd xhr as null', () => {
           cy
-          .server()
-          .route(/users/, {}).as('getUsers')
+          .intercept(/users/, {}).as('getUsers')
           .visit('http://localhost:3500/fixtures/jquery.html')
           .window().then({ timeout: 2000 }, (win) => {
             return Promise.all([
               win.$.get('/users', { num: 1 }),
               win.$.get('/users', { num: 2 }),
             ])
-          }).get('@getUsers.3').then((xhr3) => {
+          }).wait('@getUsers').wait('@getUsers').get('@getUsers.3').then((xhr3) => {
             expect(xhr3).to.be.null
           })
         })
       })
     })
-
-    // it "re-queries the dom if any element in an alias isnt visible", ->
-    //   inputs = cy.$$("input")
-    //   inputs.hide()
-
-    //   cy
-    //     .get("input", {visible: false}).as("inputs").then ($inputs) ->
-    //       @length = $inputs.length
-
-    //       ## show the inputs
-    //       $inputs.show()
-
-    //       return $inputs
-    //     .get("@inputs").then ($inputs) ->
-    //       ## we should have re-queried for these inputs
-    //       ## which should have increased their length by 1
-    //       expect($inputs).to.have.length(@length)
-
-    // these other tests are for .save
-    // it "will resolve deferred arguments", ->
-    //   df = $.Deferred()
-
-    //   _.delay ->
-    //     df.resolve("iphone")
-    //   , 100
-
-    //   cy.get("input:text:first").type(df).then ($input) ->
-    //     expect($input).to.have.value("iphone")
-
-    // it "handles saving subjects", ->
-    //   cy.noop({foo: "foo"}).assign("foo").noop(cy.get("foo")).then (subject) ->
-    //     expect(subject).to.deep.eq {foo: "foo"}
-
-    // it "resolves falsy arguments", ->
-    //   cy.noop(0).assign("zero").then ->
-    //     expect(cy.get("zero")).to.eq 0
-
-    // it "returns a function when no alias was found", ->
-    //   cy.noop().then ->
-    //     expect(cy.get("something")).to.be.a("function")
 
     describe('errors', {
       defaultCommandTimeout: 50,
@@ -840,8 +761,7 @@ describe('src/cy/commands/querying', () => {
         })
 
         cy
-        .server()
-        .route(/json/, { foo: 'foo' }).as('getJSON')
+        .intercept(/json/, { foo: 'foo' }).as('getJSON')
         .visit('http://localhost:3500/fixtures/xhr.html').then(() => {
           cy.$$('#get-json').click(() => {
             cy.timeout(1000)
@@ -974,34 +894,31 @@ describe('src/cy/commands/querying', () => {
         })
 
         cy
-        .server()
-        .route(/users/, {}).as('getUsers')
+        .intercept(/users/, {}).as('getUsers')
         .get('@getUsers.0')
       })
 
       it('throws when alias property isnt just a digit', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`1b` is not a valid alias property. Only `numbers` or `all` is permitted.')
+          expect(err.message).to.include('could not find a registered alias for: `@getUsers.1b`')
 
           done()
         })
 
         cy
-        .server()
-        .route(/users/, {}).as('getUsers')
+        .intercept(/users/, {}).as('getUsers')
         .get('@getUsers.1b')
       })
 
       it('throws when alias property isnt a digit or `all`', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`all ` is not a valid alias property. Only `numbers` or `all` is permitted.')
+          expect(err.message).to.include('could not find a registered alias for: `@getUsers.all `')
 
           done()
         })
 
         cy
-        .server()
-        .route(/users/, {}).as('getUsers')
+        .intercept(/users/, {}).as('getUsers')
         .get('@getUsers.all ')
       })
 
@@ -1074,6 +991,11 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/25025
+    it('searches multiple subject elements', () => {
+      cy.get('ul').contains('li', 'asdf 3')
+    })
+
     it('resets the subject between chain invocations', () => {
       const span = cy.$$('.k-in:contains(Quality Control):last')
       const label = cy.$$('#complex-contains label')
@@ -1089,20 +1011,23 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
-    it('GET is scoped to the current subject', () => {
+    it('is scoped to the current subject', () => {
       const span = cy.$$('#click-me a span')
 
       cy.get('#click-me a').contains('click').then(($span) => {
         expect($span.length).to.eq(1)
-
         expect($span.get(0)).to.eq(span.get(0))
       })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/25019
+    it('can locate elements contained inside <form> containers', () => {
+      cy.get('#focus').contains('button', 'focusable')
     })
 
     it('can find input type=submits by value', () => {
       cy.contains('input contains submit').then(($el) => {
         expect($el.length).to.eq(1)
-
         expect($el).to.match('input[type=submit]')
       })
     })
@@ -1111,7 +1036,6 @@ describe('src/cy/commands/querying', () => {
     it('can find input type=submits by Regex', () => {
       cy.contains(/input contains submit/).then(($el) => {
         expect($el.length).to.eq(1)
-
         expect($el).to.match('input[type=submit]')
       })
     })
@@ -1119,7 +1043,6 @@ describe('src/cy/commands/querying', () => {
     it('has an optional filter argument', () => {
       cy.contains('ul', 'li 0').then(($el) => {
         expect($el.length).to.eq(1)
-
         expect($el).to.match('ul')
       })
     })
@@ -1135,7 +1058,6 @@ describe('src/cy/commands/querying', () => {
     it('searches all els in comma separated filter', () => {
       cy.contains('a,button', 'Naruto').then(($el) => {
         expect($el.length).to.eq(1)
-
         expect($el).to.match('a')
       })
 
@@ -1232,23 +1154,9 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
-    it('finds text by regexp and restores contains', () => {
-      const { contains } = Cypress.$Cypress.$.expr[':']
-
-      cy.contains(/^asdf \d+/).then(($li) => {
-        expect($li).to.have.text('asdf 1')
-
-        expect(Cypress.$Cypress.$.expr[':'].contains).to.eq(contains)
-      })
-    })
-
-    it('finds text by regexp when second parameter is a regexp and restores contains', () => {
-      const { contains } = Cypress.$Cypress.$.expr[':']
-
+    it('finds text by regexp when second parameter is a regexp', () => {
       cy.contains('#asdf>li:first', /asdf 1/).then(($li) => {
         expect($li).to.have.text('asdf 1')
-
-        expect(Cypress.$Cypress.$.expr[':'].contains).to.eq(contains)
       })
     })
 
@@ -1314,6 +1222,20 @@ describe('src/cy/commands/querying', () => {
 
       cy.visit('fixtures/dom.html')
       cy.contains(/=[0-6]/, { timeout: 100 }).should('have.text', 'a=2')
+    })
+
+    it('does not interfere with other aliased .contains()', () => {
+      /*
+       * There was a regression (no github issue logged) while refactoring .contains() where if a test aliased
+       * a query using .contains(), future .contains() calls could overwrite its internal state, causing the first one
+       * to look for the second one's arguments rather than its own.
+       *
+       * This test guards against that regression; if the `contains('New York')` inside @newYork alias were
+       * overwritten by contains(`Nested Find`), then the existence assertion would fail.
+       */
+      cy.contains('New York').as('newYork')
+      cy.contains('Nested Find').invoke('remove')
+      cy.get('@newYork').should('exist')
     })
 
     describe('should(\'not.exist\')', () => {
@@ -1422,6 +1344,7 @@ space
 
       it('is case sensitive when matchCase is undefined', () => {
         cy.get('#test-button').contains('Test')
+        cy.contains('test').should('not.exist')
       })
 
       it('is case sensitive when matchCase is true', () => {
@@ -1599,16 +1522,20 @@ space
     })
 
     describe('special characters', () => {
-      _.each('\' " [ ] { } . @ # $ % ^ & * ( ) , ; :'.split(' '), (char) => {
-        it(`finds content by string with character: ${char}`, () => {
+      const specialCharacters = '\' " [ ] { } . @ # $ % ^ & * ( ) , ; :'.split(' ')
+
+      it(`finds content by string with characters`, () => {
+        _.each(specialCharacters, (char) => {
           const span = $(`<span>special char ${char} content</span>`).appendTo(cy.$$('body'))
 
           cy.contains('span', char).then(($span) => {
             expect($span.get(0)).to.eq(span.get(0))
           })
         })
+      })
 
-        it(`finds content by regex with character: ${char}`, () => {
+      it(`finds content by regex with characters`, () => {
+        _.each(specialCharacters, (char) => {
           const span = $(`<span>special char ${char} content</span>`).appendTo(cy.$$('body'))
 
           cy.contains('span', new RegExp(_.escapeRegExp(char))).then(($span) => {
@@ -1676,19 +1603,13 @@ space
         })
       })
 
-      it('sets type to parent when subject isnt element', () => {
-        cy.window().contains('foo').then(function () {
-          expect(this.lastLog.get('type')).to.eq('parent')
+      it('sets type to child when used as a child command', () => {
+        cy.get('#specific-contains').contains('foo').then(function () {
+          expect(this.lastLog.get('type')).to.eq('child')
 
           cy.document().contains('foo').then(function () {
-            expect(this.lastLog.get('type')).to.eq('parent')
+            expect(this.lastLog.get('type')).to.eq('child')
           })
-        })
-      })
-
-      it('sets type to child when used as a child command', () => {
-        cy.get('body').contains('foo').then(function () {
-          expect(this.lastLog.get('type')).to.eq('child')
         })
       })
 
@@ -1883,7 +1804,7 @@ space
           const containsLog = this.logs[0]
           const assertionLog = this.logs[1]
 
-          expect(err.message).to.eq('`cy.contains()` cannot be passed a `length` option because it will only ever return 1 element.')
+          expect(err.message).to.eq('`cy.contains()` only ever returns one element, so you cannot assert on a `length` greater than one.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/contains')
 
           expect(containsLog.get('state')).to.eq('passed')
@@ -1896,46 +1817,6 @@ space
         })
 
         cy.contains('Nested Find').should('have.length', 2)
-      })
-
-      it('restores contains even when cy.get fails', (done) => {
-        const { contains } = Cypress.$Cypress.$.expr[':']
-
-        const cyNow = cy.now
-
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('Syntax error, unrecognized expression')
-          expect(Cypress.$Cypress.$.expr[':'].contains).to.eq(contains)
-
-          done()
-        })
-
-        cy.stub(cy, 'now').callsFake(() => cyNow('get', 'aBad:jQuery^Selector', {}))
-
-        cy.contains(/^asdf \d+/)
-      })
-
-      it('restores contains on abort', (done) => {
-        cy.timeout(1000)
-
-        const { contains } = Cypress.$Cypress.$.expr[':']
-
-        cy.stub(Cypress.runner, 'stop')
-
-        cy.on('stop', () => {
-          _.delay(() => {
-            expect(Cypress.$Cypress.$.expr[':'].contains).to.eq(contains)
-
-            done()
-          }
-          , 50)
-        })
-
-        cy.on('command:retry', _.after(2, () => {
-          Cypress.stop()
-        }))
-
-        cy.contains(/^does not contain asdfasdf at all$/)
       })
     })
   })

@@ -1,7 +1,6 @@
 require('../spec_helper')
 import _ from 'lodash'
 import { detect, detectByPath, getMajorVersion } from '../../lib/detect'
-import * as browsers from '../../lib/browsers'
 import { goalBrowsers } from '../fixtures'
 import { expect } from 'chai'
 import { utils } from '../../lib/utils'
@@ -12,6 +11,7 @@ import * as linuxHelper from '../../lib/linux'
 import * as darwinHelper from '../../lib/darwin'
 import * as windowsHelper from '../../lib/windows'
 import type { Browser } from '@packages/types'
+import * as knownBrowsers from '../../lib/known-browsers'
 
 const isWindows = () => {
   return os.platform() === 'win32'
@@ -102,7 +102,7 @@ describe('detect', () => {
         })
       })
 
-      const mockValidator = sinon.stub(browsers, 'validateMinVersion').returns({
+      const mockValidator = sinon.stub(knownBrowsers, 'validateMinVersion').returns({
         isSupported: false,
         warningMessage: 'This is a bad version',
       })

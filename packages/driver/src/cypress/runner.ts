@@ -155,7 +155,7 @@ const wrap = (runnable): Record<string, any> | null => {
 
 // Reduce runnable down to its props and collections.
 // Sent to the Reporter to populate command log
-// and send to the Dashboard when in record mode.
+// and send to Cypress Cloud when in record mode.
 const wrapAll = (runnable): Record<string, any> => {
   return _.extend(
     {},

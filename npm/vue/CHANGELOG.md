@@ -1,3 +1,17 @@
+# [@cypress/vue-v5.0.3](https://github.com/cypress-io/cypress/compare/@cypress/vue-v5.0.2...@cypress/vue-v5.0.3) (2022-12-02)
+
+
+### Bug Fixes
+
+* remove cypress.server.defaults, cy.server and cy.route ([#24411](https://github.com/cypress-io/cypress/issues/24411)) ([2f18a8c](https://github.com/cypress-io/cypress/commit/2f18a8cbd2d1a90fe1f77a29cdc89571bf54109e))
+
+# [@cypress/vue-v5.0.2](https://github.com/cypress-io/cypress/compare/@cypress/vue-v5.0.1...@cypress/vue-v5.0.2) (2022-11-23)
+
+
+### Bug Fixes
+
+* fix windows-lint CI job ([#24758](https://github.com/cypress-io/cypress/issues/24758)) ([2166ba0](https://github.com/cypress-io/cypress/commit/2166ba0d9496037df843d55f07517f83817171a3))
+
 # [@cypress/vue-v5.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v5.0.0...@cypress/vue-v5.0.1) (2022-11-08)
 
 

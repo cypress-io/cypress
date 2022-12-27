@@ -9,7 +9,9 @@
     <InlineSpecListHeader
       v-model:specFilterModel="specFilterModel"
       :result-count="specs.length"
+      :is-run-all-specs-allowed="runAllSpecsStore.isRunAllSpecsAllowed"
       @newSpec="showModal = true"
+      @run-all-specs="runAllSpecsStore.runAllSpecs"
     />
     <InlineSpecListTree
       :specs="specs"
@@ -31,6 +33,7 @@ import CreateSpecModal from './CreateSpecModal.vue'
 import { fuzzySortSpecs, makeFuzzyFoundSpec, useCachedSpecs } from './spec-utils'
 import type { FuzzyFoundSpec } from './tree/useCollapsibleTree'
 import { useSpecFilter } from '../composables/useSpecFilter'
+import { useRunAllSpecsStore } from '../store/run-all-specs-store'
 
 gql`
 fragment SpecNode_InlineSpecList on Spec {
@@ -79,5 +82,7 @@ const specs = computed<FuzzyFoundSpec[]>(() => {
 
   return fuzzySortSpecs(specs, debouncedSpecFilterModel.value)
 })
+
+const runAllSpecsStore = useRunAllSpecsStore()
 
 </script>

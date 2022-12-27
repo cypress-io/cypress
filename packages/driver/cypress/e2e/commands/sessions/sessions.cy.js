@@ -52,7 +52,7 @@ describe('cy.session', { retries: 0 }, () => {
     })
   })
 
-  describe('testIsolation=on', { testIsolation: 'on' }, () => {
+  describe('testIsolation=true', { testIsolation: true }, () => {
     describe('test:before:run:async', () => {
       it('clears page before each run', () => {
         cy.visit('/fixtures/form.html')
@@ -62,9 +62,10 @@ describe('cy.session', { retries: 0 }, () => {
           await Cypress.action('runner:test:before:run:async', {})
 
           expect(Cypress.action).to.be.calledWith('cy:url:changed', '')
-          expect(Cypress.action).to.be.calledWith('cy:visit:blank', { type: 'session-lifecycle' })
+          expect(Cypress.action).to.be.calledWith('cy:visit:blank', { testIsolation: true })
         })
-        .url('about:blank')
+        .url()
+        .should('eq', 'about:blank')
       })
 
       it('clears session data before each run', async () => {
@@ -96,7 +97,7 @@ describe('cy.session', { retries: 0 }, () => {
           await Cypress.action('runner:test:before:run:async', {})
 
           expect(Cypress.action).to.be.calledWith('cy:url:changed', '')
-          expect(Cypress.action).to.be.calledWith('cy:visit:blank', { type: 'session-lifecycle' })
+          expect(Cypress.action).to.be.calledWith('cy:visit:blank', { testIsolation: true })
         })
 
         cy.window().its('cookie').should('be.undefined')
@@ -255,7 +256,8 @@ describe('cy.session', { retries: 0 }, () => {
           const sessionStorageData = consoleProps.groups[0].groups[0]
 
           expect(sessionStorageData.name).to.contain('Session Storage - (1)')
-          expect(sessionStorageData.items).to.deep.eq({ cypressAuthToken: '{"body":{"username":"tester"}}' })
+          expect(sessionStorageData.items).to.have.property('cypressAuthToken')
+          expect(sessionStorageData.items.cypressAuthToken).to.contains('"username":"tester"')
         })
       })
 
@@ -775,7 +777,7 @@ describe('cy.session', { retries: 0 }, () => {
     })
   })
 
-  describe('testIsolation=off', { testIsolation: 'off' }, () => {
+  describe('testIsolation=false', { testIsolation: false }, () => {
     before(async () => {
       // manually ensure clear browser state! since we turned testIsolation off
       await Cypress.session.clearCurrentSessionData()
@@ -838,29 +840,39 @@ describe('cy.session', { retries: 0 }, () => {
       let clearPageCount = 0
       let sessionGroupId
       let setup
+      let slowSetup
       let validate
 
-      const handleSetup = () => {
+      const handleSetup = (slowLogin = false) => {
       // create session clears page before running
         cy.contains('Default blank page').should('not.exist')
 
         cy.visit('/fixtures/auth/index.html')
         cy.contains('You are not logged in')
-        cy.window().then((win) => {
-          win.sessionStorage.setItem('cypressAuthToken', JSON.stringify({ body: { username: 'tester' } }))
-        })
+        cy.get('[data-cy=login-same-origin]').click()
+        cy.get('input').type('tester')
+        if (slowLogin) {
+          cy.get('[data-cy=slow-login]').click()
+        } else {
+          cy.get('[data-cy=login]').click()
+        }
       }
 
+      const handleSlowSetup = () => handleSetup(true)
+
       const handleValidate = () => {
-      // both create & restore session clears page after running
+        // both create & restore session clears page after running
         cy.contains('Default blank page').should('not.exist')
 
-        cy.visit('/fixtures/auth/index.html')
-        cy.contains('Welcome tester')
+        cy.window()
+        .its('sessionStorage')
+        .its('cypressAuthToken', { timeout: 5000 })
+        .should('contain', '"username":"tester"')
       }
 
       before(() => {
         setup = cy.stub().callsFake(handleSetup).as('setupSession')
+        slowSetup = cy.stub().callsFake(handleSlowSetup).as('setupSlowSession')
         validate = cy.stub().callsFake(handleValidate).as('validateSession')
       })
 
@@ -878,7 +890,7 @@ describe('cy.session', { retries: 0 }, () => {
         resetMocks()
         clearAllSavedSessions()
         cy.on('log:added', (attrs, log) => {
-          if (attrs.name === 'session' || attrs.name === 'sessions_manager' || attrs.name === 'page load' || attrs.alias?.includes('setupSession') || attrs.alias?.includes('validateSession')) {
+          if (attrs.name === 'session' || attrs.name === 'sessions_manager' || attrs.alias?.includes('setupSession') || attrs.alias?.includes('setupSlowSession') || attrs.alias?.includes('validateSession')) {
             logs.push(log)
             if (!sessionGroupId) {
               sessionGroupId = attrs.id
@@ -973,7 +985,8 @@ describe('cy.session', { retries: 0 }, () => {
           const sessionStorageData = consoleProps.groups[0].groups[0]
 
           expect(sessionStorageData.name).to.contain('Session Storage - (1)')
-          expect(sessionStorageData.items).to.deep.eq({ cypressAuthToken: '{"body":{"username":"tester"}}' })
+          expect(sessionStorageData.items).to.have.property('cypressAuthToken')
+          expect(sessionStorageData.items.cypressAuthToken).to.contains('"username":"tester"')
         })
       })
 
@@ -984,7 +997,7 @@ describe('cy.session', { retries: 0 }, () => {
           setupTestContext()
           cy.log('Creating new session with validation to test against')
           sessionId = `session-${Cypress.state('test').id}`
-          cy.session(sessionId, setup, { validate })
+          cy.session(sessionId, slowSetup, { validate })
         })
 
         it('does not clear the page after command', () => {
@@ -992,7 +1005,7 @@ describe('cy.session', { retries: 0 }, () => {
         })
 
         it('successfully creates new session and validates it', () => {
-          expect(setup).to.be.calledOnce
+          expect(slowSetup).to.be.calledOnce
           expect(validate).to.be.calledOnce
           expect(clearPageCount, 'total times session cleared the page').to.eq(0)
         })
@@ -1023,7 +1036,7 @@ describe('cy.session', { retries: 0 }, () => {
           })
 
           expect(logs[3].get()).to.deep.contain({
-            alias: ['setupSession'],
+            alias: ['setupSlowSession'],
             group: createNewSessionGroup.id,
           })
 
@@ -1038,6 +1051,24 @@ describe('cy.session', { retries: 0 }, () => {
             alias: ['validateSession'],
             group: validateSessionGroup.id,
           })
+        })
+
+        it('has session details in the consoleProps', () => {
+          const consoleProps = logs[0].get('consoleProps')()
+
+          expect(consoleProps.Command).to.eq('session')
+          expect(consoleProps.id).to.eq(sessionId)
+          expect(consoleProps.Domains).to.eq('This session captured data from localhost.')
+
+          expect(consoleProps.groups).to.have.length(1)
+          expect(consoleProps.groups[0].name).to.eq('localhost data:')
+          expect(consoleProps.groups[0].groups).to.have.length(1)
+
+          const sessionStorageData = consoleProps.groups[0].groups[0]
+
+          expect(sessionStorageData.name).to.contain('Session Storage - (1)')
+          expect(sessionStorageData.items).to.have.property('cypressAuthToken')
+          expect(sessionStorageData.items.cypressAuthToken).to.contains('"username":"tester"')
         })
       })
 
@@ -1457,50 +1488,6 @@ describe('cy.session', { retries: 0 }, () => {
       })
 
       return null
-    })
-
-    it('throws error when experimentalSessionAndOrigin not enabled', { experimentalSessionAndOrigin: false, experimentalSessionSupport: false }, (done) => {
-      cy.once('fail', (err) => {
-        expect(lastSessionLog).to.eq(lastLog)
-        expect(lastSessionLog.get('error')).to.eq(err)
-        expect(lastSessionLog.get('state')).to.eq('failed')
-        expect(err.message).to.eq('`cy.session()` requires enabling the `experimentalSessionAndOrigin` flag.')
-        expect(err.docsUrl).to.eq('https://on.cypress.io/session')
-
-        done()
-      })
-
-      cy.session('sessions-not-enabled')
-    })
-
-    it('throws error when experimentalSessionSupport is enabled through test config', { experimentalSessionAndOrigin: false, experimentalSessionSupport: true }, (done) => {
-      cy.once('fail', (err) => {
-        expect(lastSessionLog).to.eq(lastLog)
-        expect(lastSessionLog.get('error')).to.eq(err)
-        expect(lastSessionLog.get('state')).to.eq('failed')
-        expect(err.message).to.eq('\`cy.session()\` requires enabling the \`experimentalSessionAndOrigin\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0.')
-        expect(err.docsUrl).to.eq('https://on.cypress.io/session')
-
-        done()
-      })
-
-      cy.session('sessions-not-enabled')
-    })
-
-    it('throws error when experimentalSessionSupport is enabled through Cypress.config', { experimentalSessionAndOrigin: false }, (done) => {
-      Cypress.config('experimentalSessionSupport', true)
-
-      cy.once('fail', (err) => {
-        Cypress.config('experimentalSessionSupport', false)
-        expect(lastSessionLog).to.eq(lastLog)
-        expect(lastLog.get('error')).to.eq(err)
-        expect(lastLog.get('state')).to.eq('failed')
-        expect(err.message).to.eq('\`cy.session()\` requires enabling the \`experimentalSessionAndOrigin\` flag. The \`experimentalSessionSupport\` flag was enabled but was removed in Cypress version 9.6.0.')
-        expect(err.docsUrl).to.eq('https://on.cypress.io/session')
-        done()
-      })
-
-      cy.session('sessions-not-enabled')
     })
 
     it('throws when sessionId argument was not provided', function (done) {

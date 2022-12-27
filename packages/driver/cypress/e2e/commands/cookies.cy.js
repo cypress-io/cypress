@@ -5,134 +5,275 @@ const { Promise } = Cypress
 const isWebkit = Cypress.isBrowser('webkit')
 
 describe('src/cy/commands/cookies - no stub', () => {
-  context('#getCookies', () => {
-    // this can be removed along with the experimental flag since once the flag
-    // removed, clearing cookies for all domains will be done by default
-    beforeEach(() => {
-      if (!Cypress.config('experimentalSessionAndOrigin')) {
-        cy.clearCookies({ domain: null })
-      }
-    })
+  const setCookies = () => {
+    cy.log('set cookies')
+    cy.setCookie('key1', 'value1', { domain: 'www.foobar.com', log: false })
+    cy.setCookie('key2', 'value2', { domain: 'foobar.com', log: false })
+    cy.setCookie('key3', 'value3', { domain: 'www.barbaz.com', log: false })
+    cy.setCookie('key4', 'value4', { domain: '.www.barbaz.com', log: false })
+    cy.setCookie('key5', 'value5', { domain: 'barbaz.com', log: false })
+    cy.setCookie('key6', 'value6', { domain: '.barbaz.com', log: false })
+    cy.setCookie('key7', 'value7', { domain: 'www2.barbaz.com', log: false })
+    cy.setCookie('key8', 'value8', { domain: 'www2.foobar.com', log: false })
+  }
 
-    it('returns cookies from the domain matching the AUT by default', () => {
-      cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
-      cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
-      cy.setCookie('baz', 'qux', { domain: 'foobar.com' })
-      cy.setCookie('foo', 'bar') // defaults to (super)domain: barbaz.com
-      cy.setCookie('qux', 'quuz', { domain: 'www.barbaz.com' })
+  context('#getCookies', () => {
+    it('returns cookies from only the bare domain matching the AUT by default when AUT is an apex domain', () => {
+      cy.visit('http://barbaz.com:3500/fixtures/generic.html')
+      setCookies()
 
       cy.getCookies().then((cookies) => {
         expect(cookies).to.have.length(2)
-        // both the barbaz.com and www.barbaz.com cookies are yielded
-        expect(cookies[0].domain).to.match(/\.?barbaz\.com/)
-        expect(cookies[1].domain).to.match(/\.?www\.barbaz\.com/)
+
+        const sortedCookies = Cypress._.sortBy(cookies, 'name')
+
+        expect(sortedCookies[0].name).to.equal('key5')
+        expect(sortedCookies[0].domain).to.match(/\.?barbaz\.com/)
+        expect(sortedCookies[1].name).to.equal('key6')
+        expect(sortedCookies[1].domain).to.match(/\.?barbaz\.com/)
       })
 
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+      // webkit does not support cy.origin()
+      if (isWebkit) return
+
+      cy.origin('http://foobar.com:3500', () => {
+        cy.visit('http://foobar.com:3500/fixtures/generic.html')
+
+        cy.getCookies().then((cookies) => {
+          expect(cookies).to.have.length(1)
+          expect(cookies[0].name).to.equal('key2')
+          expect(cookies[0].domain).to.match(/\.?foobar\.com/)
+        })
+      })
+    })
+
+    it('returns cookies from the subdomain and bare domain matching the AUT by default when AUT is a subdomain', () => {
+      cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
+      setCookies()
+      cy.getCookies().then((cookies) => {
+        expect(cookies).to.have.length(4)
+
+        const sortedCookies = Cypress._.sortBy(cookies, 'name')
+
+        expect(sortedCookies[0].name).to.equal('key3')
+        expect(sortedCookies[0].domain).to.match(/\.?www\.barbaz\.com/)
+        expect(sortedCookies[1].name).to.equal('key4')
+        expect(sortedCookies[1].domain).to.match(/\.?www\.barbaz\.com/)
+        expect(sortedCookies[2].name).to.equal('key5')
+        expect(sortedCookies[2].domain).to.match(/\.?barbaz\.com/)
+        expect(sortedCookies[3].name).to.equal('key6')
+        expect(sortedCookies[3].domain).to.match(/\.?barbaz\.com/)
+      })
+
+      // webkit does not support cy.origin()
+      if (isWebkit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
 
         cy.getCookies().then((cookies) => {
-          expect(cookies[0].domain).to.match(/\.?www\.foobar\.com/)
-          expect(cookies[1].domain).to.match(/\.?foobar\.com/)
+          const sortedCookies = Cypress._.sortBy(cookies, 'name')
+
+          expect(sortedCookies).to.have.length(2)
+          expect(sortedCookies[0].name).to.equal('key1')
+          expect(sortedCookies[0].domain).to.match(/\.?www\.foobar\.com/)
+          expect(sortedCookies[1].name).to.equal('key2')
+          expect(sortedCookies[1].domain).to.match(/\.?foobar\.com/)
         })
       })
     })
 
     it('returns cookies for the specified domain', () => {
-      cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
-      cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
-      cy.setCookie('foo', 'bar') // defaults to (super)domain: barbaz.com
-      cy.setCookie('qux', 'quuz', { domain: 'www.barbaz.com' })
+      cy.visit('http://barbaz.com:3500/fixtures/generic.html')
+      setCookies()
 
       cy.getCookies({ domain: 'www.foobar.com' }).then((cookies) => {
+        expect(cookies).to.have.length(2)
+        expect(cookies[0].name).to.equal('key1')
         expect(cookies[0].domain).to.match(/\.?www\.foobar\.com/)
+        expect(cookies[1].name).to.equal('key2')
+        expect(cookies[1].domain).to.match(/\.?foobar\.com/)
       })
 
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+      cy.getCookies({ domain: 'barbaz.com' }).then((cookies) => {
+        expect(cookies).to.have.length(2)
+
+        const sortedCookies = Cypress._.sortBy(cookies, 'name')
+
+        expect(sortedCookies[0].name).to.equal('key5')
+        expect(sortedCookies[0].domain).to.match(/\.?barbaz\.com/)
+        expect(sortedCookies[1].name).to.equal('key6')
+        expect(sortedCookies[1].domain).to.match(/\.?barbaz\.com/)
+      })
+
+      // webkit does not support cy.origin()
+      if (isWebkit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
 
-        cy.getCookies({ domain: 'barbaz.com' }).then((cookies) => {
-          expect(cookies).to.have.length(2)
-          // both the barbaz.com and www.barbaz.com cookies are yielded
-          expect(cookies[0].domain).to.match(/\.?barbaz\.com/)
-          expect(cookies[1].domain).to.match(/\.?www\.barbaz\.com/)
+        cy.getCookies({ domain: 'www.barbaz.com' }).then((cookies) => {
+          expect(cookies).to.have.length(4)
+
+          const sortedCookies = Cypress._.sortBy(cookies, 'name')
+
+          expect(sortedCookies[0].name).to.equal('key3')
+          expect(sortedCookies[0].domain).to.match(/\.?www\.barbaz\.com/)
+          expect(sortedCookies[1].name).to.equal('key4')
+          expect(sortedCookies[1].domain).to.match(/\.?www\.barbaz\.com/)
+          expect(sortedCookies[2].name).to.equal('key5')
+          expect(sortedCookies[2].domain).to.match(/\.?barbaz\.com/)
+          expect(sortedCookies[3].name).to.equal('key6')
+          expect(sortedCookies[3].domain).to.match(/\.?barbaz\.com/)
         })
       })
     })
+  })
 
-    it('returns cookies for all domains when domain is null', () => {
-      cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
-      cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
-      cy.setCookie('foo', 'bar')
+  context('#getAllCookies', () => {
+    it('returns cookies from all domains', () => {
+      cy.visit('http://barbaz.com:3500/fixtures/generic.html')
+      setCookies()
 
-      cy.getCookies({ domain: null }).should('have.length', 2)
+      cy.getAllCookies().then((cookies) => {
+        expect(cookies).to.have.length(8)
 
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+        const sortedCookies = Cypress._.sortBy(cookies, 'name').map((cookie) => `${cookie.name}=${cookie.value}`)
 
-      cy.origin('http://www.foobar.com:3500', () => {
-        cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
+        expect(sortedCookies).to.deep.equal([
+          'key1=value1',
+          'key2=value2',
+          'key3=value3',
+          'key4=value4',
+          'key5=value5',
+          'key6=value6',
+          'key7=value7',
+          'key8=value8',
+        ])
+      })
 
-        cy.getCookies({ domain: null }).should('have.length', 2)
+      // webkit does not support cy.origin()
+      if (isWebkit) return
+
+      cy.origin('http://foobar.com:3500', () => {
+        cy.visit('http://foobar.com:3500/fixtures/generic.html')
+
+        cy.getAllCookies().then((cookies) => {
+          expect(cookies).to.have.length(8)
+
+          const sortedCookies = Cypress._.sortBy(cookies, 'name').map((cookie) => `${cookie.name}=${cookie.value}`)
+
+          expect(sortedCookies).to.deep.equal([
+            'key1=value1',
+            'key2=value2',
+            'key3=value3',
+            'key4=value4',
+            'key5=value5',
+            'key6=value6',
+            'key7=value7',
+            'key8=value8',
+          ])
+        })
       })
     })
   })
 
   context('#getCookie', () => {
-    it('returns the cookie from the domain matching the AUT by default', () => {
+    const setCookies = () => {
+      cy.log('set cookies')
+      cy.setCookie('key', 'www.barbaz.com value', { domain: 'www.barbaz.com', log: false })
+      cy.setCookie('key', 'barbaz.com value', { domain: 'barbaz.com', log: false })
+      cy.setCookie('key', 'www.foobar.com value', { domain: 'www.foobar.com', log: false })
+      cy.setCookie('key', 'foobar.com value', { domain: 'foobar.com', log: false })
+    }
+
+    it('returns the cookie from the domain matching the AUT by default when AUT is an apex domain', () => {
+      cy.visit('http://barbaz.com:3500/fixtures/generic.html')
+      setCookies()
+
+      cy.getCookie('key').then((cookie) => {
+        expect(cookie.value).to.equal('barbaz.com value')
+        expect(cookie.domain).to.match(/\.?barbaz\.com/)
+      })
+
+      // webkit does not support cy.origin()
+      if (isWebkit) return
+
+      cy.origin('http://foobar.com:3500', () => {
+        cy.visit('http://foobar.com:3500/fixtures/generic.html')
+
+        cy.getCookie('key').then((cookie) => {
+          expect(cookie.value).to.equal('foobar.com value')
+          expect(cookie.domain).to.match(/\.?foobar\.com/)
+        })
+      })
+    })
+
+    it('can return the cookie from the subdomain matching the AUT by default when AUT is a subdomain', () => {
       cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
-      cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
-      cy.setCookie('foo', 'bar')
+      cy.setCookie('key', 'www.barbaz.com value', { domain: 'www.barbaz.com', log: false })
 
-      cy.getCookie('foo').its('domain').should('match', /\.?barbaz\.com/)
+      cy.getCookie('key').then((cookie) => {
+        expect(cookie.value).to.equal('www.barbaz.com value')
+        expect(cookie.domain).to.match(/\.?www\.barbaz\.com/)
+      })
 
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+      // webkit does not support cy.origin()
+      if (isWebkit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
+        cy.setCookie('key', 'www.foobar.com value', { domain: 'www.foobar.com', log: false })
 
-        cy.getCookie('foo').its('domain').should('match', /\.?www\.foobar\.com/)
+        cy.getCookie('key').then((cookie) => {
+          expect(cookie.value).to.equal('www.foobar.com value')
+          expect(cookie.domain).to.match(/\.?www\.foobar\.com/)
+        })
+      })
+    })
+
+    it('can return the cookie from the bare domain matching the AUT by default when AUT is a subdomain', () => {
+      cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
+      cy.setCookie('key', 'barbaz.com value', { domain: 'barbaz.com', log: false })
+
+      cy.getCookie('key').then((cookie) => {
+        expect(cookie.value).to.equal('barbaz.com value')
+        expect(cookie.domain).to.match(/\.?barbaz\.com/)
+      })
+
+      // webkit does not support cy.origin()
+      if (isWebkit) return
+
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
+        cy.setCookie('key', 'foobar.com value', { domain: 'foobar.com', log: false })
+
+        cy.getCookie('key').then((cookie) => {
+          expect(cookie.value).to.equal('foobar.com value')
+          expect(cookie.domain).to.match(/\.?foobar\.com/)
+        })
       })
     })
 
     it('returns the cookie from the specified domain', () => {
       cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
-      cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
-      cy.setCookie('foo', 'bar')
+      setCookies()
 
-      cy.getCookie('foo', { domain: 'www.foobar.com' })
-      .its('domain').should('match', /\.?www\.foobar\.com/)
-
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
-
-      cy.origin('http://www.foobar.com:3500', () => {
-        cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
-
-        cy.getCookie('foo', { domain: 'barbaz.com' })
-        .its('domain').should('match', /\.?barbaz\.com/)
+      cy.getCookie('key', { domain: 'www.foobar.com' }).then((cookie) => {
+        expect(cookie.value).to.equal('www.foobar.com value')
+        expect(cookie.domain).to.match(/\.?www\.foobar\.com/)
       })
-    })
 
-    it('returns cookie for any domain when domain is null', () => {
-      cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
-      cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
-
-      cy.getCookie('foo', { domain: null })
-      .its('domain').should('match', /\.?www\.foobar\.com/)
-
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+      // webkit does not support cy.origin()
+      if (isWebkit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
 
-        cy.clearCookie('foo')
-        cy.setCookie('foo', 'bar', { domain: 'barbaz.com' })
-
-        cy.getCookie('foo', { domain: null })
-        .its('domain').should('match', /\.?barbaz\.com/)
+        cy.getCookie('key', { domain: 'www.barbaz.com' }).then((cookie) => {
+          expect(cookie.value).to.equal('www.barbaz.com value')
+          expect(cookie.domain).to.match(/\.?www\.barbaz\.com/)
+        })
       })
     })
   })
@@ -140,28 +281,37 @@ describe('src/cy/commands/cookies - no stub', () => {
   context('#setCookie', () => {
     it('sets the cookie on the domain matching the AUT by default', () => {
       cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
-      cy.setCookie('foo', 'bar')
+      cy.setCookie('key', 'value')
 
-      cy.getCookie('foo').its('domain').should('match', /\.?barbaz\.com/)
+      cy.getCookie('key').its('domain').should('match', /\.?www\.barbaz\.com/)
+      // domain is exact
+      cy.getCookie('key', { domain: 'barbaz.com' }).should('be.null')
 
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+      // webkit does not support cy.origin()
+      if (isWebkit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
-        cy.setCookie('foo', 'bar')
+        cy.setCookie('key', 'value')
 
-        cy.getCookie('foo').its('domain').should('equal', '.foobar.com')
+        cy.getCookie('key').its('domain').should('match', /\.?www\.foobar\.com/)
+        // domain is exact
+        cy.getCookie('key', { domain: 'foobar.com' }).should('be.null')
       })
     })
 
-    it('set the cookie on the specified domain', () => {
+    it('sets the cookie on the specified domain', () => {
       cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
       cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
 
       cy.getCookie('foo', { domain: 'www.foobar.com' })
       .its('domain').should('match', /\.?www\.foobar\.com/)
 
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+      // domain is exact
+      cy.getCookie('key', { domain: 'foobar.com' }).should('be.null')
+
+      // webkit does not support cy.origin()
+      if (isWebkit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
@@ -169,168 +319,247 @@ describe('src/cy/commands/cookies - no stub', () => {
 
         cy.getCookie('foo', { domain: 'barbaz.com' })
         .its('domain').should('match', /\.?barbaz\.com/)
+
+        // domain is exact
+        cy.getCookie('key', { domain: 'barbaz.com' }).should('be.null')
       })
     })
   })
 
   context('#clearCookies', () => {
-    it('clears all cookies', () => {
-      cy.setCookie('foo', 'bar')
-      cy.getCookies().should('have.length', 1)
-      cy.clearCookies()
-      cy.getCookies().should('have.length', 0)
-    })
-
-    it('clears the cookies on the domain matching the AUT by default', () => {
-      cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
-      cy.setCookie('foo', 'bar')
-      cy.setCookie('baz', 'qux')
-      cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
-
+    it('clears cookies from only the bare domain matching the AUT by default when AUT is an apex domain', () => {
+      cy.visit('http://barbaz.com:3500/fixtures/generic.html')
+      setCookies()
       cy.clearCookies()
 
-      cy.getCookie('foo').should('be.null')
-      cy.getCookie('baz').should('be.null')
-      cy.getCookie('foo', { domain: 'www.foobar.com' }).should('exist')
+      cy.getCookie('key1', { domain: 'www.foobar.com' }).should('exist')
+      cy.getCookie('key2', { domain: 'foobar.com' }).should('exist')
+      cy.getCookie('key3', { domain: 'www.barbaz.com' }).should('exist')
+      cy.getCookie('key4', { domain: 'www.barbaz.com' }).should('exist')
+      cy.getCookie('key5').should('not.exist')
+      cy.getCookie('key6').should('not.exist')
 
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+      // webkit does not support cy.origin()
+      if (isWebkit) return
 
-      cy.origin('http://www.foobar.com:3500', () => {
-        cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
-        cy.setCookie('baz', 'qux')
-        cy.setCookie('foo', 'bar', { domain: 'barbaz.com' })
+      cy.origin('http://foobar.com:3500', () => {
+        cy.visit('http://foobar.com:3500/fixtures/generic.html')
+        // put back cookies removed above
+        cy.setCookie('key5', 'value5', { domain: 'barbaz.com' })
+        cy.setCookie('key6', 'value6', { domain: 'barbaz.com' })
 
         cy.clearCookies()
 
-        cy.getCookie('foo').should('be.null')
-        cy.getCookie('baz').should('be.null')
-        cy.getCookie('foo', { domain: 'barbaz.com' }).should('exist')
+        cy.getCookie('key1', { domain: 'www.foobar.com' }).should('exist')
+        cy.getCookie('key2').should('be.null')
+        cy.getCookie('key3', { domain: 'www.barbaz.com' }).should('exist')
+        cy.getCookie('key4', { domain: 'www.barbaz.com' }).should('exist')
+        cy.getCookie('key5', { domain: 'barbaz.com' }).should('exist')
+        cy.getCookie('key6', { domain: 'barbaz.com' }).should('exist')
+      })
+    })
+
+    it('clears cookies from the subdomain and bare domain matching the AUT by default when AUT is a subdomain', () => {
+      cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
+      setCookies()
+      cy.clearCookies()
+
+      cy.getCookie('key1', { domain: 'www.foobar.com' }).should('exist')
+      cy.getCookie('key2', { domain: 'foobar.com' }).should('exist')
+      cy.getCookie('key3').should('not.exist')
+      cy.getCookie('key4').should('not.exist')
+      cy.getCookie('key5').should('not.exist')
+      cy.getCookie('key6').should('not.exist')
+
+      // webkit does not support cy.origin()
+      if (isWebkit) return
+
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
+        // put back cookies removed above
+        cy.setCookie('key3', 'value3', { domain: 'www.barbaz.com' })
+        cy.setCookie('key4', 'value4', { domain: 'www.barbaz.com' })
+        cy.setCookie('key5', 'value5', { domain: 'barbaz.com' })
+        cy.setCookie('key6', 'value6', { domain: 'barbaz.com' })
+
+        cy.clearCookies()
+
+        cy.getCookie('key1').should('be.null')
+        cy.getCookie('key2').should('be.null')
+        cy.getCookie('key3', { domain: 'www.barbaz.com' }).should('exist')
+        cy.getCookie('key4', { domain: 'www.barbaz.com' }).should('exist')
+        cy.getCookie('key5', { domain: 'barbaz.com' }).should('exist')
+        cy.getCookie('key6', { domain: 'barbaz.com' }).should('exist')
       })
     })
 
     it('clears the cookies on the specified domain', () => {
       cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
-      cy.setCookie('foo', 'bar')
-      cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
-      cy.setCookie('baz', 'qux', { domain: 'www.foobar.com' })
-
+      setCookies()
       cy.clearCookies({ domain: 'www.foobar.com' })
 
-      cy.getCookie('foo', { domain: 'www.foobar.com' }).should('be.null')
-      cy.getCookie('baz', { domain: 'www.foobar.com' }).should('be.null')
-      cy.getCookie('foo').should('exist')
+      cy.getCookie('key1').should('be.null')
+      cy.getCookie('key2').should('be.null')
+      cy.getCookie('key3', { domain: 'www.barbaz.com' }).should('exist')
+      cy.getCookie('key4', { domain: 'www.barbaz.com' }).should('exist')
+      cy.getCookie('key5', { domain: 'barbaz.com' }).should('exist')
+      cy.getCookie('key6', { domain: 'barbaz.com' }).should('exist')
 
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+      // webkit does not support cy.origin()
+      if (isWebkit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
-        cy.setCookie('foo', 'bar')
-        cy.setCookie('baz', 'qux', { domain: 'barbaz.com' })
+        // put back cookies removed above
+        cy.setCookie('key1', 'value1')
+        cy.setCookie('key2', 'value2', { domain: 'foobar.com' })
 
-        cy.clearCookies({ domain: 'barbaz.com' })
+        cy.clearCookies({ domain: 'www.barbaz.com' })
 
-        cy.getCookie('foo', { domain: 'barbaz.com' }).should('be.null')
-        cy.getCookie('baz', { domain: 'barbaz.com' }).should('be.null')
-        cy.getCookie('foo').should('exist')
+        cy.getCookie('key1', { domain: 'www.foobar.com' }).should('exist')
+        cy.getCookie('key2', { domain: 'foobar.com' }).should('exist')
+        cy.getCookie('key3').should('not.exist')
+        cy.getCookie('key4').should('not.exist')
+        cy.getCookie('key5').should('not.exist')
+        cy.getCookie('key6').should('not.exist')
       })
     })
+  })
 
-    it('clears cookies for all domains when domain is null', () => {
-      cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
-      cy.setCookie('foo', 'bar')
-      cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
+  context('#clearAllCookies', () => {
+    it('clears cookies from all domains', () => {
+      cy.visit('http://barbaz.com:3500/fixtures/generic.html')
+      setCookies()
+      cy.clearAllCookies()
 
-      cy.clearCookies({ domain: null })
-      cy.getCookies().should('have.length', 0)
+      cy.getAllCookies().its('length').should('equal', 0)
 
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+      // webkit does not support cy.origin()
+      if (isWebkit) return
 
-      cy.origin('http://www.foobar.com:3500', () => {
-        cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
+      cy.origin('http://foobar.com:3500', () => {
+        cy.visit('http://foobar.com:3500/fixtures/generic.html')
+        // put back cookies removed above
+        cy.setCookie('key1', 'value1', { domain: 'www.foobar.com', log: false })
+        cy.setCookie('key2', 'value2', { domain: 'foobar.com', log: false })
+        cy.setCookie('key3', 'value3', { domain: 'www.barbaz.com', log: false })
+        cy.setCookie('key4', 'value4', { domain: '.www.barbaz.com', log: false })
+        cy.setCookie('key5', 'value5', { domain: 'barbaz.com', log: false })
+        cy.setCookie('key6', 'value6', { domain: '.barbaz.com', log: false })
+        cy.setCookie('key7', 'value7', { domain: 'www2.barbaz.com', log: false })
+        cy.setCookie('key8', 'value8', { domain: 'www2.foobar.com', log: false })
 
-        cy.setCookie('foo', 'bar')
-        cy.setCookie('foo', 'bar', { domain: 'barbaz.com' })
+        cy.clearAllCookies()
 
-        cy.clearCookies({ domain: null })
-        cy.getCookies().should('have.length', 0)
+        cy.getAllCookies().its('length').should('equal', 0)
       })
     })
   })
 
   context('#clearCookie', () => {
-    it('clears a single cookie', () => {
-      cy.setCookie('foo', 'bar')
-      cy.setCookie('key', 'val')
-      cy.getCookies().should('have.length', 2)
-      cy.clearCookie('foo')
-      cy.getCookies().should('have.length', 1).then((cookies) => {
-        expect(cookies[0].name).to.eq('key')
+    const setCookies = () => {
+      cy.log('set cookies')
+      cy.setCookie('key', 'www.barbaz.com value', { domain: 'www.barbaz.com', log: false })
+      cy.setCookie('key', 'barbaz.com value', { domain: 'barbaz.com', log: false })
+      cy.setCookie('key', 'www.foobar.com value', { domain: 'www.foobar.com', log: false })
+      cy.setCookie('key', 'foobar.com value', { domain: 'foobar.com', log: false })
+    }
+
+    it('clears the cookie from the domain matching the AUT by default when AUT is an apex domain', () => {
+      cy.visit('http://barbaz.com:3500/fixtures/generic.html')
+      setCookies()
+
+      cy.clearCookie('key')
+
+      cy.getCookie('key').should('be.null')
+      cy.getCookie('key', { domain: 'www.barbaz.com' }).should('exist')
+      cy.getCookie('key', { domain: 'www.foobar.com' }).should('exist')
+      cy.getCookie('key', { domain: 'foobar.com' }).should('exist')
+
+      // webkit does not support cy.origin()
+      if (isWebkit) return
+
+      cy.origin('http://foobar.com:3500', () => {
+        cy.visit('http://foobar.com:3500/fixtures/generic.html')
+        // put back cookie removed above
+        cy.setCookie('key', 'value1', { domain: 'barbaz.com' })
+
+        cy.clearCookie('key')
+
+        cy.getCookie('key').should('be.null')
+        cy.getCookie('key', { domain: 'www.barbaz.com' }).should('exist')
+        cy.getCookie('key', { domain: 'barbaz.com' }).should('exist')
+        cy.getCookie('key', { domain: 'www.foobar.com' }).should('exist')
       })
     })
 
-    it('clears the cookie on the domain matching the AUT by default', () => {
+    it('can clear the cookie from the subdomain matching the AUT by default when AUT is a subdomain', () => {
       cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
-      cy.setCookie('foo', 'bar')
-      cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
+      cy.setCookie('key', 'www.barbaz.com value', { domain: 'www.barbaz.com', log: false })
 
-      cy.clearCookie('foo')
+      cy.clearCookie('key')
 
-      cy.getCookie('foo').should('be.null')
-      cy.getCookie('foo', { domain: 'www.foobar.com' }).should('exist')
+      cy.getCookie('key').should('not.exist')
 
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+      // webkit does not support cy.origin()
+      if (isWebkit) return
 
       cy.origin('http://www.foobar.com:3500', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
-        cy.setCookie('foo', 'bar', { domain: 'barbaz.com' })
+        cy.setCookie('key', 'www.foobar.com value', { domain: 'www.foobar.com', log: false })
 
-        cy.clearCookie('foo')
+        cy.clearCookie('key')
 
-        cy.getCookie('foo').should('be.null')
-        cy.getCookie('foo', { domain: 'barbaz.com' }).should('exist')
+        cy.getCookie('key').should('not.exist')
+      })
+    })
+
+    it('can clear the cookie from the bare domain matching the AUT by default when AUT is a subdomain', () => {
+      cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
+      cy.setCookie('key', 'barbaz.com value', { domain: 'barbaz.com', log: false })
+
+      cy.clearCookie('key')
+
+      cy.getCookie('key').should('not.exist')
+
+      // webkit does not support cy.origin()
+      if (isWebkit) return
+
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
+        cy.setCookie('key', 'foobar.com value', { domain: 'foobar.com', log: false })
+
+        cy.clearCookie('key')
+
+        cy.getCookie('key').should('not.exist')
       })
     })
 
     it('clears the cookie on the specified domain', () => {
-      cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
-      cy.setCookie('foo', 'bar')
-      cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
+      cy.visit('http://barbaz.com:3500/fixtures/generic.html')
+      setCookies()
 
-      cy.clearCookie('foo', { domain: 'www.foobar.com' })
+      cy.clearCookie('key', { domain: 'foobar.com' })
 
-      cy.getCookie('foo', { domain: 'www.foobar.com' }).should('be.null')
-      cy.getCookie('foo').should('exist')
+      cy.getCookie('key', { domain: 'foobar.com' }).should('be.null')
+      cy.getCookie('key', { domain: 'www.foobar.com' }).should('exist')
+      cy.getCookie('key', { domain: 'www.barbaz.com' }).should('exist')
+      cy.getCookie('key', { domain: 'barbaz.com' }).should('exist')
 
-      if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
+      // webkit does not support cy.origin()
+      if (isWebkit) return
 
-      cy.origin('http://www.foobar.com:3500', () => {
-        cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
-        cy.setCookie('foo', 'bar')
+      cy.origin('http://foobar.com:3500', () => {
+        cy.visit('http://foobar.com:3500/fixtures/generic.html')
+        cy.setCookie('key', 'value1')
 
-        cy.clearCookie('foo', { domain: 'barbaz.com' })
+        cy.clearCookie('key', { domain: 'barbaz.com' })
 
-        cy.getCookie('foo', { domain: 'barbaz.com' }).should('be.null')
-        cy.getCookie('foo').should('exist')
+        cy.getCookie('key', { domain: 'barbaz.com' }).should('be.null')
+        cy.getCookie('key', { domain: 'www.barbaz.com' }).should('exist')
+        cy.getCookie('key', { domain: 'www.foobar.com' }).should('exist')
+        cy.getCookie('key', { domain: 'foobar.com' }).should('exist')
       })
-    })
-  })
-
-  it('clears cookie for any domain when domain is null', () => {
-    cy.visit('http://www.barbaz.com:3500/fixtures/generic.html')
-    cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
-
-    cy.clearCookie('foo', { domain: null })
-    cy.getCookies().should('have.length', 0)
-
-    if (isWebkit || !Cypress.config('experimentalSessionAndOrigin')) return
-
-    cy.origin('http://www.foobar.com:3500', () => {
-      cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
-
-      cy.setCookie('foo', 'bar', { domain: 'barbaz.com' })
-
-      cy.clearCookie('foo', { domain: null })
-      cy.getCookies().should('have.length', 0)
     })
   })
 })
@@ -512,6 +741,159 @@ describe('src/cy/commands/cookies', () => {
         })
 
         cy.getCookies({ timeout: 50 })
+      })
+    })
+
+    describe('.log', () => {
+      beforeEach(function () {
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'getCookies') {
+            this.lastLog = log
+          }
+        })
+
+        Cypress.automation
+        .withArgs('get:cookies', { domain: 'localhost' })
+        .resolves([
+          { name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: false },
+        ])
+      })
+
+      it('can turn off logging', () => {
+        cy.getCookies({ log: false }).then(function () {
+          expect(this.lastLog).to.be.undefined
+        })
+      })
+
+      it('ends immediately', () => {
+        cy.getCookies().then(function () {
+          const { lastLog } = this
+
+          expect(lastLog.get('ended')).to.be.true
+          expect(lastLog.get('state')).to.eq('passed')
+        })
+      })
+
+      it('snapshots immediately', () => {
+        cy.getCookies().then(function () {
+          const { lastLog } = this
+
+          expect(lastLog.get('snapshots').length).to.eq(1)
+          expect(lastLog.get('snapshots')[0]).to.be.an('object')
+        })
+      })
+
+      it('#consoleProps', () => {
+        cy.getCookies().then(function (cookies) {
+          expect(cookies).to.deep.eq([{ name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false }])
+          const c = this.lastLog.invoke('consoleProps')
+
+          expect(c['Yielded']).to.deep.eq(cookies)
+          expect(c['Num Cookies']).to.eq(1)
+        })
+      })
+    })
+  })
+
+  context('#getAllCookies', () => {
+    it('returns array of cookies', () => {
+      Cypress.automation.withArgs('get:cookies').resolves([])
+
+      cy.getAllCookies().should('deep.eq', []).then(() => {
+        expect(Cypress.automation).to.be.calledWith('get:cookies')
+      })
+    })
+
+    describe('timeout', () => {
+      it('sets timeout to Cypress.config(responseTimeout)', { responseTimeout: 2500 }, () => {
+        Cypress.automation.resolves([])
+
+        const timeout = cy.spy(Promise.prototype, 'timeout')
+
+        cy.getAllCookies().then(() => {
+          expect(timeout).to.be.calledWith(2500)
+        })
+      })
+
+      it('can override timeout', () => {
+        Cypress.automation.resolves([])
+
+        const timeout = cy.spy(Promise.prototype, 'timeout')
+
+        cy.getAllCookies({ timeout: 1000 }).then(() => {
+          expect(timeout).to.be.calledWith(1000)
+        })
+      })
+
+      it('clears the current timeout and restores after success', () => {
+        Cypress.automation.resolves([])
+
+        cy.timeout(100)
+
+        cy.spy(cy, 'clearTimeout')
+
+        cy.getAllCookies().then(() => {
+          expect(cy.clearTimeout).to.be.calledWith('get:cookies')
+
+          // restores the timeout afterwards
+          expect(cy.timeout()).to.eq(100)
+        })
+      })
+    })
+
+    describe('errors', { defaultCommandTimeout: 50 }, () => {
+      beforeEach(function () {
+        this.logs = []
+
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'getAllCookies') {
+            this.lastLog = log
+            this.logs.push(log)
+          }
+        })
+
+        return null
+      })
+
+      it('logs once on error', function (done) {
+        const error = new Error('some err message')
+
+        error.name = 'foo'
+        error.stack = 'stack'
+
+        Cypress.automation.rejects(error)
+
+        cy.on('fail', () => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 1)
+          expect(lastLog.get('error').message).to.contain(`\`cy.getAllCookies()\` had an unexpected error reading cookies from ${Cypress.browser.displayName}.`)
+          expect(lastLog.get('error').message).to.contain('some err message')
+
+          done()
+        })
+
+        cy.getAllCookies()
+      })
+
+      it('throws after timing out', function (done) {
+        Cypress.automation.resolves(Promise.delay(1000))
+
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 1)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(lastLog.get('name')).to.eq('getAllCookies')
+          expect(lastLog.get('message')).to.eq('')
+          expect(err.message).to.eq('`cy.getAllCookies()` timed out waiting `50ms` to complete.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/getallcookies')
+
+          done()
+        })
+
+        cy.getAllCookies({ timeout: 50 })
       })
     })
 
@@ -1340,48 +1722,14 @@ describe('src/cy/commands/cookies', () => {
       })
     })
 
-    it('calls \'clear:cookies\' only with clearableCookies', () => {
-      Cypress.automation
-      .withArgs('get:cookies')
-      .resolves([
-        { name: 'foo' },
-        { name: 'bar' },
-      ])
-      .withArgs('clear:cookies', [
-        { name: 'foo', domain: 'localhost' },
-      ])
-      .resolves({
-        name: 'foo',
-      })
-
-      cy.stub(Cypress.Cookies, 'getClearableCookies')
-      .withArgs([{ name: 'foo' }, { name: 'bar' }])
-      .returns([{ name: 'foo' }])
-
-      cy.clearCookies().should('be.null').then(() => {
-        expect(Cypress.automation).to.be.calledWith(
-          'clear:cookies',
-          [{ name: 'foo', domain: 'localhost' }],
-        )
-      })
-    })
-
     it('calls \'clear:cookies\' with all cookies', () => {
-      Cypress.Cookies.preserveOnce('bar', 'baz')
-
       Cypress.automation
       .withArgs('get:cookies')
       .resolves([
-        { name: 'foo' },
-        { name: 'bar' },
-        { name: 'baz' },
-      ])
-      .withArgs('clear:cookies', [
         { name: 'foo', domain: 'localhost' },
+        { name: 'bar', domain: 'localhost' },
+        { name: 'baz', domain: 'localhost' },
       ])
-      .resolves({
-        name: 'foo',
-      })
       .withArgs('clear:cookies', [
         { name: 'foo', domain: 'localhost' },
         { name: 'bar', domain: 'localhost' },
@@ -1393,11 +1741,6 @@ describe('src/cy/commands/cookies', () => {
 
       cy
       .clearCookies().should('be.null').then(() => {
-        expect(Cypress.automation).to.be.calledWith(
-          'clear:cookies',
-          [{ name: 'foo', domain: 'localhost' }],
-        )
-      }).clearCookies().should('be.null').then(() => {
         expect(Cypress.automation).to.be.calledWith(
           'clear:cookies', [
             { name: 'foo', domain: 'localhost' },
@@ -1564,7 +1907,7 @@ describe('src/cy/commands/cookies', () => {
 
         Cypress.automation
         .withArgs('get:cookies', { domain: 'localhost' })
-        .resolves([{ name: 'foo' }])
+        .resolves([{ name: 'foo', domain: 'localhost' }])
         .withArgs('clear:cookies', [{ name: 'foo', domain: 'localhost' }])
         .resolves([
           { name: 'foo' },
@@ -1642,7 +1985,7 @@ describe('src/cy/commands/cookies', () => {
 
         Cypress.automation
         .withArgs('get:cookies', { domain: 'localhost' })
-        .resolves([{ name: 'foo' }])
+        .resolves([{ name: 'foo', domain: 'localhost' }])
         .withArgs('clear:cookies', [{ name: 'foo', domain: 'localhost' }])
         .resolves([])
       })
@@ -1660,33 +2003,285 @@ describe('src/cy/commands/cookies', () => {
     })
   })
 
-  context('Cypress.Cookies.defaults', () => {
-    it('throws error on use of renamed whitelist option', (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).to.include('`Cypress.Cookies.defaults` `whitelist` option has been renamed to `preserve`. Please rename `whitelist` to `preserve`.')
+  context('#clearAllCookies', () => {
+    it('returns null', () => {
+      Cypress.automation.withArgs('get:cookies').resolves([])
 
-        done()
-      })
+      cy.clearAllCookies().should('be.null')
+    })
 
-      Cypress.Cookies.defaults({
-        whitelist: 'session_id',
+    it('does not call \'clear:cookies\' when no cookies were returned', () => {
+      Cypress.automation.withArgs('get:cookies').resolves([])
+
+      cy.clearAllCookies().then(() => {
+        expect(Cypress.automation).not.to.be.calledWith(
+          'clear:cookies',
+        )
       })
     })
 
-    it('logs deprecation warning', () => {
-      cy.stub(Cypress.utils, 'warning')
+    it('calls \'clear:cookies\' with all cookies', () => {
+      Cypress.automation
+      .withArgs('get:cookies')
+      .resolves([
+        { name: 'foo', domain: 'localhost' },
+        { name: 'bar', domain: 'bar.com' },
+        { name: 'qux', domain: 'qux.com' },
+      ])
+      .withArgs('clear:cookies', [
+        { name: 'foo', domain: 'localhost' },
+        { name: 'bar', domain: 'bar.com' },
+        { name: 'qux', domain: 'qux.com' },
+      ])
+      .resolves([
+        { name: 'foo', domain: 'localhost' },
+        { name: 'bar', domain: 'bar.com' },
+        { name: 'qux', domain: 'qux.com' },
+      ])
 
-      Cypress.Cookies.defaults({})
-      expect(Cypress.utils.warning).to.be.calledWith('`Cypress.Cookies.defaults()` has been deprecated and will be removed in a future release. Consider using `cy.session()` instead.\n\nhttps://on.cypress.io/session')
+      cy
+      .clearAllCookies().should('be.null').then(() => {
+        expect(Cypress.automation).to.be.calledWith(
+          'clear:cookies', [
+            { name: 'foo', domain: 'localhost' },
+            { name: 'bar', domain: 'bar.com' },
+            { name: 'qux', domain: 'qux.com' },
+          ],
+        )
+      })
     })
-  })
 
-  context('Cypress.Cookies.preserveOnce', () => {
-    it('logs deprecation warning', () => {
-      cy.stub(Cypress.utils, 'warning')
+    describe('timeout', () => {
+      beforeEach(() => {
+        Cypress.automation
+        .withArgs('get:cookies')
+        .resolves([{}])
+        .withArgs('clear:cookies')
+        .resolves({})
+      })
 
-      Cypress.Cookies.preserveOnce({})
-      expect(Cypress.utils.warning).to.be.calledWith('`Cypress.Cookies.preserveOnce()` has been deprecated and will be removed in a future release. Consider using `cy.session()` instead.\n\nhttps://on.cypress.io/session')
+      it('sets timeout to Cypress.config(responseTimeout)', {
+        responseTimeout: 2500,
+      }, () => {
+        Cypress.automation.resolves([])
+
+        const timeout = cy.spy(Promise.prototype, 'timeout')
+
+        cy.clearAllCookies().then(() => {
+          expect(timeout).to.be.calledWith(2500)
+        })
+      })
+
+      it('can override timeout', () => {
+        Cypress.automation.resolves([])
+
+        const timeout = cy.spy(Promise.prototype, 'timeout')
+
+        cy.clearAllCookies({ timeout: 1000 }).then(() => {
+          expect(timeout).to.be.calledWith(1000)
+        })
+      })
+
+      it('clears the current timeout and restores after success', () => {
+        cy.timeout(100)
+
+        cy.spy(cy, 'clearTimeout')
+
+        cy.clearAllCookies().then(() => {
+          expect(cy.clearTimeout).to.be.calledWith('get:cookies')
+          expect(cy.clearTimeout).to.be.calledWith('clear:cookies')
+
+          // restores the timeout afterwards
+          expect(cy.timeout()).to.eq(100)
+        })
+      })
+    })
+
+    describe('errors', { defaultCommandTimeout: 100 }, () => {
+      beforeEach(function () {
+        this.logs = []
+
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'clearAllCookies') {
+            this.lastLog = log
+            this.logs.push(log)
+          }
+        })
+
+        return null
+      })
+
+      it('logs once on \'get:cookies\' error', function (done) {
+        const error = new Error('some err message')
+
+        error.name = 'foo'
+        error.stack = 'some err message\n  at fn (foo.js:1:1)'
+
+        Cypress.automation.rejects(error)
+
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 1)
+          expect(lastLog.get('error').message).to.contain(`\`cy.clearAllCookies()\` had an unexpected error clearing cookies in ${Cypress.browser.displayName}.`)
+          expect(lastLog.get('error').message).to.contain('some err message')
+          expect(lastLog.get('error')).to.eq(err)
+
+          done()
+        })
+
+        cy.clearAllCookies()
+      })
+
+      it('throws after timing out', function (done) {
+        Cypress.automation.resolves([{ name: 'foo' }])
+        Cypress.automation.withArgs('clear:cookies').resolves(Promise.delay(1000))
+
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 1)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(lastLog.get('name')).to.eq('clearAllCookies')
+          expect(lastLog.get('message')).to.eq('')
+          expect(err.message).to.eq('`cy.clearAllCookies()` timed out waiting `50ms` to complete.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/clearallcookies')
+
+          done()
+        })
+
+        cy.clearAllCookies({ timeout: 50 })
+      })
+
+      it('logs once on \'clear:cookies\' error', function (done) {
+        Cypress.automation.withArgs('get:cookies').resolves([
+          { name: 'foo' }, { name: 'bar' },
+        ])
+
+        const error = new Error('some err message')
+
+        error.name = 'foo'
+        error.stack = 'stack'
+
+        Cypress.automation.withArgs('clear:cookies').rejects(error)
+
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 1)
+          expect(lastLog.get('error').message).to.contain(`\`cy.clearAllCookies()\` had an unexpected error clearing cookies in ${Cypress.browser.displayName}.`)
+          expect(lastLog.get('error').message).to.contain('some err message')
+          expect(lastLog.get('error')).to.eq(err)
+
+          done()
+        })
+
+        cy.clearAllCookies()
+      })
+    })
+
+    describe('.log', () => {
+      beforeEach(function () {
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'clearAllCookies') {
+            this.lastLog = log
+          }
+        })
+
+        Cypress.automation
+        .withArgs('get:cookies', {})
+        .resolves([{ name: 'foo', domain: 'localhost' }])
+        .withArgs('clear:cookies', [{ name: 'foo', domain: 'localhost' }])
+        .resolves([
+          { name: 'foo' },
+        ])
+      })
+
+      it('can turn off logging', () => {
+        cy.clearAllCookies({ log: false }).then(function () {
+          expect(this.log).to.be.undefined
+        })
+      })
+
+      it('ends immediately', () => {
+        cy.clearAllCookies().then(function () {
+          const { lastLog } = this
+
+          expect(lastLog.get('ended')).to.be.true
+          expect(lastLog.get('state')).to.eq('passed')
+        })
+      })
+
+      it('snapshots immediately', () => {
+        cy.clearAllCookies().then(function () {
+          const { lastLog } = this
+
+          expect(lastLog.get('snapshots').length).to.eq(1)
+          expect(lastLog.get('snapshots')[0]).to.be.an('object')
+        })
+      })
+
+      it('#consoleProps', () => {
+        cy.clearAllCookies().then(function (cookies) {
+          expect(cookies).to.be.null
+          const c = this.lastLog.invoke('consoleProps')
+
+          expect(c['Yielded']).to.eq('null')
+          expect(c['Cleared Cookies']).to.deep.eq([{ name: 'foo' }])
+          expect(c['Num Cookies']).to.eq(1)
+        })
+      })
+    })
+
+    describe('.log with no cookies returned', () => {
+      beforeEach(function () {
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'clearAllCookies') {
+            this.lastLog = log
+          }
+        })
+
+        Cypress.automation
+        .withArgs('get:cookies')
+        .resolves([])
+      })
+
+      it('#consoleProps', () => {
+        cy.clearAllCookies().then(function (cookies) {
+          expect(cookies).to.be.null
+          const c = this.lastLog.invoke('consoleProps')
+
+          expect(c['Yielded']).to.eq('null')
+          expect(c['Cleared Cookies']).to.be.undefined
+          expect(c['Note']).to.eq('No cookies were found or removed.')
+        })
+      })
+    })
+
+    describe('.log when no cookies were cleared', () => {
+      beforeEach(function () {
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'clearAllCookies') {
+            this.lastLog = log
+          }
+        })
+
+        Cypress.automation
+        .withArgs('get:cookies', {})
+        .resolves([])
+      })
+
+      it('#consoleProps', () => {
+        cy.clearAllCookies().then(function (cookies) {
+          expect(cookies).to.be.null
+          const c = this.lastLog.invoke('consoleProps')
+
+          expect(c['Yielded']).to.eq('null')
+          expect(c['Cleared Cookies']).to.be.undefined
+          expect(c['Note']).to.eq('No cookies were found or removed.')
+        })
+      })
     })
   })
 })

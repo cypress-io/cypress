@@ -28,6 +28,10 @@ describe('http/error-middleware', function () {
         outgoingReq: {
           abort: sinon.stub(),
         },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
       }
 
       return testMiddleware([AbortRequest], ctx)
@@ -37,7 +41,12 @@ describe('http/error-middleware', function () {
     })
 
     it('does not destroy outgoingReq if it does not exist', function () {
-      return testMiddleware([AbortRequest], {})
+      return testMiddleware([AbortRequest], {
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      })
     })
   })
 
@@ -46,6 +55,10 @@ describe('http/error-middleware', function () {
       const ctx = {
         incomingResStream: {
           unpipe: sinon.stub(),
+        },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
         },
       }
 
@@ -56,7 +69,12 @@ describe('http/error-middleware', function () {
     })
 
     it('does not unpipe incomingRes if it does not exist', function () {
-      return testMiddleware([UnpipeResponse], {})
+      return testMiddleware([UnpipeResponse], {
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      })
     })
   })
 
@@ -65,6 +83,8 @@ describe('http/error-middleware', function () {
       const ctx = {
         res: {
           destroy: sinon.stub(),
+          on: (event, listener) => {},
+          off: (event, listener) => {},
         },
       }
 

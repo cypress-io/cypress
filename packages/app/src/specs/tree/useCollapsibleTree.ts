@@ -40,7 +40,8 @@ export const getPlatform = (): string => {
 }
 
 const getRegexSeparator = () => getPlatform() === 'win32' ? /\\/ : /\//
-const getSeparator = () => getPlatform() === 'win32' ? '\\' : '/'
+
+export const getSeparator = () => getPlatform() === 'win32' ? '\\' : '/'
 
 export function buildSpecTree<T extends FoundSpec> (specs: FoundSpec[], root: SpecTreeNode<T> = { name: '', isLeaf: false, children: [], id: '', highlightIndexes: [] }): SpecTreeNode<T> {
   specs.forEach((spec) => buildSpecTreeRecursive(spec.relative, root, spec))

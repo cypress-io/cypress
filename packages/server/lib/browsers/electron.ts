@@ -64,7 +64,7 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
     win.destroy()
   }
 
-  const automation = await CdpAutomation.create(sendCommand, on, sendClose, parent, options.experimentalSessionAndOrigin)
+  const automation = await CdpAutomation.create(sendCommand, on, sendClose, parent)
 
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
     switch (message) {
@@ -112,7 +112,7 @@ function _installExtensions (win: BrowserWindow, extensionPaths: string[], optio
 async function recordVideo (cdpAutomation: CdpAutomation, videoApi: RunModeVideoApi) {
   const { writeVideoFrame } = await videoApi.useFfmpegVideoController()
 
-  await cdpAutomation.startVideoRecording(writeVideoFrame)
+  await cdpAutomation.startVideoRecording(writeVideoFrame, screencastOpts())
 }
 
 export = {
@@ -288,9 +288,7 @@ export = {
     await this._enableDebugger(win.webContents)
 
     await win.loadURL(url)
-    if (options.experimentalSessionAndOrigin) {
-      this._listenToOnBeforeHeaders(win)
-    }
+    this._listenToOnBeforeHeaders(win)
 
     return win
   },

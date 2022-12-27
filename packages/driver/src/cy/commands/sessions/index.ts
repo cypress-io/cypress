@@ -12,10 +12,6 @@ import {
   statusMap,
 } from './utils'
 
-import type { ServerSessionData } from '@packages/types'
-
-type SessionData = Cypress.Commands.Session.SessionData
-
 /**
  * Session data should be cleared with spec browser launch.
  *
@@ -25,48 +21,30 @@ type SessionData = Cypress.Commands.Session.SessionData
  *  - session data SHOULD be cleared between specs in run mode
  */
 export default function (Commands, Cypress, cy) {
-  function throwIfNoSessionSupport () {
-    if (!Cypress.config('experimentalSessionAndOrigin')) {
-      $errUtils.throwErrByPath('sessions.experimentNotEnabled', {
-        args: {
-          // determine if using experimental session opt-in flag (removed in 9.6.0) to
-          // generate a coherent error message
-          experimentalSessionSupport: Cypress.config('experimentalSessionSupport'),
-        },
-      })
-    }
-  }
-
   const sessionsManager = new SessionsManager(Cypress, cy)
   const sessions = sessionsManager.sessions
 
   Cypress.on('run:start', () => {
     // @ts-ignore
-    Object.values(Cypress.state('activeSessions') || {}).forEach((sessionData: ServerSessionData) => {
+    Object.values(Cypress.state('activeSessions') || {}).forEach((sessionData: Cypress.ServerSessionData) => {
       if (sessionData.cacheAcrossSpecs) {
         sessionsManager.registeredSessions.set(sessionData.id, true)
       }
     })
 
     Cypress.on('test:before:run:async', () => {
-      if (Cypress.config('experimentalSessionAndOrigin')) {
-        if (Cypress.config('testIsolation') === 'off') {
-          return
-        }
-
-        return navigateAboutBlank(false)
-        .then(() => sessions.clearCurrentSessionData())
-        .then(() => Cypress.backend('reset:rendered:html:origins'))
+      if (!Cypress.config('testIsolation')) {
+        return
       }
 
-      return
+      return navigateAboutBlank()
+      .then(() => sessions.clearCurrentSessionData())
+      .then(() => Cypress.backend('reset:rendered:html:origins'))
     })
   })
 
   Commands.addAll({
     session (id: string | object, setup: () => void, options: Cypress.SessionOptions = { cacheAcrossSpecs: false }) {
-      throwIfNoSessionSupport()
-
       if (!id || !_.isString(id) && !_.isObject(id)) {
         $errUtils.throwErrByPath('sessions.session.wrongArgId')
       }
@@ -80,7 +58,7 @@ export default function (Commands, Cypress, cy) {
 
       // backup session command so we can set it as codeFrame location for errors later on
       const sessionCommand = cy.state('current')
-      const withinSubject = cy.state('withinSubject')
+      const withinSubjectChain = cy.state('withinSubjectChain')
 
       if (options) {
         if (!_.isObject(options)) {
@@ -107,7 +85,7 @@ export default function (Commands, Cypress, cy) {
         })
       }
 
-      let session: SessionData = sessionsManager.getActiveSession(id)
+      let session: Cypress.SessionData = sessionsManager.getActiveSession(id)
       const isRegisteredSessionForSpec = sessionsManager.registeredSessions.has(id)
 
       if (session) {
@@ -138,7 +116,7 @@ export default function (Commands, Cypress, cy) {
           $errUtils.throwErrByPath('sessions.session.duplicateId', { args: { id } })
         }
 
-        session = sessions.defineSession({
+        session = sessionsManager.defineSession({
           id,
           setup,
           validate: options.validate,
@@ -189,7 +167,11 @@ export default function (Commands, Cypress, cy) {
               return err
             })
 
-            return existingSession.setup()
+            try {
+              return existingSession.setup()
+            } finally {
+              cy.breakSubjectLinksToCurrentChainer()
+            }
           })
           .then(async () => {
             cy.state('onQueueFailed', null)
@@ -203,6 +185,8 @@ export default function (Commands, Cypress, cy) {
               consoleProps: () => {
                 return {
                   Step: statusMap.stepName(step),
+                  Message: 'The following is the collected session data after the session was successfully setup:',
+
                   ...getConsoleProps(existingSession),
                 }
               },
@@ -229,7 +213,7 @@ export default function (Commands, Cypress, cy) {
 
         _log.set({ consoleProps: () => getConsoleProps(testSession) })
 
-        return sessions.setSessionData(testSession)
+        return sessionsManager.setSessionData(testSession)
       }
 
       function validateSession (existingSession, step: keyof typeof SESSION_STEPS) {
@@ -326,7 +310,7 @@ export default function (Commands, Cypress, cy) {
 
                 // restore within subject back to the original subject used when
                 // the session command kicked off
-                Cypress.state('withinSubject', withinSubject)
+                Cypress.state('withinSubjectChain', withinSubjectChain)
 
                 // move to _commandToRunAfterValidation's index to ensure failures are
                 // handled correctly if next index was not found, the error was caused by
@@ -414,6 +398,20 @@ export default function (Commands, Cypress, cy) {
                 }
               }
 
+              // collect all session data again that may have been updated during the validation check
+              const data = await sessions.getCurrentSessionData()
+
+              _.extend(existingSession, data)
+              validateLog.set({
+                consoleProps: () => {
+                  return {
+                    Step: 'Validate Session',
+                    Message: 'The following is the collected session data after the session was successfully validated:',
+                    ...getConsoleProps(existingSession),
+                  }
+                },
+              })
+
               return isValidSession
             })
 
@@ -442,7 +440,7 @@ export default function (Commands, Cypress, cy) {
           }
 
           sessionsManager.registeredSessions.set(existingSession.id, true)
-          await sessions.saveSessionData(existingSession)
+          await sessionsManager.saveSessionData(existingSession)
 
           return statusMap.complete(step)
         })
@@ -454,7 +452,7 @@ export default function (Commands, Cypress, cy) {
        *   2. validate session
        *   3. if validation fails, catch error and recreate session
        */
-      const restoreSessionWorkflow = (existingSession: SessionData) => {
+      const restoreSessionWorkflow = (existingSession: Cypress.SessionData) => {
         return cy.then(async () => {
           setSessionLogStatus(statusMap.inProgress(SESSION_STEPS.restore))
           await navigateAboutBlank()
