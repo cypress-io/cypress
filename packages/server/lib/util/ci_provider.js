@@ -132,7 +132,7 @@ const _detectProviderName = () => {
   })
 }
 
-// useProvided environment variables are used to allow users to define their own
+// User provided environment variables are used to allow users to define their own
 // values should the CI provider not have an existing or correct mapping from the list below.
 const _userProvidedProviderCiParams = () => {
   return extract([
@@ -308,14 +308,21 @@ const _providerCiParams = () => {
       'SHORT_SHA',
       // https://cloud.google.com/cloud-build/docs/api/reference/rest/Shared.Types/Build
     ]),
+    /**
+     * References:
+     * https://ci.eclipse.org/webtools/env-vars.html/
+     * https://www.jenkins.io/doc/book/pipeline/multibranch/#additional-environment-variables
+     */
     jenkins: extract([
       'BUILD_ID',
       'BUILD_URL',
       'BUILD_NUMBER',
       'ghprbPullId',
-      // Jenkins pipeline options
+      // Jenkins pipeline options change options
       'CHANGE_ID',
       'CHANGE_URL',
+      'CHANGE_TARGET',
+      'CHANGE_TITLE',
     ]),
     // https://semaphoreci.com/docs/available-environment-variables.html
     // some come from v1, some from v2 of semaphore
@@ -551,10 +558,10 @@ const _providerCommitParams = () => {
     },
     jenkins: {
       sha: env.GIT_COMMIT,
-      branch: env.GIT_BRANCH,
-      // message: ???
-      // authorName: ???
-      // authorEmail: ???
+      branch: env.GIT_BRANCH || env.BRANCH_NAME || env.CHANGE_BRANCH,
+      // message: ??,
+      authorName: env.GIT_AUTHOR_NAME || env.CHANGE_AUTHOR_DISPLAY_NAME,
+      authorEmail: env.GIT_AUTHOR_EMAIL || env.CHANGE_AUTHOR_EMAIL,
       // remoteOrigin: ???
       // defaultBranch: ???
     },
