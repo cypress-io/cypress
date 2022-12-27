@@ -18,6 +18,7 @@ export type InjectionOpts = {
   wantsInjection: CypressWantsInjection
   wantsSecurityRemoved: any
   simulatedCookies: AutomationCookie[]
+  useDefaultDocumentDomain: boolean
 }
 
 const doctypeRe = /<\!doctype.*?>/i
@@ -36,19 +37,25 @@ function getHtmlToInject (opts: InjectionOpts & SecurityOpts) {
     modifyObstructiveThirdPartyCode,
     modifyObstructiveCode,
     simulatedCookies,
+    useDefaultDocumentDomain,
   } = opts
 
   switch (wantsInjection) {
     case 'full':
-      return inject.full(domainName)
+      return inject.full(domainName, {
+        useDefaultDocumentDomain,
+      })
     case 'fullCrossOrigin':
       return inject.fullCrossOrigin(domainName, {
         modifyObstructiveThirdPartyCode,
         modifyObstructiveCode,
         simulatedCookies,
+        useDefaultDocumentDomain,
       })
     case 'partial':
-      return inject.partial(domainName)
+      return inject.partial(domainName, {
+        useDefaultDocumentDomain,
+      })
     default:
       return
   }
