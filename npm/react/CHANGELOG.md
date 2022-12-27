@@ -1,3 +1,37 @@
+# [@cypress/react-v7.0.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v7.0.1...@cypress/react-v7.0.2) (2022-12-02)
+
+
+### Bug Fixes
+
+* remove cypress.server.defaults, cy.server and cy.route ([#24411](https://github.com/cypress-io/cypress/issues/24411)) ([2f18a8c](https://github.com/cypress-io/cypress/commit/2f18a8cbd2d1a90fe1f77a29cdc89571bf54109e))
+
+# [@cypress/react-v7.0.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v7.0.0...@cypress/react-v7.0.1) (2022-11-08)
+
+
+### Bug Fixes
+
+* make component derived info not throw ([#24571](https://github.com/cypress-io/cypress/issues/24571)) ([838dd4f](https://github.com/cypress-io/cypress/commit/838dd4fa2e0ec56633d0af2faf10a47d190b5594))
+
+# [@cypress/react-v7.0.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v6.2.1...@cypress/react-v7.0.0) (2022-11-07)
+
+
+### Bug Fixes
+
+* remove last mounted component upon subsequent mount calls ([#24470](https://github.com/cypress-io/cypress/issues/24470)) ([f39eb1c](https://github.com/cypress-io/cypress/commit/f39eb1c19e0923bda7ae263168fc6448da942d54))
+* remove some CT functions and props ([#24419](https://github.com/cypress-io/cypress/issues/24419)) ([294985f](https://github.com/cypress-io/cypress/commit/294985f8b3e0fa00ed66d25f88c8814603766074))
+
+
+### BREAKING CHANGES
+
+* remove last mounted component upon subsequent mount calls of mount
+
+# [@cypress/react-v6.2.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v6.2.0...@cypress/react-v6.2.1) (2022-11-01)
+
+
+### Bug Fixes
+
+* Hovering over mount in command log does not show component in AUT ([#24346](https://github.com/cypress-io/cypress/issues/24346)) ([355d210](https://github.com/cypress-io/cypress/commit/355d2101d38ea4d1e93b9c571cf77babab2bbbfc))
+
 # [@cypress/react-v6.2.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v6.1.1...@cypress/react-v6.2.0) (2022-08-30)
 
 

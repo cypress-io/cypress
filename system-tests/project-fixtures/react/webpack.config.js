@@ -1,4 +1,5 @@
 const path = require('path')
+
 /**
  * @type {import('webpack').Configuration}
  */
@@ -19,7 +20,10 @@ module.exports = {
           loader: 'babel-loader',
         },
       },
+      {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader'],
+      },
     ],
-  }
+  },
 }
-

@@ -5,20 +5,21 @@ let openInIdePath = Cypress.spec
 
 // ensure title is unique since it's necessary for querying the UI
 // in the verification step
-const getTitle = (ctx) => {
+const getTitle = (title, ctx) => {
   const parentTitle = ctx.parent && ctx.parent.title
 
-  return `${parentTitle} ${ctx.title}`.trim()
+  return `${parentTitle} ${title}`.trim()
 }
 
-export const fail = (ctx, test) => {
-  const title = `${count++}) ✗ FAIL - ${getTitle(ctx)}`
+export const fail = (title, ctx, test) => {
+  const testTitle = `${count++}) ✗ FAIL - ${getTitle(title, ctx)}`
 
-  it(title, { defaultCommandTimeout: 0 }, test)
+  it(testTitle, test)
 }
 
-export const verify = (ctx, options) => {
+export const verify = (title, ctx, options) => {
   const {
+    before,
     line,
     column,
     message,
@@ -28,10 +29,12 @@ export const verify = (ctx, options) => {
   const codeFrameFileRegex = new RegExp(`${Cypress.spec.relative}:${line}:${column}`)
   const stackFileRegex = new RegExp(`${Cypress.spec.relative}:${line}:${column - 1}`)
 
-  it(`✓ VERIFY`, function () {
+  it(`✓ VERIFY - ${title}`, function () {
+    if (before) before()
+
     cy.wrap(Cypress.$(window.top.document.body))
     .find('.reporter')
-    .contains(`FAIL - ${getTitle(ctx)}`)
+    .contains(`FAIL - ${getTitle(title, ctx)}`)
     .closest('.collapsible')
     .within(() => {
       cy.contains('View stack trace').click()
@@ -63,8 +66,8 @@ export const verify = (ctx, options) => {
       .invoke('text')
       .should('match', codeFrameFileRegex)
 
-      // code frames will show `fail(this,()=>` as the 1st line
-      cy.get('.test-err-code-frame pre span').should('include.text', 'fail(this,()=>')
+      // code frames will show this as the 1st line
+      cy.get('.test-err-code-frame pre span').should('include.text', `fail('${title}',this,()=>`)
 
       cy.contains('.test-err-code-frame .runnable-err-file-path', openInIdePath.relative)
     })

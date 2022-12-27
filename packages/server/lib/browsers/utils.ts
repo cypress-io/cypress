@@ -46,10 +46,12 @@ const defaultLaunchOptions: {
   preferences: {[key: string]: any}
   extensions: string[]
   args: string[]
+  env: {[key: string]: any}
 } = {
   preferences: {},
   extensions: [],
   args: [],
+  env: {},
 }
 
 const KNOWN_LAUNCH_OPTION_PROPERTIES = _.keys(defaultLaunchOptions)

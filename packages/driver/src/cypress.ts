@@ -15,6 +15,7 @@ import $Commands from './cypress/commands'
 import { $Cy } from './cypress/cy'
 import $dom from './dom'
 import $Downloads from './cypress/downloads'
+import $ensure from './cypress/ensure'
 import $errorMessages from './cypress/error_messages'
 import $errUtils from './cypress/error_utils'
 import { create as createLogFn, LogUtils } from './cypress/log'
@@ -126,6 +127,7 @@ class $Cypress {
   Chainer = $Chainer
   Command = $Command
   dom = $dom
+  ensure = $ensure
   errorMessages = $errorMessages
   Keyboard = $Keyboard
   Location = $Location
@@ -175,7 +177,7 @@ class $Cypress {
     _.extend(this.$, $)
   }
 
-  configure (config: Cypress.ObjectLike = {}) {
+  configure (config: Record<string, any> = {}) {
     const domainName = config.remote ? config.remote.domainName : undefined
 
     // set domainName but allow us to turn
@@ -219,7 +221,7 @@ class $Cypress {
     // change this in the NEXT_BREAKING
     const { env } = config
 
-    config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isCrossOriginSpecBridge')
+    config = _.omit(config, 'env', 'rawJson', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isCrossOriginSpecBridge')
 
     _.extend(this, browserInfo(config))
 
@@ -227,18 +229,26 @@ class $Cypress {
 
     /*
      * As part of the Detached DOM effort, we're changing the way subjects are determined in Cypress.
-     * While we usually consider cy.state() to be internal, in the case of cy.state('subject'),
-     * cypress-testing-library, one of our most popular plugins, relies on it.
+     * While we usually consider cy.state() to be internal, in the case of cy.state('subject') and cy.state('withinSubject'),
+     * cypress-testing-library, one of our most popular plugins, relies on them.
      * https://github.com/testing-library/cypress-testing-library/blob/1af9f2f28b2ca62936da8a8acca81fc87e2192f7/src/utils.js#L9
      *
-     * Therefore, we've added this shim to continue to support them. The library is actively maintained, so this
+     * Therefore, we've added these shims to continue to support them. The library is actively maintained, so this
      * shouldn't need to stick around too long (written 07/22).
      */
     Object.defineProperty(this.state(), 'subject', {
       get: () => {
         $errUtils.warnByPath('subject.state_subject_deprecated')
 
-        return this.cy.currentSubject()
+        return this.cy.subject()
+      },
+    })
+
+    Object.defineProperty(this.state(), 'withinSubject', {
+      get: () => {
+        $errUtils.warnByPath('subject.state_withinsubject_deprecated')
+
+        return this.cy.getSubjectFromChain(this.cy.state('withinSubjectChain'))
       },
     })
 
@@ -328,8 +338,6 @@ class $Cypress {
     this.events.proxyTo(this.cy)
 
     $scriptUtils.runScripts(specWindow, scripts)
-    // TODO: remove this after making the type of `runScripts` more specific.
-    // @ts-expect-error
     .catch((error) => {
       this.runner.onSpecError('error')({ error })
     })
@@ -345,23 +353,7 @@ class $Cypress {
       }))
     })
     .then(() => {
-      // in order to utilize focusmanager.testingmode and trick browser into being in focus even when not focused
-      // this is critical for headless mode since otherwise the browser never gains focus
-      if (this.browser.isHeadless && this.isBrowser({ family: 'firefox' })) {
-        window.addEventListener('blur', () => {
-          this.backend('firefox:window:focus')
-        })
-
-        if (!document.hasFocus()) {
-          return this.backend('firefox:window:focus')
-        }
-      }
-
-      return
-    })
-    .then(() => {
       this.cy.initialize(this.$autIframe)
-
       this.onSpecReady()
     })
   }
@@ -647,7 +639,7 @@ class $Cypress {
         return this.emit('snapshot', ...args)
 
       case 'cy:before:stability:release':
-        return this.emitThen('before:stability:release', ...args)
+        return this.emitThen('before:stability:release')
 
       case 'app:uncaught:exception':
         return this.emitMap('uncaught:exception', ...args)
@@ -795,7 +787,7 @@ class $Cypress {
     }
   }
 
-  static create (config) {
+  static create (config: Record<string, any>) {
     const cypress = new $Cypress()
 
     cypress.configure(config)

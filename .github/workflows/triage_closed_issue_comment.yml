@@ -9,7 +9,7 @@ jobs:
       !github.event.issue.pull_request &&
       github.event.issue.state == 'closed' &&
       github.event.comment.created_at != github.event.issue.closed_at &&
-      github.event.sender.login != 'cypress-bot'
+      github.event.sender.login != 'cypress-bot[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Get project data

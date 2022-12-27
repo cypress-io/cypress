@@ -6,6 +6,7 @@ import type { BasicSourceMapConsumer } from 'source-map'
 import mappingsWasm from 'source-map/lib/mappings.wasm'
 
 import $utils from './utils'
+import stackUtils from './stack_utils'
 
 const sourceMapExtractionRegex = /\/\/\s*[@#]\s*sourceMappingURL\s*=\s*(data:[^\s]*)/g
 const regexDataUrl = /data:[^;\n]+(?:;charset=[^;\n]+)?;base64,([a-zA-Z0-9+/]+={0,2})/ // matches data urls
@@ -22,7 +23,7 @@ const initializeSourceMapConsumer = async (script, sourceMap): Promise<BasicSour
 
   const consumer = await new SourceMapConsumer(sourceMap)
 
-  sourceMapConsumers[script.fullyQualifiedUrl] = consumer
+  sourceMapConsumers[stackUtils.toPosix(script.fullyQualifiedUrl)] = consumer
 
   return consumer
 }
@@ -55,10 +56,12 @@ const extractSourceMap = (fileContents) => {
 }
 
 const getSourceContents = (filePath, sourceFile) => {
-  if (!sourceMapConsumers[filePath]) return null
+  const posixFilePath = stackUtils.toPosix(filePath)
+
+  if (!sourceMapConsumers[posixFilePath]) return null
 
   try {
-    return sourceMapConsumers[filePath].sourceContentFor(sourceFile)
+    return sourceMapConsumers[posixFilePath].sourceContentFor(sourceFile)
   } catch (err) {
     // ignore the sourceFile not being in the source map. there's nothing we
     // can do about it and we don't want to thrown an exception
@@ -69,7 +72,8 @@ const getSourceContents = (filePath, sourceFile) => {
 }
 
 const getSourcePosition = (filePath, position) => {
-  const sourceMapConsumer = sourceMapConsumers[filePath]
+  const posixFilePath = stackUtils.toPosix(filePath)
+  const sourceMapConsumer = sourceMapConsumers[posixFilePath]
 
   if (!sourceMapConsumer) return null
 

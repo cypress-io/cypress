@@ -14,15 +14,17 @@ import type { Emissions } from '@packages/types'
 const mochaCtxKeysRe = /^(_runnable|test)$/
 const betweenQuotesRe = /\"(.+?)\"/
 
-const HOOKS = 'beforeAll beforeEach afterEach afterAll'.split(' ')
+const HOOKS = ['beforeAll', 'beforeEach', 'afterEach', 'afterAll'] as const
 const TEST_BEFORE_RUN_ASYNC_EVENT = 'runner:test:before:run:async'
 // event fired before hooks and test execution
 const TEST_BEFORE_RUN_EVENT = 'runner:test:before:run'
 const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
 const TEST_AFTER_RUN_ASYNC_EVENT = 'runner:runnable:after:run:async'
 
-const RUNNABLE_LOGS = 'routes agents commands hooks'.split(' ')
-const RUNNABLE_PROPS = '_testConfig id order title _titlePath root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file originalTitle invocationDetails final currentRetry retries _slow'.split(' ')
+const RUNNABLE_LOGS = ['routes', 'agents', 'commands', 'hooks'] as const
+const RUNNABLE_PROPS = [
+  '_testConfig', 'id', 'order', 'title', '_titlePath', 'root', 'hookName', 'hookId', 'err', 'state', 'failedFromHookId', 'body', 'speed', 'type', 'duration', 'wallClockStartedAt', 'wallClockDuration', 'timings', 'file', 'originalTitle', 'invocationDetails', 'final', 'currentRetry', 'retries', '_slow',
+] as const
 
 const debug = debugFn('cypress:driver:runner')
 const debugErrors = debugFn('cypress:driver:errors')
@@ -33,6 +35,8 @@ const RUNNER_EVENTS = [
   TEST_AFTER_RUN_EVENT,
   TEST_AFTER_RUN_ASYNC_EVENT,
 ] as const
+
+export type HandlerType = 'error' | 'unhandledrejection'
 
 const duration = (before: Date, after: Date) => {
   return Number(before) - Number(after)
@@ -145,11 +149,14 @@ const setWallClockDuration = (test) => {
 // tests to an id-based object which prevents
 // us from recursively iterating through every
 // parent since we could just return the found test
-const wrap = (runnable) => {
+const wrap = (runnable): Record<string, any> | null => {
   return $utils.reduceProps(runnable, RUNNABLE_PROPS)
 }
 
-const wrapAll = (runnable): any => {
+// Reduce runnable down to its props and collections.
+// Sent to the Reporter to populate command log
+// and send to Cypress Cloud when in record mode.
+const wrapAll = (runnable): Record<string, any> => {
   return _.extend(
     {},
     $utils.reduceProps(runnable, RUNNABLE_PROPS),
@@ -466,9 +473,8 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
 
 const getTestResults = (tests) => {
   return _.map(tests, (test) => {
-    const obj: Record<string, any> = _.pick(test, 'id', 'duration', 'state')
+    const obj: Record<string, any> = _.pick(test, 'title', 'id', 'duration', 'state')
 
-    obj.title = test.originalTitle
     // TODO FIX THIS!
     if (!obj.state) {
       obj.state = 'skipped'
@@ -563,11 +569,7 @@ const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, getO
       prevAttempts = []
 
       if (i.prevAttempts) {
-        prevAttempts = _.map(i.prevAttempts, (test) => {
-          // reduce this runnable down to its props
-          // and collections
-          return wrapAll(test)
-        })
+        prevAttempts = _.map(i.prevAttempts, wrapAll)
       }
 
       _.extend(runnable, i)
@@ -576,8 +578,6 @@ const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, getO
     // merge all hooks into single array
     runnable.hooks = condenseHooks(runnable, getHookId)
 
-    // reduce this runnable down to its props
-    // and collections
     const wrappedRunnable = wrapAll(runnable)
 
     if (runnable.type === 'test') {
@@ -1068,7 +1068,7 @@ export default {
     }
 
     // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
-    const onSpecError = (handlerType) => (event) => {
+    const onSpecError = (handlerType: HandlerType) => (event) => {
       let { originalErr, err } = $errUtils.errorFromUncaughtEvent(handlerType, event)
 
       debugErrors('uncaught spec error: %o', originalErr)
@@ -1111,8 +1111,18 @@ export default {
       return undefined
     }
 
-    specWindow.addEventListener('error', onSpecError('error'))
-    specWindow.addEventListener('unhandledrejection', onSpecError('unhandledrejection'))
+    // Unlike End To End Testing which has two iframes
+    // - Spec Frame, for the spec.
+    // - AUT Frame, for the user's application.
+    // Component Testing only has one iframe. The AUT Frame is also the Spec Frame,
+    // since we serve the specs from a dev server - they are bundled as a single file.
+    // We don't want to bind two error handlers, or we end up logging errors twice.
+    // For this reason, we conditionally add these event listeners here - Component Testing errors are captured and logged
+    // in contentWindowListeners#bindToListeners in cypress/cy.ts.
+    if (Cypress.testingType === 'e2e') {
+      specWindow.addEventListener('error', onSpecError('error'))
+      specWindow.addEventListener('unhandledrejection', onSpecError('unhandledrejection'))
+    }
 
     // hold onto the _runnables for faster lookup later
     let _test: any = null
@@ -1482,7 +1492,7 @@ export default {
           // attach error right now
           // if we have one
           if (err) {
-            const PendingErrorMessages = ['sync skip', 'async skip call', 'async skip; aborting execution']
+            const PendingErrorMessages = ['sync skip', 'sync skip; aborting execution', 'async skip call', 'async skip; aborting execution']
 
             if (_.find(PendingErrorMessages, err.message) !== undefined) {
               err.isPending = true
@@ -1674,6 +1684,10 @@ export default {
         const logAttrs = _.find(test.commands || [], (log) => log.id === logId)
 
         if (logAttrs) {
+          if (logAttrs._hasBeenCleanedUp) {
+            return { Message: `The command details and snapshot has been cleaned up to reduce the number of tests in memory.` }
+          }
+
           return LogUtils.getConsoleProps(logAttrs)
         }
 

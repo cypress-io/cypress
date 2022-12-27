@@ -31,21 +31,17 @@ function assertCorrectRunsLink (specFileName: string, status: string) {
 }
 
 function validateTooltip (status: string) {
-  cy.validateExternalLink({
-    // TODO: (#23778) This name is so long because the entire tooltip is wrapped in a link,
-    // we can make this more accessible by having the name of the link describe the destination
-    // (which is currently not described) and keeping the other content separate.
-    name: `accounts_new.spec.js ${status} 4 months ago 2:23 - 2:39 skipped pending passed failed`,
-    // the main thing about testing this link is that is gets composed with the expected UTM params
-    href: makeTestingCloudLink(status),
-  })
+  cy.get(`a[href="${makeTestingCloudLink(status)}"]`)
   .should('contain.text', 'accounts_new.spec.js')
-  .and('contain.text', '4 months ago')
   .and('contain.text', '2:23 - 2:39')
   .and('contain.text', 'skipped 0')
   .and('contain.text', 'pending 1-2')
   .and('contain.text', `passed 22-23`)
   .and('contain.text', 'failed 1-2')
+  .invoke('text')
+  .should((text) => {
+    expect(text).to.match(/\d+ (day|week|month|year)s? ago/)
+  })
 }
 
 function specShouldShow (specFileName: string, runDotsClasses: string[], latestRunStatus: CloudRunStatus|'PLACEHOLDER') {
@@ -164,7 +160,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
   })
 
   context('when no runs are recorded', () => {
-    beforeEach(() => {
+    it('shows placeholders for all visible specs', { defaultCommandTimeout: 6000 }, () => {
       cy.loginUser()
 
       cy.remoteGraphQLIntercept(async (obj) => {
@@ -185,10 +181,6 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       })
 
       cy.visitApp()
-      cy.findByTestId('sidebar-link-specs-page').click()
-    })
-
-    it('shows placeholders for all visible specs', () => {
       allVisibleSpecsShouldBePlaceholders()
     })
   })
@@ -206,13 +198,13 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
     it('shows correct tooltips with log in buttons', () => {
       cy.findByTestId('latest-runs-header').trigger('mouseenter')
       cy.get('.v-popper__popper--shown')
-      .should('contain', 'Connect to the Cypress Dashboard to see the status of your latest runs')
+      .should('contain', 'Connect to Cypress Cloud to see the status of your latest runs')
       .find('button')
-      .should('have.text', 'Log in to the Dashboard')
+      .should('have.text', 'Log in to Cypress Cloud')
       .click()
 
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
-        cy.get('button').contains('Log In')
+        cy.get('button').contains('Log in')
         cy.get('[aria-label="Close"]').click()
       })
 
@@ -220,13 +212,13 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
 
       cy.findByTestId('average-duration-header').trigger('mouseenter')
       cy.get('.v-popper__popper--shown')
-      .should('contain', 'Connect to the Cypress Dashboard to see the average spec durations of your latest runs')
+      .should('contain', 'Connect to Cypress Cloud to see the average spec durations of your latest runs')
       .find('button')
-      .should('have.text', 'Log in to the Dashboard')
+      .should('have.text', 'Log in to Cypress Cloud')
       .click()
 
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
-        cy.get('button').contains('Log In')
+        cy.get('button').contains('Log in')
         cy.get('[aria-label="Close"]').click()
       })
 
@@ -275,7 +267,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
     it('shows correct tooltips with log in buttons', () => {
       cy.findByTestId('latest-runs-header').trigger('mouseenter')
       cy.get('.v-popper__popper--shown')
-      .should('contain', 'Connect to the Cypress Dashboard to see the status of your latest runs')
+      .should('contain', 'Connect to Cypress Cloud to see the status of your latest runs')
       .find('button')
       .should('have.text', 'Connect your project')
       .click()
@@ -288,7 +280,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
 
       cy.findByTestId('average-duration-header').trigger('mouseenter')
       cy.get('.v-popper__popper--shown')
-      .should('contain', 'Connect to the Cypress Dashboard to see the average spec durations of your latest runs')
+      .should('contain', 'Connect to Cypress Cloud to see the average spec durations of your latest runs')
       .find('button')
       .should('have.text', 'Connect your project')
       .click()
@@ -331,7 +323,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
     it('shows correct tooltips', () => {
       cy.findByTestId('latest-runs-header').trigger('mouseenter')
       cy.get('.v-popper__popper--shown')
-      .should('contain', 'The status of your latest runs in the Cypress Dashboard')
+      .should('contain', 'The status of your latest runs in Cypress Cloud')
       .find('button')
       .should('not.exist')
 
@@ -339,7 +331,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
 
       cy.findByTestId('average-duration-header').trigger('mouseenter')
       cy.get('.v-popper__popper--shown')
-      .should('contain', 'The average spec durations of your latest runs in the Cypress Dashboard')
+      .should('contain', 'The average spec durations of your latest runs in Cypress Cloud')
       .find('button')
       .should('not.exist')
 
@@ -409,7 +401,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
         .should('have.attr', 'aria-expanded', 'false')
         .then((dir) => {
           // Perform a search/filter operation
-          cy.findByLabelText('Search Specs').type(dir.text()[0])
+          cy.findByLabelText('Search specs').type(dir.text()[0])
         })
 
         // Previously-collapsed directory should automatically expand
@@ -426,7 +418,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       // Move to Settings page and wait for render
       cy.get('a[href="#/settings"]').click()
       cy.location('hash').should('include', '/settings')
-      cy.findByText('Project Settings').should('be.visible')
+      cy.findByText('Project settings').should('be.visible')
 
       // Move back to Specs page and wait for render
       cy.get('a[href="#/specs"]').click()
@@ -679,7 +671,7 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23419
-    it.skip('shows offline alert then hides it after coming online', () => {
+    it('shows offline alert then hides it after coming online', { retries: 15 }, () => {
       cy.findByTestId('offline-alert')
       .should('contain.text', defaultMessages.specPage.offlineWarning.title)
       .and('contain.text', defaultMessages.specPage.offlineWarning.explainer)

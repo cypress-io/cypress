@@ -23,7 +23,7 @@ const components = {
 const extensions = {
   components,
 }
-beforeEach(mountCallback({ template, data }, { extensions }))
+beforeEach(mount({ template, data }, { extensions }))
 ```
 
 ![Components spec](./images/components.png)

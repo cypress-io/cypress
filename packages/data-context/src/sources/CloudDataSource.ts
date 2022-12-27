@@ -31,9 +31,9 @@ const debug = debugLib('cypress:data-context:sources:CloudDataSource')
 const cloudEnv = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development') as keyof typeof REMOTE_SCHEMA_URLS
 
 const REMOTE_SCHEMA_URLS = {
-  staging: 'https://dashboard-staging.cypress.io',
+  staging: 'https://cloud-staging.cypress.io',
   development: 'http://localhost:3000',
-  production: 'https://dashboard.cypress.io',
+  production: 'https://cloud.cypress.io',
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -99,7 +99,7 @@ export class CloudDataSource {
 
   reset () {
     return this.#cloudUrqlClient = createClient({
-      url: `${this.getDashboardUrl(cloudEnv)}/test-runner-graphql`,
+      url: `${this.getCloudUrl(cloudEnv)}/test-runner-graphql`,
       exchanges: [
         dedupExchange,
         cacheExchange({
@@ -182,7 +182,7 @@ export class CloudDataSource {
   }
 
   #formatWithErrors = async (data: OperationResult<any, any>) => {
-    // If we receive a 401 from the dashboard, we need to logout the user
+    // If we receive a 401 from Cypress Cloud, we need to logout the user
     if (data.error?.response?.status === 401) {
       await this.params.logout()
     }
@@ -333,7 +333,7 @@ export class CloudDataSource {
     return JSON.parse(this.#lastCache ?? '')
   }
 
-  getDashboardUrl (env: keyof typeof REMOTE_SCHEMA_URLS) {
+  getCloudUrl (env: keyof typeof REMOTE_SCHEMA_URLS) {
     return REMOTE_SCHEMA_URLS[env]
   }
 }

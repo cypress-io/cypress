@@ -23,6 +23,58 @@ describe('driver/src/cypress/stack_utils', () => {
     })
   })
 
+  context('getRelativePathFromRoot', () => {
+    const relativeFile = 'relative/path/to/file.js'
+    const absoluteFile = 'User/ruby/cypress/packages/driver/relative/path/to/file.js'
+    const repoRoot = 'User/ruby/cypress'
+    const relativePathFromRoot = 'packages/driver/relative/path/to/file.js'
+
+    const actualPlatform = Cypress.config('platform')
+    const actualRepoRoot = Cypress.config('repoRoot')
+
+    after(() => {
+      // restore config values to prevent bleeding into subsequent tests
+      Cypress.config('platform', actualPlatform)
+      Cypress.config('repoRoot', actualRepoRoot)
+    })
+
+    it('returns relativeFile if absoluteFile is empty', () => {
+      const result = $stackUtils.getRelativePathFromRoot(relativeFile, undefined)
+
+      expect(result).to.equal(relativeFile)
+    })
+
+    it('returns relativeFile if `repoRoot` is not set in the config', () => {
+      const result = $stackUtils.getRelativePathFromRoot(relativeFile, absoluteFile)
+
+      expect(result).to.equal(relativeFile)
+    })
+
+    it('returns relativeFile if absoluteFile does not start with `repoRoot`', () => {
+      Cypress.config('repoRoot', 'User/ruby/test-repo')
+      const result = $stackUtils.getRelativePathFromRoot(relativeFile, absoluteFile)
+
+      expect(result).to.equal(relativeFile)
+    })
+
+    it('returns the relative path from root if the absoluteFile starts with `repoRoot`', () => {
+      Cypress.config('repoRoot', repoRoot)
+      const result = $stackUtils.getRelativePathFromRoot(relativeFile, absoluteFile)
+
+      expect(result).to.equal(relativePathFromRoot)
+    })
+
+    it('uses posix on windows', () => {
+      Cypress.config('repoRoot', 'C:/Users/Administrator/Documents/GitHub/cypress')
+      Cypress.config('platform', 'win32')
+      const absoluteFile = 'C:\\Users\\Administrator\\Documents\\GitHub\\cypress\\packages\\app/cypress/e2e/reporter_header.cy.ts'
+      const relativeFile = 'cypress/e2e/reporter_header.cy.ts'
+      const result = $stackUtils.getRelativePathFromRoot(relativeFile, absoluteFile)
+
+      expect(result).to.equal('packages/app/cypress/e2e/reporter_header.cy.ts')
+    })
+  })
+
   context('.getCodeFrame', () => {
     let originalErr
     const sourceCode = `it('is a failing test', () => {
@@ -92,6 +144,14 @@ describe('driver/src/cypress/stack_utils', () => {
       cy.stub($sourceMapUtils, 'getSourceContents').returns(null)
 
       expect($stackUtils.getCodeFrame(originalErr)).to.be.undefined
+    })
+
+    it('relativeFile is relative to the repo root when `absoluteFile` starts with `repoRoot`', () => {
+      Cypress.config('repoRoot', '/dev')
+      cy.stub($sourceMapUtils, 'getSourceContents').returns(sourceCode)
+      const codeFrame = $stackUtils.getCodeFrame(originalErr)
+
+      expect(codeFrame.relativeFile).to.equal('app/cypress/integration/features/source_map_spec.js')
     })
   })
 

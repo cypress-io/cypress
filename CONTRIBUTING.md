@@ -20,7 +20,6 @@ Thanks for taking the time to contribute! :smile:
 
 - [Code of Conduct](#code-of-conduct)
 - [Opening Issues](#opening-issues)
-- [Triaging Issues](#triaging-issues)
 - [Writing Documentation](#writing-documentation)
 - [Writing Code](#writing-code)
   - [What you need to know before getting started](#what-you-need-to-know-before-getting-started)
@@ -111,134 +110,11 @@ test execution | Running tests inside a single spec | [open](https://github.com/
 typescript | Transpiling or bundling TypeScript | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20typescript), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+typescript%22+is%3Aclosed)
 video | Problems with video recordings | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20video%20%F0%9F%93%B9), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+video+%F0%9F%93%B9%22+is%3Aclosed)
 
-## Triaging Issues
-
-When an issue is opened in [cypress](https://github.com/cypress-io/cypress), we need to evaluate the issue to determine what steps should be taken next. So, when approaching new issues, there are some steps that should be taken.
-
-### Is this a question?
-
-Some opened issues are questions, not bug reports or feature requests. Issues are reserved for potential bugs or feature requests *only*. If this is the case, you should:
-
-- Explain that issues in our GitHub repo are reserved for potential bugs or feature requests and that the issue will be closed since it appears to be neither a bug nor a feature request.
-- Guide them to existing resources where their questions can be asked like our [Discussions](https://github.com/cypress-io/cypress/discussions), [community chat](https://on.cypress.io/chat), [Discord](https://on.cypress.io/discord), or [Stack Overflow](https://stackoverflow.com/questions/tagged/cypress).
-- Cypress offers support via email when signing up for any of our [paid plans](https://www.cypress.io/pricing/), so remind them that this is an option if they already have a paid account.
-- Move the issue to [Discussions](https://github.com/cypress-io/cypress/discussions).
-
-### Does this issue belong in this repository?
-
-#### Other open source repos
-
-Issues may be opened about wanting changes to our [documentation](https://github.com/cypress-io/cypress-documentation), our [example-kitchensink app](https://github.com/cypress-io/cypress-example-kitchensink), or [another repository](https://github.com/cypress-io). In this case you should:
-
-- Thank them for their contribution.
-- Explain that this repo is only for bugs or feature requests of the Cypress App.
-- If you have permission to 'Transfer the issue', do so. If not, explain that they can open an issue in our other repository and link to the repository.
-- Close the issue (if not already transferred).
-
-#### Cypress Dashboard
-
-Issues may be opened about wanting features in our Dashboard Service. In this case you should:
-
-- Thank them for opening an issue.
-- Add the `external: dashboard` label.
-
-#### Component Testing
-
-Issues may be opened about wanting features in Component Testing. In this case you should:
-
-- Thank them for opening an issue.
-- Add the `component testing` label.
-
-### Is this already an open issue?
-
-Search [all issues](https://github.com/cypress-io/cypress/issues) for keywords from the issue to ensure there isn't already an issue open for this. GitHub has some [search tips](https://help.github.com/articles/searching-issues-and-pull-requests/) that may help you better find the relevant issue.
-
-If an issue already exists you should:
-
-- Thank them for their contribution.
-- Explain that this issue is a duplicate of another issue, linking to the relevant issue (`#1234`).
-- Add the `type: duplicate` label to the issue.
-- Close the issue.
-
-### Does the issue provide all the information from our issue template?
-
-When opening an issue, there is a provided issue template based on the type of issue. If the opened issue does not provide enough information asked from the issue template you should:
-
-- Explain that we require new issues follow our provided issue template and that issues that are opened without this information are automatically closed per our [contributing guidelines](#fill-out-our-issue-template).
-- Close the issue.
-
-### Are they running the current version of Cypress?
-
-If they listed an older version of Cypress in their issue. We don't want to spend the time to set up a reproducible project (which can be time consuming) only to find that bumping the Cypress version fixes it. You should:
-
-- Ask them to update to the newest version of Cypress and comment about the results.
-- Add the `stage: awaiting response` label to the issue.
-
-### Is the fix or feature within our vision for Cypress?
-
-There will inevitably be suggestions that will not fit within the scope of Cypress's vision for our product. If an issue or pull request falls under this category you should:
-
-- Thank them for their contribution.
-- Explain why it doesn't fit into the scope at Cypress, and offer clear suggestions for improvement, if you're able. Be kind, but firm.
-- Link to relevant documentation, if there is any. If you notice repeated requests for things that are not within scope, add them into the [documentation](https://github.com/cypress-io/cypress-documentation) to avoid repeating yourself.
-- Add the `stage: wontfix` label to the issue.
-- Close the issue/pull request.
-
-### Is what they're describing actually happening?
-
-The best way to determine the validity of a bug is to recreate it yourself. Follow the directions or information provided to recreate the bug that is described. Did they provide a repository that demonstrates the bug? Great - fork it and run the project and steps required. If they didn't provide a repository, the best way to reproduce the issue is to have a 'sandbox' project up and running locally for Cypress. This is just a simple project with Cypress installed where you can freely edit the application under test and the tests themselves to recreate the problem.
-
-**Attempting to recreate the bug will lead to a few scenarios:**
-
-#### 1. You can't recreate the bug
-
- If you can't recreate the situation happening you should:
-
-- Thank them for their contribution.
-- Explain that there isn't enough information to reproduce the bug. Provide information on how you went about recreating the scenario, if you're able. Note your OS, Browser, Cypress version and any other information.
-- Note that if no reproducible example is provided, we will unfortunately have to close the issue.
-- Add the `stage: needs information` label to the issue.
-
-#### 2. You can recreate the bug
-
-If you can recreate the bug you should:
-
-- Thank them for their contribution.
-- Explain that you're able to recreate the bug. Provide the exact test code ran and the versions of Cypress, OS, and browser you used to recreate it.
-- If you know where the code is that could possibly fix this issue - link to the file or line of code from the [cypress](https://github.com/cypress-io/cypress) repo and remind the user that we are open source and that we gladly accept PRs, even if they are a work in progress.
-- Add the `stage: ready for work` label to the issue.
-
-#### 3. You can tell the problem is a user error
-
-In recreating the issue, you may realize that they had a typo or used the Cypress API incorrectly, etc. In this case you should:
-
-- Leave a comment informing the user of their error.
-- Link to relevant documentation, if there is any. If you notice repeated user errors for the same situation, add them into the [documentation](https://github.com/cypress-io/cypress-documentation) to avoid repeating yourself.
-- Close the issue.
-
-### Has the issue gone stale?
-
-Some issues are opened and sadly forgotten about by the person originally opening the issue.
-
-#### Not enough information ever provided
-
-Sometimes we request more information to be provided (label `stage: needs information`) for an open issue, but no one is able to provide a reproducible example or they simply never respond. **This does not mean that we don't believe that there is a bug!** We just, unfortunately, don't have a path forward to fix it without this information. In this case you should:
-
-- Add a comment reminding them or our request for more information and that the issue will be closed if it is not provided. Sometimes issues get forgotten about, and all the person needs is a gentle reminder.
-- If there is still no response after a weeks time, explain that you are closing the issue due to not enough information or inactivity and that they can comment in the issue with a reproducible example and we will reopen the issue.
-- Close the issue.
-
-#### They already solved their issue
-
-Some issues are resolved by the community, by giving some guidance or a workaround, but the original opener of the issue forgets to close the issue. In this case you should:
-
-- Explain that you are closing the issue as resolved and that they can comment if they are still having the issue and we will consider reopening it.
-- Close the issue.
 
 ## Writing Documentation
-
+ 
 Cypress documentation lives in a separate repository with its own dependencies and build tools.
-See [Documentation Contributing Guideline](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
+See [Documentation Contributing Guidelines](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
 
 ## Writing code
 
@@ -252,29 +128,53 @@ Cypress is a large open source project. When you want to contribute to Cypress, 
 
 Cypress uses a monorepo, which means there are many independent packages in this repository. There are two main types of packages: private and public.
 
-Private packages generally live within the [`packages`](./packages) directory and are in the `@packages/` namespace. These packages are combined to form the main Cypress app that you get when you `npm install cypress`. They are discrete modules with different responsibilities, but each is necessary for the Cypress app and is not necessarily useful outside of the Cypress app. Since these modules are all compiled and bundled into a binary upon release, they are sometimes collectively referred to as the Cypress binary.
+Private packages included in the app generally live within the [`packages`](./packages) directory and are in the `@packages/` namespace. These packages are combined to form the main Cypress app that you get when you `npm install cypress`. They are discrete modules with different responsibilities, but each is necessary for the Cypress app and is not necessarily useful outside of the Cypress app. Since these modules are all compiled and bundled into a binary upon release, they are sometimes collectively referred to as the Cypress binary.
 
 Here is a list of the core packages in this repository with a short description, located within the [`packages`](./packages) directory:
 
  | Folder Name                           | Package Name            | Purpose                                                                      |
  | :------------------------------------ | :---------------------- | :--------------------------------------------------------------------------- |
  | [cli](./cli)                          | `cypress`               | The command-line tool that is packaged as an `npm` module.                   |
+ | [app](./packages/app)           | `@packages/app`      | The front-end for the Cypress App that renders in the launched browser instance.             |
+ | [config](./packages/config)           | `@packages/config`      | The Cypress configuration types and validation used in the server, data-context and driver.             |
+ | [data-context](./packages/data-context)           | `@packages/data-context`      | Centralized data access for the Cypress application.             |
  | [driver](./packages/driver)           | `@packages/driver`      | The code that is used to drive the behavior of the API commands.             |
  | [electron](./packages/electron)       | `@packages/electron`    | The Cypress implementation of Electron.                                      |
+ | [errors](./packages/errors)           | `@packages/errors`      | Error definitions and utilities for Cypress                                  |
  | [example](./packages/example)         | `@packages/example`     | Our example kitchen-sink application.                                        |
  | [extension](./packages/extension)     | `@packages/extension`   | The Cypress Chrome browser extension                                         |
+ | [frontend-shared](./packages/frontend-shared)     | `@packages/frontend-shared`   | Shared components and styles used in the `app` and `launchpad`.                                         |
+ | [graphql](./packages/graphql)     | `@packages/graphql`   | The GraphQL layer that the `launchpad` and `app` use to interact with the `server`.                                  |
  | [https-proxy](./packages/https-proxy) | `@packages/https-proxy` | This does https proxy for handling http certs and traffic.                   |
+ | [icons](./packages/icons)       | `@packages/icons`    | The Cypress icons.                        |
+ | [launcher](./packages/launcher)       | `@packages/launcher`    | Finds and launches browsers installed on your system.                        |
+ | [launchpad](./packages/launchpad)       | `@packages/launcher`    | The portal to running Cypress that displays in `open` mode.                        |
  | [net-stubbing](./packages/net-stubbing) | `@packages/net-stubbing` | Contains server side code for Cypress' network stubbing features.         |
  | [network](./packages/network)         | `@packages/network`     | Various utilities related to networking.                                     |
+ | [packherd-require](./packages/packherd-require) | `@packages/packherd-require` | Loads modules that have been bundled by `@tooling/packherd`.  |
  | [proxy](./packages/proxy)             | `@packages/proxy`       | Code for Cypress' network proxy layer.                                       |
- | [launcher](./packages/launcher)       | `@packages/launcher`    | Finds and launches browsers installed on your system.                        |
  | [reporter](./packages/reporter)       | `@packages/reporter`    | The reporter shows the running results of the tests (The Command Log UI).    |
+ | [resolve-dist](./packages/resolve-dist)       | `@packages/resolve-dist`    | Centralizes the resolution of paths to compiled/static assets from server-side code..    |
+ | [rewriter](./packages/rewriter)       | `@packages/rewriter`    | The logic to rewrite JS and HTML that flows through the Cypress proxy.    
  | [root](./packages/root)               | `@packages/root`        | Dummy package pointing at the root of the repository.                        |
- | [runner](./packages/runner)           | `@packages/runner`      | The runner is the minimal "chrome" around the user's application under test. |
+ | [runner](./packages/runner)           | `@packages/runner`      | (deprecated) The runner is the minimal "chrome" around the user's application under test. |
+ | [scaffold-config](./packages/scaffold-config)           | `@packages/scaffold-config`      | The logic related to scaffolding new projects using launchpad.   |
  | [server](./packages/server)           | `@packages/server`      | The <3 of Cypress. This orchestrates everything. The backend node process.   |
- | [server-ct](./packages/server-ct)     | `@packages/server-ct`   | Some Component Testing specific overrides. Mostly extends functionality from `@packages/server` |
  | [socket](./packages/socket)           | `@packages/socket`      | A wrapper around socket.io to provide common libraries.                      |
  | [ts](./packages/ts)                   | `@packages/ts`          | A centralized version of typescript.                                         |
+ | [types](./packages/types)             | `@packages/types`          | The shared internal Cypress types.                                         |
+ | [v8-snapshot-require](./packages/v8-snapshot-require) | `@packages/v8-snapshot-requie` | Tool to load a snapshot for Electron applications that was created by `@tooling/v8-snapshot`. |
+ | [web-config](./packages/web-config)             | `@packages/web-config`          | The web-related configuration.                                         |
+
+Private packages involved in development of the app live within the [`tooling`](./tooling) directory and are in the `@tooling/` namespace. They are discrete modules with different responsibilities, but each is necessary for development of the Cypress app and is not necessarily useful outside of the Cypress app.
+
+Here is a list of the packages in this repository with a short description, located within the [`tooling`](./tooling) directory:
+
+ | Folder Name                           | Package Name            | Purpose                                                                      |
+ | :------------------------------------ | :---------------------- | :--------------------------------------------------------------------------- |
+ | [electron-mksnapshot](./electron-mksnapshot) | `electron-mksnapshot` | A rewrite of [electron/mksnapshot](https://github.com/electron/mksnapshot) to support multiple versions. |
+ | [packherd](./tooling/packherd)        | `packherd`              | Herds all dependencies reachable from an entry and packs them.               |
+ | [v8-snapshot](./tooling/v8-snapshot)  | `v8-snapshot`           | Tool to create a snapshot for Electron applications.                         |
 
 Public packages live within the [`npm`](./npm) folder and are standalone modules that get independently published to npm under the `@cypress/` namespace. These packages generally contain extensions, plugins, or other packages that are complementary to, yet independent of, the main Cypress app.
 
@@ -285,14 +185,19 @@ Here is a list of the npm packages in this repository:
  | [angular](./npm/angular)                               | `@cypress/angular`                   | Cypress component testing for Angular.     |
  | [create-cypress-tests](./npm/create-cypress-tests)     | `@cypress/create-cypress-tests`    | Tooling to scaffold Cypress configuration and demo test files. |
  | [eslint-plugin-dev](./npm/eslint-plugin-dev)           | `@cypress/eslint-plugin-dev`       | Eslint plugin for internal development.          |
+ | [grep](./npm/grep)                                       | `@cypress/grep`                     | Filter tests using substring                        |
  | [mount-utils](./npm/mount-utils)                       | `@cypress/mount-utils`             | Common functionality for Vue/React/Angular adapters. |
  | [react](./npm/react)                                   | `@cypress/react`                   | Cypress component testing for React.             |
  | [react18](./npm/react18)                               | `@cypress/react18`                   | Cypress component testing for React 18.           |
+ | [schematic](./npm/cypress-schematic)                   | `@cypress/schematic`            | Official Angular Schematic and Builder for the Angular CLI.|
+ | [svelte](./npm/svelte)                               | `@cypress/svelte`                   | Cypress component testing for Svelte.           |
  | [vite-dev-server](./npm/vite-dev-server)     | `@cypress/vite-dev-server`    | Vite powered dev server for Component Testing.                  |
- | [webpack-preprocessor](./npm/webpack-preprocessor)     | `@cypress/webpack-preprocessor`    | Cypress preprocessor for bundling JavaScript via webpack.  |
- | [webpack-dev-server](./npm/webpack-dev-server)     | `@cypress/webpack-dev-server`    | Webpack powered dev server for Component Testing.                |
  | [vue](./npm/vue)                                       | `@cypress/vue`                     | Cypress component testing for Vue 3.               |
  | [vue2](./npm/vue2)                                       | `@cypress/vue2`                     | Cypress component testing for Vue 2.               |
+ | [webpack-batteries-included-preprocessor](./npm/webpack-batteries-included-preprocessor)     | `@cypress/webpack-batteries-included-preprocessor`    | Cypress preprocessor for bundling JavaScript via webpack with dependencies included and support for various ES features, TypeScript, and CoffeeScript.  |
+ | [webpack-dev-server](./npm/webpack-dev-server)     | `@cypress/webpack-dev-server`    | Webpack powered dev server for Component Testing.                |
+ | [webpack-preprocessor](./npm/webpack-preprocessor)     | `@cypress/webpack-preprocessor`    | Cypress preprocessor for bundling JavaScript via webpack.  |
+ | [xpath](./npm/xpath)                                     | `@cypress/xpath`                    | Adds XPath command to Cypress.io test runner        |
 
 We try to tag all issues with a `pkg/` or `npm/` tag describing the appropriate package the work is required in. For public packages, we use their qualified package name: For example, issues relating to the  webpack preprocessor are tagged under [`npm: @cypress/webpack-preprocessor`](https://github.com/cypress-io/cypress/labels/npm%3A%20%40cypress%2Fwebpack-preprocessor) label and issues related to the `driver` package are tagged with the [`pkg/driver`](https://github.com/cypress-io/cypress/labels/pkg%2Fdriver) label.
 
@@ -333,7 +238,7 @@ If there are errors building the packages, prefix the commands with `DEBUG=cypre
 
 When running `yarn start` this routes through the CLI and eventually calls `yarn dev` with the proper arguments. This enables Cypress day-to-day development to match the logic of the built binary + CLI integration.
 
-If you want to bypass the CLI entirely, you can use the `yarn dev` task and pass arguments directly. For example, to headlessly run a project in a given folder, while trying to record to the Dashboard
+If you want to bypass the CLI entirely, you can use the `yarn dev` task and pass arguments directly. For example, to headlessly run a project in a given folder, while trying to record to Cypress Cloud.
 
 ```text
 yarn dev --run-project /project/folder --record --key <key>
@@ -453,7 +358,7 @@ This is to ensure that links do not go dead in older versions of Cypress when th
 
 ### Tests
 
-For most packages there are typically unit and integration tests.
+For most packages there are typically unit and integration tests. For UI packages there are E2E and component tests.
 
 Please refer to each packages' `README.md` which documents how to run tests. It is not feasible to try to run all of the tests together. We run our entire test fleet across over a dozen containers in CI.
 
@@ -504,6 +409,45 @@ Each package documents how to best work with it, so consult the `README.md` of e
 
 They will outline development and test procedures. When in doubt just look at the `scripts` of each `package.json` file. Everything we do at Cypress is contained there.
 
+### V8 Snapshotting
+
+In order to improve start up time, Cypress uses [electron mksnapshot](https://github.com/electron/mksnapshot) for generating [v8 snapshots](https://v8.dev/blog/custom-startup-snapshots) for both development and production.
+
+#### Snapshot Generation
+
+Locally, a v8 snapshot is generated in a post install step and set up to only include node modules. In this way, cypress code can be modified without having to regenerate a snapshot. If you do want or need to regenerate the snapshot for development you can run:
+
+```
+yarn build-v8-snapshot-dev
+```
+
+On CI and for binary builds we run:
+
+```
+yarn build-v8-snapshot-prod
+```
+
+which will include both node modules and cypress code.
+
+During the process of snapshot generation, metadata is created/updated in `tooling/v8-snapshot/cache`. Changes to these files can and should be committed to the repo as it will make subsequent snapshot generations faster.
+
+#### Troubleshooting
+
+**Generation**
+
+If the `build-v8-snapshot-prod` command is taking a long time to run on Circle CI, the snapshot cache probably needs to be updated. Run the [Update V8 Snapshot Cache](https://github.com/cypress-io/cypress/actions/workflows/update_v8_snapshot_cache.yml) github action against your branch to generate the snapshots for you on all platforms. You can choose to commit directly to your branch or alternatively issue a PR to your branch.
+
+![Update V8 SnapshotCache](https://user-images.githubusercontent.com/4873279/206541239-1afb1d29-4d66-4593-92a7-5a5961a12137.png)
+
+**Runtime**
+
+If you're experiencing issues during runtime, you can try and narrow down where the problem might be via a few different scenarios:
+
+* If the problem occurs with the binary, but not in the monorepo, chances are something is being removed during the binary cleanup step that shouldn't be
+* If the problem occurs with running `yarn build-v8-snapshot-prod` but not `yarn build-v8-snapshot-dev`, then that means there's a problem with a cypress file and not a node module dependency. Chances are that a file is not being flagged properly (e.g. healthy when it should be deferred or norewrite).
+* If the problem occurs with both `yarn build-v8-snapshot-prod` and `yarn build-v8-snapshot-dev` but does not occur when using the `DISABLE_SNAPSHOT_REQUIRE` environment variable, then that means there's a problem with a node module dependency. Chances are that a file is not being flagged properly (e.g. healthy when it should be deferred or norewrite).
+* If the problem still occurs when using the `DISABLE_SNAPSHOT_REQUIRE` environment variable, then that means the problem is not snapshot related.
+
 ## Committing Code
 
 ### Branches
@@ -522,28 +466,36 @@ We do not continuously deploy the Cypress binary, so `develop` contains all of t
 - When opening a PR for a specific issue already open, please name the branch you are working on using the convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`. If the PR is a larger issue, you can add more context like `issue-803-new-scrollable-area`. If there's not an associated open issue, **[create an issue](https://github.com/cypress-io/cypress/issues/new/choose)**.
 - PRs can be opened before all the work is finished. In fact we encourage this! Please create a [Draft Pull Request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests#draft-pull-requests) if your PR is not ready for review. [Mark the PR as **Ready for Review**](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/changing-the-stage-of-a-pull-request#marking-a-pull-request-as-ready-for-review) when you're ready for a Cypress team member to review the PR.
 - Prefix the title of the Pull Request using [semantic-release](https://github.com/semantic-release/semantic-release)'s format as defined [here](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#type). For example, if your PR is fixing a bug, you should prefix the PR title with `fix:`.
-- Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If you feel some areas are not relevant add `N/A` as opposed to deleting those sections. PR's will not be reviewed if this template is not filled in.
+- Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If you feel some areas are not relevant add `N/A` as opposed to deleting those sections. PRs will not be reviewed if this template is not filled in.
 - If the PR is a user facing change and you're a Cypress team member that has logged into [ZenHub](https://www.zenhub.com/) and downloaded the [ZenHub for GitHub extension](https://www.zenhub.com/extension), set the release the PR is intended to ship in from the sidebar of the PR. Follow semantic versioning to select the intended release. This is used to generate the changelog for the release. If you don't tag a PR for release, it won't be mentioned in the changelog.
   ![Select release for PR](https://user-images.githubusercontent.com/1271364/135139641-657015d6-2dca-42d4-a4fb-16478f61d63f.png)
 - Please check the "Allow edits from maintainers" checkbox when submitting your PR. This will make it easier for the maintainers to make minor adjustments, to help with tests or any other changes we may need.
 ![Allow edits from maintainers checkbox](https://user-images.githubusercontent.com/1271181/31393427-b3105d44-ada9-11e7-80f2-0dac51e3919e.png)
 - All Pull Requests require a minimum of **two** approvals.
 - After the PR is approved, the original contributor can merge the PR (if the original contributor has access).
-- When you merge a PR into `develop`, select [**Squash and merge**](https://docs.github.com/en/github/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-pull-request-commits). This will squash all commits into a single commit. *The only exception to squashing is when converting files to another language and there is a clear commit history needed to maintain from the file conversion.*
+- When you merge a PR into `develop`, select [**Squash and merge**](https://docs.github.com/en/github/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-pull-request-commits). This will squash all commits into a single commit.
+
+*The only exceptions to squashing are:* 
+
+1. When converting files to another language and there is a clear commit history needed to maintain from the file conversion.
+2. When merging a `release/*` branch to `develop`. Individual PRs were already squashed when they were merged to the release branch, and we want that history intact on develop.
 
 ### Write Some Tests
 
-If you are adding a new feature or fixing a regression, ensure you add tests for it. Broadly speaking, there are three categories of tests you might consider:
+If you are adding a new feature or fixing a regression, ensure you add tests for it. Broadly speaking, there are four categories of tests you might consider:
 
-1. Unit test. Those are inside of `test/unit`, if the package has them. These are the fastest and cheapest to execute.
-2. E2E/Integration tests. Those are inside `cypress/e2e`, if the package has them. These are between Unit Tests and System Tests when it comes to speed of execution.
-3. System Tests. Those go in the [`system-tests`](https://github.com/cypress-io/cypress/tree/develop/system-tests) directory. The README explains how they work. These are the slowest to run, so you generally only want to add a system-test if it's absolutely required (but don't let that discourage you; they are also the most realistic way to test Cypress).
+1. Unit tests. Those are inside of `test/unit`, if the package has them. These are the fastest and cheapest to execute.
+2. Component Tests. These are co-located with components in the `src` directory of UI-related packages. These test individual UI components in isolation. They can exhaustively test all expected variations of a component and are faster than E2E tests.
+3. E2E/Integration tests. Those are inside `cypress/e2e`, if the package has them. These are between Unit Tests and System Tests when it comes to speed of execution.
+4. System tests. Those go in the [`system-tests`](https://github.com/cypress-io/cypress/tree/develop/system-tests) directory. The README explains how they work. These are the slowest to run, so you generally only want to add a system-test if it's absolutely required (but don't let that discourage you; they are also the most realistic way to test Cypress).
 
 When choosing what's most appropriate, consider:
 
 - ease of understanding
 - ease of debugging
 - resilience to refactoring
+
+It is also worth considering when a failure will be noticed. A unit or component test is likely to be run while the related code is being modified and provides very fast feedback. E2E tests and System Tests are more likely to only fail in CI since they are slower to run.
 
 ### Dependencies
 

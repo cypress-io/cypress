@@ -98,6 +98,10 @@ export class DataContext {
     this.lifecycleManager = new ProjectLifecycleManager(this)
   }
 
+  get git () {
+    return this.coreData.currentProjectGitInfo
+  }
+
   get schema () {
     return this._config.schema
   }

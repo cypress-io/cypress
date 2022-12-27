@@ -113,7 +113,7 @@ describe('FileRow', () => {
 
     cy.contains('cypress/integration/command.js')
     cy.contains(messages.changesRequiredLabel).should('be.visible')
-    cy.contains(messages.changesRequiredBadge).should('not.exist') // Hide badge when row is expanded
+    cy.get('[data-cy=changes-required-badge]').should('not.exist') // Hide badge when row is expanded
     cy.contains(changesRequiredDescription).should('be.visible')
     cy.get('pre').should('have.length', 2)
 
@@ -140,7 +140,7 @@ describe('FileRow', () => {
 
     cy.contains('cypress/integration/command.js')
     cy.contains(messages.changesRequiredLabel).should('be.visible')
-    cy.contains(messages.changesRequiredBadge).should('not.exist')
+    cy.get('[data-cy=changes-required-badge]').should('not.exist')
     cy.contains(changesRequiredDescription).should('be.visible')
     cy.get('pre').should('exist')
 

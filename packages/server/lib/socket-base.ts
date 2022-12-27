@@ -20,13 +20,14 @@ import { openFile, OpenFileDetails } from './util/file-opener'
 import open from './util/open'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
-import { cookieJar } from './util/cookies'
+import { AutomationCookie, cookieJar, SameSiteContext, automationCookieToToughCookie } from './util/cookies'
 import runEvents from './plugins/run_events'
 
 // eslint-disable-next-line no-duplicate-imports
 import type { Socket } from '@packages/socket'
 
 import type { RunState, CachedTestState } from '@packages/types'
+import { cors } from '@packages/network'
 
 type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
@@ -48,8 +49,6 @@ const reporterEvents = [
   // "go:to:file"
   'runner:restart',
   'runner:abort',
-  'runner:console:log',
-  'runner:console:error',
   'runner:show:snapshot',
   'runner:hide:snapshot',
   'reporter:restarted',
@@ -68,14 +67,12 @@ export class SocketBase {
   private _sendFocusBrowserMessage
 
   protected supportsRunEvents: boolean
-  protected experimentalSessionAndOrigin: boolean
   protected ended: boolean
   protected _io?: socketIo.SocketIOServer
   localBus: EventEmitter
 
   constructor (config: Record<string, any>) {
     this.supportsRunEvents = config.isTextTerminal || config.experimentalInteractiveRunEvents
-    this.experimentalSessionAndOrigin = config.experimentalSessionAndOrigin
     this.ended = false
     this.localBus = new EventEmitter()
   }
@@ -226,9 +223,7 @@ export class SocketBase {
         debug('automation:client connected')
 
         // only send the necessary config
-        automationClient.emit('automation:config', {
-          experimentalSessionAndOrigin: this.experimentalSessionAndOrigin,
-        })
+        automationClient.emit('automation:config', {})
 
         // if our automation disconnects then we're
         // in trouble and should probably bomb everything
@@ -394,6 +389,12 @@ export class SocketBase {
         })
       })
 
+      const setCrossOriginCookie = ({ cookie, url, sameSiteContext }: { cookie: AutomationCookie, url: string, sameSiteContext: SameSiteContext }) => {
+        const domain = cors.getOrigin(url)
+
+        cookieJar.setCookie(automationCookieToToughCookie(cookie, domain), url, sameSiteContext)
+      }
+
       socket.on('backend:request', (eventName: string, ...args) => {
         // cb is always the last argument
         const cb = args.pop()
@@ -424,8 +425,6 @@ export class SocketBase {
               return firefoxUtil.log()
             case 'firefox:force:gc':
               return firefoxUtil.collectGarbage()
-            case 'firefox:window:focus':
-              return firefoxUtil.windowFocus()
             case 'get:fixture':
               return getFixture(args[0], args[1])
             case 'read:file':
@@ -461,8 +460,12 @@ export class SocketBase {
               return options.getRenderedHTMLOrigins()
             case 'reset:rendered:html:origins':
               return resetRenderedHTMLOrigins()
-            case 'cross:origin:automation:cookies:received':
-              return this.localBus.emit('cross:origin:automation:cookies:received')
+            case 'cross:origin:cookies:received':
+              return this.localBus.emit('cross:origin:cookies:received')
+            case 'cross:origin:set:cookie':
+              return setCrossOriginCookie(args[0])
+            case 'request:sent:with:credentials':
+              return this.localBus.emit('request:sent:with:credentials', args[0])
             default:
               throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
           }
@@ -543,8 +546,11 @@ export class SocketBase {
       })
 
       if (this.supportsRunEvents) {
-        socket.on('plugins:before:spec', async (spec) => {
-          await runEvents.execute('before:spec', {}, spec)
+        socket.on('plugins:before:spec', (spec) => {
+          runEvents.execute('before:spec', {}, spec).catch((error) => {
+            socket.disconnect()
+            throw error
+          })
         })
       }
 

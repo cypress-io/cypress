@@ -126,5 +126,5 @@ export const validateConfig = (state: State, config: Record<string, any>, skipCo
       : `Expected ${format(errResult.key)} to be ${errResult.type}.\n\nInstead the value was: ${stringify(errResult.value)}`
 
     throw new (state('specWindow').Error)(errMsg)
-  })
+  }, Cypress.testingType)
 }

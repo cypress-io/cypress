@@ -42,6 +42,7 @@ const verifyFailure = (options) => {
     uncaughtMessage,
     line,
     regex,
+    mode,
   } = options
   let { codeFrameText, stackRegex, codeFrameRegex } = options
 
@@ -130,7 +131,7 @@ const verifyFailure = (options) => {
       hasPreferredIde,
       action: () => {
         cy.get('@Root').contains('.runnable-err-stack-trace .runnable-err-file-path a', fileName)
-        .click('left')
+        .click({ force: true })
       },
       line,
       column: stackColumn,
@@ -151,7 +152,7 @@ const verifyFailure = (options) => {
     if (uncaught) {
       cy.log('uncaught error has an associated log for the original error')
       cy.get('.command-name-uncaught-exception')
-      .should('have.length', 1)
+      .should(mode === 'component' ? 'have.length.gte' : 'have.length', 1)
       .find('.command-state-failed')
       .find('.command-message-text')
       .should('include.text', uncaughtMessage || originalMessage)
@@ -168,7 +169,7 @@ const verifyFailure = (options) => {
     .invoke('text')
     .should('match', codeFrameRegex)
 
-    cy.get('.test-err-code-frame pre span').should('include.text', codeFrameText)
+    cy.get('.test-err-code-frame span').should('include.text', codeFrameText)
   })
 
   if (verifyOpenInIde) {
@@ -185,13 +186,18 @@ const verifyFailure = (options) => {
   }
 }
 
-export const createVerify = ({ fileName, hasPreferredIde }) => {
+type ChainableVerify = (specTitle: string, props: any) => Cypress.Chainable
+
+export const createVerify = ({ fileName, hasPreferredIde, mode }): ChainableVerify => {
   return (specTitle: string, props: any) => {
     props.specTitle ||= specTitle
     props.fileName ||= fileName
     props.hasPreferredIde = hasPreferredIde
+    props.mode = mode
 
-    ;(props.verifyFn || verifyFailure).call(null, props)
+    return cy.wrap(
+      (props.verifyFn || verifyFailure).call(null, props),
+    )
   }
 }
 
@@ -206,10 +212,5 @@ export const verifyInternalFailure = (props) => {
 
     cy.get('.runnable-err-stack-trace')
     .should('include.text', stackMethod || method)
-
-    // this is an internal cypress error and we can only show code frames
-    // from specs, so it should not show the code frame
-    cy.get('.test-err-code-frame')
-    .should('not.exist')
   })
 }

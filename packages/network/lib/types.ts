@@ -3,3 +3,8 @@ export type ParsedHost = {
   tld?: string
   domain?: string
 }
+
+export type ParsedHostWithProtocolAndHost = {
+  subdomain: string | null
+  protocol: string | null
+} & ParsedHost

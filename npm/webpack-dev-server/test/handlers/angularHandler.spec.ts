@@ -77,6 +77,33 @@ describe('angularHandler', function () {
     expectLoadsAngularBuildOptions(buildOptions)
   })
 
+  it('sources the config from angular-15', async () => {
+    const projectRoot = await scaffoldMigrationProject('angular-15')
+
+    process.chdir(projectRoot)
+
+    const devServerConfig = {
+      cypressConfig: {
+        projectRoot,
+        specPattern: 'src/**/*.cy.ts',
+      } as Cypress.PluginConfigOptions,
+      framework: 'angular',
+    } as AngularWebpackDevServerConfig
+
+    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = await angularHandler(devServerConfig)
+
+    expect(webpackConfig).to.exist
+    expect((webpackConfig?.entry as any).main).to.be.undefined
+    expect(sourceWebpackModulesResult.framework?.importPath).to.include(path.join('@angular-devkit', 'build-angular'))
+
+    const { buildOptions } = await expectNormalizeProjectConfig(projectRoot)
+
+    await expectLoadsAngularJson(projectRoot)
+    await expectLoadsAngularCLiModules(projectRoot)
+    await expectGeneratesTsConfig(devServerConfig, buildOptions)
+    expectLoadsAngularBuildOptions(buildOptions)
+  })
+
   it('allows custom project config', async () => {
     const customProjectConfig = {
       root: '',

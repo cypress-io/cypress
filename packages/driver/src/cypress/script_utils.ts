@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Bluebird from 'bluebird'
 
 import $networkUtils from './network_utils'
@@ -25,11 +24,15 @@ const extractSourceMap = ([script, contents]) => {
 }
 
 const evalScripts = (specWindow, scripts: any = []) => {
-  _.each(scripts, ([script, contents]) => {
-    specWindow.eval(`${contents}\n//# sourceURL=${script.fullyQualifiedUrl}`)
-  })
+  return Bluebird.each(scripts, (_script: any) => {
+    const [script, contents] = _script
 
-  return null
+    if (script.load) {
+      return script.load()
+    }
+
+    return specWindow.eval(`${contents}\n//# sourceURL=${script.fullyQualifiedUrl}`)
+  })
 }
 
 const runScriptsFromUrls = (specWindow, scripts) => {

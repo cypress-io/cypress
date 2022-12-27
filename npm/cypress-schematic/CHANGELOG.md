@@ -1,3 +1,29 @@
+# [@cypress/schematic-v2.4.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.3.0...@cypress/schematic-v2.4.0) (2022-12-02)
+
+
+### Features
+
+* Queries, Detached DOM, and Retry-Ability ([#24628](https://github.com/cypress-io/cypress/issues/24628)) ([9ae911f](https://github.com/cypress-io/cypress/commit/9ae911f396fa6cac0a1464537d1492d68cbb1898)), closes [#23665](https://github.com/cypress-io/cypress/issues/23665) [#24022](https://github.com/cypress-io/cypress/issues/24022) [#23791](https://github.com/cypress-io/cypress/issues/23791) [#24203](https://github.com/cypress-io/cypress/issues/24203) [#24417](https://github.com/cypress-io/cypress/issues/24417)
+
+# [@cypress/schematic-v2.3.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.2.0...@cypress/schematic-v2.3.0) (2022-11-01)
+
+
+### Features
+
+* introduce v8 snapshots to improve startup performance ([#24295](https://github.com/cypress-io/cypress/issues/24295)) ([b0c0eaa](https://github.com/cypress-io/cypress/commit/b0c0eaa508bb6dafdc1997bc00fb7ed6f5bcc160))
+
+# [@cypress/schematic-v2.2.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.1.1...@cypress/schematic-v2.2.0) (2022-10-13)
+
+
+### Bug Fixes
+
+* Detect user-configured browsers ([#23446](https://github.com/cypress-io/cypress/issues/23446)) ([a75d3ec](https://github.com/cypress-io/cypress/commit/a75d3ec81f3405db6721a89875d89cdca0109013))
+
+
+### Features
+
+* _addQuery() ([#23665](https://github.com/cypress-io/cypress/issues/23665)) ([41fc535](https://github.com/cypress-io/cypress/commit/41fc535dca51cda4e40b5d9fc827d8bff534f3d1))
+
 # [@cypress/schematic-v2.1.1](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.1.0...@cypress/schematic-v2.1.1) (2022-08-31)
 
 

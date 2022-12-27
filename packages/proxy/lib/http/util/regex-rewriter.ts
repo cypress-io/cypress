@@ -16,8 +16,18 @@ const topOrParentLocationOrFramesRe = /([^\da-zA-Z\(\)])?(\btop\b|\bparent\b)([.
 
 const jiraTopWindowGetterRe = /(!function\s*\((\w{1})\)\s*{\s*return\s*\w{1}\s*(?:={2,})\s*\w{1}\.parent)(\s*}\(\w{1}\))/g
 const jiraTopWindowGetterUnMinifiedRe = /(function\s*\w{1,}\s*\((\w{1})\)\s*{\s*return\s*\w{1}\s*(?:={2,})\s*\w{1}\.parent)(\s*;\s*})/g
-
-const integrityTagReplacementRe = new RegExp(`(${STRIPPED_INTEGRITY_TAG}|integrity)(=(?:\"|\')sha(?:256|384|512)-.*?(?:\"|\'))`, 'g')
+/**
+ * Matches the word integrity if being set on an object, such as foo.integrity. This MUST be followed by a valid hash to match. This is replaced with
+ * foo['cypress-stripped-integrity']
+ */
+const javaScriptIntegrityReplacementRe = new RegExp(`[\\.](${STRIPPED_INTEGRITY_TAG}|integrity)((\\s?=\\s?)(?:"|')sha(?:256|384|512)-.*?(?:"|'))`, 'g')
+/**
+ * Does a negative lookback to see a variable is being declared, such as var let or const (the 'nst' is back end of 'const' since lookbacks need a fixed width). This can then
+ * be followed by any optional character that isn't a period, space, single or double quote. This MUST be followed by a valid hash to match. A space preceding the integrity tag can still be matched,
+ * but the match only starts at the word integrity, and not the character preceding it. In these cases, we always replace the word integrity with cypress-stripped-integrity.
+ * The match for cypress-stripped-integrity is if we are replacing in the stripStream, and the replaced text is rematched to essentially complete a no op
+ */
+const generalIntegrityReplacementRe = new RegExp(`(?:(?<!(var|let|nst)\\s)[^\\.\\s'"]?)(${STRIPPED_INTEGRITY_TAG}|integrity)((?:'|")?\\]?(\\s?=|["|'],)\\s?(?:"|')sha(?:256|384|512)-.*?(?:"|'))`, 'g')
 
 export function strip (html: string, { modifyObstructiveThirdPartyCode }: Partial<SecurityOpts> = {
   modifyObstructiveThirdPartyCode: false,
@@ -30,7 +40,8 @@ export function strip (html: string, { modifyObstructiveThirdPartyCode }: Partia
   .replace(jiraTopWindowGetterUnMinifiedRe, '$1 || $2.parent.__Cypress__$3')
 
   if (modifyObstructiveThirdPartyCode) {
-    rewrittenHTML = rewrittenHTML.replace(integrityTagReplacementRe, `${STRIPPED_INTEGRITY_TAG}$2`)
+    rewrittenHTML = rewrittenHTML.replace(javaScriptIntegrityReplacementRe, `['${STRIPPED_INTEGRITY_TAG}']$2`)
+    rewrittenHTML = rewrittenHTML.replace(generalIntegrityReplacementRe, `${STRIPPED_INTEGRITY_TAG}$3`)
   }
 
   return rewrittenHTML
@@ -49,7 +60,8 @@ export function stripStream ({ modifyObstructiveThirdPartyCode }: Partial<Securi
         jiraTopWindowGetterRe,
         jiraTopWindowGetterUnMinifiedRe,
         ...(modifyObstructiveThirdPartyCode ? [
-          integrityTagReplacementRe,
+          javaScriptIntegrityReplacementRe,
+          generalIntegrityReplacementRe,
         ] : []),
       ],
       [
@@ -59,7 +71,8 @@ export function stripStream ({ modifyObstructiveThirdPartyCode }: Partial<Securi
         '$1 || $2.parent.__Cypress__$3',
         '$1 || $2.parent.__Cypress__$3',
         ...(modifyObstructiveThirdPartyCode ? [
-          `${STRIPPED_INTEGRITY_TAG}$2`,
+          `['${STRIPPED_INTEGRITY_TAG}']$2`,
+          `${STRIPPED_INTEGRITY_TAG}$3`,
         ] : []),
       ],
     ),

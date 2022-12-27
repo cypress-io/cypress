@@ -18,6 +18,8 @@ import { transformRequires } from './util/transform-requires'
 import execa from 'execa'
 import { testStaticAssets } from './util/testStaticAssets'
 import performanceTracking from '../../system-tests/lib/performance'
+import verify from '../../cli/lib/tasks/verify'
+import * as electronBuilder from 'electron-builder'
 
 const globAsync = promisify(glob)
 
@@ -174,7 +176,7 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
 
   fs.writeFileSync(meta.distDir('index.js'), `\
 process.env.CYPRESS_INTERNAL_ENV = process.env.CYPRESS_INTERNAL_ENV || 'production'
-require('./packages/server')\
+require('./packages/server/index.js')
 `)
 
   // removeTypeScript
@@ -196,8 +198,8 @@ require('./packages/server')\
 
   await transformRequires(meta.distDir())
 
-  log(`#testVersion ${meta.distDir()}`)
-  await testVersion(meta.distDir(), version)
+  log(`#testDistVersion ${meta.distDir()}`)
+  await testDistVersion(meta.distDir(), version)
 
   log('#testStaticAssets')
   await testStaticAssets(meta.distDir())
@@ -232,32 +234,38 @@ require('./packages/server')\
 
   console.log(`output folder: ${outputFolder}`)
 
-  const args = [
-    '--publish=never',
-    `--c.electronVersion=${electronVersion}`,
-    `--c.directories.app=${appFolder}`,
-    `--c.directories.output=${outputFolder}`,
-    `--c.icon=${iconFilename}`,
-    // for now we cannot pack source files in asar file
-    // because electron-builder does not copy nested folders
-    // from packages/*/node_modules
-    // see https://github.com/electron-userland/electron-builder/issues/3185
-    // so we will copy those folders later ourselves
-    '--c.asar=false',
-  ]
-
-  console.log('electron-builder arguments:')
-  console.log(args.join(' '))
+  // Update the root package.json with the next app version so that it is snapshot properly
+  fs.writeJSONSync(path.join(CY_ROOT_DIR, 'package.json'), {
+    ...jsonRoot,
+    version,
+  }, { spaces: 2 })
 
   try {
-    await execa('electron-builder', args, {
-      stdio: 'inherit',
+    await electronBuilder.build({
+      publish: 'never',
+      config: {
+        electronVersion,
+        directories: {
+          app: appFolder,
+          output: outputFolder,
+        },
+        icon: iconFilename,
+        // for now we cannot pack source files in asar file
+        // because electron-builder does not copy nested folders
+        // from packages/*/node_modules
+        // see https://github.com/electron-userland/electron-builder/issues/3185
+        // so we will copy those folders later ourselves
+        asar: false,
+      },
     })
   } catch (e) {
     if (!skipSigning) {
       throw e
     }
   }
+
+  // Revert the root package.json so that subsequent steps will work properly
+  fs.writeJSONSync(path.join(CY_ROOT_DIR, 'package.json'), jsonRoot, { spaces: 2 })
 
   await checkMaxPathLength()
 
@@ -268,9 +276,6 @@ require('./packages/server')\
 
   console.log(stdout)
 
-  // testVersion(buildAppDir)
-  await testVersion(meta.buildAppDir(), version)
-
   // runSmokeTests
   let usingXvfb = xvfb.isNeeded()
 
@@ -279,9 +284,12 @@ require('./packages/server')\
       await xvfb.start()
     }
 
+    log(`#testExecutableVersion ${meta.buildAppExecutable()}`)
+    await testExecutableVersion(meta.buildAppExecutable(), version)
+
     const executablePath = meta.buildAppExecutable()
 
-    await smoke.test(executablePath)
+    await smoke.test(executablePath, meta.buildAppDir())
   } finally {
     if (usingXvfb) {
       await xvfb.stop()
@@ -358,23 +366,46 @@ function getIconFilename () {
   return iconFilename
 }
 
-async function testVersion (dir: string, version: string) {
+async function testDistVersion (distDir: string, version: string) {
   log('#testVersion')
 
   console.log('testing dist package version')
   console.log('by calling: node index.js --version')
-  console.log('in the folder %s', dir)
+  console.log('in the folder %s', distDir)
 
   const result = await execa('node', ['index.js', '--version'], {
-    cwd: dir,
+    cwd: distDir,
   })
 
   la(result.stdout, 'missing output when getting built version', result)
 
-  console.log('app in %s', dir)
+  console.log('app in %s', distDir)
   console.log('built app version', result.stdout)
-  la(result.stdout === version, 'different version reported',
+  la(result.stdout.trim() === version.trim(), 'different version reported',
     result.stdout, 'from input version to build', version)
 
   console.log('✅ using node --version works')
+}
+
+async function testExecutableVersion (buildAppExecutable: string, version: string) {
+  log('#testVersion')
+
+  console.log('testing built app executable version')
+  console.log(`by calling: ${buildAppExecutable} --version`)
+
+  const args = ['--version']
+
+  if (verify.needsSandbox()) {
+    args.push('--no-sandbox')
+  }
+
+  const result = await execa(buildAppExecutable, args)
+
+  la(result.stdout, 'missing output when getting built version', result)
+
+  console.log('built app version', result.stdout)
+  la(result.stdout.trim() === version.trim(), 'different version reported',
+    result.stdout, 'from input version to build', version)
+
+  console.log('✅ using --version on the Cypress binary works')
 }

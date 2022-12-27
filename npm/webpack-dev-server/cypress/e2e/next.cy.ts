@@ -1,7 +1,7 @@
 /// <reference path="../support/e2e.ts" />
 import type { ProjectFixtureDir } from '@tooling/system-tests/lib/fixtureDirs'
 
-const WEBPACK_REACT: ProjectFixtureDir[] = ['next-11', 'next-12', 'next-11-webpack-4', 'next-12.1.6']
+const WEBPACK_REACT: ProjectFixtureDir[] = ['next-12', 'next-12.1.6', 'next-13']
 
 // Add to this list to focus on a particular permutation
 const ONLY_PROJECTS: ProjectFixtureDir[] = []
@@ -40,6 +40,7 @@ for (const project of WEBPACK_REACT) {
       })
 
       cy.waitForSpecToFinish({ failCount: 1 })
+      cy.get('.test-err-code-frame').should('be.visible')
 
       cy.withCtx(async (ctx) => {
         const indexTestPath = ctx.path.join('pages', 'index.cy.js')
@@ -75,7 +76,7 @@ for (const project of WEBPACK_REACT) {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23417
-    it.skip('should detect new spec', () => {
+    it('should detect new spec', { retries: 15 }, () => {
       cy.visitApp()
 
       cy.withCtx(async (ctx) => {
@@ -93,7 +94,7 @@ for (const project of WEBPACK_REACT) {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23417
-    it.skip('should allow import of global styles in support file', () => {
+    it('should allow import of global styles in support file', { retries: 15 }, () => {
       cy.visitApp()
       cy.contains('styles.cy.js').click()
       cy.waitForSpecToFinish({ passCount: 1 })

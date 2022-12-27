@@ -4,6 +4,8 @@ function startSetupFor (project: ProjectFixtureDir) {
   cy.scaffoldProject(project)
   cy.openProject(project)
   cy.visitLaunchpad()
+  cy.skipWelcome()
+
   cy.contains('Component Testing').click()
   cy.get(`[data-testid="select-framework"]`)
 }
@@ -29,7 +31,7 @@ describe('scaffolding component testing', {
 
       // should detect correctly
       cy.get('button').should('be.visible').contains('Vue CLI (Vue 2)(detected)')
-      cy.get('button').contains('Next Step').click()
+      cy.get('button').contains('Next step').click()
       cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.js`)
     })
@@ -41,7 +43,7 @@ describe('scaffolding component testing', {
 
       // should detect correctly
       cy.get('button').should('be.visible').contains('Vue CLI (Vue 3)(detected)')
-      cy.get('button').contains('Next Step').click()
+      cy.get('button').contains('Next step').click()
       cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.js`)
     })
@@ -53,7 +55,7 @@ describe('scaffolding component testing', {
 
       // should detect correctly
       cy.get('button').should('be.visible').contains('Vue CLI (Vue 3)(detected)')
-      cy.get('button').contains('Next Step').click()
+      cy.get('button').contains('Next step').click()
       cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.js`)
     })
@@ -65,7 +67,7 @@ describe('scaffolding component testing', {
 
       // should detect correctly
       cy.get('button').should('be.visible').contains('Create React App(detected)')
-      cy.get('button').contains('Next Step').click()
+      cy.get('button').contains('Next step').click()
       cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.js`)
     })
@@ -77,7 +79,7 @@ describe('scaffolding component testing', {
 
       // should detect correctly
       cy.get('button').should('be.visible').contains('React.js(detected)')
-      cy.get('button').contains('Next Step').click()
+      cy.get('button').contains('Next step').click()
       cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.ts`)
     })
@@ -89,7 +91,7 @@ describe('scaffolding component testing', {
 
       // should detect correctly
       cy.get('button').should('be.visible').contains('Vue.js 3(detected)')
-      cy.get('button').contains('Next Step').click()
+      cy.get('button').contains('Next step').click()
       cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.ts`)
     })
@@ -102,7 +104,7 @@ describe('scaffolding component testing', {
       // should detect correctly
       // Screen reader text is "Support is in", but don't want to rely on DOM introduced whitespace so using regex
       cy.contains('button', /Nuxt\.js \(v2\)\s+Support is in\s+Alpha\(detected\)/).should('be.visible')
-      cy.contains('button', 'Next Step').click()
+      cy.contains('button', 'Next step').click()
       cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.js`)
     })
@@ -110,13 +112,13 @@ describe('scaffolding component testing', {
 
   context('angular-cli-unconfigured', () => {
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23452
-    it.skip('scaffolds component testing for Angular', () => {
+    it('scaffolds component testing for Angular', { retries: 15 }, () => {
       startSetupFor('angular-cli-unconfigured')
 
       // should detect correctly
       // Screen reader text is "Support is in", but don't want to rely on DOM introduced whitespace so using regex
       cy.contains('button', 'Angular(detected)').should('be.visible')
-      cy.contains('button', 'Next Step').click()
+      cy.contains('button', 'Next step').click()
       cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.ts`)
     })
@@ -129,7 +131,7 @@ describe('scaffolding component testing', {
       // should detect correctly
       // Screen reader text is "Support is in", but don't want to rely on DOM introduced whitespace so using regex
       cy.contains('button', /Svelte\.js\s+Support is in\s+Alpha\(detected\)/).should('be.visible')
-      cy.contains('button', 'Next Step').click()
+      cy.contains('button', 'Next step').click()
       cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.js`)
     })
@@ -142,7 +144,7 @@ describe('scaffolding component testing', {
       // should detect correctly
       // Screen reader text is "Support is in", but don't want to rely on DOM introduced whitespace so using regex
       cy.contains('button', /Svelte\.js\s+Support is in\s+Alpha\(detected\)/).should('be.visible')
-      cy.contains('button', 'Next Step').click()
+      cy.contains('button', 'Next step').click()
       cy.findByRole('button', { name: 'Continue' }).click()
       verifyConfigFile(`cypress.config.js`)
     })

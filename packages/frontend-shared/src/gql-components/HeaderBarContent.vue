@@ -94,18 +94,18 @@
           @clear-force-open="isForceOpenAllowed = false"
         >
           <template
-            v-if="userData"
+            v-if="loginConnectStore.user.isLoggedIn"
             #login-title
           >
             <UserAvatar
-              :email="userData?.email"
+              :email="loginConnectStore.userData?.email"
               class="h-24px w-24px"
               data-cy="user-avatar-title"
             />
             <span class="sr-only">{{ t('topNav.login.profileMenuLabel') }}</span>
           </template>
           <template
-            v-if="userData"
+            v-if="loginConnectStore.userData"
             #login-panel
           >
             <div
@@ -114,14 +114,14 @@
             >
               <div class="border-b flex border-b-gray-100 p-16px">
                 <UserAvatar
-                  :email="userData?.email"
+                  :email="loginConnectStore.userData?.email"
                   class="h-48px mr-16px w-48px"
                   data-cy="user-avatar-panel"
                 />
                 <div>
-                  <span class="text-gray-800">{{ userData?.fullName }}</span>
+                  <span class="text-gray-800">{{ loginConnectStore.userData?.fullName }}</span>
                   <br>
-                  <span class="text-gray-600">{{ userData?.email }}</span>
+                  <span class="text-gray-600">{{ loginConnectStore.userData?.email }}</span>
                   <br>
                   <ExternalLink
                     href="https://on.cypress.io/dashboard/profile"
@@ -141,10 +141,10 @@
             </div>
           </template>
         </TopNav>
-        <div v-if="!userData">
+        <div v-if="!loginConnectStore.user.isLoggedIn">
           <button
             class="flex text-gray-600 items-center group focus:outline-transparent"
-            @click="openLogin"
+            @click="loginConnectStore.openLoginConnectModal({ utmMedium: 'Nav' })"
           >
             <i-cy-profile_x16
               class="h-16px mr-8px w-16px block icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
@@ -153,13 +153,6 @@
           </button>
         </div>
       </div>
-      <LoginModal
-        v-model="isLoginOpen"
-        :gql="props.gql"
-        utm-medium="Nav"
-        :show-connect-button-after-login="isApp && !cloudProjectId"
-        @connect-project="handleConnectProject"
-      />
     </div>
   </div>
 </template>
@@ -173,7 +166,6 @@ import {
   HeaderBarContent_AuthChangeDocument,
 } from '../generated/graphql'
 import TopNav from './topnav/TopNav.vue'
-import LoginModal from './topnav/LoginModal.vue'
 import UserAvatar from './topnav/UserAvatar.vue'
 import Auth from './Auth.vue'
 import { useI18n } from '@cy/i18n'
@@ -182,6 +174,9 @@ import interval from 'human-interval'
 import { sortBy } from 'lodash'
 import Tooltip from '../components/Tooltip.vue'
 import type { AllowedState } from '@packages/types'
+import { useLoginConnectStore } from '../store/login-connect-store'
+
+const loginConnectStore = useLoginConnectStore()
 
 gql`
 fragment HeaderBarContent_Auth on Query {
@@ -243,10 +238,6 @@ fragment HeaderBar_HeaderBarContent on Query {
 }
 `
 
-const userData = computed(() => {
-  return props.gql.cloudViewer ?? props.gql.cachedUser
-})
-
 const savedState = computed(() => {
   return props.gql?.currentProject?.savedState as AllowedState
 })
@@ -257,12 +248,7 @@ const cloudProjectId = computed(() => {
   return props.gql?.currentProject?.config?.find((item: { field: string }) => item.field === 'projectId')?.value
 })
 
-const isLoginOpen = ref(false)
 const clearCurrentProjectMutation = useMutation(GlobalPageHeader_ClearCurrentProjectDocument)
-
-const openLogin = () => {
-  isLoginOpen.value = true
-}
 
 const clearCurrentProject = () => {
   if (currentProject.value) {
@@ -276,16 +262,6 @@ const props = defineProps<{
   pageName?: string
   allowAutomaticPromptOpen?: boolean
 }>()
-
-const emit = defineEmits<{
-  (event: 'connect-project'): void
-}>()
-
-const isApp = window.__Cypress__
-
-const handleConnectProject = () => {
-  emit('connect-project')
-}
 
 const { t } = useI18n()
 const prompts = sortBy([

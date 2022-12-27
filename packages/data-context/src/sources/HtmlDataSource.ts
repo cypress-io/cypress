@@ -42,7 +42,7 @@ export class HtmlDataSource {
     throw err
   }
 
-  getPropertiesFromLegacyConfig (cfg: any) {
+  getPropertiesFromServerConfig (cfg: any = {}) {
     const keys = [
       'baseUrl',
       'browserUrl',
@@ -53,7 +53,6 @@ export class HtmlDataSource {
       'testingType',
       'componentTesting',
       'reporterUrl',
-      'xhrUrl',
       'namespace',
       'socketIoRoute',
     ]
@@ -62,7 +61,7 @@ export class HtmlDataSource {
   }
 
   async makeServeConfig () {
-    const propertiesFromLegacyConfig = this.getPropertiesFromLegacyConfig(this.ctx._apis.projectApi.getConfig() ?? {})
+    const propertiesFromLegacyConfig = this.getPropertiesFromServerConfig(this.ctx._apis.projectApi.getConfig())
 
     let cfg = { ...propertiesFromLegacyConfig }
 

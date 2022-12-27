@@ -3,6 +3,7 @@ import { devServer } from '@cypress/vite-dev-server'
 
 export default defineConfig({
   component: {
+    experimentalSingleTabRunMode: true,
     specPattern: 'src/**/*.ts',
     supportFile: false,
     async setupNodeEvents (_, config) {

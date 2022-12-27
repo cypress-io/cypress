@@ -19,7 +19,7 @@ describe('http/response-middleware', function () {
       'OmitProblematicHeaders',
       'MaybePreventCaching',
       'MaybeStripDocumentDomainFeaturePolicy',
-      'CopyCookiesFromIncomingRes',
+      'MaybeCopyCookiesFromIncomingRes',
       'MaybeSendRedirectToClient',
       'CopyResponseStatusCode',
       'ClearCyInitialCookie',
@@ -38,6 +38,10 @@ describe('http/response-middleware', function () {
     }
 
     testMiddleware([middleware], {
+      res: {
+        on: (event, listener) => {},
+        off: (event, listener) => {},
+      },
       onError (err) {
         expect(err.message).to.equal('Error running proxy middleware: Cannot call this.next() more than once in the same middleware function. Doing so can cause unintended issues.')
 
@@ -55,6 +59,10 @@ describe('http/response-middleware', function () {
     }
 
     return testMiddleware([middleware1, middleware2], {
+      res: {
+        on: (event, listener) => {},
+        off: (event, listener) => {},
+      },
       onError () {
         throw new Error('onError should not be called')
       },
@@ -152,6 +160,8 @@ describe('http/response-middleware', function () {
         res: {
           set: sinon.stub(),
           removeHeader: sinon.stub(),
+          on: (event, listener) => {},
+          off: (event, listener) => {},
         },
         incomingRes: {
           headers,
@@ -220,53 +230,7 @@ describe('http/response-middleware', function () {
       })
     })
 
-    it('doesn\'t inject anything when html does not match origin policy and "experimentalSessionAndOrigin" config flag is NOT set to true', function () {
-      prepareContext({
-        req: {
-          proxiedUrl: 'http://foobar.com',
-          isAUTFrame: true,
-          cookies: {},
-          headers: {},
-        },
-        incomingRes: {
-          headers: {
-            'content-type': 'text/html',
-          },
-        },
-      })
-
-      return testMiddleware([SetInjectionLevel], ctx)
-      .then(() => {
-        expect(ctx.res.wantsInjection).to.be.false
-      })
-    })
-
-    it('injects "fullCrossOrigin" when "experimentalSessionAndOrigin" config flag is set to true for cross-origin html"', function () {
-      prepareContext({
-        req: {
-          proxiedUrl: 'http://foobar.com',
-          isAUTFrame: true,
-          cookies: {},
-          headers: {},
-        },
-        incomingRes: {
-          headers: {
-            'content-type': 'text/html',
-          },
-        },
-        secondaryOrigins: ['http://foobar.com'],
-        config: {
-          experimentalSessionAndOrigin: true,
-        },
-      })
-
-      return testMiddleware([SetInjectionLevel], ctx)
-      .then(() => {
-        expect(ctx.res.wantsInjection).to.equal('fullCrossOrigin')
-      })
-    })
-
-    it('injects "fullCrossOrigin" when request is in origin stack for cross-origin html"', function () {
+    it('injects "fullCrossOrigin" when request is cross-origin html', function () {
       prepareContext({
         req: {
           proxiedUrl: 'http://example.com',
@@ -278,10 +242,6 @@ describe('http/response-middleware', function () {
           headers: {
             'content-type': 'text/html',
           },
-        },
-        secondaryOrigins: ['http://example.com', 'http://foobar.com'],
-        config: {
-          experimentalSessionAndOrigin: true,
         },
       })
 
@@ -320,7 +280,7 @@ describe('http/response-middleware', function () {
           return this.renderedHTMLOrigins
         },
         req: {
-          proxiedUrl: 'http://foobar.com',
+          proxiedUrl: 'http://127.0.0.1:3501/',
           isAUTFrame: true,
           cookies: {},
           headers: {
@@ -364,10 +324,6 @@ describe('http/response-middleware', function () {
           headers: {
             'content-type': 'text/html',
           },
-        },
-        secondaryOrigins: ['http://foobar.com'],
-        config: {
-          experimentalSessionAndOrigin: true,
         },
       })
 
@@ -540,6 +496,37 @@ describe('http/response-middleware', function () {
             expect(ctx.res.wantsSecurityRemoved).to.be.true
           })
         })
+
+        it(`does not remove security or inject when the request will not render html (csv).`, () => {
+          prepareContext({
+            renderedHTMLOrigins: {},
+            getRenderedHTMLOrigins () {
+              return this.renderedHTMLOrigins
+            },
+            req: {
+              proxiedUrl: 'http://www.some-third-party-csv.csv',
+              isAUTFrame: false,
+              headers: {
+                'accept': ['text/html', 'application/xhtml+xml'],
+              },
+            },
+            incomingRes: {
+              headers: {
+                'content-type': 'text/csv',
+              },
+            },
+            config: {
+              modifyObstructiveCode: true,
+              experimentalModifyObstructiveThirdPartyCode: true,
+            },
+          })
+
+          return testMiddleware([SetInjectionLevel], ctx)
+          .then(() => {
+            expect(ctx.res.wantsSecurityRemoved).to.be.false
+            expect(ctx.res.wantsInjection).to.be.false
+          })
+        })
       })
     })
 
@@ -549,11 +536,6 @@ describe('http/response-middleware', function () {
       // set the primary remote state
       remoteStates.set('http://127.0.0.1:3501')
 
-      // set the secondary remote states
-      props.secondaryOrigins?.forEach((originPolicy) => {
-        remoteStates.set(originPolicy, {}, false)
-      })
-
       ctx = {
         incomingRes: {
           headers: {},
@@ -562,6 +544,8 @@ describe('http/response-middleware', function () {
         res: {
           headers: {},
           setHeader: sinon.stub(),
+          on: (event, listener) => {},
+          off: (event, listener) => {},
           ...props.res,
         },
         req: {
@@ -584,8 +568,8 @@ describe('http/response-middleware', function () {
     }
   })
 
-  describe('CopyCookiesFromIncomingRes', function () {
-    const { CopyCookiesFromIncomingRes } = ResponseMiddleware
+  describe('MaybeCopyCookiesFromIncomingRes', function () {
+    const { MaybeCopyCookiesFromIncomingRes } = ResponseMiddleware
 
     it('appends cookies on the response when an array', async function () {
       const { appendStub, ctx } = prepareSameOriginContext({
@@ -596,7 +580,7 @@ describe('http/response-middleware', function () {
         },
       })
 
-      await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+      await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
       expect(appendStub).to.be.calledTwice
       expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie1=value1')
@@ -606,7 +590,7 @@ describe('http/response-middleware', function () {
     it('appends cookies on the response when a string', async function () {
       const { appendStub, ctx } = prepareSameOriginContext()
 
-      await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+      await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
       expect(appendStub).to.be.calledOnce
       expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value')
@@ -620,24 +604,639 @@ describe('http/response-middleware', function () {
         },
       })
 
-      await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+      await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
       expect(appendStub).not.to.be.called
     })
 
-    it('does not send cross:origin:automation:cookies if request does not need cross-origin handling', async () => {
+    it('is a noop in the cookie jar when top does NOT need simulating', async function () {
+      const appendStub = sinon.stub()
+
+      const cookieJar = {
+        getAllCookies: () => [{ key: 'cookie', value: 'value' }],
+        setCookie: sinon.stub(),
+      }
+
+      const ctx = prepareContext({
+        cookieJar,
+        res: {
+          append: appendStub,
+        },
+        incomingRes: {
+          headers: {
+            'set-cookie': 'cookie=value',
+          },
+        },
+      })
+
+      ctx.getAUTUrl = () => 'http://www.foobar.com/index.html'
+      // set the primaryOrigin to true to signal we do NOT need to simulate top
+      ctx.remoteStates.isPrimarySuperDomainOrigin = () => true
+
+      await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
+
+      expect(cookieJar.setCookie).not.to.have.been.called
+      expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value')
+    })
+
+    const getCookieJarStub = () => {
+      return {
+        getAllCookies: sinon.stub().returns([{ key: 'cookie', value: 'value' }]),
+        getCookies: sinon.stub().returns([]),
+        setCookie: sinon.stub(),
+      }
+    }
+
+    describe('same-origin', () => {
+      ['same-origin', 'include'].forEach((credentialLevel) => {
+        it(`sets first-party cookie context in the jar when simulating top if credentials included with fetch with credential ${credentialLevel}`, async function () {
+          const appendStub = sinon.stub()
+          const cookieJar = getCookieJarStub()
+          const ctx = prepareContext({
+            cookieJar,
+            res: {
+              append: appendStub,
+            },
+            req: {
+              // a same-site request that has the ability to set first-party cookies in the browser
+              requestedWith: 'fetch',
+              credentialsLevel: credentialLevel,
+              proxiedUrl: 'https://www.foobar.com/test-request',
+            },
+            incomingRes: {
+              headers: {
+                'set-cookie': ['cookie1=value1; SameSite=Strict', 'cookie2=value2; SameSite=Lax', 'cookie3=value3; SameSite=None; Secure'],
+              },
+            },
+          })
+
+          // a case where top would need to be simulated
+          ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
+          ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
+
+          await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
+
+          // should work as this would be set in the browser if the AUT url was top
+          expect(cookieJar.setCookie).to.have.been.calledWith(sinon.match({
+            key: 'cookie1',
+            value: 'value1',
+            sameSite: 'strict',
+          }), 'https://www.foobar.com/test-request', 'strict')
+
+          // should work as this would be set in the browser if the AUT url was top
+          expect(cookieJar.setCookie).to.have.been.calledWith(sinon.match({
+            key: 'cookie2',
+            value: 'value2',
+            sameSite: 'lax',
+          }), 'https://www.foobar.com/test-request', 'strict')
+
+          // should work as this would be set in the browser if the AUT url was top, just sets a third party cookie
+          expect(cookieJar.setCookie).to.have.been.calledWith(sinon.match({
+            key: 'cookie3',
+            value: 'value3',
+            sameSite: 'none',
+          }), 'https://www.foobar.com/test-request', 'strict')
+
+          expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie1=value1; SameSite=Strict')
+          expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie2=value2; SameSite=Lax')
+          expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie3=value3; SameSite=None; Secure')
+        })
+      })
+
+      ;[true, false].forEach((credentialLevel) => {
+        it(`sets first-party cookie context in the jar when simulating top if withCredentials ${credentialLevel} with xhr`, async function () {
+          const appendStub = sinon.stub()
+          const cookieJar = getCookieJarStub()
+          const ctx = prepareContext({
+            cookieJar,
+            res: {
+              append: appendStub,
+            },
+            req: {
+              // a same-site request that has the ability to set first-party cookies in the browser
+              requestedWith: 'xhr',
+              credentialsLevel: credentialLevel,
+              proxiedUrl: 'https://www.foobar.com/test-request',
+            },
+            incomingRes: {
+              headers: {
+                'set-cookie': ['cookie1=value1; SameSite=Strict', 'cookie2=value2; SameSite=Lax', 'cookie3=value3; SameSite=None; Secure'],
+              },
+            },
+          })
+
+          // a case where top would need to be simulated
+          ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
+          ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
+
+          await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
+
+          // should work as this would be set in the browser if the AUT url was top
+          expect(cookieJar.setCookie).to.have.been.calledWith(sinon.match({
+            key: 'cookie1',
+            value: 'value1',
+            sameSite: 'strict',
+          }), 'https://www.foobar.com/test-request', 'strict')
+
+          // should work as this would be set in the browser if the AUT url was top
+          expect(cookieJar.setCookie).to.have.been.calledWith(sinon.match({
+            key: 'cookie2',
+            value: 'value2',
+            sameSite: 'lax',
+          }), 'https://www.foobar.com/test-request', 'strict')
+
+          // should work as this would be set in the browser if the AUT url was top, just sets a third party cookie
+          expect(cookieJar.setCookie).to.have.been.calledWith(sinon.match({
+            key: 'cookie3',
+            value: 'value3',
+            sameSite: 'none',
+          }), 'https://www.foobar.com/test-request', 'strict')
+
+          expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie1=value1; SameSite=Strict')
+          expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie2=value2; SameSite=Lax')
+          expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie3=value3; SameSite=None; Secure')
+        })
+      })
+
+      it(`sets no cookies if fetch level is omit`, async function () {
+        const appendStub = sinon.stub()
+        const cookieJar = getCookieJarStub()
+        const ctx = prepareContext({
+          cookieJar,
+          res: {
+            append: appendStub,
+          },
+          req: {
+            // a same-site request that has the ability to set first-party cookies in the browser
+            requestedWith: 'fetch',
+            credentialsLevel: 'omit',
+            proxiedUrl: 'https://www.foobar.com/test-request',
+          },
+          incomingRes: {
+            headers: {
+              'set-cookie': ['cookie1=value1; SameSite=Strict', 'cookie2=value2; SameSite=Lax', 'cookie3=value3; SameSite=None; Secure'],
+            },
+          },
+        })
+
+        // a case where top would need to be simulated
+        ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
+        ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
+
+        await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
+
+        // should not work as this wouldn't be set in the browser if the AUT url was top
+        expect(cookieJar.setCookie).not.to.have.been.calledWith(sinon.match({
+          key: 'cookie1',
+          value: 'value1',
+          sameSite: 'strict',
+        }), 'https://www.foobar.com/test-request', 'strict')
+
+        // should not work as this wouldn't be set in the browser if the AUT url was top
+        expect(cookieJar.setCookie).not.to.have.been.calledWith(sinon.match({
+          key: 'cookie2',
+          value: 'value2',
+          sameSite: 'lax',
+        }), 'https://www.foobar.com/test-request', 'strict')
+
+        // should not work as this wouldn't be set in the browser if the AUT url was top
+        expect(cookieJar.setCookie).not.to.have.been.calledWith(sinon.match({
+          key: 'cookie3',
+          value: 'value3',
+          sameSite: 'none',
+        }), 'https://www.foobar.com/test-request', 'strict')
+
+        // return these to the browser, even though they are likely to fail setting anyway
+        expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie1=value1; SameSite=Strict')
+        expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie2=value2; SameSite=Lax')
+        expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie3=value3; SameSite=None; Secure')
+      })
+    })
+
+    describe('same-site', () => {
+      it('sets first-party cookie context in the jar when simulating top if credentials included with fetch via include', async function () {
+        const appendStub = sinon.stub()
+        const cookieJar = getCookieJarStub()
+        const ctx = prepareContext({
+          cookieJar,
+          res: {
+            append: appendStub,
+          },
+          req: {
+            // a same-site request that has the ability to set first-party cookies in the browser
+            requestedWith: 'fetch',
+            credentialsLevel: 'include',
+            proxiedUrl: 'https://app.foobar.com/test-request',
+          },
+          incomingRes: {
+            headers: {
+              'set-cookie': ['cookie1=value1; SameSite=Strict', 'cookie2=value2; SameSite=Lax', 'cookie3=value3; SameSite=None; Secure'],
+            },
+          },
+        })
+
+        // a case where top would need to be simulated
+        ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
+        ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
+
+        await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
+
+        // should work as this would be set in the browser if the AUT url was top
+        expect(cookieJar.setCookie).to.have.been.calledWith(sinon.match({
+          key: 'cookie1',
+          value: 'value1',
+          sameSite: 'strict',
+        }), 'https://app.foobar.com/test-request', 'strict')
+
+        // should work as this would be set in the browser if the AUT url was top
+        expect(cookieJar.setCookie).to.have.been.calledWith(sinon.match({
+          key: 'cookie2',
+          value: 'value2',
+          sameSite: 'lax',
+        }), 'https://app.foobar.com/test-request', 'strict')
+
+        // should work as this would be set in the browser if the AUT url was top, just sets a third party cookie
+        expect(cookieJar.setCookie).to.have.been.calledWith(sinon.match({
+          key: 'cookie3',
+          value: 'value3',
+          sameSite: 'none',
+        }), 'https://app.foobar.com/test-request', 'strict')
+
+        expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie1=value1; SameSite=Strict')
+        expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie2=value2; SameSite=Lax')
+        expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie3=value3; SameSite=None; Secure')
+      })
+
+      it('sets first-party cookie context in the jar when simulating top if credentials true with xhr', async function () {
+        const appendStub = sinon.stub()
+        const cookieJar = getCookieJarStub()
+        const ctx = prepareContext({
+          cookieJar,
+          res: {
+            append: appendStub,
+          },
+          req: {
+            // a same-site request that has the ability to set first-party cookies in the browser
+            requestedWith: 'xhr',
+            credentialsLevel: true,
+            proxiedUrl: 'https://app.foobar.com/test-request',
+          },
+          incomingRes: {
+            headers: {
+              'set-cookie': ['cookie1=value1; SameSite=Strict', 'cookie2=value2; SameSite=Lax', 'cookie3=value3; SameSite=None; Secure'],
+            },
+          },
+        })
+
+        // a case where top would need to be simulated
+        ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
+        ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
+
+        await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
+
+        // should work as this would be set in the browser if the AUT url was top
+        expect(cookieJar.setCookie).to.have.been.calledWith(sinon.match({
+          key: 'cookie1',
+          value: 'value1',
+          sameSite: 'strict',
+        }), 'https://app.foobar.com/test-request', 'strict')
+
+        // should work as this would be set in the browser if the AUT url was top
+        expect(cookieJar.setCookie).to.have.been.calledWith(sinon.match({
+          key: 'cookie2',
+          value: 'value2',
+          sameSite: 'lax',
+        }), 'https://app.foobar.com/test-request', 'strict')
+
+        // should work as this would be set in the browser if the AUT url was top, just sets a third party cookie
+        expect(cookieJar.setCookie).to.have.been.calledWith(sinon.match({
+          key: 'cookie3',
+          value: 'value3',
+          sameSite: 'none',
+        }), 'https://app.foobar.com/test-request', 'strict')
+
+        expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie1=value1; SameSite=Strict')
+        expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie2=value2; SameSite=Lax')
+        expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie3=value3; SameSite=None; Secure')
+      })
+
+      ;['same-origin', 'omit'].forEach((credentialLevel) => {
+        it(`sets no cookies if fetch level is ${credentialLevel}`, async function () {
+          const appendStub = sinon.stub()
+          const cookieJar = getCookieJarStub()
+          const ctx = prepareContext({
+            cookieJar,
+            res: {
+              append: appendStub,
+            },
+            req: {
+              // a same-site request that has the ability to set first-party cookies in the browser
+              requestedWith: 'fetch',
+              credentialsLevel: credentialLevel,
+              proxiedUrl: 'https://app.foobar.com/test-request',
+            },
+            incomingRes: {
+              headers: {
+                'set-cookie': ['cookie1=value1; SameSite=Strict', 'cookie2=value2; SameSite=Lax', 'cookie3=value3; SameSite=None; Secure'],
+              },
+            },
+          })
+
+          // a case where top would need to be simulated
+          ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
+          ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
+
+          await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
+
+          // should not work as this wouldn't be set in the browser if the AUT url was top
+          expect(cookieJar.setCookie).not.to.have.been.called
+
+          // return these to the browser, even though they are likely to fail setting anyway
+          expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie1=value1; SameSite=Strict')
+          expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie2=value2; SameSite=Lax')
+          expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie3=value3; SameSite=None; Secure')
+        })
+      })
+    })
+
+    describe('cross-site', () => {
+      it('sets third-party cookie context in the jar when simulating top if credentials included with fetch', async function () {
+        const appendStub = sinon.stub()
+        const cookieJar = getCookieJarStub()
+        const ctx = prepareContext({
+          cookieJar,
+          res: {
+            append: appendStub,
+          },
+          req: {
+            // a cross-site request that has the ability to set cookies in the browser
+            requestedWith: 'fetch',
+            credentialsLevel: 'include',
+            proxiedUrl: 'https://www.barbaz.com/test-request',
+          },
+          incomingRes: {
+            headers: {
+              'set-cookie': ['cookie1=value1; SameSite=Strict', 'cookie2=value2; SameSite=Lax', 'cookie3=value3; SameSite=None; Secure'],
+            },
+          },
+        })
+
+        // a case where top would need to be simulated
+        ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
+        ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
+
+        await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
+
+        // should not work as this wouldn't be set in the browser if the AUT url was top anyway
+        expect(cookieJar.setCookie).not.to.have.been.calledWith(sinon.match({
+          key: 'cookie1',
+          value: 'value1',
+          sameSite: 'strict',
+        }), 'https://www.barbaz.com/test-request', 'none')
+
+        // should not work as this wouldn't be set in the browser if the AUT url was top anyway
+        expect(cookieJar.setCookie).not.to.have.been.calledWith(sinon.match({
+          key: 'cookie2',
+          value: 'value2',
+          sameSite: 'lax',
+        }), 'https://www.barbaz.com/test-request', 'none')
+
+        expect(cookieJar.setCookie).to.have.been.calledWith(sinon.match({
+          key: 'cookie3',
+          value: 'value3',
+          sameSite: 'none',
+        }), 'https://www.barbaz.com/test-request', 'none')
+
+        expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie3=value3; SameSite=None; Secure')
+      })
+
+      ;['same-origin', 'omit'].forEach((credentialLevel) => {
+        it(`does NOT set third-party cookie context in the jar when simulating top if credentials ${credentialLevel} with fetch`, async function () {
+          const appendStub = sinon.stub()
+          const cookieJar = getCookieJarStub()
+          const ctx = prepareContext({
+            cookieJar,
+            res: {
+              append: appendStub,
+            },
+            req: {
+              // a cross-site request that has the ability to set cookies in the browser
+              requestedWith: 'fetch',
+              credentialsLevel: credentialLevel,
+              proxiedUrl: 'https://www.barbaz.com/test-request',
+            },
+            incomingRes: {
+              headers: {
+                'set-cookie': ['cookie1=value1; SameSite=Strict', 'cookie2=value2; SameSite=Lax', 'cookie3=value3; SameSite=None; Secure'],
+              },
+            },
+          })
+
+          // a case where top would need to be simulated
+          ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
+          ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
+
+          await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
+
+          expect(cookieJar.setCookie).not.to.have.been.called
+
+          // send to browser anyway even though these will likely fail to be set
+          expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie3=value3; SameSite=None; Secure')
+        })
+      })
+
+      it('sets third-party cookie context in the jar when simulating top if withCredentials true with xhr', async function () {
+        const appendStub = sinon.stub()
+        const cookieJar = getCookieJarStub()
+        const ctx = prepareContext({
+          cookieJar,
+          res: {
+            append: appendStub,
+          },
+          req: {
+            // a cross-site request that has the ability to set cookies in the browser
+            requestedWith: 'xhr',
+            credentialsLevel: true,
+            proxiedUrl: 'https://www.barbaz.com/test-request',
+          },
+          incomingRes: {
+            headers: {
+              'set-cookie': ['cookie1=value1; SameSite=Strict', 'cookie2=value2; SameSite=Lax', 'cookie3=value3; SameSite=None; Secure'],
+            },
+          },
+        })
+
+        // a case where top would need to be simulated
+        ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
+        ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
+
+        await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
+
+        // should not work as this wouldn't be set in the browser if the AUT url was top anyway
+        expect(cookieJar.setCookie).not.to.have.been.calledWith(sinon.match({
+          key: 'cookie1',
+          value: 'value1',
+          sameSite: 'strict',
+        }), 'https://www.barbaz.com/test-request', 'none')
+
+        // should not work as this wouldn't be set in the browser if the AUT url was top anyway
+        expect(cookieJar.setCookie).not.to.have.been.calledWith(sinon.match({
+          key: 'cookie2',
+          value: 'value2',
+          sameSite: 'lax',
+        }), 'https://www.barbaz.com/test-request', 'none')
+
+        expect(cookieJar.setCookie).to.have.been.calledWith(sinon.match({
+          key: 'cookie3',
+          value: 'value3',
+          sameSite: 'none',
+        }), 'https://www.barbaz.com/test-request', 'none')
+
+        expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie3=value3; SameSite=None; Secure')
+      })
+
+      it('does not set third-party cookie context in the jar when simulating top if withCredentials false with xhr', async function () {
+        const appendStub = sinon.stub()
+        const cookieJar = getCookieJarStub()
+        const ctx = prepareContext({
+          cookieJar,
+          res: {
+            append: appendStub,
+          },
+          req: {
+            // a cross-site request that has the ability to set cookies in the browser
+            requestedWith: 'xhr',
+            credentialsLevel: false,
+            proxiedUrl: 'https://www.barbaz.com/test-request',
+          },
+          incomingRes: {
+            headers: {
+              'set-cookie': ['cookie1=value1; SameSite=Strict', 'cookie2=value2; SameSite=Lax', 'cookie3=value3; SameSite=None; Secure'],
+            },
+          },
+        })
+
+        // a case where top would need to be simulated
+        ctx.getAUTUrl = () => 'http://www.foobar.com/index.html'
+        ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
+
+        await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
+
+        expect(cookieJar.setCookie).not.to.have.been.called
+
+        // send to the browser, even though the browser will NOT set this cookie
+        expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie3=value3; SameSite=None; Secure')
+      })
+    })
+
+    it(`does NOT set third-party cookie context in the jar if secure cookie is not enabled`, async function () {
+      const appendStub = sinon.stub()
+      const cookieJar = getCookieJarStub()
+      const ctx = prepareContext({
+        cookieJar,
+        res: {
+          append: appendStub,
+        },
+        req: {
+          // a cross-site request that has the ability to set cookies in the browser
+          requestedWith: 'xhr',
+          credentialsLevel: true,
+          proxiedUrl: 'https://www.barbaz.com/test-request',
+        },
+        incomingRes: {
+          headers: {
+            'set-cookie': ['cookie3=value3; SameSite=None'],
+          },
+        },
+      })
+
+      // a case where top would need to be simulated
+      ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
+      ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
+
+      await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
+
+      expect(cookieJar.setCookie).not.to.have.been.called
+
+      // send to browser anyway even though these will likely fail to be set
+      expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie3=value3; SameSite=None')
+    })
+
+    it(`allows setting cookies if request type cannot be determined, but comes from the AUT frame (likely in the case of documents or redirects)`, async function () {
+      const appendStub = sinon.stub()
+      const cookieJar = getCookieJarStub()
+      const ctx = prepareContext({
+        cookieJar,
+        res: {
+          append: appendStub,
+        },
+        req: {
+          isAUTFrame: true,
+          proxiedUrl: 'https://www.barbaz.com/index.html',
+        },
+        incomingRes: {
+          headers: {
+            'set-cookie': ['cookie=value'],
+          },
+        },
+      })
+
+      // a case where top would need to be simulated
+      ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
+      ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
+
+      await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
+
+      expect(cookieJar.setCookie).to.have.been.calledWith(sinon.match({
+        key: 'cookie',
+        value: 'value',
+        sameSite: 'lax',
+      }), 'https://www.barbaz.com/index.html', 'lax')
+
+      // send to browser anyway even though these will likely fail to be set
+      expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value')
+    })
+
+    it(`otherwise, does not allow setting cookies if request type cannot be determined and is not from the AUT and is cross-origin`, async function () {
+      const appendStub = sinon.stub()
+      const cookieJar = getCookieJarStub()
+      const ctx = prepareContext({
+        cookieJar,
+        res: {
+          append: appendStub,
+        },
+        req: {
+          proxiedUrl: 'https://www.barbaz.com/some-image.png',
+        },
+        incomingRes: {
+          headers: {
+            'set-cookie': ['cookie=value'],
+          },
+        },
+      })
+
+      // a case where top would need to be simulated
+      ctx.getAUTUrl = () => 'https://www.foobar.com/index.html'
+      ctx.remoteStates.isPrimarySuperDomainOrigin = () => false
+
+      await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
+
+      expect(cookieJar.setCookie).not.to.have.been.called
+
+      // send to browser anyway even though these will likely fail to be set
+      expect(appendStub).to.be.calledWith('Set-Cookie', 'cookie=value')
+    })
+
+    it('does not send cross:origin:cookies if request does not need top simulation', async () => {
       const { ctx } = prepareSameOriginContext()
 
-      await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+      await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
       expect(ctx.serverBus.emit).not.to.be.called
     })
 
-    it('does not send cross:origin:automation:cookies if there are no added cookies', async () => {
-      const cookieJar = {
-        getAllCookies: () => [{ key: 'cookie', value: 'value' }],
-      }
-
+    it('does not send cross:origin:cookies if there are no added cookies', async () => {
+      const cookieJar = getCookieJarStub()
       const ctx = prepareContext({
         cookieJar,
         incomingRes: {
@@ -647,21 +1246,22 @@ describe('http/response-middleware', function () {
         },
       })
 
-      await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+      await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
       expect(ctx.serverBus.emit).not.to.be.called
     })
 
-    it('sends cross:origin:automation:cookies if there are added cookies and resolves on cross:origin:automation:cookies:received', async () => {
-      const cookieJar = {
-        getAllCookies: sinon.stub(),
-      }
+    it('sends cross:origin:cookies with origin and cookies if there are added cookies and resolves on cross:origin:cookies:received', async () => {
+      const cookieJar = getCookieJarStub()
 
       cookieJar.getAllCookies.onCall(0).returns([])
       cookieJar.getAllCookies.onCall(1).returns([cookieStub({ key: 'cookie', value: 'value' })])
 
       const ctx = prepareContext({
         cookieJar,
+        req: {
+          isAUTFrame: true,
+        },
         incomingRes: {
           headers: {
             'set-cookie': 'cookie=value',
@@ -671,13 +1271,13 @@ describe('http/response-middleware', function () {
 
       // test will hang if this.next() is not called, so this also tests
       // that we move on once receiving this event
-      ctx.serverBus.once.withArgs('cross:origin:automation:cookies:received').yields()
+      ctx.serverBus.once.withArgs('cross:origin:cookies:received').yields()
 
-      await testMiddleware([CopyCookiesFromIncomingRes], ctx)
+      await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
-      expect(ctx.serverBus.emit).to.be.calledWith('cross:origin:automation:cookies')
+      expect(ctx.serverBus.emit).to.be.calledWith('cross:origin:cookies')
 
-      const cookies = ctx.serverBus.emit.withArgs('cross:origin:automation:cookies').args[0][1]
+      const cookies = ctx.serverBus.emit.withArgs('cross:origin:cookies').args[0][1]
 
       expect(cookies[0].name).to.equal('cookie')
       expect(cookies[0].value).to.equal('value')
@@ -689,15 +1289,11 @@ describe('http/response-middleware', function () {
       // set the primary remote state
       remoteStates.set('http://foobar.com')
 
-      // set the secondary remote states
-      props.secondaryOrigins?.forEach((originPolicy) => {
-        remoteStates.set(originPolicy, {}, false)
-      })
-
-      remoteStates.isPrimaryOrigin = () => false
+      remoteStates.isPrimarySuperDomainOrigin = () => false
 
       const cookieJar = props.cookieJar || {
         getAllCookies: () => [],
+        getCookies: () => [],
       }
 
       return {
@@ -707,7 +1303,8 @@ describe('http/response-middleware', function () {
         },
         res: {
           headers: {},
-          on () {},
+          on: (event, listener) => {},
+          off: (event, listener) => {},
           ...props.res,
         },
         req: {
@@ -719,9 +1316,6 @@ describe('http/response-middleware', function () {
           pipe () {
             return { on () {} }
           },
-        },
-        config: {
-          experimentalSessionAndOrigin: true,
         },
         getCookieJar: () => cookieJar,
         getAUTUrl: () => 'http://www.foobar.com/primary-origin.html',
@@ -758,7 +1352,7 @@ describe('http/response-middleware', function () {
         },
       })
 
-      ctx.remoteStates.isPrimaryOrigin = () => true
+      ctx.remoteStates.isPrimarySuperDomainOrigin = () => true
 
       return { appendStub, ctx }
     }
@@ -789,6 +1383,7 @@ describe('http/response-middleware', function () {
         req: {
           proxiedUrl: 'http://www.foobar.com:3501/primary-origin.html',
         },
+        simulatedCookies: [],
       })
 
       return testMiddleware([MaybeInjectHtml], ctx)
@@ -797,19 +1392,22 @@ describe('http/response-middleware', function () {
         expect(htmlStub).to.be.calledWith('foo', {
           'deferSourceMapRewrite': undefined,
           'domainName': 'foobar.com',
-          'isHtml': true,
+          'isNotJavascript': true,
           'modifyObstructiveCode': true,
           'modifyObstructiveThirdPartyCode': true,
           'url': 'http://www.foobar.com:3501/primary-origin.html',
           'useAstSourceRewriting': undefined,
           'wantsInjection': 'full',
           'wantsSecurityRemoved': true,
+          'simulatedCookies': [],
         })
       })
     })
 
     it('modifyObstructiveThirdPartyCode is false for primary requests', function () {
-      prepareContext({})
+      prepareContext({
+        simulatedCookies: [],
+      })
 
       return testMiddleware([MaybeInjectHtml], ctx)
       .then(() => {
@@ -817,13 +1415,14 @@ describe('http/response-middleware', function () {
         expect(htmlStub).to.be.calledWith('foo', {
           'deferSourceMapRewrite': undefined,
           'domainName': '127.0.0.1',
-          'isHtml': true,
+          'isNotJavascript': true,
           'modifyObstructiveCode': true,
           'modifyObstructiveThirdPartyCode': false,
           'url': 'http://127.0.0.1:3501/primary-origin.html',
           'useAstSourceRewriting': undefined,
           'wantsInjection': 'full',
           'wantsSecurityRemoved': true,
+          'simulatedCookies': [],
         })
       })
     })
@@ -837,6 +1436,7 @@ describe('http/response-middleware', function () {
           modifyObstructiveCode: false,
           experimentalModifyObstructiveThirdPartyCode: false,
         },
+        simulatedCookies: [],
       })
 
       return testMiddleware([MaybeInjectHtml], ctx)
@@ -845,13 +1445,14 @@ describe('http/response-middleware', function () {
         expect(htmlStub).to.be.calledWith('foo', {
           'deferSourceMapRewrite': undefined,
           'domainName': 'foobar.com',
-          'isHtml': true,
+          'isNotJavascript': true,
           'modifyObstructiveCode': false,
           'modifyObstructiveThirdPartyCode': false,
           'url': 'http://www.foobar.com:3501/primary-origin.html',
           'useAstSourceRewriting': undefined,
           'wantsInjection': 'full',
           'wantsSecurityRemoved': true,
+          'simulatedCookies': [],
         })
       })
     })
@@ -871,6 +1472,8 @@ describe('http/response-middleware', function () {
         res: {
           wantsInjection: 'full',
           wantsSecurityRemoved: true,
+          on: (event, listener) => {},
+          off: (event, listener) => {},
           ...props.res,
         },
         req: {
@@ -920,7 +1523,7 @@ describe('http/response-middleware', function () {
         expect(securityStub).to.be.calledOnce
         expect(securityStub).to.be.calledWith({
           'deferSourceMapRewrite': undefined,
-          'isHtml': true,
+          'isNotJavascript': true,
           'modifyObstructiveCode': true,
           'modifyObstructiveThirdPartyCode': true,
           'url': 'http://www.foobar.com:3501/primary-origin.html',
@@ -937,7 +1540,7 @@ describe('http/response-middleware', function () {
         expect(securityStub).to.be.calledOnce
         expect(securityStub).to.be.calledWith({
           'deferSourceMapRewrite': undefined,
-          'isHtml': true,
+          'isNotJavascript': true,
           'modifyObstructiveCode': true,
           'modifyObstructiveThirdPartyCode': false,
           'url': 'http://127.0.0.1:3501/primary-origin.html',
@@ -962,7 +1565,7 @@ describe('http/response-middleware', function () {
         expect(securityStub).to.be.calledOnce
         expect(securityStub).to.be.calledWith({
           'deferSourceMapRewrite': undefined,
-          'isHtml': true,
+          'isNotJavascript': true,
           'modifyObstructiveCode': false,
           'modifyObstructiveThirdPartyCode': false,
           'url': 'http://www.foobar.com:3501/primary-origin.html',
@@ -986,6 +1589,8 @@ describe('http/response-middleware', function () {
         res: {
           wantsInjection: 'full',
           wantsSecurityRemoved: true,
+          on: (event, listener) => {},
+          off: (event, listener) => {},
           ...props.res,
         },
         req: {

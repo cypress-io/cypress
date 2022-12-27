@@ -1,6 +1,8 @@
 import type { DataContext } from '..'
 import Debug from 'debug'
 
+const pkg = require('@packages/root')
+
 const debug = Debug('cypress:data-context:actions:EventCollectorActions')
 
 interface CollectableEvent {
@@ -10,7 +12,11 @@ interface CollectableEvent {
   cohort?: string
 }
 
-const cloudEnv = (process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV || 'staging') as 'development' | 'staging' | 'production'
+/**
+ * Defaults to staging when doing development. To override to production for development,
+ * explicitly set process.env.CYPRESS_INTERNAL_ENV to 'production`
+ */
+const cloudEnv = (process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV || 'production') as 'development' | 'staging' | 'production'
 
 export class EventCollectorActions {
   constructor (private ctx: DataContext) {
@@ -19,11 +25,18 @@ export class EventCollectorActions {
 
   async recordEvent (event: CollectableEvent): Promise<boolean> {
     try {
-      const dashboardUrl = this.ctx.cloud.getDashboardUrl(cloudEnv)
+      const cloudUrl = this.ctx.cloud.getCloudUrl(cloudEnv)
 
       await this.ctx.util.fetch(
-        `${dashboardUrl}/anon-collect`,
-        { method: 'POST', body: JSON.stringify(event) },
+        `${cloudUrl}/anon-collect`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-cypress-version': pkg.version,
+          },
+          body: JSON.stringify(event),
+        },
       )
 
       debug(`Recorded event: %o`, event)

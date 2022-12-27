@@ -528,9 +528,9 @@ export default function (Commands, Cypress, cy, state, config) {
       // we are not limited to "within" subject
       // https://github.com/cypress-io/cypress/issues/14253
       if (userOptions.capture !== 'runner') {
-        const withinSubject = state('withinSubject')
+        const withinSubject = cy.getSubjectFromChain(cy.state('withinSubjectChain'))
 
-        if (withinSubject && $dom.isElement(withinSubject)) {
+        if ($dom.isElement(withinSubject)) {
           subject = withinSubject
         }
       }

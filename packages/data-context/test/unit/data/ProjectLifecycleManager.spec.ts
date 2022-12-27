@@ -2,6 +2,7 @@ import { expect } from 'chai'
 import type { DataContext } from '../../../src'
 import { createTestDataContext } from '../helper'
 import sinon from 'sinon'
+import { FullConfig } from '@packages/types'
 
 const browsers = [
   { name: 'electron', family: 'chromium', channel: 'stable', displayName: 'Electron' },
@@ -28,9 +29,15 @@ function createDataContext (modeOptions?: Parameters<typeof createTestDataContex
   return context
 }
 
+const fullConfig: FullConfig = {
+  resolved: {},
+  browsers: [],
+}
+
 describe('ProjectLifecycleManager', () => {
   beforeEach(() => {
     ctx = createDataContext()
+    sinon.stub(ctx.lifecycleManager, 'getFullInitialConfig').resolves(fullConfig)
   })
 
   context('#setInitialActiveBrowser', () => {

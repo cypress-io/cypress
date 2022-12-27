@@ -31,3 +31,11 @@ beforeEach(() => {
     $(cy.state('window')).off()
   } catch (error) {} // eslint-disable-line no-empty
 })
+
+// this is here to test that cy.origin() dependencies used directly in the
+// support file work properly
+Cypress.Commands.add('originLoadUtils', (origin) => {
+  cy.origin(origin, () => {
+    require('./utils')
+  })
+})

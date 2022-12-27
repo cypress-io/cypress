@@ -158,27 +158,27 @@ describe('<FileMatch />', { viewportWidth: 600, viewportHeight: 300 }, () => {
     const matchesData: Record<string, [{ matches: {found: number, total: number}, pattern?: string, extensionPattern?: string }, string]> = {
       all: [
         { matches: { found: 10, total } },
-        '10 Matches',
+        '10 matches',
       ],
       'ignores numerator when file pattern isn\'t searched': [
         { matches: { found: 9, total } },
-        '10 Matches',
+        '10 matches',
       ],
       'shows numerator when file pattern is searched': [
         { matches: { found: 9, total }, pattern: 'A Pattern', extensionPattern: '*.tsx' },
-        '9 of 10 Matches',
+        '9 of 10 matches',
       ],
       one: [
         { matches: { found: 1, total }, pattern: 'A Pattern', extensionPattern: '*.tsx' },
-        '1 of 10 Matches',
+        '1 of 10 matches',
       ],
       'one without a pattern': [
         { matches: { found: 1, total } },
-        '1 Match',
+        '1 match',
       ],
       'no matches': [
         { matches: { found: 0, total: 0 } },
-        'No Matches',
+        'No matches',
       ],
     }
 

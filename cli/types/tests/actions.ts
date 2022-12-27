@@ -46,7 +46,7 @@ Cypress.on('scrolled', ($el) => {
 })
 
 Cypress.on('command:enqueued', (command) => {
-  command // $ExpectType EnqueuedCommand
+  command // $ExpectType EnqueuedCommandAttributes
 })
 
 Cypress.on('command:start', (command) => {

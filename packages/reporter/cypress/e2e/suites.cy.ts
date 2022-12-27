@@ -45,7 +45,9 @@ describe('suites', () => {
     .should('have.class', 'suite')
 
     // ensure the page is loaded before taking snapshot
-    cy.contains('test 4').should('be.visible')
+    // close failed commands -- not needed for to this test
+    cy.contains('test 2').click()
+    cy.contains('failed with retries').click()
     cy.percySnapshot()
   })
 

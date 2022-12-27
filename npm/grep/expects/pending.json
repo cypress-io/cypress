@@ -1,0 +1,7 @@
+{
+  "tests that use .skip": {
+    "works": "pending",
+    "is pending": "pending",
+    "is pending again": "pending"
+  }
+}

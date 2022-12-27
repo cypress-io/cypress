@@ -12,6 +12,8 @@ import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitS
 
 const whitespaceRegex = /^(\s*)*/
 const customProtocolRegex = /^[^:\/]+:\/{1,3}/
+// Find 'namespace' values (like `_N_E` for Next apps) without adjusting relative paths (like `../`)
+const webpackDevtoolNamespaceRegex = /webpack:\/{2}([^.]*)?\.\//
 const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
 const webkitStackLineRegex = /(.*)@(.*)(\n?)/g
 
@@ -142,11 +144,30 @@ const getCodeFrameFromSource = (sourceCode, { line, column: originalColumn, rela
     line,
     column,
     originalFile: relativeFile,
-    relativeFile,
+    relativeFile: getRelativePathFromRoot(relativeFile, absoluteFile),
     absoluteFile,
     frame,
     language: getLanguageFromExtension(relativeFile),
   }
+}
+
+export const toPosix = (file: string) => {
+  return Cypress.config('platform') === 'win32'
+    ? file.replaceAll('\\', '/')
+    : file
+}
+
+const getRelativePathFromRoot = (relativeFile: string, absoluteFile?: string) => {
+  // at this point relativeFile is relative to the cypress config
+  // we need it to be relative to the repo root, which is different for monorepos
+  const repoRoot = Cypress.config('repoRoot')
+  const posixAbsoluteFile = absoluteFile ? toPosix(absoluteFile) : ''
+
+  if (posixAbsoluteFile?.startsWith(`${repoRoot}/`)) {
+    return posixAbsoluteFile.replace(`${repoRoot}/`, '')
+  }
+
+  return relativeFile
 }
 
 const captureUserInvocationStack = (ErrorConstructor: SpecWindow['Error'], userInvocationStack?: string | false) => {
@@ -274,6 +295,13 @@ const stripCustomProtocol = (filePath) => {
     return
   }
 
+  // Check the path to see if custom namespaces have been applied and, if so, remove them
+  // For example, in Next.js we end up with paths like `_N_E/pages/index.cy.js`, and we
+  // need to strip off the `_N_E` so that "Open in IDE" links work correctly
+  if (webpackDevtoolNamespaceRegex.test(filePath)) {
+    return filePath.replace(webpackDevtoolNamespaceRegex, '')
+  }
+
   return filePath.replace(customProtocolRegex, '')
 }
 
@@ -313,13 +341,16 @@ const getSourceDetailsForLine = (projectRoot, line): LineDetail => {
 
   if (relativeFile) {
     relativeFile = path.normalize(relativeFile)
+
+    if (relativeFile.includes(projectRoot)) {
+      relativeFile = relativeFile.replace(projectRoot, '').substring(1)
+    }
   }
 
   let absoluteFile
 
   // WebKit stacks may include an `<unknown>` or `[native code]` location that is not navigable.
   // We ensure that the absolute path is not set in this case.
-
   const canBuildAbsolutePath = relativeFile && projectRoot && (
     !Cypress.isBrowser('webkit') || (relativeFile !== '<unknown>' && relativeFile !== '[native code]')
   )
@@ -451,22 +482,26 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
   // add/$Chainer.prototype[key] (cypress:///../driver/src/cypress/chainer.js:30:128)
   // whereas Chromium browsers have the user's line first
   const stackLines = getStackLines(userInvocationStack)
-  const winnowedStackLines = _.reject(stackLines, (line) => {
-    // WARNING: STACK TRACE WILL BE DIFFERENT IN DEVELOPMENT vs PRODUCTOIN
+  const nonCypressStackLines = _.reject(stackLines, (line) => {
+    // WARNING: STACK TRACE WILL BE DIFFERENT IN DEVELOPMENT vs PRODUCTION
     // stacks in development builds look like:
     //     at cypressErr (cypress:///../driver/src/cypress/error_utils.js:259:17)
     // stacks in prod builds look like:
     //     at cypressErr (http://localhost:3500/isolated-runner/cypress_runner.js:173123:17)
-    return line.includes('cy[name]') || line.includes('Chainer.prototype[key]')
+    return line.includes('cy[name]')
+    || line.includes('Chainer.prototype[key]')
+    || line.includes('cy.<computed>')
+    || line.includes('$Chainer.<computed>')
   }).join('\n')
 
-  return normalizeStackIndentation(winnowedStackLines)
+  return normalizeStackIndentation(nonCypressStackLines)
 }
 
 export default {
   replacedStack,
   getCodeFrame,
   getCodeFrameFromSource,
+  getRelativePathFromRoot,
   getSourceStack,
   getStackLines,
   getSourceDetailsForFirstLine,
@@ -480,4 +515,5 @@ export default {
   stackWithUserInvocationStackSpliced,
   captureUserInvocationStack,
   getInvocationDetails,
+  toPosix,
 }

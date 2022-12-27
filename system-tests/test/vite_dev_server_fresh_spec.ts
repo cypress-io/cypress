@@ -17,7 +17,7 @@ describe('@cypress/vite-dev-server', function () {
           testingType: 'component',
           browser: 'chrome',
           snapshot: true,
-          expectedExitCode: 3,
+          expectedExitCode: 7,
           onStdout: (stdout) => {
             return stdout.replace(/http:\/\/localhost:\d+/g, 'http://localhost:xxxx')
           },

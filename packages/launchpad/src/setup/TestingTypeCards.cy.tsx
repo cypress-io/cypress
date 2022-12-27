@@ -82,14 +82,4 @@ describe('TestingTypeCards', () => {
     cy.findAllByText(defaultMessages.setupPage.testingCard.running).should('have.length', 1)
     cy.percySnapshot()
   })
-
-  it('renders beta label for component testing', () => {
-    cy.mountFragment(TestingTypeCardsFragmentDoc, {
-      render: (gqlVal) => {
-        return <TestingTypeCards gql={gqlVal} />
-      },
-    })
-
-    cy.get('[data-cy-testingtype="component"]').contains('Beta')
-  })
 })

@@ -18,38 +18,20 @@
       </div>
     </div>
     <CloudConnectButton
-      :gql="props.gql"
-      class="mx-auto mt-40px"
       utm-medium="Runs Tab"
-      @success="emit('success')"
+      class="mx-auto mt-40px"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { gql } from '@urql/vue'
 import SmartIcon from '~icons/cy/illustration-gear_x120.svg'
 import DebugIcon from '~icons/cy/illustration-debug_x120.svg'
 import ChartIcon from '~icons/cy/illustration-chart_x120.svg'
 import { useI18n } from '@cy/i18n'
 import CloudConnectButton from './CloudConnectButton.vue'
-import type { RunsConnectFragment } from '../generated/graphql'
 
 const { t } = useI18n()
-
-gql`
-fragment RunsConnect on Query {
-  ...CloudConnectButton
-}
-`
-
-const emit = defineEmits<{
-  (event: 'success'): void
-}>()
-
-const props = defineProps<{
-  gql: RunsConnectFragment
-}>()
 
 const notions = [
   {

@@ -1,3 +1,76 @@
+# [@cypress/angular-v2.0.1](https://github.com/cypress-io/cypress/compare/@cypress/angular-v2.0.0...@cypress/angular-v2.0.1) (2022-11-08)
+
+
+### Bug Fixes
+
+* make component derived info not throw ([#24571](https://github.com/cypress-io/cypress/issues/24571)) ([838dd4f](https://github.com/cypress-io/cypress/commit/838dd4fa2e0ec56633d0af2faf10a47d190b5594))
+
+# [@cypress/angular-v2.0.0](https://github.com/cypress-io/cypress/compare/@cypress/angular-v1.1.2...@cypress/angular-v2.0.0) (2022-11-07)
+
+
+### Bug Fixes
+
+* possibility to override global services in Angular component tests ([#24394](https://github.com/cypress-io/cypress/issues/24394)) ([54d2853](https://github.com/cypress-io/cypress/commit/54d285321723450920e0f1d50374c4bd0590e72a))
+* remove last mounted component upon subsequent mount calls ([#24470](https://github.com/cypress-io/cypress/issues/24470)) ([f39eb1c](https://github.com/cypress-io/cypress/commit/f39eb1c19e0923bda7ae263168fc6448da942d54))
+
+
+### BREAKING CHANGES
+
+* remove last mounted component upon subsequent mount calls of mount
+
+# [@cypress/angular-v1.1.2](https://github.com/cypress-io/cypress/compare/@cypress/angular-v1.1.1...@cypress/angular-v1.1.2) (2022-10-11)
+
+
+### Bug Fixes
+
+* angular and nuxt ct tests now fail on uncaught exceptions ([#24122](https://github.com/cypress-io/cypress/issues/24122)) ([53eef4f](https://github.com/cypress-io/cypress/commit/53eef4fbd7e1caf32f0183cadbc0e4cf05524c34))
+
+# [@cypress/angular-v1.1.1](https://github.com/cypress-io/cypress/compare/@cypress/angular-v1.1.0...@cypress/angular-v1.1.1) (2022-10-04)
+
+
+### Bug Fixes
+
+* **angular:** call ngOnChanges after mount ([#23596](https://github.com/cypress-io/cypress/issues/23596)) ([670d438](https://github.com/cypress-io/cypress/commit/670d43830947c3ea93ef9fdc9c90932a817eb453))
+
+# [@cypress/angular-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/angular-v1.0.0...@cypress/angular-v1.1.0) (2022-09-28)
+
+
+### Bug Fixes
+
+* angular 14.2 mount compilation error ([#23593](https://github.com/cypress-io/cypress/issues/23593)) ([2f337db](https://github.com/cypress-io/cypress/commit/2f337dbfa2bb212754c8fa82e3f4548a2f3a07a4))
+* Fix missing `it.skip` function in Angular tests ([#23829](https://github.com/cypress-io/cypress/issues/23829)) ([64c0f45](https://github.com/cypress-io/cypress/commit/64c0f45182456bd43f4b64b2311e816dde615236))
+
+
+### Features
+
+* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
+
+# [@cypress/angular-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/angular-v1.0.0...@cypress/angular-v1.1.0) (2022-09-27)
+
+
+### Bug Fixes
+
+* angular 14.2 mount compilation error ([#23593](https://github.com/cypress-io/cypress/issues/23593)) ([2f337db](https://github.com/cypress-io/cypress/commit/2f337dbfa2bb212754c8fa82e3f4548a2f3a07a4))
+* Fix missing `it.skip` function in Angular tests ([#23829](https://github.com/cypress-io/cypress/issues/23829)) ([64c0f45](https://github.com/cypress-io/cypress/commit/64c0f45182456bd43f4b64b2311e816dde615236))
+
+
+### Features
+
+* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
+
+# [@cypress/angular-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/angular-v1.0.0...@cypress/angular-v1.1.0) (2022-09-23)
+
+
+### Bug Fixes
+
+* angular 14.2 mount compilation error ([#23593](https://github.com/cypress-io/cypress/issues/23593)) ([2f337db](https://github.com/cypress-io/cypress/commit/2f337dbfa2bb212754c8fa82e3f4548a2f3a07a4))
+* Fix missing `it.skip` function in Angular tests ([#23829](https://github.com/cypress-io/cypress/issues/23829)) ([64c0f45](https://github.com/cypress-io/cypress/commit/64c0f45182456bd43f4b64b2311e816dde615236))
+
+
+### Features
+
+* adding svelte component testing support ([#23553](https://github.com/cypress-io/cypress/issues/23553)) ([f6eaad4](https://github.com/cypress-io/cypress/commit/f6eaad40e1836fa9db87c60defa5ae6f390c8fd8))
+
 # [@cypress/angular-v1.1.0](https://github.com/cypress-io/cypress/compare/@cypress/angular-v1.0.0...@cypress/angular-v1.1.0) (2022-08-30)
 
 

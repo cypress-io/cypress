@@ -35,6 +35,7 @@ for (const project of PROJECTS) {
       })
 
       cy.waitForSpecToFinish({ failCount: 1 })
+      cy.get('.test-err-code-frame').should('be.visible')
 
       cy.withCtx(async (ctx) => {
         const tutorialCyPath = ctx.path.join('components', 'Tutorial.cy.js')
@@ -70,7 +71,7 @@ for (const project of PROJECTS) {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23455
-    it.skip('should detect new spec', () => {
+    it('should detect new spec', { retries: 15 }, () => {
       cy.visitApp()
 
       cy.withCtx(async (ctx) => {

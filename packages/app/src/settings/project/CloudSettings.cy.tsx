@@ -3,7 +3,7 @@ import { CloudSettingsFragmentDoc } from '../../generated/graphql-test'
 import CloudSettings from './CloudSettings.vue'
 
 describe('<CloudSettings />', () => {
-  it('displays the project Id and record key sections', () => {
+  it('displays the project Id and Record Key sections', () => {
     cy.mountFragment(CloudSettingsFragmentDoc, {
 
       render: (gqlVal) => {
@@ -38,14 +38,14 @@ describe('<CloudSettings />', () => {
       },
     })
 
-    cy.findByText(defaultMessages.settingsPage.projectId.title).should('be.visible')
+    cy.findByText(defaultMessages.settingsPage.projectId.title).should('not.exist')
     cy.findByText(defaultMessages.runs.connect.buttonUser).should('be.visible')
     cy.findByText(defaultMessages.settingsPage.recordKey.title).should('not.exist')
 
     cy.percySnapshot()
   })
 
-  it('hides record key when not present', () => {
+  it('hides Record Key when not present', () => {
     cy.mountFragment(CloudSettingsFragmentDoc, {
       onResult (ctx) {
         if (ctx.currentProject?.cloudProject?.__typename === 'CloudProject') {

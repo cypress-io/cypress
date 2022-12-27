@@ -60,6 +60,13 @@ describe('deprecated before:browser:launch args', () => {
     project: beforeBrowserLaunchProject,
     spec: 'app.cy.js',
     snapshot: true,
+    onRun: (exec, browser) => {
+      if (browser === 'electron') {
+        return exec({ originalTitle: `deprecated before:browser:launch args / using non-deprecated API - no warning - [electron]` })
+      }
+
+      return exec({ originalTitle: `deprecated before:browser:launch args / using non-deprecated API - no warning - [firefox,chromium]` })
+    },
     onStdout: excludesString('Deprecation Warning:'),
   })
 

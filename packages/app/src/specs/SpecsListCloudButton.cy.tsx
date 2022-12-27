@@ -42,8 +42,7 @@ describe('<SpecsListCloudButton>', { viewportWidth: 300, viewportHeight: 400 }, 
         }
       },
       render: (gql) => {
-        const showLoginSpy = cy.spy().as('showLoginSpy')
-        const showConnectToProjectSpy = cy.spy().as('showConnectToProjectSpy')
+        const showLoginConnectSpy = cy.spy().as('showLoginConnect')
         const requestAccessSpy = cy.spy().as('requestAccessSpy')
 
         return (
@@ -51,8 +50,7 @@ describe('<SpecsListCloudButton>', { viewportWidth: 300, viewportHeight: 400 }, 
             <SpecsListCloudButton
               gql={gql}
               projectConnectionStatus={status}
-              onShowLogin={showLoginSpy}
-              onShowConnectToProject={showConnectToProjectSpy}
+              onShowLoginConnect={showLoginConnectSpy}
               onRequestAccess={requestAccessSpy}
             />
           </div>)
@@ -77,7 +75,7 @@ describe('<SpecsListCloudButton>', { viewportWidth: 300, viewportHeight: 400 }, 
       .should('exist')
       .click()
 
-      cy.get('@showConnectToProjectSpy').should('have.been.calledOnce')
+      cy.get('@showLoginConnect').should('have.been.calledOnce')
 
       takeSnapshots()
     })
@@ -93,7 +91,7 @@ describe('<SpecsListCloudButton>', { viewportWidth: 300, viewportHeight: 400 }, 
       .should('exist')
       .click()
 
-      cy.get('@showLoginSpy').should('have.been.calledOnce')
+      cy.get('@showLoginConnect').should('have.been.calledOnce')
 
       takeSnapshots()
     })

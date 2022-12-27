@@ -38,6 +38,8 @@ export class OpenProject {
   }
 
   reset () {
+    cookieJar.removeAllCookies()
+    session.clearSessions(true)
     this.resetOpenProject()
   }
 
@@ -92,7 +94,6 @@ export class OpenProject {
       isTextTerminal: !!cfg.isTextTerminal,
       downloadsFolder: cfg.downloadsFolder,
       experimentalModifyObstructiveThirdPartyCode: cfg.experimentalModifyObstructiveThirdPartyCode,
-      experimentalSessionAndOrigin: cfg.experimentalSessionAndOrigin,
       experimentalWebKitSupport: cfg.experimentalWebKitSupport,
       ...prevOptions || {},
     }
@@ -184,6 +185,8 @@ export class OpenProject {
         return await browsers.connectToNewSpec(browser, { onInitializeNewBrowserTab, ...options }, automation)
       }
 
+      options.relaunchBrowser = this.relaunchBrowser
+
       return await browsers.open(browser, options, automation, this._ctx)
     }
 
@@ -243,6 +246,8 @@ export class OpenProject {
   _ctx?: DataContext
 
   async create (path: string, args: InitializeProjectOptions, options: OpenProjectLaunchOptions) {
+    // ensure switching to a new project in cy-in-cy tests and from the launchpad starts with a clean slate
+    this.reset()
     this._ctx = getCtx()
     debug('open_project create %s', path)
 

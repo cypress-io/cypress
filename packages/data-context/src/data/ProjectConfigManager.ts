@@ -367,7 +367,7 @@ export class ProjectConfigManager {
       }
 
       throw getError('CONFIG_VALIDATION_ERROR', 'configFile', file || null, errMsg)
-    })
+    }, this._testingType)
 
     return validateNoBreakingConfigLaunchpad(
       config,
@@ -461,6 +461,16 @@ export class ProjectConfigManager {
     )
   }
 
+  get repoRoot () {
+    /*
+      Used to detect the correct file path when a test fails.
+      It is derived and assigned in the packages/driver in stack_utils.
+      It's needed to show the correct link to files in repo mgmt tools like GitHub in Cypress Cloud.
+      Right now we assume the repoRoot is where the `.git` dir is located.
+    */
+    return this.options.ctx.git?.gitBaseDir
+  }
+
   private async buildBaseFullConfig (configFileContents: Cypress.ConfigOptions, envFile: Cypress.ConfigOptions, options: Partial<AllModeOptions>, withBrowsers = true) {
     assert(this._testingType, 'Cannot build base full config without a testing type')
     this.validateConfigRoot(configFileContents, this._testingType)
@@ -479,6 +489,7 @@ export class ProjectConfigManager {
       cliConfig: options.config ?? {},
       projectName: path.basename(this.options.projectRoot),
       projectRoot: this.options.projectRoot,
+      repoRoot: this.repoRoot,
       config: _.cloneDeep(configFileContents),
       envFile: _.cloneDeep(envFile),
       options: {
@@ -508,7 +519,7 @@ export class ProjectConfigManager {
           }
         }
 
-        if (browser.family !== 'chromium' && fullConfig.chromeWebSecurity) {
+        if (browser.family !== 'chromium' && !fullConfig.chromeWebSecurity) {
           return {
             ...browser,
             warning: browser.warning || getError('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name).message,
