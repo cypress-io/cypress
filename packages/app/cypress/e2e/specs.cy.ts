@@ -408,7 +408,7 @@ describe('App: Specs', () => {
             .and('contain', defaultMessages.createSpec.e2e.importEmptySpec.header)
           })
 
-          cy.contains('Create starter spec').click()
+          cy.contains('Create new spec').click()
 
           cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
           .as('enterSpecInput')
@@ -458,7 +458,7 @@ describe('App: Specs', () => {
           cy.contains('No specs found').should('be.visible')
 
           cy.findByRole('button', { name: 'New spec' }).click()
-          cy.contains('Create starter spec').click()
+          cy.contains('Create new spec').click()
 
           cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
           .as('enterSpecInput')
@@ -484,7 +484,7 @@ describe('App: Specs', () => {
           .and('contain', defaultMessages.createSpec.e2e.importEmptySpec.header)
         })
 
-        cy.contains('Create starter spec').click()
+        cy.contains('Create new spec').click()
 
         cy.findAllByLabelText(defaultMessages.createSpec.e2e.importEmptySpec.inputPlaceholder)
         .as('enterSpecInput')
@@ -527,7 +527,7 @@ describe('App: Specs', () => {
   function selectEmptySpecCard () {
     cy.findAllByTestId('card').should('have.length', 2)
     cy.findByRole('button', { name: 'Create from component' }).should('be.visible')
-    cy.findByRole('button', { name: 'Create starter spec' }).should('be.visible').click()
+    cy.findByRole('button', { name: 'Create new spec' }).should('be.visible').click()
   }
 
   describe('Testing Type: Component', {
@@ -544,11 +544,11 @@ describe('App: Specs', () => {
         cy.findAllByTestId('card').eq(1).as('EmptyCard')
       })
 
-      it('shows Create starter spec card', () => {
+      it('shows Create new spec card', () => {
         cy.get('@EmptyCard')
         .within(() => {
           cy.findByRole('button', {
-            name: 'Create starter spec',
+            name: 'Create new spec',
           }).should('be.visible')
           .and('not.be.disabled')
         })
@@ -593,10 +593,10 @@ describe('App: Specs', () => {
             cy.findByRole('button', { name: 'Create another spec' }).click()
           })
 
-          // 'Create starter spec' dialog presents with options when user indicates they want to create
+          // 'Create new spec' dialog presents with options when user indicates they want to create
           // another spec.
           cy.findAllByTestId('card').should('have.length', 2)
-          cy.findByRole('button', { name: 'Create starter spec' }).should('be.visible')
+          cy.findByRole('button', { name: 'Create new spec' }).should('be.visible')
           cy.findByRole('button', { name: 'Create from component' }).should('be.visible')
         })
 

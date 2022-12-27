@@ -85,22 +85,22 @@ describe('App: Spec List (E2E)', () => {
       cy.findAllByTestId('spec-item').should('contain', 'dom-content.spec.js')
     })
 
-    it('opens the "Create starter spec" modal after clicking the "New specs" button', () => {
+    it('opens the "Create new spec" modal after clicking the "New specs" button', () => {
       cy.findByTestId('standard-modal').should('not.exist')
       cy.findByTestId('new-spec-button').click()
-      cy.findByTestId('standard-modal').get('h2').contains('Create starter spec')
+      cy.findByTestId('standard-modal').get('h2').contains('Create new spec')
       cy.get('button').contains('Scaffold example specs').should('be.visible')
-      cy.get('button').contains('Create starter spec').should('be.visible')
+      cy.get('button').contains('Create new spec').should('be.visible')
       cy.get('button').get('[aria-label="Close"]').click()
       cy.findByTestId('standard-modal').should('not.exist')
     })
 
-    it('has the correct defaultSpecFileName in the "Create starter spec" modal', () => {
+    it('has the correct defaultSpecFileName in the "Create new spec" modal', () => {
       cy.findByTestId('standard-modal').should('not.exist')
       cy.findByTestId('new-spec-button').click()
-      cy.findByTestId('standard-modal').get('h2').contains('Create starter spec')
+      cy.findByTestId('standard-modal').get('h2').contains('Create new spec')
       cy.get('button').contains('Scaffold example specs').should('be.visible')
-      cy.get('button').contains('Create starter spec').should('be.visible').click()
+      cy.get('button').contains('Create new spec').should('be.visible').click()
       cy.get('input').get('[aria-label="Enter a relative path..."]').invoke('val').should('contain', getPathForPlatform('cypress/e2e/spec.spec.js'))
       cy.get('button').get('[aria-label="Close"]').click()
     })
