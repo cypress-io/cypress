@@ -121,7 +121,7 @@ jobs:
       # PR needs to be created
       - name: Create Pull Request
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           script: |
             const { createPullRequest } = require('./scripts/github-actions/create-pull-request.js')
