@@ -751,7 +751,7 @@ describe('lib/util/ci_provider', () => {
   })
 
   describe('jenkins', () => {
-    it('should pass envs as expected', () => {
+    it('with legacy env', () => {
       resetEnv = mockedEnv({
         JENKINS_URL: 'true',
 
@@ -759,7 +759,6 @@ describe('lib/util/ci_provider', () => {
         BUILD_URL: 'buildUrl',
         BUILD_NUMBER: 'buildNumber',
         ghprbPullId: 'gbprbPullId',
-        CHANGE_ID: 'changeId',
 
         GIT_COMMIT: 'gitCommit',
         GIT_BRANCH: 'gitBranch',
@@ -773,7 +772,6 @@ describe('lib/util/ci_provider', () => {
         buildUrl: 'buildUrl',
         buildNumber: 'buildNumber',
         ghprbPullId: 'gbprbPullId',
-        changeId: 'changeId',
       })
 
       expectsCommitParams({
@@ -808,7 +806,7 @@ describe('lib/util/ci_provider', () => {
       return expectsName('jenkins')
     })
 
-    it('jenkins with change request params (PR Scenario)', () => {
+    it('with change request params (PR Scenario)', () => {
       resetEnv = mockedEnv({
         JENKINS_URL: 'true',
 
@@ -845,7 +843,7 @@ describe('lib/util/ci_provider', () => {
       })
     })
 
-    it('jenkins with userProvided', () => {
+    it('with userProvided', () => {
       resetEnv = mockedEnv({
         JENKINS_URL: 'true',
 
