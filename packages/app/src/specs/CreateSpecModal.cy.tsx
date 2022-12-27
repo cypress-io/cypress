@@ -32,7 +32,7 @@ function testEmptySpecModal (fullDefaultSpecFileName: string, specName: string) 
 
   describe('form behavior', () => {
     beforeEach(() => {
-      cy.findByRole('button', { name: 'Create starter spec' }).should('be.visible').click()
+      cy.findByRole('button', { name: 'Create new spec' }).should('be.visible').click()
     })
 
     it('enter should call create spec function', () => {
@@ -68,7 +68,7 @@ function testEmptySpecModal (fullDefaultSpecFileName: string, specName: string) 
 
   describe('text Input', () => {
     beforeEach(() => {
-      cy.findByRole('button', { name: 'Create starter spec' }).should('be.visible').click()
+      cy.findByRole('button', { name: 'Create new spec' }).should('be.visible').click()
     })
 
     it('focuses text input and selects file name by default', () => {
@@ -219,7 +219,7 @@ describe('<CreateSpecModal />', () => {
         />
       </div>))
 
-      cy.findByRole('button', { name: 'Create starter spec' }).should('be.visible').click()
+      cy.findByRole('button', { name: 'Create new spec' }).should('be.visible').click()
 
       cy.focused().as('specNameInput')
 
@@ -296,7 +296,7 @@ describe('defaultSpecFileName', () => {
       },
     })
 
-    cy.findByText('Create starter spec').click()
+    cy.findByText('Create new spec').click()
     cy.get('input').invoke('val').should('contain', 'spec.cy.js')
 
     cy.percySnapshot()
