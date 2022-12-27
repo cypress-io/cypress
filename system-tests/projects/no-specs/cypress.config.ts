@@ -1,6 +1,6 @@
 export default ({
   component: {
-    supportFile: false,
+    experimentalSingleTabRunMode: true,
     devServer: {
       framework: 'react',
       bundler: 'webpack',

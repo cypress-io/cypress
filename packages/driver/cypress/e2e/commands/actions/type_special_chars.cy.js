@@ -85,7 +85,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
   context('{{}', () => {
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23160
-    it.skip('sets which and keyCode to 219', (done) => {
+    it('sets which and keyCode to 219', { retries: 15 }, (done) => {
       cy.$$(':text:first').on('keydown', (e) => {
         expect(e.which).to.eq(219)
         expect(e.keyCode).to.eq(219)
@@ -238,7 +238,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23160
-    it.skip('sets which and keyCode to 8 and does not fire keypress events', (done) => {
+    it('sets which and keyCode to 8 and does not fire keypress events', { retries: 15 }, (done) => {
       cy.$$(':text:first').on('keypress', () => {
         done('should not have received keypress')
       })
@@ -255,7 +255,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23160
-    it.skip('does not fire textInput event', (done) => {
+    it('does not fire textInput event', { retries: 15 }, (done) => {
       cy.$$(':text:first').on('textInput', (e) => {
         done(new Error('textInput should not have fired'))
       })
@@ -266,7 +266,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23160
-    it.skip('can prevent default backspace movement', (done) => {
+    it('can prevent default backspace movement', { retries: 15 }, (done) => {
       cy.$$(':text:first').on('keydown', (e) => {
         if (e.keyCode === 8) {
           e.preventDefault()
@@ -581,7 +581,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23160
-    it.skip('can prevent default del movement', (done) => {
+    it('can prevent default del movement', { retries: 15 }, (done) => {
       cy.$$(':text:first').on('keydown', (e) => {
         if (e.keyCode === 46) {
           e.preventDefault()
@@ -1240,7 +1240,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
     // https://github.com/cypress-io/cypress/issues/3405
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23160
-    it.skip('does fire input event when text inserted', (done) => {
+    it('does fire input event when text inserted', { retries: 15 }, (done) => {
       cy.$$('[contenteditable]:first').on('input', (e) => {
         done()
       })
@@ -1281,7 +1281,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
     context('1 input, no \'submit\' elements', () => {
       // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23160
-      it.skip('triggers form submit', function (done) {
+      it('triggers form submit', { retries: 15 }, function (done) {
         this.foo = {}
 
         this.$forms.find('#single-input').submit((e) => {
@@ -1481,7 +1481,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
 
     context('2 inputs, 1 \'submit\' element input[type=submit]', () => {
       // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23160
-      it.skip('triggers form submit', function (done) {
+      it('triggers form submit', { retries: 15 }, function (done) {
         this.$forms.find('#multiple-inputs-and-input-submit').submit((e) => {
           e.preventDefault()
 

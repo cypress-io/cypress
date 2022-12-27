@@ -11,6 +11,17 @@ import snapshot from 'snap-shot-it'
 const EXPRESS_MINIMAL_PROJECT = 'v8-snapshot/example-express'
 
 describe('integration: express', () => {
+  let originalV8UpdateMetafile
+
+  before(() => {
+    originalV8UpdateMetafile = process.env.V8_UPDATE_METAFILE
+    process.env.V8_UPDATE_METAFILE = '1'
+  })
+
+  after(() => {
+    process.env.V8_UPDATE_METAFILE = originalV8UpdateMetafile
+  })
+
   it('installs snapshot for example-express', async () => {
     Fixtures.remove()
     await FixturesScaffold.scaffoldCommonNodeModules()

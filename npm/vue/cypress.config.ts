@@ -11,6 +11,7 @@ export default defineConfig({
     'supportFile': false,
   },
   'component': {
+    experimentalSingleTabRunMode: true,
     excludeSpecPattern: 'examples/**/*',
     devServer: {
       bundler: 'vite',
