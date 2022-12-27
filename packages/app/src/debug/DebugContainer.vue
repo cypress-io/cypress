@@ -4,7 +4,7 @@
       v-if="showError"
     />
     <div
-      v-else-if="loginConnectStore.user.isLoggedIn && loginConnectStore.project.isProjectConnected && run"
+      v-else-if="loginConnectStore.user.isLoggedIn && loginConnectStore.project.isProjectConnected && run && run.status"
       class="flex flex-col h-full"
     >
       <DebugPageHeader
@@ -14,14 +14,17 @@
       <DebugPageDetails
         :status="run.status"
         :specs="run.specs"
-        :total-skipped-count="run.totalSkippedCount"
         :canceled-at="run.cancelledAt"
-        :canceled-by-full-name="run.cancelledBy.fullName"
+        :canceled-by-full-name="run.cancelledBy?.fullName"
+        :canceled-by-email="run.cancelledBy?.email"
         :is-hidden-by-usage-limits="run.isHiddenByUsageLimits"
         :over-limit-action-type="run.overLimitActionType"
+        :over-limit-action-url="run.overLimitActionUrl"
+        :ci="run.ci"
+        :errors="run.errors"
       />
       <DebugSpecList
-        v-if="run.totalFailed > 0 && ['ERRORED','CANCELLED','TIMEDOUT'].includes(run.status)"
+        v-if="run.totalFailed && ['ERRORED','CANCELLED','TIMEDOUT', 'FAILED'].includes(run.status)"
         :specs="debugSpecsArray"
       />
     </div>
@@ -66,21 +69,28 @@ fragment DebugSpecs on Query {
       __typename
       ... on CloudProject {
         id
-        runByNumber(runNumber: 1) {
+        runByNumber(runNumber: 3) {
           ...DebugPage
           cancelledBy {
             id
             fullName
+            email
           }
           cancelledAt
           id
           runNumber
+          errors
           status
           overLimitActionType
           overLimitActionUrl
           isHiddenByUsageLimits
-          totalSkipped
           totalTests
+          ci {
+            id
+            ciBuildNumberFormatted
+            formattedProvider
+            url
+          }
           testsForReview {
             id
             ...DebugSpecListTests
