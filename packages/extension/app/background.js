@@ -349,11 +349,6 @@ const automation = {
     .then(fn)
   },
 
-  forceGarbageCollection (fn) {
-    // no forced garbage collection in the extension, automatically resolve
-    return Promise.resolve().then(fn)
-  },
-
 }
 
 module.exports = automation
