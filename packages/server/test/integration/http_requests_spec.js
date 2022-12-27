@@ -322,6 +322,17 @@ describe('Routes', () => {
       })
     })
 
+    it('correctly sets the "origin-agent-cluster" to opt in to setting document.domain on spec bridge iframes', function () {
+      return this.rp('http://localhost:2020/__cypress/spec-bridge-iframes')
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
+
+        expect(res.body).to.match(/document.domain = \'localhost\'/)
+
+        expect(res.headers['origin-agent-cluster']).to.eq('?0')
+      })
+    })
+
     it('sets title to projectName', function () {
       return this.rp('http://localhost:2020/__')
       .then((res) => {
@@ -1661,7 +1672,7 @@ describe('Routes', () => {
         })
       })
 
-      it('passes invalid cookies', function () {
+      it('passes invalid cookies', function (done) {
         nock(this.server.remoteStates.current().origin)
         .get('/invalid')
         .reply(200, 'OK', {
@@ -1672,15 +1683,16 @@ describe('Routes', () => {
           ],
         })
 
-        return this.rp('http://localhost:8080/invalid')
-        .then((res) => {
+        http.get('http://localhost:8080/invalid', (res) => {
           expect(res.statusCode).to.eq(200)
 
           expect(res.headers['set-cookie']).to.deep.eq([
             'foo=bar; Path=/',
             '___utmvmXluIZsM=fidJKOsDSdm; path=/; Max-Age=900',
-            '___utmvbXluIZsM=bZM    XtQOGalF: VtR; path=/; Max-Age=900',
+            '___utmvbXluIZsM=bZM\n    XtQOGalF: VtR; path=/; Max-Age=900',
           ])
+
+          done()
         })
       })
 
@@ -2627,7 +2639,7 @@ describe('Routes', () => {
         })
       })
 
-      it('injects document.domain on matching super domains but different subdomain', function () {
+      it('does not inject document.domain on matching super domains but different subdomain - when the domain is set to strict same origin (google)', function () {
         nock('http://mail.google.com')
         .get('/iframe')
         .reply(200, '<html><head></head></html>', {
@@ -2646,7 +2658,7 @@ describe('Routes', () => {
 
           const body = cleanResponseBody(res.body)
 
-          expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = \'google.com\'; </script></head></html>')
+          expect(body).to.eq('<html><head></head></html>')
         })
       })
 
@@ -2786,6 +2798,35 @@ describe('Routes', () => {
 
             expect(body).to.eq('<html><head></head></html>')
           })
+        })
+      })
+    })
+
+    context('content injection', () => {
+      beforeEach(function () {
+        return this.setup('http://www.foo.com')
+      })
+
+      it('injects document.domain on matching super domains but different subdomain - non google domain', function () {
+        nock('http://mail.foo.com')
+        .get('/iframe')
+        .reply(200, '<html><head></head></html>', {
+          'Content-Type': 'text/html',
+        })
+
+        return this.rp({
+          url: 'http://mail.foo.com/iframe',
+          headers: {
+            'Cookie': '__cypress.initial=false',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          },
+        })
+        .then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          const body = cleanResponseBody(res.body)
+
+          expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = \'foo.com\'; </script></head></html>')
         })
       })
     })

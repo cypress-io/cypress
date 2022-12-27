@@ -28,7 +28,7 @@ describe('binary node versions', () => {
   [
     'cypress/base:12',
     'cypress/base:14',
-    'cypress/base:16.14.2',
+    'cypress/base:16.16.0',
     'cypress/base:17.3.0',
   ].forEach(smokeTestDockerImage)
 })

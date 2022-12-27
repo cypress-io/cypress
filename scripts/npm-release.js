@@ -137,22 +137,44 @@ const injectVersions = (packagesToRelease, versions, packages) => {
 const releasePackages = async (packages) => {
   console.log(`\nReleasing packages`)
 
+  let failures = []
+
   // it would make sense to run each release simultaneously with something like Promise.all()
   // however this can cause a race condition within git (git lock throws an error)
   // so we run them one by one to avoid this
   for (const name of packages) {
     console.log(`\nReleasing ${name}...`)
-    // semantic-release v19 upgraded to npm v8 which supports workspaces. When running semantic-release, npm thinks that our lerna workspace
-    // is an npm workspace. When npm executes commands that modify the workspace, it will check the validity of the workspace.
-    // We don't want this to happen since we don't use npm and our links/peerDependencies make npm unhappy.
-    // We disable the workspace update via the NPM_CONFIG_WORKSPACES_UDPATE=false env variable.
-    const { stdout } = await execa('npx', ['lerna', 'exec', '--scope', name, '--', 'npx', '--no-install', 'semantic-release'], { env: { NPM_CONFIG_WORKSPACES_UPDATE: false } })
+    // semantic-release v19 upgraded to npm v8 which supports workspaces. When
+    // running semantic-release, npm thinks that our lerna workspace is an npm
+    // workspace. When npm executes commands that modify the workspace, it will
+    // check the validity of the workspace. We don't want this to happen since
+    // since we don't use npm and our links/peerDependencies make npm unhappy.
+    // We disable the workspace update via the NPM_CONFIG_WORKSPACES_UDPATE=false
+    // env variable.
+    try {
+      const { stdout } = await execa(
+        'npx',
+        ['lerna', 'exec', '--scope', name, '--', 'npx', '--no-install', 'semantic-release'],
+        { env: { NPM_CONFIG_WORKSPACES_UPDATE: false } },
+      )
 
-    console.log(`Released ${name} successfully:`)
-    console.log(stdout)
+      console.log(`Released ${name} successfully:`)
+      console.log(stdout)
+    } catch (err) {
+      failures.push(name)
+
+      console.log(`Releasing ${name} failed:`)
+      console.log(err.stack)
+    }
   }
 
-  console.log(`\nAll packages released successfully`)
+  if (failures.length) {
+    console.log(`\nThe following packages failed to release:\n- ${failures.join('\n- ')}`)
+  } else {
+    console.log(`\nAll packages released successfully`)
+  }
+
+  return failures.length
 }
 
 const getLernaPackages = async () => {
@@ -195,9 +217,13 @@ const main = async () => {
     return console.log(`Release process cannot be run on a PR`)
   }
 
-  await releasePackages(packagesToRelease)
+  const numFailures = await releasePackages(packagesToRelease)
 
-  console.log(`\n\nRelease process completed successfully!`)
+  if (numFailures) {
+    process.exit(numFailures)
+  } else {
+    console.log(`\n\nRelease process completed successfully!`)
+  }
 }
 
 // execute main function if called from command line
@@ -208,4 +234,5 @@ if (require.main === module) {
 module.exports = {
   parseSemanticReleaseOutput,
   readPackageJson,
+  releasePackages,
 }

@@ -22,7 +22,7 @@ import { getRunnerElement, empty } from './utils'
 import { IframeModel } from './iframe-model'
 import { AutIframe } from './aut-iframe'
 import { EventManager } from './event-manager'
-import { client } from '@packages/socket/lib/browser'
+import { createWebsocket as createWebsocketIo } from '@packages/socket/lib/browser'
 import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
 import type { AutomationElementId } from '@packages/types/src'
 import { useSnapshotStore } from './snapshot-store'
@@ -31,11 +31,7 @@ import { useStudioStore } from '../store/studio-store'
 let _eventManager: EventManager | undefined
 
 export function createWebsocket (config: Cypress.Config) {
-  const ws = client({
-    path: config.socketIoRoute,
-    // TODO(webkit): the websocket socket.io transport is busted in WebKit, need polling
-    transports: config.browser.family === 'webkit' ? ['polling'] : ['websocket'],
-  })
+  const ws = createWebsocketIo({ path: config.socketIoRoute, browserFamily: config.browser.family })
 
   ws.on('connect', () => {
     ws.emit('runner:connected')
@@ -98,7 +94,7 @@ function createIframeModel () {
     autIframe.detachDom,
     autIframe.restoreDom,
     autIframe.highlightEl,
-    autIframe.doesAUTMatchTopOriginPolicy,
+    autIframe.doesAUTMatchTopSuperDomainOrigin,
     getEventManager(),
     {
       selectorPlaygroundModel: getEventManager().selectorPlaygroundModel,
@@ -147,7 +143,6 @@ function setupRunner () {
     'Test Project',
     getEventManager(),
     window.UnifiedRunner.CypressJQuery,
-    window.UnifiedRunner.highlight,
   )
 
   createIframeModel()
@@ -194,11 +189,11 @@ export async function teardown () {
  * Add a cross origin iframe for cy.origin support
  */
 export function addCrossOriginIframe (location) {
-  const id = `Spec Bridge: ${location.originPolicy}`
+  const id = `Spec Bridge: ${location.origin}`
 
   // if it already exists, don't add another one
   if (document.getElementById(id)) {
-    getEventManager().notifyCrossOriginBridgeReady(location.originPolicy)
+    getEventManager().notifyCrossOriginBridgeReady(location.origin)
 
     return
   }
@@ -209,7 +204,7 @@ export function addCrossOriginIframe (location) {
     // container since it needs to match the size of the top window for screenshots
     $container: document.body,
     className: 'spec-bridge-iframe',
-    src: `${location.originPolicy}/${getRunnerConfigFromWindow().namespace}/spec-bridge-iframes`,
+    src: `${location.origin}/${getRunnerConfigFromWindow().namespace}/spec-bridge-iframes`,
   })
 }
 
@@ -237,7 +232,7 @@ function runSpecCT (config, spec: SpecFile) {
 
   const specSrc = getSpecUrl(config.namespace, spec.absolute)
 
-  autIframe.showInitialBlankContents()
+  autIframe._showInitialBlankPage()
   $autIframe.prop('src', specSrc)
 
   // initialize Cypress (driver) with the AUT!
@@ -295,7 +290,7 @@ function runSpecE2E (config, spec: SpecFile) {
     el.remove()
   })
 
-  autIframe.showInitialBlankContents()
+  autIframe.visitBlankPage()
 
   // create Spec IFrame
   const specSrc = getSpecUrl(config.namespace, encodeURIComponent(spec.relative))

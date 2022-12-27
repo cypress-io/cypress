@@ -12,6 +12,7 @@ import supertest from 'supertest'
 import { allowDestroy } from '@packages/network'
 import { EventEmitter } from 'events'
 import { RemoteStates } from '@packages/server/lib/remote_states'
+import { CookieJar } from '@packages/server/lib/util/cookies'
 
 const Request = require('@packages/server/lib/request')
 const getFixture = async () => {}
@@ -39,12 +40,22 @@ context('network stubbing', () => {
       netStubbingState,
       config,
       middleware: defaultMiddleware,
-      getCurrentBrowser: () => ({ family: 'chromium' }),
+      getCookieJar: () => new CookieJar(),
       remoteStates,
       getFileServerToken: () => 'fake-token',
       request: new Request(),
       getRenderedHTMLOrigins: () => ({}),
       serverBus: new EventEmitter(),
+      requestedWithAndCredentialManager: {
+        get () {
+          return {
+            requestedWith: 'xhr',
+            credentialStatus: 'same-origin',
+          }
+        },
+        set () {},
+        clear () {},
+      },
     })
 
     app.use((req, res, next) => {
@@ -212,7 +223,7 @@ context('network stubbing', () => {
     let realContentLength = ''
 
     destinationApp.post('/', (req, res) => {
-      const chunks = []
+      const chunks: Buffer[] = []
 
       req.on('data', (chunk) => {
         chunks.push(chunk)

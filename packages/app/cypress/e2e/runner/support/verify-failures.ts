@@ -152,7 +152,6 @@ const verifyFailure = (options) => {
     if (uncaught) {
       cy.log('uncaught error has an associated log for the original error')
       cy.get('.command-name-uncaught-exception')
-      // https://github.com/cypress-io/cypress/issues/23920
       .should(mode === 'component' ? 'have.length.gte' : 'have.length', 1)
       .find('.command-state-failed')
       .find('.command-message-text')
@@ -187,14 +186,18 @@ const verifyFailure = (options) => {
   }
 }
 
-export const createVerify = ({ fileName, hasPreferredIde, mode }) => {
+type ChainableVerify = (specTitle: string, props: any) => Cypress.Chainable
+
+export const createVerify = ({ fileName, hasPreferredIde, mode }): ChainableVerify => {
   return (specTitle: string, props: any) => {
     props.specTitle ||= specTitle
     props.fileName ||= fileName
     props.hasPreferredIde = hasPreferredIde
     props.mode = mode
 
-    ;(props.verifyFn || verifyFailure).call(null, props)
+    return cy.wrap(
+      (props.verifyFn || verifyFailure).call(null, props),
+    )
   }
 }
 

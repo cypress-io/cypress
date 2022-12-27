@@ -7,6 +7,8 @@ import type { DebouncedFunc } from 'lodash'
 import { useStudioStore } from '../store/studio-store'
 import { getElementDimensions, setOffset } from './dimensions'
 import { getOrCreateHelperDom, getSelectorHighlightStyles, getZIndex, INT32_MAX } from './dom'
+import highlightMounter from './selector-playground/highlight-mounter'
+import Highlight from './selector-playground/Highlight.ce.vue'
 
 // JQuery bundled w/ Cypress
 type $CypressJQuery = any
@@ -22,7 +24,6 @@ export class AutIframe {
     private projectName: string,
     private eventManager: any,
     private $: $CypressJQuery,
-    private highlight: any,
   ) {
     this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
   }
@@ -47,16 +48,12 @@ export class AutIframe {
     this.$iframe.remove()
   }
 
-  showInitialBlankContents () {
+  _showInitialBlankPage () {
     this._showContents(blankContents.initial())
   }
 
-  showSessionBlankContents () {
-    this._showContents(blankContents.session())
-  }
-
-  showSessionLifecycleBlankContents () {
-    this._showContents(blankContents.sessionLifecycle())
+  _showTestIsolationBlankPage () {
+    this._showContents(blankContents.testIsolationBlankPage())
   }
 
   showVisitFailure = (props) => {
@@ -92,12 +89,12 @@ export class AutIframe {
   }
 
   /**
-   * If the AUT is cross origin relative to top, a security error is thrown and the method returns false
-   * If the AUT is cross origin relative to top and chromeWebSecurity is false, origins of the AUT and top need to be compared and returns false
-   * Otherwise, if top and the AUT match origins, the method returns true.
+   * If the AUT is cross super domain origin relative to top, a security error is thrown and the method returns false
+   * If the AUT is cross super domain origin relative to top and chromeWebSecurity is false, origins of the AUT and top need to be compared and returns false
+   * Otherwise, if top and the AUT match super domain origins, the method returns true.
    * If the AUT origin is "about://blank", that means the src attribute has been stripped off the iframe and is adhering to same origin policy
    */
-  doesAUTMatchTopOriginPolicy = () => {
+  doesAUTMatchTopSuperDomainOrigin = () => {
     const Cypress = this.eventManager.getCypress()
 
     if (!Cypress) return true
@@ -107,7 +104,7 @@ export class AutIframe {
       const locationTop = Cypress.Location.create(window.location.href)
       const locationAUT = Cypress.Location.create(currentHref)
 
-      return locationTop.originPolicy === locationAUT.originPolicy || locationAUT.originPolicy === 'about://blank'
+      return locationTop.superDomainOrigin === locationAUT.superDomainOrigin || locationAUT.superDomainOrigin === 'about://blank'
     } catch (err) {
       if (err.name === 'SecurityError') {
         return false
@@ -125,7 +122,7 @@ export class AutIframe {
     this.$iframe?.removeAttr('src')
   }
 
-  visitBlank = ({ type }: { type?: 'session' | 'session-lifecycle' }) => {
+  visitBlankPage = (testIsolation?: boolean) => {
     return new Promise<void>((resolve) => {
       if (!this.$iframe) {
         return
@@ -134,15 +131,10 @@ export class AutIframe {
       this.$iframe[0].src = 'about:blank'
 
       this.$iframe.one('load', () => {
-        switch (type) {
-          case 'session':
-            this.showSessionBlankContents()
-            break
-          case 'session-lifecycle':
-            this.showSessionLifecycleBlankContents()
-            break
-          default:
-            this.showInitialBlankContents()
+        if (testIsolation) {
+          this._showTestIsolationBlankPage()
+        } else {
+          this._showInitialBlankPage()
         }
 
         resolve()
@@ -151,7 +143,7 @@ export class AutIframe {
   }
 
   restoreDom = (snapshot) => {
-    if (!this.doesAUTMatchTopOriginPolicy()) {
+    if (!this.doesAUTMatchTopSuperDomainOrigin()) {
       /**
        * A load event fires here when the src is removed (as does an unload event).
        * This is equivalent to loading about:blank (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-src).
@@ -162,7 +154,8 @@ export class AutIframe {
         this.restoreDom(snapshot)
       })
 
-      // The iframe is in a cross origin state. Remove the src attribute to adhere to same origin policy. NOTE: This should only be done ONCE.
+      // The iframe is in a cross origin state.
+      // Remove the src attribute to adhere to same super domain origin so we can interact with the frame. NOTE: This should only be done ONCE.
       this.removeSrcAttribute()
 
       return
@@ -757,10 +750,10 @@ export class AutIframe {
   private listeners: any[] = []
 
   private _addOrUpdateSelectorPlaygroundHighlight ({ $el, $body, selector, showTooltip, onClick }: any) {
-    const { container, shadowRoot, vueContainer } = getOrCreateHelperDom({
+    const { container, vueContainer } = getOrCreateHelperDom({
       body: $body?.get(0) || document.body,
       className: '__cypress-selector-playground',
-      css: this.highlight.css,
+      css: Highlight.styles[0],
     })
 
     const removeContainerClickListeners = () => {
@@ -772,7 +765,6 @@ export class AutIframe {
     }
 
     if (!$el) {
-      this.highlight.unmount(vueContainer)
       removeContainerClickListeners()
       container.remove()
 
@@ -791,11 +783,6 @@ export class AutIframe {
       }
     }
 
-    this.highlight.render(vueContainer, {
-      selector,
-      appendTo: shadowRoot,
-      showTooltip,
-      styles,
-    })
+    highlightMounter.mount(vueContainer, selector, styles)
   }
 }

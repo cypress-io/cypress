@@ -1,0 +1,12 @@
+{
+  "name": "normal-deps",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Example with circular module dependencies.",
+  "scripts": {
+    "start": "node -r ./hook-require.js main",
+    "debug": "node --inspect-brk -r ./hook-require.js main",
+    "ndb": "ndb -r ./hook-require.js main"
+  },
+  "license": "MIT"
+}

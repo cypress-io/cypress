@@ -1,7 +1,7 @@
 import type { ProjectFixtureDir } from '@tooling/system-tests/'
 import { createVerify } from './support/verify-failures'
 
-type VerifyFunc = (specTitle: string, verifyOptions: any) => void
+type VerifyFunc = (specTitle: string, verifyOptions: any) => Cypress.Chainable
 
 type Options = {
   projectName: ProjectFixtureDir
@@ -13,6 +13,19 @@ type Options = {
 
 Cypress.on('uncaught:exception', () => false)
 
+// https://github.com/cypress-io/cypress/issues/23920
+function verifyErrorOnlyCapturedOnce (err: string) {
+  let count = 0
+
+  return cy.get('.command-message-text').each(($el) => {
+    if ($el.text().includes(err)) {
+      count++
+    }
+  }).then(() => {
+    // ensures the error is not double-captured (as per #23920)
+    expect(count).to.eq(1)
+  })
+}
 /**
  * Navigates to desired error spec file within Cypress app and waits for completion.
  * Returns scoped verify function to aid inner spec validation.
@@ -24,9 +37,14 @@ function loadErrorSpec (options: Options): VerifyFunc {
   cy.startAppServer('component')
   cy.visitApp(`specs/runner?file=${filePath}`)
 
-  cy.findByLabelText('Stats', { timeout: 30000 }).within(() => {
-    cy.get('.passed .num', { timeout: 30000 }).should('have.text', `${passCount}`)
-    cy.get('.failed .num', { timeout: 30000 }).should('have.text', `${failCount}`)
+  cy.get('.runnable-header', { log: false }).should('be.visible')
+  // Extended timeout needed due to lengthy Angular bootstrap on Windows
+  cy.contains('Your tests are loading...', { timeout: 60000, log: false }).should('not.exist')
+  // Then ensure the tests have finished
+  cy.get('[aria-label="Rerun all tests"]', { timeout: 30000 })
+  cy.findByLabelText('Stats').within(() => {
+    cy.get('.passed .num').should('have.text', `${passCount}`)
+    cy.get('.failed .num').should('have.text', `${failCount}`)
   })
 
   // Return scoped verify function with spec options baked in
@@ -61,7 +79,7 @@ reactVersions.forEach((reactVersion) => {
         uncaught: true,
         uncaughtMessage: 'mount error',
         message: [
-          'The following error originated from your test code',
+          'The following error originated from your application code',
           'mount error',
         ],
         codeFrameText: 'Errors.cy.jsx',
@@ -73,10 +91,13 @@ reactVersions.forEach((reactVersion) => {
         uncaught: true,
         uncaughtMessage: 'sync error',
         message: [
-          'The following error originated from your test code',
+          'The following error originated from your application code',
           'sync error',
         ],
         codeFrameText: 'Errors.cy.jsx',
+      }).then(() => {
+      // TODO: ReactDOM seems to double throw.
+      // verifyErrorOnlyCapturedOnce('Error: sync error')
       })
 
       verify('async error', {
@@ -85,10 +106,13 @@ reactVersions.forEach((reactVersion) => {
         uncaught: true,
         uncaughtMessage: 'async error',
         message: [
-          'The following error originated from your test code',
+          'The following error originated from your application code',
           'async error',
         ],
         codeFrameText: 'Errors.cy.jsx',
+      }).then(() => {
+        // TODO: ReactDOM seems to double throw.
+        // verifyErrorOnlyCapturedOnce('Error: async error')
       })
 
       verify('command failure', {
@@ -129,7 +153,7 @@ describe('Next.js', {
       uncaught: true,
       uncaughtMessage: 'mount error',
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
         'mount error',
       ],
       codeFrameText: 'Errors.cy.jsx',
@@ -141,10 +165,13 @@ describe('Next.js', {
       uncaught: true,
       uncaughtMessage: 'sync error',
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
         'sync error',
       ],
       codeFrameText: 'Errors.cy.jsx',
+    }).then(() => {
+      // TODO: ReactDOM seems to double throw.
+      // verifyErrorOnlyCapturedOnce('Error: sync error')
     })
 
     verify('async error', {
@@ -153,10 +180,12 @@ describe('Next.js', {
       uncaught: true,
       uncaughtMessage: 'async error',
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
         'async error',
       ],
       codeFrameText: 'Errors.cy.jsx',
+    }).then(() => {
+      verifyErrorOnlyCapturedOnce('Error: async error')
     })
 
     verify('command failure', {
@@ -207,10 +236,12 @@ describe('Vue', {
       uncaught: true,
       uncaughtMessage: 'sync error',
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
         'sync error',
       ],
       codeFrameText: 'Errors.vue',
+    }).then(() => {
+      verifyErrorOnlyCapturedOnce('Error: sync error')
     })
 
     verify('async error', {
@@ -220,10 +251,12 @@ describe('Vue', {
       uncaught: true,
       uncaughtMessage: 'async error',
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
         'async error',
       ],
       codeFrameText: 'Errors.vue',
+    }).then(() => {
+      verifyErrorOnlyCapturedOnce('Error: async error')
     })
 
     verify('command failure', {
@@ -232,8 +265,8 @@ describe('Vue', {
         'Timed out retrying',
         'element-that-does-not-exist',
       ],
-      codeFrameRegex: /Errors\.cy\.js:26/,
-      stackRegex: /Errors\.cy\.js:26/,
+      codeFrameRegex: /Errors\.cy\.js:25/,
+      stackRegex: /Errors\.cy\.js:25/,
     })
   })
 })
@@ -254,17 +287,34 @@ describe('Nuxt', {
       projectName: 'nuxtjs-vue2-configured',
       configFile: 'cypress.config.js',
       filePath: 'components/Errors.cy.js',
-      failCount: 3,
+      failCount: 4,
     })
 
     verify('error on mount', {
       fileName: 'Errors.vue',
       line: 19,
+      uncaught: true,
+      uncaughtMessage: 'mount error',
       message: [
         'mount error',
       ],
       stackRegex: /Errors\.vue:19/,
       codeFrameText: 'Errors.vue',
+    })
+
+    verify('sync error', {
+      fileName: 'Errors.vue',
+      line: 24,
+      uncaught: true,
+      uncaughtMessage: 'sync error',
+      message: [
+        'The following error originated from your application code',
+        'sync error',
+      ],
+      stackRegex: /Errors\.vue:24/,
+      codeFrameText: 'Errors.vue',
+    }).then(() => {
+      verifyErrorOnlyCapturedOnce('Error: sync error')
     })
 
     verify('async error', {
@@ -273,11 +323,13 @@ describe('Nuxt', {
       uncaught: true,
       uncaughtMessage: 'async error',
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
         'async error',
       ],
       stackRegex: /Errors\.vue:28/,
       codeFrameText: 'Errors.vue',
+    }).then(() => {
+      verifyErrorOnlyCapturedOnce('Error: async error')
     })
 
     verify('command failure', {
@@ -328,9 +380,11 @@ describe.skip('Svelte', {
       column: 16,
       uncaught: true,
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
         'sync error',
       ],
+    }).then(() => {
+      verifyErrorOnlyCapturedOnce('Error: sync error')
     })
 
     verify('async error', {
@@ -339,10 +393,12 @@ describe.skip('Svelte', {
       column: 18,
       uncaught: true,
       message: [
-        'The following error originated from your test code',
+        'The following error originated from your application code',
         'async error',
       ],
       // codeFrameText: 'Errors.vue',
+    }).then(() => {
+      verifyErrorOnlyCapturedOnce('Error: async error')
     })
 
     verify('command failure', {
@@ -376,12 +432,37 @@ angularVersions.forEach((angularVersion) => {
         projectName: `angular-${angularVersion}`,
         configFile: 'cypress.config.ts',
         filePath: 'src/app/errors.cy.ts',
-        failCount: 1,
+        failCount: 3,
+        passCount: 1,
       })
 
-      // Angular uses ZoneJS which encapsulates errors thrown by components
-      // Thus, the mount, sync, and async error case errors will not propagate to Cypress
-      // and thus won't fail the tests
+      verify('sync error', {
+        fileName: 'errors.ts',
+        line: 14,
+        column: 11,
+        uncaught: true,
+        uncaughtMessage: 'sync error',
+        message: [
+          'The following error originated from your application code',
+          'sync error',
+        ],
+      }).then(() => {
+        verifyErrorOnlyCapturedOnce('Error: sync error')
+      })
+
+      verify('async error', {
+        fileName: 'errors.ts',
+        line: 19,
+        column: 13,
+        uncaught: true,
+        uncaughtMessage: 'async error',
+        message: [
+          'The following error originated from your application code',
+          'async error',
+        ],
+      }).then(() => {
+        verifyErrorOnlyCapturedOnce('Error: async error')
+      })
 
       verify('command failure', {
         line: 21,

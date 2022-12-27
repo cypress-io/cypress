@@ -21,7 +21,8 @@ import ResponseMiddleware from './response-middleware'
 import { DeferredSourceMapCache } from '@packages/rewriter'
 import type { RemoteStates } from '@packages/server/lib/remote_states'
 import type { CookieJar } from '@packages/server/lib/util/cookies'
-import type { Automation } from '@packages/server/lib/automation/automation'
+import type { RequestedWithAndCredentialManager } from '@packages/server/lib/util/requestedWithAndCredentialManager'
+import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
 
 function getRandomColorFn () {
   return chalk.hex(`#${Number(
@@ -54,10 +55,10 @@ type HttpMiddlewareCtx<T> = {
   middleware: HttpMiddlewareStacks
   getCookieJar: () => CookieJar
   deferSourceMapRewrite: (opts: { js: string, url: string }) => string
-  getAutomation: () => Automation
   getPreRequest: (cb: GetPreRequestCb) => void
   getAUTUrl: Http['getAUTUrl']
   setAUTUrl: Http['setAUTUrl']
+  simulatedCookies: AutomationCookie[]
 } & T
 
 export const defaultMiddleware = {
@@ -69,10 +70,10 @@ export const defaultMiddleware = {
 export type ServerCtx = Readonly<{
   config: CyServer.Config & Cypress.Config
   shouldCorrelatePreRequests?: () => boolean
-  getAutomation: () => Automation
   getFileServerToken: () => string
   getCookieJar: () => CookieJar
   remoteStates: RemoteStates
+  requestedWithAndCredentialManager: RequestedWithAndCredentialManager
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
   middleware: HttpMiddlewareStacks
@@ -106,10 +107,10 @@ export type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<
   skipMiddleware: (name: string) => void
 }>
 
-export function _runStage (type: HttpStages, ctx: any, onError) {
+export function _runStage (type: HttpStages, ctx: any, onError: Function) {
   ctx.stage = HttpStages[type]
 
-  const runMiddlewareStack = () => {
+  const runMiddlewareStack = (): Promise<void> => {
     const middlewares = ctx.middleware[type]
 
     // pop the first pair off the middleware
@@ -137,7 +138,32 @@ export function _runStage (type: HttpStages, ctx: any, onError) {
         .value()
       }
 
+      function _onError (error: Error) {
+        ctx.debug('Error in middleware %o', { middlewareName, error })
+
+        if (type === HttpStages.Error) {
+          return
+        }
+
+        ctx.res.off('close', onClose)
+        _end(onError(error))
+      }
+
+      function onClose () {
+        if (!ctx.res.writableFinished) {
+          _onError(new Error('Socket closed before finished writing response.'))
+        }
+      }
+
+      // If we are in the middle of the response phase we want to listen for the on close message and abort responding and instead send an error.
+      // If the response is closed before the middleware completes, it implies the that request was canceled by the browser.
+      // The request phase is handled elsewhere because we always want the request phase to complete before erroring on canceled.
+      if (type === HttpStages.IncomingResponse) {
+        ctx.res.on('close', onClose)
+      }
+
       function _end (retval?) {
+        ctx.res.off('close', onClose)
         if (ended) {
           return
         }
@@ -161,26 +187,17 @@ export function _runStage (type: HttpStages, ctx: any, onError) {
 
           copyChangedCtx()
 
+          ctx.res.off('close', onClose)
           _end(runMiddlewareStack())
         },
-        end: () => _end(),
+        end: _end,
         onResponse: (incomingRes: Response, resStream: Readable) => {
           ctx.incomingRes = incomingRes
           ctx.incomingResStream = resStream
 
           _end()
         },
-        onError: (error: Error) => {
-          ctx.debug('Error in middleware %o', { middlewareName, error })
-
-          if (type === HttpStages.Error) {
-            return
-          }
-
-          ctx.error = error
-          onError(error)
-          _end(_runStage(HttpStages.Error, ctx, onError))
-        },
+        onError: _onError,
         skipMiddleware: (name) => {
           ctx.middleware[type] = _.omit(ctx.middleware[type], name)
         },
@@ -213,7 +230,6 @@ export class Http {
   config: CyServer.Config
   shouldCorrelatePreRequests: () => boolean
   deferredSourceMapCache: DeferredSourceMapCache
-  getAutomation: () => Automation
   getFileServerToken: () => string
   remoteStates: RemoteStates
   middleware: HttpMiddlewareStacks
@@ -222,6 +238,7 @@ export class Http {
   request: any
   socket: CyServer.Socket
   serverBus: EventEmitter
+  requestedWithAndCredentialManager: RequestedWithAndCredentialManager
   renderedHTMLOrigins: {[key: string]: boolean} = {}
   autUrl?: string
   getCookieJar: () => CookieJar
@@ -232,7 +249,6 @@ export class Http {
 
     this.config = opts.config
     this.shouldCorrelatePreRequests = opts.shouldCorrelatePreRequests || (() => false)
-    this.getAutomation = opts.getAutomation
     this.getFileServerToken = opts.getFileServerToken
     this.remoteStates = opts.remoteStates
     this.middleware = opts.middleware
@@ -240,6 +256,7 @@ export class Http {
     this.socket = opts.socket
     this.request = opts.request
     this.serverBus = opts.serverBus
+    this.requestedWithAndCredentialManager = opts.requestedWithAndCredentialManager
     this.getCookieJar = opts.getCookieJar
 
     if (typeof opts.middleware === 'undefined') {
@@ -259,7 +276,6 @@ export class Http {
       buffers: this.buffers,
       config: this.config,
       shouldCorrelatePreRequests: this.shouldCorrelatePreRequests,
-      getAutomation: this.getAutomation,
       getFileServerToken: this.getFileServerToken,
       remoteStates: this.remoteStates,
       request: this.request,
@@ -267,7 +283,9 @@ export class Http {
       netStubbingState: this.netStubbingState,
       socket: this.socket,
       serverBus: this.serverBus,
+      requestedWithAndCredentialManager: this.requestedWithAndCredentialManager,
       getCookieJar: this.getCookieJar,
+      simulatedCookies: [],
       debug: (formatter, ...args) => {
         if (!debugVerbose.enabled) return
 
@@ -287,7 +305,8 @@ export class Http {
       },
     }
 
-    const onError = () => {
+    const onError = (error: Error): Promise<void> => {
+      ctx.error = error
       if (ctx.req.browserPreRequest) {
         // browsers will retry requests in the event of network errors, but they will not send pre-requests,
         // so try to re-use the current browserPreRequest for the next retry after incrementing the ID.
@@ -299,10 +318,18 @@ export class Http {
         ctx.debug('Re-using pre-request data %o', preRequest)
         this.addPendingBrowserPreRequest(preRequest)
       }
+
+      return _runStage(HttpStages.Error, ctx, onError)
     }
 
     return _runStage(HttpStages.IncomingRequest, ctx, onError)
     .then(() => {
+      // If the response has been destroyed after handling the incoming request, it implies the that request was canceled by the browser.
+      // In this case we don't want to run the response middleware and should just exit.
+      if (res.destroyed) {
+        return onError(new Error('Socket closed before finished writing response'))
+      }
+
       if (ctx.incomingRes) {
         return _runStage(HttpStages.IncomingResponse, ctx, onError)
       }

@@ -136,8 +136,7 @@ const registerAgents = (win) => {
 
   win.cy.stub(obj, 'foo')
   win.cy.wrap(obj).should('exist')
-  win.cy.server()
-  win.cy.route('https://example.com')
+  win.cy.intercept('https://example.com')
 }
 
 export const createSuites = (win, suites = {}) => {

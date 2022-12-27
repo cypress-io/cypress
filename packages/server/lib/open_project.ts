@@ -94,7 +94,6 @@ export class OpenProject {
       isTextTerminal: !!cfg.isTextTerminal,
       downloadsFolder: cfg.downloadsFolder,
       experimentalModifyObstructiveThirdPartyCode: cfg.experimentalModifyObstructiveThirdPartyCode,
-      experimentalSessionAndOrigin: cfg.experimentalSessionAndOrigin,
       experimentalWebKitSupport: cfg.experimentalWebKitSupport,
       ...prevOptions || {},
     }
@@ -185,6 +184,8 @@ export class OpenProject {
         // to receive the next spec
         return await browsers.connectToNewSpec(browser, { onInitializeNewBrowserTab, ...options }, automation)
       }
+
+      options.relaunchBrowser = this.relaunchBrowser
 
       return await browsers.open(browser, options, automation, this._ctx)
     }

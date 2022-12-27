@@ -24,7 +24,7 @@ for (const project of WEBPACK_REACT) {
     it('should mount a passing test', () => {
       cy.visitApp()
       cy.contains('App.cy.jsx').click()
-      cy.waitForSpecToFinish({ passCount: 1 })
+      cy.waitForSpecToFinish({ passCount: 2 })
     })
 
     it('MissingReact: should fail, rerun, succeed', () => {
@@ -61,7 +61,7 @@ for (const project of WEBPACK_REACT) {
           await ctx.file.readFileInProject('src/App.cy.jsx'))
       })
 
-      cy.waitForSpecToFinish({ passCount: 1 })
+      cy.waitForSpecToFinish({ passCount: 2 })
     })
 
     it('AppCompilationError: should fail with uncaught exception error', () => {
@@ -84,7 +84,7 @@ for (const project of WEBPACK_REACT) {
         )
       })
 
-      cy.waitForSpecToFinish({ passCount: 1 })
+      cy.waitForSpecToFinish({ passCount: 2 })
 
       const appCompilationErrorSpec = dedent`
         import React from 'react'
@@ -117,7 +117,7 @@ for (const project of WEBPACK_REACT) {
 
       // 1. assert spec executes successfully
       cy.contains('App.cy.jsx').click()
-      cy.waitForSpecToFinish({ passCount: 1 })
+      cy.waitForSpecToFinish({ passCount: 2 })
 
       // 2. remove file from file system
       cy.withCtx(async (ctx) => {
@@ -129,9 +129,11 @@ for (const project of WEBPACK_REACT) {
 
       // 4. recreate spec, with same name as removed spec
       cy.findByTestId('new-spec-button').click()
+      cy.findByRole('button', { name: 'Create new empty spec' }).should('be.visible').click()
+
       cy.findByRole('dialog').within(() => {
         cy.get('input').clear().type('src/App.cy.jsx')
-        cy.contains('button', 'Create Spec').click()
+        cy.contains('button', 'Create spec').click()
       })
 
       cy.findByRole('dialog').within(() => {

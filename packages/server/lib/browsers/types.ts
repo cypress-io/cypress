@@ -35,4 +35,8 @@ export type BrowserLauncher = {
    * Used in Cypress-in-Cypress tests to connect to the existing browser instance.
    */
   connectToExisting: (browser: Browser, options: BrowserLaunchOpts, automation: Automation) => void | Promise<void>
+  /**
+   * Used to clear instance state after the browser has been exited.
+   */
+  clearInstanceState: () => void
 }

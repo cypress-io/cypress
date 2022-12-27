@@ -330,21 +330,7 @@ describe('lib/browsers/electron', () => {
       })
     })
 
-    it('does not listen to `onBeforeSendHeaders` if experimental flag is off', function () {
-      this.options.experimentalSessionAndOrigin = false
-      sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
-
-      return electron._launch(this.win, this.url, this.automation, this.options)
-      .then(() => {
-        expect(this.win.webContents.session.webRequest.onBeforeSendHeaders).not.to.be.called
-      })
-    })
-
     describe('adding header aut iframe requests', function () {
-      beforeEach(function () {
-        this.options.experimentalSessionAndOrigin = true
-      })
-
       it('does not add header if not a sub frame', function () {
         sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
 
@@ -358,7 +344,9 @@ describe('lib/browsers/electron', () => {
           this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
 
           expect(cb).to.be.calledOnce
-          expect(cb).to.be.calledWith({})
+          expect(cb).to.be.calledWith({
+            requestHeaders: {},
+          })
         })
       })
 
@@ -378,7 +366,9 @@ describe('lib/browsers/electron', () => {
           this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
 
           expect(cb).to.be.calledOnce
-          expect(cb).to.be.calledWith({})
+          expect(cb).to.be.calledWith({
+            requestHeaders: {},
+          })
         })
       })
 
@@ -402,7 +392,9 @@ describe('lib/browsers/electron', () => {
           this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
 
           expect(cb).to.be.calledOnce
-          expect(cb).to.be.calledWith({})
+          expect(cb).to.be.calledWith({
+            requestHeaders: {},
+          })
         })
       })
 
@@ -424,7 +416,9 @@ describe('lib/browsers/electron', () => {
 
           this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
 
-          expect(cb).to.be.calledWith({})
+          expect(cb).to.be.calledWith({
+            requestHeaders: {},
+          })
         })
       })
 
@@ -441,7 +435,9 @@ describe('lib/browsers/electron', () => {
 
           this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
 
-          expect(cb).to.be.calledWith({})
+          expect(cb).to.be.calledWith({
+            requestHeaders: {},
+          })
         })
       })
 
@@ -471,6 +467,37 @@ describe('lib/browsers/electron', () => {
             requestHeaders: {
               'X-Foo': 'Bar',
               'X-Cypress-Is-AUT-Frame': 'true',
+            },
+          })
+        })
+      })
+
+      it('adds X-Cypress-Is-XHR-Or-Fetch header if xhr request (includes fetch)', function () {
+        sinon.stub(this.win.webContents.session.webRequest, 'onBeforeSendHeaders')
+
+        return electron._launch(this.win, this.url, this.automation, this.options)
+        .then(() => {
+          const details = {
+            resourceType: 'xhr',
+            frame: {
+              parent: {
+                parent: null,
+              },
+            },
+            url: 'http://localhost:3000/test-request',
+            requestHeaders: {
+              'X-Foo': 'Bar',
+            },
+          }
+          const cb = sinon.stub()
+
+          this.win.webContents.session.webRequest.onBeforeSendHeaders.lastCall.args[0](details, cb)
+
+          expect(cb).to.be.calledOnce
+          expect(cb).to.be.calledWith({
+            requestHeaders: {
+              'X-Foo': 'Bar',
+              'X-Cypress-Is-XHR-Or-Fetch': 'true',
             },
           })
         })

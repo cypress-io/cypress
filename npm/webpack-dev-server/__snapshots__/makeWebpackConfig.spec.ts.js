@@ -12,16 +12,17 @@ exports['makeWebpackConfig ignores userland webpack `output.publicPath` and `dev
   },
   "optimization": {
     "emitOnErrors": true,
+    "sideEffects": false,
     "splitChunks": {
       "chunks": "all"
     }
   },
+  "devtool": "inline-source-map",
   "mode": "development",
   "plugins": [
     "HtmlWebpackPlugin",
     "CypressCTWebpackPlugin"
-  ],
-  "devtool": "inline-source-map"
+  ]
 }
 
 exports['makeWebpackConfig ignores userland webpack `output.publicPath` and `devServer.overlay` with webpack-dev-server v3 1'] = {
@@ -35,14 +36,15 @@ exports['makeWebpackConfig ignores userland webpack `output.publicPath` and `dev
   },
   "optimization": {
     "noEmitOnErrors": false,
+    "sideEffects": false,
     "splitChunks": {
       "chunks": "all"
     }
   },
+  "devtool": "inline-source-map",
   "mode": "development",
   "plugins": [
     "HtmlWebpackPlugin",
     "CypressCTWebpackPlugin"
-  ],
-  "devtool": "inline-source-map"
+  ]
 }

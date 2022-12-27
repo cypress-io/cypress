@@ -28,8 +28,7 @@ type ProjectConnectionStatus = 'NOT_FOUND' | 'LOGGED_OUT' | 'NOT_CONNECTED' | 'U
 const { t } = useI18n()
 
 const emits = defineEmits<{
-  (eventName: 'showLogin'): void
-  (eventName: 'showConnectToProject'): void
+  (eventName: 'showLoginConnect'): void
   (eventName: 'requestAccess'): void
 }>()
 
@@ -49,8 +48,6 @@ fragment SpecCloudDataHoverButton on Query {
       }
     }
   }
-  ...Auth
-  ...CloudConnectModals
   ...RequestAccessButton
 }
 `
@@ -59,7 +56,7 @@ type ButtonOptions = {
   text: string
   textShort: string
   icon: FunctionalComponent<SVGAttributes>
-  emits: 'showLogin' | 'showConnectToProject' | 'requestAccess' | undefined
+  emits: 'showLoginConnect' | 'requestAccess' | undefined
 }
 
 const VALUES: Record<ProjectConnectionStatus, ButtonOptions> = {
@@ -67,19 +64,19 @@ const VALUES: Record<ProjectConnectionStatus, ButtonOptions> = {
     text: t('specPage.hoverButton.connect'),
     textShort: t('specPage.hoverButton.connect'),
     icon: UserIcon,
-    emits: 'showLogin',
+    emits: 'showLoginConnect',
   },
   NOT_CONNECTED: {
     text: t('specPage.hoverButton.connectProject'),
     textShort: t('specPage.hoverButton.connectProjectShort'),
     icon: ChainIcon,
-    emits: 'showConnectToProject',
+    emits: 'showLoginConnect',
   },
   NOT_FOUND: {
     text: t('specPage.hoverButton.connectProject'),
     textShort: t('specPage.hoverButton.connectProjectShort'),
     icon: ChainIcon,
-    emits: 'showConnectToProject',
+    emits: 'showLoginConnect',
   },
   UNAUTHORIZED: {
     text: t('specPage.hoverButton.requestAccess'),
@@ -109,11 +106,9 @@ const buttonOptions = computed(() => {
 const handleClick = () => {
   switch (props.projectConnectionStatus) {
     case 'LOGGED_OUT':
-      emits('showLogin')
-      break
     case 'NOT_CONNECTED':
     case 'NOT_FOUND':
-      emits('showConnectToProject')
+      emits('showLoginConnect')
       break
     case 'UNAUTHORIZED':
       emits('requestAccess')

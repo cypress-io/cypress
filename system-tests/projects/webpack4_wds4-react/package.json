@@ -4,10 +4,13 @@
     "@babel/preset-env": "^7",
     "@babel/preset-react": "^7",
     "babel-loader": "^8.2.4",
+    "css-loader": "4",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "style-loader": "2",
     "webpack": "^4",
     "webpack-dev-server": "^4"
   },
+  "sideEffects": false,
   "projectFixtureDirectory": "react"
 }

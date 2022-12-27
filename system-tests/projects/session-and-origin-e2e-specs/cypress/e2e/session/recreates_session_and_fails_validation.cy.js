@@ -8,7 +8,7 @@ before(() => {
   setupFn = cy.stub().as('runSetup')
   validateFn = cy.stub().callsFake(() => {
     if (validateFn.callCount >= 2) {
-      return false
+      return Promise.reject(false)
     }
   }).as('runValidation')
 })

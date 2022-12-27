@@ -110,7 +110,7 @@ describe('driver/src/cypress/validate_config', () => {
           expect(overrideLevel).to.eq('suite')
 
           expect(() => {
-            validateConfig(state, { testIsolation: 'strict' })
+            validateConfig(state, { testIsolation: true })
           }).not.to.throw()
         })
 
@@ -127,7 +127,7 @@ describe('driver/src/cypress/validate_config', () => {
           expect(overrideLevel).to.eq('test')
 
           expect(() => {
-            validateConfig(state, { testIsolation: 'strict' })
+            validateConfig(state, { testIsolation: true })
           }).to.throw(`The \`testIsolation\` configuration can only be overridden from a suite-level override.`)
         })
       })
@@ -192,7 +192,7 @@ describe('driver/src/cypress/validate_config', () => {
       })
 
       expect(() => {
-        validateConfig(state, { testIsolation: 'legacy' })
+        validateConfig(state, { testIsolation: true })
       }).not.to.throw()
     })
 

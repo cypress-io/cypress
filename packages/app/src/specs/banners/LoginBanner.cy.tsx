@@ -6,7 +6,7 @@ describe('<LoginBanner />', () => {
   const cohortOption = { cohort: 'A', value: defaultMessages.specPage.banners.login.contentA }
 
   it('should render expected content', () => {
-    cy.mount({ render: () => <LoginBanner modelValue={true} hasBannerBeenShown={true} cohortOption={cohortOption}/> })
+    cy.mount({ render: () => <LoginBanner hasBannerBeenShown={true} cohortOption={cohortOption}/> })
 
     cy.contains(defaultMessages.specPage.banners.login.title).should('be.visible')
     cy.contains(defaultMessages.specPage.banners.login.contentA).should('be.visible')
@@ -27,7 +27,7 @@ describe('<LoginBanner />', () => {
     })
 
     it('should record expected event on mount', () => {
-      cy.mount({ render: () => <LoginBanner modelValue={true} hasBannerBeenShown={false} cohortOption={cohortOption}/> })
+      cy.mount({ render: () => <LoginBanner hasBannerBeenShown={false} cohortOption={cohortOption}/> })
 
       cy.get('@recordEvent').should('have.been.calledWith', {
         campaign: 'Log In',
@@ -38,7 +38,7 @@ describe('<LoginBanner />', () => {
     })
 
     it('should not record event on mount if already shown', () => {
-      cy.mount({ render: () => <LoginBanner modelValue={true} hasBannerBeenShown={true} cohortOption={cohortOption}/> })
+      cy.mount({ render: () => <LoginBanner hasBannerBeenShown={true} cohortOption={cohortOption}/> })
 
       cy.get('@recordEvent').should('not.have.been.called')
     })

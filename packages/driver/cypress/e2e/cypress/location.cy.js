@@ -203,51 +203,101 @@ describe('src/cypress/location', () => {
     })
   })
 
-  context('#getOriginPolicy', () => {
+  context('#getOrigin', () => {
     it('handles ip addresses', function () {
-      const str = this.setup('local').getOriginPolicy()
+      const str = this.setup('local').getOrigin()
 
       expect(str).to.eq('http://127.0.0.1:8080')
     })
 
     it('handles 1 part localhost', function () {
-      const str = this.setup('users').getOriginPolicy()
+      const str = this.setup('users').getOrigin()
 
       expect(str).to.eq('http://localhost:2020')
     })
 
     it('handles 2 parts stack', function () {
-      const str = this.setup('stack').getOriginPolicy()
+      const str = this.setup('stack').getOrigin()
 
       expect(str).to.eq('https://stackoverflow.com')
     })
 
     it('handles subdomains google', function () {
-      const str = this.setup('google').getOriginPolicy()
+      const str = this.setup('google').getOrigin()
 
-      expect(str).to.eq('https://google.com')
+      expect(str).to.eq('https://www.google.com')
     })
 
     it('issue: #255 two domains in the url', function () {
-      const str = this.setup('email').getOriginPolicy()
+      const str = this.setup('email').getOrigin()
 
       expect(str).to.eq('http://localhost:3500')
     })
 
     it('handles private tlds in the public suffix', function () {
-      const str = this.setup('heroku').getOriginPolicy()
+      const str = this.setup('heroku').getOrigin()
 
       expect(str).to.eq('https://example.herokuapp.com')
     })
 
     it('handles subdomains of private tlds in the public suffix', function () {
-      const str = this.setup('herokuSub').getOriginPolicy()
+      const str = this.setup('herokuSub').getOrigin()
+
+      expect(str).to.eq('https://foo.example.herokuapp.com')
+    })
+
+    it('falls back to dumb check when invalid tld', function () {
+      const str = this.setup('unknown').getOrigin()
+
+      expect(str).to.eq('http://what.is.so.unknown')
+    })
+  })
+
+  context('#getSuperDomainOrigin', () => {
+    it('handles ip addresses', function () {
+      const str = this.setup('local').getSuperDomainOrigin()
+
+      expect(str).to.eq('http://127.0.0.1:8080')
+    })
+
+    it('handles 1 part localhost', function () {
+      const str = this.setup('users').getSuperDomainOrigin()
+
+      expect(str).to.eq('http://localhost:2020')
+    })
+
+    it('handles 2 parts stack', function () {
+      const str = this.setup('stack').getSuperDomainOrigin()
+
+      expect(str).to.eq('https://stackoverflow.com')
+    })
+
+    it('handles subdomains google', function () {
+      const str = this.setup('google').getSuperDomainOrigin()
+
+      expect(str).to.eq('https://google.com')
+    })
+
+    it('issue: #255 two domains in the url', function () {
+      const str = this.setup('email').getSuperDomainOrigin()
+
+      expect(str).to.eq('http://localhost:3500')
+    })
+
+    it('handles private tlds in the public suffix', function () {
+      const str = this.setup('heroku').getSuperDomainOrigin()
+
+      expect(str).to.eq('https://example.herokuapp.com')
+    })
+
+    it('handles subdomains of private tlds in the public suffix', function () {
+      const str = this.setup('herokuSub').getSuperDomainOrigin()
 
       expect(str).to.eq('https://example.herokuapp.com')
     })
 
     it('falls back to dumb check when invalid tld', function () {
-      const str = this.setup('unknown').getOriginPolicy()
+      const str = this.setup('unknown').getSuperDomainOrigin()
 
       expect(str).to.eq('http://so.unknown')
     })
@@ -256,7 +306,7 @@ describe('src/cypress/location', () => {
   context('.create', () => {
     it('returns an object literal', () => {
       const obj = Location.create(urls.cypress, urls.signin)
-      const keys = ['auth', 'authObj', 'hash', 'href', 'host', 'hostname', 'origin', 'pathname', 'port', 'protocol', 'search', 'toString', 'originPolicy', 'superDomain']
+      const keys = ['auth', 'authObj', 'hash', 'href', 'host', 'hostname', 'pathname', 'port', 'protocol', 'search', 'toString', 'origin', 'superDomainOrigin', 'superDomain']
 
       expect(obj).to.have.keys(keys)
     })

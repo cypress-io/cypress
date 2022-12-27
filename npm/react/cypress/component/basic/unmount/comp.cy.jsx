@@ -15,9 +15,15 @@ it('calls callbacks on mount and unmount', () => {
   })
 
   cy.contains('Component with').should('be.visible')
-  unmount().then(() => {
-    expect(onUnmount).to.have.been.calledOnce
-  })
 
-  cy.contains('Component with').should('not.exist')
+  let stub = cy.stub()
+
+  try {
+    unmount()
+  } catch (e) {
+    expect(e.message).to.eq('`unmount` is no longer supported.')
+    stub()
+  }
+
+  expect(stub).to.have.been.calledOnce
 })

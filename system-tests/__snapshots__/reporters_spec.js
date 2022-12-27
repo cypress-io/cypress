@@ -11,16 +11,7 @@ Learn more at https://on.cypress.io/reporters
 Error: Cannot find module '/foo/bar/.projects/e2e/node_modules/module-does-not-exist'
 Require stack:
 - lib/reporter.js
-- lib/project-base.ts
-- lib/open_project.ts
-- lib/makeDataContext.ts
-- lib/modes/index.ts
-- lib/cypress.js
-- index.js
-- 
       [stack trace lines]
-
-
 `
 
 exports['e2e reporters supports junit reporter and reporter options 1'] = `
@@ -32,14 +23,14 @@ exports['e2e reporters supports junit reporter and reporter options 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (simple_passing.cy.js)                                                     │
-  │ Searched:   cypress/e2e/simple_passing.cy.js                                                   │
+  │ Specs:      2 found (simple_passing.cy.js, simple_failing.cy.js)                               │
+  │ Searched:   cypress/e2e/simple_passing.cy.js, cypress/e2e/simple_failing.cy.js                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  simple_passing.cy.js                                                            (1 of 1)
+  Running:  simple_passing.cy.js                                                            (1 of 2)
 
   (Results)
 
@@ -62,6 +53,39 @@ exports['e2e reporters supports junit reporter and reporter options 1'] = `
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing.cy.js.mp4            (X second)
 
 
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  simple_failing.cy.js                                                            (2 of 2)
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      2                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  2                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     simple_failing.cy.js                                                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing.cy.js/simple failing spec -- fai     (1280x720)
+     ls1 (failed).png                                                                               
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing.cy.js/simple failing spec -- fai     (1280x720)
+     ls2 (failed).png                                                                               
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_failing.cy.js.mp4            (X second)
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -70,8 +94,10 @@ exports['e2e reporters supports junit reporter and reporter options 1'] = `
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔  simple_passing.cy.js                     XX:XX        1        1        -        -        - │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✖  simple_failing.cy.js                     XX:XX        2        -        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+    ✖  1 of 2 failed (50%)                      XX:XX        3        1        2        -        -  
 
 
 `
@@ -675,8 +701,6 @@ Learn more at https://on.cypress.io/reporters
 
 Error: this reporter threw an error
       [stack trace lines]
-
-
 `
 
 exports['e2e reporters supports teamcity reporter and reporter options 1'] = `

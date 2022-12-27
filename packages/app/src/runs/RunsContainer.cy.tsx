@@ -1,6 +1,7 @@
 import RunsContainer from './RunsContainer.vue'
 import { RunsContainerFragmentDoc } from '../generated/graphql-test'
 import { CloudUserStubs } from '@packages/graphql/test/stubCloudTypes'
+import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 
 import { defaultMessages } from '@cy/i18n'
 
@@ -8,9 +9,18 @@ describe('<RunsContainer />', { keystrokeDelay: 0 }, () => {
   const cloudViewer = {
     ...CloudUserStubs.me,
     organizations: null,
+    firstOrganization: {
+      nodes: [],
+    },
   }
 
   context('when the user is logged in', () => {
+    beforeEach(() => {
+      const loginConnectStore = useLoginConnectStore()
+
+      loginConnectStore.setUserFlag('isLoggedIn', true)
+    })
+
     it('renders with expected runs if there is a cloud project id', () => {
       cy.mountFragment(RunsContainerFragmentDoc, {
         onResult: (result) => {

@@ -15,11 +15,15 @@ export const create = (Cypress: ICypress, state: StateFunc) => ({
     // show the 'loading spinner' during an app page loading transition event
     Cypress.action('cy:stability:changed', stable, event)
 
-    Cypress.action('cy:before:stability:release', stable)
+    if (!stable) {
+      return
+    }
+
+    Cypress.action('cy:before:stability:release')
     .then(() => {
       const whenStable = state('whenStable')
 
-      if (stable && whenStable) {
+      if (whenStable) {
         whenStable()
       }
     })

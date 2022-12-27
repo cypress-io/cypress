@@ -589,10 +589,26 @@ describe('e2e record', () => {
         retries: 2,
       })
 
+      expect(requests[2].body.tests[1].title).deep.eq([
+        'record pass',
+        'is pending',
+      ])
+
+      expect(requests[2].body.tests[1].body).to.eq('')
+
+      expect(requests[2].body.tests[2].title).deep.eq([
+        'record pass',
+        'is pending due to .skip',
+      ])
+
+      expect(requests[2].body.tests[2].body).to.eq('() => {\n    console.log(\'stuff\');\n  }')
+
       expect(requests[2].body.tests[3].title).deep.eq([
         'record pass',
         'is skipped due to browser',
       ])
+
+      expect(requests[2].body.tests[3].body).eq('() => {}')
 
       expect(requests[2].body.tests[3].config).deep.eq({
         defaultCommandTimeout: 1234,
@@ -1030,7 +1046,7 @@ describe('e2e record', () => {
               code: 'RUN_GROUP_NAME_NOT_UNIQUE',
               message: 'Run group name cannot be used again without passing the parallel flag.',
               payload: {
-                runUrl: 'https://dashboard.cypress.io/runs/12345',
+                runUrl: 'https://cloud.cypress.io/runs/12345',
               },
             })
           },
@@ -1795,7 +1811,7 @@ describe('e2e record', () => {
                 tags,
                 warnings: [{
                   name: 'FreePlanExceedsMonthlyTests',
-                  message: 'Warning from Cypress Dashboard: Organization with free plan has exceeded monthly test results limit.',
+                  message: 'Warning from Cypress Cloud: Organization with free plan has exceeded monthly test results limit.',
                   code: 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS_V2',
                   used: 700,
                   limit: 500,

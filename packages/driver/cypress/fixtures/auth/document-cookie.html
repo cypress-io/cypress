@@ -3,11 +3,14 @@
 <head>
 </head>
 <body>
-  <p id='test' data-cy="doc-cookie">should be replaced</p>
+  <p>
+    <strong>document.cookie</strong>:
+    <span data-cy="doc-cookie">should be replaced</span>
+  </p>
   <script>
     document.cookie = 'name=value'
 
-    document.getElementById('test').innerText = document.cookie
+    document.querySelector('[data-cy="doc-cookie"]').innerText = document.cookie
   </script>
 </body>
 </html>

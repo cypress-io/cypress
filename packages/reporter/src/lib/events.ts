@@ -4,7 +4,8 @@ import appState, { AppState } from './app-state'
 import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from '../runnables/runnables-store'
 import statsStore, { StatsStore } from '../header/stats-store'
 import scroller, { Scroller } from './scroller'
-import TestModel, { UpdatableTestProps, UpdateTestCallback, TestProps } from '../test/test-model'
+import { UpdatableTestProps, UpdateTestCallback, TestProps } from '../test/test-model'
+import Err from '../errors/err-model'
 
 import type { ReporterStartInfo, ReporterRunState } from '@packages/types'
 
@@ -151,13 +152,11 @@ const events: Events = {
       runner.emit('runner:console:log', testId, logId)
     })
 
-    localBus.on('show:error', (test: TestModel) => {
-      const command = test.err.isCommandErr ? test.commandMatchingErr() : null
-
+    localBus.on('show:error', ({ err, testId, commandId }: { err: Err, testId?: string, commandId?: number }) => {
       runner.emit('runner:console:error', {
-        err: test.err,
-        testId: command?.testId,
-        logId: command?.id,
+        err,
+        testId,
+        logId: commandId,
       })
     })
 

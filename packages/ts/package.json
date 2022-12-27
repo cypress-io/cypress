@@ -8,7 +8,8 @@
     "postinstall": "patch-package",
     "test": "yarn test-unit",
     "test-unit": "node test",
-    "test-watch": "echo 'no watching of tests'"
+    "test-watch": "echo 'no watching of tests'",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {
     "debug": "^4.3.2",

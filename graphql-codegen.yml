@@ -18,7 +18,7 @@ vueOperations: &vueOperations
     - 'typescript-operations'
     - 'typed-document-node':
         # Intentionally specified under typed-document-node rather than top level config,
-        # becuase we don't want it flattening the types for the operations
+        # because we don't want it flattening the types for the operations
         flattenGeneratedTypes: true
 
 vueTesting: &vueTesting
@@ -122,9 +122,10 @@ generates:
   './packages/app/src/generated/graphql-test.ts':
     documents: 
       - './packages/app/src/**/*.{vue,ts,tsx,js,jsx}'
-      - './packages/frontend-shared/src/**/*.{vue,ts,tsx,js,jsx}'
+      - './packages/frontend-shared/src/gql-components/**/*.{vue,ts,tsx,js,jsx}'
     <<: *vueTesting
 
   './packages/frontend-shared/src/generated/graphql-test.ts':
-    documents: './packages/frontend-shared/src/gql-components/**/*.{vue,ts,tsx,js,jsx}'
+    documents: 
+      - './packages/frontend-shared/src/gql-components/**/*.{vue,ts,tsx,js,jsx}'
     <<: *vueTesting

@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 import Card from './card-without-effect.jsx'
 import React from 'react'
-import { mount, unmount } from '@cypress/react'
+import { mount } from '@cypress/react'
 
 it('should select null after timing out', () => {
   const onSelect = cy.stub()
@@ -28,7 +28,8 @@ it('should cleanup on being removed', () => {
     expect(onSelect).to.not.have.been.called
   })
 
-  unmount()
+  // mount something else so that unmount is called
+  mount(<div>Test Component</div>)
 
   cy.tick(5000).then(() => {
     expect(onSelect).to.not.have.been.called
@@ -44,7 +45,8 @@ it('should cleanup on being removed (using unmount)', () => {
     expect(onSelect).to.not.have.been.called
   })
 
-  unmount()
+  // mount something else so that unmount is called
+  mount(<div>Test Component</div>)
 
   cy.tick(5000).then(() => {
     expect(onSelect).to.not.have.been.called

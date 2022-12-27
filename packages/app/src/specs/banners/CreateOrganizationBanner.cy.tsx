@@ -14,7 +14,7 @@ describe('<CreateOrganizationBanner />', () => {
       cloudOrganizationsUrl: linkHref,
     } as any
 
-    cy.mount({ render: () => <CreateOrganizationBanner modelValue={true} hasBannerBeenShown={true} cohortOption={cohortOption}/> })
+    cy.mount({ render: () => <CreateOrganizationBanner hasBannerBeenShown={true} cohortOption={cohortOption}/> })
 
     cy.contains(defaultMessages.specPage.banners.createOrganization.titleA).should('be.visible')
     cy.contains(defaultMessages.specPage.banners.createOrganization.content).should('be.visible')
@@ -39,7 +39,7 @@ describe('<CreateOrganizationBanner />', () => {
     })
 
     it('should record expected event on mount', () => {
-      cy.mount({ render: () => <CreateOrganizationBanner modelValue={true} hasBannerBeenShown={false} cohortOption={cohortOption}/> })
+      cy.mount({ render: () => <CreateOrganizationBanner hasBannerBeenShown={false} cohortOption={cohortOption}/> })
 
       cy.get('@recordEvent').should('have.been.calledWith', {
         campaign: 'Set up your organization',
@@ -50,7 +50,7 @@ describe('<CreateOrganizationBanner />', () => {
     })
 
     it('should not record event on mount if already shown', () => {
-      cy.mount({ render: () => <CreateOrganizationBanner modelValue={true} hasBannerBeenShown={true} cohortOption={cohortOption}/> })
+      cy.mount({ render: () => <CreateOrganizationBanner hasBannerBeenShown={true} cohortOption={cohortOption}/> })
 
       cy.get('@recordEvent').should('not.have.been.called')
     })

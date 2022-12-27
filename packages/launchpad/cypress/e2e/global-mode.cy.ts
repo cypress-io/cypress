@@ -10,12 +10,14 @@ describe('Launchpad: Global Mode', () => {
     it('shows global page when opened by --global flag', () => {
       cy.openGlobalMode()
       cy.visitLaunchpad()
+      cy.skipWelcome()
       cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
     })
 
     it('shows global page when opened by global install', () => {
       cy.openGlobalMode({ byFlag: false })
       cy.visitLaunchpad()
+      cy.skipWelcome()
       cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
     })
   })
@@ -24,6 +26,7 @@ describe('Launchpad: Global Mode', () => {
     it('shows "Add Project" view', () => {
       cy.openGlobalMode()
       cy.visitLaunchpad()
+      cy.skipWelcome()
       cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
       cy.get('[data-cy="dropzone"]')
       .should('contain', defaultMessages.globalPage.empty.dropText.split('{0}')[0])
@@ -34,6 +37,7 @@ describe('Launchpad: Global Mode', () => {
     it('can add a project by dragging folder into project dropzone', () => {
       cy.openGlobalMode()
       cy.visitLaunchpad()
+      cy.skipWelcome()
       cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
       cy.get('[data-cy="dropzone"]')
       .should('contain', defaultMessages.globalPage.empty.dropText.split('{0}')[0])
@@ -57,6 +61,7 @@ describe('Launchpad: Global Mode', () => {
     it('adds a project using electron native folder select', () => {
       cy.openGlobalMode()
       cy.visitLaunchpad()
+      cy.skipWelcome()
 
       cy.scaffoldProject('todos')
       .then((projectPath) => {
@@ -94,6 +99,7 @@ describe('Launchpad: Global Mode', () => {
       })
 
       cy.visitLaunchpad()
+      cy.skipWelcome()
 
       cy.log('The recents list shows all projects that have been added')
       cy.contains(defaultMessages.globalPage.recentProjectsHeader)
@@ -221,21 +227,21 @@ describe('Launchpad: Global Mode', () => {
       it('can be opened', () => {
         setupAndValidateProjectsList(['todos'])
         cy.log('Project cards have a menu can be opened')
-        cy.get('[aria-label="Project Actions"]').click()
-        cy.get('[data-cy="Remove Project"]').contains(defaultMessages.globalPage.removeProject)
-        cy.get('[data-cy="Open In IDE"]').contains(defaultMessages.globalPage.openInIDE)
-        cy.get('[data-cy="Open In Finder"]').contains(defaultMessages.globalPage.openInFinder)
+        cy.get('[aria-label="Project actions"]').click()
+        cy.get('[data-cy="Remove project"]').contains(defaultMessages.globalPage.removeProject)
+        cy.get('[data-cy="Open in IDE"]').contains(defaultMessages.globalPage.openInIDE)
+        cy.get('[data-cy="Open in Finder"]').contains(defaultMessages.globalPage.openInFinder)
       })
 
-      it('removes project from list when clicking "Remove Project" menu item', () => {
+      it('removes project from list when clicking "Remove project" menu item', () => {
         const projectList = ['todos', 'cookies']
 
         setupAndValidateProjectsList(projectList)
-        cy.get('[aria-label="Project Actions"]').then((menu) => {
+        cy.get('[aria-label="Project actions"]').then((menu) => {
           menu.get(0).click()
         })
 
-        cy.get('[data-cy="Remove Project"]').click()
+        cy.get('[data-cy="Remove project"]').click()
 
         cy.get('[data-cy="project-card"]')
         .should('have.length', 1)
@@ -246,16 +252,16 @@ describe('Launchpad: Global Mode', () => {
         const projectList = ['todos']
 
         setupAndValidateProjectsList(projectList)
-        cy.get('[aria-label="Project Actions"]').click()
+        cy.get('[aria-label="Project actions"]').click()
 
-        cy.get('[data-cy="Open In IDE"]').click()
-        cy.contains('External Editor Preferences')
+        cy.get('[data-cy="Open in IDE"]').click()
+        cy.contains('External editor preferences')
       })
 
-      it('shows file drop zone when no more projects are in list when clicking "Remove Project" menu item', () => {
+      it('shows file drop zone when no more projects are in list when clicking "Remove project" menu item', () => {
         setupAndValidateProjectsList(['todos'])
-        cy.get('[aria-label="Project Actions"]').click()
-        cy.get('[data-cy="Remove Project"]').click()
+        cy.get('[aria-label="Project actions"]').click()
+        cy.get('[data-cy="Remove project"]').click()
 
         cy.get('[data-cy="project-card"]').should('not.exist')
         cy.get('[data-cy="dropzone"]')
@@ -325,6 +331,7 @@ describe('Launchpad: Global Mode', () => {
       cy.addProject('config-with-import-error')
       cy.addProject('todos')
       cy.visitLaunchpad()
+      cy.skipWelcome()
       cy.contains('[data-cy="project-card"]', 'todos').should('be.visible')
       cy.contains('[data-cy="project-card"]', 'config-with-import-error').should('be.visible').click()
       cy.get('h1').contains('Cypress configuration error')

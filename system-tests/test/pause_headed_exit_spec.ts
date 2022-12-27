@@ -1,4 +1,5 @@
 import systemTests from '../lib/system-tests'
+import childProcess from 'child_process'
 
 describe('cy.pause() in run mode', () => {
   systemTests.setup()
@@ -17,6 +18,9 @@ describe('cy.pause() in run mode', () => {
     onSpawn: (cp) => {
       cp.stdout.on('data', (buf) => {
         if (buf.toString().includes('not exiting due to options.exit being false')) {
+          // systemTests.it spawns a new node process which then spawns the actual cypress process
+          // Killing just the new node process doesn't kill the cypress process so we find it and kill it manually
+          childProcess.execSync(`kill $(pgrep -P ${cp.pid} | awk '{print $1}')`)
           cp.kill()
         }
       })
@@ -37,6 +41,9 @@ describe('cy.pause() in run mode', () => {
     onSpawn: (cp) => {
       cp.stdout.on('data', (buf) => {
         if (buf.toString().includes('not exiting due to options.exit being false')) {
+          // systemTests.it spawns a new node process which then spawns the actual cypress process
+          // Killing just the new node process doesn't kill the cypress process so we find it and kill it manually
+          childProcess.execSync(`kill $(pgrep -P ${cp.pid} | awk '{print $1}')`)
           cp.kill()
         }
       })

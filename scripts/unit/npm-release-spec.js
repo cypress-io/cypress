@@ -1,6 +1,9 @@
+const { expect, use } = require('chai')
 const la = require('lazy-ass')
+const proxyquire = require('proxyquire').noCallThru()
+const sinon = require('sinon')
 
-const { parseSemanticReleaseOutput } = require('../npm-release')
+use(require('sinon-chai'))
 
 const semanticReleasePullRequest = `
 [semantic-release] › ℹ  Running semantic-release version 17.1.1
@@ -226,109 +229,250 @@ const semanticReleaseNew = () => {
 }
 
 describe('semantic release', () => {
-  it('ends with no output if triggered by a pull request', () => {
-    const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleasePullRequest)
+  let parseSemanticReleaseOutput
+  let releasePackages
+  let execaStub
 
-    la(currentVersion === undefined, 'Expected current version to be', undefined, 'but got', currentVersion, 'instead')
-    la(nextVersion === undefined, 'Expected current version to be', undefined, 'but got', nextVersion, 'instead')
+  beforeEach(() => {
+    sinon.restore()
+
+    execaStub = sinon.stub()
+
+    const npmRelease = proxyquire('../npm-release', {
+      'execa': execaStub,
+    })
+
+    parseSemanticReleaseOutput = npmRelease.parseSemanticReleaseOutput
+    releasePackages = npmRelease.releasePackages
   })
 
-  describe('parses old version number when there are no updates', () => {
-    it('works with standard version number', () => {
-      const version = '1.2.3'
-
-      const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseNoUpdate(version))
-
-      la(currentVersion === version, 'Expected current version to be', version, 'but got', currentVersion, 'instead')
-      la(nextVersion === undefined, 'Expected next version to be', undefined, 'but got', nextVersion, 'instead')
-    })
-
-    it('works with version 0.x.x', () => {
-      const version = '0.0.1'
-
-      const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseNoUpdate(version))
-
-      la(currentVersion === version, 'Expected current version to be', version, 'but got', currentVersion, 'instead')
-      la(nextVersion === undefined, 'Expected next version to be', undefined, 'but got', nextVersion, 'instead')
-    })
-
-    it('works with postfix alpha/beta version', () => {
-      const version = '0.1.2-alpha1.2'
-
-      const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseNoUpdate(version))
-
-      la(currentVersion === version, 'Expected current version to be', version, 'but got', currentVersion, 'instead')
-      la(nextVersion === undefined, 'Expected next version to be', undefined, 'but got', nextVersion, 'instead')
-    })
-
-    it('does not work with non-semver version', () => {
-      const version = 'abc'
-
-      const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseNoUpdate(version))
+  context('#parseSemanticReleaseOutput', () => {
+    it('ends with no output if triggered by a pull request', () => {
+      const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleasePullRequest)
 
       la(currentVersion === undefined, 'Expected current version to be', undefined, 'but got', currentVersion, 'instead')
-      la(nextVersion === undefined, 'Expected next version to be', undefined, 'but got', nextVersion, 'instead')
+      la(nextVersion === undefined, 'Expected current version to be', undefined, 'but got', nextVersion, 'instead')
+    })
+
+    describe('parses old version number when there are no updates', () => {
+      it('works with standard version number', () => {
+        const version = '1.2.3'
+
+        const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseNoUpdate(version))
+
+        la(currentVersion === version, 'Expected current version to be', version, 'but got', currentVersion, 'instead')
+        la(nextVersion === undefined, 'Expected next version to be', undefined, 'but got', nextVersion, 'instead')
+      })
+
+      it('works with version 0.x.x', () => {
+        const version = '0.0.1'
+
+        const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseNoUpdate(version))
+
+        la(currentVersion === version, 'Expected current version to be', version, 'but got', currentVersion, 'instead')
+        la(nextVersion === undefined, 'Expected next version to be', undefined, 'but got', nextVersion, 'instead')
+      })
+
+      it('works with postfix alpha/beta version', () => {
+        const version = '0.1.2-alpha1.2'
+
+        const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseNoUpdate(version))
+
+        la(currentVersion === version, 'Expected current version to be', version, 'but got', currentVersion, 'instead')
+        la(nextVersion === undefined, 'Expected next version to be', undefined, 'but got', nextVersion, 'instead')
+      })
+
+      it('does not work with non-semver version', () => {
+        const version = 'abc'
+
+        const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseNoUpdate(version))
+
+        la(currentVersion === undefined, 'Expected current version to be', undefined, 'but got', currentVersion, 'instead')
+        la(nextVersion === undefined, 'Expected next version to be', undefined, 'but got', nextVersion, 'instead')
+      })
+    })
+
+    describe('parses new version number when there are updates', () => {
+      it('works with standard version numbers', () => {
+        const oldVersion = '1.2.3'
+        const newVersion = '1.2.4'
+
+        const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
+
+        la(currentVersion === oldVersion, 'Expected current version to be', oldVersion, 'but got', currentVersion, 'instead')
+        la(nextVersion === newVersion, 'Expected next version to be', newVersion, 'but got', nextVersion, 'instead')
+      })
+
+      it('works with 0.x.x version numbers', () => {
+        const oldVersion = '0.0.1'
+        const newVersion = '0.1.0'
+
+        const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
+
+        la(currentVersion === oldVersion, 'Expected current version to be', oldVersion, 'but got', currentVersion, 'instead')
+        la(nextVersion === newVersion, 'Expected next version to be', newVersion, 'but got', nextVersion, 'instead')
+      })
+
+      it('works with 0.x.x -> 1.0.0 version numbers', () => {
+        const oldVersion = '0.2.4'
+        const newVersion = '1.0.0'
+
+        const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
+
+        la(currentVersion === oldVersion, 'Expected current version to be', oldVersion, 'but got', currentVersion, 'instead')
+        la(nextVersion === newVersion, 'Expected next version to be', newVersion, 'but got', nextVersion, 'instead')
+      })
+
+      it('works with postfix alpha/beta versions', () => {
+        const oldVersion = '0.2.4-alpha'
+        const newVersion = '0.3.0-beta'
+
+        const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
+
+        la(currentVersion === oldVersion, 'Expected current version to be', oldVersion, 'but got', currentVersion, 'instead')
+        la(nextVersion === newVersion, 'Expected next version to be', newVersion, 'but got', nextVersion, 'instead')
+      })
+
+      it('works with postfix alpha/beta version -> 1.0.0', () => {
+        const oldVersion = '0.2.4-alpha'
+        const newVersion = '1.0.0'
+
+        const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
+
+        la(currentVersion === oldVersion, 'Expected current version to be', oldVersion, 'but got', currentVersion, 'instead')
+        la(nextVersion === newVersion, 'Expected next version to be', newVersion, 'but got', nextVersion, 'instead')
+      })
+    })
+
+    describe('parses new version number when there are no existing releases', () => {
+      it('reports next version as 1.0.0', () => {
+        const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseNew())
+
+        la(currentVersion === undefined, 'Expected current version to be', undefined, 'but got', currentVersion, 'instead')
+        la(nextVersion === '1.0.0', 'Expected next version to be 1.0.0 but got', nextVersion, 'instead')
+      })
     })
   })
 
-  describe('parses new version number when there are updates', () => {
-    it('works with standard version numbers', () => {
-      const oldVersion = '1.2.3'
-      const newVersion = '1.2.4'
+  context('#releasePackages', () => {
+    it('runs semantic release on each package', async () => {
+      execaStub.returns({ stdout: 'the stdout' })
+      await releasePackages(['package-1', 'package-2'])
 
-      const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
-
-      la(currentVersion === oldVersion, 'Expected current version to be', oldVersion, 'but got', currentVersion, 'instead')
-      la(nextVersion === newVersion, 'Expected next version to be', newVersion, 'but got', nextVersion, 'instead')
+      expect(execaStub).to.be.calledTwice
+      expect(execaStub).to.be.calledWith(
+        'npx',
+        ['lerna', 'exec', '--scope', 'package-1', '--', 'npx', '--no-install', 'semantic-release'],
+        { env: { NPM_CONFIG_WORKSPACES_UPDATE: false } },
+      )
     })
 
-    it('works with 0.x.x version numbers', () => {
-      const oldVersion = '0.0.1'
-      const newVersion = '0.1.0'
+    it('logs successfully released packages', async () => {
+      sinon.spy(console, 'log')
 
-      const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
+      execaStub.returns({ stdout: 'the stdout' })
+      await releasePackages(['package-1', 'package-2'])
 
-      la(currentVersion === oldVersion, 'Expected current version to be', oldVersion, 'but got', currentVersion, 'instead')
-      la(nextVersion === newVersion, 'Expected next version to be', newVersion, 'but got', nextVersion, 'instead')
+      /* eslint-disable no-console */
+      expect(console.log).to.be.calledWith('Released package-1 successfully:')
+      expect(console.log).to.be.calledWith('Released package-2 successfully:')
+      expect(console.log).to.be.calledWith('the stdout')
+      /* eslint-enable no-console */
     })
 
-    it('works with 0.x.x -> 1.0.0 version numbers', () => {
-      const oldVersion = '0.2.4'
-      const newVersion = '1.0.0'
+    it('failures of one package release do not prevent subsequent package releases', async () => {
+      execaStub.returns({ stdout: 'the stdout' })
+      execaStub.withArgs(
+        'npx',
+        ['lerna', 'exec', '--scope', 'package-1', '--', 'npx', '--no-install', 'semantic-release'],
+      ).throws({ stack: 'could not release package-1' })
 
-      const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
+      await releasePackages(['package-1', 'package-2'])
 
-      la(currentVersion === oldVersion, 'Expected current version to be', oldVersion, 'but got', currentVersion, 'instead')
-      la(nextVersion === newVersion, 'Expected next version to be', newVersion, 'but got', nextVersion, 'instead')
+      expect(execaStub).to.be.calledTwice
+      expect(execaStub).to.be.calledWith(
+        'npx',
+        ['lerna', 'exec', '--scope', 'package-1', '--', 'npx', '--no-install', 'semantic-release'],
+        { env: { NPM_CONFIG_WORKSPACES_UPDATE: false } },
+      )
     })
 
-    it('works with postfix alpha/beta versions', () => {
-      const oldVersion = '0.2.4-alpha'
-      const newVersion = '0.3.0-beta'
+    it('logs packages that failed to release', async () => {
+      sinon.spy(console, 'log')
 
-      const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
+      execaStub.returns({ stdout: 'the stdout' })
+      execaStub.withArgs(
+        'npx',
+        ['lerna', 'exec', '--scope', 'package-1', '--', 'npx', '--no-install', 'semantic-release'],
+      ).throws({ stack: 'could not release package-1' })
 
-      la(currentVersion === oldVersion, 'Expected current version to be', oldVersion, 'but got', currentVersion, 'instead')
-      la(nextVersion === newVersion, 'Expected next version to be', newVersion, 'but got', nextVersion, 'instead')
+      await releasePackages(['package-1', 'package-2'])
+
+      /* eslint-disable no-console */
+      expect(console.log).to.be.calledWith('Releasing package-1 failed:')
+      expect(console.log).to.be.calledWith('could not release package-1')
+      expect(console.log).to.be.calledWith('Released package-2 successfully:')
+      expect(console.log).to.be.calledWith('the stdout')
+      /* eslint-enable no-console */
     })
 
-    it('works with postfix alpha/beta version -> 1.0.0', () => {
-      const oldVersion = '0.2.4-alpha'
-      const newVersion = '1.0.0'
+    it('logs success when all release succeed', async () => {
+      sinon.spy(console, 'log')
 
-      const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
+      execaStub.returns({ stdout: 'the stdout' })
+      await releasePackages(['package-1', 'package-2'])
 
-      la(currentVersion === oldVersion, 'Expected current version to be', oldVersion, 'but got', currentVersion, 'instead')
-      la(nextVersion === newVersion, 'Expected next version to be', newVersion, 'but got', nextVersion, 'instead')
+      /* eslint-disable no-console */
+      expect(console.log).to.be.calledWith('\nAll packages released successfully')
+      /* eslint-enable no-console */
     })
-  })
 
-  describe('parses new version number when there are no existing releases', () => {
-    it('reports next version as 1.0.0', () => {
-      const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseNew())
+    it('logs failure when one or more releases fail', async () => {
+      sinon.spy(console, 'log')
 
-      la(currentVersion === undefined, 'Expected current version to be', undefined, 'but got', currentVersion, 'instead')
-      la(nextVersion === '1.0.0', 'Expected next version to be 1.0.0 but got', nextVersion, 'instead')
+      execaStub.returns({ stdout: 'the stdout' })
+      execaStub.withArgs(
+        'npx',
+        ['lerna', 'exec', '--scope', 'package-1', '--', 'npx', '--no-install', 'semantic-release'],
+      ).throws({ stack: 'could not release package-1' })
+
+      execaStub.withArgs(
+        'npx',
+        ['lerna', 'exec', '--scope', 'package-3', '--', 'npx', '--no-install', 'semantic-release'],
+      ).throws({ stack: 'could not release package-3' })
+
+      await releasePackages(['package-1', 'package-2', 'package-3'])
+
+      /* eslint-disable no-console */
+      expect(console.log).to.be.calledWith(`
+The following packages failed to release:
+- package-1
+- package-3`)
+      /* eslint-enable no-console */
+    })
+
+    it('returns 0 when all releases succeed', async () => {
+      execaStub.returns({ stdout: 'the stdout' })
+      const result = await releasePackages(['package-1', 'package-2'])
+
+      expect(result).to.equal(0)
+    })
+
+    it('returns number of failures when one or more releases fail', async () => {
+      execaStub.returns({ stdout: 'the stdout' })
+      execaStub.withArgs(
+        'npx',
+        ['lerna', 'exec', '--scope', 'package-1', '--', 'npx', '--no-install', 'semantic-release'],
+      ).throws({ stack: 'could not release package-1' })
+
+      execaStub.withArgs(
+        'npx',
+        ['lerna', 'exec', '--scope', 'package-3', '--', 'npx', '--no-install', 'semantic-release'],
+      ).throws({ stack: 'could not release package-3' })
+
+      const result = await releasePackages(['package-1', 'package-2', 'package-3'])
+
+      expect(result).to.equal(2)
     })
   })
 })

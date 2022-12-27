@@ -5,22 +5,7 @@ import Copy from 'rollup-plugin-copy'
 import Legacy from '@vitejs/plugin-legacy'
 import { resolve } from 'path'
 
-export default makeConfig({
-  optimizeDeps: {
-    include: [
-      '@urql/core',
-      'vue-i18n',
-      'p-defer',
-      '@vue/test-utils',
-      'vue-router',
-      '@urql/devtools',
-      '@urql/exchange-graphcache',
-      'dayjs',
-      'dayjs/plugin/relativeTime',
-      'dayjs/plugin/duration',
-    ],
-  },
-}, {
+export default makeConfig({}, {
   plugins: [
     Layouts(),
     Pages({ extensions: ['vue'] }),
@@ -34,6 +19,6 @@ export default makeConfig({
       targets: ['Chrome >= 64', 'Firefox >= 86', 'Edge >= 79'],
       modernPolyfills: true,
       renderLegacyChunks: false,
-    })
+    }),
   ],
 })

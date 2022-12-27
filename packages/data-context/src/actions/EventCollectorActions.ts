@@ -1,6 +1,8 @@
 import type { DataContext } from '..'
 import Debug from 'debug'
 
+const pkg = require('@packages/root')
+
 const debug = Debug('cypress:data-context:actions:EventCollectorActions')
 
 interface CollectableEvent {
@@ -23,13 +25,16 @@ export class EventCollectorActions {
 
   async recordEvent (event: CollectableEvent): Promise<boolean> {
     try {
-      const dashboardUrl = this.ctx.cloud.getDashboardUrl(cloudEnv)
+      const cloudUrl = this.ctx.cloud.getCloudUrl(cloudEnv)
 
       await this.ctx.util.fetch(
-        `${dashboardUrl}/anon-collect`,
+        `${cloudUrl}/anon-collect`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'x-cypress-version': pkg.version,
+          },
           body: JSON.stringify(event),
         },
       )

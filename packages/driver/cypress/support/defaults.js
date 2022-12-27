@@ -36,6 +36,6 @@ beforeEach(() => {
 // support file work properly
 Cypress.Commands.add('originLoadUtils', (origin) => {
   cy.origin(origin, () => {
-    Cypress.require('./utils')
+    require('./utils')
   })
 })

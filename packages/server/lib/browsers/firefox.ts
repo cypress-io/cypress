@@ -371,6 +371,17 @@ export function _createDetachedInstance (browserInstance: BrowserInstance, brows
   return detachedInstance
 }
 
+/**
+* Clear instance state for the chrome instance, this is normally called in on kill or on exit.
+*/
+export function clearInstanceState () {
+  debug('closing remote interface client')
+  if (browserCriClient) {
+    browserCriClient.close().catch()
+    browserCriClient = undefined
+  }
+}
+
 export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
   await firefoxUtil.connectToNewSpec(options, automation, browserCriClient)
 }
@@ -540,7 +551,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   })
 
   try {
-    browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError, options })
+    browserCriClient = await firefoxUtil.setup({ automation, extensions: launchOptions.extensions, url, foxdriverPort, marionettePort, remotePort, onError: options.onError })
 
     if (os.platform() === 'win32') {
       // override the .kill method for Windows so that the detached Firefox process closes between specs
@@ -552,13 +563,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     const originalBrowserKill = browserInstance.kill
 
     browserInstance.kill = (...args) => {
-      debug('closing remote interface client')
-
       // Do nothing on failure here since we're shutting down anyway
-      if (browserCriClient) {
-        browserCriClient.close().catch()
-        browserCriClient = undefined
-      }
+      clearInstanceState()
 
       debug('closing firefox')
 

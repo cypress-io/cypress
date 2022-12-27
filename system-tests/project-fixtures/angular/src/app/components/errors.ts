@@ -17,6 +17,6 @@ export class ErrorsComponent {
   asyncError() {
     setTimeout(() => {
       throw new Error('async error')
-    }, 50)
+    })
   }
 }

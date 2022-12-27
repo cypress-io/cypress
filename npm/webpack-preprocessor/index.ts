@@ -14,8 +14,8 @@ const debugStats = Debug('cypress:webpack:stats')
 
 declare global {
   // this indicates which commands should be acted upon by the
-  // cross-origin-callback-loader. its absense means the loader should not
-  // be utilized at all
+  // cross-origin-callback-loader. its absence means the loader
+  // should not be utilized at all
   // eslint-disable-next-line no-var
   var __cypressCallbackReplacementCommands: string[] | undefined
 }
@@ -222,7 +222,7 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
     })
     .tap((opts) => {
       if (opts.devtool === false) {
-        // disable any overrides if we've explictly turned off sourcemaps
+        // disable any overrides if we've explicitly turned off sourcemaps
         overrideSourceMaps(false, options.typescript)
 
         return
@@ -248,8 +248,9 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
       // so that it's working with plain javascript
       webpackOptions.module.rules.unshift({
         test: /\.(js|ts|jsx|tsx)$/,
+        exclude: /node_modules/,
         use: [{
-          loader: path.join(__dirname, 'lib/cross-origin-callback-loader'),
+          loader: require.resolve('@cypress/webpack-preprocessor/dist/lib/cross-origin-callback-loader.js'),
           options: {
             commands: callbackReplacementCommands,
           },
@@ -341,8 +342,8 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
         bundles[filePath].deferreds.length = 0
       }
 
-      // the cross-origin-callback-loader extracts any cy.origin() callback
-      // functions that contains Cypress.require() and stores their sources
+      // the cross-origin-callback-loader extracts any cross-origin callback
+      // functions that require dependencies and stores their sources
       // in the CrossOriginCallbackStore. it saves the callbacks per source
       // files, since that's the context it has. here we need to unfurl
       // what dependencies the input source file has so we can know which

@@ -1,4 +1,4 @@
-describe('cy.origin logging', () => {
+describe('cy.origin logging', { browser: '!webkit' }, () => {
   const { _ } = Cypress
 
   it('groups callback commands on a passing test', () => {
@@ -11,7 +11,7 @@ describe('cy.origin logging', () => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('[data-cy="dom-check"]').invoke('text')
     })
 
@@ -30,8 +30,7 @@ describe('cy.origin logging', () => {
     })
   })
 
-  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/21300
-  it.skip('logs cy.origin as group when failing with validation failure', () => {
+  it('logs cy.origin as group when failing with validation failure', () => {
     const logs: any[] = []
 
     cy.on('log:added', (attrs) => {
@@ -51,8 +50,7 @@ describe('cy.origin logging', () => {
     cy.origin(false, () => {})
   })
 
-  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/21300
-  it.skip('logs cy.origin as group when failing with serialization failure', () => {
+  it('logs cy.origin as group when failing with serialization failure', () => {
     const logs: any[] = []
 
     cy.on('log:added', (attrs) => {
@@ -70,7 +68,7 @@ describe('cy.origin logging', () => {
 
     const options = { args: { div: Cypress.$('div') } }
 
-    cy.origin('http://foobar.com:3500', options, () => {})
+    cy.origin('http://www.foobar.com:3500', options, () => {})
   })
 
   it('groups callback commands when failing with inner command failure', (done) => {
@@ -99,7 +97,7 @@ describe('cy.origin logging', () => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('[data-cy="dom-check"]').invoke('text')
       cy.get('#does-not-exist', { timeout: 1 })
     })
@@ -131,7 +129,7 @@ describe('cy.origin logging', () => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
-    cy.origin('http://foobar.com:3500', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
       cy.get('[data-cy="dom-check"]').invoke('text').then(() => {
         setTimeout(() => {
           throw new Error('async error')

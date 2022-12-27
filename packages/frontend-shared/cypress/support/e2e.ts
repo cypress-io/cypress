@@ -1,5 +1,5 @@
 import '@testing-library/cypress/add-commands'
-import { browsers } from '@packages/launcher/lib/browsers'
+import { knownBrowsers } from '@packages/launcher/lib/known-browsers'
 import { configure } from '@testing-library/cypress'
 import { fixtureDirs, ProjectFixtureDir } from '@tooling/system-tests'
 import type { DataContext } from '@packages/data-context'
@@ -17,6 +17,8 @@ import type { E2ETaskMap } from '../e2e/e2ePluginSetup'
 import { installCustomPercyCommand } from './customPercyCommand'
 import i18n from '../../src/locales/en-US.json'
 import { addNetworkCommands } from './onlineNetwork'
+import { logInternal } from './utils'
+import { tabUntil } from './tab-until'
 
 configure({ testIdAttribute: 'data-cy' })
 
@@ -146,6 +148,10 @@ declare global {
        */
       visitLaunchpad(href?: string): Chainable<AUTWindow>
       /**
+       * Skips the welcome screen of the launchpad
+       */
+      skipWelcome(): Chainable<any>
+      /**
        * Mocks the system browser retrieval to return the desired browsers
        */
       findBrowsers(options?: FindBrowsersOptions): void
@@ -154,10 +160,6 @@ declare global {
        * and asserts that it triggers the appropriate mutation when clicked.
        */
       validateExternalLink(options: ValidateExternalLinkOptions | string): Chainable<JQuery<HTMLElement>>
-      /**
-       * Tabs until the result of fn is true
-       */
-      tabUntil(fn: ($el: JQuery) => boolean, limit?: number): Chainable<any>
       /**
        * Get the AUT <iframe>. Useful for Cypress in Cypress tests.
        */
@@ -356,6 +358,14 @@ function visitLaunchpad () {
   })
 }
 
+function skipWelcome () {
+  // click Continue on Welcome page
+  // and wait for the button to disappear
+  return cy.contains('[data-cy="major-version-welcome-footer"] button', 'Continue')
+  .click()
+  .should('not.exist')
+}
+
 type UnwrapPromise<R> = R extends PromiseLike<infer U> ? U : R
 
 export type CyTaskResult<R> =
@@ -434,7 +444,7 @@ function findBrowsers (options: FindBrowsersOptions = {}) {
       return result
     }
 
-    filteredBrowsers = [...browsers, {
+    filteredBrowsers = [...knownBrowsers, {
       name: 'electron',
       channel: 'stable',
       family: 'chromium',
@@ -467,18 +477,6 @@ function taskInternal<T extends keyof E2ETaskMap> (name: T, arg: Parameters<E2ET
   return cy.task<Resolved<ReturnType<E2ETaskMap[T]>>>(name, arg, { log: isDebugging, timeout: options.timeout ?? (isDebugging ? NO_TIMEOUT : TEN_SECONDS) })
 }
 
-function logInternal<T> (name: string | Partial<Cypress.LogConfig>, cb: (log: Cypress.Log | undefined) => Cypress.Chainable<T>, opts: Partial<Cypress.Loggable> = {}): Cypress.Chainable<T> {
-  const _log = typeof name === 'string'
-    ? Cypress.log({ name, message: '' })
-    : Cypress.log(name)
-
-  return cb(_log).then<T>((val) => {
-    _log?.end()
-
-    return val
-  })
-}
-
 /**
  * Finds a link with the provided text and href, either globally or within a chained subject,
  * and asserts that it triggers the appropriate mutation when clicked.
@@ -508,30 +506,6 @@ function validateExternalLink (subject, options: ValidateExternalLinkOptions | s
   })
 }
 
-function tabUntil (fn: (el: JQuery<HTMLElement>) => boolean, limit: number = 10) {
-  function _tabUntil (step: number) {
-    return cy.tab().focused({ log: false }).then((el) => {
-      const pass = fn(el)
-
-      if (pass) {
-        return el
-      }
-
-      if (step > limit) {
-        throw new Error(`Unable to step to element in ${fn.toString()} in ${limit} steps`)
-      }
-
-      return _tabUntil(step + 1)
-    })
-  }
-
-  return logInternal('tabUntil', () => {
-    cy.get('body')
-
-    return _tabUntil(0)
-  })
-}
-
 function getAutIframe () {
   return cy.get('iframe.aut-iframe').its('0.contentDocument.documentElement').then(cy.wrap) as Cypress.Chainable<JQuery<HTMLIFrameElement>>
 }
@@ -546,6 +520,7 @@ Cypress.Commands.add('openGlobalMode', openGlobalMode)
 Cypress.Commands.add('visitApp', visitApp)
 Cypress.Commands.add('loginUser', loginUser)
 Cypress.Commands.add('visitLaunchpad', visitLaunchpad)
+Cypress.Commands.add('skipWelcome', skipWelcome)
 Cypress.Commands.add('startAppServer', startAppServer)
 Cypress.Commands.add('openProject', openProject)
 Cypress.Commands.add('withCtx', withCtx)

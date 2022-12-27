@@ -1,7 +1,6 @@
 <template>
   <TrackedBanner
     :banner-id="bannerId"
-    :model-value="modelValue"
     data-cy="record-banner"
     status="info"
     :title="t('specPage.banners.record.title')"
@@ -14,72 +13,26 @@
       medium: 'Specs Record Runs Banner',
       cohort: 'n/a'
     }"
-    @update:model-value="value => emit('update:modelValue', value)"
   >
     <p class="mb-24px">
       {{ t('specPage.banners.record.content') }}
     </p>
-
-    <TerminalPrompt
-      :command="recordCommand"
-      :project-folder-name="query.data?.value?.currentProject?.title"
-      class="bg-white max-w-900px"
-    />
+    <RecordPromptAdapter />
   </TrackedBanner>
 </template>
 
 <script setup lang="ts">
-import { gql, useQuery } from '@urql/vue'
 import RecordIcon from '~icons/cy/action-record_x16.svg'
 import { useI18n } from '@cy/i18n'
-import TerminalPrompt from '@cy/components/TerminalPrompt.vue'
 import TrackedBanner from './TrackedBanner.vue'
 import { BannerIds } from '@packages/types'
-import { RecordBannerDocument } from '../../generated/graphql'
-import { computed } from 'vue'
-
-gql`
-query RecordBanner {
-  currentProject {
-    id
-    title
-    currentTestingType
-    cloudProject {
-      __typename
-      ... on CloudProject {
-        id
-        recordKeys {
-          id
-          key
-        }
-      }
-    }
-  }
-}
-`
+import RecordPromptAdapter from '@packages/frontend-shared/src/gql-components/RecordPromptAdapter.vue'
 
 defineProps<{
-  modelValue: boolean
   hasBannerBeenShown: boolean
-}>()
-
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void
 }>()
 
 const { t } = useI18n()
 const bannerId = BannerIds.ACI_082022_RECORD
-
-const query = useQuery({ query: RecordBannerDocument })
-
-const firstRecordKey = computed(() => {
-  return (query.data?.value?.currentProject?.cloudProject?.__typename === 'CloudProject' && query.data.value.currentProject.cloudProject.recordKeys?.[0]?.key) ?? '<record-key>'
-})
-
-const recordCommand = computed(() => {
-  const componentFlagOrSpace = query.data?.value?.currentProject?.currentTestingType === 'component' ? ' --component ' : ' '
-
-  return `npx cypress run${componentFlagOrSpace}--record --key ${firstRecordKey.value}`
-})
 
 </script>

@@ -2,7 +2,7 @@
   "name": "@cypress/xpath",
   "version": "0.0.0-development",
   "description": "Adds XPath command to Cypress.io test runner",
-  "main": "scripts",
+  "main": "src",
   "scripts": {
     "cy:run": "node ../../scripts/cypress.js run --e2e",
     "cy:open": "node ../../scripts/cypress.js open --e2e --project ${PWD}"

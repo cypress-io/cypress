@@ -46,8 +46,10 @@ describe('Proxy Logging', () => {
   }
 
   context('request logging', () => {
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23443
-    it.skip('fetch log shows resource type, url, method, and status code and has expected snapshots and consoleProps', (done) => {
+    it('fetch log shows resource type, url, method, and status code and has expected snapshots and consoleProps', {
+      // TODO(webkit): fix+unskip for webkit release
+      browser: '!webkit',
+    }, (done) => {
       fetch('/some-url')
 
       // trigger: Cypress.Log() called
@@ -96,113 +98,11 @@ describe('Proxy Logging', () => {
 
             done()
           } catch (err) {
-            done(new Error(err))
+            // don't throw, eventually the log update will come in
+            // eslint-disable-next-line no-console
+            console.error('assertion error', err)
           }
         })
-      })
-    })
-
-    // @see https://github.com/cypress-io/cypress/issues/18757 and https://github.com/cypress-io/cypress/issues/17656
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23250
-    it.skip('xhr log has response body/status code when xhr response is logged first', {
-      // TODO: unskip in Electron: https://cypress-io.atlassian.net/browse/UNIFY-1753
-      browser: '!electron',
-    }, (done) => {
-      cy.visit('/fixtures/empty.html')
-
-      cy.window()
-      .then({ timeout: 10000 }, (win) => {
-        cy.on('log:changed', (log) => {
-          try {
-            expect(log.snapshots.map((v) => v.name)).to.deep.eq(['request', 'response'])
-            expect(log.consoleProps['Response Headers']).to.include({
-              'x-powered-by': 'Express',
-            })
-
-            expect(log.consoleProps['Response Body']).to.include('Cannot GET /some-url')
-            expect(log.consoleProps['Response Status Code']).to.eq(404)
-
-            expect(log.renderProps).to.include({
-              indicator: 'bad',
-              message: 'GET 404 /some-url',
-            })
-
-            expect(Object.keys(log.consoleProps)).to.deep.eq(
-              ['Event', 'Resource Type', 'Method', 'URL', 'Request went to origin?', 'XHR', 'groups', 'Request Headers', 'Response Status Code', 'Response Headers', 'Response Body'],
-            )
-
-            done()
-          } catch (err) {
-            done(new Error(err))
-          }
-        })
-
-        const oldUpdateRequestWithResponse = Cypress.ProxyLogging.updateRequestWithResponse
-
-        cy.stub(Cypress.ProxyLogging, 'updateRequestWithResponse').log(false).callsFake(function (...args) {
-          setTimeout(() => {
-            oldUpdateRequestWithResponse.call(this, ...args)
-          }, 500)
-        })
-
-        const xhr = new win.XMLHttpRequest()
-
-        xhr.open('GET', '/some-url')
-        xhr.send()
-      })
-    })
-
-    // @see https://github.com/cypress-io/cypress/issues/18757 and https://github.com/cypress-io/cypress/issues/17656
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23203
-    it.skip('xhr log has response body/status code when xhr response is logged second', (done) => {
-      cy.visit('/fixtures/empty.html')
-
-      cy.window()
-      .then({ timeout: 10000 }, (win) => {
-        cy.on('log:changed', (log) => {
-          try {
-            expect(log.snapshots.map((v) => v.name)).to.deep.eq(['request', 'response'])
-            expect(log.consoleProps['Response Headers']).to.include({
-              'x-powered-by': 'Express',
-            })
-
-            expect(log.consoleProps['Response Body']).to.include('Cannot GET /some-url')
-            expect(log.consoleProps['Response Status Code']).to.eq(404)
-
-            expect(log.renderProps).to.include({
-              indicator: 'bad',
-              message: 'GET 404 /some-url',
-            })
-
-            expect(Object.keys(log.consoleProps)).to.deep.eq(
-              ['Event', 'Resource Type', 'Method', 'URL', 'Request went to origin?', 'XHR', 'groups', 'Request Headers', 'Response Status Code', 'Response Headers', 'Response Body'],
-            )
-
-            done()
-          } catch (err) {
-            done(new Error(err))
-          }
-        })
-
-        const xhr = new win.XMLHttpRequest()
-
-        const logIncomingRequest = Cypress.ProxyLogging.logIncomingRequest
-        const updateRequestWithResponse = Cypress.ProxyLogging.updateRequestWithResponse
-
-        // To simulate the xhr call landing second, we send updateRequestWithResponse immediately after
-        // the call is intercepted
-        cy.stub(Cypress.ProxyLogging, 'logIncomingRequest').log(false).callsFake(function (...args) {
-          logIncomingRequest.call(this, ...args)
-          updateRequestWithResponse.call(this, {
-            requestId: args[0].requestId,
-            status: 404,
-          })
-        })
-
-        cy.stub(Cypress.ProxyLogging, 'updateRequestWithResponse').log(false).callsFake(function () {})
-
-        xhr.open('GET', '/some-url')
-        xhr.send()
       })
     })
 
@@ -264,7 +164,7 @@ describe('Proxy Logging', () => {
       })
 
       // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23420
-      it.skip('intercept log has consoleProps with intercept info', (done) => {
+      it('intercept log has consoleProps with intercept info', (done) => {
         cy.intercept('/some-url', 'stubbed response').as('alias')
         .then(() => {
           fetch('/some-url')
@@ -298,8 +198,10 @@ describe('Proxy Logging', () => {
                 url: 'http://localhost:3500/some-url',
                 body: '',
                 httpVersion: '1.1',
+                query: {},
                 responseTimeout: Cypress.config('responseTimeout'),
                 headers: interceptProps.Request.headers,
+                resourceType: 'fetch',
               },
               Response: {
                 body: 'stubbed response',
@@ -316,7 +218,9 @@ describe('Proxy Logging', () => {
 
             done()
           } catch (error) {
-            done(new Error(error))
+            // don't throw, eventually the log update will come in
+            // eslint-disable-next-line no-console
+            console.error('assertion error', error)
           }
         })
       })
@@ -456,61 +360,6 @@ describe('Proxy Logging', () => {
                 res.headers.foo = 'bar'
               })
             }).as(alias)
-          },
-        ))
-      })
-    })
-
-    context('with cy.route()', () => {
-      context('flags', () => {
-        let $XMLHttpRequest
-
-        const testFlagXhr = (expectStatus, expectInterceptions, setupFn) => {
-          return testFlag(expectStatus, expectInterceptions, setupFn, (url) => {
-            const xhr = new $XMLHttpRequest()
-
-            xhr.open('GET', url)
-            xhr.send()
-          })
-        }
-
-        beforeEach(() => {
-          cy.visit('/fixtures/empty.html')
-          cy.window()
-          .then(({ XMLHttpRequest }) => {
-            $XMLHttpRequest = XMLHttpRequest
-          })
-        })
-
-        it('is unflagged when not routed', testFlagXhr(
-          undefined,
-          [],
-          () => {},
-        ))
-
-        it('spied flagged as expected', testFlagXhr(
-          undefined,
-          [{
-            command: 'route',
-            alias,
-            type: 'spy',
-          }],
-          () => {
-            cy.server()
-            cy.route(`${url}`).as(alias)
-          },
-        ))
-
-        it('stubbed flagged as expected', testFlagXhr(
-          undefined,
-          [{
-            command: 'route',
-            alias,
-            type: 'stub',
-          }],
-          () => {
-            cy.server()
-            cy.route(url, 'stubbed response').as(alias)
           },
         ))
       })

@@ -24,26 +24,3 @@ it('t2', () => {
 
   cy.log('after')
 })
-
-// https://github.com/cypress-io/cypress/issues/22381
-describe('test sessionid integrity is maintained', () => {
-  it('use same session 2x and 2nd does not provide setup', () => {
-    cy.session('session-2', setupFn)
-    cy.session('session-2')
-  })
-
-  it('restore prev session 2x and 2nd does not provide setup', () => {
-    cy.session('session-2', setupFn)
-    cy.session('session-2')
-  })
-
-  it('restore prev session without setup', () => {
-    cy.session('session-2')
-  })
-
-  it('fails when trying to use existing sessionid with diff args', () => {
-    cy.session('session-2', () => {
-    // something else
-    })
-  })
-})
