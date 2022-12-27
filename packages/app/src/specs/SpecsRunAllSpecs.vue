@@ -18,7 +18,7 @@
       class="font-normal text-sm"
       data-cy="run-all-specs-text"
     >
-      {{ t('specPage.runAllSpecs', specNumber) }}
+      {{ t('specPage.runSelectedSpecs', specNumber) }}
     </span>
   </button>
 </template>

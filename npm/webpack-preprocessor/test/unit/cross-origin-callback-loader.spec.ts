@@ -220,7 +220,6 @@ describe('./lib/cross-origin-callback-loader', () => {
       expectAddFileSource(store).to.equal(stripIndent`
         __cypressCrossOriginCallback = () => {
           const utils = require('../support/utils');
-
           utils.foo();
         }`)
     })
@@ -230,9 +229,7 @@ describe('./lib/cross-origin-callback-loader', () => {
         `it('test', () => {
           cy.origin('http://www.foobar.com:3500', () => {
             require('../support/commands')
-
             const utils = require('../support/utils')
-
             const _ = require('lodash')
           })
         })`,
@@ -241,9 +238,7 @@ describe('./lib/cross-origin-callback-loader', () => {
       expectAddFileSource(store).to.equal(stripIndent`
         __cypressCrossOriginCallback = () => {
           require('../support/commands');
-
           const utils = require('../support/utils');
-
           const _ = require('lodash');
         }`)
     })
@@ -270,9 +265,7 @@ describe('./lib/cross-origin-callback-loader', () => {
         `it('test', () => {
           cy.origin('http://www.foobar.com:3500', () => {
             const someVar = 'someValue'
-
             const result = require('./fn')(someVar)
-
             expect(result).to.equal('mutated someVar')
           })
         })`,
@@ -281,9 +274,7 @@ describe('./lib/cross-origin-callback-loader', () => {
       expectAddFileSource(store).to.equal(stripIndent`
         __cypressCrossOriginCallback = () => {
           const someVar = 'someValue';
-
           const result = require('./fn')(someVar);
-
           expect(result).to.equal('mutated someVar');
         }`)
     })
@@ -293,7 +284,6 @@ describe('./lib/cross-origin-callback-loader', () => {
         `it('test', () => {
           cy.origin('http://www.foobar.com:3500', { args: { foo: 'foo'}}, ({ foo }) => {
             const result = require('./fn')(foo)
-
             expect(result).to.equal('mutated someVar')
           })
         })`,
@@ -304,7 +294,6 @@ describe('./lib/cross-origin-callback-loader', () => {
           foo
         }) => {
           const result = require('./fn')(foo);
-
           expect(result).to.equal('mutated someVar');
         }`)
     })

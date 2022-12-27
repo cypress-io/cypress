@@ -80,12 +80,12 @@ describe('App: Specs', () => {
             'cookies',
             'cypress_api',
             'files',
-            'local_storage',
             'location',
             'navigation',
             'network_requests',
             'querying',
             'spies_stubs_clocks',
+            'storage',
             'utilities',
             'viewport',
             'waiting',
@@ -524,6 +524,12 @@ describe('App: Specs', () => {
     })
   })
 
+  function selectEmptySpecCard () {
+    cy.findAllByTestId('card').should('have.length', 2)
+    cy.findByRole('button', { name: 'Create from component' }).should('be.visible')
+    cy.findByRole('button', { name: 'Create new empty spec' }).should('be.visible').click()
+  }
+
   describe('Testing Type: Component', {
     viewportHeight: 768,
     viewportWidth: 1024,
@@ -535,7 +541,7 @@ describe('App: Specs', () => {
         cy.startAppServer('component')
         cy.visitApp()
 
-        cy.findAllByTestId('card').eq(0).as('EmptyCard')
+        cy.findAllByTestId('card').eq(1).as('EmptyCard')
       })
 
       it('shows create new empty spec card', () => {
@@ -589,7 +595,9 @@ describe('App: Specs', () => {
 
           // 'Create a new spec' dialog presents with options when user indicates they want to create
           // another spec.
-          cy.findByRole('dialog', { name: 'Enter the path for your new spec' }).should('be.visible')
+          cy.findAllByTestId('card').should('have.length', 2)
+          cy.findByRole('button', { name: 'Create new empty spec' }).should('be.visible')
+          cy.findByRole('button', { name: 'Create from component' }).should('be.visible')
         })
 
         it('navigates to spec runner when selected', () => {
@@ -628,7 +636,7 @@ describe('App: Specs', () => {
           })
 
           cy.contains('Review the docs')
-          .should('have.attr', 'href', 'https://on.cypress.io/mount')
+          .should('have.attr', 'href', 'https://on.cypress.io/styling-components')
 
           cy.log('should not contain the link if you navigate away and back')
           cy.get('body').type('f')
@@ -709,13 +717,17 @@ describe('App: Specs', () => {
       it('shows new spec button to start creation workflow', () => {
         cy.findByRole('button', { name: 'New spec', exact: false }).click()
 
+        selectEmptySpecCard()
+
         cy.findByRole('dialog', { name: 'Enter the path for your new spec' }).should('be.visible')
       })
 
       it('shows create first spec page with create empty option and goes back if it is cancel', () => {
         cy.findByRole('button', { name: 'New spec', exact: false }).click()
 
-        cy.contains('Cancel').click()
+        selectEmptySpecCard()
+
+        cy.contains('Back').click()
 
         cy.findByRole('dialog', { name: 'Enter the path for your new spec' }).should('not.exist')
       })
@@ -737,6 +749,8 @@ describe('App: Specs', () => {
         cy.contains('No specs found').should('be.visible')
 
         cy.findByRole('button', { name: 'New spec' }).click()
+
+        selectEmptySpecCard()
 
         cy.findByRole('dialog', {
           name: 'Enter the path for your new spec',

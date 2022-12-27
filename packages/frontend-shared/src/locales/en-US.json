@@ -61,6 +61,8 @@
     "newSpec": "New spec",
     "createSpec": "Create spec",
     "done": "Done!",
+    "noComponentsFound": "No components found",
+    "unableToParseFile": "Unable to parse file",
     "updateSpecPattern": "Update spec pattern",
     "newSpecModalTitle": "Create a new spec",
     "successPage": {
@@ -218,7 +220,7 @@
         "content": "Record a run to see your test results in Cypress Cloud. You can then optimize your test suite, debug failing and flaky tests, and integrate with your favorite tools."
       }
     },
-    "runAllSpecs": "Run {n} spec | Run {n} specs"
+    "runSelectedSpecs": "Run {n} spec | Run {n} specs"
   },
   "noResults": {
     "defaultMessage": "No results matched your search:",
@@ -242,6 +244,7 @@
   "topNav": {
     "released": "Released",
     "version": "Version",
+    "versionUnsupported": "Unsupported",
     "installed": "Installed",
     "latest": "Latest",
     "seeAllReleases": "See all releases",
@@ -492,10 +495,6 @@
         "name": "Interactive run events",
         "description": "Allows listening to the [`before:run`](https://on.cypress.io/before-run), [`after:run`](https://on.cypress.io/after-run), [`before:spec`](https://on.cypress.io/before-spec), and [`after:spec`](https://on.cypress.io/after-spec) events in plugins during interactive mode."
       },
-      "experimentalSessionAndOrigin": {
-        "name": "Cross-origin and session",
-        "description": "Enables cross-origin and improved session support, including the [`cy.origin()`](https://on.cypress.io/origin) and [`cy.session()`](https://on.cypress.io/session) commands."
-      },
       "experimentalModifyObstructiveThirdPartyCode": {
         "name": "Modify obstructive third party code",
         "description": "Applies `modifyObstructiveCode` to third party `.html` and `.js`, removes subresource integrity, and modifies the user agent in Electron."
@@ -519,6 +518,10 @@
       "experimentalRunAllSpecs": {
         "name": "Run All Specs",
         "description": "Enables the \"Run All Specs\" UI feature, allowing the execution of multiple specs sequentially."
+      },
+      "experimentalOriginDependencies": {
+        "name": "Origin Dependencies",
+        "description": "Enables support for `require`/`import` within `cy.origin`."
       }
     },
     "device": {
@@ -704,7 +707,7 @@
       "line4": "In the next screen, you'll be able to reconfigure component testing in a new guided configuration wizard."
     },
     "wizard": {
-      "title": "Migrating to Cypress 11",
+      "title": "Migrating to Cypress {version}",
       "description": "Your project requires updates to work with this version.",
       "typicalMigrationLabel": "Typical migration:",
       "typicalMigrationTime": "5-10 minutes",
@@ -774,7 +777,7 @@
   "openBrowser": {
     "startComponent": "Start Component Testing in {browser}",
     "startE2E": "Start E2E Testing in {browser}",
-    "openingComponent": "Opening component testing in {browser}",
+    "openingComponent": "Opening Component Testing in {browser}",
     "openingE2E": "Opening E2E Testing in {browser}",
     "running": "Running {browser}",
     "focus": "Focus",

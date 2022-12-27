@@ -112,9 +112,9 @@ video | Problems with video recordings | [open](https://github.com/cypress-io/cy
 
 
 ## Writing Documentation
-
+ 
 Cypress documentation lives in a separate repository with its own dependencies and build tools.
-See [Documentation Contributing Guideline](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
+See [Documentation Contributing Guidelines](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
 
 ## Writing code
 
@@ -164,7 +164,7 @@ Here is a list of the core packages in this repository with a short description,
  | [ts](./packages/ts)                   | `@packages/ts`          | A centralized version of typescript.                                         |
  | [types](./packages/types)             | `@packages/types`          | The shared internal Cypress types.                                         |
  | [v8-snapshot-require](./packages/v8-snapshot-require) | `@packages/v8-snapshot-requie` | Tool to load a snapshot for Electron applications that was created by `@tooling/v8-snapshot`. |
- | [web-config](./packages/web-config)             | `@packages/ui-components`          | The web-related configuration.                                         |
+ | [web-config](./packages/web-config)             | `@packages/web-config`          | The web-related configuration.                                         |
 
 Private packages involved in development of the app live within the [`tooling`](./tooling) directory and are in the `@tooling/` namespace. They are discrete modules with different responsibilities, but each is necessary for development of the Cypress app and is not necessarily useful outside of the Cypress app.
 
@@ -358,7 +358,7 @@ This is to ensure that links do not go dead in older versions of Cypress when th
 
 ### Tests
 
-For most packages there are typically unit and integration tests.
+For most packages there are typically unit and integration tests. For UI packages there are E2E and component tests.
 
 Please refer to each packages' `README.md` which documents how to run tests. It is not feasible to try to run all of the tests together. We run our entire test fleet across over a dozen containers in CI.
 
@@ -435,17 +435,9 @@ During the process of snapshot generation, metadata is created/updated in `tooli
 
 **Generation**
 
-If you run into errors while generating the v8 snapshot, you can occasionally identify the problem dependency via the output. You can try to remove that dependency from the cache and see if regenerating succeeds. If it does, likely it was moved to a more restrictive section (e.g. healthy to deferred/no-rewrite or deferred to norewrite). If all else fails, you can try running the following (but keep in mind this may take a while):
+If the `build-v8-snapshot-prod` command is taking a long time to run on Circle CI, the snapshot cache probably needs to be updated. Run the [Update V8 Snapshot Cache](https://github.com/cypress-io/cypress/actions/workflows/update_v8_snapshot_cache.yml) github action against your branch to generate the snapshots for you on all platforms. You can choose to commit directly to your branch or alternatively issue a PR to your branch.
 
-```
-V8_SNAPSHOT_FROM_SCRATCH=1 yarn build-v8-snapshot-dev
-```
-
-or
-
-```
-V8_SNAPSHOT_FROM_SCRATCH=1 yarn build-v8-snapshot-prod
-```
+![Update V8 SnapshotCache](https://user-images.githubusercontent.com/4873279/206541239-1afb1d29-4d66-4593-92a7-5a5961a12137.png)
 
 **Runtime**
 
@@ -455,20 +447,6 @@ If you're experiencing issues during runtime, you can try and narrow down where 
 * If the problem occurs with running `yarn build-v8-snapshot-prod` but not `yarn build-v8-snapshot-dev`, then that means there's a problem with a cypress file and not a node module dependency. Chances are that a file is not being flagged properly (e.g. healthy when it should be deferred or norewrite).
 * If the problem occurs with both `yarn build-v8-snapshot-prod` and `yarn build-v8-snapshot-dev` but does not occur when using the `DISABLE_SNAPSHOT_REQUIRE` environment variable, then that means there's a problem with a node module dependency. Chances are that a file is not being flagged properly (e.g. healthy when it should be deferred or norewrite).
 * If the problem still occurs when using the `DISABLE_SNAPSHOT_REQUIRE` environment variable, then that means the problem is not snapshot related.
-
-**Build Length**
-
-If the `build-v8-snapshot-prod` command is taking a long time to run on Circle CI, the snapshot cache probably needs to be updated. Run these commands on a windows, linux, and mac and commit the updates to the snapshot cache to git:
-
-```
-yarn build-v8-snapshot-dev
-```
-
-or
-
-```
-yarn build-v8-snapshot-prod
-```
 
 ## Committing Code
 
@@ -488,28 +466,36 @@ We do not continuously deploy the Cypress binary, so `develop` contains all of t
 - When opening a PR for a specific issue already open, please name the branch you are working on using the convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`. If the PR is a larger issue, you can add more context like `issue-803-new-scrollable-area`. If there's not an associated open issue, **[create an issue](https://github.com/cypress-io/cypress/issues/new/choose)**.
 - PRs can be opened before all the work is finished. In fact we encourage this! Please create a [Draft Pull Request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests#draft-pull-requests) if your PR is not ready for review. [Mark the PR as **Ready for Review**](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/changing-the-stage-of-a-pull-request#marking-a-pull-request-as-ready-for-review) when you're ready for a Cypress team member to review the PR.
 - Prefix the title of the Pull Request using [semantic-release](https://github.com/semantic-release/semantic-release)'s format as defined [here](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#type). For example, if your PR is fixing a bug, you should prefix the PR title with `fix:`.
-- Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If you feel some areas are not relevant add `N/A` as opposed to deleting those sections. PR's will not be reviewed if this template is not filled in.
+- Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If you feel some areas are not relevant add `N/A` as opposed to deleting those sections. PRs will not be reviewed if this template is not filled in.
 - If the PR is a user facing change and you're a Cypress team member that has logged into [ZenHub](https://www.zenhub.com/) and downloaded the [ZenHub for GitHub extension](https://www.zenhub.com/extension), set the release the PR is intended to ship in from the sidebar of the PR. Follow semantic versioning to select the intended release. This is used to generate the changelog for the release. If you don't tag a PR for release, it won't be mentioned in the changelog.
   ![Select release for PR](https://user-images.githubusercontent.com/1271364/135139641-657015d6-2dca-42d4-a4fb-16478f61d63f.png)
 - Please check the "Allow edits from maintainers" checkbox when submitting your PR. This will make it easier for the maintainers to make minor adjustments, to help with tests or any other changes we may need.
 ![Allow edits from maintainers checkbox](https://user-images.githubusercontent.com/1271181/31393427-b3105d44-ada9-11e7-80f2-0dac51e3919e.png)
 - All Pull Requests require a minimum of **two** approvals.
 - After the PR is approved, the original contributor can merge the PR (if the original contributor has access).
-- When you merge a PR into `develop`, select [**Squash and merge**](https://docs.github.com/en/github/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-pull-request-commits). This will squash all commits into a single commit. *The only exception to squashing is when converting files to another language and there is a clear commit history needed to maintain from the file conversion.*
+- When you merge a PR into `develop`, select [**Squash and merge**](https://docs.github.com/en/github/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-pull-request-commits). This will squash all commits into a single commit.
+
+*The only exceptions to squashing are:* 
+
+1. When converting files to another language and there is a clear commit history needed to maintain from the file conversion.
+2. When merging a `release/*` branch to `develop`. Individual PRs were already squashed when they were merged to the release branch, and we want that history intact on develop.
 
 ### Write Some Tests
 
-If you are adding a new feature or fixing a regression, ensure you add tests for it. Broadly speaking, there are three categories of tests you might consider:
+If you are adding a new feature or fixing a regression, ensure you add tests for it. Broadly speaking, there are four categories of tests you might consider:
 
-1. Unit test. Those are inside of `test/unit`, if the package has them. These are the fastest and cheapest to execute.
-2. E2E/Integration tests. Those are inside `cypress/e2e`, if the package has them. These are between Unit Tests and System Tests when it comes to speed of execution.
-3. System Tests. Those go in the [`system-tests`](https://github.com/cypress-io/cypress/tree/develop/system-tests) directory. The README explains how they work. These are the slowest to run, so you generally only want to add a system-test if it's absolutely required (but don't let that discourage you; they are also the most realistic way to test Cypress).
+1. Unit tests. Those are inside of `test/unit`, if the package has them. These are the fastest and cheapest to execute.
+2. Component Tests. These are co-located with components in the `src` directory of UI-related packages. These test individual UI components in isolation. They can exhaustively test all expected variations of a component and are faster than E2E tests.
+3. E2E/Integration tests. Those are inside `cypress/e2e`, if the package has them. These are between Unit Tests and System Tests when it comes to speed of execution.
+4. System tests. Those go in the [`system-tests`](https://github.com/cypress-io/cypress/tree/develop/system-tests) directory. The README explains how they work. These are the slowest to run, so you generally only want to add a system-test if it's absolutely required (but don't let that discourage you; they are also the most realistic way to test Cypress).
 
 When choosing what's most appropriate, consider:
 
 - ease of understanding
 - ease of debugging
 - resilience to refactoring
+
+It is also worth considering when a failure will be noticed. A unit or component test is likely to be run while the related code is being modified and provides very fast feedback. E2E tests and System Tests are more likely to only fail in CI since they are slower to run.
 
 ### Dependencies
 

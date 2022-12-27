@@ -104,9 +104,7 @@ describe('basic login', { browser: '!webkit' }, () => {
         }, {
           validate: () => {
             cy.window().then((win) => {
-              const cypressAuthToken = win.sessionStorage.getItem('cypressAuthToken')
-
-              return !!cypressAuthToken
+              expect(win.sessionStorage.getItem('cypressAuthToken')).to.exist
             })
           },
         })
@@ -169,7 +167,7 @@ describe('Multi-step Auth', { browser: '!webkit' }, () => {
   })
 
   // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23481
-  it.skip('final-auth redirects back to localhost - flat', () => {
+  it('final-auth redirects back to localhost - flat', { retries: 15 }, () => {
     cy.visit('/fixtures/auth/index.html')
     cy.get('[data-cy="login-with-approval"]').click() // takes you to foobar.com.../approval
     cy.origin('http://www.foobar.com:3500', () => { // Parent origin is localhost

@@ -1491,6 +1491,19 @@ describe('lib/cypress', () => {
         code: 'PARALLEL_GROUP_PARAMS_MISMATCH',
         payload: {
           runUrl: 'https://cloud.cypress.io/runs/12345',
+          differentParams: {
+            browserName: {
+              detected: 'Chrome',
+              expected: 'Electron',
+            },
+            browserVersion: {
+              detected: '65',
+              expected: '64',
+            },
+          },
+          differentSpecs: [
+            'cypress/integration/foo_spec.js',
+          ],
         },
       }
 
@@ -1747,9 +1760,11 @@ describe('lib/cypress', () => {
         // this should be overridden by the env argument
         json.baseUrl = 'http://localhost:8080'
 
-        const { supportFile, specPattern, excludeSpecPattern, baseUrl, experimentalSessionAndOrigin, slowTestThreshold, testIsolation, ...rest } = json
+        // "pick" out the list of properties that cannot exist on the root level so we can re-add them on the "e2e" object
+        // TODO: refactor this part of the test, this is silly and a holdover from pre-split-config
+        const { experimentalRunAllSpecs, experimentalOriginDependencies, supportFile, specPattern, excludeSpecPattern, baseUrl, slowTestThreshold, testIsolation, ...rest } = json
 
-        return settings.writeForTesting(this.todosPath, { ...rest, e2e: { baseUrl, experimentalSessionAndOrigin, supportFile, specPattern, testIsolation, excludeSpecPattern } })
+        return settings.writeForTesting(this.todosPath, { ...rest, e2e: { experimentalRunAllSpecs, experimentalOriginDependencies, baseUrl, supportFile, specPattern, testIsolation, excludeSpecPattern } })
       }).then(async () => {
         await clearCtx()
 
@@ -1780,7 +1795,6 @@ describe('lib/cypress', () => {
         expect(cfg.pageLoadTimeout).to.eq(1000)
         expect(cfg.port).to.eq(2121)
         expect(cfg.baseUrl).to.eq('http://localhost')
-        expect(cfg.experimentalSessionAndOrigin).to.be.false
         expect(cfg.watchForFileChanges).to.be.false
         expect(cfg.responseTimeout).to.eq(5555)
         expect(cfg.env.baz).to.eq('baz')

@@ -1,3 +1,24 @@
+# [@cypress/webpack-dev-server-v3.2.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.1.2...@cypress/webpack-dev-server-v3.2.0) (2022-12-19)
+
+
+### Features
+
+* create from React component ([#25168](https://github.com/cypress-io/cypress/issues/25168)) ([166b694](https://github.com/cypress-io/cypress/commit/166b69414c5e347ef825c121330b0b561a4caa3b)), closes [#24881](https://github.com/cypress-io/cypress/issues/24881) [#24954](https://github.com/cypress-io/cypress/issues/24954) [#24982](https://github.com/cypress-io/cypress/issues/24982) [#25079](https://github.com/cypress-io/cypress/issues/25079) [#25145](https://github.com/cypress-io/cypress/issues/25145)
+
+# [@cypress/webpack-dev-server-v3.1.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.1.1...@cypress/webpack-dev-server-v3.1.2) (2022-12-16)
+
+
+### Bug Fixes
+
+* use srcRoot for angular build context ([#25090](https://github.com/cypress-io/cypress/issues/25090)) ([7c36118](https://github.com/cypress-io/cypress/commit/7c361187e31c3681f415da8a9073221d807987f6))
+
+# [@cypress/webpack-dev-server-v3.1.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.1.0...@cypress/webpack-dev-server-v3.1.1) (2022-12-08)
+
+
+### Bug Fixes
+
+* add v8 snapshot usage to cypress in cypress testing ([#24860](https://github.com/cypress-io/cypress/issues/24860)) ([c540284](https://github.com/cypress-io/cypress/commit/c540284f5080d46a8597e53dd2213cb6fb133078))
+
 # [@cypress/webpack-dev-server-v3.1.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.0.1...@cypress/webpack-dev-server-v3.1.0) (2022-11-10)
 
 

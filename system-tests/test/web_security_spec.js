@@ -75,7 +75,6 @@ describe('e2e web security', () => {
       browser: '!webkit', // TODO(webkit): fix+unskip
       spec: 'web_security.cy.js',
       config: {
-        experimentalSessionAndOrigin: false,
         pageLoadTimeout: 5000,
       },
       snapshot: true,
@@ -88,7 +87,6 @@ describe('e2e web security', () => {
       spec: 'web_security.cy.js',
       config: {
         chromeWebSecurity: false,
-        experimentalSessionAndOrigin: false,
       },
       snapshot: true,
       browser: ['chrome', 'electron'],
@@ -107,19 +105,6 @@ describe('e2e web security', () => {
       onStdout (stdout) {
         expect(stdout).include('Your project has set the configuration option: `chromeWebSecurity` to `false`.\n\nThis option will not have an effect in Firefox.')
       },
-    })
-  })
-
-  context('when experimentalSessionAndOrigin is enabled', () => {
-    systemTests.it('fails', {
-      browser: '!webkit', // TODO(webkit): fix+unskip Fixed by: https://github.com/cypress-io/cypress/issues/23532
-      spec: 'web_security.cy.js',
-      config: {
-        experimentalSessionAndOrigin: true,
-        defaultCommandTimeout: 50,
-      },
-      snapshot: true,
-      expectedExitCode: 4,
     })
   })
 })

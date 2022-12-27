@@ -6,17 +6,33 @@ const text = defaultMessages.majorVersionWelcome
 
 describe('<MajorVersionWelcome />', { viewportWidth: 1280, viewportHeight: 1400 }, () => {
   it('renders expected interactive content', () => {
-    const continueStub = cy.stub()
+    const continueStub = cy.stub().as('clearLandingPage')
 
     cy.mount(<MajorVersionWelcome onClearLandingPage={continueStub} />)
 
     cy.contains('h1', 'What\'s New in Cypress').should('be.visible')
-    cy.contains('a[href="https://on.cypress.io/changelog"]', text.linkReleaseNotes).should('be.visible')
-    cy.contains('a[href="https://on.cypress.io/changelog#11-0-0"]', '11.0.0').should('be.visible')
-    cy.contains('a[href="https://on.cypress.io/changelog#10-0-0"]', '10.0.0').should('be.visible')
 
-    cy.contains('button', text.actionContinue).should('be.visible')
-    cy.contains('button', text.actionContinue).click()
+    cy.get('[data-cy="release-highlights"]').within(() => {
+      cy.contains('a[href="https://on.cypress.io/changelog#12-0-0"]', '12.0.0')
+      cy.contains('a[href="https://on.cypress.io/changelog#12-0-0"]', 'changelog')
+      cy.contains('a[href="https://on.cypress.io/migration-guide#Migrating-to-Cypress-12-0"]', 'Migration Guide')
+
+      cy.contains('a[href="https://on.cypress.io/origin"]', 'cy.origin()')
+      cy.contains('a[href="https://on.cypress.io/session"]', 'cy.session()')
+      cy.contains('a[href="https://on.cypress.io/retry-ability"]', 'Retry-ability Guide')
+    })
+
+    cy.get('[data-cy="previous-release-highlights"]').within(() => {
+      cy.contains('a[href="https://on.cypress.io/changelog#11-0-0"]', '11.0.0')
+      cy.contains('a[href="https://on.cypress.io/changelog#10-0-0"]', '10.0.0')
+    })
+
+    cy.get('[data-cy="major-version-welcome-footer"]').within(() => {
+      cy.contains('a[href="https://on.cypress.io/changelog"]', text.linkReleaseNotes)
+      cy.contains('button', text.actionContinue).scrollIntoView()
+      cy.contains('button', text.actionContinue).click()
+    })
+
     cy.wrap(continueStub).should('have.been.calledOnce')
   })
 

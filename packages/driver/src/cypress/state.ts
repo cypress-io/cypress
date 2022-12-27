@@ -1,20 +1,21 @@
-/// <reference path="../../types/cy/commands/session.d.ts" />
 /// <reference path="../../types/cypress/log.d.ts" />
 
 import type Bluebird from 'bluebird'
 
 import type { RouteMap } from '../cy/net-stubbing/types'
 import type { $Command } from './command'
-import type { XHRRequest, XHRResponse } from '../cy/commands/xhr'
 import type { KeyboardModifiers } from '../cy/keyboard'
 import type { MouseCoords } from '../cy/mouse'
-import type { Server } from './server'
 import type { LocationObject } from './location'
+
+export type QueryFunction = (any) => any
+
+export type SubjectChain = [any, ...QueryFunction[]]
 
 export interface StateFunc {
   (): Record<string, any>
   (v: Record<string, any>): Record<string, any>
-  (k: 'activeSessions', v?: Cypress.Commands.Session.ActiveSessions): Cypress.Commands.Session.ActiveSessions | undefined
+  (k: 'activeSessions', v?: Cypress.ActiveSessions): Cypress.ActiveSessions | undefined
   (k: '$autIframe', v?: JQuery<HTMLIFrameElement>): JQuery<HTMLIFrameElement> | undefined
   (k: 'routes', v?: RouteMap): RouteMap
   (k: 'aliasedRequests', v?: AliasedRequest[]): AliasedRequest[]
@@ -36,20 +37,18 @@ export interface StateFunc {
   (k: 'error', v?: Error): Error
   (k: 'assertUsed', v?: boolean): boolean
   (k: 'currentAssertionUserInvocationStack', v?: string): string
-  (k: 'responses', v?: XHRResponse[]): XHRResponse[]
   (k: 'aliases', v?: Record<string, any>): Record<string, any>
   (k: 'onBeforeLog', v?: (() => boolean) | null): () => boolean | null
   (k: 'keyboardModifiers', v?: KeyboardModifiers): KeyboardModifiers
   (k: 'mouseLastHoveredEl', v?: HTMLElement | null): HTMLElement | null
   (k: 'mouseCoords', v?: MouseCoords): MouseCoords
-  (k: 'server', v?: Server): Server
-  (k: 'requests', v?: XHRRequest[]): XHRRequest[]
+  (k: 'subjects', v?: Record<string, SubjectChain>): Record<string, SubjectChain>
+  (k: 'subjectLinks', v?: Record<string, string>): Record<string, string>
   (k: 'fetchPolyfilled', v?: boolean): boolean
   (k: 'nestedIndex', v?: number): number
   (k: 'chainerId', v?: string): string
   (k: 'ctx', v?: Mocha.Context): Mocha.Context
   (k: 'commandIntermediateValue', v?: any): any
-  (k: 'subject', v?: any): any
   (k: 'onPaused', v?: (fn: any) => void): (fn: any) => void
   (k: 'onQueueFailed', v?: (err, queue?: any) => Error): (err, queue?: any) => Error
   (k: 'promise', v?: Bluebird<unknown>): Bluebird<unknown>

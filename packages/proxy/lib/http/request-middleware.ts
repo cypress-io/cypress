@@ -35,8 +35,7 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
     delete this.req.headers['x-cypress-is-xhr-or-fetch']
   }
 
-  if (!this.config.experimentalSessionAndOrigin ||
-    !doesTopNeedToBeSimulated(this) ||
+  if (!doesTopNeedToBeSimulated(this) ||
     // this should be unreachable, as the x-cypress-is-xhr-or-fetch header is only attached if
     // the resource type is 'xhr' or 'fetch or 'true' (in the case of electron|extension).
     // This is only needed for defensive purposes.
@@ -47,11 +46,11 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
   }
 
   this.debug(`looking up credentials for ${this.req.proxiedUrl}`)
-  let { resourceType, credentialStatus } = this.resourceTypeAndCredentialManager.get(this.req.proxiedUrl, requestIsXhrOrFetch !== 'true' ? requestIsXhrOrFetch : undefined)
+  const { requestedWith, credentialStatus } = this.requestedWithAndCredentialManager.get(this.req.proxiedUrl, requestIsXhrOrFetch !== 'true' ? requestIsXhrOrFetch : undefined)
 
-  this.debug(`credentials calculated for ${resourceType}:${credentialStatus}`)
+  this.debug(`credentials calculated for ${requestedWith}:${credentialStatus}`)
 
-  this.req.requestedWith = resourceType
+  this.req.requestedWith = requestedWith
   this.req.credentialsLevel = credentialStatus
   this.next()
 }
@@ -72,11 +71,11 @@ const MaybeSimulateSecHeaders: RequestMiddleware = function () {
 }
 
 const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
-  if (!this.config.experimentalSessionAndOrigin || !doesTopNeedToBeSimulated(this)) {
+  if (!doesTopNeedToBeSimulated(this)) {
     return this.next()
   }
 
-  // Top needs to be simulated since the AUT is in a cross origin state. Get the requestedWith and credentials and see what cookies need to be attached
+  // Top needs to be simulated since the AUT is in a cross origin state. Get the "requested with" and credentials and see what cookies need to be attached
   const currentAUTUrl = this.getAUTUrl()
   const shouldCookiesBeAttachedToRequest = shouldAttachAndSetCookies(this.req.proxiedUrl, currentAUTUrl, this.req.requestedWith, this.req.credentialsLevel, this.req.isAUTFrame)
 
@@ -109,6 +108,12 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
     return this.next()
   }
 
+  const copyResourceTypeAndNext = () => {
+    this.req.resourceType = this.req.browserPreRequest?.resourceType
+
+    this.next()
+  }
+
   if (this.req.headers['x-cypress-resolving-url']) {
     this.debug('skipping prerequest for resolve:url')
     delete this.req.headers['x-cypress-resolving-url']
@@ -132,13 +137,13 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
       })
     })
 
-    return this.next()
+    return copyResourceTypeAndNext()
   }
 
   this.debug('waiting for prerequest')
   this.getPreRequest(((browserPreRequest) => {
     this.req.browserPreRequest = browserPreRequest
-    this.next()
+    copyResourceTypeAndNext()
   }))
 }
 
@@ -159,7 +164,7 @@ const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
     this.debug('ending request with buffered response')
     // NOTE: Only inject fullCrossOrigin here if experimental is on and
     // the super domain origins do not match in order to keep parity with cypress application reloads
-    this.res.wantsInjection = this.config.experimentalSessionAndOrigin && buffer.urlDoesNotMatchPolicyBasedOnDomain ? 'fullCrossOrigin' : 'full'
+    this.res.wantsInjection = buffer.urlDoesNotMatchPolicyBasedOnDomain ? 'fullCrossOrigin' : 'full'
 
     return this.onResponse(buffer.response, buffer.stream)
   }

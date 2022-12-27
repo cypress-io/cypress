@@ -78,15 +78,21 @@ class StackMap<T> {
 // ever comes in, we don't want to block proxied requests indefinitely.
 export class PreRequests {
   requestTimeout: number
+  sweepInterval: number
   pendingPreRequests = new StackMap<PendingPreRequest>()
   pendingRequests = new StackMap<PendingRequest>()
-  sweepInterval: ReturnType<typeof setInterval>
+  sweepIntervalTimer: NodeJS.Timeout
 
-  constructor (requestTimeout = 500) {
+  constructor (
+    requestTimeout = 500,
+    // 10 seconds
+    sweepInterval = 1000 * 10,
+  ) {
     // If a request comes in and we don't have a matching pre-request after this timeout,
     // we invoke the request callback to tell the server to proceed (we don't want to block
     // user requests indefinitely).
     this.requestTimeout = requestTimeout
+    this.sweepInterval = sweepInterval
 
     // Discarding prerequests on the other hand is not urgent, so we do it on a regular interval
     // rather than with a separate timer for each one.
@@ -94,11 +100,11 @@ export class PreRequests {
     // make sure we don't discard any pre-requests prematurely but that we don't leak memory over time
     // if a large number of pre-requests don't match up
     // fixes: https://github.com/cypress-io/cypress/issues/17853
-    this.sweepInterval = setInterval(() => {
+    this.sweepIntervalTimer = setInterval(() => {
       const now = Date.now()
 
       this.pendingPreRequests.removeMatching(({ timestamp, browserPreRequest }) => {
-        if (timestamp + this.requestTimeout * 2 < now) {
+        if (timestamp + this.sweepInterval < now) {
           debugVerbose('timed out unmatched pre-request: %o', browserPreRequest)
           metrics.unmatchedPreRequests++
 
@@ -107,7 +113,7 @@ export class PreRequests {
 
         return true
       })
-    }, this.requestTimeout * 2)
+    }, this.sweepInterval)
   }
 
   addPending (browserPreRequest: BrowserPreRequest) {

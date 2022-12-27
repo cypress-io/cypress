@@ -607,6 +607,7 @@ type CurrentProject implements Node & ProjectLike {
 
   """List of all code generation candidates stories"""
   codeGenCandidates(glob: String!): [FileParts]
+  codeGenFramework: String
   codeGenGlobs: CodeGenGlobs!
 
   """Project configuration"""
@@ -789,9 +790,11 @@ enum ErrorTypeEnum {
   ERROR_WRITING_FILE
   EXPERIMENTAL_COMPONENT_TESTING_REMOVED
   EXPERIMENTAL_NETWORK_STUBBING_REMOVED
+  EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY
   EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY
   EXPERIMENTAL_RUN_EVENTS_REMOVED
   EXPERIMENTAL_SAMESITE_REMOVED
+  EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED
   EXPERIMENTAL_SESSION_SUPPORT_REMOVED
   EXPERIMENTAL_SHADOW_DOM_REMOVED
   EXPERIMENTAL_SINGLE_TAB_RUN_MODE
@@ -903,7 +906,9 @@ input FileDetailsInput {
 
 enum FileExtensionEnum {
   js
+  jsx
   ts
+  tsx
 }
 
 """Represents a file on the file system"""
@@ -1247,13 +1252,18 @@ type Mutation {
   focusActiveBrowserWindow: Boolean!
 
   """Generate spec from source"""
-  generateSpecFromSource(codeGenCandidate: String!, type: CodeGenType!): GenerateSpecResponse
+  generateSpecFromSource(codeGenCandidate: String!, componentName: String, isDefault: Boolean, type: CodeGenType!): GenerateSpecResponse
+
+  """
+  Parse a JS or TS file to see any exported React components that are defined in the file
+  """
+  getReactComponentsFromFile(filePath: String!): ReactComponentResponse
   internal_clearAllProjectPreferencesCache: Boolean
   internal_clearLatestProjectCache: Boolean
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
 
   """Launches project from open_project global singleton"""
-  launchOpenProject(specPath: String): CurrentProject
+  launchOpenProject(shouldLaunchNewTab: Boolean, specPath: String): CurrentProject
 
   """Sets the active browser"""
   launchpadSetBrowser(
@@ -1574,6 +1584,28 @@ type Query {
 
   """Metadata about the wizard"""
   wizard: Wizard!
+}
+
+"""Properties describing a React component"""
+type ReactComponentDescriptor {
+  """
+  The name of the component export e.g. "export const Foo"
+  """
+  exportName: String!
+
+  """
+  Whether the component is a default export e.g. "export default Foo"
+  """
+  isDefault: Boolean!
+}
+
+"""Response from getReactComponentsFromFile"""
+type ReactComponentResponse {
+  """Components that are exported from the parsed file"""
+  components: [ReactComponentDescriptor!]!
+
+  """Whether or not there was there an error when parsing the file"""
+  errored: Boolean
 }
 
 """

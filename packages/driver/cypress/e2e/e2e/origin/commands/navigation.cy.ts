@@ -1,4 +1,3 @@
-const { stripIndent } = require('common-tags')
 import { findCrossOriginLogs } from '../../../../support/utils'
 
 context('cy.origin navigation', { browser: '!webkit' }, () => {
@@ -193,35 +192,6 @@ context('cy.origin navigation', { browser: '!webkit' }, () => {
       cy.origin('http://www.idp.com:3500', () => {
         cy.location('pathname').should('equal', '/fixtures/dom.html')
       })
-    })
-
-    // @ts-ignore
-    it('informs user to use cy.origin with experimental flag off', { experimentalSessionAndOrigin: false }, (done) => {
-      cy.on('fail', (e) => {
-        expect(e.message).to.equal(stripIndent`\
-          \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.\n
-          In order to visit a different origin, you can enable the \`experimentalSessionAndOrigin\` flag and use \`cy.origin()\`:\n
-          \`cy.visit('http://localhost:3500/fixtures/primary-origin.html')\`
-          \`<commands targeting http://localhost:3500 go here>\`\n
-          \`cy.origin('http://www.foobar.com:3500', () => {\`
-          \`  cy.visit('http://www.foobar.com:3500/fixtures/dom.html')\`
-          \`  <commands targeting http://www.foobar.com:3500 go here>\`
-          \`})\`\n
-          The new URL is considered a different origin because the following parts of the URL are different:\n
-            > superdomain\n
-          You may only \`cy.visit()\` same-origin URLs within a single test.\n
-          The previous URL you visited was:\n
-            > 'http://localhost:3500'\n
-          You're attempting to visit this URL:\n
-            > 'http://www.foobar.com:3500'`)
-
-        done()
-      })
-
-      cy.visit('/fixtures/primary-origin.html')
-
-      // this call should error since we can't visit a cross-origin
-      cy.visit('http://www.foobar.com:3500/fixtures/dom.html')
     })
 
     it('supports the query string option', () => {

@@ -1,11 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <title>Cypress</title>
+
 </head>
+
 <body>
-  <div id="app"></div>
+  <div id="app">
+    <!-- 
+      This is the same style and svg code as the Spinner.vue component.
+      Here it is used to provide a loading state before the app is mounted.
+      The contents of this element are replaced when the app mounts, which
+      cleans up these styles and everything else.
+    -->
+    <style data-cy="plain-html-spinner-styles">
+      .spinner circle {
+        stroke-dasharray: 30 115;
+        stroke-dashoffset: 145;
+        animation: dash linear 1s infinite;
+        @apply stroke-jade-300;
+      }
+
+      .spinner>path,
+      .spinner>rect {
+        @apply fill-gray-1000;
+      }
+
+      @keyframes dash {
+        20% {
+          stroke-dasharray: 45 100;
+        }
+
+        67% {
+          stroke-dasharray: 10 135;
+          stroke-dashoffset: 50;
+        }
+
+        to {
+          stroke-dashoffset: 0;
+          stroke-dasharray: 30 115;
+        }
+      }
+    </style>
+    <div class="flex top-0 right-0 bottom-0 left-0 absolute items-center justify-center" data-cy="plain-html-loading-spinner">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" class="spinner" xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true">
+        <defs>
+          <mask id="y_and_circle">
+            <path
+              d="M37.3061 16.0737L32.658 27.8353L27.979 16.0737H24.1514L30.7133 32.1268L26.0446 43.449L25.828 43.963C25.6788 44.3224 25.3533 44.5752 24.9776 44.6273C24.6537 44.6423 24.3277 44.65 24 44.65C23.9323 44.65 23.8647 44.6497 23.7972 44.649C12.4859 44.5402 3.35 35.337 3.35 24C3.35 12.5953 12.5953 3.35 24 3.35C35.4047 3.35 44.65 12.5953 44.65 24C44.65 32.5719 39.4271 39.924 31.99 43.0474L30.7772 45.9958C30.5987 46.43 30.3755 46.8377 30.1141 47.2142C40.4075 44.5105 48 35.1419 48 24C48 10.7452 37.2548 0 24 0C10.7452 0 0 10.7452 0 24C0 37.1872 10.6357 47.8902 23.7972 47.9992C23.8247 47.9994 25.0196 47.9794 25.0177 47.9794C26.736 47.9075 28.2717 46.8308 28.9276 45.235L29.4694 43.9179L40.9228 16.0737H37.3061Z"
+              fill="white" />
+          </mask>
+        </defs>
+
+        <path
+          d="M16.877 19.0494C18.819 19.0494 20.401 20.085 21.2139 21.8915L21.2782 22.0329L24.5398 20.9253L24.4704 20.7583C23.2074 17.6823 20.2981 15.7704 16.877 15.7704C14.4719 15.7704 12.5169 16.5414 10.9015 18.1243C9.29635 19.697 8.48353 21.6757 8.48353 24.0064C8.48353 26.3166 9.29635 28.285 10.9015 29.8577C12.5169 31.4407 14.4719 32.2116 16.877 32.2116C20.2981 32.2116 23.2074 30.2997 24.4704 27.2263L24.5398 27.0593L21.273 25.9491L21.2113 26.0956C20.4833 27.8713 18.8628 28.9326 16.877 28.9326C15.5239 28.9326 14.3818 28.4598 13.4763 27.5295C12.5606 26.5864 12.0976 25.4018 12.0976 24.009C12.0976 22.6059 12.5503 21.4444 13.4763 20.4576C14.3792 19.5222 15.5239 19.0494 16.877 19.0494Z" />
+        <rect x="0" y="0" width="48" height="48" mask="url(#y_and_circle)" />
+        <circle cx="24" cy="24" r="23" stroke-width="5" mask="url(#y_and_circle)" />
+      </svg>
+    </div>
+  </div>
   <script type="module" src="/src/main.ts"></script>
 </body>
+
 </html>

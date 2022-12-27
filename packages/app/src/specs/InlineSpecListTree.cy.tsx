@@ -19,11 +19,36 @@ describe('InlineSpecListTree', () => {
       </div>
     ))
 
-    cy.findAllByTestId('spec-row-item').should('have.length', 7).first().click().type('{enter}')
-    cy.findAllByTestId('spec-row-item').should('have.length', 1).focused().type('{rightarrow}')
-    .focused().type('{downarrow}').focused().type('{enter}')
+    // should have 4 actual spec links
+    cy.get('[data-cy=spec-row-item] a').should('have.length', 4)
+    // should have 3 toggle buttons to hide and show directories
+    cy.get('[data-cy=spec-row-item] button').should('have.length', 3)
+    .and('have.attr', 'aria-expanded', 'true') // all should be open at the start
 
-    cy.findAllByTestId('spec-row-item').should('have.length', 4)
+    cy.findAllByTestId('spec-row-item').should('have.length', 7)
+    .first()
+    .find('button')
+    .focus() // avoid Cypress triggering a 'click' before typing (which causes 2 separate toggles, meaning no state change)
+    .type('{enter}')
+
+    cy.findAllByTestId('spec-row-item')
+    .should('have.length', 1)
+    .first()
+    .find('button')
+    .should('have.attr', 'aria-expanded', 'false')
+    .type('{rightarrow}') // expand this folder
+    .type('{downarrow}') // move to next row
+    .focused() // focused element should be next row
+    .type('{enter}') // should close next row
+
+    // now only one link should be shown
+    cy.get('[data-cy=spec-row-item] a').should('have.length', 1)
+    .and('contain.text', 'Spec-D.spec.tsx')
+
+    // some specific assertions about button label text and aria state
+    cy.contains('button', 'src').should('have.attr', 'aria-expanded', 'true')
+    cy.contains('button', 'components').should('have.attr', 'aria-expanded', 'false')
+    cy.contains('button', 'utils').should('have.attr', 'aria-expanded', 'true')
   })
 
   it('collapses and rebuilds tree on specs change', () => {
@@ -35,7 +60,7 @@ describe('InlineSpecListTree', () => {
       </div>
     ))
 
-    cy.findByTestId('directory-item').should('contain', 'src/components')
+    cy.contains('button [data-cy=directory-item]', 'src/components')
     cy.findAllByTestId('spec-file-item').should('have.length', specProp.value.length)
 
     cy.then(() => {

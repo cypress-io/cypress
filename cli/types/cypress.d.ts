@@ -50,6 +50,9 @@ declare namespace Cypress {
   interface CommandFnWithOriginalFnAndSubject<T extends keyof Chainable, S> {
     (this: Mocha.Context, originalFn: CommandOriginalFnWithSubject<T, S>, prevSubject: S, ...args: Parameters<ChainableMethods[T]>): ReturnType<ChainableMethods[T]> | void
   }
+  interface QueryFn<T extends keyof ChainableMethods> {
+    (this: Command, ...args: Parameters<ChainableMethods[T]>): (subject: any) => any
+  }
   interface ObjectLike {
     [key: string]: any
   }
@@ -128,6 +131,58 @@ declare namespace Cypress {
     unsupportedVersion?: boolean
   }
 
+  interface Ensure {
+    /**
+     * Throws an error if `subject` is not one of the passed in `type`s.
+     */
+    isType(subject: any, type: PrevSubject[], commandName: string, cy: Chainable): void
+
+    /**
+     * Throws an error if `subject` is not a DOM element.
+     */
+    isElement(subject: any, commandName: string, cy: Chainable): void
+
+    /**
+     * Throws an error if `subject` is not a `document`.
+     */
+    isDocument(subject: any, commandName: string, cy: Chainable): void
+
+    /**
+     * Throws an error if `subject` is not a `window`.
+     */
+    isWindow(subject: any, commandName: string, cy: Chainable): void
+
+    /**
+     * Throws an error if `subject` is not a DOM element attached to the application under test.
+     */
+    isAttached(subject: any, commandName: string, cy: Chainable, onFail?: Log): void
+
+    /**
+     * Throws an error if `subject` is a disabled DOM element.
+     */
+    isNotDisabled(subject: any, commandName: string, onFail?: Log): void
+
+    /**
+     * Throws an error if `subject` is a DOM element hidden by any of its parent elements.
+     */
+    isNotHiddenByAncestors(subject: any, commandName: string, onFail?: Log): void
+
+    /**
+     * Throws an error if `subject` is a read-only form element.
+     */
+    isNotReadonly(subject: any, commandName: string, onFail?: Log): void
+
+    /**
+     * Throws an error if `subject` is a read-only form element.
+     */
+    isScrollable(subject: any, commandName: string, onFail?: Log): void
+
+    /**
+     * Throws an error if `subject` is not a DOM element visible in the AUT.
+     */
+    isVisible(subject: any, commandName: string, onFail?: Log): void
+  }
+
   interface LocalStorage {
     /**
      * Called internally to clear `localStorage` in two situations.
@@ -140,6 +195,39 @@ declare namespace Cypress {
      * @see https://on.cypress.io/clearlocalstorage
      */
     clear: (keys?: string[]) => void
+  }
+
+  // TODO: raise minimum required TypeScript version to 3.7
+  // and make this recursive
+  // https://github.com/cypress-io/cypress/issues/24875
+  type Storable =
+    | string
+    | number
+    | boolean
+    | null
+    | StorableObject
+    | StorableArray
+
+  interface StorableObject {
+    [key: string]: Storable
+  }
+
+  interface StorableArray extends Array<Storable> { }
+
+  type StorableRecord = Record<string, Storable>
+
+  interface OriginStorage {
+    origin: string
+    value: StorableRecord
+  }
+
+  interface Storages {
+    localStorage: OriginStorage[]
+    sessionStorage: OriginStorage[]
+  }
+
+  interface StorageByOrigin {
+    [key: string]: StorableRecord
   }
 
   type IsBrowserMatcher = BrowserName | Partial<Browser> | Array<BrowserName | Partial<Browser>>
@@ -271,6 +359,12 @@ declare namespace Cypress {
      * @see https://example.cypress.io/commands/spies-stubs-clocks
      */
     sinon: sinon.SinonStatic
+
+    /**
+     * Utility functions for ensuring various properties about a subject.
+     * @see https://on.cypress.io/api/custom-queries
+     */
+    ensure: Ensure
 
     /**
      * Cypress version string. i.e. "1.1.2"
@@ -463,30 +557,92 @@ declare namespace Cypress {
      */
     log(options: Partial<LogConfig>): Log
 
-    /**
-     * @see https://on.cypress.io/api/commands
-     */
     Commands: {
+      /**
+       * Add a custom command
+       * @see https://on.cypress.io/api/commands
+       */
       add<T extends keyof Chainable>(name: T, fn: CommandFn<T>): void
+
+      /**
+       * Add a custom parent command
+       * @see https://on.cypress.io/api/commands#Parent-Commands
+       */
       add<T extends keyof Chainable>(name: T, options: CommandOptions & {prevSubject: false}, fn: CommandFn<T>): void
+
+      /**
+       * Add a custom child command
+       * @see https://on.cypress.io/api/commands#Child-Commands
+       */
       add<T extends keyof Chainable, S = any>(name: T, options: CommandOptions & {prevSubject: true}, fn: CommandFnWithSubject<T, S>): void
+
+      /**
+       * Add a custom child or dual command
+       * @see https://on.cypress.io/api/commands#Validations
+       */
       add<T extends keyof Chainable, S extends PrevSubject>(
         name: T, options: CommandOptions & { prevSubject: S | ['optional'] }, fn: CommandFnWithSubject<T, PrevSubjectMap[S]>,
       ): void
+
+      /**
+       * Add a custom command that allows multiple types as the prevSubject
+       * @see https://on.cypress.io/api/commands#Validations#Allow-Multiple-Types
+       */
       add<T extends keyof Chainable, S extends PrevSubject>(
         name: T, options: CommandOptions & { prevSubject: S[] }, fn: CommandFnWithSubject<T, PrevSubjectMap<void>[S]>,
       ): void
+
+      /**
+       * Add one or more custom commands
+       * @see https://on.cypress.io/api/commands
+       */
       addAll<T extends keyof Chainable>(fns: CommandFns): void
+
+      /**
+       * Add one or more custom parent commands
+       * @see https://on.cypress.io/api/commands#Parent-Commands
+       */
       addAll<T extends keyof Chainable>(options: CommandOptions & {prevSubject: false}, fns: CommandFns): void
+
+      /**
+       * Add one or more custom child commands
+       * @see https://on.cypress.io/api/commands#Child-Commands
+       */
       addAll<T extends keyof Chainable, S = any>(options: CommandOptions & { prevSubject: true }, fns: CommandFnsWithSubject<S>): void
+
+      /**
+       * Add one or more custom commands that validate their prevSubject
+       * @see https://on.cypress.io/api/commands#Validations
+       */
       addAll<T extends keyof Chainable, S extends PrevSubject>(
         options: CommandOptions & { prevSubject: S | ['optional'] }, fns: CommandFnsWithSubject<PrevSubjectMap[S]>,
       ): void
+
+      /**
+       * Add one or more custom commands that allow multiple types as their prevSubject
+       * @see https://on.cypress.io/api/commands#Allow-Multiple-Types
+       */
       addAll<T extends keyof Chainable, S extends PrevSubject>(
         options: CommandOptions & { prevSubject: S[] }, fns: CommandFnsWithSubject<PrevSubjectMap<void>[S]>,
       ): void
+
+      /**
+       * Overwrite an existing Cypress command with a new implementation
+       * @see https://on.cypress.io/api/commands#Overwrite-Existing-Commands
+       */
       overwrite<T extends keyof Chainable>(name: T, fn: CommandFnWithOriginalFn<T>): void
+
+      /**
+       * Overwrite an existing Cypress command with a new implementation
+       * @see https://on.cypress.io/api/commands#Overwrite-Existing-Commands
+       */
       overwrite<T extends keyof Chainable, S extends PrevSubject>(name: T, fn: CommandFnWithOriginalFnAndSubject<T, PrevSubjectMap[S]>): void
+
+      /**
+       * Add a custom query
+       * @see https://on.cypress.io/api/custom-queries
+       */
+      addQuery<T extends keyof Chainable>(name: T, fn: QueryFn<T>): void
     }
 
     /**
@@ -494,16 +650,6 @@ declare namespace Cypress {
      */
     Cookies: {
       debug(enabled: boolean, options?: Partial<DebugOptions>): void
-      /**
-       * @deprecated Use `cy.session()` instead.
-       * @see https://on.cypress.io/session
-       */
-      preserveOnce(...names: string[]): void
-      /**
-       * @deprecated Use `cy.session()` instead.
-       * @see https://on.cypress.io/session
-       */
-      defaults(options: Partial<CookieDefaults>): CookieDefaults
     }
 
     /**
@@ -603,13 +749,6 @@ declare namespace Cypress {
     }
 
     /**
-     * @see https://on.cypress.io/api/api-server
-     */
-    Server: {
-      defaults(options: Partial<ServerOptions>): void
-    }
-
-    /**
      * @see https://on.cypress.io/screenshot-api
      */
     Screenshot: {
@@ -653,25 +792,6 @@ declare namespace Cypress {
      * @private
      */
     onSpecWindow: (window: Window, specList: string[] | Array<() => Promise<void>>) => void
-  }
-
-  interface SessionOptions {
-    /**
-     * Whether or not to persist the session across all specs in the run.
-     * @default {false}
-     */
-    cacheAcrossSpecs?: boolean
-    /**
-     * Function to run immediately after the session is created and `setup` function runs or
-     * after a session is restored and the page is cleared. If this returns `false`, throws an
-     * exception, returns a Promise which resolves to `false` or rejects or contains any failing
-     * Cypress command, the session is considered invalid.
-     *
-     * If validation fails immediately after `setup`, the test will fail.
-     * If validation fails after restoring a session, `setup` will re-run.
-     * @default {false}
-     */
-    validate?: () => Promise<false | void> | void
   }
 
   type CanReturnChainable = void | Chainable | Promise<unknown>
@@ -776,26 +896,81 @@ declare namespace Cypress {
     clear(options?: Partial<ClearOptions>): Chainable<Subject>
 
     /**
-     * Clear a specific browser cookie for the current superdomain or for the domain specified.
-     * Cypress automatically clears all cookies before each test to prevent state from being shared across tests. You shouldn't need to use this command unless you're using it to clear a specific cookie inside a single test.
+     * Clear a specific browser cookie for a domain.
+     *
+     * Cypress automatically clears all cookies _before_ each test to prevent
+     * state from being shared across tests when test isolation is enabled.
+     * You shouldn't need to use this command unless you're using it to clear
+     * a specific cookie inside a single test or test isolation is disabled.
      *
      * @see https://on.cypress.io/clearcookie
      */
     clearCookie(name: string, options?: CookieOptions): Chainable<null>
 
     /**
-     * Clear all browser cookies for the current superdomain or for the domain specified.
-     * Cypress automatically clears all cookies before each test to prevent state from being shared across tests. You shouldn't need to use this command unless you're using it to clear all cookies or specific cookies inside a single test.
+     * Clear browser cookies for a domain.
+     *
+     * Cypress automatically clears all cookies _before_ each test to prevent
+     * state from being shared across tests when test isolation is enabled.
+     * You shouldn't need to use this command unless you're using it to clear
+     * specific cookies inside a single test or test isolation is disabled.
      *
      * @see https://on.cypress.io/clearcookies
      */
     clearCookies(options?: CookieOptions): Chainable<null>
 
     /**
-     * Clear data in local storage.
-     * Cypress automatically runs this command before each test to prevent state from being
-     * shared across tests. You shouldn't need to use this command unless you're using it
-     * to clear localStorage inside a single test. Yields `localStorage` object.
+     * Clear all browser cookies.
+     *
+     * Cypress automatically clears all cookies _before_ each test to prevent
+     * state from being shared across tests when test isolation is enabled.
+     * You shouldn't need to use this command unless you're using it to clear
+     * all cookie inside a single test or test isolation is disabled.
+     *
+     * @see https://on.cypress.io/clearallcookies
+     */
+     clearAllCookies(options?: Partial<Loggable & Timeoutable>): Chainable<null>
+
+    /**
+     * Get local storage for all origins.
+     *
+     * @see https://on.cypress.io/getalllocalstorage
+     */
+    getAllLocalStorage(options?: Partial<Loggable>): Chainable<StorageByOrigin>
+
+    /**
+     * Clear local storage for all origins.
+     *
+     * Cypress automatically clears all local storage _before_ each test to
+     * prevent state from being shared across tests when test isolation
+     * is enabled. You shouldn't need to use this command unless you're using it
+     * to clear localStorage inside a single test or test isolation is disabled.
+     *
+     * @see https://on.cypress.io/clearalllocalstorage
+     */
+    clearAllLocalStorage(options?: Partial<Loggable>): Chainable<null>
+
+    /**
+     * Get session storage for all origins.
+     *
+     * @see https://on.cypress.io/getallsessionstorage
+     */
+    getAllSessionStorage(options?: Partial<Loggable>): Chainable<StorageByOrigin>
+
+    /**
+     * Clear session storage for all origins.
+     *
+     * @see https://on.cypress.io/clearallsessionstorage
+     */
+     clearAllSessionStorage(options?: Partial<Loggable>): Chainable<null>
+
+    /**
+     * Clear data in local storage for the current origin.
+     *
+     * Cypress automatically clears all local storage _before_ each test to
+     * prevent state from being shared across tests when test isolation
+     * is enabled. You shouldn't need to use this command unless you're using it
+     * to clear localStorage inside a single test or test isolation is disabled.
      *
      * @see https://on.cypress.io/clearlocalstorage
      * @param {string} [key] - name of a particular item to remove (optional).
@@ -1086,8 +1261,6 @@ declare namespace Cypress {
     /**
       * Save/Restore browser Cookies, LocalStorage, and SessionStorage data resulting from the supplied `setup` function.
       *
-      * Only available if the `experimentalSessionAndOrigin` config option is enabled.
-      *
       * @see https://on.cypress.io/session
       */
     session(id: string | object, setup: () => void, options?: SessionOptions): Chainable<null>
@@ -1249,18 +1422,25 @@ declare namespace Cypress {
     get<S = any>(alias: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<S>
 
     /**
-     * Get a browser cookie by its name for the current superdomain or for the domain specified.
+     * Get a browser cookie by its name.
      *
      * @see https://on.cypress.io/getcookie
      */
     getCookie(name: string, options?: CookieOptions): Chainable<Cookie | null>
 
     /**
-     * Get all of the browser cookies for the current superdomain or for the domain specified.
+     * Get browser cookies for a domain.
      *
      * @see https://on.cypress.io/getcookies
      */
     getCookies(options?: CookieOptions): Chainable<Cookie[]>
+
+    /**
+     * Get all browser cookies.
+     *
+     * @see https://on.cypress.io/getallcookies
+     */
+    getAllCookies(options?: Partial<Loggable & Timeoutable>): Chainable<Cookie[]>
 
     /**
      * Navigate back or forward to the previous or next URL in the browser's history.
@@ -1409,19 +1589,19 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/nextuntil
      */
-    nextUntil<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    nextUntil<K extends keyof HTMLElementTagNameMap>(selector: K, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
     /**
      * Get all following siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
      *
      * @see https://on.cypress.io/nextuntil
      */
-    nextUntil<E extends HTMLElement = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    nextUntil<E extends Node = HTMLElement>(selector: string, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
     /**
      * Get all following siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
      *
      * @see https://on.cypress.io/nextuntil
      */
-    nextUntil<E extends HTMLElement = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    nextUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
      * Filter DOM element(s) from a set of DOM elements. Opposite of `.filter()`
@@ -1429,6 +1609,13 @@ declare namespace Cypress {
      * @see https://on.cypress.io/not
      */
     not(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery>
+
+    /**
+     * Invoke a command synchronously, without using the command queue.
+     *
+     * @see https://on.cypress.io/api/custom-queries
+     */
+    now(name: string, ...args: any[]): Promise<any> | ((subject: any) => any)
 
     /**
      * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
@@ -1587,21 +1774,21 @@ declare namespace Cypress {
      * Get all previous siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
      * > The querying behavior of this command matches exactly how [.prevUntil()](http://api.jquery.com/prevUntil) works in jQuery.
      *
-     * @see https://on.cypress.io/prevall
+     * @see https://on.cypress.io/prevuntil
      */
     prevUntil<K extends keyof HTMLElementTagNameMap>(selector: K, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
     /**
      * Get all previous siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
      * > The querying behavior of this command matches exactly how [.prevUntil()](http://api.jquery.com/prevUntil) works in jQuery.
      *
-     * @see https://on.cypress.io/prevall
+     * @see https://on.cypress.io/prevuntil
      */
     prevUntil<E extends Node = HTMLElement>(selector: string, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
     /**
      * Get all previous siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
      * > The querying behavior of this command matches exactly how [.prevUntil()](http://api.jquery.com/prevUntil) works in jQuery.
      *
-     * @see https://on.cypress.io/prevall
+     * @see https://on.cypress.io/prevuntil
      */
     prevUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
@@ -1679,66 +1866,6 @@ declare namespace Cypress {
     root<E extends Node = HTMLHtmlElement>(options?: Partial<Loggable>): Chainable<JQuery<E>> // can't do better typing unless we ignore the `.within()` case
 
     /**
-     * @deprecated Use `cy.intercept()` instead.
-     *
-     * Use `cy.route()` to manage the behavior of network requests.
-     * @see https://on.cypress.io/route
-     * @example
-     *    cy.server()
-     *    cy.route('https://localhost:7777/users', [{id: 1, name: 'Pat'}])
-     */
-    route(url: string | RegExp, response?: string | object): Chainable<null>
-    /**
-     * @deprecated Use `cy.intercept()` instead.
-     *
-     * Spy or stub request with specific method and url.
-     *
-     * @see https://on.cypress.io/route
-     * @example
-     *    cy.server()
-     *    // spy on POST /todos requests
-     *    cy.route('POST', '/todos').as('add-todo')
-     */
-    route(method: string, url: string | RegExp, response?: string | object): Chainable<null>
-    /**
-     * @deprecated Use `cy.intercept()` instead.
-     *
-     * Set a route by returning an object literal from a callback function.
-     * Functions that return a Promise will automatically be awaited.
-     *
-     * @see https://on.cypress.io/route
-     * @example
-     *    cy.server()
-     *    cy.route(() => {
-     *      // your logic here
-     *      // return an appropriate routing object here
-     *      return {
-     *        method: 'POST',
-     *        url: '/comments',
-     *        response: this.commentsFixture
-     *      }
-     *    })
-     */
-    route(fn: () => RouteOptions): Chainable<null>
-    /**
-     * @deprecated Use `cy.intercept()` instead.
-     *
-     * Spy or stub a given route.
-     *
-     * @see https://on.cypress.io/route
-     * @example
-     *    cy.server()
-     *    cy.route({
-     *      method: 'DELETE',
-     *      url: '/users',
-     *      status: 412,
-     *      delay: 1000
-     *      // and other options, see documentation
-     *    })
-     */
-    route(options: Partial<RouteOptions>): Chainable<null>
-
-    /**
      * Take a screenshot of the application under test and the Cypress Command Log.
      *
      * @see https://on.cypress.io/screenshot
@@ -1782,26 +1909,6 @@ declare namespace Cypress {
      * @see https://on.cypress.io/select
      */
     select(valueOrTextOrIndex: string | number | Array<string | number>, options?: Partial<SelectOptions>): Chainable<Subject>
-
-    /**
-     * @deprecated Use `cy.intercept()` instead.
-     *
-     * Start a server to begin routing responses to `cy.route()` and `cy.request()`.
-     *
-     * @example
-     *    // start server
-     *    cy.server()
-     *    // get default server options
-     *    cy.server().should((server) => {
-     *      expect(server.delay).to.eq(0)
-     *      expect(server.method).to.eq('GET')
-     *      expect(server.status).to.eq(200)
-     *      // and many others options
-     *    })
-     *
-     * @see https://on.cypress.io/server
-     */
-    server(options?: Partial<ServerOptions>): Chainable<ServerOptions>
 
     /**
      * Set a browser cookie.
@@ -2404,10 +2511,6 @@ declare namespace Cypress {
 
   type Agent<T extends sinon.SinonSpy> = SinonSpyAgent<T> & T
 
-  interface CookieDefaults {
-    preserve: string | string[] | RegExp | ((cookie: Cookie) => boolean)
-  }
-
   interface Failable {
     /**
      * Whether to fail on response codes other than 2xx and 3xx
@@ -2637,7 +2740,7 @@ declare namespace Cypress {
   interface CookieOptions extends Partial<Loggable & Timeoutable> {
     /**
      * Domain to set cookies on or get cookies from
-     * @default superdomain of the current app under test
+     * @default hostname of the current app under test
      */
     domain?: string
   }
@@ -2695,7 +2798,7 @@ declare namespace Cypress {
      */
     env: { [key: string]: any }
     /**
-     * A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.
+     * A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using a tool to test what files would match.
      * @default "*.hot-update.js"
      */
     excludeSpecPattern: string | string[]
@@ -2817,8 +2920,7 @@ declare namespace Cypress {
      */
     supportFile: string | false
     /**
-     * The test isolation ensures a clean browser context between tests. This option is only available when
-     * `experimentalSessionAndOrigin=true`.
+     * The test isolation ensures a clean browser context between tests.
      *
      * Cypress will always reset/clear aliases, intercepts, clock, and viewport before each test
      * to ensure a clean test slate; i.e. this configuration only impacts the browser context.
@@ -2826,23 +2928,23 @@ declare namespace Cypress {
      * Note: the [`cy.session()`](https://on.cypress.io/session) command will inherent this value to determine whether
      * or not the page is cleared when the command executes. This command is only available in end-to-end testing.
      *
-     *  - on - The page is cleared before each test. Cookies, local storage and session storage in all domains are cleared
+     *  - true - The page is cleared before each test. Cookies, local storage and session storage in all domains are cleared
      *         before each test. The `cy.session()` command will also clear the page and current browser context when creating
      *         or restoring the browser session.
-     *  - off - The current browser state will persist between tests. The page does not clear before the test and cookies, local
+     *  - false - The current browser state will persist between tests. The page does not clear before the test and cookies, local
      *          storage and session storage will be available in the next test. The `cy.session()` command will only clear the
      *          current browser context when creating or restoring the browser session - the current page will not clear.
      *
      * Tradeoffs:
      *      Turning test isolation off may improve performance of end-to-end tests, however, previous tests could impact the
      *      browser state of the next test and cause inconsistency when using .only(). Be mindful to write isolated tests when
-     *      test isolation is off. If a test in the suite impacts the state of other tests and it were to fail, you could see
+     *      test isolation is false. If a test in the suite impacts the state of other tests and it were to fail, you could see
      *      misleading errors in later tests which makes debugging clunky. See the [documentation](https://on.cypress.io/test-isolation)
      *      for more information.
      *
-     * @default null, when experimentalSessionAndOrigin=false. The default is 'on' when experimentalSessionAndOrigin=true.
+     * @default true
      */
-    testIsolation: null | 'on' | 'off'
+    testIsolation: boolean
     /**
      * Path to folder where videos will be saved after a headless or CI run
      * @default "cypress/videos"
@@ -2903,11 +3005,6 @@ declare namespace Cypress {
      * @default false
      */
     experimentalInteractiveRunEvents: boolean
-    /**
-     * Enables cross-origin and improved session support, including the `cy.origin` and `cy.session` commands. See https://on.cypress.io/origin and https://on.cypress.io/session.
-     * @default false
-     */
-    experimentalSessionAndOrigin: boolean
     /**
      * Whether Cypress will search for and replace obstructive code in third party .js or .html files.
      * NOTE: Setting this flag to true removes Subresource Integrity (SRI).
@@ -3004,6 +3101,11 @@ declare namespace Cypress {
      * @default false
      */
     experimentalRunAllSpecs?: boolean
+    /**
+     * Enables support for require/import within cy.origin.
+     * @default false
+     */
+    experimentalOriginDependencies?: boolean
   }
 
   /**
@@ -3079,19 +3181,17 @@ declare namespace Cypress {
     socketIoRoute: string
     spec: Cypress['spec'] | null
     specs: Array<Cypress['spec']>
-    xhrRoute: string
-    xhrUrl: string
   }
 
   interface SuiteConfigOverrides extends Partial<
-    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations' | 'experimentalSessionAndOrigin'>
+    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl' | 'testIsolation'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
   }
 
   interface TestConfigOverrides extends Partial<
-    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations' | 'experimentalSessionAndOrigin'>
+    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
@@ -3148,7 +3248,7 @@ declare namespace Cypress {
     }
   }
 
-  interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl' | 'experimentalSessionAndOrigin' | 'experimentalStudio'> {
+  interface ComponentConfigOptions<ComponentDevServerOpts = any> extends Omit<CoreConfigOptions, 'baseUrl' | 'experimentalStudio'> {
     devServer: DevServerFn<ComponentDevServerOpts> | DevServerConfigOptions
     devServerConfig?: ComponentDevServerOpts
     /**
@@ -3337,31 +3437,60 @@ declare namespace Cypress {
     interval: number
   }
 
-  /**
-   * Setting default options for cy.server()
-   * @see https://on.cypress.io/server
-   */
-  interface ServerOptions {
-    delay: number
-    method: HttpMethod
-    status: number
-    headers: object
-    response: any
-    onRequest(...args: any[]): void
-    onResponse(...args: any[]): void
-    onAbort(...args: any[]): void
-    enable: boolean
-    force404: boolean
-    urlMatchingOptions: object
-    ignore(xhr: Request): void
-    onAnyRequest(route: RouteOptions, proxy: any): void
-    onAnyResponse(route: RouteOptions, proxy: any): void
-    onAnyAbort(route: RouteOptions, proxy: any): void
+  interface Session {
+    /**
+     * Clear all sessions saved on the backend, including cached global sessions.
+     */
+    clearAllSavedSessions: () => Promise<void>
+    /**
+     * Clear all storage and cookie data across all origins associated with the current session.
+     */
+    clearCurrentSessionData: () => Promise<void>
+    /**
+     * Get all storage and cookie data across all origins associated with the current session.
+     */
+    getCurrentSessionData: () => Promise<SessionData>
+    /**
+     * Get all storage and cookie data saved on the backend associated with the provided session id.
+     */
+    getSession: (id: string) => Promise<ServerSessionData>
   }
 
-  interface Session {
-    // Clear all saved sessions and re-run the current spec file.
-    clearAllSavedSessions: () => Promise<void>
+  type ActiveSessions = Record<string, SessionData>
+
+  interface SessionData {
+    id: string
+    hydrated: boolean
+    cacheAcrossSpecs: SessionOptions['cacheAcrossSpecs']
+    cookies?: Cookie[] | null
+    localStorage?: OriginStorage[] | null
+    sessionStorage?: OriginStorage[] | null
+    setup: () => void
+    validate?: SessionOptions['validate']
+  }
+
+  interface ServerSessionData extends Omit<SessionData, 'setup' |'validate'> {
+    setup: string
+    validate?: string
+  }
+
+  interface SessionOptions {
+    /**
+     * Whether or not to persist the session across all specs in the run.
+     * @default {false}
+     */
+    cacheAcrossSpecs?: boolean
+    /**
+     * Function to run immediately after the session is created and `setup` function runs or
+     * after a session is restored and the page is cleared. If this returns `false`, throws an
+     * exception, returns a Promise which resolves to `false` or rejects or contains any failing
+     * Cypress command, the session is considered invalid.
+     *
+     * If validation fails immediately after `setup`, the test will fail.
+     * If validation fails after restoring a session, `setup` will re-run.
+     * @default {false}
+     */
+    validate?: () => Promise<false | void> | void
   }
 
   type SameSiteStatus = 'no_restriction' | 'strict' | 'lax'
@@ -5778,7 +5907,7 @@ declare namespace Cypress {
      * Useful for debugging purposes if you're confused about the order in which commands will execute.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'command:enqueued', fn: (command: EnqueuedCommand) => void): Cypress
+    (action: 'command:enqueued', fn: (command: EnqueuedCommandAttributes) => void): Cypress
     /**
      * Fires when cy begins actually running and executing your command.
      * Useful for debugging and understanding how the command queue is async.
@@ -5906,7 +6035,7 @@ declare namespace Cypress {
     sameSite?: SameSiteStatus
   }
 
-  interface EnqueuedCommand {
+  interface EnqueuedCommandAttributes {
     id: string
     name: string
     args: any[]
@@ -5914,7 +6043,15 @@ declare namespace Cypress {
     chainerId: string
     injected: boolean
     userInvocationStack?: string
+    query?: boolean
     fn(...args: any[]): any
+  }
+
+  interface Command {
+    get<K extends keyof EnqueuedCommandAttributes>(attr: K): EnqueuedCommandAttributes[K]
+    get(): EnqueuedCommandAttributes
+    set<K extends keyof EnqueuedCommandAttributes>(key: K, value: EnqueuedCommandAttributes[K]): Log
+    set(options: Partial<EnqueuedCommandAttributes>): Log
   }
 
   interface Exec {
@@ -5993,28 +6130,6 @@ declare namespace Cypress {
   interface Viewport {
     viewportWidth: number
     viewportHeight: number
-  }
-
-  interface WaitXHR {
-    duration: number
-    id: string
-    method: HttpMethod
-    request: {
-      body: string | ObjectLike
-      headers: ObjectLike
-    }
-    requestBody: WaitXHR['request']['body']
-    requestHeaders: WaitXHR['request']['headers']
-    response: {
-      body: string | ObjectLike
-      headers: ObjectLike
-    }
-    responseBody: WaitXHR['response']['body']
-    responseHeaders: WaitXHR['response']['headers']
-    status: number
-    statusMessage: string
-    url: string
-    xhr: XMLHttpRequest
   }
 
   type Encodings = 'ascii' | 'base64' | 'binary' | 'hex' | 'latin1' | 'utf8' | 'utf-8' | 'ucs2' | 'ucs-2' | 'utf16le' | 'utf-16le' | null
