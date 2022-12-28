@@ -6,8 +6,10 @@
   </head>
   <body>
     <script type="text/javascript">
-      {{superDomain ? `document.domain = '${superDomain}';` : ''}}
-      
+  {{if(options.documentSuperDomainIfExists)}}
+    document.domain = '{{documentSuperDomainIfExists}}';
+  {{/if}}
+
       (function(parent) {
         var Cypress = window.Cypress = parent.Cypress;
         if (!Cypress) {
