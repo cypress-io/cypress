@@ -179,9 +179,13 @@ export const policyForDomain = (url: string, opts?: {
  * @param topUrl - The url you are testing the policy in context of.
  * @returns boolean, true if matching, false if not.
  */
-export const urlMatchesPolicyBasedOnDomain = (frameUrl: string, topUrl: string): boolean => {
+export const urlMatchesPolicyBasedOnDomain = (frameUrl: string, topUrl: string, opts?: {
+  useDefaultDocumentDomain: boolean
+}): boolean => {
   return urlMatchesPolicy({
-    policy: policyForDomain(frameUrl),
+    policy: policyForDomain(frameUrl, {
+      useDefaultDocumentDomain: opts?.useDefaultDocumentDomain || false,
+    }),
     frameUrl,
     topUrl,
   })
