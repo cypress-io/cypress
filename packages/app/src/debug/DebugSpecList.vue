@@ -89,10 +89,12 @@ fragment DebugSpecListGroups on CloudRunGroup {
   os {
     id
     name
+    nameWithVersion
   }
   browser {
     id
     formattedName
+    formattedNameWithVersion
   }
 }
 `
