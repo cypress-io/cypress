@@ -11,7 +11,7 @@
     <Button
       size="lg"
       class="mt-25px"
-      :href="getUrlWithParams({url: overLimitActionUrl, params: { utmMedium: 'Debug Tab', utmSource: getUtmSource() }})"
+      :href="actionUrl"
     >
       {{ overLimitActionType === 'CONTACT_ADMIN' ? t('debugPage.contactAdmin') : t('debugPage.upgradePlan') }}
     </Button>
@@ -25,12 +25,17 @@ import type { OverLimitActionTypeEnum } from '../generated/graphql'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
 import { useI18n } from '@cy/i18n'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
+import { computed } from '@vue/reactivity'
 
 const { t } = useI18n()
 
-defineProps<{
+const props = defineProps<{
   overLimitActionType: OverLimitActionTypeEnum
   overLimitActionUrl: string
 }>()
+
+const actionUrl = computed(() => {
+  return getUrlWithParams({ url: props.overLimitActionUrl, params: { utmMedium: 'Debug Tab', utmSource: getUtmSource() } })
+})
 
 </script>

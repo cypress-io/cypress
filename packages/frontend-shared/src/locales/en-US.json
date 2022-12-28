@@ -660,7 +660,7 @@
     "incomplete": "Incomplete",
     "specsSkipped": "{totalSkippedSpecs} of {n} spec skipped | {totalSkippedSpecs} of {n} specs skipped",
     "runHasNoTests": "Run has no tests",
-    "theRunStartedButNeverCompleted": "The run started, but never completed. This can happen when the run is cancelled from CI or when Cypress crashes during running tests.",
+    "theRunStartedButNeverCompleted": "The run started but never completed. This can happen when the run is cancelled from CI or when Cypress crashes while running tests.",
     "checkYourCiLogs": "Check your {0} logs for more information.",
     "archiveThisRun": "Archive this run to remove it from the runs list and analytics.",
     "manuallyCancelled": "Manually cancelled",

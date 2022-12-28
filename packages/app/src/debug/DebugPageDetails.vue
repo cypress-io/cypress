@@ -7,9 +7,7 @@
       v-if="status === 'CANCELLED'"
       :total-specs="specs.length"
       :total-skipped-specs="totalSkippedSpecs"
-      :cancelled-at="cancelledAt"
-      :cancelled-by-full-name="cancelledByFullName"
-      :cancelled-by-email="cancelledByEmail"
+      :cancellation="cancellation"
     />
     <DebugPassed v-else-if="status === 'PASSED'" />
     <DebugErrored
@@ -35,7 +33,7 @@
 <script lang="ts" setup>
 import { computed } from '@vue/reactivity'
 import { gql } from '@urql/vue'
-import type { CloudRunStatus, OverLimitActionTypeEnum, DebugSpecListSpecFragment, CloudCiBuildInfoFragment } from '../generated/graphql'
+import type { CloudRunStatus, OverLimitActionTypeEnum, DebugSpecListSpecFragment, DebugPageDetails_CloudCiBuildInfoFragment } from '../generated/graphql'
 import DebugCancelledAlert from './DebugCancelledAlert.vue'
 import DebugPassed from './DebugPassed.vue'
 import DebugErrored from './DebugErrored.vue'
@@ -44,7 +42,7 @@ import DebugTimedout from './DebugTimedout.vue'
 import DebugOverLimit from './DebugOverLimit.vue'
 
 gql`
-fragment CloudCiBuildInfo on CloudCiBuildInfo {
+fragment DebugPageDetails_cloudCiBuildInfo on CloudCiBuildInfo {
   id
   ciBuildNumberFormatted
   formattedProvider
@@ -54,14 +52,18 @@ fragment CloudCiBuildInfo on CloudCiBuildInfo {
 
 const props = defineProps<{
   status: CloudRunStatus
-  cancelledAt: string | null
-  cancelledByFullName?: string | null
-  cancelledByEmail?: string | null
+  cancellation: {
+    cancelledAt?: string | null
+    cancelledBy: {
+      fullName?: string | null
+      email?: string | null
+    } | null
+  }
   isHiddenByUsageLimits: boolean
   overLimitActionType: OverLimitActionTypeEnum
   overLimitActionUrl: string
   specs: readonly DebugSpecListSpecFragment[]
-  ci?: CloudCiBuildInfoFragment
+  ci?: DebugPageDetails_CloudCiBuildInfoFragment
   errors: readonly string[]
 }>()
 

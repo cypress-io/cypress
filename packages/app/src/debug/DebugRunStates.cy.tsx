@@ -92,7 +92,7 @@ describe('Debug page states', () => {
 
   context('cancelled', () => {
     it('renders', () => {
-      cy.mount(<DebugCancelledAlert totalSpecs={5} totalSkippedSpecs={2} cancelledAt="2019-01-25T02:00:00.000Z" cancelledByFullName="Test Tester" cancelledByEmail="adams@cypress.io" />)
+      cy.mount(<DebugCancelledAlert totalSpecs={5} totalSkippedSpecs={2} cancellation={{ cancelledAt: '2019-01-25T02:00:00.000Z', cancelledBy: { email: 'adams@cypress.io', fullName: 'Test Tester' } }} />)
 
       cy.percySnapshot()
     })

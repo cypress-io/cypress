@@ -4,7 +4,7 @@
       v-if="showError"
     />
     <div
-      v-else-if="loginConnectStore.user.isLoggedIn && loginConnectStore.project.isProjectConnected && run && run.status"
+      v-else-if="loginConnectStore.user.isLoggedIn && loginConnectStore.project.isProjectConnected && run?.status"
       class="flex flex-col h-full"
     >
       <DebugPageHeader
@@ -12,11 +12,10 @@
         :commits-ahead="0"
       />
       <DebugPageDetails
+        v-if="shouldDisplayDetails(run.status)"
         :status="run.status"
         :specs="run.specs"
-        :cancelled-at="run.cancelledAt"
-        :cancelled-by-full-name="run.cancelledBy?.fullName"
-        :cancelled-by-email="run.cancelledBy?.email"
+        :cancellation="{ cancelledAt: run.cancelledAt, cancelledBy: run.cancelledBy }"
         :is-hidden-by-usage-limits="run.isHiddenByUsageLimits"
         :over-limit-action-type="run.overLimitActionType"
         :over-limit-action-url="run.overLimitActionUrl"
@@ -24,7 +23,7 @@
         :errors="run.errors"
       />
       <DebugSpecList
-        v-if="run.totalFailed && ['ERRORED','CANCELLED','TIMEDOUT', 'FAILED'].includes(run.status)"
+        v-if="run.totalFailed && shouldDisplaySpecsList(run.status)"
         :specs="debugSpecsArray"
       />
     </div>
@@ -42,7 +41,7 @@
 <script setup lang="ts">
 import { gql } from '@urql/vue'
 import { computed } from '@vue/reactivity'
-import type { DebugSpecsFragment, TestingTypeEnum } from '../generated/graphql'
+import type { CloudRunStatus, DebugSpecsFragment, TestingTypeEnum } from '../generated/graphql'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import DebugPageHeader from './DebugPageHeader.vue'
 import DebugSpecList from './DebugSpecList.vue'
@@ -69,7 +68,7 @@ fragment DebugSpecs on Query {
       __typename
       ... on CloudProject {
         id
-        runByNumber(runNumber: 3) {
+        runByNumber(runNumber: 11) {
           ...DebugPage
           cancelledBy {
             id
@@ -87,7 +86,7 @@ fragment DebugSpecs on Query {
           totalTests
           ci {
             id
-            ...CloudCiBuildInfo
+            ...DebugPageDetails_cloudCiBuildInfo
           }
           testsForReview {
             id
@@ -124,6 +123,14 @@ const loginConnectStore = useLoginConnectStore()
 const run = computed(() => {
   return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject.runByNumber : null
 })
+
+function shouldDisplayDetails (status: CloudRunStatus) {
+  return !['RUNNING', 'FAILED'].includes(status)
+}
+
+function shouldDisplaySpecsList (status: CloudRunStatus) {
+  return ['ERRORED', 'CANCELLED', 'TIMEDOUT', 'FAILED'].includes(status)
+}
 
 const debugSpecsArray = computed(() => {
   if (run.value && props.gql?.currentProject) {

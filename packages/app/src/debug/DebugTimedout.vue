@@ -11,10 +11,9 @@
         scope="global"
         keypath="debugPage.checkYourCiLogs"
       >
-        <a
-          class="text-indigo-500"
-          :href="ci.url || '#'"
-        >{{ `${ci.formattedProvider} #${ci.ciBuildNumberFormatted}` }}</a>
+        <ExternalLink :href="ci.url || '#'">
+          {{ `${ci.formattedProvider} #${ci.ciBuildNumberFormatted}` }}
+        </ExternalLink>
       </i18n-t>
     </span>
     {{ t('debugPage.archiveThisRun') }}
@@ -25,22 +24,23 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, Ref } from 'vue'
+import { computed } from 'vue'
 import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 import Alert from '@cy/components/Alert.vue'
 import { useI18n } from '@cy/i18n'
-import type { CloudCiBuildInfoFragment } from '../generated/graphql'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
+import type { DebugPageDetails_CloudCiBuildInfoFragment } from '../generated/graphql'
 
 const { t } = useI18n()
 
 const props = defineProps<{
-  ci?: CloudCiBuildInfoFragment
+  ci?: DebugPageDetails_CloudCiBuildInfoFragment
   totalSpecs: number
   totalSkippedSpecs: number
 }>()
 
-const hasCiInfo: Ref<boolean> = computed(() => {
-  return !!(props.ci && props.ci.url && props.ci.formattedProvider && props.ci.ciBuildNumberFormatted)
+const hasCiInfo = computed(() => {
+  return !!(props.ci?.url && props.ci.formattedProvider && props.ci.ciBuildNumberFormatted)
 })
 
 </script>
