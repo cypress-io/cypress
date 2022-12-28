@@ -149,7 +149,8 @@ describe('src/cy/commands/assertions', () => {
         expect(testCommands()).to.containSubset([
           { name: 'wrap', snapshots: 1, retries: 0 },
           { name: 'then', snapshots: 0, retries: 0 },
-          { name: 'wrap', snapshots: 2, retries: (r) => r > 1 },
+          { name: 'wrap', snapshots: 1, retries: 0 },
+          { name: 'should', snapshots: 1, retries: (r) => r > 1 },
           { name: 'then', snapshots: 0, retries: 0 },
         ])
       })
@@ -180,11 +181,11 @@ describe('src/cy/commands/assertions', () => {
 
       cy.on('command:retry', () => {
         if (assertionMessage) {
-          expect(assertionMessage).to.equal(cy.state('current').get('logs')[1].get('message'))
+          expect(assertionMessage).to.equal(cy.state('current').get('logs')[0].get('message'))
           done()
         }
 
-        assertionMessage = cy.state('current').get('logs')[1].get('message')
+        assertionMessage = cy.state('current').get('logs')[0].get('message')
       })
 
       cy.get('#with-trailing-space').should('have.text', 'I\'ve got a lovely bunch of coconuts')
@@ -204,13 +205,8 @@ describe('src/cy/commands/assertions', () => {
         .then(() => {
           expect(testCommands()).to.eql([
             { name: 'visit', snapshots: 1, retries: 0 },
-            // cy.get() has 2 snapshots, 1 for itself, and 1
-            // for the .should(...) assertion.
-
-            // TODO: Investigate whether or not the 2 commands are
-            // snapshotted at the same time. If there's no tick between
-            // them, we could reuse the snapshots
-            { name: 'get', snapshots: 2, retries: 2 },
+            { name: 'get', snapshots: 1, retries: 0 },
+            { name: 'should', snapshots: 1, retries: 2 },
             { name: 'then', snapshots: 0, retries: 0 },
           ])
         })
@@ -413,7 +409,7 @@ describe('src/cy/commands/assertions', () => {
 
       it('does not log extra commands on fail and properly fails command + assertions', function (done) {
         cy.on('fail', (err) => {
-          assertLogLength(this.logs, 6)
+          assertLogLength(this.logs, 5)
           expect(err.message).to.eq('You must provide a valid number to a `length` assertion. You passed: `asdf`')
 
           expect(this.logs[3].get('name')).to.eq('get')
@@ -554,7 +550,7 @@ describe('src/cy/commands/assertions', () => {
     }, () => {
       it('should not be true', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('expected false to be true')
+          expect(err.message).to.eq('Timed out retrying after 50ms: expected false to be true')
 
           done()
         })
@@ -639,11 +635,11 @@ describe('src/cy/commands/assertions', () => {
         cy.get('button:first').should('have.class', 'does-not-have-class')
       })
 
-      it('has a pending state while retrying queries', (done) => {
+      it('has a pending state while retrying queries', function (done) {
         cy.on('command:retry', (command) => {
-          const [getLog, shouldLog] = cy.state('current').get('logs')
+          const [getLog, shouldLog] = this.logs
 
-          expect(getLog.get('state')).to.eq('pending')
+          expect(getLog.get('state')).to.eq('passed')
           expect(shouldLog.get('state')).to.eq('pending')
 
           done()
@@ -652,17 +648,15 @@ describe('src/cy/commands/assertions', () => {
         cy.get('button:first', { timeout: 500 }).should('have.class', 'does-not-have-class')
       })
 
-      it('has a pending state while retrying for commands with onFail', (done) => {
+      it('has a pending state while retrying on static subjects', function (done) {
         cy.on('command:retry', () => {
-          const [readFileLog, shouldLog] = cy.state('current').get('logs')
+          const [readFileLog, shouldLog] = this.logs
 
-          expect(readFileLog.get('state')).to.eq('pending')
+          expect(readFileLog.get('state')).to.eq('passed')
           expect(shouldLog.get('state')).to.eq('pending')
 
           done()
         })
-
-        cy.on('fail', () => {})
 
         cy.readFile('does-not-exist.json', { timeout: 500 }).should('exist')
       })
@@ -695,14 +689,14 @@ describe('src/cy/commands/assertions', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          assertLogLength(this.logs, 3)
+          assertLogLength(this.logs, 2)
           expect(err.message).to.eq('You must provide a valid number to a `length` assertion. You passed: `foo`')
-          expect(lastLog.get('name')).to.eq('should')
+          expect(lastLog.get('name')).to.eq('assert')
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('snapshots').length).to.eq(1)
           expect(lastLog.get('snapshots')[0]).to.be.an('object')
-          expect(lastLog.get('message')).to.eq('have.length, foo')
+          expect(lastLog.get('message')).to.eq('expected **<button>** to have a length of **foo** but got **1**')
 
           done()
         })
@@ -824,7 +818,7 @@ describe('src/cy/commands/assertions', () => {
       cy.noop({}).should('have.property', 'foo')
     })
 
-    it('snapshots immediately and sets child', (done) => {
+    it('snapshots immediately when outside of a cypress command and is parent', (done) => {
       cy.on('log:added', (attrs, log) => {
         if (attrs.name !== 'assert') {
           return
@@ -833,43 +827,42 @@ describe('src/cy/commands/assertions', () => {
         cy.removeAllListeners('log:added')
         expect(log.get('snapshots').length).to.eq(1)
         expect(log.get('snapshots')[0]).to.be.an('object')
-        expect(log.get('type')).to.eq('child')
+        expect(log.get('type')).to.eq('parent')
 
         done()
       })
 
+      expect(true).to.be.true
+    })
+
+    it('snapshots when the owning command passes and sets child', (done) => {
+      cy.on('log:added', (attrs, log) => {
+        if (attrs.name !== 'assert') {
+          return
+        }
+
+        cy.removeAllListeners('log:added')
+
+        // We do not expect to have a snapshot yet - we're inside a cypress command,
+        // and we don't take snapshots until the command resolves.
+        expect(log.get('snapshots')).not.to.exist
+        expect(log.get('type')).to.eq('child')
+
+        cy.on('command:end', (command) => {
+          if (command.get('name') !== 'then') {
+            return
+          }
+
+          cy.removeAllListeners('command:end')
+          expect(log.get('snapshots').length).to.eq(1)
+          expect(log.get('snapshots')[0]).to.be.an('object')
+
+          done()
+        })
+      })
+
       cy.get('body').then((subject) => {
         expect(subject).to.match('body')
-      })
-    })
-
-    it('sets type to child current command had arguments but does not match subject', (done) => {
-      cy.on('log:added', (attrs, log) => {
-        if (attrs.name === 'assert') {
-          cy.removeAllListeners('log:added')
-          expect(log.get('type')).to.eq('child')
-
-          done()
-        }
-      })
-
-      cy.get('body').then(($body) => {
-        expect($body.length).to.eq(1)
-      })
-    })
-
-    it('sets type to parent when assertion did not involve current subject and didnt have arguments', (done) => {
-      cy.on('log:added', (attrs, log) => {
-        if (attrs.name === 'assert') {
-          cy.removeAllListeners('log:added')
-          expect(log.get('type')).to.eq('parent')
-
-          done()
-        }
-      })
-
-      cy.get('body').then(() => {
-        expect(true).to.be.true
       })
     })
 
@@ -978,32 +971,19 @@ describe('src/cy/commands/assertions', () => {
       })
     })
 
-    it('#consoleProps for errors', (done) => {
-      cy.on('log:added', (attrs, log) => {
-        if (attrs.name === 'assert') {
-          cy.removeAllListeners('log:added')
-          let err
-
-          try {
-            expect(log.invoke('consoleProps')).to.deep.contain({
-              Command: 'assert',
-              expected: false,
-              actual: true,
-              Message: 'expected true to be false',
-              Error: log.get('error').stack,
-            })
-          } catch (e) {
-            err = e
-          }
-
-          done(err)
-        }
-      })
-
+    it('#consoleProps for errors', () => {
       cy.then(() => {
         try {
           expect(true).to.be.false
         } catch (err) {} // eslint-disable-line no-empty
+      }).then(function () {
+        expect(this.lastLog.invoke('consoleProps')).to.deep.contain({
+          Command: 'assert',
+          expected: false,
+          actual: true,
+          Message: 'expected true to be false',
+          Error: this.lastLog.get('error').stack,
+        })
       })
     })
 
@@ -2076,20 +2056,6 @@ describe('src/cy/commands/assertions', () => {
 
         cy.wrap(undefined).should('have.value', 'somevalue')
       })
-
-      it('shows subject instead of undefined when a previous traversal errors', (done) => {
-        cy.on('log:added', (attrs, log) => {
-          if (attrs.name === 'assert') {
-            cy.removeAllListeners('log:added')
-            expect(log.get('message')).to.eq('expected **subject** to have class **updated**')
-            done()
-          }
-        })
-
-        cy.get('body')
-        .contains('Does not exist')
-        .should('have.class', 'updated')
-      })
     })
 
     context('descendants', () => {
@@ -2647,7 +2613,7 @@ describe('src/cy/commands/assertions', () => {
 
         cy.get('button:first').should('have.focus')
         .then(() => {
-          expect(stub).to.be.calledTwice
+          expect(stub).to.be.calledThrice
         })
       })
     })

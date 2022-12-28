@@ -467,6 +467,25 @@ describe('src/cy/commands/aliasing', () => {
       // so we just have the primitive value "3" as our subject.
       cy.get('@itemCount').should('eq', 3)
     })
+
+    it('retries assertions', () => {
+      const obj = { value: 'a' }
+
+      cy.on('command:retry', () => {
+        // On the first retry, set it to 0. After that, increment it.
+        obj.value = typeof obj.value === 'number' ? obj.value + 1 : 0
+      })
+
+      cy.wrap(obj).its('value').should('gt', 0).as('val')
+
+      cy.get('@val').should('eq', 2)
+    })
+
+    it('includes assertions in the subject chain', () => {
+      cy.get('#button').should('have.css', 'font-family').as('font')
+
+      cy.get('@font').should('eq', 'serif')
+    })
   })
 
   context('#getAlias', () => {
