@@ -4,8 +4,7 @@
     class="space-around flex"
   >
     <div class="flex flex-col w-full items-center">
-      <!-- TODO: Replace with 'running' version of icon once cypress-design is updated -->
-      <IconTechnologyDashboardCheckmark class="mb-16px" />
+      <IconTechnologyDashboardRunning class="mb-16px" />
       <span
         data-cy="title"
         class="font-medium text-lg text-gray-900"
@@ -27,7 +26,7 @@
 <script setup lang="ts">
 import { gql } from '@urql/core'
 import { useI18n } from 'vue-i18n'
-import { IconTechnologyDashboardCheckmark } from '@cypress-design/vue-icon'
+import { IconTechnologyDashboardRunning } from '@cypress-design/vue-icon'
 import DebugPendingRunCounts from './DebugPendingRunCounts.vue'
 
 gql`
