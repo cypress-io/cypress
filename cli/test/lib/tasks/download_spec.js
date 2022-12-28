@@ -628,6 +628,11 @@ describe('lib/tasks/download', function () {
       expect(download.getProxyForUrlWithNpmConfig(testUriHttp)).to.eq('http://foo')
     })
 
+    it('uses https_proxy on https request', () => {
+      process.env.https_proxy = 'http://foo'
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq('http://foo')
+    })
+
     it('ignores http_proxy on https request', () => {
       process.env.http_proxy = 'http://foo'
       expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq(null)
@@ -635,13 +640,21 @@ describe('lib/tasks/download', function () {
       expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq('https://bar')
     })
 
+    it('ignores https_proxy on http request', () => {
+      process.env.https_proxy = 'https://bar'
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttp)).to.eq(null)
+      process.env.http_proxy = 'http://foo'
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttp)).to.eq('http://foo')
+    })
+
     it('falls back to npm_config_proxy', () => {
       process.env.npm_config_proxy = 'http://foo'
-      expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq('http://foo')
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttp)).to.eq('http://foo')
       process.env.npm_config_https_proxy = 'https://bar'
       expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq('https://bar')
       process.env.https_proxy = 'https://baz'
-      expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq('https://baz')
+      // npm_config_https_proxy takes precedence with proxy-from-env 1.1.0
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq('https://bar')
     })
 
     it('respects no_proxy on http and https requests', () => {
@@ -654,16 +667,17 @@ describe('lib/tasks/download', function () {
       expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq(null)
     })
 
-    it('ignores no_proxy for npm proxy configs, prefers https over http', () => {
+    it('uses env no_proxy for npm proxy configs, don\'t mix http and https proxys', () => {
       process.env.NO_PROXY = 'localhost,.com'
 
       process.env.npm_config_proxy = 'http://foo'
-      expect(download.getProxyForUrlWithNpmConfig(testUriHttp)).to.eq('http://foo')
-      expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq('http://foo')
+      // npm_config_proxy takes precedence over http_proxy env var, but since there is no npm_no_proxy, NO_PROXY is used
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttp)).to.eq(null)
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq(null)
 
       process.env.npm_config_https_proxy = 'https://bar'
-      expect(download.getProxyForUrlWithNpmConfig(testUriHttp)).to.eq('https://bar')
-      expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq('https://bar')
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttp)).to.eq(null)
+      expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).to.eq(null)
     })
   })
 

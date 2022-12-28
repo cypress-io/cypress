@@ -19,8 +19,6 @@ const defaultMaxRedirects = 10
 
 const getProxyForUrlWithNpmConfig = (url) => {
   return getProxyForUrl(url) ||
-    process.env.npm_config_https_proxy ||
-    process.env.npm_config_proxy ||
     null
 }
 
