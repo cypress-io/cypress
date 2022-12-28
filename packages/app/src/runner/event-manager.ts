@@ -409,7 +409,7 @@ export class EventManager {
           if (!hideCommandLog) {
             this.reporterBus.emit('runnables:ready', runnables)
             this.Mobx.runInAction(() => {
-              getMobxRunnerStore().setTotalTests(Cypress.mocha.getTotalTests())
+              getMobxRunnerStore().setTotalTests(Cypress.runner.getTotalTestsBeforeFilter())
             })
           }
 

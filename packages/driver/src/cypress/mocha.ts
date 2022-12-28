@@ -35,8 +35,6 @@ const suiteAfterEach = Suite.prototype.afterEach
 delete (window as any).mocha
 delete (window as any).Mocha
 
-let _totalTests = 0
-
 type MochaArgs = [string, Function | undefined]
 function createRunnable (ctx, fnType: 'Test' | 'Suite', mochaArgs: MochaArgs, runnableFn: Function, testCallback: Function | string = '', _testConfig?: Record<string, any>) {
   const runnable = runnableFn.apply(ctx, mochaArgs)
@@ -369,21 +367,7 @@ const patchRunnableClearTimeout = () => {
 
 const patchSuiteAddTest = (specWindow, config) => {
   Suite.prototype.addTest = function (...args) {
-    _totalTests++
-
     const test = args[0]
-
-    if (Cypress.testFilter) {
-      const titlePath = [this.fullTitle(), test.title].join(' ').trim()
-
-      if (!Cypress.testFilter.includes(titlePath)) {
-        // In case the test is marked with `.only`, add a noop so the modifier does not leak
-        // into filtered tests
-        test.parent = { appendOnlyTest: () => {} }
-
-        return
-      }
-    }
 
     if (!test.invocationDetails) {
       test.invocationDetails = $stackUtils.getInvocationDetails(specWindow, config)
@@ -513,8 +497,6 @@ const restore = () => {
   restoreSuiteAddTest()
   restoreSuiteAddSuite()
   restoreSuiteHooks()
-
-  _totalTests = 0
 }
 
 const override = (specWindow, Cypress, config) => {
@@ -569,10 +551,6 @@ const create = (specWindow, Cypress, config) => {
 
     getRootSuite () {
       return _mocha.suite
-    },
-
-    getTotalTests () {
-      return _totalTests
     },
   }
 }

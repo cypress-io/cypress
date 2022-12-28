@@ -492,7 +492,57 @@ const hasOnly = (suite) => {
   )
 }
 
-const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest) => {
+const pruneSuite = (emptySuite) => {
+  emptySuite.cleanReferences()
+
+  if (emptySuite.parent) {
+    const parentSuites = emptySuite.parent.suites.filter((suite) => suite !== emptySuite)
+
+    emptySuite.parent.suites = parentSuites
+    emptySuite.parent._onlySuites = emptySuite.parent._onlySuites.filter((suite) => parentSuites.includes(suite))
+    emptySuite.parent = null
+  }
+}
+
+const pruneEmptySuites = (rootSuite, incrementFoundTestsBy) => {
+  for (const suite of [...rootSuite.suites]) {
+    pruneEmptySuites(suite, incrementFoundTestsBy)
+  }
+
+  if (!rootSuite.suites.length && !rootSuite.tests.length) {
+    pruneSuite(rootSuite)
+  }
+
+  if (rootSuite.tests.length && Cypress.testFilter) {
+    incrementFoundTestsBy(rootSuite.tests.length)
+
+    const tests: any[] = []
+    const onlyTests: any[] = []
+
+    for (const test of rootSuite.tests) {
+      if (Cypress.testFilter.includes(test.fullTitle())) {
+        tests.push(test)
+
+        if (rootSuite._onlyTests.includes(test)) {
+          onlyTests.push(test)
+        }
+      } else {
+        delete test.fn
+      }
+    }
+
+    rootSuite.tests = tests
+    rootSuite._onlyTests = onlyTests
+
+    if (!rootSuite.tests.length && !rootSuite.suites.length) {
+      pruneSuite(rootSuite)
+    }
+  }
+}
+
+const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest, incrementFoundTestsBy) => {
+  pruneEmptySuites(suite, incrementFoundTestsBy)
+
   let hasTests = false
 
   // only loop until we find the first test
@@ -511,6 +561,7 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, getRunna
   // create optimized lookups for the tests without
   // traversing through it multiple times
   const tests: Record<string, any> = {}
+
   const normalizedSuite = normalize(suite, tests, initialTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest)
 
   if (setTestsById) {
@@ -1035,6 +1086,7 @@ export default {
     let _uncaughtFn: (() => never) | null = null
     let _resumedAtTestIndex: number | null = null
     let _skipCollectingLogs = true
+    let _testsTotalBeforeFilter = 0
 
     const _runner = mocha.getRunner()
 
@@ -1310,6 +1362,10 @@ export default {
       return test
     }
 
+    const incrementFoundTestsBy = (num: number) => {
+      _testsTotalBeforeFilter += num
+    }
+
     return {
       onSpecError,
       setOnlyTestId,
@@ -1341,6 +1397,7 @@ export default {
           getOnlyTestId,
           getOnlySuiteId,
           createEmptyOnlyTest,
+          incrementFoundTestsBy,
         )
       },
 
@@ -1802,6 +1859,10 @@ export default {
         }
 
         return logs.push(attrs)
+      },
+
+      getTotalTestsBeforeFilter () {
+        return _testsTotalBeforeFilter
       },
     }
   },

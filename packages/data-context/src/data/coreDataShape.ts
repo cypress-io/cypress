@@ -227,20 +227,20 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     cloud: {
       testsForRunResults: [
         {
-          'titlePath': 'should fail - 1',
+          'titlePath': 't1',
           'status': 'FAILED',
         },
         {
-          'titlePath': 'example to-do app can add new todo items',
-          'status': 'PASSED',
-        },
-        {
-          'titlePath': 'example to-do app can check off an item as completed',
+          'titlePath': 't2',
           'status': 'FAILED',
         },
         {
-          'titlePath': 'example to-do app with a checked task can filter for uncompleted tasks',
-          'status': 'PASSED',
+          'titlePath': 's1 t3',
+          'status': 'FAILED',
+        },
+        {
+          'titlePath': 's1 t4',
+          'status': 'FAILED',
         },
       ],
     },
