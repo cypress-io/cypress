@@ -374,7 +374,7 @@ const patchSuiteAddTest = (specWindow, config) => {
     const test = args[0]
 
     if (Cypress.testFilter) {
-      const titlePath = [this.fullTitle(), test.title].join(' ')
+      const titlePath = [this.fullTitle(), test.title].join(' ').trim()
 
       if (!Cypress.testFilter.includes(titlePath)) {
         // In case the test is marked with `.only`, add a noop so the modifier does not leak

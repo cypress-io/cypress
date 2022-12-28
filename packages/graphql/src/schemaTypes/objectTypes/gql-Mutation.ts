@@ -773,36 +773,7 @@ export const mutation = mutationType({
         runId: nonNull(stringArg()),
       },
       resolve: (source, args, ctx) => {
-        return [
-          {
-            'titlePath': 'example to-do app displays two todo items by default',
-            'status': 'FAILED',
-          },
-          {
-            'titlePath': 'example to-do app can add new todo items',
-            'status': 'PASSED',
-          },
-          {
-            'titlePath': 'example to-do app can check off an item as completed',
-            'status': 'FAILED',
-          },
-          {
-            'titlePath': 'example to-do app with a checked task can filter for uncompleted tasks',
-            'status': 'PASSED',
-          },
-          {
-            'titlePath': 'example to-do app with a checked task can filter for completed tasks',
-            'status': 'PASSED',
-          },
-          {
-            'titlePath': 'example to-do app with a checked task can delete all completed tasks',
-            'status': 'PASSED',
-          },
-          {
-            'titlePath': 'example to-do app hello should work',
-            'status': 'PASSED',
-          },
-        ]
+        return ctx.coreData.cloud.testsForRunResults || []
       },
     })
   },

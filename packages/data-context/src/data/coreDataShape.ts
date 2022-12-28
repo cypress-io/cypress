@@ -113,6 +113,10 @@ interface Diagnostics {
   warnings: ErrorWrapperSource[]
 }
 
+interface CloudDataShape {
+  testsForRunResults?: { titlePath: string, status: string }[]
+}
+
 export interface CoreDataShape {
   cliBrowser: string | null
   cliTestingType: string | null
@@ -149,6 +153,7 @@ export interface CoreDataShape {
     latestVersion: Promise<string>
     npmMetadata: Promise<Record<string, string>>
   } | null
+  cloud: CloudDataShape
 }
 
 /**
@@ -219,5 +224,25 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     packageManager: 'npm',
     forceReconfigureProject: null,
     versionData: null,
+    cloud: {
+      testsForRunResults: [
+        {
+          'titlePath': 'should fail - 1',
+          'status': 'FAILED',
+        },
+        {
+          'titlePath': 'example to-do app can add new todo items',
+          'status': 'PASSED',
+        },
+        {
+          'titlePath': 'example to-do app can check off an item as completed',
+          'status': 'FAILED',
+        },
+        {
+          'titlePath': 'example to-do app with a checked task can filter for uncompleted tasks',
+          'status': 'PASSED',
+        },
+      ],
+    },
   }
 }
