@@ -668,7 +668,7 @@
     },
     "pending": {
       "title": "Testing",
-      "pendingCount": "{completed} of {total} specs completed"
+      "pendingCount": "{completed} of {total} specs completed | {completed} of {total} spec completed | {completed} of {total} specs completed"
     },
     "header": {
       "runUrl": "View in Cypress Cloud",

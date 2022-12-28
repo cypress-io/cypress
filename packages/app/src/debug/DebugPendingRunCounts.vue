@@ -3,7 +3,7 @@
     data-cy="debug-pending-counts"
     class="text-gray-600"
   >
-    {{ t('debugPage.pending.pendingCount', { completed: totalCompleted, total: totalTests }) }}
+    {{ t('debugPage.pending.pendingCount', { n: totalTests, completed: totalCompleted, total: totalTests }) }}
   </span>
 </template>
 
