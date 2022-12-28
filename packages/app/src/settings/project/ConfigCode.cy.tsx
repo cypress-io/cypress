@@ -14,6 +14,26 @@ const objectTest = {
 
 describe('<ConfigCode />', () => {
   context('with mock values', () => {
+    it('shows empty object in one line', () => {
+      cy.mount(() => (<div class="p-12 overflow-auto">
+        <ConfigCode data-cy="code" gql={{
+          id: 'project-id',
+          configFile: 'cypress.config.js',
+          configFileAbsolutePath: '/path/to/cypress.config.js',
+          config: [{
+            field: 'emptyObjectTest',
+            value: {},
+            from: 'plugin',
+          }],
+        }} />
+      </div>))
+
+      cy.contains(`emptyObjectTest:`).should('contain.text', '{},')
+      cy.contains(`emptyObjectTest:`).within(($subject) => {
+        cy.wrap($subject).get('br').should('have.length', 1)
+      })
+    })
+
     it('shows the arrayTest nicely', () => {
       cy.mount(() => (<div class="p-12 overflow-auto">
         <ConfigCode data-cy="code" gql={{
