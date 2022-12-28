@@ -56,7 +56,7 @@
             >
           </div>
           <div
-            class="font-medium p-2 text-18px leading-28px truncate"
+            class="font-medium pt-2 px-2 text-18px leading-28px truncate"
             :class="checked ? 'text-jade-600' : ( browser.disabled || !browser.isVersionSupported ) ? 'text-gray-500' : 'text-indigo-600'"
           >
             {{ browser.displayName }}
