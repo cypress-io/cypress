@@ -6,7 +6,7 @@
   </head>
   <body>
     <script type="text/javascript">
-      document.domain = '{{domain}}';
+      {{superDomain ? `document.domain = '${superDomain}';` : ''}}
     </script>
     <script src="/{{namespace}}/runner/cypress_cross_origin_runner.js"></script>
   </body>

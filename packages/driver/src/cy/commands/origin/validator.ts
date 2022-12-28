@@ -88,7 +88,9 @@ export class Validator {
     if (cors.urlMatchesPolicyBasedOnDomain(originLocation.href, specHref)) {
       // this._isSameSuperDomainOriginWithExceptions({ originLocation, specLocation })) {
 
-      const policy = cors.policyForDomain(originLocation.href)
+      const policy = cors.policyForDomain(originLocation.href, {
+        useDefaultDocumentDomain: Cypress.config('experimentalUseDefaultDocumentDomain'),
+      })
 
       $errUtils.throwErrByPath('origin.invalid_url_argument_same_origin', {
         onFail: this.log,

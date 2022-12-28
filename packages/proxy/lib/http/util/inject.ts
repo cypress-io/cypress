@@ -18,7 +18,7 @@ export function partial (domain, options: InjectionOpts) {
     documentDomainInjection = ''
   }
 
-  // with useDefaultDocumentDomain=true we continue to inject an empty script tag in order to be consistent with our other forms of injection.
+  // With useDefaultDocumentDomain=true we continue to inject an empty script tag in order to be consistent with our other forms of injection.
   // This is also diagnostic in nature is it will allow us to debug easily to make sure injection is still occurring.
   return oneLine`
     <script type='text/javascript'>

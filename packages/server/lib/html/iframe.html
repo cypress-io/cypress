@@ -6,7 +6,7 @@
   </head>
   <body>
     <script type="text/javascript">
-      document.domain = '{{domain}}';
+      {{superDomain ? `document.domain = '${superDomain}';` : ''}}
       
       (function(parent) {
         var Cypress = window.Cypress = parent.Cypress;

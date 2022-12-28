@@ -182,7 +182,7 @@ class $Cypress {
 
     // set domainName but allow us to turn
     // off this feature in testing
-    if (domainName && config.testingType === 'e2e') {
+    if (domainName && config.testingType === 'e2e' && !config.experimentalUseDefaultDocumentDomain) {
       document.domain = domainName
     }
 

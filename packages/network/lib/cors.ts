@@ -163,10 +163,12 @@ export const urlSameSiteMatch = (frameUrl: string, topUrl: string): boolean => {
  * @param url - the url to check the policy against.
  * @returns a Policy string.
  */
-export const policyForDomain = (url: string): Policy => {
+export const policyForDomain = (url: string, opts?: {
+  useDefaultDocumentDomain: boolean
+}): Policy => {
   const obj = parseUrlIntoHostProtocolDomainTldPort(url)
 
-  return strictSameOriginDomains.includes(`${obj.domain}.${obj.tld}`) ? 'same-origin' : 'same-super-domain-origin'
+  return opts?.useDefaultDocumentDomain || strictSameOriginDomains.includes(`${obj.domain}.${obj.tld}`) ? 'same-origin' : 'same-super-domain-origin'
 }
 
 /**
@@ -193,9 +195,11 @@ export const urlMatchesPolicyBasedOnDomain = (frameUrl: string, topUrl: string):
  * @param topProps - The props of the url you are testing the policy in context of.
  * @returns boolean, true if matching, false if not.
  */
-export const urlMatchesPolicyBasedOnDomainProps = (frameUrl: string, topProps: ParsedHostWithProtocolAndHost): boolean => {
+export const urlMatchesPolicyBasedOnDomainProps = (frameUrl: string, topProps: ParsedHostWithProtocolAndHost, opts?: {
+  useDefaultDocumentDomain: boolean
+}): boolean => {
   const obj = parseUrlIntoHostProtocolDomainTldPort(frameUrl)
-  const policy = strictSameOriginDomains.includes(`${obj.domain}.${obj.tld}`) ? 'same-origin' : 'same-super-domain-origin'
+  const policy = opts?.useDefaultDocumentDomain || strictSameOriginDomains.includes(`${obj.domain}.${obj.tld}`) ? 'same-origin' : 'same-super-domain-origin'
 
   return urlMatchesPolicyProps({
     policy,
