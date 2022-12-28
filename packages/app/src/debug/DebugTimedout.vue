@@ -6,7 +6,7 @@
     class="flex flex-col mb-24px w-full"
   >
     {{ t('debugPage.theRunStartedButNeverCompleted') }}
-    <span v-if="ci && ci.url && ci.formattedProvider && ci.ciBuildNumberFormatted">
+    <span v-if="ci && hasCiInfo">
       <i18n-t
         scope="global"
         keypath="debugPage.checkYourCiLogs"
@@ -17,7 +17,7 @@
         >{{ `${ci.formattedProvider} #${ci.ciBuildNumberFormatted}` }}</a>
       </i18n-t>
     </span>
-
+    {{ t('debugPage.archiveThisRun') }}
     <div class="mt-20px">
       {{ t('debugPage.specsSkipped', {n: totalSpecs, totalSkippedSpecs}) }}
     </div>
@@ -25,17 +25,22 @@
 </template>
 
 <script lang="ts" setup>
+import { computed, Ref } from 'vue'
 import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 import Alert from '@cy/components/Alert.vue'
 import { useI18n } from '@cy/i18n'
-import type { CloudCiBuildInfo } from '@packages/data-context/src/gen/graphcache-config.gen'
+import type { CloudCiBuildInfoFragment } from '../generated/graphql'
 
 const { t } = useI18n()
 
-defineProps<{
-  ci?: Partial<CloudCiBuildInfo>
+const props = defineProps<{
+  ci?: CloudCiBuildInfoFragment
   totalSpecs: number
   totalSkippedSpecs: number
 }>()
+
+const hasCiInfo: Ref<boolean> = computed(() => {
+  return !!(props.ci && props.ci.url && props.ci.formattedProvider && props.ci.ciBuildNumberFormatted)
+})
 
 </script>

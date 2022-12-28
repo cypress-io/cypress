@@ -5,23 +5,23 @@
   >
     <DebugCancelledAlert
       v-if="status === 'CANCELLED'"
-      :total-specs="totalSpecs"
+      :total-specs="specs.length"
       :total-skipped-specs="totalSkippedSpecs"
-      :canceled-at="canceledAt"
-      :canceled-by-full-name="canceledByFullName"
-      :canceled-by-email="canceledByEmail"
+      :cancelled-at="cancelledAt"
+      :cancelled-by-full-name="cancelledByFullName"
+      :cancelled-by-email="cancelledByEmail"
     />
     <DebugPassed v-else-if="status === 'PASSED'" />
     <DebugErrored
       v-else-if="status === 'ERRORED'"
       :errors="errors"
-      :total-specs="totalSpecs"
+      :total-specs="specs.length"
       :total-skipped-specs="totalSkippedSpecs"
     />
     <DebugNoTests v-else-if="status === 'NOTESTS'" />
     <DebugTimedout
       v-else-if="status === 'TIMEDOUT'"
-      :total-specs="totalSpecs"
+      :total-specs="specs.length"
       :total-skipped-specs="totalSkippedSpecs"
       :ci="ci"
     />
@@ -34,34 +34,39 @@
 </template>
 <script lang="ts" setup>
 import { computed } from '@vue/reactivity'
-import type { CloudRunStatus, OverLimitActionTypeEnum } from '../generated/graphql'
+import { gql } from '@urql/vue'
+import type { CloudRunStatus, OverLimitActionTypeEnum, DebugSpecListSpecFragment, CloudCiBuildInfoFragment } from '../generated/graphql'
 import DebugCancelledAlert from './DebugCancelledAlert.vue'
 import DebugPassed from './DebugPassed.vue'
 import DebugErrored from './DebugErrored.vue'
 import DebugNoTests from './DebugNoTests.vue'
 import DebugTimedout from './DebugTimedout.vue'
 import DebugOverLimit from './DebugOverLimit.vue'
-import type { CloudCiBuildInfo } from '@packages/data-context/src/gen/graphcache-config.gen'
+
+gql`
+fragment CloudCiBuildInfo on CloudCiBuildInfo {
+  id
+  ciBuildNumberFormatted
+  formattedProvider
+  url
+}
+`
 
 const props = defineProps<{
   status: CloudRunStatus
-  canceledAt: string | null
-  canceledByFullName?: string | null
-  canceledByEmail?: string | null
+  cancelledAt: string | null
+  cancelledByFullName?: string | null
+  cancelledByEmail?: string | null
   isHiddenByUsageLimits: boolean
   overLimitActionType: OverLimitActionTypeEnum
   overLimitActionUrl: string
-  specs: readonly any[]
-  ci?: Partial<CloudCiBuildInfo>
+  specs: readonly DebugSpecListSpecFragment[]
+  ci?: CloudCiBuildInfoFragment
   errors: readonly string[]
 }>()
 
 const totalSkippedSpecs = computed(() => {
   return props.specs.filter((spec) => spec.status === 'UNCLAIMED' || spec.status === 'RUNNING').length
-})
-
-const totalSpecs = computed(() => {
-  return props.specs.length
 })
 
 </script>

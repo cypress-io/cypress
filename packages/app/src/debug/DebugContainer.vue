@@ -14,9 +14,9 @@
       <DebugPageDetails
         :status="run.status"
         :specs="run.specs"
-        :canceled-at="run.cancelledAt"
-        :canceled-by-full-name="run.cancelledBy?.fullName"
-        :canceled-by-email="run.cancelledBy?.email"
+        :cancelled-at="run.cancelledAt"
+        :cancelled-by-full-name="run.cancelledBy?.fullName"
+        :cancelled-by-email="run.cancelledBy?.email"
         :is-hidden-by-usage-limits="run.isHiddenByUsageLimits"
         :over-limit-action-type="run.overLimitActionType"
         :over-limit-action-url="run.overLimitActionUrl"
@@ -87,9 +87,7 @@ fragment DebugSpecs on Query {
           totalTests
           ci {
             id
-            ciBuildNumberFormatted
-            formattedProvider
-            url
+            ...CloudCiBuildInfo
           }
           testsForReview {
             id
@@ -97,7 +95,6 @@ fragment DebugSpecs on Query {
           }
           specs {
             id
-            status
             ...DebugSpecListSpec
           }
           groups {

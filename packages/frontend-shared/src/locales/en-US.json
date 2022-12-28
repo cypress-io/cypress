@@ -660,9 +660,10 @@
     "incomplete": "Incomplete",
     "specsSkipped": "{totalSkippedSpecs} of {n} spec skipped | {totalSkippedSpecs} of {n} specs skipped",
     "runHasNoTests": "Run has no tests",
-    "theRunStartedButNeverCompleted": "The run started, but never completed. This can happen when the run is canceled from CI or when Cypress crashes during running tests.",
-    "checkYourCiLogs": "Check your {0} logs for more information. Archive this run to remove it from the runs list and analytics.",
-    "manuallyCanceled": "Manually canceled",
+    "theRunStartedButNeverCompleted": "The run started, but never completed. This can happen when the run is cancelled from CI or when Cypress crashes during running tests.",
+    "checkYourCiLogs": "Check your {0} logs for more information.",
+    "archiveThisRun": "Archive this run to remove it from the runs list and analytics.",
+    "manuallyCancelled": "Manually cancelled",
     "emptyStates": {
       "debugDirectlyInCypress": "Debug failed CI runs directly in Cypress",
       "reviewRerunAndDebug": "Review, rerun, and debug failed CI test runs that are recorded to Cypress Cloud – all from within your local Cypress app.",

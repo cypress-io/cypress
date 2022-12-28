@@ -138,7 +138,7 @@ describe('<DebugContainer />', () => {
         mountTestRun('timedOutWithoutCi')
 
         cy.contains('Circle CI #1234').should('not.exist')
-        cy.contains('Archive this run to remove it').should('not.exist')
+        cy.contains('Archive this run to remove it').should('be.visible')
 
         cy.percySnapshot()
       })
@@ -158,6 +158,7 @@ describe('<DebugContainer />', () => {
       it('renders', () => {
         mountTestRun('cancelled')
 
+        cy.findByTestId('cancelled-by-user-avatar').should('be.visible')
         cy.contains('2 of 3 specs skipped').should('be.visible')
         cy.contains('Test Tester').should('be.visible')
 

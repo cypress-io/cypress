@@ -66,7 +66,7 @@ describe('Debug page states', () => {
 
     it('renders with CI information', () => {
       cy.mount(<DebugTimedout
-        ci={{ url: 'https://circleci.com/', formattedProvider: 'CircleCI', ciBuildNumberFormatted: '12345' }} totalSkippedSpecs={4} totalSpecs={50} />)
+        ci={{ id: '123', url: 'https://circleci.com/', formattedProvider: 'CircleCI', ciBuildNumberFormatted: '12345' }} totalSkippedSpecs={4} totalSpecs={50} />)
 
       cy.percySnapshot()
     })

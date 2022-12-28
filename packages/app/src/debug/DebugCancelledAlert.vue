@@ -1,6 +1,6 @@
 <template>
   <Alert
-    :title="t('debugPage.manuallyCanceled')"
+    :title="t('debugPage.manuallyCancelled')"
     status="warning"
     :icon="ErrorOutlineIcon"
     class="flex flex-col mb-24px w-full"
@@ -8,26 +8,26 @@
     <div class="flex items-center">
       <div>{{ t('debugPage.specsSkipped', {n: totalSpecs, totalSkippedSpecs}) }}</div>
       <div
-        v-if="canceledByEmail && canceledByFullName"
+        v-if="cancelledByEmail && cancelledByFullName"
         class="rounded-full font-semibold bg-orange-500 h-3px mx-10px w-3px"
       />
       <div
-        v-if="canceledByEmail && canceledByFullName"
+        v-if="cancelledByEmail && cancelledByFullName"
         class="flex items-center"
       >
         <UserAvatar
-          :email="canceledByEmail"
+          :email="cancelledByEmail"
           class="h-20px mr-7px w-20px"
-          data-cy="canceled-by-user-avatar"
+          data-cy="cancelled-by-user-avatar"
         />
-        <div>{{ canceledByFullName }}</div>
+        <div>{{ cancelledByFullName }}</div>
       </div>
       <div
-        v-if="canceledAt"
+        v-if="cancelledAt"
         class="rounded-full font-semibold bg-orange-500 h-3px mx-10px w-3px"
       />
-      <div v-if="canceledAt">
-        {{ dayjs(canceledAt).utc().format('MMM D, YYYY h:mm A UTC') }}
+      <div v-if="cancelledAt">
+        {{ dayjs(cancelledAt).utc().format('MMM D, YYYY h:mm A UTC') }}
       </div>
     </div>
   </Alert>
@@ -48,9 +48,9 @@ dayjs.extend(utc)
 defineProps<{
   totalSpecs: number
   totalSkippedSpecs: number
-  canceledAt?: string | null
-  canceledByFullName?: string | null
-  canceledByEmail?: string | null
+  cancelledAt?: string | null
+  cancelledByFullName?: string | null
+  cancelledByEmail?: string | null
 }>()
 
 </script>
