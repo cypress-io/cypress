@@ -9,7 +9,6 @@
     >
       <component
         :is="result.icon"
-        v-if="result.value"
         class="mt-px h-12px mr-1 w-12px"
         :class="result.class"
       />
@@ -38,6 +37,7 @@ import PassedIcon from '~icons/cy/status-passed_x12.svg'
 import FailedIcon from '~icons/cy/status-failed_x12.svg'
 import PendingIcon from '~icons/cy/status-pending_x12.svg'
 import { useI18n } from '@cy/i18n'
+
 const { t } = useI18n()
 
 const props = defineProps<ResultCountsProps>()
@@ -83,9 +83,7 @@ const ORDER_MAP = computed<Record<CountType, Status>>(() => {
 const results = computed(() => {
   const order = props.order || ['SKIPPED', 'PENDING', 'PASSED', 'FAILED']
 
-  const ans = order.map((status) => ORDER_MAP.value[status])
-
-  return ans
+  return order.map((status) => ORDER_MAP.value[status])
 })
 
 </script>
