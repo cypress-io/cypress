@@ -136,9 +136,8 @@ const debugSpecsArray = computed(() => {
   return []
 })
 
-// TODO Re-map to use relevant run data point (currently stubbed with current run)
+// TODO GH#24440 Re-map to use relevant run data point (currently stubbed with current run)
 const newerRelevantRun = computed(() => run.value)
 
-// TODO Validate logic for determining whether this is the "first" run - use runNumber, or some other flag?
 const isFirstPendingRun = computed(() => run.value && run.value.runNumber === 1 && run.value.status === 'RUNNING')
 </script>

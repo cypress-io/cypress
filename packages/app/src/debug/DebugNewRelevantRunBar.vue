@@ -69,7 +69,7 @@ const props = defineProps<{
 const data = computed(() => props.gql)
 
 function navigateToNewerRun () {
-  // TODO Stubbed pending Stokes' updates so this can be managed via store
+  // TODO GH#24440 Stubbed pending updates to the store so the "viewed run" value can be managed there
   return
 }
 

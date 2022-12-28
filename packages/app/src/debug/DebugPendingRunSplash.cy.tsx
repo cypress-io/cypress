@@ -10,10 +10,10 @@ describe('<DebugPendingRunSplash />', () => {
       render: (gqlVal) => {
         return (
           <DebugPendingRunSplash
-            totalTests={gqlVal.totalTests}
-            totalSkipped={gqlVal.totalSkipped}
-            totalFailed={gqlVal.totalFailed}
-            totalPassed={gqlVal.totalPassed}
+            totalTests={gqlVal.totalTests!}
+            totalSkipped={gqlVal.totalSkipped!}
+            totalFailed={gqlVal.totalFailed!}
+            totalPassed={gqlVal.totalPassed!}
           />
         )
       },
