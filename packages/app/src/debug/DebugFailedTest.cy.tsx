@@ -1,12 +1,14 @@
 import DebugFailedTest from './DebugFailedTest.vue'
-import type { TestResult } from './DebugSpec.vue'
+import type { TestResults } from './DebugSpec.vue'
 
 const group1 = {
   os: {
+    id: '123',
     name: 'Linux',
     nameWithVersion: 'Linux Debian',
   },
   browser: {
+    id: '123',
     formattedName: 'Chrome',
     formattedNameWithVersion: 'Chrome 106',
   },
@@ -16,10 +18,12 @@ const group1 = {
 
 const group2 = {
   os: {
+    id: '123',
     name: 'Windows',
     nameWithVersion: 'Windows 110',
   },
   browser: {
+    id: '123',
     formattedName: 'Electron',
     formattedNameWithVersion: 'Electron 106',
   },
@@ -29,11 +33,16 @@ const group2 = {
 
 describe('<DebugFailedTest/>', () => {
   it('mounts correctly', () => {
-    const testResult: TestResult = {
+    const testResult: TestResults = {
       id: '676df87878',
       titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
       instance: {
+        id: '123',
         groupId: '123',
+        status: 'FAILED',
+        hasScreenshots: false,
+        hasStdout: false,
+        hasVideo: false,
       },
     }
 
@@ -56,16 +65,21 @@ describe('<DebugFailedTest/>', () => {
   })
 
   it('contains multiple titleParts segments', () => {
-    const multipleTitleParts = {
+    const multipleTitleParts: TestResults = {
       id: '676df87878',
       titleParts: ['Login', 'Describe', 'it', 'context', 'Should redirect unauthenticated user to signin page'],
       instance: {
+        id: '456',
         groupId: '456',
+        status: 'FAILED',
+        hasScreenshots: false,
+        hasStdout: false,
+        hasVideo: false,
       },
     }
 
     cy.mount(() => (
-      <DebugFailedTest failedTestsResult={[multipleTitleParts]} groups={[group1]} />
+      <DebugFailedTest failedTestsResult={[multipleTitleParts]} groups={[group1]} expandable={false}/>
     ))
 
     cy.findByTestId('test-row').children().should('have.length', 7).should('be.visible')
@@ -77,19 +91,29 @@ describe('<DebugFailedTest/>', () => {
   })
 
   it('tests multiple groups', () => {
-    const testResults: TestResult[] = [
+    const testResults: TestResults[] = [
       {
         id: '676df87878',
         titleParts: ['Login', 'Describe', 'it', 'context', 'Should redirect unauthenticated user to signin page'],
         instance: {
+          id: '456',
           groupId: '456',
+          status: 'FAILED',
+          hasScreenshots: false,
+          hasStdout: false,
+          hasVideo: false,
         },
       },
       {
         id: '676df87878',
         titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
         instance: {
+          id: '123',
           groupId: '123',
+          status: 'FAILED',
+          hasScreenshots: false,
+          hasStdout: false,
+          hasVideo: false,
         },
       },
     ]

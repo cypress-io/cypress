@@ -9,7 +9,7 @@ const resultCounts = (min: number, max: number) => {
   }
 }
 
-const mutlipleGroups: {[groupId: string]: any} = {
+const multipleGroups: {[groupId: string]: any} = {
   '123': {
     os: {
       name: 'Linux',
@@ -57,6 +57,8 @@ const testResultMultipleGroups: {[thumbprint: string]: TestResults[]} = {
       id: '676df87878',
       titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
       instance: {
+        id: '123',
+        status: 'FAILED',
         groupId: '123',
         hasScreenshots: true,
         hasStdout: true,
@@ -70,6 +72,8 @@ const testResultMultipleGroups: {[thumbprint: string]: TestResults[]} = {
       id: '78afba8sf89',
       titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
       instance: {
+        id: '456',
+        status: 'FAILED',
         groupId: '456',
         hasScreenshots: true,
         hasStdout: true,
@@ -85,6 +89,8 @@ const testResultMultipleGroups: {[thumbprint: string]: TestResults[]} = {
       id: '78hjkdf987d9f',
       titleParts: ['Login', 'redirects to stored path after login'],
       instance: {
+        id: '123',
+        status: 'FAILED',
         groupId: '123',
         hasScreenshots: true,
         hasStdout: true,
@@ -98,6 +104,8 @@ const testResultMultipleGroups: {[thumbprint: string]: TestResults[]} = {
       id: '283sbd0snd8',
       titleParts: ['Login', 'redirects to stored path after login'],
       instance: {
+        id: '456',
+        status: 'FAILED',
         groupId: '456',
         hasScreenshots: true,
         hasStdout: true,
@@ -110,12 +118,14 @@ const testResultMultipleGroups: {[thumbprint: string]: TestResults[]} = {
   ],
 }
 
-const testResultSingleGroup: {[thumprint: string]: TestResults[]} = {
+const testResultSingleGroup: {[thumbprint: string]: TestResults[]} = {
   'abcd': [
     {
       id: '676df87878',
       titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
       instance: {
+        id: '123',
+        status: 'FAILED',
         groupId: '123',
         hasScreenshots: true,
         hasStdout: true,
@@ -131,6 +141,8 @@ const testResultSingleGroup: {[thumprint: string]: TestResults[]} = {
       id: '78hjkdf987d9f',
       titleParts: ['Login', 'redirects to stored path after login'],
       instance: {
+        id: '123',
+        status: 'FAILED',
         groupId: '123',
         hasScreenshots: true,
         hasStdout: true,
@@ -168,7 +180,6 @@ describe('<DebugSpec/> with multiple test results', () => {
           testingType={'e2e'}
           foundLocally={true}
           matchesCurrentTestingType={true}
-          fullPath={'cypress/tests/auth.spec.ts'}
         />
       </div>
     ))
@@ -198,19 +209,6 @@ describe('<DebugSpec/> with multiple test results', () => {
         })
       })
     })
-
-    cy.percySnapshot()
-  })
-
-  it('renders correctly with disabled run-failures button', () => {
-    cy.mount(() => (
-      <div class="px-24px">
-        <DebugSpec spec={spec} testResults={testResultSingleGroup} isDisabled={true} groups={singleGroup} testingType={'e2e'}/>
-      </div>
-    ))
-
-    cy.findByTestId('run-failures').should('have.attr', 'aria-disabled', 'disabled')
-    .should('not.have.attr', 'href')
 
     cy.percySnapshot()
   })
@@ -265,7 +263,7 @@ describe('<DebugSpec/> responsive UI', () => {
 
     cy.mount(() => (
       <div class="px-24px">
-        <DebugSpec spec={spec} testResults={testResultSingleGroup} groups={singleGroup} testingType={'e2e'} matchesCurrentTestingType={true}/>
+        <DebugSpec spec={spec} testResults={testResultSingleGroup} groups={singleGroup} foundLocally={true} testingType={'e2e'} matchesCurrentTestingType={true}/>
       </div>
     ))
 
@@ -295,7 +293,7 @@ describe('testing groupings', () => {
 
     cy.mount(() => (
       <div class="px-24px">
-        <DebugSpec spec={spec} testResults={testResultMultipleGroups} groups={mutlipleGroups} testingType={'e2e'} />
+        <DebugSpec spec={spec} testResults={testResultMultipleGroups} groups={multipleGroups} foundLocally={true} testingType={'e2e'} matchesCurrentTestingType={true}/>
       </div>
     ))
 
@@ -362,26 +360,47 @@ describe('testing groupings', () => {
         {
           id: '676df87878',
           titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
-          instance: { groupId: '123' },
+          instance: {
+            id: '123',
+            status: 'FAILED',
+            groupId: '123',
+            hasScreenshots: false,
+            hasStdout: false,
+            hasVideo: false,
+          },
         },
         {
           id: '78afba8sf89',
           titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
-          instance: { groupId: '456' },
+          instance: {
+            id: '456',
+            status: 'FAILED',
+            groupId: '456',
+            hasScreenshots: false,
+            hasStdout: false,
+            hasVideo: false,
+          },
         },
       ],
       'efgh': [
         {
           id: '78hjkdf987d9f',
           titleParts: ['Login', 'redirects to stored path after login'],
-          instance: { groupId: '456' },
+          instance: {
+            id: '456',
+            status: 'FAILED',
+            groupId: '456',
+            hasScreenshots: false,
+            hasStdout: false,
+            hasVideo: false,
+          },
         },
       ],
     }
 
     cy.mount(() => (
       <div class="px-24px">
-        <DebugSpec spec={spec} testResults={tests} groups={repeatedValueGroups} testingType={'component'} />
+        <DebugSpec spec={spec} testResults={tests} groups={repeatedValueGroups} foundLocally={true} testingType={'component'} matchesCurrentTestingType={true}/>
       </div>
     ))
 

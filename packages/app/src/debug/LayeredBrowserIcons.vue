@@ -1,12 +1,12 @@
 <template>
   <ul
     data-cy="layered-browser-icons"
-    class="flex pl-8px mr-8px"
+    class="flex mr-8px pl-8px"
   >
     <li
       v-for="(result, i) in results"
       :key="i"
-      class="-ml-8px rounded-full h-5 w-5 flex items-center justify-center rounded"
+      class="rounded-full rounded flex h-5 -ml-8px w-5 items-center justify-center"
       :class="(results.length > 1 ? 'bg-gray-50' : '')"
     >
       <component
@@ -28,6 +28,8 @@ import { IconBrowserChrome,
   IconBrowserElectronLight,
 } from '@cypress-design/vue-icon'
 
+export type BrowserType = 'CHROME' | 'SAFARI' | 'FIREFOX' | 'CHROME-CANARY' | 'EDGE' | 'WEBKIT' | 'ELECTRON'
+
 interface LayeredProps {
   order: BrowserType[]
 }
@@ -41,8 +43,6 @@ const results = computed(() => {
 
   return []
 })
-
-type BrowserType = 'CHROME' | 'SAFARI' | 'FIREFOX' | 'CHROME-CANARY' | 'EDGE' | 'WEBKIT' | 'ELECTRON'
 
 const BROWSER_MAP: Record<BrowserType, any> = {
   'CHROME': IconBrowserChrome,

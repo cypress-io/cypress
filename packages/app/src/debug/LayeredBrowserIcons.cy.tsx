@@ -2,12 +2,12 @@ import LayeredBrowserIcons from './LayeredBrowserIcons.vue'
 import type { BrowserType } from './LayeredBrowserIcons.vue'
 
 describe('<LayeredBrowserIcons/>', () => {
-  const browsers: BrowserType = ['CHROME', 'CHROME-CANARY', 'FIREFOX', 'WEBKIT', 'EDGE', 'ELECTRON']
+  const browsers: BrowserType[] = ['CHROME', 'CHROME-CANARY', 'FIREFOX', 'WEBKIT', 'EDGE', 'ELECTRON']
 
   it('mounts correctly for single browser', () => {
     browsers.forEach((ele) => {
       cy.mount(() => (
-        <div class='p-24px bg-gray-50'>
+        <div class='bg-gray-50 p-24px'>
           <LayeredBrowserIcons order={[ele]}/>
         </div>
       ))
@@ -18,7 +18,7 @@ describe('<LayeredBrowserIcons/>', () => {
 
   it('mounts correctly for multiple browsers', () => {
     cy.mount(() => (
-      <div class='p-24px bg-gray-50'>
+      <div class='bg-gray-50 p-24px'>
         <LayeredBrowserIcons order={browsers} />
         <LayeredBrowserIcons order={['CHROME', 'FIREFOX', 'EDGE']}/>
         <LayeredBrowserIcons order={['CHROME-CANARY', 'WEBKIT', 'ELECTRON']} />

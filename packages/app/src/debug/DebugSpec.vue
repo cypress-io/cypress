@@ -1,21 +1,21 @@
 <template>
   <div
     data-cy="debug-spec-col"
-    class="grid flex flex-col gap-24px self-stretch pt-24px"
+    class="flex flex-col grid pt-24px gap-24px self-stretch"
   >
     <div
       data-cy="debug-spec-item"
-      class="w-full overflow-hidden flex flex-col items-start box-border border-t-1px border-x-1px rounded"
+      class="rounded flex flex-col border-t-1px border-x-1px w-full overflow-hidden items-start box-border"
     >
       <div
         data-cy="debug-spec-header"
-        class="w-full flex flex-row items-center py-12px bg-gray-50 border-b-1px border-b-gray-100 rounded-t"
+        class="rounded-t flex flex-row bg-gray-50 border-b-1px border-b-gray-100 w-full py-12px items-center"
       >
         <div
           data-cy="spec-contents"
-          class="w-full flex px-18px items-center grid gap-y-3"
+          class="flex w-full grid px-18px gap-y-3 items-center"
         >
-          <div class="flex-grow truncate gap-x-2 w-full flex items-center">
+          <div class="flex-grow flex w-full gap-x-2 truncate items-center">
             <IconDocumentText
               stroke-color="gray-500"
               fill-color="gray-100"
@@ -23,7 +23,7 @@
             />
             <div
               data-cy="spec-path"
-              class="flex-grow non-italic text-base truncate"
+              class="flex-grow text-base non-italic truncate"
             >
               <span
                 class="font-normal text-gray-600"
@@ -42,7 +42,7 @@
           </div>
           <ul
             data-cy="spec-header-metadata"
-            class="flex flex-row truncate items-center gap-x-3 text-gray-700 whitespace-nowrap children:flex children:items-center font-normal text-sm"
+            class="flex flex-row font-normal text-sm text-gray-700 gap-x-3 truncate items-center whitespace-nowrap children:flex children:items-center"
           >
             <li
               :data-cy="'debugHeader-results'"
@@ -126,7 +126,7 @@
         v-for="thumbprint in Object.keys(specData.failedTests)"
         :key="`test-${thumbprint}`"
         :data-cy="`test-group`"
-        class="w-full flex flex-col flex-start justify-center pl-16px border-b-gray-100 border-b-1px pr-16px"
+        class="flex flex-col flex-start border-b-gray-100 border-b-1px w-full pr-16px pl-16px justify-center"
         :class="Object.keys(specData.groups).length > 1 ? 'pb-16px': 'hover:bg-gray-50'"
       >
         <DebugFailedTest
@@ -146,22 +146,22 @@ export interface Spec {
   path: string
   fileName: string
   fileExtension: string
-  testsPassed: SpecDataAggregate
-  testsFailed: SpecDataAggregate
-  testsPending: SpecDataAggregate
-  specDuration: SpecDataAggregate
+  testsPassed: SpecDataAggregate | null
+  testsFailed: SpecDataAggregate | null
+  testsPending: SpecDataAggregate | null
+  specDuration: SpecDataAggregate | null
   fullPath: string
 }
 
 export interface TestResults {
   readonly id: string
-  readonly titleParts: string[]
-  instance: CloudRunInstance
+  readonly titleParts: ReadonlyArray<string>
+  readonly instance: CloudRunInstance | null
 }
 
-import { computed } from 'vue'
+import { computed, unref } from 'vue'
 import { IconActionRefresh, IconDocumentText } from '@cypress-design/vue-icon'
-import type { SpecDataAggregate, CloudRunInstance, CloudRunGroup } from '@packages/data-context/src/gen/graphcache-config.gen'
+import type { SpecDataAggregate, CloudRunInstance } from '@packages/data-context/src/gen/graphcache-config.gen'
 import DebugFailedTest from './DebugFailedTest.vue'
 import StatsMetaData from './StatsMetadata.vue'
 import ResultCounts from '@packages/frontend-shared/src/components/ResultCounts.vue'
@@ -171,16 +171,15 @@ import SpecNameDisplay from '../specs/SpecNameDisplay.vue'
 import { useI18n } from '@cy/i18n'
 import { useDurationFormat } from '../composables/useDurationFormat'
 import { posixify } from '../paths'
-import type { TestingTypeEnum } from '../generated/graphql'
+import type { StatsMetadata_GroupsFragment, TestingTypeEnum } from '../generated/graphql'
 
 const { t } = useI18n()
 
 const props = defineProps<{
   spec: Spec
   testResults: {[thumbprint: string]: TestResults[]}
-  groups: {[groupId: string]: CloudRunGroup }
+  groups: {[groupId: string]: StatsMetadata_GroupsFragment }
   testingType: TestingTypeEnum
-  isDisabled?: boolean
   foundLocally: boolean
   matchesCurrentTestingType: boolean
 }>()
@@ -190,29 +189,37 @@ const emits = defineEmits<{
 }>()
 
 // helper function for formatting the number of passed, failed, and pending tests
-const debugResultsCalc = (min: number, max: number, specDuration: boolean = false) => {
-  if (min === max) {
-    return specDuration ? useDurationFormat(min ?? 0).value : min
+
+const durationFormatter = (val: number | null | undefined) => {
+  return unref(useDurationFormat(val ?? 0))
+}
+
+// helper function for formatting the number of passed, failed, and pending tests
+const debugResultsCalc = (value: SpecDataAggregate | null, formatter?: (val: number | null | undefined) => string) => {
+  if (!value) {
+    return ''
   }
 
-  return specDuration ? `${useDurationFormat(min ?? 0).value}-${useDurationFormat(max ?? 0).value}` : `${min}-${max}`
+  const formattedMin = formatter ? formatter(value.min) : value.min
+  const formattedMax = formatter ? formatter(value.max) : value.max
+
+  if (formattedMin === formattedMax) {
+    return formattedMin
+  }
+
+  return `${formattedMin}-${formattedMax}`
 }
 
 const specData = computed(() => {
-  const testsPassed = props.spec.testsPassed ?? 0
-  const testsFailed = props.spec.testsFailed ?? 0
-  const testsPending = props.spec.testsPending ?? 0
-  const specDuration = props.spec.specDuration ?? 0
-
   return {
     path: props.spec.path,
     fileName: props.spec.fileName,
     fileExtension: props.spec.fileExtension,
     failedTests: props.testResults,
-    testsPassed: debugResultsCalc(testsPassed.min ?? 0, testsPassed.max ?? 0),
-    testsFailed: debugResultsCalc(testsFailed.min ?? 0, testsFailed.max ?? 0),
-    testsPending: debugResultsCalc(testsPending.min ?? 0, testsPending.max ?? 0),
-    specDuration: debugResultsCalc(specDuration.min ?? 0, specDuration.max ?? 0, true),
+    testsPassed: debugResultsCalc(props.spec.testsPassed),
+    testsFailed: debugResultsCalc(props.spec.testsFailed),
+    testsPending: debugResultsCalc(props.spec.testsPending),
+    specDuration: debugResultsCalc(props.spec.specDuration, durationFormatter),
     groups: props.groups,
     testingType: props.testingType,
     fullPath: props.spec.fullPath,
@@ -220,35 +227,15 @@ const specData = computed(() => {
 })
 
 /**
- * Helper function that maps each test's thumprint to all the groups in it
+ * Helper function that maps each test's thumbprint to all the groups in it
  */
 const groupsPerTest = computed(() => {
-  return Object.keys(props.testResults).reduce<Record<string, CloudRunGroup[]>>((acc, currThumbprint) => {
-    acc[currThumbprint] = props.testResults[currThumbprint].map((test) => props.groups[test.instance?.groupId])
+  return Object.keys(props.testResults).reduce<Record<string, StatsMetadata_GroupsFragment[]>>((acc, currThumbprint) => {
+    acc[currThumbprint] = props.testResults[currThumbprint].map((test) => props.groups[test.instance?.groupId || ''])
 
     return acc
   }, {})
 })
-
-/**
- * Helper function that extracts all the unique groups for a specific spec
- */
-// const groupsT = computed(() => {
-//   const uniqueGrpIds = new Set<string>()
-
-//   return Object.keys(props.testResults).reduce<CloudRunGroup[]>((acc: CloudRunGroup[], currThumbprint) => {
-//     props.testResults[currThumbprint].map((test) => {
-//       const groupId = test.instance?.groupId
-
-//       if (groupId && !uniqueGrpIds.has(groupId)) {
-//         uniqueGrpIds.add(groupId)
-//         acc.push(props.groups[groupId])
-//       }
-//     })
-
-//     return acc
-//   }, [])
-// })
 
 const runAllFailuresState = computed(() => {
   if (!props.matchesCurrentTestingType) {

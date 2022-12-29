@@ -1,7 +1,7 @@
 <template>
   <div
     data-cy="test-row"
-    class="flex flex-row h-12 items-center gap-x-2.5 non-italic text-base text-gray-700 font-normal"
+    class="flex flex-row font-normal h-12 text-base text-gray-700 gap-x-2.5 items-center non-italic"
   >
     <SolidStatusIcon
       size="16"
@@ -12,7 +12,7 @@
     <div
       v-for="titlePart, index in failedTestData.result.titleParts"
       :key="`${titlePart}-${index}`"
-      class="flex items-center gap-x-2.5 flex-row"
+      class="flex flex-row gap-x-2.5 items-center"
       :data-cy="`titleParts-${index}`"
     >
       <IconChevronRightSmall
@@ -29,7 +29,7 @@
     <div
       v-if="!props.expandable"
       data-cy="debug-artifacts"
-      class="flex flex-grow justify-end space-x-4.5 opacity-0 test-row-artifacts pr-18px"
+      class="flex flex-grow space-x-4.5 opacity-0 pr-18px justify-end test-row-artifacts"
     >
       <div
         v-for="result, i in failedTestData.debugArtifacts"
@@ -46,7 +46,7 @@
   </div>
   <div
     v-if="props.expandable"
-    class="border-gray-100 border-1 rounded divide-y"
+    class="divide-y rounded border-gray-100 border-1"
   >
     <GroupedDebugFailedTestVue
       :failed-tests="props.failedTestsResult"
@@ -61,11 +61,11 @@ import DebugArtifactLink from './DebugArtifactLink.vue'
 import GroupedDebugFailedTestVue from './GroupedDebugFailedTest.vue'
 import { computed } from 'vue'
 import type { TestResults } from './DebugSpec.vue'
-import type { CloudRunGroup } from '@packages/data-context/src/gen/graphcache-config.gen'
+import type { StatsMetadata_GroupsFragment } from '../generated/graphql'
 
 const props = defineProps<{
   failedTestsResult: TestResults[]
-  groups: CloudRunGroup[]
+  groups: StatsMetadata_GroupsFragment[]
   expandable: boolean
 }>()
 
