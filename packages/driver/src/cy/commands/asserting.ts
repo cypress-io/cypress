@@ -83,8 +83,8 @@ export default function (Commands, Cypress, cy, state) {
     const chainers = chainerString.split('.')
     const lastChainer = _.last(chainers)
 
-    const checkingExistence = isCheckingExistence(args)
-    const checkingLengthOrExistence = checkingExistence || isCheckingLength(args)
+    const checkingExistence = isCheckingExistence([chainerString])
+    const checkingLengthOrExistence = checkingExistence || isCheckingLength([chainerString])
 
     return (subject) => {
       let exp = cy.expect(subject).to
@@ -135,7 +135,7 @@ export default function (Commands, Cypress, cy, state) {
             $errUtils.throwErr(err)
           }
 
-          if (value === lastChainer && !checkingExistence) {
+          if (value === lastChainer) {
             // https://github.com/cypress-io/cypress/issues/16006
             // Referring some commands like 'visible'  triggers assert function in chai_jquery.js
             // It creates duplicated messages and confuses users.

@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import $ from 'jquery'
 import Bluebird from 'bluebird'
 import Debug from 'debug'
 
@@ -346,7 +345,7 @@ export class CommandQueue extends Queue<$Command> {
       const firstSubject = $utils.unwrapFirst(subject)
 
       // if ret is a DOM element and its not an instance of our own jQuery
-      if (subject && $dom.isElement(firstSubject) && !$utils.isInstanceOf(subject, $)) {
+      if (subject && $dom.isElement(firstSubject) && !$dom.isJquery(subject)) {
         // set it back to our own jquery object
         // to prevent it from being passed downstream
         // TODO: enable turning this off

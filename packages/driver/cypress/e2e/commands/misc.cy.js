@@ -160,15 +160,6 @@ describe('src/cy/commands/misc', () => {
       })
     })
 
-    // TODO: fix this test in 4.0 when we refactor validating subjects
-    it.skip('throws a good error when wrapping mixed types: element + string', () => {
-      cy.get('button').then(($btn) => {
-        const btn = $btn.get(0)
-
-        cy.wrap([btn, 'asdf']).click()
-      })
-    })
-
     it('can wrap an array of DOM elements and pass command validation', () => {
       cy.get('button').then(($btn) => {
         const btn = $btn.get(0)
@@ -250,6 +241,21 @@ describe('src/cy/commands/misc', () => {
 
         cy.window().then((win) => {
           cy.wrap([win]).scrollTo('bottom')
+        })
+      })
+
+      it('throws a good error when wrapping mixed types: element + string', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.click()` failed because it requires a DOM element.')
+          expect(err.message).to.include('jQuery{2}')
+
+          done()
+        })
+
+        cy.get('button').then(($btn) => {
+          const btn = $btn.get(0)
+
+          cy.wrap([btn, 'asdf']).click()
         })
       })
 

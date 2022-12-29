@@ -205,7 +205,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         // but not non-dom subjects
         switch (callbacks.ensureExistenceFor) {
           case 'dom': {
-            const $el = determineEl(options.$el, subject)
+            const $el = options.$el ?? subject
 
             if (!$dom.isJquery($el)) {
               return
@@ -219,15 +219,6 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
           default:
             return
         }
-      }
-
-      const determineEl = ($el, subject) => {
-        // prefer $el unless it is strictly undefined
-        if (!_.isUndefined($el)) {
-          return $el
-        }
-
-        return subject
       }
 
       const onFailFn = (err) => {
@@ -293,6 +284,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
       return Promise
       .try(ensureExistence)
       .catch(onFailFn)
+      .return(subject)
     },
   }
 }
