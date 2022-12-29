@@ -37,6 +37,7 @@ fragment DebugSpecListSpec on CloudSpecRun {
     min
     max
   }
+  status
   testsPassed {
     min
     max

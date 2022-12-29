@@ -6,7 +6,7 @@ import { specsList } from './utils/DebugMapping'
 import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
 
 describe('<DebugContainer />', () => {
-  context('empty states', () => {
+  describe('empty states', () => {
     const validateEmptyState = (expectedMessages: string[]) => {
       cy.mountFragment(DebugSpecsFragmentDoc, {
         render: (gqlVal) => {
@@ -62,6 +62,108 @@ describe('<DebugContainer />', () => {
 
       cy.findByTestId('debug-empty').should('not.exist')
       cy.findByTestId('debug-alert').should('be.visible')
+    })
+  })
+
+  describe('run states', { viewportWidth: 900 }, () => {
+    beforeEach(() => {
+      const loginConnectStore = useLoginConnectStore()
+
+      loginConnectStore.setUserFlag('isLoggedIn', true)
+      loginConnectStore.setProjectFlag('isProjectConnected', true)
+    })
+
+    function mountTestRun (runName: string) {
+      cy.mountFragment(DebugSpecsFragmentDoc, {
+        onResult: (result) => {
+          if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
+            const test = result.currentProject.cloudProject.runByNumber
+            const other = CloudRunStubs[runName] as typeof test
+
+            result.currentProject.cloudProject.runByNumber = other
+          }
+        },
+        render: (gqlVal) => {
+          return (
+            <DebugContainer
+              gql={gqlVal}
+            />
+          )
+        },
+      })
+    }
+
+    context('passed', () => {
+      it('renders', () => {
+        mountTestRun('allPassing')
+
+        cy.contains('Well Done!').should('be.visible')
+
+        cy.percySnapshot()
+      })
+    })
+
+    context('errored', () => {
+      it('renders', () => {
+        mountTestRun('allSkipped')
+
+        cy.contains('The browser server never connected.').should('be.visible')
+        cy.contains('2 of 3 specs skipped').should('be.visible')
+
+        cy.percySnapshot()
+      })
+    })
+
+    context('no tests', () => {
+      it('renders', () => {
+        mountTestRun('noTests')
+
+        cy.contains('Run has no tests').should('be.visible')
+
+        cy.percySnapshot()
+      })
+    })
+
+    context('timed out', () => {
+      it('renders with CI information', () => {
+        mountTestRun('timedOutWithCi')
+
+        cy.contains('Circle CI #1234').should('have.attr', 'href', 'https://circleci.com').should('be.visible')
+        cy.contains('Archive this run to remove it').should('be.visible')
+
+        cy.percySnapshot()
+      })
+
+      it('renders without CI information', () => {
+        mountTestRun('timedOutWithoutCi')
+
+        cy.contains('Circle CI #1234').should('not.exist')
+        cy.contains('Archive this run to remove it').should('be.visible')
+
+        cy.percySnapshot()
+      })
+    })
+
+    context('over limit', () => {
+      it('renders', () => {
+        mountTestRun('overLimit')
+
+        cy.findByRole('link', { name: 'Contact admin' }).should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
+
+        cy.percySnapshot()
+      })
+    })
+
+    context('cancelled', () => {
+      it('renders', () => {
+        mountTestRun('cancelled')
+
+        cy.findByTestId('cancelled-by-user-avatar').should('be.visible')
+        cy.contains('2 of 3 specs skipped').should('be.visible')
+        cy.contains('Test Tester').should('be.visible')
+
+        cy.percySnapshot()
+      })
     })
   })
 
