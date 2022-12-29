@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v3.2.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.2.0...@cypress/webpack-dev-server-v3.2.1) (2022-12-29)
+
+
+### Bug Fixes
+
+* Allow component tests with special characters in filepath ([#25299](https://github.com/cypress-io/cypress/issues/25299)) ([dc78750](https://github.com/cypress-io/cypress/commit/dc7875064bc1ff0193d1f46ef9411f753cf39600))
+
 # [@cypress/webpack-dev-server-v3.2.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.1.2...@cypress/webpack-dev-server-v3.2.0) (2022-12-19)
 
 

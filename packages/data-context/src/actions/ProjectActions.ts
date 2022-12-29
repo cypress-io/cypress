@@ -1,4 +1,4 @@
-import type { MutationSetProjectPreferencesInGlobalCacheArgs, NexusGenObjects, NexusGenUnions } from '@packages/graphql/src/gen/nxs.gen'
+import type { MutationSetProjectPreferencesInGlobalCacheArgs } from '@packages/graphql/src/gen/nxs.gen'
 import { InitializeProjectOptions, FoundBrowser, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig, AllowedState, SpecWithRelativeRoot, OpenProjectLaunchOpts, RUN_ALL_SPECS, RUN_ALL_SPECS_KEY } from '@packages/types'
 import type { EventEmitter } from 'events'
 import execa from 'execa'
