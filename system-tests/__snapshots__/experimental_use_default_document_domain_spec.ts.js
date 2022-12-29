@@ -26,13 +26,6 @@ exports['e2e experimentalUseDefaultDocumentDomain=true / passes'] = `
 
   3 passing
 
-Warning: We failed processing this video.
-
-This error will not alter the exit code.
-
-TimeoutError: operation timed out
-      [stack trace lines]
-
 
   (Results)
 
@@ -43,10 +36,17 @@ TimeoutError: operation timed out
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
+  │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     experimental_use_default_document_domain.cy.ts                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/experimental_use_default_docume     (X second)
+                          nt_domain.cy.ts.mp4                                                       
 
 
 ====================================================================================================
