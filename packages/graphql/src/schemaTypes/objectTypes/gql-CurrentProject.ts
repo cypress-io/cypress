@@ -8,6 +8,7 @@ import { CodeGenGlobs } from './gql-CodeGenGlobs'
 import { FileParts } from './gql-FileParts'
 import { ProjectPreferences } from './gql-ProjectPreferences'
 import { Spec } from './gql-Spec'
+import { chain } from 'lodash'
 
 export const PackageManagerEnum = enumType({
   name: 'PackageManagerEnum',
@@ -239,10 +240,23 @@ export const CurrentProject = objectType({
       resolve: (source, args, ctx) => ctx.coreData.app.browserStatus,
     })
 
-    t.list.int('relevantRuns', {
+    t.field('relevantRuns', {
+      deferIfNotLoaded: undefined,
+      type: objectType({
+        name: 'RelevantRun',
+        definition (t) {
+          t.nonNull.int('completed')
+          t.nonNull.int('running')
+        },
+      }),
+      description: 'Returns a list of relevant runs for matching Git shas from the Cloud',
       resolve: async (source, args, ctx) => {
-        // return ctx.project.getRelevantRuns(source.git?.currentHashes)
-        return ctx.relevantRuns.getRelevantRuns(source.git?.currentHashes || [])
+        const runs = await ctx.relevantRuns.getRelevantRuns(source.git?.currentHashes || [])
+
+        return {
+          completed: chain(runs).filter((run) => run.status !== 'RUNNING').map((run) => run.runNumber).first().value(),
+          running: chain(runs).filter((run) => run.status === 'RUNNING').map((run) => run.runNumber).first().value(),
+        }
       },
     })
   },

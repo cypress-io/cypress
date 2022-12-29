@@ -18,15 +18,15 @@ query SideBarNavigationContainer($runNumber: Int!) {
 }
 `
 
-const relevantRun = useRelevantRun()
+const relevantRuns = useRelevantRun()
 
 const variables = ref({ runNumber: -1 })
 
 const query = useQuery({ query: SideBarNavigationContainerDocument, variables, pause: true })
 
 watchEffect(() => {
-  if (relevantRun.value) {
-    variables.value.runNumber = relevantRun.value
+  if (relevantRuns.value.completed) {
+    variables.value.runNumber = relevantRuns.value.completed
     query.executeQuery()
   }
 })

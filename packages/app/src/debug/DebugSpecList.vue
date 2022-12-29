@@ -32,6 +32,7 @@ fragment DebugSpecListSpec on CloudSpecRun {
   extension
   shortPath
   groupIds
+  status
   testsPassed {
     min
     max

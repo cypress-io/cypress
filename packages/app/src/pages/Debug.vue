@@ -34,15 +34,15 @@ query Debug($runNumber: Int!) {
 }
 `
 
-const relevantRun = useRelevantRun()
+const relevantRuns = useRelevantRun()
 
 const variables = ref({ runNumber: -1 })
 
 const query = useQuery({ query: DebugDocument, variables, pause: true })
 
 watchEffect(() => {
-  if (relevantRun.value) {
-    variables.value.runNumber = relevantRun.value
+  if (relevantRuns.value.completed) {
+    variables.value.runNumber = relevantRuns.value.completed
     query.executeQuery()
   }
 })

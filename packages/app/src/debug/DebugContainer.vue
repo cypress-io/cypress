@@ -1,16 +1,29 @@
 <template>
-  <div>
+  <div class="h-full">
     <DebugError
       v-if="showError"
     />
     <div
-      v-else-if="loginConnectStore.user.isLoggedIn && loginConnectStore.project.isProjectConnected && run"
+      v-else-if="loginConnectStore.user.isLoggedIn && loginConnectStore.project.isProjectConnected && run?.status"
+      class="flex flex-col h-full"
     >
       <DebugPageHeader
         :gql="run"
         :commits-ahead="0"
       />
+      <DebugPageDetails
+        v-if="shouldDisplayDetails(run.status)"
+        :status="run.status"
+        :specs="run.specs"
+        :cancellation="{ cancelledAt: run.cancelledAt, cancelledBy: run.cancelledBy }"
+        :is-hidden-by-usage-limits="run.isHiddenByUsageLimits"
+        :over-limit-action-type="run.overLimitActionType"
+        :over-limit-action-url="run.overLimitActionUrl"
+        :ci="run.ci"
+        :errors="run.errors"
+      />
       <DebugSpecList
+        v-if="run.totalFailed && shouldDisplaySpecsList(run.status)"
         :specs="debugSpecsArray"
       />
     </div>
@@ -28,10 +41,11 @@
 <script setup lang="ts">
 import { gql } from '@urql/vue'
 import { computed } from '@vue/reactivity'
-import type { DebugSpecsFragment, TestingTypeEnum } from '../generated/graphql'
+import type { CloudRunStatus, DebugSpecsFragment, TestingTypeEnum } from '../generated/graphql'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import DebugPageHeader from './DebugPageHeader.vue'
 import DebugSpecList from './DebugSpecList.vue'
+import DebugPageDetails from './DebugPageDetails.vue'
 import DebugNotLoggedIn from './empty/DebugNotLoggedIn.vue'
 import DebugNoProject from './empty/DebugNoProject.vue'
 import DebugNoRuns from './empty/DebugNoRuns.vue'
@@ -56,11 +70,24 @@ fragment DebugSpecs on Query {
         id
         runByNumber(runNumber: $runNumber) {
           ...DebugPage
+          cancelledBy {
+            id
+            fullName
+            email
+          }
+          cancelledAt
           id
           runNumber
+          errors
           status
           overLimitActionType
           overLimitActionUrl
+          isHiddenByUsageLimits
+          totalTests
+          ci {
+            id
+            ...DebugPageDetails_cloudCiBuildInfo
+          }
           testsForReview {
             id
             ...DebugSpecListTests
@@ -96,6 +123,14 @@ const loginConnectStore = useLoginConnectStore()
 const run = computed(() => {
   return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject.runByNumber : null
 })
+
+function shouldDisplayDetails (status: CloudRunStatus) {
+  return !['RUNNING', 'FAILED'].includes(status)
+}
+
+function shouldDisplaySpecsList (status: CloudRunStatus) {
+  return ['ERRORED', 'CANCELLED', 'TIMEDOUT', 'FAILED'].includes(status)
+}
 
 const debugSpecsArray = computed(() => {
   if (run.value && props.gql?.currentProject) {

@@ -960,7 +960,9 @@ type CurrentProject implements Node & ProjectLike {
 
   """Absolute path to the project on the filesystem"""
   projectRoot: String!
-  relevantRuns: [Int]
+
+  """Returns a list of relevant runs for matching Git shas from the Cloud"""
+  relevantRuns: RelevantRun
 
   """Project saved state"""
   savedState: JSON
@@ -1907,6 +1909,11 @@ type ReactComponentResponse {
 
   """Whether or not there was there an error when parsing the file"""
   errored: Boolean
+}
+
+type RelevantRun {
+  completed: Int!
+  running: Int!
 }
 
 type RelevantRunResponse {

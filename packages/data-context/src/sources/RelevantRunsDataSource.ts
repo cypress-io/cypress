@@ -20,6 +20,7 @@ const RELEVANT_RUN_OPERATION_DOC = gql`
         runsByCommitShas(commitShas: $shas, runLimit: 100) {
           id
           runNumber
+          status
         }
 
       }
@@ -54,7 +55,16 @@ export class RelevantRunsDataSource {
     })
 
     if (result.data?.cloudProjectBySlug?.__typename === 'CloudProject') {
-      const runs = result.data.cloudProjectBySlug.runsByCommitShas?.map((run) => run?.runNumber) || []
+      const runs = result.data.cloudProjectBySlug.runsByCommitShas?.map((run) => {
+        if (run?.runNumber && run?.status) {
+          return {
+            runNumber: run.runNumber,
+            status: run.status,
+          }
+        }
+
+        return undefined
+      }) || []
 
       debug(`Found ${runs.length} runs for ${projectSlug} and ${shas.length} shas`)
 
