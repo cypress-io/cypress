@@ -280,6 +280,30 @@ export function createCloudProjectSpecResult (config: Partial<CloudProjectSpec>)
   return indexNode(specResult)
 }
 
+const skippedSpecs: CloudSpecRun[] = [{
+  __typename: 'CloudSpecRun',
+  id: 'hash123',
+  basename: 'Test.cy.ts',
+  extension: '.cy.ts',
+  path: 'src/Test.cy.ts',
+  status: 'FAILED',
+}, {
+  __typename: 'CloudSpecRun',
+  id: 'hash1234',
+  basename: 'Test.cy.ts',
+  extension: '.cy.ts',
+  path: 'src/Test.cy.ts',
+  status: 'RUNNING',
+},
+{
+  __typename: 'CloudSpecRun',
+  id: 'hash12345',
+  basename: 'Test.cy.ts',
+  extension: '.cy.ts',
+  path: 'src/Test.cy.ts',
+  status: 'UNCLAIMED',
+}]
+
 export const CloudRecordKeyStubs = {
   e2eProject: createCloudRecordKey({}),
   componentProject: createCloudRecordKey({}),
@@ -295,8 +319,13 @@ export const CloudRunStubs = {
   running: createCloudRun({ status: 'RUNNING', totalRunning: 2, totalPassed: 8 }),
   someSkipped: createCloudRun({ status: 'PASSED', totalPassed: 7, totalSkipped: 3 }),
   somePending: createCloudRun({ status: 'PASSED', totalPassed: 100, totalSkipped: 3000, totalPending: 20 }),
-  allSkipped: createCloudRun({ status: 'ERRORED', totalPassed: 0, totalSkipped: 10 }),
+  allSkipped: createCloudRun({ status: 'ERRORED', totalPassed: 0, totalSkipped: 10, errors: ['The browser server never connected. Something is wrong.', 'The browser server never connected. Something is wrong.'], specs: skippedSpecs }),
   failingWithTests: addFailedTests(createCloudRun({ status: 'FAILED', totalPassed: 8, totalFailed: 2 })),
+  noTests: createCloudRun({ status: 'NOTESTS' }),
+  timedOutWithCi: createCloudRun({ status: 'TIMEDOUT', ci: { id: 'abc123', formattedProvider: 'Circle CI', ciBuildNumberFormatted: '1234', url: 'https://circleci.com', __typename: 'CloudCiBuildInfo' }, specs: skippedSpecs }),
+  timedOutWithoutCi: createCloudRun({ status: 'TIMEDOUT', specs: skippedSpecs }),
+  overLimit: createCloudRun({ status: 'OVERLIMIT', overLimitActionType: 'CONTACT_ADMIN', overLimitActionUrl: 'http://localhost:3000' }),
+  cancelled: createCloudRun({ status: 'CANCELLED', cancelledAt: '2019-01-25T02:00:00.000Z', specs: skippedSpecs, cancelledBy: { id: '123', fullName: 'Test Tester', email: 'adams@cypress.io', __typename: 'CloudUser', userIsViewer: true } }),
 } as Record<string, Required<CloudRun>>
 
 export const CloudUserStubs = {

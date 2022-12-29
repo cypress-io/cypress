@@ -130,7 +130,7 @@ fragment SidebarNavigation on Query {
       __typename
       ... on CloudProject {
         id
-        runByNumber(runNumber: 6) {
+        runByNumber(runNumber: 1) {
           id
           status
           testsForReview {
