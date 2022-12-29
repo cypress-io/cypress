@@ -235,8 +235,8 @@ export class EventManager {
       this.saveState(state)
     })
 
-    this.reporterBus.on('debug:dismiss', () => {
-      this.localBus.emit('debug:dismiss')
+    this.reporterBus.on('testFilter:cloudDebug:dismiss', () => {
+      this.emit('testFilter:cloudDebug:dismiss', undefined)
     })
 
     this.reporterBus.on('clear:all:sessions', () => {

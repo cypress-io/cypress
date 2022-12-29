@@ -144,8 +144,8 @@ const events: Events = {
       runner.emit('runner:stop')
     }))
 
-    localBus.on('debug:dismiss', () => {
-      runner.emit('debug:dismiss')
+    localBus.on('testFilter:cloudDebug:dismiss', () => {
+      runner.emit('testFilter:cloudDebug:dismiss')
     })
 
     localBus.on('restart', action('restart', () => {

@@ -1,17 +1,17 @@
-it('should pass - 1', () => {
+it('t1', () => {
   expect(true).eq(true)
 })
 
-it('should fail - 1', () => {
+it('t2', () => {
   expect(true).eq(false)
 })
 
-describe('nested - 1', () => {
-  it('should pass - 2', () => {
+describe('s1', () => {
+  it('t3', () => {
     expect(true).eq(true)
   })
 
-  it('should fail - 2', () => {
+  it('t4', () => {
     expect(true).eq(false)
   })
 })

@@ -4,9 +4,11 @@ import DeleteIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/
 import events from '../lib/events'
 
 export const DebugDismiss = (props: { matched: number, total: number }) => {
-  return (<button className="debug-dismiss" onClick={() => events.emit('debug:dismiss')}>
-    <DebuggerIcon />
-    <span>{props.matched} / {props.total} tests</span>
-    <DeleteIcon className="delete-icon" />
-  </button>)
+  return (
+    <button className="debug-dismiss" onClick={() => events.emit('testFilter:cloudDebug:dismiss')}>
+      <DebuggerIcon />
+      <span>{props.matched} / {props.total} tests</span>
+      <DeleteIcon className="delete-icon" />
+    </button>
+  )
 }

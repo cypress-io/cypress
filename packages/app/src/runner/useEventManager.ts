@@ -61,7 +61,7 @@ export function useEventManager () {
 
     eventManager.on('expect:origin', addCrossOriginIframe)
 
-    eventManager.on('debug:dismiss', () => {
+    eventManager.on('testFilter:cloudDebug:dismiss', () => {
       const currentRoute = router.currentRoute.value
 
       const { runId, ...query } = currentRoute.query
