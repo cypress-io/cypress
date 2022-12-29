@@ -11,6 +11,7 @@ if (!/^\d+\.\d+\.\d+$/.test(args.version)) {
   throw new Error('A valid semantic version (X.Y.Z) must be passed in `--version`.')
 }
 
+// eslint-disable-next-line no-console
 const log = (...args) => console.log('🏗', ...args)
 
 const exec = args['dry-run'] ?

@@ -73,8 +73,10 @@ module.exports = makeUserPackageFile
 if (!module.parent) {
   makeUserPackageFile()
   .catch((err) => {
+    /* eslint-disable no-console */
     console.error('Could not write user package file')
     console.error(err)
+    /* eslint-enable no-console */
     process.exit(-1)
   })
 }

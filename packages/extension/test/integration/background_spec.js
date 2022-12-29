@@ -676,6 +676,7 @@ describe('app/background', () => {
 
         return sinon.stub(browser.cookies, 'remove')
         .callsFake(function () {
+          // eslint-disable-next-line no-console
           console.log('unstubbed browser.cookies.remove', ...arguments)
         })
         .withArgs({ url: 'https://example.com', name: 'foo' })

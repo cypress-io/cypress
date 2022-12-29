@@ -350,6 +350,7 @@ describe('update browser version github action', () => {
       })
 
       expect(github.pulls.update).not.to.be.called
+      // eslint-disable-next-line no-console
       expect(console.log).to.be.calledWith('Could not find PR for branch:', 'some-branch-name')
     })
   })
