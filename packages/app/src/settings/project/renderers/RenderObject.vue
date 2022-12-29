@@ -46,7 +46,10 @@
     <span
       :class="props.colorClasses"
       :data-cy-config="props.from"
-    >{</span><br><template
+    >{</span>
+    <!-- Do not render break line for empty object or array -->
+    <br v-if="Object.keys(props.value).length">
+    <template
       v-for="(val, k) in props.value"
       :key="k"
     >

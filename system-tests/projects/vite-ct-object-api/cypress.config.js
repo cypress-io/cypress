@@ -1,6 +1,7 @@
 module.exports = {
   retries: null,
   component: {
+    experimentalSingleTabRunMode: true,
     supportFile: 'cypress/component/support/component.js',
     devServer: {
       bundler: 'vite',
