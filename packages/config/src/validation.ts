@@ -33,7 +33,7 @@ const _isFullyQualifiedUrl = (value: any): ErrResult | boolean => {
   return _.isString(value) && /^https?\:\/\//.test(value)
 }
 
-const isArrayOfStrings = (value: any): ErrResult | boolean => {
+export const isArrayOfStrings = (value: any): ErrResult | boolean => {
   return _.isArray(value) && _.every(value, _.isString)
 }
 

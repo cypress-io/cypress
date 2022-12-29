@@ -38,7 +38,7 @@ describe('e2e experimentalUseDefaultDocumentDomain=true', () => {
     expectedExitCode: 0,
     config: {
       retries: 0,
-      experimentalUseDefaultDocumentDomain: true,
+      experimentalUseDefaultDocumentDomain: ['*.foobar.com'],
     },
   })
 })

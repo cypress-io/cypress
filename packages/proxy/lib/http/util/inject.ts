@@ -3,7 +3,7 @@ import { getRunnerInjectionContents, getRunnerCrossOriginInjectionContents } fro
 import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
 
 interface InjectionOpts {
-  useDefaultDocumentDomain: boolean
+  shouldInjectDocumentDomain: boolean
 }
 interface FullCrossOriginOpts {
   modifyObstructiveThirdPartyCode: boolean
@@ -14,7 +14,7 @@ interface FullCrossOriginOpts {
 export function partial (domain, options: InjectionOpts) {
   let documentDomainInjection = `document.domain = '${domain}';`
 
-  if (options.useDefaultDocumentDomain) {
+  if (!options.shouldInjectDocumentDomain) {
     documentDomainInjection = ''
   }
 
@@ -31,7 +31,7 @@ export function full (domain, options: InjectionOpts) {
   return getRunnerInjectionContents().then((contents) => {
     let documentDomainInjection = `document.domain = '${domain}';`
 
-    if (options.useDefaultDocumentDomain) {
+    if (!options.shouldInjectDocumentDomain) {
       documentDomainInjection = ''
     }
 
@@ -50,7 +50,7 @@ export async function fullCrossOrigin (domain, options: InjectionOpts & FullCros
 
   let documentDomainInjection = `document.domain = '${domain}';`
 
-  if (options.useDefaultDocumentDomain) {
+  if (!options.shouldInjectDocumentDomain) {
     documentDomainInjection = ''
   }
 

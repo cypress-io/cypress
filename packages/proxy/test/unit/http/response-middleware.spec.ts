@@ -1395,7 +1395,7 @@ describe('http/response-middleware', function () {
           'isNotJavascript': true,
           'modifyObstructiveCode': true,
           'modifyObstructiveThirdPartyCode': true,
-          'useDefaultDocumentDomain': false,
+          'useDefaultDocumentForDomains': ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com'],
           'url': 'http://www.foobar.com:3501/primary-origin.html',
           'useAstSourceRewriting': undefined,
           'wantsInjection': 'full',
@@ -1419,7 +1419,7 @@ describe('http/response-middleware', function () {
           'isNotJavascript': true,
           'modifyObstructiveCode': true,
           'modifyObstructiveThirdPartyCode': false,
-          'useDefaultDocumentDomain': false,
+          'useDefaultDocumentForDomains': ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com'],
           'url': 'http://127.0.0.1:3501/primary-origin.html',
           'useAstSourceRewriting': undefined,
           'wantsInjection': 'full',
@@ -1437,7 +1437,7 @@ describe('http/response-middleware', function () {
         config: {
           modifyObstructiveCode: false,
           experimentalModifyObstructiveThirdPartyCode: false,
-          experimentalUseDefaultDocumentDomain: false,
+          experimentalUseDefaultDocumentDomain: ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com'],
         },
         simulatedCookies: [],
       })
@@ -1451,7 +1451,7 @@ describe('http/response-middleware', function () {
           'isNotJavascript': true,
           'modifyObstructiveCode': false,
           'modifyObstructiveThirdPartyCode': false,
-          'useDefaultDocumentDomain': false,
+          'useDefaultDocumentForDomains': ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com'],
           'url': 'http://www.foobar.com:3501/primary-origin.html',
           'useAstSourceRewriting': undefined,
           'wantsInjection': 'full',
@@ -1489,7 +1489,7 @@ describe('http/response-middleware', function () {
         config: {
           modifyObstructiveCode: true,
           experimentalModifyObstructiveThirdPartyCode: true,
-          experimentalUseDefaultDocumentDomain: false,
+          experimentalUseDefaultDocumentDomain: ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com'],
         },
         remoteStates,
         debug: (formatter, ...args) => {

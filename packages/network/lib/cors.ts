@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import minimatch from 'minimatch'
 import * as uri from './uri'
 import debugModule from 'debug'
 import _parseDomain from '@cypress/parse-domain'
@@ -10,8 +11,6 @@ const debug = debugModule('cypress:network:cors')
 
 // match IP addresses or anything following the last .
 const customTldsRe = /(^[\d\.]+$|\.[^\.]+$)/
-
-const strictSameOriginDomains = Object.freeze(['google.com'])
 
 export function getSuperDomain (url) {
   const parsed = parseUrlIntoHostProtocolDomainTldPort(url)
@@ -164,11 +163,24 @@ export const urlSameSiteMatch = (frameUrl: string, topUrl: string): boolean => {
  * @returns a Policy string.
  */
 export const policyForDomain = (url: string, opts?: {
-  useDefaultDocumentDomain: boolean
+  useDefaultDocumentForDomains: string[]
 }): Policy => {
-  const obj = parseUrlIntoHostProtocolDomainTldPort(url)
+  let { hostname } = uri.parse(url)
+  const hasDefaultDomainMatch = !!opts?.useDefaultDocumentForDomains.find((globPattern) => {
+    return minimatch(hostname || '', globPattern)
+  })
 
-  return opts?.useDefaultDocumentDomain || strictSameOriginDomains.includes(`${obj.domain}.${obj.tld}`) ? 'same-origin' : 'same-super-domain-origin'
+  return hasDefaultDomainMatch ?
+    'same-origin' :
+    'same-super-domain-origin'
+}
+
+export const shouldInjectDocumentDomain = (url: string, opts?: {
+  useDefaultDocumentForDomains: string[]
+}) => {
+  return policyForDomain(url, {
+    useDefaultDocumentForDomains: opts?.useDefaultDocumentForDomains || [],
+  }) === 'same-super-domain-origin'
 }
 
 /**
@@ -180,11 +192,11 @@ export const policyForDomain = (url: string, opts?: {
  * @returns boolean, true if matching, false if not.
  */
 export const urlMatchesPolicyBasedOnDomain = (frameUrl: string, topUrl: string, opts?: {
-  useDefaultDocumentDomain: boolean
+  useDefaultDocumentForDomains: string[]
 }): boolean => {
   return urlMatchesPolicy({
     policy: policyForDomain(frameUrl, {
-      useDefaultDocumentDomain: opts?.useDefaultDocumentDomain || false,
+      useDefaultDocumentForDomains: opts?.useDefaultDocumentForDomains || [],
     }),
     frameUrl,
     topUrl,
@@ -200,10 +212,11 @@ export const urlMatchesPolicyBasedOnDomain = (frameUrl: string, topUrl: string, 
  * @returns boolean, true if matching, false if not.
  */
 export const urlMatchesPolicyBasedOnDomainProps = (frameUrl: string, topProps: ParsedHostWithProtocolAndHost, opts?: {
-  useDefaultDocumentDomain: boolean
+  useDefaultDocumentForDomains: string[]
 }): boolean => {
-  const obj = parseUrlIntoHostProtocolDomainTldPort(frameUrl)
-  const policy = opts?.useDefaultDocumentDomain || strictSameOriginDomains.includes(`${obj.domain}.${obj.tld}`) ? 'same-origin' : 'same-super-domain-origin'
+  const policy = policyForDomain(frameUrl, {
+    useDefaultDocumentForDomains: opts?.useDefaultDocumentForDomains || [],
+  })
 
   return urlMatchesPolicyProps({
     policy,

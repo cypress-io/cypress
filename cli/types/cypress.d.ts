@@ -3018,11 +3018,13 @@ declare namespace Cypress {
      * Disables setting document.domain to the document's super domain on injection.
      * This experiment is to be used for sites that do not work with setting document.domain
      * due to cross-origin issues. Enabling this option no longer allows for default sub domain
-     * navigations, and will require the use of cy.origin().
+     * navigations, and will require the use of cy.origin(). This option takes an array of
+     * strings/string globs, and applies defaults for known domains where document.domain is known
+     * to be an issue.
      * @see https://developer.mozilla.org/en-US/docs/Web/API/Document/domain
-     * @default false
+     * @default {array} ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com']
      */
-    experimentalUseDefaultDocumentDomain: boolean
+    experimentalUseDefaultDocumentDomain: ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com']
     /**
      * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.
      * @default false

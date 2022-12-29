@@ -45,7 +45,8 @@ const isResponseHtml = function (contentType, responseBuffer) {
 
 export class ServerE2E extends ServerBase<SocketE2E> {
   private _urlResolver: Bluebird<Record<string, any>> | null
-  private useDefaultDocumentDomain: boolean = false
+  // the initialization of this variable is only precautionary as the actual config value is applied when the server is created
+  private useDefaultDocumentForDomains: string[] = ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com']
 
   constructor () {
     super()
@@ -62,7 +63,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       const { port, fileServerFolder, socketIoRoute, baseUrl, experimentalUseDefaultDocumentDomain } = config
 
       this._server = this._createHttpServer(app)
-      this.useDefaultDocumentDomain = experimentalUseDefaultDocumentDomain
+      this.useDefaultDocumentForDomains = experimentalUseDefaultDocumentDomain
       const onError = (err) => {
         // if the server bombs before starting
         // and the err no is EADDRINUSE
@@ -310,7 +311,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
                 // of when to buffer and set the remote state
                 if (isOk && details.isHtml) {
                   const urlDoesNotMatchPolicyBasedOnDomain = options.hasAlreadyVisitedUrl
-                    && !cors.urlMatchesPolicyBasedOnDomain(primaryRemoteState.origin, newUrl || '', { useDefaultDocumentDomain: this.useDefaultDocumentDomain })
+                    && !cors.urlMatchesPolicyBasedOnDomain(primaryRemoteState.origin, newUrl || '', { useDefaultDocumentForDomains: this.useDefaultDocumentForDomains })
                     || options.isFromSpecBridge
 
                   if (!handlingLocalFile) {

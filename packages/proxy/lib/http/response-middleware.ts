@@ -55,10 +55,10 @@ function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer,
   return 'latin1'
 }
 
-function reqMatchesPolicyBasedOnDomain (req: CypressIncomingRequest, remoteState, useDefaultDocumentDomain) {
+function reqMatchesPolicyBasedOnDomain (req: CypressIncomingRequest, remoteState, useDefaultDocumentForDomains) {
   if (remoteState.strategy === 'http') {
     return cors.urlMatchesPolicyBasedOnDomainProps(req.proxiedUrl, remoteState.props, {
-      useDefaultDocumentDomain,
+      useDefaultDocumentForDomains,
     })
   }
 
@@ -546,7 +546,9 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
       isNotJavascript: !resContentTypeIsJavaScript(this.incomingRes),
       useAstSourceRewriting: this.config.experimentalSourceRewriting,
       modifyObstructiveThirdPartyCode: this.config.experimentalModifyObstructiveThirdPartyCode && !this.remoteStates.isPrimarySuperDomainOrigin(this.req.proxiedUrl),
-      useDefaultDocumentDomain: this.config.experimentalUseDefaultDocumentDomain,
+      shouldInjectDocumentDomain: cors.shouldInjectDocumentDomain(this.req.proxiedUrl, {
+        useDefaultDocumentForDomains: this.config.experimentalUseDefaultDocumentDomain,
+      }),
       modifyObstructiveCode: this.config.modifyObstructiveCode,
       url: this.req.proxiedUrl,
       deferSourceMapRewrite: this.deferSourceMapRewrite,
