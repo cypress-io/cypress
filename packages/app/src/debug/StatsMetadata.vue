@@ -41,8 +41,8 @@
 <script lang="ts" setup>
 
 import { computed } from 'vue'
-import type { SpecDataAggregate, CloudRunGroup } from '@packages/data-context/src/gen/graphcache-config.gen'
-import type { TestingTypeEnum } from '../generated/graphql'
+import type { SpecDataAggregate } from '@packages/data-context/src/gen/graphcache-config.gen'
+import type { TestingTypeEnum, StatsMetadata_GroupsFragment } from '../generated/graphql'
 import { IconTimeStopwatch,
   IconOsLinux,
   IconOsApple,
@@ -54,6 +54,24 @@ import { IconTimeStopwatch,
 } from '@cypress-design/vue-icon'
 
 import LayeredBrowserIcon from './LayeredBrowserIcons.vue'
+import { gql } from '@urql/vue'
+
+gql`
+  fragment StatsMetadata_Groups on CloudRunGroup {
+    id
+    groupName
+    browser {
+      id
+      formattedName
+      formattedNameWithVersion
+    }
+    os {
+      id
+      name
+      nameWithVersion
+    }
+  }
+`
 
 type StatType = 'DURATION' | 'OS' | 'BROWSER' | 'TESTING' | 'G_OS' | 'GROUPS' | 'G_BROWSERS' | 'GROUP_NAME'
 
@@ -61,14 +79,14 @@ interface MetadataProps {
   order?: StatType[]
   specDuration?: string | number
   testing?: TestingTypeEnum
-  groups?: CloudRunGroup[]
+  groups?: StatsMetadata_GroupsFragment[]
   groupName?: string
 }
 
 const props = defineProps<MetadataProps>()
 
 interface Metadata {
-  value: number | string | null | SpecDataAggregate | TestingTypeEnum
+  value: number | string | null | SpecDataAggregate | TestingTypeEnum | undefined
   icon: any
   name: string
 }
@@ -101,7 +119,7 @@ const arrMapping = computed(() => {
   const uniqueOSes = new Set<string>()
 
   if (props.groups) {
-    props.groups.forEach((group: CloudRunGroup, index) => {
+    props.groups.forEach((group: StatsMetadata_GroupsFragment, index) => {
       const browserName = group.browser.formattedName!.toUpperCase()
       const osName = group.os.name!.toUpperCase()
 
@@ -123,7 +141,7 @@ const arrMapping = computed(() => {
 const ORDER_MAP = computed<Record<StatType, Metadata>>(() => {
   return {
     'DURATION': {
-      value: props.specDuration!,
+      value: props.specDuration,
       icon: IconTimeStopwatch,
       name: 'spec-duration',
     },

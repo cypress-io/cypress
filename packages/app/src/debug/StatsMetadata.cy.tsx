@@ -2,11 +2,14 @@ import StatsMetadata from './StatsMetadata.vue'
 
 describe('mounts correctly', () => {
   const group1 = {
+    id: '123',
     os: {
+      id: '123',
       name: 'Linux',
       nameWithVersion: 'Linux Debian',
     },
     browser: {
+      id: '123',
       formattedName: 'Chrome',
       formattedNameWithVersion: 'Chrome 106',
     },
@@ -14,11 +17,14 @@ describe('mounts correctly', () => {
   }
 
   const group2 = {
+    id: '123',
     os: {
+      id: '123',
       name: 'Apple',
       nameWithVersion: 'macOS 12.3',
     },
     browser: {
+      id: '123',
       formattedName: 'Edge',
       formattedNameWithVersion: 'Edge 100.2',
     },
@@ -26,11 +32,14 @@ describe('mounts correctly', () => {
   }
 
   const group3 = {
+    id: '123',
     os: {
+      id: '123',
       name: 'Windows',
       nameWithVersion: 'Windows 12.3',
     },
     browser: {
+      id: '123',
       formattedName: 'Webkit',
       formattedNameWithVersion: 'Webkit 108',
     },

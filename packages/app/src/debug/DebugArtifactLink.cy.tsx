@@ -15,15 +15,17 @@ describe('<DebugArtifacts />', () => {
 
       cy.findByTestId(`artifact-for-${artifact.icon}`).should('have.length', 1)
       cy.findByTestId(`${artifact.icon}-button`).should('be.visible')
-      cy.findByTestId(`artifact-for-${artifact.icon}`).realHover()
-      cy.findByTestId('tooltip-content').should('be.visible').contains(artifact.text)
+      cy.findByTestId(`artifact-for-${artifact.icon}`).realHover().then(() => {
+        cy.findByTestId('tooltip-content').should('be.visible').contains(artifact.text)
+      })
+
       cy.percySnapshot()
     })
   })
 
   it('mounts correctly for all icons together and has correct URLs', () => {
     cy.mount(() => (
-      <div class="flex flex-grow justify-center space-x-4.5 pt-24px" data-cy='debug-artifacts-all'>
+      <div class="flex flex-grow space-x-4.5 pt-24px justify-center" data-cy='debug-artifacts-all'>
         <DebugArtifactLink icon={'TERMINAL_LOG'} popperText={'View Log'} url={'www.cypress.io'}/>
         <DebugArtifactLink icon={'IMAGE_SCREENSHOT'} popperText={'View Screenshot'} url={'cloud.cypress.io'}/>
         <DebugArtifactLink icon={'PLAY'} popperText={'View Video'} url={'www.cypress.io'}/>

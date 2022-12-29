@@ -2,11 +2,11 @@
   <div
     v-for="(group, j) in props.groups"
     :key="j"
-    class="w-full flex flex-col flex-start justify-center pl-16px hover:bg-gray-50 grouped-row-class"
+    class="flex flex-col flex-start w-full pl-16px justify-center grouped-row-class hover:bg-gray-50"
     data-cy="grouped-row"
   >
     <div
-      class="flex flex-start flex-row h-12 items-center gap-x-2.5 non-italic text-base text-gray-700 font-normal border-b-gray-100"
+      class="flex flex-start flex-row font-normal border-b-gray-100 h-12 text-base text-gray-700 gap-x-2.5 items-center non-italic"
       data-cy="test-failed-metadata"
     >
       <StatsMetadata
@@ -16,7 +16,7 @@
       />
       <div
         data-cy="debug-artifacts"
-        class="flex flex-grow justify-end space-x-4.5 opacity-0 grouped-row-artifacts pr-18px"
+        class="flex flex-grow space-x-4.5 opacity-0 pr-18px justify-end grouped-row-artifacts"
       >
         <div
           v-for="artifact, l in debugArtifacts[group.id]"
@@ -34,20 +34,21 @@
   </div>
 </template>
 <script lang="ts" setup>
-import type { CloudRunGroup } from '@packages/data-context/src/gen/graphcache-config.gen'
 import type { TestResults } from './DebugSpec.vue'
 import StatsMetadata from './StatsMetadata.vue'
 import DebugArtifactLink from './DebugArtifactLink.vue'
 import { computed } from 'vue'
+import type { StatsMetadata_GroupsFragment } from '../generated/graphql'
 
 const props = defineProps<{
   failedTests: TestResults[]
-  groups: CloudRunGroup[]
+  groups: StatsMetadata_GroupsFragment[]
 }>()
 
 const debugArtifacts = computed(() => {
   return props.failedTests.reduce<{[groupID: string]: {icon: string, text: string, url: string | null | undefined }[] }>((acc, curr) => {
-    acc[curr.instance.groupId] = [
+    //TODO Update logic to not rely on defaulting to empty strings
+    acc[curr.instance?.groupId ?? ''] = [
       { icon: 'TERMINAL_LOG', text: 'View Log', url: curr.instance!.stdoutUrl ?? '' },
       { icon: 'IMAGE_SCREENSHOT', text: 'View Screenshot', url: curr.instance!.screenshotsUrl ?? '' },
       { icon: 'PLAY', text: 'View Video', url: curr.instance!.videoUrl ?? '' },

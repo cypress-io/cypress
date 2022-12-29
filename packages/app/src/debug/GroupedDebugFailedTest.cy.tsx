@@ -1,15 +1,20 @@
 import GroupedDebugFailedTest from './GroupedDebugFailedTest.vue'
-import type { TestResult } from './DebugSpec.vue'
+import type { TestResults } from './DebugSpec.vue'
 
 describe('<GroupedDebugFailedTest/>', () => {
-  const testResult: TestResult[] = [
+  const testResult: TestResults[] = [
     {
       id: '676df87878',
       titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
       instance: {
+        id: '123',
+        status: 'FAILED',
         groupId: '123',
+        hasScreenshots: true,
         screenshotsUrl: 'www.cypress.io',
+        hasStdout: true,
         stdoutUrl: 'www.cypress.io',
+        hasVideo: true,
         videoUrl: 'www.cypress.io',
       },
     },
@@ -17,9 +22,14 @@ describe('<GroupedDebugFailedTest/>', () => {
       id: 'adfkd33829',
       titleParts: ['Groups', 'Testing across multiple groups'],
       instance: {
+        id: '456',
+        status: 'FAILED',
         groupId: '456',
+        hasScreenshots: true,
         screenshotsUrl: 'cloud.cypress.io',
+        hasStdout: true,
         stdoutUrl: 'cloud.cypress.io',
+        hasVideo: true,
         videoUrl: 'cloud.cypress.io',
       },
     },
@@ -30,10 +40,12 @@ describe('<GroupedDebugFailedTest/>', () => {
       id: '123',
       groupName: 'Staging',
       os: {
+        id: '123',
         name: 'Linux',
         nameWithVersion: 'Linux Debian',
       },
       browser: {
+        id: '123',
         formattedName: 'Chrome',
         formattedNameWithVersion: 'Chrome 106',
       },
@@ -42,10 +54,12 @@ describe('<GroupedDebugFailedTest/>', () => {
       id: '456',
       groupName: 'Production',
       os: {
+        id: '456',
         name: 'Windows',
         nameWithVersion: 'Windows 11.2',
       },
       browser: {
+        id: '456',
         formattedName: 'Electron',
         formattedNameWithVersion: 'Electron 106',
       },

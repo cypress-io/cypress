@@ -3,10 +3,12 @@ import type { TestResults } from './DebugSpec.vue'
 
 const group1 = {
   os: {
+    id: '123',
     name: 'Linux',
     nameWithVersion: 'Linux Debian',
   },
   browser: {
+    id: '123',
     formattedName: 'Chrome',
     formattedNameWithVersion: 'Chrome 106',
   },
@@ -16,10 +18,12 @@ const group1 = {
 
 const group2 = {
   os: {
+    id: '123',
     name: 'Windows',
     nameWithVersion: 'Windows 110',
   },
   browser: {
+    id: '123',
     formattedName: 'Electron',
     formattedNameWithVersion: 'Electron 106',
   },
@@ -79,7 +83,12 @@ describe('<DebugFailedTest/>', () => {
       id: '676df87878',
       titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
       instance: {
+        id: '123',
         groupId: '123',
+        status: 'FAILED',
+        hasScreenshots: false,
+        hasStdout: false,
+        hasVideo: false,
       },
     }
 
@@ -100,16 +109,21 @@ describe('<DebugFailedTest/>', () => {
   })
 
   it('contains multiple titleParts segments', { viewportWidth: 1200 }, () => {
-    const multipleTitleParts = {
+    const multipleTitleParts: TestResults = {
       id: '676df87878',
       titleParts: ['Login', 'Describe', 'it', 'context', 'Should redirect unauthenticated user to signin page'],
       instance: {
+        id: '456',
         groupId: '456',
+        status: 'FAILED',
+        hasScreenshots: false,
+        hasStdout: false,
+        hasVideo: false,
       },
     }
 
     cy.mount(() => (
-      <DebugFailedTest failedTestsResult={[multipleTitleParts]} groups={[group1]} />
+      <DebugFailedTest failedTestsResult={[multipleTitleParts]} groups={[group1]} expandable={false}/>
     ))
 
     rowElementTesting(multipleTitleParts)
@@ -123,14 +137,24 @@ describe('<DebugFailedTest/>', () => {
         id: '676df87878',
         titleParts: ['Login', 'Describe', 'it', 'context', 'Should redirect unauthenticated user to signin page'],
         instance: {
+          id: '456',
           groupId: '456',
+          status: 'FAILED',
+          hasScreenshots: false,
+          hasStdout: false,
+          hasVideo: false,
         },
       },
       {
         id: '676df87878',
         titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
         instance: {
+          id: '123',
           groupId: '123',
+          status: 'FAILED',
+          hasScreenshots: false,
+          hasStdout: false,
+          hasVideo: false,
         },
       },
     ]
@@ -150,7 +174,12 @@ describe('<DebugFailedTest/>', () => {
       id: '676df87874',
       titleParts: ['Test content', 'Test content 2', 'Test content 3', 'Test content 4', 'onMount() should be called once', 'hook() should be called twice and then'],
       instance: {
+        id: '123',
         groupId: '123',
+        status: 'FAILED',
+        hasScreenshots: false,
+        hasStdout: false,
+        hasVideo: false,
       },
     }
 
