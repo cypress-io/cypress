@@ -66,7 +66,7 @@ describe('src/cy/commands/debugging', () => {
       return null
     })
 
-    it('can pause between each command and skips assertions', function () {
+    it('can pause between each command', function () {
       let expected = false
 
       cy.once('paused', (name) => {
@@ -78,7 +78,7 @@ describe('src/cy/commands/debugging', () => {
         cy.once('paused', (name) => {
           expected = true
 
-          expect(name).to.eq('then')
+          expect(name).to.eq('should')
 
           // resume the rest of the commands so this
           // test ends

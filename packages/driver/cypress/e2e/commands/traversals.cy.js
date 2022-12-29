@@ -160,58 +160,25 @@ describe('src/cy/commands/traversals', () => {
           cy.get('#list')[name](arg)
         })
 
-        it('snapshots after finding element', () => {
-          cy.get('#list')[name](arg).then(function () {
-            const { lastLog } = this
-
-            expect(lastLog.get('snapshots').length).to.eq(1)
-            expect(lastLog.get('snapshots')[0]).to.be.an('object')
-          })
-        })
-
-        it('has the $el', () => {
+        it('snapshots, has the element, and logs with console props', () => {
           cy.get('#list')[name](arg).then(function ($el) {
             const { lastLog } = this
+
+            const message = (_.isUndefined(arg) || _.isFunction(arg)) ? '' : arg.toString()
+
+            const consoleProps = {
+              'Applied To': cy.$$('#list')[0],
+              Command: name,
+              Elements: $el.length,
+              Selector: _.isFunction(arg) ? '' : [].concat(arg).join(', '),
+              Yielded: Cypress.dom.getElements($el),
+            }
 
             expect(lastLog.get('$el').get(0)).to.eq($el.get(0))
-          })
-        })
-
-        it('has a custom message', () => {
-          cy.get('#list')[name](arg).then(function () {
-            let message
-
-            if (_.isUndefined(arg) || _.isFunction(arg)) {
-              message = ''
-            } else {
-              message = arg.toString()
-            }
-
-            const { lastLog } = this
-
+            expect(lastLog.get('snapshots').length).to.eq(1)
+            expect(lastLog.get('snapshots')[0]).to.be.an('object')
             expect(lastLog.get('message')).to.eq(message)
-          })
-        })
-
-        it('#consoleProps', () => {
-          cy.get('#list')[name](arg).then(function ($el) {
-            const obj = { Command: name }
-
-            if (_.isFunction(arg)) {
-              obj.Selector = ''
-            } else {
-              obj.Selector = [].concat(arg).join(', ')
-            }
-
-            const yielded = Cypress.dom.getElements($el)
-
-            _.extend(obj, {
-              'Applied To': cy.$$('#list')[0],
-              Yielded: yielded,
-              Elements: $el.length,
-            })
-
-            expect(this.lastLog.invoke('consoleProps')).to.deep.eq(obj)
+            expect(lastLog.invoke('consoleProps')).to.deep.eq(consoleProps)
           })
         })
 

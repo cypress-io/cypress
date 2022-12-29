@@ -14,6 +14,14 @@ describe('src/cy/commands/files', () => {
   })
 
   describe('#readFile', () => {
+    it('really works', () => {
+      cy.readFile('./cypress/fixtures/fileSpec.json').its('baseUrl').should('eq', 'http://localhost:3500')
+    })
+
+    it('works when contents are supposed to be null', () => {
+      cy.readFile('does-not-exist').should('be.null')
+    })
+
     it('triggers \'read:file\' with the right options', () => {
       Cypress.backend.resolves(okResponse)
 
@@ -104,14 +112,6 @@ describe('src/cy/commands/files', () => {
       cy.readFile('foo.json').should('eq', 'quux').then(() => {
         expect(retries).to.eq(1)
       })
-    })
-
-    it('really works', () => {
-      cy.readFile('./cypress/fixtures/fileSpec.json').its('baseUrl').should('eq', 'http://localhost:3500')
-    })
-
-    it('works when contents are supposed to be null', () => {
-      cy.readFile('does-not-exist').should('be.null')
     })
 
     describe('.log', () => {

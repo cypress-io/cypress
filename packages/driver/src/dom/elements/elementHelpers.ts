@@ -15,7 +15,7 @@ export const getTagName = (el) => {
 export const isElement = function (obj): obj is HTMLElement | JQuery<HTMLElement> {
   try {
     if ($jquery.isJquery(obj)) {
-      return obj.toArray().every(isElement)
+      return obj.length && obj.toArray().every(isElement)
     }
 
     return Boolean(obj && _.isElement(obj))

@@ -323,10 +323,10 @@ describe('src/cy/commands/querying', () => {
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
+          this.logs?.push(log)
+
           if (attrs.name === 'get') {
             this.lastLog = log
-
-            this.logs?.push(log)
           }
         })
 
@@ -336,19 +336,26 @@ describe('src/cy/commands/querying', () => {
       it('logs elements length', () => {
         let buttons = cy.$$('button')
 
-        const length = buttons.length - 2
+        const length = buttons.length
 
         // add 500ms to the delta
         cy.timeout(500, true)
 
         cy.on('command:retry', () => {
-          buttons.last().remove()
+          buttons.first().remove()
           buttons = cy.$$('button')
         })
 
         // should resolving after removing 2 buttons
-        cy.get('button').should('have.length', length).then(function ($buttons) {
-          expect(this.lastLog.get('numElements')).to.eq(length)
+        cy.get('button').should('have.length', length - 2).then(function ($buttons) {
+          const [getLog, shouldLog] = this.logs
+
+          // .get() resolves when there are 24 buttons
+          expect(getLog.get('numElements')).to.eq(length)
+
+          // The assertion fails, causing .get() to retry. When the assertion passes,
+          // it logs the reduced number of buttons.
+          expect(shouldLog.get('numElements')).to.eq(length - 2)
         })
       })
 
@@ -818,17 +825,12 @@ describe('src/cy/commands/querying', () => {
 
       it('fails get command when element is not found and has chained assertions', function (done) {
         cy.once('fail', (err) => {
-          const { logs, lastLog } = this
-          const getLog = logs[logs.length - 2]
+          const { lastLog } = this
 
           expect(err.name).to.eq('AssertionError')
           expect(err.message).to.eq('Timed out retrying after 1ms: Expected to find element: `does_not_exist`, but never found it.')
 
-          expect(getLog.get('name')).to.eq('get')
-          expect(getLog.get('state')).to.eq('failed')
-          expect(getLog.get('error')).to.eq(err)
-
-          expect(lastLog.get('name')).to.eq('assert')
+          expect(lastLog.get('name')).to.eq('get')
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('error')).to.eq(err)
 

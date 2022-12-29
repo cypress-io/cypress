@@ -170,6 +170,11 @@ export default function (Commands, Cypress, cy, state) {
         // are chaining assertion properties and
         // should return this new subject
         return originalObj !== exp._obj ? exp._obj : subject
+      } catch (err) {
+        // Some commands want a chance to update the messages thrown by following assertions, for better legibility.
+        // See querying.ts and traversals.ts, specifically `this.set('onFail', (err) => {`
+        this.get('prev')?.get('onFail')?.(err)
+        throw err
       } finally {
         state('onBeforeLog', undefined)
       }
