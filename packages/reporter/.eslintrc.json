@@ -3,21 +3,7 @@
     "cypress",
     "@cypress/dev"
   ],
-  "extends": [
-    "../../.eslintrc.js"
-  ],
   "env": {
     "cypress/globals": true
-  },
-  "overrides": [
-    {
-      "files": [
-        "*.ts",
-        "*.tsx"
-      ],
-      "rules": {
-        "@typescript-eslint/no-unused-vars": "off"
-      }
-    }
-  ]
+  }
 }
