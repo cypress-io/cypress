@@ -13,7 +13,6 @@
         :class="result.class"
       />
       <span
-        v-if="result.value"
         class="sr-only"
       >{{ result.name }}</span>
       {{ result.value }}
