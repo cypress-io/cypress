@@ -4,6 +4,7 @@
   "description": "Adds XPath command to Cypress.io test runner",
   "main": "src",
   "scripts": {
+    "lint": "eslint . --ext .ts,.js",
     "cy:run": "node ../../scripts/cypress.js run --e2e",
     "cy:open": "node ../../scripts/cypress.js open --e2e --project ${PWD}"
   },
