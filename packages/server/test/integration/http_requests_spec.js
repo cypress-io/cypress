@@ -2199,7 +2199,7 @@ describe('Routes', () => {
 
     context('content injection', () => {
       beforeEach(function () {
-        return this.setup('http://www.google.com')
+        return this.setup('http://www.cypress.io')
       })
 
       it('injects when head has attributes', async function () {
@@ -2212,7 +2212,7 @@ describe('Routes', () => {
         const injection = await getRunnerInjectionContents()
         const contents = removeWhitespace(Fixtures.get('server/expected_head_inject.html').replace('{{injection}}', injection))
         const res = await this.rp({
-          url: 'http://www.google.com/bar',
+          url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
           },
@@ -2234,7 +2234,7 @@ describe('Routes', () => {
         const contents = removeWhitespace(Fixtures.get('server/expected_no_head_tag_inject.html').replace('{{injection}}', injection))
 
         const res = await this.rp({
-          url: 'http://www.google.com/bar',
+          url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
           },
@@ -2253,7 +2253,7 @@ describe('Routes', () => {
         })
 
         return this.rp({
-          url: 'http://www.google.com/bar',
+          url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
           },
@@ -2261,7 +2261,7 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(200)
 
-          expect(res.body).to.include('<HTML> <HEAD> <script type=\'text/javascript\'> document.domain = \'google.com\';')
+          expect(res.body).to.include('<HTML> <HEAD> <script type=\'text/javascript\'> document.domain = \'cypress.io\';')
         })
       })
 
@@ -2273,7 +2273,7 @@ describe('Routes', () => {
         })
 
         return this.rp({
-          url: 'http://www.google.com/bar',
+          url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
           },
@@ -2281,7 +2281,7 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(200)
 
-          expect(res.body).to.include('<html> <head> <script type=\'text/javascript\'> document.domain = \'google.com\';')
+          expect(res.body).to.include('<html> <head> <script type=\'text/javascript\'> document.domain = \'cypress.io\';')
 
           expect(res.body).to.include('</head> <body><nav>some nav</nav><header>header</header></body> </html>')
         })
@@ -2295,7 +2295,7 @@ describe('Routes', () => {
         })
 
         return this.rp({
-          url: 'http://www.google.com/bar',
+          url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
           },
@@ -2315,7 +2315,7 @@ describe('Routes', () => {
         })
 
         return this.rp({
-          url: 'http://www.google.com/bar',
+          url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
           },
@@ -2337,7 +2337,7 @@ describe('Routes', () => {
         })
 
         return this.rp({
-          url: 'http://www.google.com/bar',
+          url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
           },
@@ -2359,7 +2359,7 @@ describe('Routes', () => {
         })
 
         return this.rp({
-          url: 'http://www.google.com/bar',
+          url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
           },
@@ -2379,7 +2379,7 @@ describe('Routes', () => {
         })
 
         return this.rp({
-          url: 'http://www.google.com/bar',
+          url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=false',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -2388,7 +2388,7 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(200)
 
-          expect(res.body).to.eq('<html> <head> <script type=\'text/javascript\'> document.domain = \'google.com\'; </script> </head> <body>hello from bar!</body> </html>')
+          expect(res.body).to.eq('<html> <head> <script type=\'text/javascript\'> document.domain = \'cypress.io\'; </script> </head> <body>hello from bar!</body> </html>')
         })
       })
 
@@ -2397,7 +2397,7 @@ describe('Routes', () => {
         .get('/bar')
         .reply(302, undefined, {
           // redirect us to google.com!
-          'Location': 'http://www.google.com/foo',
+          'Location': 'http://www.cypress.io/foo',
         })
 
         nock(this.server.remoteStates.current().origin)
@@ -2407,14 +2407,14 @@ describe('Routes', () => {
         })
 
         return this.rp({
-          url: 'http://www.google.com/bar',
+          url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=true',
           },
         })
         .then((res) => {
           expect(res.statusCode).to.eq(302)
-          expect(res.headers['location']).to.eq('http://www.google.com/foo')
+          expect(res.headers['location']).to.eq('http://www.cypress.io/foo')
           expect(res.headers['set-cookie']).to.match(/initial=true/)
 
           return this.rp(res.headers['location'])
@@ -2437,7 +2437,7 @@ describe('Routes', () => {
         })
 
         return this.rp({
-          url: 'http://www.google.com/elements.html',
+          url: 'http://www.cypress.io/elements.html',
           headers: {
             'Cookie': '__cypress.initial=true',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -2446,7 +2446,7 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(200)
 
-          expect(res.body).to.include('document.domain = \'google.com\';')
+          expect(res.body).to.include('document.domain = \'cypress.io\';')
         })
       })
 
@@ -2479,7 +2479,7 @@ describe('Routes', () => {
         })
 
         return this.rp({
-          url: 'http://www.google.com/bar',
+          url: 'http://www.cypress.io/bar',
           headers: {
             'Cookie': '__cypress.initial=false',
           },
@@ -2534,10 +2534,10 @@ describe('Routes', () => {
       })
 
       it('injects even on 5xx responses', function () {
-        return this.setup('https://www.google.com')
+        return this.setup('https://www.cypress.io')
         .then(() => {
           this.server.onRequest((req, res) => {
-            return nock('https://www.google.com')
+            return nock('https://www.cypress.io')
             .get('/')
             .reply(500, '<html><head></head><body>google</body></html>', {
               'Content-Type': 'text/html',
@@ -2545,7 +2545,7 @@ describe('Routes', () => {
           })
 
           return this.rp({
-            url: 'https://www.google.com/',
+            url: 'https://www.cypress.io/',
             headers: {
               'Accept': 'text/html, application/xhtml+xml, */*',
             },
@@ -2553,7 +2553,7 @@ describe('Routes', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(500)
 
-            expect(res.body).to.include('document.domain = \'google.com\'')
+            expect(res.body).to.include('document.domain = \'cypress.io\'')
           })
         })
       })
@@ -2624,7 +2624,7 @@ describe('Routes', () => {
         })
 
         return this.rp({
-          url: 'http://www.google.com/iframe',
+          url: 'http://www.cypress.io/iframe',
           headers: {
             'Cookie': '__cypress.initial=false',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -2635,19 +2635,19 @@ describe('Routes', () => {
 
           const body = cleanResponseBody(res.body)
 
-          expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = \'google.com\'; </script></head></html>')
+          expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = \'cypress.io\'; </script></head></html>')
         })
       })
 
       it('does not inject document.domain on matching super domains but different subdomain - when the domain is set to strict same origin (google)', function () {
-        nock('http://mail.google.com')
+        nock('http://www.google.com')
         .get('/iframe')
         .reply(200, '<html><head></head></html>', {
           'Content-Type': 'text/html',
         })
 
         return this.rp({
-          url: 'http://mail.google.com/iframe',
+          url: 'http://www.google.com/iframe',
           headers: {
             'Cookie': '__cypress.initial=false',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -2694,7 +2694,7 @@ describe('Routes', () => {
         })
 
         return this.rp({
-          url: 'http://www.google.com/json',
+          url: 'http://www.cypress.io/json',
           json: true,
           headers: {
             'Cookie': '__cypress.initial=false',
@@ -2734,7 +2734,7 @@ describe('Routes', () => {
         .reply(200, { foo: 'bar' })
 
         return this.rp({
-          url: 'http://www.google.com/json',
+          url: 'http://www.cypress.io/json',
           headers: {
             'Cookie': '__cypress.initial=true',
             'Accept': 'application/json',
@@ -2757,7 +2757,7 @@ describe('Routes', () => {
         })
 
         return this.rp({
-          url: 'http://www.google.com/iframe',
+          url: 'http://www.cypress.io/iframe',
           headers: {
             'Cookie': '__cypress.initial=false',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -2788,7 +2788,7 @@ describe('Routes', () => {
           headers['Accept'] = type
 
           return this.rp({
-            url: 'http://www.google.com/iframe',
+            url: 'http://www.cypress.io/iframe',
             headers,
           })
           .then((res) => {
