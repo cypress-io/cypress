@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /*global globalThis*/
 require('../spec_helper')
 const _ = require('lodash')
