@@ -63,37 +63,33 @@ const parseValueActualAndExpected = (value, actual, expected) => {
   return obj
 }
 
-export const isCheckingExistence = (chainerString) => /exist/.test(chainerString.split('.'))
+export const isCheckingExistence = (args) => _.isString(args[0]) && /exist|undefined|null|ok|eq/.test(args[0])
 
-export const isCheckingLength = (chainerString) => /length/.test(chainerString.split('.'))
+export const isCheckingLength = (args) => _.isString(args[0]) && /length/.test(args[0])
 
-export const create = (Cypress: ICypress, cy: $Cy) => {
-  const hasUpcomingExistenceAssertions = () => {
-    const index = cy.queue.index + 1
-
-    // grab the rest of the queue'd commands
-    for (let cmd of cy.queue.slice(index)) {
-      // don't break on utilities, just skip over them
-      if (cmd.is('utility')) {
-        continue
-      }
-
-      // grab all of the queued commands which are
-      // assertions and match our current chainerId
-      if (cmd.get('name') === 'and' || cmd.get('name') === 'should') {
-        const chainers = cmd.get('args')[0]
-
-        if (_.isString(chainers) && (isCheckingExistence(chainers) || isCheckingLength(chainers))) {
-          return true
-        }
-      } else {
-        break
-      }
-    }
-
+export const hasUpcomingExistenceAssertions = (command) => {
+  if (!command || !command.get('next')) {
     return false
   }
 
+  let next = command.get('next')
+
+  while (next.is('utility')) {
+    next = next.get('next')
+  }
+
+  if (next.get('name') === 'and' || next.get('name') === 'should') {
+    const args = next.get('args')
+
+    if (isCheckingExistence(args) || isCheckingLength(args)) {
+      return true
+    }
+  }
+
+  return false
+}
+
+export const create = (Cypress: ICypress, cy: $Cy) => {
   function assert (passed, message, value, actual, expected, error) {
     // slice off everything after a ', but' or ' but ' for passing assertions, because
     // otherwise it doesn't make sense:
@@ -200,10 +196,6 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
 
     // TODO: define the specific type of options
     verifyUpcomingAssertions (subject, options: Record<string, any> = {}, callbacks: VerifyUpcomingAssertionsCallbacks = {}) {
-      if (hasUpcomingExistenceAssertions()) {
-        return Promise.resolve(subject)
-      }
-
       _.defaults(callbacks, {
         ensureExistenceFor: 'dom',
       })
@@ -235,10 +227,6 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
           return $el
         }
 
-        return subject
-      }
-
-      const onPassFn = () => {
         return subject
       }
 
@@ -298,9 +286,12 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         }
       }
 
+      if (hasUpcomingExistenceAssertions(cy.state('current'))) {
+        return Promise.resolve(subject)
+      }
+
       return Promise
       .try(ensureExistence)
-      .then(onPassFn)
       .catch(onFailFn)
     },
   }

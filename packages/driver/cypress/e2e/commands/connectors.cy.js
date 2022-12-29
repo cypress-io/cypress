@@ -475,17 +475,11 @@ describe('src/cy/commands/connectors', () => {
         })
 
         it('works with 0 as a value if object has property 0', () => {
-          let i = 0
-          const fn = () => {
-            if (i++ === 0) {
-              return 'cy.noop is undocumented'
-            }
+          const fn1 = () => 'cy.noop is undocumented'
+          const fn2 = () => 'and I don\'t understand what it is'
 
-            return 'and I don\'t understand what it is'
-          }
-
-          cy.wrap([fn, 'bar']).invoke(0).should('eq', 'cy.noop is undocumented')
-          cy.wrap({ '0': fn }).invoke(0).should('eq', 'and I don\'t understand what it is')
+          cy.wrap([fn1, 'bar']).invoke(0).should('eq', 'cy.noop is undocumented')
+          cy.wrap({ '0': fn2 }).invoke(0).should('eq', 'and I don\'t understand what it is')
         })
 
         it('forwards any additional arguments', function () {
@@ -1094,11 +1088,10 @@ describe('src/cy/commands/connectors', () => {
       })
 
       it('works with 0 as a value if object has property 0', () => {
-        cy.wrap(['foo', 'bar']).its(0).should('eq', 'foo')
-        cy.wrap({ '0': 'whoa' }).its(0).should('eq', 'whoa')
+        // cy.wrap(['foo', 'bar']).its(0).should('eq', 'foo')
+        // cy.wrap({ '0': 'whoa' }).its(0).should('eq', 'whoa')
 
-        // eslint-disable-next-line no-sparse-arrays
-        cy.wrap([/*empty*/, 'spooky']).its(0).should('not.exist')
+        cy.wrap([undefined, 'spooky']).its(0).should('not.exist')
       })
 
       it('reduces into dot separated values', () => {
@@ -1245,7 +1238,8 @@ describe('src/cy/commands/connectors', () => {
           .onCall(0).returns(undefined)
           .onCall(1).returns(undefined)
           .onCall(2).returns(undefined)
-          .onCall(3).returns(true),
+          .onCall(3).returns(true)
+          .onCall(4).returns(true),
         )
 
         cy.wrap(obj).its('foo').should('eq', true)

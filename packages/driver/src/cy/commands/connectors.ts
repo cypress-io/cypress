@@ -4,6 +4,7 @@ import Promise from 'bluebird'
 import $dom from '../../dom'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
+import { hasUpcomingExistenceAssertions } from '../assertions'
 
 const returnFalseIfThenable = (key, ...args): boolean => {
   if ((key === 'then') && _.isFunction(args[0]) && _.isFunction(args[1])) {
@@ -30,16 +31,6 @@ const getFormattedElement = ($el) => {
   }
 
   return $el
-}
-
-const upcomingAssertion = (next) => {
-  if (!next || next.get('type') !== 'assertion') {
-    return false
-  }
-
-  const arg = next.get('args')[0]
-
-  return arg === 'not.exist' || arg === 'be.undefined' || arg === 'not.be.ok' || arg === 'be.null' || arg === 'eq' || arg === 'not.eq'
 }
 
 export default function (Commands, Cypress, cy, state) {
@@ -202,7 +193,7 @@ export default function (Commands, Cypress, cy, state) {
         },
       })
 
-      if (value == null && !upcomingAssertion(this.get('next'))) {
+      if (value == null && !hasUpcomingExistenceAssertions(this)) {
         if (!_.has(subject, path)) {
           $errUtils.throwErrByPath('invoke_its.nonexistent_prop', { args: { cmd, prop: path, value } })
         }

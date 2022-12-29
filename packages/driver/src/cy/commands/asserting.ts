@@ -83,8 +83,8 @@ export default function (Commands, Cypress, cy, state) {
     const chainers = chainerString.split('.')
     const lastChainer = _.last(chainers)
 
-    const checkingExistence = isCheckingExistence(chainerString)
-    const checkingLengthOrExistence = checkingExistence || isCheckingLength(chainerString)
+    const checkingExistence = isCheckingExistence(args)
+    const checkingLengthOrExistence = checkingExistence || isCheckingLength(args)
 
     return (subject) => {
       let exp = cy.expect(subject).to
