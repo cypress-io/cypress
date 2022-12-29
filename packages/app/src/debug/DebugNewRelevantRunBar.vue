@@ -6,7 +6,7 @@
   >
     <ul
       id="metadata"
-      class="rounded flex flex-row bg-indigo-100 border-indigo-100 p-12px gap-x-2 items-center whitespace-nowrap children:flex children:items-center"
+      class="rounded flex flex-row bg-indigo-50 border-indigo-100 p-12px gap-x-2 items-center whitespace-nowrap children:flex children:items-center"
     >
       <li>
         <DebugRunNumber
@@ -25,13 +25,13 @@
           :total-passed="data.totalPassed || 0"
           :total-tests="data.totalTests || 0"
         />
-        <span
+        <button
           v-else
-          class="cursor-pointer text-indigo-500 hocus-link hover:underline"
+          class="cursor-pointer text-indigo-500 hocus-link hocus-link-default"
           @click="navigateToNewerRun"
         >
           {{ t('debugPage.viewRun') }}
-        </span>
+        </button>
       </li>
     </ul>
   </div>

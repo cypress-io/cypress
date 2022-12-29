@@ -17,7 +17,7 @@
 
       <DebugPendingRunSplash
         v-if="isFirstPendingRun"
-        class="mt-8"
+        class="mt-12"
         :total-skipped="run.totalSkipped || 0"
         :total-failed="run.totalFailed || 0"
         :total-passed="run.totalPassed || 0"
