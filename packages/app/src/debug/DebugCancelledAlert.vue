@@ -21,7 +21,7 @@
       <template v-if="cancellation.cancelledAt">
         <div class="rounded-full font-semibold bg-orange-500 h-3px mx-10px w-3px" />
         <div>
-          {{ dayjs(cancellation.cancelledAt).utc().format('MMM D, YYYY h:mm A UTC') }}
+          {{ dayjs(cancellation.cancelledAt).local().format('MMM D, YYYY h:mm A') }}
         </div>
       </template>
     </div>
