@@ -42,7 +42,7 @@
           </div>
           <ul
             data-cy="spec-header-metadata"
-            class="flex flex-row truncate items-center gap-x-3 text-gray-700 whitespace-nowrap children:flex children:items-center font-normal text-sm"
+            class="flex flex-wrap items-center gap-x-3 text-gray-700 whitespace-nowrap children:flex children:items-center font-normal text-sm"
           >
             <li
               :data-cy="'debugHeader-results'"

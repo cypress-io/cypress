@@ -263,9 +263,42 @@ describe('<DebugSpec/> responsive UI', () => {
       },
     }
 
+    const testResult: {[thumprint: string]: TestResults[]} = {
+      'abcd': [
+        {
+          id: '676df87878',
+          titleParts: ['Login', 'Should redirect unauthenticated user to signin page', 'Enter Password', '.hook() should be called'],
+          instance: {
+            groupId: '123',
+            hasScreenshots: true,
+            hasStdout: true,
+            hasVideo: true,
+            screenshotsUrl: 'www.cypress.io',
+            stdoutUrl: 'www.cypress.io',
+            videoUrl: 'www.cypress.io',
+          },
+        },
+      ],
+      'efgh': [
+        {
+          id: '78hjkdf987d9f',
+          titleParts: ['Login', 'redirects to stored path after login'],
+          instance: {
+            groupId: '123',
+            hasScreenshots: true,
+            hasStdout: true,
+            hasVideo: true,
+            screenshotsUrl: 'www.cypress.io',
+            stdoutUrl: 'www.cypress.io',
+            videoUrl: 'www.cypress.io',
+          },
+        },
+      ],
+    }
+
     cy.mount(() => (
       <div class="px-24px">
-        <DebugSpec spec={spec} testResults={testResultSingleGroup} groups={singleGroup} testingType={'e2e'} matchesCurrentTestingType={true}/>
+        <DebugSpec spec={spec} testResults={testResult} groups={singleGroup} testingType={'e2e'} matchesCurrentTestingType={true}/>
       </div>
     ))
 

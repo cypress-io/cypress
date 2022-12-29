@@ -1,12 +1,13 @@
 <template>
   <ul
     data-cy="stats-metadata"
-    class="flex flex-row items-center gap-x-2 text-gray-700 whitespace-nowrap children:flex children:items-center font-normal text-sm w-full stats-metadata-class"
+    class="contents items-center gap-x-2 text-gray-700 whitespace-nowrap children:flex children:items-center font-normal text-sm w-full stats-metadata-class"
   >
     <li
       v-for="(result, i) in results"
       :key="i"
       :data-cy="`metaData-Results-${result.name}`"
+      class="py-1"
     >
       <span
         v-if="(result.value && (result.name === 'browser' || result.name === 'browser-groups'))"
