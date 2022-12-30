@@ -282,7 +282,7 @@ declare namespace Cypress {
   }
 
   /**
-   * List of spec titlePaths (parent suite names + test name)
+   * List of full title path (parent suite names + test name) of the Cloud tests that failed that need debugged.
    */
   type TestFilter = string[] | null // could make this a callback/regex in the future
 
