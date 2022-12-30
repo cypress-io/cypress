@@ -197,7 +197,7 @@ export const policyForDomain = (url: string, opts?: {
 }
 
 export const shouldInjectDocumentDomain = (url: string, opts?: {
-  useDefaultDocumentForDomains: string[]
+  useDefaultDocumentForDomains: string[] | null
 }) => {
   // When determining if we want to injection document domain,
   // We need to make sure the experimentalUseDefaultDocumentDomain feature flag is off.
