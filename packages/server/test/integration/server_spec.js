@@ -1230,11 +1230,11 @@ describe('Server', () => {
       it('can go from http -> file -> http', function () {
         nock('http://www.cypress.io')
         .get('/')
-        .reply(200, '<html><head></head><body>google</body></html>', {
+        .reply(200, '<html><head></head><body>cypress</body></html>', {
           'Content-Type': 'text/html',
         })
         .get('/')
-        .reply(200, '<html><head></head><body>google</body></html>', {
+        .reply(200, '<html><head></head><body>cypress</body></html>', {
           'Content-Type': 'text/html',
         })
 
@@ -1257,21 +1257,21 @@ describe('Server', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include('document.domain')
-            expect(res.body).to.include('google.com')
+            expect(res.body).to.include('cypress.io')
 
             expect(res.body).to.include('.action("app:window:before:load",window)')
-            expect(res.body).to.include('</script></head><body>google</body></html>')
+            expect(res.body).to.include('</script></head><body>cypress</body></html>')
           })
         }).then(() => {
           expect(this.server.remoteStates.current()).to.deep.eq({
             auth: undefined,
             origin: 'http://www.cypress.io',
             strategy: 'http',
-            domainName: 'google.com',
+            domainName: 'cypress.io',
             fileServer: null,
             props: {
-              domain: 'google',
-              tld: 'com',
+              domain: 'cypress',
+              tld: 'io',
               port: '80',
               subdomain: 'www',
               protocol: 'http:',
@@ -1332,21 +1332,21 @@ describe('Server', () => {
             .then((res) => {
               expect(res.statusCode).to.eq(200)
               expect(res.body).to.include('document.domain')
-              expect(res.body).to.include('google.com')
+              expect(res.body).to.include('cypress.io')
 
               expect(res.body).to.include('.action("app:window:before:load",window)')
-              expect(res.body).to.include('</script></head><body>google</body></html>')
+              expect(res.body).to.include('</script></head><body>cypress</body></html>')
             })
           }).then(() => {
             expect(this.server.remoteStates.current()).to.deep.eq({
               auth: undefined,
               origin: 'http://www.cypress.io',
               strategy: 'http',
-              domainName: 'google.com',
+              domainName: 'cypress.io',
               fileServer: null,
               props: {
-                domain: 'google',
-                tld: 'com',
+                domain: 'cypress',
+                tld: 'io',
                 port: '80',
                 subdomain: 'www',
                 protocol: 'http:',
