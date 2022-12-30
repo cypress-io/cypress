@@ -1914,13 +1914,13 @@ type ReactComponentResponse {
   errored: Boolean
 }
 
+""""""
 type RelevantRun {
-  current: Int!
-  next: Int!
-}
+  """"""
+  current: Int
 
-type RelevantRunResponse {
-  hash: String!
+  """"""
+  next: Int
 }
 
 """
@@ -2145,7 +2145,7 @@ type Subscription {
   """
   Return the runs from the Cloud relevant to the current local git commit
   """
-  relevantRuns: [RelevantRunResponse!]
+  relevantRuns: RelevantRun
 
   """Issued when the watched specs for the project changes"""
   specsChange: CurrentProject

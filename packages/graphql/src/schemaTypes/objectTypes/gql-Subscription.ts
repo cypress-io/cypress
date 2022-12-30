@@ -2,6 +2,7 @@ import type { PushFragmentData } from '@packages/data-context/src/actions'
 import { list, nonNull, objectType, stringArg, subscriptionType } from 'nexus'
 import { CurrentProject, DevState, Query } from '.'
 import { Spec } from './gql-Spec'
+import { RelevantRun } from './gql-RelevantRun'
 
 export const Subscription = subscriptionType({
   definition (t) {
@@ -126,19 +127,13 @@ export const Subscription = subscriptionType({
     })
 
     t.field('relevantRuns', {
-      type: list(nonNull(objectType({
-        name: 'RelevantRunResponse',
-        definition (t) {
-          t.nonNull.string('hash')
-        },
-      }))),
+      type: RelevantRun,
       description: 'Return the runs from the Cloud relevant to the current local git commit',
       subscribe: (source, args, ctx) => {
         return ctx.emitter.subscribeTo('relevantRunChange')
       },
-      resolve: (source, args, ctx) => {
-        //TODO Fix hardcoded response
-        return [{ hash: '7ijfd88d' }]
+      resolve: async (source, args, ctx) => {
+        return ctx.relevantRuns.getRelevantRuns(source.git?.currentHashes || [])
       },
     })
   },

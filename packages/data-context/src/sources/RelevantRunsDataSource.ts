@@ -1,7 +1,7 @@
 import { gql } from '@urql/core'
 import { print } from 'graphql'
 import debugLib from 'debug'
-import { compact } from 'lodash'
+import { chain, compact } from 'lodash'
 
 import type { DataContext } from '../DataContext'
 import type { Query } from '../gen/graphcache-config.gen'
@@ -29,16 +29,23 @@ const RELEVANT_RUN_OPERATION_DOC = gql`
 `
 const RELEVANT_RUN_UPDATE_OPERATION = print(RELEVANT_RUN_OPERATION_DOC)
 
+type RelevantRunReturn = {
+  current?: number
+  next?: number
+}
+
+const EMPTY_RETURN: RelevantRunReturn = { current: undefined, next: undefined }
+
 export class RelevantRunsDataSource {
   constructor (private ctx: DataContext) {}
 
-  async getRelevantRuns (shas: string[]) {
+  async getRelevantRuns (shas: string[]): Promise<RelevantRunReturn> {
     const projectSlug = await this.ctx.project.projectId()
 
     if (!projectSlug) {
       debug('No project detected')
 
-      return []
+      return EMPTY_RETURN
     }
 
     debug(`Fetching runs for ${projectSlug} and ${shas.length} shas`)
@@ -66,11 +73,16 @@ export class RelevantRunsDataSource {
         return undefined
       }) || []
 
+      const compactedRuns = compact(runs)
+
       debug(`Found ${runs.length} runs for ${projectSlug} and ${shas.length} shas`)
 
-      return compact(runs)
+      return {
+        current: chain(compactedRuns).filter((run) => run.status !== 'RUNNING').map((run) => run.runNumber).first().value(),
+        next: chain(compactedRuns).filter((run) => run.status === 'RUNNING').map((run) => run.runNumber).first().value(),
+      }
     }
 
-    return []
+    return EMPTY_RETURN
   }
 }

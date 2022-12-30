@@ -30,7 +30,7 @@ subscription Debug_specsChange {
 
 gql `
 query Debug($runNumber: Int!) {
-   ...DebugSpecs
+  ...DebugSpecs
 }
 `
 
