@@ -818,5 +818,16 @@ describe('ProjectDataSource', () => {
 
       expect(defaultSpecFileName).to.equal('cypress/component-tests/foo/ComponentName.spec.js')
     })
+
+    it('yields correct filename from specpattern if there are jsx files in component testing', async () => {
+      ctx.coreData.currentTestingType = 'component'
+      sinon.stub(ctx.project, 'specPatterns').resolves({ specPattern: [] })
+
+      await ctx.actions.file.writeFileInProject(path.join('src', 'components', 'App.jsx'), '// foo')
+
+      const defaultSpecFileName = await ctx.project.defaultSpecFileName()
+
+      expect(defaultSpecFileName).to.equal('cypress/component/ComponentName.cy.jsx', defaultSpecFileName)
+    })
   })
 })
