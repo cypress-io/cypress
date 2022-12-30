@@ -176,11 +176,11 @@ describe('<DebugContainer />', () => {
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
             const test = result.currentProject.cloudProject.runByNumber
-            const other = CloudRunStubs.running as typeof test
 
-            other!.runNumber = 1
-
-            result.currentProject.cloudProject.runByNumber = other
+            result.currentProject.cloudProject.runByNumber = {
+              ...CloudRunStubs.running,
+              runNumber: 1,
+            } as typeof test
           }
         },
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
@@ -190,7 +190,7 @@ describe('<DebugContainer />', () => {
       cy.findByTestId('debug-pending-splash')
       .should('be.visible')
       .within(() => {
-        cy.findByTestId('debug-pending-counts').should('have.text', '8 of 10 specs completed')
+        cy.findByTestId('debug-pending-counts').should('have.text', '0 of 0 specs completed')
       })
     })
 
@@ -199,9 +199,10 @@ describe('<DebugContainer />', () => {
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
             const test = result.currentProject.cloudProject.runByNumber
-            const other = CloudRunStubs.failingWithTests as typeof test
 
-            result.currentProject.cloudProject.runByNumber = other
+            result.currentProject.cloudProject.runByNumber = {
+              ...CloudRunStubs.failingWithTests,
+            } as typeof test
           }
         },
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
@@ -218,9 +219,10 @@ describe('<DebugContainer />', () => {
           onResult: (result) => {
             if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
               const test = result.currentProject.cloudProject.runByNumber
-              const other = CloudRunStubs.running as typeof test
 
-              result.currentProject.cloudProject.runByNumber = other
+              result.currentProject.cloudProject.runByNumber = {
+                ...CloudRunStubs.running,
+              } as typeof test
             }
           },
           render: (gqlVal) => <DebugContainer gql={gqlVal} />,
@@ -229,7 +231,7 @@ describe('<DebugContainer />', () => {
         cy.findByTestId('newer-relevant-run')
         .should('be.visible')
         .and('contain.text', 'fix: make gql work RUNNING')
-        .and('contain.text', '8 of 10 specs completed')
+        .and('contain.text', '0 of 0 specs completed')
       })
 
       it('displays newer run with link when complete', () => {

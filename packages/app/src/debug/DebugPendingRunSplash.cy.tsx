@@ -5,15 +5,18 @@ describe('<DebugPendingRunSplash />', () => {
   it('renders as expected', () => {
     cy.mountFragment(DebugPendingRunSplashFragmentDoc, {
       onResult (result) {
-        result.totalTests = 999
+        result.specs = [
+          { id: '', status: 'CANCELLED', __typename: 'CloudSpecRun' },
+          { id: '', status: 'RUNNING', __typename: 'CloudSpecRun' },
+          { id: '', status: 'PASSED', __typename: 'CloudSpecRun' },
+          { id: '', status: 'FAILED', __typename: 'CloudSpecRun' },
+          { id: '', status: 'UNCLAIMED', __typename: 'CloudSpecRun' },
+        ]
       },
       render: (gqlVal) => {
         return (
           <DebugPendingRunSplash
-            totalTests={gqlVal.totalTests!}
-            totalSkipped={gqlVal.totalSkipped!}
-            totalFailed={gqlVal.totalFailed!}
-            totalPassed={gqlVal.totalPassed!}
+            specStatuses={gqlVal.specs.map((spec) => spec.status)}
           />
         )
       },

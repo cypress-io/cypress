@@ -13,10 +13,7 @@
       </span>
       <div class="font-normal text-md">
         <DebugPendingRunCounts
-          :total-skipped="totalSkipped"
-          :total-failed="totalFailed"
-          :total-passed="totalPassed"
-          :total-tests="totalTests"
+          :spec-statuses="specStatuses"
         />
       </div>
     </div>
@@ -28,6 +25,7 @@ import { gql } from '@urql/core'
 import { useI18n } from 'vue-i18n'
 import { IconTechnologyDashboardRunning } from '@cypress-design/vue-icon'
 import DebugPendingRunCounts from './DebugPendingRunCounts.vue'
+import type { CloudSpecStatus } from '../generated/graphql'
 
 gql`
 fragment DebugPendingRunSplash on CloudRun {
@@ -39,10 +37,7 @@ fragment DebugPendingRunSplash on CloudRun {
 const { t } = useI18n()
 
 defineProps<{
-  totalSkipped: number
-  totalFailed: number
-  totalPassed: number
-  totalTests: number
+  specStatuses: CloudSpecStatus[]
 }>()
 
 </script>

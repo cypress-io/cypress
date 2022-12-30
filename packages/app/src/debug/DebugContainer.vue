@@ -19,10 +19,7 @@
       <DebugPendingRunSplash
         v-if="isFirstPendingRun"
         class="mt-12"
-        :total-skipped="run.totalSkipped || 0"
-        :total-failed="run.totalFailed || 0"
-        :total-passed="run.totalPassed || 0"
-        :total-tests="run.totalTests || 0"
+        :spec-statuses="specStatuses"
       />
       <template v-else>
         <DebugPageDetails
@@ -171,6 +168,8 @@ const debugSpecsArray = computed(() => {
 
   return []
 })
+
+const specStatuses = computed(() => run.value?.specs.map((spec) => spec.status || 'UNCLAIMED') || [])
 
 // TODO GH#24440 Re-map to use relevant run data point (currently stubbed with current run)
 const newerRelevantRun = computed(() => run.value)

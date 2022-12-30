@@ -20,10 +20,7 @@
       <li class="font-normal text-sm truncate">
         <DebugPendingRunCounts
           v-if="data.status === 'RUNNING'"
-          :total-skipped="data.totalSkipped || 0"
-          :total-failed="data.totalFailed || 0"
-          :total-passed="data.totalPassed || 0"
-          :total-tests="data.totalTests || 0"
+          :spec-statuses="specStatuses"
         />
         <button
           v-else
@@ -50,13 +47,10 @@ fragment DebugNewRelevantRunBar on CloudRun {
   runNumber
   status
   url
-  totalSkipped
-  totalFailed
-  totalPassed
-  totalTests
   commitInfo {
     summary
   }
+  ...DebugPendingRunCounts
 }
 `
 
@@ -67,6 +61,8 @@ const props = defineProps<{
 }>()
 
 const data = computed(() => props.gql)
+
+const specStatuses = computed(() => data.value?.specs.map((spec) => spec.status || 'UNCLAIMED') || [])
 
 function navigateToNewerRun () {
   // TODO GH#24440 Stubbed pending updates to the store so the "viewed run" value can be managed there
