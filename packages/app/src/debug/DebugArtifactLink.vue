@@ -8,6 +8,7 @@
       :data-cy="`${icon}-button`"
       :href="props.url || '#'"
       :use-default-hocus="true"
+      :aria-label="popperText"
     >
       <component
         :is="ICON_MAP[icon]"

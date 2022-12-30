@@ -31,28 +31,33 @@ const group2 = {
   id: '456',
 }
 
-const rowElementTesting = (testResult: TestResults) => {
-  const l = testResult.titleParts.length
-  const finalPartLength = testResult.titleParts[l - 1].length
+/**
+ * This helper testing function mimicks mappedTitleParts in DebugFailedTest.
+ * It creates an ordered array of titleParts and chevron icons and then asserts
+ * the order in which they are rendered using the testAttr and text values.
+ */
+const assertRowContents = (testResults: TestResults) => {
+  const l = testResults.titleParts.length
+  const finalPartLength = testResults.titleParts[l - 1].length
   const assertionArr = [{ testAttr: 'failed-icon', text: '' }]
 
   if (l <= 3) {
-    testResult.titleParts.forEach((title, index) => {
+    testResults.titleParts.forEach((title, index) => {
       if (index === l - 1) {
-        assertionArr.push({ testAttr: `titleParts-${index}-title`, text: testResult.titleParts[l - 1].slice(0, finalPartLength - 15) })
-        assertionArr.push({ testAttr: `titleParts-${index + 1}-title`, text: testResult.titleParts[l - 1].slice(finalPartLength - 15) })
+        assertionArr.push({ testAttr: `titleParts-${index}-title`, text: testResults.titleParts[l - 1].slice(0, finalPartLength - 15) })
+        assertionArr.push({ testAttr: `titleParts-${index + 1}-title`, text: testResults.titleParts[l - 1].slice(finalPartLength - 15) })
       } else {
         assertionArr.push({ testAttr: `titleParts-${index}-title`, text: title })
         assertionArr.push({ testAttr: `titleParts-${index + 1}-chevron`, text: '' })
       }
     })
   } else {
-    testResult.titleParts.forEach((title, index) => {
+    testResults.titleParts.forEach((title, index) => {
       if (index === l - 1) {
-        if (testResult.titleParts[length - 1]) {
+        if (testResults.titleParts[l - 1]) {
           assertionArr.push({ testAttr: `titleParts-${index + 1}-chevron`, text: '' })
-          assertionArr.push({ testAttr: `titleParts-${index + 1}-title`, text: testResult.titleParts[l - 1].slice(0, finalPartLength - 15) })
-          assertionArr.push({ testAttr: `titleParts-${index + 2}-title`, text: testResult.titleParts[l - 1].slice(finalPartLength - 15) })
+          assertionArr.push({ testAttr: `titleParts-${index + 1}-title`, text: testResults.titleParts[l - 1].slice(0, finalPartLength - 15) })
+          assertionArr.push({ testAttr: `titleParts-${index + 2}-title`, text: testResults.titleParts[l - 1].slice(finalPartLength - 15) })
         }
       } else {
         if (index === 0) {
@@ -67,13 +72,10 @@ const rowElementTesting = (testResult: TestResults) => {
     })
   }
 
-  cy.findByTestId('test-row').children().each((ele, index) => {
-    if (assertionArr[index]) {
-      cy.wrap(ele).should('have.attr', 'data-cy', assertionArr[index].testAttr)
-      if (assertionArr[index].text !== '') {
-        cy.wrap(ele).should('contain.text', assertionArr[index].text)
-      }
-    }
+  cy.get('[data-cy*=titleParts]').each((ele, index) => {
+    const { testAttr, text } = assertionArr[index]
+
+    cy.findByTestId(testAttr).should('contain.text', text)
   })
 }
 
@@ -100,7 +102,7 @@ describe('<DebugFailedTest/>', () => {
 
     cy.findByTestId('test-row').children().should('have.length', 6)
     cy.findByTestId('failed-icon').should('be.visible')
-    rowElementTesting(testResult)
+    assertRowContents(testResult)
 
     cy.findByTestId('test-group').realHover()
     cy.findByTestId('debug-artifacts').should('be.visible').children().should('have.length', 3)
@@ -126,7 +128,7 @@ describe('<DebugFailedTest/>', () => {
       <DebugFailedTest failedTestsResult={[multipleTitleParts]} groups={[group1]} expandable={false}/>
     ))
 
-    rowElementTesting(multipleTitleParts)
+    assertRowContents(multipleTitleParts)
 
     cy.percySnapshot()
   })
@@ -160,9 +162,13 @@ describe('<DebugFailedTest/>', () => {
     ]
 
     cy.mount(() => (
-      <DebugFailedTest failedTestsResult={testResults} groups={[group1, group2]} expandable={true}/>
+      <div data-cy="test-group">
+        <DebugFailedTest failedTestsResult={testResults} groups={[group1, group2]} expandable={true}/>
+      </div>
     ))
 
+    cy.findByTestId('test-group').realHover()
+    cy.findByTestId('debug-artifacts').should('not.exist')
     cy.findAllByTestId('grouped-row').should('have.length', 2)
     cy.findAllByTestId('grouped-row').first().realHover()
     cy.findAllByTestId('debug-artifacts').first().should('be.visible').children().should('have.length', 3)
@@ -189,7 +195,7 @@ describe('<DebugFailedTest/>', () => {
       </div>
     ))
 
-    rowElementTesting(testResult)
+    assertRowContents(testResult)
 
     cy.percySnapshot()
   })

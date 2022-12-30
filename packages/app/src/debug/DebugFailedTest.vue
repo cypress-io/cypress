@@ -36,7 +36,7 @@
     <div
       v-if="!props.expandable"
       data-cy="debug-artifacts"
-      class="flex flex-grow space-x-4.5 opacity-0 pr-18px justify-end test-row-artifacts"
+      class="flex flex-grow space-x-4.5 opacity-0 px-18px justify-end test-row-artifacts"
     >
       <div
         v-for="result, i in failedTestData.debugArtifacts"

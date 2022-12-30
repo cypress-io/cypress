@@ -41,6 +41,7 @@
 <script lang="ts" setup>
 
 import { computed } from 'vue'
+import { useI18n } from '@cy/i18n'
 import type { SpecDataAggregate } from '@packages/data-context/src/gen/graphcache-config.gen'
 import type { TestingTypeEnum, StatsMetadata_GroupsFragment } from '../generated/graphql'
 import { IconTimeStopwatch,
@@ -55,6 +56,7 @@ import { IconTimeStopwatch,
 
 import LayeredBrowserIcon from './LayeredBrowserIcons.vue'
 import { gql } from '@urql/vue'
+const { t } = useI18n()
 
 gql`
   fragment StatsMetadata_Groups on CloudRunGroup {
@@ -161,17 +163,20 @@ const ORDER_MAP = computed<Record<StatType, Metadata>>(() => {
       name: 'testing-type',
     },
     'GROUPS': {
-      value: props.groups!.length > 1 ? `${props.groups!.length} groups` : `${props.groups!.length} group`,
+      value: props.groups!.length > 1 ? `${props.groups!.length} ${t('debugPage.groups.pluralTitle')}` :
+       `${props.groups!.length} ${t('debugPage.groups.singleTitle')}`,
       icon: IconTechnologyServer,
       name: 'group-server',
     },
     'G_OS': {
-      value: arrMapping.value.oses.length > 1 ? `${arrMapping.value.oses.length} operating systems` : `${arrMapping.value.oses.length} operating system`,
+      value: arrMapping.value.oses.length > 1 ? `${arrMapping.value.oses.length} ${t('debugPage.operatingSystems.pluralTitle')}` :
+      `${arrMapping.value.oses.length} ${t('debugPage.operatingSystems.singleTitle')}`,
       icon: OS_MAP['GROUP'],
       name: 'operating-system-groups',
     },
     'G_BROWSERS': {
-      value: arrMapping.value.browsers.length > 1 ? `${arrMapping.value.browsers.length} browsers` : `${arrMapping.value.browsers.length} browser`,
+      value: arrMapping.value.browsers.length > 1 ? `${arrMapping.value.browsers.length} ${t('debugPage.browsers.pluralTitle')}` :
+      `${arrMapping.value.browsers.length} ${t('debugPage.browsers.singleTitle')}`,
       icon: arrMapping.value.browsers,
       name: 'browser-groups',
     },
