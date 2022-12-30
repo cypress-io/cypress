@@ -1437,7 +1437,7 @@ describe('http/response-middleware', function () {
         config: {
           modifyObstructiveCode: false,
           experimentalModifyObstructiveThirdPartyCode: false,
-          experimentalUseDefaultDocumentDomain: ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com'],
+          experimentalUseDefaultDocumentDomain: null,
         },
         simulatedCookies: [],
       })
@@ -1489,7 +1489,7 @@ describe('http/response-middleware', function () {
         config: {
           modifyObstructiveCode: true,
           experimentalModifyObstructiveThirdPartyCode: true,
-          experimentalUseDefaultDocumentDomain: ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com'],
+          experimentalUseDefaultDocumentDomain: null,
         },
         remoteStates,
         debug: (formatter, ...args) => {

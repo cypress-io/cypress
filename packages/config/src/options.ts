@@ -217,8 +217,8 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     requireRestartOnChange: 'server',
   }, {
     name: 'experimentalUseDefaultDocumentDomain',
-    defaultValue: () => ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com'],
-    validation: (_: string, value: any) => validate.isArrayOfStrings(value),
+    defaultValue: null,
+    validation: (_: string, value: any) => validate.isArrayOfStrings(value) || value === null,
     isExperimental: true,
     requireRestartOnChange: 'server',
   }, {

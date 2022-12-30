@@ -46,7 +46,7 @@ const isResponseHtml = function (contentType, responseBuffer) {
 export class ServerE2E extends ServerBase<SocketE2E> {
   private _urlResolver: Bluebird<Record<string, any>> | null
   // the initialization of this variable is only precautionary as the actual config value is applied when the server is created
-  private useDefaultDocumentForDomains: string[] = ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com']
+  private useDefaultDocumentForDomains: string[] | null = null
 
   constructor () {
     super()

@@ -9,7 +9,7 @@ exports['e2e experimentalUseDefaultDocumentDomain=true / passes'] = `
   │ Browser:      FooBrowser 88                                                                    │
   │ Specs:        1 found (experimental_use_default_document_domain.cy.ts)                         │
   │ Searched:     cypress/e2e/experimental_use_default_document_domain.cy.ts                       │
-  │ Experiments:  experimentalUseDefaultDocumentDomain=*.foobar.com,*.force.com,*.google.com,goog… │
+  │ Experiments:  experimentalUseDefaultDocumentDomain=*.foobar.com                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

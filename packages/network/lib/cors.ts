@@ -12,6 +12,10 @@ const debug = debugModule('cypress:network:cors')
 // match IP addresses or anything following the last .
 const customTldsRe = /(^[\d\.]+$|\.[^\.]+$)/
 
+// TODO: if experimentalUseDefaultDocumentDomain plans to go GA, we can likely lump this strictSameOriginDomains
+// into that config option by default. @see https://github.com/cypress-io/cypress/issues/25317
+const strictSameOriginDomains = Object.freeze(['google.com'])
+
 export function getSuperDomain (url) {
   const parsed = parseUrlIntoHostProtocolDomainTldPort(url)
 
@@ -158,19 +162,36 @@ export const urlSameSiteMatch = (frameUrl: string, topUrl: string): boolean => {
 }
 
 /**
+ *
+ * @param url - the url to check the policy against.
+ * @param arrayOfStringOrGlobPatterns - an array of url strings or globs to match against
+ * @returns {boolean} - whether or not a match was found
+ */
+const doesUrlHostnameMatchGlobArray = (url: string, arrayOfStringOrGlobPatterns: string[]): boolean => {
+  let { hostname } = uri.parse(url)
+
+  return !!arrayOfStringOrGlobPatterns.find((globPattern) => {
+    return minimatch(hostname || '', globPattern)
+  })
+}
+
+/**
  * Returns the policy that will be used for the specified url.
  * @param url - the url to check the policy against.
  * @returns a Policy string.
  */
 export const policyForDomain = (url: string, opts?: {
-  useDefaultDocumentForDomains: string[]
+  useDefaultDocumentForDomains: string[] | null
 }): Policy => {
-  let { hostname } = uri.parse(url)
-  const hasDefaultDomainMatch = !!opts?.useDefaultDocumentForDomains.find((globPattern) => {
-    return minimatch(hostname || '', globPattern)
-  })
+  const obj = parseUrlIntoHostProtocolDomainTldPort(url)
+  let shouldUseSameOriginPolicy = strictSameOriginDomains.includes(`${obj.domain}.${obj.tld}`)
 
-  return hasDefaultDomainMatch ?
+  if (!shouldUseSameOriginPolicy && _.isArray(opts?.useDefaultDocumentForDomains)) {
+    // if the strict same origins matches came up false, we should check the user provided config value for useDefaultDocumentForDomains, if one exists
+    shouldUseSameOriginPolicy = doesUrlHostnameMatchGlobArray(url, opts?.useDefaultDocumentForDomains as string[])
+  }
+
+  return shouldUseSameOriginPolicy ?
     'same-origin' :
     'same-super-domain-origin'
 }
@@ -178,9 +199,14 @@ export const policyForDomain = (url: string, opts?: {
 export const shouldInjectDocumentDomain = (url: string, opts?: {
   useDefaultDocumentForDomains: string[]
 }) => {
-  return policyForDomain(url, {
-    useDefaultDocumentForDomains: opts?.useDefaultDocumentForDomains || [],
-  }) === 'same-super-domain-origin'
+  // When determining if we want to injection document domain,
+  // We need to make sure the experimentalUseDefaultDocumentDomain feature flag is off.
+  // If on, we need to make sure the glob pattern doesn't exist in the array so we cover possible intersections (google).
+  if (_.isArray(opts?.useDefaultDocumentForDomains)) {
+    return doesUrlHostnameMatchGlobArray(url, opts?.useDefaultDocumentForDomains as string[])
+  }
+
+  return true
 }
 
 /**
@@ -192,7 +218,7 @@ export const shouldInjectDocumentDomain = (url: string, opts?: {
  * @returns boolean, true if matching, false if not.
  */
 export const urlMatchesPolicyBasedOnDomain = (frameUrl: string, topUrl: string, opts?: {
-  useDefaultDocumentForDomains: string[]
+  useDefaultDocumentForDomains: string[] | null
 }): boolean => {
   return urlMatchesPolicy({
     policy: policyForDomain(frameUrl, {

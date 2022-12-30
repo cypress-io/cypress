@@ -3022,9 +3022,9 @@ declare namespace Cypress {
      * strings/string globs, and applies defaults for known domains where document.domain is known
      * to be an issue.
      * @see https://developer.mozilla.org/en-US/docs/Web/API/Document/domain
-     * @default {array} ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com']
+     * @default null
      */
-    experimentalUseDefaultDocumentDomain: ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com']
+    experimentalUseDefaultDocumentDomain: string[] | null
     /**
      * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.
      * @default false

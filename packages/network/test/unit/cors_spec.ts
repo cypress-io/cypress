@@ -2,8 +2,6 @@ import { cors } from '../../lib'
 import { expect } from 'chai'
 
 describe('lib/cors', () => {
-  const defaultSameOriginPolicyUrlGlobs = ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com']
-
   context('.parseUrlIntoHostProtocolDomainTldPort', () => {
     const expectUrlToBeParsedCorrectly = (url, obj) => {
       expect(cors.parseUrlIntoHostProtocolDomainTldPort(url)).to.deep.eq(obj)
@@ -325,15 +323,11 @@ describe('lib/cors', () => {
 
   context('.urlMatchesPolicyBasedOnDomain', () => {
     const assertsUrlsAreNotAPolicyMatch = (url1, url2) => {
-      expect(cors.urlMatchesPolicyBasedOnDomain(url1, url2, {
-        useDefaultDocumentForDomains: defaultSameOriginPolicyUrlGlobs,
-      })).to.be.false
+      expect(cors.urlMatchesPolicyBasedOnDomain(url1, url2)).to.be.false
     }
 
     const assertsUrlsAreAPolicyOriginMatch = (url1, url2) => {
-      expect(cors.urlMatchesPolicyBasedOnDomain(url1, url2, {
-        useDefaultDocumentForDomains: defaultSameOriginPolicyUrlGlobs,
-      })).to.be.true
+      expect(cors.urlMatchesPolicyBasedOnDomain(url1, url2)).to.be.true
     }
 
     describe('domain + subdomain', () => {
@@ -460,15 +454,11 @@ describe('lib/cors', () => {
 
   context('.urlMatchesPolicyBasedOnDomainProps', () => {
     const assertsUrlsAreNotAPolicyMatch = (url1, props) => {
-      expect(cors.urlMatchesPolicyBasedOnDomainProps(url1, props, {
-        useDefaultDocumentForDomains: defaultSameOriginPolicyUrlGlobs,
-      })).to.be.false
+      expect(cors.urlMatchesPolicyBasedOnDomainProps(url1, props)).to.be.false
     }
 
     const assertsUrlsAreAPolicyOriginMatch = (url1, props) => {
-      expect(cors.urlMatchesPolicyBasedOnDomainProps(url1, props, {
-        useDefaultDocumentForDomains: defaultSameOriginPolicyUrlGlobs,
-      })).to.be.true
+      expect(cors.urlMatchesPolicyBasedOnDomainProps(url1, props)).to.be.true
     }
 
     describe('domain + subdomain', () => {
@@ -669,16 +659,18 @@ describe('lib/cors', () => {
   })
 
   context('.policyForDomain', () => {
-    context('returns "same-origin" for  google domains', () => {
+    const recommendedSameOriginPolicyUrlGlobs = ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com']
+
+    context('returns "same-origin" for google domains', () => {
       it('accounts.google.com', () => {
         expect(cors.policyForDomain('https://accounts.google.com', {
-          useDefaultDocumentForDomains: defaultSameOriginPolicyUrlGlobs,
+          useDefaultDocumentForDomains: recommendedSameOriginPolicyUrlGlobs,
         })).to.equal('same-origin')
       })
 
       it('www.google.com', () => {
         expect(cors.policyForDomain('https://www.google.com', {
-          useDefaultDocumentForDomains: defaultSameOriginPolicyUrlGlobs,
+          useDefaultDocumentForDomains: recommendedSameOriginPolicyUrlGlobs,
         })).to.equal('same-origin')
       })
     })
@@ -686,25 +678,25 @@ describe('lib/cors', () => {
     context('returns "same-origin" for salesforce domains', () => {
       it('https://the-host.develop.lightning.force.com', () => {
         expect(cors.policyForDomain('https://the-host.develop.lightning.force.com', {
-          useDefaultDocumentForDomains: defaultSameOriginPolicyUrlGlobs,
+          useDefaultDocumentForDomains: recommendedSameOriginPolicyUrlGlobs,
         })).to.equal('same-origin')
       })
 
       it('https://the-host.develop.my.salesforce.com', () => {
         expect(cors.policyForDomain('https://the-host.develop.my.salesforce.com', {
-          useDefaultDocumentForDomains: defaultSameOriginPolicyUrlGlobs,
+          useDefaultDocumentForDomains: recommendedSameOriginPolicyUrlGlobs,
         })).to.equal('same-origin')
       })
 
       it('https://the-host.develop.file.force.com', () => {
         expect(cors.policyForDomain('https://the-host.develop.file.force.com', {
-          useDefaultDocumentForDomains: defaultSameOriginPolicyUrlGlobs,
+          useDefaultDocumentForDomains: recommendedSameOriginPolicyUrlGlobs,
         })).to.equal('same-origin')
       })
 
       it('https://the-host.develop.my.salesforce.com', () => {
         expect(cors.policyForDomain('https://the-host.develop.my.salesforce.com', {
-          useDefaultDocumentForDomains: defaultSameOriginPolicyUrlGlobs,
+          useDefaultDocumentForDomains: recommendedSameOriginPolicyUrlGlobs,
         })).to.equal('same-origin')
       })
     })
@@ -712,19 +704,19 @@ describe('lib/cors', () => {
     describe('returns "same-super-domain-origin" for non exception urls', () => {
       it('www.cypress.io', () => {
         expect(cors.policyForDomain('http://www.cypress.io', {
-          useDefaultDocumentForDomains: defaultSameOriginPolicyUrlGlobs,
+          useDefaultDocumentForDomains: recommendedSameOriginPolicyUrlGlobs,
         })).to.equal('same-super-domain-origin')
       })
 
       it('docs.cypress.io', () => {
         expect(cors.policyForDomain('http://docs.cypress.io', {
-          useDefaultDocumentForDomains: defaultSameOriginPolicyUrlGlobs,
+          useDefaultDocumentForDomains: recommendedSameOriginPolicyUrlGlobs,
         })).to.equal('same-super-domain-origin')
       })
 
       it('stackoverflow.com', () => {
         expect(cors.policyForDomain('https://stackoverflow.com', {
-          useDefaultDocumentForDomains: defaultSameOriginPolicyUrlGlobs,
+          useDefaultDocumentForDomains: recommendedSameOriginPolicyUrlGlobs,
         })).to.equal('same-super-domain-origin')
       })
     })
