@@ -33,7 +33,7 @@ const minTimeSinceEvent = (eventTime: number | undefined, waitTime: string) => {
   return (Date.now() - eventTime) > waitTimestamp
 }
 
-export const IATR_RELEASE = new Date('2022-12-20T00:00:00').getTime()
+export const IATR_RELEASE = new Date('2023-01-17T00:00:00').getTime()
 
 export const isAllowedFeature = (
   featureName: Feature,
