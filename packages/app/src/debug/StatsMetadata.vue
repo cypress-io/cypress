@@ -1,7 +1,7 @@
 <template>
   <ul
     data-cy="stats-metadata"
-    class="contents items-center gap-x-2 text-gray-700 whitespace-nowrap children:flex children:items-center font-normal text-sm w-full stats-metadata-class"
+    class="font-normal text-sm w-full text-gray-700 gap-x-2 contents items-center whitespace-nowrap stats-metadata-class children:flex children:items-center"
   >
     <li
       v-for="(result, i) in results"
@@ -163,20 +163,17 @@ const ORDER_MAP = computed<Record<StatType, Metadata>>(() => {
       name: 'testing-type',
     },
     'GROUPS': {
-      value: props.groups!.length > 1 ? `${props.groups!.length} ${t('debugPage.groups.pluralTitle')}` :
-       `${props.groups!.length} ${t('debugPage.groups.singleTitle')}`,
+      value: t('debugPage.stats.groups', props.groups!.length),
       icon: IconTechnologyServer,
       name: 'group-server',
     },
     'G_OS': {
-      value: arrMapping.value.oses.length > 1 ? `${arrMapping.value.oses.length} ${t('debugPage.operatingSystems.pluralTitle')}` :
-      `${arrMapping.value.oses.length} ${t('debugPage.operatingSystems.singleTitle')}`,
+      value: t('debugPage.stats.operatingSystems', arrMapping.value.oses.length),
       icon: OS_MAP['GROUP'],
       name: 'operating-system-groups',
     },
     'G_BROWSERS': {
-      value: arrMapping.value.browsers.length > 1 ? `${arrMapping.value.browsers.length} ${t('debugPage.browsers.pluralTitle')}` :
-      `${arrMapping.value.browsers.length} ${t('debugPage.browsers.singleTitle')}`,
+      value: t('debugPage.stats.browsers', arrMapping.value.browsers.length),
       icon: arrMapping.value.browsers,
       name: 'browser-groups',
     },

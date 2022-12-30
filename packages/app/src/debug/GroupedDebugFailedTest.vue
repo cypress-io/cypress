@@ -47,7 +47,7 @@ const props = defineProps<{
 
 const debugArtifacts = computed(() => {
   return props.failedTests.reduce<{[groupID: string]: {icon: string, text: string, url: string | null | undefined }[] }>((acc, curr) => {
-    //TODO Update logic to not rely on defaulting to empty strings
+    //TODO Update logic to not rely on defaulting to empty strings and only render appropriate links See https://github.com/cypress-io/cypress/issues/25319
     acc[curr.instance?.groupId ?? ''] = [
       { icon: 'TERMINAL_LOG', text: 'View Log', url: curr.instance!.stdoutUrl ?? '' },
       { icon: 'IMAGE_SCREENSHOT', text: 'View Screenshot', url: curr.instance!.screenshotsUrl ?? '' },

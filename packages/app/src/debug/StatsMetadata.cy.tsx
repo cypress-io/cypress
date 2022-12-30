@@ -1,7 +1,7 @@
 import StatsMetadata from './StatsMetadata.vue'
 
 describe('mounts correctly', () => {
-  const group1 = {
+  const group_linux_chrome = {
     id: '123',
     os: {
       id: '123',
@@ -16,7 +16,7 @@ describe('mounts correctly', () => {
     groupName: 'Staging',
   }
 
-  const group2 = {
+  const group_macos_edge = {
     id: '123',
     os: {
       id: '123',
@@ -31,7 +31,7 @@ describe('mounts correctly', () => {
     groupName: 'Production',
   }
 
-  const group3 = {
+  const group_windows_webkit = {
     id: '123',
     os: {
       id: '123',
@@ -46,16 +46,31 @@ describe('mounts correctly', () => {
     groupName: 'Production',
   }
 
+  const group_windows_chrome = {
+    id: '123',
+    os: {
+      id: '123',
+      name: 'Windows',
+      nameWithVersion: 'Windows 12.3',
+    },
+    browser: {
+      id: '123',
+      formattedName: 'Chrome',
+      formattedNameWithVersion: 'Chrome 106',
+    },
+    groupName: 'Production',
+  }
+
   it('single values', () => {
     const testingOrder = ['spec-duration 2:23', 'operating-system Linux Debian', 'browser Chrome 106', 'testing-type component']
 
     cy.mount(() => (
-      <div class='bg-gray-50'>
+      <div class='flex bg-gray-50 gap-x-3'>
         <StatsMetadata
           order={['DURATION', 'OS', 'BROWSER', 'TESTING']}
           specDuration={'2:23'}
           testing={'component'}
-          groups={[group1]}
+          groups={[group_linux_chrome]}
         />
       </div>
     ))
@@ -79,12 +94,12 @@ describe('mounts correctly', () => {
     ]
 
     cy.mount(() => (
-      <div class='bg-gray-50'>
+      <div class='flex bg-gray-50 gap-x-3'>
         <StatsMetadata
           order={['DURATION', 'GROUPS', 'G_OS', 'G_BROWSERS', 'TESTING']}
           specDuration={'2:23-3:40'}
           testing={'e2e'}
-          groups={[group2, group1, group3]}
+          groups={[group_macos_edge, group_linux_chrome, group_windows_webkit]}
         />
       </div>
     ))
@@ -98,13 +113,69 @@ describe('mounts correctly', () => {
     cy.percySnapshot()
   })
 
+  it('group values with 1 browser', () => {
+    const testingOrder = [
+      'spec-duration 2:23-3:40',
+      'group-server 2 groups',
+      'operating-system-groups 2 operating systems',
+      'browser-groups 1 browser',
+      'testing-type e2e',
+    ]
+
+    cy.mount(() => (
+      <div class='flex bg-gray-50 gap-x-3'>
+        <StatsMetadata
+          order={['DURATION', 'GROUPS', 'G_OS', 'G_BROWSERS', 'TESTING']}
+          specDuration={'2:23-3:40'}
+          testing={'e2e'}
+          groups={[group_linux_chrome, group_windows_chrome]}
+        />
+      </div>
+    ))
+
+    cy.findByTestId('stats-metadata').children().should('have.length', 5)
+    cy.findByTestId('stats-metadata').children().each((ele, index) => {
+      cy.wrap(ele).should('have.text', testingOrder[index])
+      cy.findByTestId(testingOrder[index]).should('be.visible')
+    })
+  })
+
+  it('group values with 1 os', () => {
+    const testingOrder = [
+      'spec-duration 2:23-3:40',
+      'group-server 2 groups',
+      'operating-system-groups 1 operating system',
+      'browser-groups 2 browsers',
+      'testing-type e2e',
+    ]
+
+    cy.mount(() => (
+      <div class='flex bg-gray-50 gap-x-3'>
+        <StatsMetadata
+          order={['DURATION', 'GROUPS', 'G_OS', 'G_BROWSERS', 'TESTING']}
+          specDuration={'2:23-3:40'}
+          testing={'e2e'}
+          groups={[group_windows_webkit, group_windows_chrome]}
+        />
+      </div>
+    ))
+
+    cy.findByTestId('stats-metadata').children().should('have.length', 5)
+    cy.findByTestId('stats-metadata').children().each((ele, index) => {
+      cy.wrap(ele).should('have.text', testingOrder[index])
+      cy.findByTestId(testingOrder[index]).should('be.visible')
+    })
+  })
+
   it('shows the correct groupName', () => {
     cy.mount(() => (
-      <StatsMetadata
-        order={['GROUP_NAME', 'OS', 'BROWSER']}
-        groups={[group1]}
-        groupName={group1.groupName}
-      />
+      <div class='flex bg-gray-50 gap-x-3'>
+        <StatsMetadata
+          order={['GROUP_NAME', 'OS', 'BROWSER']}
+          groups={[group_linux_chrome]}
+          groupName={group_linux_chrome.groupName}
+        />
+      </div>
     ))
 
     cy.findByTestId('group_name Staging').should('be.visible')
@@ -113,12 +184,12 @@ describe('mounts correctly', () => {
   // This tests the functionality for arrMapping in StatsMetadata
   it('only displays unique browsers and calculates correct number of OS', () => {
     cy.mount(() => (
-      <div class='bg-gray-50'>
+      <div class='flex bg-gray-50 gap-x-3'>
         <StatsMetadata
           order={['DURATION', 'GROUPS', 'G_OS', 'G_BROWSERS', 'TESTING']}
           specDuration={'2:23-3:40'}
           testing={'component'}
-          groups={[group2, group1, group2]}
+          groups={[group_macos_edge, group_linux_chrome, group_macos_edge]}
         />
       </div>
     ))
