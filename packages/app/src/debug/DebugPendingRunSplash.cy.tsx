@@ -16,7 +16,7 @@ describe('<DebugPendingRunSplash />', () => {
       render: (gqlVal) => {
         return (
           <DebugPendingRunSplash
-            specStatuses={gqlVal.specs.map((spec) => spec.status)}
+            specStatuses={gqlVal.specs.map((spec) => spec.status!)}
           />
         )
       },
