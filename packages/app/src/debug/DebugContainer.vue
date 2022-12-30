@@ -11,21 +11,33 @@
         :gql="run"
         :commits-ahead="0"
       />
-      <DebugPageDetails
-        v-if="shouldDisplayDetails(run.status)"
-        :status="run.status"
-        :specs="run.specs"
-        :cancellation="{ cancelledAt: run.cancelledAt, cancelledBy: run.cancelledBy }"
-        :is-hidden-by-usage-limits="run.isHiddenByUsageLimits"
-        :over-limit-action-type="run.overLimitActionType"
-        :over-limit-action-url="run.overLimitActionUrl"
-        :ci="run.ci"
-        :errors="run.errors"
+      <DebugNewRelevantRunBar
+        v-if="newerRelevantRun"
+        :gql="newerRelevantRun"
       />
-      <DebugSpecList
-        v-if="run.totalFailed && shouldDisplaySpecsList(run.status)"
-        :specs="debugSpecsArray"
+
+      <DebugPendingRunSplash
+        v-if="isFirstPendingRun"
+        class="mt-12"
+        :spec-statuses="specStatuses"
       />
+      <template v-else>
+        <DebugPageDetails
+          v-if="shouldDisplayDetails(run.status)"
+          :status="run.status"
+          :specs="run.specs"
+          :cancellation="{ cancelledAt: run.cancelledAt, cancelledBy: run.cancelledBy }"
+          :is-hidden-by-usage-limits="run.isHiddenByUsageLimits"
+          :over-limit-action-type="run.overLimitActionType"
+          :over-limit-action-url="run.overLimitActionUrl"
+          :ci="run.ci"
+          :errors="run.errors"
+        />
+        <DebugSpecList
+          v-if="run.totalFailed && shouldDisplaySpecsList(run.status)"
+          :specs="debugSpecsArray"
+        />
+      </template>
     </div>
     <div
       v-else
@@ -44,12 +56,14 @@ import { computed } from '@vue/reactivity'
 import type { CloudRunStatus, DebugSpecsFragment, TestingTypeEnum } from '../generated/graphql'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import DebugPageHeader from './DebugPageHeader.vue'
+import DebugPendingRunSplash from './DebugPendingRunSplash.vue'
 import DebugSpecList from './DebugSpecList.vue'
 import DebugPageDetails from './DebugPageDetails.vue'
 import DebugNotLoggedIn from './empty/DebugNotLoggedIn.vue'
 import DebugNoProject from './empty/DebugNoProject.vue'
 import DebugNoRuns from './empty/DebugNoRuns.vue'
 import DebugError from './empty/DebugError.vue'
+import DebugNewRelevantRunBar from './DebugNewRelevantRunBar.vue'
 import { specsList } from './utils/DebugMapping'
 
 gql`
@@ -69,7 +83,7 @@ fragment DebugSpecs on Query {
       ... on CloudProject {
         id
         runByNumber(runNumber: 11) {
-          ...DebugPage
+          ...DebugPageHeader
           cancelledBy {
             id
             fullName
@@ -100,6 +114,8 @@ fragment DebugSpecs on Query {
             id,
             ...DebugSpecListGroups
           }
+          ...DebugPendingRunSplash
+          ...DebugNewRelevantRunBar
         }
       }
     }
@@ -152,4 +168,11 @@ const debugSpecsArray = computed(() => {
 
   return []
 })
+
+const specStatuses = computed(() => run.value?.specs.map((spec) => spec.status || 'UNCLAIMED') || [])
+
+// TODO GH#24440 Re-map to use relevant run data point (currently stubbed with current run)
+const newerRelevantRun = computed(() => run.value)
+
+const isFirstPendingRun = computed(() => run.value && run.value.runNumber === 1 && run.value.status === 'RUNNING')
 </script>

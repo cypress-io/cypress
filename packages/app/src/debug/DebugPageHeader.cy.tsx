@@ -1,4 +1,4 @@
-import { CloudRunStatus, DebugPageFragmentDoc } from '../generated/graphql-test'
+import { CloudRunStatus, DebugPageHeaderFragmentDoc } from '../generated/graphql-test'
 import DebugPageHeader from './DebugPageHeader.vue'
 import { defaultMessages } from '@cy/i18n'
 
@@ -14,7 +14,7 @@ describe('<DebugPageHeader />', {
 },
 () => {
   it('renders with passed in gql props', () => {
-    cy.mountFragment(DebugPageFragmentDoc, {
+    cy.mountFragment(DebugPageHeaderFragmentDoc, {
       onResult (result) {
         if (result) {
           result.status = 'FAILED'
@@ -57,7 +57,7 @@ describe('<DebugPageHeader />', {
   it('displays a flaky badge', () => {
     const flakyCount = 4
 
-    cy.mountFragment(DebugPageFragmentDoc, {
+    cy.mountFragment(DebugPageHeaderFragmentDoc, {
       onResult: (result) => {
         if (result) {
           result.totalFlakyTests = flakyCount
@@ -81,7 +81,7 @@ describe('<DebugPageHeader />', {
     const statuses: CloudRunStatus[] = ['PASSED', 'FAILED', 'CANCELLED', 'RUNNING', 'ERRORED']
 
     statuses.forEach((status) => {
-      cy.mountFragment(DebugPageFragmentDoc, {
+      cy.mountFragment(DebugPageHeaderFragmentDoc, {
         onResult: (result) => {
           if (result) {
             result.status = status
@@ -100,7 +100,7 @@ describe('<DebugPageHeader />', {
   })
 
   it('renders singular commit message', () => {
-    cy.mountFragment(DebugPageFragmentDoc, {
+    cy.mountFragment(DebugPageHeaderFragmentDoc, {
       render: (gqlVal) => {
         return (
           <DebugPageHeader gql={gqlVal} commitsAhead={1}/>
@@ -113,7 +113,7 @@ describe('<DebugPageHeader />', {
   })
 
   it('renders no commit message', () => {
-    cy.mountFragment(DebugPageFragmentDoc, {
+    cy.mountFragment(DebugPageHeaderFragmentDoc, {
       render: (gqlVal) => {
         return (
           <DebugPageHeader gql={gqlVal} commitsAhead={0}/>
