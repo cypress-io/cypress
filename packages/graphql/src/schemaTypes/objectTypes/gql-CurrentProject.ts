@@ -241,12 +241,11 @@ export const CurrentProject = objectType({
     })
 
     t.field('relevantRuns', {
-      deferIfNotLoaded: undefined,
       type: objectType({
         name: 'RelevantRun',
         definition (t) {
-          t.nonNull.int('completed')
-          t.nonNull.int('running')
+          t.nonNull.int('current')
+          t.nonNull.int('next')
         },
       }),
       description: 'Returns a list of relevant runs for matching Git shas from the Cloud',
@@ -254,9 +253,19 @@ export const CurrentProject = objectType({
         const runs = await ctx.relevantRuns.getRelevantRuns(source.git?.currentHashes || [])
 
         return {
-          completed: chain(runs).filter((run) => run.status !== 'RUNNING').map((run) => run.runNumber).first().value(),
-          running: chain(runs).filter((run) => run.status === 'RUNNING').map((run) => run.runNumber).first().value(),
+          current: chain(runs).filter((run) => run.status !== 'RUNNING').map((run) => run.runNumber).first().value(),
+          next: chain(runs).filter((run) => run.status === 'RUNNING').map((run) => run.runNumber).first().value(),
         }
+      },
+    })
+
+    t.list.nonNull.string('testsForReviewBySpec', {
+      description: '',
+      args: {
+        specTitle: stringArg(),
+      },
+      resolve: (source, args, ctx) => {
+        return ['foo/bar']
       },
     })
   },

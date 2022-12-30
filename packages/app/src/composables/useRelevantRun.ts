@@ -7,8 +7,8 @@ gql`
     currentProject {
       id
       relevantRuns {
-        completed
-        running
+        current
+        next
       }
     }
   }
@@ -17,7 +17,7 @@ gql`
 export function useRelevantRun () {
   const runsQuery = useQuery({ query: Debug_RelevantRunsDocument })
 
-  return computed<{completed?: number, running?: number}>(() => {
-    return runsQuery.data.value?.currentProject?.relevantRuns || { completed: undefined, running: undefined }
+  return computed<{current?: number, next?: number}>(() => {
+    return runsQuery.data.value?.currentProject?.relevantRuns || { current: undefined, next: undefined }
   })
 }

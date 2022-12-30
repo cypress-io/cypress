@@ -14,7 +14,7 @@ import DebugLoading from '../debug/empty/DebugLoading.vue'
 import { gql, useQuery, useSubscription } from '@urql/vue'
 import { DebugDocument, Debug_SpecsChangeDocument } from '../generated/graphql'
 import { ref, watchEffect } from 'vue'
-import { useRelevantRun } from '@packages/app/src/composables/useRelevantRun'
+import { useRelevantRun } from '../composables/useRelevantRun'
 
 gql`
 subscription Debug_specsChange {
@@ -41,8 +41,8 @@ const variables = ref({ runNumber: -1 })
 const query = useQuery({ query: DebugDocument, variables, pause: true })
 
 watchEffect(() => {
-  if (relevantRuns.value.completed) {
-    variables.value.runNumber = relevantRuns.value.completed
+  if (relevantRuns.value.current) {
+    variables.value.runNumber = relevantRuns.value.current
     query.executeQuery()
   }
 })

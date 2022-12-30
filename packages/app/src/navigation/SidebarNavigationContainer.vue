@@ -25,8 +25,8 @@ const variables = ref({ runNumber: -1 })
 const query = useQuery({ query: SideBarNavigationContainerDocument, variables, pause: true })
 
 watchEffect(() => {
-  if (relevantRuns.value.completed) {
-    variables.value.runNumber = relevantRuns.value.completed
+  if (relevantRuns.value.current) {
+    variables.value.runNumber = relevantRuns.value.current
     query.executeQuery()
   }
 })

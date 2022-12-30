@@ -972,6 +972,9 @@ type CurrentProject implements Node & ProjectLike {
 
   """A list of specs for the currently open testing type of a project"""
   specs: [Spec!]!
+
+  """"""
+  testsForReviewBySpec(specTitle: String): [String!]
   title: String!
 }
 
@@ -1912,8 +1915,8 @@ type ReactComponentResponse {
 }
 
 type RelevantRun {
-  completed: Int!
-  running: Int!
+  current: Int!
+  next: Int!
 }
 
 type RelevantRunResponse {
