@@ -95,7 +95,7 @@
         "specsAddedButton": "Okay, I got it!",
         "specsAddingHeader": "Adding specs..."
       },
-      "importEmptySpec": {
+      "importTemplateSpec": {
         "header": "Create new spec",
         "description": "We'll generate a template spec file which can be used to start testing your application.",
         "chooseFilenameHeader": "Enter the path for your new spec",
@@ -110,7 +110,7 @@
         "description": "Generate a basic component test for any of the components in this project.",
         "chooseAComponentHeader": "Choose a component"
       },
-      "importEmptySpec": {
+      "importTemplateSpec": {
         "header": "Create new spec",
         "description": "We'll generate a template spec file which can be used to start testing your components.",
         "invalidComponentWarning": "We couldn't generate a valid path matching your custom "

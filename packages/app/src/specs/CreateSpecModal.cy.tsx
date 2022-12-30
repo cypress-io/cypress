@@ -86,7 +86,7 @@ function testEmptySpecModal (fullDefaultSpecFileName: string, specName: string) 
 }
 
 describe('<CreateSpecModal />', () => {
-  context('create empty spec', () => {
+  context('create template spec', () => {
     context('e2e', () => {
       const defaultSpecName = 'spec'
       const defaultSpecFileName = 'cypress/e2e/spec.cy.js'

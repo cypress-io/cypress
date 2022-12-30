@@ -253,7 +253,7 @@ export class ProjectActions {
     }
 
     // launchProject expects a spec when opening browser for url navigation.
-    // We give it an empty spec if none is passed so as to land on home page
+    // We give it an template spec if none is passed so as to land on home page
     const emptySpec: Cypress.Spec = {
       name: '',
       absolute: '',
