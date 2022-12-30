@@ -650,6 +650,7 @@
       "switchTestingTypeInfo": "There is {n} {testingType} test failing in this spec. To run it locally switch to {testingType} testing. | There are {n} {testingType} tests failing in this spec. To run them locally switch to {testingType} testing.",
       "switchTestingTypeAction": "Switch to {testingType} testing"
     },
+    "viewRun": "View run",
     "overPlanLimit": "Over plan limit",
     "reachedMonthlyUsage": "You've reached the monthly usage limit for your billing plan.",
     "upgradeYourPlan": "Upgrade your plan to continue recording runs.",
@@ -675,6 +676,10 @@
       "noRunsTestMessage": "Record your first test run to Cypress Cloud to locally debug failed CI test runs",
       "gitRepositoryNotDetected": "Git repository not detected",
       "ensureGitSetupCorrectly": "Cypress uses Git to associate runs with your local state. Please ensure that version control is set up correctly."
+    },
+    "pending": {
+      "title": "Testing",
+      "pendingCount": "{completed} of {total} specs completed | {completed} of {total} spec completed | {completed} of {total} specs completed"
     },
     "header": {
       "runUrl": "View in Cypress Cloud",

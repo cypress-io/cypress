@@ -50,19 +50,11 @@
         <li
           class="flex flex-row text-sm gap-x-2 items-center justify-center"
         >
-          <div
+          <DebugRunNumber
             v-if="(debug.runNumber && debug.status)"
-            class="border rounded flex flex-row font-semibold bg-gray-50 border-gray-200 h-6 px-2 gap-x-1 items-center justify-center"
-            :data-cy="`debug-runNumber-${debug.status}`"
-          >
-            <SolidStatusIcon
-              size="16"
-              :status="ICON_MAP[debug.status].type"
-            />
-            <span :class="runNumberColor">
-              {{ `#${debug.runNumber}` }}
-            </span>
-          </div>
+            :status="debug.status"
+            :value="debug.runNumber"
+          />
           <DebugResults
             :gql="props.gql"
             data-cy="debug-results"
@@ -114,19 +106,19 @@
 import { computed } from 'vue'
 import DebugResults from './DebugResults.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
-import type { DebugPageFragment, CloudRunStatus } from '../generated/graphql'
+import type { DebugPageHeaderFragment } from '../generated/graphql'
 import { IconTimeStopwatch } from '@cypress-design/vue-icon'
-import { SolidStatusIcon, StatusType } from '@cypress-design/vue-statusicon'
 import CommitIcon from '~icons/cy/commit_x14'
 import { gql } from '@urql/core'
 import { dayjs } from '../runs/utils/day.js'
 import { useI18n } from 'vue-i18n'
 import { useDurationFormat } from '../composables/useDurationFormat'
+import DebugRunNumber from './DebugRunNumber.vue'
 
 const { t } = useI18n()
 
 gql`
-fragment DebugPage on CloudRun {
+fragment DebugPageHeader on CloudRun {
   id
   runNumber
   createdAt
@@ -146,30 +138,11 @@ fragment DebugPage on CloudRun {
 `
 
 const props = defineProps<{
-  gql: DebugPageFragment
+  gql: DebugPageHeaderFragment
   commitsAhead: number
 }>()
 
 const debug = computed(() => props.gql)
-
-const ICON_MAP: Record<CloudRunStatus, { textColor: string, type: StatusType }> = {
-  PASSED: { textColor: 'text-jade-400', type: 'passed' },
-  FAILED: { textColor: 'text-red-400', type: 'failed' },
-  CANCELLED: { textColor: 'text-gray-500', type: 'cancelled' },
-  ERRORED: { textColor: 'text-orange-400', type: 'errored' },
-  RUNNING: { textColor: 'text-indigo-500', type: 'running' },
-  NOTESTS: { textColor: 'text-indigo-500', type: 'noTests' },
-  OVERLIMIT: { textColor: 'text-indigo-500', type: 'overLimit' },
-  TIMEDOUT: { textColor: 'text-indigo-500', type: 'timedOut' },
-} as const
-
-const runNumberColor = computed(() => {
-  if (props.gql.status) {
-    return ICON_MAP[props.gql.status].textColor
-  }
-
-  return ''
-})
 
 const relativeCreatedAt = computed(() => dayjs(new Date(debug.value.createdAt!)).fromNow())
 
