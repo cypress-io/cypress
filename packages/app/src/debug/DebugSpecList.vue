@@ -8,8 +8,9 @@
       :key="spec.spec.id"
       :spec="spec.spec"
       :test-results="spec.tests"
-      :found-locally="spec.foundLocally"
       :testing-type="spec.testingType"
+      :groups="spec.groups"
+      :found-locally="spec.foundLocally"
       :matches-current-testing-type="spec.matchesCurrentTestingType"
       @switchTestingType="switchTestingType"
     />
@@ -32,6 +33,10 @@ fragment DebugSpecListSpec on CloudSpecRun {
   extension
   shortPath
   groupIds
+  specDuration {
+    min
+    max
+  }
   status
   testsPassed {
     min
@@ -57,6 +62,7 @@ fragment DebugSpecListTests on CloudTestResult {
   duration
   isFlaky
   testUrl
+  thumbprint
   instance {
     id
     status
@@ -80,13 +86,16 @@ gql`
 fragment DebugSpecListGroups on CloudRunGroup {
   id
   testingType
+  groupName
   os {
     id
     name
+    nameWithVersion
   }
   browser {
     id
     formattedName
+    formattedNameWithVersion
   }
 }
 `
@@ -105,6 +114,7 @@ const specs = computed(() => {
 
     return {
       spec: {
+        ...specItem.spec,
         id: specItem.spec.id,
         path: specItem.spec.path.replace(fileNameWithoutExtension + fileExtension, ''),
         fileName: fileNameWithoutExtension,
@@ -112,8 +122,9 @@ const specs = computed(() => {
         fullPath: specItem.spec.path,
       },
       tests: specItem.tests,
-      foundLocally: specItem.foundLocally,
+      groups: specItem.groups,
       testingType: specItem.testingType,
+      foundLocally: specItem.foundLocally,
       matchesCurrentTestingType: specItem.matchesCurrentTestingType,
     }
   })

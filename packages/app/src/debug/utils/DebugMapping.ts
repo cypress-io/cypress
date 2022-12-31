@@ -11,11 +11,11 @@ type DebugSpecsArgs = {
 
 export type CloudDebugSpec = {
   spec: DebugSpecListSpecFragment
-  tests: DebugSpecListTestsFragment[]
-  groups: DebugSpecListGroupsFragment[]
-  foundLocally: boolean
+  tests: { [thumbprint: string]: DebugSpecListTestsFragment[] }
+  groups: { [groupId: string]: DebugSpecListGroupsFragment }
   testingType: TestingTypeEnum
   matchesCurrentTestingType: boolean
+  foundLocally: boolean
 }
 
 export const specsList = ({ specs, tests, localSpecs, currentTestingType, groups }: DebugSpecsArgs): CloudDebugSpec[] => {
@@ -33,20 +33,20 @@ export const specsList = ({ specs, tests, localSpecs, currentTestingType, groups
         throw new Error(`Could not find spec for id ${ curr.specId}`)
       }
 
-      const groups = (foundSpec.groupIds || []).reduce<DebugSpecListGroupsFragment[]>((acc, id) => {
+      const groupsMapping = (foundSpec.groupIds || []).reduce<{[grpId: string]: DebugSpecListGroupsFragment}>((acc, id) => {
         if (id) {
-          acc.push(groupsMap[id])
+          acc[id] = groupsMap[id]
         }
 
         return acc
-      }, [])
+      }, {})
       // The testingType will not differ between groups
-      const testingType = groups[0]?.testingType as TestingTypeEnum
+      const testingType = Object.values(groupsMapping)[0].testingType as TestingTypeEnum
 
       debugResult = {
         spec: foundSpec,
-        tests: [curr],
-        groups,
+        tests: { [curr.thumbprint]: [curr] },
+        groups: groupsMapping,
         testingType,
         matchesCurrentTestingType: testingType === currentTestingType,
         foundLocally: localSpecsSet.has(foundSpec.path),
@@ -54,7 +54,11 @@ export const specsList = ({ specs, tests, localSpecs, currentTestingType, groups
 
       acc[curr.specId] = debugResult
     } else {
-      debugResult.tests.push(curr)
+      if (!debugResult.tests[curr.thumbprint]) {
+        debugResult.tests[curr.thumbprint] = [curr]
+      } else {
+        debugResult.tests[curr.thumbprint].push(curr)
+      }
     }
 
     return acc

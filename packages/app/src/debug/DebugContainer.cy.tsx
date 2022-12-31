@@ -261,8 +261,8 @@ describe('<DebugContainer />', () => {
         { id: 'a1c', groupIds: ['a'] },
       ] as DebugSpecListSpecFragment[]
       const tests = [
-        { specId: 'a1c', id: 'random1' },
-        { specId: 'a1c', id: 'random2' },
+        { specId: 'a1c', id: 'random1', thumbprint: 'unique1' },
+        { specId: 'a1c', id: 'random2', thumbprint: 'unique2' },
       ] as DebugSpecListTestsFragment[]
       const groups = [
         { id: 'a', testingType: 'e2e' },
@@ -272,7 +272,16 @@ describe('<DebugContainer />', () => {
       const debugMappingArray = specsList({ specs, tests, groups, localSpecs: [], currentTestingType: 'e2e' })
 
       expect(debugMappingArray).to.have.length(1)
-      expect(debugMappingArray[0]).to.deep.equal({ spec: { id: 'a1c', groupIds: ['a'] }, tests: [{ specId: 'a1c', id: 'random1' }, { specId: 'a1c', id: 'random2' }], groups: [{ id: 'a', testingType: 'e2e' }], foundLocally: false, testingType: 'e2e', matchesCurrentTestingType: true })
+      expect(debugMappingArray).to.have.eql([
+        {
+          spec: { id: 'a1c', groupIds: ['a'] },
+          tests: { 'unique1': [{ specId: 'a1c', id: 'random1', thumbprint: 'unique1' }], 'unique2': [{ specId: 'a1c', id: 'random2', thumbprint: 'unique2' }] },
+          groups: { 'a': { id: 'a', testingType: 'e2e' } },
+          foundLocally: false,
+          testingType: 'e2e',
+          matchesCurrentTestingType: true,
+        },
+      ])
     })
 
     it('maps correctly for multiple specs and test', () => {
@@ -282,11 +291,12 @@ describe('<DebugContainer />', () => {
         { id: '789', groupIds: ['a', 'b'] },
       ] as DebugSpecListSpecFragment[]
       const tests = [
-        { specId: '123', id: 'random1' },
-        { specId: '456', id: 'random2' },
-        { specId: '456', id: 'random3' },
-        { specId: '789', id: 'random4' },
-        { specId: '123', id: 'random6' },
+        { specId: '123', id: 'random1', thumbprint: 'unique1' },
+        { specId: '456', id: 'random2', thumbprint: 'unique2' },
+        { specId: '456', id: 'random3', thumbprint: 'unique3' },
+        { specId: '789', id: 'random4', thumbprint: 'unique4' },
+        { specId: '123', id: 'random6', thumbprint: 'unique5' },
+        { specId: '789', id: 'random7', thumbprint: 'unique4' },
       ] as DebugSpecListTestsFragment[]
       const groups = [
         { id: 'a', testingType: 'e2e' },
@@ -294,11 +304,35 @@ describe('<DebugContainer />', () => {
       ] as DebugSpecListGroupsFragment[]
 
       const debugMappingArray = specsList({ specs, tests, localSpecs: [], currentTestingType: 'e2e', groups })
+      const expectedSpec123 = {
+        spec: { id: '123', groupIds: ['a'] },
+        tests: { 'unique1': [{ specId: '123', id: 'random1', thumbprint: 'unique1' }], 'unique5': [{ specId: '123', id: 'random6', thumbprint: 'unique5' }] },
+        groups: { 'a': { id: 'a', testingType: 'e2e' } },
+        foundLocally: false,
+        testingType: 'e2e',
+        matchesCurrentTestingType: true,
+      }
+
+      const expectedSpec456 = {
+        spec: { id: '456', groupIds: ['b'] },
+        tests: { 'unique2': [{ specId: '456', id: 'random2', thumbprint: 'unique2' }], 'unique3': [{ specId: '456', id: 'random3', thumbprint: 'unique3' }] },
+        groups: { 'b': { id: 'b', testingType: 'e2e' } },
+        foundLocally: false,
+        testingType: 'e2e',
+        matchesCurrentTestingType: true,
+      }
+
+      const expectedSpec789 = {
+        spec: { id: '789', groupIds: ['a', 'b'] },
+        tests: { 'unique4': [{ specId: '789', id: 'random4', thumbprint: 'unique4' }, { specId: '789', id: 'random7', thumbprint: 'unique4' }] },
+        groups: { 'a': { id: 'a', testingType: 'e2e' }, 'b': { id: 'b', testingType: 'e2e' } },
+        foundLocally: false,
+        testingType: 'e2e',
+        matchesCurrentTestingType: true,
+      }
 
       const expected = [
-        { spec: { id: '123', groupIds: ['a'] }, tests: [{ specId: '123', id: 'random1' }, { specId: '123', id: 'random6' }], groups: [{ id: 'a', testingType: 'e2e' }], foundLocally: false, testingType: 'e2e', matchesCurrentTestingType: true },
-        { spec: { id: '456', groupIds: ['b'] }, tests: [{ specId: '456', id: 'random2' }, { specId: '456', id: 'random3' }], groups: [{ id: 'b', testingType: 'e2e' }], foundLocally: false, testingType: 'e2e', matchesCurrentTestingType: true },
-        { spec: { id: '789', groupIds: ['a', 'b'] }, tests: [{ specId: '789', id: 'random4' }], groups: [{ id: 'a', testingType: 'e2e' }, { id: 'b', testingType: 'e2e' }], foundLocally: false, testingType: 'e2e', matchesCurrentTestingType: true },
+        expectedSpec123, expectedSpec456, expectedSpec789,
       ]
 
       expect(debugMappingArray).to.deep.equal(expected)
@@ -310,13 +344,23 @@ describe('<DebugContainer />', () => {
         { id: '456', groupIds: ['a'] },
         { id: '789', groupIds: ['a'] },
       ] as DebugSpecListSpecFragment[]
-      const tests = [{ specId: '123', id: 'random1' }] as DebugSpecListTestsFragment[]
+      const tests = [{ specId: '123', id: 'random1', thumbprint: 'unique1' }] as DebugSpecListTestsFragment[]
       const groups = [{ id: 'a', testingType: 'e2e' }] as DebugSpecListGroupsFragment[]
 
       const debugMappingArray = specsList({ specs, tests, localSpecs: [], currentTestingType: 'e2e', groups })
 
-      expect(debugMappingArray).to.have.length(1)
-      expect(debugMappingArray).to.deep.equal([{ spec: { id: '123', groupIds: ['a'] }, tests: [{ specId: '123', id: 'random1' }], groups: [{ id: 'a', testingType: 'e2e' }], foundLocally: false, testingType: 'e2e', matchesCurrentTestingType: true }])
+      expect(debugMappingArray).to.deep.equal(
+        [
+          {
+            spec: { id: '123', groupIds: ['a'] },
+            tests: { 'unique1': [{ specId: '123', id: 'random1', thumbprint: 'unique1' }] },
+            groups: { 'a': { id: 'a', testingType: 'e2e' } },
+            foundLocally: false,
+            testingType: 'e2e',
+            matchesCurrentTestingType: true,
+          },
+        ],
+      )
     })
 
     it('throws an error when a test does not map to a spec', () => {

@@ -82,7 +82,7 @@ fragment DebugSpecs on Query {
       __typename
       ... on CloudProject {
         id
-        runByNumber(runNumber: 11) {
+        runByNumber(runNumber: 1) {
           ...DebugPageHeader
           cancelledBy {
             id
