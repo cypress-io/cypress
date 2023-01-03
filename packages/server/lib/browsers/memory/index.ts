@@ -16,7 +16,7 @@ const FOUR_GIBIBYTES = 4 * 1024 * 1024 * 1024
 
 export type MemoryHandler = {
   getTotalMemoryLimit: () => Promise<number>
-  getAvailableMemory: (totalMemoryLimit: number) => Promise<number>
+  getAvailableMemory: (totalMemoryLimit: number, log) => Promise<number>
 }
 
 /**
@@ -136,7 +136,7 @@ export default class Memory {
 
     await measure({ name: 'checkMemoryAndCollectGarbage', log }, async () => {
       const [currentAvailableMemory, rendererProcessMemRss] = await Promise.all([
-        this.handler.getAvailableMemory(this.totalMemoryLimit),
+        this.handler.getAvailableMemory(this.totalMemoryLimit, log),
         this.getRendererMemoryUsage(),
       ])
 
@@ -169,6 +169,7 @@ export default class Memory {
       log.currentAvailableMemory = currentAvailableMemory
       log.maxAvailableRendererMemory = maxAvailableRendererMemory
       log.jsHeapSizeLimit = this.jsHeapSizeLimit
+      log.totalMemoryLimit = this.totalMemoryLimit
     })
 
     if (debugVerbose.enabled) {

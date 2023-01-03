@@ -4,7 +4,7 @@ import util from 'util'
 
 const execAsync = util.promisify(exec)
 
-const debugVerbose = debugModule('cypress-verbose:server:browsers:memory:cgroupV2')
+const debugVerbose = debugModule('cypress-verbose:server:browsers:memory:cgroupV1')
 
 const getTotalMemoryLimit = async () => {
   const limit = Number((await execAsync('cat /sys/fs/cgroup/memory/memory.limit_in_bytes', { encoding: 'utf8' })).stdout)
@@ -26,7 +26,7 @@ const processRawStats = (rawStats: string): { total_inactive_file: string } => {
   return stats
 }
 
-const getAvailableMemory = async (totalMemoryLimit: number) => {
+const getAvailableMemory = async (totalMemoryLimit: number, log) => {
   let available
 
   const [usageExec, rawStats] = await Promise.all([
@@ -38,6 +38,10 @@ const getAvailableMemory = async (totalMemoryLimit: number) => {
   const usage = Number(usageExec.stdout)
 
   available = totalMemoryLimit - usage + Number(stats.total_inactive_file)
+
+  if (log) {
+    log.totalMemoryWorkingSetUsed = (usage - Number(stats.total_inactive_file))
+  }
 
   debugVerbose('memory available', available)
 
