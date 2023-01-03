@@ -90,8 +90,8 @@ abstract class DataEmitterEvents {
   }
 
   /** */
-  relevantRunChange (runs: { runId: number}) {
-    this._emit('relevantRunChange', runs)
+  relevantRunChange () {
+    this._emit('relevantRunChange')
   }
 
   /**

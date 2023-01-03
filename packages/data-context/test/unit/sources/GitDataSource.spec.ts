@@ -227,24 +227,72 @@ describe('GitDataSource', () => {
     expect(errorStub).to.be.callCount(1)
   })
 
-  it('handles a get info change', async () => {
-    const dfd = pDefer<string[]>()
+  context('Git hashes', () => {
+    let clock
 
-    const logCallback = (hashes: string[]) => {
-      dfd.resolve(hashes)
-    }
-
-    gitInfo = new GitDataSource({
-      isRunMode: false,
-      projectRoot: projectPath,
-      onBranchChange: sinon.stub(),
-      onGitInfoChange: sinon.stub(),
-      onError: sinon.stub(),
-      onGitLogChange: logCallback,
+    beforeEach(() => {
+      clock = sinon.useFakeTimers()
     })
 
-    const result = await dfd.promise
+    afterEach(() => {
+      clock.restore()
+    })
 
-    expect(result).to.have.length(1)
+    it('loads git hashes when first loaded', async () => {
+      const dfd = pDefer()
+
+      const logCallback = () => {
+        dfd.resolve()
+      }
+
+      gitInfo = new GitDataSource({
+        isRunMode: false,
+        projectRoot: projectPath,
+        onBranchChange: sinon.stub(),
+        onGitInfoChange: sinon.stub(),
+        onError: sinon.stub(),
+        onGitLogChange: logCallback,
+      })
+
+      await dfd.promise
+
+      expect(gitInfo.currentHashes).to.have.length(1)
+    })
+
+    it('detects change in hashes after a commit', async () => {
+      const dfd = pDefer()
+      const afterCommit = pDefer()
+
+      const logCallback = sinon.stub()
+
+      logCallback.onFirstCall().callsFake(dfd.resolve)
+      logCallback.onSecondCall().callsFake(afterCommit.resolve)
+
+      gitInfo = new GitDataSource({
+        isRunMode: false,
+        projectRoot: projectPath,
+        onBranchChange: sinon.stub(),
+        onGitInfoChange: sinon.stub(),
+        onError: sinon.stub(),
+        onGitLogChange: logCallback,
+      })
+
+      await dfd.promise
+
+      expect(gitInfo.currentHashes).to.have.length(1)
+
+      const afterCommitSpec = toPosix(path.join(e2eFolder, 'afterCommit.cy.js'))
+
+      fs.createFileSync(afterCommitSpec)
+
+      git.add(afterCommitSpec)
+      git.commit('add afterCommit spec')
+
+      await clock.tickAsync(60010)
+
+      await afterCommit.promise
+
+      expect(gitInfo.currentHashes).to.have.length(2)
+    })
   })
 })

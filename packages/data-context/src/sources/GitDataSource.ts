@@ -62,7 +62,7 @@ export interface GitDataSourceConfig {
   onGitInfoChange(specPath: string[]): void
   onError(err: any): void
 
-  onGitLogChange?(hashes: string[]): void
+  onGitLogChange?(): void
 }
 
 /**
@@ -179,10 +179,14 @@ export class GitDataSource {
     debug('Stopping timer and watcher')
     this.#destroyed = true
     if (this.#intervalTimer) {
+      debug('Clearing timeout')
       clearTimeout(this.#intervalTimer)
     }
 
+    debug('Destroying watcher')
     await this.#destroyWatcher(this.#gitBaseDirWatcher)
+
+    debug('Destroy complete')
   }
 
   async #destroyWatcher (watcher?: chokidar.FSWatcher) {
@@ -208,7 +212,7 @@ export class GitDataSource {
         return
       }
 
-      if (!this.config.isRunMode) {
+      if (!this.config.isRunMode && !this.#gitBaseDirWatcher) {
         debug('Creating watcher')
         this.#gitBaseDirWatcher = chokidar.watch(path.join(this.#gitBaseDir, '.git', 'HEAD'), {
           ignoreInitial: true,
@@ -425,10 +429,6 @@ export class GitDataSource {
     return output
   }
 
-  async getRootLog () {
-    return await this.#git?.log({ maxCount: 100 })
-  }
-
   async #loadGitHashes () {
     debug('Loading git hashes')
     const logResponse = await this.#git?.log({ maxCount: 100 })
@@ -438,7 +438,7 @@ export class GitDataSource {
       this.#gitHashes = currentHashes || []
 
       debug(`Calling onGitLogChange: callback defined ${!!this.config.onGitLogChange}, git hash count ${currentHashes?.length}`)
-      this.config.onGitLogChange?.(this.#gitHashes)
+      this.config.onGitLogChange?.()
     }
   }
 }
