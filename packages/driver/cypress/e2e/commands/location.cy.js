@@ -349,14 +349,12 @@ describe('src/cy/commands/location', () => {
     // https://github.com/cypress-io/cypress/issues/16463
     it('eventually returns a given key', function () {
       cy.stub(cy, 'getRemoteLocation')
+      .returns({ pathname: '/my/path' })
       .onFirstCall().returns('')
-      .onSecondCall().returns({
-        pathname: '/my/path',
-      })
 
       cy.location('pathname').should('equal', '/my/path')
       .then(() => {
-        expect(cy.getRemoteLocation).to.have.been.calledTwice
+        expect(cy.getRemoteLocation).to.have.been.calledThrice
       })
     })
 

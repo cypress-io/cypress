@@ -60,6 +60,12 @@ export default function (Commands, Cypress, cy, state) {
         const remoteSubject = cy.getRemotejQueryInstance(subject)
 
         fn.call(state('ctx'), remoteSubject ? remoteSubject : subject)
+      } catch (err) {
+        if (Object.keys(logs).length === 0) {
+          Cypress.log({ message: 'callback' })
+        }
+
+        throw err
       } finally {
         state('current')?.set('followedByShouldCallback', false)
         state('onBeforeLog', undefined)
@@ -104,21 +110,9 @@ export default function (Commands, Cypress, cy, state) {
 
       state('onBeforeLog', onBeforeLog(logs))
 
-      // Unlike most queries, we don't create a log message by default - the code in
-      // ../assertions.ts will create one when we run the assertions below.
-      // However, if we're throwing an error, it might be before any assertions
-      // have run for this command - in that case, we need a log message to 'hang' the error
-      // off of (mostly for purposes of a DOM snapshot).
-      const addLogIfNoneExists = () => {
-        if (Object.keys(logs).length === 0) {
-          Cypress.log({ message: [chainerString, ...args] })
-        }
-      }
-
       try {
         const newExp = _.reduce(chainers, (memo, value) => {
           if (!(value in memo)) {
-            addLogIfNoneExists()
             const err = $errUtils.cypressErrByPath('should.chainer_not_found', { args: { chainer: value } })
 
             err.retry = false
@@ -128,7 +122,6 @@ export default function (Commands, Cypress, cy, state) {
           // https://github.com/cypress-io/cypress/issues/883
           // A single chainer used that is not an actual assertion, like '.should('be', 'true')'
           if (chainers.length < 2 && !checkingExistence && !_.isFunction(memo[value])) {
-            addLogIfNoneExists()
             const err = $errUtils.cypressErrByPath('should.language_chainer', { args: { originalChainers: chainerString } })
 
             err.retry = false
@@ -150,7 +143,6 @@ export default function (Commands, Cypress, cy, state) {
                 // we need to log out this .should since there
                 // was a problem with the actual assertion syntax
                 if (err.retry === false) {
-                  addLogIfNoneExists()
                   $errUtils.throwErr(err)
                 }
 
@@ -171,6 +163,15 @@ export default function (Commands, Cypress, cy, state) {
         // should return this new subject
         return originalObj !== exp._obj ? exp._obj : subject
       } catch (err) {
+        // Unlike most queries, we don't create a log message by default - the code in
+        // ../assertions.ts will create one when we run the assertion.
+        // However, if we're throwing an error, it might be before any assertions
+        // have run for this command - in that case, we need a log message to 'hang' the error
+        // off of (mostly for purposes of a DOM snapshot).
+        if (Object.keys(logs).length === 0) {
+          Cypress.log({ message: [chainerString, ...args] })
+        }
+
         // Some commands want a chance to update the messages thrown by following assertions, for better legibility.
         // See querying.ts and traversals.ts, specifically `this.set('onFail', (err) => {`
         this.get('prev')?.get('onFail')?.(err)

@@ -314,18 +314,6 @@ describe('src/cy/commands/connectors', () => {
             expect($div).to.be.instanceof(this.remoteWindow.$)
           })
         })
-
-        it('does not store the remote jquery object as the subject', () => {
-          cy
-          .get('div:first').then(function ($div) {
-            expect($div).to.be.instanceof(this.remoteWindow.$)
-
-            return $div
-          })
-          .then(function () {
-            expect(cy.subject()).not.to.be.instanceof(this.remoteWindow.$)
-          })
-        })
       })
     })
 

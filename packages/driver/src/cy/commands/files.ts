@@ -12,7 +12,7 @@ export default (Commands, Cypress, cy, state) => {
   Commands.addQuery('readFile', function readFile (file, encoding, options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
     if (_.isObject(encoding)) {
       options = encoding
-      encoding = undefined
+      encoding = options.encoding
     }
 
     encoding = encoding === undefined ? 'utf8' : encoding
@@ -33,11 +33,11 @@ export default (Commands, Cypress, cy, state) => {
 
     let fileResult = null
     let filePromise = null
-    let mostRecentError = $errUtils.cypressErrByPath('files.timed_out', {
-      args: { cmd: 'readFile', file, timeout },
+    let mostRecentError = $errUtils.cypressErrByPath('files.read_timed_out', {
+      args: { file },
     })
 
-    const createFilePromise = (err) => {
+    const createFilePromise = () => {
       // If we already have a pending request to the backend, we'll wait
       // for that one to resolve instead of creating a new one.
       if (filePromise) {
@@ -65,6 +65,7 @@ export default (Commands, Cypress, cy, state) => {
         if (err.name === 'TimeoutError') {
           $errUtils.throwErrByPath('files.timed_out', {
             args: { cmd: 'readFile', file, timeout },
+            retry: false,
           })
         }
 
@@ -100,15 +101,6 @@ export default (Commands, Cypress, cy, state) => {
         err.docsUrl = docsUrl
       }
 
-      // The 'timed out' error message already tells the user what happened.
-      // If we're being called from verifyUpcomingAssertions (so the second arg is true)
-      // and this is the default 'timed out' message, we set retry: false so we don't
-      // end up with a redundant message like
-      // "Timed out after 2000ms: readFile() timed out after 2000ms."
-      if (timedOut && err.message.match('timed out')) {
-        err.retry = false
-      }
-
       createFilePromise()
     })
 
@@ -116,12 +108,12 @@ export default (Commands, Cypress, cy, state) => {
       // Once we've read a file, that remains the result, unless it's cleared
       // because of a failed assertion in `onFail` above.
       if (fileResult) {
-        log && state('current') === this && log.set('ConsoleProps', () => {
-          return {
-            'Contents': fileResult.contents,
-            'File Path': fileResult.filePath,
-          }
-        })
+        const props = {
+          'Contents': fileResult?.contents,
+          'File Path': fileResult?.filePath,
+        }
+
+        log && state('current') === this && log.set('consoleProps', () => props)
 
         return fileResult.contents
       }

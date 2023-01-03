@@ -390,7 +390,7 @@ describe('src/cy/commands/files', () => {
           expect(fileLog.get('error')).to.eq(err)
           expect(fileLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`\
-            \`cy.readFile("foo")\` timed out after waiting \`10ms\`.
+            Timed out retrying after 10ms: \`cy.readFile("foo")\` timed out.
           `)
 
           expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
@@ -414,7 +414,7 @@ describe('src/cy/commands/files', () => {
           expect(fileLog.get('error')).to.eq(err)
           expect(fileLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`\
-            \`cy.readFile("foo")\` timed out after waiting \`42ms\`.
+            Timed out retrying after 42ms: \`cy.readFile("foo")\` timed out.
           `)
 
           expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')

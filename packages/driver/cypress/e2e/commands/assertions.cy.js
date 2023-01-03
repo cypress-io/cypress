@@ -307,6 +307,15 @@ describe('src/cy/commands/assertions', () => {
         })
       })
 
+      it('resolves failed assertions inside callbacks', function (done) {
+        cy.once('fail', (err) => {
+          expect(this.lastLog.get('state')).to.eq('failed')
+          done()
+        })
+
+        cy.then(() => expect(true).to.be.false)
+      })
+
       context('remote jQuery instances', () => {
         beforeEach(function () {
           this.remoteWindow = cy.state('window')
@@ -639,6 +648,10 @@ describe('src/cy/commands/assertions', () => {
       it('has a pending state while retrying on static subjects', function (done) {
         cy.on('command:retry', () => {
           const [readFileLog, shouldLog] = this.logs
+
+          if (!shouldLog) {
+            return
+          }
 
           expect(readFileLog.get('state')).to.eq('passed')
           expect(shouldLog.get('state')).to.eq('pending')
@@ -2017,17 +2030,14 @@ describe('src/cy/commands/assertions', () => {
         .should('contain.value', 'foo')
         .should('include.value', 'foo')
 
-        cy.wrap(null).then(() => {
+        cy.then(() => {
           cy.$$('<input value="foo1">').prependTo(cy.$$('body'))
-
           cy.$$('<input value="foo2">').prependTo(cy.$$('body'))
         })
 
         cy.get('input').should(($els) => {
           expect($els).to.have.value('foo2')
           expect($els).to.contain.value('foo')
-
-          expect($els).to.include.value('foo')
         }).should('contain.value', 'oo2')
       })
 

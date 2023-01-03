@@ -2,7 +2,7 @@ const Cookie = require('js-cookie')
 const { stripIndent } = require('common-tags')
 
 const { assertLogLength } = require('../../support/utils')
-const { _, Promise, $ } = Cypress
+const { _, Promise } = Cypress
 
 describe('src/cy/commands/navigation', () => {
   context('#reload', () => {
@@ -1866,36 +1866,29 @@ describe('src/cy/commands/navigation', () => {
     })
 
     it('does not time out current commands until stability is reached', () => {
-      // on the first retry cause a page load event synchronously
-      cy.on('command:retry', (options) => {
+      cy.on('command:retry', function onRetry (options) {
         switch (options._retries) {
           case 1: {
-            const win = cy.state('window')
-
+            // on the first retry cause a page load event synchronously
             // load a page which times out after 500ms
             // to guarantee that url does not time out
-            const $a = win.$('<a href=\'/timeout?ms=500\'>jquery</a>')
-            .appendTo(win.document.body)
+            const $a = cy.$$('<a href=\'/timeout?ms=500\'>jquery</a>')
+            .appendTo(cy.state('document').body)
 
             causeSynchronousBeforeUnload($a)
 
             break
           }
           case 2: {
-            // on 2nd retry add the DOM element
-            const win = cy.state('window')
+            // On the second retry, create the div
+            cy.$$('<div id=\'did-not-exist\'>did not exist<div>')
+            .appendTo(cy.state('document').body)
 
-            $('<div id=\'did-not-exist\'>did not exist<div>')
-            .appendTo(win.document.body)
+            cy.off('command:retry', onRetry)
 
-            break
-          }
-          case 3: {
-            // and on the 3rd retry add the class
-            cy.state('window')
-
-            $('#did-not-exist').addClass('foo')
-
+            // .get() has now resolved; the command queue moves on to .should().
+            // On the first retry of .should(), we add the foo class so it'll now resolve.
+            cy.on('command:retry', () => cy.$$('#did-not-exist').addClass('foo'))
             break
           }
           default:
@@ -1903,13 +1896,12 @@ describe('src/cy/commands/navigation', () => {
         }
       })
 
-      cy
-      .visit('/fixtures/jquery.html')
+      cy.visit('/fixtures/jquery.html')
 
       // make get timeout after 300ms
       // but even though our page does not load for 500ms
       // this does not time out
-      .get('#did-not-exist', { timeout: 300 }).should('have.class', 'foo')
+      cy.get('#did-not-exist', { timeout: 300 }).should('have.class', 'foo')
     })
 
     describe('errors', () => {

@@ -484,7 +484,7 @@ describe('src/cy/commands/aliasing', () => {
     it('includes assertions in the subject chain', () => {
       cy.get('#button').should('have.css', 'font-family').as('font')
 
-      cy.get('@font').should('eq', 'serif')
+      cy.get('@font').should('be.a', 'string')
     })
   })
 

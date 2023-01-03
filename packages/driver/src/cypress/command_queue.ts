@@ -23,11 +23,14 @@ const commandRunningFailed = (Cypress, err, current?: $Command) => {
     err.onFail(err)
     // clean up this onFail callback after it's been called
     delete err.onFail
-
-    return
   }
 
   const lastLog = current?.getLastLog()
+
+  // ensure the last log on the command ends correctly
+  if (lastLog) {
+    return lastLog.error(err)
+  }
 
   const consoleProps = () => {
     if (!current) return
@@ -45,11 +48,6 @@ const commandRunningFailed = (Cypress, err, current?: $Command) => {
       prev.get('subject')
 
     return consoleProps
-  }
-
-  // ensure the last log on the command ends correctly
-  if (lastLog && !lastLog.get('ended')) {
-    return lastLog.set({ consoleProps }).error(err)
   }
 
   return Cypress.log({
