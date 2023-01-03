@@ -124,7 +124,7 @@ describe('code-generator', () => {
           status: 'add',
           file: fileAbsolute,
           content: `${dedent`
-            describe('empty spec', () => {
+            describe('template spec', () => {
               it('passes', () => {
                 cy.visit('https://example.cypress.io')
               })
