@@ -685,6 +685,12 @@ export const breakingRootOptions: Array<BreakingOption> = [
     isWarning: false,
     testingTypes: ['e2e'],
   },
+  {
+    name: 'experimentalUseDefaultDocumentDomain',
+    errorKey: 'EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY',
+    isWarning: false,
+    testingTypes: ['e2e'],
+  },
 ]
 
 export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component: Array<BreakingOption> } = {
@@ -724,6 +730,11 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
     {
       name: 'experimentalOriginDependencies',
       errorKey: 'EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY',
+      isWarning: false,
+    },
+    {
+      name: 'experimentalUseDefaultDocumentDomain',
+      errorKey: 'EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY',
       isWarning: false,
     },
   ],
