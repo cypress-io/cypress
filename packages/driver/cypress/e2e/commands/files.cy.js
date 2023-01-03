@@ -88,7 +88,7 @@ describe('src/cy/commands/files', () => {
       .resolves(okResponse)
 
       cy.readFile('foo.json').then(() => {
-        expect(retries).to.eq(1)
+        expect(retries).to.eq(2)
       })
     })
 
@@ -110,7 +110,9 @@ describe('src/cy/commands/files', () => {
       })
 
       cy.readFile('foo.json').should('eq', 'quux').then(() => {
-        expect(retries).to.eq(1)
+        // Two retries: The first one triggers a backend request and throws a 'not ready' error.
+        // The second gets foobarbaz, triggering another request to the backend.
+        expect(retries).to.eq(2)
       })
     })
 
@@ -243,7 +245,7 @@ describe('src/cy/commands/files', () => {
         cy.on('fail', (err) => {
           const { fileLog } = this
 
-          assertLogLength(this.logs, 2)
+          assertLogLength(this.logs, 3)
           expect(fileLog.get('error')).to.eq(err)
           expect(fileLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`\

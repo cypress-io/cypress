@@ -4,118 +4,137 @@ import { basename } from 'path'
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
 
-interface InternalReadFileOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
-  _log?: Log
-  encoding: Cypress.Encodings
-}
-
 interface InternalWriteFileOptions extends Partial<Cypress.WriteFileOptions & Cypress.Timeoutable> {
   _log?: Log
 }
 
 export default (Commands, Cypress, cy, state) => {
-  Commands.addAll({
-    readFile (file, encoding, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
-      if (_.isObject(encoding)) {
-        userOptions = encoding
-        encoding = undefined
-      }
+  Commands.addQuery('readFile', function readFile (file, encoding, options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+    if (_.isObject(encoding)) {
+      options = encoding
+      encoding = undefined
+    }
 
-      const options: InternalReadFileOptions = _.defaults({}, userOptions, {
-        // https://github.com/cypress-io/cypress/issues/1558
-        // If no encoding is specified, then Cypress has historically defaulted
-        // to `utf8`, because of it's focus on text files. This is in contrast to
-        // NodeJs, which defaults to binary. We allow users to pass in `null`
-        // to restore the default node behavior.
-        encoding: encoding === undefined ? 'utf8' : encoding,
-        log: true,
-        timeout: Cypress.config('defaultCommandTimeout'),
+    encoding = encoding === undefined ? 'utf8' : encoding
+
+    const timeout = options.timeout ?? Cypress.config('defaultCommandTimeout')
+
+    this.set('timeout', timeout)
+    this.set('ensureExistenceFor', 'subject')
+
+    const log = options.log !== false && Cypress.log({ message: file, timeout })
+
+    if (!file || !_.isString(file)) {
+      $errUtils.throwErrByPath('files.invalid_argument', {
+        onFail: options._log,
+        args: { cmd: 'readFile', file },
       })
+    }
 
-      const consoleProps = {}
+    let fileResult = null
+    let filePromise = null
+    let mostRecentError = $errUtils.cypressErrByPath('files.timed_out', {
+      args: { cmd: 'readFile', file, timeout },
+    })
 
-      if (options.log) {
-        options._log = Cypress.log({
-          message: file,
-          timeout: options.timeout,
-          consoleProps () {
-            return consoleProps
-          },
-        })
+    const createFilePromise = (err) => {
+      // If we already have a pending request to the backend, we'll wait
+      // for that one to resolve instead of creating a new one.
+      if (filePromise) {
+        return
       }
 
-      if (!file || !_.isString(file)) {
-        $errUtils.throwErrByPath('files.invalid_argument', {
-          onFail: options._log,
-          args: { cmd: 'readFile', file },
-        })
-      }
+      fileResult = null
+      filePromise = Cypress.backend('read:file', file, { encoding })
+      .timeout(timeout)
+      .then((result) => {
+        // https://github.com/cypress-io/cypress/issues/1558
+        // https://github.com/cypress-io/cypress/issues/20683
+        // We invoke Buffer.from() in order to transform this from an ArrayBuffer -
+        // which socket.io uses to transfer the file over the websocket - into a `Buffer`.
+        if (encoding === null && result.contents !== null) {
+          result.contents = Buffer.from(result.contents)
+        }
 
-      // We clear the default timeout so we can handle
-      // the timeout ourselves
-      cy.clearTimeout()
+        // Add the filename to the current command, in case we need it later (such as when storing an alias)
+        state('current').set('fileName', basename(result.filePath))
 
-      const verifyAssertions = () => {
-        return Cypress.backend('read:file', file, _.pick(options, 'encoding')).timeout(options.timeout)
-        .catch((err) => {
-          if (err.name === 'TimeoutError') {
-            return $errUtils.throwErrByPath('files.timed_out', {
-              onFail: options._log,
-              args: { cmd: 'readFile', file, timeout: options.timeout },
-            })
-          }
-
-          // Non-ENOENT errors are not retried
-          if (err.code !== 'ENOENT') {
-            return $errUtils.throwErrByPath('files.unexpected_error', {
-              onFail: options._log,
-              args: { cmd: 'readFile', action: 'read', file, filePath: err.filePath, error: err.message },
-            })
-          }
-
-          return {
-            contents: null,
-            filePath: err.filePath,
-          }
-        }).then(({ filePath, contents }) => {
-          // https://github.com/cypress-io/cypress/issues/1558
-          // https://github.com/cypress-io/cypress/issues/20683
-          // We invoke Buffer.from() in order to transform this from an ArrayBuffer -
-          // which socket.io uses to transfer the file over the websocket - into a `Buffer`.
-          if (options.encoding === null && contents !== null) {
-            contents = Buffer.from(contents)
-          }
-
-          // Add the filename as a symbol, in case we need it later (such as when storing an alias)
-          state('current').set('fileName', basename(filePath))
-
-          consoleProps['File Path'] = filePath
-          consoleProps['Contents'] = contents
-
-          return cy.verifyUpcomingAssertions(contents, options, {
-            ensureExistenceFor: 'subject',
-            onFail (err) {
-              if (err.type !== 'existence') {
-                return
-              }
-
-              // file exists but it shouldn't - or - file doesn't exist but it should
-              const errPath = contents ? 'files.existent' : 'files.nonexistent'
-              const { message, docsUrl } = $errUtils.cypressErrByPath(errPath, {
-                args: { cmd: 'readFile', file, filePath },
-              })
-
-              err.message = message
-              err.docsUrl = docsUrl
-            },
-            onRetry: verifyAssertions,
+        fileResult = result
+      })
+      .catch((err) => {
+        if (err.name === 'TimeoutError') {
+          $errUtils.throwErrByPath('files.timed_out', {
+            args: { cmd: 'readFile', file, timeout },
           })
+        }
+
+        // Non-ENOENT errors are not retried
+        if (err.code !== 'ENOENT') {
+          $errUtils.throwErrByPath('files.unexpected_error', {
+            args: { cmd: 'readFile', action: 'read', file, filePath: err.filePath, error: err.message },
+            errProps: { retry: false },
+          })
+        }
+
+        // We have a ENOENT error - the file doesn't exist. Whether this is an error or not is deterimened
+        // by verifyUpcomingAssertions, when the command_queue receives the null file contents.
+        fileResult = { contents: null, filePath: err.filePath }
+      })
+      .catch((err) => mostRecentError = err)
+      // Pass or fail, we always clear the filePromise, so future retries know there's no
+      // live request to the server.
+      .finally(() => filePromise = null)
+    }
+
+    // When an assertion attached to this command fails, then we want to throw away the existing result
+    // and create a new promise to read a new one.
+    this.set('onFail', (err, timedOut) => {
+      if (err.type === 'existence') {
+        // file exists but it shouldn't - or - file doesn't exist but it should
+        const errPath = fileResult.contents ? 'files.existent' : 'files.nonexistent'
+        const { message, docsUrl } = $errUtils.cypressErrByPath(errPath, {
+          args: { cmd: 'readFile', file, filePath: fileResult.filePath },
         })
+
+        err.message = message
+        err.docsUrl = docsUrl
       }
 
-      return verifyAssertions()
-    },
+      // The 'timed out' error message already tells the user what happened.
+      // If we're being called from verifyUpcomingAssertions (so the second arg is true)
+      // and this is the default 'timed out' message, we set retry: false so we don't
+      // end up with a redundant message like
+      // "Timed out after 2000ms: readFile() timed out after 2000ms."
+      if (timedOut && err.message.match('timed out')) {
+        err.retry = false
+      }
 
+      createFilePromise()
+    })
+
+    return () => {
+      // Once we've read a file, that remains the result, unless it's cleared
+      // because of a failed assertion in `onFail` above.
+      if (fileResult) {
+        log && state('current') === this && log.set('ConsoleProps', () => {
+          return {
+            'Contents': fileResult.contents,
+            'File Path': fileResult.filePath,
+          }
+        })
+
+        return fileResult.contents
+      }
+
+      createFilePromise()
+
+      // If we don't have a result, then the promise is pending.
+      // Throw an error and wait for the promise to eventually resolve on a future retry.
+      throw mostRecentError
+    }
+  })
+
+  Commands.addAll({
     writeFile (fileName, contents, encoding, userOptions: Partial<Cypress.WriteFileOptions & Cypress.Timeoutable> = {}) {
       if (_.isObject(encoding)) {
         userOptions = encoding
