@@ -115,6 +115,9 @@ fragment DebugSpecs on Query {
             ...DebugSpecListGroups
           }
           ...DebugPendingRunSplash
+        }
+        nextRun: runByNumber(runNumber: $nextRunNumber) @include(if: $hasNextRun) {
+          id
           ...DebugNewRelevantRunBar
         }
       }
@@ -138,6 +141,10 @@ const loginConnectStore = useLoginConnectStore()
 
 const run = computed(() => {
   return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject.runByNumber : null
+})
+
+const nextRun = computed(() => {
+  return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject.nextRun : null
 })
 
 function shouldDisplayDetails (status: CloudRunStatus) {
@@ -171,8 +178,7 @@ const debugSpecsArray = computed(() => {
 
 const specStatuses = computed(() => run.value?.specs.map((spec) => spec.status || 'UNCLAIMED') || [])
 
-// TODO GH#24440 Re-map to use relevant run data point (currently stubbed with current run)
-const newerRelevantRun = computed(() => run.value)
+const newerRelevantRun = computed(() => nextRun.value)
 
 const isFirstPendingRun = computed(() => run.value && run.value.runNumber === 1 && run.value.status === 'RUNNING')
 </script>

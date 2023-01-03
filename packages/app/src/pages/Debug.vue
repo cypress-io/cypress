@@ -29,20 +29,22 @@ subscription Debug_specsChange {
 `
 
 gql `
-query Debug($runNumber: Int!) {
+query Debug($runNumber: Int!, $nextRunNumber: Int!, $hasNextRun: Boolean!) {
   ...DebugSpecs
 }
 `
 
 const relevantRuns = useRelevantRun()
 
-const variables = ref({ runNumber: -1 })
+const variables = ref({ runNumber: -1, nextRunNumber: -1, hasNextRun: false })
 
 const query = useQuery({ query: DebugDocument, variables, pause: true })
 
 watchEffect(() => {
   if (relevantRuns.value.current) {
     variables.value.runNumber = relevantRuns.value.current
+    variables.value.hasNextRun = !!relevantRuns.value.next
+    variables.value.nextRunNumber = relevantRuns.value.next || -1
     query.executeQuery()
   }
 })
