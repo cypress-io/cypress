@@ -126,7 +126,6 @@ class Reporter extends Component<SingleReporterProps> {
       runnablesStore,
       scroller,
       statsStore,
-      // runnerStore,
     })
 
     this.props.events.listen(runner)

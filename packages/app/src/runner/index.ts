@@ -374,7 +374,7 @@ async function initialize () {
  * 2. Reset the Reporter. We use the same instance of the Reporter,
  *    but reset the internal state each time we run a spec.
  *
- * 3. Teardown spec. This does a few things, primaily stopping the current
+ * 3. Teardown spec. This does a few things, primarily stopping the current
  *    spec run, which involves stopping the driver and runner.
  *
  * 4. Force the Reporter to re-render with the new spec we are executed.
