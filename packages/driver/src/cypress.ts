@@ -788,7 +788,9 @@ class $Cypress {
   }
 
   get currentRetry (): number {
-    return this.cy.state('runnable').ctx?.currentTest._currentRetry
+    const ctx = this.cy.state('runnable').ctx
+
+    return ctx?.currentTest?._currentRetry || ctx?.test?._currentRetry
   }
 
   static create (config: Record<string, any>) {
