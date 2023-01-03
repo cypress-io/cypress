@@ -46,7 +46,6 @@ const savedState = require(`../../lib/saved_state`)
 const { getCtx, clearCtx, setCtx, makeDataContext } = require(`../../lib/makeDataContext`)
 const { BrowserCriClient } = require(`../../lib/browsers/browser-cri-client`)
 const { cloudRecommendationMessage } = require('../../lib/util/print-run')
-const { expect } = require('chai')
 
 const TYPICAL_BROWSERS = [
   {

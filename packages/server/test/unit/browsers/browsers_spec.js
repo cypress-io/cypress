@@ -13,7 +13,6 @@ const util = require('util')
 const { createTestDataContext } = require('@packages/data-context/test/unit/helper')
 const electron = require('../../../lib/browsers/electron')
 const Promise = require('bluebird')
-const { expect } = require('chai')
 
 const normalizeSnapshot = (str) => {
   return snapshot(stripAnsi(str))
