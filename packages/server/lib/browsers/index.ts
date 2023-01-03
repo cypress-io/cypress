@@ -10,6 +10,7 @@ import os from 'os'
 import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser } from '@packages/types'
 import type { Browser, BrowserInstance, BrowserLauncher } from './types'
 import type { Automation } from '../automation'
+import type { DataContext } from '@packages/data-context'
 
 const debug = Debug('cypress:server:browsers')
 const isBrowserFamily = check.oneOf(BROWSER_FAMILY)
@@ -130,7 +131,7 @@ export = {
     return this.getBrowserInstance()
   },
 
-  async open (browser: Browser, options: BrowserLaunchOpts, automation: Automation, ctx): Promise<BrowserInstance | null> {
+  async open (browser: Browser, options: BrowserLaunchOpts, automation: Automation, ctx: DataContext): Promise<BrowserInstance | null> {
     await kill(true)
 
     _.defaults(options, {
@@ -163,6 +164,12 @@ export = {
       ctx.browser.setBrowserStatus('closed')
       options?.onBrowserClose?.()
       browserLauncher.clearInstanceState()
+
+      // If `open` mode: avoid throwing an error here to keep GQL clean, allows user to relaunch from launchpad
+      // For `run` mode: propagate errors to kill the run
+      if (ctx.isRunMode) {
+        throw e
+      }
 
       return null
     }
