@@ -12,7 +12,7 @@ const debugVerbose = debugModule('cypress-verbose:server:browsers:memory')
 
 const MEMORY_THRESHOLD_PERCENTAGE = 50
 const KIBIBYTE = 1024
-const FOUR_GIBIBYTES = 4294967296
+const FOUR_GIBIBYTES = 4 * 1024 * 1024 * 1024
 
 export type MemoryHandler = {
   getTotalMemoryLimit: () => Promise<number>
@@ -146,7 +146,8 @@ export default class Memory {
       debugVerbose('maxAvailableRendererMemory:', maxAvailableRendererMemory, 'bytes')
 
       // if we're using more than MEMORY_THRESHOLD_PERCENTAGE of the available memory, force a garbage collection
-      const shouldCollectGarbage = (rendererProcessMemRss / maxAvailableRendererMemory) * 100 >= MEMORY_THRESHOLD_PERCENTAGE
+      const rendererUsagePercentage = (rendererProcessMemRss / maxAvailableRendererMemory) * 100
+      const shouldCollectGarbage = rendererUsagePercentage >= MEMORY_THRESHOLD_PERCENTAGE
 
       if (shouldCollectGarbage) {
         debug('forcing garbage collection')
@@ -157,8 +158,9 @@ export default class Memory {
 
       if (debugVerbose.enabled) {
         this.logMemory({
-          memRss: rendererProcessMemRss,
+          rendererProcessMemRss,
           garbageCollected: shouldCollectGarbage,
+          rendererUsagePercentage,
           currentAvailableMemory,
           maxAvailableRendererMemory,
           jsHeapSizeLimit: this.jsHeapSizeLimit,
@@ -167,14 +169,16 @@ export default class Memory {
     })
   }
 
-  private logMemory ({ memRss, garbageCollected, currentAvailableMemory, maxAvailableRendererMemory, jsHeapSizeLimit }) {
+  private logMemory ({ rendererProcessMemRss, garbageCollected, rendererUsagePercentage, currentAvailableMemory, maxAvailableRendererMemory, jsHeapSizeLimit }) {
     this.testCount++
     const log = {
       test: this.testCount,
-      memRss,
+      rendererProcessMemRss,
       garbageCollected,
+      rendererUsagePercentage,
       currentAvailableMemory,
       maxAvailableRendererMemory,
+      availableRendererMemoryThreshold: maxAvailableRendererMemory * (MEMORY_THRESHOLD_PERCENTAGE / 100),
       jsHeapSizeLimit,
     }
 
