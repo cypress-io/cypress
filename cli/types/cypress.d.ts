@@ -282,11 +282,6 @@ declare namespace Cypress {
   }
 
   /**
-   * List of full title path (parent suite names + test name) of the Cloud tests that failed that need debugged.
-   */
-  type TestFilter = string[] | null // could make this a callback/regex in the future
-
-  /**
    * Window type for Application Under Test(AUT)
    */
   type AUTWindow = Window & typeof globalThis & ApplicationWindow
@@ -416,11 +411,6 @@ declare namespace Cypress {
      * ```
      */
     spec: Spec
-
-    /**
-     * Active test filter for currently executing spec.
-     */
-    testFilter: TestFilter
 
     /**
      * Currently executing test runnable instance.
@@ -3191,7 +3181,6 @@ declare namespace Cypress {
     socketIoRoute: string
     spec: Cypress['spec'] | null
     specs: Array<Cypress['spec']>
-    testFilter: Cypress['testFilter']
   }
 
   interface SuiteConfigOverrides extends Partial<

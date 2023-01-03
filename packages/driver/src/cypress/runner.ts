@@ -9,7 +9,8 @@ import $errUtils from './error_utils'
 import $stackUtils from './stack_utils'
 import { getResolvedTestConfigOverride } from '../cy/testConfigOverrides'
 import debugFn from 'debug'
-import type { Emissions } from '@packages/types'
+import type { Emissions, TestFilter } from '@packages/types'
+import { SKIPPED_DUE_TO_BROWSER_MESSAGE } from './mocha'
 
 const mochaCtxKeysRe = /^(_runnable|test)$/
 const betweenQuotesRe = /\"(.+?)\"/
@@ -492,6 +493,7 @@ const hasOnly = (suite) => {
   )
 }
 
+// Removes a suite and any of it's hooks/tests. Also removes the reference to itself so that it can be GC'd
 const pruneSuite = (emptySuite) => {
   emptySuite.cleanReferences()
 
@@ -504,23 +506,36 @@ const pruneSuite = (emptySuite) => {
   }
 }
 
-const pruneEmptySuites = (rootSuite, incrementFoundTestsBy) => {
+// When in open mode and a "testFilter" is active, tests/suites that do not match the test filter
+// need to be removed as they might have modifiers (.only) that would affect the matched set of tests.
+// This function will recursively iterate through all of the suites and filter out any tests that do not
+// match the specified filter. If the suite is empty after removing the tests, the suite is also removed.
+const pruneEmptySuites = (rootSuite, testFilter: NonNullable<TestFilter>) => {
+  // We want to start at the lowest level so recurse first. We want to prune child suites before parents
+
+  let totalUnfilteredTests = 0
+
   for (const suite of [...rootSuite.suites]) {
-    pruneEmptySuites(suite, incrementFoundTestsBy)
+    totalUnfilteredTests += pruneEmptySuites(suite, testFilter)
   }
 
   if (!rootSuite.suites.length && !rootSuite.tests.length) {
     pruneSuite(rootSuite)
   }
 
-  if (rootSuite.tests.length && Cypress.testFilter) {
-    incrementFoundTestsBy(rootSuite.tests.length)
+  if (rootSuite.tests.length) {
+    totalUnfilteredTests += rootSuite.tests.length
 
     const tests: any[] = []
     const onlyTests: any[] = []
 
     for (const test of rootSuite.tests) {
-      if (Cypress.testFilter.includes(test.fullTitle())) {
+      // Tests/suites of the shape "it('should', { browser: 'chrome' }, ...)" will have their title
+      // updated with a skipped message. Even if the test is skipped we should still show it in the reporter
+      // so we match the "fullTitle" with the skipped message removed.
+      const fullTitle = test.fullTitle().replaceAll(SKIPPED_DUE_TO_BROWSER_MESSAGE, '')
+
+      if (testFilter.includes(fullTitle)) {
         tests.push(test)
 
         if (rootSuite._onlyTests.includes(test)) {
@@ -538,10 +553,17 @@ const pruneEmptySuites = (rootSuite, incrementFoundTestsBy) => {
       pruneSuite(rootSuite)
     }
   }
+
+  return totalUnfilteredTests
 }
 
-const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest, incrementFoundTestsBy) => {
-  pruneEmptySuites(suite, incrementFoundTestsBy)
+const normalizeAll = (suite, initialTests = {}, testFilter, setTestsById, setTests, getRunnableId, getHookId, getOnlyTestId, getOnlySuiteId, createEmptyOnlyTest) => {
+  let totalUnfilteredTests = 0
+
+  // Empty suites don't have any impact in run mode so let's avoid this extra work.
+  if (Cypress.config('isInteractive') && testFilter) {
+    totalUnfilteredTests = pruneEmptySuites(suite, testFilter)
+  }
 
   let hasTests = false
 
@@ -595,6 +617,9 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, getRunna
 
     return
   })
+
+  normalizedSuite.testFilter = testFilter
+  normalizedSuite.totalUnfilteredTests = totalUnfilteredTests
 
   return normalizedSuite
 }
@@ -1086,8 +1111,6 @@ export default {
     let _uncaughtFn: (() => never) | null = null
     let _resumedAtTestIndex: number | null = null
     let _skipCollectingLogs = true
-    let _testsTotalBeforeFilter = 0
-
     const _runner = mocha.getRunner()
 
     _runner.suite = mocha.getRootSuite()
@@ -1362,15 +1385,11 @@ export default {
       return test
     }
 
-    const incrementFoundTestsBy = (num: number) => {
-      _testsTotalBeforeFilter += num
-    }
-
     return {
       onSpecError,
       setOnlyTestId,
       setOnlySuiteId,
-      normalizeAll (tests, skipCollectingLogs) {
+      normalizeAll (tests, skipCollectingLogs, testFilter) {
         _skipCollectingLogs = skipCollectingLogs
         // if we have an uncaught error then slice out
         // all of the tests and suites and just generate
@@ -1390,6 +1409,7 @@ export default {
         return normalizeAll(
           _runner.suite,
           tests,
+          testFilter,
           setTestsById,
           setTests,
           getRunnableId,
@@ -1397,7 +1417,6 @@ export default {
           getOnlyTestId,
           getOnlySuiteId,
           createEmptyOnlyTest,
-          incrementFoundTestsBy,
         )
       },
 
@@ -1859,10 +1878,6 @@ export default {
         }
 
         return logs.push(attrs)
-      },
-
-      getTotalTestsBeforeFilter () {
-        return _testsTotalBeforeFilter
       },
     }
   },

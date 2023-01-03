@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events'
 import { action } from 'mobx'
 import appState, { AppState } from './app-state'
-import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from '../runnables/runnables-store'
+import runnablesStore, { RunnablesStore, LogProps, RootRunnable } from '../runnables/runnables-store'
 import statsStore, { StatsStore } from '../header/stats-store'
 import scroller, { Scroller } from './scroller'
 import { UpdatableTestProps, UpdateTestCallback, TestProps } from '../test/test-model'

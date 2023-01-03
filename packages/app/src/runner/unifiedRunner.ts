@@ -75,9 +75,9 @@ export function useUnifiedRunner () {
             return acc
           }, [])
 
-          specStore.setTestFilter(failedTests.length ? failedTests : null)
+          specStore.setTestFilter(failedTests.length ? failedTests : undefined)
         } else {
-          specStore.setTestFilter(null)
+          specStore.setTestFilter(undefined)
         }
 
         // Either there is a new spec or the runId has changed. Returning a new object

@@ -30,3 +30,5 @@ export interface CachedTestState {
 export type Instrument = 'agent' | 'command' | 'route'
 
 export type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing' | 'warned'
+
+export type TestFilter = string[] | undefined

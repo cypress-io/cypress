@@ -1,8 +1,11 @@
 describe('cloud debug test filtering', () => {
-  it('works with nested suites', () => {
+  beforeEach(() => {
     cy.scaffoldProject('cloud-debug-filter')
     cy.openProject('cloud-debug-filter')
     cy.startAppServer('e2e')
+  })
+
+  it('works with nested suites', () => {
     cy.visitApp(`specs/runner?file=cypress/e2e/test.cy.js`)
 
     cy.waitForSpecToFinish()
@@ -30,9 +33,6 @@ describe('cloud debug test filtering', () => {
   })
 
   it('works with skips and onlys', () => {
-    cy.scaffoldProject('cloud-debug-filter')
-    cy.openProject('cloud-debug-filter')
-    cy.startAppServer('e2e')
     cy.visitApp(`specs/runner?file=cypress/e2e/skip-and-only.cy.js`)
 
     cy.waitForSpecToFinish({ passCount: 0, failCount: 1 })
@@ -81,5 +81,17 @@ describe('cloud debug test filtering', () => {
     cy.visitApp(`specs/runner?file=cypress/e2e/skip-and-only.cy.js&runId=123`)
     cy.waitForSpecToFinish({ passCount: 0, failCount: 1 })
     cy.get('.runnable-title').contains('t4')
+  })
+
+  it('works with browser filter', () => {
+    cy.withCtx((ctx) => {
+      ctx.coreData.cloud.testsForRunResults = [{ titlePath: 't1', status: 'FAILED' }, { titlePath: 's1 t2', status: 'FAILED' }]
+    })
+
+    cy.visitApp(`specs/runner?file=cypress/e2e/browsers.cy.js&runId=123`)
+
+    cy.get('.runnable-title').eq(0).contains('t1 (skipped due to browser)')
+    cy.get('.runnable-title').eq(1).contains('s1 (skipped due to browser)')
+    cy.get('.runnable-title').eq(2).contains('t2')
   })
 })

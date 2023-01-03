@@ -1,3 +1,4 @@
+import { TestFilter } from '@packages/types'
 import _ from 'lodash'
 import { action, observable } from 'mobx'
 import AgentModel, { AgentProps } from '../agents/agent-model'
@@ -34,6 +35,9 @@ export interface RootRunnable {
   hooks?: Array<HookProps>
   tests?: Array<TestProps>
   suites?: Array<SuiteProps>
+  testFilter?: TestFilter
+  totalTests?: number
+  totalUnfilteredTests?: number
 }
 
 type RunnableType = 'test' | 'suite'
@@ -50,7 +54,9 @@ export class RunnablesStore {
    * content: RunnableArray
    */
   @observable runnablesHistory: Record<string, RunnableArray> = {}
-  @observable totalRunnables: number = 0
+  @observable totalTests: number = 0
+  @observable totalUnfilteredTests: number = 0
+  @observable testFilter: TestFilter
 
   runningSpec: string | null = null
 
@@ -80,7 +86,10 @@ export class RunnablesStore {
 
     this.hasTests = numTests > 0
     this.hasSingleTest = numTests === 1
-    this.totalRunnables = numTests
+    this.totalTests = numTests
+
+    this.totalUnfilteredTests = rootRunnable.totalUnfilteredTests || 0
+    this.testFilter = rootRunnable.testFilter
 
     this._finishedInitialRendering()
   }
@@ -197,7 +206,7 @@ export class RunnablesStore {
     this.runnablesHistory = {}
     this._tests = {}
     this._runnablesQueue = []
-    this.totalRunnables = 0
+    this.totalTests = 0
   }
 
   @action

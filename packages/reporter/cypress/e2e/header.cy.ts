@@ -1,3 +1,4 @@
+import { TestFilter } from '@packages/types'
 import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
 
@@ -7,7 +8,7 @@ describe('header', () => {
   let runner: EventEmitter
   let runnables: RootRunnable
 
-  function setupReporter (opts?: {testFilter: string[], totalTests: number}) {
+  function setupReporter (opts?: { testFilter: TestFilter, totalUnfilteredTests: number }) {
     cy.fixture('runnables').then((_runnables) => {
       runnables = _runnables
     })
@@ -23,14 +24,12 @@ describe('header', () => {
             absolute: '/foo/bar',
             relative: 'foo/bar',
           },
-          testFilter: opts?.testFilter ?? null,
-          totalTests: opts?.totalTests ?? 0,
         },
       })
     })
 
     cy.get('.reporter').then(() => {
-      runner.emit('runnables:ready', runnables)
+      runner.emit('runnables:ready', { ...runnables, testFilter: opts?.testFilter, totalUnfilteredTests: opts?.totalUnfilteredTests })
       runner.emit('reporter:start', {})
     })
   }
@@ -241,7 +240,7 @@ describe('header', () => {
 
   describe('debug test filter', () => {
     beforeEach(() => {
-      setupReporter({ testFilter: ['suite 1 test 2'], totalTests: 10 })
+      setupReporter({ testFilter: ['suite 1 test 2'], totalUnfilteredTests: 10 })
     })
 
     it('displays debug filter when Cypress.testFilter is defined', () => {

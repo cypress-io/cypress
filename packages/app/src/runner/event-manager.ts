@@ -1,9 +1,9 @@
 import Bluebird from 'bluebird'
 import { EventEmitter } from 'events'
-import { getMobxRunnerStore, MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
+import type { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 import type MobX from 'mobx'
 import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriverMap } from './event-manager-types'
-import type { RunState, CachedTestState, AutomationElementId, FileDetails, ReporterStartInfo, ReporterRunState } from '@packages/types'
+import type { RunState, CachedTestState, AutomationElementId, FileDetails, ReporterStartInfo, ReporterRunState, TestFilter } from '@packages/types'
 
 import { logger } from './logger'
 import type { Socket } from '@packages/socket/lib/browser'
@@ -379,7 +379,7 @@ export class EventManager {
     return this.Cypress.isBrowser(browserName)
   }
 
-  initialize ($autIframe: JQuery<HTMLIFrameElement>, config: Record<string, any>) {
+  initialize ($autIframe: JQuery<HTMLIFrameElement>, config: Record<string, any>, testFilter: TestFilter) {
     performance.mark('initialize-start')
 
     return Cypress.initialize({
@@ -397,7 +397,7 @@ export class EventManager {
 
           this.studioStore.initialize(config, runState)
 
-          const runnables = Cypress.runner.normalizeAll(runState.tests, hideCommandLog)
+          const runnables = Cypress.runner.normalizeAll(runState.tests, hideCommandLog, testFilter)
 
           const run = () => {
             performance.mark('initialize-end')
@@ -408,9 +408,6 @@ export class EventManager {
 
           if (!hideCommandLog) {
             this.reporterBus.emit('runnables:ready', runnables)
-            this.Mobx.runInAction(() => {
-              getMobxRunnerStore().setTotalTests(Cypress.runner.getTotalTestsBeforeFilter())
-            })
           }
 
           if (runState?.numLogs) {

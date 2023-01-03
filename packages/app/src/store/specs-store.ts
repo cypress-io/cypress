@@ -1,10 +1,10 @@
-import type { SpecFile } from '@packages/types/src'
+import type { SpecFile, TestFilter } from '@packages/types/src'
 import { defineStore } from 'pinia'
 
 export interface SpecState {
   activeSpec: SpecFile | null | undefined
   specFilter?: string
-  testFilter: Cypress.TestFilter | null
+  testFilter: TestFilter
 }
 
 export const useSpecStore = defineStore({
@@ -13,7 +13,7 @@ export const useSpecStore = defineStore({
     return {
       activeSpec: undefined,
       specFilter: undefined,
-      testFilter: null,
+      testFilter: undefined,
     }
   },
 

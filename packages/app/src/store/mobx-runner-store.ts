@@ -23,8 +23,6 @@ export class MobxRunnerStore {
   @observable height: number
   @observable automation?: AutomationStatus
   @observable canSaveStudioLogs = false
-  @observable testFilter: Cypress.TestFilter = null
-  @observable totalTests: number = 0
 
   constructor (testingType: Cypress.TestingType) {
     this.width = defaults[testingType].width
@@ -38,14 +36,6 @@ export class MobxRunnerStore {
   @action setSpec (spec: Cypress.Spec | undefined) {
     this.spec = spec
     this.specRunId = nanoid()
-  }
-
-  @action setTestFilter (testFilter: Cypress.TestFilter) {
-    this.testFilter = testFilter
-  }
-
-  @action setTotalTests (totalTests: number) {
-    this.totalTests = totalTests
   }
 
   @action checkCurrentSpecStillExists (specs: Cypress.Spec[]) {
