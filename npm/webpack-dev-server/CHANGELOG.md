@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v3.2.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.2.1...@cypress/webpack-dev-server-v3.2.2) (2023-01-03)
+
+
+### Bug Fixes
+
+* change wording for spec creation ([#25271](https://github.com/cypress-io/cypress/issues/25271)) ([c12a7e3](https://github.com/cypress-io/cypress/commit/c12a7e37c73d972eb0514e4b602940df210d86c7))
+
 # [@cypress/webpack-dev-server-v3.2.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.2.0...@cypress/webpack-dev-server-v3.2.1) (2022-12-29)
 
 
