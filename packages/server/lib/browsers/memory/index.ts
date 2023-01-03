@@ -34,7 +34,7 @@ export type MemoryHandler = {
  */
 
 export const getJsHeapSizeLimit = async (sendDebuggerCommandFn) => {
-  return measure('getJsHeapSizeLimit', async () => {
+  return measure({ name: 'getJsHeapSizeLimit' }, async () => {
     let heapLimit = (await sendDebuggerCommandFn('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' })).result?.value
 
     if (!heapLimit) {
@@ -65,13 +65,17 @@ export const getMemoryHandler = async (): Promise<MemoryHandler> => {
   return (await import('./default')).default
 }
 
-const measure = async (name: string, fn: () => Promise<any>) => {
+const measure = async ({ name, log }, fn: () => Promise<any>) => {
   performance.mark(`${name}-start`)
 
   const result = await fn()
 
   performance.mark(`${name}-end`)
   const measurement = performance.measure(name, `${name}-start`, `${name}-end`)
+
+  if (log) {
+    log[`${name}Duration`] = measurement.duration
+  }
 
   debugVerbose('%s took %dms', name, measurement.duration)
 
@@ -111,7 +115,7 @@ export default class Memory {
 
   private async getRendererMemoryUsage (): Promise<number | null> {
     if (!this.rendererProcess) {
-      const processes = await measure('si.process', si.processes)
+      const processes = await measure({ name: 'si.process' }, si.processes)
 
       const rendererProcess = this.getRendererProcess(processes)
 
@@ -122,13 +126,15 @@ export default class Memory {
       return rendererProcess.memRss * KIBIBYTE
     }
 
-    const rendererProcess = await measure('pid', () => pid(this.rendererProcess.pid))
+    const rendererProcess = await measure({ name: 'pid' }, () => pid(this.rendererProcess.pid))
 
     return rendererProcess.memory
   }
 
   async checkMemoryAndCollectGarbage (sendDebuggerCommandFn: SendDebuggerCommand) {
-    return measure('checkMemoryAndCollectGarbage', async () => {
+    const log = {}
+
+    await measure({ name: 'checkMemoryAndCollectGarbage', log }, async () => {
       const [currentAvailableMemory, rendererProcessMemRss] = await Promise.all([
         this.handler.getAvailableMemory(this.totalMemoryLimit),
         this.getRendererMemoryUsage(),
@@ -151,35 +157,30 @@ export default class Memory {
 
       if (shouldCollectGarbage) {
         debug('forcing garbage collection')
-        await measure('garbage collection', () => sendDebuggerCommandFn('HeapProfiler.collectGarbage'))
+        await measure({ name: 'garbageCollection', log }, async () => await sendDebuggerCommandFn('HeapProfiler.collectGarbage'))
       } else {
         debug('skipping garbage collection')
       }
 
-      if (debugVerbose.enabled) {
-        this.logMemory({
-          rendererProcessMemRss,
-          garbageCollected: shouldCollectGarbage,
-          rendererUsagePercentage,
-          currentAvailableMemory,
-          maxAvailableRendererMemory,
-          jsHeapSizeLimit: this.jsHeapSizeLimit,
-        })
-      }
+      log.rendererProcessMemRss = rendererProcessMemRss
+      log.garbageCollected = shouldCollectGarbage
+      log.rendererUsagePercentage = rendererUsagePercentage
+      log.rendererMemoryThreshold = maxAvailableRendererMemory * (MEMORY_THRESHOLD_PERCENTAGE / 100)
+      log.currentAvailableMemory = currentAvailableMemory
+      log.maxAvailableRendererMemory = maxAvailableRendererMemory
+      log.jsHeapSizeLimit = this.jsHeapSizeLimit
     })
+
+    if (debugVerbose.enabled) {
+      this.logMemory(log)
+    }
   }
 
-  private logMemory ({ rendererProcessMemRss, garbageCollected, rendererUsagePercentage, currentAvailableMemory, maxAvailableRendererMemory, jsHeapSizeLimit }) {
+  private logMemory (stats) {
     this.testCount++
     const log = {
       test: this.testCount,
-      rendererProcessMemRss,
-      garbageCollected,
-      rendererUsagePercentage,
-      currentAvailableMemory,
-      maxAvailableRendererMemory,
-      availableRendererMemoryThreshold: maxAvailableRendererMemory * (MEMORY_THRESHOLD_PERCENTAGE / 100),
-      jsHeapSizeLimit,
+      ...stats,
     }
 
     fs.appendFile('/tmp/memory.json', JSON.stringify(log))
