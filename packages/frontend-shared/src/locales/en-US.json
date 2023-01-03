@@ -684,6 +684,11 @@
     "header": {
       "runUrl": "View in Cypress Cloud",
       "commitsAhead": "You are {n} commit ahead | You are {n} commits ahead"
+    },
+    "stats": {
+      "groups": "{n} group | {n} groups",
+      "operatingSystems": "{n} operating system | {n} operating systems",
+      "browsers": "{n} browser | {n} browsers"
     }
   },
   "testingType": {
