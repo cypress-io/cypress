@@ -46,6 +46,7 @@ const savedState = require(`../../lib/saved_state`)
 const { getCtx, clearCtx, setCtx, makeDataContext } = require(`../../lib/makeDataContext`)
 const { BrowserCriClient } = require(`../../lib/browsers/browser-cri-client`)
 const { cloudRecommendationMessage } = require('../../lib/util/print-run')
+const { expect } = require('chai')
 
 const TYPICAL_BROWSERS = [
   {
@@ -674,6 +675,19 @@ describe('lib/cypress', () => {
       })
       .then(() => {
         this.expectExitWithErr('SUPPORT_FILE_NOT_FOUND', `Your supportFile is missing or invalid: /does/not/exist`)
+      })
+    })
+
+    it(`cleans up browser state if error encountered during open`, function () {
+      const expectedError = new Error('browser open error')
+
+      browsers.open.throws(expectedError)
+
+      return cypress.start([`--run-project=${this.idsPath}`])
+      .then(() => {
+        this.expectExitWith(1)
+        expect(errors.log).to.be.calledWith(expectedError)
+        expect(ctx.coreData.app.browserStatus).to.equal('closed')
       })
     })
 

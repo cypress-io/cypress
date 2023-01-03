@@ -146,11 +146,24 @@ export = {
 
     debug('opening browser %o', browser)
 
-    const _instance = await browserLauncher.open(browser, options.url, options, automation)
+    try {
+      const _instance = await browserLauncher.open(browser, options.url, options, automation)
 
-    debug('browser opened')
+      debug('browser instance: %o', _instance)
 
-    instance = _instance
+      debug('browser opened')
+
+      instance = _instance
+    } catch (e) {
+      /*
+      If an error happens during open (e.g. user closes window before we finish loading) then
+      clean up browser state and re-throw error
+      */
+      debug('Error while opening browser %o', e)
+      ctx.browser.setBrowserStatus('closed')
+      throw e
+    }
+
     instance.browser = browser
 
     // TODO: normalizing opening and closing / exiting
