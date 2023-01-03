@@ -1,11 +1,7 @@
 /// <reference path="../../../../../cli/types/mocha/index.d.ts" />
 
-import * as path from 'path'
 import { expect } from 'chai'
-
-import * as fs from 'fs-extra'
-import { insertValueInJSString, insertValuesInConfigFile } from './configFileUpdater'
-const projectRoot = process.cwd()
+import { insertValueInJSString } from './configFileUpdater'
 
 // Test util - if needed outside the tests we can move it to utils
 const stripIndent = (strings: any, ...args: any) => {

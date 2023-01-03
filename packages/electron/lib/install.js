@@ -2,8 +2,11 @@
 const _ = require('lodash')
 const os = require('os')
 const path = require('path')
+const systeminformation = require('systeminformation')
+const execa = require('execa')
+
 const paths = require('./paths')
-const log = require('debug')('cypress:electron')
+const debug = require('debug')('cypress:electron')
 const fs = require('fs-extra')
 const crypto = require('crypto')
 const { flipFuses, FuseVersion, FuseV1Options } = require('@electron/fuses')
@@ -27,9 +30,7 @@ module.exports = {
     return require('@packages/icons')
   },
 
-  checkCurrentVersion () {
-    const pathToVersion = paths.getPathToVersion()
-
+  checkCurrentVersion (pathToVersion) {
     // read in the version file
     return fs.readFile(pathToVersion, 'utf8')
     .then((str) => {
@@ -55,6 +56,7 @@ module.exports = {
   },
 
   checkIconVersion () {
+    // TODO: this seems wrong, it's hard coding the check only for OSX and not windows or linux (!?)
     const mainIconsPath = this.icons().getPathToIcon('cypress.icns')
     const cachedIconsPath = path.join(__dirname, '../dist/Cypress/Cypress.app/Contents/Resources/electron.icns')
 
@@ -66,8 +68,30 @@ module.exports = {
     })
   },
 
-  checkExecExistence () {
-    return fs.stat(paths.getPathToExec())
+  checkExecExistence (pathToExec) {
+    return fs.stat(pathToExec)
+  },
+
+  async checkBinaryArchCpuArch (pathToExec, platform, arch) {
+    if (platform === 'darwin' && arch === 'x64') {
+      return Promise.all([
+        // get the current arch of the binary
+        execa('lipo', ['-archs', pathToExec])
+        .then(({ stdout }) => {
+          return stdout
+        }),
+
+        // get the real arch of the system
+        this.getRealArch(platform, arch),
+      ])
+      .then(([binaryArch, cpuArch]) => {
+        debug('archs detected %o', { binaryArch, cpuArch })
+
+        if (binaryArch !== cpuArch) {
+          throw new Error(`built binary arch: '${binaryArch}' does not match system CPU arch: '${cpuArch}', binary needs rebuilding`)
+        }
+      })
+    }
   },
 
   move (src, dest) {
@@ -94,44 +118,62 @@ module.exports = {
     })
   },
 
+  async getRealArch (platform, arch) {
+    if (platform === 'darwin' && arch === 'x64') {
+      // see this comment for explanation of x64 -> arm64 translation
+      // https://github.com/cypress-io/cypress/pull/25014/files#diff-85c4db7620ed2731baf5669a9c9993e61e620693a008199ca7c584e621b6a1fdR11
+      return systeminformation.cpu()
+      .then(({ manufacturer }) => {
+        // if the cpu is apple then return arm64 as the arch
+        return manufacturer === 'Apple' ? 'arm64' : arch
+      })
+    }
+
+    return arch
+  },
+
   package (options = {}) {
     const pkgr = require('electron-packager')
     const icons = require('@packages/icons')
 
     const iconPath = icons.getPathToIcon('cypress')
 
-    log('package icon', iconPath)
+    debug('package icon', iconPath)
 
     const platform = os.platform()
     const arch = os.arch()
 
-    _.defaults(options, {
-      dist: paths.getPathToDist(),
-      dir: 'app',
-      out: 'tmp',
-      name: 'Cypress',
-      platform,
-      arch,
-      asar: false,
-      prune: true,
-      overwrite: true,
-      electronVersion,
-      icon: iconPath,
+    return this.getRealArch(platform, arch)
+    .then((arch) => {
+      _.defaults(options, {
+        dist: paths.getPathToDist(),
+        dir: 'app',
+        out: 'tmp',
+        name: 'Cypress',
+        platform,
+        arch,
+        asar: false,
+        prune: true,
+        overwrite: true,
+        electronVersion,
+        icon: iconPath,
+      })
+
+      debug('packager options %j', options)
+
+      return pkgr(options)
     })
-
-    log('packager options %j', options)
-
-    return pkgr(options)
     .then((appPaths) => {
       return appPaths[0]
     })
     // Promise.resolve("tmp\\Cypress-win32-x64")
     .then((appPath) => {
-      // and now move the tmp into dist
-      console.log('moving created file from', appPath)
-      console.log('to', options.dist)
+      const { dist } = options
 
-      return this.move(appPath, options.dist)
+      // and now move the tmp into dist
+      debug('moving created file %o', { from: appPath, to: dist })
+
+      return this.move(appPath, dist)
     })
     .then(() => {
       return !['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE) ? flipFuses(
@@ -150,22 +192,31 @@ module.exports = {
   },
 
   ensure () {
+    const arch = os.arch()
+    const platform = os.platform()
+    const pathToExec = paths.getPathToExec()
+    const pathToVersion = paths.getPathToVersion()
+
     return Promise.all([
       // check the version of electron and re-build if updated
-      this.checkCurrentVersion(),
+      this.checkCurrentVersion(pathToVersion),
       // check if the dist folder exist and re-build if not
-      this.checkExecExistence(),
+      this.checkExecExistence(pathToExec),
       // Compare the icon in dist with the one in the icons
       // package. If different, force the re-build.
       this.checkIconVersion(),
     ])
+    .then(() => {
+      // check that the arch of the built binary matches our CPU
+      return this.checkBinaryArchCpuArch(pathToExec, platform, arch)
+    })
 
     // if all is good, then return without packaging a new electron app
   },
 
   check () {
     return this.ensure()
-    .catch(() => {
+    .catch((err) => {
       this.packageAndExit()
     })
   },

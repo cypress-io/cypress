@@ -10,9 +10,6 @@
   "plugins": [
     "cypress"
   ],
-  "rules": {
-    "@typescript-eslint/no-unused-vars": "off"
-  },
   "overrides": [
     {
       "files": [
