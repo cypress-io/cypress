@@ -161,7 +161,10 @@ export = {
       */
       debug('Error while opening browser %o', e)
       ctx.browser.setBrowserStatus('closed')
-      throw e
+      options?.onBrowserClose?.()
+      browserLauncher.clearInstanceState()
+
+      return null
     }
 
     instance.browser = browser
