@@ -1020,6 +1020,15 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/25225
+    it('returns only one element when given multiple subjects directly match selector', () => {
+      // A case with only a text selector
+      cy.get('button').contains('submit').should('have.length', 1)
+
+      // A case with a filter + text selector
+      cy.get('div').contains('div', 'foo').should('have.length', 1)
+    })
+
     // https://github.com/cypress-io/cypress/issues/25019
     it('can locate elements contained inside <form> containers', () => {
       cy.get('#focus').contains('button', 'focusable')
