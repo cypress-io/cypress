@@ -678,19 +678,6 @@ describe('lib/cypress', () => {
       })
     })
 
-    it(`cleans up browser state if error encountered during open`, function () {
-      const expectedError = new Error('browser open error')
-
-      browsers.open.throws(expectedError)
-
-      return cypress.start([`--run-project=${this.idsPath}`])
-      .then(() => {
-        this.expectExitWith(1)
-        expect(errors.log).to.be.calledWith(expectedError)
-        expect(ctx.coreData.app.browserStatus).to.equal('closed')
-      })
-    })
-
     it('logs error when browser cannot be found', function () {
       browsers.open.restore()
 

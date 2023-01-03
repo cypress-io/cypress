@@ -13,6 +13,7 @@ const util = require('util')
 const { createTestDataContext } = require('@packages/data-context/test/unit/helper')
 const electron = require('../../../lib/browsers/electron')
 const Promise = require('bluebird')
+const { expect } = require('chai')
 
 const normalizeSnapshot = (str) => {
   return snapshot(stripAnsi(str))
@@ -154,6 +155,23 @@ describe('lib/browsers/index', () => {
         expect(err).to.have.property('type').to.eq('BROWSER_NOT_FOUND_BY_NAME')
 
         expect(err).to.have.property('message').to.contain(`Browser: ${chalk.yellow('foo-bad-bang')} was not found on your system`)
+      })
+    })
+
+    it(`resets state to 'closed' if error encountered during open`, () => {
+      const expectedError = new Error('intentional error opening browser')
+
+      sinon.stub(electron, 'open').throws(expectedError)
+      sinon.stub(utils, 'throwBrowserNotFound').returns(electron)
+
+      return browsers.open({ name: 'fake', family: 'fake' }, { browsers: [], url: 'fake' }, null, ctx)
+      .then((e) => {
+        throw new Error('should\'ve failed')
+      })
+      .catch((err) => {
+        expect(err).to.eql(expectedError)
+
+        expect(ctx.coreData.app.browserStatus).to.eql('closed')
       })
     })
   })
