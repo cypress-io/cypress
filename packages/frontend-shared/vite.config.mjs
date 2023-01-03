@@ -150,6 +150,7 @@ export const makeConfig = (config = {}, plugins = {}) => {
     define: {
       'process.env': {
         CYPRESS_INTERNAL_ENV: 'development',
+        NODE_ENV: process.env.NODE_ENV,
       },
       // Fix to get cypress-plugin-tab to work in CT
       'process.version': '99',
