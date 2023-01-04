@@ -97,11 +97,6 @@ const resolvedOptions: Array<ResolvedConfigOption> = [
     isExperimental: true,
     canUpdateDuringTestTime: false,
   }, {
-    name: 'experimentalSessionAndOrigin',
-    defaultValue: false,
-    isExperimental: true,
-    canUpdateDuringTestTime: true,
-  }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
     isExperimental: true,

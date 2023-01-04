@@ -31,18 +31,6 @@ const logError = debug('cypress:snapgen:error')
  *
  * @property nodeModulesOnly if `true` only node modules will be included in the snapshot and app modules are omitted
  *
- * @property previousHealthy relative paths to modules that were previously
- * determined to be _healthy_ that is they can be included into the snapshot
- * without being deferred
- *
- * @property previousDeferred relative paths to modules that were previously
- * determined as problematic, that is it cannot be initialized during snapshot
- * creation and thus need to be _deferred_ during snapshot creation
- *
- * @property previousNoRewrite relative paths to modules that were previously
- * determined to result in invalid code when the snapshot bundler rewrites
- * their code and thus should not be rewritten
- *
  * @property forceNoRewrite relative paths to modules that we know will cause
  * problems when rewritten and we manually want to exclude them from snapshot
  * bundler rewrites
@@ -91,15 +79,13 @@ export type GenerationOpts = {
   cacheDir: string
   snapshotBinDir: string
   nodeModulesOnly: boolean
-  previousHealthy?: string[]
-  previousDeferred?: string[]
-  previousNoRewrite?: string[]
   forceNoRewrite?: string[]
   resolverMap?: Record<string, string>
   flags: Flag
   nodeEnv: string
   minify: boolean
   supportTypeScript: boolean
+  integrityCheckSource: string | undefined
 }
 
 function getDefaultGenerationOpts (projectBaseDir: string): GenerationOpts {
@@ -107,13 +93,11 @@ function getDefaultGenerationOpts (projectBaseDir: string): GenerationOpts {
     cacheDir: join(projectBaseDir, 'cache'),
     snapshotBinDir: projectBaseDir,
     nodeModulesOnly: true,
-    previousDeferred: [],
-    previousHealthy: [],
-    previousNoRewrite: [],
     flags: Flag.Script | Flag.MakeSnapshot | Flag.ReuseDoctorArtifacts,
     nodeEnv: 'development',
     minify: false,
     supportTypeScript: false,
+    integrityCheckSource: undefined,
   }
 }
 
@@ -144,18 +128,14 @@ export class SnapshotGenerator {
   private readonly electronVersion: string
   /** See {@link GenerationOpts} nodeModulesOnly */
   private readonly nodeModulesOnly: boolean
-  /** See {@link GenerationOpts} previousDeferred */
-  private readonly previousDeferred: Set<string>
-  /** See {@link GenerationOpts} previousHealthy */
-  private readonly previousHealthy: Set<string>
-  /** See {@link GenerationOpts} previousNoRewrite */
-  private readonly previousNoRewrite: Set<string>
   /** See {@link GenerationOpts} forceNoRewrite */
   private readonly forceNoRewrite: Set<string>
   /** See {@link GenerationOpts} nodeEnv */
   private readonly nodeEnv: string
   /** See {@link GenerationOpts} minify */
   private readonly minify: boolean
+  /** See {@link GenerationOpts} integrityCheckSource */
+  private readonly integrityCheckSource: string | undefined
   /**
    * Path to the Go bundler binary used to generate the bundle with rewritten code
    * {@link https://github.com/cypress-io/esbuild/tree/thlorenz/snap}
@@ -201,13 +181,11 @@ export class SnapshotGenerator {
     const {
       cacheDir,
       nodeModulesOnly,
-      previousDeferred,
-      previousHealthy,
-      previousNoRewrite,
       forceNoRewrite,
       flags: mode,
       nodeEnv,
       minify,
+      integrityCheckSource,
     }: GenerationOpts = Object.assign(
       getDefaultGenerationOpts(projectBaseDir),
       opts,
@@ -226,14 +204,12 @@ export class SnapshotGenerator {
     this.electronVersion = resolveElectronVersion(projectBaseDir)
 
     this.nodeModulesOnly = nodeModulesOnly
-    this.previousDeferred = new Set(previousDeferred)
-    this.previousHealthy = new Set(previousHealthy)
-    this.previousNoRewrite = new Set(previousNoRewrite)
     this.forceNoRewrite = new Set(forceNoRewrite)
     this.nodeEnv = nodeEnv
     this._flags = new GeneratorFlags(mode)
     this.bundlerPath = getBundlerPath()
     this.minify = minify
+    this.integrityCheckSource = integrityCheckSource
 
     const auxiliaryDataKeys = Object.keys(this.auxiliaryData || {})
 
@@ -242,16 +218,13 @@ export class SnapshotGenerator {
       cacheDir,
       snapshotScriptPath: this.snapshotScriptPath,
       nodeModulesOnly: this.nodeModulesOnly,
-      previousDeferred: this.previousDeferred.size,
-      previousHealthy: this.previousHealthy.size,
-      previousNoRewrite: this.previousNoRewrite.size,
       forceNoRewrite: this.forceNoRewrite.size,
       auxiliaryData: auxiliaryDataKeys,
     })
   }
 
   private _addGitignore () {
-    const gitignore = 'snapshot.js\nbase.snapshot.js.map\nprocessed.snapshot.js.map\nesbuild-meta.json\nsnapshot-meta.json\nsnapshot-entry.js\n'
+    const gitignore = 'snapshot.js\nbase.snapshot.js.map\nprocessed.snapshot.js.map\nesbuild-meta.json\nsnapshot-entry.js\n'
 
     const gitignorePath = join(this.cacheDir, '.gitignore')
 
@@ -276,12 +249,9 @@ export class SnapshotGenerator {
         this.cacheDir,
         {
           nodeModulesOnly: this.nodeModulesOnly,
-          previousDeferred: this.previousDeferred,
-          previousHealthy: this.previousHealthy,
-          previousNoRewrite: this.previousNoRewrite,
           forceNoRewrite: this.forceNoRewrite,
-          useHashBasedCache: this._flags.has(Flag.ReuseDoctorArtifacts),
           nodeEnv: this.nodeEnv,
+          integrityCheckSource: this.integrityCheckSource,
         },
       ))
     } catch (err) {
@@ -309,6 +279,7 @@ export class SnapshotGenerator {
         processedSourcemapExternalPath: this.snapshotScriptPath.replace('snapshot.js', 'processed.snapshot.js.map'),
         nodeEnv: this.nodeEnv,
         supportTypeScript: this.nodeModulesOnly,
+        integrityCheckSource: this.integrityCheckSource,
       })
     } catch (err) {
       logError('Failed creating script')
@@ -382,12 +353,9 @@ export class SnapshotGenerator {
         this.cacheDir,
         {
           nodeModulesOnly: this.nodeModulesOnly,
-          previousHealthy: this.previousHealthy,
-          previousDeferred: this.previousDeferred,
-          previousNoRewrite: this.previousNoRewrite,
           forceNoRewrite: this.forceNoRewrite,
-          useHashBasedCache: this._flags.has(Flag.ReuseDoctorArtifacts),
           nodeEnv: this.nodeEnv,
+          integrityCheckSource: this.integrityCheckSource,
         },
       ))
     } catch (err) {
@@ -413,6 +381,7 @@ export class SnapshotGenerator {
         auxiliaryData: this.auxiliaryData,
         nodeEnv: this.nodeEnv,
         supportTypeScript: this.nodeModulesOnly,
+        integrityCheckSource: this.integrityCheckSource,
       })
     } catch (err) {
       logError('Failed creating script')

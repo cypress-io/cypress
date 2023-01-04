@@ -517,9 +517,7 @@ describe('src/cy/commands/location', () => {
 
           const { lastLog } = this
 
-          _.each(obj, (value, key) => {
-            expect(lastLog.get(key)).to.deep.eq(value)
-          })
+          expect(_.pick(lastLog.attributes, ['name', 'message'])).to.eql(obj)
         })
       })
 

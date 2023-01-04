@@ -77,12 +77,12 @@ describe('spec-options', () => {
       })
     })
 
-    context('create from Vue component', () => {
+    context('create from component', () => {
       afterEach(function () {
         sinon.restore()
       })
 
-      context('default spec pattern', () => {
+      context('Vue', () => {
         it('generates options for generating a Vue component spec', async () => {
           const testSpecOptions = new SpecOptions({
             currentProject: 'path/to/myProject',
@@ -96,6 +96,7 @@ describe('spec-options', () => {
           const result = await testSpecOptions.getCodeGenOptions()
 
           expect(result.codeGenType).to.eq('component')
+          expect(result.templateKey).to.eq('vueComponent')
           expect(result.fileName).to.eq('MyComponent.cy.js')
         })
 
@@ -114,7 +115,67 @@ describe('spec-options', () => {
           const result = await testSpecOptions.getCodeGenOptions()
 
           expect(result.codeGenType).to.eq('component')
+          expect(result.templateKey).to.eq('vueComponent')
           expect(result.fileName).to.eq('MyComponent-copy-1.cy.js')
+        })
+      })
+
+      context('React', () => {
+        it('generates options for generating a React component spec', async () => {
+          const testSpecOptions = new SpecOptions({
+            currentProject: 'path/to/myProject',
+            codeGenPath: `${tmpPath}/Counter.tsx`,
+            codeGenType: 'component',
+            isDefaultSpecPattern: true,
+            framework: WIZARD_FRAMEWORKS[0],
+            specPattern: [defaultSpecPattern.component],
+            componentName: 'Counter',
+            isDefault: true,
+          })
+
+          const result = await testSpecOptions.getCodeGenOptions()
+
+          expect(result.codeGenType).to.eq('component')
+          expect(result.templateKey).to.eq('reactComponent')
+          expect(result.fileName).to.eq('Counter.cy.tsx')
+        })
+
+        it('creates a spec file with file and component names combined if they are different', async () => {
+          const testSpecOptions = new SpecOptions({
+            currentProject: 'path/to/myProject',
+            codeGenPath: `${tmpPath}/Counter.tsx`,
+            codeGenType: 'component',
+            isDefaultSpecPattern: true,
+            framework: WIZARD_FRAMEWORKS[0],
+            specPattern: [defaultSpecPattern.component],
+            componentName: 'View',
+          })
+
+          const result = await testSpecOptions.getCodeGenOptions()
+
+          expect(result.codeGenType).to.eq('component')
+          expect(result.templateKey).to.eq('reactComponent')
+          expect(result.fileName).to.eq('CounterView.cy.tsx')
+        })
+
+        it('creates copy file if spec already exists', async () => {
+          sinon.stub(fs, 'access').onFirstCall().resolves().onSecondCall().rejects()
+
+          const testSpecOptions = new SpecOptions({
+            currentProject: 'path/to/myProject',
+            codeGenPath: `${tmpPath}/Counter.tsx`,
+            codeGenType: 'component',
+            isDefaultSpecPattern: true,
+            framework: WIZARD_FRAMEWORKS[0],
+            specPattern: [defaultSpecPattern.component],
+            componentName: 'View',
+          })
+
+          const result = await testSpecOptions.getCodeGenOptions()
+
+          expect(result.codeGenType).to.eq('component')
+          expect(result.templateKey).to.eq('reactComponent')
+          expect(result.fileName).to.eq('CounterView-copy-1.cy.tsx')
         })
       })
 
@@ -159,6 +220,7 @@ describe('spec-options', () => {
             const result = await testSpecOptions.getCodeGenOptions()
 
             expect(result.codeGenType).to.eq('component')
+            expect(result.templateKey).to.eq('vueComponent')
             expect(`${result.overrideCodeGenDir}/${result.fileName}`).to.eq(expectedPath)
           })
         })
@@ -241,6 +303,37 @@ describe('spec-options', () => {
 
         expect(result.codeGenType).to.eq('e2e')
         expect(result.fileName).to.eq(`TestName.foo.bar-copy-2.js`)
+      })
+
+      context('file name contains special characters', async () => {
+        [
+          { condition: 'braces', fileName: '[...MyComponent].vue', expectedFileName: '[...MyComponent].cy.js', expectedComponentName: 'MyComponent' },
+          { condition: 'hyphens', fileName: 'my-component.vue', expectedFileName: 'my-component.cy.js', expectedComponentName: 'MyComponent' },
+          { condition: 'parentheses', fileName: 'My(Component).js', expectedFileName: 'My(Component).cy.js', expectedComponentName: 'MyComponent' },
+          { condition: 'period-separated', fileName: 'my.component.js', expectedFileName: 'my.component.cy.js', expectedComponentName: 'MyComponent' },
+          { condition: 'dollar', fileName: '$MyComponent.js', expectedFileName: '$MyComponent.cy.js', expectedComponentName: '$MyComponent' },
+          { condition: 'underscores', fileName: 'My_Component.js', expectedFileName: 'My_Component.cy.js', expectedComponentName: 'My_Component' },
+          { condition: 'mixed period- and hypen-delimited', fileName: 'about-us.component.js', expectedFileName: 'about-us.component.cy.js', expectedComponentName: 'AboutUsComponent' },
+        ].forEach(({ condition, fileName, expectedFileName, expectedComponentName }) => {
+          it(`generates options for ${condition}`, async () => {
+            const testSpecOptions = new SpecOptions({
+              currentProject: 'path/to/myProject',
+              codeGenPath: `${tmpPath}/${fileName}`,
+              codeGenType: 'component',
+              isDefaultSpecPattern: true,
+              specPattern: [defaultSpecPattern.component],
+              framework: WIZARD_FRAMEWORKS[1],
+            })
+
+            await fs.outputFile(`${tmpPath}/${fileName}`, '// foo')
+
+            const result = await testSpecOptions.getCodeGenOptions()
+
+            expect(result.codeGenType).to.eq('component')
+            expect(result.fileName).to.eq(expectedFileName)
+            expect(result['componentName']).to.eq(expectedComponentName)
+          })
+        })
       })
     })
   })

@@ -495,7 +495,6 @@ export function reduceConfig (cfg: LegacyCypressConfigJson, options: CreateConfi
           e2e: { ...acc.e2e, supportFile: val },
         }
       case 'baseUrl':
-      case 'experimentalSessionAndOrigin':
         return {
           ...acc,
           e2e: { ...acc.e2e, [key]: val },
@@ -536,6 +535,7 @@ export function getSpecPattern (cfg: LegacyCypressConfigJson, testingType: Testi
 function formatWithBundledBabel (config: string) {
   const ast = parse(config)
 
+  // @ts-ignore - transitive babel types have a minor conflict - readonly vs non readonly.
   let { code } = generate(ast, {}, config)
   // By default babel generates imports like this:
   // const {

@@ -1,4 +1,3 @@
-import { strict as assert } from 'assert'
 import debug from 'debug'
 import fs from 'fs'
 import path from 'path'
@@ -14,48 +13,65 @@ export async function determineDeferred (
   cacheDir: string,
   opts: {
     nodeModulesOnly: boolean
-    previousDeferred: Set<string>
-    previousHealthy: Set<string>
-    previousNoRewrite: Set<string>
     forceNoRewrite: Set<string>
-    useHashBasedCache: boolean
     nodeEnv: string
+    integrityCheckSource: string | undefined
   },
 ) {
   const jsonPath = path.join(cacheDir, 'snapshot-meta.json')
+  const usePreviousSnapshotMetadata = (!process.env.V8_SNAPSHOT_FROM_SCRATCH || !['1', 'true'].includes(process.env.V8_SNAPSHOT_FROM_SCRATCH)) && await canAccess(jsonPath)
+  const { deferredHash, norewrite, deferred, healthy } = usePreviousSnapshotMetadata ? require(jsonPath) : { deferredHash: '', norewrite: [], deferred: [], healthy: [] }
+  const hashFilePath = await findHashFile(projectBaseDir)
+  const currentHash = await createHashForFile(hashFilePath)
+  const res = await matchFileHash(hashFilePath, deferredHash)
 
-  let hashFilePath: string | undefined
-  let hash
+  let nodeModulesHealthy: string[] = []
+  let projectHealthy: string[] = []
+  let currentHealthy = opts.nodeModulesOnly ? nodeModulesHealthy : healthy
 
-  if (opts.useHashBasedCache) {
-    hashFilePath = await findHashFile(projectBaseDir)
-    assert(
-      hashFilePath != null,
-      `Unable to find hash file inside ${projectBaseDir}`,
-    )
-
-    const {
-      match,
-      hash: currentHash,
-      deferred,
-      norewrite,
-      healthy,
-    } = await validateExistingDeferred(jsonPath, hashFilePath)
-
-    if (match && opts.nodeModulesOnly) {
-      const combined: Set<string> = new Set([
-        ...norewrite,
-        ...opts.forceNoRewrite,
-      ])
-
-      return {
-        norewrite: Array.from(combined),
-        deferred,
-        healthy,
-      }
+  healthy.forEach((dependency) => {
+    if (dependency.includes('node_modules')) {
+      nodeModulesHealthy.push(dependency)
+    } else {
+      projectHealthy.push(dependency)
     }
+  })
 
-    hash = currentHash
+  let nodeModulesDeferred: string[] = []
+  let projectDeferred: string[] = []
+  let currentDeferred = opts.nodeModulesOnly ? nodeModulesDeferred : deferred
+
+  deferred.forEach((dependency) => {
+    if (dependency.includes('node_modules')) {
+      nodeModulesDeferred.push(dependency)
+    } else {
+      projectDeferred.push(dependency)
+    }
+  })
+
+  let nodeModulesNoRewrite: string[] = []
+  let projectNoRewrite: string[] = []
+  let currentNoRewrite = opts.nodeModulesOnly ? nodeModulesNoRewrite : norewrite
+
+  norewrite.forEach((dependency) => {
+    if (dependency.includes('node_modules')) {
+      nodeModulesNoRewrite.push(dependency)
+    } else {
+      projectNoRewrite.push(dependency)
+    }
+  })
+
+  if (res.match && opts.nodeModulesOnly) {
+    const combined: Set<string> = new Set([
+      ...currentNoRewrite,
+      ...opts.forceNoRewrite,
+    ])
+
+    return {
+      norewrite: Array.from(combined),
+      deferred: currentDeferred,
+      healthy: currentHealthy,
+    }
   }
 
   logInfo(
@@ -67,12 +83,13 @@ export async function determineDeferred (
     entryFilePath: snapshotEntryFile,
     baseDirPath: projectBaseDir,
     nodeModulesOnly: opts.nodeModulesOnly,
-    previousDeferred: opts.previousDeferred,
-    previousHealthy: opts.previousHealthy,
-    previousNoRewrite: opts.previousNoRewrite,
+    previousDeferred: currentDeferred,
+    previousHealthy: currentHealthy,
+    previousNoRewrite: currentNoRewrite,
     forceNoRewrite: opts.forceNoRewrite,
     nodeEnv: opts.nodeEnv,
     supportTypeScript: opts.nodeModulesOnly,
+    integrityCheckSource: opts.integrityCheckSource,
   })
 
   const {
@@ -80,61 +97,31 @@ export async function determineDeferred (
     norewrite: updatedNorewrite,
     healthy: updatedHealty,
   } = await doctor.heal()
-  const deferredHashFile = opts.useHashBasedCache
-    ? path.relative(projectBaseDir, hashFilePath!)
-    : '<not used>'
+  const deferredHashFile = path.relative(projectBaseDir, hashFilePath)
 
-  const cachedDeferred = {
-    norewrite: updatedNorewrite,
-    deferred: updatedDeferred,
-    healthy: updatedHealty,
+  const updatedMeta = {
+    norewrite: opts.nodeModulesOnly ? [...updatedNorewrite, ...projectNoRewrite] : updatedNorewrite,
+    deferred: opts.nodeModulesOnly ? [...updatedDeferred, ...projectDeferred] : updatedDeferred,
+    healthy: opts.nodeModulesOnly ? [...updatedHealty, ...projectHealthy] : updatedHealty,
     deferredHashFile,
-    deferredHash: hash,
+    deferredHash: currentHash,
   }
 
-  await fs.promises.writeFile(
-    jsonPath,
-    JSON.stringify(cachedDeferred, null, 2),
-    'utf8',
-  )
+  if (!opts.nodeModulesOnly && process.env.V8_UPDATE_METAFILE && ['1', 'true'].includes(process.env.V8_UPDATE_METAFILE)) {
+    await fs.promises.writeFile(
+      jsonPath,
+      JSON.stringify(updatedMeta, null, 2),
+      'utf8',
+    )
+  }
 
   return {
     norewrite: updatedNorewrite,
     deferred: updatedDeferred,
     healthy: updatedHealty,
-  }
-}
-
-async function validateExistingDeferred (
-  jsonPath: string,
-  hashFilePath: string,
-) {
-  if (!(await canAccess(jsonPath))) {
-    const hash = await createHashForFile(hashFilePath)
-
-    return { deferred: [], match: false, hash }
-  }
-
-  const { deferredHash, norewrite, deferred, healthy } = require(jsonPath)
-  const res = await matchFileHash(hashFilePath, deferredHash)
-
-  return {
-    norewrite,
-    deferred,
-    match: res.match,
-    hash: res.hash,
-    healthy,
   }
 }
 
 async function findHashFile (projectBaseDir: string) {
-  const yarnLock = path.join(projectBaseDir, 'yarn.lock')
-  const packageLock = path.join(projectBaseDir, 'package.json.lock')
-  const packageJson = path.join(projectBaseDir, 'package.json')
-
-  for (const x of [yarnLock, packageLock, packageJson]) {
-    if (await canAccess(x)) return x
-  }
-
-  return
+  return path.join(projectBaseDir, 'yarn.lock')
 }

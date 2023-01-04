@@ -534,7 +534,7 @@ describe('lib/browsers/firefox', () => {
         sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient)
         sinon.stub(CdpAutomation, 'create').resolves()
 
-        const actual = await firefoxUtil.setupRemote(port, null, null, { experimentalSessionAndOrigin: false })
+        const actual = await firefoxUtil.setupRemote(port, null, null)
 
         expect(actual).to.equal(browserCriClient)
         expect(browserCriClient.attachToTargetUrl).to.be.calledWith('about:blank')
@@ -544,7 +544,6 @@ describe('lib/browsers/firefox', () => {
           criClientStub.on,
           browserCriClient.resetBrowserTargets,
           null,
-          false,
         )
       })
     })

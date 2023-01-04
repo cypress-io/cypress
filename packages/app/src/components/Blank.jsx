@@ -127,13 +127,9 @@ export const initial = () => {
   return blankContentsHtml()
 }
 
-export const sessionLifecycle = () => {
+export const testIsolationBlankPage = () => {
   return blankContentsHtml(blankPageHeader,
     `${blankPageSubtext}<br>All active session data (cookies, localStorage and sessionStorage) across all domains are cleared.`)
-}
-
-export const session = () => {
-  return blankContentsHtml(blankPageHeader, blankPageSubtext)
 }
 
 export const visitFailure = (props) => {
@@ -196,7 +192,6 @@ export const visitFailure = (props) => {
 
 export const blankContents = {
   initial,
-  session,
-  sessionLifecycle,
+  testIsolationBlankPage,
   visitFailure,
 }

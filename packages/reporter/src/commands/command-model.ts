@@ -91,12 +91,13 @@ export default class Command extends Instrument {
     return this._isOpen || (this._isOpen === null
       && (
         this.err?.isRecovered ||
+        (this.name === 'session' && this.state === 'failed') ||
         // command has nested commands
         (this.name !== 'session' && this.hasChildren && !this.event && this.type !== 'system') ||
         // command has nested commands with children
         (this.name !== 'session' && _.some(this.children, (v) => v.hasChildren)) ||
         // last nested command is open
-        _.last(this.children)?.isOpen ||
+        (this.name !== 'session' && _.last(this.children)?.isOpen) ||
         // show slow command when test is running
         (_.some(this.children, (v) => v.isLongRunning) && _.last(this.children)?.state === 'pending') ||
         // at last nested command failed
@@ -117,6 +118,14 @@ export default class Command extends Instrument {
     }
 
     return this.numChildren > 0
+  }
+
+  @computed get showError () {
+    if (this.hasChildren) {
+      return (this.err?.isRecovered && this.isOpen)
+    }
+
+    return this.err?.isRecovered
   }
 
   constructor (props: CommandProps) {

@@ -55,6 +55,7 @@ export type ItOptions = ExecOptions & {
    * If a function is supplied, it will be executed instead of running the `systemTests.exec` function immediately.
    */
   onRun?: (
+    this: Mocha.Context,
     execFn: ExecFn,
     browser: BrowserName
   ) => Promise<any> | any
@@ -528,7 +529,8 @@ const localItFn = function (title: string, opts: ItOptions) {
         return systemTests.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
       }
 
-      return options.onRun(execFn, browser, ctx)
+      // pass Mocha's this context to onRun
+      return options.onRun.call(this, execFn, browser, ctx)
     })
   }
 

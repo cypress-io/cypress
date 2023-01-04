@@ -25,6 +25,7 @@
     "resolve-from": "^5.0.0",
     "source-map-js": "^0.6.2",
     "temp-dir": "^2.0.0",
+    "terser": "5.14.2",
     "tslib": "^2.0.1",
     "worker-nodes": "^2.3.0"
   },
@@ -42,18 +43,18 @@
   ],
   "types": "src/v8-snapshot.ts",
   "optionalDependencies": {
-    "@cypress/snapbuild-android-arm64": "1.0.1",
-    "@cypress/snapbuild-darwin-64": "1.0.1",
-    "@cypress/snapbuild-darwin-arm64": "1.0.1",
-    "@cypress/snapbuild-freebsd-64": "1.0.1",
-    "@cypress/snapbuild-freebsd-arm64": "1.0.1",
-    "@cypress/snapbuild-linux-32": "1.0.1",
-    "@cypress/snapbuild-linux-64": "1.0.1",
-    "@cypress/snapbuild-linux-arm": "1.0.1",
-    "@cypress/snapbuild-linux-arm64": "1.0.1",
-    "@cypress/snapbuild-linux-mips64le": "1.0.1",
-    "@cypress/snapbuild-linux-ppc64le": "1.0.1",
-    "@cypress/snapbuild-windows-32": "1.0.1",
-    "@cypress/snapbuild-windows-64": "1.0.1"
+    "@cypress/snapbuild-android-arm64": "1.0.2",
+    "@cypress/snapbuild-darwin-64": "1.0.2",
+    "@cypress/snapbuild-darwin-arm64": "1.0.2",
+    "@cypress/snapbuild-freebsd-64": "1.0.2",
+    "@cypress/snapbuild-freebsd-arm64": "1.0.2",
+    "@cypress/snapbuild-linux-32": "1.0.2",
+    "@cypress/snapbuild-linux-64": "1.0.2",
+    "@cypress/snapbuild-linux-arm": "1.0.2",
+    "@cypress/snapbuild-linux-arm64": "1.0.2",
+    "@cypress/snapbuild-linux-mips64le": "1.0.2",
+    "@cypress/snapbuild-linux-ppc64le": "1.0.2",
+    "@cypress/snapbuild-windows-32": "1.0.2",
+    "@cypress/snapbuild-windows-64": "1.0.2"
   }
 }

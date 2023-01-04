@@ -1,11 +1,11 @@
-import { Specs_InlineSpecListFragment, Specs_InlineSpecListFragmentDoc, SpecFilter_SetPreferencesDocument } from '../generated/graphql-test'
+import { Specs_InlineSpecListFragment, Specs_InlineSpecListFragmentDoc, SpecFilter_SetPreferencesDocument, RunAllSpecsDocument } from '../generated/graphql-test'
 import InlineSpecList from './InlineSpecList.vue'
 import { defaultMessages } from '@cy/i18n'
 
 let specs: Array<any> = []
 
 describe('InlineSpecList', () => {
-  const mountInlineSpecList = (specFilter?: string) => cy.mountFragment(Specs_InlineSpecListFragmentDoc, {
+  const mountInlineSpecList = ({ specFilter, experimentalRunAllSpecs }: {specFilter?: string, experimentalRunAllSpecs?: boolean} = {}) => cy.mountFragment(Specs_InlineSpecListFragmentDoc, {
     onResult: (ctx) => {
       if (!ctx.currentProject?.specs) {
         return ctx
@@ -14,6 +14,10 @@ describe('InlineSpecList', () => {
       specs = ctx.currentProject.specs = specs.map((spec) => ({ __typename: 'Spec', ...spec, id: spec.relative }))
       if (specFilter) {
         ctx.currentProject.savedState = { specFilter }
+      }
+
+      if (experimentalRunAllSpecs) {
+        ctx.currentProject.config = [{ field: 'experimentalRunAllSpecs', value: true }]
       }
 
       return ctx
@@ -147,7 +151,7 @@ describe('InlineSpecList', () => {
     beforeEach(() => {
       cy.fixture('found-specs').then((foundSpecs) => specs = foundSpecs)
 
-      mountInlineSpecList('saved-search-term 🗑')
+      mountInlineSpecList({ specFilter: 'saved-search-term 🗑' })
       cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
       .as('searchField')
 
@@ -182,6 +186,68 @@ describe('InlineSpecList', () => {
       cy.wrap(setSpecFilterStub).should('have.been.calledWith', 'te')
       cy.get('@searchField').type('{backspace}{backspace}')
       cy.wrap(setSpecFilterStub).should('have.been.calledWith', '')
+    })
+  })
+
+  describe('Run all Specs', () => {
+    const hoverRunAllSpecs = (directory: string, specNumber: number) => {
+      let command = cy.contains('[data-cy=directory-item]', directory)
+
+      return command.realHover().then(() => {
+        cy.get('[data-cy=play-button]').should('exist')
+        cy.get(`[data-cy="run-all-specs-for-${directory}"]`).realHover().then(() => {
+          cy.get('[data-cy=tooltip-content]').should('contain.text', `Run ${specNumber} spec`)
+        })
+      })
+    }
+
+    beforeEach(() => {
+      cy.fixture('found-specs').then((foundSpecs) => specs = foundSpecs)
+    })
+
+    it('does not show feature unless experimentalRunAllSpecs is enabled', () => {
+      mountInlineSpecList({ experimentalRunAllSpecs: false })
+
+      cy.findByTestId('run-all-specs-for-all').should('not.exist')
+      cy.contains('[data-cy=directory-item]', 'src').realHover()
+      cy.findByTestId('run-all-specs-for-src').should('not.exist')
+    })
+
+    it('displays runAllSpecs when hovering over a spec-list directory row', () => {
+      mountInlineSpecList({ experimentalRunAllSpecs: true })
+      hoverRunAllSpecs('src', 4)
+    })
+
+    it('checks if functionality works after a search', () => {
+      mountInlineSpecList({ experimentalRunAllSpecs: true, specFilter: 'B' })
+      hoverRunAllSpecs('src/components', 1)
+    })
+
+    it('allows keyboard interactions to run spec groups without toggling sections', () => {
+      // this test is specifically to catch regressions of a bug caused by nesting controls: https://github.com/cypress-io/cypress/issues/24762
+      // TODO: #24966 remove this test when the structure of controls in this area has been flattened out
+      mountInlineSpecList({ experimentalRunAllSpecs: true })
+
+      const mutationStub = cy.stub().as('mutationStub')
+
+      cy.stubMutationResolver(RunAllSpecsDocument, () => {
+        mutationStub()
+      })
+
+      cy.findAllByTestId('spec-file-item').should('have.length', 4)
+      cy.findAllByTestId('run-all-specs-button').eq(0)
+      .click()
+      .type(' ')
+
+      // make sure typing didn't change displayed items
+      cy.findAllByTestId('spec-file-item').should('have.length', 4)
+      cy.findAllByTestId('run-all-specs-button').eq(1)
+      .focus()
+      .type('{enter}')
+
+      // make sure typing didn't change displayed items
+      cy.findAllByTestId('spec-file-item').should('have.length', 4)
+      cy.get('@mutationStub').should('have.been.calledThrice')
     })
   })
 })

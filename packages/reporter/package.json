@@ -9,7 +9,8 @@
     "cypress:open": "node ../../scripts/cypress open --project .",
     "cypress:run": "node ../../scripts/cypress run --project .",
     "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run --component --project .",
-    "watch": "yarn build-for-tests --watch --progress"
+    "watch": "yarn build-for-tests --watch --progress",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "devDependencies": {
     "@cypress/react-tooltip": "0.5.3",

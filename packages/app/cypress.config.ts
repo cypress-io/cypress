@@ -14,6 +14,7 @@ export default defineConfig({
   },
   experimentalInteractiveRunEvents: true,
   component: {
+    experimentalSingleTabRunMode: true,
     viewportWidth: 800,
     viewportHeight: 850,
     supportFile: 'cypress/component/support/index.ts',
@@ -24,6 +25,7 @@ export default defineConfig({
     },
   },
   'e2e': {
+    experimentalRunAllSpecs: true,
     experimentalStudio: true,
     baseUrl: 'http://localhost:5555',
     supportFile: 'cypress/e2e/support/e2eSupport.ts',
@@ -34,9 +36,9 @@ export default defineConfig({
 
       // Delete this as we only want to honor it on parent Cypress when doing E2E Cypress in Cypress testing
       delete process.env.HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS
+      delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
       process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
       process.env.CYPRESS_INTERNAL_VITE_OPEN_MODE_TESTING = 'true'
-      // process.env.DEBUG = '*'
       const { e2ePluginSetup } = require('@packages/frontend-shared/cypress/e2e/e2ePluginSetup')
 
       on('task', {

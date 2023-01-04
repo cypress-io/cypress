@@ -41,6 +41,20 @@ describe('sessions instrument panel', { viewportWidth: 400 }, () => {
       },
     })
 
+    const warnedSpecSession = new SessionsModel({
+      name: 'session',
+      state: 'warned',
+      type: 'parent',
+      testId: '1',
+      id: 3,
+      sessionInfo: {
+        id: 'spec_session_warned',
+        isGlobalSession: false,
+        status: 'recreated',
+      },
+      testCurrentRetry: 1,
+    })
+
     const failedSpecSession = new SessionsModel({
       name: 'session',
       state: 'failed',
@@ -56,7 +70,7 @@ describe('sessions instrument panel', { viewportWidth: 400 }, () => {
     })
 
     beforeEach(() => {
-      cy.mount(<Sessions model={[specSession, globalSession, failedSpecSession]}/>)
+      cy.mount(<Sessions model={[specSession, globalSession, warnedSpecSession, failedSpecSession]}/>)
 
       cy.get('.sessions-container').should('exist')
       cy.get('.hook-header > .collapsible-header').as('header')
@@ -74,7 +88,7 @@ describe('sessions instrument panel', { viewportWidth: 400 }, () => {
       cy.get('@header').should('have.attr', 'aria-expanded', 'true')
 
       cy.get('.session-item')
-      .should('have.length', 3)
+      .should('have.length', 4)
       .should('be.visible')
 
       cy.percySnapshot()
@@ -106,11 +120,24 @@ describe('sessions instrument panel', { viewportWidth: 400 }, () => {
       cy.percySnapshot()
     })
 
-    it('has failed session item', () => {
+    it('has warned session item', () => {
       cy.get('@header').click()
 
       cy.get('.session-item')
       .eq(2)
+      .within(() => {
+        cy.contains('spec_session_warned').should('have.class', 'spec-session')
+        cy.get('.session-status').should('have.class', 'warned-status')
+      })
+
+      cy.percySnapshot()
+    })
+
+    it('has failed session item', () => {
+      cy.get('@header').click()
+
+      cy.get('.session-item')
+      .eq(3)
       .within(() => {
         cy.contains('spec_session_failed').should('have.class', 'spec-session')
         cy.get('.global-session-icon').should('not.exist')
@@ -125,7 +152,7 @@ describe('sessions instrument panel', { viewportWidth: 400 }, () => {
 
       cy.get('@header').click()
 
-      cy.get('.session-item').eq(2).click()
+      cy.get('.session-item').eq(3).click()
 
       cy.get('.cy-tooltip')
       .should('have.text', 'Printed output to your console')

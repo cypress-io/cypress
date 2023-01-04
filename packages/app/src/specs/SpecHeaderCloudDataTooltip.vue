@@ -50,7 +50,7 @@
             data-cy="login-button"
             @click="emits('showLoginConnect')"
           >
-            {{ t('specPage.dashboardLoginButton') }}
+            {{ t('specPage.cloudLoginButton') }}
           </Button>
           <Button
             v-else-if="userStatusMatches('needsProjectConnect')"

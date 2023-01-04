@@ -9,6 +9,7 @@ import duration from './duration'
 import newlines from './newlines'
 import env from './env'
 import terminal from './terminal'
+import { getIsCi } from './ci_provider'
 import * as experiments from '../experiments'
 import type { SpecFile } from '@packages/types'
 import type { Cfg } from '../project-base'
@@ -22,11 +23,18 @@ type Screenshot = {
   specName: string
 }
 
+export const cloudRecommendationMessage = `
+  Having trouble debugging your CI failures?
+  
+  Record your runs to Cypress Cloud to watch video recordings for each test, 
+  debug failing and flaky tests, and integrate with your favorite tools.
+`
+
 function color (val: any, c: string) {
   return chalk[c](val)
 }
 
-function gray (val: any) {
+export function gray (val: any) {
   return color(val, 'gray')
 }
 
@@ -274,7 +282,21 @@ export function displaySpecHeader (name: string, curr: number, total: number, es
   }
 }
 
-export function renderSummaryTable (runUrl: string | undefined, results: any) {
+export function maybeLogCloudRecommendationMessage (runs: CypressCommandLine.RunResult[], record: boolean) {
+  if (!getIsCi() || env.get('CYPRESS_COMMERCIAL_RECOMMENDATIONS') === '0' || record) {
+    return
+  }
+
+  if (runs.some((run) => run.stats.failures > 0)) {
+    terminal.divider('-')
+    console.log(cloudRecommendationMessage)
+    console.log(`  >>`, color('https://on.cypress.io/cloud-get-started', 'cyan'))
+    console.log('')
+    terminal.divider('-')
+  }
+}
+
+export function renderSummaryTable (runUrl: string | undefined, results: CypressCommandLine.CypressRunResult) {
   const { runs } = results
 
   console.log('')

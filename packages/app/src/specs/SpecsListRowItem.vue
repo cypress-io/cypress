@@ -2,7 +2,7 @@
   <div data-cy="specs-list-row">
     <component
       :is="isLeaf ? 'RouterLink' : 'div'"
-      class="h-full outline-none ring-inset grid pr-20px group focus:outline-transparent focus-within:ring-indigo-300 focus-within:ring-1 children:cursor-pointer"
+      class="h-full outline-none ring-inset grid pr-20px focus:outline-transparent focus-within:ring-indigo-300 focus-within:ring-1 children:cursor-pointer"
       :class="gridColumns"
       :to="route"
       :data-cy="isLeaf ? 'spec-item-link' : 'spec-item-directory'"
@@ -16,16 +16,18 @@
         <slot name="file" />
       </div>
       <template
-        v-if="lazyRender"
+        v-if="lazyRender && isLeaf"
       >
         <div
           data-cy="specs-list-row-git-info"
+          class="group"
         >
           <slot name="git-info" />
         </div>
         <SpecsListHoverCell
           data-cy="specs-list-row-latest-runs"
           :is-hover-disabled="isProjectConnected"
+          class="group"
         >
           <template #content>
             <slot name="latest-runs" />
@@ -40,7 +42,7 @@
         <SpecsListHoverCell
           data-cy="specs-list-row-average-duration"
           :is-hover-disabled="isProjectConnected"
-          class="hidden md:block"
+          class="hidden group md:block"
         >
           <template #content>
             <slot name="average-duration" />

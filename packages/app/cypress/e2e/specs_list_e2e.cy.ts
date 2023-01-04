@@ -85,22 +85,22 @@ describe('App: Spec List (E2E)', () => {
       cy.findAllByTestId('spec-item').should('contain', 'dom-content.spec.js')
     })
 
-    it('opens the "Create a new spec" modal after clicking the "New specs" button', () => {
+    it('opens the "Create new spec" modal after clicking the "New specs" button', () => {
       cy.findByTestId('standard-modal').should('not.exist')
       cy.findByTestId('new-spec-button').click()
-      cy.findByTestId('standard-modal').get('h2').contains('Create a new spec')
+      cy.findByTestId('standard-modal').get('h2').contains('Create new spec')
       cy.get('button').contains('Scaffold example specs').should('be.visible')
-      cy.get('button').contains('Create new empty spec').should('be.visible')
+      cy.get('button').contains('Create new spec').should('be.visible')
       cy.get('button').get('[aria-label="Close"]').click()
       cy.findByTestId('standard-modal').should('not.exist')
     })
 
-    it('has the correct defaultSpecFileName in the "Create a new spec" modal', () => {
+    it('has the correct defaultSpecFileName in the "Create new spec" modal', () => {
       cy.findByTestId('standard-modal').should('not.exist')
       cy.findByTestId('new-spec-button').click()
-      cy.findByTestId('standard-modal').get('h2').contains('Create a new spec')
+      cy.findByTestId('standard-modal').get('h2').contains('Create new spec')
       cy.get('button').contains('Scaffold example specs').should('be.visible')
-      cy.get('button').contains('Create new empty spec').should('be.visible').click()
+      cy.get('button').contains('Create new spec').should('be.visible').click()
       cy.get('input').get('[aria-label="Enter a relative path..."]').invoke('val').should('contain', getPathForPlatform('cypress/e2e/spec.spec.js'))
       cy.get('button').get('[aria-label="Close"]').click()
     })
@@ -245,8 +245,7 @@ describe('App: Spec List (E2E)', () => {
         cy.findByText('No specs matched your search:').should('not.be.visible')
       })
 
-      // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23305
-      it.skip('saves the filter when navigating to a spec and back', function () {
+      it('saves the filter when navigating to a spec and back', function () {
         const targetSpecFile = 'accounts_list.spec.js'
 
         clearSearchAndType(targetSpecFile)
