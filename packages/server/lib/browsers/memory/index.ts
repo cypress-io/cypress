@@ -43,8 +43,6 @@ export const getJsHeapSizeLimit = async (sendDebuggerCommandFn) => {
       heapLimit = FOUR_GIBIBYTES
     }
 
-    debugVerbose('jsHeapSizeLimit:', heapLimit)
-
     return heapLimit
   })
 }
@@ -75,16 +73,15 @@ const measure = async ({ name, log }: { name: string, log?: {}}, fn: () => Promi
 
   if (log) {
     log[`${name}Duration`] = measurement.duration
+  } else {
+    debugVerbose('%s took %dms', name, measurement.duration)
   }
-
-  debugVerbose('%s took %dms', name, measurement.duration)
 
   return result
 }
 
 export default class Memory {
   private rendererProcess: any
-  private testCount: number = 0
 
   constructor (private handler: MemoryHandler, private sendDebuggerCommand, private totalMemoryLimit: number, private jsHeapSizeLimit: number) {}
 
@@ -109,14 +106,14 @@ export default class Memory {
     // assume the renderer process with the most memory is the one we're interested in
     const maxRendererProcess = rendererProcesses.reduce((prev, current) => (prev.memRss > current.memRss) ? prev : current)
 
-    debugVerbose('renderer processes memory: %o', { pid: maxRendererProcess.pid, 'memRss(bytes)': maxRendererProcess.memRss * KIBIBYTE })
+    debugVerbose('renderer processes found: %o', maxRendererProcess)
 
     return maxRendererProcess
   }
 
-  private async getRendererMemoryUsage (): Promise<number | null> {
+  private async getRendererMemoryUsage (log?: { [key: string]: any }): Promise<number | null> {
     if (!this.rendererProcess) {
-      const processes = await measure({ name: 'si.process' }, si.processes)
+      const processes = await measure({ name: 'retrieveProcesses' }, si.processes)
 
       const rendererProcess = this.getRendererProcess(processes)
 
@@ -127,18 +124,18 @@ export default class Memory {
       return rendererProcess.memRss * KIBIBYTE
     }
 
-    const rendererProcess = await measure({ name: 'pid' }, async () => await pid(this.rendererProcess.pid))
+    const rendererProcess = await measure({ name: 'retrieveRenderer', log }, async () => await pid(this.rendererProcess.pid))
 
     return rendererProcess.memory
   }
 
   async checkMemoryAndCollectGarbage () {
-    const log: { [key: string]: any } = {}
+    const log: { [key: string]: any } | undefined = debugVerbose.enabled ? {} : undefined
 
     await measure({ name: 'checkMemoryAndCollectGarbage', log }, async () => {
       const [currentAvailableMemory, rendererProcessMemRss] = await Promise.all([
         this.handler.getAvailableMemory(this.totalMemoryLimit, log),
-        this.getRendererMemoryUsage(),
+        this.getRendererMemoryUsage(log),
       ])
 
       if (rendererProcessMemRss === null) {
@@ -148,9 +145,6 @@ export default class Memory {
       }
 
       const maxAvailableRendererMemory = Math.min(this.jsHeapSizeLimit, currentAvailableMemory + rendererProcessMemRss)
-
-      debugVerbose('rendererProcess.memRss:', rendererProcessMemRss, 'bytes')
-      debugVerbose('maxAvailableRendererMemory:', maxAvailableRendererMemory, 'bytes')
 
       // if we're using more than MEMORY_THRESHOLD_PERCENTAGE of the available memory, force a garbage collection
       const rendererUsagePercentage = (rendererProcessMemRss / maxAvailableRendererMemory) * 100
@@ -163,28 +157,26 @@ export default class Memory {
         debug('skipping garbage collection')
       }
 
-      log.rendererProcessMemRss = rendererProcessMemRss
-      log.garbageCollected = shouldCollectGarbage
-      log.rendererUsagePercentage = rendererUsagePercentage
-      log.rendererMemoryThreshold = maxAvailableRendererMemory * (MEMORY_THRESHOLD_PERCENTAGE / 100)
-      log.currentAvailableMemory = currentAvailableMemory
-      log.maxAvailableRendererMemory = maxAvailableRendererMemory
-      log.jsHeapSizeLimit = this.jsHeapSizeLimit
-      log.totalMemoryLimit = this.totalMemoryLimit
+      if (log) {
+        log.rendererProcessMemRss = rendererProcessMemRss
+        log.garbageCollected = shouldCollectGarbage
+        log.rendererUsagePercentage = rendererUsagePercentage
+        log.rendererMemoryThreshold = maxAvailableRendererMemory * (MEMORY_THRESHOLD_PERCENTAGE / 100)
+        log.currentAvailableMemory = currentAvailableMemory
+        log.maxAvailableRendererMemory = maxAvailableRendererMemory
+        log.jsHeapSizeLimit = this.jsHeapSizeLimit
+        log.totalMemoryLimit = this.totalMemoryLimit
+      }
     })
 
-    if (debugVerbose.enabled) {
+    if (log) {
       this.logMemory(log)
     }
   }
 
   private logMemory (stats) {
-    this.testCount++
-    const log = {
-      test: this.testCount,
-      ...stats,
-    }
+    debugVerbose('memory stats: %o', stats)
 
-    fs.appendFile('/tmp/memory.json', JSON.stringify(log))
+    fs.appendFile('/tmp/memory.json', JSON.stringify(stats))
   }
 }
