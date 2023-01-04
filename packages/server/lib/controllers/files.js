@@ -26,14 +26,14 @@ module.exports = {
 
       debug('all files to send %o', _.map(allFilesToSend, 'relative'))
 
-      const documentSuperDomainIfExists = cors.shouldInjectDocumentDomain(req.proxiedUrl, {
+      const superDomain = cors.shouldInjectDocumentDomain(req.proxiedUrl, {
         skipDomainInjectionForDomains: config.experimentalSkipDomainInjection,
       }) ?
         remoteStates.getPrimary().domainName :
         undefined
 
       const iframeOptions = {
-        documentSuperDomainIfExists,
+        superDomain,
         title: this.getTitle(test),
         scripts: JSON.stringify(allFilesToSend),
       }
@@ -46,7 +46,7 @@ module.exports = {
 
   handleCrossOriginIframe (req, res, config) {
     const iframePath = cwd('lib', 'html', 'spec-bridge-iframe.html')
-    const documentSuperDomainIfExists = cors.shouldInjectDocumentDomain(req.proxiedUrl, {
+    const superDomain = cors.shouldInjectDocumentDomain(req.proxiedUrl, {
       skipDomainInjectionForDomains: config.experimentalSkipDomainInjection,
     }) ?
       cors.getSuperDomain(req.proxiedUrl) :
@@ -55,7 +55,7 @@ module.exports = {
     const origin = cors.getOrigin(req.proxiedUrl)
 
     const iframeOptions = {
-      documentSuperDomainIfExists,
+      superDomain,
       title: `Cypress for ${origin}`,
       namespace: config.namespace,
     }

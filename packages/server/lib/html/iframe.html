@@ -6,8 +6,8 @@
   </head>
   <body>
     <script type="text/javascript">
-  {{if(options.documentSuperDomainIfExists)}}
-    document.domain = '{{documentSuperDomainIfExists}}';
+  {{if(options.superDomain)}}
+    document.domain = '{{superDomain}}';
   {{/if}}
 
       (function(parent) {
