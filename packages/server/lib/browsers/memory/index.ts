@@ -10,7 +10,7 @@ import type { SendDebuggerCommand } from '../cdp_automation'
 const debug = debugModule('cypress:server:browsers:memory')
 const debugVerbose = debugModule('cypress-verbose:server:browsers:memory')
 
-const MEMORY_THRESHOLD_PERCENTAGE = Number(process.env.CYPRESS_MEMORY_THRESHOLD_PERCENTAGE || 50)
+const MEMORY_THRESHOLD_PERCENTAGE = Number(process.env.CYPRESS_INTERNAL_MEMORY_THRESHOLD_PERCENTAGE || 50)
 const KIBIBYTE = 1024
 const FOUR_GIBIBYTES = 4 * 1024 * 1024 * 1024
 
@@ -181,14 +181,14 @@ export default class Memory {
   private async logMemory (stats, isFirstTest) {
     debugVerbose('memory stats: %o', stats)
 
-    if (process.env.CYPRESS_SAVE_MEMORY_STATS) {
+    if (process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS) {
       try {
         if (isFirstTest) {
-          fs.writeFile(process.env.CYPRESS_SAVE_MEMORY_STATS, JSON.stringify([stats]))
+          fs.writeFile(process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS, JSON.stringify([stats]))
         } else {
-          const data = await fs.readFile(process.env.CYPRESS_SAVE_MEMORY_STATS, 'utf8')
+          const data = await fs.readFile(process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS, 'utf8')
 
-          fs.writeFile(process.env.CYPRESS_SAVE_MEMORY_STATS, `${data.slice(0, -1)},${JSON.stringify(stats)}]`)
+          fs.writeFile(process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS, `${data.slice(0, -1)},${JSON.stringify(stats)}]`)
         }
       } catch (e) {
         debugVerbose('error creating memory stats file: %o', e)
