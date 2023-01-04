@@ -70,6 +70,8 @@
     "prepare": "husky install"
   },
   "devDependencies": {
+    "@actions/core": "1.10.0",
+    "@actions/github": "5.1.1",
     "@aws-sdk/credential-providers": "3.53.0",
     "@cypress/questions-remain": "1.0.1",
     "@cypress/request": "2.88.10",
@@ -137,6 +139,7 @@
     "check-more-types": "2.24.0",
     "commander": "6.2.1",
     "common-tags": "1.8.0",
+    "conventional-commits-parser": "3.2.4",
     "conventional-recommended-bump": "6.1.0",
     "cross-env": "7.0.3",
     "debug": "^4.3.2",

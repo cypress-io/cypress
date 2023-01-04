@@ -5,7 +5,7 @@ import $dom from '../../../dom'
 import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
-import type { ElViewportPostion } from '../../../dom/coordinates'
+import type { ElViewportPosition } from '../../../dom/coordinates'
 import type { $Cy } from '../../../cypress/cy'
 import type { ForceEl } from '../../mouse'
 
@@ -43,7 +43,7 @@ type MouseActionOptions = {
   positionOrX: string | number
   y: number
   userOptions: Record<string, any>
-  onReady: (fromElViewport: ElViewportPostion, forceEl: ForceEl) => any
+  onReady: (fromElViewport: ElViewportPosition, forceEl: ForceEl) => any
   onTable: Function
   defaultOptions?: Record<string, any>
 }
