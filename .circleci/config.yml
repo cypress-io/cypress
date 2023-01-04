@@ -32,11 +32,12 @@ jobs:
 
             cancel_build () {
               echo "Canceling the CI build..."
-              curl --request POST \
-                --url https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/cancel \
-                --header "Circle-Token: ${CIRCLE_TOKEN}"
-              sleep 30  # Give cancellation a chance to run. This script then won't continue running.
-              exit 1  # If cancellation didn't run for some reason, fail the build.
+              circleci-agent step halt
+              # curl --request POST \
+              #   --url https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/cancel \
+              #   --header "Circle-Token: ${CIRCLE_TOKEN}"
+              # sleep 30  # Give cancellation a chance to run. This script then won't continue running.
+              # exit 1  # If cancellation didn't run for some reason, fail the build.
             }
 
             TRIGGER_INSTRUCTIONS="to trigger CI , include 'run ci' in the commit message or click the 'Trigger Pipeline' button in the CircleCI UI."
@@ -71,5 +72,4 @@ workflows:
   # the setup-workflow workflow is always triggered.
   setup-workflow:
     jobs:
-      - verify-ci-should-run:
-          context: workflow-setup
+      - verify-ci-should-run
