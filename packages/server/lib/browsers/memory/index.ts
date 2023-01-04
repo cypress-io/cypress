@@ -150,7 +150,7 @@ export default class Memory {
       const rendererUsagePercentage = (rendererProcessMemRss / maxAvailableRendererMemory) * 100
       const shouldCollectGarbage = rendererUsagePercentage >= MEMORY_THRESHOLD_PERCENTAGE
 
-      if (shouldCollectGarbage) {
+      if (shouldCollectGarbage && process.env.CYPRESS_INTERNAL_FORCE_GC !== '0') {
         debug('forcing garbage collection')
         await measure({ name: 'garbageCollection', log }, async () => await this.sendDebuggerCommand('HeapProfiler.collectGarbage'))
       } else {
