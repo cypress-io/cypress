@@ -10,7 +10,7 @@ import type { SendDebuggerCommand } from '../cdp_automation'
 const debug = debugModule('cypress:server:browsers:memory')
 const debugVerbose = debugModule('cypress-verbose:server:browsers:memory')
 
-const MEMORY_THRESHOLD_PERCENTAGE = 50
+const MEMORY_THRESHOLD_PERCENTAGE = process.env.CYPRESS_MEMORY_THRESHOLD_PERCENTAGE || 50
 const KIBIBYTE = 1024
 const FOUR_GIBIBYTES = 4 * 1024 * 1024 * 1024
 
