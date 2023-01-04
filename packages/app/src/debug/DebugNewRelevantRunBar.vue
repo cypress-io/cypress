@@ -35,8 +35,8 @@
 </template>
 <script lang="ts" setup>
 import { computed } from 'vue'
-import type { DebugNewRelevantRunBarFragment } from '../generated/graphql'
-import { gql } from '@urql/core'
+import { DebugNewRelevantRunBarFragment, DebugNewRelevantRunBar_MoveToNextDocument } from '../generated/graphql'
+import { gql, useMutation } from '@urql/vue'
 import { useI18n } from 'vue-i18n'
 import DebugPendingRunCounts from './DebugPendingRunCounts.vue'
 import DebugRunNumber from './DebugRunNumber.vue'
@@ -54,6 +54,15 @@ fragment DebugNewRelevantRunBar on CloudRun {
 }
 `
 
+gql`
+mutation DebugNewRelevantRunBar_MoveToNext {
+  moveToNextRelevantRun {
+    current
+    next
+  }
+}
+`
+
 const { t } = useI18n()
 
 const props = defineProps<{
@@ -64,9 +73,10 @@ const data = computed(() => props.gql)
 
 const specStatuses = computed(() => data.value?.specs.map((spec) => spec.status || 'UNCLAIMED') || [])
 
+const moveToNewRun = useMutation(DebugNewRelevantRunBar_MoveToNextDocument)
+
 function navigateToNewerRun () {
-  // TODO GH#24440 Stubbed pending updates to the store so the "viewed run" value can be managed there
-  return
+  moveToNewRun.executeMutation({})
 }
 
 </script>

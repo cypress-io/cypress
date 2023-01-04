@@ -126,6 +126,11 @@ export const Subscription = subscriptionType({
       resolve: (o: string | null) => o,
     })
 
+    /**
+     * TODO This is just a placeholder for polling.  It currently only responds to changes when local
+     * Git information changes from the GitDataSource.  See issue #### to complete the polling work for
+     * when looking for future relevant commits or current RUNNING commits.
+     */
     t.field('relevantRuns', {
       type: RelevantRun,
       description: 'Return the runs from the Cloud relevant to the current local git commit',

@@ -34,12 +34,18 @@ type RelevantRunReturn = {
   next?: number
 }
 
-const EMPTY_RETURN: RelevantRunReturn = { current: undefined, next: undefined }
+export const EMPTY_RETURN: RelevantRunReturn = { current: undefined, next: undefined }
 
 export class RelevantRunsDataSource {
+  private _currentRun: number | undefined
+
   constructor (private ctx: DataContext) {}
 
   async getRelevantRuns (shas: string[]): Promise<RelevantRunReturn> {
+    if (shas.length === 0) {
+      return EMPTY_RETURN
+    }
+
     const projectSlug = await this.ctx.project.projectId()
 
     if (!projectSlug) {
@@ -61,6 +67,8 @@ export class RelevantRunsDataSource {
       requestPolicy: 'network-only', // we never want to hit local cache for this request
     })
 
+    debug(`Result returned type ${result.data}`)
+
     if (result.data?.cloudProjectBySlug?.__typename === 'CloudProject') {
       const runs = result.data.cloudProjectBySlug.runsByCommitShas?.map((run) => {
         if (run?.runNumber && run?.status) {
@@ -77,12 +85,26 @@ export class RelevantRunsDataSource {
 
       debug(`Found ${runs.length} runs for ${projectSlug} and ${shas.length} shas`)
 
+      let currentRun
+
+      if (this._currentRun !== undefined && compactedRuns.some((run) => run.runNumber === this._currentRun)) {
+        currentRun = this._currentRun
+      } else {
+        currentRun = chain(compactedRuns).filter((run) => run.status !== 'RUNNING').map((run) => run.runNumber).first().value()
+        this._currentRun = currentRun
+      }
+
       return {
-        current: chain(compactedRuns).filter((run) => run.status !== 'RUNNING').map((run) => run.runNumber).first().value(),
+        current: currentRun,
         next: chain(compactedRuns).filter((run) => run.status === 'RUNNING').map((run) => run.runNumber).first().value(),
       }
     }
 
     return EMPTY_RETURN
+  }
+
+  moveToNext () {
+    debug('Moving to next relevant run')
+    this._currentRun = undefined
   }
 }

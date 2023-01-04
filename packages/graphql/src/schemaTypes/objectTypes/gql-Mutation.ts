@@ -13,6 +13,7 @@ import { ScaffoldedFile } from './gql-ScaffoldedFile'
 import { WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import debugLib from 'debug'
 import { ReactComponentResponse } from './gql-ReactComponentResponse'
+import { RelevantRun } from './gql-RelevantRun'
 
 const debug = debugLib('cypress:graphql:mutation')
 
@@ -762,6 +763,16 @@ export const mutation = mutationType({
         ctx.project.setRunAllSpecs(args.runAllSpecs)
 
         return true
+      },
+    })
+
+    t.field('moveToNextRelevantRun', {
+      type: RelevantRun,
+      description: 'Allow the relevant run for debugging marked as next to be considered the current relevant run',
+      resolve: async (source, args, ctx) => {
+        ctx.relevantRuns.moveToNext()
+
+        return ctx.relevantRuns.getRelevantRuns(ctx.git?.currentHashes || [])
       },
     })
   },

@@ -1,4 +1,4 @@
-import { DebugNewRelevantRunBarFragmentDoc } from '../generated/graphql-test'
+import { DebugNewRelevantRunBarFragmentDoc, DebugNewRelevantRunBar_MoveToNextDocument } from '../generated/graphql-test'
 import DebugNewRelevantRunBar from './DebugNewRelevantRunBar.vue'
 import type { CloudRunStatus } from '../generated/graphql'
 
@@ -21,5 +21,45 @@ describe('<DebugNewRelevantRunBar />', () => {
         })
       })
     })
+  })
+
+  it('should show spec counts for RUNNING', () => {
+    cy.mountFragment(DebugNewRelevantRunBarFragmentDoc, {
+      onResult (result) {
+        result.status = 'RUNNING'
+        result.specs = [
+          { id: '', status: 'CANCELLED', __typename: 'CloudSpecRun' },
+          { id: '', status: 'RUNNING', __typename: 'CloudSpecRun' },
+          { id: '', status: 'PASSED', __typename: 'CloudSpecRun' },
+          { id: '', status: 'FAILED', __typename: 'CloudSpecRun' },
+          { id: '', status: 'UNCLAIMED', __typename: 'CloudSpecRun' },
+        ]
+      },
+      render: (gqlVal) => <DebugNewRelevantRunBar gql={gqlVal} />,
+    })
+
+    cy.contains('3 of 5').should('be.visible')
+  })
+
+  it('should call mutation when link is clicked', (done) => {
+    cy.mountFragment(DebugNewRelevantRunBarFragmentDoc, {
+      onResult (result) {
+        result.status = 'PASSED'
+      },
+      render: (gqlVal) => <DebugNewRelevantRunBar gql={gqlVal} />,
+    })
+
+    cy.stubMutationResolver(DebugNewRelevantRunBar_MoveToNextDocument, (defineResult) => {
+      defineResult({
+        moveToNextRelevantRun: {
+          current: -1,
+          next: -1,
+        },
+      })
+
+      done()
+    })
+
+    cy.contains('View run').click()
   })
 })
