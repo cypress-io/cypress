@@ -2350,7 +2350,7 @@ darwin-x64-workflow: &darwin-x64-workflow
         requires:
           - darwin-x64-node-modules-install
     - driver-integration-tests-chrome:
-        context: test-runner:cypress-record-key
+        context: mschile-test
         requires:
           - darwin-x64-build
 windows-workflow: &windows-workflow
@@ -2368,10 +2368,14 @@ windows-workflow: &windows-workflow
         requires:
           - windows-node-modules-install
     - driver-integration-tests-chrome:
-        context: test-runner:cypress-record-key
+        context: mschile-test
         requires:
           - windows-build
 workflows:
   linux-x64:
     <<: *linux-x64-workflow
     <<: *linux-x64-workflow-exclude-filters
+  darwin-x64:
+    <<: *darwin-x64-workflow
+  windows:
+    <<: *windows-workflow
