@@ -27,11 +27,13 @@
           :status="run.status"
           :specs="run.specs"
           :cancellation="{ cancelledAt: run.cancelledAt, cancelledBy: run.cancelledBy }"
-          :is-hidden-by-usage-limits="run.isHiddenByUsageLimits"
+          :is-hidden="run.isHidden"
+          :reasons-run-is-hidden="reasonsRunIsHidden"
           :over-limit-action-type="run.overLimitActionType"
           :over-limit-action-url="run.overLimitActionUrl"
           :ci="run.ci"
           :errors="run.errors"
+          :run-age-days="runAgeDays"
         />
         <DebugSpecList
           v-if="run.totalFailed && shouldDisplaySpecsList(run.status)"
@@ -65,6 +67,8 @@ import DebugNoRuns from './empty/DebugNoRuns.vue'
 import DebugError from './empty/DebugError.vue'
 import DebugNewRelevantRunBar from './DebugNewRelevantRunBar.vue'
 import { specsList } from './utils/DebugMapping'
+import type { CloudRunHidingReason } from './DebugOverLimit.vue'
+import dayjs from 'dayjs'
 
 gql`
 fragment DebugLocalSpecs on Spec {
@@ -96,7 +100,16 @@ fragment DebugSpecs on Query {
           status
           overLimitActionType
           overLimitActionUrl
-          isHiddenByUsageLimits
+          isHidden
+          reasonsRunIsHidden {
+            __typename
+            ... on DataRetentionLimitExceeded {
+              dataRetentionDays
+            }
+            ... on UsageLimitExceeded {
+              monthlyTests
+            }
+          }
           totalTests
           ci {
             id
@@ -114,6 +127,7 @@ fragment DebugSpecs on Query {
             id,
             ...DebugSpecListGroups
           }
+          createdAt
           ...DebugPendingRunSplash
           ...DebugNewRelevantRunBar
         }
@@ -175,4 +189,8 @@ const specStatuses = computed(() => run.value?.specs.map((spec) => spec.status |
 const newerRelevantRun = computed(() => run.value)
 
 const isFirstPendingRun = computed(() => run.value && run.value.runNumber === 1 && run.value.status === 'RUNNING')
+
+const reasonsRunIsHidden = computed(() => run.value?.reasonsRunIsHidden || [] as CloudRunHidingReason[])
+
+const runAgeDays = computed(() => run.value?.createdAt && dayjs(run.value.createdAt).diff(dayjs(), 'days') || 0)
 </script>

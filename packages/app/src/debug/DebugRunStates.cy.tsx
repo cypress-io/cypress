@@ -73,20 +73,72 @@ describe('Debug page states', () => {
   })
 
   context('over limit', () => {
-    it('renders type CONTACT_ADMIN', () => {
-      cy.mount(<DebugOverLimit overLimitActionType="CONTACT_ADMIN" overLimitActionUrl='http://localhost:3000/profile' />)
+    context('Usage Exceeded', () => {
+      it('displays messaging for users', () => {
+        cy.mount(
+          <DebugOverLimit
+            overLimitReason={{
+              __typename: 'UsageLimitExceeded',
+              monthlyTests: 100,
+            }}
+            overLimitActionType="CONTACT_ADMIN"
+            overLimitActionUrl="#"
+            runAgeDays={60}
+          />,
+        )
 
-      cy.findByRole('link', { name: 'Contact admin' }).should('be.visible')
+        cy.percySnapshot()
+      })
 
-      cy.percySnapshot()
+      it('displays messaging for plan admins', () => {
+        cy.mount(
+          <DebugOverLimit
+            overLimitReason={{
+              __typename: 'UsageLimitExceeded',
+              monthlyTests: 100,
+            }}
+            overLimitActionType="UPGRADE"
+            overLimitActionUrl="#"
+            runAgeDays={60}
+          />,
+        )
+
+        cy.percySnapshot()
+      })
     })
 
-    it('renders type UPGRADE', () => {
-      cy.mount(<DebugOverLimit overLimitActionType="UPGRADE" overLimitActionUrl='http://localhost:3000/profile' />)
+    context('Retention Exceeded', () => {
+      it('displays messaging for users', () => {
+        cy.mount(
+          <DebugOverLimit
+            overLimitReason={{
+              __typename: 'DataRetentionLimitExceeded',
+              dataRetentionDays: 30,
+            }}
+            overLimitActionType="CONTACT_ADMIN"
+            overLimitActionUrl="#"
+            runAgeDays={60}
+          />,
+        )
 
-      cy.findByRole('link', { name: 'Upgrade plan' }).should('be.visible')
+        cy.percySnapshot()
+      })
 
-      cy.percySnapshot()
+      it('displays messaging for plan admins', () => {
+        cy.mount(
+          <DebugOverLimit
+            overLimitReason={{
+              __typename: 'DataRetentionLimitExceeded',
+              dataRetentionDays: 30,
+            }}
+            overLimitActionType="UPGRADE"
+            overLimitActionUrl="#"
+            runAgeDays={60}
+          />,
+        )
+
+        cy.percySnapshot()
+      })
     })
   })
 
