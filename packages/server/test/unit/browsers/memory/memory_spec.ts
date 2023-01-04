@@ -1,5 +1,3 @@
-const { expect, sinon } = require('../../../spec_helper')
-
 import os from 'os'
 import si from 'systeminformation'
 import fs from 'fs-extra'
@@ -7,7 +5,7 @@ import browsers from '../../../../lib/browsers'
 import * as memory from '../../../../lib/browsers/memory'
 import defaultHandler from '../../../../lib/browsers/memory/default'
 import cgroupV1Handler from '../../../../lib/browsers/memory/cgroup-v1'
-import { proxyquire } from '../../../spec_helper'
+import { proxyquire, expect, sinon } from '../../../spec_helper'
 
 describe('lib/browsers/memory', () => {
   let sendDebuggerCommand
@@ -66,7 +64,7 @@ describe('lib/browsers/memory', () => {
 
       sinon.stub(memoryInstance, 'getRendererMemoryUsage').resolves(75)
 
-      await memoryInstance.checkMemoryAndCollectGarbage()
+      await memoryInstance.checkMemoryAndCollectGarbage({ isFirstTest: false })
 
       expect(gcStub).to.be.calledOnce
     })
@@ -84,7 +82,7 @@ describe('lib/browsers/memory', () => {
 
       sinon.stub(memoryInstance, 'getRendererMemoryUsage').resolves(50)
 
-      await memoryInstance.checkMemoryAndCollectGarbage()
+      await memoryInstance.checkMemoryAndCollectGarbage({ isFirstTest: false })
 
       expect(gcStub).to.be.calledOnce
     })
@@ -102,7 +100,7 @@ describe('lib/browsers/memory', () => {
 
       sinon.stub(memoryInstance, 'getRendererMemoryUsage').resolves(25)
 
-      await memoryInstance.checkMemoryAndCollectGarbage()
+      await memoryInstance.checkMemoryAndCollectGarbage({ isFirstTest: false })
 
       expect(gcStub).to.be.calledOnce
     })
@@ -120,7 +118,7 @@ describe('lib/browsers/memory', () => {
 
       sinon.stub(memoryInstance, 'getRendererMemoryUsage').resolves(25)
 
-      await memoryInstance.checkMemoryAndCollectGarbage()
+      await memoryInstance.checkMemoryAndCollectGarbage({ isFirstTest: false })
 
       expect(gcStub).to.not.be.called
     })
@@ -140,7 +138,7 @@ describe('lib/browsers/memory', () => {
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
       const memoryInstance = await memory.default.create(sendDebuggerCommand)
 
-      await memoryInstance.checkMemoryAndCollectGarbage()
+      await memoryInstance.checkMemoryAndCollectGarbage({ isFirstTest: false })
 
       expect(gcStub).to.not.be.called
     })
@@ -160,7 +158,7 @@ describe('lib/browsers/memory', () => {
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
       const memoryInstance = await memory.default.create(sendDebuggerCommand)
 
-      await memoryInstance.checkMemoryAndCollectGarbage()
+      await memoryInstance.checkMemoryAndCollectGarbage({ isFirstTest: false })
 
       expect(gcStub).to.not.be.called
       expect(processesMock).to.be.calledOnce
@@ -187,7 +185,7 @@ describe('lib/browsers/memory', () => {
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
       const memoryInstance = await memory.default.create(sendDebuggerCommand)
 
-      await memoryInstance.checkMemoryAndCollectGarbage()
+      await memoryInstance.checkMemoryAndCollectGarbage({ isFirstTest: false })
 
       expect(gcStub).to.be.calledOnce
       expect(processesMock).to.be.calledOnce
@@ -214,7 +212,7 @@ describe('lib/browsers/memory', () => {
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
       const memoryInstance = await memory.default.create(sendDebuggerCommand)
 
-      await memoryInstance.checkMemoryAndCollectGarbage()
+      await memoryInstance.checkMemoryAndCollectGarbage({ isFirstTest: false })
 
       expect(gcStub).to.be.calledOnce
       expect(processesMock).to.be.calledOnce
@@ -242,7 +240,7 @@ describe('lib/browsers/memory', () => {
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
       const memoryInstance = await memory.default.create(sendDebuggerCommand)
 
-      await memoryInstance.checkMemoryAndCollectGarbage()
+      await memoryInstance.checkMemoryAndCollectGarbage({ isFirstTest: false })
 
       expect(gcStub).to.be.calledOnce
       expect(processesMock).to.be.calledOnce
@@ -271,13 +269,13 @@ describe('lib/browsers/memory', () => {
       })
 
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
-      let memoryInstance = await memory.default.create(sendDebuggerCommand)
+      let memoryInstance: memory.default = await memory.default.create(sendDebuggerCommand)
 
       // first call will find the renderer process
-      await memoryInstance.checkMemoryAndCollectGarbage()
+      await memoryInstance.checkMemoryAndCollectGarbage({ isFirstTest: false })
 
       // second call will use the existing process id
-      await memoryInstance.checkMemoryAndCollectGarbage()
+      await memoryInstance.checkMemoryAndCollectGarbage({ isFirstTest: false })
 
       expect(gcStub).to.be.calledOnce
       expect(processesMock).to.be.calledOnce

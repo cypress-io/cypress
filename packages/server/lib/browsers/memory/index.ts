@@ -10,7 +10,7 @@ import type { SendDebuggerCommand } from '../cdp_automation'
 const debug = debugModule('cypress:server:browsers:memory')
 const debugVerbose = debugModule('cypress-verbose:server:browsers:memory')
 
-const MEMORY_THRESHOLD_PERCENTAGE = process.env.CYPRESS_MEMORY_THRESHOLD_PERCENTAGE || 50
+const MEMORY_THRESHOLD_PERCENTAGE = Number(process.env.CYPRESS_MEMORY_THRESHOLD_PERCENTAGE || 50)
 const KIBIBYTE = 1024
 const FOUR_GIBIBYTES = 4 * 1024 * 1024 * 1024
 
@@ -113,9 +113,13 @@ export default class Memory {
 
   private async getRendererMemoryUsage (log?: { [key: string]: any }): Promise<number | null> {
     if (!this.rendererProcess) {
-      const processes = await measure({ name: 'retrieveProcesses' }, si.processes)
+      let rendererProcess
 
-      const rendererProcess = this.getRendererProcess(processes)
+      await measure({ name: 'retrieveRenderer', log }, async () => {
+        const processes = await measure({ name: 'retrieveProcesses' }, si.processes)
+
+        rendererProcess = this.getRendererProcess(processes)
+      })
 
       if (!rendererProcess) return null
 
@@ -129,7 +133,7 @@ export default class Memory {
     return rendererProcess.memory
   }
 
-  async checkMemoryAndCollectGarbage () {
+  async checkMemoryAndCollectGarbage ({ isFirstTest }: { isFirstTest: boolean}) {
     const log: { [key: string]: any } | undefined = debugVerbose.enabled ? {} : undefined
 
     await measure({ name: 'checkMemoryAndCollectGarbage', log }, async () => {
@@ -170,13 +174,25 @@ export default class Memory {
     })
 
     if (log) {
-      this.logMemory(log)
+      this.logMemory(log, isFirstTest)
     }
   }
 
-  private logMemory (stats) {
+  private async logMemory (stats, isFirstTest) {
     debugVerbose('memory stats: %o', stats)
 
-    fs.appendFile('/tmp/memory.json', JSON.stringify(stats))
+    if (process.env.CYPRESS_SAVE_MEMORY_STATS) {
+      try {
+        if (isFirstTest) {
+          fs.writeFile(process.env.CYPRESS_SAVE_MEMORY_STATS, JSON.stringify([stats]))
+        } else {
+          const data = await fs.readFile(process.env.CYPRESS_SAVE_MEMORY_STATS, 'utf8')
+
+          fs.writeFile(process.env.CYPRESS_SAVE_MEMORY_STATS, `${data.slice(0, -1)},${JSON.stringify(stats)}]`)
+        }
+      } catch (e) {
+        debugVerbose('error creating memory stats file: %o', e)
+      }
+    }
   }
 }

@@ -357,7 +357,7 @@ export class CdpAutomation {
       case 'focus:browser:window':
         return this.sendDebuggerCommandFn('Page.bringToFront')
       case 'maybe:collect:garbage':
-        return this.memory.checkMemoryAndCollectGarbage()
+        return this.memory.checkMemoryAndCollectGarbage(data)
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }
