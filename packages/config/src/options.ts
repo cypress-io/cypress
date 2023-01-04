@@ -218,7 +218,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
   }, {
     name: 'experimentalUseDefaultDocumentDomain',
     defaultValue: null,
-    validation: (_: string, value: any) => validate.isArrayOfStrings(value) || value === null,
+    validation: validate.isNullOrArrayOfStrings,
     isExperimental: true,
     requireRestartOnChange: 'server',
   }, {

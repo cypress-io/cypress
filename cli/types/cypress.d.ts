@@ -3020,12 +3020,11 @@ declare namespace Cypress {
      */
     experimentalModifyObstructiveThirdPartyCode: boolean
     /**
-     * Disables setting document.domain to the document's super domain on injection.
+     * Disables setting document.domain to the application's super domain on injection.
      * This experiment is to be used for sites that do not work with setting document.domain
-     * due to cross-origin issues. Enabling this option no longer allows for default sub domain
+     * due to cross-origin issues. Enabling this option no longer allows for default subdomain
      * navigations, and will require the use of cy.origin(). This option takes an array of
-     * strings/string globs, and applies defaults for known domains where document.domain is known
-     * to be an issue.
+     * strings/string globs.
      * @see https://developer.mozilla.org/en-US/docs/Web/API/Document/domain
      * @default null
      */

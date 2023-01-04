@@ -33,7 +33,7 @@ const _isFullyQualifiedUrl = (value: any): ErrResult | boolean => {
   return _.isString(value) && /^https?\:\/\//.test(value)
 }
 
-export const isArrayOfStrings = (value: any): ErrResult | boolean => {
+const isArrayOfStrings = (value: any): ErrResult | boolean => {
   return _.isArray(value) && _.every(value, _.isString)
 }
 
@@ -327,4 +327,12 @@ export function isStringOrArrayOfStrings (key: string, value: any): ErrResult | 
   }
 
   return errMsg(key, value, 'a string or an array of strings')
+}
+
+export function isNullOrArrayOfStrings (key: string, value: any): ErrResult | true {
+  if (_.isNull(value) || isArrayOfStrings(value)) {
+    return true
+  }
+
+  return errMsg(key, value, 'an array of strings or null')
 }
