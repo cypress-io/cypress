@@ -32,14 +32,13 @@
 import { IconTechnologyTerminalLog, IconTechnologyImageScreenshot, IconActionPlaySmall } from '@cypress-design/vue-icon'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
+import type { ArtifactType } from './types'
 
 const props = defineProps<{
-  icon: string
+  icon: ArtifactType
   popperText: string
-  url: string | null | undefined
+  url: string
 }>()
-
-type ArtifactType = 'TERMINAL_LOG' | 'IMAGE_SCREENSHOT' | 'PLAY'
 
 const ICON_MAP: Record<ArtifactType, any> = {
   'TERMINAL_LOG': IconTechnologyTerminalLog,

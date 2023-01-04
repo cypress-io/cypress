@@ -1,5 +1,5 @@
 import GroupedDebugFailedTest from './GroupedDebugFailedTest.vue'
-import type { TestResults } from './DebugSpec.vue'
+import type { TestResults } from './types'
 
 describe('<GroupedDebugFailedTest/>', () => {
   const testResult: TestResults[] = [
@@ -8,14 +8,14 @@ describe('<GroupedDebugFailedTest/>', () => {
       titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
       instance: {
         id: '123',
-        status: 'FAILED',
         groupId: '123',
+        status: 'FAILED',
         hasScreenshots: true,
-        screenshotsUrl: 'www.cypress.io',
+        screenshotsUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/screenshots',
         hasStdout: true,
-        stdoutUrl: 'www.cypress.io',
+        stdoutUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/stdout',
         hasVideo: true,
-        videoUrl: 'www.cypress.io',
+        videoUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/video',
       },
     },
     {
@@ -26,11 +26,11 @@ describe('<GroupedDebugFailedTest/>', () => {
         status: 'FAILED',
         groupId: '456',
         hasScreenshots: true,
-        screenshotsUrl: 'cloud.cypress.io',
+        screenshotsUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/screenshots',
         hasStdout: true,
-        stdoutUrl: 'cloud.cypress.io',
+        stdoutUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/stdout',
         hasVideo: true,
-        videoUrl: 'cloud.cypress.io',
+        videoUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/video',
       },
     },
   ]
@@ -73,15 +73,12 @@ describe('<GroupedDebugFailedTest/>', () => {
       </div>
     ))
 
-    cy.findAllByTestId(`grouped-row`).should('have.length', 2)
-    .each((el) => {
-      cy.wrap(el).findByTestId('debug-artifacts').should('not.be.visible')
-      cy.wrap(el).realHover().then(() => {
-        cy.wrap(el).findByTestId('debug-artifacts').should('be.visible').children().should('have.length', 3)
-      })
-
-      cy.wrap(el).findByTestId('stats-metadata').children().should('have.length', 3)
-    })
+    cy.findAllByTestId(`grouped-row`).should('have.length', 2).each((el) => cy.wrap(el).within(() => {
+      cy.findByTestId('debug-artifacts').should('not.be.visible')
+      cy.wrap(el).realHover()
+      cy.findByTestId('debug-artifacts').should('be.visible').children().should('have.length', 3)
+      cy.findByTestId('stats-metadata').children().should('have.length', 3)
+    }))
 
     cy.percySnapshot()
   })

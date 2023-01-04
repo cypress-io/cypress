@@ -1,4 +1,4 @@
-import type { TestResults, Spec } from './DebugSpec.vue'
+import type { TestResults, Spec } from './types'
 import DebugSpec from './DebugSpec.vue'
 import { defaultMessages } from '@cy/i18n'
 

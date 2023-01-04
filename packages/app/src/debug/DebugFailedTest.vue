@@ -1,7 +1,7 @@
 <template>
   <div
     data-cy="test-row"
-    class="flex flex-row h-12 items-center non-italic text-base text-gray-700 font-normal"
+    class="flex flex-row font-normal h-12 text-base text-gray-700 items-center non-italic"
   >
     <SolidStatusIcon
       size="16"
@@ -67,8 +67,9 @@ import { SolidStatusIcon } from '@cypress-design/vue-statusicon'
 import DebugArtifactLink from './DebugArtifactLink.vue'
 import GroupedDebugFailedTestVue from './GroupedDebugFailedTest.vue'
 import { computed } from 'vue'
-import type { TestResults } from './DebugSpec.vue'
+import type { TestResults } from './types'
 import type { StatsMetadata_GroupsFragment } from '../generated/graphql'
+import { getDebugArtifacts } from './utils/debugArtifacts'
 
 const props = defineProps<{
   failedTestsResult: TestResults[]
@@ -132,12 +133,10 @@ const failedTestData = computed(() => {
     return { title: ele, type: 'MIDDLE' }
   }).flat()
 
+  const debugArtifacts = getDebugArtifacts(runInstance)
+
   return {
-    debugArtifacts: [
-      { icon: 'TERMINAL_LOG', text: 'View Log', url: runInstance?.stdoutUrl! },
-      { icon: 'IMAGE_SCREENSHOT', text: 'View Screenshot', url: runInstance?.screenshotsUrl! },
-      { icon: 'PLAY', text: 'View Video', url: runInstance?.videoUrl! },
-    ],
+    debugArtifacts,
     mappedTitleParts,
   }
 })

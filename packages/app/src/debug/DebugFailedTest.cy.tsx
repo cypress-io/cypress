@@ -1,5 +1,5 @@
 import DebugFailedTest from './DebugFailedTest.vue'
-import type { TestResults } from './DebugSpec.vue'
+import type { TestResults } from './types'
 
 const group1 = {
   os: {
@@ -31,8 +31,26 @@ const group2 = {
   id: '456',
 }
 
+const instance1: TestResults['instance'] = {
+  id: '123',
+  groupId: '123',
+  status: 'FAILED',
+  hasScreenshots: true,
+  screenshotsUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/screenshots',
+  hasStdout: true,
+  stdoutUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/stdout',
+  hasVideo: true,
+  videoUrl: 'https://cloud.cypress.io/projects/123/runs/456/overview/789/video',
+}
+
+const instance2: TestResults['instance'] = {
+  ...instance1,
+  id: '456',
+  groupId: '456',
+}
+
 /**
- * This helper testing function mimicks mappedTitleParts in DebugFailedTest.
+ * This helper testing function mimics mappedTitleParts in DebugFailedTest.
  * It creates an ordered array of titleParts and chevron icons and then asserts
  * the order in which they are rendered using the testAttr and text values.
  */
@@ -84,14 +102,7 @@ describe('<DebugFailedTest/>', () => {
     const testResult: TestResults = {
       id: '676df87878',
       titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
-      instance: {
-        id: '123',
-        groupId: '123',
-        status: 'FAILED',
-        hasScreenshots: false,
-        hasStdout: false,
-        hasVideo: false,
-      },
+      instance: instance1,
     }
 
     cy.mount(() => (
@@ -114,14 +125,7 @@ describe('<DebugFailedTest/>', () => {
     const multipleTitleParts: TestResults = {
       id: '676df87878',
       titleParts: ['Login', 'Describe', 'it', 'context', 'Should redirect unauthenticated user to signin page'],
-      instance: {
-        id: '456',
-        groupId: '456',
-        status: 'FAILED',
-        hasScreenshots: false,
-        hasStdout: false,
-        hasVideo: false,
-      },
+      instance: instance1,
     }
 
     cy.mount(() => (
@@ -138,26 +142,12 @@ describe('<DebugFailedTest/>', () => {
       {
         id: '676df87878',
         titleParts: ['Login', 'Describe', 'it', 'context', 'Should redirect unauthenticated user to signin page'],
-        instance: {
-          id: '456',
-          groupId: '456',
-          status: 'FAILED',
-          hasScreenshots: false,
-          hasStdout: false,
-          hasVideo: false,
-        },
+        instance: instance1,
       },
       {
         id: '676df87878',
         titleParts: ['Login', 'Should redirect unauthenticated user to signin page'],
-        instance: {
-          id: '123',
-          groupId: '123',
-          status: 'FAILED',
-          hasScreenshots: false,
-          hasStdout: false,
-          hasVideo: false,
-        },
+        instance: instance2,
       },
     ]
 
@@ -179,14 +169,7 @@ describe('<DebugFailedTest/>', () => {
     const testResult: TestResults = {
       id: '676df87874',
       titleParts: ['Test content', 'Test content 2', 'Test content 3', 'Test content 4', 'onMount() should be called once', 'hook() should be called twice and then'],
-      instance: {
-        id: '123',
-        groupId: '123',
-        status: 'FAILED',
-        hasScreenshots: false,
-        hasStdout: false,
-        hasVideo: false,
-      },
+      instance: instance1,
     }
 
     cy.mount(() => (
@@ -198,5 +181,38 @@ describe('<DebugFailedTest/>', () => {
     assertRowContents(testResult)
 
     cy.percySnapshot()
+  })
+
+  it('conditionally renders artifacts', () => {
+    const render = (testResult: TestResults) => cy.mount(() =>
+      <DebugFailedTest failedTestsResult={[testResult]} groups={[group1]} expandable={false}/>)
+
+    const testResult: TestResults = {
+      id: '676df87874',
+      titleParts: ['Test content', 'Test content 2', 'Test content 3', 'Test content 4', 'onMount() should be called once', 'hook() should be called twice and then'],
+      instance: instance1,
+    }
+
+    const artifactFreeInstance: TestResults['instance'] = {
+      ...instance1,
+      hasStdout: false,
+      hasScreenshots: false,
+      hasVideo: false,
+    }
+
+    render({ ...testResult, instance: artifactFreeInstance })
+    cy.findByTestId('debug-artifacts').children().should('have.length', 0)
+
+    render({ ...testResult, instance: { ...artifactFreeInstance, hasStdout: true } })
+    cy.findByTestId('debug-artifacts').children().should('have.length', 1)
+    cy.findByTestId('TERMINAL_LOG-button').should('exist')
+
+    render({ ...testResult, instance: { ...artifactFreeInstance, hasScreenshots: true } })
+    cy.findByTestId('debug-artifacts').children().should('have.length', 1)
+    cy.findByTestId('IMAGE_SCREENSHOT-button').should('exist')
+
+    render({ ...testResult, instance: { ...artifactFreeInstance, hasVideo: true } })
+    cy.findByTestId('debug-artifacts').children().should('have.length', 1)
+    cy.findByTestId('PLAY-button').should('exist')
   })
 })
