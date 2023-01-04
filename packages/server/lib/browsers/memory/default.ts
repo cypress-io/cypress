@@ -12,7 +12,7 @@ const getTotalMemoryLimit = async () => {
   return limit
 }
 
-const getAvailableMemory = async (totalMemoryLimit: number, log) => {
+const getAvailableMemory = async (totalMemoryLimit: number, log?: { [key: string]: any }) => {
   const available = (await si.mem()).available
 
   debugVerbose('memory available', available)

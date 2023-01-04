@@ -26,7 +26,7 @@ const processRawStats = (rawStats: string): { total_inactive_file: string } => {
   return stats
 }
 
-const getAvailableMemory = async (totalMemoryLimit: number, log) => {
+const getAvailableMemory = async (totalMemoryLimit: number, log?: { [key: string]: any }) => {
   let available
 
   const [usageExec, rawStats] = await Promise.all([
@@ -37,10 +37,12 @@ const getAvailableMemory = async (totalMemoryLimit: number, log) => {
   const stats = processRawStats(rawStats.stdout)
   const usage = Number(usageExec.stdout)
 
-  available = totalMemoryLimit - usage + Number(stats.total_inactive_file)
+  const totalMemoryWorkingSetUsed = (usage - Number(stats.total_inactive_file))
+
+  available = totalMemoryLimit - totalMemoryWorkingSetUsed
 
   if (log) {
-    log.totalMemoryWorkingSetUsed = (usage - Number(stats.total_inactive_file))
+    log.totalMemoryWorkingSetUsed = totalMemoryWorkingSetUsed
   }
 
   debugVerbose('memory available', available)

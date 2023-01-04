@@ -16,7 +16,7 @@ const FOUR_GIBIBYTES = 4 * 1024 * 1024 * 1024
 
 export type MemoryHandler = {
   getTotalMemoryLimit: () => Promise<number>
-  getAvailableMemory: (totalMemoryLimit: number, log) => Promise<number>
+  getAvailableMemory: (totalMemoryLimit: number, log?: { [key: string]: any }) => Promise<number>
 }
 
 /**
@@ -65,7 +65,7 @@ export const getMemoryHandler = async (): Promise<MemoryHandler> => {
   return (await import('./default')).default
 }
 
-const measure = async ({ name, log }, fn: () => Promise<any>) => {
+const measure = async ({ name, log }: { name: string, log?: {}}, fn: () => Promise<any>) => {
   performance.mark(`${name}-start`)
 
   const result = await fn()
@@ -86,12 +86,12 @@ export default class Memory {
   private rendererProcess: any
   private testCount: number = 0
 
-  constructor (private handler: MemoryHandler, private totalMemoryLimit: number, private jsHeapSizeLimit: number) {}
+  constructor (private handler: MemoryHandler, private sendDebuggerCommand, private totalMemoryLimit: number, private jsHeapSizeLimit: number) {}
 
   static async create (sendDebuggerCommand: SendDebuggerCommand) {
     const handler = await getMemoryHandler()
     const [totalMemoryLimit, jsHeapSizeLimit] = await Promise.all([handler.getTotalMemoryLimit(), getJsHeapSizeLimit(sendDebuggerCommand)])
-    const memory = new Memory(handler, totalMemoryLimit, jsHeapSizeLimit)
+    const memory = new Memory(handler, sendDebuggerCommand, totalMemoryLimit, jsHeapSizeLimit)
 
     return memory
   }
@@ -99,8 +99,9 @@ export default class Memory {
   private getRendererProcess = (processes: si.Systeminformation.ProcessesData) => {
     // filter down to the renderer processes
     const groupedProcesses = groupCyProcesses(processes)
+
     const rendererProcesses = groupedProcesses.filter(
-      (p) => p.group === 'browser' && (p.command.includes('--type=renderer') || p.params.includes('--type=renderer')),
+      (p) => p.group === 'browser' && (p.command?.includes('--type=renderer') || p.params?.includes('--type=renderer')),
     )
 
     if (rendererProcesses.length === 0) return null
@@ -126,13 +127,13 @@ export default class Memory {
       return rendererProcess.memRss * KIBIBYTE
     }
 
-    const rendererProcess = await measure({ name: 'pid' }, () => pid(this.rendererProcess.pid))
+    const rendererProcess = await measure({ name: 'pid' }, async () => await pid(this.rendererProcess.pid))
 
     return rendererProcess.memory
   }
 
-  async checkMemoryAndCollectGarbage (sendDebuggerCommandFn: SendDebuggerCommand) {
-    const log = {}
+  async checkMemoryAndCollectGarbage () {
+    const log: { [key: string]: any } = {}
 
     await measure({ name: 'checkMemoryAndCollectGarbage', log }, async () => {
       const [currentAvailableMemory, rendererProcessMemRss] = await Promise.all([
@@ -141,7 +142,7 @@ export default class Memory {
       ])
 
       if (rendererProcessMemRss === null) {
-        debugVerbose('no renderer process found, skipping garbage collection')
+        debug('no renderer process found, skipping garbage collection')
 
         return
       }
@@ -157,7 +158,7 @@ export default class Memory {
 
       if (shouldCollectGarbage) {
         debug('forcing garbage collection')
-        await measure({ name: 'garbageCollection', log }, async () => await sendDebuggerCommandFn('HeapProfiler.collectGarbage'))
+        await measure({ name: 'garbageCollection', log }, async () => await this.sendDebuggerCommand('HeapProfiler.collectGarbage'))
       } else {
         debug('skipping garbage collection')
       }
