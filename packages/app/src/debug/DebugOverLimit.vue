@@ -47,31 +47,37 @@ const actionUrl = computed(() => {
   return getUrlWithParams({ url: props.overLimitActionUrl, params: { utmMedium: 'Debug Tab', utmSource: getUtmSource() } })
 })
 
+const isPlanAdmin = computed(() => props.overLimitActionType === 'UPGRADE')
+
 const iconClasses = computed(() => {
   return [
     'icon-dark-gray-500',
     {
-      'icon-dark-secondary-jade-400': props.overLimitReason?.__typename !== 'DataRetentionLimitExceeded',
-      'icon-light-secondary-jade-200': props.overLimitReason?.__typename !== 'DataRetentionLimitExceeded',
-      'icon-dark-secondary-orange-400': props.overLimitReason?.__typename === 'DataRetentionLimitExceeded',
-      'icon-light-secondary-orange-200': props.overLimitReason?.__typename === 'DataRetentionLimitExceeded',
+      'icon-dark-secondary-jade-400': !isRetentionLimit(props.overLimitReason),
+      'icon-light-secondary-jade-200': !isRetentionLimit(props.overLimitReason),
+      'icon-dark-secondary-orange-400': isRetentionLimit(props.overLimitReason),
+      'icon-light-secondary-orange-200': isRetentionLimit(props.overLimitReason),
     },
   ]
 })
 const copy = computed(() => {
-  if (props.overLimitReason?.__typename === 'DataRetentionLimitExceeded') {
+  if (isRetentionLimit(props.overLimitReason)) {
     return {
       title: t('debugPage.overLimit.retentionExceededTitle'),
       message: t('debugPage.overLimit.retentionExceededMessage', { limitDays: props.overLimitReason.dataRetentionDays, runAgeDays: props.runAgeDays }),
-      actionLabel: props.overLimitActionType === 'CONTACT_ADMIN' ? t('debugPage.overLimit.contactAdmin') : t('debugPage.overLimit.upgradePlan'),
+      actionLabel: isPlanAdmin.value ? t('debugPage.overLimit.upgradePlan') : t('debugPage.overLimit.contactAdmin'),
     }
   }
 
   return {
     title: t('debugPage.overLimit.usageExceededTitle'),
-    message: props.overLimitActionType === 'CONTACT_ADMIN' ? t('debugPage.overLimit.usageExceededUserMessage', { numberTests: props.overLimitReason?.monthlyTests || 0 }) : t('debugPage.overLimit.usageExceededAdminMessage', { numberTests: props.overLimitReason?.monthlyTests || 0 }),
-    actionLabel: props.overLimitActionType === 'CONTACT_ADMIN' ? t('debugPage.overLimit.contactAdmin') : t('debugPage.overLimit.upgradePlan'),
+    message: isPlanAdmin.value ? t('debugPage.overLimit.usageExceededAdminMessage', { numberTests: props.overLimitReason?.monthlyTests || 0 }) : t('debugPage.overLimit.usageExceededUserMessage', { numberTests: props.overLimitReason?.monthlyTests || 0 }),
+    actionLabel: isPlanAdmin.value ? t('debugPage.overLimit.upgradePlan') : t('debugPage.overLimit.contactAdmin'),
   }
 })
+
+function isRetentionLimit (reason: CloudRunHidingReason | null | undefined): reason is DataRetentionLimitExceeded {
+  return reason?.__typename === 'DataRetentionLimitExceeded'
+}
 
 </script>
