@@ -30,7 +30,17 @@
           titlePart.type === 'LAST-1' ? 'shrink-0 whitespace-pre' :
           titlePart.type === 'LAST-0' ? 'pl-2.5 truncate' : 'px-2.5 truncate'"
       >
-        {{ titlePart.title }}
+        <template v-if="titlePart.title === '...'">
+          <Tooltip>
+            <span>...</span>
+            <template #popper>
+              <span data-cy="tooltip-content">{{ titlePart.originalTitle }}</span>
+            </template>
+          </Tooltip>
+        </template>
+        <template v-else>
+          {{ titlePart.title }}
+        </template>
       </span>
     </template>
     <div
@@ -69,6 +79,7 @@ import GroupedDebugFailedTestVue from './GroupedDebugFailedTest.vue'
 import { computed } from 'vue'
 import type { TestResults } from './DebugSpec.vue'
 import type { StatsMetadata_GroupsFragment } from '../generated/graphql'
+import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 
 const props = defineProps<{
   failedTestsResult: TestResults[]
@@ -84,6 +95,7 @@ const failedTestData = computed(() => {
   type MappedTitlePart = {
     title: string
     type: Parts
+    originalTitle?: string
   }
   let isFirstMiddleAdded: boolean = false
   const mappedTitleParts: MappedTitlePart[] = titleParts.map<MappedTitlePart | MappedTitlePart[]>((ele, index, parts) => {
@@ -121,6 +133,7 @@ const failedTestData = computed(() => {
         {
           title: '...',
           type: 'ELLIPSIS',
+          originalTitle: ele,
         },
         {
           title: ele,
