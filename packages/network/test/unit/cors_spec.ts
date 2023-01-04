@@ -721,4 +721,22 @@ describe('lib/cors', () => {
       })
     })
   })
+
+  context('.shouldInjectDocumentDomain', () => {
+    it('returns false when "skipDomainInjectionForDomains" is configured and contains a matching blob pattern ', () => {
+      expect(cors.shouldInjectDocumentDomain('http://www.cypress.io', {
+        skipDomainInjectionForDomains: ['*.cypress.io'],
+      })).to.be.false
+    })
+
+    it('returns true when "skipDomainInjectionForDomains" exists, but doesn\'t contain a matching glob pattern', () => {
+      expect(cors.shouldInjectDocumentDomain('http://www.cypress.io', {
+        skipDomainInjectionForDomains: ['*.foobar.com'],
+      })).to.be.true
+    })
+
+    it('returns true otherwise', () => {
+      expect(cors.shouldInjectDocumentDomain('http://www.cypress.io')).to.be.true
+    })
+  })
 })

@@ -203,7 +203,8 @@ export const shouldInjectDocumentDomain = (url: string, opts?: {
   // We need to make sure the experimentalSkipDomainInjection feature flag is off.
   // If on, we need to make sure the glob pattern doesn't exist in the array so we cover possible intersections (google).
   if (_.isArray(opts?.skipDomainInjectionForDomains)) {
-    return doesUrlHostnameMatchGlobArray(url, opts?.skipDomainInjectionForDomains as string[])
+    // if we match the glob, we want to return false
+    return !doesUrlHostnameMatchGlobArray(url, opts?.skipDomainInjectionForDomains as string[])
   }
 
   return true
