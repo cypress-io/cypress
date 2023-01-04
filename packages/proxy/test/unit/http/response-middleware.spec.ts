@@ -1437,7 +1437,7 @@ describe('http/response-middleware', function () {
         config: {
           modifyObstructiveCode: false,
           experimentalModifyObstructiveThirdPartyCode: false,
-          experimentalUseDefaultDocumentDomain: null,
+          experimentalSkipDomainInjection: null,
         },
         simulatedCookies: [],
       })
@@ -1489,7 +1489,7 @@ describe('http/response-middleware', function () {
         config: {
           modifyObstructiveCode: true,
           experimentalModifyObstructiveThirdPartyCode: true,
-          experimentalUseDefaultDocumentDomain: null,
+          experimentalSkipDomainInjection: null,
         },
         remoteStates,
         debug: (formatter, ...args) => {

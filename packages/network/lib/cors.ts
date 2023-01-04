@@ -12,7 +12,7 @@ const debug = debugModule('cypress:network:cors')
 // match IP addresses or anything following the last .
 const customTldsRe = /(^[\d\.]+$|\.[^\.]+$)/
 
-// TODO: if experimentalUseDefaultDocumentDomain plans to go GA, we can likely lump this strictSameOriginDomains
+// TODO: if experimentalSkipDomainInjection plans to go GA, we can likely lump this strictSameOriginDomains
 // into that config option by default. @see https://github.com/cypress-io/cypress/issues/25317
 const strictSameOriginDomains = Object.freeze(['google.com'])
 
@@ -181,14 +181,14 @@ const doesUrlHostnameMatchGlobArray = (url: string, arrayOfStringOrGlobPatterns:
  * @returns a Policy string.
  */
 export const policyForDomain = (url: string, opts?: {
-  useDefaultDocumentForDomains: string[] | null
+  skipDomainInjectionForDomains: string[] | null
 }): Policy => {
   const obj = parseUrlIntoHostProtocolDomainTldPort(url)
   let shouldUseSameOriginPolicy = strictSameOriginDomains.includes(`${obj.domain}.${obj.tld}`)
 
-  if (!shouldUseSameOriginPolicy && _.isArray(opts?.useDefaultDocumentForDomains)) {
-    // if the strict same origins matches came up false, we should check the user provided config value for useDefaultDocumentForDomains, if one exists
-    shouldUseSameOriginPolicy = doesUrlHostnameMatchGlobArray(url, opts?.useDefaultDocumentForDomains as string[])
+  if (!shouldUseSameOriginPolicy && _.isArray(opts?.skipDomainInjectionForDomains)) {
+    // if the strict same origins matches came up false, we should check the user provided config value for skipDomainInjectionForDomains, if one exists
+    shouldUseSameOriginPolicy = doesUrlHostnameMatchGlobArray(url, opts?.skipDomainInjectionForDomains as string[])
   }
 
   return shouldUseSameOriginPolicy ?
@@ -197,13 +197,13 @@ export const policyForDomain = (url: string, opts?: {
 }
 
 export const shouldInjectDocumentDomain = (url: string, opts?: {
-  useDefaultDocumentForDomains: string[] | null
+  skipDomainInjectionForDomains: string[] | null
 }) => {
   // When determining if we want to injection document domain,
-  // We need to make sure the experimentalUseDefaultDocumentDomain feature flag is off.
+  // We need to make sure the experimentalSkipDomainInjection feature flag is off.
   // If on, we need to make sure the glob pattern doesn't exist in the array so we cover possible intersections (google).
-  if (_.isArray(opts?.useDefaultDocumentForDomains)) {
-    return doesUrlHostnameMatchGlobArray(url, opts?.useDefaultDocumentForDomains as string[])
+  if (_.isArray(opts?.skipDomainInjectionForDomains)) {
+    return doesUrlHostnameMatchGlobArray(url, opts?.skipDomainInjectionForDomains as string[])
   }
 
   return true
@@ -218,11 +218,11 @@ export const shouldInjectDocumentDomain = (url: string, opts?: {
  * @returns boolean, true if matching, false if not.
  */
 export const urlMatchesPolicyBasedOnDomain = (frameUrl: string, topUrl: string, opts?: {
-  useDefaultDocumentForDomains: string[] | null
+  skipDomainInjectionForDomains: string[] | null
 }): boolean => {
   return urlMatchesPolicy({
     policy: policyForDomain(frameUrl, {
-      useDefaultDocumentForDomains: opts?.useDefaultDocumentForDomains || [],
+      skipDomainInjectionForDomains: opts?.skipDomainInjectionForDomains || [],
     }),
     frameUrl,
     topUrl,
@@ -238,10 +238,10 @@ export const urlMatchesPolicyBasedOnDomain = (frameUrl: string, topUrl: string, 
  * @returns boolean, true if matching, false if not.
  */
 export const urlMatchesPolicyBasedOnDomainProps = (frameUrl: string, topProps: ParsedHostWithProtocolAndHost, opts?: {
-  useDefaultDocumentForDomains: string[]
+  skipDomainInjectionForDomains: string[]
 }): boolean => {
   const policy = policyForDomain(frameUrl, {
-    useDefaultDocumentForDomains: opts?.useDefaultDocumentForDomains || [],
+    skipDomainInjectionForDomains: opts?.skipDomainInjectionForDomains || [],
   })
 
   return urlMatchesPolicyProps({

@@ -184,7 +184,7 @@ class $Cypress {
     // set domainName but allow us to turn
     // off this feature in testing
     const shouldInjectDocumentDomain = cors.shouldInjectDocumentDomain(window.location.origin, {
-      useDefaultDocumentForDomains: config.experimentalUseDefaultDocumentDomain,
+      skipDomainInjectionForDomains: config.experimentalSkipDomainInjection,
     })
 
     if (domainName && config.testingType === 'e2e' && shouldInjectDocumentDomain) {

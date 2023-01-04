@@ -1,4 +1,4 @@
-describe('expected behavior when experimentalUseDefaultDocumentDomain=true', () => {
+describe('expected behavior when experimentalSkipDomainInjection=true', () => {
   it('Handles cross-site/cross-origin navigation the same way without the experimental flag enabled', () => {
     cy.visit('/primary_origin.html')
     cy.get('a[data-cy="cross_origin_secondary_link"]').click()
@@ -21,7 +21,7 @@ describe('expected behavior when experimentalUseDefaultDocumentDomain=true', () 
       expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)
     })
 
-    // with experimentalUseDefaultDocumentDomain, sub domain navigations require a cy.origin() block
+    // with experimentalSkipDomainInjection, sub domain navigations require a cy.origin() block
     cy.visit('http://app.foobar.com:4466/primary_origin.html')
     cy.get('a[data-cy="cross_origin_secondary_link"]').click()
     cy.get('[data-cy="dom-check"]', {
@@ -33,7 +33,7 @@ describe('expected behavior when experimentalUseDefaultDocumentDomain=true', () 
     cy.visit('http://app.foobar.com:4466/primary_origin.html')
     cy.get('a[data-cy="cross_origin_secondary_link"]').click()
 
-    // with experimentalUseDefaultDocumentDomain, sub domain navigations require a cy.origin() block
+    // with experimentalSkipDomainInjection, sub domain navigations require a cy.origin() block
     cy.origin('http://www.foobar.com:4466', () => {
       cy.get('[data-cy="dom-check"]').should('have.text', 'From a secondary origin')
     })

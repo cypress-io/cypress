@@ -15,7 +15,7 @@ const onServer = function (app) {
   })
 }
 
-describe('e2e experimentalUseDefaultDocumentDomain=true', () => {
+describe('e2e experimentalSkipDomainInjection=true', () => {
   systemTests.setup({
     servers: [{
       port: 4466,
@@ -33,12 +33,12 @@ describe('e2e experimentalUseDefaultDocumentDomain=true', () => {
     browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
     // keep the port the same to prevent issues with the snapshot
     port: PORT,
-    spec: 'experimental_use_default_document_domain.cy.ts',
+    spec: 'experimental_skip_domain_injection.cy.ts',
     snapshot: true,
     expectedExitCode: 0,
     config: {
       retries: 0,
-      experimentalUseDefaultDocumentDomain: ['*.foobar.com'],
+      experimentalSkipDomainInjection: ['*.foobar.com'],
     },
   })
 })

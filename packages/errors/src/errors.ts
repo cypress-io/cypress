@@ -1189,12 +1189,12 @@ export const AllCypressErrors = {
     const code = errPartial`
     {
       e2e: {
-        experimentalUseDefaultDocumentDomain: ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com']
+        experimentalSkipDomainInjection: ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com']
       },
     }`
 
     return errTemplate`\
-        The ${fmt.highlight(`experimentalUseDefaultDocumentDomain`)} experiment is currently only supported for End to End Testing and must be configured as an e2e testing type property: ${fmt.highlightSecondary(`e2e.experimentalUseDefaultDocumentDomain`)}.
+        The ${fmt.highlight(`experimentalSkipDomainInjection`)} experiment is currently only supported for End to End Testing and must be configured as an e2e testing type property: ${fmt.highlightSecondary(`e2e.experimentalSkipDomainInjection`)}.
 
         ${fmt.code(code)}`
   },

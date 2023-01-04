@@ -216,7 +216,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     isExperimental: true,
     requireRestartOnChange: 'server',
   }, {
-    name: 'experimentalUseDefaultDocumentDomain',
+    name: 'experimentalSkipDomainInjection',
     defaultValue: null,
     validation: validate.isNullOrArrayOfStrings,
     isExperimental: true,
@@ -686,7 +686,7 @@ export const breakingRootOptions: Array<BreakingOption> = [
     testingTypes: ['e2e'],
   },
   {
-    name: 'experimentalUseDefaultDocumentDomain',
+    name: 'experimentalSkipDomainInjection',
     errorKey: 'EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY',
     isWarning: false,
     testingTypes: ['e2e'],
@@ -733,7 +733,7 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
       isWarning: false,
     },
     {
-      name: 'experimentalUseDefaultDocumentDomain',
+      name: 'experimentalSkipDomainInjection',
       errorKey: 'EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY',
       isWarning: false,
     },

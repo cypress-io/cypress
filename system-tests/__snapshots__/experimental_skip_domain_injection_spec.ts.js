@@ -1,4 +1,4 @@
-exports['e2e experimentalUseDefaultDocumentDomain=true / passes'] = `
+exports['e2e experimentalSkipDomainInjection=true / passes'] = `
 
 ====================================================================================================
 
@@ -7,18 +7,18 @@ exports['e2e experimentalUseDefaultDocumentDomain=true / passes'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:      1.2.3                                                                            │
   │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        1 found (experimental_use_default_document_domain.cy.ts)                         │
-  │ Searched:     cypress/e2e/experimental_use_default_document_domain.cy.ts                       │
-  │ Experiments:  experimentalUseDefaultDocumentDomain=*.foobar.com                                │
+  │ Specs:        1 found (experimental_skip_domain_injection.cy.ts)                               │
+  │ Searched:     cypress/e2e/experimental_skip_domain_injection.cy.ts                             │
+  │ Experiments:  experimentalSkipDomainInjection=*.foobar.com                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  experimental_use_default_document_domain.cy.ts                                  (1 of 1)
+  Running:  experimental_skip_domain_injection.cy.ts                                        (1 of 1)
 
 
-  expected behavior when experimentalUseDefaultDocumentDomain=true
+  expected behavior when experimentalSkipDomainInjection=true
     ✓ Handles cross-site/cross-origin navigation the same way without the experimental flag enabled
     ✓ errors appropriately when doing a sub domain navigation w/o cy.origin()
     ✓ allows sub-domain navigations with the use of cy.origin()
@@ -38,15 +38,15 @@ exports['e2e experimentalUseDefaultDocumentDomain=true / passes'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     experimental_use_default_document_domain.cy.ts                                   │
+  │ Spec Ran:     experimental_skip_domain_injection.cy.ts                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/experimental_use_default_docume     (X second)
-                          nt_domain.cy.ts.mp4                                                       
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/experimental_skip_domain_inject     (X second)
+                          ion.cy.ts.mp4                                                             
 
 
 ====================================================================================================
@@ -56,8 +56,8 @@ exports['e2e experimentalUseDefaultDocumentDomain=true / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  experimental_use_default_document_d      XX:XX        3        3        -        -        - │
-  │    omain.cy.ts                                                                                 │
+  │ ✔  experimental_skip_domain_injection.      XX:XX        3        3        -        -        - │
+  │    cy.ts                                                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        3        3        -        -        -  
 
