@@ -145,9 +145,7 @@ describe('cy.origin yields', { browser: '!webkit' }, () => {
     .should('equal', 'whoops')
   })
 
-  it('throws if an object contains a symbol', (done) => {
-    cy.timeout(100)
-
+  it('throws if an object contains a symbol', { defaultCommandTimeout: 100 }, (done) => {
     cy.on('fail', (err) => {
       assertLogLength(logs, 8)
       expect(logs[7].get('error')).to.eq(err)
@@ -184,8 +182,7 @@ describe('cy.origin yields', { browser: '!webkit' }, () => {
     })
   })
 
-  it('throws if an object is a symbol', (done) => {
-    cy.timeout(100)
+  it('throws if an object is a symbol', { defaultCommandTimeout: 100 }, (done) => {
     cy.on('fail', (err) => {
       assertLogLength(logs, 8)
       expect(logs[7].get('error')).to.eq(err)

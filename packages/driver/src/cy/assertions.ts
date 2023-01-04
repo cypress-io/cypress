@@ -200,6 +200,12 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         ensureExistenceFor: 'dom',
       })
 
+      const current = cy.state('current')
+
+      // We store the retry timeout on each command, so that
+      // any future assertions can read it and use the same timeout
+      current.set('timeout', options.timeout)
+
       const ensureExistence = () => {
         // by default, ensure existence for dom subjects,
         // but not non-dom subjects
@@ -277,7 +283,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         }
       }
 
-      if (hasUpcomingExistenceAssertions(cy.state('current'))) {
+      if (hasUpcomingExistenceAssertions(current)) {
         return Promise.resolve(subject)
       }
 

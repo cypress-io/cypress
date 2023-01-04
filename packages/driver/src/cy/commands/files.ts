@@ -4,12 +4,16 @@ import { basename } from 'path'
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
 
+interface ReadFileOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
+  encoding?: Cypress.Encodings
+}
+
 interface InternalWriteFileOptions extends Partial<Cypress.WriteFileOptions & Cypress.Timeoutable> {
   _log?: Log
 }
 
 export default (Commands, Cypress, cy, state) => {
-  Commands.addQuery('readFile', function readFile (file, encoding, options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
+  Commands.addQuery('readFile', function readFile (file, encoding, options: ReadFileOptions = {}) {
     if (_.isObject(encoding)) {
       options = encoding
       encoding = options.encoding
@@ -26,13 +30,12 @@ export default (Commands, Cypress, cy, state) => {
 
     if (!file || !_.isString(file)) {
       $errUtils.throwErrByPath('files.invalid_argument', {
-        onFail: options._log,
         args: { cmd: 'readFile', file },
       })
     }
 
-    let fileResult = null
-    let filePromise = null
+    let fileResult: any = null
+    let filePromise: Promise<void> | null = null
     let mostRecentError = $errUtils.cypressErrByPath('files.read_timed_out', {
       args: { file },
     })
