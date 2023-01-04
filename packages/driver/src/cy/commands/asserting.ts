@@ -65,6 +65,10 @@ export default function (Commands, Cypress, cy, state) {
     // with its previous incarnation.
     const logs = {}
     const onBeforeLog = (log, logIndex) => {
+      if (log.get('name') !== 'assert') {
+        return true
+      }
+
       if (logs[logIndex]) {
         if (logs[logIndex].get('state') !== 'pending') {
           return false

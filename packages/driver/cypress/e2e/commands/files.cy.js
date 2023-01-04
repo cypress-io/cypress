@@ -178,10 +178,6 @@ describe('src/cy/commands/files', () => {
 
         this.logs = []
 
-        cy.on('fail', () => {
-          cy.off('log:added', collectLogs)
-        })
-
         return null
       })
 
