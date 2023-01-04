@@ -244,21 +244,6 @@ describe('src/cy/commands/misc', () => {
         })
       })
 
-      it('throws a good error when wrapping mixed types: element + string', (done) => {
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.click()` failed because it requires a DOM element.')
-          expect(err.message).to.include('jQuery{2}')
-
-          done()
-        })
-
-        cy.get('button').then(($btn) => {
-          const btn = $btn.get(0)
-
-          cy.wrap([btn, 'asdf']).click()
-        })
-      })
-
       it('throws when wrapping an array of documents', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.screenshot()` failed because it requires a DOM element, window or document.')

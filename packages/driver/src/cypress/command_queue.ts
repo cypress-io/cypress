@@ -18,44 +18,48 @@ const __stackReplacementMarker = (fn, args) => {
 }
 
 const commandRunningFailed = (Cypress, err, current?: $Command) => {
+  const lastLog = current?.getLastLog()
+
+  // ensure the last log on the command ends correctly
+  if (lastLog) {
+    lastLog.error(err)
+  }
+
   // allow for our own custom onFail function
   if (err.onFail && _.isFunction(err.onFail)) {
     err.onFail(err)
     // clean up this onFail callback after it's been called
     delete err.onFail
+
+    return
   }
 
-  const lastLog = current?.getLastLog()
+  if (!lastLog) {
+    const consoleProps = () => {
+      if (!current) return
 
-  // ensure the last log on the command ends correctly
-  if (lastLog) {
-    return lastLog.error(err)
+      const consoleProps = {}
+      const prev = current.get('prev')
+
+      if (current.get('type') === 'parent' || !prev) return
+
+      // if type isn't parent then we know its dual or child
+      // and we can add Applied To if there is a prev command
+      // and it is a parent
+      consoleProps['Applied To'] = $dom.isElement(prev.get('subject')) ?
+        $dom.getElements(prev.get('subject')) :
+        prev.get('subject')
+
+      return consoleProps
+    }
+
+    Cypress.log({
+      end: true,
+      snapshot: true,
+      error: err,
+      consoleProps,
+    })
   }
-
-  const consoleProps = () => {
-    if (!current) return
-
-    const consoleProps = {}
-    const prev = current.get('prev')
-
-    if (current.get('type') === 'parent' || !prev) return
-
-    // if type isn't parent then we know its dual or child
-    // and we can add Applied To if there is a prev command
-    // and it is a parent
-    consoleProps['Applied To'] = $dom.isElement(prev.get('subject')) ?
-      $dom.getElements(prev.get('subject')) :
-      prev.get('subject')
-
-    return consoleProps
-  }
-
-  return Cypress.log({
-    end: true,
-    snapshot: true,
-    error: err,
-    consoleProps,
-  })
 }
 
 /*

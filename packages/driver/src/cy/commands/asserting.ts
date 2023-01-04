@@ -4,42 +4,6 @@ import $dom from '../../dom'
 import $errUtils from '../../cypress/error_utils'
 import { isCheckingExistence, isCheckingLength } from '../assertions'
 
-// Most commands manage their own log messages. However, assertion logging is handled
-// by ../assertions.ts, because assertions can be called either through `.should('be.true')'
-// or by `expect(foo).to.be.true`.
-// When .should() is retrying however, this would result in a large number of duplicated
-// log messages - so this onBeforeLog function coallates them, merging each log instance
-// with its previous incarnation.
-const onBeforeLog = (logs) => {
-  let chainerIndex = -1
-
-  return (log) => {
-    chainerIndex++
-
-    if (logs[chainerIndex]) {
-      if (logs[chainerIndex].get('state') !== 'pending') {
-        return false
-      }
-
-      // log.merge unsets any keys that aren't set on the new log instance. We
-      // copy over 'snapshots' beforehand so that existing snapshots aren't lost
-      // in the merge operation.
-      log.set('snapshots', logs[chainerIndex].get('snapshots'))
-      logs[chainerIndex].merge(log)
-
-      if (logs[chainerIndex].get('end')) {
-        logs[chainerIndex].end()
-      }
-
-      return false
-    }
-
-    logs[chainerIndex] = log
-
-    return true
-  }
-}
-
 const commandEnqueued = (obj: Cypress.EnqueuedCommandAttributes) => {
   $errUtils.throwErrByPath(
     'should.command_inside_should', {
@@ -50,10 +14,23 @@ const commandEnqueued = (obj: Cypress.EnqueuedCommandAttributes) => {
 }
 
 export default function (Commands, Cypress, cy, state) {
-  const shouldWithCallback = (fn, logs) => {
+  const shouldWithCallback = (fn, logs, onBeforeLog) => {
     return (subject) => {
+      let logIndex = -1
+
       state('current')?.set('followedByShouldCallback', true)
-      state('onBeforeLog', onBeforeLog(logs))
+      state('onBeforeLog', (log) => {
+        // For callback assertions, every log message gets its own index; no attempt is made
+        // to collapse expect(foo).to.have.property('bar', 'baz')
+        // and we end up with
+        // - assert have property bar
+        // - assert have property bar of foo
+        // in the command log.
+        logIndex++
+
+        return onBeforeLog(log, logIndex)
+      })
+
       Cypress.once('command:enqueued', commandEnqueued)
 
       try {
@@ -80,10 +57,39 @@ export default function (Commands, Cypress, cy, state) {
     Cypress.ensure.isChildCommand(this, args, cy)
     this.set('timeout', this.get('prev').get('timeout'))
 
+    // Most commands manage their own log messages. However, assertion logging is handled
+    // by ../assertions.ts, because assertions can be called either through `.should('be.true')'
+    // or by `expect(foo).to.be.true`.
+    // When .should() is retrying however, this would result in a large number of duplicated
+    // log messages - so this onBeforeLog function coallates them, merging each log instance
+    // with its previous incarnation.
     const logs = {}
+    const onBeforeLog = (log, logIndex) => {
+      if (logs[logIndex]) {
+        if (logs[logIndex].get('state') !== 'pending') {
+          return false
+        }
+
+        // log.merge unsets any keys that aren't set on the new log instance. We
+        // copy over 'snapshots' beforehand so that existing snapshots aren't lost
+        // in the merge operation.
+        log.set('snapshots', logs[logIndex].get('snapshots'))
+        logs[logIndex].merge(log)
+
+        if (logs[logIndex].get('end')) {
+          logs[logIndex].end()
+        }
+
+        return false
+      }
+
+      logs[logIndex] = log
+
+      return true
+    }
 
     if (_.isFunction(chainerString)) {
-      return shouldWithCallback(chainerString, logs)
+      return shouldWithCallback(chainerString, logs, onBeforeLog)
     }
 
     const chainers = chainerString.split('.')
@@ -108,10 +114,20 @@ export default function (Commands, Cypress, cy, state) {
         Cypress.ensure.isAttached(subject, 'should', cy)
       }
 
-      state('onBeforeLog', onBeforeLog(logs))
+      let logIndex = -1
+
+      state('onBeforeLog', (log) => onBeforeLog(log, logIndex))
 
       try {
         const newExp = _.reduce(chainers, (memo, value) => {
+          // Some assertions can trigger multiple logs. For example
+          // expect(foo).to.have.property('bar', 'baz')
+          // triggers two logs:
+          // - assert have property bar
+          // - assert have property bar of foo
+          // Therefore, the logIndex only changes with each chainer, and not with each log message.
+          logIndex++
+
           if (!(value in memo)) {
             const err = $errUtils.cypressErrByPath('should.chainer_not_found', { args: { chainer: value } })
 
