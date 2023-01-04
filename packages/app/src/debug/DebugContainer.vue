@@ -190,7 +190,7 @@ const newerRelevantRun = computed(() => run.value)
 
 const isFirstPendingRun = computed(() => run.value && run.value.runNumber === 1 && run.value.status === 'RUNNING')
 
-const reasonsRunIsHidden = computed(() => run.value?.reasonsRunIsHidden || [] as CloudRunHidingReason[])
+const reasonsRunIsHidden = computed(() => (run.value?.reasonsRunIsHidden || []) as CloudRunHidingReason[])
 
-const runAgeDays = computed(() => run.value?.createdAt && dayjs(run.value.createdAt).diff(dayjs(), 'days') || 0)
+const runAgeDays = computed(() => run.value?.createdAt && dayjs().diff(dayjs(run.value.createdAt), 'day') || 0)
 </script>
