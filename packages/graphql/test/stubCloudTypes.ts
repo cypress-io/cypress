@@ -22,7 +22,6 @@ import type {
   QueryCloudProjectsBySlugsArgs,
   CloudProjectRunsArgs,
   CloudProjectSpec,
-  CloudProjectSpecResult,
   CloudRunStatus,
   CloudSpecRun,
 } from '../src/gen/test-cloud-graphql-types.gen'

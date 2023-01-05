@@ -421,6 +421,11 @@ declare namespace Cypress {
     }
 
     /**
+     * Information about current test retry
+     */
+    currentRetry: number
+
+    /**
      * Information about the browser currently running the tests
      */
     browser: Browser
