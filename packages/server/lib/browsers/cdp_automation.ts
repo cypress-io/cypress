@@ -179,8 +179,6 @@ export class CdpAutomation {
       maxPostDataSize: 0,
     })
 
-    await sendDebuggerCommandFn('Performance.enable')
-
     return cdpAutomation
   }
 
