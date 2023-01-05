@@ -25,7 +25,7 @@ import type { OverLimitActionTypeEnum } from '../generated/graphql'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
 import { useI18n } from '@cy/i18n'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
-import { computed } from '@vue/reactivity'
+import { computed } from 'vue'
 
 const { t } = useI18n()
 

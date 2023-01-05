@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
-import { computed } from '@vue/reactivity'
+import { computed } from 'vue'
 import { SwitchTestingTypeAndRelaunchDocument, TestingTypeEnum } from '../generated/graphql'
 import DebugSpec from './DebugSpec.vue'
 import type { CloudDebugSpec } from './utils/DebugMapping'
