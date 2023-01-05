@@ -11,7 +11,7 @@ describe('cloud debug test filtering', () => {
     cy.waitForSpecToFinish()
 
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = [{ titlePath: 't2', status: 'FAILED' }]
+      ctx.coreData.cloud.testsForRunResults = ['t2']
     })
 
     cy.visitApp(`specs/runner?file=cypress/e2e/test.cy.js&runId=123`)
@@ -23,7 +23,7 @@ describe('cloud debug test filtering', () => {
     cy.waitForSpecToFinish({ passCount: 2, failCount: 2 })
 
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = [{ titlePath: 's1 t4', status: 'FAILED' }]
+      ctx.coreData.cloud.testsForRunResults = ['s1 t4']
     })
 
     cy.visitApp(`specs/runner?file=cypress/e2e/test.cy.js&runId=123`)
@@ -39,7 +39,7 @@ describe('cloud debug test filtering', () => {
 
     // .only is respected
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = [{ titlePath: 't1', status: 'FAILED' }, { titlePath: 't3', status: 'FAILED' }]
+      ctx.coreData.cloud.testsForRunResults = ['t1', 't3']
     })
 
     cy.visitApp(`specs/runner?file=cypress/e2e/skip-and-only.cy.js&runId=123`)
@@ -51,7 +51,7 @@ describe('cloud debug test filtering', () => {
 
     // .only is ignored as it is not in set of filtered tests
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = [{ titlePath: 't3', status: 'FAILED' }]
+      ctx.coreData.cloud.testsForRunResults = ['t3']
     })
 
     cy.visitApp(`specs/runner?file=cypress/e2e/skip-and-only.cy.js&runId=123`)
@@ -63,7 +63,7 @@ describe('cloud debug test filtering', () => {
 
     // .skip is respected
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = [{ titlePath: 't2', status: 'FAILED' }, { titlePath: 't3', status: 'FAILED' }]
+      ctx.coreData.cloud.testsForRunResults = ['t2', 't3']
     })
 
     cy.visitApp(`specs/runner?file=cypress/e2e/skip-and-only.cy.js&runId=123`)
@@ -75,7 +75,7 @@ describe('cloud debug test filtering', () => {
 
     // suite.only is respected
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = [{ titlePath: 't3', status: 'FAILED' }, { titlePath: 's1 t4', status: 'FAILED' }]
+      ctx.coreData.cloud.testsForRunResults = ['t3', 's1 t4']
     })
 
     cy.visitApp(`specs/runner?file=cypress/e2e/skip-and-only.cy.js&runId=123`)
@@ -85,7 +85,7 @@ describe('cloud debug test filtering', () => {
 
   it('works with browser filter', () => {
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = [{ titlePath: 't1', status: 'FAILED' }, { titlePath: 's1 t2', status: 'FAILED' }]
+      ctx.coreData.cloud.testsForRunResults = ['t1', 's1 t2']
     })
 
     cy.visitApp(`specs/runner?file=cypress/e2e/browsers.cy.js&runId=123`)

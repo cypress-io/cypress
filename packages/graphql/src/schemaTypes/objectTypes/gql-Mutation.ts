@@ -13,7 +13,6 @@ import { ScaffoldedFile } from './gql-ScaffoldedFile'
 import { WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import debugLib from 'debug'
 import { ReactComponentResponse } from './gql-ReactComponentResponse'
-import { TestForRun } from './gql-TestForRun'
 
 const debug = debugLib('cypress:graphql:mutation')
 
@@ -767,8 +766,7 @@ export const mutation = mutationType({
     })
 
     // TODO: replace stub with cloud query
-    t.list.nonNull.field('testsForRun', {
-      type: TestForRun,
+    t.list.nonNull.string('testsForRun', {
       args: {
         runId: nonNull(stringArg()),
       },

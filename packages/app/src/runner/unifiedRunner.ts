@@ -11,10 +11,7 @@ import { TestsForRunDocument } from '../generated/graphql'
 
 gql`
 mutation TestsForRun ($runId: String!) {
-  testsForRun (runId: $runId) {
-    status
-    titlePath
-  }
+  testsForRun (runId: $runId)
 }
 `
 
@@ -67,13 +64,8 @@ export function useUnifiedRunner () {
         if (route.query.runId) {
           const res = await testsForRunMutation.executeMutation({ runId: route.query.runId as string })
 
-          const testResults = res.data?.testsForRun || []
-
-          const failedTests = testResults.reduce<string[]>((acc, test) => {
-            if (test.status === 'FAILED') acc.push(test.titlePath)
-
-            return acc
-          }, [])
+          // spread to get rid of readonly
+          const failedTests = [...res.data?.testsForRun || []]
 
           specStore.setTestFilter(failedTests.length ? failedTests : undefined)
         } else {

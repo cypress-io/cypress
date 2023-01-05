@@ -5,9 +5,9 @@ import events from '../lib/events'
 
 export const DebugDismiss = (props: { matched: number, total: number }) => {
   return (
-    <button className="debug-dismiss" onClick={() => events.emit('testFilter:cloudDebug:dismiss')}>
+    <button type='button' className="debug-dismiss" onClick={() => events.emit('testFilter:cloudDebug:dismiss')}>
       <DebuggerIcon />
-      <span>{props.matched} / {props.total} tests</span>
+      <span>{props.matched} / {props.total} {props.total > 1 ? 'tests' : 'test'}</span>
       <DeleteIcon className="delete-icon" />
     </button>
   )

@@ -41,7 +41,7 @@ const Header = observer(({ appState, events = defaultEvents, statsStore, runnabl
       </button>
     </Tooltip>
     <div className='spacer' />
-    {runnablesStore.testFilter ? <DebugDismiss matched={runnablesStore.totalTests} total={runnablesStore.totalUnfilteredTests} /> : null}
+    {runnablesStore.testFilter && <DebugDismiss matched={runnablesStore.totalTests} total={runnablesStore.totalUnfilteredTests} />}
     <Stats stats={statsStore} />
     <Controls appState={appState} />
   </header>
