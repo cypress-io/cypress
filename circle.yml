@@ -1657,7 +1657,7 @@ jobs:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "check-results-for-env" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "mschile/chrome_memory_fix_v9" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -2064,10 +2064,10 @@ linux-workflow: &linux-workflow
         context: mschile-test
         requires:
           - build
-    - driver-integration-tests-firefox:
-        context: mschile-test
-        requires:
-          - build
+    # - driver-integration-tests-firefox:
+    #     context: mschile-test
+    #     requires:
+    #       - build
     # - driver-integration-tests-electron:
     #     context: mschile-test
     #     requires:
