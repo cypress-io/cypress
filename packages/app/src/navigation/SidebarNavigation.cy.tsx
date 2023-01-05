@@ -17,6 +17,12 @@ function mountComponent (props: { initialNavExpandedVal?: boolean, cloudProject?
   })
 
   cy.mountFragment(SidebarNavigationFragmentDoc, {
+    variableTypes: {
+      runNumber: 'Int',
+    },
+    variables: {
+      runNumber: 1,
+    },
     onResult (gql) {
       if (!gql.currentProject) return
 

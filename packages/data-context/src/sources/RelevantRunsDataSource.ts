@@ -36,6 +36,9 @@ type RelevantRunReturn = {
 
 export const EMPTY_RETURN: RelevantRunReturn = { current: undefined, next: undefined }
 
+/**
+ * DataSource to encapsulate querying Cypress Cloud for runs that match a list of local Git commit shas
+ */
 export class RelevantRunsDataSource {
   private _currentRun: number | undefined
 

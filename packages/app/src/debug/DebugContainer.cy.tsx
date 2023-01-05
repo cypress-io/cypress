@@ -5,10 +5,22 @@ import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-
 import { specsList } from './utils/DebugMapping'
 import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
 
+const DebugSpecVariableTypes = {
+  hasNextRun: 'Boolean',
+  runNumber: 'Int',
+  nextRunNumber: 'Int',
+}
+
 describe('<DebugContainer />', () => {
   describe('empty states', () => {
     const validateEmptyState = (expectedMessages: string[]) => {
       cy.mountFragment(DebugSpecsFragmentDoc, {
+        variableTypes: DebugSpecVariableTypes,
+        variables: {
+          hasNextRun: false,
+          runNumber: 1,
+          nextRunNumber: -1,
+        },
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
       })
 
@@ -38,6 +50,12 @@ describe('<DebugContainer />', () => {
       loginConnectStore.setUserFlag('isLoggedIn', true)
       loginConnectStore.setProjectFlag('isProjectConnected', true)
       cy.mountFragment(DebugSpecsFragmentDoc, {
+        variableTypes: DebugSpecVariableTypes,
+        variables: {
+          hasNextRun: false,
+          runNumber: 1,
+          nextRunNumber: -1,
+        },
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
       })
 
@@ -51,6 +69,12 @@ describe('<DebugContainer />', () => {
       loginConnectStore.setUserFlag('isLoggedIn', true)
       loginConnectStore.setProjectFlag('isProjectConnected', true)
       cy.mountFragment(DebugSpecsFragmentDoc, {
+        variableTypes: DebugSpecVariableTypes,
+        variables: {
+          hasNextRun: false,
+          runNumber: 1,
+          nextRunNumber: -1,
+        },
         render: (gqlVal) => <DebugContainer gql={gqlVal} showError={true} />,
       })
 
@@ -69,6 +93,12 @@ describe('<DebugContainer />', () => {
 
     function mountTestRun (runName: string) {
       cy.mountFragment(DebugSpecsFragmentDoc, {
+        variableTypes: DebugSpecVariableTypes,
+        variables: {
+          hasNextRun: false,
+          runNumber: 1,
+          nextRunNumber: -1,
+        },
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
             const test = result.currentProject.cloudProject.runByNumber
@@ -173,6 +203,12 @@ describe('<DebugContainer />', () => {
 
     it('render first pending run', () => {
       cy.mountFragment(DebugSpecsFragmentDoc, {
+        variableTypes: DebugSpecVariableTypes,
+        variables: {
+          hasNextRun: false,
+          runNumber: 1,
+          nextRunNumber: -1,
+        },
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
             const test = result.currentProject.cloudProject.runByNumber
@@ -196,6 +232,12 @@ describe('<DebugContainer />', () => {
 
     it('renders specs and tests when completed run available', () => {
       cy.mountFragment(DebugSpecsFragmentDoc, {
+        variableTypes: DebugSpecVariableTypes,
+        variables: {
+          hasNextRun: false,
+          runNumber: 1,
+          nextRunNumber: -1,
+        },
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
             const test = result.currentProject.cloudProject.runByNumber
@@ -216,13 +258,24 @@ describe('<DebugContainer />', () => {
     context('newer relevant run available', () => {
       it('displays newer run with progress when running', () => {
         cy.mountFragment(DebugSpecsFragmentDoc, {
+          variableTypes: DebugSpecVariableTypes,
+          variables: {
+            hasNextRun: false,
+            runNumber: 1,
+            nextRunNumber: -1,
+          },
           onResult: (result) => {
             if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
               const test = result.currentProject.cloudProject.runByNumber
 
               result.currentProject.cloudProject.runByNumber = {
-                ...CloudRunStubs.running,
+                ...CloudRunStubs.failingWithTests,
               } as typeof test
+
+              const nextRun = result.currentProject.cloudProject.nextRun
+              const nextCompleted = CloudRunStubs.running as typeof nextRun
+
+              result.currentProject.cloudProject.nextRun = nextCompleted
             }
           },
           render: (gqlVal) => <DebugContainer gql={gqlVal} />,
@@ -236,12 +289,24 @@ describe('<DebugContainer />', () => {
 
       it('displays newer run with link when complete', () => {
         cy.mountFragment(DebugSpecsFragmentDoc, {
+          variableTypes: DebugSpecVariableTypes,
+          variables: {
+            hasNextRun: false,
+            runNumber: 1,
+            nextRunNumber: 2,
+          },
           onResult: (result) => {
             if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
               const test = result.currentProject.cloudProject.runByNumber
-              const other = CloudRunStubs.failingWithTests as typeof test
 
-              result.currentProject.cloudProject.runByNumber = other
+              result.currentProject.cloudProject.runByNumber = {
+                ...CloudRunStubs.failingWithTests,
+              } as typeof test
+
+              const nextRun = result.currentProject.cloudProject.nextRun
+              const nextCompleted = CloudRunStubs.failingWithTests as typeof nextRun
+
+              result.currentProject.cloudProject.nextRun = nextCompleted
             }
           },
           render: (gqlVal) => <DebugContainer gql={gqlVal} />,
