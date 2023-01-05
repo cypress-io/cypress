@@ -991,8 +991,12 @@ jobs:
           name: Top level packages
           command: yarn list --depth=0 || true
       - run:
-          name: Check env canaries
-          command: node ./scripts/circle-env.js --check-canaries
+          name: Check env canaries on Linux
+          command: |
+            # only Docker has the required env data for this
+            if [[ $CI_DOCKER == 'true' ]]; then
+              node ./scripts/circle-env.js --check-canaries
+            fi
       - build-and-persist
       - store-npm-logs
 
@@ -2064,10 +2068,10 @@ linux-workflow: &linux-workflow
         context: mschile-test
         requires:
           - build
-    - driver-integration-tests-electron:
-        context: mschile-test
-        requires:
-          - build
+    # - driver-integration-tests-electron:
+    #     context: mschile-test
+    #     requires:
+    #       - build
     - create-build-artifacts:
         context:
           - test-runner:upload

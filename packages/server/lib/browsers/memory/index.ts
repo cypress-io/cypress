@@ -35,10 +35,12 @@ export type MemoryHandler = {
 
 export const getJsHeapSizeLimit = async (sendDebuggerCommandFn) => {
   return measure({ name: 'getJsHeapSizeLimit' }, async () => {
-    let heapLimit = (await sendDebuggerCommandFn('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' })).result?.value
+    let heapLimit
 
-    if (!heapLimit) {
-      debugVerbose('no heap size limit found, using default of four kibibytes')
+    try {
+      heapLimit = (await sendDebuggerCommandFn('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' })).result.value
+    } catch (err) {
+      debug('could not get jsHeapSizeLimit from browser, using default of four gibibytes')
 
       heapLimit = FOUR_GIBIBYTES
     }
