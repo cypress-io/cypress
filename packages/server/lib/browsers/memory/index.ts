@@ -133,7 +133,7 @@ export default class Memory {
     return rendererProcess.memory
   }
 
-  async checkMemoryAndCollectGarbage ({ isFirstTest }: { isFirstTest: boolean}) {
+  async checkMemoryAndCollectGarbage ({ test }: { test: { title: string, order: number, currentRetry: number }}) {
     const log: { [key: string]: any } | undefined = debugVerbose.enabled ? {} : undefined
 
     await measure({ name: 'checkMemoryAndCollectGarbage', log }, async () => {
@@ -152,9 +152,9 @@ export default class Memory {
 
       // if we're using more than MEMORY_THRESHOLD_PERCENTAGE of the available memory, force a garbage collection
       const rendererUsagePercentage = (rendererProcessMemRss / maxAvailableRendererMemory) * 100
-      const shouldCollectGarbage = rendererUsagePercentage >= MEMORY_THRESHOLD_PERCENTAGE
+      const shouldCollectGarbage = rendererUsagePercentage >= MEMORY_THRESHOLD_PERCENTAGE && process.env.CYPRESS_INTERNAL_FORCE_GC !== '0'
 
-      if (shouldCollectGarbage && process.env.CYPRESS_INTERNAL_FORCE_GC !== '0') {
+      if (shouldCollectGarbage) {
         debug('forcing garbage collection')
         await measure({ name: 'garbageCollection', log }, async () => await this.sendDebuggerCommand('HeapProfiler.collectGarbage'))
       } else {
@@ -162,6 +162,9 @@ export default class Memory {
       }
 
       if (log) {
+        log.testTitle = test.title
+        log.testOrder = test.order
+        log.testCurrentRetry = test.currentRetry
         log.rendererProcessMemRss = rendererProcessMemRss
         log.garbageCollected = shouldCollectGarbage
         log.rendererUsagePercentage = rendererUsagePercentage
@@ -174,15 +177,17 @@ export default class Memory {
     })
 
     if (log) {
-      this.logMemory(log, isFirstTest)
+      this.logMemory(log, test)
     }
   }
 
-  private async logMemory (stats, isFirstTest) {
+  private async logMemory (stats, test) {
     debugVerbose('memory stats: %o', stats)
 
     if (process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS) {
       try {
+        const isFirstTest = test.order === 1 && test.currentRetry === 0
+
         if (isFirstTest) {
           fs.writeFile(process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS, JSON.stringify([stats]))
         } else {

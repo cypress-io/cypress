@@ -573,7 +573,7 @@ export class EventManager {
 
       // if the experimental flag is on and we are in chromium based browser, force a garbage collection
       if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
-        await Cypress.automation('maybe:collect:garbage', { isFirstTest: (test.order === 1 && test.currentRetry() === 0) })
+        await Cypress.automation('maybe:collect:garbage', { test: { title: test.title, order: test.order, currentRetry: test.currentRetry() } })
       }
     })
 
