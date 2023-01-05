@@ -77,10 +77,10 @@ describe('Debug page states', () => {
       it('displays messaging for users', () => {
         cy.mount(
           <DebugOverLimit
-            overLimitReason={{
+            overLimitReasons={[{
               __typename: 'UsageLimitExceeded',
               monthlyTests: 100,
-            }}
+            }]}
             overLimitActionType="CONTACT_ADMIN"
             overLimitActionUrl="#"
             runAgeDays={60}
@@ -93,10 +93,10 @@ describe('Debug page states', () => {
       it('displays messaging for plan admins', () => {
         cy.mount(
           <DebugOverLimit
-            overLimitReason={{
+            overLimitReasons={[{
               __typename: 'UsageLimitExceeded',
               monthlyTests: 100,
-            }}
+            }]}
             overLimitActionType="UPGRADE"
             overLimitActionUrl="#"
             runAgeDays={60}
@@ -111,10 +111,10 @@ describe('Debug page states', () => {
       it('displays messaging for users', () => {
         cy.mount(
           <DebugOverLimit
-            overLimitReason={{
+            overLimitReasons={[{
               __typename: 'DataRetentionLimitExceeded',
               dataRetentionDays: 30,
-            }}
+            }]}
             overLimitActionType="CONTACT_ADMIN"
             overLimitActionUrl="#"
             runAgeDays={60}
@@ -127,10 +127,31 @@ describe('Debug page states', () => {
       it('displays messaging for plan admins', () => {
         cy.mount(
           <DebugOverLimit
-            overLimitReason={{
+            overLimitReasons={[{
               __typename: 'DataRetentionLimitExceeded',
               dataRetentionDays: 30,
-            }}
+            }]}
+            overLimitActionType="UPGRADE"
+            overLimitActionUrl="#"
+            runAgeDays={60}
+          />,
+        )
+
+        cy.percySnapshot()
+      })
+    })
+
+    context('both usage and retention exceeded', () => {
+      it('selects usage exceeded and displays appropriate message', () => {
+        cy.mount(
+          <DebugOverLimit
+            overLimitReasons={[{
+              __typename: 'DataRetentionLimitExceeded',
+              dataRetentionDays: 30,
+            }, {
+              __typename: 'UsageLimitExceeded',
+              monthlyTests: 30,
+            }]}
             overLimitActionType="UPGRADE"
             overLimitActionUrl="#"
             runAgeDays={60}
