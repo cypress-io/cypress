@@ -169,8 +169,16 @@ describe('<DebugContainer />', () => {
     })
 
     context('over limit', () => {
-      it('renders', () => {
+      it('handled usage exceeded', () => {
         mountTestRun('overLimit')
+
+        cy.findByRole('link', { name: 'Contact admin' }).should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
+
+        cy.percySnapshot()
+      })
+
+      it('handles retention exceeded', () => {
+        mountTestRun('overLimitRetention')
 
         cy.findByRole('link', { name: 'Contact admin' }).should('have.attr', 'href', 'http://localhost:3000?utmMedium=Debug+Tab&utmSource=Binary%3A+Launchpad')
 
