@@ -133,7 +133,9 @@ export class GitDataSource {
         toAwait.push(this.#loadBulkGitInfo(this.#specs))
       }
 
-      toAwait.push(this.#loadGitHashes())
+      if (!this.#gitErrored) {
+        toAwait.push(this.#loadGitHashes())
+      }
 
       Promise.all(toAwait).then(() => {
         if (this.#destroyed) {
@@ -431,14 +433,18 @@ export class GitDataSource {
 
   async #loadGitHashes () {
     debug('Loading git hashes')
-    const logResponse = await this.#git?.log({ maxCount: 100 })
-    const currentHashes = logResponse?.all.map((log) => log.hash)
+    try {
+      const logResponse = await this.#git?.log({ maxCount: 100 })
+      const currentHashes = logResponse?.all.map((log) => log.hash)
 
-    if (!isEqual(this.#gitHashes, currentHashes)) {
-      this.#gitHashes = currentHashes || []
+      if (!isEqual(this.#gitHashes, currentHashes)) {
+        this.#gitHashes = currentHashes || []
 
-      debug(`Calling onGitLogChange: callback defined ${!!this.config.onGitLogChange}, git hash count ${currentHashes?.length}`)
-      this.config.onGitLogChange?.()
+        debug(`Calling onGitLogChange: callback defined ${!!this.config.onGitLogChange}, git hash count ${currentHashes?.length}`)
+        this.config.onGitLogChange?.()
+      }
+    } catch (e) {
+      debug('Error loading git hashes %s', e)
     }
   }
 }
