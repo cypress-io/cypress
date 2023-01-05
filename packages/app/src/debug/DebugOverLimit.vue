@@ -20,19 +20,35 @@
 </template>
 
 <script lang="ts" setup>
+import { gql } from '@urql/core'
 import LockedProject from '~icons/cy/locked-project_x48.svg'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
-import type { OverLimitActionTypeEnum } from '../generated/graphql'
+import type { DebugReasonsRunIsHiddenFragment, OverLimitActionTypeEnum } from '../generated/graphql'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
 import { useI18n } from '@cy/i18n'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { computed } from '@vue/reactivity'
 
-export type DataRetentionLimitExceeded = { __typename: 'DataRetentionLimitExceeded', dataRetentionDays: number | null }
+export type CloudRunHidingReason = DebugReasonsRunIsHiddenFragment['reasonsRunIsHidden'][number]
 
-export type UsageLimitExceeded = | { __typename: 'UsageLimitExceeded', monthlyTests: number | null }
+type DataRetentionLimitExceeded = Extract<CloudRunHidingReason, { '__typename': 'DataRetentionLimitExceeded' }>
 
-export type CloudRunHidingReason = DataRetentionLimitExceeded | UsageLimitExceeded
+type UsageLimitExceeded = Extract<CloudRunHidingReason, { '__typename': 'UsageLimitExceeded' }>
+
+gql`
+fragment DebugReasonsRunIsHidden on CloudRun {
+  id
+  reasonsRunIsHidden {
+    __typename
+    ... on DataRetentionLimitExceeded {
+      dataRetentionDays
+    }
+    ... on UsageLimitExceeded {
+      monthlyTests
+    }
+  }
+}
+`
 
 const { t } = useI18n()
 
@@ -47,7 +63,7 @@ const actionUrl = computed(() => {
   return getUrlWithParams({ url: props.overLimitActionUrl, params: { utmMedium: 'Debug Tab', utmSource: getUtmSource() } })
 })
 
-const overLimitReason = computed<CloudRunHidingReason | null>(() => {
+const overLimitReason = computed<CloudRunHidingReason>(() => {
   // Prefer showing the "Usage Exceeded" messaging if multiple conditions exist
   return props.overLimitReasons.find(isUsageLimit) || props.overLimitReasons.find(isRetentionLimit) || null
 })
@@ -57,12 +73,9 @@ const isPlanAdmin = computed(() => props.overLimitActionType === 'UPGRADE')
 const iconClasses = computed(() => {
   return [
     'icon-dark-gray-500',
-    {
-      'icon-dark-secondary-jade-400': !isRetentionLimit(overLimitReason.value),
-      'icon-light-secondary-jade-200': !isRetentionLimit(overLimitReason.value),
-      'icon-dark-secondary-orange-400': isRetentionLimit(overLimitReason.value),
-      'icon-light-secondary-orange-200': isRetentionLimit(overLimitReason.value),
-    },
+    isRetentionLimit(overLimitReason.value)
+      ? 'icon-dark-secondary-orange-400 icon-light-secondary-orange-200'
+      : 'icon-dark-secondary-jade-400 icon-light-secondary-jade-200',
   ]
 })
 const copy = computed(() => {
@@ -74,9 +87,11 @@ const copy = computed(() => {
     }
   }
 
+  const numberTests = overLimitReason.value?.monthlyTests || 0
+
   return {
     title: t('debugPage.overLimit.usageExceededTitle'),
-    message: isPlanAdmin.value ? t('debugPage.overLimit.usageExceededAdminMessage', { numberTests: overLimitReason.value?.monthlyTests || 0 }) : t('debugPage.overLimit.usageExceededUserMessage', { numberTests: overLimitReason.value?.monthlyTests || 0 }),
+    message: isPlanAdmin.value ? t('debugPage.overLimit.usageExceededAdminMessage', { numberTests }) : t('debugPage.overLimit.usageExceededUserMessage', { numberTests }),
     actionLabel: isPlanAdmin.value ? t('debugPage.overLimit.upgradePlan') : t('debugPage.overLimit.contactAdmin'),
   }
 })

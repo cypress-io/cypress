@@ -24,7 +24,7 @@
       :ci="ci"
     />
     <DebugOverLimit
-      v-else-if="status === 'OVERLIMIT' || isHidden"
+      v-else-if="isHidden"
       :over-limit-reasons="reasonsRunIsHidden"
       :over-limit-action-type="overLimitActionType"
       :over-limit-action-url="overLimitActionUrl"
