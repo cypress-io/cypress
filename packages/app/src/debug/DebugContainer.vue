@@ -27,7 +27,7 @@
           :status="run.status"
           :specs="run.specs"
           :cancellation="{ cancelledAt: run.cancelledAt, cancelledBy: run.cancelledBy }"
-          :is-hidden-by-usage-limits="run.isHiddenByUsageLimits"
+          :is-hidden-by-usage-limits="run.isHidden"
           :over-limit-action-type="run.overLimitActionType"
           :over-limit-action-url="run.overLimitActionUrl"
           :ci="run.ci"
@@ -96,7 +96,7 @@ fragment DebugSpecs on Query {
           status
           overLimitActionType
           overLimitActionUrl
-          isHiddenByUsageLimits
+          isHidden
           totalTests
           ci {
             id

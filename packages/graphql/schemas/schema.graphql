@@ -432,14 +432,21 @@ type CloudRun implements Node {
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
 
-  """Whether this run is hidden by usage limits"""
-  isHiddenByUsageLimits: Boolean!
+  """
+  Whether this run is hidden to the user due to data limits. Specific reasons are provided in the reasonsRunIsHidden field.
+  """
+  isHidden: Boolean!
 
-  """What to do when the run is over the limit"""
+  """Action user can perform when the run is over a usage limit"""
   overLimitActionType: OverLimitActionTypeEnum!
 
-  """A link to upgrade or contact an admin"""
+  """A link a user can navigate to when the run is over a usage limit"""
   overLimitActionUrl: String!
+
+  """
+  Reasons why this run is hidden. List will be empty if the run is not hidden.
+  """
+  reasonsRunIsHidden: [CloudRunHidingReason]!
   runNumber: Int
 
   """All specs within this run"""
@@ -567,6 +574,9 @@ enum CloudRunGroupStatusEnum {
   TIMEDOUT
   UNCLAIMED
 }
+
+"""The reason a run was hidden, along with any details"""
+union CloudRunHidingReason = DataRetentionLimitExceeded | UsageLimitExceeded
 
 """An instance of executing a single test within a run"""
 type CloudRunInstance implements Node {
@@ -976,6 +986,12 @@ type CurrentProject implements Node & ProjectLike {
   """"""
   testsForReviewBySpec(specTitle: String): [String!]
   title: String!
+}
+
+"""A run was hidden because it was over the data retention limit"""
+type DataRetentionLimitExceeded {
+  """The number of days of data retention"""
+  dataRetentionDays: Int
 }
 
 """
@@ -2187,6 +2203,12 @@ type TestingTypeInfo implements Node {
   id: ID!
   title: String!
   type: TestingTypeEnum!
+}
+
+"""A run was hidden because it was over the usage limit"""
+type UsageLimitExceeded {
+  """The number of tests allowed per month"""
+  monthlyTests: Int
 }
 
 """Version of Cypress and release date"""
