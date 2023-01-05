@@ -103,7 +103,7 @@ describe('lib/browsers/firefox', () => {
     stubFoxdriver()
   })
 
-  context('#connectToNewSpec', () => {
+  context('#connectToNewTab', () => {
     beforeEach(function () {
       this.browser = { name: 'firefox', channel: 'stable' }
       this.automation = {
@@ -115,12 +115,12 @@ describe('lib/browsers/firefox', () => {
       }
     })
 
-    it('calls connectToNewSpec in firefoxUtil', function () {
-      sinon.stub(firefoxUtil, 'connectToNewSpec').withArgs(50505, this.options, this.automation).resolves()
+    it('calls connectToNewTab in firefoxUtil', function () {
+      sinon.stub(firefoxUtil, 'connectToNewTab').withArgs(50505, this.options, this.automation).resolves()
 
-      firefox.connectToNewSpec(this.browser, this.options, this.automation)
+      firefox.connectToNewTab(this.browser, this.options, this.automation)
 
-      expect(firefoxUtil.connectToNewSpec).to.be.called
+      expect(firefoxUtil.connectToNewTab).to.be.called
     })
   })
 

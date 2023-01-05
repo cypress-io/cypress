@@ -286,8 +286,8 @@ export class SocketBase {
         })
       })
 
-      this._sendResetBrowserTabsForNextTestMessage = async (shouldKeepTabOpen: boolean) => {
-        await automationRequest('reset:browser:tabs:for:next:test', { shouldKeepTabOpen })
+      this._sendResetBrowserTabsForNextTestMessage = async (shouldLaunchNewTab: boolean) => {
+        await automationRequest('reset:browser:tabs:for:next:test', { shouldLaunchNewTab })
       }
 
       this._sendResetBrowserStateMessage = async () => {
@@ -586,9 +586,9 @@ export class SocketBase {
     return this._io?.emit('tests:finished')
   }
 
-  async resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {
+  async resetBrowserTabsForNextTest (shouldLaunchNewTab: boolean) {
     if (this._sendResetBrowserTabsForNextTestMessage) {
-      await this._sendResetBrowserTabsForNextTestMessage(shouldKeepTabOpen)
+      await this._sendResetBrowserTabsForNextTestMessage(shouldLaunchNewTab)
     }
   }
 

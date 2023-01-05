@@ -139,7 +139,7 @@ export const normalizeResourceType = (resourceType: string | undefined): Resourc
 }
 
 type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: any) => Promise<ProtocolMapping.Commands[T]['returnType']>
-type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any> | void
+type SendCloseCommand = (shouldLaunchNewTab: boolean) => Promise<any> | void
 type OnFn = <T extends CdpEvent>(eventName: T, cb: (data: ProtocolMapping.Events[T][0]) => void) => void
 
 // the intersection of what's valid in CDP and what's valid in FFCDP
@@ -348,7 +348,7 @@ export class CdpAutomation {
           this.sendDebuggerCommandFn('Network.clearBrowserCache'),
         ])
       case 'reset:browser:tabs:for:next:test':
-        return this.sendCloseCommandFn(data.shouldKeepTabOpen)
+        return this.sendCloseCommandFn(data.shouldLaunchNewTab)
       case 'focus:browser:window':
         return this.sendDebuggerCommandFn('Page.bringToFront')
       default:

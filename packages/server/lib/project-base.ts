@@ -67,7 +67,9 @@ export class ProjectBase<TServer extends Server> extends EE {
   public testingType: Cypress.TestingType
   public spec: FoundSpec | null
   public isOpen: boolean = false
+
   projectRoot: string
+  usingExperimentalSingleTabMode: boolean = false
 
   constructor ({
     projectRoot,
@@ -202,6 +204,9 @@ export class ProjectBase<TServer extends Server> extends EE {
       stateToSave.firstOpened = now
     }
 
+    // @ts-ignore
+    this.usingExperimentalSingleTabMode = cfg.testingType === 'component' && cfg.experimentalSingleTabRunMode
+
     this.startWebsockets({
       onReloadBrowser: this.options.onReloadBrowser,
       onFocusTests: this.options.onFocusTests,
@@ -249,7 +254,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     }
 
     if (this._server) {
-      return this._server.reset()
+      this._server.reset(this.usingExperimentalSingleTabMode)
     }
 
     return
@@ -276,9 +281,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.ctx.setAppServerPort(undefined)
     this.ctx.setAppSocketServer(undefined)
 
-    await Promise.all([
-      this.server?.close(),
-    ])
+    await this.server?.close()
 
     this._isServerOpen = false
     this.isOpen = false
@@ -395,8 +398,8 @@ export class ProjectBase<TServer extends Server> extends EE {
     this.ctx.setAppSocketServer(io)
   }
 
-  async resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {
-    return this.server.socket.resetBrowserTabsForNextTest(shouldKeepTabOpen)
+  async resetBrowserTabsForNextTest (shouldLaunchNewTab: boolean) {
+    return this.server.socket.resetBrowserTabsForNextTest(shouldLaunchNewTab)
   }
 
   async resetBrowserState () {

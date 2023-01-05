@@ -155,8 +155,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return devServer
       },
       isListening,
-      resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {
-        return openProject.resetBrowserTabsForNextTest(shouldKeepTabOpen)
+      resetBrowserTabsForNextTest (shouldLaunchNewTab: boolean) {
+        return openProject.resetBrowserTabsForNextTest(shouldLaunchNewTab)
       },
       resetServer () {
         return openProject.getProject()?.server.reset()

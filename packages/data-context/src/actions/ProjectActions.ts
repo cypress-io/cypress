@@ -44,7 +44,7 @@ export interface ProjectApiShape {
     emitter: EventEmitter
   }
   isListening: (url: string) => Promise<void>
-  resetBrowserTabsForNextTest(shouldKeepTabOpen: boolean): Promise<void>
+  resetBrowserTabsForNextTest(shouldLaunchNewTab: boolean): Promise<void>
   resetServer(): void
 }
 

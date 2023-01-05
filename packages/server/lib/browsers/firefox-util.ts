@@ -117,7 +117,7 @@ async function connectMarionetteToNewTab () {
   await navigateToUrl('about:blank')
 }
 
-async function connectToNewSpec (options, automation: Automation, browserCriClient: BrowserCriClient) {
+async function connectToNewTab (options, automation: Automation, browserCriClient: BrowserCriClient) {
   debug('firefox: reconnecting to blank tab')
 
   await connectMarionetteToNewTab()
@@ -230,7 +230,7 @@ export default {
     ]).then(([,, browserCriClient]) => navigateToUrl(url).then(() => browserCriClient))
   },
 
-  connectToNewSpec,
+  connectToNewTab,
 
   navigateToUrl,
 

@@ -482,7 +482,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
     }
   }
 
-  reset () {
+  reset (_shouldDestroyAut?: boolean) {
     this._networkProxy?.reset()
     this.requestedWithAndCredentialManager.clear()
     const baseUrl = this._baseUrl ?? '<root>'

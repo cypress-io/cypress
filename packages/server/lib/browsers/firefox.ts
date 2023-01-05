@@ -357,10 +357,7 @@ export function _createDetachedInstance (browserInstance: BrowserInstance, brows
   // kill the entire process tree, from the spawned instance up
   detachedInstance.kill = (): void => {
     // Close browser cri client socket. Do nothing on failure here since we're shutting down anyway
-    if (browserCriClient) {
-      browserCriClient.close().catch()
-      browserCriClient = undefined
-    }
+    clearInstanceState()
 
     treeKill(browserInstance.pid, (err?, result?) => {
       debug('force-exit of process tree complete %o', { err, result })
@@ -376,14 +373,14 @@ export function _createDetachedInstance (browserInstance: BrowserInstance, brows
 */
 export function clearInstanceState () {
   debug('closing remote interface client')
-  if (browserCriClient) {
-    browserCriClient.close().catch()
-    browserCriClient = undefined
-  }
+
+  // Do nothing on failure here since we're shutting down anyway
+  browserCriClient?.close().catch()
+  browserCriClient = undefined
 }
 
-export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
-  await firefoxUtil.connectToNewSpec(options, automation, browserCriClient)
+export async function connectToNewTab (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
+  await firefoxUtil.connectToNewTab(options, automation, browserCriClient)
 }
 
 export function connectToExisting () {

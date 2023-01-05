@@ -362,7 +362,7 @@ export class WebKitAutomation {
 
         return
       case 'reset:browser:tabs:for:next:test':
-        if (data.shouldKeepTabOpen) return await this.reset({})
+        if (data.shouldLaunchNewTab) return await this.reset({})
 
         return await this.context.browser()?.close()
       default:

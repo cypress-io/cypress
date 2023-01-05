@@ -27,7 +27,7 @@ describe('lib/open_project', () => {
     this.onError = sinon.stub()
     sinon.stub(browsers, 'get').resolves()
     sinon.stub(browsers, 'open')
-    sinon.stub(browsers, 'connectToNewSpec')
+    sinon.stub(browsers, 'connectToNewTab')
     sinon.stub(ProjectBase.prototype, 'initializeConfig').resolves({
       specPattern: 'cypress/integration/**/*',
     })
@@ -204,9 +204,9 @@ describe('lib/open_project', () => {
         })
       })
 
-      it('calls connectToNewSpec when shouldLaunchNewTab is set', async function () {
+      it('calls connectToNewTab when shouldLaunchNewTab is set', async function () {
         await openProject.launch(this.browser, this.spec, { shouldLaunchNewTab: true })
-        expect(browsers.connectToNewSpec.lastCall.args[0]).to.be.equal(this.browser)
+        expect(browsers.connectToNewTab.lastCall.args[0]).to.be.equal(this.browser)
       })
     })
   })

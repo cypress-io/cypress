@@ -158,9 +158,9 @@ export class BrowserCriClient {
   /**
    * Resets the browser's targets optionally keeping a tab open
    *
-   * @param shouldKeepTabOpen whether or not to keep the tab open
+   * @param shouldLaunchNewTab whether or not to keep the tab open
    */
-  resetBrowserTargets = async (shouldKeepTabOpen: boolean): Promise<void> => {
+  resetBrowserTargets = async (shouldLaunchNewTab: boolean): Promise<void> => {
     if (!this.currentlyAttachedTarget) {
       throw new Error('Cannot close target because no target is currently attached')
     }
@@ -168,7 +168,7 @@ export class BrowserCriClient {
     let target
 
     // If we are keeping a tab open, we need to first launch a new default tab prior to closing the existing one
-    if (shouldKeepTabOpen) {
+    if (shouldLaunchNewTab) {
       target = await this.browserClient.send('Target.createTarget', { url: 'about:blank' })
     }
 

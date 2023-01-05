@@ -40,6 +40,7 @@ let exitEarly = (err) => {
 
   earlyExitErr = err
 }
+
 let earlyExitErr: Error
 let currentSetScreenshotMetadata: SetScreenshotMetadata
 
@@ -218,7 +219,7 @@ async function trashAssets (config: Cfg) {
       trash.folder(config.downloadsFolder),
     ])
   } catch (err) {
-    // dont make trashing assets fail the build
+    // don't make trashing assets fail the build
     errors.warning('CANNOT_TRASH_ASSETS', err)
   }
 }
@@ -345,14 +346,13 @@ async function postProcessRecording (options: { quiet: boolean, videoCompression
   return continueProcessing(onProgress)
 }
 
-function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot, setScreenshotMetadata: SetScreenshotMetadata, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, onError: (err: Error) => void, videoRecording?: VideoRecording }) {
-  const { browser, spec, setScreenshotMetadata, screenshots, projectRoot, shouldLaunchNewTab, onError } = options
+function launchBrowser (options: BrowserConnectOpts, setScreenshotMetadata: SetScreenshotMetadata) {
+  const { browser, spec, screenshots, projectRoot, onError } = options
 
   const warnings = {}
 
   const browserOpts: OpenProjectLaunchOpts = {
     projectRoot,
-    shouldLaunchNewTab,
     onError,
     videoApi: options.videoRecording?.api,
     automationMiddleware: {
@@ -443,7 +443,21 @@ function listenForProjectEnd (project, exit): Bluebird<any> {
   })
 }
 
-async function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, spec: SpecWithRelativeRoot, isFirstSpec: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean, videoRecording?: VideoRecording }) {
+type BrowserConnectOpts = {
+  project: Project
+  socketId: string
+  onError: (err: Error) => void
+  spec: SpecWithRelativeRoot
+  testingType: string
+  experimentalSingleTabRunMode: boolean
+  browser: Browser
+  screenshots: ScreenshotMetadata[]
+  projectRoot: string
+  webSecurity: boolean
+  videoRecording?: VideoRecording
+}
+
+async function waitForBrowserToConnect (options: BrowserConnectOpts) {
   if (globalThis.CY_TEST_MOCK?.waitForBrowserToConnect) return Promise.resolve()
 
   const { project, socketId, onError, spec } = options
@@ -459,14 +473,8 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
     return data
   }
 
-  // TODO: remove the need to extend options and avoid the type error
-  // @ts-expect-error
-  options.setScreenshotMetadata = (data) => {
-    return currentSetScreenshotMetadata(data)
-  }
-
-  if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpec) {
-    // reset browser state to match default behavior when opening/closing a new tab
+  if (openProject.hasBrowserInstance && project.usingExperimentalSingleTabMode) {
+    debug('connecting to same browser tab: %o, spec: %s', options.browser, spec.relative)
     await openProject.resetBrowserState()
 
     // since we aren't re-launching the browser, we have to navigate to the next spec instead
@@ -480,8 +488,7 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
 
     return Bluebird.all([
       waitForSocketConnection(project, socketId),
-      // TODO: remove the need to extend options and coerce this type
-      launchBrowser(options as typeof options & { setScreenshotMetadata: SetScreenshotMetadata }),
+      launchBrowser(options, currentSetScreenshotMetadata),
     ])
     .timeout(browserTimeout)
     .catch(Bluebird.TimeoutError, async (err) => {
@@ -538,10 +545,10 @@ function waitForSocketConnection (project: Project, id: string) {
   })
 }
 
-async function waitForTestsToFinishRunning (options: { project: Project, screenshots: ScreenshotMetadata[], videoCompression: number | false, videoUploadOnPasses: boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, testingType: TestingType, videoRecording?: VideoRecording }) {
+async function waitForTestsToFinishRunning (options: { project: Project, screenshots: ScreenshotMetadata[], videoCompression: number | false, videoUploadOnPasses: boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, testingType: TestingType, videoRecording?: VideoRecording }) {
   if (globalThis.CY_TEST_MOCK?.waitForTestsToFinishRunning) return Promise.resolve(globalThis.CY_TEST_MOCK.waitForTestsToFinishRunning)
 
-  const { project, screenshots, videoRecording, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, shouldKeepTabOpen, testingType } = options
+  const { project, screenshots, videoRecording, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config } = options
 
   const results = await listenForProjectEnd(project, exit)
 
@@ -629,24 +636,6 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
   if (!quiet && !skippedSpec) {
     printResults.displayResults(results, estimated)
-  }
-
-  // @ts-expect-error experimentalSingleTabRunMode only exists on the CT-specific config type
-  const usingExperimentalSingleTabMode = testingType === 'component' && config.experimentalSingleTabRunMode
-
-  if (usingExperimentalSingleTabMode) {
-    await project.server.destroyAut()
-  }
-
-  // we do not support experimentalSingleTabRunMode for e2e
-  if (!usingExperimentalSingleTabMode) {
-    debug('attempting to close the browser tab')
-
-    await openProject.resetBrowserTabsForNextTest(shouldKeepTabOpen)
-
-    debug('resetting server state')
-
-    project.server.reset()
   }
 
   if (videoExists && !skippedSpec && !videoCaptureFailed) {
@@ -850,10 +839,10 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
     if (config.experimentalSingleTabRunMode && !isFirstSpec && project.videoRecording) {
       // in single-tab mode, only the first spec needs to create a videoRecording object
       // which is then re-used between specs
-      return await startVideoRecording({ ...opts, previous: project.videoRecording })
+      return startVideoRecording({ ...opts, previous: project.videoRecording })
     }
 
-    return await startVideoRecording(opts)
+    return startVideoRecording(opts)
   }
 
   const videoRecording = await getVideoRecording()
@@ -875,7 +864,6 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       videoCompression: options.videoCompression,
       videoUploadOnPasses: options.videoUploadOnPasses,
       quiet: options.quiet,
-      shouldKeepTabOpen: !isLastSpec,
     }),
     waitForBrowserToConnect({
       spec,
@@ -888,9 +876,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       webSecurity: options.webSecurity,
       projectRoot: options.projectRoot,
       testingType: options.testingType,
-      isFirstSpec,
       experimentalSingleTabRunMode: config.experimentalSingleTabRunMode,
-      shouldLaunchNewTab: !isFirstSpec,
     }),
   ])
 

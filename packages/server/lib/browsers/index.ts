@@ -109,23 +109,27 @@ export = {
   },
 
   // note: does not guarantee that `browser` is still running
-  getBrowserInstance () {
+  getBrowserInstance (): BrowserInstance | null {
     return instance
   },
 
   async connectToExisting (browser: Browser, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance | null> {
     const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 
+    if (!options.url) throw new Error('Missing url in connectToExisting')
+
     await browserLauncher.connectToExisting(browser, options, automation)
 
     return this.getBrowserInstance()
   },
 
-  async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation): Promise<BrowserInstance | null> {
+  async connectToNewTab (browser: Browser, options: BrowserNewTabOpts, automation: Automation): Promise<BrowserInstance | null> {
     const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 
+    if (!options.url) throw new Error('Missing url in connectToExisting')
+
     // Instance will be null when we're dealing with electron. In that case we don't need a browserCriClient
-    await browserLauncher.connectToNewSpec(browser, options, automation)
+    await browserLauncher.connectToNewTab(browser, options, automation)
 
     return this.getBrowserInstance()
   },

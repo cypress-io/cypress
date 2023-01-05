@@ -21,6 +21,8 @@ const debug = Debug('cypress:server:open_project')
 
 export class OpenProject {
   private projectBase: ProjectBase<any> | null = null
+  hasBrowserInstance: boolean = false
+
   relaunchBrowser: (() => Promise<BrowserInstance | null>) = () => {
     throw new Error('bad relaunch')
   }
@@ -55,7 +57,7 @@ export class OpenProject {
     return this.projectBase
   }
 
-  async launch (browser, spec: Cypress.Cypress['spec'], prevOptions?: OpenProjectLaunchOpts) {
+  async launch (browser, spec: Cypress.Cypress['spec'], prevOptions: OpenProjectLaunchOpts) {
     this._ctx = getCtx()
 
     assert(this.projectBase, 'Cannot launch runner if projectBase is undefined!')
@@ -159,22 +161,23 @@ export class OpenProject {
     options.onError = this.projectBase.options.onError
 
     this.relaunchBrowser = async () => {
-      debug(
-        'launching browser: %o, spec: %s',
-        browser,
-        spec.relative,
-      )
-
       // clear cookies and all session data before each spec
       cookieJar.removeAllCookies()
       session.clearSessions()
 
       // TODO: Stub this so we can detect it being called
       if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+        debug('CYPRESS_INTERNAL_E2E_TESTING_SELF set...connecting to existing browser instance: %o, spec: %s', browser, spec.relative)
+
         return await browsers.connectToExisting(browser, options, automation)
       }
 
-      if (options.shouldLaunchNewTab) {
+      await this.resetBrowserTabsForNextTest(this.hasBrowserInstance)
+
+      // start spec in same browser instance in a new tab
+      if (this.hasBrowserInstance) {
+        debug('connecting to new browser tab: %o, spec: %s', browser, spec.relative)
+
         const onInitializeNewBrowserTab = async () => {
           await this.resetBrowserState()
         }
@@ -182,23 +185,28 @@ export class OpenProject {
         // If we do not launch the browser,
         // we tell it that we are ready
         // to receive the next spec
-        return await browsers.connectToNewSpec(browser, { onInitializeNewBrowserTab, ...options }, automation)
+        return browsers.connectToNewTab(browser, { onInitializeNewBrowserTab, ...options }, automation)
       }
 
-      options.relaunchBrowser = this.relaunchBrowser
+      debug('launching browser: %o, spec: %s', browser, spec.relative)
 
-      return await browsers.open(browser, options, automation, this._ctx)
+      options.relaunchBrowser = this.relaunchBrowser
+      this.hasBrowserInstance = true
+
+      return browsers.open(browser, options, automation, this._ctx)
     }
 
     return this.relaunchBrowser()
   }
 
   closeBrowser () {
+    this.hasBrowserInstance = false
+
     return browsers.close()
   }
 
-  async resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {
-    return this.projectBase?.resetBrowserTabsForNextTest(shouldKeepTabOpen)
+  async resetBrowserTabsForNextTest (shouldLaunchNewTab: boolean) {
+    return this.projectBase?.resetBrowserTabsForNextTest(shouldLaunchNewTab)
   }
 
   async resetBrowserState () {
