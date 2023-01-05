@@ -43,7 +43,6 @@ export interface Cfg extends ReceivedCypressOptions {
 }
 
 const localCwd = process.cwd()
-
 const debug = Debug('cypress:server:project')
 
 type StartWebsocketOptions = Pick<Cfg, 'socketIoCookie' | 'namespace' | 'screenshotsFolder' | 'report' | 'reporter' | 'reporterOptions' | 'projectRoot'>
