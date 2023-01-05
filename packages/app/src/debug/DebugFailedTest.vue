@@ -67,9 +67,9 @@ import { SolidStatusIcon } from '@cypress-design/vue-statusicon'
 import DebugArtifactLink from './DebugArtifactLink.vue'
 import GroupedDebugFailedTestVue from './GroupedDebugFailedTest.vue'
 import { computed } from 'vue'
-import type { TestResults } from './types'
 import type { StatsMetadata_GroupsFragment } from '../generated/graphql'
 import { getDebugArtifacts } from './utils/debugArtifacts'
+import type { TestResults } from './DebugSpec.vue'
 
 const props = defineProps<{
   failedTestsResult: TestResults[]

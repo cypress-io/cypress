@@ -1,5 +1,5 @@
 import DebugArtifactLink from './DebugArtifactLink.vue'
-import type { ArtifactType } from './types'
+import type { ArtifactType } from './utils/debugArtifacts'
 
 describe('<DebugArtifacts />', () => {
   const artifactMapping: {icon: ArtifactType, text: string, url: string}[] = [

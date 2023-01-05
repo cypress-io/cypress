@@ -1,7 +1,11 @@
-import type { ArtifactType, TestResults } from '../types'
+import type { CloudRunInstance } from '@packages/data-context/src/gen/graphcache-config.gen'
 
-export const getDebugArtifacts = (instance: TestResults['instance']) => {
-  const debugArtifacts: { icon: ArtifactType, text: string, url: string }[] = []
+export type ArtifactType = 'TERMINAL_LOG' | 'IMAGE_SCREENSHOT' | 'PLAY'
+
+export type DebugArtifact = { icon: ArtifactType, text: string, url: string }
+
+export const getDebugArtifacts = (instance: CloudRunInstance | null): DebugArtifact[] => {
+  const debugArtifacts: DebugArtifact[] = []
 
   if (instance?.hasStdout && instance.stdoutUrl) {
     debugArtifacts.push({ icon: 'TERMINAL_LOG', text: 'View Log', url: instance.stdoutUrl })

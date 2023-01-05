@@ -34,12 +34,12 @@
   </div>
 </template>
 <script lang="ts" setup>
-import type { TestResults } from './types'
 import StatsMetadata from './StatsMetadata.vue'
 import DebugArtifactLink from './DebugArtifactLink.vue'
 import { computed } from 'vue'
 import type { StatsMetadata_GroupsFragment } from '../generated/graphql'
 import { getDebugArtifacts } from './utils/debugArtifacts'
+import type { TestResults } from './DebugSpec.vue'
 
 const props = defineProps<{
   failedTests: TestResults[]

@@ -1,5 +1,5 @@
+import type { TestResults } from './DebugSpec.vue'
 import GroupedDebugFailedTest from './GroupedDebugFailedTest.vue'
-import type { TestResults } from './types'
 
 describe('<GroupedDebugFailedTest/>', () => {
   const testResult: TestResults[] = [

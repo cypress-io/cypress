@@ -1,5 +1,5 @@
 import DebugFailedTest from './DebugFailedTest.vue'
-import type { TestResults } from './types'
+import type { TestResults } from './DebugSpec.vue'
 
 const group1 = {
   os: {

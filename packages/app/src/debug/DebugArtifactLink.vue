@@ -32,7 +32,7 @@
 import { IconTechnologyTerminalLog, IconTechnologyImageScreenshot, IconActionPlaySmall } from '@cypress-design/vue-icon'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
-import type { ArtifactType } from './types'
+import type { ArtifactType } from './utils/debugArtifacts'
 
 const props = defineProps<{
   icon: ArtifactType

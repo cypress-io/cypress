@@ -143,7 +143,7 @@
 
 import { computed, unref } from 'vue'
 import { IconActionRefresh, IconDocumentText } from '@cypress-design/vue-icon'
-import type { SpecDataAggregate } from '@packages/data-context/src/gen/graphcache-config.gen'
+import type { SpecDataAggregate, CloudRunInstance } from '@packages/data-context/src/gen/graphcache-config.gen'
 import DebugFailedTest from './DebugFailedTest.vue'
 import StatsMetaData from './StatsMetadata.vue'
 import ResultCounts from '@packages/frontend-shared/src/components/ResultCounts.vue'
@@ -154,7 +154,24 @@ import { useI18n } from '@cy/i18n'
 import { useDurationFormat } from '../composables/useDurationFormat'
 import { posixify } from '../paths'
 import type { StatsMetadata_GroupsFragment, TestingTypeEnum } from '../generated/graphql'
-import type { Spec, TestResults } from './types'
+
+export interface Spec {
+  id: string
+  path: string
+  fileName: string
+  fileExtension: string
+  testsPassed: SpecDataAggregate | null
+  testsFailed: SpecDataAggregate | null
+  testsPending: SpecDataAggregate | null
+  specDuration: SpecDataAggregate | null
+  fullPath: string
+}
+
+export interface TestResults {
+  readonly id: string
+  readonly titleParts: ReadonlyArray<string>
+  readonly instance: CloudRunInstance | null
+}
 
 const { t } = useI18n()
 
