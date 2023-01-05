@@ -508,8 +508,13 @@ export const eventManager = {
       localBus.emit('script:error', err)
     })
 
-    Cypress.on('test:before:run:async', (_attr, test) => {
+    Cypress.on('test:before:run:async', async (_attr, test) => {
       studioRecorder.interceptTest(test)
+
+      // if the experimental flag is on and we are in chromium based browser, force a garbage collection
+      if (Cypress.isBrowser({ family: 'chromium' })) {
+        await Cypress.automation('maybe:collect:garbage', { test: { title: test.title, order: test.order, currentRetry: test.currentRetry() } })
+      }
     })
 
     Cypress.on('test:after:run', (test) => {

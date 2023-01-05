@@ -118,6 +118,9 @@ const DEFAULT_ARGS = [
   // write shared memory files into '/tmp' instead of '/dev/shm'
   // https://github.com/cypress-io/cypress/issues/5336
   '--disable-dev-shm-usage',
+
+  // enable precise memory info so performance.memory returns more accurate values
+  '--enable-precise-memory-info',
 ]
 
 /**

@@ -6,6 +6,7 @@ import type { Protocol } from 'devtools-protocol'
 import { cors, uri } from '@packages/network'
 import debugModule from 'debug'
 import { URL } from 'url'
+import Memory from './memory'
 
 import type { Automation } from '../automation'
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
@@ -163,7 +164,8 @@ const normalizeResourceType = (resourceType: string | undefined): ResourceType =
   return ffToStandardResourceTypeMap[resourceType] || 'other'
 }
 
-type SendDebuggerCommand = (message: string, data?: any) => Promise<any>
+export type SendDebuggerCommand = (message: string, data?: any) => Promise<any>
+
 type OnFn = (eventName: string, cb: Function) => void
 
 // the intersection of what's valid in CDP and what's valid in FFCDP
@@ -187,6 +189,7 @@ export class CdpAutomation {
   sendDebuggerCommandFn: SendDebuggerCommand
   automation: Automation
   experimentalSessionAndOrigin: boolean
+  memory: Memory | undefined
 
   constructor (options: CdpOptions) {
     this.sendDebuggerCommandFn = options.sendDebuggerCommandFn
@@ -203,6 +206,8 @@ export class CdpAutomation {
       maxResourceBufferSize: 0,
       maxPostDataSize: 0,
     })
+
+    this.memory = await Memory.create(this.sendDebuggerCommandFn)
   }
 
   private onNetworkRequestWillBeSent = (params: Protocol.Network.RequestWillBeSentEvent) => {
@@ -360,6 +365,8 @@ export class CdpAutomation {
         .then(({ data }) => {
           return `data:image/png;base64,${data}`
         })
+      case 'maybe:collect:garbage':
+        return this.memory?.checkMemoryAndCollectGarbage(data)
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }
