@@ -85,18 +85,39 @@ export class RelevantRunsDataSource {
 
       debug(`Found ${runs.length} runs for ${projectSlug} and ${shas.length} shas`)
 
-      let currentRun
+      const hasStoredCurrentRunThatIsStillValid = this._currentRun !== undefined && compactedRuns.some((run) => run.runNumber === this._currentRun)
 
-      if (this._currentRun !== undefined && compactedRuns.some((run) => run.runNumber === this._currentRun)) {
+      const firstNonRunningRun = chain(compactedRuns).filter((run) => run.status !== 'RUNNING').map((run) => run.runNumber).first().value()
+      const firstRunningRun = chain(compactedRuns).filter((run) => run.status === 'RUNNING').map((run) => run.runNumber).first().value()
+
+      let currentRun
+      let nextRun
+
+      if (hasStoredCurrentRunThatIsStillValid) {
+        // continue to use the cached current run
+        // the next run is the first running run if it exists
         currentRun = this._currentRun
-      } else {
-        currentRun = chain(compactedRuns).filter((run) => run.status !== 'RUNNING').map((run) => run.runNumber).first().value()
-        this._currentRun = currentRun
+        nextRun = firstRunningRun
+      } else if (firstNonRunningRun) {
+        // if a non running run is found
+        // use it has the current run
+        // the next run is the first running run if it exists
+        currentRun = firstNonRunningRun
+        nextRun = firstRunningRun
+      } else if (firstRunningRun) {
+        // if no non running run is found, and a first running run is found
+        // use it as the current run
+        // the next run will not be set
+        currentRun = firstRunningRun
+        nextRun = undefined
       }
+
+      //cache the current run
+      this._currentRun = currentRun
 
       return {
         current: currentRun,
-        next: chain(compactedRuns).filter((run) => run.status === 'RUNNING').map((run) => run.runNumber).first().value(),
+        next: nextRun,
       }
     }
 
