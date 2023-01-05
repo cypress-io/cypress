@@ -185,7 +185,9 @@ describe('<DebugFailedTest/>', () => {
 
   it('conditionally renders artifacts', () => {
     const render = (testResult: TestResults) => cy.mount(() =>
-      <DebugFailedTest failedTestsResult={[testResult]} groups={[group1]} expandable={false}/>)
+      (<div data-cy="test-group">
+        <DebugFailedTest failedTestsResult={[testResult]} groups={[group1]} expandable={false}/>
+      </div>))
 
     const testResult: TestResults = {
       id: '676df87874',

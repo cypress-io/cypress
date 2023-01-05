@@ -70,6 +70,9 @@ import { computed } from 'vue'
 import type { StatsMetadata_GroupsFragment } from '../generated/graphql'
 import { getDebugArtifacts } from './utils/debugArtifacts'
 import type { TestResults } from './DebugSpec.vue'
+import { useI18n } from '@cy/i18n'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   failedTestsResult: TestResults[]
@@ -133,7 +136,7 @@ const failedTestData = computed(() => {
     return { title: ele, type: 'MIDDLE' }
   }).flat()
 
-  const debugArtifacts = getDebugArtifacts(runInstance)
+  const debugArtifacts = getDebugArtifacts(runInstance, t)
 
   return {
     debugArtifacts,
