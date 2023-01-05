@@ -22,7 +22,7 @@ query RunAllSpecsData {
 gql`
 mutation RunAllSpecs ($specPath: String!, $runAllSpecs: [String!]!) {
   setRunAllSpecs(runAllSpecs: $runAllSpecs)
-  launchOpenProject(specPath: $specPath, shouldLaunchNewTab: true) {
+  launchOpenProject(specPath: $specPath) {
     id
   }
 }

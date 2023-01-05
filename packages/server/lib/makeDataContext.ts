@@ -155,12 +155,6 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return devServer
       },
       isListening,
-      resetBrowserTabsForNextTest (shouldLaunchNewTab: boolean) {
-        return openProject.resetBrowserTabsForNextTest(shouldLaunchNewTab)
-      },
-      resetServer () {
-        return openProject.getProject()?.server.reset()
-      },
     },
     electronApi: {
       openExternal (url: string) {

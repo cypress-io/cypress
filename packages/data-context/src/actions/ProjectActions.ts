@@ -44,8 +44,6 @@ export interface ProjectApiShape {
     emitter: EventEmitter
   }
   isListening: (url: string) => Promise<void>
-  resetBrowserTabsForNextTest(shouldLaunchNewTab: boolean): Promise<void>
-  resetServer(): void
 }
 
 export interface FindSpecs<T> {
@@ -259,12 +257,6 @@ export class ProjectActions {
       absolute: '',
       relative: '',
       specType: testingType === 'e2e' ? 'integration' : 'component',
-    }
-
-    // Used for run-all-specs feature
-    if (options?.shouldLaunchNewTab) {
-      await this.api.resetBrowserTabsForNextTest(true)
-      this.api.resetServer()
     }
 
     await this.api.launchProject(browser, activeSpec ?? emptySpec, options)

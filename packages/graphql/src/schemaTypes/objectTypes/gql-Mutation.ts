@@ -308,11 +308,10 @@ export const mutation = mutationType({
       type: CurrentProject,
       description: 'Launches project from open_project global singleton',
       args: {
-        shouldLaunchNewTab: booleanArg(),
         specPath: stringArg(),
       },
       resolve: async (_, args, ctx) => {
-        await ctx.actions.project.launchProject(ctx.coreData.currentTestingType, { shouldLaunchNewTab: args.shouldLaunchNewTab ?? false }, args.specPath)
+        await ctx.actions.project.launchProject(ctx.coreData.currentTestingType, { }, args.specPath)
 
         return ctx.lifecycleManager
       },
