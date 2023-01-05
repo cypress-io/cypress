@@ -248,6 +248,7 @@ export const CurrentProject = objectType({
       },
     })
 
+    //TODO: Finish implementing resolver for this field to supply runner with tests names to use for filtering
     t.list.nonNull.string('testsForReviewBySpec', {
       description: '',
       args: {

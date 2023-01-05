@@ -104,9 +104,12 @@ export class RelevantRunsDataSource {
 
       if (hasStoredCurrentRunThatIsStillValid) {
         // continue to use the cached current run
-        // the next run is the first running run if it exists
+        // the next run is the first running run if it exists or the firstNonRunningRun
         currentRun = this._currentRun
         nextRun = firstRunningRun
+        if (!nextRun && firstNonRunningRun !== currentRun) {
+          nextRun = firstNonRunningRun
+        }
       } else if (firstNonRunningRun) {
         // if a non running run is found
         // use it has the current run
