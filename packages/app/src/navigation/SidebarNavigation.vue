@@ -136,7 +136,7 @@ fragment SidebarNavigation on Query {
       __typename
       ... on CloudProject {
         id
-        runByNumber(runNumber: $runNumber) {
+        runByNumber(runNumber: $runNumber) @include(if: $hasCurrentRun){
           id
           status
           testsForReview {
@@ -184,16 +184,22 @@ const debugBadge = computed<Badge | undefined>(() => {
     }
 
     if (testsForReview?.length) {
+      const valueToDisplay = testsForReview.length < 9
+        ? String(testsForReview.length)
+        : '9+'
+
+      if (status === 'ERRORED') {
+        return { value: valueToDisplay, status: 'error', label: t('sidebar.debug.errored') }
+      }
+
       return {
-        value: testsForReview.length < 9
-          ? String(testsForReview.length)
-          : '9+',
+        value: valueToDisplay,
         status: 'failed',
         label: t('sidebar.debug.failed', testsForReview.length),
       }
     }
 
-    return { value: '0', status: 'error', label: t('sidebar.debug.errored') }
+    return undefined
   }
 
   return showNewBadge ? newBadge : undefined
