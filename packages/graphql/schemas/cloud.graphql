@@ -529,19 +529,24 @@ type CloudRun implements Node {
   id: ID!
 
   """
-  Whether this run is hidden by usage limits
+  Whether this run is hidden to the user due to data limits. Specific reasons are provided in the reasonsRunIsHidden field.
   """
-  isHiddenByUsageLimits: Boolean!
+  isHidden: Boolean!
 
   """
-  What to do when the run is over the limit
+  Action user can perform when the run is over a usage limit
   """
   overLimitActionType: OverLimitActionTypeEnum!
 
   """
-  A link to upgrade or contact an admin
+  A link a user can navigate to when the run is over a usage limit
   """
   overLimitActionUrl: String!
+
+  """
+  Reasons why this run is hidden. List will be empty if the run is not hidden.
+  """
+  reasonsRunIsHidden: [CloudRunHidingReason]!
   runNumber: Int
 
   """
@@ -723,6 +728,11 @@ enum CloudRunGroupStatusEnum {
   TIMEDOUT
   UNCLAIMED
 }
+
+"""
+The reason a run was hidden, along with any details
+"""
+union CloudRunHidingReason = DataRetentionLimitExceeded | UsageLimitExceeded
 
 """
 An instance of executing a single test within a run
@@ -1079,6 +1089,16 @@ type CloudUser implements Node {
 }
 
 """
+A run was hidden because it was over the data retention limit
+"""
+type DataRetentionLimitExceeded {
+  """
+  The number of days of data retention
+  """
+  dataRetentionDays: Int
+}
+
+"""
 A date string, such as 2007-12-03, compliant with the `full-date` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
 """
 scalar Date
@@ -1271,4 +1291,14 @@ type SpecDataAggregate {
   Minimum value in the groups
   """
   min: Int
+}
+
+"""
+A run was hidden because it was over the usage limit
+"""
+type UsageLimitExceeded {
+  """
+  The number of tests allowed per month
+  """
+  monthlyTests: Int
 }

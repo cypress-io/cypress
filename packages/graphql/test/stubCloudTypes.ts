@@ -195,7 +195,8 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
       id: 'ci_id',
     },
     groups: [],
-    isHiddenByUsageLimits: false,
+    isHidden: false,
+    reasonsRunIsHidden: [],
     overLimitActionType: 'UPGRADE',
     overLimitActionUrl: '',
     specs: [],
@@ -370,7 +371,8 @@ export const CloudRunStubs = {
   noTests: createCloudRun({ status: 'NOTESTS' }),
   timedOutWithCi: createCloudRun({ status: 'TIMEDOUT', ci: { id: 'abc123', formattedProvider: 'Circle CI', ciBuildNumberFormatted: '1234', url: 'https://circleci.com', __typename: 'CloudCiBuildInfo' }, specs: skippedSpecs }),
   timedOutWithoutCi: createCloudRun({ status: 'TIMEDOUT', specs: skippedSpecs }),
-  overLimit: createCloudRun({ status: 'OVERLIMIT', overLimitActionType: 'CONTACT_ADMIN', overLimitActionUrl: 'http://localhost:3000' }),
+  overLimit: createCloudRun({ status: 'OVERLIMIT', overLimitActionType: 'CONTACT_ADMIN', overLimitActionUrl: 'http://localhost:3000', isHidden: true, reasonsRunIsHidden: [{ __typename: 'UsageLimitExceeded', monthlyTests: 100 }] }),
+  overLimitRetention: createCloudRun({ status: 'OVERLIMIT', overLimitActionType: 'CONTACT_ADMIN', overLimitActionUrl: 'http://localhost:3000', isHidden: true, reasonsRunIsHidden: [{ __typename: 'DataRetentionLimitExceeded', dataRetentionDays: 10 }] }),
   cancelled: createCloudRun({ status: 'CANCELLED', cancelledAt: '2019-01-25T02:00:00.000Z', specs: skippedSpecs, cancelledBy: { id: '123', fullName: 'Test Tester', email: 'adams@cypress.io', __typename: 'CloudUser', userIsViewer: true } }),
 } as Record<string, Required<CloudRun>>
 
