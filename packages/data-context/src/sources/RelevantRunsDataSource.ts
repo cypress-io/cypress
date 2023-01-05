@@ -86,12 +86,12 @@ export class RelevantRunsDataSource {
 
       const compactedRuns = compact(runs)
 
-      debug(`Found ${runs.length} runs for ${projectSlug} and ${shas.length} shas`)
+      debug(`Found ${compactedRuns.length} runs for ${projectSlug} and ${shas.length} shas`)
 
       const hasStoredCurrentRunThatIsStillValid = this._currentRun !== undefined && compactedRuns.some((run) => run.runNumber === this._currentRun)
 
       const firstNonRunningRun = chain(compactedRuns).filter((run) => run.status !== 'RUNNING').map((run) => run.runNumber).first().value()
-      const firstRunningRun = chain(compactedRuns).filter((run) => run.status === 'RUNNING').map((run) => run.runNumber).first().value()
+      const firstRunningRun = compactedRuns[0]?.status === 'RUNNING' ? compactedRuns[0].runNumber : undefined
 
       let currentRun
       let nextRun
