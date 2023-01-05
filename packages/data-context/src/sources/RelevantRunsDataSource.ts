@@ -44,6 +44,12 @@ export class RelevantRunsDataSource {
 
   constructor (private ctx: DataContext) {}
 
+  /**
+   * Pulls runs from the current Cypress Cloud account and determines which runs are considered:
+   * - "current" the most recent completed run, or if not found, the most recent running run
+   * - "next" the most recent running run if a completed run is found
+   * @param shas list of Git commit shas to query the Cloud with for matching runs
+   */
   async getRelevantRuns (shas: string[]): Promise<RelevantRunReturn> {
     if (shas.length === 0) {
       return EMPTY_RETURN
@@ -127,6 +133,9 @@ export class RelevantRunsDataSource {
     return EMPTY_RETURN
   }
 
+  /**
+   * Clear the cached current run to allow the data source to pick the next completed run as the current
+   */
   moveToNext () {
     debug('Moving to next relevant run')
     this._currentRun = undefined
