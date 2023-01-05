@@ -24,9 +24,11 @@
       :ci="ci"
     />
     <DebugOverLimit
-      v-else-if="status === 'OVERLIMIT' || isHiddenByUsageLimits"
+      v-else-if="isHidden"
+      :over-limit-reasons="reasonsRunIsHidden"
       :over-limit-action-type="overLimitActionType"
       :over-limit-action-url="overLimitActionUrl"
+      :run-age-days="runAgeDays"
     />
   </div>
 </template>
@@ -39,7 +41,7 @@ import DebugPassed from './DebugPassed.vue'
 import DebugErrored from './DebugErrored.vue'
 import DebugNoTests from './DebugNoTests.vue'
 import DebugTimedout from './DebugTimedout.vue'
-import DebugOverLimit from './DebugOverLimit.vue'
+import DebugOverLimit, { CloudRunHidingReason } from './DebugOverLimit.vue'
 
 gql`
 fragment DebugPageDetails_cloudCiBuildInfo on CloudCiBuildInfo {
@@ -59,12 +61,14 @@ const props = defineProps<{
       email?: string | null
     } | null
   }
-  isHiddenByUsageLimits: boolean
+  isHidden: boolean
+  reasonsRunIsHidden: (CloudRunHidingReason | null)[]
   overLimitActionType: OverLimitActionTypeEnum
   overLimitActionUrl: string
   specs: readonly DebugSpecListSpecFragment[]
   ci?: DebugPageDetails_CloudCiBuildInfoFragment
   errors: readonly string[]
+  runAgeDays: number
 }>()
 
 const totalSkippedSpecs = computed(() => {

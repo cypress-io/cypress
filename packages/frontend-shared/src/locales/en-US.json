@@ -651,11 +651,15 @@
       "switchTestingTypeAction": "Switch to {testingType} testing"
     },
     "viewRun": "View run",
-    "overPlanLimit": "Over plan limit",
-    "reachedMonthlyUsage": "You've reached the monthly usage limit for your billing plan.",
-    "upgradeYourPlan": "Upgrade your plan to continue recording runs.",
-    "upgradePlan": "Upgrade plan",
-    "contactAdmin": "Contact admin",
+    "overLimit": {
+      "usageExceededTitle": "You've reached your monthly test result limit",
+      "usageExceededUserMessage": "Your Free Cypress Cloud plan includes {numberTests} monthly recorded test results. Contact your Cypress Cloud admin to upgrade your plan and view more test results.",
+      "usageExceededAdminMessage": "Your Free Cypress Cloud plan includes {numberTests} monthly recorded test results. Upgrade your plan now to view more test results.",
+      "retentionExceededTitle": "Beyond data retention",
+      "retentionExceededMessage": "Your data retention limit is {limitDays} days and these tests ran {runAgeDays} days ago. Upgrade your plan to increase your data retention limit.",
+      "upgradePlan": "Upgrade plan",
+      "contactAdmin": "Contact admin"
+    },
     "wellDone": "Well Done!",
     "allYourTestsPassed": "All your tests passed.",
     "incomplete": "Incomplete",
