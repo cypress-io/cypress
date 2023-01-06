@@ -601,8 +601,12 @@ export const AllCypressErrors = {
 
         - You wrote an endless loop and you must fix your own code
         - You are running Docker (there is an easy fix for this: see link below)
-        - You are running lots of tests on a memory intense application
-        - You are running in a memory starved VM environment
+        - You are running lots of tests on a memory intense application.
+            - Try enabling ${fmt.highlight('experimentalMemoryManagement')} in your config file.
+            - Try lowering ${fmt.highlight('numTestsKeptInMemory')} in your config file.
+        - You are running in a memory starved VM environment.
+            - Try enabling ${fmt.highlight('experimentalMemoryManagement')} in your config file.
+            - Try lowering ${fmt.highlight('numTestsKeptInMemory')} in your config file.
         - There are problems with your GPU / GPU drivers
         - There are browser bugs in Chromium
 

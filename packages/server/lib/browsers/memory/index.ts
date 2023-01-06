@@ -2,6 +2,7 @@ import debugModule from 'debug'
 import si from 'systeminformation'
 import os from 'os'
 import fs from 'fs-extra'
+import { performance } from 'perf_hooks'
 import { groupCyProcesses } from '../../util/process_profiler'
 import pid from 'pidusage'
 
@@ -74,8 +75,10 @@ const measure = async ({ name, log }: { name: string, log?: {}}, fn: () => Promi
   const measurement = performance.measure(name, `${name}-start`, `${name}-end`)
 
   if (log) {
+    // @ts-ignore
     log[`${name}Duration`] = measurement.duration
   } else {
+    // @ts-ignore
     debugVerbose('%s took %dms', name, measurement.duration)
   }
 
