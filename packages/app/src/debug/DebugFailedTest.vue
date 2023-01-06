@@ -32,7 +32,9 @@
       >
         <template v-if="type === 'ELLIPSIS'">
           <Tooltip>
-            <span>{{ text }}</span>
+            <!-- button gives us free keyboard focus activation of the tooltip -->
+            <button>{{ text }}</button>
+            <span class="sr-only">{{ middlePartText }}</span>
             <template #popper>
               <span data-cy="tooltip-content">{{ middlePartText }}</span>
             </template>
