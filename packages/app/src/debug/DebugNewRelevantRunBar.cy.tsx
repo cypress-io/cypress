@@ -50,13 +50,6 @@ describe('<DebugNewRelevantRunBar />', () => {
     })
 
     cy.stubMutationResolver(DebugNewRelevantRunBar_MoveToNextDocument, (defineResult) => {
-      defineResult({
-        moveToNextRelevantRun: {
-          current: -1,
-          next: -1,
-        },
-      })
-
       done()
     })
 

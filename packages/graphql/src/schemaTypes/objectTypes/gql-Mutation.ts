@@ -766,13 +766,14 @@ export const mutation = mutationType({
       },
     })
 
-    t.field('moveToNextRelevantRun', {
-      type: RelevantRun,
+    t.boolean('moveToNextRelevantRun', {
       description: 'Allow the relevant run for debugging marked as next to be considered the current relevant run',
       resolve: async (source, args, ctx) => {
         ctx.relevantRuns.moveToNext()
 
-        return ctx.relevantRuns.getRelevantRuns(ctx.git?.currentHashes || [])
+        ctx.emitter.relevantRunChange(ctx.git?.currentHashes || [])
+
+        return true
       },
     })
   },

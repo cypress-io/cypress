@@ -56,10 +56,7 @@ fragment DebugNewRelevantRunBar on CloudRun {
 
 gql`
 mutation DebugNewRelevantRunBar_MoveToNext {
-  moveToNextRelevantRun {
-    current
-    next
-  }
+  moveToNextRelevantRun
 }
 `
 
