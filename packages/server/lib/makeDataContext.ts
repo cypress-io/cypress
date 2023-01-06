@@ -7,7 +7,6 @@ import { isMainWindowFocused, focusMainWindow } from './gui/windows'
 import type {
   AllModeOptions,
   AllowedState,
-  OpenProjectLaunchOpts,
   FoundBrowser,
   InitializeProjectOptions,
   OpenProjectLaunchOptions,
@@ -76,7 +75,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
     },
     projectApi: {
-      async launchProject (browser: FoundBrowser, spec: Cypress.Spec, options: OpenProjectLaunchOpts) {
+      async launchProject (browser: FoundBrowser, spec: Cypress.Spec) {
         await openProject.launch({ ...browser }, spec, options)
       },
       openProjectCreate (args: InitializeProjectOptions, options: OpenProjectLaunchOptions) {
@@ -155,6 +154,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return devServer
       },
       isListening,
+      resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {
+        return openProject.resetBrowserTabsForNextTest(shouldKeepTabOpen)
+      },
     },
     electronApi: {
       openExternal (url: string) {

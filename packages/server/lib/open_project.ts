@@ -21,7 +21,6 @@ const debug = Debug('cypress:server:open_project')
 
 export class OpenProject {
   private projectBase: ProjectBase<any> | null = null
-  hasBrowserInstance: boolean = false
 
   relaunchBrowser: (() => Promise<BrowserInstance | null>) = () => {
     throw new Error('bad relaunch')
@@ -69,7 +68,7 @@ export class OpenProject {
 
     // reset to reset server and socket state because
     // of potential domain changes, request buffers, etc
-    this.projectBase!.reset()
+    await this.projectBase!.reset()
 
     const url = process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF ? undefined : getSpecUrl({
       spec,
@@ -172,13 +171,15 @@ export class OpenProject {
         return await browsers.connectToExisting(browser, options, automation)
       }
 
-      await this.resetBrowserTabsForNextTest(this.hasBrowserInstance)
-
       // start spec in same browser instance in a new tab
-      if (this.hasBrowserInstance) {
+      if (this.hasBrowserInstance()) {
         debug('connecting to new browser tab: %o, spec: %s', browser, spec.relative)
 
         const onInitializeNewBrowserTab = async () => {
+          if (options.isTextTerminal) {
+            await this.resetBrowserTabsForNextTest(this.hasBrowserInstance())
+          }
+
           await this.resetBrowserState()
         }
 
@@ -191,7 +192,6 @@ export class OpenProject {
       debug('launching browser: %o, spec: %s', browser, spec.relative)
 
       options.relaunchBrowser = this.relaunchBrowser
-      this.hasBrowserInstance = true
 
       return browsers.open(browser, options, automation, this._ctx)
     }
@@ -200,9 +200,11 @@ export class OpenProject {
   }
 
   closeBrowser () {
-    this.hasBrowserInstance = false
-
     return browsers.close()
+  }
+
+  hasBrowserInstance () {
+    return !!browsers.getBrowserInstance()
   }
 
   async resetBrowserTabsForNextTest (shouldLaunchNewTab: boolean) {

@@ -49,11 +49,7 @@ export class ServerCt extends ServerBase<SocketCt> {
     })
   }
 
-  reset (shouldDestroyAut) {
-    if (shouldDestroyAut) {
-      this.socket.destroyAut()
-    }
-
-    return super.reset()
+  destroyAut () {
+    return this.socket.destroyAut()
   }
 }

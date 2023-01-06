@@ -473,7 +473,7 @@ async function waitForBrowserToConnect (options: BrowserConnectOpts) {
     return data
   }
 
-  if (openProject.hasBrowserInstance && project.usingExperimentalSingleTabMode) {
+  if (openProject.hasBrowserInstance() && project.usingExperimentalSingleTabMode) {
     debug('connecting to same browser tab: %o, spec: %s', options.browser, spec.relative)
     await openProject.resetBrowserState()
 
@@ -636,6 +636,10 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
   if (!quiet && !skippedSpec) {
     printResults.displayResults(results, estimated)
+  }
+
+  if (project.usingExperimentalSingleTabMode) {
+    await project.server.destroyAut()
   }
 
   if (videoExists && !skippedSpec && !videoCaptureFailed) {

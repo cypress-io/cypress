@@ -253,7 +253,7 @@ export class ProjectBase<TServer extends Server> extends EE {
     }
 
     if (this._server) {
-      this._server.reset(this.usingExperimentalSingleTabMode)
+      this._server.reset()
     }
 
     return

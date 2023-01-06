@@ -1,5 +1,5 @@
 import type { MutationSetProjectPreferencesInGlobalCacheArgs } from '@packages/graphql/src/gen/nxs.gen'
-import { InitializeProjectOptions, FoundBrowser, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig, AllowedState, SpecWithRelativeRoot, OpenProjectLaunchOpts, RUN_ALL_SPECS, RUN_ALL_SPECS_KEY } from '@packages/types'
+import { InitializeProjectOptions, FoundBrowser, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig, AllowedState, SpecWithRelativeRoot, RUN_ALL_SPECS, RUN_ALL_SPECS_KEY } from '@packages/types'
 import type { EventEmitter } from 'events'
 import execa from 'execa'
 import path from 'path'
@@ -20,7 +20,7 @@ export interface ProjectApiShape {
    *   order for CT to startup
    */
   openProjectCreate(args: InitializeProjectOptions, options: OpenProjectLaunchOptions): Promise<unknown>
-  launchProject(browser: FoundBrowser, spec: Cypress.Spec, options?: Partial<OpenProjectLaunchOpts>): Promise<void>
+  launchProject(browser: FoundBrowser, spec: Cypress.Spec): Promise<void>
   insertProjectToCache(projectRoot: string): Promise<void>
   removeProjectFromCache(projectRoot: string): Promise<void>
   getProjectRootsFromCache(): Promise<ProjectShape[]>
@@ -44,6 +44,7 @@ export interface ProjectApiShape {
     emitter: EventEmitter
   }
   isListening: (url: string) => Promise<void>
+  resetBrowserTabsForNextTest(shouldLaunchNewTab: boolean): Promise<void>
 }
 
 export interface FindSpecs<T> {
@@ -226,7 +227,7 @@ export class ProjectActions {
     }
   }
 
-  async launchProject (testingType: Cypress.TestingType | null, options?: Partial<OpenProjectLaunchOpts>, specPath?: string | null) {
+  async launchProject (testingType: Cypress.TestingType | null, specPath?: string | null) {
     if (!this.ctx.currentProject) {
       return null
     }
@@ -259,7 +260,11 @@ export class ProjectActions {
       specType: testingType === 'e2e' ? 'integration' : 'component',
     }
 
-    await this.api.launchProject(browser, activeSpec ?? emptySpec, options)
+    if (specPath === RUN_ALL_SPECS_KEY) {
+      await this.api.resetBrowserTabsForNextTest(true) // launch run-all mode in a new tab
+    }
+
+    await this.api.launchProject(browser, activeSpec ?? emptySpec)
 
     return
   }
