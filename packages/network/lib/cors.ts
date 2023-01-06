@@ -228,9 +228,7 @@ export const urlMatchesPolicyBasedOnDomain = (frameUrl: string, topUrl: string, 
   skipDomainInjectionForDomains: string[] | null
 }): boolean => {
   return urlMatchesPolicy({
-    policy: policyForDomain(frameUrl, {
-      skipDomainInjectionForDomains: opts?.skipDomainInjectionForDomains,
-    }),
+    policy: policyForDomain(frameUrl, opts),
     frameUrl,
     topUrl,
   })
@@ -248,9 +246,7 @@ export const urlMatchesPolicyBasedOnDomain = (frameUrl: string, topUrl: string, 
 export const urlMatchesPolicyBasedOnDomainProps = (frameUrl: string, topProps: ParsedHostWithProtocolAndHost, opts?: {
   skipDomainInjectionForDomains: string[]
 }): boolean => {
-  const policy = policyForDomain(frameUrl, {
-    skipDomainInjectionForDomains: opts?.skipDomainInjectionForDomains,
-  })
+  const policy = policyForDomain(frameUrl, opts)
 
   return urlMatchesPolicyProps({
     policy,
