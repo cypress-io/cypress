@@ -165,7 +165,7 @@ describe('<DebugFailedTest/>', () => {
     cy.percySnapshot()
   })
 
-  it('tests responsvie UI', { viewportWidth: 700 }, () => {
+  it('tests responsive UI', { viewportWidth: 700 }, () => {
     const testResult: TestResults = {
       id: '676df87874',
       titleParts: ['Test content', 'Test content 2', 'Test content 3', 'Test content 4', 'onMount() should be called once', 'hook() should be called twice and then'],
@@ -179,6 +179,9 @@ describe('<DebugFailedTest/>', () => {
     ))
 
     assertRowContents(testResult)
+
+    cy.contains('...').realHover()
+    cy.contains('[data-cy=tooltip-content]', 'Test content 2 > Test content 3 > Test content 4').should('be.visible')
 
     cy.percySnapshot()
   })
