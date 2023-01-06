@@ -1625,7 +1625,7 @@ type Mutation {
   """
   Allow the relevant run for debugging marked as next to be considered the current relevant run
   """
-  moveToNextRelevantRun: RelevantRun
+  moveToNextRelevantRun: Boolean
 
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean
