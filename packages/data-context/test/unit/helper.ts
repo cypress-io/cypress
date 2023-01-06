@@ -53,7 +53,7 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
       resetAuthState: sinon.stub(),
     } as unknown as AuthApiShape,
     projectApi: {
-      closeActiveProject: sinon.stub(),
+      closeActiveProject: sinon.stub().resolves(),
       insertProjectToCache: sinon.stub().resolves(),
       getProjectRootsFromCache: sinon.stub().resolves([]),
     } as unknown as ProjectApiShape,

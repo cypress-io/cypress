@@ -12,8 +12,8 @@ const debug = Debug('cypress:server:browsers:webkit')
 
 let wkAutomation: WebKitAutomation | undefined
 
-export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
-  if (!wkAutomation) throw new Error('connectToNewSpec called without wkAutomation')
+export async function connectToNewTab (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
+  if (!wkAutomation) throw new Error('connectToNewTab called without wkAutomation')
 
   automation.use(wkAutomation)
   wkAutomation.automation = automation

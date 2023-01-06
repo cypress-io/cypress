@@ -475,8 +475,8 @@ export = {
    */
   clearInstanceState () {},
 
-  async connectToNewSpec (browser: Browser, options: ElectronOpts, automation: Automation) {
-    if (!options.url) throw new Error('Missing url in connectToNewSpec')
+  async connectToNewTab (browser: Browser, options: ElectronOpts, automation: Automation) {
+    if (!options.url) throw new Error('Missing url in connectToNewTab')
 
     await this.open(browser, options.url, options, automation)
   },

@@ -361,8 +361,8 @@ export class WebKitAutomation {
         debug('stubbed reset:browser:state')
 
         return
-      case 'reset:browser:tabs:for:next:test':
-        if (data.shouldKeepTabOpen) return await this.reset({})
+      case 'reset:browser:tabs:for:next:spec':
+        if (data.shouldLaunchNewTab) return await this.reset({})
 
         return await this.context.browser()?.close()
       default:

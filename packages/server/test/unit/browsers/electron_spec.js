@@ -79,10 +79,10 @@ describe('lib/browsers/electron', () => {
     }
   })
 
-  context('.connectToNewSpec', () => {
+  context('.connectToNewTab', () => {
     it('calls open with the browser, url, options, and automation', async function () {
       sinon.stub(electron, 'open').withArgs({ isHeaded: true }, 'http://www.example.com', { url: 'http://www.example.com' }, this.automation)
-      await electron.connectToNewSpec({ isHeaded: true }, { url: 'http://www.example.com' }, this.automation)
+      await electron.connectToNewTab({ isHeaded: true }, { url: 'http://www.example.com' }, this.automation)
       expect(electron.open).to.be.called
     })
   })
@@ -324,7 +324,7 @@ describe('lib/browsers/electron', () => {
         expect(this.automation.use).to.be.called
         expect(this.automation.use.lastCall.args[0].onRequest).to.be.a('function')
 
-        this.automation.use.lastCall.args[0].onRequest('reset:browser:tabs:for:next:test', { shouldKeepTabOpen: true })
+        this.automation.use.lastCall.args[0].onRequest('reset:browser:tabs:for:next:spec', { shouldLaunchNewTab: true })
 
         expect(this.win.destroy).to.be.called
       })

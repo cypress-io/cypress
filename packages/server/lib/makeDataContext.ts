@@ -115,7 +115,7 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       removeProjectFromCache (path: string) {
         return cache.removeProject(path)
       },
-      closeActiveProject () {
+      async closeActiveProject () {
         return openProject.closeActiveProject()
       },
       getCurrentBrowser () {
@@ -155,8 +155,8 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return devServer
       },
       isListening,
-      resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {
-        return openProject.resetBrowserTabsForNextTest(shouldKeepTabOpen)
+      resetBrowserTabsForNextSpec (shouldLaunchNewTab: boolean) {
+        return openProject.resetBrowserTabsForNextSpec(shouldLaunchNewTab)
       },
       resetServer () {
         return openProject.getProject()?.server.reset()

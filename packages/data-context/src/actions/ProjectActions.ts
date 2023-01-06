@@ -29,7 +29,7 @@ export interface ProjectApiShape {
   clearLatestProjectsCache(): Promise<unknown>
   clearProjectPreferences(projectTitle: string): Promise<unknown>
   clearAllProjectPreferences(): Promise<unknown>
-  closeActiveProject(shouldCloseBrowser?: boolean): Promise<unknown>
+  closeActiveProject(shouldCloseBrowser?: boolean): Promise<void>
   getConfig(): ReceivedCypressOptions | undefined
   getRemoteStates(): { reset(): void, getPrimary(): Cypress.RemoteState } | undefined
   getCurrentBrowser: () => Cypress.Browser | undefined
@@ -44,7 +44,7 @@ export interface ProjectApiShape {
     emitter: EventEmitter
   }
   isListening: (url: string) => Promise<void>
-  resetBrowserTabsForNextTest(shouldKeepTabOpen: boolean): Promise<void>
+  resetBrowserTabsForNextTest(shouldLaunchNewTab: boolean): Promise<void>
   resetServer(): void
 }
 

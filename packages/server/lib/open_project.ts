@@ -159,22 +159,20 @@ export class OpenProject {
     options.onError = this.projectBase.options.onError
 
     this.relaunchBrowser = async () => {
-      debug(
-        'launching browser: %o, spec: %s',
-        browser,
-        spec.relative,
-      )
-
       // clear cookies and all session data before each spec
       cookieJar.removeAllCookies()
       session.clearSessions()
 
       // TODO: Stub this so we can detect it being called
       if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
+        debug('CYPRESS_INTERNAL_E2E_TESTING_SELF set...connecting to existing browser instance: %o, spec: %s', browser, spec.relative)
+
         return await browsers.connectToExisting(browser, options, automation)
       }
 
-      if (options.shouldLaunchNewTab) {
+      if (this.hasBrowserInstance()) {
+        debug('connecting to new browser tab: %o, spec: %s', browser, spec.relative)
+
         const onInitializeNewBrowserTab = async () => {
           await this.resetBrowserState()
         }
@@ -182,8 +180,10 @@ export class OpenProject {
         // If we do not launch the browser,
         // we tell it that we are ready
         // to receive the next spec
-        return await browsers.connectToNewSpec(browser, { onInitializeNewBrowserTab, ...options }, automation)
+        return await browsers.connectToNewTab(browser, { onInitializeNewBrowserTab, ...options }, automation)
       }
+
+      debug('launching browser: %o, spec: %s', browser, spec.relative)
 
       options.relaunchBrowser = this.relaunchBrowser
 
@@ -197,8 +197,12 @@ export class OpenProject {
     return browsers.close()
   }
 
-  async resetBrowserTabsForNextTest (shouldKeepTabOpen: boolean) {
-    return this.projectBase?.resetBrowserTabsForNextTest(shouldKeepTabOpen)
+  hasBrowserInstance () {
+    return !!browsers.getBrowserInstance()
+  }
+
+  async resetBrowserTabsForNextSpec (shouldLaunchNewTab: boolean) {
+    return this.projectBase?.resetBrowserTabsForNextSpec(shouldLaunchNewTab)
   }
 
   async resetBrowserState () {
@@ -240,7 +244,7 @@ export class OpenProject {
   // if you are switching from CT to E2E or vice versa.
   // used by launchpad
   async closeActiveProject () {
-    await this.closeOpenProjectAndBrowsers()
+    return this.closeOpenProjectAndBrowsers()
   }
 
   _ctx?: DataContext

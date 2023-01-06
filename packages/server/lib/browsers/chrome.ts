@@ -442,7 +442,7 @@ const _handlePausedRequests = async (client) => {
   })
 }
 
-const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
+const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldLaunchNewTab: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
   const cdpAutomation = await CdpAutomation.create(client.send, client.on, resetBrowserTargets, automation)
 
   automation.use(cdpAutomation)
@@ -573,18 +573,18 @@ export = {
     browserCriClient = undefined
   },
 
-  async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
+  async connectToNewTab (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
     debug('connecting to new chrome tab in existing instance with url and debugging port', { url: options.url })
 
     const browserCriClient = this._getBrowserCriClient()
 
-    if (!browserCriClient) throw new Error('Missing browserCriClient in connectToNewSpec')
+    if (!browserCriClient) throw new Error('Missing browserCriClient in connectToNewTab')
 
     const pageCriClient = browserCriClient.currentlyAttachedTarget
 
-    if (!pageCriClient) throw new Error('Missing pageCriClient in connectToNewSpec')
+    if (!pageCriClient) throw new Error('Missing pageCriClient in connectToNewTab')
 
-    if (!options.url) throw new Error('Missing url in connectToNewSpec')
+    if (!options.url) throw new Error('Missing url in connectToNewTab')
 
     await this.attachListeners(options.url, pageCriClient, automation, options)
   },

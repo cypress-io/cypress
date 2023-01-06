@@ -382,8 +382,8 @@ export function clearInstanceState () {
   }
 }
 
-export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
-  await firefoxUtil.connectToNewSpec(options, automation, browserCriClient)
+export async function connectToNewTab (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
+  await firefoxUtil.connectToNewTab(options, automation, browserCriClient)
 }
 
 export function connectToExisting () {

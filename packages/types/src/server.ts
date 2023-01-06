@@ -5,7 +5,6 @@ import type { RunModeVideoApi } from './video'
 
 export type OpenProjectLaunchOpts = {
   projectRoot: string
-  shouldLaunchNewTab: boolean
   automationMiddleware: AutomationMiddleware
   videoApi?: RunModeVideoApi
   onWarning: (err: Error) => void

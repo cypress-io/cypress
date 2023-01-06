@@ -116,9 +116,9 @@ describe('lib/browsers/index', () => {
     })
   })
 
-  context('.connectToNewSpec', () => {
+  context('.connectToNewTab', () => {
     it(`throws an error if browser family doesn't exist`, () => {
-      return browsers.connectToNewSpec({
+      return browsers.connectToNewTab({
         name: 'foo-bad-bang',
         family: 'foo-bad',
       }, {

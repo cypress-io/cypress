@@ -536,7 +536,7 @@ describe('lib/browsers/chrome', () => {
     })
   })
 
-  context('#connectToNewSpec', () => {
+  context('#connectToNewTab', () => {
     it('launches a new tab, connects a cri client to it, starts video, navigates to the spec url, and handles downloads', async function () {
       const pageCriClient = {
         send: sinon.stub().resolves(),
@@ -572,7 +572,7 @@ describe('lib/browsers/chrome', () => {
       sinon.stub(chrome, '_navigateUsingCRI').withArgs(pageCriClient, options.url, 354).resolves()
       sinon.stub(chrome, '_handleDownloads').withArgs(pageCriClient, options.downloadFolder, automation).resolves()
 
-      await chrome.connectToNewSpec({ majorVersion: 354 }, options, automation, launchedBrowser)
+      await chrome.connectToNewTab({ majorVersion: 354 }, options, automation, launchedBrowser)
 
       expect(automation.use).to.be.called
       expect(chrome._getBrowserCriClient).to.be.called

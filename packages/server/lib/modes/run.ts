@@ -345,14 +345,13 @@ async function postProcessRecording (options: { quiet: boolean, videoCompression
   return continueProcessing(onProgress)
 }
 
-function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot, setScreenshotMetadata: SetScreenshotMetadata, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, onError: (err: Error) => void, videoRecording?: VideoRecording }) {
-  const { browser, spec, setScreenshotMetadata, screenshots, projectRoot, shouldLaunchNewTab, onError } = options
+function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot, screenshots: ScreenshotMetadata[], projectRoot: string, onError: (err: Error) => void, videoRecording?: VideoRecording }, setScreenshotMetadata: SetScreenshotMetadata) {
+  const { browser, spec, screenshots, projectRoot, onError } = options
 
   const warnings = {}
 
   const browserOpts: OpenProjectLaunchOpts = {
     projectRoot,
-    shouldLaunchNewTab,
     onError,
     videoApi: options.videoRecording?.api,
     automationMiddleware: {
@@ -393,8 +392,8 @@ function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot,
   return openProject.launch(browser, spec, browserOpts)
 }
 
-function listenForProjectEnd (project, exit): Bluebird<any> {
-  if (globalThis.CY_TEST_MOCK?.listenForProjectEnd) return Bluebird.resolve(globalThis.CY_TEST_MOCK.listenForProjectEnd)
+function listenForSpecEnd (project, exit): Bluebird<any> {
+  if (globalThis.CY_TEST_MOCK?.listenForSpecEnd) return Bluebird.resolve(globalThis.CY_TEST_MOCK.listenForSpecEnd)
 
   return new Bluebird((resolve, reject) => {
     if (exit === false) {
@@ -443,7 +442,7 @@ function listenForProjectEnd (project, exit): Bluebird<any> {
   })
 }
 
-async function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, spec: SpecWithRelativeRoot, isFirstSpec: boolean, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, shouldLaunchNewTab: boolean, webSecurity: boolean, videoRecording?: VideoRecording }) {
+async function waitForBrowserToConnect (options: { project: Project, socketId: string, onError: (err: Error) => void, spec: SpecWithRelativeRoot, testingType: string, experimentalSingleTabRunMode: boolean, browser: Browser, screenshots: ScreenshotMetadata[], projectRoot: string, webSecurity: boolean, videoRecording?: VideoRecording }) {
   if (globalThis.CY_TEST_MOCK?.waitForBrowserToConnect) return Promise.resolve()
 
   const { project, socketId, onError, spec } = options
@@ -459,13 +458,7 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
     return data
   }
 
-  // TODO: remove the need to extend options and avoid the type error
-  // @ts-expect-error
-  options.setScreenshotMetadata = (data) => {
-    return currentSetScreenshotMetadata(data)
-  }
-
-  if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpec) {
+  if (options.experimentalSingleTabRunMode && options.testingType === 'component' && openProject.hasBrowserInstance()) {
     // reset browser state to match default behavior when opening/closing a new tab
     await openProject.resetBrowserState()
 
@@ -480,8 +473,7 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
 
     return Bluebird.all([
       waitForSocketConnection(project, socketId),
-      // TODO: remove the need to extend options and coerce this type
-      launchBrowser(options as typeof options & { setScreenshotMetadata: SetScreenshotMetadata }),
+      launchBrowser(options, currentSetScreenshotMetadata),
     ])
     .timeout(browserTimeout)
     .catch(Bluebird.TimeoutError, async (err) => {
@@ -538,12 +530,12 @@ function waitForSocketConnection (project: Project, id: string) {
   })
 }
 
-async function waitForTestsToFinishRunning (options: { project: Project, screenshots: ScreenshotMetadata[], videoCompression: number | false, videoUploadOnPasses: boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, testingType: TestingType, videoRecording?: VideoRecording }) {
+async function waitForTestsToFinishRunning (options: { project: Project, screenshots: ScreenshotMetadata[], videoCompression: number | false, videoUploadOnPasses: boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldLaunchNewTab: boolean, testingType: TestingType, videoRecording?: VideoRecording }) {
   if (globalThis.CY_TEST_MOCK?.waitForTestsToFinishRunning) return Promise.resolve(globalThis.CY_TEST_MOCK.waitForTestsToFinishRunning)
 
-  const { project, screenshots, videoRecording, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, shouldKeepTabOpen, testingType } = options
+  const { project, screenshots, videoRecording, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, config, shouldLaunchNewTab, testingType } = options
 
-  const results = await listenForProjectEnd(project, exit)
+  const results = await listenForSpecEnd(project, exit)
 
   debug('received project end %o', results)
 
@@ -642,7 +634,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   if (!usingExperimentalSingleTabMode) {
     debug('attempting to close the browser tab')
 
-    await openProject.resetBrowserTabsForNextTest(shouldKeepTabOpen)
+    await openProject.resetBrowserTabsForNextSpec(shouldLaunchNewTab)
 
     debug('resetting server state')
 
@@ -875,7 +867,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       videoCompression: options.videoCompression,
       videoUploadOnPasses: options.videoUploadOnPasses,
       quiet: options.quiet,
-      shouldKeepTabOpen: !isLastSpec,
+      shouldLaunchNewTab: !isLastSpec,
     }),
     waitForBrowserToConnect({
       spec,
@@ -888,9 +880,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       webSecurity: options.webSecurity,
       projectRoot: options.projectRoot,
       testingType: options.testingType,
-      isFirstSpec,
       experimentalSingleTabRunMode: config.experimentalSingleTabRunMode,
-      shouldLaunchNewTab: !isFirstSpec,
     }),
   ])
 
@@ -915,7 +905,7 @@ async function ready (options: { projectRoot: string, record: boolean, key: stri
   assert(socketId)
 
   // this needs to be a closure over `exitEarly` and not a reference
-  // because `exitEarly` gets overwritten in `listenForProjectEnd`
+  // because `exitEarly` gets overwritten in `listenForSpecEnd`
   // TODO: refactor this so we don't need to extend options
   const onError = options.onError = (err) => exitEarly(err)
 

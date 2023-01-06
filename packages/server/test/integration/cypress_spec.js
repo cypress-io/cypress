@@ -343,11 +343,11 @@ describe('lib/cypress', () => {
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       globalThis.CY_TEST_MOCK = {
         waitForSocketConnection: true,
-        listenForProjectEnd: { stats: { failures: 0 } },
+        listenForSpecEnd: { stats: { failures: 0 } },
       }
 
       sinon.stub(browsers, 'open')
-      sinon.stub(browsers, 'connectToNewSpec')
+      sinon.stub(browsers, 'connectToNewTab')
       sinon.stub(commitInfo, 'getRemoteOrigin').resolves('remoteOrigin')
     })
 
@@ -357,7 +357,7 @@ describe('lib/cypress', () => {
 
         sinon.stub(ciProvider, 'getIsCi').returns(true)
         delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
-        globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
+        globalThis.CY_TEST_MOCK.listenForSpecEnd = { stats: { failures: 1 } }
 
         return cypress.start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test1.js`]).then(() => {
           expect(console.log).to.be.calledWith(cloudRecommendationMessage)
@@ -371,7 +371,7 @@ describe('lib/cypress', () => {
 
         sinon.stub(ciProvider, 'getIsCi').returns(true)
         process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS = '0'
-        globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
+        globalThis.CY_TEST_MOCK.listenForSpecEnd = { stats: { failures: 1 } }
 
         return cypress.start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test1.js`]).then(() => {
           expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
@@ -383,7 +383,7 @@ describe('lib/cypress', () => {
 
         sinon.stub(ciProvider, 'getIsCi').returns(true)
         delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
-        globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 0 } }
+        globalThis.CY_TEST_MOCK.listenForSpecEnd = { stats: { failures: 0 } }
 
         return cypress.start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test1.js`]).then(() => {
           expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
@@ -395,7 +395,7 @@ describe('lib/cypress', () => {
 
         sinon.stub(ciProvider, 'getIsCi').returns(undefined)
         delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
-        globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
+        globalThis.CY_TEST_MOCK.listenForSpecEnd = { stats: { failures: 1 } }
 
         return cypress.start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test1.js`]).then(() => {
           expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
@@ -531,7 +531,7 @@ describe('lib/cypress', () => {
       .then(() => {
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
       }).then(() => {
-        expect(browsers.connectToNewSpec).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test1.js' })
+        expect(browsers.connectToNewTab).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test1.js' })
         this.expectExitWith(0)
       })
     })
@@ -1092,7 +1092,7 @@ describe('lib/cypress', () => {
 
     describe('--port', () => {
       beforeEach(() => {
-        globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 0 } }
+        globalThis.CY_TEST_MOCK.listenForSpecEnd = { stats: { failures: 0 } }
       })
 
       it('can change the default port to 5544', function () {
@@ -1129,7 +1129,7 @@ describe('lib/cypress', () => {
         process.env = _.omit(process.env, 'CYPRESS_DEBUG')
         delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
 
-        globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 0 } }
+        globalThis.CY_TEST_MOCK.listenForSpecEnd = { stats: { failures: 0 } }
       })
 
       it('can set specific environment variables', function () {
@@ -1643,7 +1643,7 @@ describe('lib/cypress', () => {
       it('does not display if --record is passed', function () {
         sinon.stub(ciProvider, 'getIsCi').returns(true)
         delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
-        globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
+        globalThis.CY_TEST_MOCK.listenForSpecEnd = { stats: { failures: 1 } }
 
         return cypress.start([
           `--run-project=${this.recordPath}`,
