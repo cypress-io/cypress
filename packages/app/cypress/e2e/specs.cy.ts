@@ -575,7 +575,7 @@ describe('App: Specs', () => {
 
         it('shows success modal when template spec is created', () => {
           cy.get('@CreateEmptySpecDialog').within(() => {
-            cy.findByLabelText('Enter a relative path...').invoke('val').should('eq', getPathForPlatform('cypress/component/ComponentName.cy.ts'))
+            cy.findByLabelText('Enter a relative path...').invoke('val').should('eq', getPathForPlatform('cypress/component/ComponentName.cy.tsx'))
 
             cy.findByLabelText('Enter a relative path...').clear().type('cypress/my-empty-spec.cy.js')
 
@@ -603,7 +603,7 @@ describe('App: Specs', () => {
 
         it('navigates to spec runner when selected', () => {
           cy.get('@CreateEmptySpecDialog').within(() => {
-            cy.findByLabelText('Enter a relative path...').invoke('val').should('eq', getPathForPlatform('cypress/component/ComponentName.cy.ts'))
+            cy.findByLabelText('Enter a relative path...').invoke('val').should('eq', getPathForPlatform('cypress/component/ComponentName.cy.tsx'))
 
             cy.findByLabelText('Enter a relative path...').clear().type('cypress/my-empty-spec.cy.js')
 
@@ -623,7 +623,7 @@ describe('App: Specs', () => {
 
         it('displays alert with docs link on new spec', () => {
           cy.get('@CreateEmptySpecDialog').within(() => {
-            cy.findByLabelText('Enter a relative path...').invoke('val').should('eq', getPathForPlatform('cypress/component/ComponentName.cy.ts'))
+            cy.findByLabelText('Enter a relative path...').invoke('val').should('eq', getPathForPlatform('cypress/component/ComponentName.cy.tsx'))
 
             cy.findByLabelText('Enter a relative path...').clear().type('cypress/my-empty-spec.cy.js')
 
@@ -756,7 +756,7 @@ describe('App: Specs', () => {
         cy.findByRole('dialog', {
           name: 'Enter the path for your new spec',
         }).within(() => {
-          cy.findByLabelText('Enter a relative path...').invoke('val').should('eq', getPathForPlatform('src/specs-folder/ComponentName.js'))
+          cy.findByLabelText('Enter a relative path...').invoke('val').should('eq', getPathForPlatform('src/specs-folder/ComponentName.jsx'))
 
           cy.findByRole('button', { name: 'Create spec' }).click()
         })
