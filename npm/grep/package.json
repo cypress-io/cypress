@@ -2,10 +2,11 @@
   "name": "@cypress/grep",
   "version": "0.0.0-development",
   "description": "Filter tests using substring",
-  "main": "src/support",
+  "main": "src/support.js",
   "scripts": {
     "cy:run": "node ../../scripts/cypress.js run --config specPattern='**/unit.js'",
-    "cy:open": "node ../../scripts/cypress.js open --e2e -b electron --config specPattern='**/unit.js'"
+    "cy:open": "node ../../scripts/cypress.js open --e2e -b electron --config specPattern='**/unit.js'",
+    "lint": "eslint . --ext .js,.ts"
   },
   "dependencies": {
     "debug": "^4.3.2",

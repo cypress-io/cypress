@@ -1,6 +1,0 @@
-{
-  "env": {
-    "browser": true
-  },
-  "parser": "@typescript-eslint/parser"
-}

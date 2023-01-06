@@ -137,16 +137,28 @@ context('lib/browsers/cdp_automation', () => {
           cookies: [
             { name: 'foo', value: 'f', path: '/', domain: 'localhost', secure: true, httpOnly: true, expires: 123 },
             { name: 'bar', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expires: 456 },
+            { name: 'qux', value: 'q', path: '/', domain: 'foobar.com', secure: false, httpOnly: false, expires: 789 },
           ],
         })
       })
 
-      it('returns all cookies', function () {
+      it('returns cookies that match filter', function () {
         return this.onRequest('get:cookies', { domain: 'localhost' })
         .then((resp) => {
           expect(resp).to.deep.eq([
             { name: 'foo', value: 'f', path: '/', domain: 'localhost', secure: true, httpOnly: true, expirationDate: 123, sameSite: undefined },
             { name: 'bar', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456, sameSite: undefined },
+          ])
+        })
+      })
+
+      it('returns all cookies if there is no filter', function () {
+        return this.onRequest('get:cookies', {})
+        .then((resp) => {
+          expect(resp).to.deep.eq([
+            { name: 'foo', value: 'f', path: '/', domain: 'localhost', secure: true, httpOnly: true, expirationDate: 123, sameSite: undefined },
+            { name: 'bar', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456, sameSite: undefined },
+            { name: 'qux', value: 'q', path: '/', domain: 'foobar.com', secure: false, hostOnly: true, httpOnly: false, expirationDate: 789, sameSite: undefined },
           ])
         })
       })

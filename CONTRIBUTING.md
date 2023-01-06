@@ -435,17 +435,9 @@ During the process of snapshot generation, metadata is created/updated in `tooli
 
 **Generation**
 
-If you run into errors while generating the v8 snapshot, you can occasionally identify the problem dependency via the output. You can try to remove that dependency from the cache and see if regenerating succeeds. If it does, likely it was moved to a more restrictive section (e.g. healthy to deferred/no-rewrite or deferred to norewrite). If all else fails, you can try running the following (but keep in mind this may take a while):
+If the `build-v8-snapshot-prod` command is taking a long time to run on Circle CI, the snapshot cache probably needs to be updated. Run the [Update V8 Snapshot Cache](https://github.com/cypress-io/cypress/actions/workflows/update_v8_snapshot_cache.yml) github action against your branch to generate the snapshots for you on all platforms. You can choose to commit directly to your branch or alternatively issue a PR to your branch.
 
-```
-V8_SNAPSHOT_FROM_SCRATCH=1 yarn build-v8-snapshot-dev
-```
-
-or
-
-```
-V8_SNAPSHOT_FROM_SCRATCH=1 yarn build-v8-snapshot-prod
-```
+![Update V8 SnapshotCache](https://user-images.githubusercontent.com/4873279/206541239-1afb1d29-4d66-4593-92a7-5a5961a12137.png)
 
 **Runtime**
 
@@ -455,20 +447,6 @@ If you're experiencing issues during runtime, you can try and narrow down where 
 * If the problem occurs with running `yarn build-v8-snapshot-prod` but not `yarn build-v8-snapshot-dev`, then that means there's a problem with a cypress file and not a node module dependency. Chances are that a file is not being flagged properly (e.g. healthy when it should be deferred or norewrite).
 * If the problem occurs with both `yarn build-v8-snapshot-prod` and `yarn build-v8-snapshot-dev` but does not occur when using the `DISABLE_SNAPSHOT_REQUIRE` environment variable, then that means there's a problem with a node module dependency. Chances are that a file is not being flagged properly (e.g. healthy when it should be deferred or norewrite).
 * If the problem still occurs when using the `DISABLE_SNAPSHOT_REQUIRE` environment variable, then that means the problem is not snapshot related.
-
-**Build Length**
-
-If the `build-v8-snapshot-prod` command is taking a long time to run on Circle CI, the snapshot cache probably needs to be updated. Run these commands on a windows, linux, and mac and commit the updates to the snapshot cache to git:
-
-```
-yarn build-v8-snapshot-dev
-```
-
-or
-
-```
-yarn build-v8-snapshot-prod
-```
 
 ## Committing Code
 

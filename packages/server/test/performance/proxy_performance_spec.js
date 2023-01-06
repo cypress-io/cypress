@@ -376,7 +376,7 @@ describe('Proxy Performance', function () {
 
   URLS_UNDER_TEST.map((urlUnderTest) => {
     // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23214
-    describe.skip(urlUnderTest, function () {
+    describe(urlUnderTest, { retries: 15 }, function () {
       let baseline
       const testCases = _.cloneDeep(TEST_CASES)
 
@@ -414,6 +414,7 @@ describe('Proxy Performance', function () {
         debug(`Done in ${Math.round((new Date() / 1000) - start)}s`)
         process.stdout.write('Note: All times are in milliseconds.\n')
 
+        // eslint-disable-next-line no-console
         console.table(testCases)
 
         return Promise.map(testCases, (testCase) => {
