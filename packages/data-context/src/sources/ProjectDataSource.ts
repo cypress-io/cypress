@@ -419,11 +419,42 @@ export class ProjectDataSource {
 
   async defaultSpecFileName (): Promise<string> {
     const { specPattern = [] } = await this.ctx.project.specPatterns()
+    let fileExtensionToUse: FileExtension = this.ctx.lifecycleManager.fileExtensionToUse
+
+    // If generating a component test then check whether there are JSX/TSX files present in the project.
+    // If project uses JSX then user likely wants to use JSX for their tests as well.
+    // JSX can be used (or not used) with a variety of frameworks depending on user preference/config, so
+    // the only reliable way to determine is whether there are files with JSX extension present
+    if (this.ctx.coreData.currentTestingType === 'component') {
+      debug('Checking for jsx/tsx files to determine file extension for default spec filename')
+      const projectJsxFiles = await this.ctx.file.getFilesByGlob(this.ctx.currentProject ?? '', '**/*.[jt]sx')
+
+      if (projectJsxFiles.length > 0) {
+        debug('At least one jsx/tsx file found in project, utilizing for default spec filename')
+        const generatedSpecFileName = await getDefaultSpecFileName({
+          currentProject: this.ctx.currentProject,
+          testingType: this.ctx.coreData.currentTestingType,
+          fileExtensionToUse: `${fileExtensionToUse}x`,
+          specs: this.specs,
+          specPattern,
+        })
+
+        // There is the possibility that a specPattern has been configured to exclude spec files using jsx/tsx extensions
+        // In this case, fallback to default logic which will generate js/ts filename
+        if (await this.matchesSpecPattern(generatedSpecFileName)) {
+          return generatedSpecFileName
+        }
+
+        debug('jsx/tsx extension would violate configured specPattern, utilizing default spec filename')
+      } else {
+        debug('No jsx/tsx files found, utilizing default spec filename')
+      }
+    }
 
     return getDefaultSpecFileName({
       currentProject: this.ctx.currentProject,
       testingType: this.ctx.coreData.currentTestingType,
-      fileExtensionToUse: this.ctx.lifecycleManager.fileExtensionToUse,
+      fileExtensionToUse,
       specs: this.specs,
       specPattern,
     })
