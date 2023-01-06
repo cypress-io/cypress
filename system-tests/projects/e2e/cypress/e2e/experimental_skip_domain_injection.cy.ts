@@ -16,6 +16,8 @@ describe('expected behavior when experimentalSkipDomainInjection=true', () => {
       expect(err.message).to.contain('This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.')
       expect(err.message).to.contain('Using `cy.origin()` to wrap the commands run on `http://www.foobar.com:4466` will likely fix this issue.')
       expect(err.message).to.include(`cy.origin('http://www.foobar.com:4466', () => {\`\n\`  <commands targeting http://www.foobar.com:4466 go here>\`\n\`})`)
+      expect(err.message).to.include('If `experimentalSkipDomainInjection` is enabled for this domain, a `cy.origin()` command is required.')
+
       //  make sure that the secondary origin failures do NOT show up as spec failures or AUT failures
       expect(err.message).not.to.include(`The following error originated from your test code, not from Cypress`)
       expect(err.message).not.to.include(`The following error originated from your application code, not from Cypress`)

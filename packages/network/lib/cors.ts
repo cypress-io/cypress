@@ -162,7 +162,6 @@ export const urlSameSiteMatch = (frameUrl: string, topUrl: string): boolean => {
 }
 
 /**
- *
  * @param url - the url to check the policy against.
  * @param arrayOfStringOrGlobPatterns - an array of url strings or globs to match against
  * @returns {boolean} - whether or not a match was found
@@ -178,10 +177,11 @@ const doesUrlHostnameMatchGlobArray = (url: string, arrayOfStringOrGlobPatterns:
 /**
  * Returns the policy that will be used for the specified url.
  * @param url - the url to check the policy against.
+ * @param opts - an options object containing the skipDomainInjectionForDomains config. Default is undefined.
  * @returns a Policy string.
  */
 export const policyForDomain = (url: string, opts?: {
-  skipDomainInjectionForDomains: string[] | null
+  skipDomainInjectionForDomains: string[] | null | undefined
 }): Policy => {
   const obj = parseUrlIntoHostProtocolDomainTldPort(url)
   let shouldUseSameOriginPolicy = strictSameOriginDomains.includes(`${obj.domain}.${obj.tld}`)
@@ -196,6 +196,11 @@ export const policyForDomain = (url: string, opts?: {
     'same-super-domain-origin'
 }
 
+/**
+ * @param url - The url to check for injection
+ * @param opts - an options object containing the skipDomainInjectionForDomains config. Default is undefined.
+ * @returns {boolean} whether or not document.domain should be injected solely based on the url.
+ */
 export const shouldInjectDocumentDomain = (url: string, opts?: {
   skipDomainInjectionForDomains: string[] | null
 }) => {
@@ -216,6 +221,7 @@ export const shouldInjectDocumentDomain = (url: string, opts?: {
  * in which case the policy is 'same-origin'
  * @param frameUrl - The url you are testing the policy for.
  * @param topUrl - The url you are testing the policy in context of.
+ * @param opts - an options object containing the skipDomainInjectionForDomains config. Default is undefined.
  * @returns boolean, true if matching, false if not.
  */
 export const urlMatchesPolicyBasedOnDomain = (frameUrl: string, topUrl: string, opts?: {
@@ -223,7 +229,7 @@ export const urlMatchesPolicyBasedOnDomain = (frameUrl: string, topUrl: string, 
 }): boolean => {
   return urlMatchesPolicy({
     policy: policyForDomain(frameUrl, {
-      skipDomainInjectionForDomains: opts?.skipDomainInjectionForDomains || [],
+      skipDomainInjectionForDomains: opts?.skipDomainInjectionForDomains,
     }),
     frameUrl,
     topUrl,
@@ -236,13 +242,14 @@ export const urlMatchesPolicyBasedOnDomain = (frameUrl: string, topUrl: string, 
  * in which case the policy is 'same-origin'
  * @param frameUrl - The url you are testing the policy for.
  * @param topProps - The props of the url you are testing the policy in context of.
+ * @param opts - an options object containing the skipDomainInjectionForDomains config. Default is undefined.
  * @returns boolean, true if matching, false if not.
  */
 export const urlMatchesPolicyBasedOnDomainProps = (frameUrl: string, topProps: ParsedHostWithProtocolAndHost, opts?: {
   skipDomainInjectionForDomains: string[]
 }): boolean => {
   const policy = policyForDomain(frameUrl, {
-    skipDomainInjectionForDomains: opts?.skipDomainInjectionForDomains || [],
+    skipDomainInjectionForDomains: opts?.skipDomainInjectionForDomains,
   })
 
   return urlMatchesPolicyProps({
