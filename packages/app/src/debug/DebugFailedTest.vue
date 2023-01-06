@@ -1,7 +1,7 @@
 <template>
   <div
     data-cy="test-row"
-    class="flex flex-row h-12 items-center non-italic text-base text-gray-700 font-normal"
+    class="flex flex-row font-normal h-12 text-base text-gray-700 items-center non-italic"
   >
     <SolidStatusIcon
       size="16"
@@ -10,27 +10,39 @@
       class="isolate"
     />
     <template
-      v-for="titlePart, index in failedTestData.mappedTitleParts"
+      v-for="{text, type}, index in failedTestData.mappedTitleParts"
       :key="`${titlePart}-${index}`"
       :data-cy="`titleParts-${index}`"
     >
       <IconChevronRightSmall
-        v-if="index !== 0 && titlePart.type !== 'LAST-1'"
+        v-if="index !== 0 && type !== 'LAST-PART-END'"
         :data-cy="`titleParts-${index}-chevron`"
         size="8"
         stroke-color="gray-200"
         fill-color="gray-200"
         class="shrink-0"
-        :class="titlePart.type === 'MIDDLE' ? 'hidden lg:block' : titlePart.type === 'ELLIPSIS' ? 'lg:hidden' : ''"
+        :class="type === 'MIDDLE' ? 'hidden lg:block' : type === 'ELLIPSIS' ? 'lg:hidden' : ''"
       />
       <span
         :data-cy="`titleParts-${index}-title`"
-        :class="titlePart.type === 'ELLIPSIS' ? 'px-2.5 shrink-0 lg:hidden' :
-          titlePart.type === 'MIDDLE' ? 'truncate px-2.5 hidden lg:block' :
-          titlePart.type === 'LAST-1' ? 'shrink-0 whitespace-pre' :
-          titlePart.type === 'LAST-0' ? 'pl-2.5 truncate' : 'px-2.5 truncate'"
+        :class="type === 'ELLIPSIS' ? 'px-2.5 shrink-0 lg:hidden' :
+          type === 'MIDDLE' ? 'truncate px-2.5 hidden lg:block' :
+          type === 'LAST-PART-END' ? 'shrink-0 whitespace-pre' :
+          type === 'LAST-PART-START' ? 'pl-2.5 truncate' : 'px-2.5 truncate'"
       >
-        {{ titlePart.title }}
+        <template v-if="type === 'ELLIPSIS'">
+          <Tooltip>
+            <!-- button gives us free keyboard focus activation of the tooltip -->
+            <button>{{ text }}</button>
+            <span class="sr-only">{{ middlePartText }}</span>
+            <template #popper>
+              <span data-cy="tooltip-content">{{ middlePartText }}</span>
+            </template>
+          </Tooltip>
+        </template>
+        <template v-else>
+          {{ text }}
+        </template>
       </span>
     </template>
     <div
@@ -69,6 +81,7 @@ import GroupedDebugFailedTestVue from './GroupedDebugFailedTest.vue'
 import { computed } from 'vue'
 import type { TestResults } from './DebugSpec.vue'
 import type { StatsMetadata_GroupsFragment } from '../generated/graphql'
+import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 
 const props = defineProps<{
   failedTestsResult: TestResults[]
@@ -76,61 +89,79 @@ const props = defineProps<{
   expandable: boolean
 }>()
 
+type ItemType = 'SHOW_FULL' | 'MIDDLE' | 'ELLIPSIS' | 'LAST-PART-START' | 'LAST-PART-END'
+  type MappedTitlePart = {
+    text: string
+    type: ItemType
+  }
+
 const failedTestData = computed(() => {
   const runInstance = props.failedTestsResult[0].instance
   const titleParts = props.failedTestsResult[0].titleParts
 
-  type Parts = 'FIRST' | 'MIDDLE' | 'PENULTIMATE' | 'ELLIPSIS' | 'LAST-0' | 'LAST-1'
-  type MappedTitlePart = {
-    title: string
-    type: Parts
-  }
   let isFirstMiddleAdded: boolean = false
-  const mappedTitleParts: MappedTitlePart[] = titleParts.map<MappedTitlePart | MappedTitlePart[]>((ele, index, parts) => {
+
+  const mappedTitleParts: MappedTitlePart[] = titleParts.map<MappedTitlePart | MappedTitlePart[]>((titlePart, index, parts) => {
     if (index === 0) {
+      // always use the whole first part of the title
       return {
-        title: ele,
-        type: 'FIRST',
+        text: titlePart,
+        type: 'SHOW_FULL',
       }
     }
 
     if (index === parts.length - 1) {
+      // split the last part into 2 pieces, so that we can truncate the first half if needed,
+      // and still show the end of the text.
       return [
         {
-          title: ele.slice(0, ele.length - 15),
-          type: 'LAST-0',
+          text: titlePart.slice(0, titlePart.length - 15),
+          type: 'LAST-PART-START',
         },
         {
-          title: ele.slice(ele.length - 15),
-          type: 'LAST-1',
+          text: titlePart.slice(titlePart.length - 15),
+          type: 'LAST-PART-END',
         },
       ]
     }
 
     if (index === parts.length - 2 && parts.length >= 3) {
+      // this is the second-last part of the title,
+      // and will be the *third-to-last* item in the array.
+
+      // We only label this SHOW_FULL if there are enough
+      // actual parts in the title that it is required to separate this
+      // from "middle" items that may be hidden in smaller screens
+
       return {
-        title: ele,
-        type: 'PENULTIMATE',
+        text: titlePart,
+        type: 'SHOW_FULL',
       }
     }
 
     if (!isFirstMiddleAdded && parts.length > 3) {
       isFirstMiddleAdded = true
 
+      // a fake part with type ELLIPSIS is shown conditionally
+      // at smaller screen sizes
+
+      // we insert it here and will flatten the result later
+      // to undo the nesting this creates
       return [
         {
-          title: '...',
+          text: '...',
           type: 'ELLIPSIS',
         },
         {
-          title: ele,
+          text: titlePart,
           type: 'MIDDLE',
         },
       ]
     }
 
-    return { title: ele, type: 'MIDDLE' }
-  }).flat()
+    return { text: titlePart, type: 'MIDDLE' }
+  })
+  .flat() // flatten the array since one of the internal items may itself be an array.
 
   return {
     debugArtifacts: [
@@ -140,6 +171,13 @@ const failedTestData = computed(() => {
     ],
     mappedTitleParts,
   }
+})
+
+const middlePartText = computed(() => {
+  return failedTestData.value.mappedTitleParts
+  .filter((item) => item.type === 'MIDDLE')
+  .map((item) => item.text)
+  .join(' > ')
 })
 
 </script>
