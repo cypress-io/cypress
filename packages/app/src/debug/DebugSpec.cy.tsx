@@ -1,5 +1,4 @@
-import type { TestResults, Spec } from './DebugSpec.vue'
-import DebugSpec from './DebugSpec.vue'
+import DebugSpec, { Spec, TestResults } from './DebugSpec.vue'
 import { defaultMessages } from '@cy/i18n'
 
 const resultCounts = (min: number, max: number) => {

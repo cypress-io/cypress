@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from '@vue/reactivity'
+import { computed } from 'vue'
 import type { CloudRunStatus } from '../generated/graphql'
 import { SolidStatusIcon, StatusType } from '@cypress-design/vue-statusicon'
 

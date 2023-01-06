@@ -34,25 +34,24 @@
   </div>
 </template>
 <script lang="ts" setup>
-import type { TestResults } from './DebugSpec.vue'
 import StatsMetadata from './StatsMetadata.vue'
 import DebugArtifactLink from './DebugArtifactLink.vue'
 import { computed } from 'vue'
 import type { StatsMetadata_GroupsFragment } from '../generated/graphql'
+import { DebugArtifact, getDebugArtifacts } from './utils/debugArtifacts'
+import type { TestResults } from './DebugSpec.vue'
+import { useI18n } from '@cy/i18n'
 
 const props = defineProps<{
   failedTests: TestResults[]
   groups: StatsMetadata_GroupsFragment[]
 }>()
 
+const { t } = useI18n()
+
 const debugArtifacts = computed(() => {
-  return props.failedTests.reduce<{[groupID: string]: {icon: string, text: string, url: string | null | undefined }[] }>((acc, curr) => {
-    //TODO Update logic to not rely on defaulting to empty strings and only render appropriate links See https://github.com/cypress-io/cypress/issues/25319
-    acc[curr.instance?.groupId ?? ''] = [
-      { icon: 'TERMINAL_LOG', text: 'View Log', url: curr.instance!.stdoutUrl ?? '' },
-      { icon: 'IMAGE_SCREENSHOT', text: 'View Screenshot', url: curr.instance!.screenshotsUrl ?? '' },
-      { icon: 'PLAY', text: 'View Video', url: curr.instance!.videoUrl ?? '' },
-    ]
+  return props.failedTests.reduce<{[groupID: string]: DebugArtifact[] }>((acc, curr) => {
+    acc[curr.instance?.groupId ?? ''] = getDebugArtifacts(curr.instance, t)
 
     return acc
   }, {})

@@ -54,7 +54,7 @@
 
 <script setup lang="ts">
 import { gql } from '@urql/vue'
-import { computed } from '@vue/reactivity'
+import { computed } from 'vue'
 import type { CloudRunStatus, DebugSpecsFragment, TestingTypeEnum } from '../generated/graphql'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import DebugPageHeader from './DebugPageHeader.vue'

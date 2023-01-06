@@ -79,9 +79,13 @@ import { SolidStatusIcon } from '@cypress-design/vue-statusicon'
 import DebugArtifactLink from './DebugArtifactLink.vue'
 import GroupedDebugFailedTestVue from './GroupedDebugFailedTest.vue'
 import { computed } from 'vue'
-import type { TestResults } from './DebugSpec.vue'
 import type { StatsMetadata_GroupsFragment } from '../generated/graphql'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
+import { getDebugArtifacts } from './utils/debugArtifacts'
+import type { TestResults } from './DebugSpec.vue'
+import { useI18n } from '@cy/i18n'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   failedTestsResult: TestResults[]
@@ -163,12 +167,10 @@ const failedTestData = computed(() => {
   })
   .flat() // flatten the array since one of the internal items may itself be an array.
 
+  const debugArtifacts = getDebugArtifacts(runInstance, t)
+
   return {
-    debugArtifacts: [
-      { icon: 'TERMINAL_LOG', text: 'View Log', url: runInstance?.stdoutUrl! },
-      { icon: 'IMAGE_SCREENSHOT', text: 'View Screenshot', url: runInstance?.screenshotsUrl! },
-      { icon: 'PLAY', text: 'View Video', url: runInstance?.videoUrl! },
-    ],
+    debugArtifacts,
     mappedTitleParts,
   }
 })

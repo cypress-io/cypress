@@ -33,7 +33,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed } from '@vue/reactivity'
+import { computed } from 'vue'
 import { gql } from '@urql/vue'
 import type { CloudRunStatus, OverLimitActionTypeEnum, DebugSpecListSpecFragment, DebugPageDetails_CloudCiBuildInfoFragment } from '../generated/graphql'
 import DebugCancelledAlert from './DebugCancelledAlert.vue'

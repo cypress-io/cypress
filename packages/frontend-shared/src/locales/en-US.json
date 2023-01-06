@@ -693,6 +693,11 @@
       "groups": "{n} group | {n} groups",
       "operatingSystems": "{n} operating system | {n} operating systems",
       "browsers": "{n} browser | {n} browsers"
+    },
+    "artifacts": {
+      "stdout": "View Log",
+      "screenshots": "View Screenshots",
+      "video": "View Video"
     }
   },
   "testingType": {
