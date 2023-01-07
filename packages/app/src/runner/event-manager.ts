@@ -571,7 +571,7 @@ export class EventManager {
     Cypress.on('test:before:run:async', async (_attr, test) => {
       this.studioStore.interceptTest(test)
 
-      // if the experimental flag is on and we are in chromium based browser, force a garbage collection
+      // if the experimental flag is on and we are in a chromium based browser, determine if garbage collection is needed
       if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
         await Cypress.automation('maybe:collect:garbage', { test: { title: test.title, order: test.order, currentRetry: test.currentRetry() } })
       }

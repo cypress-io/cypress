@@ -1,13 +1,14 @@
 const { expect, sinon } = require('../../spec_helper')
 
 import { CdpAutomation } from '../../../lib/browsers/cdp_automation'
-import * as memory from '../../../lib/browsers/memory'
+import Memory from '../../../lib/browsers/memory'
 
 context('lib/browsers/cdp_automation', () => {
   context('.CdpAutomation', () => {
     let cdpAutomation: CdpAutomation
 
     beforeEach(async function () {
+      this.memory = sinon.createStubInstance(Memory)
       this.sendDebuggerCommand = sinon.stub()
       this.onFn = sinon.stub()
       this.sendCloseTargetCommand = sinon.stub()
@@ -16,7 +17,7 @@ context('lib/browsers/cdp_automation', () => {
         onRequestEvent: sinon.stub(),
       }
 
-      cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, this.automation)
+      cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, this.automation, this.memory)
       this.onRequest = cdpAutomation.onRequest
     })
 
@@ -306,10 +307,12 @@ context('lib/browsers/cdp_automation', () => {
     })
 
     describe('maybe:collect:garbage', function () {
-      it('calls memory.checkMemoryAndCollectGarbage', function () {
-        sinon.stub(memory, 'checkMemoryAndCollectGarbage').withArgs(this.sendDebuggerCommand).resolves()
+      it('calls memory.checkMemoryAndCollectGarbage', async function () {
+        const args = { test: { title: 'test 1', order: 1, currentRetry: 0 } }
 
-        return this.onRequest('maybe:collect:garbage').then((resp) => expect(resp).to.be.undefined)
+        await this.onRequest('maybe:collect:garbage', args)
+
+        expect(this.memory.checkMemoryAndCollectGarbage).to.be.calledOnceWith(args)
       })
     })
   })

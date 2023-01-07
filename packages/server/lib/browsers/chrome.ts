@@ -21,6 +21,7 @@ import { BrowserCriClient } from './browser-cri-client'
 import type { CriClient } from './cri-client'
 import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
+import Memory from './memory'
 
 const debug = debugModule('cypress:server:browsers:chrome')
 
@@ -446,7 +447,8 @@ const _handlePausedRequests = async (client) => {
 }
 
 const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
-  const cdpAutomation = await CdpAutomation.create(client.send, client.on, resetBrowserTargets, automation)
+  const memory = await Memory.create(client.send)
+  const cdpAutomation = await CdpAutomation.create(client.send, client.on, resetBrowserTargets, automation, memory)
 
   automation.use(cdpAutomation)
 

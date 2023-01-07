@@ -12,6 +12,7 @@ import type { Browser, BrowserInstance } from './types'
 import type { BrowserWindow, WebContents } from 'electron'
 import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, Preferences, RunModeVideoApi } from '@packages/types'
+import Memory from './memory'
 
 // TODO: unmix these two types
 type ElectronOpts = Windows.WindowOptions & BrowserLaunchOpts
@@ -64,7 +65,8 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
     win.destroy()
   }
 
-  const automation = await CdpAutomation.create(sendCommand, on, sendClose, parent)
+  const memory = await Memory.create(sendCommand)
+  const automation = await CdpAutomation.create(sendCommand, on, sendClose, parent, memory)
 
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
     switch (message) {

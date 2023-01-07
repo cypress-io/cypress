@@ -12,7 +12,7 @@ import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@
 import type { WriteVideoFrame } from '@packages/types'
 import type { Automation } from '../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
-import Memory from './memory'
+import type Memory from './memory'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
@@ -155,7 +155,7 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
 }
 
 export class CdpAutomation {
-  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private memory: Memory) {
+  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private memory?: Memory) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
   }
@@ -169,8 +169,7 @@ export class CdpAutomation {
     await this.sendDebuggerCommandFn('Page.startScreencast', screencastOpts)
   }
 
-  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation): Promise<CdpAutomation> {
-    const memory = await Memory.create(sendDebuggerCommandFn)
+  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, memory?: Memory): Promise<CdpAutomation> {
     const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, sendCloseCommandFn, automation, memory)
 
     await sendDebuggerCommandFn('Network.enable', {
@@ -355,7 +354,7 @@ export class CdpAutomation {
       case 'focus:browser:window':
         return this.sendDebuggerCommandFn('Page.bringToFront')
       case 'maybe:collect:garbage':
-        return this.memory.checkMemoryAndCollectGarbage(data)
+        return this.memory?.checkMemoryAndCollectGarbage(data)
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }
