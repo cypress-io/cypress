@@ -7,6 +7,7 @@ gql`
     relevantRuns {
       current
       next
+      commitsAhead
     }
   }
 

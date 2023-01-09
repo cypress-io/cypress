@@ -1939,6 +1939,11 @@ type ReactComponentResponse {
 Indicates builds from the Cypress Cloud that most closely align with the current local Git commit
 """
 type RelevantRun {
+  """
+  How many commits ahead the current local commit is from the commit of the current run
+  """
+  commitsAhead: Int
+
   """Run number that is the most recent build that is not a RUNNING status"""
   current: Int
 

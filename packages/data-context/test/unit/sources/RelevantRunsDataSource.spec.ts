@@ -4,9 +4,7 @@ import sinon from 'sinon'
 import { DataContext } from '../../../src'
 import { createTestDataContext } from '../helper'
 import { RelevantRunsDataSource, EMPTY_RETURN } from '../../../src/sources'
-import { FAKE_PROJECT_MULTIPLE_COMPLETED, FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, FAKE_PROJECT_NO_RUNS, FAKE_PROJECT_ONE_RUNNING_RUN } from './fixtures/graphqlFixtures'
-
-const TEST_SHA = 'fcb90fc753a2111d1eb32d207e801e6b2985a231'
+import { FAKE_PROJECT_MULTIPLE_COMPLETED, FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, FAKE_PROJECT_NO_RUNS, FAKE_PROJECT_ONE_RUNNING_RUN, FAKE_SHAS } from './fixtures/graphqlFixtures'
 
 describe('RelevantRunsDataSource', () => {
   let ctx: DataContext
@@ -26,7 +24,7 @@ describe('RelevantRunsDataSource', () => {
   it('returns empty with no project set', async () => {
     sinon.stub(ctx.project, 'projectId').resolves(undefined)
 
-    const result = await dataSource.getRelevantRuns([TEST_SHA])
+    const result = await dataSource.getRelevantRuns([FAKE_SHAS[0]])
 
     expect(result).to.equal(EMPTY_RETURN)
   })
@@ -36,15 +34,21 @@ describe('RelevantRunsDataSource', () => {
       sinon.stub(ctx.project, 'projectId').resolves('test123')
     })
 
-    const testScenario = async (testData, expectedResult) => {
+    type TestDataType = typeof FAKE_PROJECT_MULTIPLE_COMPLETED |
+      typeof FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING |
+      typeof FAKE_PROJECT_NO_RUNS |
+      typeof FAKE_PROJECT_ONE_RUNNING_RUN
+
+    const testScenario = async (testData: TestDataType, expectedResult: { current?: number, next?: number, commitsAhead?: number}) => {
       sinon.stub(ctx.cloud, 'executeRemoteGraphQL').resolves(testData)
 
-      const result = await dataSource.getRelevantRuns([TEST_SHA])
+      const testShas: string[] = testData.data.cloudProjectBySlug.runsByCommitShas.map((run) => run.commitInfo.sha)
+
+      const result = await dataSource.getRelevantRuns(testShas)
 
       expect(result).to.eql(expectedResult)
     }
 
-    //TODO: Skipping to figure out how to mock cloud query
     it('returns empty if cloud project not loaded', async () => {
       await testScenario(FAKE_PROJECT_NO_RUNS, EMPTY_RETURN)
     })
@@ -53,6 +57,7 @@ describe('RelevantRunsDataSource', () => {
       await testScenario(FAKE_PROJECT_ONE_RUNNING_RUN, {
         current: 1,
         next: undefined,
+        commitsAhead: 0,
       })
     })
 
@@ -60,6 +65,7 @@ describe('RelevantRunsDataSource', () => {
       await testScenario(FAKE_PROJECT_MULTIPLE_COMPLETED, {
         current: 4,
         next: undefined,
+        commitsAhead: 0,
       })
     })
 
@@ -67,6 +73,7 @@ describe('RelevantRunsDataSource', () => {
       await testScenario(FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, {
         current: 4,
         next: 5,
+        commitsAhead: 1,
       })
     })
 
@@ -76,25 +83,28 @@ describe('RelevantRunsDataSource', () => {
       .onSecondCall().resolves(FAKE_PROJECT_MULTIPLE_COMPLETED)
       .onThirdCall().resolves(FAKE_PROJECT_MULTIPLE_COMPLETED)
 
-      const firstResult = await dataSource.getRelevantRuns([TEST_SHA])
+      const firstResult = await dataSource.getRelevantRuns([FAKE_SHAS[0]])
 
       expect(firstResult).to.eql({
         current: 1,
         next: undefined,
+        commitsAhead: 0,
       })
 
-      const secondResult = await dataSource.getRelevantRuns([TEST_SHA])
+      const secondResult = await dataSource.getRelevantRuns([FAKE_SHAS[1], FAKE_SHAS[0]])
 
       expect(secondResult).to.eql({
         current: 1,
         next: 4,
+        commitsAhead: 1,
       })
 
-      const thirdResult = await dataSource.moveToNext([TEST_SHA])
+      const thirdResult = await dataSource.moveToNext([FAKE_SHAS[1], FAKE_SHAS[0]])
 
       expect(thirdResult).to.eql({
         current: 4,
         next: undefined,
+        commitsAhead: 0,
       })
     })
   })

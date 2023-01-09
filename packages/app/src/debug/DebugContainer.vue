@@ -10,7 +10,7 @@
     >
       <DebugPageHeader
         :gql="run"
-        :commits-ahead="0"
+        :commits-ahead="props.commitsAhead || 0"
       />
       <DebugNewRelevantRunBar
         v-if="newerRelevantRun"
@@ -152,6 +152,7 @@ const props = defineProps<{
   // This prop is just to stub the error state for now
   showError?: boolean
   isLoading?: boolean
+  commitsAhead?: number
 }>()
 
 const loginConnectStore = useLoginConnectStore()

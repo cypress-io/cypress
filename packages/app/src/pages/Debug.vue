@@ -3,6 +3,7 @@
     data-cy="debug-container"
     :gql="query.data.value"
     :is-loading="isLoading"
+    :commits-ahead="relevantRuns?.commitsAhead"
   />
 </template>
 

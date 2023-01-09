@@ -43,10 +43,12 @@ export const CLOUD_PROJECT_REQUEST_WITH_VARIABLES = parse(`
   }
 `)
 
+export const FAKE_SHAS = ['fcb90f', 'fc753a', '207e80']
+
 export const FAKE_PROJECT_NO_RUNS = { data: { cloudProjectBySlug: { __typename: 'CloudProject', runsByCommitShas: [] } } }
 
-export const FAKE_PROJECT_ONE_RUNNING_RUN = { data: { cloudProjectBySlug: { __typename: 'CloudProject', runsByCommitShas: [{ runNumber: 1, status: 'RUNNING' }] } } }
+export const FAKE_PROJECT_ONE_RUNNING_RUN = { data: { cloudProjectBySlug: { __typename: 'CloudProject', runsByCommitShas: [{ runNumber: 1, status: 'RUNNING', commitInfo: { sha: FAKE_SHAS[0] } }] } } }
 
-export const FAKE_PROJECT_MULTIPLE_COMPLETED = { data: { cloudProjectBySlug: { __typename: 'CloudProject', runsByCommitShas: [{ runNumber: 4, status: 'FAILED' }, { runNumber: 1, status: 'PASSED' }] } } }
+export const FAKE_PROJECT_MULTIPLE_COMPLETED = { data: { cloudProjectBySlug: { __typename: 'CloudProject', runsByCommitShas: [{ runNumber: 4, status: 'FAILED', commitInfo: { sha: FAKE_SHAS[1] } }, { runNumber: 1, status: 'PASSED', commitInfo: { sha: FAKE_SHAS[0] } }] } } }
 
-export const FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING = { data: { cloudProjectBySlug: { __typename: 'CloudProject', runsByCommitShas: [{ runNumber: 5, status: 'RUNNING' }, { runNumber: 4, status: 'FAILED' }, { runNumber: 1, status: 'PASSED' }] } } }
+export const FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING = { data: { cloudProjectBySlug: { __typename: 'CloudProject', runsByCommitShas: [{ runNumber: 5, status: 'RUNNING', commitInfo: { sha: FAKE_SHAS[2] } }, { runNumber: 4, status: 'FAILED', commitInfo: { sha: FAKE_SHAS[1] } }, { runNumber: 1, status: 'PASSED', commitInfo: { sha: FAKE_SHAS[0] } }] } } }

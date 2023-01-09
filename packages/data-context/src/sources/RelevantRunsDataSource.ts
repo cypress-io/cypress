@@ -21,6 +21,9 @@ const RELEVANT_RUN_OPERATION_DOC = gql`
           id
           runNumber
           status
+          commitInfo {
+            sha
+          }
         }
 
       }
@@ -29,18 +32,14 @@ const RELEVANT_RUN_OPERATION_DOC = gql`
 `
 const RELEVANT_RUN_UPDATE_OPERATION = print(RELEVANT_RUN_OPERATION_DOC)
 
-type RelevantRunReturn = {
-  current?: number
-  next?: number
-}
-
-export const EMPTY_RETURN: RelevantRunReturn = { current: undefined, next: undefined }
+export const EMPTY_RETURN: RelevantRun = { current: undefined, next: undefined, commitsAhead: -1 }
 
 /**
  * DataSource to encapsulate querying Cypress Cloud for runs that match a list of local Git commit shas
  */
 export class RelevantRunsDataSource {
-  private _currentRun: number | undefined
+  #currentRun?: number
+  #currentCommitSha?: string
   #pollingTimeout?: NodeJS.Timeout
   #cachedRuns: RelevantRun = EMPTY_RETURN
 
@@ -84,10 +83,11 @@ export class RelevantRunsDataSource {
 
     if (result.data?.cloudProjectBySlug?.__typename === 'CloudProject') {
       const runs = result.data.cloudProjectBySlug.runsByCommitShas?.map((run) => {
-        if (run?.runNumber && run?.status) {
+        if (run?.runNumber && run?.status && run.commitInfo?.sha) {
           return {
             runNumber: run.runNumber,
             status: run.status,
+            commitSha: run.commitInfo.sha,
           }
         }
 
@@ -98,7 +98,7 @@ export class RelevantRunsDataSource {
 
       debug(`Found ${compactedRuns.length} runs for ${projectSlug} and ${shas.length} shas`)
 
-      const hasStoredCurrentRunThatIsStillValid = this._currentRun !== undefined && compactedRuns.some((run) => run.runNumber === this._currentRun)
+      const hasStoredCurrentRunThatIsStillValid = this.#currentRun !== undefined && compactedRuns.some((run) => run.runNumber === this.#currentRun)
 
       //Using lodash chain here to allow for lazy evaluation of the array that will return the `first` match quickly
       const firstNonRunningRun = chain(compactedRuns).filter((run) => run.status !== 'RUNNING').map((run) => run.runNumber).first().value()
@@ -110,7 +110,7 @@ export class RelevantRunsDataSource {
       if (hasStoredCurrentRunThatIsStillValid) {
         // continue to use the cached current run
         // the next run is the first running run if it exists or the firstNonRunningRun
-        currentRun = this._currentRun
+        currentRun = this.#currentRun
         nextRun = firstRunningRun
         if (!nextRun && firstNonRunningRun !== currentRun) {
           nextRun = firstNonRunningRun
@@ -130,11 +130,17 @@ export class RelevantRunsDataSource {
       }
 
       //cache the current run
-      this._currentRun = currentRun
+      this.#currentRun = currentRun
+
+      this.#currentCommitSha = compactedRuns.find((run) => run.runNumber === this.#currentRun)?.commitSha
+      const commitsAhead = shas.indexOf(this.#currentCommitSha || '')
+
+      debug(`Current commit sha: ${this.#currentCommitSha} commitsBehind: ${commitsAhead}`)
 
       return {
         current: currentRun,
         next: nextRun,
+        commitsAhead,
       }
     }
 
@@ -146,7 +152,8 @@ export class RelevantRunsDataSource {
    */
   moveToNext (shas: string[]) {
     debug('Moving to next relevant run')
-    this._currentRun = undefined
+    this.#currentRun = undefined
+    this.#currentCommitSha = undefined
 
     return this.getRelevantRuns(shas)
   }

@@ -11,5 +11,9 @@ export const RelevantRun = objectType({
     t.int('next', {
       description: 'Run number that is the most recent build regardless of status ',
     })
+
+    t.int('commitsAhead', {
+      description: 'How many commits ahead the current local commit is from the commit of the current run',
+    })
   },
 })
