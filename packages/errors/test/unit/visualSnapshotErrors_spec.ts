@@ -1268,5 +1268,11 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+
+    EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
+      return {
+        default: [],
+      }
+    },
   })
 })
