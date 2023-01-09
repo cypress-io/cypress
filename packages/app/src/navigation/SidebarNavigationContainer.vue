@@ -20,7 +20,12 @@ query SideBarNavigationContainer($runNumber: Int!, $hasCurrentRun: Boolean!) {
 
 const relevantRuns = useRelevantRun()
 
-const variables = ref({ runNumber: -1, hasCurrentRun: false })
+const variables = computed(() => {
+  return {
+    runNumber: relevantRuns.value?.current || -1,
+    hasCurrentRun: !!relevantRuns.value?.current,
+  }
+})
 
 const query = useQuery({ query: SideBarNavigationContainerDocument, variables, pause: true })
 
@@ -31,8 +36,8 @@ const isLoading = computed(() => {
 })
 
 watchEffect(() => {
-  variables.value.runNumber = relevantRuns.value.current || -1
-  variables.value.hasCurrentRun = !!relevantRuns.value.current
+  variables.value.runNumber = relevantRuns.value?.current || -1
+  variables.value.hasCurrentRun = !!relevantRuns.value?.current
   query.executeQuery()
   hasLoadedFirstTime.value = true
 })

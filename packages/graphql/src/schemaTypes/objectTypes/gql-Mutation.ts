@@ -771,7 +771,7 @@ export const mutation = mutationType({
       resolve: async (source, args, ctx) => {
         ctx.relevantRuns.moveToNext()
 
-        ctx.emitter.relevantRunChange(ctx.git?.currentHashes || [])
+        ctx.emitter.relevantRunChange()
 
         return true
       },

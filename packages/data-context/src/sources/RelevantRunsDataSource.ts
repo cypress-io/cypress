@@ -1,10 +1,10 @@
 import { gql } from '@urql/core'
 import { print } from 'graphql'
 import debugLib from 'debug'
-import { chain, compact } from 'lodash'
+import { chain, compact, isEqual } from 'lodash'
 
 import type { DataContext } from '../DataContext'
-import type { Query } from '../gen/graphcache-config.gen'
+import type { Query, RelevantRun } from '../gen/graphcache-config.gen'
 
 const debug = debugLib('cypress:data-context:sources:RelevantRunsDataSource')
 
@@ -41,6 +41,8 @@ export const EMPTY_RETURN: RelevantRunReturn = { current: undefined, next: undef
  */
 export class RelevantRunsDataSource {
   private _currentRun: number | undefined
+  #pollingTimeout?: NodeJS.Timeout
+  #cachedRuns: RelevantRun = EMPTY_RETURN
 
   constructor (private ctx: DataContext) {}
 
@@ -50,8 +52,10 @@ export class RelevantRunsDataSource {
    * - "next" the most recent running run if a completed run is found
    * @param shas list of Git commit shas to query the Cloud with for matching runs
    */
-  async getRelevantRuns (shas: string[]): Promise<RelevantRunReturn> {
+  async getRelevantRuns (shas: string[]): Promise<RelevantRun> {
     if (shas.length === 0) {
+      debug('Called with no shas')
+
       return EMPTY_RETURN
     }
 
@@ -76,7 +80,7 @@ export class RelevantRunsDataSource {
       requestPolicy: 'network-only', // we never want to hit local cache for this request
     })
 
-    debug(`Result returned type ${result.data}`)
+    debug('Result returned type', result.data?.cloudProjectBySlug?.__typename)
 
     if (result.data?.cloudProjectBySlug?.__typename === 'CloudProject') {
       const runs = result.data.cloudProjectBySlug.runsByCommitShas?.map((run) => {
@@ -96,6 +100,7 @@ export class RelevantRunsDataSource {
 
       const hasStoredCurrentRunThatIsStillValid = this._currentRun !== undefined && compactedRuns.some((run) => run.runNumber === this._currentRun)
 
+      //Using lodash chain here to allow for lazy evaluation of the array that will return the `first` match quickly
       const firstNonRunningRun = chain(compactedRuns).filter((run) => run.status !== 'RUNNING').map((run) => run.runNumber).first().value()
       const firstRunningRun = compactedRuns[0]?.status === 'RUNNING' ? compactedRuns[0].runNumber : undefined
 
@@ -142,5 +147,53 @@ export class RelevantRunsDataSource {
   moveToNext () {
     debug('Moving to next relevant run')
     this._currentRun = undefined
+
+    return this.getRelevantRuns(this.ctx.git?.currentHashes || [])
+  }
+
+  polling () {
+    debug('relevant runs subscription subscribe')
+
+    this.#pollForRuns()
+
+    return this.ctx.emitter.subscribeTo('relevantRunChange', {
+      sendInitial: false,
+      initialValue: this.#cachedRuns,
+      onUnsubscribe: () => {
+        debug('in unsubscribe')
+        this.#stopPolling()
+      },
+    })
+  }
+
+  #pollForRuns () {
+    debug('poll for runs')
+    if (this.#pollingTimeout) {
+      debug('found polling timeout')
+
+      return
+    }
+
+    this.#pollingTimeout = setTimeout(async () => {
+      debug('polling interval')
+      const runs = await this.getRelevantRuns(this.ctx.git?.currentHashes || [])
+
+      //only emit a new value if it changes
+      if (!isEqual(runs, this.#cachedRuns)) {
+        this.#cachedRuns = runs
+        this.ctx.emitter.relevantRunChange()
+      }
+
+      this.#pollingTimeout = undefined
+      this.#pollForRuns()
+    }, 15000)
+  }
+
+  #stopPolling () {
+    debug('stop polling')
+    if (this.#pollingTimeout) {
+      clearInterval(this.#pollingTimeout)
+      this.#pollingTimeout = undefined
+    }
   }
 }

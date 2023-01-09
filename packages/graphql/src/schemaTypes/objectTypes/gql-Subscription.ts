@@ -135,10 +135,10 @@ export const Subscription = subscriptionType({
       type: RelevantRun,
       description: 'Return the runs from the Cloud relevant to the current local git commit',
       subscribe: (source, args, ctx) => {
-        return ctx.emitter.subscribeTo('relevantRunChange')
+        return ctx.relevantRuns.polling()
       },
-      resolve: async (source, args, ctx) => {
-        return ctx.relevantRuns.getRelevantRuns(source.git?.currentHashes || [])
+      resolve: async (root, args, ctx) => {
+        return ctx.relevantRuns.getRelevantRuns(ctx.git?.currentHashes || [])
       },
     })
   },
