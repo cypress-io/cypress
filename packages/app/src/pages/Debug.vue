@@ -1,22 +1,17 @@
 <template>
-  <TransitionQuickFade>
-    <DebugLoading v-if="isLoading" />
-    <DebugContainer
-      v-else
-      data-cy="debug-container"
-      :gql="query.data.value"
-    />
-  </TransitionQuickFade>
+  <DebugContainer
+    data-cy="debug-container"
+    :gql="query.data.value"
+    :is-loading="isLoading"
+  />
 </template>
 
 <script setup lang="ts">
 
 import DebugContainer from '../debug/DebugContainer.vue'
-import DebugLoading from '../debug/empty/DebugLoading.vue'
 import { gql, useQuery, useSubscription } from '@urql/vue'
 import { DebugDocument, Debug_SpecsChangeDocument } from '../generated/graphql'
-import { ref, watchEffect, computed } from 'vue'
-import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
+import { computed } from 'vue'
 import { useRelevantRun } from '../composables/useRelevantRun'
 
 gql`
@@ -37,8 +32,6 @@ query Debug($runNumber: Int!, $nextRunNumber: Int!, $hasNextRun: Boolean!) {
 }
 `
 
-const hasLoadedFirstTime = ref(false)
-
 const relevantRuns = useRelevantRun()
 
 const variables = computed(() => {
@@ -49,17 +42,14 @@ const variables = computed(() => {
   }
 })
 
-const query = useQuery({ query: DebugDocument, variables, pause: true, requestPolicy: 'network-only' })
-
-const isLoading = computed(() => {
-  return !hasLoadedFirstTime.value || query.fetching.value
+const shouldPauseQuery = computed(() => {
+  return variables.value.runNumber === -1
 })
 
-watchEffect(() => {
-  if (relevantRuns.value?.current) {
-    query.executeQuery()
-    hasLoadedFirstTime.value = true
-  }
+const query = useQuery({ query: DebugDocument, variables, pause: shouldPauseQuery, requestPolicy: 'network-only' })
+
+const isLoading = computed(() => {
+  return !relevantRuns.value || query.fetching.value
 })
 
 useSubscription({ query: Debug_SpecsChangeDocument })

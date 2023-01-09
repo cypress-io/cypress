@@ -1,7 +1,8 @@
 <template>
   <div class="h-full">
+    <DebugLoading v-if="isLoading" />
     <DebugError
-      v-if="showError"
+      v-else-if="showError"
     />
     <div
       v-else-if="loginConnectStore.user.isLoggedIn && loginConnectStore.project.isProjectConnected && run?.status"
@@ -57,6 +58,7 @@ import { gql } from '@urql/vue'
 import { computed } from '@vue/reactivity'
 import type { CloudRunStatus, DebugSpecsFragment, TestingTypeEnum } from '../generated/graphql'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import DebugLoading from '../debug/empty/DebugLoading.vue'
 import DebugPageHeader from './DebugPageHeader.vue'
 import DebugPendingRunSplash from './DebugPendingRunSplash.vue'
 import DebugSpecList from './DebugSpecList.vue'
@@ -149,6 +151,7 @@ const props = defineProps<{
   gql?: DebugSpecsFragment
   // This prop is just to stub the error state for now
   showError?: boolean
+  isLoading?: boolean
 }>()
 
 const loginConnectStore = useLoginConnectStore()
