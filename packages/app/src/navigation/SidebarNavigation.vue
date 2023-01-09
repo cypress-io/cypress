@@ -139,10 +139,7 @@ fragment SidebarNavigation on Query {
         runByNumber(runNumber: $runNumber) @include(if: $hasCurrentRun){
           id
           status
-          testsForReview {
-            id
-            state
-          }
+          totalFailed
         }
       }
     }
@@ -173,7 +170,7 @@ const debugBadge = computed<Badge | undefined>(() => {
   const newBadge: Badge = { value: t('sidebar.debug.new'), status: 'success', label: t('sidebar.debug.debugFeature') }
 
   if (props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject') {
-    const { status, testsForReview } = props.gql.currentProject.cloudProject.runByNumber || {}
+    const { status, totalFailed } = props.gql.currentProject.cloudProject.runByNumber || {}
 
     if (status === 'NOTESTS' || status === 'RUNNING') {
       return showNewBadge ? newBadge : undefined
@@ -183,23 +180,19 @@ const debugBadge = computed<Badge | undefined>(() => {
       return { value: '0', status: 'success', label: t('sidebar.debug.passed') }
     }
 
-    if (testsForReview?.length) {
-      const valueToDisplay = testsForReview.length < 9
-        ? String(testsForReview.length)
+    if (totalFailed) {
+      const valueToDisplay = totalFailed < 9
+        ? String(totalFailed)
         : '9+'
-
-      if (status === 'ERRORED') {
-        return { value: valueToDisplay, status: 'error', label: t('sidebar.debug.errored') }
-      }
 
       return {
         value: valueToDisplay,
         status: 'failed',
-        label: t('sidebar.debug.failed', testsForReview.length),
+        label: t('sidebar.debug.failed', totalFailed),
       }
     }
 
-    return undefined
+    return { value: '0', status: 'error', label: t('sidebar.debug.errored') }
   }
 
   return showNewBadge ? newBadge : undefined
