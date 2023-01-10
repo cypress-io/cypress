@@ -69,8 +69,9 @@ export function useUnifiedRunner () {
           specStore.setTestFilter(undefined)
         }
 
-        // Either there is a new spec or the runId has changed. Returning a new object
-        // will kick off a new run
+        // Either there is a new spec or the runId has changed. Returning a new object will kick off a new run.
+        // A user could be looking at a given run when a new run is kicked off by CI or another user.
+        // They can view the newer run using an in-UI transition which updates the runId and kicks off new queries.
         specStore.setActiveSpec({ ...activeSpecInSpecsList })
       })
 
