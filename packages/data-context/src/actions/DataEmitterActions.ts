@@ -205,9 +205,7 @@ export class DataEmitterActions extends DataEmitterEvents {
       pending.push({ done: false, value: opts?.initialValue })
     }
 
-    if (this.pub.listenerCount(evt) === 0) {
-      this.pub.on(evt, subscribed)
-    }
+    this.pub.on(evt, subscribed)
 
     const iterator = {
       async next () {
