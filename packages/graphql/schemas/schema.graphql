@@ -202,6 +202,18 @@ type CloudOrganizationEdge {
   node: CloudOrganization!
 }
 
+type CloudPollingIntervals {
+  """
+  The frequency with which the CloudProject.runByNumber field should be polled, in seconds.
+  """
+  runByNumber: Int
+
+  """
+  The frequency with which the CloudProject.runsByCommitShas field should be polled, in seconds.
+  """
+  runsByCommitShas: Int
+}
+
 """A CloudProject represents a Project stored in the Cypress Cloud"""
 type CloudProject implements Node {
   """A link to the settings page of the project in the dashboard"""
@@ -1896,6 +1908,9 @@ type Query {
   """Metadata about the migration, null if we aren't showing it"""
   migration: Migration
   node(id: ID!): Node
+
+  """Defines the suggested polling intervals for various schema resources"""
+  pollingIntervals: CloudPollingIntervals
 
   """All known projects for the app"""
   projects: [ProjectLike!]!

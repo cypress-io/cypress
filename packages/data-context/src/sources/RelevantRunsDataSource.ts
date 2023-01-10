@@ -25,8 +25,10 @@ const RELEVANT_RUN_OPERATION_DOC = gql`
             sha
           }
         }
-
       }
+    }
+    pollingIntervals {
+      runsByCommitShas
     }
   }
 `
@@ -38,6 +40,7 @@ export const EMPTY_RETURN: RelevantRun = { current: undefined, next: undefined, 
  * DataSource to encapsulate querying Cypress Cloud for runs that match a list of local Git commit shas
  */
 export class RelevantRunsDataSource {
+  #pollingInterval: number = 30
   #currentRun?: number
   #currentCommitSha?: string
   #pollingTimeout?: NodeJS.Timeout
@@ -68,7 +71,7 @@ export class RelevantRunsDataSource {
 
     debug(`Fetching runs for ${projectSlug} and ${shas.length} shas`)
 
-    const result = await this.ctx.cloud.executeRemoteGraphQL<Pick<Query, 'cloudProjectBySlug'>>({
+    const result = await this.ctx.cloud.executeRemoteGraphQL<Pick<Query, 'cloudProjectBySlug'> & Pick<Query, 'pollingIntervals'>>({
       fieldName: 'cloudProjectBySlug',
       operationDoc: RELEVANT_RUN_OPERATION_DOC,
       operation: RELEVANT_RUN_UPDATE_OPERATION,
@@ -79,10 +82,17 @@ export class RelevantRunsDataSource {
       requestPolicy: 'network-only', // we never want to hit local cache for this request
     })
 
-    debug('Result returned type', result.data?.cloudProjectBySlug?.__typename)
+    const cloudProject = result.data?.cloudProjectBySlug
+    const pollingInterval = result.data?.pollingIntervals?.runsByCommitShas
 
-    if (result.data?.cloudProjectBySlug?.__typename === 'CloudProject') {
-      const runs = result.data.cloudProjectBySlug.runsByCommitShas?.map((run) => {
+    debug(`Result returned - type: ${cloudProject?.__typename} pollingInterval: ${pollingInterval}`)
+
+    if (pollingInterval) {
+      this.#pollingInterval = pollingInterval
+    }
+
+    if (cloudProject?.__typename === 'CloudProject') {
+      const runs = cloudProject.runsByCommitShas?.map((run) => {
         if (run?.runNumber && run?.status && run.commitInfo?.sha) {
           return {
             runNumber: run.runNumber,
@@ -117,7 +127,7 @@ export class RelevantRunsDataSource {
         }
       } else if (firstNonRunningRun) {
         // if a non running run is found
-        // use it has the current run
+        // use it as the current run
         // the next run is the first running run if it exists
         currentRun = firstNonRunningRun
         nextRun = firstRunningRun
@@ -193,7 +203,7 @@ export class RelevantRunsDataSource {
 
       this.#pollingTimeout = undefined
       this.#pollForRuns()
-    }, 15000)
+    }, this.#pollingInterval * 1000)
   }
 
   #stopPolling () {
