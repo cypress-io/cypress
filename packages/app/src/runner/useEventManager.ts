@@ -19,7 +19,7 @@ export function useEventManager () {
     }
 
     autStore.setScriptError(null)
-    UnifiedRunnerAPI.executeSpec(specStore.activeSpec, isRerun, specStore.testFilter)
+    UnifiedRunnerAPI.executeSpec(specStore.activeSpec, isRerun)
   }
 
   function initializeRunnerLifecycleEvents () {

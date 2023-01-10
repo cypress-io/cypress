@@ -24,7 +24,7 @@ import { AutIframe } from './aut-iframe'
 import { EventManager } from './event-manager'
 import { createWebsocket as createWebsocketIo } from '@packages/socket/lib/browser'
 import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
-import type { AutomationElementId, TestFilter } from '@packages/types/src'
+import type { AutomationElementId } from '@packages/types'
 import { useSnapshotStore } from './snapshot-store'
 import { useStudioStore } from '../store/studio-store'
 
@@ -213,7 +213,7 @@ export function addCrossOriginIframe (location) {
  * Cypress on it.
  *
  */
-function runSpecCT (config, spec: SpecFile, testFilter: TestFilter) {
+function runSpecCT (config, spec: SpecFile) {
   const $runnerRoot = getRunnerElement()
 
   // clear AUT, if there is one.
@@ -236,7 +236,7 @@ function runSpecCT (config, spec: SpecFile, testFilter: TestFilter) {
   $autIframe.prop('src', specSrc)
 
   // initialize Cypress (driver) with the AUT!
-  getEventManager().initialize($autIframe, config, testFilter)
+  getEventManager().initialize($autIframe, config)
 }
 
 /**
@@ -267,7 +267,7 @@ function setSpecForDriver (spec: SpecFile) {
  * a Spec IFrame to load the spec's source code, and
  * initialize Cypress on the AUT.
  */
-function runSpecE2E (config, spec: SpecFile, testFilter: TestFilter) {
+function runSpecE2E (config, spec: SpecFile) {
   const $runnerRoot = getRunnerElement()
 
   // clear AUT, if there is one.
@@ -311,7 +311,7 @@ function runSpecE2E (config, spec: SpecFile, testFilter: TestFilter) {
   })
 
   // initialize Cypress (driver) with the AUT!
-  getEventManager().initialize($autIframe, config, testFilter)
+  getEventManager().initialize($autIframe, config)
 }
 
 export function getRunnerConfigFromWindow () {
@@ -382,7 +382,7 @@ async function initialize () {
  * 5. Setup the spec. This involves a few things, see the `runSpecCT` function's
  *    description for more information.
  */
-async function executeSpec (spec: SpecFile, isRerun: boolean = false, testFilter: TestFilter) {
+async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
   await teardownSpec(isRerun)
 
   const mobxRunnerStore = getMobxRunnerStore()
@@ -404,11 +404,11 @@ async function executeSpec (spec: SpecFile, isRerun: boolean = false, testFilter
   getEventManager().setup(config)
 
   if (window.__CYPRESS_TESTING_TYPE__ === 'e2e') {
-    return runSpecE2E(config, spec, testFilter)
+    return runSpecE2E(config, spec)
   }
 
   if (window.__CYPRESS_TESTING_TYPE__ === 'component') {
-    return runSpecCT(config, spec, testFilter)
+    return runSpecCT(config, spec)
   }
 
   throw Error('Unknown or undefined testingType on window.__CYPRESS_TESTING_TYPE__')

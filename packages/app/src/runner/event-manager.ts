@@ -3,12 +3,13 @@ import { EventEmitter } from 'events'
 import type { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 import type MobX from 'mobx'
 import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriverMap } from './event-manager-types'
-import type { RunState, CachedTestState, AutomationElementId, FileDetails, ReporterStartInfo, ReporterRunState, TestFilter } from '@packages/types'
+import type { RunState, CachedTestState, AutomationElementId, FileDetails, ReporterStartInfo, ReporterRunState } from '@packages/types'
 
 import { logger } from './logger'
 import type { Socket } from '@packages/socket/lib/browser'
 import { automation, useRunnerUiStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
+import { useSpecStore } from '../store/specs-store'
 import { useStudioStore } from '../store/studio-store'
 import { getAutIframeModel } from '.'
 import { handlePausing } from './events/pausing'
@@ -55,6 +56,7 @@ export class EventManager {
   cypressInCypressMochaEvents: CypressInCypressMochaEvent[] = []
   // Used for testing the experimentalSingleTabRunMode experiment. Ensures AUT is correctly destroyed between specs.
   ws: Socket
+  specStore: ReturnType<typeof useSpecStore>
   studioStore: ReturnType<typeof useStudioStore>
 
   constructor (
@@ -68,6 +70,7 @@ export class EventManager {
   ) {
     this.selectorPlaygroundModel = selectorPlaygroundModel
     this.ws = ws
+    this.specStore = useSpecStore()
     this.studioStore = useStudioStore()
   }
 
@@ -379,8 +382,10 @@ export class EventManager {
     return this.Cypress.isBrowser(browserName)
   }
 
-  initialize ($autIframe: JQuery<HTMLIFrameElement>, config: Record<string, any>, testFilter: TestFilter) {
+  initialize ($autIframe: JQuery<HTMLIFrameElement>, config: Record<string, any>) {
     performance.mark('initialize-start')
+
+    const testFilter = this.specStore.testFilter
 
     return Cypress.initialize({
       $autIframe,

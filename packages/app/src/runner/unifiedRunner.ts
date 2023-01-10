@@ -64,10 +64,7 @@ export function useUnifiedRunner () {
         if (route.query.runId) {
           const res = await testsForRunMutation.executeMutation({ runId: route.query.runId as string })
 
-          // spread to get rid of readonly
-          const failedTests = [...res.data?.testsForRun || []]
-
-          specStore.setTestFilter(failedTests.length ? failedTests : undefined)
+          specStore.setTestFilter(res.data?.testsForRun?.length ? res.data.testsForRun : undefined)
         } else {
           specStore.setTestFilter(undefined)
         }
