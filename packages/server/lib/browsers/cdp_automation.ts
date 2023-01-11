@@ -12,7 +12,6 @@ import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@
 import type { WriteVideoFrame } from '@packages/types'
 import type { Automation } from '../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
-import type Memory from './memory'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
@@ -155,7 +154,7 @@ const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
 }
 
 export class CdpAutomation {
-  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private memory?: Memory) {
+  private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
     onFn('Network.responseReceived', this.onResponseReceived)
   }
@@ -169,8 +168,8 @@ export class CdpAutomation {
     await this.sendDebuggerCommandFn('Page.startScreencast', screencastOpts)
   }
 
-  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, memory?: Memory): Promise<CdpAutomation> {
-    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, sendCloseCommandFn, automation, memory)
+  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, sendCloseCommandFn: SendCloseCommand, automation: Automation): Promise<CdpAutomation> {
+    const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, sendCloseCommandFn, automation)
 
     await sendDebuggerCommandFn('Network.enable', {
       maxTotalBufferSize: 0,
@@ -353,8 +352,10 @@ export class CdpAutomation {
         return this.sendCloseCommandFn(data.shouldKeepTabOpen)
       case 'focus:browser:window':
         return this.sendDebuggerCommandFn('Page.bringToFront')
-      case 'maybe:collect:garbage':
-        return this.memory?.checkMemoryAndCollectGarbage(data)
+      case 'get:heap:size:limit':
+        return this.sendDebuggerCommandFn('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' })
+      case 'collect:garbage':
+        return this.sendDebuggerCommandFn('HeapProfiler.collectGarbage')
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }

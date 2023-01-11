@@ -21,7 +21,7 @@ import { BrowserCriClient } from './browser-cri-client'
 import type { CriClient } from './cri-client'
 import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
-import Memory from './memory'
+import memory from './memory'
 
 const debug = debugModule('cypress:server:browsers:chrome')
 
@@ -447,8 +447,7 @@ const _handlePausedRequests = async (client) => {
 }
 
 const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
-  const memory = await Memory.create(client.send)
-  const cdpAutomation = await CdpAutomation.create(client.send, client.on, resetBrowserTargets, automation, memory)
+  const cdpAutomation = await CdpAutomation.create(client.send, client.on, resetBrowserTargets, automation)
 
   automation.use(cdpAutomation)
 
@@ -615,6 +614,8 @@ export = {
     // Handle chrome tab crashes.
     pageCriClient.on('Inspector.targetCrashed', () => {
       const err = errors.get('RENDERER_CRASHED')
+
+      memory.endProfiling(options.spec)
 
       if (!options.onError) {
         errors.log(err)

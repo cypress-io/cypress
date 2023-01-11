@@ -539,6 +539,18 @@ export class EventManager {
       })
     })
 
+    Cypress.on('run:start', async () => {
+      if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
+        Cypress.backend('start:memory:profiling')
+      }
+    })
+
+    Cypress.on('run:end', () => {
+      if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
+        Cypress.backend('end:memory:profiling', Cypress.config('spec'))
+      }
+    })
+
     driverToLocalEvents.forEach((event) => {
       Cypress.on(event, (...args: unknown[]) => {
         // special case for asserting the correct mocha events + payload
@@ -573,7 +585,7 @@ export class EventManager {
 
       // if the experimental flag is on and we are in a chromium based browser, determine if garbage collection is needed
       if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
-        await Cypress.automation('maybe:collect:garbage', { test: { title: test.title, order: test.order, currentRetry: test.currentRetry() } })
+        await Cypress.backend('maybe:collect:garbage', { test: { title: test.title, order: test.order, currentRetry: test.currentRetry() } })
       }
     })
 

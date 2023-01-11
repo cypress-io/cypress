@@ -12,7 +12,7 @@ import type { Browser, BrowserInstance } from './types'
 import type { BrowserWindow, WebContents } from 'electron'
 import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, Preferences, RunModeVideoApi } from '@packages/types'
-import Memory from './memory'
+import memory from './memory'
 
 // TODO: unmix these two types
 type ElectronOpts = Windows.WindowOptions & BrowserLaunchOpts
@@ -65,8 +65,7 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
     win.destroy()
   }
 
-  const memory = await Memory.create(sendCommand)
-  const automation = await CdpAutomation.create(sendCommand, on, sendClose, parent, memory)
+  const automation = await CdpAutomation.create(sendCommand, on, sendClose, parent)
 
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
     switch (message) {
@@ -147,6 +146,8 @@ export = {
       resizable: !options.browser.isHeadless,
       onCrashed () {
         const err = errors.get('RENDERER_CRASHED')
+
+        memory.endProfiling(options.spec)
 
         if (!options.onError) {
           errors.log(err)
@@ -473,14 +474,14 @@ export = {
   },
 
   /**
-   * Clear instance state for the electron instance, this is normally called in on kill or on exit for electron there isn't state to clear.
+   * Clear instance state for the electron instance, this is normally called on kill or on exit, for electron there isn't any state to clear.
    */
   clearInstanceState () {},
 
   async connectToNewSpec (browser: Browser, options: ElectronOpts, automation: Automation) {
     if (!options.url) throw new Error('Missing url in connectToNewSpec')
 
-    await this.open(browser, options.url, options, automation)
+    return await this.open(browser, options.url, options, automation)
   },
 
   connectToExisting () {

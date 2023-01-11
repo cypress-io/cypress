@@ -8,7 +8,7 @@ const browsers = require('../browsers')
 const plugins = require('../plugins')
 
 type Group = 'browser' | 'cypress' | 'launchpad' | 'plugin' | 'ffmpeg' | 'electron-shared' | 'other'
-type Process = si.Systeminformation.ProcessesProcessData & {
+export type Process = si.Systeminformation.ProcessesProcessData & {
   group?: Group
 }
 

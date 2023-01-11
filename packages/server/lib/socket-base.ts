@@ -28,6 +28,7 @@ import type { Socket } from '@packages/socket'
 
 import type { RunState, CachedTestState } from '@packages/types'
 import { cors } from '@packages/network'
+import memory from './browsers/memory'
 
 type StartListeningCallbacks = {
   onSocketConnection: (socket: any) => void
@@ -466,6 +467,12 @@ export class SocketBase {
               return setCrossOriginCookie(args[0])
             case 'request:sent:with:credentials':
               return this.localBus.emit('request:sent:with:credentials', args[0])
+            case 'start:memory:profiling':
+              return memory.startProfiling(automation)
+            case 'end:memory:profiling':
+              return memory.endProfiling(args[0])
+            case 'maybe:collect:garbage':
+              return memory.maybeCollectGarbage({ ...args[0], automation })
             default:
               throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
           }
