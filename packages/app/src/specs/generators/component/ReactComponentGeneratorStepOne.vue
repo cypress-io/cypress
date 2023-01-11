@@ -167,7 +167,7 @@ whenever(result, () => {
 })
 
 whenever(generatedSpecError, () => {
-  title.value = t('createSpec.component.importEmptySpec.header')
+  title.value = t('createSpec.component.importTemplateSpec.header')
 })
 
 const makeSpec = async ({ file, item }) => {

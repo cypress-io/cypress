@@ -3,6 +3,7 @@ module.exports = {
   'port': 8888,
   'projectId': 'abc123',
   'component': {
+    experimentalSingleTabRunMode: true,
     'specPattern': 'src/**/*.spec.cy.js',
     'supportFile': 'tests/_support/spec_helper.js',
     'devServer': {

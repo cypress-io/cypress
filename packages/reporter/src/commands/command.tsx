@@ -37,7 +37,8 @@ export const formattedMessage = (message: string) => {
   const split = message.split(regex)
   const matchingText = searchText.find((text) => message.includes(text))
   const textToConvert = [split[0].trim(), ...(matchingText ? [matchingText] : [])].join(' ')
-  const converted = md.renderInline(textToConvert)
+  const spaceEscapedText = textToConvert.replace(/^ +/gm, (initialSpaces) => '&#32;'.repeat(initialSpaces.length)) // &#32 is the HTML entity for a space
+  const converted = md.renderInline(spaceEscapedText)
   const assertion = (split[1] && [`<strong>${split[1].trim()}</strong>`]) || []
 
   return [converted, ...assertion].join(' ')

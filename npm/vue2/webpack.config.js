@@ -2,7 +2,6 @@
 // The default for running tests in this project
 // https://vue-loader.vuejs.org/guide/#manual-setup
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
 const path = require('path')
 const pkg = require('package.json')
 

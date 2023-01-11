@@ -1,24 +1,24 @@
 import _ from 'lodash'
-import { browsers, validateMinVersion } from '../../lib/browsers'
+import { knownBrowsers, validateMinVersion } from '../../lib/known-browsers'
 import { expect } from 'chai'
 import { FoundBrowser } from '@packages/types'
 const snapshot = require('snap-shot-it')
 
 describe('browsers', () => {
   it('returns the expected list of browsers', () => {
-    snapshot(browsers)
+    snapshot(knownBrowsers)
   })
 
   // https://github.com/cypress-io/cypress/issues/6669
   it('exports multiline versionRegexes', () => {
-    expect(_.every(browsers.map(({ versionRegex }) => {
+    expect(_.every(knownBrowsers.map(({ versionRegex }) => {
       return versionRegex.multiline
     }))).to.be.true
   })
 
   describe('firefox-stable validator', () => {
     const firefoxBrowser = {
-      ...browsers.find(({ name, channel }) => name === 'firefox' && channel === 'stable'),
+      ...knownBrowsers.find(({ name, channel }) => name === 'firefox' && channel === 'stable'),
       path: '/path/to/firefox',
     }
 
