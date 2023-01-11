@@ -39,6 +39,10 @@
           v-if="run.totalFailed && shouldDisplaySpecsList(run.status)"
           :specs="debugSpecsArray"
         />
+        <DebugSpecLimitBanner
+          v-if="run.totalFailed && run.totalFailed >= 100"
+          :cloud-run-url="run.url"
+        />
       </template>
     </div>
     <div
@@ -65,6 +69,7 @@ import DebugNotLoggedIn from './empty/DebugNotLoggedIn.vue'
 import DebugNoProject from './empty/DebugNoProject.vue'
 import DebugNoRuns from './empty/DebugNoRuns.vue'
 import DebugError from './empty/DebugError.vue'
+import DebugSpecLimitBanner from './DebugSpecLimitBanner.vue'
 import DebugNewRelevantRunBar from './DebugNewRelevantRunBar.vue'
 import { specsList } from './utils/DebugMapping'
 import type { CloudRunHidingReason } from './DebugOverLimit.vue'
@@ -115,7 +120,7 @@ fragment DebugSpecs on Query {
             id
             ...DebugPageDetails_cloudCiBuildInfo
           }
-          testsForReview {
+          testsForReview(limit: 100) {
             id
             ...DebugSpecListTests
           }
