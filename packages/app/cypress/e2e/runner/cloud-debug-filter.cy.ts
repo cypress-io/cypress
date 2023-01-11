@@ -32,6 +32,33 @@ describe('cloud debug test filtering', () => {
     cy.get('.runnable-title').contains('t4')
   })
 
+  it('wraps filter UI with large number of tests', () => {
+    cy.visitApp(`specs/runner?file=cypress/e2e/lots-of-tests.cy.js`)
+
+    cy.get('[data-cy="reporter-panel"]').as('reporterPanel')
+
+    cy.waitForSpecToFinish()
+
+    cy.withCtx((ctx) => {
+      ctx.coreData.cloud.testsForRunResults = ['test1']
+    })
+
+    cy.visitApp(`specs/runner?file=cypress/e2e/lots-of-tests.cy.js&runId=123`)
+    cy.waitForSpecToFinish({ passCount: 50 })
+
+    cy.get('@reporterPanel').then((el) => el.width(500))
+    cy.get('@reporterPanel').percySnapshot('wide')
+
+    cy.get('@reporterPanel').then((el) => el.width(350))
+    cy.get('@reporterPanel').percySnapshot('medium')
+
+    cy.get('@reporterPanel').then((el) => el.width(250))
+    cy.get('@reporterPanel').percySnapshot('narrow')
+
+    cy.get('@reporterPanel').then((el) => el.width(150))
+    cy.get('@reporterPanel').percySnapshot('skinny')
+  })
+
   it('works with skips and onlys', () => {
     cy.visitApp(`specs/runner?file=cypress/e2e/skip-and-only.cy.js`)
 
@@ -93,5 +120,20 @@ describe('cloud debug test filtering', () => {
     cy.get('.runnable-title').eq(0).contains('t1 (skipped due to browser)')
     cy.get('.runnable-title').eq(1).contains('s1 (skipped due to browser)')
     cy.get('.runnable-title').eq(2).contains('t2')
+  })
+
+  it('filter is maintained across cross-domain reinitialization', () => {
+    cy.visitApp(`specs/runner?file=cypress/e2e/domain-change.cy.js`)
+
+    cy.get('[data-cy="reporter-panel"]').as('reporterPanel')
+
+    cy.waitForSpecToFinish()
+
+    cy.withCtx((ctx) => {
+      ctx.coreData.cloud.testsForRunResults = ['t2', 't3']
+    })
+
+    cy.visitApp(`specs/runner?file=cypress/e2e/domain-change.cy.js&runId=123`)
+    cy.waitForSpecToFinish({ failCount: 2 })
   })
 })
