@@ -40,7 +40,8 @@
           :specs="debugSpecsArray"
         />
         <DebugSpecLimitBanner
-          v-if="run.totalFailed && run.totalFailed >= 100"
+          v-if="run.totalFailed && run.totalFailed > 100"
+          :failed-test-count="run.totalFailed"
           :cloud-run-url="run.url"
         />
       </template>
