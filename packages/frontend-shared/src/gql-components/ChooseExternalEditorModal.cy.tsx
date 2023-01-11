@@ -45,7 +45,7 @@ describe('ChooseExternalEditorModal', () => {
 
     cy.get('[data-cy="custom-editor"]').should('not.exist')
 
-    cy.get('@chooseEditor').click()
+    cy.contains('Vim').click()
     cy.contains('Custom').click()
     cy.get('[data-cy="custom-editor"]').should('exist')
 

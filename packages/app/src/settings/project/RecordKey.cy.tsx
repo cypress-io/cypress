@@ -27,7 +27,8 @@ describe('<RecordKey />', () => {
     cy.get('code').as('Record key input')
     .should('be.visible')
     .contains('code', key).should('not.exist')
-    .get('[aria-label="Record Key Visibility Toggle"]').as('Password Toggle')
+
+    cy.get('[aria-label="Record Key Visibility Toggle"]').as('Password Toggle')
     .click()
 
     cy.contains('code', key).should('be.visible')

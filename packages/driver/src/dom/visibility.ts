@@ -455,6 +455,10 @@ const parentHasOpacityZero = function ($el) {
 
 /* eslint-disable no-cond-assign */
 export const getReasonIsHidden = function ($el, options = { checkOpacity: true }) {
+  if (_.isString($el)) {
+    return `No \`${$el}\` exists`
+  }
+
   // TODO: need to add in the reason an element
   // is hidden when its fixed position and its
   // either being covered or there is no el

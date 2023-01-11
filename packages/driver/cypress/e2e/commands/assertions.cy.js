@@ -765,6 +765,22 @@ describe('src/cy/commands/assertions', () => {
 
         cy.should(() => {})
       })
+
+      it('throws a good error when aliased subject disappears', function (done) {
+        cy.once('fail', (err) => {
+          expect(this.lastLog.get('state')).to.eq('failed')
+          expect(err.message).to.eq('Timed out retrying after 50ms: expected \'button\' to be \'visible\'\n\nNo `button` exists')
+          done()
+        })
+
+        cy.get('button').should('be.visible').as('btn')
+
+        cy.then(() => {
+          cy.$$('button').remove()
+        })
+
+        cy.get('@btn', { timeout: 50 })
+      })
     })
 
     describe('.log', () => {

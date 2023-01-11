@@ -205,14 +205,14 @@ describe('<ExpandableFileChooser />', () => {
     .type(newExtension, { delay: 0 })
 
     // Validate it's in there
-    .get(extensionInputSelector)
+    cy.get(extensionInputSelector)
     .should('have.value', newExtension)
 
     // debounce should cause this to hit
-    .get('@onUpdateExtensionSpy').should('not.have.been.calledWith', newExtension)
+    cy.get('@onUpdateExtensionSpy').should('not.have.been.calledWith', newExtension)
 
     // once the debounce is resolved, this will hit
-    .get('@onUpdateExtensionSpy').should('have.been.calledWith', newExtension)
+    cy.get('@onUpdateExtensionSpy').should('have.been.calledWith', newExtension)
   })
 
   it('renders expanded content slot when row is clicked', () => {
