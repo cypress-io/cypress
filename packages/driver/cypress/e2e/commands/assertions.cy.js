@@ -394,6 +394,10 @@ describe('src/cy/commands/assertions', () => {
         cy.get('button').should('have.length', `${length}`)
       })
 
+      it('allows non-existent elements to have length 0', () => {
+        cy.get('#does-not-exist').should('have.length', 0)
+      })
+
       it('throws when should(\'have.length\') isnt a number', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.eq('You must provide a valid number to a `length` assertion. You passed: `asdf`')

@@ -56,6 +56,7 @@ export default function (Commands, Cypress, cy, state) {
   function should (chainerString, ...args) {
     Cypress.ensure.isChildCommand(this, args, cy)
     this.set('timeout', this.get('prev').get('timeout'))
+    this.set('ensureExistenceFor', '')
 
     // Most commands manage their own log messages. However, assertion logging is handled
     // by ../assertions.ts, because assertions can be called either through `.should('be.true')'
@@ -65,7 +66,7 @@ export default function (Commands, Cypress, cy, state) {
     // with its previous incarnation.
     const logs = {}
     const onBeforeLog = (log, logIndex) => {
-      if (log.get('name') !== 'assert') {
+      if (log.get('name') !== 'assert' && log.get('name') !== 'should') {
         return true
       }
 
