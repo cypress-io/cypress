@@ -138,15 +138,14 @@ const getUserInvocationStack = (err, state) => {
   // prefer err.userInvocation stack if it's been set
   let userInvocationStack = getUserInvocationStackFromError(err) || state('currentAssertionUserInvocationStack')
 
-  // if there is no user invocation stack from an assertion or it is the default
-  // assertion, meaning it came from a command (e.g. cy.get), prefer the
-  // command's user invocation stack so the code frame points to the command.
-  // `should` callbacks are tricky because the `currentAssertionUserInvocationStack`
+  // if there is no user invocation stack from an assertion, meaning it came
+  // from a command (e.g. cy.get), prefer the command's user invocation stack
+  // so the code frame points to the command. `should` callbacks are tricky
+  // because the `currentAssertionUserInvocationStack`
   // points to the `cy.should`, but the error came from inside the callback,
   // so we need to prefer that.
   if (
     !userInvocationStack
-    || err.isDefaultAssertionErr
     || (currentAssertionCommand && !current?.get('followedByShouldCallback'))
     || withInvocationStack?.get('selector')
   ) {

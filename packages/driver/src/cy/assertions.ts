@@ -243,8 +243,6 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
           err = e2
         }
 
-        err.isDefaultAssertionErr = true
-
         options.error = err
 
         const { onFail, onRetry } = callbacks
