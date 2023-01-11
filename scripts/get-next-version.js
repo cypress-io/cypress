@@ -8,7 +8,7 @@ const bumpCb = require('conventional-recommended-bump')
 const { promisify } = require('util')
 
 const currentVersion = require('../package.json').version
-
+const { releaseRules } = require('./semantic-commits/changeCategories')
 const bump = promisify(bumpCb)
 const paths = ['packages', 'cli']
 
@@ -20,7 +20,33 @@ const getNextVersionForPath = async (path) => {
     return process.env.NEXT_VERSION
   }
 
-  const { releaseType } = await bump({ preset: 'angular', path })
+  const whatBump = (foundCommits) => {
+    // semantic version bump: 0 - major, 1 - minor, 2 - patch
+    let level = 2
+    let breakings = 0
+    let features = 0
+
+    foundCommits.forEach((commit) => {
+      if (releaseRules[commit.type].release === 'major') {
+        breakings += 1
+        level = 0
+      } else if (releaseRules[commit.type].release === 'minor') {
+        features += 1
+        if (level === 2) {
+          level = 1
+        }
+      }
+    })
+
+    return {
+      level,
+      reason: breakings > 0
+        ? `There is ${breakings} BREAKING CHANGE and ${features} features`
+        : features > 0 ? `There ${features} features` : 'There are only patch changes in this release',
+    }
+  }
+
+  const { releaseType } = await bump({ whatBump, path })
 
   return semver.inc(currentVersion, releaseType || 'patch')
 }
