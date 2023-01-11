@@ -38,7 +38,7 @@ defineProps<{
 
 <style scoped>
 #limit-row li:not(:first-child)::before {
-  content: '.';
-  @apply -mt-8px text-lg text-gray-500 pr-8px
+  content: '•';
+  @apply text-lg text-gray-500 pr-8px
 }
 </style>
