@@ -315,10 +315,10 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     this.res.setHeader('Origin-Agent-Cluster', '?0')
 
     // Only patch the headers that are being supplied by the response
-    const incomingCSPHeaders = ['content-security-policy', 'content-security-policy-report-only']
+    const incomingCspHeaders = ['content-security-policy', 'content-security-policy-report-only']
     .filter((headerName) => hasCspHeader(this.incomingRes.headers, headerName))
 
-    if (incomingCSPHeaders.length) {
+    if (incomingCspHeaders.length) {
       // In order to allow the injected script to run on sites with a CSP header
       // we must add a generated `nonce` into the response headers
       const nonce = crypto.randomBytes(16).toString('base64')
@@ -335,12 +335,12 @@ const SetInjectionLevel: ResponseMiddleware = function () {
       }
 
       // Iterate through each CSP header
-      incomingCSPHeaders.forEach((headerName) => {
+      incomingCspHeaders.forEach((headerName) => {
         // Map the nonce on each CSP header
-        const modifiedCSPHeaders = parseCspHeaders(this.incomingRes.headers, headerName).map(mapPolicies)
+        const modifiedCspHeaders = parseCspHeaders(this.incomingRes.headers, headerName).map(mapPolicies)
 
         // To replicate original response CSP headers, we must apply all header values as an array
-        this.res.setHeader(headerName, modifiedCSPHeaders)
+        this.res.setHeader(headerName, modifiedCspHeaders)
       })
     }
   }
