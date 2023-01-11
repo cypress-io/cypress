@@ -1,4 +1,4 @@
-import type { MutationSetProjectPreferencesInGlobalCacheArgs, NexusGenObjects, NexusGenUnions } from '@packages/graphql/src/gen/nxs.gen'
+import type { MutationSetProjectPreferencesInGlobalCacheArgs } from '@packages/graphql/src/gen/nxs.gen'
 import { InitializeProjectOptions, FoundBrowser, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig, AllowedState, SpecWithRelativeRoot, OpenProjectLaunchOpts, RUN_ALL_SPECS, RUN_ALL_SPECS_KEY } from '@packages/types'
 import type { EventEmitter } from 'events'
 import execa from 'execa'
@@ -253,7 +253,7 @@ export class ProjectActions {
     }
 
     // launchProject expects a spec when opening browser for url navigation.
-    // We give it an empty spec if none is passed so as to land on home page
+    // We give it an template spec if none is passed so as to land on home page
     const emptySpec: Cypress.Spec = {
       name: '',
       absolute: '',
