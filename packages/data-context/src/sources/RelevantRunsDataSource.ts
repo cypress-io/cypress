@@ -5,6 +5,7 @@ import { chain, compact, isEqual } from 'lodash'
 
 import type { DataContext } from '../DataContext'
 import type { Query, RelevantRun } from '../gen/graphcache-config.gen'
+import { Poller } from '../polling'
 
 const debug = debugLib('cypress:data-context:sources:RelevantRunsDataSource')
 
@@ -43,8 +44,9 @@ export class RelevantRunsDataSource {
   #pollingInterval: number = 30
   #currentRun?: number
   #currentCommitSha?: string
-  #pollingTimeout?: NodeJS.Timeout
   #cachedRuns: RelevantRun = EMPTY_RETURN
+
+  #runsPoller?: Poller<'relevantRunChange'>
 
   constructor (private ctx: DataContext) {}
 
@@ -89,6 +91,9 @@ export class RelevantRunsDataSource {
 
     if (pollingInterval) {
       this.#pollingInterval = pollingInterval
+      if (this.#runsPoller) {
+        this.#runsPoller.interval = this.#pollingInterval
+      }
     }
 
     if (cloudProject?.__typename === 'CloudProject') {
@@ -168,49 +173,19 @@ export class RelevantRunsDataSource {
     return this.getRelevantRuns(shas)
   }
 
-  polling () {
-    debug('relevant runs subscription subscribe')
+  pollForRuns () {
+    if (!this.#runsPoller) {
+      this.#runsPoller = new Poller(this.ctx, 'relevantRunChange', this.#pollingInterval, async () => {
+        const runs = await this.getRelevantRuns(this.ctx.git?.currentHashes || [])
 
-    this.#pollForRuns()
-
-    return this.ctx.emitter.subscribeTo('relevantRunChange', {
-      sendInitial: false,
-      initialValue: this.#cachedRuns,
-      onUnsubscribe: () => {
-        debug('in unsubscribe')
-        this.#stopPolling()
-      },
-    })
-  }
-
-  #pollForRuns () {
-    debug('poll for runs')
-    if (this.#pollingTimeout) {
-      debug('found polling timeout')
-
-      return
+        //only emit a new value if it changes
+        if (!isEqual(runs, this.#cachedRuns)) {
+          this.#cachedRuns = runs
+          this.ctx.emitter.relevantRunChange(runs)
+        }
+      })
     }
 
-    this.#pollingTimeout = setTimeout(async () => {
-      debug('polling interval')
-      const runs = await this.getRelevantRuns(this.ctx.git?.currentHashes || [])
-
-      //only emit a new value if it changes
-      if (!isEqual(runs, this.#cachedRuns)) {
-        this.#cachedRuns = runs
-        this.ctx.emitter.relevantRunChange()
-      }
-
-      this.#pollingTimeout = undefined
-      this.#pollForRuns()
-    }, this.#pollingInterval * 1000)
-  }
-
-  #stopPolling () {
-    debug('stop polling')
-    if (this.#pollingTimeout) {
-      clearInterval(this.#pollingTimeout)
-      this.#pollingTimeout = undefined
-    }
+    return this.#runsPoller.start(this.#cachedRuns)
   }
 }

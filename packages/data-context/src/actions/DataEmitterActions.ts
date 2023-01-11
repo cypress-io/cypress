@@ -1,6 +1,7 @@
 import pDefer from 'p-defer'
 import { EventEmitter } from 'stream'
 import { DataContext } from '../DataContext'
+import type { RelevantRun } from '../gen/graphcache-config.gen'
 
 export interface PushFragmentData {
   data: any
@@ -90,8 +91,8 @@ abstract class DataEmitterEvents {
   }
 
   /** */
-  relevantRunChange () {
-    this._emit('relevantRunChange')
+  relevantRunChange (runs: RelevantRun) {
+    this._emit('relevantRunChange', runs)
   }
 
   /**
@@ -135,6 +136,9 @@ abstract class DataEmitterEvents {
     this.pub.emit(evt, ...args)
   }
 }
+
+export type EventType = keyof DataEmitterEvents
+
 export class DataEmitterActions extends DataEmitterEvents {
   constructor (private ctx: DataContext) {
     super()
