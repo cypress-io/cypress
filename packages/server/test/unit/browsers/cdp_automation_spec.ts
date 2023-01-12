@@ -1,14 +1,12 @@
 const { expect, sinon } = require('../../spec_helper')
 
 import { CdpAutomation } from '../../../lib/browsers/cdp_automation'
-import Memory from '../../../lib/browsers/memory'
 
 context('lib/browsers/cdp_automation', () => {
   context('.CdpAutomation', () => {
     let cdpAutomation: CdpAutomation
 
     beforeEach(async function () {
-      this.memory = sinon.createStubInstance(Memory)
       this.sendDebuggerCommand = sinon.stub()
       this.onFn = sinon.stub()
       this.sendCloseTargetCommand = sinon.stub()
@@ -17,7 +15,7 @@ context('lib/browsers/cdp_automation', () => {
         onRequestEvent: sinon.stub(),
       }
 
-      cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, this.automation, this.memory)
+      cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, this.automation)
       this.onRequest = cdpAutomation.onRequest
     })
 
@@ -306,13 +304,19 @@ context('lib/browsers/cdp_automation', () => {
       })
     })
 
-    describe('maybe:collect:garbage', function () {
-      it('calls memory.checkMemoryAndCollectGarbage', async function () {
-        const args = { test: { title: 'test 1', order: 1, currentRetry: 0 } }
+    describe('get:heap:size:limit', function () {
+      it('sends Runtime.evaluate to request the performance.memory.jsHeapSizeLimit', async function () {
+        this.sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' }).resolves()
 
-        await this.onRequest('maybe:collect:garbage', args)
+        return this.onRequest('get:heap:size:limit').then((resp) => expect(resp).to.be.undefined)
+      })
+    })
 
-        expect(this.memory.checkMemoryAndCollectGarbage).to.be.calledOnceWith(args)
+    describe('collect:garbage', function () {
+      it('sends HeapProfiler.collectGarbage when garbage collection is requested', async function () {
+        this.sendDebuggerCommand.withArgs('HeapProfiler.collectGarbage').resolves()
+
+        return this.onRequest('collect:garbage').then((resp) => expect(resp).to.be.undefined)
       })
     })
   })

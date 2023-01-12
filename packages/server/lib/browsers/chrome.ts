@@ -615,7 +615,7 @@ export = {
     pageCriClient.on('Inspector.targetCrashed', () => {
       const err = errors.get('RENDERER_CRASHED')
 
-      memory.endProfiling(options.spec)
+      memory.endProfiling()
 
       if (!options.onError) {
         errors.log(err)
