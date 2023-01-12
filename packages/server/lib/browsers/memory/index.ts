@@ -1,4 +1,5 @@
 import debugModule from 'debug'
+import _ from 'lodash'
 import si from 'systeminformation'
 import os from 'os'
 import fs from 'fs-extra'
@@ -16,7 +17,7 @@ const MEMORY_THRESHOLD_PERCENTAGE = Number(process.env.CYPRESS_INTERNAL_MEMORY_T
 const MEMORY_PROFILER_INTERVAL = Number(process.env.CYPRESS_MEMORY_PROFILER_INTERVAL) || 1000
 const MEMORY_FOLDER = 'cypress/logs/memory'
 const KIBIBYTE = 1024
-const FOUR_GIBIBYTES = 4 * 1024 * 1024 * 1024
+const FOUR_GIBIBYTES = 4 * (KIBIBYTE ** 3)
 
 let rendererProcess: Process | null
 let handler: MemoryHandler
@@ -26,6 +27,7 @@ let started = false
 let cumulativeStats: { [key: string]: any }[] = []
 let collectGarbageOnNextTest = false
 let timer: NodeJS.Timeout
+let currentSpec
 
 export type MemoryHandler = {
   getTotalMemoryLimit: () => Promise<number>
@@ -47,19 +49,17 @@ export type MemoryHandler = {
  */
 
 export const getJsHeapSizeLimit = async (automation: Automation): Promise<number> => {
-  return measure({ name: 'getJsHeapSizeLimit' }, async () => {
-    let heapLimit
+  let heapLimit
 
-    try {
-      heapLimit = (await automation.request('get:heap:size:limit', null, null)).result.value
-    } catch (err) {
-      debug('could not get jsHeapSizeLimit from browser, using default of four gibibytes')
+  try {
+    heapLimit = (await automation.request('get:heap:size:limit', null, null)).result.value
+  } catch (err) {
+    debug('could not get jsHeapSizeLimit from browser, using default of four gibibytes')
 
-      heapLimit = FOUR_GIBIBYTES
-    }
+    heapLimit = FOUR_GIBIBYTES
+  }
 
-    return heapLimit
-  })
+  return heapLimit
 }
 
 export const getMemoryHandler = async (): Promise<MemoryHandler> => {
@@ -97,7 +97,7 @@ const measure = async ({ name, stats }: { name: string, stats?: {}}, fn: () => P
   return result
 }
 
-const getRendererProcess = (processes: si.Systeminformation.ProcessesData) => {
+export const getRendererProcess = (processes: si.Systeminformation.ProcessesData) => {
   // filter down to the renderer processes
   const groupedProcesses = groupCyProcesses(processes)
   const rendererProcesses = groupedProcesses.filter(
@@ -114,15 +114,13 @@ const getRendererProcess = (processes: si.Systeminformation.ProcessesData) => {
   return maxRendererProcess
 }
 
-const getRendererMemoryUsage = async (stats: { [key: string]: any }): Promise<number | null> => {
+export const getRendererMemoryUsage = async (stats: { [key: string]: any }): Promise<number | null> => {
   if (!rendererProcess) {
     let _rendererProcess: Process | null = null
 
-    await measure({ name: 'retrieveRenderer', stats }, async () => {
-      const processes = await measure({ name: 'retrieveProcesses' }, si.processes)
+    const processes = await measure({ name: 'retrieveProcesses' }, si.processes)
 
-      _rendererProcess = getRendererProcess(processes)
-    })
+    _rendererProcess = getRendererProcess(processes)
 
     if (!_rendererProcess) return null
 
@@ -132,7 +130,7 @@ const getRendererMemoryUsage = async (stats: { [key: string]: any }): Promise<nu
   }
 
   try {
-    const _rendererProcess = await measure({ name: 'retrieveRenderer', stats }, async () => await pid(rendererProcess.pid))
+    const _rendererProcess = await pid(rendererProcess.pid)
 
     return _rendererProcess.memory
   } catch {
@@ -142,43 +140,41 @@ const getRendererMemoryUsage = async (stats: { [key: string]: any }): Promise<nu
   }
 }
 
-const gatherMemoryStats = async () => {
+export const gatherMemoryStats = async () => {
   const stats: { [key: string]: any } = {}
 
-  await measure({ name: 'gatherMemoryStats', stats }, async () => {
-    const [currentAvailableMemory, rendererProcessMemRss] = await Promise.all([
-      handler.getAvailableMemory(totalMemoryLimit, stats),
-      getRendererMemoryUsage(stats),
-    ])
+  const [currentAvailableMemory, rendererProcessMemRss] = await Promise.all([
+    handler.getAvailableMemory(totalMemoryLimit, stats),
+    getRendererMemoryUsage(stats),
+  ])
 
-    if (rendererProcessMemRss === null) {
-      debug('no renderer process found, skipping memory stat collection')
+  if (rendererProcessMemRss === null) {
+    debug('no renderer process found, skipping memory stat collection')
 
-      return
-    }
+    return
+  }
 
-    const maxAvailableRendererMemory = Math.min(jsHeapSizeLimit, currentAvailableMemory + rendererProcessMemRss)
+  const maxAvailableRendererMemory = Math.min(jsHeapSizeLimit, currentAvailableMemory + rendererProcessMemRss)
 
-    // if we're using more than MEMORY_THRESHOLD_PERCENTAGE of the available memory, force a garbage collection
-    const rendererUsagePercentage = (rendererProcessMemRss / maxAvailableRendererMemory) * 100
-    const shouldCollectGarbage = rendererUsagePercentage >= MEMORY_THRESHOLD_PERCENTAGE && process.env.CYPRESS_INTERNAL_FORCE_GC !== '0'
+  // if we're using more than MEMORY_THRESHOLD_PERCENTAGE of the available memory, force a garbage collection
+  const rendererUsagePercentage = (rendererProcessMemRss / maxAvailableRendererMemory) * 100
+  const shouldCollectGarbage = rendererUsagePercentage >= MEMORY_THRESHOLD_PERCENTAGE && process.env.CYPRESS_INTERNAL_FORCE_GC !== '0'
 
-    collectGarbageOnNextTest = collectGarbageOnNextTest || shouldCollectGarbage
+  collectGarbageOnNextTest = collectGarbageOnNextTest || shouldCollectGarbage
 
-    stats.rendererProcessMemRss = rendererProcessMemRss
-    stats.shouldCollectGarbage = shouldCollectGarbage
-    stats.rendererUsagePercentage = rendererUsagePercentage
-    stats.rendererMemoryThreshold = maxAvailableRendererMemory * (MEMORY_THRESHOLD_PERCENTAGE / 100)
-    stats.currentAvailableMemory = currentAvailableMemory
-    stats.maxAvailableRendererMemory = maxAvailableRendererMemory
-    stats.jsHeapSizeLimit = jsHeapSizeLimit
-    stats.totalMemoryLimit = totalMemoryLimit
-    stats.timestamp = Date.now()
+  stats.rendererProcessMemRss = rendererProcessMemRss
+  stats.shouldCollectGarbage = shouldCollectGarbage
+  stats.rendererUsagePercentage = rendererUsagePercentage
+  stats.rendererMemoryThreshold = maxAvailableRendererMemory * (MEMORY_THRESHOLD_PERCENTAGE / 100)
+  stats.currentAvailableMemory = currentAvailableMemory
+  stats.maxAvailableRendererMemory = maxAvailableRendererMemory
+  stats.jsHeapSizeLimit = jsHeapSizeLimit
+  stats.totalMemoryLimit = totalMemoryLimit
+  stats.timestamp = Date.now()
 
-    if (process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS) {
-      cumulativeStats.push(stats)
-    }
-  })
+  if (['1', 'true'].includes(process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS as string)) {
+    cumulativeStats.push(stats)
+  }
 
   debugVerbose('memory stats: %o', stats)
 }
@@ -188,7 +184,7 @@ export const maybeCollectGarbage = async ({ automation, test }: { automation: Au
 
   if (collectGarbageOnNextTest) {
     debug('forcing garbage collection')
-    await measure({ name: 'garbageCollection', stats: log }, async () => await automation.request('collect:garbage', null, null))
+    await automation.request('collect:garbage', null, null)
   } else {
     debug('skipping garbage collection')
   }
@@ -198,7 +194,7 @@ export const maybeCollectGarbage = async ({ automation, test }: { automation: Au
   log.garbageCollected = collectGarbageOnNextTest
   log.timestamp = Date.now()
 
-  if (process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS) {
+  if (['1', 'true'].includes(process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS as string)) {
     cumulativeStats.push(log)
   }
 
@@ -219,7 +215,7 @@ const scheduleMemoryCheck = () => {
   }
 }
 
-export async function startProfiling (automation: Automation) {
+export async function startProfiling (automation: Automation, spec?) {
   if (started) {
     return
   }
@@ -227,6 +223,7 @@ export async function startProfiling (automation: Automation) {
   debugVerbose('start memory profiler')
 
   started = true
+  currentSpec = spec
 
   try {
     handler = await getMemoryHandler()
@@ -242,13 +239,13 @@ export async function startProfiling (automation: Automation) {
   }
 }
 
-export async function endProfiling (spec) {
+export async function endProfiling () {
   clearTimeout(timer)
   started = false
 
-  if (process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS) {
+  if (['1', 'true'].includes(process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS as string) && currentSpec) {
     try {
-      await fs.outputFile(path.join(MEMORY_FOLDER, `${spec.fileName}.json`), JSON.stringify(cumulativeStats))
+      await fs.outputFile(path.join(MEMORY_FOLDER, `${currentSpec.fileName}.json`), JSON.stringify(cumulativeStats))
     } catch (err) {
       debugVerbose('error creating memory stats file: %o', err)
     }
@@ -259,9 +256,14 @@ export async function endProfiling (spec) {
   debugVerbose('end memory profiler')
 }
 
+const getCumulativeStats = () => {
+  return _.clone(cumulativeStats)
+}
+
 export default {
   startProfiling,
   endProfiling,
   checkMemory,
   maybeCollectGarbage,
+  getCumulativeStats,
 }

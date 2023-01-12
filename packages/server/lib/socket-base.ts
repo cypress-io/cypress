@@ -468,9 +468,9 @@ export class SocketBase {
             case 'request:sent:with:credentials':
               return this.localBus.emit('request:sent:with:credentials', args[0])
             case 'start:memory:profiling':
-              return memory.startProfiling(automation)
+              return memory.startProfiling(automation, args[0])
             case 'end:memory:profiling':
-              return memory.endProfiling(args[0])
+              return memory.endProfiling()
             case 'maybe:collect:garbage':
               return memory.maybeCollectGarbage({ ...args[0], automation })
             default:

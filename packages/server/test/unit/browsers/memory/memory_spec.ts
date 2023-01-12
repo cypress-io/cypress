@@ -6,25 +6,32 @@ import * as memory from '../../../../lib/browsers/memory'
 import defaultHandler from '../../../../lib/browsers/memory/default'
 import cgroupV1Handler from '../../../../lib/browsers/memory/cgroup-v1'
 import { proxyquire, expect, sinon } from '../../../spec_helper'
+import { Automation } from '../../../../lib/automation'
 
 describe('lib/browsers/memory', () => {
-  let sendDebuggerCommand
+  before(() => {
+    sinon.useFakeTimers()
+  })
 
-  beforeEach(() => {
-    sendDebuggerCommand = sinon.stub()
+  afterEach(() => {
+    memory.default.endProfiling()
   })
 
   context('#getJsHeapSizeLimit', () => {
     it('retrieves the jsHeapSizeLimit from performance.memory', async () => {
-      sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' }).resolves({ result: { value: 50 } })
+      const automation = sinon.createStubInstance(Automation)
 
-      expect(await memory.getJsHeapSizeLimit(sendDebuggerCommand)).to.eq(50)
+      automation.request.withArgs('get:heap:size:limit', null, null).resolves({ result: { value: 50 } })
+
+      expect(await memory.getJsHeapSizeLimit(automation)).to.eq(50)
     })
 
     it('defaults the jsHeapSizeLimit to four gibibytes', async () => {
-      sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' }).throws(new Error('performance not available'))
+      const automation = sinon.createStubInstance(Automation)
 
-      expect(await memory.getJsHeapSizeLimit(sendDebuggerCommand)).to.eq(4294967296)
+      automation.request.withArgs('get:heap:size:limit', null, null).throws(new Error('performance not available'))
+
+      expect(await memory.getJsHeapSizeLimit(automation)).to.eq(4294967296)
     })
   })
 
@@ -50,82 +57,156 @@ describe('lib/browsers/memory', () => {
     })
   })
 
-  context('#checkMemoryAndCollectGarbage', () => {
-    it('collects memory when renderer process is greater than the threshold', async () => {
-      sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' }).resolves({ result: { value: 100 } })
-      const gcStub = sendDebuggerCommand.withArgs('HeapProfiler.collectGarbage').resolves()
+  context('#startProfiling', () => {
+    it('starts the profiling', async () => {
+      const automation = sinon.createStubInstance(Automation)
+
       const mockHandler = {
         getAvailableMemory: sinon.stub().resolves(1000),
         getTotalMemoryLimit: sinon.stub().resolves(2000),
       }
 
+      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
-      const memoryInstance = await memory.default.create(sendDebuggerCommand)
+      sinon.stub(memory, 'gatherMemoryStats').resolves()
 
-      sinon.stub(memoryInstance, 'getRendererMemoryUsage').resolves(75)
+      sinon.stub(global, 'setTimeout').onFirstCall().callsFake(async (fn) => {
+        await fn()
+      })
 
-      await memoryInstance.checkMemoryAndCollectGarbage({ test: { title: 'test', order: 1, currentRetry: 0 } })
+      await memory.default.startProfiling(automation)
+
+      expect(memory.gatherMemoryStats).to.be.calledTwice
+    })
+
+    it('doesn\'t start twice', async () => {
+      const automation = sinon.createStubInstance(Automation)
+
+      const mockHandler = {
+        getAvailableMemory: sinon.stub().resolves(1000),
+        getTotalMemoryLimit: sinon.stub().resolves(2000),
+      }
+
+      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
+      sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
+      sinon.stub(memory, 'gatherMemoryStats').resolves()
+
+      await memory.default.startProfiling(automation)
+
+      // second call doesn't do anything
+      await memory.default.startProfiling(automation)
+
+      expect(memory.gatherMemoryStats).to.be.calledOnce
+    })
+  })
+
+  context('#maybeCollectGarbage', () => {
+    // afterEach(() => {
+    //   memory.default.endProfiling()
+    // })
+
+    it('collects memory when renderer process is greater than the default threshold', async () => {
+      const automation = sinon.createStubInstance(Automation)
+      const gcStub = automation.request.withArgs('collect:garbage').resolves()
+      const mockHandler = {
+        getAvailableMemory: sinon.stub().resolves(1000),
+        getTotalMemoryLimit: sinon.stub().resolves(2000),
+      }
+
+      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
+      sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
+      sinon.stub(memory, 'getRendererMemoryUsage').resolves(75)
+
+      await memory.default.startProfiling(automation)
+
+      await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
+
+      expect(gcStub).to.be.calledOnce
+    })
+
+    it('collects memory when renderer process is greater than the custom threshold', async () => {
+      process.env.CYPRESS_INTERNAL_MEMORY_THRESHOLD_PERCENTAGE = '25'
+
+      const memory = proxyquire('../lib/browsers/memory', {})
+
+      const automation = sinon.createStubInstance(Automation)
+      const gcStub = automation.request.withArgs('collect:garbage').resolves()
+      const mockHandler = {
+        getAvailableMemory: sinon.stub().resolves(1000),
+        getTotalMemoryLimit: sinon.stub().resolves(2000),
+      }
+
+      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
+      sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
+      sinon.stub(memory, 'getRendererMemoryUsage').resolves(25)
+
+      await memory.default.startProfiling(automation)
+
+      await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
       expect(gcStub).to.be.calledOnce
     })
 
     it('collects memory when renderer process is equal to the threshold', async () => {
-      sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' }).resolves({ result: { value: 100 } })
-      const gcStub = sendDebuggerCommand.withArgs('HeapProfiler.collectGarbage').resolves()
+      const automation = sinon.createStubInstance(Automation)
+      const gcStub = automation.request.withArgs('collect:garbage').resolves()
       const mockHandler = {
         getAvailableMemory: sinon.stub().resolves(1000),
         getTotalMemoryLimit: sinon.stub().resolves(2000),
       }
 
+      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
-      const memoryInstance = await memory.default.create(sendDebuggerCommand)
+      sinon.stub(memory, 'getRendererMemoryUsage').resolves(50)
 
-      sinon.stub(memoryInstance, 'getRendererMemoryUsage').resolves(50)
+      await memory.default.startProfiling(automation)
 
-      await memoryInstance.checkMemoryAndCollectGarbage({ test: { title: 'test', order: 1, currentRetry: 0 } })
+      await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
       expect(gcStub).to.be.calledOnce
     })
 
     it('uses the available memory limit if it\'s less than the jsHeapSizeLimit', async () => {
-      sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' }).resolves({ result: { value: 100 } })
-      const gcStub = sendDebuggerCommand.withArgs('HeapProfiler.collectGarbage').resolves()
+      const automation = sinon.createStubInstance(Automation)
+      const gcStub = automation.request.withArgs('collect:garbage').resolves()
       const mockHandler = {
         getAvailableMemory: sinon.stub().resolves(10),
         getTotalMemoryLimit: sinon.stub().resolves(2000),
       }
 
+      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
-      const memoryInstance = await memory.default.create(sendDebuggerCommand)
+      sinon.stub(memory, 'getRendererMemoryUsage').resolves(25)
 
-      sinon.stub(memoryInstance, 'getRendererMemoryUsage').resolves(25)
+      await memory.default.startProfiling(automation)
 
-      await memoryInstance.checkMemoryAndCollectGarbage({ test: { title: 'test', order: 1, currentRetry: 0 } })
+      await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
       expect(gcStub).to.be.calledOnce
     })
 
     it('skips collecting memory when renderer process is less than the threshold', async () => {
-      sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' }).resolves({ result: { value: 100 } })
-      const gcStub = sendDebuggerCommand.withArgs('HeapProfiler.collectGarbage').resolves()
+      const automation = sinon.createStubInstance(Automation)
+      const gcStub = automation.request.withArgs('collect:garbage').resolves()
       const mockHandler = {
         getAvailableMemory: sinon.stub().resolves(1000),
         getTotalMemoryLimit: sinon.stub().resolves(2000),
       }
 
+      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
-      const memoryInstance = await memory.default.create(sendDebuggerCommand)
+      sinon.stub(memory, 'getRendererMemoryUsage').resolves(25)
 
-      sinon.stub(memoryInstance, 'getRendererMemoryUsage').resolves(25)
+      await memory.default.startProfiling(automation)
 
-      await memoryInstance.checkMemoryAndCollectGarbage({ test: { title: 'test', order: 1, currentRetry: 0 } })
+      await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
       expect(gcStub).to.not.be.called
     })
 
     it('skips collecting memory if the renderer process is not found', async () => {
-      sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' }).resolves({ result: { value: 100 } })
-      const gcStub = sendDebuggerCommand.withArgs('HeapProfiler.collectGarbage').resolves()
+      const automation = sinon.createStubInstance(Automation)
+      const gcStub = automation.request.withArgs('collect:garbage').resolves()
       const mockHandler = {
         getAvailableMemory: sinon.stub().resolves(1000),
         getTotalMemoryLimit: sinon.stub().resolves(2000),
@@ -135,38 +216,19 @@ describe('lib/browsers/memory', () => {
         { name: 'foo', pid: process.pid },
       ] })
 
+      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
-      const memoryInstance = await memory.default.create(sendDebuggerCommand)
 
-      await memoryInstance.checkMemoryAndCollectGarbage({ test: { title: 'test', order: 1, currentRetry: 0 } })
+      await memory.default.startProfiling(automation)
+
+      await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
       expect(gcStub).to.not.be.called
-    })
-
-    it('skips collecting memory if the renderer process is not found', async () => {
-      sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' }).resolves({ result: { value: 100 } })
-      const gcStub = sendDebuggerCommand.withArgs('HeapProfiler.collectGarbage').resolves()
-      const mockHandler = {
-        getAvailableMemory: sinon.stub().resolves(1000),
-        getTotalMemoryLimit: sinon.stub().resolves(2000),
-      }
-
-      const processesMock = sinon.stub(si, 'processes').resolves({ list: [
-        { name: 'foo', pid: process.pid },
-      ] })
-
-      sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
-      const memoryInstance = await memory.default.create(sendDebuggerCommand)
-
-      await memoryInstance.checkMemoryAndCollectGarbage({ test: { title: 'test', order: 1, currentRetry: 0 } })
-
-      expect(gcStub).to.not.be.called
-      expect(processesMock).to.be.calledOnce
     })
 
     it('finds the renderer process from the process.command', async () => {
-      sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' }).resolves({ result: { value: 2000 } })
-      const gcStub = sendDebuggerCommand.withArgs('HeapProfiler.collectGarbage').resolves()
+      const automation = sinon.createStubInstance(Automation)
+      const gcStub = automation.request.withArgs('collect:garbage').resolves()
       const mockHandler = {
         getAvailableMemory: sinon.stub().resolves(2000),
         getTotalMemoryLimit: sinon.stub().resolves(3000),
@@ -182,18 +244,20 @@ describe('lib/browsers/memory', () => {
         pid: 1234,
       })
 
+      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(2000)
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
-      const memoryInstance = await memory.default.create(sendDebuggerCommand)
 
-      await memoryInstance.checkMemoryAndCollectGarbage({ test: { title: 'test', order: 1, currentRetry: 0 } })
+      await memory.default.startProfiling(automation)
+
+      await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
       expect(gcStub).to.be.calledOnce
       expect(processesMock).to.be.calledOnce
     })
 
     it('finds the renderer process from the process.params', async () => {
-      sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' }).resolves({ result: { value: 2000 } })
-      const gcStub = sendDebuggerCommand.withArgs('HeapProfiler.collectGarbage').resolves()
+      const automation = sinon.createStubInstance(Automation)
+      const gcStub = automation.request.withArgs('collect:garbage').resolves()
       const mockHandler = {
         getAvailableMemory: sinon.stub().resolves(2000),
         getTotalMemoryLimit: sinon.stub().resolves(3000),
@@ -209,18 +273,20 @@ describe('lib/browsers/memory', () => {
         pid: 1234,
       })
 
+      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(2000)
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
-      const memoryInstance = await memory.default.create(sendDebuggerCommand)
 
-      await memoryInstance.checkMemoryAndCollectGarbage({ test: { title: 'test', order: 1, currentRetry: 0 } })
+      await memory.default.startProfiling(automation)
+
+      await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
       expect(gcStub).to.be.calledOnce
       expect(processesMock).to.be.calledOnce
     })
 
     it('selects the renderer process with the most memory', async () => {
-      sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' }).resolves({ result: { value: 10000 } })
-      const gcStub = sendDebuggerCommand.withArgs('HeapProfiler.collectGarbage').resolves()
+      const automation = sinon.createStubInstance(Automation)
+      const gcStub = automation.request.withArgs('collect:garbage').resolves()
       const mockHandler = {
         getAvailableMemory: sinon.stub().resolves(10000),
         getTotalMemoryLimit: sinon.stub().resolves(20000),
@@ -237,10 +303,12 @@ describe('lib/browsers/memory', () => {
         pid: 1234,
       })
 
+      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(10000)
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
-      const memoryInstance = await memory.default.create(sendDebuggerCommand)
 
-      await memoryInstance.checkMemoryAndCollectGarbage({ test: { title: 'test', order: 1, currentRetry: 0 } })
+      await memory.default.startProfiling(automation)
+
+      await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
       expect(gcStub).to.be.calledOnce
       expect(processesMock).to.be.calledOnce
@@ -251,8 +319,8 @@ describe('lib/browsers/memory', () => {
 
       const memory = proxyquire('../lib/browsers/memory', { pidusage: pidStub })
 
-      sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' }).resolves({ result: { value: 3000 } })
-      const gcStub = sendDebuggerCommand.withArgs('HeapProfiler.collectGarbage').resolves()
+      const automation = sinon.createStubInstance(Automation)
+      const gcStub = automation.request.withArgs('collect:garbage').resolves()
       const mockHandler = {
         getAvailableMemory: sinon.stub().resolves(3000),
         getTotalMemoryLimit: sinon.stub().resolves(4000),
@@ -268,18 +336,86 @@ describe('lib/browsers/memory', () => {
         pid: 1234,
       })
 
+      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(3000)
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
-      let memoryInstance: memory.default = await memory.default.create(sendDebuggerCommand)
 
-      // first call will find the renderer process
-      await memoryInstance.checkMemoryAndCollectGarbage({ test: { title: 'test', order: 1, currentRetry: 0 } })
+      // first call will find the renderer process and use si.processes
+      await memory.default.startProfiling(automation)
 
-      // second call will use the existing process id
-      await memoryInstance.checkMemoryAndCollectGarbage({ test: { title: 'test', order: 1, currentRetry: 0 } })
+      // second call will use the existing process id and use pidusage
+      await memory.default.checkMemory()
+
+      await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
       expect(gcStub).to.be.calledOnce
       expect(processesMock).to.be.calledOnce
       expect(pidStub).to.be.calledOnce
+    })
+
+    it('collects memory when a previous checkMemory call goes over the threshold', async () => {
+      const automation = sinon.createStubInstance(Automation)
+      const gcStub = automation.request.withArgs('collect:garbage').resolves()
+      const mockHandler = {
+        getAvailableMemory: sinon.stub().resolves(1000),
+        getTotalMemoryLimit: sinon.stub().resolves(2000),
+      }
+
+      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
+      sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
+      sinon.stub(memory, 'getRendererMemoryUsage')
+      .onFirstCall().resolves(75)
+      .onSecondCall().resolves(25)
+
+      sinon.stub(global, 'setTimeout').onFirstCall().callsFake(async (fn) => {
+        await fn()
+      })
+
+      await memory.default.startProfiling(automation)
+
+      await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
+
+      expect(gcStub).to.be.calledOnce
+      expect(memory.getRendererMemoryUsage).to.be.calledTwice
+    })
+  })
+
+  context('#endProfiling', () => {
+    it('stops the profiling', async () => {
+      const automation = sinon.createStubInstance(Automation)
+
+      const mockHandler = {
+        getAvailableMemory: sinon.stub().resolves(1000),
+        getTotalMemoryLimit: sinon.stub().resolves(2000),
+      }
+
+      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
+      sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
+      sinon.stub(memory, 'gatherMemoryStats').resolves()
+
+      await memory.default.startProfiling(automation)
+      await memory.default.endProfiling()
+
+      // move the clock forward by 5 seconds, but no more collections should occur
+      await sinon._clock.tickAsync(1000)
+      await sinon._clock.tickAsync(1000)
+      await sinon._clock.tickAsync(1000)
+      await sinon._clock.tickAsync(1000)
+      await sinon._clock.tickAsync(1000)
+
+      expect(memory.gatherMemoryStats).to.be.calledOnce
+    })
+
+    it('saves the cumulative memory stats to a file', async () => {
+      process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS = 'true'
+
+      const fileStub = sinon.stub(fs, 'outputFile').withArgs('cypress/logs/memory/memory_spec.json').resolves()
+
+      const automation = sinon.createStubInstance(Automation)
+
+      await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
+      await memory.default.endProfiling()
+
+      expect(fileStub).to.be.calledOnce
     })
   })
 })
