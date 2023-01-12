@@ -221,6 +221,24 @@ describe('<DebugContainer />', () => {
       cy.findByTestId('debug-spec-item').should('be.visible')
     })
 
+    it('renders failed test limit when exceeded', () => {
+      cy.mountFragment(DebugSpecsFragmentDoc, {
+        onResult: (result) => {
+          if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
+            const test = result.currentProject.cloudProject.runByNumber
+
+            result.currentProject.cloudProject.runByNumber = {
+              ...CloudRunStubs.failingWithTests,
+              totalFailed: 120,
+            } as typeof test
+          }
+        },
+        render: (gqlVal) => <DebugContainer gql={gqlVal} />,
+      })
+
+      cy.findByTestId('debug-spec-limit').should('be.visible')
+    })
+
     context('newer relevant run available', () => {
       it('displays newer run with progress when running', () => {
         cy.mountFragment(DebugSpecsFragmentDoc, {

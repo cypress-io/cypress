@@ -644,6 +644,11 @@
     }
   },
   "debugPage": {
+    "limit": {
+      "title": "Cypress renders up to 100 failed test results",
+      "message": "This run has {n} failed tests | This run has {n} failed test | This run has {n} failed tests",
+      "link": "See all test results in Cypress Cloud"
+    },
     "runFailures": {
       "btn": "Run Failures",
       "notFoundLocally": "Spec was not found locally",
