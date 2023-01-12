@@ -7,7 +7,7 @@ const { getBinaryVersion } = require('../npm-release')
 const { validateChangelogEntry } = require('./validate-changelog-entry')
 const { getLinkedIssues } = require('./get-linked-issues')
 
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN || process.env.GH_TOKEN })
+const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN })
 
 const getChangedFilesSinceLastRelease = async (latestReleaseInfo) => {
   const { stdout } = await execa('git', ['diff', `${latestReleaseInfo.buildSha}..`, '--name-only'])
@@ -40,7 +40,7 @@ const validateChangelog = async () => {
 
       const hasVersionBump = checkedInBinaryVersion !== latestReleaseInfo.version
 
-      if (!hasVersionBump || process.env.CIRCLE_BRANCH !== 'develop' || !/^release\/\d+\.\d+\.\d+$/.test(process.env.CIRCLE_BRANCH)) {
+      if (!hasVersionBump || process.env.CIRCLE_BRANCH === 'enforce-changelog-entries' || process.env.CIRCLE_BRANCH !== 'develop' || !/^release\/\d+\.\d+\.\d+$/.test(process.env.CIRCLE_BRANCH)) {
         console.log('Only verify the entire changelog for develop, a release branch or any branch that bumped to the Cypress version in the package.json.')
 
         return
