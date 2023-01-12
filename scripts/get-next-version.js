@@ -20,12 +20,14 @@ const getNextVersionForPath = async (path) => {
     return process.env.NEXT_VERSION
   }
 
+  let commits
   const whatBump = (foundCommits) => {
     // semantic version bump: 0 - major, 1 - minor, 2 - patch
     let level = 2
     let breakings = 0
     let features = 0
 
+    commits = foundCommits
     foundCommits.forEach((commit) => {
       if (releaseRules[commit.type].release === 'major') {
         breakings += 1
@@ -46,9 +48,17 @@ const getNextVersionForPath = async (path) => {
     }
   }
 
-  const { releaseType } = await bump({ whatBump, path })
+  const { releaseType } = await bump({
+    whatBump,
+    path,
+  })
 
-  return semver.inc(currentVersion, releaseType || 'patch')
+  console.log('commits', commits)
+
+  return {
+    nextVersion: semver.inc(currentVersion, releaseType || 'patch'),
+    commits,
+  }
 }
 
 if (require.main !== module) {
@@ -61,7 +71,7 @@ if (require.main !== module) {
   process.chdir(path.join(__dirname, '..'))
 
   for (const path of paths) {
-    const pathNextVersion = await getNextVersionForPath(path)
+    const { nextVersion: pathNextVersion } = await getNextVersionForPath(path)
 
     if (!nextVersion || semver.gt(pathNextVersion, nextVersion)) {
       nextVersion = pathNextVersion

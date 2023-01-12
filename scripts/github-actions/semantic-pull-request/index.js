@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
-const { validatePrTitle } = require('./validatePrTitle')
-const { validateChangelogEntry } = require('../../semantic-commits/validateChangelogEntry')
+const { validatePrTitle } = require('./validate-pr-title')
+const { validateChangelogEntry } = require('../../semantic-commits/validate-changelog-entry')
+const { getLinkedIssues } = require('../../semantic-commits/get-linked-issues')
 
 /**
  * Semantic Pull Request:
@@ -33,21 +34,23 @@ async function run ({ context, core, github }) {
 
     const { data: pullRequest } = await github.pulls.get(restParameters)
 
-    const semanticResult = await validatePrTitle({
+    const { type: semanticType } = await validatePrTitle({
       github,
       restParameters,
       prTitle: pullRequest.title,
     })
 
+    const associatedIssues = getLinkedIssues(pullRequest.body)
+
     const { data } = await github.pulls.listFiles(restParameters)
 
-    const pullRequestFiles = data.map((fileDetails) => fileDetails.filename)
+    const changedFiles = data.map((fileDetails) => fileDetails.filename)
 
     await validateChangelogEntry({
       prNumber: contextPullRequest.number,
-      pullRequestFiles,
-      semanticResult,
-      body: pullRequest.body,
+      changedFiles,
+      semanticType,
+      associatedIssues,
     })
   } catch (error) {
     core.setFailed(error.message)

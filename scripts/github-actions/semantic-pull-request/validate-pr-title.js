@@ -1,5 +1,5 @@
 const parser = require('conventional-commits-parser').sync
-const { changeCatagories, parserOpts } = require('../../semantic-commits/changeCategories')
+const { changeCatagories, parserOpts } = require('../../semantic-commits/change-categories')
 
 const types = Object.keys(changeCatagories)
 

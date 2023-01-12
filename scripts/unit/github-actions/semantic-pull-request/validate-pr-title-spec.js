@@ -1,6 +1,6 @@
 const { expect } = require('chai')
 const sinon = require('sinon')
-const { validatePrTitle, _validateTitle } = require('../../../github-actions/semantic-pull-request/validatePrTitle')
+const { validatePrTitle, _validateTitle } = require('../../../github-actions/semantic-pull-request/validate-pr-title')
 
 describe('semantic-pull-request/validatePrTitle', () => {
   context('validatePrTitle', () => {

@@ -1,13 +1,13 @@
 /* eslint-disable no-console */
-const { userFacingChanges } = require('./changeCategories')
+const { userFacingChanges } = require('./change-categories')
 const fs = require('fs')
 const path = require('path')
 
-function _getResolvedMessage (type, prNumber, linkedIssues) {
-  if (linkedIssues && linkedIssues.length) {
-    const issueMessage = userFacingChanges[type].message.hasIssue
+function _getResolvedMessage (semanticType, prNumber, associatedIssues = []) {
+  if (associatedIssues.length) {
+    const issueMessage = userFacingChanges[semanticType].message.hasIssue
 
-    const links = linkedIssues.sort((a, b) => a - b)
+    const links = associatedIssues.sort((a, b) => a - b)
     .map((issueNumber) => {
       return `[#${issueNumber}](https://github.com/cypress-io/cypress/issues/${issueNumber})`
     })
@@ -20,39 +20,20 @@ function _getResolvedMessage (type, prNumber, linkedIssues) {
     return `${issueMessage} ${linkMessage}.`
   }
 
-  const prMessage = userFacingChanges[type].message.onlyPR
+  const prMessage = userFacingChanges[semanticType].message.onlyPR
 
   return `${prMessage} [#${prNumber}](https://github.com/cypress-io/cypress/pull/${prNumber}).`
 }
 
-const getIssueNumbers = (body = '') => {
-  // remove markdown comments
-  body.replace(/(<!--.*?-->)|(<!--[\S\s]+?-->)|(<!--[\S\s]*?$)/g, '')
+function printChangeLogExample (semanticType, prNumber, associatedIssues) {
+  const resolveMessage = _getResolvedMessage(semanticType, prNumber, associatedIssues)
 
-  const references = body.match(/(close[sd]?|fix(es|ed)?|resolve[s|d]?) (cypress-io\/cypress)?#\d+/gi)
-
-  if (!references) {
-    return []
-  }
-
-  const issues = []
-
-  references.forEach((issue) => {
-    issues.push(issue.match(/\d+/)[0])
-  })
-
-  return issues.filter((v, i, a) => a.indexOf(v) === i)
+  return `${userFacingChanges[semanticType].section}\n - <Insert change details>. ${resolveMessage}`
 }
 
-function printChangeLogExample (type, prNumber, linkedIssues) {
-  const resolveMessage = _getResolvedMessage(type, prNumber, linkedIssues)
-
-  return `${userFacingChanges[type].section}\n - <Insert change details>. ${resolveMessage}`
-}
-
-async function validateChangelogEntry ({ pullRequestFiles, prNumber, semanticResult, body, nextVersion }) {
-  const hasChangeLogUpdate = pullRequestFiles.includes('cli/CHANGELOG.md')
-  const binaryFiles = pullRequestFiles.filter((filename) => {
+async function validateChangelogEntry ({ changedFiles, prNumber, semanticType, associatedIssues, nextVersion }) {
+  const hasChangeLogUpdate = changedFiles.includes('cli/CHANGELOG.md')
+  const binaryFiles = changedFiles.filter((filename) => {
     return /^(cli|packages)/.test(filename) && filename !== 'cli/CHANGELOG.md'
   })
 
@@ -67,7 +48,7 @@ async function validateChangelogEntry ({ pullRequestFiles, prNumber, semanticRes
     return
   }
 
-  if (!Object.keys(userFacingChanges).includes(semanticResult.type)) {
+  if (!Object.keys(userFacingChanges).includes(semanticType)) {
     console.log('This pull request does not contain user-facing changes that impacts the next Cypress release.')
 
     if (hasChangeLogUpdate) {
@@ -78,11 +59,9 @@ async function validateChangelogEntry ({ pullRequestFiles, prNumber, semanticRes
     return
   }
 
-  const linkedIssues = getIssueNumbers(body)
-
   if (!hasChangeLogUpdate) {
     throw new Error(
-      `A changelog entry was not found in cli/CHANGELOG.md. Please add a changelog entry that describes the changes made in this pull request. Include this entry under the section:/\n\n${printChangeLogExample(semanticResult.type, prNumber, linkedIssues)}`,
+      `A changelog entry was not found in cli/CHANGELOG.md. Please add a changelog entry that describes the changes made in this pull request. Include this entry under the section:/\n\n${printChangeLogExample(semanticType, prNumber, associatedIssues)}`,
     )
   }
 
@@ -93,14 +72,14 @@ async function validateChangelogEntry ({ pullRequestFiles, prNumber, semanticRes
     throw new Error(`The changelog version does not contain the next Cypress version of ${nextVersion}. If the changelog version is correct, please correct the pull request title to correctly reflect the change being made.`)
   }
 
-  if (!changelog.includes(userFacingChanges[semanticResult.type].section)) {
-    throw new Error(`The changelog does not include the ${userFacingChanges[semanticResult.type].section} section. Given the pull request title provided, this section should be included in the changelog. If the changelog section is correct, please correct the pull request title to correctly reflect the change being made.`)
+  if (!changelog.includes(userFacingChanges[semanticType].section)) {
+    throw new Error(`The changelog does not include the ${userFacingChanges[semanticType].section} section. Given the pull request title provided, this section should be included in the changelog. If the changelog section is correct, please correct the pull request title to correctly reflect the change being made.`)
   }
 
-  const resolveMessage = _getResolvedMessage(semanticResult.type, prNumber, linkedIssues)
+  const resolveMessage = _getResolvedMessage(semanticType, prNumber, associatedIssues)
 
   if (!changelog.includes(resolveMessage)) {
-    if (linkedIssues && linkedIssues.length) {
+    if (associatedIssues && associatedIssues.length) {
       throw new Error(`The changelog entry does not include the linked issues that this pull request resolves. Please update your entry to include:\n\n${resolveMessage}`)
     }
 
@@ -112,6 +91,5 @@ async function validateChangelogEntry ({ pullRequestFiles, prNumber, semanticRes
 
 module.exports = {
   validateChangelogEntry,
-  getIssueNumbers,
   _getResolvedMessage,
 }
