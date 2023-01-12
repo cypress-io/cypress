@@ -14,10 +14,12 @@ export type SecurityOpts = {
 }
 
 export type InjectionOpts = {
+  cspNonce?: string
   domainName: string
   wantsInjection: CypressWantsInjection
   wantsSecurityRemoved: any
   simulatedCookies: AutomationCookie[]
+  shouldInjectDocumentDomain: boolean
 }
 
 const doctypeRe = /<\!doctype.*?>/i
@@ -31,24 +33,34 @@ function getRewriter (useAstSourceRewriting: boolean) {
 
 function getHtmlToInject (opts: InjectionOpts & SecurityOpts) {
   const {
+    cspNonce,
     domainName,
     wantsInjection,
     modifyObstructiveThirdPartyCode,
     modifyObstructiveCode,
     simulatedCookies,
+    shouldInjectDocumentDomain,
   } = opts
 
   switch (wantsInjection) {
     case 'full':
-      return inject.full(domainName)
+      return inject.full(domainName, {
+        shouldInjectDocumentDomain,
+        cspNonce,
+      })
     case 'fullCrossOrigin':
       return inject.fullCrossOrigin(domainName, {
+        cspNonce,
         modifyObstructiveThirdPartyCode,
         modifyObstructiveCode,
         simulatedCookies,
+        shouldInjectDocumentDomain,
       })
     case 'partial':
-      return inject.partial(domainName)
+      return inject.partial(domainName, {
+        shouldInjectDocumentDomain,
+        cspNonce,
+      })
     default:
       return
   }

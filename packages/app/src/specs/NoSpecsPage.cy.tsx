@@ -72,8 +72,8 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
 
       cy.contains(text.importFromScaffold.header).should('be.visible')
       cy.contains(text.importFromScaffold.description).should('be.visible')
-      cy.contains(text.importEmptySpec.header).should('be.visible')
-      cy.contains(text.importEmptySpec.description).should('be.visible')
+      cy.contains(text.importTemplateSpec.header).should('be.visible')
+      cy.contains(text.importTemplateSpec.description).should('be.visible')
       cy.percySnapshot()
     })
   })

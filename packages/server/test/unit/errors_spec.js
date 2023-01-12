@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 require('../spec_helper')
 
 const exception = require(`../../lib/cloud/exception`)
