@@ -101,10 +101,6 @@ describe('lib/browsers/memory', () => {
   })
 
   context('#maybeCollectGarbage', () => {
-    // afterEach(() => {
-    //   memory.default.endProfiling()
-    // })
-
     it('collects memory when renderer process is greater than the default threshold', async () => {
       const automation = sinon.createStubInstance(Automation)
       const gcStub = automation.request.withArgs('collect:garbage').resolves()
@@ -392,17 +388,16 @@ describe('lib/browsers/memory', () => {
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
       sinon.stub(memory, 'gatherMemoryStats').resolves()
 
+      const timer = sinon.stub()
+
+      sinon.stub(global, 'setTimeout').returns(timer)
+      sinon.stub(global, 'clearTimeout')
+
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
       await memory.default.endProfiling()
 
-      // move the clock forward by 5 seconds, but no more collections should occur
-      await sinon._clock.tickAsync(1000)
-      await sinon._clock.tickAsync(1000)
-      await sinon._clock.tickAsync(1000)
-      await sinon._clock.tickAsync(1000)
-      await sinon._clock.tickAsync(1000)
-
       expect(memory.gatherMemoryStats).to.be.calledOnce
+      expect(global.clearTimeout).to.be.calledWith(timer)
     })
 
     it('saves the cumulative memory stats to a file', async () => {
