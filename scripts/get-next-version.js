@@ -8,7 +8,7 @@ const bumpCb = require('conventional-recommended-bump')
 const { promisify } = require('util')
 
 const currentVersion = require('../package.json').version
-const { releaseRules } = require('./semantic-commits/changeCategories')
+const { releaseRules } = require('./semantic-commits/change-categories')
 const bump = promisify(bumpCb)
 const paths = ['packages', 'cli']
 
