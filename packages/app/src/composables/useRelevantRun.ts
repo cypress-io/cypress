@@ -14,8 +14,6 @@ gql`
 `
 
 export function useRelevantRun () {
-  //const runsQuery = useQuery({ query: Debug_RelevantRunsDocument })
-
   const subscriptionResponse = useSubscription({ query: Debug_RelevantRuns_SubscriptionDocument })
 
   return computed(() => {

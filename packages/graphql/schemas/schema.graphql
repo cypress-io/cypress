@@ -983,6 +983,9 @@ type CurrentProject implements Node & ProjectLike {
   """Absolute path to the project on the filesystem"""
   projectRoot: String!
 
+  """"""
+  relevantRunSpecs: CurrentProjectRelevantRunSpecs
+
   """Returns a list of relevant runs for matching Git shas from the Cloud"""
   relevantRuns: RelevantRun
 
@@ -998,6 +1001,14 @@ type CurrentProject implements Node & ProjectLike {
   """"""
   testsForReviewBySpec(specTitle: String): [String!]
   title: String!
+}
+
+type CurrentProjectRelevantRunSpecs {
+  """Spec counts for the current run"""
+  current: RelevantRunSpecs
+
+  """Spec counts for the next run"""
+  next: RelevantRunSpecs
 }
 
 """A run was hidden because it was over the data retention limit"""
@@ -1966,6 +1977,18 @@ type RelevantRun {
   next: Int
 }
 
+""""""
+type RelevantRunSpecs {
+  """Number of specs in the run that have finished being processed"""
+  completedSpecs: Int
+
+  """The runNumber that these spec counts belong to"""
+  runNumber: Int
+
+  """Total number of specs in the run"""
+  totalSpecs: Int
+}
+
 """
 Represents a container for a piece of remote data stitched into the graph
 """
@@ -2184,6 +2207,9 @@ type Subscription {
   When we have resolved a section of a query, and want to update the local normalized cache, we "push" the fragment to the frontend to merge in the client side cache
   """
   pushFragment: [PushFragmentPayload!]!
+
+  """Return the count of specs for a given run."""
+  relevantRunSpecChange: Query
 
   """
   Return the runs from the Cloud relevant to the current local git commit

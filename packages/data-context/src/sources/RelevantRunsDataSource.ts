@@ -50,6 +50,10 @@ export class RelevantRunsDataSource {
 
   constructor (private ctx: DataContext) {}
 
+  get runs () {
+    return this.#cachedRuns
+  }
+
   /**
    * Pulls runs from the current Cypress Cloud account and determines which runs are considered:
    * - "current" the most recent completed run, or if not found, the most recent running run

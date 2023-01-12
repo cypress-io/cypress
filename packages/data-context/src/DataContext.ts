@@ -28,6 +28,7 @@ import {
   BrowserApiShape,
   MigrationDataSource,
   RelevantRunsDataSource,
+  RelevantRunSpecsDataSource,
 } from './sources/'
 import { cached } from './util/cached'
 import type { GraphQLSchema, OperationTypeNode, DocumentNode } from 'graphql'
@@ -227,6 +228,11 @@ export class DataContext {
   @cached
   get relevantRuns () {
     return new RelevantRunsDataSource(this)
+  }
+
+  @cached
+  get relevantRunSpecs () {
+    return new RelevantRunSpecsDataSource(this)
   }
 
   @cached

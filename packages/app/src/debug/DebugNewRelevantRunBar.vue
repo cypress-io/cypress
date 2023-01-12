@@ -20,7 +20,7 @@
       <li class="font-normal text-sm truncate">
         <DebugPendingRunCounts
           v-if="data.status === 'RUNNING'"
-          :spec-statuses="specStatuses"
+          :specs="specCounts"
         />
         <button
           v-else
@@ -35,8 +35,8 @@
 </template>
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { DebugNewRelevantRunBarFragment, DebugNewRelevantRunBar_MoveToNextDocument } from '../generated/graphql'
-import { gql, useMutation } from '@urql/vue'
+import { DebugNewRelevantRunBarFragment, DebugNewRelevantRunBar_MoveToNextDocument, DebugNewRelevantRunBar_SpecsDocument } from '../generated/graphql'
+import { gql, useMutation, useSubscription } from '@urql/vue'
 import { useI18n } from 'vue-i18n'
 import DebugPendingRunCounts from './DebugPendingRunCounts.vue'
 import DebugRunNumber from './DebugRunNumber.vue'
@@ -50,13 +50,27 @@ fragment DebugNewRelevantRunBar on CloudRun {
   commitInfo {
     summary
   }
-  ...DebugPendingRunCounts
 }
 `
 
 gql`
 mutation DebugNewRelevantRunBar_MoveToNext {
   moveToNextRelevantRun
+}
+`
+
+gql`
+subscription DebugNewRelevantRunBar_Specs {
+  relevantRunSpecChange {
+    currentProject {
+      id
+      relevantRunSpecs {
+        next {
+          ...DebugPendingRunCounts
+        }
+      }
+    }
+  }
 }
 `
 
@@ -68,7 +82,15 @@ const props = defineProps<{
 
 const data = computed(() => props.gql)
 
-const specStatuses = computed(() => data.value?.specs.map((spec) => spec.status || 'UNCLAIMED') || [])
+const shouldPauseSubscription = computed(() => {
+  return props.gql.status !== 'RUNNING'
+})
+
+const specs = useSubscription({ query: DebugNewRelevantRunBar_SpecsDocument, pause: shouldPauseSubscription })
+
+const specCounts = computed(() => {
+  return specs.data.value?.relevantRunSpecChange?.currentProject?.relevantRunSpecs?.next
+})
 
 const moveToNewRun = useMutation(DebugNewRelevantRunBar_MoveToNextDocument)
 

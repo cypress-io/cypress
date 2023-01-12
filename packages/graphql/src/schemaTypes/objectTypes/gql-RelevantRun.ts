@@ -17,3 +17,21 @@ export const RelevantRun = objectType({
     })
   },
 })
+
+export const RelevantRunSpecs = objectType({
+  name: 'RelevantRunSpecs',
+  description: '',
+  definition (t) {
+    t.int('runNumber', {
+      description: 'The runNumber that these spec counts belong to',
+    })
+
+    t.int('totalSpecs', {
+      description: 'Total number of specs in the run',
+    })
+
+    t.int('completedSpecs', {
+      description: 'Number of specs in the run that have finished being processed',
+    })
+  },
+})

@@ -30,7 +30,6 @@ import type { CloudSpecStatus } from '../generated/graphql'
 gql`
 fragment DebugPendingRunSplash on CloudRun {
   id
-  ...DebugPendingRunCounts
 }
 `
 

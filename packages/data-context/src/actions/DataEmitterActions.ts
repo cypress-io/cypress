@@ -1,7 +1,7 @@
 import pDefer from 'p-defer'
 import { EventEmitter } from 'stream'
 import { DataContext } from '../DataContext'
-import type { RelevantRun } from '../gen/graphcache-config.gen'
+import type { RelevantRun, RelevantRunSpecs } from '../gen/graphcache-config.gen'
 
 export interface PushFragmentData {
   data: any
@@ -90,9 +90,19 @@ abstract class DataEmitterEvents {
     this._emit('specsChange')
   }
 
-  /** */
+  /**
+   * Emitted when then relevant run numbers changed after querying for matching
+   * runs based on local commit shas
+  */
   relevantRunChange (runs: RelevantRun) {
     this._emit('relevantRunChange', runs)
+  }
+
+  /**
+   *
+   */
+  relevantRunSpecChange () {
+    this._emit('relevantRunSpecChange')
   }
 
   /**

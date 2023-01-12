@@ -1,7 +1,7 @@
 import { PACKAGE_MANAGERS } from '@packages/types'
 import { enumType, nonNull, objectType, stringArg } from 'nexus'
 import path from 'path'
-import { BrowserStatusEnum, FileExtensionEnum } from '..'
+import { BrowserStatusEnum, FileExtensionEnum, RelevantRunSpecs } from '..'
 import { TestingTypeEnum } from '../enumTypes/gql-WizardEnums'
 import { Browser } from './gql-Browser'
 import { CodeGenGlobs } from './gql-CodeGenGlobs'
@@ -245,6 +245,27 @@ export const CurrentProject = objectType({
       description: 'Returns a list of relevant runs for matching Git shas from the Cloud',
       resolve: async (source, args, ctx) => {
         return ctx.relevantRuns.getRelevantRuns(source.git?.currentHashes || [])
+      },
+    })
+
+    t.field('relevantRunSpecs', {
+      description: '',
+      type: objectType({
+        name: 'CurrentProjectRelevantRunSpecs',
+        definition (t) {
+          t.field('current', {
+            type: RelevantRunSpecs,
+            description: 'Spec counts for the current run',
+          })
+
+          t.field('next', {
+            type: RelevantRunSpecs,
+            description: 'Spec counts for the next run',
+          })
+        },
+      }),
+      resolve: async (source, args, ctx) => {
+        return ctx.relevantRunSpecs.specs
       },
     })
 

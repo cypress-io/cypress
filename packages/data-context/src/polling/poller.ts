@@ -13,7 +13,7 @@ export class Poller<E extends EventType> {
   #timeout?: NodeJS.Timeout
 
   set interval (interval: number) {
-    debug(`interval set to ${interval}`)
+    debug(`interval for ${this.event} set to ${interval}`)
     this.pollingInterval = interval
   }
 
