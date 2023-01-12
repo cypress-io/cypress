@@ -41,6 +41,7 @@ macWorkflowFilters: &darwin-workflow-filters
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
+
 linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
@@ -1397,7 +1398,7 @@ jobs:
           path: packages/errors/__snapshot-images__
       - store-npm-logs
 
-  pre-release:
+  verify-release-readiness:
     <<: *defaults
     resource_class: small
     parallelism: 1
@@ -2367,7 +2368,7 @@ linux-x64-workflow: &linux-x64-workflow
     - unit-tests:
         requires:
           - build
-    - pre-release:
+    - verify-release-readiness:
         context: test-runner:npm-release
         requires:
           - build
@@ -2538,7 +2539,7 @@ linux-x64-workflow: &linux-x64-workflow
           - server-unit-tests
           - test-kitchensink
           - unit-tests
-          - pre-release
+          - verify-release-readiness
           - cli-visual-tests
           - reporter-integration-tests
           - run-app-component-tests-chrome
