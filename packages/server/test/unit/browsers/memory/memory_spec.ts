@@ -74,7 +74,7 @@ describe('lib/browsers/memory', () => {
         await fn()
       })
 
-      await memory.default.startProfiling(automation)
+      await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
       expect(memory.gatherMemoryStats).to.be.calledTwice
     })
@@ -91,10 +91,10 @@ describe('lib/browsers/memory', () => {
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
       sinon.stub(memory, 'gatherMemoryStats').resolves()
 
-      await memory.default.startProfiling(automation)
+      await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
       // second call doesn't do anything
-      await memory.default.startProfiling(automation)
+      await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
       expect(memory.gatherMemoryStats).to.be.calledOnce
     })
@@ -117,7 +117,7 @@ describe('lib/browsers/memory', () => {
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
       sinon.stub(memory, 'getRendererMemoryUsage').resolves(75)
 
-      await memory.default.startProfiling(automation)
+      await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
       await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
@@ -140,7 +140,7 @@ describe('lib/browsers/memory', () => {
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
       sinon.stub(memory, 'getRendererMemoryUsage').resolves(25)
 
-      await memory.default.startProfiling(automation)
+      await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
       await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
@@ -159,7 +159,7 @@ describe('lib/browsers/memory', () => {
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
       sinon.stub(memory, 'getRendererMemoryUsage').resolves(50)
 
-      await memory.default.startProfiling(automation)
+      await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
       await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
@@ -178,7 +178,7 @@ describe('lib/browsers/memory', () => {
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
       sinon.stub(memory, 'getRendererMemoryUsage').resolves(25)
 
-      await memory.default.startProfiling(automation)
+      await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
       await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
@@ -197,7 +197,7 @@ describe('lib/browsers/memory', () => {
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
       sinon.stub(memory, 'getRendererMemoryUsage').resolves(25)
 
-      await memory.default.startProfiling(automation)
+      await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
       await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
@@ -219,7 +219,7 @@ describe('lib/browsers/memory', () => {
       sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
 
-      await memory.default.startProfiling(automation)
+      await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
       await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
@@ -247,7 +247,7 @@ describe('lib/browsers/memory', () => {
       sinon.stub(memory, 'getJsHeapSizeLimit').resolves(2000)
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
 
-      await memory.default.startProfiling(automation)
+      await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
       await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
@@ -276,7 +276,7 @@ describe('lib/browsers/memory', () => {
       sinon.stub(memory, 'getJsHeapSizeLimit').resolves(2000)
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
 
-      await memory.default.startProfiling(automation)
+      await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
       await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
@@ -306,7 +306,7 @@ describe('lib/browsers/memory', () => {
       sinon.stub(memory, 'getJsHeapSizeLimit').resolves(10000)
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
 
-      await memory.default.startProfiling(automation)
+      await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
       await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
@@ -340,7 +340,7 @@ describe('lib/browsers/memory', () => {
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
 
       // first call will find the renderer process and use si.processes
-      await memory.default.startProfiling(automation)
+      await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
       // second call will use the existing process id and use pidusage
       await memory.default.checkMemory()
@@ -370,7 +370,7 @@ describe('lib/browsers/memory', () => {
         await fn()
       })
 
-      await memory.default.startProfiling(automation)
+      await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
       await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
@@ -392,7 +392,7 @@ describe('lib/browsers/memory', () => {
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
       sinon.stub(memory, 'gatherMemoryStats').resolves()
 
-      await memory.default.startProfiling(automation)
+      await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
       await memory.default.endProfiling()
 
       // move the clock forward by 5 seconds, but no more collections should occur

@@ -3,7 +3,7 @@ import _ from 'lodash'
 import si from 'systeminformation'
 import os from 'os'
 import fs from 'fs-extra'
-import { performance } from 'perf_hooks'
+import { performance, PerformanceObserver } from 'perf_hooks'
 import { groupCyProcesses, Process } from '../../util/process_profiler'
 import pid from 'pidusage'
 
@@ -26,8 +26,10 @@ let jsHeapSizeLimit: number
 let started = false
 let cumulativeStats: { [key: string]: any }[] = []
 let collectGarbageOnNextTest = false
-let timer: NodeJS.Timeout
+let timer: NodeJS.Timeout | null
 let currentSpec
+let perfObserver: PerformanceObserver | null
+let currentStats: { [key: string]: any } = {}
 
 export type MemoryHandler = {
   getTotalMemoryLimit: () => Promise<number>
@@ -78,26 +80,7 @@ export const getMemoryHandler = async (): Promise<MemoryHandler> => {
   return (await import('./default')).default
 }
 
-const measure = async ({ name, stats }: { name: string, stats?: {}}, fn: () => Promise<any>) => {
-  performance.mark(`${name}-start`)
-
-  const result = await fn()
-
-  performance.mark(`${name}-end`)
-  const measurement = performance.measure(name, `${name}-start`, `${name}-end`)
-
-  if (stats) {
-    // @ts-ignore
-    stats[`${name}Duration`] = measurement.duration
-  } else {
-    // @ts-ignore
-    debugVerbose('%s took %dms', name, measurement.duration)
-  }
-
-  return result
-}
-
-export const getRendererProcess = (processes: si.Systeminformation.ProcessesData) => {
+const _getRendererProcess = (processes: si.Systeminformation.ProcessesData) => {
   // filter down to the renderer processes
   const groupedProcesses = groupCyProcesses(processes)
   const rendererProcesses = groupedProcesses.filter(
@@ -114,11 +97,11 @@ export const getRendererProcess = (processes: si.Systeminformation.ProcessesData
   return maxRendererProcess
 }
 
-export const getRendererMemoryUsage = async (stats: { [key: string]: any }): Promise<number | null> => {
+const _getRendererMemoryUsage = async (): Promise<number | null> => {
   if (!rendererProcess) {
     let _rendererProcess: Process | null = null
 
-    const processes = await measure({ name: 'retrieveProcesses' }, si.processes)
+    const processes = await si.processes()
 
     _rendererProcess = getRendererProcess(processes)
 
@@ -130,22 +113,24 @@ export const getRendererMemoryUsage = async (stats: { [key: string]: any }): Pro
   }
 
   try {
-    const _rendererProcess = await pid(rendererProcess.pid)
-
-    return _rendererProcess.memory
+    return (await pid(rendererProcess.pid)).memory
   } catch {
     rendererProcess = null
 
-    return getRendererMemoryUsage(stats)
+    return getRendererMemoryUsage()
   }
 }
 
-export const gatherMemoryStats = async () => {
-  const stats: { [key: string]: any } = {}
+const _getAvailableMemory = (stats: { [key: string]: any }) => {
+  return handler.getAvailableMemory(totalMemoryLimit, stats)
+}
+
+const _gatherMemoryStats = async () => {
+  let stats: { [key: string]: any } = {}
 
   const [currentAvailableMemory, rendererProcessMemRss] = await Promise.all([
-    handler.getAvailableMemory(totalMemoryLimit, stats),
-    getRendererMemoryUsage(stats),
+    getAvailableMemory(stats),
+    getRendererMemoryUsage(),
   ])
 
   if (rendererProcessMemRss === null) {
@@ -172,14 +157,10 @@ export const gatherMemoryStats = async () => {
   stats.totalMemoryLimit = totalMemoryLimit
   stats.timestamp = Date.now()
 
-  if (['1', 'true'].includes(process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS as string)) {
-    cumulativeStats.push(stats)
-  }
-
-  debugVerbose('memory stats: %o', stats)
+  return stats
 }
 
-export const maybeCollectGarbage = async ({ automation, test }: { automation: Automation, test: { title: string, order: number, currentRetry: number }}) => {
+export const _maybeCollectGarbage = async ({ automation, test }: { automation: Automation, test: { title: string, order: number, currentRetry: number }}) => {
   const log: { [key: string]: any } = {}
 
   if (collectGarbageOnNextTest) {
@@ -194,13 +175,9 @@ export const maybeCollectGarbage = async ({ automation, test }: { automation: Au
   log.garbageCollected = collectGarbageOnNextTest
   log.timestamp = Date.now()
 
-  if (['1', 'true'].includes(process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS as string)) {
-    cumulativeStats.push(log)
-  }
-
-  debugVerbose('memory stats: %o', log)
-
   collectGarbageOnNextTest = false
+
+  return log
 }
 
 const checkMemory = async () => {
@@ -215,7 +192,30 @@ const scheduleMemoryCheck = () => {
   }
 }
 
-export async function startProfiling (automation: Automation, spec?) {
+const perfObserverHandler = (list, observer) => {
+  list.getEntries().forEach((entry) => {
+    const { name, duration } = entry
+
+    if (currentStats) {
+      // @ts-ignore
+      currentStats[`${name}Duration`] = duration
+    } else {
+      // @ts-ignore
+      debugVerbose('%s took %dms', name, duration)
+    }
+
+    if (name === '_gatherMemoryStats' || name === '_maybeCollectGarbage') {
+      // debugVerbose('memory stats: %o', combinedStats)
+      if (['1', 'true'].includes(process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS as string)) {
+        cumulativeStats.push(combinedStats)
+      }
+
+      currentStats = {}
+    }
+  })
+}
+
+async function startProfiling (automation: Automation, spec: { fileName: string }) {
   if (started) {
     return
   }
@@ -224,6 +224,9 @@ export async function startProfiling (automation: Automation, spec?) {
 
   started = true
   currentSpec = spec
+
+  perfObserver = new PerformanceObserver(perfObserverHandler)
+  perfObserver.observe({ entryTypes: ['function'] })
 
   try {
     handler = await getMemoryHandler()
@@ -239,10 +242,7 @@ export async function startProfiling (automation: Automation, spec?) {
   }
 }
 
-export async function endProfiling () {
-  clearTimeout(timer)
-  started = false
-
+const saveCumulativeStats = async () => {
   if (['1', 'true'].includes(process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS as string) && currentSpec) {
     try {
       await fs.outputFile(path.join(MEMORY_FOLDER, `${currentSpec.fileName}.json`), JSON.stringify(cumulativeStats))
@@ -252,6 +252,23 @@ export async function endProfiling () {
   }
 
   cumulativeStats = []
+}
+
+async function endProfiling () {
+  if (timer) clearTimeout(timer)
+
+  perfObserver?.disconnect()
+  started = false
+
+  await saveCumulativeStats()
+
+  rendererProcess = null
+  cumulativeStats = []
+  collectGarbageOnNextTest = false
+  currentSpec = null
+  perfObserver = null
+  timer = null
+  currentStats = {}
 
   debugVerbose('end memory profiler')
 }
@@ -259,6 +276,16 @@ export async function endProfiling () {
 const getCumulativeStats = () => {
   return _.clone(cumulativeStats)
 }
+
+export const getRendererProcess = performance.timerify(_getRendererProcess)
+
+export const getRendererMemoryUsage = performance.timerify(_getRendererMemoryUsage)
+
+export const gatherMemoryStats = performance.timerify(_gatherMemoryStats)
+
+export const maybeCollectGarbage = performance.timerify(_maybeCollectGarbage)
+
+export const getAvailableMemory = performance.timerify(_getAvailableMemory)
 
 export default {
   startProfiling,
