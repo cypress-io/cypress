@@ -3,7 +3,7 @@ import _ from 'lodash'
 import si from 'systeminformation'
 import os from 'os'
 import fs from 'fs-extra'
-import { performance, PerformanceObserver } from 'perf_hooks'
+// import { performance } from 'perf_hooks'
 import { groupCyProcesses, Process } from '../../util/process_profiler'
 import pid from 'pidusage'
 
@@ -28,7 +28,6 @@ let cumulativeStats: { [key: string]: any }[] = []
 let collectGarbageOnNextTest = false
 let timer: NodeJS.Timeout | null
 let currentSpec
-let perfObserver: PerformanceObserver | null
 let currentStats: { [key: string]: any } = {}
 
 export type MemoryHandler = {
@@ -49,6 +48,23 @@ export type MemoryHandler = {
  *   4. calc % of memory used, current renderer mem usage / max avail render mem
  *   5. if that exceeds the defined memory threshold percentage (e.g. 50%) do a GC
  */
+
+const measure = (func: (...args) => any, opts: { name?: string, save?: boolean } = { save: true }) => {
+  return async (...args) => {
+    // const start = performance.now()
+    const result = await func.apply(this, args)
+    // const duration = performance.now() - start
+    // const name = opts.name || func.name
+
+    // if (args?.opts?.log) {
+    //   currentStats[`${name}Duration`] = duration
+    // } else {
+    //   debugVerbose('%s took %dms', name, duration)
+    // }
+
+    return result
+  }
+}
 
 export const getJsHeapSizeLimit = async (automation: Automation): Promise<number> => {
   let heapLimit
@@ -103,7 +119,7 @@ const _getRendererMemoryUsage = async (): Promise<number | null> => {
 
     const processes = await si.processes()
 
-    _rendererProcess = getRendererProcess(processes)
+    _rendererProcess = await getRendererProcess(processes)
 
     if (!_rendererProcess) return null
 
@@ -126,10 +142,8 @@ const _getAvailableMemory = (stats: { [key: string]: any }) => {
 }
 
 const _gatherMemoryStats = async () => {
-  let stats: { [key: string]: any } = {}
-
   const [currentAvailableMemory, rendererProcessMemRss] = await Promise.all([
-    getAvailableMemory(stats),
+    getAvailableMemory(currentStats),
     getRendererMemoryUsage(),
   ])
 
@@ -147,17 +161,18 @@ const _gatherMemoryStats = async () => {
 
   collectGarbageOnNextTest = collectGarbageOnNextTest || shouldCollectGarbage
 
-  stats.rendererProcessMemRss = rendererProcessMemRss
-  stats.shouldCollectGarbage = shouldCollectGarbage
-  stats.rendererUsagePercentage = rendererUsagePercentage
-  stats.rendererMemoryThreshold = maxAvailableRendererMemory * (MEMORY_THRESHOLD_PERCENTAGE / 100)
-  stats.currentAvailableMemory = currentAvailableMemory
-  stats.maxAvailableRendererMemory = maxAvailableRendererMemory
-  stats.jsHeapSizeLimit = jsHeapSizeLimit
-  stats.totalMemoryLimit = totalMemoryLimit
-  stats.timestamp = Date.now()
+  currentStats.rendererProcessMemRss = rendererProcessMemRss
+  currentStats.shouldCollectGarbage = shouldCollectGarbage
+  currentStats.rendererUsagePercentage = rendererUsagePercentage
+  currentStats.rendererMemoryThreshold = maxAvailableRendererMemory * (MEMORY_THRESHOLD_PERCENTAGE / 100)
+  currentStats.currentAvailableMemory = currentAvailableMemory
+  currentStats.maxAvailableRendererMemory = maxAvailableRendererMemory
+  currentStats.jsHeapSizeLimit = jsHeapSizeLimit
+  currentStats.totalMemoryLimit = totalMemoryLimit
+  currentStats.timestamp = Date.now()
 
-  return stats
+  cumulativeStats.push(currentStats)
+  cumulativeStats = []
 }
 
 export const _maybeCollectGarbage = async ({ automation, test }: { automation: Automation, test: { title: string, order: number, currentRetry: number }}) => {
@@ -177,6 +192,8 @@ export const _maybeCollectGarbage = async ({ automation, test }: { automation: A
 
   collectGarbageOnNextTest = false
 
+  cumulativeStats.push(log)
+
   return log
 }
 
@@ -192,29 +209,6 @@ const scheduleMemoryCheck = () => {
   }
 }
 
-const perfObserverHandler = (list, observer) => {
-  list.getEntries().forEach((entry) => {
-    const { name, duration } = entry
-
-    if (currentStats) {
-      // @ts-ignore
-      currentStats[`${name}Duration`] = duration
-    } else {
-      // @ts-ignore
-      debugVerbose('%s took %dms', name, duration)
-    }
-
-    if (name === '_gatherMemoryStats' || name === '_maybeCollectGarbage') {
-      // debugVerbose('memory stats: %o', combinedStats)
-      if (['1', 'true'].includes(process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS as string)) {
-        cumulativeStats.push(combinedStats)
-      }
-
-      currentStats = {}
-    }
-  })
-}
-
 async function startProfiling (automation: Automation, spec: { fileName: string }) {
   if (started) {
     return
@@ -224,9 +218,6 @@ async function startProfiling (automation: Automation, spec: { fileName: string 
 
   started = true
   currentSpec = spec
-
-  perfObserver = new PerformanceObserver(perfObserverHandler)
-  perfObserver.observe({ entryTypes: ['function'] })
 
   try {
     handler = await getMemoryHandler()
@@ -257,7 +248,6 @@ const saveCumulativeStats = async () => {
 async function endProfiling () {
   if (timer) clearTimeout(timer)
 
-  perfObserver?.disconnect()
   started = false
 
   await saveCumulativeStats()
@@ -266,7 +256,6 @@ async function endProfiling () {
   cumulativeStats = []
   collectGarbageOnNextTest = false
   currentSpec = null
-  perfObserver = null
   timer = null
   currentStats = {}
 
@@ -277,15 +266,15 @@ const getCumulativeStats = () => {
   return _.clone(cumulativeStats)
 }
 
-export const getRendererProcess = performance.timerify(_getRendererProcess)
+export const getRendererProcess = measure(_getRendererProcess)
 
-export const getRendererMemoryUsage = performance.timerify(_getRendererMemoryUsage)
+export const getRendererMemoryUsage = measure(_getRendererMemoryUsage)
 
-export const gatherMemoryStats = performance.timerify(_gatherMemoryStats)
+export const gatherMemoryStats = measure(_gatherMemoryStats)
 
-export const maybeCollectGarbage = performance.timerify(_maybeCollectGarbage)
+export const maybeCollectGarbage = measure(_maybeCollectGarbage)
 
-export const getAvailableMemory = performance.timerify(_getAvailableMemory)
+export const getAvailableMemory = measure(_getAvailableMemory)
 
 export default {
   startProfiling,
