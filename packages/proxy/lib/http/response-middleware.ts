@@ -15,8 +15,6 @@ import { URL } from 'url'
 import { CookiesHelper } from './util/cookies'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
 import { toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
-import { generateCspDirectives, hasCspHeader, parseCspHeaders } from './util/csp-header'
-import crypto from 'crypto'
 
 interface ResponseMiddlewareProps {
   /**
@@ -313,36 +311,6 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     // We set the header here only for proxied requests that have scripts injected that set the domain.
     // Other proxied requests are ignored.
     this.res.setHeader('Origin-Agent-Cluster', '?0')
-
-    // Only patch the headers that are being supplied by the response
-    const incomingCspHeaders = ['content-security-policy', 'content-security-policy-report-only']
-    .filter((headerName) => hasCspHeader(this.incomingRes.headers, headerName))
-
-    if (incomingCspHeaders.length) {
-      // In order to allow the injected script to run on sites with a CSP header
-      // we must add a generated `nonce` into the response headers
-      const nonce = crypto.randomBytes(16).toString('base64')
-
-      this.res.injectionNonce = nonce
-
-      // Since CSP headers are not cumulative, the nonce policy must be set on each CSP header individually
-      const mapPolicies = (policy: Map<string, string[]>) => {
-        const cspScriptSrc = policy.get('script-src') || []
-
-        policy.set('script-src', [...cspScriptSrc, `'nonce-${nonce}'`])
-
-        return generateCspDirectives(policy)
-      }
-
-      // Iterate through each CSP header
-      incomingCspHeaders.forEach((headerName) => {
-        // Map the nonce on each CSP header
-        const modifiedCspHeaders = parseCspHeaders(this.incomingRes.headers, headerName).map(mapPolicies)
-
-        // To replicate original response CSP headers, we must apply all header values as an array
-        this.res.setHeader(headerName, modifiedCspHeaders)
-      })
-    }
   }
 
   this.res.wantsSecurityRemoved = (this.config.modifyObstructiveCode || this.config.experimentalModifyObstructiveThirdPartyCode) &&
@@ -388,6 +356,8 @@ const OmitProblematicHeaders: ResponseMiddleware = function () {
     'x-frame-options',
     'content-length',
     'transfer-encoding',
+    'content-security-policy',
+    'content-security-policy-report-only',
     'connection',
   ])
 
@@ -570,7 +540,6 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
 
     const decodedBody = iconv.decode(body, nodeCharset)
     const injectedBody = await rewriter.html(decodedBody, {
-      cspNonce: this.res.injectionNonce,
       domainName: cors.getDomainNameFromUrl(this.req.proxiedUrl),
       wantsInjection: this.res.wantsInjection,
       wantsSecurityRemoved: this.res.wantsSecurityRemoved,
@@ -644,8 +613,8 @@ export default {
   AttachPlainTextStreamFn,
   InterceptResponse,
   PatchExpressSetHeader,
-  OmitProblematicHeaders, // Since we might modify CSP headers, this middleware needs to come BEFORE SetInjectionLevel
   SetInjectionLevel,
+  OmitProblematicHeaders,
   MaybePreventCaching,
   MaybeStripDocumentDomainFeaturePolicy,
   MaybeCopyCookiesFromIncomingRes,
