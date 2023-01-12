@@ -39,6 +39,7 @@ const validateChangelog = async () => {
       const checkedInBinaryVersion = await getBinaryVersion()
 
       console.log({ checkedInBinaryVersion })
+
       const hasVersionBump = checkedInBinaryVersion !== latestReleaseInfo.version
 
       if (!hasVersionBump || process.env.CIRCLE_BRANCH !== 'enforce-changelog-entries' || process.env.CIRCLE_BRANCH !== 'develop' || !/^release\/\d+\.\d+\.\d+$/.test(process.env.CIRCLE_BRANCH)) {
