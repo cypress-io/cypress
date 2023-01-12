@@ -27,13 +27,6 @@ describe('<DebugNewRelevantRunBar />', () => {
     cy.mountFragment(DebugNewRelevantRunBarFragmentDoc, {
       onResult (result) {
         result.status = 'RUNNING'
-        result.specs = [
-          { id: '', status: 'CANCELLED', __typename: 'CloudSpecRun' },
-          { id: '', status: 'RUNNING', __typename: 'CloudSpecRun' },
-          { id: '', status: 'PASSED', __typename: 'CloudSpecRun' },
-          { id: '', status: 'FAILED', __typename: 'CloudSpecRun' },
-          { id: '', status: 'UNCLAIMED', __typename: 'CloudSpecRun' },
-        ]
       },
       render: (gqlVal) => <DebugNewRelevantRunBar gql={gqlVal} />,
     })

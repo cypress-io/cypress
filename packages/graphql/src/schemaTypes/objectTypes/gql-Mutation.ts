@@ -769,7 +769,7 @@ export const mutation = mutationType({
     t.boolean('moveToNextRelevantRun', {
       description: 'Allow the relevant run for debugging marked as next to be considered the current relevant run',
       resolve: async (source, args, ctx) => {
-        const runs = await ctx.relevantRuns.moveToNext(ctx.git?.currentHashes || [])
+        const runs = await ctx.relevantRuns.moveToNext()
 
         ctx.emitter.relevantRunChange(runs)
 

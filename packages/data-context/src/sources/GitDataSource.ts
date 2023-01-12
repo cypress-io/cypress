@@ -62,7 +62,7 @@ export interface GitDataSourceConfig {
   onGitInfoChange(specPath: string[]): void
   onError(err: any): void
 
-  onGitLogChange?(): void
+  onGitLogChange?(shas: string[]): void
 }
 
 /**
@@ -441,7 +441,7 @@ export class GitDataSource {
         this.#gitHashes = currentHashes || []
 
         debug(`Calling onGitLogChange: callback defined ${!!this.config.onGitLogChange}, git hash count ${currentHashes?.length}`)
-        this.config.onGitLogChange?.()
+        this.config.onGitLogChange?.(this.#gitHashes)
       }
     } catch (e) {
       debug('Error loading git hashes %s', e)

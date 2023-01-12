@@ -169,12 +169,12 @@ export class RelevantRunsDataSource {
   /**
    * Clear the cached current run to allow the data source to pick the next completed run as the current
    */
-  moveToNext (shas: string[]) {
+  moveToNext () {
     debug('Moving to next relevant run')
     this.#currentRun = undefined
     this.#currentCommitSha = undefined
 
-    return this.getRelevantRuns(shas)
+    return this.getRelevantRuns(this.ctx.git?.currentHashes || [])
   }
 
   pollForRuns () {
