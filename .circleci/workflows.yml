@@ -1397,14 +1397,17 @@ jobs:
           path: packages/errors/__snapshot-images__
       - store-npm-logs
 
-  unit-tests-release:
+  pre-release:
     <<: *defaults
     resource_class: small
     parallelism: 1
+    environment:
+      GITHUB_TOKEN: $GH_TOKEN
     steps:
       - restore_cached_workspace
       - update_known_hosts
       - run: yarn test-npm-package-release-script
+      - run: node ./scripts/semantic-commits/validate-binary-changelog.js
 
   lint-types:
     <<: *defaults
@@ -2364,7 +2367,7 @@ linux-x64-workflow: &linux-x64-workflow
     - unit-tests:
         requires:
           - build
-    - unit-tests-release:
+    - pre-release:
         context: test-runner:npm-release
         requires:
           - build
@@ -2535,7 +2538,7 @@ linux-x64-workflow: &linux-x64-workflow
           - server-unit-tests
           - test-kitchensink
           - unit-tests
-          - unit-tests-release
+          - pre-release
           - cli-visual-tests
           - reporter-integration-tests
           - run-app-component-tests-chrome
