@@ -7,7 +7,7 @@ const { getBinaryVersion } = require('../npm-release')
 const { validateChangelogEntry } = require('./validate-changelog-entry')
 const { getLinkedIssues } = require('./get-linked-issues')
 
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN })
+const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN || process.env.GH_TOKEN })
 
 const getChangedFilesSinceLastRelease = async (latestReleaseInfo) => {
   const { stdout } = await execa('git', ['diff', `${latestReleaseInfo.buildSha}..`, '--name-only'])
