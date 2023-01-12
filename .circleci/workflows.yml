@@ -92,7 +92,7 @@ executors:
   mac:
     macos:
       # Executor should have Node >= required version
-      xcode: "14.0.0"
+      xcode: "14.0.1"
     resource_class: macos.x86.medium.gen2
     environment:
       PLATFORM: darwin
@@ -481,7 +481,7 @@ commands:
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
 
-            yarn cypress:run --browser <<parameters.browser>> --spec "cypress/e2e/memory.cy.js"
+            yarn cypress:run --browser <<parameters.browser>> --spec "cypress/e2e/memory*"
           working_directory: packages/driver
       - verify-mocha-results
       - store_test_results:
@@ -2458,3 +2458,5 @@ workflows:
     <<: *darwin-arm64-workflow
   windows:
     <<: *windows-workflow
+
+# VS Code Extension Version: 1.5.1
