@@ -27,6 +27,8 @@ const getNextVersionForPath = async (path) => {
 
     commits = foundCommits
     foundCommits.forEach((commit) => {
+      if (!commit.type || !changeCatagories[commit.type]) return
+
       if (changeCatagories[commit.type].release === 'major') {
         breakings += 1
         level = 0
