@@ -15,7 +15,7 @@ const debugVerbose = debugModule('cypress-verbose:server:browsers:memory')
 
 const MEMORY_THRESHOLD_PERCENTAGE = Number(process.env.CYPRESS_INTERNAL_MEMORY_THRESHOLD_PERCENTAGE) || 50
 const MEMORY_PROFILER_INTERVAL = Number(process.env.CYPRESS_INTERNAL_MEMORY_PROFILER_INTERVAL) || 1000
-const MEMORY_FOLDER = 'cypress/logs/memory'
+const MEMORY_FOLDER = process.env.CYPRESS_INTERNAL_MEMORY_FOLDER_PATH || path.join('cypress', 'logs', 'memory')
 const KIBIBYTE = 1024
 const FOUR_GIBIBYTES = 4 * (KIBIBYTE ** 3)
 

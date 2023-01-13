@@ -139,7 +139,6 @@ export const normalizeResourceType = (resourceType: string | undefined): Resourc
 }
 
 type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: any) => Promise<ProtocolMapping.Commands[T]['returnType']>
-
 type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any> | void
 type OnFn = <T extends CdpEvent>(eventName: T, cb: (data: ProtocolMapping.Events[T][0]) => void) => void
 

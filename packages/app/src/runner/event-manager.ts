@@ -542,13 +542,13 @@ export class EventManager {
 
     Cypress.on('run:start', async () => {
       if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
-        Cypress.backend('start:memory:profiling', Cypress.config('spec'))
+        await Cypress.backend('start:memory:profiling', Cypress.config('spec'))
       }
     })
 
-    Cypress.on('run:end', () => {
+    Cypress.on('run:end', async () => {
       if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
-        Cypress.backend('end:memory:profiling')
+        await Cypress.backend('end:memory:profiling')
       }
     })
 
