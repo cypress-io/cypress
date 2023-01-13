@@ -1,6 +1,6 @@
 ## 12.4.0
 
-__Released 1/17/2023 (PENDING)__
+__Released 01/17/2023 (PENDING)__
 
 **Features:**
 
