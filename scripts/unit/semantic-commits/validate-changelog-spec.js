@@ -4,11 +4,11 @@ const sinonChai = require('sinon-chai')
 const sinon = require('sinon')
 const fs = require('fs')
 
-const { validateChangelog, _validateEntry, _getResolvedMessage } = require('../../semantic-commits/validate-changelog-entry')
+const { validateChangelog, _validateEntry, _getResolvedMessage } = require('../../semantic-commits/validate-changelog')
 
 use(sinonChai)
 
-describe('semantic-pull-request/validate-changelog-entry', () => {
+describe('semantic-pull-request/validate-changelog', () => {
   context('_getResolvedMessage', () => {
     it('returned pr link', () => {
       const message = _getResolvedMessage('feat', 52, [])

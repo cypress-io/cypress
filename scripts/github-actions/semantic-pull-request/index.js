@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 const { validatePrTitle } = require('./validate-pr-title')
-const { validateChangelog } = require('../../semantic-commits/validate-changelog-entry')
+const { validateChangelog } = require('../../semantic-commits/validate-changelog')
 const { getLinkedIssues } = require('../../semantic-commits/get-linked-issues')
 
 /**
