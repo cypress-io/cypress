@@ -522,6 +522,10 @@
       "experimentalOriginDependencies": {
         "name": "Origin Dependencies",
         "description": "Enables support for `require`/`import` within `cy.origin`."
+      },
+      "experimentalSkipDomainInjection": {
+        "name": "Skip Domain Injection",
+        "description": "Disables setting `document.domain` to the application's super domain on injection"
       }
     },
     "device": {
