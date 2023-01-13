@@ -169,7 +169,7 @@ const debugBadge = computed<Badge | undefined>(() => {
   const showNewBadge = isAllowedFeature('debugNewBadge', loginConnectStore)
   const newBadge: Badge = { value: t('sidebar.debug.new'), status: 'success', label: t('sidebar.debug.debugFeature') }
 
-  if (props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject') {
+  if (props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' && props.gql.currentProject.cloudProject.runByNumber) {
     const { status, totalFailed } = props.gql.currentProject.cloudProject.runByNumber || {}
 
     if (status === 'NOTESTS' || status === 'RUNNING') {
@@ -180,19 +180,27 @@ const debugBadge = computed<Badge | undefined>(() => {
       return { value: '0', status: 'success', label: t('sidebar.debug.passed') }
     }
 
+    let countToDisplay = '0'
+
     if (totalFailed) {
-      const valueToDisplay = totalFailed < 9
+      countToDisplay = totalFailed < 9
         ? String(totalFailed)
         : '9+'
+    }
 
+    if (status === 'FAILED') {
       return {
-        value: valueToDisplay,
+        value: countToDisplay,
         status: 'failed',
-        label: t('sidebar.debug.failed', totalFailed),
+        label: t('sidebar.debug.failed', totalFailed || 0),
       }
     }
 
-    return { value: '0', status: 'error', label: t('sidebar.debug.errored') }
+    const errorLabel = totalFailed && totalFailed > 0
+      ? t('sidebar.debug.erroredWithFailures', totalFailed)
+      : t('sidebar.debug.errored')
+
+    return { value: countToDisplay, status: 'error', label: errorLabel }
   }
 
   return showNewBadge ? newBadge : undefined

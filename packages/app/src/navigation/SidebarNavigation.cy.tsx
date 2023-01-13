@@ -177,7 +177,7 @@ describe('SidebarNavigation', () => {
       for (const status of ['CANCELLED', 'ERRORED', 'OVERLIMIT', 'TIMEDOUT'] as CloudRunStatus[]) {
         cy.log(status)
         mountComponent({ cloudProject: { status, numFailedTests: 4 } })
-        cy.findByLabelText('Relevant run had 4 test failures').should('be.visible').contains('4')
+        cy.findByLabelText('Relevant run had an error with 4 test failures').should('be.visible').contains('4')
       }
     })
 
