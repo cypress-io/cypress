@@ -1,7 +1,8 @@
 import DebugArtifactLink from './DebugArtifactLink.vue'
+import type { ArtifactType } from './utils/debugArtifacts'
 
 describe('<DebugArtifacts />', () => {
-  const artifactMapping: {icon: string, text: string, url: string}[] = [
+  const artifactMapping: {icon: ArtifactType, text: string, url: string}[] = [
     { icon: 'TERMINAL_LOG', text: 'View Log', url: 'www.cypress.io' },
     { icon: 'IMAGE_SCREENSHOT', text: 'View Screenshot', url: 'cloud.cypress.io' },
     { icon: 'PLAY', text: 'View Video', url: 'www.cypress.io' },

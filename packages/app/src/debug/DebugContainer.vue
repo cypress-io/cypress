@@ -40,6 +40,11 @@
           v-if="run.totalFailed && shouldDisplaySpecsList(run.status)"
           :specs="debugSpecsArray"
         />
+        <DebugSpecLimitBanner
+          v-if="run.totalFailed && run.totalFailed > 100"
+          :failed-test-count="run.totalFailed"
+          :cloud-run-url="run.url"
+        />
       </template>
     </div>
     <div
@@ -55,7 +60,7 @@
 
 <script setup lang="ts">
 import { gql } from '@urql/vue'
-import { computed } from '@vue/reactivity'
+import { computed } from 'vue'
 import type { CloudRunStatus, DebugSpecsFragment, TestingTypeEnum } from '../generated/graphql'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import DebugLoading from '../debug/empty/DebugLoading.vue'
@@ -67,6 +72,7 @@ import DebugNotLoggedIn from './empty/DebugNotLoggedIn.vue'
 import DebugNoProject from './empty/DebugNoProject.vue'
 import DebugNoRuns from './empty/DebugNoRuns.vue'
 import DebugError from './empty/DebugError.vue'
+import DebugSpecLimitBanner from './DebugSpecLimitBanner.vue'
 import DebugNewRelevantRunBar from './DebugNewRelevantRunBar.vue'
 import { specsList } from './utils/DebugMapping'
 import type { CloudRunHidingReason } from './DebugOverLimit.vue'
@@ -117,7 +123,7 @@ fragment DebugSpecs on Query {
             id
             ...DebugPageDetails_cloudCiBuildInfo
           }
-          testsForReview {
+          testsForReview(limit: 100) {
             id
             ...DebugSpecListTests
           }

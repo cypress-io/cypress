@@ -42,7 +42,7 @@
           </div>
           <ul
             data-cy="spec-header-metadata"
-            class="flex flex-wrap items-center gap-x-3 text-gray-700 whitespace-nowrap children:flex children:items-center font-normal text-sm"
+            class="flex flex-wrap font-normal text-sm text-gray-700 gap-x-3 items-center whitespace-nowrap children:flex children:items-center"
           >
             <li
               :data-cy="'debugHeader-results'"
@@ -141,6 +141,20 @@
 </template>
 <script lang="ts" setup>
 
+import { computed, unref } from 'vue'
+import { IconActionRefresh, IconDocumentText } from '@cypress-design/vue-icon'
+import type { SpecDataAggregate, CloudRunInstance } from '@packages/data-context/src/gen/graphcache-config.gen'
+import DebugFailedTest from './DebugFailedTest.vue'
+import StatsMetaData from './StatsMetadata.vue'
+import ResultCounts from '@packages/frontend-shared/src/components/ResultCounts.vue'
+import Button from '@packages/frontend-shared/src/components/Button.vue'
+import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
+import SpecNameDisplay from '../specs/SpecNameDisplay.vue'
+import { useI18n } from '@cy/i18n'
+import { useDurationFormat } from '../composables/useDurationFormat'
+import { posixify } from '../paths'
+import type { StatsMetadata_GroupsFragment, TestingTypeEnum } from '../generated/graphql'
+
 export interface Spec {
   id: string
   path: string
@@ -158,20 +172,6 @@ export interface TestResults {
   readonly titleParts: ReadonlyArray<string>
   readonly instance: CloudRunInstance | null
 }
-
-import { computed, unref } from 'vue'
-import { IconActionRefresh, IconDocumentText } from '@cypress-design/vue-icon'
-import type { SpecDataAggregate, CloudRunInstance } from '@packages/data-context/src/gen/graphcache-config.gen'
-import DebugFailedTest from './DebugFailedTest.vue'
-import StatsMetaData from './StatsMetadata.vue'
-import ResultCounts from '@packages/frontend-shared/src/components/ResultCounts.vue'
-import Button from '@packages/frontend-shared/src/components/Button.vue'
-import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
-import SpecNameDisplay from '../specs/SpecNameDisplay.vue'
-import { useI18n } from '@cy/i18n'
-import { useDurationFormat } from '../composables/useDurationFormat'
-import { posixify } from '../paths'
-import type { StatsMetadata_GroupsFragment, TestingTypeEnum } from '../generated/graphql'
 
 const { t } = useI18n()
 

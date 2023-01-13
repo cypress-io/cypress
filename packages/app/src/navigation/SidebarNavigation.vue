@@ -2,7 +2,7 @@
   <HideDuringScreenshot
     id="sidebar"
     data-cy="sidebar"
-    class="flex flex-col bg-gray-1000 transition-all duration-300 relative"
+    class="flex flex-col bg-gray-1000 border-gray-900 border-r-1 transition-all duration-300 relative"
     :class="isNavBarExpanded ? 'w-248px' : 'w-64px'"
   >
     <button

@@ -635,7 +635,12 @@ export class ProjectLifecycleManager {
         metaState.isProjectUsingESModules = true
       }
 
-      metaState.isUsingTypeScript = detectLanguage({ projectRoot: this.projectRoot, pkgJson, isMigrating: metaState.hasLegacyCypressJson }) === 'ts'
+      metaState.isUsingTypeScript = detectLanguage({
+        projectRoot: this.projectRoot,
+        customConfigFile: configFile,
+        pkgJson,
+        isMigrating: metaState.hasLegacyCypressJson,
+      }) === 'ts'
     } catch {
       // No need to handle
     }

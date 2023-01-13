@@ -151,7 +151,7 @@ const totalDuration = useDurationFormat(debug.value.totalDuration ?? 0)
 </script>
 <style scoped>
 [data-cy=metadata] li:not(:first-child)::before {
-  content: '.';
-  @apply -mt-8px text-lg text-gray-400 pr-8px
+  content: '•';
+  @apply text-lg text-gray-400 pr-8px
 }
 </style>

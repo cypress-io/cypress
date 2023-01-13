@@ -101,7 +101,7 @@ function navigateToNewerRun () {
 </script>
 <style scoped>
 #metadata li:last-child::before {
-  content: '.';
-  @apply -mt-8px text-lg text-gray-400 pr-8px
+  content: '•';
+  @apply text-lg text-gray-400 pr-8px
 }
 </style>
