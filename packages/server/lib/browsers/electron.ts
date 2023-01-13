@@ -144,10 +144,10 @@ export = {
       // prevents a tiny 1px padding around the window
       // causing screenshots/videos to be off by 1px
       resizable: !options.browser.isHeadless,
-      onCrashed () {
+      async onCrashed () {
         const err = errors.get('RENDERER_CRASHED')
 
-        memory.endProfiling()
+        await memory.endProfiling()
 
         if (!options.onError) {
           errors.log(err)

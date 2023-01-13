@@ -612,10 +612,10 @@ export = {
     const browserCriClient = this._getBrowserCriClient()
 
     // Handle chrome tab crashes.
-    pageCriClient.on('Inspector.targetCrashed', () => {
+    pageCriClient.on('Inspector.targetCrashed', async () => {
       const err = errors.get('RENDERER_CRASHED')
 
-      memory.endProfiling()
+      await memory.endProfiling()
 
       if (!options.onError) {
         errors.log(err)

@@ -3,7 +3,7 @@ import _ from 'lodash'
 import si from 'systeminformation'
 import os from 'os'
 import fs from 'fs-extra'
-// import { performance } from 'perf_hooks'
+import { performance } from 'perf_hooks'
 import { groupCyProcesses, Process } from '../../util/process_profiler'
 import pid from 'pidusage'
 
@@ -14,7 +14,7 @@ const debug = debugModule('cypress:server:browsers:memory')
 const debugVerbose = debugModule('cypress-verbose:server:browsers:memory')
 
 const MEMORY_THRESHOLD_PERCENTAGE = Number(process.env.CYPRESS_INTERNAL_MEMORY_THRESHOLD_PERCENTAGE) || 50
-const MEMORY_PROFILER_INTERVAL = Number(process.env.CYPRESS_MEMORY_PROFILER_INTERVAL) || 1000
+const MEMORY_PROFILER_INTERVAL = Number(process.env.CYPRESS_INTERNAL_MEMORY_PROFILER_INTERVAL) || 1000
 const MEMORY_FOLDER = 'cypress/logs/memory'
 const KIBIBYTE = 1024
 const FOUR_GIBIBYTES = 4 * (KIBIBYTE ** 3)
@@ -28,7 +28,8 @@ let cumulativeStats: { [key: string]: any }[] = []
 let collectGarbageOnNextTest = false
 let timer: NodeJS.Timeout | null
 let currentSpec
-let currentStats: { [key: string]: any } = {}
+let statsLog: { [key: string]: any } = {}
+let gcLog: { [key: string]: any } = {}
 
 export type MemoryHandler = {
   getTotalMemoryLimit: () => Promise<number>
@@ -51,16 +52,20 @@ export type MemoryHandler = {
 
 const measure = (func: (...args) => any, opts: { name?: string, save?: boolean } = { save: true }) => {
   return async (...args) => {
-    // const start = performance.now()
+    const start = performance.now()
     const result = await func.apply(this, args)
-    // const duration = performance.now() - start
-    // const name = opts.name || func.name
+    const duration = performance.now() - start
+    const name = opts.name || func.name
 
-    // if (args?.opts?.log) {
-    //   currentStats[`${name}Duration`] = duration
-    // } else {
-    //   debugVerbose('%s took %dms', name, duration)
-    // }
+    if (opts?.save) {
+      if (name === '_maybeCollectGarbage') {
+        gcLog[`${name}Duration`] = duration
+      } else {
+        statsLog[`${name}Duration`] = duration
+      }
+    } else {
+      debugVerbose('%s took %dms', name, duration)
+    }
 
     return result
   }
@@ -143,7 +148,7 @@ const _getAvailableMemory = (stats: { [key: string]: any }) => {
 
 const _gatherMemoryStats = async () => {
   const [currentAvailableMemory, rendererProcessMemRss] = await Promise.all([
-    getAvailableMemory(currentStats),
+    getAvailableMemory(statsLog),
     getRendererMemoryUsage(),
   ])
 
@@ -157,48 +162,51 @@ const _gatherMemoryStats = async () => {
 
   // if we're using more than MEMORY_THRESHOLD_PERCENTAGE of the available memory, force a garbage collection
   const rendererUsagePercentage = (rendererProcessMemRss / maxAvailableRendererMemory) * 100
-  const shouldCollectGarbage = rendererUsagePercentage >= MEMORY_THRESHOLD_PERCENTAGE && process.env.CYPRESS_INTERNAL_FORCE_GC !== '0'
+  const shouldCollectGarbage = rendererUsagePercentage >= MEMORY_THRESHOLD_PERCENTAGE && !['0', 'false'].includes(process.env.CYPRESS_INTERNAL_FORCE_GC as string)
 
   collectGarbageOnNextTest = collectGarbageOnNextTest || shouldCollectGarbage
 
-  currentStats.rendererProcessMemRss = rendererProcessMemRss
-  currentStats.shouldCollectGarbage = shouldCollectGarbage
-  currentStats.rendererUsagePercentage = rendererUsagePercentage
-  currentStats.rendererMemoryThreshold = maxAvailableRendererMemory * (MEMORY_THRESHOLD_PERCENTAGE / 100)
-  currentStats.currentAvailableMemory = currentAvailableMemory
-  currentStats.maxAvailableRendererMemory = maxAvailableRendererMemory
-  currentStats.jsHeapSizeLimit = jsHeapSizeLimit
-  currentStats.totalMemoryLimit = totalMemoryLimit
-  currentStats.timestamp = Date.now()
-
-  cumulativeStats.push(currentStats)
-  cumulativeStats = []
+  statsLog.rendererProcessMemRss = rendererProcessMemRss
+  statsLog.shouldCollectGarbage = shouldCollectGarbage
+  statsLog.rendererUsagePercentage = rendererUsagePercentage
+  statsLog.rendererMemoryThreshold = maxAvailableRendererMemory * (MEMORY_THRESHOLD_PERCENTAGE / 100)
+  statsLog.currentAvailableMemory = currentAvailableMemory
+  statsLog.maxAvailableRendererMemory = maxAvailableRendererMemory
+  statsLog.jsHeapSizeLimit = jsHeapSizeLimit
+  statsLog.totalMemoryLimit = totalMemoryLimit
+  statsLog.timestamp = Date.now()
 }
 
-export const _maybeCollectGarbage = async ({ automation, test }: { automation: Automation, test: { title: string, order: number, currentRetry: number }}) => {
-  const log: { [key: string]: any } = {}
+const _maybeCollectGarbageAndLog = async ({ automation, test }: { automation: Automation, test: { title: string, order: number, currentRetry: number }}) => {
+  await maybeCollectGarbage({ automation })
 
+  gcLog.testTitle = test.title
+  gcLog.testOrder = Number(`${test.order}.${test.currentRetry}`)
+  gcLog.garbageCollected = collectGarbageOnNextTest
+  gcLog.timestamp = Date.now()
+
+  addStats(gcLog)
+}
+
+const _maybeCollectGarbage = async ({ automation }: { automation: Automation }) => {
   if (collectGarbageOnNextTest) {
     debug('forcing garbage collection')
     await automation.request('collect:garbage', null, null)
+    collectGarbageOnNextTest = false
   } else {
     debug('skipping garbage collection')
   }
+}
 
-  log.testTitle = test.title
-  log.testOrder = Number(`${test.order}.${test.currentRetry}`)
-  log.garbageCollected = collectGarbageOnNextTest
-  log.timestamp = Date.now()
-
-  collectGarbageOnNextTest = false
-
-  cumulativeStats.push(log)
-
-  return log
+const addStats = (stats) => {
+  debugVerbose('memory stats: %o', stats)
+  cumulativeStats.push(stats)
+  stats = {}
 }
 
 const checkMemory = async () => {
   await gatherMemoryStats()
+  addStats(statsLog)
   scheduleMemoryCheck()
 }
 
@@ -241,8 +249,6 @@ const saveCumulativeStats = async () => {
       debugVerbose('error creating memory stats file: %o', err)
     }
   }
-
-  cumulativeStats = []
 }
 
 async function endProfiling () {
@@ -257,7 +263,8 @@ async function endProfiling () {
   collectGarbageOnNextTest = false
   currentSpec = null
   timer = null
-  currentStats = {}
+  statsLog = {}
+  gcLog = {}
 
   debugVerbose('end memory profiler')
 }
@@ -280,6 +287,6 @@ export default {
   startProfiling,
   endProfiling,
   checkMemory,
-  maybeCollectGarbage,
+  maybeCollectGarbage: _maybeCollectGarbageAndLog,
   getCumulativeStats,
 }
