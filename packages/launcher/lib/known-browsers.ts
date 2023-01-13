@@ -127,7 +127,7 @@ export const knownBrowsers: Browser[] = [
     channel: 'canary',
     displayName: 'Edge Canary',
     versionRegex: /Microsoft Edge Canary (\S+)/m,
-    binary: 'edge-canary',
+    binary: ['edge-canary', 'microsoft-edge-canary'],
     minSupportedVersion: MIN_EDGE_VERSION,
   },
   {
@@ -136,7 +136,7 @@ export const knownBrowsers: Browser[] = [
     channel: 'beta',
     displayName: 'Edge Beta',
     versionRegex: /Microsoft Edge Beta (\S+)/m,
-    binary: 'edge-beta',
+    binary: ['edge-beta', 'microsoft-edge-beta'],
     minSupportedVersion: MIN_EDGE_VERSION,
   },
   {
