@@ -120,6 +120,8 @@ class $Cypress {
   isCrossOriginSpecBridge: boolean
   on: any
 
+  // pretend to be breaking changes and/or some release-ready change.
+  
   // attach to $Cypress to access
   // all of the constructors
   // to enable users to monkeypatch
