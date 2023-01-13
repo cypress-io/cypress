@@ -996,7 +996,7 @@ type CurrentProject implements Node & ProjectLike {
   specs: [Spec!]!
 
   """"""
-  testsForReviewBySpec(specTitle: String): [String!]
+  testsForReviewBySpec(specTitle: String!): [String!]
   title: String!
 }
 

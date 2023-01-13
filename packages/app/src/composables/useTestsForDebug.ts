@@ -1,6 +1,5 @@
 import { gql, useQuery } from '@urql/vue'
 import { Debug_TestsForDebugDocument } from '@packages/app/src/generated/graphql'
-import { computed } from 'vue'
 
 gql`
   query Debug_TestsForDebug($specTitle: String!) {
@@ -21,6 +20,6 @@ export function useTestsForDebug () {
 
     const results = query.executeQuery()
 
-    return computed(() => results.data.value)
+    return results.data.value
   }
 }

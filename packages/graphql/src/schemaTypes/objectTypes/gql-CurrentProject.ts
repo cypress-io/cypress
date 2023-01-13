@@ -264,7 +264,7 @@ export const CurrentProject = objectType({
     t.list.nonNull.string('testsForReviewBySpec', {
       description: '',
       args: {
-        specTitle: stringArg(),
+        specTitle: nonNull(stringArg()),
       },
       resolve: (source, args, ctx) => {
         return ['foo/bar']
