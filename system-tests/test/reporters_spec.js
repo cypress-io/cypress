@@ -111,6 +111,36 @@ describe('e2e reporters', () => {
         })
       })
 
+      it(`pending with ${ma} npm custom reporter`, function () {
+        return systemTests.exec(this, {
+          spec: 'simple_pending.cy.js',
+          snapshot: true,
+          // cypress supports passing module name, relative path, or absolute path
+          reporter: require.resolve(ma),
+        })
+        .then(() => {
+          if (ma === 'mochawesome-1.5.2') {
+            return fs.readFileAsync(path.join(e2ePath, 'mochawesome-reports', 'mochawesome.html'), 'utf8')
+            .then((xml) => {
+              expect(xml).to.include('<h3 class="suite-title">simple pending spec</h3>')
+
+              expect(xml).to.include('<div class="status-item status-item-pending-pct">100% Pending</div>')
+            })
+          }
+
+          return fs.readJsonAsync(path.join(e2ePath, 'mochawesome-report', 'mochawesome.json'))
+          .then((json) => {
+            expect(json.stats).to.be.an('object')
+
+            expect(json.stats.pending).to.eq(1)
+
+            // https://github.com/cypress-io/cypress/issues/24477
+            expect(json.stats.skipped).to.eq(0)
+            expect(json.stats.hasSkipped).to.eq(false)
+          })
+        })
+      })
+
       it(`fails with ${ma} npm custom reporter`, function () {
         return systemTests.exec(this, {
           spec: 'simple_failing_hook.cy.js',

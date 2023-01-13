@@ -657,4 +657,86 @@ describe('lib/cors', () => {
       expect(cors.getOrigin('http://www.app.herokuapp.com:8080')).to.equal('http://www.app.herokuapp.com:8080')
     })
   })
+
+  context('.policyForDomain', () => {
+    const recommendedSameOriginPolicyUrlGlobs = ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com']
+
+    context('returns "same-origin" for google domains', () => {
+      it('accounts.google.com', () => {
+        expect(cors.policyForDomain('https://accounts.google.com', {
+          skipDomainInjectionForDomains: recommendedSameOriginPolicyUrlGlobs,
+        })).to.equal('same-origin')
+      })
+
+      it('www.google.com', () => {
+        expect(cors.policyForDomain('https://www.google.com', {
+          skipDomainInjectionForDomains: recommendedSameOriginPolicyUrlGlobs,
+        })).to.equal('same-origin')
+      })
+    })
+
+    context('returns "same-origin" for salesforce domains', () => {
+      it('https://the-host.develop.lightning.force.com', () => {
+        expect(cors.policyForDomain('https://the-host.develop.lightning.force.com', {
+          skipDomainInjectionForDomains: recommendedSameOriginPolicyUrlGlobs,
+        })).to.equal('same-origin')
+      })
+
+      it('https://the-host.develop.my.salesforce.com', () => {
+        expect(cors.policyForDomain('https://the-host.develop.my.salesforce.com', {
+          skipDomainInjectionForDomains: recommendedSameOriginPolicyUrlGlobs,
+        })).to.equal('same-origin')
+      })
+
+      it('https://the-host.develop.file.force.com', () => {
+        expect(cors.policyForDomain('https://the-host.develop.file.force.com', {
+          skipDomainInjectionForDomains: recommendedSameOriginPolicyUrlGlobs,
+        })).to.equal('same-origin')
+      })
+
+      it('https://the-host.develop.my.salesforce.com', () => {
+        expect(cors.policyForDomain('https://the-host.develop.my.salesforce.com', {
+          skipDomainInjectionForDomains: recommendedSameOriginPolicyUrlGlobs,
+        })).to.equal('same-origin')
+      })
+    })
+
+    describe('returns "same-super-domain-origin" for non exception urls', () => {
+      it('www.cypress.io', () => {
+        expect(cors.policyForDomain('http://www.cypress.io', {
+          skipDomainInjectionForDomains: recommendedSameOriginPolicyUrlGlobs,
+        })).to.equal('same-super-domain-origin')
+      })
+
+      it('docs.cypress.io', () => {
+        expect(cors.policyForDomain('http://docs.cypress.io', {
+          skipDomainInjectionForDomains: recommendedSameOriginPolicyUrlGlobs,
+        })).to.equal('same-super-domain-origin')
+      })
+
+      it('stackoverflow.com', () => {
+        expect(cors.policyForDomain('https://stackoverflow.com', {
+          skipDomainInjectionForDomains: recommendedSameOriginPolicyUrlGlobs,
+        })).to.equal('same-super-domain-origin')
+      })
+    })
+  })
+
+  context('.shouldInjectDocumentDomain', () => {
+    it('returns false when "skipDomainInjectionForDomains" is configured and contains a matching blob pattern ', () => {
+      expect(cors.shouldInjectDocumentDomain('http://www.cypress.io', {
+        skipDomainInjectionForDomains: ['*.cypress.io'],
+      })).to.be.false
+    })
+
+    it('returns true when "skipDomainInjectionForDomains" exists, but doesn\'t contain a matching glob pattern', () => {
+      expect(cors.shouldInjectDocumentDomain('http://www.cypress.io', {
+        skipDomainInjectionForDomains: ['*.foobar.com'],
+      })).to.be.true
+    })
+
+    it('returns true otherwise', () => {
+      expect(cors.shouldInjectDocumentDomain('http://www.cypress.io')).to.be.true
+    })
+  })
 })

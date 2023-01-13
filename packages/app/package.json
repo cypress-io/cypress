@@ -30,6 +30,7 @@
     "@intlify/vite-plugin-vue-i18n": "2.4.0",
     "@packages/frontend-shared": "0.0.0-development",
     "@percy/cypress": "^3.1.0",
+    "@popperjs/core": "2.11.6",
     "@testing-library/cypress": "BlueWinds/cypress-testing-library#119054b5963b0d2e064b13c5cc6fc9db32c8b7b5",
     "@types/faker": "5.5.8",
     "@urql/core": "2.4.4",

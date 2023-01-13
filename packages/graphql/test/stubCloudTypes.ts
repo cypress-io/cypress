@@ -22,7 +22,6 @@ import type {
   QueryCloudProjectsBySlugsArgs,
   CloudProjectRunsArgs,
   CloudProjectSpec,
-  CloudProjectSpecResult,
   CloudRunStatus,
   CloudSpecRun,
   CloudTestResult,

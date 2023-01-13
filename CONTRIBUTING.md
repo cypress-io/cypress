@@ -335,14 +335,8 @@ Many Cypress packages print out debugging information to console via the `debug`
 We use [eslint](https://eslint.org/) to lint all JavaScript code and follow rules specified in
 [@cypress/eslint-plugin-dev](./npm/eslint-plugin-cypress) plugin.
 
-When you edit files, you can quickly fix all changed files before you commit using
-
-```bash
-$ yarn lint-changed --fix
-```
-
-When committing files, we run a Git pre-commit hook to lint the staged JS files. See the [`lint-staged` project](https://github.com/okonet/lint-staged).
-If this command fails, you may need to run `yarn lint-changed --fix` and commit those changes.
+This project uses a Git pre-commit hook to lint staged files before committing. See the [`lint-staged` project](https://github.com/okonet/lint-staged) for details.
+`lint-staged` will try to auto-fix any lint errors with `eslint --fix`, so if it fails, you must manually fix the lint errors before committing.
 
 We **DO NOT** use Prettier to format code. You can find [.prettierignore](.prettierignore) file that ignores all files in this repository. To ensure this file is loaded, please always open _the root repository folder_ in your text editor, otherwise your code formatter might execute, reformatting lots of source files.
 
