@@ -986,9 +986,6 @@ type CurrentProject implements Node & ProjectLike {
   """Returns the spec counts for the current and next runs"""
   relevantRunSpecs: CurrentProjectRelevantRunSpecs
 
-  """Returns a list of relevant runs for matching Git shas from the Cloud"""
-  relevantRuns: RelevantRun
-
   """Project saved state"""
   savedState: JSON
 

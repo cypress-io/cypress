@@ -18,19 +18,20 @@ export class Poller<E extends EventType> {
   }
 
   start (initialValue?: any) {
-    debug(`starting poller for ${this.event}`)
-
     if (!this.#timeout) {
+      debug(`starting poller for ${this.event}`)
       this.#poll().catch((e) => {
         debug('error executing poller %o', e)
       })
     }
 
+    debug(`subscribing to ${this.event}`)
+
     return this.ctx.emitter.subscribeTo(this.event, {
       sendInitial: false,
       initialValue,
       onUnsubscribe: () => {
-        debug(`in unsubscribe for ${this.event}`)
+        debug(`stopping poller for ${this.event}`)
         this.#stop()
       },
     })

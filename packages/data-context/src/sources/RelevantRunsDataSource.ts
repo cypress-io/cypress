@@ -185,6 +185,7 @@ export class RelevantRunsDataSource {
 
         //only emit a new value if it changes
         if (!isEqual(runs, this.#cachedRuns)) {
+          debug('Runs changed %o', runs)
           this.#cachedRuns = runs
           this.ctx.emitter.relevantRunChange(runs)
         }

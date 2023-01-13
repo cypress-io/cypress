@@ -8,7 +8,6 @@ import { CodeGenGlobs } from './gql-CodeGenGlobs'
 import { FileParts } from './gql-FileParts'
 import { ProjectPreferences } from './gql-ProjectPreferences'
 import { Spec } from './gql-Spec'
-import { RelevantRun } from './gql-RelevantRun'
 
 export const PackageManagerEnum = enumType({
   name: 'PackageManagerEnum',
@@ -238,14 +237,6 @@ export const CurrentProject = objectType({
       type: BrowserStatusEnum,
       description: 'If the browser is open or not',
       resolve: (source, args, ctx) => ctx.coreData.app.browserStatus,
-    })
-
-    t.field('relevantRuns', {
-      type: RelevantRun,
-      description: 'Returns a list of relevant runs for matching Git shas from the Cloud',
-      resolve: async (source, args, ctx) => {
-        return ctx.relevantRuns.getRelevantRuns(source.git?.currentHashes || [])
-      },
     })
 
     t.field('relevantRunSpecs', {
