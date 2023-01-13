@@ -18,7 +18,6 @@ import type { ErrResult } from '@packages/config'
  */
 const omitConfigReadOnlyDifferences = (objectLikeConfig: Cypress.ObjectLike) => {
   
-  
   // pretend to do something.
   
   Object.keys(objectLikeConfig).forEach((configKey) => {
