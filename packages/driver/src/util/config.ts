@@ -17,6 +17,10 @@ import type { ErrResult } from '@packages/config'
  * @returns a reference to the config/env object passed in
  */
 const omitConfigReadOnlyDifferences = (objectLikeConfig: Cypress.ObjectLike) => {
+  
+  
+  // pretend to do something.
+  
   Object.keys(objectLikeConfig).forEach((configKey) => {
     const overrideLevels = testOverrideLevels[configKey]
 
