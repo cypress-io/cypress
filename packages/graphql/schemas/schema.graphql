@@ -1981,13 +1981,13 @@ type RelevantRun {
 """"""
 type RelevantRunSpecs {
   """Number of specs in the run that have finished being processed"""
-  completedSpecs: Int
+  completedSpecs: Int!
 
   """The runNumber that these spec counts belong to"""
-  runNumber: Int
+  runNumber: Int!
 
   """Total number of specs in the run"""
-  totalSpecs: Int
+  totalSpecs: Int!
 }
 
 """

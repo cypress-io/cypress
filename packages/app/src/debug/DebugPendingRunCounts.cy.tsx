@@ -24,16 +24,4 @@ describe('<DebugPendingRunCounts />', () => {
 
     cy.percySnapshot()
   })
-
-  it('renders count of zero if value in input is null', () => {
-    cy.mount(
-      <DebugPendingRunCounts
-        specs={{ completedSpecs: null, totalSpecs: 1 }}
-      />,
-    )
-
-    cy.contains('0 of 1').should('be.visible')
-
-    cy.percySnapshot()
-  })
 })
