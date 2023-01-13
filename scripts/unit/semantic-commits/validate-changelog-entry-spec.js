@@ -7,7 +7,7 @@ const { validateChangelogEntry, _getResolvedMessage } = require('../../semantic-
 
 use(sinonChai)
 
-describe('semantic-pull-request/validateChangelogEntry', () => {
+describe('semantic-pull-request/validate-changelog-entry', () => {
   context('_getResolvedMessage', () => {
     it('returned pr link', () => {
       const message = _getResolvedMessage('feat', 52, [])

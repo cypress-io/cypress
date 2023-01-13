@@ -2,7 +2,7 @@ const { expect } = require('chai')
 const sinon = require('sinon')
 const { validatePrTitle, _validateTitle } = require('../../../github-actions/semantic-pull-request/validate-pr-title')
 
-describe('semantic-pull-request/validatePrTitle', () => {
+describe('semantic-pull-request/validate-pr-title', () => {
   context('validatePrTitle', () => {
     const restParameters = {
       owner: 'cypress-io',

@@ -1,4 +1,4 @@
-const getIssueNumbers = (body = '') => {
+const getLinkedIssues = (body = '') => {
   // remove markdown comments
   body.replace(/(<!--.*?-->)|(<!--[\S\s]+?-->)|(<!--[\S\s]*?$)/g, '')
 
@@ -18,5 +18,5 @@ const getIssueNumbers = (body = '') => {
 }
 
 module.exports = {
-  getIssueNumbers,
+  getLinkedIssues,
 }
