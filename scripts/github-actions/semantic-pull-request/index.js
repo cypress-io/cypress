@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 const { validatePrTitle } = require('./validate-pr-title')
-const { validateChangelogEntry } = require('../../semantic-commits/validate-changelog-entry')
+const { validateChangelog } = require('../../semantic-commits/validate-changelog-entry')
 const { getLinkedIssues } = require('../../semantic-commits/get-linked-issues')
 
 /**
@@ -34,7 +34,7 @@ async function run ({ context, core, github }) {
 
     const { data: pullRequest } = await github.pulls.get(restParameters)
 
-    const { type: semanticType } = await validatePrTitle({
+    const { type: semanticType, header } = await validatePrTitle({
       github,
       restParameters,
       prTitle: pullRequest.title,
@@ -46,11 +46,14 @@ async function run ({ context, core, github }) {
 
     const changedFiles = data.map((fileDetails) => fileDetails.filename)
 
-    await validateChangelogEntry({
-      prNumber: contextPullRequest.number,
+    await validateChangelog({
       changedFiles,
-      semanticType,
-      associatedIssues,
+      commits: [{
+        commitMessage: header,
+        prNumber: contextPullRequest.number,
+        semanticType,
+        associatedIssues,
+      }],
     })
   } catch (error) {
     core.setFailed(error.message)

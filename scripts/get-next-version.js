@@ -8,11 +8,9 @@ const bumpCb = require('conventional-recommended-bump')
 const { promisify } = require('util')
 
 const currentVersion = require('../package.json').version
-const { releaseRules } = require('./semantic-commits/change-categories')
+const { changeCatagories } = require('./semantic-commits/change-categories')
 const bump = promisify(bumpCb)
 const paths = ['packages', 'cli']
-
-let nextVersion
 
 const getNextVersionForPath = async (path) => {
   // allow the semantic next version to be overridden by environment
@@ -29,10 +27,10 @@ const getNextVersionForPath = async (path) => {
 
     commits = foundCommits
     foundCommits.forEach((commit) => {
-      if (releaseRules[commit.type].release === 'major') {
+      if (changeCatagories[commit.type].release === 'major') {
         breakings += 1
         level = 0
-      } else if (releaseRules[commit.type].release === 'minor') {
+      } else if (changeCatagories[commit.type].release === 'minor') {
         features += 1
         if (level === 2) {
           level = 1
@@ -53,16 +51,41 @@ const getNextVersionForPath = async (path) => {
     path,
   })
 
-  console.log('commits', commits)
-
   return {
     nextVersion: semver.inc(currentVersion, releaseType || 'patch'),
     commits,
   }
 }
 
+const getNextVersionForBinary = async () => {
+  let commits = []
+  let nextVersion
+
+  for (const path of paths) {
+    const { nextVersion: pathNextVersion, commits: pathCommits } = await getNextVersionForPath(path)
+
+    if (!nextVersion || semver.gt(pathNextVersion, nextVersion)) {
+      nextVersion = pathNextVersion
+    }
+
+    commits = commits.concat(pathCommits)
+  }
+
+  if (!nextVersion) {
+    throw new Error('Unable to determine next version.')
+  }
+
+  return {
+    nextVersion,
+    commits,
+  }
+}
+
 if (require.main !== module) {
-  module.exports.getNextVersionForPath = getNextVersionForPath
+  module.exports = {
+    getNextVersionForBinary,
+    getNextVersionForPath,
+  }
 
   return
 }
@@ -70,17 +93,7 @@ if (require.main !== module) {
 (async () => {
   process.chdir(path.join(__dirname, '..'))
 
-  for (const path of paths) {
-    const { nextVersion: pathNextVersion } = await getNextVersionForPath(path)
-
-    if (!nextVersion || semver.gt(pathNextVersion, nextVersion)) {
-      nextVersion = pathNextVersion
-    }
-  }
-
-  if (!nextVersion) {
-    throw new Error('Unable to determine next version.')
-  }
+  const { nextVersion } = await getNextVersionForBinary()
 
   if (process.argv.includes('--npm')) {
     const cmd = `npm --no-git-tag-version version ${nextVersion}`
