@@ -526,6 +526,10 @@
       "experimentalMemoryManagement": {
         "name": "Memory Management",
         "description": "Enables support for improved memory management."
+      },
+      "experimentalSkipDomainInjection": {
+        "name": "Skip Domain Injection",
+        "description": "Disables setting `document.domain` to the application's super domain on injection."
       }
     },
     "device": {
