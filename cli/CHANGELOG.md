@@ -1,4 +1,4 @@
-## 12.4.0
+## 12.4.0 (PENDING RELEASE)
 
 **Features:**
  - <Insert change details>. Addresses [#24495](https://github.com/cypress-io/cypress/issues/24495).
@@ -8,14 +8,3 @@
 **Bugfixes:**
  - <Insert change details>. Fixes [#25379](https://github.com/cypress-io/cypress/issues/25379).
  - <Insert change details>. Fixes [#23679](https://github.com/cypress-io/cypress/issues/23679).
-
-
- The changelog entry does not include the pull request link. Please update your entry to include:
-
-Fixed in [#24687](https://github.com/cypress-io/cypress/pull/24687).
-
-The changelog entry does not include the pull request link. Please update your entry to include:
-
-Fixed in [#25380](https://github.com/cypress-io/cypress/pull/25380).
-
-The changelog entry does not include the pull request link. Please update your entry to include:

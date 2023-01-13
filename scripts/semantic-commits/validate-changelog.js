@@ -128,7 +128,5 @@ async function validateChangelog ({ changedFiles, nextVersion, commits }) {
 module.exports = {
   validateChangelog,
   _validateEntry,
-  // validateChangelog,
-  // validateChangelogEntry,
   _getResolvedMessage,
 }
