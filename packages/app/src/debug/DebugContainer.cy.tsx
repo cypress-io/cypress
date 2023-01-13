@@ -12,6 +12,14 @@ const DebugSpecVariableTypes = {
 }
 
 describe('<DebugContainer />', () => {
+  describe('offline', () => {
+    it('shows offline message if offline', () => {
+      cy.mount(() => <DebugContainer online={false}/>)
+
+      cy.contains('You have no internet connection').should('be.visible')
+    })
+  })
+
   describe('empty states', () => {
     const validateEmptyState = (expectedMessages: string[]) => {
       cy.mountFragment(DebugSpecsFragmentDoc, {

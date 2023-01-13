@@ -155,7 +155,11 @@ mutation SideBarNavigation_SetPreferences ($value: String!) {
   }
 }`
 
-const props = defineProps<{ gql: SidebarNavigationFragment | undefined, isLoading: boolean }>()
+const props = defineProps<{
+  gql: SidebarNavigationFragment | undefined
+  isLoading: boolean
+  online: boolean
+}>()
 
 const NAV_EXPAND_MIN_SCREEN_WIDTH = 1024
 
@@ -169,7 +173,10 @@ const debugBadge = computed<Badge | undefined>(() => {
   const showNewBadge = isAllowedFeature('debugNewBadge', loginConnectStore)
   const newBadge: Badge = { value: t('sidebar.debug.new'), status: 'success', label: t('sidebar.debug.debugFeature') }
 
-  if (props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' && props.gql.currentProject.cloudProject.runByNumber) {
+  if (props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject'
+    && props.gql.currentProject.cloudProject.runByNumber
+    && props.online
+  ) {
     const { status, totalFailed } = props.gql.currentProject.cloudProject.runByNumber || {}
 
     if (status === 'NOTESTS' || status === 'RUNNING') {

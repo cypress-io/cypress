@@ -6,8 +6,8 @@ import { cloneDeep } from 'lodash'
 import { IATR_RELEASE } from '@packages/frontend-shared/src/utils/isAllowedFeature'
 import interval from 'human-interval'
 
-function mountComponent (props: { initialNavExpandedVal?: boolean, cloudProject?: { status: CloudRunStatus, numFailedTests: number }, isLoading?: boolean} = {}) {
-  const withDefaults = { initialNavExpandedVal: false, isLoading: false, ...props }
+function mountComponent (props: { initialNavExpandedVal?: boolean, cloudProject?: { status: CloudRunStatus, numFailedTests: number }, isLoading?: boolean, online?: boolean} = {}) {
+  const withDefaults = { initialNavExpandedVal: false, isLoading: false, online: true, ...props }
   let _gql: SidebarNavigationFragment
 
   cy.stubMutationResolver(SideBarNavigation_SetPreferencesDocument, (defineResult) => {
@@ -43,7 +43,7 @@ function mountComponent (props: { initialNavExpandedVal?: boolean, cloudProject?
       return (
         <div>
           <div class={[withDefaults.initialNavExpandedVal ? 'w-248px' : 'w-64px', 'transition-all', 'h-screen', 'grid', 'grid-rows-1']}>
-            <SidebarNavigation gql={gql} isLoading={withDefaults.isLoading} />
+            <SidebarNavigation gql={gql} isLoading={withDefaults.isLoading} online={withDefaults.online}/>
           </div>
         </div>
       )
@@ -196,6 +196,14 @@ describe('SidebarNavigation', () => {
 
       mountComponent({ isLoading: true })
       cy.findByLabelText('New Debug feature').should('not.exist')
+    })
+
+    it('renders new badge if offline', () => {
+      cy.clock(IATR_RELEASE)
+
+      mountComponent({ online: false })
+
+      cy.findByLabelText('New Debug feature').should('be.visible').contains('New')
     })
   })
 })

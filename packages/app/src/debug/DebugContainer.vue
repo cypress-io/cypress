@@ -1,6 +1,9 @@
 <template>
   <div class="h-full">
-    <DebugLoading v-if="isLoading" />
+    <NoInternetConnection v-if="!online">
+      {{ t('launchpadErrors.noInternet.connectProject') }}
+    </NoInternetConnection>
+    <DebugLoading v-else-if="isLoading" />
     <DebugError
       v-else-if="showError"
     />
@@ -63,6 +66,7 @@ import { gql } from '@urql/vue'
 import { computed } from 'vue'
 import type { CloudRunStatus, DebugSpecsFragment, TestingTypeEnum } from '../generated/graphql'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import NoInternetConnection from '@packages/frontend-shared/src/components/NoInternetConnection.vue'
 import DebugLoading from '../debug/empty/DebugLoading.vue'
 import DebugPageHeader from './DebugPageHeader.vue'
 import DebugPendingRunSplash from './DebugPendingRunSplash.vue'
@@ -77,6 +81,9 @@ import DebugNewRelevantRunBar from './DebugNewRelevantRunBar.vue'
 import { specsList } from './utils/DebugMapping'
 import type { CloudRunHidingReason } from './DebugOverLimit.vue'
 import dayjs from 'dayjs'
+import { useI18n } from '@cy/i18n'
+
+const { t } = useI18n()
 
 gql`
 fragment DebugLocalSpecs on Spec {
@@ -158,11 +165,13 @@ const props = withDefaults(defineProps<{
   showError?: boolean
   isLoading?: boolean
   commitsAhead?: number
+  online?: boolean
 }>(),
 {
   gql: undefined,
   isLoading: false,
   commitsAhead: 0,
+  online: true,
 })
 
 const loginConnectStore = useLoginConnectStore()

@@ -4,6 +4,7 @@
     :gql="query.data.value"
     :is-loading="isLoading"
     :commits-ahead="relevantRuns?.commitsAhead || 0"
+    :online="online"
   />
 </template>
 
@@ -11,9 +12,13 @@
 
 import DebugContainer from '../debug/DebugContainer.vue'
 import { gql, useQuery, useSubscription } from '@urql/vue'
+import { useOnline } from '@vueuse/core'
+
 import { DebugDocument, Debug_SpecsChangeDocument } from '../generated/graphql'
 import { computed } from 'vue'
 import { useRelevantRun } from '../composables/useRelevantRun'
+
+const online = useOnline()
 
 gql`
 subscription Debug_specsChange {
@@ -44,7 +49,7 @@ const variables = computed(() => {
 })
 
 const shouldPauseQuery = computed(() => {
-  return variables.value.runNumber === -1
+  return variables.value.runNumber === -1 || !online
 })
 
 const query = useQuery({ query: DebugDocument, variables, pause: shouldPauseQuery, requestPolicy: 'network-only' })

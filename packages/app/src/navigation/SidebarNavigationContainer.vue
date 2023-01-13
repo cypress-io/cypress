@@ -2,12 +2,14 @@
   <SidebarNavigation
     :gql="query.data.value"
     :is-loading="isLoading"
+    :online="online"
   />
 </template>
 
 <script lang="ts" setup>
 import SidebarNavigation from './SidebarNavigation.vue'
 import { gql, useQuery } from '@urql/vue'
+import { useOnline } from '@vueuse/core'
 import { SideBarNavigationContainerDocument } from '../generated/graphql'
 import { useRelevantRun } from '@packages/app/src/composables/useRelevantRun'
 import { ref, watchEffect, computed } from 'vue'
@@ -17,6 +19,8 @@ query SideBarNavigationContainer($runNumber: Int!, $hasCurrentRun: Boolean!) {
   ...SidebarNavigation
 }
 `
+
+const online = useOnline()
 
 const relevantRuns = useRelevantRun()
 
