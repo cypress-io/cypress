@@ -8,6 +8,6 @@
  **Performance:**
  - <Insert change details>. Fixed in [#25460](https://github.com/cypress-io/cypress/pull/25460).
  
-**Bugfixes:**
+
  - <Insert change details>. Fixes [#25379](https://github.com/cypress-io/cypress/issues/25379).
  - <Insert change details>. Fixes [#23679](https://github.com/cypress-io/cypress/issues/23679).
