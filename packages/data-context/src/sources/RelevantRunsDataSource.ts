@@ -77,6 +77,7 @@ export class RelevantRunsDataSource {
 
     debug(`Fetching runs for ${projectSlug} and ${shas.length} shas`)
 
+    //Not ideal typing for this return since the query is not fetching all the fields, but better than nothing
     const result = await this.ctx.cloud.executeRemoteGraphQL<Pick<Query, 'cloudProjectBySlug'> & Pick<Query, 'pollingIntervals'>>({
       fieldName: 'cloudProjectBySlug',
       operationDoc: RELEVANT_RUN_OPERATION_DOC,
@@ -130,7 +131,10 @@ export class RelevantRunsDataSource {
         // continue to use the cached current run
         // the next run is the first running run if it exists or the firstNonRunningRun
         currentRun = this.#currentRun
-        nextRun = firstRunningRun
+        if (firstRunningRun !== currentRun) {
+          nextRun = firstRunningRun
+        }
+
         if (!nextRun && firstNonRunningRun !== currentRun) {
           nextRun = firstNonRunningRun
         }

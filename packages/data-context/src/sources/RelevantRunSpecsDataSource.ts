@@ -106,6 +106,7 @@ export class RelevantRunSpecsDataSource {
 
     debug(`Fetching specs for ${projectSlug} and %o`, runs)
 
+    //Not ideal typing for this return since the query is not fetching all the fields, but better than nothing
     type CloudResult = { cloudProjectBySlug: { __typename: string, current?: CloudRun, next?: CloudRun } } & Pick<Query, 'pollingIntervals'>
 
     const result = await this.ctx.cloud.executeRemoteGraphQL<CloudResult>({

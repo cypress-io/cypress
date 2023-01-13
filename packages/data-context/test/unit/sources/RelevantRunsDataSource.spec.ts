@@ -77,7 +77,29 @@ describe('RelevantRunsDataSource', () => {
       })
     })
 
-    it('returns the same current if current already set and moves to next', async () => {
+    it('returns the same current if current already set only one running', async () => {
+      sinon.stub(ctx.cloud, 'executeRemoteGraphQL')
+      .onFirstCall().resolves(FAKE_PROJECT_ONE_RUNNING_RUN)
+      .onSecondCall().resolves(FAKE_PROJECT_ONE_RUNNING_RUN)
+
+      const firstResult = await dataSource.getRelevantRuns([FAKE_SHAS[0]])
+
+      expect(firstResult).to.eql({
+        current: 1,
+        next: undefined,
+        commitsAhead: 0,
+      })
+
+      const secondResult = await dataSource.getRelevantRuns([FAKE_SHAS[0]])
+
+      expect(secondResult).to.eql({
+        current: 1,
+        next: undefined,
+        commitsAhead: 0,
+      })
+    })
+
+    it('returns the same current if current already set and updates after movesToNext is called', async () => {
       sinon.stub(ctx.cloud, 'executeRemoteGraphQL')
       .onFirstCall().resolves(FAKE_PROJECT_ONE_RUNNING_RUN)
       .onSecondCall().resolves(FAKE_PROJECT_MULTIPLE_COMPLETED)

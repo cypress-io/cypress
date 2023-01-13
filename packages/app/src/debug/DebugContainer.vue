@@ -208,7 +208,7 @@ const specStatuses = computed(() => run.value?.specs.map((spec) => spec.status |
 
 const newerRelevantRun = computed(() => nextRun.value)
 
-const isFirstPendingRun = computed(() => run.value && run.value.runNumber === 1 && run.value.status === 'RUNNING')
+const isFirstPendingRun = computed(() => run.value && run.value.status === 'RUNNING')
 
 const reasonsRunIsHidden = computed(() => (run.value?.reasonsRunIsHidden || []) as CloudRunHidingReason[])
 
