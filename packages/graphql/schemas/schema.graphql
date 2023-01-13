@@ -983,7 +983,7 @@ type CurrentProject implements Node & ProjectLike {
   """Absolute path to the project on the filesystem"""
   projectRoot: String!
 
-  """"""
+  """Returns the spec counts for the current and next runs"""
   relevantRunSpecs: CurrentProjectRelevantRunSpecs
 
   """Returns a list of relevant runs for matching Git shas from the Cloud"""

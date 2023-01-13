@@ -130,7 +130,6 @@ fragment DebugSpecs on Query {
             ...DebugSpecListGroups
           }
           createdAt
-          ...DebugPendingRunSplash
         }
         nextRun: runByNumber(runNumber: $nextRunNumber) @include(if: $hasNextRun) {
           id
@@ -151,8 +150,8 @@ const props = withDefaults(defineProps<{
   gql?: DebugSpecsFragment
   // This prop is just to stub the error state for now
   showError?: boolean
-  isLoading: boolean
-  commitsAhead: number
+  isLoading?: boolean
+  commitsAhead?: number
 }>(),
 {
   gql: undefined,

@@ -249,7 +249,7 @@ export const CurrentProject = objectType({
     })
 
     t.field('relevantRunSpecs', {
-      description: '',
+      description: 'Returns the spec counts for the current and next runs',
       type: objectType({
         name: 'CurrentProjectRelevantRunSpecs',
         definition (t) {
