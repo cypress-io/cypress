@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 const { userFacingChanges } = require('./change-categories')
-const fs = require('fs')
-const path = require('path')
+const { parseChangelog } = require('./parse-changelog')
 
 const hasUserFacingChange = (type) => Object.keys(userFacingChanges).includes(type)
 
@@ -35,26 +34,28 @@ function printChangeLogExample (semanticType, prNumber, associatedIssues = []) {
 
 function _validateEntry (changelog, { commitMessage, prNumber, semanticType, associatedIssues }) {
   if (!hasUserFacingChange(semanticType)) {
-    return []
+    return
   }
 
-  const errors = []
+  const sectionDetails = changelog[userFacingChanges[semanticType].section]
 
-  if (!changelog.includes(userFacingChanges[semanticType].section)) {
-    errors.push(`The changelog does not include the ${userFacingChanges[semanticType].section} section. Given the pull request title provided, this section should be included in the changelog. If the changelog section is correct, please correct the pull request title to correctly reflect the change being made.`)
+  if (!sectionDetails) {
+    return `The changelog does not include the ${userFacingChanges[semanticType].section} section. Given the pull request title provided, this section should be included in the changelog. If the changelog section is correct, please correct the pull request title to correctly reflect the change being made.`
   }
 
   const resolveMessage = _getResolvedMessage(semanticType, prNumber, associatedIssues)
 
-  if (!changelog.includes(resolveMessage)) {
+  const hasMatchingEntry = sectionDetails.some((detail) => detail.includes(resolveMessage))
+
+  if (!hasMatchingEntry) {
     if (associatedIssues && associatedIssues.length) {
-      errors.push(`The changelog entry does not include the linked issues that this pull request resolves. Please update your entry for '${commitMessage}' to include:\n\n${resolveMessage}`)
-    } else {
-      errors.push(`The changelog entry does not include the pull request link. Please update your entry for '${commitMessage}' to include:\n\n${resolveMessage}`)
+      return `The changelog entry does not include the linked issues that this pull request resolves. Please update your entry for '${commitMessage}' to include:\n\n${resolveMessage}`
     }
+
+    return `The changelog entry does not include the pull request link. Please update your entry for '${commitMessage}' to include:\n\n${resolveMessage}`
   }
 
-  return errors
+  return
 }
 
 const _handleErrors = (errors) => {
@@ -98,9 +99,9 @@ async function validateChangelog ({ changedFiles, nextVersion, commits }) {
     }
   }
 
-  const changelog = fs.readFileSync(path.join(__dirname, '..', '..', 'cli', 'CHANGELOG.md'), 'utf8')
+  const changelog = await parseChangelog()
 
-  if (nextVersion && !changelog.includes(`## ${nextVersion}`)) {
+  if (nextVersion && !changelog.version === `## ${nextVersion}`) {
     errors.push(`The changelog version does not contain the next Cypress version of ${nextVersion}. If the changelog version is correct, please correct the pull request title to correctly reflect the change being made.`)
   }
 
@@ -113,9 +114,11 @@ async function validateChangelog ({ changedFiles, nextVersion, commits }) {
       printChangeLogExample(semanticType, prNumber, associatedIssues)
     }
 
-    const entryErrors = _validateEntry(changelog, { commitMessage, semanticType, prNumber, associatedIssues })
+    const errMessage = _validateEntry(changelog, { commitMessage, semanticType, prNumber, associatedIssues })
 
-    errors = errors.concat(...entryErrors)
+    if (errMessage) {
+      errors.push(errMessage)
+    }
   })
 
   if (errors.length) {
