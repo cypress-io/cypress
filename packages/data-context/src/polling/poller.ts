@@ -21,7 +21,9 @@ export class Poller<E extends EventType> {
     debug(`starting poller for ${this.event}`)
 
     if (!this.#timeout) {
-      this.#poll()
+      this.#poll().catch((e) => {
+        debug('error executing poller %o', e)
+      })
     }
 
     return this.ctx.emitter.subscribeTo(this.event, {
@@ -43,9 +45,9 @@ export class Poller<E extends EventType> {
 
     await this.callback()
 
-    this.#timeout = setTimeout(() => {
+    this.#timeout = setTimeout(async () => {
       this.#timeout = undefined
-      this.#poll()
+      await this.#poll()
     }, this.pollingInterval * 1000)
   }
 

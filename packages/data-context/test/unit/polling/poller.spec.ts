@@ -62,6 +62,9 @@ describe('Poller', () => {
 
     await clock.tickAsync(interval * 1000)
     expect(callback, 'should be called after longer interval').to.have.callCount(4)
+
+    //stop iterator
+    iterator.return(undefined)
   })
 
   it('handles multiple pollers for the same event', async () => {

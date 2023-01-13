@@ -265,6 +265,12 @@ describe('<DebugContainer />', () => {
 
     it('renders failed test limit when exceeded', () => {
       cy.mountFragment(DebugSpecsFragmentDoc, {
+        variableTypes: DebugSpecVariableTypes,
+        variables: {
+          hasNextRun: false,
+          runNumber: 1,
+          nextRunNumber: -1,
+        },
         onResult: (result) => {
           if (result.currentProject?.cloudProject?.__typename === 'CloudProject') {
             const test = result.currentProject.cloudProject.runByNumber
