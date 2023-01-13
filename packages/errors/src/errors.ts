@@ -1189,6 +1189,20 @@ export const AllCypressErrors = {
 
         ${fmt.code(code)}`
   },
+  EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
+    const code = errPartial`
+    {
+      e2e: {
+        experimentalSkipDomainInjection: ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com']
+      },
+    }`
+
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalSkipDomainInjection`)} experiment is currently only supported for End to End Testing and must be configured as an e2e testing type property: ${fmt.highlightSecondary(`e2e.experimentalSkipDomainInjection`)}.
+        The suggested values are only a recommendation.
+
+        ${fmt.code(code)}`
+  },
   FIREFOX_GC_INTERVAL_REMOVED: () => {
     return errTemplate`\
         The ${fmt.highlight(`firefoxGcInterval`)} configuration option was removed in ${fmt.cypressVersion(`8.0.0`)}. It was introduced to work around a bug in Firefox 79 and below.
@@ -1620,11 +1634,11 @@ export const AllCypressErrors = {
       `
   },
 
-  MIGRATION_MISMATCHED_CYPRESS_VERSIONS: (version: string) => {
+  MIGRATION_MISMATCHED_CYPRESS_VERSIONS: (version: string, currentVersion: string) => {
     return errTemplate`
-      You are running Cypress version 10 in global mode, but you are attempting to migrate a project where ${fmt.cypressVersion(version)} is installed. 
+      You are running ${fmt.cypressVersion(currentVersion)} in global mode, but you are attempting to migrate a project where ${fmt.cypressVersion(version)} is installed. 
 
-      Ensure the project you are migrating has Cypress version 10 installed.
+      Ensure the project you are migrating has Cypress version ${fmt.cypressVersion(currentVersion)} installed.
 
       https://on.cypress.io/migration-guide
     `

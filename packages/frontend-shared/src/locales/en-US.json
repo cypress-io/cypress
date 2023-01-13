@@ -61,8 +61,10 @@
     "newSpec": "New spec",
     "createSpec": "Create spec",
     "done": "Done!",
+    "noComponentsFound": "No components found",
+    "unableToParseFile": "Unable to parse file",
     "updateSpecPattern": "Update spec pattern",
-    "newSpecModalTitle": "Create a new spec",
+    "newSpecModalTitle": "Create new spec",
     "successPage": {
       "header": "Great! The spec was successfully added",
       "runSpecButton": "Okay, run the spec",
@@ -93,9 +95,9 @@
         "specsAddedButton": "Okay, I got it!",
         "specsAddingHeader": "Adding specs..."
       },
-      "importEmptySpec": {
-        "header": "Create new empty spec",
-        "description": "We'll generate an empty spec file which can be used to start testing your application.",
+      "importTemplateSpec": {
+        "header": "Create new spec",
+        "description": "We'll generate a template spec file which can be used to start testing your application.",
         "chooseFilenameHeader": "Enter the path for your new spec",
         "inputPlaceholder": "Enter a relative path...",
         "invalidSpecWarning": "This path is invalid because it doesn't match the following ",
@@ -108,9 +110,9 @@
         "description": "Generate a basic component test for any of the components in this project.",
         "chooseAComponentHeader": "Choose a component"
       },
-      "importEmptySpec": {
-        "header": "Create a new spec",
-        "description": "We'll generate an empty spec file to start testing components.",
+      "importTemplateSpec": {
+        "header": "Create new spec",
+        "description": "We'll generate a template spec file which can be used to start testing your components.",
         "invalidComponentWarning": "We couldn't generate a valid path matching your custom "
       }
     }
@@ -242,6 +244,7 @@
   "topNav": {
     "released": "Released",
     "version": "Version",
+    "versionUnsupported": "Unsupported",
     "installed": "Installed",
     "latest": "Latest",
     "seeAllReleases": "See all releases",
@@ -708,7 +711,7 @@
       "line4": "In the next screen, you'll be able to reconfigure component testing in a new guided configuration wizard."
     },
     "wizard": {
-      "title": "Migrating to Cypress 11",
+      "title": "Migrating to Cypress {version}",
       "description": "Your project requires updates to work with this version.",
       "typicalMigrationLabel": "Typical migration:",
       "typicalMigrationTime": "5-10 minutes",

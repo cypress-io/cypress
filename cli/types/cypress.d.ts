@@ -421,6 +421,11 @@ declare namespace Cypress {
     }
 
     /**
+     * Information about current test retry
+     */
+    currentRetry: number
+
+    /**
      * Information about the browser currently running the tests
      */
     browser: Browser
@@ -1589,19 +1594,19 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/nextuntil
      */
-    nextUntil<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    nextUntil<K extends keyof HTMLElementTagNameMap>(selector: K, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
     /**
      * Get all following siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
      *
      * @see https://on.cypress.io/nextuntil
      */
-    nextUntil<E extends HTMLElement = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    nextUntil<E extends Node = HTMLElement>(selector: string, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
     /**
      * Get all following siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
      *
      * @see https://on.cypress.io/nextuntil
      */
-    nextUntil<E extends HTMLElement = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    nextUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
      * Filter DOM element(s) from a set of DOM elements. Opposite of `.filter()`
@@ -1774,21 +1779,21 @@ declare namespace Cypress {
      * Get all previous siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
      * > The querying behavior of this command matches exactly how [.prevUntil()](http://api.jquery.com/prevUntil) works in jQuery.
      *
-     * @see https://on.cypress.io/prevall
+     * @see https://on.cypress.io/prevuntil
      */
     prevUntil<K extends keyof HTMLElementTagNameMap>(selector: K, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
     /**
      * Get all previous siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
      * > The querying behavior of this command matches exactly how [.prevUntil()](http://api.jquery.com/prevUntil) works in jQuery.
      *
-     * @see https://on.cypress.io/prevall
+     * @see https://on.cypress.io/prevuntil
      */
     prevUntil<E extends Node = HTMLElement>(selector: string, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
     /**
      * Get all previous siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
      * > The querying behavior of this command matches exactly how [.prevUntil()](http://api.jquery.com/prevUntil) works in jQuery.
      *
-     * @see https://on.cypress.io/prevall
+     * @see https://on.cypress.io/prevuntil
      */
     prevUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
@@ -3014,6 +3019,16 @@ declare namespace Cypress {
      * @see https://on.cypress.io/configuration#experimentalModifyObstructiveThirdPartyCode
      */
     experimentalModifyObstructiveThirdPartyCode: boolean
+    /**
+     * Disables setting document.domain to the applications super domain on injection.
+     * This experiment is to be used for sites that do not work with setting document.domain
+     * due to cross-origin issues. Enabling this option no longer allows for default subdomain
+     * navigations, and will require the use of cy.origin(). This option takes an array of
+     * strings/string globs.
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/Document/domain
+     * @default null
+     */
+    experimentalSkipDomainInjection: string[] | null
     /**
      * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.
      * @default false

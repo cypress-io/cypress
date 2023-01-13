@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { parse } from '@babel/parser'
 import type { File } from '@babel/types'
 import type { NodePath } from 'ast-types/lib/node-path'

@@ -20,6 +20,7 @@ import { LogoComponent } from './components/logo.component'
 import { TransientService, TransientServicesComponent } from './components/transient-services.component'
 import { ComponentProviderComponent, MessageService } from './components/component-provider.component'
 import { Cart, ProductComponent } from './components/cart.component'
+import { UrlImageComponent } from './components/url-image.component'
 
 @Component({
   template: `<app-projection>Hello World</app-projection>`,
@@ -360,9 +361,20 @@ describe('angular mount', () => {
     cy.get('p').should('have.text', 'Hi . ngOnInit fired: true and ngOnChanges fired: false and conditionalName: false')
   })
 
-  it('can load static assets', () => {
-    cy.mount(LogoComponent)
-    cy.get('img').should('be.visible').and('have.prop', 'naturalWidth').should('be.greaterThan', 0)
+  context('assets', () => {
+    it('can load static assets from <img src="..." />', () => {
+      cy.mount(LogoComponent)
+      cy.get('img').should('be.visible').and('have.prop', 'naturalWidth').should('be.greaterThan', 0)
+    })
+
+    it('can load root relative scss "url()" assets', () => {
+      cy.mount(UrlImageComponent)
+      cy.get('.test-img')
+      .invoke('css', 'background-image')
+      .then((img) => {
+        expect(img).to.contain('__cypress/src/test.png')
+      })
+    })
   })
 
   context('dependency injection', () => {
@@ -430,27 +442,27 @@ describe('angular mount', () => {
 
   describe('teardown', () => {
     beforeEach(() => {
-      cy.get("[id^=root]").should("not.exist");
-    });
+      cy.get('[id^=root]').should('not.exist')
+    })
 
-    it("should mount", () => {
-      cy.mount(ButtonOutputComponent);
-    });
+    it('should mount', () => {
+      cy.mount(ButtonOutputComponent)
+    })
 
     it('should remove previous mounted component', () => {
-      cy.mount(ChildComponent, {componentProperties: { msg: 'Render 1' }})
+      cy.mount(ChildComponent, { componentProperties: { msg: 'Render 1' } })
       cy.contains('Render 1')
-      cy.mount(ChildComponent, {componentProperties: { msg: 'Render 2' }})
+      cy.mount(ChildComponent, { componentProperties: { msg: 'Render 2' } })
       cy.contains('Render 2')
 
       cy.contains('Render 1').should('not.exist')
       cy.get('[id^=root]').children().should('have.length', 1)
     })
-  });
+  })
 
   it('should error when passing in undecorated component', () => {
     Cypress.on('fail', (err) => {
-      expect(err.message).contain("Please add a @Pipe/@Directive/@Component");
+      expect(err.message).contain('Please add a @Pipe/@Directive/@Component')
 
       return false
     })
@@ -459,4 +471,4 @@ describe('angular mount', () => {
 
     cy.mount(MyClass)
   })
-});
+})

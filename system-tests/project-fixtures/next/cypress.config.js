@@ -2,6 +2,7 @@ const path = require('path')
 
 module.exports = {
   component: {
+    experimentalSingleTabRunMode: true,
     devServer: {
       framework: 'next',
       bundler: 'webpack',

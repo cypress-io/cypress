@@ -350,7 +350,7 @@ export function mount<T> (
  * import { mount, createOutputSpy } from '@cypress/angular'
  *
  * it('Has spy', () => {
- *   mount(StepperComponent, { change: createOutputSpy('changeSpy') })
+ *   mount(StepperComponent, { componentProperties: { change: createOutputSpy('changeSpy') } })
  *   cy.get('[data-cy=increment]').click()
  *   cy.get('@changeSpy').should('have.been.called')
  * })

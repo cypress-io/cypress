@@ -14,6 +14,7 @@ const sanitizeSnapshot = (str) => {
 const render = function (...tables) {
   const str = terminal.renderTables(...tables)
 
+  // eslint-disable-next-line no-console
   console.log(str)
 
   return str

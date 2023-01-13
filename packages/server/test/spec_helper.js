@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 require('../lib/environment')
 
 const chai = require('chai')

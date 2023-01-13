@@ -113,7 +113,7 @@ function _installExtensions (win: BrowserWindow, extensionPaths: string[], optio
 async function recordVideo (cdpAutomation: CdpAutomation, videoApi: RunModeVideoApi) {
   const { writeVideoFrame } = await videoApi.useFfmpegVideoController()
 
-  await cdpAutomation.startVideoRecording(writeVideoFrame)
+  await cdpAutomation.startVideoRecording(writeVideoFrame, screencastOpts())
 }
 
 export = {

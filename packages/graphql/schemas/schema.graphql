@@ -607,6 +607,7 @@ type CurrentProject implements Node & ProjectLike {
 
   """List of all code generation candidates stories"""
   codeGenCandidates(glob: String!): [FileParts]
+  codeGenFramework: String
   codeGenGlobs: CodeGenGlobs!
 
   """Project configuration"""
@@ -799,6 +800,7 @@ enum ErrorTypeEnum {
   EXPERIMENTAL_SINGLE_TAB_RUN_MODE
   EXPERIMENTAL_STUDIO_E2E_ONLY
   EXPERIMENTAL_STUDIO_REMOVED
+  EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY
   EXTENSION_NOT_LOADED
   FIREFOX_COULD_NOT_CONNECT
   FIREFOX_GC_INTERVAL_REMOVED
@@ -905,7 +907,9 @@ input FileDetailsInput {
 
 enum FileExtensionEnum {
   js
+  jsx
   ts
+  tsx
 }
 
 """Represents a file on the file system"""
@@ -1249,7 +1253,12 @@ type Mutation {
   focusActiveBrowserWindow: Boolean!
 
   """Generate spec from source"""
-  generateSpecFromSource(codeGenCandidate: String!, type: CodeGenType!): GenerateSpecResponse
+  generateSpecFromSource(codeGenCandidate: String!, componentName: String, isDefault: Boolean, type: CodeGenType!): GenerateSpecResponse
+
+  """
+  Parse a JS or TS file to see any exported React components that are defined in the file
+  """
+  getReactComponentsFromFile(filePath: String!): ReactComponentResponse
   internal_clearAllProjectPreferencesCache: Boolean
   internal_clearLatestProjectCache: Boolean
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
@@ -1576,6 +1585,28 @@ type Query {
 
   """Metadata about the wizard"""
   wizard: Wizard!
+}
+
+"""Properties describing a React component"""
+type ReactComponentDescriptor {
+  """
+  The name of the component export e.g. "export const Foo"
+  """
+  exportName: String!
+
+  """
+  Whether the component is a default export e.g. "export default Foo"
+  """
+  isDefault: Boolean!
+}
+
+"""Response from getReactComponentsFromFile"""
+type ReactComponentResponse {
+  """Components that are exported from the parsed file"""
+  components: [ReactComponentDescriptor!]!
+
+  """Whether or not there was there an error when parsing the file"""
+  errored: Boolean
 }
 
 """
