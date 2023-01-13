@@ -35,7 +35,7 @@ const RELEVANT_RUN_OPERATION_DOC = gql`
 `
 const RELEVANT_RUN_UPDATE_OPERATION = print(RELEVANT_RUN_OPERATION_DOC)
 
-export const EMPTY_RETURN: RelevantRun = { current: undefined, next: undefined, commitsAhead: -1 }
+export const RUNS_EMPTY_RETURN: RelevantRun = { current: undefined, next: undefined, commitsAhead: -1 }
 
 /**
  * DataSource to encapsulate querying Cypress Cloud for runs that match a list of local Git commit shas
@@ -44,7 +44,7 @@ export class RelevantRunsDataSource {
   #pollingInterval: number = 30
   #currentRun?: number
   #currentCommitSha?: string
-  #cachedRuns: RelevantRun = EMPTY_RETURN
+  #cachedRuns: RelevantRun = RUNS_EMPTY_RETURN
 
   #runsPoller?: Poller<'relevantRunChange'>
 
@@ -64,7 +64,7 @@ export class RelevantRunsDataSource {
     if (shas.length === 0) {
       debug('Called with no shas')
 
-      return EMPTY_RETURN
+      return RUNS_EMPTY_RETURN
     }
 
     const projectSlug = await this.ctx.project.projectId()
@@ -72,7 +72,7 @@ export class RelevantRunsDataSource {
     if (!projectSlug) {
       debug('No project detected')
 
-      return EMPTY_RETURN
+      return RUNS_EMPTY_RETURN
     }
 
     debug(`Fetching runs for ${projectSlug} and ${shas.length} shas`)
@@ -163,18 +163,19 @@ export class RelevantRunsDataSource {
       }
     }
 
-    return EMPTY_RETURN
+    return RUNS_EMPTY_RETURN
   }
 
   /**
    * Clear the cached current run to allow the data source to pick the next completed run as the current
    */
-  moveToNext () {
+  //TODO figure out how to mock in test so do not need to pass in values here
+  moveToNext (shasForTest?: string[]) {
     debug('Moving to next relevant run')
     this.#currentRun = undefined
     this.#currentCommitSha = undefined
 
-    return this.getRelevantRuns(this.ctx.git?.currentHashes || [])
+    return this.getRelevantRuns(this.ctx.git?.currentHashes || shasForTest || [])
   }
 
   pollForRuns () {

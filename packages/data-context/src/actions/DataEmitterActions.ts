@@ -1,7 +1,7 @@
 import pDefer from 'p-defer'
 import { EventEmitter } from 'stream'
 import { DataContext } from '../DataContext'
-import type { RelevantRun, RelevantRunSpecs } from '../gen/graphcache-config.gen'
+import type { RelevantRun } from '../gen/graphcache-config.gen'
 
 export interface PushFragmentData {
   data: any

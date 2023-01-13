@@ -3,7 +3,7 @@ import sinon from 'sinon'
 
 import { DataContext } from '../../../src'
 import { createTestDataContext } from '../helper'
-import { RelevantRunsDataSource, EMPTY_RETURN } from '../../../src/sources'
+import { RelevantRunsDataSource, RUNS_EMPTY_RETURN } from '../../../src/sources'
 import { FAKE_PROJECT_MULTIPLE_COMPLETED, FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, FAKE_PROJECT_NO_RUNS, FAKE_PROJECT_ONE_RUNNING_RUN, FAKE_SHAS } from './fixtures/graphqlFixtures'
 
 describe('RelevantRunsDataSource', () => {
@@ -18,7 +18,7 @@ describe('RelevantRunsDataSource', () => {
   it('returns empty with no shas', async () => {
     const result = await dataSource.getRelevantRuns([])
 
-    expect(result).to.equal(EMPTY_RETURN)
+    expect(result).to.equal(RUNS_EMPTY_RETURN)
   })
 
   it('returns empty with no project set', async () => {
@@ -26,7 +26,7 @@ describe('RelevantRunsDataSource', () => {
 
     const result = await dataSource.getRelevantRuns([FAKE_SHAS[0]])
 
-    expect(result).to.equal(EMPTY_RETURN)
+    expect(result).to.equal(RUNS_EMPTY_RETURN)
   })
 
   context('cloud responses', () => {
@@ -50,7 +50,7 @@ describe('RelevantRunsDataSource', () => {
     }
 
     it('returns empty if cloud project not loaded', async () => {
-      await testScenario(FAKE_PROJECT_NO_RUNS, EMPTY_RETURN)
+      await testScenario(FAKE_PROJECT_NO_RUNS, RUNS_EMPTY_RETURN)
     })
 
     it('returns latest RUNNING build as current if only RUNNING found', async () => {
@@ -98,6 +98,8 @@ describe('RelevantRunsDataSource', () => {
         next: 4,
         commitsAhead: 1,
       })
+
+      //TODO figure out how to mock ctx.git so we do not have to pass in the shas to moveToNext
 
       const thirdResult = await dataSource.moveToNext([FAKE_SHAS[1], FAKE_SHAS[0]])
 

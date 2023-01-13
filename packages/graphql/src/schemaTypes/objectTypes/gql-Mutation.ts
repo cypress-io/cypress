@@ -13,7 +13,6 @@ import { ScaffoldedFile } from './gql-ScaffoldedFile'
 import { WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import debugLib from 'debug'
 import { ReactComponentResponse } from './gql-ReactComponentResponse'
-import { RelevantRun } from './gql-RelevantRun'
 
 const debug = debugLib('cypress:graphql:mutation')
 

@@ -4,7 +4,7 @@ import debugLib from 'debug'
 import { isEqual } from 'lodash'
 
 import type { DataContext } from '../DataContext'
-import type { CloudSpecStatus, Query, RelevantRun, RelevantRunSpecs, CurrentProjectRelevantRunSpecs, RunType, CloudSpecRun, CloudRun } from '../gen/graphcache-config.gen'
+import type { CloudSpecStatus, Query, RelevantRun, CurrentProjectRelevantRunSpecs, CloudSpecRun, CloudRun } from '../gen/graphcache-config.gen'
 import { Poller } from '../polling'
 
 const debug = debugLib('cypress:data-context:sources:RelevantRunSpecsDataSource')
@@ -44,7 +44,7 @@ const RELEVANT_RUN_SPEC_OPERATION_DOC = gql`
 `
 const RELEVANT_RUN_SPEC_UPDATE_OPERATION = print(RELEVANT_RUN_SPEC_OPERATION_DOC)
 
-export const EMPTY_RETURN: CurrentProjectRelevantRunSpecs = { }
+export const SPECS_EMPTY_RETURN: CurrentProjectRelevantRunSpecs = { }
 
 const INCOMPLETE_STATUSES: CloudSpecStatus[] = ['RUNNING', 'UNCLAIMED']
 
@@ -85,7 +85,7 @@ export class RelevantRunSpecsDataSource {
     if (!projectSlug) {
       debug('No project detected')
 
-      return EMPTY_RETURN
+      return SPECS_EMPTY_RETURN
     }
 
     debug(`Fetching specs for ${projectSlug} and ${runs}`)
@@ -135,7 +135,7 @@ export class RelevantRunSpecsDataSource {
       }
     }
 
-    return EMPTY_RETURN
+    return SPECS_EMPTY_RETURN
   }
 
   pollForSpecs () {
