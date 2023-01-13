@@ -103,7 +103,7 @@ export const getMemoryHandler = async (): Promise<MemoryHandler> => {
   return (await import('./default')).default
 }
 
-const findRendererProcess = measure((processes: si.Systeminformation.ProcessesData) => {
+const findRendererProcess = (processes: si.Systeminformation.ProcessesData) => {
   // filter down to the renderer processes
   const groupedProcesses = groupCyProcesses(processes)
   const rendererProcesses = groupedProcesses.filter(
@@ -118,7 +118,7 @@ const findRendererProcess = measure((processes: si.Systeminformation.ProcessesDa
   debugVerbose('renderer processes found: %o', maxRendererProcess)
 
   return maxRendererProcess
-}, { name: 'getRendererProcess' })
+}
 
 export const getRendererMemoryUsage: () => Promise<number | null> = measure(async () => {
   if (!rendererProcess) {
@@ -142,11 +142,11 @@ export const getRendererMemoryUsage: () => Promise<number | null> = measure(asyn
 
     return getRendererMemoryUsage()
   }
-}, { name: 'getRendererMemoryUsage' })
+}, { name: 'getRendererMemoryUsage', save: true })
 
 export const getAvailableMemory: () => Promise<number> = measure(() => {
   return handler.getAvailableMemory(totalMemoryLimit, statsLog)
-}, { name: 'getAvailableMemory' })
+}, { name: 'getAvailableMemory', save: true })
 
 export const gatherMemoryStats: () => Promise<void> = measure(async () => {
   const [currentAvailableMemory, rendererProcessMemRss] = await Promise.all([
@@ -177,7 +177,7 @@ export const gatherMemoryStats: () => Promise<void> = measure(async () => {
   statsLog.jsHeapSizeLimit = jsHeapSizeLimit
   statsLog.totalMemoryLimit = totalMemoryLimit
   statsLog.timestamp = Date.now()
-}, { name: 'gatherMemoryStats' })
+}, { name: 'gatherMemoryStats', save: true })
 
 const maybeCollectGarbageAndLog = async ({ automation, test }: { automation: Automation, test: { title: string, order: number, currentRetry: number }}) => {
   await maybeCollectGarbage({ automation })
@@ -198,13 +198,13 @@ const maybeCollectGarbage = measure(async ({ automation }: { automation: Automat
   } else {
     debug('skipping garbage collection')
   }
-}, { name: 'maybeCollectGarbage' })
+}, { name: 'maybeCollectGarbage', save: true })
 
 const addCumulativeStats = (stats: { [key: string]: any }) => {
   debugVerbose('memory stats: %o', stats)
 
   if (['1', 'true'].includes(process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS as string)) {
-    cumulativeStats.push(stats)
+    cumulativeStats.push(_.clone(stats))
   }
 
   stats = {}
