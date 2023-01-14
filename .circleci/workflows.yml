@@ -1374,8 +1374,15 @@ jobs:
             CYPRESS_CONFIG_ENV: production
           command: |
             echo Current working directory is $PWD
-            
-            yarn cypress:run --browser electron --spec "cypress/e2e/**/memory*.cy.*"
+            node --version
+            if [[ `node ./scripts/get-platform-key.js` == 'linux-arm64' ]]; then
+              # these are missing on Circle and there is no way to pre-install them on Arm
+              sudo apt-get update
+              sudo apt-get install -y libgbm-dev
+            fi
+
+            CYPRESS_INTERNAL_SAVE_MEMORY_STATS=true \
+            yarn cypress:run --browser electron --spec "cypress/e2e/memory/*.cy.*"
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress

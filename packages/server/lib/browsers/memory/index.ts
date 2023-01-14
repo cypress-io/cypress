@@ -164,7 +164,7 @@ export const gatherMemoryStats: () => Promise<void> = measure(async () => {
 
   // if we're using more than MEMORY_THRESHOLD_PERCENTAGE of the available memory, force a garbage collection
   const rendererUsagePercentage = (rendererProcessMemRss / maxAvailableRendererMemory) * 100
-  const shouldCollectGarbage = rendererUsagePercentage >= MEMORY_THRESHOLD_PERCENTAGE && !['0', 'false'].includes(process.env.CYPRESS_INTERNAL_FORCE_GC as string)
+  const shouldCollectGarbage = rendererUsagePercentage >= MEMORY_THRESHOLD_PERCENTAGE && !['0', 'false'].includes(process.env.CYPRESS_INTERNAL_FORCE_GC?.toLowerCase() as string)
 
   collectGarbageOnNextTest = collectGarbageOnNextTest || shouldCollectGarbage
 
@@ -203,7 +203,7 @@ const maybeCollectGarbage = measure(async ({ automation }: { automation: Automat
 const addCumulativeStats = (stats: { [key: string]: any }) => {
   debugVerbose('memory stats: %o', stats)
 
-  if (['1', 'true'].includes(process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS as string)) {
+  if (['1', 'true'].includes(process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS?.toLowerCase() as string)) {
     cumulativeStats.push(_.clone(stats))
   }
 
@@ -254,7 +254,7 @@ async function startProfiling (automation: Automation, spec: { fileName: string 
 }
 
 const saveCumulativeStats = async () => {
-  if (['1', 'true'].includes(process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS as string) && currentSpecFileName) {
+  if (['1', 'true'].includes(process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS?.toLowerCase() as string) && currentSpecFileName) {
     try {
       await fs.outputFile(path.join(MEMORY_FOLDER, `${currentSpecFileName}.json`), JSON.stringify(cumulativeStats))
     } catch (err) {
