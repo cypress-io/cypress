@@ -1374,11 +1374,8 @@ jobs:
             CYPRESS_CONFIG_ENV: production
           command: |
             echo Current working directory is $PWD
-
-            TESTFILES=$(circleci tests glob "cypress/e2e/**/memory*.cy.*")
-            echo "Test files for this machine are $TESTFILES"
-
-            yarn cypress:run --browser electron --spec $TESTFILES
+            
+            yarn cypress:run --browser electron --spec "cypress/e2e/**/memory*.cy.*"
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
