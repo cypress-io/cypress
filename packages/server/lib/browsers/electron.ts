@@ -481,7 +481,7 @@ export = {
   async connectToNewSpec (browser: Browser, options: ElectronOpts, automation: Automation) {
     if (!options.url) throw new Error('Missing url in connectToNewSpec')
 
-    return await this.open(browser, options.url, options, automation)
+    return this.open(browser, options.url, options, automation)
   },
 
   connectToExisting () {

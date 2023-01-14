@@ -211,8 +211,12 @@ const addCumulativeStats = (stats: { [key: string]: any }) => {
 }
 
 const checkMemory = async () => {
-  await gatherMemoryStats()
-  addCumulativeStats(statsLog)
+  try {
+    await gatherMemoryStats()
+    addCumulativeStats(statsLog)
+  } catch (err) {
+    debug('error gathering memory stats: %o', err)
+  }
   scheduleMemoryCheck()
 }
 
