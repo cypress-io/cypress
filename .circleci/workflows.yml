@@ -1382,7 +1382,7 @@ jobs:
             fi
 
             CYPRESS_INTERNAL_SAVE_MEMORY_STATS=true \
-            yarn cypress:run --browser electron --spec "cypress/memory/*.cy.*"
+            yarn cypress:run --browser electron --spec "cypress/e2e/memory/*.cy.*"
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
@@ -2454,6 +2454,9 @@ linux-x64-workflow: &linux-x64-workflow
           - build
     - driver-integration-tests-webkit:
         context: test-runner:cypress-record-key
+        requires:
+          - build
+    - memory-driver-tests:
         requires:
           - build
     - run-frontend-shared-component-tests-chrome:
