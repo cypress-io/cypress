@@ -1382,11 +1382,14 @@ jobs:
             fi
 
             CYPRESS_INTERNAL_SAVE_MEMORY_STATS=true \
-            yarn cypress:run --browser electron --spec "cypress/e2e/memory/*.cy.*"
+            yarn cypress:run --browser electron --spec "cypress/memory/*.cy.*"
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
+      - store_artifacts:
+          path: cypress/logs/memory
+          working_directory: packages/driver
 
   unit-tests:
     <<: *defaults

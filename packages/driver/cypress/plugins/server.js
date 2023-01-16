@@ -339,7 +339,7 @@ const createApp = (port) => {
           for (let i = 0; i < 100; i++) {
             const el = document.createElement('p')
             el.id = 'p' + i
-            el.innerHTML = 'x'.repeat(10000)
+            el.innerHTML = 'x'.repeat(100000)
             
             document.body.appendChild(el)
           }
