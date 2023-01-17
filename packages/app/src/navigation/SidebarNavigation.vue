@@ -114,7 +114,7 @@ import { isAllowedFeature } from '@packages/frontend-shared/src/utils/isAllowedF
 const { t } = useI18n()
 
 gql`
-fragment SidebarNavigation on Query {
+fragment SidebarNavigation_Settings on Query {
   localSettings {
     preferences {
       isSideNavigationOpen
@@ -124,19 +124,22 @@ fragment SidebarNavigation on Query {
       specListWidth
     }
   }
+}
+`
+
+gql`
+fragment SidebarNavigation on Query {
+  ...SidebarNavigation_Settings
   currentProject {
     id
     cloudProject {
       __typename
       ... on CloudProject {
         id
-        runByNumber(runNumber: 1) {
+        runByNumber(runNumber: $runNumber) @include(if: $hasCurrentRun){
           id
           status
-          testsForReview {
-            id
-            state
-          }
+          totalFailed
         }
       }
     }
@@ -148,11 +151,15 @@ fragment SidebarNavigation on Query {
 gql`
 mutation SideBarNavigation_SetPreferences ($value: String!) {
   setPreferences (value: $value, type: global) {
-    ...SidebarNavigation
+    ...SidebarNavigation_Settings
   }
 }`
 
-const props = defineProps<{ gql: SidebarNavigationFragment | undefined, isLoading: boolean }>()
+const props = defineProps<{
+  gql: SidebarNavigationFragment | undefined
+  isLoading: boolean
+  online: boolean
+}>()
 
 const NAV_EXPAND_MIN_SCREEN_WIDTH = 1024
 
@@ -166,8 +173,11 @@ const debugBadge = computed<Badge | undefined>(() => {
   const showNewBadge = isAllowedFeature('debugNewBadge', loginConnectStore)
   const newBadge: Badge = { value: t('sidebar.debug.new'), status: 'success', label: t('sidebar.debug.debugFeature') }
 
-  if (props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject') {
-    const { status, testsForReview } = props.gql.currentProject.cloudProject.runByNumber || {}
+  if (props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject'
+    && props.gql.currentProject.cloudProject.runByNumber
+    && props.online
+  ) {
+    const { status, totalFailed } = props.gql.currentProject.cloudProject.runByNumber || {}
 
     if (status === 'NOTESTS' || status === 'RUNNING') {
       return showNewBadge ? newBadge : undefined
@@ -177,17 +187,27 @@ const debugBadge = computed<Badge | undefined>(() => {
       return { value: '0', status: 'success', label: t('sidebar.debug.passed') }
     }
 
-    if (testsForReview?.length) {
+    let countToDisplay = '0'
+
+    if (totalFailed) {
+      countToDisplay = totalFailed < 9
+        ? String(totalFailed)
+        : '9+'
+    }
+
+    if (status === 'FAILED') {
       return {
-        value: testsForReview.length < 9
-          ? String(testsForReview.length)
-          : '9+',
+        value: countToDisplay,
         status: 'failed',
-        label: t('sidebar.debug.failed', testsForReview.length),
+        label: t('sidebar.debug.failed', totalFailed || 0),
       }
     }
 
-    return { value: '0', status: 'error', label: t('sidebar.debug.errored') }
+    const errorLabel = totalFailed && totalFailed > 0
+      ? t('sidebar.debug.erroredWithFailures', totalFailed)
+      : t('sidebar.debug.errored')
+
+    return { value: countToDisplay, status: 'error', label: errorLabel }
   }
 
   return showNewBadge ? newBadge : undefined

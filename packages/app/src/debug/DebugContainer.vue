@@ -1,7 +1,11 @@
 <template>
   <div class="h-full">
+    <NoInternetConnection v-if="!online">
+      {{ t('launchpadErrors.noInternet.connectProject') }}
+    </NoInternetConnection>
+    <DebugLoading v-else-if="isLoading" />
     <DebugError
-      v-if="showError"
+      v-else-if="showError"
     />
     <div
       v-else-if="loginConnectStore.user.isLoggedIn && loginConnectStore.project.isProjectConnected && run?.status"
@@ -9,7 +13,7 @@
     >
       <DebugPageHeader
         :gql="run"
-        :commits-ahead="0"
+        :commits-ahead="props.commitsAhead"
       />
       <DebugNewRelevantRunBar
         v-if="newerRelevantRun"
@@ -19,11 +23,10 @@
       <DebugPendingRunSplash
         v-if="isFirstPendingRun"
         class="mt-12"
-        :spec-statuses="specStatuses"
       />
       <template v-else>
         <DebugPageDetails
-          v-if="shouldDisplayDetails(run.status)"
+          v-if="shouldDisplayDetails(run.status, run.isHidden)"
           :status="run.status"
           :specs="run.specs"
           :cancellation="{ cancelledAt: run.cancelledAt, cancelledBy: run.cancelledBy }"
@@ -62,6 +65,8 @@ import { gql } from '@urql/vue'
 import { computed } from 'vue'
 import type { CloudRunStatus, DebugSpecsFragment, TestingTypeEnum } from '../generated/graphql'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
+import NoInternetConnection from '@packages/frontend-shared/src/components/NoInternetConnection.vue'
+import DebugLoading from '../debug/empty/DebugLoading.vue'
 import DebugPageHeader from './DebugPageHeader.vue'
 import DebugPendingRunSplash from './DebugPendingRunSplash.vue'
 import DebugSpecList from './DebugSpecList.vue'
@@ -75,6 +80,9 @@ import DebugNewRelevantRunBar from './DebugNewRelevantRunBar.vue'
 import { specsList } from './utils/DebugMapping'
 import type { CloudRunHidingReason } from './DebugOverLimit.vue'
 import dayjs from 'dayjs'
+import { useI18n } from '@cy/i18n'
+
+const { t } = useI18n()
 
 gql`
 fragment DebugLocalSpecs on Spec {
@@ -92,7 +100,7 @@ fragment DebugSpecs on Query {
       __typename
       ... on CloudProject {
         id
-        runByNumber(runNumber: 1) {
+        runByNumber(runNumber: $runNumber) {
           ...DebugPageHeader
           cancelledBy {
             id
@@ -134,7 +142,9 @@ fragment DebugSpecs on Query {
             ...DebugSpecListGroups
           }
           createdAt
-          ...DebugPendingRunSplash
+        }
+        nextRun: runByNumber(runNumber: $nextRunNumber) @include(if: $hasNextRun) {
+          id
           ...DebugNewRelevantRunBar
         }
       }
@@ -148,11 +158,20 @@ fragment DebugSpecs on Query {
 }
 `
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   gql?: DebugSpecsFragment
   // This prop is just to stub the error state for now
   showError?: boolean
-}>()
+  isLoading?: boolean
+  commitsAhead?: number
+  online?: boolean
+}>(),
+{
+  gql: undefined,
+  isLoading: false,
+  commitsAhead: 0,
+  online: true,
+})
 
 const loginConnectStore = useLoginConnectStore()
 
@@ -160,8 +179,12 @@ const run = computed(() => {
   return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject.runByNumber : null
 })
 
-function shouldDisplayDetails (status: CloudRunStatus) {
-  return !['RUNNING', 'FAILED'].includes(status)
+const nextRun = computed(() => {
+  return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject.nextRun : null
+})
+
+function shouldDisplayDetails (status: CloudRunStatus, isHidden: boolean) {
+  return !['RUNNING', 'FAILED'].includes(status) || isHidden
 }
 
 function shouldDisplaySpecsList (status: CloudRunStatus) {
@@ -189,12 +212,9 @@ const debugSpecsArray = computed(() => {
   return []
 })
 
-const specStatuses = computed(() => run.value?.specs.map((spec) => spec.status || 'UNCLAIMED') || [])
+const newerRelevantRun = computed(() => nextRun.value)
 
-// TODO GH#24440 Re-map to use relevant run data point (currently stubbed with current run)
-const newerRelevantRun = computed(() => run.value)
-
-const isFirstPendingRun = computed(() => run.value && run.value.runNumber === 1 && run.value.status === 'RUNNING')
+const isFirstPendingRun = computed(() => run.value && run.value.status === 'RUNNING')
 
 const reasonsRunIsHidden = computed(() => (run.value?.reasonsRunIsHidden || []) as CloudRunHidingReason[])
 

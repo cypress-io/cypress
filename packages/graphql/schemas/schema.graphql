@@ -202,6 +202,18 @@ type CloudOrganizationEdge {
   node: CloudOrganization!
 }
 
+type CloudPollingIntervals {
+  """
+  The frequency with which the CloudProject.runByNumber field should be polled, in seconds.
+  """
+  runByNumber: Int
+
+  """
+  The frequency with which the CloudProject.runsByCommitShas field should be polled, in seconds.
+  """
+  runsByCommitShas: Int
+}
+
 """A CloudProject represents a Project stored in the Cypress Cloud"""
 type CloudProject implements Node {
   """A link to the settings page of the project in the dashboard"""
@@ -971,6 +983,9 @@ type CurrentProject implements Node & ProjectLike {
   """Absolute path to the project on the filesystem"""
   projectRoot: String!
 
+  """Returns the spec counts for the current and next runs"""
+  relevantRunSpecs: CurrentProjectRelevantRunSpecs
+
   """Project saved state"""
   savedState: JSON
 
@@ -979,7 +994,18 @@ type CurrentProject implements Node & ProjectLike {
 
   """A list of specs for the currently open testing type of a project"""
   specs: [Spec!]!
+
+  """"""
+  testsForReviewBySpec(specTitle: String!): [String!]
   title: String!
+}
+
+type CurrentProjectRelevantRunSpecs {
+  """Spec counts for the current run"""
+  current: RelevantRunSpecs
+
+  """Spec counts for the next run"""
+  next: RelevantRunSpecs
 }
 
 """A run was hidden because it was over the data retention limit"""
@@ -1617,6 +1643,11 @@ type Mutation {
   """While migrating to 10+ skip manual rename step"""
   migrateSkipManualRename: Query
 
+  """
+  Allow the relevant run for debugging marked as next to be considered the current relevant run
+  """
+  moveToNextRelevantRun: Boolean
+
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean
   openExternal(includeGraphqlPort: Boolean, url: String!): Boolean
@@ -1888,6 +1919,9 @@ type Query {
   migration: Migration
   node(id: ID!): Node
 
+  """Defines the suggested polling intervals for various schema resources"""
+  pollingIntervals: CloudPollingIntervals
+
   """All known projects for the app"""
   projects: [ProjectLike!]!
 
@@ -1924,6 +1958,34 @@ type ReactComponentResponse {
 
   """Whether or not there was there an error when parsing the file"""
   errored: Boolean
+}
+
+"""
+Indicates builds from the Cypress Cloud that most closely align with the current local Git commit
+"""
+type RelevantRun {
+  """
+  How many commits ahead the current local commit is from the commit of the current run
+  """
+  commitsAhead: Int
+
+  """Run number that is the most recent build that is not a RUNNING status"""
+  current: Int
+
+  """Run number that is the most recent build regardless of status """
+  next: Int
+}
+
+""""""
+type RelevantRunSpecs {
+  """Number of specs in the run that have finished being processed"""
+  completedSpecs: Int!
+
+  """The runNumber that these spec counts belong to"""
+  runNumber: Int!
+
+  """Total number of specs in the run"""
+  totalSpecs: Int!
 }
 
 """
@@ -2144,6 +2206,16 @@ type Subscription {
   When we have resolved a section of a query, and want to update the local normalized cache, we "push" the fragment to the frontend to merge in the client side cache
   """
   pushFragment: [PushFragmentPayload!]!
+
+  """
+  Subscription that watches for a relevant run to the debug page to be RUNNING and returns updated spec counts until complete
+  """
+  relevantRunSpecChange: Query
+
+  """
+  Subscription that polls the cloud for new relevant runs that match local git commit hashes
+  """
+  relevantRuns: RelevantRun
 
   """Issued when the watched specs for the project changes"""
   specsChange: CurrentProject

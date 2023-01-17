@@ -1,18 +1,24 @@
 <template>
-  <DebugLoading v-if="query.fetching.value" />
   <DebugContainer
-    v-else
     data-cy="debug-container"
     :gql="query.data.value"
+    :is-loading="isLoading"
+    :commits-ahead="relevantRuns?.commitsAhead || 0"
+    :online="online"
   />
 </template>
 
 <script setup lang="ts">
 
 import DebugContainer from '../debug/DebugContainer.vue'
-import DebugLoading from '../debug/empty/DebugLoading.vue'
 import { gql, useQuery, useSubscription } from '@urql/vue'
+import { useOnline } from '@vueuse/core'
+
 import { DebugDocument, Debug_SpecsChangeDocument } from '../generated/graphql'
+import { computed } from 'vue'
+import { useRelevantRun } from '../composables/useRelevantRun'
+
+const online = useOnline()
 
 gql`
 subscription Debug_specsChange {
@@ -27,12 +33,30 @@ subscription Debug_specsChange {
 `
 
 gql `
-query Debug {
+query Debug($runNumber: Int!, $nextRunNumber: Int!, $hasNextRun: Boolean!) {
   ...DebugSpecs
 }
 `
 
-const query = useQuery({ query: DebugDocument })
+const relevantRuns = useRelevantRun()
+
+const variables = computed(() => {
+  return {
+    runNumber: relevantRuns.value?.current || -1,
+    nextRunNumber: relevantRuns.value?.next || -1,
+    hasNextRun: !!relevantRuns.value?.next,
+  }
+})
+
+const shouldPauseQuery = computed(() => {
+  return variables.value.runNumber === -1 || !online
+})
+
+const query = useQuery({ query: DebugDocument, variables, pause: shouldPauseQuery, requestPolicy: 'network-only' })
+
+const isLoading = computed(() => {
+  return !relevantRuns.value || query.fetching.value
+})
 
 useSubscription({ query: Debug_SpecsChangeDocument })
 

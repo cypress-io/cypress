@@ -192,6 +192,9 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
     ci: {
       __typename: 'CloudCiBuildInfo',
       id: 'ci_id',
+      formattedProvider: 'CircleCI',
+      ciBuildNumberFormatted: '12345',
+      url: 'http://ci.com',
     },
     groups: [],
     isHidden: false,
@@ -219,7 +222,29 @@ function addFailedTests (run: CloudRun) {
     basename: 'Test.cy.ts',
     extension: '.cy.ts',
     path: 'src/Test.cy.ts',
+    shortPath: 'src/Test.cy.ts',
     groupIds: ['groupID1'],
+    status: 'FAILED',
+    testsPassed: {
+      __typename: 'SpecDataAggregate',
+      min: 5,
+      max: 5,
+    },
+    testsFailed: {
+      __typename: 'SpecDataAggregate',
+      min: 1,
+      max: 1,
+    },
+    testsPending: {
+      __typename: 'SpecDataAggregate',
+      min: 0,
+      max: 0,
+    },
+    specDuration: {
+      __typename: 'SpecDataAggregate',
+      min: 1000,
+      max: 1000,
+    },
   }
 
   const test: CloudTestResult = {
@@ -240,6 +265,11 @@ function addFailedTests (run: CloudRun) {
       screenshotsUrl: 'www.cypress.io',
       hasVideo: true,
       videoUrl: 'www.cypress.io',
+      totalFailed: 1,
+      totalSkipped: 0,
+      totalPassed: 20,
+      totalPending: 0,
+      totalRunning: 0,
     },
     testUrl: 'http://cloudurl',
     title: '<test/> Should render',

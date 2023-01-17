@@ -13,7 +13,7 @@
       </span>
       <div class="font-normal text-md">
         <DebugPendingRunCounts
-          :spec-statuses="specStatuses"
+          :specs="specCounts"
         />
       </div>
     </div>
@@ -25,19 +25,31 @@ import { gql } from '@urql/core'
 import { useI18n } from 'vue-i18n'
 import { IconTechnologyDashboardRunning } from '@cypress-design/vue-icon'
 import DebugPendingRunCounts from './DebugPendingRunCounts.vue'
-import type { CloudSpecStatus } from '../generated/graphql'
+import { DebugPendingRunSplash_SpecsDocument } from '../generated/graphql'
+import { useSubscription } from '@urql/vue'
+import { computed } from 'vue'
 
 gql`
-fragment DebugPendingRunSplash on CloudRun {
-  id
-  ...DebugPendingRunCounts
+subscription DebugPendingRunSplash_Specs {
+  relevantRunSpecChange {
+    currentProject {
+      id
+      relevantRunSpecs {
+        current {
+          ...DebugPendingRunCounts
+        }
+      }
+    }
+  }
 }
 `
 
 const { t } = useI18n()
 
-defineProps<{
-  specStatuses: CloudSpecStatus[]
-}>()
+const specs = useSubscription({ query: DebugPendingRunSplash_SpecsDocument })
+
+const specCounts = computed(() => {
+  return specs.data.value?.relevantRunSpecChange?.currentProject?.relevantRunSpecs?.current
+})
 
 </script>

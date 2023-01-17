@@ -412,6 +412,11 @@ export class ProjectLifecycleManager {
         onGitInfoChange: (specPaths) => {
           this.ctx.emitter.gitInfoChange(specPaths)
         },
+        onGitLogChange: async (shas) => {
+          const runs = await this.ctx.relevantRuns.getRelevantRuns(shas)
+
+          this.ctx.emitter.relevantRunChange(runs)
+        },
       })
 
       s.diagnostics = { error: null, warnings: [] }

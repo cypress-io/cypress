@@ -245,7 +245,8 @@
       "debugFeature": "New Debug feature",
       "passed": "Relevant run passed",
       "failed": "Relevant run had {n} test failure | Relevant run had {n} test failures",
-      "errored": "Relevant run had an error"
+      "errored": "Relevant run had an error",
+      "erroredWithFailures": "Relevant run had an error with {n} test failure | Relevant run had an error with {n} test failures"
     }
   },
   "topNav": {

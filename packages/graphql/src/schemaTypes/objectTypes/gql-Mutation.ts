@@ -765,6 +765,15 @@ export const mutation = mutationType({
       },
     })
 
+    t.boolean('moveToNextRelevantRun', {
+      description: 'Allow the relevant run for debugging marked as next to be considered the current relevant run',
+      resolve: async (source, args, ctx) => {
+        await ctx.relevantRuns.moveToNext()
+
+        return true
+      },
+    })
+
     // TODO: replace stub with cloud query
     t.list.nonNull.string('testsForRun', {
       args: {

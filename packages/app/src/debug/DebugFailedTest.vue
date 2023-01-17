@@ -11,7 +11,7 @@
     />
     <template
       v-for="{text, type}, index in failedTestData.mappedTitleParts"
-      :key="`${titlePart}-${index}`"
+      :key="`${text}-${index}`"
       :data-cy="`titleParts-${index}`"
     >
       <IconChevronRightSmall

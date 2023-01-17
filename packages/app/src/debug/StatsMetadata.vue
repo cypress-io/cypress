@@ -107,6 +107,11 @@ const TESTING_MAP: Record<TestingTypeEnum, any> = {
   'component': IconTestingTypeComponent,
 }
 
+const TESTING_TITLE_MAP: Record<TestingTypeEnum, string> = {
+  'e2e': 'E2E',
+  'component': 'Component',
+}
+
 const results = computed(() => {
   if (props.order) {
     return props.order.map((status) => ORDER_MAP.value[status])
@@ -158,7 +163,7 @@ const ORDER_MAP = computed<Record<StatType, Metadata>>(() => {
       name: 'browser',
     },
     'TESTING': {
-      value: props.testing!,
+      value: TESTING_TITLE_MAP[props.testing!],
       icon: TESTING_MAP[props.testing!],
       name: 'testing-type',
     },

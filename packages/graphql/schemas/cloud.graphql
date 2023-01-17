@@ -189,6 +189,18 @@ type CloudOrganizationEdge {
   node: CloudOrganization!
 }
 
+type CloudPollingIntervals {
+  """
+  The frequency with which the CloudProject.runByNumber field should be polled, in seconds.
+  """
+  runByNumber: Int
+
+  """
+  The frequency with which the CloudProject.runsByCommitShas field should be polled, in seconds.
+  """
+  runsByCommitShas: Int
+}
+
 """
 A CloudProject represents a Project stored in the Cypress Cloud
 """
@@ -1262,6 +1274,11 @@ type Query {
   A user within the Cypress Cloud
   """
   cloudViewer: CloudUser
+
+  """
+  Defines the suggested polling intervals for various schema resources
+  """
+  pollingIntervals: CloudPollingIntervals
 }
 
 """

@@ -8,7 +8,7 @@ import os from 'os'
 import Debug from 'debug'
 import type { gitStatusType } from '@packages/types'
 import chokidar from 'chokidar'
-import _ from 'lodash'
+import { isEqual } from 'lodash'
 
 const debug = Debug('cypress:data-context:sources:GitDataSource')
 const debugVerbose = Debug('cypress-verbose:data-context:sources:GitDataSource')
@@ -61,6 +61,8 @@ export interface GitDataSourceConfig {
    */
   onGitInfoChange(specPath: string[]): void
   onError(err: any): void
+
+  onGitLogChange?(shas: string[]): void
 }
 
 /**
@@ -78,6 +80,7 @@ export class GitDataSource {
   #gitBaseDir?: string
   #gitBaseDirWatcher?: chokidar.FSWatcher
   #gitMeta = new Map<string, GitInfo | null>()
+  #gitHashes?: string[]
   #currentBranch: string | null = null
   #intervalTimer?: NodeJS.Timeout
 
@@ -120,6 +123,7 @@ export class GitDataSource {
   }
 
   #refreshAllGitData () {
+    debug('Refreshing git data')
     this.#verifyGitRepo().then(() => {
       const toAwait = [
         this.#loadAndWatchCurrentBranch(),
@@ -129,9 +133,16 @@ export class GitDataSource {
         toAwait.push(this.#loadBulkGitInfo(this.#specs))
       }
 
+      if (!this.#gitErrored) {
+        toAwait.push(this.#loadGitHashes())
+      }
+
       Promise.all(toAwait).then(() => {
+        if (this.#destroyed) {
+          return
+        }
+
         this.#intervalTimer = setTimeout(() => {
-          debug('Refreshing git data')
           this.#refreshAllGitData()
         }, SIXTY_SECONDS)
       }).catch(this.config.onError)
@@ -162,13 +173,22 @@ export class GitDataSource {
     return this.#currentBranch
   }
 
+  get currentHashes () {
+    return this.#gitHashes
+  }
+
   async destroy () {
+    debug('Stopping timer and watcher')
     this.#destroyed = true
     if (this.#intervalTimer) {
+      debug('Clearing timeout')
       clearTimeout(this.#intervalTimer)
     }
 
+    debug('Destroying watcher')
     await this.#destroyWatcher(this.#gitBaseDirWatcher)
+
+    debug('Destroy complete')
   }
 
   async #destroyWatcher (watcher?: chokidar.FSWatcher) {
@@ -194,7 +214,8 @@ export class GitDataSource {
         return
       }
 
-      if (!this.config.isRunMode) {
+      if (!this.config.isRunMode && !this.#gitBaseDirWatcher) {
+        debug('Creating watcher')
         this.#gitBaseDirWatcher = chokidar.watch(path.join(this.#gitBaseDir, '.git', 'HEAD'), {
           ignoreInitial: true,
           ignorePermissionErrors: true,
@@ -207,6 +228,7 @@ export class GitDataSource {
           this.#loadCurrentBranch().then(() => {
             if (prevBranch !== this.#currentBranch) {
               this.config.onBranchChange(this.#currentBranch)
+              this.#loadGitHashes().catch(() => {})
             }
           }).catch((e) => {
             debug('Errored loading branch info on git change %s', e.message)
@@ -326,7 +348,7 @@ export class GitDataSource {
         }
 
         this.#gitMeta.set(file, toSet)
-        if (!_.isEqual(toSet, current)) {
+        if (!isEqual(toSet, current)) {
           changed.push(file)
         }
       }
@@ -408,5 +430,22 @@ export class GitDataSource {
     }
 
     return output
+  }
+
+  async #loadGitHashes () {
+    debug('Loading git hashes')
+    try {
+      const logResponse = await this.#git?.log({ maxCount: 100 })
+      const currentHashes = logResponse?.all.map((log) => log.hash)
+
+      if (!isEqual(this.#gitHashes, currentHashes)) {
+        this.#gitHashes = currentHashes || []
+
+        debug(`Calling onGitLogChange: callback defined ${!!this.config.onGitLogChange}, git hash count ${currentHashes?.length}`)
+        this.config.onGitLogChange?.(this.#gitHashes)
+      }
+    } catch (e) {
+      debug('Error loading git hashes %s', e)
+    }
   }
 }

@@ -1,6 +1,7 @@
 import pDefer from 'p-defer'
 import { EventEmitter } from 'stream'
 import { DataContext } from '../DataContext'
+import type { RelevantRun } from '../gen/graphcache-config.gen'
 
 export interface PushFragmentData {
   data: any
@@ -90,6 +91,21 @@ abstract class DataEmitterEvents {
   }
 
   /**
+   * Emitted when then relevant run numbers changed after querying for matching
+   * runs based on local commit shas
+  */
+  relevantRunChange (runs: RelevantRun) {
+    this._emit('relevantRunChange', runs)
+  }
+
+  /**
+   *
+   */
+  relevantRunSpecChange () {
+    this._emit('relevantRunSpecChange')
+  }
+
+  /**
    * When we want to update the cache with known values from the server, without
    * triggering a full refresh, we can send down a specific fragment / data to update
    */
@@ -130,6 +146,9 @@ abstract class DataEmitterEvents {
     this.pub.emit(evt, ...args)
   }
 }
+
+export type EventType = keyof DataEmitterEvents
+
 export class DataEmitterActions extends DataEmitterEvents {
   constructor (private ctx: DataContext) {
     super()
@@ -177,7 +196,7 @@ export class DataEmitterActions extends DataEmitterEvents {
    * when subscribing, we want to execute the operation to get the up-to-date initial
    * value, and then we keep a deferred object, resolved when the given emitter is fired
    */
-  subscribeTo (evt: keyof DataEmitterEvents, opts?: {sendInitial: boolean, onUnsubscribe?: () => void }): AsyncGenerator<any> {
+  subscribeTo (evt: keyof DataEmitterEvents, opts?: {sendInitial: boolean, initialValue?: any, onUnsubscribe?: () => void }): AsyncGenerator<any> {
     const { sendInitial = true } = opts ?? {}
     let hasSentInitial = false
     let dfd: pDefer.DeferredPromise<any> | undefined
@@ -193,6 +212,11 @@ export class DataEmitterActions extends DataEmitterEvents {
       } else {
         pending.push({ done: false, value })
       }
+    }
+
+    // will send an initial value if supplied instead of waiting for first event
+    if (opts?.initialValue) {
+      pending.push({ done: false, value: opts?.initialValue })
     }
 
     this.pub.on(evt, subscribed)
