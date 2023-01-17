@@ -141,7 +141,7 @@ export class OpenProject {
 
     const { onBrowserClose } = options
 
-    options.onBrowserClose = async () => {
+    options.onBrowserClose = () => {
       if (spec && spec.absolute) {
         preprocessor.removeFile(spec.absolute, cfg)
       }

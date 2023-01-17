@@ -3,8 +3,6 @@ import si from 'systeminformation'
 import fs from 'fs-extra'
 import browsers from '../../../../lib/browsers'
 import * as memory from '../../../../lib/browsers/memory'
-import defaultHandler from '../../../../lib/browsers/memory/default'
-import cgroupV1Handler from '../../../../lib/browsers/memory/cgroup-v1'
 import { proxyquire, expect, sinon } from '../../../spec_helper'
 import { Automation } from '../../../../lib/automation'
 
@@ -37,12 +35,16 @@ describe('lib/browsers/memory', () => {
 
   context('#getMemoryHandler', () => {
     it('returns "default" for non-linux', async () => {
+      const defaultHandler = require('../../../../lib/browsers/memory/default').default
+
       sinon.stub(os, 'platform').returns('darwin')
 
       expect(await memory.getMemoryHandler()).to.eq(defaultHandler)
     })
 
     it('returns "cgroup-v1" for linux cgroup v1', async () => {
+      const cgroupV1Handler = require('../../../../lib/browsers/memory/cgroup-v1').default
+
       sinon.stub(os, 'platform').returns('linux')
       sinon.stub(fs, 'pathExists').withArgs('/sys/fs/cgroup/cgroup.controllers').resolves(false)
 
@@ -50,6 +52,8 @@ describe('lib/browsers/memory', () => {
     })
 
     it('returns "default" for linux cgroup v2', async () => {
+      const defaultHandler = require('../../../../lib/browsers/memory/default').default
+
       sinon.stub(os, 'platform').returns('linux')
       sinon.stub(fs, 'pathExists').withArgs('/sys/fs/cgroup/cgroup.controllers').resolves(true)
 

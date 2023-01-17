@@ -2,13 +2,18 @@ const { expect, sinon } = require('../../../spec_helper')
 
 import util from 'util'
 
-const mockExec = sinon.stub()
-
-sinon.stub(util, 'promisify').returns(mockExec)
-
-import memory from '../../../../lib/browsers/memory/cgroup-v1'
-
 describe('lib/browsers/memory/cgroup-v1', () => {
+  let mockExec
+  let memory
+
+  before(async () => {
+    mockExec = sinon.stub()
+
+    sinon.stub(util, 'promisify').returns(mockExec)
+
+    memory = require('../../../../lib/browsers/memory/cgroup-v1').default
+  })
+
   context('#getTotalMemoryLimit', () => {
     it('returns total memory limit from limit_in_bytes', async () => {
       mockExec.withArgs('cat /sys/fs/cgroup/memory/memory.limit_in_bytes', { encoding: 'utf8' }).resolves({ stdout: '100' })
