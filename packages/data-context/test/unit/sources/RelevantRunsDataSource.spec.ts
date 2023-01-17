@@ -121,11 +121,28 @@ describe('RelevantRunsDataSource', () => {
         commitsAhead: 1,
       })
 
+      //TODO refactor to not have to replicate the subscription iterator
+      const subscription = ctx.emitter.subscribeTo('relevantRunChange')
+      const subValues = []
+      const watchSubscription = async () => {
+        for await (const value of subscription) {
+          //ignore the first undefined value
+          if (value) {
+            subValues.push(value)
+          }
+        }
+      }
+
       //TODO figure out how to mock ctx.git so we do not have to pass in the shas to moveToNext
+      await dataSource.moveToNext([FAKE_SHAS[1], FAKE_SHAS[0]])
 
-      const thirdResult = await dataSource.moveToNext([FAKE_SHAS[1], FAKE_SHAS[0]])
+      setImmediate(() => {
+        subscription.return(undefined)
+      })
 
-      expect(thirdResult).to.eql({
+      await watchSubscription()
+
+      expect(subValues[0]).to.eql({
         current: 4,
         next: undefined,
         commitsAhead: 0,

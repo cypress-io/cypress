@@ -107,7 +107,7 @@ describe('DataEmitterActions', () => {
       expect(completed).to.be.true
     })
 
-    const createTestIterator = (subscription, i) => {
+    const createTestIterator = (subscription) => {
       const returnVal = {
         items: 0,
         completed: false,
@@ -134,7 +134,7 @@ describe('DataEmitterActions', () => {
 
       const subscription1 = actions.subscribeTo('specsChange', { sendInitial: true, onUnsubscribe: unsubscribe1 })
 
-      const iteratorFactory1 = createTestIterator(subscription1, 1)
+      const iteratorFactory1 = createTestIterator(subscription1)
 
       const iteratorPromise1 = iteratorFactory1.iterator()
 
@@ -151,7 +151,7 @@ describe('DataEmitterActions', () => {
       setImmediate(() => {
         subscription2 = actions.subscribeTo('specsChange', { sendInitial: true, onUnsubscribe: unsubscribe2 })
 
-        iteratorFactory2 = createTestIterator(subscription2, 2)
+        iteratorFactory2 = createTestIterator(subscription2)
 
         iteratorPromise2 = iteratorFactory2.iterator()
       })
@@ -163,7 +163,7 @@ describe('DataEmitterActions', () => {
       setImmediate(() => {
         subscription1.return(undefined)
         subscription2.return(undefined)
-      }, 10)
+      })
 
       await iteratorPromise1
       await iteratorPromise2
