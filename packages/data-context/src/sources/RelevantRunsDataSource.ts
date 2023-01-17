@@ -89,6 +89,10 @@ export class RelevantRunsDataSource {
       requestPolicy: 'network-only', // we never want to hit local cache for this request
     })
 
+    if (result.error) {
+      throw new Error(`Error fetching relevant runs for project ${projectSlug}`, result.error)
+    }
+
     const cloudProject = result.data?.cloudProjectBySlug
     const pollingInterval = result.data?.pollingIntervals?.runsByCommitShas
 
