@@ -1,6 +1,6 @@
 import StatsMetadata from './StatsMetadata.vue'
 
-describe('mounts correctly', () => {
+describe('<StatsMetadata />', () => {
   const group_linux_chrome = {
     id: '123',
     os: {
@@ -62,7 +62,7 @@ describe('mounts correctly', () => {
   }
 
   it('single values', () => {
-    const testingOrder = ['spec-duration 2:23', 'operating-system Linux Debian', 'browser Chrome 106', 'testing-type component']
+    const testingOrder = ['spec-duration 2:23', 'operating-system Linux Debian', 'browser Chrome 106', 'testing-type Component']
 
     cy.mount(() => (
       <div class='flex bg-gray-50 gap-x-3'>
@@ -90,7 +90,7 @@ describe('mounts correctly', () => {
       'group-server 3 groups',
       'operating-system-groups 3 operating systems',
       'browser-groups 3 browsers',
-      'testing-type e2e',
+      'testing-type E2E',
     ]
 
     cy.mount(() => (
@@ -119,7 +119,7 @@ describe('mounts correctly', () => {
       'group-server 2 groups',
       'operating-system-groups 2 operating systems',
       'browser-groups 1 browser',
-      'testing-type e2e',
+      'testing-type E2E',
     ]
 
     cy.mount(() => (
@@ -146,7 +146,7 @@ describe('mounts correctly', () => {
       'group-server 2 groups',
       'operating-system-groups 1 operating system',
       'browser-groups 2 browsers',
-      'testing-type e2e',
+      'testing-type E2E',
     ]
 
     cy.mount(() => (
@@ -199,7 +199,7 @@ describe('mounts correctly', () => {
       'group-server 3 groups',
       'operating-system-groups 2 operating systems',
       'browser-groups 2 browsers',
-      'testing-type component',
+      'testing-type Component',
     ]
 
     cy.findByTestId('stats-metadata').children().each((ele, index) => {
