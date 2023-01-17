@@ -115,7 +115,7 @@ const descriptions = {
   headed: 'displays the browser instead of running headlessly',
   headless: 'hide the browser instead of running headed (default for cypress run)',
   key: 'your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.',
-  noAutoCancelAfterFailures: 'disables auto cancellation for the run',
+  noAutoCancelAfterFailures: 'override the global Cloud configuration to disables auto cancellation for the run when recording to the Cloud',
   parallel: 'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',
   port: 'runs Cypress on a specific port. overrides any value in cypress.config.{js,ts,mjs,cjs}.',
   project: 'path to the project',
