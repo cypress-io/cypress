@@ -124,7 +124,7 @@ export class RelevantRunSpecsDataSource {
     })
 
     if (result.error) {
-      //TODO Handle error
+      throw new Error(`Error when fetching relevant runs for runs ${runs.current} and ${runs.next}`, result.error)
     }
 
     const cloudProject = result.data?.cloudProjectBySlug

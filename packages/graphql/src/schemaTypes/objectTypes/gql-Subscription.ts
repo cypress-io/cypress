@@ -128,7 +128,7 @@ export const Subscription = subscriptionType({
 
     t.field('relevantRuns', {
       type: RelevantRun,
-      description: 'Return the runs from the Cloud relevant to the current local git commit',
+      description: 'Subscription that polls the cloud for new relevant runs that match local git commit hashes',
       subscribe: (source, args, ctx) => {
         return ctx.relevantRuns.pollForRuns()
       },
@@ -139,7 +139,7 @@ export const Subscription = subscriptionType({
 
     t.field('relevantRunSpecChange', {
       type: Query,
-      description: 'Return the count of specs for a given run.',
+      description: 'Subscription that watches for a relevant run to the debug page to be RUNNING and returns updated spec counts until complete',
       subscribe: (source, args, ctx) => {
         return ctx.relevantRunSpecs.pollForSpecs()
       },

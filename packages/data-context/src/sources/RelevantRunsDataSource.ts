@@ -174,12 +174,14 @@ export class RelevantRunsDataSource {
    * Clear the cached current run to allow the data source to pick the next completed run as the current
    */
   //TODO figure out how to mock in test so do not need to pass in values here
-  moveToNext (shasForTest?: string[]) {
+  async moveToNext (shasForTest?: string[]) {
     debug('Moving to next relevant run')
     this.#currentRun = undefined
     this.#currentCommitSha = undefined
 
-    return this.getRelevantRuns(this.ctx.git?.currentHashes || shasForTest || [])
+    const runs = await this.getRelevantRuns(this.ctx.git?.currentHashes || shasForTest || [])
+
+    this.ctx.emitter.relevantRunChange(runs)
   }
 
   pollForRuns () {
