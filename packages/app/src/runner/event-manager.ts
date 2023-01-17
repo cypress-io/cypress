@@ -10,6 +10,7 @@ import { logger } from './logger'
 import type { Socket } from '@packages/socket/lib/browser'
 import { automation, useRunnerUiStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
+import { useSpecStore } from '../store/specs-store'
 import { useStudioStore } from '../store/studio-store'
 import { getAutIframeModel } from '.'
 import { handlePausing } from './events/pausing'
@@ -56,6 +57,7 @@ export class EventManager {
   cypressInCypressMochaEvents: CypressInCypressMochaEvent[] = []
   // Used for testing the experimentalSingleTabRunMode experiment. Ensures AUT is correctly destroyed between specs.
   ws: Socket
+  specStore: ReturnType<typeof useSpecStore>
   studioStore: ReturnType<typeof useStudioStore>
 
   constructor (
@@ -69,6 +71,7 @@ export class EventManager {
   ) {
     this.selectorPlaygroundModel = selectorPlaygroundModel
     this.ws = ws
+    this.specStore = useSpecStore()
     this.studioStore = useStudioStore()
   }
 
@@ -236,6 +239,10 @@ export class EventManager {
       this.saveState(state)
     })
 
+    this.reporterBus.on('testFilter:cloudDebug:dismiss', () => {
+      this.emit('testFilter:cloudDebug:dismiss', undefined)
+    })
+
     this.reporterBus.on('clear:all:sessions', () => {
       if (!Cypress) return
 
@@ -379,6 +386,8 @@ export class EventManager {
   initialize ($autIframe: JQuery<HTMLIFrameElement>, config: Record<string, any>) {
     performance.mark('initialize-start')
 
+    const testFilter = this.specStore.testFilter
+
     return Cypress.initialize({
       $autIframe,
       onSpecReady: () => {
@@ -394,7 +403,7 @@ export class EventManager {
 
           this.studioStore.initialize(config, runState)
 
-          const runnables = Cypress.runner.normalizeAll(runState.tests, hideCommandLog)
+          const runnables = Cypress.runner.normalizeAll(runState.tests, hideCommandLog, testFilter)
 
           const run = () => {
             performance.mark('initialize-end')
