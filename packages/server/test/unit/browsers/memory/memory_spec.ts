@@ -239,7 +239,7 @@ describe('lib/browsers/memory', () => {
       sinon.stub(browsers, 'getBrowserInstance').returns({
         pid: 1234,
         once: sinon.stub().resolves(),
-        removeAllListeners: sinon.stub(),
+        removeListener: sinon.stub(),
       })
 
       sinon.stub(memory, 'getJsHeapSizeLimit').resolves(2000)
@@ -270,7 +270,7 @@ describe('lib/browsers/memory', () => {
       sinon.stub(browsers, 'getBrowserInstance').returns({
         pid: 1234,
         once: sinon.stub().resolves(),
-        removeAllListeners: sinon.stub(),
+        removeListener: sinon.stub(),
       })
 
       sinon.stub(memory, 'getJsHeapSizeLimit').resolves(2000)
@@ -302,7 +302,7 @@ describe('lib/browsers/memory', () => {
       sinon.stub(browsers, 'getBrowserInstance').returns({
         pid: 1234,
         once: sinon.stub().resolves(),
-        removeAllListeners: sinon.stub(),
+        removeListener: sinon.stub(),
       })
 
       sinon.stub(memory, 'getJsHeapSizeLimit').resolves(10000)
@@ -337,7 +337,7 @@ describe('lib/browsers/memory', () => {
       sinon.stub(browsers, 'getBrowserInstance').returns({
         pid: 1234,
         once: sinon.stub().resolves(),
-        removeAllListeners: sinon.stub(),
+        removeListener: sinon.stub(),
       })
 
       sinon.stub(memory, 'getJsHeapSizeLimit').resolves(3000)
@@ -410,6 +410,7 @@ describe('lib/browsers/memory', () => {
 
     it('saves the cumulative memory stats to a file', async () => {
       process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS = 'true'
+      const memory = proxyquire('../lib/browsers/memory', {})
 
       const fileStub = sinon.stub(fs, 'outputFile').withArgs('cypress/logs/memory/memory_spec.json').resolves()
 
