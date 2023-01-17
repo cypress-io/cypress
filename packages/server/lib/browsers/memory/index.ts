@@ -7,8 +7,10 @@ import { performance } from 'perf_hooks'
 import path from 'path'
 import pid from 'pidusage'
 import { groupCyProcesses, Process } from '../../util/process_profiler'
+import browsers from '..'
 
 import type { Automation } from '../../automation'
+import type { BrowserInstance } from '../types'
 
 const debug = debugModule('cypress:server:browsers:memory')
 const debugVerbose = debugModule('cypress-verbose:server:browsers:memory')
@@ -23,6 +25,7 @@ let rendererProcess: Process | null
 let handler: MemoryHandler
 let totalMemoryLimit: number
 let jsHeapSizeLimit: number
+let browserInstance: BrowserInstance | null = null
 let started = false
 let cumulativeStats: { [key: string]: any }[] = []
 let collectGarbageOnNextTest = false
@@ -310,6 +313,13 @@ async function startProfiling (automation: Automation, spec: { fileName: string 
 
   started = true
 
+  browserInstance = browsers.getBrowserInstance()
+
+  // stop the profiler when the browser exits
+  browserInstance?.once('exit', async () => {
+    await endProfiling()
+  })
+
   // save the current spec file name to be used later for saving the cumulative stats
   currentSpecFileName = spec?.fileName
 
@@ -355,12 +365,16 @@ const reset = () => {
   currentSpecFileName = null
   statsLog = {}
   gcLog = {}
+  browserInstance?.removeAllListeners()
+  browserInstance = null
 }
 
 /**
  * Ends the memory profiler.
  */
 const endProfiling = async () => {
+  if (!started) return
+
   // clear the timer
   if (timer) clearTimeout(timer)
 

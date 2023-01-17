@@ -15,7 +15,6 @@ import { getSpecUrl } from './project_utils'
 import type { BrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions, OpenProjectLaunchOpts, FoundBrowser } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
-import memory from './browsers/memory'
 import type { BrowserInstance } from './browsers/types'
 
 const debug = Debug('cypress:server:open_project')
@@ -146,8 +145,6 @@ export class OpenProject {
       if (spec && spec.absolute) {
         preprocessor.removeFile(spec.absolute, cfg)
       }
-
-      await memory.endProfiling()
 
       afterSpec()
       .catch((err) => {

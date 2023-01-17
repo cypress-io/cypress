@@ -238,6 +238,8 @@ describe('lib/browsers/memory', () => {
 
       sinon.stub(browsers, 'getBrowserInstance').returns({
         pid: 1234,
+        once: sinon.stub().resolves(),
+        removeAllListeners: sinon.stub(),
       })
 
       sinon.stub(memory, 'getJsHeapSizeLimit').resolves(2000)
@@ -267,6 +269,8 @@ describe('lib/browsers/memory', () => {
 
       sinon.stub(browsers, 'getBrowserInstance').returns({
         pid: 1234,
+        once: sinon.stub().resolves(),
+        removeAllListeners: sinon.stub(),
       })
 
       sinon.stub(memory, 'getJsHeapSizeLimit').resolves(2000)
@@ -297,6 +301,8 @@ describe('lib/browsers/memory', () => {
 
       sinon.stub(browsers, 'getBrowserInstance').returns({
         pid: 1234,
+        once: sinon.stub().resolves(),
+        removeAllListeners: sinon.stub(),
       })
 
       sinon.stub(memory, 'getJsHeapSizeLimit').resolves(10000)
@@ -330,6 +336,8 @@ describe('lib/browsers/memory', () => {
 
       sinon.stub(browsers, 'getBrowserInstance').returns({
         pid: 1234,
+        once: sinon.stub().resolves(),
+        removeAllListeners: sinon.stub(),
       })
 
       sinon.stub(memory, 'getJsHeapSizeLimit').resolves(3000)

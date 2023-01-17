@@ -7,7 +7,6 @@ import check from 'check-more-types'
 import { exec } from 'child_process'
 import util from 'util'
 import os from 'os'
-import memory from './memory'
 import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser } from '@packages/types'
 import type { Browser, BrowserInstance, BrowserLauncher } from './types'
 import type { Automation } from '../automation'
@@ -182,8 +181,6 @@ export = {
       // depending on what browser has crashed.
       if (code === null && ['SIGTRAP', 'SIGABRT'].includes(signal) || code === 2147483651 && signal === null) {
         const err = errors.get('BROWSER_CRASHED', browserDisplayName, code, signal)
-
-        await memory.endProfiling()
 
         if (!options.onError) {
           errors.log(err)
