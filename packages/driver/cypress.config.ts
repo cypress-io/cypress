@@ -4,6 +4,7 @@ import { devServer as cypressWebpackDevServer } from '@cypress/webpack-dev-serve
 export default defineConfig({
   projectId: 'ypt4pf',
   experimentalStudio: true,
+  experimentalMemoryManagement: true,
   experimentalWebKitSupport: true,
   hosts: {
     'foobar.com': '127.0.0.1',
@@ -19,7 +20,6 @@ export default defineConfig({
   },
   e2e: {
     experimentalOriginDependencies: true,
-    experimentalMemoryManagement: true,
     experimentalModifyObstructiveThirdPartyCode: true,
     setupNodeEvents: (on, config) => {
       return require('./cypress/plugins')(on, config)
