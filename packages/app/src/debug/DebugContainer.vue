@@ -26,7 +26,7 @@
       />
       <template v-else>
         <DebugPageDetails
-          v-if="shouldDisplayDetails(run.status)"
+          v-if="shouldDisplayDetails(run.status, run.isHidden)"
           :status="run.status"
           :specs="run.specs"
           :cancellation="{ cancelledAt: run.cancelledAt, cancelledBy: run.cancelledBy }"
@@ -183,8 +183,8 @@ const nextRun = computed(() => {
   return props.gql?.currentProject?.cloudProject?.__typename === 'CloudProject' ? props.gql.currentProject.cloudProject.nextRun : null
 })
 
-function shouldDisplayDetails (status: CloudRunStatus) {
-  return !['RUNNING', 'FAILED'].includes(status)
+function shouldDisplayDetails (status: CloudRunStatus, isHidden: boolean) {
+  return !['RUNNING', 'FAILED'].includes(status) || isHidden
 }
 
 function shouldDisplaySpecsList (status: CloudRunStatus) {
