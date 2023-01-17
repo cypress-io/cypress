@@ -23,7 +23,6 @@
       <DebugPendingRunSplash
         v-if="isFirstPendingRun"
         class="mt-12"
-        :spec-statuses="specStatuses"
       />
       <template v-else>
         <DebugPageDetails
@@ -212,8 +211,6 @@ const debugSpecsArray = computed(() => {
 
   return []
 })
-
-const specStatuses = computed(() => run.value?.specs.map((spec) => spec.status || 'UNCLAIMED') || [])
 
 const newerRelevantRun = computed(() => nextRun.value)
 

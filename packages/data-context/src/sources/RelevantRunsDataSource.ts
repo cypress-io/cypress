@@ -162,7 +162,7 @@ export class RelevantRunsDataSource {
       this.#currentCommitSha = compactedRuns.find((run) => run.runNumber === this.#currentRun)?.commitSha
       const commitsAhead = shas.indexOf(this.#currentCommitSha || '')
 
-      debug(`Current commit sha: ${this.#currentCommitSha} commitsBehind: ${commitsAhead}`)
+      debug(`Current run: ${currentRun} next run: ${nextRun} current commit sha: ${this.#currentCommitSha} commitsHead: ${commitsAhead}`)
 
       return {
         current: currentRun,
@@ -170,6 +170,8 @@ export class RelevantRunsDataSource {
         commitsAhead,
       }
     }
+
+    debug('Returning empty')
 
     return RUNS_EMPTY_RETURN
   }
