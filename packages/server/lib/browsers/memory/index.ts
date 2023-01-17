@@ -147,7 +147,7 @@ const findRendererProcess = (processes: si.Systeminformation.ProcessesData) => {
 
 /**
  * Retrieves the memory usage for the renderer process.
- * @returns the memory usage for the renderer process or null if there is no renderer process
+ * @returns the memory usage in bytes for the renderer process or null if there is no renderer process
  */
 export const getRendererMemoryUsage: () => Promise<number | null> = measure(async () => {
   // if we don't have a renderer process yet, find it.
@@ -189,7 +189,7 @@ export const getAvailableMemory: () => Promise<number> = measure(() => {
 }, { name: 'getAvailableMemory', save: true })
 
 /**
- * Calculates the memory stats used to determine if garbage collection should be run.
+ * Calculates the memory stats used to determine if garbage collection should be run before the next test starts.
  */
 export const gatherMemoryStats: () => Promise<void> = measure(async () => {
   // retrieve the available memory and the renderer process memory usage
@@ -247,7 +247,7 @@ const maybeCollectGarbageAndLog = async ({ automation, test }: { automation: Aut
 }
 
 /**
- * Collects garbage if needed.
+ * Collects the browser's garbage if it previously exceeded the threshold when it was measured.
  * @param automation the automation client used to collect garbage
  */
 const maybeCollectGarbage: (automation: Automation) => Promise<void> = measure(async (automation) => {

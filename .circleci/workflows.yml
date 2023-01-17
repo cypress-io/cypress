@@ -1369,7 +1369,7 @@ jobs:
     steps:
       - restore_cached_workspace
       - run:
-          name: Run memory tests in Cypress
+          name: Driver memory tests in Electron
           environment:
             CYPRESS_CONFIG_ENV: production
           command: |
