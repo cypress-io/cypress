@@ -55,7 +55,7 @@ export class Poller<E extends EventType> {
   #stop () {
     debug(`stopping poller for ${this.event}`)
     if (this.#timeout) {
-      clearInterval(this.#timeout)
+      clearTimeout(this.#timeout)
       this.#timeout = undefined
     }
   }
