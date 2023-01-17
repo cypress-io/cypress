@@ -20,6 +20,8 @@ const MEMORY_PROFILER_INTERVAL = Number(process.env.CYPRESS_INTERNAL_MEMORY_PROF
 const MEMORY_FOLDER = process.env.CYPRESS_INTERNAL_MEMORY_FOLDER_PATH || path.join('cypress', 'logs', 'memory')
 const KIBIBYTE = 1024
 const FOUR_GIBIBYTES = 4 * (KIBIBYTE ** 3)
+const SAVE_MEMORY_STATS = ['1', 'true'].includes(process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS?.toLowerCase() as string)
+const SKIP_GC = ['1', 'true'].includes(process.env.CYPRESS_INTERNAL_SKIP_GC?.toLowerCase() as string)
 
 let rendererProcess: Process | null
 let handler: MemoryHandler
@@ -85,7 +87,7 @@ const measure = (func: (...args) => any, opts: { name?: string, save?: boolean }
 /**
  * Retrieves the JS heap size limit for the browser.
  * @param automation the automation client to use
- * @returns the JS heap size limit for the browser. If not available, returns a default of four gibibytes.
+ * @returns the JS heap size limit in bytes for the browser. If not available, returns a default of four gibibytes.
  */
 export const getJsHeapSizeLimit: (automation: Automation) => Promise<number> = measure(async (automation) => {
   let heapLimit: Number
@@ -182,7 +184,7 @@ export const getRendererMemoryUsage: () => Promise<number | null> = measure(asyn
 
 /**
  * Retrieves the available memory for the container/host.
- * @returns the available memory for the container/host
+ * @returns the available memory in bytes for the container/host
  */
 export const getAvailableMemory: () => Promise<number> = measure(() => {
   return handler.getAvailableMemory(totalMemoryLimit, statsLog)
@@ -210,7 +212,7 @@ export const gatherMemoryStats: () => Promise<void> = measure(async () => {
 
   const rendererUsagePercentage = (rendererProcessMemRss / maxAvailableRendererMemory) * 100
   // if we're using more than MEMORY_THRESHOLD_PERCENTAGE of the available memory,
-  const shouldCollectGarbage = rendererUsagePercentage >= MEMORY_THRESHOLD_PERCENTAGE && !['0', 'false'].includes(process.env.CYPRESS_INTERNAL_FORCE_GC?.toLowerCase() as string)
+  const shouldCollectGarbage = rendererUsagePercentage >= MEMORY_THRESHOLD_PERCENTAGE && !SKIP_GC
 
   // if we should collect garbage, set the flag to true so we can collect garbage on the next test
   collectGarbageOnNextTest = collectGarbageOnNextTest || shouldCollectGarbage
@@ -266,7 +268,7 @@ const maybeCollectGarbage: (automation: Automation) => Promise<void> = measure(a
 const addCumulativeStats = (stats: { [key: string]: any }) => {
   debugVerbose('memory stats: %o', stats)
 
-  if (['1', 'true'].includes(process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS?.toLowerCase() as string)) {
+  if (SAVE_MEMORY_STATS) {
     cumulativeStats.push(_.clone(stats))
   }
 
@@ -343,7 +345,7 @@ async function startProfiling (automation: Automation, spec: { fileName: string 
  * Saves the cumulative stats to a file.
  */
 const saveCumulativeStats = async () => {
-  if (['1', 'true'].includes(process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS?.toLowerCase() as string) && currentSpecFileName) {
+  if (SAVE_MEMORY_STATS && currentSpecFileName) {
     try {
       // save the cumulative stats to a file named after the spec file
       await fs.outputFile(path.join(MEMORY_FOLDER, `${currentSpecFileName}.json`), JSON.stringify(cumulativeStats))
