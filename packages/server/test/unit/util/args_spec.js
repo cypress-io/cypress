@@ -237,14 +237,6 @@ describe('lib/util/args', () => {
     })
   })
 
-  context('--no-auto-cancel-after-failures', () => {
-    it('converts to false', function () {
-      const options = this.setup('--no-auto-cancel-after-failures')
-
-      expect(options.autoCancelAfterFailures).to.eq(false)
-    })
-  })
-
   context('--port', () => {
     it('converts to Number', function () {
       const options = this.setup('--port', '8080')

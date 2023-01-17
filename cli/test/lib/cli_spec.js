@@ -503,11 +503,6 @@ describe('cli', () => {
       this.exec('run --auto-cancel-after-failures false')
       expect(run.start).to.be.calledWith({ autoCancelAfterFailures: 'false' })
     })
-
-    it('call run with --no-auto-cancel-after-failures', () => {
-      this.exec('run --no-auto-cancel-after-failures')
-      expect(run.start).to.be.calledWith({ autoCancelAfterFailures: false })
-    })
   })
 
   context('cypress open', () => {

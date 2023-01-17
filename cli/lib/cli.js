@@ -93,7 +93,7 @@ const parseVariableOpts = (fnArgs, args) => {
 }
 
 const descriptions = {
-  autoCancelAfterFailures: 'sets auto cancellation for the run. pass a number for the failed test threshold, or "false"',
+  autoCancelAfterFailures: 'overrides the global Cloud configuration to set the failed test threshold for auto cancellation or to disabled auto cancellation when recording to the Cloud',
   browser: 'runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.',
   cacheClear: 'delete all cached binaries',
   cachePrune: 'deletes all cached binaries except for the version currently in use',
@@ -115,7 +115,6 @@ const descriptions = {
   headed: 'displays the browser instead of running headlessly',
   headless: 'hide the browser instead of running headed (default for cypress run)',
   key: 'your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.',
-  noAutoCancelAfterFailures: 'override the global Cloud configuration to disables auto cancellation for the run when recording to the Cloud',
   parallel: 'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',
   port: 'runs Cypress on a specific port. overrides any value in cypress.config.{js,ts,mjs,cjs}.',
   project: 'path to the project',
@@ -256,7 +255,6 @@ const addCypressRunCommand = (program) => {
   .option('-k, --key <record-key>', text('key'))
   .option('--headed', text('headed'))
   .option('--headless', text('headless'))
-  .option('--no-auto-cancel-after-failures', text('noAutoCancelAfterFailures'))
   .option('--no-exit', text('exit'))
   .option('--parallel', text('parallel'))
   .option('-p, --port <port>', text('port'))

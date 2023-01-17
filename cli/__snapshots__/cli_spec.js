@@ -79,7 +79,6 @@ exports['shows help for run --foo 1'] = `
     -k, --key <record-key>                                  your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.
     --headed                                                displays the browser instead of running headlessly
     --headless                                              hide the browser instead of running headed (default for cypress run)
-    --no-auto-cancel-after-failures                         disables auto cancellation for the run
     --no-exit                                               keep the browser open after tests finish
     --parallel                                              enables concurrent runs and automatic load balancing of specs across multiple machines or processes
     -p, --port <port>                                       runs Cypress on a specific port. overrides any value in cypress.config.{js,ts,mjs,cjs}.

@@ -1432,18 +1432,6 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('errors and exits when using --no-auto-cancel-after-failures without recording', function () {
-      return cypress.start([
-        `--run-project=${this.recordPath}`,
-        '--no-auto-cancel-after-failures',
-      ])
-      .then(() => {
-        this.expectExitWithErr('RECORD_PARAMS_WITHOUT_RECORDING')
-
-        return snapshotConsoleLogs('RECORD_PARAMS_WITHOUT_RECORDING-no-auto-cancel-after-failures 1')
-      })
-    })
-
     beforeEach(() => {
       browsers.open.restore()
 
