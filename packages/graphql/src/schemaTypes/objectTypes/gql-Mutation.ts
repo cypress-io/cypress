@@ -773,7 +773,7 @@ export const mutation = mutationType({
         return true
       },
     })
-              
+
     // TODO: replace stub with cloud query
     t.list.nonNull.string('testsForRun', {
       args: {
