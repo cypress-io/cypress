@@ -228,7 +228,7 @@ export class GitDataSource {
           this.#loadCurrentBranch().then(() => {
             if (prevBranch !== this.#currentBranch) {
               this.config.onBranchChange(this.#currentBranch)
-              this.#loadGitHashes().then(() => {})
+              this.#loadGitHashes().catch(() => {})
             }
           }).catch((e) => {
             debug('Errored loading branch info on git change %s', e.message)
