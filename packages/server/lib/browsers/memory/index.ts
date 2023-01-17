@@ -4,11 +4,11 @@ import si from 'systeminformation'
 import os from 'os'
 import fs from 'fs-extra'
 import { performance } from 'perf_hooks'
-import { groupCyProcesses, Process } from '../../util/process_profiler'
+import path from 'path'
 import pid from 'pidusage'
+import { groupCyProcesses, Process } from '../../util/process_profiler'
 
 import type { Automation } from '../../automation'
-import path from 'path'
 
 const debug = debugModule('cypress:server:browsers:memory')
 const debugVerbose = debugModule('cypress-verbose:server:browsers:memory')

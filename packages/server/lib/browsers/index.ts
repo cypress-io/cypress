@@ -183,7 +183,7 @@ export = {
       if (code === null && ['SIGTRAP', 'SIGABRT'].includes(signal) || code === 2147483651 && signal === null) {
         const err = errors.get('BROWSER_CRASHED', browserDisplayName, code, signal)
 
-        memory.endProfiling()
+        await memory.endProfiling()
 
         if (!options.onError) {
           errors.log(err)

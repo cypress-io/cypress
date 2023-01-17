@@ -142,12 +142,12 @@ export class OpenProject {
 
     const { onBrowserClose } = options
 
-    options.onBrowserClose = () => {
+    options.onBrowserClose = async () => {
       if (spec && spec.absolute) {
         preprocessor.removeFile(spec.absolute, cfg)
       }
 
-      memory.endProfiling()
+      await memory.endProfiling()
 
       afterSpec()
       .catch((err) => {
