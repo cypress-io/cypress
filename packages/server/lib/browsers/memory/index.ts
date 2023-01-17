@@ -318,9 +318,7 @@ async function startProfiling (automation: Automation, spec: { fileName: string 
   browserInstance = browsers.getBrowserInstance()
 
   // stop the profiler when the browser exits
-  browserInstance?.once('exit', async () => {
-    await endProfiling()
-  })
+  browserInstance?.once('exit', endProfiling)
 
   // save the current spec file name to be used later for saving the cumulative stats
   currentSpecFileName = spec?.fileName
@@ -367,7 +365,7 @@ const reset = () => {
   currentSpecFileName = null
   statsLog = {}
   gcLog = {}
-  browserInstance?.removeAllListeners()
+  browserInstance?.removeListener('exit', endProfiling)
   browserInstance = null
 }
 
