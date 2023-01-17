@@ -1693,6 +1693,7 @@ type Mutation {
 
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
+  testsForRun(runId: String!): [String!]
 
   """Updates the different fields of the wizard data store"""
   wizardUpdate(input: WizardUpdateInput!): Wizard

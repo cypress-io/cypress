@@ -764,5 +764,15 @@ export const mutation = mutationType({
         return true
       },
     })
+
+    // TODO: replace stub with cloud query
+    t.list.nonNull.string('testsForRun', {
+      args: {
+        runId: nonNull(stringArg()),
+      },
+      resolve: (source, args, ctx) => {
+        return ctx.coreData.cloud.testsForRunResults || []
+      },
+    })
   },
 })

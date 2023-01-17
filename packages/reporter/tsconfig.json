@@ -10,10 +10,9 @@
     "lib": ["DOM"]
   },
   "include": [
-    "src/*.ts",
-    "src/*.tsx",
-    "./src/**/*.ts",
-    "./src/**/*.tsx"
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "cypress/**/*.ts"
   ],
   "files": [
     "./../ts/index.d.ts", "./index.d.ts"
