@@ -253,7 +253,7 @@ describe('src/cy/commands/aliasing', () => {
 
       it('throws when given non-object options', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq(`\`cy.as()\` only accepts an \`options\` object for its second argument. You passed: \`wut?\``)
+          expect(err.message).to.eq(`\`cy.as()\` only accepts an options object for its second argument. You passed: \`wut?\``)
           expect(err.docsUrl).to.eq('https://on.cypress.io/as')
 
           done()
