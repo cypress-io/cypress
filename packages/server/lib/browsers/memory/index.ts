@@ -86,7 +86,7 @@ const measure = (func: (...args) => any, opts: { name?: string, save?: boolean }
 
 /**
  * Retrieves the JS heap size limit for the browser.
- * @param automation the automation client to use
+ * @param automation - the automation client to use
  * @returns the JS heap size limit in bytes for the browser. If not available, returns a default of four gibibytes.
  */
 export const getJsHeapSizeLimit: (automation: Automation) => Promise<number> = measure(async (automation) => {
@@ -124,7 +124,7 @@ export const getMemoryHandler = async (): Promise<MemoryHandler> => {
 
 /**
  * Attempts to find the browser's renderer process running the Cypress tests.
- * @param processes all of the system processes
+ * @param processes - all of the system processes
  * @returns the renderer process or null if there is no renderer process
  */
 const findRendererProcess = (processes: si.Systeminformation.ProcessesData) => {
@@ -231,8 +231,8 @@ export const gatherMemoryStats: () => Promise<void> = measure(async () => {
 
 /**
  * Collects garbage if needed and logs the test information.
- * @param automation the automation client used to collect garbage
- * @param test the current test
+ * @param automation - the automation client used to collect garbage
+ * @param test - the current test
  */
 const maybeCollectGarbageAndLog = async ({ automation, test }: { automation: Automation, test: { title: string, order: number, currentRetry: number }}) => {
   await maybeCollectGarbage(automation)
@@ -263,7 +263,7 @@ const maybeCollectGarbage: (automation: Automation) => Promise<void> = measure(a
 
 /**
  * Adds the memory stats to the cumulative stats.
- * @param stats memory stats to add to the cumulative stats
+ * @param stats - memory stats to add to the cumulative stats
  */
 const addCumulativeStats = (stats: { [key: string]: any }) => {
   debugVerbose('memory stats: %o', stats)
@@ -300,8 +300,8 @@ const scheduleMemoryCheck = () => {
 
 /**
  * Starts the memory profiler.
- * @param automation the automation client used to interact with the browser
- * @param spec the current spec file
+ * @param automation - the automation client used to interact with the browser
+ * @param spec - the current spec file
  */
 async function startProfiling (automation: Automation, spec: { fileName: string }) {
   if (started) {
