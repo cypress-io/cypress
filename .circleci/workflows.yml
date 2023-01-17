@@ -1382,7 +1382,7 @@ jobs:
             fi
 
             CYPRESS_INTERNAL_SAVE_MEMORY_STATS=true \
-            DEBUG=cypress*memory,cypress*process_profiler \
+            DEBUG=cypress*memory \
             yarn cypress:run --browser electron --spec "cypress/e2e/memory/*.cy.*"
           working_directory: packages/driver
       - store_test_results:

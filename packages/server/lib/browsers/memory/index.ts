@@ -131,11 +131,11 @@ const findRendererProcess = (processes: si.Systeminformation.ProcessesData) => {
   // group the processes by their group (e.g. browser, cypress, launchpad, etc...)
   const groupedProcesses = groupCyProcesses(processes)
 
-  // eslint-disable-next-line no-console
-  console.log(groupedProcesses)
-
   // filter down to the renderer processes by looking at the 'browser' group and the command/params with type renderer
-  const rendererProcesses = groupedProcesses.filter(
+  const browserProcesses = groupedProcesses.filter((p) => p.group === 'browser')
+
+  // if we only have one browser process assume it's the renderer process, otherwise filter down to the renderer processes
+  const rendererProcesses = browserProcesses.length === 1 ? browserProcesses : browserProcesses.filter(
     (p) => p.group === 'browser' && (p.command?.includes('--type=renderer') || p.params?.includes('--type=renderer')),
   )
 
