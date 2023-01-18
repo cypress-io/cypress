@@ -13,7 +13,7 @@ import { useScreenshotStore } from '../store/screenshot-store'
 import { useStudioStore } from '../store/studio-store'
 import { getAutIframeModel } from '.'
 import { handlePausing } from './events/pausing'
-import { runSpec } from './useEventManager'
+import { useEventManager } from './useEventManager'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -360,7 +360,7 @@ export class EventManager {
       this.ws.emit('watch:test:file', config.spec)
       console.log('experimentalInteractiveRunEvents?', config.experimentalInteractiveRunEvents)
       if (config.isTextTerminal || config.experimentalInteractiveRunEvents) {
-        this.ws.emit('plugins:before:spec', config.spec)
+        // this.ws.emit('plugins:before:spec', config.spec)
         this.ws.emit('plugins:before:spec', config.spec, (res?: { error: Error }) => {
           if (res && res.error) {
             reject(res.error)
@@ -833,7 +833,7 @@ export class EventManager {
     Cypress.removeAllListeners()
     const isRerun = true
 
-    await runSpec(isRerun)
+    await useEventManager.runSpec(isRerun)
     // this.localBus.emit('restart')
   }
 

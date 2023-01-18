@@ -404,11 +404,11 @@ async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
   return getEventManager()
   .setup(config)
   .then((promise) => {
-    if (useSpecStore().getLastPromise() !== promise) {
-      console.log(`different spec was selected while setting up ${spec.fileName}`)
+    // if (useSpecStore().getLastPromise() !== promise) {
+    //   console.log(`different spec was selected while setting up ${spec.fileName}`)
 
-      return
-    }
+    //   return
+    // }
 
     if (window.__CYPRESS_TESTING_TYPE__ === 'e2e') {
       return runSpecE2E(config, spec)
