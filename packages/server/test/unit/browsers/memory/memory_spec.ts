@@ -413,7 +413,7 @@ describe('lib/browsers/memory', () => {
     })
 
     it('saves the cumulative memory stats to a file', async () => {
-      process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS = 'true'
+      process.env.CYPRESS_INTERNAL_MEMORY_SAVE_STATS = 'true'
       const memory = proxyquire('../lib/browsers/memory', {})
 
       const fileStub = sinon.stub(fs, 'outputFile').withArgs('cypress/logs/memory/memory_spec.json').resolves()

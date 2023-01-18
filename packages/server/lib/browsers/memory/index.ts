@@ -18,10 +18,10 @@ const debugVerbose = debugModule('cypress-verbose:server:browsers:memory')
 const MEMORY_THRESHOLD_PERCENTAGE = Number(process.env.CYPRESS_INTERNAL_MEMORY_THRESHOLD_PERCENTAGE) || 50
 const MEMORY_PROFILER_INTERVAL = Number(process.env.CYPRESS_INTERNAL_MEMORY_PROFILER_INTERVAL) || 1000
 const MEMORY_FOLDER = process.env.CYPRESS_INTERNAL_MEMORY_FOLDER_PATH || path.join('cypress', 'logs', 'memory')
+const SAVE_MEMORY_STATS = ['1', 'true'].includes(process.env.CYPRESS_INTERNAL_MEMORY_SAVE_STATS?.toLowerCase() as string)
+const SKIP_GC = ['1', 'true'].includes(process.env.CYPRESS_INTERNAL_MEMORY_SKIP_GC?.toLowerCase() as string)
 const KIBIBYTE = 1024
 const FOUR_GIBIBYTES = 4 * (KIBIBYTE ** 3)
-const SAVE_MEMORY_STATS = ['1', 'true'].includes(process.env.CYPRESS_INTERNAL_SAVE_MEMORY_STATS?.toLowerCase() as string)
-const SKIP_GC = ['1', 'true'].includes(process.env.CYPRESS_INTERNAL_SKIP_GC?.toLowerCase() as string)
 
 let rendererProcess: Process | null
 let handler: MemoryHandler
@@ -89,7 +89,7 @@ const measure = (func: (...args) => any, opts: { name?: string, save?: boolean }
  * @param automation - the automation client to use
  * @returns the JS heap size limit in bytes for the browser. If not available, returns a default of four gibibytes.
  */
-export const getJsHeapSizeLimit: (automation: Automation) => Promise<number> = measure(async (automation) => {
+export const getJsHeapSizeLimit: (automation: Automation) => Promise<number> = measure(async (automation: Automation) => {
   let heapLimit: Number
 
   try {
@@ -159,10 +159,17 @@ export const getRendererMemoryUsage: () => Promise<number | null> = measure(asyn
   // this is done once since the renderer process will not change
   if (!rendererProcess) {
     let process: Process | null = null
+    let processes: si.Systeminformation.ProcessesData
 
-    const processes = await si.processes()
+    try {
+      processes = await si.processes()
+    } catch (err) {
+      debug('could not get processes to find renderer process: %o', err)
 
-    process = await findRendererProcess(processes)
+      return null
+    }
+
+    process = findRendererProcess(processes)
 
     if (!process) return null
 
@@ -247,6 +254,8 @@ const maybeCollectGarbageAndLog = async ({ automation, test }: { automation: Aut
 
   addCumulativeStats(gcLog)
 
+  gcLog = {}
+
   // clear the flag so we don't collect garbage on every test
   collectGarbageOnNextTest = false
 }
@@ -255,10 +264,14 @@ const maybeCollectGarbageAndLog = async ({ automation, test }: { automation: Aut
  * Collects the browser's garbage if it previously exceeded the threshold when it was measured.
  * @param automation the automation client used to collect garbage
  */
-const maybeCollectGarbage: (automation: Automation) => Promise<void> = measure(async (automation) => {
+const maybeCollectGarbage: (automation: Automation) => Promise<void> = measure(async (automation: Automation) => {
   if (collectGarbageOnNextTest) {
     debug('forcing garbage collection')
-    await automation.request('collect:garbage', null, null)
+    try {
+      await automation.request('collect:garbage', null, null)
+    } catch (err) {
+      debug('error collecting garbage: %o', err)
+    }
   } else {
     debug('skipping garbage collection')
   }
@@ -274,8 +287,6 @@ const addCumulativeStats = (stats: { [key: string]: any }) => {
   if (SAVE_MEMORY_STATS) {
     cumulativeStats.push(_.clone(stats))
   }
-
-  stats = {}
 }
 
 /**
@@ -285,6 +296,7 @@ const checkMemory = async () => {
   try {
     await gatherMemoryStats()
     addCumulativeStats(statsLog)
+    statsLog = {}
   } catch (err) {
     debug('error gathering memory stats: %o', err)
   }
@@ -313,20 +325,20 @@ async function startProfiling (automation: Automation, spec: { fileName: string 
 
   debugVerbose('start memory profiler')
 
-  // ensure we are starting from a clean state
-  reset()
-
-  started = true
-
-  browserInstance = browsers.getBrowserInstance()
-
-  // stop the profiler when the browser exits
-  browserInstance?.once('exit', endProfiling)
-
-  // save the current spec file name to be used later for saving the cumulative stats
-  currentSpecFileName = spec?.fileName
-
   try {
+    // ensure we are starting from a clean state
+    reset()
+
+    started = true
+
+    browserInstance = browsers.getBrowserInstance()
+
+    // stop the profiler when the browser exits
+    browserInstance?.once('exit', endProfiling)
+
+    // save the current spec file name to be used later for saving the cumulative stats
+    currentSpecFileName = spec?.fileName
+
     handler = await getMemoryHandler()
 
     // get the js heap size limit and total memory limit once
@@ -338,7 +350,7 @@ async function startProfiling (automation: Automation, spec: { fileName: string 
 
     await checkMemory()
   } catch (err) {
-    debug('error checking memory: %o', err)
+    debug('error starting memory profiler: %o', err)
   }
 }
 
