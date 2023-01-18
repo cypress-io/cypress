@@ -1408,6 +1408,20 @@ describe('src/cy/commands/assertions', () => {
 
         cy.get('#does-not-exist').should('not.exist')
       })
+
+      context('with a jQuery selector', () => {
+        it('can be chained', () => {
+          cy.get('#foo').should('exist').and('exist')
+        })
+      })
+
+      context('with an HTML element', () => {
+        it('can be chained', () => {
+          cy.document().then((doc) => {
+            cy.wrap(doc.getElementById('foo')).should('exist').and('exist')
+          })
+        })
+      })
     })
 
     describe('#be.visible', () => {

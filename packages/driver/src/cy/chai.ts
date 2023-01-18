@@ -400,7 +400,7 @@ chai.use((chai, u) => {
         } else {
           let isAttached
 
-          if (!obj.length) {
+          if ($dom.isJquery(obj) && !obj.length) {
             this._obj = null
           }
 
