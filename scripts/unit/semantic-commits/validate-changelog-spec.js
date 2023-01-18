@@ -35,8 +35,8 @@ describe('semantic-pull-request/validate-changelog', () => {
 
   context('_validateEntry', () => {
     it('verifies changelog entry has been included', () => {
-      const errors = _validateEntry(
-        '**Performance:**\n- Fixed in [#77](https://github.com/cypress-io/cypress/pull/77).',
+      const errMessage = _validateEntry(
+        { '**Performance:**': ['- Fixed in [#77](https://github.com/cypress-io/cypress/pull/77).'] },
         {
           commitMessage: 'perf: fix an issue (#77)',
           semanticType: 'perf',
@@ -45,12 +45,12 @@ describe('semantic-pull-request/validate-changelog', () => {
         },
       )
 
-      expect(errors).to.have.length(0)
+      expect(errMessage).to.undefined
     })
 
     it('returns an error when entry does not correct change section', () => {
-      const errors = _validateEntry(
-        '**Bugfixes:**\n- Fixes [#75](https://github.com/cypress-io/cypress/issues/75).',
+      const errMessage = _validateEntry(
+        { '**Bugfixes:**': ['- Fixed in [#75](https://github.com/cypress-io/cypress/issues/75).'] },
         {
           commitMessage: 'perf: do something faster (#77)',
           semanticType: 'perf',
@@ -59,13 +59,12 @@ describe('semantic-pull-request/validate-changelog', () => {
         },
       )
 
-      expect(errors).to.have.length(1)
-      expect(errors[0]).to.contain('The changelog does not include the **Performance:** section.')
+      expect(errMessage).to.contain('The changelog does not include the **Performance:** section.')
     })
 
     it('returns an error when entry does not include associated issue links', () => {
-      const errors = _validateEntry(
-        '**Performance:**',
+      const errMessage = _validateEntry(
+        { '**Performance:**': ['does another thing not related'] },
         {
           commitMessage: 'perf: do something faster (#77)',
           semanticType: 'perf',
@@ -74,13 +73,12 @@ describe('semantic-pull-request/validate-changelog', () => {
         },
       )
 
-      expect(errors).to.have.length(1)
-      expect(errors[0]).to.contain('The changelog entry does not include the linked issues that this pull request resolves.')
+      expect(errMessage).to.contain('The changelog entry does not include the linked issues that this pull request resolves.')
     })
 
     it('returns an error when entry does not include pull request link', () => {
-      const errors = _validateEntry(
-        '**Performance:**',
+      const errMessage = _validateEntry(
+        { '**Performance:**': ['does another thing not related'] },
         {
           commitMessage: 'perf: do something faster (#77)',
           semanticType: 'perf',
@@ -88,13 +86,12 @@ describe('semantic-pull-request/validate-changelog', () => {
         },
       )
 
-      expect(errors).to.have.length(1)
-      expect(errors[0]).to.contain('The changelog entry does not include the pull request link.')
+      expect(errMessage).to.contain('The changelog entry does not include the pull request link.')
     })
 
     it('returns multiple error when entry does not correct section or include pull request link', () => {
-      const errors = _validateEntry(
-        '**Features:**\n-do something faster.',
+      const errMessage = _validateEntry(
+        { '**Features:**': ['does another cool'] },
         {
           commitMessage: 'perf: do something faster (#77)',
           semanticType: 'perf',
@@ -102,9 +99,7 @@ describe('semantic-pull-request/validate-changelog', () => {
         },
       )
 
-      expect(errors).to.have.length(2)
-      expect(errors[0]).to.contain('The changelog does not include the **Performance:** section.')
-      expect(errors[1]).to.contain('The changelog entry does not include the pull request link.')
+      expect(errMessage).to.contain('The changelog does not include the **Performance:** section.')
     })
   })
 
@@ -125,7 +120,13 @@ describe('semantic-pull-request/validate-changelog', () => {
         'cli/CHANGELOG.md',
       ]
 
-      fs.readFileSync.returns('**Performance:**\n- Fixed in [#77](https://github.com/cypress-io/cypress/pull/77).')
+      fs.readFileSync.returns(`## 120.2.0
+
+__Released 01/17/2033 (PENDING)__
+
+**Performance:**
+
+- Fixed in [#77](https://github.com/cypress-io/cypress/pull/77).`)
 
       await validateChangelog({
         changedFiles,
@@ -180,7 +181,11 @@ describe('semantic-pull-request/validate-changelog', () => {
           'packages/driver/lib/index.js',
         ]
 
-        fs.readFileSync.returns('## 20.0.2')
+        fs.readFileSync.returns(`## 120.2.0
+
+__Released 01/17/2033 (PENDING)__
+
+`)
 
         return validateChangelog({
           changedFiles,
@@ -202,7 +207,13 @@ describe('semantic-pull-request/validate-changelog', () => {
           'cli/CHANGELOG.md',
         ]
 
-        fs.readFileSync.returns('**Features:**\n- Addresses [#75](https://github.com/cypress-io/cypress/issues/75).')
+        fs.readFileSync.returns(`## 120.2.0
+
+__Released 01/17/2033 (PENDING)__
+
+**Features:**
+
+- Addresses [#75](https://github.com/cypress-io/cypress/issues/75).`)
 
         return validateChangelog({
           changedFiles,
@@ -224,7 +235,13 @@ describe('semantic-pull-request/validate-changelog', () => {
           'cli/CHANGELOG.md',
         ]
 
-        fs.readFileSync.returns('**Performance:**')
+        fs.readFileSync.returns(`## 120.2.0
+
+__Released 01/17/2033 (PENDING)__
+
+**Performance:**
+
+- comment without link.`)
 
         return validateChangelog({
           changedFiles,
@@ -246,7 +263,13 @@ describe('semantic-pull-request/validate-changelog', () => {
           'cli/CHANGELOG.md',
         ]
 
-        fs.readFileSync.returns('**Performance:**')
+        fs.readFileSync.returns(`## 120.2.0
+
+__Released 01/17/2033 (PENDING)__
+
+**Performance:**
+
+- comment without link.`)
 
         return validateChangelog({
           changedFiles,
