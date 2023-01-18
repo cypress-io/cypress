@@ -2,30 +2,17 @@ import { ProviderToken } from '@angular/core'
 import { TestBed } from '@angular/core/testing'
 
 /**
- * Returns a dependency according to the passed ProviderToken. Calls internally TestBed.inject.
+ * Returns a dependency according to the passed ProviderToken.
+ * Calls internally TestBed.inject. In most cases, the token is
+ * an Angular service.
  *
- * @param {ProviderToken<T>>} providerToken ProviderToken representing a dependency
+ * @param token ProviderToken representing a dependency.
  * @example
- * import { HelloWorldComponent } from 'hello-world/hello-world.component'
- * import { MyService } from 'services/my.service'
- * import { SharedModule } from 'shared/shared.module';
- * import { mount } from '@cypress/angular'
- * it('can mount', () => {
- *  mount(HelloWorldComponent, {
- *    providers: [MyService],
- *    imports: [SharedModule]
- *  })
- *  cy.get('h1').contains('Hello World')
- * })
- *
- * or
- *
- * it('can mount with template', () => {
- *  mount('<app-hello-world></app-hello-world>', {
- *    declarations: [HelloWorldComponent],
- *    providers: [MyService],
- *    imports: [SharedModule]
- *  })
+ * it('should verify the amount items in the Cart service', () => {
+ *   cy.mount(ProductComponent)
+ *   cy.inject(Cart).invoke('getItems').should('have.length', 0)
+ *   cy.get('[data-testid=btn-buy]').click()
+ *   cy.inject(Cart).invoke('getItems').should('have.length', 1)
  * })
  * @returns Cypress.Chainable<T>
  */

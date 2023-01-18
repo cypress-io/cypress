@@ -59,6 +59,6 @@ describe('inject function', () => {
     cy.mount(ProductComponent, { providers: [{ provide: Cart, useValue: cartFake }] })
     cy.inject(Cart).invoke('getItems').should('have.length', 0)
     cy.get('[data-testid=btn-buy]').click()
-    cy.wrap(Cart).invoke('getItems').should('have.length', 1)
+    cy.inject(Cart).invoke('getItems').should('have.length', 1)
   })
 })
