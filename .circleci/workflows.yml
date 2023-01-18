@@ -28,7 +28,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - /^release\/\d+\.\d+\.\d+$/
-        - 'ryanm/fix/cy-in-cy-and-v8-snapshots'
+        - 'macOS-launch-arm-browser'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -37,7 +37,7 @@ macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/fix/cy-in-cy-and-v8-snapshots', << pipeline.git.branch >> ]
+    - equal: [ 'macOS-launch-arm-browser', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -45,7 +45,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/fix/cy-in-cy-and-v8-snapshots', << pipeline.git.branch >> ]
+    - equal: [ 'macOS-launch-arm-browser', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -63,7 +63,7 @@ windowsWorkflowFilters: &windows-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'ryanm/fix/cy-in-cy-and-v8-snapshots', << pipeline.git.branch >> ]
+    - equal: [ 'retry-flake', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -129,7 +129,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "ryanm/fix/cy-in-cy-and-v8-snapshots" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "macOS-launch-arm-browser" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -2680,12 +2680,6 @@ darwin-x64-workflow: &darwin-x64-workflow
         requires:
           - darwin-x64-node-modules-install
 
-    - lint:
-        name: darwin-x64-lint
-        executor: mac
-        requires:
-          - darwin-x64-build
-
     - create-build-artifacts:
         name: darwin-x64-create-build-artifacts
         context:
@@ -2772,12 +2766,6 @@ windows-workflow: &windows-workflow
         executor: windows
         resource_class: windows.large
         context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
-        requires:
-          - windows-build
-
-    - lint:
-        name: windows-lint
-        executor: windows
         requires:
           - windows-build
 

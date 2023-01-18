@@ -1,3 +1,3 @@
-import { writable } from "svelte/store";
+import { writable } from 'svelte/store'
 
-export const messageStore = writable("Hello World!");
+export const messageStore = writable('Hello World!')

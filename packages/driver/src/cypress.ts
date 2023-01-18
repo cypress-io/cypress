@@ -44,6 +44,7 @@ import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from './cross-origi
 import { setupAutEventHandlers } from './cypress/aut_event_handlers'
 
 import type { CachedTestState } from '@packages/types'
+import * as cors from '@packages/network/lib/cors'
 
 const debug = debugFn('cypress:driver:cypress')
 
@@ -182,7 +183,11 @@ class $Cypress {
 
     // set domainName but allow us to turn
     // off this feature in testing
-    if (domainName && config.testingType === 'e2e') {
+    const shouldInjectDocumentDomain = cors.shouldInjectDocumentDomain(window.location.origin, {
+      skipDomainInjectionForDomains: config.experimentalSkipDomainInjection,
+    })
+
+    if (domainName && config.testingType === 'e2e' && shouldInjectDocumentDomain) {
       document.domain = domainName
     }
 
@@ -351,21 +356,6 @@ class $Cypress {
           this._onInitialize = resolve
         }
       }))
-    })
-    .then(() => {
-      // in order to utilize focusmanager.testingmode and trick browser into being in focus even when not focused
-      // this is critical for headless mode since otherwise the browser never gains focus
-      if (this.browser.isHeadless && this.isBrowser({ family: 'firefox' })) {
-        window.addEventListener('blur', () => {
-          this.backend('firefox:window:focus')
-        })
-
-        if (!document.hasFocus()) {
-          return this.backend('firefox:window:focus')
-        }
-      }
-
-      return
     })
     .then(() => {
       this.cy.initialize(this.$autIframe)
@@ -800,6 +790,12 @@ class $Cypress {
       title: currentTestRunnable.title,
       titlePath: currentTestRunnable.titlePath(),
     }
+  }
+
+  get currentRetry (): number {
+    const ctx = this.cy.state('runnable').ctx
+
+    return ctx?.currentTest?._currentRetry || ctx?.test?._currentRetry
   }
 
   static create (config: Record<string, any>) {

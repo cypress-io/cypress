@@ -27,6 +27,7 @@ export default defineConfig({
     baseUrl: 'http://localhost:3500',
   },
   component: {
+    experimentalSingleTabRunMode: true,
     specPattern: 'cypress/component/**/*.cy.js',
     supportFile: false,
     devServer: (devServerOptions) => {

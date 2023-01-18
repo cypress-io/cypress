@@ -236,7 +236,7 @@ describe('component testing dependency warnings', () => {
     cy.get('[data-cy-testingtype="component"]').click()
     cy.get('[data-cy="warning-alert"]', { timeout: 12000 }).should('exist')
     .should('contain.text', 'Warning: Component Testing Mismatched Dependencies')
-    .should('contain.text', 'vite. Expected ^=2.0.0 || ^=3.0.0, found 2.0.0-beta.70')
+    .should('contain.text', 'vite. Expected ^=2.0.0 || ^=3.0.0 || ^=4.0.0, found 2.0.0-beta.70')
     .should('contain.text', 'react. Expected ^=16.0.0 || ^=17.0.0 || ^=18.0.0, found 15.6.2.')
     .should('contain.text', 'react-dom. Expected ^=16.0.0 || ^=17.0.0 || ^=18.0.0 but dependency was not found.')
 
@@ -244,7 +244,7 @@ describe('component testing dependency warnings', () => {
   })
 
   // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23154
-  it.skip('warns against outdated @vue/cli dependency', () => {
+  it('warns against outdated @vue/cli dependency', { retries: 15 }, () => {
     cy.scaffoldProject('outdated-deps-vuecli3')
     cy.addProject('outdated-deps-vuecli3')
     cy.openGlobalMode()

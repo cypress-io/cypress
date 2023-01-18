@@ -287,6 +287,39 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
 
   await testAlteringEntryPoint('console.log("simple alteration")', 'Integrity check failed with expected stack length 9 but got 10')
   await testAlteringEntryPoint('console.log("accessing " + global.getSnapshotResult())', 'getSnapshotResult can only be called once')
+
+  function compareGlobals () {
+    const childProcess = require('child_process')
+    const nodeGlobalKeys = JSON.parse(childProcess.spawnSync('node -p "const x = Object.getOwnPropertyNames(global);JSON.stringify(x)"', { shell: true, encoding: 'utf8' }).stdout)
+
+    const extraKeys = Object.getOwnPropertyNames(global).filter((key) => {
+      return !nodeGlobalKeys.includes(key)
+    })
+
+    console.error(`extra keys in electron process: ${extraKeys}`)
+  }
+
+  const allowList = ['regeneratorRuntime', '__core-js_shared__', 'getSnapshotResult', 'supportTypeScript']
+
+  await testAlteringEntryPoint(`(${compareGlobals.toString()})()`, `extra keys in electron process: ${allowList}\nIntegrity check failed with expected stack length 9 but got 10`)
+
+  const testTemporarilyRewritingEntryPoint = async () => {
+    const file = path.join(buildAppDir, 'index.js')
+    const backupFile = path.join(buildAppDir, 'index.js.bak')
+    const contents = await fs.readFile(file)
+
+    // Backup state
+    await fs.move(file, backupFile)
+
+    // Modify app
+    await fs.writeFile(file, `console.log("rewritten code");const fs=require('fs');const { join } = require('path');fs.writeFileSync(join(__dirname,'index.js'),fs.readFileSync(join(__dirname,'index.js.bak')));${contents}`)
+    await runErroringProjectTest(buildAppExecutable, e2e, 'temporarily rewriting index.js', 'Integrity check failed with expected column number 2573 but got')
+
+    // Restore original state
+    await fs.move(backupFile, file, { overwrite: true })
+  }
+
+  await testTemporarilyRewritingEntryPoint()
 }
 
 const test = async function (buildAppExecutable, buildAppDir) {

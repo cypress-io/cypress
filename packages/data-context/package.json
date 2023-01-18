@@ -22,6 +22,7 @@
     "@urql/core": "2.4.4",
     "@urql/exchange-execute": "1.1.0",
     "@urql/exchange-graphcache": "4.3.6",
+    "ast-types": "^0.14.2",
     "chokidar": "3.5.1",
     "common-path-prefix": "3.0.0",
     "cross-fetch": "^3.1.4",
@@ -46,8 +47,9 @@
     "prettier": "2.5.1",
     "randexp": "0.5.3",
     "randomstring": "1.1.5",
+    "react-docgen": "6.0.0-alpha.3",
     "semver": "7.3.2",
-    "simple-git": "3.4.0",
+    "simple-git": "3.15.0",
     "stringify-object": "^3.0.0",
     "underscore.string": "^3.3.5",
     "wonka": "^4.0.15"

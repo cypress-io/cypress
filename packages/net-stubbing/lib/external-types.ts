@@ -68,6 +68,9 @@ type Method =
     | 'unlink'
     | 'unlock'
     | 'unsubscribe'
+
+export type ResourceType = 'document' | 'fetch' | 'xhr' | 'websocket' | 'stylesheet' | 'script' | 'image' | 'font' | 'cspviolationreport' | 'ping' | 'manifest' | 'other'
+
 export namespace CyHttpMessages {
   export interface BaseMessage {
     /**
@@ -139,6 +142,10 @@ export namespace CyHttpMessages {
      * The HTTP version used in the request. Read only.
      */
     httpVersion: string
+    /**
+     * The resource type that is being requested, according to the browser.
+     */
+    resourceType: ResourceType
     /**
      * If provided, the number of milliseconds before an upstream response to this request
      * will time out and cause an error. By default, `responseTimeout` from config is used.
@@ -370,6 +377,10 @@ export interface RouteMatcherOptionsGeneric<S> {
    * Match on parsed querystring parameters.
    */
   query?: DictMatcher<S>
+  /**
+   * Match on the request's resource type, according to the browser.
+   */
+  resourceType?: ResourceType | S
   /**
    * If set, this `RouteMatcher` will only match the first `times` requests.
    */

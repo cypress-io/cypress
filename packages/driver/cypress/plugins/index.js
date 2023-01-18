@@ -52,13 +52,13 @@ module.exports = (on, config) => {
     'wait' () {
       return Promise.delay(2000)
     },
-    'create:long:file' () {
+    async 'create:long:file' () {
       const filePath = path.join(__dirname, '..', '_test-output', 'longtext.txt')
       const longText = _.times(2000).map(() => {
         return _.times(20).map(() => Math.random()).join(' ')
       }).join('\n\n')
 
-      fs.outputFileSync(filePath, longText)
+      await fs.outputFile(filePath, longText)
 
       return null
     },
