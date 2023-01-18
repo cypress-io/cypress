@@ -525,6 +525,7 @@
     "./node_modules/picomatch/index.js",
     "./node_modules/picomatch/lib/constants.js",
     "./node_modules/picomatch/lib/picomatch.js",
+    "./node_modules/pidusage/lib/stats.js",
     "./node_modules/pinkie/index.js",
     "./node_modules/pngjs/lib/chunkstream.js",
     "./node_modules/pngjs/lib/filter-parse-async.js",
@@ -2707,6 +2708,14 @@
     "./node_modules/picomatch/lib/parse.js",
     "./node_modules/picomatch/lib/scan.js",
     "./node_modules/picomatch/lib/utils.js",
+    "./node_modules/pidusage/index.js",
+    "./node_modules/pidusage/lib/bin.js",
+    "./node_modules/pidusage/lib/helpers/cpu.js",
+    "./node_modules/pidusage/lib/helpers/parallel.js",
+    "./node_modules/pidusage/lib/history.js",
+    "./node_modules/pidusage/lib/procfile.js",
+    "./node_modules/pidusage/lib/ps.js",
+    "./node_modules/pidusage/lib/wmic.js",
     "./node_modules/pify/index.js",
     "./node_modules/pinkie-promise/index.js",
     "./node_modules/pixelmatch/index.js",
@@ -4280,5 +4289,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "7520727043f0935e864f3d1f8096dac95d86a907f0c8045536e6865ebd7a3b01"
+  "deferredHash": "5a30e2aa1f598a2590be298a95e5dd462a9177e68fbc42fbe7b88dc953d2655e"
 }
