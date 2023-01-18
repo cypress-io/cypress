@@ -11,10 +11,12 @@ describe('cloud debug test filtering', () => {
     cy.waitForSpecToFinish()
 
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = ['t2']
+      ctx.coreData.cloud.testsForRunResults = {
+        'cypress/e2e/test.cy.js': ['t2'],
+      }
     })
 
-    cy.visitApp(`specs/runner?file=cypress/e2e/test.cy.js&runId=123`)
+    cy.visitApp(`specs/runner?file=cypress/e2e/test.cy.js&mode=debug`)
     cy.waitForSpecToFinish({ passCount: 0, failCount: 1 })
 
     cy.get('.runnable-title').contains('t2')
@@ -23,10 +25,12 @@ describe('cloud debug test filtering', () => {
     cy.waitForSpecToFinish({ passCount: 2, failCount: 2 })
 
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = ['s1 t4']
+      ctx.coreData.cloud.testsForRunResults = {
+        'cypress/e2e/test.cy.js': ['s1 t4'],
+      }
     })
 
-    cy.visitApp(`specs/runner?file=cypress/e2e/test.cy.js&runId=123`)
+    cy.visitApp(`specs/runner?file=cypress/e2e/test.cy.js&mode=debug`)
     cy.waitForSpecToFinish({ passCount: 0, failCount: 1 })
 
     cy.get('.runnable-title').contains('t4')
@@ -40,10 +44,12 @@ describe('cloud debug test filtering', () => {
     cy.waitForSpecToFinish()
 
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = ['test1']
+      ctx.coreData.cloud.testsForRunResults = {
+        'cypress/e2e/lots-of-tests.cy.js': ['test1'],
+      }
     })
 
-    cy.visitApp(`specs/runner?file=cypress/e2e/lots-of-tests.cy.js&runId=123`)
+    cy.visitApp(`specs/runner?file=cypress/e2e/lots-of-tests.cy.js&mode=debug`)
     cy.waitForSpecToFinish({ passCount: 50 })
 
     cy.get('@reporterPanel').then((el) => el.width(500))
@@ -66,10 +72,12 @@ describe('cloud debug test filtering', () => {
 
     // .only is respected
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = ['t1', 't3']
+      ctx.coreData.cloud.testsForRunResults = {
+        'cypress/e2e/skip-and-only.cy.js': ['t1', 't3'],
+      }
     })
 
-    cy.visitApp(`specs/runner?file=cypress/e2e/skip-and-only.cy.js&runId=123`)
+    cy.visitApp(`specs/runner?file=cypress/e2e/skip-and-only.cy.js&mode=debug`)
     cy.waitForSpecToFinish({ passCount: 0, failCount: 1 })
 
     cy.get('.runnable-title').contains('t1')
@@ -78,10 +86,12 @@ describe('cloud debug test filtering', () => {
 
     // .only is ignored as it is not in set of filtered tests
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = ['t3']
+      ctx.coreData.cloud.testsForRunResults = {
+        'cypress/e2e/skip-and-only.cy.js': ['t3'],
+      }
     })
 
-    cy.visitApp(`specs/runner?file=cypress/e2e/skip-and-only.cy.js&runId=123`)
+    cy.visitApp(`specs/runner?file=cypress/e2e/skip-and-only.cy.js&mode=debug`)
     cy.waitForSpecToFinish({ passCount: 0, failCount: 1 })
 
     cy.get('.runnable-title').contains('t3')
@@ -90,10 +100,12 @@ describe('cloud debug test filtering', () => {
 
     // .skip is respected
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = ['t2', 't3']
+      ctx.coreData.cloud.testsForRunResults = {
+        'cypress/e2e/skip-and-only.cy.js': ['t2', 't3'],
+      }
     })
 
-    cy.visitApp(`specs/runner?file=cypress/e2e/skip-and-only.cy.js&runId=123`)
+    cy.visitApp(`specs/runner?file=cypress/e2e/skip-and-only.cy.js&mode=debug`)
     cy.waitForSpecToFinish({ passCount: 0, failCount: 1, pendingCount: 1 })
     cy.get('.runnable-title').first().contains('t2')
     cy.get('.runnable-title').last().contains('t3')
@@ -102,20 +114,24 @@ describe('cloud debug test filtering', () => {
 
     // suite.only is respected
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = ['t3', 's1 t4']
+      ctx.coreData.cloud.testsForRunResults = {
+        'cypress/e2e/skip-and-only.cy.js': ['t3', 's1 t4'],
+      }
     })
 
-    cy.visitApp(`specs/runner?file=cypress/e2e/skip-and-only.cy.js&runId=123`)
+    cy.visitApp(`specs/runner?file=cypress/e2e/skip-and-only.cy.js&mode=debug`)
     cy.waitForSpecToFinish({ passCount: 0, failCount: 1 })
     cy.get('.runnable-title').contains('t4')
   })
 
   it('works with browser filter', () => {
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = ['t1', 's1 t2']
+      ctx.coreData.cloud.testsForRunResults = {
+        'cypress/e2e/lots-of-tests.cy.j': ['t1', 's1 t2'],
+      }
     })
 
-    cy.visitApp(`specs/runner?file=cypress/e2e/browsers.cy.js&runId=123`)
+    cy.visitApp(`specs/runner?file=cypress/e2e/browsers.cy.js&mode=debug`)
 
     cy.get('.runnable-title').eq(0).contains('t1 (skipped due to browser)')
     cy.get('.runnable-title').eq(1).contains('s1 (skipped due to browser)')
@@ -130,10 +146,12 @@ describe('cloud debug test filtering', () => {
     cy.waitForSpecToFinish()
 
     cy.withCtx((ctx) => {
-      ctx.coreData.cloud.testsForRunResults = ['t2', 't3']
+      ctx.coreData.cloud.testsForRunResults = {
+        'cypress/e2e/lots-of-tests.cy.j': ['t2', 't3'],
+      }
     })
 
-    cy.visitApp(`specs/runner?file=cypress/e2e/domain-change.cy.js&runId=123`)
+    cy.visitApp(`specs/runner?file=cypress/e2e/domain-change.cy.js&mode=debug`)
     cy.waitForSpecToFinish({ failCount: 2 })
   })
 })
