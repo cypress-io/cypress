@@ -13,6 +13,7 @@ import { ScaffoldedFile } from './gql-ScaffoldedFile'
 import { WIZARD_BUNDLERS, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
 import debugLib from 'debug'
 import { ReactComponentResponse } from './gql-ReactComponentResponse'
+import { TestsBySpecInput } from '../inputTypes'
 
 const debug = debugLib('cypress:graphql:mutation')
 
@@ -774,13 +775,40 @@ export const mutation = mutationType({
       },
     })
 
-    // TODO: replace stub with cloud query
+    //Using a mutation to just return data in order to be able to await the results in the component
     t.list.nonNull.string('testsForRun', {
+      description: 'Return the set of test titles for the given spec path',
       args: {
-        runId: nonNull(stringArg()),
+        spec: nonNull(stringArg({
+          description: 'Spec path relative to the project',
+        })),
       },
       resolve: (source, args, ctx) => {
-        return ctx.coreData.cloud.testsForRunResults || []
+        if (!ctx.coreData.cloud.testsForRunResults) {
+          return []
+        }
+
+        const testsForSpec = ctx.coreData.cloud.testsForRunResults[args.spec]
+
+        return testsForSpec || []
+      },
+    })
+
+    t.boolean('setTestsForRun', {
+      description: 'Set failed tests for the current run to be used by the runner',
+      args: {
+        testsBySpec: nonNull(list(nonNull(arg({
+          type: TestsBySpecInput,
+        })))),
+      },
+      resolve: (source, args, ctx) => {
+        ctx.coreData.cloud.testsForRunResults = args.testsBySpec.reduce<{[index: string]: string[]}>((acc, spec) => {
+          acc[spec.specPath] = spec.tests
+
+          return acc
+        }, {})
+
+        return true
       },
     })
   },

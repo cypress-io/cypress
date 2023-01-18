@@ -114,7 +114,7 @@ interface Diagnostics {
 }
 
 interface CloudDataShape {
-  testsForRunResults?: string[]
+  testsForRunResults?: Record<string, string[]>
 }
 
 export interface CoreDataShape {
@@ -224,9 +224,8 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     packageManager: 'npm',
     forceReconfigureProject: null,
     versionData: null,
-    // TODO: Replace stubbed data with real data from cloud
     cloud: {
-      testsForRunResults: ['t1', 't2', 's1 t3', 's1 t4'],
+      testsForRunResults: {},
     },
   }
 }

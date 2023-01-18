@@ -994,9 +994,6 @@ type CurrentProject implements Node & ProjectLike {
 
   """A list of specs for the currently open testing type of a project"""
   specs: [Spec!]!
-
-  """"""
-  testsForReviewBySpec(specTitle: String!): [String!]
   title: String!
 }
 
@@ -1722,9 +1719,17 @@ type Mutation {
   """List of specs to run for the "Run All Specs" Feature"""
   setRunAllSpecs(runAllSpecs: [String!]!): Boolean
 
+  """Set failed tests for the current run to be used by the runner"""
+  setTestsForRun(testsBySpec: [TestsBySpecInput!]!): Boolean
+
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
-  testsForRun(runId: String!): [String!]
+
+  """Return the set of test titles for the given spec path"""
+  testsForRun(
+    """Spec path relative to the project"""
+    spec: String!
+  ): [String!]
 
   """Updates the different fields of the wizard data store"""
   wizardUpdate(input: WizardUpdateInput!): Wizard
@@ -2250,6 +2255,17 @@ type TestingTypeInfo implements Node {
   id: ID!
   title: String!
   type: TestingTypeEnum!
+}
+
+"""
+Represents the input for setting a mapping of test titles by the spec path
+"""
+input TestsBySpecInput {
+  """Path to the spec relative to the project"""
+  specPath: String!
+
+  """Full test title which should be all parts joined by a space"""
+  tests: [String!]!
 }
 
 """A run was hidden because it was over the usage limit"""

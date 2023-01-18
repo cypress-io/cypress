@@ -526,7 +526,7 @@ describe('Run Failures button', () => {
     ))
 
     cy.findByTestId('run-failures')
-    .should('have.attr', 'href', '#/specs/runner?file=cypress/tests/auth.spec.ts')
+    .should('have.attr', 'href', '#/specs/runner?file=cypress/tests/auth.spec.ts&mode=debug')
     .and('not.have.attr', 'aria-disabled')
   })
 })
