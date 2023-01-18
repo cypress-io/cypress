@@ -19,8 +19,8 @@ describe('lib/browsers/memory', () => {
     memory = require('../../../../lib/browsers/memory')
   })
 
-  afterEach(() => {
-    memory.default.endProfiling()
+  afterEach(async () => {
+    await memory.default.endProfiling()
   })
 
   context('#getJsHeapSizeLimit', () => {
