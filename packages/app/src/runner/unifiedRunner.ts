@@ -4,7 +4,7 @@ import { useSpecStore } from '../store'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import { RUN_ALL_SPECS, RUN_ALL_SPECS_KEY, SpecFile } from '@packages/types/src'
 import { LocationQuery, useRoute } from 'vue-router'
-import { getPathForPlatform } from '../paths'
+import { getPathForPlatform, posixify } from '../paths'
 import { isEqual } from 'lodash'
 import { gql, useMutation } from '@urql/vue'
 import { TestsForRunDocument } from '../generated/graphql'
@@ -62,7 +62,8 @@ export function useUnifiedRunner () {
         }
 
         if (route.query.mode && route.query.mode === 'debug') {
-          const res = await testsForRunMutation.executeMutation({ spec: activeSpecInSpecsList.relative })
+          const posixPath = posixify(activeSpecInSpecsList.relative)
+          const res = await testsForRunMutation.executeMutation({ spec: posixPath })
 
           specStore.setTestFilter(res.data?.testsForRun?.length ? res.data.testsForRun : undefined)
         } else {
