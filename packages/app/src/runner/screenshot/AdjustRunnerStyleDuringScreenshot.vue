@@ -1,8 +1,5 @@
 <template>
-  <div
-    :style="style"
-    :class="screenshotStore.isScreenshotting || isRunMode ? '' : 'border-l-1'"
-  >
+  <div :style="style">
     <slot />
   </div>
 </template>

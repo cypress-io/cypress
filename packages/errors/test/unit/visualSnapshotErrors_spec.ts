@@ -18,7 +18,7 @@ const isCi = require('is-ci')
 const { terminalBanner } = require('terminal-banner')
 const ciProvider = require('@packages/server/lib/util/ci_provider')
 const browsers = require('@packages/server/lib/browsers')
-const launcherBrowsers = require('@packages/launcher/lib/browsers')
+const { knownBrowsers } = require('@packages/launcher/lib/known-browsers')
 
 const debug = Debug(isCi ? '*' : 'visualSnapshotErrors')
 
@@ -339,8 +339,8 @@ describe('visual error templates', () => {
     },
     BROWSER_NOT_FOUND_BY_NAME: () => {
       return {
-        default: ['invalid-browser', browsers.formatBrowsersToOptions(launcherBrowsers.browsers)],
-        canary: ['canary', browsers.formatBrowsersToOptions(launcherBrowsers.browsers)],
+        default: ['invalid-browser', browsers.formatBrowsersToOptions(knownBrowsers)],
+        canary: ['canary', browsers.formatBrowsersToOptions(knownBrowsers)],
       }
     },
     BROWSER_NOT_FOUND_BY_PATH: () => {
@@ -1228,7 +1228,7 @@ describe('visual error templates', () => {
                 package: 'vite',
                 installer: 'vite',
                 description: 'Vite is dev server that serves your source files over native ES modules',
-                minVersion: '^=2.0.0 || ^=3.0.0',
+                minVersion: '^=2.0.0 || ^=3.0.0 || ^=4.0.0',
               },
               satisfied: false,
               detectedVersion: '1.0.0',
@@ -1264,6 +1264,12 @@ describe('visual error templates', () => {
     },
 
     EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY: () => {
+      return {
+        default: [],
+      }
+    },
+
+    EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
       return {
         default: [],
       }

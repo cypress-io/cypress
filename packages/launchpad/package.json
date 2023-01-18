@@ -5,7 +5,7 @@
   "scripts": {
     "check-ts": "vue-tsc --noEmit",
     "build-prod-ui": "cross-env NODE_ENV=production vite build",
-    "clean": "rimraf dist && rimraf ./node_modules/.vite && rimraf dist-e2e && echo 'cleaned'",
+    "clean": "rimraf dist && rimraf dist-e2e && echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
     "test": "yarn cypress:run:ct && yarn types",
     "windi": "yarn windicss-analysis",
@@ -14,7 +14,7 @@
     "cypress:open:ct": "yarn cypress:run-cypress-in-cypress gulp open --component --project .",
     "cypress:run:ct": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --component --project .",
     "cypress:run:e2e": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --e2e --project .",
-    "dev": "yarn gulp dev --project .",
+    "dev": "yarn cypress:run-cypress-in-cypress gulp dev --project .",
     "start": "echo 'run yarn dev from the root' && exit 1",
     "watch": "echo 'run yarn dev from the root' && exit 1",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
