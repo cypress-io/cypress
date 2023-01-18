@@ -405,7 +405,7 @@ const endProfiling = async () => {
  * Returns all of the memory stats collected thus far.
  * @returns Array of memory stats.
  */
-const getCumulativeStats = () => {
+const getMemoryStats = () => {
   return _.clone(cumulativeStats)
 }
 
@@ -414,5 +414,5 @@ export default {
   endProfiling,
   gatherMemoryStats,
   checkMemoryPressure: checkMemoryPressureAndLog,
-  getCumulativeStats,
+  getMemoryStats,
 }

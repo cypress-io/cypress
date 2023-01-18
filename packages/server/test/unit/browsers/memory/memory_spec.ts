@@ -2,13 +2,21 @@ import os from 'os'
 import si from 'systeminformation'
 import fs from 'fs-extra'
 import browsers from '../../../../lib/browsers'
-import * as memory from '../../../../lib/browsers/memory'
 import { proxyquire, expect, sinon } from '../../../spec_helper'
 import { Automation } from '../../../../lib/automation'
 
 describe('lib/browsers/memory', () => {
+  let memory: typeof import('../../../../lib/browsers/memory')
+
   before(() => {
+    delete require.cache[require.resolve('../../../../lib/browsers/memory')]
+  })
+
+  beforeEach(() => {
     sinon.useFakeTimers()
+    process.env.CYPRESS_INTERNAL_MEMORY_SAVE_STATS = 'true'
+
+    memory = require('../../../../lib/browsers/memory')
   })
 
   afterEach(() => {
@@ -121,7 +129,31 @@ describe('lib/browsers/memory', () => {
 
       await memory.default.checkMemoryPressure({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
+      const expected = [
+        {
+          getAvailableMemoryDuration: 0,
+          jsHeapSizeLimit: 100,
+          totalMemoryLimit: 2000,
+          rendererProcessMemRss: 75,
+          rendererUsagePercentage: 75,
+          rendererMemoryThreshold: 50,
+          currentAvailableMemory: 1000,
+          maxAvailableRendererMemory: 100,
+          shouldCollectGarbage: true,
+          timestamp: 0,
+          calculateMemoryStatsDuration: 0,
+        },
+        {
+          checkMemoryPressureDuration: 0,
+          testTitle: 'test',
+          testOrder: 1,
+          garbageCollected: true,
+          timestamp: 0,
+        },
+      ]
+
       expect(gcStub).to.be.calledOnce
+      expect(memory.default.getMemoryStats()).to.deep.eql(expected)
     })
 
     it('collects memory when renderer process is greater than the custom threshold', async () => {
@@ -144,7 +176,31 @@ describe('lib/browsers/memory', () => {
 
       await memory.default.checkMemoryPressure({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
+      const expected = [
+        {
+          getAvailableMemoryDuration: 0,
+          jsHeapSizeLimit: 100,
+          totalMemoryLimit: 2000,
+          rendererProcessMemRss: 25,
+          rendererUsagePercentage: 25,
+          rendererMemoryThreshold: 25,
+          currentAvailableMemory: 1000,
+          maxAvailableRendererMemory: 100,
+          shouldCollectGarbage: true,
+          timestamp: 0,
+          calculateMemoryStatsDuration: 0,
+        },
+        {
+          checkMemoryPressureDuration: 0,
+          testTitle: 'test',
+          testOrder: 1,
+          garbageCollected: true,
+          timestamp: 0,
+        },
+      ]
+
       expect(gcStub).to.be.calledOnce
+      expect(memory.default.getMemoryStats()).to.deep.eql(expected)
     })
 
     it('collects memory when renderer process is equal to the threshold', async () => {
@@ -163,7 +219,31 @@ describe('lib/browsers/memory', () => {
 
       await memory.default.checkMemoryPressure({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
+      const expected = [
+        {
+          getAvailableMemoryDuration: 0,
+          jsHeapSizeLimit: 100,
+          totalMemoryLimit: 2000,
+          rendererProcessMemRss: 50,
+          rendererUsagePercentage: 50,
+          rendererMemoryThreshold: 50,
+          currentAvailableMemory: 1000,
+          maxAvailableRendererMemory: 100,
+          shouldCollectGarbage: true,
+          timestamp: 0,
+          calculateMemoryStatsDuration: 0,
+        },
+        {
+          checkMemoryPressureDuration: 0,
+          testTitle: 'test',
+          testOrder: 1,
+          garbageCollected: true,
+          timestamp: 0,
+        },
+      ]
+
       expect(gcStub).to.be.calledOnce
+      expect(memory.default.getMemoryStats()).to.deep.eql(expected)
     })
 
     it('uses the available memory limit if it\'s less than the jsHeapSizeLimit', async () => {
@@ -182,7 +262,31 @@ describe('lib/browsers/memory', () => {
 
       await memory.default.checkMemoryPressure({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
+      const expected = [
+        {
+          getAvailableMemoryDuration: 0,
+          jsHeapSizeLimit: 100,
+          totalMemoryLimit: 2000,
+          rendererProcessMemRss: 25,
+          rendererUsagePercentage: 71.42857142857143,
+          rendererMemoryThreshold: 17.5,
+          currentAvailableMemory: 10,
+          maxAvailableRendererMemory: 35,
+          shouldCollectGarbage: true,
+          timestamp: 0,
+          calculateMemoryStatsDuration: 0,
+        },
+        {
+          checkMemoryPressureDuration: 0,
+          testTitle: 'test',
+          testOrder: 1,
+          garbageCollected: true,
+          timestamp: 0,
+        },
+      ]
+
       expect(gcStub).to.be.calledOnce
+      expect(memory.default.getMemoryStats()).to.deep.eql(expected)
     })
 
     it('skips collecting memory when renderer process is less than the threshold', async () => {
@@ -201,7 +305,31 @@ describe('lib/browsers/memory', () => {
 
       await memory.default.checkMemoryPressure({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
+      const expected = [
+        {
+          getAvailableMemoryDuration: 0,
+          jsHeapSizeLimit: 100,
+          totalMemoryLimit: 2000,
+          rendererProcessMemRss: 25,
+          rendererUsagePercentage: 25,
+          rendererMemoryThreshold: 50,
+          currentAvailableMemory: 1000,
+          maxAvailableRendererMemory: 100,
+          shouldCollectGarbage: false,
+          timestamp: 0,
+          calculateMemoryStatsDuration: 0,
+        },
+        {
+          checkMemoryPressureDuration: 0,
+          testTitle: 'test',
+          testOrder: 1,
+          garbageCollected: false,
+          timestamp: 0,
+        },
+      ]
+
       expect(gcStub).to.not.be.called
+      expect(memory.default.getMemoryStats()).to.deep.eql(expected)
     })
 
     it('skips collecting memory if the renderer process is not found', async () => {
@@ -223,7 +351,23 @@ describe('lib/browsers/memory', () => {
 
       await memory.default.checkMemoryPressure({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
+      const expected = [
+        {
+          getAvailableMemoryDuration: 0,
+          getRendererMemoryUsageDuration: 0,
+          calculateMemoryStatsDuration: 0,
+        },
+        {
+          checkMemoryPressureDuration: 0,
+          testTitle: 'test',
+          testOrder: 1,
+          garbageCollected: false,
+          timestamp: 0,
+        },
+      ]
+
       expect(gcStub).to.not.be.called
+      expect(memory.default.getMemoryStats()).to.deep.eql(expected)
     })
 
     it('finds the renderer process from the process.command', async () => {
@@ -253,8 +397,33 @@ describe('lib/browsers/memory', () => {
 
       await memory.default.checkMemoryPressure({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
+      const expected = [
+        {
+          getAvailableMemoryDuration: 0,
+          getRendererMemoryUsageDuration: 0,
+          jsHeapSizeLimit: 2000,
+          totalMemoryLimit: 3000,
+          rendererProcessMemRss: 1024,
+          rendererUsagePercentage: 51.2,
+          rendererMemoryThreshold: 1000,
+          currentAvailableMemory: 2000,
+          maxAvailableRendererMemory: 2000,
+          shouldCollectGarbage: true,
+          timestamp: 0,
+          calculateMemoryStatsDuration: 0,
+        },
+        {
+          checkMemoryPressureDuration: 0,
+          testTitle: 'test',
+          testOrder: 1,
+          garbageCollected: true,
+          timestamp: 0,
+        },
+      ]
+
       expect(gcStub).to.be.calledOnce
       expect(processesMock).to.be.calledOnce
+      expect(memory.default.getMemoryStats()).to.deep.eql(expected)
     })
 
     it('finds the renderer process from the process.params', async () => {
@@ -284,8 +453,33 @@ describe('lib/browsers/memory', () => {
 
       await memory.default.checkMemoryPressure({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
+      const expected = [
+        {
+          getAvailableMemoryDuration: 0,
+          getRendererMemoryUsageDuration: 0,
+          jsHeapSizeLimit: 2000,
+          totalMemoryLimit: 3000,
+          rendererProcessMemRss: 1024,
+          rendererUsagePercentage: 51.2,
+          rendererMemoryThreshold: 1000,
+          currentAvailableMemory: 2000,
+          maxAvailableRendererMemory: 2000,
+          shouldCollectGarbage: true,
+          timestamp: 0,
+          calculateMemoryStatsDuration: 0,
+        },
+        {
+          checkMemoryPressureDuration: 0,
+          testTitle: 'test',
+          testOrder: 1,
+          garbageCollected: true,
+          timestamp: 0,
+        },
+      ]
+
       expect(gcStub).to.be.calledOnce
       expect(processesMock).to.be.calledOnce
+      expect(memory.default.getMemoryStats()).to.deep.eql(expected)
     })
 
     it('selects the renderer process with the most memory', async () => {
@@ -316,8 +510,33 @@ describe('lib/browsers/memory', () => {
 
       await memory.default.checkMemoryPressure({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
+      const expected = [
+        {
+          getAvailableMemoryDuration: 0,
+          getRendererMemoryUsageDuration: 0,
+          jsHeapSizeLimit: 10000,
+          totalMemoryLimit: 20000,
+          rendererProcessMemRss: 5120,
+          rendererUsagePercentage: 51.2,
+          rendererMemoryThreshold: 5000,
+          currentAvailableMemory: 10000,
+          maxAvailableRendererMemory: 10000,
+          shouldCollectGarbage: true,
+          timestamp: 0,
+          calculateMemoryStatsDuration: 0,
+        },
+        {
+          checkMemoryPressureDuration: 0,
+          testTitle: 'test',
+          testOrder: 1,
+          garbageCollected: true,
+          timestamp: 0,
+        },
+      ]
+
       expect(gcStub).to.be.calledOnce
       expect(processesMock).to.be.calledOnce
+      expect(memory.default.getMemoryStats()).to.deep.eql(expected)
     })
 
     it('uses the existing process id to obtain the memory usage', async () => {
@@ -355,9 +574,48 @@ describe('lib/browsers/memory', () => {
 
       await memory.default.checkMemoryPressure({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
+      const expected = [
+        {
+          getAvailableMemoryDuration: 0,
+          getRendererMemoryUsageDuration: 0,
+          jsHeapSizeLimit: 3000,
+          totalMemoryLimit: 4000,
+          rendererProcessMemRss: 1024,
+          rendererUsagePercentage: 34.13333333333333,
+          rendererMemoryThreshold: 1500,
+          currentAvailableMemory: 3000,
+          maxAvailableRendererMemory: 3000,
+          shouldCollectGarbage: false,
+          timestamp: 0,
+          calculateMemoryStatsDuration: 0,
+        },
+        {
+          getAvailableMemoryDuration: 0,
+          getRendererMemoryUsageDuration: 0,
+          jsHeapSizeLimit: 3000,
+          totalMemoryLimit: 4000,
+          rendererProcessMemRss: 2000,
+          rendererUsagePercentage: 66.66666666666666,
+          rendererMemoryThreshold: 1500,
+          currentAvailableMemory: 3000,
+          maxAvailableRendererMemory: 3000,
+          shouldCollectGarbage: true,
+          timestamp: 0,
+          calculateMemoryStatsDuration: 0,
+        },
+        {
+          checkMemoryPressureDuration: 0,
+          testTitle: 'test',
+          testOrder: 1,
+          garbageCollected: true,
+          timestamp: 0,
+        },
+      ]
+
       expect(gcStub).to.be.calledOnce
       expect(processesMock).to.be.calledOnce
       expect(pidStub).to.be.calledOnce
+      expect(memory.default.getMemoryStats()).to.deep.eql(expected)
     })
 
     it('collects memory when a previous checkMemory call goes over the threshold', async () => {
@@ -374,16 +632,49 @@ describe('lib/browsers/memory', () => {
       .onFirstCall().resolves(75)
       .onSecondCall().resolves(25)
 
-      sinon.stub(global, 'setTimeout').onFirstCall().callsFake(async (fn) => {
-        await fn()
-      })
-
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
-
+      await memory.default.gatherMemoryStats()
       await memory.default.checkMemoryPressure({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
+
+      const expected = [
+        {
+          getAvailableMemoryDuration: 0,
+          jsHeapSizeLimit: 100,
+          totalMemoryLimit: 2000,
+          rendererProcessMemRss: 75,
+          rendererUsagePercentage: 75,
+          rendererMemoryThreshold: 50,
+          currentAvailableMemory: 1000,
+          maxAvailableRendererMemory: 100,
+          shouldCollectGarbage: true,
+          timestamp: 0,
+          calculateMemoryStatsDuration: 0,
+        },
+        {
+          getAvailableMemoryDuration: 0,
+          jsHeapSizeLimit: 100,
+          totalMemoryLimit: 2000,
+          rendererProcessMemRss: 25,
+          rendererUsagePercentage: 25,
+          rendererMemoryThreshold: 50,
+          currentAvailableMemory: 1000,
+          maxAvailableRendererMemory: 100,
+          shouldCollectGarbage: false,
+          timestamp: 0,
+          calculateMemoryStatsDuration: 0,
+        },
+        {
+          checkMemoryPressureDuration: 0,
+          testTitle: 'test',
+          testOrder: 1,
+          garbageCollected: true,
+          timestamp: 0,
+        },
+      ]
 
       expect(gcStub).to.be.calledOnce
       expect(memory.getRendererMemoryUsage).to.be.calledTwice
+      expect(memory.default.getMemoryStats()).to.deep.eql(expected)
     })
   })
 
@@ -413,9 +704,6 @@ describe('lib/browsers/memory', () => {
     })
 
     it('saves the cumulative memory stats to a file', async () => {
-      process.env.CYPRESS_INTERNAL_MEMORY_SAVE_STATS = 'true'
-      const memory = proxyquire('../lib/browsers/memory', {})
-
       const fileStub = sinon.stub(fs, 'outputFile').withArgs('cypress/logs/memory/memory_spec.json').resolves()
 
       const automation = sinon.createStubInstance(Automation)
