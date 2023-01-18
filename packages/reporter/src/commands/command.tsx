@@ -24,7 +24,7 @@ import HiddenIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/
 import PinIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/object-pin_x16.svg'
 import RunningIcon from '-!react-svg-loader!@packages/frontend-shared/src/assets/icons/status-running_x16.svg'
 
-const md = new Markdown()
+const md = new Markdown({ breaks: true })
 
 const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
