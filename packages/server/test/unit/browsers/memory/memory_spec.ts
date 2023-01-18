@@ -72,7 +72,7 @@ describe('lib/browsers/memory', () => {
 
       sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
-      sinon.stub(memory, 'gatherMemoryStats').resolves()
+      sinon.stub(memory, 'calculateMemoryStats').resolves()
 
       sinon.stub(global, 'setTimeout').onFirstCall().callsFake(async (fn) => {
         await fn()
@@ -80,7 +80,7 @@ describe('lib/browsers/memory', () => {
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
-      expect(memory.gatherMemoryStats).to.be.calledTwice
+      expect(memory.calculateMemoryStats).to.be.calledTwice
     })
 
     it('doesn\'t start twice', async () => {
@@ -93,18 +93,18 @@ describe('lib/browsers/memory', () => {
 
       sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
-      sinon.stub(memory, 'gatherMemoryStats').resolves()
+      sinon.stub(memory, 'calculateMemoryStats').resolves()
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
       // second call doesn't do anything
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
-      expect(memory.gatherMemoryStats).to.be.calledOnce
+      expect(memory.calculateMemoryStats).to.be.calledOnce
     })
   })
 
-  context('#maybeCollectGarbage', () => {
+  context('#checkMemoryPressure', () => {
     it('collects memory when renderer process is greater than the default threshold', async () => {
       const automation = sinon.createStubInstance(Automation)
       const gcStub = automation.request.withArgs('collect:garbage').resolves()
@@ -119,7 +119,7 @@ describe('lib/browsers/memory', () => {
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
-      await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
+      await memory.default.checkMemoryPressure({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
       expect(gcStub).to.be.calledOnce
     })
@@ -142,7 +142,7 @@ describe('lib/browsers/memory', () => {
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
-      await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
+      await memory.default.checkMemoryPressure({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
       expect(gcStub).to.be.calledOnce
     })
@@ -161,7 +161,7 @@ describe('lib/browsers/memory', () => {
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
-      await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
+      await memory.default.checkMemoryPressure({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
       expect(gcStub).to.be.calledOnce
     })
@@ -180,7 +180,7 @@ describe('lib/browsers/memory', () => {
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
-      await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
+      await memory.default.checkMemoryPressure({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
       expect(gcStub).to.be.calledOnce
     })
@@ -199,7 +199,7 @@ describe('lib/browsers/memory', () => {
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
-      await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
+      await memory.default.checkMemoryPressure({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
       expect(gcStub).to.not.be.called
     })
@@ -221,7 +221,7 @@ describe('lib/browsers/memory', () => {
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
-      await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
+      await memory.default.checkMemoryPressure({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
       expect(gcStub).to.not.be.called
     })
@@ -251,7 +251,7 @@ describe('lib/browsers/memory', () => {
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
-      await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
+      await memory.default.checkMemoryPressure({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
       expect(gcStub).to.be.calledOnce
       expect(processesMock).to.be.calledOnce
@@ -282,7 +282,7 @@ describe('lib/browsers/memory', () => {
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
-      await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
+      await memory.default.checkMemoryPressure({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
       expect(gcStub).to.be.calledOnce
       expect(processesMock).to.be.calledOnce
@@ -314,7 +314,7 @@ describe('lib/browsers/memory', () => {
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
-      await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
+      await memory.default.checkMemoryPressure({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
       expect(gcStub).to.be.calledOnce
       expect(processesMock).to.be.calledOnce
@@ -351,9 +351,9 @@ describe('lib/browsers/memory', () => {
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
       // second call will use the existing process id and use pidusage
-      await memory.default.checkMemory()
+      await memory.default.gatherMemoryStats()
 
-      await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
+      await memory.default.checkMemoryPressure({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
       expect(gcStub).to.be.calledOnce
       expect(processesMock).to.be.calledOnce
@@ -380,7 +380,7 @@ describe('lib/browsers/memory', () => {
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
-      await memory.default.maybeCollectGarbage({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
+      await memory.default.checkMemoryPressure({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
       expect(gcStub).to.be.calledOnce
       expect(memory.getRendererMemoryUsage).to.be.calledTwice
@@ -398,7 +398,7 @@ describe('lib/browsers/memory', () => {
 
       sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
-      sinon.stub(memory, 'gatherMemoryStats').resolves()
+      sinon.stub(memory, 'calculateMemoryStats').resolves()
 
       const timer = sinon.stub()
 
@@ -408,7 +408,7 @@ describe('lib/browsers/memory', () => {
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
       await memory.default.endProfiling()
 
-      expect(memory.gatherMemoryStats).to.be.calledOnce
+      expect(memory.calculateMemoryStats).to.be.calledOnce
       expect(global.clearTimeout).to.be.calledWith(timer)
     })
 

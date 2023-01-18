@@ -471,8 +471,8 @@ export class SocketBase {
               return memory.startProfiling(automation, args[0])
             case 'end:memory:profiling':
               return memory.endProfiling()
-            case 'maybe:collect:garbage':
-              return memory.maybeCollectGarbage({ ...args[0], automation })
+            case 'check:memory:pressure':
+              return memory.checkMemoryPressure({ ...args[0], automation })
             default:
               throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
           }

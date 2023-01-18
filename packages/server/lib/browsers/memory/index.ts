@@ -71,7 +71,7 @@ const measure = (func: (...args) => any, opts: { name?: string, save?: boolean }
     const name = opts.name || func.name
 
     if (opts?.save) {
-      if (name === 'maybeCollectGarbage') {
+      if (name === 'checkMemoryPressure') {
         gcLog[`${name}Duration`] = duration
       } else {
         statsLog[`${name}Duration`] = duration
@@ -203,7 +203,7 @@ export const getAvailableMemory: () => Promise<number> = measure(() => {
 /**
  * Calculates the memory stats used to determine if garbage collection should be run before the next test starts.
  */
-export const gatherMemoryStats: () => Promise<void> = measure(async () => {
+export const calculateMemoryStats: () => Promise<void> = measure(async () => {
   // retrieve the available memory and the renderer process memory usage
   const [currentAvailableMemory, rendererProcessMemRss] = await Promise.all([
     getAvailableMemory(),
@@ -237,15 +237,15 @@ export const gatherMemoryStats: () => Promise<void> = measure(async () => {
   statsLog.maxAvailableRendererMemory = maxAvailableRendererMemory
   statsLog.shouldCollectGarbage = shouldCollectGarbage
   statsLog.timestamp = Date.now()
-}, { name: 'gatherMemoryStats', save: true })
+}, { name: 'calculateMemoryStats', save: true })
 
 /**
  * Collects garbage if needed and logs the test information.
  * @param automation - the automation client used to collect garbage
  * @param test - the current test
  */
-const maybeCollectGarbageAndLog = async ({ automation, test }: { automation: Automation, test: { title: string, order: number, currentRetry: number }}) => {
-  await maybeCollectGarbage(automation)
+const checkMemoryPressureAndLog = async ({ automation, test }: { automation: Automation, test: { title: string, order: number, currentRetry: number }}) => {
+  await checkMemoryPressure(automation)
 
   gcLog.testTitle = test.title
   gcLog.testOrder = Number(`${test.order}.${test.currentRetry}`)
@@ -264,7 +264,7 @@ const maybeCollectGarbageAndLog = async ({ automation, test }: { automation: Aut
  * Collects the browser's garbage if it previously exceeded the threshold when it was measured.
  * @param automation the automation client used to collect garbage
  */
-const maybeCollectGarbage: (automation: Automation) => Promise<void> = measure(async (automation: Automation) => {
+const checkMemoryPressure: (automation: Automation) => Promise<void> = measure(async (automation: Automation) => {
   if (collectGarbageOnNextTest) {
     debug('forcing garbage collection')
     try {
@@ -275,7 +275,7 @@ const maybeCollectGarbage: (automation: Automation) => Promise<void> = measure(a
   } else {
     debug('skipping garbage collection')
   }
-}, { name: 'maybeCollectGarbage', save: true })
+}, { name: 'checkMemoryPressure', save: true })
 
 /**
  * Adds the memory stats to the cumulative stats.
@@ -290,11 +290,11 @@ const addCumulativeStats = (stats: { [key: string]: any }) => {
 }
 
 /**
- * Checks the memory usage to gather the stats and schedules the next check.
+ * Gathers the memory stats and schedules the next check.
  */
-const checkMemory = async () => {
+const gatherMemoryStats = async () => {
   try {
-    await gatherMemoryStats()
+    await calculateMemoryStats()
     addCumulativeStats(statsLog)
     statsLog = {}
   } catch (err) {
@@ -304,12 +304,12 @@ const checkMemory = async () => {
 }
 
 /**
- * Schedules the next memory check based on the MEMORY_PROFILER_INTERVAL.
+ * Schedules the next gathering of memory stats based on the MEMORY_PROFILER_INTERVAL.
  */
 const scheduleMemoryCheck = () => {
   if (started) {
-    // not setinterval, since checkMemory is asynchronous
-    timer = setTimeout(checkMemory, MEMORY_PROFILER_INTERVAL)
+    // not setinterval, since gatherMemoryStats is asynchronous
+    timer = setTimeout(gatherMemoryStats, MEMORY_PROFILER_INTERVAL)
   }
 }
 
@@ -348,7 +348,7 @@ async function startProfiling (automation: Automation, spec: { fileName: string 
       totalMemoryLimit = await handler.getTotalMemoryLimit(),
     ])
 
-    await checkMemory()
+    await gatherMemoryStats()
   } catch (err) {
     debug('error starting memory profiler: %o', err)
   }
@@ -412,7 +412,7 @@ const getCumulativeStats = () => {
 export default {
   startProfiling,
   endProfiling,
-  checkMemory,
-  maybeCollectGarbage: maybeCollectGarbageAndLog,
+  gatherMemoryStats,
+  checkMemoryPressure: checkMemoryPressureAndLog,
   getCumulativeStats,
 }
