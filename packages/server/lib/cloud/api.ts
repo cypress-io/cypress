@@ -13,9 +13,9 @@ const machineId = require('./machine_id')
 const errors = require('../errors')
 const { apiRoutes } = require('./routes')
 
-import type Bluebird from 'bluebird'
+import Bluebird from 'bluebird'
 import type { OptionsWithUrl } from 'request-promise'
-import { encryptRequest } from './encryption'
+import { decryptResponse, encryptRequest } from './encryption'
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
@@ -75,13 +75,27 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
     params.auth && params.auth.bearer,
   )
 
-  // If we're encrypting the request
-  if (params.encrypt) {
-    encryptRequest(params)
-  }
+  return Bluebird.try(async () => {
+    // If we're encrypting the request, we generate the JWE
+    // and set it to the JSON body for the request
+    if (params.encrypt) {
+      const { secretKey, jwe } = await encryptRequest(params)
 
-  return request[method](params, callback)
-  .promise()
+      params.transform = (body, response) => {
+        if (response.headers['x-cypress-encrypted']) {
+          return decryptResponse(body, secretKey)
+        }
+
+        return body
+      }
+
+      params.body = jwe
+
+      headers['x-cypress-encrypted'] = '1'
+    }
+
+    return request[method](params, callback).promise()
+  })
   .tap((resp) => {
     if (params.cacheable) {
       debug('caching response for ', params.url)

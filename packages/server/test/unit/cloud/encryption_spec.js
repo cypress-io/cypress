@@ -1,5 +1,8 @@
 require('../../spec_helper')
+const jose = require('jose')
+const crypto = require('crypto')
 const encryption = require('../../../lib/cloud/encryption')
+const { expect } = require('chai')
 
 const TEST_BODY = {
   test: 'string',
@@ -16,94 +19,48 @@ const TEST_BODY = {
   ],
 }
 
-describe('encryption', () => {
-  describe('encryptRequest', () => {
-    encryption.encryptRequest({
-      encrypt: true,
-      body: TEST_BODY,
-    })
-
-    //
-  })
+const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+  modulusLength: 2048,
 })
 
-// const crypto = require('crypto')
-// const { Readable } = require('stream')
-// const stream = require('stream')
-// const zlib = require('zlib')
-// const secretKey = crypto.createSecretKey(crypto.randomBytes(16))
+describe('encryption', () => {
+  it('encrypts payloads with encryptRequest', async () => {
+    const { jwe, secretKey } = await encryption.encryptRequest({
+      encrypt: true,
+      body: TEST_BODY,
+    }, publicKey)
 
-// ;(async () => {
-//   const iv = crypto.randomBytes(16)
-//   const cipher = crypto.createCipheriv('aes-128-gcm', secretKey, iv)
-//   const hexKey = secretKey.export().toString('hex')
+    const { plaintext } = await jose.generalDecrypt(jwe, privateKey)
 
-//   Readable.from(JSON.stringify({
-//     timothy: 1,
-//     again: [
-//       {
-//         c: 2,
-//       },
-//       {
-//         timothy: 2,
-//       },
-//       {
-//         timothy: 2,
-//       },
-//     ],
-//   }))
-//   .pipe(zlib.createGzip())
-//   // .pipe(zlib.createGunzip())
-//   .pipe(cipher)
-//   .pipe(new stream.Transform({
-//     transform (chunk, encoding, callback) {
-//       if (!this.__init) {
-//         this.__init = true
-//         this.push(Buffer.concat([iv, chunk]))
-//       } else {
-//         this.push(chunk)
-//       }
+    expect(JSON.parse(plaintext)).to.eql(TEST_BODY)
 
-//       callback()
-//     },
-//     final (cb) {
-//       this.push(cipher.getAuthTag())
-//       cb()
-//     },
-//   }))
-//   // .pipe(new stream.PassThrough({
-//   //   transform (chunk, enc, cb) {
-//   //     this.chunks ??= []
-//   //     this.chunks.push(chunk)
-//   //     cb()
-//   //   },
-//   //   final (cb) {
-//   //     console.log(this.chunks)
-//   //     cb()
-//   //   },
-//   // }))
-//   .pipe(new stream.Transform({
-//     transform (chunk, encoding, callback) {
-//       chunk = Buffer.from(chunk)
-//       if (!this.__crypto) {
-//         this.__crypto = crypto.createDecipheriv('aes-128-gcm', Buffer.from(hexKey, 'hex'), chunk.slice(0, 16))
-//         this.__input = chunk.slice(16)
-//       } else {
-//         this.__input = Buffer.concat([this.__input, chunk])
-//       }
+    const unwrappedKey = crypto.privateDecrypt(privateKey, Buffer.from(jwe.recipients[0].encrypted_key, 'base64'))
 
-//       callback()
-//     },
-//     final (cb) {
-//       const input = this.__input
-//       const tag = input.slice(input.length - 16, input.length)
-//       const toDecrypt = input.slice(0, input.length - tag.length)
+    expect(
+      unwrappedKey.toString('base64'),
+    ).to.eql(secretKey.export().toString('base64'))
+  })
 
-//       this.__crypto.setAuthTag(tag)
-//       this.push(Buffer.concat([this.__crypto.update(toDecrypt), this.__crypto.final()]))
-//       cb()
-//     },
-//   }))
-//   .pipe(zlib.createUnzip())
-//   .pipe(process.stdout)
-// })()
+  it('is possible to use the secretKey to decrypt future responses', async () => {
+    const { jwe, secretKey } = await encryption.encryptRequest({
+      encrypt: true,
+      body: TEST_BODY,
+    }, publicKey)
+
+    const RESPONSE_BODY = { runId: 123 }
+
+    const unwrappedKey = crypto.privateDecrypt(privateKey, Buffer.from(jwe.recipients[0].encrypted_key, 'base64'))
+    const unwrappedSecretKey = crypto.createSecretKey(unwrappedKey)
+
+    const enc = new jose.GeneralEncrypt(
+      Buffer.from(JSON.stringify(RESPONSE_BODY)),
+    )
+
+    enc.setProtectedHeader({ alg: 'A256GCMKW', enc: 'A256GCM', zip: 'DEF' }).addRecipient(unwrappedSecretKey)
+
+    const jweResponse = await enc.encrypt()
+    const roundtripResponse = await encryption.decryptResponse(jweResponse, secretKey)
+
+    expect(roundtripResponse).to.eql(RESPONSE_BODY)
+  })
+})
