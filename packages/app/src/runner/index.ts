@@ -14,7 +14,7 @@
  *
  */
 import { watchEffect } from 'vue'
-import { getMobxRunnerStore, initializeMobxStore, useAutStore, useRunnerUiStore } from '../store'
+import { getMobxRunnerStore, initializeMobxStore, useAutStore, useSpecStore, useRunnerUiStore } from '../store'
 import { dfd } from './injectBundle'
 import type { SpecFile } from '@packages/types/src/spec'
 import { UnifiedReporterAPI } from './reporter'
@@ -61,7 +61,7 @@ export function getEventManager () {
   return _eventManager
 }
 
-window.getEventManager = getEventManager
+// window.getEventManager = getEventManager
 
 let _autIframeModel: AutIframe | null
 
@@ -401,17 +401,25 @@ async function executeSpec (spec: SpecFile, isRerun: boolean = false) {
 
   // creates a new instance of the Cypress driver for this spec,
   // initializes a bunch of listeners watches spec file for changes.
-  getEventManager().setup(config)
+  return getEventManager()
+  .setup(config)
+  .then((promise) => {
+    if (useSpecStore().getLastPromise() !== promise) {
+      console.log(`different spec was selected while setting up ${spec.fileName}`)
 
-  if (window.__CYPRESS_TESTING_TYPE__ === 'e2e') {
-    return runSpecE2E(config, spec)
-  }
+      return
+    }
 
-  if (window.__CYPRESS_TESTING_TYPE__ === 'component') {
-    return runSpecCT(config, spec)
-  }
+    if (window.__CYPRESS_TESTING_TYPE__ === 'e2e') {
+      return runSpecE2E(config, spec)
+    }
 
-  throw Error('Unknown or undefined testingType on window.__CYPRESS_TESTING_TYPE__')
+    if (window.__CYPRESS_TESTING_TYPE__ === 'component') {
+      return runSpecCT(config, spec)
+    }
+
+    throw Error('Unknown or undefined testingType on window.__CYPRESS_TESTING_TYPE__')
+  })
 }
 
 function getAutomationElementId (): AutomationElementId {

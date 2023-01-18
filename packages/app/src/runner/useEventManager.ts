@@ -22,14 +22,14 @@ export function useEventManager () {
 
   function initializeRunnerLifecycleEvents () {
     // these events do not use GraphQL
-    eventManager.on('restart', () => {
-      // If we get the event to restart but have already navigated away from the runner, don't execute the spec
-      if (specStore.activeSpec) {
-        const isRerun = true
+    // eventManager.on('restart', () => {
+    //   // If we get the event to restart but have already navigated away from the runner, don't execute the spec
+    //   if (specStore.activeSpec) {
+    //     const isRerun = true
 
-        runSpec(isRerun)
-      }
-    })
+    //     runSpec(isRerun)
+    //   }
+    // })
 
     eventManager.on('script:error', (err) => {
       autStore.setScriptError(err)
