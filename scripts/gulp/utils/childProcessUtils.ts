@@ -10,6 +10,7 @@ import util from 'util'
 
 import { prefixLog, prefixStream } from './prefixStream'
 import { addChildProcess } from '../tasks/gulpRegistry'
+import stripAnsi from 'strip-ansi'
 
 export type AllSpawnableApps =
   | `cmd-${string}`
@@ -45,7 +46,7 @@ export async function spawnUntilMatch (
   spawned(prefix, config.command, {
     ...config.options,
     tapOut (chunk, enc, cb) {
-      if (!ready && String(chunk).match(config.match)) {
+      if (!ready && stripAnsi(String(chunk)).match(config.match)) {
         ready = true
         setTimeout(() => dfd.resolve(), 20) // flush the rest of the chunks
       }
@@ -172,16 +173,19 @@ export const execAsync = async (
   const { silent } = options
 
   if (!silent) {
+    // eslint-disable-next-line no-console
     console.log(command)
   }
 
   const result = await execAsyncLocal(command, options)
 
   if (!silent && typeof result.stdout === 'string' && result.stdout.length) {
+    // eslint-disable-next-line no-console
     console.log(result.stdout)
   }
 
   if (!silent && typeof result.stderr === 'string' && result.stderr.length) {
+    // eslint-disable-next-line no-console
     console.error(result.stderr)
   }
 
