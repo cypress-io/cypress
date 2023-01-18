@@ -71,6 +71,9 @@ describe('lib/browsers/memory', () => {
 
   context('#startProfiling', () => {
     it('starts the profiling', async () => {
+      // restore the fake timers since we are stubbing setTimeout directly
+      sinon._clock.restore()
+
       const automation = sinon.createStubInstance(Automation)
 
       const mockHandler = {
@@ -680,6 +683,9 @@ describe('lib/browsers/memory', () => {
 
   context('#endProfiling', () => {
     it('stops the profiling', async () => {
+      // restore the fake timers since we are stubbing setTimeout/clearTimeout directly
+      sinon._clock.restore()
+
       const automation = sinon.createStubInstance(Automation)
 
       const mockHandler = {
