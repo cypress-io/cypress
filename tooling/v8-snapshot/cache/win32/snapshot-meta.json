@@ -60,6 +60,7 @@
     "./packages/network/node_modules/minimatch/minimatch.js",
     "./packages/proxy/lib/http/util/prerequests.ts",
     "./packages/server/lib/browsers/index.ts",
+    "./packages/server/lib/browsers/memory/index.ts",
     "./packages/server/lib/browsers/utils.ts",
     "./packages/server/lib/capture.js",
     "./packages/server/lib/cloud/exception.ts",
@@ -525,6 +526,7 @@
     "./node_modules/picomatch/index.js",
     "./node_modules/picomatch/lib/constants.js",
     "./node_modules/picomatch/lib/picomatch.js",
+    "./node_modules/pidusage/lib/stats.js",
     "./node_modules/pinkie/index.js",
     "./node_modules/pngjs/lib/chunkstream.js",
     "./node_modules/pngjs/lib/filter-parse-async.js",
@@ -2710,6 +2712,14 @@
     "./node_modules/picomatch/lib/parse.js",
     "./node_modules/picomatch/lib/scan.js",
     "./node_modules/picomatch/lib/utils.js",
+    "./node_modules/pidusage/index.js",
+    "./node_modules/pidusage/lib/bin.js",
+    "./node_modules/pidusage/lib/helpers/cpu.js",
+    "./node_modules/pidusage/lib/helpers/parallel.js",
+    "./node_modules/pidusage/lib/history.js",
+    "./node_modules/pidusage/lib/procfile.js",
+    "./node_modules/pidusage/lib/ps.js",
+    "./node_modules/pidusage/lib/wmic.js",
     "./node_modules/pify/index.js",
     "./node_modules/pinkie-promise/index.js",
     "./node_modules/pixelmatch/index.js",
@@ -4001,6 +4011,8 @@
     "./packages/server/lib/browsers/cri-client.ts",
     "./packages/server/lib/browsers/electron.ts",
     "./packages/server/lib/browsers/firefox-util.ts",
+    "./packages/server/lib/browsers/memory/cgroup-v1.ts",
+    "./packages/server/lib/browsers/memory/default.ts",
     "./packages/server/lib/browsers/protocol.ts",
     "./packages/server/lib/browsers/webkit-automation.ts",
     "./packages/server/lib/browsers/webkit.ts",
@@ -4279,5 +4291,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "a328fbfd9fb4a5f3673bc08804df824f3e6180ab931ee4defffc8fa51f6a8605"
+  "deferredHash": "ce68df4adeedfb2256fca9d73e08c8e93dcad73cb1c38ca889b12357a5dc8f4b"
 }
