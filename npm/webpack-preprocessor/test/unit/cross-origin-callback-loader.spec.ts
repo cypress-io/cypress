@@ -24,7 +24,12 @@ describe('./lib/cross-origin-callback-loader', () => {
       resourcePath: '/path/to/file',
       query: { commands },
     }
-    const originalMap = { sourcesContent: [] }
+    const originalMap = {
+      sources: [],
+      sourcesContent: [],
+      version: 3,
+      mappings: [],
+    }
 
     store.addFile = sinon.stub()
     loader.call(context, source, originalMap, null, store)
@@ -91,12 +96,13 @@ describe('./lib/cross-origin-callback-loader', () => {
     })
 
     it('replaces cy.origin() callback with an object when using require()', () => {
-      const { resultingSource, resultingMap } = callLoader(stripIndent`
+      const source = stripIndent`
         it('test', () => {
           cy.origin('http://www.foobar.com:3500', () => {
             require('../support/utils')
           })
-        })`)
+        })`
+      const { originalMap, resultingSource, resultingMap } = callLoader(source)
 
       expect(resultingSource).to.equal(stripIndent`
         it('test', () => {
@@ -106,16 +112,19 @@ describe('./lib/cross-origin-callback-loader', () => {
           });
         });`)
 
-      expect(resultingMap).to.be.undefined
+      expect(resultingMap).to.exist
+      expect(resultingMap).not.to.equal(originalMap)
+      expect(resultingMap.sourcesContent[0]).to.equal(source)
     })
 
     it('replaces cy.origin() callback with an object when using import()', () => {
-      const { resultingSource, resultingMap } = callLoader(stripIndent`
+      const source = stripIndent`
         it('test', () => {
           cy.origin('http://www.foobar.com:3500', async () => {
             await import('../support/utils')
           })
-        })`)
+        })`
+      const { originalMap, resultingSource, resultingMap } = callLoader(source)
 
       expect(resultingSource).to.equal(stripIndent`
         it('test', () => {
@@ -125,17 +134,19 @@ describe('./lib/cross-origin-callback-loader', () => {
           });
         });`)
 
-      expect(resultingMap).to.be.undefined
+      expect(resultingMap).to.exist
+      expect(resultingMap).not.to.equal(originalMap)
+      expect(resultingMap.sourcesContent[0]).to.equal(source)
     })
 
     it('replaces cy.other() when specified in commands', () => {
-      const { resultingSource, resultingMap } = callLoader(stripIndent`
+      const source = stripIndent`
         it('test', () => {
           cy.other('http://www.foobar.com:3500', () => {
             require('../support/utils')
           })
-        })`,
-      ['other'])
+        })`
+      const { originalMap, resultingSource, resultingMap } = callLoader(source, ['other'])
 
       expect(resultingSource).to.equal(stripIndent`
         it('test', () => {
@@ -145,7 +156,9 @@ describe('./lib/cross-origin-callback-loader', () => {
           });
         });`)
 
-      expect(resultingMap).to.be.undefined
+      expect(resultingMap).to.exist
+      expect(resultingMap).not.to.equal(originalMap)
+      expect(resultingMap.sourcesContent[0]).to.equal(source)
     })
 
     it('adds the file to the store, replacing require() with require()', () => {
@@ -207,7 +220,6 @@ describe('./lib/cross-origin-callback-loader', () => {
       expectAddFileSource(store).to.equal(stripIndent`
         __cypressCrossOriginCallback = () => {
           const utils = require('../support/utils');
-
           utils.foo();
         }`)
     })
@@ -226,9 +238,7 @@ describe('./lib/cross-origin-callback-loader', () => {
       expectAddFileSource(store).to.equal(stripIndent`
         __cypressCrossOriginCallback = () => {
           require('../support/commands');
-
           const utils = require('../support/utils');
-
           const _ = require('lodash');
         }`)
     })
@@ -264,9 +274,7 @@ describe('./lib/cross-origin-callback-loader', () => {
       expectAddFileSource(store).to.equal(stripIndent`
         __cypressCrossOriginCallback = () => {
           const someVar = 'someValue';
-
           const result = require('./fn')(someVar);
-
           expect(result).to.equal('mutated someVar');
         }`)
     })
@@ -286,7 +294,6 @@ describe('./lib/cross-origin-callback-loader', () => {
           foo
         }) => {
           const result = require('./fn')(foo);
-
           expect(result).to.equal('mutated someVar');
         }`)
     })

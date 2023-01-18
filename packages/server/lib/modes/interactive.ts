@@ -13,6 +13,8 @@ import { globalPubSub, getCtx, clearCtx } from '@packages/data-context'
 import type { WebContents } from 'electron'
 import type { LaunchArgs, Preferences } from '@packages/types'
 
+import { debugElapsedTime } from '../util/performance_benchmark'
+
 import debugLib from 'debug'
 import { getPathToDesktopIndex } from '@packages/resolve-dist'
 
@@ -191,6 +193,8 @@ export = {
         app.quit()
       })
     })
+
+    debugElapsedTime('open mode ready')
 
     return this.ready(options, port)
   },

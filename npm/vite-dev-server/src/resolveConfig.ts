@@ -4,52 +4,84 @@
  * You can find it here https://github.com/vitest-dev/vitest/blob/main/packages/vitest/src/node/create.ts
  */
 import debugFn from 'debug'
-import { importModule } from 'local-pkg'
-import { relative, resolve } from 'pathe'
-import type { InlineConfig, UserConfig } from 'vite'
+import type { InlineConfig } from 'vite'
 import path from 'path'
 
 import { configFiles } from './constants'
 import type { ViteDevServerConfig } from './devServer'
-import { Cypress, CypressInspect, CypressSourcemap } from './plugins/index'
+import { Cypress, CypressSourcemap } from './plugins/index'
 import type { Vite } from './getVite'
+import { dynamicImport } from './dynamic-import'
 
 const debug = debugFn('cypress:vite-dev-server:resolve-config')
 
 export const createViteDevServerConfig = async (config: ViteDevServerConfig, vite: Vite): Promise<InlineConfig> => {
-  const { specs, cypressConfig, viteConfig: viteOverrides } = config
-  const root = cypressConfig.projectRoot
-  const { default: findUp } = await importModule('find-up')
-  const configFile = await findUp(configFiles, { cwd: root } as { cwd: string })
+  const { viteConfig: inlineViteConfig, cypressConfig: { projectRoot } } = config
+  let resolvedOverrides: InlineConfig = {}
 
-  // INFO logging, a lot is logged here.
-  // debug('all dev-server options are', options)
+  if (inlineViteConfig) {
+    debug(`Received a custom viteConfig`, inlineViteConfig)
 
-  if (configFile) {
-    debug('resolved config file at', configFile, 'using root', root)
-  } else if (viteOverrides) {
-    debug(`Couldn't find a Vite config file, however we received a custom viteConfig`, viteOverrides)
-  } else {
-    if (config.onConfigNotFound) {
-      config.onConfigNotFound('vite', root, configFiles)
-      // The config process will be killed from the parent, but we want to early exit so we don't get
-      // any additional errors related to not having a config
-      process.exit(0)
-    } else {
-      throw new Error(`Your component devServer config for vite is missing a required viteConfig property, since we could not automatically detect one.\n Please add one to your ${config.cypressConfig.configFile}`)
+    if (typeof inlineViteConfig === 'function') {
+      resolvedOverrides = await inlineViteConfig()
+    } else if (typeof inlineViteConfig === 'object') {
+      resolvedOverrides = inlineViteConfig
     }
+
+    // Set "configFile: false" to disable auto resolution of <project-root>/vite.config.js
+    resolvedOverrides = { configFile: false, ...resolvedOverrides }
+  } else {
+    const { findUp } = await dynamicImport<typeof import('find-up')>('find-up')
+
+    const configFile = await findUp(configFiles, { cwd: projectRoot })
+
+    if (!configFile) {
+      if (config.onConfigNotFound) {
+        config.onConfigNotFound('vite', projectRoot, configFiles)
+        // The config process will be killed from the parent, but we want to early exit so we don't get
+        // any additional errors related to not having a config
+        process.exit(0)
+      } else {
+        throw new Error(`Your component devServer config for vite is missing a required viteConfig property, since we could not automatically detect one.\n Please add one to your ${config.cypressConfig.configFile}`)
+      }
+    }
+
+    debug('Resolved config file at', configFile, 'using root', projectRoot)
+
+    resolvedOverrides = { configFile }
   }
+
+  const finalConfig = vite.mergeConfig(
+    resolvedOverrides,
+    makeCypressViteConfig(config, vite),
+  )
+
+  debug('The resolved server config is', JSON.stringify(finalConfig, null, 2))
+
+  return finalConfig
+}
+
+function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): InlineConfig {
+  const {
+    cypressConfig: {
+      projectRoot,
+      devServerPublicPathRoute,
+      supportFile,
+      cypressBinaryRoot,
+      isTextTerminal,
+    },
+    specs,
+  } = config
 
   // Vite caches its output in the .vite directory in the node_modules where vite lives.
   // So we want to find that node_modules path and ensure it's added to the "allow" list
   const vitePathNodeModules = path.dirname(path.dirname(require.resolve(`vite/package.json`, {
-    paths: [root],
+    paths: [projectRoot],
   })))
 
-  const viteBaseConfig: InlineConfig = {
-    root,
-    base: `${cypressConfig.devServerPublicPathRoute}/`,
-    configFile,
+  return {
+    root: projectRoot,
+    base: `${devServerPublicPathRoute}/`,
     optimizeDeps: {
       esbuildOptions: {
         incremental: true,
@@ -70,49 +102,27 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
         ],
       },
       entries: [
-        ...specs.map((s) => relative(root, s.relative)),
-        ...(cypressConfig.supportFile ? [resolve(root, cypressConfig.supportFile)] : []),
+        ...specs.map((s) => path.relative(projectRoot, s.relative)),
+        ...(supportFile ? [path.resolve(projectRoot, supportFile)] : []),
       ].filter((v) => v != null),
     },
     server: {
       fs: {
         allow: [
-          root,
+          projectRoot,
           vitePathNodeModules,
-          cypressConfig.cypressBinaryRoot,
+          cypressBinaryRoot,
         ],
       },
       host: '127.0.0.1',
+      // Disable file watching and HMR when executing tests in `run` mode
+      ...(isTextTerminal
+        ? { watch: { ignored: '**/*' }, hmr: false }
+        : {}),
     },
     plugins: [
       Cypress(config, vite),
-      CypressInspect(config),
       CypressSourcemap(config, vite),
-    ].filter((p) => p != null),
+    ],
   }
-
-  if (config.cypressConfig.isTextTerminal) {
-    viteBaseConfig.server = {
-      ...(viteBaseConfig.server || {}),
-      // Disable file watching and HMR when executing tests in `run` mode
-      watch: {
-        ignored: '**/*',
-      },
-      hmr: false,
-    }
-  }
-
-  let resolvedOverrides: UserConfig = {}
-
-  if (typeof viteOverrides === 'function') {
-    resolvedOverrides = await viteOverrides()
-  } else if (typeof viteOverrides === 'object') {
-    resolvedOverrides = viteOverrides
-  }
-
-  const finalConfig = vite.mergeConfig(viteBaseConfig, resolvedOverrides)
-
-  debug('The resolved server config is', JSON.stringify(finalConfig, null, 2))
-
-  return finalConfig
 }

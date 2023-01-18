@@ -55,6 +55,7 @@ export type ItOptions = ExecOptions & {
    * If a function is supplied, it will be executed instead of running the `systemTests.exec` function immediately.
    */
   onRun?: (
+    this: Mocha.Context,
     execFn: ExecFn,
     browser: BrowserName
   ) => Promise<any> | any
@@ -279,6 +280,7 @@ export type SpawnerResult = {
   on(event: 'error', cb: (err: Error) => void): void
   on(event: 'exit', cb: (exitCode: number) => void): void
   kill: ChildProcess['kill']
+  pid: number
 }
 
 const cpSpawner: Spawner = (cmd, args, env, options) => {
@@ -527,7 +529,8 @@ const localItFn = function (title: string, opts: ItOptions) {
         return systemTests.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
       }
 
-      return options.onRun(execFn, browser, ctx)
+      // pass Mocha's this context to onRun
+      return options.onRun.call(this, execFn, browser, ctx)
     })
   }
 
@@ -805,7 +808,7 @@ const systemTests = {
       // symlinks won't work via docker
       options.dockerImage || await DepInstaller.scaffoldCommonNodeModules()
       await Fixtures.scaffoldProject(options.project)
-      await DepInstaller.scaffoldProjectNodeModules(options.project)
+      await DepInstaller.scaffoldProjectNodeModules({ project: options.project })
     }
 
     if (process.env.NO_EXIT) {

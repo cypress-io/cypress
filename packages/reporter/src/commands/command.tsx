@@ -14,6 +14,7 @@ import Tag from '../lib/tag'
 import { TimeoutID } from '../lib/types'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import { Alias, AliasObject } from '../instruments/instrument-model'
+import { determineTagType } from '../sessions/utils'
 
 import CommandModel, { RenderProps } from './command-model'
 import TestError from '../errors/test-error'
@@ -36,7 +37,8 @@ export const formattedMessage = (message: string) => {
   const split = message.split(regex)
   const matchingText = searchText.find((text) => message.includes(text))
   const textToConvert = [split[0].trim(), ...(matchingText ? [matchingText] : [])].join(' ')
-  const converted = md.renderInline(textToConvert)
+  const spaceEscapedText = textToConvert.replace(/^ +/gm, (initialSpaces) => '&#32;'.repeat(initialSpaces.length)) // &#32 is the HTML entity for a space
+  const converted = md.renderInline(spaceEscapedText)
   const assertion = (split[1] && [`<strong>${split[1].trim()}</strong>`]) || []
 
   return [converted, ...assertion].join(' ')
@@ -78,7 +80,7 @@ const shouldShowCount = (aliasesWithDuplicates: Array<Alias> | null, aliasName: 
 const NavColumns = observer(({ model, isPinned, toggleColumnPin }) => (
   <>
     <div className='command-number-column' onClick={toggleColumnPin}>
-      {model._isPending() && <RunningIcon className='fa-spin' />}
+      {model._isPending() && <RunningIcon data-cy="reporter-running-icon" className='fa-spin' />}
       {(!model._isPending() && isPinned) && <PinIcon className='command-pin' />}
       {(!model._isPending() && !isPinned) && model.number}
     </div>
@@ -288,7 +290,6 @@ const CommandControls = observer(({ model, commandName, events }) => {
   }
 
   return (
-
     <span className='command-controls'>
       {model.type === 'parent' && model.isStudio && (
         <i
@@ -299,7 +300,7 @@ const CommandControls = observer(({ model, commandName, events }) => {
       {isSessionCommand && (
         <Tag
           content={model.sessionInfo?.status}
-          type={`${model.sessionInfo?.status === 'failed' ? 'failed' : 'successful'}-status`}
+          type={determineTagType(model.state)}
         />
       )}
       {!model.visible && (
@@ -401,8 +402,16 @@ class Command extends Component<Props> {
           <Progress model={model} />
           {this._children()}
         </li>
-        {model.err?.isRecovered && (
-          <li><TestError err={model.err} testId={model.testId} commandId={model.id} groupLevel={groupLevel}/></li>
+        {model.showError && (
+          <li>
+            <TestError
+              err={model.err}
+              testId={model.testId}
+              commandId={model.id}
+              // if the err is recovered and the current command is a log group, nest the test error within the group
+              groupLevel={model.group && model.hasChildren ? ++groupLevel : groupLevel}
+            />
+          </li>
         )}
       </>
     )

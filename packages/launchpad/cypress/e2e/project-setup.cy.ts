@@ -1,3 +1,4 @@
+import { MAJOR_VERSION_FOR_CONTENT } from '@packages/types/src'
 import { getPathForPlatform } from './support/getPathForPlatform'
 
 function verifyScaffoldedFiles (testingType: string) {
@@ -36,8 +37,14 @@ describe('Launchpad: Setup Project', () => {
 
     cy.withCtx(async (ctx, o) => {
       o.sinon.stub(ctx.project, 'projectId').resolves(null)
+      o.sinon.stub(ctx._apis.localSettingsApi, 'getPreferences').resolves({ majorVersionWelcomeDismissed: {
+        [o.MAJOR_VERSION_FOR_CONTENT]: Date.now(),
+      } })
+
       // Delete the fixtures folder so it scaffold correctly the example
       await ctx.actions.file.removeFileInProject('cypress/fixtures')
+    }, {
+      MAJOR_VERSION_FOR_CONTENT,
     })
   }
 
@@ -75,16 +82,15 @@ describe('Launchpad: Setup Project', () => {
     cy.scaffoldProject('pristine')
     cy.openProject('pristine', ['--e2e'])
     cy.visitLaunchpad()
+    cy.skipWelcome()
 
     cy.contains('h1', 'Configuration files')
     cy.findByText('We added the following files to your project:')
 
-    cy.get('[data-cy=valid]').within(() => {
-      cy.contains('cypress.config.js')
-      cy.containsPath('cypress/support/e2e.js')
-      cy.containsPath('cypress/support/commands.js')
-      cy.containsPath('cypress/fixtures/example.json')
-    })
+    cy.get('[data-cy=valid]').as('valid').contains('cypress.config.js')
+    cy.get('@valid').containsPath('cypress/support/e2e.js')
+    cy.get('@valid').containsPath('cypress/support/commands.js')
+    cy.get('@valid').containsPath('cypress/fixtures/example.json')
 
     cy.get('[data-cy=valid] [data-cy=collapsible-header]').each((element) => {
       cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
@@ -97,6 +103,7 @@ describe('Launchpad: Setup Project', () => {
     cy.scaffoldProject('pristine')
     cy.openProject('pristine', ['--component'])
     cy.visitLaunchpad()
+    cy.skipWelcome()
     cy.get('h1').should('contain', 'Project setup')
   })
 
@@ -238,12 +245,10 @@ describe('Launchpad: Setup Project', () => {
         cy.contains('h1', 'Configuration files')
         cy.findByText('We added the following files to your project:')
 
-        cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress.config.js')
-          cy.containsPath('cypress/support/e2e.js')
-          cy.containsPath('cypress/support/commands.js')
-          cy.containsPath('cypress/fixtures/example.json')
-        })
+        cy.get('[data-cy=valid]').as('valid').contains('cypress.config.js')
+        cy.get('@valid').containsPath('cypress/support/e2e.js')
+        cy.get('@valid').containsPath('cypress/support/commands.js')
+        cy.get('@valid').containsPath('cypress/fixtures/example.json')
 
         cy.get('[data-cy=valid] [data-cy=collapsible-header]').each((element) => {
           cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
@@ -269,12 +274,10 @@ describe('Launchpad: Setup Project', () => {
         cy.contains('h1', 'Configuration files')
         cy.findByText('We added the following files to your project:')
 
-        cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress.config.js')
-          cy.containsPath('cypress/support/e2e.js')
-          cy.containsPath('cypress/support/commands.js')
-          cy.containsPath('cypress/fixtures/example.json')
-        })
+        cy.get('[data-cy=valid]').as('valid').contains('cypress.config.js')
+        cy.get('@valid').containsPath('cypress/support/e2e.js')
+        cy.get('@valid').containsPath('cypress/support/commands.js')
+        cy.get('@valid').containsPath('cypress/fixtures/example.json')
 
         verifyScaffoldedFiles('e2e')
 
@@ -308,12 +311,10 @@ describe('Launchpad: Setup Project', () => {
         cy.contains('h1', 'Configuration files')
         cy.findByText('We added the following files to your project:')
 
-        cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress.config.js')
-          cy.containsPath('cypress/support/e2e.js')
-          cy.containsPath('cypress/support/commands.js')
-          cy.containsPath('cypress/fixtures/example.json')
-        })
+        cy.get('[data-cy=valid]').as('valid').contains('cypress.config.js')
+        cy.get('@valid').containsPath('cypress/support/e2e.js')
+        cy.get('@valid').containsPath('cypress/support/commands.js')
+        cy.get('@valid').containsPath('cypress/fixtures/example.json')
 
         cy.get('[data-cy=valid] [data-cy=collapsible-header]').each((element) => {
           cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
@@ -344,12 +345,10 @@ describe('Launchpad: Setup Project', () => {
         cy.contains('h1', 'Configuration files')
         cy.findByText('We added the following files to your project:')
 
-        cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress.config.ts')
-          cy.containsPath('cypress/support/e2e.ts')
-          cy.containsPath('cypress/support/commands.ts')
-          cy.containsPath('cypress/fixtures/example.json')
-        })
+        cy.get('[data-cy=valid]').as('valid').contains('cypress.config.ts')
+        cy.get('@valid').containsPath('cypress/support/e2e.ts')
+        cy.get('@valid').containsPath('cypress/support/commands.ts')
+        cy.get('@valid').containsPath('cypress/fixtures/example.json')
 
         cy.get('[data-cy=valid] [data-cy=collapsible-header]').each((element) => {
           cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
@@ -401,12 +400,10 @@ describe('Launchpad: Setup Project', () => {
 
         cy.findByRole('button', { name: 'Skip' }).click()
 
-        cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress.config.js')
-          cy.containsPath('cypress/support/component-index.html')
-          cy.containsPath('cypress/support/component.js')
-          cy.containsPath('cypress/support/commands.js')
-        })
+        cy.get('[data-cy=valid]').as('valid').contains('cypress.config.js')
+        cy.get('@valid').containsPath('cypress/support/component-index.html')
+        cy.get('@valid').containsPath('cypress/support/component.js')
+        cy.get('@valid').containsPath('cypress/support/commands.js')
 
         verifyScaffoldedFiles('component')
       })
@@ -437,6 +434,7 @@ describe('Launchpad: Setup Project', () => {
       it('can move forward to choose browser if e2e is configured', () => {
         cy.openProject('pristine-with-e2e-testing')
         cy.visitLaunchpad()
+        cy.skipWelcome()
 
         verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
 
@@ -448,6 +446,7 @@ describe('Launchpad: Setup Project', () => {
       it('can move forward to choose browser if component is configured', () => {
         cy.openProject('pristine-with-ct-testing')
         cy.visitLaunchpad()
+        cy.skipWelcome()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: true })
 

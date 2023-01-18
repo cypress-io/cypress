@@ -13,7 +13,7 @@ const machineId = require('../../../lib/cloud/machine_id')
 const Promise = require('bluebird')
 
 const API_BASEURL = 'http://localhost:1234'
-const DASHBOARD_BASEURL = 'http://localhost:3000'
+const CLOUD_BASEURL = 'http://localhost:3000'
 const AUTH_URLS = {
   'dashboardAuthUrl': 'http://localhost:3000/test-runner.html',
   'dashboardLogoutUrl': 'http://localhost:3000/logout',
@@ -65,6 +65,20 @@ describe('lib/cloud/api', () => {
 
         expect(agent.addRequest).to.be.calledWithMatch(sinon.match.any, {
           href: 'http://localhost:1234/ping',
+        })
+      })
+    })
+
+    it('sets rejectUnauthorized on the request', () => {
+      nock.cleanAll()
+
+      return api.ping()
+      .thenThrow()
+      .catch(() => {
+        expect(agent.addRequest).to.be.calledOnce
+
+        expect(agent.addRequest).to.be.calledWithMatch(sinon.match.any, {
+          rejectUnauthorized: true,
         })
       })
     })
@@ -701,7 +715,7 @@ describe('lib/cloud/api', () => {
     })
 
     it('POSTs /logout', () => {
-      nock(DASHBOARD_BASEURL)
+      nock(CLOUD_BASEURL)
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
       .matchHeader('x-machine-id', 'foo')
@@ -714,7 +728,7 @@ describe('lib/cloud/api', () => {
     })
 
     it('tags errors', () => {
-      nock(DASHBOARD_BASEURL)
+      nock(CLOUD_BASEURL)
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
       .matchHeader('x-machine-id', 'foo')
@@ -1009,7 +1023,7 @@ describe('lib/cloud/api', () => {
 
       return api.retryWithBackoff(fn).then(() => {
         expect(errors.warning).to.be.calledThrice
-        expect(errors.warning.firstCall.args[0]).to.eql('DASHBOARD_API_RESPONSE_FAILED_RETRYING')
+        expect(errors.warning.firstCall.args[0]).to.eql('CLOUD_API_RESPONSE_FAILED_RETRYING')
         expect(errors.warning.firstCall.args[1]).to.eql({
           delay: 30000,
           tries: 3,

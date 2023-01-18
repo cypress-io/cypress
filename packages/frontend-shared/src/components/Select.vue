@@ -74,7 +74,7 @@
           <ListboxOptions class="bg-white rounded shadow-lg ring-black mt-1 text-base w-full max-h-60 ring-1 ring-opacity-5 z-10 absolute overflow-auto sm:text-sm focus:outline-none">
             <ListboxOption
               v-for="option in props.options"
-              :key="get(option, itemKey ?? '')"
+              :key="get(option, itemKey)"
               v-slot="{ active, selected }"
               as="ul"
               :value="option"
@@ -83,9 +83,9 @@
               <li
                 class="border-transparent cursor-pointer border-1 py-2 pr-8 pl-4 block truncate select-none relative "
                 :class="[{
-                  'font-medium bg-jade-50': option.isSelected,
+                  'font-medium bg-jade-50': isSelectedOption(option),
                   'bg-gray-50': active,
-                  'text-gray-800': !option.isSelected && !active,
+                  'text-gray-800': !isSelectedOption(option) && !active,
                   'text-opacity-40': option.disabled || false
                 }]"
                 :data-cy="get(option, itemKey)"
@@ -107,7 +107,7 @@
                 >
                   <slot
                     name="item-body"
-                    :selected="option.isSelected"
+                    :selected="isSelectedOption(option)"
                     :active="active"
                     :value="option"
                   >
@@ -118,12 +118,12 @@
                 <span class="flex text-sm pr-3 inset-y-0 right-0 absolute items-center">
                   <slot
                     name="item-suffix"
-                    :selected="option.isSelected"
+                    :selected="isSelectedOption(option)"
                     :active="active"
                     :value="option"
                   >
                     <span
-                      v-if="option.isSelected"
+                      v-if="isSelectedOption(option)"
                       class="flex pr-3 right-0 text-jade-400 absolute items-center"
                     >
                       <i-mdi-check
@@ -166,7 +166,13 @@ const props = withDefaults(defineProps<{
   modelValue?: Option // Current object being selected
   placeholder?: string
   label?: string
-  itemValue?: string // The key of the modelValue to render
+  /**
+   * The value of the modelValue to render. `value` by default
+   */
+  itemValue?: string
+  /**
+   * The key of the modelValue to render and check selected option. `key` by default
+   */
   itemKey?: string
   error?: boolean
 }>(), {
@@ -176,6 +182,12 @@ const props = withDefaults(defineProps<{
   modelValue: undefined,
   itemKey: 'key',
 })
+
+const isSelectedOption = (option: Option) => {
+  const optionKey = get(option, props.itemKey)
+
+  return optionKey && optionKey === get(props.modelValue, props.itemKey)
+}
 
 const emit = defineEmits<{
   (event: 'update:modelValue', value: Option)

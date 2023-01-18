@@ -8,6 +8,7 @@ import { createModuleMatrixResult } from './test-helpers/createModuleMatrixResul
 import sinon from 'sinon'
 import SinonChai from 'sinon-chai'
 import type { SourceRelativeWebpackResult } from '../src/helpers/sourceRelativeWebpackModules'
+import path from 'path'
 
 Chai.use(SinonChai)
 
@@ -28,7 +29,7 @@ describe('makeWebpackConfig', () => {
         devServer: {
           progress: true,
           overlay: true, // This will be overridden by makeWebpackConfig.ts
-        },
+        } as any,
         optimization: {
           noEmitOnErrors: true, // This will be overridden by makeWebpackConfig.ts
         },
@@ -46,7 +47,7 @@ describe('makeWebpackConfig', () => {
 
     // plugins contain circular deps which cannot be serialized in a snapshot.
     // instead just compare the name and order of the plugins.
-    actual.plugins = actual.plugins.map((p) => p.constructor.name)
+    ;(actual as any).plugins = actual.plugins.map((p) => p.constructor.name)
 
     // these will include paths from the user's local file system, so we should not include them the snapshot
     delete actual.output.path
@@ -93,7 +94,7 @@ describe('makeWebpackConfig', () => {
 
     // plugins contain circular deps which cannot be serialized in a snapshot.
     // instead just compare the name and order of the plugins.
-    actual.plugins = actual.plugins.map((p) => p.constructor.name)
+    ;(actual as any).plugins = actual.plugins.map((p) => p.constructor.name)
 
     // these will include paths from the user's local file system, so we should not include them the snapshot
     delete actual.output.path
@@ -153,45 +154,100 @@ describe('makeWebpackConfig', () => {
     })
   })
 
-  it('calls webpackConfig if it is a function, passing in the base config', async () => {
-    const testPlugin = new IgnorePlugin({
-      contextRegExp: /aaa/,
-      resourceRegExp: /bbb/,
-    })
-
-    const modifyConfig = sinon.spy(async () => {
-      return {
-        plugins: [testPlugin],
+  context('config resolution', () => {
+    it('with <project-root>/webpack.config.js', async () => {
+      const devServerConfig: WebpackDevServerConfig = {
+        specs: [],
+        cypressConfig: {
+          projectRoot: path.join(__dirname, 'fixtures'),
+          devServerPublicPathRoute: '/test-public-path', // This will be overridden by makeWebpackConfig.ts
+        } as Cypress.PluginConfigOptions,
+        devServerEvents: new EventEmitter(),
       }
+
+      const actual = await makeWebpackConfig({
+        devServerConfig,
+        sourceWebpackModulesResult: createModuleMatrixResult({
+          webpack: 5,
+          webpackDevServer: 4,
+        }),
+      })
+
+      expect(actual.plugins.map((p) => p.constructor.name)).to.have.members(
+        ['CypressCTWebpackPlugin', 'HtmlWebpackPlugin', 'FromWebpackConfigFile'],
+      )
     })
 
-    const devServerConfig: WebpackDevServerConfig = {
-      specs: [],
-      cypressConfig: {
-        isTextTerminal: false,
-        projectRoot: '.',
-        supportFile: '/support.js',
-        devServerPublicPathRoute: '/test-public-path', // This will be overridden by makeWebpackConfig.ts
-      } as Cypress.PluginConfigOptions,
-      webpackConfig: modifyConfig,
-      devServerEvents: new EventEmitter(),
-    }
+    it('with component.devServer.webpackConfig', async () => {
+      class FromInlineWebpackConfig {
+        apply () {}
+      }
 
-    const actual = await makeWebpackConfig({
-      devServerConfig,
-      sourceWebpackModulesResult: createModuleMatrixResult({
-        webpack: 4,
-        webpackDevServer: 4,
-      }),
+      const devServerConfig: WebpackDevServerConfig = {
+        specs: [],
+        cypressConfig: {
+          projectRoot: path.join(__dirname, 'fixtures'),
+          devServerPublicPathRoute: '/test-public-path', // This will be overridden by makeWebpackConfig.ts
+        } as Cypress.PluginConfigOptions,
+        devServerEvents: new EventEmitter(),
+        webpackConfig: {
+          plugins: [new FromInlineWebpackConfig()],
+        },
+      }
+
+      const actual = await makeWebpackConfig({
+        devServerConfig,
+        sourceWebpackModulesResult: createModuleMatrixResult({
+          webpack: 5,
+          webpackDevServer: 4,
+        }),
+      })
+
+      expect(actual.plugins.map((p) => p.constructor.name)).to.have.members(
+        ['CypressCTWebpackPlugin', 'HtmlWebpackPlugin', 'FromInlineWebpackConfig'],
+      )
     })
 
-    expect(actual.plugins.length).to.eq(3)
-    expect(modifyConfig).to.have.been.called
-    // merged plugins get added at the top of the chain by default
-    // should be merged, not overriding existing plugins
-    expect(actual.plugins[0].constructor.name).to.eq('IgnorePlugin')
-    expect(actual.plugins[1].constructor.name).to.eq('HtmlWebpackPlugin')
-    expect(actual.plugins[2].constructor.name).to.eq('CypressCTWebpackPlugin')
+    it('calls webpackConfig if it is a function, passing in the base config', async () => {
+      const testPlugin = new IgnorePlugin({
+        contextRegExp: /aaa/,
+        resourceRegExp: /bbb/,
+      })
+
+      const modifyConfig = sinon.spy(async () => {
+        return {
+          plugins: [testPlugin],
+        }
+      })
+
+      const devServerConfig: WebpackDevServerConfig = {
+        specs: [],
+        cypressConfig: {
+          isTextTerminal: false,
+          projectRoot: '.',
+          supportFile: '/support.js',
+          devServerPublicPathRoute: '/test-public-path', // This will be overridden by makeWebpackConfig.ts
+        } as Cypress.PluginConfigOptions,
+        webpackConfig: modifyConfig,
+        devServerEvents: new EventEmitter(),
+      }
+
+      const actual = await makeWebpackConfig({
+        devServerConfig,
+        sourceWebpackModulesResult: createModuleMatrixResult({
+          webpack: 4,
+          webpackDevServer: 4,
+        }),
+      })
+
+      expect(actual.plugins.length).to.eq(3)
+      expect(modifyConfig).to.have.been.called
+      // merged plugins get added at the top of the chain by default
+      // should be merged, not overriding existing plugins
+      expect(actual.plugins[0].constructor.name).to.eq('IgnorePlugin')
+      expect(actual.plugins[1].constructor.name).to.eq('HtmlWebpackPlugin')
+      expect(actual.plugins[2].constructor.name).to.eq('CypressCTWebpackPlugin')
+    })
   })
 
   describe('file watching', () => {

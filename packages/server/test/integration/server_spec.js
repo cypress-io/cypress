@@ -606,6 +606,7 @@ describe('Server', () => {
                 domain: 'go',
                 tld: 'com',
                 port: '80',
+                subdomain: 'espn',
                 protocol: 'http:',
               },
             })
@@ -822,7 +823,7 @@ describe('Server', () => {
       })
 
       it('can serve non 2xx status code requests when option set', function () {
-        nock('http://google.com')
+        nock('http://cypress.io')
         .matchHeader('user-agent', 'foobarbaz')
         .matchHeader('accept', 'text/html,*/*')
         .get('/foo')
@@ -836,29 +837,29 @@ describe('Server', () => {
 
         headers['user-agent'] = 'foobarbaz'
 
-        return this.server._onResolveUrl('http://google.com/foo', headers, this.automationRequest, { failOnStatusCode: false })
+        return this.server._onResolveUrl('http://cypress.io/foo', headers, this.automationRequest, { failOnStatusCode: false })
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
             isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
-            url: 'http://google.com/foo',
-            originalUrl: 'http://google.com/foo',
+            url: 'http://cypress.io/foo',
+            originalUrl: 'http://cypress.io/foo',
             status: 404,
             statusText: 'Not Found',
             redirects: [],
             cookies: [],
           })
         }).then(() => {
-          return this.rp('http://google.com/foo')
+          return this.rp('http://cypress.io/foo')
           .then((res) => {
             expect(res.statusCode).to.eq(404)
             expect(res.headers['set-cookie']).not.to.match(/initial=;/)
             expect(res.headers['x-foo-bar']).to.eq('true')
             expect(res.headers['cache-control']).to.eq('no-cache, no-store, must-revalidate')
             expect(res.body).to.include('content')
-            expect(res.body).to.include('document.domain = \'google.com\'')
+            expect(res.body).to.include('document.domain = \'cypress.io\'')
 
             expect(res.body).to.include('.action("app:window:before:load",window)')
             expect(res.body).to.include('</head>content</html>')
@@ -923,6 +924,7 @@ describe('Server', () => {
               domain: 'google',
               tld: 'com',
               port: '80',
+              subdomain: null,
               protocol: 'http:',
             },
           })
@@ -954,6 +956,7 @@ describe('Server', () => {
               domain: 'cypress',
               port: '80',
               tld: 'io',
+              subdomain: null,
               protocol: 'http:',
             },
             origin: 'http://cypress.io',
@@ -983,7 +986,7 @@ describe('Server', () => {
             const buffer = this.buffers.take('http://www.cypress.io/')
 
             expect(buffer).to.not.be.empty
-            expect(buffer.isCrossSuperDomainOrigin).to.be.true
+            expect(buffer.urlDoesNotMatchPolicyBasedOnDomain).to.be.true
 
             // Verify the secondary remote state is returned
             expect(this.server.remoteStates.current()).to.deep.eq({
@@ -992,6 +995,7 @@ describe('Server', () => {
                 domain: 'cypress',
                 port: '80',
                 tld: 'io',
+                subdomain: 'www',
                 protocol: 'http:',
               },
               origin: 'http://www.cypress.io',
@@ -1026,6 +1030,7 @@ describe('Server', () => {
                 domain: '',
                 port: '3500',
                 tld: 'localhost',
+                subdomain: null,
                 protocol: 'http:',
               },
               origin: 'http://localhost:3500',
@@ -1057,6 +1062,7 @@ describe('Server', () => {
                 domain: '',
                 port: '3500',
                 tld: 'localhost',
+                subdomain: null,
                 protocol: 'http:',
               },
               origin: 'http://localhost:3500',
@@ -1093,6 +1099,7 @@ describe('Server', () => {
                 domain: '',
                 port: '3500',
                 tld: 'localhost',
+                subdomain: null,
                 protocol: 'http:',
               },
               origin: 'http://localhost:3500',
@@ -1125,7 +1132,7 @@ describe('Server', () => {
       })
 
       it('can go from file -> http -> file', function () {
-        nock('http://www.google.com')
+        nock('http://www.cypress.io')
         .get('/')
         .reply(200, 'content page', {
           'Content-Type': 'text/html',
@@ -1152,36 +1159,37 @@ describe('Server', () => {
             expect(res.statusCode).to.eq(200)
           })
         }).then(() => {
-          return this.server._onResolveUrl('http://www.google.com/', {}, this.automationRequest)
+          return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest)
         }).then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
             isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
-            url: 'http://www.google.com/',
-            originalUrl: 'http://www.google.com/',
+            url: 'http://www.cypress.io/',
+            originalUrl: 'http://www.cypress.io/',
             status: 200,
             statusText: 'OK',
             redirects: [],
             cookies: [],
           })
         }).then(() => {
-          return this.rp('http://www.google.com/')
+          return this.rp('http://www.cypress.io/')
           .then((res) => {
             expect(res.statusCode).to.eq(200)
           })
         }).then(() => {
           expect(this.server.remoteStates.current()).to.deep.eq({
             auth: undefined,
-            origin: 'http://www.google.com',
+            origin: 'http://www.cypress.io',
             strategy: 'http',
-            domainName: 'google.com',
+            domainName: 'cypress.io',
             fileServer: null,
             props: {
-              domain: 'google',
-              tld: 'com',
+              domain: 'cypress',
+              tld: 'io',
               port: '80',
+              subdomain: 'www',
               protocol: 'http:',
             },
           })
@@ -1220,51 +1228,52 @@ describe('Server', () => {
       })
 
       it('can go from http -> file -> http', function () {
-        nock('http://www.google.com')
+        nock('http://www.cypress.io')
         .get('/')
-        .reply(200, '<html><head></head><body>google</body></html>', {
+        .reply(200, '<html><head></head><body>cypress</body></html>', {
           'Content-Type': 'text/html',
         })
         .get('/')
-        .reply(200, '<html><head></head><body>google</body></html>', {
+        .reply(200, '<html><head></head><body>cypress</body></html>', {
           'Content-Type': 'text/html',
         })
 
-        return this.server._onResolveUrl('http://www.google.com/', {}, this.automationRequest)
+        return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest)
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
             isPrimarySuperDomainOrigin: true,
             isHtml: true,
             contentType: 'text/html',
-            url: 'http://www.google.com/',
-            originalUrl: 'http://www.google.com/',
+            url: 'http://www.cypress.io/',
+            originalUrl: 'http://www.cypress.io/',
             status: 200,
             statusText: 'OK',
             redirects: [],
             cookies: [],
           })
         }).then(() => {
-          return this.rp('http://www.google.com/')
+          return this.rp('http://www.cypress.io/')
           .then((res) => {
             expect(res.statusCode).to.eq(200)
             expect(res.body).to.include('document.domain')
-            expect(res.body).to.include('google.com')
+            expect(res.body).to.include('cypress.io')
 
             expect(res.body).to.include('.action("app:window:before:load",window)')
-            expect(res.body).to.include('</script></head><body>google</body></html>')
+            expect(res.body).to.include('</script></head><body>cypress</body></html>')
           })
         }).then(() => {
           expect(this.server.remoteStates.current()).to.deep.eq({
             auth: undefined,
-            origin: 'http://www.google.com',
+            origin: 'http://www.cypress.io',
             strategy: 'http',
-            domainName: 'google.com',
+            domainName: 'cypress.io',
             fileServer: null,
             props: {
-              domain: 'google',
-              tld: 'com',
+              domain: 'cypress',
+              tld: 'io',
               port: '80',
+              subdomain: 'www',
               protocol: 'http:',
             },
           })
@@ -1304,41 +1313,42 @@ describe('Server', () => {
             props: null,
           })
         }).then(() => {
-          return this.server._onResolveUrl('http://www.google.com/', {}, this.automationRequest)
+          return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest)
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
               isPrimarySuperDomainOrigin: true,
               isHtml: true,
               contentType: 'text/html',
-              url: 'http://www.google.com/',
-              originalUrl: 'http://www.google.com/',
+              url: 'http://www.cypress.io/',
+              originalUrl: 'http://www.cypress.io/',
               status: 200,
               statusText: 'OK',
               redirects: [],
               cookies: [],
             })
           }).then(() => {
-            return this.rp('http://www.google.com/')
+            return this.rp('http://www.cypress.io/')
             .then((res) => {
               expect(res.statusCode).to.eq(200)
               expect(res.body).to.include('document.domain')
-              expect(res.body).to.include('google.com')
+              expect(res.body).to.include('cypress.io')
 
               expect(res.body).to.include('.action("app:window:before:load",window)')
-              expect(res.body).to.include('</script></head><body>google</body></html>')
+              expect(res.body).to.include('</script></head><body>cypress</body></html>')
             })
           }).then(() => {
             expect(this.server.remoteStates.current()).to.deep.eq({
               auth: undefined,
-              origin: 'http://www.google.com',
+              origin: 'http://www.cypress.io',
               strategy: 'http',
-              domainName: 'google.com',
+              domainName: 'cypress.io',
               fileServer: null,
               props: {
-                domain: 'google',
-                tld: 'com',
+                domain: 'cypress',
+                tld: 'io',
                 port: '80',
+                subdomain: 'www',
                 protocol: 'http:',
               },
             })
@@ -1384,6 +1394,7 @@ describe('Server', () => {
               domain: 'foobar',
               tld: 'com',
               port: '8443',
+              subdomain: 'www',
               protocol: 'https:',
             },
           })
@@ -1458,6 +1469,7 @@ describe('Server', () => {
                 domain: 'foobar',
                 tld: 'com',
                 port: '8443',
+                subdomain: 'www',
                 protocol: 'https:',
               },
             })
@@ -1511,6 +1523,7 @@ describe('Server', () => {
               domain: '',
               tld: 's3.amazonaws.com',
               port: '443',
+              subdomain: null,
               protocol: 'https:',
             },
           })
@@ -1591,6 +1604,7 @@ describe('Server', () => {
                 domain: '',
                 tld: 's3.amazonaws.com',
                 port: '443',
+                subdomain: null,
                 protocol: 'https:',
               },
             })

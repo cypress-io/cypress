@@ -37,10 +37,22 @@ context('cy.origin misc', { browser: '!webkit' }, () => {
   })
 
   it('.pause()', () => {
+    // ensures the 'paused' event makes it to the event-manager in the primary.
+    // if we get cross-origin cy-in-cy test working, we could potentially make
+    // this even more end-to-end: test out the reporter UI and click the
+    // resume buttons instead of sending the resume:all event
+    Cypress.primaryOriginCommunicator.once('paused', ({ nextCommandName, origin }) => {
+      expect(nextCommandName).to.equal('wrap')
+      expect(origin).to.equal('http://www.foobar.com:3500')
+
+      Cypress.primaryOriginCommunicator.toSpecBridge(origin, 'resume:all')
+    })
+
     cy.origin('http://www.foobar.com:3500', () => {
       const afterPaused = new Promise<void>((resolve) => {
-        cy.once('paused', () => {
-          Cypress.emit('resume:all')
+        // event is sent from the event listener in the primary above,
+        // ensuring that the pause sequence has come full circle
+        cy.once('resume:all', () => {
           resolve()
         })
       })
@@ -198,16 +210,17 @@ it('verifies number of cy commands', () => {
   // remove custom commands we added for our own testing
   const customCommands = ['getAll', 'shouldWithTimeout', 'originLoadUtils']
   // @ts-ignore
-  const actualCommands = Cypress._.reject(Object.keys(cy.commandFns), (command) => customCommands.includes(command))
+  const actualCommands = Cypress._.pullAll([...Object.keys(cy.commandFns), ...Object.keys(cy.queryFns)], customCommands)
   const expectedCommands = [
     'check', 'uncheck', 'click', 'dblclick', 'rightclick', 'focus', 'blur', 'hover', 'scrollIntoView', 'scrollTo', 'select',
-    'selectFile', 'submit', 'type', 'clear', 'trigger', 'as', 'ng', 'should', 'and', 'clock', 'tick', 'spread', 'each', 'then',
+    'selectFile', 'submit', 'type', 'clear', 'trigger', 'should', 'and', 'clock', 'tick', 'spread', 'each', 'then',
     'invoke', 'its', 'getCookie', 'getCookies', 'setCookie', 'clearCookie', 'clearCookies', 'pause', 'debug', 'exec', 'readFile',
     'writeFile', 'fixture', 'clearLocalStorage', 'url', 'hash', 'location', 'end', 'noop', 'log', 'wrap', 'reload', 'go', 'visit',
-    'focused', 'get', 'contains', 'root', 'shadow', 'within', 'request', 'session', 'screenshot', 'task', 'find', 'filter', 'not',
+    'focused', 'get', 'contains', 'shadow', 'within', 'request', 'session', 'screenshot', 'task', 'find', 'filter', 'not',
     'children', 'eq', 'closest', 'first', 'last', 'next', 'nextAll', 'nextUntil', 'parent', 'parents', 'parentsUntil', 'prev',
     'prevAll', 'prevUntil', 'siblings', 'wait', 'title', 'window', 'document', 'viewport', 'server', 'route', 'intercept', 'origin',
-    'mount',
+    'mount', 'as', 'root', 'getAllLocalStorage', 'clearAllLocalStorage', 'getAllSessionStorage', 'clearAllSessionStorage',
+    'getAllCookies', 'clearAllCookies',
   ]
   const addedCommands = Cypress._.difference(actualCommands, expectedCommands)
   const removedCommands = Cypress._.difference(expectedCommands, actualCommands)

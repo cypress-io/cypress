@@ -1,6 +1,7 @@
 /// <reference types="cypress" />
 
 declare namespace Cypress {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface Chainable<Subject> {
     /**
     * Get one or more DOM elements by an XPath selector.
@@ -10,6 +11,6 @@ declare namespace Cypress {
     * cy.xpath(`//ul[@class="todo-list"]//li`)
     *   .should('have.length', 3)
     */
-   xpath<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    xpath<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
   }
 }

@@ -148,6 +148,7 @@ const getUserInvocationStack = (err, state) => {
     !userInvocationStack
     || err.isDefaultAssertionErr
     || (currentAssertionCommand && !current?.get('followedByShouldCallback'))
+    || withInvocationStack?.get('selector')
   ) {
     userInvocationStack = withInvocationStack?.get('userInvocationStack')
   }
@@ -188,6 +189,10 @@ const appendErrMsg = (err, errMsg) => {
 }
 
 const makeErrFromObj = (obj) => {
+  if (_.isString(obj)) {
+    return new Error(obj)
+  }
+
   const err2 = new Error(obj.message)
 
   err2.name = obj.name
@@ -212,12 +217,12 @@ const makeErrFromErr = (err, options: any = {}) => {
   // assume onFail is a command if
   // onFail is present and isn't a function
   if (onFail && !_.isFunction(onFail)) {
-    const command = onFail
+    const log = onFail
 
     // redefine onFail and automatically
     // hook this into our command
     onFail = (err) => {
-      return command.error(err)
+      return log.error(err)
     }
   }
 
@@ -262,7 +267,8 @@ const warnByPath = (errPath, options: any = {}) => {
 }
 
 export class InternalCypressError extends Error {
-  onFail?: undefined | Function
+  onFail?: Function
+  isRecovered?: boolean
 
   constructor (message) {
     super(message)
@@ -279,7 +285,8 @@ export class CypressError extends Error {
   docsUrl?: string
   retry?: boolean
   userInvocationStack?: any
-  onFail?: undefined | Function
+  onFail?: Function
+  isRecovered?: boolean
 
   constructor (message) {
     super(message)
@@ -546,9 +553,11 @@ const errorFromUncaughtEvent = (handlerType: HandlerType, event) => {
     errorFromProjectRejectionEvent(event)
 }
 
-const logError = (Cypress, handlerType: HandlerType, err, handled = false) => {
+const logError = (Cypress, handlerType: HandlerType, err: unknown, handled = false) => {
+  const error = toLoggableError(err)
+
   Cypress.log({
-    message: `${err.name}: ${err.message}`,
+    message: `${error.name || 'Error'}: ${error.message}`,
     name: 'uncaught exception',
     type: 'parent',
     // specifying the error causes the log to be red/failed
@@ -567,6 +576,25 @@ const logError = (Cypress, handlerType: HandlerType, err, handled = false) => {
       return consoleObj
     },
   })
+}
+
+interface LoggableError { name?: string, message: string }
+
+const isLoggableError = (error: unknown): error is LoggableError => {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error)
+}
+
+const toLoggableError = (maybeError: unknown): LoggableError => {
+  if (isLoggableError(maybeError)) return maybeError
+
+  try {
+    return { message: JSON.stringify(maybeError) }
+  } catch {
+    return { message: String(maybeError) }
+  }
 }
 
 const getUnsupportedPlugin = (runnable) => {

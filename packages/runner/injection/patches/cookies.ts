@@ -63,6 +63,17 @@ export const patchDocumentCookie = (requestCookies: AutomationCookie[]) => {
     })
   }
 
+  const setCookie = (cookie: ToughCookie | string) => {
+    try {
+      return cookieJar.setCookie(cookie, url, undefined)
+    } catch (err) {
+      // it's possible setting the cookie fails because the domain does not
+      // match. this is expected and okay to do nothing, since it wouldn't be
+      // set in the browser anyway
+      return
+    }
+  }
+
   // requestCookies are ones included with the page request that's now being
   // injected into. they're captured by the proxy and included statically in
   // the injection so they can be added here and available before page load
@@ -84,18 +95,20 @@ export const patchDocumentCookie = (requestCookies: AutomationCookie[]) => {
       // value, but tough-cookie doesn't recognize it using an instanceof
       // check and throws an error. because we can't, we have to massage
       // some of the properties below to be correct
-      const cookie = cookieJar.setCookie(stringValue, url, undefined)!
+      const cookie = setCookie(stringValue)
 
-      cookie.sameSite = parsedCookie.sameSite
+      if (cookie) {
+        cookie.sameSite = parsedCookie.sameSite
 
-      if (!parsedCookie.path) {
-        cookie.path = '/'
+        if (!parsedCookie.path) {
+          cookie.path = '/'
+        }
+
+        // send the cookie to the server so it can be set in the browser via
+        // automation and in our server-side cookie jar so it's available
+        // to subsequent injections
+        sendCookieToServer(toughCookieToAutomationCookie(cookie, domain))
       }
-
-      // send the cookie to the server so it can be set in the browser via
-      // automation and in our server-side cookie jar so it's available
-      // to subsequent injections
-      sendCookieToServer(toughCookieToAutomationCookie(cookie, domain))
 
       return getDocumentCookieValue()
     },
@@ -111,7 +124,7 @@ export const patchDocumentCookie = (requestCookies: AutomationCookie[]) => {
     // the following listeners are called from Cypress cookie commands, so that
     // the document.cookie value is updated optimistically
     Cypress.on('set:cookie', (cookie: AutomationCookie) => {
-      cookieJar.setCookie(automationCookieToToughCookie(cookie, domain), url, undefined)
+      setCookie(automationCookieToToughCookie(cookie, domain))
     })
 
     Cypress.on('clear:cookie', (name: string) => {

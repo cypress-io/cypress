@@ -1,6 +1,6 @@
 <template>
   <div
-    class="h-full grid gap-8px grid-cols-[16px,auto,auto] items-center"
+    class="h-full grid gap-8px group grid-cols-[16px,auto,auto] items-center"
     data-cy="spec-item"
   >
     <i-cy-document-blank_x16

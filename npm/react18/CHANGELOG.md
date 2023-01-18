@@ -1,3 +1,16 @@
+# [@cypress/react18-v2.0.0](https://github.com/cypress-io/cypress/compare/@cypress/react18-v1.1.1...@cypress/react18-v2.0.0) (2022-11-07)
+
+
+### Bug Fixes
+
+* remove last mounted component upon subsequent mount calls ([#24470](https://github.com/cypress-io/cypress/issues/24470)) ([f39eb1c](https://github.com/cypress-io/cypress/commit/f39eb1c19e0923bda7ae263168fc6448da942d54))
+* remove some CT functions and props ([#24419](https://github.com/cypress-io/cypress/issues/24419)) ([294985f](https://github.com/cypress-io/cypress/commit/294985f8b3e0fa00ed66d25f88c8814603766074))
+
+
+### BREAKING CHANGES
+
+* remove last mounted component upon subsequent mount calls of mount
+
 # [@cypress/react18-v1.1.1](https://github.com/cypress-io/cypress/compare/@cypress/react18-v1.1.0...@cypress/react18-v1.1.1) (2022-10-13)
 
 

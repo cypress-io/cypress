@@ -72,6 +72,8 @@ describe('Cypress In Cypress E2E', { viewportWidth: 1500, defaultCommandTimeout:
     cy.findByTestId('playground-print').click().window().then((win) => {
       expect(win.console.log).to.have.been.calledWith('%cCommand:  ', 'font-weight: bold', 'cy.contains(\'Item 1\')')
     })
+
+    cy.get('.hook-open-in-ide').should('exist')
   })
 
   it('navigation between specs and other parts of the app works', () => {

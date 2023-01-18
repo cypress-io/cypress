@@ -10,12 +10,14 @@ describe('Launchpad: Global Mode', () => {
     it('shows global page when opened by --global flag', () => {
       cy.openGlobalMode()
       cy.visitLaunchpad()
+      cy.skipWelcome()
       cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
     })
 
     it('shows global page when opened by global install', () => {
       cy.openGlobalMode({ byFlag: false })
       cy.visitLaunchpad()
+      cy.skipWelcome()
       cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
     })
   })
@@ -24,6 +26,7 @@ describe('Launchpad: Global Mode', () => {
     it('shows "Add Project" view', () => {
       cy.openGlobalMode()
       cy.visitLaunchpad()
+      cy.skipWelcome()
       cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
       cy.get('[data-cy="dropzone"]')
       .should('contain', defaultMessages.globalPage.empty.dropText.split('{0}')[0])
@@ -34,6 +37,7 @@ describe('Launchpad: Global Mode', () => {
     it('can add a project by dragging folder into project dropzone', () => {
       cy.openGlobalMode()
       cy.visitLaunchpad()
+      cy.skipWelcome()
       cy.get('h1').should('contain', defaultMessages.globalPage.empty.title)
       cy.get('[data-cy="dropzone"]')
       .should('contain', defaultMessages.globalPage.empty.dropText.split('{0}')[0])
@@ -57,6 +61,7 @@ describe('Launchpad: Global Mode', () => {
     it('adds a project using electron native folder select', () => {
       cy.openGlobalMode()
       cy.visitLaunchpad()
+      cy.skipWelcome()
 
       cy.scaffoldProject('todos')
       .then((projectPath) => {
@@ -94,6 +99,7 @@ describe('Launchpad: Global Mode', () => {
       })
 
       cy.visitLaunchpad()
+      cy.skipWelcome()
 
       cy.log('The recents list shows all projects that have been added')
       cy.contains(defaultMessages.globalPage.recentProjectsHeader)
@@ -325,6 +331,7 @@ describe('Launchpad: Global Mode', () => {
       cy.addProject('config-with-import-error')
       cy.addProject('todos')
       cy.visitLaunchpad()
+      cy.skipWelcome()
       cy.contains('[data-cy="project-card"]', 'todos').should('be.visible')
       cy.contains('[data-cy="project-card"]', 'config-with-import-error').should('be.visible').click()
       cy.get('h1').contains('Cypress configuration error')

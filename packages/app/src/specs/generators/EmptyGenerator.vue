@@ -6,8 +6,8 @@
           <Input
             v-model="specFile"
             :input-ref="inputRefFn"
-            :placeholder="t('createSpec.e2e.importEmptySpec.inputPlaceholder')"
-            :aria-label="t('createSpec.e2e.importEmptySpec.inputPlaceholder')"
+            :placeholder="t('createSpec.e2e.importTemplateSpec.inputPlaceholder')"
+            :aria-label="t('createSpec.e2e.importTemplateSpec.inputPlaceholder')"
             :has-error="hasError"
           >
             <template #prefix>
@@ -36,7 +36,7 @@
             class="rounded flex font-medium bg-warning-100 mt-16px p-16px text-warning-600 gap-8px items-center"
           >
             <i-cy-errored-outline_x16 class="icon-dark-warning-600" />
-            {{ t('createSpec.e2e.importEmptySpec.specExtensionWarning') }}<span class="rounded bg-warning-200 py-2px px-8px text-warning-700">{{ recommendedFileName }}</span>
+            {{ t('createSpec.e2e.importTemplateSpec.specExtensionWarning') }}<span class="rounded bg-warning-200 py-2px px-8px text-warning-700">{{ recommendedFileName }}</span>
           </div>
 
           <div
@@ -94,7 +94,7 @@
           :to="{
             name: 'SpecRunner',
             query: {
-              file: result.file.relative?.replace(/\\/g, '/')
+              file: posixify(result.file.relative)
             },
             params: props.type === 'component' || props.type === 'componentEmpty'
               ? {
@@ -140,6 +140,7 @@ import StandardModalFooter from '@packages/frontend-shared/src/components/Standa
 import GeneratorSuccess from './GeneratorSuccess.vue'
 import TestResultsIcon from '~icons/cy/test-results_x24.svg'
 import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
+import { posixify } from '../../paths'
 
 const props = defineProps<{
   title: string
@@ -240,7 +241,7 @@ watch(specFile, async (value) => {
   isValidSpecFile.value = result.data?.matchesSpecPattern ?? false
 }, { immediate: true })
 
-title.value = t('createSpec.e2e.importEmptySpec.chooseFilenameHeader')
+title.value = t('createSpec.e2e.importTemplateSpec.chooseFilenameHeader')
 
 const showExtensionWarning = computed(() => isValidSpecFile.value && !specFile.value.includes('.cy'))
 const recommendedFileName = computed(() => {
@@ -249,6 +250,6 @@ const recommendedFileName = computed(() => {
   return `{filename}.cy.${split[split.length - 1]}`
 })
 
-const invalidSpecWarning = computed(() => props.type === 'e2e' ? t('createSpec.e2e.importEmptySpec.invalidSpecWarning') : t('createSpec.component.importEmptySpec.invalidComponentWarning'))
+const invalidSpecWarning = computed(() => props.type === 'e2e' ? t('createSpec.e2e.importTemplateSpec.invalidSpecWarning') : t('createSpec.component.importTemplateSpec.invalidComponentWarning'))
 
 </script>

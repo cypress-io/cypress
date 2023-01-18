@@ -3,6 +3,7 @@ const { projects } = require('./angular.json')
 
 export default defineConfig({
   component: {
+    experimentalSingleTabRunMode: true,
     devServer: {
       framework: 'angular',
       bundler: 'webpack',

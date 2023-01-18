@@ -6,22 +6,27 @@ export default defineConfig({
   experimentalStudio: true,
   experimentalWebKitSupport: true,
   hosts: {
+    'foobar.com': '127.0.0.1',
     '*.foobar.com': '127.0.0.1',
+    'barbaz.com': '127.0.0.1',
     '*.barbaz.com': '127.0.0.1',
     '*.idp.com': '127.0.0.1',
     'localalias': '127.0.0.1',
   },
-  reporter: 'cypress-multi-reporters',
+  reporter: '../../node_modules/cypress-multi-reporters/index.js',
   reporterOptions: {
     configFile: '../../mocha-reporter-config.json',
   },
   e2e: {
+    experimentalOriginDependencies: true,
+    experimentalModifyObstructiveThirdPartyCode: true,
     setupNodeEvents: (on, config) => {
       return require('./cypress/plugins')(on, config)
     },
     baseUrl: 'http://localhost:3500',
   },
   component: {
+    experimentalSingleTabRunMode: true,
     specPattern: 'cypress/component/**/*.cy.js',
     supportFile: false,
     devServer: (devServerOptions) => {

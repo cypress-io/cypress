@@ -1,0 +1,2817 @@
+version: 2.1
+
+defaults: &defaults
+  parallelism: 1
+  working_directory: ~/cypress
+  parameters: &defaultsParameters
+    executor:
+      type: executor
+      default: cy-doc
+    only-cache-for-root-user:
+      type: boolean
+      default: false
+  executor: <<parameters.executor>>
+  environment: &defaultsEnvironment
+    ## set specific timezone
+    TZ: "/usr/share/zoneinfo/America/New_York"
+
+    ## store artifacts here
+    CIRCLE_ARTIFACTS: /tmp/artifacts
+
+    ## set so that e2e tests are consistent
+    COLUMNS: 100
+    LINES: 24
+
+mainBuildFilters: &mainBuildFilters
+  filters:
+    branches:
+      only:
+        - develop
+        - /^release\/\d+\.\d+\.\d+$/
+        - 'macOS-launch-arm-browser'
+
+# usually we don't build Mac app - it takes a long time
+# but sometimes we want to really confirm we are doing the right thing
+# so just add your branch to the list here to build and test on Mac
+macWorkflowFilters: &darwin-workflow-filters
+  when:
+    or:
+    - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ 'macOS-launch-arm-browser', << pipeline.git.branch >> ]
+    - matches:
+        pattern: /^release\/\d+\.\d+\.\d+$/
+        value: << pipeline.git.branch >>
+linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
+  when:
+    or:
+    - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ 'macOS-launch-arm-browser', << pipeline.git.branch >> ]
+    - matches:
+        pattern: /^release\/\d+\.\d+\.\d+$/
+        value: << pipeline.git.branch >>
+
+# uncomment & add to the branch conditions below to disable the main linux
+# flow if we don't want to test it for a certain branch
+linuxWorkflowExcludeFilters: &linux-x64-workflow-exclude-filters
+  unless:
+    or:
+    - false
+
+# windows is slow and expensive in CI, so it normally only runs on main branches
+# add your branch to this list to run the full Windows build on your PR
+windowsWorkflowFilters: &windows-workflow-filters
+  when:
+    or:
+    - equal: [ develop, << pipeline.git.branch >> ]
+    - equal: [ 'retry-flake', << pipeline.git.branch >> ]
+    - matches:
+        pattern: /^release\/\d+\.\d+\.\d+$/
+        value: << pipeline.git.branch >>
+executors:
+  # the Docker image with Cypress dependencies and Chrome browser
+  cy-doc:
+    docker:
+      - image: cypress/browsers:node16.16.0-chrome106-ff99-edge
+    # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
+    resource_class: medium
+    environment:
+      PLATFORM: linux
+      CI_DOCKER: "true"
+
+  # Docker image with non-root "node" user
+  non-root-docker-user:
+    docker:
+      - image: cypress/browsers:node16.16.0-chrome106-ff99-edge
+        user: node
+    environment:
+      PLATFORM: linux
+
+  # executor to run on Mac OS
+  # https://circleci.com/docs/2.0/executor-types/#using-macos
+  # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
+  mac:
+    macos:
+      # Executor should have Node >= required version
+      xcode: "14.0.0"
+    resource_class: macos.x86.medium.gen2
+    environment:
+      PLATFORM: darwin
+
+  # executor to run on Windows - based off of the windows-orb default executor since it is
+  # not customizable enough to align with our existing setup.
+  # https://github.com/CircleCI-Public/windows-orb/blob/master/src/executors/default.yml
+  # https://circleci.com/docs/2.0/hello-world-windows/#software-pre-installed-in-the-windows-image
+  windows: &windows-executor
+    machine:
+      image: windows-server-2019-vs2019:stable
+      shell: bash.exe -eo pipefail
+    resource_class: windows.large
+    environment:
+      PLATFORM: windows
+
+  darwin-arm64: &darwin-arm64-executor
+    machine: true
+    environment:
+      PLATFORM: darwin
+
+  linux-arm64: &linux-arm64-executor
+    machine:
+      image: ubuntu-2004:2022.04.1
+    resource_class: arm.medium
+    environment:
+      PLATFORM: linux
+      # TODO: Disabling snapshots for now on Linux Arm 64 architectures. Will revisit with https://github.com/cypress-io/cypress/issues/23557
+      DISABLE_SNAPSHOT_REQUIRE: 1
+
+commands:
+  verify_should_persist_artifacts:
+    steps:
+      - run:
+          name: Check current branch to persist artifacts
+          command: |
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "macOS-launch-arm-browser" ]]; then
+              echo "Not uploading artifacts or posting install comment for this branch."
+              circleci-agent step halt
+            fi
+
+  restore_workspace_binaries:
+    steps:
+      - attach_workspace:
+          at: ~/
+      # make sure we have cypress.zip received
+      - run: ls -l
+      - run: ls -l cypress.zip cypress.tgz
+      - run: node --version
+      - run: npm --version
+
+  restore_cached_workspace:
+    steps:
+      - attach_workspace:
+          at: ~/
+      - install-required-node
+      - unpack-dependencies
+
+  restore_cached_binary:
+    steps:
+      - attach_workspace:
+          at: ~/
+
+  prepare-modules-cache:
+    parameters:
+      dont-move:
+        type: boolean
+        default: false
+    steps:
+      - run: node scripts/circle-cache.js --action prepare
+      - unless:
+          condition: << parameters.dont-move >>
+          steps:
+            - run:
+                name: Move to /tmp dir for consistent caching across root/non-root users
+                command: |
+                  mkdir -p /tmp/node_modules_cache
+                  mv ~/cypress/node_modules /tmp/node_modules_cache/root_node_modules
+                  mv ~/cypress/cli/node_modules /tmp/node_modules_cache/cli_node_modules
+                  mv ~/cypress/system-tests/node_modules /tmp/node_modules_cache/system-tests_node_modules
+                  mv ~/cypress/globbed_node_modules /tmp/node_modules_cache/globbed_node_modules
+
+  install-webkit-deps:
+    steps:
+      - run:
+          name: Install WebKit dependencies
+          command: |
+            npx playwright install webkit
+            npx playwright install-deps webkit
+
+  build-and-persist:
+    description: Save entire folder as artifact for other jobs to run without reinstalling
+    steps:
+      - run:
+          name: Build all codegen
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn gulp buildProd
+      - run:
+          name: Build packages
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn build
+      - run:
+          name: Generate v8 snapshot
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn build-v8-snapshot-prod
+      - prepare-modules-cache # So we don't throw these in the workspace cache
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - cypress
+            - .ssh
+            - node_modules # contains the npm i -g modules
+
+  install_cache_helpers_dependencies:
+    steps:
+      - run:
+          # Dependencies needed by circle-cache.js, before we "yarn" or unpack cached node_modules
+          name: Cache Helper Dependencies
+          working_directory: ~/
+          command: npm i glob@7.1.6 fs-extra@10.0.0 minimist@1.2.5 fast-json-stable-stringify@2.1.0
+
+  unpack-dependencies:
+    description: 'Unpacks dependencies associated with the current workflow'
+    steps:
+      - install_cache_helpers_dependencies
+      - run:
+          name: Generate Circle Cache Key
+          command: node scripts/circle-cache.js --action cacheKey > circle_cache_key
+      - run:
+          name: Generate platform key
+          command: node ./scripts/get-platform-key.js > platform_key
+      - restore_cache:
+          name: Restore cache state, to check for known modules cache existence
+          key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-node-modules-cache-{{ checksum "circle_cache_key" }}
+      - run:
+          name: Move node_modules back from /tmp
+          command: |
+            if [[ -d "/tmp/node_modules_cache" ]]; then
+              mv /tmp/node_modules_cache/root_node_modules ~/cypress/node_modules
+              mv /tmp/node_modules_cache/cli_node_modules ~/cypress/cli/node_modules
+              mv /tmp/node_modules_cache/system-tests_node_modules ~/cypress/system-tests/node_modules
+              mv /tmp/node_modules_cache/globbed_node_modules ~/cypress/globbed_node_modules
+              rm -rf /tmp/node_modules_cache
+            fi
+      - run:
+          name: Restore all node_modules to proper workspace folders
+          command: node scripts/circle-cache.js --action unpack
+
+  restore_cached_system_tests_deps:
+    description: 'Restore the cached node_modules for projects in "system-tests/projects/**"'
+    steps:
+      - run:
+          name: Generate Circle Cache key for system tests
+          command: ./system-tests/scripts/cache-key.sh > system_tests_cache_key
+      - run:
+          name: Generate platform key
+          command: node ./scripts/get-platform-key.js > platform_key
+      - restore_cache:
+          name: Restore system tests node_modules cache
+          keys:
+            - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+
+  update_cached_system_tests_deps:
+    description: 'Update the cached node_modules for projects in "system-tests/projects/**"'
+    steps:
+      - run:
+          name: Generate Circle Cache key for system tests
+          command: ./system-tests/scripts/cache-key.sh > system_tests_cache_key
+      - run:
+          name: Generate platform key
+          command: node ./scripts/get-platform-key.js > platform_key
+      - restore_cache:
+          name: Restore cache state, to check for known modules cache existence
+          keys:
+            - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+      - run:
+          name: Send root honeycomb event for this CI build
+          command: cd system-tests/scripts && node ./send-root-honeycomb-event.js
+      - run:
+          name: Bail if specific cache exists
+          command: |
+            if [[ -f "/tmp/system_tests_node_modules_installed" ]]; then
+              echo "No updates to system tests node modules, exiting"
+              circleci-agent step halt
+            fi
+      - restore_cache:
+          name: Restore system tests node_modules cache
+          keys:
+            - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+            - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-
+      - run:
+          name: Update system-tests node_modules cache
+          command: yarn workspace @tooling/system-tests projects:yarn:install
+      - save_cache:
+          name: Save system tests node_modules cache
+          key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+          paths:
+            - /tmp/cy-system-tests-node-modules
+      - run: touch /tmp/system_tests_node_modules_installed
+      - save_cache:
+          name: Save system tests node_modules cache state key
+          key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-system-tests-projects-node-modules-cache-{{ checksum "system_tests_cache_key" }}
+          paths:
+            - /tmp/system_tests_node_modules_installed
+
+  caching-dependency-installer:
+    description: 'Installs & caches the dependencies based on yarn lock & package json dependencies'
+    parameters:
+      only-cache-for-root-user:
+        type: boolean
+        default: false
+    steps:
+      - install_cache_helpers_dependencies
+      - run:
+          name: Generate Circle Cache Key
+          command: node scripts/circle-cache.js --action cacheKey > circle_cache_key
+      - run:
+          name: Generate platform key
+          command: node ./scripts/get-platform-key.js > platform_key
+      - restore_cache:
+          name: Restore cache state, to check for known modules cache existence
+          key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-node-modules-cache-{{ checksum "circle_cache_key" }}
+      - run:
+          name: Bail if cache exists
+          command: |
+            if [[ -f "node_modules_installed" ]]; then
+              echo "Node modules already cached for dependencies, exiting"
+              circleci-agent step halt
+            fi
+      - run: date +%Y-%U > cache_date
+      - restore_cache:
+          name: Restore weekly yarn cache
+          keys:
+            - v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-deps-root-weekly-{{ checksum "cache_date" }}
+      - run:
+          name: Install Node Modules
+          command: |
+            source ./scripts/ensure-node.sh
+            # avoid installing Percy's Chromium every time we use @percy/cli
+            # https://docs.percy.io/docs/caching-asset-discovery-browser-in-ci
+            PERCY_POSTINSTALL_BROWSER=true \
+            yarn --prefer-offline --frozen-lockfile --cache-folder ~/.yarn
+          no_output_timeout: 20m
+      - prepare-modules-cache:
+          dont-move: <<parameters.only-cache-for-root-user>> # we don't move, so we don't hit any issues unpacking symlinks
+      - when:
+          condition: <<parameters.only-cache-for-root-user>> # we don't move to /tmp since we don't need to worry about different users
+          steps:
+            - save_cache:
+                name: Saving node modules for root, cli, and all globbed workspace packages
+                key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-node-modules-cache-{{ checksum "circle_cache_key" }}
+                paths:
+                  - node_modules
+                  - cli/node_modules
+                  - system-tests/node_modules
+                  - globbed_node_modules
+      - unless:
+          condition: <<parameters.only-cache-for-root-user>>
+          steps:
+            - save_cache:
+                name: Saving node modules for root, cli, and all globbed workspace packages
+                key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-node-modules-cache-{{ checksum "circle_cache_key" }}
+                paths:
+                  - /tmp/node_modules_cache
+      - run: touch node_modules_installed
+      - save_cache:
+          name: Saving node-modules cache state key
+          key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-state-of-node-modules-cache-{{ checksum "circle_cache_key" }}
+          paths:
+            - node_modules_installed
+      - save_cache:
+          name: Save weekly yarn cache
+          key: v{{ checksum ".circleci/cache-version.txt" }}-{{ checksum "platform_key" }}-deps-root-weekly-{{ checksum "cache_date" }}
+          paths:
+            - ~/.yarn
+            - ~/.cy-npm-cache
+
+  verify-build-setup:
+    description: Common commands run when setting up for build or yarn install
+    parameters:
+      executor:
+        type: executor
+        default: cy-doc
+    steps:
+      - run: pwd
+      - run:
+          name: print global yarn cache path
+          command: echo $(yarn global bin)
+      - run:
+          name: print yarn version
+          command: yarn versions
+      - unless:
+          condition:
+            # stop-only does not correctly match on windows: https://github.com/bahmutov/stop-only/issues/78
+            equal: [ *windows-executor, << parameters.executor >> ]
+          steps:
+            - run:
+                name: Stop .only
+                 # this will catch ".only"s in js/coffee as well
+                command: |
+                  source ./scripts/ensure-node.sh
+                  yarn stop-only-all
+      - run:
+          name: Check terminal variables
+          ## make sure the TERM is set to 'xterm' in node (Linux only)
+          ## else colors (and tests) will fail
+          ## See the following information
+          ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
+          ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn check-terminal
+
+  install-required-node:
+    # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
+    description: Install Node version matching .node-version
+    steps:
+      # installing NVM will use git+ssh, so update known_hosts
+      - update_known_hosts
+      - run:
+          name: Install Node
+          command: |
+            node_version=$(cat .node-version)
+            source ./scripts/ensure-node.sh
+            echo "Installing Yarn"
+            npm install yarn -g # ensure yarn is installed with the correct node engine
+            yarn check-node-version
+      - run:
+          name: Check Node
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn check-node-version
+
+  install-chrome:
+    description: Install Google Chrome
+    parameters:
+      channel:
+        description: browser channel to install
+        type: string
+      version:
+        description: browser version to install
+        type: string
+    steps:
+      - run:
+          name: Install Google Chrome (<<parameters.channel>>)
+          command: |
+            echo "Installing Chrome (<<parameters.channel>>) v<<parameters.version>>"
+            wget -O /usr/src/google-chrome-<<parameters.channel>>_<<parameters.version>>_amd64.deb "http://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-<<parameters.channel>>/google-chrome-<<parameters.channel>>_<<parameters.version>>-1_amd64.deb" && \
+            dpkg -i /usr/src/google-chrome-<<parameters.channel>>_<<parameters.version>>_amd64.deb ; \
+            apt-get install -f -y && \
+            rm -f /usr/src/google-chrome-<<parameters.channel>>_<<parameters.version>>_amd64.deb
+            which google-chrome-<<parameters.channel>> || (printf "\n\033[0;31mChrome was not successfully downloaded - bailing\033[0m\n\n" && exit 1)
+            echo "Location of Google Chrome Installation: `which google-chrome-<<parameters.channel>>`"
+            echo "Google Chrome Version: `google-chrome-<<parameters.channel>> --version`"
+
+  run-driver-integration-tests:
+    parameters:
+      browser:
+        description: browser shortname to target
+        type: string
+      install-chrome-channel:
+        description: chrome channel to install
+        type: string
+        default: ''
+    steps:
+      - restore_cached_workspace
+      - when:
+          condition: <<parameters.install-chrome-channel>>
+          steps:
+            - install-chrome:
+                channel: <<parameters.install-chrome-channel>>
+                version: $(node ./scripts/get-browser-version.js chrome:<<parameters.install-chrome-channel>>)
+      - when:
+          condition:
+            equal: [ webkit, << parameters.browser >> ]
+          steps:
+            - install-webkit-deps
+      - run:
+          name: Run driver tests in Cypress
+          environment:
+            CYPRESS_CONFIG_ENV: production
+          command: |
+            echo Current working directory is $PWD
+            echo Total containers $CIRCLE_NODE_TOTAL
+
+            if [[ -v MAIN_RECORD_KEY ]]; then
+              # internal PR
+              CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
+              yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>>
+            else
+              # external PR
+              TESTFILES=$(circleci tests glob "cypress/e2e/**/*.cy.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+              echo "Test files for this machine are $TESTFILES"
+
+              if [[ -z "$TESTFILES" ]]; then
+                echo "Empty list of test files"
+              fi
+              yarn cypress:run --browser <<parameters.browser>> --spec $TESTFILES
+            fi
+          working_directory: packages/driver
+      - verify-mocha-results
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs
+
+  windows-install-chrome:
+    parameters:
+      browser:
+        description: browser shortname to target
+        type: string
+    steps:
+      - run:
+          # TODO: How can we have preinstalled browsers on CircleCI?
+          name: 'Install Chrome on Windows'
+          command: |
+            # install with `--ignore-checksums` to avoid checksum error
+            # https://www.gep13.co.uk/blog/chocolatey-error-hashes-do-not-match
+            [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]] && choco install googlechrome --ignore-checksums || [[ $PLATFORM != 'windows' ]]
+
+  run-new-ui-tests:
+    parameters:
+      package:
+        description: package to target
+        type: enum
+        enum: ['frontend-shared', 'launchpad', 'app', 'reporter']
+      browser:
+        description: browser shortname to target
+        type: string
+      percy:
+        description: enable percy
+        type: boolean
+        default: false
+      type:
+        description: ct or e2e
+        type: enum
+        enum: ['ct', 'e2e']
+      debug:
+        description: debug option
+        type: string
+        default: ''
+    steps:
+      - restore_cached_workspace
+      - windows-install-chrome:
+          browser: <<parameters.browser>>
+      - run:
+          command: |
+            echo Current working directory is $PWD
+            echo Total containers $CIRCLE_NODE_TOTAL
+
+            if [[ -v MAIN_RECORD_KEY ]]; then
+              # internal PR
+              cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --parallel -- --') || true
+              DEBUG=<<parameters.debug>> \
+              CYPRESS_CONFIG_ENV=production \
+              CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
+              PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
+              PERCY_ENABLE=${PERCY_TOKEN:-0} \
+              PERCY_PARALLEL_TOTAL=-1 \
+              $cmd yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --record --parallel --group <<parameters.package>>-<<parameters.type>>
+            else
+              # external PR
+
+              # To make `circleci tests` work correctly, we need to step into the package folder.
+              cd packages/<<parameters.package>>
+
+              GLOB="cypress/e2e/**/*cy.*"
+
+              if [[ <<parameters.type>> == 'ct' ]]; then
+                # component tests are located side by side with the source codes.
+                GLOB="src/**/*cy.*"
+              fi
+
+              TESTFILES=$(circleci tests glob "$GLOB" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+              echo "Test files for this machine are $TESTFILES"
+
+              # To run the `yarn` command, we need to walk out of the package folder.
+              cd ../..
+
+              DEBUG=<<parameters.debug>> \
+              CYPRESS_CONFIG_ENV=production \
+              PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
+              PERCY_ENABLE=${PERCY_TOKEN:-0} \
+              PERCY_PARALLEL_TOTAL=-1 \
+              yarn workspace @packages/<<parameters.package>> cypress:run:<<parameters.type>> --browser <<parameters.browser>> --spec $TESTFILES
+            fi
+      - run:
+          command: |
+            if [[ <<parameters.package>> == 'app' && <<parameters.percy>> == 'true' && -d "packages/app/cypress/screenshots/runner/screenshot/screenshot.cy.tsx/percy" ]]; then
+              PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
+              PERCY_ENABLE=${PERCY_TOKEN:-0} \
+              PERCY_PARALLEL_TOTAL=-1 \
+              yarn percy upload packages/app/cypress/screenshots/runner/screenshot/screenshot.cy.tsx/percy
+            else
+              echo "skipping percy screenshots uploading"
+            fi
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: ./packages/<<parameters.package>>/cypress/videos
+      - store-npm-logs
+
+  run-system-tests:
+    parameters:
+      browser:
+        description: browser shortname to target
+        type: string
+    steps:
+      - restore_cached_workspace
+      - restore_cached_system_tests_deps
+      - when:
+          condition:
+            equal: [ webkit, << parameters.browser >> ]
+          steps:
+            - install-webkit-deps
+      - run:
+          name: Run system tests
+          environment:
+            CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
+          command: |
+            ALL_SPECS=`circleci tests glob "/root/cypress/system-tests/test/*spec*"`
+            SPECS=
+            for file in $ALL_SPECS; do
+              # filter out non_root tests, they have their own stage
+              if [[ "$file" == *"non_root"* ]]; then
+                echo "Skipping $file"
+                continue
+              fi
+              SPECS="$SPECS $file"
+            done
+            SPECS=`echo $SPECS | xargs -n 1 | circleci tests split --split-by=timings`
+            echo SPECS=$SPECS
+            yarn workspace @tooling/system-tests test:ci $SPECS --browser <<parameters.browser>>
+      - verify-mocha-results
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs
+
+  run-binary-system-tests:
+    steps:
+      - restore_cached_workspace
+      - restore_cached_system_tests_deps
+      - run:
+          name: Run system tests
+          environment:
+            CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
+          command: |
+            ALL_SPECS=`circleci tests glob "$HOME/cypress/system-tests/test-binary/*spec*"`
+            SPECS=`echo $ALL_SPECS | xargs -n 1 | circleci tests split --split-by=timings`
+            echo SPECS=$SPECS
+            yarn workspace @tooling/system-tests test:ci $SPECS
+      - verify-mocha-results
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs
+
+  store-npm-logs:
+    description: Saves any NPM debug logs as artifacts in case there is a problem
+    steps:
+      - store_artifacts:
+          path: ~/.npm/_logs
+
+  post-install-comment:
+    description: Post GitHub comment with a blurb on how to install pre-release version
+    steps:
+      - run:
+          name: Post pre-release install comment
+          command: |
+            node scripts/add-install-comment.js \
+              --npm npm-package-url.json \
+              --binary binary-url.json
+
+  verify-mocha-results:
+    description: Double-check that Mocha tests ran as expected.
+    parameters:
+      expectedResultCount:
+        description: The number of result files to expect, ie, the number of Mocha test suites that ran.
+        type: integer
+        ## by default, assert that at least 1 test ran
+        default: 0
+    steps:
+      - run:
+          name: 'Verify Mocha Results'
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn verify:mocha:results <<parameters.expectedResultCount>>
+
+  clone-repo-and-checkout-branch:
+    description: |
+      Clones an external repo and then checks out the branch that matches the next version otherwise uses 'master' branch.
+    parameters:
+      repo:
+        description: "Name of the github repo to clone like: cypress-example-kitchensink"
+        type: string
+      pull_request_id:
+        description: Pull request number to check out before installing and testing
+        type: integer
+        default: 0
+    steps:
+      - restore_cached_binary
+      - run:
+          name: "Cloning test project and checking out release branch: <<parameters.repo>>"
+          working_directory: /tmp/<<parameters.repo>>
+          command: |
+            git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git .
+
+            cd ~/cypress/..
+            # install some deps for get-next-version
+            npm i semver@7.3.2 conventional-recommended-bump@6.1.0 conventional-changelog-angular@5.0.12
+            NEXT_VERSION=$(node ./cypress/scripts/get-next-version.js)
+            cd -
+
+            git checkout $NEXT_VERSION || true
+      - when:
+          condition: <<parameters.pull_request_id>>
+          steps:
+            - run:
+                name: Check out PR <<parameters.pull_request_id>>
+                working_directory: /tmp/<<parameters.repo>>
+                command: |
+                  git fetch origin pull/<<parameters.pull_request_id>>/head:pr-<<parameters.pull_request_id>>
+                  git checkout pr-<<parameters.pull_request_id>>
+
+  test-binary-against-rwa:
+    description: |
+      Takes the built binary and NPM package, clones the RWA repo
+      and runs the new version of Cypress against it.
+    parameters:
+      repo:
+        description: "Name of the github repo to clone like"
+        type: string
+        default: "cypress-realworld-app"
+      browser:
+        description: Name of the browser to use, like "electron", "chrome", "firefox"
+        type: enum
+        enum: ["", "electron", "chrome", "firefox"]
+        default: ""
+      command:
+        description: Test command to run to start Cypress tests
+        type: string
+        default: "yarn cypress:run"
+      # if the repo to clone and test is a monorepo, you can
+      # run tests inside a specific subfolder
+      folder:
+        description: Subfolder to test in
+        type: string
+        default: ""
+      # you can test new features in the test runner against recipes or other repos
+      # by opening a pull request in those repos and running this test job
+      # against a pull request number in the example repo
+      pull_request_id:
+        description: Pull request number to check out before installing and testing
+        type: integer
+        default: 0
+      wait-on:
+        description: Whether to use wait-on to wait on a server to be booted
+        type: string
+        default: ""
+      server-start-command:
+        description: Server start command for repo
+        type: string
+        default: "CI=true yarn start"
+    steps:
+      - clone-repo-and-checkout-branch:
+          repo: <<parameters.repo>>
+      - when:
+          condition: <<parameters.pull_request_id>>
+          steps:
+            - run:
+                name: Check out PR <<parameters.pull_request_id>>
+                working_directory: /tmp/<<parameters.repo>>
+                command: |
+                  git fetch origin pull/<<parameters.pull_request_id>>/head:pr-<<parameters.pull_request_id>>
+                  git checkout pr-<<parameters.pull_request_id>>
+                  git log -n 2
+      - run:
+          command: yarn
+          working_directory: /tmp/<<parameters.repo>>
+      - run:
+          name: Install Cypress
+          working_directory: /tmp/<<parameters.repo>>
+          # force installing the freshly built binary
+          command: |
+            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i --legacy-peer-deps ~/cypress/cypress.tgz && [[ -f yarn.lock ]] && yarn
+      - run:
+          name: Print Cypress version
+          working_directory: /tmp/<<parameters.repo>>
+          command: npx cypress version
+      - run:
+          name: Types check 🧩 (maybe)
+          working_directory: /tmp/<<parameters.repo>>
+          command: yarn types
+      - run:
+          working_directory: /tmp/<<parameters.repo>>
+          command: <<parameters.server-start-command>>
+          background: true
+      - run:
+          condition: <<parameters.wait-on>>
+          name: "Waiting on server to boot: <<parameters.wait-on>>"
+          command: "npx wait-on <<parameters.wait-on>>"
+      - when:
+          condition: <<parameters.folder>>
+          steps:
+            - when:
+                condition: <<parameters.browser>>
+                steps:
+                  - run:
+                      name: Run tests using browser "<<parameters.browser>>"
+                      working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
+                      command: |
+                        <<parameters.command>> -- --browser <<parameters.browser>>
+            - unless:
+                condition: <<parameters.browser>>
+                steps:
+                  - run:
+                      name: Run tests using command
+                      working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
+                      command: <<parameters.command>>
+      - unless:
+          condition: <<parameters.folder>>
+          steps:
+            - when:
+                condition: <<parameters.browser>>
+                steps:
+                  - run:
+                      name: Run tests using browser "<<parameters.browser>>"
+                      working_directory: /tmp/<<parameters.repo>>
+                      command: <<parameters.command>> -- --browser <<parameters.browser>>
+            - unless:
+                condition: <<parameters.browser>>
+                steps:
+                  - run:
+                      name: Run tests using command
+                      working_directory: /tmp/<<parameters.repo>>
+                      command: <<parameters.command>>
+      - store-npm-logs
+
+  test-binary-against-repo:
+    description: |
+      Takes the built binary and NPM package, clones given example repo
+      and runs the new version of Cypress against it.
+    parameters:
+      repo:
+        description: "Name of the github repo to clone like: cypress-example-kitchensink"
+        type: string
+      browser:
+        description: Name of the browser to use, like "electron", "chrome", "firefox"
+        type: enum
+        enum: ["", "electron", "chrome", "firefox"]
+        default: ""
+      command:
+        description: Test command to run to start Cypress tests
+        type: string
+        default: "npm run e2e"
+      build-project:
+        description: Should the project build script be executed
+        type: boolean
+        default: true
+      # if the repo to clone and test is a monorepo, you can
+      # run tests inside a specific subfolder
+      folder:
+        description: Subfolder to test in
+        type: string
+        default: ""
+      # you can test new features in the test runner against recipes or other repos
+      # by opening a pull request in those repos and running this test job
+      # against a pull request number in the example repo
+      pull_request_id:
+        description: Pull request number to check out before installing and testing
+        type: integer
+        default: 0
+      wait-on:
+        description: Whether to use wait-on to wait on a server to be booted
+        type: string
+        default: ""
+      server-start-command:
+        description: Server start command for repo
+        type: string
+        default: "npm start --if-present"
+    steps:
+      - clone-repo-and-checkout-branch:
+          repo: <<parameters.repo>>
+          pull_request_id: <<parameters.pull_request_id>>
+      - run:
+          # Ensure we're installing the node-version for the cloned repo
+          command: |
+            if [[ -f .node-version ]]; then
+              branch="<< pipeline.git.branch >>"
+
+              externalBranchPattern='^pull\/[0-9]+'
+              if [[ $branch =~ $externalBranchPattern ]]; then
+                # We are unable to curl from the external PR branch location
+                # so we fall back to develop
+                branch="develop"
+              fi
+
+              curl -L https://raw.githubusercontent.com/cypress-io/cypress/$branch/scripts/ensure-node.sh --output ci-ensure-node.sh
+            else
+              # if no .node-version file exists, we no-op the node script and use the global yarn
+              echo '' > ci-ensure-node.sh
+            fi
+          working_directory: /tmp/<<parameters.repo>>
+      - run:
+          # Install deps + Cypress binary with yarn if yarn.lock present
+          command: |
+            source ./ci-ensure-node.sh
+            if [[ -f yarn.lock ]]; then
+              yarn --frozen-lockfile
+              CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip yarn add -D ~/cypress/cypress.tgz
+            else
+              npm install
+              CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm install --legacy-peer-deps ~/cypress/cypress.tgz
+            fi
+          working_directory: /tmp/<<parameters.repo>>
+      - run:
+          name: Scaffold new config file
+          working_directory: /tmp/<<parameters.repo>>
+          environment:
+            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
+          command: |
+            if [[ -f cypress.json ]]; then
+              rm -rf cypress.json
+              echo 'module.exports = { e2e: {} }' > cypress.config.js
+            fi
+      - run:
+          name: Rename support file
+          working_directory: /tmp/<<parameters.repo>>
+          command: |
+            if [[ -f cypress/support/index.js ]]; then
+              mv cypress/support/index.js cypress/support/e2e.js
+            fi
+      - run:
+          name: Print Cypress version
+          working_directory: /tmp/<<parameters.repo>>
+          command: |
+            source ./ci-ensure-node.sh
+            npx cypress version
+      - run:
+          name: Types check 🧩 (maybe)
+          working_directory: /tmp/<<parameters.repo>>
+          command: |
+            source ./ci-ensure-node.sh
+            [[ -f yarn.lock ]] && yarn types || npm run types --if-present
+      - when:
+          condition: <<parameters.build-project>>
+          steps:
+          - run:
+              name: Build 🏗 (maybe)
+              working_directory: /tmp/<<parameters.repo>>
+              command: |
+                source ./ci-ensure-node.sh
+                [[ -f yarn.lock ]] && yarn build || npm run build --if-present
+      - run:
+          working_directory: /tmp/<<parameters.repo>>
+          command: |
+            source ./ci-ensure-node.sh
+            <<parameters.server-start-command>>
+          background: true
+      - run:
+          condition: <<parameters.wait-on>>
+          name: "Waiting on server to boot: <<parameters.wait-on>>"
+          command: |
+            npx wait-on <<parameters.wait-on>> --timeout 120000
+      - windows-install-chrome:
+          browser: <<parameters.browser>>
+      - when:
+          condition: <<parameters.folder>>
+          steps:
+            - when:
+                condition: <<parameters.browser>>
+                steps:
+                  - run:
+                      name: Run tests using browser "<<parameters.browser>>"
+                      working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
+                      command: |
+                        <<parameters.command>> -- --browser <<parameters.browser>>
+            - unless:
+                condition: <<parameters.browser>>
+                steps:
+                  - run:
+                      name: Run tests using command
+                      working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
+                      command: <<parameters.command>>
+      - unless:
+          condition: <<parameters.folder>>
+          steps:
+            - when:
+                condition: <<parameters.browser>>
+                steps:
+                  - run:
+                      name: Run tests using browser "<<parameters.browser>>"
+                      working_directory: /tmp/<<parameters.repo>>
+                      command: |
+                        source ./ci-ensure-node.sh
+                        <<parameters.command>> -- --browser <<parameters.browser>>
+            - unless:
+                condition: <<parameters.browser>>
+                steps:
+                  - run:
+                      name: Run tests using command
+                      working_directory: /tmp/<<parameters.repo>>
+                      command: |
+                        source ./ci-ensure-node.sh
+                        <<parameters.command>>
+      - store-npm-logs
+
+  wait-on-circle-jobs:
+    description: Polls certain Circle CI jobs until they finish
+    parameters:
+      job-names:
+        description: comma separated list of circle ci job names to wait for
+        type: string
+    steps:
+      - run:
+          name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
+          command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>"
+
+  build-binary:
+    steps:
+      - run:
+          name: Check environment variables before code sign (if on Mac/Windows)
+          # NOTE
+          # our code sign works via electron-builder
+          # by default, electron-builder will NOT sign app built in a pull request
+          # even our internal one (!)
+          # Usually this is not a problem, since we only build and test binary
+          # built on the "develop" branch
+          # but if you need to really build and sign a binary in a PR
+          # set variable CSC_FOR_PULL_REQUEST=true
+          command: |
+            set -e
+            NEEDS_CODE_SIGNING=`node -p 'process.platform === "win32" || process.platform === "darwin"'`
+            if [[ "$NEEDS_CODE_SIGNING" == "true" ]]; then
+              echo "Checking for required environment variables..."
+              if [ -z "$CSC_LINK" ]; then
+                echo "Need to provide environment variable CSC_LINK"
+                echo "with base64 encoded certificate .p12 file"
+                exit 1
+              fi
+              if [ -z "$CSC_KEY_PASSWORD" ]; then
+                echo "Need to provide environment variable CSC_KEY_PASSWORD"
+                echo "with password for unlocking certificate .p12 file"
+                exit 1
+              fi
+              echo "Succeeded."
+            else
+              echo "Not code signing for this platform"
+            fi
+      - run:
+          name: Build the Cypress binary
+          environment:
+            DEBUG: electron-builder,electron-osx-sign*
+          # notarization on Mac can take a while
+          no_output_timeout: "45m"
+          command: |
+            source ./scripts/ensure-node.sh
+            node --version
+            if [[ `node ./scripts/get-platform-key.js` == 'linux-arm64' ]]; then
+              # these are missing on Circle and there is no way to pre-install them on Arm
+              sudo apt-get update
+              sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+              DISABLE_SNAPSHOT_REQUIRE=1 yarn binary-build --version $(node ./scripts/get-next-version.js)
+            else
+              yarn binary-build --version $(node ./scripts/get-next-version.js)
+            fi
+      - run:
+          name: Zip the binary
+          command: |
+            if [[ $PLATFORM == 'linux' ]]; then
+              # on Arm, CI runs as non-root, on x64 CI runs as root but there is no sudo binary
+              if [[ `whoami` == 'root' ]]; then
+                apt-get update && apt-get install -y zip
+              else
+                sudo apt-get update && sudo apt-get install -y zip
+              fi
+            fi
+            source ./scripts/ensure-node.sh
+            yarn binary-zip
+      - store-npm-logs
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - cypress/cypress.zip
+
+  build-cypress-npm-package:
+    parameters:
+      executor:
+        type: executor
+        default: cy-doc
+    steps:
+      - run:
+          name: Bump NPM version
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn get-next-version --npm
+      - run:
+          name: Build NPM package
+          command: |
+            source ./scripts/ensure-node.sh
+            yarn build --scope cypress
+      - run:
+          name: Copy Re-exported NPM Packages
+          command: node ./scripts/post-build.js
+          working_directory: cli
+      - run:
+          command: ls -la types
+          working_directory: cli/build
+      - run:
+          command: ls -la vue vue2 mount-utils react
+          working_directory: cli/build
+      - unless:
+          condition:
+            equal: [ *windows-executor, << parameters.executor >> ]
+          steps:
+            - run:
+                name: list NPM package contents
+                command: |
+                  source ./scripts/ensure-node.sh
+                  yarn workspace cypress size
+      - run:
+          name: pack NPM package
+          working_directory: cli/build
+          command: yarn pack --filename ../../cypress.tgz
+      - run:
+          name: list created NPM package
+          command: ls -l
+      - store-npm-logs
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - cypress/cypress.tgz
+
+  upload-build-artifacts:
+    steps:
+      - run: ls -l
+      - run:
+          name: Upload unique binary to S3
+          command: |
+            node scripts/binary.js upload-build-artifact \
+              --type binary \
+              --file cypress.zip \
+              --version $(node -p "require('./package.json').version")
+      - run:
+          name: Upload NPM package to S3
+          command: |
+            node scripts/binary.js upload-build-artifact \
+              --type npm-package \
+              --file cypress.tgz \
+              --version $(node -p "require('./package.json').version")
+      - store-npm-logs
+      - run: ls -l
+      - run: cat binary-url.json
+      - run: cat npm-package-url.json
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - cypress/binary-url.json
+            - cypress/npm-package-url.json
+
+  update_known_hosts:
+    description: Ensures that we have the latest Git public keys to prevent git+ssh from failing.
+    steps:
+    - run:
+        name: Update known_hosts with github.com keys
+        command: |
+          mkdir -p ~/.ssh
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+jobs:
+  ## Checks if we already have a valid cache for the node_modules_install and if it has,
+  ## skips ahead to the build step, otherwise installs and caches the node_modules
+  node_modules_install:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium
+    resource_class: << parameters.resource_class >>
+    steps:
+      - checkout
+      - install-required-node
+      - verify-build-setup:
+          executor: << parameters.executor >>
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - cypress
+            - .nvm # mac / linux
+            - ProgramData/nvm # windows
+      - caching-dependency-installer:
+          only-cache-for-root-user: <<parameters.only-cache-for-root-user>>
+      - store-npm-logs
+
+  ## restores node_modules from previous step & builds if first step skipped
+  build:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: large
+    resource_class: << parameters.resource_class >>
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Top level packages
+          command: yarn list --depth=0 || true
+      - run:
+          name: Check env canaries on Linux
+          command: |
+            # only Docker has the required env data for this
+            if [[ $CI_DOCKER == 'true' ]]; then
+              node ./scripts/circle-env.js --check-canaries
+            fi
+      - build-and-persist
+      - store-npm-logs
+
+  lint:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Linting 🧹
+          command: |
+            yarn clean
+            git clean -df
+            yarn lint
+      - run:
+          name: cypress info (dev)
+          command: node cli/bin/cypress info --dev
+      - store-npm-logs
+
+  check-ts:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - install-required-node
+      - run:
+          name: Check TS Types
+          command: NODE_OPTIONS=--max_old_space_size=4096 yarn gulp checkTs
+
+
+  # a special job that keeps polling Circle and when all
+  # individual jobs are finished, it closes the Percy build
+  percy-finalize:
+    <<: *defaults
+    resource_class: small
+    parameters:
+      <<: *defaultsParameters
+      required_env_var:
+        type: env_var_name
+    steps:
+      - restore_cached_workspace
+      - run:
+          # if this is an external pull request, the environment variables
+          # are NOT set for security reasons, thus no need to poll -
+          # and no need to finalize Percy, since there will be no visual tests
+          name: Check if <<parameters.required_env_var>> is set
+          command: |
+            if [[ -v <<parameters.required_env_var>> ]]; then
+              echo "Internal PR, good to go"
+            else
+              echo "This is an external PR, cannot access other services"
+              circleci-agent step halt
+            fi
+      - wait-on-circle-jobs:
+          job-names: >
+            cli-visual-tests,
+            reporter-integration-tests,
+            run-app-component-tests-chrome,
+            run-app-integration-tests-chrome,
+            run-frontend-shared-component-tests-chrome,
+            run-launchpad-component-tests-chrome,
+            run-launchpad-integration-tests-chrome,
+            run-reporter-component-tests-chrome,
+            run-webpack-dev-server-integration-tests,
+            run-vite-dev-server-integration-tests
+      - run:
+          # Sometimes, even though all the circle jobs have finished, Percy times out during `build:finalize`
+          # If all other jobs finish but `build:finalize` fails, we retry it once
+          name: Finalize percy build - allows single retry
+          command: |
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
+            yarn percy build:finalize || yarn percy build:finalize
+
+  cli-visual-tests:
+    <<: *defaults
+    resource_class: small
+    steps:
+      - restore_cached_workspace
+      - run: mkdir -p cli/visual-snapshots
+      - run:
+          command: node cli/bin/cypress info --dev | yarn --silent term-to-html | node scripts/sanitize --type cli-info > cli/visual-snapshots/cypress-info.html
+          environment:
+            FORCE_COLOR: 2
+      - run:
+          command: node cli/bin/cypress help | yarn --silent term-to-html > cli/visual-snapshots/cypress-help.html
+          environment:
+            FORCE_COLOR: 2
+      - store_artifacts:
+          path: cli/visual-snapshots
+      - run:
+          name: Upload CLI snapshots for diffing
+          command: |
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
+            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_PARALLEL_TOTAL=-1 \
+            yarn percy snapshot ./cli/visual-snapshots
+
+  v8-integration-tests:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium
+    resource_class: << parameters.resource_class >>
+    parallelism: 1
+    steps:
+      - restore_cached_workspace
+      - restore_cached_system_tests_deps
+      # TODO: Remove this once we switch off self-hosted M1 runners
+      - when:
+          condition:
+            equal: [ *darwin-arm64-executor, << parameters.executor >> ]
+          steps:
+            - run: rm -f /tmp/cypress/junit/*
+      - unless:
+          condition:
+            or:
+              - equal: [ *linux-arm64-executor, << parameters.executor >> ] # TODO: Figure out how to support linux-arm64 when we get to linux arm64 build: https://github.com/cypress-io/cypress/issues/23557
+          steps:
+            - run:
+                name: Run v8 integration tests
+                command: |
+                  source ./scripts/ensure-node.sh
+                  yarn test-integration --scope "'@tooling/{packherd,v8-snapshot,electron-mksnapshot}'"
+            - verify-mocha-results:
+                expectedResultCount: 3
+      - when:
+          condition:
+            or:
+              - equal: [ *linux-arm64-executor, << parameters.executor >> ]
+          steps:
+            - run:
+                name: Run v8 integration tests
+                command: |
+                  source ./scripts/ensure-node.sh
+                  yarn test-integration --scope "'@tooling/packherd'"
+            - verify-mocha-results:
+                expectedResultCount: 1
+      - store_test_results:
+          path: /tmp/cypress
+      - store-npm-logs
+
+  unit-tests:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium
+    resource_class: << parameters.resource_class >>
+    parallelism: 1
+    steps:
+      - restore_cached_workspace
+      - when:
+          condition:
+            # several snapshots fails for windows due to paths.
+            # until these are fixed, run the tests that are working.
+            equal: [ *windows-executor, << parameters.executor >> ]
+          steps:
+            - run: yarn test-scripts scripts/**/*spec.js
+      - unless:
+          condition:
+            equal: [ *windows-executor, << parameters.executor >> ]
+          steps:
+            - run: yarn test-scripts
+            # make sure packages with TypeScript can be transpiled to JS
+            - run: yarn lerna run build-prod --stream --concurrency 4
+            # run unit tests from each individual package
+            - run: yarn test
+            # run type checking for each individual package
+            - run: yarn lerna run types
+            - verify-mocha-results:
+                expectedResultCount: 18
+      - store_test_results:
+          path: /tmp/cypress
+      # CLI tests generate HTML files with sample CLI command output
+      - store_artifacts:
+          path: cli/test/html
+      - store_artifacts:
+          path: packages/errors/__snapshot-images__
+      - store-npm-logs
+
+  unit-tests-release:
+    <<: *defaults
+    resource_class: small
+    parallelism: 1
+    steps:
+      - restore_cached_workspace
+      - update_known_hosts
+      - run: yarn test-npm-package-release-script
+
+  lint-types:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - restore_cached_workspace
+      - run:
+          command: ls -la types
+          working_directory: cli
+      - run:
+          command: ls -la chai
+          working_directory: cli/types
+      - run:
+          name: "Lint types 🧹"
+          command: yarn workspace cypress dtslint
+  # todo(lachlan): do we need this? yarn check-ts does something very similar
+  #     - run:
+  #         name: "TypeScript check 🧩"
+  #         command: yarn type-check --ignore-progress
+      - store-npm-logs
+
+  server-unit-tests:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - restore_cached_workspace
+      - run: yarn test-unit --scope @packages/server
+      - verify-mocha-results:
+          expectedResultCount: 1
+      - store_test_results:
+          path: /tmp/cypress
+      - store-npm-logs
+
+  server-integration-tests:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - restore_cached_workspace
+      - run: yarn test-integration --scope @packages/server
+      - verify-mocha-results:
+          expectedResultCount: 1
+      - store_test_results:
+          path: /tmp/cypress
+      - store-npm-logs
+
+  server-performance-tests:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - run:
+          command: yarn workspace @packages/server test-performance
+      - verify-mocha-results:
+          expectedResultCount: 1
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs
+
+  system-tests-node-modules-install:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - update_cached_system_tests_deps
+
+  binary-system-tests:
+    parallelism: 2
+    working_directory: ~/cypress
+    environment:
+      <<: *defaultsEnvironment
+      PLATFORM: linux
+    machine:
+      # using `machine` gives us a Linux VM that can run Docker
+      image: ubuntu-2004:202111-02
+      docker_layer_caching: true
+    resource_class: medium
+    steps:
+      - run-binary-system-tests
+
+  system-tests-chrome:
+    <<: *defaults
+    parallelism: 8
+    steps:
+      - run-system-tests:
+          browser: chrome
+
+  system-tests-electron:
+    <<: *defaults
+    parallelism: 8
+    steps:
+      - run-system-tests:
+          browser: electron
+
+  system-tests-firefox:
+    <<: *defaults
+    parallelism: 8
+    steps:
+      - run-system-tests:
+          browser: firefox
+
+  system-tests-webkit:
+    <<: *defaults
+    parallelism: 8
+    steps:
+      - run-system-tests:
+          browser: webkit
+
+  system-tests-non-root:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - run:
+          environment:
+            CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
+          command: yarn workspace @tooling/system-tests test:ci "test/non_root*spec*" --browser electron
+      - verify-mocha-results
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs
+
+  run-frontend-shared-component-tests-chrome:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      percy:
+        type: boolean
+        default: false
+    parallelism: 3
+    steps:
+      - run-new-ui-tests:
+          browser: chrome
+          percy: << parameters.percy >>
+          package: frontend-shared
+          type: ct
+
+  run-launchpad-component-tests-chrome:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      percy:
+        type: boolean
+        default: false
+    parallelism: 7
+    steps:
+      - run-new-ui-tests:
+          browser: chrome
+          percy: << parameters.percy >>
+          package: launchpad
+          type: ct
+          # debug: cypress:*,engine:socket
+
+  run-launchpad-integration-tests-chrome:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium
+      percy:
+        type: boolean
+        default: false
+    resource_class: << parameters.resource_class >>
+    parallelism: 3
+    steps:
+      - run-new-ui-tests:
+          browser: chrome
+          percy: << parameters.percy >>
+          package: launchpad
+          type: e2e
+
+  run-app-component-tests-chrome:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      percy:
+        type: boolean
+        default: false
+    parallelism: 7
+    steps:
+      - run-new-ui-tests:
+          browser: chrome
+          percy: << parameters.percy >>
+          package: app
+          type: ct
+
+  run-app-integration-tests-chrome:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium
+      percy:
+        type: boolean
+        default: false
+    resource_class: << parameters.resource_class >>
+    parallelism: 8
+    steps:
+      - run-new-ui-tests:
+          browser: chrome
+          percy: << parameters.percy >>
+          package: app
+          type: e2e
+
+  driver-integration-tests-chrome:
+    <<: *defaults
+    parallelism: 5
+    steps:
+      - run-driver-integration-tests:
+          browser: chrome
+          install-chrome-channel: stable
+
+  driver-integration-tests-chrome-beta:
+    <<: *defaults
+    parallelism: 5
+    steps:
+      - run-driver-integration-tests:
+          browser: chrome:beta
+          install-chrome-channel: beta
+
+  driver-integration-tests-firefox:
+    <<: *defaults
+    parallelism: 5
+    steps:
+      - run-driver-integration-tests:
+          browser: firefox
+
+  driver-integration-tests-electron:
+    <<: *defaults
+    parallelism: 5
+    steps:
+      - run-driver-integration-tests:
+          browser: electron
+
+  driver-integration-tests-webkit:
+    <<: *defaults
+    resource_class: medium+
+    parallelism: 5
+    steps:
+      - run-driver-integration-tests:
+          browser: webkit
+
+  run-reporter-component-tests-chrome:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      percy:
+        type: boolean
+        default: false
+    parallelism: 2
+    steps:
+      - run-new-ui-tests:
+          browser: chrome
+          percy: << parameters.percy >>
+          package: reporter
+          type: ct
+
+  reporter-integration-tests:
+    <<: *defaults
+    parallelism: 3
+    steps:
+      - restore_cached_workspace
+      - run:
+          command: yarn build-for-tests
+          working_directory: packages/reporter
+      - run:
+          command: |
+            CYPRESS_CONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
+            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_PARALLEL_TOTAL=-1 \
+            yarn percy exec --parallel -- -- \
+            yarn cypress:run --record --parallel --group reporter
+          working_directory: packages/reporter
+      - verify-mocha-results
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs
+
+  run-webpack-dev-server-integration-tests:
+    <<: *defaults
+    parallelism: 2
+    steps:
+      - restore_cached_workspace
+      - restore_cached_system_tests_deps
+      - run:
+          command: |
+            CYPRESS_CONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
+            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_PARALLEL_TOTAL=-1 \
+            yarn percy exec --parallel -- -- \
+            yarn cypress:run --record --parallel --group webpack-dev-server
+          working_directory: npm/webpack-dev-server
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs
+
+  run-vite-dev-server-integration-tests:
+    <<: *defaults
+    # parallelism: 3 TODO: Add parallelism once we have more specs
+    steps:
+      - restore_cached_workspace
+      - restore_cached_system_tests_deps
+      - run:
+          command: |
+            CYPRESS_CONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
+            PERCY_ENABLE=${PERCY_TOKEN:-0} \
+            PERCY_PARALLEL_TOTAL=-1 \
+            yarn percy exec --parallel -- -- \
+            yarn cypress:run --record --parallel --group vite-dev-server
+          working_directory: npm/vite-dev-server
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs
+
+  npm-webpack-preprocessor:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Build
+          command: yarn workspace @cypress/webpack-preprocessor build
+      - run:
+          name: Test babelrc
+          command: yarn test
+          working_directory: npm/webpack-preprocessor/examples/use-babelrc
+      - run:
+          name: Build ts-loader
+          command: yarn install
+          working_directory: npm/webpack-preprocessor/examples/use-ts-loader
+      - run:
+          name: Types ts-loader
+          command: yarn types
+          working_directory: npm/webpack-preprocessor/examples/use-ts-loader
+      - run:
+          name: Test ts-loader
+          command: yarn test
+          working_directory: npm/webpack-preprocessor/examples/use-ts-loader
+      - run:
+          name: Start React app
+          command: yarn start
+          background: true
+          working_directory: npm/webpack-preprocessor/examples/react-app
+      - run:
+          name: Test React app
+          command: yarn test
+          working_directory: npm/webpack-preprocessor/examples/react-app
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/webpack-preprocessor test
+      - store-npm-logs
+
+  npm-webpack-dev-server:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - restore_cached_system_tests_deps
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/webpack-dev-server test
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/webpack-dev-server test
+
+  npm-vite-dev-server:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Run tests
+          command: yarn test
+          working_directory: npm/vite-dev-server
+      - store_test_results:
+          path: npm/vite-dev-server/test_results
+      - store-npm-logs
+
+  npm-webpack-batteries-included-preprocessor:
+    <<: *defaults
+    resource_class: small
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/webpack-batteries-included-preprocessor test
+
+  npm-vue:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Build
+          command: yarn workspace @cypress/vue build
+      - run:
+          name: Type Check
+          command: yarn typecheck
+          working_directory: npm/vue
+      - store_test_results:
+          path: npm/vue/test_results
+      - store_artifacts:
+          path: npm/vue/test_results
+      - store-npm-logs
+
+  npm-angular:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Build
+          command: yarn workspace @cypress/angular build
+      - store-npm-logs
+
+  npm-react:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Build
+          command: yarn workspace @cypress/react build
+      - run:
+          name: Run tests
+          command: yarn test
+          working_directory: npm/react
+      - store_test_results:
+          path: npm/react/test_results
+      - store_artifacts:
+          path: npm/react/test_results
+      - store-npm-logs
+
+  npm-mount-utils:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Build
+          command: yarn workspace @cypress/mount-utils build
+      - store-npm-logs
+
+  npm-xpath:
+    <<: *defaults
+    resource_class: small
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/xpath cy:run
+      - store_test_results:
+          path: npm/xpath/test_results
+      - store_artifacts:
+          path: npm/xpath/test_results
+      - store-npm-logs
+
+  npm-grep:
+    <<: *defaults
+    resource_class: small
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/grep cy:run
+      - store_test_results:
+          path: npm/grep/test_results
+      - store_artifacts:
+          path: npm/grep/test_results
+      - store-npm-logs
+
+  npm-create-cypress-tests:
+    <<: *defaults
+    resource_class: small
+    steps:
+      - restore_cached_workspace
+      - run: yarn workspace create-cypress-tests build
+
+  npm-eslint-plugin-dev:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/eslint-plugin-dev test
+
+  npm-cypress-schematic:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Build + Install
+          command: |
+            yarn workspace @cypress/schematic build
+          working_directory: npm/cypress-schematic
+      - run:
+          name: Run unit tests
+          command: |
+            yarn test
+          working_directory: npm/cypress-schematic
+      - store-npm-logs
+
+  npm-release:
+    <<: *defaults
+    resource_class: medium+
+    steps:
+      - restore_cached_workspace
+      - run:
+          name: Release packages after all jobs pass
+          command: yarn npm-release
+
+  create-build-artifacts:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: xlarge
+    resource_class: << parameters.resource_class >>
+    steps:
+      - restore_cached_workspace
+      - build-binary
+      - build-cypress-npm-package:
+          executor: << parameters.executor >>
+      - verify_should_persist_artifacts
+      - upload-build-artifacts
+      - post-install-comment
+
+  test-kitchensink:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: medium+
+    steps:
+      - restore_cached_workspace
+      - clone-repo-and-checkout-branch:
+          repo: cypress-example-kitchensink
+      - install-required-node
+      - run:
+          name: Remove cypress.json
+          description: Remove cypress.json in case it exists
+          working_directory: /tmp/cypress-example-kitchensink
+          environment:
+            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
+          command: rm -rf cypress.json
+      - run:
+          name: Install prod dependencies
+          command: yarn --production
+          working_directory: /tmp/cypress-example-kitchensink
+      - run:
+          name: Example server
+          command: yarn start
+          working_directory: /tmp/cypress-example-kitchensink
+          background: true
+      - run:
+          name: Rename support file
+          working_directory: /tmp/cypress-example-kitchensink
+          command: |
+            if [[ -f cypress/support/index.js ]]; then
+              mv cypress/support/index.js cypress/support/e2e.js
+            fi
+      - run:
+          name: Run Kitchensink example project
+          command: |
+            yarn cypress:run --project /tmp/cypress-example-kitchensink
+      - store-npm-logs
+
+  test-kitchensink-against-staging:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - clone-repo-and-checkout-branch:
+          repo: cypress-example-kitchensink
+      - install-required-node
+      - run:
+          name: Install prod dependencies
+          command: yarn --production
+          working_directory: /tmp/cypress-example-kitchensink
+      - run:
+          name: Example server
+          command: yarn start
+          working_directory: /tmp/cypress-example-kitchensink
+          background: true
+      - run:
+          name: Run Kitchensink example project
+          command: |
+            CYPRESS_PROJECT_ID=$TEST_KITCHENSINK_PROJECT_ID \
+            CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
+            CYPRESS_INTERNAL_ENV=staging \
+            CYPRESS_video=false \
+            yarn cypress:run --project /tmp/cypress-example-kitchensink --record
+      - store-npm-logs
+
+  test-against-staging:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - clone-repo-and-checkout-branch:
+          repo: cypress-test-tiny
+      - run:
+          name: Run test project
+          command: |
+            CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
+            CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
+            CYPRESS_INTERNAL_ENV=staging \
+            yarn cypress:run --project /tmp/cypress-test-tiny --record
+      - store-npm-logs
+
+  test-npm-module-and-verify-binary:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      # make sure we have cypress.zip received
+      - run: ls -l
+      - run: ls -l cypress.zip cypress.tgz
+      - run: mkdir test-binary
+      - run:
+          name: Create new NPM package
+          working_directory: test-binary
+          command: npm init -y
+      - run:
+          # install NPM from built NPM package folder
+          name: Install Cypress
+          working_directory: test-binary
+          # force installing the freshly built binary
+          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm i /root/cypress/cypress.tgz
+      - run:
+          name: Cypress version
+          working_directory: test-binary
+          command: $(yarn bin cypress) version
+      - run:
+          name: Verify Cypress binary
+          working_directory: test-binary
+          command: $(yarn bin cypress) verify
+      - run:
+          name: Cypress help
+          working_directory: test-binary
+          command: $(yarn bin cypress) help
+      - run:
+          name: Cypress info
+          working_directory: test-binary
+          command: $(yarn bin cypress) info
+      - store-npm-logs
+
+  test-npm-module-on-minimum-node-version:
+    <<: *defaults
+    resource_class: small
+    docker:
+      - image: cypress/base:12.0.0-libgbm
+    steps:
+      - restore_workspace_binaries
+      - run: mkdir test-binary
+      - run:
+          name: Create new NPM package
+          working_directory: test-binary
+          command: npm init -y
+      - run:
+          name: Install Cypress
+          working_directory: test-binary
+          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm install /root/cypress/cypress.tgz
+      - run:
+          name: Verify Cypress binary
+          working_directory: test-binary
+          command: $(npm bin)/cypress verify
+      - run:
+          name: Print Cypress version
+          working_directory: test-binary
+          command: $(npm bin)/cypress version
+      - run:
+          name: Cypress info
+          working_directory: test-binary
+          command: $(npm bin)/cypress info
+
+  test-types-cypress-and-jest:
+    parameters:
+      executor:
+        description: Executor name to use
+        type: executor
+        default: cy-doc
+      wd:
+        description: Working directory, should be OUTSIDE cypress monorepo folder
+        type: string
+        default: /root/test-cypress-and-jest
+    <<: *defaults
+    resource_class: small
+    steps:
+      - restore_workspace_binaries
+      - run: mkdir <<parameters.wd>>
+      - run:
+          name: Create new NPM package ⚗️
+          working_directory: <<parameters.wd>>
+          command: npm init -y
+      - run:
+          name: Install dependencies 📦
+          working_directory: <<parameters.wd>>
+          environment:
+            CYPRESS_INSTALL_BINARY: /root/cypress/cypress.zip
+          # let's install Cypress, Jest and any other package that might conflict
+          # https://github.com/cypress-io/cypress/issues/6690
+
+          # Todo: Add `jest` back into the list once https://github.com/yargs/yargs-parser/issues/452
+          # is resolved.
+          command: |
+            npm install /root/cypress/cypress.tgz \
+              typescript @types/jest enzyme @types/enzyme
+      - run:
+          name: Test types clash ⚔️
+          working_directory: <<parameters.wd>>
+          command: |
+            echo "console.log('hello world')" > hello.ts
+            npx tsc hello.ts --noEmit
+
+  test-full-typescript-project:
+    parameters:
+      executor:
+        description: Executor name to use
+        type: executor
+        default: cy-doc
+      wd:
+        description: Working directory, should be OUTSIDE cypress monorepo folder
+        type: string
+        default: /root/test-full-typescript
+    <<: *defaults
+    resource_class: small
+    steps:
+      - restore_workspace_binaries
+      - run: mkdir <<parameters.wd>>
+      - run:
+          name: Create new NPM package ⚗️
+          working_directory: <<parameters.wd>>
+          command: npm init -y
+      - run:
+          name: Install dependencies 📦
+          working_directory: <<parameters.wd>>
+          environment:
+            CYPRESS_INSTALL_BINARY: /root/cypress/cypress.zip
+          command: |
+            npm install /root/cypress/cypress.tgz typescript
+      - run:
+          name: Scaffold full TypeScript project 🏗
+          working_directory: <<parameters.wd>>
+          command: npx @bahmutov/cly@1.9.0 init --typescript
+      - run:
+          name: Run project tests 🗳
+          working_directory: <<parameters.wd>>
+          command: npx cypress run
+
+  # install NPM + binary zip and run against staging API
+  test-binary-against-staging:
+    <<: *defaults
+    steps:
+      - restore_workspace_binaries
+      - clone-repo-and-checkout-branch:
+          repo: cypress-test-tiny
+      - run:
+          name: Install Cypress
+          working_directory: /tmp/cypress-test-tiny
+          # force installing the freshly built binary
+          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i --legacy-peer-deps ~/cypress/cypress.tgz
+      - run:
+          name: Run test project
+          working_directory: /tmp/cypress-test-tiny
+          command: |
+            CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
+            CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
+            CYPRESS_INTERNAL_ENV=staging \
+            $(yarn bin cypress) run --record
+      - store-npm-logs
+
+  test-binary-against-recipes-firefox:
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-recipes
+          command: npm run test:ci:firefox
+
+  test-binary-against-recipes-chrome:
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-recipes
+          command: npm run test:ci:chrome
+
+  test-binary-against-recipes:
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-recipes
+          command: npm run test:ci
+
+  # This is a special job. It allows you to test the current
+  # built test runner against a pull request in the repo
+  # cypress-example-recipes.
+  # Imagine you are working on a feature and want to show / test a recipe
+  # You would need to run the built test runner before release
+  # against a PR that cannot be merged until the new version
+  # of the test runner is released.
+  # Use:
+  #   specify pull request number
+  #   and the recipe folder
+
+  # test-binary-against-recipe-pull-request:
+  #   <<: *defaults
+  #   steps:
+  #     # test a specific pull request by number from cypress-example-recipes
+  #     - test-binary-against-repo:
+  #         repo: cypress-example-recipes
+  #         command: npm run test:ci
+  #         pull_request_id: 515
+  #         folder: examples/fundamentals__typescript
+
+  test-binary-against-kitchensink:
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-kitchensink
+          browser: "electron"
+
+  test-binary-against-kitchensink-firefox:
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-kitchensink
+          browser: firefox
+
+  test-binary-against-kitchensink-chrome:
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-kitchensink
+          browser: chrome
+
+  test-binary-against-todomvc-firefox:
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-todomvc
+          browser: firefox
+
+  test-binary-against-conduit-chrome:
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-conduit-app
+          browser: chrome
+          command: "npm run cypress:run"
+          wait-on: http://localhost:3000
+
+  test-binary-against-api-testing-firefox:
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-api-testing
+          browser: firefox
+          command: "npm run cy:run"
+
+  test-binary-against-piechopper-firefox:
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-piechopper
+          browser: firefox
+          command: "npm run cypress:run"
+
+  test-binary-against-cypress-realworld-app:
+    <<: *defaults
+    resource_class: medium+
+    steps:
+      - test-binary-against-rwa:
+          repo: cypress-realworld-app
+          browser: chrome
+          wait-on: http://localhost:3000
+
+  test-binary-as-specific-user:
+    <<: *defaults
+    steps:
+      - restore_workspace_binaries
+      # the user should be "node"
+      - run: whoami
+      - run: pwd
+      # prints the current user's effective user id
+      # for root it is 0
+      # for other users it is a positive integer
+      - run: node -e 'console.log(process.geteuid())'
+      # make sure the binary and NPM package files are present
+      - run: ls -l
+      - run: ls -l cypress.zip cypress.tgz
+      - run: mkdir test-binary
+      - run:
+          name: Create new NPM package
+          working_directory: test-binary
+          command: npm init -y
+      - run:
+          # install NPM from built NPM package folder
+          name: Install Cypress
+          working_directory: test-binary
+          # force installing the freshly built binary
+          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
+      - run:
+          name: Cypress help
+          working_directory: test-binary
+          command: $(yarn bin cypress) help
+      - run:
+          name: Cypress info
+          working_directory: test-binary
+          command: $(yarn bin cypress) info
+      - run:
+          name: Add Cypress demo
+          working_directory: test-binary
+          command: npx @bahmutov/cly@1.9.0 init
+      - run:
+          name: Verify Cypress binary
+          working_directory: test-binary
+          command: DEBUG=cypress:cli $(yarn bin cypress) verify
+      - run:
+          name: Run Cypress binary
+          working_directory: test-binary
+          command: DEBUG=cypress:cli $(yarn bin cypress) run
+      - store-npm-logs
+
+linux-x64-workflow: &linux-x64-workflow
+  jobs:
+    - node_modules_install
+    - build:
+        context: test-runner:env-canary
+        requires:
+          - node_modules_install
+    - check-ts:
+        requires:
+          - build
+    - lint:
+        name: linux-lint
+        requires:
+          - build
+    - percy-finalize:
+        context: [test-runner:poll-circle-workflow, test-runner:percy]
+        required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
+        requires:
+          - build
+    - lint-types:
+        requires:
+          - build
+    # unit, integration and e2e tests
+    - cli-visual-tests:
+        context: test-runner:percy
+        requires:
+          - build
+    - unit-tests:
+        requires:
+          - build
+    - unit-tests-release:
+        context: test-runner:npm-release
+        requires:
+          - build
+    - server-unit-tests:
+        requires:
+          - build
+    - server-integration-tests:
+        requires:
+          - build
+    - server-performance-tests:
+        requires:
+          - build
+    - system-tests-node-modules-install:
+        context: test-runner:performance-tracking
+        requires:
+          - build
+    - system-tests-chrome:
+        context: test-runner:performance-tracking
+        requires:
+          - system-tests-node-modules-install
+    - system-tests-electron:
+        context: test-runner:performance-tracking
+        requires:
+          - system-tests-node-modules-install
+    - system-tests-firefox:
+        context: test-runner:performance-tracking
+        requires:
+          - system-tests-node-modules-install
+    - system-tests-webkit:
+        context: test-runner:performance-tracking
+        requires:
+          - system-tests-node-modules-install
+    - system-tests-non-root:
+        context: test-runner:performance-tracking
+        executor: non-root-docker-user
+        requires:
+          - system-tests-node-modules-install
+    - driver-integration-tests-chrome:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
+    - driver-integration-tests-chrome-beta:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
+    - driver-integration-tests-firefox:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
+    - driver-integration-tests-electron:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
+    - driver-integration-tests-webkit:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
+    - run-frontend-shared-component-tests-chrome:
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        percy: true
+        requires:
+          - build
+    - run-launchpad-integration-tests-chrome:
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        percy: true
+        requires:
+          - build
+    - run-launchpad-component-tests-chrome:
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        percy: true
+        requires:
+          - build
+    - run-app-integration-tests-chrome:
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        percy: true
+        requires:
+          - build
+    - run-webpack-dev-server-integration-tests:
+        context: [test-runner:cypress-record-key, test-runner:percy]
+        requires:
+          - system-tests-node-modules-install
+    - run-vite-dev-server-integration-tests:
+        context: [test-runner:cypress-record-key, test-runner:percy]
+        requires:
+          - system-tests-node-modules-install
+    - run-app-component-tests-chrome:
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests, test-runner:percy]
+        percy: true
+        requires:
+          - build
+    - run-reporter-component-tests-chrome:
+        context: [test-runner:cypress-record-key, test-runner:percy]
+        percy: true
+        requires:
+          - build
+    - reporter-integration-tests:
+        context: [test-runner:cypress-record-key, test-runner:percy]
+        requires:
+          - build
+    - npm-webpack-dev-server:
+        requires:
+          - system-tests-node-modules-install
+    - npm-vite-dev-server:
+        requires:
+          - build
+    - npm-webpack-preprocessor:
+        requires:
+          - build
+    - npm-webpack-batteries-included-preprocessor:
+        requires:
+          - build
+    - npm-vue:
+        requires:
+          - build
+    - npm-react:
+        requires:
+          - build
+    - npm-angular:
+        requires:
+          - build
+    - npm-mount-utils:
+        requires:
+          - build
+    - npm-create-cypress-tests:
+        requires:
+          - build
+    - npm-eslint-plugin-dev:
+        requires:
+          - build
+    - npm-cypress-schematic:
+        requires:
+          - build
+    - v8-integration-tests:
+        requires:
+          - system-tests-node-modules-install
+    # This release definition must be updated with any new jobs
+    # Any attempts to automate this are welcome
+    # If CircleCI provided an "after all" hook, then this wouldn't be necessary
+    - npm-release:
+        context: test-runner:npm-release
+        requires:
+          - build
+          - check-ts
+          - npm-angular
+          - npm-eslint-plugin-dev
+          - npm-create-cypress-tests
+          - npm-react
+          - npm-mount-utils
+          - npm-vue
+          - npm-webpack-batteries-included-preprocessor
+          - npm-webpack-preprocessor
+          - npm-vite-dev-server
+          - npm-webpack-dev-server
+          - npm-cypress-schematic
+          - lint-types
+          - linux-lint
+          - percy-finalize
+          - driver-integration-tests-firefox
+          - driver-integration-tests-chrome
+          - driver-integration-tests-chrome-beta
+          - driver-integration-tests-electron
+          - system-tests-non-root
+          - system-tests-firefox
+          - system-tests-electron
+          - system-tests-chrome
+          - server-performance-tests
+          - server-integration-tests
+          - server-unit-tests
+          - test-kitchensink
+          - unit-tests
+          - unit-tests-release
+          - cli-visual-tests
+          - reporter-integration-tests
+          - run-app-component-tests-chrome
+          - run-app-integration-tests-chrome
+          - run-frontend-shared-component-tests-chrome
+          - run-launchpad-component-tests-chrome
+          - run-launchpad-integration-tests-chrome
+          - run-reporter-component-tests-chrome
+          - run-webpack-dev-server-integration-tests
+          - run-vite-dev-server-integration-tests
+          - v8-integration-tests
+
+    # various testing scenarios, like building full binary
+    # and testing it on a real project
+    - test-against-staging:
+        context: test-runner:record-tests
+        <<: *mainBuildFilters
+        requires:
+          - build
+    - test-kitchensink:
+        requires:
+          - build
+    - test-kitchensink-against-staging:
+        context: test-runner:record-tests
+        <<: *mainBuildFilters
+        requires:
+          - build
+    - create-build-artifacts:
+        context:
+          - test-runner:upload
+          - test-runner:commit-status-checks
+        requires:
+          - build
+    - test-npm-module-on-minimum-node-version:
+        requires:
+          - create-build-artifacts
+    - test-types-cypress-and-jest:
+        requires:
+          - create-build-artifacts
+    - test-full-typescript-project:
+        requires:
+          - create-build-artifacts
+    - test-binary-against-kitchensink:
+        requires:
+          - create-build-artifacts
+    - test-npm-module-and-verify-binary:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-staging:
+        context: test-runner:record-tests
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-kitchensink-chrome:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-recipes-firefox:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-recipes-chrome:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-recipes:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-kitchensink-firefox:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-todomvc-firefox:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-cypress-realworld-app:
+        <<: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-as-specific-user:
+        name: "test binary as a non-root user"
+        executor: non-root-docker-user
+        requires:
+          - create-build-artifacts
+    - test-binary-as-specific-user:
+        name: "test binary as a root user"
+        requires:
+          - create-build-artifacts
+    - binary-system-tests:
+        requires:
+          - create-build-artifacts
+          - system-tests-node-modules-install
+
+linux-arm64-workflow: &linux-arm64-workflow
+  jobs:
+    - node_modules_install:
+        name: linux-arm64-node-modules-install
+        executor: linux-arm64
+        resource_class: arm.medium
+        only-cache-for-root-user: true
+
+    - build:
+        name: linux-arm64-build
+        executor: linux-arm64
+        resource_class: arm.medium
+        requires:
+          - linux-arm64-node-modules-install
+
+    - create-build-artifacts:
+        name: linux-arm64-create-build-artifacts
+        context:
+          - test-runner:upload
+          - test-runner:commit-status-checks
+        executor: linux-arm64
+        resource_class: arm.medium
+        requires:
+          - linux-arm64-build
+
+    - v8-integration-tests:
+        name: linux-arm64-v8-integration-tests
+        executor: linux-arm64
+        resource_class: arm.medium
+        requires:
+          - linux-arm64-build
+
+darwin-x64-workflow: &darwin-x64-workflow
+  jobs:
+    - node_modules_install:
+        name: darwin-x64-node-modules-install
+        executor: mac
+        resource_class: macos.x86.medium.gen2
+        only-cache-for-root-user: true
+
+    - build:
+        name: darwin-x64-build
+        context: test-runner:env-canary
+        executor: mac
+        resource_class: macos.x86.medium.gen2
+        requires:
+          - darwin-x64-node-modules-install
+
+    - create-build-artifacts:
+        name: darwin-x64-create-build-artifacts
+        context:
+          - test-runner:sign-mac-binary
+          - test-runner:upload
+          - test-runner:commit-status-checks
+        executor: mac
+        resource_class: macos.x86.medium.gen2
+        requires:
+          - darwin-x64-build
+
+    - test-kitchensink:
+        name: darwin-x64-test-kitchensink
+        executor: mac
+        requires:
+          - darwin-x64-build
+
+    - v8-integration-tests:
+        name: darwin-x64-v8-integration-tests
+        executor: mac
+        resource_class: macos.x86.medium.gen2
+        requires:
+          - darwin-x64-build
+
+darwin-arm64-workflow: &darwin-arm64-workflow
+  jobs:
+    - node_modules_install:
+        name: darwin-arm64-node-modules-install
+        executor: darwin-arm64
+        resource_class: cypress-io/latest_m1
+        only-cache-for-root-user: true
+
+    - build:
+        name: darwin-arm64-build
+        executor: darwin-arm64
+        resource_class: cypress-io/latest_m1
+        requires:
+          - darwin-arm64-node-modules-install
+
+    - create-build-artifacts:
+        name: darwin-arm64-create-build-artifacts
+        context:
+          - test-runner:sign-mac-binary
+          - test-runner:upload
+          - test-runner:commit-status-checks
+        executor: darwin-arm64
+        resource_class: cypress-io/latest_m1
+        requires:
+          - darwin-arm64-build
+
+    - v8-integration-tests:
+        name: darwin-arm64-v8-integration-tests
+        executor: darwin-arm64
+        resource_class: cypress-io/latest_m1
+        requires:
+          - darwin-arm64-build
+
+windows-workflow: &windows-workflow
+  jobs:
+    - node_modules_install:
+        name: windows-node-modules-install
+        executor: windows
+        resource_class: windows.large
+        only-cache-for-root-user: true
+
+    - build:
+        name: windows-build
+        context: test-runner:env-canary
+        executor: windows
+        resource_class: windows.large
+        requires:
+          - windows-node-modules-install
+
+    - run-app-integration-tests-chrome:
+        name: windows-run-app-integration-tests-chrome
+        executor: windows
+        resource_class: windows.large
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
+        requires:
+          - windows-build
+
+    - run-launchpad-integration-tests-chrome:
+        name: windows-run-launchpad-integration-tests-chrome
+        executor: windows
+        resource_class: windows.large
+        context: [test-runner:cypress-record-key, test-runner:launchpad-tests]
+        requires:
+          - windows-build
+
+    - unit-tests:
+        name: windows-unit-tests
+        executor: windows
+        resource_class: windows.large
+        requires:
+          - windows-build
+
+    - create-build-artifacts:
+        name: windows-create-build-artifacts
+        executor: windows
+        resource_class: windows.large
+        context:
+          - test-runner:sign-windows-binary
+          - test-runner:upload
+          - test-runner:commit-status-checks
+        requires:
+          - windows-build
+    - test-binary-against-kitchensink-chrome:
+        name: windows-test-binary-against-kitchensink-chrome
+        executor: windows
+        requires:
+          - windows-create-build-artifacts
+
+    - v8-integration-tests:
+        name: windows-v8-integration-tests
+        executor: windows
+        resource_class: windows.large
+        requires:
+          - windows-build
+
+workflows:
+  linux-x64:
+    <<: *linux-x64-workflow
+    <<: *linux-x64-workflow-exclude-filters
+  linux-arm64:
+    <<: *linux-arm64-workflow
+    <<: *linux-arm64-workflow-filters
+  darwin-x64:
+    <<: *darwin-x64-workflow
+    <<: *darwin-workflow-filters
+  darwin-arm64:
+    <<: *darwin-arm64-workflow
+    <<: *darwin-workflow-filters
+  windows:
+    <<: *windows-workflow
+    <<: *windows-workflow-filters

@@ -23,7 +23,7 @@ const TEST_AFTER_RUN_ASYNC_EVENT = 'runner:runnable:after:run:async'
 
 const RUNNABLE_LOGS = ['routes', 'agents', 'commands', 'hooks'] as const
 const RUNNABLE_PROPS = [
-  '_testConfig', 'id', 'order', 'title', '_titlePath', 'root', 'hookName', 'hookId', 'err', 'state', 'failedFromHookId', 'body', 'speed', 'type', 'duration', 'wallClockStartedAt', 'wallClockDuration', 'timings', 'file', 'originalTitle', 'invocationDetails', 'final', 'currentRetry', 'retries', '_slow',
+  '_testConfig', 'id', 'order', 'title', '_titlePath', 'root', 'hookName', 'hookId', 'err', 'state', 'pending', 'failedFromHookId', 'body', 'speed', 'type', 'duration', 'wallClockStartedAt', 'wallClockDuration', 'timings', 'file', 'originalTitle', 'invocationDetails', 'final', 'currentRetry', 'retries', '_slow',
 ] as const
 
 const debug = debugFn('cypress:driver:runner')
@@ -155,7 +155,7 @@ const wrap = (runnable): Record<string, any> | null => {
 
 // Reduce runnable down to its props and collections.
 // Sent to the Reporter to populate command log
-// and send to the Dashboard when in record mode.
+// and send to Cypress Cloud when in record mode.
 const wrapAll = (runnable): Record<string, any> => {
   return _.extend(
     {},
@@ -1492,7 +1492,7 @@ export default {
           // attach error right now
           // if we have one
           if (err) {
-            const PendingErrorMessages = ['sync skip', 'async skip call', 'async skip; aborting execution']
+            const PendingErrorMessages = ['sync skip', 'sync skip; aborting execution', 'async skip call', 'async skip; aborting execution']
 
             if (_.find(PendingErrorMessages, err.message) !== undefined) {
               err.isPending = true

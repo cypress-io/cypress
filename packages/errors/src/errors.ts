@@ -142,10 +142,10 @@ export const AllCypressErrors = {
   TESTS_DID_NOT_START_FAILED: () => {
     return errTemplate`The browser never connected. Something is wrong. The tests cannot run. Aborting...`
   },
-  DASHBOARD_CANCEL_SKIPPED_SPEC: () => {
+  CLOUD_CANCEL_SKIPPED_SPEC: () => {
     return errTemplate`${fmt.off(`\n  `)}This spec and its tests were skipped because the run has been canceled.`
   },
-  DASHBOARD_API_RESPONSE_FAILED_RETRYING: (arg1: {tries: number, delay: number, response: Error}) => {
+  CLOUD_API_RESPONSE_FAILED_RETRYING: (arg1: {tries: number, delay: number, response: Error}) => {
     const time = pluralize('time', arg1.tries)
     const delay = humanTime.long(arg1.delay, false)
 
@@ -160,7 +160,7 @@ export const AllCypressErrors = {
     /* Because of fmt.listFlags() and fmt.listItems() */
     /* eslint-disable indent */
   },
-  DASHBOARD_CANNOT_PROCEED_IN_PARALLEL: (arg1: {flags: any, response: Error}) => {
+  CLOUD_CANNOT_PROCEED_IN_PARALLEL: (arg1: {flags: any, response: Error}) => {
     return errTemplate`\
         We encountered an unexpected error talking to our servers.
 
@@ -175,7 +175,7 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(arg1.response)}`
   },
-  DASHBOARD_CANNOT_PROCEED_IN_SERIAL: (arg1: {flags: any, response: Error}) => {
+  CLOUD_CANNOT_PROCEED_IN_SERIAL: (arg1: {flags: any, response: Error}) => {
     return errTemplate`\
         We encountered an unexpected error talking to our servers.
 
@@ -188,7 +188,7 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(arg1.response)}`
   },
-  DASHBOARD_UNKNOWN_INVALID_REQUEST: (arg1: {flags: any, response: Error}) => {
+  CLOUD_UNKNOWN_INVALID_REQUEST: (arg1: {flags: any, response: Error}) => {
     return errTemplate`\
         We encountered an unexpected error talking to our servers.
 
@@ -205,14 +205,14 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(arg1.response)}`
   },
-  DASHBOARD_UNKNOWN_CREATE_RUN_WARNING: (arg1: {props: any, message: string}) => {
+  CLOUD_UNKNOWN_CREATE_RUN_WARNING: (arg1: {props: any, message: string}) => {
     return errTemplate`\
-        Warning from Cypress Dashboard: ${fmt.highlight(arg1.message)}
+        Warning from Cypress Cloud: ${fmt.highlight(arg1.message)}
 
         Details:
         ${fmt.meta(arg1.props)}`
   },
-  DASHBOARD_STALE_RUN: (arg1: {runUrl: string, [key: string]: any}) => {
+  CLOUD_STALE_RUN: (arg1: {runUrl: string, [key: string]: any}) => {
     return errTemplate`\
         You are attempting to pass the ${fmt.flag(`--parallel`)} flag to a run that was completed over 24 hours ago.
 
@@ -229,7 +229,7 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/stale-run`
   },
-  DASHBOARD_ALREADY_COMPLETE: (props: {runUrl: string}) => {
+  CLOUD_ALREADY_COMPLETE: (props: {runUrl: string}) => {
     return errTemplate`\
         The run you are attempting to access is already complete and will not accept new groups.
 
@@ -246,7 +246,7 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/already-complete`
   },
-  DASHBOARD_PARALLEL_REQUIRED: (arg1: {runUrl: string}) => {
+  CLOUD_PARALLEL_REQUIRED: (arg1: {runUrl: string}) => {
     return errTemplate`\
         You did not pass the ${fmt.flag(`--parallel`)} flag, but this run's group was originally created with the --parallel flag.
 
@@ -263,7 +263,7 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/parallel-required`
   },
-  DASHBOARD_PARALLEL_DISALLOWED: (arg1: {runUrl: string}) => {
+  CLOUD_PARALLEL_DISALLOWED: (arg1: {runUrl: string}) => {
     return errTemplate`\
         You passed the ${fmt.flag(`--parallel`)} flag, but this run group was originally created without the --parallel flag.
 
@@ -279,7 +279,37 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/parallel-disallowed`
   },
-  DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH: (arg1: {runUrl: string, parameters: any}) => {
+  CLOUD_PARALLEL_GROUP_PARAMS_MISMATCH: (arg1: {runUrl: string, parameters: any, payload: any }) => {
+    let params: any = arg1.parameters
+
+    if (arg1.payload?.differentParams) {
+      params = {}
+
+      _.map(arg1.parameters, (value, key) => {
+        if (key === 'specs' && arg1.payload.differentSpecs?.length) {
+          const addedSpecs: string[] = []
+          const missingSpecs: string[] = []
+
+          _.forEach(arg1.payload.differentSpecs, (s) => {
+            if (value.includes(s)) {
+              addedSpecs.push(s)
+            } else {
+              missingSpecs.push(s)
+            }
+          })
+
+          params['differentSpecs'] = {
+            added: addedSpecs,
+            missing: missingSpecs,
+          }
+        } else if (arg1.payload.differentParams[key]?.expected) {
+          params[key] = `${value}.... (Expected: ${(arg1.payload.differentParams[key].expected)})`
+        } else {
+          params[key] = value
+        }
+      })
+    }
+
     return errTemplate`\
         You passed the ${fmt.flag(`--parallel`)} flag, but we do not parallelize tests across different environments.
 
@@ -299,11 +329,11 @@ export const AllCypressErrors = {
 
         This machine sent the following parameters:
 
-        ${fmt.meta(arg1.parameters)}
+        ${fmt.meta(params)}
 
         https://on.cypress.io/parallel-group-params-mismatch`
   },
-  DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE: (arg1: {runUrl: string, ciBuildId?: string | null}) => {
+  CLOUD_RUN_GROUP_NAME_NOT_UNIQUE: (arg1: {runUrl: string, ciBuildId?: string | null}) => {
     return errTemplate`\
         You passed the ${fmt.flag(`--group`)} flag, but this group name has already been used for this run.
 
@@ -369,7 +399,7 @@ export const AllCypressErrors = {
       parallel: '--parallel',
     })}
 
-        These flags can only be used when recording to the Cypress Dashboard service.
+        These flags can only be used when recording to Cypress Cloud.
 
         https://on.cypress.io/record-params-without-recording`
   },
@@ -415,7 +445,7 @@ export const AllCypressErrors = {
   },
   PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION: (arg1: string) => {
     return errTemplate`\
-        This project has been configured to record runs on our Dashboard.
+        This project has been configured to record runs on our Cypress Cloud.
 
         It currently has the projectId: ${fmt.highlight(arg1)}
 
@@ -433,7 +463,7 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/recording-project-runs`
   },
-  DASHBOARD_INVALID_RUN_REQUEST: (arg1: {message: string, errors: string[], object: object}) => {
+  CLOUD_INVALID_RUN_REQUEST: (arg1: {message: string, errors: string[], object: object}) => {
     return errTemplate`\
         Recording this run failed because the request was invalid.
 
@@ -457,7 +487,7 @@ export const AllCypressErrors = {
 
         This error will not alter the exit code.`
   },
-  DASHBOARD_CANNOT_UPLOAD_RESULTS: (apiErr: Error) => {
+  CLOUD_CANNOT_UPLOAD_RESULTS: (apiErr: Error) => {
     return errTemplate`\
         Warning: We encountered an error while uploading results from your run.
 
@@ -467,7 +497,7 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(apiErr)}`
   },
-  DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE: (apiErr: Error) => {
+  CLOUD_CANNOT_CREATE_RUN_OR_INSTANCE: (apiErr: Error) => {
     return errTemplate`\
         Warning: We encountered an error talking to our servers.
 
@@ -477,23 +507,23 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(apiErr)}`
   },
-  DASHBOARD_RECORD_KEY_NOT_VALID: (recordKey: string, projectId: string) => {
+  CLOUD_RECORD_KEY_NOT_VALID: (recordKey: string, projectId: string) => {
     return errTemplate`\
         Your Record Key ${fmt.highlight(recordKey)} is not valid with this projectId: ${fmt.highlightSecondary(projectId)}
 
         It may have been recently revoked by you or another user.
 
-        Please log into the Dashboard to see the valid Record Keys.
+        Please log into Cypress Cloud to see the valid Record Keys.
 
         https://on.cypress.io/dashboard/projects/${fmt.off(projectId)}`
   },
-  DASHBOARD_PROJECT_NOT_FOUND: (projectId: string, configFileBaseName: string) => {
+  CLOUD_PROJECT_NOT_FOUND: (projectId: string, configFileBaseName: string) => {
     return errTemplate`\
-        We could not find a Dashboard project with the projectId: ${fmt.highlight(projectId)}
+        We could not find a Cypress Cloud project with the projectId: ${fmt.highlight(projectId)}
 
         This ${fmt.highlightSecondary(`projectId`)} came from your ${fmt.path(configFileBaseName)} file or an environment variable.
 
-        Please log into the Dashboard and find your project.
+        Please log into Cypress Cloud and find your project.
 
         We will list the correct projectId in the 'Settings' tab.
 
@@ -850,7 +880,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         You've exceeded the limit of private test results under your free plan this month. ${getUsedTestsMessage(arg1.limit, arg1.usedTestsMessage)}
 
-        Your plan is now in a grace period, which means your tests will still be recorded until ${fmt.off(arg1.gracePeriodMessage)}. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
+        Your plan is now in a grace period, which means your tests will still be recorded until ${fmt.off(arg1.gracePeriodMessage)}. Please upgrade your plan to continue recording tests on Cypress Cloud in the future.
 
         ${fmt.off(arg1.link)}`
   },
@@ -1072,9 +1102,20 @@ export const AllCypressErrors = {
   },
   EXPERIMENTAL_SESSION_SUPPORT_REMOVED: () => {
     return errTemplate`\
-        The ${fmt.highlight(`experimentalSessionSupport`)} configuration option was removed in ${fmt.cypressVersion(`9.6.0`)} and replaced with ${fmt.highlight(`experimentalSessionAndOrigin`)}. Please update your config to use ${fmt.highlight(`experimentalSessionAndOrigin`)} instead.
+        The ${fmt.highlight(`experimentalSessionSupport`)} configuration option was removed in ${fmt.cypressVersion(`9.6.0`)}.
+
+        You can safely remove this option from your config.
         
         https://on.cypress.io/session`
+  },
+  EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED: () => {
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalSessionAndOrigin`)} configuration option was removed in ${fmt.cypressVersion(`12.0.0`)}.
+
+        You can safely remove this option from your config.
+        
+        https://on.cypress.io/session
+        https://on.cypress.io/origin`
   },
   EXPERIMENTAL_SHADOW_DOM_REMOVED: () => {
     return errTemplate`\
@@ -1115,6 +1156,48 @@ export const AllCypressErrors = {
         The ${fmt.highlight(`experimentalStudio`)} experiment is currently only supported for End to End Testing.
 
         If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/studio-beta`
+  },
+  EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY: () => {
+    const code = errPartial`
+    {
+      e2e: {
+        experimentalRunAllSpecs: true
+      },
+    }`
+
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalRunAllSpecs`)} experiment is currently only supported for End to End Testing and must be configured as an e2e testing type property: ${fmt.highlightSecondary(`e2e.experimentalRunAllSpecs`)}.
+
+        ${fmt.code(code)}
+
+        If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/run-all-specs`
+  },
+  EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY: () => {
+    const code = errPartial`
+    {
+      e2e: {
+        experimentalOriginDependencies: true
+      },
+    }`
+
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalOriginDependencies`)} experiment is currently only supported for End to End Testing and must be configured as an e2e testing type property: ${fmt.highlightSecondary(`e2e.experimentalOriginDependencies`)}.
+
+        ${fmt.code(code)}`
+  },
+  EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
+    const code = errPartial`
+    {
+      e2e: {
+        experimentalSkipDomainInjection: ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com']
+      },
+    }`
+
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalSkipDomainInjection`)} experiment is currently only supported for End to End Testing and must be configured as an e2e testing type property: ${fmt.highlightSecondary(`e2e.experimentalSkipDomainInjection`)}.
+        The suggested values are only a recommendation.
+
+        ${fmt.code(code)}`
   },
   FIREFOX_GC_INTERVAL_REMOVED: () => {
     return errTemplate`\
@@ -1436,9 +1519,9 @@ export const AllCypressErrors = {
     `
   },
 
-  DASHBOARD_GRAPHQL_ERROR: (err: Error) => {
+  CLOUD_GRAPHQL_ERROR: (err: Error) => {
     return errTemplate`
-      We received an unexpected error response from the request to the Cypress Dashboard:
+      We received an unexpected error response from the request to Cypress Cloud:
 
       ${fmt.stringify(err.message)}
     `
@@ -1547,11 +1630,11 @@ export const AllCypressErrors = {
       `
   },
 
-  MIGRATION_MISMATCHED_CYPRESS_VERSIONS: (version: string) => {
+  MIGRATION_MISMATCHED_CYPRESS_VERSIONS: (version: string, currentVersion: string) => {
     return errTemplate`
-      You are running Cypress version 10 in global mode, but you are attempting to migrate a project where ${fmt.cypressVersion(version)} is installed. 
+      You are running ${fmt.cypressVersion(currentVersion)} in global mode, but you are attempting to migrate a project where ${fmt.cypressVersion(version)} is installed. 
 
-      Ensure the project you are migrating has Cypress version 10 installed.
+      Ensure the project you are migrating has Cypress version ${fmt.cypressVersion(currentVersion)} installed.
 
       https://on.cypress.io/migration-guide
     `
@@ -1559,9 +1642,9 @@ export const AllCypressErrors = {
 
   MIGRATION_CYPRESS_NOT_FOUND: () => {
     return errTemplate`
-      You are running Cypress 10 in global mode and attempting to open or migrate a project where an install of ${fmt.code('cypress')} cannot be found.
+      You are running Cypress 10+ in global mode and attempting to open or migrate a project where an install of ${fmt.code('cypress')} cannot be found.
 
-      Ensure that ${fmt.code('cypress@10')} is installed in the project you are attempting to open or migrate.
+      Ensure that ${fmt.code('cypress@10')} or greater is installed in the project you are attempting to open or migrate.
 
       https://on.cypress.io/migration-guide
     `

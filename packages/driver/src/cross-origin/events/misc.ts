@@ -35,4 +35,16 @@ export const handleMiscEvents = (Cypress: Cypress.Cypress, cy: $Cy) => {
     Cypress.action('app:window:load', undefined, url)
     Cypress.emit('internal:window:load', { type: 'same:origin', url })
   })
+
+  Cypress.on('paused', (nextCommandName: string) => {
+    Cypress.specBridgeCommunicator.toPrimary('paused', { nextCommandName, origin: window.origin })
+  })
+
+  Cypress.specBridgeCommunicator.on('resume:next', () => {
+    Cypress.emit('resume:next')
+  })
+
+  Cypress.specBridgeCommunicator.on('resume:all', () => {
+    Cypress.emit('resume:all')
+  })
 }

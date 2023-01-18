@@ -33,14 +33,16 @@ describe('slow network: launchpad', () => {
   it('loads through to the browser screen when the network is slow', () => {
     cy.loginUser()
     cy.visitLaunchpad()
+    cy.skipWelcome()
     cy.get('[data-cy=top-nav-cypress-version-current-link]').should('not.exist')
     cy.contains('E2E Testing').click()
     cy.get('h1').should('contain', 'Choose a browser')
   })
 
   // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/21897
-  it.skip('shows the versions after they resolve', () => {
+  it('shows the versions after they resolve', { retries: 15 }, () => {
     cy.visitLaunchpad()
+    cy.skipWelcome()
     cy.get('[data-cy=top-nav-cypress-version-current-link]').should('not.exist')
     cy.contains('Log in')
     cy.wait(500)

@@ -7,10 +7,7 @@
     "build-prod": "tsc --project .",
     "clean": "rimraf 'lib/**/*.js'",
     "clean-deps": "rimraf node_modules",
-    "test": "yarn test-unit",
-    "test-debug": "yarn test-unit --inspect-brk=5566",
-    "test-unit": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "test-watch": "yarn test-unit --watch"
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
   },
   "dependencies": {
     "fs-extra": "9.1.0"

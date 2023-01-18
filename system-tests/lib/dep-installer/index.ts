@@ -148,7 +148,15 @@ async function makeWorkspacePackagesAbsolute (pathToPkgJson: string): Promise<st
  * specified in the project's `package.json`. No-op if no `package.json` is found.
  * Will use `yarn` or `npm` based on the lockfile present.
  */
-export async function scaffoldProjectNodeModules (project: string, updateLockFile: boolean = !!process.env.UPDATE_LOCK_FILE): Promise<void> {
+export async function scaffoldProjectNodeModules ({
+  project,
+  updateLockFile = !!process.env.UPDATE_LOCK_FILE,
+  forceCopyDependencies = false,
+}: {
+  project: string
+  updateLockFile?: boolean
+  forceCopyDependencies?: boolean
+}): Promise<void> {
   const projectDir = projectPath(project)
   const relativePathToMonorepoRoot = path.relative(
     path.join(projects, project),
@@ -195,7 +203,7 @@ export async function scaffoldProjectNodeModules (project: string, updateLockFil
 
     let persistCacheCb: () => Promise<void>
 
-    if (hasYarnLock) {
+    if (hasYarnLock && !forceCopyDependencies) {
       await symlinkNodeModulesFromCache(tmpNodeModulesDir, cacheNodeModulesDir)
     } else {
       // due to an issue in NPM, we cannot have `node_modules` be a symlink. fall back to copying.
@@ -300,7 +308,7 @@ export async function scaffoldCommonNodeModules () {
   ].map(symlinkNodeModule))
 }
 
-async function symlinkNodeModule (pkg) {
+export async function symlinkNodeModule (pkg) {
   const from = path.join(cyTmpDir, 'node_modules', pkg)
   const to = pathToPackage(pkg)
 

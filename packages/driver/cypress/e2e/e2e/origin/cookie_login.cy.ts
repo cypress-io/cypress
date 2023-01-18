@@ -691,6 +691,18 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
       })
     })
 
+    it('does not error when setting cookie with different domain', () => {
+      cy.get('[data-cy="cross-origin-secondary-link"]').click()
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.document().then((doc) => {
+          doc.cookie = 'key=value; domain=www.example.com'
+        })
+
+        // the cookie should not be set if the domain does not match
+        cy.document().its('cookie').should('equal', '')
+      })
+    })
+
     it('works when setting cookie with extra, benign parts', () => {
       cy.get('[data-cy="cross-origin-secondary-link"]').click()
       cy.origin('http://www.foobar.com:3500', () => {

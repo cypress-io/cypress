@@ -9,7 +9,7 @@ const scaffoldAngularProject = async (project: string) => {
 
   Fixtures.removeProject(project)
   await Fixtures.scaffoldProject(project)
-  await FixturesScaffold.scaffoldProjectNodeModules(project)
+  await FixturesScaffold.scaffoldProjectNodeModules({ project })
   await fs.remove(path.join(projectPath, 'cypress.config.ts'))
   await fs.remove(path.join(projectPath, 'cypress'))
 

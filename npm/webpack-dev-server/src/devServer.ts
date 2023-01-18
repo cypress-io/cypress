@@ -137,7 +137,7 @@ async function getPreset (devServerConfig: WebpackDevServerConfig): Promise<Opti
       return { sourceWebpackModulesResult: sourceDefaultWebpackDependencies(devServerConfig) }
 
     default:
-      throw new Error(`Unexpected framework ${(devServerConfig as any).framework}, please visit https://docs.cypress.io/guides/component-testing/component-framework-configuration to see a list of supported frameworks`)
+      throw new Error(`Unexpected framework ${(devServerConfig as any).framework}, please visit https://on.cypress.io/component-framework-configuration to see a list of supported frameworks`)
   }
 }
 

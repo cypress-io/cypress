@@ -1,0 +1,8 @@
+$border-radius: 4px;
+
+@mixin menu-style {
+  background: #fff;
+  border: 1px solid #DDD;
+  box-shadow: 2px 5px 12px rgba(0, 0, 0, 0.2);
+  border-radius: $border-radius;
+}

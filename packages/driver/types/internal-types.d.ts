@@ -58,10 +58,21 @@ declare namespace Cypress {
     (action: 'clear:cookies', fn: () => void)
     (action: 'cross:origin:cookies', fn: (cookies: AutomationCookie[]) => void)
     (action: 'before:stability:release', fn: () => void)
+    (action: 'paused', fn: (nextCommandName: string) => void)
   }
 
   interface Backend {
     (task: 'cross:origin:cookies:received'): Promise<void>
+    (task: 'get:rendered:html:origins'): Promise<string[]>
+  }
+}
+
+declare namespace InternalCypress {
+  interface Cypress extends Cypress.Cypress, NodeEventEmitter {}
+
+  interface LocalStorage extends Cypress.LocalStorage {
+    setStorages: (local, remote) => LocalStorage
+    unsetStorages: () => LocalStorage
   }
 }
 

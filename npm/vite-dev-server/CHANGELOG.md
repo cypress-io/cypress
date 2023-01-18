@@ -1,3 +1,55 @@
+# [@cypress/vite-dev-server-v5.0.2](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.0.1...@cypress/vite-dev-server-v5.0.2) (2022-12-09)
+
+
+### Bug Fixes
+
+* **vite-dev-server:** ensure assets are correctly reloaded ([#24965](https://github.com/cypress-io/cypress/issues/24965)) ([89c013f](https://github.com/cypress-io/cypress/commit/89c013fcedc2509850ec820f938d33f08f9cbb42))
+
+# [@cypress/vite-dev-server-v5.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v5.0.0...@cypress/vite-dev-server-v5.0.1) (2022-12-08)
+
+
+### Bug Fixes
+
+* add v8 snapshot usage to cypress in cypress testing ([#24860](https://github.com/cypress-io/cypress/issues/24860)) ([c540284](https://github.com/cypress-io/cypress/commit/c540284f5080d46a8597e53dd2213cb6fb133078))
+
+# [@cypress/vite-dev-server-v5.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v4.0.1...@cypress/vite-dev-server-v5.0.0) (2022-12-02)
+
+
+### chore
+
+* remove experimentalSessionAndOrigin flag ([#24340](https://github.com/cypress-io/cypress/issues/24340)) ([69873ae](https://github.com/cypress-io/cypress/commit/69873ae9884228f15310fd151e42cbc0cb712817))
+
+
+### BREAKING CHANGES
+
+* removed experimentalSessionAndOrigin flag. testIsolation defaults to strict
+
+# [@cypress/vite-dev-server-v4.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v4.0.0...@cypress/vite-dev-server-v4.0.1) (2022-11-08)
+
+
+### Bug Fixes
+
+* vite-dev-server hoisting issue in binary ([#24599](https://github.com/cypress-io/cypress/issues/24599)) ([2513bea](https://github.com/cypress-io/cypress/commit/2513beac307e95267ab736a93a39cd1cd1280506))
+
+# [@cypress/vite-dev-server-v4.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.4.0...@cypress/vite-dev-server-v4.0.0) (2022-11-07)
+
+
+### Bug Fixes
+
+* normalize vite config resolution ([#24369](https://github.com/cypress-io/cypress/issues/24369)) ([feba489](https://github.com/cypress-io/cypress/commit/feba489a9aeaddad3197764fe7e7405cfb4e7a56))
+
+
+### BREAKING CHANGES
+
+* vite.config.js is no longer merged when devServer.viteConfig is provided
+
+# [@cypress/vite-dev-server-v3.4.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.3.1...@cypress/vite-dev-server-v3.4.0) (2022-11-01)
+
+
+### Features
+
+* introduce v8 snapshots to improve startup performance ([#24295](https://github.com/cypress-io/cypress/issues/24295)) ([b0c0eaa](https://github.com/cypress-io/cypress/commit/b0c0eaa508bb6dafdc1997bc00fb7ed6f5bcc160))
+
 # [@cypress/vite-dev-server-v3.3.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v3.3.0...@cypress/vite-dev-server-v3.3.1) (2022-10-11)
 
 

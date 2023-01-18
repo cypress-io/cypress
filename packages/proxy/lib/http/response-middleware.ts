@@ -55,9 +55,11 @@ function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer,
   return 'latin1'
 }
 
-function reqMatchesSuperDomainOrigin (req: CypressIncomingRequest, remoteState) {
+function reqMatchesPolicyBasedOnDomain (req: CypressIncomingRequest, remoteState, skipDomainInjectionForDomains) {
   if (remoteState.strategy === 'http') {
-    return cors.urlMatchesSuperDomainOriginProps(req.proxiedUrl, remoteState.props)
+    return cors.urlMatchesPolicyBasedOnDomainProps(req.proxiedUrl, remoteState.props, {
+      skipDomainInjectionForDomains,
+    })
   }
 
   if (remoteState.strategy === 'file') {
@@ -67,7 +69,7 @@ function reqMatchesSuperDomainOrigin (req: CypressIncomingRequest, remoteState) 
   return false
 }
 
-function reqWillRenderHtml (req: CypressIncomingRequest) {
+function reqWillRenderHtml (req: CypressIncomingRequest, res: IncomingMessage) {
   // will this request be rendered in the browser, necessitating injection?
   // https://github.com/cypress-io/cypress/issues/288
 
@@ -79,7 +81,11 @@ function reqWillRenderHtml (req: CypressIncomingRequest) {
   // don't inject if we didn't find both text/html and application/xhtml+xml,
   const accept = req.headers['accept']
 
-  return accept && accept.includes('text/html') && accept.includes('application/xhtml+xml')
+  // only check the content-type value, if it exists, to contains some type of html mimetype
+  const contentType = res?.headers['content-type'] || ''
+  const contentTypeIsHtmlIfExists = contentType ? contentType.includes('html') : true
+
+  return accept && accept.includes('text/html') && accept.includes('application/xhtml+xml') && contentTypeIsHtmlIfExists
 }
 
 function resContentTypeIs (res: IncomingMessage, contentType: string) {
@@ -91,10 +97,6 @@ function resContentTypeIsJavaScript (res: IncomingMessage) {
     ['application/javascript', 'application/x-javascript', 'text/javascript']
     .map(_.partial(resContentTypeIs, res)),
   )
-}
-
-function isHtml (res: IncomingMessage) {
-  return !resContentTypeIsJavaScript(res)
 }
 
 function resIsGzipped (res: IncomingMessage) {
@@ -240,7 +242,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
   this.res.isInitial = this.req.cookies['__cypress.initial'] === 'true'
 
   const isHTML = resContentTypeIs(this.incomingRes, 'text/html')
-  const isRenderedHTML = reqWillRenderHtml(this.req)
+  const isRenderedHTML = reqWillRenderHtml(this.req, this.incomingRes)
 
   if (isRenderedHTML) {
     const origin = new URL(this.req.proxiedUrl).origin
@@ -250,7 +252,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
 
   this.debug('determine injection')
 
-  const isReqMatchSuperDomainOrigin = reqMatchesSuperDomainOrigin(this.req, this.remoteStates.current())
+  const isReqMatchSuperDomainOrigin = reqMatchesPolicyBasedOnDomain(this.req, this.remoteStates.current(), this.config.experimentalSkipDomainInjection)
   const getInjectionLevel = () => {
     if (this.incomingRes.headers['x-cypress-file-server-error'] && !this.res.isInitial) {
       this.debug('- partial injection (x-cypress-file-server-error)')
@@ -259,10 +261,11 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     }
 
     // NOTE: Only inject fullCrossOrigin if the super domain origins do not match in order to keep parity with cypress application reloads
-    const isCrossSuperDomainOrigin = !reqMatchesSuperDomainOrigin(this.req, this.remoteStates.getPrimary())
+    const urlDoesNotMatchPolicyBasedOnDomain = !reqMatchesPolicyBasedOnDomain(this.req, this.remoteStates.getPrimary(), this.config.experimentalSkipDomainInjection)
     const isAUTFrame = this.req.isAUTFrame
+    const isHTMLLike = isHTML || isRenderedHTML
 
-    if (this.config.experimentalSessionAndOrigin && isCrossSuperDomainOrigin && isAUTFrame && (isHTML || isRenderedHTML)) {
+    if (urlDoesNotMatchPolicyBasedOnDomain && isAUTFrame && isHTMLLike) {
       this.debug('- cross origin injection')
 
       return 'fullCrossOrigin'
@@ -274,7 +277,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
       return false
     }
 
-    if (this.res.isInitial) {
+    if (this.res.isInitial && isHTMLLike) {
       this.debug('- full injection')
 
       return 'full'
@@ -300,7 +303,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
   }
 
   if (this.res.wantsInjection) {
-    // Chrome plans to make document.domain immutable in Chrome 106, with the default value
+    // Chrome plans to make document.domain immutable in Chrome 109, with the default value
     // of the Origin-Agent-Cluster header becoming 'true'. We explicitly disable this header
     // so that we can continue to support tests that visit multiple subdomains in a single spec.
     // https://github.com/cypress-io/cypress/issues/20147
@@ -426,7 +429,7 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
     }
   }
 
-  if (!this.config.experimentalSessionAndOrigin || !doesTopNeedSimulating) {
+  if (!doesTopNeedSimulating) {
     ([] as string[]).concat(cookies).forEach((cookie) => {
       appendCookie(cookie)
     })
@@ -442,7 +445,7 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
       url: this.req.proxiedUrl,
       isAUTFrame: this.req.isAUTFrame,
       doesTopNeedSimulating,
-      resourceType: this.req.requestedWith,
+      requestedWith: this.req.requestedWith,
       credentialLevel: this.req.credentialsLevel,
     },
   })
@@ -540,9 +543,12 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
       domainName: cors.getDomainNameFromUrl(this.req.proxiedUrl),
       wantsInjection: this.res.wantsInjection,
       wantsSecurityRemoved: this.res.wantsSecurityRemoved,
-      isHtml: isHtml(this.incomingRes),
+      isNotJavascript: !resContentTypeIsJavaScript(this.incomingRes),
       useAstSourceRewriting: this.config.experimentalSourceRewriting,
       modifyObstructiveThirdPartyCode: this.config.experimentalModifyObstructiveThirdPartyCode && !this.remoteStates.isPrimarySuperDomainOrigin(this.req.proxiedUrl),
+      shouldInjectDocumentDomain: cors.shouldInjectDocumentDomain(this.req.proxiedUrl, {
+        skipDomainInjectionForDomains: this.config.experimentalSkipDomainInjection,
+      }),
       modifyObstructiveCode: this.config.modifyObstructiveCode,
       url: this.req.proxiedUrl,
       deferSourceMapRewrite: this.deferSourceMapRewrite,
@@ -571,7 +577,7 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
 
   this.incomingResStream.setEncoding('utf8')
   this.incomingResStream = this.incomingResStream.pipe(rewriter.security({
-    isHtml: isHtml(this.incomingRes),
+    isNotJavascript: !resContentTypeIsJavaScript(this.incomingRes),
     useAstSourceRewriting: this.config.experimentalSourceRewriting,
     modifyObstructiveThirdPartyCode: this.config.experimentalModifyObstructiveThirdPartyCode && !this.remoteStates.isPrimarySuperDomainOrigin(this.req.proxiedUrl),
     modifyObstructiveCode: this.config.modifyObstructiveCode,

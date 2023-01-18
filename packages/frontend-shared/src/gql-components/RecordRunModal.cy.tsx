@@ -1,6 +1,6 @@
 import RecordRunModalVue from './RecordRunModal.vue'
 import { defaultMessages } from '@cy/i18n'
-import { UsePromptManager_SetPreferencesDocument } from '../generated/graphql-test'
+import { UsePromptManager_SetProjectPreferencesDocument } from '../generated/graphql-test'
 
 describe('RecordRunModal', () => {
   it('renders and records that it has been shown', () => {
@@ -9,7 +9,7 @@ describe('RecordRunModal', () => {
     cy.clock(now)
     const setPreferencesStub = cy.stub()
 
-    cy.stubMutationResolver(UsePromptManager_SetPreferencesDocument, (defineResult, { value }) => {
+    cy.stubMutationResolver(UsePromptManager_SetProjectPreferencesDocument, (defineResult, { value }) => {
       setPreferencesStub(JSON.parse(value))
     })
 

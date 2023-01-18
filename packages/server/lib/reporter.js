@@ -237,11 +237,6 @@ const events = {
   'test:before:run': mergeRunnable('test:before:run'), // our own custom event
 }
 
-const reporters = {
-  teamcity: 'mocha-teamcity-reporter',
-  junit: 'mocha-junit-reporter',
-}
-
 class Reporter {
   constructor (reporterName = 'spec', reporterOptions = {}, projectRoot) {
     if (!(this instanceof Reporter)) {
@@ -498,16 +493,22 @@ class Reporter {
   }
 
   static loadReporter (reporterName, projectRoot) {
-    let p; let r
+    let p
 
     debug('trying to load reporter:', reporterName)
 
-    r = reporters[reporterName]
-
-    if (r) {
+    // Explicitly require this here (rather than dynamically) so that it gets included in the v8 snapshot
+    if (reporterName === 'teamcity') {
       debug(`${reporterName} is built-in reporter`)
 
-      return require(r)
+      return require('mocha-teamcity-reporter')
+    }
+
+    // Explicitly require this here (rather than dynamically) so that it gets included in the v8 snapshot
+    if (reporterName === 'junit') {
+      debug(`${reporterName} is built-in reporter`)
+
+      return require('mocha-junit-reporter')
     }
 
     if (mochaReporters[reporterName]) {

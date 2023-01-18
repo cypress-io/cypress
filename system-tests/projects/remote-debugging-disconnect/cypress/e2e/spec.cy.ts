@@ -1,3 +1,9 @@
+const callAutomation = () => {
+  return Cypress.automation('remote:debugger:protocol', {
+    command: 'Browser.getVersion',
+  })
+}
+
 describe('e2e remote debugging disconnect', () => {
   it('reconnects as expected', () => {
     // 1 probing connection and 1 real connection should have been made during startup
@@ -9,15 +15,13 @@ describe('e2e remote debugging disconnect', () => {
 
     // now, kill all CDP sockets
     cy.task('kill:active:connections')
+    cy.then(() => {
+      const onRetry = () => {
+        return callAutomation().catch(() => cy.retry(onRetry, {}))
+      }
 
-    // this will attempt to run a CDP command, realize the socket is dead, enqueue it,
-    // and start the reconnection process
-    cy.wrap(Cypress)
-    // @ts-ignore
-    .invoke('automation', 'remote:debugger:protocol', {
-      command: 'Browser.getVersion',
+      return onRetry()
     })
-    .should('have.keys', ['protocolVersion', 'product', 'revision', 'userAgent', 'jsVersion'])
 
     // TODO: We're only reconnecting the page client. See if we can find a way to reconnect the browser client
     // evidence of a reconnection:
@@ -32,11 +36,9 @@ describe('e2e remote debugging disconnect', () => {
     cy.task('destroy:server')
     cy.task('kill:active:connections')
 
-    // this will cause a project-level error once we realize we can't talk to CDP anymore
-    cy.wrap(Cypress)
-    // @ts-ignore
-    .invoke('automation', 'remote:debugger:protocol', {
-      command: 'Browser.getVersion',
+    cy.then(() => {
+      // this will cause a project-level error once we realize we can't talk to CDP anymore
+      return callAutomation()
     })
   })
 })
