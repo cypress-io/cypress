@@ -28,7 +28,7 @@
         :class="type === 'ELLIPSIS' ? 'px-2.5 shrink-0 lg:hidden' :
           type === 'MIDDLE' ? 'truncate px-2.5 hidden lg:block' :
           type === 'LAST-PART-END' ? 'shrink-0 whitespace-pre' :
-          type === 'LAST-PART-START' ? 'pl-2.5 truncate' : 'px-2.5 truncate'"
+          type === 'LAST-PART-START' ? 'pl-2.5 truncate whitespace-pre' : 'px-2.5 truncate'"
       >
         <template v-if="type === 'ELLIPSIS'">
           <Tooltip>
