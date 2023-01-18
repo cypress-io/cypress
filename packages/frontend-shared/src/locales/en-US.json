@@ -525,7 +525,7 @@
       },
       "experimentalMemoryManagement": {
         "name": "Memory Management",
-        "description": "Enables support for improved memory management."
+        "description": "Enables support for improved memory management within Chromium-based browsers."
       },
       "experimentalSkipDomainInjection": {
         "name": "Skip Domain Injection",

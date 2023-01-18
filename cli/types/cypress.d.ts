@@ -3045,7 +3045,7 @@ declare namespace Cypress {
      */
     experimentalWebKitSupport: boolean
     /**
-     * Enables support for improved memory management.
+     * Enables support for improved memory management within Chromium-based browsers.
      * @default false
      */
     experimentalMemoryManagement: boolean
