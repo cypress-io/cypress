@@ -31,7 +31,7 @@ const cleanup = () => {
 // Extract the component name from the object passed to mount
 const getComponentDisplayName = <T extends SvelteComponent>(Component: SvelteConstructor<T>): string => {
   if (Component.name) {
-    const [_, match] = /Proxy\<(\w+)\>/.exec(Component.name) || []
+    const [, match] = /Proxy\<(\w+)\>/.exec(Component.name) || []
 
     return match || Component.name
   }
