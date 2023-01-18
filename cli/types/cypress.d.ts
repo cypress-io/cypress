@@ -3045,6 +3045,11 @@ declare namespace Cypress {
      */
     experimentalWebKitSupport: boolean
     /**
+     * Enables support for improved memory management within Chromium-based browsers.
+     * @default false
+     */
+    experimentalMemoryManagement: boolean
+    /**
      * Number of times to retry a failed test.
      * If a number is set, tests will retry in both runMode and openMode.
      * To enable test retries only in runMode, set e.g. `{ openMode: null, runMode: 2 }`
