@@ -64,15 +64,21 @@ export const useCohorts = () => {
   const getCohort = (config: CohortConfig) => {
     const cohortOptionSelected = ref<CohortOption>()
 
-    const cohortIds = config.options.map((option) => option.cohort)
+    const { name, options } = config
 
-    const fetchCohort = async () => {
-      const cohortSelected = await determineCohort(config.name, cohortIds)
+    if (!options || options.length <= 1) {
+      cohortOptionSelected.value = options?.[0]
+    } else {
+      const cohortIds = options.map((option) => option.cohort)
 
-      cohortOptionSelected.value = config.options.find((option) => option.cohort === cohortSelected.data?.determineCohort?.cohort)
+      const fetchCohort = async () => {
+        const cohortSelected = await determineCohort(name, cohortIds)
+
+        cohortOptionSelected.value = options.find((option) => option.cohort === cohortSelected.data?.determineCohort?.cohort)
+      }
+
+      fetchCohort()
     }
-
-    fetchCohort()
 
     return cohortOptionSelected
   }
