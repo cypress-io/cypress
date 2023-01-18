@@ -10,8 +10,8 @@ import { gql, useMutation } from '@urql/vue'
 import { TestsForRunDocument } from '../generated/graphql'
 
 gql`
-mutation TestsForRun ($runId: String!) {
-  testsForRun (runId: $runId)
+mutation TestsForRun ($spec: String!) {
+  testsForRun (spec: $spec)
 }
 `
 
@@ -61,8 +61,8 @@ export function useUnifiedRunner () {
           return specStore.setActiveSpec(null)
         }
 
-        if (route.query.runId) {
-          const res = await testsForRunMutation.executeMutation({ runId: route.query.runId as string })
+        if (route.query.mode && route.query.mode === 'debug') {
+          const res = await testsForRunMutation.executeMutation({ spec: activeSpecInSpecsList.relative })
 
           specStore.setTestFilter(res.data?.testsForRun?.length ? res.data.testsForRun : undefined)
         } else {

@@ -64,7 +64,7 @@ export function useEventManager () {
     eventManager.on('testFilter:cloudDebug:dismiss', () => {
       const currentRoute = router.currentRoute.value
 
-      const { runId, ...query } = currentRoute.query
+      const { mode, ...query } = currentRoute.query
 
       // Delete runId from query which will remove the test filter and trigger a rerun
       router.replace({ ...currentRoute, query })

@@ -87,7 +87,7 @@
               variant="white"
               class="gap-x-10px inline-flex whitespace-nowrap justify-center items-center isolate"
               :disabled="runAllFailuresState.disabled"
-              :to="{ path: '/specs/runner', query: { file: posixify(specData.fullPath) } }"
+              :to="{ path: '/specs/runner', query: { file: posixify(specData.fullPath), mode: 'debug' } }"
             >
               <template #prefix>
                 <IconActionRefresh

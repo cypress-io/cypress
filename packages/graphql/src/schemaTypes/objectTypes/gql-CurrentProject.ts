@@ -259,17 +259,6 @@ export const CurrentProject = objectType({
         return ctx.relevantRunSpecs.specs
       },
     })
-
-    //TODO: Finish implementing resolver for this field to supply runner with tests names to use for filtering
-    t.list.nonNull.string('testsForReviewBySpec', {
-      description: '',
-      args: {
-        specTitle: nonNull(stringArg()),
-      },
-      resolve: (source, args, ctx) => {
-        return ['foo/bar']
-      },
-    })
   },
   sourceType: {
     module: '@packages/data-context/src/data/ProjectLifecycleManager',

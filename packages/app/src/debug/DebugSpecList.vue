@@ -20,8 +20,8 @@
 <script setup lang="ts">
 import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
-import { computed } from 'vue'
-import { SwitchTestingTypeAndRelaunchDocument, TestingTypeEnum } from '../generated/graphql'
+import { computed, watchEffect } from 'vue'
+import { SetTestsForDebugDocument, SwitchTestingTypeAndRelaunchDocument, TestingTypeEnum } from '../generated/graphql'
 import DebugSpec from './DebugSpec.vue'
 import type { CloudDebugSpec } from './utils/DebugMapping'
 
@@ -100,11 +100,19 @@ fragment DebugSpecListGroups on CloudRunGroup {
 }
 `
 
+gql`
+  mutation SetTestsForDebug($testsBySpec: [TestsBySpecInput!]!) {
+    setTestsForRun (testsBySpec: $testsBySpec)
+  }
+`
+
 const props = defineProps<{
   specs: CloudDebugSpec[]
 }>()
 
 const switchTestingTypeMutation = useMutation(SwitchTestingTypeAndRelaunchDocument)
+
+const setTestsForDebug = useMutation(SetTestsForDebugDocument)
 
 const specs = computed(() => {
   return props.specs.map((specItem) => {
@@ -133,5 +141,20 @@ const specs = computed(() => {
 function switchTestingType (testingType: TestingTypeEnum) {
   switchTestingTypeMutation.executeMutation({ testingType })
 }
+
+watchEffect(() => {
+  const testsNamesBySpec = props.specs.map((specItem) => {
+    return {
+      specPath: specItem.spec.path,
+      tests: Object.values(specItem.tests)
+      .flat()
+      .map((test) => {
+        return test.titleParts.join(' ')
+      }),
+    }
+  })
+
+  setTestsForDebug.executeMutation({ testsBySpec: testsNamesBySpec })
+})
 
 </script>
