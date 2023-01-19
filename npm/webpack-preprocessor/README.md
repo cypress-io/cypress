@@ -42,6 +42,11 @@ module.exports = (on) => {
 }
 ```
 
+## Examples
+
+- [use-webpack-5](https://github.com/cypress-io/cypress/tree/develop/system-tests/projects/webpack-preprocessor-webpack-5) shows how to use webpack-preprocessor with Webpack 5
+- [use-ts-loader](https://github.com/cypress-io/cypress/tree/develop/system-tests/projects/webpack-preprocessor-ts-loader) shows how to transpile TypeScript specs following [Webpack TypeScript guide](https://webpack.js.org/guides/typescript/)
+
 ## Options
 
 Pass in options as the second argument to `webpack`:
