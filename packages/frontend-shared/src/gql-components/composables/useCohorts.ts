@@ -66,6 +66,7 @@ export const useCohorts = () => {
 
     const { name, options } = config
 
+    // If an experiment has been ended it will have <= 1 cohort option. In this case, bypass selecting & persisting a cohort
     if (!options || options.length <= 1) {
       cohortOptionSelected.value = options?.[0]
     } else {
