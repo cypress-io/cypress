@@ -131,8 +131,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
     - Merge any release-specific documentation changes into the main release PR.
     - You can view the doc's [branch deploy preview](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md#pull-requests) by clicking 'Details' on the PR's `netlify-cypress-docs/deploy-preview` GitHub status check.
 
-12. Create a PR for a new docker image in [`cypress-docker-images`](https://github.com/cypress-io/cypress-docker-images) under `included` for the new cypress version. Note: we use the base image with the Node version matching the bundled Node version. Instructions for updating `cypress-docker-images` can be found [here](https://github.com/cypress-io/cypress-docker-images/blob/master/CONTRIBUTING.md#add-new-included-image). Ensure the docker image is reviewed and has passing tests before preceeding.
-
+12. Create a new docker image using the new cypress version in [`cypress-docker-images`](https://github.com/cypress-io/cypress-docker-images). Create a PR in which you update [factory/.env](https://github.com/cypress-io/cypress-docker-images/blob/master/factory/.env#L20) to use the new cypress version. Ensure the docker image is reviewed and has passing tests before proceeding.
 
 13. Make the new npm version the "latest" version by updating the dist-tag `latest` to point to the new version:
 
@@ -157,7 +156,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
     - Create a new patch release (and a new minor release, if this is a minor release) in ZenHub, and schedule them both to be completed 2 weeks from the current date.
     - Move all issues that are still open from the current release to the appropriate future release.
 
-19. Bump `version` in [`package.json`](package.json), submit, get approvals on, and merge a new PR for the change. 
+19. Bump `version` in [`package.json`](package.json), submit, get approvals on, and merge a new PR for the change.
 
 20. After the PR to bump the  [`package.json`](package.json) version merges:
 
