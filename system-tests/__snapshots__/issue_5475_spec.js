@@ -42,7 +42,9 @@ exports['e2e issue 5475 history pushState hangs / fails when remote debugging po
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_5475_spec_1.js.mp4            (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/issue_5475_spec_1.js.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -90,7 +92,9 @@ exports['e2e issue 5475 history pushState hangs / fails when remote debugging po
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_5475_spec_2.js.mp4            (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/issue_5475_spec_2.js.mp4
 
 
 ====================================================================================================

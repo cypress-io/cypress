@@ -110,6 +110,8 @@ const destroySourceMapConsumers = () => {
   Object.values(sourceMapConsumers).forEach((consumer) => {
     consumer.destroy()
   })
+
+  sourceMapConsumers = {}
 }
 
 export default {
