@@ -10,7 +10,7 @@ import { Poller } from '../polling'
 const debug = debugLib('cypress:data-context:sources:RelevantRunsDataSource')
 
 const RELEVANT_RUN_OPERATION_DOC = gql`
-  query RelevantRunsDataSource_latestRunUpdateSpecData(
+  query RelevantRunsDataSource_RunsByCommitShas(
     $projectSlug: String!
     $shas: [String!]!
   ) {
