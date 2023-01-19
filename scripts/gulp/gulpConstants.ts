@@ -3,7 +3,7 @@
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
-      CYPRESS_INTERNAL_ENV: 'staging' | 'development' | 'production'
+      CYPRESS_INTERNAL_ENV?: 'staging' | 'development' | 'production'
     }
   }
 }
