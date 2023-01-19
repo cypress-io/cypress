@@ -6,7 +6,7 @@ import type { PresetHandlerResult, WebpackDevServerConfig } from '../devServer'
 import { dynamicAbsoluteImport, dynamicImport } from '../dynamic-import'
 import { sourceDefaultWebpackDependencies } from './sourceRelativeWebpackModules'
 import debugLib from 'debug'
-import type { logging } from '@angular-devkit/core'
+import { logging } from '@angular-devkit/core'
 
 const debugPrefix = 'cypress:webpack-dev-server:angularHandler'
 const debug = debugLib(debugPrefix)
@@ -205,23 +205,13 @@ export async function getAngularJson (projectRoot: string): Promise<AngularJson>
   return JSON.parse(angularJson)
 }
 
-function buildLogger (name: string = ''): logging.Logger {
-  const debugLogger = debugLib(`${debugPrefix}${name ? `:${name}` : ''}`)
-
-  return {
-    name,
-    log: debugLogger,
-    debug: debugLogger,
-    info: debugLogger,
-    warn: debugLogger,
-    error: debugLogger,
-    fatal: debugLogger,
-    createChild: buildLogger,
-  } as unknown as logging.Logger
-}
-
 function createFakeContext (projectRoot: string, defaultProjectConfig: Cypress.AngularDevServerProjectConfig) {
-  const logger: logging.LoggerApi = buildLogger()
+  const logger = new logging.Logger(debugPrefix)
+
+  // Proxy all logging calls through to the debug logger
+  logger.forEach((value: logging.LogEntry) => {
+    debug(JSON.stringify(value))
+  })
 
   const context = {
     target: {
