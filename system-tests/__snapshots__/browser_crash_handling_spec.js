@@ -57,7 +57,9 @@ https://on.cypress.io/renderer-process-crashed
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/chrome_tab_crash.cy.js.mp4          (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/chrome_tab_crash.cy.js.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -88,7 +90,9 @@ https://on.cypress.io/renderer-process-crashed
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple.cy.js.mp4                    (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple.cy.js.mp4
 
 
 ====================================================================================================
@@ -166,7 +170,9 @@ https://on.cypress.io/renderer-process-crashed
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/chrome_tab_crash.cy.js.mp4          (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/chrome_tab_crash.cy.js.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -197,7 +203,9 @@ https://on.cypress.io/renderer-process-crashed
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple.cy.js.mp4                    (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple.cy.js.mp4
 
 
 ====================================================================================================
@@ -266,7 +274,9 @@ This can happen for many different reasons:
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/chrome_process_crash.cy.js.mp4      (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/chrome_process_crash.cy.js.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -297,7 +307,9 @@ This can happen for many different reasons:
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple.cy.js.mp4                    (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple.cy.js.mp4
 
 
 ====================================================================================================
