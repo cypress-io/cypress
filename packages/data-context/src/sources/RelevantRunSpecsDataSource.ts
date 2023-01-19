@@ -4,7 +4,7 @@ import debugLib from 'debug'
 import { isEqual } from 'lodash'
 
 import type { DataContext } from '../DataContext'
-import type { CloudSpecStatus, Query, RelevantRun, CurrentProjectRelevantRunSpecs, CloudSpecRun, CloudRun, CloudRunGroup, CloudRunGroupStatusEnum } from '../gen/graphcache-config.gen'
+import type { CloudSpecStatus, Query, RelevantRun, CurrentProjectRelevantRunSpecs, CloudSpecRun, CloudRun } from '../gen/graphcache-config.gen'
 import { Poller } from '../polling'
 import type { CloudRunStatus } from '@packages/graphql/src/gen/cloud-source-types.gen'
 
@@ -19,10 +19,6 @@ const RELEVANT_RUN_SPEC_OPERATION_DOC = gql`
       id
       status
       groupIds
-    }
-    groups {
-      id
-      status
     }
   }
 
@@ -90,26 +86,15 @@ export class RelevantRunSpecsDataSource {
     return this.#cached.runSpecs
   }
 
-  #calculateSpecMetadata (specs: CloudSpecRun[], groups: CloudRunGroup[]) {
+  #calculateSpecMetadata (specs: CloudSpecRun[]) {
     //mimic logic in Cloud to sum up the count of groups per spec to give the total spec counts
-    const countGroupsForSpecs = (specs: CloudSpecRun[]) => {
+    const countGroupsForSpec = (specs: CloudSpecRun[]) => {
       return specs.map((spec) => spec.groupIds?.length || 0).reduce((acc, curr) => acc += curr, 0)
     }
 
-    const groupStatusById = groups.reduce<Record<string, CloudRunGroupStatusEnum>>((acc, curr) => {
-      acc[curr.id] = curr.status
-
-      return acc
-    }, {})
-
     return {
-      totalSpecs: countGroupsForSpecs(specs),
-      completedSpecs:
-      specs.flatMap((spec) => spec.groupIds) // pull out the group ids
-      .filter((groupId): groupId is string => !!groupId) //make sure there are no undefined values
-      .map((groupId) => groupStatusById[groupId]) //find the status for that group
-      .filter((status) => !INCOMPLETE_STATUSES.includes(status || 'UNCLAIMED')) //filter to only "complete" statuses
-      .length, //count them
+      totalSpecs: countGroupsForSpec(specs),
+      completedSpecs: countGroupsForSpec(specs.filter((spec) => !INCOMPLETE_STATUSES.includes(spec.status || 'UNCLAIMED'))),
     }
   }
 
@@ -169,7 +154,7 @@ export class RelevantRunSpecsDataSource {
 
       if (cloudProject.current && cloudProject.current.runNumber && cloudProject.current.status) {
         runSpecsToReturn.runSpecs.current = {
-          ...this.#calculateSpecMetadata(cloudProject.current.specs || [], cloudProject.current.groups || []),
+          ...this.#calculateSpecMetadata(cloudProject.current.specs || []),
           runNumber: cloudProject.current.runNumber,
         }
 
@@ -178,7 +163,7 @@ export class RelevantRunSpecsDataSource {
 
       if (cloudProject.next && cloudProject.next.runNumber && cloudProject.next.status) {
         runSpecsToReturn.runSpecs.next = {
-          ...this.#calculateSpecMetadata(cloudProject.next.specs || [], cloudProject.next.groups || []),
+          ...this.#calculateSpecMetadata(cloudProject.next.specs || []),
           runNumber: cloudProject.next.runNumber,
         }
 
