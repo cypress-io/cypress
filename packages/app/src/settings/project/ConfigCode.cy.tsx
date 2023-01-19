@@ -75,10 +75,8 @@ describe('<ConfigCode />', () => {
         .should('contain.text', 'plugin')
       })
 
-      cy.get('.v-popper__popper--shown').should('have.length', 1).then(() => {
-        // Take a snapshot after the other tooltips have closed
-        cy.percySnapshot()
-      })
+      // Take a snapshot of the last case
+      cy.percySnapshot()
     })
 
     it('shows the objectTest nicely', () => {
@@ -120,6 +118,7 @@ describe('<ConfigCode />', () => {
         valElement.realHover()
 
         cy.get('.v-popper__popper--shown')
+        .should('have.length', 1)
         .should('be.visible')
         .should('contain.text', 'env')
       })
