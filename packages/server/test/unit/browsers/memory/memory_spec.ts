@@ -10,13 +10,13 @@ describe('lib/browsers/memory', () => {
 
   before(() => {
     delete require.cache[require.resolve('../../../../lib/browsers/memory')]
+    process.env.CYPRESS_INTERNAL_MEMORY_SAVE_STATS = 'true'
+
+    memory = require('../../../../lib/browsers/memory')
   })
 
   beforeEach(() => {
     sinon.useFakeTimers()
-    process.env.CYPRESS_INTERNAL_MEMORY_SAVE_STATS = 'true'
-
-    memory = require('../../../../lib/browsers/memory')
   })
 
   afterEach(async () => {
@@ -141,6 +141,8 @@ describe('lib/browsers/memory', () => {
           rendererUsagePercentage: 75,
           rendererMemoryThreshold: 50,
           currentAvailableMemory: 1000,
+          emergencyGarbageCollected: false,
+          emergencyRendererMemoryThreshold: 90,
           maxAvailableRendererMemory: 100,
           shouldCollectGarbage: true,
           timestamp: 0,
@@ -161,6 +163,7 @@ describe('lib/browsers/memory', () => {
 
     it('collects memory when renderer process is greater than the custom threshold', async () => {
       process.env.CYPRESS_INTERNAL_MEMORY_THRESHOLD_PERCENTAGE = '25'
+      process.env.CYPRESS_INTERNAL_MEMORY_SAVE_STATS = 'true'
 
       const memory = proxyquire('../lib/browsers/memory', {})
 
@@ -188,6 +191,8 @@ describe('lib/browsers/memory', () => {
           rendererUsagePercentage: 25,
           rendererMemoryThreshold: 25,
           currentAvailableMemory: 1000,
+          emergencyGarbageCollected: false,
+          emergencyRendererMemoryThreshold: 90,
           maxAvailableRendererMemory: 100,
           shouldCollectGarbage: true,
           timestamp: 0,
@@ -231,6 +236,8 @@ describe('lib/browsers/memory', () => {
           rendererUsagePercentage: 50,
           rendererMemoryThreshold: 50,
           currentAvailableMemory: 1000,
+          emergencyGarbageCollected: false,
+          emergencyRendererMemoryThreshold: 90,
           maxAvailableRendererMemory: 100,
           shouldCollectGarbage: true,
           timestamp: 0,
@@ -274,6 +281,8 @@ describe('lib/browsers/memory', () => {
           rendererUsagePercentage: 71.42857142857143,
           rendererMemoryThreshold: 17.5,
           currentAvailableMemory: 10,
+          emergencyGarbageCollected: false,
+          emergencyRendererMemoryThreshold: 31.5,
           maxAvailableRendererMemory: 35,
           shouldCollectGarbage: true,
           timestamp: 0,
@@ -317,6 +326,8 @@ describe('lib/browsers/memory', () => {
           rendererUsagePercentage: 25,
           rendererMemoryThreshold: 50,
           currentAvailableMemory: 1000,
+          emergencyGarbageCollected: false,
+          emergencyRendererMemoryThreshold: 90,
           maxAvailableRendererMemory: 100,
           shouldCollectGarbage: false,
           timestamp: 0,
@@ -410,6 +421,8 @@ describe('lib/browsers/memory', () => {
           rendererUsagePercentage: 51.2,
           rendererMemoryThreshold: 1000,
           currentAvailableMemory: 2000,
+          emergencyGarbageCollected: false,
+          emergencyRendererMemoryThreshold: 1800,
           maxAvailableRendererMemory: 2000,
           shouldCollectGarbage: true,
           timestamp: 0,
@@ -466,6 +479,8 @@ describe('lib/browsers/memory', () => {
           rendererUsagePercentage: 51.2,
           rendererMemoryThreshold: 1000,
           currentAvailableMemory: 2000,
+          emergencyGarbageCollected: false,
+          emergencyRendererMemoryThreshold: 1800,
           maxAvailableRendererMemory: 2000,
           shouldCollectGarbage: true,
           timestamp: 0,
@@ -523,6 +538,8 @@ describe('lib/browsers/memory', () => {
           rendererUsagePercentage: 51.2,
           rendererMemoryThreshold: 5000,
           currentAvailableMemory: 10000,
+          emergencyGarbageCollected: false,
+          emergencyRendererMemoryThreshold: 9000,
           maxAvailableRendererMemory: 10000,
           shouldCollectGarbage: true,
           timestamp: 0,
@@ -543,9 +560,11 @@ describe('lib/browsers/memory', () => {
     })
 
     it('uses the existing process id to obtain the memory usage', async () => {
+      process.env.CYPRESS_INTERNAL_MEMORY_SAVE_STATS = 'true'
+
       const pidStub = sinon.stub().resolves({ memory: 2000 })
 
-      const memory = proxyquire('../lib/browsers/memory', { pidusage: pidStub })
+      const memory: typeof import('../../../../lib/browsers/memory') = proxyquire('../lib/browsers/memory', { pidusage: pidStub })
 
       const automation = sinon.createStubInstance(Automation)
       const gcStub = automation.request.withArgs('collect:garbage').resolves()
@@ -573,7 +592,7 @@ describe('lib/browsers/memory', () => {
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
 
       // second call will use the existing process id and use pidusage
-      await memory.default.gatherMemoryStats()
+      await memory.default.gatherMemoryStats(automation)
 
       await memory.default.checkMemoryPressure({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
@@ -587,6 +606,8 @@ describe('lib/browsers/memory', () => {
           rendererUsagePercentage: 34.13333333333333,
           rendererMemoryThreshold: 1500,
           currentAvailableMemory: 3000,
+          emergencyGarbageCollected: false,
+          emergencyRendererMemoryThreshold: 2700,
           maxAvailableRendererMemory: 3000,
           shouldCollectGarbage: false,
           timestamp: 0,
@@ -601,6 +622,8 @@ describe('lib/browsers/memory', () => {
           rendererUsagePercentage: 66.66666666666666,
           rendererMemoryThreshold: 1500,
           currentAvailableMemory: 3000,
+          emergencyGarbageCollected: false,
+          emergencyRendererMemoryThreshold: 2700,
           maxAvailableRendererMemory: 3000,
           shouldCollectGarbage: true,
           timestamp: 0,
@@ -621,7 +644,7 @@ describe('lib/browsers/memory', () => {
       expect(memory.default.getMemoryStats()).to.deep.eql(expected)
     })
 
-    it('collects memory when a previous checkMemory call goes over the threshold', async () => {
+    it('collects memory when a previous interval call goes over the threshold', async () => {
       const automation = sinon.createStubInstance(Automation)
       const gcStub = automation.request.withArgs('collect:garbage').resolves()
       const mockHandler = {
@@ -632,11 +655,11 @@ describe('lib/browsers/memory', () => {
       sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
       sinon.stub(memory, 'getRendererMemoryUsage')
-      .onFirstCall().resolves(75)
-      .onSecondCall().resolves(25)
+      .onFirstCall().resolves(75) // above threshold
+      .onSecondCall().resolves(25) // below threshold
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
-      await memory.default.gatherMemoryStats()
+      await memory.default.gatherMemoryStats(automation)
       await memory.default.checkMemoryPressure({ automation, test: { title: 'test', order: 1, currentRetry: 0 } })
 
       const expected = [
@@ -648,6 +671,8 @@ describe('lib/browsers/memory', () => {
           rendererUsagePercentage: 75,
           rendererMemoryThreshold: 50,
           currentAvailableMemory: 1000,
+          emergencyGarbageCollected: false,
+          emergencyRendererMemoryThreshold: 90,
           maxAvailableRendererMemory: 100,
           shouldCollectGarbage: true,
           timestamp: 0,
@@ -661,6 +686,8 @@ describe('lib/browsers/memory', () => {
           rendererUsagePercentage: 25,
           rendererMemoryThreshold: 50,
           currentAvailableMemory: 1000,
+          emergencyGarbageCollected: false,
+          emergencyRendererMemoryThreshold: 90,
           maxAvailableRendererMemory: 100,
           shouldCollectGarbage: false,
           timestamp: 0,
@@ -672,6 +699,62 @@ describe('lib/browsers/memory', () => {
           testOrder: 1,
           garbageCollected: true,
           timestamp: 0,
+        },
+      ]
+
+      expect(gcStub).to.be.calledOnce
+      expect(memory.getRendererMemoryUsage).to.be.calledTwice
+      expect(memory.default.getMemoryStats()).to.deep.eql(expected)
+    })
+
+    it('performs an emergency garbage collection when the renderer memory goes over the emergency threshold', async () => {
+      const automation = sinon.createStubInstance(Automation)
+      const gcStub = automation.request.withArgs('collect:garbage').resolves()
+      const mockHandler = {
+        getAvailableMemory: sinon.stub().resolves(1000),
+        getTotalMemoryLimit: sinon.stub().resolves(2000),
+      }
+
+      sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
+      sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
+      sinon.stub(memory, 'getRendererMemoryUsage')
+      .onFirstCall().resolves(25)
+      .onSecondCall().resolves(90) // equal to the emergency threshold
+
+      await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
+      // this should trigger an emergency garbage collection without needing a call to checkMemoryPressure
+      await memory.default.gatherMemoryStats(automation)
+
+      const expected = [
+        {
+          getAvailableMemoryDuration: 0,
+          jsHeapSizeLimit: 100,
+          totalMemoryLimit: 2000,
+          rendererProcessMemRss: 25,
+          rendererUsagePercentage: 25,
+          rendererMemoryThreshold: 50,
+          currentAvailableMemory: 1000,
+          emergencyGarbageCollected: false,
+          emergencyRendererMemoryThreshold: 90,
+          maxAvailableRendererMemory: 100,
+          shouldCollectGarbage: false,
+          timestamp: 0,
+          calculateMemoryStatsDuration: 0,
+        },
+        {
+          getAvailableMemoryDuration: 0,
+          jsHeapSizeLimit: 100,
+          totalMemoryLimit: 2000,
+          rendererProcessMemRss: 90,
+          rendererUsagePercentage: 90,
+          rendererMemoryThreshold: 50,
+          currentAvailableMemory: 1000,
+          emergencyGarbageCollected: true,
+          emergencyRendererMemoryThreshold: 90,
+          maxAvailableRendererMemory: 100,
+          shouldCollectGarbage: true,
+          timestamp: 0,
+          calculateMemoryStatsDuration: 0,
         },
       ]
 
