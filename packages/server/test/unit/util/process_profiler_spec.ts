@@ -4,7 +4,7 @@ import _ from 'lodash'
 import si from 'systeminformation'
 import { expect } from 'chai'
 import {
-  _groupCyProcesses,
+  groupCyProcesses,
   _renameBrowserGroup,
   _aggregateGroups,
   _reset,
@@ -116,13 +116,13 @@ describe('lib/util/process_profiler', function () {
     _reset()
   })
 
-  context('._groupCyProcesses', () => {
+  context('.groupCyProcesses', () => {
     it('groups correctly', () => {
       sinon.stub(browsers, 'getBrowserInstance').returns({ pid: BROWSER_PID })
       sinon.stub(plugins, 'getPluginPid').returns(PLUGIN_PID)
 
       // @ts-ignore
-      const groupedProcesses = _groupCyProcesses({ list: PROCESSES })
+      const groupedProcesses = groupCyProcesses({ list: PROCESSES })
 
       const checkGroup = (pid, group) => {
         expect(_.find(groupedProcesses, { pid }))
@@ -184,7 +184,7 @@ describe('lib/util/process_profiler', function () {
       })
 
       // @ts-ignore
-      const result = _aggregateGroups(_groupCyProcesses({ list: processes }))
+      const result = _aggregateGroups(groupCyProcesses({ list: processes }))
 
       // main process will have variable pid, replace it w constant for snapshotting
       // @ts-ignore

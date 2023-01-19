@@ -659,8 +659,8 @@ describe('src/cy/commands/window', () => {
       it('changes viewport and then resets back to the original', () => {
         const { viewportHeight, viewportWidth } = Cypress.config()
 
-        cy.viewport(500, 400).then(() => {
-          Cypress.action('runner:test:before:run:async', {})
+        cy.viewport(500, 400).then(async () => {
+          await Cypress.action('runner:test:before:run:async', {}, Cypress.state('runnable'))
           .then(() => {
             expect(Cypress.config('viewportWidth')).to.eq(viewportWidth)
             expect(Cypress.config('viewportHeight')).to.eq(viewportHeight)
