@@ -6,7 +6,7 @@ import type { PresetHandlerResult, WebpackDevServerConfig } from '../devServer'
 import { dynamicAbsoluteImport, dynamicImport } from '../dynamic-import'
 import { sourceDefaultWebpackDependencies } from './sourceRelativeWebpackModules'
 import debugLib from 'debug'
-import { logging } from '@angular-devkit/core'
+import type { logging as AngularLogging } from '@angular-devkit/core'
 
 const debugPrefix = 'cypress:webpack-dev-server:angularHandler'
 const debug = debugLib(debugPrefix)
@@ -168,19 +168,21 @@ export async function getAngularCliModules (projectRoot: string) {
     '@angular-devkit/build-angular/src/utils/webpack-browser-config.js',
     '@angular-devkit/build-angular/src/webpack/configs/common.js',
     '@angular-devkit/build-angular/src/webpack/configs/styles.js',
+    '@angular-devkit/core/src/index.js',
   ] as const
 
   const [
     { generateBrowserWebpackConfigFromContext },
     { getCommonConfig },
     { getStylesConfig },
+    { logging },
   ] = await Promise.all(angularCLiModules.map((dep) => {
     try {
       const depPath = require.resolve(dep, { paths: [projectRoot] })
 
       return dynamicAbsoluteImport(depPath)
     } catch (e) {
-      throw new Error(`Could not resolve "${dep}". Do you have "@angular-devkit/build-angular" installed?`)
+      throw new Error(`Could not resolve "${dep}". Do you have "@angular-devkit/build-angular" and "@angular-devkit/core" installed?`)
     }
   }))
 
@@ -188,6 +190,7 @@ export async function getAngularCliModules (projectRoot: string) {
     generateBrowserWebpackConfigFromContext,
     getCommonConfig,
     getStylesConfig,
+    logging,
   }
 }
 
@@ -205,11 +208,11 @@ export async function getAngularJson (projectRoot: string): Promise<AngularJson>
   return JSON.parse(angularJson)
 }
 
-function createFakeContext (projectRoot: string, defaultProjectConfig: Cypress.AngularDevServerProjectConfig) {
+function createFakeContext (projectRoot: string, defaultProjectConfig: Cypress.AngularDevServerProjectConfig, logging: typeof AngularLogging) {
   const logger = new logging.Logger(debugPrefix)
 
   // Proxy all logging calls through to the debug logger
-  logger.forEach((value: logging.LogEntry) => {
+  logger.forEach((value: AngularLogging.LogEntry) => {
     debug(JSON.stringify(value))
   })
 
@@ -240,6 +243,7 @@ async function getAngularCliWebpackConfig (devServerConfig: AngularWebpackDevSer
     generateBrowserWebpackConfigFromContext,
     getCommonConfig,
     getStylesConfig,
+    logging,
   } = await getAngularCliModules(projectRoot)
 
   // normalize
@@ -249,7 +253,7 @@ async function getAngularCliWebpackConfig (devServerConfig: AngularWebpackDevSer
 
   const buildOptions = getAngularBuildOptions(projectConfig.buildOptions, tsConfig)
 
-  const context = createFakeContext(projectRoot, projectConfig)
+  const context = createFakeContext(projectRoot, projectConfig, logging)
 
   const { config } = await generateBrowserWebpackConfigFromContext(
     buildOptions,
