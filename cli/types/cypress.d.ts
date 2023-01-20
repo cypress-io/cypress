@@ -583,6 +583,12 @@ declare namespace Cypress {
 
       /**
        * Add a custom child or dual command
+       * @see https://on.cypress.io/api/commands#Custom-Dual-Command
+       */
+      add<T extends keyof Chainable, S = any>(name: T, options: CommandOptions & {prevSubject: 'optional'}, fn: CommandFnWithSubject<T, S | undefined>): void
+
+      /**
+       * Add a custom child or dual command
        * @see https://on.cypress.io/api/commands#Validations
        */
       add<T extends keyof Chainable, S extends PrevSubject>(
