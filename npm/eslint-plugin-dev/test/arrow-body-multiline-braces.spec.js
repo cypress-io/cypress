@@ -2,6 +2,7 @@ const path = require('path')
 const CLIEngine = require('eslint').CLIEngine
 const plugin = require('..')
 const _ = require('lodash')
+const { expect } = require('chai')
 
 const pluginName = '__plugin__'
 
@@ -44,7 +45,7 @@ describe('arrow-body-multiline-braces', () => {
       fix: true,
     })
 
-    expect(result.output).toContain('{')
+    expect(result.output).to.contain('{')
   })
 
   it('lint oneline js', async () => {
@@ -52,6 +53,6 @@ describe('arrow-body-multiline-braces', () => {
     const result = execute(filename, { fix: false })
 
     expect(result.output).not.ok
-    expect(result).toHaveProperty('errorCount', 0)
+    expect(result.errorCount).eq(0)
   })
 })
