@@ -181,27 +181,32 @@ export class RelevantRunsDataSource {
    * Clear the cached current run to allow the data source to pick the next completed run as the current
    */
   //TODO figure out how to mock in test so do not need to pass in values here
-  async moveToNext (shasForTest?: string[]) {
+  async moveToNext (shas: string[]) {
     debug('Moving to next relevant run')
-    this.#currentRun = undefined
-    this.#currentCommitSha = undefined
 
-    const runs = await this.getRelevantRuns(this.ctx.git?.currentHashes || shasForTest || [])
+    this.checkRelevantRuns(shas, true)
+  }
 
-    this.ctx.emitter.relevantRunChange(runs)
+  async checkRelevantRuns (shas: string[], clearCache: boolean = false) {
+    if (clearCache) {
+      this.#currentRun = undefined
+      this.#currentCommitSha = undefined
+    }
+
+    const runs = await this.getRelevantRuns(shas)
+
+    //only emit a new value if it changes
+    if (!isEqual(runs, this.#cachedRuns)) {
+      debug('Runs changed %o', runs)
+      this.#cachedRuns = runs
+      this.ctx.emitter.relevantRunChange(runs)
+    }
   }
 
   pollForRuns () {
     if (!this.#runsPoller) {
       this.#runsPoller = new Poller(this.ctx, 'relevantRunChange', this.#pollingInterval, async () => {
-        const runs = await this.getRelevantRuns(this.ctx.git?.currentHashes || [])
-
-        //only emit a new value if it changes
-        if (!isEqual(runs, this.#cachedRuns)) {
-          debug('Runs changed %o', runs)
-          this.#cachedRuns = runs
-          this.ctx.emitter.relevantRunChange(runs)
-        }
+        await this.checkRelevantRuns(this.ctx.git?.currentHashes || [])
       })
     }
 

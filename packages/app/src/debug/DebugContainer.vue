@@ -3,12 +3,24 @@
     <NoInternetConnection v-if="!online">
       {{ t('launchpadErrors.noInternet.connectProject') }}
     </NoInternetConnection>
-    <DebugLoading v-else-if="isLoading" />
+    <DebugLoading v-else-if="!loginConnectStore.hasInitiallyLoaded || loginConnectStore.project.isProjectConnected && isLoading" />
     <DebugError
       v-else-if="showError"
     />
+    <DebugNotLoggedIn
+      v-else-if="!loginConnectStore.user.isLoggedIn"
+      data-cy="debug-empty"
+    />
+    <DebugNoProject
+      v-else-if="!loginConnectStore.project.isProjectConnected"
+      data-cy="debug-empty"
+    />
+    <DebugNoRuns
+      v-else-if="!run"
+      data-cy="debug-empty"
+    />
     <div
-      v-else-if="loginConnectStore.user.isLoggedIn && loginConnectStore.project.isProjectConnected && run?.status"
+      v-else-if="run?.status"
       class="flex flex-col h-full"
     >
       <DebugPageHeader
@@ -48,14 +60,6 @@
           :cloud-run-url="run.url"
         />
       </template>
-    </div>
-    <div
-      v-else
-      data-cy="debug-empty"
-    >
-      <DebugNotLoggedIn v-if="!loginConnectStore.user.isLoggedIn" />
-      <DebugNoProject v-else-if="!loginConnectStore.project.isProjectConnected" />
-      <DebugNoRuns v-else-if="!run" />
     </div>
   </div>
 </template>
