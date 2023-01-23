@@ -11,6 +11,17 @@ import fs from 'fs-extra'
 const exec = promisify(execOrig)
 
 describe('doctor', () => {
+  let originalV8UpdateMetafile
+
+  before(() => {
+    originalV8UpdateMetafile = process.env.V8_UPDATE_METAFILE
+    process.env.V8_UPDATE_METAFILE = '1'
+  })
+
+  after(() => {
+    process.env.V8_UPDATE_METAFILE = originalV8UpdateMetafile
+  })
+
   it('snapshots an entry points with two modules, one accessing Buffer', async () => {
     const projectBaseDir = path.join(__dirname, '..', 'fixtures', 'access-buffer')
     const cacheDir = path.join(projectBaseDir, 'cache')
@@ -27,7 +38,8 @@ describe('doctor', () => {
     expect(meta).to.deep.equal({
       norewrite: [],
       deferred: ['./accessing-buffer.js'],
-      deferredHashFile: '<not used>',
+      deferredHashFile: 'yarn.lock',
+      deferredHash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
       healthy: ['./entry.js', './valid-module.js'],
     })
 
@@ -54,7 +66,8 @@ describe('doctor', () => {
     expect(meta).to.deep.equal({
       norewrite: [],
       deferred: [],
-      deferredHashFile: '<not used>',
+      deferredHashFile: 'yarn.lock',
+      deferredHash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
       healthy: ['./entry.js', './reassign-console.js', './using-console.js'],
     })
 
@@ -127,7 +140,8 @@ describe('doctor', () => {
     expect(meta).to.deep.equal({
       norewrite: [],
       deferred: ['./using-filename-init.js'],
-      deferredHashFile: '<not used>',
+      deferredHashFile: 'yarn.lock',
+      deferredHash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
       healthy: ['./entry.js', './using-dirname-delayed.js', './valid-module.js'],
     })
 
@@ -164,7 +178,8 @@ describe('doctor', () => {
     expect(meta).to.deep.equal({
       norewrite: ['./invoke-not-function.js', './invoke-undefined.js'],
       deferred: ['./invoke-push-on-undefined.js'],
-      deferredHashFile: '<not used>',
+      deferredHashFile: 'yarn.lock',
+      deferredHash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
       healthy: ['./entry.js', './valid-module.js'],
     })
 
@@ -202,7 +217,8 @@ describe('doctor', () => {
         './static-deferred.js',
         './uses-loads-static-deferred.js',
       ],
-      deferredHashFile: '<not used>',
+      deferredHashFile: 'yarn.lock',
+      deferredHash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
       healthy: [
         './entry.js',
         './lateuses-static-deferred.js',

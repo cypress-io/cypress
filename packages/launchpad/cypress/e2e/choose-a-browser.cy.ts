@@ -16,7 +16,7 @@ describe.skip('Choose a browser page', () => {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23158
-    it.skip('preselects browser that is provided through the command line', () => {
+    it('preselects browser that is provided through the command line', { retries: 15 }, () => {
       cy.withCtx((ctx, o) => {
         // stub launching project since we have `--browser --testingType --project` here
         o.sinon.stub(ctx._apis.projectApi, 'launchProject').resolves()
@@ -218,7 +218,7 @@ describe.skip('Choose a browser page', () => {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23220
-    it.skip('performs mutation to focus open browser when focus button is pressed', () => {
+    it('performs mutation to focus open browser when focus button is pressed', { retries: 15 }, () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()
@@ -271,7 +271,7 @@ describe.skip('Choose a browser page', () => {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23158
-    it.skip('subscribes to changes to browserStatus/activeBrowser through the browserStatusUpdated subscription', () => {
+    it('subscribes to changes to browserStatus/activeBrowser through the browserStatusUpdated subscription', { retries: 15 }, () => {
       cy.openProject('launchpad', ['--e2e'])
 
       cy.visitLaunchpad()

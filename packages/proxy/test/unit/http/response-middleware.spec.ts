@@ -1395,6 +1395,7 @@ describe('http/response-middleware', function () {
           'isNotJavascript': true,
           'modifyObstructiveCode': true,
           'modifyObstructiveThirdPartyCode': true,
+          'shouldInjectDocumentDomain': true,
           'url': 'http://www.foobar.com:3501/primary-origin.html',
           'useAstSourceRewriting': undefined,
           'wantsInjection': 'full',
@@ -1418,6 +1419,7 @@ describe('http/response-middleware', function () {
           'isNotJavascript': true,
           'modifyObstructiveCode': true,
           'modifyObstructiveThirdPartyCode': false,
+          'shouldInjectDocumentDomain': true,
           'url': 'http://127.0.0.1:3501/primary-origin.html',
           'useAstSourceRewriting': undefined,
           'wantsInjection': 'full',
@@ -1435,6 +1437,7 @@ describe('http/response-middleware', function () {
         config: {
           modifyObstructiveCode: false,
           experimentalModifyObstructiveThirdPartyCode: false,
+          experimentalSkipDomainInjection: null,
         },
         simulatedCookies: [],
       })
@@ -1448,6 +1451,7 @@ describe('http/response-middleware', function () {
           'isNotJavascript': true,
           'modifyObstructiveCode': false,
           'modifyObstructiveThirdPartyCode': false,
+          'shouldInjectDocumentDomain': true,
           'url': 'http://www.foobar.com:3501/primary-origin.html',
           'useAstSourceRewriting': undefined,
           'wantsInjection': 'full',
@@ -1485,6 +1489,7 @@ describe('http/response-middleware', function () {
         config: {
           modifyObstructiveCode: true,
           experimentalModifyObstructiveThirdPartyCode: true,
+          experimentalSkipDomainInjection: null,
         },
         remoteStates,
         debug: (formatter, ...args) => {

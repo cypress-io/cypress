@@ -853,11 +853,11 @@ export default {
     },
     invalid_new_query: {
       message: '`Cypress.Commands.addQuery()` is used to create new queries, but `{{name}}` is an existing Cypress command or query, or is reserved internally by Cypress.\n\n If you want to override an existing command or query, use `Cypress.Commands.overrideQuery()` instead.',
-      docsUrl: 'https://on.cypress.io/custom-queries',
+      docsUrl: 'https://on.cypress.io/api/custom-queries',
     },
     reserved_command_query: {
       message: '`Cypress.Commands.addQuery()` cannot create a new query named `{{name}}` because that name is reserved internally by Cypress.',
-      docsUrl: 'https://on.cypress.io/custom-queries',
+      docsUrl: 'https://on.cypress.io/api/custom-queries',
     },
     invalid_overwrite: {
       message: 'Cannot overwite command for: `{{name}}`. An existing command does not exist by that name.',
@@ -912,13 +912,15 @@ export default {
       return `Timed out retrying after ${ms}ms: `
     },
     test_stopped: 'Cypress test was stopped while running this command.',
-    cross_origin_command ({ commandOrigin, autOrigin }) {
+    cross_origin_command ({ commandOrigin, autOrigin, isSkipDomainInjectionEnabled }) {
       return {
         message: stripIndent`\
         The command was expected to run against origin \`${commandOrigin}\` but the application is at origin \`${autOrigin}\`.
 
         This commonly happens when you have either not navigated to the expected origin or have navigated away unexpectedly.
-        
+        ${isSkipDomainInjectionEnabled ? `
+        If \`experimentalSkipDomainInjection\` is enabled for this domain, a ${cmd('origin')} command is required.
+        ` : ''}
         Using ${cmd('origin')} to wrap the commands run on \`${autOrigin}\` will likely fix this issue.
 
         \`cy.origin('${autOrigin}', () => {\`

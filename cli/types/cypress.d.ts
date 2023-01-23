@@ -362,7 +362,7 @@ declare namespace Cypress {
 
     /**
      * Utility functions for ensuring various properties about a subject.
-     * @see https://on.cypress.io/custom-queries
+     * @see https://on.cypress.io/api/custom-queries
      */
     ensure: Ensure
 
@@ -419,6 +419,11 @@ declare namespace Cypress {
       title: string
       titlePath: string[]
     }
+
+    /**
+     * Information about current test retry
+     */
+    currentRetry: number
 
     /**
      * Information about the browser currently running the tests
@@ -896,20 +901,40 @@ declare namespace Cypress {
     clear(options?: Partial<ClearOptions>): Chainable<Subject>
 
     /**
-     * Clear a specific browser cookie for the current hostname or for the domain specified.
-     * Cypress automatically clears all cookies before each test to prevent state from being shared across tests. You shouldn't need to use this command unless you're using it to clear a specific cookie inside a single test.
+     * Clear a specific browser cookie for a domain.
+     *
+     * Cypress automatically clears all cookies _before_ each test to prevent
+     * state from being shared across tests when test isolation is enabled.
+     * You shouldn't need to use this command unless you're using it to clear
+     * a specific cookie inside a single test or test isolation is disabled.
      *
      * @see https://on.cypress.io/clearcookie
      */
     clearCookie(name: string, options?: CookieOptions): Chainable<null>
 
     /**
-     * Clear all browser cookies for the current hostname or for the domain specified.
-     * Cypress automatically clears all cookies before each test to prevent state from being shared across tests. You shouldn't need to use this command unless you're using it to clear all cookies or specific cookies inside a single test.
+     * Clear browser cookies for a domain.
+     *
+     * Cypress automatically clears all cookies _before_ each test to prevent
+     * state from being shared across tests when test isolation is enabled.
+     * You shouldn't need to use this command unless you're using it to clear
+     * specific cookies inside a single test or test isolation is disabled.
      *
      * @see https://on.cypress.io/clearcookies
      */
     clearCookies(options?: CookieOptions): Chainable<null>
+
+    /**
+     * Clear all browser cookies.
+     *
+     * Cypress automatically clears all cookies _before_ each test to prevent
+     * state from being shared across tests when test isolation is enabled.
+     * You shouldn't need to use this command unless you're using it to clear
+     * all cookie inside a single test or test isolation is disabled.
+     *
+     * @see https://on.cypress.io/clearallcookies
+     */
+     clearAllCookies(options?: Partial<Loggable & Timeoutable>): Chainable<null>
 
     /**
      * Get local storage for all origins.
@@ -920,6 +945,11 @@ declare namespace Cypress {
 
     /**
      * Clear local storage for all origins.
+     *
+     * Cypress automatically clears all local storage _before_ each test to
+     * prevent state from being shared across tests when test isolation
+     * is enabled. You shouldn't need to use this command unless you're using it
+     * to clear localStorage inside a single test or test isolation is disabled.
      *
      * @see https://on.cypress.io/clearalllocalstorage
      */
@@ -941,9 +971,11 @@ declare namespace Cypress {
 
     /**
      * Clear data in local storage for the current origin.
-     * Cypress automatically runs this command before each test to prevent state from being
-     * shared across tests. You shouldn't need to use this command unless you're using it
-     * to clear localStorage inside a single test. Yields `localStorage` object.
+     *
+     * Cypress automatically clears all local storage _before_ each test to
+     * prevent state from being shared across tests when test isolation
+     * is enabled. You shouldn't need to use this command unless you're using it
+     * to clear localStorage inside a single test or test isolation is disabled.
      *
      * @see https://on.cypress.io/clearlocalstorage
      * @param {string} [key] - name of a particular item to remove (optional).
@@ -1395,18 +1427,25 @@ declare namespace Cypress {
     get<S = any>(alias: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<S>
 
     /**
-     * Get a browser cookie by its name for the current hostname or for the domain specified.
+     * Get a browser cookie by its name.
      *
      * @see https://on.cypress.io/getcookie
      */
     getCookie(name: string, options?: CookieOptions): Chainable<Cookie | null>
 
     /**
-     * Get all of the browser cookies for the current hostname or for the domain specified.
+     * Get browser cookies for a domain.
      *
      * @see https://on.cypress.io/getcookies
      */
     getCookies(options?: CookieOptions): Chainable<Cookie[]>
+
+    /**
+     * Get all browser cookies.
+     *
+     * @see https://on.cypress.io/getallcookies
+     */
+    getAllCookies(options?: Partial<Loggable & Timeoutable>): Chainable<Cookie[]>
 
     /**
      * Navigate back or forward to the previous or next URL in the browser's history.
@@ -1555,19 +1594,19 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/nextuntil
      */
-    nextUntil<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    nextUntil<K extends keyof HTMLElementTagNameMap>(selector: K, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
     /**
      * Get all following siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
      *
      * @see https://on.cypress.io/nextuntil
      */
-    nextUntil<E extends HTMLElement = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    nextUntil<E extends Node = HTMLElement>(selector: string, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
     /**
      * Get all following siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
      *
      * @see https://on.cypress.io/nextuntil
      */
-    nextUntil<E extends HTMLElement = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    nextUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
      * Filter DOM element(s) from a set of DOM elements. Opposite of `.filter()`
@@ -1579,7 +1618,7 @@ declare namespace Cypress {
     /**
      * Invoke a command synchronously, without using the command queue.
      *
-     * @see https://on.cypress.io/custom-queries
+     * @see https://on.cypress.io/api/custom-queries
      */
     now(name: string, ...args: any[]): Promise<any> | ((subject: any) => any)
 
@@ -1740,21 +1779,21 @@ declare namespace Cypress {
      * Get all previous siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
      * > The querying behavior of this command matches exactly how [.prevUntil()](http://api.jquery.com/prevUntil) works in jQuery.
      *
-     * @see https://on.cypress.io/prevall
+     * @see https://on.cypress.io/prevuntil
      */
     prevUntil<K extends keyof HTMLElementTagNameMap>(selector: K, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
     /**
      * Get all previous siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
      * > The querying behavior of this command matches exactly how [.prevUntil()](http://api.jquery.com/prevUntil) works in jQuery.
      *
-     * @see https://on.cypress.io/prevall
+     * @see https://on.cypress.io/prevuntil
      */
     prevUntil<E extends Node = HTMLElement>(selector: string, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
     /**
      * Get all previous siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
      * > The querying behavior of this command matches exactly how [.prevUntil()](http://api.jquery.com/prevUntil) works in jQuery.
      *
-     * @see https://on.cypress.io/prevall
+     * @see https://on.cypress.io/prevuntil
      */
     prevUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
@@ -2981,6 +3020,16 @@ declare namespace Cypress {
      */
     experimentalModifyObstructiveThirdPartyCode: boolean
     /**
+     * Disables setting document.domain to the applications super domain on injection.
+     * This experiment is to be used for sites that do not work with setting document.domain
+     * due to cross-origin issues. Enabling this option no longer allows for default subdomain
+     * navigations, and will require the use of cy.origin(). This option takes an array of
+     * strings/string globs.
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/Document/domain
+     * @default null
+     */
+    experimentalSkipDomainInjection: string[] | null
+    /**
      * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.
      * @default false
      */
@@ -2995,6 +3044,11 @@ declare namespace Cypress {
      * @default false
      */
     experimentalWebKitSupport: boolean
+    /**
+     * Enables support for improved memory management within Chromium-based browsers.
+     * @default false
+     */
+    experimentalMemoryManagement: boolean
     /**
      * Number of times to retry a failed test.
      * If a number is set, tests will retry in both runMode and openMode.

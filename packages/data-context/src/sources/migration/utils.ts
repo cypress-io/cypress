@@ -13,9 +13,11 @@ export const isDefaultSupportFile = (supportFile: string) => {
   return false
 }
 
+export type FileExtension = 'js' | 'ts' | 'jsx' | 'tsx'
+
 export async function getDefaultSpecFileName (
   { currentProject, testingType, fileExtensionToUse, specPattern, specs = [], name }:
-  { currentProject: string | null, testingType: TestingType | null, fileExtensionToUse: 'js' | 'ts', specPattern: string[], specs?: FoundSpec[], name?: string },
+  { currentProject: string | null, testingType: TestingType | null, fileExtensionToUse: FileExtension, specPattern: string[], specs?: FoundSpec[], name?: string },
 ): Promise<string> {
   const debug = Debug('cypress:data-context:sources:migration:utils')
 

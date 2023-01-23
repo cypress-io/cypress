@@ -1,3 +1,4 @@
+/* eslint-disable no-dupe-class-members */
 import Bluebird from 'bluebird'
 import { EventEmitter } from 'events'
 import type { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
@@ -539,6 +540,18 @@ export class EventManager {
       })
     })
 
+    Cypress.on('run:start', async () => {
+      if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
+        await Cypress.backend('start:memory:profiling', Cypress.config('spec'))
+      }
+    })
+
+    Cypress.on('run:end', async () => {
+      if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
+        await Cypress.backend('end:memory:profiling')
+      }
+    })
+
     driverToLocalEvents.forEach((event) => {
       Cypress.on(event, (...args: unknown[]) => {
         // special case for asserting the correct mocha events + payload
@@ -568,8 +581,16 @@ export class EventManager {
       this.localBus.emit('script:error', err)
     })
 
-    Cypress.on('test:before:run:async', (_attr, test) => {
+    Cypress.on('test:before:run:async', async (_attr, test) => {
       this.studioStore.interceptTest(test)
+
+      // if the experimental flag is on and we are in a chromium based browser,
+      // check the memory pressure to determine if garbage collection is needed
+      if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
+        await Cypress.backend('check:memory:pressure', {
+          test: { title: test.title, order: test.order, currentRetry: test.currentRetry() },
+        })
+      }
     })
 
     Cypress.on('test:after:run', (test) => {

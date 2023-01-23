@@ -158,7 +158,7 @@ export class CdpAutomation {
     onFn('Network.responseReceived', this.onResponseReceived)
   }
 
-  async startVideoRecording (writeVideoFrame: WriteVideoFrame, screencastOpts?) {
+  async startVideoRecording (writeVideoFrame: WriteVideoFrame, screencastOpts) {
     this.onFn('Page.screencastFrame', async (e) => {
       writeVideoFrame(Buffer.from(e.data, 'base64'))
       await this.sendDebuggerCommandFn('Page.screencastFrameAck', { sessionId: e.sessionId })
@@ -351,6 +351,10 @@ export class CdpAutomation {
         return this.sendCloseCommandFn(data.shouldKeepTabOpen)
       case 'focus:browser:window':
         return this.sendDebuggerCommandFn('Page.bringToFront')
+      case 'get:heap:size:limit':
+        return this.sendDebuggerCommandFn('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' })
+      case 'collect:garbage':
+        return this.sendDebuggerCommandFn('HeapProfiler.collectGarbage')
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }

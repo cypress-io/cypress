@@ -99,7 +99,9 @@ Error: Resolution method is overspecified. Specify a callback *or* return a Prom
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/return_value.cy.js.mp4              (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/return_value.cy.js.mp4
 
 
 ====================================================================================================

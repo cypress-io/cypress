@@ -8,7 +8,7 @@ const browsers = require('../browsers')
 const plugins = require('../plugins')
 
 type Group = 'browser' | 'cypress' | 'launchpad' | 'plugin' | 'ffmpeg' | 'electron-shared' | 'other'
-type Process = si.Systeminformation.ProcessesProcessData & {
+export type Process = si.Systeminformation.ProcessesProcessData & {
   group?: Group
 }
 
@@ -37,7 +37,7 @@ const formatPidDisplay = (groupedProcesses) => {
   return display
 }
 
-export const _groupCyProcesses = ({ list }: si.Systeminformation.ProcessesData) => {
+export const groupCyProcesses = ({ list }: si.Systeminformation.ProcessesData) => {
   const cyProcesses: Process[] = []
   const thisProcess: Process = _.find(list, { pid: process.pid })!
 
@@ -231,7 +231,7 @@ export const _printGroupedProcesses = (groupTotals) => {
 
 function _checkProcesses () {
   return si.processes()
-  .then(_groupCyProcesses)
+  .then(groupCyProcesses)
   .then(_renameBrowserGroup)
   .then(_aggregateGroups)
   .then(_printGroupedProcesses)
