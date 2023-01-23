@@ -13,7 +13,7 @@ __Released 01/17/2023 (PENDING)__
   - <Insert change details>. Addressed in [#24760](https://github.com/cypress-io/cypress/pull/24760).
   -->
 
- **Performance:**
+ **Bugfixes:**
 
   - <Insert change details>. Fixed in [#25460](https://github.com/cypress-io/cypress/pull/25460).
  
