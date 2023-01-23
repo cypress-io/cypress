@@ -18,7 +18,7 @@ exports['e2e record passing passes 1'] = `
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  record_error.cy.js                                                              (1 of 4)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 
 Oops...we found an error preparing this test file:
 
@@ -60,7 +60,7 @@ Fix the error in your code and re-run your tests.
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Estimated:    8 seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     record_error.cy.js                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -68,7 +68,9 @@ Fix the error in your code and re-run your tests.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_error.cy.js.mp4              (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/record_error.cy.js.mp4
 
 
   (Uploading Results)
@@ -78,7 +80,7 @@ Fix the error in your code and re-run your tests.
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  record_fail.cy.js                                                               (2 of 4)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 
 
   record fails
@@ -109,7 +111,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Estimated:    8 seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     record_fail.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -123,7 +125,9 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_fail.cy.js.mp4               (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/record_fail.cy.js.mp4
 
 
   (Uploading Results)
@@ -134,7 +138,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  record_pass.cy.js                                                               (3 of 4)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 
 
   record pass
@@ -158,7 +162,7 @@ plugin stdout
   │ Screenshots:  1                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Estimated:    8 seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     record_pass.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -175,7 +179,7 @@ plugin stdout
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  record_uncaught.cy.js                                                           (4 of 4)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 
 
   1) An uncaught error was detected outside of a test
@@ -209,7 +213,7 @@ We dynamically generated a new test to display this failure.
   │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Estimated:    8 seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     record_uncaught.cy.js                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -223,7 +227,9 @@ We dynamically generated a new test to display this failure.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_uncaught.cy.js.mp4           (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/record_uncaught.cy.js.mp4
 
 
   (Uploading Results)
@@ -290,7 +296,7 @@ exports['e2e record api interaction errors update instance stdout warns but proc
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  record_pass.cy.js                                                               (1 of 1)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 
 
   record pass
@@ -313,7 +319,7 @@ exports['e2e record api interaction errors update instance stdout warns but proc
   │ Screenshots:  1                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Estimated:    8 seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     record_pass.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -411,7 +417,7 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  record_pass.cy.js                                                               (1 of 1)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 
 
   record pass
@@ -434,7 +440,7 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
   │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Estimated:    8 seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     record_pass.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -447,7 +453,9 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4               (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
 
 
   (Uploading Results)
@@ -647,7 +655,7 @@ exports['e2e record api interaction errors update instance 500 does not proceed 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  record_pass.cy.js                                                               (1 of 1)
-  Estimated: 5 seconds
+  Estimated: X second(s)
 
 
   record pass
@@ -670,7 +678,7 @@ exports['e2e record api interaction errors update instance 500 does not proceed 
   │ Screenshots:  1                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Estimated:    5 seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     record_pass.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -698,21 +706,21 @@ StatusCodeError: 500 - "Internal Server Error"
 exports['e2e record api interaction errors api retries on error warns and does not create or update instances 1'] = `
 We encountered an unexpected error talking to our servers.
 
-We will retry 3 more times in 1 second...
+We will retry 3 more times in X second(s)...
 
 The server's response was:
 
 StatusCodeError: 500 - "Internal Server Error"
 We encountered an unexpected error talking to our servers.
 
-We will retry 2 more times in 2 seconds...
+We will retry 2 more times in X second(s)...
 
 The server's response was:
 
 StatusCodeError: 500 - "Internal Server Error"
 We encountered an unexpected error talking to our servers.
 
-We will retry 1 more time in 3 seconds...
+We will retry 1 more time in X second(s)...
 
 The server's response was:
 
@@ -733,7 +741,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
 We encountered an unexpected error talking to our servers.
 
-We will retry 3 more times in 1 second...
+We will retry 3 more times in X second(s)...
 
 The server's response was:
 
@@ -742,7 +750,7 @@ StatusCodeError: 500 - "Internal Server Error"
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  record_pass.cy.js                                                               (1 of 1)
-  Estimated: 5 seconds
+  Estimated: X second(s)
 
 
   record pass
@@ -765,7 +773,7 @@ StatusCodeError: 500 - "Internal Server Error"
   │ Screenshots:  1                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Estimated:    5 seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     record_pass.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -944,7 +952,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  record_pass.cy.js                                                               (1 of 1)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 
 
   record pass
@@ -967,7 +975,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Screenshots:  1                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Estimated:    8 seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     record_pass.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1024,7 +1032,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  record_pass.cy.js                                                               (1 of 1)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 
 
   record pass
@@ -1047,7 +1055,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Screenshots:  1                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Estimated:    8 seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     record_pass.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1109,7 +1117,7 @@ Details:
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  record_pass.cy.js                                                               (1 of 1)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 
 
   record pass
@@ -1132,7 +1140,7 @@ Details:
   │ Screenshots:  1                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Estimated:    8 seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     record_pass.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1445,7 +1453,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  record_pass.cy.js                                                               (1 of 1)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 
 
   record pass
@@ -1468,7 +1476,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Screenshots:  1                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Estimated:    8 seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     record_pass.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1527,7 +1535,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  record_pass.cy.js                                                               (1 of 1)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 
 
   record pass
@@ -1550,7 +1558,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Screenshots:  1                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Estimated:    8 seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     record_pass.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1607,7 +1615,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  record_pass.cy.js                                                               (1 of 1)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 
 
   record pass
@@ -1630,7 +1638,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Screenshots:  1                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Estimated:    8 seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     record_pass.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1687,7 +1695,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  record_pass.cy.js                                                               (1 of 1)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 
 
   record pass
@@ -1710,7 +1718,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Screenshots:  1                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Estimated:    8 seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     record_pass.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1767,7 +1775,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  record_pass.cy.js                                                               (1 of 1)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 
 
   record pass
@@ -1790,7 +1798,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Screenshots:  1                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Estimated:    8 seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     record_pass.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1909,7 +1917,7 @@ exports['e2e record api interaction errors postInstanceTests without paralleliza
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  a_record.cy.js                                                                  (1 of 2)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 We encountered an unexpected error talking to our servers.
 
 The --group flag you passed was: foo
@@ -1940,7 +1948,7 @@ exports['e2e record api interaction errors postInstanceTests with parallelizatio
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  a_record.cy.js                                                                  (1 of 2)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 We encountered an unexpected error talking to our servers.
 
 Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
@@ -1973,7 +1981,7 @@ exports['e2e record api interaction errors postInstanceResults errors and exits 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  record_pass.cy.js                                                               (1 of 1)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 
 
   record pass
@@ -1996,7 +2004,7 @@ exports['e2e record api interaction errors postInstanceResults errors and exits 
   │ Screenshots:  1                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Estimated:    8 seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     record_pass.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -2035,14 +2043,14 @@ exports['e2e record api skips specs records tests and exits without executing 1'
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  a_record_instantfail.cy.js                                                      (1 of 2)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 
   This spec and its tests were skipped because the run has been canceled.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  b_record.cy.js                                                                  (2 of 2)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 
 
   b spec
@@ -2063,7 +2071,7 @@ exports['e2e record api skips specs records tests and exits without executing 1'
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Estimated:    8 seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     b_record.cy.js                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -2114,14 +2122,14 @@ exports['e2e record api skips specs records tests and exits without executing in
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  a_record_instantfail.cy.js                                                      (1 of 2)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 
   This spec and its tests were skipped because the run has been canceled.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  b_record.cy.js                                                                  (2 of 2)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 
 
   b spec
@@ -2142,7 +2150,7 @@ exports['e2e record api skips specs records tests and exits without executing in
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Estimated:    8 seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     b_record.cy.js                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -2193,7 +2201,7 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  empty_suite.cy.js                                                               (1 of 2)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 
 
   0 passing
@@ -2210,7 +2218,7 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Estimated:    8 seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     empty_suite.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -2222,7 +2230,7 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  empty.cy.js                                                                     (2 of 2)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 
 
   0 passing
@@ -2239,7 +2247,7 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Estimated:    8 seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     empty.cy.js                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -2267,27 +2275,6 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
   Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
 
 
-`
-
-exports['e2e record misconfiguration errors and exits when no browser found 1'] = `
-Can't run because you've entered an invalid browser name.
-
-Browser: browserDoesNotExist was not found on your system or is not supported by Cypress.
-
-Cypress supports the following browsers:
- - electron
- - chrome
- - chromium
- - chrome:canary
- - edge
- - firefox
-
-You can also use a custom browser: https://on.cypress.io/customize-browsers
-
-Available browsers found on your system are:
-- browser1
-- browser2
-- browser3
 `
 
 exports['e2e record quiet mode respects quiet mode 1'] = `
@@ -2362,7 +2349,7 @@ exports['e2e record video recording when videoUploadOnPasses=false does not uplo
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  record_fail.cy.js                                                               (1 of 2)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 
 
   record fails
@@ -2393,7 +2380,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Estimated:    8 seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     record_fail.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -2407,7 +2394,9 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/record_fail.cy.js.mp4               (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/record_fail.cy.js.mp4
 
 
   (Uploading Results)
@@ -2418,7 +2407,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  record_pass.cy.js                                                               (2 of 2)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 
 
   record pass
@@ -2442,7 +2431,7 @@ plugin stdout
   │ Screenshots:  1                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Estimated:    8 seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     record_pass.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -2496,7 +2485,7 @@ exports['e2e record video recording when video=false does not upload when not en
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  record_pass.cy.js                                                               (1 of 1)
-  Estimated: 8 seconds
+  Estimated: X second(s)
 
 
   record pass
@@ -2520,7 +2509,7 @@ plugin stdout
   │ Screenshots:  1                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Estimated:    8 seconds                                                                        │
+  │ Estimated:    X second(s)                                                                      │
   │ Spec Ran:     record_pass.cy.js                                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
