@@ -120,7 +120,8 @@ describe('semantic-pull-request/validate-changelog', () => {
         'cli/CHANGELOG.md',
       ]
 
-      fs.readFileSync.returns(`## 120.2.0
+      fs.readFileSync.returns(`
+## 120.2.0
 
 __Released 01/17/2033 (PENDING)__
 
@@ -181,7 +182,8 @@ __Released 01/17/2033 (PENDING)__
           'packages/driver/lib/index.js',
         ]
 
-        fs.readFileSync.returns(`## 120.2.0
+        fs.readFileSync.returns(`
+## 120.2.0
 
 __Released 01/17/2033 (PENDING)__
 
@@ -207,7 +209,8 @@ __Released 01/17/2033 (PENDING)__
           'cli/CHANGELOG.md',
         ]
 
-        fs.readFileSync.returns(`## 120.2.0
+        fs.readFileSync.returns(`
+## 120.2.0
 
 __Released 01/17/2033 (PENDING)__
 
@@ -235,7 +238,8 @@ __Released 01/17/2033 (PENDING)__
           'cli/CHANGELOG.md',
         ]
 
-        fs.readFileSync.returns(`## 120.2.0
+        fs.readFileSync.returns(`
+## 120.2.0
 
 __Released 01/17/2033 (PENDING)__
 
@@ -267,7 +271,8 @@ __Released 01/17/2033 (PENDING)__
           'cli/CHANGELOG.md',
         ]
 
-        fs.readFileSync.returns(`## 120.2.0
+        fs.readFileSync.returns(`
+## 120.2.0
 
 __Released 01/17/2033 (PENDING)__
 
@@ -295,7 +300,8 @@ __Released 01/17/2033 (PENDING)__
           'cli/CHANGELOG.md',
         ]
 
-        fs.readFileSync.returns(`## 120.2.0
+        fs.readFileSync.returns(`
+## 120.2.0
 
 __Released 01/17/2033 (PENDING)__
 
