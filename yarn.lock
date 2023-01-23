@@ -22,10 +22,21 @@
     "@angular-devkit/core" "14.2.1"
     rxjs "6.6.7"
 
-"@angular-devkit/core@14.2.1", "@angular-devkit/core@^14.2.1":
+"@angular-devkit/core@14.2.1":
   version "14.2.1"
   resolved "https://registry.yarnpkg.com/@angular-devkit/core/-/core-14.2.1.tgz#7ce14efdb5fce687bb4f13bef03d4b67e971b22e"
   integrity sha512-lW8oNGuJqr4r31FWBjfWQYkSXdiOHBGOThIEtHvUVBKfPF/oVrupLueCUgBPel+NvxENXdo93uPsqHN7bZbmsQ==
+  dependencies:
+    ajv "8.11.0"
+    ajv-formats "2.1.1"
+    jsonc-parser "3.1.0"
+    rxjs "6.6.7"
+    source-map "0.7.4"
+
+"@angular-devkit/core@14.2.10", "@angular-devkit/core@^14.2.1":
+  version "14.2.10"
+  resolved "https://registry.yarnpkg.com/@angular-devkit/core/-/core-14.2.10.tgz#9eedb7cf783030252f0c7546ce80fc321633b499"
+  integrity sha512-K4AO7mROTdbhQ7chtyQd6oPwmuL+BPUh+wn6Aq1qrmYJK4UZYFOPp8fi/Ehs8meCEeywtrssOPfrOE4Gsre9dg==
   dependencies:
     ajv "8.11.0"
     ajv-formats "2.1.1"
@@ -45,12 +56,23 @@
     symbol-observable "4.0.0"
     yargs-parser "21.1.1"
 
-"@angular-devkit/schematics@14.2.1", "@angular-devkit/schematics@^14.2.1":
+"@angular-devkit/schematics@14.2.1":
   version "14.2.1"
   resolved "https://registry.yarnpkg.com/@angular-devkit/schematics/-/schematics-14.2.1.tgz#9d66080e60ab32d1b44c854cabc8f5cbb421d877"
   integrity sha512-0U18FwDYt4zROBPrvewH6iBTkf2ozVHN4/gxUb9jWrqVw8mPU5AWc/iYxQLHBSinkr2Egjo1H/i9aBqgJSeh3g==
   dependencies:
     "@angular-devkit/core" "14.2.1"
+    jsonc-parser "3.1.0"
+    magic-string "0.26.2"
+    ora "5.4.1"
+    rxjs "6.6.7"
+
+"@angular-devkit/schematics@14.2.10", "@angular-devkit/schematics@^14.2.1":
+  version "14.2.10"
+  resolved "https://registry.yarnpkg.com/@angular-devkit/schematics/-/schematics-14.2.10.tgz#91fcc85199aa7fa9a3a0cb49d8a5266421f9d5e3"
+  integrity sha512-MMp31KpJTwKHisXOq+6VOXYApq97hZxFaFmZk396X5aIFTCELUwjcezQDk+u2nEs5iK/COUfnN3plGcfJxYhQA==
+  dependencies:
+    "@angular-devkit/core" "14.2.10"
     jsonc-parser "3.1.0"
     magic-string "0.26.2"
     ora "5.4.1"
@@ -5729,13 +5751,22 @@
   dependencies:
     any-observable "^0.3.0"
 
-"@schematics/angular@14.2.1", "@schematics/angular@^14.2.1":
+"@schematics/angular@14.2.1":
   version "14.2.1"
   resolved "https://registry.yarnpkg.com/@schematics/angular/-/angular-14.2.1.tgz#00f54cb6b30dc1945b6d344ca225c04dcc12f682"
   integrity sha512-Dchixep/FMETAMuyFchw9Nryi7tfuZQRumzIOtQpv+KaVtfjvcIlES0KuI0U3Qh7tGIYPBmO3Mkt3oojcl2RBA==
   dependencies:
     "@angular-devkit/core" "14.2.1"
     "@angular-devkit/schematics" "14.2.1"
+    jsonc-parser "3.1.0"
+
+"@schematics/angular@^14.2.1":
+  version "14.2.10"
+  resolved "https://registry.yarnpkg.com/@schematics/angular/-/angular-14.2.10.tgz#676b045ea647e8908ade169ebb688e40b158ca83"
+  integrity sha512-YFTc/9QJdx422XcApizEcVLKoyknu8b9zHIlAepZCu7WkV8GPT0hvVEHQ7KBWys5aQ7pPZMT0JpZLeAz0F2xYQ==
+  dependencies:
+    "@angular-devkit/core" "14.2.10"
+    "@angular-devkit/schematics" "14.2.10"
     jsonc-parser "3.1.0"
 
 "@semantic-release/changelog@5.0.1":
@@ -29798,9 +29829,9 @@ rxjs@6.6.7, rxjs@^6.3.3, rxjs@^6.4.0, rxjs@^6.5.4, rxjs@^6.6.0, rxjs@^6.6.3, rxj
     tslib "^1.9.0"
 
 rxjs@^7.1.0, rxjs@^7.5.5:
-  version "7.5.6"
-  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.5.6.tgz#0446577557862afd6903517ce7cae79ecb9662bc"
-  integrity sha512-dnyv2/YsXhnm461G+R/Pe5bWP41Nm6LBXEYWI6eiFP4fiwx6WRI/CD0zbdVAudd9xwLEF2IDcKXLHit0FYjUzw==
+  version "7.5.7"
+  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.5.7.tgz#2ec0d57fdc89ece220d2e702730ae8f1e49def39"
+  integrity sha512-z9MzKh/UcOqB3i20H6rtrlaE/CgjLOvheWK/9ILrbhROGTweAi1BaFsTT9FbwZi5Trr1qNRs+MXkhmR06awzQA==
   dependencies:
     tslib "^2.1.0"
 

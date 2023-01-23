@@ -31,7 +31,7 @@
 
 ## Requirements
 
-- Angular 13+
+- Angular 14+
 
 ## Usage ⏯
 
