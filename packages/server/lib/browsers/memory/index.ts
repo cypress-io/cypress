@@ -44,8 +44,10 @@ export type MemoryHandler = {
 /**
  * Algorithm:
  *
- * When the test runs starts:
+ * When the spec run starts:
  *   1. set total mem limit for the container/host by reading off cgroup memory limits (if available) otherwise use os.totalmem()
+ *   2. set js heap size limit by reading off the browser
+ *   3. turn on memory profiler
  *
  * On a defined interval (e.g. 1s):
  *   1. set current mem available for the container/host by reading off cgroup memory usage (if available) otherwise use si.mem().available
@@ -54,7 +56,10 @@ export type MemoryHandler = {
  *   4. calc % of memory used, current renderer mem usage / max avail render mem
  *
  * Before each test:
- *   1. if that exceeds the defined memory threshold percentage (e.g. 50%) do a GC
+ *   1. if any interval exceeded the defined memory threshold (e.g. 50%), do a GC
+ *
+ * After the spec run ends:
+ *   1. turn off memory profiler
  */
 
 /**
@@ -221,7 +226,7 @@ export const calculateMemoryStats: () => Promise<void> = measure(async () => {
   const maxAvailableRendererMemory = Math.min(jsHeapSizeLimit, currentAvailableMemory + rendererProcessMemRss)
 
   const rendererUsagePercentage = (rendererProcessMemRss / maxAvailableRendererMemory) * 100
-  // if we're using more than MEMORY_THRESHOLD_PERCENTAGE of the available memory,
+  // if the renderer's memory is above the MEMORY_THRESHOLD_PERCENTAGE, we should collect garbage on the next test
   const shouldCollectGarbage = rendererUsagePercentage >= MEMORY_THRESHOLD_PERCENTAGE && !SKIP_GC
 
   // if we should collect garbage, set the flag to true so we can collect garbage on the next test
