@@ -8,6 +8,9 @@ const { getLinkedIssues } = require('./get-linked-issues')
 
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN })
 
+/**
+ * Get the version, commit date and git sha of the latest tag published on npm.
+ */
 const getCurrentReleaseData = async () => {
   console.log('Get Current Release Information\n')
   const { stdout } = await execa('npm', ['info', 'cypress', '--json'])
@@ -24,6 +27,15 @@ const getCurrentReleaseData = async () => {
   return latestReleaseInfo
 }
 
+/**
+ * Get the list of file names that have been added, deleted or changed since the git
+ * sha associated with the latest tag published on npm.
+ *
+ * @param {object} latestReleaseInfo - data of the latest tag published on npm
+ * @param {string} latestReleaseInfo.version - version of Cypress
+ * @param {string} latestReleaseInfo.commitDate - data of release
+ * @param {string} latestReleaseInfo.buildSha - git commit associated with published content
+ */
 const getChangedFilesSinceLastRelease = async (latestReleaseInfo) => {
   const { stdout } = await execa('git', ['diff', `${latestReleaseInfo.buildSha}..`, '--name-only'])
 
@@ -36,6 +48,17 @@ const getChangedFilesSinceLastRelease = async (latestReleaseInfo) => {
   return stdout.split('\n')
 }
 
+/**
+ * Get the next release version given the semantic commits in the git history. Then using the commit history,
+ * determine which files have changed, list of PRs merged and issues resolved since the latest tag was
+ * published on npm. It also collects the list of commit data including the semantic type, PR and associated
+ * issues.
+ *
+ * @param {object} latestReleaseInfo - data of the latest tag published on npm
+ * @param {string} latestReleaseInfo.version - version of Cypress
+ * @param {string} latestReleaseInfo.commitDate - data of release
+ * @param {string} latestReleaseInfo.buildSha - git commit associated with published content
+ */
 const getReleaseData = async (latestReleaseInfo) => {
   let {
     nextVersion,

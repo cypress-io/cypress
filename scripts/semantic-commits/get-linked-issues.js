@@ -1,3 +1,8 @@
+/**
+ * Parses the pull request body to find any associated github issues that were
+ * resolved when the pull request merged.
+ * @returns list of associated issue numbers
+ */
 const getLinkedIssues = (body = '') => {
   // remove markdown comments
   body.replace(/(<!--.*?-->)|(<!--[\S\s]+?-->)|(<!--[\S\s]*?$)/g, '')

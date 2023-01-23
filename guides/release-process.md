@@ -81,11 +81,9 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
 2. Confirm that every issue labeled [stage: pending release](https://github.com/cypress-io/cypress/issues?q=label%3A%22stage%3A+pending+release%22+is%3Aclosed) has a ZenHub release set. **Tip:** there is a command in [`release-automations`](https://github.com/cypress-io/release-automations)'s `issues-in-release` tool to list and check such issues. Without a ZenHub release issues will not be included in the right changelog. Also ensure that every closed issue in any obsolete releases are moved to the appropriate release in ZehHub. For example, if the open releases are 9.5.5 and 9.6.0, the current release is 9.6.0, then all closed issues marked as 9.5.5 should be moved to 9.6.0. Ensure that there are no commits on `develop` since the last release that are user facing and aren't marked with the current release.
 
 3. Create a Release PR Bump, submit, get approvals on, and merge a new PR. This PR Should:
- bump the Cypress version, fix an changelog entries and to bump the `cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version.
   - Bump the Cypress `version` in [`package.json`](package.json)
   - Bump the [`packages/example`](../packages/example) dependency if there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version
-  - Update, correct grammar or add details to existing changelog entries
-
+  - Follow the writing the [Cypress Changelog release steps](./writing-the-cypress-changelog.md#release) to update the [`cli/CHANGELOG.md`](../cli/CHANGELOG.md).
 4. Once the `develop` branch is passing for all test projects with the new changes and the `linux-x64` binary is present at `https://cdn.cypress.io/beta/binary/X.Y.Z/linux-x64/develop-<sha>/cypress.zip`, and the `linux-x64` cypress npm package is present at `https://cdn.cypress.io/beta/npm/X.Y.Z/linux-x64/develop-<sha>/cypress.tgz`, publishing can proceed.
 
 5. Log into AWS SSO with `aws sso login --profile <name_of_profile>`. If you have setup your credentials under a different profile than `prod`, be sure to set the `AWS_PROFILE` environment variable to that profile name for the remaining steps. For example, if you are using `production` instead of `prod`, do `export AWS_PROFILE=production`.

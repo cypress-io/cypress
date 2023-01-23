@@ -474,6 +474,7 @@ We do not continuously deploy the Cypress binary, so `develop` contains all of t
     - `refactor` - A code change that neither fixes a bug nor adds a feature
     - `revert` - Reverts a previous commit
     - `test` - Adding missing or correcting existing tests
+- For user-facing changes that will be released with the next Cypress version, be sure to add a changelog entry to the appropriate section in [`cli/CHANGELOG.md`](./cli/CHANGELOG.md). See [Writing the Cypress Changelog Guide](./guides/writing-the-cypress-changelog.md) for more details.
 - Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If you feel some areas are not relevant add `N/A` as opposed to deleting those sections. PRs will not be reviewed if this template is not filled in.
 - If the PR is a user facing change and you're a Cypress team member that has logged into [ZenHub](https://www.zenhub.com/) and downloaded the [ZenHub for GitHub extension](https://www.zenhub.com/extension), set the release the PR is intended to ship in from the sidebar of the PR. Follow semantic versioning to select the intended release. This is used to generate the changelog for the release. If you don't tag a PR for release, it won't be mentioned in the changelog.
   ![Select release for PR](https://user-images.githubusercontent.com/1271364/135139641-657015d6-2dca-42d4-a4fb-16478f61d63f.png)

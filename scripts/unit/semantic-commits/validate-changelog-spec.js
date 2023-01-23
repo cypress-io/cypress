@@ -120,7 +120,8 @@ describe('semantic-pull-request/validate-changelog', () => {
         'cli/CHANGELOG.md',
       ]
 
-      fs.readFileSync.returns(`## 120.2.0
+      fs.readFileSync.returns(`
+## 120.2.0
 
 __Released 01/17/2033 (PENDING)__
 
@@ -181,7 +182,8 @@ __Released 01/17/2033 (PENDING)__
           'packages/driver/lib/index.js',
         ]
 
-        fs.readFileSync.returns(`## 120.2.0
+        fs.readFileSync.returns(`
+## 120.2.0
 
 __Released 01/17/2033 (PENDING)__
 
@@ -201,13 +203,14 @@ __Released 01/17/2033 (PENDING)__
         })
       })
 
-      it('entry does not correct change section', async () => {
+      it('entry does not include correct change section', async () => {
         const changedFiles = [
           'packages/driver/lib/index.js',
           'cli/CHANGELOG.md',
         ]
 
-        fs.readFileSync.returns(`## 120.2.0
+        fs.readFileSync.returns(`
+## 120.2.0
 
 __Released 01/17/2033 (PENDING)__
 
@@ -229,13 +232,47 @@ __Released 01/17/2033 (PENDING)__
         })
       })
 
+      it('entry added to wrong change section', async () => {
+        const changedFiles = [
+          'packages/driver/lib/index.js',
+          'cli/CHANGELOG.md',
+        ]
+
+        fs.readFileSync.returns(`
+## 120.2.0
+
+__Released 01/17/2033 (PENDING)__
+
+**Performance:**
+
+- Some other update already added & vetted. Addresses [#32](https://github.com/cypress-io/cypress/issues/32).
+
+**Features:**
+
+- Fixes [#75](https://github.com/cypress-io/cypress/issues/75).`)
+
+        return validateChangelog({
+          changedFiles,
+          commits: [{
+            commitMessage: 'perf: do something faster (#77)',
+            prNumber: 77,
+            semanticType: 'perf',
+            associatedIssues: ['75'],
+          }],
+        }).catch((err) => {
+          expect(err.message).to.contain('There was one or more errors when validating the changelog. See above for details.')
+          expect(console.log.firstCall.args[0]).to.contain('Found the changelog entry in the wrong section.')
+        })
+      })
+
       it('entry does not include associated issue links', async () => {
         const changedFiles = [
           'packages/driver/lib/index.js',
           'cli/CHANGELOG.md',
         ]
 
-        fs.readFileSync.returns(`## 120.2.0
+        fs.readFileSync.returns(`
+## 120.2.0
 
 __Released 01/17/2033 (PENDING)__
 
@@ -263,7 +300,8 @@ __Released 01/17/2033 (PENDING)__
           'cli/CHANGELOG.md',
         ]
 
-        fs.readFileSync.returns(`## 120.2.0
+        fs.readFileSync.returns(`
+## 120.2.0
 
 __Released 01/17/2033 (PENDING)__
 

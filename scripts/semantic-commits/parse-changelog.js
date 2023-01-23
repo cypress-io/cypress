@@ -17,8 +17,8 @@ async function parseChangelog (pendingRelease = true) {
   const sections = {}
   let currentSection = ''
   let content = []
-  let index = -1
-  let nextKnownLineBreak = 1
+  let index = 0
+  let nextKnownLineBreak = 2
 
   while (parseChangelog) {
     index++
@@ -30,18 +30,19 @@ async function parseChangelog (pendingRelease = true) {
 
     const line = changeLogLines[index]
 
-    if (index > 0 && /^## \d+\.\d+\.\d+/.test(line)) {
+    // reached next release section
+    if (index > 1 && /^## \d+\.\d+\.\d+/.test(line)) {
       sections[currentSection] = content
       parseChangelog = false
     }
 
-    if (index === 0) {
+    if (index === 1) {
       if (!/^## \d+\.\d+\.\d+/.test(line)) {
         throw new Error(`Expected line number ${index} to include "## x.x.x"`)
       }
 
       sections['version'] = line
-    } else if (index === 2) {
+    } else if (index === 3) {
       nextKnownLineBreak = index + 1
       if (pendingRelease && !/__Released \d+\/\d+\/\d+ \(PENDING\)__/.test(line)) {
         throw new Error(`Expected line number ${index} to include "__Released xx/xx/xxxx (PENDING)__"`)
