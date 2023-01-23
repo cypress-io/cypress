@@ -2667,8 +2667,9 @@ declare namespace Cypress {
    */
   interface AsOptions {
     /**
-     * If an alias should be a 'query' (re-fetched every time so it's always live) or a
-     * 'value' (read once when the alias is saved, never updated).
+     * The type of alias to store, which impacts how the value is retrieved later in the test. 
+     * If an alias should be a 'query' (re-runs all queries leading up to the resulting value so it's alway up-to-date) or a
+     * 'static' (read once when the alias is saved and is never updated). `type` has no effect when aliasing intercepts, spies, and stubs.
      *
      * @default 'query'
      */
