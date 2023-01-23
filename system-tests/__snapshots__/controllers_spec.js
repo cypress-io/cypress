@@ -49,7 +49,9 @@ Fix the error in your code and re-run your tests.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/spec.cy.js.mp4                      (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/spec.cy.js.mp4
 
 
 ====================================================================================================
@@ -108,7 +110,9 @@ exports['e2e plugins handles specs with $, &, and + in file name 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/s%p+ec&.js.mp4                      (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/s%p+ec&.js.mp4
 
 
 ====================================================================================================

@@ -3020,6 +3020,16 @@ declare namespace Cypress {
      */
     experimentalModifyObstructiveThirdPartyCode: boolean
     /**
+     * Disables setting document.domain to the applications super domain on injection.
+     * This experiment is to be used for sites that do not work with setting document.domain
+     * due to cross-origin issues. Enabling this option no longer allows for default subdomain
+     * navigations, and will require the use of cy.origin(). This option takes an array of
+     * strings/string globs.
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/Document/domain
+     * @default null
+     */
+    experimentalSkipDomainInjection: string[] | null
+    /**
      * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.
      * @default false
      */
@@ -3034,6 +3044,11 @@ declare namespace Cypress {
      * @default false
      */
     experimentalWebKitSupport: boolean
+    /**
+     * Enables support for improved memory management within Chromium-based browsers.
+     * @default false
+     */
+    experimentalMemoryManagement: boolean
     /**
      * Number of times to retry a failed test.
      * If a number is set, tests will retry in both runMode and openMode.

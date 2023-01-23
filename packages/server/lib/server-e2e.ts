@@ -45,6 +45,8 @@ const isResponseHtml = function (contentType, responseBuffer) {
 
 export class ServerE2E extends ServerBase<SocketE2E> {
   private _urlResolver: Bluebird<Record<string, any>> | null
+  // the initialization of this variable is only precautionary as the actual config value is applied when the server is created
+  private skipDomainInjectionForDomains: string[] | null = null
 
   constructor () {
     super()
@@ -58,10 +60,10 @@ export class ServerE2E extends ServerBase<SocketE2E> {
 
   createServer (app, config, onWarning): Bluebird<[number, WarningErr?]> {
     return new Bluebird((resolve, reject) => {
-      const { port, fileServerFolder, socketIoRoute, baseUrl } = config
+      const { port, fileServerFolder, socketIoRoute, baseUrl, experimentalSkipDomainInjection } = config
 
       this._server = this._createHttpServer(app)
-
+      this.skipDomainInjectionForDomains = experimentalSkipDomainInjection
       const onError = (err) => {
         // if the server bombs before starting
         // and the err no is EADDRINUSE
@@ -308,7 +310,9 @@ export class ServerE2E extends ServerBase<SocketE2E> {
                 // TODO: think about moving this logic back into the frontend so that the driver can be in control
                 // of when to buffer and set the remote state
                 if (isOk && details.isHtml) {
-                  const urlDoesNotMatchPolicyBasedOnDomain = options.hasAlreadyVisitedUrl && !cors.urlMatchesPolicyBasedOnDomain(primaryRemoteState.origin, newUrl || '') || options.isFromSpecBridge
+                  const urlDoesNotMatchPolicyBasedOnDomain = options.hasAlreadyVisitedUrl
+                    && !cors.urlMatchesPolicyBasedOnDomain(primaryRemoteState.origin, newUrl || '', { skipDomainInjectionForDomains: this.skipDomainInjectionForDomains })
+                    || options.isFromSpecBridge
 
                   if (!handlingLocalFile) {
                     this._remoteStates.set(newUrl as string, options, !urlDoesNotMatchPolicyBasedOnDomain)

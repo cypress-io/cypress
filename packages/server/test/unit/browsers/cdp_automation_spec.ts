@@ -15,13 +15,7 @@ context('lib/browsers/cdp_automation', () => {
         onRequestEvent: sinon.stub(),
       }
 
-      cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, this.automation, false)
-
-      this.sendDebuggerCommand
-      .throws(new Error('not stubbed'))
-      .withArgs('Browser.getVersion')
-      .resolves()
-
+      cdpAutomation = await CdpAutomation.create(this.sendDebuggerCommand, this.onFn, this.sendCloseTargetCommand, this.automation)
       this.onRequest = cdpAutomation.onRequest
     })
 
@@ -307,6 +301,22 @@ context('lib/browsers/cdp_automation', () => {
         this.sendDebuggerCommand.withArgs('Page.bringToFront').resolves()
 
         return this.onRequest('focus:browser:window').then((resp) => expect(resp).to.be.undefined)
+      })
+    })
+
+    describe('get:heap:size:limit', function () {
+      it('sends Runtime.evaluate to request the performance.memory.jsHeapSizeLimit', async function () {
+        this.sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' }).resolves()
+
+        return this.onRequest('get:heap:size:limit').then((resp) => expect(resp).to.be.undefined)
+      })
+    })
+
+    describe('collect:garbage', function () {
+      it('sends HeapProfiler.collectGarbage when garbage collection is requested', async function () {
+        this.sendDebuggerCommand.withArgs('HeapProfiler.collectGarbage').resolves()
+
+        return this.onRequest('collect:garbage').then((resp) => expect(resp).to.be.undefined)
       })
     })
   })
