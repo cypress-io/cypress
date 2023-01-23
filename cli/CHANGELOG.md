@@ -17,7 +17,6 @@ __Released 01/17/2023 (PENDING)__
 
   - <Insert change details>. Fixed in [#25460](https://github.com/cypress-io/cypress/pull/25460).
  
-**Bugfixes:**
 
 -  Fixed an issue with Component Testing project setup which could incorrectly treat new major versions of [`webpack`](https://www.npmjs.com/package/webpack), [`typescript`](https://www.npmjs.com/package/typescript), [`@angular/cli`](https://www.npmjs.com/package/@angular/cli), [`@angular-devkit/build-angular`](https://www.npmjs.com/package/@angular-devkit/build-angular), [`@angular/core`](https://www.npmjs.com/package/@angular/core), [`@angular/common`](https://www.npmjs.com/package/@angular/common) and [`@angular/platform-browser-dynamic`](https://www.npmjs.com/package/@angular/platform-browser-dynamic) as supported. Fixes [#25379](https://github.com/cypress-io/cypress/issues/25379).
 - Fixed a formatting issue where spaces and tabs on newlines in Command Log text were not maintained. Fixes [#23679](https://github.com/cypress-io/cypress/issues/23679).
