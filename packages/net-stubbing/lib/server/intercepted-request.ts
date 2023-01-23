@@ -153,11 +153,14 @@ export class InterceptedRequest {
           data,
         }
 
-        // https://github.com/cypress-io/cypress/issues/17139
-        // Routes should be counted before they're sent.
         if (eventName === 'before:request') {
           const route = this.matchingRoutes.find(({ id }) => id === subscription.routeId) as BackendRoute
 
+          // To prevent users from accidentally setting `log: false` via fallthru, reset `req.log` on each interception.
+          this.req.log = !!(route.staticResponse?.log || this.req.log)
+
+          // https://github.com/cypress-io/cypress/issues/17139
+          // Routes should be counted before they're sent.
           route.matches++
 
           if (route.routeMatcher.times && route.matches >= route.routeMatcher.times) {

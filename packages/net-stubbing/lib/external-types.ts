@@ -161,6 +161,13 @@ export namespace CyHttpMessages {
      * request via `cy.wait('@alias')`.
      */
     alias?: string
+    /**
+     * If set to `false`, this request will not be logged.
+     * NOTE: To prevent accidentally ignoring `cy.intercept()` logs, all intercepts set
+     * `req.log = true` by default. `req.log` must be `false` at the end of the handler chain
+     * to hide the log.
+     */
+    log: boolean
   }
 
   export interface IncomingHttpRequest extends IncomingRequest, RequestEvents {
@@ -441,6 +448,13 @@ export interface GenericStaticResponse<Fixture, Body> {
    * Milliseconds to delay before the response is sent.
    */
   delay?: number
+  /**
+   * If set to `false`, this request will not be logged.
+   * NOTE: To prevent accidentally ignoring `cy.intercept()` logs, all intercepts set
+   * `req.log = true` by default. `req.log` must be `false` at the end of the handler chain
+   * to hide the log.
+   */
+  log: boolean
 }
 
 /**

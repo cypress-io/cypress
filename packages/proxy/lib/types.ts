@@ -9,6 +9,10 @@ export type CypressIncomingRequest = Request & {
   proxiedUrl: string
   abort: () => void
   requestId: string
+  /**
+   * Should this request be logged in the Command Log?
+   */
+  log?: boolean
   browserPreRequest?: BrowserPreRequest
   body?: string
   responseTimeout?: number
