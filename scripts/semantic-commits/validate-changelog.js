@@ -2,8 +2,14 @@
 const { userFacingChanges } = require('./change-categories')
 const { parseChangelog } = require('./parse-changelog')
 
+// whether or not the semantic type is a user-facing semantic-type
 const hasUserFacingChange = (type) => Object.keys(userFacingChanges).includes(type)
 
+/**
+ * Formats the resolved message that is appended to the changelog entry to indicate what
+ * issues where addressed by a given change. If no issues are addressed, it references the
+ * pull request which made the change.
+ */
 function _getResolvedMessage (semanticType, prNumber, associatedIssues = []) {
   if (associatedIssues.length) {
     const issueMessage = userFacingChanges[semanticType].message.hasIssue
@@ -26,26 +32,51 @@ function _getResolvedMessage (semanticType, prNumber, associatedIssues = []) {
   return `${prMessage} [#${prNumber}](https://github.com/cypress-io/cypress/pull/${prNumber}).`
 }
 
-function printChangeLogExample (semanticType, prNumber, associatedIssues = []) {
+/**
+ * Helper to format an example of what the changelog entry might look like for a given commit.
+ */
+function _printChangeLogExample (semanticType, prNumber, associatedIssues = []) {
   const resolveMessage = _getResolvedMessage(semanticType, prNumber, associatedIssues)
 
   return `${userFacingChanges[semanticType].section}\n - <Insert change details>. ${resolveMessage}`
 }
 
+/**
+ * Ensures the changelog entry was added to the correct changelog section given it's semantic commit type
+ * and that it includes the correct reference(s) to the issue(s) or pull request the commit addressed.
+ */
 function _validateEntry (changelog, { commitMessage, prNumber, semanticType, associatedIssues }) {
   if (!hasUserFacingChange(semanticType)) {
     return
   }
 
-  const sectionDetails = changelog[userFacingChanges[semanticType].section]
-
-  if (!sectionDetails) {
-    return `The changelog does not include the ${userFacingChanges[semanticType].section} section. Given the pull request title provided, this section should be included in the changelog. If the changelog section is correct, please correct the pull request title to correctly reflect the change being made.`
-  }
+  const expectedSection = userFacingChanges[semanticType].section
+  let missingExpectedSection = false
+  let sectionEntryFoundIn = ''
 
   const resolveMessage = _getResolvedMessage(semanticType, prNumber, associatedIssues)
 
-  const hasMatchingEntry = sectionDetails.some((detail) => detail.includes(resolveMessage))
+  const hasMatchingEntry = Object.entries(userFacingChanges).some(([type, { section }]) => {
+    const sectionDetails = changelog[section]
+
+    if (!sectionDetails) {
+      missingExpectedSection = semanticType === type
+
+      return false
+    }
+
+    const hasMatchingEntry = sectionDetails.some((detail) => detail.includes(resolveMessage))
+
+    if (hasMatchingEntry) {
+      sectionEntryFoundIn = section
+    }
+
+    return hasMatchingEntry
+  })
+
+  if (missingExpectedSection) {
+    return `The changelog does not include the ${expectedSection} section. Given the pull request title provided, this section should be included in the changelog. If the changelog section is correct, please correct the pull request title to correctly reflect the change being made.`
+  }
 
   if (!hasMatchingEntry) {
     if (associatedIssues && associatedIssues.length) {
@@ -53,6 +84,10 @@ function _validateEntry (changelog, { commitMessage, prNumber, semanticType, ass
     }
 
     return `The changelog entry does not include the pull request link. Please update your entry for '${commitMessage}' to include:\n\n${resolveMessage}`
+  }
+
+  if (hasMatchingEntry && sectionEntryFoundIn !== expectedSection) {
+    return `Found the changelog entry in the wrong section. Expected the entry to be under the ${expectedSection} section, but found it in the ${sectionEntryFoundIn} section. Please move your entry to the correct changelog section.`
   }
 
   return
@@ -67,6 +102,10 @@ const _handleErrors = (errors) => {
   throw new Error('There was one or more errors when validating the changelog. See above for details.')
 }
 
+/**
+ * Determines if the Cypress changelog has the correct next version and changelog entires given the provided
+ * list of commits.
+ */
 async function validateChangelog ({ changedFiles, nextVersion, commits }) {
   const hasUserFacingCommits = commits.some(({ semanticType }) => hasUserFacingChange(semanticType))
 
@@ -93,7 +132,7 @@ async function validateChangelog ({ changedFiles, nextVersion, commits }) {
     errors.push(`A changelog entry was not found in cli/CHANGELOG.md.`)
 
     if (commits.length === 1) {
-      errors.push(`Please add a changelog entry that describes the changes. Include this entry under the section:/\n\n${printChangeLogExample(commits[0].semanticType, commits[0].prNumber, commits[0].associatedIssues)}`)
+      errors.push(`Please add a changelog entry that describes the changes. Include this entry under the section:/\n\n${_printChangeLogExample(commits[0].semanticType, commits[0].prNumber, commits[0].associatedIssues)}`)
 
       return _handleErrors(errors)
     }
@@ -111,7 +150,7 @@ async function validateChangelog ({ changedFiles, nextVersion, commits }) {
     }
 
     if (!hasChangeLogUpdate) {
-      printChangeLogExample(semanticType, prNumber, associatedIssues)
+      _printChangeLogExample(semanticType, prNumber, associatedIssues)
     }
 
     const errMessage = _validateEntry(changelog, { commitMessage, semanticType, prNumber, associatedIssues })

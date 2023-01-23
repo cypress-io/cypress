@@ -80,6 +80,7 @@ const changeCatagories = {
   },
 }
 
+// Used by @semantic-release/commit-analyzer to determine next version for npm packages
 const releaseRules = Object.entries(changeCatagories).map(([type, attrs]) => {
   return {
     type,
@@ -103,8 +104,6 @@ const parserOpts = {
 }
 
 const migrationGuideBlurb = (version) => `Please read our Migration Guide which explains the changes in more detail and how to change your code to migrate to Cypress ${version}.`
-
-// const regression = 'Fixed a regression in []' // with link to changelog
 
 module.exports = {
   changeCatagories,

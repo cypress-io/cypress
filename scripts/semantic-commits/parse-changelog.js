@@ -30,6 +30,7 @@ async function parseChangelog (pendingRelease = true) {
 
     const line = changeLogLines[index]
 
+    // reached next release section
     if (index > 0 && /^## \d+\.\d+\.\d+/.test(line)) {
       sections[currentSection] = content
       parseChangelog = false
