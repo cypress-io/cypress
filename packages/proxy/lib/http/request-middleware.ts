@@ -148,9 +148,7 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
 }
 
 const SendToDriver: RequestMiddleware = function () {
-  const { browserPreRequest, resourceType } = this.req
-
-  this.req.log = (resourceType === 'fetch' || resourceType === 'xhr')
+  const { browserPreRequest } = this.req
 
   if (browserPreRequest) {
     this.socket.toDriver('request:event', 'incoming:request', browserPreRequest)

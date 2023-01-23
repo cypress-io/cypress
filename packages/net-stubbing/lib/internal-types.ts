@@ -25,7 +25,6 @@ export const SERIALIZABLE_REQ_PROPS = [
   'followRedirect',
   'resourceType',
   'query',
-  'log',
 ]
 
 export const SERIALIZABLE_RES_PROPS = _.concat(
