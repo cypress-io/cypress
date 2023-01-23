@@ -13,9 +13,6 @@
     "cypress/globals": true
   },
   "root": true,
-  "globals": {
-    "jest": "readonly"
-  },
   "rules": {
     "no-console": "off",
     "mocha/no-global-tests": "off",
