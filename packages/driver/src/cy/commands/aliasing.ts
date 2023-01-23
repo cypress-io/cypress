@@ -11,7 +11,7 @@ export default function (Commands, Cypress, cy) {
       $errUtils.throwErrByPath('as.invalid_options', { args: { arg: options } })
     }
 
-    if (options.type && !options.type.match(/query|value/)) {
+    if (options.type && !options.type.match(/query|static/)) {
       $errUtils.throwErrByPath('as.invalid_options_type', { args: { type: options.type } })
     }
 
@@ -23,10 +23,10 @@ export default function (Commands, Cypress, cy) {
     // don't apply here as well.
     let subjectChain = [...cy.subjectChain()]
 
-    // If the user wants us to store a specific value, rather than requery it live, we replace
-    // the subject chain with a resolved value.
+    // If the user wants us to store a specific static value, rather than
+    // requery it live, we replace the subject chain with a resolved value.
     // https://github.com/cypress-io/cypress/issues/25173
-    if (options.type === 'value') {
+    if (options.type === 'static') {
       subjectChain = [cy.getSubjectFromChain(subjectChain)]
     }
 
@@ -58,7 +58,7 @@ export default function (Commands, Cypress, cy) {
 
       if (!alreadyAliasedLog && log) {
         log.set({
-          alias: `@${alias}${options.type ? ` (${ options.type })` : ''}`,
+          alias: `@${alias}${options.type === 'static' ? ` (${ options.type })` : ''}`,
           aliasType: $dom.isElement(subject) ? 'dom' : 'primitive',
         })
       }

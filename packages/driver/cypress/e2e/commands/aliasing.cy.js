@@ -68,7 +68,7 @@ describe('src/cy/commands/aliasing', () => {
     it('allows users to store a static value', () => {
       const obj = { foo: 'bar' }
 
-      cy.wrap(obj).its('foo').as('alias1', { type: 'value' })
+      cy.wrap(obj).its('foo').as('alias1', { type: 'static' })
       cy.wrap(obj).its('foo').as('alias2', { type: 'query' })
 
       cy.then(() => {
@@ -264,7 +264,7 @@ describe('src/cy/commands/aliasing', () => {
 
       it('throws when given invalid `type`', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq(`\`cy.as()\` only accepts a \`type\` of \`'query'\` or \`'value'\`. You passed: \`wut?\``)
+          expect(err.message).to.eq(`\`cy.as()\` only accepts a \`type\` of \`'query'\` or \`'static'\`. You passed: \`wut?\``)
           expect(err.docsUrl).to.eq('https://on.cypress.io/as')
 
           done()
@@ -325,11 +325,11 @@ describe('src/cy/commands/aliasing', () => {
         })
       })
 
-      it('includes the alias `type` when explicitly set', () => {
-        cy.wrap({}).as('foo', { type: 'value' }).then(function () {
+      it('includes the alias `type` when set to `static`', () => {
+        cy.wrap({}).as('foo', { type: 'static' }).then(function () {
           const { lastLog } = this
 
-          expect(lastLog.get('alias')).to.eq('@foo (value)')
+          expect(lastLog.get('alias')).to.eq('@foo (static)')
         })
       })
 

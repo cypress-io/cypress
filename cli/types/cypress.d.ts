@@ -2672,7 +2672,7 @@ declare namespace Cypress {
      *
      * @default 'query'
      */
-    type?: 'query' | 'value'
+    type: 'query' | 'static'
   }
 
   interface BlurOptions extends Loggable, Timeoutable, Forceable { }

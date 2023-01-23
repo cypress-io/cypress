@@ -142,7 +142,7 @@ export default {
       message: `${cmd('as')} cannot be aliased as: \`{{alias}}\`. This word is reserved.`,
     },
     invalid_options: `${cmd('as')} only accepts an options object for its second argument. You passed: \`{{arg}}\``,
-    invalid_options_type: `${cmd('as')} only accepts a \`type\` of \`'query'\` or \`'value'\`. You passed: \`{{type}}\``,
+    invalid_options_type: `${cmd('as')} only accepts a \`type\` of \`'query'\` or \`'static'\`. You passed: \`{{type}}\``,
   },
 
   blur: {
