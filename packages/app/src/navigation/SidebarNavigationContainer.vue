@@ -9,10 +9,10 @@
 <script lang="ts" setup>
 import SidebarNavigation from './SidebarNavigation.vue'
 import { gql, useQuery } from '@urql/vue'
-import { useOnline } from '@vueuse/core'
+import { useDebounceFn, useOnline } from '@vueuse/core'
 import { SideBarNavigationContainerDocument } from '../generated/graphql'
 import { useRelevantRun } from '@packages/app/src/composables/useRelevantRun'
-import { computed } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 
 gql`
 query SideBarNavigationContainer($runNumber: Int!, $hasCurrentRun: Boolean!) {
@@ -31,14 +31,16 @@ const variables = computed(() => {
   }
 })
 
-const shouldPauseQuery = computed(() => {
-  return variables.value.runNumber === -1 || !online
+const query = useQuery({ query: SideBarNavigationContainerDocument, variables })
+
+const isLoading = ref(true)
+
+const setIsLoading = useDebounceFn((value) => {
+  isLoading.value = value
 })
 
-const query = useQuery({ query: SideBarNavigationContainerDocument, variables, pause: shouldPauseQuery })
-
-const isLoading = computed(() => {
-  return !relevantRuns.value || query.fetching.value
+watchEffect(() => {
+  setIsLoading(!relevantRuns.value || query.fetching.value)
 })
 
 </script>
