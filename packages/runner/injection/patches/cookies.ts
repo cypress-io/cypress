@@ -91,23 +91,37 @@ export const patchDocumentCookie = (requestCookies: AutomationCookie[]) => {
       // if result is undefined, it was invalid and couldn't be parsed
       if (!parsedCookie) return getDocumentCookieValue()
 
-      // we should be able to pass in parsedCookie here instead of the string
-      // value, but tough-cookie doesn't recognize it using an instanceof
-      // check and throws an error. because we can't, we have to massage
-      // some of the properties below to be correct
-      const cookie = setCookie(stringValue)
+      // if the cookie is not expired, don't set it
+      if (parsedCookie.expiryTime() < Date.now()) {
+        cookieJar.removeCookie({
+          name: parsedCookie.key,
+          path: parsedCookie.path || '/',
+          domain: parsedCookie.domain as string,
+        })
 
-      if (cookie) {
-        cookie.sameSite = parsedCookie.sameSite
+        // send the cookie to the server so it can be removed from the browser
+        // via aututomation. If the cookie expiry is set inside the server-side cookie jar,
+        // the cookie will be automatically removed.
+        sendCookieToServer(toughCookieToAutomationCookie(parsedCookie, domain))
+      } else {
+        // we should be able to pass in parsedCookie here instead of the string
+        // value, but tough-cookie doesn't recognize it using an instanceof
+        // check and throws an error. because we can't, we have to massage
+        // some of the properties below to be correct
+        const cookie = setCookie(stringValue)
 
-        if (!parsedCookie.path) {
-          cookie.path = '/'
+        if (cookie) {
+          cookie.sameSite = parsedCookie.sameSite
+
+          if (!parsedCookie.path) {
+            cookie.path = '/'
+          }
+
+          // send the cookie to the server so it can be set in the browser via
+          // automation and in our server-side cookie jar so it's available
+          // to subsequent injections
+          sendCookieToServer(toughCookieToAutomationCookie(cookie, domain))
         }
-
-        // send the cookie to the server so it can be set in the browser via
-        // automation and in our server-side cookie jar so it's available
-        // to subsequent injections
-        sendCookieToServer(toughCookieToAutomationCookie(cookie, domain))
       }
 
       return getDocumentCookieValue()

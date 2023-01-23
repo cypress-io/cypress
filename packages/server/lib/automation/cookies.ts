@@ -5,7 +5,7 @@ import { isHostOnlyCookie } from '../browsers/cdp_automation'
 
 export interface AutomationCookie {
   domain: string
-  expiry: number | null
+  expiry: 'Infinity' | '-Infinity' | number | null
   httpOnly: boolean
   maxAge: 'Infinity' | '-Infinity' | number | null
   name: string
@@ -33,7 +33,13 @@ const normalizeCookieProps = function (props) {
 
   const cookie = _.pick(props, COOKIE_PROPERTIES)
 
-  if (props.expiry != null) {
+  if (props.expiry === '-Infinity') {
+    cookie.expiry = -Infinity
+    // set the cookie to expired so when set, the cookie is removed
+    cookie.expirationDate = 0
+  } else if (props.expiry === 'Infinity') {
+    cookie.expiry = null
+  } else if (props.expiry != null) {
     // when sending cookie props we need to convert
     // expiry to expirationDate
     delete cookie.expiry
