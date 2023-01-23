@@ -43,7 +43,9 @@ exports['e2e server sent events / passes'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/server_sent_events.cy.js.mp4        (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/server_sent_events.cy.js.mp4
 
 
 ====================================================================================================

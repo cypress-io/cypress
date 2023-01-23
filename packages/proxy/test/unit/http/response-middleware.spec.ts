@@ -15,8 +15,8 @@ describe('http/response-middleware', function () {
       'AttachPlainTextStreamFn',
       'InterceptResponse',
       'PatchExpressSetHeader',
-      'OmitProblematicHeaders',
       'SetInjectionLevel',
+      'OmitProblematicHeaders',
       'MaybePreventCaching',
       'MaybeStripDocumentDomainFeaturePolicy',
       'MaybeCopyCookiesFromIncomingRes',
@@ -355,87 +355,6 @@ describe('http/response-middleware', function () {
       return testMiddleware([SetInjectionLevel], ctx)
       .then(() => {
         expect(ctx.res.setHeader).to.be.calledWith('Origin-Agent-Cluster', '?0')
-      })
-    })
-
-    describe('modify CSP headers', () => {
-      // Loop through valid CSP header names can verify that we handle them
-      [
-        'content-security-policy',
-        'Content-Security-Policy',
-        'content-security-policy-report-only',
-        'Content-Security-Policy-Report-Only',
-      ].forEach((headerName) => {
-        describe(`${headerName}`, () => {
-          it(`modifies "${headerName}" header if injection is requested, and header exists`, () => {
-            prepareContext({
-              res: {
-                wantsInjection: 'full',
-              },
-              incomingRes: {
-                headers: {
-                  [`${headerName}`]: 'fake-csp-directive fake-csp-value',
-                },
-              },
-            })
-
-            return testMiddleware([SetInjectionLevel], ctx)
-            .then(() => {
-              expect(ctx.res.setHeader).to.be.calledWith(headerName.toLowerCase(), sinon.match.every(sinon.match(/^fake-csp-directive fake-csp-value; script-src 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'/)))
-            })
-          })
-
-          it(`modifies all "${headerName}" headers if injection is requested, and multiple headers exists`, () => {
-            prepareContext({
-              res: {
-                wantsInjection: 'full',
-              },
-              incomingRes: {
-                headers: {
-                  [`${headerName}`]: 'fake-csp-directive-0 fake-csp-value-0,fake-csp-directive-1 fake-csp-value-1',
-                },
-              },
-            })
-
-            return testMiddleware([SetInjectionLevel], ctx)
-            .then(() => {
-              expect(ctx.res.setHeader).to.be.calledWith(headerName.toLowerCase(), sinon.match.every(sinon.match(/^fake-csp-directive-[0-1] fake-csp-value-[0-1]; script-src 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'/)))
-            })
-          })
-
-          it(`does not modify "${headerName}" header if full injection is requested, and header does not exist`, () => {
-            prepareContext({
-              res: {
-                wantsInjection: 'full',
-              },
-            })
-
-            return testMiddleware([SetInjectionLevel], ctx)
-            .then(() => {
-              expect(ctx.res.setHeader).not.to.be.calledWith(headerName, sinon.match.array)
-              expect(ctx.res.setHeader).not.to.be.calledWith(headerName.toLowerCase(), sinon.match.array)
-            })
-          })
-
-          it(`does not modify "${headerName}" header when no injection is requested, and header exists`, () => {
-            prepareContext({
-              res: {
-                wantsInjection: false,
-              },
-              incomingRes: {
-                headers: {
-                  [`${headerName}`]: 'fake-csp-directive fake-csp-value',
-                },
-              },
-            })
-
-            return testMiddleware([SetInjectionLevel], ctx)
-            .then(() => {
-              expect(ctx.res.setHeader).not.to.be.calledWith(headerName, sinon.match.array)
-              expect(ctx.res.setHeader).not.to.be.calledWith(headerName.toLowerCase(), sinon.match.array)
-            })
-          })
-        })
       })
     })
 
@@ -1471,7 +1390,6 @@ describe('http/response-middleware', function () {
       .then(() => {
         expect(htmlStub).to.be.calledOnce
         expect(htmlStub).to.be.calledWith('foo', {
-          'cspNonce': undefined,
           'deferSourceMapRewrite': undefined,
           'domainName': 'foobar.com',
           'isNotJavascript': true,
@@ -1496,7 +1414,6 @@ describe('http/response-middleware', function () {
       .then(() => {
         expect(htmlStub).to.be.calledOnce
         expect(htmlStub).to.be.calledWith('foo', {
-          'cspNonce': undefined,
           'deferSourceMapRewrite': undefined,
           'domainName': '127.0.0.1',
           'isNotJavascript': true,
@@ -1529,43 +1446,11 @@ describe('http/response-middleware', function () {
       .then(() => {
         expect(htmlStub).to.be.calledOnce
         expect(htmlStub).to.be.calledWith('foo', {
-          'cspNonce': undefined,
           'deferSourceMapRewrite': undefined,
           'domainName': 'foobar.com',
           'isNotJavascript': true,
           'modifyObstructiveCode': false,
           'modifyObstructiveThirdPartyCode': false,
-          'shouldInjectDocumentDomain': true,
-          'url': 'http://www.foobar.com:3501/primary-origin.html',
-          'useAstSourceRewriting': undefined,
-          'wantsInjection': 'full',
-          'wantsSecurityRemoved': true,
-          'simulatedCookies': [],
-        })
-      })
-    })
-
-    it('cspNonce is set to the value stored in res.injectionNonce', function () {
-      prepareContext({
-        req: {
-          proxiedUrl: 'http://www.foobar.com:3501/primary-origin.html',
-        },
-        res: {
-          injectionNonce: 'fake-nonce',
-        },
-        simulatedCookies: [],
-      })
-
-      return testMiddleware([MaybeInjectHtml], ctx)
-      .then(() => {
-        expect(htmlStub).to.be.calledOnce
-        expect(htmlStub).to.be.calledWith('foo', {
-          'cspNonce': 'fake-nonce',
-          'deferSourceMapRewrite': undefined,
-          'domainName': 'foobar.com',
-          'isNotJavascript': true,
-          'modifyObstructiveCode': true,
-          'modifyObstructiveThirdPartyCode': true,
           'shouldInjectDocumentDomain': true,
           'url': 'http://www.foobar.com:3501/primary-origin.html',
           'useAstSourceRewriting': undefined,

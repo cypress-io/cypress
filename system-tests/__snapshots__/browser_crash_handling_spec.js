@@ -26,8 +26,12 @@ This can happen for a number of different reasons:
 
 - You wrote an endless loop and you must fix your own code
 - You are running Docker (there is an easy fix for this: see link below)
-- You are running lots of tests on a memory intense application
-- You are running in a memory starved VM environment
+- You are running lots of tests on a memory intense application.
+    - Try enabling experimentalMemoryManagement in your config file.
+    - Try lowering numTestsKeptInMemory in your config file.
+- You are running in a memory starved VM environment.
+    - Try enabling experimentalMemoryManagement in your config file.
+    - Try lowering numTestsKeptInMemory in your config file.
 - There are problems with your GPU / GPU drivers
 - There are browser bugs in Chromium
 
@@ -53,7 +57,9 @@ https://on.cypress.io/renderer-process-crashed
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/chrome_tab_crash.cy.js.mp4          (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/chrome_tab_crash.cy.js.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -84,7 +90,9 @@ https://on.cypress.io/renderer-process-crashed
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple.cy.js.mp4                    (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple.cy.js.mp4
 
 
 ====================================================================================================
@@ -131,8 +139,12 @@ This can happen for a number of different reasons:
 
 - You wrote an endless loop and you must fix your own code
 - You are running Docker (there is an easy fix for this: see link below)
-- You are running lots of tests on a memory intense application
-- You are running in a memory starved VM environment
+- You are running lots of tests on a memory intense application.
+    - Try enabling experimentalMemoryManagement in your config file.
+    - Try lowering numTestsKeptInMemory in your config file.
+- You are running in a memory starved VM environment.
+    - Try enabling experimentalMemoryManagement in your config file.
+    - Try lowering numTestsKeptInMemory in your config file.
 - There are problems with your GPU / GPU drivers
 - There are browser bugs in Chromium
 
@@ -158,7 +170,9 @@ https://on.cypress.io/renderer-process-crashed
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/chrome_tab_crash.cy.js.mp4          (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/chrome_tab_crash.cy.js.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -189,7 +203,9 @@ https://on.cypress.io/renderer-process-crashed
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple.cy.js.mp4                    (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple.cy.js.mp4
 
 
 ====================================================================================================
@@ -258,7 +274,9 @@ This can happen for many different reasons:
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/chrome_process_crash.cy.js.mp4      (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/chrome_process_crash.cy.js.mp4
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -289,7 +307,9 @@ This can happen for many different reasons:
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple.cy.js.mp4                    (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/simple.cy.js.mp4
 
 
 ====================================================================================================
