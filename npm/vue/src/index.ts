@@ -92,6 +92,7 @@ const cleanup = () => {
  * `MountOptions` are modifying, including some Cypress specific options like `styles`.
  * The return type is different. Instead of VueWrapper, it's Cypress.Chainable<VueWrapper<...>>.
  */
+
 type PublicProps = VNodeProps & AllowedComponentProps & ComponentCustomProps
 
 type ComponentMountingOptions<T> = T extends DefineComponent<
@@ -121,7 +122,7 @@ export function mount<V extends {}>(
   options?: MountingOptions<any> & Record<string, any>
 ): Cypress.Chainable<{
   wrapper: VueWrapper<ComponentPublicInstance<V>>
-  component: VueWrapper<ComponentPublicInstance<V>>['vm']
+  vm: VueWrapper<ComponentPublicInstance<V>>['vm']
 }>
 
 // Class component (without vue-class-component) - props
@@ -134,7 +135,7 @@ export function mount<V extends {}, P>(
   options?: MountingOptions<P & PublicProps> & Record<string, any>
 ): Cypress.Chainable<{
   wrapper: VueWrapper<ComponentPublicInstance<V>>
-  component: VueWrapper<ComponentPublicInstance<V>>['vm']
+  vm: VueWrapper<ComponentPublicInstance<V>>['vm']
 }>
 
 // Class component - no props
@@ -146,7 +147,7 @@ export function mount<V extends {}>(
   options?: MountingOptions<any> & Record<string, any>
 ): Cypress.Chainable<{
   wrapper: VueWrapper<ComponentPublicInstance<V>>
-  component: VueWrapper<ComponentPublicInstance<V>>['vm']
+  vm: VueWrapper<ComponentPublicInstance<V>>['vm']
 }>
 
 // Class component - props
@@ -159,7 +160,7 @@ export function mount<V extends {}, P>(
   options?: MountingOptions<P & PublicProps> & Record<string, any>
 ): Cypress.Chainable<{
   wrapper: VueWrapper<ComponentPublicInstance<V>>
-  component: VueWrapper<ComponentPublicInstance<V>>['vm']
+  vm: VueWrapper<ComponentPublicInstance<V>>['vm']
 }>
 
 // Functional component with emits
@@ -168,7 +169,7 @@ export function mount<Props extends {}, E extends EmitsOptions = {}>(
   options?: MountingOptions<Props & PublicProps> & Record<string, any>
 ): Cypress.Chainable<{
   wrapper: VueWrapper<ComponentPublicInstance<Props>>
-  component: VueWrapper<ComponentPublicInstance<Props>>['vm']
+  vm: VueWrapper<ComponentPublicInstance<Props>>['vm']
 }>
 
 // Component declared with defineComponent
@@ -206,51 +207,52 @@ export function mount<
   > &
   Record<string, any>
 ): Cypress.Chainable<{
+
   wrapper: VueWrapper<
-    InstanceType<
-      DefineComponent<
-        PropsOrPropOptions,
-        RawBindings,
-        D,
-        C,
-        M,
-        Mixin,
-        Extends,
-        E,
-        EE,
-        PP,
-        Props,
-        Defaults
-      >
+  InstanceType<
+    DefineComponent<
+      PropsOrPropOptions,
+      RawBindings,
+      D,
+      C,
+      M,
+      Mixin,
+      Extends,
+      E,
+      EE,
+      PP,
+      Props,
+      Defaults
     >
   >
-  component: VueWrapper<
-    InstanceType<
-      DefineComponent<
-        PropsOrPropOptions,
-        RawBindings,
-        D,
-        C,
-        M,
-        Mixin,
-        Extends,
-        E,
-        EE,
-        PP,
-        Props,
-        Defaults
-      >
-    >
-  >['vm']}
 >
+  vm: VueWrapper<
+  InstanceType<
+    DefineComponent<
+      PropsOrPropOptions,
+      RawBindings,
+      D,
+      C,
+      M,
+      Mixin,
+      Extends,
+      E,
+      EE,
+      PP,
+      Props,
+      Defaults
+    >
+  >
+>['vm']
+}>
 
 // component declared by vue-tsc ScriptSetup
-export function mount<T extends DefineComponent<any, any, any, any>>(
+export function mount<T extends DefineComponent<any, any, any, any, any>>(
   component: T,
   options?: ComponentMountingOptions<T>
 ): Cypress.Chainable<{
   wrapper: VueWrapper<InstanceType<T>>
-  component: VueWrapper<InstanceType<T>>['vm']
+  vm: VueWrapper<InstanceType<T>>['vm']
 }>
 
 // Component declared with no props
@@ -278,9 +280,17 @@ export function mount<
   >,
   options?: MountingOptions<Props & PublicProps, D>
 ): Cypress.Chainable<{
-  wrapper: VueWrapper<ComponentPublicInstance<Props, RawBindings, D, C, M, E, VNodeProps & Props>>
-  component: VueWrapper<ComponentPublicInstance<Props, RawBindings, D, C, M, E, VNodeProps & Props>>['vm']
-}> & Record<string, any>
+  wrapper: VueWrapper<
+
+  ComponentPublicInstance<Props, RawBindings, D, C, M, E, VNodeProps & Props>
+> &
+  Record<string, any>
+  vm: VueWrapper<
+
+  ComponentPublicInstance<Props, RawBindings, D, C, M, E, VNodeProps & Props>
+> &
+  Record<string, any>['vm']
+}>
 
 // Component declared with { props: [] }
 export function mount<
@@ -312,7 +322,7 @@ export function mount<
   options?: MountingOptions<Props & PublicProps, D>
 ): Cypress.Chainable<{
   wrapper: VueWrapper<ComponentPublicInstance<Props, RawBindings, D, C, M, E>>
-  component: VueWrapper<ComponentPublicInstance<Props, RawBindings, D, C, M, E>>['vm']
+  vm: VueWrapper<ComponentPublicInstance<Props, RawBindings, D, C, M, E>>['vm']
 }>
 
 // Component declared with { props: { ... } }
@@ -343,27 +353,27 @@ export function mount<
   options?: MountingOptions<ExtractPropTypes<PropsOptions> & PublicProps, D>
 ): Cypress.Chainable<{
   wrapper: VueWrapper<
-    ComponentPublicInstance<
-      ExtractPropTypes<PropsOptions>,
-      RawBindings,
-      D,
-      C,
-      M,
-      E,
-      VNodeProps & ExtractPropTypes<PropsOptions>
-    >
+  ComponentPublicInstance<
+    ExtractPropTypes<PropsOptions>,
+    RawBindings,
+    D,
+    C,
+    M,
+    E,
+    VNodeProps & ExtractPropTypes<PropsOptions>
   >
-  component: VueWrapper<
-    ComponentPublicInstance<
-      ExtractPropTypes<PropsOptions>,
-      RawBindings,
-      D,
-      C,
-      M,
-      E,
-      VNodeProps & ExtractPropTypes<PropsOptions>
-    >
-  >['vm']
+>
+  vm: VueWrapper<
+  ComponentPublicInstance<
+    ExtractPropTypes<PropsOptions>,
+    RawBindings,
+    D,
+    C,
+    M,
+    E,
+    VNodeProps & ExtractPropTypes<PropsOptions>
+  >
+>['vm']
 }>
 
 /**
