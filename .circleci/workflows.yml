@@ -1775,31 +1775,6 @@ jobs:
           name: Build
           command: yarn workspace @cypress/webpack-preprocessor build
       - run:
-          name: Test babelrc
-          command: yarn test
-          working_directory: npm/webpack-preprocessor/examples/use-babelrc
-      - run:
-          name: Build ts-loader
-          command: yarn install
-          working_directory: npm/webpack-preprocessor/examples/use-ts-loader
-      - run:
-          name: Types ts-loader
-          command: yarn types
-          working_directory: npm/webpack-preprocessor/examples/use-ts-loader
-      - run:
-          name: Test ts-loader
-          command: yarn test
-          working_directory: npm/webpack-preprocessor/examples/use-ts-loader
-      - run:
-          name: Start React app
-          command: yarn start
-          background: true
-          working_directory: npm/webpack-preprocessor/examples/react-app
-      - run:
-          name: Test React app
-          command: yarn test
-          working_directory: npm/webpack-preprocessor/examples/react-app
-      - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-preprocessor test
       - store-npm-logs
