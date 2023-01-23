@@ -7,11 +7,11 @@ export default function (Commands, Cypress, cy) {
     Cypress.ensure.isChildCommand(this, [alias], cy)
     cy.validateAlias(alias)
 
-    if (!_.isObject(options)) {
+    if (!_.isPlainObject(options)) {
       $errUtils.throwErrByPath('as.invalid_options', { args: { arg: options } })
     }
 
-    if (options.type && !options.type.match(/query|static/)) {
+    if (options.type && !['query', 'static'].includes(options.type)) {
       $errUtils.throwErrByPath('as.invalid_options_type', { args: { type: options.type } })
     }
 
