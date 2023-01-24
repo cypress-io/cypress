@@ -1,7 +1,7 @@
 <template>
   <div
     data-cy="debug-spec-col"
-    class="flex flex-col grid pt-24px gap-24px self-stretch"
+    class="flex flex-col grid gap-24px self-stretch"
   >
     <div
       data-cy="debug-spec-item"
@@ -13,7 +13,7 @@
       >
         <div
           data-cy="spec-contents"
-          class="flex w-full grid px-18px gap-y-3 items-center"
+          class="flex w-full grid px-18px gap-y-8px items-center"
         >
           <div class="flex-grow flex w-full gap-x-2 truncate items-center">
             <IconDocumentText
