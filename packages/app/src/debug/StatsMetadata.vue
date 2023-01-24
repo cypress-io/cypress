@@ -26,7 +26,7 @@
       >
         <component
           :is="result.icon"
-          class="mr-8px"
+          class="mr-8px text-gray-500"
           stroke-color="gray-500"
           fill-color="gray-100"
           :data-cy="`${result.name} ${result.value}`"
