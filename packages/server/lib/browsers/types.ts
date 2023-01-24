@@ -30,7 +30,7 @@ export type BrowserInstance = EventEmitter & {
 
 export type BrowserLauncher = {
   open: (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation) => Promise<BrowserInstance>
-  connectToNewSpec: (browser: Browser, options: BrowserNewTabOpts, automation: Automation) => Promise<void>
+  connectToNewSpec: (browser: Browser, options: BrowserNewTabOpts, automation: Automation) => Promise<BrowserInstance | void>
   /**
    * Used in Cypress-in-Cypress tests to connect to the existing browser instance.
    */

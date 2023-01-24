@@ -21,6 +21,7 @@ import { BrowserCriClient } from './browser-cri-client'
 import type { CriClient } from './cri-client'
 import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
+import memory from './memory'
 
 const debug = debugModule('cypress:server:browsers:chrome')
 
@@ -119,6 +120,9 @@ const DEFAULT_ARGS = [
   // write shared memory files into '/tmp' instead of '/dev/shm'
   // https://github.com/cypress-io/cypress/issues/5336
   '--disable-dev-shm-usage',
+
+  // enable precise memory info so performance.memory returns more accurate values
+  '--enable-precise-memory-info',
 ]
 
 let browserCriClient: BrowserCriClient | undefined
@@ -608,8 +612,10 @@ export = {
     const browserCriClient = this._getBrowserCriClient()
 
     // Handle chrome tab crashes.
-    pageCriClient.on('Inspector.targetCrashed', () => {
+    pageCriClient.on('Inspector.targetCrashed', async () => {
       const err = errors.get('RENDERER_CRASHED')
+
+      await memory.endProfiling()
 
       if (!options.onError) {
         errors.log(err)

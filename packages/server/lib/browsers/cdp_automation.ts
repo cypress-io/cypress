@@ -351,6 +351,10 @@ export class CdpAutomation {
         return this.sendCloseCommandFn(data.shouldKeepTabOpen)
       case 'focus:browser:window':
         return this.sendDebuggerCommandFn('Page.bringToFront')
+      case 'get:heap:size:limit':
+        return this.sendDebuggerCommandFn('Runtime.evaluate', { expression: 'performance.memory.jsHeapSizeLimit' })
+      case 'collect:garbage':
+        return this.sendDebuggerCommandFn('HeapProfiler.collectGarbage')
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }
