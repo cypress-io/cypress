@@ -44,7 +44,7 @@ async function parseChangelog (pendingRelease = true) {
       sections['version'] = line
     } else if (index === 3) {
       nextKnownLineBreak = index + 1
-      if (pendingRelease && !/_Released \d+\/\d+\/\d+ \(PENDING\)__/.test(line)) {
+      if (pendingRelease && !/_Released \d+\/\d+\/\d+ \(PENDING\)_/.test(line)) {
         throw new Error(`Expected line number ${index} to include "_Released xx/xx/xxxx (PENDING)_"`)
       } else if (!pendingRelease && !/_Released \d+\/\d+\/\d+__/.test(line)) {
         throw new Error(`Expected line number ${index} to include "_Released xx/xx/xxxx_"`)
