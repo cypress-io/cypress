@@ -53,6 +53,13 @@ describe('src/cypress/log', function () {
       expect(this.cy.createSnapshot).not.to.be.called
       expect(result).to.equal(log)
     })
+
+    it('line break persists in snapshot', function () {
+      const log = this.log({ 'message': 'First line \n Second Line' })
+      const result = log.snapshot()
+
+      expect(result).to.equal(log)
+    })
   })
 
   context('countLogsByTests', () => {
