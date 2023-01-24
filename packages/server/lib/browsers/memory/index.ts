@@ -16,7 +16,6 @@ const debug = debugModule('cypress:server:browsers:memory')
 const debugVerbose = debugModule('cypress-verbose:server:browsers:memory')
 
 const MEMORY_THRESHOLD_PERCENTAGE = Number(process.env.CYPRESS_INTERNAL_MEMORY_THRESHOLD_PERCENTAGE) || 50
-const EMERGENCY_MEMORY_THRESHOLD_PERCENTAGE = Number(process.env.CYPRESS_INTERNAL_EMERGENCY_MEMORY_THRESHOLD_PERCENTAGE) || 90
 const MEMORY_PROFILER_INTERVAL = Number(process.env.CYPRESS_INTERNAL_MEMORY_PROFILER_INTERVAL) || 1000
 const MEMORY_FOLDER = process.env.CYPRESS_INTERNAL_MEMORY_FOLDER_PATH || path.join('cypress', 'logs', 'memory')
 const SAVE_MEMORY_STATS = ['1', 'true'].includes(process.env.CYPRESS_INTERNAL_MEMORY_SAVE_STATS?.toLowerCase() as string)
@@ -55,7 +54,6 @@ export type MemoryHandler = {
  *   2. set current renderer mem usage
  *   3. set max avail render mem to minimum of v8 heap size limit and total available mem (current available mem + current renderer mem usage)
  *   4. calc % of memory used, current renderer mem usage / max avail render mem
- *   5. if % of memory used  exceeds the emergency memory threshold percentage (e.g. 90%) do a GC
  *
  * Before each test:
  *   1. if any interval exceeded the defined memory threshold (e.g. 50%), do a GC
@@ -210,7 +208,7 @@ export const getAvailableMemory: () => Promise<number> = measure(() => {
 /**
  * Calculates the memory stats used to determine if garbage collection should be run before the next test starts.
  */
-export const calculateMemoryStats: (automation: Automation) => Promise<void> = measure(async (automation: Automation) => {
+export const calculateMemoryStats: () => Promise<void> = measure(async () => {
   // retrieve the available memory and the renderer process memory usage
   const [currentAvailableMemory, rendererProcessMemRss] = await Promise.all([
     getAvailableMemory(),
@@ -234,14 +232,6 @@ export const calculateMemoryStats: (automation: Automation) => Promise<void> = m
   // if we should collect garbage, set the flag to true so we can collect garbage on the next test
   collectGarbageOnNextTest = collectGarbageOnNextTest || shouldCollectGarbage
 
-  // if the renderer's memory is above the EMERGENCY_MEMORY_THRESHOLD_PERCENTAGE, we should perform an emergency garbage collection now
-  const shouldEmergencyCollectGarbage = rendererUsagePercentage >= EMERGENCY_MEMORY_THRESHOLD_PERCENTAGE && !SKIP_GC
-
-  if (shouldEmergencyCollectGarbage) {
-    debug('emergency garbage collection triggered')
-    await checkMemoryPressure(automation, shouldEmergencyCollectGarbage)
-  }
-
   // set all the memory stats on the stats log
   statsLog.jsHeapSizeLimit = jsHeapSizeLimit
   statsLog.totalMemoryLimit = totalMemoryLimit
@@ -251,8 +241,6 @@ export const calculateMemoryStats: (automation: Automation) => Promise<void> = m
   statsLog.currentAvailableMemory = currentAvailableMemory
   statsLog.maxAvailableRendererMemory = maxAvailableRendererMemory
   statsLog.shouldCollectGarbage = shouldCollectGarbage
-  statsLog.emergencyGarbageCollected = shouldEmergencyCollectGarbage
-  statsLog.emergencyRendererMemoryThreshold = maxAvailableRendererMemory * (EMERGENCY_MEMORY_THRESHOLD_PERCENTAGE / 100)
   statsLog.timestamp = Date.now()
 }, { name: 'calculateMemoryStats', save: true })
 
@@ -281,8 +269,8 @@ const checkMemoryPressureAndLog = async ({ automation, test }: { automation: Aut
  * Collects the browser's garbage if it previously exceeded the threshold when it was measured.
  * @param automation the automation client used to collect garbage
  */
-const checkMemoryPressure: (automation: Automation, emergencyCollectGarbage?: boolean) => Promise<void> = measure(async (automation: Automation, emergencyCollectGarbage: boolean = false) => {
-  if (collectGarbageOnNextTest || emergencyCollectGarbage) {
+const checkMemoryPressure: (automation: Automation) => Promise<void> = measure(async (automation: Automation) => {
+  if (collectGarbageOnNextTest) {
     debug('forcing garbage collection')
     try {
       await automation.request('collect:garbage', null, null)
@@ -309,24 +297,24 @@ const addCumulativeStats = (stats: { [key: string]: any }) => {
 /**
  * Gathers the memory stats and schedules the next check.
  */
-const gatherMemoryStats = async (automation: Automation) => {
+const gatherMemoryStats = async () => {
   try {
-    await calculateMemoryStats(automation)
+    await calculateMemoryStats()
     addCumulativeStats(statsLog)
     statsLog = {}
   } catch (err) {
     debug('error gathering memory stats: %o', err)
   }
-  scheduleMemoryCheck(automation)
+  scheduleMemoryCheck()
 }
 
 /**
  * Schedules the next gathering of memory stats based on the MEMORY_PROFILER_INTERVAL.
  */
-const scheduleMemoryCheck = (automation: Automation) => {
+const scheduleMemoryCheck = () => {
   if (started) {
     // not setinterval, since gatherMemoryStats is asynchronous
-    timer = setTimeout(() => gatherMemoryStats(automation), MEMORY_PROFILER_INTERVAL)
+    timer = setTimeout(gatherMemoryStats, MEMORY_PROFILER_INTERVAL)
   }
 }
 
@@ -365,7 +353,7 @@ async function startProfiling (automation: Automation, spec: { fileName: string 
       totalMemoryLimit = await handler.getTotalMemoryLimit(),
     ])
 
-    await gatherMemoryStats(automation)
+    await gatherMemoryStats()
   } catch (err) {
     debug('error starting memory profiler: %o', err)
   }
