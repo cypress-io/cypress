@@ -72,27 +72,9 @@ context('network stubbing', () => {
 
     destinationApp.get('/', (req, res) => res.send('it worked'))
 
-    destinationApp.get('/csp-header', (req, res) => {
-      const headerName = req.query.headerName
-
-      res.setHeader('content-type', 'text/html')
-      res.setHeader(headerName, 'fake-directive fake-value')
-      res.send('<foo>bar</foo>')
-    })
-
-    destinationApp.get('/csp-header-multiple', (req, res) => {
-      const headerName = req.query.headerName
-
-      res.setHeader('content-type', 'text/html')
-      res.setHeader(headerName, ['default \'self\'', 'script-src \'self\' localhost'])
-      res.send('<foo>bar</foo>')
-    })
-
     server = allowDestroy(destinationApp.listen(() => {
       destinationPort = server.address().port
       remoteStates.set(`http://localhost:${destinationPort}`)
-      remoteStates.set(`http://localhost:${destinationPort}/csp-header`)
-      remoteStates.set(`http://localhost:${destinationPort}/csp-header-multiple`)
       done()
     }))
   })
@@ -302,96 +284,5 @@ context('network stubbing', () => {
 
     expect(sendContentLength).to.eq(receivedContentLength)
     expect(sendContentLength).to.eq(realContentLength)
-  })
-
-  describe('CSP Headers', () => {
-    // Loop through valid CSP header names can verify that we handle them
-    [
-      'content-security-policy',
-      'Content-Security-Policy',
-      'content-security-policy-report-only',
-      'Content-Security-Policy-Report-Only',
-    ].forEach((headerName) => {
-      describe(`${headerName}`, () => {
-        it('does not add CSP header if injecting JS and original response had no CSP header', () => {
-          netStubbingState.routes.push({
-            id: '1',
-            routeMatcher: {
-              url: '*',
-            },
-            hasInterceptor: false,
-            staticResponse: {
-              body: '<foo>bar</foo>',
-            },
-            getFixture: async () => {},
-            matches: 1,
-          })
-
-          return supertest(app)
-          .get(`/http://localhost:${destinationPort}`)
-          .set('Accept', 'text/html,application/xhtml+xml')
-          .then((res) => {
-            expect(res.headers[headerName]).to.be.undefined
-            expect(res.headers[headerName.toLowerCase()]).to.be.undefined
-          })
-        })
-
-        it('does not modify CSP header if not injecting JS and original response had CSP header', () => {
-          return supertest(app)
-          .get(`/http://localhost:${destinationPort}/csp-header?headerName=${headerName}`)
-          .then((res) => {
-            expect(res.headers[headerName.toLowerCase()]).to.equal('fake-directive fake-value')
-          })
-        })
-
-        it('modifies CSP header if injecting JS and original response had CSP header', () => {
-          return supertest(app)
-          .get(`/http://localhost:${destinationPort}/csp-header?headerName=${headerName}`)
-          .set('Accept', 'text/html,application/xhtml+xml')
-          .then((res) => {
-            expect(res.headers[headerName.toLowerCase()]).to.match(/^fake-directive fake-value; script-src 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'/)
-          })
-        })
-
-        it('modifies CSP header if injecting JS and original response had multiple CSP headers', () => {
-          return supertest(app)
-          .get(`/http://localhost:${destinationPort}/csp-header-multiple?headerName=${headerName}`)
-          .set('Accept', 'text/html,application/xhtml+xml')
-          .then((res) => {
-            expect(res.headers[headerName.toLowerCase()]).to.match(/default 'self'; script-src 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'/)
-            expect(res.headers[headerName.toLowerCase()]).to.match(/script-src 'self' localhost 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'/)
-          })
-        })
-
-        if (headerName !== headerName.toLowerCase()) {
-          // Do not add a non-lowercase version of a CSP header, because most-restrictive is used
-          it('removes non-lowercase CSP header to avoid conflicts on unmodified CSP headers', () => {
-            return supertest(app)
-            .get(`/http://localhost:${destinationPort}/csp-header?headerName=${headerName}`)
-            .then((res) => {
-              expect(res.headers[headerName]).to.be.undefined
-            })
-          })
-
-          it('removes non-lowercase CSP header to avoid conflicts on modified CSP headers', () => {
-            return supertest(app)
-            .get(`/http://localhost:${destinationPort}/csp-header?headerName=${headerName}`)
-            .set('Accept', 'text/html,application/xhtml+xml')
-            .then((res) => {
-              expect(res.headers[headerName]).to.be.undefined
-            })
-          })
-
-          it('removes non-lowercase CSP header to avoid conflicts on multiple CSP headers', () => {
-            return supertest(app)
-            .get(`/http://localhost:${destinationPort}/csp-header-multiple?headerName=${headerName}`)
-            .set('Accept', 'text/html,application/xhtml+xml')
-            .then((res) => {
-              expect(res.headers[headerName]).to.be.undefined
-            })
-          })
-        }
-      })
-    })
   })
 })

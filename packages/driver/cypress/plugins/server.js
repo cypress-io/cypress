@@ -331,6 +331,23 @@ const createApp = (port) => {
     res.sendStatus(200)
   })
 
+  app.get('/memory', (req, res) => {
+    res.send(`
+      <html>
+        <body></body>
+        <script>
+          for (let i = 0; i < 100; i++) {
+            const el = document.createElement('p')
+            el.id = 'p' + i
+            el.innerHTML = 'x'.repeat(100000)
+            
+            document.body.appendChild(el)
+          }
+        </script>
+      </html>  
+    `)
+  })
+
   app.use(express.static(path.join(__dirname, '..')))
 
   app.use(require('errorhandler')())

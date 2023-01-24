@@ -55,10 +55,11 @@ const replaceDurationInTables = (str: string, p1: string, p2: string) => {
   return _.padStart('XX:XX', p1.length + p2.length)
 }
 
-// could be (1 second) or (10 seconds)
-// need to account for shortest and longest
-const replaceParenTime = (str: string, p1: string) => {
-  return _.padStart('(X second)', p1.length)
+// since time lives on it's own line
+// we can replace the time with 'X second(s)' and pad the length of the expected string.
+// This accounts for the test taking 1 second, X seconds, or XX seconds, and so on.
+const replaceTime = (str: string, p1: string) => {
+  return _.padEnd('X second(s)', p1.length)
 }
 
 const replaceScreenshotDims = (str: string, p1: string) => _.padStart('(YxX)', p1.length)
@@ -146,8 +147,8 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   .replace(/(Duration\:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
   // duration='1589' -> duration='XXXX'
   .replace(/(duration\=\')(\d+)(\')/g, replaceDurationFromReporter)
-  // (15 seconds) -> (XX seconds)
-  .replace(/(\((\d+ minutes?,\s+)?\d+ seconds?\))/g, replaceParenTime)
+  // 15 seconds -> XX seconds
+  .replace(/((\d+ minutes?,\s+)?\d+ seconds? *)/g, replaceTime)
   .replace(/\r/g, '')
   // replaces multiple lines of uploading results (since order not guaranteed)
   .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults)
