@@ -38,7 +38,7 @@
             data-cy="debug-header-dashboard-link"
             :href="debug.url || '#'"
           >
-            <span class="sr-only">Dashboard Link:</span> {{ t('debugPage.header.runUrl') }}
+            {{ t('debugPage.header.runUrl') }}
           </ExternalLink>
         </li>
       </ul>
