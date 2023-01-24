@@ -1,7 +1,11 @@
  <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 12.4.1
+## 13.0.0
 
 _Released 01/31/2023 (PENDING)_
+
+**Breaking:**
+
+- `.should()` and `.and()` Cypress commands are now queries. This means that it is safe to chain further commands that interact with the DOM after them, they no longer break retry-ability, and are re-run when querying aliases. Addresses [#25134](https://github.com/cypress-io/cypress/issues/25134).
 
 ## 12.4.0
 
