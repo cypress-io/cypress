@@ -36,7 +36,6 @@ export interface StateFunc {
   (k: 'canceld', v?: boolean): boolean
   (k: 'error', v?: Error): Error
   (k: 'assertUsed', v?: boolean): boolean
-  (k: 'currentAssertionUserInvocationStack', v?: string): string
   (k: 'aliases', v?: Record<string, any>): Record<string, any>
   (k: 'onBeforeLog', v?: (() => boolean) | null): () => boolean | null
   (k: 'keyboardModifiers', v?: KeyboardModifiers): KeyboardModifiers

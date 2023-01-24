@@ -10,7 +10,6 @@ import $dom from '../dom'
 import $utils from '../cypress/utils'
 import { escapeBackslashes, escapeQuotes } from '../util/escape'
 import $errUtils from '../cypress/error_utils'
-import $stackUtils from '../cypress/stack_utils'
 import $chaiJquery from '../cypress/chai_jquery'
 import * as chaiInspect from './chai/inspect'
 import type { StateFunc } from '../cypress/state'
@@ -439,22 +438,6 @@ chai.use((chai, u) => {
     })
   }
 
-  const captureUserInvocationStack = (specWindow: SpecWindow, state: StateFunc, ssfi) => {
-    // we need a user invocation stack with the top line being the point where
-    // the error occurred for the sake of the code frame
-    // in chrome, stack lines from another frame don't appear in the
-    // error. specWindow.Error works for our purposes because it
-    // doesn't include anything extra (chai.Assertion error doesn't work
-    // because it doesn't have lines from the spec iframe)
-    // in firefox, specWindow.Error has too many extra lines at the
-    // beginning, but chai.AssertionError helps us winnow those down
-    const chaiInvocationStack = $stackUtils.hasCrossFrameStacks(specWindow) && (new chai.AssertionError('uis', {}, ssfi)).stack
-
-    const userInvocationStack = $stackUtils.captureUserInvocationStack(specWindow.Error, chaiInvocationStack)
-
-    state('currentAssertionUserInvocationStack', userInvocationStack)
-  }
-
   const createPatchedAssert = (specWindow, state: StateFunc, assertFn) => {
     return (function (...args) {
       let err
@@ -482,13 +465,6 @@ chai.use((chai, u) => {
 
       if (!err) return
 
-      // when assert() is used instead of expect(), we override the method itself
-      // below in `overrideAssert` and prefer the user invocation stack
-      // that we capture there
-      if (!state('assertUsed')) {
-        captureUserInvocationStack(specWindow, state, chaiUtils.flag(this, 'ssfi'))
-      }
-
       throw err
     })
   }
@@ -498,8 +474,6 @@ chai.use((chai, u) => {
     // expect function instance so we do not affect
     // the outside world
     return (val, message) => {
-      captureUserInvocationStack(specWindow, state, overrideExpect)
-
       // make the assertion
       return new chai.Assertion(val, message)
     }
@@ -508,7 +482,6 @@ chai.use((chai, u) => {
   const overrideAssert = function (specWindow, state: StateFunc) {
     const fn = (express, errmsg) => {
       state('assertUsed', true)
-      captureUserInvocationStack(specWindow, state, fn)
 
       return chai.assert(express, errmsg)
     }
@@ -518,7 +491,6 @@ chai.use((chai, u) => {
     _.each(fns, (name) => {
       fn[name] = function () {
         state('assertUsed', true)
-        captureUserInvocationStack(specWindow, state, overrideAssert)
 
         return chai.assert[name].apply(this, arguments)
       }

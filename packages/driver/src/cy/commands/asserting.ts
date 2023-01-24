@@ -18,7 +18,6 @@ export default function (Commands, Cypress, cy, state) {
     return (subject) => {
       let logIndex = -1
 
-      state('current')?.set('followedByShouldCallback', true)
       state('onBeforeLog', (log) => {
         // For callback assertions, every log message gets its own index; no attempt is made
         // to collapse expect(foo).to.have.property('bar', 'baz')
@@ -44,7 +43,6 @@ export default function (Commands, Cypress, cy, state) {
 
         throw err
       } finally {
-        state('current')?.set('followedByShouldCallback', false)
         state('onBeforeLog', undefined)
         Cypress.removeListener('command:enqueued', commandEnqueued)
       }
