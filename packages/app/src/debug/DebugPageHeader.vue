@@ -9,35 +9,32 @@
     >
       <ul
         data-cy="header-top"
-        class="children:inline"
       >
         <li
           v-if="debug?.commitInfo?.summary"
-          class="font-medium text-lg text-gray-900"
+          class="font-medium text-lg mr-8px text-gray-900 inline"
           data-cy="debug-test-summary"
         >
           {{ debug.commitInfo.summary }}
         </li>
         <li
           v-if="props.commitsAhead"
-          class="border rounded border-gray-100 h-6 text-sm ml-8px"
+          class="border rounded border-gray-100 h-6 text-sm inline-block"
         >
           <span
-            v-if="props.commitsAhead"
             class="font-normal mx-px px-2 text-orange-500 items-center"
             data-cy="debug-commitsAhead"
           >
             {{ t('debugPage.header.commitsAhead', props.commitsAhead) }}
           </span>
         </li>
-
         <li
-          class="text-lg text-gray-400 w-16px"
+          class="text-lg text-gray-400 w-16px inline"
           aria-hidden="true"
         >
           •
         </li>
-        <li class="font-normal text-sm text-indigo-500">
+        <li class="font-normal text-sm text-indigo-500 inline">
           <ExternalLink
             data-cy="debug-header-dashboard-link"
             :href="debug.url || '#'"
