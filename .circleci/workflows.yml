@@ -103,7 +103,7 @@ executors:
   # https://circleci.com/docs/2.0/hello-world-windows/#software-pre-installed-in-the-windows-image
   windows: &windows-executor
     machine:
-      image: windows-server-2022-gui:current
+      image: windows-server-2019-vs2019:stable
       shell: bash.exe -eo pipefail
     resource_class: windows.large
     environment:
@@ -2814,3 +2814,4 @@ workflows:
     <<: *darwin-workflow-filters
   windows:
     <<: *windows-workflow
+    <<: *windows-workflow-filters
