@@ -12,7 +12,8 @@
       >
         <li
           v-if="debug?.commitInfo?.summary"
-          class="font-medium text-lg mr-8px text-gray-900 inline"
+          class="font-medium text-lg text-gray-900 inline"
+          :class="{'mr-8px': props.commitsAhead}"
           data-cy="debug-test-summary"
         >
           {{ debug.commitInfo.summary }}
