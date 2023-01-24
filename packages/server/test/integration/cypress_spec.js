@@ -1654,6 +1654,35 @@ describe('lib/cypress', () => {
       })
     })
 
+    it('errors and exits when auto cancel mismatch', function () {
+      const err = new Error()
+
+      err.statusCode = 422
+      err.error = {
+        code: 'AUTO_CANCEL_MISMATCH',
+        payload: {
+          runUrl: 'https://cloud.cypress.io/runs/12345',
+        },
+      }
+
+      api.createRun.rejects(err)
+
+      return cypress.start([
+        `--run-project=${this.recordPath}`,
+        '--record',
+        '--key=token-123',
+        '--tag=nightly',
+        '--group=electron-smoke-tests',
+        '--ciBuildId=ciBuildId123',
+        '--auto-cancel-after-failures=4',
+      ])
+      .then(() => {
+        this.expectExitWithErr('CLOUD_AUTO_CANCEL_MISMATCH')
+
+        return snapshotConsoleLogs('CLOUD_AUTO_CANCEL_MISMATCH 1')
+      })
+    })
+
     describe('cloud recommendation message', () => {
       it('does not display if --record is passed', function () {
         sinon.stub(ciProvider, 'getIsCi').returns(true)

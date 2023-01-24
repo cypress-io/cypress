@@ -2541,3 +2541,10 @@ plugin stdout
 
 
 `
+
+exports['e2e record api interaction errors create run 402 - auto cancel not available in plan errors and exits when auto cancel not available in plan 1'] = `
+Auto Cancellation is not included under your current billing plan.
+To enable this service, please visit your billing and upgrade to another plan with Auto Cancellation.
+https://on.cypress.io/dashboard/organizations/org-id-1234/billing
+
+`

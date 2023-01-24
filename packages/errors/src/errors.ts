@@ -351,6 +351,30 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/run-group-name-not-unique`
   },
+  CLOUD_AUTO_CANCEL_NOT_AVAILABLE_IN_PLAN: (arg1: {link: string}) => {
+    return errTemplate`\
+      ${fmt.highlightSecondary(`Auto Cancellation`)} is not included under your current billing plan.
+      To enable this service, please visit your billing and upgrade to another plan with Auto Cancellation.
+      ${fmt.off(arg1.link)}`
+  },
+  CLOUD_AUTO_CANCEL_MISMATCH: (arg1: {runUrl: string}) => {
+    return errTemplate`\
+        You passed the ${fmt.flag(`--auto-cancel-after-failures`)} flag, but this run originally started with a different value on this --auto-cancel-after-failures flag.
+      
+        The existing run is: ${fmt.url(arg1.runUrl)}
+        
+        ${fmt.listFlags(arg1, {
+      tags: '--tag',
+      group: '--group',
+      parallel: '--parallel',
+      ciBuildId: '--ciBuildId',
+      autoCancelAfterFailures: '--auto-cancel-after-failures',
+    })}
+
+        The first setting of --auto-cancel-after-failures for any given run takes precedent.
+        
+        https://on.cypress.io/auto-cancellation-mismatch`
+  },
   DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS: () => {
     return errTemplate`\
       Deprecation Warning: The ${fmt.highlight(`before:browser:launch`)} plugin event changed its signature in ${fmt.cypressVersion(`4.0.0`)}
@@ -390,7 +414,7 @@ export const AllCypressErrors = {
   },
   RECORD_PARAMS_WITHOUT_RECORDING: (arg1: Record<string, string>) => {
     return errTemplate`\
-        You passed the ${fmt.flag(`--ci-build-id`)}, ${fmt.flag(`--group`)}, ${fmt.flag(`--tag`)}, ${fmt.flag(`--auto-cancel-after-failures`)}, or ${fmt.flag(`--parallel`)} flag without also passing the ${fmt.flag(`--record`)} flag.
+        You passed the ${fmt.flag(`--ci-build-id`)}, ${fmt.flag(`--group`)}, ${fmt.flag(`--tag`)}, ${fmt.flag(`--parallel`)}, or ${fmt.flag(`--auto-cancel-after-failures`)} flag without also passing the ${fmt.flag(`--record`)} flag.
 
         ${fmt.listFlags(arg1, {
       ciBuildId: '--ci-build-id',

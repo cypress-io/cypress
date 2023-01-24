@@ -426,6 +426,10 @@ const createRun = Promise.method((options = {}) => {
             return errors.throwErr('RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN', {
               link: billingLink(orgId),
             })
+          case 'AUTO_CANCEL_NOT_AVAILABLE_IN_PLAN':
+            return errors.throwErr('CLOUD_AUTO_CANCEL_NOT_AVAILABLE_IN_PLAN', {
+              link: billingLink(orgId),
+            })
           default:
             return errors.throwErr('CLOUD_UNKNOWN_INVALID_REQUEST', {
               response: err,
@@ -495,6 +499,14 @@ const createRun = Promise.method((options = {}) => {
             })
           case 'STALE_RUN':
             return errors.throwErr('CLOUD_STALE_RUN', {
+              runUrl,
+              tags,
+              group,
+              parallel,
+              ciBuildId,
+            })
+          case 'AUTO_CANCEL_MISMATCH':
+            return errors.throwErr('CLOUD_AUTO_CANCEL_MISMATCH', {
               runUrl,
               tags,
               group,
