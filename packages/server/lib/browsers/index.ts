@@ -124,8 +124,13 @@ export = {
   async connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation): Promise<BrowserInstance | null> {
     const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 
-    // Instance will be null when we're dealing with electron. In that case we don't need a browserCriClient
-    await browserLauncher.connectToNewSpec(browser, options, automation)
+    const newInstance = await browserLauncher.connectToNewSpec(browser, options, automation)
+
+    // if a new instance was returned, update our instance to use the new one
+    if (newInstance) {
+      instance = newInstance
+      instance.browser = browser
+    }
 
     return this.getBrowserInstance()
   },
