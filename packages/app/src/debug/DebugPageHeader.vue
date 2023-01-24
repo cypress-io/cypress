@@ -9,7 +9,7 @@
     >
       <ul
         data-cy="header-top"
-        class="flex flex-row gap-x-2 items-center self-stretch whitespace-nowrap"
+        class="children:inline"
       >
         <li
           v-if="debug?.commitInfo?.summary"
@@ -20,7 +20,7 @@
         </li>
         <li
           v-if="props.commitsAhead"
-          class="border rounded flex border-gray-100 h-6 text-sm items-center"
+          class="border rounded border-gray-100 h-6 text-sm ml-8px"
         >
           <span
             v-if="props.commitsAhead"
@@ -30,8 +30,12 @@
             {{ t('debugPage.header.commitsAhead', props.commitsAhead) }}
           </span>
         </li>
-        <li class="-mt-8px text-lg text-gray-400">
-          .
+
+        <li
+          class="text-lg text-gray-400 w-16px"
+          aria-hidden="true"
+        >
+          •
         </li>
         <li class="font-normal text-sm text-indigo-500">
           <ExternalLink
