@@ -36,6 +36,7 @@
         <li class="font-normal text-sm text-indigo-500">
           <ExternalLink
             data-cy="debug-header-dashboard-link"
+            class="hover:underline focus:underline"
             :href="debug.url || '#'"
             :use-default-hocus="false"
           >
