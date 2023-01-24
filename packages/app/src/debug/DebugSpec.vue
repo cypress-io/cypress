@@ -5,7 +5,7 @@
   >
     <div
       data-cy="debug-spec-item"
-      class="rounded flex flex-col border-t-1px border-x-1px w-full overflow-hidden items-start box-border"
+      class="rounded flex flex-col border-gray-100 border-t-1px border-x-1px w-full overflow-hidden items-start box-border"
     >
       <div
         data-cy="debug-spec-header"
