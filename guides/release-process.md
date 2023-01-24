@@ -124,11 +124,6 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
     - Optionally, do more thorough tests, for example test the new version of Cypress against the Cypress Cloud repo.
 
 11. Review the release-specific documentation and changelog PR in [cypress-documentation](https://github.com/cypress-io/cypress-documentation). If there is not already a release-specific PR open, create one.
-     - Use [`release-automations`](https://github.com/cypress-io/release-automations)'s `issues-in-release` tool to generate a starting point for the changelog, based off of ZenHub:
-        ```shell
-        cd packages/issues-in-release
-        yarn do:changelog --release <release label>
-        ```
     - Ensure the changelog is up-to-date and has the correct date.
     - Merge any release-specific documentation changes into the main release PR.
     - You can view the doc's [branch deploy preview](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md#pull-requests) by clicking 'Details' on the PR's `netlify-cypress-docs/deploy-preview` GitHub status check.

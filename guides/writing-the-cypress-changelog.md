@@ -18,7 +18,7 @@ The changelog should include anything that was merged into the develop branch of
 ```md
 ## <RELEASE_VERSION>
 
-__Released <RELEASE_DATE> (PENDING)__
+_Released <RELEASE_DATE> (PENDING)_
 
 **<CHANGE_SECTION:**
 

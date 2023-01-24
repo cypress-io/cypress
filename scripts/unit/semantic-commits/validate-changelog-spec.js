@@ -123,7 +123,7 @@ describe('semantic-pull-request/validate-changelog', () => {
       fs.readFileSync.returns(`
 ## 120.2.0
 
-__Released 01/17/2033 (PENDING)__
+_Released 01/17/2033 (PENDING)_
 
 **Performance:**
 
@@ -185,7 +185,7 @@ __Released 01/17/2033 (PENDING)__
         fs.readFileSync.returns(`
 ## 120.2.0
 
-__Released 01/17/2033 (PENDING)__
+_Released 01/17/2033 (PENDING)_
 
 `)
 
@@ -212,7 +212,7 @@ __Released 01/17/2033 (PENDING)__
         fs.readFileSync.returns(`
 ## 120.2.0
 
-__Released 01/17/2033 (PENDING)__
+_Released 01/17/2033 (PENDING)_
 
 **Features:**
 
@@ -241,7 +241,7 @@ __Released 01/17/2033 (PENDING)__
         fs.readFileSync.returns(`
 ## 120.2.0
 
-__Released 01/17/2033 (PENDING)__
+_Released 01/17/2033 (PENDING)_
 
 **Performance:**
 
@@ -274,7 +274,7 @@ __Released 01/17/2033 (PENDING)__
         fs.readFileSync.returns(`
 ## 120.2.0
 
-__Released 01/17/2033 (PENDING)__
+_Released 01/17/2033 (PENDING)_
 
 **Performance:**
 
@@ -303,7 +303,7 @@ __Released 01/17/2033 (PENDING)__
         fs.readFileSync.returns(`
 ## 120.2.0
 
-__Released 01/17/2033 (PENDING)__
+_Released 01/17/2033 (PENDING)_
 
 **Performance:**
 
