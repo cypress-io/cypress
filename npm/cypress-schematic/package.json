@@ -10,16 +10,16 @@
     "lint": "eslint --ext .ts,.json, ."
   },
   "dependencies": {
-    "@angular-devkit/architect": "^0.1402.1",
-    "@angular-devkit/core": "^14.2.1",
-    "@angular-devkit/schematics": "^14.2.1",
-    "@schematics/angular": "^14.2.1",
     "jsonc-parser": "^3.0.0",
     "rxjs": "~6.6.0"
   },
   "devDependencies": {
+    "@angular-devkit/architect": "^0.1402.1",
+    "@angular-devkit/core": "^14.2.1",
+    "@angular-devkit/schematics": "^14.2.1",
     "@angular-devkit/schematics-cli": "^14.2.1",
     "@angular/cli": "^14.2.1",
+    "@schematics/angular": "^14.2.1",
     "@types/chai-enzyme": "0.6.7",
     "@types/mocha": "8.0.3",
     "@types/node": "^18.0.6",
@@ -28,8 +28,8 @@
     "typescript": "^4.7.4"
   },
   "peerDependencies": {
-    "@angular/cli": ">=12",
-    "@angular/core": ">=12"
+    "@angular/cli": ">=14",
+    "@angular/core": ">=14"
   },
   "license": "MIT",
   "repository": {

@@ -419,7 +419,7 @@ describe('src/cy/commands/querying', () => {
             state: 'passed',
             name: 'get',
             message: 'body',
-            alias: 'b',
+            alias: '@b',
             aliasType: 'dom',
             referencesAlias: undefined,
           }

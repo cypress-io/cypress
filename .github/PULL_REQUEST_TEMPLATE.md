@@ -7,12 +7,6 @@
 
 - Closes <!-- link to the issue here, if there is one -->
 
-### User facing changelog
-<!-- 
-Explain the change(s) for every user to read in our changelog. Examples: https://on.cypress.io/changelog
-If the change is not user-facing, write "n/a".
--->
-
 ### Additional details
 <!-- Examples:
 - Why was this change necessary?

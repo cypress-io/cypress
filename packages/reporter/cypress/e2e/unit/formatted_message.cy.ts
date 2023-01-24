@@ -32,6 +32,6 @@ describe('formattedMessage', () => {
     const specialMessage = 'hello\n world `code block`'
     const result = formattedMessage(specialMessage)
 
-    expect(result).to.equal('hello\n world <code>code block</code>')
+    expect(result).to.equal('hello<br>\n world <code>code block</code>')
   })
 })

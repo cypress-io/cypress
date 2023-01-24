@@ -459,7 +459,22 @@ We do not continuously deploy the Cypress binary, so `develop` contains all of t
 - Break down pull requests into the smallest necessary parts to address the original issue or feature. This helps you get a timely review and helps the reviewer clearly understand which pieces of the code changes are relevant.
 - When opening a PR for a specific issue already open, please name the branch you are working on using the convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`. If the PR is a larger issue, you can add more context like `issue-803-new-scrollable-area`. If there's not an associated open issue, **[create an issue](https://github.com/cypress-io/cypress/issues/new/choose)**.
 - PRs can be opened before all the work is finished. In fact we encourage this! Please create a [Draft Pull Request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests#draft-pull-requests) if your PR is not ready for review. [Mark the PR as **Ready for Review**](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/changing-the-stage-of-a-pull-request#marking-a-pull-request-as-ready-for-review) when you're ready for a Cypress team member to review the PR.
-- Prefix the title of the Pull Request using [semantic-release](https://github.com/semantic-release/semantic-release)'s format as defined [here](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#type). For example, if your PR is fixing a bug, you should prefix the PR title with `fix:`.
+- Prefix the title of the Pull Request using [semantic-release](https://github.com/semantic-release/semantic-release)'s format using one of the following definitions. Once committed to develop, this prefix will determine the appropriate 'next version' of Cypress or the corresponding npm module.
+  - Changes has user-facing impact:
+    - `breaking` - A breaking change that will require a MVB
+    - `dependency` - A change to a dependency that impact the user
+    - `deprecation` - A API deprecation notice for users
+    - `feat` - A new feature
+    - `fix` - A bug fix or regression fix.
+    - `misc` - a misc user-facing change, like a UI update which is not a fix or enhancement to how Cypress works
+    - `perf` - A code change that improves performance
+  - Changes that improves the codebase or system but has no user-facing impact:
+    - `chore` - Changes to the build process or auxiliary tools and libraries such as documentation generation
+    - `docs` -  Documentation only changes
+    - `refactor` - A code change that neither fixes a bug nor adds a feature
+    - `revert` - Reverts a previous commit
+    - `test` - Adding missing or correcting existing tests
+- For user-facing changes that will be released with the next Cypress version, be sure to add a changelog entry to the appropriate section in [`cli/CHANGELOG.md`](./cli/CHANGELOG.md). See [Writing the Cypress Changelog Guide](./guides/writing-the-cypress-changelog.md) for more details.
 - Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If you feel some areas are not relevant add `N/A` as opposed to deleting those sections. PRs will not be reviewed if this template is not filled in.
 - If the PR is a user facing change and you're a Cypress team member that has logged into [ZenHub](https://www.zenhub.com/) and downloaded the [ZenHub for GitHub extension](https://www.zenhub.com/extension), set the release the PR is intended to ship in from the sidebar of the PR. Follow semantic versioning to select the intended release. This is used to generate the changelog for the release. If you don't tag a PR for release, it won't be mentioned in the changelog.
   ![Select release for PR](https://user-images.githubusercontent.com/1271364/135139641-657015d6-2dca-42d4-a4fb-16478f61d63f.png)
