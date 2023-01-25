@@ -171,6 +171,11 @@ declare global {
 
 cy.i18n = i18n
 
+// Reset
+Cypress.on('window:before:load', (win) => {
+  win.__CYPRESS_GQL_NO_SOCKET__ = undefined
+})
+
 before(() => {
   Cypress.env('e2e_launchpadPort', undefined)
   taskInternal('__internal__before', undefined).then(({ launchpadPort }) => {
