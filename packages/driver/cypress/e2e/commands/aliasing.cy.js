@@ -65,6 +65,20 @@ describe('src/cy/commands/aliasing', () => {
       cy.get('@obj').should('deep.eq', { foo: 'bar' })
     })
 
+    it('allows users to store a static value', () => {
+      const obj = { foo: 'bar' }
+
+      cy.wrap(obj).its('foo').as('alias1', { type: 'static' })
+      cy.wrap(obj).its('foo').as('alias2', { type: 'query' })
+
+      cy.then(() => {
+        obj.foo = 'baz'
+      })
+
+      cy.get('@alias1').should('eq', 'bar')
+      cy.get('@alias2').should('eq', 'baz')
+    })
+
     it('allows dot in alias names', () => {
       cy.get('body').as('body.foo').then(() => {
         expect(cy.state('aliases')['body.foo']).to.exist
@@ -236,6 +250,28 @@ describe('src/cy/commands/aliasing', () => {
           cy.get('div:first').as(reserved)
         })
       })
+
+      it('throws when given non-object options', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq(`\`cy.as()\` only accepts an options object for its second argument. You passed: \`wut?\``)
+          expect(err.docsUrl).to.eq('https://on.cypress.io/as')
+
+          done()
+        })
+
+        cy.wrap({}).as('value', 'wut?')
+      })
+
+      it('throws when given invalid `type`', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq(`\`cy.as()\` only accepts a \`type\` of \`'query'\` or \`'static'\`. You passed: \`wut?\``)
+          expect(err.docsUrl).to.eq('https://on.cypress.io/as')
+
+          done()
+        })
+
+        cy.wrap({}).as('value', { type: 'wut?' })
+      })
     })
 
     describe('log', () => {
@@ -284,8 +320,16 @@ describe('src/cy/commands/aliasing', () => {
           const { lastLog } = this
 
           assertLogLength(this.logs, 1)
-          expect(lastLog.get('alias')).to.eq('foo')
+          expect(lastLog.get('alias')).to.eq('@foo')
           expect(lastLog.get('aliasType')).to.eq('dom')
+        })
+      })
+
+      it('includes the alias `type` when set to `static`', () => {
+        cy.wrap({}).as('foo', { type: 'static' }).then(function () {
+          const { lastLog } = this
+
+          expect(lastLog.get('alias')).to.eq('@foo (static)')
         })
       })
 
@@ -495,9 +539,8 @@ describe('src/cy/commands/aliasing', () => {
       })
     })
 
-    // TODO: Re-enable as part of https://github.com/cypress-io/cypress/issues/23902
-    it.skip('maintains .within() context while reading aliases', () => {
-      cy.get('#specific-contains').within(() => {
+    it('maintains .within() context while reading aliases', () => {
+      cy.get('#nested-div').within(() => {
         cy.get('span').as('spanWithin').should('have.length', 1)
       })
 
