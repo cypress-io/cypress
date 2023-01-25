@@ -5,6 +5,8 @@ _Released 01/31/2023 (PENDING)_
 
 **Bugfixes:**
 
+- Fixed an issue where Cypress was not exiting properly when running multiple Component Testing specs in `electron` in run mode. 
+  Fixes [#25568](https://github.com/cypress-io/cypress/issues/25568).
 - Fixed an issue where alternative Microsoft Edge Beta and Canary binary names were not being discovered by Cypress. 
   Fixes [#25455](https://github.com/cypress-io/cypress/issues/25455).
 
