@@ -31,7 +31,7 @@
 
 ## Requirements
 
-- Angular 13+
+- Angular 14+
 
 ## Usage ⏯
 
@@ -48,6 +48,8 @@ To install the schematic via cli arguments (installs both e2e and component test
 ```shell
 ng add @cypress/schematic --e2e --component
 ```
+
+The installation will add this schematic to the [default schematic collections](https://angular.io/guide/workspace-config#angular-cli-configuration-options). This allows you to execute the CLI commands without prefixing them with the package name.
 
 To run Cypress in `open` mode within your project: 
 
@@ -78,37 +80,43 @@ ng run {project-name}:ct
 To generate a new e2e spec file:
 
 ```shell script
-ng generate @cypress/schematic:spec 
+ng generate spec 
 ```
 
 or (without cli prompt)
 
 ```shell script
-ng generate @cypress/schematic:spec {name}
+ng generate spec {name}
 ```
 
 To generate a new component spec file:
 
 ```shell script
-ng generate @cypress/schematic:spec --component
+ng generate spec --component
 ```
 
 or (without cli prompt)
 
 ```shell script
-ng generate @cypress/schematic:spec {component name} --component
+ng generate spec {component name} --component
 ```
 
 To generate a new component spec file in a specific folder:
 
 ```shell script
-ng generate @cypress/schematic:spec {component name} --component --path {path relative to project root}
+ng generate spec {component name} --component --path {path relative to project root}
 ```
 
 To generate new component spec files alongside all component files in a project:
 
 ```shell script
-ng generate @cypress/schematic:specs-ct
+ng generate specs-ct
+```
+
+To generate a new, generic component definition with a component spec file in the given or default project. This wraps the [Angular CLI Component Generator](https://angular.io/cli/generate#component) and supports the same arguments.
+
+```shell script
+ng generate component {component name}
 ```
 
 ## Builder Options 🛠
