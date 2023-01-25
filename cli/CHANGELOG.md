@@ -1,7 +1,12 @@
- <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 12.4.1
+<!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.5.0
 
 _Released 01/31/2023 (PENDING)_
+
+**Features:**
+
+- Added a new `hide` property to `Cypress.Log` and `cy.log` that enables
+  selectively hiding/showing specific Command Log entries. Added in [#25579](https://github.com/cypress-io/cypress/pull/25579).
 
 ## 12.4.0
 
