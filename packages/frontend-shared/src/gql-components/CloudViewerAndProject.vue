@@ -71,6 +71,7 @@ subscription CloudViewerAndProject_CheckCloudOrgMembership {
 
 const loginConnectStore = useLoginConnectStore()
 const {
+  setHasInitiallyLoaded,
   setUserFlag,
   setProjectFlag,
   setUserData,
@@ -135,6 +136,9 @@ watchEffect(() => {
   if (currentProject?.cloudProject || !loginConnectStore.user.isLoggedIn) {
     setProjectFlag('isProjectConnected', currentProject?.cloudProject?.__typename === 'CloudProject')
   }
+
+  console.log('SET!!!!!')
+  setHasInitiallyLoaded()
 })
 
 </script>

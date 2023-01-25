@@ -133,7 +133,6 @@ describe('RelevantRunsDataSource', () => {
         }
       }
 
-      //TODO figure out how to mock ctx.git so we do not have to pass in the shas to moveToNext
       await dataSource.moveToNext([FAKE_SHAS[1], FAKE_SHAS[0]])
 
       setImmediate(() => {

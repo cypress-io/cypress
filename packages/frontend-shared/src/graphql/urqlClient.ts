@@ -183,11 +183,6 @@ export async function makeUrqlClient (config: UrqlClientConfig): Promise<Client>
 
   const url = config.target === 'launchpad' ? `/__launchpad/graphql` : `/${config.namespace}/graphql`
 
-  console.log(
-    'fetch?',
-    config.target === 'launchpad' || window.__CYPRESS_GQL_NO_SOCKET__ 
-  )
-
   const client = createClient({
     url,
     requestPolicy: cypressInRunMode ? 'cache-only' : 'cache-first',

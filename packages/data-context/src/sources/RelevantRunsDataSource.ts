@@ -181,35 +181,32 @@ export class RelevantRunsDataSource {
    * Clear the cached current run to allow the data source to pick the next completed run as the current
    */
   //TODO figure out how to mock in test so do not need to pass in values here
-  async moveToNext (shasForTest?: string[]) {
+  async moveToNext (shas: string[]) {
     debug('Moving to next relevant run')
-    this.#currentRun = undefined
-    this.#currentCommitSha = undefined
 
-    const runs = await this.getRelevantRuns(this.ctx.git?.currentHashes || shasForTest || [])
+    await this.checkRelevantRuns(shas, true)
+  }
 
-    console.log('EMIT 1 => ', runs)
-    this.ctx.emitter.relevantRunChange(runs)
+  async checkRelevantRuns (shas: string[], clearCache: boolean = false) {
+    if (clearCache) {
+      this.#currentRun = undefined
+      this.#currentCommitSha = undefined
+    }
+
+    const runs = await this.getRelevantRuns(shas)
+
+    //only emit a new value if it changes
+    if (!isEqual(runs, this.#cachedRuns)) {
+      debug('Runs changed %o', runs)
+      this.#cachedRuns = runs
+      this.ctx.emitter.relevantRunChange(runs)
+    }
   }
 
   pollForRuns () {
     if (!this.#runsPoller) {
       this.#runsPoller = new Poller(this.ctx, 'relevantRunChange', this.#pollingInterval, async () => {
-        console.log('SHAS =>>>', this.ctx.git, this.ctx.git?.currentHashes)
-        const runs = await this.getRelevantRuns(this.ctx.git?.currentHashes || [])
-
-
-        console.log('Comparing ->>>>', runs, this.#cachedRuns)
-
-        //only emit a new value if it changes
-        if (!isEqual(runs, this.#cachedRuns)) {
-          debug('Runs changed %o', runs)
-          this.#cachedRuns = runs
-          console.log('EMIT 2 => ', runs)
-          this.ctx.emitter.relevantRunChange(runs)
-        } else {
-          console.log('NO EMIT X => ', runs)
-        }
+        await this.checkRelevantRuns(this.ctx.git?.currentHashes || [])
       })
     }
 
