@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v3.2.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.2.2...@cypress/webpack-dev-server-v3.2.3) (2023-01-24)
+
+
+### Bug Fixes
+
+* Extend mock logger used in angular bootstrap ([#25500](https://github.com/cypress-io/cypress/issues/25500)) ([fdd402f](https://github.com/cypress-io/cypress/commit/fdd402fee2d3eb46150e8e785556607045016aa8))
+
 # [@cypress/webpack-dev-server-v3.2.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v3.2.1...@cypress/webpack-dev-server-v3.2.2) (2023-01-03)
 
 
