@@ -803,6 +803,7 @@
     "./packages/scaffold-config/index.js",
     "./packages/server/lib/browsers/chrome.ts",
     "./packages/server/lib/browsers/firefox.ts",
+    "./packages/server/lib/browsers/memory/index.ts",
     "./packages/server/lib/cache.js",
     "./packages/server/lib/cloud/api.ts",
     "./packages/server/lib/cloud/auth.ts",
@@ -4293,5 +4294,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "bdfa466821aee8d283ad0c88bbc577b8189e281c3916d39eccb805d6c5e81fb4"
+  "deferredHash": "3a0e64ea590ebb886626e77cd51eb03fff79cd210f8464a16a27f93c0965a582"
 }
