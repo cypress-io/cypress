@@ -129,7 +129,7 @@ export const createRoutesE2E = ({
     // @see https://github.com/cypress-io/cypress/issues/25010
     res.setHeader('Origin-Agent-Cluster', '?0')
 
-    files.handleCrossOriginIframe(req, res, config.namespace)
+    files.handleCrossOriginIframe(req, res, config)
   })
 
   return routesE2E

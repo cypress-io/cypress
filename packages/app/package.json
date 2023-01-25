@@ -5,7 +5,7 @@
   "scripts": {
     "check-ts": "vue-tsc --noEmit",
     "build-prod-ui": "cross-env NODE_ENV=production vite build",
-    "clean": "rimraf dist && rimraf ./node_modules/.vite && echo 'cleaned'",
+    "clean": "rimraf dist && echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
     "test": "echo 'ok'",
     "cypress:run-cypress-in-cypress": "cross-env CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=1 HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS=http://localhost:4455 CYPRESS_REMOTE_DEBUGGING_PORT=6666 TZ=America/New_York",
@@ -29,6 +29,7 @@
     "@intlify/vite-plugin-vue-i18n": "2.4.0",
     "@packages/frontend-shared": "0.0.0-development",
     "@percy/cypress": "^3.1.0",
+    "@popperjs/core": "2.11.6",
     "@testing-library/cypress": "BlueWinds/cypress-testing-library#119054b5963b0d2e064b13c5cc6fc9db32c8b7b5",
     "@types/faker": "5.5.8",
     "@urql/core": "2.4.4",

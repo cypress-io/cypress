@@ -55,6 +55,7 @@ describe('lib/plugins/child/ts_node', () => {
       sinon.spy(console, 'warn')
       tsNodeUtil.register('proj-root', '/path/to/plugins/file.js')
 
+      // eslint-disable-next-line no-console
       expect(console.warn).not.to.be.calledWith('Missing baseUrl in compilerOptions. tsconfig-paths will be skipped')
     })
   })
