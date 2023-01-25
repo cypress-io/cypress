@@ -1,3 +1,15 @@
+# [@cypress/schematic-v2.5.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.4.0...@cypress/schematic-v2.5.0) (2023-01-25)
+
+
+### Bug Fixes
+
+* **cypress-schematic:** do not disable e2e support file ([#25400](https://github.com/cypress-io/cypress/issues/25400)) ([d52f3dc](https://github.com/cypress-io/cypress/commit/d52f3dc8cbf0daf276d1ec5db95e065cf703b070))
+
+
+### Features
+
+* Add Angular CT Schematic ([#24374](https://github.com/cypress-io/cypress/issues/24374)) ([af6be6f](https://github.com/cypress-io/cypress/commit/af6be6f27d8547bbfbed60cd3a7524861d842548)), closes [#23645](https://github.com/cypress-io/cypress/issues/23645) [#23673](https://github.com/cypress-io/cypress/issues/23673) [#23696](https://github.com/cypress-io/cypress/issues/23696)
+
 # [@cypress/schematic-v2.4.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v2.3.0...@cypress/schematic-v2.4.0) (2022-12-02)
 
 

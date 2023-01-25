@@ -22,8 +22,9 @@ import {
 
 import path from 'path'
 import execa from 'execa'
+import _ from 'lodash'
 
-import type { CyTaskResult, OpenGlobalModeOptions, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from '../support/e2e'
+import type { CyTaskResult, OpenGlobalModeOptions, RemoteGraphQLBatchInterceptor, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions } from '../support/e2e'
 import { fixtureDirs } from '@tooling/system-tests'
 import * as inspector from 'inspector'
 import sinonChai from '@cypress/sinon-chai'
@@ -127,6 +128,7 @@ async function makeE2ETasks () {
   let ctx: DataContext
   let testState: Record<string, any> = {}
   let remoteGraphQLIntercept: RemoteGraphQLInterceptor | undefined
+  let remoteGraphQLInterceptBatched: RemoteGraphQLBatchInterceptor | undefined
   let scaffoldedProjects = new Set<string>()
 
   const cachedCwd = process.cwd()
@@ -205,6 +207,7 @@ async function makeE2ETasks () {
       sinon.reset()
       sinon.restore()
       remoteGraphQLIntercept = undefined
+      remoteGraphQLInterceptBatched = undefined
 
       const fetchApi = ctx.util.fetch
 
@@ -236,7 +239,69 @@ async function makeE2ETasks () {
 
           operationCount[operationName ?? 'unknown']++
 
-          if (remoteGraphQLIntercept) {
+          if (operationName === 'batchTestRunnerExecutionQuery' && remoteGraphQLInterceptBatched) {
+            const fn = remoteGraphQLInterceptBatched
+            const keys: string[] = []
+            const values: Promise<any>[] = []
+            const finalVal: Record<string, any> = {}
+            const errors: GraphQLError[] = []
+
+            // The batch execution plugin (https://www.graphql-tools.com/docs/batch-execution) batches the
+            // query variables & payloads by rewriting both the fields & variables to ensure there
+            // are no collisions. It does so in a consistent manner, prefixing each field with an incrementing integer,
+            // and prefixing the variables within that selection set with the same id
+            //
+            // It ends up looking something like this:
+            //
+            // query ($_0_variableA: String, $_0_variableB: String, $_1_variableA: String, $_1_variableB: String) {
+            //   _0_someQueryField: someQueryField(argA: $_0_variableA) {
+            //     id
+            //     field(argB: $_0_variableB))
+            //   }
+            //   _1_someQueryField: someQueryField(argA: $_1_variableA) {
+            //     id
+            //     field(argB: $_1_variableB))
+            //   }
+            // }
+            //
+            // To make it simpler to test, we take this knowledge and use some regexes & rewriting it to parse out the index,
+            // and re-write the variables as though we were executing the query individually, the same way the plugin does when
+            // we return the resolved data. We then expect that you return the data for the individual row
+            //
+            for (const [key, val] of Object.entries(result.data as Record<string, any>)) {
+              const re = /^_(\d+)_(.*?)$/.exec(key)
+
+              if (!re) {
+                finalVal[key] = val
+                continue
+              }
+
+              const [, capture1, capture2] = re
+              const subqueryVariables = _.transform(_.pickBy(variables, (val, key) => key.startsWith(`_${capture1}_`)), (acc, val, k) => {
+                acc[k.replace(`_${capture1}_`, '')] = val
+              }, {})
+
+              keys.push(key)
+              values.push(Promise.resolve().then(() => {
+                return fn({
+                  key,
+                  index: Number(capture1),
+                  field: capture2,
+                  variables: subqueryVariables,
+                  result: result[key],
+                }, testState)
+              }).catch((e) => {
+                errors.push(new GraphQLError(e.message, undefined, undefined, undefined, [key], e))
+
+                return null
+              }))
+            }
+            result = {
+              data: _.zipObject(keys, (await Promise.allSettled(values)).map((v) => v.status === 'fulfilled' ? v.value : v.reason)),
+              errors: errors.length ? [...(result.errors ?? []), ...errors] : result.errors,
+              extensions: result.extensions,
+            }
+          } else if (remoteGraphQLIntercept) {
             try {
               result = await Promise.resolve(remoteGraphQLIntercept({
                 operationName,
@@ -286,6 +351,11 @@ async function makeE2ETasks () {
 
     __internal_remoteGraphQLIntercept (fn: string) {
       remoteGraphQLIntercept = new Function('console', 'obj', 'testState', `return (${fn})(obj, testState)`).bind(null, console) as RemoteGraphQLInterceptor
+
+      return null
+    },
+    __internal_remoteGraphQLInterceptBatched (fn: string) {
+      remoteGraphQLInterceptBatched = new Function('console', 'obj', 'testState', `return (${fn})(obj, testState)`).bind(null, console) as RemoteGraphQLBatchInterceptor
 
       return null
     },
