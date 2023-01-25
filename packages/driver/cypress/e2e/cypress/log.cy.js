@@ -108,4 +108,71 @@ describe('src/cypress/log', function () {
       expect(LogUtils.countLogsByTests(tests)).to.equal(0)
     })
   })
+
+  context('hiding logs', () => {
+    beforeEach(() => {
+      Cypress.log({ message: 'always visible', name: 'log-test' })
+      Cypress.log({ message: 'always hidden', hide: true, name: 'log-test' })
+    })
+
+    function getMessages () {
+      return cy.wrap(window.top.document)
+      .find('.command-name-log-test .command-message-text')
+    }
+
+    it('can hide a log and then display it', () => {
+      const log = Cypress.log({
+        name: 'log-test',
+        message: 'hidden then shown',
+        hide: true,
+      })
+
+      getMessages()
+      .should((els) => {
+        const messages = [...els].map((el) => el.innerText)
+
+        expect(messages).to.have.length(1)
+        expect(messages[0]).to.eq('always visible')
+      })
+      .then(() => {
+        log.set('hide', false)
+      })
+
+      getMessages()
+      .should((els) => {
+        const messages = [...els].map((el) => el.innerText)
+
+        expect(messages).to.have.length(2)
+        expect(messages[0]).to.eq('always visible')
+        expect(messages[1]).to.eq('hidden then shown')
+      })
+    })
+
+    it('can show a log and then hide it', () => {
+      const log = Cypress.log({
+        name: 'log-test',
+        message: 'shown then hidden',
+      })
+
+      getMessages()
+      .should((els) => {
+        const messages = [...els].map((el) => el.innerText)
+
+        expect(messages).to.have.length(2)
+        expect(messages[0]).to.eq('always visible')
+        expect(messages[1]).to.eq('shown then hidden')
+      })
+      .then(() => {
+        log.set('hide', true)
+      })
+
+      getMessages()
+      .should((els) => {
+        const messages = [...els].map((el) => el.innerText)
+
+        expect(messages).to.have.length(1)
+        expect(messages[0]).to.eq('always visible')
+      })
+    })
+  })
 })

@@ -6140,6 +6140,8 @@ declare namespace Cypress {
     autoEnd: boolean
     /** Set to true to immediately finish the log  */
     end: boolean
+    /** Should this log be hidden in the Command Log? */
+    hide: boolean
     /** Return an object that will be printed in the dev tools console */
     consoleProps(): ObjectLike
   }

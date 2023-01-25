@@ -352,6 +352,10 @@ class Command extends Component<Props> {
       return null
     }
 
+    if (model.hide) {
+      return null
+    }
+
     const commandName = model.name ? nameClassName(model.name) : ''
     const groupPlaceholder: Array<JSX.Element> = []
 
