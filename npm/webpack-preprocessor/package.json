@@ -62,7 +62,7 @@
   "peerDependencies": {
     "@babel/core": "^7.0.1",
     "@babel/preset-env": "^7.0.0",
-    "babel-loader": "^8.0.2",
+    "babel-loader": "^8.0.2 || ^9",
     "webpack": "^4 || ^5"
   },
   "files": [
