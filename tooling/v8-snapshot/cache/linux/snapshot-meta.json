@@ -716,6 +716,7 @@
     "./packages/data-context/node_modules/chokidar/lib/fsevents-handler.js",
     "./packages/data-context/node_modules/chokidar/lib/nodefs-handler.js",
     "./packages/data-context/node_modules/cross-spawn/node_modules/semver/semver.js",
+    "./packages/data-context/node_modules/dataloader/index.js",
     "./packages/data-context/node_modules/debug/src/browser.js",
     "./packages/data-context/node_modules/debug/src/index.js",
     "./packages/data-context/node_modules/execa/lib/errname.js",
