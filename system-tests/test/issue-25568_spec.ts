@@ -3,7 +3,7 @@ import systemTests from '../lib/system-tests'
 // We had an issue that only occurred when:
 // - CT testing
 // - browser=electron
-// - more than 1 test
+// - more than 1 spec file
 // - experimentalSingleTabMode=false
 //
 // The electron browser would not exit after all the tests finished.
