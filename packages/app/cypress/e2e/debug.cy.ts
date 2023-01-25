@@ -1,63 +1,5 @@
-<template>
-  <DebugContainer
-    data-cy="debug-container"
-    :gql="query.data.value"
-    :is-loading="isLoading"
-    :commits-ahead="relevantRuns?.commitsAhead || 0"
-    :online="online"
-  />
-    <!-- :gql="gqlMockData"  -->
-</template>
-
-<script setup lang="ts">
-
-import DebugContainer from '../debug/DebugContainer.vue'
-import { gql, useQuery, useSubscription } from '@urql/vue'
-import { useOnline } from '@vueuse/core'
-
-import { DebugDocument, Debug_SpecsChangeDocument } from '../generated/graphql'
-import { computed, watch } from 'vue'
-import { useRelevantRun } from '../composables/useRelevantRun'
-
-const online = useOnline()
-
-gql`
-subscription Debug_specsChange {
-  specsChange {
-    id
-    specs {
-      id
-      ...DebugLocalSpecs
-    }
-  }
-}
-`
-
-gql `
-query Debug($runNumber: Int!, $nextRunNumber: Int!, $hasNextRun: Boolean!) {
-  ...DebugSpecs
-}
-`
-
-// {
-//     "current": 129,
-//     "next": null,
-//     "commitsAhead": 0,
-//     "__typename": "RelevantRun"
-// }
-const relevantRuns = useRelevantRun()
-
-const variables = computed(() => {
-  return {
-    runNumber: relevantRuns.value?.current || -1,
-    nextRunNumber: relevantRuns.value?.next || -1,
-    hasNextRun: !!relevantRuns.value?.next,
-  }
-})
-
-const shouldPauseQuery = computed(() => {
-  return variables.value.runNumber === -1 || !online
-})
+import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
+import type { SinonStub } from 'sinon'
 
 const gqlMockData = {
     "__typename": "Query",
@@ -317,16 +259,60 @@ const gqlMockData = {
     }
 }
 
-const query = useQuery({ query: DebugDocument, variables, pause: shouldPauseQuery, requestPolicy: 'network-only' })
+function moveToDebugPage (): void {
+  cy.findByTestId('sidebar-link-debug-page').click()
+  cy.findByTestId('debug-container').should('be.visible')
+}
 
-watch(query.data, val => {
-  console.log('query', query.data.value, shouldPauseQuery.value)
+Cypress.on('window:before:load', (win) => {
+  win.__CYPRESS_GQL_NO_SOCKET__ = 'true'
+  console.log('on before load!!!')
 })
 
-const isLoading = computed(() => {
-  return !relevantRuns.value //  || query.fetching.value
+describe('App: Debug', { viewportWidth: 1200 }, () => {
+  beforeEach(() => {
+    console.log('before')
+    window.__CYPRESS_GQL_NO_SOCKET__ = 'true'
+  })
+
+  it('resolves the runs page', () => {
+    cy.intercept('POST', '/__cypress/graphql/query-Debug', {
+      body: {
+        data: gqlMockData
+      }
+    }).as('network')
+
+    cy.remoteGraphQLIntercept(async (obj, testState) => {
+        if (obj.operationName === 'RelevantRunsDataSource_RunsByCommitShas') {
+        console.log('need to do something here!', obj.result)
+        if (obj.result?.data?.cloudProjectBySlug)
+        obj.result.data.cloudProjectBySlug.runsByCommitShas = [
+
+        {
+            id: 'Q2xvdWRSdW46a0wzRVBlNTBHdw==',
+            runNumber: 129,
+            status: 'FAILED',
+            commitInfo: {
+              sha: '7f70914881637df321edbeb398cdfd5e54de74ef',
+              __typename: 'CloudRunCommitInfo'
+            },
+            __typename: 'CloudRun'
+          },
+        ]
+    }
+      return obj.result
+    })
+
+    cy.scaffoldProject('cypress-in-cypress')
+    cy.openProject('cypress-in-cypress')
+    cy.startAppServer('e2e')
+    cy.withCtx((ctx) => {
+      ctx.git!.__testSetGitHashes(['7f70914881637df321edbeb398cdfd5e54de74ef'])
+    })
+    cy.loginUser()
+
+    cy.visitApp()
+
+    moveToDebugPage()
+  })
 })
-
-useSubscription({ query: Debug_SpecsChangeDocument })
-
-</script>

@@ -448,4 +448,10 @@ export class GitDataSource {
       debug('Error loading git hashes %s', e)
     }
   }
+
+  // For testing purposes
+  __testSetGitHashes(hashes: string[]) {
+    console.log('Setting hashes...', hashes)
+    this.#gitHashes = hashes
+  }
 }

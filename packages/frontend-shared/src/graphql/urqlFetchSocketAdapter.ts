@@ -20,6 +20,7 @@ export const urqlFetchSocketAdapter = (io: Socket): ClientOptions['fetch'] => {
 
       // An ad-hoc version of the "Request"
       io.emit(`graphql:request`, uid, fetchOptions.body, (payload) => {
+        console.log('Emitting', {uid, body: fetchOptions.body, payload})
         resolve(new Response(JSON.stringify(payload), {
           status: 200,
           headers: {
