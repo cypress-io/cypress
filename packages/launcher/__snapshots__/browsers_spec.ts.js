@@ -93,7 +93,10 @@ exports['browsers returns the expected list of browsers 1'] = [
     "channel": "canary",
     "displayName": "Edge Canary",
     "versionRegex": {},
-    "binary": "edge-canary",
+    "binary": [
+      "edge-canary",
+      "microsoft-edge-canary"
+    ],
     "minSupportedVersion": 79
   },
   {
@@ -102,7 +105,10 @@ exports['browsers returns the expected list of browsers 1'] = [
     "channel": "beta",
     "displayName": "Edge Beta",
     "versionRegex": {},
-    "binary": "edge-beta",
+    "binary": [
+      "edge-beta",
+      "microsoft-edge-beta"
+     ],
     "minSupportedVersion": 79
   },
   {
