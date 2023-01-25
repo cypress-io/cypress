@@ -2,11 +2,11 @@
   <div
     v-if="data.status && data.runNumber"
     data-cy="newer-relevant-run"
-    class="w-full px-24px pb-16px gap-y-1"
+    class="w-full px-24px pb-24px gap-y-1"
   >
     <ul
       id="metadata"
-      class="border rounded flex flex-row bg-indigo-50 border-indigo-100 p-12px gap-x-2 items-center whitespace-nowrap children:flex children:items-center "
+      class="border rounded flex flex-row bg-indigo-50 border-indigo-100 p-12px gap-x-2 items-center whitespace-nowrap children:flex children:items-center"
     >
       <li>
         <DebugRunNumber
