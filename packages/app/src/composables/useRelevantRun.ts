@@ -25,9 +25,9 @@ export function useRelevantRun () {
   //   }
   // })
 
-
   return computed(() => {
     console.log('subscription response', subscriptionResponse.data.value)
+
     return subscriptionResponse.data.value?.relevantRuns
   })
 }
