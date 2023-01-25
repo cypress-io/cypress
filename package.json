@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "12.3.0",
+  "version": "12.4.0",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -173,7 +173,6 @@
     "husky": "7.0.2",
     "inquirer": "3.3.0",
     "inquirer-confirm": "2.0.3",
-    "jest": "24.9.0",
     "lazy-ass": "1.6.0",
     "lerna": "3.22.1",
     "lint-staged": "11.1.2",
