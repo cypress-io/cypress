@@ -205,7 +205,6 @@ export class RelevantRunSpecsDataSource {
         //if statuses change, then let debug page know to refresh runs
         if (statusesChanged) {
           debug('Run statuses changed')
-          console.log('EMIT 3 => ', runs)
           this.ctx.emitter.relevantRunChange(runs)
         }
       })

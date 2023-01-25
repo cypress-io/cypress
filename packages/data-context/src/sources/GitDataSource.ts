@@ -450,8 +450,7 @@ export class GitDataSource {
   }
 
   // For testing purposes
-  __testSetGitHashes(hashes: string[]) {
-    console.log('Setting hashes...', hashes)
+  __testSetGitHashes (hashes: string[]) {
     this.#gitHashes = hashes
   }
 }

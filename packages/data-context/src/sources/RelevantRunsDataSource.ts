@@ -107,7 +107,7 @@ export class RelevantRunsDataSource {
     }
 
     if (cloudProject?.__typename === 'CloudProject') {
-      const runs = (cloudProject.runsByCommitShas)?.map((run) => {
+      const runs = cloudProject.runsByCommitShas?.map((run) => {
         if (run?.runNumber && run?.status && run.commitInfo?.sha) {
           return {
             runNumber: run.runNumber,
@@ -188,27 +188,19 @@ export class RelevantRunsDataSource {
 
     const runs = await this.getRelevantRuns(this.ctx.git?.currentHashes || shasForTest || [])
 
-    console.log('EMIT 1 => ', runs)
     this.ctx.emitter.relevantRunChange(runs)
   }
 
   pollForRuns () {
     if (!this.#runsPoller) {
       this.#runsPoller = new Poller(this.ctx, 'relevantRunChange', this.#pollingInterval, async () => {
-        console.log('SHAS =>>>', this.ctx.git, this.ctx.git?.currentHashes)
         const runs = await this.getRelevantRuns(this.ctx.git?.currentHashes || [])
-
-
-        console.log('Comparing ->>>>', runs, this.#cachedRuns)
 
         //only emit a new value if it changes
         if (!isEqual(runs, this.#cachedRuns)) {
           debug('Runs changed %o', runs)
           this.#cachedRuns = runs
-          console.log('EMIT 2 => ', runs)
           this.ctx.emitter.relevantRunChange(runs)
-        } else {
-          console.log('NO EMIT X => ', runs)
         }
       })
     }
