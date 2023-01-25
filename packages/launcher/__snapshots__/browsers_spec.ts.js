@@ -243,4 +243,28 @@ exports['browsers returns the expected list of browsers 1'] = [
     ],
     'minSupportedVersion': 79,
   },
+  {
+    'name': 'edge',
+    'family': 'chromium',
+    'channel': 'beta',
+    'displayName': 'Edge Beta',
+    'versionRegex': {},
+    'binary': [
+      'edge-beta',
+      'microsoft-edge-beta',
+    ],
+    'minSupportedVersion': 79,
+  },
+  {
+    'name': 'edge',
+    'family': 'chromium',
+    'channel': 'dev',
+    'displayName': 'Edge Dev',
+    'versionRegex': {},
+    'binary': [
+      'edge-dev',
+      'microsoft-edge-dev',
+    ],
+    'minSupportedVersion': 79,
+  },
 ]
