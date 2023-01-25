@@ -180,7 +180,6 @@ export class RelevantRunsDataSource {
   /**
    * Clear the cached current run to allow the data source to pick the next completed run as the current
    */
-  //TODO figure out how to mock in test so do not need to pass in values here
   async moveToNext (shas: string[]) {
     debug('Moving to next relevant run')
 

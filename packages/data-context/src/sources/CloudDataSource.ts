@@ -218,6 +218,7 @@ export class CloudDataSource {
         const eagerResult = this.readFromCache(config)
 
         if (eagerResult?.stale) {
+          debug('Has initial result with stale eagerResult', op.data, eagerResult.data)
           await this.invalidate({ __typename: 'Query' })
           this.params.invalidateClientUrqlCache()
 
@@ -280,7 +281,7 @@ export class CloudDataSource {
     // If we do have a synchronous result, return it, and determine if we want to check for
     // updates to this field
     if (eagerResult && config.requestPolicy !== 'network-only') {
-      debug(`eagerResult found stale? %s, %o`, eagerResult.stale, eagerResult.data)
+      debug(`eagerResult found stale? %s, %s, %o`, eagerResult.stale, config.requestPolicy, eagerResult.data)
 
       // If we have some of the fields, but not the full thing, return what we do have and follow up
       // with an update we send to the client.
