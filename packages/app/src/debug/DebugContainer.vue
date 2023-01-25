@@ -1,66 +1,68 @@
 <template>
   <div class="h-full">
-    <NoInternetConnection v-if="!online">
-      {{ t('launchpadErrors.noInternet.connectProject') }}
-    </NoInternetConnection>
-    <DebugLoading v-else-if="!loginConnectStore.hasInitiallyLoaded || loginConnectStore.project.isProjectConnected && isLoading" />
-    <DebugError
-      v-else-if="showError"
-    />
-    <DebugNotLoggedIn
-      v-else-if="!loginConnectStore.user.isLoggedIn"
-      data-cy="debug-empty"
-    />
-    <DebugNoProject
-      v-else-if="!loginConnectStore.project.isProjectConnected"
-      data-cy="debug-empty"
-    />
-    <DebugNoRuns
-      v-else-if="!run"
-      data-cy="debug-empty"
-    />
-    <div
-      v-else-if="run?.status"
-      class="flex flex-col h-full"
-    >
-      <DebugPageHeader
-        :gql="run"
-        :commits-ahead="props.commitsAhead"
+    <TransitionQuickFade mode="out-in">
+      <NoInternetConnection v-if="!online">
+        {{ t('launchpadErrors.noInternet.connectProject') }}
+      </NoInternetConnection>
+      <DebugLoading v-else-if="!loginConnectStore.hasInitiallyLoaded || loginConnectStore.project.isProjectConnected && isLoading" />
+      <DebugError
+        v-else-if="showError"
       />
-      <DebugNewRelevantRunBar
-        v-if="newerRelevantRun"
-        :gql="newerRelevantRun"
+      <DebugNotLoggedIn
+        v-else-if="!loginConnectStore.user.isLoggedIn"
+        data-cy="debug-empty"
       />
+      <DebugNoProject
+        v-else-if="!loginConnectStore.project.isProjectConnected"
+        data-cy="debug-empty"
+      />
+      <DebugNoRuns
+        v-else-if="!run"
+        data-cy="debug-empty"
+      />
+      <div
+        v-else-if="run?.status"
+        class="flex flex-col h-full"
+      >
+        <DebugPageHeader
+          :gql="run"
+          :commits-ahead="props.commitsAhead"
+        />
+        <DebugNewRelevantRunBar
+          v-if="newerRelevantRun"
+          :gql="newerRelevantRun"
+        />
 
-      <DebugPendingRunSplash
-        v-if="isFirstPendingRun"
-        class="mt-12"
-      />
-      <template v-else>
-        <DebugPageDetails
-          v-if="shouldDisplayDetails(run.status, run.isHidden)"
-          :status="run.status"
-          :specs="run.specs"
-          :cancellation="{ cancelledAt: run.cancelledAt, cancelledBy: run.cancelledBy }"
-          :is-hidden="run.isHidden"
-          :reasons-run-is-hidden="reasonsRunIsHidden"
-          :over-limit-action-type="run.overLimitActionType"
-          :over-limit-action-url="run.overLimitActionUrl"
-          :ci="run.ci"
-          :errors="run.errors"
-          :run-age-days="runAgeDays"
+        <DebugPendingRunSplash
+          v-if="isFirstPendingRun"
+          class="mt-12"
         />
-        <DebugSpecList
-          v-if="run.totalFailed && shouldDisplaySpecsList(run.status)"
-          :specs="debugSpecsArray"
-        />
-        <DebugSpecLimitBanner
-          v-if="run.totalFailed && run.totalFailed > 100"
-          :failed-test-count="run.totalFailed"
-          :cloud-run-url="run.url"
-        />
-      </template>
-    </div>
+        <template v-else>
+          <DebugPageDetails
+            v-if="shouldDisplayDetails(run.status, run.isHidden)"
+            :status="run.status"
+            :specs="run.specs"
+            :cancellation="{ cancelledAt: run.cancelledAt, cancelledBy: run.cancelledBy }"
+            :is-hidden="run.isHidden"
+            :reasons-run-is-hidden="reasonsRunIsHidden"
+            :over-limit-action-type="run.overLimitActionType"
+            :over-limit-action-url="run.overLimitActionUrl"
+            :ci="run.ci"
+            :errors="run.errors"
+            :run-age-days="runAgeDays"
+          />
+          <DebugSpecList
+            v-if="run.totalFailed && shouldDisplaySpecsList(run.status)"
+            :specs="debugSpecsArray"
+          />
+          <DebugSpecLimitBanner
+            v-if="run.totalFailed && run.totalFailed > 100"
+            :failed-test-count="run.totalFailed"
+            :cloud-run-url="run.url"
+          />
+        </template>
+      </div>
+    </TransitionQuickFade>
   </div>
 </template>
 
@@ -83,6 +85,8 @@ import DebugSpecLimitBanner from './DebugSpecLimitBanner.vue'
 import DebugNewRelevantRunBar from './DebugNewRelevantRunBar.vue'
 import { specsList } from './utils/DebugMapping'
 import type { CloudRunHidingReason } from './DebugOverLimit.vue'
+import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
+
 import dayjs from 'dayjs'
 import { useI18n } from '@cy/i18n'
 
