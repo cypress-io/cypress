@@ -354,7 +354,9 @@ export const AllCypressErrors = {
   CLOUD_AUTO_CANCEL_NOT_AVAILABLE_IN_PLAN: (arg1: {link: string}) => {
     return errTemplate`\
       ${fmt.highlightSecondary(`Auto Cancellation`)} is not included under your current billing plan.
+
       To enable this service, please visit your billing and upgrade to another plan with Auto Cancellation.
+      
       ${fmt.off(arg1.link)}`
   },
   CLOUD_AUTO_CANCEL_MISMATCH: (arg1: {runUrl: string}) => {
