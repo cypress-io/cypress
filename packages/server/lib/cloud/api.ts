@@ -11,11 +11,11 @@ const pkg = require('@packages/root')
 
 const machineId = require('./machine_id')
 const errors = require('../errors')
-const { apiRoutes } = require('./routes')
+const { apiUrl, apiRoutes } = require('./routes')
 
 import Bluebird from 'bluebird'
 import type { OptionsWithUrl } from 'request-promise'
-import { decryptResponse, encryptRequest } from './encryption'
+import * as enc from './encryption'
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
@@ -79,11 +79,11 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
     // If we're encrypting the request, we generate the JWE
     // and set it to the JSON body for the request
     if (params.encrypt) {
-      const { secretKey, jwe } = await encryptRequest(params)
+      const { secretKey, jwe } = await enc.encryptRequest(params)
 
       params.transform = (body, response) => {
         if (response.headers['x-cypress-encrypted']) {
-          return decryptResponse(body, secretKey)
+          return enc.decryptResponse(body, secretKey)
         }
 
         return body
@@ -196,6 +196,13 @@ export type CreateRunOptions = {
   timeout?: number
 }
 
+let preflightResult = {
+  encrypt: true,
+  apiUrl,
+}
+
+let recordRoutes = apiRoutes
+
 module.exports = {
   rp,
 
@@ -262,9 +269,9 @@ module.exports = {
 
       return rp.post({
         body,
-        url: apiRoutes.runs(),
+        url: recordRoutes.runs(),
         json: true,
-        encrypt: true,
+        encrypt: preflightResult.encrypt,
         timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
         headers: {
           'x-route-version': '4',
@@ -289,9 +296,9 @@ module.exports = {
     return retryWithBackoff((attemptIndex) => {
       return rp.post({
         body,
-        url: apiRoutes.instances(runId),
+        url: recordRoutes.instances(runId),
         json: true,
-        encrypt: true,
+        encrypt: preflightResult.encrypt,
         timeout: timeout != null ? timeout : SIXTY_SECONDS,
         headers: {
           'x-route-version': '5',
@@ -309,9 +316,9 @@ module.exports = {
 
     return retryWithBackoff((attemptIndex) => {
       return rp.post({
-        url: apiRoutes.instanceTests(instanceId),
+        url: recordRoutes.instanceTests(instanceId),
         json: true,
-        encrypt: true,
+        encrypt: preflightResult.encrypt,
         timeout: timeout || SIXTY_SECONDS,
         headers: {
           'x-route-version': '1',
@@ -328,7 +335,7 @@ module.exports = {
   updateInstanceStdout (options) {
     return retryWithBackoff((attemptIndex) => {
       return rp.put({
-        url: apiRoutes.instanceStdout(options.instanceId),
+        url: recordRoutes.instanceStdout(options.instanceId),
         json: true,
         timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
         body: {
@@ -348,9 +355,9 @@ module.exports = {
   postInstanceResults (options) {
     return retryWithBackoff((attemptIndex) => {
       return rp.post({
-        url: apiRoutes.instanceResults(options.instanceId),
+        url: recordRoutes.instanceResults(options.instanceId),
         json: true,
-        encrypt: true,
+        encrypt: preflightResult.encrypt,
         timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
         headers: {
           'x-route-version': '1',
@@ -416,7 +423,7 @@ module.exports = {
     return rp.post({
       url: apiRoutes.projects(),
       json: true,
-      encrypt: true,
+      encrypt: preflightResult.encrypt,
       auth: {
         bearer: authToken,
       },

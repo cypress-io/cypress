@@ -60,5 +60,7 @@ const makeRoutes = (baseUrl: string, routes: typeof CLOUD_ENDPOINTS) => {
 const apiRoutes = makeRoutes(apiUrl, CLOUD_ENDPOINTS)
 
 module.exports = {
+  apiUrl,
   apiRoutes,
+  makeRoutes: (baseUrl) => makeRoutes(baseUrl, CLOUD_ENDPOINTS),
 }

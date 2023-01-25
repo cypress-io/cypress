@@ -1,7 +1,10 @@
+import crypto from 'crypto'
 import _ from 'lodash'
 import Bluebird from 'bluebird'
 import bodyParser from 'body-parser'
 import { api as jsonSchemas } from '@cypress/json-schemas'
+import * as jose from 'jose'
+
 import systemTests from './system-tests'
 
 export const postRunResponseWithWarnings = jsonSchemas.getExample('postRunResponse')('2.2.0')
@@ -214,12 +217,16 @@ const ensureSchema = function (onRequestBody, expectedRequestSchema, responseBod
         body,
       })
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.log('Schema Error:', err.message)
 
       return res.status(412).json(getSchemaErr('request', err, expectedRequestSchema))
     }
   }
 }
+
+const SYSTEM_TESTS_PK = 'LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2UUlCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktjd2dnU2pBZ0VBQW9JQkFRRE9hSmVkRVhIMlQ3SVAKbzU0Z1g0RHdNVk01aTZVVDRaRUs2VUVIWkR5TVhVSVNlWG5MU25aazlYeDh0alcxSFMrNUp0T1NCMmtubGRwOApLamtkbllaWVNFS1JydWlyN0szeHU1dFBhYjFOUFN6Y3V0aFh1ZUpvVURaRVVmMGVwUDJ2UDY0TzVEOHpGb3BaCi9PTjNpZGo3YjUyY21hdFJlamdCMzQ2Rk5la2hobDFYQ2hObGJzYzRRbEJsczNubFAxMDc2aWh2TDFQRUlubzIKSlpRNzVKMndCWHp3dTA5TkFKdG5YSWdSNmJMaHgxWTRxYlFkL0VFTXRGd3ZmbUhPVnNxQnFqc3dWQUF2L1FyZQpDVnlzMFc5aVFyTG13Z2VoUkFiaTFsUWxuSzlReVNCbnRpeTh1MGF5YjRFd1o5NDV0T1pNbElicEtZb2lLNGNDCjBnV3NKcUVOQWdNQkFBRUNnZ0VCQUo4YVprdlBSNjRhYm1HNXVFaXg5VHl3ZUx0eDFmUkdPanhUNGlsbGJYcXcKNUI1RGZzdGlBWEwrKzA5U1VJSGtGb1k4MUhiS3VaYW0zenc0ZThCRlRXbzlnUHEwL1dxUXpOLzV3ZFRyNTl4aQozSExrbjZDM2l6cm5JWDEyU1l0V21LbCtoNWU0L3JKTm5LV1MxbSt0VlJFelR5V0lHbE42eHpOQ2RLUmdFdTBnCk4ycUJld1YzU21vMTVTbkk5alZvTmJvdzJtaTcxekF0UEo3SktqUHljUld4ZUJ0dXJDbXNGZ3lvc2lIOTRLMVgKaG1scEExcGYvZjJZcGx1VmtUYTRESjlUdzBEWVY0RlVVUVloY1JEbjNSSno2UDM4MUxPV1RONnRxaVRRemtoSApwc1JhdTF1d1E0UE5aKzd6M3RYSVJoU1hnRUptZ1hJNy9zSDFtYm51b3FFQ2dZRUE4cUo5UWlCUGVIOXNxZmNSCnVINlBFbmR1S1JISW4rYVpDeGh2UExld200VUE0ZTBTbGsvM3NEdm8xOCtxckgzclIraFJCWFBDZ0FhTDFySlMKSFlFb2h4V2txcjNmMVVuc0VWcWVoVTBoM01hOGZhMlRWNVY4N05HZ1oyTlV5eXgxYVFKYW1nUHNIMUh3eWlITgplY1ZhMVNaVm5YaFE3WUk3V1cwMDR5d3lYeVVDZ1lFQTJjZENtdGJVVm9paFJrcVBYc2lqWDhLejQ5N0JhSEcyCkd5RnUxOWU3OWorVVdxYTBodkJsSFdxUjlxSldobTFOK01XVlRWaENybWNYMnJXcGJyaU9pVElqUExlVDhkbHMKYllpbnBzbjJ3ekJpbHk0OHZKVEZLek50OEJ4NVovMkZDTGMzbXRGYnl6NFhhSVhKKzdxdDc3MUlXOC9lc3VOWApFaGZKM08zWktja0NnWUI4WDZLSmxQcG5zQm5KZmlhTlJnS2MycStUU2RSbmN0TWNodWZ1WGRLZnhhdlFJN0FWCmNPUnNhQ2xSQnRoY0Z5ZlY4bFlsejFMeVFXakpJeHRJbUg1bjBFWmFaMzRuWFA4dlhoNUlBbVBMUWV3NUdCS2gKSUxXcXgwSEwvWFRudU9CdWRaQnZ4bmJ4RHhXNDUxN21mcTJ5K1RXRnhMam5Kb3k1cUdzbHorLzZLUUtCZ0MwcwpNZHFnV1NjaDdDSUNjVDY5NjNWL2s0VGV2Y3VHV3JuQjg1WDkvOVVTVnhsK25zK21xYkt5V2xpSVQ5NU9hZkFDCk8vZnhLTk80T3JCNUlnMy9aa0Y3RHVnWFJDN1VaTE5MdDByWGRjSURGVkE2blFxWTZWVU9zKzBzV3RxQk1ja2YKQi8rckVabFU1ZEllZmtraTdkVmVzOVduaHBBZ3EvenF4a3AzWTZaUkFvR0Fmd042elJEL0xUaG1yOHpqNHdHVwp6TG16NHdBTEF6ZElvWXpaYjlGd3RyTFkxbDhmVldFYzJkMnlmN1BscStua0Q2dUJXd0gzblhudzBmaVVHM0lzCmoxWVhQZm9BcHJGRFIxd3B5WjB6OU5Pb3lzK1pRZndBUUM2MXhwZXY5dFljUEpUZGFKTzZPWi9oNExTMFR6ZFYKRm5qVk1YanJRRmpIQ0JrVkRJREFvSlE9Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0='
+const PK = crypto.createPrivateKey(Buffer.from(SYSTEM_TESTS_PK, 'base64').toString('utf-8'))
 
 const assertResponseBodySchema = function (req, res, next) {
   const oldWrite = res.write
@@ -248,6 +255,7 @@ const assertResponseBodySchema = function (req, res, next) {
       try {
         jsonSchemas.assertSchema(resName, resVersion)(body)
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.log('Schema Error:', err.message)
 
         return res.status(412).json(getSchemaErr('response', err, res.expectedResponseSchema))
@@ -267,6 +275,23 @@ const assertResponseBodySchema = function (req, res, next) {
 const onServer = (routes) => {
   return (function (app) {
     app.use(bodyParser.json())
+    app.use((req, res, next) => {
+      if (req.headers['x-cypress-encrypted']) {
+        req.unwrappedSecretKey = crypto.createSecretKey(
+          crypto.privateDecrypt(
+            PK,
+            Buffer.from(req.body.recipients[0].encrypted_key, 'base64'),
+          ),
+        )
+
+        return jose.generalDecrypt(req.body, PK).then(({ plaintext }) => Buffer.from(plaintext).toString('utf8')).then((body) => {
+          req.body = JSON.parse(body)
+          next()
+        }).catch(next)
+      }
+
+      return next()
+    })
 
     app.use(assertResponseBodySchema)
 
