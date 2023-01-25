@@ -3,13 +3,13 @@ import LoginBanner from './LoginBanner.vue'
 import { TrackedBanner_RecordBannerSeenDocument } from '../../generated/graphql'
 
 describe('<LoginBanner />', () => {
-  const cohortOption = { cohort: 'A', value: defaultMessages.specPage.banners.login.contentA }
+  const cohortOption = { cohort: '', value: defaultMessages.specPage.banners.login.content }
 
   it('should render expected content', () => {
     cy.mount({ render: () => <LoginBanner hasBannerBeenShown={true} cohortOption={cohortOption}/> })
 
     cy.contains(defaultMessages.specPage.banners.login.title).should('be.visible')
-    cy.contains(defaultMessages.specPage.banners.login.contentA).should('be.visible')
+    cy.contains(defaultMessages.specPage.banners.login.content).should('be.visible')
     cy.contains(defaultMessages.specPage.banners.login.buttonLabel).should('be.visible')
 
     cy.percySnapshot()
@@ -33,7 +33,7 @@ describe('<LoginBanner />', () => {
         campaign: 'Log In',
         medium: 'Specs Login Banner',
         messageId: Cypress.sinon.match.string,
-        cohort: cohortOption.cohort,
+        cohort: null,
       })
     })
 
