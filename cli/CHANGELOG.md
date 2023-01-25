@@ -5,8 +5,8 @@ _Released 01/31/2023 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed an issue where alternative Microsoft Edge Beta and Canary binary names were not being discovered by Cypress. Fixes
-  [#25455](https://github.com/cypress-io/cypress/issues/25455).
+- Fixed an issue where alternative Microsoft Edge Beta and Canary binary names were not being discovered by Cypress. 
+  Fixes [#25455](https://github.com/cypress-io/cypress/issues/25455).
 
 ## 12.4.0
 
