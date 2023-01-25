@@ -15,7 +15,7 @@ describe('Debug page empty states', () => {
 
       cy.mount(<DebugNotLoggedIn />)
 
-      cy.findByRole('link', { name: 'Learn about debugging CI failures in Cypress' }).should('have.attr', 'href', 'https://on.cypress.io/debug-page')
+      cy.findByRole('link', { name: 'Learn about debugging CI failures in Cypress' }).should('have.attr', 'href', 'https://on.cypress.io/debug-page?utm_source=Binary%3A+Launchpad&utm_medium=Debug+Tab&utm_campaign=Learn+More')
 
       cy.percySnapshot()
     })
@@ -30,7 +30,7 @@ describe('Debug page empty states', () => {
 
       cy.mount(<DebugNoProject />)
 
-      cy.findByRole('link', { name: 'Learn about project setup in Cypress' }).should('have.attr', 'href', 'https://on.cypress.io/adding-new-project')
+      cy.findByRole('link', { name: 'Learn about project setup in Cypress' }).should('have.attr', 'href', 'https://on.cypress.io/adding-new-project?utm_source=Binary%3A+Launchpad&utm_medium=Debug+Tab&utm_campaign=Learn+More')
 
       cy.percySnapshot()
     })
@@ -40,7 +40,7 @@ describe('Debug page empty states', () => {
     it('renders', () => {
       cy.mount(<DebugNoRuns />)
 
-      cy.findByRole('link', { name: 'Learn about recording a run to Cypress Cloud' }).should('have.attr', 'href', 'https://on.cypress.io/cypress-run-record-key')
+      cy.findByRole('link', { name: 'Learn about recording a run to Cypress Cloud' }).should('have.attr', 'href', 'https://on.cypress.io/cypress-run-record-key?utm_source=Binary%3A+Launchpad&utm_medium=Debug+Tab&utm_campaign=Learn+More')
 
       cy.percySnapshot()
     })
@@ -58,7 +58,7 @@ describe('Debug page empty states', () => {
     it('renders', () => {
       cy.mount(<DebugError />)
 
-      cy.findByRole('link', { name: 'Learn about debugging CI failures in Cypress' }).should('have.attr', 'href', 'https://on.cypress.io/debug-page')
+      cy.findByRole('link', { name: 'Learn about debugging CI failures in Cypress' }).should('have.attr', 'href', 'https://on.cypress.io/debug-page?utm_source=Binary%3A+Launchpad&utm_medium=Debug+Tab&utm_campaign=Learn+More')
 
       cy.percySnapshot()
     })
