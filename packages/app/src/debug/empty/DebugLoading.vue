@@ -23,7 +23,7 @@
         </template>
       </div>
     </div>
-    <div class="mt-20px">
+    <div class="mt-24px">
       <DebugTestLoadingContainer
         width-class="w-full"
         dot-class="icon-light-gray-50"
@@ -52,7 +52,7 @@
         </template>
       </DebugTestLoadingContainer>
     </div>
-    <div class="mt-20px">
+    <div class="mt-24px">
       <DebugTestLoadingContainer
         width-class="w-full"
         dot-class="icon-light-gray-50"
