@@ -34,7 +34,7 @@ export class Poller<E extends EventType, M> {
 
     const subscriptionId = ++this.#subscriptionCount
 
-    debug(`subscribing to ${this.event}`)
+    debug(`subscribing to ${this.event} with initial value %o`, config?.initialValue)
     this.#subscriptions[subscriptionId] = { meta: config?.meta }
 
     return this.ctx.emitter.subscribeTo(this.event, {
