@@ -39,7 +39,7 @@ circleCiRootEvent.add({
 // Therefore, we have each honeycomb event await this promise
 // before sending itself.
 let asyncInfo = Promise.all([getNextVersionForPath(path.resolve(__dirname, '../../packages')), commitInfo()])
-.then(([nextVersion, commitInformation]) => {
+.then(([{ nextVersion }, commitInformation]) => {
   const ciInformation = ciProvider.commitParams() || {}
 
   return {
@@ -62,6 +62,7 @@ class HoneycombReporter {
       return
     }
 
+    // eslint-disable-next-line
     console.log(chalk.green('Reporting to honeycomb'))
 
     runner.on('suite', (suite) => {
