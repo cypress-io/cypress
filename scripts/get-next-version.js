@@ -13,11 +13,6 @@ const bump = promisify(bumpCb)
 const paths = ['packages', 'cli']
 
 const getNextVersionForPath = async (path) => {
-  // allow the semantic next version to be overridden by environment
-  if (process.env.NEXT_VERSION) {
-    return process.env.NEXT_VERSION
-  }
-
   let commits
   const whatBump = (foundCommits) => {
     // semantic version bump: 0 - major, 1 - minor, 2 - patch
@@ -54,7 +49,8 @@ const getNextVersionForPath = async (path) => {
   })
 
   return {
-    nextVersion: semver.inc(currentVersion, releaseType || 'patch'),
+    // allow the semantic next version to be overridden by environment
+    nextVersion: process.env.NEXT_VERSION || semver.inc(currentVersion, releaseType || 'patch'),
     commits,
   }
 }
