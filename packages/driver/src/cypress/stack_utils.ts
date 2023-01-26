@@ -100,7 +100,7 @@ const stackWithUserInvocationStackSpliced = (err, userInvocationStack): StackAnd
   }
 }
 
-type InvocationDetails = LineDetail | {}
+type InvocationDetails = MessageLineDetail | {}
 
 const getInvocationDetails = (specWindow, config) => {
   if (specWindow.Error) {
