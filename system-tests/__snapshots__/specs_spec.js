@@ -76,7 +76,9 @@ exports['e2e specs handles glob characters in the working directory and spec pat
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app.cy.js.mp4                       (X second)
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/app.cy.js.mp4
 
 
 ====================================================================================================

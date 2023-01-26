@@ -59,7 +59,7 @@ describe('cy.session', { retries: 0 }, () => {
         .then(async () => {
           cy.spy(Cypress, 'action').log(false)
 
-          await Cypress.action('runner:test:before:run:async', {})
+          await Cypress.action('runner:test:before:run:async', {}, Cypress.state('runnable'))
 
           expect(Cypress.action).to.be.calledWith('cy:url:changed', '')
           expect(Cypress.action).to.be.calledWith('cy:visit:blank', { testIsolation: true })
@@ -71,7 +71,7 @@ describe('cy.session', { retries: 0 }, () => {
       it('clears session data before each run', async () => {
         const clearCurrentSessionData = cy.spy(Cypress.session, 'clearCurrentSessionData')
 
-        await Cypress.action('runner:test:before:run:async', {})
+        await Cypress.action('runner:test:before:run:async', {}, Cypress.state('runnable'))
 
         expect(clearCurrentSessionData).to.be.called
       })
@@ -79,7 +79,7 @@ describe('cy.session', { retries: 0 }, () => {
       it('resets rendered html origins before each run', async () => {
         const backendSpy = cy.spy(Cypress, 'backend')
 
-        await Cypress.action('runner:test:before:run:async', {})
+        await Cypress.action('runner:test:before:run:async', {}, Cypress.state('runnable'))
 
         expect(backendSpy).to.be.calledWith('reset:rendered:html:origins')
       })
@@ -94,7 +94,7 @@ describe('cy.session', { retries: 0 }, () => {
         .then(async () => {
           cy.spy(Cypress, 'action').log(false)
 
-          await Cypress.action('runner:test:before:run:async', {})
+          await Cypress.action('runner:test:before:run:async', {}, Cypress.state('runnable'))
 
           expect(Cypress.action).to.be.calledWith('cy:url:changed', '')
           expect(Cypress.action).to.be.calledWith('cy:visit:blank', { testIsolation: true })
@@ -789,7 +789,7 @@ describe('cy.session', { retries: 0 }, () => {
         .then(async () => {
           cy.spy(Cypress, 'action').log(false)
 
-          await Cypress.action('runner:test:before:run:async', {})
+          await Cypress.action('runner:test:before:run:async', {}, Cypress.state('runnable'))
 
           expect(Cypress.action).not.to.be.calledWith('cy:url:changed')
           expect(Cypress.action).not.to.be.calledWith('cy:visit:blank')
@@ -800,7 +800,7 @@ describe('cy.session', { retries: 0 }, () => {
       it('does not clear session data before each run', async () => {
         const clearCurrentSessionData = cy.spy(Cypress.session, 'clearCurrentSessionData')
 
-        await Cypress.action('runner:test:before:run:async', {})
+        await Cypress.action('runner:test:before:run:async', {}, Cypress.state('runnable'))
 
         expect(clearCurrentSessionData).not.to.be.called
       })
@@ -808,7 +808,7 @@ describe('cy.session', { retries: 0 }, () => {
       it('does not reset rendered html origins before each run', async () => {
         const backendSpy = cy.spy(Cypress, 'backend')
 
-        await Cypress.action('runner:test:before:run:async', {})
+        await Cypress.action('runner:test:before:run:async', {}, Cypress.state('runnable'))
 
         expect(backendSpy).not.to.be.calledWith('reset:rendered:html:origins')
       })
@@ -823,7 +823,7 @@ describe('cy.session', { retries: 0 }, () => {
         .then(async () => {
           cy.spy(Cypress, 'action').log(false)
 
-          await Cypress.action('runner:test:before:run:async', {})
+          await Cypress.action('runner:test:before:run:async', {}, Cypress.state('runnable'))
 
           expect(Cypress.action).not.to.be.calledWith('cy:url:changed')
           expect(Cypress.action).not.to.be.calledWith('cy:visit:blank')

@@ -7,15 +7,12 @@ const apiUrl = app_config[process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_
 const CLOUD_ENDPOINTS = {
   api: '',
   auth: 'auth',
-  me: 'me',
   ping: 'ping',
   runs: 'runs',
   instances: 'runs/:id/instances',
   instanceTests: 'instances/:id/tests',
   instanceResults: 'instances/:id/results',
   instanceStdout: 'instances/:id/stdout',
-  projects: 'projects',
-  project: 'projects/:id',
   exceptions: 'exceptions',
 } as const
 

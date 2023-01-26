@@ -226,35 +226,11 @@ module.exports = {
     .catch(tagError)
   },
 
-  getMe (authToken): Bluebird<any> {
-    return rp.get({
-      url: apiRoutes.me(),
-      json: true,
-      auth: {
-        bearer: authToken,
-      },
-    })
-  },
-
   getAuthUrls () {
     return rp.get({
       url: apiRoutes.auth(),
       json: true,
       cacheable: true,
-      headers: {
-        'x-route-version': '2',
-      },
-    })
-    .catch(tagError)
-  },
-
-  getProject (projectId, authToken) {
-    return rp.get({
-      url: apiRoutes.project(projectId),
-      json: true,
-      auth: {
-        bearer: authToken,
-      },
       headers: {
         'x-route-version': '2',
       },
@@ -449,34 +425,6 @@ module.exports = {
         .catch(tagError)
       },
     )
-  },
-
-  createProject (projectDetails, remoteOrigin, authToken) {
-    debug('create project with args %o', {
-      projectDetails,
-      remoteOrigin,
-      authToken,
-    })
-
-    return rp.post({
-      url: apiRoutes.projects(),
-      json: true,
-      encrypt: preflightResult.encrypt,
-      auth: {
-        bearer: authToken,
-      },
-      headers: {
-        'x-route-version': '2',
-      },
-      body: {
-        name: projectDetails.projectName,
-        orgId: projectDetails.orgId,
-        public: projectDetails.public,
-        remoteOrigin,
-      },
-    })
-    .catch(RequestErrors.StatusCodeError, formatResponseBody)
-    .catch(tagError)
   },
 
   clearCache () {
