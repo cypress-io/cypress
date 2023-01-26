@@ -17,8 +17,6 @@
   "devDependencies": {
     "cross-env": "6.0.3",
     "cypress-example-kitchensink": "https://github.com/cypress-io/cypress-example-kitchensink.git#d7150632ac15268f2c7a50110cadf039a248ac4e",
-    "gh-pages": "4.0.0",
-    "glob": "7.1.3",
     "gulp": "4.0.2",
     "gulp-clean": "0.4.0",
     "gulp-rev-all": "2.0.2",
