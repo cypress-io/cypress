@@ -1,4 +1,13 @@
  <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+
+## 12.4.2
+
+_Released 01/31/2023 (PENDING)_
+
+**Misc**
+
+- `cy.readFile()` is now a [query command](https://on.cypress.io/retry-ability). This should not affect any tests using it; the functionality is unchanged. This is a prerequisite to address [#25134](https://github.com/cypress-io/cypress/issues/25134) in a future release.
+
 ## 12.4.1
 
 _Released 01/31/2023 (PENDING)_
