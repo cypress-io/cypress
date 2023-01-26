@@ -4,8 +4,6 @@
     "./get-stream/buffer-stream.js",
     "./graceful-fs/polyfills.js",
     "./lockfile/lockfile.js",
-<<<<<<< HEAD:tooling/v8-snapshot/cache/dev-darwin/snapshot-meta.cache.json
-=======
     "./node_modules/@babel/traverse/lib/index.js",
     "./node_modules/@babel/traverse/lib/path/comments.js",
     "./node_modules/@babel/traverse/lib/path/conversion.js",
@@ -13,7 +11,6 @@
     "./node_modules/@babel/traverse/lib/path/introspection.js",
     "./node_modules/@babel/traverse/lib/path/lib/virtual-types-validator.js",
     "./node_modules/@babel/types/lib/definitions/core.js",
->>>>>>> develop:tooling/v8-snapshot/cache/linux/snapshot-meta.json
     "./node_modules/@cspotcode/source-map-support/source-map-support.js",
     "./node_modules/@cypress/commit-info/node_modules/debug/src/node.js",
     "./node_modules/@cypress/get-windows-proxy/node_modules/debug/src/node.js",
@@ -54,10 +51,7 @@
     "./packages/config/node_modules/@babel/traverse/lib/path/conversion.js",
     "./packages/config/node_modules/@babel/traverse/lib/path/family.js",
     "./packages/config/node_modules/@babel/traverse/lib/path/introspection.js",
-<<<<<<< HEAD:tooling/v8-snapshot/cache/dev-darwin/snapshot-meta.cache.json
-=======
     "./packages/data-context/node_modules/@babel/generator/node_modules/@babel/types/lib/definitions/core.js",
->>>>>>> develop:tooling/v8-snapshot/cache/linux/snapshot-meta.json
     "./packages/data-context/node_modules/debug/src/node.js",
     "./packages/data-context/node_modules/minimatch/minimatch.js",
     "./packages/graphql/node_modules/debug/src/node.js",
@@ -108,9 +102,6 @@
     "./node_modules/@babel/core/node_modules/semver/semver.js",
     "./node_modules/@babel/generator/lib/node/index.js",
     "./node_modules/@babel/generator/lib/node/whitespace.js",
-<<<<<<< HEAD:tooling/v8-snapshot/cache/dev-darwin/snapshot-meta.cache.json
-    "./node_modules/@babel/types/lib/definitions/core.js",
-=======
     "./node_modules/@babel/helper-compilation-targets/node_modules/semver/semver.js",
     "./node_modules/@babel/helper-module-transforms/lib/index.js",
     "./node_modules/@babel/traverse/lib/context.js",
@@ -133,7 +124,6 @@
     "./node_modules/@babel/types/lib/converters/toSequenceExpression.js",
     "./node_modules/@babel/types/lib/converters/toStatement.js",
     "./node_modules/@babel/types/lib/converters/valueToNode.js",
->>>>>>> develop:tooling/v8-snapshot/cache/linux/snapshot-meta.json
     "./node_modules/@babel/types/lib/definitions/experimental.js",
     "./node_modules/@babel/types/lib/definitions/flow.js",
     "./node_modules/@babel/types/lib/definitions/index.js",
@@ -677,10 +667,7 @@
     "./node_modules/xml2js/lib/xml2js.js",
     "./node_modules/yauzl/index.js",
     "./node_modules/zip-stream/index.js",
-<<<<<<< HEAD:tooling/v8-snapshot/cache/dev-darwin/snapshot-meta.cache.json
-=======
     "./packages/config/index.js",
->>>>>>> develop:tooling/v8-snapshot/cache/linux/snapshot-meta.json
     "./packages/config/node_modules/@babel/traverse/lib/context.js",
     "./packages/config/node_modules/@babel/traverse/lib/index.js",
     "./packages/config/node_modules/@babel/traverse/lib/path/ancestry.js",
@@ -689,9 +676,6 @@
     "./packages/config/node_modules/@babel/traverse/lib/path/modification.js",
     "./packages/config/node_modules/@babel/traverse/lib/path/removal.js",
     "./packages/config/node_modules/@babel/traverse/lib/path/replacement.js",
-<<<<<<< HEAD:tooling/v8-snapshot/cache/dev-darwin/snapshot-meta.cache.json
-    "./packages/config/node_modules/@babel/traverse/lib/scope/index.js",
-=======
     "./packages/config/src/options.ts",
     "./packages/data-context/index.js",
     "./packages/data-context/node_modules/@babel/generator/lib/node/index.js",
@@ -725,7 +709,6 @@
     "./packages/data-context/node_modules/@babel/generator/node_modules/@babel/types/lib/validators/isPlaceholderType.js",
     "./packages/data-context/node_modules/@babel/generator/node_modules/@babel/types/lib/validators/isType.js",
     "./packages/data-context/node_modules/@babel/generator/node_modules/@babel/types/lib/validators/validate.js",
->>>>>>> develop:tooling/v8-snapshot/cache/linux/snapshot-meta.json
     "./packages/data-context/node_modules/chokidar/index.js",
     "./packages/data-context/node_modules/chokidar/lib/constants.js",
     "./packages/data-context/node_modules/chokidar/lib/fsevents-handler.js",
@@ -764,14 +747,11 @@
     "./packages/electron/index.js",
     "./packages/electron/lib/electron.js",
     "./packages/electron/node_modules/get-stream/buffer-stream.js",
-<<<<<<< HEAD:tooling/v8-snapshot/cache/dev-darwin/snapshot-meta.cache.json
-=======
     "./packages/errors/index.js",
     "./packages/errors/src/errTemplate.ts",
     "./packages/example/node_modules/glob/glob.js",
     "./packages/example/node_modules/glob/sync.js",
     "./packages/graphql/index.js",
->>>>>>> develop:tooling/v8-snapshot/cache/linux/snapshot-meta.json
     "./packages/graphql/node_modules/chalk/node_modules/supports-color/index.js",
     "./packages/graphql/node_modules/chalk/source/index.js",
     "./packages/graphql/node_modules/debug/src/browser.js",
@@ -1064,8 +1044,6 @@
     "./node_modules/@babel/template/lib/parse.js",
     "./node_modules/@babel/template/lib/populate.js",
     "./node_modules/@babel/template/lib/string.js",
-<<<<<<< HEAD:tooling/v8-snapshot/cache/dev-darwin/snapshot-meta.cache.json
-=======
     "./node_modules/@babel/traverse/lib/cache.js",
     "./node_modules/@babel/traverse/lib/hub.js",
     "./node_modules/@babel/traverse/lib/path/ancestry.js",
@@ -1081,7 +1059,6 @@
     "./node_modules/@babel/traverse/lib/scope/index.js",
     "./node_modules/@babel/traverse/lib/scope/lib/renamer.js",
     "./node_modules/@babel/traverse/lib/visitors.js",
->>>>>>> develop:tooling/v8-snapshot/cache/linux/snapshot-meta.json
     "./node_modules/@babel/types/lib/asserts/assertNode.js",
     "./node_modules/@babel/types/lib/asserts/generated/index.js",
     "./node_modules/@babel/types/lib/ast-types/generated/index.js",
@@ -3597,10 +3574,7 @@
     "./node_modules/yallist/yallist.js",
     "./node_modules/yn/index.js",
     "./node_modules/yn/lenient.js",
-<<<<<<< HEAD:tooling/v8-snapshot/cache/dev-darwin/snapshot-meta.cache.json
-=======
     "./package.json",
->>>>>>> develop:tooling/v8-snapshot/cache/linux/snapshot-meta.json
     "./packages/config/node_modules/@babel/traverse/lib/cache.js",
     "./packages/config/node_modules/@babel/traverse/lib/hub.js",
     "./packages/config/node_modules/@babel/traverse/lib/path/evaluation.js",
@@ -3611,10 +3585,6 @@
     "./packages/config/node_modules/@babel/traverse/lib/path/lib/removal-hooks.js",
     "./packages/config/node_modules/@babel/traverse/lib/path/lib/virtual-types.js",
     "./packages/config/node_modules/@babel/traverse/lib/scope/binding.js",
-<<<<<<< HEAD:tooling/v8-snapshot/cache/dev-darwin/snapshot-meta.cache.json
-    "./packages/config/node_modules/@babel/traverse/lib/scope/lib/renamer.js",
-    "./packages/config/node_modules/@babel/traverse/lib/visitors.js",
-=======
     "./packages/config/node_modules/@babel/traverse/lib/scope/index.js",
     "./packages/config/node_modules/@babel/traverse/lib/scope/lib/renamer.js",
     "./packages/config/node_modules/@babel/traverse/lib/visitors.js",
@@ -3627,7 +3597,6 @@
     "./packages/config/src/project/utils.ts",
     "./packages/config/src/utils.ts",
     "./packages/config/src/validation.ts",
->>>>>>> develop:tooling/v8-snapshot/cache/linux/snapshot-meta.json
     "./packages/data-context/node_modules/@babel/code-frame/lib/index.js",
     "./packages/data-context/node_modules/@babel/generator/lib/buffer.js",
     "./packages/data-context/node_modules/@babel/generator/lib/generators/base.js",
@@ -3810,8 +3779,6 @@
     "./packages/electron/node_modules/is-stream/index.js",
     "./packages/electron/node_modules/npm-run-path/index.js",
     "./packages/electron/node_modules/path-key/index.js",
-<<<<<<< HEAD:tooling/v8-snapshot/cache/dev-darwin/snapshot-meta.cache.json
-=======
     "./packages/errors/src/errorTypes.ts",
     "./packages/errors/src/errorUtils.ts",
     "./packages/errors/src/errors.ts",
@@ -3826,7 +3793,6 @@
     "./packages/extension/lib/util.js",
     "./packages/frontend-shared/cypress/e2e/prod-dependencies.ts",
     "./packages/frontend-shared/cypress/e2e/v8-snapshot-entry.ts",
->>>>>>> develop:tooling/v8-snapshot/cache/linux/snapshot-meta.json
     "./packages/graphql/node_modules/chalk/source/templates.js",
     "./packages/graphql/node_modules/chalk/source/util.js",
     "./packages/graphql/node_modules/debug/node_modules/ms/index.js",
@@ -4314,9 +4280,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-<<<<<<< HEAD:tooling/v8-snapshot/cache/dev-darwin/snapshot-meta.cache.json
-  "deferredHash": "df8a0b54f3b9a217eaf8657e7af9e12349e34bc767d7cafb23895fb3bd59a1db"
-=======
   "deferredHash": "7520727043f0935e864f3d1f8096dac95d86a907f0c8045536e6865ebd7a3b01"
->>>>>>> develop:tooling/v8-snapshot/cache/linux/snapshot-meta.json
 }
