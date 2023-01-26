@@ -28,7 +28,7 @@ The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) di
 
 - Set up the following environment variables:
   - For the `release-automations` steps, you will need setup the following envs:
-    - GitHub token - generated yourself in github.
+    - GitHub token - Found in 1Password.
     - [ZenHub API token](https://app.zenhub.com/dashboard/tokens) to interact with Zenhub. Found in 1Password.
     - The `cypress-bot` GitHub app credentials. Found in 1Password.
     ```text
