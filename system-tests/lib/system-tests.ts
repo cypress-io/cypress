@@ -928,7 +928,7 @@ const systemTests = {
       CYPRESS_EVERY_NTH_FRAME: 1,
 
       // enable the test key for the stubServer
-      CYPRESS_INTERNAL_TEST_KEY: '0',
+      // CYPRESS_INTERNAL_TEST_KEY: '0',
 
       // force file watching for use with --no-exit
       ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),

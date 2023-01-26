@@ -30,11 +30,11 @@ describe('e2e record', () => {
   })
 
   afterEach(() => {
-    process.env.CYPRESS_INTERNAL_TEST_KEY = '0'
+    delete process.env.CYPRESS_INTERNAL_TEST_KEY
   })
 
   after(() => {
-    process.env.CYPRESS_INTERNAL_TEST_KEY = '0'
+    delete process.env.CYPRESS_INTERNAL_TEST_KEY
   })
 
   beforeEach(() => {
