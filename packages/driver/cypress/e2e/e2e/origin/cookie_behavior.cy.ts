@@ -31,7 +31,7 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
 
           // add httpClient here globally until Cypress.require PR is merged
           cy.origin(`${scheme}://www.foobar.com:${sameOriginPort}`, () => {
-            const { makeRequestForCookieBehaviorTests: makeRequest } = require('../../../support/utils')
+            const { makeRequestForCookieBehaviorTests: makeRequest } = Cypress.require('../../../support/utils')
 
             // @ts-ignore
             window.makeRequest = makeRequest
