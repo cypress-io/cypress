@@ -25,6 +25,8 @@ const makeError = (details = {}) => {
 
 describe('lib/cloud/api', () => {
   beforeEach(() => {
+    api.setPreflightResult({ encrypt: false })
+
     nock(API_BASEURL)
     .matchHeader('x-route-version', '2')
     .get('/auth')
@@ -46,6 +48,10 @@ describe('lib/cloud/api', () => {
       email: 'foo@bar',
       //authToken: 'auth-token-123'
     })
+  })
+
+  afterEach(() => {
+    api.resetPreflightResult()
   })
 
   context('.rp', () => {

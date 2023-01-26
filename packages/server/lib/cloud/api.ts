@@ -11,7 +11,7 @@ const pkg = require('@packages/root')
 
 const machineId = require('./machine_id')
 const errors = require('../errors')
-const { apiUrl, apiRoutes } = require('./routes')
+const { apiUrl, apiRoutes, makeRoutes } = require('./routes')
 
 import Bluebird from 'bluebird'
 import type { OptionsWithUrl } from 'request-promise'
@@ -206,6 +206,21 @@ let recordRoutes = apiRoutes
 module.exports = {
   rp,
 
+  // For internal testing
+  setPreflightResult (toSet) {
+    preflightResult = {
+      ...preflightResult,
+      ...toSet,
+    }
+  },
+
+  resetPreflightResult () {
+    preflightResult = {
+      encrypt: true,
+      apiUrl,
+    }
+  },
+
   ping () {
     return rp.get(apiRoutes.ping())
     .catch(tagError)
@@ -245,6 +260,29 @@ module.exports = {
       },
     })
     .catch(tagError)
+  },
+
+  preflight (preflightInfo) {
+    return retryWithBackoff(async (attemptIndex) => {
+      const result = await rp.post({
+        url: `${apiUrl.replace('api', 'api-preflight')}runs/preflight`,
+        body: {
+          apiUrl,
+          envUrl: process.env.CYPRESS_API_URL,
+          ...preflightInfo,
+        },
+        headers: {
+          'x-route-version': '1',
+          'x-cypress-request-attempt': attemptIndex,
+        },
+        encrypt: true,
+      })
+
+      preflightResult = result
+      recordRoutes = makeRoutes(result.apiUrl)
+
+      return result
+    })
   },
 
   createRun (options: CreateRunOptions) {
