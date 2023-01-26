@@ -4,7 +4,7 @@ import debugLib from 'debug'
 import { chain, compact, isEqual } from 'lodash'
 
 import type { DataContext } from '../DataContext'
-import type { Query, RelevantRun } from '../gen/graphcache-config.gen'
+import type { Query, RelevantRun, RelevantRunLocationEnum } from '../gen/graphcache-config.gen'
 import { Poller } from '../polling'
 
 const debug = debugLib('cypress:data-context:sources:RelevantRunsDataSource')
@@ -46,7 +46,7 @@ export class RelevantRunsDataSource {
   #currentCommitSha?: string
   #cachedRuns: RelevantRun = RUNS_EMPTY_RETURN
 
-  #runsPoller?: Poller<'relevantRunChange'>
+  #runsPoller?: Poller<'relevantRunChange', { name: RelevantRunLocationEnum}>
 
   constructor (private ctx: DataContext) {}
 
@@ -187,12 +187,15 @@ export class RelevantRunsDataSource {
   }
 
   async checkRelevantRuns (shas: string[], clearCache: boolean = false) {
+    debug(`check relevant runs with ${shas.length} shas and clear cache set to ${clearCache}`)
     if (clearCache) {
       this.#currentRun = undefined
       this.#currentCommitSha = undefined
     }
 
     const runs = await this.getRelevantRuns(shas)
+
+    //TODO handle error from remote call
 
     //only emit a new value if it changes
     if (!isEqual(runs, this.#cachedRuns)) {
@@ -202,13 +205,16 @@ export class RelevantRunsDataSource {
     }
   }
 
-  pollForRuns () {
+  pollForRuns (location: RelevantRunLocationEnum) {
     if (!this.#runsPoller) {
-      this.#runsPoller = new Poller(this.ctx, 'relevantRunChange', this.#pollingInterval, async () => {
-        await this.checkRelevantRuns(this.ctx.git?.currentHashes || [])
+      this.#runsPoller = new Poller<'relevantRunChange', { name: RelevantRunLocationEnum }>(this.ctx, 'relevantRunChange', this.#pollingInterval, async () => {
+        // clear the cached run if there is not a current subscription from the DEBUG page
+        const clearCache = !this.#runsPoller?.subscriptions.some((sub) => sub.meta?.name === 'DEBUG')
+
+        await this.checkRelevantRuns(this.ctx.git?.currentHashes || [], clearCache)
       })
     }
 
-    return this.#runsPoller.start(this.#cachedRuns)
+    return this.#runsPoller.start({ initialValue: this.#cachedRuns, meta: { name: location } })
   }
 }

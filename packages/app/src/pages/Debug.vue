@@ -38,7 +38,7 @@ query Debug($runNumber: Int!, $nextRunNumber: Int!, $hasNextRun: Boolean!) {
 }
 `
 
-const relevantRuns = useRelevantRun()
+const relevantRuns = useRelevantRun('DEBUG')
 
 const variables = computed(() => {
   return {

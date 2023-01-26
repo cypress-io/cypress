@@ -22,7 +22,7 @@ query SideBarNavigationContainer($runNumber: Int!, $hasCurrentRun: Boolean!) {
 
 const online = useOnline()
 
-const relevantRuns = useRelevantRun()
+const relevantRuns = useRelevantRun('SIDEBAR')
 
 const variables = computed(() => {
   return {

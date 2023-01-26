@@ -74,7 +74,7 @@ export class RelevantRunSpecsDataSource {
     statuses: {},
   }
 
-  #poller?: Poller<'relevantRunSpecChange'>
+  #poller?: Poller<'relevantRunSpecChange', never>
 
   constructor (private ctx: DataContext) {}
 
@@ -204,6 +204,6 @@ export class RelevantRunSpecsDataSource {
       })
     }
 
-    return this.#poller.start(this.#cached)
+    return this.#poller.start({ initialValue: this.#cached })
   }
 }

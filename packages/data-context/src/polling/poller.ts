@@ -4,7 +4,7 @@ import debugLib from 'debug'
 
 const debug = debugLib('cypress:data-context:polling:Poller')
 
-export class Poller<E extends EventType> {
+export class Poller<E extends EventType, M> {
   constructor (private ctx: DataContext,
     private event: E,
     private pollingInterval: number,
@@ -12,12 +12,19 @@ export class Poller<E extends EventType> {
 
   #timeout?: NodeJS.Timeout
 
+  #subscriptionCount: number = 0
+  #subscriptions: Record<string, { meta: M | undefined }> = {}
+
+  get subscriptions () {
+    return Object.values(this.#subscriptions)
+  }
+
   set interval (interval: number) {
     debug(`interval for ${this.event} set to ${interval}`)
     this.pollingInterval = interval
   }
 
-  start (initialValue?: any) {
+  start (config?: {initialValue?: any, meta?: M}) {
     if (!this.#timeout) {
       debug(`starting poller for ${this.event}`)
       this.#poll().catch((e) => {
@@ -25,14 +32,22 @@ export class Poller<E extends EventType> {
       })
     }
 
+    const subscriptionId = ++this.#subscriptionCount
+
     debug(`subscribing to ${this.event}`)
+    this.#subscriptions[subscriptionId] = { meta: config?.meta }
 
     return this.ctx.emitter.subscribeTo(this.event, {
       sendInitial: false,
-      initialValue,
-      onUnsubscribe: () => {
-        debug(`stopping poller for ${this.event}`)
-        this.#stop()
+      initialValue: config?.initialValue,
+      onUnsubscribe: (listenerCount) => {
+        debug(`onUnsubscribe for ${this.event}`)
+        delete this.#subscriptions[subscriptionId]
+
+        if (listenerCount === 0) {
+          debug(`stopping poller for ${this.event}`)
+          this.#stop()
+        }
       },
     })
   }

@@ -1981,6 +1981,11 @@ type RelevantRun {
   next: Int
 }
 
+enum RelevantRunLocationEnum {
+  DEBUG
+  SIDEBAR
+}
+
 """"""
 type RelevantRunSpecs {
   """Number of specs in the run that have finished being processed"""
@@ -2220,7 +2225,7 @@ type Subscription {
   """
   Subscription that polls the cloud for new relevant runs that match local git commit hashes
   """
-  relevantRuns: RelevantRun
+  relevantRuns(location: RelevantRunLocationEnum!): RelevantRun
 
   """Issued when the watched specs for the project changes"""
   specsChange: CurrentProject

@@ -207,7 +207,9 @@ export class GitDataSource {
       }
 
       if (this.#git) {
-        await this.#loadCurrentBranch()
+        await this.#loadCurrentBranch().then(() => {
+          this.config.onBranchChange(this.#currentBranch)
+        })
       }
 
       if (this.#destroyed || !this.#gitBaseDir) {

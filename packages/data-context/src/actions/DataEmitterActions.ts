@@ -196,7 +196,7 @@ export class DataEmitterActions extends DataEmitterEvents {
    * when subscribing, we want to execute the operation to get the up-to-date initial
    * value, and then we keep a deferred object, resolved when the given emitter is fired
    */
-  subscribeTo (evt: keyof DataEmitterEvents, opts?: {sendInitial: boolean, initialValue?: any, onUnsubscribe?: () => void }): AsyncGenerator<any> {
+  subscribeTo (evt: keyof DataEmitterEvents, opts?: {sendInitial: boolean, initialValue?: any, onUnsubscribe?: (listenerCount: number) => void }): AsyncGenerator<any> {
     const { sendInitial = true } = opts ?? {}
     let hasSentInitial = false
     let dfd: pDefer.DeferredPromise<any> | undefined
@@ -248,7 +248,10 @@ export class DataEmitterActions extends DataEmitterEvents {
         this.pub.off(evt, subscribed)
 
         if (opts?.onUnsubscribe) {
-          opts.onUnsubscribe()
+          // the unsubscribe method can use the listener count to make
+          // decisions like if a poller should be stopped if there are no
+          // longer any listeners left
+          opts.onUnsubscribe(this.pub.listenerCount(evt))
         }
 
         // If we are currently waiting on a deferred promise, we need to resolve it and signify we're done to ensure that the async loop terminates

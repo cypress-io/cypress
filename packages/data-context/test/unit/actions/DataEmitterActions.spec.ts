@@ -174,8 +174,8 @@ describe('DataEmitterActions', () => {
       expect(iteratorFactory2.items, 'second subscription should be called 2 times').to.eql(2)
       expect(iteratorFactory2.completed).to.be.true
 
-      expect(unsubscribe1).to.have.been.calledOnce
-      expect(unsubscribe2).to.have.been.calledOnce
+      expect(unsubscribe1, 'should unsubscribe and see there is 1 subscription still listening').to.have.been.calledOnceWith(1)
+      expect(unsubscribe2).to.have.been.calledOnceWith(0)
     })
   })
 })
