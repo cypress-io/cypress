@@ -33,14 +33,14 @@ const clear = () => {
 
 const prune = () => {
   const cacheDir = state.getCacheDir()
-  const currentVersion = util.pkgVersion()
+  const checkedInBinaryVersion = util.pkgVersion()
 
   let deletedBinary = false
 
   return fs.readdirAsync(cacheDir)
   .then((versions) => {
     return Bluebird.all(versions.map((version) => {
-      if (version !== currentVersion) {
+      if (version !== checkedInBinaryVersion) {
         deletedBinary = true
 
         const versionDir = join(cacheDir, version)
@@ -51,7 +51,7 @@ const prune = () => {
   })
   .then(() => {
     if (deletedBinary) {
-      logger.always(`Deleted all binary caches except for the ${currentVersion} binary cache.`)
+      logger.always(`Deleted all binary caches except for the ${checkedInBinaryVersion} binary cache.`)
     } else {
       logger.always(`No binary caches found to prune.`)
     }

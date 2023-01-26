@@ -1,18 +1,19 @@
 /* eslint-disable no-console */
 
-// See ../guides/next-version.md for documentation.
-
 const path = require('path')
 const semver = require('semver')
 const bumpCb = require('conventional-recommended-bump')
 const { promisify } = require('util')
 
-const currentVersion = require('../package.json').version
+const checkedInBinaryVersion = require('../package.json').version
 const { changeCatagories } = require('./semantic-commits/change-categories')
+const { getCurrentReleaseData } = require('./semantic-commits/get-binary-release-data')
 const bump = promisify(bumpCb)
 const paths = ['packages', 'cli']
 
 const getNextVersionForPath = async (path) => {
+  const { version: releasedVersion } = await getCurrentReleaseData()
+
   let commits
   const whatBump = (foundCommits) => {
     // semantic version bump: 0 - major, 1 - minor, 2 - patch
@@ -48,9 +49,22 @@ const getNextVersionForPath = async (path) => {
     path,
   })
 
+  let nextVersion = semver.inc(checkedInBinaryVersion, releaseType || 'patch')
+
+  const hasVersionBump = checkedInBinaryVersion !== releasedVersion
+
+  // See ../guides/next-version.md for documentation.
+  // for the time being, honoring this ENV -- ideally this will be deleted to remove manually overriding without a PR
+  if (process.env.NEXT_VERSION) {
+    console.log('honoring process.env.NEXT_VERSION')
+    nextVersion = process.env.NEXT_VERSION
+  } else if (hasVersionBump) {
+    console.log('honoring the approved binary version bump')
+    nextVersion = checkedInBinaryVersion
+  }
+
   return {
-    // allow the semantic next version to be overridden by environment
-    nextVersion: process.env.NEXT_VERSION || semver.inc(currentVersion, releaseType || 'patch'),
+    nextVersion,
     commits,
   }
 }
@@ -93,7 +107,7 @@ if (require.main !== module) {
 
   const { nextVersion } = await getNextVersionForBinary()
 
-  if (process.argv.includes('--npm')) {
+  if (process.argv.includes('--npm') && checkedInBinaryVersion !== nextVersion) {
     const cmd = `npm --no-git-tag-version version ${nextVersion}`
 
     console.log(`Running '${cmd}'...`)
