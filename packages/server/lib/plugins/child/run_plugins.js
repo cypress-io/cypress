@@ -143,19 +143,6 @@ class RunPlugins {
     })
   }
 
-  _getExperimentalOriginDependenciesValue (initialConfig, modifiedConfig) {
-    // prefer the modified value if it's specified
-    if (
-      typeof modifiedConfig === 'object'
-      && typeof modifiedConfig.experimentalOriginDependencies === 'boolean'
-    ) {
-      return modifiedConfig.experimentalOriginDependencies
-    }
-
-    // otherwise, use the initial value
-    return initialConfig.experimentalOriginDependencies
-  }
-
   execute (event, ids, args = []) {
     debug(`execute plugin event: ${event} (%o)`, ids)
 
