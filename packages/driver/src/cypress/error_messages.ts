@@ -1489,12 +1489,16 @@ export default {
   },
 
   require: {
-    invalid_outside_origin: {
-      message: `${cmd('Cypress.require')} can only be used inside the ${cmd('origin')} callback.`,
-      docsUrl: 'https://on.cypress.io/origin',
-    },
     invalid_inside_origin: {
       message: `${cmd('Cypress.require')} is supposed to be replaced with a \`require()\` statement before the test code using it is run. If this error is being thrown, something unexpected has occurred. Please submit an issue.`,
+      docsUrl: 'https://on.cypress.io/origin',
+    },
+    invalid_outside_origin: {
+      message: `${cmd('Cypress.require')} can only be used inside the ${cmd('origin')} callback and requires enabling the \`experimentalOriginDependencies\` flag.`,
+      docsUrl: 'https://on.cypress.io/origin',
+    },
+    invalid_without_flag: {
+      message: `Using ${cmd('Cypress.require')} requires enabling the \`experimentalOriginDependencies\` flag.`,
       docsUrl: 'https://on.cypress.io/origin',
     },
   },

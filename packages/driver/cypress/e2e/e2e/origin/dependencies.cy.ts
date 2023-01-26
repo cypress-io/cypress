@@ -126,5 +126,17 @@ describe('cy.origin dependencies', { browser: '!webkit' }, () => {
         Cypress.require('./does-not-exist')
       })
     })
+
+    // @ts-ignore
+    it('when experimental flag is disabled', { experimentalOriginDependencies: false }, (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('Using `Cypress.require()` requires enabling the `experimentalOriginDependencies` flag.')
+        done()
+      })
+
+      cy.origin('http://www.foobar.com:3500', () => {
+        Cypress.require('./does-not-exist')
+      })
+    })
   })
 })
