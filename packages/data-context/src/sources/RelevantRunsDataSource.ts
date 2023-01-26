@@ -91,7 +91,8 @@ export class RelevantRunsDataSource {
 
     if (result.error) {
       debug(`Error fetching relevant runs for project ${projectSlug}`, result.error)
-      throw result.error
+
+      return RUNS_EMPTY_RETURN
     }
 
     const cloudProject = result.data?.cloudProjectBySlug

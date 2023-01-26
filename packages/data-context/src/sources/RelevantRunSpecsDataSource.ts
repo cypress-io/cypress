@@ -125,7 +125,8 @@ export class RelevantRunSpecsDataSource {
 
     if (result.error) {
       debug(`Error when fetching relevant runs for runs ${runs.current} and ${runs.next}`, result.error)
-      throw result.error
+
+      return SPECS_EMPTY_RETURN
     }
 
     const cloudProject = result.data?.cloudProjectBySlug
