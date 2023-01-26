@@ -1,3 +1,4 @@
+import { $errUtils } from '@packages/driver/src/cypress/error_utils'
 import 'setimmediate'
 
 import '../config/bluebird'
@@ -134,6 +135,13 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   Cypress.Commands = $Commands.create(Cypress, cy, state, config)
   // @ts-ignore
   Cypress.isCy = cy.isCy
+
+  // this is "valid" inside the cy.origin() callback, but it should be replaced
+  // by the preprocessor at runtime with an actual require() before it's
+  // run in the browser. if it's not, something unexpected has gone wrong
+  Cypress.require = () => {
+    $errUtils.throwErrByPath('require.invalid_inside_origin')
+  }
 
   handleOriginFn(Cypress, cy)
   handleLogs(Cypress)

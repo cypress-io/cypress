@@ -787,13 +787,19 @@ declare namespace Cypress {
     off: Actions
 
     /**
+     * Used to include dependencies within the cy.origin() callback
+     * @see https://on.cypress.io/origin
+     */
+    require: (id: string) => any
+
+    /**
      * Trigger action
      * @private
      */
     action: (action: string, ...args: any[]) => any[] | void
 
     /**
-     * Load  files
+     * Load files
      * @private
      */
     onSpecWindow: (window: Window, specList: string[] | Array<() => Promise<void>>) => void
