@@ -172,7 +172,7 @@ const setDebugBadge = useDebounceFn((badge) => {
 }, 500)
 
 watchEffect(() => {
-  if (props.isLoading) {
+  if (props.isLoading && loginConnectStore.project.isProjectConnected) {
     setDebugBadge(undefined)
 
     return

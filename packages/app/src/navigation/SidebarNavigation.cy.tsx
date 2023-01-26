@@ -4,6 +4,7 @@ import { CloudRunStatus, SidebarNavigationFragment, SidebarNavigationFragmentDoc
 import { CloudRunStubs } from '@packages/graphql/test/stubCloudTypes'
 import { cloneDeep } from 'lodash'
 import { IATR_RELEASE } from '@packages/frontend-shared/src/utils/isAllowedFeature'
+import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import interval from 'human-interval'
 
 function mountComponent (props: { initialNavExpandedVal?: boolean, cloudProject?: { status: CloudRunStatus, numFailedTests: number }, isLoading?: boolean, online?: boolean} = {}) {
@@ -195,6 +196,10 @@ describe('SidebarNavigation', () => {
     })
 
     it('renders no badge when query is loading', () => {
+      const loginConnectStore = useLoginConnectStore()
+
+      loginConnectStore.setProjectFlag('isProjectConnected', true)
+
       cy.clock(IATR_RELEASE)
 
       mountComponent({ isLoading: true })
