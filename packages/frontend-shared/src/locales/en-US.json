@@ -199,20 +199,17 @@
     "banners": {
       "login": {
         "title": "Optimize and record your CI test runs with Cypress Cloud",
-        "contentA": "Parallelize your tests in CI and visualize every error by watching full video recordings of each test you run.",
-        "contentB": "When you configure Cypress to record tests to Cypress Cloud, you'll see data from your latest recorded runs in the Cypress app. This increased visibility into your test history allows you to debug your tests faster and more effectively, all within your local workflow.",
+        "content": "When you configure Cypress to record tests to Cypress Cloud, you'll see data from your latest recorded runs in the Cypress app. This increased visibility into your test history allows you to debug your tests faster and more effectively, all within your local workflow.",
         "buttonLabel": "Get started with Cypress Cloud"
       },
       "createOrganization": {
-        "titleA": "Finish setting up Cypress Cloud",
-        "titleB": "Create or join an organization",
+        "title": "Finish setting up Cypress Cloud",
         "content": "Join or create an organization in Cypress Cloud to access your projects and recorded test runs.",
         "buttonLabel": "Set up your organization"
       },
       "connectProject": {
         "title": "Connect your project to Cypress Cloud",
-        "contentA": "View recorded test runs directly in the Cypress app to monitor, run, and fix tests locally.",
-        "contentB": "Bring your recorded test results into your local development workflow to monitor, run, and fix tests all in the Cypress app.",
+        "content": "Bring your recorded test results into your local development workflow to monitor, run, and fix tests all in the Cypress app.",
         "buttonLabel": "Connect your project"
       },
       "record": {
