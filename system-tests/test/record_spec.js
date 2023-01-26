@@ -24,20 +24,11 @@ const { instanceId } = postRunInstanceResponse
 
 let requests = null
 
+process.env.CYPRESS_INTERNAL_TEST_KEY = '1'
+
 describe('e2e record', () => {
   beforeEach(() => {
     process.env.CYPRESS_INTERNAL_TEST_KEY = '1'
-  })
-
-  afterEach(() => {
-    delete process.env.CYPRESS_INTERNAL_TEST_KEY
-  })
-
-  after(() => {
-    delete process.env.CYPRESS_INTERNAL_TEST_KEY
-  })
-
-  beforeEach(() => {
     requests = getRequests()
   })
 
