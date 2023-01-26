@@ -126,14 +126,6 @@ class RunPlugins {
     .then((modifiedCfg) => {
       debug('plugins file successfully loaded')
 
-      // if the experimentalOriginDependencies flag is true, specify which
-      // commands should (potentially) have their callbacks replaced. this is
-      // currently used by the webpack preprocessor. see its implementation for
-      // more details
-      // if (this._getExperimentalOriginDependenciesValue(initialConfig, modifiedCfg)) {
-      //   global.__cypressCallbackReplacementCommands = ['origin']
-      // }
-
       this.ipc.send('setupTestingType:reply', {
         setupConfig: modifiedCfg,
         registrations: this.registrations,

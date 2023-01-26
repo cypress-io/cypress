@@ -11,16 +11,11 @@ interface Options {
   fn: string
 }
 
-// TODO: needs `join` from memory-fs to ensure it's the right one?
-// https://github.com/webpack/memory-fs/blob/master/lib/join.js
-
 // @ts-ignore - webpack expects `fs.join` to exist for some reason
 fs.join = path.join
 
 export const processCallback = ({ file, fn }: Options) => {
-  const source = fn
-  .replace(/Cypress\.require/g, 'require')
-  .replace(/Cypress\.import/g, 'import')
+  const source = fn.replace(/Cypress\.require/g, 'require')
   const webpackOptions = getFullWebpackOptions(file, require.resolve('typescript'))
 
   const inputFileName = md5(source)

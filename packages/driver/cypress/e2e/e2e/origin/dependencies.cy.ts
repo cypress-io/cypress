@@ -4,9 +4,6 @@ describe('cy.origin dependencies', { browser: '!webkit' }, () => {
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
   })
 
-  // TODO: try in project without 'typescript' installed
-  // TODO: try in project with different tsconfig?
-
   it('works with Cypress.require()', () => {
     cy.origin('http://www.foobar.com:3500', () => {
       const lodash = Cypress.require('lodash')

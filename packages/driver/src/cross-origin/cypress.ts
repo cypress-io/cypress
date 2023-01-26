@@ -1,4 +1,3 @@
-import { $errUtils } from '@packages/driver/src/cypress/error_utils'
 import 'setimmediate'
 
 import '../config/bluebird'
@@ -9,6 +8,7 @@ import $Cypress from '../cypress'
 import { $Cy } from '../cypress/cy'
 import { $Location } from '../cypress/location'
 import $Commands from '../cypress/commands'
+import $errUtils from '../cypress/error_utils'
 import { create as createLog } from '../cypress/log'
 import { bindToListeners } from '../cy/listeners'
 import { handleOriginFn } from './origin_fn'

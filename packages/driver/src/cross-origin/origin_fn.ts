@@ -62,7 +62,7 @@ const rehydrateRunnable = (data: serializedRunnable): Runnable|Test => {
 }
 
 const getCallbackFn = async (fn: string, file?: string) => {
-  if (!fn.includes('Cypress.require') && !fn.includes('Cypress.import')) {
+  if (!fn.includes('Cypress.require')) {
     return fn
   }
 

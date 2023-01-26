@@ -59,7 +59,6 @@ export const createRoutesE2E = ({
       debug('process origin callback: %s', fn)
 
       const contents = await processCallback({ file, fn })
-      // const contents = (await fs.readFile(filePath)).toString()
 
       res.json({ contents })
     } catch (err) {
