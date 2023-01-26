@@ -11,7 +11,18 @@ import type { CloudRunStatus } from '@packages/graphql/src/gen/cloud-source-type
 const debug = debugLib('cypress:data-context:sources:RelevantRunSpecsDataSource')
 
 const RELEVANT_RUN_SPEC_OPERATION_DOC = gql`
-  query RelevantRunsDataSource_latestRunUpdateSpecData(
+  fragment RelevantRunSpecsDataSource_Runs on CloudRun {
+    id
+    runNumber
+    status
+    specs {
+      id
+      status
+      groupIds
+    }
+  }
+
+  query RelevantRunSpecsDataSource_Specs(
     $projectSlug: String!
     $currentRunNumber: Int!
     $hasCurrent: Boolean!
@@ -24,21 +35,11 @@ const RELEVANT_RUN_SPEC_OPERATION_DOC = gql`
         id
         current: runByNumber(runNumber: $currentRunNumber) @include(if: $hasCurrent) {
           id
-          runNumber
-          status
-          specs {
-            id
-            status
-          }
+          ...RelevantRunSpecsDataSource_Runs
         }
         next: runByNumber(runNumber: $nextRunNumber) @include(if: $hasNext) {
           id
-          runNumber
-          status
-          specs {
-            id
-            status
-          }
+          ...RelevantRunSpecsDataSource_Runs
         }
       }
     }
@@ -56,13 +57,16 @@ export const SPECS_EMPTY_RETURN: RunSpecReturn = {
 
 const INCOMPLETE_STATUSES: CloudSpecStatus[] = ['RUNNING', 'UNCLAIMED']
 
-type RunSpecReturn = {
+export type RunSpecReturn = {
   runSpecs: CurrentProjectRelevantRunSpecs
   statuses: {
     current?: CloudRunStatus
     next?: CloudRunStatus
   }
 }
+
+//Not ideal typing for this return since the query is not fetching all the fields, but better than nothing
+export type RelevantRunSpecsCloudResult = { cloudProjectBySlug: { __typename?: string, current?: Partial<CloudRun>, next?: Partial<CloudRun> } } & Pick<Query, 'pollingIntervals'>
 
 /**
  * DataSource to encapsulate querying Cypress Cloud for runs that match a list of local Git commit shas
@@ -83,9 +87,14 @@ export class RelevantRunSpecsDataSource {
   }
 
   #calculateSpecMetadata (specs: CloudSpecRun[]) {
+    //mimic logic in Cloud to sum up the count of groups per spec to give the total spec counts
+    const countGroupsForSpec = (specs: CloudSpecRun[]) => {
+      return specs.map((spec) => spec.groupIds?.length || 0).reduce((acc, curr) => acc += curr, 0)
+    }
+
     return {
-      totalSpecs: specs.length,
-      completedSpecs: specs.map((spec) => spec.status || 'UNCLAIMED').filter((status) => !INCOMPLETE_STATUSES.includes(status)).length,
+      totalSpecs: countGroupsForSpec(specs),
+      completedSpecs: countGroupsForSpec(specs.filter((spec) => !INCOMPLETE_STATUSES.includes(spec.status || 'UNCLAIMED'))),
     }
   }
 
@@ -106,10 +115,7 @@ export class RelevantRunSpecsDataSource {
 
     debug(`Fetching specs for ${projectSlug} and %o`, runs)
 
-    //Not ideal typing for this return since the query is not fetching all the fields, but better than nothing
-    type CloudResult = { cloudProjectBySlug: { __typename: string, current?: CloudRun, next?: CloudRun } } & Pick<Query, 'pollingIntervals'>
-
-    const result = await this.ctx.cloud.executeRemoteGraphQL<CloudResult>({
+    const result = await this.ctx.cloud.executeRemoteGraphQL<RelevantRunSpecsCloudResult>({
       fieldName: 'cloudProjectBySlug',
       operationDoc: RELEVANT_RUN_SPEC_OPERATION_DOC,
       operation: RELEVANT_RUN_SPEC_UPDATE_OPERATION,

@@ -9,37 +9,38 @@
     >
       <ul
         data-cy="header-top"
-        class="flex flex-row gap-x-2 items-center self-stretch whitespace-nowrap"
       >
         <li
           v-if="debug?.commitInfo?.summary"
-          class="font-medium text-lg text-gray-900"
+          class="font-medium text-lg text-gray-900 inline"
+          :class="{'mr-8px': props.commitsAhead}"
           data-cy="debug-test-summary"
         >
           {{ debug.commitInfo.summary }}
         </li>
         <li
           v-if="props.commitsAhead"
-          class="border rounded flex border-gray-100 h-6 text-sm items-center"
+          class="border rounded border-gray-100 h-6 text-sm inline-block"
         >
           <span
-            v-if="props.commitsAhead"
             class="font-normal mx-px px-2 text-orange-500 items-center"
             data-cy="debug-commitsAhead"
           >
             {{ t('debugPage.header.commitsAhead', props.commitsAhead) }}
           </span>
         </li>
-        <li class="-mt-8px text-lg text-gray-400">
-          .
+        <li
+          class="text-lg text-gray-400 w-16px inline"
+          aria-hidden="true"
+        >
+          •
         </li>
-        <li class="font-normal text-sm text-indigo-500">
+        <li class="font-normal text-sm text-indigo-500 inline">
           <ExternalLink
             data-cy="debug-header-dashboard-link"
             :href="debug.url || '#'"
-            :use-default-hocus="false"
           >
-            <span class="sr-only">Dashboard Link:</span> {{ t('debugPage.header.runUrl') }}
+            {{ t('debugPage.header.runUrl') }}
           </ExternalLink>
         </li>
       </ul>

@@ -43,6 +43,7 @@ export const urqlCacheKeys: Partial<UrqlCacheKeys> = {
     CloudPollingIntervals: (data) => null,
     GeneratedSpecError: () => null,
     GenerateSpecResponse: (data) => data.__typename,
+    CloudFeatureNotEnabled: () => null,
   },
   resolvers: {
     CloudProject: {

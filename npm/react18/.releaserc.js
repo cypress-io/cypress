@@ -1,3 +1,3 @@
 module.exports = {
-  ...require('../../.releaserc.base'),
+  ...require('../../.releaserc'),
 }

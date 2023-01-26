@@ -780,7 +780,7 @@ export const mutation = mutationType({
       description: 'Return the set of test titles for the given spec path',
       args: {
         spec: nonNull(stringArg({
-          description: 'Spec path relative to the project',
+          description: 'Spec path relative to the project in posix format',
         })),
       },
       resolve: (source, args, ctx) => {

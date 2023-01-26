@@ -1727,7 +1727,7 @@ type Mutation {
 
   """Return the set of test titles for the given spec path"""
   testsForRun(
-    """Spec path relative to the project"""
+    """Spec path relative to the project in posix format"""
     spec: String!
   ): [String!]
 
