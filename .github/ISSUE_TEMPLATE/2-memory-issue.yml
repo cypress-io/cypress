@@ -25,8 +25,8 @@ body:
       label: Cypress Mode
       description: What mode of Cypress are you running?
       options:
-        - `cypress run`
-        - `cypress open`
+        - cypress run
+        - cypress open
         - both modes
     validations:
       required: true
