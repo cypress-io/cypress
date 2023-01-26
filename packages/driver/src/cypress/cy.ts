@@ -109,8 +109,8 @@ const setTopOnError = function (Cypress, cy: $Cy) {
 
   // prevent Mocha from setting top.onerror
   Object.defineProperty(top, 'onerror', {
-    set () {},
-    get () {},
+    set () { },
+    get () { },
     configurable: false,
     enumerable: true,
   })
@@ -131,12 +131,12 @@ const ensureRunnable = (cy, cmd) => {
 interface ICyFocused extends Omit<
   IFocused,
   'documentHasFocus' | 'interceptFocus' | 'interceptBlur'
-> {}
+> { }
 
 interface ICySnapshots extends Omit<
   ISnapshots,
   'onCssModified' | 'onBeforeWindowLoad'
-> {}
+> { }
 
 export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssertions, IRetries, IJQuery, ILocation, ITimer, IChai, IXhr, IAliases, ICySnapshots, ICyFocused {
   id: string
@@ -505,16 +505,16 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         // If the runner can communicate, we should setup all events, otherwise just setup the window and fire the load event.
         if (isRunnerAbleToCommunicateWithAUT) {
           if (this.Cypress.isBrowser('webkit')) {
-          // WebKit's unhandledrejection event will sometimes not fire within the AUT
-          // due to a documented bug: https://bugs.webkit.org/show_bug.cgi?id=187822
-          // To ensure that the event will always fire (and always report these
-          // unhandled rejections to the user), we patch the AUT's Error constructor
-          // to enqueue a no-op microtask when executed, which ensures that the unhandledrejection
-          // event handler will be executed if this Error is uncaught.
+            // WebKit's unhandledrejection event will sometimes not fire within the AUT
+            // due to a documented bug: https://bugs.webkit.org/show_bug.cgi?id=187822
+            // To ensure that the event will always fire (and always report these
+            // unhandled rejections to the user), we patch the AUT's Error constructor
+            // to enqueue a no-op microtask when executed, which ensures that the unhandledrejection
+            // event handler will be executed if this Error is uncaught.
             const originalError = autWindow.Error
 
             autWindow.Error = function __CyWebKitError (...args) {
-              autWindow.queueMicrotask(() => {})
+              autWindow.queueMicrotask(() => { })
 
               return originalError.apply(this, args)
             }
@@ -1059,6 +1059,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
       onError: (handlerType) => (event) => {
         const { originalErr, err, promise } = $errUtils.errorFromUncaughtEvent(handlerType, event) as ErrorFromProjectRejectionEvent
+
         const handled = cy.onUncaughtException({
           err,
           promise,
@@ -1080,7 +1081,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       onSubmit (e) {
         return cy.Cypress.action('app:form:submitted', e)
       },
-      onLoad () {},
+      onLoad () { },
       onBeforeUnload (e) {
         cy.isStable(false, 'beforeunload')
 

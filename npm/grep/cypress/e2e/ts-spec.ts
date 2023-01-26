@@ -13,6 +13,7 @@ describe('TypeScript spec', () => {
 
   it('loads', () => {
     const n: number = 1
+
     cy.wrap(n).should('eq', 1)
   })
 
@@ -24,6 +25,7 @@ describe('TypeScript spec', () => {
     const p: Person = {
       name: 'Joe',
     }
+
     cy.wrap(p).should('have.property', 'name', 'Joe')
   })
 })

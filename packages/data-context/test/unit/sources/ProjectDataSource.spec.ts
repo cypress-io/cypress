@@ -818,5 +818,29 @@ describe('ProjectDataSource', () => {
 
       expect(defaultSpecFileName).to.equal('cypress/component-tests/foo/ComponentName.spec.js')
     })
+
+    describe('jsx/tsx handling', () => {
+      beforeEach(async () => {
+        ctx.coreData.currentTestingType = 'component'
+        await ctx.actions.file.writeFileInProject(path.join('src', 'components', 'App.jsx'), '// foo')
+      })
+
+      it('yields correct jsx extension if there are jsx files and specPattern allows', async () => {
+        sinon.stub(ctx.project, 'specPatterns').resolves({ specPattern: [defaultSpecPattern.component] })
+
+        const defaultSpecFileName = await ctx.project.defaultSpecFileName()
+
+        expect(defaultSpecFileName).to.equal('cypress/component/ComponentName.cy.jsx', defaultSpecFileName)
+      })
+
+      it('yields non-jsx extension if there are jsx files but specPattern disallows', async () => {
+        sinon.stub(ctx.project, 'specPatterns').resolves({ specPattern: ['cypress/component/*.cy.js'] })
+
+        const defaultSpecFileName = await ctx.project.defaultSpecFileName()
+
+        // specPattern does not allow for jsx, so generated spec name should not use jsx extension
+        expect(defaultSpecFileName).to.equal('cypress/component/ComponentName.cy.js', defaultSpecFileName)
+      })
+    })
   })
 })

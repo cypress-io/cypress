@@ -232,6 +232,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  getBinaryVersion,
   parseSemanticReleaseOutput,
   readPackageJson,
   releasePackages,

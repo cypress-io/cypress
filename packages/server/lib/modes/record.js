@@ -466,6 +466,7 @@ const createRun = Promise.method((options = {}) => {
                 browserVersion,
                 specs,
               },
+              payload,
             })
           }
           case 'PARALLEL_DISALLOWED':

@@ -157,7 +157,10 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "channel": "canary",
     "displayName": "Edge Canary",
     "versionRegex": {},
-    "binary": "edge-canary",
+    "binary": [
+      "edge-canary",
+      "microsoft-edge-canary"
+    ],
     "minSupportedVersion": 79,
     "path": "C:/Users/flotwig/AppData/Local/Microsoft/Edge SxS/Application/msedge.exe",
     "version": "14",
@@ -174,7 +177,10 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "channel": "beta",
     "displayName": "Edge Beta",
     "versionRegex": {},
-    "binary": "edge-beta",
+    "binary": [
+      "edge-beta",
+      "microsoft-edge-beta"
+    ],
     "minSupportedVersion": 79,
     "path": "C:/Program Files (x86)/Microsoft/Edge Beta/Application/msedge.exe",
     "version": "12",

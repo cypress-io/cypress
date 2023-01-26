@@ -61,8 +61,10 @@
     "newSpec": "New spec",
     "createSpec": "Create spec",
     "done": "Done!",
+    "noComponentsFound": "No components found",
+    "unableToParseFile": "Unable to parse file",
     "updateSpecPattern": "Update spec pattern",
-    "newSpecModalTitle": "Create a new spec",
+    "newSpecModalTitle": "Create new spec",
     "successPage": {
       "header": "Great! The spec was successfully added",
       "runSpecButton": "Okay, run the spec",
@@ -93,9 +95,9 @@
         "specsAddedButton": "Okay, I got it!",
         "specsAddingHeader": "Adding specs..."
       },
-      "importEmptySpec": {
-        "header": "Create new empty spec",
-        "description": "We'll generate an empty spec file which can be used to start testing your application.",
+      "importTemplateSpec": {
+        "header": "Create new spec",
+        "description": "We'll generate a template spec file which can be used to start testing your application.",
         "chooseFilenameHeader": "Enter the path for your new spec",
         "inputPlaceholder": "Enter a relative path...",
         "invalidSpecWarning": "This path is invalid because it doesn't match the following ",
@@ -108,9 +110,9 @@
         "description": "Generate a basic component test for any of the components in this project.",
         "chooseAComponentHeader": "Choose a component"
       },
-      "importEmptySpec": {
-        "header": "Create a new spec",
-        "description": "We'll generate an empty spec file to start testing components.",
+      "importTemplateSpec": {
+        "header": "Create new spec",
+        "description": "We'll generate a template spec file which can be used to start testing your components.",
         "invalidComponentWarning": "We couldn't generate a valid path matching your custom "
       }
     }
@@ -197,20 +199,17 @@
     "banners": {
       "login": {
         "title": "Optimize and record your CI test runs with Cypress Cloud",
-        "contentA": "Parallelize your tests in CI and visualize every error by watching full video recordings of each test you run.",
-        "contentB": "When you configure Cypress to record tests to Cypress Cloud, you'll see data from your latest recorded runs in the Cypress app. This increased visibility into your test history allows you to debug your tests faster and more effectively, all within your local workflow.",
+        "content": "When you configure Cypress to record tests to Cypress Cloud, you'll see data from your latest recorded runs in the Cypress app. This increased visibility into your test history allows you to debug your tests faster and more effectively, all within your local workflow.",
         "buttonLabel": "Get started with Cypress Cloud"
       },
       "createOrganization": {
-        "titleA": "Finish setting up Cypress Cloud",
-        "titleB": "Create or join an organization",
+        "title": "Finish setting up Cypress Cloud",
         "content": "Join or create an organization in Cypress Cloud to access your projects and recorded test runs.",
         "buttonLabel": "Set up your organization"
       },
       "connectProject": {
         "title": "Connect your project to Cypress Cloud",
-        "contentA": "View recorded test runs directly in the Cypress app to monitor, run, and fix tests locally.",
-        "contentB": "Bring your recorded test results into your local development workflow to monitor, run, and fix tests all in the Cypress app.",
+        "content": "Bring your recorded test results into your local development workflow to monitor, run, and fix tests all in the Cypress app.",
         "buttonLabel": "Connect your project"
       },
       "record": {
@@ -242,6 +241,7 @@
   "topNav": {
     "released": "Released",
     "version": "Version",
+    "versionUnsupported": "Unsupported",
     "installed": "Installed",
     "latest": "Latest",
     "seeAllReleases": "See all releases",
@@ -519,6 +519,14 @@
       "experimentalOriginDependencies": {
         "name": "Origin Dependencies",
         "description": "Enables support for `require`/`import` within `cy.origin`."
+      },
+      "experimentalMemoryManagement": {
+        "name": "Memory Management",
+        "description": "Enables support for improved memory management within Chromium-based browsers."
+      },
+      "experimentalSkipDomainInjection": {
+        "name": "Skip Domain Injection",
+        "description": "Disables setting `document.domain` to the application's super domain on injection."
       }
     },
     "device": {
@@ -704,7 +712,7 @@
       "line4": "In the next screen, you'll be able to reconfigure component testing in a new guided configuration wizard."
     },
     "wizard": {
-      "title": "Migrating to Cypress 11",
+      "title": "Migrating to Cypress {version}",
       "description": "Your project requires updates to work with this version.",
       "typicalMigrationLabel": "Typical migration:",
       "typicalMigrationTime": "5-10 minutes",

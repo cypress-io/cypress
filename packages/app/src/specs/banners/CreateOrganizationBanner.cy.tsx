@@ -3,7 +3,7 @@ import CreateOrganizationBanner from './CreateOrganizationBanner.vue'
 import { TrackedBanner_RecordBannerSeenDocument } from '../../generated/graphql'
 
 describe('<CreateOrganizationBanner />', () => {
-  const cohortOption = { cohort: 'A', value: defaultMessages.specPage.banners.createOrganization.titleA }
+  const cohortOption = { cohort: '', value: defaultMessages.specPage.banners.createOrganization.title }
 
   it('should render expected content', () => {
     const linkHref = 'http://dummy.cypress.io/organizations/create'
@@ -16,7 +16,7 @@ describe('<CreateOrganizationBanner />', () => {
 
     cy.mount({ render: () => <CreateOrganizationBanner hasBannerBeenShown={true} cohortOption={cohortOption}/> })
 
-    cy.contains(defaultMessages.specPage.banners.createOrganization.titleA).should('be.visible')
+    cy.contains(defaultMessages.specPage.banners.createOrganization.title).should('be.visible')
     cy.contains(defaultMessages.specPage.banners.createOrganization.content).should('be.visible')
     cy.contains(defaultMessages.specPage.banners.createOrganization.buttonLabel).should('be.visible')
 
@@ -45,7 +45,7 @@ describe('<CreateOrganizationBanner />', () => {
         campaign: 'Set up your organization',
         medium: 'Specs Create Organization Banner',
         messageId: Cypress.sinon.match.string,
-        cohort: 'A',
+        cohort: null,
       })
     })
 
