@@ -10,13 +10,13 @@ describe('lib/browsers/memory', () => {
 
   before(() => {
     delete require.cache[require.resolve('../../../../lib/browsers/memory')]
+    process.env.CYPRESS_INTERNAL_MEMORY_SAVE_STATS = 'true'
+
+    memory = require('../../../../lib/browsers/memory')
   })
 
   beforeEach(() => {
     sinon.useFakeTimers()
-    process.env.CYPRESS_INTERNAL_MEMORY_SAVE_STATS = 'true'
-
-    memory = require('../../../../lib/browsers/memory')
   })
 
   afterEach(async () => {
@@ -161,6 +161,7 @@ describe('lib/browsers/memory', () => {
 
     it('collects memory when renderer process is greater than the custom threshold', async () => {
       process.env.CYPRESS_INTERNAL_MEMORY_THRESHOLD_PERCENTAGE = '25'
+      process.env.CYPRESS_INTERNAL_MEMORY_SAVE_STATS = 'true'
 
       const memory = proxyquire('../lib/browsers/memory', {})
 
@@ -543,9 +544,11 @@ describe('lib/browsers/memory', () => {
     })
 
     it('uses the existing process id to obtain the memory usage', async () => {
+      process.env.CYPRESS_INTERNAL_MEMORY_SAVE_STATS = 'true'
+
       const pidStub = sinon.stub().resolves({ memory: 2000 })
 
-      const memory = proxyquire('../lib/browsers/memory', { pidusage: pidStub })
+      const memory: typeof import('../../../../lib/browsers/memory') = proxyquire('../lib/browsers/memory', { pidusage: pidStub })
 
       const automation = sinon.createStubInstance(Automation)
       const gcStub = automation.request.withArgs('collect:garbage').resolves()
@@ -621,7 +624,7 @@ describe('lib/browsers/memory', () => {
       expect(memory.default.getMemoryStats()).to.deep.eql(expected)
     })
 
-    it('collects memory when a previous checkMemory call goes over the threshold', async () => {
+    it('collects memory when a previous interval call goes over the threshold', async () => {
       const automation = sinon.createStubInstance(Automation)
       const gcStub = automation.request.withArgs('collect:garbage').resolves()
       const mockHandler = {
@@ -632,8 +635,8 @@ describe('lib/browsers/memory', () => {
       sinon.stub(memory, 'getJsHeapSizeLimit').resolves(100)
       sinon.stub(memory, 'getMemoryHandler').resolves(mockHandler)
       sinon.stub(memory, 'getRendererMemoryUsage')
-      .onFirstCall().resolves(75)
-      .onSecondCall().resolves(25)
+      .onFirstCall().resolves(75) // above threshold
+      .onSecondCall().resolves(25) // below threshold
 
       await memory.default.startProfiling(automation, { fileName: 'memory_spec' })
       await memory.default.gatherMemoryStats()
