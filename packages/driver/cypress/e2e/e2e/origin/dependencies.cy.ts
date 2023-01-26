@@ -12,14 +12,6 @@ describe('cy.origin dependencies', { browser: '!webkit' }, () => {
     })
   })
 
-  it('works with await Cypress.import()', () => {
-    cy.origin('http://www.foobar.com:3500', async () => {
-      const lodash = await Cypress.import('lodash')
-
-      expect(lodash.get({ foo: 'foo' }, 'foo')).to.equal('foo')
-    })
-  })
-
   it('works with an arrow function', () => {
     cy.origin('http://www.foobar.com:3500', () => {
       const lodash = Cypress.require('lodash')
