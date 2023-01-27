@@ -22,7 +22,7 @@ const style = computed(() => {
 
   return {
     // since run mode has no nav, let's check for run mode here
-    width: isRunMode ? '100%' : `calc(100% - ${runnerConstants.collapsedNavBarWidth})`,
+    width: isRunMode() ? '100%' : `calc(100% - ${runnerConstants.collapsedNavBarWidth})`,
   }
 })
 </script>

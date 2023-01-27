@@ -67,14 +67,14 @@
         </HideDuringScreenshot>
       </template>
       <template #panel3>
-        <HideDuringScreenshotOrRunMode class="bg-white">
+        <HideDuringScreenshot class="bg-white">
           <SpecRunnerHeaderOpenMode
             v-if="props.gql.currentProject"
             :gql="props.gql.currentProject"
             :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
           />
-        </HideDuringScreenshotOrRunMode>
+        </HideDuringScreenshot>
 
         <RemoveClassesDuringScreenshotting
           class="h-0 p-16px"

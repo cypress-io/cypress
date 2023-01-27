@@ -98,7 +98,7 @@ export const useRunnerStyle = () => {
   return {
     viewportStyle,
     windowWidth: computed(() => {
-      if (isRunMode) {
+      if (isRunMode()) {
         return windowWidth.value
       }
 

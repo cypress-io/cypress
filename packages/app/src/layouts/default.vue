@@ -62,6 +62,7 @@ import { computed } from 'vue'
 
 import { MainAppQueryDocument, MainApp_ResetErrorsAndLoadConfigDocument } from '../generated/graphql'
 import SidebarNavigationContainer from '../navigation/SidebarNavigationContainer.vue'
+import { isRunMode } from '@packages/frontend-shared/src/utils/isRunMode'
 
 gql`
 fragment MainAppQueryData on Query {
@@ -109,6 +110,6 @@ const resetErrorAndLoadConfig = (id: string) => {
   }
 }
 
-const renderSidebar = window.__CYPRESS_MODE__ !== 'run'
+const renderSidebar = !isRunMode()
 
 </script>
