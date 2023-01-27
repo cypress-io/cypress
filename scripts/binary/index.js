@@ -5,8 +5,8 @@ const cwd = process.cwd()
 const path = require('path')
 const _ = require('lodash')
 const os = require('os')
-const gift = require('gift')
 const chalk = require('chalk')
+const simpleGit = require('simple-git')
 const Promise = require('bluebird')
 const minimist = require('minimist')
 const la = require('lazy-ass')
@@ -23,9 +23,6 @@ const upload = require('./upload')
 const uploadUtils = require('./util/upload')
 const { uploadArtifactToS3 } = require('./upload-build-artifact')
 const { moveBinaries } = require('./move-binaries')
-
-// initialize on existing repo
-const repo = Promise.promisifyAll(gift(cwd))
 
 const success = (str) => {
   return console.log(chalk.bgGreen(` ${chalk.black(str)} `))
@@ -59,11 +56,11 @@ const askMissingOptions = function (properties = []) {
 // hack for @packages/server modifying cwd
 process.chdir(cwd)
 
-const commitVersion = function (version) {
+const commitVersion = function async (version) {
   const msg = `release ${version} [skip ci]`
 
-  return repo.commitAsync(msg, {
-    'allow-empty': true,
+  return simpleGit.commit(msg, {
+    '--allow-empty': null,
   })
 }
 

@@ -84,12 +84,12 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
 
 3. Ensure all changes to the links manifest to [`on.cypress.io`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on) have been merged to `master` and deployed.
 
-4. Create a Release PR Bump, submit, get approvals on, and merge a new PR. This PR Should:
+4. Create a Release PR, submit, get approvals on, and merge a new PR. This PR Should:
   - Bump the Cypress `version` in [`package.json`](package.json)
   - Bump the [`packages/example`](../packages/example) dependency if there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version
   - Follow the writing the [Cypress Changelog release steps](./writing-the-cypress-changelog.md#release) to update the [`cli/CHANGELOG.md`](../cli/CHANGELOG.md).
 
-5. Once the `develop` branch is passing in CI and you have confirmed the `cypress-bot` user has commented on the last commit with the pre-release versions for `darwin-x64`, `darwin-arm64`, `linux-x64`,`linux-arm64`, and `win32-x64`, publishing can proceed.
+5. Once the `develop` branch is passing in CI, confirmed a pre-release binary was built for `darwin-x64`, `darwin-arm64`, `linux-x64`,`linux-arm64`, and `win32-x64`
   ```
     yarn binary-ensure --ensurePrerelease --branch develop --sha <sha> --version <version>
   ```
@@ -98,8 +98,10 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
 
 7. Validate you are logged in to `npm` with `npm whoami`. Otherwise log in with `npm login`.
 
-8. Run the `yarn publish-dev-distribution --sha <sha> --version <version>` to prepare the pre-release artifacts for npm and then publish the content under the `dev` tag.
-
+8. Prepare and distribute the pre-release version to npm under the `dev` tag by running the following. Note must run this on a Mac or Linux machine.
+    ```
+    yarn publish-dev-distribution --sha <sha> --version <version>
+    ```
     You can pass `--dry-run` to see the commands this would run under the hood.
 
 9. Test `cypress@X.Y.Z` to make sure everything is working.
