@@ -14,7 +14,6 @@ _Released 01/27/2023_
 
 **Bugfixes:**
 
-
 - Fixed a regression from Cypress [12.4.0](https://docs.cypress.io/guides/references/changelog#12-4-0) where Cypress was not exiting properly when running multiple Component Testing specs in `electron` in `run` mode. Fixes [#25568](https://github.com/cypress-io/cypress/issues/25568).
 
 **Dependency Updates:**
