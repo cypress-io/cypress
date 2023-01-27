@@ -56,7 +56,7 @@
 
 <script lang="ts" setup>
 import { gql, useMutation } from '@urql/vue'
-import { ScaffoldGeneratorStepOne_ScaffoldIntegrationDocument } from '../../../generated/graphql'
+import { ScaffoldGeneratorStepOne_E2eExamplesDocument } from '../../../generated/graphql'
 import { computed, onMounted } from 'vue'
 import { buildSpecTree } from '../../../specs/tree/useCollapsibleTree'
 import { useCollapsibleTree } from '../../tree/useCollapsibleTree'
@@ -68,8 +68,8 @@ import type { FoundSpec } from '@packages/types/src'
 const { t } = useI18n()
 
 gql`
-mutation ScaffoldGeneratorStepOne_scaffoldIntegration {
-  scaffoldIntegration {
+mutation ScaffoldGeneratorStepOne_e2eExamples {
+  e2eExamples {
     file {
       id
       absolute
@@ -89,7 +89,7 @@ const emits = defineEmits<{
   (event: 'close'): void
 }>()
 
-const mutation = useMutation(ScaffoldGeneratorStepOne_ScaffoldIntegrationDocument)
+const mutation = useMutation(ScaffoldGeneratorStepOne_E2eExamplesDocument)
 
 onMounted(async () => {
   emits('update:title', t('createSpec.e2e.importFromScaffold.specsAddingHeader'))
@@ -97,7 +97,7 @@ onMounted(async () => {
   emits('update:title', t('createSpec.e2e.importFromScaffold.specsAddedHeader'))
 })
 
-const scaffoldedFiles = computed(() => mutation.data.value?.scaffoldIntegration || [])
+const scaffoldedFiles = computed(() => mutation.data.value?.e2eExamples || [])
 const specTree = computed(() => {
   const files: FoundSpec[] = scaffoldedFiles.value.map((res) => {
     return {

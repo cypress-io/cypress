@@ -129,13 +129,13 @@ export class CodegenActions {
     return path.join(projectRoot, 'cypress', 'e2e')
   }
 
-  async scaffoldIntegration (): Promise<NexusGenObjects['ScaffoldedFile'][]> {
+  async e2eExamples (): Promise<NexusGenObjects['ScaffoldedFile'][]> {
     const projectRoot = this.ctx.currentProject
 
     assert(projectRoot, `Cannot create spec without currentProject.`)
 
     const results = await codeGenerator(
-      { templateDir: templates['scaffoldIntegration'], target: this.defaultE2EPath },
+      { templateDir: templates['e2eExamples'], target: this.defaultE2EPath },
       {},
     )
 
