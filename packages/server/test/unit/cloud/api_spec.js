@@ -1,7 +1,13 @@
+const crypto = require('crypto')
+const jose = require('jose')
+const base64Url = require('base64url')
+
 require('../../spec_helper')
 
 const _ = require('lodash')
 const os = require('os')
+const encryption = require('../../../lib/cloud/encryption')
+
 const {
   agent,
 } = require('@packages/network')
@@ -137,6 +143,60 @@ describe('lib/cloud/api', () => {
         throw new Error('should have thrown here')
       }).catch((err) => {
         expect(err.isApiError).to.be.true
+      })
+    })
+  })
+
+  context('.preflight', () => {
+    it('POST /preflight + returns encryption', function () {
+      const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+        modulusLength: 2048,
+      })
+      const encryptRequest = encryption.encryptRequest
+
+      /**
+       * @type {crypto.KeyObject}
+       */
+      let _secretKey
+
+      sinon.stub(encryption, 'encryptRequest').callsFake(async (params) => {
+        const { secretKey, jwe } = await encryptRequest(params, publicKey)
+
+        _secretKey = secretKey
+
+        return { secretKey, jwe }
+      })
+
+      nock(API_BASEURL)
+      .defaultReplyHeaders({ 'x-cypress-encrypted': 'true' })
+      .matchHeader('x-route-version', '1')
+      .matchHeader('x-os-name', 'linux')
+      .matchHeader('x-cypress-version', pkg.version)
+      .post('/preflight', () => true)
+      .reply(200, async (uri, requestBody) => {
+        const decryptedSecretKey = crypto.createSecretKey(
+          crypto.privateDecrypt(
+            privateKey,
+            Buffer.from(base64Url.toBase64(requestBody.recipients[0].encrypted_key), 'base64'),
+          ),
+        )
+
+        expect(_secretKey.export().toString('utf8')).to.eq(decryptedSecretKey.export().toString('utf8'))
+
+        const enc = new jose.GeneralEncrypt(
+          Buffer.from(JSON.stringify({ encrypted: true, apiUrl: 'https://localhost:1234' })),
+        )
+
+        enc.setProtectedHeader({ alg: 'A256GCMKW', enc: 'A256GCM', zip: 'DEF' }).addRecipient(decryptedSecretKey)
+
+        const jweResponse = await enc.encrypt()
+
+        return jweResponse
+      })
+
+      return api.preflight({ projectId: 'abc123' })
+      .then((ret) => {
+        expect(ret).to.deep.eq({ encrypted: true, apiUrl: 'https://localhost:1234' })
       })
     })
   })

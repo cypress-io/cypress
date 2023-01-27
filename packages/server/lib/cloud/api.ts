@@ -241,7 +241,7 @@ module.exports = {
   preflight (preflightInfo) {
     return retryWithBackoff(async (attemptIndex) => {
       const result = await rp.post({
-        url: `${apiUrl.replace('api', 'api-proxy')}/preflight`,
+        url: `${apiUrl.replace('api', 'api-proxy')}preflight`,
         body: {
           apiUrl,
           envUrl: process.env.CYPRESS_API_URL,
@@ -251,6 +251,7 @@ module.exports = {
           'x-route-version': '1',
           'x-cypress-request-attempt': attemptIndex,
         },
+        json: true,
         encrypt: true,
       })
 
