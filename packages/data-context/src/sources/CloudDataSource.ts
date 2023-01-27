@@ -9,7 +9,7 @@ import crypto from 'crypto'
 
 import type { DataContext } from '..'
 import getenv from 'getenv'
-import { print, DocumentNode, ExecutionResult, GraphQLResolveInfo, OperationTypeNode, visit, OperationDefinitionNode } from 'graphql'
+import { print, DocumentNode, ExecutionResult, GraphQLResolveInfo, OperationTypeNode, visit, OperationDefinitionNode, FieldNode } from 'graphql'
 import {
   createClient,
   dedupExchange,
@@ -402,11 +402,24 @@ function namedExecutionDocument (document: DocumentNode) {
       }
 
       hasReplaced = true
+
+      const selectionSet = new Set()
+
+      op.selectionSet.selections.forEach((selection) => {
+        selectionSet.add((selection as FieldNode).name.value)
+      })
+
+      let operationName = 'batchTestRunnerExecutionQuery'
+
+      if (selectionSet.size > 0) {
+        operationName = `${operationName}_${Array.from(selectionSet).join('_')}`
+      }
+
       const namedOperationNode: OperationDefinitionNode = {
         ...op,
         name: {
           kind: 'Name',
-          value: 'batchTestRunnerExecutionQuery',
+          value: operationName,
         },
       }
 
