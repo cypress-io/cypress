@@ -1,6 +1,10 @@
 import RelevantRunsDataSource_RunsByCommitShas from '../fixtures/gql-RelevantRunsDataSource_RunsByCommitShas.json'
 import Debug from '../fixtures/gql-Debug.json'
 
+Cypress.on('window:before:load', (win) => {
+  win.__CYPRESS_GQL_NO_SOCKET__ = 'true'
+})
+
 describe('App - Debug Page', () => {
   it('works', () => {
     cy.scaffoldProject('cypress-in-cypress')
