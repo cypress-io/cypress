@@ -28,7 +28,7 @@ The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) di
 
 - Set up the following environment variables:
   - For the `release-automations` steps, you will need setup the following envs:
-    - GitHub token - generated yourself in github.
+    - GitHub token - Found in 1Password.
     - [ZenHub API token](https://app.zenhub.com/dashboard/tokens) to interact with Zenhub. Found in 1Password.
     - The `cypress-bot` GitHub app credentials. Found in 1Password.
     ```text
@@ -124,11 +124,6 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
     - Optionally, do more thorough tests, for example test the new version of Cypress against the Cypress Cloud repo.
 
 11. Review the release-specific documentation and changelog PR in [cypress-documentation](https://github.com/cypress-io/cypress-documentation). If there is not already a release-specific PR open, create one.
-     - Use [`release-automations`](https://github.com/cypress-io/release-automations)'s `issues-in-release` tool to generate a starting point for the changelog, based off of ZenHub:
-        ```shell
-        cd packages/issues-in-release
-        yarn do:changelog --release <release label>
-        ```
     - Ensure the changelog is up-to-date and has the correct date.
     - Merge any release-specific documentation changes into the main release PR.
     - You can view the doc's [branch deploy preview](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md#pull-requests) by clicking 'Details' on the PR's `netlify-cypress-docs/deploy-preview` GitHub status check.
@@ -180,7 +175,6 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
 
 23. Check all `cypress-test-*` and `cypress-example-*` repositories, and if there is a branch named `x.y.z` for testing the features or fixes from the newly published version `x.y.z`, update that branch to refer to the newly published NPM version in `package.json`. Then, get the changes approved and merged into that project's main branch. For projects without a `x.y.z` branch, you can go to the Renovate dependency issue and check the box next to `Update dependency cypress to X.Y.Z`. It will automatically create a PR. Once it passes, you can merge it. Try updating at least the following projects:
     - [cypress-example-todomvc](https://github.com/cypress-io/cypress-example-todomvc/issues/99)
-    - [cypress-example-todomvc-redux](https://github.com/cypress-io/cypress-example-todomvc-redux/issues/1)
     - [cypress-realworld-app](https://github.com/cypress-io/cypress-realworld-app/issues/41)
     - [cypress-example-recipes](https://github.com/cypress-io/cypress-example-recipes/issues/225)
     - [cypress-fiddle](https://github.com/cypress-io/cypress-fiddle/issues/5)

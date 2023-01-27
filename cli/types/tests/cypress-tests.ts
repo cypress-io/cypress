@@ -546,6 +546,8 @@ cy.stub().withArgs('').log(false).as('foo')
 
 cy.spy().withArgs('').log(false).as('foo')
 
+cy.get('something').as('foo', {type: 'static'})
+
 cy.wrap('foo').then(subject => {
   subject // $ExpectType string
   return cy.wrap(subject)
