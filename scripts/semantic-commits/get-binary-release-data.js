@@ -1,9 +1,9 @@
 /* eslint-disable no-console */
-const execa = require('execa')
+const childProcess = require('child_process')
 const _ = require('lodash')
 const { Octokit } = require('@octokit/core')
 
-const { getCurrentReleaseData } = require('../get-current-release-data')
+const { getCurrentReleaseData } = require('./get-current-release-data')
 const { getNextVersionForBinary } = require('../get-next-version')
 const { getLinkedIssues } = require('./get-linked-issues')
 
@@ -18,8 +18,8 @@ const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN })
  * @param {string} latestReleaseInfo.commitDate - data of release
  * @param {string} latestReleaseInfo.buildSha - git commit associated with published content
  */
-const getChangedFilesSinceLastRelease = async (latestReleaseInfo) => {
-  const { stdout } = await execa('git', ['diff', `${latestReleaseInfo.buildSha}..`, '--name-only'])
+const getChangedFilesSinceLastRelease = (latestReleaseInfo) => {
+  const stdout = childProcess.execSync(`git diff ${latestReleaseInfo.buildSha}.. --name-only`)
 
   if (!stdout) {
     console.log('no files changes since last release')
