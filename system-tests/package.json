@@ -35,6 +35,7 @@
     "@types/chai": "4.2.15",
     "@types/mocha": "9.1.0",
     "babel-loader": "8.1.0",
+    "base64url": "^3.0.1",
     "bluebird": "3.7.2",
     "body-parser": "1.19.0",
     "cachedir": "2.3.0",

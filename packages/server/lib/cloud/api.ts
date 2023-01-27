@@ -177,7 +177,7 @@ const tagError = function (err) {
 const isRetriableError = (err) => {
   return (err instanceof Promise.TimeoutError) ||
     (500 <= err.statusCode && err.statusCode < 600) ||
-    (err.statusCode == null)
+    (err.statusCode == null) && !err.message?.includes('routines:RSA_padding_check_PKCS1_OAEP_mgf1')
 }
 
 export type CreateRunOptions = {
@@ -241,7 +241,7 @@ module.exports = {
   preflight (preflightInfo) {
     return retryWithBackoff(async (attemptIndex) => {
       const result = await rp.post({
-        url: `${apiUrl.replace('api', 'api-preflight')}runs/preflight`,
+        url: `${apiUrl.replace('api', 'api-proxy')}/preflight`,
         body: {
           apiUrl,
           envUrl: process.env.CYPRESS_API_URL,
