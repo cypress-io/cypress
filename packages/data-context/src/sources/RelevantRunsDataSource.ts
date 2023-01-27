@@ -161,8 +161,7 @@ export class RelevantRunsDataSource {
       this.#currentRun = currentRun
 
       this.#currentCommitSha = compactedRuns.find((run) => run.runNumber === this.#currentRun)?.commitSha
-      debug('current commit sha', this.#currentCommitSha)
-      debug({ shas })
+
       const commitsAhead = shas.indexOf(this.#currentCommitSha || '')
 
       debug(`Current run: ${currentRun} next run: ${nextRun} current commit sha: ${this.#currentCommitSha} commitsHead: ${commitsAhead}`)

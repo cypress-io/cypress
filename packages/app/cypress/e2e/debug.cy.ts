@@ -13,11 +13,7 @@ describe('App - Debug Page', () => {
 
     cy.loginUser()
     cy.withCtx((ctx) => {
-      ctx.git?.__setGitHashesForTesting(
-        ['commit1', 'commit2'],
-      )
-
-      ctx.git
+      ctx.git?.__setGitHashesForTesting(['commit1', 'commit2'])
     })
 
     cy.remoteGraphQLIntercept((obj, testState, options) => {
@@ -66,9 +62,6 @@ describe('App - Debug Page', () => {
       cy.findByTestId('metaData-Results-testing-type').contains('Component')
     })
 
-    // describe('InfoPanel', () => {
-    //   it('renders', () => { ... })
-    // })
     cy.findByTestId('test-row').contains('InfoPanel')
     cy.findByTestId('test-row').contains('renders')
   })

@@ -462,10 +462,6 @@ function findBrowsers (options: FindBrowsersOptions = {}) {
     }, { browsers: filteredBrowsers, log: false })
   })
 }
-// return cy.task<CyTaskResult<R>>('__internal_withCtx', {
-//   fn: fn.toString(),
-//   options: rest,
-// }, { timeout: timeout ?? Cypress.env('e2e_isDebugging') ? NO_TIMEOUT : SIXTY_SECONDS, log: Boolean(Cypress.env('e2e_isDebugging')) }).then((result) => {
 
 function remoteGraphQLIntercept (fn: RemoteGraphQLInterceptor, opts: Record<string, any>) {
   return logInternal('remoteGraphQLIntercept', () => {
