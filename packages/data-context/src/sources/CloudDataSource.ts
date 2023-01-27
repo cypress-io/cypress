@@ -414,7 +414,7 @@ function namedExecutionDocument (document: DocumentNode) {
       let operationName = 'batchTestRunnerExecutionQuery'
 
       if (selectionSet.size > 0) {
-        operationName = `${operationName}_${Array.from(selectionSet).join('_')}`
+        operationName = `${operationName}_${Array.from(selectionSet).sort().join('_')}`
       }
 
       const namedOperationNode: OperationDefinitionNode = {
