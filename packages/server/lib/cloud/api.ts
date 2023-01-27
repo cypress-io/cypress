@@ -215,6 +215,7 @@ module.exports = {
   },
 
   resetPreflightResult () {
+    recordRoutes = apiRoutes
     preflightResult = {
       encrypt: true,
       apiUrl,

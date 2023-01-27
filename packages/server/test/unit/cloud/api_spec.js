@@ -180,11 +180,12 @@ describe('lib/cloud/api', () => {
             Buffer.from(base64Url.toBase64(requestBody.recipients[0].encrypted_key), 'base64'),
           ),
         )
+        const decrypted = await encryption.decryptResponse(requestBody, privateKey)
 
         expect(_secretKey.export().toString('utf8')).to.eq(decryptedSecretKey.export().toString('utf8'))
 
         const enc = new jose.GeneralEncrypt(
-          Buffer.from(JSON.stringify({ encrypted: true, apiUrl: 'https://localhost:1234' })),
+          Buffer.from(JSON.stringify({ encrypted: true, apiUrl: decrypted.apiUrl })),
         )
 
         enc.setProtectedHeader({ alg: 'A256GCMKW', enc: 'A256GCM', zip: 'DEF' }).addRecipient(decryptedSecretKey)
@@ -196,7 +197,7 @@ describe('lib/cloud/api', () => {
 
       return api.preflight({ projectId: 'abc123' })
       .then((ret) => {
-        expect(ret).to.deep.eq({ encrypted: true, apiUrl: 'https://localhost:1234' })
+        expect(ret).to.deep.eq({ encrypted: true, apiUrl: `${API_BASEURL}/` })
       })
     })
   })
