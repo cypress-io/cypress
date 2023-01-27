@@ -4,6 +4,7 @@
 _Released 01/32/2023 (PENDING)_
 
 **Bugfixes:**
+
 - Fixed an issue where alternative Microsoft Edge Beta, Canary, and Dev binary versions were not being discovered by Cypress. 
   Fixes [#25455](https://github.com/cypress-io/cypress/issues/25455).
 
