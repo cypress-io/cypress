@@ -12,7 +12,7 @@ export class Poller<E extends EventType, M> {
 
   #timeout?: NodeJS.Timeout
 
-  #subscriptionCount: number = 0
+  #subscriptionId: number = 0
   #subscriptions: Record<string, { meta: M | undefined }> = {}
 
   get subscriptions () {
@@ -32,7 +32,7 @@ export class Poller<E extends EventType, M> {
       })
     }
 
-    const subscriptionId = ++this.#subscriptionCount
+    const subscriptionId = ++this.#subscriptionId
 
     debug(`subscribing to ${this.event} with initial value %o`, config?.initialValue)
     this.#subscriptions[subscriptionId] = { meta: config?.meta }
