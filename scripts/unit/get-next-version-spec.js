@@ -29,7 +29,7 @@ describe('get-next-version', () => {
       './semantic-commits/get-current-release-data': {
         getCurrentReleaseData: getCurrentReleaseDataStub,
       },
-      '../package.json': sinon.stub({ version: '12.2.0' }),
+      '../package.json': sinon.stub({ version: releasedVersion }),
     })
 
     getNextVersionForPath = npmRelease.getNextVersionForPath
