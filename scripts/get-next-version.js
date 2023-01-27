@@ -7,12 +7,13 @@ const { promisify } = require('util')
 
 const checkedInBinaryVersion = require('../package.json').version
 const { changeCatagories } = require('./semantic-commits/change-categories')
-const { getCurrentReleaseData } = require('./semantic-commits/get-binary-release-data')
+const { getCurrentReleaseData } = require('./semantic-commits/get-current-release-data')
+
 const bump = promisify(bumpCb)
 const paths = ['packages', 'cli']
 
 const getNextVersionForPath = async (path) => {
-  const { version: releasedVersion } = await getCurrentReleaseData()
+  const { version: releasedVersion } = await getCurrentReleaseData(false)
 
   let commits
   const whatBump = (foundCommits) => {
@@ -56,10 +57,8 @@ const getNextVersionForPath = async (path) => {
   // See ../guides/next-version.md for documentation.
   // for the time being, honoring this ENV -- ideally this will be deleted to remove manually overriding without a PR
   if (process.env.NEXT_VERSION) {
-    console.log('honoring process.env.NEXT_VERSION')
     nextVersion = process.env.NEXT_VERSION
   } else if (hasVersionBump) {
-    console.log('honoring the approved binary version bump')
     nextVersion = checkedInBinaryVersion
   }
 

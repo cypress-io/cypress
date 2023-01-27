@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 const { validateChangelog } = require('./validate-changelog')
-const { getCurrentReleaseData, getReleaseData } = require('./get-binary-release-data')
+const { getCurrentReleaseData } = require('./get-current-release-data')
+const { getReleaseData } = require('./get-binary-release-data')
 const checkedInBinaryVersion = require('../../package.json').version
 
 const changelog = async () => {

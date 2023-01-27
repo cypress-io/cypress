@@ -20,10 +20,13 @@ describe('get-next-version', () => {
 
     bumpStub = sinon.stub()
     getCurrentReleaseDataStub = sinon.stub()
+    getCurrentReleaseDataStub.resolves({
+      version: releasedVersion,
+    })
 
     const npmRelease = proxyquire('../get-next-version', {
       'conventional-recommended-bump': bumpStub,
-      './semantic-commits/get-binary-release-data': {
+      './semantic-commits/get-current-release-data': {
         getCurrentReleaseData: getCurrentReleaseDataStub,
       },
       '../package.json': sinon.stub({ version: '12.2.0' }),
@@ -47,7 +50,7 @@ describe('get-next-version', () => {
         return cb(undefined, { releaseType: 'patch' })
       })
 
-      const { nextVersion, commits } = await getNextVersionForPath('packages', releasedVersion)
+      const { nextVersion, commits } = await getNextVersionForPath('packages')
 
       expect(nextVersion).to.eq('12.2.1')
       expect(commits).to.contain.members(semanticCommits)
@@ -67,7 +70,7 @@ describe('get-next-version', () => {
         return cb(undefined, { releaseType: 'minor' })
       })
 
-      const { nextVersion, commits } = await getNextVersionForPath('packages', releasedVersion)
+      const { nextVersion, commits } = await getNextVersionForPath('packages')
 
       expect(nextVersion).to.eq('12.3.0')
       expect(commits).to.contain.members(semanticCommits)
@@ -88,7 +91,7 @@ describe('get-next-version', () => {
         return cb(undefined, { releaseType: 'major' })
       })
 
-      const { nextVersion, commits } = await getNextVersionForPath('packages', releasedVersion)
+      const { nextVersion, commits } = await getNextVersionForPath('packages')
 
       expect(nextVersion).to.eq('13.0.0')
       expect(commits).to.contain.members(semanticCommits)
@@ -107,8 +110,12 @@ describe('get-next-version', () => {
         return cb(undefined, { releaseType: 'patch' })
       })
 
-      // package version !== release version assumed check in version is correct
-      const { nextVersion, commits } = await getNextVersionForPath('packages', '12.2.2')
+      getCurrentReleaseDataStub.resolves({
+        // package version !== release version assumed check in version is correct
+        version: '12.2.2',
+      })
+
+      const { nextVersion, commits } = await getNextVersionForPath('packages')
 
       expect(nextVersion).to.eq('12.2.0')
       expect(commits).to.contain.members(semanticCommits)
@@ -147,10 +154,6 @@ describe('get-next-version', () => {
       const packagesSemanticCommits = [
         { type: 'feat', title: 'feat: add new command' },
       ]
-
-      getCurrentReleaseDataStub.resolves({
-        version: releasedVersion,
-      })
 
       bumpStub.callsFake(async ({ whatBump, _path }, cb) => {
         if (calls === 0) {
