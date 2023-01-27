@@ -9,7 +9,7 @@ import crypto from 'crypto'
 
 import type { DataContext } from '..'
 import getenv from 'getenv'
-import { print, DocumentNode, ExecutionResult, GraphQLResolveInfo, OperationTypeNode, visit, OperationDefinitionNode, FieldNode } from 'graphql'
+import { print, DocumentNode, ExecutionResult, GraphQLResolveInfo, OperationTypeNode, visit, OperationDefinitionNode } from 'graphql'
 import {
   createClient,
   dedupExchange,
@@ -405,8 +405,10 @@ function namedExecutionDocument (document: DocumentNode) {
 
       const selectionSet = new Set()
 
-      op.selectionSet.selections.forEach((selection) => {
-        selectionSet.add((selection as FieldNode).name.value)
+      op.selectionSet.selections.forEach((s) => {
+        if (s.kind === 'Field') {
+          selectionSet.add(s.name.value)
+        }
       })
 
       let operationName = 'batchTestRunnerExecutionQuery'
