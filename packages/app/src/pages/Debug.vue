@@ -56,14 +56,13 @@ const query = useQuery({ query: DebugDocument, variables, pause: shouldPauseQuer
 
 const isLoading = computed(() => {
   const relevantRunsHaveNotLoaded = !relevantRuns.value
-  const relevantRunHasEmptyState = relevantRuns?.value?.current === undefined
   const queryIsBeingFetched = query.fetching.value
-  const waitingForRunToFetchFromTheCloud = relevantRuns.value?.current !== -1
+  const waitingForRunToFetchFromTheCloud = !!relevantRuns.value?.current && relevantRuns.value.current > 0
     && (!query.data.value?.currentProject?.cloudProject
       || query.data.value?.currentProject?.cloudProject?.__typename === 'CloudProject'
       && !query.data.value.currentProject.cloudProject.runByNumber?.status)
 
-  return relevantRunsHaveNotLoaded || relevantRunHasEmptyState || queryIsBeingFetched || waitingForRunToFetchFromTheCloud
+  return relevantRunsHaveNotLoaded || queryIsBeingFetched || waitingForRunToFetchFromTheCloud
 })
 
 useSubscription({ query: Debug_SpecsChangeDocument })
