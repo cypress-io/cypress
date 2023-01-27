@@ -272,10 +272,10 @@ export const mutation = mutationType({
       },
     })
 
-    t.nonNull.list.nonNull.field('scaffoldIntegration', {
+    t.nonNull.list.nonNull.field('e2eExamples', {
       type: ScaffoldedFile,
       resolve: (src, args, ctx) => {
-        return ctx.actions.codegen.scaffoldIntegration()
+        return ctx.actions.codegen.e2eExamples()
       },
     })
 
