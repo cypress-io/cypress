@@ -4,7 +4,7 @@ describe('cy.origin dependencies', { browser: '!webkit' }, () => {
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
   })
 
-  it('works with Cypress.require()', () => {
+  it('works', () => {
     cy.origin('http://www.foobar.com:3500', () => {
       const lodash = Cypress.require('lodash')
 
@@ -135,7 +135,7 @@ describe('cy.origin dependencies', { browser: '!webkit' }, () => {
       })
 
       cy.origin('http://www.foobar.com:3500', () => {
-        Cypress.require('./does-not-exist')
+        Cypress.require('lodash')
       })
     })
   })

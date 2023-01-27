@@ -167,7 +167,7 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
 
     try {
       const callback = await getCallbackFn(fn, file)
-      const value = window.eval(callback)(args)
+      const value = window.eval(`(${callback})`)(args)
 
       // If we detect a non promise value with commands in queue, throw an error
       if (value && cy.queue.length > 0 && !value.then) {
