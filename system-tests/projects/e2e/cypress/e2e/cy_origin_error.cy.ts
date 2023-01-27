@@ -28,6 +28,14 @@ describe('cy.origin errors', () => {
     },
   })
 
+  fail('failure when using dependency', this, () => {
+    cy.origin('http://www.foobar.com:4466', () => {
+      Cypress.require('../support/util')
+
+      cy.get('#doesnotexist', { timeout: 1 })
+    })
+  })
+
   verify('failure when using dependency', this, {
     line: 32,
     column: 8,
