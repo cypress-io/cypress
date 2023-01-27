@@ -196,8 +196,6 @@ export class RelevantRunsDataSource {
 
     const runs = await this.getRelevantRuns(shas)
 
-    //TODO handle error from remote call
-
     //only emit a new value if it changes
     if (!isEqual(runs, this.#cachedRuns)) {
       debug('Runs changed %o', runs)
