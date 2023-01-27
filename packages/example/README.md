@@ -1,10 +1,10 @@
 # Example
 
-This package is responsible for coping the `cypress/e2e` and `app` files from [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink) into the cypress repository.
+This package is responsible for copying the `cypress/e2e` and `app` files from [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink) into the cypress repository.
 
-The `cypress/e2e` tests, pulled into this package from the [kitchen sink app](https://github.com/cypress-io/cypress-example-kitchensink, are used for scaffolding user's e2e tests in `packages/data-context` and in `npm/create-cypress-tests`.
+The `cypress/e2e` tests, pulled into this package from the [kitchen sink app](https://github.com/cypress-io/cypress-example-kitchensink), are used for scaffolding user's e2e tests in `packages/data-context` and in `npm/create-cypress-tests`.
 
-The `app` content, pulled into this package from the [kitchen sink app](https://github.com/cypress-io/cypress-example-kitchensink, are published to `cypress-io/cypress` repository's Github page, [https://example.cypress.io](https://example.cypress.io).
+The `app` content, pulled into this package from the [kitchen sink app](https://github.com/cypress-io/cypress-example-kitchensink), is published to `cypress-io/cypress` repository's Github page, [https://example.cypress.io](https://example.cypress.io).
 
 ## Updating Content
 
@@ -19,7 +19,7 @@ If any of the breaking changes in the next major release requires updates to Cyp
 
 ## Using a new version of `cypress-example-kitchen-sink`
 
-After [new version is automatically](https://github.com/cypress-io/cypress-example-kitchensink/blob/master/CONTRIBUTING.md#deployment) on the [`cypress-example-kitchen-sink` repo](https://github.com/cypress-io/cypress-example-kitchensink/tree/master/cypress/e2e/2-advanced-examples) when a commit is merged to `master`, you will need to update the `example`'s dependency to match the newly released version.
+When a commit is merged into `master`, a new version of the [`cypress-example-kitchen-sink` repo](https://github.com/cypress-io/cypress-example-kitchensink/tree/master/cypress/e2e/2-advanced-examples) is released [automatically to npm](https://github.com/cypress-io/cypress-example-kitchensink/blob/master/CONTRIBUTING.md#deployment). When this happens, you will need to update the `example`'s dependency to match the newly released version.
 
 1. Bump the `cypress-example-kitchensink` `devDependency` within this package's [`package.json`](https://github.com/cypress-io/cypress/blob/develop/packages/example/package.json).
 
