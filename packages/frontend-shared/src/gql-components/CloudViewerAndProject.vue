@@ -89,6 +89,13 @@ watchEffect(() => {
     return
   }
 
+  /**
+   * Indicates that the CloudViewerAndProject has received its initial data response to use to set flags.  It can be used
+   * to detect that the app or launchpad has completed the first initialization of determining if the user is logged in,
+   * a project is connected to the cloud, etc.
+   */
+  setHasInitiallyLoaded()
+
   const {
     currentProject,
     cachedUser,
@@ -136,8 +143,6 @@ watchEffect(() => {
   if (currentProject?.cloudProject || !loginConnectStore.user.isLoggedIn) {
     setProjectFlag('isProjectConnected', currentProject?.cloudProject?.__typename === 'CloudProject')
   }
-
-  setHasInitiallyLoaded()
 })
 
 </script>
