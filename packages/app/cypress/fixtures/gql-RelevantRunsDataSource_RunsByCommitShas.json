@@ -1,0 +1,32 @@
+{
+  "cloudProjectBySlug": {
+    "__typename": "CloudProject",
+    "id": "Q2xvdWRQcm9qZWN0OnZncXJ3cA==",
+    "runsByCommitShas": [
+      {
+        "id": "Q2xvdWRSdW46ajl4bjhYV05PbA==",
+        "runNumber": 130,
+        "status": "FAILED",
+        "commitInfo": {
+          "sha": "commit1",
+          "__typename": "CloudRunCommitInfo"
+        },
+        "__typename": "CloudRun"
+      },
+      {
+        "id": "Q2xvdWRSdW46ajl4bjhYV05PbA==",
+        "runNumber": 131,
+        "status": "PASSED",
+        "commitInfo": {
+          "sha": "commit2",
+          "__typename": "CloudRunCommitInfo"
+        },
+        "__typename": "CloudRun"
+      }
+    ]
+  },
+  "pollingIntervals": {
+    "runsByCommitShas": 30,
+    "__typename": "CloudPollingIntervals"
+  }
+}

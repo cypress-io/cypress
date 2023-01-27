@@ -1,0 +1,180 @@
+{
+  "currentProject": {
+    "id": "Q3VycmVudFByb2plY3Q6L3ByaXZhdGUvdmFyL2ZvbGRlcnMvZ2svZnl4aHl6MzUyNDM4eXRfZnBwZ3dfMzNoMDAwMGduL1QvY3ktcHJvamVjdHMvY3lwcmVzcy1pbi1jeXByZXNz",
+    "cloudProject": {
+      "__typename": "CloudProject",
+      "id": "Q3VycmVudFByb2plY3Q6L3ByaXZhdGUvdmFyL2ZvbGRlcnMvZ2svZnl4aHl6MzUyNDM4eXRfZnBwZ3dfMzNoMDAwMGduL1QvY3ktcHJvamVjdHMvY3lwcmVzcy1pbi1jeXByZXNz",
+      "runByNumber": {
+        "id": "Q2xvdWRSdW46ajl4bjhYV05PbA==",
+        "runNumber": 130,
+        "createdAt": "2023-01-26T01:13:40.289Z",
+        "status": "FAILED",
+        "totalDuration": 33842,
+        "commitInfo": {
+          "sha": "commit1",
+          "authorName": "Lachlan Miller",
+          "summary": "wip - cypress testing",
+          "branch": "main",
+          "__typename": "CloudRunCommitInfo"
+        },
+        "url": "https://cloud.cypress.io/projects/vgqrwp/runs/130",
+        "totalPassed": 1,
+        "totalFailed": 1,
+        "totalPending": 0,
+        "totalSkipped": 0,
+        "totalFlakyTests": null,
+        "cancelledBy": null,
+        "cancelledAt": null,
+        "errors": [],
+        "overLimitActionType": "UPGRADE",
+        "overLimitActionUrl": "https://cloud.cypress.io/organizations/021fea67-d608-4ab2-af17-3f8a2a23d019/pricing",
+        "isHidden": false,
+        "reasonsRunIsHidden": [],
+        "totalTests": 2,
+        "ci": {
+          "id": "Q2xvdWRDaUJ1aWxkSW5mbzpiZGU5OTQ0NS1iZDIwLTQ2OTEtYmE5Yy04MDIxYWEyMmE2ODg=",
+          "ciBuildNumberFormatted": "4011392501",
+          "formattedProvider": "GitHub Actions",
+          "url": "https://github.com/lmiller1990/eleutheria/actions/runs/4011392501",
+          "__typename": "CloudCiBuildInfo"
+        },
+        "testsForReview": [
+          {
+            "id": "Q2xvdWRUZXN0UmVzdWx0OmUzMWIyZTJjLWJkMDctNDRmMy1hMmZlLWFlYjkzMjhjNmU5Ng==",
+            "specId": "Q2xvdWRTcGVjUnVuOmJkZTk5NDQ1LWJkMjAtNDY5MS1iYTljLTgwMjFhYTIyYTY4ODpNekExTlRVNE1UWXRNalZqTmkxak0yWmlMVEU0WWpFdFkyWTVaV1JrWkRFM05qTmk=",
+            "title": "InfoPanel > renders",
+            "titleParts": [
+              "InfoPanel",
+              "renders"
+            ],
+            "duration": 4612,
+            "isFlaky": false,
+            "testUrl": "https://cloud.cypress.io/projects/vgqrwp/runs/66502449/overview/e31b2e2c-bd07-44f3-a2fe-aeb9328c6e96",
+            "thumbprint": "c5505b0a8bdf0a7d0cf7acf4bf6bc6a3",
+            "instance": {
+              "id": "Q2xvdWRSdW5JbnN0YW5jZToxMDAyODU2MzQ4OmUzMWIyZTJjLWJkMDctNDRmMy1hMmZlLWFlYjkzMjhjNmU5Ng==",
+              "status": "FAILED",
+              "groupId": "Q2xvdWRSdW5Hcm91cDo2NjUwMjQ0OTpsaW51eC1FbGVjdHJvbi0xMDYtYjAyZTk4NDJiNQ==",
+              "totalPassed": 0,
+              "totalFailed": 1,
+              "totalPending": 0,
+              "totalSkipped": 0,
+              "totalRunning": 0,
+              "hasStdout": true,
+              "stdoutUrl": "https://cloud.cypress.io/projects/vgqrwp/runs/130/overview/e31b2e2c-bd07-44f3-a2fe-aeb9328c6e96/stdout",
+              "hasScreenshots": false,
+              "screenshotsUrl": null,
+              "hasVideo": true,
+              "videoUrl": "https://cloud.cypress.io/projects/vgqrwp/runs/130/overview/e31b2e2c-bd07-44f3-a2fe-aeb9328c6e96/video",
+              "__typename": "CloudRunInstance"
+            },
+            "__typename": "CloudTestResult"
+          }
+        ],
+        "specs": [
+          {
+            "id": "Q2xvdWRTcGVjUnVuOmJkZTk5NDQ1LWJkMjAtNDY5MS1iYTljLTgwMjFhYTIyYTY4ODpNekExTlRVNE1UWXRNalZqTmkxak0yWmlMVEU0WWpFdFkyWTVaV1JrWkRFM05qTmk=",
+            "path": "src/components/InfoPanel/InfoPanel.cy.ts",
+            "basename": "InfoPanel.cy.ts",
+            "extension": ".cy.ts",
+            "shortPath": "src/components/InfoPanel/InfoPanel.cy.ts",
+            "groupIds": [
+              "Q2xvdWRSdW5Hcm91cDo2NjUwMjQ0OTpsaW51eC1FbGVjdHJvbi0xMDYtYjAyZTk4NDJiNQ=="
+            ],
+            "specDuration": {
+              "min": 4689,
+              "max": 4689,
+              "__typename": "SpecDataAggregate"
+            },
+            "status": "FAILED",
+            "testsPassed": {
+              "min": 0,
+              "max": 0,
+              "__typename": "SpecDataAggregate"
+            },
+            "testsFailed": {
+              "min": 1,
+              "max": 1,
+              "__typename": "SpecDataAggregate"
+            },
+            "testsPending": {
+              "min": 0,
+              "max": 0,
+              "__typename": "SpecDataAggregate"
+            },
+            "__typename": "CloudSpecRun"
+          },
+          {
+            "id": "Q2xvdWRTcGVjUnVuOmJkZTk5NDQ1LWJkMjAtNDY5MS1iYTljLTgwMjFhYTIyYTY4ODpaalU0TnpJeFltSXROek13T1Mxa05XWXlMV05pT1dNdE5UVTRZemRsTVdKak9HUTE=",
+            "path": "src/components/DifficultyItem.cy.ts",
+            "basename": "DifficultyItem.cy.ts",
+            "extension": ".cy.ts",
+            "shortPath": "src/components/DifficultyItem.cy.ts",
+            "groupIds": [
+              "Q2xvdWRSdW5Hcm91cDo2NjUwMjQ0OTpsaW51eC1FbGVjdHJvbi0xMDYtYjAyZTk4NDJiNQ=="
+            ],
+            "specDuration": {
+              "min": 231,
+              "max": 231,
+              "__typename": "SpecDataAggregate"
+            },
+            "status": "PASSED",
+            "testsPassed": {
+              "min": 1,
+              "max": 1,
+              "__typename": "SpecDataAggregate"
+            },
+            "testsFailed": {
+              "min": 0,
+              "max": 0,
+              "__typename": "SpecDataAggregate"
+            },
+            "testsPending": {
+              "min": 0,
+              "max": 0,
+              "__typename": "SpecDataAggregate"
+            },
+            "__typename": "CloudSpecRun"
+          }
+        ],
+        "groups": [
+          {
+            "id": "Q2xvdWRSdW5Hcm91cDo2NjUwMjQ0OTpsaW51eC1FbGVjdHJvbi0xMDYtYjAyZTk4NDJiNQ==",
+            "testingType": "component",
+            "groupName": null,
+            "os": {
+              "id": "Q2xvdWRPcGVyYXRpbmdTeXN0ZW06NjY1MDI0NDk6bGludXgtRWxlY3Ryb24tMTA2LWIwMmU5ODQyYjU=",
+              "name": "Linux",
+              "nameWithVersion": "Linux Ubuntu - ",
+              "__typename": "CloudOperatingSystem"
+            },
+            "browser": {
+              "id": "Q2xvdWRCcm93c2VySW5mbzo2NjUwMjQ0OTpsaW51eC1FbGVjdHJvbi0xMDYtYjAyZTk4NDJiNQ==",
+              "formattedName": "Electron",
+              "formattedNameWithVersion": "Electron 106",
+              "__typename": "CloudBrowserInfo"
+            },
+            "__typename": "CloudRunGroup"
+          }
+        ],
+        "__typename": "CloudRun"
+      }
+    },
+    "specs": [
+      {
+        "id": "U3BlYzovVXNlcnMvbGFjaGxhbm1pbGxlci9jb2RlL2R1bXAvZWxldXRoZXJpYS9wYWNrYWdlcy9mcm9udGVuZC9zcmMvY29tcG9uZW50cy9EaWZmaWN1bHR5SXRlbS5jeS50cw==",
+        "absolute": "/Users/lachlanmiller/code/dump/eleutheria/packages/frontend/src/components/DifficultyItem.cy.ts",
+        "relative": "src/components/DifficultyItem.cy.ts",
+        "__typename": "Spec"
+      },
+      {
+        "id": "U3BlYzovVXNlcnMvbGFjaGxhbm1pbGxlci9jb2RlL2R1bXAvZWxldXRoZXJpYS9wYWNrYWdlcy9mcm9udGVuZC9zcmMvY29tcG9uZW50cy9JbmZvUGFuZWwvSW5mb1BhbmVsLmN5LnRz",
+        "absolute": "/Users/lachlanmiller/code/dump/eleutheria/packages/frontend/src/components/InfoPanel/InfoPanel.cy.ts",
+        "relative": "src/components/InfoPanel/InfoPanel.cy.ts",
+        "__typename": "Spec"
+      }
+    ],
+    "currentTestingType": "component",
+    "__typename": "CurrentProject"
+  }
+}

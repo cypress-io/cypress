@@ -126,6 +126,7 @@ async function makeE2ETasks () {
 
   let ctx: DataContext
   let testState: Record<string, any> = {}
+  let remoteGraphQLOptions: Record<string, any> = {}
   let remoteGraphQLIntercept: RemoteGraphQLInterceptor | undefined
   let scaffoldedProjects = new Set<string>()
 
@@ -197,6 +198,7 @@ async function makeE2ETasks () {
     async __internal__beforeEach () {
       process.chdir(cachedCwd)
       testState = {}
+      remoteGraphQLOptions = {}
       await DataContext.waitForActiveRequestsToFlush()
       await globalPubSub.emitThen('test:cleanup')
       await ctx.actions.app.removeAppDataDir()
@@ -246,7 +248,7 @@ async function makeE2ETasks () {
                 result,
                 callCount: operationCount[operationName ?? 'unknown'],
                 Response,
-              }, testState))
+              }, testState, remoteGraphQLOptions))
             } catch (e) {
               const err = e as Error
 
@@ -284,8 +286,14 @@ async function makeE2ETasks () {
       return null
     },
 
-    __internal_remoteGraphQLIntercept (fn: string) {
-      remoteGraphQLIntercept = new Function('console', 'obj', 'testState', `return (${fn})(obj, testState)`).bind(null, console) as RemoteGraphQLInterceptor
+    __internal_remoteGraphQLIntercept (payload: {
+      fn: string
+      options: Record<string, any>
+    }) {
+      const { fn, options } = payload
+
+      remoteGraphQLOptions = options
+      remoteGraphQLIntercept = new Function('console', 'obj', 'testState', 'options', `return (${fn})(obj, testState, options)`).bind(null, console) as RemoteGraphQLInterceptor
 
       return null
     },
