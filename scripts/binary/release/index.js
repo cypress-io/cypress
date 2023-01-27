@@ -1,0 +1,118 @@
+/* eslint-disable no-console */
+const check = require('check-more-types')
+const execa = require('execa')
+const la = require('lazy-ass')
+const Bluebird = require('bluebird')
+
+const { prepareReleaseArtifacts } = require('./prepare-release-artifacts')
+const { getCurrentReleaseData } = require('../../semantic-commits/get-current-release-data')
+
+const exec = (dryRun) => {
+  if (dryRun) {
+    return (...args) => console.log('Dry run, not executing:', args[0])
+  }
+
+  return (...args) => execa(...args)
+}
+
+const publishDistributionToNPM = async (version, distTag, dryRun) => {
+  console.log(`\nPublishing ${version} to npm under ${distTag} tag`)
+
+  if (distTag === 'latest') {
+    return exec(dryRun)(`npm dist-tag add cypress@${version}`)
+  }
+
+  return exec(dryRun)(`npm publish /tmp/cypress-prod.tgz --tag ${distTag}`)
+}
+
+const getDistTags = async () => {
+  const { distTags } = await getCurrentReleaseData(false)
+
+  return distTags
+}
+
+// make this step retry-able with an incremental increase of in delay of retry attempt.
+// Observed delays between publishing to npm to when this information has been updated.
+const runWithRetry = async (promise) => {
+  const delaysRemaining = [0, 1000, 3000, 6000]
+
+  const poll = () => {
+    console.log('run poll')
+
+    return promise()
+    .catch((err) => {
+      console.log('poll err', err)
+      const delay = delaysRemaining.shift()
+
+      if (!delay) {
+        throw err
+      }
+
+      console.warn(`Re-polling Cypress\'s distribution tags in ${delay} ms`)
+
+      return Bluebird.delay(delay)
+      .then(() => {
+        console.log('run poll')
+
+        return poll()
+      })
+    })
+  }
+
+  return poll()
+}
+
+const releaseDevDistribution = async (sha, nextVersion, dryRun = false) => {
+  la(check.unemptyString(sha), 'missing sha to distribute')
+  la(check.unemptyString(nextVersion), 'missing next version to distribute')
+
+  console.log('Releasing Cypress Binary:\n')
+  console.log('Next version:', nextVersion)
+
+  const {
+    latest: currentVersion,
+    dev: devDistribution,
+  } = await getDistTags()
+
+  console.log('\nCurrent distribution information:')
+  console.log('  - version:', currentVersion)
+  console.log('  - latest distribution:', currentVersion)
+  console.log('  - dev distribution:', devDistribution)
+  console.log()
+
+  if (devDistribution === nextVersion) {
+    return
+  }
+
+  return prepareReleaseArtifacts(sha, nextVersion, dryRun)
+  .then(() => {
+    // publish dev distribution
+    return publishDistributionToNPM(nextVersion, 'dev', dryRun)
+  })
+  .then(() => {
+    const ensureDevDistribution = () => {
+      return getDistTags()
+      .then(({ latest, dev }) => {
+        if (latest !== currentVersion) {
+          throw new Error(`The latest distribution of ${latest} does not match the expected previous version of ${currentVersion}.`)
+        }
+
+        if (!dryRun && dev !== nextVersion) {
+          throw new Error(`The dev distribution of ${dev} does not match the expected next version of ${nextVersion}.`)
+        }
+
+        console.log('\nUpdated distribution information')
+        console.log('  - version:', currentVersion)
+        console.log('  - latest distribution:', latest)
+        console.log('  - dev distribution:', dev)
+        console.log()
+      })
+    }
+
+    return runWithRetry(ensureDevDistribution)
+  })
+}
+
+module.exports = {
+  releaseDevDistribution,
+}

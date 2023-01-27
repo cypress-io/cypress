@@ -34,6 +34,8 @@ const success = (str) => {
 const fail = (str) => {
   return console.log(chalk.bgRed(` ${chalk.black(str)} `))
 }
+const { releaseDevDistribution } = require('./release/index.js')
+const { getCurrentReleaseData } = require('../semantic-commits/get-current-release-data')
 
 const zippedFilename = () => upload.zipName
 
@@ -44,6 +46,7 @@ const askMissingOptions = function (properties = []) {
   const questions = {
     platform: ask.whichPlatform,
     version: ask.deployNewVersion,
+    sha: ask.deploySha,
     // note: zip file might not be absolute
     zip: ask.whichZipFile,
     commit: ask.toCommit,
@@ -71,6 +74,7 @@ const deploy = {
     const opts = minimist(argv, {
       alias: {
         zip: ['zipFile', 'zip-file', 'filename'],
+        dryRun: ['dry-run'],
       },
     })
 
@@ -84,6 +88,24 @@ const deploy = {
     debug(opts)
 
     return opts
+  },
+
+  releaseDevDistribution () {
+    // read off the argv
+    const options = this.parseOptions(process.argv)
+
+    return askMissingOptions(['version', 'sha'])(options)
+    .then(({ sha, version, dryRun }) => {
+      return this.checkDownloads({
+        version,
+        sha,
+        branch: 'develop',
+        ensurePrerelease: true,
+      })
+      .then(() => {
+        releaseDevDistribution(options.sha, options.version, options.dryRun)
+      })
+    })
   },
 
   release () {
@@ -111,7 +133,7 @@ const deploy = {
     .then(release)
   },
 
-  checkDownloads ({ version }) {
+  checkDownloads ({ version, ensurePrerelease, branch, sha }) {
     const systems = [
       { platform: 'linux', arch: 'x64' },
       { platform: 'linux', arch: 'arm64' },
@@ -127,8 +149,12 @@ const deploy = {
     }
 
     const checkSystem = ({ platform, arch }) => {
-      const url = `https://download.cypress.io/desktop/${version}?platform=${platform}&arch=${arch}`
       const system = `${platform}-${arch}`
+      let url = `https://download.cypress.io/desktop/${version}?platform=${platform}&arch=${arch}`
+
+      if (ensurePrerelease) {
+        url = uploadUtils.getBetaUrl(version, system, branch, sha, 'cypress.tgz')
+      }
 
       process.stdout.write(`Checking for ${chalk.yellow(system)} at ${chalk.cyan(url)} ... `)
 
@@ -169,6 +195,10 @@ const deploy = {
     .then((results) => {
       if (allEnsured(results)) return
 
+      if (ensurePrerelease) {
+        throw new Error(`Validate the CircleCi job building the binaries for ${version} have successfully finished.`)
+      }
+
       const purgeCommand = `yarn binary-purge --version ${version}`
       const ensureCommand = `yarn binary-ensure --version ${version}`
 
@@ -181,7 +211,29 @@ const deploy = {
   ensure () {
     const options = this.parseOptions(process.argv)
 
-    return questionsRemain({ version: ask.getEnsureVersion })(options)
+    return questionsRemain({
+      version: ask.getEnsureVersion,
+    })(options)
+    .then(async (options) => {
+      const { version, ensurePrerelease } = options
+      const { versions: releasedVersions } = await getCurrentReleaseData(false)
+
+      if (!!ensurePrerelease || !releasedVersions.includes(version)) {
+        const opts = await questionsRemain({
+          sha: ask.getEnsureSha,
+          branch: ask.getEnsureBranch,
+        })(options)
+
+        return {
+          version,
+          sha: options.sha.sha || opts.sha,
+          branch: opts.branch.branch || options.branch,
+          ensurePrerelease: true,
+        }
+      }
+
+      return { version }
+    })
     .then(this.checkDownloads)
   },
 

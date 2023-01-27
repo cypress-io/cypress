@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const awspublish = require('gulp-awspublish')
 const human = require('human-interval')
 const la = require('lazy-ass')
@@ -72,6 +73,12 @@ const getPublisher = async function () {
     secretAccessKey: aws.secretAccessKey,
     sessionToken: aws.sessionToken,
   })
+}
+
+const getBetaUrl = function (version, osName, branch, sha, zipName) {
+  const url = getUploadUrl()
+
+  return [url, 'beta', 'npm', version, osName, `${branch}-${sha}`, zipName].join('/')
 }
 
 const getDesktopUrl = function (version, osName, zipName) {
@@ -155,5 +162,6 @@ module.exports = {
   isValidPlatformArch,
   saveUrl,
   formHashFromEnvironment,
+  getBetaUrl,
   getUploadUrl,
 }
