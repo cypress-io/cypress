@@ -78,7 +78,7 @@ export class RelevantRunSpecsDataSource {
     statuses: {},
   }
 
-  #poller?: Poller<'relevantRunSpecChange'>
+  #poller?: Poller<'relevantRunSpecChange', never>
 
   constructor (private ctx: DataContext) {}
 
@@ -131,7 +131,8 @@ export class RelevantRunSpecsDataSource {
 
     if (result.error) {
       debug(`Error when fetching relevant runs for runs ${runs.current} and ${runs.next}`, result.error)
-      throw result.error
+
+      return SPECS_EMPTY_RETURN
     }
 
     const cloudProject = result.data?.cloudProjectBySlug
@@ -210,6 +211,6 @@ export class RelevantRunSpecsDataSource {
       })
     }
 
-    return this.#poller.start(this.#cached)
+    return this.#poller.start({ initialValue: this.#cached })
   }
 }

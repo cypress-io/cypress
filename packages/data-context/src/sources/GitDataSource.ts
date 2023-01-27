@@ -207,7 +207,9 @@ export class GitDataSource {
       }
 
       if (this.#git) {
-        await this.#loadCurrentBranch()
+        await this.#loadCurrentBranch().then(() => {
+          this.config.onBranchChange(this.#currentBranch)
+        })
       }
 
       if (this.#destroyed || !this.#gitBaseDir) {
@@ -253,7 +255,6 @@ export class GitDataSource {
       try {
         this.#currentBranch = (await this.#git.branch()).current
         debug(`On current branch %s`, this.#currentBranch)
-        this.config.onBranchChange(this.#currentBranch)
       } catch {
         debug('this is not a git repo')
       }
