@@ -107,7 +107,7 @@ export const stubMutation: MaybeResolver<Mutation> = {
   resetWizard (src, args, ctx) {
     return true
   },
-  scaffoldIntegration (src, args, ctx) {
+  e2eExamples (src, args, ctx) {
     return [{
       __typename: 'ScaffoldedFile',
       status: 'valid',
