@@ -19,7 +19,7 @@ const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN })
  * @param {string} latestReleaseInfo.buildSha - git commit associated with published content
  */
 const getChangedFilesSinceLastRelease = (latestReleaseInfo) => {
-  const stdout = childProcess.execSync(`git diff ${latestReleaseInfo.buildSha}.. --name-only`)
+  const stdout = childProcess.execSync(`git diff ${latestReleaseInfo.buildSha}.. --name-only`, { encoding: 'utf8' })
 
   if (!stdout) {
     console.log('no files changes since last release')
