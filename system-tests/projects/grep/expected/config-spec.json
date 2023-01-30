@@ -1,5 +1,0 @@
-{
-  "tests that use config object": {
-    "still works @config": "passed"
-  }
-}

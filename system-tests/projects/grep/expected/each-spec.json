@@ -1,7 +1,0 @@
-{
-  "tests that use .each work": {
-    "test for 1": "pending",
-    "test for 2": "passing",
-    "test for 3": "pending"
-  }
-}

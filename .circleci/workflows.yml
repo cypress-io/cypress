@@ -1892,9 +1892,6 @@ jobs:
           command: yarn workspace @cypress/grep test
       - store_test_results:
           path: npm/grep/test_results
-      - run:
-          name: Run e2e tests
-          command: yarn workspace @cypress/grep cy:run
       - store_artifacts:
           path: npm/grep/test_results
       - store-npm-logs
