@@ -1,31 +1,13 @@
 /* eslint-disable no-console */
-const execa = require('execa')
+const childProcess = require('child_process')
 const _ = require('lodash')
 const { Octokit } = require('@octokit/core')
 
+const { getCurrentReleaseData } = require('./get-current-release-data')
 const { getNextVersionForBinary } = require('../get-next-version')
 const { getLinkedIssues } = require('./get-linked-issues')
 
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN })
-
-/**
- * Get the version, commit date and git sha of the latest tag published on npm.
- */
-const getCurrentReleaseData = async () => {
-  console.log('Get Current Release Information\n')
-  const { stdout } = await execa('npm', ['info', 'cypress', '--json'])
-  const npmInfo = JSON.parse(stdout)
-
-  const latestReleaseInfo = {
-    version: npmInfo['dist-tags'].latest,
-    commitDate: npmInfo.buildInfo.commitDate,
-    buildSha: npmInfo.buildInfo.commitSha,
-  }
-
-  console.log({ latestReleaseInfo })
-
-  return latestReleaseInfo
-}
 
 /**
  * Get the list of file names that have been added, deleted or changed since the git
@@ -36,8 +18,8 @@ const getCurrentReleaseData = async () => {
  * @param {string} latestReleaseInfo.commitDate - data of release
  * @param {string} latestReleaseInfo.buildSha - git commit associated with published content
  */
-const getChangedFilesSinceLastRelease = async (latestReleaseInfo) => {
-  const { stdout } = await execa('git', ['diff', `${latestReleaseInfo.buildSha}..`, '--name-only'])
+const getChangedFilesSinceLastRelease = (latestReleaseInfo) => {
+  const stdout = childProcess.execSync(`git diff ${latestReleaseInfo.buildSha}.. --name-only`, { encoding: 'utf8' })
 
   if (!stdout) {
     console.log('no files changes since last release')
@@ -117,7 +99,6 @@ const getReleaseData = async (latestReleaseInfo) => {
 
 if (require.main !== module) {
   module.exports = {
-    getCurrentReleaseData,
     getReleaseData,
   }
 

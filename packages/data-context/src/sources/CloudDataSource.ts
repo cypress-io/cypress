@@ -1,13 +1,15 @@
 // @ts-ignore
 import pkg from '@packages/root'
 import debugLib from 'debug'
+import DataLoader from 'dataloader'
+import { createBatchingExecutor } from '@graphql-tools/batch-execute'
 import { cacheExchange, Cache } from '@urql/exchange-graphcache'
 import fetch, { Response } from 'cross-fetch'
 import crypto from 'crypto'
 
 import type { DataContext } from '..'
 import getenv from 'getenv'
-import type { DocumentNode, ExecutionResult, GraphQLResolveInfo, OperationTypeNode } from 'graphql'
+import { print, DocumentNode, ExecutionResult, GraphQLResolveInfo, OperationTypeNode, visit, OperationDefinitionNode } from 'graphql'
 import {
   createClient,
   dedupExchange,
@@ -49,6 +51,7 @@ export interface CloudExecuteQuery {
 
 export interface CloudExecuteRemote extends CloudExecuteQuery {
   fieldName: string
+  shouldBatch?: boolean
   operationType?: OperationTypeNode
   requestPolicy?: RequestPolicy
   onUpdatedResult?: (data: any) => any
@@ -81,9 +84,16 @@ export interface CloudDataSourceParams {
 export class CloudDataSource {
   #cloudUrqlClient: Client
   #lastCache?: string
+  #batchExecutor: ReturnType<typeof createBatchingExecutor>
+  #batchExecutorBatcher: DataLoader<CloudExecuteRemote, OperationResult>
 
   constructor (private params: CloudDataSourceParams) {
     this.#cloudUrqlClient = this.reset()
+    this.#batchExecutor = createBatchingExecutor((config) => {
+      return this.#executeQuery(namedExecutionDocument(config.document), config.variables)
+    }, { maxBatchSize: 20 })
+
+    this.#batchExecutorBatcher = this.#makeBatchExecutionBatcher()
   }
 
   get #user () {
@@ -206,7 +216,11 @@ export class CloudDataSource {
       return loading
     }
 
-    loading = this.#cloudUrqlClient.query(config.operationDoc, config.operationVariables, { requestPolicy: 'network-only' }).toPromise().then(this.#formatWithErrors)
+    const query = config.shouldBatch
+      ? this.#batchExecutorBatcher.load(config)
+      : this.#executeQuery(config.operationDoc, config.operationVariables)
+
+    loading = query.then(this.#formatWithErrors)
     .then(async (op) => {
       this.#pendingPromises.delete(stableKey)
 
@@ -241,6 +255,12 @@ export class CloudDataSource {
     this.#pendingPromises.set(stableKey, loading)
 
     return loading
+  }
+
+  #executeQuery (operationDoc: DocumentNode, operationVariables: object = {}) {
+    debug(`Executing remote dashboard request %s, %j`, print(operationDoc), operationVariables)
+
+    return this.#cloudUrqlClient.query(operationDoc, operationVariables, { requestPolicy: 'network-only' }).toPromise()
   }
 
   isResolving (config: CloudExecuteQuery) {
@@ -336,4 +356,61 @@ export class CloudDataSource {
   getCloudUrl (env: keyof typeof REMOTE_SCHEMA_URLS) {
     return REMOTE_SCHEMA_URLS[env]
   }
+
+  /**
+   * Creates a non-caching batch-loader, used to aggregate multiple remote GraphQL
+   * requests and rewrite them into a single query issued against the remote server.
+   * https://www.graphql-tools.com/docs/batch-execution
+   */
+  #makeBatchExecutionBatcher () {
+    return new DataLoader<CloudExecuteRemote, any>(async (toBatch) => {
+      return Promise.allSettled(toBatch.map((b) => {
+        return this.#batchExecutor({
+          operationType: 'query',
+          document: b.operationDoc,
+          variables: b.operationVariables,
+        })
+      })).then((val) => val.map((v) => v.status === 'fulfilled' ? v.value : this.#ensureError(v.reason)))
+    }, {
+      cache: false,
+    })
+  }
+
+  #ensureError (val: any): Error {
+    return val instanceof Error ? val : new Error(val)
+  }
+}
+
+/**
+ * Adds "batchExecutionQuery" to the query that we generate from the batch loader,
+ * useful to key off of in the tests.
+ */
+function namedExecutionDocument (document: DocumentNode) {
+  let hasReplaced = false
+
+  return visit(document, {
+    enter () {
+      if (hasReplaced) {
+        return false
+      }
+
+      return
+    },
+    OperationDefinition (op) {
+      if (op.name) {
+        return op
+      }
+
+      hasReplaced = true
+      const namedOperationNode: OperationDefinitionNode = {
+        ...op,
+        name: {
+          kind: 'Name',
+          value: 'batchTestRunnerExecutionQuery',
+        },
+      }
+
+      return namedOperationNode
+    },
+  })
 }
