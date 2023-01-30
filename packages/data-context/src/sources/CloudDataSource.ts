@@ -402,11 +402,26 @@ function namedExecutionDocument (document: DocumentNode) {
       }
 
       hasReplaced = true
+
+      const selectionSet = new Set()
+
+      op.selectionSet.selections.forEach((s) => {
+        if (s.kind === 'Field') {
+          selectionSet.add(s.name.value)
+        }
+      })
+
+      let operationName = 'batchTestRunnerExecutionQuery'
+
+      if (selectionSet.size > 0) {
+        operationName = `${operationName}_${Array.from(selectionSet).sort().join('_')}`
+      }
+
       const namedOperationNode: OperationDefinitionNode = {
         ...op,
         name: {
           kind: 'Name',
-          value: 'batchTestRunnerExecutionQuery',
+          value: operationName,
         },
       }
 
