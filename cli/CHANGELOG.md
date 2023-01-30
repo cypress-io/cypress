@@ -9,6 +9,7 @@ _Released 01/31/2023 (PENDING)_
   Fixes [#25455](https://github.com/cypress-io/cypress/issues/25455).
 
 **Performance:**
+
 - Improved memory consumption in `run` mode by removing reporter logs for successful tests. 
   Fixes [#25230](https://github.com/cypress-io/cypress/issues/25230).
 
