@@ -1,4 +1,15 @@
  <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+
+## 12.5.0
+
+_Released 02/13/2023_
+
+**Experimental Breaking Changes:**
+
+- Added `Cypress.require()` for including dependencies within the `cy.origin()`
+callback.  Removed support for `require()` and `import()` within the callback.
+Addresses [#24976](https://github.com/cypress-io/cypress/issues/24976).
+
 ## 12.4.1
 
 _Released 01/27/2023_
