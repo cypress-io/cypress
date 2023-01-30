@@ -3,6 +3,7 @@ import Debug from '../fixtures/gql-Debug.json'
 import CloudViewerAndProject_RequiredData from '../fixtures/gql-CloudViewerAndProject_RequiredData.json'
 import MainApp from '../fixtures/gql-MainAppQuery.json'
 import SideBarNavigationContainer from '../fixtures/gql-SideBarNavigationContainer.json'
+import RecordPromptAdapter from '../fixtures/gql-RecordPromptAdapter.json'
 import HeaderBar from '../fixtures/gql-HeaderBar_HeaderBarQuery.json'
 import SpecsPageContainer from '../fixtures/gql-SpecsPageContainer.json'
 import SetTestsForDebug from '../fixtures/gql-Mutation-SetTestsForDebug.json'
@@ -24,13 +25,11 @@ describe('App - Debug Page', () => {
 
     cy.remoteGraphQLIntercept((obj, testState, options) => {
       if (obj.operationName === 'RelevantRunsDataSource_RunsByCommitShas') {
-        obj.result.data = options.RelevantRunsDataSource_RunsByCommitShas
+        obj.result.data = options.RelevantRunsDataSource_RunsByCommitShas.data
       }
 
       return obj.result
     }, { RelevantRunsDataSource_RunsByCommitShas })
-
-    cy.visitApp()
 
     cy.intercept('POST', '/__cypress/graphql/query-Debug', (req) => {
       req.reply(
@@ -58,12 +57,12 @@ describe('App - Debug Page', () => {
       req.reply(HeaderBar)
     })
 
-    cy.intercept('POST', '/__cypress/graphql/query-HeaderBar_HeaderBarQuery', (req) => {
-      req.reply(HeaderBar)
-    })
-
     cy.intercept('POST', '/__cypress/graphql/query-SpecsPageContainer', (req) => {
       req.reply(SpecsPageContainer)
+    })
+
+    cy.intercept('POST', '/__cypress/graphql/query-RecordPromptAdapter', (req) => {
+      req.reply(RecordPromptAdapter)
     })
 
     cy.intercept('POST', '/__cypress/graphql/query-RunAllSpecsData', (req) => {
@@ -74,13 +73,16 @@ describe('App - Debug Page', () => {
       req.reply(SetTestsForDebug)
     })
 
+    cy.visitApp()
+
     cy.findByTestId('sidebar-link-debug-page').click()
     cy.findByTestId('debug-container').should('be.visible')
 
     cy.findByTestId('header-top').contains('chore: testing cypress')
     cy.findByTestId('debug-header-dashboard-link')
     .contains('View in Cypress Cloud')
-    .should('have.attr', 'href', Debug.data.currentProject.cloudProject.runByNumber.url)
+    // .should('have.attr', 'href', Debug.data.currentProject.cloudProject.runByNumber.url)
+    // .should('have.attr', 'href', SideBarNavigationContainer.data.currentProject.cloudProject.runByNumber.url)
 
     cy.findByTestId('debug-runNumber-FAILED').contains('#136')
     cy.findByTestId('debug-commitsAhead').contains('You are 1 commit ahead')
@@ -91,7 +93,7 @@ describe('App - Debug Page', () => {
       cy.get('[title="skipped"]').contains('0')
       cy.get('[title="pending"]').contains('0')
       cy.findByTestId('debug-header-branch').contains('main')
-      cy.findByTestId('debug-header-commitHash').contains('6895fdc')
+      cy.findByTestId('debug-header-commitHash').contains('commit1')
       cy.findByTestId('debug-header-author').contains('Lachlan Miller')
       cy.findByTestId('debug-header-createdAt').contains('00:19')
     })

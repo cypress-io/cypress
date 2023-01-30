@@ -127,8 +127,8 @@ async function makeE2ETasks () {
 
   let ctx: DataContext
   let testState: Record<string, any> = {}
-  let remoteGraphQLOptions: Record<string, any> = {}
   let remoteGraphQLIntercept: RemoteGraphQLInterceptor | undefined
+  let remoteGraphQLOptions: Record<string, any> | undefined
   let remoteGraphQLInterceptBatched: RemoteGraphQLBatchInterceptor | undefined
   let scaffoldedProjects = new Set<string>()
 
@@ -313,7 +313,7 @@ async function makeE2ETasks () {
                 result,
                 callCount: operationCount[operationName ?? 'unknown'],
                 Response,
-              }, testState, remoteGraphQLOptions))
+              }, testState, remoteGraphQLOptions ?? {}))
             } catch (e) {
               const err = e as Error
 
@@ -351,14 +351,12 @@ async function makeE2ETasks () {
       return null
     },
 
-    __internal_remoteGraphQLIntercept (payload: {
+    __internal_remoteGraphQLIntercept (args: {
       fn: string
-      options: Record<string, any>
+      remoteGraphQLOptions?: Record<string, any>
     }) {
-      const { fn, options } = payload
-
-      remoteGraphQLOptions = options
-      remoteGraphQLIntercept = new Function('console', 'obj', 'testState', 'options', `return (${fn})(obj, testState, options)`).bind(null, console) as RemoteGraphQLInterceptor
+      remoteGraphQLOptions = args.remoteGraphQLOptions
+      remoteGraphQLIntercept = new Function('console', 'obj', 'testState', 'remoteGraphQLOptions', `return (${args.fn})(obj, testState, remoteGraphQLOptions)`).bind(null, console) as RemoteGraphQLInterceptor
 
       return null
     },

@@ -1,16 +1,5 @@
 {
   "data": {
-    "localSettings": {
-      "preferences": {
-        "isSideNavigationOpen": true,
-        "isSpecsListOpen": false,
-        "autoScrollingEnabled": true,
-        "reporterWidth": 787,
-        "specListWidth": null,
-        "__typename": "LocalSettingsPreferences"
-      },
-      "__typename": "LocalSettings"
-    },
     "currentProject": {
       "id": "debug-test-project-id",
       "cloudProject": {
@@ -29,7 +18,6 @@
       "title": "frontend",
       "branch": "main",
       "__typename": "CurrentProject"
-    },
-    "invokedFromCli": true
+    }
   }
 }

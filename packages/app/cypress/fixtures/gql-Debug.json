@@ -1,10 +1,10 @@
 {
   "data": {
     "currentProject": {
-      "id": "Q3VycmVudFByb2plY3Q6L1VzZXJzL2xhY2hsYW5taWxsZXIvY29kZS9kdW1wL2VsZXV0aGVyaWEvcGFja2FnZXMvZnJvbnRlbmQ=",
+      "id": "debug-test-project-id",
       "cloudProject": {
         "__typename": "CloudProject",
-        "id": "Q2xvdWRQcm9qZWN0OnZncXJ3cA==",
+        "id": "cloud-project-test-id",
         "runByNumber": {
           "id": "Q2xvdWRSdW46TUdWZXhvQkRPNg==",
           "runNumber": 136,
@@ -12,7 +12,7 @@
           "status": "FAILED",
           "totalDuration": 19572,
           "commitInfo": {
-            "sha": "6895fdc09efd0d558b6e0b8e970a81012c831a13",
+            "sha": "commit1",
             "authorName": "Lachlan Miller",
             "summary": "chore: testing cypress",
             "branch": "main",

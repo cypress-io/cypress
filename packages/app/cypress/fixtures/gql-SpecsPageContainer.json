@@ -1,12 +1,12 @@
 {
   "data": {
     "currentProject": {
-      "id": "Q3VycmVudFByb2plY3Q6L1VzZXJzL2xhY2hsYW5taWxsZXIvY29kZS9kdW1wL2VsZXV0aGVyaWEvcGFja2FnZXMvZnJvbnRlbmQ=",
+      "id": "debug-test-project-id",
       "projectRoot": "/Users/lachlanmiller/code/dump/eleutheria/packages/frontend",
       "currentTestingType": "component",
       "cloudProject": {
         "__typename": "CloudProject",
-        "id": "Q2xvdWRQcm9qZWN0OnZncXJ3cA=="
+        "id": "cloud-project-test-id"
       },
       "specs": [
         {
@@ -34,7 +34,7 @@
             "data": {
               "__typename": "CloudProjectSpec",
               "id": "Q2xvdWRQcm9qZWN0U3BlYzp2Z3Fyd3A6YzNKakwyTnZiWEJ2Ym1WdWRITXZSR2xtWm1samRXeDBlVWwwWlcwdVkza3VkSE09",
-              "retrievedAt": "2023-01-30T02:51:43.811Z",
+              "retrievedAt": "2023-01-30T04:42:05.607Z",
               "averageDuration": 200,
               "isConsideredFlaky": false,
               "flakyStatus": {
@@ -210,10 +210,10 @@
           "relative": "src/components/InfoPanel/InfoPanel.cy.ts",
           "gitInfo": {
             "lastModifiedTimestamp": "2023-01-30 11:01:22 +1000",
-            "lastModifiedHumanReadable": "2 hours ago",
+            "lastModifiedHumanReadable": "4 hours ago",
             "author": "Lachlan Miller",
             "statusType": "unmodified",
-            "shortHash": "6895fdc",
+            "shortHash": "commit1",
             "subject": "chore: testing cypress",
             "__typename": "GitInfo"
           },
@@ -223,7 +223,7 @@
             "data": {
               "__typename": "CloudProjectSpec",
               "id": "Q2xvdWRQcm9qZWN0U3BlYzp2Z3Fyd3A6YzNKakwyTnZiWEJ2Ym1WdWRITXZTVzVtYjFCaGJtVnNMMGx1Wm05UVlXNWxiQzVqZVM1MGN3PT0=",
-              "retrievedAt": "2023-01-30T02:51:43.811Z",
+              "retrievedAt": "2023-01-30T04:42:05.608Z",
               "averageDuration": 1440.3,
               "isConsideredFlaky": false,
               "flakyStatus": {
@@ -747,7 +747,7 @@
       ],
       "savedState": {
         "firstOpened": 1674605493218,
-        "lastOpened": 1675047100072,
+        "lastOpened": 1675053721981,
         "lastProjectId": "vgqrwp",
         "specFilter": ""
       },

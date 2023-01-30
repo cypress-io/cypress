@@ -1,32 +1,34 @@
 {
-  "cloudProjectBySlug": {
-    "__typename": "CloudProject",
-    "id": "Q2xvdWRQcm9qZWN0OnZncXJ3cA==",
-    "runsByCommitShas": [
-      {
-        "id": "Q2xvdWRSdW46ajl4bjhYV05PbA==",
-        "runNumber": 130,
-        "status": "FAILED",
-        "commitInfo": {
-          "sha": "commit1",
-          "__typename": "CloudRunCommitInfo"
+  "data": {
+    "cloudProjectBySlug": {
+      "__typename": "CloudProject",
+      "id": "Q2xvdWRQcm9qZWN0OnZncXJ3cA==",
+      "runsByCommitShas": [
+        {
+          "id": "Q2xvdWRSdW46TUdWZXhvQkRPNg==",
+          "runNumber": 136,
+          "status": "FAILED",
+          "commitInfo": {
+            "sha": "commit2",
+            "__typename": "CloudRunCommitInfo"
+          },
+          "__typename": "CloudRun"
         },
-        "__typename": "CloudRun"
-      },
-      {
-        "id": "Q2xvdWRSdW46ajl4bjhYV05PbA==",
-        "runNumber": 131,
-        "status": "PASSED",
-        "commitInfo": {
-          "sha": "commit2",
-          "__typename": "CloudRunCommitInfo"
-        },
-        "__typename": "CloudRun"
-      }
-    ]
-  },
-  "pollingIntervals": {
-    "runsByCommitShas": 30,
-    "__typename": "CloudPollingIntervals"
+        {
+          "id": "Q2xvdWRSdW46ckdXb2wzbzJHVg==",
+          "runNumber": 134,
+          "status": "PASSED",
+          "commitInfo": {
+            "sha": "37fa5bfb9e774d00a03fe8f0d439f06ec70f533d",
+            "__typename": "CloudRunCommitInfo"
+          },
+          "__typename": "CloudRun"
+        }
+      ]
+    },
+    "pollingIntervals": {
+      "runsByCommitShas": 30,
+      "__typename": "CloudPollingIntervals"
+    }
   }
 }
