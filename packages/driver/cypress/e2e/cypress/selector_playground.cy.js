@@ -2,7 +2,7 @@ const { $ } = window.Cypress.$Cypress
 const SelectorPlayground = Cypress.SelectorPlayground
 
 const SELECTOR_DEFAULTS = [
-  'data-cy', 'data-test', 'data-testid', 'id', 'class', 'tag', 'attributes', 'nth-child',
+  'data-cy', 'data-test', 'data-testid', 'data-qa', 'id', 'class', 'tag', 'attributes', 'nth-child',
 ]
 
 describe('src/cypress/selector_playground', () => {

@@ -547,7 +547,7 @@ enum CodeGenType {
   component
   componentEmpty
   e2e
-  scaffoldIntegration
+  e2eExamples
 }
 
 enum CodeLanguageEnum {
@@ -800,6 +800,7 @@ enum ErrorTypeEnum {
   EXPERIMENTAL_SINGLE_TAB_RUN_MODE
   EXPERIMENTAL_STUDIO_E2E_ONLY
   EXPERIMENTAL_STUDIO_REMOVED
+  EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY
   EXTENSION_NOT_LOADED
   FIREFOX_COULD_NOT_CONNECT
   FIREFOX_GC_INTERVAL_REMOVED
@@ -1244,6 +1245,7 @@ type Mutation {
 
   """Dismisses a warning displayed by the frontend"""
   dismissWarning(id: ID!): Query
+  e2eExamples: [ScaffoldedFile!]!
 
   """user has finished migration component specs - move to next step"""
   finishedRenamingComponentSpecs: Query
@@ -1362,7 +1364,6 @@ type Mutation {
 
   """Reset the Wizard to the starting position"""
   resetWizard: Boolean!
-  scaffoldIntegration: [ScaffoldedFile!]!
   scaffoldTestingType: Query
   setAndLoadCurrentTestingType(testingType: TestingTypeEnum!): Query
 

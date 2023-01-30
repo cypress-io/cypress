@@ -44,6 +44,7 @@ import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from './cross-origi
 import { setupAutEventHandlers } from './cypress/aut_event_handlers'
 
 import type { CachedTestState } from '@packages/types'
+import * as cors from '@packages/network/lib/cors'
 
 const debug = debugFn('cypress:driver:cypress')
 
@@ -182,7 +183,11 @@ class $Cypress {
 
     // set domainName but allow us to turn
     // off this feature in testing
-    if (domainName && config.testingType === 'e2e') {
+    const shouldInjectDocumentDomain = cors.shouldInjectDocumentDomain(window.location.origin, {
+      skipDomainInjectionForDomains: config.experimentalSkipDomainInjection,
+    })
+
+    if (domainName && config.testingType === 'e2e' && shouldInjectDocumentDomain) {
       document.domain = domainName
     }
 

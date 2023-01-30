@@ -415,7 +415,7 @@ export class ProjectActions {
 
     switch (this.ctx.coreData.currentTestingType) {
       case 'e2e':
-        return hasNonExampleSpec(templates.scaffoldIntegration, specs)
+        return hasNonExampleSpec(templates.e2eExamples, specs)
       case 'component':
         return specs.length > 0
       case null:

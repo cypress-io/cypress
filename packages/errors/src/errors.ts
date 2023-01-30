@@ -601,8 +601,12 @@ export const AllCypressErrors = {
 
         - You wrote an endless loop and you must fix your own code
         - You are running Docker (there is an easy fix for this: see link below)
-        - You are running lots of tests on a memory intense application
-        - You are running in a memory starved VM environment
+        - You are running lots of tests on a memory intense application.
+            - Try enabling ${fmt.highlight('experimentalMemoryManagement')} in your config file.
+            - Try lowering ${fmt.highlight('numTestsKeptInMemory')} in your config file.
+        - You are running in a memory starved VM environment.
+            - Try enabling ${fmt.highlight('experimentalMemoryManagement')} in your config file.
+            - Try lowering ${fmt.highlight('numTestsKeptInMemory')} in your config file.
         - There are problems with your GPU / GPU drivers
         - There are browser bugs in Chromium
 
@@ -1182,6 +1186,20 @@ export const AllCypressErrors = {
 
     return errTemplate`\
         The ${fmt.highlight(`experimentalOriginDependencies`)} experiment is currently only supported for End to End Testing and must be configured as an e2e testing type property: ${fmt.highlightSecondary(`e2e.experimentalOriginDependencies`)}.
+
+        ${fmt.code(code)}`
+  },
+  EXPERIMENTAL_USE_DEFAULT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
+    const code = errPartial`
+    {
+      e2e: {
+        experimentalSkipDomainInjection: ['*.salesforce.com', '*.force.com', '*.google.com', 'google.com']
+      },
+    }`
+
+    return errTemplate`\
+        The ${fmt.highlight(`experimentalSkipDomainInjection`)} experiment is currently only supported for End to End Testing and must be configured as an e2e testing type property: ${fmt.highlightSecondary(`e2e.experimentalSkipDomainInjection`)}.
+        The suggested values are only a recommendation.
 
         ${fmt.code(code)}`
   },
