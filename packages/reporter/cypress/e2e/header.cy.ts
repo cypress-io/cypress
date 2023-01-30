@@ -8,10 +8,14 @@ describe('header', () => {
   let runner: EventEmitter
   let runnables: RootRunnable
 
-  function setupReporter (opts?: { testFilter: TestFilter, totalUnfilteredTests: number }) {
-    cy.fixture('runnables').then((_runnables) => {
-      runnables = _runnables
-    })
+  function setupReporter (opts?: { testFilter: TestFilter, totalUnfilteredTests: number, skipRunnableCreation?: boolean}) {
+    if (opts?.skipRunnableCreation) {
+      runnables = {}
+    } else {
+      cy.fixture('runnables').then((_runnables) => {
+        runnables = _runnables
+      })
+    }
 
     runner = new EventEmitter()
 
@@ -239,15 +243,17 @@ describe('header', () => {
   })
 
   describe('debug test filter', () => {
-    beforeEach(() => {
-      setupReporter({ testFilter: ['suite 1 test 2'], totalUnfilteredTests: 10 })
-    })
-
     it('displays debug filter when Cypress.testFilter is defined', () => {
+      setupReporter({ testFilter: ['suite 1 test 2'], totalUnfilteredTests: 10 })
       cy.spy(runner, 'emit').as('debugDismiss')
       cy.get('.debug-dismiss').contains(`8 / 10 tests`).click()
       cy.get('@debugDismiss').should('have.been.called')
       cy.percySnapshot()
+    })
+
+    it('does not display filter when there are no tests', () => {
+      setupReporter({ testFilter: ['suite 1 test 2'], totalUnfilteredTests: 10, skipRunnableCreation: true })
+      cy.get('.debug-dismiss').should('not.exist')
     })
   })
 })
