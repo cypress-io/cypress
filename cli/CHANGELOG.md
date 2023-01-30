@@ -2,11 +2,33 @@
 
 ## 12.5.0
 
-_Released 01/31/2023_
+_Released 01/31/2023 (PENDING)_
 
 **Features:**
 
-- Easily debug failed CI test runs from within the Cypress app with the new "Debug" page. For more details, see the [Debug documentation](https://on.cypress.io/debug-page).
+- Easily debug failed CI test runs from within the Cypress app with the new "Debug" page. For more details, see the [Debug documentation](https://on.cypress.io/debug-page). 
+  - Added "Debug" to the sidebar which includes badge to highlight the new page as well as show when there are failed tests that need to be fixed. Addresses [#24441](https://github.com/cypress-io/cypress/issues/24441) and [#24852](https://github.com/cypress-io/cypress/issues/24852).
+  - Added the "Debug" page. Addresses
+[#24442](https://github.com/cypress-io/cypress/issues/24442),
+[#24443](https://github.com/cypress-io/cypress/issues/24443),
+[#24444](https://github.com/cypress-io/cypress/issues/24444),
+[#24851](https://github.com/cypress-io/cypress/issues/24851),
+[#24852](https://github.com/cypress-io/cypress/issues/24852),
+[#24847](https://github.com/cypress-io/cypress/issues/24847),
+[#24854](https://github.com/cypress-io/cypress/issues/24854),
+[#24848](https://github.com/cypress-io/cypress/issues/24848),
+[#24853](https://github.com/cypress-io/cypress/issues/24853),
+[#24849](https://github.com/cypress-io/cypress/issues/24849),
+[#25352](https://github.com/cypress-io/cypress/issues/25352),
+[#25339](https://github.com/cypress-io/cypress/issues/25339),
+[#25319](https://github.com/cypress-io/cypress/issues/25319),
+[#25418](https://github.com/cypress-io/cypress/issues/25418),
+[#24440](https://github.com/cypress-io/cypress/issues/24440),
+[#25487](https://github.com/cypress-io/cypress/issues/25487),
+[#25543](https://github.com/cypress-io/cypress/issues/25543),
+[#25570](https://github.com/cypress-io/cypress/issues/25570) and
+[#25486](https://github.com/cypress-io/cypress/issues/25486).
+  - The test runner can be filtered to only run the tests that failed from the Cloud run being shown in the Debug page. Addresses [#24855](https://github.com/cypress-io/cypress/issues/24855).
 
 ## 12.4.1
 
