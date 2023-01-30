@@ -1,6 +1,7 @@
 <template>
   <div
     class="flex flex-col items-center"
+    data-cy="debug-passed"
   >
     <DashboardCheckmark class="icon-dark-gray-500" />
     <span class="font-medium mt-24px text-gray-900">
