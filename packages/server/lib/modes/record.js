@@ -587,8 +587,11 @@ const createRunAndRecordSpecs = (options = {}) => {
   // we want to normalize this to an array to send to API
   const tags = _.split(options.tag, ',')
 
-  return commitInfo.commitInfo(projectRoot)
-  .then((git) => {
+  return Promise.all([
+    commitInfo.commitInfo(projectRoot),
+    api.preflight({ projectId, ciBuildId, browser, specs }),
+  ])
+  .then(([git]) => {
     debugCiInfo('found the following git information')
     debugCiInfo(git)
 
