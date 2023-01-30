@@ -42,7 +42,7 @@ export function install (url: string, rewriter: RewritingStream, deferSourceMapR
     return rewriter.emitRaw(raw)
   })
 
-  rewriter.on('text', (_textToken, raw) => {
+  rewriter.on('text', (textToken, raw) => {
     if (!currentlyInsideJsScriptTag) {
       return rewriter.emitRaw(raw)
     }
@@ -51,6 +51,6 @@ export function install (url: string, rewriter: RewritingStream, deferSourceMapR
     // create a unique filename per inline script
     const fakeJsUrl = [url, inlineJsIndex++].join(':')
 
-    return rewriter.emitRaw(js.rewriteJs(fakeJsUrl, raw, deferSourceMapRewrite))
+    return rewriter.emitRaw(js.rewriteJs(fakeJsUrl, textToken.text, deferSourceMapRewrite))
   })
 }
