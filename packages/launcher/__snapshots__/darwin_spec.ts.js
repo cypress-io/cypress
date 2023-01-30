@@ -157,7 +157,10 @@ exports['darwin browser detection detects browsers as expected 1'] = [
     "channel": "canary",
     "displayName": "Edge Canary",
     "versionRegex": {},
-    "binary": "edge-canary",
+    "binary": [
+      "edge-canary",
+      "microsoft-edge-canary"
+    ],
     "minSupportedVersion": 79,
     "path": "/Applications/Microsoft Edge Canary.app/Contents/MacOS/Microsoft Edge Canary",
     "version": "someVersion",
@@ -174,7 +177,10 @@ exports['darwin browser detection detects browsers as expected 1'] = [
     "channel": "beta",
     "displayName": "Edge Beta",
     "versionRegex": {},
-    "binary": "edge-beta",
+    "binary": [
+      "edge-beta",
+      "microsoft-edge-beta"
+    ],
     "minSupportedVersion": 79,
     "path": "/Applications/Microsoft Edge Beta.app/Contents/MacOS/Microsoft Edge Beta",
     "version": "someVersion",

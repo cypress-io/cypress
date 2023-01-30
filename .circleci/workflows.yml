@@ -28,7 +28,7 @@ mainBuildFilters: &mainBuildFilters
       only:
         - develop
         - /^release\/\d+\.\d+\.\d+$/
-        - 'mschile/chrome_memory_fix'
+        - 'emily/next-version'
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
@@ -41,6 +41,7 @@ macWorkflowFilters: &darwin-workflow-filters
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
+
 linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
@@ -129,7 +130,7 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "mschile/chrome_memory_fix" ]]; then
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "emily/next-version" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
@@ -1431,14 +1432,17 @@ jobs:
           path: packages/errors/__snapshot-images__
       - store-npm-logs
 
-  unit-tests-release:
+  verify-release-readiness:
     <<: *defaults
     resource_class: small
     parallelism: 1
+    environment:
+      GITHUB_TOKEN: $GH_TOKEN
     steps:
       - restore_cached_workspace
       - update_known_hosts
       - run: yarn test-npm-package-release-script
+      - run: node ./scripts/semantic-commits/validate-binary-changelog.js
 
   lint-types:
     <<: *defaults
@@ -2373,7 +2377,7 @@ linux-x64-workflow: &linux-x64-workflow
     - unit-tests:
         requires:
           - build
-    - unit-tests-release:
+    - verify-release-readiness:
         context: test-runner:npm-release
         requires:
           - build
@@ -2547,7 +2551,7 @@ linux-x64-workflow: &linux-x64-workflow
           - server-unit-tests
           - test-kitchensink
           - unit-tests
-          - unit-tests-release
+          - verify-release-readiness
           - cli-visual-tests
           - reporter-integration-tests
           - run-app-component-tests-chrome
