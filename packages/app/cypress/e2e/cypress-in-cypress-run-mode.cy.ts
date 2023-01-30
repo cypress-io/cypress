@@ -1,10 +1,12 @@
+import { CY_IN_CY_SIMULATE_RUN_MODE } from '@packages/types/src/constants'
+
 describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
   it('e2e run mode spec runner header is correct', () => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.findBrowsers()
     cy.openProject('cypress-in-cypress')
     cy.startAppServer()
-    cy.visitApp('/specs/runner?file=cypress/e2e/dom-content.spec.js&CY_IN_CY_SIMULATE_RUN_MODE')
+    cy.visitApp(`/specs/runner?file=cypress/e2e/dom-content.spec.js&${CY_IN_CY_SIMULATE_RUN_MODE}`)
 
     cy.waitForSpecToFinish()
 
@@ -35,7 +37,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.findBrowsers()
     cy.openProject('cypress-in-cypress')
     cy.startAppServer('component')
-    cy.visitApp('/specs/runner?file=src/TestComponent.spec.jsx&CY_IN_CY_SIMULATE_RUN_MODE')
+    cy.visitApp(`/specs/runner?file=src/TestComponent.spec.jsx&${CY_IN_CY_SIMULATE_RUN_MODE}`)
 
     cy.waitForSpecToFinish()
     cy.findByTestId('aut-url').should('not.exist')
@@ -75,7 +77,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
       })
     })
 
-    cy.visitApp('/specs/runner?file=cypress/e2e/dom-content.spec.js&CY_IN_CY_SIMULATE_RUN_MODE')
+    cy.visitApp(`/specs/runner?file=cypress/e2e/dom-content.spec.js&${CY_IN_CY_SIMULATE_RUN_MODE}`)
 
     cy.contains('http://localhost:4455/cypress/e2e/dom-content.html').should('be.visible')
     cy.findByLabelText('Stats').should('not.exist')
