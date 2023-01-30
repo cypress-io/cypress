@@ -6,8 +6,8 @@ _Released 01/31/2023 (PENDING)_
 
 **Features:**
 
-- Easily debug failed CI test runs from within the Cypress app with the new "Debug" page. For more details, see the [Debug documentation](https://on.cypress.io/debug-page). 
-  - Added "Debug" to the sidebar which includes a badge to highlight the new page as well as show a count of failed tests that need to be fixed. Addresses [#24441](https://github.com/cypress-io/cypress/issues/24441) and [#24852](https://github.com/cypress-io/cypress/issues/24852).
+- Easily debug failed CI test runs from within the Cypress app with the new Debug page. For more details, see the [Debug documentation](https://on.cypress.io/debug-page).
+  - Added Debug to the sidebar which includes a dynamic badge that shows a count of failed tests that need to be fixed. Addresses [#24441](https://github.com/cypress-io/cypress/issues/24441) and [#24852](https://github.com/cypress-io/cypress/issues/24852).
   - Added the "Debug" page. Addresses
 [#24442](https://github.com/cypress-io/cypress/issues/24442),
 [#24443](https://github.com/cypress-io/cypress/issues/24443),
