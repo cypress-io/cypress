@@ -130,7 +130,7 @@ import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import RefreshIcon from '~icons/cy/action-restart_x16'
 import { useRoute } from 'vue-router'
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch, Ref } from 'vue'
 import RequestAccessButton from './RequestAccessButton.vue'
 import { gql, useSubscription } from '@urql/vue'
 import { SpecsListBannersFragment, SpecsListBanners_CheckCloudOrgMembershipDocument } from '../generated/graphql'
@@ -138,7 +138,7 @@ import { AllowedState, BannerIds } from '@packages/types'
 import { LoginBanner, CreateOrganizationBanner, ConnectProjectBanner, RecordBanner } from './banners'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import { usePromptManager } from '@packages/frontend-shared/src/gql-components/composables/usePromptManager'
-import { CohortConfig, useCohorts } from '@packages/frontend-shared/src/gql-components/composables/useCohorts'
+import { CohortConfig, CohortOption, useCohorts } from '@packages/frontend-shared/src/gql-components/composables/useCohorts'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -248,27 +248,31 @@ watch(cloudData, () => {
 },
 { immediate: true })
 
-const bannerCohortOptions = {
+type BannerKeys = keyof typeof BannerIds
+type BannerId = typeof BannerIds[BannerKeys]
+type BannerCohortOptions = Partial<Record<BannerId, CohortOption[]>>
+
+const bannerCohortOptions: BannerCohortOptions = {
   [BannerIds.ACI_082022_LOGIN]: [
-    { cohort: 'A', value: t('specPage.banners.login.contentA') },
-    { cohort: 'B', value: t('specPage.banners.login.contentB') },
+    // Campaign ended in v12.4.0, see GH issue #24472
+    { cohort: '', value: t('specPage.banners.login.content') },
   ],
   [BannerIds.ACI_082022_CREATE_ORG]: [
-    { cohort: 'A', value: t('specPage.banners.createOrganization.titleA') },
-    { cohort: 'B', value: t('specPage.banners.createOrganization.titleB') },
+    // Campaign ended in v12.4.0, see GH issue #24472
+    { cohort: '', value: t('specPage.banners.createOrganization.title') },
   ],
   [BannerIds.ACI_082022_CONNECT_PROJECT]: [
-    { cohort: 'A', value: t('specPage.banners.connectProject.contentA') },
-    { cohort: 'B', value: t('specPage.banners.connectProject.contentB') },
+    // Campaign ended in v12.4.0, see GH issue #24472
+    { cohort: '', value: t('specPage.banners.connectProject.content') },
   ],
 }
 
 const cohortBuilder = useCohorts()
 
-const getCohortForBanner = (bannerId: string) => {
+const getCohortForBanner = (bannerId: BannerId): Ref<CohortOption | undefined> => {
   const cohortConfig: CohortConfig = {
     name: bannerId,
-    options: bannerCohortOptions[bannerId],
+    options: bannerCohortOptions[bannerId] || [],
   }
 
   return cohortBuilder.getCohort(cohortConfig)
