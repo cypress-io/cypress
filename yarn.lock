@@ -5994,11 +5994,6 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
-"@types/base64-url@^2.2.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@types/base64-url/-/base64-url-2.2.0.tgz#ff17c19bf357821bd637af2f54f7922443377950"
-  integrity sha512-adGV3KUTc9uO7kZNQOF3u9WVuKZsgKPsaShZePe+hQXNYd+3dnIK+Y2Wyw7A6M4iIH01xKCRZCZWLQnG9bulIQ==
-
 "@types/bluebird@*", "@types/bluebird@3.5.33":
   version "3.5.33"
   resolved "https://registry.yarnpkg.com/@types/bluebird/-/bluebird-3.5.33.tgz#d79c020f283bd50bd76101d7d300313c107325fc"
@@ -9268,11 +9263,6 @@ base64-js@^1.0.2, base64-js@^1.3.1, base64-js@^1.5.1:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.5.1.tgz#1b1b440160a5bf7ad40b650f095963481903930a"
   integrity sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==
-
-base64-url@^2.3.3:
-  version "2.3.3"
-  resolved "https://registry.yarnpkg.com/base64-url/-/base64-url-2.3.3.tgz#645b71455c75109511f27d98450327e455f488ec"
-  integrity sha512-dLMhIsK7OplcDauDH/tZLvK7JmUZK3A7KiQpjNzsBrM6Etw7hzNI1tLEywqJk9NnwkgWuFKSlx/IUO7vF6Mo8Q==
 
 base64id@2.0.0, base64id@~2.0.0:
   version "2.0.0"
