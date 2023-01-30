@@ -695,7 +695,7 @@ function screenshotMetadata (data, resp) {
 async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, headed: boolean, outputPath: string, specs: SpecWithRelativeRoot[], specPattern: string | RegExp | string[], beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean, group?: string, tag?: string, autoCancelAfterFailures?: number | false, testingType: TestingType, quiet: boolean, project: Project, onError: (err: Error) => void, exit: boolean, socketId: string, webSecurity: boolean, projectRoot: string } & Pick<Cfg, 'video' | 'videoCompression' | 'videosFolder' | 'videoUploadOnPasses'>) {
   if (globalThis.CY_TEST_MOCK?.runSpecs) return globalThis.CY_TEST_MOCK.runSpecs
 
-  const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag, testingType, autoCancelAfterFailures } = options
+  const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag, autoCancelAfterFailures } = options
 
   const isHeadless = !headed
 
@@ -815,10 +815,6 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
       screenshots: remove,
     })),
   })
-
-  if (testingType === 'component') {
-    await openProject.closeBrowser()
-  }
 
   await runEvents.execute('after:run', config, moduleAPIResults)
   await writeOutput(outputPath, moduleAPIResults)
