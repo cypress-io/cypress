@@ -7,6 +7,10 @@ const { getCurrentReleaseData } = require('./get-current-release-data')
 const { getNextVersionForBinary } = require('../get-next-version')
 const { getLinkedIssues } = require('./get-linked-issues')
 
+if (process.env.CIRCLECI && !process.env.GITHUB_TOKEN) {
+  throw new Error('The GITHUB_TOKEN env is not set.')
+}
+
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN })
 
 /**

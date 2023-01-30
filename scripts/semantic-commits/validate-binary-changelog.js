@@ -12,7 +12,7 @@ const changelog = async () => {
 
     const hasVersionBump = checkedInBinaryVersion !== latestReleaseInfo.version
 
-    if (process.env.CIRCLE_BRANCH !== 'develop' && !/^release\/\d+\.\d+\.\d+$/.test(process.env.CIRCLE_BRANCH) && !hasVersionBump) {
+    if (process.env.CIRCLE_BRANCH !== 'develop' && process.env.CIRCLE_BRANCH !== 'emily/changelog' && !/^release\/\d+\.\d+\.\d+$/.test(process.env.CIRCLE_BRANCH) && !hasVersionBump) {
       console.log('Only verify the entire changelog for develop, a release branch or any branch that bumped to the Cypress version in the package.json.')
 
       return
