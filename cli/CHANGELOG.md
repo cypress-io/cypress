@@ -7,6 +7,8 @@ _Released 01/31/2023 (PENDING)_
 
 - Fixed an issue where alternative Microsoft Edge Beta, Canary, and Dev binary versions were not being discovered by Cypress. 
   Fixes [#25455](https://github.com/cypress-io/cypress/issues/25455).
+- Improved memory consumption in `run` mode by removing reporter logs for successful tests. 
+  Fixes [#25230]https://github.com/cypress-io/cypress/issues/25230
 
 ## 12.4.1
 
