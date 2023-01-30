@@ -1,23 +1,15 @@
  <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 12.4.1
 
-_Released 01/31/2023 (PENDING)_
+_Released 01/27/2023_
 
 **Bugfixes:**
 
-- Fixed a regression from Cypress 12.4.0 where Cypress was not exiting properly when running multiple Component Testing specs in `electron` in `run` mode.
-  Fixes [#25568](https://github.com/cypress-io/cypress/issues/25568).
-- Fixed an issue where alternative Microsoft Edge Beta and Canary binary names were not being discovered by Cypress. 
-  Fixes [#25455](https://github.com/cypress-io/cypress/issues/25455).
+- Fixed a regression from Cypress [12.4.0](https://docs.cypress.io/guides/references/changelog#12-4-0) where Cypress was not exiting properly when running multiple Component Testing specs in `electron` in `run` mode. Fixes [#25568](https://github.com/cypress-io/cypress/issues/25568).
 
 **Dependency Updates:**
 
-- Upgraded [`ua-parser-js`](https://github.com/faisalman/ua-parser-js) from `0.7.24`
-  to `0.7.33` to address this
-  [security vulnerability](https://github.com/faisalman/ua-parser-js/security/advisories/GHSA-fhg7-m89q-25r3)
-  where crafting a very-very-long user-agent string with specific pattern, an attacker can turn the script to 
-  get stuck processing for a very long time which results in a denial of service (DoS) condition. 
-  Addressed in [#25561](https://github.com/cypress-io/cypress/pull/25561).
+- Upgraded [`ua-parser-js`](https://github.com/faisalman/ua-parser-js) from `0.7.24` to `0.7.33` to address this [security vulnerability](https://github.com/faisalman/ua-parser-js/security/advisories/GHSA-fhg7-m89q-25r3) where crafting a very-very-long user-agent string with specific pattern, an attacker can turn the script to get stuck processing for a very long time which results in a denial of service (DoS) condition. Addressed in [#25561](https://github.com/cypress-io/cypress/pull/25561).
 
 ## 12.4.0
 
