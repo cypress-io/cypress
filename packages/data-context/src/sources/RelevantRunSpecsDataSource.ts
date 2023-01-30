@@ -206,6 +206,13 @@ export class RelevantRunSpecsDataSource {
         //if statuses change, then let debug page know to refresh runs
         if (statusesChanged) {
           debug('Run statuses changed')
+          const projectSlug = await this.ctx.project.projectId()
+
+          if (projectSlug) {
+            debug(`Invalidate cloudProjectBySlug ${projectSlug}`)
+            await this.ctx.cloud.invalidate('Query', 'cloudProjectBySlug', { slug: projectSlug })
+          }
+
           this.ctx.emitter.relevantRunChange(runs)
         }
       })
