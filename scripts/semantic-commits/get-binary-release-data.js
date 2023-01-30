@@ -11,7 +11,7 @@ if (process.env.CIRCLECI && !process.env.GITHUB_TOKEN) {
   throw new Error('The GITHUB_TOKEN env is not set.')
 }
 
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN })
+const octokit = new Octokit({ auth: process.env.GH_TOKEN })
 
 /**
  * Get the list of file names that have been added, deleted or changed since the git
