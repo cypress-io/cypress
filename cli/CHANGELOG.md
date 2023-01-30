@@ -1,12 +1,12 @@
- <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+<!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 
-## 12.4.2
+## 13.0.0
 
 _Released 01/31/2023 (PENDING)_
 
-**Misc**
+**Breaking Changes**
 
-- `cy.readFile()` is now a [query command](https://on.cypress.io/retry-ability). This should not affect any tests using it; the functionality is unchanged. This is a prerequisite to address [#25134](https://github.com/cypress-io/cypress/issues/25134) in a future release.
+- `cy.readFile()` is now a [query command](https://on.cypress.io/retry-ability). This should not affect any tests using it; the functionality is unchanged. However, it can no longer be overwritten using `Cypress.Commands.overwrite()` This is a prerequisite to address [#25134](https://github.com/cypress-io/cypress/issues/25134).
 
 ## 12.4.1
 
