@@ -241,7 +241,7 @@ async function makeE2ETasks () {
 
           operationCount[operationName ?? 'unknown']++
 
-          if (operationName === 'batchTestRunnerExecutionQuery' && remoteGraphQLInterceptBatched) {
+          if (operationName?.startsWith('batchTestRunnerExecutionQuery') && remoteGraphQLInterceptBatched) {
             const fn = remoteGraphQLInterceptBatched
             const keys: string[] = []
             const values: Promise<any>[] = []

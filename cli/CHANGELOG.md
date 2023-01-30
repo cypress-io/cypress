@@ -30,6 +30,11 @@ _Released 01/31/2023 (PENDING)_
 [#25486](https://github.com/cypress-io/cypress/issues/25486).
   - The test runner can be filtered to only run the tests that failed from the Cloud run being shown in the Debug page. Addresses [#24855](https://github.com/cypress-io/cypress/issues/24855).
 
+**Bugfixes:**
+
+- Fixed an issue where alternative Microsoft Edge Beta, Canary, and Dev binary versions were not being discovered by Cypress. 
+  Fixes [#25455](https://github.com/cypress-io/cypress/issues/25455).
+
 ## 12.4.1
 
 _Released 01/27/2023_
