@@ -36,7 +36,7 @@ export const useRunAllSpecsStore = defineStore('runAllSpecs', () => {
 
   const separator = getSeparator()
   const router = useRouter()
-  const query = useQuery({ query: RunAllSpecsDataDocument, pause: isRunMode() })
+  const query = useQuery({ query: RunAllSpecsDataDocument, pause: isRunMode })
   const setRunAllSpecsMutation = useMutation(RunAllSpecsDocument)
 
   async function runSpecs (runAllSpecs: string[]) {

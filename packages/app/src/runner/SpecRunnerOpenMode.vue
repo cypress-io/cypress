@@ -35,7 +35,7 @@
       @panel-width-updated="handlePanelWidthUpdated"
     >
       <template #panel1="{isDragging}">
-        <HideDuringScreenshotOrRunMode
+        <HideDuringScreenshot
           v-if="props.gql.currentProject"
           v-show="runnerUiStore.isSpecsListOpen"
           id="inline-spec-list"
@@ -52,7 +52,7 @@
             @close="runnerUiStore.setShowChooseExternalEditorModal(false)"
             @selected="openFile"
           />
-        </HideDuringScreenshotOrRunMode>
+        </HideDuringScreenshot>
       </template>
       <template #panel2>
         <HideDuringScreenshot
@@ -121,7 +121,6 @@ import type { SpecRunnerFragment } from '../generated/graphql'
 import { usePreferences } from '../composables/usePreferences'
 import ScriptError from './ScriptError.vue'
 import ResizablePanels from './ResizablePanels.vue'
-import HideDuringScreenshotOrRunMode from './screenshot/HideDuringScreenshotOrRunMode.vue'
 import AutomationElement from './automation/AutomationElement.vue'
 import { useResizablePanels, useRunnerStyle } from './useRunnerStyle'
 import { useEventManager } from './useEventManager'

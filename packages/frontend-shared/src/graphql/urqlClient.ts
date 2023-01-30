@@ -100,7 +100,6 @@ declare global {
      */
     __CYPRESS_GQL_NO_SOCKET__?: string
     __CYPRESS_MODE__: 'run' | 'open'
-    __CYPRESS_SIMULATE_RUN_MODE_FOR_CY_IN_CY_TEST__?: boolean
     __RUN_MODE_SPECS__: SpecFile[]
     __CYPRESS_TESTING_TYPE__: 'e2e' | 'component'
     __CYPRESS_BROWSER__: Partial<Browser> & {majorVersion: string | number}

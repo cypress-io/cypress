@@ -4,11 +4,8 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.findBrowsers()
     cy.openProject('cypress-in-cypress')
     cy.startAppServer()
-    cy.visitApp()
+    cy.visitApp('/specs/runner?file=cypress/e2e/dom-content.spec.js&CY_IN_CY_SIMULATE_RUN_MODE')
 
-    simulateRunModeInUI()
-
-    cy.contains('dom-content.spec').click()
     cy.waitForSpecToFinish()
 
     cy.findByTestId('aut-url').should('be.visible')
@@ -20,7 +17,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
 
     // confirm expected content is rendered
     cy.contains('1000x660').should('be.visible')
-    cy.contains('65%').should('be.visible')
+    cy.contains('71%').should('be.visible')
     cy.contains('Chrome 1').should('be.visible')
     cy.contains('http://localhost:4455/cypress/e2e/dom-content.html').should('be.visible')
 
@@ -33,15 +30,13 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
   })
 
-  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23306
-  it('component testing run mode spec runner header is correct', { retries: 0 }, () => {
+  it('component testing run mode spec runner header is correct', () => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.findBrowsers()
     cy.openProject('cypress-in-cypress')
     cy.startAppServer('component')
-    cy.visitApp()
-    simulateRunModeInUI()
-    cy.contains('TestComponent.spec').click()
+    cy.visitApp('/specs/runner?file=src/TestComponent.spec.jsx&CY_IN_CY_SIMULATE_RUN_MODE')
+
     cy.waitForSpecToFinish()
     cy.findByTestId('aut-url').should('not.exist')
     cy.findByTestId('playground-activator').should('not.exist')
@@ -80,9 +75,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
       })
     })
 
-    cy.visitApp()
-    simulateRunModeInUI()
-    cy.contains('dom-content.spec').click()
+    cy.visitApp('/specs/runner?file=cypress/e2e/dom-content.spec.js&CY_IN_CY_SIMULATE_RUN_MODE')
 
     cy.contains('http://localhost:4455/cypress/e2e/dom-content.html').should('be.visible')
     cy.findByLabelText('Stats').should('not.exist')
@@ -91,13 +84,3 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.findByTestId('sidebar').should('not.exist')
   })
 })
-
-function simulateRunModeInUI () {
-  // this simulates run mode enough for this test
-  cy.window().then((win) => {
-    win.__CYPRESS_SIMULATE_RUN_MODE_FOR_CY_IN_CY_TEST__ = true
-    cy.get('body').then(($el) => {
-      $el.find('[data-cy="sidebar"]')?.remove()
-    })
-  })
-}

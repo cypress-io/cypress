@@ -5,7 +5,7 @@
     />
   </router-view>
 
-  <template v-if="!isRunMode()">
+  <template v-if="!isRunMode">
     <!--
       avoiding graphql in run mode
     -->

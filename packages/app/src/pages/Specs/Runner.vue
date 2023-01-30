@@ -7,7 +7,7 @@
       It also has no GraphQL dependency.
     -->
     <SpecRunnerContainerRunMode
-      v-if="isRunMode()"
+      v-if="isRunMode"
       :run-mode-specs="specs"
     />
 
@@ -67,7 +67,7 @@ subscription Runner_ConfigChange {
 // subscriptions so they never execute.
 useSubscription({
   query: SpecPageContainer_SpecsChangeDocument,
-  pause: isRunMode(),
+  pause: isRunMode,
 })
 
 // in run mode, we are not using GraphQL or urql
@@ -77,7 +77,7 @@ useSubscription({
 // requests, which is what we want.
 const query = useQuery({
   query: SpecPageContainerDocument,
-  pause: isRunMode(),
+  pause: isRunMode,
 })
 
 let initialLoad = true

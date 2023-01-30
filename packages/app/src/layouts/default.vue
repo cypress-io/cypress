@@ -110,6 +110,6 @@ const resetErrorAndLoadConfig = (id: string) => {
   }
 }
 
-const renderSidebar = !isRunMode()
+const renderSidebar = !isRunMode
 
 </script>
