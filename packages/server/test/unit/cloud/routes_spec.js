@@ -38,14 +38,6 @@ describe('lib/cloud/routes', () => {
       expect(apiRoutes.instanceResults(123)).to.eq('http://localhost:1234/instances/123/results')
     })
 
-    it('projects', () => {
-      expect(apiRoutes.projects()).to.eq('http://localhost:1234/projects')
-    })
-
-    it('project', () => {
-      expect(apiRoutes.project('123-foo')).to.eq('http://localhost:1234/projects/123-foo')
-    })
-
     it('exceptions', () => {
       expect(apiRoutes.exceptions()).to.eq('http://localhost:1234/exceptions')
     })
