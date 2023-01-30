@@ -8,6 +8,11 @@ _Released 01/31/2023 (PENDING)_
 - Fixed an issue where alternative Microsoft Edge Beta, Canary, and Dev binary versions were not being discovered by Cypress. 
   Fixes [#25455](https://github.com/cypress-io/cypress/issues/25455).
 
+**Dependency Updates:**
+
+- Upgraded [`underscore.string`](https://github.com/esamattis/underscore.string/blob/HEAD/CHANGELOG.markdown) from `3.3.5` to `3.3.6` to reference rebuilt assets after security patch to fix regular expression DDOS exploit. 
+  Fixed in [#25574](https://github.com/cypress-io/cypress/pull/25574).
+
 ## 12.4.1
 
 _Released 01/27/2023_
