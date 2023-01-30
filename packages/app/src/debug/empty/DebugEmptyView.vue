@@ -7,7 +7,12 @@
           {{ title }}
         </div>
         <div class="font-normal my-5px text-center leading-relaxed text-16px text-gray-600">
-          {{ description }}
+          {{ description }} <ExternalLink
+            v-if="helpLinkText && helpLinkHref"
+            :href="helpLink"
+          >
+            {{ helpLinkText }}
+          </ExternalLink>
         </div>
       </div>
       <slot name="cta" />
@@ -41,12 +46,26 @@
 
 <script lang="ts" setup>
 import DebugTestLoadingContainer from './DebugTestLoadingContainer.vue'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
+import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
 
-defineProps<{
+const props = defineProps<{
   title: string
   description?: string
   exampleTestName?: string
+  helpLinkText?: string
+  helpLinkHref?: string
 }>()
+
+const helpLink = getUrlWithParams({
+  url: props.helpLinkHref || '',
+  params: {
+    utm_source: getUtmSource(),
+    utm_medium: 'Debug Tab',
+    utm_campaign: 'Learn More',
+  },
+})
 
 const loadingRows = [
   ['w-40px', 'w-[40%]'],

@@ -1,5 +1,5 @@
 import type { PushFragmentData } from '@packages/data-context/src/actions'
-import { list, nonNull, objectType, stringArg, subscriptionType } from 'nexus'
+import { enumType, list, nonNull, objectType, stringArg, subscriptionType } from 'nexus'
 import { CurrentProject, DevState, Query } from '.'
 import { Spec } from './gql-Spec'
 import { RelevantRun } from './gql-RelevantRun'
@@ -129,8 +129,14 @@ export const Subscription = subscriptionType({
     t.field('relevantRuns', {
       type: RelevantRun,
       description: 'Subscription that polls the cloud for new relevant runs that match local git commit hashes',
+      args: {
+        location: nonNull(enumType({
+          name: 'RelevantRunLocationEnum',
+          members: ['DEBUG', 'SIDEBAR'],
+        })),
+      },
       subscribe: (source, args, ctx) => {
-        return ctx.relevantRuns.pollForRuns()
+        return ctx.relevantRuns.pollForRuns(args.location)
       },
       resolve: async (root, args, ctx) => {
         return root

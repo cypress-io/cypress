@@ -107,7 +107,7 @@ import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.pn
 import { useI18n } from '@cy/i18n'
 import { useRoute } from 'vue-router'
 import SidebarNavigationHeader from './SidebarNavigationHeader.vue'
-import { useWindowSize } from '@vueuse/core'
+import { useDebounceFn, useWindowSize } from '@vueuse/core'
 import { useLoginConnectStore } from '@packages/frontend-shared/src/store/login-connect-store'
 import { isAllowedFeature } from '@packages/frontend-shared/src/utils/isAllowedFeature'
 
@@ -165,9 +165,17 @@ const NAV_EXPAND_MIN_SCREEN_WIDTH = 1024
 
 const loginConnectStore = useLoginConnectStore()
 
-const debugBadge = computed<Badge | undefined>(() => {
-  if (props.isLoading) {
-    return undefined
+const debugBadge = ref<Badge | undefined>()
+
+const setDebugBadge = useDebounceFn((badge) => {
+  debugBadge.value = badge
+}, 500)
+
+watchEffect(() => {
+  if (props.isLoading && loginConnectStore.project.isProjectConnected) {
+    setDebugBadge(undefined)
+
+    return
   }
 
   const showNewBadge = isAllowedFeature('debugNewBadge', loginConnectStore)
@@ -180,11 +188,15 @@ const debugBadge = computed<Badge | undefined>(() => {
     const { status, totalFailed } = props.gql.currentProject.cloudProject.runByNumber || {}
 
     if (status === 'NOTESTS' || status === 'RUNNING') {
-      return showNewBadge ? newBadge : undefined
+      setDebugBadge(showNewBadge ? newBadge : undefined)
+
+      return
     }
 
     if (status === 'PASSED') {
-      return { value: '0', status: 'success', label: t('sidebar.debug.passed') }
+      setDebugBadge({ value: '0', status: 'success', label: t('sidebar.debug.passed') })
+
+      return
     }
 
     let countToDisplay = '0'
@@ -196,21 +208,25 @@ const debugBadge = computed<Badge | undefined>(() => {
     }
 
     if (status === 'FAILED') {
-      return {
+      setDebugBadge({
         value: countToDisplay,
         status: 'failed',
         label: t('sidebar.debug.failed', totalFailed || 0),
-      }
+      })
+
+      return
     }
 
     const errorLabel = totalFailed && totalFailed > 0
       ? t('sidebar.debug.erroredWithFailures', totalFailed)
       : t('sidebar.debug.errored')
 
-    return { value: countToDisplay, status: 'error', label: errorLabel }
+    setDebugBadge({ value: countToDisplay, status: 'error', label: errorLabel })
+
+    return
   }
 
-  return showNewBadge ? newBadge : undefined
+  setDebugBadge(showNewBadge ? newBadge : undefined)
 })
 
 const navigation = computed<{ name: string, icon: FunctionalComponent, href: string, badge?: Badge }[]>(() => {

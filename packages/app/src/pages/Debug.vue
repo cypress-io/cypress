@@ -38,7 +38,7 @@ query Debug($runNumber: Int!, $nextRunNumber: Int!, $hasNextRun: Boolean!) {
 }
 `
 
-const relevantRuns = useRelevantRun()
+const relevantRuns = useRelevantRun('DEBUG')
 
 const variables = computed(() => {
   return {
@@ -55,7 +55,14 @@ const shouldPauseQuery = computed(() => {
 const query = useQuery({ query: DebugDocument, variables, pause: shouldPauseQuery, requestPolicy: 'network-only' })
 
 const isLoading = computed(() => {
-  return !relevantRuns.value || query.fetching.value
+  const relevantRunsHaveNotLoaded = !relevantRuns.value
+  const queryIsBeingFetched = query.fetching.value
+  const waitingForRunToFetchFromTheCloud = !!relevantRuns.value?.current && relevantRuns.value.current > 0
+    && (!query.data.value?.currentProject?.cloudProject
+      || query.data.value?.currentProject?.cloudProject?.__typename === 'CloudProject'
+      && !query.data.value.currentProject.cloudProject.runByNumber?.status)
+
+  return relevantRunsHaveNotLoaded || queryIsBeingFetched || waitingForRunToFetchFromTheCloud
 })
 
 useSubscription({ query: Debug_SpecsChangeDocument })

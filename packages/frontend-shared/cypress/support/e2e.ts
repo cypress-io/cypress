@@ -53,11 +53,19 @@ export interface RemoteGraphQLInterceptPayload {
   Response: typeof Response
 }
 
-export type RemoteGraphQLInterceptor = (
+export interface RemoteGraphQLBatchInterceptPayload<T> {
+  key: string
+  index: number
+  field: string
+  variables: Record<string, any>
+  result: T
+}
+
+export type RemoteGraphQLBatchInterceptor <T = {[key: string]: any}> = (
   obj: RemoteGraphQLInterceptPayload,
   testState: Record<string, any>,
   options: Record<string, any>
-) => ExecutionResult | Promise<ExecutionResult> | Response
+) => ExecutionResult<T> | Promise<ExecutionResult<T>> | Response
 
 export interface FindBrowsersOptions {
   // Array of FoundBrowser objects that will be used as the mock output
@@ -139,6 +147,10 @@ declare global {
        * Gives the ability to intercept the remote GraphQL request & respond accordingly
        */
       remoteGraphQLIntercept: typeof remoteGraphQLIntercept
+      /**
+       * Gives the ability to intercept the batched remote GraphQL request & respond accordingly
+       */
+      remoteGraphQLInterceptBatched: typeof remoteGraphQLInterceptBatched
       /**
        * Removes the sinon spy'ing on the remote GraphQL fake requests
        */
@@ -463,12 +475,18 @@ function findBrowsers (options: FindBrowsersOptions = {}) {
   })
 }
 
-function remoteGraphQLIntercept (fn: RemoteGraphQLInterceptor, opts: Record<string, any>) {
+function remoteGraphQLIntercept<T = any> (fn: RemoteGraphQLBatchInterceptor<T>, opts: Record<string, any>) {
   return logInternal('remoteGraphQLIntercept', () => {
     return taskInternal('__internal_remoteGraphQLIntercept', {
       fn: fn.toString(),
       options: opts,
     })
+  })
+}
+
+function remoteGraphQLInterceptBatched <T = any> (fn: RemoteGraphQLBatchInterceptor<T>) {
+  return logInternal('remoteGraphQLInterceptBatched', () => {
+    return taskInternal('__internal_remoteGraphQLInterceptBatched', fn.toString())
   })
 }
 
@@ -533,6 +551,7 @@ Cypress.Commands.add('openProject', openProject)
 Cypress.Commands.add('withCtx', withCtx)
 Cypress.Commands.add('withRetryableCtx', withRetryableCtx)
 Cypress.Commands.add('remoteGraphQLIntercept', remoteGraphQLIntercept)
+Cypress.Commands.add('remoteGraphQLInterceptBatched', remoteGraphQLInterceptBatched)
 Cypress.Commands.add('findBrowsers', findBrowsers)
 Cypress.Commands.add('tabUntil', tabUntil)
 Cypress.Commands.add('validateExternalLink', { prevSubject: ['optional', 'element'] }, validateExternalLink)

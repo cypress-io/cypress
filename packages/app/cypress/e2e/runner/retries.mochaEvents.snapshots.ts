@@ -151,6 +151,7 @@ export const snapshots = {
       'test:before:run',
       {
         'id': 'r3',
+        'order': 1,
         'title': 'test 1',
         'pending': false,
         'body': '[body]',
@@ -167,6 +168,7 @@ export const snapshots = {
       'pass',
       {
         'id': 'r3',
+        'order': 1,
         'title': 'test 1',
         'state': 'passed',
         'pending': false,
@@ -193,6 +195,7 @@ export const snapshots = {
       'test end',
       {
         'id': 'r3',
+        'order': 1,
         'title': 'test 1',
         'state': 'passed',
         'pending': false,
@@ -234,6 +237,7 @@ export const snapshots = {
       'test:after:run',
       {
         'id': 'r3',
+        'order': 1,
         'title': 'test 1',
         'state': 'passed',
         'pending': false,
@@ -632,6 +636,7 @@ export const snapshots = {
       'test:before:run',
       {
         'id': 'r3',
+        'order': 1,
         'title': 'test 1',
         'pending': false,
         'body': '[body]',
@@ -742,6 +747,7 @@ export const snapshots = {
       'pass',
       {
         'id': 'r3',
+        'order': 1,
         'title': 'test 1',
         'state': 'passed',
         'pending': false,
@@ -789,6 +795,7 @@ export const snapshots = {
       'test end',
       {
         'id': 'r3',
+        'order': 1,
         'title': 'test 1',
         'state': 'passed',
         'pending': false,
@@ -851,6 +858,7 @@ export const snapshots = {
       'test:after:run',
       {
         'id': 'r3',
+        'order': 1,
         'title': 'test 1',
         'state': 'passed',
         'pending': false,
@@ -1270,6 +1278,7 @@ export const snapshots = {
       'test:before:run',
       {
         'id': 'r3',
+        'order': 1,
         'title': 'test 2',
         'pending': false,
         'body': '[body]',
@@ -1380,6 +1389,7 @@ export const snapshots = {
       'pass',
       {
         'id': 'r3',
+        'order': 1,
         'title': 'test 2',
         'state': 'passed',
         'pending': false,
@@ -1427,6 +1437,7 @@ export const snapshots = {
       'test end',
       {
         'id': 'r3',
+        'order': 1,
         'title': 'test 2',
         'state': 'passed',
         'pending': false,
@@ -1489,6 +1500,7 @@ export const snapshots = {
       'test:after:run',
       {
         'id': 'r3',
+        'order': 1,
         'title': 'test 2',
         'state': 'passed',
         'pending': false,
@@ -2000,6 +2012,7 @@ export const snapshots = {
       'test:before:run',
       {
         'id': 'r3',
+        'order': 1,
         'title': 'test 1',
         'pending': false,
         'body': '[body]',
@@ -2185,6 +2198,7 @@ export const snapshots = {
       'pass',
       {
         'id': 'r3',
+        'order': 1,
         'title': 'test 1',
         'state': 'passed',
         'pending': false,
@@ -2242,6 +2256,7 @@ export const snapshots = {
       'test end',
       {
         'id': 'r3',
+        'order': 1,
         'title': 'test 1',
         'state': 'passed',
         'pending': false,
@@ -2314,6 +2329,7 @@ export const snapshots = {
       'test:after:run',
       {
         'id': 'r3',
+        'order': 1,
         'title': 'test 1',
         'state': 'passed',
         'pending': false,
@@ -2857,6 +2873,7 @@ export const snapshots = {
       'test:before:run',
       {
         'id': 'r3',
+        'order': 1,
         'title': 'test 1',
         'pending': false,
         'body': '[body]',
@@ -3012,6 +3029,7 @@ export const snapshots = {
       'pass',
       {
         'id': 'r3',
+        'order': 1,
         'title': 'test 1',
         'state': 'passed',
         'pending': false,
@@ -3062,6 +3080,7 @@ export const snapshots = {
       'test end',
       {
         'id': 'r3',
+        'order': 1,
         'title': 'test 1',
         'state': 'passed',
         'pending': false,
@@ -3112,6 +3131,7 @@ export const snapshots = {
       'test:after:run',
       {
         'id': 'r3',
+        'order': 1,
         'title': 'test 1',
         'state': 'passed',
         'pending': false,
@@ -4158,6 +4178,7 @@ export const snapshots = {
       'test:before:run',
       {
         'id': 'r7',
+        'order': 4,
         'title': 'test 1',
         'pending': false,
         'body': '[body]',
@@ -4199,6 +4220,7 @@ export const snapshots = {
       'retry',
       {
         'id': 'r7',
+        'order': 4,
         'title': 'test 1',
         'hookName': 'after each',
         'err': {
@@ -4314,6 +4336,7 @@ export const snapshots = {
       'test:after:run',
       {
         'id': 'r7',
+        'order': 4,
         'title': 'test 1',
         'hookName': 'after each',
         'err': {
@@ -4361,6 +4384,7 @@ export const snapshots = {
       'test:before:run',
       {
         'id': 'r7',
+        'order': 4,
         'title': 'test 1',
         'pending': false,
         'body': '[body]',
@@ -4459,6 +4483,7 @@ export const snapshots = {
       'pass',
       {
         'id': 'r7',
+        'order': 4,
         'title': 'test 1',
         'state': 'passed',
         'pending': false,
@@ -4497,6 +4522,7 @@ export const snapshots = {
       'test end',
       {
         'id': 'r7',
+        'order': 4,
         'title': 'test 1',
         'state': 'passed',
         'pending': false,
@@ -4535,6 +4561,7 @@ export const snapshots = {
       'test:after:run',
       {
         'id': 'r7',
+        'order': 4,
         'title': 'test 1',
         'state': 'passed',
         'pending': false,
@@ -5688,6 +5715,7 @@ export const snapshots = {
       'test:before:run',
       {
         'id': 'r4',
+        'order': 2,
         'title': 'test 2',
         'pending': false,
         'body': '[body]',
@@ -5723,6 +5751,7 @@ export const snapshots = {
       'retry',
       {
         'id': 'r4',
+        'order': 2,
         'title': 'test 2',
         'err': {
           'message': '[error message]',
@@ -5813,6 +5842,7 @@ export const snapshots = {
       'test:after:run',
       {
         'id': 'r4',
+        'order': 2,
         'title': 'test 2',
         'err': {
           'message': '[error message]',
@@ -5879,6 +5909,7 @@ export const snapshots = {
       'test:before:run',
       {
         'id': 'r4',
+        'order': 2,
         'title': 'test 2',
         'pending': false,
         'body': '[body]',
@@ -5952,6 +5983,7 @@ export const snapshots = {
       'pass',
       {
         'id': 'r4',
+        'order': 2,
         'title': 'test 2',
         'state': 'passed',
         'pending': false,
@@ -5992,6 +6024,7 @@ export const snapshots = {
       'test end',
       {
         'id': 'r4',
+        'order': 2,
         'title': 'test 2',
         'state': 'passed',
         'pending': false,
@@ -6032,6 +6065,7 @@ export const snapshots = {
       'test:after:run',
       {
         'id': 'r4',
+        'order': 2,
         'title': 'test 2',
         'state': 'passed',
         'pending': false,
@@ -6539,6 +6573,7 @@ export const snapshots = {
       'test:before:run',
       {
         'id': 'r2',
+        'order': 1,
         'title': 'visits',
         'pending': false,
         'body': '[body]',
@@ -6555,6 +6590,7 @@ export const snapshots = {
       'retry',
       {
         'id': 'r2',
+        'order': 1,
         'title': 'visits',
         'err': {
           'message': '[error message]',
@@ -6593,6 +6629,7 @@ export const snapshots = {
       'test:after:run',
       {
         'id': 'r2',
+        'order': 1,
         'title': 'visits',
         'err': {
           'message': '[error message]',
@@ -6626,6 +6663,7 @@ export const snapshots = {
       'test:before:run',
       {
         'id': 'r2',
+        'order': 1,
         'title': 'visits',
         'pending': false,
         'body': '[body]',
@@ -6642,6 +6680,7 @@ export const snapshots = {
       'fail',
       {
         'id': 'r2',
+        'order': 1,
         'title': 'visits',
         'err': {
           'message': '[error message]',
@@ -6679,6 +6718,7 @@ export const snapshots = {
       'test end',
       {
         'id': 'r2',
+        'order': 1,
         'title': 'visits',
         'err': {
           'message': '[error message]',
@@ -6711,6 +6751,7 @@ export const snapshots = {
       'test:after:run',
       {
         'id': 'r2',
+        'order': 1,
         'title': 'visits',
         'err': {
           'message': '[error message]',

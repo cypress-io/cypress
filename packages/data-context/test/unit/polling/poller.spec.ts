@@ -90,4 +90,48 @@ describe('Poller', () => {
     await clock.tickAsync(interval * 1000)
     expect(callback).to.have.been.calledThrice
   })
+
+  it('returns initial value', async () => {
+    const callback = sinon.stub()
+    const interval = 5
+
+    const initialValue = { foo: true }
+
+    const poller = new Poller(ctx, 'relevantRunChange', interval, callback)
+    const iterator1 = poller.start({ initialValue })
+
+    expect(callback).to.have.been.calledOnce
+
+    const result1 = await iterator1.next()
+
+    expect(result1.value).to.eq(initialValue)
+  })
+
+  it('stores and returns meta values for each subscription', async () => {
+    const callback = sinon.stub()
+    const interval = 5
+
+    const poller = new Poller<'relevantRunChange', { name: string }>(ctx, 'relevantRunChange', interval, callback)
+
+    expect(poller.subscriptions).to.have.length(0)
+
+    const iterator1 = poller.start({ meta: { name: 'one' } })
+
+    expect(poller.subscriptions).to.have.length(1)
+    expect(poller.subscriptions.map((sub) => sub.meta.name)).to.eql(['one'])
+
+    const iterator2 = poller.start({ meta: { name: 'two' } })
+
+    expect(poller.subscriptions).to.have.length(2)
+    expect(poller.subscriptions.map((sub) => sub.meta.name)).to.eql(['one', 'two'])
+
+    iterator1.return(undefined)
+
+    expect(poller.subscriptions).to.have.length(1)
+    expect(poller.subscriptions.map((sub) => sub.meta.name)).to.eql(['two'])
+
+    iterator2.return(undefined)
+
+    expect(poller.subscriptions).to.have.length(0)
+  })
 })

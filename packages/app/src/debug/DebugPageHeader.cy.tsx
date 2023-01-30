@@ -112,6 +112,27 @@ describe('<DebugPageHeader />', {
     .should('have.text', 'You are 1 commit ahead')
   })
 
+  it('renders long commit message', () => {
+    const longText = 'This commit contains many changes which are described at great length in this commit summary, arguably the length is long enough to be considered unwieldy, but nevertheless we should render the text nicely'
+
+    cy.mountFragment(DebugPageHeaderFragmentDoc, {
+      render: (gqlVal) => {
+        if (!gqlVal.commitInfo?.summary) {
+          throw new Error('Missing commit info for test')
+        }
+
+        gqlVal.commitInfo.summary = longText
+
+        return (
+          <DebugPageHeader gql={gqlVal} commitsAhead={1} class="overflow-auto resize"/>
+        )
+      },
+    })
+
+    cy.contains(longText).should('be.visible')
+    cy.percySnapshot()
+  })
+
   it('renders no commit message', () => {
     cy.mountFragment(DebugPageHeaderFragmentDoc, {
       render: (gqlVal) => {

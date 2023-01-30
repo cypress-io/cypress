@@ -45,8 +45,9 @@ exports['e2e experimentalSkipDomainInjection=true / passes'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/experimental_skip_domain_inject     (X second)
-                          ion.cy.ts.mp4                                                             
+  -  Finished processing: X second(s)                                                
+
+  -  Video output: /XXX/XXX/XXX/cypress/videos/experimental_skip_domain_injection.cy.ts.mp4
 
 
 ====================================================================================================

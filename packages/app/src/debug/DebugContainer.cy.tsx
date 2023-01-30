@@ -38,6 +38,10 @@ describe('<DebugContainer />', () => {
     }
 
     it('shows not logged in', () => {
+      const loginConnectStore = useLoginConnectStore()
+
+      loginConnectStore.setHasInitiallyLoaded()
+
       validateEmptyState([defaultMessages.debugPage.emptyStates.connectToCypressCloud, defaultMessages.debugPage.emptyStates.debugDirectlyInCypress, defaultMessages.debugPage.emptyStates.notLoggedInTestMessage])
       cy.findByRole('button', { name: 'Connect to Cypress Cloud' }).should('be.visible')
     })
@@ -47,6 +51,7 @@ describe('<DebugContainer />', () => {
 
       loginConnectStore.setUserFlag('isLoggedIn', true)
       loginConnectStore.setProjectFlag('isProjectConnected', false)
+      loginConnectStore.setHasInitiallyLoaded()
 
       validateEmptyState([defaultMessages.debugPage.emptyStates.debugDirectlyInCypress, defaultMessages.debugPage.emptyStates.reviewRerunAndDebug, defaultMessages.debugPage.emptyStates.noProjectTestMessage])
       cy.findByRole('button', { name: 'Connect a Cypress Cloud project' }).should('be.visible')
@@ -57,6 +62,7 @@ describe('<DebugContainer />', () => {
 
       loginConnectStore.setUserFlag('isLoggedIn', true)
       loginConnectStore.setProjectFlag('isProjectConnected', true)
+      loginConnectStore.setHasInitiallyLoaded()
       cy.mountFragment(DebugSpecsFragmentDoc, {
         variableTypes: DebugSpecVariableTypes,
         variables: {
@@ -76,6 +82,7 @@ describe('<DebugContainer />', () => {
 
       loginConnectStore.setUserFlag('isLoggedIn', true)
       loginConnectStore.setProjectFlag('isProjectConnected', true)
+      loginConnectStore.setHasInitiallyLoaded()
       cy.mountFragment(DebugSpecsFragmentDoc, {
         variableTypes: DebugSpecVariableTypes,
         variables: {
@@ -97,6 +104,7 @@ describe('<DebugContainer />', () => {
 
       loginConnectStore.setUserFlag('isLoggedIn', true)
       loginConnectStore.setProjectFlag('isProjectConnected', true)
+      loginConnectStore.setHasInitiallyLoaded()
     })
 
     function mountTestRun (runName: string) {
@@ -215,6 +223,7 @@ describe('<DebugContainer />', () => {
 
       loginConnectStore.setUserFlag('isLoggedIn', true)
       loginConnectStore.setProjectFlag('isProjectConnected', true)
+      loginConnectStore.setHasInitiallyLoaded()
     })
 
     it('render first pending run', () => {

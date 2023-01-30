@@ -4,7 +4,7 @@ import debugLib from 'debug'
 import { chain, compact, isEqual } from 'lodash'
 
 import type { DataContext } from '../DataContext'
-import type { Query, RelevantRun } from '../gen/graphcache-config.gen'
+import type { Query, RelevantRun, RelevantRunLocationEnum } from '../gen/graphcache-config.gen'
 import { Poller } from '../polling'
 
 const debug = debugLib('cypress:data-context:sources:RelevantRunsDataSource')
@@ -46,7 +46,7 @@ export class RelevantRunsDataSource {
   #currentCommitSha?: string
   #cachedRuns: RelevantRun = RUNS_EMPTY_RETURN
 
-  #runsPoller?: Poller<'relevantRunChange'>
+  #runsPoller?: Poller<'relevantRunChange', { name: RelevantRunLocationEnum}>
 
   constructor (private ctx: DataContext) {}
 
@@ -91,7 +91,8 @@ export class RelevantRunsDataSource {
 
     if (result.error) {
       debug(`Error fetching relevant runs for project ${projectSlug}`, result.error)
-      throw result.error
+
+      return RUNS_EMPTY_RETURN
     }
 
     const cloudProject = result.data?.cloudProjectBySlug
@@ -181,31 +182,39 @@ export class RelevantRunsDataSource {
   /**
    * Clear the cached current run to allow the data source to pick the next completed run as the current
    */
-  //TODO figure out how to mock in test so do not need to pass in values here
-  async moveToNext (shasForTest?: string[]) {
+  async moveToNext (shas: string[]) {
     debug('Moving to next relevant run')
-    this.#currentRun = undefined
-    this.#currentCommitSha = undefined
 
-    const runs = await this.getRelevantRuns(this.ctx.git?.currentHashes || shasForTest || [])
-
-    this.ctx.emitter.relevantRunChange(runs)
+    await this.checkRelevantRuns(shas, true)
   }
 
-  pollForRuns () {
-    if (!this.#runsPoller) {
-      this.#runsPoller = new Poller(this.ctx, 'relevantRunChange', this.#pollingInterval, async () => {
-        const runs = await this.getRelevantRuns(this.ctx.git?.currentHashes || [])
+  async checkRelevantRuns (shas: string[], clearCache: boolean = false) {
+    debug(`check relevant runs with ${shas.length} shas and clear cache set to ${clearCache}`)
+    if (clearCache) {
+      this.#currentRun = undefined
+      this.#currentCommitSha = undefined
+    }
 
-        //only emit a new value if it changes
-        if (!isEqual(runs, this.#cachedRuns)) {
-          debug('Runs changed %o', runs)
-          this.#cachedRuns = runs
-          this.ctx.emitter.relevantRunChange(runs)
-        }
+    const runs = await this.getRelevantRuns(shas)
+
+    //only emit a new value if it changes
+    if (!isEqual(runs, this.#cachedRuns)) {
+      debug('Runs changed %o', runs)
+      this.#cachedRuns = runs
+      this.ctx.emitter.relevantRunChange(runs)
+    }
+  }
+
+  pollForRuns (location: RelevantRunLocationEnum) {
+    if (!this.#runsPoller) {
+      this.#runsPoller = new Poller<'relevantRunChange', { name: RelevantRunLocationEnum }>(this.ctx, 'relevantRunChange', this.#pollingInterval, async () => {
+        // clear the cached run if there is not a current subscription from the DEBUG page
+        const clearCache = !this.#runsPoller?.subscriptions.some((sub) => sub.meta?.name === 'DEBUG')
+
+        await this.checkRelevantRuns(this.ctx.git?.currentHashes || [], clearCache)
       })
     }
 
-    return this.#runsPoller.start(this.#cachedRuns)
+    return this.#runsPoller.start({ initialValue: this.#cachedRuns, meta: { name: location } })
   }
 }
