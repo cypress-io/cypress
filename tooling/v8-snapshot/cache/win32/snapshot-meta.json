@@ -757,8 +757,6 @@
     "./packages/electron/node_modules/get-stream/buffer-stream.js",
     "./packages/errors/index.js",
     "./packages/errors/src/errTemplate.ts",
-    "./packages/example/node_modules/glob/glob.js",
-    "./packages/example/node_modules/glob/sync.js",
     "./packages/graphql/index.js",
     "./packages/graphql/node_modules/chalk/node_modules/supports-color/index.js",
     "./packages/graphql/node_modules/chalk/source/index.js",
@@ -3802,7 +3800,6 @@
     "./packages/errors/src/stripIndent.ts",
     "./packages/example/index.js",
     "./packages/example/lib/example.js",
-    "./packages/example/node_modules/glob/common.js",
     "./packages/extension/index.js",
     "./packages/extension/lib/extension.js",
     "./packages/extension/lib/util.js",
@@ -4294,5 +4291,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "6842bdf78c3a103eb58935721a78bef9071a19cc48bb86102bd7ecd6a3545567"
+  "deferredHash": "341ebba213ec79a67bcc52778d6995d88023351c0f2393e9ab59ee304f1ed823"
 }
