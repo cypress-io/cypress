@@ -13,7 +13,7 @@
     :prefix-icon="SendIcon"
     prefix-icon-class="icon-dark-white icon-light-transparent"
     data-cy="access-requested-button"
-    class="bg-gray-800 border-gray-800"
+    class="btn-disabled"
     disabled
   >
     {{ t("specPage.requestSentButton") }}
@@ -86,3 +86,10 @@ async function requestAccess () {
 }
 
 </script>
+
+<style scoped>
+/* Override <Button> classes, do not rely on css class order */
+.btn-disabled {
+  @apply bg-gray-800 border-gray-800;
+}
+</style>

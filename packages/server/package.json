@@ -122,7 +122,7 @@
     "tree-kill": "1.2.2",
     "ts-node": "^10.9.1",
     "tslib": "2.3.1",
-    "underscore.string": "3.3.5",
+    "underscore.string": "3.3.6",
     "url-parse": "1.5.9",
     "uuid": "8.3.2",
     "widest-line": "3.1.0"

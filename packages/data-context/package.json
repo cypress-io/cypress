@@ -51,7 +51,7 @@
     "semver": "7.3.2",
     "simple-git": "3.15.0",
     "stringify-object": "^3.0.0",
-    "underscore.string": "^3.3.5",
+    "underscore.string": "^3.3.6",
     "wonka": "^4.0.15"
   },
   "devDependencies": {
@@ -77,6 +77,8 @@
     "@types/sinon-chai": "3.2.8",
     "@types/stringify-object": "^3.0.0",
     "mocha": "7.0.1",
+    "mocha-junit-reporter": "2.2.0",
+    "mocha-multi-reporters": "1.5.1",
     "rimraf": "3.0.2",
     "sinon": "13.0.2",
     "sinon-chai": "3.7.0",

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // store the cwd
 const cwd = process.cwd()
 
@@ -194,7 +195,7 @@ const deploy = {
 
     return askMissingOptions(['version', 'platform'])(options)
     .then(() => {
-      debug('building binary: platform %s version %s', options.platform, options.version)
+      console.log('building binary: platform %s version %s', options.platform, options.version)
 
       return build.buildCypressApp(options)
     })

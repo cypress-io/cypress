@@ -113,6 +113,10 @@ interface Diagnostics {
   warnings: ErrorWrapperSource[]
 }
 
+interface CloudDataShape {
+  testsForRunResults?: Record<string, string[]>
+}
+
 export interface CoreDataShape {
   cliBrowser: string | null
   cliTestingType: string | null
@@ -149,6 +153,7 @@ export interface CoreDataShape {
     latestVersion: Promise<string>
     npmMetadata: Promise<Record<string, string>>
   } | null
+  cloud: CloudDataShape
 }
 
 /**
@@ -219,5 +224,8 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     packageManager: 'npm',
     forceReconfigureProject: null,
     versionData: null,
+    cloud: {
+      testsForRunResults: {},
+    },
   }
 }
