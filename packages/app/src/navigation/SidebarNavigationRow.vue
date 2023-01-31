@@ -8,8 +8,7 @@
       :class="active
         ? 'before:(bg-indigo-300 scale-x-100 transition-colors) cursor-default'
         : 'before:(scale-x-0 transition-transform bg-gray-300)'"
-      class="rounded-md
-        flex
+      class="rounded-md flex
         h-40px
         my-16px
         w-full
@@ -48,6 +47,14 @@
       >
         {{ name }}
       </span>
+      <span
+        v-if="badge"
+        :aria-label="badge.label"
+        class="rounded-md font-medium text-white p-4px transition-opacity z-1"
+        :class="[badgeVariant, badgeColorStyles[badge.status], {'opacity-0': transitioning}]"
+      >
+        {{ badge.value }}
+      </span>
     </div>
     <template #popper>
       {{ name }}
@@ -56,17 +63,44 @@
 </template>
 
 <script lang="ts" setup>
-import type { FunctionalComponent, SVGAttributes } from 'vue'
+import { computed, FunctionalComponent, SVGAttributes, watch, ref } from 'vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
+import { promiseTimeout } from '@vueuse/core'
 
-withDefaults(defineProps <{
+export type Badge = { value: string, status: 'success' | 'failed' | 'error', label: string }
+
+const props = withDefaults(defineProps <{
   icon: FunctionalComponent<SVGAttributes>
   name: string
   // Currently active row (generally the current route)
   active?: boolean
   isNavBarExpanded: boolean
+  badge?: Badge
 }>(), {
   active: false,
+  badge: undefined,
+})
+
+const badgeVariant = computed(() => {
+  return props.isNavBarExpanded ? 'ml-16px h-20px text-sm leading-3' : 'absolute outline-gray-1000 outline-2px outline bottom-0 left-36px text-xs h-16px leading-2'
+})
+
+const badgeColorStyles = {
+  'success': 'bg-jade-500',
+  'failed': 'bg-error-500',
+  'error': 'bg-warning-500',
+}
+
+const transitioning = ref(false)
+
+// Badge is either absolutely positioned or relative. Since the navbar expands with an animation,
+// the badge needs to animate as well, otherwise it pops into place before the sidebar is finished animating
+watch(() => props.isNavBarExpanded, async () => {
+  if (props.badge) {
+    transitioning.value = true
+    await promiseTimeout(125)
+    transitioning.value = false
+  }
 })
 
 </script>

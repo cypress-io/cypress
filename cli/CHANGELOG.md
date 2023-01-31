@@ -6,10 +6,16 @@ _Released 01/31/2023 (PENDING)_
 **Features:**
 
 - Added `Cypress.require()` for including dependencies within the `cy.origin()` callback.  Removed support for `require()` and `import()` within the callback. Addresses [#24976](https://github.com/cypress-io/cypress/issues/24976).
+- Easily debug failed CI test runs right from your local Cypress app with the new Debug page, powered by Cypress Cloud.  For more details, see the [Debug documentation](https://on.cypress.io/debug-page). Addressed in [#25488](https://github.com/cypress-io/cypress/pull/25488).
 
 **Bugfixes:**
 
 - Fixed an issue where alternative Microsoft Edge Beta, Canary, and Dev binary versions were not being discovered by Cypress. Fixes [#25455](https://github.com/cypress-io/cypress/issues/25455).
+
+**Dependency Updates:**
+
+- Upgraded [`underscore.string`](https://github.com/esamattis/underscore.string/blob/HEAD/CHANGELOG.markdown) from `3.3.5` to `3.3.6` to reference rebuilt assets after security patch to fix regular expression DDOS exploit.
+  Fixed in [#25574](https://github.com/cypress-io/cypress/pull/25574).
 
 ## 12.4.1
 
