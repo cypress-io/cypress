@@ -41,7 +41,7 @@ async function parseChangelog (pendingRelease = true) {
       nextKnownLineBreak = index + 1
       if (pendingRelease && !/_Released \d+\/\d+\/\d+ \(PENDING\)_/.test(line)) {
         throw new Error(`Expected line number ${index + 1} to include "_Released xx/xx/xxxx (PENDING)_"`)
-      } else if (!pendingRelease && !/_Released \d+\/\d+\/\d+__/.test(line)) {
+      } else if (!pendingRelease && !/_Released \d+\/\d+\/\d+_/.test(line)) {
         throw new Error(`Expected line number ${index + 1} to include "_Released xx/xx/xxxx_"`)
       }
 
@@ -51,7 +51,7 @@ async function parseChangelog (pendingRelease = true) {
         throw new Error(`Expected line number ${index + 1} to be a line break`)
       }
     } else {
-      const result = /\*\*.+?:\*\*/.exec(line)
+      const result = /^\*\*.+?:\*\*/.exec(line)
 
       if (currentSection === '' && !result) {
         throw new Error(`Expected line number ${index + 1} to be a valid section header. Received ${line}. Expected one of ...\n  - ${userFacingSections.join('\n  - ')}`)
