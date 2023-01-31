@@ -1196,8 +1196,11 @@ describe('lib/cypress', () => {
     beforeEach(async function () {
       await clearCtx()
 
+      sinon.stub(api, 'preflight').resolves()
       sinon.stub(api, 'createRun').resolves()
       const createInstanceStub = sinon.stub(api, 'createInstance')
+
+      api.setPreflightResult({ encrypt: false, apiUrl: 'http://localhost:1234' })
 
       createInstanceStub.onFirstCall().resolves({
         spec: 'cypress/e2e/app.cy.js',
@@ -1256,6 +1259,10 @@ describe('lib/cypress', () => {
           this.projectId = 'abc123'
         }),
       ])
+    })
+
+    afterEach(() => {
+      api.resetPreflightResult()
     })
 
     it('uses process.env.CYPRESS_PROJECT_ID', function () {

@@ -61,6 +61,7 @@ describe('e2e record', () => {
 
       expect(instanceReqs).to.deep.eq([
         // first create run request
+        'POST /preflight',
         'POST /runs',
 
         // spec 1
@@ -458,6 +459,7 @@ describe('e2e record', () => {
       })
 
       expect(getRequestUrls()).deep.eq([
+        'POST /preflight',
         'POST /runs',
         `POST /runs/${runId}/instances`,
         `POST /instances/${instanceId}/tests`,
@@ -688,6 +690,7 @@ describe('e2e record', () => {
       })
 
       expect(getRequestUrls()).deep.eq([
+        'POST /preflight',
         'POST /runs',
         'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
         'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
@@ -719,6 +722,7 @@ describe('e2e record', () => {
       })
 
       expect(getRequestUrls()).deep.eq([
+        'POST /preflight',
         'POST /runs',
         'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
         'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
@@ -881,6 +885,7 @@ describe('e2e record', () => {
           const urls = getRequestUrls()
 
           expect(urls).to.deep.eq([
+            'POST /preflight',
             'POST /runs',
           ])
         })
@@ -903,6 +908,7 @@ describe('e2e record', () => {
           const urls = getRequestUrls()
 
           expect(urls).to.deep.eq([
+            'POST /preflight',
             'POST /runs',
           ])
         })
@@ -927,6 +933,7 @@ describe('e2e record', () => {
           const urls = getRequestUrls()
 
           expect(urls).to.deep.eq([
+            'POST /preflight',
             'POST /runs',
           ])
         })
@@ -963,6 +970,7 @@ describe('e2e record', () => {
           const urls = getRequestUrls()
 
           expect(urls).to.deep.eq([
+            'POST /preflight',
             'POST /runs',
             `POST /runs/${runId}/instances`,
           ])
@@ -984,6 +992,7 @@ describe('e2e record', () => {
           const urls = getRequestUrls()
 
           expect(urls).to.deep.eq([
+            'POST /preflight',
             'POST /runs',
             'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
           ])
@@ -1032,6 +1041,7 @@ describe('e2e record', () => {
           const urls = getRequestUrls()
 
           expect(urls).to.deep.eq([
+            'POST /preflight',
             'POST /runs',
             `POST /runs/${runId}/instances`,
             'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
@@ -1073,6 +1083,7 @@ describe('e2e record', () => {
           const urls = getRequestUrls()
 
           expect(urls).to.deep.eq([
+            'POST /preflight',
             'POST /runs',
           ])
         })
@@ -1140,6 +1151,7 @@ describe('e2e record', () => {
           const urls = getRequestUrls()
 
           expect(urls).to.deep.eq([
+            'POST /preflight',
             'POST /runs',
           ])
         })
@@ -1296,6 +1308,7 @@ describe('e2e record', () => {
           const urls = getRequestUrls()
 
           expect(urls).to.deep.eq([
+            'POST /preflight',
             'POST /runs',
             `POST /runs/${runId}/instances`,
           ])
@@ -1317,7 +1330,7 @@ describe('e2e record', () => {
 
       //   return systemTests.exec(this, {
       //     key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-      'cypress-with-project-id.config.js',
+      //     configFile: 'cypress-with-project-id.config.js',
       //     spec: '*_record.spec*',
       //     record: true,
       //     snapshot: true,
@@ -1352,6 +1365,7 @@ describe('e2e record', () => {
           const urls = getRequestUrls()
 
           expect(urls).to.deep.eq([
+            'POST /preflight',
             'POST /runs',
             'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
             'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
@@ -1377,6 +1391,7 @@ describe('e2e record', () => {
           const urls = getRequestUrls()
 
           expect(urls).to.deep.eq([
+            'POST /preflight',
             'POST /runs',
             'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
             'POST /instances/e9e81b5e-cc58-4026-b2ff-8ae3161435a6/tests',
@@ -1411,6 +1426,7 @@ describe('e2e record', () => {
           const urls = getRequestUrls()
 
           expect(urls).to.deep.eq([
+            'POST /preflight',
             'POST /runs',
             `POST /runs/${runId}/instances`,
             `POST /instances/${instanceId}/tests`,
@@ -1445,6 +1461,7 @@ describe('e2e record', () => {
           const urls = getRequestUrls()
 
           expect(urls).to.deep.eq([
+            'POST /preflight',
             'POST /runs',
             `POST /runs/${runId}/instances`,
             `POST /instances/${instanceId}/tests`,
@@ -1489,6 +1506,7 @@ describe('e2e record', () => {
           const urls = getRequestUrls()
 
           expect(urls).to.have.members([
+            'POST /preflight',
             'POST /runs',
             `POST /runs/${runId}/instances`,
             `POST /instances/${instanceId}/tests`,
@@ -1566,9 +1584,13 @@ describe('e2e record', () => {
           const urls = getRequestUrls()
 
           expect(urls).to.deep.eq([
+            'POST /preflight',
             'POST /runs',
+            'POST /preflight',
             'POST /runs',
+            'POST /preflight',
             'POST /runs',
+            'POST /preflight',
             'POST /runs',
             'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
             'POST /runs/00748421-e035-4a3d-8604-8468cc48bdb5/instances',
