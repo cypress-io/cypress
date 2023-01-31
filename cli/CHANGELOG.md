@@ -3,6 +3,10 @@
 
 _Released 01/31/2023 (PENDING)_
 
+**Features:**
+
+- Easily debug failed CI test runs right from your local Cypress app with the new Debug page, powered by Cypress Cloud.  For more details, see the [Debug documentation](https://on.cypress.io/debug-page). Addressed in [#25488](https://github.com/cypress-io/cypress/pull/25488).
+
 **Bugfixes:**
 
 - Fixed an issue where alternative Microsoft Edge Beta, Canary, and Dev binary versions were not being discovered by Cypress. 

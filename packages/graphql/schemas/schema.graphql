@@ -66,6 +66,56 @@ type CachedUser implements Node {
   id: ID!
 }
 
+"""Information about the browser the tests were run on"""
+type CloudBrowserInfo implements Node {
+  """The formatted name of the browser, e.g. `Electron`"""
+  formattedName: String
+
+  """
+  The formatted name of the browser with the current version i.e `Electron 59.0.278`
+  """
+  formattedNameWithVersion: String
+
+  """The version of the browser, i.e. `59`"""
+  formattedVersion: String
+  id: ID!
+
+  """The ID of the browser, e.g. `electron`"""
+  unformattedName: String
+
+  """The unformatted version of the browser, i.e. `59.0.278`"""
+  unformattedVersion: String
+}
+
+"""Information about the CI provider that performed a run"""
+type CloudCiBuildInfo implements Node {
+  """CI build ID as extracted from the CI worker environment (if available)"""
+  ciBuildNumber: String
+
+  """
+  Formatted CI build ID as extracted from the CI worker environment (if available)
+  """
+  ciBuildNumberFormatted: String
+
+  """
+  The formatted name of the provider that performed the associated run, e.g. `CircleCI`
+  """
+  formattedProvider: String
+
+  """Globally unique identifier representing a concrete GraphQL ObjectType"""
+  id: ID!
+
+  """
+  The ID of the provider that performed the associated run, e.g. `circleci`
+  """
+  provider: String
+
+  """
+  A link to the build details for the associated run within the CI provider (if available)
+  """
+  url: String
+}
+
 """Feature not available for subscription"""
 type CloudFeatureNotEnabled {
   """an error message"""
@@ -81,6 +131,26 @@ type CloudLatestRunUpdateSpecData {
 
   """Recommended seconds to wait before next poll."""
   pollingInterval: Int
+}
+
+"""The operating system the tests were run on"""
+type CloudOperatingSystem implements Node {
+  id: ID!
+
+  """The formatted name of the operating system, e.g. `linux`"""
+  name: String
+
+  """
+  The formatted name of the operating system with the version, e.g. `linux 14.04`
+  """
+  nameWithVersion: String
+
+  """The platform of the OS, e.g. `linux`"""
+  platform: OperatingSystemsEnum
+  unformattedName: String
+
+  """The version of the operating system, e.g. `14.04`"""
+  version: String
 }
 
 """
@@ -132,6 +202,18 @@ type CloudOrganizationEdge {
   node: CloudOrganization!
 }
 
+type CloudPollingIntervals {
+  """
+  The frequency with which the CloudProject.runByNumber field should be polled, in seconds.
+  """
+  runByNumber: Int
+
+  """
+  The frequency with which the CloudProject.runsByCommitShas field should be polled, in seconds.
+  """
+  runsByCommitShas: Int
+}
+
 """A CloudProject represents a Project stored in the Cypress Cloud"""
 type CloudProject implements Node {
   """A link to the settings page of the project in the dashboard"""
@@ -155,6 +237,9 @@ type CloudProject implements Node {
   """Record keys for the service"""
   recordKeys: [CloudRecordKey!]
 
+  """Gets a single CloudRun by runNumber"""
+  runByNumber(runNumber: Int!): CloudRun
+
   """A connection field type"""
   runs(
     """Returns the elements in the list that come after the specified cursor"""
@@ -171,6 +256,17 @@ type CloudProject implements Node {
     last: Int
     status: CloudRunStatus
   ): CloudRunConnection
+
+  """
+  Returns runs associated to the given git commit SHAs hashes. The returned runs are ordered in the same way as the provided hashes.
+  """
+  runsByCommitShas(
+    """An ordered list of git commit sha1 hashes."""
+    commitShas: [String!]!
+
+    """A limit to apply to the sorted list of found runs."""
+    runLimit: Int! = 100
+  ): [CloudRun]
 
   """Unique identifier for a Project"""
   slug: String!
@@ -258,7 +354,16 @@ type CloudProjectSpec implements Node {
 
     """Returns the last n elements from the list."""
     last: Int
-  ): CloudSpecRunConnection
+  ): CloudSpecRunConnection @deprecated(reason: "Cypress app should utilize specRunsForRunIds to retrieve more relevant data based on local state")
+
+  """
+  Runs this spec has been involved with, limited to the provided list of CloudRun ids.
+  Runs will be returned in the same order as the runs provided, where matches are found.
+  """
+  specRunsForRunIds(
+    """A list of IDs for a CloudRun Node, conforming to the Relay spec"""
+    cloudRunIds: [ID!]!
+  ): [CloudSpecRun]
 }
 
 union CloudProjectSpecFlakyResult = CloudFeatureNotEnabled | CloudProjectSpecFlakyStatus
@@ -309,15 +414,60 @@ type CloudRecordKey implements Node {
 
 """A Recorded run of the Test Runner, typically to the cloud"""
 type CloudRun implements Node {
+  """Whether or not the run was canceled due to a failure"""
+  cancelOnFailure: Boolean
+
+  """When the run was cancelled, null if not cancelled"""
+  cancelledAt: DateTime
+
+  """
+  The user who manually cancelled the run, null if not cancelled manually
+  """
+  cancelledBy: CloudUser
+
+  """Information about the CI provider that performed the run"""
+  ci: CloudCiBuildInfo!
   commitInfo: CloudRunCommitInfo
   completedAt: DateTime
-  createdAt: DateTime
+
+  """When the run was created"""
+  createdAt: DateTime!
+
+  """
+  Errors recorded against tests within this run, as reported by the Cypress App during recording
+  """
+  errors: [String!]!
+
+  """All groups within this run"""
+  groups: [CloudRunGroup!]!
 
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
+
+  """
+  Whether this run is hidden to the user due to data limits. Specific reasons are provided in the reasonsRunIsHidden field.
+  """
+  isHidden: Boolean!
+
+  """Action user can perform when the run is over a usage limit"""
+  overLimitActionType: OverLimitActionTypeEnum!
+
+  """A link a user can navigate to when the run is over a usage limit"""
+  overLimitActionUrl: String!
+
+  """
+  Reasons why this run is hidden. List will be empty if the run is not hidden.
+  """
+  reasonsRunIsHidden: [CloudRunHidingReason]!
   runNumber: Int
+
+  """All specs within this run"""
+  specs: [CloudSpecRun!]!
   status: CloudRunStatus
   tags: [CloudRunTag]
+
+  """Tests within this run that failed and need to be reviewed"""
+  testsForReview(limit: Int! = 100): [CloudTestResult!]!
 
   """
   Total duration of the run in milliseconds, accounting for any parallelization
@@ -387,6 +537,102 @@ type CloudRunEdge {
   node: CloudRun!
 }
 
+"""A group of tests that are executed together within a run"""
+type CloudRunGroup implements Node {
+  """The browser the tests were run on"""
+  browser: CloudBrowserInfo!
+
+  """The date and time the group was completed"""
+  completedAt: DateTime
+
+  """The date and time the group was created"""
+  createdAt: DateTime!
+
+  """The overall duration of the tests in the group in milliseconds"""
+  duration: Int!
+
+  """The name of the group"""
+  groupName: String
+  id: ID!
+
+  """The operating system the tests were run on"""
+  os: CloudOperatingSystem!
+  status: CloudRunGroupStatusEnum!
+
+  """The type of the test"""
+  testingType: String!
+
+  """The total number of tests that failed within the group"""
+  totalFailures: Int!
+
+  """The total number of tests that passed within the group"""
+  totalPasses: Int!
+
+  """The total number of tests that are pending within the group"""
+  totalPending: Int!
+
+  """The total number of tests that are skipped within the group"""
+  totalSkipped: Int!
+}
+
+"""Possible check status of a run group"""
+enum CloudRunGroupStatusEnum {
+  CANCELLED
+  ERRORED
+  FAILED
+  NOTESTS
+  PASSED
+  RUNNING
+  TIMEDOUT
+  UNCLAIMED
+}
+
+"""The reason a run was hidden, along with any details"""
+union CloudRunHidingReason = DataRetentionLimitExceeded | UsageLimitExceeded
+
+"""An instance of executing a single test within a run"""
+type CloudRunInstance implements Node {
+  """The ID of the group that this instance belongs to"""
+  groupId: String!
+
+  """Used to determine if the instance has screenshots"""
+  hasScreenshots: Boolean!
+
+  """Used to determine if the instance has stdout"""
+  hasStdout: Boolean!
+
+  """Used to determine if the instance has screenshots"""
+  hasVideo: Boolean!
+  id: ID!
+
+  """Link to Cypress Cloud to view stdout, if available"""
+  screenshotsUrl: String
+
+  """The status of the instance"""
+  status: RunInstanceStatusEnum!
+
+  """Link to Cypress Cloud to view stdout, if available"""
+  stdoutUrl: String
+
+  """This is the number of failed tests for the instance"""
+  totalFailed: Int
+
+  """This is the number of passed tests for the instance"""
+  totalPassed: Int
+
+  """This is the number of pending tests for the instance"""
+  totalPending: Int
+
+  """This is the number of running tests for the instance"""
+  totalRunning: Int
+
+  """This is the number of skipped tests for the instance"""
+  totalSkipped: Int
+
+  """Link to Cypress Cloud to view stdout, if available"""
+  videoUrl: String
+}
+
 """Possible check status of the test run"""
 enum CloudRunStatus {
   CANCELLED
@@ -406,23 +652,36 @@ type CloudRunTag implements Node {
 }
 
 """
-A Recorded run of a given spec from the Test Runner, typically to the cloud
+Details of test recording in Cypress Cloud for a spec file within a run
 """
 type CloudSpecRun implements Node {
-  """When the run was completed"""
+  """Basename of the spec file"""
+  basename: String!
+
+  """When the spec was completed"""
   completedAt: DateTime
 
-  """When the run was created"""
+  """When the spec was registered to run"""
   createdAt: DateTime
+
+  """Extension of the spec file"""
+  extension: String!
 
   """Amount of groups this spec was run in"""
   groupCount: Int
 
-  """Globally unique identifier representing a concrete GraphQL ObjectType"""
+  """Unique identifiers for each group this spec was run in"""
+  groupIds: [String]
   id: ID!
+
+  """Full path to the spec file"""
+  path: String!
 
   """Incremental run number assigned"""
   runNumber: Int
+
+  """Short path to the spec file without leading Cypress directories"""
+  shortPath: String
 
   """
   Aggregate information about how long the spec took to run in the groups
@@ -444,7 +703,7 @@ type CloudSpecRun implements Node {
   """Aggregate information about how many tests were skipped in the groups"""
   testsSkipped: SpecDataAggregate
 
-  """A link to the run overview page filtered by spec"""
+  """A link to the run overview page in Cypress Cloud filtered by spec"""
   url: String
 }
 
@@ -481,6 +740,55 @@ enum CloudSpecStatus {
   RUNNING
   TIMEDOUT
   UNCLAIMED
+}
+
+"""Details of a recording in Cypress Cloud for a single test within a run"""
+type CloudTestResult implements Node {
+  """This is the duration of the test result in milliseconds"""
+  duration: Int
+  id: ID!
+
+  """The instance of running the test result within the corresponding run"""
+  instance: CloudRunInstance
+
+  """If the test result was flaky in the current run"""
+  isFlaky: Boolean!
+
+  """The spec ID of the test result"""
+  specId: String!
+
+  """The state of the test result"""
+  state: CloudTestResultStateEnum!
+
+  """The URL to the test result in Cypress Cloud"""
+  testUrl: String!
+
+  """
+  The thumbprint of the test result, allows for deduping tests sharing the same title in the same spec
+  """
+  thumbprint: String!
+
+  """The title of the test result: describe/context > it/test"""
+  title(
+    """This will trim the test title to the provided depth"""
+    depth: Int!
+  ): String!
+
+  """The title of the test result split into parts"""
+  titleParts: [String!]!
+}
+
+"""State of the test result"""
+enum CloudTestResultStateEnum {
+  CANCELLED
+  ERRORED
+  FAILED
+  PASSED
+  PENDING
+  RUNNING
+  SKIPPED
+  TIMEDOUT
+  UNKNOWN
 }
 
 """A CloudUser represents an User stored in the Cypress Cloud"""
@@ -675,6 +983,9 @@ type CurrentProject implements Node & ProjectLike {
   """Absolute path to the project on the filesystem"""
   projectRoot: String!
 
+  """Returns the spec counts for the current and next runs"""
+  relevantRunSpecs: CurrentProjectRelevantRunSpecs
+
   """Project saved state"""
   savedState: JSON
 
@@ -684,6 +995,20 @@ type CurrentProject implements Node & ProjectLike {
   """A list of specs for the currently open testing type of a project"""
   specs: [Spec!]!
   title: String!
+}
+
+type CurrentProjectRelevantRunSpecs {
+  """Spec counts for the current run"""
+  current: RelevantRunSpecs
+
+  """Spec counts for the next run"""
+  next: RelevantRunSpecs
+}
+
+"""A run was hidden because it was over the data retention limit"""
+type DataRetentionLimitExceeded {
+  """The number of days of data retention"""
+  dataRetentionDays: Int
 }
 
 """
@@ -1316,6 +1641,11 @@ type Mutation {
   """While migrating to 10+ skip manual rename step"""
   migrateSkipManualRename: Query
 
+  """
+  Allow the relevant run for debugging marked as next to be considered the current relevant run
+  """
+  moveToNextRelevantRun: Boolean
+
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean
   openExternal(includeGraphqlPort: Boolean, url: String!): Boolean
@@ -1389,8 +1719,17 @@ type Mutation {
   """List of specs to run for the "Run All Specs" Feature"""
   setRunAllSpecs(runAllSpecs: [String!]!): Boolean
 
+  """Set failed tests for the current run to be used by the runner"""
+  setTestsForRun(testsBySpec: [TestsBySpecInput!]!): Boolean
+
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
+
+  """Return the set of test titles for the given spec path"""
+  testsForRun(
+    """Spec path relative to the project in posix format"""
+    spec: String!
+  ): [String!]
 
   """Updates the different fields of the wizard data store"""
   wizardUpdate(input: WizardUpdateInput!): Wizard
@@ -1400,6 +1739,20 @@ type Mutation {
 interface Node {
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
+}
+
+"""Possible operating systems for a build"""
+enum OperatingSystemsEnum {
+  LINUX
+  MAC
+  UNKNOWN
+  WINDOWS
+}
+
+"""What to do when the run is over the limit"""
+enum OverLimitActionTypeEnum {
+  CONTACT_ADMIN
+  UPGRADE
 }
 
 enum PackageManagerEnum {
@@ -1505,7 +1858,7 @@ type Query {
     """A list of Project slugs"""
     projectSlug: String!
 
-    """Datetime since the fetched data"""
+    """DateTime since the fetched data"""
     sinceDateTime: DateTime
   ): CloudLatestRunUpdateSpecData
 
@@ -1571,6 +1924,9 @@ type Query {
   migration: Migration
   node(id: ID!): Node
 
+  """Defines the suggested polling intervals for various schema resources"""
+  pollingIntervals: CloudPollingIntervals
+
   """All known projects for the app"""
   projects: [ProjectLike!]!
 
@@ -1607,6 +1963,39 @@ type ReactComponentResponse {
 
   """Whether or not there was there an error when parsing the file"""
   errored: Boolean
+}
+
+"""
+Indicates builds from the Cypress Cloud that most closely align with the current local Git commit
+"""
+type RelevantRun {
+  """
+  How many commits ahead the current local commit is from the commit of the current run
+  """
+  commitsAhead: Int
+
+  """Run number that is the most recent build that is not a RUNNING status"""
+  current: Int
+
+  """Run number that is the most recent build regardless of status """
+  next: Int
+}
+
+enum RelevantRunLocationEnum {
+  DEBUG
+  SIDEBAR
+}
+
+""""""
+type RelevantRunSpecs {
+  """Number of specs in the run that have finished being processed"""
+  completedSpecs: Int!
+
+  """The runNumber that these spec counts belong to"""
+  runNumber: Int!
+
+  """Total number of specs in the run"""
+  totalSpecs: Int!
 }
 
 """
@@ -1713,6 +2102,18 @@ enum RemoteFetchableStatus {
   NOT_FETCHED
 }
 
+"""Possible check status of the instances run"""
+enum RunInstanceStatusEnum {
+  CANCELLED
+  ERRORED
+  FAILED
+  NOTESTS
+  PASSED
+  RUNNING
+  TIMEDOUT
+  UNCLAIMED
+}
+
 """A file that we just added to the filesystem during project setup"""
 type ScaffoldedFile {
   """Info about the file we just scaffolded"""
@@ -1816,6 +2217,16 @@ type Subscription {
   """
   pushFragment: [PushFragmentPayload!]!
 
+  """
+  Subscription that watches for a relevant run to the debug page to be RUNNING and returns updated spec counts until complete
+  """
+  relevantRunSpecChange: Query
+
+  """
+  Subscription that polls the cloud for new relevant runs that match local git commit hashes
+  """
+  relevantRuns(location: RelevantRunLocationEnum!): RelevantRun
+
   """Issued when the watched specs for the project changes"""
   specsChange: CurrentProject
 
@@ -1849,6 +2260,23 @@ type TestingTypeInfo implements Node {
   id: ID!
   title: String!
   type: TestingTypeEnum!
+}
+
+"""
+Represents the input for setting a mapping of test titles by the spec path
+"""
+input TestsBySpecInput {
+  """Path to the spec relative to the project"""
+  specPath: String!
+
+  """Full test title which should be all parts joined by a space"""
+  tests: [String!]!
+}
+
+"""A run was hidden because it was over the usage limit"""
+type UsageLimitExceeded {
+  """The number of tests allowed per month"""
+  monthlyTests: Int
 }
 
 """Version of Cypress and release date"""
