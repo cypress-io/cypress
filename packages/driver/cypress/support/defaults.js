@@ -2,8 +2,6 @@ const { $ } = Cypress
 
 const isActuallyInteractive = Cypress.config('isInteractive')
 
-Cypress.config('isActuallyInteractive', isActuallyInteractive)
-
 window.top.__cySkipValidateConfig = true
 
 if (!isActuallyInteractive) {
