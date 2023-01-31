@@ -106,7 +106,7 @@ const _handleErrors = (errors) => {
  * Determines if the Cypress changelog has the correct next version and changelog entires given the provided
  * list of commits.
  */
-async function validateChangelog ({ changedFiles, nextVersion, commits }) {
+async function validateChangelog ({ changedFiles, nextVersion, pendingRelease, commits }) {
   const hasUserFacingCommits = commits.some(({ semanticType }) => hasUserFacingChange(semanticType))
 
   if (!hasUserFacingCommits) {
@@ -138,7 +138,7 @@ async function validateChangelog ({ changedFiles, nextVersion, commits }) {
     }
   }
 
-  const changelog = await parseChangelog()
+  const changelog = await parseChangelog(pendingRelease)
 
   if (nextVersion && !changelog.version === `## ${nextVersion}`) {
     errors.push(`The changelog version does not contain the next Cypress version of ${nextVersion}. If the changelog version is correct, please correct the pull request title to correctly reflect the change being made.`)
