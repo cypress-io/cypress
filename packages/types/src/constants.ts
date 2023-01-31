@@ -36,3 +36,10 @@ export const RUN_ALL_SPECS: SpecFile = {
   baseName: RUN_ALL_SPECS_KEY,
   fileName: RUN_ALL_SPECS_KEY,
 }
+
+/**
+ * In cypress-in-cypress tests that visit the app in open mode,
+ * we use this to make `isRunMode` true on the UI side so that
+ * we can test some run-mode-specific UI features
+ */
+export const CY_IN_CY_SIMULATE_RUN_MODE = 'CY_IN_CY_SIMULATE_RUN_MODE'
