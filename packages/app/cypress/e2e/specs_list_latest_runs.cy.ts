@@ -79,6 +79,9 @@ function simulateRunData () {
           status: s,
           createdAt: new Date('2022-05-08T03:17:00').toISOString(),
           completedAt: new Date('2022-05-08T05:17:00').toISOString(),
+          basename: idPrefix.substring(idPrefix.lastIndexOf('/') + 1, idPrefix.indexOf('.')),
+          path: idPrefix,
+          extension: idPrefix.substring(idPrefix.indexOf('.')),
           runNumber: 432,
           groupCount: 2,
           specDuration: {
@@ -460,6 +463,9 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
               status: s,
               createdAt: new Date('2022-05-08T03:17:00').toISOString(),
               completedAt: new Date('2022-05-08T05:17:00').toISOString(),
+              basename: idPrefix.substring(idPrefix.lastIndexOf('/') + 1, idPrefix.indexOf('.')),
+              path: idPrefix,
+              extension: idPrefix.substring(idPrefix.indexOf('.')),
               runNumber: 432,
               groupCount: 2,
               specDuration: {
@@ -574,6 +580,9 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
               status: s,
               createdAt: new Date('2022-05-08T03:17:00').toISOString(),
               completedAt: new Date('2022-05-08T05:17:00').toISOString(),
+              basename: idPrefix.substring(idPrefix.lastIndexOf('/') + 1, idPrefix.indexOf('.')),
+              path: idPrefix,
+              extension: idPrefix.substring(idPrefix.indexOf('.')),
               runNumber: 432,
               groupCount: 2,
               specDuration: {

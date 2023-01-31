@@ -61,7 +61,8 @@ export interface RemoteGraphQLBatchInterceptPayload<T> {
   result: T
 }
 
-export type RemoteGraphQLInterceptor <T = {[key: string]: any}> = (obj: RemoteGraphQLInterceptPayload, testState: Record<string, any>) => ExecutionResult<T> | Promise<ExecutionResult<T>> | Response
+export type RemoteGraphQLInterceptor <T = {[key: string]: any}> = (
+  obj: RemoteGraphQLInterceptPayload, testState: Record<string, any>, options: Record<string, any>) => ExecutionResult<T> | Promise<ExecutionResult<T>> | Response
 
 export type RemoteGraphQLBatchInterceptor<T = any> = (obj: RemoteGraphQLBatchInterceptPayload<T>, testState: Record<string, any>) => T | Promise<T>
 
@@ -473,9 +474,12 @@ function findBrowsers (options: FindBrowsersOptions = {}) {
   })
 }
 
-function remoteGraphQLIntercept <T = any> (fn: RemoteGraphQLInterceptor<T>) {
+function remoteGraphQLIntercept <T = any> (fn: RemoteGraphQLInterceptor<T>, remoteGraphQLOptions?: Record<string, any>) {
   return logInternal('remoteGraphQLIntercept', () => {
-    return taskInternal('__internal_remoteGraphQLIntercept', fn.toString())
+    return taskInternal('__internal_remoteGraphQLIntercept', {
+      fn: fn.toString(),
+      remoteGraphQLOptions,
+    })
   })
 }
 

@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events'
 import { action } from 'mobx'
 import appState, { AppState } from './app-state'
-import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from '../runnables/runnables-store'
+import runnablesStore, { RunnablesStore, LogProps, RootRunnable } from '../runnables/runnables-store'
 import statsStore, { StatsStore } from '../header/stats-store'
 import scroller, { Scroller } from './scroller'
 import { UpdatableTestProps, UpdateTestCallback, TestProps } from '../test/test-model'
@@ -143,6 +143,10 @@ const events: Events = {
       appState.stop()
       runner.emit('runner:stop')
     }))
+
+    localBus.on('testFilter:cloudDebug:dismiss', () => {
+      runner.emit('testFilter:cloudDebug:dismiss')
+    })
 
     localBus.on('restart', action('restart', () => {
       runner.emit('runner:restart')
