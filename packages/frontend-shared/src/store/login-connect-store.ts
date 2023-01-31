@@ -7,6 +7,7 @@ interface LoginUserData {
 }
 
 export interface LoginConnectState {
+  hasInitiallyLoaded: boolean
   isLoginConnectOpen: boolean
   utmMedium: string
   cypressFirstOpened?: number
@@ -51,6 +52,7 @@ export const useLoginConnectStore = defineStore({
 
   state (): LoginConnectState {
     return {
+      hasInitiallyLoaded: false,
       utmMedium: '',
       isLoginConnectOpen: false,
       cypressFirstOpened: undefined,
@@ -75,6 +77,9 @@ export const useLoginConnectStore = defineStore({
     }
   },
   actions: {
+    setHasInitiallyLoaded () {
+      this.hasInitiallyLoaded = true
+    },
     openLoginConnectModal ({ utmMedium }: { utmMedium: string }) {
       this.isLoginConnectOpen = true
       this.utmMedium = utmMedium
