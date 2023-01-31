@@ -1,11 +1,18 @@
  <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.6.0
+
+_Released 02/14/2023 (PENDING)_
+
+**Features:**
+
+- Added `Cypress.require()` for including dependencies within the `cy.origin()` callback.  Removed support for `require()` and `import()` within the callback. Addresses [#24976](https://github.com/cypress-io/cypress/issues/24976).
+
 ## 12.5.0
 
 _Released 01/31/2023 (PENDING)_
 
 **Features:**
 
-- Added `Cypress.require()` for including dependencies within the `cy.origin()` callback.  Removed support for `require()` and `import()` within the callback. Addresses [#24976](https://github.com/cypress-io/cypress/issues/24976).
 - Easily debug failed CI test runs right from your local Cypress app with the new Debug page, powered by Cypress Cloud.  For more details, see the [Debug documentation](https://on.cypress.io/debug-page). Addressed in [#25488](https://github.com/cypress-io/cypress/pull/25488).
 
 **Bugfixes:**
