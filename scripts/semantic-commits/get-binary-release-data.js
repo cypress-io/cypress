@@ -7,7 +7,11 @@ const { getCurrentReleaseData } = require('./get-current-release-data')
 const { getNextVersionForBinary } = require('../get-next-version')
 const { getLinkedIssues } = require('./get-linked-issues')
 
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN })
+if (process.env.CIRCLECI && !process.env.GH_TOKEN) {
+  throw new Error('The GITHUB_TOKEN env is not set.')
+}
+
+const octokit = new Octokit({ auth: process.env.GH_TOKEN })
 
 /**
  * Get the list of file names that have been added, deleted or changed since the git
@@ -19,7 +23,7 @@ const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN })
  * @param {string} latestReleaseInfo.buildSha - git commit associated with published content
  */
 const getChangedFilesSinceLastRelease = (latestReleaseInfo) => {
-  const stdout = childProcess.execSync(`git diff ${latestReleaseInfo.buildSha}.. --name-only`)
+  const stdout = childProcess.execSync(`git diff ${latestReleaseInfo.buildSha}.. --name-only`, { encoding: 'utf8' })
 
   if (!stdout) {
     console.log('no files changes since last release')
