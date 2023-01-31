@@ -29,7 +29,8 @@ export const specsList = ({ specs, tests, localSpecs, currentTestingType, groups
       const foundSpec = specs.find((spec) => spec.id === curr.specId)
 
       if (!foundSpec) {
-        //TODO better handle error case
+        // TODO better handle error case by showing an error message rather than just throwing
+        // an error. Will be addressed in https://github.com/cypress-io/cypress/issues/25639
         throw new Error(`Could not find spec for id ${ curr.specId}`)
       }
 
