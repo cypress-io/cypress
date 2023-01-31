@@ -5,7 +5,7 @@ _Released 01/31/2023_
 
 **Features:**
 
-- Easily debug failed CI test runs recorded to the Cypress Cloud from your local Cypress app with the new Debug page.  For more details, see the [Debug documentation](https://on.cypress.io/debug-page). Addressed in [#25488](https://github.com/cypress-io/cypress/pull/25488).
+- Easily debug failed CI test runs recorded to the Cypress Cloud from your local Cypress app with the new Debug page. Please leave any feedback [here](https://github.com/cypress-io/cypress/discussions/25649). Your feedback will help us make decisions to improve the Debug experience. For more details, see [our blog post](https://on.cypress.io/debug-page-release). Addressed in [#25488](https://github.com/cypress-io/cypress/pull/25488).
 
 **Performance:**
 
