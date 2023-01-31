@@ -27,13 +27,14 @@
   "packageRules": [
     {
       "matchPackagePatterns": [
-        "devDependencies"
+        "*"
       ],
       "semanticCommitType": "chore"
     },
     {
       "matchDepTypes": [
-        "dependencies"
+        "dependencies",
+        "require"
       ],
       "semanticCommitType": "dependency"
     }
