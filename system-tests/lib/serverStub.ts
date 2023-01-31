@@ -161,11 +161,11 @@ beforeEach(() => {
 })
 
 export const getRequestUrls = () => {
-  return _.map(mockServerState.requests, 'url')
+  return _.map(mockServerState.requests, 'url').filter((u) => u !== 'POST /preflight')
 }
 
 export const getRequests = () => {
-  return mockServerState.requests
+  return mockServerState.requests.filter((r) => r.url !== 'POST /preflight')
 }
 
 const getSchemaErr = (tag, err, schema) => {

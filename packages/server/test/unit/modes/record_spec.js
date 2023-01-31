@@ -16,6 +16,18 @@ const initialEnv = _.clone(process.env)
 // NOTE: the majority of the logic of record_spec is
 // tested as an e2e/record_spec
 describe('lib/modes/record', () => {
+  let preflight
+
+  beforeEach(() => {
+    preflight = sinon.stub(api, 'preflight').callsFake(async () => {
+      api.setPreflightResult({ encrypt: false })
+    })
+  })
+
+  afterEach(() => {
+    api.resetPreflightResult({ encrypt: false })
+  })
+
   // QUESTION: why are these tests here when
   // this is a module... ?
   context('.getCommitFromGitOrCi', () => {
@@ -144,6 +156,7 @@ describe('lib/modes/record', () => {
         })
         .then(() => {
           expect(runAllSpecs).to.have.been.calledWith({ parallel: false })
+          expect(preflight).to.have.been.calledOnce
           expect(createRun).to.have.been.calledOnce
           expect(createRun.firstCall.args).to.have.length(1)
           const { commit } = createRun.firstCall.args[0]
@@ -203,6 +216,7 @@ describe('lib/modes/record', () => {
         .then(() => {
           expect(runAllSpecs).to.have.been.calledWith({ parallel: false })
           expect(createRun).to.have.been.calledOnce
+          expect(preflight).to.have.been.calledOnce
           expect(createRun.firstCall.args).to.have.length(1)
           const { commit } = createRun.firstCall.args[0]
 
