@@ -487,7 +487,7 @@ describe('Launchpad: Setup Project', () => {
 
     describe('project not been configured for cypress', () => {
       // TODO: unskip once Object API lands https://github.com/cypress-io/cypress/pull/20861
-      it.skip('can setup component testing', () => {
+      it('can setup component testing', () => {
         scaffoldAndOpenProject('pristine')
         cy.visitLaunchpad()
 
@@ -534,7 +534,7 @@ describe('Launchpad: Setup Project', () => {
       })
 
       // TODO: unskip once Object API lands https://github.com/cypress-io/cypress/pull/20861
-      it.skip('setup component testing with typescript files', () => {
+      it('setup component testing with typescript files', () => {
         scaffoldAndOpenProject('pristine')
         cy.visitLaunchpad()
 
@@ -584,7 +584,7 @@ describe('Launchpad: Setup Project', () => {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23153
-    it.skip('makes the right command for pnpm', () => {
+    it('makes the right command for pnpm', () => {
       scaffoldAndOpenProject('pristine-pnpm')
 
       cy.visitLaunchpad()
@@ -597,7 +597,7 @@ describe('Launchpad: Setup Project', () => {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23153
-    it.skip('makes the right command for npm', () => {
+    it('makes the right command for npm', () => {
       scaffoldAndOpenProject('pristine-npm')
 
       cy.visitLaunchpad()
@@ -672,7 +672,7 @@ describe('Launchpad: Setup Project', () => {
     })
 
     // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23418
-    it.skip('takes the user to first step of ct setup when switching from app', () => {
+    it('takes the user to first step of ct setup when switching from app', () => {
       scaffoldAndOpenProject('pristine-with-e2e-testing')
       cy.visitLaunchpad()
       verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })

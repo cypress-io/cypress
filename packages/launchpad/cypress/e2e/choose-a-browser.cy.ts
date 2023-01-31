@@ -1,7 +1,7 @@
 import type { FoundBrowser } from '@packages/types/src'
 
 // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23418
-describe.skip('Choose a browser page', () => {
+describe('Choose a browser page', () => {
   beforeEach(() => {
     cy.scaffoldProject('launchpad')
   })

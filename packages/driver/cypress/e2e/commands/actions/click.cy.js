@@ -3070,7 +3070,7 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     // TODO: fix this once we implement aborting / restoring / reset
-    it.skip('can cancel multiple dblclicks', function (done) {
+    it('can cancel multiple dblclicks', function (done) {
       let dblclicks = 0
 
       const spy = this.sandbox.spy(() => {

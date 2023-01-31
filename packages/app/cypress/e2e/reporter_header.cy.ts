@@ -17,7 +17,7 @@ describe('Reporter Header', () => {
     })
 
     // TODO: Reenable as part of https://github.com/cypress-io/cypress/issues/23902
-    it.skip('filters the list of specs when searching for specs', () => {
+    it('filters the list of specs when searching for specs', () => {
       cy.get('body').type('f')
 
       cy.findByTestId('specs-list-panel').within(() => {

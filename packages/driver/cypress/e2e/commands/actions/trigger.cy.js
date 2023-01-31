@@ -126,7 +126,7 @@ describe('src/cy/commands/actions/trigger', () => {
     // temporarily skipping for now, but this needs
     // to be reenabled after launch once we have time
     // to look at the underlying failure cause
-    it.skip('records correct pageX and pageY el scrolled', (done) => {
+    it('records correct pageX and pageY el scrolled', (done) => {
       const $btn = $('<button id=\'scrolledBtn\' style=\'position: absolute; top: 1600px; left: 1200px; width: 100px;\'>foo</button>').appendTo(cy.$$('body'))
 
       const win = cy.state('window')
@@ -1002,7 +1002,7 @@ describe('src/cy/commands/actions/trigger', () => {
       })
 
       // TODO: trigger() doesn't throw an error now.
-      it.skip('throws when eventName is not a string', (done) => {
+      it('throws when eventName is not a string', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.eq('`cy.trigger()` can only be called on a single element. Your subject contained 15 elements.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/trigger')

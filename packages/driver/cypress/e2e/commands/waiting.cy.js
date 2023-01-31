@@ -798,7 +798,7 @@ describe('src/cy/commands/waiting', () => {
       })
 
       // FIXME: failing in CI sometimes https://circleci.com/gh/cypress-io/cypress/5655
-      it.skip('waits for the 4th request before resolving', () => {
+      it('waits for the 4th request before resolving', () => {
         const resp = { foo: 'foo' }
         let response = 0
 

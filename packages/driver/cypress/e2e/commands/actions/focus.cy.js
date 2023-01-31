@@ -385,7 +385,7 @@ describe('src/cy/commands/actions/focus', () => {
       })
 
       // TODO: dont skip this
-      it.skip('slurps up failed promises', (done) => {
+      it('slurps up failed promises', (done) => {
         cy.timeout(1000)
 
         // we only want to test when the document

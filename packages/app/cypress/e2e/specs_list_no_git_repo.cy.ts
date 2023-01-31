@@ -7,7 +7,7 @@ describe('Spec List - Last updated with no git info', () => {
   })
 
   // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23474
-  it.skip('shows no icon and file system timestamp for files', () => {
+  it('shows no icon and file system timestamp for files', () => {
     cy.get('[data-cy-row="blank-contents.spec.js"] [data-cy="git-info-row"] svg')
     .should('not.exist')
 

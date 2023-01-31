@@ -875,7 +875,7 @@ describe('src/cypress/dom/visibility', () => {
 
     describe('css clip-path', () => {
       // TODO: why is this skipped?
-      it.skip('is hidden when outside of parents clip-path', function () {
+      it('is hidden when outside of parents clip-path', function () {
         expect(this.$parentWithClipPathAbsolutePositionElOutsideClipPath.find('span')).to.be.hidden
       })
 

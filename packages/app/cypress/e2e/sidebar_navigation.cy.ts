@@ -290,7 +290,7 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
     })
 
     // TODO: Remove skip when we fix cy.reload() in Cypress in Cypress - UNIFY-1346
-    it.skip('resize nav and persist the state after refresh', () => {
+    it('resize nav and persist the state after refresh', () => {
       cy.contains('fixture.js').click()
 
       cy.get('.toggle-specs-text').click()
