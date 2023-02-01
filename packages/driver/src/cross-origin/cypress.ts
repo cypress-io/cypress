@@ -140,6 +140,7 @@ const setup = (cypressConfig: Cypress.Config, env: Cypress.ObjectLike) => {
   // flag is enabled), but it should be replaced by the preprocessor at runtime
   // with an actual require() before it's run in the browser. if it's not,
   // something unexpected has gone wrong
+  // @ts-expect-error
   Cypress.require = () => {
     // @ts-ignore
     if (!Cypress.config('experimentalOriginDependencies')) {
