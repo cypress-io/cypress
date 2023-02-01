@@ -790,7 +790,7 @@ declare namespace Cypress {
      * Used to include dependencies within the cy.origin() callback
      * @see https://on.cypress.io/origin
      */
-    require: (id: string) => any
+    require: <T = any>(id: string) => T
 
     /**
      * Trigger action

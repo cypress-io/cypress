@@ -1,3 +1,5 @@
+import type { LoDashStatic } from 'lodash'
+
 describe('cy.origin dependencies', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
@@ -6,9 +8,15 @@ describe('cy.origin dependencies', { browser: '!webkit' }, () => {
 
   it('works', () => {
     cy.origin('http://www.foobar.com:3500', () => {
-      const lodash = Cypress.require('lodash')
+      // default type: any
+      const lodash1 = Cypress.require('lodash')
+      // 2 ways of getting the proper type
+      const lodash2 = Cypress.require('lodash') as typeof import('lodash')
+      const lodash3 = Cypress.require<LoDashStatic>('lodash')
 
-      expect(lodash.get({ foo: 'foo' }, 'foo')).to.equal('foo')
+      expect(lodash1.get({ foo: 'foo' }, 'foo')).to.equal('foo')
+      expect(lodash2.get({ foo: 'foo' }, 'foo')).to.equal('foo')
+      expect(lodash3.get({ foo: 'foo' }, 'foo')).to.equal('foo')
     })
   })
 
