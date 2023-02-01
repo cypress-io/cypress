@@ -649,13 +649,14 @@ describe('src/cy/commands/assertions', () => {
         cy.get('button:first', { timeout: 500 }).should('have.class', 'does-not-have-class')
       })
 
-      it('has a pending state while retrying on static subjects', function (done) {
+      it('has a pending state while retrying for commands with onFail', function (done) {
         cy.on('command:retry', () => {
-          const [readFileLog, shouldLog] = this.logs
-
-          if (!shouldLog) {
+          // Wait for the readFile response to come back from the server
+          if (this.logs.length < 2) {
             return
           }
+
+          const [readFileLog, shouldLog] = this.logs
 
           expect(readFileLog.get('state')).to.eq('passed')
           expect(shouldLog.get('state')).to.eq('pending')
