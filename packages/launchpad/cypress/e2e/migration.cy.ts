@@ -1385,6 +1385,8 @@ describe('Full migration flow for each project', { retries: { openMode: 0, runMo
 // TODO: UNIFY-1350 toLaunchpad emitter not working in Cypress in Cypress,
 // re-evaluate after conversion to subscriptions
 describe.skip('component testing migration - defaults', () => {
+  // FIXME: the UI seems to have changed since this test was written/skipped
+  // the text 'I have moved my component specs' only exists in these test
   it('live update migration UI as user moves files', () => {
     cy.scaffoldProject('migration-component-testing-customized')
     cy.openProject('migration-component-testing-customized')
