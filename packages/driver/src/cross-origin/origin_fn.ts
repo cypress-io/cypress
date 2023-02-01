@@ -61,15 +61,26 @@ const rehydrateRunnable = (data: serializedRunnable): Runnable|Test => {
   return runnable
 }
 
+// Callback function handling / preprocessing for dependencies
+// ---
+// 1. If experimentalOriginDependencies is disabled or the string "Cypress.require"
+//    does not exist in the callback, just eval the callback as-is
+// 2. Otherwise, we send it to the server
+// 3. The server webpacks the callback to bundle in all the deps, then returns
+//    that bundle
+// 4. Eval the callback like normal
 const getCallbackFn = async (fn: string, file?: string) => {
   if (
-    // @ts-ignore
+    // @ts-expect-error
     !Cypress.config('experimentalOriginDependencies')
     || !fn.includes('Cypress.require')
   ) {
     return fn
   }
 
+  // Since webpack will wrap everything up in a closure, we create a variable
+  // in the outer scope (see the return value below), assign the function to it
+  // in the inner scope, then call the function with the args
   const callbackName = '__cypressCallback'
   const response = await fetch('/__cypress/process-origin-callback', {
     body: JSON.stringify({ file, fn: `${callbackName} = ${fn};` }),

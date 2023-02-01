@@ -11,7 +11,7 @@ interface Options {
   fn: string
 }
 
-// @ts-ignore - webpack expects `fs.join` to exist for some reason
+// @ts-expect-error - webpack expects `fs.join` to exist for some reason
 fs.join = path.join
 
 export const processCallback = ({ file, fn }: Options) => {
@@ -45,7 +45,7 @@ export const processCallback = ({ file, fn }: Options) => {
 
   const compiler = webpack(modifiedWebpackOptions)
 
-  // @ts-ignore
+  // @ts-expect-error
   compiler.outputFileSystem = fs
 
   return new Promise<string>((resolve, reject) => {
