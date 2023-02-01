@@ -1,4 +1,4 @@
-import { AppComponent } from './app.component'
+/* eslint-disable @cypress/dev/skip-comment */
 
 // Validating Mocha syntax and behavior of *.skip is still valid after being patched by `zone.js/testing`
 // Github Issue: https://github.com/cypress-io/cypress/issues/23409

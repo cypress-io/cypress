@@ -5,7 +5,9 @@ import './button.css'
 /**
  * Primary UI component for user interaction
  */
-export default Button = ({ primary, backgroundColor, size, label, ...props }) => {
+export default Button
+
+const Button = ({ primary, backgroundColor, size, label, ...props }) => {
   const mode = primary ? 'button--primary' : 'button--secondary'
 
   return (

@@ -1,5 +1,4 @@
-import { AppComponent } from './app.component'
-
+/* eslint-disable mocha/no-exclusive-tests */
 const ExcludedTestTitle = 'should not exist'
 
 // Validating Mocha syntax and behavior of *.only is still valid after being patched by `zone.js/testing`

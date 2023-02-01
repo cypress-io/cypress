@@ -13,5 +13,8 @@
   ],
   "rules": {
     "no-console": "off"
-  }
+  },
+  "ignorePatterns": [
+    "project-fixtures/react/src/AppCompilationError.cy.jsx"
+  ]
 }
