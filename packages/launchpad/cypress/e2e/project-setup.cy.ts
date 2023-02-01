@@ -570,7 +570,8 @@ describe('Launchpad: Setup Project', () => {
     })
   })
 
-  describe('Command for package managers', () => {
+  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23153
+  describe('Command for package managers', { retries: 15 }, () => {
     it('makes the right command for yarn', () => {
       scaffoldAndOpenProject('pristine-yarn')
 
@@ -583,8 +584,7 @@ describe('Launchpad: Setup Project', () => {
       cy.findByDisplayValue('yarn add -D react-scripts react-dom react').should('be.visible')
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23153
-    it.skip('makes the right command for pnpm', () => {
+    it('makes the right command for pnpm', () => {
       scaffoldAndOpenProject('pristine-pnpm')
 
       cy.visitLaunchpad()
@@ -593,11 +593,10 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Create React App').click()
       cy.findByText('Next step').click()
-      cy.get('code').should('contain.text', 'pnpm install -D ')
+      cy.findByDisplayValue('pnpm install -D react-scripts react-dom react')
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23153
-    it.skip('makes the right command for npm', () => {
+    it('makes the right command for npm', () => {
       scaffoldAndOpenProject('pristine-npm')
 
       cy.visitLaunchpad()
@@ -606,7 +605,7 @@ describe('Launchpad: Setup Project', () => {
       cy.get('[data-testid="select-framework"]').click()
       cy.findByText('Create React App').click()
       cy.findByText('Next step').click()
-      cy.get('code').should('contain.text', 'npm install -D ')
+      cy.findByDisplayValue('npm install -D react-scripts react-dom react')
     })
   })
 
