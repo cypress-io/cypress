@@ -184,7 +184,9 @@ export default {
         }
 
         queries[name] = function overridden (...args) {
-          return fn.call(this, original, ...args)
+          args.unshift(original)
+
+          return fn.apply(this, args)
         }
 
         cy.addQuery({ name, fn: queries[name] })
