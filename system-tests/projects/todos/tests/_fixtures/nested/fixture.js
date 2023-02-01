@@ -1,1 +1,1 @@
-{nested: "fixture"}
+{ 'fixture' }

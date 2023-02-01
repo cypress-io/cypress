@@ -1,0 +1,10 @@
+system-tests/projects/config-with-ts-module-error/cypress.config.ts
+system-tests/projects/config-with-ts-syntax-error/cypress.config.ts
+system-tests/projects/e2e/cypress/e2e/stdout_exit_early_failing.cy.js
+system-tests/projects/e2e/cypress/e2e/typescript_syntax_error.cy.ts
+system-tests/projects/e2e/lib/fail.js
+system-tests/projects/e2e/static/fail.js
+system-tests/projects/e2e/static/jquery.js
+system-tests/projects/ids/cypress/e2e/dom.jsx
+system-tests/projects/no-specs/src/Invalid.jsx
+system-tests/projects/todos/tests/_fixtures/**

@@ -9,7 +9,7 @@ describe('skip', () => {
         it('skipped', () => {})
       })
     })
-    
+
     describe('describe', () => {
       describe.skip('should exist on "describe"', () => {
         it('skipped', () => {})
@@ -37,12 +37,12 @@ describe('skip', () => {
 
   context('02 - validations', () => {
     const verifyWasSkipped = (title: string) => {
-      cy.wrap(Cypress.$(window.top!.document.body)).within(() =>
-        cy
-          .contains(title)
-          .parents('[data-model-state="pending"]')          // Find parent row with class indicating test was skipped
-          .should('be.visible')
-      )
+      cy.wrap(Cypress.$(window.top!.document.body)).within(() => {
+        return cy
+        .contains(title)
+        .parents('[data-model-state="pending"]') // Find parent row with class indicating test was skipped
+        .should('be.visible')
+      })
     }
 
     describe('suite', () => {

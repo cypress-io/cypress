@@ -1,1 +1,1 @@
-{js: true}
+{ true }

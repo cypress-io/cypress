@@ -8,5 +8,4 @@ declare global {
   }
 }
 
-
-Cypress.Commands.add('mount', mount);
+Cypress.Commands.add('mount', mount)
