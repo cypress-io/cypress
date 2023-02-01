@@ -243,7 +243,7 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
       })
     })
 
-    it('.alias()', () => {
+    it('.as()', () => {
       cy.get('a[data-cy="dom-link"]').click()
       cy.origin('http://www.foobar.com:3500', () => {
         cy.get('#button').as('buttonAlias')
@@ -255,7 +255,7 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
         // make sure $el is in fact a jquery instance to keep the logs happy
         expect($el.jquery).to.be.ok
 
-        expect(alias).to.equal('buttonAlias')
+        expect(alias).to.equal('@buttonAlias')
         expect(aliasType).to.equal('dom')
         expect(consoleProps.Command).to.equal('get')
         expect(consoleProps.Elements).to.equal(1)
@@ -488,7 +488,7 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
     })
 
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23480
-    it.skip('.submit()', () => {
+    it('.submit()', { retries: 15 }, () => {
       cy.get('a[data-cy="dom-link"]').click()
       cy.origin('http://www.foobar.com:3500', () => {
         cy.get('form#multiple-inputs-and-input-submit input[name="fname"]').type('foo')

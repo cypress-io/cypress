@@ -112,7 +112,7 @@ describe('scaffolding component testing', {
 
   context('angular-cli-unconfigured', () => {
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23452
-    it.skip('scaffolds component testing for Angular', () => {
+    it('scaffolds component testing for Angular', { retries: 15 }, () => {
       startSetupFor('angular-cli-unconfigured')
 
       // should detect correctly

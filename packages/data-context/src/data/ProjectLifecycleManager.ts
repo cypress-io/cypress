@@ -412,6 +412,9 @@ export class ProjectLifecycleManager {
         onGitInfoChange: (specPaths) => {
           this.ctx.emitter.gitInfoChange(specPaths)
         },
+        onGitLogChange: async (shas) => {
+          await this.ctx.relevantRuns.checkRelevantRuns(shas, true)
+        },
       })
 
       s.diagnostics = { error: null, warnings: [] }
@@ -630,7 +633,12 @@ export class ProjectLifecycleManager {
         metaState.isProjectUsingESModules = true
       }
 
-      metaState.isUsingTypeScript = detectLanguage({ projectRoot: this.projectRoot, pkgJson, isMigrating: metaState.hasLegacyCypressJson }) === 'ts'
+      metaState.isUsingTypeScript = detectLanguage({
+        projectRoot: this.projectRoot,
+        customConfigFile: configFile,
+        pkgJson,
+        isMigrating: metaState.hasLegacyCypressJson,
+      }) === 'ts'
     } catch {
       // No need to handle
     }

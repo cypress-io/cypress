@@ -1,3 +1,4 @@
+/* eslint-disable no-dupe-class-members */
 import Bluebird from 'bluebird'
 import { EventEmitter } from 'events'
 import type { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
@@ -9,6 +10,7 @@ import { logger } from './logger'
 import type { Socket } from '@packages/socket/lib/browser'
 import { automation, useRunnerUiStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
+import { useSpecStore } from '../store/specs-store'
 import { useStudioStore } from '../store/studio-store'
 import { getAutIframeModel } from '.'
 import { handlePausing } from './events/pausing'
@@ -55,6 +57,7 @@ export class EventManager {
   cypressInCypressMochaEvents: CypressInCypressMochaEvent[] = []
   // Used for testing the experimentalSingleTabRunMode experiment. Ensures AUT is correctly destroyed between specs.
   ws: Socket
+  specStore: ReturnType<typeof useSpecStore>
   studioStore: ReturnType<typeof useStudioStore>
 
   constructor (
@@ -68,6 +71,7 @@ export class EventManager {
   ) {
     this.selectorPlaygroundModel = selectorPlaygroundModel
     this.ws = ws
+    this.specStore = useSpecStore()
     this.studioStore = useStudioStore()
   }
 
@@ -235,6 +239,10 @@ export class EventManager {
       this.saveState(state)
     })
 
+    this.reporterBus.on('testFilter:cloudDebug:dismiss', () => {
+      this.emit('testFilter:cloudDebug:dismiss', undefined)
+    })
+
     this.reporterBus.on('clear:all:sessions', () => {
       if (!Cypress) return
 
@@ -378,6 +386,8 @@ export class EventManager {
   initialize ($autIframe: JQuery<HTMLIFrameElement>, config: Record<string, any>) {
     performance.mark('initialize-start')
 
+    const testFilter = this.specStore.testFilter
+
     return Cypress.initialize({
       $autIframe,
       onSpecReady: () => {
@@ -393,7 +403,7 @@ export class EventManager {
 
           this.studioStore.initialize(config, runState)
 
-          const runnables = Cypress.runner.normalizeAll(runState.tests, hideCommandLog)
+          const runnables = Cypress.runner.normalizeAll(runState.tests, hideCommandLog, testFilter)
 
           const run = () => {
             performance.mark('initialize-end')
@@ -539,6 +549,18 @@ export class EventManager {
       })
     })
 
+    Cypress.on('run:start', async () => {
+      if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
+        await Cypress.backend('start:memory:profiling', Cypress.config('spec'))
+      }
+    })
+
+    Cypress.on('run:end', async () => {
+      if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
+        await Cypress.backend('end:memory:profiling')
+      }
+    })
+
     driverToLocalEvents.forEach((event) => {
       Cypress.on(event, (...args: unknown[]) => {
         // special case for asserting the correct mocha events + payload
@@ -568,8 +590,16 @@ export class EventManager {
       this.localBus.emit('script:error', err)
     })
 
-    Cypress.on('test:before:run:async', (_attr, test) => {
+    Cypress.on('test:before:run:async', async (_attr, test) => {
       this.studioStore.interceptTest(test)
+
+      // if the experimental flag is on and we are in a chromium based browser,
+      // check the memory pressure to determine if garbage collection is needed
+      if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
+        await Cypress.backend('check:memory:pressure', {
+          test: { title: test.title, order: test.order, currentRetry: test.currentRetry() },
+        })
+      }
     })
 
     Cypress.on('test:after:run', (test) => {

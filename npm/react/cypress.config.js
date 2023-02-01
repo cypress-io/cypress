@@ -8,6 +8,7 @@ module.exports = {
   },
   'experimentalFetchPolyfill': true,
   'component': {
+    experimentalSingleTabRunMode: true,
     'excludeSpecPattern': [
       '**/__snapshots__/*',
       '**/__image_snapshots__/*',

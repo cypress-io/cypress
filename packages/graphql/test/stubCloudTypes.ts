@@ -22,9 +22,10 @@ import type {
   QueryCloudProjectsBySlugsArgs,
   CloudProjectRunsArgs,
   CloudProjectSpec,
-  CloudProjectSpecResult,
   CloudRunStatus,
   CloudSpecRun,
+  CloudTestResult,
+  CloudRunGroup,
 } from '../src/gen/test-cloud-graphql-types.gen'
 import type { GraphQLResolveInfo } from 'graphql'
 
@@ -184,6 +185,24 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
     url: 'http://dummy.cypress.io/runs/1',
     createdAt: new Date(Date.now() - 1000 * 60 * 61).toISOString(),
     completedAt: null,
+    cancelledAt: null,
+    cancelOnFailure: null,
+    cancelledBy: null,
+    errors: [],
+    ci: {
+      __typename: 'CloudCiBuildInfo',
+      id: 'ci_id',
+      formattedProvider: 'CircleCI',
+      ciBuildNumberFormatted: '12345',
+      url: 'http://ci.com',
+    },
+    groups: [],
+    isHidden: false,
+    reasonsRunIsHidden: [],
+    overLimitActionType: 'UPGRADE',
+    overLimitActionUrl: '',
+    specs: [],
+    testsForReview: [],
     commitInfo: createCloudRunCommitInfo({
       sha: `fake-sha-${getNodeIdx('CloudRun')}`,
       summary: `fix: make gql work ${config.status ?? 'PASSED'}`,
@@ -192,6 +211,109 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
   }
 
   return indexNode(cloudRunData)
+}
+
+function addFailedTests (run: CloudRun) {
+  const specId = 'hash123'
+
+  const spec: CloudSpecRun = {
+    __typename: 'CloudSpecRun',
+    id: specId,
+    basename: 'Test.cy.ts',
+    extension: '.cy.ts',
+    path: 'src/Test.cy.ts',
+    shortPath: 'src/Test.cy.ts',
+    groupIds: ['groupID1'],
+    status: 'FAILED',
+    testsPassed: {
+      __typename: 'SpecDataAggregate',
+      min: 5,
+      max: 5,
+    },
+    testsFailed: {
+      __typename: 'SpecDataAggregate',
+      min: 1,
+      max: 1,
+    },
+    testsPending: {
+      __typename: 'SpecDataAggregate',
+      min: 0,
+      max: 0,
+    },
+    specDuration: {
+      __typename: 'SpecDataAggregate',
+      min: 1000,
+      max: 1000,
+    },
+  }
+
+  const test: CloudTestResult = {
+    __typename: 'CloudTestResult',
+    id: '123',
+    isFlaky: false,
+    specId,
+    state: 'FAILED' as const,
+    duration: null,
+    instance: {
+      __typename: 'CloudRunInstance',
+      id: 'instanceID',
+      status: 'FAILED',
+      groupId: 'groupID1',
+      hasStdout: true,
+      stdoutUrl: 'www.cypress.io',
+      hasScreenshots: true,
+      screenshotsUrl: 'www.cypress.io',
+      hasVideo: true,
+      videoUrl: 'www.cypress.io',
+      totalFailed: 1,
+      totalSkipped: 0,
+      totalPassed: 20,
+      totalPending: 0,
+      totalRunning: 0,
+    },
+    testUrl: 'http://cloudurl',
+    title: '<test/> Should render',
+    titleParts: ['<test/>', 'should render'],
+    thumbprint: 'abc',
+  }
+
+  const group: CloudRunGroup = {
+    __typename: 'CloudRunGroup',
+    id: 'groupID1',
+    groupName: null,
+    testingType: 'e2e',
+    totalPasses: 2,
+    totalFailures: 33,
+    totalPending: 0,
+    totalSkipped: 85,
+    createdAt: '',
+    status: 'FAILED',
+    duration: 0,
+    os: {
+      __typename: 'CloudOperatingSystem',
+      id: 'osID',
+      name: 'Mac',
+      unformattedName: 'darwin',
+      version: '22.1.0',
+      platform: 'MAC',
+      nameWithVersion: 'Mac 22.1.0',
+    },
+    browser: {
+      __typename: 'CloudBrowserInfo',
+      id: 'browserID',
+      unformattedName: 'electron',
+      formattedName: 'Electron',
+      unformattedVersion: '106.0.5249.51',
+      formattedVersion: '106',
+      formattedNameWithVersion: 'Electron 106',
+    },
+  }
+
+  run.specs = [spec]
+  run.testsForReview = [test]
+  run.groups = [group]
+
+  return run
 }
 
 export function createCloudOrganization (config: Partial<CloudOrganization>): Required<CloudOrganization> {
@@ -227,11 +349,36 @@ export function createCloudProjectSpecResult (config: Partial<CloudProjectSpec>)
       __typename: 'CloudProjectSpecFlakyStatus',
       severity: 'NONE',
     },
+    specRunsForRunIds: [],
     ...config,
   }
 
   return indexNode(specResult)
 }
+
+const skippedSpecs: CloudSpecRun[] = [{
+  __typename: 'CloudSpecRun',
+  id: 'hash123',
+  basename: 'Test.cy.ts',
+  extension: '.cy.ts',
+  path: 'src/Test.cy.ts',
+  status: 'FAILED',
+}, {
+  __typename: 'CloudSpecRun',
+  id: 'hash1234',
+  basename: 'Test.cy.ts',
+  extension: '.cy.ts',
+  path: 'src/Test.cy.ts',
+  status: 'RUNNING',
+},
+{
+  __typename: 'CloudSpecRun',
+  id: 'hash12345',
+  basename: 'Test.cy.ts',
+  extension: '.cy.ts',
+  path: 'src/Test.cy.ts',
+  status: 'UNCLAIMED',
+}]
 
 export const CloudRecordKeyStubs = {
   e2eProject: createCloudRecordKey({}),
@@ -248,7 +395,14 @@ export const CloudRunStubs = {
   running: createCloudRun({ status: 'RUNNING', totalRunning: 2, totalPassed: 8 }),
   someSkipped: createCloudRun({ status: 'PASSED', totalPassed: 7, totalSkipped: 3 }),
   somePending: createCloudRun({ status: 'PASSED', totalPassed: 100, totalSkipped: 3000, totalPending: 20 }),
-  allSkipped: createCloudRun({ status: 'ERRORED', totalPassed: 0, totalSkipped: 10 }),
+  allSkipped: createCloudRun({ status: 'ERRORED', totalPassed: 0, totalSkipped: 10, errors: ['The browser server never connected. Something is wrong.', 'The browser server never connected. Something is wrong.'], specs: skippedSpecs }),
+  failingWithTests: addFailedTests(createCloudRun({ status: 'FAILED', totalPassed: 8, totalFailed: 2 })),
+  noTests: createCloudRun({ status: 'NOTESTS' }),
+  timedOutWithCi: createCloudRun({ status: 'TIMEDOUT', ci: { id: 'abc123', formattedProvider: 'Circle CI', ciBuildNumberFormatted: '1234', url: 'https://circleci.com', __typename: 'CloudCiBuildInfo' }, specs: skippedSpecs }),
+  timedOutWithoutCi: createCloudRun({ status: 'TIMEDOUT', specs: skippedSpecs }),
+  overLimit: createCloudRun({ status: 'OVERLIMIT', overLimitActionType: 'CONTACT_ADMIN', overLimitActionUrl: 'http://localhost:3000', isHidden: true, reasonsRunIsHidden: [{ __typename: 'UsageLimitExceeded', monthlyTests: 100 }] }),
+  overLimitRetention: createCloudRun({ status: 'OVERLIMIT', overLimitActionType: 'CONTACT_ADMIN', overLimitActionUrl: 'http://localhost:3000', isHidden: true, reasonsRunIsHidden: [{ __typename: 'DataRetentionLimitExceeded', dataRetentionDays: 10 }] }),
+  cancelled: createCloudRun({ status: 'CANCELLED', cancelledAt: '2019-01-25T02:00:00.000Z', specs: skippedSpecs, cancelledBy: { id: '123', fullName: 'Test Tester', email: 'adams@cypress.io', __typename: 'CloudUser', userIsViewer: true } }),
 } as Record<string, Required<CloudRun>>
 
 export const CloudUserStubs = {
