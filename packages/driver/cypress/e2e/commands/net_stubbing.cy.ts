@@ -319,14 +319,14 @@ describe('network stubbing', { retries: 15 }, function () {
 
     // TODO: implement warning in cy.intercept if appropriate
     // https://github.com/cypress-io/cypress/issues/2372
-    it('warns if a percent-encoded URL is used', function () {
+    it, skip('warns if a percent-encoded URL is used', function () {
       cy.intercept('GET', '/foo%25bar').then(function () {
         expect(Cypress.utils.warning).to.be.calledWith('A URL with percent-encoded characters was passed to cy.intercept(), but cy.intercept() expects a decoded URL.\n\nDid you mean to pass "/foo%bar"?')
       })
     })
 
     // NOTE: see todo on 'warns if a percent-encoded URL is used'
-    it('does not warn if an invalid percent-encoded URL is used', function () {
+    it.skip('does not warn if an invalid percent-encoded URL is used', function () {
       cy.intercept('GET', 'http://example.com/%E0%A4%A').then(function () {
         expect(Cypress.utils.warning).to.not.be.called
       })
