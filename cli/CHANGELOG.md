@@ -5,7 +5,7 @@ _Released 02/10/2023 (PENDING)_
 
 **Features:**
 
-- It is now possible to overwrite query commands using the newly added `Cypress.Commands.overwriteQuery`. See [the docs](https://on.cypress.io/api/custom-queries) for details. Addressed in [#25674](https://github.com/cypress-io/cypress/pull/25674).
+- It is now possible to overwrite query commands using [`Cypress.Commands.overwriteQuery`](https://on.cypress.io/api/custom-queries). Addresses [#25078](https://github.com/cypress-io/cypress/issues/25078).
 
 **Dependency Updates:**
 
