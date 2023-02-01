@@ -64,15 +64,22 @@ export const useCohorts = () => {
   const getCohort = (config: CohortConfig) => {
     const cohortOptionSelected = ref<CohortOption>()
 
-    const cohortIds = config.options.map((option) => option.cohort)
+    const { name, options } = config
 
-    const fetchCohort = async () => {
-      const cohortSelected = await determineCohort(config.name, cohortIds)
+    // If an experiment has been ended it will have <= 1 cohort option. In this case, bypass selecting & persisting a cohort
+    if (!options || options.length <= 1) {
+      cohortOptionSelected.value = options?.[0]
+    } else {
+      const cohortIds = options.map((option) => option.cohort)
 
-      cohortOptionSelected.value = config.options.find((option) => option.cohort === cohortSelected.data?.determineCohort?.cohort)
+      const fetchCohort = async () => {
+        const cohortSelected = await determineCohort(name, cohortIds)
+
+        cohortOptionSelected.value = options.find((option) => option.cohort === cohortSelected.data?.determineCohort?.cohort)
+      }
+
+      fetchCohort()
     }
-
-    fetchCohort()
 
     return cohortOptionSelected
   }
