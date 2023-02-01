@@ -803,6 +803,7 @@
     "./packages/scaffold-config/index.js",
     "./packages/server/lib/browsers/chrome.ts",
     "./packages/server/lib/browsers/firefox.ts",
+    "./packages/server/lib/browsers/memory/index.ts",
     "./packages/server/lib/cache.js",
     "./packages/server/lib/cloud/api.ts",
     "./packages/server/lib/cloud/auth.ts",
