@@ -402,7 +402,7 @@ describe('App: Settings without cloud', () => {
       o.sinon.stub(ctx._apis.authApi, 'logIn')
     })
 
-    cy.contains('button', 'Log in to Cypress Cloud').click()
+    cy.contains('button', 'Connect to Cypress Cloud').click()
     cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
       cy.contains('button', 'Log in').click()
     })

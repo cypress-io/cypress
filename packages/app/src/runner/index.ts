@@ -24,7 +24,7 @@ import { AutIframe } from './aut-iframe'
 import { EventManager } from './event-manager'
 import { createWebsocket as createWebsocketIo } from '@packages/socket/lib/browser'
 import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
-import type { AutomationElementId } from '@packages/types/src'
+import type { AutomationElementId } from '@packages/types'
 import { useSnapshotStore } from './snapshot-store'
 import { useStudioStore } from '../store/studio-store'
 
@@ -374,7 +374,7 @@ async function initialize () {
  * 2. Reset the Reporter. We use the same instance of the Reporter,
  *    but reset the internal state each time we run a spec.
  *
- * 3. Teardown spec. This does a few things, primaily stopping the current
+ * 3. Teardown spec. This does a few things, primarily stopping the current
  *    spec run, which involves stopping the driver and runner.
  *
  * 4. Force the Reporter to re-render with the new spec we are executed.

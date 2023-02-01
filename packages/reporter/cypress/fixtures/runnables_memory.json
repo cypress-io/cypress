@@ -1,0 +1,484 @@
+{
+  "id": "r1",
+  "title": "",
+  "root": true,
+  "hooks": [],
+  "tests": [],
+  "suites": [
+    {
+      "id": "r2",
+      "title": "suite 1",
+      "root": false,
+      "hooks": [],
+      "tests": [
+        {
+          "id": "r3",
+          "title": "passed",
+          "state": "passed",
+          "hooks": [
+            {
+              "title": "\"before each\" hook",
+              "hookName": "before each",
+              "hookId": "h1",
+              "pending": false,
+              "body": "() => {\\n      cy.session('test', () => {});\\n    }",
+              "type": "hook",
+              "currentRetry": 0,
+              "retries": -1
+            }
+          ],
+          "agents": [
+            {
+              "id": 1,
+              "functionName": "get",
+              "name": "spy",
+              "alias": "getAlias",
+              "instrument": "agent",
+              "callCount": 1
+            }
+          ],
+          "routes": [
+            {
+              "id": 1,
+              "name": "route",
+              "numResponses": 1,
+              "method": "GET",
+              "url": "/",
+              "instrument": "route"
+            }
+          ],
+          "commands": [
+            {
+              "id": "c2",
+              "hookId": "h1",
+              "instrument": "command",
+              "message": "test",
+              "name": "session",
+              "sessionInfo": {
+                "id": "test",
+                "isGlobalSession": false,
+                "status": "created"
+              },
+              "state": "passed",
+              "testId": "r3",
+              "type": "parent"
+            },
+            {
+              "id": "c1",
+              "hookId": "r3",
+              "instrument": "command",
+              "message": "http://localhost:3000",
+              "name": "visit",
+              "state": "passed",
+              "testId": "r3",
+              "timeout": 4000,
+              "type": "parent",
+              "wallClockStartedAt": "2020-01-01T00:00:00.000Z"
+            }
+          ]
+        },
+        {
+          "id": "r4",
+          "title": "failed",
+          "state": "failed",
+          "err": {
+            "name": "CommandError",
+            "message": "failed to visit",
+            "stack": "failed to visit\n\ncould not visit http: //localhost:3000"
+          },
+          "hooks": [
+            {
+              "title": "\"before each\" hook",
+              "hookName": "before each",
+              "hookId": "h1",
+              "pending": false,
+              "body": "() => {\\n      cy.session('test', () => {});\\n    }",
+              "type": "hook",
+              "currentRetry": 0,
+              "retries": -1
+            }
+          ],
+          "agents": [
+            {
+              "id": 1,
+              "functionName": "get",
+              "name": "spy",
+              "alias": "getAlias",
+              "instrument": "agent",
+              "callCount": 1
+            }
+          ],
+          "routes": [
+            {
+              "id": 1,
+              "name": "route",
+              "numResponses": 1,
+              "method": "GET",
+              "url": "/",
+              "instrument": "route"
+            }
+          ],
+          "commands": [
+            {
+              "id": "c2",
+              "hookId": "h1",
+              "instrument": "command",
+              "message": "test",
+              "name": "session",
+              "sessionInfo": {
+                "id": "test",
+                "isGlobalSession": false,
+                "status": "created"
+              },
+              "state": "passed",
+              "testId": "r3",
+              "type": "parent"
+            },
+            {
+              "id": "c1",
+              "hookId": "r3",
+              "instrument": "command",
+              "message": "http://localhost:3000",
+              "name": "visit",
+              "state": "passed",
+              "testId": "r3",
+              "timeout": 4000,
+              "type": "parent",
+              "wallClockStartedAt": "2020-01-01T00:00:00.000Z"
+            }
+          ]
+        },
+        {
+          "id": "r5",
+          "title": "passed after retry",
+          "state": "passed",
+          "retries": 1,
+          "currentRetry": 1,
+          "hooks": [
+            {
+              "title": "\"before each\" hook",
+              "hookName": "before each",
+              "hookId": "h1",
+              "pending": false,
+              "body": "() => {\\n      cy.session('test', () => {});\\n    }",
+              "type": "hook",
+              "currentRetry": 0,
+              "retries": -1
+            }
+          ],
+          "agents": [
+            {
+              "id": 1,
+              "functionName": "get",
+              "name": "spy",
+              "alias": "getAlias",
+              "instrument": "agent",
+              "callCount": 1
+            }
+          ],
+          "routes": [
+            {
+              "id": 1,
+              "name": "route",
+              "numResponses": 1,
+              "method": "GET",
+              "url": "/",
+              "instrument": "route"
+            }
+          ],
+          "commands": [
+            {
+              "id": "c1",
+              "hookId": "h1",
+              "instrument": "command",
+              "message": "test",
+              "name": "session",
+              "sessionInfo": {
+                "id": "test",
+                "isGlobalSession": false,
+                "status": "created"
+              },
+              "state": "passed",
+              "testId": "r5",
+              "type": "parent"
+            },
+            {
+              "id": "c2",
+              "hookId": "r5",
+              "instrument": "command",
+              "message": "http://localhost:3000",
+              "name": "visit",
+              "state": "passed",
+              "testId": "r5",
+              "timeout": 4000,
+              "type": "parent",
+              "wallClockStartedAt": "2020-01-01T00:00:00.000Z"
+            }
+          ],
+          "prevAttempts": [
+            {
+              "hookId": "r88",
+              "id": "c1",
+              "instrument": "command",
+              "message": "#id",
+              "name": "get",
+              "state": "failed",
+              "testId": "r88",
+              "timeout": 4000,
+              "type": "parent",
+              "wallClockStartedAt": "2020-01-01T00:00:00.000Z",
+              "hooks": [
+                {
+                  "title": "\"before each\" hook",
+                  "hookName": "before each",
+                  "hookId": "h1",
+                  "pending": false,
+                  "body": "() => {\\n      cy.session('test', () => {});\\n    }",
+                  "type": "hook",
+                  "currentRetry": 0,
+                  "retries": -1
+                }
+              ],
+              "agents": [
+                {
+                  "id": 1,
+                  "functionName": "get",
+                  "name": "spy",
+                  "alias": "getAlias",
+                  "instrument": "agent",
+                  "callCount": 1
+                }
+              ],
+              "routes": [
+                {
+                  "id": 1,
+                  "name": "route",
+                  "numResponses": 1,
+                  "method": "GET",
+                  "url": "/",
+                  "instrument": "route"
+                }
+              ],
+              "commands": [
+                {
+                  "id": "c2",
+                  "hookId": "h1",
+                  "instrument": "command",
+                  "message": "test",
+                  "name": "session",
+                  "sessionInfo": {
+                    "id": "test",
+                    "isGlobalSession": false,
+                    "status": "created"
+                  },
+                  "state": "passed",
+                  "testId": "r3",
+                  "type": "parent"
+                },
+                {
+                  "hookId": "r5",
+                  "id": "c3",
+                  "instrument": "command",
+                  "message": "#does_not_exist",
+                  "name": "get",
+                  "state": "failed",
+                  "testId": "r5",
+                  "timeout": 4000,
+                  "type": "parent",
+                  "wallClockStartedAt": "2020-01-01T00:00:00.000Z",
+                  "err": {
+                    "name": "CommandError",
+                    "message": "failed to get",
+                    "stack": "failed to get element"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "r6",
+          "title": "failed with retries",
+          "state": "failed",
+          "retries": 1,
+          "currentRetry": 1,
+          "hooks": [
+            {
+              "title": "\"before each\" hook",
+              "hookName": "before each",
+              "hookId": "h1",
+              "pending": false,
+              "body": "() => {\\n      cy.session('test', () => {});\\n    }",
+              "type": "hook",
+              "currentRetry": 0,
+              "retries": -1
+            }
+          ],
+          "agents": [
+            {
+              "id": 1,
+              "functionName": "get",
+              "name": "spy",
+              "alias": "getAlias",
+              "instrument": "agent",
+              "callCount": 1
+            }
+          ],
+          "routes": [
+            {
+              "id": 1,
+              "name": "route",
+              "numResponses": 1,
+              "method": "GET",
+              "url": "/",
+              "instrument": "route"
+            }
+          ],
+          "commands": [
+            {
+              "id": "c2",
+              "hookId": "h1",
+              "instrument": "command",
+              "message": "test",
+              "name": "session",
+              "sessionInfo": {
+                "id": "test",
+                "isGlobalSession": false,
+                "status": "created"
+              },
+              "state": "passed",
+              "testId": "r3",
+              "type": "parent"
+            },
+            {
+              "id": "c1",
+              "hookId": "r6",
+              "instrument": "command",
+              "message": "http://localhost:3000",
+              "name": "visit",
+              "state": "passed",
+              "testId": "r6",
+              "timeout": 4000,
+              "type": "parent",
+              "wallClockStartedAt": "2020-01-01T00:00:00.000Z"
+            },
+            {
+              "hookId": "r6",
+              "id": "c1",
+              "instrument": "command",
+              "message": "#does_not_exist",
+              "name": "get",
+              "state": "failed",
+              "testId": "r6",
+              "timeout": 4000,
+              "type": "parent",
+              "wallClockStartedAt": "2020-01-01T00:00:00.000Z",
+              "err": {
+                "name": "CommandError",
+                "message": "failed to get",
+                "stack": "failed to get element"
+              }
+            }
+          ],
+          "prevAttempts": [
+            {
+              "hookId": "r6",
+              "id": "c1",
+              "instrument": "command",
+              "message": "#does_not_exist",
+              "name": "get",
+              "state": "failed",
+              "testId": "r6",
+              "timeout": 4000,
+              "type": "parent",
+              "wallClockStartedAt": "2020-01-01T00:00:00.000Z",
+              "hooks": [
+                {
+                  "title": "\"before each\" hook",
+                  "hookName": "before each",
+                  "hookId": "h1",
+                  "pending": false,
+                  "body": "() => {\\n      cy.session('test', () => {});\\n    }",
+                  "type": "hook",
+                  "currentRetry": 0,
+                  "retries": -1
+                }
+              ],
+              "agents": [
+                {
+                  "id": 1,
+                  "functionName": "get",
+                  "name": "spy",
+                  "alias": "getAlias",
+                  "instrument": "agent",
+                  "callCount": 1
+                }
+              ],
+              "routes": [
+                {
+                  "id": 1,
+                  "name": "route",
+                  "numResponses": 1,
+                  "method": "GET",
+                  "url": "/",
+                  "instrument": "route"
+                }
+              ],
+              "commands": [
+                {
+                  "id": "c1",
+                  "hookId": "h1",
+                  "instrument": "command",
+                  "message": "test",
+                  "name": "session",
+                  "sessionInfo": {
+                    "id": "test",
+                    "isGlobalSession": false,
+                    "status": "created"
+                  },
+                  "state": "passed",
+                  "testId": "r6",
+                  "type": "parent"
+                },
+                {
+                  "id": "c2",
+                  "hookId": "r6",
+                  "instrument": "command",
+                  "message": "http://localhost:3000",
+                  "name": "visit",
+                  "state": "passed",
+                  "testId": "r6",
+                  "timeout": 4000,
+                  "type": "parent",
+                  "wallClockStartedAt": "2020-01-01T00:00:00.000Z"
+                },
+                {
+                  "hookId": "r6",
+                  "id": "c3",
+                  "instrument": "command",
+                  "message": "#does_not_exist",
+                  "name": "get",
+                  "state": "failed",
+                  "testId": "r6",
+                  "timeout": 4000,
+                  "type": "parent",
+                  "wallClockStartedAt": "2020-01-01T00:00:00.000Z",
+                  "err": {
+                    "name": "CommandError",
+                    "message": "failed to get",
+                    "stack": "failed to get element"
+                  }
+                }
+              ]
+            }
+          ],
+          "err": {
+            "name": "CommandError",
+            "message": "failed to get",
+            "stack": "failed to get element"
+          }
+        }
+      ]
+    }
+  ]
+}
