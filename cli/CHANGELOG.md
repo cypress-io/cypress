@@ -7,13 +7,25 @@ _Released 02/14/2023 (PENDING)_
 
 - Added `Cypress.require()` for including dependencies within the `cy.origin()` callback.  Removed support for `require()` and `import()` within the callback. Addresses [#24976](https://github.com/cypress-io/cypress/issues/24976).
 
+## 12.5.1
+
+_Released 02/10/2023 (PENDING)_
+
+**Dependency Updates:**
+
+- Upgraded [`simple-git`](https://github.com/steveukx/git-js) from `3.15.0` to `3.16.0` to address this [security vulnerability](https://github.com/advisories/GHSA-9p95-fxvg-qgq2) where Remote Code Execution (RCE) via the clone(), pull(), push() and listRemote() methods due to improper input sanitization was possible. Addressed in [#25603](https://github.com/cypress-io/cypress/pull/25603).
+
 ## 12.5.0
 
-_Released 01/31/2023 (PENDING)_
+_Released 01/31/2023_
 
 **Features:**
 
-- Easily debug failed CI test runs right from your local Cypress app with the new Debug page, powered by Cypress Cloud.  For more details, see the [Debug documentation](https://on.cypress.io/debug-page). Addressed in [#25488](https://github.com/cypress-io/cypress/pull/25488).
+- Easily debug failed CI test runs recorded to the Cypress Cloud from your local Cypress app with the new Debug page. Please leave any feedback [here](https://github.com/cypress-io/cypress/discussions/25649). Your feedback will help us make decisions to improve the Debug experience. For more details, see [our blog post](https://on.cypress.io/debug-page-release). Addressed in [#25488](https://github.com/cypress-io/cypress/pull/25488).
+
+**Performance:**
+
+- Improved memory consumption in `run` mode by removing reporter logs for successful tests. Fixes [#25230](https://github.com/cypress-io/cypress/issues/25230).
 
 **Bugfixes:**
 
@@ -21,8 +33,7 @@ _Released 01/31/2023 (PENDING)_
 
 **Dependency Updates:**
 
-- Upgraded [`underscore.string`](https://github.com/esamattis/underscore.string/blob/HEAD/CHANGELOG.markdown) from `3.3.5` to `3.3.6` to reference rebuilt assets after security patch to fix regular expression DDOS exploit.
-  Fixed in [#25574](https://github.com/cypress-io/cypress/pull/25574).
+- Upgraded [`underscore.string`](https://github.com/esamattis/underscore.string/blob/HEAD/CHANGELOG.markdown) from `3.3.5` to `3.3.6` to reference rebuilt assets after security patch to fix regular expression DDOS exploit. Addressed in [#25574](https://github.com/cypress-io/cypress/pull/25574).
 
 ## 12.4.1
 

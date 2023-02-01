@@ -161,9 +161,9 @@ export class RunnablesStore {
     })
   }
 
-  runnableFinished (props: TestProps) {
+  runnableFinished (props: TestProps, isInteractive: boolean) {
     this._withTest(props.id, (test) => {
-      test.finish(props)
+      test.finish(props, isInteractive)
     })
   }
 
