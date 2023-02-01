@@ -1,1 +1,1 @@
-[{ js: true }]
+[{js: true}]
