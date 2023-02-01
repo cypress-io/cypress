@@ -98,7 +98,7 @@ declare namespace CypressCommandLine {
     /**
      * Specify the number of failures to cancel a run being recorded to the cloud
      */
-    autoCancelAfterFailures: number
+    autoCancelAfterFailures: number | false
   }
 
   /**
