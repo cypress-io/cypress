@@ -6,12 +6,10 @@ const checkedInBinaryVersion = require('../../package.json').version
 
 const changelog = async () => {
   const latestReleaseInfo = await getCurrentReleaseData()
+  const hasVersionBump = checkedInBinaryVersion !== latestReleaseInfo.version
 
   if (process.env.CIRCLECI) {
     console.log({ checkedInBinaryVersion })
-
-    const hasVersionBump = checkedInBinaryVersion !== latestReleaseInfo.version
-
     if (process.env.CIRCLE_BRANCH !== 'develop' && process.env.CIRCLE_BRANCH !== 'emily/changelog2' && !/^release\/\d+\.\d+\.\d+$/.test(process.env.CIRCLE_BRANCH) && !hasVersionBump) {
       console.log('Only verify the entire changelog for develop, a release branch or any branch that bumped to the Cypress version in the package.json.')
 
@@ -25,12 +23,11 @@ const changelog = async () => {
     commits,
   } = await getReleaseData(latestReleaseInfo)
 
-  console.log({ nextVersion })
-
   return validateChangelog({
     nextVersion,
     changedFiles,
     commits,
+    pendingRelease: !hasVersionBump,
   })
 }
 

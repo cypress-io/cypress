@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import _ from 'lodash'
 
 import { s3helpers } from './s3-api'
@@ -122,6 +123,8 @@ export const moveBinaries = async (args = []) => {
     // aliases
     '--sha': '--commit',
     '-v': '--version',
+    '--dry-run': Boolean,
+    '--skip-confirmation': Boolean,
   }, {
     argv: args.slice(2),
   })
@@ -200,17 +203,23 @@ export const moveBinaries = async (args = []) => {
     })
   }
 
-  console.log('Copying %s for commit %s',
+  console.log('Expected to copy %s for commit %s',
     pluralize('last build', lastBuilds.length, true), releaseOptions.commit)
 
   console.log(lastBuilds.map((v) => v.s3zipPath).join('\n'))
 
-  try {
-    await prompts.shouldCopy()
-  } catch (e) {
-    console.log('Copying has been canceled')
-
+  if (options['--dry-run']) {
     return
+  }
+
+  if (!options['--skip-confirmation']) {
+    try {
+      await prompts.shouldCopy()
+    } catch (e) {
+      console.log('Copying has been canceled')
+
+      return
+    }
   }
 
   console.log('Copying ...')

@@ -1,6 +1,7 @@
 const minimist = require('minimist')
 const os = require('os')
 const { execSync } = require('child_process')
+const { moveBinaries } = require('../move-binaries')
 
 const validatePlatform = () => {
   const platform = os.platform()
@@ -31,18 +32,27 @@ const prepareReleaseArtifacts = async (sha, version, dryRun = false) => {
   validateSha(sha)
   validateVersion(version)
 
-  const exec = dryRun ?
-    (...args) => log('Dry run, not executing:', args[0])
-    : (...args) => execSync(...args)
-
   log('Running `move-binaries`...')
-  exec(`node ./binary.js move-binaries --sha ${sha} --version ${version}`, { stdio: 'inherit' })
+  const args = [null, null, '--sha', sha, '--version', version, '--skip-confirmation']
+
+  if (dryRun) {
+    args.push('--dry-run')
+  }
+
+  await moveBinaries(args)
 
   const prereleaseNpmUrl = `https://cdn.cypress.io/beta/npm/${version}/linux-x64/develop-${sha}/cypress.tgz`
 
   log('Running `create-stable-npm-package`...')
+  let output = execSync(`./create-stable-npm-package.sh ${prereleaseNpmUrl}`, { cwd: __dirname, stdio: 'pipe', encoding: 'utf8' })
 
-  return exec(`./create-stable-npm-package.sh ${prereleaseNpmUrl}`, { stdio: 'inherit' })
+  // eslint-disable-next-line
+  console.log(output)
+
+  output = output.split('\n')
+
+  // return tgz path
+  return output[output.length - 2].trim()
 }
 
 if (require.main === module) {

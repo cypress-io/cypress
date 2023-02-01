@@ -3,9 +3,13 @@ const check = require('check-more-types')
 const execa = require('execa')
 const la = require('lazy-ass')
 const Bluebird = require('bluebird')
-
+const verifyNpmAuth = require('@semantic-release/npm/lib/verify-auth')
+const { tmpdir } = require('os')
+const path = require('path')
+const fs = require('fs')
 const { prepareReleaseArtifacts } = require('./prepare-release-artifacts')
 const { getCurrentReleaseData } = require('../../semantic-commits/get-current-release-data')
+const packageJson = require('../../../cli/package.json')
 
 const exec = (dryRun) => {
   if (dryRun) {
@@ -15,14 +19,23 @@ const exec = (dryRun) => {
   return (...args) => execa(...args)
 }
 
-const publishDistributionToNPM = async (version, distTag, dryRun) => {
-  console.log(`\nPublishing ${version} to npm under ${distTag} tag`)
+const publishDistributionToNPM = async (tgzPath, version, distTag, dryRun) => {
+  const tmpDir = path.join(tmpdir(), 'dev-distribution')
+  const npmrc = path.join(tmpDir, '.npmrc')
 
-  if (distTag === 'latest') {
-    return exec(dryRun)(`npm dist-tag add cypress@${version}`)
+  try {
+    await verifyNpmAuth(npmrc, packageJson, {
+      cwd: __dirname,
+      env: process.env,
+      logger: console,
+    })
+
+    console.log(`\nPublishing ${version} to npm under ${distTag} tag`)
+
+    return exec(dryRun)(`npm publish ${tgzPath} --tag ${distTag}`)
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true })
   }
-
-  return exec(dryRun)(`npm publish /tmp/cypress-prod.tgz --tag ${distTag}`)
 }
 
 const getDistTags = async () => {
@@ -80,14 +93,22 @@ const releaseDevDistribution = async (sha, nextVersion, dryRun = false) => {
   console.log('  - dev distribution:', devDistribution)
   console.log()
 
+  if (currentVersion === nextVersion) {
+    console.log('Provided version has already been released and tagged as latest.')
+
+    return
+  }
+
   if (devDistribution === nextVersion) {
+    console.log('Provided version has already been released and tagged as dev.')
+
     return
   }
 
   return prepareReleaseArtifacts(sha, nextVersion, dryRun)
-  .then(() => {
+  .then((tgzPath) => {
     // publish dev distribution
-    return publishDistributionToNPM(nextVersion, 'dev', dryRun)
+    return publishDistributionToNPM(tgzPath, nextVersion, 'dev', dryRun)
   })
   .then(() => {
     const ensureDevDistribution = () => {

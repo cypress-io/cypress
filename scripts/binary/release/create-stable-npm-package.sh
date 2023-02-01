@@ -25,6 +25,10 @@ PREPROD_TGZ_PATH=/tmp/cypress-preprod.tgz
 UNPACKED_PATH=/tmp/unpacked-cypress
 PROD_TGZ_PATH=/tmp/cypress-prod.tgz
 
+rm -rf $PREPROD_TGZ_PATH || true
+rm -rf $UNPACKED_PATH || true
+rm -rf $PROD_TGZ_PATH || true
+
 echo "Downloading tgz from TGZ_URL=$TGZ_URL"
 curl $TGZ_URL -o $PREPROD_TGZ_PATH
 
