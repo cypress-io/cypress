@@ -537,8 +537,8 @@ export class EventManager {
     Cypress.on('after:screenshot', handleAfterScreenshot)
 
     driverTestEvents.forEach((event) => {
-      Cypress.on(event, (test, cb) => {
-        this.reporterBus.emit(event, test, cb)
+      Cypress.on(event, (test, _runnable) => {
+        this.reporterBus.emit(event, test, Cypress.config('isInteractive'))
       })
     })
 
