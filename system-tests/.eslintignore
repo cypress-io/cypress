@@ -7,4 +7,10 @@ system-tests/projects/e2e/static/fail.js
 system-tests/projects/e2e/static/jquery.js
 system-tests/projects/ids/cypress/e2e/dom.jsx
 system-tests/projects/no-specs/src/Invalid.jsx
-system-tests/projects/todos/tests/_fixtures/**
+system-tests/projects/todos/tests/_fixtures/bad_js.js
+system-tests/projects/todos/tests/_fixtures/bar.js
+system-tests/projects/todos/tests/_fixtures/foo.js
+system-tests/projects/todos/tests/_fixtures/nested/fixture.js
+system-tests/projects/todos/tests/_fixtures/no_format.js
+system-tests/projects/todos/tests/_fixtures/trailing_new_line.js
+system-tests/projects/todos/tests/_fixtures/user.js
