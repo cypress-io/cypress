@@ -96,7 +96,7 @@ const getReleaseData = async (latestReleaseInfo) => {
 
   console.log(`${prsInRelease.length} user-facing pull requests have merged since ${latestReleaseInfo.version} was released.`)
 
-  .prsInRelease.forEach((link) => {
+  prsInRelease.forEach((link) => {
     console.log('  -', link)
   })
 

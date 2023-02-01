@@ -1,4 +1,6 @@
 /* eslint-disable no-console */
+const fs = require('fs')
+const path = require('path')
 const { validateChangelog } = require('./validate-changelog')
 const { getCurrentReleaseData } = require('./get-current-release-data')
 const { getReleaseData } = require('./get-binary-release-data')
@@ -17,11 +19,30 @@ const changelog = async () => {
     }
   }
 
+  const releaseData = await getReleaseData(latestReleaseInfo)
+
+  console.log({ releaseData })
+  const dirPath = path.join(path.sep, 'tmp', 'releaseData')
+
+  await fs.mkdir(dirPath, async (err) => {
+    if (err) {
+      throw err
+    }
+
+    await fs.writeFile(path.join(dirPath, 'releaseData.json'), JSON.stringify(releaseData, null, 2), (err) => {
+      if (err) {
+        throw err
+      }
+
+      console.log('Release data saved to', 'releaseData.json')
+    })
+  })
+
   const {
     nextVersion,
     changedFiles,
     commits,
-  } = await getReleaseData(latestReleaseInfo)
+  } = releaseData
 
   return validateChangelog({
     nextVersion,

@@ -58,7 +58,7 @@ For every commit to `develop`, CI will:
 1. Build the npm package with the [next target version](./next-version.md) baked in.
 2. Build the Linux, Mac & Windows binaries on CircleCI.
 3. Upload the binaries and the new npm package to the AWS S3 Bucket `cdn.cypress.io` under the "beta" folder.
-4. [Launch test projects](./testing-other-projects.md) using the newly-uploaded package & binary instead of installing the currently release version from the npm registry.
+4. [Launch test projects](./testing-other-projects.md) using the newly-uploaded package & binary instead of installing the currently released version from the npm registry.
 
 Multiple test projects are launched for each target operating system and the results are reported
 back to GitHub using status checks so that you can see if a change has broken real-world usage
