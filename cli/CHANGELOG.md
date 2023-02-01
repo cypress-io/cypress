@@ -1,7 +1,11 @@
- <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 12.5.1
+<!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.6.0
 
 _Released 02/10/2023 (PENDING)_
+
+**Features:**
+
+- It is now possible to overwrite query commands using the newly added `Cypress.Commands.overwriteQuery`. See [the docs](https://on.cypress.io/api/custom-queries) for details.
 
 **Dependency Updates:**
 
