@@ -81,11 +81,13 @@ describe('App: Specs', () => {
             'cypress_api',
             'files',
             'location',
+            'misc',
             'navigation',
             'network_requests',
             'querying',
             'spies_stubs_clocks',
             'storage',
+            'traversal',
             'utilities',
             'viewport',
             'waiting',
@@ -114,10 +116,7 @@ describe('App: Specs', () => {
               additionalIgnorePattern: [],
             })).map((spec) => spec.relative)
 
-            // Validate that all expected paths have been generated within the data context
-            expect(generatedSpecPaths.filter((path) => {
-              return options.expectedScaffoldPathsForPlatform.includes(path)
-            })).to.have.lengthOf(options.expectedScaffoldPathsForPlatform.length)
+            expect(generatedSpecPaths).to.include.members(options.expectedScaffoldPathsForPlatform)
           }, { expectedScaffoldPathsForPlatform })
 
           // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435

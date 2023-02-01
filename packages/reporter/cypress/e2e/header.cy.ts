@@ -1,3 +1,4 @@
+import { TestFilter } from '@packages/types'
 import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
 
@@ -7,10 +8,14 @@ describe('header', () => {
   let runner: EventEmitter
   let runnables: RootRunnable
 
-  beforeEach(() => {
-    cy.fixture('runnables').then((_runnables) => {
-      runnables = _runnables
-    })
+  function setupReporter (opts?: { testFilter: TestFilter, totalUnfilteredTests: number, skipRunnableCreation?: boolean}) {
+    if (opts?.skipRunnableCreation) {
+      runnables = {}
+    } else {
+      cy.fixture('runnables').then((_runnables) => {
+        runnables = _runnables
+      })
+    }
 
     runner = new EventEmitter()
 
@@ -28,12 +33,16 @@ describe('header', () => {
     })
 
     cy.get('.reporter').then(() => {
-      runner.emit('runnables:ready', runnables)
+      runner.emit('runnables:ready', { ...runnables, testFilter: opts?.testFilter, totalUnfilteredTests: opts?.totalUnfilteredTests })
       runner.emit('reporter:start', {})
     })
-  })
+  }
 
   describe('tests button', () => {
+    beforeEach(() => {
+      setupReporter()
+    })
+
     it('displays tooltip on mouseover', () => {
       cy.get('.toggle-specs-wrapper').trigger('mouseover')
       cy.get('.cy-tooltip').should('have.text', 'Expand Specs List F')
@@ -53,6 +62,10 @@ describe('header', () => {
   })
 
   describe('stats', () => {
+    beforeEach(() => {
+      setupReporter()
+    })
+
     it('displays numbers for passed, failed, and pending tests', () => {
       const addStat = (state: string, times: number) => {
         _.times(times, () => {
@@ -81,6 +94,10 @@ describe('header', () => {
   })
 
   describe('controls', () => {
+    beforeEach(() => {
+      setupReporter()
+    })
+
     describe('when running, not paused, and/or without next command', () => {
       beforeEach(() => {
         runner.emit('run:start')
@@ -222,6 +239,21 @@ describe('header', () => {
       it('does not display stop button', () => {
         cy.get('.stop').should('not.exist')
       })
+    })
+  })
+
+  describe('debug test filter', () => {
+    it('displays debug filter when Cypress.testFilter is defined', () => {
+      setupReporter({ testFilter: ['suite 1 test 2'], totalUnfilteredTests: 10 })
+      cy.spy(runner, 'emit').as('debugDismiss')
+      cy.get('.debug-dismiss').contains(`8 / 10 tests`).click()
+      cy.get('@debugDismiss').should('have.been.called')
+      cy.percySnapshot()
+    })
+
+    it('does not display filter when there are no tests', () => {
+      setupReporter({ testFilter: ['suite 1 test 2'], totalUnfilteredTests: 10, skipRunnableCreation: true })
+      cy.get('.debug-dismiss').should('not.exist')
     })
   })
 })
