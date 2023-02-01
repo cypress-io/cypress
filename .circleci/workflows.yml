@@ -2717,9 +2717,10 @@ darwin-x64-workflow: &darwin-x64-workflow
         executor: darwin-x64
         requires:
           - darwin-x64-build
+
     - driver-integration-memory-tests:
         name: darwin-x64-driver-integration-memory-tests
-        executor: mac
+        executor: darwin-x64
         resource_class: macos.x86.medium.gen2
         requires:
           - darwin-x64-build
@@ -2754,10 +2755,12 @@ darwin-arm64-workflow: &darwin-arm64-workflow
         executor: darwin-arm64
         requires:
           - darwin-arm64-build
+
     - driver-integration-memory-tests:
         name: darwin-arm64-driver-integration-memory-tests
         executor: darwin-arm64
-        resource_class: cypress-io/latest_m1
+        # resource_class is passed as a job parameter to override `medium`, which isn't available on M1
+        resource_class: macos.m1.large.gen1
         requires:
           - darwin-arm64-build
 
