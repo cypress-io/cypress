@@ -38,7 +38,6 @@ interface AddGlobalListenerOptions {
 
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
-const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
 const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed visit:blank cypress:in:cypress:runner:event'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
 const socketToDriverEvents = 'net:stubbing:event request:event script:error cross:origin:cookies'.split(' ')
@@ -536,17 +535,19 @@ export class EventManager {
 
     Cypress.on('after:screenshot', handleAfterScreenshot)
 
-    driverTestEvents.forEach((event) => {
-      Cypress.on(event, (test, _runnable) => {
-        this.reporterBus.emit(event, test, Cypress.config('isInteractive'))
-      })
-    })
-
     driverToLocalAndReporterEvents.forEach((event) => {
       Cypress.on(event, (...args) => {
         this.localBus.emit(event, ...args)
         this.reporterBus.emit(event, ...args)
       })
+    })
+
+    Cypress.on('test:before:run:async', (test, _runnable) => {
+      this.reporterBus.emit('test:before:run:async', test)
+    })
+
+    Cypress.on('test:after:run', (test, _runnable) => {
+      this.reporterBus.emit('test:after:run', test, Cypress.config('isInteractive'))
     })
 
     Cypress.on('run:start', async () => {
