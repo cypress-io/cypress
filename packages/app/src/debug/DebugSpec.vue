@@ -17,12 +17,12 @@
         >
           <div class="flex-grow flex w-full gap-x-2 truncate items-center">
             <Tooltip
+              v-if="foundLocally"
               placement="bottom"
               color="dark"
               data-cy="open-in-ide"
             >
               <OpenFileInIDE
-                v-if="foundLocally"
                 v-slot="{onClick}"
                 :file-path="specData.fullPath"
               >
@@ -40,16 +40,6 @@
                   />
                 </button>
               </OpenFileInIDE>
-              <div
-                v-else
-                class="rounded-md border-1px border-gray-100 p-4px"
-              >
-                <IconDocumentMinus
-                  stroke-color="gray-500"
-                  fill-color="gray-100"
-                  size="16"
-                />
-              </div>
               <template
                 #popper
               >
@@ -57,10 +47,32 @@
                   class="text-center text-sm max-w-240px"
                   data-cy="open-in-ide-tooltip"
                 >
-                  {{ openInIDEText }}
+                  {{ t('debugPage.openFile.openInIDE') }}
                 </div>
               </template>
-              <span class="sr-only">{{ openInIDEText }}</span>
+            </Tooltip>
+            <Tooltip
+              v-else
+              class="rounded-md border-1px border-gray-100 p-4px"
+              placement="bottom"
+              color="dark"
+              data-cy="open-in-ide-disabled"
+            >
+              <IconDocumentMinus
+                stroke-color="gray-500"
+                fill-color="gray-100"
+                size="16"
+              />
+              <template
+                #popper
+              >
+                <div
+                  class="text-center text-sm max-w-240px"
+                  data-cy="open-in-ide-disabled-tooltip"
+                >
+                  {{ t('debugPage.openFile.notFoundLocally') }}
+                </div>
+              </template>
             </Tooltip>
             <div
               data-cy="spec-path"
@@ -300,7 +312,5 @@ const runAllFailuresState = computed(() => {
 
   return { disabled: false }
 })
-
-const openInIDEText = computed(() => props.foundLocally ? t('debugPage.openFile.openInIDE') : t('debugPage.openFile.notFoundLocally'))
 
 </script>

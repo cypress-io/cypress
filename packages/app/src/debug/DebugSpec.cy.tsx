@@ -574,8 +574,8 @@ describe('Open in IDE', () => {
   it('shows disabled openInIDE if file is not found locally', () => {
     renderDebugSpec({ foundLocally: false })
 
-    cy.findByTestId('open-in-ide').as('openInIDE').realHover()
-    cy.findByTestId('open-in-ide-tooltip').should('be.visible').and('contain', defaultMessages.debugPage.openFile.notFoundLocally)
+    cy.findByTestId('open-in-ide-disabled').as('openInIDE').realHover()
+    cy.findByTestId('open-in-ide-disabled-tooltip').should('be.visible').and('contain', defaultMessages.debugPage.openFile.notFoundLocally)
     cy.percySnapshot()
   })
 })
