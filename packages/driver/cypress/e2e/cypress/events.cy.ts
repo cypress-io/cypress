@@ -1,5 +1,3 @@
-import { LogUtils } from '../../../src/cypress/log'
-
 describe('src/cypress', () => {
   describe('events', () => {
     it('fail event', (done) => {
@@ -192,12 +190,14 @@ describe('src/cypress', () => {
 
       it('test 2', () => {
         // the before runnables should be from this test
-        // use toSerializedJSON to remove the circular references
-        expect(LogUtils.toSerializedJSON(beforeAsyncRunnable)).to.deep.equal(LogUtils.toSerializedJSON(Cypress.state('runnable')))
-        expect(LogUtils.toSerializedJSON(beforeRunnable)).to.deep.equal(LogUtils.toSerializedJSON(Cypress.state('runnable')))
+        const runnable = Cypress.state('runnable')
+
+        // use === to avoid the circular references
+        expect(beforeAsyncRunnable === runnable).to.be.true
+        expect(beforeRunnable === runnable).to.be.true
 
         // the after runnable should be from the previous test
-        expect(afterRunnable).to.eq(expectedAfterRunnable)
+        expect(afterRunnable).to.deep.equal(expectedAfterRunnable)
       })
     })
   })
