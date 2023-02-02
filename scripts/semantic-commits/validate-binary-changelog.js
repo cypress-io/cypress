@@ -6,7 +6,7 @@ const checkedInBinaryVersion = require('../../package.json').version
 
 const changelog = async () => {
   const latestReleaseInfo = await getCurrentReleaseData()
-  let hasVersionBump = checkedInBinaryVersion !== latestReleaseInfo.version
+  let hasVersionBump = !latestReleaseInfo.versions.includes(checkedInBinaryVersion)
 
   if (process.env.CIRCLECI) {
     console.log({ checkedInBinaryVersion })
