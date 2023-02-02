@@ -1,11 +1,13 @@
  <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 12.5.1
 
-_Released 02/02/2023_ PENDING
-
 **Bugfixes:**
 
 - Fixed a regression from Cypress [12.5.0](https://docs.cypress.io/guides/references/changelog#12-5-0) where the `runnable` was not included in the `test:after:run` event. Fixes [#25663](https://github.com/cypress-io/cypress/issues/25663).
+
+**Dependency Updates:**
+
+- Upgraded [`simple-git`](https://github.com/steveukx/git-js) from `3.15.0` to `3.16.0` to address this [security vulnerability](https://github.com/advisories/GHSA-9p95-fxvg-qgq2) where Remote Code Execution (RCE) via the clone(), pull(), push() and listRemote() methods due to improper input sanitization was possible. Addressed in [#25603](https://github.com/cypress-io/cypress/pull/25603).
 
 ## 12.5.0
 
@@ -23,9 +25,9 @@ _Released 01/31/2023_
 
 - Fixed an issue where alternative Microsoft Edge Beta, Canary, and Dev binary versions were not being discovered by Cypress. Fixes [#25455](https://github.com/cypress-io/cypress/issues/25455).
 
-<!-- **Dependency Updates:** // this was committed with 'fix' instead of 'dependency' -->
+**Dependency Updates:**
 
-- Upgraded [`underscore.string`](https://github.com/esamattis/underscore.string/blob/HEAD/CHANGELOG.markdown) from `3.3.5` to `3.3.6` to reference rebuilt assets after security patch to fix regular expression DDOS exploit. Fixed in [#25574](https://github.com/cypress-io/cypress/pull/25574).
+- Upgraded [`underscore.string`](https://github.com/esamattis/underscore.string/blob/HEAD/CHANGELOG.markdown) from `3.3.5` to `3.3.6` to reference rebuilt assets after security patch to fix regular expression DDOS exploit. Addressed in [#25574](https://github.com/cypress-io/cypress/pull/25574).
 
 ## 12.4.1
 
