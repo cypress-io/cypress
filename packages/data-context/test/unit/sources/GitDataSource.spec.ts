@@ -46,10 +46,8 @@ describe('GitDataSource', () => {
     sinon.restore()
   })
 
-  it(`gets correct status for files on ${os.platform()}`, async function () {
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23317
-    this.retries(15)
-
+  // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23317
+  it.skip(`gets correct status for files on ${os.platform()}`, async function () {
     const onBranchChange = sinon.stub()
     const onGitInfoChange = sinon.stub()
     const onError = sinon.stub()
