@@ -9,6 +9,10 @@ _test-output
 cypress.zip
 .babel-cache
 
+**/cypress/downloads
+**/cypress/videos
+**/cypress/screenshots
+
 # from config, compiled .js files
 packages/config/src/*.js
 

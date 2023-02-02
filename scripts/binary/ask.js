@@ -3,6 +3,8 @@ let fs = require('fs-extra')
 let glob = require('glob')
 const Promise = require('bluebird')
 const inquirer = require('inquirer')
+const childProcess = require('child_process')
+const { getNextVersionForBinary } = require('../get-next-version')
 
 glob = Promise.promisify(glob)
 
@@ -55,14 +57,10 @@ const getQuestions = (version) => {
     name: 'version',
     type: 'input',
     message: `Bump version to...? (currently: ${version})`,
-    default () {
-      const a = version.split('.')
-      let v = a[a.length - 1]
+    async default () {
+      const { nextVersion } = await getNextVersionForBinary()
 
-      v = Number(v) + 1
-      a.splice(a.length - 1, 1, v)
-
-      return a.join('.')
+      return nextVersion
     },
     when (answers) {
       return answers.publish
@@ -89,6 +87,26 @@ const getEnsureVersion = () => {
     name: 'version',
     type: 'input',
     message: 'Which version do you want to ensure?',
+  }])
+}
+
+const getEnsureSha = () => {
+  return prompt([{
+    name: 'sha',
+    message: 'Which sha do you want to ensure?',
+    async default () {
+      return childProcess.execSync('git rev-parse HEAD').toString().trim()
+    },
+  }])
+}
+
+const getEnsureBranch = () => {
+  return prompt([{
+    name: 'branch',
+    message: 'Which branch do you want to ensure?',
+    async default () {
+      return childProcess.execSync('git branch --show-current').toString().trim()
+    },
   }])
 }
 
@@ -206,6 +224,8 @@ module.exports = {
   getQuestions,
   getReleases,
   getEnsureVersion,
+  getEnsureBranch,
+  getEnsureSha,
   getVersions,
   getBumpTasks,
   deployNewVersion,

@@ -1,4 +1,6 @@
 /* eslint-disable no-console */
+const fs = require('fs')
+const path = require('path')
 const { validateChangelog } = require('./validate-changelog')
 const { getCurrentReleaseData } = require('./get-current-release-data')
 const { getReleaseData } = require('./get-binary-release-data')
@@ -6,7 +8,7 @@ const checkedInBinaryVersion = require('../../package.json').version
 
 const changelog = async () => {
   const latestReleaseInfo = await getCurrentReleaseData()
-  let hasVersionBump = checkedInBinaryVersion !== latestReleaseInfo.version
+  let hasVersionBump = !latestReleaseInfo.versions.includes(checkedInBinaryVersion) // account for branches behind develop
 
   if (process.env.CIRCLECI) {
     console.log({ checkedInBinaryVersion })
@@ -18,13 +20,23 @@ const changelog = async () => {
     }
   }
 
+  const releaseData = await getReleaseData(latestReleaseInfo)
+
+  const dirPath = path.join(path.sep, 'tmp', 'releaseData')
+
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath)
+  }
+
+  fs.writeFileSync(path.join(dirPath, 'releaseData.json'), JSON.stringify(releaseData, null, 2))
+
+  console.log('Release data saved to', path.join(dirPath, 'releaseData.json'))
+
   const {
     nextVersion,
     changedFiles,
     commits,
-  } = await getReleaseData(latestReleaseInfo)
-
-  console.log({ nextVersion })
+  } = releaseData
 
   return validateChangelog({
     nextVersion,

@@ -13,7 +13,7 @@ const bump = promisify(bumpCb)
 const paths = ['packages', 'cli']
 
 const getNextVersionForPath = async (path) => {
-  const { version: releasedVersion } = await getCurrentReleaseData(false)
+  const { versions: releasedVersions, version: releasedVersion } = await getCurrentReleaseData(false)
 
   let commits
   const whatBump = (foundCommits) => {
@@ -52,14 +52,15 @@ const getNextVersionForPath = async (path) => {
 
   let nextVersion = semver.inc(checkedInBinaryVersion, releaseType || 'patch')
 
-  const hasVersionBump = checkedInBinaryVersion !== releasedVersion
-
   // See ../guides/next-version.md for documentation.
   // for the time being, honoring this ENV -- ideally this will be deleted to remove manually overriding without a PR
   if (process.env.NEXT_VERSION) {
     nextVersion = process.env.NEXT_VERSION
-  } else if (hasVersionBump) {
-    nextVersion = checkedInBinaryVersion
+  }
+
+  // if the calculated next-version has already been released, determine next, releasable version
+  if (releasedVersions.includes(checkedInBinaryVersion)) {
+    nextVersion = semver.inc(releasedVersion, releaseType || 'patch')
   }
 
   return {

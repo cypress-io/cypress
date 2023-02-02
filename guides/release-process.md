@@ -8,7 +8,7 @@ The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) di
 
 ## Publishing
 
-### Prerequisites
+### Permissions
 
 - Ensure you have the following permissions set up:
   - An AWS account with permission to access and write to the AWS S3, i.e. the Cypress CDN.
@@ -51,12 +51,14 @@ Tip: Use [as-a](https://github.com/bahmutov/as-a) to manage environment variable
 
 ### Before Publishing a New Version
 
-In order to publish a new version of the `cypress` package to the npm registry, CI must build and test it across multiple platforms and test projects. CI is set up to do the following on every commit to `develop`:
+Before publishing a new version of the `cypress` package to the npm registry, CI must build and pass for all platforms.
+
+For every commit to `develop`, CI will:
 
 1. Build the npm package with the [next target version](./next-version.md) baked in.
 2. Build the Linux, Mac & Windows binaries on CircleCI.
 3. Upload the binaries and the new npm package to the AWS S3 Bucket `cdn.cypress.io` under the "beta" folder.
-4. [Launch test projects](./testing-other-projects.md) using the newly-uploaded package & binary instead of installing from the npm registry.
+4. [Launch test projects](./testing-other-projects.md) using the newly-uploaded package & binary instead of installing the currently released version from the npm registry.
 
 Multiple test projects are launched for each target operating system and the results are reported
 back to GitHub using status checks so that you can see if a change has broken real-world usage
@@ -80,11 +82,16 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
 
 2. Confirm that every issue labeled [stage: pending release](https://github.com/cypress-io/cypress/issues?q=label%3A%22stage%3A+pending+release%22+is%3Aclosed) has a ZenHub release set. **Tip:** there is a command in [`release-automations`](https://github.com/cypress-io/release-automations)'s `issues-in-release` tool to list and check such issues. Without a ZenHub release issues will not be included in the right changelog. Also ensure that every closed issue in any obsolete releases are moved to the appropriate release in ZehHub. For example, if the open releases are 9.5.5 and 9.6.0, the current release is 9.6.0, then all closed issues marked as 9.5.5 should be moved to 9.6.0. Ensure that there are no commits on `develop` since the last release that are user facing and aren't marked with the current release.
 
-3. Create a Release PR Bump, submit, get approvals on, and merge a new PR. This PR Should:
-  - Bump the Cypress `version` in [`package.json`](package.json)
-  - Bump the [`packages/example`](../packages/example) dependency if there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version
-  - Follow the writing the [Cypress Changelog release steps](./writing-the-cypress-changelog.md#release) to update the [`cli/CHANGELOG.md`](../cli/CHANGELOG.md).
-4. Once the `develop` branch is passing for all test projects with the new changes and the `linux-x64` binary is present at `https://cdn.cypress.io/beta/binary/X.Y.Z/linux-x64/develop-<sha>/cypress.zip`, and the `linux-x64` cypress npm package is present at `https://cdn.cypress.io/beta/npm/X.Y.Z/linux-x64/develop-<sha>/cypress.tgz`, publishing can proceed.
+3. Create a Release PR, submit, get approvals on, and merge a new PR. This PR Should:
+    - Bump the Cypress `version` in [`package.json`](package.json)
+    - Bump the [`packages/example`](../packages/example) dependency if there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version
+    - Follow the writing the [Cypress Changelog release steps](./writing-the-cypress-changelog.md#release) to update the [`cli/CHANGELOG.md`](../cli/CHANGELOG.md).
+
+4. Once the `develop` branch is passing in CI and you have confirmed CI has built the pre-release versions for `darwin-x64`, `darwin-arm64`, `linux-x64`,`linux-arm64`, and `win32-x64`, publishing can proceed.
+
+    ```shell
+    yarn binary-ensure --ensurePrerelease --branch develop --version <version> --sha <sha>
+    ```
 
 5. Log into AWS SSO with `aws sso login --profile <name_of_profile>`. If you have setup your credentials under a different profile than `prod`, be sure to set the `AWS_PROFILE` environment variable to that profile name for the remaining steps. For example, if you are using `production` instead of `prod`, do `export AWS_PROFILE=production`.
 

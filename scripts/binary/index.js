@@ -5,7 +5,7 @@ const cwd = process.cwd()
 const path = require('path')
 const _ = require('lodash')
 const os = require('os')
-const gift = require('gift')
+const simpleGit = require('simple-git')
 const chalk = require('chalk')
 const Promise = require('bluebird')
 const minimist = require('minimist')
@@ -23,9 +23,7 @@ const upload = require('./upload')
 const uploadUtils = require('./util/upload')
 const { uploadArtifactToS3 } = require('./upload-build-artifact')
 const { moveBinaries } = require('./move-binaries')
-
-// initialize on existing repo
-const repo = Promise.promisifyAll(gift(cwd))
+const { getCurrentReleaseData } = require('../semantic-commits/get-current-release-data')
 
 const success = (str) => {
   return console.log(chalk.bgGreen(` ${chalk.black(str)} `))
@@ -56,11 +54,11 @@ const askMissingOptions = function (properties = []) {
 // hack for @packages/server modifying cwd
 process.chdir(cwd)
 
-const commitVersion = function (version) {
+const commitVersion = function async (version) {
   const msg = `release ${version} [skip ci]`
 
-  return repo.commitAsync(msg, {
-    'allow-empty': true,
+  return simpleGit.commit(msg, {
+    '--allow-empty': null,
   })
 }
 
@@ -111,7 +109,7 @@ const deploy = {
     .then(release)
   },
 
-  checkDownloads ({ version }) {
+  checkDownloads ({ version, ensurePrerelease, branch, sha }) {
     const systems = [
       { platform: 'linux', arch: 'x64' },
       { platform: 'linux', arch: 'arm64' },
@@ -127,8 +125,12 @@ const deploy = {
     }
 
     const checkSystem = ({ platform, arch }) => {
-      const url = `https://download.cypress.io/desktop/${version}?platform=${platform}&arch=${arch}`
       const system = `${platform}-${arch}`
+      let url = `https://download.cypress.io/desktop/${version}?platform=${platform}&arch=${arch}`
+
+      if (ensurePrerelease) {
+        url = uploadUtils.getBetaUrl(version, system, branch, sha, 'cypress.tgz')
+      }
 
       process.stdout.write(`Checking for ${chalk.yellow(system)} at ${chalk.cyan(url)} ... `)
 
@@ -149,6 +151,10 @@ const deploy = {
     return Promise.mapSeries(systems, checkSystem)
     .then((results) => {
       if (allEnsured(results)) return results
+
+      if (ensurePrerelease) {
+        throw new Error(`Validate the CircleCi job building the binaries for ${version} have successfully finished.`)
+      }
 
       console.log(chalk.red(`\nCould not ensure v${version} of the Cypress binary is available for the following systems:`))
 
@@ -182,6 +188,26 @@ const deploy = {
     const options = this.parseOptions(process.argv)
 
     return questionsRemain({ version: ask.getEnsureVersion })(options)
+    .then(async (options) => {
+      const { version, ensurePrerelease } = options
+      const { versions: releasedVersions } = await getCurrentReleaseData(false)
+
+      if (!!ensurePrerelease || !releasedVersions.includes(version)) {
+        const opts = await questionsRemain({
+          sha: ask.getEnsureSha,
+          branch: ask.getEnsureBranch,
+        })(options)
+
+        return {
+          version,
+          sha: options.sha.sha || opts.sha,
+          branch: opts.branch.branch || options.branch,
+          ensurePrerelease: true,
+        }
+      }
+
+      return { version }
+    })
     .then(this.checkDownloads)
   },
 

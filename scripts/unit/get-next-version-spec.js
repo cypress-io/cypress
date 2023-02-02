@@ -121,6 +121,30 @@ describe('get-next-version', () => {
       expect(commits).to.contain.members(semanticCommits)
     })
 
+    it('honors package.json version when its been bumped', async () => {
+      const semanticCommits = [
+        { type: 'fix' },
+      ]
+
+      bumpStub.callsFake(async ({ whatBump, _path }, cb) => {
+        const { level } = whatBump(semanticCommits)
+
+        expect(level, 'semantic bump level').to.eq(2)
+
+        return cb(undefined, { releaseType: 'patch' })
+      })
+
+      getCurrentReleaseDataStub.resolves({
+        // package version !== release version assumed check in version is correct
+        version: '12.2.2',
+      })
+
+      const { nextVersion, commits } = await getNextVersionForPath('packages')
+
+      expect(nextVersion).to.eq('12.2.0')
+      expect(commits).to.contain.members(semanticCommits)
+    })
+
     it('honors NEXT_VERSION env', async () => {
       process.env.NEXT_VERSION = '15.0.0'
       const semanticCommits = [
