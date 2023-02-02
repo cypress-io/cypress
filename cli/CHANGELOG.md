@@ -1,4 +1,12 @@
  <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.6.0
+
+_Released 02/14/2023 (PENDING)_
+
+**Features:**
+
+ - Added the "Open in IDE" feature for failed tests reported from the Debug page Addressed in [#25691](https://github.com/cypress-io/cypress/pull/25691).
+
 ## 12.5.1
 
 _Released 02/10/2023_
