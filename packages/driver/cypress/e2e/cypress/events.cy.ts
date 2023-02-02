@@ -129,6 +129,7 @@ describe('src/cypress', () => {
 
       it('log:changed event', (done) => {
         const handler = (attr, log) => {
+          cy.off('log:changed', handler)
           expect(attr.name).to.eq('bar')
           expect(log.attributes.name).to.eq('bar')
           done()
