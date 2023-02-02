@@ -484,7 +484,6 @@ describe('Launchpad: Setup Project', () => {
     })
 
     describe('project not been configured for cypress', () => {
-      // TODO: unskip once Object API lands https://github.com/cypress-io/cypress/pull/20861
       it('can setup component testing', () => {
         scaffoldAndOpenProject('pristine')
         cy.visitLaunchpad()
