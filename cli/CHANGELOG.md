@@ -8,7 +8,7 @@ _Released 02/10/2023 (PENDING)_
 - Upgraded [`simple-git`](https://github.com/steveukx/git-js) from `3.15.0` to `3.16.0` to address this [security vulnerability](https://github.com/advisories/GHSA-9p95-fxvg-qgq2) where Remote Code Execution (RCE) via the clone(), pull(), push() and listRemote() methods due to improper input sanitization was possible. Addressed in [#25603](https://github.com/cypress-io/cypress/pull/25603).
 
 **Misc**
-- Icons in Debug page will no longer shrink at small viewports. Fixes [#25665](https://github.com/cypress-io/cypress/issues/25665).
+- Icons in Debug page will no longer shrink at small viewports. Addresses [#25665](https://github.com/cypress-io/cypress/issues/25665).
 ## 12.5.0
 
 _Released 01/31/2023_
