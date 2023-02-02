@@ -10,7 +10,7 @@ _Released 01/31/2023 (PENDING)_
 
 ## 12.5.1
 
-_Released 02/10/2023 (PENDING)_
+_Released 02/10/2023_
 
 **Dependency Updates:**
 
