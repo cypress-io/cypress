@@ -16,11 +16,52 @@
           class="flex w-full grid px-18px gap-y-8px items-center"
         >
           <div class="flex-grow flex w-full gap-x-2 truncate items-center">
-            <IconDocumentText
-              stroke-color="gray-500"
-              fill-color="gray-100"
-              size="16"
-            />
+            <Tooltip
+              placement="bottom"
+              color="dark"
+              data-cy="open-in-ide"
+            >
+              <OpenFileInIDE
+                v-if="foundLocally"
+                v-slot="{onClick}"
+                :file-path="specData.fullPath"
+              >
+                <button
+                  class="rounded-md border-1px border-gray-100 p-4px group hocus:border-indigo-200"
+                  @click="onClick"
+                >
+                  <IconDocumentText
+                    stroke-color="gray-500"
+                    fill-color="gray-100"
+                    hocus-stroke-color="indigo-400"
+                    hocus-fill-color="indigo-200"
+                    size="16"
+                    interactive-colors-on-group
+                  />
+                </button>
+              </OpenFileInIDE>
+              <div
+                v-else
+                class="rounded-md border-1px border-gray-100 p-4px"
+              >
+                <IconDocumentMinus
+                  stroke-color="gray-500"
+                  fill-color="gray-100"
+                  size="16"
+                />
+              </div>
+              <template
+                #popper
+              >
+                <div
+                  class="text-center text-sm max-w-240px"
+                  data-cy="open-in-ide-tooltip"
+                >
+                  {{ openInIDEText }}
+                </div>
+              </template>
+              <span class="sr-only">{{ openInIDEText }}</span>
+            </Tooltip>
             <div
               data-cy="spec-path"
               class="flex-grow text-base non-italic truncate"
@@ -142,7 +183,7 @@
 <script lang="ts" setup>
 
 import { computed, unref } from 'vue'
-import { IconActionRefresh, IconDocumentText } from '@cypress-design/vue-icon'
+import { IconActionRefresh, IconDocumentText, IconDocumentMinus } from '@cypress-design/vue-icon'
 import type { SpecDataAggregate, CloudRunInstance } from '@packages/data-context/src/gen/graphcache-config.gen'
 import DebugFailedTest from './DebugFailedTest.vue'
 import StatsMetaData from './StatsMetadata.vue'
@@ -154,6 +195,7 @@ import { useI18n } from '@cy/i18n'
 import { useDurationFormat } from '../composables/useDurationFormat'
 import { posixify } from '../paths'
 import type { StatsMetadata_GroupsFragment, TestingTypeEnum } from '../generated/graphql'
+import OpenFileInIDE from '@cy/gql-components/OpenFileInIDE.vue'
 
 export interface Spec {
   id: string
@@ -258,5 +300,7 @@ const runAllFailuresState = computed(() => {
 
   return { disabled: false }
 })
+
+const openInIDEText = computed(() => props.foundLocally ? t('debugPage.openFile.openInIDE') : t('debugPage.openFile.notFoundLocally'))
 
 </script>
