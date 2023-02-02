@@ -70,7 +70,7 @@ export const defaultMiddleware = {
 export type ServerCtx = Readonly<{
   config: CyServer.Config & Cypress.Config
   shouldCorrelatePreRequests?: () => boolean
-  getFileServerToken: () => string
+  getFileServerToken: () => string | undefined
   getCookieJar: () => CookieJar
   remoteStates: RemoteStates
   requestedWithAndCredentialManager: RequestedWithAndCredentialManager
@@ -182,7 +182,11 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
       const fullCtx = {
         next: () => {
           fullCtx.next = () => {
-            throw new Error('Error running proxy middleware: Cannot call this.next() more than once in the same middleware function. Doing so can cause unintended issues.')
+            if (type === HttpStages.Error) {
+              ctx.debug('`this.next` called more than once within the same middleware function but was ignored due to being in an Error flow. %o', { middlewareName, error: ctx.error })
+            } else {
+              throw new Error(`Error running proxy middleware: Cannot call this.next() more than once in the same middleware function. Doing so can cause unintended issues.`)
+            }
           }
 
           copyChangedCtx()
@@ -207,6 +211,14 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
       try {
         middleware.call(fullCtx)
       } catch (err) {
+        // TODO Find better way to log this
+        // eslint-disable-next-line no-console
+        console.error(err)
+
+        // This is a total failure so we will not be retrying the request, clear it before executing handler
+        // If we do not do this we will end up attempting to double-execute the middleware `next` method
+        // https://github.com/cypress-io/cypress/issues/22825
+        fullCtx.req.browserPreRequest = null
         fullCtx.onError(err)
       }
     })
@@ -230,7 +242,7 @@ export class Http {
   config: CyServer.Config
   shouldCorrelatePreRequests: () => boolean
   deferredSourceMapCache: DeferredSourceMapCache
-  getFileServerToken: () => string
+  getFileServerToken: () => string | undefined
   remoteStates: RemoteStates
   middleware: HttpMiddlewareStacks
   netStubbingState: NetStubbingState
