@@ -16,7 +16,6 @@ describe('Reporter Header', () => {
       cy.get('[data-selected-spec="false"]').should('have.length', '27')
     })
 
-    // TODO: Reenable as part of https://github.com/cypress-io/cypress/issues/23902
     it('filters the list of specs when searching for specs', () => {
       cy.get('body').type('f')
 
