@@ -11,28 +11,28 @@ const { prepareReleaseArtifacts } = require('./prepare-release-artifacts')
 const { getCurrentReleaseData } = require('../../semantic-commits/get-current-release-data')
 const packageJson = require('../../../cli/package.json')
 
-const exec = (dryRun) => {
-  if (dryRun) {
-    return (...args) => console.log('Dry run, not executing:', args[0])
-  }
-
-  return (...args) => execa(...args)
-}
-
 const publishDistributionToNPM = async (tgzPath, version, distTag, dryRun) => {
   const tmpDir = path.join(tmpdir(), 'dev-distribution')
   const npmrc = path.join(tmpDir, '.npmrc')
 
   try {
     await verifyNpmAuth(npmrc, packageJson, {
-      cwd: __dirname,
+      cwd: process.cwd(),
       env: process.env,
       logger: console,
+      stdout: process.stdout,
+      stderr: process.stderr,
     })
 
     console.log(`\nPublishing ${version} to npm under ${distTag} tag`)
 
-    return exec(dryRun)(`npm publish ${tgzPath} --tag ${distTag}`)
+    const command = `npm publish ${tgzPath} --tag ${distTag} --userconfig ${npmrc} --registry https://registry.npmjs.org/`
+
+    if (dryRun) {
+      return execa(command.concat(' --dry-run'))
+    }
+
+    return execa(command)
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true })
   }
@@ -50,8 +50,6 @@ const runWithRetry = async (promise) => {
   const delaysRemaining = [0, 1000, 3000, 6000]
 
   const poll = () => {
-    console.log('run poll')
-
     return promise()
     .catch((err) => {
       console.log('poll err', err)
@@ -65,8 +63,6 @@ const runWithRetry = async (promise) => {
 
       return Bluebird.delay(delay)
       .then(() => {
-        console.log('run poll')
-
         return poll()
       })
     })
