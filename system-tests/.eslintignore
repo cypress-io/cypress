@@ -1,10 +1,10 @@
+# purposeful syntax errors
 system-tests/projects/config-with-ts-module-error/cypress.config.ts
 system-tests/projects/config-with-ts-syntax-error/cypress.config.ts
 system-tests/projects/e2e/cypress/e2e/stdout_exit_early_failing.cy.js
 system-tests/projects/e2e/cypress/e2e/typescript_syntax_error.cy.ts
 system-tests/projects/e2e/lib/fail.js
 system-tests/projects/e2e/static/fail.js
-system-tests/projects/e2e/static/jquery.js
 system-tests/projects/ids/cypress/e2e/dom.jsx
 system-tests/projects/no-specs/src/Invalid.jsx
 system-tests/projects/todos/tests/_fixtures/bad_js.js
@@ -14,3 +14,14 @@ system-tests/projects/todos/tests/_fixtures/nested/fixture.js
 system-tests/projects/todos/tests/_fixtures/no_format.js
 system-tests/projects/todos/tests/_fixtures/trailing_new_line.js
 system-tests/projects/todos/tests/_fixtures/user.js
+system-tests/project-fixtures/react/src/AppCompilationError.cy.jsx
+
+# 3rd party
+system-tests/projects/e2e/static/jquery.js
+
+# snapshots
+system-tests/projects/pristine/expected-cypress-js-component-create-react-app-v5/cypress.config.js
+system-tests/projects/pristine/expected-cypress-js-e2e/cypress.config.js
+system-tests/projects/pristine/expected-cypress-js-e2e-without-fixtures/cypress.config.js
+system-tests/projects/pristine-module/expected-cypress-js-e2e/cypress.config.js
+system-tests/projects/pristine-cjs-project/expected-cypress-js-component-vue.js-3-webpack/cypress.config.js
