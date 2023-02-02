@@ -1,3 +1,10 @@
+# [@cypress/webpack-preprocessor-v5.16.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.16.1...@cypress/webpack-preprocessor-v5.16.2) (2023-02-02)
+
+
+### Bug Fixes
+
+* allow version 9 of the babel-loader peer dependency ([#25569](https://github.com/cypress-io/cypress/issues/25569)) ([5afe19f](https://github.com/cypress-io/cypress/commit/5afe19f8d17b5da53d66a0513424403006167adf))
+
 # [@cypress/webpack-preprocessor-v5.16.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.16.0...@cypress/webpack-preprocessor-v5.16.1) (2022-12-29)
 
 

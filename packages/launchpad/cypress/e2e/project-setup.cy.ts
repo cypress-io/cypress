@@ -259,8 +259,6 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'Continue' })
         .should('not.have.disabled')
         .click()
-
-        verifyChooseABrowserPage()
       })
 
       it('moves to "Choose a browser" page after clicking "Continue" button in first step in configuration page', () => {
@@ -486,8 +484,7 @@ describe('Launchpad: Setup Project', () => {
     })
 
     describe('project not been configured for cypress', () => {
-      // TODO: unskip once Object API lands https://github.com/cypress-io/cypress/pull/20861
-      it.skip('can setup component testing', () => {
+      it('can setup component testing', () => {
         scaffoldAndOpenProject('pristine')
         cy.visitLaunchpad()
 
@@ -499,7 +496,7 @@ describe('Launchpad: Setup Project', () => {
 
         cy.findByText('Confirm the front-end framework and bundler used in your project.')
 
-        cy.findByRole('button', { name: 'Front-end Framework React.js (detected)' }).click()
+        cy.contains('Pick a framework').click()
         cy.findByRole('option', { name: 'Create React App' }).click()
 
         cy.get('[data-testid="select-bundler"').should('not.exist')
@@ -508,34 +505,28 @@ describe('Launchpad: Setup Project', () => {
         cy.findByRole('button', { name: 'Back' }).click()
         cy.get('[data-cy-testingtype="component"]').click()
 
-        cy.findByRole('button', { name: 'Front-end Framework React.js (detected)' }).click()
+        cy.contains('Pick a framework').click()
         cy.findByRole('option', { name: 'Vue.js 3' }).click()
 
         cy.findByRole('button', { name: 'Bundler(dev server) Pick a bundler' }).click()
         cy.findByRole('option', { name: 'Vite' }).click()
 
-        cy.findByRole('button', { name: 'TypeScript' }).click()
         cy.findByRole('button', { name: 'Next step' }).should('not.have.disabled')
         cy.findByRole('button', { name: 'Next step' }).click()
 
         cy.findByRole('button', { name: 'Skip' }).click()
 
-        cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress.config.ts')
-          cy.containsPath('cypress/support/component-index.html')
-          cy.containsPath(`cypress/support/component.ts`)
-          cy.containsPath(`cypress/support/commands.ts`)
-          cy.containsPath('cypress/fixtures/example.json')
-        })
+        cy.contains('cypress.config.js')
+        cy.containsPath('cypress/support/component-index.html')
+        cy.containsPath('cypress/support/component.js')
+        cy.containsPath('cypress/support/commands.js')
+        cy.containsPath('cypress/fixtures/example.json')
 
         cy.findByRole('button', { name: 'Continue' }).click()
-
-        verifyChooseABrowserPage()
       })
 
-      // TODO: unskip once Object API lands https://github.com/cypress-io/cypress/pull/20861
-      it.skip('setup component testing with typescript files', () => {
-        scaffoldAndOpenProject('pristine')
+      it('setup component testing with typescript files', () => {
+        scaffoldAndOpenProject('pristine-yarn')
         cy.visitLaunchpad()
 
         verifyWelcomePage({ e2eIsConfigured: false, ctIsConfigured: false })
@@ -546,26 +537,21 @@ describe('Launchpad: Setup Project', () => {
 
         cy.findByText('Confirm the front-end framework and bundler used in your project.')
 
-        cy.findByRole('button', { name: 'Front-end Framework React.js (detected)' }).click()
+        cy.contains('Pick a framework').click()
         cy.findByRole('option', { name: 'Create React App' }).click()
-        cy.findByRole('button', { name: 'TypeScript' }).click()
 
         cy.findByRole('button', { name: 'Next step' }).click()
         cy.findByRole('button', { name: 'Skip' }).click()
 
-        cy.get('[data-cy=valid]').within(() => {
-          cy.contains('cypress.config.ts')
-          cy.containsPath('cypress/support/component-index.html')
-          cy.containsPath('cypress/support/component.ts')
-          cy.containsPath('cypress/support/commands.ts')
-          cy.containsPath('cypress/fixtures/example.json')
-        })
+        cy.contains('cypress.config.ts')
+        cy.containsPath('cypress/support/component-index.html')
+        cy.containsPath('cypress/support/component.ts')
+        cy.containsPath('cypress/support/commands.ts')
+        cy.containsPath('cypress/fixtures/example.json')
 
         verifyScaffoldedFiles('component')
 
         cy.findByRole('button', { name: 'Continue' }).click()
-
-        verifyChooseABrowserPage()
       })
     })
   })
