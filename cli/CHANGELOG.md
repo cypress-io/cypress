@@ -1,4 +1,12 @@
  <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.5.1
+
+_Released 02/02/2023_ PENDING
+
+**Bugfixes:**
+
+- Fixed a regression from Cypress [12.5.0](https://docs.cypress.io/guides/references/changelog#12-5-0) where the `runnable` was not included in the `test:after:run` event. Fixes [#25663](https://github.com/cypress-io/cypress/issues/25663).
+
 ## 12.5.0
 
 _Released 01/31/2023_
