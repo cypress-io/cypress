@@ -128,6 +128,7 @@ async function makeE2ETasks () {
   let ctx: DataContext
   let testState: Record<string, any> = {}
   let remoteGraphQLIntercept: RemoteGraphQLInterceptor | undefined
+  let remoteGraphQLOptions: Record<string, any> | undefined
   let remoteGraphQLInterceptBatched: RemoteGraphQLBatchInterceptor | undefined
   let scaffoldedProjects = new Set<string>()
 
@@ -199,6 +200,7 @@ async function makeE2ETasks () {
     async __internal__beforeEach () {
       process.chdir(cachedCwd)
       testState = {}
+      remoteGraphQLOptions = {}
       await DataContext.waitForActiveRequestsToFlush()
       await globalPubSub.emitThen('test:cleanup')
       await ctx.actions.app.removeAppDataDir()
@@ -239,7 +241,7 @@ async function makeE2ETasks () {
 
           operationCount[operationName ?? 'unknown']++
 
-          if (operationName === 'batchTestRunnerExecutionQuery' && remoteGraphQLInterceptBatched) {
+          if (operationName?.startsWith('batchTestRunnerExecutionQuery') && remoteGraphQLInterceptBatched) {
             const fn = remoteGraphQLInterceptBatched
             const keys: string[] = []
             const values: Promise<any>[] = []
@@ -311,7 +313,7 @@ async function makeE2ETasks () {
                 result,
                 callCount: operationCount[operationName ?? 'unknown'],
                 Response,
-              }, testState))
+              }, testState, remoteGraphQLOptions ?? {}))
             } catch (e) {
               const err = e as Error
 
@@ -349,8 +351,12 @@ async function makeE2ETasks () {
       return null
     },
 
-    __internal_remoteGraphQLIntercept (fn: string) {
-      remoteGraphQLIntercept = new Function('console', 'obj', 'testState', `return (${fn})(obj, testState)`).bind(null, console) as RemoteGraphQLInterceptor
+    __internal_remoteGraphQLIntercept (args: {
+      fn: string
+      remoteGraphQLOptions?: Record<string, any>
+    }) {
+      remoteGraphQLOptions = args.remoteGraphQLOptions
+      remoteGraphQLIntercept = new Function('console', 'obj', 'testState', 'remoteGraphQLOptions', `return (${args.fn})(obj, testState, remoteGraphQLOptions)`).bind(null, console) as RemoteGraphQLInterceptor
 
       return null
     },

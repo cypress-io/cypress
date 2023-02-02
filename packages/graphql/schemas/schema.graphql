@@ -983,6 +983,9 @@ type CurrentProject implements Node & ProjectLike {
   """Absolute path to the project on the filesystem"""
   projectRoot: String!
 
+  """Returns the spec counts for the current and next runs"""
+  relevantRunSpecs: CurrentProjectRelevantRunSpecs
+
   """Project saved state"""
   savedState: JSON
 
@@ -992,6 +995,14 @@ type CurrentProject implements Node & ProjectLike {
   """A list of specs for the currently open testing type of a project"""
   specs: [Spec!]!
   title: String!
+}
+
+type CurrentProjectRelevantRunSpecs {
+  """Spec counts for the current run"""
+  current: RelevantRunSpecs
+
+  """Spec counts for the next run"""
+  next: RelevantRunSpecs
 }
 
 """A run was hidden because it was over the data retention limit"""
@@ -1632,6 +1643,11 @@ type Mutation {
   """While migrating to 10+ skip manual rename step"""
   migrateSkipManualRename: Query
 
+  """
+  Allow the relevant run for debugging marked as next to be considered the current relevant run
+  """
+  moveToNextRelevantRun: Boolean
+
   """Open a path in preferred IDE"""
   openDirectoryInIDE(path: String!): Boolean
   openExternal(includeGraphqlPort: Boolean, url: String!): Boolean
@@ -1705,8 +1721,17 @@ type Mutation {
   """List of specs to run for the "Run All Specs" Feature"""
   setRunAllSpecs(runAllSpecs: [String!]!): Boolean
 
+  """Set failed tests for the current run to be used by the runner"""
+  setTestsForRun(testsBySpec: [TestsBySpecInput!]!): Boolean
+
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
+
+  """Return the set of test titles for the given spec path"""
+  testsForRun(
+    """Spec path relative to the project in posix format"""
+    spec: String!
+  ): [String!]
 
   """Updates the different fields of the wizard data store"""
   wizardUpdate(input: WizardUpdateInput!): Wizard
@@ -1943,6 +1968,39 @@ type ReactComponentResponse {
 }
 
 """
+Indicates builds from the Cypress Cloud that most closely align with the current local Git commit
+"""
+type RelevantRun {
+  """
+  How many commits ahead the current local commit is from the commit of the current run
+  """
+  commitsAhead: Int
+
+  """Run number that is the most recent build that is not a RUNNING status"""
+  current: Int
+
+  """Run number that is the most recent build regardless of status """
+  next: Int
+}
+
+enum RelevantRunLocationEnum {
+  DEBUG
+  SIDEBAR
+}
+
+""""""
+type RelevantRunSpecs {
+  """Number of specs in the run that have finished being processed"""
+  completedSpecs: Int!
+
+  """The runNumber that these spec counts belong to"""
+  runNumber: Int!
+
+  """Total number of specs in the run"""
+  totalSpecs: Int!
+}
+
+"""
 Represents a container for a piece of remote data stitched into the graph
 """
 interface RemoteFetchable implements Node {
@@ -2161,6 +2219,16 @@ type Subscription {
   """
   pushFragment: [PushFragmentPayload!]!
 
+  """
+  Subscription that watches for a relevant run to the debug page to be RUNNING and returns updated spec counts until complete
+  """
+  relevantRunSpecChange: Query
+
+  """
+  Subscription that polls the cloud for new relevant runs that match local git commit hashes
+  """
+  relevantRuns(location: RelevantRunLocationEnum!): RelevantRun
+
   """Issued when the watched specs for the project changes"""
   specsChange: CurrentProject
 
@@ -2194,6 +2262,17 @@ type TestingTypeInfo implements Node {
   id: ID!
   title: String!
   type: TestingTypeEnum!
+}
+
+"""
+Represents the input for setting a mapping of test titles by the spec path
+"""
+input TestsBySpecInput {
+  """Path to the spec relative to the project"""
+  specPath: String!
+
+  """Full test title which should be all parts joined by a space"""
+  tests: [String!]!
 }
 
 """A run was hidden because it was over the usage limit"""
