@@ -1,4 +1,12 @@
  <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.6.0
+
+_Released 02/14/2023 (PENDING)_
+
+**Misc:**
+
+- Improved the responsiveness of the Debug Page pending run UI. Addresses [#25664](https://github.com/cypress-io/cypress/issues/25664).
+
 ## 12.5.1
 
 _Released 02/10/2023_
