@@ -767,6 +767,7 @@ describe('src/cy/commands/assertions', () => {
         cy.should(() => {})
       })
 
+      // https://github.com/cypress-io/cypress/issues/25491
       it('throws a good error when aliased subject disappears', function (done) {
         cy.once('fail', (err) => {
           expect(this.lastLog.get('state')).to.eq('failed')
