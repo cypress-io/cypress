@@ -1,4 +1,12 @@
  <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.6.0
+
+_Released 02/14/2023 (PENDING)_
+
+**Misc:**
+
+- Improved the layout of the Debug Page empty states on smaller viewports. Addressed in [#25703](https://github.com/cypress-io/cypress/pull/25703).
+
 ## 12.5.1
 
 _Released 02/10/2023_
