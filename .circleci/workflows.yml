@@ -1443,6 +1443,8 @@ jobs:
       - update_known_hosts
       - run: yarn test-npm-package-release-script
       - run: node ./scripts/semantic-commits/validate-binary-changelog.js
+      - store_artifacts:
+          path: /tmp/releaseData
 
   lint-types:
     <<: *defaults

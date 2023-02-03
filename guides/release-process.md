@@ -26,7 +26,7 @@ The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) di
     ```
 
 - Set up the following environment variables:
-  - For the `release-automations` steps, you will need setup the following envs:
+  - For the `release-automations` step, you will need setup the following envs:
     - GitHub token - Found in 1Password.
     - The `cypress-bot` GitHub app credentials. Found in 1Password.
     ```text
@@ -36,7 +36,7 @@ The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) di
     GITHUB_PRIVATE_KEY=
     ```
 
-  - For purging the Cloudflare cache (part of the `move-binaries` step), you'll need `CF_ZONEID` and `CF_TOKEN` set. These can be found in 1Password.
+  - For purging the Cloudflare cache (need for the `prepare-release-artifacts` script in step 6), you'll need `CF_ZONEID` and `CF_TOKEN` set. These can be found in 1Password.
       ```text
       CF_ZONEID="..."
       CF_TOKEN="..."
@@ -78,10 +78,11 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
 2. Ensure all changes to the links manifest to [`on.cypress.io`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on) have been merged to `master` and deployed.
 
 3. Create a Release PR Bump, submit, get approvals on, and merge a new PR. This PR Should:
-  - Bump the Cypress `version` in [`package.json`](package.json)
-  - Bump the [`packages/example`](../packages/example) dependency if there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version
-  - Follow the writing the [Cypress Changelog release steps](./writing-the-cypress-changelog.md#release) to update the [`cli/CHANGELOG.md`](../cli/CHANGELOG.md).
-4. Once the `develop` branch is passing for all test projects with the new changes and the `linux-x64` binary is present at `https://cdn.cypress.io/beta/binary/X.Y.Z/linux-x64/develop-<sha>/cypress.zip`, and the `linux-x64` cypress npm package is present at `https://cdn.cypress.io/beta/npm/X.Y.Z/linux-x64/develop-<sha>/cypress.tgz`, publishing can proceed.
+    - Bump the Cypress `version` in [`package.json`](package.json)
+    - Bump the [`packages/example`](../packages/example) dependency if there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version
+    - Follow the writing the [Cypress Changelog release steps](./writing-the-cypress-changelog.md#release) to update the [`cli/CHANGELOG.md`](../cli/CHANGELOG.md).
+
+4. Once the `develop` branch is passing in CI and the and you have confirmed the `cypress-bot` has comment on the commit with the pre-release versions for `darwin-x64`, `darwin-arm64`, `linux-x64`,`linux-arm64`, and `win32-x64`, publishing can proceed.
 
 5. Log into AWS SSO with `aws sso login --profile <name_of_profile>`. If you have setup your credentials under a different profile than `prod`, be sure to set the `AWS_PROFILE` environment variable to that profile name for the remaining steps. For example, if you are using `production` instead of `prod`, do `export AWS_PROFILE=production`.
 
@@ -148,17 +149,17 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
     git checkout develop
     git pull origin develop
     git log --pretty=oneline
-    # copy sha of the previous commit
+    # copy sha of the version bump commit
     git tag -a vX.Y.Z -m vX.Y.Z <sha>
     git push origin vX.Y.Z
     ```
 
 18. Create a new [GitHub release](https://github.com/cypress-io/cypress/releases). Choose the tag you created previously and add contents to match previous releases.
 
-19. Inside of [cypress-io/release-automations][release-automations], run the following to add a comment to each GH issue that has been resolved with the new published version:
+19. Add a comment to each GH issue that has been resolved with the new published version. Download the `releaseData.json` from from CI and run the following command inside of [cypress-io/release-automations][release-automations]:
 
     ```shell
-    cd packages/issues-in-release && npm run do:comment -- --release X.Y.Z
+    cd packages/issues-in-release && npm run do:comment -- --release-data <path_to_releaseData.json>
     ```
 
 22. Confirm there are no issues from the release with the label [stage: pending release](https://github.com/cypress-io/cypress/issues?q=label%3A%22stage%3A+pending+release%22+is%3Aclosed) left.
