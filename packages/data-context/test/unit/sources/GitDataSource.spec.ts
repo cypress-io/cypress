@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { expect } from 'chai'
 import path from 'path'
 import os from 'os'
@@ -47,10 +48,8 @@ describe('GitDataSource', () => {
   })
 
   it(`gets correct status for files on ${os.platform()}`, async function () {
-    this.timeout(5000)
-
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23317
-    this.retries(10)
+    this.timeout(7500)
+    this.retries(5)
 
     const onBranchChange = sinon.stub()
     const onGitInfoChange = sinon.stub()
@@ -62,6 +61,7 @@ describe('GitDataSource', () => {
     const aRecordSpec = toPosix(path.join(e2eFolder, 'a_record.cy.js'))
     const xhrSpec = toPosix(path.join(e2eFolder, 'xhr.cy.js'))
 
+    console.log('Creating Git Data Source')
     gitInfo = new GitDataSource({
       isRunMode: false,
       projectRoot: projectPath,
@@ -70,24 +70,29 @@ describe('GitDataSource', () => {
       onError,
     })
 
+    console.log('Creating File')
     fs.createFileSync(fooSpec)
+    console.log('Writing File')
     fs.writeFileSync(xhrSpec, 'it(\'modifies the file\', () => {})')
 
+    console.log('Set specs')
     gitInfo.setSpecs([fooSpec, aRecordSpec, xhrSpec])
 
     let result: Array<GitInfo | null> = []
 
     do {
+      console.log('Get info')
       result = await Promise.all([
         gitInfo.gitInfoFor(fooSpec),
         gitInfo.gitInfoFor(aRecordSpec),
         gitInfo.gitInfoFor(xhrSpec),
       ])
 
-      await new Promise((resolve) => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 500))
     } while (result.some((r) => r == null))
 
     const [created, unmodified, modified] = result as GitInfo[]
+    console.log('Assertions')
 
     expect(created.lastModifiedHumanReadable).to.match(/(a few|[0-9]) seconds? ago/)
     expect(created.statusType).to.eql('created')
