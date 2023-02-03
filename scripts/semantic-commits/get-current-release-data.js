@@ -17,6 +17,7 @@ const getCurrentReleaseData = (verbose = true) => {
   }
 
   verbose && console.log({ latestReleaseInfo })
+  latestReleaseInfo.versions = npmInfo.versions
 
   return latestReleaseInfo
 }
