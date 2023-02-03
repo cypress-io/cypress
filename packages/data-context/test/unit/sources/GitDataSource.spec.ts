@@ -47,8 +47,10 @@ describe('GitDataSource', () => {
   })
 
   it(`gets correct status for files on ${os.platform()}`, async function () {
+    this.timeout(5000)
+
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23317
-    this.retries(15)
+    this.retries(10)
 
     const onBranchChange = sinon.stub()
     const onGitInfoChange = sinon.stub()
@@ -73,7 +75,7 @@ describe('GitDataSource', () => {
 
     gitInfo.setSpecs([fooSpec, aRecordSpec, xhrSpec])
 
-    let result: any[] = []
+    let result: Array<GitInfo | null> = []
 
     do {
       result = await Promise.all([
@@ -85,7 +87,7 @@ describe('GitDataSource', () => {
       await new Promise((resolve) => setTimeout(resolve, 100))
     } while (result.some((r) => r == null))
 
-    const [created, unmodified, modified] = result
+    const [created, unmodified, modified] = result as GitInfo[]
 
     expect(created.lastModifiedHumanReadable).to.match(/(a few|[0-9]) seconds? ago/)
     expect(created.statusType).to.eql('created')
