@@ -1,4 +1,4 @@
-import { WIZARD_FRAMEWORKS, isDependencyInstalled, WizardFrontendFramework, WizardBundler } from './frameworks'
+import { CT_FRAMEWORKS, isDependencyInstalled, WizardFrontendFramework, WizardBundler } from './frameworks'
 import { WIZARD_BUNDLERS } from './dependencies'
 import path from 'path'
 import fs from 'fs'
@@ -13,7 +13,7 @@ interface DetectFramework {
   bundler?: WizardBundler
 }
 
-export async function areAllDepsSatisified (projectPath: string, framework: typeof WIZARD_FRAMEWORKS[number]) {
+export async function areAllDepsSatisified (projectPath: string, framework: typeof CT_FRAMEWORKS[number]) {
   for (const dep of framework.detectors) {
     const result = await isDependencyInstalled(dep, projectPath)
 
@@ -34,7 +34,7 @@ export async function areAllDepsSatisified (projectPath: string, framework: type
 // and the bundler, which could be Vite.
 export async function detectFramework (projectPath: string): Promise<DetectFramework> {
   // first see if it's a template
-  for (const framework of WIZARD_FRAMEWORKS.filter((x) => x.category === 'template')) {
+  for (const framework of CT_FRAMEWORKS.filter((x) => x.category === 'template')) {
     const hasAllDeps = await areAllDepsSatisified(projectPath, framework)
 
     // so far all the templates we support only have 1 bundler,
@@ -51,7 +51,7 @@ export async function detectFramework (projectPath: string): Promise<DetectFrame
   }
 
   // if not a template, they probably just installed/configured on their own.
-  for (const library of WIZARD_FRAMEWORKS.filter((x) => x.category === 'library')) {
+  for (const library of CT_FRAMEWORKS.filter((x) => x.category === 'library')) {
     // multiple bundlers supported, eg React works with webpack and Vite.
     // try to infer which one they are using.
     const hasLibrary = await areAllDepsSatisified(projectPath, library)

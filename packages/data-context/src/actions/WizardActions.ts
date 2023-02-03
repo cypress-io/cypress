@@ -1,5 +1,5 @@
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
-import { detectFramework, WIZARD_FRAMEWORKS, commandsFileBody, supportFileComponent, supportFileE2E, WizardBundler, WizardFrontendFramework } from '@packages/scaffold-config'
+import { detectFramework, CT_FRAMEWORKS, commandsFileBody, supportFileComponent, supportFileE2E, WizardBundler, WizardFrontendFramework } from '@packages/scaffold-config'
 import assert from 'assert'
 import path from 'path'
 import Debug from 'debug'
@@ -9,6 +9,7 @@ const debug = Debug('cypress:data-context:wizard-actions')
 
 import type { DataContext } from '..'
 import { addTestingTypeToCypressConfig, AddTestingTypeToCypressConfigOptions } from '@packages/config'
+import componentIndexHtmlGenerator from '@packages/scaffold-config/src/component-index-template'
 
 export class WizardActions {
   constructor (private ctx: DataContext) {}
@@ -24,13 +25,13 @@ export class WizardActions {
   }
 
   setFramework (framework: WizardFrontendFramework | null): void {
-    const next = WIZARD_FRAMEWORKS.find((x) => x.type === framework?.type)
+    const next = CT_FRAMEWORKS.find((x) => x.type === framework?.type)
 
     this.ctx.update((coreData) => {
       coreData.wizard.chosenFramework = framework
     })
 
-    if (next?.supportedBundlers?.length === 1) {
+    if (next?.supportedBundlers?.[0]) {
       this.setBundler(next?.supportedBundlers?.[0])
 
       return
@@ -300,9 +301,11 @@ export class WizardActions {
 
     await this.ensureDir('support')
 
+    const defaultComponentIndex = componentIndexHtmlGenerator('')
+
     return this.scaffoldFile(
       componentIndexHtmlPath,
-      chosenFramework.componentIndexHtml(),
+      chosenFramework.componentIndexHtml?.() ?? defaultComponentIndex(),
       'The HTML wrapper that each component is served with. Used for global fonts, CSS, JS, HTML, etc.',
     )
   }

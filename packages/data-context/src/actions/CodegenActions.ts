@@ -5,7 +5,7 @@ import type { DataContext } from '..'
 import { SpecOptions, codeGenerator } from '../codegen'
 import templates from '../codegen/templates'
 import type { CodeGenType } from '../gen/graphcache-config.gen'
-import { WizardFrontendFramework, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import { WizardFrontendFramework, CT_FRAMEWORKS } from '@packages/scaffold-config'
 import { parse as parseReactComponent, resolver as reactDocgenResolvers } from 'react-docgen'
 import { visit } from 'ast-types'
 
@@ -161,7 +161,7 @@ export class CodegenActions {
     }
 
     // @ts-ignore - because of the conditional above, we know that devServer isn't a function
-    return WIZARD_FRAMEWORKS.find((framework) => framework.configFramework === config?.component?.devServer.framework)
+    return CT_FRAMEWORKS.find((framework) => framework.configFramework === config?.component?.devServer.framework)
   }
 }
 

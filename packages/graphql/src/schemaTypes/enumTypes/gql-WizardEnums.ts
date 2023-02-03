@@ -1,5 +1,5 @@
 import { CODE_LANGUAGES } from '@packages/types'
-import { WIZARD_FRAMEWORKS, WIZARD_BUNDLERS } from '@packages/scaffold-config'
+import { CT_FRAMEWORKS, WIZARD_BUNDLERS } from '@packages/scaffold-config'
 import { enumType } from 'nexus'
 
 export const SupportedBundlerEnum = enumType({
@@ -15,7 +15,7 @@ export const WizardConfigFileStatusEnum = enumType({
 
 export const FrontendFrameworkEnum = enumType({
   name: 'FrontendFrameworkEnum',
-  members: WIZARD_FRAMEWORKS.map((t) => t.type),
+  members: CT_FRAMEWORKS.map((t) => t.type),
 })
 
 export const SupportStatusEnum = enumType({

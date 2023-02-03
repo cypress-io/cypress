@@ -2,26 +2,25 @@ import path from 'path'
 import fs from 'fs-extra'
 import * as dependencies from './dependencies'
 import componentIndexHtmlGenerator from './component-index-template'
+import type { CypressComponentDependency } from './dependencies'
 import semver from 'semver'
 
 export type PkgJson = { version: string, dependencies?: Record<string, string>, devDependencies?: Record<string, string> }
 
 export type WizardBundler = typeof dependencies.WIZARD_BUNDLERS[number]
 
-export type CodeGenFramework = typeof WIZARD_FRAMEWORKS[number]['codeGenFramework']
-
-export type WizardDependency = typeof dependencies.WIZARD_DEPENDENCIES[number]
+export type CodeGenFramework = typeof CT_FRAMEWORKS[number]['codeGenFramework']
 
 export interface DependencyToInstall {
-  dependency: WizardDependency
+  dependency: CypressComponentDependency
   satisfied: boolean
   loc: string | null
   detectedVersion: string | null
 }
 
-export type WizardFrontendFramework = typeof WIZARD_FRAMEWORKS[number] & { specPattern?: string }
+export type WizardFrontendFramework = typeof CT_FRAMEWORKS[number] & { specPattern?: string }
 
-export async function isDependencyInstalled (dependency: WizardDependency, projectPath: string): Promise<DependencyToInstall> {
+export async function isDependencyInstalled (dependency: CypressComponentDependency, projectPath: string): Promise<DependencyToInstall> {
   try {
     const loc = require.resolve(path.join(dependency.package, 'package.json'), {
       paths: [projectPath],
@@ -61,7 +60,7 @@ function getBundlerDependency (bundler: WizardBundler['type'], projectPath: stri
   }
 }
 
-export type WizardMountModule = Awaited<ReturnType<typeof WIZARD_FRAMEWORKS[number]['mountModule']>>
+export type WizardMountModule = Awaited<ReturnType<typeof CT_FRAMEWORKS[number]['mountModule']>>
 
 const mountModule = <T extends string>(mountModule: T) => (projectPath: string) => Promise.resolve(mountModule)
 
@@ -75,7 +74,124 @@ const reactMountModule = async (projectPath: string) => {
   return semver.major(reactPkg.detectedVersion) === 18 ? 'cypress/react18' : 'cypress/react'
 }
 
-export const WIZARD_FRAMEWORKS = [
+interface ComponentFrameworkDefinition {
+  /**
+   * A semantic, unique identifier.
+   * Example: 'reactscripts', 'nextjs'
+   */
+  type: string
+
+  /**
+     * Used as the flag for `getPreset` for meta framworks, such as finding the webpack config for CRA, Angular, etc.
+     * @see https://github.com/cypress-io/cypress/blob/ad0b2a37c2fe587f4efe4920d2e445eca5301600/npm/webpack-dev-server/src/devServer.ts#L119
+     * This could be extended to be a function that a user can inject, eg:
+     *
+     * configFramwork: () => {
+     *   return getSolidJsMetaFrameworkBundlerConfig()
+     * }
+     * It is also the name of the string added to `cypress.config`
+     *
+     * @example
+     *
+     * export default {
+     *   component: {
+     *     devServer: {
+     *       framework: 'solid' // can be 'next', 'create-react-app', etc etc.
+     *     }
+     *   }
+     * }
+     */
+  configFramework: string // 'create-react-app',
+
+  /**
+     * Library (React, Vue) or template (aka "meta framework") (CRA, Next.js, Angular)
+     */
+  category: 'library' | 'template'
+
+  /**
+     * Implement a similar interface to https://github.com/cypress-io/cypress/blob/ad0b2a37c2fe587f4efe4920d2e445eca5301600/npm/webpack-dev-server/src/devServer.ts#L117
+     *
+     * Only required for `category: framework`.
+     *
+     * @cypress/webpack-dev-server will need updating to receive custom `devServerHandler`.
+     * @cypress/vite-dev-server does not currently support the concept of a framework config preset yet, but this can be added.
+     *
+     * NOTE: This could be a "fast follow" if we want to reduce the scope of this brief.
+     */
+  getDevServerConfig?: () => Promise<{ frameworkConfig: any }>
+
+  /**
+     * Name displayed in Launchpad when doing initial setup.
+     * @example 'Solid.js', 'Create React App'
+     */
+  name: string
+
+  /**
+     * Supported bundlers.
+     */
+  supportedBundlers: Array<typeof dependencies.WIZARD_DEPENDENCY_WEBPACK | typeof dependencies.WIZARD_DEPENDENCY_VITE>
+
+  /**
+     * Used to attempt to automatically select the correct framework/bundler from the dropdown.
+     * @example
+     *
+     * const SOLID_DETECTOR: Dependency = {
+     *   type: 'solid',
+     *   name: 'Solid.js',
+     *   package: 'solid-js',
+     *   installer: 'solid-js',
+     *   description: 'Solid is a declarative JavaScript library for creating user interfaces',
+     *   minVersion: '^1.0.0',
+     * }
+     */
+  detectors: CypressComponentDependency[]
+
+  /**
+     * Array of required dependencies. This could be the bundler and JavaScript library.
+     * It's the same type as `detectors`.
+     */
+  dependencies: (bundler: WizardBundler['type'], projectPath: string) => Promise<DependencyToInstall[]>
+  // dependencies: () => Promise<CypressComponentDependency[]>
+
+  /**
+     * @internal
+     * This is used interally by Cypress for the "Create From Component" feature.
+     * @example 'react'
+     */
+  codeGenFramework: string
+
+  /**
+     * @internal
+     * This is used interally by Cypress for the "Create From Component" feature.
+     * @example '*.{js,jsx,tsx}'
+     */
+  glob: string
+
+  /**
+     * This is the path to get mount, eg `import { mount } from <mount_module>,
+     * @example: `cypress-ct-solidjs/src/mount`
+     */
+  mountModule: (projectPath: string) => Promise<string>
+
+  /**
+     * Support status. Internally alpha | beta | full.
+     * Community integrations are "community".
+     */
+  supportStatus: 'alpha' | 'beta' | 'full' | 'community'
+
+  /**
+     * Function returning string for used for the component-index.html file.
+     * Cypress provides a default if one isn't specified for third party integrations.
+     */
+  componentIndexHtml?: () => string
+
+  /**
+     * @internal
+     */
+  specPattern?: '**/*.cy.ts'
+}
+
+export const CT_FRAMEWORKS: ComponentFrameworkDefinition[] = [
   {
     type: 'reactscripts',
     configFramework: 'create-react-app',
@@ -280,4 +396,4 @@ export const WIZARD_FRAMEWORKS = [
     supportStatus: 'alpha',
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
-] as const
+]
