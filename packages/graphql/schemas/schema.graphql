@@ -885,33 +885,6 @@ input CohortInput {
   weights: [Int!]
 }
 
-"""A frontend framework that we can setup within the app"""
-type ComponentFrameworkDefinition implements Node {
-  """The category (framework, like react-scripts, or library, like react"""
-  category: String!
-
-  """Relay style Node ID field for the ComponentFrameworkDefinition field"""
-  id: ID!
-
-  """Whether this is the detected framework"""
-  isDetected: Boolean!
-
-  """Whether this is the selected framework in the wizard"""
-  isSelected: Boolean!
-
-  """The display name of the framework"""
-  name: String!
-
-  """Current support status of the framework"""
-  supportStatus: SupportStatusEnum!
-
-  """All of the supported bundlers for this framework"""
-  supportedBundlers: [WizardBundler!]!
-
-  """The unique identifier for a framework or library"""
-  type: String!
-}
-
 """
 The currently opened Cypress project, represented by a cypress.config.{js,ts,mjs,cjs} file
 """
@@ -2321,10 +2294,10 @@ type Wizard {
   """All of the bundlers to choose from"""
   allBundlers: [WizardBundler!]!
   bundler: WizardBundler
-  framework: ComponentFrameworkDefinition
+  framework: WizardFrontendFramework
 
   """All of the component testing frameworks to choose from"""
-  frameworks: [ComponentFrameworkDefinition!]!
+  frameworks: [WizardFrontendFramework!]!
 
   """Command to install required command"""
   installDependenciesCommand: String
@@ -2355,6 +2328,33 @@ enum WizardConfigFileStatusEnum {
   error
   skipped
   valid
+}
+
+"""A frontend framework that we can setup within the app"""
+type WizardFrontendFramework implements Node {
+  """The category (framework, like react-scripts, or library, like react"""
+  category: String!
+
+  """Relay style Node ID field for the WizardFrontendFramework field"""
+  id: ID!
+
+  """Whether this is the detected framework"""
+  isDetected: Boolean!
+
+  """Whether this is the selected framework in the wizard"""
+  isSelected: Boolean!
+
+  """The display name of the framework"""
+  name: String!
+
+  """Current support status of the framework"""
+  supportStatus: SupportStatusEnum!
+
+  """All of the supported bundlers for this framework"""
+  supportedBundlers: [WizardBundler!]!
+
+  """The unique identifier for a framework or library"""
+  type: String!
 }
 
 """Details about an NPM Package listed during the wizard install"""

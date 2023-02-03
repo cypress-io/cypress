@@ -2,8 +2,8 @@ import { WizardBundler } from './gql-WizardBundler'
 import { SupportStatusEnum } from '../enumTypes/gql-WizardEnums'
 import { objectType } from 'nexus'
 
-export const ComponentFrameworkDefinition = objectType({
-  name: 'ComponentFrameworkDefinition',
+export const WizardFrontendFramework = objectType({
+  name: 'WizardFrontendFramework',
   description: 'A frontend framework that we can setup within the app',
   node: 'type',
   definition (t) {

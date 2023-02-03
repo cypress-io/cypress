@@ -1,5 +1,5 @@
 import { WizardBundler } from './gql-WizardBundler'
-import { ComponentFrameworkDefinition } from './gql-WizardFrontendFramework'
+import { WizardFrontendFramework } from './gql-WizardFrontendFramework'
 import { WizardNpmPackage } from './gql-WizardNpmPackage'
 import { objectType } from 'nexus'
 import { WIZARD_BUNDLERS } from '@packages/scaffold-config'
@@ -20,12 +20,12 @@ export const Wizard = objectType({
     })
 
     t.field('framework', {
-      type: ComponentFrameworkDefinition,
+      type: WizardFrontendFramework,
       resolve: (source, args, ctx) => ctx.coreData.wizard.chosenFramework ?? null,
     })
 
     t.nonNull.list.nonNull.field('frameworks', {
-      type: ComponentFrameworkDefinition,
+      type: WizardFrontendFramework,
       description: 'All of the component testing frameworks to choose from',
       resolve: (source, args, ctx) => Array.from(ctx.coreData.wizard.frameworks),
     })
