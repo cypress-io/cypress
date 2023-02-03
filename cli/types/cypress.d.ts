@@ -5976,14 +5976,14 @@ declare namespace Cypress {
      * Useful to see how internal cypress commands utilize the {% url 'Cypress.log()' cypress-log %} API.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'log:added', fn: (log: any, interactive: boolean) => void): Cypress
+    (action: 'log:added', fn: (attributes: ObjectLike, log: any) => void): Cypress
     /**
      * Fires whenever a command's attributes changes.
      * This event is debounced to prevent it from firing too quickly and too often.
      * Useful to see how internal cypress commands utilize the {% url 'Cypress.log()' cypress-log %} API.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'log:changed', fn: (log: any, interactive: boolean) => void): Cypress
+    (action: 'log:changed', fn: (attributes: ObjectLike, log: any) => void): Cypress
     /**
      * Fires before the test and all **before** and **beforeEach** hooks run.
      * @see https://on.cypress.io/catalog-of-events#App-Events

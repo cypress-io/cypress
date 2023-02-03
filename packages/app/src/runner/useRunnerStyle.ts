@@ -39,7 +39,7 @@ export const useRunnerStyle = () => {
     // might not be there
     let nonAutWidth = autMargin * 2
 
-    if (window.__CYPRESS_MODE__ === 'open') {
+    if (!isRunMode) {
       nonAutWidth += collapsedNavBarWidth
     }
 
