@@ -73,7 +73,7 @@ interface RootOption {
 }
 
 interface FrameworkOption extends RootOption {
-  type: FrontendFrameworkEnum
+  type: string
   supportStatus: 'alpha' | 'beta' | 'full'
 }
 
@@ -90,7 +90,6 @@ import { computed, ref } from 'vue'
 import { FrameworkBundlerLogos } from '../utils/icons'
 import Select from '@cy/components/Select.vue'
 import type {
-  FrontendFrameworkEnum,
   SupportedBundlers,
 } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
@@ -113,7 +112,7 @@ const props = withDefaults(defineProps<{
 })
 
 const emit = defineEmits<{
-  (event: 'selectFramework', type: FrontendFrameworkEnum)
+  (event: 'selectFramework', type: string)
   (event: 'selectBundler', type: SupportedBundlers)
 }>()
 

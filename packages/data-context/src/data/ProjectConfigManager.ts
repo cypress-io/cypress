@@ -18,7 +18,7 @@ import { CypressEnv } from './CypressEnv'
 import { autoBindDebug } from '../util/autoBindDebug'
 import type { EventRegistrar } from './EventRegistrar'
 import type { DataContext } from '../DataContext'
-import { DependencyToInstall, isDependencyInstalled, WIZARD_BUNDLERS, CT_FRAMEWORKS } from '@packages/scaffold-config'
+import { DependencyToInstall, isDependencyInstalled, WIZARD_BUNDLERS, ComponentFrameworkDefinition } from '@packages/scaffold-config'
 
 const debug = debugLib(`cypress:lifecycle:ProjectConfigManager`)
 
@@ -191,7 +191,7 @@ export class ProjectConfigManager {
       return
     }
 
-    const isFrameworkSatisfied = async (bundler: typeof WIZARD_BUNDLERS[number], framework: typeof CT_FRAMEWORKS[number]) => {
+    const isFrameworkSatisfied = async (bundler: typeof WIZARD_BUNDLERS[number], framework: ComponentFrameworkDefinition) => {
       for (const dep of await (framework.dependencies(bundler.type, this.options.projectRoot))) {
         const res = await isDependencyInstalled(dep.dependency, this.options.projectRoot)
 
@@ -203,7 +203,8 @@ export class ProjectConfigManager {
       return true
     }
 
-    const frameworks = CT_FRAMEWORKS.filter((x) => x.configFramework === devServerOptions.framework)
+    // hm, not sure about this
+    const frameworks = this.options.ctx.coreData.wizard.frameworks.filter((x) => x.configFramework === devServerOptions.framework)
 
     const mismatchedFrameworkDeps = new Map<string, DependencyToInstall>()
 

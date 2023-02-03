@@ -3,7 +3,7 @@ import type {
   CurrentProject,
   Browser,
   WizardBundler,
-  WizardFrontendFramework,
+  ComponentFrameworkDefinition,
   GlobalProject,
   VersionData,
   LocalSettings,
@@ -26,7 +26,7 @@ export interface ClientTestContext {
   localSettings: LocalSettings
   wizard: {
     chosenBundler: WizardBundler | null
-    chosenFramework: WizardFrontendFramework | null
+    chosenFramework: ComponentFrameworkDefinition | null
     chosenManualInstall: boolean
     allBundlers: WizardBundler[]
     warnings: []

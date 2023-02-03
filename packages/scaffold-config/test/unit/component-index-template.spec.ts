@@ -48,7 +48,7 @@ describe('componentIndexHtmlGenerator', () => {
   it('generates correct template for Next.js', () => {
     const nextjs = CT_FRAMEWORKS.find((x) => x.name === 'Next.js')!
 
-    const actual = nextjs.componentIndexHtml()
+    const actual = nextjs.componentIndexHtml?.()
 
     const expected = dedent`
     <!DOCTYPE html>

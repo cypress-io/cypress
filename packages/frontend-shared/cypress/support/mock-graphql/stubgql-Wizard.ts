@@ -53,7 +53,7 @@ export const stubWizard: MaybeResolver<Wizard> = {
   allBundlers,
   frameworks: testFrameworks.map(({ name, type, supportedBundlers, category, supportStatus }, idx) => {
     return {
-      ...testNodeId('WizardFrontendFramework'),
+      ...testNodeId('ComponentFrameworkDefinition'),
       supportStatus,
       name,
       category,

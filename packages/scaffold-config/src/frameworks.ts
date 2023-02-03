@@ -9,7 +9,7 @@ export type PkgJson = { version: string, dependencies?: Record<string, string>, 
 
 export type WizardBundler = typeof dependencies.WIZARD_BUNDLERS[number]
 
-export type CodeGenFramework = typeof CT_FRAMEWORKS[number]['codeGenFramework']
+export type CodeGenFramework = ComponentFrameworkDefinition['codeGenFramework']
 
 export interface DependencyToInstall {
   dependency: CypressComponentDependency
@@ -17,8 +17,6 @@ export interface DependencyToInstall {
   loc: string | null
   detectedVersion: string | null
 }
-
-export type WizardFrontendFramework = typeof CT_FRAMEWORKS[number] & { specPattern?: string }
 
 export async function isDependencyInstalled (dependency: CypressComponentDependency, projectPath: string): Promise<DependencyToInstall> {
   try {
@@ -60,8 +58,6 @@ function getBundlerDependency (bundler: WizardBundler['type'], projectPath: stri
   }
 }
 
-export type WizardMountModule = Awaited<ReturnType<typeof CT_FRAMEWORKS[number]['mountModule']>>
-
 const mountModule = <T extends string>(mountModule: T) => (projectPath: string) => Promise.resolve(mountModule)
 
 const reactMountModule = async (projectPath: string) => {
@@ -74,7 +70,7 @@ const reactMountModule = async (projectPath: string) => {
   return semver.major(reactPkg.detectedVersion) === 18 ? 'cypress/react18' : 'cypress/react'
 }
 
-interface ComponentFrameworkDefinition {
+export interface ComponentFrameworkDefinition {
   /**
    * A semantic, unique identifier.
    * Example: 'reactscripts', 'nextjs'
@@ -158,7 +154,7 @@ interface ComponentFrameworkDefinition {
      * This is used interally by Cypress for the "Create From Component" feature.
      * @example 'react'
      */
-  codeGenFramework: string
+  codeGenFramework: 'react' | 'vue' | 'svelte' | 'angular'
 
   /**
      * @internal

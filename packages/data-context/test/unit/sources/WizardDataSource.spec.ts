@@ -1,8 +1,8 @@
-import { WizardBundler, WizardFrontendFramework, WIZARD_BUNDLERS, CT_FRAMEWORKS } from '@packages/scaffold-config'
+import { WizardBundler, ComponentFrameworkDefinition, WIZARD_BUNDLERS, CT_FRAMEWORKS } from '@packages/scaffold-config'
 import { expect } from 'chai'
 import { createTestDataContext, scaffoldMigrationProject, removeCommonNodeModules } from '../helper'
 
-function findFramework (type: WizardFrontendFramework['type']) {
+function findFramework (type: ComponentFrameworkDefinition['type']) {
   return CT_FRAMEWORKS.find((x) => x.type === type)!
 }
 

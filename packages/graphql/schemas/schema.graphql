@@ -885,6 +885,33 @@ input CohortInput {
   weights: [Int!]
 }
 
+"""A frontend framework that we can setup within the app"""
+type ComponentFrameworkDefinition implements Node {
+  """The category (framework, like react-scripts, or library, like react"""
+  category: String!
+
+  """Relay style Node ID field for the ComponentFrameworkDefinition field"""
+  id: ID!
+
+  """Whether this is the detected framework"""
+  isDetected: Boolean!
+
+  """Whether this is the selected framework in the wizard"""
+  isSelected: Boolean!
+
+  """The display name of the framework"""
+  name: String!
+
+  """Current support status of the framework"""
+  supportStatus: SupportStatusEnum!
+
+  """All of the supported bundlers for this framework"""
+  supportedBundlers: [WizardBundler!]!
+
+  """The unique identifier for a framework or library"""
+  type: String!
+}
+
 """
 The currently opened Cypress project, represented by a cypress.config.{js,ts,mjs,cjs} file
 """
@@ -1274,19 +1301,6 @@ type FileParts implements Node {
 
   """Relative path to file (e.g. src/component/MySpec.test.tsx)"""
   relative: String!
-}
-
-enum FrontendFrameworkEnum {
-  angular
-  nextjs
-  nuxtjs
-  react
-  reactscripts
-  svelte
-  vue2
-  vue3
-  vueclivue2
-  vueclivue3
 }
 
 """Error from generated spec"""
@@ -2307,10 +2321,10 @@ type Wizard {
   """All of the bundlers to choose from"""
   allBundlers: [WizardBundler!]!
   bundler: WizardBundler
-  framework: WizardFrontendFramework
+  framework: ComponentFrameworkDefinition
 
   """All of the component testing frameworks to choose from"""
-  frameworks: [WizardFrontendFramework!]!
+  frameworks: [ComponentFrameworkDefinition!]!
 
   """Command to install required command"""
   installDependenciesCommand: String
@@ -2343,33 +2357,6 @@ enum WizardConfigFileStatusEnum {
   valid
 }
 
-"""A frontend framework that we can setup within the app"""
-type WizardFrontendFramework implements Node {
-  """The category (framework, like react-scripts, or library, like react"""
-  category: String!
-
-  """Relay style Node ID field for the WizardFrontendFramework field"""
-  id: ID!
-
-  """Whether this is the detected framework"""
-  isDetected: Boolean!
-
-  """Whether this is the selected framework in the wizard"""
-  isSelected: Boolean!
-
-  """The display name of the framework"""
-  name: String!
-
-  """Current support status of the framework"""
-  supportStatus: SupportStatusEnum!
-
-  """All of the supported bundlers for this framework"""
-  supportedBundlers: [WizardBundler!]!
-
-  """The unique identifier for a framework or library"""
-  type: FrontendFrameworkEnum!
-}
-
 """Details about an NPM Package listed during the wizard install"""
 type WizardNpmPackage implements Node {
   """Short description about the purpose of the package"""
@@ -2398,5 +2385,5 @@ type WizardNpmPackage implements Node {
 
 input WizardUpdateInput {
   bundler: SupportedBundlers
-  framework: FrontendFrameworkEnum
+  framework: String
 }

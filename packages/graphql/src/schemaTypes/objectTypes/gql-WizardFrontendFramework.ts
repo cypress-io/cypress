@@ -1,14 +1,13 @@
 import { WizardBundler } from './gql-WizardBundler'
-import { FrontendFrameworkEnum, SupportStatusEnum } from '../enumTypes/gql-WizardEnums'
+import { SupportStatusEnum } from '../enumTypes/gql-WizardEnums'
 import { objectType } from 'nexus'
 
-export const WizardFrontendFramework = objectType({
-  name: 'WizardFrontendFramework',
+export const ComponentFrameworkDefinition = objectType({
+  name: 'ComponentFrameworkDefinition',
   description: 'A frontend framework that we can setup within the app',
   node: 'type',
   definition (t) {
-    t.nonNull.field('type', {
-      type: FrontendFrameworkEnum,
+    t.nonNull.string('type', {
       description: 'The unique identifier for a framework or library',
     }),
 
@@ -47,6 +46,6 @@ export const WizardFrontendFramework = objectType({
 
   sourceType: {
     module: '@packages/scaffold-config',
-    export: 'WizardFrontendFramework',
+    export: 'ComponentFrameworkDefinition',
   },
 })

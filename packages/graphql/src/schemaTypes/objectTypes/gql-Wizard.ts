@@ -1,8 +1,8 @@
 import { WizardBundler } from './gql-WizardBundler'
-import { WizardFrontendFramework } from './gql-WizardFrontendFramework'
+import { ComponentFrameworkDefinition } from './gql-WizardFrontendFramework'
 import { WizardNpmPackage } from './gql-WizardNpmPackage'
 import { objectType } from 'nexus'
-import { WIZARD_BUNDLERS, CT_FRAMEWORKS } from '@packages/scaffold-config'
+import { WIZARD_BUNDLERS } from '@packages/scaffold-config'
 
 export const Wizard = objectType({
   name: 'Wizard',
@@ -20,14 +20,14 @@ export const Wizard = objectType({
     })
 
     t.field('framework', {
-      type: WizardFrontendFramework,
+      type: ComponentFrameworkDefinition,
       resolve: (source, args, ctx) => ctx.coreData.wizard.chosenFramework ?? null,
     })
 
     t.nonNull.list.nonNull.field('frameworks', {
-      type: WizardFrontendFramework,
+      type: ComponentFrameworkDefinition,
       description: 'All of the component testing frameworks to choose from',
-      resolve: () => Array.from(CT_FRAMEWORKS), // TODO(tim): fix this in nexus to accept Readonly
+      resolve: (source, args, ctx) => Array.from(ctx.coreData.wizard.frameworks),
     })
 
     t.nonNull.list.nonNull.field('packagesToInstall', {

@@ -1,5 +1,5 @@
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
-import { detectFramework, CT_FRAMEWORKS, commandsFileBody, supportFileComponent, supportFileE2E, WizardBundler, WizardFrontendFramework } from '@packages/scaffold-config'
+import { detectFramework, commandsFileBody, supportFileComponent, supportFileE2E, WizardBundler, ComponentFrameworkDefinition } from '@packages/scaffold-config'
 import assert from 'assert'
 import path from 'path'
 import Debug from 'debug'
@@ -24,8 +24,8 @@ export class WizardActions {
     return this.ctx.wizardData
   }
 
-  setFramework (framework: WizardFrontendFramework | null): void {
-    const next = CT_FRAMEWORKS.find((x) => x.type === framework?.type)
+  setFramework (framework: ComponentFrameworkDefinition | null): void {
+    const next = this.ctx.coreData.wizard.frameworks.find((x) => x.type === framework?.type)
 
     this.ctx.update((coreData) => {
       coreData.wizard.chosenFramework = framework
@@ -88,7 +88,7 @@ export class WizardActions {
 
     this.resetWizard()
 
-    const detected = await detectFramework(this.ctx.currentProject)
+    const detected = await detectFramework(this.ctx.currentProject, this.ctx.coreData.wizard.frameworks)
 
     debug('detected %o', detected)
 
@@ -296,7 +296,7 @@ export class WizardActions {
     }
   }
 
-  private async scaffoldComponentIndexHtml (chosenFramework: WizardFrontendFramework): Promise<NexusGenObjects['ScaffoldedFile']> {
+  private async scaffoldComponentIndexHtml (chosenFramework: ComponentFrameworkDefinition): Promise<NexusGenObjects['ScaffoldedFile']> {
     const componentIndexHtmlPath = path.join(this.projectRoot, 'cypress', 'support', 'component-index.html')
 
     await this.ensureDir('support')

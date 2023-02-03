@@ -1,6 +1,6 @@
 import type { ParsedPath } from 'path'
 import type { CodeGenType } from '@packages/graphql/src/gen/nxs.gen'
-import type { WizardFrontendFramework } from '@packages/scaffold-config'
+import type { ComponentFrameworkDefinition } from '@packages/scaffold-config'
 import fs from 'fs-extra'
 import { uniq, upperFirst } from 'lodash'
 import path from 'path'
@@ -14,7 +14,7 @@ interface CodeGenOptions {
   isDefaultSpecPattern: boolean
   specPattern: string[]
   currentProject: string | null
-  framework?: WizardFrontendFramework
+  framework?: ComponentFrameworkDefinition
   specs?: FoundSpec[]
   componentName?: string
   isDefault?: boolean
