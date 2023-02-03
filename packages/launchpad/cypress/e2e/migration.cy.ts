@@ -80,8 +80,6 @@ function renameSupport (lang: 'js' | 'ts' | 'coffee' = 'js') {
 }
 
 describe('global mode', () => {
-  // TODO: Figure out why it is flaky. Seems to be due to MigrationWizard query being executed multiple times
-  // see: https://github.com/cypress-io/cypress/issues/25377
   it('migrates 2 projects in global mode', () => {
     cy.openGlobalMode()
     cy.addProject('migration-e2e-export-default')
