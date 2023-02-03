@@ -23,6 +23,7 @@ import type { RemoteStates } from '@packages/server/lib/remote_states'
 import type { CookieJar } from '@packages/server/lib/util/cookies'
 import type { RequestedWithAndCredentialManager } from '@packages/server/lib/util/requestedWithAndCredentialManager'
 import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
+import { errorUtils } from '@packages/errors'
 
 function getRandomColorFn () {
   return chalk.hex(`#${Number(
@@ -182,11 +183,13 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
       const fullCtx = {
         next: () => {
           fullCtx.next = () => {
-            if (type === HttpStages.Error) {
-              ctx.debug('`this.next` called more than once within the same middleware function but was ignored due to being in an Error flow. %o', { middlewareName, error: ctx.error })
-            } else {
-              throw new Error(`Error running proxy middleware: Cannot call this.next() more than once in the same middleware function. Doing so can cause unintended issues.`)
+            const error = new Error('Error running proxy middleware: Detected `this.next()` was called more than once in the same middleware function. This can cause unintended issues and may indicate an error in your middleware logic or configuration.')
+
+            if (ctx.error) {
+              error.message = error.message += `\nThis middleware invocation previously encountered an error which may be related: ${ctx.error}`
             }
+
+            throw error
           }
 
           copyChangedCtx()
@@ -211,10 +214,7 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
       try {
         middleware.call(fullCtx)
       } catch (err) {
-        // TODO Find better way to log this
-        // eslint-disable-next-line no-console
-        console.error(err)
-
+        errorUtils.logError(err)
         // This is a total failure so we will not be retrying the request, clear it before executing handler
         // If we do not do this we will end up attempting to double-execute the middleware `next` method
         // https://github.com/cypress-io/cypress/issues/22825

@@ -31,41 +31,67 @@ describe('http/response-middleware', function () {
     ])
   })
 
-  it('errors if this.next() is called more than once in the same middleware', function (done) {
-    const middleware = function () {
-      this.next()
-      this.next()
-    }
+  describe('multiple this.next invocations', () => {
+    context('within the same middleware', () => {
+      it('throws an error', function (done) {
+        const middleware = function () {
+          this.next()
+          this.next()
+        }
 
-    testMiddleware([middleware], {
-      res: {
-        on: (event, listener) => {},
-        off: (event, listener) => {},
-      },
-      onError (err) {
-        expect(err.message).to.equal('Error running proxy middleware: Cannot call this.next() more than once in the same middleware function. Doing so can cause unintended issues.')
+        testMiddleware([middleware], {
+          res: {
+            on: (event, listener) => {},
+            off: (event, listener) => {},
+          },
+          onError (err) {
+            expect(err.message).to.equal('Error running proxy middleware: Detected `this.next()` was called more than once in the same middleware function. This can cause unintended issues and may indicate an error in your middleware logic or configuration.')
 
-        done()
-      },
+            done()
+          },
+        })
+      })
+
+      it('includes a previous context error in error message if one exists', (done) => {
+        const middleware = function () {
+          this.next()
+          this.next()
+        }
+
+        testMiddleware([middleware], {
+          error: new Error('previous error'),
+          res: {
+            on: (event, listener) => {},
+            off: (event, listener) => {},
+          },
+          onError (err) {
+            expect(err.message).to.contain('This middleware invocation previously encountered an error which may be related: Error: previous error')
+
+            done()
+          },
+        })
+      })
     })
-  })
 
-  it('does not error if this.next() is called more than once in different middleware', function () {
-    const middleware1 = function () {
-      this.next()
-    }
-    const middleware2 = function () {
-      this.next()
-    }
+    context('across different middleware', () => {
+      it('does not throw an error', function () {
+        const middleware1 = function () {
+          this.next()
+        }
+        const middleware2 = function () {
+          this.next()
+        }
 
-    return testMiddleware([middleware1, middleware2], {
-      res: {
-        on: (event, listener) => {},
-        off: (event, listener) => {},
-      },
-      onError () {
-        throw new Error('onError should not be called')
-      },
+        return testMiddleware([middleware1, middleware2], {
+          res: {
+            on: (event, listener) => {},
+            off: (event, listener) => {},
+          },
+          onError () {
+            throw new Error('onError should not be called')
+          },
+        })
+      })
     })
   })
 
