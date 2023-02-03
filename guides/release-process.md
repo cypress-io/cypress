@@ -75,7 +75,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
         - [cypress-realworld-app](https://github.com/cypress-io/cypress-realworld-app) uses yarn and represents a typical consumer implementation.
     - Optionally, do more thorough tests, for example test the new version of Cypress against the Cypress Cloud repo.
 
-2. Ensure all changes to the links manifest to [`on.cypress.io`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on) have been merged to `master` and deployed.
+2. Ensure all changes to the links manifest to [`on.cypress.io`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on) have been merged to `develop` and deployed.
 
 3. Create a Release PR Bump, submit, get approvals on, and merge a new PR. This PR Should:
     - Bump the Cypress `version` in [`package.json`](package.json)
