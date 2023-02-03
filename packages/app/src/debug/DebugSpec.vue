@@ -20,7 +20,7 @@
               v-if="foundLocally"
               placement="bottom"
               color="dark"
-              data-cy="open-in-ide"
+              :distance="8"
             >
               <OpenFileInIDE
                 v-slot="{onClick}"
@@ -28,6 +28,7 @@
               >
                 <button
                   class="rounded-md border-1px border-gray-100 p-4px group hocus:border-indigo-200"
+                  :aria-label="t('debugPage.openFile.openInIDE')"
                   @click="onClick"
                 >
                   <IconDocumentText
@@ -53,16 +54,21 @@
             </Tooltip>
             <Tooltip
               v-else
-              class="rounded-md border-1px border-gray-100 p-4px"
               placement="bottom"
               color="dark"
-              data-cy="open-in-ide-disabled"
+              :distance="8"
             >
-              <IconDocumentMinus
-                stroke-color="gray-500"
-                fill-color="gray-100"
-                size="16"
-              />
+              <button
+                aria-disabled
+                :aria-label="t('debugPage.openFile.notFoundLocally')"
+                class="rounded-md border-1px border-gray-100 p-4px"
+              >
+                <IconDocumentMinus
+                  stroke-color="gray-500"
+                  fill-color="gray-100"
+                  size="16"
+                />
+              </button>
               <template
                 #popper
               >
