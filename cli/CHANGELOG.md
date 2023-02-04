@@ -5,7 +5,7 @@ _Released 02/14/2023 (PENDING)_
 
 **Misc:**
 
-- Improved the responsiveness of the Debug Page pending run UI. Addresses [#25664](https://github.com/cypress-io/cypress/issues/25664).
+- Improved the layout of the Debug Page on smaller viewports when there is a pending run. Addresses [#25664](https://github.com/cypress-io/cypress/issues/25664).
 
 ## 12.5.1
 
