@@ -1,4 +1,12 @@
  <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 12.6.0
+
+_Released 02/14/2023 (PENDING)_
+
+**Misc:**
+
+- Icons in Debug page will no longer shrink at small viewports. Addresses [#25665](https://github.com/cypress-io/cypress/issues/25665).
+
 ## 12.5.1
 
 _Released 02/10/2023_
