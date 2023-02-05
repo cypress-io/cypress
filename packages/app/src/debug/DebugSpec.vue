@@ -20,7 +20,9 @@
               stroke-color="gray-500"
               fill-color="gray-100"
               size="16"
+              class="min-w-16px"
             />
+
             <div
               data-cy="spec-path"
               class="flex-grow text-base non-italic truncate"
