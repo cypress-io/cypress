@@ -409,7 +409,7 @@ type ComponentFrameworkDefinition = Omit<ResolvedComponentFrameworkDefinition, '
   dependencies: (bundler: WizardBundler['type']) => CypressComponentDependency[]
 }
 
-export function processThirdPartyFrameworkDefinition (definition: ComponentFrameworkDefinition): ResolvedComponentFrameworkDefinition {
+export function resolveComponentFrameworkDefinition (definition: ComponentFrameworkDefinition): ResolvedComponentFrameworkDefinition {
   return {
     ...definition,
     supportStatus: 'community',
