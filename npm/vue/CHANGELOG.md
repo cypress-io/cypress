@@ -1,3 +1,5 @@
+# [@cypress/vue-v5.0.4](https://github.com/cypress-io/cypress/compare/@cypress/vue-v5.0.3...@cypress/vue-v5.0.4) (2023-02-06)
+
 # [@cypress/vue-v5.0.3](https://github.com/cypress-io/cypress/compare/@cypress/vue-v5.0.2...@cypress/vue-v5.0.3) (2022-12-02)
 
 
