@@ -148,6 +148,8 @@
     "./node_modules/@cypress/commit-info/node_modules/semver/semver.js",
     "./node_modules/@cypress/get-windows-proxy/node_modules/debug/src/browser.js",
     "./node_modules/@cypress/get-windows-proxy/node_modules/debug/src/index.js",
+    "./node_modules/@cypress/get-windows-proxy/node_modules/registry-js/dist/lib/index.js",
+    "./node_modules/@cypress/get-windows-proxy/node_modules/registry-js/dist/lib/registry.js",
     "./node_modules/@cypress/request-promise/lib/rp.js",
     "./node_modules/@cypress/request/index.js",
     "./node_modules/@cypress/request/lib/helpers.js",
@@ -4296,5 +4298,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "ffcc71a4e23db83054bb13332cd29a4c3df19e31ab277cec2e80ca0a351cca3c"
+  "deferredHash": "123ca8b4798073e5237d48d0ec586f69b70fc39e94439e3b22068269e27638e3"
 }
