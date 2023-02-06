@@ -5,7 +5,7 @@ _Released 02/14/2023 (PENDING)_
 
 **Features:**
 
-- It is now possible to overwrite query commands using [`Cypress.Commands.overwriteQuery`](https://on.cypress.io/api/custom-queries). Addresses [#25078](https://github.com/cypress-io/cypress/issues/25078).
+- It is now possible to overwrite query commands using [`Cypress.Commands.overwriteQuery`](https://on.cypress.io/api/custom-queries). Addressed in [#25674](https://github.com/cypress-io/cypress/pull/25674).
 - Added the "Open in IDE" feature for failed tests reported from the Debug page. Addressed in [#25691](https://github.com/cypress-io/cypress/pull/25691).
 
 **Misc:**
