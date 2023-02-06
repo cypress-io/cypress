@@ -163,11 +163,10 @@ describe('App - Debug Page', () => {
     cy.findByTestId('test-row').contains('renders')
     cy.findByTestId('run-failures').should('exist').should('have.attr', 'href', '#/specs/runner?file=src/components/InfoPanel/InfoPanel.cy.ts&mode=debug')
 
-    cy.findByTestId('open-in-ide').click().then(() => {
-      cy.wait('@openFileInIDE')
-      cy.withCtx((ctx) => {
-        expect(ctx.actions.file.openFile).to.have.been.calledWith('src/components/InfoPanel/InfoPanel.cy.ts', 1, 1)
-      })
+    cy.findByLabelText('Open in IDE').click()
+    cy.wait('@openFileInIDE')
+    cy.withCtx((ctx) => {
+      expect(ctx.actions.file.openFile).to.have.been.calledWith('src/components/InfoPanel/InfoPanel.cy.ts', 1, 1)
     })
   })
 })
