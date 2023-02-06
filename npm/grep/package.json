@@ -9,7 +9,7 @@
     "lint": "eslint . --ext .js,.ts"
   },
   "dependencies": {
-    "debug": "^4.3.2",
+    "debug": "^4.3.4",
     "find-test-names": "^1.19.0",
     "globby": "^11.0.4"
   },
