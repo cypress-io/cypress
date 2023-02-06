@@ -68,12 +68,12 @@ describe('SpecItem', () => {
         }}
       />))
 
-    cy.findByTestId('latest').trigger('mouseenter').wait(300)
-    cy.findByTestId('button').contains('Specs Latest Runs Empty State')
-    cy.findByTestId('button').trigger('mouseleave')
+    cy.findByTestId('latest').trigger('mouseenter')
+    cy.findByTestId('button').as('button').contains('Specs Latest Runs Empty State')
+    cy.get('@button').trigger('mouseleave')
 
-    cy.findByTestId('duration').trigger('mouseenter').wait(300)
-    cy.findByTestId('button').contains('Specs Average Duration Empty State')
-    cy.findByTestId('button').trigger('mouseleave')
+    cy.findByTestId('duration').trigger('mouseenter')
+    cy.get('@button').contains('Specs Average Duration Empty State')
+    cy.get('@button').trigger('mouseleave')
   })
 })
