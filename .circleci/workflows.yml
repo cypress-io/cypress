@@ -1524,28 +1524,28 @@ jobs:
 
   system-tests-chrome:
     <<: *defaults
-    parallelism: 8
+    parallelism: 10
     steps:
       - run-system-tests:
           browser: chrome
 
   system-tests-electron:
     <<: *defaults
-    parallelism: 8
+    parallelism: 10
     steps:
       - run-system-tests:
           browser: electron
 
   system-tests-firefox:
     <<: *defaults
-    parallelism: 8
+    parallelism: 10
     steps:
       - run-system-tests:
           browser: firefox
 
   system-tests-webkit:
     <<: *defaults
-    parallelism: 8
+    parallelism: 10
     steps:
       - run-system-tests:
           browser: webkit
@@ -1641,7 +1641,7 @@ jobs:
         type: boolean
         default: false
     resource_class: << parameters.resource_class >>
-    parallelism: 8
+    parallelism: 10
     steps:
       - run-new-ui-tests:
           browser: chrome
