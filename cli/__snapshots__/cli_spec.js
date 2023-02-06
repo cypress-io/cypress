@@ -67,7 +67,7 @@ exports['shows help for run --foo 1'] = `
   Runs Cypress tests from the CLI without the GUI
 
   Options:
-    --auto-cancel-after-failures <autoCancelAfterFailures>  sets auto cancellation for the run. pass a number for the failed test threshold, or "false"
+    --auto-cancel-after-failures <autoCancelAfterFailures>  overrides the global Cloud configuration to set the failed test threshold for auto cancellation or to disabled auto cancellation when recording to the Cloud
     -b, --browser <browser-name-or-path>                    runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.
     --ci-build-id <id>                                      the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers
     --component                                             runs component tests
