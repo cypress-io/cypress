@@ -96,7 +96,7 @@ export const FAKE_PROJECT_ONE_RUNNING_RUN_ONE_COMPLETED_TWO_SPECS = {
           'groupIds': [
             '3', '4', '5',
           ],
-          'status': 'PENDING',
+          'status': 'UNCLAIMED',
           '__typename': 'CloudSpecRun',
         }],
       },

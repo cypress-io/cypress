@@ -67,7 +67,7 @@ describe('RelevantRunsDataSource', () => {
         next: {
           completedSpecs: 0,
           runNumber: 2,
-          totalSpecs: 0,
+          totalSpecs: 3,
         },
         },
         statuses: {
