@@ -31,7 +31,7 @@ export class WizardActions {
       coreData.wizard.chosenFramework = framework
     })
 
-    if (next?.supportedBundlers?.[0]) {
+    if (next?.supportedBundlers?.[0] && next.supportedBundlers.length === 1) {
       this.setBundler(next?.supportedBundlers?.[0])
 
       return
