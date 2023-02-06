@@ -801,7 +801,10 @@ describe('http/request-middleware', () => {
             on: () => {},
           },
         },
-        res: {} as Partial<CypressOutgoingResponse>,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        } as Partial<CypressOutgoingResponse>,
         remoteStates,
       }
     })

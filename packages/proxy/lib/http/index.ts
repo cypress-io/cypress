@@ -215,10 +215,6 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
         middleware.call(fullCtx)
       } catch (err) {
         errorUtils.logError(err)
-        // This is a total failure so we will not be retrying the request, clear it before executing handler
-        // If we do not do this we will end up attempting to double-execute the middleware `next` method
-        // https://github.com/cypress-io/cypress/issues/22825
-        fullCtx.req.browserPreRequest = null
         fullCtx.onError(err)
       }
     })
