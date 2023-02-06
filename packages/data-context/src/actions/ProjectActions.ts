@@ -98,6 +98,7 @@ export class ProjectActions {
       d.app.browserStatus = 'closed'
     })
 
+    this.ctx.actions.migration.reset()
     await this.ctx.lifecycleManager.clearCurrentProject()
     resetIssuedWarnings()
     await this.api.closeActiveProject()
