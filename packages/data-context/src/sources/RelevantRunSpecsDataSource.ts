@@ -99,10 +99,8 @@ export class RelevantRunSpecsDataSource {
   }
 
   /**
-   * Pulls runs from the current Cypress Cloud account and determines which runs are considered:
-   * - "current" the most recent completed run, or if not found, the most recent running run
-   * - "next" the most recent running run if a completed run is found
-   * @param shas list of Git commit shas to query the Cloud with for matching runs
+   * Pulls the specs that match the relevant run.
+   * @param runs - the current and (optionally) next relevant run
    */
   async getRelevantRunSpecs (runs: RelevantRun): Promise<RunSpecReturn> {
     const projectSlug = await this.ctx.project.projectId()
