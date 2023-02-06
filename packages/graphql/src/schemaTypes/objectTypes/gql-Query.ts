@@ -43,7 +43,18 @@ export const Query = objectType({
     t.field('migration', {
       type: Migration,
       description: 'Metadata about the migration, null if we aren\'t showing it',
-      resolve: (root, args, ctx) => ctx.coreData.migration.legacyConfigForMigration ? ctx.coreData.migration : null,
+      resolve: async (root, args, ctx) => {
+        // First check to see if "legacyConfigForMigration" is defined as that means we have started migration
+        if (ctx.coreData.migration.legacyConfigForMigration) return ctx.coreData.migration.legacyConfigForMigration
+
+        if (!ctx.migration.needsCypressJsonMigration()) {
+          return null
+        }
+
+        await ctx.lifecycleManager.legacyMigration()
+
+        return ctx.coreData.migration.legacyConfigForMigration
+      },
     })
 
     t.nonNull.field('dev', {

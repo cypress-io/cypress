@@ -80,7 +80,7 @@ describe('<GroupedDebugFailedTest/>', () => {
 
     cy.findAllByTestId(`grouped-row`).should('have.length', 2).each((el) => cy.wrap(el).within(() => {
       cy.findByTestId('debug-artifacts').should('not.be.visible')
-      cy.wrap(el).realHover()
+      cy.findByTestId('test-failed-metadata').realHover()
       cy.findByTestId('debug-artifacts').should('be.visible').children().should('have.length', 3)
       cy.findByTestId('stats-metadata').children().should('have.length', 3)
     }))

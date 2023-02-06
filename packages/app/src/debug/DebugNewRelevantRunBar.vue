@@ -6,7 +6,7 @@
   >
     <ul
       id="metadata"
-      class="border rounded flex flex-row bg-indigo-50 border-indigo-100 p-12px gap-x-2 items-center whitespace-nowrap children:flex children:items-center"
+      class="border rounded flex flex-wrap bg-indigo-50 border-indigo-100 p-12px gap-8px items-center children:flex children:items-center"
     >
       <li>
         <DebugRunNumber
