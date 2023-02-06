@@ -4,7 +4,7 @@ import sinon from 'sinon'
 import { DataContext } from '../../../src'
 import { createTestDataContext } from '../helper'
 import { RelevantRunSpecsDataSource, SPECS_EMPTY_RETURN } from '../../../src/sources'
-import { FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC } from './fixtures/graphqlFixtures'
+import { FAKE_PROJECT_ONE_RUNNING_RUN_ONE_COMPLETED_TWO_SPECS, FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC } from './fixtures/graphqlFixtures'
 
 describe('RelevantRunsDataSource', () => {
   let ctx: DataContext
@@ -38,7 +38,7 @@ describe('RelevantRunsDataSource', () => {
       expect(result).to.eql(SPECS_EMPTY_RETURN)
     })
 
-    it('returns specs and statuses when they are found', async () => {
+    it('returns expected specs and statuses when one run is found', async () => {
       sinon.stub(ctx.cloud, 'executeRemoteGraphQL').resolves(FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC)
 
       const result = await dataSource.getRelevantRunSpecs({ current: 1, next: null, commitsAhead: 0 })
@@ -50,6 +50,30 @@ describe('RelevantRunsDataSource', () => {
           totalSpecs: 1,
         } },
         statuses: { current: 'RUNNING' },
+      })
+    })
+
+    it('returns expected specs and statuses when one run is completed and one is running', async () => {
+      sinon.stub(ctx.cloud, 'executeRemoteGraphQL').resolves(FAKE_PROJECT_ONE_RUNNING_RUN_ONE_COMPLETED_TWO_SPECS)
+
+      const result = await dataSource.getRelevantRunSpecs({ current: 1, next: null, commitsAhead: 0 })
+
+      expect(result).to.eql({
+        runSpecs: { current: {
+          completedSpecs: 2,
+          runNumber: 1,
+          totalSpecs: 2,
+        },
+        next: {
+          completedSpecs: 0,
+          runNumber: 2,
+          totalSpecs: 0,
+        },
+        },
+        statuses: {
+          current: 'PASSED',
+          next: 'RUNNING',
+        },
       })
     })
   })
