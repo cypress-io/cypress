@@ -61,44 +61,29 @@ export const FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC = {
       __typename: 'CloudProject',
       current: {
         runNumber: 1,
+        completedInstanceCount: 1,
+        totalInstanceCount: 1,
         status: 'RUNNING',
-        specs: [{
-          'groupIds': [
-            '1',
-          ],
-          'status': 'PASSED',
-          '__typename': 'CloudSpecRun',
-        }],
       },
     },
   },
 }
 
-export const FAKE_PROJECT_ONE_RUNNING_RUN_ONE_COMPLETED_TWO_SPECS = {
+export const FAKE_PROJECT_ONE_RUNNING_RUN_ONE_COMPLETED_THREE_SPECS = {
   data: {
     cloudProjectBySlug: {
       __typename: 'CloudProject',
       current: {
         runNumber: 1,
         status: 'PASSED',
-        specs: [{
-          'groupIds': [
-            '1', '2',
-          ],
-          'status': 'PASSED',
-          '__typename': 'CloudSpecRun',
-        }],
+        completedInstanceCount: 3,
+        totalInstanceCount: 3,
       },
       next: {
         runNumber: 2,
         status: 'RUNNING',
-        specs: [{
-          'groupIds': [
-            '3', '4', '5',
-          ],
-          'status': 'UNCLAIMED',
-          '__typename': 'CloudSpecRun',
-        }],
+        completedInstanceCount: 0,
+        totalInstanceCount: 3,
       },
     },
   },

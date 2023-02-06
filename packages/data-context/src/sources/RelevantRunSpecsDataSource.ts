@@ -4,7 +4,7 @@ import debugLib from 'debug'
 import { isEqual } from 'lodash'
 
 import type { DataContext } from '../DataContext'
-import type { CloudSpecStatus, Query, RelevantRun, CurrentProjectRelevantRunSpecs, CloudSpecRun, CloudRun } from '../gen/graphcache-config.gen'
+import type { Query, RelevantRun, CurrentProjectRelevantRunSpecs, CloudRun } from '../gen/graphcache-config.gen'
 import { Poller } from '../polling'
 import type { CloudRunStatus } from '@packages/graphql/src/gen/cloud-source-types.gen'
 
@@ -55,8 +55,6 @@ export const SPECS_EMPTY_RETURN: RunSpecReturn = {
   statuses: {},
 }
 
-const INCOMPLETE_STATUSES: CloudSpecStatus[] = ['RUNNING', 'UNCLAIMED']
-
 export type RunSpecReturn = {
   runSpecs: CurrentProjectRelevantRunSpecs
   statuses: {
@@ -84,18 +82,6 @@ export class RelevantRunSpecsDataSource {
 
   get specs () {
     return this.#cached.runSpecs
-  }
-
-  #calculateSpecMetadata (specs: CloudSpecRun[]) {
-    //mimic logic in Cloud to sum up the count of groups per spec to give the total spec counts
-    const countGroupsForSpec = (specs: CloudSpecRun[]) => {
-      return specs.map((spec) => spec.groupIds?.length || 0).reduce((acc, curr) => acc += curr, 0)
-    }
-
-    return {
-      totalSpecs: countGroupsForSpec(specs),
-      completedSpecs: countGroupsForSpec(specs.filter((spec) => !INCOMPLETE_STATUSES.includes(spec.status || 'UNCLAIMED'))),
-    }
   }
 
   /**
@@ -151,22 +137,26 @@ export class RelevantRunSpecsDataSource {
         statuses: {},
       }
 
-      if (cloudProject.current && cloudProject.current.runNumber && cloudProject.current.status) {
+      const { current, next } = cloudProject
+
+      if (current && current.runNumber && current.status) {
         runSpecsToReturn.runSpecs.current = {
-          ...this.#calculateSpecMetadata(cloudProject.current.specs || []),
-          runNumber: cloudProject.current.runNumber,
+          totalSpecs: current.totalInstanceCount,
+          completedSpecs: current.completedInstanceCount,
+          runNumber: current.runNumber,
         }
 
-        runSpecsToReturn.statuses.current = cloudProject.current.status
+        runSpecsToReturn.statuses.current = current.status
       }
 
-      if (cloudProject.next && cloudProject.next.runNumber && cloudProject.next.status) {
+      if (next && next.runNumber && next.status) {
         runSpecsToReturn.runSpecs.next = {
-          ...this.#calculateSpecMetadata(cloudProject.next.specs || []),
-          runNumber: cloudProject.next.runNumber,
+          totalSpecs: next.totalInstanceCount,
+          completedSpecs: next.completedInstanceCount,
+          runNumber: next.runNumber,
         }
 
-        runSpecsToReturn.statuses.next = cloudProject.next.status
+        runSpecsToReturn.statuses.next = next.status
       }
 
       return runSpecsToReturn
