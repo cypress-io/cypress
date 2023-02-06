@@ -1,11 +1,26 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 12.6.0
 
-_Released 02/10/2023 (PENDING)_
+_Released 02/14/2023 (PENDING)_
 
 **Features:**
 
 - It is now possible to overwrite query commands using [`Cypress.Commands.overwriteQuery`](https://on.cypress.io/api/custom-queries). Addresses [#25078](https://github.com/cypress-io/cypress/issues/25078).
+- Added the "Open in IDE" feature for failed tests reported from the Debug page. Addressed in [#25691](https://github.com/cypress-io/cypress/pull/25691).
+
+**Misc:**
+
+- Improved the layout of the Debug Page on smaller viewports when there is a pending run. Addresses [#25664](https://github.com/cypress-io/cypress/issues/25664).
+- Icons in Debug page will no longer shrink at small viewports. Addresses [#25665](https://github.com/cypress-io/cypress/issues/25665).
+
+## 12.5.1
+
+_Released 02/10/2023_
+
+**Bugfixes:**
+
+- Fixed a regression introduced in Cypress [12.5.0](https://docs.cypress.io/guides/references/changelog#12-5-0) where the `runnable` was not included in the [`test:after:run`](https://docs.cypress.io/api/events/catalog-of-events) event. Fixes [#25663](https://github.com/cypress-io/cypress/issues/25663).
+
 
 **Dependency Updates:**
 
