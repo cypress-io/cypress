@@ -127,6 +127,12 @@ const stackWithReplacedProps = (err, props) => {
 }
 
 const getUserInvocationStack = (err, state) => {
+  let stack = state('currentAssertionUserInvocationStack')
+
+  if (stack) {
+    return stack
+  }
+
   if (
     isCypressErr(err)
     || isAssertionErr(err)
