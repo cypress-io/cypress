@@ -13,6 +13,10 @@ _Released 02/14/2023 (PENDING)_
 - Icons in Debug page will no longer shrink at small viewports. Addresses [#25665](https://github.com/cypress-io/cypress/issues/25665).
 - Increased the spacing between elements and their associated tooltip and added borders around artifact links on the Debug Page. Addresses [#25666](https://github.com/cypress-io/cypress/issues/25666).
 
+**Dependency Updates:**
+
+- Upgrade [`debug`][(https://www.npmjs.com/package/debug) to `4.3.4`. Addressed in [#25699](https://github.com/cypress-io/cypress/pull/25699).
+
 ## 12.5.1
 
 _Released 02/10/2023_

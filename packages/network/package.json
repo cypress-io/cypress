@@ -17,7 +17,7 @@
     "@cypress/parse-domain": "2.4.0",
     "bluebird": "3.5.3",
     "concat-stream": "1.6.2",
-    "debug": "^4.3.2",
+    "debug": "^4.3.4",
     "fs-extra": "9.1.0",
     "lodash": "^4.17.21",
     "minimatch": "3.0.5",
