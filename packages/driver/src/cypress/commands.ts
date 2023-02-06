@@ -155,7 +155,7 @@ export default {
         return cy.addCommand(overridden)
       },
 
-      addQuery (name: string, fn: () => QueryFunction) {
+      addQuery (name: string, fn: (...args: any[]) => QueryFunction) {
         if (reservedCommandNames.has(name)) {
           internalError('miscellaneous.reserved_command_query', { name })
         }
@@ -172,7 +172,7 @@ export default {
         cy.addQuery({ name, fn })
       },
 
-      overwriteQuery (name: string, fn: () => QueryFunction) {
+      overwriteQuery (name: string, fn: (...args: any[]) => QueryFunction) {
         if (commands[name]) {
           internalError('miscellaneous.invalid_overwrite_command_with_query', { name })
         }
