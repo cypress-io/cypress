@@ -38,6 +38,7 @@
                     hocus-fill-color="indigo-200"
                     size="16"
                     interactive-colors-on-group
+                    class="min-w-16px"
                   />
                 </button>
               </OpenFileInIDE>
@@ -67,6 +68,7 @@
                   stroke-color="gray-500"
                   fill-color="gray-100"
                   size="16"
+                  class="min-w-16px"
                 />
               </button>
               <template
