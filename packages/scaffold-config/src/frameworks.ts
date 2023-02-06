@@ -70,6 +70,8 @@ const reactMountModule = async (projectPath: string) => {
   return semver.major(reactPkg.detectedVersion) === 18 ? 'cypress/react18' : 'cypress/react'
 }
 
+export const supportStatus = ['alpha', 'beta', 'full', 'community'] as const
+
 export interface ComponentFrameworkDefinition {
   /**
    * A semantic, unique identifier.
@@ -154,14 +156,14 @@ export interface ComponentFrameworkDefinition {
      * This is used interally by Cypress for the "Create From Component" feature.
      * @example 'react'
      */
-  codeGenFramework: 'react' | 'vue' | 'svelte' | 'angular'
+  codeGenFramework?: 'react' | 'vue' | 'svelte' | 'angular'
 
   /**
      * @internal
      * This is used interally by Cypress for the "Create From Component" feature.
      * @example '*.{js,jsx,tsx}'
      */
-  glob: string
+  glob?: string
 
   /**
      * This is the path to get mount, eg `import { mount } from <mount_module>,
@@ -173,7 +175,7 @@ export interface ComponentFrameworkDefinition {
      * Support status. Internally alpha | beta | full.
      * Community integrations are "community".
      */
-  supportStatus: 'alpha' | 'beta' | 'full' | 'community'
+  supportStatus: typeof supportStatus[number]
 
   /**
      * Function returning string for used for the component-index.html file.
@@ -393,3 +395,55 @@ export const CT_FRAMEWORKS: ComponentFrameworkDefinition[] = [
     componentIndexHtml: componentIndexHtmlGenerator(),
   },
 ]
+
+const solidDep: CypressComponentDependency = {
+  type: 'solid',
+  name: 'Solid.js',
+  package: 'solid-js',
+  installer: 'solid-js',
+  description: 'Solid is a declarative JavaScript library for creating user interfaces',
+  minVersion: '^1.0.0',
+}
+
+type MaybePromise<T> = T | Promise<T>
+
+type ThirdPartyComponentFrameworkDefinition = Omit<ComponentFrameworkDefinition, 'dependencies' | 'glob' | 'codeGenFramework' | 'supportStatus'> & {
+  dependencies: (bundler: WizardBundler['type'], projectPath: string) => MaybePromise<CypressComponentDependency[]>
+}
+
+export function processThirdPartyFrameworkDefinition (definition: ThirdPartyComponentFrameworkDefinition): ComponentFrameworkDefinition {
+  return {
+    ...definition,
+    supportStatus: 'community',
+    dependencies: async (bundler, projectPath) => {
+      // From the third party library - array of dependencies.
+      const declaredDeps = await definition.dependencies(bundler, projectPath)
+      const promises = declaredDeps.map((dep) => isDependencyInstalled(dep, projectPath))
+      const all = await Promise.all(promises)
+
+      return all
+    },
+  }
+}
+
+// must be default export
+export const solidJs: ThirdPartyComponentFrameworkDefinition = {
+  type: 'solid-js',
+
+  configFramework: 'solid-js',
+
+  category: 'library',
+
+  name: 'Solid.js',
+
+  supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
+
+  detectors: [solidDep],
+
+  // Cypress will include the bundler dependency here, if they selected one.
+  dependencies: () => {
+    return [solidDep]
+  },
+
+  mountModule: (projectPath: string) => Promise.resolve('cypress-ct-solid-js'),
+}

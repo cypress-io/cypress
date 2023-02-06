@@ -2226,6 +2226,7 @@ type Subscription {
 enum SupportStatusEnum {
   alpha
   beta
+  community
   full
 }
 
