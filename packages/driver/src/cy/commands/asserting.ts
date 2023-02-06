@@ -16,6 +16,11 @@ const commandEnqueued = (obj: Cypress.EnqueuedCommandAttributes) => {
 export default function (Commands, Cypress, cy, state) {
   const shouldWithCallback = (fn, logs, onBeforeLog) => {
     return (subject) => {
+      // When multiple assertions are chained, we need to ensure that any errors thrown
+      // by this callback are from this callback, and not left over from previous
+      // .should()s.
+      state('currentAssertionUserInvocationStack', null)
+
       let logIndex = -1
 
       state('onBeforeLog', (log) => {

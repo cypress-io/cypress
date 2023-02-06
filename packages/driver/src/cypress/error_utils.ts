@@ -127,12 +127,20 @@ const stackWithReplacedProps = (err, props) => {
 }
 
 const getUserInvocationStack = (err, state) => {
+  // This is set in cy/chai.ts, when an `expect()` is called.
+  // If it points to user code, then it's the most precise
+  // source of truth. This can reference internal
+  // Cypress code if we're outside the normal command-queue flow
+  // such as with cy.session(), though.
   let stack = state('currentAssertionUserInvocationStack')
 
-  if (stack) {
+  if (stack && !stack.match('@cypress://')) {
     return stack
   }
 
+  // Another potential source of a pointer to user code is from the current
+  // command - if this error was thrown by a command or query, then
+  // we'll have a pointer to where that command was called from.
   if (
     isCypressErr(err)
     || isAssertionErr(err)
@@ -281,10 +289,6 @@ export class CypressError extends Error {
 
     return this
   }
-}
-
-const getUserInvocationStackFromError = (err) => {
-  return err.userInvocationStack
 }
 
 const internalErr = (err): InternalCypressError => {
@@ -604,7 +608,6 @@ export default {
   errorFromUncaughtEvent,
   getUnsupportedPlugin,
   getUserInvocationStack,
-  getUserInvocationStackFromError,
   isAssertionErr,
   isChaiValidationErr,
   isCypressErr,
