@@ -176,6 +176,7 @@ class RunPlugins {
       case 'before:spec':
       case 'after:run':
       case 'after:spec':
+      case 'after:browser:new:tab':
       case 'after:screenshot':
         return util.wrapChildPromise(this.ipc, this.invoke, ids, args)
       case 'task':

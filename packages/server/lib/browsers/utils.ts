@@ -134,6 +134,13 @@ async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaul
   return launchOptions
 }
 
+// TODO: Is this the best place for this
+async function executeAfterBrowserNewTab () {
+  if (plugins.has('after:browser:new:tab')) {
+    await plugins.execute('after:browser:new:tab')
+  }
+}
+
 function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, options: BrowserLaunchOpts) {
   // if we returned an array from the plugin
   // then we know the user is using the deprecated
@@ -355,6 +362,8 @@ export = {
   extendLaunchOptionsFromPlugins,
 
   executeBeforeBrowserLaunch,
+
+  executeAfterBrowserNewTab,
 
   defaultLaunchOptions,
 
