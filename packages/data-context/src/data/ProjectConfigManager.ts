@@ -18,7 +18,7 @@ import { CypressEnv } from './CypressEnv'
 import { autoBindDebug } from '../util/autoBindDebug'
 import type { EventRegistrar } from './EventRegistrar'
 import type { DataContext } from '../DataContext'
-import { DependencyToInstall, isDependencyInstalled, WIZARD_BUNDLERS, ComponentFrameworkDefinition } from '@packages/scaffold-config'
+import { DependencyToInstall, isDependencyInstalled, WIZARD_BUNDLERS, ResolvedComponentFrameworkDefinition } from '@packages/scaffold-config'
 
 const debug = debugLib(`cypress:lifecycle:ProjectConfigManager`)
 
@@ -197,7 +197,7 @@ export class ProjectConfigManager {
       return
     }
 
-    const isFrameworkSatisfied = async (bundler: typeof WIZARD_BUNDLERS[number], framework: ComponentFrameworkDefinition) => {
+    const isFrameworkSatisfied = async (bundler: typeof WIZARD_BUNDLERS[number], framework: ResolvedComponentFrameworkDefinition) => {
       for (const dep of await (framework.dependencies(bundler.type, this.options.projectRoot))) {
         const res = await isDependencyInstalled(dep.dependency, this.options.projectRoot)
 

@@ -5,7 +5,7 @@ import type { DataContext } from '..'
 import { SpecOptions, codeGenerator } from '../codegen'
 import templates from '../codegen/templates'
 import type { CodeGenType } from '../gen/graphcache-config.gen'
-import type { ComponentFrameworkDefinition } from '@packages/scaffold-config'
+import type { ResolvedComponentFrameworkDefinition } from '@packages/scaffold-config'
 import { parse as parseReactComponent, resolver as reactDocgenResolvers } from 'react-docgen'
 import { visit } from 'ast-types'
 
@@ -152,7 +152,7 @@ export class CodegenActions {
     })
   }
 
-  getWizardFrameworkFromConfig (): ComponentFrameworkDefinition | undefined {
+  getWizardFrameworkFromConfig (): ResolvedComponentFrameworkDefinition | undefined {
     const config = this.ctx.lifecycleManager.loadedConfigFile
 
     // If devServer is a function, they are using a custom dev server.

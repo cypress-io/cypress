@@ -9,7 +9,7 @@ export type PkgJson = { version: string, dependencies?: Record<string, string>, 
 
 export type WizardBundler = typeof dependencies.WIZARD_BUNDLERS[number]
 
-export type CodeGenFramework = ComponentFrameworkDefinition['codeGenFramework']
+export type CodeGenFramework = ResolvedComponentFrameworkDefinition['codeGenFramework']
 
 export interface DependencyToInstall {
   dependency: CypressComponentDependency
@@ -72,7 +72,7 @@ const reactMountModule = async (projectPath: string) => {
 
 export const supportStatus = ['alpha', 'beta', 'full', 'community'] as const
 
-export interface ComponentFrameworkDefinition {
+export interface ResolvedComponentFrameworkDefinition {
   /**
    * A semantic, unique identifier.
    * Example: 'reactscripts', 'nextjs'
@@ -189,7 +189,7 @@ export interface ComponentFrameworkDefinition {
   specPattern?: '**/*.cy.ts'
 }
 
-export const CT_FRAMEWORKS: ThirdPartyComponentFrameworkDefinition[] = [
+export const CT_FRAMEWORKS: ComponentFrameworkDefinition[] = [
   {
     type: 'reactscripts',
     configFramework: 'create-react-app',
@@ -405,11 +405,11 @@ const solidDep: CypressComponentDependency = {
   minVersion: '^1.0.0',
 }
 
-type ThirdPartyComponentFrameworkDefinition = Omit<ComponentFrameworkDefinition, 'dependencies'> & {
+type ComponentFrameworkDefinition = Omit<ResolvedComponentFrameworkDefinition, 'dependencies'> & {
   dependencies: (bundler: WizardBundler['type']) => CypressComponentDependency[]
 }
 
-export function processThirdPartyFrameworkDefinition (definition: ThirdPartyComponentFrameworkDefinition): ComponentFrameworkDefinition {
+export function processThirdPartyFrameworkDefinition (definition: ComponentFrameworkDefinition): ResolvedComponentFrameworkDefinition {
   return {
     ...definition,
     supportStatus: 'community',
@@ -422,7 +422,7 @@ export function processThirdPartyFrameworkDefinition (definition: ThirdPartyComp
 }
 
 // must be default export
-export const solidJs: ThirdPartyComponentFrameworkDefinition = {
+export const solidJs: ComponentFrameworkDefinition = {
   type: 'solid-js',
 
   configFramework: 'solid-js',

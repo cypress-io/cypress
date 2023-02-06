@@ -1,4 +1,4 @@
-import type { ComponentFrameworkDefinition } from '@packages/scaffold-config'
+import type { ResolvedComponentFrameworkDefinition } from '@packages/scaffold-config'
 import type { SnapshotScaffoldTestResult } from '@packages/launchpad/cypress/tasks/snapshotsScaffold'
 
 // The tests in this file take an existing project without Cypress Configured
@@ -56,8 +56,8 @@ function scaffoldAndOpenE2EProject (opts: {
 
 function scaffoldAndOpenCTProject (opts: {
   name: Parameters<typeof cy.scaffoldProject>[0]
-  framework: ComponentFrameworkDefinition['name']
-  bundler?: ComponentFrameworkDefinition['supportedBundlers'][number]['name']
+  framework: ResolvedComponentFrameworkDefinition['name']
+  bundler?: ResolvedComponentFrameworkDefinition['supportedBundlers'][number]['name']
   args?: Parameters<typeof cy.openProject>[1]
   removeFixturesFolder?: boolean
 }) {

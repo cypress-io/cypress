@@ -46,6 +46,6 @@ export const WizardFrontendFramework = objectType({
 
   sourceType: {
     module: '@packages/scaffold-config',
-    export: 'ComponentFrameworkDefinition',
+    export: 'ResolvedComponentFrameworkDefinition',
   },
 })

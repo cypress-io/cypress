@@ -1,5 +1,5 @@
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
-import { detectFramework, commandsFileBody, supportFileComponent, supportFileE2E, WizardBundler, ComponentFrameworkDefinition } from '@packages/scaffold-config'
+import { detectFramework, commandsFileBody, supportFileComponent, supportFileE2E, WizardBundler, ResolvedComponentFrameworkDefinition } from '@packages/scaffold-config'
 import assert from 'assert'
 import path from 'path'
 import Debug from 'debug'
@@ -24,7 +24,7 @@ export class WizardActions {
     return this.ctx.wizardData
   }
 
-  setFramework (framework: ComponentFrameworkDefinition | null): void {
+  setFramework (framework: ResolvedComponentFrameworkDefinition | null): void {
     const next = this.ctx.coreData.wizard.frameworks.find((x) => x.type === framework?.type)
 
     this.ctx.update((coreData) => {
@@ -296,7 +296,7 @@ export class WizardActions {
     }
   }
 
-  private async scaffoldComponentIndexHtml (chosenFramework: ComponentFrameworkDefinition): Promise<NexusGenObjects['ScaffoldedFile']> {
+  private async scaffoldComponentIndexHtml (chosenFramework: ResolvedComponentFrameworkDefinition): Promise<NexusGenObjects['ScaffoldedFile']> {
     const componentIndexHtmlPath = path.join(this.projectRoot, 'cypress', 'support', 'component-index.html')
 
     await this.ensureDir('support')

@@ -1,5 +1,5 @@
 import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep, BannerState } from '@packages/types'
-import { WizardBundler, ComponentFrameworkDefinition, CT_FRAMEWORKS, processThirdPartyFrameworkDefinition } from '@packages/scaffold-config'
+import { WizardBundler, ResolvedComponentFrameworkDefinition, CT_FRAMEWORKS, processThirdPartyFrameworkDefinition } from '@packages/scaffold-config'
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
@@ -66,11 +66,11 @@ export interface AppDataShape {
 
 export interface WizardDataShape {
   chosenBundler: WizardBundler | null
-  chosenFramework: ComponentFrameworkDefinition | null
+  chosenFramework: ResolvedComponentFrameworkDefinition | null
   chosenManualInstall: boolean
   detectedBundler: WizardBundler | null
-  detectedFramework: ComponentFrameworkDefinition | null
-  frameworks: ComponentFrameworkDefinition[]
+  detectedFramework: ResolvedComponentFrameworkDefinition | null
+  frameworks: ResolvedComponentFrameworkDefinition[]
 }
 
 export interface MigrationDataShape {
