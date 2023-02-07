@@ -413,6 +413,16 @@ export type ComponentFrameworkDefinition = Omit<ResolvedComponentFrameworkDefini
   dependencies: (bundler: WizardBundler['type']) => CypressComponentDependency[]
 }
 
+/**
+ * Define a component framework to be embedded in the Cypress Component Testing
+ * onboarding workflow.
+ *
+ * This is a no-op at runtime - it's purely for type safety.
+ */
+export function defineComponentFramework<T extends Omit<ComponentFrameworkDefinition, 'glob' | 'codeGenFramework' | 'supportStatus' | 'specPattern'>> (definition: T): T {
+  return definition
+}
+
 export function resolveComponentFrameworkDefinition (definition: ComponentFrameworkDefinition): ResolvedComponentFrameworkDefinition {
   return {
     supportStatus: 'community',
