@@ -64,6 +64,8 @@
 </template>
 
 <script lang="ts">
+import type { supportStatus } from '@packages/scaffold-config'
+
 interface RootOption {
   name: string
   description?: string
@@ -74,7 +76,7 @@ interface RootOption {
 
 interface FrameworkOption extends RootOption {
   type: string
-  supportStatus: 'alpha' | 'beta' | 'full'
+  supportStatus: typeof supportStatus[number]
 }
 
 interface BundlerOption extends RootOption {
