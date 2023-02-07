@@ -128,7 +128,7 @@ export interface ResolvedComponentFrameworkDefinition {
      *
      * NOTE: This could be a "fast follow" if we want to reduce the scope of this brief.
      */
-  getDevServerConfig?: (projectPath: string) => MaybePromise<any>
+  getDevServerConfig?: (projectPath: string, bundler: WizardBundler['type']) => MaybePromise<any>
 
   /**
      * Name displayed in Launchpad when doing initial setup.
@@ -450,7 +450,7 @@ export const solidJs: ComponentFrameworkDefinition = {
 
   supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
 
-  getDevServerConfig: (projectRoot) => {
+  getDevServerConfig: (projectRoot, bundler) => {
     // console.log('running getDevServerConfig', projectRoot)
     const c = require(require.resolve('webpack.config.js', { paths: [projectRoot] }))
 

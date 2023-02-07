@@ -11,6 +11,7 @@ import { vueCliHandler } from './helpers/vueCliHandler'
 import { nuxtHandler } from './helpers/nuxtHandler'
 import { createReactAppHandler } from './helpers/createReactAppHandler'
 import { nextHandler } from './helpers/nextHandler'
+import { importModule } from 'local-pkg'
 import { sourceDefaultWebpackDependencies, SourceRelativeWebpackResult } from './helpers/sourceRelativeWebpackModules'
 import { angularHandler } from './helpers/angularHandler'
 
@@ -119,10 +120,22 @@ async function getPreset (devServerConfig: WebpackDevServerConfig): Promise<Opti
 
   // Third party framework
   if (devServerConfig.framework?.startsWith('cypress-ct-')) {
+    let frameworkConfig: Configuration | undefined
+
+    try {
+      // eg `import('cypress-ct-solid-js')
+      const mod = await importModule(devServerConfig.framework)
+
+      frameworkConfig = await mod?.getDevServerConfig?.(devServerConfig.cypressConfig.projectRoot, 'webpack')
+    } catch (e) {
+      // third parties may implemnent getDevServerConfig, but it is optional.
+      // will fall back to default strategy which is to let webpack resolve `webpack.config`.
+    }
+
     return {
       ...defaultWebpackModules(),
       // Call their config handler, if they provided one.
-      // frameworkConfig: devServerConfig.getDevServerConfig?.(devServerConfig.cypressConfig.projectRoot)
+      frameworkConfig,
     }
   }
 
