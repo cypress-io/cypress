@@ -132,7 +132,7 @@ const getUserInvocationStack = (err, state) => {
   // source of truth. This can reference internal
   // Cypress code if we're outside the normal command-queue flow
   // such as with cy.session(), though.
-  let stack = state('currentAssertionUserInvocationStack')
+  let stack = err.userInvocationStack || state('currentAssertionUserInvocationStack')
 
   if (stack && !stack.match('@cypress://')) {
     return stack
