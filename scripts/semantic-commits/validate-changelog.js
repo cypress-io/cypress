@@ -38,7 +38,7 @@ function _getResolvedMessage (semanticType, prNumber, associatedIssues = []) {
 function _printChangeLogExample (semanticType, prNumber, associatedIssues = []) {
   const resolveMessage = _getResolvedMessage(semanticType, prNumber, associatedIssues)
 
-  return `${userFacingChanges[semanticType].section}\n - <Insert change details>. ${resolveMessage}`
+  return `${userFacingChanges[semanticType].section}\n\n - <Insert change details>. ${resolveMessage}`
 }
 
 /**
