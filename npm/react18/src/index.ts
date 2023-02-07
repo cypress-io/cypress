@@ -8,6 +8,7 @@ import {
 } from '@cypress/react'
 import type {
   MountOptions,
+  MountReturn,
   InternalMountOptions,
   UnmountArgs,
 } from '@cypress/react'
@@ -82,4 +83,9 @@ export function unmount (options: UnmountArgs = { log: true }) {
 // Re-export this to help with migrating away from `unmount`
 export {
   getContainerEl,
+}
+
+export type {
+  MountOptions,
+  MountReturn,
 }
