@@ -82,7 +82,24 @@ const props = withDefaults(defineProps <{
 })
 
 const badgeVariant = computed(() => {
-  return props.isNavBarExpanded ? 'ml-16px h-20px text-sm leading-3' : 'absolute outline-gray-1000 outline-2px outline bottom-0 left-36px text-xs h-16px leading-2'
+  const classes: string[] = []
+
+  if (props.isNavBarExpanded) {
+    classes.push('ml-16px', 'h-20px', 'text-sm', 'leading-3')
+  } else {
+    classes.push('absolute', 'outline-gray-1000', 'outline-2px', 'outline', 'bottom-0', 'text-xs', 'h-16px', 'leading-2')
+
+    // Right-align failure counts within sidebar (#25662)
+    if (props.badge.status === 'failed' || props.badge.status === 'error') {
+      // Add min-width so that single-digit badge overlaps sidebar icon at least a little
+      classes.push('right-4px', 'min-w-20px', 'text-center')
+    } else {
+      // Non-failures should left-align and overflow sidebar if needed
+      classes.push('left-36px')
+    }
+  }
+
+  return classes
 })
 
 const badgeColorStyles = {
