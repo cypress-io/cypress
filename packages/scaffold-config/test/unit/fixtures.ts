@@ -1,7 +1,6 @@
-import { CypressComponentDependency, defineComponentFramework } from '../../src'
-import * as dependencies from '../../src/dependencies'
+import { defineComponentFramework } from '../../src'
 
-export const solidDep: CypressComponentDependency = {
+export const solidDep: Cypress.CypressComponentDependency = {
   type: 'solid-js',
   name: 'Solid.js',
   package: 'solid-js',
@@ -20,7 +19,7 @@ export const solidJs = defineComponentFramework({
 
   name: 'Solid.js',
 
-  supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
+  supportedBundlers: ['webpack', 'vite'],
 
   getDevServerConfig: (projectRoot, bundler) => {
     // console.log('running getDevServerConfig', projectRoot)

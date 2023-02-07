@@ -285,20 +285,27 @@ export type ComponentFrameworkDefinition = Omit<Cypress.ResolvedComponentFramewo
   dependencies: (bundler: WizardBundler['type']) => Cypress.CypressComponentDependency[]
 }
 
+export function defineComponentFrameworkInternal (definition: ComponentFrameworkDefinition): ComponentFrameworkDefinition {
+  return definition
+}
+
+// Certain properties are not supported for third party frameworks right now, such as ones related to the "Create From" feature.
+type ThirdPartyComponentFrameworkDefinition = Omit<ComponentFrameworkDefinition, 'glob' | 'codeGenFramework' | 'supportStatus' | 'specPattern'>
+
 /**
  * Define a component framework to be embedded in the Cypress Component Testing
  * onboarding workflow.
  *
  * This is a no-op at runtime - it's purely for type safety.
  */
-export function defineComponentFramework<T extends Omit<ComponentFrameworkDefinition, 'glob' | 'codeGenFramework' | 'supportStatus' | 'specPattern'>> (definition: T): T {
+export function defineComponentFramework (definition: ThirdPartyComponentFrameworkDefinition): ThirdPartyComponentFrameworkDefinition {
   return definition
 }
 
-export function resolveComponentFrameworkDefinition (definition: ComponentFrameworkDefinition): Cypress.ResolvedComponentFrameworkDefinition {
+export function resolveComponentFrameworkDefinition (definition: ComponentFrameworkDefinition | ThirdPartyComponentFrameworkDefinition): Cypress.ResolvedComponentFrameworkDefinition {
   return {
     ...definition,
-    supportStatus: definition.type.startsWith('cypress-ct-') ? 'community' : definition.supportStatus,
+    supportStatus: definition.type.startsWith('cypress-ct-') ? 'community' : (definition as ComponentFrameworkDefinition).supportStatus,
     dependencies: async (bundler, projectPath) => {
       const declaredDeps = definition.dependencies(bundler)
 
