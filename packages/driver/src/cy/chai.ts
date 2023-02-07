@@ -508,7 +508,7 @@ chai.use((chai, u) => {
   const overrideAssert = function (specWindow, state: StateFunc) {
     const fn = (express, errmsg) => {
       state('assertUsed', true)
-      captureUserInvocationStack(specWindow, state, overrideExpect)
+      captureUserInvocationStack(specWindow, state, fn)
 
       return chai.assert(express, errmsg)
     }
@@ -518,7 +518,7 @@ chai.use((chai, u) => {
     _.each(fns, (name) => {
       fn[name] = function () {
         state('assertUsed', true)
-        captureUserInvocationStack(specWindow, state, overrideExpect)
+        captureUserInvocationStack(specWindow, state, overrideAssert)
 
         return chai.assert[name].apply(this, arguments)
       }
