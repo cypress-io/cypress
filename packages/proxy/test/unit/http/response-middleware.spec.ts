@@ -45,7 +45,7 @@ describe('http/response-middleware', function () {
             off: (event, listener) => {},
           },
           onError (err) {
-            expect(err.message).to.equal('Error running proxy middleware: Detected `this.next()` was called more than once in the same middleware function, but a middleware can only be completed once.')
+            expect(err.message).to.equal('Internal error while proxying "undefined undefined" in 0:\nError running proxy middleware: Detected `this.next()` was called more than once in the same middleware function, but a middleware can only be completed once.')
 
             done()
           },
@@ -70,6 +70,8 @@ describe('http/response-middleware', function () {
             expect(err['cause']).to.equal(error)
             done()
           },
+          method: 'GET',
+          proxiedUrl: 'url',
         })
       })
     })
