@@ -116,6 +116,14 @@ describe('cypress', function () {
       })
     })
 
+    it('calls run#start, passing in autoCancelAfterFailures 0', () => {
+      return cypress.run({ autoCancelAfterFailures: 0 })
+      .then(getStartArgs)
+      .then((args) => {
+        expect(args.autoCancelAfterFailures).to.equal(0)
+      })
+    })
+
     it('normalizes config object', () => {
       const config = {
         pageLoadTime: 10000,
