@@ -1,9 +1,9 @@
-import { WizardBundler, ResolvedComponentFrameworkDefinition, WIZARD_BUNDLERS, CT_FRAMEWORKS } from '@packages/scaffold-config'
+import { WizardBundler, ResolvedComponentFrameworkDefinition, WIZARD_BUNDLERS, CT_FRAMEWORKS, resolveComponentFrameworkDefinition } from '@packages/scaffold-config'
 import { expect } from 'chai'
 import { createTestDataContext, scaffoldMigrationProject, removeCommonNodeModules } from '../helper'
 
 function findFramework (type: ResolvedComponentFrameworkDefinition['type']) {
-  return CT_FRAMEWORKS.find((x) => x.type === type)!
+  return resolveComponentFrameworkDefinition(CT_FRAMEWORKS.find((x) => x.type === type)!)
 }
 
 function findBundler (type: WizardBundler['type']) {
