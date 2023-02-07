@@ -17,7 +17,7 @@ export default function (Commands, Cypress, cy, state) {
   const shouldWithCallback = (fn, logs, onBeforeLog) => {
     return (subject) => {
       // When multiple assertions are chained, we need to ensure that any errors thrown
-      // by this callback are from this callback, and not left over from previous
+      // by this callback use their own stack trace, and not one left over from previous
       // .should()s.
       state('currentAssertionUserInvocationStack', null)
 
@@ -154,7 +154,7 @@ export default function (Commands, Cypress, cy, state) {
 
           if (value === lastChainer) {
             // https://github.com/cypress-io/cypress/issues/16006
-            // Referring some commands like 'visible'  triggers assert function in chai_jquery.js
+            // Referring some commands like 'visible' triggers assert function in chai_jquery.js
             // It creates duplicated messages and confuses users.
             const cmd = memo[value]
 

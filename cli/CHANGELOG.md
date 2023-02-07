@@ -69,7 +69,6 @@ _Released 01/27/2023_
 **Dependency Updates:**
 
 - Upgraded [`ua-parser-js`](https://github.com/faisalman/ua-parser-js) from `0.7.24` to `0.7.33` to address this [security vulnerability](https://github.com/faisalman/ua-parser-js/security/advisories/GHSA-fhg7-m89q-25r3) where crafting a very-very-long user-agent string with specific pattern, an attacker can turn the script to get stuck processing for a very long time which results in a denial of service (DoS) condition. Addressed in [#25561](https://github.com/cypress-io/cypress/pull/25561).
->>>>>>> e0a97ee948549138b35774a011ca7ef5da849a13
 
 ## 12.4.0
 
