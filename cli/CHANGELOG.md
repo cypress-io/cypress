@@ -10,9 +10,6 @@ _Released 02/14/2023 (PENDING)_
 **Features:**
 
 - Added the "Open in IDE" feature for failed tests reported from the Debug page. Addressed in [#25691](https://github.com/cypress-io/cypress/pull/25691).
-
-**Bugfixes:**
-
 - Fixed an issue in middleware where error-handling code could itself generate an error and fail to report the original issue. Fixes [#22825](https://github.com/cypress-io/cypress/issues/22825).
 
 **Misc:**
