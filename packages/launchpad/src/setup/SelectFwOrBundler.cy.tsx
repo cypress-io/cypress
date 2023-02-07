@@ -1,5 +1,6 @@
 import { ref } from 'vue'
-import SelectFwOrBundler, { Option } from './SelectFwOrBundler.vue'
+import SelectFwOrBundler from './SelectFwOrBundler.vue'
+import type { Option } from './types'
 
 const manyOptions: Readonly<Option[]> = [
   {
@@ -11,7 +12,6 @@ const manyOptions: Readonly<Option[]> = [
   },
   {
     name: 'React.js',
-    description: '(detected)',
     id: 'react',
     type: 'react',
     supportStatus: 'alpha',

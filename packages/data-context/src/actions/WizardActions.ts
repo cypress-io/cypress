@@ -1,5 +1,5 @@
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
-import { detectFramework, commandsFileBody, supportFileComponent, supportFileE2E, WizardBundler, ResolvedComponentFrameworkDefinition } from '@packages/scaffold-config'
+import { detectFramework, commandsFileBody, supportFileComponent, supportFileE2E, getBundler } from '@packages/scaffold-config'
 import assert from 'assert'
 import path from 'path'
 import Debug from 'debug'
@@ -24,7 +24,7 @@ export class WizardActions {
     return this.ctx.wizardData
   }
 
-  setFramework (framework: ResolvedComponentFrameworkDefinition | null): void {
+  setFramework (framework: Cypress.ResolvedComponentFrameworkDefinition | null): void {
     const next = this.ctx.coreData.wizard.frameworks.find((x) => x.type === framework?.type)
 
     this.ctx.update((coreData) => {
@@ -42,7 +42,7 @@ export class WizardActions {
     // if the previous bundler was incompatible with the
     // new framework that was selected, we need to reset it
     const doesNotSupportChosenBundler = (chosenBundler && !new Set(
-      this.ctx.coreData.wizard.chosenFramework?.supportedBundlers.map((x) => x.type) || [],
+      this.ctx.coreData.wizard.chosenFramework?.supportedBundlers ?? [],
     ).has(chosenBundler.type)) ?? false
 
     const prevFramework = this.ctx.coreData.wizard.chosenFramework?.type ?? null
@@ -52,9 +52,21 @@ export class WizardActions {
     }
   }
 
-  setBundler (bundler: WizardBundler | null) {
+  getNullableBundler (bundler: 'vite' | 'webpack' | null) {
+    if (!bundler) {
+      return null
+    }
+
+    try {
+      return getBundler(bundler)
+    } catch (e) {
+      return null
+    }
+  }
+
+  setBundler (bundler: 'vite' | 'webpack' | null) {
     this.ctx.update((coreData) => {
-      coreData.wizard.chosenBundler = bundler
+      coreData.wizard.chosenBundler = this.getNullableBundler(bundler)
     })
 
     return this.ctx.coreData.wizard
@@ -101,8 +113,9 @@ export class WizardActions {
           return
         }
 
-        coreData.wizard.detectedBundler = detected.bundler || detected.framework.supportedBundlers[0]
-        coreData.wizard.chosenBundler = detected.bundler || detected.framework.supportedBundlers[0]
+        // coreData.wizard.chosenBundler = this.getNullableBundler(bundler)
+        coreData.wizard.detectedBundler = this.getNullableBundler(detected.bundler || detected.framework.supportedBundlers[0])
+        coreData.wizard.chosenBundler = this.getNullableBundler(detected.bundler || detected.framework.supportedBundlers[0])
       })
     }
   }
@@ -296,7 +309,7 @@ export class WizardActions {
     }
   }
 
-  private async scaffoldComponentIndexHtml (chosenFramework: ResolvedComponentFrameworkDefinition): Promise<NexusGenObjects['ScaffoldedFile']> {
+  private async scaffoldComponentIndexHtml (chosenFramework: Cypress.ResolvedComponentFrameworkDefinition): Promise<NexusGenObjects['ScaffoldedFile']> {
     const componentIndexHtmlPath = path.join(this.projectRoot, 'cypress', 'support', 'component-index.html')
 
     await this.ensureDir('support')

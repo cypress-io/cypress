@@ -1,5 +1,5 @@
 import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep, BannerState } from '@packages/types'
-import { WizardBundler, ResolvedComponentFrameworkDefinition, CT_FRAMEWORKS, resolveComponentFrameworkDefinition } from '@packages/scaffold-config'
+import { WizardBundler, CT_FRAMEWORKS, resolveComponentFrameworkDefinition } from '@packages/scaffold-config'
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
@@ -66,11 +66,11 @@ export interface AppDataShape {
 
 export interface WizardDataShape {
   chosenBundler: WizardBundler | null
-  chosenFramework: ResolvedComponentFrameworkDefinition | null
+  chosenFramework: Cypress.ResolvedComponentFrameworkDefinition | null
   chosenManualInstall: boolean
   detectedBundler: WizardBundler | null
-  detectedFramework: ResolvedComponentFrameworkDefinition | null
-  frameworks: ResolvedComponentFrameworkDefinition[]
+  detectedFramework: Cypress.ResolvedComponentFrameworkDefinition | null
+  frameworks: Cypress.ResolvedComponentFrameworkDefinition[]
 }
 
 export interface MigrationDataShape {

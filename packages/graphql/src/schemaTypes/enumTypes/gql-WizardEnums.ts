@@ -1,5 +1,5 @@
 import { CODE_LANGUAGES } from '@packages/types'
-import { WIZARD_BUNDLERS, supportStatus } from '@packages/scaffold-config'
+import { WIZARD_BUNDLERS } from '@packages/scaffold-config'
 import { enumType } from 'nexus'
 
 export const SupportedBundlerEnum = enumType({
@@ -15,7 +15,7 @@ export const WizardConfigFileStatusEnum = enumType({
 
 export const SupportStatusEnum = enumType({
   name: 'SupportStatusEnum',
-  members: supportStatus,
+  members: ['alpha', 'beta', 'full', 'community'],
 })
 
 export const CodeLanguageEnum = enumType({

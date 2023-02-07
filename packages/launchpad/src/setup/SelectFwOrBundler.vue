@@ -63,33 +63,10 @@
   </Select>
 </template>
 
-<script lang="ts">
-import type { supportStatus } from '@packages/scaffold-config'
-
-interface RootOption {
-  name: string
-  description?: string
-  id: string
-  isDetected?: boolean
-  disabled?: boolean
-}
-
-interface FrameworkOption extends RootOption {
-  type: string
-  supportStatus: typeof supportStatus[number]
-}
-
-interface BundlerOption extends RootOption {
-  type: SupportedBundlers
-}
-
-export type Option = FrameworkOption | BundlerOption
-
-</script>
-
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { FrameworkBundlerLogos } from '../utils/icons'
+import type { Option, FrameworkOption } from './types'
 import Select from '@cy/components/Select.vue'
 import type {
   SupportedBundlers,

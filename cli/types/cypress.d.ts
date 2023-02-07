@@ -15,7 +15,7 @@ declare namespace Cypress {
   interface JQueryWithSelector<TElement = HTMLElement> extends JQuery<TElement> {
     selector?: string | null
   }
-
+  
   interface PrevSubjectMap<O = unknown> {
     optional: O
     element: JQueryWithSelector
@@ -3243,6 +3243,168 @@ declare namespace Cypress {
   }
 
   type PickConfigOpt<T> = T extends keyof DefineDevServerConfig ? DefineDevServerConfig[T] : any
+
+  interface DependencyToInstall {
+    dependency: CypressComponentDependency
+    satisfied: boolean
+    loc: string | null
+    detectedVersion: string | null
+  }
+
+  interface CypressComponentDependency {
+    /**
+     * Unique idenitifer.
+     * @example 'reactscripts'
+     */
+    type: string
+
+    /**
+     * Name to display in the user interface.
+     * @example "React Scripts"
+     */
+    name: string
+
+    /**
+     * Package name on npm.
+     * @example react-scripts
+     */
+    package: string
+
+    /**
+     * Code to run when installing. Version is optional.
+     *
+     * Should be <package_name>@<version>.
+     *
+     * @example `react`
+     * @example `react@18`
+     * @example `react-scripts`
+     */
+    installer: string
+
+    /**
+     * Description shown in UI. It is recommended to use the same one the package uses on npm.
+     * @example  'Create React apps with no build configuration'
+     */
+    description: string
+
+    /**
+     * Minimum version supported. Should conform to Semantic Versioning as used in `package.json`.
+     * @see https://docs.npmjs.com/cli/v9/configuring-npm/package-json#dependencies
+     * @example '^=4.0.0 || ^=5.0.0'
+     * @example '^2.0.0'
+     */
+    minVersion: string
+  }
+
+  interface ResolvedComponentFrameworkDefinition {
+    /**
+     * A semantic, unique identifier. Must begin with `cypress-ct-` for third party implementations.
+     * @example: 'reactscripts', 'nextjs', 'cypress-ct-solid-js'
+     */
+    type: string
+
+    /**
+     * Used as the flag for `getPreset` for meta framworks, such as finding the webpack config for CRA, Angular, etc.
+     *
+     * configFramwork: () => {
+     *   return getSolidJsMetaFrameworkBundlerConfig()
+     * }
+     * It is also the name of the string added to `cypress.config`
+     *
+     * @example
+     *
+     * export default {
+     *   component: {
+     *     devServer: {
+     *       framework: 'create-react-app' // can be 'next', 'create-react-app', etc etc.
+     *     }
+     *   }
+     * }
+     */
+    configFramework: string
+
+    /**
+     * Library (React, Vue) or template (aka "meta framework") (CRA, Next.js, Angular)
+     */
+    category: 'library' | 'template'
+
+    /**
+     * Only required for `category: framework`.
+     * Should return a valid configuration object for the given bundler.
+     */
+    getDevServerConfig?: (projectPath: string, bundler: 'webpack' | 'vite') => Promise<any> | any
+
+    /**
+     * Name displayed in Launchpad when doing initial setup.
+     * @example 'Solid.js', 'Create React App'
+     */
+    name: string
+
+    /**
+     * Supported bundlers.
+     */
+    supportedBundlers: Array<'webpack' | 'vite'>
+
+    /**
+     * Used to attempt to automatically select the correct framework/bundler from the dropdown.
+     * @example
+     *
+     * const SOLID_DETECTOR: Dependency = {
+     *   type: 'solid',
+     *   name: 'Solid.js',
+     *   package: 'solid-js',
+     *   installer: 'solid-js',
+     *   description: 'Solid is a declarative JavaScript library for creating user interfaces',
+     *   minVersion: '^1.0.0',
+     * }
+     */
+    detectors: CypressComponentDependency[]
+
+    /**
+     * Array of required dependencies. This could be the bundler and JavaScript library.
+     * It's the same type as `detectors`.
+     */
+    dependencies: (bundler: 'webpack' | 'vite', projectPath: string) => Promise<DependencyToInstall[]>
+
+    /**
+     * @internal
+     * This is used interally by Cypress for the "Create From Component" feature.
+     */
+    codeGenFramework?: 'react' | 'vue' | 'svelte' | 'angular'
+
+    /**
+     * @internal
+     * This is used interally by Cypress for the "Create From Component" feature.
+     * @example '*.{js,jsx,tsx}'
+     */
+    glob?: string
+
+    /**
+     * This is the path to get mount, eg `import { mount } from <mount_module>,
+     * @example: `cypress-ct-solidjs/src/mount`
+     */
+    mountModule: (projectPath: string) => Promise<string>
+
+    /**
+     * Support status. Internally alpha | beta | full.
+     * Community integrations are "community".
+     * @internal
+     */
+    supportStatus: 'alpha' | 'beta' | 'full' | 'community'
+
+    /**
+     * Function returning string for used for the component-index.html file.
+     * Cypress provides a default if one isn't specified for third party integrations.
+     */
+    componentIndexHtml?: () => string
+
+    /**
+     * Used for the Create From Comopnent feature.
+     * This is currently not supported for third party frameworks.
+     * @internal
+     */
+    specPattern?: '**/*.cy.ts'
+  }
 
   interface AngularDevServerProjectConfig {
     root: string

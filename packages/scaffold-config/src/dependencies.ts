@@ -1,48 +1,3 @@
-export interface CypressComponentDependency {
-  /**
-   * Unique idenitifer.
-   * @example 'reactscripts'
-   */
-  type: string
-
-  /**
-   * Name to display in the user interface.
-   * @example "React Scripts"
-   */
-  name: string
-
-  /**
-   * Package name on npm.
-   * @example react-scripts
-   */
-  package: string
-
-  /**
-   * Code to run when installing. Version is optional.
-   *
-   * Should be <package_name>@<version>.
-   *
-   * @example `react`
-   * @example `react@18`
-   * @example `react-scripts`
-   */
-  installer: string
-
-  /**
-   * Description shown in UI. It is recommended to use the same one the package uses on npm.
-   * @example  'Create React apps with no build configuration'
-   */
-  description: string
-
-  /**
-   * Minimum version supported. Should conform to Semantic Versioning as used in `package.json`.
-   * @see https://docs.npmjs.com/cli/v9/configuring-npm/package-json#dependencies
-   * @example '^=4.0.0 || ^=5.0.0'
-   * @example '^2.0.0'
-   */
-  minVersion: string
-}
-
 export const WIZARD_DEPENDENCY_WEBPACK = {
   type: 'webpack',
   name: 'Webpack',
@@ -187,7 +142,7 @@ export const WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC = {
   minVersion: '^=13.0.0 || ^=14.0.0 || ^=15.0.0',
 } as const
 
-export const WIZARD_DEPENDENCY_SVELTE: CypressComponentDependency = {
+export const WIZARD_DEPENDENCY_SVELTE: Cypress.CypressComponentDependency = {
   type: 'svelte',
   name: 'Svelte.js',
   package: 'svelte',

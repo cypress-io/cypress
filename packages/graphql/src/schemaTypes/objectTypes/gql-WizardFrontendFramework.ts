@@ -1,6 +1,7 @@
 import { WizardBundler } from './gql-WizardBundler'
-import { SupportStatusEnum } from '../enumTypes/gql-WizardEnums'
 import { objectType } from 'nexus'
+import { WIZARD_BUNDLERS } from '@packages/scaffold-config'
+// const a: Cypress.ResolvedComponentFrameworkDefinition
 
 export const WizardFrontendFramework = objectType({
   name: 'WizardFrontendFramework',
@@ -11,10 +12,17 @@ export const WizardFrontendFramework = objectType({
       description: 'The unique identifier for a framework or library',
     }),
 
-    t.nonNull.field('category', {
-      type: 'String',
+    t.nonNull.string('category', {
       description: 'The category (framework, like react-scripts, or library, like react',
     }),
+
+    t.nonNull.string('name', {
+      description: 'The display name of the framework',
+    })
+
+    t.nonNull.string('supportStatus', {
+      description: 'Current support status of the framework',
+    })
 
     t.nonNull.boolean('isSelected', {
       description: 'Whether this is the selected framework in the wizard',
@@ -26,26 +34,22 @@ export const WizardFrontendFramework = objectType({
       resolve: (source, args, ctx) => ctx.wizardData.detectedFramework?.type === source.type,
     })
 
-    t.nonNull.string('name', {
-      description: 'The display name of the framework',
-    })
-
-    t.nonNull.field('supportStatus', {
-      description: 'Current support status of the framework',
-      type: SupportStatusEnum,
-    })
-
     t.nonNull.list.nonNull.field('supportedBundlers', {
       type: WizardBundler,
       description: 'All of the supported bundlers for this framework',
       resolve: (source, args, ctx) => {
-        return [...source.supportedBundlers]
+        const findBundler = (type: 'webpack' | 'vite') => {
+          const b = WIZARD_BUNDLERS.find((b) => b.type === type)
+
+          if (!b) {
+            throw Error(`Invalid bundler: ${type}`)
+          }
+
+          return b
+        }
+
+        return ctx.wizardData.chosenFramework?.supportedBundlers.map(findBundler) ?? []
       },
     })
-  },
-
-  sourceType: {
-    module: '@packages/scaffold-config',
-    export: 'ResolvedComponentFrameworkDefinition',
   },
 })
