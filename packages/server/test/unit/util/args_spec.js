@@ -242,6 +242,12 @@ describe('lib/util/args', () => {
       expect(options.autoCancelAfterFailures).to.eq(false)
     })
 
+    it('handles value 0', function () {
+      const options = this.setup('--auto-cancel-after-failures', '0')
+
+      expect(options.autoCancelAfterFailures).to.eq(0)
+    })
+
     it('throws error when a string is set', function () {
       try {
         return this.setup('--auto-cancel-after-failures', 'foo')
@@ -255,6 +261,22 @@ describe('lib/util/args', () => {
         return this.setup('--auto-cancel-after-failures', 'true')
       } catch (err) {
         return snapshot('invalid --auto-cancel-after-failures (true) error', stripAnsi(err.message))
+      }
+    })
+
+    it('throws error when a negative value is set', function () {
+      try {
+        return this.setup('--auto-cancel-after-failures', '-1')
+      } catch (err) {
+        return snapshot('invalid --auto-cancel-after-failures (negative value) error', stripAnsi(err.message))
+      }
+    })
+
+    it('throws error when a decimal value is set', function () {
+      try {
+        return this.setup('--auto-cancel-after-failures', '1.5')
+      } catch (err) {
+        return snapshot('invalid --auto-cancel-after-failures (decimal value) error', stripAnsi(err.message))
       }
     })
   })

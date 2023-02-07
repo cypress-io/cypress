@@ -45,3 +45,19 @@ You passed: true
 
 The error was: auto-cancel-after-failures must be an integer or false
 `
+
+exports['invalid --auto-cancel-after-failures (negative value) error'] = `
+Cypress encountered an error while parsing the argument: --auto-cancel-after-failures
+
+You passed: true
+
+The error was: auto-cancel-after-failures must be an integer or false
+`
+
+exports['invalid --auto-cancel-after-failures (decimal value) error'] = `
+Cypress encountered an error while parsing the argument: --auto-cancel-after-failures
+
+You passed: 1.5
+
+The error was: auto-cancel-after-failures must be an integer or false
+`
