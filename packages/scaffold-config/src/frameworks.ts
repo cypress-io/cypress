@@ -92,112 +92,113 @@ export interface ResolvedComponentFrameworkDefinition {
   type: string
 
   /**
-     * Used as the flag for `getPreset` for meta framworks, such as finding the webpack config for CRA, Angular, etc.
-     * @see https://github.com/cypress-io/cypress/blob/ad0b2a37c2fe587f4efe4920d2e445eca5301600/npm/webpack-dev-server/src/devServer.ts#L119
-     * This could be extended to be a function that a user can inject, eg:
-     *
-     * configFramwork: () => {
-     *   return getSolidJsMetaFrameworkBundlerConfig()
-     * }
-     * It is also the name of the string added to `cypress.config`
-     *
-     * @example
-     *
-     * export default {
-     *   component: {
-     *     devServer: {
-     *       framework: 'solid' // can be 'next', 'create-react-app', etc etc.
-     *     }
-     *   }
-     * }
-     */
+   * Used as the flag for `getPreset` for meta framworks, such as finding the webpack config for CRA, Angular, etc.
+   * @see https://github.com/cypress-io/cypress/blob/ad0b2a37c2fe587f4efe4920d2e445eca5301600/npm/webpack-dev-server/src/devServer.ts#L119
+   * This could be extended to be a function that a user can inject, eg:
+   *
+   * configFramwork: () => {
+   *   return getSolidJsMetaFrameworkBundlerConfig()
+   * }
+   * It is also the name of the string added to `cypress.config`
+   *
+   * @example
+   *
+   * export default {
+   *   component: {
+   *     devServer: {
+   *       framework: 'solid' // can be 'next', 'create-react-app', etc etc.
+   *     }
+   *   }
+   * }
+   */
   configFramework: string // 'create-react-app',
 
   /**
-     * Library (React, Vue) or template (aka "meta framework") (CRA, Next.js, Angular)
-     */
+   * Library (React, Vue) or template (aka "meta framework") (CRA, Next.js, Angular)
+   */
   category: 'library' | 'template'
 
   /**
-     * Implement a similar interface to https://github.com/cypress-io/cypress/blob/ad0b2a37c2fe587f4efe4920d2e445eca5301600/npm/webpack-dev-server/src/devServer.ts#L117
-     *
-     * Only required for `category: framework`.
-     *
-     * @cypress/webpack-dev-server will need updating to receive custom `devServerHandler`.
-     * @cypress/vite-dev-server does not currently support the concept of a framework config preset yet, but this can be added.
-     *
-     * NOTE: This could be a "fast follow" if we want to reduce the scope of this brief.
-     */
+   * Implement a similar interface to https://github.com/cypress-io/cypress/blob/ad0b2a37c2fe587f4efe4920d2e445eca5301600/npm/webpack-dev-server/src/devServer.ts#L117
+   *
+   * Only required for `category: framework`.
+   *
+   * @cypress/webpack-dev-server will need updating to receive custom `devServerHandler`.
+   * @cypress/vite-dev-server does not currently support the concept of a framework config preset yet, but this can be added.
+   *
+   * NOTE: This could be a "fast follow" if we want to reduce the scope of this brief.
+   */
   getDevServerConfig?: (projectPath: string, bundler: WizardBundler['type']) => MaybePromise<any>
 
   /**
-     * Name displayed in Launchpad when doing initial setup.
-     * @example 'Solid.js', 'Create React App'
-     */
+   * Name displayed in Launchpad when doing initial setup.
+   * @example 'Solid.js', 'Create React App'
+   */
   name: string
 
   /**
-     * Supported bundlers.
-     */
+   * Supported bundlers.
+   */
   supportedBundlers: Array<typeof dependencies.WIZARD_DEPENDENCY_WEBPACK | typeof dependencies.WIZARD_DEPENDENCY_VITE>
 
   /**
-     * Used to attempt to automatically select the correct framework/bundler from the dropdown.
-     * @example
-     *
-     * const SOLID_DETECTOR: Dependency = {
-     *   type: 'solid',
-     *   name: 'Solid.js',
-     *   package: 'solid-js',
-     *   installer: 'solid-js',
-     *   description: 'Solid is a declarative JavaScript library for creating user interfaces',
-     *   minVersion: '^1.0.0',
-     * }
-     */
+   * Used to attempt to automatically select the correct framework/bundler from the dropdown.
+   * @example
+   *
+   * const SOLID_DETECTOR: Dependency = {
+   *   type: 'solid',
+   *   name: 'Solid.js',
+   *   package: 'solid-js',
+   *   installer: 'solid-js',
+   *   description: 'Solid is a declarative JavaScript library for creating user interfaces',
+   *   minVersion: '^1.0.0',
+   * }
+   */
   detectors: CypressComponentDependency[]
 
   /**
-     * Array of required dependencies. This could be the bundler and JavaScript library.
-     * It's the same type as `detectors`.
-     */
+   * Array of required dependencies. This could be the bundler and JavaScript library.
+   * It's the same type as `detectors`.
+   */
   dependencies: (bundler: WizardBundler['type'], projectPath: string) => Promise<DependencyToInstall[]>
-  // dependencies: () => Promise<CypressComponentDependency[]>
 
   /**
-     * @internal
-     * This is used interally by Cypress for the "Create From Component" feature.
-     * @example 'react'
-     */
+   * @internal
+   * This is used interally by Cypress for the "Create From Component" feature.
+   * @example 'react'
+   */
   codeGenFramework?: 'react' | 'vue' | 'svelte' | 'angular'
 
   /**
-     * @internal
-     * This is used interally by Cypress for the "Create From Component" feature.
-     * @example '*.{js,jsx,tsx}'
-     */
+   * @internal
+   * This is used interally by Cypress for the "Create From Component" feature.
+   * @example '*.{js,jsx,tsx}'
+   */
   glob?: string
 
   /**
-     * This is the path to get mount, eg `import { mount } from <mount_module>,
-     * @example: `cypress-ct-solidjs/src/mount`
-     */
+   * This is the path to get mount, eg `import { mount } from <mount_module>,
+   * @example: `cypress-ct-solidjs/src/mount`
+   */
   mountModule: (projectPath: string) => Promise<string>
 
   /**
-     * Support status. Internally alpha | beta | full.
-     * Community integrations are "community".
-     */
+   * Support status. Internally alpha | beta | full.
+   * Community integrations are "community".
+   */
   supportStatus?: typeof supportStatus[number]
 
   /**
-     * Function returning string for used for the component-index.html file.
-     * Cypress provides a default if one isn't specified for third party integrations.
-     */
+   * Function returning string for used for the component-index.html file.
+   * Cypress provides a default if one isn't specified for third party integrations.
+   */
   componentIndexHtml?: () => string
 
   /**
-     * @internal
-     */
+   * Used for the Create From Comopnent feature.
+   * This is currently not supported for third party frameworks.
+   * @internal
+   */
   specPattern?: '**/*.cy.ts'
 }
 
@@ -408,16 +409,7 @@ export const CT_FRAMEWORKS: ComponentFrameworkDefinition[] = [
   },
 ]
 
-const solidDep: CypressComponentDependency = {
-  type: 'solid-js',
-  name: 'Solid.js',
-  package: 'solid-js',
-  installer: 'solid-js',
-  description: 'Solid is a declarative JavaScript library for creating user interfaces',
-  minVersion: '^1.0.0',
-}
-
-type ComponentFrameworkDefinition = Omit<ResolvedComponentFrameworkDefinition, 'dependencies'> & {
+export type ComponentFrameworkDefinition = Omit<ResolvedComponentFrameworkDefinition, 'dependencies'> & {
   dependencies: (bundler: WizardBundler['type']) => CypressComponentDependency[]
 }
 
@@ -436,34 +428,4 @@ export function resolveComponentFrameworkDefinition (definition: ComponentFramew
       return await Promise.all(declaredDeps.map((dep) => isDependencyInstalled(dep, projectPath)))
     },
   }
-}
-
-// must be default export
-export const solidJs: ComponentFrameworkDefinition = {
-  type: 'cypress-ct-solid-js',
-
-  configFramework: 'cypress-ct-solid-js',
-
-  category: 'library',
-
-  name: 'Solid.js',
-
-  supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
-
-  getDevServerConfig: (projectRoot, bundler) => {
-    // console.log('running getDevServerConfig', projectRoot)
-    const c = require(require.resolve('webpack.config.js', { paths: [projectRoot] }))
-
-    // console.log(c)
-    return c
-  },
-
-  detectors: [solidDep],
-
-  // Cypress will include the bundler dependency here, if they selected one.
-  dependencies: () => {
-    return [solidDep]
-  },
-
-  mountModule: (projectPath: string) => Promise.resolve('cypress-ct-solid-js'),
 }

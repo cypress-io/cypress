@@ -214,7 +214,6 @@ export class ProjectConfigManager {
       return true
     }
 
-    // hm, not sure about this
     const frameworks = this.options.ctx.coreData.wizard.frameworks.filter((x) => x.configFramework === devServerOptions.framework)
 
     const mismatchedFrameworkDeps = new Map<string, DependencyToInstall>()
