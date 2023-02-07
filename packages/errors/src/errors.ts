@@ -361,7 +361,7 @@ export const AllCypressErrors = {
   },
   CLOUD_AUTO_CANCEL_MISMATCH: (arg1: {runUrl: string}) => {
     return errTemplate`\
-        You passed the ${fmt.flag(`--auto-cancel-after-failures`)} flag, but this run originally started with a different value on this  ${fmt.flag(`--auto-cancel-after-failures`)}  flag.
+        You passed the ${fmt.flag(`--auto-cancel-after-failures`)} flag, but this run originally started with a different value for the ${fmt.flag(`--auto-cancel-after-failures`)} flag.
       
         The existing run is: ${fmt.url(arg1.runUrl)}
         

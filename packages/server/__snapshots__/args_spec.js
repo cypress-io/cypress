@@ -35,7 +35,7 @@ Cypress encountered an error while parsing the argument: --auto-cancel-after-fai
 
 You passed: foo
 
-The error was: auto-cancel-after-failures must be a integer or false
+The error was: auto-cancel-after-failures must be an integer or false
 `
 
 exports['invalid --auto-cancel-after-failures (true) error'] = `
@@ -43,5 +43,5 @@ Cypress encountered an error while parsing the argument: --auto-cancel-after-fai
 
 You passed: true
 
-The error was: auto-cancel-after-failures must be a integer or false
+The error was: auto-cancel-after-failures must be an integer or false
 `

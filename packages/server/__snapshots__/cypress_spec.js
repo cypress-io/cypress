@@ -325,7 +325,7 @@ exports['Long Cypress Cloud URL'] = `
   │ Browser:    FooBrowser 88                                                                      │
   │ Specs:      1 found (app.cy.js)                                                                │
   │ Searched:   cypress/e2e/**/*.cy.{js,jsx,ts,tsx}                                                │
-  │ Params:     Tag: false, Group: electron-smoke-tests, Parallel: false, Auto Cancel After Failu… │
+  │ Params:     Tag: false, Group: electron-smoke-tests, Parallel: false                           │
   │ Run URL:    http://cloud.cypress.io/this-is-a-long-long-long-long-long-long-long-long-long-lon │
   │             g-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long- │
   │             long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-long-lo │
@@ -430,7 +430,7 @@ https://on.cypress.io/record-params-without-recording
 `
 
 exports['CLOUD_AUTO_CANCEL_MISMATCH 1'] = `
-You passed the --auto-cancel-after-failures flag, but this run originally started with a different value on this --auto-cancel-after-failures flag.
+You passed the --auto-cancel-after-failures flag, but this run originally started with a different value for the --auto-cancel-after-failures flag.
 
 The existing run is: https://cloud.cypress.io/runs/12345
 

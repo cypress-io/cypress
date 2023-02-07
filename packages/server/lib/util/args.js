@@ -451,7 +451,7 @@ module.exports = {
     }
 
     if (autoCancelAfterFailures && !((typeof autoCancelAfterFailures === 'number' && Number.isInteger(autoCancelAfterFailures)) || autoCancelAfterFailures === false)) {
-      return errors.throwErr('COULD_NOT_PARSE_ARGUMENTS', 'auto-cancel-after-failures', autoCancelAfterFailures, 'auto-cancel-after-failures must be a integer or false')
+      return errors.throwErr('COULD_NOT_PARSE_ARGUMENTS', 'auto-cancel-after-failures', autoCancelAfterFailures, 'auto-cancel-after-failures must be an integer or false')
     }
 
     if (tag) {
