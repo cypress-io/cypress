@@ -3,13 +3,18 @@ import fs from 'fs-extra'
 import * as dependencies from './dependencies'
 import componentIndexHtmlGenerator from './component-index-template'
 import type { CypressComponentDependency } from './dependencies'
+import debugLib from 'debug'
 import semver from 'semver'
+
+const debug = debugLib('cypress:scaffold-config:frameworks')
 
 export type PkgJson = { version: string, dependencies?: Record<string, string>, devDependencies?: Record<string, string> }
 
 export type WizardBundler = typeof dependencies.WIZARD_BUNDLERS[number]
 
 export type CodeGenFramework = ResolvedComponentFrameworkDefinition['codeGenFramework']
+
+type MaybePromise<T> = Promise<T> | T
 
 export interface DependencyToInstall {
   dependency: CypressComponentDependency
@@ -20,11 +25,14 @@ export interface DependencyToInstall {
 
 export async function isDependencyInstalled (dependency: CypressComponentDependency, projectPath: string): Promise<DependencyToInstall> {
   try {
+    debug('detecting %s in %s', dependency.package, projectPath)
     const loc = require.resolve(path.join(dependency.package, 'package.json'), {
       paths: [projectPath],
     })
 
     const pkg = await fs.readJson(loc) as PkgJson
+
+    debug('found package.json %o', pkg)
 
     if (!pkg.version) {
       throw Error(`${pkg.version} for ${dependency.package} is not a valid semantic version.`)
@@ -34,6 +42,8 @@ export async function isDependencyInstalled (dependency: CypressComponentDepende
       includePrerelease: true,
     }))
 
+    debug('%s is satisfied? %s', dependency.package, satisfied)
+
     return {
       dependency,
       detectedVersion: pkg.version,
@@ -41,6 +51,8 @@ export async function isDependencyInstalled (dependency: CypressComponentDepende
       satisfied,
     }
   } catch (e) {
+    debug('error when detecting %s: %s', dependency.package, e.message)
+
     return {
       dependency,
       detectedVersion: null,
@@ -50,7 +62,7 @@ export async function isDependencyInstalled (dependency: CypressComponentDepende
   }
 }
 
-function getBundler (bundler: WizardBundler['type']) {
+function getBundler (bundler: WizardBundler['type']): CypressComponentDependency {
   switch (bundler) {
     case 'vite': return dependencies.WIZARD_DEPENDENCY_VITE
     case 'webpack': return dependencies.WIZARD_DEPENDENCY_WEBPACK
@@ -116,7 +128,7 @@ export interface ResolvedComponentFrameworkDefinition {
      *
      * NOTE: This could be a "fast follow" if we want to reduce the scope of this brief.
      */
-  getDevServerConfig?: () => Promise<{ frameworkConfig: any }>
+  getDevServerConfig?: (projectPath: string) => MaybePromise<any>
 
   /**
      * Name displayed in Launchpad when doing initial setup.
@@ -397,7 +409,7 @@ export const CT_FRAMEWORKS: ComponentFrameworkDefinition[] = [
 ]
 
 const solidDep: CypressComponentDependency = {
-  type: 'solid',
+  type: 'solid-js',
   name: 'Solid.js',
   package: 'solid-js',
   installer: 'solid-js',
@@ -411,10 +423,15 @@ type ComponentFrameworkDefinition = Omit<ResolvedComponentFrameworkDefinition, '
 
 export function resolveComponentFrameworkDefinition (definition: ComponentFrameworkDefinition): ResolvedComponentFrameworkDefinition {
   return {
-    ...definition,
     supportStatus: 'community',
+    ...definition,
     dependencies: async (bundler, projectPath) => {
       const declaredDeps = definition.dependencies(bundler)
+
+      // Must add bundler based on launchpad selection if it's a third party definition.
+      if (definition.type.startsWith('cypress-ct-')) {
+        declaredDeps.push(getBundler(bundler))
+      }
 
       return await Promise.all(declaredDeps.map((dep) => isDependencyInstalled(dep, projectPath)))
     },
@@ -423,15 +440,23 @@ export function resolveComponentFrameworkDefinition (definition: ComponentFramew
 
 // must be default export
 export const solidJs: ComponentFrameworkDefinition = {
-  type: 'solid-js',
+  type: 'cypress-ct-solid-js',
 
-  configFramework: 'solid-js',
+  configFramework: 'cypress-ct-solid-js',
 
   category: 'library',
 
   name: 'Solid.js',
 
   supportedBundlers: [dependencies.WIZARD_DEPENDENCY_WEBPACK, dependencies.WIZARD_DEPENDENCY_VITE],
+
+  getDevServerConfig: (projectRoot) => {
+    // console.log('running getDevServerConfig', projectRoot)
+    const c = require(require.resolve('webpack.config.js', { paths: [projectRoot] }))
+
+    // console.log(c)
+    return c
+  },
 
   detectors: [solidDep],
 

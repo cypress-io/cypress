@@ -198,7 +198,12 @@ export class ProjectConfigManager {
     }
 
     const isFrameworkSatisfied = async (bundler: typeof WIZARD_BUNDLERS[number], framework: ResolvedComponentFrameworkDefinition) => {
-      for (const dep of await (framework.dependencies(bundler.type, this.options.projectRoot))) {
+      const deps = await (framework.dependencies(bundler.type, this.options.projectRoot))
+
+      debug('deps are %o', deps)
+
+      for (const dep of deps) {
+        debug('detecting %s in %s', dep.dependency.name, this.options.projectRoot)
         const res = await isDependencyInstalled(dep.dependency, this.options.projectRoot)
 
         if (!res.satisfied) {
