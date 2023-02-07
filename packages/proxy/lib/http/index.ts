@@ -215,6 +215,7 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
       try {
         middleware.call(fullCtx)
       } catch (err) {
+        err.message = `Internal error while proxying "${ctx.req.method} ${ctx.req.proxiedUrl}" in ${middlewareName}:\n${err.message}`
         errorUtils.logError(err)
         fullCtx.onError(err)
       }
