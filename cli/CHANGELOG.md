@@ -14,6 +14,7 @@ _Released 02/14/2023 (PENDING)_
 **Misc:**
 
 - Improved the layout of the Debug Page on smaller viewports when there is a pending run. Addresses [#25664](https://github.com/cypress-io/cypress/issues/25664).
+- Improved the layout of the Debug Page when displaying informational messages. Addresses [#25669](https://github.com/cypress-io/cypress/issues/25669).
 - Icons in Debug page will no longer shrink at small viewports. Addresses [#25665](https://github.com/cypress-io/cypress/issues/25665).
 
 **Dependency Updates:**
