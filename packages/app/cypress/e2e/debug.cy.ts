@@ -1,3 +1,4 @@
+import type { OpenFileInIdeQuery } from '../../src/generated/graphql-test'
 import RelevantRunsDataSource_RunsByCommitShas from '../fixtures/gql-RelevantRunsDataSource_RunsByCommitShas.json'
 
 Cypress.on('window:before:load', (win) => {
@@ -31,27 +32,27 @@ describe('App - Debug Page', () => {
   it('all tests passed', () => {
     // This mocks all the responses so we can get deterministic
     // results to test the debug page.
-    cy.intercept('POST', '/__cypress/graphql/query-Debug', {
+    cy.intercept('query-Debug', {
       fixture: 'debug-Passing/gql-Debug.json',
     })
 
-    cy.intercept('POST', '/__cypress/graphql/query-CloudViewerAndProject_RequiredData', {
+    cy.intercept('query-CloudViewerAndProject_RequiredData', {
       fixture: 'debug-Passing/gql-CloudViewerAndProject_RequiredData.json',
     })
 
-    cy.intercept('POST', '/__cypress/graphql/query-MainAppQuery', {
+    cy.intercept('query-MainAppQuery', {
       fixture: 'debug-Passing/gql-MainAppQuery.json',
     })
 
-    cy.intercept('POST', '/__cypress/graphql/query-SideBarNavigationContainer', {
+    cy.intercept('query-SideBarNavigationContainer', {
       fixture: 'debug-Passing/gql-SideBarNavigationContainer',
     })
 
-    cy.intercept('POST', '/__cypress/graphql/query-HeaderBar_HeaderBarQuery', {
+    cy.intercept('query-HeaderBar_HeaderBarQuery', {
       fixture: 'debug-Passing/gql-HeaderBar_HeaderBarQuery',
     })
 
-    cy.intercept('POST', '/__cypress/graphql/query-SpecsPageContainer', {
+    cy.intercept('query-SpecsPageContainer', {
       fixture: 'debug-Passing/gql-SpecsPageContainer',
     })
 
@@ -86,28 +87,42 @@ describe('App - Debug Page', () => {
   })
 
   it('shows information about a failed spec', () => {
-    cy.intercept('POST', '/__cypress/graphql/query-Debug', {
+    cy.intercept('query-Debug', {
       fixture: 'debug-Failing/gql-Debug.json',
     })
 
-    cy.intercept('POST', '/__cypress/graphql/query-CloudViewerAndProject_RequiredData', {
+    cy.intercept('query-CloudViewerAndProject_RequiredData', {
       fixture: 'debug-Failing/gql-CloudViewerAndProject_RequiredData.json',
     })
 
-    cy.intercept('POST', '/__cypress/graphql/query-MainAppQuery', {
+    cy.intercept('query-MainAppQuery', {
       fixture: 'debug-Failing/gql-MainAppQuery.json',
     })
 
-    cy.intercept('POST', '/__cypress/graphql/query-SideBarNavigationContainer', {
+    cy.intercept('query-SideBarNavigationContainer', {
       fixture: 'debug-Failing/gql-SideBarNavigationContainer',
     })
 
-    cy.intercept('POST', '/__cypress/graphql/query-HeaderBar_HeaderBarQuery', {
+    cy.intercept('query-HeaderBar_HeaderBarQuery', {
       fixture: 'debug-Failing/gql-HeaderBar_HeaderBarQuery',
     })
 
-    cy.intercept('POST', '/__cypress/graphql/query-SpecsPageContainer', {
+    cy.intercept('query-SpecsPageContainer', {
       fixture: 'debug-Failing/gql-SpecsPageContainer',
+    })
+
+    cy.intercept('query-OpenFileInIDE', (req) => {
+      req.on('response', (res) => {
+        const gqlData = res.body.data as OpenFileInIdeQuery
+
+        gqlData.localSettings.preferences.preferredEditorBinary = 'code'
+      })
+    })
+
+    cy.intercept('mutation-OpenFileInIDE_Mutation').as('openFileInIDE')
+
+    cy.withCtx((ctx, { sinon }) => {
+      sinon.stub(ctx.actions.file, 'openFile')
     })
 
     cy.visitApp()
@@ -147,5 +162,11 @@ describe('App - Debug Page', () => {
     cy.findByTestId('test-row').contains('InfoPanel')
     cy.findByTestId('test-row').contains('renders')
     cy.findByTestId('run-failures').should('exist').should('have.attr', 'href', '#/specs/runner?file=src/components/InfoPanel/InfoPanel.cy.ts&mode=debug')
+
+    cy.findByLabelText('Open in IDE').click()
+    cy.wait('@openFileInIDE')
+    cy.withCtx((ctx) => {
+      expect(ctx.actions.file.openFile).to.have.been.calledWith('src/components/InfoPanel/InfoPanel.cy.ts', 1, 1)
+    })
   })
 })
