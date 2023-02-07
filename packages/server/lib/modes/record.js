@@ -78,7 +78,7 @@ const throwIfIndeterminateCiBuildId = (ciBuildId, parallel, group) => {
 }
 
 const throwIfRecordParamsWithoutRecording = (record, ciBuildId, parallel, group, tag, autoCancelAfterFailures) => {
-  if (!record && _.some([ciBuildId, parallel, group, tag, autoCancelAfterFailures || autoCancelAfterFailures === false])) {
+  if (!record && _.some([ciBuildId, parallel, group, tag, autoCancelAfterFailures !== undefined])) {
     errors.throwErr('RECORD_PARAMS_WITHOUT_RECORDING', {
       ciBuildId,
       tag,

@@ -170,7 +170,7 @@ function formatNodeVersion ({ resolvedNodeVersion, resolvedNodePath }: Pick<Cfg,
 
 function formatRecordParams (runUrl?: string, parallel?: boolean, group?: string, tag?: string, autoCancelAfterFailures?: number | false) {
   if (runUrl) {
-    return `Tag: ${tag || 'false'}, Group: ${group || 'false'}, Parallel: ${Boolean(parallel)}, Auto Cancel After Failures: ${autoCancelAfterFailures || 'false'}`
+    return `Tag: ${tag || 'false'}, Group: ${group || 'false'}, Parallel: ${Boolean(parallel)}${autoCancelAfterFailures !== undefined && `, Auto Cancel After Failures: ${autoCancelAfterFailures}`}`
   }
 
   return

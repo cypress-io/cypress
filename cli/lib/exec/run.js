@@ -45,6 +45,7 @@ const processRunOptions = (options = {}) => {
 
   const args = ['--run-project', options.project]
 
+  // when false, send this to the server to ensure globally enabled auto cancellation is turned off
   if (options.autoCancelAfterFailures || options.autoCancelAfterFailures === false) {
     args.push('--auto-cancel-after-failures', options.autoCancelAfterFailures)
   }

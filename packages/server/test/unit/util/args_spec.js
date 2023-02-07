@@ -235,6 +235,28 @@ describe('lib/util/args', () => {
 
       expect(options.autoCancelAfterFailures).to.eq(4)
     })
+
+    it('converts to false', function () {
+      const options = this.setup('--auto-cancel-after-failures', 'false')
+
+      expect(options.autoCancelAfterFailures).to.eq(false)
+    })
+
+    it('throws error when a string is set', function () {
+      try {
+        return this.setup('--auto-cancel-after-failures', 'foo')
+      } catch (err) {
+        return snapshot('invalid --auto-cancel-after-failures error', stripAnsi(err.message))
+      }
+    })
+
+    it('throws error when true is set', function () {
+      try {
+        return this.setup('--auto-cancel-after-failures', 'true')
+      } catch (err) {
+        return snapshot('invalid --auto-cancel-after-failures (true) error', stripAnsi(err.message))
+      }
+    })
   })
 
   context('--port', () => {
