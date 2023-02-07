@@ -3,6 +3,10 @@
 
 _Released 02/14/2023 (PENDING)_
 
+**Bugfixes:**
+
+ - Fixed an issue with the Cloud project selection modal not showing the correct prompts. Fixes [#25520](https://github.com/cypress-io/cypress/issues/25520).
+
 **Features:**
 
 - Added the "Open in IDE" feature for failed tests reported from the Debug page. Addressed in [#25691](https://github.com/cypress-io/cypress/pull/25691).
