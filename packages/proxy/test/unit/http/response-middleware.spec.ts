@@ -45,7 +45,7 @@ describe('http/response-middleware', function () {
             off: (event, listener) => {},
           },
           onError (err) {
-            expect(err.message).to.equal('Error running proxy middleware: Detected `this.next()` was called more than once in the same middleware function. This can cause unintended issues and may indicate an error in your middleware logic or configuration.')
+            expect(err.message).to.equal('Error running proxy middleware: Detected `this.next()` was called more than once in the same middleware function, but a middleware can only be completed once.')
 
             done()
           },
@@ -57,16 +57,17 @@ describe('http/response-middleware', function () {
           this.next()
           this.next()
         }
+        const error = new Error('previous error')
 
         testMiddleware([middleware], {
-          error: new Error('previous error'),
+          error,
           res: {
             on: (event, listener) => {},
             off: (event, listener) => {},
           },
           onError (err) {
-            expect(err.message).to.contain('This middleware invocation previously encountered an error which may be related: Error: previous error')
-
+            expect(err.message).to.contain('This middleware invocation previously encountered an error which may be related, see `error.cause`')
+            expect(err['cause']).to.equal(error)
             done()
           },
         })

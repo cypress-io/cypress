@@ -95,7 +95,7 @@ const notSSE = (req, res) => {
 
 export type WarningErr = Record<string, any>
 
-export type FileServer = {
+type FileServer = {
   token: string
   port: () => number
   close: () => void

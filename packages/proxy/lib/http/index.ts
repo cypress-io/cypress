@@ -183,10 +183,11 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
       const fullCtx = {
         next: () => {
           fullCtx.next = () => {
-            const error = new Error('Error running proxy middleware: Detected `this.next()` was called more than once in the same middleware function. This can cause unintended issues and may indicate an error in your middleware logic or configuration.')
+            const error = new Error('Error running proxy middleware: Detected `this.next()` was called more than once in the same middleware function, but a middleware can only be completed once.')
 
             if (ctx.error) {
-              error.message = error.message += `\nThis middleware invocation previously encountered an error which may be related: ${ctx.error}`
+              error.message = error.message += '\nThis middleware invocation previously encountered an error which may be related, see `error.cause`'
+              error['cause'] = ctx.error
             }
 
             throw error
