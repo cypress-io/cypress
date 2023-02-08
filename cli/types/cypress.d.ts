@@ -15,7 +15,7 @@ declare namespace Cypress {
   interface JQueryWithSelector<TElement = HTMLElement> extends JQuery<TElement> {
     selector?: string | null
   }
-  
+
   interface PrevSubjectMap<O = unknown> {
     optional: O
     element: JQueryWithSelector
