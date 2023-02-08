@@ -3,6 +3,10 @@
 
 _Released 02/14/2023 (PENDING)_
 
+**Bugfixes:**
+
+ - Fixed an issue with the Cloud project selection modal not showing the correct prompts. Fixes [#25520](https://github.com/cypress-io/cypress/issues/25520).
+
 **Features:**
 
 - Added the "Open in IDE" feature for failed tests reported from the Debug page. Addressed in [#25691](https://github.com/cypress-io/cypress/pull/25691).
@@ -13,6 +17,7 @@ _Released 02/14/2023 (PENDING)_
 - Improved the layout of the Debug Page when displaying informational messages. Addresses [#25669](https://github.com/cypress-io/cypress/issues/25669).
 - Icons in Debug page will no longer shrink at small viewports. Addresses [#25665](https://github.com/cypress-io/cypress/issues/25665).
 - Improved the layout of the Debug Page empty states on smaller viewports. Addressed in [#25703](https://github.com/cypress-io/cypress/pull/25703).
+- Increased the spacing between elements and their associated tooltip and added borders around artifact links on the Debug Page. Addresses [#25666](https://github.com/cypress-io/cypress/issues/25666).
 
 **Dependency Updates:**
 
