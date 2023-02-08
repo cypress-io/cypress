@@ -1861,7 +1861,7 @@ describe('e2e record', () => {
     })
   })
 
-  describe.only('/preflight', () => {
+  describe('/preflight', () => {
     describe('preflight failure: unencrypted', () => {
       setupStubbedServer(createRoutes({
         preflight: {

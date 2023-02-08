@@ -135,9 +135,6 @@ const retryWithBackoff = (fn) => {
   return (attempt = (retryIndex) => {
     return Promise
     .try(() => fn(retryIndex))
-    .catch(RequestErrors.TransformError, (err) => {
-      throw err.cause
-    })
     .catch(isRetriableError, (err) => {
       if (retryIndex > DELAYS.length) {
         throw err
@@ -162,6 +159,9 @@ const retryWithBackoff = (fn) => {
 
         return attempt(retryIndex)
       })
+    })
+    .catch(RequestErrors.TransformError, (err) => {
+      throw err.cause
     })
   })(0)
 }
