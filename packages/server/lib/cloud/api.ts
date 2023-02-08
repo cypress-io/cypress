@@ -83,14 +83,8 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
 
       params.transform = async function (body, response) {
         if (response.headers['x-cypress-encrypted'] || params.encrypt === 'always') {
-          let decryptedBody
+          const decryptedBody = await enc.decryptResponse(body, secretKey)
 
-          try {
-            decryptedBody = await enc.decryptResponse(body, secretKey)
-          } catch (e) {
-            e.isDecryptionError = true
-            throw e
-          }
           // If we've hit an encrypted payload error case, we need to re-constitute the error
           // as it would happen normally, with the body as an error property
           if (response.statusCode > 400) {
@@ -195,7 +189,7 @@ const tagError = function (err) {
 const isRetriableError = (err) => {
   // .error is exposed as a property when the error is thrown
   // from the transform handler
-  if (err.isDecryptionError) {
+  if (err instanceof RequestErrors.TransformError) {
     return false
   }
 
