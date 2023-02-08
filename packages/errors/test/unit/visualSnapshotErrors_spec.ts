@@ -547,6 +547,7 @@ describe('visual error templates', () => {
           tag: '123',
           group: 'foo',
           parallel: true,
+          autoCancelAfterFailures: 3,
         }],
       }
     },

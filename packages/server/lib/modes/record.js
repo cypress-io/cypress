@@ -512,6 +512,7 @@ const createRun = Promise.method((options = {}) => {
               group,
               parallel,
               ciBuildId,
+              autoCancelAfterFailures,
             })
           default:
             return errors.throwErr('CLOUD_UNKNOWN_INVALID_REQUEST', {

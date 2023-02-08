@@ -437,6 +437,7 @@ The existing run is: https://cloud.cypress.io/runs/12345
 The --tag flag you passed was: nightly
 The --group flag you passed was: electron-smoke-tests
 The --ciBuildId flag you passed was: ciBuildId123
+The --auto-cancel-after-failures flag you passed was: 4
 
 The first setting of --auto-cancel-after-failures for any given run takes precedent.
 
