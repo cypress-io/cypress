@@ -93,7 +93,7 @@ const parseVariableOpts = (fnArgs, args) => {
 }
 
 const descriptions = {
-  autoCancelAfterFailures: 'overrides the global Cloud configuration to set the failed test threshold for auto cancellation or to disable auto cancellation when recording to the Cloud',
+  autoCancelAfterFailures: 'overrides the project-level Cloud configuration to set the failed test threshold for auto cancellation or to disable auto cancellation when recording to the Cloud',
   browser: 'runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.',
   cacheClear: 'delete all cached binaries',
   cachePrune: 'deletes all cached binaries except for the version currently in use',
