@@ -34,6 +34,7 @@
         {{ selectedOptionName }}
       </span>
       <AlphaLabel v-if="selectedFrameworkOptionObject?.supportStatus === 'alpha'" />
+      <CommunityLabel v-if="selectedFrameworkOptionObject?.supportStatus === 'community'" />
       <span
         v-if="isDetected"
         class="ml-4px text-gray-400 inline-block"
@@ -47,6 +48,7 @@
         {{ itemValue.name }}
       </span>
       <AlphaLabel v-if="itemValue.supportStatus === 'alpha'" />
+      <CommunityLabel v-if="itemValue.supportStatus === 'community'" />
       <span
         v-if="itemValue.isDetected"
         class="ml-4px text-gray-400 inline-block"
@@ -73,6 +75,7 @@ import type {
 } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import AlphaLabel from './AlphaLabel.vue'
+import CommunityLabel from './CommunityLabel.vue'
 
 const { t } = useI18n()
 

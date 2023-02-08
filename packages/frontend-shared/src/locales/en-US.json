@@ -937,6 +937,7 @@
   },
   "versions": {
     "alpha": "Alpha",
+    "community": "Community",
     "beta": "Beta",
     "new": "New"
   }
