@@ -221,7 +221,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       if (!fullyQualifiedRe.test(urlStr)) {
         handlingLocalFile = true
 
-        options.headers['x-cypress-authorization'] = this._fileServer.token
+        options.headers['x-cypress-authorization'] = this._fileServer?.token
 
         const state = this._remoteStates.set(urlStr, options)
 
