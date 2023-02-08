@@ -53,7 +53,7 @@ export const patchDocumentCookie = (requestCookies: AutomationCookie[]) => {
 
   const getDocumentCookieValue = () => {
     return cookieJar.getCookies(url, undefined).map((cookie: ToughCookie) => {
-      return `${cookie.key}=${cookie.value}`
+      return cookie.toString()
     }).join('; ')
   }
 
