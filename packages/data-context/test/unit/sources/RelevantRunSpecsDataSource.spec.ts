@@ -59,16 +59,17 @@ describe('RelevantRunsDataSource', () => {
       const result = await dataSource.getRelevantRunSpecs({ current: 1, next: null, commitsAhead: 0 })
 
       expect(result).to.eql({
-        runSpecs: { current: {
-          runNumber: 1,
-          completedSpecs: 3,
-          totalSpecs: 3,
-        },
-        next: {
-          runNumber: 2,
-          completedSpecs: 0,
-          totalSpecs: 3,
-        },
+        runSpecs: {
+          current: {
+            runNumber: 1,
+            completedSpecs: 3,
+            totalSpecs: 3,
+          },
+          next: {
+            runNumber: 2,
+            completedSpecs: 0,
+            totalSpecs: 3,
+          },
         },
         statuses: {
           current: 'PASSED',
