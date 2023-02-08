@@ -10,6 +10,7 @@ _Released 02/14/2023 (PENDING)_
 **Features:**
 
 - Added the "Open in IDE" feature for failed tests reported from the Debug page. Addressed in [#25691](https://github.com/cypress-io/cypress/pull/25691).
+- Added "--auto-cancel-after-failures" flag that would override the "Auto Cancellation" feature when recording to the cloud. Addressed in [#25237](https://github.com/cypress-io/cypress/pull/25237)
 
 **Misc:**
 
