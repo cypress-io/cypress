@@ -16,6 +16,7 @@ import type { BrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOpti
 import { DataContext, getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
 import type { BrowserInstance } from './browsers/types'
+import utils from './browsers/utils'
 
 const debug = Debug('cypress:server:open_project')
 
@@ -178,6 +179,7 @@ export class OpenProject {
       if (options.shouldLaunchNewTab) {
         const onInitializeNewBrowserTab = async () => {
           await this.resetBrowserState()
+          await utils.executeAfterBrowserNewTab()
         }
 
         // If we do not launch the browser,

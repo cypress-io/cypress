@@ -698,6 +698,8 @@ export = {
     // we will load the actual page
     const launchedBrowser = await launch(browser, 'about:blank', port, args, launchOptions.env) as unknown as BrowserInstance & { browserCriClient: BrowserCriClient}
 
+    await utils.executeAfterBrowserNewTab()
+
     la(launchedBrowser, 'did not get launched browser instance')
 
     // SECOND connect to the Chrome remote interface

@@ -35,6 +35,7 @@ const eventValidators = {
   'dev-server:start': isFunction,
   'file:preprocessor': isFunction,
   'task': isObject,
+  'after:browser:new:tab': isFunction,
 }
 
 const validateEvent = (event, handler, config, errConstructorFn) => {
