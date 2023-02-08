@@ -1,7 +1,6 @@
 import { WizardBundler } from './gql-WizardBundler'
 import { objectType } from 'nexus'
 import { WIZARD_BUNDLERS } from '@packages/scaffold-config'
-// const a: Cypress.ResolvedComponentFrameworkDefinition
 
 export const WizardFrontendFramework = objectType({
   name: 'WizardFrontendFramework',

@@ -3329,12 +3329,6 @@ declare namespace Cypress {
     category: 'library' | 'template'
 
     /**
-     * Only required for `category: framework`.
-     * Should return a valid configuration object for the given bundler.
-     */
-    getDevServerConfig?: (projectPath: string, bundler: 'webpack' | 'vite') => Promise<any> | any
-
-    /**
      * Name displayed in Launchpad when doing initial setup.
      * @example 'Solid.js', 'Create React App'
      */

@@ -113,7 +113,6 @@ export class WizardActions {
           return
         }
 
-        // coreData.wizard.chosenBundler = this.getNullableBundler(bundler)
         coreData.wizard.detectedBundler = this.getNullableBundler(detected.bundler || detected.framework.supportedBundlers[0])
         coreData.wizard.chosenBundler = this.getNullableBundler(detected.bundler || detected.framework.supportedBundlers[0])
       })

@@ -11,7 +11,6 @@ import { vueCliHandler } from './helpers/vueCliHandler'
 import { nuxtHandler } from './helpers/nuxtHandler'
 import { createReactAppHandler } from './helpers/createReactAppHandler'
 import { nextHandler } from './helpers/nextHandler'
-import { importModule } from 'local-pkg'
 import { sourceDefaultWebpackDependencies, SourceRelativeWebpackResult } from './helpers/sourceRelativeWebpackModules'
 import { angularHandler } from './helpers/angularHandler'
 
@@ -118,25 +117,9 @@ type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>
 async function getPreset (devServerConfig: WebpackDevServerConfig): Promise<Optional<PresetHandlerResult, 'frameworkConfig'>> {
   const defaultWebpackModules = () => ({ sourceWebpackModulesResult: sourceDefaultWebpackDependencies(devServerConfig) })
 
-  // Third party framework
+  // Third party library (eg solid-js, lit, etc)
   if (devServerConfig.framework?.startsWith('cypress-ct-')) {
-    let frameworkConfig: Configuration | undefined
-
-    try {
-      // eg `import('cypress-ct-solid-js')
-      const mod = await importModule(devServerConfig.framework)
-
-      frameworkConfig = await mod?.getDevServerConfig?.(devServerConfig.cypressConfig.projectRoot, 'webpack')
-    } catch (e) {
-      // third parties may implemnent getDevServerConfig, but it is optional.
-      // will fall back to default strategy which is to let webpack resolve `webpack.config`.
-    }
-
-    return {
-      ...defaultWebpackModules(),
-      // Call their config handler, if they provided one.
-      frameworkConfig,
-    }
+    return defaultWebpackModules()
   }
 
   switch (devServerConfig.framework) {
