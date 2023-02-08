@@ -11,6 +11,7 @@ interface RootOption {
 export interface FrameworkOption extends RootOption {
   type: string
   supportStatus: Cypress.ResolvedComponentFrameworkDefinition['supportStatus']
+  icon?: string
 }
 
 interface BundlerOption extends RootOption {

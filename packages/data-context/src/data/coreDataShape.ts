@@ -1,5 +1,5 @@
 import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep, BannerState } from '@packages/types'
-import { WizardBundler, CT_FRAMEWORKS, resolveComponentFrameworkDefinition } from '@packages/scaffold-config'
+import type { WizardBundler } from '@packages/scaffold-config'
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'
@@ -199,7 +199,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
       detectedBundler: null,
       detectedFramework: null,
       // TODO: API to add third party frameworks to this list.
-      frameworks: CT_FRAMEWORKS.map((framework) => resolveComponentFrameworkDefinition(framework)),
+      frameworks: [],
     },
     migration: {
       step: 'renameAuto',

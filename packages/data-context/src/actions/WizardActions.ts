@@ -1,5 +1,5 @@
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
-import { detectFramework, commandsFileBody, supportFileComponent, supportFileE2E, getBundler } from '@packages/scaffold-config'
+import { detectFramework, commandsFileBody, supportFileComponent, supportFileE2E, getBundler, detectThirdPartyCTFrameworks, resolveComponentFrameworkDefinition, CT_FRAMEWORKS } from '@packages/scaffold-config'
 import assert from 'assert'
 import path from 'path'
 import Debug from 'debug'
@@ -99,6 +99,8 @@ export class WizardActions {
     }
 
     this.resetWizard()
+
+    await this.detectFrameworks(this.ctx.currentProject)
 
     const detected = await detectFramework(this.ctx.currentProject, this.ctx.coreData.wizard.frameworks)
 
@@ -360,6 +362,15 @@ export class WizardActions {
 
   private ensureDir (type: 'e2e' | 'fixtures' | 'support') {
     return this.ctx.fs.ensureDir(path.join(this.projectRoot, 'cypress', type))
+  }
+
+  private async detectFrameworks (projectRoot: string) {
+    const officialFrameworks = CT_FRAMEWORKS.map((framework) => resolveComponentFrameworkDefinition(framework))
+    const thirdPartyFrameworks = await detectThirdPartyCTFrameworks(projectRoot).then((frameworks) => frameworks.map(resolveComponentFrameworkDefinition))
+
+    this.ctx.update((d) => {
+      d.wizard.frameworks = officialFrameworks.concat(thirdPartyFrameworks)
+    })
   }
 }
 

@@ -52,5 +52,9 @@ export const WizardFrontendFramework = objectType({
         return ctx.wizardData.chosenFramework?.supportedBundlers.map(findBundler) ?? []
       },
     })
+
+    t.string('icon', {
+      description: 'Raw SVG icon of framework',
+    })
   },
 })

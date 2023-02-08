@@ -3398,6 +3398,12 @@ declare namespace Cypress {
      * @internal
      */
     specPattern?: '**/*.cy.ts'
+
+    /**
+     * Raw SVG icon that will be displayed in the Project Setup Wizard. Used for third parties that
+     * want to render a custom icon.
+     */
+    icon?: string
   }
 
   type ComponentFrameworkDefinition = Omit<ResolvedComponentFrameworkDefinition, 'dependencies'> & {
