@@ -35,7 +35,7 @@ const runnerCapabilities = {
 let responseCache = {}
 
 export interface CypressRequestOptions extends OptionsWithUrl {
-  encrypt?: boolean
+  encrypt?: boolean | 'always'
   method: string
   cacheable?: boolean
 }
@@ -78,12 +78,26 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
   return Bluebird.try(async () => {
     // If we're encrypting the request, we generate the JWE
     // and set it to the JSON body for the request
-    if (params.encrypt) {
+    if (params.encrypt === true || params.encrypt === 'always') {
       const { secretKey, jwe } = await enc.encryptRequest(params)
 
-      params.transform = (body, response) => {
-        if (response.headers['x-cypress-encrypted']) {
-          return enc.decryptResponse(body, secretKey)
+      params.transform = async function (body, response) {
+        if (response.headers['x-cypress-encrypted'] || params.encrypt === 'always') {
+          let decryptedBody
+
+          try {
+            decryptedBody = await enc.decryptResponse(body, secretKey)
+          } catch (e) {
+            e.isDecryptionError = true
+            throw e
+          }
+          // If we've hit an encrypted payload error case, we need to re-constitute the error
+          // as it would happen normally, with the body as an error property
+          if (response.statusCode > 400) {
+            throw new RequestErrors.StatusCodeError(response.statusCode, decryptedBody, {}, decryptedBody)
+          }
+
+          return decryptedBody
         }
 
         return body
@@ -127,6 +141,9 @@ const retryWithBackoff = (fn) => {
   return (attempt = (retryIndex) => {
     return Promise
     .try(() => fn(retryIndex))
+    .catch(RequestErrors.TransformError, (err) => {
+      throw err.cause
+    })
     .catch(isRetriableError, (err) => {
       if (retryIndex > DELAYS.length) {
         throw err
@@ -174,10 +191,17 @@ const tagError = function (err) {
 }
 
 // retry on timeouts, 5xx errors, or any error without a status code
+// do not retry on decryption errors
 const isRetriableError = (err) => {
-  return (err instanceof Promise.TimeoutError) ||
-    (500 <= err.statusCode && err.statusCode < 600) ||
-    (err.statusCode == null) && !err.message?.includes('routines:RSA_padding_check_PKCS1_OAEP_mgf1')
+  // .error is exposed as a property when the error is thrown
+  // from the transform handler
+  if (err.isDecryptionError) {
+    return false
+  }
+
+  return err instanceof Promise.TimeoutError ||
+    (err.statusCode >= 500 && err.statusCode < 600) ||
+    (err.statusCode == null)
 }
 
 export type CreateRunOptions = {
@@ -241,8 +265,9 @@ module.exports = {
 
   preflight (preflightInfo) {
     return retryWithBackoff(async (attemptIndex) => {
+      const preflightBase = process.env.CYPRESS_API_URL ? apiUrl.replace('api', 'api-proxy') : apiUrl
       const result = await rp.post({
-        url: `${apiUrl.replace('api', 'api-proxy')}preflight`,
+        url: `${preflightBase}preflight`,
         body: {
           apiUrl,
           envUrl: process.env.CYPRESS_API_URL,
@@ -253,10 +278,10 @@ module.exports = {
           'x-cypress-request-attempt': attemptIndex,
         },
         json: true,
-        encrypt: true,
+        encrypt: 'always',
       })
 
-      preflightResult = result
+      preflightResult = result // { encrypt: boolean, apiUrl: string }
       recordRoutes = makeRoutes(result.apiUrl)
 
       return result
@@ -264,39 +289,51 @@ module.exports = {
   },
 
   createRun (options: CreateRunOptions) {
-    return retryWithBackoff((attemptIndex) => {
-      const body = {
-        ..._.pick(options, [
-          'ci',
-          'specs',
-          'commit',
-          'group',
-          'platform',
-          'parallel',
-          'ciBuildId',
-          'projectId',
-          'recordKey',
-          'specPattern',
-          'tags',
-          'testingType',
-        ]),
-        runnerCapabilities,
-      }
+    const preflightOptions = _.pick(options, ['projectId', 'ciBuildId', 'browser'])
 
-      return rp.post({
-        body,
-        url: recordRoutes.runs(),
-        json: true,
-        encrypt: preflightResult.encrypt,
-        timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
-        headers: {
-          'x-route-version': '4',
-          'x-cypress-request-attempt': attemptIndex,
-        },
+    return this.preflight(preflightOptions).then((result) => {
+      const { warnings } = result
+
+      return retryWithBackoff((attemptIndex) => {
+        const body = {
+          ..._.pick(options, [
+            'ci',
+            'specs',
+            'commit',
+            'group',
+            'platform',
+            'parallel',
+            'ciBuildId',
+            'projectId',
+            'recordKey',
+            'specPattern',
+            'tags',
+            'testingType',
+          ]),
+          runnerCapabilities,
+        }
+
+        return rp.post({
+          body,
+          url: recordRoutes.runs(),
+          json: true,
+          encrypt: preflightResult.encrypt,
+          timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
+          headers: {
+            'x-route-version': '4',
+            'x-cypress-request-attempt': attemptIndex,
+          },
+        })
+        .tap((result) => {
+          // Tack on any preflight warnings prior to run warnings
+          if (warnings) {
+            result.warnings = warnings.concat(result.warnings ?? [])
+          }
+        })
       })
-      .catch(RequestErrors.StatusCodeError, formatResponseBody)
-      .catch(tagError)
     })
+    .catch(RequestErrors.StatusCodeError, formatResponseBody)
+    .catch(tagError)
   },
 
   createInstance (options) {

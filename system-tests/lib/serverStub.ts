@@ -57,24 +57,26 @@ const mockServerState = {
   specs: [],
 }
 
-const routeHandlers = {
+export const encryptBody = async (req, res, body) => {
+  const enc = new jose.GeneralEncrypt(Buffer.from(JSON.stringify(body)))
+
+  enc
+  .setProtectedHeader({ alg: 'A256GCMKW', enc: 'A256GCM', zip: 'DEF' })
+  .addRecipient(req.unwrappedSecretKey())
+
+  res.header('x-cypress-encrypted', 'true')
+
+  return await enc.encrypt()
+}
+
+export const routeHandlers = {
   preflight: {
     method: 'post',
     url: '/preflight',
     res: async (req, res) => {
       const preflightResponse = { encrypt: true, apiUrl: req.body.apiUrl }
 
-      mockServerState.setSpecs(req)
-
-      const enc = new jose.GeneralEncrypt(Buffer.from(JSON.stringify(preflightResponse)))
-
-      enc
-      .setProtectedHeader({ alg: 'A256GCMKW', enc: 'A256GCM', zip: 'DEF' })
-      .addRecipient(req.unwrappedSecretKey())
-
-      res.header('x-cypress-encrypted', 'true')
-
-      return res.json(await enc.encrypt())
+      return res.json(await encryptBody(req, res, preflightResponse))
     },
   },
   postRun: {

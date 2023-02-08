@@ -13,6 +13,8 @@ const {
   postRunResponseWithWarnings,
   postRunInstanceResponse,
   postInstanceTestsResponse,
+  routeHandlers,
+  encryptBody,
 } = require('../lib/serverStub')
 const { expectRunsToHaveCorrectTimings } = require('../lib/resultsUtils')
 
@@ -1854,6 +1856,121 @@ describe('e2e record', () => {
             record: true,
             snapshot: true,
           })
+        })
+      })
+    })
+  })
+
+  describe.only('/preflight', () => {
+    describe('preflight failure: unencrypted', () => {
+      setupStubbedServer(createRoutes({
+        preflight: {
+          res (req, res) {
+            return res.json({ apiUrl: 'http://localhost:1234' })
+          },
+        },
+      }))
+
+      it('fails on an unencrypted preflight repsonse', async function () {
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          group: 'foo',
+          tag: 'nightly',
+          record: true,
+          parallel: true,
+          snapshot: true,
+          ciBuildId: 'ciBuildId123',
+          expectedExitCode: 1,
+        })
+      })
+    })
+
+    describe('preflight failure', () => {
+      setupStubbedServer(createRoutes({
+        preflight: {
+          res: async (req, res) => {
+            return res.status(412).json(await encryptBody(req, res, {
+              message: 'Recording this way is no longer supported',
+              errors: [
+                'attempted to send envUrl foo.bar.baz',
+              ],
+              object: {
+                ciBuildId: 'abc-123',
+                projectId: 'cy12345',
+              },
+            }))
+          },
+        },
+      }))
+
+      it('renders error messages properly', async function () {
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          group: 'foo',
+          tag: 'nightly',
+          record: true,
+          parallel: true,
+          snapshot: true,
+          ciBuildId: 'ciBuildId123',
+          expectedExitCode: 1,
+        })
+      })
+    })
+
+    describe('preflight failure: warning message', () => {
+      const mockServer = setupStubbedServer(createRoutes({
+        preflight: {
+          res: async (req, res) => {
+            return res.json(await encryptBody(req, res, {
+              encrypt: true,
+              apiUrl: req.body.apiUrl,
+              warnings: [
+                {
+                  message: 'This feature will not be supported soon, please check with Cypress to learn more: https://on.cypress.io/',
+                  name: 'NotSupported',
+                },
+              ],
+            }))
+          },
+        },
+        postRun: {
+          res (req, res) {
+            mockServer.setSpecs(req)
+
+            return res.status(200).json({
+              runId,
+              groupId,
+              machineId,
+              runUrl,
+              tags,
+              warnings: [{
+                name: 'foo',
+                message: 'foo',
+                code: 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS',
+                limit: 500,
+                gracePeriodEnds: '2999-12-31',
+                orgId: 'org-id-1234',
+              }],
+            })
+          },
+        },
+      }))
+
+      it('renders preflight warning messages prior to run warnings', async function () {
+        return await systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          group: 'foo',
+          tag: 'nightly',
+          record: true,
+          parallel: true,
+          snapshot: true,
+          ciBuildId: 'ciBuildId123',
         })
       })
     })
