@@ -89,12 +89,11 @@ const badgeVariant = computed(() => {
   } else {
     classes.push('absolute', 'outline-gray-1000', 'outline-2px', 'outline', 'bottom-0', 'text-xs', 'h-16px', 'leading-2')
 
-    // Right-align failure counts within sidebar (#25662)
-    if (props.badge.status === 'failed' || props.badge.status === 'error') {
-      // Add min-width so that single-digit badge overlaps sidebar icon at least a little
-      classes.push('right-4px', 'min-w-20px', 'text-center')
+    // Keep failure count from overflowing sidebar (#25662)
+    if ((props.badge.status === 'failed' || props.badge.status === 'error') && props.badge.value.length >= 3) {
+      classes.push('right-4px')
     } else {
-      // Non-failures should left-align and overflow sidebar if needed
+      // Anything else should left-align and overflow sidebar if needed
       classes.push('left-36px')
     }
   }
