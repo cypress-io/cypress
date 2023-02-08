@@ -1897,7 +1897,7 @@ describe('e2e record', () => {
                 'attempted to send envUrl foo.bar.baz',
               ],
               object: {
-                ciBuildId: 'abc-123',
+                ciBuildId: 'ciBuildId123',
                 projectId: 'cy12345',
               },
             }))

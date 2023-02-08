@@ -2577,7 +2577,7 @@ Errors:
 Request Sent:
 
 {
-  "ciBuildId": "abc-123",
+  "ciBuildId": "ciBuildId123",
   "projectId": "cy12345"
 }
 
@@ -2658,7 +2658,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (800x2044)
+  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
 
   (Uploading Results)
