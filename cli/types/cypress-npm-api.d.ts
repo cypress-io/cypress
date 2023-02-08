@@ -96,7 +96,7 @@ declare namespace CypressCommandLine {
      */
     spec: string
     /**
-     * Specify the number of failures to cancel a run being recorded to the cloud or false to disable auto-cancellation.
+     * Specify the number of failures to cancel a run being recorded to the Cloud or false to disable auto-cancellation.
      */
     autoCancelAfterFailures: number | false
   }
