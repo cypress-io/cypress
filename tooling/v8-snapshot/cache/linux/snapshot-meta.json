@@ -3857,7 +3857,7 @@
     "./packages/graphql/src/schemaTypes/objectTypes/gql-VersionData.ts",
     "./packages/graphql/src/schemaTypes/objectTypes/gql-Wizard.ts",
     "./packages/graphql/src/schemaTypes/objectTypes/gql-WizardBundler.ts",
-    "./packages/graphql/src/schemaTypes/objectTypes/gql-ComponentFrameworkDefinition.ts",
+    "./packages/graphql/src/schemaTypes/objectTypes/gql-WizardFrontendFramework.ts",
     "./packages/graphql/src/schemaTypes/objectTypes/gql-WizardNpmPackage.ts",
     "./packages/graphql/src/schemaTypes/unions/gql-GeneratedSpecResult.ts",
     "./packages/graphql/src/schemaTypes/unions/index.ts",
