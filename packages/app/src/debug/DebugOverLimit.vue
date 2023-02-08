@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex flex-col items-center"
+    class="flex flex-col max-w-440px items-center"
   >
     <LockedProject :class="iconClasses" />
     <span class="font-medium mt-24px text-gray-900">
