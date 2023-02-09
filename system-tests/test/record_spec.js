@@ -13,7 +13,6 @@ const {
   postRunResponseWithWarnings,
   postRunInstanceResponse,
   postInstanceTestsResponse,
-  routeHandlers,
   encryptBody,
 } = require('../lib/serverStub')
 const { expectRunsToHaveCorrectTimings } = require('../lib/resultsUtils')
@@ -26,11 +25,8 @@ const { instanceId } = postRunInstanceResponse
 
 let requests = null
 
-process.env.CYPRESS_INTERNAL_TEST_KEY = '1'
-
 describe('e2e record', () => {
   beforeEach(() => {
-    process.env.CYPRESS_INTERNAL_TEST_KEY = '1'
     requests = getRequests()
   })
 

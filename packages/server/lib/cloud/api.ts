@@ -160,9 +160,6 @@ const retryWithBackoff = (fn) => {
         return attempt(retryIndex)
       })
     })
-    .catch(RequestErrors.TransformError, (err) => {
-      throw err.cause
-    })
   })(0)
 }
 
@@ -257,31 +254,6 @@ module.exports = {
     .catch(tagError)
   },
 
-  preflight (preflightInfo) {
-    return retryWithBackoff(async (attemptIndex) => {
-      const preflightBase = process.env.CYPRESS_API_URL ? apiUrl.replace('api', 'api-proxy') : apiUrl
-      const result = await rp.post({
-        url: `${preflightBase}preflight`,
-        body: {
-          apiUrl,
-          envUrl: process.env.CYPRESS_API_URL,
-          ...preflightInfo,
-        },
-        headers: {
-          'x-route-version': '1',
-          'x-cypress-request-attempt': attemptIndex,
-        },
-        json: true,
-        encrypt: 'always',
-      })
-
-      preflightResult = result // { encrypt: boolean, apiUrl: string }
-      recordRoutes = makeRoutes(result.apiUrl)
-
-      return result
-    })
-  },
-
   createRun (options: CreateRunOptions) {
     const preflightOptions = _.pick(options, ['projectId', 'ciBuildId', 'browser'])
 
@@ -326,7 +298,7 @@ module.exports = {
         })
       })
     })
-    .catch(RequestErrors.StatusCodeError, formatResponseBody)
+    .catch(RequestErrors.StatusCodeError, RequestErrors.TransformError, formatResponseBody)
     .catch(tagError)
   },
 
@@ -353,7 +325,7 @@ module.exports = {
           'x-cypress-request-attempt': attemptIndex,
         },
       })
-      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(RequestErrors.StatusCodeError, RequestErrors.TransformError, formatResponseBody)
       .catch(tagError)
     })
   },
@@ -374,7 +346,7 @@ module.exports = {
         },
         body,
       })
-      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(RequestErrors.StatusCodeError, RequestErrors.TransformError, formatResponseBody)
       .catch(tagError)
     })
   },
@@ -394,7 +366,7 @@ module.exports = {
 
         },
       })
-      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(RequestErrors.StatusCodeError, RequestErrors.TransformError, formatResponseBody)
       .catch(tagError)
     })
   },
@@ -421,7 +393,7 @@ module.exports = {
           'metadata',
         ]),
       })
-      .catch(RequestErrors.StatusCodeError, formatResponseBody)
+      .catch(RequestErrors.StatusCodeError, RequestErrors.TransformError, formatResponseBody)
       .catch(tagError)
     })
   },
@@ -462,6 +434,31 @@ module.exports = {
 
   clearCache () {
     responseCache = {}
+  },
+
+  preflight (preflightInfo) {
+    return retryWithBackoff(async (attemptIndex) => {
+      const preflightBase = process.env.CYPRESS_API_URL ? apiUrl.replace('api', 'api-proxy') : apiUrl
+      const result = await rp.post({
+        url: `${preflightBase}preflight`,
+        body: {
+          apiUrl,
+          envUrl: process.env.CYPRESS_API_URL,
+          ...preflightInfo,
+        },
+        headers: {
+          'x-route-version': '1',
+          'x-cypress-request-attempt': attemptIndex,
+        },
+        json: true,
+        encrypt: 'always',
+      })
+
+      preflightResult = result // { encrypt: boolean, apiUrl: string }
+      recordRoutes = makeRoutes(result.apiUrl)
+
+      return result
+    })
   },
 
   retryWithBackoff,
