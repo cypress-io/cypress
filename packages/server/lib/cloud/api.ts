@@ -90,7 +90,7 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
       const { secretKey, jwe } = await enc.encryptRequest(params)
 
       params.transform = async function (body, response) {
-        if (response.headers['x-cypress-encrypted'] || params.encrypt === 'always') {
+        if (response.headers['x-cypress-encrypted'] || params.encrypt === 'always' && response.statusCode < 500) {
           let decryptedBody
 
           try {

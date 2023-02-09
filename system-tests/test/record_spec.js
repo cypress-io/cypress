@@ -1890,6 +1890,44 @@ describe('e2e record', () => {
       })
     })
 
+    describe('preflight failure 500 server error', () => {
+      setupStubbedServer(createRoutes({
+        preflight: {
+          res (req, res) {
+            return res.sendStatus(500)
+          },
+        },
+      }))
+
+      it('retries on a preflight server error', async function () {
+        await new Promise((resolve, reject) => {
+          let sp
+
+          systemTests.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            configFile: 'cypress-with-project-id.config.js',
+            spec: 'record_pass*',
+            group: 'foo',
+            tag: 'nightly',
+            record: true,
+            parallel: true,
+            ciBuildId: 'ciBuildId123',
+            onSpawn (spawnResult) {
+              sp = spawnResult
+              sp.stdout.on('data', (chunk) => {
+                const msg = String(chunk)
+
+                if (msg.includes('We will retry')) {
+                  resolve()
+                  sp.kill()
+                }
+              })
+            },
+          }).catch(reject)
+        })
+      })
+    })
+
     describe('preflight failure', () => {
       setupStubbedServer(createRoutes({
         preflight: {
