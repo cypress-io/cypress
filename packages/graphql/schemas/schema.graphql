@@ -470,6 +470,9 @@ type CloudRun implements Node {
   commitInfo: CloudRunCommitInfo
   completedAt: DateTime
 
+  """Number of specs instances that have been completed within a run"""
+  completedInstanceCount: Int
+
   """When the run was created"""
   createdAt: DateTime!
 
@@ -519,6 +522,9 @@ type CloudRun implements Node {
 
   """Number of flaky tests, null if flake detection is not enabled"""
   totalFlakyTests: Int
+
+  """Number of instances within a run"""
+  totalInstanceCount: Int
 
   """This is the number of passed tests across all groups in the run"""
   totalPassed: Int
