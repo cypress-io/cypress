@@ -1222,7 +1222,7 @@ exports['e2e record passing passes 2'] = [
             'wallClockStartedAt': '2018-02-01T20:14:19.323Z',
             'wallClockDuration': 1234,
             'videoTimestamp': 9999,
-            },
+          },
         ],
       },
       {
@@ -1302,7 +1302,7 @@ exports['e2e record passing passes 2'] = [
             'wallClockStartedAt': '2018-02-01T20:14:19.323Z',
             'wallClockDuration': 1234,
             'videoTimestamp': 9999,
-            },
+          },
         ],
       },
       {
@@ -1395,9 +1395,9 @@ exports['e2e record passing passes 2'] = [
             'wallClockStartedAt': '2018-02-01T20:14:19.323Z',
             'wallClockDuration': 1234,
             'videoTimestamp': 9999,
-            },
+          },
         ],
-            },
+      },
     ],
     'exception': null,
     'video': true,
@@ -1426,7 +1426,7 @@ exports['e2e record passing passes 2'] = [
       'studioCreated': 0,
       'studioExtended': 0,
     },
-    },
+  },
 ]
 
 exports['e2e record api interaction warnings create run warnings grace period - over private tests limit warns when over private test results 1'] = `
@@ -2583,7 +2583,7 @@ Request Sent:
 
 `
 
-exports['e2e record /preflight preflight failure: unencrypted fails on an unencrypted preflight repsonse 1'] = `
+exports['e2e record /preflight preflight failure: unencrypted fails on an unencrypted preflight response 1'] = `
 We encountered an unexpected error talking to our servers.
 
 Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.

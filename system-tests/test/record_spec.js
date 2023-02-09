@@ -10,7 +10,8 @@ const Fixtures = require('../lib/fixtures')
 const {
   createRoutes,
   setupStubbedServer,
-  getRequestUrls, getRequests,
+  getRequestUrls,
+  getRequests,
   postRunResponse,
   postRunResponseWithWarnings,
   postRunInstanceResponse,
@@ -25,13 +26,7 @@ const outputPath = path.join(e2ePath, 'output.json')
 let { runId, groupId, machineId, runUrl, tags } = postRunResponse
 const { instanceId } = postRunInstanceResponse
 
-let requests = null
-
 describe('e2e record', () => {
-  beforeEach(() => {
-    requests = getRequests()
-  })
-
   context('passing', () => {
     setupStubbedServer(createRoutes())
 
@@ -56,6 +51,7 @@ describe('e2e record', () => {
       expect(stdout).to.include(runUrl)
 
       const urls = getRequestUrls()
+      const requests = getRequests()
 
       const instanceReqs = urls.slice(0, 22)
 
@@ -406,6 +402,7 @@ describe('e2e record', () => {
         snapshot: true,
       })
       .then(() => {
+        const requests = getRequests()
         const postResults = requests[3]
 
         expect(postResults.url).to.eq(`POST /instances/${instanceId}/results`)
@@ -574,6 +571,8 @@ describe('e2e record', () => {
 
       })
 
+      const requests = getRequests()
+
       expect(requests[2].body.config.defaultCommandTimeout).eq(1111)
       expect(requests[2].body.config.resolved.defaultCommandTimeout).deep.eq({
         value: 1111,
@@ -645,6 +644,8 @@ describe('e2e record', () => {
           snapshot: false,
         })
 
+        const requests = getRequests()
+
         // specs were reordered
         expect(requests[2].body.tests[0].title[1]).eq('b test')
         expect(requests[6].body.tests[0].title[1]).eq('a test')
@@ -686,6 +687,8 @@ describe('e2e record', () => {
         snapshot: true,
         expectedExitCode: 1,
       })
+
+      const requests = getRequests()
 
       expect(getRequestUrls()).deep.eq([
         'POST /runs',
@@ -748,6 +751,7 @@ describe('e2e record', () => {
             },
           },
         })
+        const requests = getRequests()
 
         console.log(stdout)
 
@@ -783,6 +787,7 @@ describe('e2e record', () => {
             },
           },
         })
+        const requests = getRequests()
 
         console.log(stdout)
 
@@ -1869,7 +1874,7 @@ describe('e2e record', () => {
         },
       }))
 
-      it('fails on an unencrypted preflight repsonse', async function () {
+      it('fails on an unencrypted preflight response', async function () {
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           configFile: 'cypress-with-project-id.config.js',

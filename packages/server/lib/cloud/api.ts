@@ -88,7 +88,6 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
           try {
             decryptedBody = await enc.decryptResponse(body, secretKey)
           } catch (e) {
-            e.name ??= 'JWEInvalid'
             e.isDecryptionError = true
             throw e
           }
