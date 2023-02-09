@@ -238,6 +238,10 @@ export class CookiesHelper {
 
     try {
       this.cookieJar.setCookie(toughCookie, this.request.url, this.sameSiteContext)
+      // If a cookie is stored in the jar, we want to make sure that the domain set in the cookie here MATCHES
+      // the domain of what is set in CDP to prevent duplications or strange overwrite behavior
+      // @ts-expect-error
+      toughCookie.isStoredInServerSideCookieJar = true
     } catch (err) {
       this.debug('adding cookie to jar failed: %s', err.message)
     }

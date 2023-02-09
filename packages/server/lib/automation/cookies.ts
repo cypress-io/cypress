@@ -46,6 +46,13 @@ const normalizeCookieProps = function (props) {
     cookie.expiry = props.expirationDate
   }
 
+  // if the cookie is stored inside the server side cookie jar,
+  // we want to make the automation client aware so the domain property
+  // isn't mutated to prevent duplicate setting of cookies from different contexts
+  if (props.isStoredInServerSideCookieJar) {
+    cookie.isStoredInServerSideCookieJar = true
+  }
+
   return cookie
 }
 

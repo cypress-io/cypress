@@ -24,11 +24,15 @@ export const toughCookieToAutomationCookie = (toughCookie: Cookie, defaultDomain
     sameSite: toughCookie.sameSite === 'none' ? 'no_restriction' : toughCookie.sameSite,
     secure: toughCookie.secure,
     value: toughCookie.value,
+    // @ts-expect-error
+    ...(toughCookie.isStoredInServerSideCookieJar ? {
+      isStoredInServerSideCookieJar: true,
+    } : {}),
   }
 }
 
 export const automationCookieToToughCookie = (automationCookie: AutomationCookie, defaultDomain: string): Cookie => {
-  return new Cookie({
+  const cookie = new Cookie({
     domain: automationCookie.domain || defaultDomain,
     expires: automationCookie.expiry != null && isFinite(automationCookie.expiry) ? new Date(automationCookie.expiry * 1000) : undefined,
     httpOnly: automationCookie.httpOnly,
@@ -39,6 +43,14 @@ export const automationCookieToToughCookie = (automationCookie: AutomationCookie
     secure: automationCookie.secure,
     value: automationCookie.value,
   })
+
+  // @ts-expect-error
+  if (automationCookie.isStoredInServerSideCookieJar) {
+    // @ts-expect-error
+    cookie.isStoredInServerSideCookieJar = true
+  }
+
+  return cookie
 }
 
 const sameSiteNoneRe = /; +samesite=(?:'none'|"none"|none)/i
