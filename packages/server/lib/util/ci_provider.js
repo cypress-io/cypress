@@ -194,6 +194,7 @@ const _providerCiParams = () => {
       'BUILDKITE_PULL_REQUEST',
       'BUILDKITE_PULL_REQUEST_REPO',
       'BUILDKITE_PULL_REQUEST_BASE_BRANCH',
+      'BUILDKITE_RETRY_COUNT',
     ]),
     circle: extract([
       'CIRCLE_JOB',
@@ -487,6 +488,7 @@ const _providerCommitParams = () => {
       authorEmail: env.BUILDKITE_BUILD_CREATOR_EMAIL,
       remoteOrigin: env.BUILDKITE_REPO,
       defaultBranch: env.BUILDKITE_PIPELINE_DEFAULT_BRANCH,
+      retryCount: env.BUILDKITE_RETRY_COUNT,
     },
     circle: {
       sha: env.CIRCLE_SHA1,

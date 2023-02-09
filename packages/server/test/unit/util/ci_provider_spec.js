@@ -298,6 +298,7 @@ describe('lib/util/ci_provider', () => {
       BUILDKITE_PULL_REQUEST: 'buildkitePullRequest',
       BUILDKITE_PULL_REQUEST_REPO: 'buildkitePullRequestRepo',
       BUILDKITE_PULL_REQUEST_BASE_BRANCH: 'buildkitePullRequestBaseBranch',
+      BUILDKITE_RETRY_COUNT: 'buildkiteRetryCount',
 
       BUILDKITE_COMMIT: 'buildKiteCommit',
       BUILDKITE_BRANCH: 'buildKiteBranch',
@@ -311,6 +312,7 @@ describe('lib/util/ci_provider', () => {
     expectsCiParams({
       buildkiteRepo: 'buildkiteRepo',
       buildkiteJobId: 'buildkiteJobId',
+      buildkiteRetryCount: 'buildkiteRetryCount',
       buildkiteSource: 'buildkiteSource',
       buildkiteBuildId: 'buildkiteBuildId',
       buildkiteBuildUrl: 'buildkiteBuildUrl',
@@ -328,6 +330,7 @@ describe('lib/util/ci_provider', () => {
       authorEmail: 'buildKiteCreatorEmail',
       remoteOrigin: 'buildkiteRepo',
       defaultBranch: 'buildkitePipelineDefaultBranch',
+      retryCount: 'buildkiteRetryCount',
     })
 
     // in this test only interested in branch and sha for example
