@@ -5,8 +5,9 @@ _Released 02/14/2023 (PENDING)_
 
 **Bugfixes:**
 
- - Fixed an issue with the Cloud project selection modal not showing the correct prompts. Fixes [#25520](https://github.com/cypress-io/cypress/issues/25520).
- - Fixed an issue where cookies were being duplicated with the same hostname, but a prepended dot. Fixed an issue where cookies may not be expiring correctly. Fixes [#25174](https://github.com/cypress-io/cypress/issues/25174), [#25205](https://github.com/cypress-io/cypress/issues/25205) and [#25495](https://github.com/cypress-io/cypress/issues/25495).
+- Fixed an issue with the Cloud project selection modal not showing the correct prompts. Fixes [#25520](https://github.com/cypress-io/cypress/issues/25520).
+- Fixed an issue in middleware where error-handling code could itself generate an error and fail to report the original issue. Fixes [#22825](https://github.com/cypress-io/cypress/issues/22825).
+- Fixed an issue where cookies were being duplicated with the same hostname, but a prepended dot. Fixed an issue where cookies may not be expiring correctly. Fixes [#25174](https://github.com/cypress-io/cypress/issues/25174), [#25205](https://github.com/cypress-io/cypress/issues/25205) and [#25495](https://github.com/cypress-io/cypress/issues/25495).
 
 **Features:**
 
@@ -17,6 +18,7 @@ _Released 02/14/2023 (PENDING)_
 - Improved the layout of the Debug Page on smaller viewports when there is a pending run. Addresses [#25664](https://github.com/cypress-io/cypress/issues/25664).
 - Improved the layout of the Debug Page when displaying informational messages. Addresses [#25669](https://github.com/cypress-io/cypress/issues/25669).
 - Icons in Debug page will no longer shrink at small viewports. Addresses [#25665](https://github.com/cypress-io/cypress/issues/25665).
+- Improved the layout of the Debug Page empty states on smaller viewports. Addressed in [#25703](https://github.com/cypress-io/cypress/pull/25703).
 - Increased the spacing between elements and their associated tooltip and added borders around artifact links on the Debug Page. Addresses [#25666](https://github.com/cypress-io/cypress/issues/25666).
 
 **Dependency Updates:**
