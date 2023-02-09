@@ -37,7 +37,7 @@
     "commander": "^5.1.0",
     "common-tags": "^1.8.0",
     "dayjs": "^1.10.4",
-    "debug": "^4.3.2",
+    "debug": "^4.3.4",
     "enquirer": "^2.3.6",
     "eventemitter2": "6.4.7",
     "execa": "4.1.0",

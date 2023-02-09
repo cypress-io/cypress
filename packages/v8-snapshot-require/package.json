@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@packages/packherd-require": "0.0.0-development",
-    "debug": "^4.1.1",
+    "debug": "^4.3.4",
     "source-map-js": "^0.6.2"
   },
   "devDependencies": {
