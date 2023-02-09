@@ -23,7 +23,7 @@ export const utils = {
           ...opts,
           env: {
             ARCHPREFERENCE: 'arm64,x86_64',
-            ...opts.env, ...process.env
+            ...opts.env,
           },
         } as T,
       )
@@ -42,7 +42,7 @@ export const utils = {
       let stdout = ''
       let stderr = ''
 
-      const proc = utils.spawnWithArch(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'] })
+      const proc = utils.spawnWithArch(cmd, args, { stdio: ['ignore', 'pipe', 'pipe'], env: process.env })
 
       const finish = () => {
         proc.kill()
