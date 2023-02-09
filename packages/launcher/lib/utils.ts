@@ -23,7 +23,7 @@ export const utils = {
           ...opts,
           env: {
             ARCHPREFERENCE: 'arm64,x86_64',
-            ...opts.env,
+            ...opts.env, ...process.env
           },
         } as T,
       )
