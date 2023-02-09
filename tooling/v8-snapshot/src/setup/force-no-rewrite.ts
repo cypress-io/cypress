@@ -26,9 +26,6 @@ export default [
   // results in recursive call to __get_fs2__
   'packages/https-proxy/lib/ca.js',
 
-  // results in losing the names of the errors
-  'node_modules/jose/dist/node/cjs/util/errors.js',
-
   // TODO: Figure out why these don't properly get flagged as norewrite: https://github.com/cypress-io/cypress/issues/23986
   'node_modules/@cspotcode/source-map-support/source-map-support.js',
   'packages/server/lib/modes/record.js',

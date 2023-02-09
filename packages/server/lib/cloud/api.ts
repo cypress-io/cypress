@@ -34,6 +34,14 @@ const runnerCapabilities = {
 
 let responseCache = {}
 
+class DecryptionError extends Error {
+  isDecryptionError = true
+  constructor (message: string) {
+    super(message)
+    this.name = 'DecryptionError'
+  }
+}
+
 export interface CypressRequestOptions extends OptionsWithUrl {
   encrypt?: boolean | 'always'
   method: string
@@ -88,8 +96,7 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
           try {
             decryptedBody = await enc.decryptResponse(body, secretKey)
           } catch (e) {
-            e.isDecryptionError = true
-            throw e
+            throw new DecryptionError(e.message)
           }
 
           // If we've hit an encrypted payload error case, we need to re-constitute the error

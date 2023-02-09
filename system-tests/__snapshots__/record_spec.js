@@ -2593,7 +2593,7 @@ The --ciBuildId flag you passed was: ciBuildId123
 
 The server's response was:
 
-JWEInvalid: JWE Recipients missing or incorrect type
+DecryptionError: JWE Recipients missing or incorrect type
 
 `
 
