@@ -53,6 +53,7 @@ export const patchDocumentCookie = (requestCookies: AutomationCookie[]) => {
 
   const getDocumentCookieValue = () => {
     return cookieJar.getCookies(url, undefined).map((cookie: ToughCookie) => {
+      // opt for the TouchCookie.toString() method to get cookie type, domain, expiry, and other attributes that might be set on the cookie that are pertinent
       return cookie.toString()
     }).join('; ')
   }
