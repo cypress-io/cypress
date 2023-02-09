@@ -170,10 +170,14 @@ describe('SidebarNavigation', () => {
     it('renders failure badge', () => {
       mountComponent({ cloudProject: { status: 'FAILED', numFailedTests: 1 } })
       cy.findByLabelText('Relevant run had 1 test failure').should('be.visible').contains('1')
-      cy.percySnapshot('Debug Badge:failed')
+      cy.percySnapshot('Debug Badge:failed:single-digit')
 
       mountComponent({ cloudProject: { status: 'FAILED', numFailedTests: 10 } })
-      cy.findByLabelText('Relevant run had 10 test failures').should('be.visible').contains('9+')
+      cy.findByLabelText('Relevant run had 10 test failures').should('be.visible').contains('10')
+      cy.percySnapshot('Debug Badge:failed:double-digit')
+
+      mountComponent({ cloudProject: { status: 'FAILED', numFailedTests: 100 } })
+      cy.findByLabelText('Relevant run had 100 test failures').should('be.visible').contains('99+')
       cy.percySnapshot('Debug Badge:failed:truncated')
     })
 
