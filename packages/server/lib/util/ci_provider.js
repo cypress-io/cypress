@@ -488,7 +488,6 @@ const _providerCommitParams = () => {
       authorEmail: env.BUILDKITE_BUILD_CREATOR_EMAIL,
       remoteOrigin: env.BUILDKITE_REPO,
       defaultBranch: env.BUILDKITE_PIPELINE_DEFAULT_BRANCH,
-      retryCount: env.BUILDKITE_RETRY_COUNT,
     },
     circle: {
       sha: env.CIRCLE_SHA1,

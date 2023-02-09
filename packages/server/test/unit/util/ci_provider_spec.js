@@ -330,7 +330,6 @@ describe('lib/util/ci_provider', () => {
       authorEmail: 'buildKiteCreatorEmail',
       remoteOrigin: 'buildkiteRepo',
       defaultBranch: 'buildkitePipelineDefaultBranch',
-      retryCount: 'buildkiteRetryCount',
     })
 
     // in this test only interested in branch and sha for example
