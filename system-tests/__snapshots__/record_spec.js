@@ -1222,7 +1222,7 @@ exports['e2e record passing passes 2'] = [
             'wallClockStartedAt': '2018-02-01T20:14:19.323Z',
             'wallClockDuration': 1234,
             'videoTimestamp': 9999,
-          },
+            },
         ],
       },
       {
@@ -1302,7 +1302,7 @@ exports['e2e record passing passes 2'] = [
             'wallClockStartedAt': '2018-02-01T20:14:19.323Z',
             'wallClockDuration': 1234,
             'videoTimestamp': 9999,
-          },
+            },
         ],
       },
       {
@@ -1395,9 +1395,9 @@ exports['e2e record passing passes 2'] = [
             'wallClockStartedAt': '2018-02-01T20:14:19.323Z',
             'wallClockDuration': 1234,
             'videoTimestamp': 9999,
-          },
+            },
         ],
-      },
+            },
     ],
     'exception': null,
     'video': true,
@@ -1426,7 +1426,7 @@ exports['e2e record passing passes 2'] = [
       'studioCreated': 0,
       'studioExtended': 0,
     },
-  },
+    },
 ]
 
 exports['e2e record api interaction warnings create run warnings grace period - over private tests limit warns when over private test results 1'] = `
@@ -2598,13 +2598,12 @@ JWEInvalid: JWE Recipients missing or incorrect type
 `
 
 exports['e2e record /preflight preflight failure: warning message renders preflight warning messages prior to run warnings 1'] = `
-Warning from Cypress Cloud: This feature will not be supported soon, please check with Cypress to learn more: https://on.cypress.io/
+Warning from Cypress Cloud: 
 
-Details:
+----------------------------------------------------------------------
+This feature will not be supported soon, please check with Cypress to learn more: https://on.cypress.io/
+----------------------------------------------------------------------
 
-{
-  "name": "NotSupported"
-}
 You've exceeded the limit of private test results under your free plan this month. The limit is 500 private test results.
 
 Your plan is now in a grace period, which means your tests will still be recorded until 2999-12-31. Please upgrade your plan to continue recording tests on Cypress Cloud in the future.

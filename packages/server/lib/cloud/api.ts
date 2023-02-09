@@ -83,7 +83,15 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
 
       params.transform = async function (body, response) {
         if (response.headers['x-cypress-encrypted'] || params.encrypt === 'always') {
-          const decryptedBody = await enc.decryptResponse(body, secretKey)
+          let decryptedBody
+
+          try {
+            decryptedBody = await enc.decryptResponse(body, secretKey)
+          } catch (e) {
+            e.name ??= 'JWEInvalid'
+            e.isDecryptionError = true
+            throw e
+          }
 
           // If we've hit an encrypted payload error case, we need to re-constitute the error
           // as it would happen normally, with the body as an error property
@@ -159,6 +167,9 @@ const retryWithBackoff = (fn) => {
 
         return attempt(retryIndex)
       })
+    })
+    .catch(RequestErrors.TransformError, (err) => {
+      throw err.cause
     })
   })(0)
 }
@@ -298,7 +309,7 @@ module.exports = {
         })
       })
     })
-    .catch(RequestErrors.StatusCodeError, RequestErrors.TransformError, formatResponseBody)
+    .catch(RequestErrors.StatusCodeError, formatResponseBody)
     .catch(tagError)
   },
 
@@ -325,7 +336,7 @@ module.exports = {
           'x-cypress-request-attempt': attemptIndex,
         },
       })
-      .catch(RequestErrors.StatusCodeError, RequestErrors.TransformError, formatResponseBody)
+      .catch(RequestErrors.StatusCodeError, formatResponseBody)
       .catch(tagError)
     })
   },
@@ -346,7 +357,7 @@ module.exports = {
         },
         body,
       })
-      .catch(RequestErrors.StatusCodeError, RequestErrors.TransformError, formatResponseBody)
+      .catch(RequestErrors.StatusCodeError, formatResponseBody)
       .catch(tagError)
     })
   },
@@ -366,7 +377,7 @@ module.exports = {
 
         },
       })
-      .catch(RequestErrors.StatusCodeError, RequestErrors.TransformError, formatResponseBody)
+      .catch(RequestErrors.StatusCodeError, formatResponseBody)
       .catch(tagError)
     })
   },
@@ -393,7 +404,7 @@ module.exports = {
           'metadata',
         ]),
       })
-      .catch(RequestErrors.StatusCodeError, RequestErrors.TransformError, formatResponseBody)
+      .catch(RequestErrors.StatusCodeError, formatResponseBody)
       .catch(tagError)
     })
   },

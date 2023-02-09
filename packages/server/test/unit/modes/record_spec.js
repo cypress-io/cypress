@@ -16,10 +16,8 @@ const initialEnv = _.clone(process.env)
 // NOTE: the majority of the logic of record_spec is
 // tested as an e2e/record_spec
 describe('lib/modes/record', () => {
-  let preflight
-
   beforeEach(() => {
-    preflight = sinon.stub(api, 'preflight').callsFake(async () => {
+    sinon.stub(api, 'preflight').callsFake(async () => {
       api.setPreflightResult({ encrypt: false })
     })
   })

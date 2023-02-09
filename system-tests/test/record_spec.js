@@ -2,6 +2,8 @@ const _ = require('lodash')
 const path = require('path')
 const Promise = require('bluebird')
 const jsonSchemas = require('@cypress/json-schemas').api
+const dedent = require('dedent')
+
 const systemTests = require('../lib/system-tests').default
 const { fs } = require('@packages/server/lib/util/fs')
 const Fixtures = require('../lib/fixtures')
@@ -1926,8 +1928,11 @@ describe('e2e record', () => {
               apiUrl: req.body.apiUrl,
               warnings: [
                 {
-                  message: 'This feature will not be supported soon, please check with Cypress to learn more: https://on.cypress.io/',
-                  name: 'NotSupported',
+                  message: dedent`
+                    ----------------------------------------------------------------------
+                    This feature will not be supported soon, please check with Cypress to learn more: https://on.cypress.io/
+                    ----------------------------------------------------------------------
+                  `,
                 },
               ],
             }))

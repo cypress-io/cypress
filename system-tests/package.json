@@ -51,6 +51,7 @@
     "cors": "2.8.5",
     "dayjs": "^1.9.3",
     "debug": "^4.3.4",
+    "dedent": "^0.7.0",
     "dockerode": "3.3.1",
     "execa": "4",
     "express": "4.17.3",
