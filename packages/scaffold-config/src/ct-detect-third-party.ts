@@ -3,6 +3,7 @@ import { pathToFileURL } from 'url'
 import globby from 'globby'
 import { z } from 'zod'
 import Debug from 'debug'
+import type { ThirdPartyComponentFrameworkDefinition } from './frameworks'
 
 const debug = Debug('cypress:scaffold-config:ct-detect-thrid-party')
 
@@ -22,7 +23,6 @@ const BundlerSchema = z.enum(['webpack', 'vite'])
 const ThirdPartyComponentFrameworkSchema = z.object({
   type: z.string().startsWith('cypress-ct-'),
   configFramework: z.string().startsWith('cypress-ct-'),
-  category: z.enum(['library', 'template']),
   name: z.string(),
   supportedBundlers: z.array(BundlerSchema),
   detectors: DependencyArraySchema,
@@ -49,7 +49,7 @@ const dynamicAbsoluteImport = (filePath: string) => {
 
 export async function detectThirdPartyCTFrameworks (
   projectRoot: string,
-): Promise<any[]> {
+): Promise<ThirdPartyComponentFrameworkDefinition[]> {
   try {
     const fullPathGlob = path.join(projectRoot, CT_FRAMEWORK_GLOB)
 
@@ -82,7 +82,7 @@ export async function detectThirdPartyCTFrameworks (
         if (!m) return false
 
         try {
-          return !!ThirdPartyComponentFrameworkSchema.parse(m)
+          return !!validateThirdPartyModule(m)
         } catch (e) {
           debug('Failed to parse third party module with validation error: %o', e)
 
@@ -97,4 +97,8 @@ export async function detectThirdPartyCTFrameworks (
 
     return []
   }
+}
+
+export function validateThirdPartyModule (m: ThirdPartyComponentFrameworkDefinition) {
+  return ThirdPartyComponentFrameworkSchema.parse(m)
 }
