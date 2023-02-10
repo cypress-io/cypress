@@ -99,8 +99,8 @@ const cypressModuleApi = {
    * })
    *
    * @see ../types/cypress-npm-api.d.ts
-   * @param {Cypress.ComponentFrameworkDefinition} config
-   * @returns {Cypress.ComponentFrameworkDefinition} the configuration passed in parameter
+   * @param {Cypress.ThirdPartyComponentFrameworkDefinition} config
+   * @returns {Cypress.ThirdPartyComponentFrameworkDefinition} the configuration passed in parameter
    */
   defineComponentFrameworkDefinition (config) {
     return config

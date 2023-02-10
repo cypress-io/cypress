@@ -1,6 +1,6 @@
 // type tests for Cypress NPM module
 // https://on.cypress.io/module-api
-import cypress, { defineConfig } from 'cypress'
+import cypress, { defineComponentFrameworkDefinition, defineConfig } from 'cypress'
 
 cypress.run // $ExpectType (options?: Partial<CypressRunOptions> | undefined) => Promise<CypressRunResult | CypressFailedRunResult>
 cypress.open // $ExpectType (options?: Partial<CypressOpenOptions> | undefined) => Promise<void>
@@ -53,6 +53,34 @@ cypress.run().then(results => {
 
 const config = defineConfig({
   modifyObstructiveCode: true
+})
+
+const solid 
+    = {
+      type: 'solid-js',
+      name: 'Solid.js',
+      package: 'solid-js',
+      installer: 'solid-js',
+      description: 'Solid is a declarative JavaScript library for creating user interfaces',
+      minVersion: '^1.0.0',
+    }
+
+const thirdPartyFrameworkDefinition = defineComponentFrameworkDefinition({
+  type: 'cypress-ct-third-party',
+  name: 'Third Party',
+  category: 'library',
+  dependencies: (bundler) => [solid],
+  detectors: [solid],
+  supportedBundlers: ['vite', 'webpack'],
+})
+
+const thirdPartyFrameworkDefinitionInvalidStrings = defineComponentFrameworkDefinition({
+  type: 'cypress-not-cy-wrong-prefix', // $ExpectError
+  name: 'Third Party',
+  category: 'template', // $ExpectError - only library supported for third party definitions
+  dependencies: (bundler) => [],
+  detectors: [{}], // $ExpectError
+  supportedBundlers: ['metro', 'webpack'], // $ExpectError
 })
 
 // component options
