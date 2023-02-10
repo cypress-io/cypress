@@ -141,35 +141,27 @@ export class RelevantRunSpecsDataSource {
 
       const { current, next } = cloudProject
 
-      if (
-        current
-         && current.runNumber
-         && current.status
-         && Number.isFinite(current.totalInstanceCount)
-         && Number.isFinite(current.completedInstanceCount)
-      ) {
-        runSpecsToReturn.runSpecs.current = {
-          totalSpecs: current.totalInstanceCount!,
-          completedSpecs: current.completedInstanceCount!,
-          runNumber: current.runNumber,
+      const formatCloudRunInfo = (cloudRunDetails: Partial<CloudRun>) => {
+        const { runNumber, totalInstanceCount, completedInstanceCount } = cloudRunDetails
+
+        if (runNumber && Number.isFinite(totalInstanceCount) && Number.isFinite(completedInstanceCount)) {
+          return {
+            totalSpecs: totalInstanceCount!,
+            completedSpecs: completedInstanceCount!,
+            runNumber,
+          }
         }
 
+        return undefined
+      }
+
+      if (current && current.status) {
+        runSpecsToReturn.runSpecs.current = formatCloudRunInfo(current)
         runSpecsToReturn.statuses.current = current.status
       }
 
-      if (
-        next
-        && next.runNumber
-        && next.status
-        && Number.isFinite(next.totalInstanceCount)
-        && Number.isFinite(next.completedInstanceCount)
-      ) {
-        runSpecsToReturn.runSpecs.next = {
-          totalSpecs: next.totalInstanceCount!,
-          completedSpecs: next.completedInstanceCount!,
-          runNumber: next.runNumber,
-        }
-
+      if (next && next.status) {
+        runSpecsToReturn.runSpecs.next = formatCloudRunInfo(next)
         runSpecsToReturn.statuses.next = next.status
       }
 
