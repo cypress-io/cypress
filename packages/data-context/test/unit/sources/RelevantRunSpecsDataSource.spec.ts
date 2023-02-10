@@ -13,25 +13,10 @@ describe('RelevantRunsDataSource', () => {
   beforeEach(() => {
     ctx = createTestDataContext('open')
     dataSource = new RelevantRunSpecsDataSource(ctx)
+    sinon.stub(ctx.project, 'projectId').resolves('test123')
   })
 
-  describe('specs', () => {
-    it('returns empty when no specs found', async () => {
-      const specs = dataSource.specs
-
-      expect(specs).to.eql({})
-    })
-
-    it('returns specs when specs are found', () => {
-      // TODO
-    })
-  })
-
-  describe('getRelevantRunSpecs()', async () => {
-    beforeEach(() => {
-      sinon.stub(ctx.project, 'projectId').resolves('test123')
-    })
-
+  describe('getRelevantRunSpecs()', () => {
     it('returns no specs or statuses when no specs found for run', async () => {
       const result = await dataSource.getRelevantRunSpecs({ current: 11111, next: 22222, commitsAhead: 0 })
 
@@ -44,11 +29,13 @@ describe('RelevantRunsDataSource', () => {
       const result = await dataSource.getRelevantRunSpecs({ current: 1, next: null, commitsAhead: 0 })
 
       expect(result).to.eql({
-        runSpecs: { current: {
-          runNumber: 1,
-          completedSpecs: 1,
-          totalSpecs: 1,
-        } },
+        runSpecs: {
+          current: {
+            runNumber: 1,
+            completedSpecs: 1,
+            totalSpecs: 1,
+          },
+        },
         statuses: { current: 'RUNNING' },
       })
     })
