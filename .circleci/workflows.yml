@@ -46,7 +46,7 @@ linuxArm64WorkflowFilters: &linux-arm64-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'mschile/chrome_memory_fix', << pipeline.git.branch >> ]
+    - equal: [ 'wait-for-workflows', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -1288,6 +1288,33 @@ jobs:
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
             yarn percy build:finalize || yarn percy build:finalize
 
+  # a special job that keeps polling Circle and when all
+  # individual jobs are finished, it closes the Percy build
+  trigger-binary-release-workflow:
+    <<: *defaults
+    resource_class: small
+    parameters:
+      <<: *defaultsParameters
+      required_env_var:
+        type: env_var_name
+    steps:
+      - restore_cached_workspace
+      - run:
+          # if this is an external pull request, the environment variables
+          # are NOT set for security reasons, thus no need to poll -
+          # and no need to finalize Percy, since there will be no visual tests
+          name: Check if <<parameters.required_env_var>> is set
+          command: |
+            if [[ -v <<parameters.required_env_var>> ]]; then
+              echo "Internal PR, good to go"
+            else
+              echo "This is an external PR, cannot access other services"
+              circleci-agent step halt
+            fi
+      - run:
+          name: "Waiting on other Circle CI workflows to finish"
+          command: CIRCLE_PIPELINE_ID="<<parameters.job-names>>" node ./scripts/wait-on-circle-workflows.js
+
   cli-visual-tests:
     <<: *defaults
     resource_class: small
@@ -2436,6 +2463,9 @@ linux-x64-workflow: &linux-x64-workflow
         requires:
           - build
     - driver-integration-memory-tests:
+        requires:
+          - build
+    - trigger-binary-release-workflow:
         requires:
           - build
     - run-frontend-shared-component-tests-chrome:
