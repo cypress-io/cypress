@@ -60,13 +60,29 @@ export async function detectThirdPartyCTFrameworks (
     const modules = await Promise.all(
       packageJsonPaths.map(async (packageJsonPath) => {
         try {
-          const packageRoot = path.dirname(packageJsonPath)
+          /**
+           * Node.js require.resolve resolves differently when given an absolute path vs package name e.g.
+           * - require.resolve('/<project-root>/node_modules/cypress-ct-solidjs') => packageJson.main
+           * - require.resolve('cypress-ct-solidjs', { paths: [projectRoot] }) => packageJson.exports
+           * We need to respect packageJson.exports so as to resolve the node specifier so we find package.json,
+           * get the packageRoot and then get the baseName giving us the module name
+           *
+           * Example package.json:
+           * {
+           *    "main": "index.mjs",
+           *    "exports": {
+           *      "node": "definition.mjs",
+           *      "default": "index.mjs"
+           *    }
+           * }
+          */
+          const packageName = path.basename(path.dirname(packageJsonPath))
 
-          debug('Attempting to resolve third party module with require.resolve: %s', packageRoot)
+          debug('Attempting to resolve third party module with require.resolve: %s', packageName)
 
-          const modulePath = require.resolve(packageRoot)
+          const modulePath = require.resolve(packageName, { paths: [projectRoot] })
 
-          debug('Resolve successful: %s', path.dirname(packageJsonPath))
+          debug('Resolve successful: %s', modulePath)
 
           const m = await dynamicAbsoluteImport(modulePath).then((m) => m.default || m)
 
