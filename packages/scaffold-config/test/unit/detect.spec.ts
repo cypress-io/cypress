@@ -6,7 +6,7 @@ import type { ProjectFixtureDir } from '@tooling/system-tests'
 import { detectFramework, detectLanguage, PkgJson, CT_FRAMEWORKS, resolveComponentFrameworkDefinition, WIZARD_DEPENDENCY_WEBPACK } from '../../src'
 import Fixtures from '@tooling/system-tests'
 import path from 'path'
-import { solidJs, solidDep } from './fixtures'
+import solidJs, { solidDep } from './fixtures'
 
 beforeEach(() => {
   // @ts-ignore

@@ -74,7 +74,7 @@ const reactMountModule = async (projectPath: string) => {
 
 export const supportStatus = ['alpha', 'beta', 'full', 'community'] as const
 
-export const CT_FRAMEWORKS: ComponentFrameworkDefinition[] = [
+export const CT_FRAMEWORKS: Cypress.ComponentFrameworkDefinition[] = [
   {
     type: 'reactscripts',
     configFramework: 'create-react-app',
@@ -281,40 +281,36 @@ export const CT_FRAMEWORKS: ComponentFrameworkDefinition[] = [
   },
 ]
 
-export type ComponentFrameworkDefinition = Omit<Cypress.ResolvedComponentFrameworkDefinition, 'dependencies'> & {
-  dependencies: (bundler: WizardBundler['type']) => Cypress.CypressComponentDependency[]
-}
-
-export function defineComponentFrameworkInternal (definition: ComponentFrameworkDefinition): ComponentFrameworkDefinition {
-  return definition
-}
-
-// Certain properties are not supported for third party frameworks right now, such as ones related to the "Create From" feature.
-type ThirdPartyComponentFrameworkDefinition = Omit<ComponentFrameworkDefinition, 'glob' | 'codeGenFramework' | 'supportStatus' | 'specPattern'>
-
 /**
- * Define a component framework to be embedded in the Cypress Component Testing
- * onboarding workflow.
- *
- * This is a no-op at runtime - it's purely for type safety.
+ * Given a first or third party Component Framework Definition,
+ * resolves into a unified ResolvedComponentFrameworkDefinition.
+ * This way we have a single type used throughout Cypress.
  */
-export function defineComponentFramework (definition: ThirdPartyComponentFrameworkDefinition): ThirdPartyComponentFrameworkDefinition {
-  return definition
-}
+export function resolveComponentFrameworkDefinition (definition: Cypress.ComponentFrameworkDefinition | Cypress.ThirdPartyComponentFrameworkDefinition): Cypress.ResolvedComponentFrameworkDefinition {
+  const isThirdPartyDefinition = definition.type.startsWith('cypress-ct-')
 
-export function resolveComponentFrameworkDefinition (definition: ComponentFrameworkDefinition | ThirdPartyComponentFrameworkDefinition): Cypress.ResolvedComponentFrameworkDefinition {
-  return {
-    ...definition,
-    supportStatus: definition.type.startsWith('cypress-ct-') ? 'community' : (definition as ComponentFrameworkDefinition).supportStatus,
-    dependencies: async (bundler, projectPath) => {
-      const declaredDeps = definition.dependencies(bundler)
+  const dependencies: Cypress.ResolvedComponentFrameworkDefinition['dependencies'] = async (bundler, projectPath) => {
+    const declaredDeps = definition.dependencies(bundler)
 
-      // Must add bundler based on launchpad selection if it's a third party definition.
-      if (definition.type.startsWith('cypress-ct-')) {
-        declaredDeps.push(getBundler(bundler))
-      }
+    // Must add bundler based on launchpad selection if it's a third party definition.
+    declaredDeps.push(getBundler(bundler))
 
-      return await Promise.all(declaredDeps.map((dep) => isDependencyInstalled(dep, projectPath)))
-    },
+    return await Promise.all(declaredDeps.map((dep) => isDependencyInstalled(dep, projectPath)))
   }
+
+  if (isThirdPartyDefinition) {
+    const def = definition as Cypress.ThirdPartyComponentFrameworkDefinition
+
+    return {
+      ...def,
+      dependencies,
+      configFramework: def.type,
+      supportStatus: 'community',
+      mountModule: () => Promise.resolve(definition.type),
+    }
+  }
+
+  const def = definition as Cypress.ComponentFrameworkDefinition
+
+  return { ...def, dependencies }
 }

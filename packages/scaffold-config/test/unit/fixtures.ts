@@ -1,4 +1,4 @@
-import { defineComponentFramework } from '../../src'
+import { defineComponentFrameworkDefinition } from 'cypress'
 
 export const solidDep: Cypress.CypressComponentDependency = {
   type: 'solid-js',
@@ -10,10 +10,8 @@ export const solidDep: Cypress.CypressComponentDependency = {
 }
 
 // must be default export
-export const solidJs = defineComponentFramework({
+export default defineComponentFrameworkDefinition({
   type: 'cypress-ct-solid-js',
-
-  configFramework: 'cypress-ct-solid-js',
 
   category: 'library',
 
@@ -27,6 +25,4 @@ export const solidJs = defineComponentFramework({
   dependencies: () => {
     return [solidDep]
   },
-
-  mountModule: (projectPath: string) => Promise.resolve('cypress-ct-solid-js'),
 })
