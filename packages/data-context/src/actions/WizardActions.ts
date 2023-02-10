@@ -100,8 +100,6 @@ export class WizardActions {
 
     this.resetWizard()
 
-    await this.detectFrameworks(this.ctx.currentProject)
-
     const detected = await detectFramework(this.ctx.currentProject, this.ctx.coreData.wizard.frameworks)
 
     debug('detected %o', detected)
@@ -161,6 +159,19 @@ export class WizardActions {
       default:
         throw new Error('Unreachable')
     }
+  }
+
+  async detectFrameworks () {
+    if (!this.ctx.currentProject) {
+      return
+    }
+
+    const officialFrameworks = CT_FRAMEWORKS.map((framework) => resolveComponentFrameworkDefinition(framework))
+    const thirdPartyFrameworks = await detectThirdPartyCTFrameworks(this.ctx.currentProject).then((frameworks) => frameworks.map(resolveComponentFrameworkDefinition))
+
+    this.ctx.update((d) => {
+      d.wizard.frameworks = officialFrameworks.concat(thirdPartyFrameworks)
+    })
   }
 
   private async scaffoldE2E () {
@@ -362,15 +373,6 @@ export class WizardActions {
 
   private ensureDir (type: 'e2e' | 'fixtures' | 'support') {
     return this.ctx.fs.ensureDir(path.join(this.projectRoot, 'cypress', type))
-  }
-
-  private async detectFrameworks (projectRoot: string) {
-    const officialFrameworks = CT_FRAMEWORKS.map((framework) => resolveComponentFrameworkDefinition(framework))
-    const thirdPartyFrameworks = await detectThirdPartyCTFrameworks(projectRoot).then((frameworks) => frameworks.map(resolveComponentFrameworkDefinition))
-
-    this.ctx.update((d) => {
-      d.wizard.frameworks = officialFrameworks.concat(thirdPartyFrameworks)
-    })
   }
 }
 

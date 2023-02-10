@@ -3,7 +3,6 @@ import { pathToFileURL } from 'url'
 import globby from 'globby'
 import { z } from 'zod'
 import Debug from 'debug'
-import type { ThirdPartyComponentFrameworkDefinition } from './frameworks'
 
 const debug = Debug('cypress:scaffold-config:ct-detect-thrid-party')
 
@@ -22,12 +21,10 @@ const BundlerSchema = z.enum(['webpack', 'vite'])
 
 const ThirdPartyComponentFrameworkSchema = z.object({
   type: z.string().startsWith('cypress-ct-'),
-  configFramework: z.string().startsWith('cypress-ct-'),
   name: z.string(),
   supportedBundlers: z.array(BundlerSchema),
   detectors: DependencyArraySchema,
   dependencies: z.function(),
-  mountModule: z.function(),
   componentIndexHtml: z.optional(z.function()),
 })
 
@@ -49,7 +46,7 @@ const dynamicAbsoluteImport = (filePath: string) => {
 
 export async function detectThirdPartyCTFrameworks (
   projectRoot: string,
-): Promise<ThirdPartyComponentFrameworkDefinition[]> {
+): Promise<Cypress.ThirdPartyComponentFrameworkDefinition[]> {
   try {
     const fullPathGlob = path.join(projectRoot, CT_FRAMEWORK_GLOB)
 
@@ -115,6 +112,6 @@ export async function detectThirdPartyCTFrameworks (
   }
 }
 
-export function validateThirdPartyModule (m: ThirdPartyComponentFrameworkDefinition) {
+export function validateThirdPartyModule (m: Cypress.ThirdPartyComponentFrameworkDefinition) {
   return ThirdPartyComponentFrameworkSchema.parse(m)
 }

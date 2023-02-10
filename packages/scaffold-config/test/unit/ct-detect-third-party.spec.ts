@@ -3,7 +3,7 @@ import fs from 'fs-extra'
 import path from 'path'
 import { detectThirdPartyCTFrameworks, validateThirdPartyModule } from '../../src'
 import { expect } from 'chai'
-import { solidJs } from './fixtures'
+import solidJs from './fixtures'
 
 async function scaffoldQwikApp (thirdPartyModuleNames: Array<'cypress-ct-qwik' | 'misconfigured-cypress-ct-qwik'>) {
   const projectRoot = await scaffoldMigrationProject('qwik-app')
@@ -43,12 +43,10 @@ describe('detectThirdPartyCTFrameworks', () => {
     const gen = (m: any) => m
 
     expect(() => validateThirdPartyModule(gen({ ...solidJs, type: 'misconfigured' }))).to.throw()
-    expect(() => validateThirdPartyModule(gen({ ...solidJs, configFramework: 'misconfigured' }))).to.throw()
     expect(() => validateThirdPartyModule(gen({ ...solidJs, name: 5 }))).to.throw()
     expect(() => validateThirdPartyModule(gen({ ...solidJs, supportedBundlers: ['random'] }))).to.throw()
     expect(() => validateThirdPartyModule(gen({ ...solidJs, detectors: {} }))).to.throw()
     expect(() => validateThirdPartyModule(gen({ ...solidJs, dependencies: {} }))).to.throw()
-    expect(() => validateThirdPartyModule(gen({ ...solidJs, mountModule: {} }))).to.throw()
     expect(() => validateThirdPartyModule(gen({ ...solidJs, componentIndexHtml: {} }))).to.throw()
   })
 })
