@@ -3400,20 +3400,20 @@ declare namespace Cypress {
     specPattern?: '**/*.cy.ts'
   }
 
-  type ComponentFrameworkDefinition = Omit<Cypress.ResolvedComponentFrameworkDefinition, 'dependencies'> & {
-    dependencies: (bundler: 'webpack' | 'vite') => Cypress.CypressComponentDependency[]
+  type ComponentFrameworkDefinition = Omit<ResolvedComponentFrameworkDefinition, 'dependencies'> & {
+    dependencies: (bundler: 'webpack' | 'vite') => CypressComponentDependency[]
   }
 
   // Certain properties are not supported for third party frameworks right now, such as ones related to the "Create From" feature.
-  type ThirdPartyComponentFrameworkDefinition = Omit<Cypress.ComponentFrameworkDefinition, 'glob' | 'codeGenFramework' | 'supportStatus' | 'specPattern' | 'mountModule' | 'configFramework' | 'type' | 'category'> & {
+  type ThirdPartyComponentFrameworkDefinition = Omit<ComponentFrameworkDefinition, 'glob' | 'codeGenFramework' | 'supportStatus' | 'specPattern' | 'mountModule' | 'configFramework' | 'type' | 'category'> & {
     type: `cypress-ct-${string}`
 
-    /** 
+    /**
      * Only `library` is supported for third party definitions.
      * `template` will be supported in the future.
      */
     category: 'library'
-  } 
+  }
 
   interface AngularDevServerProjectConfig {
     root: string

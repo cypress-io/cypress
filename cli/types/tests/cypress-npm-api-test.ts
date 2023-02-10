@@ -55,15 +55,14 @@ const config = defineConfig({
   modifyObstructiveCode: true
 })
 
-const solid 
-    = {
-      type: 'solid-js',
-      name: 'Solid.js',
-      package: 'solid-js',
-      installer: 'solid-js',
-      description: 'Solid is a declarative JavaScript library for creating user interfaces',
-      minVersion: '^1.0.0',
-    }
+const solid = {
+  type: 'solid-js',
+  name: 'Solid.js',
+  package: 'solid-js',
+  installer: 'solid-js',
+  description: 'Solid is a declarative JavaScript library for creating user interfaces',
+  minVersion: '^1.0.0',
+}
 
 const thirdPartyFrameworkDefinition = defineComponentFrameworkDefinition({
   type: 'cypress-ct-third-party',
