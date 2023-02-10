@@ -5782,6 +5782,7 @@ declare namespace Cypress {
     specPattern?: string[]
     system: SystemDetails
     tag?: string
+    autoCancelAfterFailures?: number | false
   }
 
   interface DevServerConfig {
