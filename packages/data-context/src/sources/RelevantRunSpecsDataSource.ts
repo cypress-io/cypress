@@ -139,7 +139,13 @@ export class RelevantRunSpecsDataSource {
 
       const { current, next } = cloudProject
 
-      if (current && current.runNumber && current.status) {
+      if (
+        current
+         && current.runNumber
+         && current.status
+         && typeof current.totalInstanceCount === 'number'
+         && typeof current.completedInstanceCount === 'number'
+      ) {
         runSpecsToReturn.runSpecs.current = {
           totalSpecs: current.totalInstanceCount,
           completedSpecs: current.completedInstanceCount,
@@ -149,7 +155,13 @@ export class RelevantRunSpecsDataSource {
         runSpecsToReturn.statuses.current = current.status
       }
 
-      if (next && next.runNumber && next.status) {
+      if (
+        next
+        && next.runNumber
+        && next.status
+        && typeof next.totalInstanceCount === 'number'
+        && typeof next.completedInstanceCount === 'number'
+      ) {
         runSpecsToReturn.runSpecs.next = {
           totalSpecs: next.totalInstanceCount,
           completedSpecs: next.completedInstanceCount,
