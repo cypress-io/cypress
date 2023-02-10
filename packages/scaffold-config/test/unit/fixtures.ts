@@ -1,4 +1,4 @@
-import { defineComponentFrameworkDefinition } from 'cypress'
+import { defineComponentFramework } from 'cypress'
 
 export const solidDep: Cypress.CypressComponentDependency = {
   type: 'solid-js',
@@ -10,7 +10,7 @@ export const solidDep: Cypress.CypressComponentDependency = {
 }
 
 // must be default export
-export default defineComponentFrameworkDefinition({
+export default defineComponentFramework({
   type: 'cypress-ct-solid-js',
 
   category: 'library',

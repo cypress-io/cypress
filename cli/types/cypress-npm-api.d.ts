@@ -397,9 +397,9 @@ declare module 'cypress' {
     /**
      * Provides automatic code completion for Component Frameworks Definitions.
      * While it's not strictly necessary for Cypress to parse your configuration, we
-     * recommend wrapping your Component Framework Definition object with `defineComponentFrameworkDefinition()`
+     * recommend wrapping your Component Framework Definition object with `defineComponentFramework()`
      * @example
-     * module.exports = defineComponentFrameworkDefinition({
+     * module.exports = defineComponentFramework({
      *   type: 'cypress-ct-solid-js'
      *   // ...
      * })
@@ -408,7 +408,7 @@ declare module 'cypress' {
      * @param {Cypress.ThirdPartyComponentFrameworkDefinition} config
      * @returns {Cypress.ThirdPartyComponentFrameworkDefinition} the configuration passed in parameter
      */
-    defineComponentFrameworkDefinition (config: Cypress.ThirdPartyComponentFrameworkDefinition): Cypress.ThirdPartyComponentFrameworkDefinition
+    defineComponentFramework(config: Cypress.ThirdPartyComponentFrameworkDefinition): Cypress.ThirdPartyComponentFrameworkDefinition
   }
 
   // export Cypress NPM module interface
