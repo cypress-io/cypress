@@ -2541,3 +2541,33 @@ plugin stdout
 
 
 `
+
+exports['e2e record api interaction errors create run 402 - auto cancel not available in plan errors and exits when auto cancel not available in plan 1'] = `
+Auto Cancellation is not included under your current billing plan.
+
+To enable this service, please visit your billing and upgrade to another plan with Auto Cancellation.
+
+https://on.cypress.io/dashboard/organizations/org-id-1234/billing
+
+`
+
+exports['e2e record misconfiguration errors and exits when no browser found 1'] = `
+Can't run because you've entered an invalid browser name.
+
+Browser: browserDoesNotExist was not found on your system or is not supported by Cypress.
+
+Cypress supports the following browsers:
+ - electron
+ - chrome
+ - chromium
+ - chrome:canary
+ - edge
+ - firefox
+
+You can also use a custom browser: https://on.cypress.io/customize-browsers
+
+Available browsers found on your system are:
+- browser1
+- browser2
+- browser3
+`
