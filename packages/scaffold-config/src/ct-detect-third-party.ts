@@ -4,7 +4,7 @@ import globby from 'globby'
 import { z } from 'zod'
 import Debug from 'debug'
 
-const debug = Debug('cypress:scaffold-config:ct-detect-thrid-party')
+const debug = Debug('cypress:scaffold-config:ct-detect-third-party')
 
 const DependencySchema = z.object({
   type: z.string(),
@@ -28,7 +28,7 @@ const ThirdPartyComponentFrameworkSchema = z.object({
   componentIndexHtml: z.optional(z.function()),
 })
 
-const CT_FRAMEWORK_GLOB = 'node_modules/cypress-ct-*/package.json'
+const CT_FRAMEWORK_GLOB = path.join('node_modules', 'cypress-ct-*', 'package.json')
 
 // tsc will compile `import(...)` calls to require unless a different tsconfig.module value
 // is used (e.g. module=node16). To change this, we would also have to change the ts-node behavior when requiring the
@@ -48,11 +48,11 @@ export async function detectThirdPartyCTFrameworks (
   projectRoot: string,
 ): Promise<Cypress.ThirdPartyComponentFrameworkDefinition[]> {
   try {
-    const fullPathGlob = path.join(projectRoot, CT_FRAMEWORK_GLOB)
+    const fullPathGlob = path.join(projectRoot, CT_FRAMEWORK_GLOB).replaceAll('\\', '/')
 
     const packageJsonPaths = await globby(fullPathGlob)
 
-    debug('Found packages matching "cypress-ct-*/package.json": %o', packageJsonPaths)
+    debug('Found packages matching %s glob: %o', fullPathGlob, packageJsonPaths)
 
     const modules = await Promise.all(
       packageJsonPaths.map(async (packageJsonPath) => {
