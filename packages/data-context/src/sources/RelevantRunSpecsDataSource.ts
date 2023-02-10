@@ -15,6 +15,8 @@ const RELEVANT_RUN_SPEC_OPERATION_DOC = gql`
     id
     runNumber
     status
+    completedInstanceCount
+    totalInstanceCount
     specs {
       id
       status
