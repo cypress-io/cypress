@@ -2,7 +2,6 @@ const _ = require('lodash')
 const os = require('os')
 const debug = require('debug')('cypress:server:cloud:api')
 const request = require('@cypress/request-promise')
-const Promise = require('bluebird')
 const humanInterval = require('human-interval')
 
 const RequestErrors = require('@cypress/request-promise/errors')
@@ -21,7 +20,7 @@ const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
 const TWO_MINUTES = humanInterval('2 minutes')
 
-const DELAYS = process.env.API_RETRY_INTERVALS ? process.env.API_RETRY_INTERVALS.split(',').map(_.toNumber) : [
+const DELAYS: number[] = process.env.API_RETRY_INTERVALS ? process.env.API_RETRY_INTERVALS.split(',').map(_.toNumber) : [
   THIRTY_SECONDS,
   SIXTY_SECONDS,
   TWO_MINUTES,
@@ -54,7 +53,7 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
   if (params.cacheable && (resp = getCachedResponse(params))) {
     debug('resolving with cached response for ', params.url)
 
-    return Promise.resolve(resp)
+    return Bluebird.resolve(resp)
   }
 
   _.defaults(params, {
@@ -143,11 +142,11 @@ const retryWithBackoff = (fn) => {
   if (process.env.DISABLE_API_RETRIES) {
     debug('api retries disabled')
 
-    return Promise.try(() => fn(0))
+    return Bluebird.try(() => fn(0))
   }
 
   return (attempt = (retryIndex) => {
-    return Promise
+    return Bluebird
     .try(() => fn(retryIndex))
     .catch(isRetriableError, (err) => {
       if (retryIndex > DELAYS.length) {
@@ -166,7 +165,7 @@ const retryWithBackoff = (fn) => {
 
       retryIndex++
 
-      return Promise
+      return Bluebird
       .delay(delay)
       .then(() => {
         debug(`retry #${retryIndex} after ${delay}ms`)
@@ -207,7 +206,7 @@ const isRetriableError = (err) => {
     return false
   }
 
-  return err instanceof Promise.TimeoutError ||
+  return err instanceof Bluebird.TimeoutError ||
     (err.statusCode >= 500 && err.statusCode < 600) ||
     (err.statusCode == null)
 }
@@ -429,7 +428,7 @@ module.exports = {
   },
 
   postLogout (authToken) {
-    return Promise.join(
+    return Bluebird.join(
       this.getAuthUrls(),
       machineId.machineId(),
       (urls, machineId) => {
