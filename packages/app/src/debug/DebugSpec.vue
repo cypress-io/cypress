@@ -16,11 +16,72 @@
           class="flex w-full grid px-18px gap-y-8px items-center"
         >
           <div class="flex-grow flex w-full gap-x-2 truncate items-center">
-            <IconDocumentText
-              stroke-color="gray-500"
-              fill-color="gray-100"
-              size="16"
-            />
+            <Tooltip
+              v-if="foundLocally"
+              placement="bottom"
+              color="dark"
+              :distance="8"
+            >
+              <OpenFileInIDE
+                v-slot="{onClick}"
+                :file-path="specData.fullPath"
+              >
+                <button
+                  class="rounded-md border-1px border-gray-100 p-4px group hocus:border-indigo-200"
+                  :aria-label="t('debugPage.openFile.openInIDE')"
+                  @click="onClick"
+                >
+                  <IconDocumentText
+                    stroke-color="gray-500"
+                    fill-color="gray-100"
+                    hocus-stroke-color="indigo-400"
+                    hocus-fill-color="indigo-200"
+                    size="16"
+                    interactive-colors-on-group
+                    class="min-w-16px"
+                  />
+                </button>
+              </OpenFileInIDE>
+              <template
+                #popper
+              >
+                <div
+                  class="text-center text-sm max-w-240px"
+                  data-cy="open-in-ide-tooltip"
+                >
+                  {{ t('debugPage.openFile.openInIDE') }}
+                </div>
+              </template>
+            </Tooltip>
+            <Tooltip
+              v-else
+              placement="bottom"
+              color="dark"
+              :distance="8"
+            >
+              <button
+                aria-disabled
+                :aria-label="t('debugPage.openFile.notFoundLocally')"
+                class="rounded-md border-1px border-gray-100 p-4px"
+              >
+                <IconDocumentMinus
+                  stroke-color="gray-500"
+                  fill-color="gray-100"
+                  size="16"
+                  class="min-w-16px"
+                />
+              </button>
+              <template
+                #popper
+              >
+                <div
+                  class="text-center text-sm max-w-240px"
+                  data-cy="open-in-ide-disabled-tooltip"
+                >
+                  {{ t('debugPage.openFile.notFoundLocally') }}
+                </div>
+              </template>
+            </Tooltip>
             <div
               data-cy="spec-path"
               class="flex-grow text-base non-italic truncate"
@@ -81,6 +142,7 @@
             color="dark"
             :is-interactive="!!(runAllFailuresState.cta)"
             :disabled="!runAllFailuresState.disabled"
+            :distance="8"
           >
             <Button
               data-cy="run-failures"
@@ -125,9 +187,9 @@
       <div
         v-for="thumbprint in Object.keys(specData.failedTests)"
         :key="`test-${thumbprint}`"
-        :data-cy="`test-group`"
+        data-cy="test-group"
         class="flex flex-col flex-start border-b-gray-100 border-b-1px w-full pr-16px pl-16px justify-center"
-        :class="Object.keys(specData.groups).length > 1 ? 'pb-16px': 'hover:bg-gray-50'"
+        :class="Object.keys(specData.groups).length > 1 ? 'pb-16px': 'hover:bg-gray-50 focus-within:bg-gray-50'"
       >
         <DebugFailedTest
           v-if="specData.failedTests[thumbprint].length >= 1"
@@ -142,7 +204,7 @@
 <script lang="ts" setup>
 
 import { computed, unref } from 'vue'
-import { IconActionRefresh, IconDocumentText } from '@cypress-design/vue-icon'
+import { IconActionRefresh, IconDocumentText, IconDocumentMinus } from '@cypress-design/vue-icon'
 import type { SpecDataAggregate, CloudRunInstance } from '@packages/data-context/src/gen/graphcache-config.gen'
 import DebugFailedTest from './DebugFailedTest.vue'
 import StatsMetaData from './StatsMetadata.vue'
@@ -154,6 +216,7 @@ import { useI18n } from '@cy/i18n'
 import { useDurationFormat } from '../composables/useDurationFormat'
 import { posixify } from '../paths'
 import type { StatsMetadata_GroupsFragment, TestingTypeEnum } from '../generated/graphql'
+import OpenFileInIDE from '@cy/gql-components/OpenFileInIDE.vue'
 
 export interface Spec {
   id: string

@@ -38,7 +38,7 @@ function _getResolvedMessage (semanticType, prNumber, associatedIssues = []) {
 function _printChangeLogExample (semanticType, prNumber, associatedIssues = []) {
   const resolveMessage = _getResolvedMessage(semanticType, prNumber, associatedIssues)
 
-  return `${userFacingChanges[semanticType].section}\n - <Insert change details>. ${resolveMessage}`
+  return `${userFacingChanges[semanticType].section}\n\n - <Insert change details>. ${resolveMessage}`
 }
 
 /**
@@ -132,7 +132,7 @@ async function validateChangelog ({ changedFiles, nextVersion, pendingRelease, c
     errors.push(`A changelog entry was not found in cli/CHANGELOG.md.`)
 
     if (commits.length === 1) {
-      errors.push(`Please add a changelog entry that describes the changes. Include this entry under the section:/\n\n${_printChangeLogExample(commits[0].semanticType, commits[0].prNumber, commits[0].associatedIssues)}`)
+      errors.push(`Please add a changelog entry that describes the changes. Include this entry under the section:\n\n${_printChangeLogExample(commits[0].semanticType, commits[0].prNumber, commits[0].associatedIssues)}`)
 
       return _handleErrors(errors)
     }
