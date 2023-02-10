@@ -1277,6 +1277,31 @@ describe('e2e record', () => {
       })
     })
 
+    describe('create run 402 - auto cancel not available in plan', () => {
+      setupStubbedServer(createRoutes({
+        postRun: {
+          res (req, res) {
+            return res.status(402).json({
+              code: 'AUTO_CANCEL_NOT_AVAILABLE_IN_PLAN',
+              payload: {
+                orgId: 'org-id-1234',
+              },
+            })
+          },
+        } }))
+
+      it('errors and exits when auto cancel not available in plan', function () {
+        return systemTests.exec(this, {
+          key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+          configFile: 'cypress-with-project-id.config.js',
+          spec: 'record_pass*',
+          record: true,
+          snapshot: true,
+          expectedExitCode: 1,
+        })
+      })
+    })
+
     describe('create instance', () => {
       setupStubbedServer(createRoutes({
         postRunInstance: {
