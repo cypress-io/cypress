@@ -198,7 +198,7 @@ export class ProjectConfigManager {
     }
 
     const isFrameworkSatisfied = async (bundler: typeof WIZARD_BUNDLERS[number], framework: Cypress.ResolvedComponentFrameworkDefinition) => {
-      const deps = await (framework.dependencies(bundler.type, this.options.projectRoot))
+      const deps = await framework.dependencies(bundler.type, this.options.projectRoot)
 
       debug('deps are %o', deps)
 

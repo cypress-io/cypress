@@ -74,9 +74,10 @@ const thirdPartyFrameworkDefinition = defineComponentFramework({
 })
 
 const thirdPartyFrameworkDefinitionInvalidStrings = defineComponentFramework({
-  type: 'cypress-not-cy-wrong-prefix', // $ExpectError
+  type: 'cypress-ct-third-party',
   name: 'Third Party',
-  category: 'template', // $ExpectError - only library supported for third party definitions
+  // only library supported for third party definitions
+  category: 'template', // $ExpectError
   dependencies: (bundler) => [],
   detectors: [{}], // $ExpectError
   supportedBundlers: ['metro', 'webpack'] // $ExpectError

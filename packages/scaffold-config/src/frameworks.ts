@@ -72,7 +72,7 @@ const reactMountModule = async (projectPath: string) => {
   return semver.major(reactPkg.detectedVersion) === 18 ? 'cypress/react18' : 'cypress/react'
 }
 
-export const supportStatus = ['alpha', 'beta', 'full', 'community'] as const
+export const SUPPORT_STATUSES: Readonly<Cypress.ResolvedComponentFrameworkDefinition['supportStatus'][]> = ['alpha', 'beta', 'full', 'community'] as const
 
 export const CT_FRAMEWORKS: Cypress.ComponentFrameworkDefinition[] = [
   {

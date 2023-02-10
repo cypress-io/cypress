@@ -34,7 +34,7 @@
         {{ selectedOptionName }}
       </span>
       <AlphaLabel v-if="selectedFrameworkOptionObject?.supportStatus === 'alpha'" />
-      <CommunityLabel v-if="selectedFrameworkOptionObject?.supportStatus === 'community'" />
+      <CommunityLabel v-else-if="selectedFrameworkOptionObject?.supportStatus === 'community'" />
       <span
         v-if="isDetected"
         class="ml-4px text-gray-400 inline-block"
@@ -48,7 +48,7 @@
         {{ itemValue.name }}
       </span>
       <AlphaLabel v-if="itemValue.supportStatus === 'alpha'" />
-      <CommunityLabel v-if="itemValue.supportStatus === 'community'" />
+      <CommunityLabel v-else-if="itemValue.supportStatus === 'community'" />
       <span
         v-if="itemValue.isDetected"
         class="ml-4px text-gray-400 inline-block"

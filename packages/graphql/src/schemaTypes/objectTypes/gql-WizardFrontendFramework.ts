@@ -1,6 +1,7 @@
 import { WizardBundler } from './gql-WizardBundler'
 import { objectType } from 'nexus'
 import { WIZARD_BUNDLERS } from '@packages/scaffold-config'
+import { SupportStatusEnum } from '../enumTypes'
 
 export const WizardFrontendFramework = objectType({
   name: 'WizardFrontendFramework',
@@ -19,8 +20,9 @@ export const WizardFrontendFramework = objectType({
       description: 'The display name of the framework',
     })
 
-    t.nonNull.string('supportStatus', {
+    t.nonNull.field('supportStatus', {
       description: 'Current support status of the framework',
+      type: SupportStatusEnum,
     })
 
     t.nonNull.boolean('isSelected', {

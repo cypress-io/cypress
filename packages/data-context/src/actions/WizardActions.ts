@@ -313,7 +313,7 @@ export class WizardActions {
 
     await this.ensureDir('support')
 
-    const defaultComponentIndex = componentIndexHtmlGenerator('')
+    const defaultComponentIndex = componentIndexHtmlGenerator()
 
     return this.scaffoldFile(
       componentIndexHtmlPath,

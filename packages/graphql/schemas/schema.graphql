@@ -311,6 +311,16 @@ type CloudProjectSpec implements Node {
     """
     fromBranch: String!
   ): Float
+
+  """
+  Average duration the spec takes to run within the context of the provided CloudRun ids.
+  """
+  averageDurationForRunIds(
+    """
+    The ids for the CloudRuns to use to derive the average duration. When provided, the fromBranch argument is ignored, as the provided run ids define the search space.
+    """
+    cloudRunIds: [ID!]!
+  ): Float
   flakyStatus(
     """The number of runs to consider when counting flaky runs."""
     flakyRunsWindow: Int!
@@ -321,11 +331,31 @@ type CloudProjectSpec implements Node {
     fromBranch: String!
   ): CloudProjectSpecFlakyResult
 
+  """
+  The flaky metadata for the spec within the context of the provided CloudRun ids.
+  """
+  flakyStatusForRunIds(
+    """
+    The ids for the CloudRuns, ordered from most to least relevant, to use to derive the flaky status.
+    """
+    cloudRunIds: [ID!]!
+  ): CloudProjectSpecFlakyResult
+
   """Globally unique identifier representing a concrete GraphQL ObjectType"""
   id: ID!
   isConsideredFlaky(
     """The branch to measure flakiness against"""
     fromBranch: String!
+  ): Boolean
+
+  """
+  Indicator that a spec is considered flaky within the context of the provided CloudRun ids.
+  """
+  isConsideredFlakyForRunIds(
+    """
+    The ids for the CloudRuns to use to derive the flake indicator. When provided, the fromBranch argument is ignored, as the provided run ids define the search space.
+    """
+    cloudRunIds: [ID!]!
   ): Boolean
 
   """
@@ -380,6 +410,16 @@ type CloudProjectSpecFlakyStatus {
   The last flaky run occurrence, interpreted as "n runs ago" - ex: a value of 5 means a flaky run last occurred 5 runs ago
   """
   lastFlaky: Int
+
+  """
+  The associated commit_sha of the CloudRun containing the most recent flaky occurrence of the spec.
+  """
+  lastFlakyRunCommitSha: String
+
+  """
+  The run number of the CloudRun containing the most recent flaky occurrence of the spec.
+  """
+  lastFlakyRunNumber: Int
   severity: String
 }
 
@@ -430,6 +470,9 @@ type CloudRun implements Node {
   commitInfo: CloudRunCommitInfo
   completedAt: DateTime
 
+  """Number of specs instances that have been completed within a run"""
+  completedInstanceCount: Int
+
   """When the run was created"""
   createdAt: DateTime!
 
@@ -479,6 +522,9 @@ type CloudRun implements Node {
 
   """Number of flaky tests, null if flake detection is not enabled"""
   totalFlakyTests: Int
+
+  """Number of instances within a run"""
+  totalInstanceCount: Int
 
   """This is the number of passed tests across all groups in the run"""
   totalPassed: Int
@@ -2351,7 +2397,7 @@ type WizardFrontendFramework implements Node {
   name: String!
 
   """Current support status of the framework"""
-  supportStatus: String!
+  supportStatus: SupportStatusEnum!
 
   """All of the supported bundlers for this framework"""
   supportedBundlers: [WizardBundler!]!
