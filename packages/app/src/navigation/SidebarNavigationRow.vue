@@ -82,7 +82,23 @@ const props = withDefaults(defineProps <{
 })
 
 const badgeVariant = computed(() => {
-  return props.isNavBarExpanded ? 'ml-16px h-20px text-sm leading-3' : 'absolute outline-gray-1000 outline-2px outline bottom-0 left-36px text-xs h-16px leading-2'
+  const classes: string[] = []
+
+  if (props.isNavBarExpanded) {
+    classes.push('ml-16px', 'h-20px', 'text-sm', 'leading-3')
+  } else {
+    classes.push('absolute', 'outline-gray-1000', 'outline-2px', 'outline', 'bottom-0', 'text-xs', 'h-16px', 'leading-2')
+
+    // Keep failure count from overflowing sidebar (#25662)
+    if ((props.badge.status === 'failed' || props.badge.status === 'error') && props.badge.value.length >= 3) {
+      classes.push('right-4px')
+    } else {
+      // Anything else should left-align and overflow sidebar if needed
+      classes.push('left-36px')
+    }
+  }
+
+  return classes
 })
 
 const badgeColorStyles = {
