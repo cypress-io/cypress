@@ -6,7 +6,7 @@ import { createTestDataContext } from '../helper'
 import { RelevantRunSpecsDataSource, SPECS_EMPTY_RETURN } from '../../../src/sources'
 import { FAKE_PROJECT_ONE_RUNNING_RUN_ONE_COMPLETED_THREE_SPECS, FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC } from './fixtures/graphqlFixtures'
 
-describe('RelevantRunsDataSource', () => {
+describe('RelevantRunSpecsDataSource', () => {
   let ctx: DataContext
   let dataSource: RelevantRunSpecsDataSource
 
