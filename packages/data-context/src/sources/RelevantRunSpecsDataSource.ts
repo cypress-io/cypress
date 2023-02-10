@@ -210,9 +210,9 @@ export class RelevantRunSpecsDataSource {
           debug('Run statuses changed')
           const projectSlug = await this.ctx.project.projectId()
 
-          const isWatchingCurrentProject = this.ctx.relevantRuns.runs.current === this.#cached.runSpecs.current?.runNumber
+          const wasWatchingCurrentProject = this.#cached.statuses.current === 'RUNNING'
 
-          if (projectSlug && isWatchingCurrentProject) {
+          if (projectSlug && wasWatchingCurrentProject) {
             debug(`Invalidate cloudProjectBySlug ${projectSlug}`)
             await this.ctx.cloud.invalidate('Query', 'cloudProjectBySlug', { slug: projectSlug })
           }
