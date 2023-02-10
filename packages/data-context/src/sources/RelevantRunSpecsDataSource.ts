@@ -145,12 +145,12 @@ export class RelevantRunSpecsDataSource {
         current
          && current.runNumber
          && current.status
-         && typeof current.totalInstanceCount === 'number'
-         && typeof current.completedInstanceCount === 'number'
+         && Number.isFinite(current.totalInstanceCount)
+         && Number.isFinite(current.completedInstanceCount)
       ) {
         runSpecsToReturn.runSpecs.current = {
-          totalSpecs: current.totalInstanceCount,
-          completedSpecs: current.completedInstanceCount,
+          totalSpecs: current.totalInstanceCount!,
+          completedSpecs: current.completedInstanceCount!,
           runNumber: current.runNumber,
         }
 
@@ -161,12 +161,12 @@ export class RelevantRunSpecsDataSource {
         next
         && next.runNumber
         && next.status
-        && typeof next.totalInstanceCount === 'number'
-        && typeof next.completedInstanceCount === 'number'
+        && Number.isFinite(next.totalInstanceCount)
+        && Number.isFinite(next.completedInstanceCount)
       ) {
         runSpecsToReturn.runSpecs.next = {
-          totalSpecs: next.totalInstanceCount,
-          completedSpecs: next.completedInstanceCount,
+          totalSpecs: next.totalInstanceCount!,
+          completedSpecs: next.completedInstanceCount!,
           runNumber: next.runNumber,
         }
 
@@ -195,6 +195,7 @@ export class RelevantRunSpecsDataSource {
 
         debug(`Spec data is `, specs)
 
+        const wasWatchingCurrentProject = this.#cached.statuses.current === 'RUNNING'
         const specCountsChanged = !isEqual(specs.runSpecs, this.#cached.runSpecs)
         const statusesChanged = !isEqual(specs.statuses, this.#cached.statuses)
 
@@ -209,8 +210,6 @@ export class RelevantRunSpecsDataSource {
         if (statusesChanged) {
           debug('Run statuses changed')
           const projectSlug = await this.ctx.project.projectId()
-
-          const wasWatchingCurrentProject = this.#cached.statuses.current === 'RUNNING'
 
           if (projectSlug && wasWatchingCurrentProject) {
             debug(`Invalidate cloudProjectBySlug ${projectSlug}`)
