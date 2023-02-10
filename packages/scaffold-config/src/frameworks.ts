@@ -293,7 +293,9 @@ export function resolveComponentFrameworkDefinition (definition: Cypress.Compone
     const declaredDeps = definition.dependencies(bundler)
 
     // Must add bundler based on launchpad selection if it's a third party definition.
-    declaredDeps.push(getBundler(bundler))
+    if (isThirdPartyDefinition) {
+      declaredDeps.push(getBundler(bundler))
+    }
 
     return await Promise.all(declaredDeps.map((dep) => isDependencyInstalled(dep, projectPath)))
   }
