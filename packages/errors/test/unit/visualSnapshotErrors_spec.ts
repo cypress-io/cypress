@@ -535,6 +535,22 @@ describe('visual error templates', () => {
         }],
       }
     },
+    CLOUD_AUTO_CANCEL_NOT_AVAILABLE_IN_PLAN: () => {
+      return {
+        default: [{ link: 'https://on.cypress.io/set-up-billing' }],
+      }
+    },
+    CLOUD_AUTO_CANCEL_MISMATCH: () => {
+      return {
+        default: [{
+          runUrl: 'https://cloud.cypress.io/project/abcd/runs/1',
+          tag: '123',
+          group: 'foo',
+          parallel: true,
+          autoCancelAfterFailures: 3,
+        }],
+      }
+    },
     DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS: () => {
       return {
         default: [],
