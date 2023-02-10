@@ -202,9 +202,9 @@ watchEffect(() => {
     let countToDisplay = '0'
 
     if (totalFailed) {
-      countToDisplay = totalFailed < 9
+      countToDisplay = totalFailed < 99
         ? String(totalFailed)
-        : '9+'
+        : '99+'
     }
 
     if (status === 'FAILED') {

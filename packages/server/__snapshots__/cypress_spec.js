@@ -1,5 +1,5 @@
 exports['RECORD_PARAMS_WITHOUT_RECORDING-ciBuildId 1'] = `
-You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
+You passed the --ci-build-id, --group, --tag, --parallel, or --auto-cancel-after-failures flag without also passing the --record flag.
 
 The --ci-build-id flag you passed was: ciBuildId123
 
@@ -19,7 +19,7 @@ https://on.cypress.io/incorrect-ci-build-id-usage
 `
 
 exports['RECORD_PARAMS_WITHOUT_RECORDING-group 1'] = `
-You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
+You passed the --ci-build-id, --group, --tag, --parallel, or --auto-cancel-after-failures flag without also passing the --record flag.
 
 The --group flag you passed was: e2e-tests
 
@@ -29,7 +29,7 @@ https://on.cypress.io/record-params-without-recording
 `
 
 exports['RECORD_PARAMS_WITHOUT_RECORDING-parallel 1'] = `
-You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
+You passed the --ci-build-id, --group, --tag, --parallel, or --auto-cancel-after-failures flag without also passing the --record flag.
 
 The --parallel flag you passed was: true
 
@@ -39,7 +39,7 @@ https://on.cypress.io/record-params-without-recording
 `
 
 exports['RECORD_PARAMS_WITHOUT_RECORDING-group-parallel 1'] = `
-You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
+You passed the --ci-build-id, --group, --tag, --parallel, or --auto-cancel-after-failures flag without also passing the --record flag.
 
 The --group flag you passed was: electron-smoke-tests
 The --parallel flag you passed was: true
@@ -273,7 +273,7 @@ https://on.cypress.io/stale-run
 `
 
 exports['RECORD_PARAMS_WITHOUT_RECORDING-tag 1'] = `
-You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
+You passed the --ci-build-id, --group, --tag, --parallel, or --auto-cancel-after-failures flag without also passing the --record flag.
 
 These flags can only be used when recording to Cypress Cloud.
 
@@ -409,4 +409,37 @@ exports['CLOUD_RECOMMENDATION_MESSAGE'] = `
   >> https://on.cypress.io/cloud-get-started
 
 ----------------------------------------------------------------------------------------------------
+`
+
+exports['RECORD_PARAMS_WITHOUT_RECORDING-no-auto-cancel-after-failures 1'] = `
+You passed the --ci-build-id, --group, --tag, --parallel, or --auto-cancel-after-failures flag without also passing the --record flag.
+
+These flags can only be used when recording to Cypress Cloud.
+
+https://on.cypress.io/record-params-without-recording
+`
+
+exports['RECORD_PARAMS_WITHOUT_RECORDING-auto-cancel-after-failures 1'] = `
+You passed the --ci-build-id, --group, --tag, --parallel, or --auto-cancel-after-failures flag without also passing the --record flag.
+
+The --auto-cancel-after-failures flag you passed was: 4
+
+These flags can only be used when recording to Cypress Cloud.
+
+https://on.cypress.io/record-params-without-recording
+`
+
+exports['CLOUD_AUTO_CANCEL_MISMATCH 1'] = `
+You passed the --auto-cancel-after-failures flag, but this run originally started with a different value for the --auto-cancel-after-failures flag.
+
+The existing run is: https://cloud.cypress.io/runs/12345
+
+The --tag flag you passed was: nightly
+The --group flag you passed was: electron-smoke-tests
+The --ciBuildId flag you passed was: ciBuildId123
+The --auto-cancel-after-failures flag you passed was: 4
+
+The first setting of --auto-cancel-after-failures for any given run takes precedent.
+
+https://on.cypress.io/auto-cancellation-mismatch
 `

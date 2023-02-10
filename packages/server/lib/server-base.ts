@@ -95,6 +95,12 @@ const notSSE = (req, res) => {
 
 export type WarningErr = Record<string, any>
 
+type FileServer = {
+  token: string
+  port: () => number
+  close: () => void
+}
+
 export interface OpenServerOptions {
   SocketCtor: typeof SocketE2E | typeof SocketCt
   testingType: Cypress.TestingType
@@ -112,7 +118,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected isListening: boolean
   protected socketAllowed: SocketAllowed
   protected requestedWithAndCredentialManager: RequestedWithAndCredentialManager
-  protected _fileServer
+  protected _fileServer: FileServer | null
   protected _baseUrl: string | null
   protected _server?: DestroyableHttpServer
   protected _socket?: TSocket
@@ -320,7 +326,7 @@ export abstract class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   createNetworkProxy ({ config, remoteStates, requestedWithAndCredentialManager, shouldCorrelatePreRequests }) {
     const getFileServerToken = () => {
-      return this._fileServer.token
+      return this._fileServer?.token
     }
 
     this._netStubbingState = netStubbingState()
