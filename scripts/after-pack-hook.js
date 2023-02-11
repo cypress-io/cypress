@@ -79,6 +79,8 @@ module.exports = async function (params) {
         },
       )
 
+      process.env.V8_UPDATE_METAFILE = '1'
+
       // Build out the entry point and clean up prior to setting up v8 snapshots so that the state of the binary is correct
       await buildEntryPointAndCleanup(outputFolder)
       await setupV8Snapshots({

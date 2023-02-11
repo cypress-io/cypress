@@ -271,7 +271,7 @@ module.exports = {
   },
 
   createRun (options: CreateRunOptions) {
-    const preflightOptions = _.pick(options, ['projectId', 'ciBuildId', 'browser'])
+    const preflightOptions = _.pick(options, ['projectId', 'ciBuildId', 'browser', 'testingType', 'parallel', 'platform'])
 
     return this.preflight(preflightOptions).then((result) => {
       const { warnings } = result
