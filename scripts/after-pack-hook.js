@@ -58,8 +58,17 @@ module.exports = async function (params) {
 
     if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE)) {
       const binaryEntryPointSource = await getBinaryEntryPointSource()
+      const encryptionFile = path.join(outputFolder, 'packages/server/lib/cloud/encryption.js')
+      const fileContents = await fs.readFile(encryptionFile, 'utf8')
 
-      await fs.writeFile(path.join(outputFolder, 'index.js'), binaryEntryPointSource)
+      if (!fileContents.includes(`test: CY_TEST,`)) {
+        throw new Error(`Expected to find test key in cloud encryption file`)
+      }
+
+      await Promise.all([
+        fs.writeFile(encryptionFile, fileContents.replace(`test: CY_TEST,`, '')),
+        fs.writeFile(path.join(outputFolder, 'index.js'), binaryEntryPointSource),
+      ])
 
       await flipFuses(
         exePathPerPlatform[os.platform()],
