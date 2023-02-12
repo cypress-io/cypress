@@ -1812,24 +1812,17 @@ declare namespace Cypress {
     readFile<Contents = any>(filePath: string, encoding: Encodings, options?: Partial<Loggable & Timeoutable>): Chainable<Contents>
 
     /**
-     * Reload the page.
-     *
-     * @see https://on.cypress.io/reload
-     * @example
-     *    cy.reload()
-     */
-    reload(options?: Partial<Loggable & Timeoutable>): Chainable<AUTWindow>
-    /**
      * Reload the page without cache
      *
      * @see https://on.cypress.io/reload
      * @param {Boolean} forceReload Whether to reload the current page without using the cache. true forces the reload without cache.
+     * @param {ReloadOptions} [options] Pass in an options object to modify the default behavior of `cy.reload()`
      * @example
      *    // Reload the page without using the cache
      *    cy.visit('http://localhost:3000/admin')
      *    cy.reload(true)
      */
-    reload(forceReload: boolean): Chainable<AUTWindow>
+    reload(forceReload?: boolean, options?: Partial<ReloadOptions>): Chainable<AUTWindow>
 
     /**
      * Make an HTTP GET request.
@@ -3364,6 +3357,24 @@ declare namespace Cypress {
     keystrokeDelay: number
   }
 
+  /**
+   * Reload page options
+   *
+   * @see https://on.cypress.io/reload
+   */
+  interface ReloadOptions extends Loggable, Timeoutable {
+    /**
+     * Whether or not to display the command in the Command log
+     * @default true
+     */
+    log?: boolean
+    /**
+     * Time to wait for cy.reload() to resolve before timing out
+     * @default 'pageLoadTimeout'
+     */
+    timeout?: number
+  }
+  
   /**
    * Full set of possible options for cy.request call
    */
