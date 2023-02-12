@@ -26,6 +26,7 @@ _Released 02/14/2023 (PENDING)_
 - Increased maximum number of failing tests to reflect in sidebar badge to 99. Addresses [#25662](https://github.com/cypress-io/cypress/issues/25662).
 - Improved the layout of the Debug Page empty states on smaller viewports. Addressed in [#25703](https://github.com/cypress-io/cypress/pull/25703).
 - Increased the spacing between elements and their associated tooltip and added borders around artifact links on the Debug Page. Addresses [#25666](https://github.com/cypress-io/cypress/issues/25666).
+- Improved type definitions for cy.reload() command. Addressed in [#25779](https://github.com/cypress-io/cypress/pull/25779).
 
 **Dependency Updates:**
 
