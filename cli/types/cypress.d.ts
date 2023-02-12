@@ -1832,7 +1832,7 @@ declare namespace Cypress {
      */
     reload(forceReload: boolean): Chainable<AUTWindow>
     /**
-     * Reload the page without cache
+     * Reload the page without cache and with log and timeout options
      *
      * @see https://on.cypress.io/reload
      * @param {Boolean} forceReload Whether to reload the current page without using the cache. true forces the reload without cache.
