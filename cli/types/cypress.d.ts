@@ -1811,6 +1811,26 @@ declare namespace Cypress {
      */
     readFile<Contents = any>(filePath: string, encoding: Encodings, options?: Partial<Loggable & Timeoutable>): Chainable<Contents>
 
+        /**
+     * Reload the page.
+     *
+     * @see https://on.cypress.io/reload
+     * @param {ReloadOptions} [options] Pass in an options object to modify the default behavior of `cy.reload()`
+     * @example
+     *    cy.reload({log: false, timeout: 30000})
+     */
+    reload(options?: Partial<ReloadOptions>): Chainable<AUTWindow>
+    /**
+     * Reload the page without cache
+     *
+     * @see https://on.cypress.io/reload
+     * @param {Boolean} forceReload Whether to reload the current page without using the cache. true forces the reload without cache.
+     * @example
+     *    // Reload the page without using the cache
+     *    cy.visit('http://localhost:3000/admin')
+     *    cy.reload(true)
+     */
+    reload(forceReload: boolean): Chainable<AUTWindow>
     /**
      * Reload the page without cache
      *
@@ -1818,11 +1838,11 @@ declare namespace Cypress {
      * @param {Boolean} forceReload Whether to reload the current page without using the cache. true forces the reload without cache.
      * @param {ReloadOptions} [options] Pass in an options object to modify the default behavior of `cy.reload()`
      * @example
-     *    // Reload the page without using the cache
+     *    // Reload the page without using the cache, do not log it in the command log and timeout after 5s
      *    cy.visit('http://localhost:3000/admin')
-     *    cy.reload(true)
+     *    cy.reload(true, {log: false, timeout: 5000})
      */
-    reload(forceReload?: boolean, options?: Partial<ReloadOptions>): Chainable<AUTWindow>
+    reload(forceReload: boolean, options?: Partial<ReloadOptions>): Chainable<AUTWindow>
 
     /**
      * Make an HTTP GET request.
@@ -3374,7 +3394,7 @@ declare namespace Cypress {
      */
     timeout?: number
   }
-  
+
   /**
    * Full set of possible options for cy.request call
    */
