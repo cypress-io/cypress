@@ -3382,7 +3382,7 @@ declare namespace Cypress {
    *
    * @see https://on.cypress.io/reload
    */
-  interface ReloadOptions extends Loggable, Timeoutable {
+  interface ReloadOptions {
     /**
      * Whether or not to display the command in the Command log
      * @default true
@@ -3390,7 +3390,7 @@ declare namespace Cypress {
     log?: boolean
     /**
      * Time to wait for cy.reload() to resolve before timing out
-     * @default 'pageLoadTimeout'
+     * @default pageLoadTimeout
      */
     timeout?: number
   }
