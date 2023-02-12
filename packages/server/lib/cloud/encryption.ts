@@ -22,7 +22,7 @@ const keys: Record<string, string> = {
 const keyObjects: Record<string, crypto.KeyObject> = {}
 
 function getPublicKey () {
-  const env = process.env.CYPRESS_INTERNAL_ENV || 'production'
+  const env = process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'development'
 
   if (!keyObjects[env]) {
     keyObjects[env] = crypto.createPublicKey(Buffer.from(keys[env], 'base64').toString('utf8').trim())

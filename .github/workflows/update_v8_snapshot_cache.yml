@@ -5,7 +5,7 @@ on:
     - cron: '0 0 * * 3'
   push:
     branches:
-      - tgriesser/spike/spike
+      # - tgriesser/spike/spike
       - ryanm/feature/v8-snapshots-auto-pr
       - develop
       - 'release/**'
