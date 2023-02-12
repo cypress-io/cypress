@@ -281,38 +281,37 @@ export const CT_FRAMEWORKS: Cypress.ComponentFrameworkDefinition[] = [
   },
 ]
 
+function isThirdPartyDefinition (definition: Cypress.ComponentFrameworkDefinition | Cypress.ThirdPartyComponentFrameworkDefinition): definition is Cypress.ThirdPartyComponentFrameworkDefinition {
+  return definition.type.startsWith('cypress-ct')
+}
 /**
  * Given a first or third party Component Framework Definition,
  * resolves into a unified ResolvedComponentFrameworkDefinition.
  * This way we have a single type used throughout Cypress.
  */
 export function resolveComponentFrameworkDefinition (definition: Cypress.ComponentFrameworkDefinition | Cypress.ThirdPartyComponentFrameworkDefinition): Cypress.ResolvedComponentFrameworkDefinition {
-  const isThirdPartyDefinition = definition.type.startsWith('cypress-ct-')
+  const thirdParty = isThirdPartyDefinition(definition) // type.startsWith('cypress-ct-')
 
   const dependencies: Cypress.ResolvedComponentFrameworkDefinition['dependencies'] = async (bundler, projectPath) => {
     const declaredDeps = definition.dependencies(bundler)
 
     // Must add bundler based on launchpad selection if it's a third party definition.
-    if (isThirdPartyDefinition) {
+    if (thirdParty) {
       declaredDeps.push(getBundler(bundler))
     }
 
     return await Promise.all(declaredDeps.map((dep) => isDependencyInstalled(dep, projectPath)))
   }
 
-  if (isThirdPartyDefinition) {
-    const def = definition as Cypress.ThirdPartyComponentFrameworkDefinition
-
+  if (thirdParty) {
     return {
-      ...def,
+      ...definition,
       dependencies,
-      configFramework: def.type,
+      configFramework: definition.type,
       supportStatus: 'community',
       mountModule: () => Promise.resolve(definition.type),
     }
   }
 
-  const def = definition as Cypress.ComponentFrameworkDefinition
-
-  return { ...def, dependencies }
+  return { ...definition, dependencies }
 }
