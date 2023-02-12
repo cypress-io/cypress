@@ -1811,7 +1811,7 @@ declare namespace Cypress {
      */
     readFile<Contents = any>(filePath: string, encoding: Encodings, options?: Partial<Loggable & Timeoutable>): Chainable<Contents>
 
-        /**
+    /**
      * Reload the page.
      *
      * @see https://on.cypress.io/reload
