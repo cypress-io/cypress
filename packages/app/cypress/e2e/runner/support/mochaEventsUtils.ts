@@ -145,7 +145,7 @@ export function runCypressInCypressMochaEventsTest<T> (snapshots: T, snapToCompa
   // "cypress in cypress"
   bus.on('assert:cypress:in:cypress', (snapshot: CypressInCypressMochaEvent[]) => {
     const expected = snapshots[snapToCompare]
-    const diff = disparity.unifiedNoColor(JSON.stringify(snapshot, null, 2), JSON.stringify(expected, null, 2), {})
+    const diff = disparity.unifiedNoColor(JSON.stringify(expected, null, 2), JSON.stringify(snapshot, null, 2), {})
 
     if (diff !== '') {
       /* eslint-disable no-console */

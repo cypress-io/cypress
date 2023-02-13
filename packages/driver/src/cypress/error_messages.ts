@@ -141,6 +141,8 @@ export default {
     reserved_word: {
       message: `${cmd('as')} cannot be aliased as: \`{{alias}}\`. This word is reserved.`,
     },
+    invalid_options: `${cmd('as')} only accepts an options object for its second argument. You passed: \`{{arg}}\``,
+    invalid_options_type: `${cmd('as')} only accepts a \`type\` of \`'query'\` or \`'static'\`. You passed: \`{{type}}\``,
   },
 
   blur: {
@@ -1230,9 +1232,7 @@ export default {
 
         Variables must either be defined within the ${cmd('origin')} command or passed in using the args option.
 
-        Using \`require()\` or \`import()\` to include dependencies requires enabling the \`experimentalOriginDependencies\` flag and using the latest version of \`@cypress/webpack-preprocessor\`.
-        
-        Note: Using \`require()\` or \`import()\` within ${cmd('origin')} from a \`node_modules\` plugin is not currently supported.`,
+        Using \`require()\` or \`import()\` within the ${cmd('origin')} callback is not supported. Use ${cmd('Cypress.require')} to include dependencies instead, but note that it currently requires enabling the \`experimentalOriginDependencies\` flag.`,
     },
     callback_mixes_sync_and_async: {
       message: stripIndent`\
@@ -1485,6 +1485,21 @@ export default {
     url_wrong_type: {
       message: `${cmd('request')} requires the \`url\` to be a string.`,
       docsUrl: 'https://on.cypress.io/request',
+    },
+  },
+
+  require: {
+    invalid_inside_origin: {
+      message: `${cmd('Cypress.require')} is supposed to be replaced with a \`require()\` statement before the test code using it is run. If this error is being thrown, something unexpected has occurred. Please submit an issue.`,
+      docsUrl: 'https://on.cypress.io/origin',
+    },
+    invalid_outside_origin: {
+      message: `${cmd('Cypress.require')} can only be used inside the ${cmd('origin')} callback and requires enabling the \`experimentalOriginDependencies\` flag.`,
+      docsUrl: 'https://on.cypress.io/origin',
+    },
+    invalid_without_flag: {
+      message: `Using ${cmd('Cypress.require')} requires enabling the \`experimentalOriginDependencies\` flag.`,
+      docsUrl: 'https://on.cypress.io/origin',
     },
   },
 

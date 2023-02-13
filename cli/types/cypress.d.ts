@@ -787,13 +787,19 @@ declare namespace Cypress {
     off: Actions
 
     /**
+     * Used to include dependencies within the cy.origin() callback
+     * @see https://on.cypress.io/origin
+     */
+    require: <T = any>(id: string) => T
+
+    /**
      * Trigger action
      * @private
      */
     action: (action: string, ...args: any[]) => any[] | void
 
     /**
-     * Load  files
+     * Load files
      * @private
      */
     onSpecWindow: (window: Window, specList: string[] | Array<() => Promise<void>>) => void
@@ -827,29 +833,13 @@ declare namespace Cypress {
      * @see https://on.cypress.io/variables-and-aliases
      * @see https://on.cypress.io/get
      * @example
-    ```
-    // Get the aliased 'todos' elements
-    cy.get('ul#todos').as('todos')
-    //...hack hack hack...
-    // later retrieve the todos
-    cy.get('@todos')
-    ```
-     */
-    as(alias: string): Chainable<Subject>
-
-    /**
-     * Select a file with the given <input> element, or drag and drop a file over any DOM subject.
+     *    // Get the aliased 'todos' elements
+     *    cy.get('ul#todos').as('todos')
      *
-     * @param {FileReference} files - The file(s) to select or drag onto this element.
-     * @see https://on.cypress.io/selectfile
-     * @example
-     *    cy.get('input[type=file]').selectFile(Cypress.Buffer.from('text'))
-     *    cy.get('input[type=file]').selectFile({
-     *      fileName: 'users.json',
-     *      contents: [{name: 'John Doe'}]
-     *    })
+     *    // later retrieve the todos
+     *    cy.get('@todos')
      */
-    selectFile(files: FileReference | FileReference[], options?: Partial<SelectFileOptions>): Chainable<Subject>
+    as(alias: string, options?: Partial<AsOptions>): Chainable<Subject>
 
     /**
      * Blur a focused element. This element must currently be in focus.
@@ -1916,6 +1906,20 @@ declare namespace Cypress {
     select(valueOrTextOrIndex: string | number | Array<string | number>, options?: Partial<SelectOptions>): Chainable<Subject>
 
     /**
+     * Select a file with the given <input> element, or drag and drop a file over any DOM subject.
+     *
+     * @param {FileReference} files - The file(s) to select or drag onto this element.
+     * @see https://on.cypress.io/selectfile
+     * @example
+     *    cy.get('input[type=file]').selectFile(Cypress.Buffer.from('text'))
+     *    cy.get('input[type=file]').selectFile({
+     *      fileName: 'users.json',
+     *      contents: [{name: 'John Doe'}]
+     *    })
+     */
+    selectFile(files: FileReference | FileReference[], options?: Partial<SelectFileOptions>): Chainable<Subject>
+
+    /**
      * Set a browser cookie.
      *
      * @see https://on.cypress.io/setcookie
@@ -2650,6 +2654,7 @@ declare namespace Cypress {
     waitForAnimations: boolean
     /**
      * The distance in pixels an element must exceed over time to be considered animating
+     *
      * @default 5
      */
     animationDistanceThreshold: number
@@ -2661,15 +2666,20 @@ declare namespace Cypress {
     scrollBehavior: scrollBehaviorOptions
   }
 
-  interface SelectFileOptions extends Loggable, Timeoutable, ActionableOptions {
+  /**
+   * Options to affect how an alias is stored
+   *
+   * @see https://on.cypress.io/as
+   */
+  interface AsOptions {
     /**
-     * Which user action to perform. `select` matches selecting a file while
-     * `drag-drop` matches dragging files from the operating system into the
-     * document.
+     * The type of alias to store, which impacts how the value is retrieved later in the test.
+     * If an alias should be a 'query' (re-runs all queries leading up to the resulting value so it's alway up-to-date) or a
+     * 'static' (read once when the alias is saved and is never updated). `type` has no effect when aliasing intercepts, spies, and stubs.
      *
-     * @default 'select'
+     * @default 'query'
      */
-    action: 'select' | 'drag-drop'
+    type: 'query' | 'static'
   }
 
   interface BlurOptions extends Loggable, Timeoutable, Forceable { }
@@ -3045,6 +3055,11 @@ declare namespace Cypress {
      */
     experimentalWebKitSupport: boolean
     /**
+     * Enables support for improved memory management within Chromium-based browsers.
+     * @default false
+     */
+    experimentalMemoryManagement: boolean
+    /**
      * Number of times to retry a failed test.
      * If a number is set, tests will retry in both runMode and openMode.
      * To enable test retries only in runMode, set e.g. `{ openMode: null, runMode: 2 }`
@@ -3117,7 +3132,7 @@ declare namespace Cypress {
      */
     experimentalRunAllSpecs?: boolean
     /**
-     * Enables support for require/import within cy.origin.
+     * Enables support for `Cypress.require()` for including dependencies within the `cy.origin()` callback.
      * @default false
      */
     experimentalOriginDependencies?: boolean
@@ -3509,6 +3524,17 @@ declare namespace Cypress {
   }
 
   type SameSiteStatus = 'no_restriction' | 'strict' | 'lax'
+
+  interface SelectFileOptions extends Loggable, Timeoutable, ActionableOptions {
+    /**
+     * Which user action to perform. `select` matches selecting a file while
+     * `drag-drop` matches dragging files from the operating system into the
+     * document.
+     *
+     * @default 'select'
+     */
+    action: 'select' | 'drag-drop'
+  }
 
   interface SetCookieOptions extends Loggable, Timeoutable {
     path: string
@@ -5756,6 +5782,7 @@ declare namespace Cypress {
     specPattern?: string[]
     system: SystemDetails
     tag?: string
+    autoCancelAfterFailures?: number | false
   }
 
   interface DevServerConfig {
@@ -5956,14 +5983,14 @@ declare namespace Cypress {
      * Useful to see how internal cypress commands utilize the {% url 'Cypress.log()' cypress-log %} API.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'log:added', fn: (log: any, interactive: boolean) => void): Cypress
+    (action: 'log:added', fn: (attributes: ObjectLike, log: any) => void): Cypress
     /**
      * Fires whenever a command's attributes changes.
      * This event is debounced to prevent it from firing too quickly and too often.
      * Useful to see how internal cypress commands utilize the {% url 'Cypress.log()' cypress-log %} API.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'log:changed', fn: (log: any, interactive: boolean) => void): Cypress
+    (action: 'log:changed', fn: (attributes: ObjectLike, log: any) => void): Cypress
     /**
      * Fires before the test and all **before** and **beforeEach** hooks run.
      * @see https://on.cypress.io/catalog-of-events#App-Events

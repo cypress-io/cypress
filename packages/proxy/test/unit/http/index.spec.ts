@@ -63,13 +63,13 @@ describe('http', function () {
       incomingRequest.throws(new Error('oops'))
 
       error.callsFake(function () {
-        expect(this.error.message).to.eq('oops')
+        expect(this.error.message).to.eq('Internal error while proxying "GET url" in 0:\noops')
         this.end()
       })
 
       return new Http(httpOpts)
       // @ts-ignore
-      .handle({}, { on, off })
+      .handle({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       .then(function () {
         expect(incomingRequest).to.be.calledOnce
         expect(incomingResponse).to.not.be.called
@@ -88,13 +88,13 @@ describe('http', function () {
       incomingResponse.throws(new Error('oops'))
 
       error.callsFake(function () {
-        expect(this.error.message).to.eq('oops')
+        expect(this.error.message).to.eq('Internal error while proxying "GET url" in 0:\noops')
         this.end()
       })
 
       return new Http(httpOpts)
       // @ts-ignore
-      .handle({}, { on, off })
+      .handle({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       .then(function () {
         expect(incomingRequest).to.be.calledOnce
         expect(incomingResponse).to.be.calledOnce
@@ -141,7 +141,7 @@ describe('http', function () {
       })
 
       error.callsFake(function () {
-        expect(this.error.message).to.eq('goto error stack')
+        expect(this.error.message).to.eq('Internal error while proxying "GET url" in 1:\ngoto error stack')
         expect(this).to.include.keys(expectedKeys)
         this.errorAdded = errorAdded
         this.next()
@@ -159,7 +159,7 @@ describe('http', function () {
 
       return new Http(httpOpts)
       // @ts-ignore
-      .handle({}, { on, off })
+      .handle({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       .then(function () {
         [
           incomingRequest, incomingRequest2,

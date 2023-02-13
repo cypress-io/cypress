@@ -279,7 +279,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         name: 'Test User A',
       } })
 
-      cy.contains('button', 'Log in to Cypress Cloud').click()
+      cy.contains('button', 'Connect to Cypress Cloud').click()
 
       cy.findByRole('dialog', { name: 'Log in to Cypress' }).as('logInModal').within(() => {
         cy.findByRole('button', { name: 'Log in' }).click()
@@ -922,7 +922,8 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       completeNext(1)
     })
 
-    itSkipIfWindows('should fetch newer runs and maintain them when navigating', () => {
+    // TODO: unskip https://github.com/cypress-io/cypress/issues/24575
+    it.skip('should fetch newer runs and maintain them when navigating', () => {
       cy.get('[data-cy="run-card-icon-RUNNING"]').should('have.length', RUNNING_COUNT).should('be.visible')
 
       cy.remoteGraphQLIntercept(async (obj) => {
