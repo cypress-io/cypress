@@ -133,6 +133,10 @@ export class RelevantRunSpecsDataSource {
       }
     }
 
+    function isValidNumber (value: unknown): value is number {
+      return Number.isFinite(value)
+    }
+
     if (cloudProject?.__typename === 'CloudProject') {
       const runSpecsToReturn: RunSpecReturn = {
         runSpecs: {},
@@ -144,10 +148,10 @@ export class RelevantRunSpecsDataSource {
       const formatCloudRunInfo = (cloudRunDetails: Partial<CloudRun>) => {
         const { runNumber, totalInstanceCount, completedInstanceCount } = cloudRunDetails
 
-        if (runNumber && Number.isFinite(totalInstanceCount) && Number.isFinite(completedInstanceCount)) {
+        if (runNumber && isValidNumber(totalInstanceCount) && isValidNumber(completedInstanceCount)) {
           return {
-            totalSpecs: totalInstanceCount!,
-            completedSpecs: completedInstanceCount!,
+            totalSpecs: totalInstanceCount,
+            completedSpecs: completedInstanceCount,
             runNumber,
           }
         }
