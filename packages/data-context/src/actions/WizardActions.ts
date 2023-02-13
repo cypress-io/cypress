@@ -172,6 +172,7 @@ export class WizardActions {
 
     this.ctx.update((d) => {
       d.wizard.frameworks = officialFrameworks.concat(resolvedThirdPartyFrameworks)
+      d.wizard.hasLoadedThirdPartyCtFrameworks = true
     })
   }
 

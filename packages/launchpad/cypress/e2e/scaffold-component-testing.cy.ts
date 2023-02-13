@@ -150,34 +150,37 @@ describe('scaffolding component testing', {
     })
   })
 
-  context('3rd party ct plugin', () => {
-    it('Scaffolds component testing for Qwik using Vite', () => {
-      cy.scaffoldProject('qwik-app')
-      cy.openProject('qwik-app')
+  // eslint-disable-next-line mocha/no-exclusive-tests
+  context.only('3rd party ct plugin', () => {
+    for (let i = 0; i < 20; i++) {
+      it('Scaffolds component testing for Qwik using Vite', () => {
+        cy.scaffoldProject('qwik-app')
+        cy.openProject('qwik-app')
 
-      cy.withCtx(async (ctx) => {
-        await ctx.actions.file.removeFileInProject('./node_modules/cypress-ct-qwik')
-        await ctx.actions.file.moveFileInProject('./cypress-ct-qwik', './node_modules/cypress-ct-qwik')
+        cy.withCtx(async (ctx) => {
+          await ctx.actions.file.removeFileInProject('./node_modules/cypress-ct-qwik')
+          await ctx.actions.file.moveFileInProject('./cypress-ct-qwik', './node_modules/cypress-ct-qwik')
+        })
+
+        cy.visitLaunchpad()
+        cy.skipWelcome()
+
+        cy.contains('Component Testing').click()
+        cy.contains('button', 'Qwik').should('be.visible')
+        cy.contains('button', 'Next step').click()
+
+        cy.contains('li', '@builder.io/qwik').within(() => {
+          cy.findByLabelText('installed')
+        })
+
+        cy.contains('li', 'vite').within(() => {
+          cy.findByLabelText('installed')
+        })
+
+        cy.contains('button', 'Continue').click()
+
+        verifyConfigFile('cypress.config.js')
       })
-
-      cy.visitLaunchpad()
-      cy.skipWelcome()
-
-      cy.contains('Component Testing').click()
-      cy.contains('button', 'Qwik').should('be.visible')
-      cy.contains('button', 'Next step').click()
-
-      cy.contains('li', '@builder.io/qwik').within(() => {
-        cy.findByLabelText('installed')
-      })
-
-      cy.contains('li', 'vite').within(() => {
-        cy.findByLabelText('installed')
-      })
-
-      cy.contains('button', 'Continue').click()
-
-      verifyConfigFile('cypress.config.js')
-    })
+    }
   })
 })

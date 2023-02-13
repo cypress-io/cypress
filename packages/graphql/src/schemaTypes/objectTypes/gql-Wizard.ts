@@ -27,7 +27,13 @@ export const Wizard = objectType({
     t.nonNull.list.nonNull.field('frameworks', {
       type: WizardFrontendFramework,
       description: 'All of the component testing frameworks to choose from',
-      resolve: (source, args, ctx) => Array.from(ctx.coreData.wizard.frameworks),
+      resolve: async (source, args, ctx) => {
+        if (!ctx.coreData.wizard.hasLoadedThirdPartyCtFrameworks) {
+          await ctx.actions.wizard.detectFrameworks()
+        }
+
+        return ctx.coreData.wizard.frameworks
+      },
     })
 
     t.nonNull.list.nonNull.field('packagesToInstall', {
