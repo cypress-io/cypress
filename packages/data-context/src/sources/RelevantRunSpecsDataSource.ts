@@ -4,7 +4,7 @@ import debugLib from 'debug'
 import { isEqual } from 'lodash'
 
 import type { DataContext } from '../DataContext'
-import type { CloudSpecStatus, Query, RelevantRun, CurrentProjectRelevantRunSpecs, CloudSpecRun, CloudRun } from '../gen/graphcache-config.gen'
+import type { Query, RelevantRun, CurrentProjectRelevantRunSpecs, CloudRun } from '../gen/graphcache-config.gen'
 import { Poller } from '../polling'
 import type { CloudRunStatus } from '@packages/graphql/src/gen/cloud-source-types.gen'
 
@@ -15,6 +15,8 @@ const RELEVANT_RUN_SPEC_OPERATION_DOC = gql`
     id
     runNumber
     status
+    completedInstanceCount
+    totalInstanceCount
     specs {
       id
       status
@@ -55,8 +57,6 @@ export const SPECS_EMPTY_RETURN: RunSpecReturn = {
   statuses: {},
 }
 
-const INCOMPLETE_STATUSES: CloudSpecStatus[] = ['RUNNING', 'UNCLAIMED']
-
 export type RunSpecReturn = {
   runSpecs: CurrentProjectRelevantRunSpecs
   statuses: {
@@ -86,23 +86,9 @@ export class RelevantRunSpecsDataSource {
     return this.#cached.runSpecs
   }
 
-  #calculateSpecMetadata (specs: CloudSpecRun[]) {
-    //mimic logic in Cloud to sum up the count of groups per spec to give the total spec counts
-    const countGroupsForSpec = (specs: CloudSpecRun[]) => {
-      return specs.map((spec) => spec.groupIds?.length || 0).reduce((acc, curr) => acc += curr, 0)
-    }
-
-    return {
-      totalSpecs: countGroupsForSpec(specs),
-      completedSpecs: countGroupsForSpec(specs.filter((spec) => !INCOMPLETE_STATUSES.includes(spec.status || 'UNCLAIMED'))),
-    }
-  }
-
   /**
-   * Pulls runs from the current Cypress Cloud account and determines which runs are considered:
-   * - "current" the most recent completed run, or if not found, the most recent running run
-   * - "next" the most recent running run if a completed run is found
-   * @param shas list of Git commit shas to query the Cloud with for matching runs
+   * Pulls the specs that match the relevant run.
+   * @param runs - the current and (optionally) next relevant run
    */
   async getRelevantRunSpecs (runs: RelevantRun): Promise<RunSpecReturn> {
     const projectSlug = await this.ctx.project.projectId()
@@ -147,28 +133,40 @@ export class RelevantRunSpecsDataSource {
       }
     }
 
+    function isValidNumber (value: unknown): value is number {
+      return Number.isFinite(value)
+    }
+
     if (cloudProject?.__typename === 'CloudProject') {
       const runSpecsToReturn: RunSpecReturn = {
         runSpecs: {},
         statuses: {},
       }
 
-      if (cloudProject.current && cloudProject.current.runNumber && cloudProject.current.status) {
-        runSpecsToReturn.runSpecs.current = {
-          ...this.#calculateSpecMetadata(cloudProject.current.specs || []),
-          runNumber: cloudProject.current.runNumber,
+      const { current, next } = cloudProject
+
+      const formatCloudRunInfo = (cloudRunDetails: Partial<CloudRun>) => {
+        const { runNumber, totalInstanceCount, completedInstanceCount } = cloudRunDetails
+
+        if (runNumber && isValidNumber(totalInstanceCount) && isValidNumber(completedInstanceCount)) {
+          return {
+            totalSpecs: totalInstanceCount,
+            completedSpecs: completedInstanceCount,
+            runNumber,
+          }
         }
 
-        runSpecsToReturn.statuses.current = cloudProject.current.status
+        return undefined
       }
 
-      if (cloudProject.next && cloudProject.next.runNumber && cloudProject.next.status) {
-        runSpecsToReturn.runSpecs.next = {
-          ...this.#calculateSpecMetadata(cloudProject.next.specs || []),
-          runNumber: cloudProject.next.runNumber,
-        }
+      if (current && current.status) {
+        runSpecsToReturn.runSpecs.current = formatCloudRunInfo(current)
+        runSpecsToReturn.statuses.current = current.status
+      }
 
-        runSpecsToReturn.statuses.next = cloudProject.next.status
+      if (next && next.status) {
+        runSpecsToReturn.runSpecs.next = formatCloudRunInfo(next)
+        runSpecsToReturn.statuses.next = next.status
       }
 
       return runSpecsToReturn
@@ -193,6 +191,7 @@ export class RelevantRunSpecsDataSource {
 
         debug(`Spec data is `, specs)
 
+        const wasWatchingCurrentProject = this.#cached.statuses.current === 'RUNNING'
         const specCountsChanged = !isEqual(specs.runSpecs, this.#cached.runSpecs)
         const statusesChanged = !isEqual(specs.statuses, this.#cached.statuses)
 
@@ -208,7 +207,7 @@ export class RelevantRunSpecsDataSource {
           debug('Run statuses changed')
           const projectSlug = await this.ctx.project.projectId()
 
-          if (projectSlug) {
+          if (projectSlug && wasWatchingCurrentProject) {
             debug(`Invalidate cloudProjectBySlug ${projectSlug}`)
             await this.ctx.cloud.invalidate('Query', 'cloudProjectBySlug', { slug: projectSlug })
           }
