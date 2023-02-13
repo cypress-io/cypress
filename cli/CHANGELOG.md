@@ -1,4 +1,14 @@
  <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+
+## 12.7.0
+
+_Released 02/28/2023 (PENDING)_
+
+**Features:**
+
+- Added the ability to control whether a request is logged to the command log via `cy.intercept()` by passing `log: false` or `log: true`. Addresses [#7362](https://github.com/cypress-io/cypress/issues/7362).
+  - This can be used to override Cypress's default behavior of logging all XHRs and fetches, see the [example](https://docs.cypress.io/api/commands/intercept#controlling-log-behavior).
+
 ## 12.6.0
 
 _Released 02/14/2023 (PENDING)_
