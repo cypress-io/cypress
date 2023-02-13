@@ -8,11 +8,11 @@ describe('mount', () => {
   context('teardown', () => {
     beforeEach(() => {
       cy.get('[data-cy-root]').children().should('have.length', 0)
-    });
+    })
 
     it('should mount', () => {
       cy.mount(<HelloWorld />)
-    });
+    })
 
     it('should remove previous mounted component', () => {
       cy.mount(<HelloWorld msg="Render 1" />)
@@ -23,7 +23,7 @@ describe('mount', () => {
       cy.contains('Render 1').should('not.exist')
       cy.get('[data-cy-root]').children().should('have.length', 1)
     })
-  });
+  })
 
   it('does not error when rendering primitives', () => {
     cy.mount('Hello World')
