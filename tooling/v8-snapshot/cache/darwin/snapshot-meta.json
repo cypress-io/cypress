@@ -4017,6 +4017,7 @@
     "./packages/rewriter/node_modules/parse5/lib/utils/mixin.js",
     "./packages/root/index.js",
     "./packages/scaffold-config/src/commandFile.ts",
+    "./packages/scaffold-config/src/ct-detect-third-party.ts",
     "./packages/scaffold-config/src/component-index-template.ts",
     "./packages/scaffold-config/src/dependencies.ts",
     "./packages/scaffold-config/src/detect.ts",
