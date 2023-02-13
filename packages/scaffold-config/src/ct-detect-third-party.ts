@@ -1,5 +1,4 @@
 import path from 'path'
-import { pathToFileURL } from 'url'
 import globby from 'globby'
 import { z } from 'zod'
 import Debug from 'debug'
@@ -34,15 +33,16 @@ const CT_FRAMEWORK_GLOB = path.join('node_modules', 'cypress-ct-*', 'package.jso
 // is used (e.g. module=node16). To change this, we would also have to change the ts-node behavior when requiring the
 // Cypress config file. This hack for keeping dynamic imports from being converted works across all
 // of our supported node versions
-const _dynamicImport = new Function('specifier', 'return import(specifier)')
 
-const dynamicImport = <T>(module: string) => {
-  return _dynamicImport(module) as Promise<T>
-}
+// const _dynamicImport = new Function('specifier', 'return import(specifier)')
 
-const dynamicAbsoluteImport = (filePath: string) => {
-  return dynamicImport(pathToFileURL(filePath).href) as Promise<any>
-}
+// const dynamicImport = <T>(module: string) => {
+//   return _dynamicImport(module) as Promise<T>
+// }
+
+// const dynamicAbsoluteImport = (filePath: string) => {
+//   return dynamicImport(pathToFileURL(filePath).href) as Promise<any>
+// }
 
 /**
  * When compiling CJS -> ESM, TS can produce:
@@ -94,7 +94,9 @@ export async function detectThirdPartyCTFrameworks (
 
           debug('Resolve successful: %s', modulePath)
 
-          const m = await dynamicAbsoluteImport(modulePath)
+          debug('require(%s)', modulePath)
+
+          const m = require(modulePath)
 
           debug('Imported %o', m)
 
