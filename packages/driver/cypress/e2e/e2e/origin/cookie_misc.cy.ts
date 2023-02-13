@@ -1,5 +1,3 @@
-import { makeRequestForCookieBehaviorTests as makeRequest } from '../../../support/utils'
-
 describe('misc cookie tests', () => {
   // NOTE: For this test to work correctly, we need to have a FQDN, not localhost (www.foobar.com).
   // FIXES: https://github.com/cypress-io/cypress/issues/25174 (cookies are duplicated with prepended dot (.))
@@ -29,10 +27,7 @@ describe('misc cookie tests', () => {
   describe('expiring cookies', () => {
     before(() => {
       cy.origin(`https://app.foobar.com:3503`, () => {
-        const { makeRequestForCookieBehaviorTests: makeRequest } = require('../../../support/utils')
-
-        // @ts-ignore
-        window.makeRequest = makeRequest
+        window.makeRequest = Cypress.require('../../../support/utils').makeRequestForCookieBehaviorTests
       })
     })
 
@@ -43,13 +38,13 @@ describe('misc cookie tests', () => {
         cy.visit(`https://app.foobar.com:3503/fixtures/secondary-origin.html`)
         cy.origin(`https://app.foobar.com:3503`, () => {
           cy.window().then((win) => {
-            return cy.wrap(makeRequest(win, `/set-cookie?cookie=foo=bar; Domain=.foobar.com;`))
+            return cy.wrap(window.makeRequest(win, `/set-cookie?cookie=foo=bar; Domain=.foobar.com;`))
           })
 
           cy.getCookie('foo').its('value').should('eq', 'bar')
 
           cy.window().then((win) => {
-            return cy.wrap(makeRequest(win, `/set-cookie?cookie=foo=deleted; Domain=.foobar.com; Max-Age=0;`))
+            return cy.wrap(window.makeRequest(win, `/set-cookie?cookie=foo=deleted; Domain=.foobar.com; Max-Age=0;`))
           })
 
           cy.getCookie('foo').should('eq', null)
@@ -62,13 +57,13 @@ describe('misc cookie tests', () => {
         cy.visit(`https://app.foobar.com:3503/fixtures/secondary-origin.html`)
         cy.origin(`https://app.foobar.com:3503`, () => {
           cy.window().then((win) => {
-            return cy.wrap(makeRequest(win, `/set-cookie?cookie=foo=bar; Domain=.foobar.com;`))
+            return cy.wrap(window.makeRequest(win, `/set-cookie?cookie=foo=bar; Domain=.foobar.com;`))
           })
 
           cy.getCookie('foo').its('value').should('eq', 'bar')
 
           cy.window().then((win) => {
-            return cy.wrap(makeRequest(win, `/set-cookie?cookie=foo=deleted; Domain=.foobar.com; expires=Thu, 01-Jan-1970 00:00:01 GMT;`))
+            return cy.wrap(window.makeRequest(win, `/set-cookie?cookie=foo=deleted; Domain=.foobar.com; expires=Thu, 01-Jan-1970 00:00:01 GMT;`))
           })
 
           cy.getCookie('foo').should('eq', null)
@@ -81,13 +76,13 @@ describe('misc cookie tests', () => {
         cy.visit(`https://app.foobar.com:3503/fixtures/secondary-origin.html`)
         cy.origin(`https://app.foobar.com:3503`, () => {
           cy.window().then((win) => {
-            return cy.wrap(makeRequest(win, `/set-cookie?cookie=foo=bar; Domain=.foobar.com;`))
+            return cy.wrap(window.makeRequest(win, `/set-cookie?cookie=foo=bar; Domain=.foobar.com;`))
           })
 
           cy.getCookie('foo').its('value').should('eq', 'bar')
 
           cy.window().then((win) => {
-            return cy.wrap(makeRequest(win, `/set-cookie?cookie=foo=deleted; Domain=.foobar.com; expires=Tues, 01-Jan-1980 00:00:01 GMT; Max-Age=0;`))
+            return cy.wrap(window.makeRequest(win, `/set-cookie?cookie=foo=deleted; Domain=.foobar.com; expires=Tues, 01-Jan-1980 00:00:01 GMT; Max-Age=0;`))
           })
 
           cy.getCookie('foo').should('eq', null)
@@ -100,13 +95,13 @@ describe('misc cookie tests', () => {
         cy.visit(`https://app.foobar.com:3503/fixtures/secondary-origin.html`)
         cy.origin(`https://app.foobar.com:3503`, () => {
           cy.window().then((win) => {
-            return cy.wrap(makeRequest(win, `/set-cookie?cookie=foo=bar; Domain=.foobar.com;`))
+            return cy.wrap(window.makeRequest(win, `/set-cookie?cookie=foo=bar; Domain=.foobar.com;`))
           })
 
           cy.getCookie('foo').its('value').should('eq', 'bar')
 
           cy.window().then((win) => {
-            return cy.wrap(makeRequest(win, `/set-cookie?cookie=foo=deleted; Domain=.foobar.com; expires=Thu, 01-Jan-1970 00:00:01 GMT; Max-Age=0;`))
+            return cy.wrap(window.makeRequest(win, `/set-cookie?cookie=foo=deleted; Domain=.foobar.com; expires=Thu, 01-Jan-1970 00:00:01 GMT; Max-Age=0;`))
           })
 
           cy.getCookie('foo').should('eq', null)
