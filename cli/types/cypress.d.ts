@@ -53,6 +53,9 @@ declare namespace Cypress {
   interface QueryFn<T extends keyof ChainableMethods> {
     (this: Command, ...args: Parameters<ChainableMethods[T]>): (subject: any) => any
   }
+  interface QueryFnWithOriginalFn<T extends keyof Chainable> {
+    (this: Command, originalFn: QueryFn<T>, ...args: Parameters<ChainableMethods[T]>): (subject: any) => any
+  }
   interface ObjectLike {
     [key: string]: any
   }
@@ -648,6 +651,12 @@ declare namespace Cypress {
        * @see https://on.cypress.io/api/custom-queries
        */
       addQuery<T extends keyof Chainable>(name: T, fn: QueryFn<T>): void
+
+      /**
+       * Overwrite an existing Cypress query with a new implementation
+       * @see https://on.cypress.io/api/custom-queries
+       */
+      overwriteQuery<T extends keyof Chainable>(name: T, fn: QueryFnWithOriginalFn<T>): void
     }
 
     /**

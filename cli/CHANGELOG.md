@@ -1,10 +1,11 @@
- <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+<!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 12.6.0
 
 _Released 02/14/2023 (PENDING)_
 
 **Features:**
 
+- It is now possible to overwrite query commands using [`Cypress.Commands.overwriteQuery`](https://on.cypress.io/api/custom-queries). Addressed in [#25674](https://github.com/cypress-io/cypress/pull/25674).
 - Added the "Open in IDE" feature for failed tests reported from the Debug page. Addressed in [#25691](https://github.com/cypress-io/cypress/pull/25691).
 - Added a new CLI flag, called [`--auto-cancel-after-failures`](https://docs.cypress.io/guides/guides/command-line#Options), that overrides the project-level CI ["Auto Cancellation"](https://docs.cypress.io/guides/cloud/smart-orchestration#Auto-Cancellation) value when recording to the Cloud. This gives Cloud users on Business and Enterprise plans the flexibility to alter the auto-cancellation value per run. Addressed in [#25237](https://github.com/cypress-io/cypress/pull/25237).
 - Added `Cypress.require()` for including dependencies within the `cy.origin()` callback.  Removed support for `require()` and `import()` within the callback. Addresses [#24976](https://github.com/cypress-io/cypress/issues/24976).
@@ -30,7 +31,7 @@ _Released 02/14/2023 (PENDING)_
 
 ## 12.5.1
 
-_Released 02/10/2023_
+_Released 02/02/2023_
 
 **Bugfixes:**
 
