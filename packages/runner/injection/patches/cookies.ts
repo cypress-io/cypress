@@ -96,6 +96,8 @@ export const patchDocumentCookie = (requestCookies: AutomationCookie[]) => {
       const parsedCookie = CookieJar.parse(stringValue)
 
       if (parsedCookie?.hostOnly === null) {
+        // we want to make sure the hostOnly property is respected when syncing with CDP/extension to prevent duplicates.
+        // in the case it is not set, we need to calculate it
         parsedCookie.hostOnly = isHostOnlyCookie(parsedCookie.domain || domain)
       }
 
