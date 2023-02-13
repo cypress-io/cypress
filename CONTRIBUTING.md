@@ -476,8 +476,6 @@ We do not continuously deploy the Cypress binary, so `develop` contains all of t
     - `test` - Adding missing or correcting existing tests
 - For user-facing changes that will be released with the next Cypress version, be sure to add a changelog entry to the appropriate section in [`cli/CHANGELOG.md`](./cli/CHANGELOG.md). See [Writing the Cypress Changelog Guide](./guides/writing-the-cypress-changelog.md) for more details.
 - Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If you feel some areas are not relevant add `N/A` as opposed to deleting those sections. PRs will not be reviewed if this template is not filled in.
-- If the PR is a user facing change and you're a Cypress team member that has logged into [ZenHub](https://www.zenhub.com/) and downloaded the [ZenHub for GitHub extension](https://www.zenhub.com/extension), set the release the PR is intended to ship in from the sidebar of the PR. Follow semantic versioning to select the intended release. This is used to generate the changelog for the release. If you don't tag a PR for release, it won't be mentioned in the changelog.
-  ![Select release for PR](https://user-images.githubusercontent.com/1271364/135139641-657015d6-2dca-42d4-a4fb-16478f61d63f.png)
 - Please check the "Allow edits from maintainers" checkbox when submitting your PR. This will make it easier for the maintainers to make minor adjustments, to help with tests or any other changes we may need.
 ![Allow edits from maintainers checkbox](https://user-images.githubusercontent.com/1271181/31393427-b3105d44-ada9-11e7-80f2-0dac51e3919e.png)
 - All Pull Requests require a minimum of **two** approvals.
@@ -561,10 +559,6 @@ Below are guidelines to help during code review. If any of the following require
 - [ ] There is no irrelevant code to the issue being addressed. If there is, ask the contributor to break the work out into a separate PR.
 - [ ] Tests are testing the code's intended functionality in the best way possible.
 
-#### Internal
-
-- [ ] The original issue has been tagged with a release in ZenHub.
-
 ### Code Review of Dependency Updates
 
 Below are some guidelines Cypress uses when reviewing dependency updates.
@@ -579,7 +573,6 @@ Below are some guidelines Cypress uses when reviewing dependency updates.
 
 - [ ] Code using the dependency has been updated to accommodate any breaking changes
 - [ ] The dependency still supports the version of Node that the package requires.
-- [ ] The PR been tagged with a release in ZenHub.
 - [ ] Appropriate labels have been added to the PR (for example: label `type: breaking change` if it is a breaking change)
 
 ## Releases
