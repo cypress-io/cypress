@@ -22,7 +22,7 @@ export type CypressIncomingRequest = Request & {
    */
   resourceType?: ResourceType
   /**
-   * Ordered list of `cy.intercept()`s matching this request.
+   * Stack-ordered list of `cy.intercept()`s matching this request.
    */
   matchingRoutes?: BackendRoute[]
 }

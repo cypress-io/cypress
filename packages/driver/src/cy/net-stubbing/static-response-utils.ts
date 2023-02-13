@@ -135,7 +135,9 @@ export function getBackendStaticResponse (staticResponse: Readonly<StaticRespons
     }
   }
 
-  backendStaticResponse.log = _.isUndefined(staticResponse.log) ? true : !!staticResponse.log
+  if (!_.isUndefined(staticResponse.log)) {
+    backendStaticResponse.log = !!staticResponse.log
+  }
 
   return backendStaticResponse
 }

@@ -201,8 +201,11 @@ export class InterceptedRequest {
           }
         }
 
-        if (eventName === 'before:request') {
-          if (immediateStaticResponse) {
+        if (eventName === 'before:request' && immediateStaticResponse) {
+          // Since StaticResponse is conflated with InterceptOptions, only send an immediate response if there are keys other than `log`.
+          const hasOnlyLog = _.isEqual(Object.keys(immediateStaticResponse), ['log'])
+
+          if (!hasOnlyLog) {
             await sendStaticResponse(this, immediateStaticResponse)
 
             return data

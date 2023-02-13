@@ -239,20 +239,12 @@ export default class ProxyLogging {
   /**
    * Update an existing proxy log with an interception, or create a new log if one was not created (like if shouldLog returned false)
    */
-  logInterception (interception: Interception, route: Route): ProxyRequest {
-    let proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === interception.browserRequestId)
+  logInterception (interception: Interception, route: Route): ProxyRequest | undefined {
+    const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === interception.browserRequestId)
 
-    // TODO: we prob don't need to do this anymore?
     if (!proxyRequest) {
-      // this can happen in a race condition, if user runs Network.disable, if the browser doesn't send pre-request for some reason...
-      debug(`Missing pre-request/proxy log for cy.intercept to ${interception.request.url} %o`, { interception, route })
-
-      proxyRequest = this.createProxyRequestLog({
-        requestId: interception.browserRequestId || interception.id,
-        resourceType: 'other',
-        originalResourceType: 'Request with no browser pre-request',
-        ..._.pick(interception.request, ['url', 'method', 'headers']),
-      })
+      // request was never logged
+      return undefined
     }
 
     proxyRequest.interceptions.push({ interception, route })

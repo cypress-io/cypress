@@ -151,7 +151,7 @@ const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
 function shouldLog (req: CypressIncomingRequest) {
   // 1. Any matching `cy.intercept()` should cause `req` to be logged by default, unless `log: false` is passed explicitly.
   if (req.matchingRoutes?.length) {
-    const lastMatchingRoute = req.matchingRoutes[req.matchingRoutes.length - 1]
+    const lastMatchingRoute = req.matchingRoutes[0]
 
     if (!lastMatchingRoute.staticResponse) {
       // No StaticResponse is set, therefore the request must be logged.
@@ -309,8 +309,8 @@ export default {
   MaybeSimulateSecHeaders,
   MaybeAttachCrossOriginCookies,
   MaybeEndRequestWithBufferedResponse,
-  SetMatchingRoutes,
   CorrelateBrowserPreRequest,
+  SetMatchingRoutes,
   SendToDriver,
   InterceptRequest,
   RedirectToClientRouteIfUnloaded,
