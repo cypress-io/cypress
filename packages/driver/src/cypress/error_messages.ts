@@ -862,12 +862,16 @@ export default {
       docsUrl: 'https://on.cypress.io/api/custom-queries',
     },
     invalid_overwrite: {
-      message: 'Cannot overwite command for: `{{name}}`. An existing command does not exist by that name.',
-      docsUrl: 'https://on.cypress.io/api',
+      message: 'Cannot overwite command for: `{{name}}`. An existing {{type}} does not exist by that name.',
+      docsUrl: 'https://on.cypress.io/api/custom-commands',
+    },
+    invalid_overwrite_command_with_query: {
+      message: 'Cannot overwite the `{{name}}` command. Commands can only be overwritten with `Cypress.Commands.overwrite()`.',
+      docsUrl: 'https://on.cypress.io/api/custom-commands',
     },
     invalid_overwrite_query_with_command: {
-      message: 'Cannot overwite the `{{name}}` query. Queries cannot be overwritten.',
-      docsUrl: 'https://on.cypress.io/api',
+      message: 'Cannot overwite the `{{name}}` query. Queries can only be overwritten with `Cypress.Commands.overwriteQuery()`.',
+      docsUrl: 'https://on.cypress.io/api/custom-queries',
     },
     invoking_child_without_parent (obj) {
       return stripIndent`\
