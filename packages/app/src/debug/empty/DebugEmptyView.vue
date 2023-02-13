@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col my-45px items-center">
+  <div class="flex flex-col mx-auto my-45px max-w-640px items-center">
     <div class="flex flex-col items-center justify-evenly">
       <div><i-cy-box-open_x48 class="icon-dark-gray-500 icon-light-indigo-100" /></div>
       <div class="flex flex-col mx-[20%] mt-25px mb-20px items-center">
@@ -24,18 +24,16 @@
         :rows="loadingRows"
       >
         <template #header>
-          <div class="bg-white border rounded-md flex border-gray-100 w-max p-5px text-14px text-gray-700">
-            <div><i-cy-status-failed_x12 /></div>
-            <div class="bg-gray-700 h-1px mx-5px mt-7px w-5px" />
-            <div
-              v-if="exampleTestName"
-              class="bg-gray-100 h-13px mx-1 pb-1px w-1px"
-            />
-            <div
-              v-if="exampleTestName"
-              class="mx-1 text-14px text-gray-700"
-            >
-              {{ exampleTestName }}
+          <div class="flex">
+            <div class="bg-white border rounded-md flex border-gray-100 py-4px px-8px text-14px text-gray-700 gap-8px items-center">
+              <i-cy-status-failed_x12 class="h-12px w-12px" />
+              <span>-</span>
+              <div
+                v-if="exampleTestName"
+                class="border-l border-gray-100 pl-8px"
+              >
+                {{ exampleTestName }}
+              </div>
             </div>
           </div>
         </template>

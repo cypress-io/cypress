@@ -41,6 +41,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     'packages/server/lib/plugins/child/require_async_child.js',
     'packages/server/lib/plugins/child/register_ts_node.js',
     'packages/rewriter/lib/threads/worker.js',
+    'node_modules/@cypress/webpack-batteries-included-preprocessor/index.js',
     'node_modules/webpack/lib/webpack.js',
     'node_modules/webpack-dev-server/lib/Server.js',
     'node_modules/html-webpack-plugin-4/index.js',
@@ -83,6 +84,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
         'pnpapi',
         '@swc/core',
         'emitter',
+        'ts-loader',
       ],
     })
 
@@ -128,10 +130,12 @@ const createServerEntryPointBundle = async (buildAppDir) => {
     ],
   })
 
+  // eslint-disable-next-line no-console
   console.log(`copying server entry point bundle from ${path.join(workingDir, 'index.js')} to ${path.join(buildAppDir, 'packages', 'server', 'index.js')}`)
 
   await fs.copy(path.join(workingDir, 'index.js'), path.join(buildAppDir, 'packages', 'server', 'index.js'))
 
+  // eslint-disable-next-line no-console
   console.log(`compiling server entry point bundle to ${path.join(buildAppDir, 'packages', 'server', 'index.jsc')}`)
 
   // Use bytenode to compile the entry point bundle. This will save time on the v8 compile step and ensure the integrity of the entry point
@@ -165,6 +169,7 @@ const buildEntryPointAndCleanup = async (buildAppDir) => {
     ...serverEntryPointBundleDependencies,
   ]
 
+  // eslint-disable-next-line no-console
   console.log(`potentially removing ${potentiallyRemovedDependencies.length} dependencies`)
 
   // 4. Remove all dependencies that are in the snapshot but not in the list of kept dependencies from the binary

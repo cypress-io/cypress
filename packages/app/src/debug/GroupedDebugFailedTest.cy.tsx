@@ -67,16 +67,17 @@ describe('<GroupedDebugFailedTest/>', () => {
   ]
 
   it('mounts correctly and shows artifacts on hover', () => {
+    // On retries in CI, the realHover() event can be persistant, causing the component to
+    // be hovered at the start of the test. We therefore hover the mouse somewhere else on the screen
+    // to reduce flake.
+    // This sort of weirdness is exactly why Cypress doesn't support a 'hover' command natively.
+    cy.get('body').realHover({ position: 'topLeft' })
+
     cy.mount(() => (
       <div class='p-24px'>
         <GroupedDebugFailedTest groups={groups} failedTests={testResult} />
       </div>
     ))
-
-    cy.get('body').click('topLeft')
-    // 👆 this click is to address some flake in CI where this component renders already in the hover state
-    // example: https://cloud.cypress.io/projects/ypt4pf/runs/43417/overview/18107774-3213-47f0-902e-79502a832c34/video?reviewViewBy=FAILED&utm_source=Dashboard&utm_medium=Share+URL&utm_campaign=Video
-    // this should avoid whatever situation leads to the appearance of being hovered right after mount.
 
     cy.findAllByTestId(`grouped-row`).should('have.length', 2).each((el) => cy.wrap(el).within(() => {
       cy.findByTestId('debug-artifacts').should('not.be.visible')

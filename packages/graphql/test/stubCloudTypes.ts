@@ -179,6 +179,8 @@ export function createCloudRun (config: Partial<CloudRun>): Required<CloudRun> {
     totalRunning: 0,
     totalTests: 10,
     totalPassed: 10,
+    completedInstanceCount: 10,
+    totalInstanceCount: 10,
     totalDuration: 1000 * 60,
     totalFlakyTests: 0,
     tags: [],
@@ -348,8 +350,12 @@ export function createCloudProjectSpecResult (config: Partial<CloudProjectSpec>)
     flakyStatus: {
       __typename: 'CloudProjectSpecFlakyStatus',
       severity: 'NONE',
+
     },
     specRunsForRunIds: [],
+    averageDurationForRunIds: 1234,
+    flakyStatusForRunIds: null,
+    isConsideredFlakyForRunIds: false,
     ...config,
   }
 
