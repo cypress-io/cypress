@@ -76,7 +76,6 @@ const thirdPartyFrameworkDefinition = defineComponentFramework({
 const thirdPartyFrameworkDefinitionInvalidStrings = defineComponentFramework({
   type: 'cypress-ct-third-party',
   name: 'Third Party',
-  // only library supported for third party definitions
   category: 'template', // $ExpectError
   dependencies: (bundler) => [],
   detectors: [{}], // $ExpectError
