@@ -44,6 +44,19 @@ const dynamicAbsoluteImport = (filePath: string) => {
   return dynamicImport(pathToFileURL(filePath).href) as Promise<any>
 }
 
+/**
+ * When compiling CJS -> ESM, TS can produce:
+ * Imported [Module: null prototype] { __esModule: true, default: { default: { type: 'cypress-ct-solid-js', ... } } }
+ * We just keep getting `default` property until none exists.
+ */
+function getDefaultExport<T extends { default?: T }> (mod: T): T {
+  if (mod?.default) {
+    return getDefaultExport(mod.default)
+  }
+
+  return mod?.default ?? mod
+}
+
 export async function detectThirdPartyCTFrameworks (
   projectRoot: string,
 ): Promise<Cypress.ThirdPartyComponentFrameworkDefinition[]> {
@@ -81,11 +94,17 @@ export async function detectThirdPartyCTFrameworks (
 
           debug('Resolve successful: %s', modulePath)
 
-          const m = await dynamicAbsoluteImport(modulePath).then((m) => m.default || m)
+          const m = await dynamicAbsoluteImport(modulePath)
 
-          debug('Import successful: %o', m)
+          debug('Imported %o', m)
 
-          return m
+          const mod = getDefaultExport(m)
+
+          debug('Module is %o', mod)
+
+          debug('Import successful: %o', mod)
+
+          return mod
         } catch (e) {
           debug('Ignoring %s due to error resolving: %o', e)
         }
