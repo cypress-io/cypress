@@ -30,7 +30,7 @@ _Released 02/14/2023 (PENDING)_
 
 ## 12.5.1
 
-_Released 02/10/2023_
+_Released 02/02/2023_
 
 **Bugfixes:**
 
