@@ -6,30 +6,30 @@ import { state as NetStubbingState } from '../../lib/server/state'
 
 describe('InterceptedRequest', () => {
   context('handleSubscriptions', () => {
-    it('handles subscriptions as expected', async () => {
+    it.only('handles subscriptions as expected', async () => {
       const socket = {
         toDriver: sinon.stub(),
       }
       const state = NetStubbingState()
       const interceptedRequest = new InterceptedRequest({
-        // @ts-ignore
-        req: {},
+        req: {
+          matchingRoutes: [
+            // @ts-ignore
+            {
+              id: '1',
+              hasInterceptor: true,
+              routeMatcher: {},
+            },
+            // @ts-ignore
+            {
+              id: '2',
+              hasInterceptor: true,
+              routeMatcher: {},
+            },
+          ],
+        },
         state,
-        socket,
-        matchingRoutes: [
-          // @ts-ignore
-          {
-            id: '1',
-            hasInterceptor: true,
-            routeMatcher: {},
-          },
-          // @ts-ignore
-          {
-            id: '2',
-            hasInterceptor: true,
-            routeMatcher: {},
-          },
-        ],
+        socket
       })
 
       interceptedRequest.addSubscription({
