@@ -18,7 +18,7 @@ import { CypressEnv } from './CypressEnv'
 import { autoBindDebug } from '../util/autoBindDebug'
 import type { EventRegistrar } from './EventRegistrar'
 import type { DataContext } from '../DataContext'
-import { DependencyToInstall, isDependencyInstalled, WIZARD_BUNDLERS, WIZARD_DEPENDENCIES, WIZARD_FRAMEWORKS } from '@packages/scaffold-config'
+import { isDependencyInstalled, WIZARD_BUNDLERS } from '@packages/scaffold-config'
 
 const debug = debugLib(`cypress:lifecycle:ProjectConfigManager`)
 
@@ -191,14 +191,19 @@ export class ProjectConfigManager {
 
     // Use a map since sometimes the same dependency can appear in `bundler` and `framework`,
     // for example webpack appears in both `bundler: 'webpack', framework: 'react-scripts'`
-    const unsupportedDeps = new Map<DependencyToInstall['dependency']['type'], DependencyToInstall>()
+    const unsupportedDeps = new Map<Cypress.DependencyToInstall['dependency']['type'], Cypress.DependencyToInstall>()
 
     if (!bundler) {
       return
     }
 
-    const isFrameworkSatisfied = async (bundler: typeof WIZARD_BUNDLERS[number], framework: typeof WIZARD_FRAMEWORKS[number]) => {
-      for (const dep of await (framework.dependencies(bundler.type, this.options.projectRoot))) {
+    const isFrameworkSatisfied = async (bundler: typeof WIZARD_BUNDLERS[number], framework: Cypress.ResolvedComponentFrameworkDefinition) => {
+      const deps = await framework.dependencies(bundler.type, this.options.projectRoot)
+
+      debug('deps are %o', deps)
+
+      for (const dep of deps) {
+        debug('detecting %s in %s', dep.dependency.name, this.options.projectRoot)
         const res = await isDependencyInstalled(dep.dependency, this.options.projectRoot)
 
         if (!res.satisfied) {
@@ -209,9 +214,9 @@ export class ProjectConfigManager {
       return true
     }
 
-    const frameworks = WIZARD_FRAMEWORKS.filter((x) => x.configFramework === devServerOptions.framework)
+    const frameworks = this.options.ctx.coreData.wizard.frameworks.filter((x) => x.configFramework === devServerOptions.framework)
 
-    const mismatchedFrameworkDeps = new Map<typeof WIZARD_DEPENDENCIES[number]['type'], DependencyToInstall>()
+    const mismatchedFrameworkDeps = new Map<string, Cypress.DependencyToInstall>()
 
     let isSatisfied = false
 

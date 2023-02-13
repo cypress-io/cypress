@@ -115,6 +115,13 @@ export type PresetHandlerResult = { frameworkConfig: Configuration, sourceWebpac
 type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>
 
 async function getPreset (devServerConfig: WebpackDevServerConfig): Promise<Optional<PresetHandlerResult, 'frameworkConfig'>> {
+  const defaultWebpackModules = () => ({ sourceWebpackModulesResult: sourceDefaultWebpackDependencies(devServerConfig) })
+
+  // Third party library (eg solid-js, lit, etc)
+  if (devServerConfig.framework?.startsWith('cypress-ct-')) {
+    return defaultWebpackModules()
+  }
+
   switch (devServerConfig.framework) {
     case 'create-react-app':
       return createReactAppHandler(devServerConfig)
@@ -134,7 +141,7 @@ async function getPreset (devServerConfig: WebpackDevServerConfig): Promise<Opti
     case 'vue':
     case 'svelte':
     case undefined:
-      return { sourceWebpackModulesResult: sourceDefaultWebpackDependencies(devServerConfig) }
+      return defaultWebpackModules()
 
     default:
       throw new Error(`Unexpected framework ${(devServerConfig as any).framework}, please visit https://on.cypress.io/component-framework-configuration to see a list of supported frameworks`)

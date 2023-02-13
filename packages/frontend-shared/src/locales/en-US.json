@@ -352,7 +352,6 @@
       "frameworkLabel": "Front-end framework",
       "frameworkPlaceholder": "Pick a framework",
       "bundlerLabel": "Bundler",
-      "bundlerLabelDescription": "(dev server)",
       "bundlerPlaceholder": "Pick a bundler",
       "languageLabel": "Language",
       "configFileLanguageLabel": "Cypress config file",
@@ -937,7 +936,9 @@
   },
   "versions": {
     "alpha": "Alpha",
+    "community": "Community",
     "beta": "Beta",
-    "new": "New"
+    "new": "New",
+    "communityNote": "This is a community provided definition."
   }
 }

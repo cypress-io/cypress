@@ -97,6 +97,6 @@ describe('<EnvironmentSetup />', { viewportWidth: 800 }, () => {
       ),
     })
 
-    cy.findByLabelText('Bundler(dev server)').should('be.visible')
+    cy.findByLabelText('Bundler').should('be.visible')
   })
 })
