@@ -274,6 +274,7 @@ describe('lib/modes/record', () => {
         }
         const tag = 'nightly,develop'
         const testingType = 'e2e'
+        const autoCancelAfterFailures = 4
 
         return recordMode.createRunAndRecordSpecs({
           key,
@@ -289,6 +290,7 @@ describe('lib/modes/record', () => {
           runAllSpecs,
           tag,
           testingType,
+          autoCancelAfterFailures,
         })
         .then(() => {
           expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
@@ -325,6 +327,7 @@ describe('lib/modes/record', () => {
               sha: 'sha-123',
             },
             tags: ['nightly', 'develop'],
+            autoCancelAfterFailures: 4,
           })
         })
       })
