@@ -1819,7 +1819,7 @@ declare namespace Cypress {
      * @example
      *    cy.reload({log: false, timeout: 30000})
      */
-    reload(options?: Partial<ReloadOptions>): Chainable<AUTWindow>
+    reload(options?: Partial<Loggable & Timeoutable>): Chainable<AUTWindow>
     /**
      * Reload the page without cache
      *
@@ -1842,7 +1842,7 @@ declare namespace Cypress {
      *    cy.visit('http://localhost:3000/admin')
      *    cy.reload(true, {log: false, timeout: 5000})
      */
-    reload(forceReload: boolean, options?: Partial<ReloadOptions>): Chainable<AUTWindow>
+    reload(forceReload: boolean, options: Partial<Loggable & Timeoutable>): Chainable<AUTWindow>
 
     /**
      * Make an HTTP GET request.
@@ -3375,24 +3375,6 @@ declare namespace Cypress {
     * @default 10
     */
     keystrokeDelay: number
-  }
-
-  /**
-   * Reload page options
-   *
-   * @see https://on.cypress.io/reload
-   */
-  interface ReloadOptions {
-    /**
-     * Whether or not to display the command in the Command log
-     * @default true
-     */
-    log?: boolean
-    /**
-     * Time to wait for cy.reload() to resolve before timing out
-     * @default pageLoadTimeout
-     */
-    timeout?: number
   }
 
   /**
