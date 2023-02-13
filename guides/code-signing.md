@@ -27,13 +27,13 @@ Code signing is done for the Windows and Mac distributions of Cypress when they 
     * If renewing, follow the [renewal instructions](https://www.ssl.com/how-to/renewing-ev-ov-and-iv-certificates/).
     * If rotating, contact SSL.com's support to request certificate re-issuance.
 3. Obtain the full certificate chain from SSL.com's dashboard in ASCII-armored PEM format and save it as `win-code-signing.crt`. (`-----BEGIN PRIVATE KEY-----`, `-----BEGIN CERTIFICATE-----`)
-2. Using `openssl`, convert the plaintext PEM public and private key to binary PKCS#12/PFX format and encrypt it with a strong passphrase, which will later become `CSC_KEY_PASSWORD`.
+4. Using `openssl`, convert the plaintext PEM public and private key to binary PKCS#12/PFX format and encrypt it with a strong passphrase, which will later become `CSC_KEY_PASSWORD`.
     ```shell
     ➜ openssl pkcs12 -export -inkey win-code-signing.key -in win-code-signing.crt -out encrypted-win-code-signing.pfx
     Enter Export Password: <password>
     Verifying - Enter Export Password: <password>
     ```
-3. Upload the `encrypted-win-code-signing.pfx` file to the Cypress App Google Drive and obtain a public [direct download link][direct-download].
-4. Within the `test-runner:sign-windows-binary` CircleCI context, set `CSC_LINK` to that direct download URL and set `CSC_KEY_PASSWORD` to the passphrase used to encrypt the `pfx` file.
+5. Upload the `encrypted-win-code-signing.pfx` file to the Cypress App Google Drive and obtain a public [direct download link][direct-download].
+6. Within the `test-runner:sign-windows-binary` CircleCI context, set `CSC_LINK` to that direct download URL and set `CSC_KEY_PASSWORD` to the passphrase used to encrypt the `pfx` file.
 
 [direct-download]: https://www.syncwithtech.org/p/direct-download-link-generator.html
