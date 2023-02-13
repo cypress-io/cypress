@@ -204,6 +204,7 @@ export class ProjectConfigManager {
 
       for (const dep of deps) {
         debug('detecting %s in %s', dep.dependency.name, this.options.projectRoot)
+
         const res = await isDependencyInstalled(dep.dependency, this.options.projectRoot)
 
         if (!res.satisfied) {
