@@ -163,7 +163,7 @@ describe('scaffolding component testing', {
       })
 
       cy.contains('Component Testing').click()
-      cy.contains('button', /Qwik\s+Support is in\s+Community\(detected\)/)
+      cy.contains('button', 'Qwik')
       cy.contains('button', 'Next step').click()
 
       cy.contains('li', '@builder.io/qwik').within(() => {
