@@ -528,6 +528,7 @@
     "./node_modules/picomatch/lib/picomatch.js",
     "./node_modules/pidusage/lib/stats.js",
     "./node_modules/pinkie/index.js",
+    "./node_modules/pngjs/lib/chunkstream.js",
     "./node_modules/pngjs/lib/filter-parse-async.js",
     "./node_modules/pngjs/lib/packer-async.js",
     "./node_modules/pngjs/lib/packer-sync.js",
