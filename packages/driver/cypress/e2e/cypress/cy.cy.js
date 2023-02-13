@@ -565,5 +565,54 @@ describe('driver/src/cypress/cy', () => {
 
       cy.get('body').find('#specific-contains').children().should('have.class', 'active')
     })
+
+    context('overwriting queries', () => {
+      it('does not allow commands to overwrite queries', () => {
+        const fn = () => Cypress.Commands.overwrite('get', () => {})
+
+        expect(fn).to.throw().with.property('message')
+        .and.include('Cannot overwite the `get` query. Queries can only be overwritten with `Cypress.Commands.overwriteQuery()`.')
+
+        expect(fn).to.throw().with.property('docsUrl')
+        .and.include('https://on.cypress.io/api')
+      })
+
+      it('does not allow queries to overwrite commands', () => {
+        const fn = () => Cypress.Commands.overwriteQuery('click', () => {})
+
+        expect(fn).to.throw().with.property('message')
+        .and.include('Cannot overwite the `click` command. Commands can only be overwritten with `Cypress.Commands.overwrite()`.')
+
+        expect(fn).to.throw().with.property('docsUrl')
+        .and.include('https://on.cypress.io/api')
+      })
+
+      it('can call the originalFn', () => {
+        // Ensure nothing gets confused when we overwrite the same query multiple times.
+        // Both overwrites should succeed, layered on top of each other.
+
+        let overwriteCalled = 0
+
+        Cypress.Commands.overwriteQuery('get', function (originalFn, ...args) {
+          overwriteCalled++
+
+          return originalFn.call(this, ...args)
+        })
+
+        let secondOverwriteCalled = 0
+
+        Cypress.Commands.overwriteQuery('get', function (originalFn, ...args) {
+          secondOverwriteCalled++
+
+          return originalFn.call(this, ...args)
+        })
+
+        cy.get('button').should('have.length', 24)
+        cy.then(() => {
+          expect(overwriteCalled).to.eq(1)
+          expect(secondOverwriteCalled).to.eq(1)
+        })
+      })
+    })
   })
 })
