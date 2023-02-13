@@ -23,10 +23,7 @@ mockery.enable({
 mockery.registerMock('webpack', webpack)
 
 const preprocessor = require('../../index')
-const utils = require('../../lib/utils').default
 const typescriptOverrides = require('../../lib/typescript-overrides')
-const crossOriginCallbackStore = require('../../lib/cross-origin-callback-store').crossOriginCallbackStore
-const crossOriginCallbackCompile = require('../../lib/cross-origin-callback-compile')
 
 describe('webpack preprocessor', function () {
   beforeEach(function () {
@@ -67,9 +64,6 @@ describe('webpack preprocessor', function () {
       fileUpdated: sinon.spy(),
       onClose: sinon.stub(),
     }
-
-    sinon.stub(utils, 'rmdir').resolves()
-    sinon.stub(utils, 'tmpdir').returns('/path/to/tmp/dir')
 
     this.run = (options, file = this.file) => {
       return preprocessor(options)(file)
@@ -163,79 +157,6 @@ describe('webpack preprocessor', function () {
             publicPath: '',
             path: 'output',
             filename: 'output.ts.js',
-          })
-        })
-      })
-
-      describe('cross-origin callback compilation', function () {
-        beforeEach(function () {
-          global.__cypressCallbackReplacementCommands = ['origin']
-
-          this.files = []
-
-          sinon.stub(crossOriginCallbackStore, 'hasFilesFor').returns(true)
-          sinon.stub(crossOriginCallbackStore, 'getFilesFor').returns(this.files)
-          sinon.stub(crossOriginCallbackCompile, 'compileCrossOriginCallbackFiles').resolves()
-          sinon.stub(crossOriginCallbackStore, 'reset')
-
-          this.statsApi = {
-            hasErrors: () => false,
-            toJson () {
-              return { warnings: [], errors: [], modules: [] }
-            },
-          }
-
-          this.compilerApi.run.yields(null, this.statsApi)
-        })
-
-        afterEach(function () {
-          global.__cypressCallbackReplacementCommands = undefined
-        })
-
-        it('adds cross-origin callback loader when flag is on', function () {
-          const options = { webpackOptions: { devtool: false, module: { rules: [] } } }
-
-          return this.run(options).then(() => {
-            expect(options.webpackOptions.module.rules[0].use[0].loader).to.include('cross-origin-callback-loader')
-          })
-        })
-
-        it('runs additional compilation for cross-origin callback files', function () {
-          return this.run().then(() => {
-            expect(crossOriginCallbackCompile.compileCrossOriginCallbackFiles).to.be.calledWith(this.files)
-            expect(crossOriginCallbackStore.reset).to.be.called
-          })
-        })
-
-        it('rejects the main bundle promise if callback file compilation errors', function () {
-          const err = new Error('compilation failed')
-
-          crossOriginCallbackCompile.compileCrossOriginCallbackFiles.rejects(err)
-
-          return this.run()
-          .then(() => {
-            throw new Error('should not resolve')
-          })
-          .catch((_err) => {
-            expect(_err).to.equal(err)
-            expect(crossOriginCallbackStore.reset).to.be.called
-          })
-        })
-
-        it('does not compile files when no commands are specified', function () {
-          global.__cypressCallbackReplacementCommands = undefined
-
-          return this.run().then(() => {
-            expect(crossOriginCallbackStore.hasFilesFor).not.to.be.called
-            expect(crossOriginCallbackCompile.compileCrossOriginCallbackFiles).not.to.be.called
-          })
-        })
-
-        it('does not compile files there are no files', function () {
-          crossOriginCallbackStore.hasFilesFor.returns(false)
-
-          return this.run().then(() => {
-            expect(crossOriginCallbackCompile.compileCrossOriginCallbackFiles).not.to.be.called
           })
         })
       })
@@ -383,15 +304,6 @@ describe('webpack preprocessor', function () {
         return this.run().then(() => {
           this.file.on.withArgs('close').yield()
           expect(this.watchApi.close).not.to.be.called
-        })
-      })
-
-      it('deletes temp dir when `close` is emitted', function () {
-        this.compilerApi.watch.yields(null, this.statsApi)
-
-        return this.run().then(() => {
-          this.file.on.withArgs('close').yield()
-          expect(utils.rmdir).to.be.calledWith(utils.tmpdir())
         })
       })
 
