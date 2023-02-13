@@ -6,7 +6,7 @@ import { state as NetStubbingState } from '../../lib/server/state'
 
 describe('InterceptedRequest', () => {
   context('handleSubscriptions', () => {
-    it.only('handles subscriptions as expected', async () => {
+    it('handles subscriptions as expected', async () => {
       const socket = {
         toDriver: sinon.stub(),
       }
@@ -29,7 +29,7 @@ describe('InterceptedRequest', () => {
           ],
         },
         state,
-        socket
+        socket,
       })
 
       interceptedRequest.addSubscription({
