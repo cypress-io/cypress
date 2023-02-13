@@ -1,8 +1,8 @@
 <template>
-  <span class="text-warning-600 bg-warning-50 border-warning-300 border-1 border-transparent rounded p-2px ml-4px pr-3px">
+  <span class="text-jade-600 bg-jade-50 border-jade-300 border-1 border-transparent rounded p-2px ml-4px pr-3px">
     <!-- for screen readers -->
     <span class="sr-only">
-      Support is in
+      {{ t('versions.communityNote') }}
     </span>
     {{ t('versions.community') }}
   </span>

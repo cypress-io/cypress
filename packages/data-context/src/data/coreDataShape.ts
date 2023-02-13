@@ -1,5 +1,5 @@
 import { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, MIGRATION_STEPS, MigrationStep, BannerState } from '@packages/types'
-import { CT_FRAMEWORKS, resolveComponentFrameworkDefinition, WizardBundler } from '@packages/scaffold-config'
+import { WizardBundler, CT_FRAMEWORKS, resolveComponentFrameworkDefinition } from '@packages/scaffold-config'
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
 import type { App, BrowserWindow } from 'electron'
 import type { ChildProcess } from 'child_process'

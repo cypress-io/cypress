@@ -1,5 +1,5 @@
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
-import { detectFramework, commandsFileBody, supportFileComponent, supportFileE2E, getBundler, detectThirdPartyCTFrameworks, resolveComponentFrameworkDefinition, CT_FRAMEWORKS } from '@packages/scaffold-config'
+import { detectFramework, commandsFileBody, supportFileComponent, supportFileE2E, getBundler, CT_FRAMEWORKS, resolveComponentFrameworkDefinition, detectThirdPartyCTFrameworks } from '@packages/scaffold-config'
 import assert from 'assert'
 import path from 'path'
 import Debug from 'debug'
@@ -167,10 +167,11 @@ export class WizardActions {
     }
 
     const officialFrameworks = CT_FRAMEWORKS.map((framework) => resolveComponentFrameworkDefinition(framework))
-    const thirdPartyFrameworks = await detectThirdPartyCTFrameworks(this.ctx.currentProject).then((frameworks) => frameworks.map(resolveComponentFrameworkDefinition))
+    const thirdParty = await detectThirdPartyCTFrameworks(this.ctx.currentProject)
+    const resolvedThirdPartyFrameworks = thirdParty.map(resolveComponentFrameworkDefinition)
 
     this.ctx.update((d) => {
-      d.wizard.frameworks = officialFrameworks.concat(thirdPartyFrameworks)
+      d.wizard.frameworks = officialFrameworks.concat(resolvedThirdPartyFrameworks)
     })
   }
 
