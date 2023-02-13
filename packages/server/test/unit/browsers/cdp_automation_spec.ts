@@ -204,7 +204,7 @@ context('lib/browsers/cdp_automation', () => {
         })
       })
 
-      it('does not mutate domain property if cookie is set in the server side cookie jar to prevent duplication / inconsistent overwrite behavior', function () {
+      it('resolves with the cookie props (host only)', function () {
         this.sendDebuggerCommand
         .withArgs('Network.setCookie', { domain: 'google.com', name: 'session', value: 'key', path: '/' })
         .resolves({ success: true })
@@ -215,7 +215,7 @@ context('lib/browsers/cdp_automation', () => {
           ],
         })
 
-        return this.onRequest('set:cookie', { domain: 'google.com', name: 'session', value: 'key', path: '/', isStoredInServerSideCookieJar: true })
+        return this.onRequest('set:cookie', { domain: 'google.com', name: 'session', value: 'key', path: '/', hostOnly: true })
         .then((resp) => {
           expect(resp).to.deep.eq({ domain: 'google.com', expirationDate: undefined, hostOnly: true, httpOnly: false, name: 'session', value: 'key', path: '/', secure: false, sameSite: undefined })
         })
