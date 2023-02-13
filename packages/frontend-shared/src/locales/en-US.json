@@ -526,7 +526,7 @@
       },
       "experimentalOriginDependencies": {
         "name": "Origin Dependencies",
-        "description": "Enables support for `require`/`import` within `cy.origin`."
+        "description": "Enables support for `Cypress.require()` for including dependencies within the `cy.origin()` callback."
       },
       "experimentalMemoryManagement": {
         "name": "Memory Management",
@@ -650,6 +650,10 @@
     }
   },
   "debugPage": {
+    "openFile": {
+      "openInIDE": "Open in IDE",
+      "notFoundLocally": "Opening in IDE is disabled because the spec is not found in this project"
+    },
     "limit": {
       "title": "Cypress renders up to 100 failed test results",
       "message": "This run has {n} failed tests | This run has {n} failed test | This run has {n} failed tests",

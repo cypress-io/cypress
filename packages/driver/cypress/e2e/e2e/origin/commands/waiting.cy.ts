@@ -3,41 +3,24 @@ import { findCrossOriginLogs } from '../../../../support/utils'
 declare global {
   interface Window {
     xhrGet: any
-    abortRequests: any
   }
 }
-
-let reqQueue: XMLHttpRequest[] = []
 
 const xhrGet = (url) => {
   const xhr = new window.XMLHttpRequest()
 
   xhr.open('GET', url)
-  reqQueue.push(xhr)
   xhr.send()
-}
-
-const abortRequests = () => {
-  reqQueue.forEach((xhr) => xhr.abort())
-  reqQueue = []
 }
 
 context('cy.origin waiting', { browser: '!webkit' }, () => {
   before(() => {
     cy.origin('http://www.foobar.com:3500', () => {
-      let reqQueue: XMLHttpRequest[] = []
-
       window.xhrGet = (url) => {
         const xhr = new window.XMLHttpRequest()
 
         xhr.open('GET', url)
-        reqQueue.push(xhr)
         xhr.send()
-      }
-
-      window.abortRequests = () => {
-        reqQueue.forEach((xhr) => xhr.abort())
-        reqQueue = []
       }
     })
   })
@@ -45,12 +28,6 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
   let logs: Map<string, any>
 
   beforeEach(() => {
-    cy.origin('http://www.foobar.com:3500', () => {
-      window.abortRequests()
-    })
-
-    abortRequests()
-
     logs = new Map()
 
     cy.on('log:changed', (attrs, log) => {
