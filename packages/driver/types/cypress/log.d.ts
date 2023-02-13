@@ -113,7 +113,7 @@ declare namespace Cypress {
     }
     snapshot?: boolean
     snapshots?: []
-    state?: 'failed' | 'passed' | 'pending' // representative of Mocha.Runnable.constants (not publicly exposed by Mocha types)
+    state?: 'failed' | 'warned' | 'passed' | 'pending' // representative of Mocha.Runnable.constants (not publicly exposed by Mocha types)
     status?: number
     testCurrentRetry?: number
     testId?: string

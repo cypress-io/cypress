@@ -49,6 +49,16 @@ const USER_FRIENDLY_TYPE_DETECTORS = _.map([
 
 export default {
   warning (msg) {
+    Cypress.log({
+      instrument: 'command',
+      type: 'system',
+      state: 'warned',
+      name: 'Warning',
+      message: msg,
+      snapshot: false,
+      ended: true,
+    } as Cypress.InternalLogConfig)
+
     // eslint-disable-next-line no-console
     return console.warn(`Cypress Warning: ${msg}`)
   },
