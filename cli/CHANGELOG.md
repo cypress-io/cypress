@@ -3,17 +3,18 @@
 
 _Released 02/14/2023 (PENDING)_
 
+**Features:**
+
+- Added the "Open in IDE" feature for failed tests reported from the Debug page. Addressed in [#25691](https://github.com/cypress-io/cypress/pull/25691).
+- Added a new CLI flag, called [`--auto-cancel-after-failures`](https://docs.cypress.io/guides/guides/command-line#Options), that overrides the project-level CI ["Auto Cancellation"](https://docs.cypress.io/guides/cloud/smart-orchestration#Auto-Cancellation) value when recording to the Cloud. This gives Cloud users on Business and Enterprise plans the flexibility to alter the auto-cancellation value per run. Addressed in [#25237](https://github.com/cypress-io/cypress/pull/25237).
+- Added `Cypress.require()` for including dependencies within the `cy.origin()` callback.  Removed support for `require()` and `import()` within the callback. Addresses [#24976](https://github.com/cypress-io/cypress/issues/24976).
+
 **Bugfixes:**
 
 - Fixed an issue with the Cloud project selection modal not showing the correct prompts. Fixes [#25520](https://github.com/cypress-io/cypress/issues/25520).
 - Fixed an issue in middleware where error-handling code could itself generate an error and fail to report the original issue. Fixes [#22825](https://github.com/cypress-io/cypress/issues/22825).
 - Fixed an issue that could cause the Debug page to display a different number of specs for in-progress runs than shown in Cypress Cloud. Fixes [#25647](https://github.com/cypress-io/cypress/issues/25647).
 - Fixed an issue where custom browsers that relied on process environment variables were not found on macOS arm64 architectures. Fixed in [#25753](https://github.com/cypress-io/cypress/pull/25753).
-
-**Features:**
-
-- Added the "Open in IDE" feature for failed tests reported from the Debug page. Addressed in [#25691](https://github.com/cypress-io/cypress/pull/25691).
-- Added a new CLI flag, called [`--auto-cancel-after-failures`](https://docs.cypress.io/guides/guides/command-line#Options), that overrides the project-level CI ["Auto Cancellation"](https://docs.cypress.io/guides/cloud/smart-orchestration#Auto-Cancellation) value when recording to the Cloud. This gives Cloud users on Business and Enterprise plans the flexibility to alter the auto-cancellation value per run. Addressed in [#25237](https://github.com/cypress-io/cypress/pull/25237).
 
 **Misc:**
 
