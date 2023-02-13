@@ -156,7 +156,7 @@ In the following instructions, "X.Y.Z" is used to denote the [next version of Cy
 
 18. Create a new [GitHub release](https://github.com/cypress-io/cypress/releases). Choose the tag you created previously and add contents to match previous releases.
 
-19. Add a comment to each GH issue that has been resolved with the new published version. Download the `releaseData.json` from from CI and run the following command inside of [cypress-io/release-automations][release-automations]:
+19. Add a comment to each GH issue that has been resolved with the new published version. Download the `releaseData.json` from CI and run the following command inside of [cypress-io/release-automations][release-automations]:
 
     ```shell
     cd packages/issues-in-release && npm run do:comment -- --release-data <path_to_releaseData.json>
