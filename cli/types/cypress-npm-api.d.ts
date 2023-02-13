@@ -405,7 +405,6 @@ declare module 'cypress' {
      * @example
      * module.exports = defineComponentFramework({
      *   type: 'cypress-ct-solid-js'
-     *   // ...
      * })
      *
      * @see ../types/cypress-npm-api.d.ts

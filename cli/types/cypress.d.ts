@@ -3299,27 +3299,24 @@ declare namespace Cypress {
   interface ResolvedComponentFrameworkDefinition {
     /**
      * A semantic, unique identifier. Must begin with `cypress-ct-` for third party implementations.
-     * @example: 'reactscripts', 'nextjs', 'cypress-ct-solid-js'
+     * @example 'reactscripts'
+     * @example 'nextjs'
+     * @example 'cypress-ct-solid-js'
      */
     type: string
 
     /**
      * Used as the flag for `getPreset` for meta framworks, such as finding the webpack config for CRA, Angular, etc.
-     *
-     * configFramwork: () => {
-     *   return getSolidJsMetaFrameworkBundlerConfig()
-     * }
      * It is also the name of the string added to `cypress.config`
      *
      * @example
-     *
-     * export default {
-     *   component: {
-     *     devServer: {
-     *       framework: 'create-react-app' // can be 'next', 'create-react-app', etc etc.
+     *   export default {
+     *     component: {
+     *       devServer: {
+     *         framework: 'create-react-app' // can be 'next', 'create-react-app', etc etc.
+     *       }
      *     }
      *   }
-     * }
      */
     configFramework: string
 
@@ -3330,7 +3327,8 @@ declare namespace Cypress {
 
     /**
      * Name displayed in Launchpad when doing initial setup.
-     * @example 'Solid.js', 'Create React App'
+     * @example 'Solid.js'
+     * @example 'Create React App'
      */
     name: string
 
@@ -3341,33 +3339,30 @@ declare namespace Cypress {
 
     /**
      * Used to attempt to automatically select the correct framework/bundler from the dropdown.
-     * @example
      *
-     * const SOLID_DETECTOR: Dependency = {
-     *   type: 'solid',
-     *   name: 'Solid.js',
-     *   package: 'solid-js',
-     *   installer: 'solid-js',
-     *   description: 'Solid is a declarative JavaScript library for creating user interfaces',
-     *   minVersion: '^1.0.0',
-     * }
+     * @example
+     *   const SOLID_DETECTOR: Dependency = {
+     *     type: 'solid',
+     *     name: 'Solid.js',
+     *     package: 'solid-js',
+     *     installer: 'solid-js',
+     *     description: 'Solid is a declarative JavaScript library for creating user interfaces',
+     *     minVersion: '^1.0.0',
+     *   }
      */
     detectors: CypressComponentDependency[]
 
     /**
      * Array of required dependencies. This could be the bundler and JavaScript library.
-     * It's the same type as `detectors`.
      */
     dependencies: (bundler: 'webpack' | 'vite', projectPath: string) => Promise<DependencyToInstall[]>
 
     /**
-     * @internal
      * This is used interally by Cypress for the "Create From Component" feature.
      */
     codeGenFramework?: 'react' | 'vue' | 'svelte' | 'angular'
 
     /**
-     * @internal
      * This is used interally by Cypress for the "Create From Component" feature.
      * @example '*.{js,jsx,tsx}'
      */
@@ -3382,7 +3377,6 @@ declare namespace Cypress {
     /**
      * Support status. Internally alpha | beta | full.
      * Community integrations are "community".
-     * @internal
      */
     supportStatus: 'alpha' | 'beta' | 'full' | 'community'
 
@@ -3395,7 +3389,6 @@ declare namespace Cypress {
     /**
      * Used for the Create From Comopnent feature.
      * This is currently not supported for third party frameworks.
-     * @internal
      */
     specPattern?: '**/*.cy.ts'
 
@@ -3410,9 +3403,17 @@ declare namespace Cypress {
     dependencies: (bundler: 'webpack' | 'vite') => CypressComponentDependency[]
   }
 
-  // Certain properties are not supported for third party frameworks right now, such as ones related to the "Create From" feature.
+  /**
+   * Certain properties are not supported for third party frameworks right now,
+   * such as ones related to the "Create From" feature. This is a subset of
+   * properties that are exposed for public usage.
+   */
+
   type ThirdPartyComponentFrameworkDefinition = Pick<ComponentFrameworkDefinition, 'type' | 'name' | 'supportedBundlers' | 'detectors' | 'dependencies'> & {
-    type: `cypress-ct-${string}` | string
+    /**
+     * @example `cypress-ct-${string} for third parties. Any string is valid internally.
+     */
+    type: string
 
     /**
      * Only `library` is supported for third party definitions.
