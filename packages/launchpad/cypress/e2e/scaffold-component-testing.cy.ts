@@ -154,16 +154,17 @@ describe('scaffolding component testing', {
     it('Scaffolds component testing for Qwik using Vite', () => {
       cy.scaffoldProject('qwik-app')
       cy.openProject('qwik-app')
-      cy.visitLaunchpad()
-      cy.skipWelcome()
 
       cy.withCtx(async (ctx) => {
         await ctx.actions.file.removeFileInProject('./node_modules/cypress-ct-qwik')
         await ctx.actions.file.moveFileInProject('./cypress-ct-qwik', './node_modules/cypress-ct-qwik')
       })
 
+      cy.visitLaunchpad()
+      cy.skipWelcome()
+
       cy.contains('Component Testing').click()
-      cy.contains('button', 'Qwik')
+      cy.contains('button', 'Qwik').should('be.visible')
       cy.contains('button', 'Next step').click()
 
       cy.contains('li', '@builder.io/qwik').within(() => {

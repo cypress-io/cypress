@@ -40,7 +40,7 @@
         {{ selectedOptionName }}
       </span>
       <AlphaLabel v-if="selectedFrameworkOptionObject?.supportStatus === 'alpha'" />
-      <CommunityLabel v-else-if="selectedFrameworkOptionObject?.supportStatus === 'community'" />
+      <CommunityLabel v-if="selectedFrameworkOptionObject?.supportStatus === 'community'" />
       <span
         v-if="isDetected"
         class="ml-4px text-gray-400 inline-block"
@@ -78,7 +78,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { FrameworkBundlerLogos } from '../utils/icons'
 import type { Option, FrameworkOption } from './types'
 import Select from '@cy/components/Select.vue'
@@ -122,6 +122,13 @@ const selectedFrameworkOptionObject = computed(() => {
 
 const selectedOptionName = ref(selectedOptionObject.value?.name || '')
 const isDetected = ref(selectedOptionObject.value?.isDetected)
+
+watch(selectedOptionObject, () => {
+  if (selectedOptionObject.value) {
+    selectedOptionName.value = selectedOptionObject.value.name
+    isDetected.value = selectedOptionObject.value.isDetected
+  }
+})
 
 const selectOption = (opt) => {
   selectedOptionName.value = opt.name
