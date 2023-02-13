@@ -19,16 +19,14 @@ export const toughCookieToAutomationCookie = (toughCookie: Cookie, defaultDomain
     // if expiry is Infinity or -Infinity, this operation is a no-op
     expiry: (expiry === Infinity || expiry === -Infinity) ? expiry.toString() as '-Infinity' | 'Infinity' : expiry / 1000,
     httpOnly: toughCookie.httpOnly,
+    // we want to make sure the hostOnly property is respected when syncing with CDP/extension to prevent duplicates
+    hostOnly: toughCookie.hostOnly || false,
     maxAge: toughCookie.maxAge,
     name: toughCookie.key,
     path: toughCookie.path,
     sameSite: toughCookie.sameSite === 'none' ? 'no_restriction' : toughCookie.sameSite,
     secure: toughCookie.secure,
     value: toughCookie.value,
-    // @ts-expect-error
-    ...(toughCookie.isStoredInServerSideCookieJar ? {
-      isStoredInServerSideCookieJar: true,
-    } : {}),
   }
 }
 
@@ -44,10 +42,12 @@ export const automationCookieToToughCookie = (automationCookie: AutomationCookie
     }
   }
 
-  const cookie = new Cookie({
+  return new Cookie({
     domain: automationCookie.domain || defaultDomain,
     expires: expiry,
     httpOnly: automationCookie.httpOnly,
+    // we want to make sure the hostOnly property is respected when syncing with CDP/extension to prevent duplicates
+    hostOnly: automationCookie.hostOnly || false,
     maxAge: automationCookie.maxAge || 'Infinity',
     key: automationCookie.name,
     path: automationCookie.path || undefined,
@@ -55,14 +55,6 @@ export const automationCookieToToughCookie = (automationCookie: AutomationCookie
     secure: automationCookie.secure,
     value: automationCookie.value,
   })
-
-  // @ts-expect-error
-  if (automationCookie.isStoredInServerSideCookieJar) {
-    // @ts-expect-error
-    cookie.isStoredInServerSideCookieJar = true
-  }
-
-  return cookie
 }
 
 const sameSiteNoneRe = /; +samesite=(?:'none'|"none"|none)/i

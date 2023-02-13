@@ -6,18 +6,25 @@ import {
 import { Cookie as ToughCookie } from 'tough-cookie'
 import type { AutomationCookie } from '@packages/server/lib/automation/cookies'
 
+function isHostOnlyCookie (domain) {
+  return domain[0] !== '.'
+}
+
 const parseDocumentCookieString = (documentCookieString: string): AutomationCookie[] => {
   if (!documentCookieString || !documentCookieString.trim().length) return []
 
   return documentCookieString.split(';').map((cookieString) => {
-    const [name, value] = cookieString.split('=')
+    const [name, value, domain] = cookieString.split('=')
+
+    let cookieDomain = domain || location.hostname
 
     return {
       name: name.trim(),
       value: value.trim(),
-      domain: location.hostname,
+      domain: cookieDomain,
       expiry: null,
       httpOnly: false,
+      hostOnly: isHostOnlyCookie(cookieDomain),
       maxAge: null,
       path: null,
       sameSite: 'lax',
@@ -87,6 +94,10 @@ export const patchDocumentCookie = (requestCookies: AutomationCookie[]) => {
     set (newValue: any) {
       const stringValue = `${newValue}`
       const parsedCookie = CookieJar.parse(stringValue)
+
+      if (parsedCookie?.hostOnly === null) {
+        parsedCookie.hostOnly = isHostOnlyCookie(parsedCookie.domain || domain)
+      }
 
       // if result is undefined, it was invalid and couldn't be parsed
       if (!parsedCookie) return getDocumentCookieValue()

@@ -110,8 +110,7 @@ const normalizeSetCookieProps = (cookie: CyCookie): Protocol.Network.SetCookieRe
   // without this logic, a cookie being set on 'foo.com' will only be set for 'foo.com', not other subdomains
   // However, we do NOT want to prefix the domain for cookies that are stored inside our server-side cookie jar,
   // as it might lead to duplicate cookies when another request or script overrides the value
-  // @ts-expect-error
-  if (!cookie.hostOnly && isHostOnlyCookie(cookie) && !cookie.isStoredInServerSideCookieJar) {
+  if (!cookie.hostOnly && isHostOnlyCookie(cookie)) {
     setCookieRequest.domain = `.${cookie.domain}`
   }
 

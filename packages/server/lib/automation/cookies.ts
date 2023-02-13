@@ -7,6 +7,7 @@ export interface AutomationCookie {
   domain: string
   expiry: 'Infinity' | '-Infinity' | number | null
   httpOnly: boolean
+  hostOnly: boolean
   maxAge: 'Infinity' | '-Infinity' | number | null
   name: string
   path: string | null
@@ -31,6 +32,11 @@ const normalizeCookieProps = function (props) {
     return props
   }
 
+  // if the cookie is stored inside the server side cookie jar,
+  // we want to make the automation client aware so the domain property
+  // isn't mutated to prevent duplicate setting of cookies from different contexts.
+  // This should be handled by the hostOnly property
+
   const cookie = _.pick(props, COOKIE_PROPERTIES)
 
   if (props.expiry === '-Infinity') {
@@ -50,13 +56,6 @@ const normalizeCookieProps = function (props) {
     delete cookie.expirationDate
     delete cookie.url
     cookie.expiry = props.expirationDate
-  }
-
-  // if the cookie is stored inside the server side cookie jar,
-  // we want to make the automation client aware so the domain property
-  // isn't mutated to prevent duplicate setting of cookies from different contexts
-  if (props.isStoredInServerSideCookieJar) {
-    cookie.isStoredInServerSideCookieJar = true
   }
 
   return cookie

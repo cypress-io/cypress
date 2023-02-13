@@ -3,7 +3,8 @@
 <head>
 </head>
 <body>
-  <a data-cy="cookie-cross-origin-redirects">Trigger Cross Origin Redirect Loop that sets cookies</a>
+  <a data-cy="cookie-cross-origin-redirects-host-only">Trigger Cross Origin Redirect Loop that sets host only cookie</a>
+  <a data-cy="cookie-cross-origin-redirects">Trigger Cross Origin Redirect Loop that sets non host only cookie</a>
   <script>
     function setHref (dataCy, redirect, cookie) {
       const redirectEncoded = encodeURIComponent(redirect)
@@ -13,7 +14,8 @@
         `/set-same-site-none-cookie-on-redirect?redirect=${redirectEncoded}&cookie=${cookieEncoded}`
       )
     }
-    setHref('cookie-cross-origin-redirects', `${window.location.origin}/fixtures/primary-origin.html`, 'foo=bar')
+    setHref('cookie-cross-origin-redirects-host-only', `${window.location.origin}/fixtures/primary-origin.html`, 'foo=bar')
+    setHref('cookie-cross-origin-redirects', `${window.location.origin}/fixtures/primary-origin.html`, `foo=bar; domain=.${window.location.hostname}`)
   </script>
 </body>
 </html>
