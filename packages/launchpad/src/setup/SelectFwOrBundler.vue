@@ -25,7 +25,13 @@
     >
       <component
         :is="FrameworkBundlerLogos[itemValue?.type]"
+        v-if="!itemValue?.icon"
         class="h-16px w-16px"
+      />
+      <div
+        v-else
+        class="h-16px w-16px"
+        v-html="itemValue.icon"
       />
     </template>
 
@@ -59,7 +65,13 @@
     <template #item-prefix="{ value: itemValue }">
       <component
         :is="FrameworkBundlerLogos[itemValue?.type]"
+        v-if="!itemValue?.icon"
         class="h-16px w-16px"
+      />
+      <div
+        v-else
+        class="h-16px w-16px"
+        v-html="itemValue.icon"
       />
     </template>
   </Select>

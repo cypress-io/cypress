@@ -65,6 +65,7 @@ fragment EnvironmentSetup on Wizard {
       isDetected
     }
     category
+    icon
   }
   frameworks {
     id
@@ -73,6 +74,7 @@ fragment EnvironmentSetup on Wizard {
     isDetected
     type
     category
+    icon
   }
   allBundlers {
     id
@@ -104,6 +106,7 @@ const frameworks = computed(() => {
       name: x.name,
       id: x.id,
       isDetected: x.isDetected,
+      icon: x.icon || undefined,
     }
   })
 

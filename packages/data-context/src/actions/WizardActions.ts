@@ -1,5 +1,5 @@
 import type { NexusGenObjects } from '@packages/graphql/src/gen/nxs.gen'
-import { detectFramework, commandsFileBody, supportFileComponent, supportFileE2E, getBundler } from '@packages/scaffold-config'
+import { detectFramework, commandsFileBody, supportFileComponent, supportFileE2E, getBundler, CT_FRAMEWORKS, resolveComponentFrameworkDefinition, detectThirdPartyCTFrameworks } from '@packages/scaffold-config'
 import assert from 'assert'
 import path from 'path'
 import Debug from 'debug'
@@ -159,6 +159,20 @@ export class WizardActions {
       default:
         throw new Error('Unreachable')
     }
+  }
+
+  async detectFrameworks () {
+    if (!this.ctx.currentProject) {
+      return
+    }
+
+    const officialFrameworks = CT_FRAMEWORKS.map((framework) => resolveComponentFrameworkDefinition(framework))
+    const thirdParty = await detectThirdPartyCTFrameworks(this.ctx.currentProject)
+    const resolvedThirdPartyFrameworks = thirdParty.map(resolveComponentFrameworkDefinition)
+
+    this.ctx.update((d) => {
+      d.wizard.frameworks = officialFrameworks.concat(resolvedThirdPartyFrameworks)
+    })
   }
 
   private async scaffoldE2E () {

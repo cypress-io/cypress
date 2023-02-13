@@ -53,7 +53,7 @@ interface DevDepToFake {
  * We have some real e2e tests that actually run `npm install`.
  * Those are in launchpad/cypress/e2e/scaffold-component-testing.cy.ts.
  */
-function fakeDepsInNodeModules (cwd: string, deps: Array<DepToFake | DevDepToFake>) {
+export function fakeDepsInNodeModules (cwd: string, deps: Array<DepToFake | DevDepToFake>) {
   fs.mkdirSync(path.join(cwd, 'node_modules'))
   for (const dep of deps) {
     const depName = 'dependency' in dep ? dep.dependency : dep.devDependency

@@ -2338,6 +2338,9 @@ type WizardFrontendFramework implements Node {
   """The category (framework, like react-scripts, or library, like react"""
   category: String!
 
+  """Raw SVG icon of framework"""
+  icon: String
+
   """Relay style Node ID field for the WizardFrontendFramework field"""
   id: ID!
 
