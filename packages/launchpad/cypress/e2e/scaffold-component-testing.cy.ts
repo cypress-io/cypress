@@ -150,8 +150,7 @@ describe('scaffolding component testing', {
     })
   })
 
-  // eslint-disable-next-line mocha/no-exclusive-tests
-  context.only('3rd party ct plugin', () => {
+  context('3rd party ct plugin', () => {
     for (let i = 0; i < 20; i++) {
       it('Scaffolds component testing for Qwik using Vite', () => {
         cy.scaffoldProject('qwik-app')
