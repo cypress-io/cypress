@@ -161,13 +161,6 @@ export namespace CyHttpMessages {
      * request via `cy.wait('@alias')`.
      */
     alias?: string
-    /**
-     * If set to `false`, this request will not be logged.
-     * NOTE: To prevent accidentally ignoring `cy.intercept()` logs, all intercepts set
-     * `req.log = true` by default. `req.log` must be `false` at the end of the handler chain
-     * to hide the log.
-     */
-    log: boolean
   }
 
   export interface IncomingHttpRequest extends IncomingRequest, RequestEvents {
@@ -402,7 +395,17 @@ export interface RouteMatcherOptionsGeneric<S> {
 
 export type RouteHandlerController = HttpRequestInterceptor
 
-export type RouteHandler = string | StaticResponse | RouteHandlerController | object
+export type RouteHandler = string | StaticResponseWithOptions | RouteHandlerController | object
+
+export type InterceptOptions = {
+  /**
+   * If set to `false`, matching requests will not be shown in the Command Log.
+   * @default true
+   */
+  log?: boolean
+}
+
+export type StaticResponseWithOptions = StaticResponse & InterceptOptions
 
 /**
  * Describes a response that will be sent back to the browser to fulfill the request.
@@ -448,13 +451,6 @@ export interface GenericStaticResponse<Fixture, Body> {
    * Milliseconds to delay before the response is sent.
    */
   delay?: number
-  /**
-   * If set to `false`, this request will not be logged.
-   * NOTE: To prevent accidentally ignoring `cy.intercept()` logs, all intercepts set
-   * `req.log = true` by default. `req.log` must be `false` at the end of the handler chain
-   * to hide the log.
-   */
-  log: boolean
 }
 
 /**
