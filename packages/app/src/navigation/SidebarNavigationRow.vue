@@ -48,13 +48,17 @@
         {{ name }}
       </span>
       <span
-        v-if="badge"
+        v-if="badge && !showDot"
         :aria-label="badge.label"
-        class="rounded-md font-medium text-white p-4px transition-opacity z-1"
+        class=""
         :class="[badgeVariant, badgeColorStyles[badge.status], {'opacity-0': transitioning}]"
       >
         {{ badge.value }}
       </span>
+      <div
+        v-else-if="badge && showDot"
+        :class="dotClass"
+      />
     </div>
     <template #popper>
       {{ name }}
@@ -66,8 +70,11 @@
 import { computed, FunctionalComponent, SVGAttributes, watch, ref } from 'vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import { promiseTimeout } from '@vueuse/core'
+import { useI18n } from '@cy/i18n'
 
 export type Badge = { value: string, status: 'success' | 'failed' | 'error', label: string }
+
+const { t } = useI18n()
 
 const props = withDefaults(defineProps <{
   icon: FunctionalComponent<SVGAttributes>
@@ -82,7 +89,7 @@ const props = withDefaults(defineProps <{
 })
 
 const badgeVariant = computed(() => {
-  const classes: string[] = []
+  const classes: string[] = ['rounded-md font-medium text-white p-4px transition-opacity z-1']
 
   if (props.isNavBarExpanded) {
     classes.push('ml-16px', 'h-20px', 'text-sm', 'leading-3')
@@ -106,6 +113,12 @@ const badgeColorStyles = {
   'failed': 'bg-error-500',
   'error': 'bg-warning-500',
 }
+
+const showDot = computed(() => {
+  return props.badge.value === t('sidebar.debug.new') && !props.isNavBarExpanded
+})
+
+const dotClass = 'bg-jade-500 w-10px h-10px relative z-1 border-2px border-gray-1000 rounded-full -bottom-7px -left-30px flex-shrink-0'
 
 const transitioning = ref(false)
 
