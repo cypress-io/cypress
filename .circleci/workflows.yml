@@ -134,7 +134,8 @@ commands:
       - run:
           name: Check current branch to persist artifacts
           command: |
-            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "mikep/22825-next-middleware" ]]; then
+            # Keep update-v8-snapshot-cache-on-develop to ensure that we fully test v8 snapshot cache updates
+            if [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "update-v8-snapshot-cache-on-develop" ]]; then
               echo "Not uploading artifacts or posting install comment for this branch."
               circleci-agent step halt
             fi
