@@ -7,6 +7,7 @@ _Released 02/14/2023 (PENDING)_
 
 - Fixed an issue with the Cloud project selection modal not showing the correct prompts. Fixes [#25520](https://github.com/cypress-io/cypress/issues/25520).
 - Fixed an issue in middleware where error-handling code could itself generate an error and fail to report the original issue. Fixes [#22825](https://github.com/cypress-io/cypress/issues/22825).
+- Fixed an issue that could cause the Debug page to display a different number of specs for in-progress runs than shown in Cypress Cloud. Fixes [#25647](https://github.com/cypress-io/cypress/issues/25647).
 - Fixed an issue where custom browsers that relied on process environment variables were not found on macOS arm64 architectures. Fixed in [#25753](https://github.com/cypress-io/cypress/pull/25753).
 
 **Features:**

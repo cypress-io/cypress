@@ -49,6 +49,42 @@ export const FAKE_PROJECT_NO_RUNS = { data: { cloudProjectBySlug: { __typename: 
 
 export const FAKE_PROJECT_ONE_RUNNING_RUN = { data: { cloudProjectBySlug: { __typename: 'CloudProject', runsByCommitShas: [{ runNumber: 1, status: 'RUNNING', commitInfo: { sha: FAKE_SHAS[0] } }] } } }
 
-export const FAKE_PROJECT_MULTIPLE_COMPLETED = { data: { cloudProjectBySlug: { __typename: 'CloudProject', runsByCommitShas: [{ runNumber: 4, status: 'FAILED', commitInfo: { sha: FAKE_SHAS[1] } }, { runNumber: 1, status: 'PASSED', commitInfo: { sha: FAKE_SHAS[0] } }] } } }
+export const FAKE_PROJECT_MULTIPLE_COMPLETED = { data: { cloudProjectBySlug: { __typename: 'CloudProject', runsByCommitShas: [
+  { runNumber: 4, status: 'FAILED', commitInfo: { sha: FAKE_SHAS[1] } }, { runNumber: 1, status: 'PASSED', commitInfo: { sha: FAKE_SHAS[0] } },
+] } } }
 
 export const FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING = { data: { cloudProjectBySlug: { __typename: 'CloudProject', runsByCommitShas: [{ runNumber: 5, status: 'RUNNING', commitInfo: { sha: FAKE_SHAS[2] } }, { runNumber: 4, status: 'FAILED', commitInfo: { sha: FAKE_SHAS[1] } }, { runNumber: 1, status: 'PASSED', commitInfo: { sha: FAKE_SHAS[0] } }] } } }
+
+export const FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC = {
+  data: {
+    cloudProjectBySlug: {
+      __typename: 'CloudProject',
+      current: {
+        runNumber: 1,
+        completedInstanceCount: 1,
+        totalInstanceCount: 1,
+        status: 'RUNNING',
+      },
+    },
+  },
+}
+
+export const FAKE_PROJECT_ONE_RUNNING_RUN_ONE_COMPLETED_THREE_SPECS = {
+  data: {
+    cloudProjectBySlug: {
+      __typename: 'CloudProject',
+      current: {
+        runNumber: 1,
+        status: 'PASSED',
+        completedInstanceCount: 3,
+        totalInstanceCount: 3,
+      },
+      next: {
+        runNumber: 2,
+        status: 'RUNNING',
+        completedInstanceCount: 0,
+        totalInstanceCount: 3,
+      },
+    },
+  },
+}
