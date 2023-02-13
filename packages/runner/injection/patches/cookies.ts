@@ -14,9 +14,9 @@ const parseDocumentCookieString = (documentCookieString: string): AutomationCook
   if (!documentCookieString || !documentCookieString.trim().length) return []
 
   return documentCookieString.split(';').map((cookieString) => {
-    const [name, value, domain] = cookieString.split('=')
+    const [name, value] = cookieString.split('=')
 
-    let cookieDomain = domain || location.hostname
+    let cookieDomain = location.hostname
 
     return {
       name: name.trim(),
