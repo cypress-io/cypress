@@ -1815,7 +1815,6 @@ declare namespace Cypress {
      * Reload the page.
      *
      * @see https://on.cypress.io/reload
-     * @param {ReloadOptions} [options] Pass in an options object to modify the default behavior of `cy.reload()`
      * @example
      *    cy.reload({log: false, timeout: 30000})
      */
@@ -1836,7 +1835,6 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/reload
      * @param {Boolean} forceReload Whether to reload the current page without using the cache. true forces the reload without cache.
-     * @param {ReloadOptions} [options] Pass in an options object to modify the default behavior of `cy.reload()`
      * @example
      *    // Reload the page without using the cache, do not log it in the command log and timeout after 5s
      *    cy.visit('http://localhost:3000/admin')
