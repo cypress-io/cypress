@@ -180,6 +180,16 @@ preprocessor.defaultOptions = {
   watchOptions: {},
 }
 
+preprocessor.getFullWebpackOptions = (filePath, typescript) => {
+  const options = { typescript }
+
+  options.webpackOptions = getDefaultWebpackOptions()
+
+  addTypeScriptConfig({ filePath }, options)
+
+  return options.webpackOptions
+}
+
 // for testing purposes, but do not add this to the typescript interface
 preprocessor.__reset = webpackPreprocessor.__reset
 
