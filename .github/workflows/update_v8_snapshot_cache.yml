@@ -1,14 +1,12 @@
 name: Update V8 Snapshot Cache
 on:
   schedule:
-    # Run everyday at 00:00 UTC
-    - cron: '0 0 * * *'
+    # Run everyday except Wednesday at 00:00 UTC
+    - cron: '0 0 * * 0,1,2,4,5,6'
     # Run every Wednesday at 00:00 UTC
     - cron: '0 0 * * 3'
   push:
     branches:
-      - ryanm/feature/v8-snapshots-auto-pr
-      - develop
       - 'release/**'
   workflow_dispatch:
     inputs:
