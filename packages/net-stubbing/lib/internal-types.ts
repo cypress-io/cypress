@@ -12,7 +12,7 @@ export type FixtureOpts = {
   filePath: string
 }
 
-export type BackendStaticResponse = GenericStaticResponse<FixtureOpts, string>
+export type BackendStaticResponse = GenericStaticResponse<FixtureOpts, string> & InterceptOptions
 
 export type BackendStaticResponseWithArrayBuffer = GenericStaticResponse<FixtureOpts, string | ArrayBuffer> & InterceptOptions
 
