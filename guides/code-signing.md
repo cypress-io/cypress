@@ -30,7 +30,7 @@ Code signing is done for the Windows and Mac distributions of Cypress when they 
 4. Using `openssl`, convert the plaintext PEM public and private key to binary PKCS#12/PFX format and encrypt it with a strong passphrase, which will later become `CSC_KEY_PASSWORD`.
     ```shell
     ➜ openssl pkcs12 -export -inkey win-code-signing.key -in win-code-signing.crt -out encrypted-win-code-signing.pfx
-    Enter Export Password: <passphrase>
+    Enter Export Password: <password>
     Verifying - Enter Export Password: <password>
     ```
 5. Upload the `encrypted-win-code-signing.pfx` file to the [Code Signing folder][code-signing-folder] in Google Drive and obtain a public [direct download link][direct-download].
