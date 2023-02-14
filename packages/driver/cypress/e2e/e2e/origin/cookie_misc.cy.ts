@@ -1,4 +1,5 @@
-describe('misc cookie tests', () => {
+// FIXME: currently cookies aren't cleared properly in headless mode with webkit between tests, as the below tests (excluding cy.origin) pass headfully locally.
+describe('misc cookie tests', { browser: '!webkit' }, () => {
   // NOTE: For this test to work correctly, we need to have a FQDN, not localhost (www.foobar.com).
   // FIXES: https://github.com/cypress-io/cypress/issues/25174 (cookies are duplicated with prepended dot (.))
   it('does not duplicate cookies with a prepended dot for cookies that are stored inside the server side cookie jar (host only)', () => {
