@@ -1816,9 +1816,21 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/reload
      * @example
-     *    cy.reload({log: false, timeout: 30000})
+     *    cy.visit('http://localhost:3000/admin')
+     *    cy.reload()
      */
-    reload(options?: Partial<Loggable & Timeoutable>): Chainable<AUTWindow>
+    reload(): Chainable<AUTWindow>
+    /**
+     * Reload the page.
+     *
+     * @see https://on.cypress.io/reload
+     * @param {Partial<Loggable & Timeoutable>} options Pass in an options object to modify the default behavior of cy.reload()
+     * @example
+     *    // Reload the page, do not log it in the command log and timeout after 15s
+     *    cy.visit('http://localhost:3000/admin')
+     *    cy.reload({log: false, timeout: 15000})
+     */
+    reload(options: Partial<Loggable & Timeoutable>): Chainable<AUTWindow>
     /**
      * Reload the page without cache
      *
@@ -1835,10 +1847,11 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/reload
      * @param {Boolean} forceReload Whether to reload the current page without using the cache. true forces the reload without cache.
+     * @param {Partial<Loggable & Timeoutable>} options Pass in an options object to modify the default behavior of cy.reload()
      * @example
-     *    // Reload the page without using the cache, do not log it in the command log and timeout after 5s
+     *    // Reload the page without using the cache, do not log it in the command log and timeout after 15s
      *    cy.visit('http://localhost:3000/admin')
-     *    cy.reload(true, {log: false, timeout: 5000})
+     *    cy.reload(true, {log: false, timeout: 15000})
      */
     reload(forceReload: boolean, options: Partial<Loggable & Timeoutable>): Chainable<AUTWindow>
 
