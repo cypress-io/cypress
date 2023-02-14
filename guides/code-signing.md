@@ -23,7 +23,7 @@ Code signing is done for the Windows and Mac distributions of Cypress when they 
     # create a CSR using the private key
     openssl req -new -key win-code-signing.key -out win-code-signing.csr
     ```
-2. Obtain a certificate by submitting your CSR to SSL.com using the Cypress SSL.com account.
+2. Obtain a certificate by submitting the CSR to SSL.com using the Cypress SSL.com account.
     * If renewing, follow the [renewal instructions](https://www.ssl.com/how-to/renewing-ev-ov-and-iv-certificates/).
     * If rotating, contact SSL.com's support to request certificate re-issuance.
 3. Obtain the full certificate chain from SSL.com's dashboard in ASCII-armored PEM format and save it as `win-code-signing.crt`. (`-----BEGIN PRIVATE KEY-----`, `-----BEGIN CERTIFICATE-----`)
