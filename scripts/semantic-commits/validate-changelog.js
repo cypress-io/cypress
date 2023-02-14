@@ -19,26 +19,40 @@ function _getResolvedMessage (semanticType, prNumber, associatedIssues = []) {
       return `[#${issueNumber}](https://github.com/cypress-io/cypress/issues/${issueNumber})`
     })
 
-    // one issue: [#num]
-    // two issues: [#num] and [#num]
-    // two+ issues: [#num], [#num] and [#num]
-    const linkMessage = [links.slice(0, -1).join(', '), links.slice(-1)[0]].join(links.length < 2 ? '' : ' and ')
-
-    return `${issueMessage} ${linkMessage}.`
+    return {
+      message: issueMessage,
+      links,
+    }
   }
 
   const prMessage = userFacingChanges[semanticType].message.onlyPR
 
-  return `${prMessage} [#${prNumber}](https://github.com/cypress-io/cypress/pull/${prNumber}).`
+  return {
+    message: prMessage,
+    links: [`[#${prNumber}](https://github.com/cypress-io/cypress/pull/${prNumber})`],
+  }
+}
+
+function _linksText (links) {
+  // one issue: [#num]
+  // two issues: [#num] and [#num]
+  // two+ issues: [#num], [#num] and [#num]
+  const linkMessage = [links.slice(0, -1).join(', '), links.slice(-1)[0]].join(links.length < 2 ? '' : ' and ')
+
+  return linkMessage
+}
+
+function _printResolveExample ({ message, links }) {
+  return `${message} ${_linksText(links)}.`
 }
 
 /**
  * Helper to format an example of what the changelog entry might look like for a given commit.
  */
 function _printChangeLogExample (semanticType, prNumber, associatedIssues = []) {
-  const resolveMessage = _getResolvedMessage(semanticType, prNumber, associatedIssues)
+  const resolveData = _getResolvedMessage(semanticType, prNumber, associatedIssues)
 
-  return `${userFacingChanges[semanticType].section}\n\n - <Insert change details>. ${resolveMessage}`
+  return `${userFacingChanges[semanticType].section}\n\n - <Insert change details>. ${_printResolveExample(resolveData)}`
 }
 
 /**
@@ -51,21 +65,27 @@ function _validateEntry (changelog, { commitMessage, prNumber, semanticType, ass
   }
 
   const expectedSection = userFacingChanges[semanticType].section
-  let missingExpectedSection = false
+  let missingExpectedSection = !changelog[expectedSection]
   let sectionEntryFoundIn = ''
 
-  const resolveMessage = _getResolvedMessage(semanticType, prNumber, associatedIssues)
+  const resolveData = _getResolvedMessage(semanticType, prNumber, associatedIssues)
 
   const hasMatchingEntry = Object.entries(userFacingChanges).some(([type, { section }]) => {
     const sectionDetails = changelog[section]
 
     if (!sectionDetails) {
-      missingExpectedSection = semanticType === type
-
       return false
     }
 
-    const hasMatchingEntry = sectionDetails.some((detail) => detail.includes(resolveMessage))
+    const hasMatchingEntry = sectionDetails.some((detail) => {
+      const index = detail.lastIndexOf(resolveData.message)
+
+      if (index === undefined) return false // missing message
+
+      const resolveString = detail.substring(index)
+
+      return resolveData.links.every((link) => resolveString.includes(link))
+    })
 
     if (hasMatchingEntry) {
       sectionEntryFoundIn = section
@@ -80,10 +100,10 @@ function _validateEntry (changelog, { commitMessage, prNumber, semanticType, ass
 
   if (!hasMatchingEntry) {
     if (associatedIssues && associatedIssues.length) {
-      return `The changelog entry does not include the linked issues that this pull request resolves. Please update your entry for '${commitMessage}' to include:\n\n${resolveMessage}`
+      return `The changelog entry does not include the linked issues that this pull request resolves. Please update your entry for '${commitMessage}' to include:\n\n${_printResolveExample(resolveData)}`
     }
 
-    return `The changelog entry does not include the pull request link. Please update your entry for '${commitMessage}' to include:\n\n${resolveMessage}`
+    return `The changelog entry does not include the pull request link. Please update your entry for '${commitMessage}' to include:\n\n${_printResolveExample(resolveData)}`
   }
 
   if (hasMatchingEntry && sectionEntryFoundIn !== expectedSection) {
