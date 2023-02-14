@@ -12,7 +12,7 @@ Code signing is done for the Windows and Mac distributions of Cypress when they 
     2. Follow "Create a signing certificate", and choose the type of "Developer ID Application" when prompted.
     3. Follow "Export a signing certificate". Set a strong passphrase when prompted, which will later become `CSC_KEY_PASSWORD`.
 3. Upload the exported, encrypted `.p12` file to the Cypress App Google Drive and obtain a public [direct download link][direct-download].
-4. Within the `test-runner:sign-mac-binary` CircleCI context, set `CSC_LINK` to that direct download URL and set `CSC_KEY_PASSWORD` to the passphrase used to encrypt the `pfx` file.
+4. Within the `test-runner:sign-mac-binary` CircleCI context, set `CSC_LINK` to that direct download URL and set `CSC_KEY_PASSWORD` to the passphrase used to encrypt the `p12` file.
 
 ## Rotating the Windows code signing key
 
