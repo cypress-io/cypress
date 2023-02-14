@@ -41,7 +41,7 @@ macWorkflowFilters: &darwin-workflow-filters
   when:
     or:
     - equal: [ develop, << pipeline.git.branch >> ]
-    - equal: [ 'mschile/chrome_memory_fix', << pipeline.git.branch >> ]
+    - equal: [ 'emily/wait-for-workflows', << pipeline.git.branch >> ]
     - matches:
         pattern: /^release\/\d+\.\d+\.\d+$/
         value: << pipeline.git.branch >>
@@ -129,51 +129,6 @@ executors:
       DISABLE_SNAPSHOT_REQUIRE: 1
 
 commands:
-  verify_ci_should_run:
-    steps:
-       - run:
-          name: Verify CI should run
-          command: |
-            # run CI when manually triggers via CircleCi Dashboard
-            if [ <<pipeline.trigger_source>> == 'api' ]; then
-              echo "Always run CI when manually triggered from the UI."
-              exit 0
-            fi
-
-            if [[ "$CIRCLE_BRANCH" == "develop" || "$CIRCLE_BRANCH" == "release/"* ]]; then
-              echo "Always run CI for develop and for release candidate branches."
-              exit 0
-            fi
-
-            LAST_COMMIT_MESSAGE=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/commits/${CIRCLE_BRANCH}" | jq '.commit.message')
-
-            if [[ "$LAST_COMMIT_MESSAGE" =~ "run ci" ]]; then
-              echo "Always run CI when the commit message includes 'run ci'."
-              exit 0
-            fi
-
-            cancel_build () {
-              echo "Canceling the CI build..."
-              exit 1
-            }
-
-            TRIGGER_INSTRUCTIONS="to trigger CI , include 'run ci' in the commit message or click the 'Trigger Pipeline' button in the CircleCI UI."
-
-            if [ ! -z "${CIRCLE_PULL_REQUEST##*/}" ]; then
-              DRAFT=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}" | jq '.draft')
-
-              if [[ "${DRAFT}" == true ]]; then
-                echo "Skipping CI; PR is in draft - $TRIGGER_INSTRUCTIONS"
-                cancel_build
-              fi
-
-              echo "Always run CI for PR that is ready for review."
-              exit 0
-            fi
-
-            echo "Skipping CI; branch in progress - $TRIGGER_INSTRUCTIONS"
-            cancel_build
-
   verify_should_persist_artifacts:
     steps:
       - run:
@@ -1220,6 +1175,53 @@ commands:
           ssh-keyscan github.com >> ~/.ssh/known_hosts
 
 jobs:
+  verify-ci-should-run:
+    docker:
+      - image: cimg/node:current
+    steps:
+      - run:
+          name: Verify CI should run
+          command: |
+            # run CI when manually triggers via CircleCi Dashboard
+            if [ <<pipeline.trigger_source>> == 'api' ]; then
+              echo "Always run CI when manually triggered from the UI."
+              exit 0
+            fi
+
+            if [[ "$CIRCLE_BRANCH" == "develop" || "$CIRCLE_BRANCH" == "release/"* ]]; then
+              echo "Always run CI for develop and for release candidate branches."
+              exit 0
+            fi
+
+            LAST_COMMIT_MESSAGE=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/commits/${CIRCLE_BRANCH}" | jq '.commit.message')
+
+            if [[ "$LAST_COMMIT_MESSAGE" =~ "run ci" ]]; then
+              echo "Always run CI when the commit message includes 'run ci'."
+              exit 0
+            fi
+
+            cancel_build () {
+              echo "Canceling the CI build..."
+              exit 1
+            }
+
+            TRIGGER_INSTRUCTIONS="to trigger CI , include 'run ci' in the commit message or click the 'Trigger Pipeline' button in the CircleCI UI."
+
+            if [ ! -z "${CIRCLE_PULL_REQUEST##*/}" ]; then
+              DRAFT=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pulls/${CIRCLE_PULL_REQUEST##*/}" | jq '.draft')
+
+              if [[ "${DRAFT}" == true ]]; then
+                echo "Skipping CI; PR is in draft - $TRIGGER_INSTRUCTIONS"
+                cancel_build
+              fi
+
+              echo "Always run CI for PR that is ready for review."
+              exit 0
+            fi
+
+            echo "Skipping CI; branch in progress - $TRIGGER_INSTRUCTIONS"
+            cancel_build
+
   ## Checks if we already have a valid cache for the node_modules_install and if it has,
   ## skips ahead to the build step, otherwise installs and caches the node_modules
   node_modules_install:
@@ -1231,7 +1233,6 @@ jobs:
         default: medium
     resource_class: << parameters.resource_class >>
     steps:
-      - verify_ci_should_run
       - checkout
       - install-required-node
       - verify-build-setup:
@@ -2424,6 +2425,7 @@ jobs:
 
 linux-x64-workflow: &linux-x64-workflow
   jobs:
+    - verify-ci-should-run
     - node_modules_install
     - build:
         context: test-runner:env-canary
@@ -2729,6 +2731,7 @@ linux-x64-workflow: &linux-x64-workflow
 
 linux-arm64-workflow: &linux-arm64-workflow
   jobs:
+    - verify-ci-should-run
     - node_modules_install:
         name: linux-arm64-node-modules-install
         executor: linux-arm64
@@ -2767,91 +2770,94 @@ linux-arm64-workflow: &linux-arm64-workflow
 
 darwin-x64-workflow: &darwin-x64-workflow
   jobs:
-    - node_modules_install:
-        name: darwin-x64-node-modules-install
-        executor: mac
-        resource_class: macos.x86.medium.gen2
-        only-cache-for-root-user: true
+    - verify-ci-should-run
+    # - node_modules_install:
+    #     name: darwin-x64-node-modules-install
+    #     executor: mac
+    #     resource_class: macos.x86.medium.gen2
+    #     only-cache-for-root-user: true
 
-    - build:
-        name: darwin-x64-build
-        context: test-runner:env-canary
-        executor: mac
-        resource_class: macos.x86.medium.gen2
-        requires:
-          - darwin-x64-node-modules-install
+    # - build:
+    #     name: darwin-x64-build
+    #     context: test-runner:env-canary
+    #     executor: mac
+    #     resource_class: macos.x86.medium.gen2
+    #     requires:
+    #       - darwin-x64-node-modules-install
 
-    - create-build-artifacts:
-        name: darwin-x64-create-build-artifacts
-        context:
-          - test-runner:sign-mac-binary
-          - test-runner:upload
-          - test-runner:commit-status-checks
-        executor: mac
-        resource_class: macos.x86.medium.gen2
-        requires:
-          - darwin-x64-build
+    # - create-build-artifacts:
+    #     name: darwin-x64-create-build-artifacts
+    #     context:
+    #       - test-runner:sign-mac-binary
+    #       - test-runner:upload
+    #       - test-runner:commit-status-checks
+    #     executor: mac
+    #     resource_class: macos.x86.medium.gen2
+    #     requires:
+    #       - darwin-x64-build
 
-    - test-kitchensink:
-        name: darwin-x64-test-kitchensink
-        executor: mac
-        requires:
-          - darwin-x64-build
+    # - test-kitchensink:
+    #     name: darwin-x64-test-kitchensink
+    #     executor: mac
+    #     requires:
+    #       - darwin-x64-build
 
-    - v8-integration-tests:
-        name: darwin-x64-v8-integration-tests
-        executor: mac
-        resource_class: macos.x86.medium.gen2
-        requires:
-          - darwin-x64-build
-    - driver-integration-memory-tests:
-        name: darwin-x64-driver-integration-memory-tests
-        executor: mac
-        resource_class: macos.x86.medium.gen2
-        requires:
-          - darwin-x64-build
+    # - v8-integration-tests:
+    #     name: darwin-x64-v8-integration-tests
+    #     executor: mac
+    #     resource_class: macos.x86.medium.gen2
+    #     requires:
+    #       - darwin-x64-build
+    # - driver-integration-memory-tests:
+    #     name: darwin-x64-driver-integration-memory-tests
+    #     executor: mac
+    #     resource_class: macos.x86.medium.gen2
+    #     requires:
+    #       - darwin-x64-build
 
 darwin-arm64-workflow: &darwin-arm64-workflow
   jobs:
-    - node_modules_install:
-        name: darwin-arm64-node-modules-install
-        executor: darwin-arm64
-        resource_class: cypress-io/latest_m1
-        only-cache-for-root-user: true
+    - verify-ci-should-run
+    # - node_modules_install:
+    #     name: darwin-arm64-node-modules-install
+    #     executor: darwin-arm64
+    #     resource_class: cypress-io/latest_m1
+    #     only-cache-for-root-user: true
 
-    - build:
-        name: darwin-arm64-build
-        executor: darwin-arm64
-        resource_class: cypress-io/latest_m1
-        requires:
-          - darwin-arm64-node-modules-install
+    # - build:
+    #     name: darwin-arm64-build
+    #     executor: darwin-arm64
+    #     resource_class: cypress-io/latest_m1
+    #     requires:
+    #       - darwin-arm64-node-modules-install
 
-    - create-build-artifacts:
-        name: darwin-arm64-create-build-artifacts
-        context:
-          - test-runner:sign-mac-binary
-          - test-runner:upload
-          - test-runner:commit-status-checks
-        executor: darwin-arm64
-        resource_class: cypress-io/latest_m1
-        requires:
-          - darwin-arm64-build
+    # - create-build-artifacts:
+    #     name: darwin-arm64-create-build-artifacts
+    #     context:
+    #       - test-runner:sign-mac-binary
+    #       - test-runner:upload
+    #       - test-runner:commit-status-checks
+    #     executor: darwin-arm64
+    #     resource_class: cypress-io/latest_m1
+    #     requires:
+    #       - darwin-arm64-build
 
-    - v8-integration-tests:
-        name: darwin-arm64-v8-integration-tests
-        executor: darwin-arm64
-        resource_class: cypress-io/latest_m1
-        requires:
-          - darwin-arm64-build
-    - driver-integration-memory-tests:
-        name: darwin-arm64-driver-integration-memory-tests
-        executor: darwin-arm64
-        resource_class: cypress-io/latest_m1
-        requires:
-          - darwin-arm64-build
+    # - v8-integration-tests:
+    #     name: darwin-arm64-v8-integration-tests
+    #     executor: darwin-arm64
+    #     resource_class: cypress-io/latest_m1
+    #     requires:
+    #       - darwin-arm64-build
+    # - driver-integration-memory-tests:
+    #     name: darwin-arm64-driver-integration-memory-tests
+    #     executor: darwin-arm64
+    #     resource_class: cypress-io/latest_m1
+    #     requires:
+    #       - darwin-arm64-build
 
 windows-workflow: &windows-workflow
   jobs:
+    - verify-ci-should-run
     - node_modules_install:
         name: windows-node-modules-install
         executor: windows
