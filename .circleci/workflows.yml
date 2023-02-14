@@ -2596,7 +2596,6 @@ linux-x64-workflow: &linux-x64-workflow
     - trigger-binary-release-workflow:
         context: test-runner:poll-circle-workflow
         requires:
-        requires:
           - build
           - check-ts
           - npm-angular
